@@ -22,7 +22,7 @@ result = warper(
     warp_convention="auto",  # warp 约定：按 FSL 规则自动判定 relative/absolute
     output_dtype="float",  # 输出：写盘时使用 float32
 )
-result.save(path="subject_GM_to_template.nii.gz")  # 输出路径：reference 网格重采样图像
+result.save(output="subject_GM_to_template.nii.gz")  # 输出路径：reference 网格重采样图像
 ```
 
 `result.image` 是 reference 网格上的 NIfTI image，`result.valid_mask` 标记 warp
@@ -173,7 +173,7 @@ supersampling、`--paddingsize`、`--mask`、`--usesqform` 和逐帧矩阵。CLI
 TBSS 预处理后的 native FA，reference 是 `FMRIB58_FA_1mm`，warp 是 FSL FNIRT
 生成的 intent-2007 cubic coefficient；FSL 直接 `applywarp` 输出作为 reference。
 验证运行的 `src/fnit/applywarp/core.py` SHA-256 为
-`cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5`，与本页源码一致。
+`cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5`。这是当时的官方对照快照；2026-10-02 采样计划的当前 FNIT 对照结果见下文。
 
 | 检查 | 结果 |
 |---|---:|
@@ -207,3 +207,42 @@ TorchApplyWarp/FSL applywarp 对照；精度、时间和图像见
 
 单元测试位于 [`tests/applywarp`](../../../tests/applywarp)。当前真实数据复现入口为
 [`validation/applywarp/validate_real.py`](../../../validation/applywarp/validate_real.py)；它要求调用方显式提供输入、FSL reference、coefficient warp 与输出目录。测试和验证期间可以安装 FSL 生成参照，`TorchApplyWarp` 的正常运行不调用 FSL。
+
+## 复用同网格指标图的采样计划（2026-10-02）
+
+`warper.prepare()` 读取一份 warp/矩阵，计算采样坐标和有效掩膜；返回的 `ApplyWarpPlan` 可对同一 native 网格的其他指标图调用 `apply()`。每张图仍独立进行三线性或最近邻采样，保留原来的通道数、float32 插值和输出 dtype 选择。FNIRT coefficient 只展开一次，坐标计算保留 float64。
+
+```python
+import nibabel as nib
+from fnit.applywarp import TorchApplyWarp
+
+native_fractional_anisotropy = nib.load("dti_FA_preprocessed.nii.gz")  # TBSS 使用预处理后的 FA
+native_mean_diffusivity = nib.load("dti_MD.nii.gz")  # 同一 native 网格上的 MD
+standard_fa_template = nib.load("FMRIB58_FA_1mm.nii.gz")  # 输出参考图
+fnirt_coefficient_image = nib.load("dti_FA_to_MNI_warp.nii.gz")  # 含 affine 的 FNIRT 系数
+sampling_plan = TorchApplyWarp(device="cuda:0").prepare(
+    input=native_fractional_anisotropy,  # 仅用此图确定 native shape、affine 和 pixdim
+    reference=standard_fa_template,  # 确定输出坐标和 NIfTI header
+    warp=fnirt_coefficient_image,  # 本次计划捕获的固定形变
+    premat=None,  # 沿用原 applywarp 的 FSL scaled-mm 约定
+    postmat=None,
+    interpolation="trilinear",  # 在 prepare 时固定，apply 时不能更改
+    warp_convention="relative",  # 同原 TBSS 调用
+)
+standard_mean_diffusivity = sampling_plan.apply(
+    input=native_mean_diffusivity,  # 强度和数据 dtype 可不同，空间几何必须完全相同
+    reference=standard_fa_template,  # 可省略；提供时核对几何、完整 header 和 extensions
+    output_dtype="float",  # 每张图独立选择输出 dtype；省略时沿用原规则
+)
+standard_mean_diffusivity.save(output="MD.nii.gz")  # 输出 reference 网格 NIfTI
+```
+
+`prepare()` 的参数与原 `TorchApplyWarp` 一致，但没有 `output_dtype`：输出类型由各次 `plan.apply()` 决定。`input` 接受 3D 或 4D NIfTI；`reference` 决定输出网格；`warp`、`premat`、`postmat`、`interpolation` 和 `warp_convention` 在创建时捕获。`apply()` 接受同网格的新图、可选 reference 和可选 output_dtype，返回原 `ApplyWarpResult`。
+
+计划按 shape、affine、header pixdim 和 FSL scaled-mm 坐标精确核验，参考图还核验 NIfTI 类型、完整 header 与 extensions。几何不同会报错，调用方应为该网格创建另一份计划。计划是当前变换的快照；修改 warp 或矩阵后创建新计划。图像强度没有缓存，输出 header 仍按原函数生成。TBSS 九图按 native 网格分组复用，FA 预处理、FA 有效区域和 skeleton 掩膜规则照原计算执行。
+
+命令行与原 FSL 命令保持上文用法；跨图复用只发生于同一 Python 进程。新增定向测试检查不同 handedness、dense/coefficient、三线性/最近邻、3D/4D、dtype/header 和缓存失效。
+
+真实九图验收于 2026-10-02 在 H100 完成：固定 FNIRT coefficient，输出 `182×218×182`，CPU 线程 8，PyTorch CUDA 分配限额 20,000,000,000 bytes。三轮每轮交替先后顺序，全部九图的解码体素、完整 header、affine、有效掩膜及 TBSS standard/skeleton 后处理结果逐值一致。首轮含冷启动，原逐图调用/采样计划为 `0.702855815/0.248454907 s`；后两轮热调用中位数为 `0.365734295/0.180841511 s`，观察到约 **2.02 倍**速度。计时包含计划准备、九图独立采样与输出回传，输入加载、FA 预处理和输出写盘在计时外；结果适用于固定形变的传播阶段。
+
+复现脚本为 [benchmark_map_propagation.py](../../../validation/dmri_pipeline/benchmark_map_propagation.py)，完整三轮及计时边界见[九图验收](../../../validation/dmri_pipeline/map_propagation_20261002.md)，整体进展见[主报告](../../../validation/dmri_pipeline/lossless_20261002.md)。

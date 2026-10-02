@@ -178,7 +178,7 @@ supersampling、`--paddingsize`、`--mask`、`--usesqform` 和逐帧矩阵。CLI
 TBSS 预处理后的 native FA，reference 是 `FMRIB58_FA_1mm`，warp 是 FSL FNIRT
 生成的 intent-2007 cubic coefficient；FSL 直接 `applywarp` 输出作为 reference。
 验证运行的 `src/fnit/applywarp/core.py` SHA-256 为
-`cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5`，与本页源码一致。
+`cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5`。这是当时的官方对照快照；2026-10-02 采样计划的当前 FNIT 对照结果见下文。
 
 | 检查 | 结果 |
 |---|---:|
@@ -214,6 +214,19 @@ coefficient；不能外推到其他病例、nearest、dense warp 或未实现选
 
 单元测试位于 [`tests/applywarp`](../../tests/applywarp)。当前真实数据复现入口为
 [`validation/applywarp/validate_real.py`](../../validation/applywarp/validate_real.py)；它要求调用方显式提供输入、FSL reference、coefficient warp 与输出目录。测试和验证期间可以安装 FSL 生成参照，`TorchApplyWarp` 的正常运行不调用 FSL。
+
+## 2026-10-02：同网格多指标图传播
+
+新增采样计划先准备固定 warp/affine 的坐标，再对每张图独立插值。源 shape、affine、header pixdim 和 FSL scaled-mm 网格须完全相同；参考图还核验完整 header 和 extensions。原 API、float64 坐标计算、float32 插值与输出规则保持兼容。
+
+2026-10-02 在 H100 上，使用既有真实数据的九张指标图与固定 FNIRT coefficient，输出网格为 `182×218×182`，CPU 线程为 8，PyTorch CUDA 分配限额为 20,000,000,000 bytes。每轮交替先后顺序，三轮的九图解码体素、完整 header、affine、有效掩膜及 TBSS standard/skeleton 后处理结果均逐值一致。
+
+| 九图传播计时 | 原逐图调用 | 复用采样计划 |
+|---|---:|---:|
+| 首轮，含冷启动 | 0.702855815 s | 0.248454907 s |
+| 后两轮热调用中位数 | 0.365734295 s | 0.180841511 s |
+
+热调用观察到约 **2.02 倍**速度。新方案的计时包含准备计划、九图采样与输出回传；输入加载、FA 预处理和输出写盘在计时外。这是固定形变的九图传播结果，不代表整条 pipeline 或配准估计的加速比。完整参数和 Python 示例见[组件文档](../../src/fnit/applywarp/README.md)，三轮记录及复现命令见[九图验收](../../validation/dmri_pipeline/map_propagation_20261002.md)，整体进展见[主报告](../../validation/dmri_pipeline/lossless_20261002.md)。
 
 ## Reference
 

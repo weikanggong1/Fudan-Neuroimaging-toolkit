@@ -249,7 +249,7 @@ mmorf --config multimodal.ini
 
 ## 真实数据 benchmark
 
-当前代码使用一例真实 T1w、DTI FA 和六通道 tensor，对应的 T1、FA 与 tensor 模板，计算两组标量加一组张量的共享 warp。T1 与 tensor 的既有线性矩阵保持固定；FA 标量的矩阵由内部 PyTorchFLIRT 12-DOF CorRatio 自动估计。两组标量权重均为 0.5。对照使用同一组图像和矩阵运行官方 MMORF 0.3.2。具体命令、完整 3D 指标及输入边界见[当前报告](../../validation/mmorf/report.public.json)。
+既有官方对照报告使用一例真实 T1w、DTI FA 和六通道 tensor，对应的 T1、FA 与 tensor 模板，计算两组标量加一组张量的共享 warp。T1 与 tensor 的既有线性矩阵保持固定；FA 标量的矩阵由内部 PyTorchFLIRT 12-DOF CorRatio 自动估计。两组标量权重均为 0.5。对照使用同一组图像和矩阵运行官方 MMORF 0.3.2。具体命令、完整 3D 指标及输入边界见[当前报告](../../validation/mmorf/report.public.json)。
 
 | 运行 | 时间 | 峰值分配显存 |
 |---|---:|---:|
@@ -276,6 +276,19 @@ FNIT 与官方的输出均可读取，warp 和 Jacobian 的 shape、affine、dty
 ## 来源与许可
 
 实现参考[官方 MMORF 源码](https://git.fmrib.ox.ac.uk/fsl/MMORF)的 v0.3.2、commit `1c1c13b8368f05e1a79a6dafe919d6b61df36bd6`。发行包不含官方 MMORF 源码或可执行文件。源代码改写仍遵守 [`FSL Software Licence, Release 6.0`](../../licenses/FSL-6.0.txt)；FNIT 不是官方 FSL 发布。
+
+## 2026-10-02：同网格多指标图传播
+
+新增采样计划先准备固定 warp/affine 的坐标，再对每张图独立插值。源 shape、affine、header pixdim 和 FSL scaled-mm 网格须完全相同；参考图还核验完整 header 和 extensions。保留原混合精度：矩阵与位移转换使用 float64，基础网格、最终采样坐标、图像和 reference axes 极分解保持原 float32 计算。
+
+2026-10-02 在 H100 上，使用既有真实数据的九张指标图、固定 MMORF warp 与 affine，输出网格为 `182×218×182`，CPU 线程为 8，PyTorch CUDA 分配限额为 20,000,000,000 bytes。每轮交替先后顺序，三轮的九图解码体素、完整 header 和 affine 均逐值一致。
+
+| 九图传播计时 | 原逐图调用 | 复用采样计划 |
+|---|---:|---:|
+| 首轮，含冷启动 | 0.645693060 s | 0.224990048 s |
+| 后两轮热调用中位数 | 0.517138056 s | 0.270091293 s |
+
+热调用观察到约 **1.91 倍**速度。新方案的计时包含准备计划、九图采样与输出回传；输入加载和输出写盘在计时外。这是固定形变的九图传播结果，不代表整条 pipeline 或配准估计的加速比，也不改变本页官方 MMORF 对照的数值等价结论。完整参数和 Python 示例见[组件文档](../../src/fnit/mmorf/README.md)，三轮记录及复现命令见[九图验收](../../validation/dmri_pipeline/map_propagation_20261002.md)，整体进展见[主报告](../../validation/dmri_pipeline/lossless_20261002.md)。
 
 ## Reference
 

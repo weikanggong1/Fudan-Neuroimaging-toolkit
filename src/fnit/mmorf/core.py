@@ -22,6 +22,7 @@ import torch.nn.functional as F
 from scipy.ndimage import spline_filter
 
 from .._dmri import configure_device, image_like
+from .._sampling_plan import SamplingGeometry
 from ..flirt import flirt_to_world_affine, world_to_flirt_affine
 from ..fnirt.spline import BendingOperator
 
@@ -839,16 +840,57 @@ def _validate_warp(warp, reference):
     return warp_image, field
 
 
-def apply_mmorf_warp(
-    image,
-    reference,
-    warp,
-    *,
-    affine=None,
-    device=None,
-    interpolation="linear",
+@dataclass(frozen=True)
+class MMORFWarpPlan:
+    """Reusable MMORF pull geometry with one independent call per image."""
+
+    device: torch.device
+    input_geometry: SamplingGeometry
+    reference_geometry: SamplingGeometry
+    interpolation: str
+    _reference: object
+    _coordinates: torch.Tensor
+    _grid: torch.Tensor | None
+
+    def apply(self, image, *, reference=None):
+        source = nib.load(os.fspath(image)) if isinstance(image, (str, os.PathLike)) else image
+        common = self._reference if reference is None else (
+            nib.load(os.fspath(reference)) if isinstance(reference, (str, os.PathLike)) else reference
+        )
+        if not isinstance(source, (nib.Nifti1Image, nib.Nifti2Image)) or not isinstance(
+            common, (nib.Nifti1Image, nib.Nifti2Image)
+        ):
+            raise TypeError("image and reference must be NIfTI paths or images")
+        self.input_geometry.require(source, "image")
+        self.reference_geometry.require(common, "reference")
+        data = np.asarray(source.dataobj, dtype=np.float32)
+        tensor = torch.as_tensor(
+            np.moveaxis(data, -1, 0) if data.ndim == 4 else data,
+            dtype=torch.float32, device=self.device,
+        )
+        if self.interpolation == "cubic":
+            sampled = _sample_cubic(_cubic_spline_coefficients(tensor), self._coordinates)
+        else:
+            if tensor.ndim == 3:
+                tensor = tensor[None]
+            mode = "nearest" if self.interpolation in ("nearest", "nn") else "bilinear"
+            sampled = F.grid_sample(
+                tensor.permute(0, 3, 2, 1)[None], self._grid,
+                mode=mode, padding_mode="zeros", align_corners=True,
+            )[0].permute(0, 3, 2, 1)
+        output = sampled.detach().cpu().numpy()
+        output = np.moveaxis(output, 0, -1) if data.ndim == 4 else output[0]
+        return image_like(output.astype(np.float32), common)
+
+
+def prepare_mmorf_warp(
+    image, reference, warp, *, affine=None, device=None, interpolation="linear",
 ):
-    """Apply an MMORF reference-axis millimetre pull field."""
+    """Capture MMORF warp/affine once for images sharing exact geometry.
+
+    The reference-axis mm field is converted in float64 with the original
+    operation order. A changed transform or image grid needs another plan.
+    """
     source = nib.load(os.fspath(image)) if isinstance(image, (str, os.PathLike)) else image
     common = nib.load(os.fspath(reference)) if isinstance(reference, (str, os.PathLike)) else reference
     if not isinstance(source, (nib.Nifti1Image, nib.Nifti2Image)) or not isinstance(
@@ -873,23 +915,29 @@ def apply_mmorf_warp(
     )
     input_displacement = torch.einsum("ij,jxyz->ixyz", pull_linear, world_displacement)
     coordinates = base + input_displacement.float()
-    data = np.asarray(source.dataobj, dtype=np.float32)
-    tensor = torch.as_tensor(
-        np.moveaxis(data, -1, 0) if data.ndim == 4 else data,
-        dtype=torch.float32,
-        device=selected_device,
+    grid = (
+        None if interpolation == "cubic"
+        else _normalised_grid(coordinates, source.shape[:3]).to(torch.float32)
     )
-    if interpolation == "cubic":
-        sampled = _sample_cubic(_cubic_spline_coefficients(tensor), coordinates)
-    else:
-        mode = "nearest" if interpolation in ("nearest", "nn") else "bilinear"
-        sampled = _sample(tensor, coordinates, mode=mode)
-    output = sampled.detach().cpu().numpy()
-    if data.ndim == 4:
-        output = np.moveaxis(output, 0, -1)
-    else:
-        output = output[0]
-    return image_like(output.astype(np.float32), common)
+    return MMORFWarpPlan(
+        device=selected_device,
+        input_geometry=SamplingGeometry.capture(source),
+        reference_geometry=SamplingGeometry.capture(common, output_header=True),
+        interpolation=interpolation,
+        _reference=common,
+        _coordinates=coordinates,
+        _grid=grid,
+    )
+
+
+def apply_mmorf_warp(
+    image, reference, warp, *, affine=None, device=None, interpolation="linear",
+):
+    """Apply an MMORF reference-axis millimetre pull field."""
+    return prepare_mmorf_warp(
+        image, reference, warp, affine=affine, device=device,
+        interpolation=interpolation,
+    ).apply(image)
 
 
 class TorchMMORF:
@@ -1539,6 +1587,8 @@ __all__ = [
     "MMORF_VERSION",
     "MMORFConfig",
     "MMORFResult",
+    "MMORFWarpPlan",
     "TorchMMORF",
     "apply_mmorf_warp",
+    "prepare_mmorf_warp",
 ]

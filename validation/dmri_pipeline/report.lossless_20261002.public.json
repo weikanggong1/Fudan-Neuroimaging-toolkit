@@ -1,0 +1,3047 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-02",
+  "comparison": "frozen FNIT baseline vs optimized FNIT; same real inputs",
+  "baseline_commit": "954ad19e29ddde8617eddf58ebafc3a4f72b8951",
+  "official_equivalence_claim": false,
+  "current_full_raw_to_mni_rerun": false,
+  "environment": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "gpu": "NVIDIA H100 PCIe",
+    "shared_gpu": true,
+    "cpu_threads": 8,
+    "cuda_allocator_limit_bytes": 20000000000,
+    "precision": "existing TF32/float32 paths and float64 solver/geometry exceptions unchanged; no FP16/BF16"
+  },
+  "source_binding": {
+    "python_files_checked": 428,
+    "whole_source_manifest_sha256": "3d9165bf9096ee24a7cb1da143a5cd8b690154a53a07dbdb5cc624e99e862f8a",
+    "all_uploaded_python_files_matched_local_candidate_at_benchmark": true,
+    "relevant_candidate_source_sha256": {
+      "fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+      "fnit/_sampling_plan.py": "a44a7fedd476be3f41cd3d9426790eadfabef08eb72f45dba14db1ebd2a8d3c3",
+      "fnit/amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+      "fnit/amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "fnit/amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+      "fnit/amico_noddi/classic.py": "ee5292dc4a14b43736a9f105c8946a43f35f482faa8bb8259992e9de2d8193ea",
+      "fnit/amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+      "fnit/amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+      "fnit/amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+      "fnit/amico_noddi/solver.py": "0f04c492b61f91a60aede8d281a8c87d5aac0a7453eb15898a788d8a90e1497d",
+      "fnit/applywarp/__init__.py": "fe480862dfbe483b5d71e18ac3c5e9926cc71ffa3c6c2685a56748d0fe7cee08",
+      "fnit/applywarp/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+      "fnit/applywarp/cli.py": "024de40d9121d2352071cf37f2c47558d97f0630faa1bfc47abcfb4e6e38270e",
+      "fnit/applywarp/core.py": "57031bdc2120d10116593c987b9598e3ee695545daa34736395b4b5a4187c560",
+      "fnit/dmri_pipeline/__init__.py": "ebb576959a603e9c9ce7dc6ae052397a5a54b603d7b714deed4b40a6960a82cd",
+      "fnit/dmri_pipeline/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "fnit/dmri_pipeline/bids.py": "460c430159c3c3efd80a98a931977381959a996c8e7fab43b6f805a15d60afdd",
+      "fnit/dmri_pipeline/cli.py": "7337034523b5612e4e33d4ead6339fa2f069a0bd59e7c4129438c3f56798212a",
+      "fnit/dmri_pipeline/pipeline.py": "5cb5e82c8fce246f3cf771022c55cc13fcb8bdd7c1049635a9ede6174746ddff",
+      "fnit/dmri_pipeline/tbss.py": "d814d4ab5fdb8e4fcecf4ae3629a9d12957c2143bb957e8893ed73264766086d",
+      "fnit/eddy/__init__.py": "e1239c07080954468a0d3060a0385275df55addfa243ac039f4bbcd65cea1908",
+      "fnit/eddy/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "fnit/eddy/cli.py": "833f4b2838792ba0c45be53b6b34db7b297e42e001f5d86ec3fdfc21b44c0117",
+      "fnit/eddy/fsl2111_strict/__init__.py": "82de3ea49caa7ac9460c0172621eef9c76b52074f54f5e9c71fa362178a06b46",
+      "fnit/eddy/fsl2111_strict/config.py": "2440c28354d70fd40317584c2a1ff9d43dcc25d0ec83c173033a2f1f7653600d",
+      "fnit/eddy/fsl2111_strict/geometry.py": "4933be355012c36aa281c5cbb309444f3d0e66a3dd493eaa737c1671384981ae",
+      "fnit/eddy/fsl2111_strict/gp.py": "1b0cd8303eded816bf986703962f4644f8fb7435ddf25c72f22658c3e9fc8f2a",
+      "fnit/eddy/fsl2111_strict/outlier.py": "5b125641eaa882e02fe682a769a66b6ce171139e301f8d301b50834b51fb8d7d",
+      "fnit/eddy/fsl2111_strict/pipeline.py": "148335d9b4d314bcb216bbf95501e7574e3a8f30e50df60a965fbe9eca6bf0d4",
+      "fnit/eddy/fsl2111_strict/registration.py": "064e0b4e92c6bee67149eb03f413be57f6ae0ebcf25c307629bee0077cff19b7",
+      "fnit/eddy/fsl2111_strict/shell_alignment.py": "477028cecfebf0ba4ff1938f2b2228c0bca690450a5742a89b560ab7cbef1030",
+      "fnit/eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+      "fnit/eddy/fsl2111_strict/warp.py": "d9e03b07016bad2bda750ffec3141352e9b17f327b5eb0ba2a66fd80ee14e8ee",
+      "fnit/eddy/topup_field.py": "54d076b5187d70596db7778264326dbd797d9972c28f954aa32e43f6db2c6b74",
+      "fnit/eddy/ukb.py": "a3e7fef62e572fbd3b0e9de6fad96845a18a57d341088549c1718c0d1dce1e11",
+      "fnit/mmorf/__init__.py": "6b44520b11f72192c1f78a5ba309b6f49e7cd767e4cff24e2b135748ae65c4ef",
+      "fnit/mmorf/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "fnit/mmorf/cli.py": "3e9d2d8c2cbeed1121e986545cc0d6d26f4f248937c9ff7423a4ea81e0b61101",
+      "fnit/mmorf/core.py": "1692d754c41139fbc61ce2d1fd1071790168e30ed2039dbb8d2e7bc256105338",
+      "fnit/mmorf/standalone.py": "cfad1efe8703a620af4b196a98cad2b6b490b7a7d57daf2293e1bd7f0b816326"
+    },
+    "scope": "428-file frozen benchmark candidate; unrelated later main updates are outside this snapshot",
+    "release_check": {
+      "parent_main_commit": "de23971119b38b83c6a513380fd699e88ecf3fb8",
+      "relevant_python_files_checked": 40,
+      "relevant_python_files_match_benchmark_candidate": true
+    }
+  },
+  "tests": {
+    "combined_component_run_before_final_gram_only_revision": {
+      "passed": 175,
+      "skipped": 2,
+      "seconds": 46.07,
+      "skips": "external FSL applywarp tests; executable absent"
+    },
+    "final_gram_only_noddi_targeted_run": {
+      "passed": 25,
+      "seconds": 5.79
+    },
+    "frozen_original_sampler_combinations_cpu_cuda": 56
+  },
+  "stages": {
+    "eddy": {
+      "scope": "full eight-round EDDY, including image IO",
+      "runs": [
+        {
+          "run": "baseline_eddy",
+          "stage": "eddy",
+          "inputs": {
+            "fieldmap_out_fieldcoef.nii.gz": "a49dd02ae6d6c3b70f540c903f724caf24bcb14a57b07e13126d3835bd6338b7",
+            "fieldmap_out_movpar.txt": "7ea51158e1c7f2ff4cce8ef511049b3a58c6e2753a9759e6e37f700ecd91ef7c",
+            "imain": {
+              "bytes": 124216611,
+              "sha256": "c37773b5749bc169b96c1bc8642a572637a61325c6eb2ac33e765253011533f1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            },
+            "bvecs": {
+              "bytes": 2998,
+              "sha256": "e9dbf67c3a948f726b06f33c97f173c55ecbe186240541682af9d8cd8fb5835e"
+            },
+            "mask": {
+              "bytes": 61159,
+              "sha256": "ab81477fc0b456fae0522878b90400597bec8001aeaaf3209233ced1a633b419"
+            },
+            "acqp": {
+              "bytes": 25,
+              "sha256": "328fc80e6b9c6c78191d6b59a124c0265360987d0b0548361f68e161e0fa86e5"
+            },
+            "index": {
+              "bytes": 210,
+              "sha256": "04914d5dcf56d72e35f7465c6f3ac3fe16b33b8067082847af3371b60680837b"
+            }
+          },
+          "source_manifest": {
+            "eddy/__init__.py": "e1239c07080954468a0d3060a0385275df55addfa243ac039f4bbcd65cea1908",
+            "eddy/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "eddy/cli.py": "833f4b2838792ba0c45be53b6b34db7b297e42e001f5d86ec3fdfc21b44c0117",
+            "eddy/fsl2111_strict/__init__.py": "82de3ea49caa7ac9460c0172621eef9c76b52074f54f5e9c71fa362178a06b46",
+            "eddy/fsl2111_strict/config.py": "2440c28354d70fd40317584c2a1ff9d43dcc25d0ec83c173033a2f1f7653600d",
+            "eddy/fsl2111_strict/geometry.py": "4933be355012c36aa281c5cbb309444f3d0e66a3dd493eaa737c1671384981ae",
+            "eddy/fsl2111_strict/gp.py": "b046a603152b3d2a1e85d691b91455a765c5acca49e8a43d0c319f188aab7c66",
+            "eddy/fsl2111_strict/outlier.py": "5b125641eaa882e02fe682a769a66b6ce171139e301f8d301b50834b51fb8d7d",
+            "eddy/fsl2111_strict/pipeline.py": "72a20be7bd2afc817c38f8306abd416a68448c0a7ef461419cfb502ab2cde569",
+            "eddy/fsl2111_strict/registration.py": "c803a949a173a09528caa9a97ad3cdfea80aae6097e8f6fc972e91cd525ad563",
+            "eddy/fsl2111_strict/shell_alignment.py": "477028cecfebf0ba4ff1938f2b2228c0bca690450a5742a89b560ab7cbef1030",
+            "eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+            "eddy/fsl2111_strict/warp.py": "7c3bed66af25e5e3c49e5a42798d0886bcd7dac008fbbd810a15dd7e58a86d34",
+            "eddy/topup_field.py": "54d076b5187d70596db7778264326dbd797d9972c28f954aa32e43f6db2c6b74",
+            "eddy/ukb.py": "50c75303c3aa1f5543d144fc9aad07bc67581c1e47ebab502c964e2281c602c9",
+            "topup/__init__.py": "e15e503ddf68a59a8e36274ddfd6dc1609c38437885071049b8c9c37d813876d",
+            "topup/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+            "topup/cli.py": "fc5220c7c9de36577f5e116262bb5789733397beff00796059fe07313fba3388",
+            "topup/core.py": "4746d50f28b8137abf9bf6d8a211c12489bddc6a931bd06e695db1965f14b976",
+            "topup/io.py": "c87edab5c5369204d1a7ccfd2cb079dfd1a64e68279d8899f51755609038176a",
+            "topup/ukb.py": "63eb5cc0d9e2f4a4547585af4f041f543dd256a653101ca54ceab235addd0d08",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242316,
+          "wall_seconds_including_io": 484.75327489199117,
+          "peak_allocated_bytes": 4842673664,
+          "peak_reserved_bytes": 6184501248,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 43950, 0",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 1812, 2"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 37104, 5",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 14219, 93"
+          ],
+          "outputs": {
+            "corrected": {
+              "shape": [
+                104,
+                104,
+                72,
+                105
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "8fd70f499ca5e512b460944197a0c0e6efa2071ace218ce7f255044029db8250"
+            },
+            "rotated_bvecs": {
+              "shape": [
+                3,
+                105
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "65e085860f6f33a34df891a1cbe238bfbca82de75fd7b1ddb5f2896be2b68c32"
+            },
+            "parameters": {
+              "shape": [
+                105,
+                16
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "c1fb6155ea00ce23ba822a78b013f83ba581095a0629b17c7088254e20bad16b"
+            },
+            "movement_rms": {
+              "shape": [
+                105,
+                2
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "3ea4ce643190507569f7aea0644158aa764cabd81433a093ca7b09047c0e7e64"
+            },
+            "restricted_movement_rms": {
+              "shape": [
+                105,
+                2
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "bc33708a0360cef54e93ac46528132c0be81b87aaba54f28d320cdf1efb9a080"
+            },
+            "outlier_map": {
+              "shape": [
+                105,
+                72
+              ],
+              "dtype": "int32",
+              "finite": true,
+              "sha256_decoded": "c664901b3ff7419b60b21aff6adf2bddd3bf2b57182a78d74d77a521d9a5716b"
+            },
+            "outlier_n_stdev_map": {
+              "shape": [
+                105,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "24d8cf494d84f42a8f16644286d4b9239ada4bcc2d609c1e6117cb3a3fe93546"
+            },
+            "outlier_n_sqr_stdev_map": {
+              "shape": [
+                105,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "5dd4d3ccc423deb8d80fe794855dd3c536621baf1c9c534c138b6a167b14cacb"
+            }
+          },
+          "model_qc": {
+            "backend": "fsl2111_strict",
+            "fsl_eddy_version": "2111.0",
+            "fsl_eddy_commit": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c",
+            "device": "cuda:0",
+            "tf32": true,
+            "iterations": [
+              {
+                "stage": "b0",
+                "iteration": 0,
+                "fwhm_mm": 10.0,
+                "mean_update_mss": 6.555693528541194
+              },
+              {
+                "stage": "b0",
+                "iteration": 1,
+                "fwhm_mm": 8.0,
+                "mean_update_mss": 5.6569143157768895
+              },
+              {
+                "stage": "b0",
+                "iteration": 2,
+                "fwhm_mm": 4.0,
+                "mean_update_mss": 15.906924506245403
+              },
+              {
+                "stage": "b0",
+                "iteration": 3,
+                "fwhm_mm": 2.0,
+                "mean_update_mss": 70.82586943938662
+              },
+              {
+                "stage": "b0",
+                "iteration": 4,
+                "fwhm_mm": 0.0,
+                "mean_update_mss": 107.35057997926656
+              },
+              {
+                "stage": "b0",
+                "iteration": 5,
+                "fwhm_mm": 0.0,
+                "mean_update_mss": 99.40493359061665
+              },
+              {
+                "stage": "b0",
+                "iteration": 6,
+                "fwhm_mm": 0.0,
+                "mean_update_mss": 98.27053341867348
+              },
+              {
+                "stage": "b0",
+                "iteration": 7,
+                "fwhm_mm": 0.0,
+                "mean_update_mss": 98.27053341867348
+              },
+              {
+                "stage": "dwi",
+                "iteration": 0,
+                "fwhm_mm": 10.0,
+                "gp_seed": 12345,
+                "outliers": 3,
+                "mean_update_mss": 2.476059647795143
+              },
+              {
+                "stage": "dwi",
+                "iteration": 1,
+                "fwhm_mm": 8.0,
+                "gp_seed": 12345,
+                "outliers": 9,
+                "mean_update_mss": 0.9509543710451108
+              },
+              {
+                "stage": "dwi",
+                "iteration": 2,
+                "fwhm_mm": 4.0,
+                "gp_seed": 12345,
+                "outliers": 10,
+                "mean_update_mss": 1.7916060745166482
+              },
+              {
+                "stage": "dwi",
+                "iteration": 3,
+                "fwhm_mm": 2.0,
+                "gp_seed": 12345,
+                "outliers": 9,
+                "mean_update_mss": 4.923801371351603
+              },
+              {
+                "stage": "dwi",
+                "iteration": 4,
+                "fwhm_mm": 0.0,
+                "gp_seed": 12345,
+                "outliers": 8,
+                "mean_update_mss": 7.009700240106066
+              },
+              {
+                "stage": "dwi",
+                "iteration": 5,
+                "fwhm_mm": 0.0,
+                "gp_seed": 12345,
+                "outliers": 8,
+                "mean_update_mss": 6.936478913614466
+              },
+              {
+                "stage": "dwi",
+                "iteration": 6,
+                "fwhm_mm": 0.0,
+                "gp_seed": 12345,
+                "outliers": 8,
+                "mean_update_mss": 7.149276279460517
+              },
+              {
+                "stage": "dwi",
+                "iteration": 7,
+                "fwhm_mm": 0.0,
+                "gp_seed": 12345,
+                "outliers": 8,
+                "mean_update_mss": 7.174974024529482
+              }
+            ],
+            "gp_seed_override": 12345
+          },
+          "internal_times_seconds": {
+            "elapsed_seconds": 468.62419120175764
+          }
+        },
+        {
+          "run": "candidate_eddy",
+          "stage": "eddy",
+          "inputs": {
+            "fieldmap_out_fieldcoef.nii.gz": "a49dd02ae6d6c3b70f540c903f724caf24bcb14a57b07e13126d3835bd6338b7",
+            "fieldmap_out_movpar.txt": "7ea51158e1c7f2ff4cce8ef511049b3a58c6e2753a9759e6e37f700ecd91ef7c",
+            "imain": {
+              "bytes": 124216611,
+              "sha256": "c37773b5749bc169b96c1bc8642a572637a61325c6eb2ac33e765253011533f1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            },
+            "bvecs": {
+              "bytes": 2998,
+              "sha256": "e9dbf67c3a948f726b06f33c97f173c55ecbe186240541682af9d8cd8fb5835e"
+            },
+            "mask": {
+              "bytes": 61159,
+              "sha256": "ab81477fc0b456fae0522878b90400597bec8001aeaaf3209233ced1a633b419"
+            },
+            "acqp": {
+              "bytes": 25,
+              "sha256": "328fc80e6b9c6c78191d6b59a124c0265360987d0b0548361f68e161e0fa86e5"
+            },
+            "index": {
+              "bytes": 210,
+              "sha256": "04914d5dcf56d72e35f7465c6f3ac3fe16b33b8067082847af3371b60680837b"
+            }
+          },
+          "source_manifest": {
+            "eddy/__init__.py": "e1239c07080954468a0d3060a0385275df55addfa243ac039f4bbcd65cea1908",
+            "eddy/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "eddy/cli.py": "833f4b2838792ba0c45be53b6b34db7b297e42e001f5d86ec3fdfc21b44c0117",
+            "eddy/fsl2111_strict/__init__.py": "82de3ea49caa7ac9460c0172621eef9c76b52074f54f5e9c71fa362178a06b46",
+            "eddy/fsl2111_strict/config.py": "2440c28354d70fd40317584c2a1ff9d43dcc25d0ec83c173033a2f1f7653600d",
+            "eddy/fsl2111_strict/geometry.py": "4933be355012c36aa281c5cbb309444f3d0e66a3dd493eaa737c1671384981ae",
+            "eddy/fsl2111_strict/gp.py": "1b0cd8303eded816bf986703962f4644f8fb7435ddf25c72f22658c3e9fc8f2a",
+            "eddy/fsl2111_strict/outlier.py": "5b125641eaa882e02fe682a769a66b6ce171139e301f8d301b50834b51fb8d7d",
+            "eddy/fsl2111_strict/pipeline.py": "148335d9b4d314bcb216bbf95501e7574e3a8f30e50df60a965fbe9eca6bf0d4",
+            "eddy/fsl2111_strict/registration.py": "064e0b4e92c6bee67149eb03f413be57f6ae0ebcf25c307629bee0077cff19b7",
+            "eddy/fsl2111_strict/shell_alignment.py": "477028cecfebf0ba4ff1938f2b2228c0bca690450a5742a89b560ab7cbef1030",
+            "eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+            "eddy/fsl2111_strict/warp.py": "d9e03b07016bad2bda750ffec3141352e9b17f327b5eb0ba2a66fd80ee14e8ee",
+            "eddy/topup_field.py": "54d076b5187d70596db7778264326dbd797d9972c28f954aa32e43f6db2c6b74",
+            "eddy/ukb.py": "a3e7fef62e572fbd3b0e9de6fad96845a18a57d341088549c1718c0d1dce1e11",
+            "topup/__init__.py": "e15e503ddf68a59a8e36274ddfd6dc1609c38437885071049b8c9c37d813876d",
+            "topup/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+            "topup/cli.py": "fc5220c7c9de36577f5e116262bb5789733397beff00796059fe07313fba3388",
+            "topup/core.py": "4746d50f28b8137abf9bf6d8a211c12489bddc6a931bd06e695db1965f14b976",
+            "topup/io.py": "c87edab5c5369204d1a7ccfd2cb079dfd1a64e68279d8899f51755609038176a",
+            "topup/ukb.py": "63eb5cc0d9e2f4a4547585af4f041f543dd256a653101ca54ceab235addd0d08",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242316,
+          "wall_seconds_including_io": 404.3073866167106,
+          "peak_allocated_bytes": 4891255808,
+          "peak_reserved_bytes": 6159335424,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 44048, 74",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 9415, 95"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41954, 25",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 12833, 87"
+          ],
+          "outputs": {
+            "corrected": {
+              "shape": [
+                104,
+                104,
+                72,
+                105
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "8fd70f499ca5e512b460944197a0c0e6efa2071ace218ce7f255044029db8250"
+            },
+            "rotated_bvecs": {
+              "shape": [
+                3,
+                105
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "65e085860f6f33a34df891a1cbe238bfbca82de75fd7b1ddb5f2896be2b68c32"
+            },
+            "parameters": {
+              "shape": [
+                105,
+                16
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "c1fb6155ea00ce23ba822a78b013f83ba581095a0629b17c7088254e20bad16b"
+            },
+            "movement_rms": {
+              "shape": [
+                105,
+                2
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "3ea4ce643190507569f7aea0644158aa764cabd81433a093ca7b09047c0e7e64"
+            },
+            "restricted_movement_rms": {
+              "shape": [
+                105,
+                2
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "bc33708a0360cef54e93ac46528132c0be81b87aaba54f28d320cdf1efb9a080"
+            },
+            "outlier_map": {
+              "shape": [
+                105,
+                72
+              ],
+              "dtype": "int32",
+              "finite": true,
+              "sha256_decoded": "c664901b3ff7419b60b21aff6adf2bddd3bf2b57182a78d74d77a521d9a5716b"
+            },
+            "outlier_n_stdev_map": {
+              "shape": [
+                105,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "24d8cf494d84f42a8f16644286d4b9239ada4bcc2d609c1e6117cb3a3fe93546"
+            },
+            "outlier_n_sqr_stdev_map": {
+              "shape": [
+                105,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "5dd4d3ccc423deb8d80fe794855dd3c536621baf1c9c534c138b6a167b14cacb"
+            }
+          },
+          "model_qc": {
+            "backend": "fsl2111_strict",
+            "fsl_eddy_version": "2111.0",
+            "fsl_eddy_commit": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c",
+            "device": "cuda:0",
+            "tf32": true,
+            "iterations": [
+              {
+                "stage": "b0",
+                "iteration": 0,
+                "fwhm_mm": 10.0,
+                "mean_update_mss": 6.555693528541194
+              },
+              {
+                "stage": "b0",
+                "iteration": 1,
+                "fwhm_mm": 8.0,
+                "mean_update_mss": 5.6569143157768895
+              },
+              {
+                "stage": "b0",
+                "iteration": 2,
+                "fwhm_mm": 4.0,
+                "mean_update_mss": 15.906924506245403
+              },
+              {
+                "stage": "b0",
+                "iteration": 3,
+                "fwhm_mm": 2.0,
+                "mean_update_mss": 70.82586943938662
+              },
+              {
+                "stage": "b0",
+                "iteration": 4,
+                "fwhm_mm": 0.0,
+                "mean_update_mss": 107.35057997926656
+              },
+              {
+                "stage": "b0",
+                "iteration": 5,
+                "fwhm_mm": 0.0,
+                "mean_update_mss": 99.40493359061665
+              },
+              {
+                "stage": "b0",
+                "iteration": 6,
+                "fwhm_mm": 0.0,
+                "mean_update_mss": 98.27053341867348
+              },
+              {
+                "stage": "b0",
+                "iteration": 7,
+                "fwhm_mm": 0.0,
+                "mean_update_mss": 98.27053341867348
+              },
+              {
+                "stage": "dwi",
+                "iteration": 0,
+                "fwhm_mm": 10.0,
+                "gp_seed": 12345,
+                "outliers": 3,
+                "mean_update_mss": 2.476059647795143
+              },
+              {
+                "stage": "dwi",
+                "iteration": 1,
+                "fwhm_mm": 8.0,
+                "gp_seed": 12345,
+                "outliers": 9,
+                "mean_update_mss": 0.9509543710451108
+              },
+              {
+                "stage": "dwi",
+                "iteration": 2,
+                "fwhm_mm": 4.0,
+                "gp_seed": 12345,
+                "outliers": 10,
+                "mean_update_mss": 1.7916060745166482
+              },
+              {
+                "stage": "dwi",
+                "iteration": 3,
+                "fwhm_mm": 2.0,
+                "gp_seed": 12345,
+                "outliers": 9,
+                "mean_update_mss": 4.923801371351603
+              },
+              {
+                "stage": "dwi",
+                "iteration": 4,
+                "fwhm_mm": 0.0,
+                "gp_seed": 12345,
+                "outliers": 8,
+                "mean_update_mss": 7.009700240106066
+              },
+              {
+                "stage": "dwi",
+                "iteration": 5,
+                "fwhm_mm": 0.0,
+                "gp_seed": 12345,
+                "outliers": 8,
+                "mean_update_mss": 6.936478913614466
+              },
+              {
+                "stage": "dwi",
+                "iteration": 6,
+                "fwhm_mm": 0.0,
+                "gp_seed": 12345,
+                "outliers": 8,
+                "mean_update_mss": 7.149276279460517
+              },
+              {
+                "stage": "dwi",
+                "iteration": 7,
+                "fwhm_mm": 0.0,
+                "gp_seed": 12345,
+                "outliers": 8,
+                "mean_update_mss": 7.174974024529482
+              }
+            ],
+            "gp_seed_override": 12345
+          },
+          "internal_times_seconds": {
+            "elapsed_seconds": 386.88655433477834
+          }
+        }
+      ],
+      "exact_comparisons": {
+        "compare_candidate_eddy": {
+          "stage": "eddy",
+          "inputs_exact": true,
+          "unrounded_output_arrays_exact": true,
+          "model_qc_changes": {},
+          "saved_images": {
+            "data.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            }
+          },
+          "saved_sidecars": {
+            "data.eddy_movement_rms": true,
+            "data.eddy_outlier_map": true,
+            "data.eddy_outlier_n_sqr_stdev_map": true,
+            "data.eddy_outlier_n_stdev_map": true,
+            "data.eddy_outlier_report": true,
+            "data.eddy_parameters": true,
+            "data.eddy_restricted_movement_rms": true,
+            "data.eddy_rotated_bvecs": true
+          },
+          "outlier_report_exact": true,
+          "all_gates_passed": true
+        }
+      },
+      "timing_conclusion": "one paired shared-GPU observation; not a general speed ratio",
+      "gp_seed": 12345,
+      "reference_scan_no": 0,
+      "iterations": 8
+    },
+    "amico": {
+      "scope": "full-brain NODDI fit, including image IO; two independent processes per condition in ABBA order",
+      "runs": [
+        {
+          "run": "baseline3_amico",
+          "stage": "amico",
+          "inputs": {
+            "data": {
+              "bytes": 284600779,
+              "sha256": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa"
+            },
+            "mask": {
+              "bytes": 60928,
+              "sha256": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4"
+            },
+            "bvecs": {
+              "bytes": 4569,
+              "sha256": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            }
+          },
+          "source_manifest": {
+            "amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+            "amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+            "amico_noddi/classic.py": "2d1cd22c73b40edb5aeabe2c3ebf3dd642a3984b5cf037dc058dad778be16ee7",
+            "amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+            "amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+            "amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+            "amico_noddi/solver.py": "b86c56d9e3aef90efad74748309c627f4cb013071f3670f74c615f9e27001bf3",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242261,
+          "wall_seconds_including_io": 27.74067022278905,
+          "peak_allocated_bytes": 9952554496,
+          "peak_reserved_bytes": 19386073088,
+          "allocation_retries": 3,
+          "allocator_ooms": 0,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 9",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 6251, 3"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 13626, 2",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 23419, 61"
+          ],
+          "outputs": {
+            "ndi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "0ae53a83f05a5687bb990064a05230c28e4a0614f70e0e76da08ac266347a81f"
+            },
+            "odi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "c66e78ebc637972e545dee48db555110b3399765017a0ae3b699ee51d8110a65"
+            },
+            "fwf": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "764bcc594251ffee627ac932d8a40208d072290bd9529c9abc98cf6dee48e78f"
+            },
+            "directions": {
+              "shape": [
+                104,
+                104,
+                72,
+                3
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "5943f1449033381618f6189a31f95eb63051a6f7b1b89e7a39ef133bfa104bc9"
+            },
+            "rmse": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "f2844f55019955d5379474736f09977bc6cf479faf7cdedc3c89bf83071744e4"
+            }
+          },
+          "model_qc": {
+            "device": "cuda:0",
+            "kernel_dtype": "float32",
+            "solver_dtype": "float64",
+            "tf32": true,
+            "reference_implementation": "AMICO 2.0.3 NODDI",
+            "reference_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "amico_initialization_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "dictionary_atoms": 145,
+            "lut_directions": 500,
+            "solver": "AMICO three-stage NNLS, positive elastic-net, NNLS debias",
+            "fit_method": "amico",
+            "linear_solver": "batched compact float64 Cholesky with CG fallback",
+            "amico_output_contract": true,
+            "amico_numerically_equivalent": false,
+            "current_input_compared_with_amico": false,
+            "numpy_version": "1.26.4",
+            "numpy_blas_name": "blas",
+            "numpy_blas_version": "3.9.0",
+            "validated_numpy_build": false,
+            "voxels": 242261,
+            "volumes": 105,
+            "lut_directions_used": 500,
+            "lut_batch_size": 400,
+            "support_size_min": 1,
+            "support_size_median": 10.0,
+            "support_size_max": 27
+          },
+          "internal_times_seconds": {
+            "kernel_seconds": 0.6981618320569396,
+            "direction_seconds": 0.5355443912558258,
+            "solver_seconds": 21.302565065212548,
+            "amico_initialization_seconds": 21.302415192127228,
+            "elapsed_seconds": 24.33405955787748
+          }
+        },
+        {
+          "run": "gram1_amico",
+          "stage": "amico",
+          "inputs": {
+            "data": {
+              "bytes": 284600779,
+              "sha256": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa"
+            },
+            "mask": {
+              "bytes": 60928,
+              "sha256": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4"
+            },
+            "bvecs": {
+              "bytes": 4569,
+              "sha256": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            }
+          },
+          "source_manifest": {
+            "amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+            "amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+            "amico_noddi/classic.py": "ee5292dc4a14b43736a9f105c8946a43f35f482faa8bb8259992e9de2d8193ea",
+            "amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+            "amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+            "amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+            "amico_noddi/solver.py": "0f04c492b61f91a60aede8d281a8c87d5aac0a7453eb15898a788d8a90e1497d",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242261,
+          "wall_seconds_including_io": 22.144909034948796,
+          "peak_allocated_bytes": 10020129280,
+          "peak_reserved_bytes": 19507707904,
+          "allocation_retries": 3,
+          "allocator_ooms": 0,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 17774, 4",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 8145, 3"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 18006, 42",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 20877, 0"
+          ],
+          "outputs": {
+            "ndi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "0ae53a83f05a5687bb990064a05230c28e4a0614f70e0e76da08ac266347a81f"
+            },
+            "odi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "c66e78ebc637972e545dee48db555110b3399765017a0ae3b699ee51d8110a65"
+            },
+            "fwf": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "764bcc594251ffee627ac932d8a40208d072290bd9529c9abc98cf6dee48e78f"
+            },
+            "directions": {
+              "shape": [
+                104,
+                104,
+                72,
+                3
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "5943f1449033381618f6189a31f95eb63051a6f7b1b89e7a39ef133bfa104bc9"
+            },
+            "rmse": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "f2844f55019955d5379474736f09977bc6cf479faf7cdedc3c89bf83071744e4"
+            }
+          },
+          "model_qc": {
+            "device": "cuda:0",
+            "kernel_dtype": "float32",
+            "solver_dtype": "float64",
+            "tf32": true,
+            "reference_implementation": "AMICO 2.0.3 NODDI",
+            "reference_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "amico_initialization_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "dictionary_atoms": 145,
+            "lut_directions": 500,
+            "solver": "AMICO three-stage NNLS, positive elastic-net, NNLS debias",
+            "fit_method": "amico",
+            "linear_solver": "batched compact float64 Cholesky with CG fallback",
+            "amico_output_contract": true,
+            "amico_numerically_equivalent": false,
+            "current_input_compared_with_amico": false,
+            "numpy_version": "1.26.4",
+            "numpy_blas_name": "blas",
+            "numpy_blas_version": "3.9.0",
+            "validated_numpy_build": false,
+            "voxels": 242261,
+            "volumes": 105,
+            "lut_directions_used": 500,
+            "lut_batch_size": 400,
+            "support_size_min": 1,
+            "support_size_median": 10.0,
+            "support_size_max": 27
+          },
+          "internal_times_seconds": {
+            "kernel_seconds": 0.6796668241731822,
+            "direction_seconds": 0.5783968409523368,
+            "solver_seconds": 15.14047055086121,
+            "amico_initialization_seconds": 15.140309806913137,
+            "elapsed_seconds": 18.55770227732137
+          }
+        },
+        {
+          "run": "gram2_amico",
+          "stage": "amico",
+          "inputs": {
+            "data": {
+              "bytes": 284600779,
+              "sha256": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa"
+            },
+            "mask": {
+              "bytes": 60928,
+              "sha256": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4"
+            },
+            "bvecs": {
+              "bytes": 4569,
+              "sha256": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            }
+          },
+          "source_manifest": {
+            "amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+            "amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+            "amico_noddi/classic.py": "ee5292dc4a14b43736a9f105c8946a43f35f482faa8bb8259992e9de2d8193ea",
+            "amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+            "amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+            "amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+            "amico_noddi/solver.py": "0f04c492b61f91a60aede8d281a8c87d5aac0a7453eb15898a788d8a90e1497d",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242261,
+          "wall_seconds_including_io": 32.75782901188359,
+          "peak_allocated_bytes": 10020129280,
+          "peak_reserved_bytes": 19507707904,
+          "allocation_retries": 3,
+          "allocator_ooms": 0,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 18006, 44",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 22005, 9"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 18006, 45",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 24949, 86"
+          ],
+          "outputs": {
+            "ndi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "0ae53a83f05a5687bb990064a05230c28e4a0614f70e0e76da08ac266347a81f"
+            },
+            "odi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "c66e78ebc637972e545dee48db555110b3399765017a0ae3b699ee51d8110a65"
+            },
+            "fwf": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "764bcc594251ffee627ac932d8a40208d072290bd9529c9abc98cf6dee48e78f"
+            },
+            "directions": {
+              "shape": [
+                104,
+                104,
+                72,
+                3
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "5943f1449033381618f6189a31f95eb63051a6f7b1b89e7a39ef133bfa104bc9"
+            },
+            "rmse": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "f2844f55019955d5379474736f09977bc6cf479faf7cdedc3c89bf83071744e4"
+            }
+          },
+          "model_qc": {
+            "device": "cuda:0",
+            "kernel_dtype": "float32",
+            "solver_dtype": "float64",
+            "tf32": true,
+            "reference_implementation": "AMICO 2.0.3 NODDI",
+            "reference_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "amico_initialization_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "dictionary_atoms": 145,
+            "lut_directions": 500,
+            "solver": "AMICO three-stage NNLS, positive elastic-net, NNLS debias",
+            "fit_method": "amico",
+            "linear_solver": "batched compact float64 Cholesky with CG fallback",
+            "amico_output_contract": true,
+            "amico_numerically_equivalent": false,
+            "current_input_compared_with_amico": false,
+            "numpy_version": "1.26.4",
+            "numpy_blas_name": "blas",
+            "numpy_blas_version": "3.9.0",
+            "validated_numpy_build": false,
+            "voxels": 242261,
+            "volumes": 105,
+            "lut_directions_used": 500,
+            "lut_batch_size": 400,
+            "support_size_min": 1,
+            "support_size_median": 10.0,
+            "support_size_max": 27
+          },
+          "internal_times_seconds": {
+            "kernel_seconds": 0.8488681758753955,
+            "direction_seconds": 0.6017423616722226,
+            "solver_seconds": 25.251491175033152,
+            "amico_initialization_seconds": 25.251182316802442,
+            "elapsed_seconds": 29.03473266400397
+          }
+        },
+        {
+          "run": "baseline4_amico",
+          "stage": "amico",
+          "inputs": {
+            "data": {
+              "bytes": 284600779,
+              "sha256": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa"
+            },
+            "mask": {
+              "bytes": 60928,
+              "sha256": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4"
+            },
+            "bvecs": {
+              "bytes": 4569,
+              "sha256": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            }
+          },
+          "source_manifest": {
+            "amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+            "amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+            "amico_noddi/classic.py": "2d1cd22c73b40edb5aeabe2c3ebf3dd642a3984b5cf037dc058dad778be16ee7",
+            "amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+            "amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+            "amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+            "amico_noddi/solver.py": "b86c56d9e3aef90efad74748309c627f4cb013071f3670f74c615f9e27001bf3",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242261,
+          "wall_seconds_including_io": 33.799191371072084,
+          "peak_allocated_bytes": 9952554496,
+          "peak_reserved_bytes": 19386073088,
+          "allocation_retries": 3,
+          "allocator_ooms": 0,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 18006, 45",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 7665, 86"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 15596, 5",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 24681, 9"
+          ],
+          "outputs": {
+            "ndi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "0ae53a83f05a5687bb990064a05230c28e4a0614f70e0e76da08ac266347a81f"
+            },
+            "odi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "c66e78ebc637972e545dee48db555110b3399765017a0ae3b699ee51d8110a65"
+            },
+            "fwf": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "764bcc594251ffee627ac932d8a40208d072290bd9529c9abc98cf6dee48e78f"
+            },
+            "directions": {
+              "shape": [
+                104,
+                104,
+                72,
+                3
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "5943f1449033381618f6189a31f95eb63051a6f7b1b89e7a39ef133bfa104bc9"
+            },
+            "rmse": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "f2844f55019955d5379474736f09977bc6cf479faf7cdedc3c89bf83071744e4"
+            }
+          },
+          "model_qc": {
+            "device": "cuda:0",
+            "kernel_dtype": "float32",
+            "solver_dtype": "float64",
+            "tf32": true,
+            "reference_implementation": "AMICO 2.0.3 NODDI",
+            "reference_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "amico_initialization_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "dictionary_atoms": 145,
+            "lut_directions": 500,
+            "solver": "AMICO three-stage NNLS, positive elastic-net, NNLS debias",
+            "fit_method": "amico",
+            "linear_solver": "batched compact float64 Cholesky with CG fallback",
+            "amico_output_contract": true,
+            "amico_numerically_equivalent": false,
+            "current_input_compared_with_amico": false,
+            "numpy_version": "1.26.4",
+            "numpy_blas_name": "blas",
+            "numpy_blas_version": "3.9.0",
+            "validated_numpy_build": false,
+            "voxels": 242261,
+            "volumes": 105,
+            "lut_directions_used": 500,
+            "lut_batch_size": 400,
+            "support_size_min": 1,
+            "support_size_median": 10.0,
+            "support_size_max": 27
+          },
+          "internal_times_seconds": {
+            "kernel_seconds": 0.7302474747411907,
+            "direction_seconds": 0.6056334599852562,
+            "solver_seconds": 26.423518837895244,
+            "amico_initialization_seconds": 26.423178566154093,
+            "elapsed_seconds": 29.958714867942035
+          }
+        }
+      ],
+      "exact_comparisons": {
+        "compare_gram1_amico": {
+          "stage": "amico",
+          "inputs_exact": true,
+          "unrounded_output_arrays_exact": true,
+          "model_qc_changes": {},
+          "saved_images": {
+            "fit_FWF.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_NDI.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_ODI.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_RMSE.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_dir.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            }
+          },
+          "saved_sidecars": {},
+          "all_gates_passed": true
+        },
+        "compare_gram2_amico": {
+          "stage": "amico",
+          "inputs_exact": true,
+          "unrounded_output_arrays_exact": true,
+          "model_qc_changes": {},
+          "saved_images": {
+            "fit_FWF.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_NDI.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_ODI.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_RMSE.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_dir.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            }
+          },
+          "saved_sidecars": {},
+          "all_gates_passed": true
+        }
+      },
+      "timing_conclusion": "large overlapping timing ranges; stable speedup not established",
+      "median_seconds": {
+        "baseline": 30.769930796930566,
+        "candidate": 27.45136902341619
+      }
+    },
+    "classic": {
+      "scope": "full-brain NODDI fit, including image IO; two independent processes per condition in ABBA order",
+      "runs": [
+        {
+          "run": "baseline3_classic",
+          "stage": "classic",
+          "inputs": {
+            "data": {
+              "bytes": 284600779,
+              "sha256": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa"
+            },
+            "mask": {
+              "bytes": 60928,
+              "sha256": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4"
+            },
+            "bvecs": {
+              "bytes": 4569,
+              "sha256": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            }
+          },
+          "source_manifest": {
+            "amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+            "amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+            "amico_noddi/classic.py": "2d1cd22c73b40edb5aeabe2c3ebf3dd642a3984b5cf037dc058dad778be16ee7",
+            "amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+            "amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+            "amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+            "amico_noddi/solver.py": "b86c56d9e3aef90efad74748309c627f4cb013071f3670f74c615f9e27001bf3",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242261,
+          "wall_seconds_including_io": 74.30314389010891,
+          "peak_allocated_bytes": 9952554496,
+          "peak_reserved_bytes": 19386073088,
+          "allocation_retries": 3,
+          "allocator_ooms": 0,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 19976, 2",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 7687, 47"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 17",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 24693, 90"
+          ],
+          "outputs": {
+            "ndi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "364b6c8db59c0c0036dce136f31916260ab0347eeaaa8059b18b7b820557f418"
+            },
+            "odi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "d89dd57703ca07b41c1b2d7d9e4ec1cd95ad0acbd613e89f4bd09c58f8013cd8"
+            },
+            "fwf": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "448674cc4d4548cbe6aaced61726460dd688c406fb3d75fc0aedb5b58a04393d"
+            },
+            "directions": {
+              "shape": [
+                104,
+                104,
+                72,
+                3
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "10b379bc86756403c823dc3365c4184ae0170dd1b8e1e6cd94fcfa038f7e369e"
+            },
+            "rmse": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "41b186efc65d536d5deebebb6f7e00742a2c84cbd0f6fac0b22fb8ed854ff885"
+            }
+          },
+          "model_qc": {
+            "device": "cuda:0",
+            "kernel_dtype": "float32",
+            "solver_dtype": "float64",
+            "tf32": true,
+            "reference_implementation": "classical continuous Watson NODDI",
+            "reference_commit": null,
+            "amico_initialization_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "dictionary_atoms": 145,
+            "lut_directions": 500,
+            "solver": "AMICO initialization, continuous five-parameter Rician nonlinear fit",
+            "fit_method": "classic",
+            "linear_solver": "AMICO active set followed by batched 5x5 damped Gauss-Newton",
+            "amico_output_contract": true,
+            "amico_numerically_equivalent": false,
+            "current_input_compared_with_amico": false,
+            "numpy_version": "1.26.4",
+            "numpy_blas_name": "blas",
+            "numpy_blas_version": "3.9.0",
+            "validated_numpy_build": false,
+            "voxels": 242261,
+            "volumes": 105,
+            "lut_directions_used": 500,
+            "lut_batch_size": 400,
+            "support_size_min": 1,
+            "support_size_median": 10.0,
+            "support_size_max": 27,
+            "accepted_updates": 3710053,
+            "rician_sigma_median": 0.00035961007233709097
+          },
+          "internal_times_seconds": {
+            "kernel_seconds": 0.5578341227956116,
+            "direction_seconds": 0.5534720537252724,
+            "solver_seconds": 67.748743891716,
+            "amico_initialization_seconds": 18.597750740125775,
+            "elapsed_seconds": 70.96053460007533,
+            "classic_refinement_seconds": 49.15097379172221
+          }
+        },
+        {
+          "run": "gram1_classic",
+          "stage": "classic",
+          "inputs": {
+            "data": {
+              "bytes": 284600779,
+              "sha256": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa"
+            },
+            "mask": {
+              "bytes": 60928,
+              "sha256": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4"
+            },
+            "bvecs": {
+              "bytes": 4569,
+              "sha256": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            }
+          },
+          "source_manifest": {
+            "amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+            "amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+            "amico_noddi/classic.py": "ee5292dc4a14b43736a9f105c8946a43f35f482faa8bb8259992e9de2d8193ea",
+            "amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+            "amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+            "amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+            "amico_noddi/solver.py": "0f04c492b61f91a60aede8d281a8c87d5aac0a7453eb15898a788d8a90e1497d",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242261,
+          "wall_seconds_including_io": 69.52493678266183,
+          "peak_allocated_bytes": 10020129280,
+          "peak_reserved_bytes": 19507707904,
+          "allocation_retries": 3,
+          "allocator_ooms": 0,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 85",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 7717, 98"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 0",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 20901, 3"
+          ],
+          "outputs": {
+            "ndi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "364b6c8db59c0c0036dce136f31916260ab0347eeaaa8059b18b7b820557f418"
+            },
+            "odi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "d89dd57703ca07b41c1b2d7d9e4ec1cd95ad0acbd613e89f4bd09c58f8013cd8"
+            },
+            "fwf": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "448674cc4d4548cbe6aaced61726460dd688c406fb3d75fc0aedb5b58a04393d"
+            },
+            "directions": {
+              "shape": [
+                104,
+                104,
+                72,
+                3
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "10b379bc86756403c823dc3365c4184ae0170dd1b8e1e6cd94fcfa038f7e369e"
+            },
+            "rmse": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "41b186efc65d536d5deebebb6f7e00742a2c84cbd0f6fac0b22fb8ed854ff885"
+            }
+          },
+          "model_qc": {
+            "device": "cuda:0",
+            "kernel_dtype": "float32",
+            "solver_dtype": "float64",
+            "tf32": true,
+            "reference_implementation": "classical continuous Watson NODDI",
+            "reference_commit": null,
+            "amico_initialization_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "dictionary_atoms": 145,
+            "lut_directions": 500,
+            "solver": "AMICO initialization, continuous five-parameter Rician nonlinear fit",
+            "fit_method": "classic",
+            "linear_solver": "AMICO active set followed by batched 5x5 damped Gauss-Newton",
+            "amico_output_contract": true,
+            "amico_numerically_equivalent": false,
+            "current_input_compared_with_amico": false,
+            "numpy_version": "1.26.4",
+            "numpy_blas_name": "blas",
+            "numpy_blas_version": "3.9.0",
+            "validated_numpy_build": false,
+            "voxels": 242261,
+            "volumes": 105,
+            "lut_directions_used": 500,
+            "lut_batch_size": 400,
+            "support_size_min": 1,
+            "support_size_median": 10.0,
+            "support_size_max": 27,
+            "accepted_updates": 3710053,
+            "rician_sigma_median": 0.00035961007233709097
+          },
+          "internal_times_seconds": {
+            "kernel_seconds": 0.6852206801995635,
+            "direction_seconds": 0.6135549573227763,
+            "solver_seconds": 63.15017860196531,
+            "amico_initialization_seconds": 18.5401514461264,
+            "elapsed_seconds": 66.30136302672327,
+            "classic_refinement_seconds": 44.61000631703064
+          }
+        },
+        {
+          "run": "gram2_classic",
+          "stage": "classic",
+          "inputs": {
+            "data": {
+              "bytes": 284600779,
+              "sha256": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa"
+            },
+            "mask": {
+              "bytes": 60928,
+              "sha256": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4"
+            },
+            "bvecs": {
+              "bytes": 4569,
+              "sha256": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            }
+          },
+          "source_manifest": {
+            "amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+            "amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+            "amico_noddi/classic.py": "ee5292dc4a14b43736a9f105c8946a43f35f482faa8bb8259992e9de2d8193ea",
+            "amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+            "amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+            "amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+            "amico_noddi/solver.py": "0f04c492b61f91a60aede8d281a8c87d5aac0a7453eb15898a788d8a90e1497d",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242261,
+          "wall_seconds_including_io": 90.09442380582914,
+          "peak_allocated_bytes": 10020129280,
+          "peak_reserved_bytes": 19507707904,
+          "allocation_retries": 3,
+          "allocator_ooms": 0,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 68",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 3681, 0"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 69",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 25263, 47"
+          ],
+          "outputs": {
+            "ndi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "364b6c8db59c0c0036dce136f31916260ab0347eeaaa8059b18b7b820557f418"
+            },
+            "odi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "d89dd57703ca07b41c1b2d7d9e4ec1cd95ad0acbd613e89f4bd09c58f8013cd8"
+            },
+            "fwf": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "448674cc4d4548cbe6aaced61726460dd688c406fb3d75fc0aedb5b58a04393d"
+            },
+            "directions": {
+              "shape": [
+                104,
+                104,
+                72,
+                3
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "10b379bc86756403c823dc3365c4184ae0170dd1b8e1e6cd94fcfa038f7e369e"
+            },
+            "rmse": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "41b186efc65d536d5deebebb6f7e00742a2c84cbd0f6fac0b22fb8ed854ff885"
+            }
+          },
+          "model_qc": {
+            "device": "cuda:0",
+            "kernel_dtype": "float32",
+            "solver_dtype": "float64",
+            "tf32": true,
+            "reference_implementation": "classical continuous Watson NODDI",
+            "reference_commit": null,
+            "amico_initialization_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "dictionary_atoms": 145,
+            "lut_directions": 500,
+            "solver": "AMICO initialization, continuous five-parameter Rician nonlinear fit",
+            "fit_method": "classic",
+            "linear_solver": "AMICO active set followed by batched 5x5 damped Gauss-Newton",
+            "amico_output_contract": true,
+            "amico_numerically_equivalent": false,
+            "current_input_compared_with_amico": false,
+            "numpy_version": "1.26.4",
+            "numpy_blas_name": "blas",
+            "numpy_blas_version": "3.9.0",
+            "validated_numpy_build": false,
+            "voxels": 242261,
+            "volumes": 105,
+            "lut_directions_used": 500,
+            "lut_batch_size": 400,
+            "support_size_min": 1,
+            "support_size_median": 10.0,
+            "support_size_max": 27,
+            "accepted_updates": 3710053,
+            "rician_sigma_median": 0.00035961007233709097
+          },
+          "internal_times_seconds": {
+            "kernel_seconds": 0.6036715707741678,
+            "direction_seconds": 0.5681640803813934,
+            "solver_seconds": 83.48843691777438,
+            "amico_initialization_seconds": 39.964562363922596,
+            "elapsed_seconds": 86.79109778394923,
+            "classic_refinement_seconds": 43.52385251224041
+          }
+        },
+        {
+          "run": "baseline4_classic",
+          "stage": "classic",
+          "inputs": {
+            "data": {
+              "bytes": 284600779,
+              "sha256": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa"
+            },
+            "mask": {
+              "bytes": 60928,
+              "sha256": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4"
+            },
+            "bvecs": {
+              "bytes": 4569,
+              "sha256": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+            },
+            "bvals": {
+              "bytes": 492,
+              "sha256": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224"
+            }
+          },
+          "source_manifest": {
+            "amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+            "amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+            "amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+            "amico_noddi/classic.py": "2d1cd22c73b40edb5aeabe2c3ebf3dd642a3984b5cf037dc058dad778be16ee7",
+            "amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+            "amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+            "amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+            "amico_noddi/solver.py": "b86c56d9e3aef90efad74748309c627f4cb013071f3670f74c615f9e27001bf3",
+            "_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+          },
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "mask_voxels": 242261,
+          "wall_seconds_including_io": 61.9995862939395,
+          "peak_allocated_bytes": 9952554496,
+          "peak_reserved_bytes": 19386073088,
+          "allocation_retries": 3,
+          "allocator_ooms": 0,
+          "tf32_actual_after": {
+            "matmul": true,
+            "cudnn": true
+          },
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 0",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 12365, 0"
+          ],
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 12",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 20158, 0"
+          ],
+          "outputs": {
+            "ndi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "364b6c8db59c0c0036dce136f31916260ab0347eeaaa8059b18b7b820557f418"
+            },
+            "odi": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "d89dd57703ca07b41c1b2d7d9e4ec1cd95ad0acbd613e89f4bd09c58f8013cd8"
+            },
+            "fwf": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "448674cc4d4548cbe6aaced61726460dd688c406fb3d75fc0aedb5b58a04393d"
+            },
+            "directions": {
+              "shape": [
+                104,
+                104,
+                72,
+                3
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "10b379bc86756403c823dc3365c4184ae0170dd1b8e1e6cd94fcfa038f7e369e"
+            },
+            "rmse": {
+              "shape": [
+                104,
+                104,
+                72
+              ],
+              "dtype": "float32",
+              "finite": true,
+              "sha256_decoded": "41b186efc65d536d5deebebb6f7e00742a2c84cbd0f6fac0b22fb8ed854ff885"
+            }
+          },
+          "model_qc": {
+            "device": "cuda:0",
+            "kernel_dtype": "float32",
+            "solver_dtype": "float64",
+            "tf32": true,
+            "reference_implementation": "classical continuous Watson NODDI",
+            "reference_commit": null,
+            "amico_initialization_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+            "dictionary_atoms": 145,
+            "lut_directions": 500,
+            "solver": "AMICO initialization, continuous five-parameter Rician nonlinear fit",
+            "fit_method": "classic",
+            "linear_solver": "AMICO active set followed by batched 5x5 damped Gauss-Newton",
+            "amico_output_contract": true,
+            "amico_numerically_equivalent": false,
+            "current_input_compared_with_amico": false,
+            "numpy_version": "1.26.4",
+            "numpy_blas_name": "blas",
+            "numpy_blas_version": "3.9.0",
+            "validated_numpy_build": false,
+            "voxels": 242261,
+            "volumes": 105,
+            "lut_directions_used": 500,
+            "lut_batch_size": 400,
+            "support_size_min": 1,
+            "support_size_median": 10.0,
+            "support_size_max": 27,
+            "accepted_updates": 3710053,
+            "rician_sigma_median": 0.00035961007233709097
+          },
+          "internal_times_seconds": {
+            "kernel_seconds": 0.8019745661877096,
+            "direction_seconds": 0.5450675636529922,
+            "solver_seconds": 55.39315702300519,
+            "amico_initialization_seconds": 17.035377745050937,
+            "elapsed_seconds": 58.702497004996985,
+            "classic_refinement_seconds": 38.357757615856826
+          }
+        }
+      ],
+      "exact_comparisons": {
+        "compare_gram1_classic": {
+          "stage": "classic",
+          "inputs_exact": true,
+          "unrounded_output_arrays_exact": true,
+          "model_qc_changes": {},
+          "saved_images": {
+            "fit_FWF.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_NDI.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_ODI.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_RMSE.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_dir.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            }
+          },
+          "saved_sidecars": {},
+          "all_gates_passed": true
+        },
+        "compare_gram2_classic": {
+          "stage": "classic",
+          "inputs_exact": true,
+          "unrounded_output_arrays_exact": true,
+          "model_qc_changes": {},
+          "saved_images": {
+            "fit_FWF.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_NDI.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_ODI.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_RMSE.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            },
+            "fit_dir.nii.gz": {
+              "complete_header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "compressed_file_exact": true
+            }
+          },
+          "saved_sidecars": {},
+          "all_gates_passed": true
+        }
+      },
+      "timing_conclusion": "whole-fit candidate median was slower; speedup not established",
+      "median_seconds": {
+        "baseline": 68.15136509202421,
+        "candidate": 79.80968029424548
+      }
+    },
+    "map_tbss": {
+      "schema_version": 1,
+      "scope": "real saved native nine maps; fixed existing warp and affine; no registration re-estimation",
+      "backend": "tbss",
+      "timing_scope": "materialized input; synchronized prepare + nine independent image calls including D2H; no input reads or output NIfTI writes",
+      "sampling": "same single-map channel shape/order; original float64 transform geometry and float32 image sampling; no FP16/BF16",
+      "device": "cuda:0",
+      "python": "3.11.16",
+      "torch": "2.5.1",
+      "threads": 8,
+      "memory_limit_bytes": 20000000000,
+      "device_name": "NVIDIA H100 PCIe",
+      "legacy_module_sha256": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+      "current_module_sha256": "57031bdc2120d10116593c987b9598e3ee695545daa34736395b4b5a4187c560",
+      "geometry_guard_sha256": "a44a7fedd476be3f41cd3d9426790eadfabef08eb72f45dba14db1ebd2a8d3c3",
+      "input_sha256": {
+        "FA": "052c0648546703d3ec0f8bb9f3a85bdd1963193e6bb4f41d4e3a1b7f148fcd5b",
+        "MD": "73375e35f2d0fda6ec67e5791289fdafe260555273c2639ec635abc4e42f4cab",
+        "L1": "05b9f82c83ea235d9313892746fd1a04068b8a29b3d35625c984d2996b027588",
+        "L2": "7afbf848c3ff049cca7dd7a03d41005621e07e64ce1e7e3191d5e3b9ccd29c7e",
+        "L3": "b9511209d00bfaaa19035b2789816e6b9d9953cb6fd4ff18cea6e3312e1cc77c",
+        "MO": "fdcaa8b8318143830ca1124b37d5e70e54097f436fa1fcf95afe44d58df2509c",
+        "ICVF": "03160cf0bda5c25e0d388bad477ab2546cf321c32819d3b6a71b142dd951c4f8",
+        "OD": "0ddc9d13f28968b8abbed84812eea433ae0e3391d3e69ba45d5ec492b832de52",
+        "ISOVF": "08c14b1db6f7e1c493ecdaa7a2f3306ff9d38c056e5072d7d2832891d2ad0bbc"
+      },
+      "reference_sha256": "1268fd84b658451c9a85799a636688bc1f6947fdf8de2d9cf7f62320de1b3837",
+      "warp_sha256": "bb19cb12057edd513e1b3d1d283bad4619443b993015d0cd279bd12c960a081b",
+      "affine_sha256": null,
+      "fa_skeleton_sha256": "db7a69531396504ecf1555061831dd909c524b6d5575d5c1b280a340eea9c8de",
+      "runs": [
+        {
+          "repeat": 0,
+          "condition": "first_call",
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 98",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 8217, 10"
+          ],
+          "legacy_memory_before": {
+            "allocated_bytes": 0,
+            "reserved_bytes": 0,
+            "free_whole_device_bytes": 76326109184,
+            "total_device_bytes": 84942979072
+          },
+          "legacy_seconds": 0.702855815179646,
+          "legacy_prepare_seconds": null,
+          "legacy_plan_count": null,
+          "legacy_peak_allocated_bytes": 1957834752,
+          "legacy_peak_reserved_bytes": 2040528896,
+          "legacy_memory_after": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 2040528896,
+            "free_whole_device_bytes": 73931161600,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 75938136064,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_seconds": 0.2484549069777131,
+          "prepared_prepare_seconds": 0.03498672693967819,
+          "prepared_plan_count": 1,
+          "prepared_peak_allocated_bytes": 1969162240,
+          "prepared_peak_reserved_bytes": 2040528896,
+          "prepared_memory_after": {
+            "allocated_bytes": 301491712,
+            "reserved_bytes": 2040528896,
+            "free_whole_device_bytes": 73929064448,
+            "total_device_bytes": 84942979072
+          },
+          "image_gates": {
+            "FA": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L1": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L2": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L3": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MO": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ICVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "OD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ISOVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            }
+          },
+          "valid_mask_exact": {
+            "FA": true,
+            "MD": true,
+            "L1": true,
+            "L2": true,
+            "L3": true,
+            "MO": true,
+            "ICVF": true,
+            "OD": true,
+            "ISOVF": true
+          },
+          "tbss_postprocessing_exact": {
+            "fa_valid_mask": true,
+            "skeleton_mask": true,
+            "standard_nine": true,
+            "skeleton_nine": true
+          },
+          "gates_passed": true,
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 13",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10503, 0"
+          ]
+        },
+        {
+          "repeat": 1,
+          "condition": "warm",
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 13",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10503, 0"
+          ],
+          "prepared_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 75936038912,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_seconds": 0.21455739391967654,
+          "prepared_prepare_seconds": 0.049534465186297894,
+          "prepared_plan_count": 1,
+          "prepared_peak_allocated_bytes": 1969162240,
+          "prepared_peak_reserved_bytes": 2040528896,
+          "prepared_memory_after": {
+            "allocated_bytes": 301491712,
+            "reserved_bytes": 2040528896,
+            "free_whole_device_bytes": 73929064448,
+            "total_device_bytes": 84942979072
+          },
+          "legacy_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 75936038912,
+            "total_device_bytes": 84942979072
+          },
+          "legacy_seconds": 0.35911974404007196,
+          "legacy_prepare_seconds": null,
+          "legacy_plan_count": null,
+          "legacy_peak_allocated_bytes": 1957834752,
+          "legacy_peak_reserved_bytes": 2040528896,
+          "legacy_memory_after": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 2040528896,
+            "free_whole_device_bytes": 73929064448,
+            "total_device_bytes": 84942979072
+          },
+          "image_gates": {
+            "FA": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L1": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L2": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L3": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MO": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ICVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "OD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ISOVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            }
+          },
+          "valid_mask_exact": {
+            "FA": true,
+            "MD": true,
+            "L1": true,
+            "L2": true,
+            "L3": true,
+            "MO": true,
+            "ICVF": true,
+            "OD": true,
+            "ISOVF": true
+          },
+          "tbss_postprocessing_exact": {
+            "fa_valid_mask": true,
+            "skeleton_mask": true,
+            "standard_nine": true,
+            "skeleton_nine": true
+          },
+          "gates_passed": true,
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 71",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10505, 47"
+          ]
+        },
+        {
+          "repeat": 2,
+          "condition": "warm",
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 71",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10505, 47"
+          ],
+          "legacy_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 75933941760,
+            "total_device_bytes": 84942979072
+          },
+          "legacy_seconds": 0.372348845936358,
+          "legacy_prepare_seconds": null,
+          "legacy_plan_count": null,
+          "legacy_peak_allocated_bytes": 1957834752,
+          "legacy_peak_reserved_bytes": 2040528896,
+          "legacy_memory_after": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 2040528896,
+            "free_whole_device_bytes": 73924870144,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 75931844608,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_seconds": 0.14712562737986445,
+          "prepared_prepare_seconds": 0.04587867483496666,
+          "prepared_plan_count": 1,
+          "prepared_peak_allocated_bytes": 1969162240,
+          "prepared_peak_reserved_bytes": 2040528896,
+          "prepared_memory_after": {
+            "allocated_bytes": 301491712,
+            "reserved_bytes": 2040528896,
+            "free_whole_device_bytes": 73924870144,
+            "total_device_bytes": 84942979072
+          },
+          "image_gates": {
+            "FA": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L1": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L2": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L3": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MO": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ICVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "OD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ISOVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            }
+          },
+          "valid_mask_exact": {
+            "FA": true,
+            "MD": true,
+            "L1": true,
+            "L2": true,
+            "L3": true,
+            "MO": true,
+            "ICVF": true,
+            "OD": true,
+            "ISOVF": true
+          },
+          "tbss_postprocessing_exact": {
+            "fa_valid_mask": true,
+            "skeleton_mask": true,
+            "standard_nine": true,
+            "skeleton_nine": true
+          },
+          "gates_passed": true,
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 19",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10507, 62"
+          ]
+        }
+      ],
+      "all_gates_passed": true
+    },
+    "map_mmorf": {
+      "schema_version": 1,
+      "scope": "real saved native nine maps; fixed existing warp and affine; no registration re-estimation",
+      "backend": "mmorf",
+      "timing_scope": "materialized input; synchronized prepare + nine independent image calls including D2H; no input reads or output NIfTI writes",
+      "sampling": "same single-map channel shape/order; original mixed float64 transforms and float32 sampling coordinates/images; no FP16/BF16",
+      "device": "cuda:0",
+      "python": "3.11.16",
+      "torch": "2.5.1",
+      "threads": 8,
+      "memory_limit_bytes": 20000000000,
+      "device_name": "NVIDIA H100 PCIe",
+      "legacy_module_sha256": "49260559dddbf67e227d53c16f01a772f2ceb20cff09c0c3f9117e2633fa9b27",
+      "current_module_sha256": "1692d754c41139fbc61ce2d1fd1071790168e30ed2039dbb8d2e7bc256105338",
+      "geometry_guard_sha256": "a44a7fedd476be3f41cd3d9426790eadfabef08eb72f45dba14db1ebd2a8d3c3",
+      "input_sha256": {
+        "FA": "052c0648546703d3ec0f8bb9f3a85bdd1963193e6bb4f41d4e3a1b7f148fcd5b",
+        "MD": "73375e35f2d0fda6ec67e5791289fdafe260555273c2639ec635abc4e42f4cab",
+        "L1": "05b9f82c83ea235d9313892746fd1a04068b8a29b3d35625c984d2996b027588",
+        "L2": "7afbf848c3ff049cca7dd7a03d41005621e07e64ce1e7e3191d5e3b9ccd29c7e",
+        "L3": "b9511209d00bfaaa19035b2789816e6b9d9953cb6fd4ff18cea6e3312e1cc77c",
+        "MO": "fdcaa8b8318143830ca1124b37d5e70e54097f436fa1fcf95afe44d58df2509c",
+        "ICVF": "03160cf0bda5c25e0d388bad477ab2546cf321c32819d3b6a71b142dd951c4f8",
+        "OD": "0ddc9d13f28968b8abbed84812eea433ae0e3391d3e69ba45d5ec492b832de52",
+        "ISOVF": "08c14b1db6f7e1c493ecdaa7a2f3306ff9d38c056e5072d7d2832891d2ad0bbc"
+      },
+      "reference_sha256": "32d5be33460f995a5d305507053c8862c823d9ca6bfb543381308df14590f212",
+      "warp_sha256": "80ec04dd7d7138693c079f169d2c6788f9555d92b610ca4d12306ae7f9cc1237",
+      "affine_sha256": "e4ae244c562b1f48053b0ef28f2a4143eb4778aa9a5c2047a991405dea49990d",
+      "fa_skeleton_sha256": null,
+      "runs": [
+        {
+          "repeat": 0,
+          "condition": "first_call",
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 72",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 8227, 55"
+          ],
+          "legacy_memory_before": {
+            "allocated_bytes": 0,
+            "reserved_bytes": 0,
+            "free_whole_device_bytes": 76315623424,
+            "total_device_bytes": 84942979072
+          },
+          "legacy_seconds": 0.6456930600106716,
+          "legacy_prepare_seconds": null,
+          "legacy_plan_count": null,
+          "legacy_peak_allocated_bytes": 990526464,
+          "legacy_peak_reserved_bytes": 994050048,
+          "legacy_memory_after": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 994050048,
+            "free_whole_device_bytes": 73895510016,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 74856005632,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_seconds": 0.22499004798009992,
+          "prepared_prepare_seconds": 0.028515914920717478,
+          "prepared_plan_count": 1,
+          "prepared_peak_allocated_bytes": 990526464,
+          "prepared_peak_reserved_bytes": 994050048,
+          "prepared_memory_after": {
+            "allocated_bytes": 207618048,
+            "reserved_bytes": 994050048,
+            "free_whole_device_bytes": 73895510016,
+            "total_device_bytes": 84942979072
+          },
+          "image_gates": {
+            "FA": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L1": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L2": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L3": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MO": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ICVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "OD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ISOVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            }
+          },
+          "gates_passed": true,
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 89",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10535, 52"
+          ]
+        },
+        {
+          "repeat": 1,
+          "condition": "warm",
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 89",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10535, 52"
+          ],
+          "prepared_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 74856005632,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_seconds": 0.2848819512873888,
+          "prepared_prepare_seconds": 0.03462118795141578,
+          "prepared_plan_count": 1,
+          "prepared_peak_allocated_bytes": 990526464,
+          "prepared_peak_reserved_bytes": 994050048,
+          "prepared_memory_after": {
+            "allocated_bytes": 207618048,
+            "reserved_bytes": 994050048,
+            "free_whole_device_bytes": 73895510016,
+            "total_device_bytes": 84942979072
+          },
+          "legacy_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 74856005632,
+            "total_device_bytes": 84942979072
+          },
+          "legacy_seconds": 0.46998261800035834,
+          "legacy_prepare_seconds": null,
+          "legacy_plan_count": null,
+          "legacy_peak_allocated_bytes": 990526464,
+          "legacy_peak_reserved_bytes": 994050048,
+          "legacy_memory_after": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 994050048,
+            "free_whole_device_bytes": 73895510016,
+            "total_device_bytes": 84942979072
+          },
+          "image_gates": {
+            "FA": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L1": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L2": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L3": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MO": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ICVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "OD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ISOVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            }
+          },
+          "gates_passed": true,
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 19",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10535, 38"
+          ]
+        },
+        {
+          "repeat": 2,
+          "condition": "warm",
+          "gpu_before": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 19",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10535, 38"
+          ],
+          "legacy_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 74856005632,
+            "total_device_bytes": 84942979072
+          },
+          "legacy_seconds": 0.564293494913727,
+          "legacy_prepare_seconds": null,
+          "legacy_plan_count": null,
+          "legacy_peak_allocated_bytes": 990526464,
+          "legacy_peak_reserved_bytes": 994050048,
+          "legacy_memory_after": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 994050048,
+            "free_whole_device_bytes": 73895510016,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_memory_before": {
+            "allocated_bytes": 33554432,
+            "reserved_bytes": 33554432,
+            "free_whole_device_bytes": 74856005632,
+            "total_device_bytes": 84942979072
+          },
+          "prepared_seconds": 0.25530063500627875,
+          "prepared_prepare_seconds": 0.046596385072916746,
+          "prepared_plan_count": 1,
+          "prepared_peak_allocated_bytes": 990526464,
+          "prepared_peak_reserved_bytes": 994050048,
+          "prepared_memory_after": {
+            "allocated_bytes": 207618048,
+            "reserved_bytes": 994050048,
+            "free_whole_device_bytes": 73895510016,
+            "total_device_bytes": 84942979072
+          },
+          "image_gates": {
+            "FA": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L1": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L2": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "L3": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "MO": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ICVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "OD": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            },
+            "ISOVF": {
+              "voxels_exact": true,
+              "header_exact": true,
+              "affine_exact": true,
+              "shape_exact": true,
+              "dtype_exact": true,
+              "maximum_absolute_difference": 0.0
+            }
+          },
+          "gates_passed": true,
+          "gpu_after": [
+            "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41966, 14",
+            "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 10535, 64"
+          ]
+        }
+      ],
+      "all_gates_passed": true
+    },
+    "preparation": {
+      "scope": "real AP/PA; TOPUP selection outside EDDY preparation timers",
+      "ap_index": 0,
+      "pa_index": 0,
+      "ap_scores": [
+        0.98834228515625,
+        0.9816651493310928,
+        0.9905994832515717,
+        0.9824833869934082,
+        0.9917209595441818
+      ],
+      "pa_scores": [
+        0.9994640648365021,
+        0.9995508193969727,
+        0.9995162189006805
+      ],
+      "runs": [
+        {
+          "repeat": 0,
+          "original_seconds": 6.022163917310536,
+          "reused_seconds": 0.15204159868881106,
+          "gates": {
+            "reference_exact": true,
+            "mask_exact": true,
+            "mask_header_exact": true,
+            "mask_affine_exact": true,
+            "index_exact": true,
+            "other_inputs_exact": true
+          }
+        },
+        {
+          "repeat": 1,
+          "reused_seconds": 0.15340935997664928,
+          "original_seconds": 7.3462531901896,
+          "gates": {
+            "reference_exact": true,
+            "mask_exact": true,
+            "mask_header_exact": true,
+            "mask_affine_exact": true,
+            "index_exact": true,
+            "other_inputs_exact": true
+          }
+        },
+        {
+          "repeat": 2,
+          "original_seconds": 6.991076356731355,
+          "reused_seconds": 0.20516890287399292,
+          "gates": {
+            "reference_exact": true,
+            "mask_exact": true,
+            "mask_header_exact": true,
+            "mask_affine_exact": true,
+            "index_exact": true,
+            "other_inputs_exact": true
+          }
+        }
+      ],
+      "all_gates_passed": true
+    },
+    "classic_qc": {
+      "scope": "real full-brain classic refinement; fixed unrounded AMICO initialization; no image IO or initialization in timers",
+      "mask_voxels": 242261,
+      "runs": [
+        {
+          "route": "host_qc",
+          "seconds": 38.64986616419628,
+          "output_sha256": [
+            "872bed25fe633462a272dd66c96d89cae644430547cc5645c5c78b14f2fb8d96",
+            "025381d9f3b1cf9e1b8eceda32745fd8a8e779557ae274996dba58b0c6bc5ee0",
+            "5a7899015d33fe2d5db2be5230d31a944e0a85afd922a07fb61102eff45026ed"
+          ],
+          "qc": {
+            "accepted_updates": 3710053,
+            "rician_sigma_median": 0.00035961007233709097
+          },
+          "exact": true
+        },
+        {
+          "route": "device_qc",
+          "seconds": 38.488963324576616,
+          "output_sha256": [
+            "872bed25fe633462a272dd66c96d89cae644430547cc5645c5c78b14f2fb8d96",
+            "025381d9f3b1cf9e1b8eceda32745fd8a8e779557ae274996dba58b0c6bc5ee0",
+            "5a7899015d33fe2d5db2be5230d31a944e0a85afd922a07fb61102eff45026ed"
+          ],
+          "qc": {
+            "accepted_updates": 3710053,
+            "rician_sigma_median": 0.00035961007233709097
+          },
+          "exact": true
+        },
+        {
+          "route": "device_qc",
+          "seconds": 38.694472562056035,
+          "output_sha256": [
+            "872bed25fe633462a272dd66c96d89cae644430547cc5645c5c78b14f2fb8d96",
+            "025381d9f3b1cf9e1b8eceda32745fd8a8e779557ae274996dba58b0c6bc5ee0",
+            "5a7899015d33fe2d5db2be5230d31a944e0a85afd922a07fb61102eff45026ed"
+          ],
+          "qc": {
+            "accepted_updates": 3710053,
+            "rician_sigma_median": 0.00035961007233709097
+          },
+          "exact": true
+        },
+        {
+          "route": "host_qc",
+          "seconds": 58.08465304784477,
+          "output_sha256": [
+            "872bed25fe633462a272dd66c96d89cae644430547cc5645c5c78b14f2fb8d96",
+            "025381d9f3b1cf9e1b8eceda32745fd8a8e779557ae274996dba58b0c6bc5ee0",
+            "5a7899015d33fe2d5db2be5230d31a944e0a85afd922a07fb61102eff45026ed"
+          ],
+          "qc": {
+            "accepted_updates": 3710053,
+            "rician_sigma_median": 0.00035961007233709097
+          },
+          "exact": true
+        }
+      ],
+      "all_gates_passed": true
+    }
+  },
+  "rejected_experiment": {
+    "implementation": "full Gram plus linear-product caching; not retained in final production code",
+    "reason": "higher live memory and no reliable AMICO speed benefit",
+    "amico_baseline_seconds": [
+      28.5966581790708,
+      27.37736148526892
+    ],
+    "amico_candidate_seconds": [
+      30.895238902885467,
+      49.84196473378688
+    ],
+    "baseline_peak_allocated_bytes": 9952554496,
+    "candidate_peak_allocated_bytes": 10373233664,
+    "unrounded_outputs_exact": true
+  },
+  "remaining_work": [
+    "Current full raw-to-MNI run and repeated isolated-GPU end-to-end timing",
+    "Stable classic/AMICO NODDI speed improvement; current shared-GPU times overlap",
+    "Existing odd-z TOPUP crop vs AP mask shape handling; current 72-slice case unaffected",
+    "Existing official EDDY/FNIRT/AMICO numerical differences remain outside this lossless optimization"
+  ]
+}

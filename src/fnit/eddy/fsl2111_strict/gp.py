@@ -79,10 +79,13 @@ def _fsl_select_coordinates(mask: torch.Tensor, nvox: int, seed: int | None):
     actual_seed = int(time.time()) if seed is None or int(seed) == 0 else int(seed)
     libc.srand(ctypes.c_uint(actual_seed))
     nx, ny, nz = map(int, mask.shape)
+    # Keep glibc's draw and acceptance order; copy this fit's mask once rather
+    # than synchronising a CUDA scalar for every rejected or accepted draw.
+    mask_cpu = mask.detach().cpu().numpy()
     selected=[]; seen=set(); maxtry=int(1e8)
     for _ in range(maxtry):
         c=(libc.rand()%nx, libc.rand()%ny, libc.rand()%nz)
-        if bool(mask[c].item()) and c not in seen:
+        if bool(mask_cpu[c]) and c not in seen:
             seen.add(c); selected.append(c)
             if len(selected)==nvox: break
     if len(selected)!=nvox:

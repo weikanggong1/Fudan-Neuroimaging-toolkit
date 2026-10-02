@@ -40,6 +40,24 @@ def test_bvec_source_cli_and_invalid_value():
         DMRIPipeline(device="cpu", noddi_fit_method="invalid")
 
 
+@pytest.mark.parametrize("seed", [0, -1, 2**32, True, 1.5, "12345"])
+def test_eddy_seed_rejects_automatic_zero_and_invalid_values(seed):
+    with pytest.raises(ValueError, match="eddy_gp_seed"):
+        DMRIPipeline(device="cpu", eddy_gp_seed=seed)
+
+
+def test_eddy_seed_cli_and_default():
+    parser = argparse.ArgumentParser()
+    _arguments(parser)
+    args = parser.parse_args([
+        "--raw-dir", "raw", "-o", "out", "--fa-template", "fa.nii.gz",
+        "--eddy-gp-seed", "12345",
+    ])
+    assert args.eddy_gp_seed == 12345
+    assert DMRIPipeline(device="cpu").eddy_gp_seed is None
+    assert DMRIPipeline(device="cpu", eddy_gp_seed=np.int64(12345)).eddy_gp_seed == 12345
+
+
 def _bids_case(root, *, with_t1):
     (root / "dataset_description.json").write_text(
         json.dumps({"Name": "Real-format fixture", "BIDSVersion": "1.11.0"})
@@ -361,6 +379,7 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
             pass
 
         def run(self, **kwargs):
+            captured["gp_seed"] = kwargs["gp_seed"]
             return SimpleNamespace(qc={})
 
     class FakeDTIFIT:
@@ -428,8 +447,10 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
     monkeypatch.setattr(pipeline_module, "run_mmorf", fake_run_mmorf)
     monkeypatch.setattr(
         pipeline_module,
-        "apply_mmorf_warp",
-        lambda image, *args, **kwargs: image,
+        "prepare_mmorf_warp",
+        lambda image, *args, **kwargs: SimpleNamespace(
+            apply=lambda source, **options: source
+        ),
     )
 
     output_dir = tmp_path / "out"
@@ -439,6 +460,7 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
         synthstrip_weights="synthstrip.pt",
         bvec_source=bvec_source,
         noddi_fit_method="classic" if bvec_source == "raw" else "amico",
+        eddy_gp_seed=12345,
     ).run(
         raw,
         output_dir,
@@ -462,6 +484,7 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
     assert captured["shell_bvecs"] == expected_bvecs
     assert captured["noddi_bvecs"] == expected_bvecs
     assert result.qc["bvec_source"] == bvec_source
+    assert captured["gp_seed"] == result.qc["eddy_gp_seed"] == 12345
     assert captured["noddi_fit_method"] == (
         "classic" if bvec_source == "raw" else "amico"
     )
@@ -513,7 +536,11 @@ def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):
         def __init__(self, device=None):
             pass
 
-        def __call__(self, source, reference, **kwargs):
+        def prepare(self, source, reference, **kwargs):
+            captured["sampling_preparations"] = captured.get("sampling_preparations", 0) + 1
+            return self
+
+        def apply(self, source, reference=None):
             loaded = nib.load(str(source)) if isinstance(source, (str, bytes)) else source
             return SimpleNamespace(image=loaded)
 
@@ -526,6 +553,7 @@ def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):
     assert isinstance(captured["fixed"], nib.Nifti1Image)
     np.testing.assert_array_equal(captured["moving"].affine, np.eye(4))
     assert set(result.standard_maps) == set(STANDARD_MAP_NAMES)
+    assert captured["sampling_preparations"] == 1
     assert result.standard_maps["ICVF"].shape == shape
     assert result.skeleton_maps["ICVF"].shape == shape
     assert result.qc["oxford_subsampling_fwhm_lambda_iteration_values_combined"]

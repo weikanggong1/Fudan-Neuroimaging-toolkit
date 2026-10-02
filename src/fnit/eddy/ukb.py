@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from pathlib import Path
+from numbers import Integral
 import nibabel as nib
 import numpy as np
 import torch
@@ -29,7 +30,13 @@ def _brain_mask(image):
     return mask
 
 
-def prepare_ukb_eddy(raw_dir, topup_dir, output_dir, *, device=None, overwrite=False):
+def prepare_ukb_eddy(raw_dir, topup_dir, output_dir, *, device=None, overwrite=False,
+                     ref_scan_no=None):
+    """Prepare EDDY inputs; optionally reuse TOPUP's selected AP b0 index.
+
+    ``ref_scan_no`` is the zero-based AP volume index returned as ``ap_index``
+    by ``prepare_ukb_topup``. Omitting it retains pairwise b0 selection.
+    """
     raw_dir = Path(raw_dir)
     topup_dir = Path(topup_dir)
     output_dir = Path(output_dir)
@@ -42,6 +49,12 @@ def prepare_ukb_eddy(raw_dir, topup_dir, output_dir, *, device=None, overwrite=F
     if missing:
         raise FileNotFoundError(missing[0])
     bvals = load_bvals(raw_dir / "AP.bval")
+    if ref_scan_no is not None:
+        if (isinstance(ref_scan_no, bool) or not isinstance(ref_scan_no, Integral)
+                or not 0 <= ref_scan_no < bvals.size
+                or not bvals[ref_scan_no] < 100):
+            raise ValueError("ref_scan_no must index an AP b<100 volume")
+        ref_scan_no = int(ref_scan_no)
     index_path = output_dir / "eddy_index.txt"
     mask_path = output_dir / "nodif_brain_mask.nii.gz"
     existing = [p for p in (index_path, mask_path) if p.exists()]
@@ -55,10 +68,12 @@ def prepare_ukb_eddy(raw_dir, topup_dir, output_dir, *, device=None, overwrite=F
         corrected = nib.load(str(raw_dir / "AP.nii.gz"))
     mask = _brain_mask(corrected)
     nib.save(image_like(mask.astype(np.float32), corrected), str(mask_path))
-    ap_image, candidates, indices = _load_b0_candidates(raw_dir, "AP")
-    voxel_sizes = tuple(float(v) for v in ap_image.header.get_zooms()[:3])
-    selected_device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-    best, _ = _best_b0(candidates, voxel_sizes, selected_device)
+    if ref_scan_no is None:
+        ap_image, candidates, indices = _load_b0_candidates(raw_dir, "AP")
+        voxel_sizes = tuple(float(v) for v in ap_image.header.get_zooms()[:3])
+        selected_device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        best, _ = _best_b0(candidates, voxel_sizes, selected_device)
+        ref_scan_no = int(indices[best])
     return {
         "imain": raw_dir / "AP.nii.gz",
         "mask": mask_path,
@@ -67,7 +82,7 @@ def prepare_ukb_eddy(raw_dir, topup_dir, output_dir, *, device=None, overwrite=F
         "bvecs": raw_dir / "AP.bvec",
         "bvals": raw_dir / "AP.bval",
         "topup": topup_dir / "fieldmap_out",
-        "ref_scan_no": int(indices[best]),
+        "ref_scan_no": ref_scan_no,
     }
 
 

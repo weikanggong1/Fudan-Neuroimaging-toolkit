@@ -95,6 +95,7 @@ result = DMRIPipeline(
     dti_tolerance=100,  # DTI shell 容差，单位 s/mm²
     bvec_source="rotated",  # DTI/NODDI 使用 EDDY 旋转后的梯度
     noddi_fit_method="amico",  # 默认 AMICO 字典拟合；"classic" 为连续 Watson 拟合
+    eddy_gp_seed=12345,  # 固定 GP 抽样，便于重复对照；默认 None 为按时间抽样
 ).run_bids(
     bids_root="/data/bids",  # 含 dataset_description.json 的原始 BIDS 根目录
     output_dir="/data/results/sub-01_tbss",  # 单被试 FNIT 输出根目录
@@ -126,6 +127,7 @@ result = DMRIPipeline(
     dti_tolerance=100,  # DTI shell 容差，单位 s/mm²
     bvec_source="rotated",  # DTI/NODDI 使用 EDDY 旋转后的梯度
     noddi_fit_method="amico",  # 保持与本页 raw-to-standard 对照相同的 NODDI 路径
+    eddy_gp_seed=12345,  # 固定 GP 抽样，便于重复对照；默认 None 为按时间抽样
 ).run_bids(
     bids_root="/data/bids",  # 原始 BIDS 根目录
     output_dir="/data/results/sub-01_mmorf",  # 单被试 FNIT 输出根目录
@@ -163,6 +165,7 @@ result = DMRIPipeline(
     dti_tolerance=100,  # 纳入 DTI shell 的 b-value 容差
     bvec_source="rotated",  # DTIFIT/NODDI 梯度：EDDY 旋转后；对照试验可选 "raw"
     noddi_fit_method="classic",  # 连续 Watson 非线性拟合；默认 "amico"
+    eddy_gp_seed=12345,  # 固定 GP 抽样，便于重复对照；默认 None 为按时间抽样
 ).run(
     raw_dir="raw",  # 输入：AP.* 及可选 PA.* 的单被试目录
     output_dir="subject_tbss",  # 输出：该受试者的唯一结果根目录
@@ -192,6 +195,7 @@ result = DMRIPipeline(
     dti_tolerance=100,  # 纳入 DTI shell 的 b-value 容差
     bvec_source="rotated",  # DTIFIT/NODDI 梯度：EDDY 旋转后；对照试验可选 "raw"
     noddi_fit_method="classic",  # 连续 Watson 非线性拟合；默认 "amico"
+    eddy_gp_seed=12345,  # 固定 GP 抽样，便于重复对照；默认 None 为按时间抽样
 ).run(
     raw_dir="raw",  # 输入：AP.* 及可选 PA.* 的单被试目录
     output_dir="subject_mmorf",  # 输出：该受试者的唯一结果根目录
@@ -218,7 +222,7 @@ fnit-dmri-pipeline --bids-root /data/bids --subject 01 --session 01 \
   --registration-backend tbss --fnirt-preset tbss \
   --fa-template FMRIB58_FA_1mm.nii.gz \
   --fa-skeleton FMRIB58_FA-skeleton_1mm.nii.gz \
-  --bvec-source rotated --noddi-fit-method amico --device cuda:0
+  --bvec-source rotated --noddi-fit-method amico --eddy-gp-seed 12345 --device cuda:0
 ~~~
 
 BIDS 有 T1w（MMORF）：
@@ -230,7 +234,7 @@ fnit-dmri-pipeline --bids-root /data/bids --subject 01 --session 01 \
   --t1-template MNI152_T1_1mm_brain.nii.gz \
   --tensor-template FSL_HCP1065_tensor_1mm.nii.gz \
   --synthstrip-weights /weights/synthstrip.1.pt \
-  --bvec-source rotated --noddi-fit-method amico --device cuda:0
+  --bvec-source rotated --noddi-fit-method amico --eddy-gp-seed 12345 --device cuda:0
 ~~~
 
 `--bids-root` 是原始 BIDS 根目录；`--subject` 选择一名被试，`--session`、`--run`、`--acquisition` 和 `--direction` 在有多次采集时限定主 DWI。第二条命令省略 `--t1`，表示从该被试的 `anat/` 读取唯一 T1w；如果有多张，用 `--t1` 明确指定。`--noddi-fit-method amico` 使用默认字典拟合，改为 `classic` 时使用连续 Watson 拟合。`-o` 保存九张 native 和 standard 参数图及报告。BIDS 图像与梯度不会被改写：`bids_input/` 中保留源文件链接、合并后的 JSON 和 `bids_selection.json`；输出九图沿用下面的 FNIT 目录结构，尚未命名为 BIDS Derivatives。
@@ -251,6 +255,7 @@ fnit-dmri-pipeline \
   --fa-skeleton FMRIB58_FA-skeleton_1mm.nii.gz \
   --bvec-source rotated \
   --noddi-fit-method classic \
+  --eddy-gp-seed 12345 \
   --device cuda:0
 ~~~
 
@@ -268,12 +273,19 @@ fnit-dmri-pipeline \
   --synthstrip-weights /weights/synthstrip.1.pt \
   --bvec-source rotated \
   --noddi-fit-method classic \
+  --eddy-gp-seed 12345 \
   --device cuda:0
 ~~~
 
 --raw-dir 选择单个 subject；-o 是该 subject 的唯一输出根；--registration-backend 选择非线性标准化分支。其余行分别提供该分支需要的模板、T1 和权重。--device 控制所有 PyTorch 步骤使用同一设备；每次调用只处理这一名被试。--bvec-source rotated 使 DTIFIT 和 NODDI 使用 EDDY 旋转后的梯度；改为 raw 时，两者都使用原始 AP.bvec。`--noddi-fit-method classic` 将 NODDI 阶段切换到[连续 Watson 拟合](../amico_noddi/README.md)；默认 `amico` 保留原数值路径。报告的 `noddi_fit_method` 与 `noddi.fit_method` 记录实际选择。
 
 本页下方既有 raw-to-standard 整链对照使用默认 `amico`；上面的 `classic` 示例是新增的选择方式，单独的集成结果见“经典 NODDI 接入验证”。
+
+`eddy_gp_seed` / `--eddy-gp-seed` 接受 1–4294967295 的整数；省略时保留按时间初始化的 GP 抽样。相同种子用于比较同环境、同输入下的 EDDY 输出，写入报告的 `eddy_gp_seed`。它不改变 GP 样本数量、拟合精度或优化轮数。
+
+TOPUP 已计算的 AP b0 参考体积会直接供 EDDY 使用，避免对同一组 b0 再做一遍成对配准。独立调用 `prepare_ukb_eddy` 时省略 `ref_scan_no` 仍执行原选择流程；传入该参数时，它必须是 AP 中 b<100 体积的从零开始索引。
+
+当前反向图 TOPUP 路径对奇数 z 片数会裁掉末片；传给 EDDY 的 mask 可能与未裁剪 AP 的形状不匹配。最新完整组件验收使用 72 片输入；奇数片输入的裁剪/padding 尚待真实数据修复与验收，见[剩余工作](../../validation/dmri_pipeline/lossless_20261002.md#5-后续工作与更新记录)。
 
 ## 输出契约
 
@@ -328,6 +340,21 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 
 ## 真实数据验证与原软件对照
 
+### 2026-10-02：保持已有 FNIT 输出的优化
+
+本版复用 TOPUP 已选 AP 参考索引、EDDY 不可变几何、NODDI Gram 和固定 warp 的九图采样计划。完整 EDDY、两种全脑 NODDI 与真实九图传播在同输入下均与冻结基线逐值相同，完整 header、affine、sidecar 和模型 QC 也一致；新增 `eddy_gp_seed` 便于配对复现。
+
+| 实测范围 | 基线→本版 | 结果 |
+|---|---:|---|
+| 完整八轮 EDDY，含读写 | 484.75→404.31 s | 一次共享 H100 配对观察，耗时低 16.6% |
+| EDDY 准备，已完成 TOPUP 选择 | 三次中位数 6.991→0.153 s | 消除重复参考选择 |
+| TBSS / MMORF 固定 warp 九图传播 | warm 中位数 0.366→0.181 / 0.517→0.270 s | 约 2.02 / 1.91 倍，不包括配准估计或文件读写 |
+| 全脑 AMICO / 经典 NODDI，含读写 | 两次中位数 30.77→27.45 / 68.15→79.81 s | 共享 GPU 波动较大；AMICO 稳定收益未确定，经典模式整体未提速 |
+
+详细输入、逐次时间、显存、验收和未采用的缓存方案见[本版报告](../../validation/dmri_pipeline/lossless_20261002.md)。本次未重跑最新源码的完整 raw-to-MNI，也未更新下方原软件误差；两类对照分别保留。
+
+### 既有整链与原软件对照
+
 下面几组结果的输入和计时边界不同，完整方法、逐图误差及源码范围见[验证页](../../validation/dmri_pipeline/README.md)。
 
 | 验证 | 已完成的输出 | 结果与范围 |
@@ -339,6 +366,13 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 | [经典 NODDI 接入](../../validation/dmri_pipeline/pipeline_classic_real.public.json) | 九图接口与真实体素拟合 | 24 个真实脑内体素的阶段集成测试；使用 identity 配准，不是 raw-to-MNI 整链。 |
 
 上述 FSL EDDY 对照固定 TOPUP 场、掩膜和后续 FNIT 步骤，只替换 EDDY 的校正图。另一个[原版 FSL TBSS 参考](../../validation/dmri_pipeline/README.md#既有-ukb-tbss-与-fsl-对照)从官方 UKB native 参数图开始，其 standard 九图 r=0.358268–0.699381；它与本包 raw AP/PA 起步的输入不同，不能据此计算整链加速比或把差异单独归给 FNIRT。FSL 对照的九图相关性不是本次 BIDS 运行重新测得的结果。
+
+## 最近更新
+
+| 日期 | 更新与验收 |
+|---|---|
+| 2026-10-02 | 固定 GP seed、参考索引复用、EDDY/NODDI 不可变缓存、按几何分组的九图采样计划；完整组件和固定 warp 的真实逐值对照通过，[报告](../../validation/dmri_pipeline/lossless_20261002.md) |
+| 2026-09-29 至 10-01 | BIDS 入口、TOPUP/EDDY 和 TBSS/MMORF 整链记录、经典 NODDI 接入；对应精度和时间继续见[验证索引](../../validation/dmri_pipeline/README.md) |
 
 ## 参考文献与原实现
 

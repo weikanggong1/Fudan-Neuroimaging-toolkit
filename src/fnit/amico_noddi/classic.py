@@ -132,13 +132,18 @@ class ClassicNODDIModel:
 def fit_classic_noddi(
     signal, bvals, bvecs, b0_indices, estimates, directions, *,
     d_par, d_iso, device, batch_size=1024, maximum_iterations=30,
+    _defer_qc_count=True,
 ):
     """Refine AMICO initial values with the Toolbox's b0-based noise scale."""
     model = ClassicNODDIModel(bvals, bvecs, d_par=d_par, d_iso=d_iso, device=device)
     fitted = np.empty_like(estimates, dtype=np.float32)
     fitted_directions = np.empty_like(directions, dtype=np.float32)
     fitted_rmse = np.empty(len(signal), dtype=np.float32)
-    improved = 0
+    # This statistic does not control acceptance or stopping.  Accumulate exact
+    # integers on the fit device and read once after all voxel batches.
+    improved = (
+        torch.zeros((), device=device, dtype=torch.int64) if _defer_qc_count else 0
+    )
     noise_scales = np.empty(len(signal), dtype=np.float32)
     for start in range(0, len(signal), batch_size):
         stop = min(start + batch_size, len(signal))
@@ -196,7 +201,11 @@ def fit_classic_noddi(
             )
             candidate_cost = objective(model.evaluate(candidate, candidate_vectors))
             accept = candidate_cost < current
-            improved += int(accept.sum().item())
+            accepted_count = accept.sum(dtype=torch.int64)
+            if _defer_qc_count:
+                improved.add_(accepted_count)
+            else:
+                improved += int(accepted_count.item())
             parameters = torch.where(accept[:, None], candidate, parameters)
             vectors = torch.where(accept[:, None], candidate_vectors, vectors)
             current = torch.where(accept, candidate_cost, current)
@@ -209,6 +218,6 @@ def fit_classic_noddi(
             (prediction - observed).square().mean(1)
         ).cpu().numpy().astype(np.float32)
     return fitted, fitted_directions, fitted_rmse, {
-        "accepted_updates": improved,
+        "accepted_updates": int(improved.item()) if _defer_qc_count else improved,
         "rician_sigma_median": float(np.median(noise_scales)),
     }
