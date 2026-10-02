@@ -25,7 +25,7 @@ def main():
     err=np.sqrt(np.sum((np.asarray(f.dataobj,dtype=np.float64)[:,:,:,0,:]-np.asarray(g.dataobj,dtype=np.float64)[:,:,:,0,:])**2,axis=-1))
     fig,axes=plt.subplots(4,3,figsize=(10,11),constrained_layout=True)
     arrays=[r,c,(r!=c).astype(np.uint8),err]
-    labels=['Frozen check','Candidate check','Different voxels','RAS displacement error (mm)']
+    labels=['Frozen check','Candidate check','Different voxels','RAS error (mm)']
     for axis in range(3):
         index=ref.shape[axis]//2
         for row,data in enumerate(arrays):
