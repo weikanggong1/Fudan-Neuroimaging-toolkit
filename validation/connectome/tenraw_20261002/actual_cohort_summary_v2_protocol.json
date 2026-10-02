@@ -1,0 +1,548 @@
+{
+  "schema_version": 1,
+  "dataset": "OpenNeuro ds001226",
+  "scope": "Actual two completed baseline/candidate pairs and current CPU-only table schema, not a final ten-case benchmark.",
+  "status": "waiting_actual_outputs",
+  "requested_cases": 10,
+  "completed_pairs": 2,
+  "anatomy_compared_cases": 8,
+  "failed_comparisons": 0,
+  "actual_pairs": [
+    {
+      "case_id": "sub-CON01",
+      "completed_utc": "2026-10-02T20:42:27.921505+00:00",
+      "actual_scientific_report_sha256": "8d048aaaca76bf886dcb491979809f36f7382c926c30b9443b021d2875f94e6c",
+      "count_exact_all_atlases": true,
+      "all_32_matrix_numeric_exact": true,
+      "node_counts": {
+        "fs-aparc": 84,
+        "aparc+tian-s1": 84,
+        "aparc.a2009s+tian-s1": 164,
+        "glasser+tian-s1": 376,
+        "glasser+tian-s4": 414,
+        "schaefer200+tian-s1": 216,
+        "schaefer500+tian-s4": 554,
+        "schaefer1000+tian-s4": 1054
+      },
+      "all_nodes_and_labels_equal": true,
+      "matrix_max_numeric_neq": 0,
+      "matrix_max_raw_scalar_bits_neq": 0,
+      "matrix_max_rmse": 0.0,
+      "matrix_max_abs_error": 0.0,
+      "images": {
+        "five_tissue_dwi_world.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 83886080,
+          "finite_intersection_elements": 83886080,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "3a560ca4ca4e6512b8b2ddd0854155cc3be95c4a79d9038c9efdbe366c45b4c6",
+          "candidate_payload_sha256": "3a560ca4ca4e6512b8b2ddd0854155cc3be95c4a79d9038c9efdbe366c45b4c6"
+        },
+        "gmwmi_dwi_world.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 16777216,
+          "finite_intersection_elements": 16777216,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "0b01af69c4c8375fc778cf29e110f12f959b36e57cfab9aa7081d0eb7f4874a5",
+          "candidate_payload_sha256": "0b01af69c4c8375fc778cf29e110f12f959b36e57cfab9aa7081d0eb7f4874a5"
+        },
+        "fa_dwi.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 552960,
+          "finite_intersection_elements": 552924,
+          "nonfinite_frames": [
+            {
+              "frame": 0,
+              "patterns": {
+                "NaN": {
+                  "baseline_count": 36,
+                  "candidate_count": 36,
+                  "position_neq": 0
+                },
+                "positive_Inf": {
+                  "baseline_count": 0,
+                  "candidate_count": 0,
+                  "position_neq": 0
+                },
+                "negative_Inf": {
+                  "baseline_count": 0,
+                  "candidate_count": 0,
+                  "position_neq": 0
+                }
+              },
+              "patterns_equal": true,
+              "finite_intersection_elements": 552924,
+              "finite_position_neq": 0,
+              "policy": "Undefined image values are preserved; NaN payload and +/-Inf positions/signs must match. Errors use only the finite intersection, with its size reported; no nan_to_num or voxel reduction.",
+              "payload_raw_bits_neq": 0
+            }
+          ],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "0a00a2d049897b6d09ebd46e0d5bf618aa9d49270e5742df898bba7d30acd67a",
+          "candidate_payload_sha256": "0a00a2d049897b6d09ebd46e0d5bf618aa9d49270e5742df898bba7d30acd67a"
+        },
+        "brain_mask_dwi.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 552960,
+          "finite_intersection_elements": 552960,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "63acfee1a622292e79e27629aad4f576c896a00db8f5047d31e34f70070622bb",
+          "candidate_payload_sha256": "63acfee1a622292e79e27629aad4f576c896a00db8f5047d31e34f70070622bb"
+        },
+        "preproc/eddy/data.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 56401920,
+          "finite_intersection_elements": 56401920,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "b58fe4a0aebd46742671e6bb9ee7619d2d0b57d5fe84fa1a23d891f20d572ab2",
+          "candidate_payload_sha256": "b58fe4a0aebd46742671e6bb9ee7619d2d0b57d5fe84fa1a23d891f20d572ab2"
+        },
+        "preproc/topup/fieldmap_out_fieldcoef.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 85833,
+          "finite_intersection_elements": 85833,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "7e09db6e54def8192b4d8564be0251c33cefc510f5784074765e54681bbcd414",
+          "candidate_payload_sha256": "7e09db6e54def8192b4d8564be0251c33cefc510f5784074765e54681bbcd414"
+        },
+        "preproc/topup/fieldmap_iout.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 1105920,
+          "finite_intersection_elements": 1105920,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "20f2d07dcd5aac44ca78134eb5b3d34fef1b5c090eefa91c21e07c6b21a303f6",
+          "candidate_payload_sha256": "20f2d07dcd5aac44ca78134eb5b3d34fef1b5c090eefa91c21e07c6b21a303f6"
+        }
+      },
+      "numeric_files_exact": true,
+      "source_fingerprints": {
+        "baseline": "deefeb6908c3c14a9aa7b4cf154c8df941a56abffd4a4e893045a1c4d1ddfd4a",
+        "candidate": "9fd44cbc49c9cdfc16c9a8cff2971fec3239b450dce41222e6ef059861eb0dc7"
+      },
+      "timings": {
+        "baseline": {
+          "raw_dwi_cli_total_runtime_seconds": 641.2045834190212,
+          "gpu_command_wall_seconds": 648.4338327953592,
+          "gpu_lock_queue_seconds": 1055.6996350954287,
+          "worker_wall_seconds": 1719.8335342281498,
+          "driver_timing": {
+            "head_driver_full_elapsed_utc_seconds": 11423.56394314766,
+            "head_driver_full_elapsed_utc_excluding_gpu_queue_seconds": 10367.863872326445,
+            "original_recon_same_node_elapsed_utc_seconds": 4800.160575866699,
+            "original_recon_command_seconds": 4797.502608783543,
+            "original_recon_worker_monotonic_seconds": 4800.133853822947,
+            "driver_start_minus_recon_worker_start_utc_seconds": 13.116514921188354,
+            "revalidation_same_node_elapsed_utc_seconds": 2.622152805328369,
+            "revalidation_monotonic_seconds": 2.622182995080948,
+            "gpu_driver_queue_seconds": 0.00043572578579187393,
+            "gpu_lock_queue_seconds": 1055.6996350954287,
+            "timestamps_adjusted": false,
+            "pristine_cold_benchmark": false,
+            "scope": "head UTC start-to-end interval including prior failures and repair gaps; CPU and GPU command timers are their own host monotonic intervals; observed cross-host start difference includes SSH launch plus clock difference; no timestamps shifted and no stage durations substituted for full wall",
+            "revalidation_head_elapsed_utc_seconds": 5.355893850326538
+          },
+          "memory_budget": {
+            "limit_bytes": 20000000000,
+            "measurements": {
+              "process_tree": 19795017728,
+              "allocated_bytes": 14681586176,
+              "reserved_bytes": 17607688192
+            },
+            "status": "observed_below_budget",
+            "monitor_issues": [],
+            "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+          }
+        },
+        "candidate": {
+          "raw_dwi_cli_total_runtime_seconds": 1972.7306006732397,
+          "gpu_command_wall_seconds": 1980.3718714131974,
+          "gpu_lock_queue_seconds": 2736.4330287911,
+          "worker_wall_seconds": 4731.7793465470895,
+          "driver_timing": {
+            "official_recon_command_seconds": 4868.840657673776,
+            "preparation_worker_wall_seconds": 4871.815001197159,
+            "preparation_head_wall_seconds": 4873.7248360700905,
+            "preparation_coordinator_wall_seconds": 4873.7248360700905,
+            "cpu_driver_queue_seconds": 0.00900390837341547,
+            "raw_dwi_head_wall_seconds": 4746.094804184511,
+            "raw_dwi_head_wall_excluding_gpu_queue_seconds": 2009.6617753934115,
+            "raw_dwi_cli_seconds": 1972.7306006732397,
+            "gpu_lock_queue_seconds": 2736.4330287911,
+            "prep_to_gpu_observed_utc_gap_seconds": 4704.437629,
+            "staged_observed_utc_elapsed_seconds": 14324.257269,
+            "staged_observed_utc_elapsed_excluding_gpu_queue_seconds": 11587.8242402089,
+            "continuous_cold_pipeline": false,
+            "scope": "original head preparation UTC start -> head GPU/report UTC end, including freeze/wait gap; stage walls are separate same-process monotonic timers; no cross-host monotonic reconstruction"
+          },
+          "memory_budget": {
+            "limit_bytes": 20000000000,
+            "measurements": {
+              "process_tree": 19795017728,
+              "allocated_bytes": 14681594880,
+              "reserved_bytes": 17607688192
+            },
+            "status": "observed_below_budget",
+            "monitor_issues": [],
+            "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "sub-CON03",
+      "completed_utc": "2026-10-02T21:09:05.034333+00:00",
+      "actual_scientific_report_sha256": "550eed74dc8a836cceabd971e000eff6c58bda3971858078e5f6609430c4d7eb",
+      "count_exact_all_atlases": true,
+      "all_32_matrix_numeric_exact": true,
+      "node_counts": {
+        "fs-aparc": 84,
+        "aparc+tian-s1": 84,
+        "aparc.a2009s+tian-s1": 164,
+        "glasser+tian-s1": 376,
+        "glasser+tian-s4": 414,
+        "schaefer200+tian-s1": 216,
+        "schaefer500+tian-s4": 554,
+        "schaefer1000+tian-s4": 1054
+      },
+      "all_nodes_and_labels_equal": true,
+      "matrix_max_numeric_neq": 0,
+      "matrix_max_raw_scalar_bits_neq": 0,
+      "matrix_max_rmse": 0.0,
+      "matrix_max_abs_error": 0.0,
+      "images": {
+        "five_tissue_dwi_world.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 83886080,
+          "finite_intersection_elements": 83886080,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "e4c96da978386a6e2a170a75279f434110e174fc79eda07f20662ba1889d23b5",
+          "candidate_payload_sha256": "e4c96da978386a6e2a170a75279f434110e174fc79eda07f20662ba1889d23b5"
+        },
+        "gmwmi_dwi_world.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 16777216,
+          "finite_intersection_elements": 16777216,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "1efe0fb50c5bc6cec2d40adee615c4f1c33dfb04fae44a008b76bf8553556dd1",
+          "candidate_payload_sha256": "1efe0fb50c5bc6cec2d40adee615c4f1c33dfb04fae44a008b76bf8553556dd1"
+        },
+        "fa_dwi.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 552960,
+          "finite_intersection_elements": 552959,
+          "nonfinite_frames": [
+            {
+              "frame": 0,
+              "patterns": {
+                "NaN": {
+                  "baseline_count": 1,
+                  "candidate_count": 1,
+                  "position_neq": 0
+                },
+                "positive_Inf": {
+                  "baseline_count": 0,
+                  "candidate_count": 0,
+                  "position_neq": 0
+                },
+                "negative_Inf": {
+                  "baseline_count": 0,
+                  "candidate_count": 0,
+                  "position_neq": 0
+                }
+              },
+              "patterns_equal": true,
+              "finite_intersection_elements": 552959,
+              "finite_position_neq": 0,
+              "policy": "Undefined image values are preserved; NaN payload and +/-Inf positions/signs must match. Errors use only the finite intersection, with its size reported; no nan_to_num or voxel reduction.",
+              "payload_raw_bits_neq": 0
+            }
+          ],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "60d1502035da7b9ff7cd08315435011274596bb31e516f1aba10298a09697176",
+          "candidate_payload_sha256": "60d1502035da7b9ff7cd08315435011274596bb31e516f1aba10298a09697176"
+        },
+        "brain_mask_dwi.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 552960,
+          "finite_intersection_elements": 552960,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "75d8a21be13f445c34ceb6a0088410195f31333feec87ce586061335437368d0",
+          "candidate_payload_sha256": "75d8a21be13f445c34ceb6a0088410195f31333feec87ce586061335437368d0"
+        },
+        "preproc/eddy/data.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 56401920,
+          "finite_intersection_elements": 56401920,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "a9d13a872c48ddf090ae7b4fc82e0e20f0c83edda22196593e0d891efb103a9d",
+          "candidate_payload_sha256": "a9d13a872c48ddf090ae7b4fc82e0e20f0c83edda22196593e0d891efb103a9d"
+        },
+        "preproc/topup/fieldmap_out_fieldcoef.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 85833,
+          "finite_intersection_elements": 85833,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "ac96855e106d964ad42725a3246c1c99b6f7393b9d246b5135a64b33a08dfac1",
+          "candidate_payload_sha256": "ac96855e106d964ad42725a3246c1c99b6f7393b9d246b5135a64b33a08dfac1"
+        },
+        "preproc/topup/fieldmap_iout.nii.gz": {
+          "strict_scientific_equal": true,
+          "elements": 1105920,
+          "finite_intersection_elements": 1105920,
+          "nonfinite_frames": [],
+          "numeric_neq": 0,
+          "raw_scalar_bits_neq": 0,
+          "baseline_payload_sha256": "fd1a9981da635f70309ef68d197f14a5c59bad3bb6ba3906c4b1f76d842e93d8",
+          "candidate_payload_sha256": "fd1a9981da635f70309ef68d197f14a5c59bad3bb6ba3906c4b1f76d842e93d8"
+        }
+      },
+      "numeric_files_exact": true,
+      "source_fingerprints": {
+        "baseline": "deefeb6908c3c14a9aa7b4cf154c8df941a56abffd4a4e893045a1c4d1ddfd4a",
+        "candidate": "9fd44cbc49c9cdfc16c9a8cff2971fec3239b450dce41222e6ef059861eb0dc7"
+      },
+      "timings": {
+        "baseline": {
+          "raw_dwi_cli_total_runtime_seconds": 632.673662413843,
+          "gpu_command_wall_seconds": 639.5077444408089,
+          "gpu_lock_queue_seconds": 64.46693622786552,
+          "worker_wall_seconds": 720.4294953700155,
+          "driver_timing": {
+            "head_driver_full_elapsed_utc_seconds": 12200.295553207397,
+            "head_driver_full_elapsed_utc_excluding_gpu_queue_seconds": 12135.828519789502,
+            "original_recon_same_node_elapsed_utc_seconds": 4243.945250988007,
+            "original_recon_command_seconds": 4241.2467591241,
+            "original_recon_worker_monotonic_seconds": 4243.918243408203,
+            "driver_start_minus_recon_worker_start_utc_seconds": 13.125101804733276,
+            "revalidation_same_node_elapsed_utc_seconds": 2.6469860076904297,
+            "revalidation_monotonic_seconds": 2.6470192223787308,
+            "gpu_driver_queue_seconds": 9.719002991914749e-05,
+            "gpu_lock_queue_seconds": 64.46693622786552,
+            "timestamps_adjusted": false,
+            "pristine_cold_benchmark": false,
+            "scope": "head UTC start-to-end interval including prior failures and repair gaps; CPU and GPU command timers are their own host monotonic intervals; observed cross-host start difference includes SSH launch plus clock difference; no timestamps shifted and no stage durations substituted for full wall",
+            "revalidation_head_elapsed_utc_seconds": 4.71468186378479
+          },
+          "memory_budget": {
+            "limit_bytes": 20000000000,
+            "measurements": {
+              "process_tree": 19795017728,
+              "allocated_bytes": 14679787008,
+              "reserved_bytes": 17607688192
+            },
+            "status": "observed_below_budget",
+            "monitor_issues": [],
+            "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+          }
+        },
+        "candidate": {
+          "raw_dwi_cli_total_runtime_seconds": 886.1388252009638,
+          "gpu_command_wall_seconds": 893.2479017619044,
+          "gpu_lock_queue_seconds": 1185.1568231773563,
+          "worker_wall_seconds": 2092.688286626246,
+          "driver_timing": {
+            "official_recon_command_seconds": 4334.311536878347,
+            "preparation_worker_wall_seconds": 4337.648775406182,
+            "preparation_head_wall_seconds": 4338.920473461971,
+            "preparation_coordinator_wall_seconds": 4338.920473461971,
+            "cpu_driver_queue_seconds": 0.012971567921340466,
+            "raw_dwi_head_wall_seconds": 2105.7720584087074,
+            "raw_dwi_head_wall_excluding_gpu_queue_seconds": 920.6152352313511,
+            "raw_dwi_cli_seconds": 886.1388252009638,
+            "gpu_lock_queue_seconds": 1185.1568231773563,
+            "prep_to_gpu_observed_utc_gap_seconds": 9994.948729,
+            "staged_observed_utc_elapsed_seconds": 16439.641305,
+            "staged_observed_utc_elapsed_excluding_gpu_queue_seconds": 15254.484481822645,
+            "continuous_cold_pipeline": false,
+            "scope": "original head preparation UTC start -> head GPU/report UTC end, including freeze/wait gap; stage walls are separate same-process monotonic timers; no cross-host monotonic reconstruction"
+          },
+          "memory_budget": {
+            "limit_bytes": 20000000000,
+            "measurements": {
+              "process_tree": 19795017728,
+              "allocated_bytes": 14679795712,
+              "reserved_bytes": 17607688192
+            },
+            "status": "observed_below_budget",
+            "monitor_issues": [],
+            "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+          }
+        }
+      }
+    }
+  ],
+  "actual_table_rows": {
+    "cases": 10,
+    "matrices": 320,
+    "anatomy": 130,
+    "sources": 20
+  },
+  "actual_case_table_observation": [
+    {
+      "case_id": "sub-CON01",
+      "anatomy_status": "completed",
+      "paired_status": "completed_comparison",
+      "count_exact_all_atlases": true,
+      "matrix_numeric_exact_all_atlases": true,
+      "baseline_raw_dwi_cli_total_runtime_seconds": 641.2045834190212,
+      "candidate_raw_dwi_cli_total_runtime_seconds": 1972.7306006732397
+    },
+    {
+      "case_id": "sub-CON03",
+      "anatomy_status": "completed",
+      "paired_status": "completed_comparison",
+      "count_exact_all_atlases": true,
+      "matrix_numeric_exact_all_atlases": true,
+      "baseline_raw_dwi_cli_total_runtime_seconds": 632.673662413843,
+      "candidate_raw_dwi_cli_total_runtime_seconds": 886.1388252009638
+    },
+    {
+      "case_id": "sub-CON04",
+      "anatomy_status": "completed",
+      "paired_status": "waiting_actual_outputs",
+      "count_exact_all_atlases": null,
+      "matrix_numeric_exact_all_atlases": null,
+      "baseline_raw_dwi_cli_total_runtime_seconds": 1865.6735309707,
+      "candidate_raw_dwi_cli_total_runtime_seconds": null
+    },
+    {
+      "case_id": "sub-CON05",
+      "anatomy_status": "completed",
+      "paired_status": "waiting_actual_outputs",
+      "count_exact_all_atlases": null,
+      "matrix_numeric_exact_all_atlases": null,
+      "baseline_raw_dwi_cli_total_runtime_seconds": 1614.0825246269815,
+      "candidate_raw_dwi_cli_total_runtime_seconds": null
+    },
+    {
+      "case_id": "sub-CON06",
+      "anatomy_status": "completed",
+      "paired_status": "waiting_actual_outputs",
+      "count_exact_all_atlases": null,
+      "matrix_numeric_exact_all_atlases": null,
+      "baseline_raw_dwi_cli_total_runtime_seconds": 939.9281116370112,
+      "candidate_raw_dwi_cli_total_runtime_seconds": null
+    },
+    {
+      "case_id": "sub-CON07",
+      "anatomy_status": "completed",
+      "paired_status": "waiting_actual_outputs",
+      "count_exact_all_atlases": null,
+      "matrix_numeric_exact_all_atlases": null,
+      "baseline_raw_dwi_cli_total_runtime_seconds": 975.4246213678271,
+      "candidate_raw_dwi_cli_total_runtime_seconds": null
+    },
+    {
+      "case_id": "sub-CON08",
+      "anatomy_status": "completed",
+      "paired_status": "waiting_actual_outputs",
+      "count_exact_all_atlases": null,
+      "matrix_numeric_exact_all_atlases": null,
+      "baseline_raw_dwi_cli_total_runtime_seconds": 1074.9145133779384,
+      "candidate_raw_dwi_cli_total_runtime_seconds": null
+    },
+    {
+      "case_id": "sub-CON09",
+      "anatomy_status": "completed",
+      "paired_status": "waiting_actual_outputs",
+      "count_exact_all_atlases": null,
+      "matrix_numeric_exact_all_atlases": null,
+      "baseline_raw_dwi_cli_total_runtime_seconds": null,
+      "candidate_raw_dwi_cli_total_runtime_seconds": null
+    },
+    {
+      "case_id": "sub-CON10",
+      "anatomy_status": "pending",
+      "paired_status": "waiting_actual_outputs",
+      "count_exact_all_atlases": null,
+      "matrix_numeric_exact_all_atlases": null,
+      "baseline_raw_dwi_cli_total_runtime_seconds": null,
+      "candidate_raw_dwi_cli_total_runtime_seconds": null
+    },
+    {
+      "case_id": "sub-CON11",
+      "anatomy_status": "pending",
+      "paired_status": "waiting_actual_outputs",
+      "count_exact_all_atlases": null,
+      "matrix_numeric_exact_all_atlases": null,
+      "baseline_raw_dwi_cli_total_runtime_seconds": null,
+      "candidate_raw_dwi_cli_total_runtime_seconds": null
+    }
+  ],
+  "candidate_frozen_label": "641f16b2",
+  "source_label_scope": "Declared label is separate from actual verified runtime file fingerprints; archive Git metadata remains null.",
+  "protocol_tests": {
+    "passed": 75,
+    "failed": 0,
+    "skipped": 0,
+    "runtime_seconds": 0.549,
+    "host": "headcw",
+    "scope": "CPU table/provenance/reader guards; fixture tests are not MRI benchmark"
+  },
+  "frozen_helper_files": [
+    {
+      "name": "tools/reference/compare_freesurfer_recon_outputs.py",
+      "sha256": "df3594314dfb75961481e2e331ab648cd2fc9afe76803b36c44d267de96314b6"
+    },
+    {
+      "name": "tools/reference/benchmark_connectome_cohort_compare.py",
+      "sha256": "18e7515bf1658909207562df0b1b471b2c290a62731bc861fe14cca0840d71b6"
+    },
+    {
+      "name": "tests/connectome/test_actual_cohort_comparison_tools.py",
+      "sha256": "04c1a5136380a7b0d92c99347b202a2fdfac6197193dd7662af3f4f1e084c5d4"
+    },
+    {
+      "name": "tools/reference/summarize_connectome_actual_cohort.py",
+      "sha256": "dac98bbbd041bc8cd6330201906d3ebc17370e8dc4fa6e678ae56944b7f448b9"
+    },
+    {
+      "name": "tests/connectome/test_actual_cohort_summary_tables.py",
+      "sha256": "55d7f6668318878fbeb716f6fdac0ce1114e1bb0679c2bba8a7f2461f9ecb091"
+    }
+  ],
+  "actual_readonly_summary_controller": {
+    "namespace_label": "root_actual_cohort_summary_v2",
+    "helper_label": "formal_actual_summary_helper_v4",
+    "tmux": "fnit-connectome-actual-summary-v2",
+    "head_PID": 1598290,
+    "observed_running": true,
+    "status": "partial_actual_comparison_tables",
+    "ready_for_ten_case_render": false,
+    "GPU_started": false
+  },
+  "preserved_original_summary_failure": {
+    "namespace_label": "root_actual_cohort_summary_v1",
+    "reason": "Overstrict identity dictionary equality did not allow the actual additional anatomy scientific-status flag; path/SHA were unchanged. New reader validates path/SHA and flag separately.",
+    "actual_failure_report_sha256": "77bec9fb7865bf2e1d5e2fa50b82a2fd21956a8b818e1bd18b741ced5dafb1ef",
+    "old_summary_or_scientific_reports_modified": false
+  },
+  "remaining_cases": "Eight paired outputs pending; missing matrix decisions/statistics stay null. Known completed one-arm monotonic times are actual observations and do not imply a completed paired scientific comparison.",
+  "performance_conclusion": "No whole-chain speedup claim: actual first two candidate CLI wall observations exceed baseline; other cases and repeat reference acceptance are pending.",
+  "render_and_acceptance": "Ten-case render readiness false; independent MRtrix repeat acceptance is decided by the separate reference harness.",
+  "private_paths_in_public_record": false
+}

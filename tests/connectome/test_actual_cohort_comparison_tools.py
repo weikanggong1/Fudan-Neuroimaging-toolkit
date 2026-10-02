@@ -217,6 +217,57 @@ class ProtocolTests(unittest.TestCase):
                 if isinstance(node,ast.ImportFrom):imports.append(node.module or '')
             self.assertFalse(any(name=='torch' or name.startswith('fnit') for name in imports))
 
+    def prior_binding_fixture(self):
+        original=self.root/'prior';original.mkdir()
+        fields=('manifest','prep_bindings','baseline_anatomy_root','baseline_root','candidate_root','baseline_driver','candidate_driver')
+        options=type('Options',(),{key:self.root/key for key in fields})()
+        state={'manifest':{'sha256':'1'*64},'preparation_bindings':{'sha256':'2'*64},'case_origin_index':{'sub-00':0},
+               'cases':{'sub-00':{'status':'waiting_actual_outputs'}}}
+        result_path=self.write(original/'sub-00.official_anatomy.json',{'case_id':'sub-00','status':'completed','all_requested_scientific_data_equal':True})
+        prior={'status':'failed_actual_comparison','end_utc':'actual-previous-end','manifest':state['manifest'],
+               'preparation_bindings':state['preparation_bindings'],'case_origin_index':state['case_origin_index'],
+               'configuration':{key:str(getattr(options,key)) for key in fields},'tool_sha256':'3'*64,'anatomy_tool_sha256':'4'*64,
+               'cases':{'sub-00':{'status':'failed_comparison','error':{'type':'ValueError','message':'nonfinite scientific array'},
+                                  'anatomy':{'path':str(result_path),'sha256':anatomy.sha(result_path),'all_requested_scientific_data_equal':True}}}}
+        self.write(original/'status.json',prior)
+        return original,options,state,prior
+
+    def test_prior_binding_reuses_only_verified_anatomy_and_preserves_failure(self):
+        original,options,state,prior=self.prior_binding_fixture();before=(original/'status.json').read_bytes();watched={}
+        with patch.object(compare,'verify_cached_anatomy') as verify:
+            compare.bind_prior_anatomy(original,options,state,watched)
+        verify.assert_called_once();self.assertEqual((original/'status.json').read_bytes(),before)
+        self.assertEqual(state['cases']['sub-00']['status'],'waiting_actual_outputs')
+        self.assertEqual(state['prior_comparison_binding']['reused_actual_anatomy_cases'],['sub-00'])
+        self.assertEqual(len(watched),2)
+
+    def test_prior_running_controller_refused(self):
+        original,options,state,prior=self.prior_binding_fixture();prior['status']='waiting_actual_outputs';self.write(original/'status.json',prior)
+        with self.assertRaises(ValueError):compare.bind_prior_anatomy(original,options,state,{})
+
+    def test_prior_different_failure_refused(self):
+        original,options,state,prior=self.prior_binding_fixture();prior['cases']['sub-00']['error']['message']='missing raw source';self.write(original/'status.json',prior)
+        with self.assertRaises(ValueError):compare.bind_prior_anatomy(original,options,state,{})
+
+    def test_prior_raw_manifest_change_refused(self):
+        original,options,state,prior=self.prior_binding_fixture();prior['manifest']['sha256']='9'*64;self.write(original/'status.json',prior)
+        state['manifest']={'sha256':'1'*64}
+        with self.assertRaises(ValueError):compare.bind_prior_anatomy(original,options,state,{})
+
+    def test_prior_completed_anatomy_file_change_refused(self):
+        original,options,state,prior=self.prior_binding_fixture();(original/'sub-00.official_anatomy.json').write_text('{}')
+        with self.assertRaises(ValueError):compare.bind_prior_anatomy(original,options,state,{})
+
+    def test_prior_anatomy_with_scientific_difference_refused(self):
+        original,options,state,prior=self.prior_binding_fixture();path=original/'sub-00.official_anatomy.json';self.write(path,{'case_id':'sub-00','status':'completed','all_requested_scientific_data_equal':False})
+        prior['cases']['sub-00']['anatomy']['sha256']=anatomy.sha(path);self.write(original/'status.json',prior)
+        with self.assertRaises(ValueError):compare.bind_prior_anatomy(original,options,state,{})
+
+    def test_prior_cached_input_change_is_not_bypassed(self):
+        original,options,state,_=self.prior_binding_fixture()
+        with patch.object(compare,'verify_cached_anatomy',side_effect=ValueError('actual original input changed')):
+            with self.assertRaises(ValueError):compare.bind_prior_anatomy(original,options,state,{})
+
 
 @unittest.skipUnless(HAS_SCIENCE,"numpy/nibabel are provided by the FNIT conda environment")
 class ActualCPUReaderFixtureTests(unittest.TestCase):
@@ -228,6 +279,48 @@ class ActualCPUReaderFixtureTests(unittest.TestCase):
         n=self.np;result=anatomy.compare_arrays(n.array([0.],dtype='float32'),n.array([-0.],dtype='float32'))
         self.assertEqual(result['numeric_neq'],0);self.assertEqual(result['raw_scalar_bits_neq'],1)
         self.assertFalse(result['exact_scientific_array_equal'])
+
+    def test_default_scientific_array_still_refuses_nan(self):
+        n=self.np;a=n.array([n.nan],dtype='float32')
+        with self.assertRaises(ValueError):anatomy.compare_arrays(a,a.copy())
+
+    def test_matching_undefined_image_values_preserve_exact_payload(self):
+        n=self.np;a=n.array([1.,n.nan,n.inf,-n.inf],dtype='float32')
+        result=anatomy.compare_arrays(a,a.copy(),allow_matching_nonfinite=True)
+        self.assertTrue(result['exact_scientific_array_equal']);self.assertEqual(result['nonfinite']['finite_intersection_elements'],1)
+        self.assertEqual(result['nonfinite']['patterns']['NaN']['baseline_count'],1)
+        self.assertEqual(result['nonfinite']['payload_raw_bits_neq'],0);self.assertEqual(result['rmse'],0)
+
+    def test_new_or_lost_nan_in_image_refused(self):
+        n=self.np;a=n.array([1.,n.nan],dtype='float32');b=n.array([1.,2.],dtype='float32')
+        with self.assertRaises(ValueError):anatomy.compare_arrays(a,b,allow_matching_nonfinite=True)
+        with self.assertRaises(ValueError):anatomy.compare_arrays(b,a,allow_matching_nonfinite=True)
+
+    def test_inf_sign_change_in_image_refused(self):
+        n=self.np
+        with self.assertRaises(ValueError):anatomy.compare_arrays(n.array([n.inf]),n.array([-n.inf]),allow_matching_nonfinite=True)
+
+    def test_nan_payload_change_in_image_refused(self):
+        n=self.np;a=n.array([0x7fc00000],dtype='uint32').view('float32');b=n.array([0x7fc00001],dtype='uint32').view('float32')
+        with self.assertRaises(ValueError):anatomy.compare_arrays(a,b,allow_matching_nonfinite=True)
+
+    def test_finite_error_denominator_is_actual_finite_intersection(self):
+        n=self.np;a=n.array([1.,n.nan],dtype='float32');b=n.array([3.,n.nan],dtype='float32')
+        result=anatomy.compare_arrays(a,b,allow_matching_nonfinite=True)
+        self.assertEqual(result['rmse'],2);self.assertEqual(result['numeric_neq'],1)
+
+    def test_image_keeps_all_elements_and_nan_payload(self):
+        n=self.np;a=n.zeros((2,2,2,2),dtype='float32');a[1,1,1,1]=n.nan
+        paths=[self.root/'a.nii.gz',self.root/'b.nii.gz']
+        for path in paths:self.nib.save(self.nib.Nifti1Image(a.copy(),n.eye(4)),path)
+        result=compare.image_compare(*paths);self.assertTrue(result['strict_scientific_equal'])
+        self.assertEqual(result['data']['elements'],16);self.assertEqual(result['data']['finite_intersection_elements'],15)
+        self.assertEqual(result['data']['nonfinite_frames'][0]['frame'],1)
+
+    def test_matrix_nonfinite_gate_is_not_relaxed(self):
+        n=self.np;a=self.matrix('a.csv',[[1,n.nan],[n.nan,2]]);b=self.matrix('b.csv',[[1,n.nan],[n.nan,2]])
+        for kind in compare.MATRICES:
+            with self.assertRaises(ValueError):compare.matrix_compare(a,b,2,kind)
 
     def test_single_float32_ulp_is_reported_not_declared_atomic(self):
         n=self.np;a=n.array([1.],dtype='float32');b=n.nextafter(a,n.array([2.],dtype='float32'))

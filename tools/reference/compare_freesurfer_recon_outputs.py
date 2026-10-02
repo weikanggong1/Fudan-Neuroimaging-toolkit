@@ -71,30 +71,51 @@ def describe_array(array):
             'finite': bool(np.isfinite(array).all())}
 
 
-def compare_arrays(left, right):
+def compare_arrays(left, right, *, allow_matching_nonfinite=False):
     scientific_modules()
     left, right = np.asarray(left), np.asarray(right)
     result = {'baseline': describe_array(left), 'candidate': describe_array(right),
               'dtype_equal': left.dtype == right.dtype, 'shape_equal': left.shape == right.shape}
-    check(result['baseline']['finite'] and result['candidate']['finite'], 'nonfinite scientific array')
+    if not allow_matching_nonfinite:
+        check(result['baseline']['finite'] and result['candidate']['finite'], 'nonfinite scientific array')
     if left.shape != right.shape:
         result.update(numeric_neq=None, raw_scalar_bits_neq=None, rmse=None, max_abs_error=None,
                       exact_scientific_array_equal=False)
         return result
-    result['numeric_neq'] = int(np.count_nonzero(left != right))
+    finite_left, finite_right = np.isfinite(left), np.isfinite(right)
+    finite_joint = finite_left & finite_right
+    patterns = {}
+    for name, operation in (('NaN', np.isnan), ('positive_Inf', np.isposinf), ('negative_Inf', np.isneginf)):
+        a_pattern, b_pattern = operation(left), operation(right)
+        patterns[name] = {'baseline_count': int(a_pattern.sum()), 'candidate_count': int(b_pattern.sum()),
+                          'position_neq': int(np.count_nonzero(a_pattern != b_pattern))}
+    pattern_equal = all(value['position_neq'] == 0 for value in patterns.values())
+    result['nonfinite'] = {'patterns': patterns, 'patterns_equal': pattern_equal,
+                           'finite_intersection_elements': int(finite_joint.sum()),
+                           'finite_position_neq': int(np.count_nonzero(finite_left != finite_right)),
+                           'policy': 'Undefined image values are preserved; NaN payload and +/-Inf positions/signs must match. Errors use only the finite intersection, with its size reported; no nan_to_num or voxel reduction.'}
+    check(pattern_equal, 'nonfinite image NaN/+Inf/-Inf positions changed')
+    result['numeric_neq'] = int(np.count_nonzero((left != right) & finite_joint))
     if left.dtype.kind == right.dtype.kind and left.dtype.itemsize == right.dtype.itemsize:
         dtype = np.dtype(f'<u{left.dtype.itemsize}')
         result['raw_scalar_bits_neq'] = int(np.count_nonzero(canonical(left).view(dtype) != canonical(right).view(dtype)))
+        nonfinite_bits_neq = int(np.count_nonzero((canonical(left).view(dtype) != canonical(right).view(dtype)) & ~finite_joint))
     else:
         result['raw_scalar_bits_neq'] = None
+        nonfinite_bits_neq = None
+    result['nonfinite']['payload_raw_bits_neq'] = nonfinite_bits_neq
+    if not result['baseline']['finite'] or not result['candidate']['finite']:
+        check(result['dtype_equal'] and nonfinite_bits_neq == 0, 'nonfinite image scalar dtype or NaN/Inf payload changed')
     squared_error, maximum = 0.0, 0.0
-    a, b = left.reshape(-1), right.reshape(-1)
+    a, b, valid = left.reshape(-1), right.reshape(-1), finite_joint.reshape(-1)
     for start in range(0, a.size, 1_000_000):
-        delta = a[start:start + 1_000_000].astype(np.float64) - b[start:start + 1_000_000].astype(np.float64)
+        mask = valid[start:start + 1_000_000]
+        delta = a[start:start + 1_000_000][mask].astype(np.float64) - b[start:start + 1_000_000][mask].astype(np.float64)
         squared_error += float(np.dot(delta, delta))
         if delta.size:
             maximum = max(maximum, float(np.abs(delta).max()))
-    result['rmse'] = math.sqrt(squared_error / max(1, a.size))
+    result['rmse'] = math.sqrt(squared_error / max(1, result['nonfinite']['finite_intersection_elements']))
+    result['error_scope'] = 'all elements' if result['baseline']['finite'] and result['candidate']['finite'] else 'finite intersection; undefined values checked separately by exact pattern and payload'
     result['max_abs_error'] = maximum
     result['exact_scientific_array_equal'] = bool(result['dtype_equal'] and result['numeric_neq'] == 0 and result['raw_scalar_bits_neq'] == 0)
     return result

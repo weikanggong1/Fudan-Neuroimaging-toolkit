@@ -313,18 +313,26 @@ def image_compare(left, right):
     check(len(a.shape) in (3, 4) and len(b.shape) in (3, 4), "only actual 3D/4D image outputs supported")
     check(geometry["shape_equal"], "actual image dimensions differ")
     ha, hb = hashlib.sha256(), hashlib.sha256()
-    squared_error, maximum, unequal, bit_unequal, total, dtype_equal = 0.0, 0.0, 0, 0, 0, True
+    squared_error, maximum, unequal, bit_unequal, total, finite_total, dtype_equal = 0.0, 0.0, 0, 0, 0, 0, True
+    nonfinite_frames = []
     frames = a.shape[3] if len(a.shape) == 4 else 1
     for frame in range(frames):
         selection = (..., frame) if len(a.shape) == 4 else (...,)
         x, y = np.asanyarray(a.dataobj[selection]), np.asanyarray(b.dataobj[selection])
-        values = anatomy.compare_arrays(x, y)
+        try:
+            values = anatomy.compare_arrays(x, y, allow_matching_nonfinite=True)
+        except ValueError as error:
+            raise ValueError(f"actual image {left.name}, frame {frame}: {error}") from error
         ha.update(anatomy.canonical(x).tobytes()); hb.update(anatomy.canonical(y).tobytes())
         total += x.size; unequal += values["numeric_neq"]
         dtype_equal = dtype_equal and values["dtype_equal"]
         if values["raw_scalar_bits_neq"] is None: bit_unequal = None
         elif bit_unequal is not None: bit_unequal += values["raw_scalar_bits_neq"]
-        squared_error += values["rmse"] ** 2 * x.size
+        finite_count = values["nonfinite"]["finite_intersection_elements"]
+        finite_total += finite_count
+        squared_error += values["rmse"] ** 2 * finite_count
+        if finite_count != x.size:
+            nonfinite_frames.append({"frame": frame, **values["nonfinite"]})
         maximum = max(maximum, values["max_abs_error"])
     forms = {}
     for form in ("qform", "sform"):
@@ -339,10 +347,12 @@ def image_compare(left, right):
     geometry["units_candidate"] = list(b.header.get_xyzt_units()) if hasattr(b.header, "get_xyzt_units") else None
     geometry.update(dataobj_scaling_baseline={"slope": float(getattr(a.dataobj, "slope", 1)), "inter": float(getattr(a.dataobj, "inter", 0))},
                     dataobj_scaling_candidate={"slope": float(getattr(b.dataobj, "slope", 1)), "inter": float(getattr(b.dataobj, "inter", 0))})
-    data = {"numeric_neq": int(unequal), "raw_scalar_bits_neq": bit_unequal, "rmse": math.sqrt(squared_error / max(1, total)),
+    data = {"numeric_neq": int(unequal), "raw_scalar_bits_neq": bit_unequal, "rmse": math.sqrt(squared_error / max(1, finite_total)),
             "max_abs_error": maximum, "elements": int(total), "effective_data_dtype_equal": dtype_equal,
             "baseline_payload_sha256": ha.hexdigest(), "candidate_payload_sha256": hb.hexdigest(),
-            "payload_hash_order": "frames in order; each XYZ frame little-endian C order", "voxel_reduction_or_approximation": False}
+            "payload_hash_order": "frames in order; each XYZ frame little-endian C order", "voxel_reduction_or_approximation": False,
+            "finite_intersection_elements": int(finite_total), "nonfinite_frames": nonfinite_frames,
+            "error_scope": "all actual finite elements; matching NaN payload and +/-Inf positions/signs checked exactly; no data changed"}
     strict = geometry["stored_dtype_equal"] and geometry["affine"]["exact_scientific_array_equal"] and geometry["zooms"]["exact_scientific_array_equal"] and \
              geometry["dataobj_scaling_baseline"] == geometry["dataobj_scaling_candidate"] and dtype_equal and unequal == 0 and bit_unequal == 0 and \
              geometry["units_baseline"] == geometry["units_candidate"] and all(entry["code_equal"] and
@@ -514,6 +524,46 @@ def check_report_namespace(report_dir, protected):
         check(not destination.is_relative_to(original) and not original.is_relative_to(destination),
               "comparison namespace overlaps original source/data/status/output")
 
+
+def bind_prior_anatomy(prior_dir, options, state, watched):
+    """Reuse only verified science from the immutable known v1 reader failure.
+
+    This is a new CPU comparison namespace, never a resume of MRI computation.
+    Original failures and their frozen helper identities remain visible.
+    """
+    prior_dir = Path(prior_dir)
+    prior_path = prior_dir / "status.json"
+    prior, identity = safe_json(prior_path)
+    check(prior.get("status") == "failed_actual_comparison" and prior.get("end_utc"),
+          "prior comparison must be a finished, preserved failure")
+    check(prior.get("manifest") == state["manifest"] and prior.get("preparation_bindings") == state["preparation_bindings"] and
+          prior.get("case_origin_index") == state["case_origin_index"], "prior comparison inputs/bindings changed")
+    for key in ("manifest", "prep_bindings", "baseline_anatomy_root", "baseline_root", "candidate_root", "baseline_driver", "candidate_driver"):
+        check(prior["configuration"].get(key) == str(getattr(options, key)), "prior actual comparison scope changed")
+    errors = [record.get("error") for record in prior["cases"].values() if record.get("status") == "failed_comparison"]
+    check(errors and all(error == {"type": "ValueError", "message": "nonfinite scientific array"} for error in errors),
+          "prior failure is not the explicitly supported matching-undefined-image reader failure")
+    watched[str(prior_path)] = identity["sha256"]
+    reused = []
+    for case_id, record in prior["cases"].items():
+        check(case_id in state["cases"], "prior comparison has an unknown case")
+        if not record.get("anatomy"):
+            continue
+        result_path = Path(record["anatomy"]["path"])
+        check(result_path.parent.resolve() == prior_dir.resolve(), "prior anatomy report is outside its original namespace")
+        result, report_identity = safe_json(result_path)
+        check(report_identity["sha256"] == record["anatomy"]["sha256"] and result.get("case_id") == case_id and
+              result.get("status") == "completed" and result.get("all_requested_scientific_data_equal") is True,
+              "prior actual anatomy is incomplete, changed or has scientific differences")
+        verify_cached_anatomy(result)
+        state["cases"][case_id]["anatomy"] = dict(record["anatomy"])
+        watched[str(result_path)] = report_identity["sha256"]
+        reused.append(case_id)
+    state["prior_comparison_binding"] = {"original_status": identity, "original_end_utc": prior["end_utc"],
+        "original_tool_sha256": prior["tool_sha256"], "original_anatomy_tool_sha256": prior["anatomy_tool_sha256"],
+        "original_errors": errors, "reused_actual_anatomy_cases": reused,
+        "scope": "explicit binding of verified original anatomy reports only; original failed status and helper remain immutable; no MRI rerun/resume or preprocessing reuse"}
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, required=True)
@@ -524,6 +574,7 @@ def main(argv=None):
     parser.add_argument("--baseline-driver", type=Path, required=True, help="actual baseline driver status.json")
     parser.add_argument("--candidate-driver", type=Path, required=True, help="actual candidate driver status.json, may be absent until formal run starts")
     parser.add_argument("--report-dir", type=Path, required=True)
+    parser.add_argument("--prior-comparison-dir", type=Path, help="explicit immutable v1 nonfinite-reader failure; reuse only its verified completed official anatomy reports in a NEW comparison namespace")
     parser.add_argument("--poll-seconds", type=int, default=60)
     parser.add_argument("--timeout-hours", type=float, default=72)
     parser.add_argument("--once", action="store_true", help="one real observation; waiting remains waiting, never ten-case completion")
@@ -532,6 +583,8 @@ def main(argv=None):
     for path in (options.manifest, options.prep_bindings, options.baseline_anatomy_root, options.baseline_root,
                  options.candidate_root, options.baseline_driver, options.candidate_driver, options.report_dir):
         check(path.is_absolute(), "explicit absolute paths are required")
+    if options.prior_comparison_dir is not None:
+        check(options.prior_comparison_dir.is_absolute(), "prior comparison must be an explicit absolute path")
     manifest, manifest_identity = safe_json(options.manifest)
     cases = manifest_cases(manifest)
     origins, mapping, binding_identity = load_origins(options.prep_bindings, cases)
@@ -546,6 +599,8 @@ def main(argv=None):
     protected += [Path(origin["root"]) for origin in origins] + [Path(origin["driver_dir"]) for origin in origins]
     protected += [options.baseline_driver.parent, options.candidate_driver.parent, options.prep_bindings.parent]
     protected += [Path(identity["directory"]) for identity in baseline_config["frozen_sources"].values()]
+    if options.prior_comparison_dir is not None:
+        protected.append(options.prior_comparison_dir)
     check_report_namespace(options.report_dir, protected)
     options.report_dir.parent.mkdir(parents=True, exist_ok=True)
     options.report_dir.mkdir(exist_ok=False)
@@ -562,6 +617,8 @@ def main(argv=None):
              "cases": {case["case_id"]: {"case_id": case["case_id"], "status": "waiting_actual_outputs"} for case in cases},
              "scope": "read-only actual CPU scientific comparisons; no original-source/status/output mutations; unknown is not ready; staged wall and queue/gap observations are retained without stage-sum full-wall claims",
              "GPU_used": False, "original_namespaces_modified": False}
+    if options.prior_comparison_dir is not None:
+        bind_prior_anatomy(options.prior_comparison_dir, options, state, watched)
     started = time.perf_counter()
     try:
         while True:
