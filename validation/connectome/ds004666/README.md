@@ -4,6 +4,10 @@
 
 ![配对 T1、校正前后 b0 与真实 atlas 切面](../../../docs/connectome/figures/ds004666_t1_raw_vs_topup_eddy_atlas.png)
 
+## 当前无损性能优化
+
+[2026-10-02 固定真实输入的优化报告](lossless_20261002/README.md)对比最新 main 基线与批量轨迹整理、原点打包和多 atlas 复用。验证包含实际重新追踪、27,401 条固定流线的精确 FA 与七套四矩阵，以及真实三 atlas 构建；它检验与原 FNIT 逐值一致，原有 MRtrix 随机分布差异继续由下文独立对照描述。
+
 ## 与官方流程逐项对照
 
 原 [UKB-connectomics](https://github.com/sina-mansour/UKB-connectomics) 以 UKB `data_ud`、FIRST、七套皮层+Tian 图谱及 1,000 万次播种为输入。本公开样本起初用 MRtrix3 3.0.3 的 FreeSurfer 5TT、20 节点 atlas 和每次 10,000 次播种隔离追踪误差；后续已扩展到 100k 播种和七套图谱矩阵。适配流程仍不等于原 UKB 的 FIRST/FNIRT/10M 整链。[早期参考命令和输出](corrected_mrtrix_fs5tt_act_adapted/)可核对。
