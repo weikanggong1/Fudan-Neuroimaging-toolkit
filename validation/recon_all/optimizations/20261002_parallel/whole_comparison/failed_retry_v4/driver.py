@@ -206,8 +206,7 @@ def geometry(reference: Path, candidate: Path, surface_tool) -> dict:
     conform = (images[0].shape == images[1].shape and
                np.allclose(images[0].affine, images[1].affine, atol=1e-6, rtol=0) and
                np.array_equal(images[0].header.get_vox2ras_tkr(), images[1].header.get_vox2ras_tkr()))
-    # MGH 头的 shape 元素可能是 NumPy int32；报告保留整数值并转为 JSON 原生类型。
-    result = {"conform_shape": [[int(size) for size in image.shape] for image in images],
+    result = {"conform_shape": [list(image.shape) for image in images],
               "conform_affine_max_abs_difference": float(np.max(np.abs(images[0].affine - images[1].affine))),
               "conform_scanner_affine_atol": 1e-6, "common_conform_and_tkras": bool(conform), "surfaces": {}}
     for hemi in ("lh", "rh"):
@@ -228,9 +227,6 @@ def geometry(reference: Path, candidate: Path, surface_tool) -> dict:
                         np.issubdtype(f.dtype, np.integer) and np.all((f >= 0) & (f < len(x)))
                         for x, f, _ in pairs)
             topologies = [_topology(x, f) for x, f, _ in pairs] if valid else [{"valid": False}] * 2
-            for topology in topologies:
-                # 拓扑判断中的 np.all 可能留下 np.bool_；仅规范报告类型。
-                topology["valid"] = bool(topology["valid"])
             ordered = valid and pairs[0][0].shape == pairs[1][0].shape and np.array_equal(pairs[0][1], pairs[1][1])
             matches_white = valid and all(x.shape == w.shape and np.array_equal(f, wf)
                                          for (x, f, _), (w, wf) in zip(pairs, whites))
