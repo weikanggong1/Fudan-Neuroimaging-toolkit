@@ -80,7 +80,7 @@ GCA 评分和 ACJ 邻域本身没有独立官方 CLI。`profile_native.py` 对�
 
 见 `RESULTS.md` 与同目录 JSON/CSV。首轮已有评分尾差如实保存，后续修正另存新版本。整体指标等效维持 `not_assessed`；138 项严格诊断与两例原始 T1 空目录整例由协调者执行。完整 GCA 可选后端只替换原生搜索热点，全部后续优化循环保留；没有 N4 算法或分割核心替换。
 
-任务 1 的接入方式：两次 `wm_fix_*` 调用用 `fix_ento_wm_gpu`，保持原参数并新增 `device=device`。GCA 缓存后端在两例完整阶段更慢，因此保留现有程序；该后端只作显式实验入口。WM 核心和 N4 保持既有接口。无新增依赖；PyTorch、NumPy、nibabel、Numba 均为现有 Conda 安装依赖。
+任务 1 的接入方式：两次 `wm_fix_*` 调用用 `fix_ento_wm_gpu`，保持原参数并新增 `device=device`。当前 v3 GCA 缓存保持完整原生优化器，两例同构建注册耗时下降 14.6%／12.1%，矩阵零差异；两例自产连续链已运行到 filled，最终 filled 和当前 GPU／CPU WM 对照均零差异。首例 EntoWM／WM 相对冻结参考各有 1 个体素差异，详见 RESULTS；生产接入由协调者结合原始 T1 整例、138 项诊断和安装验收决定。旧 v1/v2 退化候选不启用。WM 核心和 N4 保持既有接口。无新增依赖；PyTorch、NumPy、nibabel、Numba 均为现有 Conda 安装依赖。
 
 ## 原代码与参考文献
 
