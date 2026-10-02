@@ -17,8 +17,16 @@ def geometry_fields(image, *, filename="unknown"):
         center = np.asarray(image.header['Pxyz_c'],np.float32)
     else:
         sizes = np.asarray(image.header.get_zooms()[:3],np.float32)
-        directions = (geometry.affine[:3,:3]/sizes).T.astype(np.float32)
-        center = (geometry.affine @ np.array([*(s/2 for s in geometry.shape),1]))[:3].astype(np.float32)
+        # MRIsetVox2RASFromMatrix normalizes sform columns using their double
+        # norms, but retains header voxel sizes. MRIp0ToCRAS then uses the
+        # ordinary MatrixMultiply (ordered FLOAT accumulation), not MultiplyD.
+        columns = geometry.affine[:3,:3]
+        directions = (columns/np.sqrt((columns*columns).sum(axis=0))).T.astype(np.float32)
+        linear = np.float32(directions.T*sizes)
+        center = np.zeros(3,np.float32)
+        for axis,size in enumerate(geometry.shape):
+            center = np.float32(center + np.float32(linear[:,axis]*np.float32(size/2)))
+        center = np.float32(center + geometry.affine[:3,3].astype(np.float32))
     if not np.allclose(directions @ directions.T,np.eye(3),atol=1e-5,rtol=0):
         raise ValueError("MNI FS warp requires shear-free geometry")
     fields = (1,*geometry.shape,*sizes,*directions.flat,*center,0.,0.,0.)
