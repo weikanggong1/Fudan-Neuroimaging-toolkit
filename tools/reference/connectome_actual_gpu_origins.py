@@ -9,6 +9,10 @@ from __future__ import annotations
 import math
 import os
 from pathlib import Path
+import copy
+
+SELECTED_MODE = "selected_same_round_anatomy_fresh_raw_dwi_monitor_recovery"
+_SELECTED_FILES = {"science_worker", "recovery_worker", "resources_manifest"}
 
 
 def reader():
@@ -25,6 +29,39 @@ def bound_json(identity):
     value, actual = compare.safe_json(identity["path"])
     compare.check(actual == identity, "original GPU recovery provenance changed")
     return value
+
+
+def bound_file(identity):
+    compare = reader()
+    compare.check(isinstance(identity, dict) and set(identity) == {"path", "sha256"} and Path(identity["path"]).is_absolute() and
+                  not Path(identity["path"]).is_symlink() and compare.anatomy.sha(identity["path"]) == identity["sha256"],
+                  "explicit selected recovery file identity changed")
+
+
+def normalize_selected_declaration(declaration):
+    """Interpret actual selected-worker ledgers without changing their files."""
+    compare = reader()
+    extra = set(declaration) - {"arm", "case_id", "reason", "original", "replacement"}
+    if not extra:
+        return declaration, None
+    compare.check(extra == _SELECTED_FILES, "unknown selected recovery provenance fields")
+    for key in _SELECTED_FILES: bound_file(declaration[key])
+    actual = copy.deepcopy(declaration)
+    replacement = actual["replacement"]
+    config = bound_json(replacement["configuration"])
+    driver = bound_json(replacement["driver_status"])
+    compare.check(driver.get("mode") == SELECTED_MODE and driver.get("status") == "completed_selected_subset" and
+                  driver.get("selected_completed") == driver.get("selected_attempted") > 0,
+                  "selected recovery binding requires its actual completed immutable driver")
+    compare.check(Path(replacement["root"]) == Path(config["run_root"]) / actual["arm"] / actual["case_id"] and
+                  Path(replacement["configuration"]["path"]) == Path(replacement["root"]) / "recovery_config.json" and
+                  not any(path.is_symlink() for path in (Path(config["run_root"]), Path(config["run_root"]) / actual["arm"], Path(replacement["root"]))) and
+                  Path(replacement["root"]).resolve().is_relative_to(Path(config["run_root"]).resolve()),
+                  "selected recovery job/config namespace differs from actual run_root")
+    replacement["root"] = config["run_root"]
+    replacement["driver_status"] = declaration["replacement"]["driver_status"]["path"]
+    for key in _SELECTED_FILES: actual.pop(key)
+    return actual, {"declaration": declaration, "driver_identity": declaration["replacement"]["driver_status"]}
 
 
 def incomplete_monitor(GPU):
@@ -78,7 +115,8 @@ def load_bindings(path, cases, options):
                   "explicit GPU monitor recovery binding schema required")
     canonical = {case["case_id"]: case for case in cases}
     result = {}
-    for declaration in value["bindings"]:
+    for declared in value["bindings"]:
+        declaration, selected = normalize_selected_declaration(declared)
         compare.check(set(declaration) == {"arm", "case_id", "reason", "original", "replacement"} and
                       declaration["reason"] in {"monitor_incomplete", "original_not_dispatched", "original_queue_stopped_before_compute"}, "explicit GPU origin reason required")
         arm, case_id = declaration["arm"], declaration["case_id"]
@@ -125,7 +163,7 @@ def load_bindings(path, cases, options):
             compare.check(original["GPU_report"]["path"] == str(root / arm / case_id / "gpu_report.json") and original["wall_report"] is None,
                           "queued-stop original report identity is wrong")
             GPU = bound_json(original["GPU_report"]); wall = None
-            compare.check(driver.get("end_utc") and driver.get("dispatch_paused") is True and record.get("status") == "failed" and
+            compare.check(driver.get("end_utc") and driver.get("dispatch_paused") is True and record.get("status") in {"failed", "failed_gpu_execution"} and
                           record.get("gpu_report", record.get("gpu_result")) == GPU and GPU.get("status") == "failed" and
                           GPU.get("error") == {"type": "RuntimeError", "message": "STOP_DISPATCH prevents starting the queued raw-DWI computation"} and
                           GPU.get("case_id") == case_id and GPU.get("version") == arm and GPU.get("raw_input_provenance") == canonical[case_id]["input_files"] and
@@ -149,6 +187,11 @@ def load_bindings(path, cases, options):
                       compare.anatomy.sha(new_config["wall_script"]) == new_config["wall_script_sha256"], "replacement altered frozen science or wall evaluator bytes")
         for key in ("atlases", "atlas_options", "eddy_gp_seed", "n_seeds", "seed", "device", "gpu_lock", "gpu_host", "gpu_cpu_threads", "cuda_visible_devices"):
             compare.check(key in new_config and new_config[key] == configuration.get(key), "replacement scientific setting or shared GPU lock changed: " + key)
+        if selected:
+            excluded = {"run_root", "gpu_python", "stop_dispatch_path", "resources_manifest"}
+            compare.check({key: item for key, item in new_config.items() if key not in excluded} ==
+                          {key: item for key, item in configuration.items() if key not in excluded},
+                          "selected worker altered more than declared namespace/runtime/dispatch/resource metadata")
         compare.check(new_config.get("gpu_python") and Path(new_config["gpu_python"]).is_absolute(), "declared monitor interpreter required")
         compare.check(Path(new_config["gpu_python"]).is_file() and os.access(new_config["gpu_python"], os.X_OK) and
                       compare.anatomy.sha(new_config["gpu_python"]) == preflight["original_runtime"]["python_binary_sha256"],
@@ -157,12 +200,82 @@ def load_bindings(path, cases, options):
         compare.check(preflight["original_runtime"]["gpu_python"] == configuration["gpu_python"] and
                       (GPU is None or preflight["original_runtime"]["python_binary_sha256"] == GPU["identity"]["python_executable_sha256"]) and
                       preflight["NVML"]["original_wall_helper"]["sha256"] == configuration["wall_script_sha256"], "monitor preflight differs from original actual runtime")
-        replacement_manifest, _ = compare.safe_json(new_root / "input_manifest.json")
+        manifest_path = root / "input_manifest.json" if selected else new_root / "input_manifest.json"
+        replacement_manifest, _ = compare.safe_json(manifest_path)
         compare.check(compare.manifest_cases(replacement_manifest) == cases, "replacement canonical raw cohort changed")
         result[arm, case_id] = {"declaration": declaration, "binding_file": identity, "original_GPU": GPU,
                                "original_wall": wall, "original_configuration": configuration,
-                               "replacement_configuration": new_config, "runtime_preflight": preflight}
+                               "replacement_configuration": new_config, "runtime_preflight": preflight, "selected_recovery": selected}
     return result, identity
+
+
+def selected_proof(binding, case):
+    """Read the actual selected worker proof; never manufacture an anatomy gate."""
+    compare = reader(); selected = binding.get("selected_recovery")
+    compare.check(selected is not None, "actual selected worker binding required")
+    declaration = binding["declaration"]; declared = selected["declaration"]
+    for key in _SELECTED_FILES: bound_file(declared[key])
+    driver = bound_json(selected["driver_identity"])
+    root = Path(declaration["replacement"]["root"])
+    proof, identity = compare.safe_json(root / declaration["arm"] / case["case_id"] / "recovery_binding.json")
+    compare.check(proof.get("mode") == SELECTED_MODE and proof.get("arm") == declaration["arm"] and
+                  proof.get("case_id") == case["case_id"] and proof.get("case") == case and
+                  proof.get("original_config") == declaration["original"]["configuration"] and
+                  proof.get("original_driver", {}).get("sha256") == declaration["original"]["driver_snapshot"]["sha256"] and
+                  proof.get("FS_recomputed") is False and proof.get("old_DWI_outputs_used") is False and
+                  proof.get("raw_DWI_execution_policy") == "complete_from_raw",
+                  "selected actual proof changed original inputs/anatomy/source policy")
+    original_driver = bound_json(proof["original_driver"])
+    compare.check(original_driver == bound_json(declaration["original"]["driver_snapshot"]), "selected proof does not preserve original terminal driver bytes")
+    for name, expected in (("gpu_report.json", declaration["original"]["GPU_report"]), ("raw_bids_wall.json", declaration["original"]["wall_report"])):
+        item = proof.get("old_case_reports", {}).get(name, {})
+        compare.check(item.get("binding") == expected and (expected is not None or item == {"absent_at_bind": True}),
+                      "selected proof hid original failed/completed or absent report")
+        if expected is not None: compare.check(item.get("value") == bound_json(expected), "selected original case report bytes differ")
+    config = binding["replacement_configuration"]
+    resources = bound_json(declared["resources_manifest"])
+    original_resources = bound_json(binding["original_configuration"]["resources_manifest"])
+    def scientific_resources(value):
+        files = value.get("files", [])
+        compare.check(isinstance(files, list) and files, "selected scientific resource ledger is incomplete")
+        records = {(item["role"], item["path"]): item for item in files if item["role"] != "gpu_python"}
+        compare.check(len(records) == sum(item["role"] != "gpu_python" for item in files), "duplicate selected scientific resource record")
+        return records
+    compare.check(scientific_resources(resources) == scientific_resources(original_resources),
+                  "selected recovery changed a non-monitor scientific resource")
+    compare.check(declared["science_worker"] == {"path": config["worker_script"], "sha256": config["worker_script_sha256"]} and
+                  declared["resources_manifest"] == config.get("resources_manifest") and
+                  resources == proof.get("resources"), "selected original worker/resource proof changed")
+    runtime = proof.get("runtime", {}); preflight = binding["runtime_preflight"]
+    compare.check(runtime.get("scientific_runtime_equal") is True and runtime.get("CUDA_initialized") is False,
+                  "selected actual runtime proof is incomplete")
+    for key, field in (("original", "original_runtime"), ("isolated", "new_runtime")):
+        observed = runtime.get(key, {})
+        compare.check(all(observed.get(name) == preflight[field][name] for name in
+                      ("gpu_python", "python_binary", "python_binary_sha256", "python_version", "modules", "CUDA_initialized")),
+                      "selected actual runtime differs from frozen optional monitor preflight")
+    return proof, identity, driver
+
+
+def selected_driver_record(binding, record, state, case):
+    compare = reader(); proof, identity, actual = selected_proof(binding, case)
+    response = record.get("response", {}); declaration = binding["selected_recovery"]["declaration"]
+    root = Path(binding["declaration"]["replacement"]["root"]) / binding["declaration"]["arm"] / case["case_id"]
+    eligibility, _ = compare.safe_json(root / "recovery_eligibility.json")
+    compare.check(state == actual and state.get("mode") == SELECTED_MODE and record.get("status") == "completed" and
+                  response.get("binding") == proof and response.get("new_config") == binding["replacement_configuration"] and
+                  response.get("configuration") == declaration["replacement"]["configuration"] and
+                  all(response.get(key) == declaration[key] for key in _SELECTED_FILES) and
+                  response.get("eligibility") == eligibility and eligibility.get("status") == "execution_complete_memory_observed_below_budget" and
+                  eligibility.get("validation_error") is None and eligibility.get("full_ten_complete") is False and
+                  state.get("full_ten_complete") is False,
+                  "selected completed driver does not match actual bound worker/result/configuration")
+    head = record.get("recovery_head_wall_seconds")
+    compare.check(isinstance(head, (float, int)) and not isinstance(head, bool) and math.isfinite(head) and head > 0,
+                  "selected original head request monotonic time is missing")
+    timing = {"recovery_head_wall_seconds": head, "recovery_binding": identity,
+              "scope": "actual selected recovery head request wall includes runtime/resource/anatomy revalidation, shared GPU queue and fresh full raw-DWI computation; original independent official FS and previous failures/waits are separate, no continuous cold pipeline total is inferred"}
+    return binding["replacement_configuration"], timing, response.get("gpu_result"), response
 
 
 def verify_replacement(binding, GPU, wall, case, subject_dir):
@@ -231,7 +344,23 @@ def verify_replacement(binding, GPU, wall, case, subject_dir):
     interval, gap = process.get("sample_interval_seconds"), process.get("max_observed_interval_seconds")
     compare.check(all(isinstance(value, (float, int)) and not isinstance(value, bool) and math.isfinite(value) and value > 0 for value in (interval, gap)) and
                   gap <= max(5., 10 * interval), "replacement direct NVML sampling gap failed")
+    selected_provenance = None
+    if binding.get("selected_recovery"):
+        proof, proof_identity, state = selected_proof(binding, case)
+        record = state.get("cases", {}).get(declaration["arm"] + "/" + case["case_id"], {})
+        _, _, reported_GPU, response = selected_driver_record(binding, record, state, case)
+        compare.check(reported_GPU == GPU and proof.get("anatomy_subject_dir") == str(subject_dir) and
+                      response.get("GPU_report") == {"path": str(output.parent / "gpu_report.json"), "sha256": compare.anatomy.sha(output.parent / "gpu_report.json")} and
+                      response.get("wall_report") == {"path": str(output.parent / "raw_bids_wall.json"), "sha256": compare.anatomy.sha(output.parent / "raw_bids_wall.json")},
+                      "selected report or same-round FS differs from actual eligible execution")
+        times = [wall.get("total_runtime_seconds"), GPU.get("gpu_command_wall_seconds"), GPU.get("worker_wall_seconds"), GPU.get("gpu_lock_queue_seconds")]
+        compare.check(all(isinstance(item, (float, int)) and not isinstance(item, bool) and math.isfinite(item) and item >= 0 for item in times) and
+                      times[0] <= times[1] <= times[2] and times[3] <= times[2],
+                      "selected same-GPU worker/CLI/queue monotonic timer scope is inconsistent")
+        selected_provenance = {"producer_declaration": binding["selected_recovery"]["declaration"], "recovery_binding": proof_identity,
+                               "recovery_driver": binding["selected_recovery"]["driver_identity"]}
     return {"status": "actual_eligible_replacement_verified", "declaration": declaration, "binding_file": binding["binding_file"],
+            "selected_recovery_provenance": selected_provenance,
             "original_memory_budget": before.get("memory_budget") if before else None, "original_CLI_seconds": old_wall["total_runtime_seconds"] if old_wall else None,
             "original_queued_stop_timing": {key: before.get(key) for key in ("start_utc", "end_utc", "worker_wall_seconds", "gpu_lock_queue_seconds", "error")}
                 if declaration["reason"] == "original_queue_stopped_before_compute" else None,

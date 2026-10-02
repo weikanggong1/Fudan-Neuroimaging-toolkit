@@ -192,14 +192,16 @@ def validate_input_ledger(entries, case, description):
 
 def validate_gpu_run(root, driver_path, version, case, subject_dir, atlases, touched, *, GPU_origin_binding=None):
     record, state, observation = ready_case(driver_path, version, case["case_id"])
-    config = state["config"]
-    check(isinstance(record.get("timing"), dict) and bool(record["timing"]), "completed actual GPU driver has no validated original wall/queue/gap timing")
+    if GPU_origin_binding and GPU_origin_binding.get("selected_recovery"):
+        config, timing, declared_result, response = gpu_origins.selected_driver_record(GPU_origin_binding, record, state, case)
+    else:
+        config, timing, declared_result = state["config"], record.get("timing"), record.get("gpu_report", record.get("gpu_result"))
+    check(isinstance(timing, dict) and bool(timing), "completed actual GPU driver has no validated original wall/queue/gap timing")
     check(config["run_root"] == str(root) and config["atlases"] == atlases and version in config["frozen_sources"], "actual GPU config scope or atlas selection changed")
     job = Path(root) / version / case["case_id"]
     gpu, gpu_identity = safe_json(job / "gpu_report.json", touched)
     check(gpu.get("status") == "completed" and gpu.get("exit_code") == 0 and gpu.get("case_id") == case["case_id"] and gpu.get("version") == version,
           "actual GPU report is incomplete or wrong case/version")
-    declared_result = record.get("gpu_report", record.get("gpu_result"))
     check(declared_result == gpu, "driver case does not match immutable actual GPU result")
     check(gpu.get("raw_input_provenance") == case["input_files"], "raw provenance differs from canonical case")
     validate_input_ledger(gpu["input_verification"], case, "before GPU")
@@ -243,7 +245,7 @@ def validate_gpu_run(root, driver_path, version, case, subject_dir, atlases, tou
     recovered_origin = gpu_origins.verify_replacement(GPU_origin_binding, gpu, wall, case, subject_dir) if GPU_origin_binding else None
     return output, {"gpu_report": gpu_identity, "wall_report": wall_identity, "driver_observation": observation,
                     "actual_GPU_root": str(root), "actual_GPU_driver": str(driver_path), "GPU_origin_binding": recovered_origin,
-                    "actual_source": verified_source, "memory_budget": budget, "driver_timing": record.get("timing"),
+                    "actual_source": verified_source, "memory_budget": budget, "driver_timing": timing,
                     "worker_wall_seconds": gpu.get("worker_wall_seconds"), "gpu_lock_queue_seconds": gpu.get("gpu_lock_queue_seconds"),
                     "gpu_command_wall_seconds": gpu.get("gpu_command_wall_seconds"), "raw_dwi_cli_total_runtime_seconds": wall.get("total_runtime_seconds"),
                     "timing_scope": gpu.get("execution_scope"), "stages": wall.get("stages"), "stage_qc": wall.get("stage_qc"),
@@ -459,6 +461,19 @@ def preserve_configs(namespace, baseline_root, origins, binding_path, manifest_p
     return watched
 
 
+def baseline_validation_report(options, case_id):
+    """Choose only real same-round anatomy validation in declared namespaces."""
+    paths = [options.baseline_anatomy_root / "baseline" / case_id / "recon_report.revalidated.json",
+             options.baseline_root / "baseline" / case_id / "anatomy_origin.json"]
+    actual_root, _, binding = gpu_origins.selected_origin(options, "baseline", case_id, getattr(options, "_gpu_origins", None))
+    if binding is not None:
+        paths.append(actual_root / "baseline" / case_id / "recovery_binding.json")
+    for path in paths:
+        if path.exists() or path.is_symlink():
+            return path, binding if path.name == "recovery_binding.json" else None
+    raise WaitingForActualResults("baseline official reconstruction/revalidation is not yet complete")
+
+
 def compare_once(options, state, cases, origins, mapping):
     namespace = options.report_dir
     for case in cases:
@@ -470,15 +485,14 @@ def compare_once(options, state, cases, origins, mapping):
             if not record.get("anatomy"):
                 preparation_observation = validate_prepared_case(origin, case)
                 raw_job = options.baseline_anatomy_root / "baseline" / case["case_id"]
-                validation = raw_job / "recon_report.revalidated.json"
-                if not validation.exists():
-                    validation = options.baseline_root / "baseline" / case["case_id"] / "anatomy_origin.json"
-                if not (raw_job / "recon_report.json").exists() or not validation.exists():
+                if not (raw_job / "recon_report.json").exists():
                     raise WaitingForActualResults("baseline official reconstruction/revalidation is not yet complete")
+                validation, validation_origin = baseline_validation_report(options, case["case_id"])
                 validation_report, _ = safe_json(validation)
                 if validation_report.get("status") == "running":
                     raise WaitingForActualResults("baseline actual revalidation is running")
-                anatomy_result = anatomy.compare_fresh_case(case, options.baseline_anatomy_root, Path(origin["root"]), baseline_validation_path=validation)
+                anatomy_result = anatomy.compare_fresh_case(case, options.baseline_anatomy_root, Path(origin["root"]),
+                    baseline_validation_path=validation, baseline_validation_origin=validation_origin)
                 anatomy_result["candidate_preparation_observation"] = preparation_observation
                 anatomy_result["original_preparation_config_identity"] = origin["config_identity"]
                 anatomy_path = namespace / f"{case['case_id']}.official_anatomy.json"

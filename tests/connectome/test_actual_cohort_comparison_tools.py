@@ -57,6 +57,76 @@ class ProtocolTests(unittest.TestCase):
         with self.assertRaises(compare.WaitingForActualResults):
             compare.ready_case(self.root / "not-started.json", "candidate", "sub-00")
 
+    def validation_options(self):
+        return type("Options", (), {"baseline_anatomy_root": self.root / "raw-anatomy",
+            "baseline_root": self.root / "old-baseline", "baseline_driver": self.root / "old-driver/status.json"})()
+
+    def test_same_round_revalidation_precedes_anatomy_binding(self):
+        options = self.validation_options()
+        revalidation = self.write(options.baseline_anatomy_root / "baseline/sub-00/recon_report.revalidated.json", {"fixture_only": True})
+        self.write(options.baseline_root / "baseline/sub-00/anatomy_origin.json", {"fixture_only": True})
+        self.assertEqual(compare.baseline_validation_report(options, "sub-00"), (revalidation, None))
+
+    def test_explicit_replacement_anatomy_origin_for_original_not_dispatched(self):
+        options = self.validation_options()
+        new_root = self.root / "actual-declared-new-baseline"
+        options._gpu_origins = {("baseline", "sub-00"): {"declaration": {"replacement": {
+            "root": str(new_root), "driver_status": str(self.root / "new-driver/status.json")}}}}
+        path = self.write(new_root / "baseline/sub-00/recovery_binding.json", {"fixture_only": True})
+        self.assertEqual(compare.baseline_validation_report(options, "sub-00"), (path, options._gpu_origins["baseline", "sub-00"]))
+
+    def test_undeclared_new_anatomy_namespace_is_not_discovered(self):
+        options = self.validation_options()
+        self.write(self.root / "undeclared-new-baseline/baseline/sub-00/anatomy_origin.json", {"fixture_only": True})
+        with self.assertRaises(compare.WaitingForActualResults):
+            compare.baseline_validation_report(options, "sub-00")
+
+    def test_existing_linked_validation_is_rejected_not_hidden_by_replacement(self):
+        options = self.validation_options()
+        outside = self.write(self.root / "outside.json", {"fixture_only": True})
+        link = options.baseline_anatomy_root / "baseline/sub-00/recon_report.revalidated.json"
+        link.parent.mkdir(parents=True); link.symlink_to(outside)
+        self.assertEqual(compare.baseline_validation_report(options, "sub-00"), (link, None))
+        with self.assertRaises(ValueError): compare.safe_json(link)
+
+    def recovery_anatomy_fixture(self):
+        case = self.manifest["cases"][0]; subject = self.root / "raw-anatomy/baseline/sub-00/FS/00"
+        original_report = {"path": str(subject.parent / "original.json"), "sha256": "1" * 64}
+        failure = {"type": "RuntimeError", "message": "known int32 serialization failure fixture"}
+        report = {"error": failure, "anatomy": {"scripts/recon-all.done": {"sha256": "2" * 64}}}
+        original = {}
+        for key in ("configuration", "driver_snapshot"):
+            path = self.write(self.root / (key + ".json"), {"fixture_only": True})
+            original[key] = {"path": str(path), "sha256": anatomy.sha(path)}
+        new_root = self.root / "new-actual-raw-DWI"
+        context = {"declaration": {"original": original, "replacement": {"root": str(new_root)}}}
+        path = new_root / "baseline/sub-00/recovery_binding.json"
+        proof = {"mode": "selected_same_round_anatomy_fresh_raw_dwi_monitor_recovery", "arm": "baseline", "case_id": "sub-00",
+            "case": case, "FS_recomputed": False, "old_DWI_outputs_used": False, "raw_DWI_execution_policy": "complete_from_raw",
+            "original_config": original["configuration"], "original_driver": original["driver_snapshot"],
+            "anatomy_subject_dir": str(subject), "anatomy": report["anatomy"], "same_round_anatomy": {
+                "original_recon_report": original_report, "original_reconstruction_failure": failure,
+                "anatomy_geometry": {"status": "actual_images_surfaces_annotations_read"}}}
+        return proof, context, path, original_report, case, subject, report
+
+    def test_actual_selected_anatomy_proof_accepts_only_explicit_original_bindings(self):
+        fields = self.recovery_anatomy_fixture(); touched = {}
+        result = anatomy.validate_recovery_anatomy(*fields, touched)
+        self.assertEqual(result["status"], "actual_images_surfaces_annotations_read"); self.assertEqual(len(touched), 2)
+
+    def test_selected_anatomy_changed_case_original_source_or_FS_rejected(self):
+        for field, value in (("case", {"wrong_case": True}), ("anatomy_subject_dir", "/wrong/FS"),
+                             ("old_DWI_outputs_used", True), ("FS_recomputed", True), ("original_config", {"path": "/fake", "sha256": "0" * 64})):
+            with self.subTest(field=field):
+                fields = list(self.recovery_anatomy_fixture()); fields[0][field] = value
+                with self.assertRaises(ValueError): anatomy.validate_recovery_anatomy(*fields, {})
+
+    def test_selected_anatomy_changed_original_recon_SHA_rejected(self):
+        fields = list(self.recovery_anatomy_fixture()); fields[0]["same_round_anatomy"]["original_recon_report"]["sha256"] = "0" * 64
+        # Avoid shared fixture dictionary hiding the deliberately changed identity.
+        fields[3] = {"path": fields[3]["path"], "sha256": "1" * 64}
+        with self.assertRaises(ValueError): anatomy.validate_recovery_anatomy(*fields, {})
+
     def test_running_driver_does_not_mean_ready(self):
         path = self.write(self.root / "status.json", {"cases": {"candidate/sub-00": {"status": "gpu_queued"}}})
         with self.assertRaises(compare.WaitingForActualResults): compare.ready_case(path, "candidate", "sub-00")

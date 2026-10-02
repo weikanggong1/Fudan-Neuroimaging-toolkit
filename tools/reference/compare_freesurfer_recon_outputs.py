@@ -141,7 +141,34 @@ def input_t1(case, report):
     return {'path': case['t1w'], 'sha256': actual, 'bytes': Path(case['t1w']).stat().st_size}
 
 
-def validate_run(root, case, version, manifest_case, touched, *, validation_path=None):
+def validate_recovery_anatomy(valid, context, path, original, manifest_case, subject, report, touched):
+    """Accept an explicitly bound selected worker's actual same-round FS proof."""
+    declaration = context['declaration']
+    expected_path = Path(declaration['replacement']['root']) / 'baseline' / manifest_case['case_id'] / 'recovery_binding.json'
+    check(Path(path) == expected_path and valid.get('mode') == 'selected_same_round_anatomy_fresh_raw_dwi_monitor_recovery' and
+          valid.get('arm') == 'baseline' and valid.get('case_id') == manifest_case['case_id'] and valid.get('case') == manifest_case and
+          valid.get('FS_recomputed') is False and valid.get('old_DWI_outputs_used') is False and
+          valid.get('raw_DWI_execution_policy') == 'complete_from_raw', 'explicit selected same-round anatomy proof is invalid')
+    for field, key in (('original_config', 'configuration'), ('original_driver', 'driver_snapshot')):
+        expected = declaration['original'][key]
+        declared = valid.get(field)
+        check(isinstance(declared, dict) and set(declared) == {'path', 'sha256'} and
+              declared['sha256'] == expected['sha256'] and (key == 'driver_snapshot' or declared == expected),
+              'selected anatomy original origin differs from explicit binding')
+        preserved, actual = read_record(expected['path'], touched)
+        original_data, original_identity = read_record(declared['path'], touched)
+        check(actual == expected and original_identity == declared and original_data == preserved,
+              'selected anatomy original config/driver changed')
+    proof = valid.get('same_round_anatomy', {})
+    geometry = proof.get('anatomy_geometry', {})
+    check(proof.get('original_recon_report') == original and proof.get('original_reconstruction_failure') == report.get('error') and
+          geometry.get('status') == 'actual_images_surfaces_annotations_read' and
+          valid.get('anatomy_subject_dir') == str(subject) and valid.get('anatomy') == report['anatomy'],
+          'selected anatomy is not the actual original official-success reconstruction')
+    return geometry
+
+
+def validate_run(root, case, version, manifest_case, touched, *, validation_path=None, validation_origin=None):
     """Verify an actual official raw-T1 run; no license contents are read."""
     job = Path(root) / version / case
     report, identity = read_record(job / 'recon_report.json', touched)
@@ -170,16 +197,21 @@ def validate_run(root, case, version, manifest_case, touched, *, validation_path
               'baseline is not the known official-success validation failure')
         path = Path(validation_path) if validation_path else job / 'recon_report.revalidated.json'
         valid, validation_identity = read_record(path, touched)
-        check(valid['status'] == 'completed' and valid['action'] in ('revalidate_official_anatomy', 'bind_same_round_official_anatomy') and
+        if validation_origin is not None:
+            validate_recovery_anatomy(valid, validation_origin, path, identity, manifest_case, subject, report, touched)
+            validation_status = 'actual_same_round_anatomy_binding_verified'
+        else:
+            check(valid['status'] == 'completed' and valid['action'] in ('revalidate_official_anatomy', 'bind_same_round_official_anatomy') and
               valid['case_id'] == case and valid['version'] == version and
               valid['original_report'] == identity and valid.get('raw_t1_sha256_after', t1['sha256']) == t1['sha256'] and
               valid['recon_all_rerun'] is False and valid['anatomy'] == report['anatomy'] and bool(valid['anatomy_geometry']),
               'baseline independent real revalidation is invalid')
-        for key in ('input_verification', 'input_verification_after'):
-            verified = valid[key]
-            check(len(verified) == len(manifest_case['input_files']) and all(
+            for key in ('input_verification', 'input_verification_after'):
+                verified = valid[key]
+                check(len(verified) == len(manifest_case['input_files']) and all(
                 a['path'] == b['path'] and a['kind'] == b['kind'] and a['sha256'] == b['sha256'] and a['actual_sha256'] == b['sha256']
                 for a,b in zip(verified,manifest_case['input_files'])), 'revalidation input ledger differs from actual raw run')
+            validation_status = valid['status']
     else:
         check(report['status'] == 'completed' and report['raw_t1_sha256_after'] == t1['sha256'] and bool(report['anatomy_geometry']),
               'candidate official reconstruction did not complete actual validation')
@@ -188,6 +220,7 @@ def validate_run(root, case, version, manifest_case, touched, *, validation_path
               valid['candidate_source'] == 'unknown' and valid['gpu_started'] is False and valid['recon_all_reused'] is False and
               valid['reconstruction_report'] == identity and valid['reconstruction_result'] == report,
               'candidate original preparation report is incomplete or reused')
+        validation_status = valid['status']
     for relative, record in report['anatomy'].items():
         path = subject / relative
         check(not Path(relative).is_absolute() and '..' not in Path(relative).parts and
@@ -199,7 +232,7 @@ def validate_run(root, case, version, manifest_case, touched, *, validation_path
     record = {'reconstruction_report': identity, 'validation_report': validation_identity,
               'original_report_status': report['status'], 'official_exit_code': report['exit_code'],
               'baseline_original_failure': report.get('error'),
-              'actual_validation_status': valid['status'], 'subject_directory': str(subject),
+              'actual_validation_status': validation_status, 'subject_directory': str(subject),
               'raw_T1': t1, 'command': cmd, 'cpu_threads': report['cpu_threads'],
               'official_version': report['freesurfer_version'], 'official_host': report['identity'],
               'official_executable_sha256': report['executable_sha256'], 'setup_script_sha256': report['setup_script_sha256'],
@@ -357,10 +390,10 @@ def compare_subjects(left, right, touched=None):
             "GPU_used": False, "original_namespaces_modified": False}
 
 
-def compare_fresh_case(case, baseline_root, candidate_root, *, baseline_validation_path=None):
+def compare_fresh_case(case, baseline_root, candidate_root, *, baseline_validation_path=None, baseline_validation_origin=None):
     touched = {}
     left, baseline = validate_run(baseline_root, case["case_id"], "baseline", case, touched,
-                                  validation_path=baseline_validation_path)
+                                  validation_path=baseline_validation_path, validation_origin=baseline_validation_origin)
     right, candidate = validate_run(candidate_root, case["case_id"], "candidate", case, touched)
     check(baseline["raw_T1"] == candidate["raw_T1"] and baseline["official_version"] == candidate["official_version"] and
           baseline["official_executable_sha256"] == candidate["official_executable_sha256"] and

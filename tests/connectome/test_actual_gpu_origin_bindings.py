@@ -231,6 +231,12 @@ class ActualOriginTests(unittest.TestCase):
         self.assertEqual(mapping["candidate", "sub-00"]["original_GPU"]["worker_wall_seconds"], 8.)
         self.assertIsNone(mapping["candidate", "sub-00"]["original_wall"])
 
+    def test_actual_queue_stop_driver_failed_gpu_execution_is_explicit(self):
+        self.queued_stop(); path = Path(self.declaration["original"]["driver_snapshot"]["path"])
+        state = json.loads(path.read_text()); state["cases"]["candidate/sub-00"]["status"] = "failed_gpu_execution"
+        self.write(path, state); self.declaration["original"]["driver_snapshot"] = self.identity(path)
+        mapping, _ = self.load(); self.assertEqual(mapping["candidate", "sub-00"]["original_GPU"]["error"], self.stopped_GPU["error"])
+
     def test_queue_stop_other_error_or_actual_science_start_refused(self):
         self.queued_stop(); path = Path(self.declaration["original"]["GPU_report"]["path"])
         for update in ({"error": {"type": "RuntimeError", "message": "other failure"}}, {"command": ["actual-CLI-was-started"]}):

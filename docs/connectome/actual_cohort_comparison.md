@@ -187,7 +187,7 @@ print(result["completed_pairs"])  # 只有实际十例齐全时返回 10
 
 ```bash
 plot_python=/shared/cpu-plot-python/bin/python
-export_helper="$benchmark_root/formal_actual_comparison_helper_v7/tools/reference"
+export_helper="$benchmark_root/formal_actual_comparison_helper_v8/tools/reference"
 "$plot_python" "$export_helper/export_connectome_actual_cohort.py" \
   --comparison-root "$benchmark_root/root_actual_cohort_comparison_v2" \
   --summary-root "$benchmark_root/root_actual_cohort_summary_v2" \
@@ -255,8 +255,14 @@ export_helper="$benchmark_root/formal_actual_comparison_helper_v7/tools/referenc
 
 新运行必须使用同一冻结 FNIT source、原输入 SHA、同轮真实 FS、atlas、seed、科学 CLI、线程、allocator 和共享 lock。允许明确的独立监控 venv；其原/新 Python 实际二进制、torch 与 NumPy C 扩展、nibabel 的文件路径/版本/SHA 必须一致，预检不初始化 CUDA。新的实际监测必须为直接 `pynvml`、无监测错误且 allocated/reserved/process-tree 三项均 `<20e9`。原 wall helper bytes 保持相同。新环境和等待间隔另列；不会用新的监测计时宣称与旧监测环境存在稳定整链加速。
 
+原 baseline 未派发 GPU 的病例，从显式新 baseline 目录读取实际生成的 `recovery_binding.json`。其 `same_round_anatomy` 必须绑定原 raw-T1 `recon_report.json` 的路径和 SHA、真实重读的解剖 geometry、同一 fresh FS 目录，以及原配置和 terminal driver 的原字节 SHA。仍核对完整输入 SHA、官方 exit 0 并实际读取比较 13 项解剖；不会搜索未声明的其他目录，也不会自行生成校验报告。
+
+选例恢复 worker 的实际 `recovery_origins.json` 还保留 `science_worker`、`recovery_worker` 和 `resources_manifest` 三个路径/SHA；`replacement.root` 是病例 job 目录，`driver_status` 是原字节路径/SHA。读取端核对实际配置中的 `run_root/arm/case_id` 后解析到该病例，保留原声明。只有 selected controller 真正结束且全部声明对应成功 worker，才冻结这份映射。`response.new_config/gpu_result/binding/eligibility` 分别与实际配置、GPU 报告、恢复证明、资格文件一致；新配置仅允许改 namespace、监控解释器、停止派发路径及资源清单，非监控资源记录不变。选例 driver 的 `full_ten_complete=False` 保留；十例完成由本只读比较器独立核验。
+
+恢复计时只记录真实 `recovery_head_wall_seconds`、GPU worker/command/queue 和 CLI 时间。head 的单次 monotonic 时间包含 SSH 和恢复校验，独立于原官方 FS 时间；不跨节点相减，不合成连续 cold pipeline 总时间。GPU 节点内核对 CLI≤command≤worker、queue≤worker，原 failed worker/queue 记录仍单列。
+
 ```bash
-recovery_helper="$benchmark_root/formal_actual_comparison_helper_v7/tools/reference"
+recovery_helper="$benchmark_root/formal_actual_comparison_helper_v8/tools/reference"
 # 以下为新运行实际就绪后的调用示例；当前尚未据此启动新比较。
 "$benchmark_python" "$recovery_helper/benchmark_connectome_cohort_compare.py" \
   --manifest "$benchmark_root/formal_baseline_raw_v2/input_manifest.json" \
@@ -358,6 +364,7 @@ CON04 原预算不合格的实际科学输出另做完整 CPU 读取：32 矩阵
 - 汇总观察 v1 / helper v3：首次真实读取因 FS identity 的额外科学状态字段使过严字典比较退出，原失败保存；科学比较 v2 的首对结果未改变。
 - 汇总工具 / helper v4：身份核验按原 path+SHA，另核对实际科学状态字段。比较/汇总共 75 项 headcw CPU 测试全部通过，0.549 s；包含 missing→null、错误报告拒绝、164/166 病例维度、源码标签与 fingerprint 区分等守卫。测试 fixture 不是 MRI benchmark。
 - 只读 helper v7：增加明确的三类原 GPU 来源、新监控环境字节守卫、最终十例完成/终止状态守卫、实际执行顺序/显存表和 CPU 真图输入读取。116 项 headcw CPU 测试全部通过，3.069 s、无跳过；实际 NVML preflight 与 CON01/03 两 arm 的保存 FA/atlas/矩阵读取通过，36/1 个 NaN 保留。原两个失败观察器、源码和输出均未修改；没有启动新比较或最终渲染。来源与测试快照见 [`actual_cohort_reader_v7_protocol.json`](../../validation/connectome/tenraw_20261002/actual_cohort_reader_v7_protocol.json)。
+- 只读 helper v8：适配实际选例恢复 worker 的 job/config/driver/resource 绑定和 nested response，明确原 driver 与其原字节副本可有不同路径；CON11 只从声明的新 `recovery_binding.json` 核对原 FS 和真实重读证明。138 项 headcw CPU 测试全部通过，5.479 s、无跳过；两例真实图像输入再次读取通过，未生成最终图。原 terminal driver 和 CON05 queued STOP 的真实 failed 报告均保留，新选例运行及十例完整比较仍待实际完成。来源见 [`actual_cohort_reader_v8_protocol.json`](../../validation/connectome/tenraw_20261002/actual_cohort_reader_v8_protocol.json)。
 
 ## 7. 原实现与参考
 
