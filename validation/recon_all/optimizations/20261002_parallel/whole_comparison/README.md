@@ -109,6 +109,30 @@ driver自己取得共同锁，启动命令不要再外包同文件flock，以免
 
 ## 更新记录与引用
 
+### 完成后回收原始报告
+
+`../collect_completed_comparison.py`复用已有SSH/SCP连接脚本，先核对两例比较
+确实完成，再逐文件收集JSON、CSV、日志和已核实许可的PNG脑图。输出目录必须
+不存在；不复制MRI、表面、模型或许可证。收集前后在远端分别计算SHA-256，
+本地逐字节核对；报告在收集中变化或哈希不符时抛异常，不覆盖已有目录。
+数值单位与坐标空间沿用原报告，收集器不计算或修改影像指标。
+
+```bash
+# 下列连接脚本需复用已认证ControlMaster；本命令不新建服务器登录。
+python validation/recon_all/optimizations/20261002_parallel/collect_completed_comparison.py \
+  --remote-root /data/benchmark/whole_comparison_8d750e2_v2 \
+  --output validation/recon_all/optimizations/20261002_parallel/whole_comparison/results_v2 \
+  --ssh-wrapper /path/to/ssh_gpucw1.sh \
+  --scp-wrapper /path/to/scp_gpucw1.sh
+```
+
+四个具名参数均必需：`remote-root`为已完成的远端比较目录；`output`为新本地
+目录；`ssh-wrapper`接受一条远端命令；`scp-wrapper`接受来源与目标路径，目标
+主机固定为本轮已授权的`gpucw1`。返回stdout计数，同时在输出目录旁写
+`collected_comparison_v2.json`，包含原路径、每文件大小/SHA、收集器SHA和时间。
+这是元数据回收工具，没有对应的官方软件命令或独立影像计算API；实际完成
+情况以收集收据为准。
+
 - 2026-10-02：新增三方整例driver；保留138项诊断，补显式空间/索引门控和成熟no-th3派生比较，复用质量与脑图工具；正式比较尚未执行。
 - 同日编排回归：7项标准库控制测试覆盖锁互斥、失败记录、一次interop配置、失败completion、源码变化、partial质量及精确数组缓存；无MRI或GPU计算。重复数组距离缓存只改变比较driver耗时，不作为生产提速结果。
 - 同日诊断复审：register scope纳入基线avg_curv，与实际worker一致；显存缺测/零记录不判预算通过，allocator分量峰值与同期进程树峰值分列；补监督失败归档、冻结安装入口断言和报告SHA。新监督检查须由新版进程执行，旧进程不会自动加载。正式候选结果仍以实际completion为准。
