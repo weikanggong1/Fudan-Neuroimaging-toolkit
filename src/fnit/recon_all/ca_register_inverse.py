@@ -108,9 +108,16 @@ def _splat_counts(node_coordinates: np.ndarray, width: int, height: int, depth: 
     for z in range(node_coordinates.shape[2]):
         for y in range(node_coordinates.shape[1]):
             for x in range(node_coordinates.shape[0]):
-                xf = min(max(float(node_coordinates[x, y, z, 0]), 0.0), width - 1.0)
-                yf = min(max(float(node_coordinates[x, y, z, 1]), 0.0), height - 1.0)
-                zf = min(max(float(node_coordinates[x, y, z, 2]), 0.0), depth - 1.0)
+                # GCAMinvert clips only outside [0,size), then the native
+                # MRIinterpolateIntoVolume rejects by MRIindexNotInVolume/rint.
+                xf = max(float(node_coordinates[x, y, z, 0]), 0.0)
+                yf = max(float(node_coordinates[x, y, z, 1]), 0.0)
+                zf = max(float(node_coordinates[x, y, z, 2]), 0.0)
+                if xf >= width: xf = width - 1.0
+                if yf >= height: yf = height - 1.0
+                if zf >= depth: zf = depth - 1.0
+                if np.rint(xf) >= width or np.rint(yf) >= height or np.rint(zf) >= depth:
+                    continue
                 xm, ym, zm = int(xf), int(yf), int(zf)
                 xp, yp, zp = min(xm + 1, width - 1), min(ym + 1, height - 1), min(zm + 1, depth - 1)
                 xmd, ymd, zmd = xf - xm, yf - ym, zf - zm
@@ -140,9 +147,16 @@ def _splat_coordinate_sums(positions: np.ndarray, width: int, height: int, depth
     for z in range(positions.shape[2]):
         for y in range(positions.shape[1]):
             for x in range(positions.shape[0]):
-                xf = min(max(float(positions[x, y, z, 0]), 0.0), width - 1.0)
-                yf = min(max(float(positions[x, y, z, 1]), 0.0), height - 1.0)
-                zf = min(max(float(positions[x, y, z, 2]), 0.0), depth - 1.0)
+                # GCAMinvert clips only outside [0,size), then the native
+                # MRIinterpolateIntoVolume rejects by MRIindexNotInVolume/rint.
+                xf = max(float(positions[x, y, z, 0]), 0.0)
+                yf = max(float(positions[x, y, z, 1]), 0.0)
+                zf = max(float(positions[x, y, z, 2]), 0.0)
+                if xf >= width: xf = width - 1.0
+                if yf >= height: yf = height - 1.0
+                if zf >= depth: zf = depth - 1.0
+                if np.rint(xf) >= width or np.rint(yf) >= height or np.rint(zf) >= depth:
+                    continue
                 xm, ym, zm = int(xf), int(yf), int(zf)
                 xp, yp, zp = min(xm + 1, width - 1), min(ym + 1, height - 1), min(zm + 1, depth - 1)
                 xmd, ymd, zmd = xf - xm, yf - ym, zf - zm

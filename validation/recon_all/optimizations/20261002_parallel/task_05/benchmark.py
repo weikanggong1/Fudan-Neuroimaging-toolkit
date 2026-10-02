@@ -78,7 +78,7 @@ def main():
       'threads':4,'torch':torch.__version__,'dtype':'FP32 fields; FP64 native matrix accumulation and stop tests',
       'tf32_matmul':torch.backends.cuda.matmul.allow_tf32,'tf32_cudnn':torch.backends.cudnn.allow_tf32,
       'pid':os.getpid(),'cpu_load_before':os.getloadavg(),'cases':{},
-      'source_sha256':{f.name:sha(f) for f in Path(__file__).resolve().parents[5].joinpath('src/fnit/recon_all').glob('mni_warp*.py')}}
+      'source_sha256':{f.name:sha(f) for f in Path(__file__).resolve().parents[5].joinpath('src/fnit/recon_all').glob('*.py') if f.name.startswith('mni_warp') or f.name in ('ca_register_inverse.py','ca_register_inverse_fill.py','ca_register_inverse_output.py')}}
     for case in cfg['cases']:
         ident=case['id'];subject=Path(case['subject']);mri=subject/'mri'
         transform=mri/'transforms/synthmorph.1.0mm.1.0mm';tmp=transform/'tmp'

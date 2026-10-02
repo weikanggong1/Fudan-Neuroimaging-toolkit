@@ -94,6 +94,10 @@ mri_convert -rt nearest orig.mgz -at forward.nii.gz test.nii.gz
 
 外置权重/模板继续走项目现有 manifest、来源和许可路线。安装前核查固定 Release 清单；无法确认再分发权的模板仍用项目原作者来源。专项报告只保存哈希与数值，不发布影像、模板、权重或许可证。
 
+## 成熟子函数的兼容修复
+
+本轮核对固定源码后修正 `ca_register_inverse.py` 的最后半个体素边界：原实现过早夹到 `size-1`，漏掉 `MRIindexNotInVolume` 的 `rint` 拒绝步骤；原生只在坐标达到 `size` 后夹取。修复 counts 和三个坐标 sums 的相同判断，保留公共接口和有序累加。专项单元测试涵盖最后半体素、半整数奇偶边界及真正越界后的夹取；真实两例上新旧散射的差异另记于报告。该文件是本任务唯一必要的既有逆场兼容修改。
+
 ## 当前版本、真实 benchmark 与验证
 
 最新专项证据见 [任务 5 报告](../../validation/recon_all/optimizations/20261002_parallel/task_05/README.md)。必须先通过同输入回归再接入生产；这份接口不把旧 188–196 秒总阶段估计改标为新结果。两个完整原始 T1 整例与 138 项严格诊断由协调者执行。

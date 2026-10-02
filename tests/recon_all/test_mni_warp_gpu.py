@@ -72,3 +72,13 @@ def test_native_nearest_promotes_half_addition_and_matches_border_rint():
     assert valid.tolist()==[True,True,True]
     idx,valid=_native_nearest_plan(q,(3,2,2))
     assert idx[0][2].item()==2 and valid[2].item()
+
+
+def test_native_splat_preserves_last_half_voxel_rejection():
+    from fnit.recon_all.ca_register_inverse import splat_inverse_counts, splat_inverse_coordinate_sums
+    for x,expected in [(2.49,1.),(2.5,1.),(2.51,0.),(3.1,1.)]:
+        positions=np.array([[[[x,1.,1.]]]],np.float32)
+        counts=splat_inverse_counts(positions,(3,3,3))
+        assert float(counts.sum())==expected
+        sums=splat_inverse_coordinate_sums(positions,(3,3,3))
+        assert all(not item.any() for item in sums)  # node coordinates are zero
