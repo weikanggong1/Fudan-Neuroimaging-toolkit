@@ -228,6 +228,8 @@ def parser_for_cli():
                             ("output-dir", "尚不存在的私有输出目录")):
         parser.add_argument("--" + flag, type=Path, required=True, help=help_text)
     parser.add_argument("--baseline-corrected", type=Path, help="可选：完整冻结 MCFLIRT 重采样影像")
+    parser.add_argument("--baseline-memory-matrices", type=Path, help="可选：冻结未舍入 float64 N×4×4 .npy；与 memory-parameters 同时提供")
+    parser.add_argument("--baseline-memory-parameters", type=Path, help="可选：冻结未舍入 float64 N×6 .npy")
     parser.add_argument("--baseline-kind", choices=("frozen_fnit", "native_mcflirt"), default="frozen_fnit",
                         help="基线来源；默认是冻结 FNIT，不能据此声称与原 FSL 比较")
     parser.add_argument("--baseline-source-revision", default=None, help="可选：冻结 FNIT 的 Git revision")
@@ -245,6 +247,8 @@ def parser_for_cli():
 def main(argv=None):
     parser = parser_for_cli()
     args = parser.parse_args(argv)
+    if bool(args.baseline_memory_matrices) != bool(args.baseline_memory_parameters):
+        parser.error("both baseline memory arrays are required together")
     if args.threads < 1 or (args.frames is not None and args.frames < 2):
         parser.error("threads must be positive and frames must be at least 2")
     for revision in (args.source_revision, args.baseline_source_revision):
@@ -388,6 +392,25 @@ def main(argv=None):
         written_parameters - baseline_parameters[:compared_frames])))
     motion_report["written_parameter_text_exact_equal"] = bool(np.array_equal(
         written_parameters, baseline_parameters[:compared_frames]))
+    if args.baseline_memory_matrices is not None:
+        memory_matrices = np.load(args.baseline_memory_matrices, allow_pickle=False)
+        memory_parameters = np.load(args.baseline_memory_parameters, allow_pickle=False)
+        for values, shape in ((memory_matrices, (total_frames, 4, 4)),
+                              (memory_parameters, (total_frames, 6))):
+            if values.dtype != np.dtype(np.float64) or values.shape != shape or not np.isfinite(values).all():
+                parser.error("baseline memory arrays must be finite float64 with full-series shapes")
+        motion_report["unrounded_memory_comparison"] = {
+            "matrices_bitwise_equal": bool(np.array_equal(
+                fit.matrices[:compared_frames].view(np.uint64),
+                memory_matrices[:compared_frames].view(np.uint64))),
+            "parameters_bitwise_equal": bool(np.array_equal(
+                fit.parameters[:compared_frames].view(np.uint64),
+                memory_parameters[:compared_frames].view(np.uint64))),
+            "matrix_max_abs": float(np.max(np.abs(fit.matrices[:compared_frames] - memory_matrices[:compared_frames]))),
+            "parameters_max_abs": float(np.max(np.abs(fit.parameters[:compared_frames] - memory_parameters[:compared_frames]))),
+            "baseline_memory_matrices_sha256": sha256(args.baseline_memory_matrices),
+            "baseline_memory_parameters_sha256": sha256(args.baseline_memory_parameters),
+        }
     report = {"subjects": 1, "real_input_frames": total_frames, "candidate_frames": frames,
               "full_series": full_series, "source_revision": args.source_revision,
               "baseline_kind": args.baseline_kind, "baseline_source_revision": args.baseline_source_revision,
