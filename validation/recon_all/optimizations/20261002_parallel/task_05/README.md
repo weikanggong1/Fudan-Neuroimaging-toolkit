@@ -22,9 +22,9 @@
 
 两例几何、dtype、intent、单位一致。输出描述及 gzip 元数据不同，文件 SHA 不相等；数值严格一致与文件严格一致分别评价。sub01 前向数值严格复现未通过，不能用预先声明的 1e-4 mm 排错范围替代零差异严格门槛。检查图使用相同冻结 forward，该结果不代表候选前向场产生的检查图已经验证。
 
-[显存监测](operators_v4_monitor.json)：命令全程 27.445750 s，同次查询合计父子进程采样峰值 754,974,720 字节（0.755 GB / 0.703 GiB），76 次样本，失败 0，请求间隔 0.25 s、最大间隔 1.450328 s。采样不能证明连续峰值上界；尚不能用于完整模型阶段显存预算结论。外部 GPU 负载见服务器 `gpu_samples.csv`，待同步归档。allocator 禁用时 Torch allocated/reserved 标为 unavailable，不以零冒充零显存。
+[显存监测](operators_v4_monitor.json)：命令全程 27.445750 s，同次查询合计父子进程采样峰值 754,974,720 字节（0.755 GB / 0.703 GiB），76 次样本，失败 0，请求间隔 0.25 s、最大间隔 1.450328 s。采样不能证明连续峰值上界；尚不能用于完整模型阶段显存预算结论。[逐次显存与全 GPU 负载](operators_v4_gpu_samples.csv)已同步归档；全 GPU 与进程树分别查询，不能当作同一时刻的连续峰值。allocator 禁用时 Torch allocated/reserved 标为 unavailable，不以零冒充零显存。
 
-CUDA 完整中心/边缘控制点单元回归与成熟 CPU 参考逐元素一致、完整迭代数相同，v3/v4 各 5 项通过。v8 CPU 公共 API 回归 12 项通过、2 CUDA 项未执行；覆盖 native nearest/rint、最后半体素散射、错误 affine、MGZ 大端、向量编码、spacing、多帧拒绝。小网格只属于单元测试，不替代真实 benchmark。
+CUDA 完整中心/边缘控制点单元回归与成熟 CPU 参考逐元素一致、完整迭代数相同，v3/v4 各 5 项通过。[v8 CPU 日志](cpu_v8.log)：公共 API 回归 12 项通过、2 CUDA 项未执行；覆盖 native nearest/rint、最后半体素散射、错误 affine、MGZ 大端、向量编码、spacing、多帧拒绝。小网格只属于单元测试，不替代真实 benchmark。
 
 ## 待执行与门槛
 
