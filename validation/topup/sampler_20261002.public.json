@@ -1,0 +1,435 @@
+{
+  "schema_version": 1,
+  "subjects": 1,
+  "scope": "real full-resolution b0 image coefficient sampling at fixed official field/motion coordinates; no fitting",
+  "timing_scope": "warm sampler calls with identical resident float32 inputs; allocations, Python launches, CUDA work and final synchronization; excludes input IO, regrid, prefilter, geometry, JIT warmup and JSON write",
+  "event_scope": "CUDA stream interval including gaps between tensor-oracle kernel launches; not exclusive summed kernel time",
+  "memory_scope": "per-call PyTorch allocator peak, including fixed resident inputs and allocator reserve; excludes CUDA context/other processes; Triton allocations follow its runtime",
+  "oracle_scope": "independent test _official_reference double z/y/x expression; not a FSL executable performance baseline",
+  "preparation_seconds": 1.2476018485613167,
+  "preparation_scope": "input read/decode, fixed official field/motion, default regrid with maximum subsampling 2, source-grid prefilter and one target-grid state render including CUDA sampler compilation; no optimization",
+  "input_sha256": {
+    "b0_pair": "f701b4ef97e39f3e821030d8c630f575a1410ec380627f26f11312005968c774",
+    "acquisition": "328fc80e6b9c6c78191d6b59a124c0265360987d0b0548361f68e161e0fa86e5",
+    "official_fieldcoef": "4a14d9a561eb19e93e412efb187ed837abd31280fdf44e9466ee1e32ced69b7b",
+    "official_movpar": "ecbd4f3bd56681b86b49e4b984347de1b2d7a0508d9ffe6dde304c54939402e6"
+  },
+  "source_sha256": {
+    "fnit/topup/core.py": "d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8",
+    "fnit/topup/_sampling_cuda.py": "ee19a764849bda80137312ed3ab8f1bf0aaef5e13f852f49f435e511b40d2427",
+    "independent_oracle_file": "fc5dd0a8c80d03125ec3ffd1dc5d8c32f3d3911dc8550021f70b2b4d35db25f0",
+    "independent_oracle_function": "f44929cfe1fd7ffa3e91339781ec738e24195389852fd2a0d3052a1d062897ac",
+    "benchmark_script": "816ba0c77a7cf34974cf58e2eb3c6078ca0f1dac900abf2f361c1188180dce44"
+  },
+  "versions": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "triton": "3.1.0",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2"
+  },
+  "device": {
+    "name": "NVIDIA H100 PCIe",
+    "total_memory_bytes": 84942979072
+  },
+  "threads": 8,
+  "warmup_per_method": 2,
+  "abba_blocks": 2,
+  "memory_limit_bytes": 20000000000,
+  "tf32_allowed": true,
+  "low_precision": false,
+  "inputs": {
+    "input_shape": [
+      104,
+      104,
+      72,
+      2
+    ],
+    "full_grid_shape": [
+      104,
+      104,
+      72
+    ],
+    "voxel_sizes_mm": [
+      2.019230842590332,
+      2.019230842590332,
+      1.9999994039535522
+    ],
+    "phase_encode_axis": 1,
+    "source_grid_shape": [
+      106,
+      106,
+      74
+    ],
+    "source_voxel_sizes_mm": [
+      1.9620827436447144,
+      1.9620827436447144,
+      1.918918251991272
+    ],
+    "regrid": true,
+    "maximum_subsampling": 2,
+    "canonical_x_flip": false,
+    "field_knot_spacing_voxels": [
+      2,
+      2,
+      2
+    ],
+    "image_intensity_normalization": "each real b0 volume to full-FOV mean 100; float32 scaling",
+    "coordinate_rule": "official fixed fieldcoef/movpar, matched _TOPUPLevel.state, full resolution",
+    "coordinate_dtype": "float32",
+    "image_coefficient_dtype": "float32",
+    "coordinates_sha256": [
+      "0034f0cbdebbf45559e6cdc40c87b3f94a153fb78beafb9605b18f633f8eb8e5",
+      "51f4536f2ae5a8de3c43478a9cc99d666e1d55f53b6b2425825a45660aa704e8"
+    ],
+    "image_coefficients_sha256": [
+      "8d5936ea87ff8988c3b0958eec9853f4122294d1bd134d2880cf4dbb8424da3f",
+      "6990f091ffbd6e4c10439c33d0b05a049b7396859af243f5fbfa8d53f7469f1b"
+    ]
+  },
+  "scans": [
+    {
+      "scan_index": 0,
+      "accuracy": {
+        "valid_exact": true,
+        "reference_valid_voxels": 760552,
+        "candidate_valid_voxels": 760552,
+        "values_all_voxels": {
+          "elements": 778752,
+          "compared": true,
+          "exact": true,
+          "different_elements": 0,
+          "finite": true,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_absdiff": 0.0
+        },
+        "values_reference_valid": {
+          "elements": 760552,
+          "compared": true,
+          "exact": true,
+          "different_elements": 0,
+          "finite": true,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_absdiff": 0.0
+        },
+        "derivatives_all_voxels": [
+          {
+            "elements": 778752,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          },
+          {
+            "elements": 778752,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          },
+          {
+            "elements": 778752,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          }
+        ],
+        "derivatives_reference_valid": [
+          {
+            "elements": 760552,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          },
+          {
+            "elements": 760552,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          },
+          {
+            "elements": 760552,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          }
+        ]
+      },
+      "timings": {
+        "double_tensor_oracle": [
+          {
+            "wall_seconds": 0.01946454495191574,
+            "cuda_event_seconds": 0.019355775833129883,
+            "peak_allocated_bytes": 518513664,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 0,
+            "position": 0
+          },
+          {
+            "wall_seconds": 0.01932623190805316,
+            "cuda_event_seconds": 0.019303552627563475,
+            "peak_allocated_bytes": 518513664,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 0,
+            "position": 3
+          },
+          {
+            "wall_seconds": 0.019306295085698366,
+            "cuda_event_seconds": 0.019281503677368163,
+            "peak_allocated_bytes": 518513664,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 1,
+            "position": 0
+          },
+          {
+            "wall_seconds": 0.019325254950672388,
+            "cuda_event_seconds": 0.01930179214477539,
+            "peak_allocated_bytes": 518513664,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 1,
+            "position": 3
+          }
+        ],
+        "fused_official_cuda": [
+          {
+            "wall_seconds": 0.000251558143645525,
+            "cuda_event_seconds": 0.00022646400332450867,
+            "peak_allocated_bytes": 72135168,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 0,
+            "position": 1
+          },
+          {
+            "wall_seconds": 0.0001944839023053646,
+            "cuda_event_seconds": 0.00017535999417304991,
+            "peak_allocated_bytes": 72135168,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 0,
+            "position": 2
+          },
+          {
+            "wall_seconds": 0.0002397908829152584,
+            "cuda_event_seconds": 0.00021747200191020967,
+            "peak_allocated_bytes": 72135168,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 1,
+            "position": 1
+          },
+          {
+            "wall_seconds": 0.0001902361400425434,
+            "cuda_event_seconds": 0.00017231999337673188,
+            "peak_allocated_bytes": 72135168,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 1,
+            "position": 2
+          }
+        ]
+      },
+      "wall_medians_seconds": {
+        "double_tensor_oracle": 0.019325743429362774,
+        "fused_official_cuda": 0.0002171373926103115
+      },
+      "observed_tensor_to_fused_time_ratio": 89.00237401324043
+    },
+    {
+      "scan_index": 1,
+      "accuracy": {
+        "valid_exact": true,
+        "reference_valid_voxels": 746020,
+        "candidate_valid_voxels": 746020,
+        "values_all_voxels": {
+          "elements": 778752,
+          "compared": true,
+          "exact": true,
+          "different_elements": 0,
+          "finite": true,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_absdiff": 0.0
+        },
+        "values_reference_valid": {
+          "elements": 746020,
+          "compared": true,
+          "exact": true,
+          "different_elements": 0,
+          "finite": true,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_absdiff": 0.0
+        },
+        "derivatives_all_voxels": [
+          {
+            "elements": 778752,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          },
+          {
+            "elements": 778752,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          },
+          {
+            "elements": 778752,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          }
+        ],
+        "derivatives_reference_valid": [
+          {
+            "elements": 746020,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          },
+          {
+            "elements": 746020,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          },
+          {
+            "elements": 746020,
+            "compared": true,
+            "exact": true,
+            "different_elements": 0,
+            "finite": true,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "max_absdiff": 0.0
+          }
+        ]
+      },
+      "timings": {
+        "double_tensor_oracle": [
+          {
+            "wall_seconds": 0.019318456295877695,
+            "cuda_event_seconds": 0.01927631950378418,
+            "peak_allocated_bytes": 518513664,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 0,
+            "position": 0
+          },
+          {
+            "wall_seconds": 0.01935106422752142,
+            "cuda_event_seconds": 0.01933075141906738,
+            "peak_allocated_bytes": 518513664,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 0,
+            "position": 3
+          },
+          {
+            "wall_seconds": 0.01931227883324027,
+            "cuda_event_seconds": 0.019290016174316405,
+            "peak_allocated_bytes": 518513664,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 1,
+            "position": 0
+          },
+          {
+            "wall_seconds": 0.019336516968905926,
+            "cuda_event_seconds": 0.019314943313598634,
+            "peak_allocated_bytes": 518513664,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 1,
+            "position": 3
+          }
+        ],
+        "fused_official_cuda": [
+          {
+            "wall_seconds": 0.00022938894107937813,
+            "cuda_event_seconds": 0.00020710399746894835,
+            "peak_allocated_bytes": 72135168,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 0,
+            "position": 1
+          },
+          {
+            "wall_seconds": 0.00019588693976402283,
+            "cuda_event_seconds": 0.00017734399437904357,
+            "peak_allocated_bytes": 72135168,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 0,
+            "position": 2
+          },
+          {
+            "wall_seconds": 0.00022606784477829933,
+            "cuda_event_seconds": 0.00020559999346733094,
+            "peak_allocated_bytes": 72135168,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 1,
+            "position": 1
+          },
+          {
+            "wall_seconds": 0.00019851187244057655,
+            "cuda_event_seconds": 0.0001796479970216751,
+            "peak_allocated_bytes": 72135168,
+            "peak_reserved_bytes": 562036736,
+            "abba_block": 1,
+            "position": 2
+          }
+        ]
+      },
+      "wall_medians_seconds": {
+        "double_tensor_oracle": 0.01932748663239181,
+        "fused_official_cuda": 0.00021228985860943794
+      },
+      "observed_tensor_to_fused_time_ratio": 91.04291066465741
+    }
+  ],
+  "external_process": {
+    "wall_seconds": 4.61,
+    "includes": "Python startup, imports, CUDA initialization, reading, calculation, NIfTI output, accuracy statistics and JSON write",
+    "peak_rss_kib": 756644,
+    "exit_code": 0,
+    "cpu_affinity": "8-15",
+    "gpu_own_timed_jobs_overlap": false,
+    "reference_cpu_registration_on_disjoint_cores": true
+  }
+}

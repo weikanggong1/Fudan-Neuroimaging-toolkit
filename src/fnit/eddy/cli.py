@@ -9,6 +9,7 @@ def _arguments(parser):
     parser.add_argument("--raw-dir")
     parser.add_argument("--topup-dir")
     parser.add_argument("--output-dir")
+    parser.add_argument("--synthstrip-weights", help="UKB mode: standard synthstrip.1.pt file/directory; default FNIT local resolver")
     parser.add_argument("--imain")
     parser.add_argument("--mask")
     parser.add_argument("--acqp")
@@ -17,7 +18,8 @@ def _arguments(parser):
     parser.add_argument("--bvals")
     parser.add_argument("--topup")
     parser.add_argument("--out")
-    parser.add_argument("--ref-scan-no", type=int, default=0)
+    parser.add_argument("--ref-scan-no", type=int,
+                        help="0-based reference volume; default direct mode 0, UKB mode automatic b0 selection")
     parser.add_argument("--gp-seed", type=int)
     parser.add_argument("--device")
     parser.add_argument("--overwrite", action="store_true")
@@ -33,6 +35,9 @@ def run(args):
             args.output_dir,
             device=args.device,
             overwrite=args.overwrite,
+            synthstrip_weights=args.synthstrip_weights,
+            ref_scan_no=args.ref_scan_no,
+            gp_seed=args.gp_seed,
         )
     else:
         required = (
@@ -57,7 +62,7 @@ def run(args):
             args.bvals,
             topup=args.topup,
             out=args.out,
-            ref_scan_no=args.ref_scan_no,
+            ref_scan_no=0 if args.ref_scan_no is None else args.ref_scan_no,
             gp_seed=args.gp_seed,
             overwrite=args.overwrite,
         )
