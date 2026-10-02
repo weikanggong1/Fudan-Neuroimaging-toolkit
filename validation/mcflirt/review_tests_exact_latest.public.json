@@ -1,0 +1,93 @@
+{
+  "scope": "本轮 MCFLIRT 与 fMRI motion/sampling 合同测试；不作为真实影像 benchmark",
+  "source_revision": "8a3f2276c3e990bb60971ab38b1a93c6d7cb0ba8",
+  "targets": [
+    "tests/mcflirt",
+    "tests/test_fmri_motion_spatial.py",
+    "tests/test_fmri_sampling_reference.py",
+    "tests/test_fmri_single_pass.py"
+  ],
+  "cuda_visible_devices": "0,1",
+  "threads": 8,
+  "counts": {
+    "tests": 74,
+    "passed": 74,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "two_device_tests": {
+    "test_cuda_one_executor_preserves_callers_cuda_zero_device": {
+      "status": "passed",
+      "class_name": "Notebook_code.fnit_mcflirt_exact_20261002.candidate.tests.mcflirt.test_cuda_executor"
+    },
+    "test_explicit_device_restores_other_current_device_and_stream": {
+      "status": "passed",
+      "class_name": "Notebook_code.fnit_mcflirt_exact_20261002.candidate.tests.mcflirt.test_sampling_cuda"
+    }
+  },
+  "both_two_device_tests_passed": true,
+  "source_before": {
+    "files": 1184,
+    "canonical_sha256": "32fcb1bfa513d021341af12b4c231a86fb0af55b73ad767760298a8b92df744c",
+    "expected_canonical_sha256": "32fcb1bfa513d021341af12b4c231a86fb0af55b73ad767760298a8b92df744c",
+    "matches_frozen_git_tree": true,
+    "mismatched_repository_paths": []
+  },
+  "source_after": {
+    "files": 1184,
+    "canonical_sha256": "32fcb1bfa513d021341af12b4c231a86fb0af55b73ad767760298a8b92df744c",
+    "expected_canonical_sha256": "32fcb1bfa513d021341af12b4c231a86fb0af55b73ad767760298a8b92df744c",
+    "matches_frozen_git_tree": true,
+    "mismatched_repository_paths": []
+  },
+  "test_source_before": {
+    "files": 8,
+    "canonical_sha256": "b03ac3de74e9dc6fcd9f447cd33d7f16d4c8085d9e2fbd926a195703eff7d690",
+    "expected_canonical_sha256": "b03ac3de74e9dc6fcd9f447cd33d7f16d4c8085d9e2fbd926a195703eff7d690",
+    "matches_frozen_git_tree": true,
+    "mismatched_repository_paths": []
+  },
+  "test_source_after": {
+    "files": 8,
+    "canonical_sha256": "b03ac3de74e9dc6fcd9f447cd33d7f16d4c8085d9e2fbd926a195703eff7d690",
+    "expected_canonical_sha256": "b03ac3de74e9dc6fcd9f447cd33d7f16d4c8085d9e2fbd926a195703eff7d690",
+    "matches_frozen_git_tree": true,
+    "mismatched_repository_paths": []
+  },
+  "source_and_tests_unchanged": true,
+  "changed_repository_paths": [],
+  "runtime_file_sha256": {
+    "src/fnit/mcflirt/core.py": "2b344c34ecbc96d14a07132f6c5731a87ebe13178ab5fa1452222ed2299bae78",
+    "src/fnit/mcflirt/_cuda_executor.py": "a02430aa2001f13dcf463329dae5aecfb5fbd9064de146c9b2e6c0a8dcbba73b",
+    "src/fnit/mcflirt/_rigid.py": "ea6ca9d4aa6f87d8b353cecdfdd1650a99f4e3dcd558290815a4004935c2158e",
+    "src/fnit/mcflirt/_sampling_cuda.py": "a660736802d68e8e1cd29beeceedf70c5fb6f3062a14ff8e5d37f2d41320cada",
+    "src/fnit/mcflirt/sampling.py": "af10cfd4f42f94adff2bb910eafe40834786a3b7646756a3967d5c9fc3aa0b8f",
+    "src/fnit/flirt/core.py": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+    "src/fnit/fmri/spatial.py": "30588cba481622c057e55472853d6b9acdc0af35247ba7297f8163d87151dda4"
+  },
+  "software": {
+    "python": "3.11.16",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "torch": "2.5.1",
+    "triton": "3.1.0",
+    "torch_cuda": "11.8",
+    "visible_devices": 2,
+    "device_names": [
+      "NVIDIA H100 PCIe",
+      "NVIDIA H100 PCIe"
+    ]
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "exit_code": 0,
+      "initialization_oom": false
+    }
+  ],
+  "test_validation_wall_seconds": 31.460929811932147,
+  "driver_sha256": "7d9a2d6f46b1282f1473f01bc29d724785b5980b1d769f72c01fa6e1de084f53",
+  "accepted": true,
+  "privacy": "原 pytest 日志/XML 留在服务器；JSON 仅含匿名测试计数、源码哈希和软件版本"
+}
