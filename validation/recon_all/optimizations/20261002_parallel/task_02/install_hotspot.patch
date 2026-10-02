@@ -1,6 +1,6 @@
 --- a/tools/build_recon_all_fs_cpp_conda.sh
 +++ b/tools/build_recon_all_fs_cpp_conda.sh
-@@ -131,6 +131,24 @@
+@@ -131,6 +131,27 @@
      exit 1
    fi
  done
@@ -10,6 +10,9 @@
 +  --build "$build_dir" --source "$build_source" \
 +  --output "$output_dir/placement-hotspot-build" \
 +  --ninja "$CONDA_PREFIX/bin/ninja"
++"$output_dir/placement-hotspot-build/candidate/mris_place_surface_fnit_hotspot" \
++  --fnit-placement-capabilities > "$output_dir/mris_place_surface_fnit_hotspot.capabilities.json"
++"$CONDA_PREFIX/bin/python" -c 'import json,sys; c=json.load(open(sys.argv[1])); assert c["schema_version"]==1 and "skip-unconsumed-repulse-face-table" in c["features"] and c["upstream_commit"]=="d932c45b7941662ea380a05efef580568b98d41a"' "$output_dir/mris_place_surface_fnit_hotspot.capabilities.json"
 +install -m 755 "$output_dir/placement-hotspot-build/candidate/mris_place_surface_fnit_hotspot" \
 +  "$output_dir/bin/mris_place_surface_fnit_hotspot"
 +ldd "$output_dir/bin/mris_place_surface_fnit_hotspot" > "$output_dir/mris_place_surface_fnit_hotspot.ldd"

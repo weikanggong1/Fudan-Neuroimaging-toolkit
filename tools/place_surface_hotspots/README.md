@@ -13,13 +13,13 @@ python tools/place_surface_hotspots/build_native.py \
 ```
 
 - `--build`：已完成的 Conda Ninja 完整 FS 构建目录，须有 utils/libutils.a 及 mris_place_surface 链接命令。
-- `--source`：与其匹配的固定源码根，两个相关源文件须严格匹配 builder 内声明 SHA-256。不是任意兼容源码或系统二进制目录。
+- `--source`：与其匹配的固定源码根，六个入口、计算与哈希支持源文件须严格匹配 builder 内声明 SHA-256。不是任意兼容源码或系统二进制目录。
 - `--output`：新的独立目录；必须不存在，不覆盖源目录/共享安装/其他任务产物。
 - `--ninja`：该 Conda 环境中的 Ninja 可执行文件。编译器、参数、库来自已有构建命令，不更换编译器/数值选项。
 
 没有参数默认值。源码偏移、未读参数条件变化、缺编译对象、原构建不匹配、输出已存在、编译/链接失败均立即报错。
 
-输出 `control/` 与 `candidate/` 各含 mris_place_surface_fnit_hotspot、私有patched源、source.patch、对象与libutils.a及build.json。control 保留未改代码；candidate 删除构建。build.json 绑定两份输入源码、原archive、编译器/命令、builder、最终程序hash。patched完整上游源和二进制只留授权构建目录，不提交进FNIT仓库。
+输出 `control/` 与 `candidate/` 各含 mris_place_surface_fnit_hotspot、私有patched源、source.patch、对象与libutils.a及build.json。control 保留未改代码；candidate 删除构建，并增加只读能力查询。build.json 绑定六份输入源码、原archive、编译器/命令、builder、最终程序hash。patched完整上游源和二进制只留授权构建目录，不提交进FNIT仓库。
 
 ## Python调用与产物
 
@@ -46,3 +46,5 @@ final_white_result = run_final_white(
 2026-10-02候选：固定哈希的未消费面哈希构建删除；实测状态见专项报告。没有以旧native_cuda_pilot或20261001时间作为本轮收益，也未补齐完整Python white。
 
 来源：[mrisurf_mri.cpp](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_mri.cpp)、[mrisurf_compute_dxyz.cpp](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_compute_dxyz.cpp)。保留仓库 licenses/FreeSurfer.txt 与 THIRD_PARTY_NOTICES.md 的适用条款。没有复制或发布无关上游代码、许可证或真实影像。
+
+能力查询 `mris_place_surface_fnit_hotspot --fnit-placement-capabilities` 在常规参数解析前返回 JSON，包含 schema_version、program、features、upstream_commit、uses_cuda；退出码为 0。仅对这一精确单参数调用触发，正常 white/pial 调用不改变。安装应检查特性 skip-unconsumed-repulse-face-table 与固定上游提交，不根据文件名判断能力。
