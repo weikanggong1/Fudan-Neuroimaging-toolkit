@@ -91,7 +91,7 @@ track_metrics.npz             # 同顺序weights(float64)、lengths、mean_fa、
 dwi_to_t1_world.csv            # 实际4×4世界变换，17位有效数字
 ```
 
-导出器不长期保留参数或张量，只保存小型路径清单和 affine；原科学返回值不变。NIfTI-1 header本身保存float32几何，组合后的5TT世界affine若需要算子级精确复用，读取`geometry.npz`原始float64矩阵，不能把header舍入当优化引入的误差。原始或校正 DWI、recon-all输入不复制进检查点，报告记录其真实路径/哈希。受控原始影像、个体矩阵、TCK、脑图和私有路径不能随工具提交公开。
+导出器不长期保留参数或张量，只保存小型路径清单和 affine；原科学返回值不变。NIfTI-1 header本身保存float32几何，组合后的5TT世界affine若需要算子级精确复用，读取`geometry.npz`原始float64矩阵，不能把header舍入当优化引入的误差。`tracking_inputs.pt` 另保存实际 tracking 调用的 FOD、5TT、GMWMI、float64 affine、原始 header spacing、解析后的 tracking 参数及可选 FA，支持 `torch.load(weights_only=True)`。它在实际 tracking 返回后写入，导出时间不计入 tracking 阶段，但包含在外层 core 的 inclusive 诊断时间。原始或校正 DWI、recon-all输入不复制进检查点，报告记录其真实路径/哈希。受控或许可不明确的原始影像、个体矩阵、TCK、脑图和私有路径不能随工具提交公开。公开数据的汇总和脑图按其明确许可发布，并注明来源；原始影像仍从数据提供方下载。
 
 ## 3. 命令行
 
