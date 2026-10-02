@@ -5,6 +5,7 @@ requires --execute and an explicit, nonempty (arm, case) selection from root.
 """
 from __future__ import annotations
 import argparse
+import inspect
 import copy
 import hashlib
 import importlib
@@ -295,6 +296,36 @@ def validate_reason(row, old_job, cohort):
             'original_GPU_report':binding(gpu),'original_wall_report':binding(wall)}
 
 
+def build_resources_compat(config, arm, rerun):
+    """Only the two actual frozen signatures are supported."""
+    parameters=inspect.signature(rerun.build_resources).parameters
+    if arm=='baseline' and tuple(parameters)==('config',):
+        return rerun.build_resources(config)
+    if (arm=='candidate' and tuple(parameters)==('config','source_version')
+            and parameters['source_version'].kind==inspect.Parameter.KEYWORD_ONLY):
+        return rerun.build_resources(config,source_version=arm)
+    raise ValueError('unsupported frozen resource helper API; retain guards and fail before science')
+
+
+def matured_worker_compat(cohort, payload, loader, subject_loader, extra_arguments):
+    """Use new callbacks or scoped old anatomy hooks; worker bytes/math unchanged."""
+    parameters=inspect.signature(cohort.worker).parameters
+    callbacks={'anatomy_loader','anatomy_subject','extra_cli_arguments'}
+    if (tuple(parameters)==('payload','anatomy_loader','anatomy_subject','extra_cli_arguments')
+            and all(parameters[name].kind==inspect.Parameter.KEYWORD_ONLY for name in callbacks)):
+        return cohort.worker(payload,anatomy_loader=loader,anatomy_subject=subject_loader,extra_cli_arguments=extra_arguments)
+    if tuple(parameters)!=('payload',) or extra_arguments:
+        raise ValueError('unsupported frozen worker API; cannot drop scientific scheduling arguments')
+    old_loader=cohort.load_recon_for_gpu; old_subject=cohort.gpu_anatomy_subject
+    # Each _worker is a clean single-case process. Only these orchestration
+    # globals are temporarily rebound; original source files stay untouched.
+    try:
+        cohort.load_recon_for_gpu=loader; cohort.gpu_anatomy_subject=subject_loader
+        return cohort.worker(payload)
+    finally:
+        cohort.load_recon_for_gpu=old_loader; cohort.gpu_anatomy_subject=old_subject
+
+
 def worker(payload):
     row, new = payload['selection'], payload['config']
     if sha(__file__) != payload['driver_sha256']: raise ValueError('recovery driver bytes changed')
@@ -309,8 +340,8 @@ def worker(payload):
     recon, subject, proof = anatomy(row,original,case,cohort,rerun,staged)
     for protected in (case['bids_root'],subject):
         if overlaps(new['run_root'],protected): raise ValueError('new raw-DWI output overlaps raw inputs or same-round FS')
-    resources = rerun.build_resources(new,source_version=row['arm'])
     prior_resources=read_bound(original['resources_manifest'])
+    resources = build_resources_compat(new,row['arm'],rerun)
     prior={item['role']+':'+item['path']:item for item in prior_resources['files'] if item['role']!='gpu_python'}
     current={item['role']+':'+item['path']:item for item in resources['files'] if item['role']!='gpu_python'}
     if prior!=current: raise ValueError('non-monitor scientific resource identity changed')
@@ -328,7 +359,11 @@ def worker(payload):
                 raise ValueError('original selected case computation still running')
             snapshots[name] = {'binding':binding(path),'value':value}
         else: snapshots[name] = {'absent_at_bind':True}
-    bound = {'mode':MODE,'arm':row['arm'],'case_id':case['case_id'],'case':case,'reason':reason,
+    helper_API={'build_resources':str(inspect.signature(rerun.build_resources)),
+                'worker':str(inspect.signature(cohort.worker)),
+                'validate_anatomy_child':str(inspect.signature(cohort.validate_anatomy_child)) if hasattr(cohort,'validate_anatomy_child') else 'fixture_only',
+                'candidate_verify_preparation':str(inspect.signature(staged.verify_preparation)) if staged and hasattr(staged,'verify_preparation') else None}
+    bound = {'helper_API':helper_API,'mode':MODE,'arm':row['arm'],'case_id':case['case_id'],'case':case,'reason':reason,
         'origin_case_state':old_state.get('cases',{}).get(row['arm']+'/'+case['case_id']),
         'original_config':row['origin_config'],'original_driver':row['origin_driver'],
         'old_case_reports':snapshots,'same_round_anatomy':proof,'anatomy':recon['anatomy'],
@@ -360,9 +395,8 @@ def worker(payload):
     def subject_loader(config,c,j):
         if Path(new['stop_dispatch_path']).exists(): raise RuntimeError('STOP_DISPATCH prevents science after GPU lock wait')
         revalidate(); return subject
-    result=cohort.worker({'action':'gpu','config':active,'case':case,'version':row['arm']},
-        anatomy_loader=loader,anatomy_subject=subject_loader,
-        extra_cli_arguments=staged.extra_arguments(original.get('candidate_cli_arguments',[])) if staged else ())
+    result=matured_worker_compat(cohort,{'action':'gpu','config':active,'case':case,'version':row['arm']},
+        loader,subject_loader,staged.extra_arguments(original.get('candidate_cli_arguments',[])) if staged else ())
     result['execution_scope']='selected monitor recovery: same-round fresh official FS reused; new full raw-DWI stage; not continuous cold pipeline'
     ok=result.get('status')=='completed' and result.get('exit_code')==0 and eligible(result.get('memory_budget',{}))
     validation_error=None

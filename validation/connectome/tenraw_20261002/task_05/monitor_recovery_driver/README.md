@@ -99,15 +99,22 @@ python tools/benchmark_connectome_selected_raw_recovery.py \
 
 ## 5. 当前验证与门槛
 
-本窗口只完成 CPU byte/protocol fixtures：24 项 guard 测试通过；CLI `--plan-only` 实际运行完成，未调用 remote worker，未创建 science run root。见 `CPU_guard_tests.log`、`fixture_dry_run.json`。fixture 不是 MRI benchmark；第一次 fixture 将原控制文件放在共同父目录，目录 overlap guard 正确拒绝，调整为互不重叠的 fixture 子目录后干运行通过。
+本窗口只完成 CPU byte/protocol fixtures：当前修复版 27 项 guard 测试通过；CLI `--plan-only` 实际运行完成，未调用 remote worker，未创建 science run root。见 `CPU_guard_tests_v2.log`、`fixture_dry_run_v2.json`；第一版 24 项记录原样保留在 `CPU_guard_tests.log`、`fixture_dry_run.json`。fixture 不是 MRI benchmark；第一次 fixture 将原控制文件放在共同父目录，目录 overlap guard 正确拒绝，调整为互不重叠的 fixture 子目录后干运行通过。
 
 测试覆盖：空/重复/非法选择，CON02 排除；固定协议/source 改动；旧 binding 字节/symlink；旧 DWI 跳步参数；新 namespace；module path/version/SHA/低显存策略保持；原 driver 未终止；三类 reason 的真实报告与 absent 条件；CPU preflight 不调用 science worker；原成熟 worker 回调接口；STOP；计算 completed 而 monitor 不合格时保留真实成功并标 not eligible。读取 root 成熟 `cohort.memory_budget` 的真实代码，验证 Timeout、13.79 s gap 和超预算仍不通过。
 
 严格预算维持 `<20,000,000,000` bytes，要求原成熟 `memory_budget.status=observed_below_budget`、monitor issues 空，process-tree、allocated、reserved 三组有效测量及全部测量有限非负且低于预算。原 helper 对 sampling gap 的门槛仍为 `max(5 s, 4 × interval)`；failed/unresolved samples、errors、allocator error 都不能通过。缺失和零统计不自动等于完整测量。
 
-真实 selected-case runtime/source/FS 预检及 recovery GPU 尚未运行；Root 已确认两旧 driver 真正终止，并给出实际 subset；实际 terminal snapshots/paths 已交付，等待 root 部署；baseline terminal SHA 为 `abd6f82569372577067c700d6822f7e0ea445cb17dcf7cbbdfdffab611bf0cb3`，candidate 为 `23d89316af635d123d4c13569272f4b0a8dc1b9151ab0a318970f9fe2bddb322`。本窗口 readonly 确認 CON05 queued-stop report SHA `48d5a0a5ef9cb16b300018ad98a50962d04d7b5ad5ae3fc14f16d9bbe30a25d6`，且 wall/log/connectome 确实不存在，见 `actual_queue_stop_readonly.json`。没有新的 raw-DWI 耗时、脑图或病例显存结论；原先的 atlas/SynthMorph 组件结果仍见上级 README，不能代替本工具验证。
+Root 已运行第一版真实 CPU preflight：baseline CON05 在资源调用处以 `build_resources() got unexpected keyword argument source_version` 失败，科学 GPU 未启动。`formal_selected_monitor_recovery_preflight_v1` 的状态、日志和 namespace 保留。本窗口修复后尚未运行新的真实 CPU preflight 或 recovery GPU；Root 将在全新 v2 namespace 重新验证。Root 已确认两旧 driver 真正终止，并给出实际 subset；实际 terminal snapshots/paths 已交付；baseline terminal SHA 为 `abd6f82569372577067c700d6822f7e0ea445cb17dcf7cbbdfdffab611bf0cb3`，candidate 为 `23d89316af635d123d4c13569272f4b0a8dc1b9151ab0a318970f9fe2bddb322`。本窗口 readonly 确認 CON05 queued-stop report SHA `48d5a0a5ef9cb16b300018ad98a50962d04d7b5ad5ae3fc14f16d9bbe30a25d6`，且 wall/log/connectome 确实不存在，见 `actual_queue_stop_readonly.json`。没有新的 raw-DWI 耗时、脑图或病例显存结论；原先的 atlas/SynthMorph 组件结果仍见上级 README，不能代替本工具验证。
 
 ## 6. 版本与接口交接
+
+修复版只支持现场核对的两套冻结 API：baseline `build_resources(config)` 和 `worker(payload)`；candidate `build_resources(config, *, source_version='baseline')` 和 `worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_arguments=())`。资源 helper 保持原 size/SHA、可读性和 executable guards。未知签名直接拒绝，不重建旧 candidate 资源逻辑，不吞掉科学参数。
+
+旧 baseline worker 在载入 recon 时调用 `load_recon_for_gpu`，在 GPU 锁内及 `cli_command` 内调用 `gpu_anatomy_subject`。新工具在独立单病例进程中临时绑定这两个 Python globals 到已验证的同轮 FS loader，`finally` 恢复。原 helper、wall、配置和生产源文件 bytes 不变；原 worker 仍构造并执行原科学 argv 和 wall 计时。本工具最终继续验证 FS/raw/source/provenance。
+
+新增三项 CPU 测试直接编译 `actual_frozen_old_API_test_excerpts.json` 中按真实旧文件 SHA 留存的 orchestration 函数体，核对 excerpt SHA，再执行资源固定身份 guards 和完整旧 worker GPU 分支（subprocess 是写字节 fixture 的 mock）。验证临时 hooks、完整 argv、环境、异常恢复和未知接口拒绝。它们不导入科学模块、不运行 GPU，也不提供 MRI 精度或耗时结论。第一版 tests 只覆盖新版 mock，未发现冻结旧 API 差异；此次修复针对这个遗漏。
+
 
 本工具源 SHA、测试/干运行证据 SHA、原工具与 runtime 身份见 `delivery.json`。本窗口未复制或修改 integration/frozen helper，也未修改生产源码。Root 负责最终部署/推送。
 

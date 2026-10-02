@@ -2,24 +2,25 @@
   "scope": "task05 CPU-tested explicit selected raw-DWI monitor recovery utility; root deployment only",
   "tool": {
     "path": "tools/benchmark_connectome_selected_raw_recovery.py",
-    "sha256": "06cf1af3eee92b8adf819d3eb93dfb3191eaed634791cf218bddc24cb74a5149"
+    "sha256": "bae2ffc58c24fa47a7e46c07b4f3d1eba0f24e4c334b111ebb36662c15ba2424"
   },
   "tests": {
     "path": "tests/connectome/test_selected_raw_recovery_tool.py",
-    "sha256": "059786d94c72196b146ae7cb6f85d8d18fe3322612707c96c485aa10c1e371b9"
+    "sha256": "a823670cd84a2c3bb78e2434e795271f4c5ab4c2e0bfd510684c54a68cfd001b"
   },
   "test_result": {
-    "CPU_guards_passed": 24,
+    "CPU_guards_passed": 27,
     "log": {
-      "path": "validation/connectome/tenraw_20261002/task_05/monitor_recovery_driver/CPU_guard_tests.log",
-      "sha256": "ae6f5b5cb9b11fc802d373135fed439a3d8fb1030f49016d1ada2ad4b025c4a0"
+      "path": "validation/connectome/tenraw_20261002/task_05/monitor_recovery_driver/CPU_guard_tests_v2.log",
+      "sha256": "3c7d843fc330e8902540571ed594b849cea74f6509886eb80c2e16bbc2dac7ef"
     },
     "fixture_CLI_dry_run": {
-      "path": "validation/connectome/tenraw_20261002/task_05/monitor_recovery_driver/fixture_dry_run.json",
-      "sha256": "0f1c56188d3229e7ed4b3b29cb94a354804ecc22a672fdb7cfc4adaa9ce6b95f"
+      "path": "validation/connectome/tenraw_20261002/task_05/monitor_recovery_driver/fixture_dry_run_v2.json",
+      "sha256": "66b3bc09915583fe44305fa113e98719cbe0f0872af58969669110315e6942c1"
     },
     "real_selected_preflight_executed": false,
-    "science_GPU_work_dispatched": false
+    "science_GPU_work_dispatched": false,
+    "clarification": "This revised tool has not run actual preflight; first tool v1 root CPU preflight failed before scientific dispatch."
   },
   "actual_root_selection": {
     "path": "validation/connectome/tenraw_20261002/task_05/monitor_recovery_driver/actual_selection_binding.json",
@@ -205,7 +206,7 @@
     "status": "selected subset only; old timing and failures retained separately; full_ten_complete always false"
   },
   "deploy": {
-    "new_helper_only": "Copy the committed single selected recovery tool to a fresh shared helper path visible at the same absolute path from coordinator and gpucw1. Do not replace original helper/wall files.",
+    "new_helper_only": "Deploy this revised tool to a fresh v2 helper path and v2 CPU preflight namespace; retain v1 failed preflight untouched. Never replace original frozen helper/wall files.",
     "selection": "Use actual_selection_binding.json or generate bind-selection from root_explicit_pairs.json plus root_terminal_origin_paths.json; bind original terminal SHA after reading actual augmented config.",
     "sequence": [
       "--plan-only in fresh report dir",
@@ -215,14 +216,41 @@
     "runtime": "--runtime-declaration must point to actual root runtime_preflight.json; no reinstallation or old-config mutation"
   },
   "files": {
-    "README.md": "95d3f4bdd1dadf886f0a8880c693d48a33d0beb3047ba1c7fcd55e76c959854c",
+    "README.md": "594cd7a0d90ab1b9ad485f0a851ebb9490924e74abbac1efebf59aac2822bf08",
     "root_terminal_origin_paths.json": "70032397f9227b225035509bb1da6b96ffad7ae6003a360196acb51526168a7f",
     "actual_queue_stop_readonly.json": "f80f1a9859b0f9b0ca3d43b6dcac944413ab05536f20030f10661541f4930003",
     "actual_selection_binding.json": "d57078f703d7f1ee1d21bfdd8e53b197554fe366dab45935e07fa3244a24a143",
+    "CPU_guard_tests_v2.log": "3c7d843fc330e8902540571ed594b849cea74f6509886eb80c2e16bbc2dac7ef",
     "CLI_help.txt": "b79e07fdb396a54843d87c97981e14e7cec5941a306396b3eb50686620f8797a",
     "root_explicit_pairs.json": "3c764515af64515da684639a0bd8e4e3d3e1c3641bbbd6665a08b014dc26ddc5",
+    "fixture_dry_run_v2.json": "66b3bc09915583fe44305fa113e98719cbe0f0872af58969669110315e6942c1",
     "fixture_dry_run.json": "0f1c56188d3229e7ed4b3b29cb94a354804ecc22a672fdb7cfc4adaa9ce6b95f",
+    "actual_frozen_old_API_test_excerpts.json": "66bb3db68bc331e1f51174909cf0749c4e942cd22448b5193ab2767179ca95fa",
     "actual_terminal_and_helpers_readonly.json": "f59ff72b4e3cdb8c1188d6fe236f1784f60f2c303e2f19ff0e11065ed5d5e5d7",
     "CPU_guard_tests.log": "ae6f5b5cb9b11fc802d373135fed439a3d8fb1030f49016d1ada2ad4b025c4a0"
+  },
+  "previous_delivery": {
+    "commit": "9c2d6c0bc6de5b7d2e1cbf2e75108d95f7991736",
+    "tool_sha256": "06cf1af3eee92b8adf819d3eb93dfb3191eaed634791cf218bddc24cb74a5149",
+    "CPU_guards_passed": 24,
+    "actual_root_preflight_v1": "baseline CON05 failed before science: build_resources unexpected source_version; original status/logs/namespace retained"
+  },
+  "actual_frozen_API_support": {
+    "baseline": {
+      "build_resources": "(config)",
+      "worker": "(payload)",
+      "adaptation": "scoped two anatomy globals with finally restore in clean one-case process"
+    },
+    "candidate": {
+      "build_resources": "(config, *, source_version='baseline')",
+      "worker": "(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_arguments=())"
+    },
+    "unknown_signatures": "reject before science",
+    "actual_old_excerpt_fixture": {
+      "path": "validation/connectome/tenraw_20261002/task_05/monitor_recovery_driver/actual_frozen_old_API_test_excerpts.json",
+      "sha256": "66bb3db68bc331e1f51174909cf0749c4e942cd22448b5193ab2767179ca95fa"
+    },
+    "frozen_source_bytes_changed": false,
+    "scientific_wall_or_argv_changed": false
   }
 }

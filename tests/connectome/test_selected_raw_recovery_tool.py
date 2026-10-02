@@ -188,7 +188,8 @@ class RecoveryGuards(unittest.TestCase):
         calls=[]
         def fresh(p):
             p=Path(p);p.mkdir(parents=True,exist_ok=False);return p
-        def science(payload,**kwargs):
+        def science(payload,*,anatomy_loader=None,anatomy_subject=None,extra_cli_arguments=()):
+            kwargs={'anatomy_loader':anatomy_loader,'anatomy_subject':anatomy_subject,'extra_cli_arguments':extra_cli_arguments}
             # Mock only: exercises callback ordering, no production maths/GPU.
             calls.append(payload)
             j=Path(new['run_root'])/'candidate/sub-CON04'
@@ -198,7 +199,8 @@ class RecoveryGuards(unittest.TestCase):
             return {'status':'completed','exit_code':0,'memory_budget':copy.deepcopy(self.budget),'raw_dwi_cli_total_runtime_seconds':1.0}
         cohort=SimpleNamespace(__file__=str(wall),require_fresh=fresh,atomic_json=driver.atomic,worker=science,
             memory_budget=lambda wall:{'status':'not_fully_measured','monitor_issues':['failed_samples']})
-        rerun=SimpleNamespace(build_resources=lambda config,source_version:{'files':[]},verify_resources=lambda config:None)
+        def resources(config,*,source_version='baseline'):return {'files':[]}
+        rerun=SimpleNamespace(build_resources=resources,verify_resources=lambda config:None)
         staged=SimpleNamespace(extra_arguments=lambda arguments:arguments)
         payload={'action':'preflight','selection':self.row,'config':new,'runtime_declaration':driver.binding(runtime_path),'driver_sha256':driver.sha(driver.__file__)}
         patches=[patch.object(driver,'load_helpers',return_value=(cohort,rerun,staged)),
@@ -287,5 +289,110 @@ class RecoveryGuards(unittest.TestCase):
             p=job/name;p.write_text('{}')
             with self.assertRaises(ValueError):driver.validate_reason(row,job,None)
             p.unlink()
+
+class FrozenActualAPIs(unittest.TestCase):
+    """Execute archived actual old orchestration bodies, with CPU byte fixtures."""
+    def setUp(self):
+        import hashlib
+        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+        self.root=Path(self.tmp.name)
+        archive=path.parent.parent/'validation/connectome/tenraw_20261002/task_05/monitor_recovery_driver/actual_frozen_old_API_test_excerpts.json'
+        self.archive=json.loads(archive.read_text())
+        for entry in self.archive.values():
+            for item in entry['functions'].values():
+                self.assertEqual(hashlib.sha256(item['source'].encode()).hexdigest(),item['source_sha256'])
+
+    def module(self, filename, globals_):
+        from types import ModuleType
+        module=ModuleType('actual_frozen_fixture')
+        module.__dict__.update(globals_)
+        for item in self.archive[filename]['functions'].values():
+            exec(compile(item['source'],filename,'exec'),module.__dict__)
+        return module
+
+    def test_actual_old_resource_guard_and_arm_dispatch(self):
+        import ast,os
+        source=self.root/'source';(source/'src/fnit/connectome').mkdir(parents=True)
+        weight=self.root/'checkpoint';weight.write_bytes(b'CPU byte checkpoint')
+        atlas=self.root/'atlas';atlas.write_bytes(b'CPU byte atlas')
+        (source/'src/fnit/weights.py').write_text('WEIGHT_FILES = '+repr({weight.name:('upstream',weight.stat().st_size,driver.sha(weight))}))
+        (source/'src/fnit/connectome/atlas_manifest.json').write_text(json.dumps({'files':{atlas.name:{'sha256':driver.sha(atlas),'size_bytes':atlas.stat().st_size}}}))
+        module=self.module('benchmark_connectome_raw_rerun.py',dict(Path=Path,ast=ast,json=json,
+            cohort=SimpleNamespace(sha256=driver.sha,os=os),required_resource_paths=lambda config:[('weight',weight),('atlas',atlas)]))
+        config={'sources':{'baseline':str(source)}}
+        result=driver.build_resources_compat(config,'baseline',module)
+        self.assertEqual([x['sha256'] for x in result['files']],[driver.sha(weight),driver.sha(atlas)])
+        with self.assertRaises(ValueError):driver.build_resources_compat(config,'candidate',module)
+        weight.write_bytes(b'altered')
+        with self.assertRaisesRegex(ValueError,'pinned official'):driver.build_resources_compat(config,'baseline',module)
+        called=[]
+        def candidate(config,*,source_version='baseline'):
+            called.append(source_version);return {'files':[]}
+        driver.build_resources_compat(config,'candidate',SimpleNamespace(build_resources=candidate))
+        self.assertEqual(called,['candidate'])
+        def unknown(config,**kwargs):return {}
+        with self.assertRaises(ValueError):driver.build_resources_compat(config,'candidate',SimpleNamespace(build_resources=unknown))
+
+    def test_actual_old_worker_command_hooks_and_restoration(self):
+        import fcntl,os,time
+        worker_file=self.root/'frozen_cohort.py';worker_file.write_bytes(b'unchanged original source identity fixture')
+        wall_script=self.root/'wall.py';wall_script.write_bytes(b'unchanged wall identity fixture')
+        subject=self.root/'this_round_FS';subject.mkdir()
+        anatomy={'files':'CPU byte anatomy ledger'}
+        calls=[];commands=[]
+        config={'worker_script_sha256':driver.sha(worker_file),'wall_script':str(wall_script),
+            'wall_script_sha256':driver.sha(wall_script),'run_root':str(self.root/'fresh'),
+            'gpu_lock':str(self.root/'gpu.lock'),'sources':{'baseline':'/frozen/source'},
+            'frozen_sources':{'baseline':{'source_fingerprint':'fixed'}},'atlases':['aal'],
+            'gpu_python':'/isolated/python','eddy_gp_seed':12345,'device':'cuda:0','n_seeds':100000,
+            'seed':0,'atlas_options':[],'gpu_cpu_threads':8,'cuda_visible_devices':'1',
+            'cuda_alloc_conf':'expandable_segments:True','gpu_uuid':driver.GPU}
+        case={'case_id':'sub-CON05','subject':'CON05','bids_root':'/raw/BIDS','input_files':[]}
+        job=Path(config['run_root'])/'baseline'/case['case_id'];job.mkdir(parents=True)
+        def run(command,**kwargs):
+            commands.append((command,kwargs['env']))
+            report=Path(command[command.index('--report')+1])
+            report.write_text(json.dumps({'selected_inputs':{'freesurfer_subject_dir':str(subject)},'total_runtime_seconds':1}))
+            return SimpleNamespace(returncode=0)
+        module=self.module('benchmark_connectome_raw_cohort.py',dict(Path=Path,json=json,
+            __file__=str(worker_file),sha256=driver.sha,SCHEMA_VERSION=1,time=time,fcntl=fcntl,os=os,
+            subprocess=SimpleNamespace(run=run,STDOUT=-2),utc=lambda:'fixture UTC',host_identity=lambda:{},
+            source_manifest=lambda source:{'source_fingerprint':'fixed'},check_anatomy=lambda *args:anatomy,
+            verify_inputs=lambda case:[],check_wall_report=lambda *args:None,check_selected_inputs=lambda *args:None,
+            check_outputs=lambda *args:{'fixture':True},memory_budget=lambda wall:{'status':'observed_below_budget'},
+            atomic_json=driver.atomic))
+        original_loader=module.load_recon_for_gpu;original_subject=module.gpu_anatomy_subject
+        def loader(*args):calls.append('loader');return {'anatomy':anatomy}
+        def subject_loader(*args):calls.append('subject');return subject
+        payload={'config':config,'case':case,'action':'gpu','version':'baseline'}
+        result=driver.matured_worker_compat(module,payload,loader,subject_loader,())
+        self.assertEqual(result['status'],'completed',result)
+        self.assertEqual(calls,['loader','subject','subject'])
+        expected=[config['gpu_python'],str(wall_script),'--mode','wall','--eddy-gp-seed','12345',
+            '--report',str(job/'raw_bids_wall.json'),'--gpu-uuid',driver.GPU,'--',
+            'UKBConnectome_pipeline','--bids-root','/raw/BIDS','--subject','CON05',
+            '--freesurfer-subject-dir',str(subject),'--output-dir',str(job/'connectome'),
+            '--device','cuda:0','--n-seeds','100000','--seed','0','--atlas','aal']
+        self.assertEqual(commands[0][0],expected)
+        self.assertEqual(commands[0][1]['CUDA_VISIBLE_DEVICES'],'1')
+        self.assertEqual(commands[0][1]['PYTORCH_CUDA_ALLOC_CONF'],'expandable_segments:True')
+        self.assertIs(module.load_recon_for_gpu,original_loader);self.assertIs(module.gpu_anatomy_subject,original_subject)
+        self.assertEqual(driver.sha(worker_file),config['worker_script_sha256'])
+        with self.assertRaises(ValueError):driver.matured_worker_compat(module,payload,loader,subject_loader,('--new-argument',))
+        # Exception before the original worker's try block must also restore hooks.
+        wrong={**payload,'config':{**config,'worker_script_sha256':'changed'}}
+        with self.assertRaises(RuntimeError):driver.matured_worker_compat(module,wrong,loader,subject_loader,())
+        self.assertIs(module.load_recon_for_gpu,original_loader);self.assertIs(module.gpu_anatomy_subject,original_subject)
+
+    def test_new_worker_exact_callbacks_and_unknown_signature_rejected(self):
+        called=[]
+        def newer(payload,*,anatomy_loader=None,anatomy_subject=None,extra_cli_arguments=()):
+            called.append((payload,anatomy_loader,anatomy_subject,extra_cli_arguments));return 'result'
+        loader=lambda *args:None;subject=lambda *args:None
+        self.assertEqual(driver.matured_worker_compat(SimpleNamespace(worker=newer),{},loader,subject,('--fixed',)),'result')
+        self.assertEqual(called,[({},loader,subject,('--fixed',))])
+        def unknown(payload,**kwargs):raise AssertionError('must never dispatch')
+        with self.assertRaises(ValueError):driver.matured_worker_compat(SimpleNamespace(worker=unknown),{},loader,subject,())
+
 
 if __name__=='__main__':unittest.main()
