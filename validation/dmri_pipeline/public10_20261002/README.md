@@ -8,7 +8,9 @@
 
 主比较已改为统一使用修复提交 **`bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a`**，仅 `amico_noddi/solver.py` 的临时内存调度变化，dtype、TF32 设置及模型参数不变。新的 433 文件部署清单已逐项核对，相对路径与 SHA-256 完全匹配，清单 SHA-256 为 `f13a40989b96d9e3608a427a1fe10d1960b20f146c768a3dd101f84fe4deae1e`，见 [修复源码绑定](source_binding_memoryfix.public.json)。全部 20 个 FNIT 完整流程从原始输入统一重跑，写入新的 `memoryfix_cohort/results/`；旧版两次成功和 `case02` 失败不进入新主比较。
 
-原软件 `case01` TBSS 已完整完成，GNU time 为 **2480.47 秒**；`case01` MMORF 的全新 `official_recovered` 已完成 18 张指标图，GNU time 为 **2113.98 秒**，API 为 **2097.248599635903 秒**，observer 为 **2113.9841028 秒**，GNU 最大 RSS 为 **9,507,700 KiB**。各时钟分列记录。状态核对时，新主候选尚无已完成配对；报告已生成的 20 个病例行和 450 个指标图行只是固定计划的进度占位。十人最终精度、耗时与失败率仍待完成，当前不计算十人提速结论。详细历史表和恢复规则见 [PROTOCOL.md](PROTOCOL.md)。
+原软件 `case01` TBSS 已完整完成，GNU time 为 **2480.47 秒**；`case01` MMORF 的全新 `official_recovered` 已完成 18 张指标图，GNU time 为 **2113.98 秒**，API 为 **2097.248599635903 秒**，observer 为 **2113.9841028 秒**，GNU 最大 RSS 为 **9,507,700 KiB**。各时钟分列记录。
+
+修正版 `case02` MMORF 已从 raw 全流程完成，18 张指标图的形状、affine、有限值及所需文件检查全部通过，见 [完整运行报告](case02_mmorf_memoryfix_full.public.json)。API 为 **557.384 秒**，GNU 完整命令为 **562.24 秒**；allocated/reserved 峰值为 **12.335/13.808 GB**，低于 20 GB 上限。这确认此前的 NODDI 显存问题在完整 EDDY→NODDI 衔接中得到解决，不能解读为输出已匹配原软件。此时固定主计划完成 FNIT **1/20**、原软件 **3/20**；十人精度、耗时与失败率仍待配对比较和其余运行完成。20 个病例位置和 450 个指标图位置是固定分母，不代表已完成行数。详细历史表和恢复规则见 [PROTOCOL.md](PROTOCOL.md)。
 
 - [PROTOCOL.md](PROTOCOL.md)：事前固定的流程、参数、资源和计时边界。
 - [DATASET.md](DATASET.md)：OpenNeuro ds003138 v1.0.1、CC0、十人清单和采集条件。

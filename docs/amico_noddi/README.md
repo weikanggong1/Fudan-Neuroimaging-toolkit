@@ -287,6 +287,8 @@ print(qc_differences(baseline_result.qc, candidate_result.qc))  # 模型和结�
 
 本次组件检查支持 `case01` 没有输出数值回归，并确认 `case02` 的分配失败已解除；`case02` 与原软件的精度仍由独立整链比较验收。十人端到端对照尚未完成，不把组件耗时写成 end-to-end 时间，也不以两例组件成功宣称十人通过。此前本页的单被试耗时来自不同修订，保留其历史范围。
 
+随后，同一修正版的 [case02 MMORF 完整流程](../../validation/dmri_pipeline/public10_20261002/case02_mmorf_memoryfix_full.public.json)已从原始 AP/PA、梯度和 T1 跑通，18 张指标图及全部所需文件通过完整性检查。API 为 557.384 秒、GNU 完整命令为 562.24 秒；整个 pipeline allocated/reserved 峰值为 12.335/13.808 GB。这核验了实际 EDDY→NODDI 衔接，仍需独立原软件比较来评价输出数值；其余 19 个修正版完整分支作业继续执行。
+
 ## Reference
 
 - 参考文献：Daducci et al., *Accelerated Microstructure Imaging via Convex Optimization (AMICO) from diffusion MRI data*, NeuroImage (2015), [doi:10.1016/j.neuroimage.2014.10.026](https://doi.org/10.1016/j.neuroimage.2014.10.026)。
