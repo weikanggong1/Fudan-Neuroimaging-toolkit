@@ -219,6 +219,89 @@ def test_checkpoints_stream_real_paths_and_preserve_dtype_affine(tmp_path):
         module.Checkpoints(exporter.directory)
 
 
+@pytest.mark.parametrize("mode", ("wall", "diagnostic"))
+def test_tracking_checkpoint_uses_actual_bound_inputs_after_stage(tmp_path, monkeypatch, mode):
+    module = tool()
+    bids, pipeline, _ = fake_modules()
+    returned = SimpleNamespace(actual="original tracking result")
+    calls = []
+
+    def tracking(wm_sh, fod_affine, five_tissue, five_tissue_affine, gmwmi, *,
+                 n_seeds, lmax=8, five_tissue_spacing_mm=None, fa=None,
+                 seed=0, batch_size=8192, arc_proposals=16, max_length_mm=250.,
+                 min_length_mm=None, step_mm=None, max_angle_degrees=45.,
+                 cutoff=0.1, power=0.5, compile_arc=False):
+        calls.append(n_seeds)
+        return returned
+
+    pipeline.probabilistic_tractography = tracking
+    wm = torch.arange(16, dtype=torch.float32).reshape(2, 2, 2, 2)
+    affine = torch.eye(4, dtype=torch.float64)
+    affine[0, 1], affine[2, 3] = 0.123456789123456, 12.987654321987654
+    five = torch.ones(2, 2, 2, 5, dtype=torch.float64)
+    anatomy_affine = affine.clone()
+    anatomy_affine[0, 0] = 1.7
+    gmwmi = torch.ones(2, 2, 2, dtype=torch.float32)
+    fa = torch.ones(2, 2, 2, dtype=torch.float64)
+    spacing = tuple(np.float32(value) for value in (0.9, 1.1, 1.3))
+    checkpoint_dir = tmp_path / "checkpoints"
+    extra = ("--checkpoint-dir", str(checkpoint_dir)) if mode == "diagnostic" else ()
+    # Four clocks: stage start/stop, then checkpoint start/stop.
+    clocks = iter((10., 12., 20., 25.))
+    monkeypatch.setattr(module, "time", SimpleNamespace(perf_counter=lambda: next(clocks)))
+    with module.Measure(SimpleNamespace(cuda=CUDA()), bids, pipeline,
+                        options(module, tmp_path, mode=mode, extra=extra)) as measure:
+        result = pipeline.probabilistic_tractography(
+            wm, affine, five, five_tissue_affine=anatomy_affine, gmwmi=gmwmi,
+            n_seeds=np.int64(123), seed=np.int64(7), fa=fa,
+            five_tissue_spacing_mm=spacing, compile_arc=np.bool_(False))
+    assert result is returned and calls == [123]
+    assert pipeline.probabilistic_tractography is tracking
+    if mode == "wall":
+        assert measure.stages == {} and measure.checkpoints.seconds == 0
+        assert not checkpoint_dir.exists()
+        return
+    assert measure.stages["probabilistic_tractography"][0]["seconds_inclusive"] == 2.
+    assert measure.checkpoints.seconds == 5.
+    path = checkpoint_dir / "tracking_inputs.pt"
+    checkpoint = torch.load(path, map_location="cpu", weights_only=True)
+    for key, expected in (("wm_sh", wm), ("fod_affine", affine),
+                          ("five_tissue", five), ("five_tissue_affine", anatomy_affine),
+                          ("gmwmi", gmwmi), ("fa", fa)):
+        assert checkpoint[key].dtype == expected.dtype
+        assert checkpoint[key].device.type == "cpu"
+        assert torch.equal(checkpoint[key], expected)
+    assert checkpoint["five_tissue_spacing_mm"] == tuple(float(value) for value in spacing)
+    assert all(type(value) is float for value in checkpoint["five_tissue_spacing_mm"])
+    parameters = checkpoint["tracking_kwargs"]
+    assert parameters["n_seeds"] == 123 and type(parameters["n_seeds"]) is int
+    assert parameters["seed"] == 7 and parameters["compile_arc"] is False
+    assert parameters["lmax"] == 8 and parameters["batch_size"] == 8192
+    assert parameters["five_tissue_spacing_mm"] == checkpoint["five_tissue_spacing_mm"]
+    assert "lmax" not in checkpoint["explicit_arguments"]
+    assert "five_tissue_affine" in checkpoint["explicit_arguments"]
+    assert measure.checkpoints.paths == [path]
+    assert not any(isinstance(value, torch.Tensor) for value in vars(measure.checkpoints).values())
+
+
+def test_tracking_checkpoint_preserves_default_spacing_none(tmp_path):
+    module = tool()
+    exporter = module.Checkpoints(tmp_path / "checkpoints")
+    def tracking(wm_sh, fod_affine, five_tissue, five_tissue_affine, gmwmi, *,
+                 n_seeds, five_tissue_spacing_mm=None, fa=None):
+        return None
+    image = torch.ones(1, 1, 1, 1)
+    affine = torch.eye(4, dtype=torch.float32)
+    exporter.tracking_inputs(tracking, (image, affine, image, affine, image), {"n_seeds": 1})
+    checkpoint = torch.load(exporter.directory / "tracking_inputs.pt", weights_only=True)
+    assert checkpoint["five_tissue_spacing_mm"] is None
+    assert checkpoint["tracking_kwargs"]["five_tissue_spacing_mm"] is None
+    assert checkpoint["fa"] is None
+    assert checkpoint["fod_affine"].dtype == torch.float64
+    assert checkpoint["five_tissue_affine"].dtype == torch.float64
+    assert torch.equal(checkpoint["fod_affine"], affine.double())
+
+
 def test_failed_cli_writes_report_and_returns_failure(tmp_path, monkeypatch):
     module = tool()
     bids, pipeline, _ = fake_modules()

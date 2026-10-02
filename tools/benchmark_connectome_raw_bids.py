@@ -344,6 +344,57 @@ class Checkpoints:
             self.paths.append(path)
         self._write(write)
 
+    def tracking_inputs(self, function, args, kwargs):
+        """Save actual call tensors/geometry without a NIfTI header round trip."""
+        def write():
+            import torch
+
+            def basic(value):
+                # torch.load(weights_only=True) must not need NumPy globals.
+                if value is None or isinstance(value, str):
+                    return value
+                if isinstance(value, bool):
+                    return bool(value)
+                if isinstance(value, numbers.Integral):
+                    return int(value)
+                if isinstance(value, numbers.Real):
+                    return float(value)
+                if isinstance(value, tuple):
+                    return tuple(basic(item) for item in value)
+                if isinstance(value, list):
+                    return [basic(item) for item in value]
+                if isinstance(value, dict):
+                    return {str(key): basic(item) for key, item in value.items()}
+                if getattr(value, "ndim", None) == 0 and hasattr(value, "item"):
+                    return basic(value.item())
+                raise TypeError(f"unsupported tracking checkpoint parameter: {type(value).__name__}")
+
+            bound = inspect.signature(function).bind(*args, **kwargs)
+            explicit = tuple(bound.arguments)
+            bound.apply_defaults()
+            tensors = ("wm_sh", "fod_affine", "five_tissue", "five_tissue_affine", "gmwmi")
+            payload = {}
+            for key in tensors:
+                value = bound.arguments[key]
+                if not isinstance(value, torch.Tensor):
+                    raise TypeError(f"tracking input {key} must be a tensor")
+                dtype = torch.float64 if key in ("fod_affine", "five_tissue_affine") else value.dtype
+                payload[key] = value.detach().to(device="cpu", dtype=dtype, copy=True)
+            spacing = bound.arguments.get("five_tissue_spacing_mm")
+            payload["five_tissue_spacing_mm"] = (None if spacing is None else
+                                                  tuple(float(item) for item in spacing))
+            fa = bound.arguments.get("fa")
+            payload["fa"] = None if fa is None else fa.detach().to(device="cpu", copy=True)
+            payload["tracking_kwargs"] = {
+                key: (payload["five_tissue_spacing_mm"] if key == "five_tissue_spacing_mm" else basic(value))
+                for key, value in bound.arguments.items() if key not in (*tensors, "fa")
+            }
+            payload["explicit_arguments"] = explicit
+            path = self.directory / "tracking_inputs.pt"
+            torch.save(payload, path)
+            self.paths.append(path)
+        self._write(write)
+
     def core(self, result):
         if self.directory is None:
             return
@@ -447,6 +498,8 @@ class Measure:
         elif name == "normalise_mrtrix_three_tissue":
             bound = inspect.signature(function).bind_partial(*args, **kwargs).arguments
             cp.image("normalise_mask.nii.gz", bound["mask"])
+        elif name == "probabilistic_tractography":
+            cp.tracking_inputs(function, args, kwargs)
 
     def __enter__(self):
         try:
