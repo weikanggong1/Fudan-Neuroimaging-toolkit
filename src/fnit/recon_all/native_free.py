@@ -318,7 +318,9 @@ def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
     失败的回调，device 为 CPU 或 CUDA。输出写入 subject，返回辅助网络实际
     前向记录字典；原生程序或计算失败抛异常。全部网络使用 device，
     辅助网络卷积在局部作用域采用经同输入验证的FP32，matmul TF32不变；
-    finalsurfs 后处理使用 CPU；空间、命令与实测见 MNI_NONLINEAR_CHAIN.md。
+    CUDA 的 MNI warp 转换、完整求逆和检查图采用自有 GPU 后处理，CPU
+    使用原有 Conda 程序；finalsurfs 后处理使用 CPU。空间、命令与实测
+    见 MNI_NONLINEAR_CHAIN.md。后处理失败抛出异常，不静默切换后端。
     """
     from .finalsurfs_python import run_finalsurfs
     from .mni_aux_chain import run_mni_aux_chain
@@ -329,7 +331,8 @@ def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
               device=device, threads=threads)
     stage("mni_nonlinear", run_mni_nonlinear_chain, subject, weights, assets,
           warp_convert=warp_binaries[0], ca_register=warp_binaries[1],
-          mri_convert=warp_binaries[2], device=device, threads=threads)
+          mri_convert=warp_binaries[2], device=device, threads=threads,
+          postprocess_backend="gpu" if torch.device(device).type == "cuda" else "conda")
     stage("brain_finalsurfs", run_finalsurfs, subject, device="cpu")
     return auxiliary["runtime"]
 
@@ -819,7 +822,11 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["defects_volume"] = {"binary": str(defect_binary[0]),
                                  "sha256": defect_binary[1]}
     report["mni_nonlinear"] = {
-        "implementation": "PyTorch deform + Conda source-built warp conversion",
+        "implementation": ("PyTorch deform + FNIT GPU warp conversion/inversion/check"
+                           if torch.device(device).type == "cuda" else
+                           "PyTorch deform + Conda source-built warp conversion"),
+        "postprocess_backend": "gpu" if torch.device(device).type == "cuda" else "conda",
+        "native_programs_used": torch.device(device).type != "cuda",
         "device": device,
         "precision": "FP32 CUDA exception" if torch.device(device).type == "cuda" else "FP32 CPU",
         "native_sha256": {name: binary[1] for name, binary in zip(
@@ -846,6 +853,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             row["actual_forwards"] = value["actual_forwards"]
         if name == "mni_nonlinear" and isinstance(value, dict):
             row["precision"] = value.get("precision")
+            row["postprocess_backend"] = value.get("postprocess_backend")
+            row["postprocess"] = value.get("postprocess")
         if isinstance(value, dict) and "timings_seconds" in value:
             row["timings_seconds"] = value["timings_seconds"]
         if isinstance(value, dict) and isinstance(value.get("seconds"), dict):

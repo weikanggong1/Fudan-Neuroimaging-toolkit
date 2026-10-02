@@ -14,6 +14,11 @@ CUDA 默认允许 TF32，不自动使用 FP16/BF16。SynthStrip、SynthSeg、辅
 
 本轮复用并优化已有[有序归一化](NORMALIZATION.md)、[球面几何](CPU_GEOMETRY_PERFORMANCE.md)及[PyTorch 指标函数](SURFACE_METRICS.md)。多图谱共享[同版本几何缓存](SURFACE_STATS_CACHE.md)，厚度使用[完整空间候选](SURFACE_THICKNESS.md)。完整 Python pial 已做同输入回归，但仍比当前 C++ 慢，生产路径保留 Conda 源码构建实现。不得将冻结同输入加速写成整例提速。
 
+2026-10-02 工作分支正在接入五任务候选，见[生产接入与当前实测范围](PERFORMANCE_INTEGRATION.md)。
+半球并行、GCA缓存、white热点、网格/球面及MNI GPU后处理的阶段报告分别保留
+源码版本和同输入比较。两例原始T1的新整例对照正在执行；目前没有合并版本的
+整例提速结论，main发布和整体指标等效仍待验证。
+
 ## 流程策略
 
 ```mermaid

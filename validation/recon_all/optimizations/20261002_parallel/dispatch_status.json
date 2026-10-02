@@ -41,9 +41,9 @@
     "new_login_or_password": "not_required",
     "shared_host_local_flock": "verified; previous GPFS ENOLCK retained as failed attempt"
   },
-  "implementation_validation": "in_progress",
-  "whole_validation": "not_started",
-  "main_push": "not_started",
+  "implementation_validation": "tasks 1,2,3,5 merged; task 4 all 12 frozen pairs and 4 own chains complete, final review pending",
+  "whole_validation": "baseline sub01 initialized-CUDA API running from raw T1 and new output; baseline sub02 CLI scheduled; integrated candidate not started",
+  "main_push": "not_started; whole paired runs and installation pending",
   "resource_fingerprints": {
     "status": "passed",
     "measured_utc": "2026-10-02T07:42:42.921207+00:00",
@@ -55,5 +55,25 @@
     "report": "baseline_resources.json",
     "isolation": "not_verified"
   },
-  "integration_preserves_main": "5d84c7ddec099f1b94772d273c0f76a79934c9bb"
+  "integration_preserves_main": "f436de588647a0de80735e4a98d53df5d88e502d",
+  "updated_utc": "2026-10-02T13:06:39.277528+00:00",
+  "integration_source_commit_before_mni_wiring": "24390dc",
+  "baseline_queue": {
+    "supervisor_pid": 128920,
+    "sub01_started_utc": "2026-10-02T12:54:04.120098+00:00",
+    "baseline_code_commit": "6f67cc06ee8c5108ef3640cbfc289f3e5a742f65",
+    "source_archive_sha256": "fd189e0181cf4f2e82e70895224965f14e21bd482d22c28affc535349af2af17",
+    "raw_source_contents_verified": true,
+    "target_gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "total_cpu_threads": 4,
+    "empty_outputs": true,
+    "candidate_whole_speedup": null
+  },
+  "integration_cpu_regression": {
+    "code_commit": "1dd6df8fc10d8446491fea11bdf3dadb507428f9",
+    "scope": "CPU API/failure tests, no real MRI",
+    "passed": true,
+    "report": "coordinator/cpu_1dd6df8/cpu_integration_1dd6df8.json"
+  },
+  "scientific_metric_equivalence": "not_assessed; no formally confirmed whole-case gates"
 }

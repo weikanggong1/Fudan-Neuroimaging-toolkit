@@ -68,6 +68,21 @@ flock /tmp/fnit-recon-benchmark.lock \
 周期采样不能证明连续峰值。缓存关闭时 PyTorch allocated/reserved 可能不可用，
 不可写成零显存。预算为 20,000,000,000 字节；GB 为除以 1e9，GiB 为除以 2**30。
 
+多例顺序验证使用 `run_whole_queue.py`。`--configs` 按给定顺序列出完整配置，
+`--lock` 为服务器本地的共用锁，`--output` 必须是新队列目录，`--monitor` 和
+`--launcher` 为上述两个脚本的绝对路径。每例分别取得锁；上一例失败后保留
+非零状态并继续独立的下一例，最终队列也非零退出。`queue.json` 包含脚本和配置
+SHA、命令、状态及监测器的整例墙钟；锁等待和包装器开销另列，不计为算法时间。
+
+```bash
+# 两份配置分别声明原始T1和新输出；不复用中途检查点。
+python /code/validation/recon_all/optimizations/20261002_parallel/run_whole_queue.py \
+  --configs /data/benchmark/sub01_api.json /data/benchmark/sub02_cli.json \
+  --lock /tmp/fnit-recon-benchmark.lock --output /data/benchmark/queue_baseline \
+  --monitor /code/validation/recon_all/python_gpu_port/run_monitored.py \
+  --launcher /code/validation/recon_all/optimizations/20261002_parallel/execute_whole_case.py
+```
+
 ## 既有主页环境中的安装回归
 
 `validate_installation.py` 复用当前 Conda 的编译器构建 wheel，安装到新 `target`
