@@ -72,3 +72,7 @@ GCA 71,651,552 字节，SHA-256 `2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe15
 自产 pretess 输入的 GPU／成熟 CPU WM 编辑体素与文件 SHA 完全相同。LTA 矩阵、空间信息及最终 filled 体素零差异，filled 的 0／127／255 标签 Dice 均为 1。norm、ctrl_pts、aseg.presurf、brain、antsdn.brain、wm.seg 也逐体素相同。EntoWM 相对冻结参考有 1 个标签体素不同（最大标签差 4201，4201 标签 Dice 0.996678）；wm.asegedit／wm 各有 1 个体素不同、最大强度差 5。完整原生 WM 编辑读取 EntoWM，该差异已出现在 GPU 后编辑之前；不能据此宣称所有中间结果一致，也不把它归因于新的 GPU 后编辑。尚未单独确定 EntoWM 标签变化的机制。
 
 EntoWM 实际在 CUDA 使用 FP32 参数与输入，autocast 关闭、cuDNN TF32 关闭，其他默认 TF32 保留。同期本进程树最大采样显存为 4,659,871,744 字节，低于 20 GB；请求间隔 0.5 秒、实际最大间隔 18.979 秒、采样失败 0，因此它是采样峰值，不是连续瞬时峰值保证。第二例连续链和第二例 v3 原生配对仍在共享锁队列，生产默认仍不激活缓存。
+
+## 原生 v3 两例完整阶段验收
+
+两例同构建控制均完成，原始／缓存后端二进制 SHA-256 均为 `a9435e7e0a3141e54b28e14785fc098a8dc315a406c9b414520f4d5e38cceedb`，实际 ROMP fast=0／reproducible=1。sub01 原始→缓存 219.740→187.703 秒（下降 14.6%），sub02 缓存→原始，原始／缓存 185.731／163.217 秒（下降 12.1%）。两例完整调用 LTA 矩阵零差异，未改评分容差。sub02 两后端有限评分入口各 1,522,021 次，缓存刷新 2,841 个密度项；这些计数不覆盖未补丁的梯度入口。报告见 `native_same_build_v3_sub01.json`、`native_same_build_v3_sub02.json`，汇总见 `native_same_build_v3_timings.csv`。完整注册阶段的两例收益成立，生产接入仍由协调者结合连续链及原始 T1 整例决定。
