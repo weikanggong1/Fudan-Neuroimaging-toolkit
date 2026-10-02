@@ -395,15 +395,39 @@ def staged_timing(prepared, gpu, gpu_head_start, gpu_head_end, gpu_head_wall):
     positive = rerun.nonnegative
     recon = positive(prepared["preparation_report"]["recon_command_seconds"], "official reconstruction duration")
     worker_wall = positive(prepared["preparation_worker_wall_seconds"], "original preparation worker wall")
-    prep_wall = positive(prepared["timing"]["head_case_wall_seconds"], "original head preparation wall")
+    prep_wall = positive(prepared["timing"].get("preparation_coordinator_case_wall_seconds",
+        prepared["timing"].get("head_case_wall_seconds")), "original preparation coordinator wall")
     if recon > worker_wall + .001 or worker_wall > prep_wall + .001:
         raise ValueError("preparation timers exceed their same-process intervals")
     wall, queue = positive(gpu_head_wall, "head raw-DWI monotonic wall"), positive(gpu.get("gpu_lock_queue_seconds", 0.), "GPU lock queue")
     if queue > wall + .001 or parse_utc(gpu_head_end) < parse_utc(gpu_head_start):
         raise ValueError("invalid head GPU interval or lock queue")
+    if prepared.get("coordinator_transport") == "local":
+        binding = prepared.get("parent_connection")
+        if not binding:
+            raise ValueError("CPU-local staged timing needs its immutable actual head connection-start record")
+        path = Path(binding["path"])
+        if path.is_symlink() or cohort.sha256(path) != binding["sha256"]:
+            raise ValueError("actual parent head connection-start record changed")
+        parent = json.loads(path.read_bytes())
+        if parent.get("coordinator_identity", {}).get("hostname") != cohort.socket.gethostname():
+            raise ValueError("parent head and staged GPU coordinator clock domains differ")
+        parent_elapsed = positive((parse_utc(gpu_head_end)-parse_utc(parent["start_utc"])).total_seconds(), "head C-batch connection start to case GPU end")
+        return {"official_recon_command_seconds":recon, "preparation_worker_wall_seconds":worker_wall,
+            "preparation_coordinator_wall_seconds":prep_wall, "preparation_coordinator_identity":prepared.get("coordinator_identity"),
+            "cpu_driver_queue_seconds":positive(prepared["timing"]["cpu_driver_queue_seconds"],"CPU scheduler queue"),
+            "raw_dwi_head_wall_seconds":wall, "raw_dwi_head_wall_excluding_gpu_queue_seconds":max(0.,wall-queue),
+            "raw_dwi_cli_seconds":gpu.get("raw_dwi_cli_total_runtime_seconds"), "gpu_lock_queue_seconds":queue,
+            "head_C_batch_start_to_case_gpu_end_observed_utc_seconds":parent_elapsed,
+            "head_C_batch_start_to_case_gpu_end_excluding_gpu_queue_seconds":max(0.,parent_elapsed-queue),
+            "cross_host_prep_to_gpu_utc_difference_seconds":(parse_utc(gpu_head_start)-parse_utc(prepared["end_utc"])).total_seconds(),
+            "cross_host_prep_start_to_gpu_end_utc_difference_seconds":(parse_utc(gpu_head_end)-parse_utc(prepared["start_utc"])).total_seconds(),
+            "cross_host_utc_differences_are_wall_timers":False, "continuous_cold_pipeline":False,
+            "scope":"nodecw10 local case monotonic preparation wall; actual head C4-batch connection UTC start to this case head GPU end includes pre-case scheduling/freeze/wait; node/head UTC differences descriptive only, never used to synthesize monotonic or per-case cold wall"}
     elapsed = positive((parse_utc(gpu_head_end)-parse_utc(prepared["start_utc"])).total_seconds(), "observed staged UTC elapsed")
     gap = positive((parse_utc(gpu_head_start)-parse_utc(prepared["end_utc"])).total_seconds(), "observed preparation/GPU gap")
     return {"official_recon_command_seconds":recon, "preparation_worker_wall_seconds":worker_wall, "preparation_head_wall_seconds":prep_wall,
+            "preparation_coordinator_wall_seconds":prep_wall,
             "cpu_driver_queue_seconds":positive(prepared["timing"]["cpu_driver_queue_seconds"], "CPU scheduler queue"),
             "raw_dwi_head_wall_seconds":wall, "raw_dwi_head_wall_excluding_gpu_queue_seconds":max(0.,wall-queue),
             "raw_dwi_cli_seconds":gpu.get("raw_dwi_cli_total_runtime_seconds"), "gpu_lock_queue_seconds":queue,
@@ -432,8 +456,9 @@ def collect_gpu_result(record, response, head_start, head_end, head_wall):
 def atomic_cases_csv(path, records):
     path = Path(path)
     temporary = path.with_name(f".{path.name}.{cohort.uuid.uuid4().hex}.tmp")
-    columns = ("case_id","subject","status","official_recon_command_seconds","preparation_head_wall_seconds","raw_dwi_cli_seconds",
-               "raw_dwi_head_wall_seconds","gpu_lock_queue_seconds","prep_to_gpu_observed_utc_gap_seconds","staged_observed_utc_elapsed_seconds","timing_error")
+    columns = ("case_id","subject","status","official_recon_command_seconds","preparation_head_wall_seconds","preparation_coordinator_wall_seconds","raw_dwi_cli_seconds",
+               "raw_dwi_head_wall_seconds","gpu_lock_queue_seconds","prep_to_gpu_observed_utc_gap_seconds","staged_observed_utc_elapsed_seconds",
+               "head_C_batch_start_to_case_gpu_end_observed_utc_seconds","cross_host_prep_to_gpu_utc_difference_seconds","timing_error")
     try:
         with temporary.open("w", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=columns)

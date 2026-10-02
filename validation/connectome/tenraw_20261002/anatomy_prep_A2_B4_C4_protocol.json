@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-03",
+  "scope": "Actual running official raw-T1 preparation in fresh A2/B4/C4 namespaces; no candidate GPU scientific execution",
+  "candidate_source": "unknown",
+  "candidate_gpu_started": false,
+  "official_freesurfer_version": "freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45",
+  "official_threads_per_subject": 8,
+  "full_canonical_raw_subject_count": 10,
+  "preparation_origins": [
+    {"name": "A", "namespace_version": 1, "subjects": ["CON01", "CON03"], "coordinator": "headcw", "cpu_jobs": 2, "stop_prevents_new_dispatch": true, "status_at_observation": "official reconstruction running"},
+    {"name": "B", "namespace_version": 2, "subjects": ["CON04", "CON05", "CON06", "CON07"], "coordinator": "headcw", "configured_cpu_jobs": 8, "actual_official_jobs": 4, "head_controller_pid": 528772, "official_pids": {"CON04": 113660, "CON05": 113681, "CON06": 113664, "CON07": 113738}, "status_at_observation": "four official reconstructions running; other four original dispatch failures preserved"},
+    {"name": "C", "namespace_version": 3, "subjects": ["CON08", "CON09", "CON10", "CON11"], "coordinator": "nodecw10", "cpu_transport": "local", "cpu_jobs": 4, "head_wrapper_pid": 637373, "head_ssh_pid": 637374, "official_pids": {"CON08": 147110, "CON09": 147106, "CON10": 147240, "CON11": 147239}, "status_at_observation": "four actual official reconstructions running"}
+  ],
+  "B_failures_preserved": {
+    "subjects": ["CON08", "CON09", "CON10", "CON11"],
+    "ssh_exit_code": 255,
+    "stderr": "mux_client_request_session: session request failed: Session open refused by peer; fresh BatchMode fallback authentication was denied",
+    "official_commands_started": false,
+    "FS_job_directories_existed": false,
+    "failed_driver_entries_rewritten": false
+  },
+  "C_frozen_helper_sha256": {
+    "benchmark_connectome_raw_cohort.py": "79ebfa58fb40ab9e069a7615fb10700fbdda586120e8be0e59a26112c449c3e1",
+    "benchmark_connectome_anatomy_prep.py": "8fa0767ed1d328bcad58c7048c58f2c76669f453644c7208f0ad83d1161f8b98",
+    "head_launch_driver.py": "ce89871a18ca6898aface7f07e628da559c0e3bbe97713ff8cb6b3e8a8dd1317"
+  },
+  "actual_C_preflight": {
+    "status": "C4_local_official_cpu_preflight_verified",
+    "hostname": "nodecw10",
+    "cpu_count": 192,
+    "fresh_raw_T1_i_all_openmp8_argv_and_processes_verified": true,
+    "MRI_output_integrity_completed": false
+  },
+  "timing": {
+    "local_C_case_wall_host": "nodecw10",
+    "head_C_batch_connection_wall_host": "headcw",
+    "head_start_record_immutable": true,
+    "cross_host_UTC_used_as_monotonic_wall": false,
+    "continuous_cold_pipeline_claimed": false,
+    "CPU_parallelism_speedup_attributed_to_FNIT_GPU": false
+  },
+  "tests": {"protocol_tests_before_C_launch": 229, "seconds": 27.527, "MRI_or_GPU_benchmark_simulated": false},
+  "scientific_parity": "not_assessed",
+  "speedup": "not_assessed"
+}

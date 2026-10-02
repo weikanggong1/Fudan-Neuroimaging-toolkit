@@ -75,7 +75,14 @@ def validate_config(config):
         cohort.absolute_path(config.get(name), name)
     if not config.get("cpu_host") or not config.get("atlases") or any(name not in cohort.ATLAS_NAMES for name in config["atlases"]):
         raise ValueError("official preparation needs the original CPU host and supported atlas declarations")
-    cohort.ssh_command(config["cpu_host"], config.get("cpu_port"), config.get("cpu_control_path"), [config["cpu_python"]])
+    transport = config.get("cpu_transport", "ssh")
+    if transport not in ("ssh", "local"):
+        raise ValueError("unknown official preparation CPU transport")
+    if transport == "local":
+        if config["cpu_host"] != "nodecw10":
+            raise ValueError("local CPU transport requires the frozen nodecw10 host")
+    else:
+        cohort.ssh_command(config["cpu_host"], config.get("cpu_port"), config.get("cpu_control_path"), [config["cpu_python"]])
 
 
 def official_origin_identity(original_config, cases):
@@ -141,6 +148,10 @@ def verify_runtime_files(config):
     report = config["official_origin"]["report"]
     if cohort.sha256(report["path"]) != report["sha256"]:
         raise ValueError("recorded original official identity report changed")
+    if config.get("parent_connection"):
+        connection = config["parent_connection"]
+        if cohort.sha256(connection["path"]) != connection["sha256"]:
+            raise ValueError("original head connection-start record changed")
     verify_prior_preparations(config)
 
 
@@ -216,6 +227,13 @@ def derive_config(options):
                                   "driver_status_sha256_at_launch": cohort.hashlib.sha256(origin_bytes).hexdigest(),
                                   "input_manifest_path": str(manifest_path), "input_manifest_sha256": cohort.sha256(manifest_path)},
                   official_origin=official_origin_identity(original, full_cases))
+    if getattr(options, "cpu_transport", "ssh") == "local":
+        config["cpu_transport"] = "local"
+    if getattr(options, "parent_connection_record", None):
+        if config.get("cpu_transport") != "local":
+            raise ValueError("head connection-start record only belongs to an explicit CPU-local coordinator")
+        path = options.parent_connection_record
+        config["parent_connection"] = {"path": str(path), "sha256": cohort.sha256(path)}
     if selected is not None:
         config["selected_cases"] = list(selected)
         config["full_manifest_case_count"] = len(full_cases)
@@ -237,6 +255,8 @@ def derive_config(options):
 
 def worker(payload):
     config, action = payload["config"], payload["action"]
+    if config.get("cpu_transport") == "local" and cohort.socket.gethostname().split(".")[0] != config["cpu_host"]:
+        raise ValueError("local official CPU execution requires the actual frozen nodecw10 hostname")
     verify_runtime_files(config)
     if action == "preflight":
         case = payload["case"]
@@ -341,18 +361,34 @@ def validate_preparation_result(config, case, result):
 
 
 def remote(config, action, case, log_path):
+    if config.get("cpu_transport") == "local":
+        validate_config(config)
+        if cohort.socket.gethostname().split(".")[0] != config["cpu_host"]:
+            raise ValueError("local official CPU execution requires the actual frozen nodecw10 hostname")
+        payload = {"action": action, "config": config, "case": case, "version": VERSION}
+        result = subprocess.run([config["cpu_python"], config["anatomy_prep_script"], "_worker"],
+                                input=json.dumps(payload), capture_output=True, text=True)
+        Path(log_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(log_path).write_text(result.stderr)
+        if result.returncode:
+            raise RuntimeError(f"local official CPU worker failed with code {result.returncode}; see {log_path}")
+        return json.loads(result.stdout)
     transport = {**config, "worker_script": config["anatomy_prep_script"]}
     return cohort.remote(transport, "cpu", {"action": action, "config": config, "case": case, "version": VERSION}, log_path)
 
 
-def case_timing(started, ended, queued, recon_seconds):
+def case_timing(started, ended, queued, recon_seconds, *, cpu_local=False):
     full = finite_nonnegative(ended - started, "head reconstruction/report wall")
     queue = finite_nonnegative(started - queued, "CPU scheduler queue")
     recon = finite_nonnegative(recon_seconds, "official reconstruction command timer")
     if recon > full + .001:
         raise ValueError("official command timer exceeds its enclosing head monotonic task wall")
-    return {"head_case_wall_seconds": full, "cpu_driver_queue_seconds": queue, "recon_command_seconds": recon,
-            "scope": "one head-process monotonic timer before CPU SSH through actual report/input/anatomy checks; CPU scheduler queue before dispatch recorded separately; GPU not started"}
+    result = {"preparation_coordinator_case_wall_seconds": full, "cpu_driver_queue_seconds": queue, "recon_command_seconds": recon,
+              "scope": "one preparation coordinator monotonic timer before local CPU worker through actual report/input/anatomy checks; GPU not started" if cpu_local else
+                       "one head-process monotonic timer before CPU SSH through actual report/input/anatomy checks; CPU scheduler queue before dispatch recorded separately; GPU not started"}
+    if not cpu_local:
+        result["head_case_wall_seconds"] = full
+    return result
 
 
 def collect_preparation_result(record, context):
@@ -377,7 +413,7 @@ def atomic_cases_csv(path, records):
     path = Path(path)
     temporary = path.with_name(f".{path.name}.{cohort.uuid.uuid4().hex}.tmp")
     columns = ("version", "case_id", "subject", "status", "start_utc", "end_utc", "head_case_wall_seconds",
-               "cpu_driver_queue_seconds", "recon_command_seconds", "preparation_worker_wall_seconds")
+               "preparation_coordinator_case_wall_seconds", "cpu_driver_queue_seconds", "recon_command_seconds", "preparation_worker_wall_seconds")
     try:
         with temporary.open("w", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=columns)
@@ -398,6 +434,7 @@ def run(options):
              "scope": SCOPE, "candidate_source": "unknown", "gpu_status": "GPU_not_started", "gpu_started": False,
              "full_pipeline_benchmark": False, "comparison_ready": False, "cases": {},
              "scientific_parity": "not_assessed", "speedup": "not_assessed"}
+    state["coordinator_identity"] = cohort.host_identity()
     state_lock = cohort.threading.RLock()
     def save():
         with state_lock:
@@ -422,7 +459,8 @@ def run(options):
         queued = time.perf_counter()
         for case in cases:
             state["cases"][VERSION + "/" + case["case_id"]] = {"version": VERSION, "case_id": case["case_id"],
-                                                                   "subject": case["subject"], "status": "cpu_queued"}
+                "subject": case["subject"], "status": "cpu_queued", "coordinator_identity": state["coordinator_identity"],
+                "coordinator_transport": config.get("cpu_transport", "ssh"), "parent_connection": config.get("parent_connection")}
         save()
         def reconstruct(case):
             if (report_dir / "STOP_DISPATCH").exists():
@@ -441,7 +479,7 @@ def run(options):
             ended, ended_utc = time.perf_counter(), cohort.utc()
             context["end_utc"] = ended_utc
             try:
-                context["timing"] = case_timing(begun, ended, queued, result.get("recon_command_seconds", 0.))
+                context["timing"] = case_timing(begun, ended, queued, result.get("recon_command_seconds", 0.), cpu_local=config.get("cpu_transport") == "local")
             except Exception as error:
                 context["timing_error"] = {"type": type(error).__name__, "message": str(error)}
             return context
@@ -479,7 +517,9 @@ def run(options):
         state.update(completed_cases=completed, timing_complete=timing_complete, status=status)
     except Exception as error:
         state.update(status="failed_anatomy_preparation", error={"type": type(error).__name__, "message": str(error)})
-    state.update(end_utc=cohort.utc(), head_preparation_wall_seconds=time.perf_counter() - started)
+    state.update(end_utc=cohort.utc(), preparation_coordinator_wall_seconds=time.perf_counter() - started)
+    if config.get("cpu_transport") != "local":
+        state["head_preparation_wall_seconds"] = state["preparation_coordinator_wall_seconds"]
     save()
     return 0 if state["status"] == "completed_anatomy_preparation" else 1
 
@@ -499,6 +539,9 @@ def main(argv=None):
     parser.add_argument("--avoid-preparations", nargs=2, action="append", metavar=("PREP_CONFIG", "DRIVER_DIR"),
                         help="prior original preparation config plus its driver STOP_DISPATCH; selected subjects must never have started there")
     parser.add_argument("--cpu-threads", type=int, choices=(8,), default=8)
+    parser.add_argument("--cpu-transport", choices=("ssh", "local"), default="ssh",
+                        help="local only on the actual frozen nodecw10 coordinator; does not use ssh localhost")
+    parser.add_argument("--parent-connection-record", type=Path, help="immutable actual head SSH-start record for a CPU-local coordinator")
     parser.add_argument("--poll-seconds", type=float, default=5.)
     options = parser.parse_args(argv)
     for value in vars(options).values():

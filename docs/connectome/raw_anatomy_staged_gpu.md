@@ -121,7 +121,11 @@ benchmark_harness="$benchmark_root/formal_harness_staged_gpu_v1"
 
 命令只需把单来源的 `--prep-config` 和 `--prep-driver-report-dir` 替换为 `--prep-bindings /shared/candidate_prep_bindings.json`。每份原配置逐字节保存，原 helper 分别导入，CLI 实际使用各 case 自己来源中的 FreeSurfer 目录。重复/缺例、不同原始输入、伪装官方身份、超出原明确准备子集和映射文件变更全部拒绝。GPU 输出依旧使用一个全新的 namespace。
 
-各例的准备计时来自各自原 head 控制器，等待间隔保留原始 UTC 观察值；两批准备不被伪装成一次连续冷十例评测。
+各例的准备计时来自各自原控制器和实际主机，等待间隔保留原始 UTC 观察值；多批准备不被伪装成一次连续冷十例评测。
+
+如果一批准备在 nodecw10 本地运行，映射可有第三个来源：A 为 CON01/03，B 为 CON04–07，C 为 CON08–11。各来源的 `case_ids` 只列实际被选中的原始准备结果；B 中 CON08–11 的 SSH 失败保持原样，不混入成功来源。
+
+C 的准备 timer 来自 node 控制器，保留 `preparation_coordinator_wall_seconds`，不填 `preparation_head_wall_seconds`。`cross_host_*_utc_difference_seconds` 可包含主机时钟偏差，明确不作为 wall timer。实际不可变 head SSH 开始记录可给出 `head_C_batch_start_to_case_gpu_end_observed_utc_seconds`：它是**整个 C4 batch 的 head 连接起点到本例 GPU 结束**，包含本例之前的启动、排队、代码冻结和等待，不能当作单例连续冷 wall。实际 head 包装连接的 monotonic 总时长和 node 每例时长分别保留。
 
 ## 4. 官方步骤与实际调用
 
@@ -157,5 +161,6 @@ JSON/CSV 分别保存官方 `recon_command_seconds`、原准备 worker/head 的 
 
 - 2026-10-03：新增候选解剖准备与真实冻结源码绑定；原准备配置/工具字节不变；复用现有 cohort GPU worker、资源检查和 wall 评测器。默认普通 fresh cohort 路径保持原样。
 - 同日：支持显式十例 case 到多个原准备来源映射；保留各配置原字节与独立计时，用于首两例和余八例的安全并行 CPU 调度。
+- 同日：支持 A2+B4+C4 来源和 CPU-local 主机计时；主机时钟不同的原始 UTC 差不被用于合成 monotonic wall。
 - 准备阶段：[raw_anatomy_prep.md](raw_anatomy_prep.md)。共同基线受控重跑：[raw_cohort_controlled_rerun.md](raw_cohort_controlled_rerun.md)。
 - 官方 FreeSurfer：[recon-all 文档](https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all)、[官方代码库](https://github.com/freesurfer/freesurfer)。生产 pipeline 与各算法参考文献见项目 connectome 主说明，本工具只负责评测编排。
