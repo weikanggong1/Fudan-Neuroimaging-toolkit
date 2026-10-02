@@ -15,11 +15,13 @@ import os
 import shutil
 import subprocess
 import time
+from types import SimpleNamespace
 
 import nibabel as nib
 from nibabel.cifti2.cifti2_axes import BrainModelAxis, SeriesAxis
 import numpy as np
 
+from .._hemisphere_parallel import map_hemispheres, resolve_cpu_threads, workbench_environment
 from .assets_setup import ASSETS, FMRIPREP_ASSETS, FMRIPREP_BASE, _sha256
 from .surface import (
     SurfaceHemisphere, SurfaceProjectionResult, _check_gifti_hemisphere,
@@ -66,6 +68,17 @@ def _las(image):
     current = nib.orientations.io_orientation(image.affine)
     target = nib.orientations.axcodes2ornt(("L", "A", "S"))
     return image.as_reoriented(nib.orientations.ornt_transform(current, target))
+
+
+def _las_grid(image):
+    """Inspect the LAS grid without decoding or reorienting 4D image data."""
+    current = nib.orientations.io_orientation(image.affine)
+    target = nib.orientations.axcodes2ornt(("L", "A", "S"))
+    orientation = nib.orientations.ornt_transform(current, target)
+    order = np.argsort(orientation[:, 0]).astype(int)
+    shape = tuple(image.shape[index] for index in order) + tuple(image.shape[3:])
+    affine = image.affine @ nib.orientations.inv_ornt_aff(orientation, image.shape[:3])
+    return SimpleNamespace(shape=shape, ndim=image.ndim, affine=affine, header=image.header)
 
 
 def _tr_seconds(image, name, expected=None):
@@ -149,7 +162,7 @@ def _metric_frames(path, hemisphere, nframes):
 
 def create_fmriprep_cifti(
     clean_mni, left_metric, right_metric, left_label, right_label,
-    hcp_dseg, output_file, *, tr_seconds=None,
+    hcp_dseg, output_file, *, tr_seconds=None, parallel=True, cpu_threads=None,
 ):
     """Assemble fixed 91k CIFTI using NiWorkflows 1.14.4 ordering.
 
@@ -158,6 +171,8 @@ def create_fmriprep_cifti(
     the installer SHA-256 manifest. ``tr_seconds`` supplies the original
     BIDS TR and must agree with the NIfTI header after unit conversion.
     Without it, the validated MNI header provides the time step.
+    ``parallel`` reads the independent cortical metrics concurrently while
+    preserving L/R axis order. ``cpu_threads`` is the total CPU budget.
     """
     bold = _las(nib.load(str(clean_mni)))
     tr = _tr_seconds(bold, "MNI BOLD", tr_seconds)
@@ -166,13 +181,20 @@ def create_fmriprep_cifti(
     nframes = bold.shape[3]
     models = []
     arrays = []
-    for hemisphere, metric_file in (("LEFT", left_metric), ("RIGHT", right_metric)):
+    def cortex(hemisphere, threads):
+        hemisphere = "LEFT" if hemisphere == "L" else "RIGHT"
+        metric_file = left_metric if hemisphere == "LEFT" else right_metric
         frames = _metric_frames(metric_file, hemisphere, nframes)
         selected = vertices[hemisphere]
-        arrays.append(np.stack([frame[selected] for frame in frames], axis=0))
-        models.append(BrainModelAxis.from_surface(
+        values = np.stack([frame[selected] for frame in frames], axis=0)
+        model = BrainModelAxis.from_surface(
             selected, 32492, name=f"CIFTI_STRUCTURE_CORTEX_{hemisphere}"
-        ))
+        )
+        return values, model
+
+    for values, model in map_hemispheres(cortex, parallel=parallel, cpu_threads=cpu_threads):
+        arrays.append(values)
+        models.append(model)
     label_data = np.asarray(labels.dataobj, dtype=np.int16)
     bold_data = np.asarray(bold.dataobj, dtype=np.float32)
     if not np.isfinite(bold_data).all():
@@ -257,14 +279,20 @@ def run_fmriprep_surface_projection(
     tr_seconds: float | None = None,
     goodvoxels: str | Path | None = None,
     wb_command: str | Path = "wb_command", overwrite: bool = False,
+    parallel: bool = True, cpu_threads: int | None = None,
 ) -> SurfaceProjectionResult:
     """Project matched T1w/MNI BOLD and publish the complete fsLR32k/91k result.
 
     ``tr_seconds`` is the source BIDS TR; both volume headers must agree.
     Existing generated files are protected unless ``overwrite=True``.
     Workbench failure or invalid output leaves previous results intact.
+    ``parallel=False`` selects serial hemispheres; ``cpu_threads`` is the
+    total budget, shared by the L/R Workbench processes. ``None`` uses
+    OMP_NUM_THREADS or PyTorch's existing thread count. No parent process
+    thread setting is changed.
     """
     output = Path(output_dir).expanduser().resolve()
+    budget = resolve_cpu_threads(cpu_threads)
     names = _projection_names()
     for name in names:
         target = output / name
@@ -280,7 +308,7 @@ def run_fmriprep_surface_projection(
     if t1w.shape[3] != mni.shape[3]:
         raise ValueError("T1w and MNI inputs must have equal frame counts")
     labels, _ = _cifti_assets(left_label, right_label, hcp_dseg)
-    _mni_grid(_las(mni), labels)
+    _mni_grid(_las_grid(mni), labels)
     if goodvoxels is not None:
         roi = nib.load(str(goodvoxels))
         values = np.asarray(roi.dataobj)
@@ -298,12 +326,17 @@ def run_fmriprep_surface_projection(
     with TemporaryDirectory(prefix=".fnit-surface-", dir=output.parent) as temporary:
         staging = Path(temporary)
 
-        def command(key, *args):
-            start = time.perf_counter()
-            subprocess.run([wb, *map(str, args)], check=True, capture_output=True, text=True)
-            timing[key] = time.perf_counter() - start
+        def project(hemisphere, threads):
+            paths = hemis[hemisphere]
+            local_timing = {}
+            environment = workbench_environment(threads)
 
-        for hemisphere, paths in hemis.items():
+            def command(key, *args):
+                start = time.perf_counter()
+                subprocess.run([wb, *map(str, args)], check=True, capture_output=True,
+                               text=True, env=environment)
+                local_timing[key] = time.perf_counter() - start
+
             native = staging / f"{hemisphere}.native.func.gii"
             dilated = staging / f"{hemisphere}.native_dilated.func.gii"
             masked = staging / f"{hemisphere}.native_masked.func.gii"
@@ -324,11 +357,18 @@ def run_fmriprep_surface_projection(
                     paths["atlas_midthickness"], "-current-roi", paths["native_roi"])
             command(f"{hemisphere}_atlas_mask", "-metric-mask", atlas,
                     paths["atlas_roi"], final)
+            return local_timing
+
+        projection_started = time.perf_counter()
+        for local_timing in map_hemispheres(project, parallel=parallel, cpu_threads=budget):
+            timing.update(local_timing)
+        timing["hemisphere_projection"] = time.perf_counter() - projection_started
         start = time.perf_counter()
         dtseries = staging / "space-fsLR_den-91k_bold.dtseries.nii"
         create_fmriprep_cifti(
             clean_mni, staging / "L.32k.func.gii", staging / "R.32k.func.gii",
             left_label, right_label, hcp_dseg, dtseries, tr_seconds=tr,
+            parallel=parallel, cpu_threads=budget,
         )
         timing["cifti"] = time.perf_counter() - start
         # QC must own its data before staging is unlinked. A float32
@@ -342,6 +382,7 @@ def run_fmriprep_surface_projection(
             "varying_grayordinates": int((np.ptp(data, axis=0) > 0).sum()),
             "nonfinite_values": int(np.count_nonzero(~np.isfinite(data))),
             "tr_seconds": float(image.header.get_axis(0).step),
+            "execution": {"parallel": parallel and budget > 1, "cpu_threads": budget},
             "timing_seconds": timing,
         }, indent=2) + "\n", encoding="utf-8")
         _publish_projection(staging, output, names, overwrite)

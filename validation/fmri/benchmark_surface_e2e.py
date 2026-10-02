@@ -80,6 +80,9 @@ def main():
     parser.add_argument("--wb-command", required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=8)
+    parser.add_argument("--serial-hemispheres", action="store_true",
+                        help="Run L/R sequentially for a paired execution comparison")
+    parser.add_argument("--msm-execution", choices=("optimized", "reference"), default="optimized")
     parser.add_argument("--gpu-memory-limit-gb", type=float, default=20)
     parser.add_argument("--capture-dir", type=Path,
                         help="New protected directory for actual API geometry and MSM inputs")
@@ -125,8 +128,8 @@ def main():
                               "peak_reserved_bytes": torch.cuda.max_memory_reserved(selected)})
 
     def observed_reset(device=None):
-        # MSMSulc resets its counters before each hemisphere. Preserve the
-        # preceding maximum so the final report covers preparation and both L/R.
+        # Preserve any internal reset boundary. Parallel registration resets
+        # once in its parent; legacy serial registration resets per hemisphere.
         memory_snapshot("before_internal_reset_" + str(len(memory_phases)))
         return original_reset(device)
 
@@ -207,13 +210,20 @@ def main():
     surface_pipeline.run_msmsulc = observed_msm
     surface_pipeline.prepare_msmsulc_inputs = observed_prepare_msm
     surface_pipeline.run_fmriprep_surface_projection = observed_projection
+    execution_options = {}
+    supported_options = inspect.signature(fMRISurface_pipeline).parameters
+    if "parallel" in supported_options:
+        execution_options["parallel"] = not args.serial_hemispheres
+    if "cpu_threads" in supported_options:
+        execution_options["cpu_threads"] = args.threads
     try:
         started = time.perf_counter()
         result = fMRISurface_pipeline(
             args.bids_root, args.derivatives_root, subject=args.subject,
             recon_all=args.recon_all, hcp_assets_dir=args.hcp_assets_dir,
             wb_command=args.wb_command, device=args.device, signal="preproc",
-            registered_spheres=None, msm_config=None, msm_execution="optimized",
+            registered_spheres=None, msm_config=None, msm_execution=args.msm_execution,
+            **execution_options,
         )
         torch.cuda.synchronize(selected)
         observed_api_seconds = time.perf_counter() - started
@@ -301,6 +311,13 @@ def main():
         "input_sha256": input_hashes, "actual_projection_inputs_sha256": actual_input_hashes,
         "actual_msm_inputs_sha256": msm_input_hashes, "checks": checks,
         "algorithm": {"signal": "preproc", "registered_spheres": None,
+                      "hemisphere_execution": (
+                          "parallel" if execution_options.get("parallel") and args.threads > 1 else "serial"
+                      ),
+                      "parallel_requested": bool(execution_options.get("parallel")),
+                      "parallel_api_supported": "parallel" in supported_options,
+                      "cpu_thread_budget": args.threads,
+                      "msm_execution": args.msm_execution,
                       "registration": metadata["FNIT"]["Registration"],
                       "registration_details": metadata["FNIT"]["RegistrationDetails"],
                       "msm_report": qc["MSM"]["Report"], "coverage": qc["Coverage"]},

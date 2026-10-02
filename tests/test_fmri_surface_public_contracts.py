@@ -97,7 +97,7 @@ def public_case(tmp_path, monkeypatch):
     monkeypatch.setattr(pipeline.shutil, "which", lambda _: "/mock/wb_command")
     monkeypatch.setattr(pipeline.subprocess, "run", lambda *args, **kwargs: None)
     labels = nib.Nifti1Image(np.ones((2, 2, 2), dtype=np.int16), affine)
-    monkeypatch.setattr(pipeline, "_cifti_assets", lambda *args: (pipeline._las(labels), {}))
+    monkeypatch.setattr(pipeline, "_cifti_assets", lambda *args: (pipeline._las_grid(labels), {}))
     monkeypatch.setattr(pipeline, "_sha256", lambda _: "b" * 64)
     calls = []
 
@@ -151,7 +151,8 @@ def test_msmall_outputs_coexist_with_default_registration(public_case, monkeypat
     monkeypatch.setattr(pipeline, "resample_world", resample)
     default = pipeline.fMRISurface_pipeline(**public_case.arguments, signal=signal)
 
-    def refine(inputs, spheres, native_geometry, assets, work, configuration, device, execution, wb_command):
+    def refine(inputs, spheres, native_geometry, assets, work, configuration, device, execution,
+               wb_command, **kwargs):
         output = work / "msmall"
         output.mkdir()
         write_json(output / "registration_report.json", {

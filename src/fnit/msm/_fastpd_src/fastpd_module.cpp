@@ -8,6 +8,7 @@
 #include <map>
 #include <cstring>
 #include <exception>
+#include <stdexcept>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -16,6 +17,29 @@
 #include "FastPD.h"
 
 namespace {
+
+// Every graph/geometry computation below owns its state. Immutable snapshots
+// let independent hemisphere workers run without the Python GIL, including
+// when a caller supplied a writable or read-only view of a mutable array.
+// Snapshot references and Python exceptions are handled only while holding it.
+struct BufferSnapshot {
+    PyObject* object;
+    const char* pointer;
+    explicit BufferSnapshot(const Py_buffer& buffer) {
+        if (PyBytes_Check(buffer.obj)) { object = buffer.obj; Py_INCREF(object); }
+        else object = PyBytes_FromStringAndSize(static_cast<const char*>(buffer.buf), buffer.len);
+        pointer = object ? PyBytes_AS_STRING(object) : nullptr;
+    }
+    ~BufferSnapshot() { Py_XDECREF(object); }
+    const char* data() const { return pointer; }
+};
+struct ReleasedGIL {
+    PyThreadState* state;
+    ReleasedGIL() : state(PyEval_SaveThread()) {}
+    ~ReleasedGIL() { PyEval_RestoreThread(state); }
+    ReleasedGIL(const ReleasedGIL&) = delete;
+    ReleasedGIL& operator=(const ReleasedGIL&) = delete;
+};
 
 struct Face {
     std::array<int, 3> ids;
@@ -160,10 +184,16 @@ PyObject* optimize(PyObject*, PyObject* args) {
         PyErr_SetString(PyExc_ValueError, "too many faces or vertices for FastPD");
         return nullptr;
     }
+    // Validate the immutable copies, so the checked bytes are exactly those
+    // consumed after releasing the GIL, even for mutable caller buffers.
+    BufferSnapshot face_copy(face_buffer), cost_copy(cost_buffer);
+    if (!face_copy.object || !cost_copy.object) {
+        PyBuffer_Release(&face_buffer); PyBuffer_Release(&cost_buffer); return nullptr;
+    }
     // Buffers can start at arbitrary byte offsets. Reading through typed
     // pointers is undefined on unaligned input, so validation also uses memcpy.
-    const auto* face_data = static_cast<const char*>(face_buffer.buf);
-    const auto* cost_data = static_cast<const char*>(cost_buffer.buf);
+    const auto* face_data = face_copy.data();
+    const auto* cost_data = cost_copy.data();
     for (Py_ssize_t f = 0; f < face_count; ++f) {
         std::int32_t ids[3];
         std::memcpy(ids, face_data + f*3*sizeof(std::int32_t), sizeof(ids));
@@ -187,9 +217,11 @@ PyObject* optimize(PyObject*, PyObject* args) {
     }
     PyObject* answer = nullptr;
     try {
-        const auto labels = fuse(static_cast<const char*>(face_buffer.buf),
-                                 static_cast<const char*>(cost_buffer.buf),
-                                 vertices, static_cast<int>(face_count));
+        std::string labels;
+        {
+            ReleasedGIL unlocked;
+            labels = fuse(face_copy.data(), cost_copy.data(), vertices, static_cast<int>(face_count));
+        }
         answer = PyBytes_FromStringAndSize(labels.data(), labels.size());
     } catch (const std::exception& error) {
         PyErr_SetString(PyExc_RuntimeError, error.what());
@@ -221,13 +253,18 @@ PyObject* source_wls_cost(PyObject*, PyObject* args) {
             "expected float64 [rows,width,3] buffer and finite positive sigma");
         return nullptr;
     }
-    const char* data = static_cast<const char*>(buffer.buf);
+    BufferSnapshot snapshot(buffer);
+    if (!snapshot.object) { PyBuffer_Release(&buffer); return nullptr; }
+    const char* data = snapshot.data();
     double cost = 0.0;
-    for (Py_ssize_t row = 0; row < rows; ++row) {
+    try {
+      ReleasedGIL unlocked;
+      for (Py_ssize_t row = 0; row < rows; ++row) {
         double weight_sum = 0.0, value_sum = 0.0;
         for (Py_ssize_t column = 0; column < width; ++column) {
             // A buffer may be a byte-offset memoryview. Avoid undefined
-            // unaligned double loads, and retain the GIL for mutable buffers.
+            // unaligned double loads. The immutable snapshot stays valid
+            // while the GIL is released.
             double sample[3];
             std::memcpy(sample, data + (row*width+column)*sample_bytes,
                         sizeof(sample));
@@ -235,10 +272,8 @@ PyObject* source_wls_cost(PyObject*, PyObject* args) {
             const double valid = sample[2];
             if (!std::isfinite(distance) || distance < 0.0 ||
                 !std::isfinite(similarity) || (valid != 0.0 && valid != 1.0)) {
-                PyBuffer_Release(&buffer);
-                PyErr_SetString(PyExc_ValueError,
+                throw std::invalid_argument(
                     "WLS distance and similarity must be finite; distance nonnegative and valid zero or one");
-                return nullptr;
             }
             if (valid == 0.0 || distance == 0.0) continue;
             const double weight = std::exp(-distance/denominator);
@@ -247,6 +282,11 @@ PyObject* source_wls_cost(PyObject*, PyObject* args) {
         }
         if (weight_sum > 0.0) value_sum /= weight_sum;
         cost += value_sum;
+    }
+    } catch (const std::exception& error) {
+        PyBuffer_Release(&buffer);
+        PyErr_SetString(PyExc_ValueError, error.what());
+        return nullptr;
     }
     PyBuffer_Release(&buffer);
     if (!std::isfinite(cost)) {
@@ -306,15 +346,16 @@ PyObject* source_rotation_matrices(PyObject*, PyObject* args) {
     PyObject* output = PyBytes_FromStringAndSize(nullptr, count*matrix_bytes);
     if (!output) { release(); return nullptr; }
     char* matrices = PyBytes_AS_STRING(output);
-    const char* points = static_cast<const char*>(prior_buffer.buf);
-    for (Py_ssize_t index = 0; index < count; ++index) {
+    BufferSnapshot snapshot(prior_buffer);
+    if (!snapshot.object) { release(); Py_DECREF(output); return nullptr; }
+    const char* points = snapshot.data();
+    try {
+      ReleasedGIL unlocked;
+      for (Py_ssize_t index = 0; index < count; ++index) {
         Point3 point;
         std::memcpy(point.data(), points+index*point_bytes, point_bytes);
         for (double value : point) if (!std::isfinite(value)) {
-            release();
-            Py_DECREF(output);
-            PyErr_SetString(PyExc_ValueError, "rotation coordinates must be finite");
-            return nullptr;
+            throw std::invalid_argument("rotation coordinates must be finite");
         }
         normalize_point(point);
         const double cosine = (centre[0]*point[0]+centre[1]*point[1]) +
@@ -357,6 +398,9 @@ PyObject* source_rotation_matrices(PyObject*, PyObject* args) {
             }
         }
         std::memcpy(matrices+index*matrix_bytes, matrix, sizeof(matrix));
+    }
+    } catch (const std::exception& error) {
+        release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, error.what()); return nullptr;
     }
     release();
     return output;
@@ -426,31 +470,37 @@ PyObject* source_radial_selection(PyObject*, PyObject* args) {
     }
     auto* output = PyBytes_FromStringAndSize(nullptr, query_count*4*sizeof(double));
     if (!output) { release(); return nullptr; }
-    auto read_point = [](const Py_buffer& buffer, Py_ssize_t index) {
+    char* output_data = PyBytes_AS_STRING(output);
+    BufferSnapshot vertices_copy(vertices);
+    BufferSnapshot faces_copy(faces);
+    BufferSnapshot queries_copy(queries);
+    BufferSnapshot candidates_copy(candidates);
+    if (!vertices_copy.object || !faces_copy.object || !queries_copy.object || !candidates_copy.object) { release(); Py_DECREF(output); return nullptr; }
+    auto read_point = [](const char* data, Py_ssize_t index) {
         Point3 point;
-        std::memcpy(point.data(), static_cast<const char*>(buffer.buf)+index*3*sizeof(double), 3*sizeof(double));
+        std::memcpy(point.data(), data+index*3*sizeof(double), 3*sizeof(double));
         return point;
     };
+    try {
+      ReleasedGIL unlocked;
     for (Py_ssize_t row = 0; row < query_count; ++row) {
-        const Point3 point = read_point(queries, row);
+        const Point3 point = read_point(queries_copy.data(), row);
         double best = std::numeric_limits<double>::max();
         double result[4] = {-1, 0, 0, 0};
         for (Py_ssize_t column = 0; column < width; ++column) {
             std::int64_t face;
-            std::memcpy(&face, static_cast<const char*>(candidates.buf)+(row*width+column)*sizeof(face), sizeof(face));
+            std::memcpy(&face, candidates_copy.data()+(row*width+column)*sizeof(face), sizeof(face));
             if (face < 0 || face >= face_count) {
-                release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "radial candidate is outside the mesh");
-                return nullptr;
+                throw std::invalid_argument("radial candidate is outside the mesh");
             }
             std::array<Point3, 3> triangle;
             for (int corner = 0; corner < 3; ++corner) {
                 std::int64_t vertex;
-                std::memcpy(&vertex, static_cast<const char*>(faces.buf)+(face*3+corner)*sizeof(vertex), sizeof(vertex));
+                std::memcpy(&vertex, faces_copy.data()+(face*3+corner)*sizeof(vertex), sizeof(vertex));
                 if (vertex < 0 || vertex >= vertex_count) {
-                    release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "triangle vertex is outside the mesh");
-                    return nullptr;
+                    throw std::invalid_argument("triangle vertex is outside the mesh");
                 }
-                triangle[corner] = read_point(vertices, vertex);
+                triangle[corner] = read_point(vertices_copy.data(), vertex);
             }
             auto first = subtract_point(triangle[2], triangle[0]); normalize_point(first);
             auto second = subtract_point(triangle[1], triangle[0]); normalize_point(second);
@@ -466,7 +516,10 @@ PyObject* source_radial_selection(PyObject*, PyObject* args) {
                 for (int dimension = 0; dimension < 3; ++dimension) result[dimension+1] = projected[dimension];
             }
         }
-        std::memcpy(PyBytes_AS_STRING(output)+row*4*sizeof(double), result, sizeof(result));
+        std::memcpy(output_data+row*4*sizeof(double), result, sizeof(result));
+    }
+    } catch (const std::exception& error) {
+        release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, error.what()); return nullptr;
     }
     release(); return output;
 }
@@ -499,32 +552,39 @@ PyObject* source_sphere_warp(PyObject*, PyObject* args) {
     }
     auto* output = PyBytes_FromStringAndSize(nullptr, queries.len);
     if (!output) { release(); return nullptr; }
-    auto read_point = [](const Py_buffer& buffer, Py_ssize_t index) {
+    char* output_data = PyBytes_AS_STRING(output);
+    BufferSnapshot vertices_copy(vertices);
+    BufferSnapshot faces_copy(faces);
+    BufferSnapshot target_copy(target);
+    BufferSnapshot queries_copy(queries);
+    BufferSnapshot patches_copy(patches);
+    if (!vertices_copy.object || !faces_copy.object || !target_copy.object || !queries_copy.object || !patches_copy.object) { release(); Py_DECREF(output); return nullptr; }
+    auto read_point = [](const char* data, Py_ssize_t index) {
         Point3 point;
-        std::memcpy(point.data(), static_cast<const char*>(buffer.buf)+index*3*sizeof(double), 3*sizeof(double));
+        std::memcpy(point.data(), data+index*3*sizeof(double), 3*sizeof(double));
         return point;
     };
+    try {
+      ReleasedGIL unlocked;
     for (Py_ssize_t row = 0; row < query_count; ++row) {
         std::int64_t face;
-        std::memcpy(&face, static_cast<const char*>(patches.buf)+row*sizeof(face), sizeof(face));
+        std::memcpy(&face, patches_copy.data()+row*sizeof(face), sizeof(face));
         if (face < 0 || face >= face_count) {
-            release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "warp face is outside the mesh");
-            return nullptr;
+            throw std::invalid_argument("warp face is outside the mesh");
         }
         std::array<Point3, 3> triangle;
         std::array<std::int64_t, 3> ids;
         for (int corner = 0; corner < 3; ++corner) {
-            std::memcpy(&ids[corner], static_cast<const char*>(faces.buf)+(face*3+corner)*sizeof(std::int64_t), sizeof(std::int64_t));
+            std::memcpy(&ids[corner], faces_copy.data()+(face*3+corner)*sizeof(std::int64_t), sizeof(std::int64_t));
             if (ids[corner] < 0 || ids[corner] >= vertex_count) {
-                release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "warp vertex is outside the mesh");
-                return nullptr;
+                throw std::invalid_argument("warp vertex is outside the mesh");
             }
-            triangle[corner] = read_point(vertices, ids[corner]);
+            triangle[corner] = read_point(vertices_copy.data(), ids[corner]);
         }
         auto first = subtract_point(triangle[2], triangle[0]); normalize_point(first);
         auto second = subtract_point(triangle[1], triangle[0]); normalize_point(second);
         auto normal = cross_point(first, second); normalize_point(normal);
-        const auto point = read_point(queries, row);
+        const auto point = read_point(queries_copy.data(), row);
         const double scale = dot_point(normal, triangle[0])/dot_point(normal, point);
         const Point3 projected{{point[0]*scale, point[1]*scale, point[2]*scale}};
         const auto area = [&](int first_corner, int second_corner) {
@@ -537,7 +597,7 @@ PyObject* source_sphere_warp(PyObject*, PyObject* args) {
         std::sort(order.begin(), order.end(), [&](int a, int b) { return ids[a] < ids[b]; });
         Point3 result{{0, 0, 0}};
         for (int corner : order) {
-            const auto destination = read_point(target, ids[corner]);
+            const auto destination = read_point(target_copy.data(), ids[corner]);
             const double weight = weights[corner]/total;
             for (int dimension = 0; dimension < 3; ++dimension)
                 result[dimension] += destination[dimension]*weight;
@@ -545,10 +605,12 @@ PyObject* source_sphere_warp(PyObject*, PyObject* args) {
         normalize_point(result);
         for (double& value : result) value *= 100;
         if (!std::isfinite(result[0]) || !std::isfinite(result[1]) || !std::isfinite(result[2])) {
-            release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "sphere warp produced a nonfinite point");
-            return nullptr;
+            throw std::invalid_argument("sphere warp produced a nonfinite point");
         }
-        std::memcpy(PyBytes_AS_STRING(output)+row*3*sizeof(double), result.data(), 3*sizeof(double));
+        std::memcpy(output_data+row*3*sizeof(double), result.data(), 3*sizeof(double));
+    }
+    } catch (const std::exception& error) {
+        release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, error.what()); return nullptr;
     }
     release(); return output;
 }
@@ -578,34 +640,42 @@ PyObject* source_triangle_nearest(PyObject*, PyObject* args) {
     }
     auto* output = PyBytes_FromStringAndSize(nullptr, patches.len);
     if (!output) { release(); return nullptr; }
+    char* output_data = PyBytes_AS_STRING(output);
+    BufferSnapshot vertices_copy(vertices);
+    BufferSnapshot faces_copy(faces);
+    BufferSnapshot queries_copy(queries);
+    BufferSnapshot patches_copy(patches);
+    if (!vertices_copy.object || !faces_copy.object || !queries_copy.object || !patches_copy.object) { release(); Py_DECREF(output); return nullptr; }
+    try {
+      ReleasedGIL unlocked;
     for (Py_ssize_t row = 0; row < query_count; ++row) {
         std::int64_t face;
-        std::memcpy(&face, static_cast<const char*>(patches.buf)+row*sizeof(face), sizeof(face));
+        std::memcpy(&face, patches_copy.data()+row*sizeof(face), sizeof(face));
         if (face < 0 || face >= face_count) {
-            release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "nearest face is outside the mesh");
-            return nullptr;
+            throw std::invalid_argument("nearest face is outside the mesh");
         }
         Point3 point;
-        std::memcpy(point.data(), static_cast<const char*>(queries.buf)+row*3*sizeof(double), 3*sizeof(double));
+        std::memcpy(point.data(), queries_copy.data()+row*3*sizeof(double), 3*sizeof(double));
         double best = std::numeric_limits<double>::max();
         std::int64_t selected = -1;
         for (int corner = 0; corner < 3; ++corner) {
             std::int64_t vertex;
-            std::memcpy(&vertex, static_cast<const char*>(faces.buf)+(face*3+corner)*sizeof(vertex), sizeof(vertex));
+            std::memcpy(&vertex, faces_copy.data()+(face*3+corner)*sizeof(vertex), sizeof(vertex));
             if (vertex < 0 || vertex >= vertex_count) {
-                release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "nearest vertex is outside the mesh");
-                return nullptr;
+                throw std::invalid_argument("nearest vertex is outside the mesh");
             }
             Point3 coordinates;
-            std::memcpy(coordinates.data(), static_cast<const char*>(vertices.buf)+vertex*3*sizeof(double), 3*sizeof(double));
+            std::memcpy(coordinates.data(), vertices_copy.data()+vertex*3*sizeof(double), 3*sizeof(double));
             const double distance = point_norm(subtract_point(point, coordinates));
             if (distance < best) { best = distance; selected = vertex; }
         }
         if (selected < 0) {
-            release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "nearest point distances are nonfinite");
-            return nullptr;
+            throw std::invalid_argument("nearest point distances are nonfinite");
         }
-        std::memcpy(PyBytes_AS_STRING(output)+row*sizeof(selected), &selected, sizeof(selected));
+        std::memcpy(output_data+row*sizeof(selected), &selected, sizeof(selected));
+    }
+    } catch (const std::exception& error) {
+        release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, error.what()); return nullptr;
     }
     release(); return output;
 }

@@ -24,6 +24,8 @@ prepared = prepare_fmriprep_surface_inputs(
     output_dir="/absolute/path/work/initial",       # FS→fsLR 初始球面及 ROI 工作目录
     wb_command="wb_command",                         # Workbench 命令
     overwrite=False,                                 # 是否替换准备结果
+    parallel=True,                                   # 左右半球独立准备
+    cpu_threads=8,                                   # 总 CPU 预算；并行时左右各四个
 )
 inputs = prepare_msmsulc_inputs(
     subject_dir="/absolute/path/recon-all/sub-0001",  # 与上一步相同的 recon-all 目录
@@ -31,6 +33,8 @@ inputs = prepare_msmsulc_inputs(
     hcp_assets_dir="/absolute/path/hcp_surface_assets",  # HCP 164k 参考球面和 sulc
     output_dir="/absolute/path/work/msm-inputs",    # 双侧球面、sulc、仿射矩阵工作目录
     wb_command="wb_command",                         # Workbench 命令
+    parallel=True,                                   # 双侧转换和仿射准备并行
+    cpu_threads=8,                                   # 本次准备的总 CPU 预算
 )
 spheres = run_msmsulc(
     inputs=inputs,                                    # {"L": MSMSulcInputs, "R": MSMSulcInputs}
@@ -38,6 +42,8 @@ spheres = run_msmsulc(
     device="cuda:0",                                 # PyTorch 计算设备，也可为 cpu
     config=MSMSulcConfig(),                           # 默认 HCP 四级配置，也可填官方配置文件路径
     execution="optimized",                          # 缓存和合并传输；reference 用于执行方式对照
+    parallel=True,                                   # 左右独立配准；False 保留串行执行
+    cpu_threads=8,                                   # 局部邻域搜索的总 CPU 预算
 )
 print(spheres["L"])  # L.sphere.MSMSulc.native.surf.gii
 print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
@@ -46,6 +52,24 @@ print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 `MSMSulcInputs` 每侧包括 `native_sphere`、`rotated_sphere`、`native_sulc`、`reference_sphere`、`reference_sulc`、`affine` 六个绝对路径，分别保存原生球面、FS→fsLR 旋转球面、原生脑沟图、参考球面、参考脑沟图和初始旋转矩阵。`run_msmsulc` 返回 `{"L": Path, "R": Path}`；每个 `.surf.gii` 含 N×3 顶点坐标及 F×3 三角形索引，可直接用于 Workbench 表面重采样。
 
 `registration_report.json` 记录实际配置、仿射角度、逐级能量、更新数量、停止位置、展开操作、耗时、峰值已分配显存和写出折叠数。球面可传给 `fMRISurface_pipeline(registered_spheres=(spheres["L"], spheres["R"]))` 做固定球面投影对照；使用已注册球面时不再指定 `msm_config`。独立配准输出是工作文件，最终 fMRI 时间序列由 surface 流程写成 BIDS Derivatives。
+
+### 左右并行与资源预算
+
+`prepare_msmsulc_inputs` 和 `run_msmsulc` 默认 `parallel=True`。`cpu_threads=None` 依次读取 `OMP_NUM_THREADS` 与 `torch.get_num_threads()`；显式输入必须是正整数，表示双侧合计预算。预算 8 分为 4/4，预算 1 自动串行；`parallel=False` 用于逐侧执行。该参数限制局部邻域查询和准备阶段的 Workbench 子进程；PyTorch 使用调用方已有的线程池，库不改全局 CPU 线程设置。MSMAll 的独立配准入口使用相同执行参数，算法配置仍由各自配置类控制。
+
+CUDA 并行时，左右模型和数组独立，各用一个 stream；所有 worker 和 stream 结束后按固定 L/R 顺序汇总报告。每侧仍按原顺序求刚性成本、位移标签、HOCR/FastPD 和能量停止条件。WLS、Rodrigues 矩阵与 HOCR/FastPD 保留包内有序 C++ 运算：真实验证已经表明末位舍入会影响球面邻域和后续离散选择；几何、特征和标签成本继续由 PyTorch GPU 计算。
+
+库内部不重置调用方的 CUDA allocator 峰值。`registration_report.json` 的 `execution` 记录总线程预算、实际并行方式、stream 数和 `peak_scope`；双侧 `peak_allocated_gb` 共享调用方上次重置以来的设备峰值，不能相加作为新峰值。测量独立配准时，在调用前初始化设备、统一重置计数，结束后同步并记录整个调用。
+
+| 配准计算 | 当前后端 | 严格结果边界 |
+|---|---|---|
+| 最近邻与特征插值 | PyTorch GPU；必要时 cKDTree CPU 回退 | GPU 检查相邻 27 格，并用外部格距离下界证明最近邻。近并列或证明范围不足保留原搜索；有序 CSR 保持既有稀疏权重与累加顺序。 |
+| 三角形成本、标签应用、球面变形 | PyTorch GPU float64 | 与原顺序一致的标签、应变成本和逐级传递。 |
+| WLS、Rodrigues、源码精度回退 | 包内 C++ CPU | 原标量运算次序；缓存旋转矩阵后 GPU 应用。 |
+| HOCR/FastPD 与逐顶点展开 | 包内 C++ / CPU | 图模型独立，离散标签与展开的顺序保持。 |
+| GIFTI/报告读写、准备阶段仿射与 ROI | nibabel / NumPy、Workbench CPU | 文件格式与准备的参考定义保持；双侧分别执行。 |
+
+CPU 运算保留在影响离散解的严格标量边界和文件处理处。GPU 最近邻与有序稀疏路径的实际收益按完整双侧复测记录，不从单个算子或启动两个 worker 推断整链加速。
 
 离散迭代中的 DATA 和控制网格保留 newMSM 的展开处理。最后从 DATA 变形到原生球面后，按官方行为写出有限坐标，并分别报告求解坐标和实际 float32 GIFTI 的翻折数、最小方向比及输入退化面数。最终原生球面不再额外优化；使用前应检查这份质控报告。
 
@@ -78,10 +102,11 @@ print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 fnit-msm msmsulc \
   --inputs-json /absolute/path/msmsulc.inputs.json \
   --output-dir /absolute/path/work/msmsulc \
+  --cpu-threads 8 \
   --device cuda:0
 ```
 
-JSON 顶层含 `L`、`R`；每侧填 `MSMSulcInputs` 的六个文件路径，可用绝对路径或相对清单目录的路径。`--config` 与 `--execution` 对应上述 Python 参数。MSMAll 命令使用 `fnit-msm msmall`，完整输入和例子见[功能页](msmall.md)。
+JSON 顶层含 `L`、`R`；每侧填 `MSMSulcInputs` 的六个文件路径，可用绝对路径或相对清单目录的路径。`--config` 与 `--execution` 对应上述 Python 参数；`--cpu-threads` 为总 CPU 预算，`--no-parallel` 对应 `parallel=False`。MSMAll 命令使用 `fnit-msm msmall`，支持相同执行参数；完整输入和例子见[功能页](msmall.md)。
 
 ## 原版对照命令
 

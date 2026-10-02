@@ -9,6 +9,7 @@ import nibabel.freesurfer.io as fsio
 import numpy as np
 
 from ..msm.prepare import _write_gifti
+from .._hemisphere_parallel import map_hemispheres, resolve_cpu_threads, workbench_environment
 
 
 @dataclass(frozen=True)
@@ -42,18 +43,22 @@ def load_fsnative_to_t1w(value):
 
 def prepare_t1w_surface_geometry(subject_dir: str | Path, output_dir: str | Path,
                                  *, fsnative_to_t1w=None,
-                                 overwrite: bool = False) -> T1SurfaceGeometry:
+                                 overwrite: bool = False,
+                                 parallel: bool = True,
+                                 cpu_threads: int | None = None) -> T1SurfaceGeometry:
     """Convert recon-all white/pial meshes from tkRAS to scanner T1w RAS.
 
     The returned pairs have native FreeSurfer vertex order. This only reads
     recon-all files with nibabel; no FreeSurfer executable is invoked. Both
     hemispheres are validated before any final file is written; failed
-    publication restores previous outputs.
+    publication restores previous outputs. ``parallel=False`` selects the
+    serial control; ``cpu_threads`` supplies the total hemisphere budget.
     """
     from .surface_fmriprep import _publish_projection
 
     subject = Path(subject_dir).expanduser().resolve()
     output = Path(output_dir).expanduser().resolve()
+    budget = resolve_cpu_threads(cpu_threads)
     destinations = {
         hemi: {name: output / f"{hemi}.{name}.T1w.native.surf.gii"
                for name in ("white", "pial", "midthickness")}
@@ -72,9 +77,8 @@ def prepare_t1w_surface_geometry(subject_dir: str | Path, output_dir: str | Path
                  @ np.linalg.inv(orig.header.get_vox2ras_tkr()))
     if not np.isfinite(transform).all() or abs(np.linalg.det(transform[:3, :3])) < 1e-10:
         raise ValueError("orig.mgz and fsnative_to_t1w must define an invertible finite world affine")
-    result = {}
-    converted = {}
-    for hemi in ("lh", "rh"):
+    def convert(hemisphere, threads):
+        hemi = "lh" if hemisphere == "L" else "rh"
         paths = destinations[hemi]
         white, faces = fsio.read_geometry(str(subject / "surf" / f"{hemi}.white"))
         pial, pial_faces = fsio.read_geometry(str(subject / "surf" / f"{hemi}.pial"))
@@ -102,20 +106,28 @@ def prepare_t1w_surface_geometry(subject_dir: str | Path, output_dir: str | Path
         white = _apply_affine(white, transform)
         pial = _apply_affine(pial, transform)
         mid = _apply_affine(mid, transform)
-        converted[hemi] = ({"white": white, "pial": pial, "midthickness": mid}, faces)
-        result[hemi] = T1SurfacePair(paths["white"], paths["pial"],
-                                      paths["midthickness"], len(white), mid_path)
+        vertices = {"white": white, "pial": pial, "midthickness": mid}
+        pair = T1SurfacePair(paths["white"], paths["pial"],
+                             paths["midthickness"], len(white), mid_path)
+        return hemi, vertices, faces, pair
+
+    converted = map_hemispheres(convert, parallel=parallel, cpu_threads=budget)
     output.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix=".fnit-t1-surfaces-", dir=output.parent) as directory:
         staging = Path(directory)
-        names = []
-        for hemi, (vertices, faces) in converted.items():
+        def serialize(hemisphere, threads):
+            hemi, vertices, faces, _ = converted[0 if hemisphere == "L" else 1]
+            names = []
             for name, values in vertices.items():
                 destination = destinations[hemi][name]
                 _write_gifti(staging / destination.name, values, faces, hemi)
                 names.append(destination.name)
+            return names
+
+        names = tuple(name for entries in map_hemispheres(
+            serialize, parallel=parallel, cpu_threads=budget) for name in entries)
         _publish_projection(staging, output, tuple(names), overwrite)
-    return T1SurfaceGeometry(result["lh"], result["rh"])
+    return T1SurfaceGeometry(converted[0][3], converted[1][3])
 
 
 @dataclass(frozen=True)
@@ -140,13 +152,17 @@ def prepare_fmriprep_surface_inputs(
     subject_dir: str | Path, hcp_assets_dir: str | Path, output_dir: str | Path,
     *, wb_command: str | Path = "wb_command", fsnative_to_t1w=None,
     overwrite: bool = False,
+    parallel: bool = True, cpu_threads: int | None = None,
 ) -> T1SurfacePreparation:
     """Prepare T1w native meshes, FS-to-fsLR spheres and cortex ROIs.
 
     Requires existing recon-all ``orig.mgz``, white/pial, midthickness or
     graymid, sphere.reg and thickness files. All 16 generated files are
     protected by ``overwrite`` and staged together before publication.
-    Does not create MNI surfaces or resample wmparc.
+    ``parallel`` runs independent L/R branches; ``cpu_threads`` is their
+    shared total budget, split between Workbench child processes. A budget
+    of one uses the serial path. Does not create MNI surfaces or resample
+    wmparc.
     """
     import shutil
     import subprocess
@@ -154,6 +170,7 @@ def prepare_fmriprep_surface_inputs(
 
     subject = Path(subject_dir).expanduser().resolve()
     output = Path(output_dir).expanduser().resolve()
+    budget = resolve_cpu_threads(cpu_threads)
     names = _preparation_names()
     for name in names:
         path = output / name
@@ -165,9 +182,9 @@ def prepare_fmriprep_surface_inputs(
     executable = shutil.which(str(wb_command))
     if executable is None:
         raise FileNotFoundError(wb_command)
-    def command(destination, *args):
+    def command(destination, environment, *args):
         subprocess.run([executable, *map(str, args)], check=True,
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, env=environment)
         if not destination.is_file():
             raise RuntimeError(f"Workbench did not create {destination}")
 
@@ -176,9 +193,11 @@ def prepare_fmriprep_surface_inputs(
         staging = Path(directory)
         geometry = prepare_t1w_surface_geometry(
             subject, staging / "native", fsnative_to_t1w=fsnative_to_t1w,
+            parallel=parallel, cpu_threads=budget,
         )
-        for hemi, fs_hemi, pair in (("L", "lh", geometry.left),
-                                    ("R", "rh", geometry.right)):
+        def prepare(hemi, threads):
+            fs_hemi, pair = ("lh", geometry.left) if hemi == "L" else ("rh", geometry.right)
+            environment = workbench_environment(threads)
             vertices, faces = fsio.read_geometry(str(subject / "surf" / f"{fs_hemi}.sphere.reg"))
             native_faces = np.asarray(nib.load(str(pair.white)).darrays[1].data)
             if (vertices.shape != (pair.vertex_count, 3) or not np.isfinite(vertices).all()
@@ -192,7 +211,7 @@ def prepare_fmriprep_surface_inputs(
                 f"spherical_std.164k_fs_{hemi}.surf.gii"
             )
             registered = staging / f"{hemi}.sphere.FS_to_fsLR.native.surf.gii"
-            command(registered, "-surface-sphere-project-unproject", sphere,
+            command(registered, environment, "-surface-sphere-project-unproject", sphere,
                     average, transform, registered)
             thickness = np.asarray(fsio.read_morph_data(
                 str(subject / "surf" / f"{fs_hemi}.thickness")), dtype=np.float32)
@@ -204,9 +223,10 @@ def prepare_fmriprep_surface_inputs(
             nib.save(nib.GiftiImage(darrays=[nib.gifti.GiftiDataArray(
                 (np.abs(thickness) > 0).astype(np.float32), intent="NIFTI_INTENT_SHAPE"
             )]), str(raw))
-            command(filled, "-metric-fill-holes", pair.midthickness, raw, filled)
-            command(individual, "-metric-remove-islands", pair.midthickness,
+            command(filled, environment, "-metric-fill-holes", pair.midthickness, raw, filled)
+            command(individual, environment, "-metric-remove-islands", pair.midthickness,
                     filled, individual)
+        map_hemispheres(prepare, parallel=parallel, cpu_threads=budget)
         _publish_projection(staging, output, names, overwrite)
 
     def published_pair(pair):

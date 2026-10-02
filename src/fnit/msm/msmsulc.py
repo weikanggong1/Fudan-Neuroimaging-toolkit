@@ -15,6 +15,7 @@ from ._affine import _surface, _affine_initialization
 from .config import MSMSulcConfig
 from ._sphere_map import RadialSphereMap, _area_weights, _cross, _dot, _normalize
 from .prepare import MSMSulcInputs
+from ._execution import register_hemispheres, execution_report, record_statistics, current_statistics
 
 def _ico(level,*,cached_area=False):
     a,b=0.8506508084,0.5257311121
@@ -67,6 +68,23 @@ def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda
     reverse_map=RadialSphereMap(new_vertices,new_faces,selected,execution=execution,source_precision=source_precision)
     forward_ids,forward_weight,_=forward_map.weights(torch.as_tensor(new_vertices,device=selected))
     reverse_ids,reverse_weight,_=reverse_map.weights(torch.as_tensor(vertices,device=selected))
+    if selected.type == "cuda" and execution == "optimized":
+        from ._ordered_sparse import adaptive_values, SparseLayoutTooLarge
+        record_statistics(cuda_adaptive_resampling_calls=1)
+        old_area=(_vertex_area(np.asarray(vertices,dtype=np.float64),np.asarray(faces,dtype=np.int64))
+                  if old_area is None else np.asarray(old_area,dtype=np.float64))
+        new_area=(_vertex_area(np.asarray(new_vertices,dtype=np.float64),np.asarray(new_faces,dtype=np.int64))
+                  if new_area is None else np.asarray(new_area,dtype=np.float64))
+        if (old_area.shape != (len(vertices),) or new_area.shape != (len(new_vertices),)
+                or not np.isfinite(old_area).all() or not np.isfinite(new_area).all()):
+            raise ValueError("adaptive resampling vertex-area arrays differ from their meshes")
+        try:
+            return adaptive_values(forward_ids,forward_weight,reverse_ids,reverse_weight,
+                                   values,old_area,new_area).cpu().numpy()
+        except SparseLayoutTooLarge:
+            # Keep the original sparse algorithm for exceptional meshes;
+            # never allocate a huge rectangular padding table on CUDA.
+            record_statistics(adaptive_cpu_layout_fallback_calls=1)
     fi=forward_ids.cpu().numpy();fw=forward_weight.cpu().numpy()
     ri=reverse_ids.cpu().numpy();rw=reverse_weight.cpu().numpy()
     m=len(new_vertices);n=len(vertices)
@@ -235,7 +253,7 @@ def _label_samples(grid,faces,max_distance):
                     samples[distance]=grid[neighbour]
                     seen.add(neighbour);next_frontier.append(neighbour)
         frontier=next_frontier
-    return centre,np.asarray([samples[d] for d in sorted(samples)],dtype=np.float64)
+    return centre,np.asarray([samples[d] for d in sorted(samples)],dtype=np.float64).reshape(-1,3)
 
 
 def _rescaled_labels(centre,samples,scale):
@@ -391,7 +409,7 @@ def _native_output_qc(vertices,faces,original):
 def run_msmsulc(
     inputs: dict[str, MSMSulcInputs], output_dir: str | Path, *,
     device: str = "cuda:0", config: MSMSulcConfig | str | Path | None = None,
-    execution: str = "optimized",
+    execution: str = "optimized", parallel: bool = True, cpu_threads: int | None = None,
 ) -> dict[str, Path]:
     """Register both sulcal spheres with the explicit official MSMSulc schedule."""
     from . import _fastpd_native
@@ -408,150 +426,164 @@ def run_msmsulc(
         torch.cuda.init()
     output=Path(output_dir).expanduser().resolve()
     output.mkdir(parents=True,exist_ok=True)
-    report={}
-    for hemi in "LR":
-        started=time.perf_counter()
-        if selected.type=="cuda":torch.cuda.reset_peak_memory_stats(selected)
-        entry=inputs[hemi]
-        native,native_faces=_surface(entry.rotated_sphere)
-        reference_xyz,reference_faces=_surface(entry.reference_sphere)
-        # File-loaded Triangle areas are cached before recentre/true_rescale.
-        native_area=_vertex_area(native,native_faces)
-        reference_area=_vertex_area(reference_xyz,reference_faces)
-        native=_normalize_sphere(native)
-        reference_xyz=_normalize_sphere(reference_xyz)
-        source_metric=np.asarray(nib.load(str(entry.native_sulc)).darrays[0].data,np.float64)
-        reference_metric=np.asarray(nib.load(str(entry.reference_sulc)).darrays[0].data,np.float64)
-        if (source_metric.shape!=(len(native),) or reference_metric.shape!=(len(reference_xyz),)
-                or not np.isfinite(source_metric).all() or not np.isfinite(reference_metric).all()):
-            raise ValueError(f"{hemi} sphere/metric dimensions differ or metric is not finite")
-        affine_started=time.perf_counter()
-        affine_grid,affine_faces,affine_area=_ico(config.data_grid[0],cached_area=True)
-        affine_source=_variance_normalize(_adaptive_resample(native,native_faces,source_metric,
-                                                              affine_grid,affine_faces,device=device,execution=execution,
-                                                              old_area=native_area,new_area=affine_area))
-        affine_target=_variance_normalize(_adaptive_resample(reference_xyz,reference_faces,reference_metric,
-                                                              affine_grid,affine_faces,device=device,execution=execution,
-                                                              old_area=reference_area,new_area=affine_area))
-        affine,angles,affine_report,previous_positions=_affine_initialization(affine_grid,affine_faces,
-                                                          affine_source,affine_target,selected,config,execution=execution)
-        previous_grid=affine_grid
-        previous_faces=affine_faces
-        affine_seconds=time.perf_counter()-affine_started
-        stages=[]
-        for stage_index in range(1,4):
-            stage_started=time.perf_counter()
-            level=config.control_grid[stage_index]
-            data_level=config.data_grid[stage_index]
-            lam=config.regularization[stage_index]
-            regular_np,faces_np=_ico(level)
-            data_np,data_faces,data_area=_ico(data_level,cached_area=True)
-            label_grid,label_faces=_ico(config.sampling_grid[stage_index])
-            regular=torch.as_tensor(regular_np,dtype=torch.float64,device=selected)
-            strain_original=torch.as_tensor(data_np[:len(regular_np)],dtype=torch.float64,device=selected)
-            # Official transfer: previous data grid -> native mesh -> the new
-            # data/control grids. Direct CP-to-CP transfer changes trajectories.
-            native_positions=_sphere_warp(torch.as_tensor(native,device=selected),previous_grid,
-                                          previous_faces,previous_positions,selected,execution=execution)
-            source_positions=_sphere_warp(torch.as_tensor(data_np,device=selected),native,
-                                          native_faces,native_positions,selected,execution=execution)
-            cp_positions=_sphere_warp(regular,native,native_faces,native_positions,selected,execution=execution)
-            source_positions,source_unfold=_unfold(source_positions,data_faces)
-            cp_positions,control_unfold=_unfold(cp_positions,faces_np)
-            src=_variance_normalize(_adaptive_resample(native,native_faces,source_metric,
-                                                        data_np,data_faces,device=device,execution=execution,
-                                                        old_area=native_area,new_area=data_area))
-            tgt=_variance_normalize(_adaptive_resample(reference_xyz,reference_faces,reference_metric,
-                                                        data_np,data_faces,device=device,execution=execution,
-                                                        old_area=reference_area,new_area=data_area))
-            source_values=torch.as_tensor(src,device=selected)
-            target_values=torch.as_tensor(tgt,device=selected)
-            target_map=RadialSphereMap(data_np,data_faces,selected,execution=execution)
-            edges=np.unique(np.sort(np.concatenate((faces_np[:,[0,1]],
-                faces_np[:,[1,2]],faces_np[:,[2,0]])),axis=1),axis=0)
-            chord=np.linalg.norm(regular_np[edges[:,0]]-regular_np[edges[:,1]],axis=1)
-            spacing=float((200*np.arcsin(chord/200)).max())
-            centre,samples=_label_samples(label_grid,label_faces,0.5*spacing)
-            sorted_faces=np.sort(faces_np,axis=1).astype(np.int32)
-            face_tensor=torch.as_tensor(sorted_faces.astype(np.int64),device=selected)
-            face_bytes=sorted_faces.tobytes()
-            iterations=[];scale=1.0;previous_energy=0.0;converged=False
-            for iteration in range(config.iterations[stage_index]):
-                iteration_started=time.perf_counter()
-                prior=cp_positions.clone()
-                prior_np=prior.detach().cpu().numpy()
-                rotations=_rotation_matrices(prior_np,centre,selected)
-                current_map=RadialSphereMap(prior_np,faces_np,selected,execution=execution)
-                _,_,patch=current_map.weights(source_positions)
-                weights=_triplet_data_weights(prior,face_tensor,patch,source_positions)
-                layout=_face_layout(sorted_faces,patch,weights,source_values,selected)
-                labels=np.zeros(len(regular_np),np.int16)
-                changed=0
-                label_positions,scale=_rescaled_labels(centre,np.vstack((centre,samples)),scale)
-                # Source costs and applyLabeling rotate every label, including
-                # label zero. R(prior)*centre differs from prior by rounding;
-                # retaining prior for zero labels alters near-tie proposals.
-                cp_positions=_rotated_label(rotations,label_positions[0])
-                for _ in range(2):
-                    for label,sample in enumerate(label_positions):
-                        if np.all(labels==label):continue
-                        candidate=_rotated_label(rotations,sample)
-                        costs=_face_costs(cp_positions,candidate,strain_original,face_tensor,
-                                          layout,target_map,target_values,lam,
-                                          simval=config.simval[stage_index],config=config,fold_reference=prior)
-                        ordered=costs.astype(np.float64)
-                        choice=np.frombuffer(_fastpd_native.optimize(
-                            face_bytes,ordered.tobytes(),len(regular_np)),dtype=np.uint8)
-                        update=(choice==1)&(labels!=label)
-                        if update.any():
-                            mask=torch.as_tensor(update,device=selected)
-                            cp_positions[mask]=candidate[mask]
-                            labels[update]=label
-                            changed+=int(update.sum())
-                energy_costs=_face_costs(cp_positions,cp_positions,strain_original,face_tensor,
-                                         layout,target_map,target_values,lam,
-                                         simval=config.simval[stage_index],config=config,
-                                         energy_only=True,fold_reference=prior)
-                # evaluateTotalCostSum adds triplets sequentially in face order.
-                energy=sum(float(value) for value in energy_costs[:,0])
-                # Source checks convergence before applyLabeling and before the
-                # control/data warp. Revert this tentative fusion on stopping.
-                stopping=iteration>2 and (iteration-1)%2==0 and previous_energy-energy<0.001
-                if stopping:
-                    cp_positions=prior;converged=True
-                    iterations.append({"changed":changed,"energy":energy,"applied":False,
-                                       "seconds":time.perf_counter()-iteration_started})
-                    break
-                source_positions=_sphere_warp(source_positions,prior_np,
-                                              faces_np,cp_positions,selected,execution=execution)
-                cp_positions,moved=_unfold(cp_positions,faces_np);control_unfold+=moved
-                source_positions,moved=_unfold(source_positions,data_faces);source_unfold+=moved
-                previous_energy=energy
-                iterations.append({"changed":changed,"energy":energy,"applied":True,
-                                   "seconds":time.perf_counter()-iteration_started})
-            previous_grid=data_np;previous_faces=data_faces;previous_positions=source_positions
-            stages.append({"control_points":len(regular_np),"data_points":len(data_np),
-                           "labels":len(samples)+1,"similarity":config.simval[stage_index],
-                           "maximum_iterations":config.iterations[stage_index],"converged":converged,
-                           "source_unfold_updates":source_unfold,"control_unfold_updates":control_unfold,
-                           "iterations":iterations,"seconds":time.perf_counter()-stage_started})
-        vertices=_sphere_warp(torch.as_tensor(native,device=selected),previous_grid,
-                              previous_faces,previous_positions,selected,execution=execution).detach().cpu().numpy()
-        output_qc=_native_output_qc(vertices,native_faces,native)
-        # User-authorized source-compatible output: official transform() saves
-        # this interpolation directly. Its dense native output can contain a
-        # folded face even with unfolded DATA/control grids; the real paired
-        # oracle has confirmed the same face. Keep both actual-precision counts
-        # in the report and do not introduce an additional final deformation.
-        path=output/f"{hemi}.sphere.MSMSulc.native.surf.gii"
-        nib.save(nib.GiftiImage(darrays=[
-            nib.gifti.GiftiDataArray(vertices.astype(np.float32),intent="NIFTI_INTENT_POINTSET"),
-            nib.gifti.GiftiDataArray(native_faces.astype(np.int32),intent="NIFTI_INTENT_TRIANGLE")]),str(path))
-        report[hemi]={"seconds":time.perf_counter()-started,
-                      "affine_angles_deg":angles,"affine_seconds":affine_seconds,
-                      "affine":affine_report,"config":config.to_dict(),"execution":execution,
-                      **output_qc,
-                      "peak_allocated_gb":(torch.cuda.max_memory_allocated(selected)/1e9
-                                           if selected.type=="cuda" else None),"stages":stages}
+    def register(hemi, threads):
+        path, report = _register_msmsulc_one(inputs[hemi],output,hemi=hemi,
+                                           device=device,config=config,execution=execution)
+        report["cpu_threads"] = threads
+        report["execution_counts"] = current_statistics()
+        return path, report
+    results = register_hemispheres(register,selected,parallel=parallel,cpu_threads=cpu_threads)
+    report = {hemi:results[index][1] for index,hemi in enumerate("LR")}
+    overall = execution_report(selected,parallel=parallel,cpu_threads=cpu_threads)
+    for hemisphere in "LR":
+        report[hemisphere]["peak_allocated_gb"] = overall["peak_allocated_gb"]
+        report[hemisphere]["peak_scope"] = overall["peak_scope"]
+    report["execution"] = overall
     (output/"registration_report.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")
     return {hemi:output/f"{hemi}.sphere.MSMSulc.native.surf.gii" for hemi in "LR"}
+
+
+def _register_msmsulc_one(entry, output, *, hemi, device, config, execution):
+    from . import _fastpd_native
+    selected=torch.device(device)
+    started=time.perf_counter()
+    native,native_faces=_surface(entry.rotated_sphere)
+    reference_xyz,reference_faces=_surface(entry.reference_sphere)
+    # File-loaded Triangle areas are cached before recentre/true_rescale.
+    native_area=_vertex_area(native,native_faces)
+    reference_area=_vertex_area(reference_xyz,reference_faces)
+    native=_normalize_sphere(native)
+    reference_xyz=_normalize_sphere(reference_xyz)
+    source_metric=np.asarray(nib.load(str(entry.native_sulc)).darrays[0].data,np.float64)
+    reference_metric=np.asarray(nib.load(str(entry.reference_sulc)).darrays[0].data,np.float64)
+    if (source_metric.shape!=(len(native),) or reference_metric.shape!=(len(reference_xyz),)
+            or not np.isfinite(source_metric).all() or not np.isfinite(reference_metric).all()):
+        raise ValueError(f"{hemi} sphere/metric dimensions differ or metric is not finite")
+    affine_started=time.perf_counter()
+    affine_grid,affine_faces,affine_area=_ico(config.data_grid[0],cached_area=True)
+    affine_source=_variance_normalize(_adaptive_resample(native,native_faces,source_metric,
+                                                          affine_grid,affine_faces,device=device,execution=execution,
+                                                          old_area=native_area,new_area=affine_area))
+    affine_target=_variance_normalize(_adaptive_resample(reference_xyz,reference_faces,reference_metric,
+                                                          affine_grid,affine_faces,device=device,execution=execution,
+                                                          old_area=reference_area,new_area=affine_area))
+    affine,angles,affine_report,previous_positions=_affine_initialization(affine_grid,affine_faces,
+                                                      affine_source,affine_target,selected,config,execution=execution)
+    previous_grid=affine_grid
+    previous_faces=affine_faces
+    affine_seconds=time.perf_counter()-affine_started
+    stages=[]
+    for stage_index in range(1,4):
+        stage_started=time.perf_counter()
+        level=config.control_grid[stage_index]
+        data_level=config.data_grid[stage_index]
+        lam=config.regularization[stage_index]
+        regular_np,faces_np=_ico(level)
+        data_np,data_faces,data_area=_ico(data_level,cached_area=True)
+        label_grid,label_faces=_ico(config.sampling_grid[stage_index])
+        regular=torch.as_tensor(regular_np,dtype=torch.float64,device=selected)
+        strain_original=torch.as_tensor(data_np[:len(regular_np)],dtype=torch.float64,device=selected)
+        # Official transfer: previous data grid -> native mesh -> the new
+        # data/control grids. Direct CP-to-CP transfer changes trajectories.
+        native_positions=_sphere_warp(torch.as_tensor(native,device=selected),previous_grid,
+                                      previous_faces,previous_positions,selected,execution=execution)
+        source_positions=_sphere_warp(torch.as_tensor(data_np,device=selected),native,
+                                      native_faces,native_positions,selected,execution=execution)
+        cp_positions=_sphere_warp(regular,native,native_faces,native_positions,selected,execution=execution)
+        source_positions,source_unfold=_unfold(source_positions,data_faces)
+        cp_positions,control_unfold=_unfold(cp_positions,faces_np)
+        src=_variance_normalize(_adaptive_resample(native,native_faces,source_metric,
+                                                    data_np,data_faces,device=device,execution=execution,
+                                                    old_area=native_area,new_area=data_area))
+        tgt=_variance_normalize(_adaptive_resample(reference_xyz,reference_faces,reference_metric,
+                                                    data_np,data_faces,device=device,execution=execution,
+                                                    old_area=reference_area,new_area=data_area))
+        source_values=torch.as_tensor(src,device=selected)
+        target_values=torch.as_tensor(tgt,device=selected)
+        target_map=RadialSphereMap(data_np,data_faces,selected,execution=execution)
+        edges=np.unique(np.sort(np.concatenate((faces_np[:,[0,1]],
+            faces_np[:,[1,2]],faces_np[:,[2,0]])),axis=1),axis=0)
+        chord=np.linalg.norm(regular_np[edges[:,0]]-regular_np[edges[:,1]],axis=1)
+        spacing=float((200*np.arcsin(chord/200)).max())
+        centre,samples=_label_samples(label_grid,label_faces,0.5*spacing)
+        sorted_faces=np.sort(faces_np,axis=1).astype(np.int32)
+        face_tensor=torch.as_tensor(sorted_faces.astype(np.int64),device=selected)
+        face_bytes=sorted_faces.tobytes()
+        iterations=[];scale=1.0;previous_energy=0.0;converged=False
+        for iteration in range(config.iterations[stage_index]):
+            iteration_started=time.perf_counter()
+            prior=cp_positions.clone()
+            prior_np=prior.detach().cpu().numpy()
+            rotations=_rotation_matrices(prior_np,centre,selected)
+            current_map=RadialSphereMap(prior_np,faces_np,selected,execution=execution)
+            _,_,patch=current_map.weights(source_positions)
+            weights=_triplet_data_weights(prior,face_tensor,patch,source_positions)
+            layout=_face_layout(sorted_faces,patch,weights,source_values,selected)
+            labels=np.zeros(len(regular_np),np.int16)
+            changed=0
+            label_positions,scale=_rescaled_labels(centre,np.vstack((centre,samples)),scale)
+            # Source costs and applyLabeling rotate every label, including
+            # label zero. R(prior)*centre differs from prior by rounding;
+            # retaining prior for zero labels alters near-tie proposals.
+            cp_positions=_rotated_label(rotations,label_positions[0])
+            for _ in range(2):
+                for label,sample in enumerate(label_positions):
+                    if np.all(labels==label):continue
+                    candidate=_rotated_label(rotations,sample)
+                    costs=_face_costs(cp_positions,candidate,strain_original,face_tensor,
+                                      layout,target_map,target_values,lam,
+                                      simval=config.simval[stage_index],config=config,fold_reference=prior)
+                    ordered=costs.astype(np.float64)
+                    choice=np.frombuffer(_fastpd_native.optimize(
+                        face_bytes,ordered.tobytes(),len(regular_np)),dtype=np.uint8)
+                    update=(choice==1)&(labels!=label)
+                    if update.any():
+                        mask=torch.as_tensor(update,device=selected)
+                        cp_positions[mask]=candidate[mask]
+                        labels[update]=label
+                        changed+=int(update.sum())
+            energy_costs=_face_costs(cp_positions,cp_positions,strain_original,face_tensor,
+                                     layout,target_map,target_values,lam,
+                                     simval=config.simval[stage_index],config=config,
+                                     energy_only=True,fold_reference=prior)
+            # evaluateTotalCostSum adds triplets sequentially in face order.
+            energy=sum(float(value) for value in energy_costs[:,0])
+            # Source checks convergence before applyLabeling and before the
+            # control/data warp. Revert this tentative fusion on stopping.
+            stopping=iteration>2 and (iteration-1)%2==0 and previous_energy-energy<0.001
+            if stopping:
+                cp_positions=prior;converged=True
+                iterations.append({"changed":changed,"energy":energy,"applied":False,
+                                   "seconds":time.perf_counter()-iteration_started})
+                break
+            source_positions=_sphere_warp(source_positions,prior_np,
+                                          faces_np,cp_positions,selected,execution=execution)
+            cp_positions,moved=_unfold(cp_positions,faces_np);control_unfold+=moved
+            source_positions,moved=_unfold(source_positions,data_faces);source_unfold+=moved
+            previous_energy=energy
+            iterations.append({"changed":changed,"energy":energy,"applied":True,
+                               "seconds":time.perf_counter()-iteration_started})
+        previous_grid=data_np;previous_faces=data_faces;previous_positions=source_positions
+        stages.append({"control_points":len(regular_np),"data_points":len(data_np),
+                       "labels":len(samples)+1,"similarity":config.simval[stage_index],
+                       "maximum_iterations":config.iterations[stage_index],"converged":converged,
+                       "source_unfold_updates":source_unfold,"control_unfold_updates":control_unfold,
+                       "iterations":iterations,"seconds":time.perf_counter()-stage_started})
+    vertices=_sphere_warp(torch.as_tensor(native,device=selected),previous_grid,
+                          previous_faces,previous_positions,selected,execution=execution).detach().cpu().numpy()
+    output_qc=_native_output_qc(vertices,native_faces,native)
+    # User-authorized source-compatible output: official transform() saves
+    # this interpolation directly. Its dense native output can contain a
+    # folded face even with unfolded DATA/control grids; the real paired
+    # oracle has confirmed the same face. Keep both actual-precision counts
+    # in the report and do not introduce an additional final deformation.
+    path=output/f"{hemi}.sphere.MSMSulc.native.surf.gii"
+    nib.save(nib.GiftiImage(darrays=[
+        nib.gifti.GiftiDataArray(vertices.astype(np.float32),intent="NIFTI_INTENT_POINTSET"),
+        nib.gifti.GiftiDataArray(native_faces.astype(np.int32),intent="NIFTI_INTENT_TRIANGLE")]),str(path))
+    report={"seconds":time.perf_counter()-started,
+                  "affine_angles_deg":angles,"affine_seconds":affine_seconds,
+                  "affine":affine_report,"config":config.to_dict(),"execution":execution,
+                  **output_qc,
+                  "stages":stages}
+    return path, report

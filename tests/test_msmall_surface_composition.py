@@ -57,7 +57,7 @@ def test_fsLR_warp_is_composed_on_native_msmsulc_before_projection(tmp_path, mon
     monkeypatch.setattr("fnit.fmri.surface_pipeline.subprocess.run",
                         lambda command, **options: commands.append(command))
     result, topology = _refine_msmall(inputs, native_spheres, geometry, assets,
-                                      tmp_path / "result", MSMAllConfig(), "cpu", "optimized", "wb_command")
+                                      tmp_path / "result", MSMAllConfig(), "cpu", "optimized", "wb_command", parallel=False)
     assert topology == {"L": "fsLR32k", "R": "fsLR32k"}
     for hemisphere, initial_native, command, output in zip("LR", native_spheres, commands, result):
         assert command[1:4] == ["-surface-sphere-project-unproject", str(initial_native),
@@ -74,7 +74,7 @@ def test_native_features_use_initial_native_registration_without_atlas_compositi
         raise AssertionError("native topology must not be composed as a 32k warp")
     monkeypatch.setattr("fnit.fmri.surface_pipeline.subprocess.run", forbidden)
     _, topology = _refine_msmall(inputs, native_spheres, geometry, assets, tmp_path / "result",
-                                MSMAllConfig(), "cpu", "optimized", "wb_command")
+                                MSMAllConfig(), "cpu", "optimized", "wb_command", parallel=False)
     assert topology == {"L": "native", "R": "native"}
     assert observed["inputs"]["L"].initial_sphere == native_spheres[0]
 
@@ -88,4 +88,4 @@ def test_unknown_feature_topology_fails_before_registration(tmp_path, monkeypatc
     monkeypatch.setattr(fnit.msm, "run_msmall", forbidden)
     with pytest.raises(ValueError, match="matching native topology or the canonical"):
         _refine_msmall(inputs, native_spheres, geometry, assets, tmp_path / "result",
-                      MSMAllConfig(), "cpu", "optimized", "wb_command")
+                      MSMAllConfig(), "cpu", "optimized", "wb_command", parallel=False)

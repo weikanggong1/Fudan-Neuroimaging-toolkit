@@ -63,6 +63,10 @@ def main(argv=None):
     surface.add_argument("--recon-all", required=True)
     surface.add_argument("--surface-assets-dir", required=True)
     surface.add_argument("--wb-command", default="wb_command")
+    surface.add_argument("--threads", type=int,
+                         help="左右半球共用的CPU总线程数；默认读取OMP_NUM_THREADS或PyTorch设置")
+    surface.add_argument("--serial-hemispheres", action="store_true",
+                         help="顺序执行左右半球，供数值和耗时对照")
     surface.add_argument("--signal", choices=("preproc", "clean"), default="preproc",
                          help="读取对应 volume 分支；默认 preproc，clean 须显式选择")
     surface.add_argument("--fsnative-to-t1w", help="4x4 forward scanner-RAS affine text file")
@@ -114,6 +118,7 @@ def main(argv=None):
             msm_execution=args.msm_execution,
             msmall_inputs=args.msmall_inputs_json,
             msmall_config=args.msmall_config,
+            parallel=not args.serial_hemispheres, cpu_threads=args.threads,
         )
         print(result.dtseries)
     return 0

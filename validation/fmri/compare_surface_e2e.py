@@ -199,13 +199,29 @@ def verify_startpoints(candidate, reference, candidate_inputs, reference_inputs)
 
 def configuration_comparison(candidate, reference, config_module):
     oracle = reference["msm_config"]
+    canonical = lambda value: json.loads(json.dumps(value, sort_keys=True))
+    if "configuration_text" not in oracle:
+        # Independently executed FNIT chains carry the effective scientific
+        # configuration directly; every field must be present and validated.
+        required = set(config_module.MSMSulcConfig().to_dict())
+        if set(oracle) != required or set(candidate["msm_config"]) != required:
+            raise ValueError("paired FNIT configurations must contain every scientific field")
+        effective = config_module.MSMSulcConfig(**oracle).to_dict()
+        actual = config_module.MSMSulcConfig(**candidate["msm_config"]).to_dict()
+        if canonical(actual) != canonical(effective):
+            raise ValueError("candidate and reference effective four-level MSMSulc schedules differ")
+        encoded = json.dumps(canonical(effective), sort_keys=True, separators=(",", ":")).encode()
+        return {"effective_scientific_schedule_equal": True,
+                "effective_configuration": canonical(effective),
+                "reference_kind": "independently executed FNIT chain",
+                "effective_configuration_canonical_sha256": hashlib.sha256(encoded).hexdigest(),
+                "threads_are_execution_setting": True}
     if hashlib.sha256(oracle["configuration_text"].encode("utf-8")).hexdigest() != oracle["effective_sha256"]:
         raise ValueError("reference effective MSM configuration checksum differs from its actual text")
     with tempfile.TemporaryDirectory(prefix="surface_config_") as directory:
         path = Path(directory) / "official.conf"
         path.write_text(oracle["configuration_text"], encoding="utf-8")
         effective = config_module.MSMSulcConfig.from_file(path).to_dict()
-    canonical = lambda value: json.loads(json.dumps(value, sort_keys=True))
     if canonical(candidate["msm_config"]) != canonical(effective):
         raise ValueError("candidate and reference effective four-level MSMSulc schedules differ")
     return {"effective_scientific_schedule_equal": True, "effective_configuration": canonical(effective),

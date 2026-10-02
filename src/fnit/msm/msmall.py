@@ -13,6 +13,7 @@ import torch
 from ._affine import _surface
 from ._sphere_map import RadialSphereMap
 from .config_msmall import MSMAllConfig
+from ._execution import register_hemispheres, execution_report, current_statistics
 from .msmsulc import (
     _adaptive_resample, _face_layout, _ico, _label_samples, _native_output_qc,
     _normalize_sphere, _regularized_triangle_cost, _rescaled_labels,
@@ -189,7 +190,6 @@ def _register_msmall_one(entry, output_dir, *, hemi="L", device="cuda:0", config
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
         torch.cuda.init()
-        torch.cuda.reset_peak_memory_stats(selected)
     output = Path(output_dir).expanduser().resolve(); output.mkdir(parents=True, exist_ok=True)
     started = time.perf_counter()
     native, native_faces = _surface(entry.source_sphere)
@@ -351,14 +351,25 @@ def _register_msmall_one(entry, output_dir, *, hemi="L", device="cuda:0", config
     return path, report
 
 
-def run_msmall(inputs, output_dir, *, device="cuda:0", config=None, execution="optimized"):
+def run_msmall(inputs, output_dir, *, device="cuda:0", config=None, execution="optimized",
+               parallel=True, cpu_threads=None):
     """Register bilateral feature matrices; return the two native-order spheres."""
     if set(inputs) != {"L", "R"}:
         raise ValueError("inputs must contain L and R MSMAll inputs")
-    paths = {}; report = {}
-    for hemi in "LR":
-        paths[hemi], report[hemi] = _register_msmall_one(
-            inputs[hemi], output_dir, hemi=hemi, device=device, config=config, execution=execution)
+    def register(hemi, threads):
+        path, report = _register_msmall_one(inputs[hemi], output_dir, hemi=hemi,
+                                          device=device, config=config, execution=execution)
+        report["cpu_threads"] = threads
+        report["execution_counts"] = current_statistics()
+        return path, report
+    results = register_hemispheres(register,device,parallel=parallel,cpu_threads=cpu_threads)
+    paths = {hemi:results[index][0] for index,hemi in enumerate("LR")}
+    report = {hemi:results[index][1] for index,hemi in enumerate("LR")}
+    overall = execution_report(device,parallel=parallel,cpu_threads=cpu_threads)
+    for hemisphere in "LR":
+        report[hemisphere]["peak_allocated_gb"] = overall["peak_allocated_gb"]
+        report[hemisphere]["peak_scope"] = overall["peak_scope"]
+    report["execution"] = overall
     (Path(output_dir).expanduser().resolve() / "registration_report.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8")
     return paths

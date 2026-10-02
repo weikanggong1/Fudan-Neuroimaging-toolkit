@@ -12,6 +12,9 @@ import zipfile
 import nibabel as nib
 import numpy as np
 
+from .._hemisphere_parallel import (
+    hemisphere_items, map_hemispheres, resolve_cpu_threads, workbench_environment,
+)
 from ..flirt.coordinates import flirt_to_world_affine
 from ..msm import MSMAllConfig, MSMAllInputs, prepare_msmsulc_inputs, run_msmsulc
 from ..msm.config import MSMSulcConfig
@@ -21,7 +24,7 @@ from .derivatives import ensure_derivative_dataset, fmri_derivative_paths, sidec
 from .normalization import resample_world
 from .surface import SurfaceHemisphere
 from .surface_fmriprep import (
-    _cifti_assets, _las, _millimeter_affine, _mni_grid, _publish_projection, _tr_seconds,
+    _cifti_assets, _las_grid, _millimeter_affine, _mni_grid, _publish_projection, _tr_seconds,
     fmriprep_cifti_metadata, run_fmriprep_surface_projection,
 )
 from .surface_prepare import load_fsnative_to_t1w, prepare_fmriprep_surface_inputs
@@ -155,7 +158,8 @@ def _tr_matches(image, tr):
 
 
 def _refine_msmall(inputs, native_spheres, native_geometry, assets, output,
-                   configuration, device, execution, wb_command):
+                   configuration, device, execution, wb_command,
+                   parallel=True, cpu_threads=None):
     """Refine native features or compose a prepared fsLR32k registration.
 
     Native feature arrays retain recon-all vertex order. Features on the
@@ -185,24 +189,25 @@ def _refine_msmall(inputs, native_spheres, native_geometry, assets, output,
             raise ValueError(f"{hemi} MSMAll source features must use matching native topology or the canonical fsLR32k sphere")
         entries[hemi] = entry
     registered = run_msmall(entries, output / "msmall", device=device,
-                           config=configuration, execution=execution)
+                           config=configuration, execution=execution,
+                           parallel=parallel, cpu_threads=cpu_threads)
     executable = shutil.which(str(wb_command))
     if executable is None:
         raise FileNotFoundError(wb_command)
-    final = {}
-    for hemi, native_sphere in zip(("L", "R"), native_spheres):
+    def compose(hemi, threads):
+        native_sphere = native_spheres[0 if hemi == "L" else 1]
         if topology[hemi] == "native":
-            final[hemi] = registered[hemi]
-        else:
-            final[hemi] = output / "msmall" / f"{hemi}.sphere.MSMAll.native.surf.gii"
-            # Keep the 32k solver sphere and composed native sphere distinct.
-            if final[hemi] == registered[hemi]:
-                final[hemi] = output / "msmall" / f"{hemi}.sphere.MSMAll.composed-native.surf.gii"
-            subprocess.run([
-                executable, "-surface-sphere-project-unproject", str(native_sphere),
-                str(entries[hemi].source_sphere), str(registered[hemi]), str(final[hemi]),
-            ], check=True, capture_output=True, text=True)
-    return (final["L"], final["R"]), topology
+            return registered[hemi]
+        final = output / "msmall" / f"{hemi}.sphere.MSMAll.native.surf.gii"
+        # Keep the 32k solver sphere and composed native sphere distinct.
+        if final == registered[hemi]:
+            final = output / "msmall" / f"{hemi}.sphere.MSMAll.composed-native.surf.gii"
+        subprocess.run([
+            executable, "-surface-sphere-project-unproject", str(native_sphere),
+            str(entries[hemi].source_sphere), str(registered[hemi]), str(final),
+        ], check=True, capture_output=True, text=True, env=workbench_environment(threads))
+        return final
+    return map_hemispheres(compose, parallel=parallel, cpu_threads=cpu_threads), topology
 
 
 def fMRISurface_pipeline(
@@ -221,6 +226,7 @@ def fMRISurface_pipeline(
     goodvoxels: str | Path | None = None,
     signal: str = "preproc",
     fsnative_to_t1w: str | Path | np.ndarray | None = None,
+    parallel: bool = True, cpu_threads: int | None = None,
 ) -> FMRISurfaceResult:
     """Project one verified volume run and publish its complete surface result.
 
@@ -229,8 +235,14 @@ def fMRISurface_pipeline(
     selects denoised volume data. Missing preprocessed data never fall back
     to clean data. ``fsnative_to_t1w`` maps recon-all scanner RAS to the source
     T1w RAS; omitting it requires the original images to match in content.
+    ``parallel=True`` runs independent L/R preparation, registration and
+    projection branches. ``cpu_threads`` is the shared total budget; None
+    uses OMP_NUM_THREADS or the current PyTorch thread count. A budget of one
+    selects serial execution. Parent process settings are preserved.
     """
     started = time.perf_counter()
+    budget = resolve_cpu_threads(cpu_threads)
+    hemisphere_items(parallel=parallel, cpu_threads=budget)
     if signal not in ("preproc", "clean"):
         raise ValueError("signal must be 'preproc' or 'clean'")
     if registered_spheres is not None and len(registered_spheres) != 2:
@@ -356,7 +368,7 @@ def fMRISurface_pipeline(
     _tr_seconds(input_image, "T1w BOLD" if signal == "preproc" else "native BOLD", inputs.tr)
     if input_image.shape[3] != mni_image.shape[3] or input_image.shape[3] != nib.load(str(inputs.bold)).shape[3]:
         raise ValueError("surface inputs and raw BOLD must have equal frame counts")
-    _mni_grid(_las(mni_image), labels)
+    _mni_grid(_las_grid(mni_image), labels)
     if signal == "clean":
         native_metadata = json.loads(sidecar(selected_t1w).read_text(encoding="utf-8"))
         _validate_volume_metadata(native_metadata, inputs, source_t1)
@@ -411,19 +423,24 @@ def fMRISurface_pipeline(
                     with archive.open(f"FreeSurfer/{name}") as reader, target.open("wb") as writer:
                         shutil.copyfileobj(reader, writer)
         identity = _matching_original_t1(subject_dir, source_t1, world_affine)
+        preparation_started = time.perf_counter()
         prepared = prepare_fmriprep_surface_inputs(
             subject_dir=subject_dir, hcp_assets_dir=assets,
             output_dir=work / "prepared", wb_command=wb_command,
             fsnative_to_t1w=world_affine,
+            parallel=parallel, cpu_threads=budget,
         )
+        preparation_seconds = time.perf_counter() - preparation_started
         if registered_spheres is None:
             registration_started = time.perf_counter()
             sulc_inputs = prepare_msmsulc_inputs(
                 subject_dir=subject_dir, initial_spheres=prepared.initial_spheres,
                 hcp_assets_dir=assets, output_dir=work / "msmsulc_inputs", wb_command=wb_command,
+                parallel=parallel, cpu_threads=budget,
             )
             estimates = run_msmsulc(sulc_inputs, work / "msmsulc", device=device,
-                                   config=configuration, execution=msm_execution)
+                                   config=configuration, execution=msm_execution,
+                                   parallel=parallel, cpu_threads=budget)
             spheres = (Path(estimates["L"]), Path(estimates["R"]))
             registration = "MSMSulc-HOCR-FastPD"
             registration_qc = {
@@ -458,6 +475,7 @@ def fMRISurface_pipeline(
             spheres, feature_topology = _refine_msmall(
                 msmall_inputs, spheres, (prepared.geometry.left, prepared.geometry.right),
                 assets, work, msmall_configuration, device, msm_execution, wb_command,
+                parallel=parallel, cpu_threads=budget,
             )
             msmall_seconds = time.perf_counter() - msmall_started
             msmall_report = json.loads((work / "msmall/registration_report.json").read_text())
@@ -478,14 +496,14 @@ def fMRISurface_pipeline(
                 "FeaturePreparation": "provided multimodal feature/weight files",
                 "Hemispheres": msmall_report,
             }
-        hemispheres = {}
-        identity["MidthicknessSource"] = {}
-        for hemi, geometry, individual_roi, sphere in zip(
-            ("L", "R"), (prepared.geometry.left, prepared.geometry.right), prepared.individual_rois, spheres,
-        ):
+        def area_surface(hemi, threads):
+            index = 0 if hemi == "L" else 1
+            geometry = prepared.geometry.left if hemi == "L" else prepared.geometry.right
+            individual_roi, sphere = prepared.individual_rois[index], spheres[index]
             middle_source = getattr(geometry, "midthickness_source", None)
+            middle_info = None
             if middle_source is not None:
-                identity["MidthicknessSource"][hemi] = {
+                middle_info = {
                     "File": Path(middle_source).relative_to(subject_dir).as_posix(),
                     "SHA256": _sha256(Path(middle_source)),
                 }
@@ -494,18 +512,29 @@ def fMRISurface_pipeline(
             subprocess.run([
                 executable, "-surface-resample", str(geometry.midthickness), str(sphere),
                 str(mesh / f"{hemi}.sphere.32k_fs_LR.surf.gii"), "BARYCENTRIC", str(atlas_mid),
-            ], check=True, capture_output=True, text=True)
-            hemispheres[hemi] = SurfaceHemisphere(
+            ], check=True, capture_output=True, text=True, env=workbench_environment(threads))
+            hemisphere = SurfaceHemisphere(
                 white=geometry.white, pial=geometry.pial, midthickness=geometry.midthickness,
                 registered_sphere=sphere, native_roi=individual_roi,
                 atlas_sphere=mesh / f"{hemi}.sphere.32k_fs_LR.surf.gii",
                 atlas_midthickness=atlas_mid, atlas_roi=mesh / f"{hemi}.atlasroi.32k_fs_LR.shape.gii",
             )
+            return hemisphere, middle_info
+
+        area_started = time.perf_counter()
+        hemisphere_results = map_hemispheres(area_surface, parallel=parallel, cpu_threads=budget)
+        area_seconds = time.perf_counter() - area_started
+        hemispheres = {hemi: result[0] for hemi, result in zip(("L", "R"), hemisphere_results)}
+        identity["MidthicknessSource"] = {
+            hemi: result[1] for hemi, result in zip(("L", "R"), hemisphere_results)
+            if result[1] is not None
+        }
         projection = run_fmriprep_surface_projection(
             clean_t1w=t1_bold, clean_mni=selected_mni,
             left=hemispheres["L"], right=hemispheres["R"], left_label=left_roi, right_label=right_roi,
             hcp_dseg=dseg, output_dir=work / "projection", tr_seconds=inputs.tr,
             goodvoxels=goodvoxels, wb_command=wb_command,
+            parallel=parallel, cpu_threads=budget,
         )
         publish = work / "publish"
         publish.mkdir()
@@ -522,6 +551,8 @@ def fMRISurface_pipeline(
                 "EstimatedHere": registered_spheres is None,
             }
         timing = {**projection.timing_seconds, "total": time.perf_counter() - started}
+        timing["native_surface_preparation"] = preparation_seconds
+        timing["atlas_area_surfaces"] = area_seconds
         if registration_seconds is not None:
             timing["msmsulc_preparation_and_registration"] = registration_seconds
         if msmall_seconds is not None:
@@ -544,6 +575,10 @@ def fMRISurface_pipeline(
                          "SliceTimingCorrection", "SusceptibilityCorrection",
                      ) if key in space},
                      "Projection": "fMRIPrep-style T1w cortex + MNI subcortex",
+                     "HemisphereExecution": {"Parallel": parallel and budget > 1,
+                                             "CPUThreads": budget,
+                                             "CPUThreadsPerHemisphere": dict(hemisphere_items(
+                                                 parallel=parallel, cpu_threads=budget))},
                      "StandardSpace": space["StandardSpace"],
                      "StandardTemplateSHA256": template_hash,
                      "StandardTemplateIdentity": space["StandardTemplateIdentity"],

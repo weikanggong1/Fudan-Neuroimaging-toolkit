@@ -10,6 +10,9 @@ import numpy as np
 from scipy.spatial import cKDTree
 import torch
 
+from ._execution import cpu_workers, record_statistics
+from ._spatial import ExactCellNearest
+
 
 def _dot(first, second):
     product = first*second
@@ -78,6 +81,9 @@ class RadialSphereMap:
         self.vertices = torch.as_tensor(vertices, dtype=torch.float64, device=self.device)
         self.faces = torch.as_tensor(faces, dtype=torch.long, device=self.device)
         self.tree = cKDTree(np.asarray(vertices))
+        self.cpu_threads = cpu_workers()
+        self.gpu_nearest = (ExactCellNearest(vertices, self.device)
+                            if self.device.type == "cuda" and execution == "optimized" else None)
         incident = [[] for _ in range(len(vertices))]
         for face_id, triangle in enumerate(faces):
             for vertex in triangle: incident[vertex].append(face_id)
@@ -145,9 +151,12 @@ class RadialSphereMap:
 
     def _fallback(self, points, query, face, projection, missing):
         if missing.any():
+            if query is None:
+                query = points.detach().cpu().numpy()
             missing_ids = np.flatnonzero(missing)
+            record_statistics(tree_expanded_face_queries=len(missing_ids))
             k = min(32, len(self.vertices))
-            expanded = self.tree.query(query[missing], k=k, workers=4)[1]
+            expanded = self.tree.query(query[missing], k=k, workers=self.cpu_threads)[1]
             expanded = np.asarray(expanded).reshape(len(missing_ids), k)
             ids = torch.as_tensor(missing_ids, device=self.device)
             better, q, found, _ = self._select(points[ids], torch.as_tensor(expanded, device=self.device))
@@ -170,23 +179,42 @@ class RadialSphereMap:
             empty_ids = torch.empty((0, 3), dtype=torch.long, device=self.device)
             empty_weights = torch.empty((0, 3), dtype=torch.float64, device=self.device)
             return empty_ids, empty_weights, empty_ids[:, 0]
-        query = points.detach().cpu().numpy()
-        nearest = self.tree.query(query, k=1, workers=4)[1][:, None]
+        query = points.detach().cpu().numpy() if self.gpu_nearest is None or self.source_precision else None
+        if self.gpu_nearest is None:
+            nearest_cpu = self.tree.query(query, k=1, workers=self.cpu_threads)[1][:, None]
+            record_statistics(tree_nearest_queries=len(points))
+            nearest = torch.as_tensor(nearest_cpu, device=self.device)
+        else:
+            nearest, uncertain = self.gpu_nearest.query(points)
+            masks = torch.stack((uncertain, self.gpu_nearest.last_ties), -1).detach().cpu().numpy()
+            uncertain_cpu = masks[:, 0]
+            fallback_count = np.count_nonzero(uncertain_cpu)
+            record_statistics(cuda_nearest_queries=len(points),
+                              cuda_nearest_proved_queries=len(points)-fallback_count,
+                              tree_nearest_queries=fallback_count,
+                              nearest_tie_fallback_queries=np.count_nonzero(masks[:, 1]))
+            if uncertain_cpu.any():
+                ids = np.flatnonzero(uncertain_cpu)
+                unresolved_query = points[torch.as_tensor(ids, device=self.device)].detach().cpu().numpy()
+                fallback = self.tree.query(unresolved_query, k=1, workers=self.cpu_threads)[1]
+                nearest[torch.as_tensor(ids, device=self.device)] = torch.as_tensor(fallback, device=self.device)
+            nearest = nearest[:, None]
+            nearest_cpu = nearest.detach().cpu().numpy() if self.source_precision else None
         chosen_faces = []; chosen_weights = []; chosen_patches = []
         blocks = []
-        for start in range(0, len(query), batch_size):
-            stop = min(start+batch_size, len(query)); p = points[start:stop]
-            near = torch.as_tensor(nearest[start:stop], device=self.device)
+        for start in range(0, len(points), batch_size):
+            stop = min(start+batch_size, len(points)); p = points[start:stop]
+            near = nearest[start:stop]
             face, projection, inside, ambiguous = self._select(p, near)
             if self.execution == 'reference':
                 if self.source_precision:
                     masks = torch.stack((~inside, ambiguous), -1).detach().cpu().numpy()
                     missing = masks[:, 0]
-                    face, projection = self._source_select(query[start:stop], nearest[start:stop],
+                    face, projection = self._source_select(query[start:stop], nearest_cpu[start:stop],
                                                           face, projection, masks[:, 1])
                 else:
                     missing = (~inside).detach().cpu().numpy()
-                face, projection = self._fallback(p, query[start:stop], face, projection, missing)
+                face, projection = self._fallback(p, query[start:stop] if query is not None else None, face, projection, missing)
                 w = _area_weights(self.vertices[self.faces[face]], projection if project else p)
                 chosen_faces.append(self.faces[face]); chosen_weights.append(w); chosen_patches.append(face)
             else:
@@ -203,9 +231,12 @@ class RadialSphereMap:
             for start, stop, face, projection, _, _ in blocks:
                 p = points[start:stop]
                 if self.source_precision:
-                    face, projection = self._source_select(query[start:stop], nearest[start:stop],
+                    face, projection = self._source_select(query[start:stop], nearest_cpu[start:stop],
                                                           face, projection, masks[start:stop, 1])
-                face, projection = self._fallback(p, query[start:stop], face, projection, missing_all[start:stop])
+                missing = missing_all[start:stop]
+                fallback_query = (query[start:stop] if query is not None else
+                                  p.detach().cpu().numpy() if missing.any() else np.empty((len(p), 3)))
+                face, projection = self._fallback(p, fallback_query, face, projection, missing)
                 w = _area_weights(self.triangles[face], projection if project else p)
                 chosen_faces.append(self.faces[face]); chosen_weights.append(w); chosen_patches.append(face)
         return torch.cat(chosen_faces), torch.cat(chosen_weights), torch.cat(chosen_patches)

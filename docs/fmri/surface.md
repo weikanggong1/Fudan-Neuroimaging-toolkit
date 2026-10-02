@@ -83,7 +83,7 @@ clean 的原生/MNI JSON 都须匹配来源、TR 和已完成的 ICA-AROMA；旧
 
 ### 单独准备已有重建的表面
 
-这两个公开子函数与完整 surface 入口共用几何转换代码，读取已有中层面，不生成 white/pial 的均值替代物。
+这两个公开子函数与完整 surface 入口共用几何转换代码，读取已有中层面，不生成 white/pial 的均值替代物。它们都支持 `parallel=True` 与 `cpu_threads=None`；左右半球分别准备，全部完成并通过检查后一起发布。
 
 | 函数 | 输入与参数 | 输出 |
 |---|---|---|
@@ -98,6 +98,8 @@ t1w_surface_geometry = prepare_t1w_surface_geometry(
     output_dir="/absolute/path/t1w_surfaces",                # 只保存六个几何 GIFTI
     fsnative_to_t1w=None,                                   # 或正向 scanner-RAS 世界仿射
     overwrite=False,                                       # 任一已有文件均阻止覆盖
+    parallel=True,                                         # 同时准备左右半球；False 为串行
+    cpu_threads=8,                                         # 本次调用的总 CPU 线程预算
 )
 left_t1w_middle = t1w_surface_geometry.left.midthickness
 
@@ -108,6 +110,8 @@ surface_preparation = prepare_fmriprep_surface_inputs(
     wb_command="wb_command",                               # Connectome Workbench
     fsnative_to_t1w=None,                                   # 或正向 scanner-RAS 世界仿射
     overwrite=False,                                       # 任一已有产物均阻止覆盖
+    parallel=True,                                         # 左右独立准备，完成后一起发布
+    cpu_threads=8,                                         # 并行时左右各分配四个 CPU 线程
 )
 left_t1w_middle = surface_preparation.geometry.left.midthickness
 left_initial_sphere, right_initial_sphere = surface_preparation.initial_spheres
@@ -116,7 +120,7 @@ left_native_roi, right_native_roi = surface_preparation.individual_rois
 
 共享准备子函数已修复发布问题：原几何函数可能先写左侧、再因右侧缺文件或已有输出失败；完整准备函数原先没有对球面和 ROI 应用覆盖保护。现在对六个或 16 个产物统一预检，在同一文件系统中暂存后发布，失败保留之前的完整结果。`overwrite=False` 同样保护悬空符号链接，并在创建最终文件时拒绝并发出现的同名文件。该修改保留原坐标变换、顶点顺序和 Workbench 运算。
 
-低层 `run_fmriprep_surface_projection` 也共用覆盖保护，要求 T1w BOLD 使用有限、可逆的毫米世界仿射；帧数、TR 单位及 MNI/dseg 网格检查与完整入口一致。
+低层 `run_fmriprep_surface_projection` 也共用覆盖保护，要求 T1w BOLD 使用有限、可逆的毫米世界仿射；帧数、TR 单位及 MNI/dseg 网格检查与完整入口一致。它与 `create_fmriprep_cifti` 同样接受 `parallel` 和 `cpu_threads`：前者独立投影双侧，后者独立读取皮层时序后按固定左、右顺序组装；CIFTI 轴、QC 和最终发布仍在双侧完成后执行。
 
 ### Python 调用与参数
 
@@ -147,6 +151,8 @@ surface_result = fMRISurface_pipeline(
     wb_command="wb_command",                               # Workbench 命令名或绝对路径
     device="cuda:0",                                       # PyTorch 计算设备，也可为 cpu
     overwrite=False,                                       # 保护全部同名最终产物
+    parallel=True,                                         # 双侧准备、配准与投影分别并行
+    cpu_threads=8,                                         # 总 CPU 预算；不是每侧八个线程
 )
 print(surface_result.left)                # 左半球 T 帧 × 32,492 顶点 GIFTI
 print(surface_result.right)               # 右半球 T 帧 × 32,492 顶点 GIFTI
@@ -180,10 +186,24 @@ print(surface_result.registered_spheres)  # 持久化的 (左, 右) 注册球面
 | `wb_command` | 默认 `"wb_command"`；命令名或可执行文件绝对路径。 |
 | `device` | 默认 `"cuda:0"`；PyTorch 重采样和 MSMSulc 的设备。Workbench 使用 CPU。 |
 | `overwrite` | 默认 `False`；任一最终数据、JSON、QC 或注册球面已存在时拒绝覆盖。成功检查所有结果后整批发布；发布异常回滚已有结果。 |
+| `parallel` | 默认 `True`；独立执行左右半球的准备、配准和投影。`False` 保留串行执行，输出顺序与算法配置相同。 |
+| `cpu_threads` | 默认 `None`，依次读取 `OMP_NUM_THREADS`、`torch.get_num_threads()`；必须为正整数，表示总 CPU 预算。并行时分给双侧，8 为 4/4；预算 1 自动串行。此参数限制局部邻域搜索和 Workbench 子进程，不改变进程的 PyTorch 线程池。 |
 
 估计球面时，JSON 还记录实际 MSM 配置、执行方式和双侧配准报告；`msmsulc_preparation_and_registration` 单列准备与球面估计时间，提供外部球面时不生成这项计时。
 
 MSMAll 模式另记录 `msmall_registration_and_native_composition` 耗时、实际多特征配置、每侧特征网格与输入 SHA-256；QC 同时保留初始 MSMSulc 和 MSMAll 的双侧报告。
+
+### 实际计算设备
+
+| 步骤 | 当前后端 | 运算与执行边界 |
+|---|---|---|
+| 球面最近邻、特征重采样 | PyTorch GPU | 最近邻先检查相邻 27 个网格单元，只有外部单元距离下界证明候选足够近时才采用；近并列或范围不足交给原 cKDTree。有序 CSR 保留原 SciPy 稀疏权重和 NumPy 累加顺序。 |
+| 配准三角形成本、位移标签和变形 | PyTorch GPU | 保持 float64、标签顺序与停止条件；左右使用独立模型和 CUDA stream。 |
+| 严格 WLS、旋转矩阵、HOCR/FastPD、源码精度回退及展开 | 包内 C++ / CPU | 保留有序标量舍入、离散标签选择和逐顶点展开。原生算子释放 GIL 后可处理独立双侧模型；每轮旋转矩阵缓存后在 GPU 应用。 |
+| 影像与几何读写、scanner-RAS 仿射、分位数/统计、有限值 QC、CIFTI 组装 | nibabel / NumPy CPU | 文件解析、格式 metadata 和最终写盘在 CPU；几何仿射保留 double 运算。搬到 GPU 还需要传输数组与回传结果，本轮没有单独测量这些操作的 GPU 收益。 |
+| Ribbon、10 mm dilate、native mask、ADAP_BARY_AREA、atlas mask，以及面积表面与 ROI 准备 | Connectome Workbench CPU | 保留原参考步骤，左右独立执行并共享总 CPU 预算；组装之前等待双方完成。 |
+
+本轮评估了 GPU 最近邻与有序稀疏重采样，并保留严格标量和图优化边界。ribbon 的几何体素权重、测地最近邻填补及面积校正重采样仍使用 Workbench；新实现的完整耗时和精度由同输入 490 帧复测确定。
 
 默认球面遵循 HCP/sMRIPrep 的 `simval=3,2,2,2`、最大迭代数 `50,10,15,15`。`msm_config` 仅在估计球面时使用，不能与 `registered_spheres` 同时指定。独立用法及各配置参数见 [MSMSulc](../msm/README.md)。命令行可加 `--msm-config /absolute/path/MSMSulcStrainFinalconf` 和 `--msm-execution reference` 复测相同科学配置的执行路径。
 
@@ -226,7 +246,7 @@ sub-0001/func/
 
 共享投影函数原来以默认内存映射读取暂存 CIFTI 计算 QC，NFS 上文件发布后仍保留打开的 mapping，可能使临时目录清理报 `EBUSY`，完整入口因而在计算完成后失败。当前仅对这份暂存 CIFTI 使用非映射读取并关闭持续文件句柄；覆盖报告与影像数值保持原定义。
 
-`FMRISurfaceResult` 返回 `left`、`right`、`dtseries`、CIFTI JSON 的 `metadata`、分步 `timing_seconds`、`qc_report` 和 `registered_spheres`。其中 `total` 在最终 JSON 和发布前记录；完整 API 墙钟时间由调用方测量。CUDA 峰值记录需同时核对所选配准器是否重置内部计数；最新完整复测在每次内部重置前保存峰值，覆盖两侧配准及整个 API。
+`FMRISurfaceResult` 返回 `left`、`right`、`dtseries`、CIFTI JSON 的 `metadata`、分步 `timing_seconds`、`qc_report` 和 `registered_spheres`。其中 `total` 在最终 JSON 和发布前记录；完整 API 墙钟时间由调用方测量。双侧任务结束后才组装、检查和发布结果；一侧失败时也先等待另一侧退出，随后清理临时目录。选择 CUDA、开启并行且总线程预算大于 1 时，配准使用所选 GPU 上的两个 stream；库内部不重置调用方显存计数。MSM 报告中的峰值表示调用方上次重置以来的设备 allocator 峰值，双侧共享该统计范围；完整 API benchmark 在外层统一重置并统计。
 
 ## 命令行调用
 
@@ -240,10 +260,11 @@ fnit-fmri surface \
   --recon-all /absolute/path/recon-all/sub-0001 \
   --surface-assets-dir /absolute/path/hcp_surface_assets \
   --signal preproc \
+  --threads 8 \
   --device cuda:0
 ```
 
-`--signal clean` 选择 clean 分支；`--fsnative-to-t1w /absolute/path/fsnative_to_T1w_world.txt` 提供世界仿射。`--registered-spheres /absolute/path/L.surf.gii /absolute/path/R.surf.gii` 选择外部球面，`--goodvoxels /absolute/path/roi.nii.gz` 提供额外 volume ROI；对应 Python 参数见上表。完整 CLI 参数用 `fnit-fmri surface --help` 查看。
+`--threads 8` 设置总 CPU 预算，默认双侧并行；追加 `--serial-hemispheres` 对应 `parallel=False`。`--signal clean` 选择 clean 分支；`--fsnative-to-t1w /absolute/path/fsnative_to_T1w_world.txt` 提供世界仿射。`--registered-spheres /absolute/path/L.surf.gii /absolute/path/R.surf.gii` 选择外部球面，`--goodvoxels /absolute/path/roi.nii.gz` 提供额外 volume ROI；对应 Python 参数见上表。完整 CLI 参数用 `fnit-fmri surface --help` 查看。
 
 可选 `--msmall-inputs-json /absolute/path/msmall.inputs.json` 和 `--msmall-config /absolute/path/MSMAll.conf` 分别对应 `msmall_inputs` 与 `msmall_config`；JSON 的相对路径按清单所在目录解析。
 
@@ -284,7 +305,7 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 <a id="surface-e2e-latest"></a>
 
-### 最新完整默认 surface：排除 recon-all 和 volume
+### 优化前完整 surface：`7102c187` 历史基准
 
 2026-10-01，冻结源码 `7102c187`，使用 `cfb7beee` 完整 volume 的 **490 帧 preproc**、TR 0.735 s，以及同源已有 FreeSurfer 7 重建和 graymid。FNIT 与原版从相同 T1w/MNI BOLD 开始，分别准备几何、皮层 ROI、FS→fsLR 初始化球面和 MSM 输入；各自重新估计双侧四级 MSMSulc，再生成对应面积表面、投影、CIFTI、QC 和最终文件。原版没有使用 FNIT 捕获的几何或球面。
 
@@ -336,7 +357,7 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 [完整复测说明与命令](../../validation/fmri/surface_e2e/README.md) · [全帧精度及 21 结构统计](../../validation/fmri/surface_e2e/precision.public.json) · [第一次 API](../../validation/fmri/surface_e2e/fnit_run1.public.json) · [第二次 API](../../validation/fmri/surface_e2e/fnit_run2.public.json) · [原版单线程参照](../../validation/fmri/surface_e2e/reference_strict1.public.json) · [原版 8 线程时间](../../validation/fmri/surface_e2e/reference_speed8.public.json) · [重复运行检查](../../validation/fmri/surface_e2e/repeatability.public.json)。公开源码哈希与实际编译器/扩展 SHA 保存在这些报告及[编译记录](../../validation/fmri/surface_e2e/build_provenance.public.json)，本次没有修改 FNIT 运行算法。
 
-### 最新全帧脑图
+### 已公开的 `7102c187` 全帧脑图
 
 上下行为左右半球，三列为 FNIT 时间标准差、独立原版时间标准差和逐顶点时间 r。两套标准差共用完整数据的色阶，r 色阶为 −1 到 1；灰色表示恒定时序的未定义 r。图使用原版独立准备的 32k 中层面，不追加平滑；PNG SHA-256 绑定[本轮精度报告](../../validation/fmri/surface_e2e/precision.public.json)。
 
