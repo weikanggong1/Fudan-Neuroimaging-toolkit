@@ -1,5 +1,5 @@
 {
-  "status": "authorized_preparing_sessions",
+  "status": "dispatched_running",
   "baseline_commit": "6f67cc06ee8c5108ef3640cbfc289f3e5a742f65",
   "timing_code_commit": "ff372d73f106e850b999fbc95ae0b324cd315cbf",
   "common_prompt": "仓库 https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit。规划时已核对 origin/main=6f67cc06ee8c5108ef3640cbfc289f3e5a742f65；实际开工由协调者冻结最新 main，并给五个会话相同基线。规划耗时来自绑定 ff372d73f106e850b999fbc95ae0b324cd315cbf 的两例原始 T1 整例，不作为你的新版本结果。\n读取 AGENTS.md 和更具体规范；本轮用户已改为五会话协作，旧“五阶段串行”规定由协调者同步。各自独立 worktree、分支、输出及报告目录；保护其他人的修改。先核对已有代码、manifest、数据、权重和程序 SHA-256，复用授权持久 SSH 路径。不得记录凭据、许可证或发布真实影像。\n优先复用成熟 FNIT PyTorch/Numba。生产仅运行 FNIT 与固定源码在 Conda 独立构建的必要组件；不调用系统预装脑影像软件和封装包；官方参考只用于隔离 benchmark。允许使用不调用命令的 Surfa、Workbench、ANTsPy。读写优先 nibabel，默认 TF32，保留已有经验证的局部 FP32，禁止擅自 FP16/BF16。\n固定线程总预算 4、目标 GPU 与 UUID；性能测量统一向协调者申请运行时间窗，不在同一 GPU 同时运行不同任务的计时 benchmark。记录冷热/JIT、加载/传输/读写、同步 GPU 时间、实际全进程树同一时刻显存，目标低于 20,000,000,000 字节。并行实现仍须满足总预算。\n先同输入阶段回归，再自产受影响连续链，最终由协调者执行两例原始 T1+空目录整例。保留 138 严格诊断，算子容差在测量前声明，沿用已建立门槛，不事后放宽。分别报告严格复现、新增退化、整体指标等效；整体等效无正式阈值时 not_assessed。检查坐标/单位/dtype/标签、拓扑与局部异常；分割用逐标签 Dice，有对应顶点才做同索引比较，否则用双向点到三角面距离，统计逐区厚度/面积/体积。\n中文文档包含输入输出/结构/空间/单位/全部参数及默认限制/失败行为，具名参数逐项中文注释示例、CLI/官方命令、原代码/参考文献、真实数据耗时精度和版本。报告绑定实际 commit、源码/程序/资源哈希。提供代码、专项测试、JSON/CSV、复现脚本、中文说明和分支提交；未执行内容明确写出。\n只修改指定范围。native_free.py/batch.py/CLI/全局精度/profiling 的生产调度由任务1负责，其余任务提供兼容 callable、后端选择接口和准确接入说明，不同时改调度。共有 place_surface_normals.py 归任务4，保持向后兼容；任务2补 surface placement 回归。共享安装、根 AGENTS、README 和总报告由协调者合并。新增构建或依赖须提供安装补丁给协调者。\n子任务只提交各自工作分支，不推 main、不强制推送。协调者合并最新 main、独立检查与两例整例验证后统一普通推送 main。",
@@ -70,5 +70,6 @@
       ],
       "prompt": "当前MNI非线性链约188—196秒；SynthMorph自有GPU前向/保存约76—77秒，Conda mri_warp_convert约15—18秒，mri_ca_register求逆约86—94秒，mri_convert检查图约7—10秒。优先替换后三项原生CPU后处理，保留已经接入的自有SynthMorph GPU网络。\n检索复用FNIT既有变换、warp inverse与图像采样函数，先确认算法完整性、source/target方向、裁剪/full网格和坐标约定。明确scanner RAS/world-mm位移与体素位移、LTA composition、NIfTI(*shape,1,3)向量分量、边界/越界和最近邻量化。\n对warp conversion与检查图实现分块/缓存GPU采样；逆场必须保留原定义和完整求解、边界、停止规则，不能简单用负位移、反向网络输出或未经验证的固定点替代。对现有逆场全域局部残差单列排错，不能通过掩膜剔除/少迭代或吞掉失败提高速度。\n模型两次反对称前向和已有局部FP32例外保留，不删除完整必要输出。固定同一forward为三方求逆输入，比较官方/Conda/自有实现，报告全域和脑内残差P99/max、异常区域、输出几何、反向warp与check图差异和保存性能。\n减少不必要格式中间文件/加载/CPU-GPU搬运但保留复现能力。交付完整可调用后端、真实同输入回归和自产链收益，供任务1接入。已有厚度/面积/曲率已是GPU、厚度约3—4秒，不重复迁移。"
     }
-  ]
+  ],
+  "working_baseline_commit": "f07cf59c7f51ae1393e2578f141b4d130ed7801a"
 }
