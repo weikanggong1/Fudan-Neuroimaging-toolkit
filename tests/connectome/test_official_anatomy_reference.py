@@ -15,6 +15,37 @@ SPEC.loader.exec_module(MODULE)
 
 
 class OfficialAnatomyContracts(unittest.TestCase):
+    def test_standard_freesurfer_pial_symlink_binds_real_content(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subject = root / "subjects/sub-01"
+            anatomy = {}
+            names = ["mri/brain.mgz", "mri/aparc+aseg.mgz", "mri/ribbon.mgz", "scripts/recon-all.done"]
+            names += [f"surf/{h}.{n}" for h in ("lh", "rh") for n in ("white", "pial", "sphere.reg")]
+            names += [f"label/{h}.{n}.annot" for h in ("lh", "rh") for n in ("aparc", "aparc.a2009s")]
+            for name in names:
+                path = subject / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                if name.endswith(".pial"):
+                    target = path.with_suffix(".pial.T1")
+                    target.write_bytes(b"actual pial content")
+                    path.symlink_to(target.name)
+                else:
+                    path.write_bytes(b"bound input")
+                anatomy[name] = {**MODULE.file_record(path), "path": str(path)}
+            raw = root / "raw_t1.nii.gz"
+            raw.write_bytes(b"raw acquisition")
+            report = root / "report.json"
+            report.write_text(json.dumps({"case_id": "sub-01", "status": "completed", "exit_code": 0,
+                "command": ["recon-all", "-i", str(raw), "-sd", str(subject.parent), "-s", subject.name],
+                "raw_input_provenance": [{**MODULE.file_record(raw), "kind": "raw_t1w"}], "anatomy": anatomy}))
+            config = {"case_id": "sub-01", "anatomy_report": MODULE.file_record(report),
+                      "raw_t1w": MODULE.file_record(raw), "subject_dir": str(subject)}
+            MODULE.verify_anatomy(config)
+            (subject / "surf/lh.pial.T1").write_bytes(b"changed pial content")
+            with self.assertRaisesRegex(ValueError, "changed"):
+                MODULE.verify_anatomy(config)
+
     def test_changed_report_cannot_be_rebound(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "report.json"

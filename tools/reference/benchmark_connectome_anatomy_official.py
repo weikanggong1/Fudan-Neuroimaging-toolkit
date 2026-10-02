@@ -107,7 +107,7 @@ def verify_anatomy(config):
     required += [f"label/{hemi}.{name}.annot" for hemi in ("lh", "rh") for name in ("aparc", "aparc.a2009s")]
     for name in required:
         record = files.get(name)
-        if record is None or verify_file(record) != subject / name:
+        if record is None or verify_file(record) != (subject / name).resolve():
             raise ValueError(f"unbound anatomy input: {name}")
     return {"report": config["anatomy_report"], "original_report": report.get("original_report"),
             "raw_t1w": config["raw_t1w"], "subject_dir": str(subject), "files": files,

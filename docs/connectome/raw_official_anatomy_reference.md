@@ -134,6 +134,7 @@ FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚�
 ## 6. 更新记录
 
 - 2026-10-03：新增prepare/complete独立官方解剖参照和可审核契约；禁止覆盖原输出，锁定fresh T1/FS，逐例隔离public_0路径，保留官方world-geometry变换与NN atlas定义。
+- 2026-10-03：真实CON03预检发现官方`lh.pial`为标准`lh.pial.T1`链接；统一比较resolve路径并仍校验目标字节SHA，保留原预检失败，无MRI重算。
 - 2026-10-03：核对SynthMorph真正CLI；现有shell wrapper命令原本正确，仅补说明与回归，未修改生产重采样。
 
 ## 7. 原实现与参考
