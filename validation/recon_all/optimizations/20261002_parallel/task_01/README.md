@@ -56,7 +56,7 @@ reconstruction_report = run_recon_all_python(
 
 主报告 `fnit-native-free-run.json` 新增 `hemisphere_scheduling`：workers、总预算、四个groups；每组包含values（双侧原函数结果）、workers（双侧独立报告）、group_wall_seconds、private_copy_seconds、publish_seconds、cleanup_seconds、worker_span_seconds、worker_sum_seconds、overlap_seconds，以及device_process_tree同期显存采样。所有秒数为墙钟或明确标注的CPU秒数，显存为字节。GPU UUID、最大采样间隔、失败采样及外部进程另列；unavailable不能当作零显存。
 
-每组独立报告位于 scripts/OPERATION.hemisphere-group.json，完整worker stdout/stderr位于 scripts/OPERATION.H.worker.log；原生其他日志加阶段及半球前缀，保留固定文件名的来源。私有影像成功/失败均删除，不进入报告交付。
+每组独立报告位于 scripts/OPERATION.hemisphere-group.json，完整worker stdout/stderr位于 scripts/OPERATION.H.worker.log；原生其他日志加阶段及半球前缀，保留固定文件名的来源。私有影像正常成功/失败均删除，不进入报告交付；清理自身失败则组状态failed并记录残留私有路径。最终报告采用临时元数据+replace；写出失败仍在内存主报告中标failed，保留原始worker异常与收尾错误，不产生成功的临时JSON。
 
 失败行为：worker异常、未知共享写入、输入删除或不完整报告均失败，取消同组进程树，不发布该组计算结果。逐文件发布遇到I/O错误则主报告明确failed并保留已发布路径，没有跨文件事务回滚。输入/资源/线程/allocator错误继续沿用原接口异常。默认串行接口兼容；完整整例只由协调者统一验证。
 
@@ -94,6 +94,8 @@ fnit-recon-all /data/sub-01_T1w.nii.gz /results/sub-01 \
 - f07cf59：本轮共同基线，双侧串行。
 - e44451a：四组可选双侧exec，私有文件隔离、共享发布、失败传播和同期设备采样；专项CPU测试42项及14子测试通过。
 - c457eae：固定worker候选源码路径，首次CUDA用显式FP32单元素分配再同步；AB/BA测试均完成，保留此前首同步失败。
+- f9f570a：基于metrics真实配对，将指标从final放置worker移到父进程串行；接口兼容回归43项及14子测试通过。
+- 42589db：清理、日志关闭、设备采样收尾、最终元数据失败保护；故障注入与回归46项及14子测试通过。成功路径计算算法未改，新增失败路径测试使用独立源码快照。
 - 测量期间worker导入路径固定补丁见 measured_source_delta.patch；报告绑定基线commit与每个实际Python源码SHA-256，不能标为无改动e44451a运行。
 
 ## 7. 原实现和参考文献
