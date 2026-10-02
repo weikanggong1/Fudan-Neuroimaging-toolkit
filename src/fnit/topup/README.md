@@ -45,4 +45,4 @@ H100 三次独立进程的 API 读取、计算和写盘为 `17.864061/6.704100/7
 
 无新增运行依赖或外置权重。上游实现、许可、输入输出结构、完整变量注释示例及历史 benchmark 见[功能说明](../../../docs/topup/README.md)。数值正确性的 CPU 数学测试不替代真实数据 benchmark；新版仍不声明 FSL 数值等价。
 
-2026-10-02 最终源码删除未调用的 core helper 和旧 float CUDA 分支。`core.py` SHA-256 为 `d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8`，`_sampling_cuda.py` 为 `ee19a764849bda80137312ed3ab8f1bf0aaef5e13f852f49f435e511b40d2427`；上述数值及固定参数、初始梯度、sampler 检查均已在该源码重跑完成。真实 sampler 的全部强度、三个导数和 valid 精确匹配独立 double tensor 数学参照，暖采样时间比分别为 `89.002×/91.043×`，不代表 FSL 或整组件速度。[96 项组合回归](../../../validation/dmri_pipeline/regression_synthstrip_topup_20261002.public.json)通过；完整 dMRI 链的精度和计时单独记录。
+2026-10-02 最终源码删除未调用的 core helper 和旧 float CUDA 分支。`core.py` SHA-256 为 `d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8`，`_sampling_cuda.py` 为 `ee19a764849bda80137312ed3ab8f1bf0aaef5e13f852f49f435e511b40d2427`；上述数值及固定参数、初始梯度、sampler 检查均已在该源码重跑完成。真实 sampler 的全部强度、三个导数和 valid 精确匹配独立 double tensor 数学参照，暖采样时间比分别为 `89.002×/91.043×`，不代表 FSL 或整组件速度。[104 项组合回归](../../../validation/dmri_pipeline/regression_synthstrip_topup_20261002.public.json)通过；完整 dMRI 链的精度和计时单独记录。

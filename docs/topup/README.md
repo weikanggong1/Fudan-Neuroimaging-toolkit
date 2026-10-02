@@ -232,7 +232,7 @@ FSL 两次输出文件的 SHA-256 相同。外层 FSL 墙钟中位数 `211.11051
 
 另对两帧各 778,752 个真实 Target 坐标，在相同驻留 image coefficient 与坐标上比较融合 CUDA sampler 和独立 double tensor 数学参照。强度、三个空间导数和 valid mask 的全部值精确相同。两帧暖同步 wall 中位数分别为 tensor `0.019326/0.019327 s`、融合 `0.000217/0.000212 s`，时间比分别 `89.002×/91.043×`。这是相对逐 tap tensor 参照的 sampler 时间比，参照没有调用 FSL；不表示完整 TOPUP 或 FSL 加速比。计时排除输入读写、regrid、预滤、几何准备与 JIT warmup，CUDA event 表示 stream 区间而非独占 kernel 时间。
 
-机器可读结果为[独立同输入估计](../../validation/topup/report.matched_20261002.public.json)、[三次 GPU 重复](../../validation/topup/repeats_20261002.public.json)、[两次原生 FSL 重复](../../validation/topup/reference_repeats_20261002.public.json)、[固定官方参数重渲染](../../validation/topup/fixed_parameters_20261002.public.json)、[首层梯度](../../validation/topup/initial_gradient_20261002.public.json)和[真实 sampler](../../validation/topup/sampler_20261002.public.json)；运行和区域定义见[验收说明](../../validation/topup/README.md)。受支持本地 Python 3.11 / PyTorch 2.5.1 的[96 项组合回归](../../validation/dmri_pipeline/regression_synthstrip_topup_20261002.public.json)通过，其中 20 项 CUDA sampler 测试使用 RTX 3060，其余为 CPU 接口与数学检查；小测试不作为 benchmark。新版脑图随独立完整链验收更新；下方图属于历史 L-BFGS 版本。
+机器可读结果为[独立同输入估计](../../validation/topup/report.matched_20261002.public.json)、[三次 GPU 重复](../../validation/topup/repeats_20261002.public.json)、[两次原生 FSL 重复](../../validation/topup/reference_repeats_20261002.public.json)、[固定官方参数重渲染](../../validation/topup/fixed_parameters_20261002.public.json)、[首层梯度](../../validation/topup/initial_gradient_20261002.public.json)和[真实 sampler](../../validation/topup/sampler_20261002.public.json)；运行和区域定义见[验收说明](../../validation/topup/README.md)。受支持本地 Python 3.11 / PyTorch 2.5.1 的[104 项组合回归](../../validation/dmri_pipeline/regression_synthstrip_topup_20261002.public.json)通过，其中 20 项 CUDA sampler 测试使用 RTX 3060，其余为 CPU 接口与数学检查；小测试不作为 benchmark。新版脑图随独立完整链验收更新；下方图属于历史 L-BFGS 版本。
 
 ## 历史发布验收状态
 
@@ -280,6 +280,6 @@ UKB AP/PA b0 准备顺序参考 UK Biobank brain imaging pipeline v1.5；场估�
 
 | 日期 | 代码与 benchmark 范围 |
 |---|---|
-| 2026-10-02 | 补齐默认源图 regrid，修正目标函数支持区、周期平滑、图像插值精度及索引、层间场传递、FSL storage 约定，改为联合 LM/SCG；一例同输入真实场图信号区 RMSE 0.010799 Hz，固定参数脑内 iout RMSE 0.011135；当前源码三次 API 中位数 7.094846 s，96 项组合回归通过，独立估计非逐元素一致。 |
+| 2026-10-02 | 补齐默认源图 regrid，修正目标函数支持区、周期平滑、图像插值精度及索引、层间场传递、FSL storage 约定，改为联合 LM/SCG；一例同输入真实场图信号区 RMSE 0.010799 Hz，固定参数脑内 iout RMSE 0.011135；当前源码三次 API 中位数 7.094846 s，104 项组合回归通过，独立估计非逐元素一致。 |
 | FNIT 0.16.0 | 与 0.14.0 数值文件逐字节相同；保留当时一例真实 pair 的 L-BFGS 对照。 |
 | FNIT 0.14.0 | 初版 AP/PA 路径、FSL 文件合同、单病例精度与三次共享节点计时；不声明数值等价。 |

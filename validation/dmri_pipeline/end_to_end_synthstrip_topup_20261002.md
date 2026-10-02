@@ -6,13 +6,13 @@
 
 本次将 FNIT 的 b0 阈值/形态学掩膜替换为项目成熟的 PyTorch SynthStrip；TOPUP 补齐原软件默认内部 regrid，并使用源码对应的联合场/运动 LM、固定运动 SCG、周期平滑和样条采样。运行时不调用 FSL 或 FreeSurfer，无新增依赖；标准 SynthStrip 权重由既有外部权重配置准备。
 
-同一例真实原始 AP/PA，两套流程各自执行全部阶段，生成九张 native、九张 standard、九张 skeleton 图。新版 FNIT 处理时间 **499.55 s（8.33 分钟）**，独立参考链 **2055.53 s（34.26 分钟）**。两套流程的 27 对图均通过 shape、affine 及有限值检查；未设置事后数值通过阈值。
+同一例真实原始 AP/PA，两套流程各自执行全部阶段，生成九张 native、九张 standard、九张 skeleton 图。新版 FNIT 处理时间 **404.74 s（6.75 分钟）**，独立参考链 **2055.53 s（34.26 分钟）**。两套流程的 27 对图均通过 shape、affine 及有限值检查；未设置事后数值通过阈值。
 
-采用同一 SynthStrip 脑提取方法、两侧独立生成 mask 的参考协议：mask Dice **0.9999834**，标准空间九图 r **0.9880–0.9987**；native FA/MD r **0.999051/0.999642**。两次 FNIT 完整运行的 27 张解码数组和 header binary block 分别完全一致；它们对应清理前后两个源码快照，不能当作同一版本两次计时取中位数。
+采用同一 SynthStrip 脑提取方法、两侧独立生成 mask 的参考协议：mask Dice **0.9999834**，标准空间九图 r **0.9880–0.9987**；native FA/MD r **0.999051/0.999642**。清理前后及合并最新 main 后的三次 FNIT 完整运行，其 27 张解码数组和 header binary block 分别完全一致；它们对应不同源码快照，时间分别保留，不能作为同一版本的三次计时取中位数。
 
 另与保留的旧 FSL＋BET 参考链比较，标准空间九图 r 为 **0.8465–0.9597**。两种参考协议的掩膜不同，结果分别报告。当前输出仍非逐值相等，观察到的整链时间比不能称为数值等价流程的加速。
 
-本报告初始数字绑定合并最新 main 前的已测源码快照；最终 main 的实际接入回归另按报告版本记录。
+当前主要数字绑定最新 main 整合提交 `b3ccafe`：实际运行的 433 个 Python 源码文件 SHA-256 全部与该提交吻合。清理前、清理后及最新 main 整合的三次真实整链分别记录；后续只更新文档、报告和测试。
 
 ```mermaid
 flowchart TD
@@ -30,7 +30,7 @@ flowchart TD
 
 参考为 FSL 6.0.7.4、官方 Python AMICO 2.0.3、FreeSurfer 8.2 安装内的原版 SynthStrip 脚本及同 SHA 标准模型。SynthStrip 在安装提供的 8 线程 CPU Python 环境中运行；FNIT 使用 H100 GPU。参考的 mask 来自其自身 TOPUP 均值，FNIT 来自 FNIT 自产均值，没有借用参考 mask、场或校正 DWI。参考是 UKB 命令的明确适配链：原 T1 mask 改为 b0 SynthStrip、MCR AMICO 改为 Python AMICO、使用 rotated bvec、seed12345、不执行 GDC。
 
-服务器为 gpucw1 / H100 PCIe。双方各 8 CPU 线程，参考固定 cores0–7，FNIT cores8–15；同一目标 GPU 的本任务计算串行，参考 CPU 配准与 FNIT GPU 流程在不同 CPU 核上重叠。输出位于同一节点私有 tmp 文件系统，raw 只读。未清空系统或 Triton 缓存；共享机器的时间为描述性观测。FNIT allocator 上限20,000,000,000 bytes，图像 float32、默认 TF32，TOPUP 沿用官方 double 系数/求解器与插值累加，不使用 FP16/BF16。
+服务器为 gpucw1 / H100 PCIe。双方各 8 CPU 线程，参考固定 cores0–7，FNIT cores8–15；同一目标 GPU 的本任务计算串行，早期参考 CPU 配准与合并前 FNIT GPU 流程在不同 CPU 核上重叠；当前 main 整合复测在参考链完成后运行。输出位于同一节点私有 tmp 文件系统，raw 只读。未清空系统或 Triton 缓存；共享机器的时间为描述性观测。FNIT allocator 上限20,000,000,000 bytes，图像 float32、默认 TF32，TOPUP 沿用官方 double 系数/求解器与插值累加，不使用 FP16/BF16。
 
 许可证、程序、模型、模板、输入和源码 SHA 见 JSON。FSL/FreeSurfer/AMICO 仅在独立验证侧使用；本次不发布它们的二进制、权重、模板或原始影像。
 
@@ -40,17 +40,18 @@ flowchart TD
 | --- | --- | --- | --- |
 | official_e2e | 2055.53 | 2073.54 | 0 |
 | fnit_e2e | 516.305 | 521.75 | 0 |
-| fnit_e2e_final | 499.547 | 503.37 | 0 |
+| fnit_e2e_final（合并前清理版） | 499.547 | 503.37 | 0 |
+| fnit_main_integrated（当前主结果） | 404.743 | 408.54 | 0 |
 
-处理时间包含模型加载、预处理、计算和最终输出保存；进程时间另含导入、CUDA 初始化和验证审计。嵌套 TOPUP 事件已包含在准备阶段，不能重复相加。先期 FNIT 源码保留后来删除的非活跃 helper；性能比较使用最终清理版单次与当前独立参考单次。
+处理时间包含模型加载、预处理、计算和最终输出保存；进程时间另含导入、CUDA 初始化和验证审计。嵌套 TOPUP 事件已包含在准备阶段，不能重复相加。先期 FNIT 源码保留后来删除的非活跃 helper；当前比较使用实际 main 整合版的单次完整运行与已有独立参考单次。输入、官方环境和参考协议均保持相同，参考结果复用；每套流程自产中间影像，未把参考影像作为 FNIT 输入。观察到的处理时间比为 5.08；共享负载及源码版本不同，不能将与合并前 499.55 s 的时间变化全部归为某一项优化。
 
 | 阶段 | FNIT / s | 参考 / s |
 | --- | --- | --- |
-| b0选择、TOPUP、mask及EDDY准备 | 12.6359 | 330.362 |
-| 完整EDDY及保存 | 418.427 | 645.879 |
-| shell读取/选择、DTIFIT及保存 | 13.3309 | 15.9075 |
-| AMICO NODDI及保存 | 27.4997 | 35.0526 |
-| FA预处理、FLIRT/FNIRT、九图传播及骨架 | 27.1587 | 1028.33 |
+| b0选择、TOPUP、mask及EDDY准备 | 12.8898 | 330.362 |
+| 完整EDDY及保存 | 331.411 | 645.879 |
+| shell读取/选择、DTIFIT及保存 | 13.1485 | 15.9075 |
+| AMICO NODDI及保存 | 24.7769 | 35.0526 |
+| FA预处理、FLIRT/FNIRT、九图传播及骨架 | 22.1405 | 1028.33 |
 
 DTIFIT 使用 pipeline QC 的完整 shell 读取/选择口径；单独模型事件较短。原软件的详细 TOPUP、CPU SynthStrip、EDDY CUDA 与三阶段 FNIRT 计时均保存在报告。
 
@@ -157,6 +158,6 @@ python validation/dmri_pipeline/compare_end_to_end.py \
 
 ## 7. 更新与参考
 
-- 2026-10-02 本版：PyTorch SynthStrip mask、TOPUP源码路径与融合采样、27图真实整链及旧BET协议补充比较；96项回归通过。
+- 2026-10-02 本版：PyTorch SynthStrip mask、TOPUP源码路径与融合采样、27图真实整链及旧BET协议补充比较；104项回归通过。
 - 同日历史：[阈值mask＋L-BFGS TOPUP整链](end_to_end_20261002.md)，保留原实际版本与失败数值。
 - 原代码、引用、资源许可：[DMRIPipeline说明](../../docs/dmri_pipeline/README.md#参考文献与原实现)、[TOPUP说明](../../docs/topup/README.md)、[SynthStrip说明](../../docs/synthstrip/README.md)。

@@ -13,7 +13,7 @@
 
 当前实际验收源码 `core.py` SHA-256 为 `d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8`，CUDA helper 为 `ee19a764849bda80137312ed3ab8f1bf0aaef5e13f852f49f435e511b40d2427`。估计、重复与 sampler 报告直接记录两项哈希；固定参数和梯度报告直接记录 core 哈希。估计、固定参数与梯度三项的输入 SHA-256 相同：`f701b4ef97e39f3e821030d8c630f575a1410ec380627f26f11312005968c774`。当前实现已经删除未调用 helper 和旧 float CUDA 分支。
 
-本地[96 项组合回归](../dmri_pipeline/regression_synthstrip_topup_20261002.public.json)通过（39.87 s）：Python 3.11.16 / PyTorch 2.5.1，其中 20 项 CUDA sampler 测试运行于 RTX 3060，其余为 CPU 接口和数学合同检查。这些小测试不作为真实精度或性能 benchmark。
+本地[104 项组合回归](../dmri_pipeline/regression_synthstrip_topup_20261002.public.json)通过（13.61 s）：Python 3.11.16 / PyTorch 2.5.1，其中 20 项 CUDA sampler 测试运行于 RTX 3060，其余为 CPU 接口和数学合同检查。这些小测试不作为真实精度或性能 benchmark。
 
 ## 独立同输入估计与统计
 

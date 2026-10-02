@@ -504,23 +504,23 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 
 输入 SHA-256、源码范围、各阶段耗时、与原软件的参照范围及新脑图见[本轮完整验证](../../validation/registration_lossless_20261002/README.md)。
 
-### 2026-10-02：SynthStrip＋匹配 TOPUP 的独立整链复测（合并前源码）
+### 2026-10-02：当前 main 的 SynthStrip＋匹配 TOPUP 整链
 
-本轮以同一例真实 `104×104×72×105` raw AP/PA 为起点，两侧各自完成 b0 选择、TOPUP、脑提取、EDDY、DTIFIT、AMICO 和 TBSS，在新目录保存九张 native、九张 standard、九张 skeleton 图。主要原软件参考使用官方 TOPUP → 官方 CPU SynthStrip → FSL GPU EDDY → FSL DTIFIT／官方 Python AMICO／FSL TBSS；脑提取输入为参考侧自己的 TOPUP 校正 b0 均值，标准权重与 FNIT 同哈希。DTIFIT 和 AMICO 分别使用各自 EDDY 产生的旋转梯度。参考仍保留 UKB 单被试流程的无 T1、无 GDC 适配。环境为 Python 3.11.16、Torch 2.5.1、FSL 6.0.7.4、AMICO 2.0.3；官方 AMICO 本例 protocol kernels 重建并计入时间，全局 rotation cache 已存在。
+当前 main 集成版从同一例真实 `104×104×72×105` raw AP/PA 重新完成全部阶段，在新目录保存九张 native、九张 standard、九张 skeleton 图。主要原软件参考复用本轮已经独立完成的官方 TOPUP → 官方 CPU SynthStrip → FSL GPU EDDY → FSL DTIFIT／官方 Python AMICO／FSL TBSS 结果；同 raw、官方环境和参考协议均未改变。脑提取输入分别为各自 TOPUP 校正 b0 均值，标准权重同哈希；DTIFIT 和 AMICO 分别使用各自 EDDY 产生的旋转梯度。参考仍保留 UKB 单被试流程的无 T1、无 GDC 适配。环境为 Python 3.11.16、Torch 2.5.1、FSL 6.0.7.4、AMICO 2.0.3；官方 AMICO 本例 protocol kernels 重建并计入其原测时间，全局 rotation cache 已存在。
 
-双方均使用 8 个 CPU 线程，原软件固定 CPU 0–7，FNIT 固定 CPU 8–15；GPU 阶段在同一张 H100 GPU 1 上串行运行。参考侧 CPU 配准与 FNIT GPU 阶段有时间重叠。处理计时从 raw 输入处理开始，到全部 27 图写盘结束；Python／CUDA 初始化、预检和验证报告统计另行记录。嵌套 TOPUP 子步骤包含在父步骤中，不重复累加。这里记录单被试共享系统上的实测耗时，数值差异按固定脑区及共同有效区域分别报告；较高相关性本身不构成数值等价结论。
+双方均使用 8 个 CPU 线程，原软件固定 CPU 0–7，FNIT 固定 CPU 8–15；本任务 GPU 阶段在同一张 H100 GPU 1 上串行运行。最新 main 在参考流程完成后执行，二者没有本任务时间重叠；只有下方早期合并前运行与参考 CPU 配准有重叠。处理计时从 raw 输入处理开始，到全部 27 图写盘结束；Python／CUDA 初始化、预检和验证报告统计另行记录。嵌套 TOPUP 子步骤包含在父步骤中，不重复累加。这里记录单被试共享系统上的实测耗时，数值差异按固定脑区及共同有效区域分别报告；较高相关性本身不构成数值等价结论。
 
-| 处理步骤，包含该阶段读写 / 秒 | 最终 FNIT | 独立官方 SynthStrip 参考 |
+| 处理步骤，包含该阶段读写 / 秒 | 当前 main FNIT | 独立官方 SynthStrip 参考 |
 |---|---:|---:|
-| b0 选择、TOPUP、脑掩膜与 EDDY 输入准备 | 12.64 | 330.36 |
-| 完整八轮 EDDY | 418.43 | 645.88 |
-| shell 选择＋DTIFIT | 13.33 | 15.91 |
-| AMICO 准备、拟合与保存 | 27.50 | 35.05 |
-| FA 预处理、FLIRT/FNIRT、九图传播与骨架保存 | 27.16 | 1028.33 |
-| 总处理时间 | 499.55（8.33 分钟） | 2055.53（34.26 分钟） |
-| 完整进程，包含启动、预检和报告 | 503.37 | 2073.54 |
+| b0 选择、TOPUP、脑掩膜与 EDDY 输入准备 | 12.89 | 330.36 |
+| 完整八轮 EDDY | 331.41 | 645.88 |
+| shell 选择＋DTIFIT | 13.15 | 15.91 |
+| AMICO 准备、拟合与保存 | 24.78 | 35.05 |
+| FA 预处理、FLIRT/FNIRT、九图传播与骨架保存 | 22.14 | 1028.33 |
+| 总处理时间 | 404.74（6.75 分钟） | 2055.53（34.26 分钟） |
+| 完整进程，包含启动、预检和报告 | 408.54 | 2073.54 |
 
-FNIT 的 TOPUP 估计和保存子步骤为 5.01 s，原软件为 215.47 s；二者已包含在准备行中。处理时间比为本例观察值 4.11。各阶段由独立计时记录，总处理时间还包含阶段之间的操作；表中不把嵌套子步骤再次相加。最终整链的 CUDA allocator 已分配／保留峰值为 14.65145／19.98166 GB，低于设置的 20,000,000,000 bytes 预算；它是各公共阶段记录的最大值，包含存活 SynthStrip 模型和 allocator 缓存，不包含 CUDA context 或其他进程。保留峰值接近预算，不能用已分配峰值代表整个进程的设备占用。
+FNIT 的 TOPUP 估计和保存子步骤为 5.58 s，原软件为 215.47 s；二者已包含在准备行中。处理时间比为本例观察值 5.08。各阶段由独立计时记录，总处理时间还包含阶段之间的操作；表中不把嵌套子步骤再次相加。当前整链的 CUDA allocator 已分配／保留峰值为 14.65145／19.98166 GB，低于设置的 20,000,000,000 bytes 预算；它是各公共阶段记录的最大值，包含存活 SynthStrip 模型和 allocator 缓存，不包含 CUDA context 或其他进程。保留峰值接近预算，不能用已分配峰值代表整个进程的设备占用。
 
 本轮同时公开两套精度协议。主要参考是上述新生成的官方 SynthStrip 链；历史协议用同一最终 FNIT 结果与先前独立 FSL BET 链比较，保留脑提取方法的差别。
 
@@ -533,7 +533,14 @@ FNIT 的 TOPUP 估计和保存子步骤为 5.01 s，原软件为 215.47 s；二�
 
 完整 EDDY 105 volume 在固定官方脑区 r=0.999764，MAE／RMSE=23.2314／43.0074（原信号单位）；100 个 DWI 旋转梯度的平均夹角为 0.05585°，离群图共有 1 个条目不同。FA FLIRT 在八个体素中心角点及图像中心的位移 RMS 为 0.24793 mm，属于九点检查。旧阈值/BET 整链的 r 和 6.49 mm 九点位移来自不同上游与掩膜输入，不能把新旧差值单独归因于某个修复，也没有由这些结果隔离 FNIRT 的残差贡献。
 
-本节记录与新 main 合并前已完成的源码验证：最终清理版运行基于 `ac692bb` 加本轮工作源码，以报告中的逐文件 SHA-256 为准；TOPUP core／CUDA sampler 哈希分别以 `d6b9838c`／`ee19a764` 开头。清理前候选的 FNIT 处理时间另为 516.31 s；清理版 fresh 运行的 27 张解码数组与 header binary block 同候选完全相同，未将不同源码的两次时间合并成最终版中位数。合并新 main 后的整链将单独绑定其实际源码与运行记录，本节不把合并前结果归为尚未运行的新版本。
+当前实际运行的 433 个 Python 源文件哈希全部与集成提交 `b3ccafe0a48f4c1c396ae6285d0bdbe07a7664c9` 一致；TOPUP core／CUDA sampler 哈希仍以 `d6b9838c`／`ee19a764` 开头。集成版包含新 main 的共享 FNIRT／ApplyWarp 更新，已从 raw 完整重新运行。相对合并前清理版，27 张解码数组和 header binary block 全部相同；当前图像与参考的精度报告也重新生成并核对。
+
+| 同轮 FNIT 历史源码快照 | 处理 / 秒 | 完整进程 / 秒 |
+|---|---:|---:|
+| 合并前、清理前候选（`ac692bb` 加当时工作源码） | 516.31 | 521.75 |
+| 合并前清理版（`ac692bb` 加 `d6b9838c`／`ee19a764` 样条源码） | 499.55 | 503.37 |
+
+上述两个历史快照之间的 27 图解码值与 header binary block 也相同。不同源码的时间分别保留，不合并为当前版本中位数；共享负载、缓存和运行时刻同时变化，不能把 499.55→404.74 s 的差值全部归于新共享组件优化。
 
 完整方法和脑图见[本轮整链报告](../../validation/dmri_pipeline/end_to_end_synthstrip_topup_20261002.md)，计时、版本与源码见[运行报告](../../validation/dmri_pipeline/report.synthstrip_topup_20261002.public.json)。两协议的逐图误差分别见[官方 SynthStrip 对照](../../validation/dmri_pipeline/comparison.synthstrip_topup_20261002.public.json)和[历史 BET 对照](../../validation/dmri_pipeline/comparison.historical_bet_20261002.public.json)，上游见[校正与配准检查](../../validation/dmri_pipeline/upstream.synthstrip_topup_20261002.public.json)。本轮覆盖 TBSS＋AMICO；MMORF 与经典 NODDI 保留其既有验证范围。
 
@@ -600,7 +607,8 @@ FNIT 模型加载＋推理为 1.5973 s，allocator allocation/reserve 峰值 6.5
 
 | 日期 | 更新与验收 |
 |---|---|
-| 2026-10-02，SynthStrip＋匹配 TOPUP 整链 | 合并前清理源码 fresh TBSS＋AMICO 27 图完成；处理时间 499.55／2055.53 s，官方 SynthStrip 参考标准九图 r=0.988013–0.998676，历史 BET 参考另列 r=0.846458–0.959704；逐图误差、上游、显存和脑图见[最新报告](../../validation/dmri_pipeline/end_to_end_synthstrip_topup_20261002.md)。 |
+| 2026-10-02，当前 main 整链 | 集成提交 `b3ccafe` 的 433 个实际 Python 源文件哈希一致，raw-to-27 图 fresh 完成；处理时间 404.74／2055.53 s，官方 SynthStrip 参考标准九图 r=0.988013–0.998676，历史 BET 参考另列 r=0.846458–0.959704；相对合并前清理版 27 图解码值及 header binary block 全同，见[最新报告](../../validation/dmri_pipeline/end_to_end_synthstrip_topup_20261002.md)。 |
+| 2026-10-02，SynthStrip＋匹配 TOPUP 合并前快照 | 清理前／清理版独立运行处理时间分别为 516.31／499.55 s，逐图相同；不同源码的时间单独保留，不合并为当前版本重复计时。 |
 | 2026-10-02，SynthStrip b0 接入 | TOPUP 校正 b0 均值和 AP-only b0 均值使用项目 SynthStrip；标准权重校验、实例复用、CPU/GPU 和匿名 QC。移除旧阈值形态学代码，修复缺 iout 时平均全部 DWI 的输入准备 bug。相同真实官方 b0 均值的 mask Dice=0.9999907776（差 5 voxel），53 项受支持 CPU 回归通过；独立整链见上一行。 |
 | 2026-10-02，FNIRT 优化 | 跳过未使用的 trilinear 梯度、复用 T1 intensity mapping 与 float64 deformation increment；原 mask/TOPUP 流程的真实 dMRI TBSS 66 项检查及另外两条 FNIRT 全流程均通过，见[统一验证页](../../validation/registration_lossless_20261002/README.md)。 |
 | 2026-10-02，历史阈值/BET 完整复测 | 同 raw 的旧 FNIT/独立 FSL BET＋AMICO 各两轮，27 图、上游、误差、重复性与脑图完成，[历史整链报告](../../validation/dmri_pipeline/end_to_end_20261002.md) |
