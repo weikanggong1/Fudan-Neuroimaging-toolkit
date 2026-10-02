@@ -200,6 +200,7 @@ def segment_sclimbic_image(source: nib.spatialimages.SpatialImage, *,
     默认None时加载一次。fov为RAS网络立方边长（体素），默认160；
     device为显式CPU/CUDA。stats_path可写体积统计，etiv单位mm³。
     precision_report可传列表记录实际前向dtype、TF32和autocast。
+    cuDNN TF32继承调用者当前设置；本函数不强制开启或关闭，不改全局默认。
     返回MGHImage，原网格/affine、标签int32；不写影像临时文件。
     非1 mm输入、标签/模型通道不符或推理失败抛异常。
     算法对应mri_sclimbic_seg内部推理，没有独立原软件CLI。
@@ -221,7 +222,8 @@ def segment_sclimbic_image(source: nib.spatialimages.SpatialImage, *,
 
     if model is None:
         model = LimbicUNet.from_h5(model_path).to(device).eval()
-    with torch.backends.cudnn.flags(enabled=True, allow_tf32=True):
+    with torch.backends.cudnn.flags(enabled=True,
+                                    allow_tf32=torch.backends.cudnn.allow_tf32):
         if precision_report is not None:
             from .profiling import record_network_forward
             record_network_forward(model, conformed, precision_report, model=str(model_path))

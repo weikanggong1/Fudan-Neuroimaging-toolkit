@@ -1,4 +1,8 @@
-"""冻结自产输入的Synth辅助链计时；每次在空目录运行，影像/资源均记录SHA。"""
+"""冻结自产输入的Synth辅助链计时；空目录运行，影像/资源均记录SHA。
+
+--cudnn-tf32/--matmul-tf32取0或1，默认1仅规定本诊断进程的前向策略。
+精度对照不改变生产默认，不使用半精度；实际前向设置写入precision字段。
+"""
 import argparse, hashlib, inspect, json, os, platform, shutil, time
 from pathlib import Path
 import nibabel as nib
@@ -20,6 +24,8 @@ def main():
     p.add_argument("--device",required=True)
     p.add_argument("--commit",required=True)
     p.add_argument("--threads",type=int,default=4)
+    p.add_argument("--cudnn-tf32",type=int,choices=(0,1),default=1)
+    p.add_argument("--matmul-tf32",type=int,choices=(0,1),default=1)
     a=p.parse_args()
     if a.output.exists():raise FileExistsError(a.output)
     inputs={}
@@ -29,8 +35,8 @@ def main():
         shutil.copyfile(src,dst)
     (a.output/"stats").mkdir()
     torch.set_num_threads(a.threads)
-    torch.backends.cuda.matmul.allow_tf32=True
-    torch.backends.cudnn.allow_tf32=True
+    torch.backends.cuda.matmul.allow_tf32=bool(a.matmul_tf32)
+    torch.backends.cudnn.allow_tf32=bool(a.cudnn_tf32)
     cuda=torch.device(a.device).type=="cuda"
     if cuda:torch.cuda.synchronize(a.device);torch.cuda.reset_peak_memory_stats(a.device)
     forwards=[]
