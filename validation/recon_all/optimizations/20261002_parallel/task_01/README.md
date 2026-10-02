@@ -1,0 +1,92 @@
+# FNIT 左右半球并行调度
+
+## 1. 功能和流程
+
+从单幅原始 T1 运行成熟 FNIT 重建链，左右半球独立计算的四组阶段可采用两个独立 Python exec 进程。每个阶段结束后统一发布双侧输出，再进入下一阶段。总计算线程预算默认4，双侧各2；topology 原生算法仍固定1线程。
+
+```mermaid
+flowchart TD
+    A[原始 T1 → 共有 MRI / MNI / finalsurfs] --> B[复制半球私有被试目录]
+    B --> L[左侧 surface / sphere]
+    B --> R[右侧 surface / sphere]
+    L --> C[屏障与发布；左→右缺陷体积累计]
+    R --> C
+    C --> D[双侧 sphere registration → 屏障]
+    D --> E[双侧三套 annotation → 屏障]
+    E --> F[双侧 final white / pial / maps → 屏障]
+    F --> G[统一 exvivo / ribbon / 脑区体积与统计]
+```
+
+共享文件审计见 [AUDIT.md](AUDIT.md)。私有复制、进程启动、GPU同步、输出发布和清理均包含在组墙钟，worker 耗时之和不能称为整例耗时。
+
+## 2. Python 调用及输入输出
+
+```python
+from fnit.recon_all.native_free import run_recon_all_python
+
+reconstruction_report = run_recon_all_python(
+    t1="/data/sub-01_T1w.nii.gz",           # 原始3D T1，nibabel可读取的影像
+    subject_dir="/results/sub-01",         # 空被试目录，禁止复用非空目录
+    weights_dir="/resources/weights",      # 项目manifest校验的外置网络权重
+    assets_dir="/resources/assets",        # 固定图谱/模板/标签，只读复用
+    device="cuda:0",                       # CUDA_VISIBLE_DEVICES下的逻辑设备
+    threads=4,                             # 总计算线程预算，双侧各2
+    native_bin_dir="/conda/env/bin",        # 项目固定源码构建的必要组件
+    profile_stages=True,                    # 记录阶段同步、父子CPU秒数
+    cuda_allocator_cache="auto",           # 首次CUDA默认关缓存；已初始化API保留原状态
+    hemisphere_workers=2,                  # 1=既有串行默认；2=双侧exec进程
+)
+```
+
+输入参数：
+
+| 参数 | 默认值及限制 |
+| --- | --- |
+| t1 | 必填，单幅原始3D结构像；生产不读取官方参考结果 |
+| subject_dir | 必填，空目录；成功或失败报告写在此目录 |
+| weights_dir / assets_dir | 必填，既有SHA-256/大小校验的资源；无明确再分发许可者仅从作者源获取 |
+| device | cuda:0；显式CPU接口用于兼容诊断；生产GPU运行不静默回退CPU |
+| threads | 4；正整数，半球workers=2时至少2，奇数每侧向下取整 |
+| native_bin_dir | None，当前Conda bin或FNIT_RECON_ALL_BIN_DIR；禁止系统预装脑影像程序 |
+| profile_stages | False，生产不额外插入每子步骤同步；进程生命周期终点必须等待完成 |
+| cuda_allocator_cache | auto；enabled/disabled只能在CUDA初始化前选择 |
+| hemisphere_workers | 1或2，默认1；2要求调用者CPU/CUDA autocast均关闭，不启用FP16/BF16 |
+
+输出结构保持既有138项清单：mri为1 mm conform网格，surf为surface RAS/mm，label为有对应顶点的标签/注释，stats为脑区统计。厚度单位mm，面积mm²，体积mm³，曲率mm⁻¹。半球共享的 `mrisps.wpa.mgz`、`mrisps.white.mgz` 最终保留右侧诊断；surface.defects按左侧生成、右侧累计。
+
+主报告 `fnit-native-free-run.json` 新增 `hemisphere_scheduling`：workers、总预算、四个groups；每组包含values（双侧原函数结果）、workers（双侧独立报告）、group_wall_seconds、private_copy_seconds、publish_seconds、cleanup_seconds、worker_span_seconds、worker_sum_seconds、overlap_seconds，以及device_process_tree同期显存采样。所有秒数为墙钟或明确标注的CPU秒数，显存为字节。GPU UUID、最大采样间隔、失败采样及外部进程另列；unavailable不能当作零显存。
+
+每组独立报告位于 scripts/OPERATION.hemisphere-group.json，完整worker stdout/stderr位于 scripts/OPERATION.H.worker.log；原生其他日志加阶段及半球前缀，保留固定文件名的来源。私有影像成功/失败均删除，不进入报告交付。
+
+失败行为：worker异常、未知共享写入、输入删除或不完整报告均失败，取消同组进程树，不发布该组计算结果。逐文件发布遇到I/O错误则主报告明确failed并保留已发布路径，没有跨文件事务回滚。输入/资源/线程/allocator错误继续沿用原接口异常。默认串行接口兼容；完整整例只由协调者统一验证。
+
+batch接口 `run_recon_all_python_batch(..., hemisphere_workers=2, threads=4)` 向每个设备独立被试进程传递相同参数。每设备同一时刻一个被试；threads是每被试总预算，多GPU的全机预算由调用者另行安排。
+
+## 3. 命令行
+
+```bash
+fnit-recon-all /data/sub-01_T1w.nii.gz /results/sub-01 \
+  --weights-dir /resources/weights --assets-dir /resources/assets \
+  --native-bin-dir /conda/env/bin --device cuda:0 --threads 4 \
+  --hemisphere-workers 2 --profile-stages --cuda-allocator-cache auto
+```
+
+## 4. 对应原软件调用
+
+原软件对应 `recon-all -i T1.nii.gz -s subject -all -parallel -openmp 4`；仅在隔离benchmark参考环境运行，不进入FNIT生产链。半球组为内部调度阶段，没有独立官方整体命令。现有各子模块文档保留其具体原命令和算法。
+
+## 5. 实测和精度
+
+专项CPU测试与真实配对结果在本目录保存。真实测试脚本 benchmark_hemi.py 接收 --checkpoint（冻结自产被试）、--output（新目录）、--assets、--binaries、--device、--operation、--order=AB/BA、--commit。输入、源码、程序SHA-256写入JSON；严格零差异及正式数值容差在测量前记录。父CUDA先初始化，验证Python API已初始化时仍能exec worker。
+
+冻结同输入阶段仅说明调度回归，不是原始T1整例验收。复制检查点中未重算的文件不得作为新版本成果。总体指标等效保持not_assessed；138项严格诊断与局部网格/脑区统计由相应专项和最终整例报告分别陈述。真实脑图、两例空目录整例与最终端到端速度由协调者统一交付。
+
+## 6. 版本和benchmark记录
+
+- f07cf59：本轮共同基线，双侧串行。
+- e44451a：四组可选双侧exec，私有文件隔离、共享发布、失败传播和同期设备采样；专项CPU测试42项及14子测试通过。
+- 测量期间worker导入路径固定补丁见 measured_source_delta.patch；报告绑定基线commit与每个实际Python源码SHA-256，不能标为无改动e44451a运行。
+
+## 7. 原实现和参考文献
+
+FreeSurfer recon-all、mris_place_surface、mris_fix_topology、mris_register 源码与文档：[FreeSurfer源码](https://github.com/freesurfer/freesurfer)、[recon-all文档](https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all)。FNIT现有子函数保留原论文引文；调度层无新的成像算法或外置资源。基础表面重建参考 Dale, Fischl & Sereno (1999), NeuroImage 9:179–194；Fischl, Sereno & Dale (1999), NeuroImage 9:195–207。本轮不改变原算法、坐标或数据许可。

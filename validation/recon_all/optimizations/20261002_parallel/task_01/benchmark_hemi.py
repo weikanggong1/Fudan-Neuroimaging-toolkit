@@ -105,7 +105,7 @@ def main():
     args.output.mkdir(parents=True,exist_ok=True)
     # 严格复现门槛预先声明为0；沿用项目正式数值容差，不修改整体等效门槛。
     tolerance = Path(__file__).resolve().parents[5] / 'tests/recon_all/tolerances_numeric.json'
-    report = {'commit': args.commit, 'checkpoint': str(args.checkpoint), 'operation': args.operation,
+    report = {'commit': args.commit, 'measured_source_diff': 'see measured_source_delta.patch when present', 'checkpoint': str(args.checkpoint), 'operation': args.operation,
               'order': args.order, 'total_threads': 4, 'strict_tolerance': 0,
               'numeric_tolerances': json.loads(tolerance.read_text()), 'overall_equivalence':'not_assessed',
               'source_sha256': {str(p.relative_to(Path(__file__).resolve().parents[5])):sha(p)

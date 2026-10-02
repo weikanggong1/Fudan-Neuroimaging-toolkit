@@ -23,6 +23,16 @@ def main():
         torch.backends.cudnn.allow_tf32 = request['precision']['cudnn_tf32']
         torch.set_num_interop_threads(1)
         allocator = configure_cuda_allocator(request['device'], 'auto')
+        bootstrap_tick = time.monotonic()
+        if torch.device(request['device']).type == 'cuda':
+            # 先显式FP32分配再同步；与既有SynthMorph首CUDA分配规则一致。
+            bootstrap = torch.empty(1, dtype=torch.float32, device=request['device'])
+            torch.cuda.synchronize(torch.device(request['device']))
+            properties = torch.cuda.get_device_properties(torch.device(request['device']))
+            report['actual_cuda_device'] = {'name': properties.name,
+                'uuid': str(getattr(properties, 'uuid', 'unavailable'))}
+            del bootstrap
+        report['cuda_bootstrap_seconds'] = time.monotonic() - bootstrap_tick
         profiler = StageProfiler(device=request['device'],
                                  synchronize=request['profile_stages'], allocator=allocator)
         module, name = request['callable'].rsplit(':', 1)
