@@ -1,4 +1,4 @@
-"""严格/预声明算子容差分别评估实际自产受影响文件；未知类型不伪造数值比较。"""
+"""严格/冻结门槛评估自产文件；测后别名仅作同算子容差诊断，不计通过。"""
 import argparse
 import hashlib
 import json
@@ -8,6 +8,20 @@ import nibabel.freesurfer.io as fs
 import numpy as np
 from fnit.recon_all.compare_subject import _numeric, _labels, _surface, _topology
 
+POSTHOC_ALIASES = {'white.preaparc.H': 'white.H', 'white.preaparc.K': 'white.K'}
+
+
+def posthoc_alias_diagnostic(check, tolerance_key):
+    """保留全部数值；测后映射不能充当预声明门槛验收。"""
+    check = dict(check)
+    check['diagnostic_status'] = check['status']
+    check['status'] = 'not_assessed'
+    check['assessment_basis'] = 'posthoc same-operator tolerance diagnostic; alias absent from frozen declaration'
+    check['diagnostic_tolerance_key'] = tolerance_key
+    check['predeclared_tolerance_mapping'] = False
+    return check
+
+
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('pair_root',type=Path)
 args=parser.parse_args();root=args.pair_root
@@ -16,7 +30,10 @@ a,b=root/'serial/subject',root/'parallel/subject'
 paths=run['results']['parallel']['published']
 report={'scope':'newly produced affected files only; prefix copies excluded','run_commit':run['commit'],
         'strict_reproduction':run['strict_reproduction'],'overall_equivalence':'not_assessed','checks':{},
-        'tolerance_aliases_declared_before_parallel_results':{'white.preaparc.H':'white.H','white.preaparc.K':'white.K'},
+        'posthoc_same_operator_tolerance_diagnostics':POSTHOC_ALIASES,
+        'tolerance_mapping_provenance':{'predeclared':False,
+            'first_recorded_script_commit':'a2ef51b942f47fff7544db66a33a8d30ceca5290',
+            'evidence':'frozen numeric_tolerances and pre-run AUDIT contain no preaparc H/K alias'},
         'script_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
 correspondence={}
 for hemi in ('lh','rh'):
@@ -28,7 +45,7 @@ for relative in sorted(set(paths)):
     if not x.exists() or not y.exists():
         report['checks'][relative]={'status':'missing'};continue
     suffix=x.name[3:] if x.name.startswith(('lh.','rh.')) else x.name
-    tolerance_key={'white.preaparc.H':'white.H','white.preaparc.K':'white.K'}.get(suffix,suffix)
+    tolerance_key=POSTHOC_ALIASES.get(suffix,suffix)
     tol=tolerances.get(tolerance_key,{'atol':0.,'rtol':0.})
     if x.suffix in ('.mgz','.mgh'):
         xx,yy=nib.load(x),nib.load(y);vx,vy=np.asarray(xx.dataobj),np.asarray(yy.dataobj)
@@ -56,7 +73,10 @@ for relative in sorted(set(paths)):
         else:check=_surface(xx,yy,tolerances['coordinates'],50)
     elif relative.startswith('surf/') and (suffix in ('thickness','area','area.pial','area.mid','volume','curv','curv.pial','sulc','avg_curv','white.preaparc.H','white.preaparc.K','inflated.H','inflated.K') or suffix.startswith('smoothwm.') and suffix.endswith('.crv')):
         if not correspondence[x.name[:2]]:check={'status':'blocked','reason':'ordered mesh correspondence absent'}
-        else:check=_numeric(fs.read_morph_data(x),fs.read_morph_data(y),tol,50)
+        else:
+            check=_numeric(fs.read_morph_data(x),fs.read_morph_data(y),tol,50)
+            if suffix in POSTHOC_ALIASES:
+                check=posthoc_alias_diagnostic(check,tolerance_key)
     else:
         same=x.read_bytes()==y.read_bytes()
         check={'status':'passed' if same else 'not_assessed','bytes_equal':same,

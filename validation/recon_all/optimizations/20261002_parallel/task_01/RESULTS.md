@@ -25,10 +25,10 @@
 - 逐区比较覆盖278条记录：顶点数、white面积、厚度均值/标准差、no-TH3灰质体积差异全为0。统计来自本次重算表面与注释，不是复制历史stats。
 - 双侧sphere及sphere.reg的负向面与零朝向面均0，球面半径约100 mm。
 - 全量cortex white/pial两网格面配对按现有1e-6平面容差计入接触，左117、右228对，两模式完整面配对列表相同；对应面逆向棱柱左417、右441也相同。这些诊断与单张表面自相交不同，未宣称两网格交叉为0，也未判定原算法质量优于原软件。
-- 91项实际自产受影响文件检查：83通过，8项smoothwm H/K/K1/K2中间曲率图因没有预声明非零门槛，按0容差失败，最大差0.000333786；无缺失、无对应关系阻断。保留失败，不追加事后容差。总体数值回归标记failed_or_not_assessed，严格逐字节复现failed，科学等效not_assessed。
+- 91项实际自产受影响文件检查：79通过；4张white.preaparc.H/K的同算子容差映射缺少测前预声明证据，仅列后验诊断（诊断在white.H/K容差内，状态not_assessed，最大差9.536743e-5），不计验收通过；8项smoothwm H/K/K1/K2中间曲率图因没有预声明非零门槛，按0容差失败，最大差0.000333786；无缺失、无对应关系阻断。保留失败，不追加事后容差。总体数值回归标记failed_or_not_assessed，严格逐字节复现failed，科学等效not_assessed。
 - 本次阶段目录在138项全流程清单中仅97项存在；共有MRI来自冻结前缀，exvivo/ribbon/体积投影/最终stats等没有重算，不能当作138项整例验收。
 
-逐文件预声明门槛结果：[chain_affected_numeric.json](chain_affected_numeric.json)；完整质量、所有交叉面对及逐区结果：[chain_quality_and_regions.json](chain_quality_and_regions.json)、[chain_regional_differences.csv](chain_regional_differences.csv)。中间sphere线搜索的overflow/invalid警告在串行和并行均保留于日志，最终finite与fold检查上述通过；未更改成熟数学实现掩盖警告。
+逐文件冻结门槛与单列后验诊断结果：[chain_affected_numeric.json](chain_affected_numeric.json)；完整质量、所有交叉面对及逐区结果：[chain_quality_and_regions.json](chain_quality_and_regions.json)、[chain_regional_differences.csv](chain_regional_differences.csv)。中间sphere线搜索的overflow/invalid警告在串行和并行均保留于日志，最终finite与fold检查上述通过；未更改成熟数学实现掩盖警告。
 
 ## 资源、线程与采样
 
@@ -40,7 +40,7 @@ CPU旁路记录仅覆盖启动后的一段3408.2秒，6066次样本，最大间�
 
 ## 复现与版本绑定
 
-实测冻结源码commit `db7af9b1e1ec67a12e6c6c253b212589c8d0c663`，当前候选新增失败收尾和API边界修复，数值函数AST独立核验不变：[numerical_source_continuity.json](numerical_source_continuity.json)。不得把冻结测量标成最终候选已完成整例运行。专项CPU测试50项及14子测试通过：[cpu_tests_boundaries.log](cpu_tests_boundaries.log)。
+实测冻结源码commit `db7af9b1e1ec67a12e6c6c253b212589c8d0c663`，当前候选新增失败收尾和API边界修复，数值函数AST独立核验不变：[numerical_source_continuity.json](numerical_source_continuity.json)。不得把冻结测量标成最终候选已完成整例运行。报告来源修订：别名脚本首次记录于测后a2ef51b，冻结AUDIT与chain_AB的numeric_tolerances均无该映射。原83项通过的分类不成立，修订为79通过/4后验not_assessed/8失败；存量数值未改，未重跑分析或性能。原报告与执行脚本SHA-256、修订脚本SHA-256及测量commit分别保存在chain_affected_numeric.json的report_correction；原性能/输入/source SHA-256保留。专项CPU测试50项及14子测试通过：[cpu_tests_boundaries.log](cpu_tests_boundaries.log)。
 
 ```bash
 # 在对应冻结源码目录运行；所有资源必须先按固定清单验证。

@@ -3670,7 +3670,7 @@
       }
     },
     "surf/lh.white.preaparc.H": {
-      "status": "passed",
+      "status": "not_assessed",
       "count": 105598,
       "tolerance": {
         "atol": 0.001,
@@ -3687,10 +3687,14 @@
       "p95_abs_error": 2.9802322387695312e-08,
       "p99_abs_error": 1.1920928955078125e-07,
       "max_abs_error": 2.2172927856445312e-05,
-      "max_error_id": 60873
+      "max_error_id": 60873,
+      "diagnostic_status": "passed",
+      "assessment_basis": "posthoc same-operator tolerance diagnostic; alias absent from frozen declaration",
+      "diagnostic_tolerance_key": "white.H",
+      "predeclared_tolerance_mapping": false
     },
     "surf/lh.white.preaparc.K": {
-      "status": "passed",
+      "status": "not_assessed",
       "count": 105598,
       "tolerance": {
         "atol": 0.001,
@@ -3707,7 +3711,11 @@
       "p95_abs_error": 1.4901161193847656e-08,
       "p99_abs_error": 8.918112143874141e-08,
       "max_abs_error": 3.135204315185547e-05,
-      "max_error_id": 15023
+      "max_error_id": 15023,
+      "diagnostic_status": "passed",
+      "assessment_basis": "posthoc same-operator tolerance diagnostic; alias absent from frozen declaration",
+      "diagnostic_tolerance_key": "white.K",
+      "predeclared_tolerance_mapping": false
     },
     "surf/rh.area": {
       "status": "passed",
@@ -4995,7 +5003,7 @@
       }
     },
     "surf/rh.white.preaparc.H": {
-      "status": "passed",
+      "status": "not_assessed",
       "count": 104619,
       "tolerance": {
         "atol": 0.001,
@@ -5012,10 +5020,14 @@
       "p95_abs_error": 2.9802322387695312e-08,
       "p99_abs_error": 1.1920928955078125e-07,
       "max_abs_error": 9.5367431640625e-05,
-      "max_error_id": 55323
+      "max_error_id": 55323,
+      "diagnostic_status": "passed",
+      "assessment_basis": "posthoc same-operator tolerance diagnostic; alias absent from frozen declaration",
+      "diagnostic_tolerance_key": "white.H",
+      "predeclared_tolerance_mapping": false
     },
     "surf/rh.white.preaparc.K": {
-      "status": "passed",
+      "status": "not_assessed",
       "count": 104619,
       "tolerance": {
         "atol": 0.001,
@@ -5032,18 +5044,42 @@
       "p95_abs_error": 1.4901161193847656e-08,
       "p99_abs_error": 8.195638656616211e-08,
       "max_abs_error": 6.461143493652344e-05,
-      "max_error_id": 55323
+      "max_error_id": 55323,
+      "diagnostic_status": "passed",
+      "assessment_basis": "posthoc same-operator tolerance diagnostic; alias absent from frozen declaration",
+      "diagnostic_tolerance_key": "white.K",
+      "predeclared_tolerance_mapping": false
     }
   },
-  "tolerance_aliases_declared_before_parallel_results": {
-    "white.preaparc.H": "white.H",
-    "white.preaparc.K": "white.K"
-  },
   "script_sha256": "840a9dab50e4dc1bebd4be551b9c0d0523210a27351d32f56a6df40cefe775b9",
-  "passed_count": 83,
+  "passed_count": 79,
   "failed_count": 8,
   "blocked_count": 0,
   "missing_count": 0,
-  "not_assessed_count": 0,
-  "numeric_operator_regression": "failed_or_not_assessed"
+  "not_assessed_count": 4,
+  "numeric_operator_regression": "failed_or_not_assessed",
+  "posthoc_same_operator_tolerance_diagnostics": {
+    "white.preaparc.H": "white.H",
+    "white.preaparc.K": "white.K"
+  },
+  "tolerance_mapping_provenance": {
+    "predeclared": false,
+    "first_recorded_script_commit": "a2ef51b942f47fff7544db66a33a8d30ceca5290",
+    "evidence": "frozen numeric_tolerances and pre-run AUDIT contain no preaparc H/K alias"
+  },
+  "report_correction": {
+    "original_report_commit": "891fe9945852874c023da9745aebc3d8ad155a8e",
+    "original_report_sha256": "4550f251f94e263dd9b836b2e29355423c671dd4f7e27e794eb73ac1e944f4bc",
+    "original_executed_analysis_script_sha256": "840a9dab50e4dc1bebd4be551b9c0d0523210a27351d32f56a6df40cefe775b9",
+    "corrected_analysis_script_sha256": "b625d0081e125db0c22556f58411aebea85e682b2de56a1bc48c52b7affcbd76",
+    "method": "classification-only correction of stored metrics; no analysis or performance rerun",
+    "reason": "No frozen pre-run evidence for preaparc H/K to white H/K mapping; retain same-operator diagnostic and exclude from passed gates",
+    "changed_files": [
+      "surf/lh.white.preaparc.H",
+      "surf/lh.white.preaparc.K",
+      "surf/rh.white.preaparc.H",
+      "surf/rh.white.preaparc.K"
+    ],
+    "measurement_run_commit_unchanged": "db7af9b1e1ec67a12e6c6c253b212589c8d0c663"
+  }
 }
