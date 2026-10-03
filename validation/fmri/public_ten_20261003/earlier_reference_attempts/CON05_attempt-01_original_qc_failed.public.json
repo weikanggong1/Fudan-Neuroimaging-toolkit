@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "subject": "CON05",
+  "status": "failed",
+  "protocol": {
+    "reference": "Official complete fMRIPrep 25.2.4 with its bundled FreeSurfer",
+    "input": "Matched original T1w and complete original resting-state BOLD",
+    "discarded_volumes": 0,
+    "slice_timing_correction": false,
+    "fieldmaps_supplied": false,
+    "syn_sdc_requested": false,
+    "surface_registration": "Default complete MSMSulc, no precomputed subject surfaces",
+    "outputs": [
+      "MNI152NLin6Asym:res-2",
+      "T1w",
+      "fsnative",
+      "fsLR 91k CIFTI"
+    ],
+    "denoising": "None; preprocessed BOLD is the principal comparison",
+    "nprocs": 8,
+    "omp_nthreads": 4,
+    "memory_limit_mb": 49152,
+    "whole_timing": "Continuous container process creation through completed output validation and saved QC; includes fresh anatomical reconstruction, all volume/surface work, output saves and QC",
+    "excluded_from_whole_timing": [
+      "SIF staging/verification",
+      "input checksum preflight",
+      "template cache snapshot copying",
+      "reference version probe"
+    ],
+    "algorithm_boundary": "Reference ANTs normalization and FNIT chosen FNIRT normalization are different algorithms; complete pipeline comparisons do not assert algorithmic equivalence"
+  },
+  "versions": {
+    "fmriprep": "25.2.4",
+    "smriprep": "0.19.2",
+    "nipype": "1.10.0",
+    "nibabel": "5.3.2",
+    "python": "3.12.11",
+    "FreeSurfer": "freesurfer-linux-ubuntu22_x86_64-7.3.2-20220804-6354275"
+  },
+  "SIF_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+  "software_versions": {
+    "fmriprep": "25.2.4",
+    "freesurfer": "7.3.2",
+    "smriprep": "0.19.2",
+    "nipype": "1.10.0",
+    "nibabel": "5.3.2",
+    "python": "3.12.11"
+  },
+  "launcher_sha256": "e62da8ff23168516ea3f35272363f6f6a5242e6ef337701596e811fedb5e16ad",
+  "source_kind": "Official reference harness; this does not wrap FNIT source",
+  "canonical_container_command": [
+    "fmriprep",
+    "/data",
+    "/case/derivatives",
+    "participant",
+    "--participant-label",
+    "CON05",
+    "--ignore",
+    "slicetiming",
+    "--cifti-output",
+    "91k",
+    "--output-spaces",
+    "MNI152NLin6Asym:res-2",
+    "T1w",
+    "fsnative",
+    "--fs-license",
+    "/opt/fs-license/license.txt",
+    "--fs-subjects-dir",
+    "/case/derivatives/sourcedata/freesurfer",
+    "--nprocs",
+    "8",
+    "--omp-nthreads",
+    "4",
+    "--mem-mb",
+    "49152",
+    "--work-dir",
+    "/case/work",
+    "--resource-monitor",
+    "--stop-on-first-crash",
+    "--notrack"
+  ],
+  "canonical_command_sha256": "1e992e78c8780a43d32cb9f9996e6c9510b5009d753341b8c2603e5f41a617fc",
+  "actual_host_command_sha256": "482ee4e9e20f7732e6bde6f536fa96ca3fc25581f8adf7f05e442b8a9ac155d3",
+  "input_sha256": {
+    "t1w": "0189151160abe4bece3c09cc350d76a4192cb8bdaeba90ca4f2077a18033a729",
+    "bold": "1a8930be7c923de7a032f7c4d37db3d47b1097914998e80078ba9fa6b7ab4b14"
+  },
+  "input_sidecar_sha256": {
+    "T1w_json": "058c670080a3b22e557c6710edd53b3b72cf40865d419e44f8e7d9bee4009318",
+    "BOLD_json": "c7fdeb73c84e87d118416ac511399511545ee8fa5e65b67e3b001170bbd0922e"
+  },
+  "input_frames": 180,
+  "input_TR_seconds": 2.4,
+  "frames": 180,
+  "repetition_time": 2.4,
+  "hardware_before": {
+    "CPU_model": "Intel(R) Xeon(R) Gold 6418H",
+    "logical_cpus": 192,
+    "load_average": [
+      4.64,
+      3.72,
+      1.96
+    ],
+    "MemTotal_GiB": 1007.2009735107422,
+    "MemAvailable_GiB": 841.8086738586426
+  },
+  "fresh_anatomical_cache": true,
+  "subject_work_existed_before_process": false,
+  "subject_derivatives_existed_before_process": false,
+  "start_utc": "2026-10-03T06:18:29.218335+00:00",
+  "container_process_wall_seconds": 12259.01841969043,
+  "container_exit_code": 0,
+  "command_exit_code": 0,
+  "process_exit_utc": "2026-10-03T09:42:48.236806+00:00",
+  "node_runtime_extraction_exit_code": 0,
+  "QC": {
+    "passed": false,
+    "errors": [
+      "Expected two fsnative BOLD GIFTI outputs, observed 0"
+    ],
+    "outputs": [
+      {
+        "kind": "MNI152NLin6Asym_res2_preproc",
+        "relative_path": "derivatives/sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_space-MNI152NLin6Asym_res-2_desc-preproc_bold.nii.gz",
+        "bytes": 599161925,
+        "sha256": "4180c44cd6d8544e9e5163352ae6074bd468bdd6aa8662fa3672dc7aa85bdb07",
+        "shape": [
+          91,
+          109,
+          91,
+          180
+        ],
+        "zooms": [
+          2.0,
+          2.0,
+          2.0,
+          2.4000000953674316
+        ],
+        "finite_fraction": 1.0,
+        "frames": 180,
+        "repetition_time_seconds": 2.4000000953674316
+      },
+      {
+        "kind": "T1w_preproc",
+        "relative_path": "derivatives/sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_space-T1w_desc-preproc_bold.nii.gz",
+        "bytes": 97971852,
+        "sha256": "e0d56e41cf6c1678744d3af2600e5b286b5528e53ed22eb5fd268f2c66dbc39e",
+        "shape": [
+          49,
+          62,
+          49,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.0,
+          2.4000000953674316
+        ],
+        "finite_fraction": 1.0,
+        "frames": 180,
+        "repetition_time_seconds": 2.4000000953674316
+      },
+      {
+        "kind": "fsLR91k_CIFTI",
+        "relative_path": "derivatives/sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_space-fsLR_den-91k_bold.dtseries.nii",
+        "bytes": 66352496,
+        "sha256": "9d062e87e5abfc61224286f5fd6b12641c2a285ee8dcc7dd9204c0f9772c1b97",
+        "shape": [
+          180,
+          91282
+        ],
+        "grayordinates": 91282,
+        "finite_fraction": 1.0,
+        "frames": 180,
+        "repetition_time_seconds": 2.4
+      },
+      {
+        "kind": "new_MSMSulc_sphere",
+        "relative_path": "derivatives/sub-CON05/ses-preop/anat/sub-CON05_ses-preop_hemi-L_space-fsLR_desc-msmsulc_sphere.surf.gii",
+        "bytes": 4855184,
+        "sha256": "d1d38bdb78c7a35259e68cb0e2cdcc674da590106c6bf4cd5d945864b9c0b77e",
+        "point_count": 143115
+      },
+      {
+        "kind": "new_MSMSulc_sphere",
+        "relative_path": "derivatives/sub-CON05/ses-preop/anat/sub-CON05_ses-preop_hemi-R_space-fsLR_desc-msmsulc_sphere.surf.gii",
+        "bytes": 4999037,
+        "sha256": "6f66452982c709f7928ecfedccbad06c859b07f9291faf71ddb28ddfde30a0f0",
+        "point_count": 147400
+      }
+    ],
+    "final_HTML_saved": true,
+    "saved_QC_SVG_count": 8
+  },
+  "hardware_after": {
+    "CPU_model": "Intel(R) Xeon(R) Gold 6418H",
+    "logical_cpus": 192,
+    "load_average": [
+      39.53,
+      26.4,
+      18.33
+    ],
+    "MemTotal_GiB": 1007.2009735107422,
+    "MemAvailable_GiB": 831.1102294921875
+  },
+  "source_after_sha256": "e62da8ff23168516ea3f35272363f6f6a5242e6ef337701596e811fedb5e16ad",
+  "source_unchanged_during_run": true,
+  "input_after_sha256": {
+    "t1w": "0189151160abe4bece3c09cc350d76a4192cb8bdaeba90ca4f2077a18033a729",
+    "bold": "1a8930be7c923de7a032f7c4d37db3d47b1097914998e80078ba9fa6b7ab4b14"
+  },
+  "input_unchanged_during_run": true,
+  "output_checks": {
+    "preproc_mni": {
+      "kind": "MNI152NLin6Asym_res2_preproc",
+      "relative_path": "derivatives/sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_space-MNI152NLin6Asym_res-2_desc-preproc_bold.nii.gz",
+      "bytes": 599161925,
+      "sha256": "4180c44cd6d8544e9e5163352ae6074bd468bdd6aa8662fa3672dc7aa85bdb07",
+      "shape": [
+        91,
+        109,
+        91,
+        180
+      ],
+      "zooms": [
+        2.0,
+        2.0,
+        2.0,
+        2.4000000953674316
+      ],
+      "finite_fraction": 1.0,
+      "frames": 180,
+      "repetition_time_seconds": 2.4000000953674316
+    },
+    "preproc_t1w": {
+      "kind": "T1w_preproc",
+      "relative_path": "derivatives/sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_space-T1w_desc-preproc_bold.nii.gz",
+      "bytes": 97971852,
+      "sha256": "e0d56e41cf6c1678744d3af2600e5b286b5528e53ed22eb5fd268f2c66dbc39e",
+      "shape": [
+        49,
+        62,
+        49,
+        180
+      ],
+      "zooms": [
+        3.0,
+        3.0,
+        3.0,
+        2.4000000953674316
+      ],
+      "finite_fraction": 1.0,
+      "frames": 180,
+      "repetition_time_seconds": 2.4000000953674316
+    },
+    "dtseries": {
+      "kind": "fsLR91k_CIFTI",
+      "relative_path": "derivatives/sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_space-fsLR_den-91k_bold.dtseries.nii",
+      "bytes": 66352496,
+      "sha256": "9d062e87e5abfc61224286f5fd6b12641c2a285ee8dcc7dd9204c0f9772c1b97",
+      "shape": [
+        180,
+        91282
+      ],
+      "grayordinates": 91282,
+      "finite_fraction": 1.0,
+      "frames": 180,
+      "repetition_time_seconds": 2.4
+    }
+  },
+  "end_utc": "2026-10-03T09:44:03.469592+00:00",
+  "continuous_wall_through_saved_QC_seconds": 12334.25408372283,
+  "wall_seconds": 12334.25408372283,
+  "timing_record_note": "The continuous clock stops after the primary final QC report is fsynced; the final scalar timing record is then appended. Parallel node runtime sums are not used as whole wall."
+}

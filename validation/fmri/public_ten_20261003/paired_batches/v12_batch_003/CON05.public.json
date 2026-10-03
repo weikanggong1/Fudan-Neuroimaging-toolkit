@@ -1,0 +1,1963 @@
+{
+  "schema_version": 1,
+  "cohort_id": "formal-v4",
+  "candidate_source_revision_bound": "1128bc52c7a0233266e5b8a8d7dc0b382994e676",
+  "case_id": "CON05",
+  "status": "complete",
+  "frames": 180,
+  "dataset": {
+    "id": "ds001226",
+    "version": "5.0.1",
+    "license": "CC0",
+    "git_commit": "359d372c5e972a161966312128adb365870df949"
+  },
+  "tr_seconds": 2.4,
+  "raw_input_sha256": {
+    "t1w": "0189151160abe4bece3c09cc350d76a4192cb8bdaeba90ca4f2077a18033a729",
+    "bold": "1a8930be7c923de7a032f7c4d37db3d47b1097914998e80078ba9fa6b7ab4b14"
+  },
+  "fixed_brain_mask_sha256": "e4e2b284170271afdafe26ac0997b2af5a0f5ddac35e28a7e796b52e8bc5adb1",
+  "fixed_cifti_axis_assets_sha256": {
+    "left_roi": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512",
+    "right_roi": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015",
+    "dseg": "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"
+  },
+  "candidate": {
+    "report_sha256": "5b3ae92f9259d5f9ccc264519b3fa7284c15e099b05dca8ca77bb1eda5633f76",
+    "files_manifest_sha256": "e304fa7b6a24e5816d61f5c93942780319b590dfc22b0f3a04c85e6bd9edd249",
+    "source_revision": "1128bc52c7a0233266e5b8a8d7dc0b382994e676",
+    "driver_sha256": "7cf5ef33c17af14e55a776ec1ff539718552e2c948a6e1575ba0b5f95a940db9",
+    "driver_sha256_after": "7cf5ef33c17af14e55a776ec1ff539718552e2c948a6e1575ba0b5f95a940db9",
+    "configuration_sha256": "d8d449af7691d5eb9a10fbb48f9a76c928bea71c7ca04550827ab75941305346",
+    "execution_guards": {
+      "raw_inputs_unchanged": true,
+      "configuration_unchanged": true,
+      "driver_unchanged": true
+    },
+    "launcher_sha256": null,
+    "container_SIF_sha256": null,
+    "canonical_command_sha256": null,
+    "software_versions": {},
+    "reported_timing_seconds": {
+      "continuous_api_wall_seconds": 4739.11533576576,
+      "driver_through_saved_output_validation_seconds": 4751.051150446758
+    },
+    "timing_boundaries": {
+      "continuous_api_wall_seconds": "FNIT API call and final target-device synchronization after imports/CUDA initialization; includes automatic volume ICA/AROMA and pipeline publication/cleanup; excludes subsequent wrapper validation",
+      "driver_through_saved_output_validation_seconds": "FNIT API-start boundary through saved-image validation, private output binding and raw/config/metadata rechecks; excludes imports/CUDA initialization, monitor join, final source checks and final report save"
+    },
+    "timing_boundary": "FNIT API and driver-through-validation intervals reported separately; both start after imports/CUDA initialization. Automatic mature volume includes ICA/AROMA clean work. The API excludes subsequent wrapper validation; the driver validation interval still excludes monitor/source finalization and final report save",
+    "output_sha256": {
+      "preproc_mni": "b43c1e3462ae60676e2911de527f84498d188aa31ef3013eeda9f2d7bff682cc",
+      "dtseries": "7f4bb3a679c43504d37ddaad65fc1e1b7b13423db947b20133d71d73ad1a4759"
+    }
+  },
+  "reference": {
+    "report_sha256": "2a2d956a025c770cc1875e9f473dd22f3c7448a5252597dbf9ce2e3b347ba907",
+    "files_manifest_sha256": "4d9e46a1439c9645d59b610b550989c3d6820720851343e4c7109b100f7d3080",
+    "source_revision": null,
+    "driver_sha256": null,
+    "driver_sha256_after": null,
+    "configuration_sha256": null,
+    "execution_guards": {},
+    "launcher_sha256": "e62da8ff23168516ea3f35272363f6f6a5242e6ef337701596e811fedb5e16ad",
+    "container_SIF_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+    "canonical_command_sha256": "1e992e78c8780a43d32cb9f9996e6c9510b5009d753341b8c2603e5f41a617fc",
+    "software_versions": {
+      "fmriprep": "25.2.4",
+      "freesurfer": "7.3.2",
+      "smriprep": "0.19.2",
+      "nipype": "1.10.0",
+      "nibabel": "5.3.2",
+      "python": "3.12.11"
+    },
+    "reported_timing_seconds": {
+      "container_process_wall_seconds": 12259.01841969043,
+      "wall_seconds": 12334.25408372283,
+      "continuous_wall_through_saved_QC_seconds": 12334.25408372283,
+      "recovered_QC_seconds": 8.212958842515945,
+      "recovery_gap_since_original_end_seconds": 293.239844
+    },
+    "timing_boundaries": {
+      "container_process_wall_seconds": "Official container process creation through exit; wrapper validation and saved QC excluded",
+      "wall_seconds": "Original container-start through wrapper filename-binding/QC failure and saved original report; later complete output recovery and elapsed recovery span excluded",
+      "continuous_wall_through_saved_QC_seconds": "Original container-start through wrapper filename-binding/QC failure and saved original report; later complete output recovery and elapsed recovery span excluded",
+      "recovered_QC_seconds": "Independent later saved-output verification and binding recovery; original MRI workflow clocks unchanged; waiting gap excluded",
+      "recovery_gap_since_original_end_seconds": "Wall span from original wrapper end to later recovery completion; includes recovered_QC_seconds and any intervening wait, not MRI compute time; never add it to recovered_QC_seconds"
+    },
+    "timing_boundary": "Official MRI process completed; original wrapper filename/QC binding failed, and later corrective QC is a separate interval with waiting gap excluded",
+    "output_sha256": {
+      "preproc_mni": "4180c44cd6d8544e9e5163352ae6074bd468bdd6aa8662fa3672dc7aa85bdb07",
+      "dtseries": "9d062e87e5abfc61224286f5fd6b12641c2a285ee8dcc7dd9204c0f9772c1b97"
+    },
+    "reference_qc_recovery": {
+      "original_report_sha256": "c1b83b80cf0587cbe047c74eb6a37a81e6cf39575f869f3da80ee6cd297a1b55",
+      "original_harness_status": "failed",
+      "recovered_saved_output_status": "passed",
+      "validator_sha256": "0e6dade330ab3415104d40db351865130afe686c2f949cbaa51e8442057d01bb",
+      "saved_file_guards_equal": true,
+      "source_guards_equal": true,
+      "original_report_guard_equal": true,
+      "original_continuous_boundary": "original filename-check failed",
+      "timing_scope": "later full saved-output checks; original workflow clocks immutable",
+      "corrective_harness_sha256": "b9021dc3945d2c91a3b2c8558f05dde3cc91348aefdcf886a9ede03510f10425",
+      "corrective_validator_sha256": "0e6dade330ab3415104d40db351865130afe686c2f949cbaa51e8442057d01bb"
+    }
+  },
+  "comparison_script_sha256": "cb04445f6acf4252bf067500e70d53ec2981ee3ce9a24d9f47365c6ec12737d1",
+  "sources_unchanged_during_comparison": true,
+  "software_versions": {
+    "nibabel": "5.4.2",
+    "numpy": "1.26.4"
+  },
+  "method": {
+    "signal": "full minimally preprocessed final outputs",
+    "protocol_difference": "FNIT recon-all fixed FreeSurfer 8.2 algorithms plus FNIRT versus complete fMRIPrep 25.2.4 with FreeSurfer 7.3.2 and ANTs; scientific protocols/algorithm versions differ",
+    "timed_work_difference": "FNIT automatic mature volume computes/saves both preproc and ICA/AROMA clean outputs and all four volumes are checked by its runner; official complete fMRIPrep does not denoise BOLD, and its default anatomical workflow also registers internal MNI152NLin2009cAsym in addition to the requested MNI152NLin6Asym outputs. Accuracy compares only preproc and corresponding CIFTI. Raw whole durations and corresponding steps remain separate; no general speedup inferred",
+    "strict_numerical_equivalence": "not_assessed; metrics describe complete protocol differences",
+    "pearson": "each complete 180-frame nonconstant pair; undefined constant pairs counted, never assigned r=0 or removed from error metrics",
+    "rmse": "sqrt(mean((candidate-reference)^2)) over every point/frame in each named domain, including zeros/constants",
+    "normalized_rmse": "RMSE / sqrt(mean(reference^2)); null if reference RMS=0",
+    "temporal_mean_bias": "candidate temporal mean minus reference temporal mean, per point",
+    "tsnr": "temporal mean / population temporal SD (ddof=0); constant-series tSNR undefined and counted",
+    "absolute_p99": "exact percentile across all point/frame absolute errors",
+    "memory": "CPU NumPy validation with 8-frame reads and bounded exact-error buffers; no production GPU timing included"
+  },
+  "volume": {
+    "points": 228483,
+    "frames": 180,
+    "values": 41126940,
+    "nonfinite_candidate_values": 0,
+    "nonfinite_reference_values": 0,
+    "constant_candidate": 0,
+    "constant_reference": 0,
+    "both_constant": 0,
+    "one_side_constant": 0,
+    "zero_candidate": 0,
+    "zero_reference": 0,
+    "both_zero": 0,
+    "one_side_zero": 0,
+    "temporal_r": {
+      "count": 228483,
+      "mean": 0.5938941183543534,
+      "median": 0.7243684704329612,
+      "p05": -0.20417334622870803,
+      "p95": 0.976293085717325,
+      "minimum": -0.9962635389480107,
+      "maximum": 0.9996910960114235
+    },
+    "rmse": 106.65677537418051,
+    "reference_rms": 692.4825860691415,
+    "normalized_rmse": 0.15402087723189517,
+    "absolute_difference": {
+      "mean": 52.06579601835817,
+      "p99": 468.6577352905265,
+      "maximum": 1802.1347827911377
+    },
+    "temporal_mean_bias": {
+      "signed": {
+        "count": 228483,
+        "mean": -3.057155837336133,
+        "median": 0.1690619574652601,
+        "p05": -113.63115136040587,
+        "p95": 123.62962778727214,
+        "minimum": -1719.5955988089247,
+        "maximum": 1250.0931287977428
+      },
+      "mean_absolute": 50.83792479599367
+    },
+    "tsnr": {
+      "candidate": {
+        "count": 228483,
+        "mean": 49.972707721979745,
+        "median": 50.409158468863616,
+        "p05": 9.283099677467877,
+        "p95": 87.38315470586448,
+        "minimum": -28.222533888383005,
+        "maximum": 177.13871209195395
+      },
+      "reference": {
+        "count": 228483,
+        "mean": 50.019862807062275,
+        "median": 50.57136237423019,
+        "p05": 9.202581200733336,
+        "p95": 86.89906690253476,
+        "minimum": -23.639487648573656,
+        "maximum": 171.17327541338025
+      },
+      "valid_pairs": 228483,
+      "undefined_pairs": 0,
+      "bias": {
+        "count": 228483,
+        "mean": -0.04715508508252877,
+        "median": 0.22303997717801138,
+        "p05": -27.264451960577688,
+        "p95": 25.901956413130133,
+        "minimum": -148.48589588056873,
+        "maximum": 116.88585190702801
+      }
+    },
+    "domain": "entire fixed TemplateFlow MNI152NLin6Asym res-02 brain mask, including zero and constant timeseries",
+    "canonical_ras_shape": [
+      91,
+      109,
+      91
+    ],
+    "canonical_ras_affine": [
+      [
+        2.0,
+        0.0,
+        0.0,
+        -90.0
+      ],
+      [
+        0.0,
+        2.0,
+        0.0,
+        -126.0
+      ],
+      [
+        0.0,
+        0.0,
+        2.0,
+        -72.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "physical_grid_equal": true,
+    "index_reorientation_only": true,
+    "spatial_interpolation_performed": false,
+    "output_metadata": {
+      "candidate": {
+        "stored_dtype": "float32",
+        "original_shape": [
+          91,
+          109,
+          91,
+          180
+        ],
+        "original_axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "spatial_unit": "mm",
+        "temporal_unit": "sec",
+        "stored_time_step": 2.4000000953674316
+      },
+      "reference": {
+        "stored_dtype": "float32",
+        "original_shape": [
+          91,
+          109,
+          91,
+          180
+        ],
+        "original_axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "spatial_unit": "mm",
+        "temporal_unit": "sec",
+        "stored_time_step": 2.4000000953674316
+      }
+    }
+  },
+  "cifti": {
+    "points": 91282,
+    "frames": 180,
+    "values": 16430760,
+    "nonfinite_candidate_values": 0,
+    "nonfinite_reference_values": 0,
+    "constant_candidate": 582,
+    "constant_reference": 594,
+    "both_constant": 554,
+    "one_side_constant": 68,
+    "zero_candidate": 582,
+    "zero_reference": 594,
+    "both_zero": 554,
+    "one_side_zero": 68,
+    "temporal_r": {
+      "count": 90660,
+      "mean": 0.7357889494657541,
+      "median": 0.8554471794421092,
+      "p05": 0.08867646687182484,
+      "p95": 0.98692671607059,
+      "minimum": -0.9962635389480107,
+      "maximum": 0.9995879940693747
+    },
+    "rmse": 50.1618656678846,
+    "reference_rms": 664.7039709925336,
+    "normalized_rmse": 0.07546497065901844,
+    "absolute_difference": {
+      "mean": 29.959575916621542,
+      "p99": 199.38664276123052,
+      "maximum": 840.7925415039062
+    },
+    "temporal_mean_bias": {
+      "signed": {
+        "count": 91282,
+        "mean": -1.7465641608406717,
+        "median": -1.3644390530054693,
+        "p05": -71.4768167114257,
+        "p95": 66.40725394354911,
+        "minimum": -760.5964219835073,
+        "maximum": 664.4678025987416
+      },
+      "mean_absolute": 29.2156980372017
+    },
+    "tsnr": {
+      "candidate": {
+        "count": 90700,
+        "mean": 63.224868193473256,
+        "median": 60.24499257644949,
+        "p05": 12.740458940470637,
+        "p95": 120.65017576119058,
+        "minimum": -28.222533888383005,
+        "maximum": 261.4181103431285
+      },
+      "reference": {
+        "count": 90688,
+        "mean": 62.337662490296836,
+        "median": 59.95011941440441,
+        "p05": 12.486573017565627,
+        "p95": 118.03544197943941,
+        "minimum": -23.639487648573656,
+        "maximum": 233.72599008145866
+      },
+      "valid_pairs": 90660,
+      "undefined_pairs": 622,
+      "bias": {
+        "count": 90660,
+        "mean": 0.8884187602412604,
+        "median": 0.516971675094215,
+        "p05": -30.118547472439136,
+        "p95": 32.497631824246966,
+        "minimum": -143.99970401347485,
+        "maximum": 161.37879295514097
+      }
+    },
+    "brain_axis_exactly_equal": true,
+    "series_axis_exactly_equal": true,
+    "fixed_original_assets_axis_exactly_equal": true,
+    "time_axis": {
+      "start": 0.0,
+      "step": 2.4,
+      "unit": "SECOND",
+      "size": 180
+    },
+    "output_metadata": {
+      "candidate": {
+        "stored_dtype": "float32",
+        "shape": [
+          180,
+          91282
+        ]
+      },
+      "reference": {
+        "stored_dtype": "float32",
+        "shape": [
+          180,
+          91282
+        ]
+      }
+    },
+    "per_structure": {
+      "CIFTI_STRUCTURE_CORTEX_LEFT": {
+        "points": 29696,
+        "frames": 180,
+        "values": 5345280,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 292,
+        "constant_reference": 297,
+        "both_constant": 276,
+        "one_side_constant": 37,
+        "zero_candidate": 292,
+        "zero_reference": 297,
+        "both_zero": 276,
+        "one_side_zero": 37,
+        "temporal_r": {
+          "count": 29383,
+          "mean": 0.7194170896682704,
+          "median": 0.8344253190802539,
+          "p05": 0.07737188498906852,
+          "p95": 0.9813659220722813,
+          "minimum": -0.9639277677338745,
+          "maximum": 0.9981647253782369
+        },
+        "rmse": 58.06089628235406,
+        "reference_rms": 754.4253034524432,
+        "normalized_rmse": 0.07696043069691928,
+        "absolute_difference": {
+          "mean": 34.39836991226454,
+          "p99": 228.07974487304682,
+          "maximum": 834.7657470703125
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 29696,
+            "mean": -3.8907550864066165,
+            "median": -2.3804578993057817,
+            "p05": -85.50263248019738,
+            "p95": 74.44872707790765,
+            "minimum": -760.5964219835073,
+            "maximum": 664.4678025987416
+          },
+          "mean_absolute": 33.80887263714572
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 29404,
+            "mean": 74.71722082489973,
+            "median": 73.85928730147977,
+            "p05": 24.432668283012955,
+            "p95": 125.79510139759883,
+            "minimum": 3.1036042796842973,
+            "maximum": 224.31035870601895
+          },
+          "reference": {
+            "count": 29399,
+            "mean": 74.21374246032124,
+            "median": 73.54132437392667,
+            "p05": 24.785689089540273,
+            "p95": 122.9934091631724,
+            "minimum": 3.447379662952903,
+            "maximum": 208.03698804731908
+          },
+          "valid_pairs": 29383,
+          "undefined_pairs": 313,
+          "bias": {
+            "count": 29383,
+            "mean": 0.5038987871448214,
+            "median": 0.3580292112458636,
+            "p05": -36.676784381792245,
+            "p95": 37.44245994585224,
+            "minimum": -136.69616371338145,
+            "maximum": 161.37879295514097
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_CORTEX_RIGHT": {
+        "points": 29716,
+        "frames": 180,
+        "values": 5348880,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 290,
+        "constant_reference": 297,
+        "both_constant": 278,
+        "one_side_constant": 31,
+        "zero_candidate": 290,
+        "zero_reference": 297,
+        "both_zero": 278,
+        "one_side_zero": 31,
+        "temporal_r": {
+          "count": 29407,
+          "mean": 0.7872843658202198,
+          "median": 0.8854616804699444,
+          "p05": 0.2393547152428992,
+          "p95": 0.9875826183719758,
+          "minimum": -0.939616070810566,
+          "maximum": 0.9993449416075066
+        },
+        "rmse": 49.88578476017609,
+        "reference_rms": 758.5192990317652,
+        "normalized_rmse": 0.06576732434343371,
+        "absolute_difference": {
+          "mean": 31.486330966831318,
+          "p99": 185.914302368164,
+          "maximum": 508.0561828613281
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 29716,
+            "mean": -1.6467898276996553,
+            "median": -1.810926394992407,
+            "p05": -75.06495352851027,
+            "p95": 71.86427268981934,
+            "minimum": -457.5982447306317,
+            "maximum": 453.0391079372829
+          },
+          "mean_absolute": 31.0712631886893
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 29426,
+            "mean": 78.45996774102923,
+            "median": 77.70536307891425,
+            "p05": 26.308898443815778,
+            "p95": 131.52348249921008,
+            "minimum": 2.5501016577055817,
+            "maximum": 261.4181103431285
+          },
+          "reference": {
+            "count": 29419,
+            "mean": 77.38151837513257,
+            "median": 77.01984531941693,
+            "p05": 25.442185066750092,
+            "p95": 127.87077350000342,
+            "minimum": 2.7501248272814527,
+            "maximum": 233.72599008145866
+          },
+          "valid_pairs": 29407,
+          "undefined_pairs": 309,
+          "bias": {
+            "count": 29407,
+            "mean": 1.0872188841663994,
+            "median": 0.7710869312263924,
+            "p05": -34.586473606223485,
+            "p95": 37.50895198251357,
+            "minimum": -143.99970401347485,
+            "maximum": 145.86327229909665
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_ACCUMBENS_LEFT": {
+        "points": 135,
+        "frames": 180,
+        "values": 24300,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 135,
+          "mean": 0.8264330065254524,
+          "median": 0.8446779955716951,
+          "p05": 0.6160447474408038,
+          "p95": 0.9764286969990944,
+          "minimum": 0.4194523379111401,
+          "maximum": 0.9953485812061438
+        },
+        "rmse": 42.45104467428031,
+        "reference_rms": 464.65348936012873,
+        "normalized_rmse": 0.09136064970208094,
+        "absolute_difference": {
+          "mean": 31.800557102627224,
+          "p99": 125.30245178222656,
+          "maximum": 167.40902709960938
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 135,
+            "mean": 23.22955085518919,
+            "median": 21.250722757975154,
+            "p05": -22.179707675509917,
+            "p95": 85.13564076317677,
+            "minimum": -42.46958279079877,
+            "maximum": 134.45518332587352
+          },
+          "mean_absolute": 31.335598189585486
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 135,
+            "mean": 36.342990292560685,
+            "median": 34.40949884342825,
+            "p05": 13.279586480733524,
+            "p95": 62.24129278130241,
+            "minimum": 6.880375022050831,
+            "maximum": 72.98522159648023
+          },
+          "reference": {
+            "count": 135,
+            "mean": 34.78818483246251,
+            "median": 30.78957735964565,
+            "p05": 8.296978660427335,
+            "p95": 66.12858165547894,
+            "minimum": 5.582923144869551,
+            "maximum": 79.508223400396
+          },
+          "valid_pairs": 135,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 135,
+            "mean": 1.5548054600981716,
+            "median": 2.320100419201264,
+            "p05": -10.140585498840814,
+            "p95": 11.066669396579531,
+            "minimum": -19.20066855902582,
+            "maximum": 17.766283397389177
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": {
+        "points": 140,
+        "frames": 180,
+        "values": 25200,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 140,
+          "mean": 0.7631735244318979,
+          "median": 0.7932626426870479,
+          "p05": 0.42476281031523627,
+          "p95": 0.9624715359786493,
+          "minimum": -0.08649102372792357,
+          "maximum": 0.9948876327794783
+        },
+        "rmse": 54.545671847278044,
+        "reference_rms": 511.1940560392122,
+        "normalized_rmse": 0.10670247668743238,
+        "absolute_difference": {
+          "mean": 41.34142144642179,
+          "p99": 132.2224659729003,
+          "maximum": 169.9156494140625
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 140,
+            "mean": 36.191848317100906,
+            "median": 27.003332180447046,
+            "p05": -15.827351523505309,
+            "p95": 108.1295165252685,
+            "minimum": -33.48167724609368,
+            "maximum": 143.9476038614908
+          },
+          "mean_absolute": 40.87206471579417
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 140,
+            "mean": 46.578951550445424,
+            "median": 46.945111222001856,
+            "p05": 22.556128611091385,
+            "p95": 70.18261156276964,
+            "minimum": 15.015374742259011,
+            "maximum": 76.9189948099631
+          },
+          "reference": {
+            "count": 140,
+            "mean": 42.03897989618257,
+            "median": 42.546845349542274,
+            "p05": 16.186830543462463,
+            "p95": 66.99527186147846,
+            "minimum": 8.644845074633404,
+            "maximum": 76.80346586855578
+          },
+          "valid_pairs": 140,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 140,
+            "mean": 4.539971654262861,
+            "median": 4.210031894248779,
+            "p05": -9.194413525880883,
+            "p95": 16.182331157745917,
+            "minimum": -21.555676079867965,
+            "maximum": 26.584138102482818
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_AMYGDALA_LEFT": {
+        "points": 315,
+        "frames": 180,
+        "values": 56700,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 315,
+          "mean": 0.5509184084521804,
+          "median": 0.5845284875516408,
+          "p05": 0.11937761079743643,
+          "p95": 0.8911362734635484,
+          "minimum": -0.29346843927356603,
+          "maximum": 0.9677001406640372
+        },
+        "rmse": 39.67515860943628,
+        "reference_rms": 411.54035147551315,
+        "normalized_rmse": 0.09640648472789423,
+        "absolute_difference": {
+          "mean": 30.352862759612016,
+          "p99": 112.7756939697266,
+          "maximum": 160.9505157470703
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 315,
+            "mean": 9.705974744833753,
+            "median": 4.781083679199185,
+            "p05": -41.57194890340168,
+            "p95": 73.5597434149848,
+            "minimum": -91.26373274061416,
+            "maximum": 135.70558386908624
+          },
+          "mean_absolute": 29.121320858439017
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 315,
+            "mean": 38.38213379140656,
+            "median": 40.10915025863972,
+            "p05": 16.80418543069696,
+            "p95": 52.76578143308076,
+            "minimum": 6.262841182184883,
+            "maximum": 63.08162384552082
+          },
+          "reference": {
+            "count": 315,
+            "mean": 36.12590415125841,
+            "median": 37.46010394331936,
+            "p05": 14.282923475421487,
+            "p95": 52.67747189892055,
+            "minimum": 7.198908827442047,
+            "maximum": 66.27662236386908
+          },
+          "valid_pairs": 315,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 315,
+            "mean": 2.25622964014814,
+            "median": 2.1085337486810083,
+            "p05": -11.07527611795361,
+            "p95": 15.178317575529753,
+            "minimum": -38.905407527639454,
+            "maximum": 28.320544416019185
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_AMYGDALA_RIGHT": {
+        "points": 332,
+        "frames": 180,
+        "values": 59760,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 332,
+          "mean": 0.7454104633995289,
+          "median": 0.8145114178429721,
+          "p05": 0.23975917924575224,
+          "p95": 0.9667582953749532,
+          "minimum": -0.39657642366703516,
+          "maximum": 0.9954491597747848
+        },
+        "rmse": 31.406593145838123,
+        "reference_rms": 456.2670390224084,
+        "normalized_rmse": 0.06883379788539945,
+        "absolute_difference": {
+          "mean": 22.983885692816024,
+          "p99": 97.38857238769505,
+          "maximum": 519.2557067871094
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 332,
+            "mean": 6.619625574390247,
+            "median": 6.373883310953687,
+            "p05": -41.57404477437335,
+            "p95": 55.857565345764066,
+            "minimum": -111.79744940863714,
+            "maximum": 108.92412346733943
+          },
+          "mean_absolute": 21.81410130701231
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 332,
+            "mean": 40.25710039598577,
+            "median": 41.26899275373824,
+            "p05": 18.828083011650627,
+            "p95": 59.79791895251761,
+            "minimum": 10.527737911010213,
+            "maximum": 72.72401627305062
+          },
+          "reference": {
+            "count": 332,
+            "mean": 37.04132655149634,
+            "median": 37.91834071877318,
+            "p05": 15.398276915081109,
+            "p95": 58.28890730855629,
+            "minimum": 9.094836153157932,
+            "maximum": 67.64825508878504
+          },
+          "valid_pairs": 332,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 332,
+            "mean": 3.215773844489435,
+            "median": 1.9560206841261802,
+            "p05": -11.251618165555568,
+            "p95": 24.78500602231401,
+            "minimum": -28.748553231035007,
+            "maximum": 38.319001671968046
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_BRAIN_STEM": {
+        "points": 3472,
+        "frames": 180,
+        "values": 624960,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 3472,
+          "mean": 0.6787632404885512,
+          "median": 0.7774995312874355,
+          "p05": 0.1886041122315469,
+          "p95": 0.9802780231454934,
+          "minimum": -0.9941676926215923,
+          "maximum": 0.9988457531369399
+        },
+        "rmse": 26.742779827843346,
+        "reference_rms": 322.7121981861735,
+        "normalized_rmse": 0.08286882236913576,
+        "absolute_difference": {
+          "mean": 17.07393234176984,
+          "p99": 115.12579803466798,
+          "maximum": 261.6556701660156
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 3472,
+            "mean": -7.213617605258952,
+            "median": -4.3801420423719435,
+            "p05": -41.0214162868924,
+            "p95": 24.025294113159184,
+            "minimum": -226.42050882975252,
+            "maximum": 64.20486094156908
+          },
+          "mean_absolute": 15.917700828517143
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 3472,
+            "mean": 29.85538005695652,
+            "median": 31.92904664686042,
+            "p05": 2.7164279575010424,
+            "p95": 45.47671505664917,
+            "minimum": -22.327876489690237,
+            "maximum": 61.868461952890016
+          },
+          "reference": {
+            "count": 3472,
+            "mean": 30.245095458852266,
+            "median": 32.314712836221176,
+            "p05": 2.7237492225717777,
+            "p95": 46.2808160162337,
+            "minimum": -23.639487648573656,
+            "maximum": 56.832861707042596
+          },
+          "valid_pairs": 3472,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 3472,
+            "mean": -0.3897154018957484,
+            "median": -0.43346692599425474,
+            "p05": -9.98258245100499,
+            "p95": 9.103163517707879,
+            "minimum": -23.840576592659936,
+            "maximum": 26.56762697100576
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_CAUDATE_LEFT": {
+        "points": 728,
+        "frames": 180,
+        "values": 131040,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 728,
+          "mean": 0.7307014151707225,
+          "median": 0.774432862272008,
+          "p05": 0.3365595405291622,
+          "p95": 0.9743381281986898,
+          "minimum": -0.17598526232168088,
+          "maximum": 0.9926726943843691
+        },
+        "rmse": 32.8437601454431,
+        "reference_rms": 660.6788640681699,
+        "normalized_rmse": 0.04971213993922201,
+        "absolute_difference": {
+          "mean": 24.397186694302402,
+          "p99": 98.59447692871093,
+          "maximum": 161.10870361328125
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 728,
+            "mean": -14.53745597494682,
+            "median": -10.64581739637589,
+            "p05": -67.54593034532333,
+            "p95": 23.743814604017523,
+            "minimum": -126.42055358886705,
+            "maximum": 51.24631958007808
+          },
+          "mean_absolute": 23.37369062169859
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 728,
+            "mean": 52.95232732032155,
+            "median": 53.071561708532535,
+            "p05": 36.9145613136338,
+            "p95": 69.91162321559314,
+            "minimum": 20.20276507021522,
+            "maximum": 83.50825732248254
+          },
+          "reference": {
+            "count": 728,
+            "mean": 53.167936197574235,
+            "median": 52.83926908976435,
+            "p05": 37.07155441617073,
+            "p95": 70.54023895946693,
+            "minimum": 16.75242151586967,
+            "maximum": 87.47042886417
+          },
+          "valid_pairs": 728,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 728,
+            "mean": -0.2156088772526875,
+            "median": -0.08830392314965607,
+            "p05": -13.613359636890172,
+            "p95": 13.387210659370975,
+            "minimum": -26.533878464523305,
+            "maximum": 25.938012915178817
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_CAUDATE_RIGHT": {
+        "points": 755,
+        "frames": 180,
+        "values": 135900,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 755,
+          "mean": 0.8713500898903463,
+          "median": 0.9097266280683982,
+          "p05": 0.6406501220641212,
+          "p95": 0.9825916181080355,
+          "minimum": 0.10236564164969802,
+          "maximum": 0.9941683193547817
+        },
+        "rmse": 28.938418459785222,
+        "reference_rms": 683.7590291968226,
+        "normalized_rmse": 0.042322539409501814,
+        "absolute_difference": {
+          "mean": 21.452036910460574,
+          "p99": 89.49850646972659,
+          "maximum": 153.1448974609375
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 755,
+            "mean": -11.209215870478994,
+            "median": -8.733315022786485,
+            "p05": -56.57197102864585,
+            "p95": 25.66120513916011,
+            "minimum": -123.20699801974831,
+            "maximum": 88.86151123046852
+          },
+          "mean_absolute": 20.914961895244446
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 755,
+            "mean": 55.39265413603168,
+            "median": 55.568889256133836,
+            "p05": 35.89420041202571,
+            "p95": 76.96408292224869,
+            "minimum": 16.70284938735586,
+            "maximum": 95.52960560234258
+          },
+          "reference": {
+            "count": 755,
+            "mean": 56.053161735768356,
+            "median": 55.2641431637669,
+            "p05": 36.36311115154725,
+            "p95": 77.94062449315801,
+            "minimum": 18.543706498218675,
+            "maximum": 96.51904981172146
+          },
+          "valid_pairs": 755,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 755,
+            "mean": -0.6605075997366721,
+            "median": -0.4688514684279994,
+            "p05": -13.861324024259956,
+            "p95": 12.455237848955344,
+            "minimum": -36.08920164117084,
+            "maximum": 28.475686317204556
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_CEREBELLUM_LEFT": {
+        "points": 8709,
+        "frames": 180,
+        "values": 1567620,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 8709,
+          "mean": 0.6010779530080038,
+          "median": 0.7496966631122017,
+          "p05": -0.2915265799465527,
+          "p95": 0.9907341628063466,
+          "minimum": -0.9347562000175708,
+          "maximum": 0.9989177946365376
+        },
+        "rmse": 53.87441148382095,
+        "reference_rms": 455.2959357503414,
+        "normalized_rmse": 0.11832833823792935,
+        "absolute_difference": {
+          "mean": 32.924424610884635,
+          "p99": 216.95561737060547,
+          "maximum": 510.05047607421875
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 8709,
+            "mean": 4.781476036561885,
+            "median": 1.2927072335448533,
+            "p05": -66.44147505018444,
+            "p95": 83.77812489827474,
+            "minimum": -383.2606341891818,
+            "maximum": 436.560299513075
+          },
+          "mean_absolute": 31.3372888253579
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 8709,
+            "mean": 39.347364514103894,
+            "median": 41.67492638223227,
+            "p05": -0.7764025824189653,
+            "p95": 75.80438687222428,
+            "minimum": -28.222533888383005,
+            "maximum": 119.6419866927678
+          },
+          "reference": {
+            "count": 8709,
+            "mean": 37.60097539111882,
+            "median": 39.87115062207865,
+            "p05": -0.7155525888963506,
+            "p95": 72.92326384804322,
+            "minimum": -19.386046688803393,
+            "maximum": 123.23613752676235
+          },
+          "valid_pairs": 8709,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 8709,
+            "mean": 1.7463891229850768,
+            "median": 0.7762720332799229,
+            "p05": -23.00203651914815,
+            "p95": 28.60810848801637,
+            "minimum": -81.08090583529719,
+            "maximum": 78.9070405523386
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": {
+        "points": 9144,
+        "frames": 180,
+        "values": 1645920,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 9144,
+          "mean": 0.6511827351140311,
+          "median": 0.8096508299456747,
+          "p05": -0.21204783942398853,
+          "p95": 0.9910604041066782,
+          "minimum": -0.9962635389480107,
+          "maximum": 0.9991425186948104
+        },
+        "rmse": 48.09037917839407,
+        "reference_rms": 425.46382238109555,
+        "normalized_rmse": 0.11303047791292267,
+        "absolute_difference": {
+          "mean": 27.358213449373235,
+          "p99": 211.45354507446325,
+          "maximum": 840.7925415039062
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 9144,
+            "mean": -1.5664793856234591,
+            "median": -0.8063050164116135,
+            "p05": -61.49829043918181,
+            "p95": 55.94578380160874,
+            "minimum": -368.4886397679645,
+            "maximum": 374.6841719733344
+          },
+          "mean_absolute": 26.025438935755947
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 9144,
+            "mean": 37.415959406432805,
+            "median": 40.45129826942552,
+            "p05": -0.9516561058867988,
+            "p95": 70.43348162454264,
+            "minimum": -24.594242786901415,
+            "maximum": 123.61617300978989
+          },
+          "reference": {
+            "count": 9144,
+            "mean": 36.12870154680858,
+            "median": 38.66073751663391,
+            "p05": -0.499453712652275,
+            "p95": 69.05116181278905,
+            "minimum": -22.468470907581565,
+            "maximum": 106.40907451411832
+          },
+          "valid_pairs": 9144,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 9144,
+            "mean": 1.2872578596242308,
+            "median": 0.5005770920721702,
+            "p05": -19.19271994985283,
+            "p95": 23.877705267498342,
+            "minimum": -73.73475345958765,
+            "maximum": 77.5045406418619
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": {
+        "points": 706,
+        "frames": 180,
+        "values": 127080,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 706,
+          "mean": 0.9246484291536844,
+          "median": 0.9619807049971987,
+          "p05": 0.7227211181745572,
+          "p95": 0.9956299340613903,
+          "minimum": 0.21174966060989042,
+          "maximum": 0.998737617461878
+        },
+        "rmse": 21.810519552053037,
+        "reference_rms": 360.5410118740836,
+        "normalized_rmse": 0.06049386570110977,
+        "absolute_difference": {
+          "mean": 14.647132601642669,
+          "p99": 73.4176916503902,
+          "maximum": 143.91226196289062
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 706,
+            "mean": 3.139763964310657,
+            "median": 0.4042223612466955,
+            "p05": -28.749600495232492,
+            "p95": 41.880854415893516,
+            "minimum": -73.1960669623482,
+            "maximum": 114.40703531901039
+          },
+          "mean_absolute": 14.016453239206328
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 706,
+            "mean": 27.671335825226308,
+            "median": 27.419482395251762,
+            "p05": 8.131150741532215,
+            "p95": 46.29328581964862,
+            "minimum": 3.2312999205147523,
+            "maximum": 61.542469877959114
+          },
+          "reference": {
+            "count": 706,
+            "mean": 26.988244573083854,
+            "median": 26.720341046419577,
+            "p05": 6.871526787131663,
+            "p95": 45.67793847806428,
+            "minimum": 3.301350050837738,
+            "maximum": 60.57781045038323
+          },
+          "valid_pairs": 706,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 706,
+            "mean": 0.683091252142456,
+            "median": 0.47548933520637826,
+            "p05": -5.297819297847917,
+            "p95": 7.658169692443231,
+            "minimum": -13.51257206563994,
+            "maximum": 15.367305226493606
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": {
+        "points": 712,
+        "frames": 180,
+        "values": 128160,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 712,
+          "mean": 0.8833075104784122,
+          "median": 0.9330663385787024,
+          "p05": 0.586170387223832,
+          "p95": 0.992672390759015,
+          "minimum": 0.2087988319307188,
+          "maximum": 0.9974465689031262
+        },
+        "rmse": 27.473373584071897,
+        "reference_rms": 370.59530131582903,
+        "normalized_rmse": 0.074133086648766,
+        "absolute_difference": {
+          "mean": 19.88610177743301,
+          "p99": 83.21332336425783,
+          "maximum": 320.3895969390869
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 712,
+            "mean": 2.0025201137964825,
+            "median": 0.8692497253418026,
+            "p05": -41.505290468004006,
+            "p95": 49.006188549465534,
+            "minimum": -93.24412468804258,
+            "maximum": 97.31114540100094
+          },
+          "mean_absolute": 19.08592114691878
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 712,
+            "mean": 27.270944948368662,
+            "median": 27.37672509597052,
+            "p05": 8.737010641312484,
+            "p95": 44.4398829690819,
+            "minimum": 3.2028499722748607,
+            "maximum": 74.8216008841204
+          },
+          "reference": {
+            "count": 712,
+            "mean": 26.446424610199873,
+            "median": 25.878154797095625,
+            "p05": 8.406372680464548,
+            "p95": 46.65436466548897,
+            "minimum": 3.169178675231934,
+            "maximum": 71.84536782411786
+          },
+          "valid_pairs": 712,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 712,
+            "mean": 0.8245203381687863,
+            "median": 0.7944269670652684,
+            "p05": -7.963749451485396,
+            "p95": 9.359488781750919,
+            "minimum": -24.501907456527576,
+            "maximum": 19.357374576395223
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": {
+        "points": 764,
+        "frames": 180,
+        "values": 137520,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 764,
+          "mean": 0.822856727693731,
+          "median": 0.8557524897080205,
+          "p05": 0.5387351705414475,
+          "p95": 0.9783057394387786,
+          "minimum": -0.107833245517981,
+          "maximum": 0.9963134658900916
+        },
+        "rmse": 22.831275951402528,
+        "reference_rms": 394.6586446407051,
+        "normalized_rmse": 0.05785069264652238,
+        "absolute_difference": {
+          "mean": 17.22938163184787,
+          "p99": 65.87280807495114,
+          "maximum": 142.10464477539062
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 764,
+            "mean": 3.878122744191307,
+            "median": 3.249698638916101,
+            "p05": -31.116761336856403,
+            "p95": 36.60819429185649,
+            "minimum": -64.44240146213104,
+            "maximum": 122.35644259982644
+          },
+          "mean_absolute": 16.392418546271646
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 764,
+            "mean": 35.14931606652161,
+            "median": 35.00695261295912,
+            "p05": 15.051960796912091,
+            "p95": 54.56226896356997,
+            "minimum": 3.9539956730190067,
+            "maximum": 65.00265412762799
+          },
+          "reference": {
+            "count": 764,
+            "mean": 34.799793575366614,
+            "median": 34.97448705821202,
+            "p05": 14.468027012279437,
+            "p95": 52.98519784666987,
+            "minimum": 4.186886147770859,
+            "maximum": 72.2687756425569
+          },
+          "valid_pairs": 764,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 764,
+            "mean": 0.349522491154995,
+            "median": 0.5547899454183387,
+            "p05": -10.61405520658615,
+            "p95": 9.683269528175277,
+            "minimum": -22.56960220173911,
+            "maximum": 24.278393904249405
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": {
+        "points": 795,
+        "frames": 180,
+        "values": 143100,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 795,
+          "mean": 0.8827843863302782,
+          "median": 0.9226056837463926,
+          "p05": 0.6501057583783562,
+          "p95": 0.988678371025747,
+          "minimum": -0.10341593463664948,
+          "maximum": 0.998698777972332
+        },
+        "rmse": 16.096157627060524,
+        "reference_rms": 422.67275087777875,
+        "normalized_rmse": 0.038081843680798186,
+        "absolute_difference": {
+          "mean": 11.932017730137087,
+          "p99": 43.95503387451175,
+          "maximum": 516.4410400390625
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 795,
+            "mean": 3.6883444166949846,
+            "median": 2.345615302191959,
+            "p05": -17.528231370713996,
+            "p95": 28.200417887369802,
+            "minimum": -43.69671249389654,
+            "maximum": 54.89934319390187
+          },
+          "mean_absolute": 11.07223051858898
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 795,
+            "mean": 38.61871264350881,
+            "median": 38.56378784152826,
+            "p05": 16.205643900750264,
+            "p95": 59.84710777248686,
+            "minimum": 7.70993805305235,
+            "maximum": 81.78601591455735
+          },
+          "reference": {
+            "count": 795,
+            "mean": 37.57537809804352,
+            "median": 37.669418047767174,
+            "p05": 15.00817076372595,
+            "p95": 59.53651173620889,
+            "minimum": 5.652466824141718,
+            "maximum": 81.3323614605985
+          },
+          "valid_pairs": 795,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 795,
+            "mean": 1.0433345454652843,
+            "median": 0.8717083912479566,
+            "p05": -11.315664038992004,
+            "p95": 13.108915803569834,
+            "minimum": -23.349167029988017,
+            "maximum": 45.64669525689854
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_PALLIDUM_LEFT": {
+        "points": 297,
+        "frames": 180,
+        "values": 53460,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 297,
+          "mean": 0.7786775929769029,
+          "median": 0.820593698427858,
+          "p05": 0.4596036558782612,
+          "p95": 0.9686149335929444,
+          "minimum": -0.013641544760831804,
+          "maximum": 0.9971585204898633
+        },
+        "rmse": 35.375414503441796,
+        "reference_rms": 359.0411682394839,
+        "normalized_rmse": 0.09852746044945479,
+        "absolute_difference": {
+          "mean": 26.244372128459162,
+          "p99": 97.2970721435546,
+          "maximum": 165.21556091308594
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 297,
+            "mean": -1.1818291715143159,
+            "median": -0.6861334906683965,
+            "p05": -63.239552883572024,
+            "p95": 51.730455152723486,
+            "minimum": -136.54344194200306,
+            "maximum": 87.21593458387594
+          },
+          "mean_absolute": 25.58724412243776
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 297,
+            "mean": 32.017735433522944,
+            "median": 32.34746833004662,
+            "p05": 20.441035210152034,
+            "p95": 43.031421020627256,
+            "minimum": 12.647564609945078,
+            "maximum": 52.32682260616031
+          },
+          "reference": {
+            "count": 297,
+            "mean": 32.01093145635045,
+            "median": 32.21106081797956,
+            "p05": 19.40088270391904,
+            "p95": 43.31896891115633,
+            "minimum": 13.275704963872386,
+            "maximum": 50.466661265129936
+          },
+          "valid_pairs": 297,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 297,
+            "mean": 0.006803977172492823,
+            "median": 0.045619329755744786,
+            "p05": -9.084109028507914,
+            "p95": 9.285993125300394,
+            "minimum": -25.010692208503993,
+            "maximum": 15.988351204616897
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_PALLIDUM_RIGHT": {
+        "points": 260,
+        "frames": 180,
+        "values": 46800,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 260,
+          "mean": 0.74343150432415,
+          "median": 0.7698580530636423,
+          "p05": 0.42567119145119375,
+          "p95": 0.9486709926995438,
+          "minimum": 0.052207786549227746,
+          "maximum": 0.9882172995178142
+        },
+        "rmse": 32.20835807365384,
+        "reference_rms": 378.1166801722392,
+        "normalized_rmse": 0.08518100301468406,
+        "absolute_difference": {
+          "mean": 26.084408550751515,
+          "p99": 76.93526336669925,
+          "maximum": 101.40655517578125
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 260,
+            "mean": -3.178766468080699,
+            "median": 1.433118862575924,
+            "p05": -57.295072038438505,
+            "p95": 41.46397122701023,
+            "minimum": -74.07233479817705,
+            "maximum": 63.281753031412734
+          },
+          "mean_absolute": 25.522637915652016
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 260,
+            "mean": 34.99520119607438,
+            "median": 34.89823246801535,
+            "p05": 22.915123591941107,
+            "p95": 46.436397504338885,
+            "minimum": 18.051405097711385,
+            "maximum": 69.04554676476728
+          },
+          "reference": {
+            "count": 260,
+            "mean": 35.674136794514894,
+            "median": 36.29201031267408,
+            "p05": 21.846558793265192,
+            "p95": 46.33730311729209,
+            "minimum": 17.047208401394787,
+            "maximum": 59.34682198774322
+          },
+          "valid_pairs": 260,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 260,
+            "mean": -0.6789355984405099,
+            "median": 0.4040197434987931,
+            "p05": -14.474834327308399,
+            "p95": 9.799083325236174,
+            "minimum": -27.40452740401259,
+            "maximum": 17.58945665723769
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_PUTAMEN_LEFT": {
+        "points": 1060,
+        "frames": 180,
+        "values": 190800,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 1060,
+          "mean": 0.9044454282233065,
+          "median": 0.9302857693151869,
+          "p05": 0.7438771102313155,
+          "p95": 0.985983267208472,
+          "minimum": 0.30452093769066413,
+          "maximum": 0.998418438575872
+        },
+        "rmse": 18.363915805364996,
+        "reference_rms": 526.6786962039812,
+        "normalized_rmse": 0.03486739816461591,
+        "absolute_difference": {
+          "mean": 12.414663457570585,
+          "p99": 65.98877746582032,
+          "maximum": 109.67538452148438
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 1060,
+            "mean": 4.821963086318173,
+            "median": 2.4761376274956888,
+            "p05": -16.934999008178718,
+            "p95": 37.79686057196717,
+            "minimum": -51.497158474392336,
+            "maximum": 88.45512118869357
+          },
+          "mean_absolute": 11.683437274716937
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 1060,
+            "mean": 44.51059112448018,
+            "median": 44.43067516154419,
+            "p05": 31.2132265133489,
+            "p95": 58.77084648484346,
+            "minimum": 17.603474606393654,
+            "maximum": 71.84832403293997
+          },
+          "reference": {
+            "count": 1060,
+            "mean": 43.87751150172043,
+            "median": 43.54487406646814,
+            "p05": 30.51329213336856,
+            "p95": 58.19028173656423,
+            "minimum": 13.122462635175841,
+            "maximum": 68.53166339711598
+          },
+          "valid_pairs": 1060,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 1060,
+            "mean": 0.6330796227597527,
+            "median": 0.45347946896147917,
+            "p05": -6.966929657316937,
+            "p95": 8.23302177917911,
+            "minimum": -19.894147196955522,
+            "maximum": 16.62798435318301
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_PUTAMEN_RIGHT": {
+        "points": 1010,
+        "frames": 180,
+        "values": 181800,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 1010,
+          "mean": 0.8872708146166678,
+          "median": 0.9475595897793387,
+          "p05": 0.418486798466738,
+          "p95": 0.9944630628636552,
+          "minimum": -0.11329066161437192,
+          "maximum": 0.9995879940693747
+        },
+        "rmse": 23.809010502652463,
+        "reference_rms": 548.4803394908323,
+        "normalized_rmse": 0.04340905003952365,
+        "absolute_difference": {
+          "mean": 13.084616033750267,
+          "p99": 98.76375579833993,
+          "maximum": 750.6025085449219
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 1010,
+            "mean": 8.00576149039799,
+            "median": 3.4871173434788147,
+            "p05": -12.252012905544683,
+            "p95": 46.28874051411944,
+            "minimum": -49.62814771864112,
+            "maximum": 160.32870669894749
+          },
+          "mean_absolute": 12.522637225052444
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 1010,
+            "mean": 49.746054379712724,
+            "median": 50.071728215062976,
+            "p05": 32.23540968549059,
+            "p95": 66.32357321682974,
+            "minimum": 10.725385466013138,
+            "maximum": 82.57633485401279
+          },
+          "reference": {
+            "count": 1010,
+            "mean": 46.93617950850415,
+            "median": 48.17809556087805,
+            "p05": 15.952952307723598,
+            "p95": 65.93712331692926,
+            "minimum": 7.184432871702748,
+            "maximum": 92.60141549168328
+          },
+          "valid_pairs": 1010,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 1010,
+            "mean": 2.809874871208565,
+            "median": 0.9850570027209322,
+            "p05": -6.459118914818822,
+            "p95": 22.480209335554978,
+            "minimum": -25.457434418479647,
+            "maximum": 50.296112675620265
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_THALAMUS_LEFT": {
+        "points": 1288,
+        "frames": 180,
+        "values": 231840,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 1288,
+          "mean": 0.9080567707770295,
+          "median": 0.9365148214580556,
+          "p05": 0.7192586534423026,
+          "p95": 0.9882710068403182,
+          "minimum": 0.3574835171138091,
+          "maximum": 0.9986244457210176
+        },
+        "rmse": 14.114885980527513,
+        "reference_rms": 454.8031811047525,
+        "normalized_rmse": 0.031035152274531918,
+        "absolute_difference": {
+          "mean": 9.779887602261793,
+          "p99": 47.01865417480466,
+          "maximum": 134.46572875976562
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 1288,
+            "mean": -2.5390954848237506,
+            "median": -2.9737814161511835,
+            "p05": -20.52807079739027,
+            "p95": 16.132577709621742,
+            "minimum": -47.55772603352858,
+            "maximum": 99.63644273545998
+          },
+          "mean_absolute": 9.111560811726614
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 1288,
+            "mean": 42.65432185215067,
+            "median": 43.938564711466604,
+            "p05": 25.30045172508635,
+            "p95": 55.621581713412326,
+            "minimum": 7.561640954735526,
+            "maximum": 73.03112675473218
+          },
+          "reference": {
+            "count": 1288,
+            "mean": 42.366668858095196,
+            "median": 43.57859206359462,
+            "p05": 24.878094132166947,
+            "p95": 55.30501147529805,
+            "minimum": 8.445999749342459,
+            "maximum": 82.43741028648627
+          },
+          "valid_pairs": 1288,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 1288,
+            "mean": 0.28765299405546196,
+            "median": 0.17052672464664198,
+            "p05": -6.902361439364231,
+            "p95": 7.576935870729405,
+            "minimum": -14.788695330982254,
+            "maximum": 20.67089377180491
+          }
+        }
+      },
+      "CIFTI_STRUCTURE_THALAMUS_RIGHT": {
+        "points": 1248,
+        "frames": 180,
+        "values": 224640,
+        "nonfinite_candidate_values": 0,
+        "nonfinite_reference_values": 0,
+        "constant_candidate": 0,
+        "constant_reference": 0,
+        "both_constant": 0,
+        "one_side_constant": 0,
+        "zero_candidate": 0,
+        "zero_reference": 0,
+        "both_zero": 0,
+        "one_side_zero": 0,
+        "temporal_r": {
+          "count": 1248,
+          "mean": 0.7852726798278451,
+          "median": 0.813409025733854,
+          "p05": 0.4993131439135442,
+          "p95": 0.9827363249755338,
+          "minimum": 0.114654517976461,
+          "maximum": 0.9987553990288103
+        },
+        "rmse": 20.270766674992895,
+        "reference_rms": 457.2815132982448,
+        "normalized_rmse": 0.04432885670095315,
+        "absolute_difference": {
+          "mean": 15.6394800449029,
+          "p99": 57.072174072265625,
+          "maximum": 105.47247314453125
+        },
+        "temporal_mean_bias": {
+          "signed": {
+            "count": 1248,
+            "mean": -7.952625630112455,
+            "median": -7.587942165798637,
+            "p05": -37.05923060099277,
+            "p95": 19.501766306559016,
+            "minimum": -65.10560506184896,
+            "maximum": 85.77829335530589
+          },
+          "mean_absolute": 14.757241188834536
+        },
+        "tsnr": {
+          "candidate": {
+            "count": 1248,
+            "mean": 44.509271698236645,
+            "median": 45.72374733756469,
+            "p05": 24.018065542936803,
+            "p95": 59.29327301809882,
+            "minimum": 8.681084284005713,
+            "maximum": 69.68035254788944
+          },
+          "reference": {
+            "count": 1248,
+            "mean": 44.26872123826961,
+            "median": 45.68548456518438,
+            "p05": 23.449548909858713,
+            "p95": 58.149704059967995,
+            "minimum": 8.001633494283816,
+            "maximum": 68.46964213975792
+          },
+          "valid_pairs": 1248,
+          "undefined_pairs": 0,
+          "bias": {
+            "count": 1248,
+            "mean": 0.24055045996703775,
+            "median": 0.38962113502192075,
+            "p05": -10.26747856581227,
+            "p95": 9.987724705213685,
+            "minimum": -24.252553819689712,
+            "maximum": 21.629102518843013
+          }
+        }
+      }
+    },
+    "cortical_structures": 2,
+    "subcortical_structures": 19,
+    "brain_axis_identity_sha256": "21f809d99602c536d6d3afe4361dbb1260505171740b6913b74aeeb2b957a699"
+  },
+  "reconstruction_geometry": {
+    "status": "not_assessed_here",
+    "reason": "independent native reconstructions are not assumed to share topology or vertex correspondence; same-index mesh and sphere-angle errors require a separate validated geometry comparison"
+  },
+  "derived_arrays": {
+    "file": "arrays.private.npz",
+    "sha256": "c4e5e3686753d19bde654cea381dea1f9ea26ed1cb219cff1b57a298a1f0d4a8",
+    "publication": "private derived arrays; only CC0 brain-masked figures and aggregate numbers approved for publication"
+  },
+  "comparison_wall_seconds": 32.14873465616256,
+  "private_manifest_sha256": "49de16581527aa5ecbbfc2f7ee2c0babe2211cb4f1588d27e01bcbc0294aa999"
+}

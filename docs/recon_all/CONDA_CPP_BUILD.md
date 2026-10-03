@@ -25,7 +25,7 @@ bash tools/build_recon_all_fs_cpp_conda.sh \
 
 外部图谱服务器曾在全新安装中途断开；再次运行同一安装器后从断点续传，当前源码 `--verify-only` 对全新目录的 98 项标准资产全部通过。下载失败时可重试同一 `--dest`；安装器仍核对大小及 SHA-256。
 
-原生程序包括 `mri_em_register`、`mri_segment`、`mri_edit_wm_with_aseg`、`mris_fix_topology_fnit`、`mris_remove_intersection`、`mris_inflate`、`mris_place_surface`、`mris_place_surface_white_fast`、`mrisp_paint`、`mris_curvature_stats`、`mri_label2vol`、`mri_warp_convert`、`mri_ca_register` 和 `mri_convert`；N4从FNIT源码另行编译，共15项安装产物。`mris_place_surface_white_fast`仅移除white未消费的面哈希构建，pial仍调用原放置程序。球面优化与配准调用FNIT Python/Numba实现。`mris_fix_topology_fnit`使用构建脚本记录的有限源码补丁；未修改的上游 `mris_fix_topology` 仅留作诊断，不进入标准运行路径。当前CUDA recon-all的MNI后处理已调用FNIT GPU实现，独立API默认及CPU链仍保留Conda路径。MNI152非线性模型还需外置约3.5 GB的 `synthmorph.deform.3.h5`；项目安装器从固定FNIT Release分卷下载、合并并核对完整SHA-256，参见[该阶段说明](MNI_NONLINEAR_CHAIN.md)。
+原生程序包括 `mri_em_register`、`mri_segment`、`mri_edit_wm_with_aseg`、`mris_fix_topology_fnit`、`mris_remove_intersection`、`mris_inflate`、`mris_place_surface`、`mris_place_surface_white_fast`、`mrisp_paint`、`mris_curvature_stats`、`mri_label2vol`、`mri_warp_convert`、`mri_ca_register`、`mri_convert` 和 `mris_expand`；N4从FNIT源码另行编译，当前共16项安装产物。`mris_expand` 用于 fMRI surface 入口缺少中层面时执行 `-thickness white 0.5 graymid`，主页安装脚本已将它加入固定源码的 MINIMAL 构建与安装哈希清单；之前的14/15项记录仍对应各自历史版本。`mris_place_surface_white_fast`仅移除white未消费的面哈希构建，pial仍调用原放置程序。球面优化与配准调用FNIT Python/Numba实现。`mris_fix_topology_fnit`使用构建脚本记录的有限源码补丁；未修改的上游 `mris_fix_topology` 仅留作诊断，不进入标准运行路径。当前CUDA recon-all的MNI后处理已调用FNIT GPU实现，独立API默认及CPU链仍保留Conda路径。MNI152非线性模型还需外置约3.5 GB的 `synthmorph.deform.3.h5`；项目安装器从固定FNIT Release分卷下载、合并并核对完整SHA-256，参见[该阶段说明](MNI_NONLINEAR_CHAIN.md)。
 
 ## 运行时检查
 
@@ -33,6 +33,7 @@ bash tools/build_recon_all_fs_cpp_conda.sh \
 export FS_LICENSE=/private/license.txt
 command -v fnit_n4_itk
 command -v mris_fix_topology_fnit
+command -v mris_expand
 ldd "$(command -v mris_place_surface)"
 fnit-recon-all /data/sub01_T1w.nii.gz /data/subjects/sub01 \
   --weights-dir /data/fnit-weights \

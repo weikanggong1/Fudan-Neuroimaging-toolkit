@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "cohort_id": "formal-v4",
+  "status": "partial",
+  "dataset": {
+    "id": "ds001226",
+    "version": "5.0.1",
+    "license": "CC0"
+  },
+  "render_script_sha256": "b62d5c944effba8e60152ff227e6ced980bf3bba403c69fac59c4bc89149070c",
+  "comparison_inputs_unchanged": true,
+  "cases": [
+    {
+      "case_id": "CON01",
+      "status": "complete",
+      "comparison_report_sha256": "142f2f30558e51c14151ab7f0de25bc49a6c21cfbe9864777870cc2988fdac25",
+      "derived_arrays_sha256": "27e911cc25bf601a759b78b8a1a08e65f5dc34ce4a953e6b8e77cf6c526fa64e",
+      "raw_input_sha256": {
+        "t1w": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+        "bold": "606b93257c4b14dceb5e681f741a2d5694c10f989714312d247a9104f1dd4acb"
+      },
+      "comparison_script_sha256": "cb04445f6acf4252bf067500e70d53ec2981ee3ce9a24d9f47365c6ec12737d1"
+    },
+    {
+      "case_id": "CON03",
+      "status": "complete",
+      "comparison_report_sha256": "d4a39110fa43955889319ef6f8e87d336637647d52a2b0da110e816a629a9193",
+      "derived_arrays_sha256": "c37d2368020aa39377312b224497cbb45741ed9270cf7fa7de6f4768855e02fe",
+      "raw_input_sha256": {
+        "t1w": "bf0a72d3f17781d2a178b629b72563b4b1423c52b7866fa88e5ae393f97b6f81",
+        "bold": "b8a3dea34c3d138d84fb0f9d47ea505c44461e4098c869fde2e3145ac9930599"
+      },
+      "comparison_script_sha256": "cb04445f6acf4252bf067500e70d53ec2981ee3ce9a24d9f47365c6ec12737d1"
+    }
+  ],
+  "completed_cases": [
+    "CON01",
+    "CON03"
+  ],
+  "missing_cases": [
+    "CON04",
+    "CON05",
+    "CON06",
+    "CON07",
+    "CON08",
+    "CON09",
+    "CON10",
+    "CON11"
+  ],
+  "failed_cases": [],
+  "mesh_provenance": {
+    "left": {
+      "sha256": "986b9fac6b5a22e27d11d2f068a7433107354e231dac03315a30d9c7ffffb201",
+      "space": "fsLR32k",
+      "kind": "midthickness"
+    },
+    "right": {
+      "sha256": "b855e8caf7df5bbc70d40b1bd9113fae3cf5693034643938dbfdf4cbd892bb3e",
+      "space": "fsLR32k",
+      "kind": "midthickness"
+    }
+  },
+  "display_geometry": {
+    "source_case_id": "CON01",
+    "generation_provenance_sha256": "5f534405fd62500184aa8b8f0303dbc3b18f922aa5e73113ec345b3136d948f8",
+    "usage": "one shared real cortical display geometry; each plotted case retains its own CIFTI scalar values"
+  },
+  "figures": [
+    {
+      "file": "CON01_mni_mean_difference.png",
+      "sha256": "d02f818fdb28135f9692a3cdeda11df1b8b191f2b5b8554cace1a0cf04a77993",
+      "case_id": "CON01",
+      "kind": "mni_mean_difference"
+    },
+    {
+      "file": "CON01_cortical_temporal_r.png",
+      "sha256": "718b1626e4f6e49fbeaf6f21b12cca0378a1807bb773bca8e3aca9fead075887",
+      "case_id": "CON01",
+      "kind": "cortical_temporal_r"
+    },
+    {
+      "file": "CON03_mni_mean_difference.png",
+      "sha256": "b2dc123c075cedc50877aff1eac9d142a607feff346cb913cb16c59eff69effb",
+      "case_id": "CON03",
+      "kind": "mni_mean_difference"
+    },
+    {
+      "file": "CON03_cortical_temporal_r.png",
+      "sha256": "fc06ab37bc1bfef31b5fc03adf0084d656676cb00956a8c8b2441b4c673c1605",
+      "case_id": "CON03",
+      "kind": "cortical_temporal_r"
+    },
+    {
+      "file": "cohort_temporal_r.png",
+      "sha256": "df70f6294d0c4895568132ad8a8b3b8c094539f4e332a5a89023cfc875db1c73",
+      "kind": "per-case spatial distributions"
+    }
+  ],
+  "method": {
+    "privacy": "MNI BOLD maps masked strictly to fixed intracranial brain mask; no raw head/T1 image rendered",
+    "cortex": "CIFTI brain-model vertex indices expanded to 32492 actual fsLR vertices; gray denotes medial wall/undefined r; display-only face color averages three finite vertex r values",
+    "cohort": "one row per predeclared case; P05/P95 span spatial points and are not confidence intervals; incomplete cases remain visible",
+    "scope": "real brain-derived CC0 figures from completed paired reports; no synthetic performance or accuracy results"
+  },
+  "private_manifest_sha256": "91610154545870b66b7acaaffd8f9274f80fb73eaf14d76f702283a02fe056bb"
+}

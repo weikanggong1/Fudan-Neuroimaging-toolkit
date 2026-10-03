@@ -73,7 +73,11 @@ CPU 运算保留在影响离散解的严格标量边界和文件处理处。GPU 
 
 本轮还修复了两个共享子函数问题。`run_msmsulc` 和 MSMAll 原来逐侧重置全设备显存峰值，使调用方完整 API 统计失去前序峰值；当前统一保留调用方计数并写明 `peak_scope`。`_label_samples` 在没有非零位移标签时原返回形状 `(0,)`，后续拼接失败；现在空结果为 `(0,3)`，正常配置的标签数量、顺序与数值不变。空标签、CPU/GPU 和双侧执行控制已覆盖这些情况，真实完整复测记录见[本轮验证页](../../validation/fmri/surface_gpu_parallel/README.md)。
 
-离散迭代中的 DATA 和控制网格保留 newMSM 的展开处理。最后从 DATA 变形到原生球面后，按官方行为写出有限坐标，并分别报告求解坐标和实际 float32 GIFTI 的翻折数、最小方向比及输入退化面数。最终原生球面不再额外优化；使用前应检查这份质控报告。
+离散迭代中的 DATA 和控制网格保留 newMSM 的展开处理。最后从 DATA 变形到原生球面后，按官方行为写出有限坐标，并分别报告求解坐标和实际 float32 GIFTI 的相对方向变化数、最小方向比及输入退化面数。`folded_output_faces` 使用归一化旋转输入的 signed determinant 作分母，不等同于保存球面的绝对朝内面数；有限输出完成也不等于几何质量通过。最终原生球面不再额外优化。真实 CON07 的生产相对 QC 为 1，绝对保存负面为 26，原 native 负面为 28；相对变化面属于原 native 朝内到保存朝外，具体基线、清理记录及同例脑图见[独立质量诊断](../../validation/fmri/public_ten_20261003/CON07_sphere_quality_diagnostic.md)。
+
+source1128 的真实 CON10 给出另一种限制：FNIT 左侧 native 与 sphere.reg 的绝对负面均为 0，最终保存球面有 1 个绝对负面（有序 face 27100，signed area −0.108021095 mm²），相对 fold 为 1、最小方向比 −0.42596758。该例不能按 CON07 的负转正解释。独立官方参考左侧 native、sphere.reg 与最终保存球面的绝对负面分别为 14、19、14；相对于自身 native 的 fold 为 0、最小方向比 +0.1307442，说明相对零 fold 可以保留绝对朝内的基线。两侧、两流程的四张保存球面在 FP32/FP64 几何判据下的面集合相同，坐标有限、有序 face 一致，源码和输入前后守卫全部通过，见[同输入保存质量记录](../../validation/fmri/public_ten_20261003/reconstruction_completed/CON10.saved-MSM-absolute.public.json)。这些是末尾原生插值与基线取向的实际质量边界；数值 MRI 源码保持不变，报告不把它们归为浮点尾数误差或完整 API 的严格质量通过。
+
+CON10 的[原生产 QC](../../validation/fmri/public_ten_20261003/reconstruction_completed/CON10.production-MSM-qc.public.json)另使用原归一化旋转输入为基线：左侧 solver/output 相对 fold 均为 1，最小 ratio 分别为 −0.4486985623/−0.4486895048，右侧均为 0。这里的 solver 坐标来自最后 `_sphere_warp` 的原生插值，尚未转为保存用 float32，不能解释为 DATA/control 优化网格的最终质量，也不能把该例负面只归因于保存 cast。未保存的插值坐标无法恢复其绝对负面集合；原生产与后验自身 native 基线的 ratio 分别保留。
 
 ### 配置参数
 

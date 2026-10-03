@@ -149,7 +149,7 @@ recon-all -i "$raw_t1w_image" -s "$official_subject_id" \
 
 此前完整整链的诊断用于定位显存问题，不与上述阶段数字合并：
 
-2026-10-03 的公开 ds001226 v5.0.1（CC0）诊断使用真实原始 T1w＋完整 180 帧 BOLD。旧候选 `01de7f30` 的父子进程同期采样如下；JSON 保留源码与输入 SHA，见[诊断原始记录](../../validation/fmri/public_ten_20261003/runtime_snapshot.public.json)：
+2026-10-03 的公开 ds001226 v5.0.1（CC0）诊断使用真实原始 T1w＋完整 180 帧 BOLD。旧候选 `01de7f30` 的父子进程同期采样如下；JSON 保留源码与输入 SHA，见[诊断原始记录](../../validation/fmri/public_ten_20261003/runtime_snapshot_v3_failed.public.json)：
 
 | 旧诊断例 | 实际执行状态 | 父子进程同时峰值 | 对 20,000,000,000 bytes 目标 |
 |---|---|---:|---|

@@ -49,7 +49,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [TorchMCFLIRT](docs/mcflirt/README.md) | FSL `mcflirt` | BOLD 每帧刚体运动估计、FSL 矩阵与六列参数、图像重采样；[真实数据对照](validation/mcflirt/README.md)。 |
 | [parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject.m` | fsLR32k 或 MNI BOLD 到个体 17 网络标签与连接矩阵。 |
 | [fMRIVolume_pipeline](docs/fmri/README.md) | FSL FEAT、ICA-AROMA；fMRIPrep 单次重采样 | 原始 BIDS 单 run 同时生成 T1w 原生 BOLD 分辨率/MNI 2 mm preproc 与 FEAT/AROMA clean 体积 BOLD；默认关闭 slice timing；[验证记录](validation/fmri/README.md)。 |
-| [fMRISurface_pipeline](docs/fmri/surface.md) | fMRIPrep fsLR 重采样、Workbench | 默认读取 volume preproc 和同源 T1 recon-all 的已有中层面，输出 fsLR32k GIFTI、91k CIFTI、注册球面与 QC；可显式选 clean。 |
+| [fMRISurface_pipeline](docs/fmri/surface.md) | recon-all、fMRIPrep fsLR 重采样、Workbench | 从原始配对 T1w＋BOLD 自动检查并运行 volume，选择 FNIT、FreeSurfer 或用户已有 recon-all，补齐中层面，输出 fsLR32k GIFTI、91k CIFTI、注册球面与 QC。 |
 | [fnit.msm.run_msmsulc](docs/msm/README.md) | newMSM MSMSulc | 独立的 HOCR/FastPD 脑沟球面配准。 |
 | [fnit.msm.run_msmall](docs/msm/msmall.md) | newMSM / HCP MSMAll | 独立的加权多特征球面配准；附 [VN、DR/WRN 与 C/CA/CAT 特征准备](docs/msm/features.md)，可接入 surface。真实 C 模式的完整一级/三级配置与固定 490 帧投影逐值匹配官方；[测量记录](validation/msm/README.md#独立-msmall-验证)。 |
 | [fnit.melodic.run_melodic_bids](docs/melodic/README.md) | FSL MELODIC | 独立的 PyTorch 单被试空间 PICA，输入和输出均为 BIDS Derivatives。 |
@@ -162,7 +162,7 @@ fsLR32k 表面投影的 HCP 公开模板不属于模型权重，同样优先从�
 fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep
 ```
 
-该命令包含 fsLR32k/MSMSulc 的球面、脑沟参考图、ROI 与配置，以及 `fmriprep/` 下的三个 TemplateFlow 文件。volume 核对模板体素内容身份，surface 默认使用其单次插值 preproc；缺少 preproc 或身份字段的旧 volume 需重新运行。被试须提供同源 recon-all 的 white、pial、sphere、sphere.reg、sulc、thickness，及每侧已有的 midthickness 或 graymid；完整参数与源 T1/世界仿射要求见 [fMRI 表面投影](docs/fmri/surface.md)，模板大小和 SHA-256 见[原站模板清单](docs/WEIGHTS.md#fmri-templateflow-原站模板)。
+该命令包含 fsLR32k/MSMSulc 的球面、脑沟参考图、ROI 与配置，以及 `fmriprep/` 下的三个 TemplateFlow 文件。surface 入口自动检查对应 volume 的来源、模板、网格、完整帧数、TR 和有限值；缺少整条 volume 时先运行 FNIT volume，残缺或无效结果给出具体原因。重建可选择 FNIT、显式 FreeSurfer 或用户已有目录/ZIP；用户输入只读，缺中层面时在独立目录运行 `mris_expand -thickness` 补齐。FNIT 重建复用 PyTorch/Numba 和固定上游源码在 Conda 内独立编译的必要 native 程序；安装重建依赖时包含 `mris_expand`。完整参数与源 T1/世界仿射要求见 [fMRI 表面投影](docs/fmri/surface.md)，模板大小和 SHA-256 见[原站模板清单](docs/WEIGHTS.md#fmri-templateflow-原站模板)。
 
 使用可选 [MSMAll](docs/msm/msmall.md) 时，资源命令加 `--msmall`，下载多特征配准配置、d40 参考及 WRN 的 d7–d21 图，并校验固定大小和 SHA-256。无个体髓鞘图时须明确选择连接特征 `C`；默认 surface 仍使用 T1w-only MSMSulc。
 

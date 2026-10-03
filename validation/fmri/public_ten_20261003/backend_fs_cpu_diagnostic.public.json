@@ -1,0 +1,161 @@
+{
+  "status": "cold_adapter_complete_cache_control_interrupted",
+  "dataset": "OpenNeuro ds001226 v5.0.1 CC0",
+  "subject": "CON01",
+  "backend": "freesurfer",
+  "source_revision": "e21d21f8",
+  "adapter_producer": {
+    "fmri/surface_reconstruction.py": "913a0e2f188ae6ffa156c8b16212e933375f516f2d4c886deb3873cf9d5f3208"
+  },
+  "raw_t1w_sha256": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+  "requested_device": "cpu",
+  "actual_reconstruction_device": "cpu",
+  "cpu_threads": 4,
+  "cuda_visible_devices": "",
+  "scope": "Diagnostic explicit official CPU recon-all -all from public original T1w followed by actual thickness-based middle generation and completed adapter validation. Volume and full surface API are excluded. The subsequent same-request cache control mistakenly began a repeated reconstruction and was interrupted; no cache reuse success is claimed.",
+  "adapter_cold_wall_seconds": 5942.206622511148,
+  "adapter_timing_seconds": {
+    "reconstruction_seconds": 4639.356755651534,
+    "pre_middle_validation_seconds": 0.5723964124917984,
+    "middle_seconds": 1302.0617497935891,
+    "final_validation_seconds": 0.17825237661600113,
+    "whole_seconds": 5942.199749819934
+  },
+  "first_adapter_status": "complete",
+  "first_adapter_completed_closure_checksums": {
+    "mri/orig.mgz": {
+      "size": 4834545,
+      "sha256": "4ab9bd1e21b7f6b65b1eb1821ca37988d5ae034f6c0d2e0b05f2b2456dcbf2eb"
+    },
+    "mri/orig/001.mgz": {
+      "size": 6892313,
+      "sha256": "b218e8c8f07804045f503a16a9a324d495da4f11c9948667a031489289f08eb4"
+    },
+    "surf/lh.graymid": {
+      "size": 5102051,
+      "sha256": "87e00231035b22642359f0fef8c5ea29fff1ed54085eb1a3560c5dfd667bbc32"
+    },
+    "surf/lh.pial": {
+      "size": 5102051,
+      "sha256": "ddfbd9f06c78a4b6acddd26188c5ac52d9a130528e1eff270fe44f0827211bc6"
+    },
+    "surf/lh.sphere": {
+      "size": 5103305,
+      "sha256": "b167ab5c32cd9fde28b134584b178d366adcddb2623ddf8dcd61098e295f4dff"
+    },
+    "surf/lh.sphere.reg": {
+      "size": 5104068,
+      "sha256": "6b25abcd9a2eaa9fabb8bb645b02efee890f316eac5f7d9eadaf5a91591ae429"
+    },
+    "surf/lh.sulc": {
+      "size": 566767,
+      "sha256": "9976884102e1ccd6649d390889b90ed53281de424642a16da6772ce9c32d4f77"
+    },
+    "surf/lh.thickness": {
+      "size": 566767,
+      "sha256": "d65343676fd86b72fc217b3944e0801cb0634ceeb2f7eda93376a3218ff8ce65"
+    },
+    "surf/lh.white": {
+      "size": 5102051,
+      "sha256": "8567a2cd143307ecbf0bc54a9ece45ee04db5786c171d01d7fa87b4509d69659"
+    },
+    "surf/rh.graymid": {
+      "size": 5333063,
+      "sha256": "430e2000ef514a586a9b0944eb58edc64146e52b75f657056b094c0fed439732"
+    },
+    "surf/rh.pial": {
+      "size": 5333063,
+      "sha256": "f4d3f8f0f844e99f53df2b7fa8aa15d2f463cfd88116553a7091b49754eedb92"
+    },
+    "surf/rh.sphere": {
+      "size": 5334317,
+      "sha256": "2e90327123188763e9ece54e5dfaf49665559726aa086971589cc9608ab2a564"
+    },
+    "surf/rh.sphere.reg": {
+      "size": 5335080,
+      "sha256": "75cea437c514e65ec5423c4afa40a010364cd8dff1843714dee778c6b59505c8"
+    },
+    "surf/rh.sulc": {
+      "size": 592435,
+      "sha256": "a64f7631f0228a9eda82fe15448ece432c0e763e9d1629f7434f759245f9d092"
+    },
+    "surf/rh.thickness": {
+      "size": 592435,
+      "sha256": "f6d675648c7a54c84069e5dc295bc559b5ad13fda64667a13a28b1af8df5c47f"
+    },
+    "surf/rh.white": {
+      "size": 5333063,
+      "sha256": "93aa4127bc3f13fa6c75f58474c899da67794027d580810a63205301d38acefe"
+    }
+  },
+  "first_adapter_source_t1_identity": {
+    "OriginalT1Identity": "matching source image grid and voxel content",
+    "FsnativeToT1wWorldAffine": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "commands": [
+    {
+      "program": "recon-all",
+      "sha256": "55410a0dc005237f99a1a35fb5d41c4e1994b3ae189ca9232a59b87034f86415",
+      "wall_seconds": 4639.356755651534
+    },
+    {
+      "program": "mris_expand",
+      "sha256": "d7b1e99b6ad4a266b7a02a0bcb2be0b59d39a4d73c2347865a644badc281563b",
+      "wall_seconds": 635.3070485591888
+    },
+    {
+      "program": "mris_expand",
+      "sha256": "d7b1e99b6ad4a266b7a02a0bcb2be0b59d39a4d73c2347865a644badc281563b",
+      "wall_seconds": 666.7541075721383
+    }
+  ],
+  "cache_reused": false,
+  "repeat_interrupted_utc": "2026-10-03T09:13:35.357886+00:00",
+  "original_first_closure_preserved_after_repeat": false,
+  "bug": "The old adapter cache rejected every symlink although official FreeSurfer 8.2 T1 pial placement creates hemi.pial -> hemi.pial.T1. The request identity remained identical; the adapter started a repeated owned reconstruction. Its first cold completion metadata and hashes are retained, while the partial repeated run is excluded from all timing tables.",
+  "fix": "Validate a non-symlink owned subject root and regular resolved files strictly inside that subject, with exact size and SHA-256; permit internal standard pial links. External/broken/root links, parent escapes, directory targets and changed bytes remain rejected.",
+  "original_software_source": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/scripts/recon-all",
+  "installed_original_pial_link_lines": [
+    4508,
+    4534
+  ],
+  "fixed_adapter_contract_tests": {
+    "passed": 31,
+    "seconds": 7.71,
+    "controls": [
+      "standard bilateral pial.T1 links reuse without new commands",
+      "external file",
+      "parent-directory escape",
+      "subject root link",
+      "broken target",
+      "directory target",
+      "changed internal bytes"
+    ],
+    "scope": "Small contract fixtures mock reconstruction only; they are regression tests and are excluded from benchmark."
+  }
+}

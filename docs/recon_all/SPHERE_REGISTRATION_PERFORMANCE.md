@@ -11,10 +11,10 @@ Python/PyTorch 移植；本轮优化计算方式和重复开销，没有改变�
 调度根据 `device` 选择平均后端；CUDA 使用明确的目标 GPU。`overlap_device`
 独立选择末尾清理设备；本页示例和配对验证保持它为 CPU。
 
-本页接口对应生产提交 **`c24852054f3321c1142b1ae88fa3d2bf68329bb3`**。
-阶段测试先后使用下面记录的不可变源码归档；当前相关生产源码与最终归档
-逐文件 SHA 相同。该提交从原始 T1 开始的新整例正在准备，尚无完成结果。
-已完成的 1b 整例继续作为冻结输入和精度基线，不代表 c248520 整例。
+本页阶段优化对照对应生产提交 **`c24852054f3321c1142b1ae88fa3d2bf68329bb3`**，
+使用下面记录的不可变源码归档；已完成的 1b 整例作为冻结输入和精度基线。
+后续 source1128 正式 CON07 的实际球面仍有残留负面，原记录与时钟均保留，
+其清理停止语义、判据、保存最终状态及脑图见[独立质量诊断](../../validation/fmri/public_ten_20261003/CON07_sphere_quality_diagnostic.md)。
 
 ```mermaid
 flowchart LR
@@ -189,6 +189,12 @@ Triton 3.1.0 已在主页 [Conda 环境](../../environment.yml) 声明，本轮�
   有序 `updates`、清理的 `negative_counts` 和包含读写的总耗时。
 - `total_seconds_including_io`：完整两遍配准、临时读写/删除及输出写出的秒数；
   子阶段时间已经包含其中。
+
+`negative_counts` 是每次清理更新之前的负面数量，不包含末次更新后的保存状态。
+source1128 CON07 的 LH `sphere`/`sphere.reg` 清理 history 均有 1001 项，
+最后更新前为 27/22，独立保存检查为 28/23；RH 最后一项为 1，但保存为 0。
+固定原软件在有限清理后允许剩余负面并返回成功；完整文件写出与几何质量通过
+分别记录，不将 history 的最后一项当作保存最终数量。
 
 `updates` 每项包含迭代编号、phase 或 stage、sigma、平均轮数、选中 `dt`、
 `next_state` 和秒数。`next_state` 是阶段/尺度/计数结构或 `None`。当前 API

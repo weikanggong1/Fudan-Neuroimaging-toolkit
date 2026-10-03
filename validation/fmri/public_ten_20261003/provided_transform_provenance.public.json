@@ -1,0 +1,173 @@
+{
+  "status": "passed",
+  "dataset": "OpenNeuro ds001226 v5.0.1 CC0",
+  "subject": "CON01",
+  "scope": "Read-only same-vertex proof of saved image-transform direction, with no fitted registration, MRI/surface modification or whole-pipeline benchmark.",
+  "oracle_source_provenance": {
+    "container_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+    "software_versions": {
+      "fmriprep": "25.2.4",
+      "smriprep": "0.19.2",
+      "niworkflows": "1.14.4",
+      "nitransforms": "25.1.0"
+    },
+    "inspection_scope": "Read-only inspection of installed source in the exact official-reference SIF; this verifier uses nibabel/NumPy rather than running those interfaces.",
+    "installed_source_sha256": {
+      "smriprep/workflows/surfaces.py": "17784d0bb26db872aaa5b43e7b54ab78b93932b557348b105d6d3f12bc8abe96",
+      "smriprep/workflows/outputs.py": "771f6b86738db77e9375e83e8ec93365da82f9abeffd088b4795b66bea3d0428",
+      "smriprep/interfaces/surf.py": "b65b68e66cac1d7eb31b4f4b67af03a9ce6b78cb7bf91a4190e7b8dc27b91a03",
+      "niworkflows/interfaces/nitransforms.py": "c51afbee61fc7d1439cbd1a2ab28681bf29c2e480c2c5d9406509d4dafa778bb",
+      "nitransforms/io/lta.py": "936952a1e4a9d4424ee1d6139ab9edf05fc712c157511bc6a37e9164327786ae",
+      "nitransforms/io/itk.py": "627a1e178b6a7c5e9181023d9d7b4bc47909ad28d7eae01db44e443498ac6551",
+      "nitransforms/linear.py": "325ef1010529ae876da35c01ef862874e881582ff20c9c7645046fedb8a9cd14"
+    },
+    "direction_evidence": [
+      {
+        "source": "smriprep/workflows/surfaces.py",
+        "lines": [
+          320,
+          328
+        ],
+        "meaning": "RobustRegister source is FreeSurfer T1.mgz; target is the native anatomical image."
+      },
+      {
+        "source": "smriprep/workflows/outputs.py",
+        "lines": [
+          668,
+          702
+        ],
+        "meaning": "ConcatenateXFMs converts that LTA, and out_xfm is saved as from-fsnative_to-T1w."
+      },
+      {
+        "source": "niworkflows/interfaces/nitransforms.py",
+        "lines": [
+          92,
+          109
+        ],
+        "meaning": "The LTA is loaded into NiTransforms, then written as ITK; the reverse file uses the inverse transform."
+      },
+      {
+        "source": "nitransforms/io/lta.py",
+        "lines": [
+          190,
+          222
+        ],
+        "meaning": "LTA loading inverts its RAS matrix to obtain the image-sampling pull transform."
+      },
+      {
+        "source": "nitransforms/io/itk.py",
+        "lines": [
+          85,
+          92,
+          178,
+          184
+        ],
+        "meaning": "ITK conversion changes LPS/RAS coordinates and applies a nonzero fixed center, without a direction inversion."
+      },
+      {
+        "source": "smriprep/interfaces/surf.py",
+        "lines": [
+          202,
+          211
+        ],
+        "meaning": "The saved transform is loaded and applied to scanner-RAS surface coordinates with inverse=True."
+      }
+    ],
+    "primary_links": [
+      "https://github.com/nipreps/smriprep/blob/0.19.2/src/smriprep/workflows/surfaces.py",
+      "https://github.com/nipreps/smriprep/blob/0.19.2/src/smriprep/workflows/outputs.py",
+      "https://github.com/nipreps/smriprep/blob/0.19.2/src/smriprep/interfaces/surf.py",
+      "https://github.com/nipreps/niworkflows/blob/1.14.4/niworkflows/interfaces/nitransforms.py",
+      "https://github.com/nipy/nitransforms/blob/25.1.0/nitransforms/io/lta.py",
+      "https://github.com/nipy/nitransforms/blob/25.1.0/nitransforms/io/itk.py"
+    ]
+  },
+  "reference_report_SIF_identity_verified": true,
+  "input_sha256_before": {
+    "reference_completed_report": "3927f8b93a9a4fae3c2e79c5646b297eb36052b6e3b3f40e7802776524953ddd",
+    "raw_T1w": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+    "preproc_T1w": "7af0e8e53f385dd582c9b09688d1e201fea882276001040fed5695c1b646124e",
+    "orig001": "f950295b63b2d828ee39839c562da0ce63f60a64edc58cee7b04ceebf62bab8c",
+    "orig": "64ab3f3d872e982c52ccf7de1eb42cf6a6a16013a2cb7917cc54a2bcabb93dda",
+    "fs_T1": "225d6557d43228cf8cf0d902edcbadf80c2c4b026271f00706fe68965e7b73ce",
+    "LTA": "e28b6a23323616e09680b33371ff7d10365426b5a5d6e3ae16d338292d6fe3cd",
+    "ITK_forward_named": "ed5008cfc37d2bfa0b9387eb060aa95a7bdfdaf622837933551a1d3230dea309",
+    "ITK_inverse_named": "e765e49341ae8b6b5b217f60a406b3e915e522b06752d4c6478bcaeb6cd3de0a",
+    "white_L": "417dca7d55fc3f4b439ebc7add3e380238a2f0e37dddef9b1fc3bc2cf042d829",
+    "GIFTI_L": "d2e849fafc18f5e605e38e3f0f01e73bd5c350c9f650027424d9cbda1154c8ca",
+    "white_R": "b0d4427aff1a9af9f8a4abd676e918ba315d132aeebccb0d7f14fcb048ef911e",
+    "GIFTI_R": "04e32aa45e40db60cb5c970bb51c82f244b64731c10a9158b5025939defe1b2e"
+  },
+  "input_sha256_after": {
+    "reference_completed_report": "3927f8b93a9a4fae3c2e79c5646b297eb36052b6e3b3f40e7802776524953ddd",
+    "raw_T1w": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+    "preproc_T1w": "7af0e8e53f385dd582c9b09688d1e201fea882276001040fed5695c1b646124e",
+    "orig001": "f950295b63b2d828ee39839c562da0ce63f60a64edc58cee7b04ceebf62bab8c",
+    "orig": "64ab3f3d872e982c52ccf7de1eb42cf6a6a16013a2cb7917cc54a2bcabb93dda",
+    "fs_T1": "225d6557d43228cf8cf0d902edcbadf80c2c4b026271f00706fe68965e7b73ce",
+    "LTA": "e28b6a23323616e09680b33371ff7d10365426b5a5d6e3ae16d338292d6fe3cd",
+    "ITK_forward_named": "ed5008cfc37d2bfa0b9387eb060aa95a7bdfdaf622837933551a1d3230dea309",
+    "ITK_inverse_named": "e765e49341ae8b6b5b217f60a406b3e915e522b06752d4c6478bcaeb6cd3de0a",
+    "white_L": "417dca7d55fc3f4b439ebc7add3e380238a2f0e37dddef9b1fc3bc2cf042d829",
+    "GIFTI_L": "d2e849fafc18f5e605e38e3f0f01e73bd5c350c9f650027424d9cbda1154c8ca",
+    "white_R": "b0d4427aff1a9af9f8a4abd676e918ba315d132aeebccb0d7f14fcb048ef911e",
+    "GIFTI_R": "04e32aa45e40db60cb5c970bb51c82f244b64731c10a9158b5025939defe1b2e"
+  },
+  "input_sha_guards_equal": true,
+  "verifier_sha256": "4b93e296841d36e67b0cc8ac3a4601c2a4a37afa4ee575d11378fc5ecb91b09b",
+  "verifier_sha_guard_equal": true,
+  "source_T1_and_orig_scanner_affine_max_abs": 0.0,
+  "canonical_raw_preproc_same_shape": true,
+  "canonical_raw_orig001_same_shape": true,
+  "canonical_raw_preproc_affine_max_abs": 1.1641532182693481e-10,
+  "canonical_raw_orig001_affine_max_abs": 1.1641532182693481e-10,
+  "orig001_vs_raw_pixel_max_abs": 201.46661376953125,
+  "orig001_vs_preproc_pixel_max_abs": 2433.9793090820312,
+  "itk_named_from_fsnative_to_T1w_semantics": "T1w scanner-RAS to FreeSurfer scanner-RAS pull map after LPS conversion",
+  "fnit_required_forward_scanner_ras_matrix": [
+    [
+      0.9999998720963952,
+      -7.610725281188762e-05,
+      0.00034944721498602395,
+      0.03446961883732985
+    ],
+    [
+      7.589410993196028e-05,
+      0.9999996172311001,
+      0.0006140103011004905,
+      0.020980802560774885
+    ],
+    [
+      -0.0003494875453737789,
+      -0.0006139841899158582,
+      0.9999995008797278,
+      -0.026580827072368564
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "itk_bidirectional_inverse_max_abs": 4.991206332682907e-07,
+  "lta_forward_vs_converted_inverse_itk_max_abs": 2.6355961035839925e-07,
+  "hemisphere_coordinate_proof": {
+    "L": {
+      "vertices": 142173,
+      "face_order_exact": true,
+      "forward_candidate_vs_official_gifti_max_abs_mm": 8.039391758529746e-06,
+      "forward_candidate_vs_official_gifti_mean_euclidean_mm": 1.6683404504330453e-06,
+      "wrong_uninverted_pull_vs_official_gifti_max_abs_mm": 0.15906830531110083,
+      "wrong_uninverted_pull_vs_official_gifti_mean_euclidean_mm": 0.09887075095473861
+    },
+    "R": {
+      "vertices": 148403,
+      "face_order_exact": true,
+      "forward_candidate_vs_official_gifti_max_abs_mm": 7.92995518850148e-06,
+      "forward_candidate_vs_official_gifti_mean_euclidean_mm": 1.5714166149514234e-06,
+      "wrong_uninverted_pull_vs_official_gifti_max_abs_mm": 0.17749870460144912,
+      "wrong_uninverted_pull_vs_official_gifti_mean_euclidean_mm": 0.11617336043276344
+    }
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "status": "complete",
+  "dataset": "OpenNeuro ds001226 v5.0.1 CC0",
+  "subject": "CON01",
+  "backend": "freesurfer",
+  "source_revision": "1128bc52c7a0233266e5b8a8d7dc0b382994e676",
+  "requested_device": "cuda:0",
+  "actual_reconstruction_device": "cpu",
+  "cpu_threads": 4,
+  "torch_version": "2.5.1",
+  "torch_cuda_available": false,
+  "torch_cuda_device_count": 0,
+  "cuda_visible_devices": "",
+  "allocator_flag_present": false,
+  "validation_helper_sha256": "7cf5ef33c17af14e55a776ec1ff539718552e2c948a6e1575ba0b5f95a940db9",
+  "runner_sha256": "79abebb28fc98ea4c14199b6c1f85cc74a86e4d0319ddbba3e668ee73b7093f2",
+  "actual_fnit_source_identity_verified": true,
+  "raw_t1w_sha256_before": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+  "scope": "One fresh explicit official recon-all -all from the original public T1w, plus real thickness-based middle generation and adapter validation. Exact-request cache lookup is timed separately. This CPU preparation excludes BOLD volume and downstream full surface API; queue and package imports are outside adapter wall.",
+  "adapter_cold_wall_seconds": 6390.436483174562,
+  "adapter_timing_seconds": {
+    "reconstruction_seconds": 4742.234953165054,
+    "pre_middle_validation_seconds": 0.6023847386240959,
+    "middle_seconds": 1647.3802112787962,
+    "final_validation_seconds": 0.1909782588481903,
+    "whole_seconds": 6390.431957423687
+  },
+  "adapter_producer": {
+    "fmri/surface_reconstruction.py": "26da1681679190a0bdb4b86ba99ec7b42260301ec10a159da3020b88edeb538b"
+  },
+  "closure": {
+    "mri/orig.mgz": {
+      "size": 4834576,
+      "sha256": "4802ba8580320fdf9e46ca79bdc6bea8f6e85395a7aee24ff59d806b634605b9"
+    },
+    "mri/orig/001.mgz": {
+      "size": 6892346,
+      "sha256": "2f5811083afeec1d1d721aedbeefd78674dabdd329572528c6d0b6f7272e7308"
+    },
+    "surf/lh.graymid": {
+      "size": 5102074,
+      "sha256": "22890b6b108a82b18c62928dcb21097ec9fd97f3351da5865edba27244d904a8"
+    },
+    "surf/lh.pial": {
+      "size": 5102074,
+      "sha256": "87a9e336fec041566f0c79d3b06ecb032c068b9471a3a8e241c7f728e92cf935"
+    },
+    "surf/lh.sphere": {
+      "size": 5103328,
+      "sha256": "bc7c460c8450367ba66e8f4989ab509f5d77f5a6e2c53acb2d311987cef4cb83"
+    },
+    "surf/lh.sphere.reg": {
+      "size": 5104137,
+      "sha256": "27d63c112539a58f6291fb6275b5f43af8471741193603e82ea3387406826de5"
+    },
+    "surf/lh.sulc": {
+      "size": 566767,
+      "sha256": "9976884102e1ccd6649d390889b90ed53281de424642a16da6772ce9c32d4f77"
+    },
+    "surf/lh.thickness": {
+      "size": 566767,
+      "sha256": "d65343676fd86b72fc217b3944e0801cb0634ceeb2f7eda93376a3218ff8ce65"
+    },
+    "surf/lh.white": {
+      "size": 5102074,
+      "sha256": "a94941dfc59637ec4c4a6219bb9ef5887f2fcebca6782c4f6cdcc5dfe899c767"
+    },
+    "surf/rh.graymid": {
+      "size": 5333086,
+      "sha256": "5fa29549347bd6b1848cbb36580299578e08b83197e7dd71e9637b9c09c4d444"
+    },
+    "surf/rh.pial": {
+      "size": 5333086,
+      "sha256": "8a47c3153c1dafd0d7265bff0b2520e800e8d5611f1642c637f7e583e4c7e543"
+    },
+    "surf/rh.sphere": {
+      "size": 5334340,
+      "sha256": "305b7a350abd59edd0db4bac030549a4a4e26c79fcbc279de93e2d7e2ba2b5a6"
+    },
+    "surf/rh.sphere.reg": {
+      "size": 5335149,
+      "sha256": "ee81c751e770b1c248562b992a5292ff54e672d265b4c8e27a44521bd4dee7f5"
+    },
+    "surf/rh.sulc": {
+      "size": 592435,
+      "sha256": "a64f7631f0228a9eda82fe15448ece432c0e763e9d1629f7434f759245f9d092"
+    },
+    "surf/rh.thickness": {
+      "size": 592435,
+      "sha256": "f6d675648c7a54c84069e5dc295bc559b5ad13fda64667a13a28b1af8df5c47f"
+    },
+    "surf/rh.white": {
+      "size": 5333086,
+      "sha256": "7be03a030ebbc320535a877d595a6b8ed13171fe550e624383847e438a3342dd"
+    }
+  },
+  "commands": [
+    {
+      "program": "recon-all",
+      "sha256": "55410a0dc005237f99a1a35fb5d41c4e1994b3ae189ca9232a59b87034f86415",
+      "wall_seconds": 4742.234953165054
+    },
+    {
+      "program": "mris_expand",
+      "sha256": "d7b1e99b6ad4a266b7a02a0bcb2be0b59d39a4d73c2347865a644badc281563b",
+      "wall_seconds": 921.0258720070124
+    },
+    {
+      "program": "mris_expand",
+      "sha256": "d7b1e99b6ad4a266b7a02a0bcb2be0b59d39a4d73c2347865a644badc281563b",
+      "wall_seconds": 726.3540379479527
+    }
+  ],
+  "cache_reused": true,
+  "cache_lookup_seconds": 0.912131242454052,
+  "raw_t1w_sha256_after": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+  "raw_input_guard_equal": true,
+  "frozen_source_guard_equal": true,
+  "validation_helper_guard_equal": true,
+  "runner_guard_equal": true,
+  "driver_seconds_excluding_import": 6391.443974554539
+}

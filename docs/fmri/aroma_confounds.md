@@ -162,6 +162,8 @@ fsl_regfilt -i filtered_func_data.nii.gz -d melodic_mix \
 
 ## 最近版本与 benchmark 记录
 
+2026-10-03 自动 volume 接入发现并修复标准模板存储方向问题：原 ICA-AROMA 掩膜采用 LAS，而安装器提供的已验证 TemplateFlow T1w 采用 RAS。volume 现在仅对同一物理网格执行精确轴置换／翻转，保持原掩膜的 dtype、体素值与世界坐标；不做插值，物理网格不同仍报错。原 LAS 输入保持既有路径和算法。三张真实原掩膜的反向恢复逐值检查通过；十人完整流程的分类精度和耗时另在[整例验证](../../validation/fmri/public_ten_20261003/README.md)报告，不用这项输入检查代替 benchmark。
+
 | 版本/记录 | 变化与保留范围 |
 |---|---|
 | 2026-10-02 文档整理 | 按当前输入/输出与七节结构统一说明，保留原生/MNI 分类、可选回归和真实误差；不改变重采样或统计定义。 |

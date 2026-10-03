@@ -1,0 +1,1047 @@
+{
+  "schema_version": 1,
+  "dataset": "OpenNeuro ds001226 BTC_preop",
+  "dataset_doi": "doi:10.18112/openneuro.ds001226.v5.0.1",
+  "license": "CC0",
+  "upstream_git_commit": "359d372c5e972a161966312128adb365870df949",
+  "dataset_description": {
+    "relative_path": "dataset_description.json",
+    "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/dataset_description.json",
+    "bytes": 1209,
+    "sha256": "84185f9c387ae232ddbe87e20b329bacf82b9b5dafe9bde63b64c9bc78bed6f2",
+    "md5": "cd686a690fbbea7af7475eeaa301ede4"
+  },
+  "official_readme": {
+    "relative_path": "README",
+    "source_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/README",
+    "bytes": 3145,
+    "sha256": "fbb3e2e1b00d699835badc0bbda1296f9a90f2995117d93ba3123bd2f8e2d0bb",
+    "md5": "94fc0e787c99a9811993bc72f64ded36"
+  },
+  "selected_subjects": [
+    "CON01",
+    "CON03",
+    "CON04",
+    "CON05",
+    "CON06",
+    "CON07",
+    "CON08",
+    "CON09",
+    "CON10",
+    "CON11"
+  ],
+  "selection": {
+    "description": "Reuse the 10 healthy-control subject labels in the existing FNIT public connectome cohort.",
+    "excluded_subjects": [
+      "CON02"
+    ],
+    "CON02_exclusion_reason": "The earlier dMRI cohort excluded CON02 because its AP j-/PA i- world phase-encoding directions are nearly orthogonal (dot product -1.913485687e-8) and added CON11. This fMRI cohort preserves those same ten subject labels; this is not an exclusion based on T1w or BOLD quality.",
+    "CON02_exclusion_evidence": [
+      "docs/connectome/bids_preparation_20261002.md:30",
+      "validation/connectome/tenraw_20261002/task_01/README.md:7",
+      "validation/connectome/tenraw_20261002/task_01/download_new_raw.py:194"
+    ]
+  },
+  "acquisition_scope": "One matched original T1w and full original resting-state BOLD per subject, with original JSON sidecars; no volume trimming.",
+  "subjects": [
+    {
+      "subject": "CON01",
+      "T1w": {
+        "relative_path": "sub-CON01/ses-preop/anat/sub-CON01_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON01/ses-preop/anat/sub-CON01_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 6887418,
+          "md5": "a0eb59fda403f9808b0da4cc62e4a9b8",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON01/ses-preop/anat/sub-CON01_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 6887418,
+        "sha256": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+        "md5": "a0eb59fda403f9808b0da4cc62e4a9b8",
+        "shape": [
+          144,
+          256,
+          256
+        ],
+        "zooms": [
+          1.0000003576278687,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "a0eb59fda403f9808b0da4cc62e4a9b8"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON01/ses-preop/anat/sub-CON01_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON01/ses-preop/anat/sub-CON01_ses-preop_T1w.json",
+        "bytes": 902,
+        "sha256": "4fcd56ba07e48a1801cdac69a46b11e2a5fe5e4aef72ac9e088b1d6fcdf0d0c2",
+        "md5": "774d72931689ed12d3fbaf86704d1d0f",
+        "s3_etag": "774d72931689ed12d3fbaf86704d1d0f",
+        "metadata": {
+          "RepetitionTime": 1.59,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON01/ses-preop/func/sub-CON01_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON01/ses-preop/func/sub-CON01_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 37225220,
+          "md5": "b640c7f62709e4bdd2577b175d220d61",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON01/ses-preop/func/sub-CON01_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 37225220,
+        "sha256": "606b93257c4b14dceb5e681f741a2d5694c10f989714312d247a9104f1dd4acb",
+        "md5": "b640c7f62709e4bdd2577b175d220d61",
+        "shape": [
+          64,
+          64,
+          42,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.3000001907348633,
+          2.0999999046325684
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "b640c7f62709e4bdd2577b175d220d61",
+        "header_repetition_time_seconds": 2.0999999046325684,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON01/ses-preop/func/sub-CON01_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON01/ses-preop/func/sub-CON01_ses-preop_task-rest_bold.json",
+        "bytes": 1448,
+        "sha256": "4989e03f52d94ecbb884c2546819fb791390d1ec4783b2ffa5604a1bed794457",
+        "md5": "ceca3145f53245dedd83c9dbc1c938b8",
+        "s3_etag": "ceca3145f53245dedd83c9dbc1c938b8",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.1,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.01464
+        },
+        "slice_timing_count": 42
+      },
+      "repetition_time_seconds": 2.1,
+      "complete_original_frames": 180
+    },
+    {
+      "subject": "CON03",
+      "T1w": {
+        "relative_path": "sub-CON03/ses-preop/anat/sub-CON03_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON03/ses-preop/anat/sub-CON03_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 7138339,
+          "md5": "b692b814075cb531c8c59934de305b03",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON03/ses-preop/anat/sub-CON03_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 7138339,
+        "sha256": "bf0a72d3f17781d2a178b629b72563b4b1423c52b7866fa88e5ae393f97b6f81",
+        "md5": "b692b814075cb531c8c59934de305b03",
+        "shape": [
+          160,
+          256,
+          256
+        ],
+        "zooms": [
+          1.0000004768371582,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "b692b814075cb531c8c59934de305b03"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON03/ses-preop/anat/sub-CON03_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON03/ses-preop/anat/sub-CON03_ses-preop_T1w.json",
+        "bytes": 910,
+        "sha256": "77b9330905ce69303ff30b0492aa184dc1c997aa63e8c35812aff4df74015dae",
+        "md5": "d817544ffc14af3f91d12f5049b90a60",
+        "s3_etag": "d817544ffc14af3f91d12f5049b90a60",
+        "metadata": {
+          "RepetitionTime": 1.7,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON03/ses-preop/func/sub-CON03_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON03/ses-preop/func/sub-CON03_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 37650675,
+          "md5": "e076fec7438bb3140bb53b4507b97955",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON03/ses-preop/func/sub-CON03_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 37650675,
+        "sha256": "b8a3dea34c3d138d84fb0f9d47ea505c44461e4098c869fde2e3145ac9930599",
+        "md5": "e076fec7438bb3140bb53b4507b97955",
+        "shape": [
+          64,
+          64,
+          42,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.299999952316284,
+          2.0999999046325684
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "e076fec7438bb3140bb53b4507b97955",
+        "header_repetition_time_seconds": 2.0999999046325684,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON03/ses-preop/func/sub-CON03_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON03/ses-preop/func/sub-CON03_ses-preop_task-rest_bold.json",
+        "bytes": 1447,
+        "sha256": "194d8cea817c8f443d1ff7026f6499940caec3f789c0a4077f907d4f1ed42ea5",
+        "md5": "65bd526e959aeb2a26240e6bd787fc23",
+        "s3_etag": "65bd526e959aeb2a26240e6bd787fc23",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.1,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.01464
+        },
+        "slice_timing_count": 42
+      },
+      "repetition_time_seconds": 2.1,
+      "complete_original_frames": 180
+    },
+    {
+      "subject": "CON04",
+      "T1w": {
+        "relative_path": "sub-CON04/ses-preop/anat/sub-CON04_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON04/ses-preop/anat/sub-CON04_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 6988515,
+          "md5": "194f2dc283421174feae79ab141062f5",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON04/ses-preop/anat/sub-CON04_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 6988515,
+        "sha256": "a2cc3339da4f6f3d2ceb2ceb777645c8a96376f02fae35994fa688d54b3172e4",
+        "md5": "194f2dc283421174feae79ab141062f5",
+        "shape": [
+          160,
+          256,
+          256
+        ],
+        "zooms": [
+          0.9999991655349731,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "194f2dc283421174feae79ab141062f5"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON04/ses-preop/anat/sub-CON04_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON04/ses-preop/anat/sub-CON04_ses-preop_T1w.json",
+        "bytes": 911,
+        "sha256": "71b80dc03f98d4ba09ef47190709c17b39fca99a9ed6a463b7296e48b77b5f84",
+        "md5": "ab60ae72f8efde608981ce4ae3095b67",
+        "s3_etag": "ab60ae72f8efde608981ce4ae3095b67",
+        "metadata": {
+          "RepetitionTime": 1.75,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON04/ses-preop/func/sub-CON04_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON04/ses-preop/func/sub-CON04_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 36119478,
+          "md5": "0cec152748282d3d59e4d8cbed8b273e",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON04/ses-preop/func/sub-CON04_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 36119478,
+        "sha256": "d3e85d1a46294c1b20114676175d1a22c6af466a54949800422e6dd75bd397b1",
+        "md5": "0cec152748282d3d59e4d8cbed8b273e",
+        "shape": [
+          64,
+          64,
+          42,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.299999952316284,
+          2.0999999046325684
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "0cec152748282d3d59e4d8cbed8b273e",
+        "header_repetition_time_seconds": 2.0999999046325684,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON04/ses-preop/func/sub-CON04_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON04/ses-preop/func/sub-CON04_ses-preop_task-rest_bold.json",
+        "bytes": 1454,
+        "sha256": "a71fc4b7f696486117349c67123e18703d646a58ecdcbf442c9439df56be09c7",
+        "md5": "a912c989cf053d88f630f8bffcbab19a",
+        "s3_etag": "a912c989cf053d88f630f8bffcbab19a",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.1,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.01464
+        },
+        "slice_timing_count": 42
+      },
+      "repetition_time_seconds": 2.1,
+      "complete_original_frames": 180
+    },
+    {
+      "subject": "CON05",
+      "T1w": {
+        "relative_path": "sub-CON05/ses-preop/anat/sub-CON05_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON05/ses-preop/anat/sub-CON05_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 7871825,
+          "md5": "7dd69b153d15bd738602129fa50ca104",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON05/ses-preop/anat/sub-CON05_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 7871825,
+        "sha256": "0189151160abe4bece3c09cc350d76a4192cb8bdaeba90ca4f2077a18033a729",
+        "md5": "7dd69b153d15bd738602129fa50ca104",
+        "shape": [
+          160,
+          256,
+          256
+        ],
+        "zooms": [
+          0.9999991655349731,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "7dd69b153d15bd738602129fa50ca104"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON05/ses-preop/anat/sub-CON05_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON05/ses-preop/anat/sub-CON05_ses-preop_T1w.json",
+        "bytes": 911,
+        "sha256": "058c670080a3b22e557c6710edd53b3b72cf40865d419e44f8e7d9bee4009318",
+        "md5": "10b975a12de521bb428c8ba5a7e89a52",
+        "s3_etag": "10b975a12de521bb428c8ba5a7e89a52",
+        "metadata": {
+          "RepetitionTime": 1.75,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 39418295,
+          "md5": "85d63a389da6a2bb9551856cf8c9f24b",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 39418295,
+        "sha256": "1a8930be7c923de7a032f7c4d37db3d47b1097914998e80078ba9fa6b7ab4b14",
+        "md5": "85d63a389da6a2bb9551856cf8c9f24b",
+        "shape": [
+          64,
+          64,
+          42,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.0,
+          2.4000000953674316
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "85d63a389da6a2bb9551856cf8c9f24b",
+        "header_repetition_time_seconds": 2.4000000953674316,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON05/ses-preop/func/sub-CON05_ses-preop_task-rest_bold.json",
+        "bytes": 1475,
+        "sha256": "c7fdeb73c84e87d118416ac511399511545ee8fa5e65b67e3b001170bbd0922e",
+        "md5": "f211c0ff2bccf422b96dbec6186132af",
+        "s3_etag": "f211c0ff2bccf422b96dbec6186132af",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.4,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.0216561
+        },
+        "slice_timing_count": 42
+      },
+      "repetition_time_seconds": 2.4,
+      "complete_original_frames": 180
+    },
+    {
+      "subject": "CON06",
+      "T1w": {
+        "relative_path": "sub-CON06/ses-preop/anat/sub-CON06_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON06/ses-preop/anat/sub-CON06_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 7596244,
+          "md5": "dc32c3f091223ef830b6b477723d42cd",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON06/ses-preop/anat/sub-CON06_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 7596244,
+        "sha256": "4fdf03a4b695831657a47eb11f6775ec0c37700caa350cc4adb052037436b9d9",
+        "md5": "dc32c3f091223ef830b6b477723d42cd",
+        "shape": [
+          160,
+          256,
+          256
+        ],
+        "zooms": [
+          0.9999973177909851,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "dc32c3f091223ef830b6b477723d42cd"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON06/ses-preop/anat/sub-CON06_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON06/ses-preop/anat/sub-CON06_ses-preop_T1w.json",
+        "bytes": 911,
+        "sha256": "613cb9dbe88f1db980903ad73601c89ed2fe9f9396c7c8a677610fd261815830",
+        "md5": "aab3d0bc9b7e28db17cd240e61f845c9",
+        "s3_etag": "aab3d0bc9b7e28db17cd240e61f845c9",
+        "metadata": {
+          "RepetitionTime": 1.75,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON06/ses-preop/func/sub-CON06_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON06/ses-preop/func/sub-CON06_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 38818778,
+          "md5": "9f4928dc7ba6fb355abab216d0775809",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON06/ses-preop/func/sub-CON06_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 38818778,
+        "sha256": "a35de6dd606126680f6489ba4fbb46d81d9e7d0cbe6ac8d08b862d638cb5dacd",
+        "md5": "9f4928dc7ba6fb355abab216d0775809",
+        "shape": [
+          64,
+          64,
+          42,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.0,
+          2.4000000953674316
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "9f4928dc7ba6fb355abab216d0775809",
+        "header_repetition_time_seconds": 2.4000000953674316,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON06/ses-preop/func/sub-CON06_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON06/ses-preop/func/sub-CON06_ses-preop_task-rest_bold.json",
+        "bytes": 1469,
+        "sha256": "15694f1cbdb9eb3693d210794c267dda84c5a14f61e3161a12f5964fe793d1af",
+        "md5": "e520cbeae11c62fb5aba3d8220995f5c",
+        "s3_etag": "e520cbeae11c62fb5aba3d8220995f5c",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.4,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.01464
+        },
+        "slice_timing_count": 42
+      },
+      "repetition_time_seconds": 2.4,
+      "complete_original_frames": 180
+    },
+    {
+      "subject": "CON07",
+      "T1w": {
+        "relative_path": "sub-CON07/ses-preop/anat/sub-CON07_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON07/ses-preop/anat/sub-CON07_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 7504069,
+          "md5": "dd3f568439bdbac3a83b4b1e4f8def70",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON07/ses-preop/anat/sub-CON07_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 7504069,
+        "sha256": "11fd6ba345b8eccfc6fc57c58a05c8edb3cb2464644901bd6210c78c9ac86aa7",
+        "md5": "dd3f568439bdbac3a83b4b1e4f8def70",
+        "shape": [
+          160,
+          256,
+          256
+        ],
+        "zooms": [
+          0.9999997615814209,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "dd3f568439bdbac3a83b4b1e4f8def70"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON07/ses-preop/anat/sub-CON07_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON07/ses-preop/anat/sub-CON07_ses-preop_T1w.json",
+        "bytes": 911,
+        "sha256": "2ebe614f465cdf88c8a454a1086deaa83b2221a644676a96d7082a756a751aa0",
+        "md5": "dbe0d8c0ad009ac62301a0be40e8c73f",
+        "s3_etag": "dbe0d8c0ad009ac62301a0be40e8c73f",
+        "metadata": {
+          "RepetitionTime": 1.75,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON07/ses-preop/func/sub-CON07_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON07/ses-preop/func/sub-CON07_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 38547519,
+          "md5": "9546387b99003dfd1a5e813170cc95c9",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON07/ses-preop/func/sub-CON07_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 38547519,
+        "sha256": "fcca88667db4b0e4b540cf46a4a93ff60644c28093c4e777cd7e75633746cf18",
+        "md5": "9546387b99003dfd1a5e813170cc95c9",
+        "shape": [
+          64,
+          64,
+          42,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.0,
+          2.4000000953674316
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "9546387b99003dfd1a5e813170cc95c9",
+        "header_repetition_time_seconds": 2.4000000953674316,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON07/ses-preop/func/sub-CON07_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON07/ses-preop/func/sub-CON07_ses-preop_task-rest_bold.json",
+        "bytes": 1470,
+        "sha256": "5bc9951975e13dc696ddf6c9d81beb716af6f3e45513f9325cc40ef7520e066b",
+        "md5": "bcb9d9955536823d873e1f8d7b158cd0",
+        "s3_etag": "bcb9d9955536823d873e1f8d7b158cd0",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.4,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.01464
+        },
+        "slice_timing_count": 42
+      },
+      "repetition_time_seconds": 2.4,
+      "complete_original_frames": 180
+    },
+    {
+      "subject": "CON08",
+      "T1w": {
+        "relative_path": "sub-CON08/ses-preop/anat/sub-CON08_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON08/ses-preop/anat/sub-CON08_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 7709809,
+          "md5": "62fa0dd3bb01c7808d120509169b0b1f",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON08/ses-preop/anat/sub-CON08_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 7709809,
+        "sha256": "2cf6d2f2afc65cb7e87ef68ac95a645387ab5c397f93e080a6b25ac485b810b6",
+        "md5": "62fa0dd3bb01c7808d120509169b0b1f",
+        "shape": [
+          160,
+          256,
+          256
+        ],
+        "zooms": [
+          0.9999976754188538,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "62fa0dd3bb01c7808d120509169b0b1f"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON08/ses-preop/anat/sub-CON08_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON08/ses-preop/anat/sub-CON08_ses-preop_T1w.json",
+        "bytes": 902,
+        "sha256": "6afda0214aa2f770e25118309fa2fe204bbddb23d759a12b56ebbd50c214f192",
+        "md5": "52d98335e6969806fb848e7de2fe8e62",
+        "s3_etag": "52d98335e6969806fb848e7de2fe8e62",
+        "metadata": {
+          "RepetitionTime": 1.75,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON08/ses-preop/func/sub-CON08_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON08/ses-preop/func/sub-CON08_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 38041644,
+          "md5": "8348a9deeb43cbe29fe743ffddd78ce4",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON08/ses-preop/func/sub-CON08_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 38041644,
+        "sha256": "24f4c4547182eb8267a455cfbee24593564e96ca97160da58037bbc7bbcbdd4b",
+        "md5": "8348a9deeb43cbe29fe743ffddd78ce4",
+        "shape": [
+          64,
+          64,
+          42,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.0,
+          2.4000000953674316
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "8348a9deeb43cbe29fe743ffddd78ce4",
+        "header_repetition_time_seconds": 2.4000000953674316,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON08/ses-preop/func/sub-CON08_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON08/ses-preop/func/sub-CON08_ses-preop_task-rest_bold.json",
+        "bytes": 1460,
+        "sha256": "671c9bfc8f8db67d9a6e0740d8b2bff92706ad8308f2e43d973611f70b1579cc",
+        "md5": "c532b300fd8fcc5c8b2c3b19d0dce692",
+        "s3_etag": "c532b300fd8fcc5c8b2c3b19d0dce692",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.4,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.01464
+        },
+        "slice_timing_count": 42
+      },
+      "repetition_time_seconds": 2.4,
+      "complete_original_frames": 180
+    },
+    {
+      "subject": "CON09",
+      "T1w": {
+        "relative_path": "sub-CON09/ses-preop/anat/sub-CON09_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON09/ses-preop/anat/sub-CON09_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 7889426,
+          "md5": "f0e50b356ef3a15837a13e1163858bf3",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON09/ses-preop/anat/sub-CON09_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 7889426,
+        "sha256": "6559a4bb00a2b3fcd82f2bd04bb4bdb8ba9db96d515fe78f93478b39ccfb26c0",
+        "md5": "f0e50b356ef3a15837a13e1163858bf3",
+        "shape": [
+          160,
+          256,
+          256
+        ],
+        "zooms": [
+          0.9999979138374329,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "f0e50b356ef3a15837a13e1163858bf3"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON09/ses-preop/anat/sub-CON09_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON09/ses-preop/anat/sub-CON09_ses-preop_T1w.json",
+        "bytes": 911,
+        "sha256": "c8cdcccd218c9a7bf6b8f35e4c927a41d0c67c4ea7ba65f35f10e0c5779ed7a9",
+        "md5": "ccc3bd31e2ad2adad53e94b16db910ef",
+        "s3_etag": "ccc3bd31e2ad2adad53e94b16db910ef",
+        "metadata": {
+          "RepetitionTime": 1.75,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON09/ses-preop/func/sub-CON09_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON09/ses-preop/func/sub-CON09_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 41817630,
+          "md5": "0be1fed6e4b63a1b3bd26833539ec366",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON09/ses-preop/func/sub-CON09_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 41817630,
+        "sha256": "eeb3e2a96db5212803741712958896cde1105e8af94cd54af7e0f627568cb581",
+        "md5": "0be1fed6e4b63a1b3bd26833539ec366",
+        "shape": [
+          64,
+          64,
+          46,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.0,
+          2.4000000953674316
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "0be1fed6e4b63a1b3bd26833539ec366",
+        "header_repetition_time_seconds": 2.4000000953674316,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON09/ses-preop/func/sub-CON09_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON09/ses-preop/func/sub-CON09_ses-preop_task-rest_bold.json",
+        "bytes": 1511,
+        "sha256": "24be2a730d8cd75090812202d7638cf2f1d289c009fa512738d4545a720af5ea",
+        "md5": "7e1acd5ad9647458c833570fa012f19e",
+        "s3_etag": "7e1acd5ad9647458c833570fa012f19e",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.4,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.0231001
+        },
+        "slice_timing_count": 46
+      },
+      "repetition_time_seconds": 2.4,
+      "complete_original_frames": 180
+    },
+    {
+      "subject": "CON10",
+      "T1w": {
+        "relative_path": "sub-CON10/ses-preop/anat/sub-CON10_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON10/ses-preop/anat/sub-CON10_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 7966319,
+          "md5": "3bb1850bd3df07a78bd394450b96ca28",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON10/ses-preop/anat/sub-CON10_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 7966319,
+        "sha256": "8426862e3b867c8054ca18713651f74bd87663e8fbac02c4ebf4a54d23780813",
+        "md5": "3bb1850bd3df07a78bd394450b96ca28",
+        "shape": [
+          160,
+          256,
+          256
+        ],
+        "zooms": [
+          0.9999972581863403,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "3bb1850bd3df07a78bd394450b96ca28"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON10/ses-preop/anat/sub-CON10_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON10/ses-preop/anat/sub-CON10_ses-preop_T1w.json",
+        "bytes": 906,
+        "sha256": "6e100c0fed6c4635f6e7a79259201655a6e70b401595eff8129c5dfb725326d2",
+        "md5": "8824f8022fcef816275099ea34f07724",
+        "s3_etag": "8824f8022fcef816275099ea34f07724",
+        "metadata": {
+          "RepetitionTime": 1.75,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON10/ses-preop/func/sub-CON10_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON10/ses-preop/func/sub-CON10_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 39643667,
+          "md5": "d6a905ba3f048ee7b5c478837e9ee407",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON10/ses-preop/func/sub-CON10_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 39643667,
+        "sha256": "d5d19e9934c730f1231b5765e10c78c3910a9c619146b4dbcf5b0151ff6da430",
+        "md5": "d6a905ba3f048ee7b5c478837e9ee407",
+        "shape": [
+          64,
+          64,
+          42,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.0,
+          2.4000000953674316
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "d6a905ba3f048ee7b5c478837e9ee407",
+        "header_repetition_time_seconds": 2.4000000953674316,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON10/ses-preop/func/sub-CON10_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON10/ses-preop/func/sub-CON10_ses-preop_task-rest_bold.json",
+        "bytes": 1463,
+        "sha256": "1087f9c5854a5b96fc31351bdabc28c64983e31c22e3a3a035b5f905dfa4555a",
+        "md5": "f19bee328bfe229ae2b139fbba8994c6",
+        "s3_etag": "f19bee328bfe229ae2b139fbba8994c6",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.4,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.01464
+        },
+        "slice_timing_count": 42
+      },
+      "repetition_time_seconds": 2.4,
+      "complete_original_frames": 180
+    },
+    {
+      "subject": "CON11",
+      "T1w": {
+        "relative_path": "sub-CON11/ses-preop/anat/sub-CON11_ses-preop_T1w.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON11/ses-preop/anat/sub-CON11_ses-preop_T1w.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 7643134,
+          "md5": "4c09b313e36da222eeb78be6a176b405",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON11/ses-preop/anat/sub-CON11_ses-preop_T1w.nii.gz"
+        },
+        "acquisition": "copied_existing_T1w_after_official_size_md5_verification",
+        "bytes": 7643134,
+        "sha256": "84f2ec0f1b68931fb449308e8e16a83f04f9374d8215ee55331e59c6fa3b9b18",
+        "md5": "4c09b313e36da222eeb78be6a176b405",
+        "shape": [
+          160,
+          256,
+          256
+        ],
+        "zooms": [
+          0.9999997019767761,
+          1.0,
+          1.0
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "4c09b313e36da222eeb78be6a176b405"
+      },
+      "T1w_json": {
+        "relative_path": "sub-CON11/ses-preop/anat/sub-CON11_ses-preop_T1w.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON11/ses-preop/anat/sub-CON11_ses-preop_T1w.json",
+        "bytes": 906,
+        "sha256": "155a34ff79b0766ecaf712062435d4bd384c0e71c8e534ca8d2f2c458b0ce40e",
+        "md5": "dc476e34e8e3ff746759300eeceeb3fc",
+        "s3_etag": "dc476e34e8e3ff746759300eeceeb3fc",
+        "metadata": {
+          "RepetitionTime": 1.75,
+          "EchoTime": 0.00418,
+          "PhaseEncodingDirection": "i-"
+        },
+        "slice_timing_count": 0
+      },
+      "BOLD": {
+        "relative_path": "sub-CON11/ses-preop/func/sub-CON11_ses-preop_task-rest_bold.nii.gz",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON11/ses-preop/func/sub-CON11_ses-preop_task-rest_bold.nii.gz",
+        "upstream_git_annex": {
+          "bytes": 37003252,
+          "md5": "53f25748b89ced82e715b669732d30fe",
+          "pointer_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds001226/359d372c5e972a161966312128adb365870df949/sub-CON11/ses-preop/func/sub-CON11_ses-preop_task-rest_bold.nii.gz"
+        },
+        "acquisition": "downloaded_complete_original",
+        "bytes": 37003252,
+        "sha256": "c0988b485e09f85b3dd5466b3745110f0859c79eff960200943c8b558fc45488",
+        "md5": "53f25748b89ced82e715b669732d30fe",
+        "shape": [
+          64,
+          64,
+          42,
+          180
+        ],
+        "zooms": [
+          3.0,
+          3.0,
+          3.0,
+          2.4000000953674316
+        ],
+        "dtype": "int16",
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "s3_etag": "53f25748b89ced82e715b669732d30fe",
+        "header_repetition_time_seconds": 2.4000000953674316,
+        "frames": 180,
+        "volume_trimming": false
+      },
+      "BOLD_json": {
+        "relative_path": "sub-CON11/ses-preop/func/sub-CON11_ses-preop_task-rest_bold.json",
+        "source_url": "https://s3.amazonaws.com/openneuro.org/ds001226/sub-CON11/ses-preop/func/sub-CON11_ses-preop_task-rest_bold.json",
+        "bytes": 1466,
+        "sha256": "574d0bb8aa516270f8a89e37c00c434ecf37769ebae0655ce69f53e2a9fc4b51",
+        "md5": "788ac1b85a51c61deb153369da897393",
+        "s3_etag": "788ac1b85a51c61deb153369da897393",
+        "metadata": {
+          "TaskName": "rest",
+          "RepetitionTime": 2.4,
+          "EchoTime": 0.027,
+          "PhaseEncodingDirection": "j-",
+          "TotalReadoutTime": 0.01464
+        },
+        "slice_timing_count": 42
+      },
+      "repetition_time_seconds": 2.4,
+      "complete_original_frames": 180
+    }
+  ],
+  "errors": [],
+  "complete": true,
+  "updated_utc": "2026-10-03T06:17:09.787080+00:00",
+  "total_bold_compressed_bytes": 384286158,
+  "acquisition_recovered_errors": [
+    {
+      "subject": "CON10",
+      "error": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1006)>"
+    }
+  ],
+  "generated_BIDS_ignore": {
+    "relative_path": ".bidsignore",
+    "sha256": "b4ce99c4f2e001ea8879504da66a61a6cd32db2d7a9e12f7e031a447b47ada5d",
+    "content": [
+      "public_manifest.json",
+      "*.partial"
+    ],
+    "purpose": "Exclude only provenance metadata and unfinished transfer files from official BIDS validation; original MRI and sidecar files are unchanged."
+  }
+}

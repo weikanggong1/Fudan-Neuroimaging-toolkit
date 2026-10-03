@@ -1,0 +1,123 @@
+{
+  "case_id": "CON01",
+  "attempt": "candidate_v2",
+  "source_revision": "01de7f30",
+  "scope": "read-only geometric diagnostic of completed sphere and sphere.reg before whole reconstruction finished; excluded from formal candidate_v3 ten-case benchmark",
+  "coordinate_unit": "mm",
+  "sphere_radius_mm": 100,
+  "method": "float64 cross products of on-disk geometry, outward centroid-dot-cross sign; all vertices and triangles; topology from unique undirected edge incidence",
+  "meshes": {
+    "lh.sphere": {
+      "vertices": 141831,
+      "faces": 283658,
+      "finite_coordinates": true,
+      "same_orig_face_order": true,
+      "euler": 2,
+      "unclosed_edges": 0,
+      "signed_negative_faces": 0,
+      "zero_area_faces": 0,
+      "nonfinite_areas": 0,
+      "radius_min_mm": 99.99999441934479,
+      "radius_max_mm": 100.00000555928555,
+      "radius_error_max_mm": 5.580655212611418e-06,
+      "area_min_mm2": 3.4101411249648187e-06,
+      "sha256_before": "e4f4702c3f02f49e1d53f2c4bff2ff79c98718b756baa0b532de533488b0df5f",
+      "sha256_after": "e4f4702c3f02f49e1d53f2c4bff2ff79c98718b756baa0b532de533488b0df5f",
+      "unchanged_during_diagnostic": true
+    },
+    "lh.sphere.reg": {
+      "vertices": 141831,
+      "faces": 283658,
+      "finite_coordinates": true,
+      "same_orig_face_order": true,
+      "euler": 2,
+      "unclosed_edges": 0,
+      "signed_negative_faces": 0,
+      "zero_area_faces": 0,
+      "nonfinite_areas": 0,
+      "radius_min_mm": 99.99999485678248,
+      "radius_max_mm": 100.00000531298713,
+      "radius_error_max_mm": 5.312987127581437e-06,
+      "area_min_mm2": 4.960152506087741e-06,
+      "sha256_before": "4036bd7a04d70779f662b26fe26bb39a2ec69bdf333e2f73abb06abf885fd442",
+      "sha256_after": "4036bd7a04d70779f662b26fe26bb39a2ec69bdf333e2f73abb06abf885fd442",
+      "unchanged_during_diagnostic": true
+    },
+    "rh.sphere": {
+      "vertices": 148047,
+      "faces": 296090,
+      "finite_coordinates": true,
+      "same_orig_face_order": true,
+      "euler": 2,
+      "unclosed_edges": 0,
+      "signed_negative_faces": 0,
+      "zero_area_faces": 0,
+      "nonfinite_areas": 0,
+      "radius_min_mm": 99.99999436041827,
+      "radius_max_mm": 100.0000056051441,
+      "radius_error_max_mm": 5.639581729610654e-06,
+      "area_min_mm2": 2.5610205622178374e-06,
+      "sha256_before": "ae34c3b695b1ab22ff258b1ce18b6d6f41c6929852ebd75a7a2e7005a60eff9a",
+      "sha256_after": "ae34c3b695b1ab22ff258b1ce18b6d6f41c6929852ebd75a7a2e7005a60eff9a",
+      "unchanged_during_diagnostic": true
+    },
+    "rh.sphere.reg": {
+      "vertices": 148047,
+      "faces": 296090,
+      "finite_coordinates": true,
+      "same_orig_face_order": true,
+      "euler": 2,
+      "unclosed_edges": 0,
+      "signed_negative_faces": 0,
+      "zero_area_faces": 0,
+      "nonfinite_areas": 0,
+      "radius_min_mm": 99.99999441125975,
+      "radius_max_mm": 100.00000561270417,
+      "radius_error_max_mm": 5.612704171653604e-06,
+      "area_min_mm2": 2.4390419429312024e-05,
+      "sha256_before": "f9a8a8adcef25f189942fbdaed3b6b17cc5cf8a71bc052ae9094e3378c459cfa",
+      "sha256_after": "f9a8a8adcef25f189942fbdaed3b6b17cc5cf8a71bc052ae9094e3378c459cfa",
+      "unchanged_during_diagnostic": true
+    }
+  },
+  "warnings": {
+    "lh": {
+      "log_sha256": "2ebeb70c5db8595d60d38c15c3eaa65712332603550b887fe038d20338939bc4",
+      "runtime_warning_count": 4,
+      "source_module": "src/fnit/recon_all/sphere_standard_line_search.py",
+      "lines": [
+        108,
+        113
+      ],
+      "categories": [
+        "overflow encountered in scalar multiply",
+        "invalid value encountered in scalar subtract"
+      ],
+      "preserved_in_original_log": true
+    },
+    "rh": {
+      "log_sha256": "3f2c53ab40c76ce3eca8e0ec284050bc238d47b7908862681fcf63dc7b448952",
+      "runtime_warning_count": 4,
+      "source_module": "src/fnit/recon_all/sphere_standard_line_search.py",
+      "lines": [
+        108,
+        113
+      ],
+      "categories": [
+        "overflow encountered in scalar multiply",
+        "invalid value encountered in scalar subtract"
+      ],
+      "preserved_in_original_log": true
+    }
+  },
+  "whole_reconstruction_status_at_observation": "finish_surface_workers_running",
+  "equivalence": "not_assessed",
+  "interpretation": {
+    "warning_path": "float32 quadratic normal-equation determinant/cofactor overflow; nonfinite predicted quadratic step is excluded by _quadratic_candidate_allowed; precomputed bracket and zero candidates remain",
+    "existing_regression": "6 first-epoch float32 native-compatible line-search tests passed locally",
+    "overflow_route_check": "tiny finite gradient contract check produced NaN quadratic coefficients, four finite fallback candidates, selected_dt=0; not a benchmark",
+    "geometry_result": "all four completed sphere meshes finite, zero signed-negative and zero zero-area faces; closed genus-zero face order preserved",
+    "quality_scope": "geometric checks do not establish reconstruction accuracy, optimal spherical fit or cross-version equivalence",
+    "implementation_change": "none; warnings were not suppressed"
+  }
+}

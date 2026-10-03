@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "status": "complete",
+  "created_utc": "2026-10-03T06:06:58.405296+00:00",
+  "case": "case-A",
+  "input_source": "one existing real complete single-T1 FNIT reconstruction; same copied inputs for both programs",
+  "scope": "same-input middle-surface native algorithm comparison, not a whole recon-all/fMRI benchmark",
+  "coordinate_system": "FreeSurfer surface RAS",
+  "coordinate_units": "mm",
+  "source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_sha256": "55535a45ce94355781f919cedfb016ed5195830820239330bcbf8e9678ab16fc",
+  "input_files": {
+    "lh.white": {
+      "size": 3802463,
+      "sha256": "9e3bc5482605327fd2a2283cd987b51380794a3821fb8953c271bf50bc32ec53"
+    },
+    "lh.pial": {
+      "size": 3802463,
+      "sha256": "24d36cb3d17d9026e4547d96d21c5d70e48db717e43a2a15938f88064fad8a6c"
+    },
+    "lh.thickness": {
+      "size": 422407,
+      "sha256": "afaa470f866cefdce97f2ecb63203f8a2bd2e71a6f995edea3b073b3858c961a"
+    },
+    "lh.sphere": {
+      "size": 3802194,
+      "sha256": "cfea75cebfe13eed877387ec81f48ed587f02b057944a3e11b0cff9807e4899f"
+    },
+    "rh.white": {
+      "size": 3767219,
+      "sha256": "fcab8d9387a9dcaab28cc46a0b0ace6cdcca80fcef21e92a0145e5fc9fc17bad"
+    },
+    "rh.pial": {
+      "size": 3767219,
+      "sha256": "9bcca7124aa018848ebc0078a0baeafd7b5e599076789414e324066c05080835"
+    },
+    "rh.thickness": {
+      "size": 418491,
+      "sha256": "8a76cbc2a4b74b489438968d477c0aecb99633fdab862d694a823d006b257bb9"
+    },
+    "rh.sphere": {
+      "size": 3766950,
+      "sha256": "f7179c201021c9ad3bb9b1974d3a57d9b15d8ad3b6b3cff87c206b8b574e4316"
+    }
+  },
+  "method": "mris_expand -thickness white 0.5 graymid; reads real pial, thickness and sphere; no vertex averaging",
+  "timing_scope": "one sequential native invocation per hemisphere/backend, process startup plus reading/computation/writing; copy/build/analysis excluded; shared host",
+  "omp_threads": 4,
+  "fnit_binary_sha256": "d7b1e99b6ad4a266b7a02a0bcb2be0b59d39a4d73c2347865a644badc281563b",
+  "reference_binary_sha256": "2e48f2e6931a95042813972b9c6366682cc9850d1fe7dd9b7f31927123655e83",
+  "fnit_link_check": {
+    "missing_libraries": false,
+    "preinstalled_freesurfer_libraries": false
+  },
+  "hemispheres": {
+    "lh": {
+      "vertices": 105598,
+      "faces": 211192,
+      "face_order_exact": true,
+      "white_face_order_preserved": true,
+      "coordinates_exact": true,
+      "coordinate_absolute_difference_mm": {
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "vertex_distance_mm": {
+        "max": 0.0,
+        "mean": 0.0,
+        "rms": 0.0
+      },
+      "native_wall_seconds": {
+        "fnit": 669.8473837343045,
+        "reference": 430.8821196472272
+      },
+      "output_sha256": {
+        "fnit": "6ac0175ea01c05ccc23ed10f62d1998ef650d9a7c2bafcbfef4ff3510b92cc7d",
+        "reference": "a09f3525684d957b8a03f4b1cbfb2efdcae16f8d001d4fab8a36ec38b1da558a"
+      },
+      "output_bytes_equal": false
+    },
+    "rh": {
+      "vertices": 104619,
+      "faces": 209234,
+      "face_order_exact": true,
+      "white_face_order_preserved": true,
+      "coordinates_exact": true,
+      "coordinate_absolute_difference_mm": {
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "vertex_distance_mm": {
+        "max": 0.0,
+        "mean": 0.0,
+        "rms": 0.0
+      },
+      "native_wall_seconds": {
+        "fnit": 583.3445910220034,
+        "reference": 424.782752238214
+      },
+      "output_sha256": {
+        "fnit": "9cd96cbff8590a7f3afde428cd8160260cf162ecbf429cfa1a936c426ce46f16",
+        "reference": "e0818ae13eb3b741a91e05067f7df44892fc22ff449b69bf33215e83a35461d4"
+      },
+      "output_bytes_equal": false
+    }
+  },
+  "original_inputs_unchanged": true,
+  "total_validation_wall_seconds": 2108.9925745348446,
+  "reference_version": "mris_expand freesurfer 8.2.0",
+  "source_code_url": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mris_expand/mris_expand.cpp",
+  "fnit_build": {
+    "toolchain": "independent Conda C++ compilation; read-only reuse of fixed-source Conda static libraries",
+    "build_wall_seconds": 3.1481885761022568,
+    "preinstalled_freesurfer_libraries": false
+  },
+  "command_template": [
+    "mris_expand",
+    "-thickness",
+    "inputs/{hemi}.white",
+    "0.5",
+    "outputs/{hemi}.graymid"
+  ]
+}
