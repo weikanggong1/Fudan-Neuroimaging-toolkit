@@ -1,0 +1,8 @@
+import pathlib,json,hashlib,subprocess,os,datetime
+r=pathlib.Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04');tool=r/'final_raw_matrix_tools_v1/benchmark_connectome_final_raw_envelope.py';config=tool.parent/'configuration.json';digest=hashlib.sha256(config.read_bytes()).hexdigest();assert digest=='bec71f47418e78ed1830e29da96eff66526d272e16c39f03b7f8cdc276d5b07e'
+output=r/'final_raw_matrix_twenty_watch_v1';log=r/'final_raw_matrix_twenty_watch_v1.log';receipt=r/'final_raw_matrix_twenty_watch_v1.launch.json';assert not any(p.exists() for p in (output,log,receipt))
+argv=['/cwStorage/home/gongwk/anaconda3/bin/python3.11',str(tool),'--config',str(config),'--config-sha256',digest,'--output-root',str(output),'--watch','--poll-seconds','60','--timeout-hours','72']
+env=dict(os.environ,CUDA_VISIBLE_DEVICES='',PYTHONDONTWRITEBYTECODE='1',OMP_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1')
+with log.open('xb') as stream:child=subprocess.Popen(argv,stdin=subprocess.DEVNULL,stdout=stream,stderr=subprocess.STDOUT,start_new_session=True,env=env)
+record={'PID':child.pid,'start_ticks':pathlib.Path(f'/proc/{child.pid}/stat').read_text().split()[21],'argv':argv,'configuration_sha256':digest,'tool_sha256':hashlib.sha256(tool.read_bytes()).hexdigest(),'start_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'host':'nodecw10','log':str(log),'output_root':str(output),'scope':'CPU waiting then readonly20rawmatrix reports; no MRI/GPU; task5 driver and mapping readonly','final_comparison_completed':False}
+receipt.write_text(json.dumps(record,indent=2)+'\n');print(json.dumps(record))
