@@ -1,0 +1,581 @@
+{
+  "status": "complete",
+  "dataset": "OpenNeuro ds001226 v5.0.1 CC0",
+  "subject": "CON03",
+  "scope": "Same-input real SynthSeg warmup then full bilateral register and avg_curv stage on private copies of complete FNIT CON03 reconstruction. Not raw-T1 reconstruction or whole fMRI pipeline.",
+  "source_base_revision": "19c8e0a328b5647aeb954405d94bd15c51bfcbf6",
+  "tested_helper_module_at_revision": "96859a4f2eead3ef09b1786f36b98c66c78689b1",
+  "source_changes": [
+    "src/fnit/recon_all/hemisphere_parallel.py"
+  ],
+  "source_before_module_sha256": "74ae787046ef068a9943a75c50e6972f540d523bb848e0b22cf8bcee1ed4806c",
+  "source_after_module_sha256": "a2305d820661cc87a30086399a8960f89461ee1b755f12fc3bc4c852e4525b82",
+  "driver_sha256": "59399e5759458b262a4f6d1b11b72b3398283e1eb6989ff923636f61bd3039c1",
+  "driver_unchanged_in_both": true,
+  "inputs_unchanged_in_both": true,
+  "source_unchanged_in_both": true,
+  "input_sha256": {
+    "mri/T1.mgz": "21697ede4e0bf89ce1e02388bd8b1b82648d6d4a3394502b98f15838cab702ed",
+    "mri/antsdn.brain.mgz": "eea3975fe656db8b8dffa2bfccbcad1dcb4e503e361d9c483cccf7e866e505be",
+    "mri/aparc+aseg.mgz": "fc3ca8c7c42205699d8b8108348872e608bde0e3f2725e634edbcd88718f919a",
+    "mri/aparc.DKTatlas+aseg.mgz": "bacd5a4078e5c92caebd8c49b8d03794f16246143eff33694c491bb9818f3159",
+    "mri/aparc.a2009s+aseg.mgz": "f0f7616c11aa3b4c3b974fbcbeecaf55d17417e4ab0ee0a2e6c3004f81c29242",
+    "mri/aseg.auto.mgz": "8191b1546adf60bcd7dbcac11c019f2ec26980d70a37c60c7b8ead46c4622c35",
+    "mri/aseg.auto_noCCseg.mgz": "33a570455870669a6503965eae9e4d1842c61a6344b21df48f3521b6d4ca26c4",
+    "mri/aseg.mgz": "2fb1faf69c23d2c4c8a88532384bafba1ae24a2569fa01efbe648241f69a2f8e",
+    "mri/aseg.presurf.hypos.mgz": "1a2d2fb54102be48551c9af544ff9b29909d73422b8fdba516de8652dfa293dc",
+    "mri/aseg.presurf.mgz": "8191b1546adf60bcd7dbcac11c019f2ec26980d70a37c60c7b8ead46c4622c35",
+    "mri/brain.finalsurfs.manedit.mgz": "4617abde4c50638a9535f748edb074f8af92fe1154feeaba6e27ac2e8487778b",
+    "mri/brain.finalsurfs.mgz": "4617abde4c50638a9535f748edb074f8af92fe1154feeaba6e27ac2e8487778b",
+    "mri/brain.mgz": "9377f553cf733bc6c275e22107917bbf2b3f1a2b2746e8f4526a428c19b17a04",
+    "mri/brainmask.mgz": "823f9d8f4c3e4a28b94943c916d3788c07d4853eb0ad6fa8fceb8e2a2843c412",
+    "mri/ctrl_pts.mgz": "cf86de61905a84586eb7b3025efda174b3df10140486de65ad0e389f1b1031b8",
+    "mri/entowm.mgz": "d229a5d1261e8cb102f152fb131ae6141aa114e9c614fd6eea75ead127a4b329",
+    "mri/filled-pretess127.mgz": "e109472eb4da15c03a4dcbd83d2627f1cdab4d12f42e302fd041f22b880e7cd4",
+    "mri/filled-pretess255.mgz": "0af05b2f9b8f55f72b60de9088e011597f38b65391c94f53571bc93bb9978d41",
+    "mri/filled.auto.mgz": "93824a811b6a1b01049e78a5e9db6263d12dbc94e46c919f6c2d447688cf3c6e",
+    "mri/filled.mgz": "93824a811b6a1b01049e78a5e9db6263d12dbc94e46c919f6c2d447688cf3c6e",
+    "mri/lh.ribbon.mgz": "2d23a88f2963bae68af6bc3edb29dd6c246751ad0e23ba4283da643de2988e6a",
+    "mri/mca-dura.mgz": "caca097f5ef56e24b47a1b68b6b34b1c8097d96380384aed7766442e4e1e1949",
+    "mri/mrisps.white.mgz": "44fa45852f8e0f87cd61a75366d9cd6b0645a509f9d6aee3277c23f72de26294",
+    "mri/mrisps.wpa.mgz": "44fa45852f8e0f87cd61a75366d9cd6b0645a509f9d6aee3277c23f72de26294",
+    "mri/norm.mgz": "3f8f7410abd27f8c66377bce5721f82ace48493c8311149640d4f86becdb5105",
+    "mri/nu.mgz": "96fae70b18438130707d4fdc268b372d006a8f97681897dae986fc3f4a3e7484",
+    "mri/orig/001.mgz": "ca0d432fff28ab833b2a7462753ddab7f3bdc5f596e983fdbeb679cf833a1231",
+    "mri/orig.mgz": "e73aed47e60d59f36f6d9b9b04f4933d0aef22d4e549fe73140a362e17097329",
+    "mri/rawavg.mgz": "ca0d432fff28ab833b2a7462753ddab7f3bdc5f596e983fdbeb679cf833a1231",
+    "mri/rh.ribbon.mgz": "de0ccba42fd42c80f5864aa2b33accb5eec8be53d41603d3107ea472ca52a1ae",
+    "mri/ribbon.mgz": "46ba219cec5ba335a48b65f8bf711078c09661542f46032822107713c1232b2a",
+    "mri/segment.dat": "00ce61b6a32e607774b240113ad96a4959017b32ce68d62a99df33a0bb68e442",
+    "mri/surface.defects.mgz": "044b3a8a5c468e41881fa7c2d9ddec987dbb7ddb311a850b71f6561601029316",
+    "mri/synthseg.rca.mgz": "33a570455870669a6503965eae9e4d1842c61a6344b21df48f3521b6d4ca26c4",
+    "mri/synthstrip.mgz": "7dfc864482f38ae1032d9d2cd7c603b28b3171745b4360174b13511143af9b20",
+    "mri/talairach.log": "d876a997ab8095468e1165a5b007fd6664b3929c27e9cb48744a8ba35a40bdc9",
+    "mri/tmp/nu0.mgz": "1f175e0837395828b8b9f4b5afd5c99c725882230794d9128a379bdebb96c538",
+    "mri/transforms/cc_up.lta": "3604e048f2697b4df56e5bef83e35144b2d1fd6cdc8d3f372919a690d86d05f8",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/aff.lta": "e9fc712b94b93144f98523d82398556190ec256b7ffa639440c5cd8a04ed0d8d",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "5db1d8320a469b77b97718a57ea2ede8120937db9c901540072262685f5521bb",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/reg.targ_to_invol.lta": "feb4f1ce9995aa73db8f628ced9da16b90b9890d56231c07b9e8b9f14100d40a",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz": "01110d8892d1f02144715634f90bc11548f157988b79857fc15e24ecb32011a1",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz": "7b830f95ac55a1c756f2d36fcbf3ed6970a9fcbe48f1b426b8a10c26c2942d5b",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-full.lta": "0aa7a34ed0c52da4b4d6271c6842372af90dba68e955105540945715a98c844c",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-invol.lta": "9303572bc65706681e7926e4db37c78b63c882d08432bdde2a235c604063de02",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": "c8ab6a1528e841196d4826deff9c1be99e08e1bc88a565ae10b3914cca3f8546",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz": "21cb1ccaba1f7fab7d6fff61ab604fdefcdc0fa6e9589a85af1c6ff59d2f8af4",
+    "mri/transforms/synthmorph.mni305/aff.lta": "fde266ebf61579eefe86a237273e61cd54ec5a317c1d5a61b8ce18162006344b",
+    "mri/transforms/talairach.lta": "2c578270fd7c97f30861b0399592d1b94d58a8944b33facf4b3d8bb37782d0c8",
+    "mri/transforms/talairach.xfm": "ba1e26249b739fe8fab81aab2c46ca60c6237832f8e04367d8c0ba91381910fc",
+    "mri/transforms/talairach.xfm.lta": "04ea92c953506ecb4154fbf6c47bf1c267284276e68cbe2542f0ebb74b88fd38",
+    "mri/vsinus.mgz": "50190183d765edfbaedb7414290edaa81497a8e2d3db2257d92133a29fee2931",
+    "mri/wm.asegedit.mgz": "ad96224775c8087a95746b1d11dc644c12abe3e64f07026415a14ddf0e78769f",
+    "mri/wm.mgz": "96bac9583cbb6b54dd88492e0091dba5159e0b7b5adee422148d7881c468078c",
+    "mri/wm.seg.mgz": "7847f6639e2f1159792028b2c1ae78ec49204540852f6703f4e62d26d4743ef2",
+    "mri/wmparc.mgz": "959f4180641fce03bb4f17b7508bf81749f671e67fd3e35b7313f169d9fa1f70",
+    "surf/autodet.gw.stats.lh.dat": "d59dd09ca0d11ea34c40b154535f16be988c4934e292d53c24bf115ba23951fe",
+    "surf/autodet.gw.stats.rh.dat": "a722e886ddbc0a1b8c01a65ba47b67c5f9c55883f528e0ddf9397b3f9085a625",
+    "surf/lh.area": "cc95db1b949e07629adb1690ad344a0e2d8279d233df5a94501743b451f3a21c",
+    "surf/lh.area.mid": "39c91c55e85881eebe680a12f5351143de2c58c48c89165e0462c54f275e6ad4",
+    "surf/lh.area.pial": "8355d87ef7b8e5d532bf58556bb4f485b9576e9f24d954c6309b3c0a8cc6c481",
+    "surf/lh.avg_curv": "cee3e7dc1730d0c697b22bc04329c40710475f4a4808d8c119953f2435d1c412",
+    "surf/lh.curv": "15f3cfd27324cba5d54ae258ad99860db5fe5c72172173573054c963a57e72d0",
+    "surf/lh.curv.pial": "91519c06cf3fa84dcd57a4efac375d07c02ba5ca95ba3bac63c9acb722a2b9ba",
+    "surf/lh.defect_borders": "a792335d711641cb37e4e1a5b1d7ad736853aff9a689d7590a254ef5e85753a2",
+    "surf/lh.defect_chull": "37ba8b42f71b9b55ddb2220b150d3e9d64c0c749bc092fcca0a46d6540ff345a",
+    "surf/lh.defect_labels": "6f1118df641c299dcce02e9a0a6e9ea08d78737f4bcd2587f6290302f8000849",
+    "surf/lh.graymid": "fec30455fc409f31acac19558fa005763301d260a6079b985a20c7bf8bf9b15d",
+    "surf/lh.inflated": "81d127f2865102740ebf6904031c8ac4d5e5d68e39259a3f9f7b05556090e7cb",
+    "surf/lh.inflated.H": "26a0be980e0d76c3958b6fe6979fcb6b6dfc7c0aa4e499307330d951b7abeb9b",
+    "surf/lh.inflated.K": "de7475107e305cb55f19ff4e95dc647422b3c0f9d71489b1bfe824d1bd27712e",
+    "surf/lh.inflated.nofix": "4d436f71a32f213c50c293e21cca4c8d7c638621df02e36f603915e35842dc18",
+    "surf/lh.jacobian_white": "4f87b90151e4465e8823cf98069a4323ba0ee2e60740f20a29f757c5185b1ef5",
+    "surf/lh.orig": "f8619cfddd43347644fe1e8699fa61e4dcebfcf79bef7cf01442ea855121d857",
+    "surf/lh.orig.nofix": "f9e717f7a2cda2b71668877f971d093462cff9b0074165ab36d0c505acc11a91",
+    "surf/lh.orig.premesh": "6acb541ac588b9dc8939c5e31819ff6ce6e2acc637d8a75808ade285f7662d1e",
+    "surf/lh.orig.raw.quad": "9a1df8479b88d6a20d9104bd79a0e9ac34049f0846a56ab754b100bc0c8580b2",
+    "surf/lh.pial": "c04e579c60370a09125efbb4d2ce9b8efefc5b1c61bcc979536ff49c84410577",
+    "surf/lh.pial.T1": "c04e579c60370a09125efbb4d2ce9b8efefc5b1c61bcc979536ff49c84410577",
+    "surf/lh.qsphere.nofix": "bb788c346592991a5b20d5156aa1ccaeab0f903707e6f7ec03793ec0b9c8223e",
+    "surf/lh.smoothwm": "b89de30454083cad09743daf120db83bd64db385eda9056eab69d8062f7ab858",
+    "surf/lh.smoothwm.BE.crv": "9e6b2eef01b25c4c6d2513bfab70bfa19f03fc1f398b3fb47145c3364419139e",
+    "surf/lh.smoothwm.C.crv": "ad62244a7970c21dfe035a944c8779f54b2e5365a2792e7996ba73619ae3786f",
+    "surf/lh.smoothwm.FI.crv": "f240ccbc117eb4a20878082676a7a029cc2cf4c4ecf644e72500c2f5c625c516",
+    "surf/lh.smoothwm.H.crv": "6db98a8cb339446be13ea1733db0454a2cca8f749a25302b54e734abf2599774",
+    "surf/lh.smoothwm.K.crv": "421d9df55f18985a460f34e29863110a1a19d14de61f076796cea4fea9a5eaef",
+    "surf/lh.smoothwm.K1.crv": "abe4571b930c7c763c92998de3eedc42ed6caf1be184d72ababe5fb83be7a154",
+    "surf/lh.smoothwm.K2.crv": "38d36f9ef30349e58b3e73ad7ce6a0f981bd65875c710b1d43c8c7fef5a5391a",
+    "surf/lh.smoothwm.S.crv": "27592dcc712758525ca7db41cec4e7a111c34e7ee3c69eacb9802fa55836cb53",
+    "surf/lh.smoothwm.nofix": "efc59d45b9dd4b78c3ce4b93127d97e2109f1b7b9a07a14d3171c450f63eb432",
+    "surf/lh.sphere": "e5b13dc321bd8cf677da579ae06b477d99ce60c9d52473c2c9aead6538cad9d9",
+    "surf/lh.sphere.reg": "0d5c4e493e1ddb1dcd4acf96d39dc91487d158481507cb77ae6a1d4d2c671572",
+    "surf/lh.sulc": "58120b099297552645e42f34c5d0e2f3d6e0000f153c624c4dbb6ab06edba26a",
+    "surf/lh.thickness": "af6f7b4c6758fd58bf0a1f2094db15902d61476e116aa0200b98fe92eae29814",
+    "surf/lh.topology-centered.sphere": "7b027580d96d00ebfbe24729389c93f913ed793cd25c029d337c4322affed9cc",
+    "surf/lh.volume": "09896055280263fdfe7afcd7c26d2abfc51c3423a528498c2e4ec6bdb82a36b7",
+    "surf/lh.w-g.pct.mgh": "a70a030f27ec4c0db6b4643b122e6d457554c9e24fb263f3cd8edeca3836fef1",
+    "surf/lh.white": "c4e14c088ad01a49b804e2650fe1f57db3f601dcdbb8ad6aa0c20bbad1054026",
+    "surf/lh.white.preaparc": "92559f23df9f412736943da386e7f6f2af0721e11ef11e4b477fdcbde343bf53",
+    "surf/lh.white.preaparc.H": "07866d9a4d4a35eac968583c69bbbbb33263fc9b080ee1eb808470103a469226",
+    "surf/lh.white.preaparc.K": "db3b9c7523e81e7f5908d4053a856aca78afa201534fd093a7c4fbe6cb2e4cf6",
+    "surf/rh.area": "8eedbc64a8fb8821c5dd8983a7e65f6da031d0e118a715aa298822e362349c6b",
+    "surf/rh.area.mid": "1958973fd076a9e54e72d55f2f8d524300f619f7bfd0bcbdd40b81d565758bae",
+    "surf/rh.area.pial": "0a4359fa5485d67b1be375cd3f54502607b979f83c30922599679aef5f295e27",
+    "surf/rh.avg_curv": "41c14d543f4e09b752b22479845028ee5afc5db19f86196c96a4b4ae16f8aeed",
+    "surf/rh.curv": "cafda17c1227c0ebfe8b82ae612cba42a80a80af76e41e1377feca9ffea5d8b3",
+    "surf/rh.curv.pial": "52f431db66f74df3c14d70bd6a1df3b9d96e3f7ebaa22c33616280943c669949",
+    "surf/rh.defect_borders": "cd0ef3d7c507d2677f52ac093954c9090e790e229a6fbe0de738ee666cb4fcd8",
+    "surf/rh.defect_chull": "3d9f8f172a262cf8f8a5309e4daaeee1246aafde9e2c26009d0121461a13bc5f",
+    "surf/rh.defect_labels": "3227ba8f2f3a9d6b6140ceb175f745f21a0df4edbeb7cb32f805f6d49f01b966",
+    "surf/rh.graymid": "aa64b8f519ae2d5d845f0106c794366bcc884adc046a035dba4df6fca9c6193a",
+    "surf/rh.inflated": "c67eda3b322f79f4153d1e94545e1f39d1fe9f8c8e5a4552c09f866ff449d79a",
+    "surf/rh.inflated.H": "523eabe0fe2bca9febeab134ff5139649ab5f100e95e79f6d7b3e8e037efdbb6",
+    "surf/rh.inflated.K": "bd60c6b086516848ab823b25628d60687f99bacb65222150a321c5883513bf0c",
+    "surf/rh.inflated.nofix": "3dce7031060a190f722a005d1cce640783e51e918c04b9bf75e2eb480a77c93e",
+    "surf/rh.jacobian_white": "2feed278089cf7560824374ccd6d4b95a0b38d6ff5d9f832c66473e3e764df78",
+    "surf/rh.orig": "1154b68216a16282755d337173a7c12e0d3ee32ab78a72b9ae51e9b337a4f375",
+    "surf/rh.orig.nofix": "76e3b24b16af49e4229ff3037fddda59cfbd039cc65058bd7af07e9324aa3425",
+    "surf/rh.orig.premesh": "aae43d1fd79a5ec709279943d14621b2d13d16a4d5c5c4e5f11a360a0347e19a",
+    "surf/rh.orig.raw.quad": "2316c283d8646a2211f2175532f47497b5c6307689568341cb8d0591e4be29d6",
+    "surf/rh.pial": "4597b8352349383f82b8864e144dfa41c083130f8bc6b8fdd875d5fb20d4c16b",
+    "surf/rh.pial.T1": "4597b8352349383f82b8864e144dfa41c083130f8bc6b8fdd875d5fb20d4c16b",
+    "surf/rh.qsphere.nofix": "d469100a84274b4549cabf9041c2d7fd229e4b9a3ca83b9324f5438da2680ed5",
+    "surf/rh.smoothwm": "f3c54b93ab375efdba782049ab92b61f2c75b00bac5af058edae5a2192dbc94f",
+    "surf/rh.smoothwm.BE.crv": "7cf269817829fff9e205a7fbb9dc436964b9c8684b73b21b04f7b34ac5d34b7e",
+    "surf/rh.smoothwm.C.crv": "a7dcf5129aa25d87cc6a2334a887d9f7d29d709ac009b8c17e38d66028aee219",
+    "surf/rh.smoothwm.FI.crv": "7e847a72c31e573ab83f7929551fcf46c2452cf7a4c0ac5f408dfb88b26762dd",
+    "surf/rh.smoothwm.H.crv": "b3c74e662f6c90c256ed185821a650e5224aebe799dce36636c797ca96ecefe1",
+    "surf/rh.smoothwm.K.crv": "eaa57b57f95976e463bbf02d294335b13189e861c07451224d63cd348a4c1bf3",
+    "surf/rh.smoothwm.K1.crv": "383fb7c786422e3a34b4252edc4c02641de06220504c10c8fa90a576e9014c5f",
+    "surf/rh.smoothwm.K2.crv": "666c4a512de106e5d202f8ab03a07b5adad0b40a2aeeae4ebc32198a414b6a08",
+    "surf/rh.smoothwm.S.crv": "ffdaf85b7a0d168900ea26cd09e5211a4166f962f5fcf195ce6cf5f61d22089c",
+    "surf/rh.smoothwm.nofix": "f2347ec992b872f8a4088be6fb2412815f7da18f0370a0ce7e426fb945aa519a",
+    "surf/rh.sphere": "8add2988271c962ed575ea199fdffba63521974a5aab64d726b67e40e63bdf7f",
+    "surf/rh.sphere.reg": "e3bec851b51d4ec29b256e0322d95d2f91925ed5bd5689f2c028982fddc7054c",
+    "surf/rh.sulc": "b7a565061c3a74aefde2dd83d64bf8ac4014466769b3ec45b1b2b68a39686645",
+    "surf/rh.thickness": "7aac7f56ca479296f71536a754729ea6e80fefec756b681836132ebd6dac2813",
+    "surf/rh.topology-centered.sphere": "b57cf0aea71e283dc50a74de001839fcd14dae80f2b73ead414480ead8ee0ba9",
+    "surf/rh.volume": "663f8261bb17785c574950c19da122f319467e2869a55f5c3cf9aaa7212277f3",
+    "surf/rh.w-g.pct.mgh": "c18883d623581f63b885d1801af24818c31f5a33e1a7a63a871120d25d8853d8",
+    "surf/rh.white": "27db312d7ef0a6390c94a508f2a6f3b57a1d002db0966bdf829d3112bd96a415",
+    "surf/rh.white.preaparc": "6bd2c794df07f91e95bb9672c586c74361f96d900d3673137bbf2d4bc9d91ca2",
+    "surf/rh.white.preaparc.H": "5dda8b3cc1478e52be292024f19686cb57e7fa3c172a5b1b8c4a68ae0ffc8368",
+    "surf/rh.white.preaparc.K": "d803da2800f911b3cd82390e36dd217b7507e42c61cf23ff3b3eba52109f6fd4",
+    "label/lh.BA1_exvivo.label": "00d2c8d7dc01fb5a4791ce1a04be0e504e02c8a6c890bc21ac061465532f18f8",
+    "label/lh.BA1_exvivo.thresh.label": "cc819f568db2f6e717728bbab812c084a39d78d361b633905c3d55ad86b20ea1",
+    "label/lh.BA2_exvivo.label": "ec97149f6b905dc1677ec44c26f4d63623da810fe5cf3fac4a7b3f79d001e2d2",
+    "label/lh.BA2_exvivo.thresh.label": "0f08bbd81f95e4d0170829ac14cc0363505c2629cbee1af7437c08ebeb2df918",
+    "label/lh.BA3a_exvivo.label": "b5a9e6d730d0061ac69fdb56a50ab494db4188caa9fc54fc45dc376de1ff2d4c",
+    "label/lh.BA3a_exvivo.thresh.label": "a69c0a9fa151b432f2cfa36c0909753d58cfe7548c0b7edf3a5c5b2d6c3586bb",
+    "label/lh.BA3b_exvivo.label": "612ddbd84d0453c27d4822a14551bfc52f08ac0a989922bf8d6d921786fb6b4b",
+    "label/lh.BA3b_exvivo.thresh.label": "e8ee39fb28a4daf530821ded8e27493eac8cedaacc64f674032ef4b98d45a07e",
+    "label/lh.BA44_exvivo.label": "2b56ff3edf79fe037be81c1dcdd1bfe88af75b55f0dd056f6f12f4e48a6be70f",
+    "label/lh.BA44_exvivo.thresh.label": "7a3e26f98c4bcb44e65a8796d00c009b0e68d6c36021eaf1b3a402747d7fa835",
+    "label/lh.BA45_exvivo.label": "f9d572e57f422b06ed6ee79ee10c392b5147ce61fe91efdcb4d67f8fb04133fe",
+    "label/lh.BA45_exvivo.thresh.label": "5bd09b0eb19a1e0fd2f22bf5e3c42ab37e68604919c26097e345a46aca98e277",
+    "label/lh.BA4a_exvivo.label": "639a9d1a42ed45a8b4d652b2cc131deb385e18b4c273ee742e97a6d716cb101c",
+    "label/lh.BA4a_exvivo.thresh.label": "99dda617197bed91a9779f55ad45555bd666409bdfd4ee2dde4989e181cf394a",
+    "label/lh.BA4p_exvivo.label": "42901f45476acc219383eeeedf715d1b4a2e1dfe6a7cbd12bd6bb58c1763c627",
+    "label/lh.BA4p_exvivo.thresh.label": "4e0ec1c815e4610b26ba5a92b2c97c0e15882db19cd1f187a2ebe684d96a82a4",
+    "label/lh.BA6_exvivo.label": "f2714fcb71db055a98717db78675ca5e1506a9252dc023e93383a40c3bb8d4ef",
+    "label/lh.BA6_exvivo.thresh.label": "97e17ca9b3bc77c8269e62c5c5d0b63080225d0d3ca40cbe1bb2824f7ba175dd",
+    "label/lh.BA_exvivo.annot": "a3dd8a1e65a3ca1ab9467cc26bcf2e7598f22187209748cdefbd970b8f1020df",
+    "label/lh.BA_exvivo.thresh.annot": "824e77060cc79e6df91c34002f6482415e830b331cc1b4523c1eaa9789c9179f",
+    "label/lh.FG1.mpm.vpnl.label": "37959c3d3a0ce068539229610a4179f221fde9da65d508f6a41460e72356ed16",
+    "label/lh.FG2.mpm.vpnl.label": "4f0c8fd5d2071d5a20739004a856ce9ac1e1b916dddc49dfe2221737111607c9",
+    "label/lh.FG3.mpm.vpnl.label": "6195f7250083e3da1813672f0ce38abe3e43e43604072cfde10faffb55e84913",
+    "label/lh.FG4.mpm.vpnl.label": "9552b26da640aa22b76a8a5284d0d18d431c2c7fc09a40e33191dd0de2d33c32",
+    "label/lh.MT_exvivo.label": "e591453f910a57de7afd090f63c8cb6ef2fc23e4932afadcc31732e0c54b0232",
+    "label/lh.MT_exvivo.thresh.label": "3b9f8e1987d6ac2de5ba2da4b122afad8783998201bc10a209982d2cedd774b8",
+    "label/lh.V1_exvivo.label": "c1ba9108e9170f38888e175581b0072b0caf4a80f748ee6d57e01222ddbe7a53",
+    "label/lh.V1_exvivo.thresh.label": "f655a140ffbcc1507e265a2ba5ecb297ffff70098eea6a051951607ebca682ba",
+    "label/lh.V2_exvivo.label": "04a3aaf4fc6eaf0d2166addac9766b1e0ec2fddd9be3aaa453c1dc1a524688b8",
+    "label/lh.V2_exvivo.thresh.label": "8b5547f29a3cd9884ab7955a07425e0ae8a017348e93143216aba30e5c594edb",
+    "label/lh.aparc.DKTatlas.annot": "cf191434e4e43bec3e5cbc76d71a85e5496572748e65a0403f632bb26402bbf2",
+    "label/lh.aparc.a2009s.annot": "abb4bc800fe3d14acd835c9ce754ac25b42748bd4f257851a94fb27f1032c7ed",
+    "label/lh.aparc.annot": "a28c91697dafd76065731cb19cc62cfe8225f187fdd25152e75f47946222b8ff",
+    "label/lh.cortex+hipamyg.label": "a47d1b6751b4010ddbe92bdf5dd9c654789dcb299389d389f3f7af1dd3528593",
+    "label/lh.cortex.label": "b7cdd741eaa7812d322ef8056baed69e4a7da302d66e8a1bcdcc2cbb60f4a26d",
+    "label/lh.entorhinal_exvivo.label": "6cc0a88101bb0aabb1005250d7bff60564c3328abdcef09fd44247de3c48690f",
+    "label/lh.entorhinal_exvivo.thresh.label": "b7b4bf653341bba1c76b93aeb619beeb585ec5c0ce2f232a6bef952d2b7e44e9",
+    "label/lh.hOc1.mpm.vpnl.label": "f033b34ec3cd93f9fc18ec5b9bf421cea8704146a517302eb39e750039cdd31c",
+    "label/lh.hOc2.mpm.vpnl.label": "8259ee9f7e68372e3f0ae43858e755f459de69c2719f2c370d1055e8e700368c",
+    "label/lh.hOc3v.mpm.vpnl.label": "1214f00b13b3df8ed1b7f0640893084d018bf4d8f0315ef5317d680d7a25c22f",
+    "label/lh.hOc4v.mpm.vpnl.label": "db7a9f3a42f96e8000cfb801d9540c246e8cacb17b6e4ac3b59d9be035547a8f",
+    "label/lh.mpm.vpnl.annot": "b78d30a36a9cc84a0316615129c79e2c40497cfc66db34d7c441f606ab68f7ee",
+    "label/lh.nofix.cortex.label": "00c6d887147ad4a832ddec6d69e9fca07ea31f2756220b48806174399f574a47",
+    "label/lh.perirhinal_exvivo.label": "b4ab01a7432563a8e6738590b4172b42496cf2ee9bcd990f79186213d54f2924",
+    "label/lh.perirhinal_exvivo.thresh.label": "a8f33700ae67b4690913429025463b9944f8c6a2bbb8e5ccf1f06b488f378096",
+    "label/rh.BA1_exvivo.label": "fee325a51d5ca065fcfc72246ca84754d7b845eb5574df9ac5e30b6c5d7e41d1",
+    "label/rh.BA1_exvivo.thresh.label": "76c54ff07c46c9f6b1463826d896f813268c520bdae9d25215843d81fe94fab4",
+    "label/rh.BA2_exvivo.label": "446ff68383dbe4f57214665a0d0ed9a400734623f31575a07844fe593e5ed97d",
+    "label/rh.BA2_exvivo.thresh.label": "af77c47a34095934fc0ddf0fc3f238df32b80fd12132b4e513789f16a8b8869e",
+    "label/rh.BA3a_exvivo.label": "3cf65eb310cb3723f63bb8233697fc82db692b2e0f5ee34739aa0948bbc39d93",
+    "label/rh.BA3a_exvivo.thresh.label": "c6219d782dc83e1f4101445dcfb7c20e13961fb8465df60e58c102e5763244d0",
+    "label/rh.BA3b_exvivo.label": "7cb39326211d4d5da5ed6d87dbce8b0264182998e7d40c30a1c2bbbaa4db6c3e",
+    "label/rh.BA3b_exvivo.thresh.label": "11e8de22993ba3db53f7bf4a2e69f08ddc96823e3f3a2158332827dc2bf37d5b",
+    "label/rh.BA44_exvivo.label": "a1365b27b8b78e9cdb60e4f7ed6c5ab9343562a5b5b87d07d33014974c97c8c2",
+    "label/rh.BA44_exvivo.thresh.label": "84dc948569dc15fa39342b1fd67d91214ff97fea6e46dde25242e3c49c01c9f2",
+    "label/rh.BA45_exvivo.label": "f7a01cca844e98dd5fb8eac0ebe413defa94a3526e6804a9d345f631e613d982",
+    "label/rh.BA45_exvivo.thresh.label": "fb75e0175b2e61acb3e3a8a1658f24987e113d55abb37d27939cf5bdcea2c252",
+    "label/rh.BA4a_exvivo.label": "4eee07ecfeb0d763c375a4cf27ba544ca33bd81d37ba05d389049ad8e8a7a41d",
+    "label/rh.BA4a_exvivo.thresh.label": "f9d80a56b7273e217945f38e3321177b91a72c0a80e1300250efc09c91407652",
+    "label/rh.BA4p_exvivo.label": "18a9f5d3563c52d4d3ee664982ee227c1ad1bda1854d8445762027e75d1c276d",
+    "label/rh.BA4p_exvivo.thresh.label": "e6b0df7bdf0d5ed65dd65110ebe7cedc5c76ef55b2a5cbb51f5146f4b450a933",
+    "label/rh.BA6_exvivo.label": "4807acb0e7ff3c204a90e2a17b5f63236cbff60f49c97942d1fede4a3747d75d",
+    "label/rh.BA6_exvivo.thresh.label": "24b407598f586ef4051efb75648ec25e1c33cf1cc457d96036378efa677f69f1",
+    "label/rh.BA_exvivo.annot": "26039f247b62f2a762f25d3ca81c994c5f808e9a02613a2dcd2768ca361f34c6",
+    "label/rh.BA_exvivo.thresh.annot": "a6849762cefbbdc296d71059e5963daabbde2876e1804cc28a8ffee4a9059fdd",
+    "label/rh.FG1.mpm.vpnl.label": "e75fed218da40df9e3599f44c4f9d7bcc446df6a713a9de6abaeac91b76e76e7",
+    "label/rh.FG2.mpm.vpnl.label": "6e8973d3170fc54c646b48c82c0787aa59eee2944f7088fd4d9348b2db6a558e",
+    "label/rh.FG3.mpm.vpnl.label": "82a43a3366c221161ed1ec87892fdea6c8290294f26e2a85516f76c3fe53f723",
+    "label/rh.FG4.mpm.vpnl.label": "d60d928eb78f9d624272f184ab13fcc4fa09ca46975257384456a86b22a05643",
+    "label/rh.MT_exvivo.label": "1e890fdc3e85b7e6020d92f45b04b9af5c3b16e3b064ff52b302b10557154519",
+    "label/rh.MT_exvivo.thresh.label": "91e88b84039c1c45726cf15a086fe57943d1b8af7649ed476981668feef64279",
+    "label/rh.V1_exvivo.label": "dbe812a7fd1f55128f330fabde24ce607fb1e317a079cf1f4837cfdd75ba5219",
+    "label/rh.V1_exvivo.thresh.label": "2e013ceafd1c675868216020cfeab18cd14175489313d4dcb431540825597d25",
+    "label/rh.V2_exvivo.label": "5d46231bcb105d4e8f074bdf3b8681b6c6c4cc4883a6f5f5159a48e9e7ff645d",
+    "label/rh.V2_exvivo.thresh.label": "860431266f1138371081ad56604002fe729609482f3a101263a3f1dd6eed52df",
+    "label/rh.aparc.DKTatlas.annot": "1a9d222d80bebe5043e6936a9536641ff839711719d4e41412422c4c36f45360",
+    "label/rh.aparc.a2009s.annot": "2a1d538fc8c78f684ad052a8619977b8aec3b6754d7fad45847022cdae80f561",
+    "label/rh.aparc.annot": "3c4f6651102cc0931daacd971b97163833852d79ce89d4baf5508be00771419a",
+    "label/rh.cortex+hipamyg.label": "93e0b8b680202b71960d2cf103e62856a33cdad368fccc2d36419afbab2a1a1b",
+    "label/rh.cortex.label": "f5f0f2604011f31ec6d9d799db035f4c590f42b7d690137f3664dbb20d40cee7",
+    "label/rh.entorhinal_exvivo.label": "de3bff51f439143edfc05f6013423b69ac8112ef9ee32ef2da64de077576b0f2",
+    "label/rh.entorhinal_exvivo.thresh.label": "03b6e876c665c4f495026ca651ca7ef8db5e01dc922390f56174e7cbf8828773",
+    "label/rh.hOc1.mpm.vpnl.label": "19dbb6d1317c623ae7aca7e1d5b708105a0a49fb259c9578062f5eeca1568c2f",
+    "label/rh.hOc2.mpm.vpnl.label": "b3c958681d7b128713680eaf41a7aade63c0c991998fae1deaf203efc18e7435",
+    "label/rh.hOc3v.mpm.vpnl.label": "71353624fbd0e0f9ea1809ea5fd53c31e19ca4ab555e9e9a2a2d24aae617806d",
+    "label/rh.hOc4v.mpm.vpnl.label": "303668460cadcc91455144e445105ad5872ab77f699b3e7f6aa9a6a018fb2435",
+    "label/rh.mpm.vpnl.annot": "2377a246cfe4d2d34c185359089aa9fc063f94b0b2ff83ab2bf5a524fe98b23c",
+    "label/rh.nofix.cortex.label": "c2b3ac6cba421005632860e76d7f054868327db37409550cccaa25164d20fd08",
+    "label/rh.perirhinal_exvivo.label": "12d9f7f16f6c29d77734da7cd7bb0e6e0c9fef4697cb3a96deaa08959419f65b",
+    "label/rh.perirhinal_exvivo.thresh.label": "00eabaf3f51c680a6b327733b55316f466a9d9628b9a5c44c1807bdf233ef013",
+    "stats/aseg.stats": "7aabf6742057e7f5880d3f8c96b3239b713b14ca385d2c71ddf5ad55e7358dda",
+    "stats/brainvol.stats": "ee29de909438fc34fa3273b9ccfff19801d393bf379c576184560e69f0551326",
+    "stats/entowm.stats": "beb3459e5a6e63bb74853b5405795bb3f9f3a6c88e09cadfb8a0c2cfd479e769",
+    "stats/lh.BA_exvivo.stats": "35fbdc506c01649034fe9949f06c7e151dea35dbdf5d0ee3cae7d432b8013596",
+    "stats/lh.BA_exvivo.thresh.stats": "e25c8459ab14915e323a69aa9faf9a154604f6e184b6a003198196ff05909ba4",
+    "stats/lh.aparc.DKTatlas.stats": "b9cdad960d4086cd2a1e6b71df7125c926eafceaaf559f6e6b36154ac0ce58ee",
+    "stats/lh.aparc.a2009s.stats": "c90165fb9f78ae9e610c6f3b7ea93193519e68183dfcf00ab25c878c34840e6a",
+    "stats/lh.aparc.pial.stats": "987a0449656c6f7a51ad21d3bb9e009fc0dd8f013a59cc5ce00c3ad5c0817611",
+    "stats/lh.aparc.stats": "2a72f1515a6dbfc195f7b7bb7b8fd90a4f0bada8768c6ef1d41e1881e0b25af7",
+    "stats/lh.curv.stats": "3292e38129e2cf0dc8aabc03451704486e4956c3661ee66c95809a2def2432e5",
+    "stats/lh.w-g.pct.stats": "e7025280703e0321242401d15d0427147a795867e321304a4f68f55603f67eca",
+    "stats/rh.BA_exvivo.stats": "2cd4ccd75850c26469a8c183c35ab826539136c895e446c72413ba8559b31656",
+    "stats/rh.BA_exvivo.thresh.stats": "c214f49c117525a1cc0a232836be122127b65d1d57d0d8365db45f3c4fd096a9",
+    "stats/rh.aparc.DKTatlas.stats": "a83ad18d25ae4456f8ff83f89a3788784c915a80f33ed3b2adbb2c7f9b2e28d9",
+    "stats/rh.aparc.a2009s.stats": "98beaba6438f0a56dd5b42d83aac8ae9d8484d2de9b3a2bc71b84872c76c8354",
+    "stats/rh.aparc.pial.stats": "22fc5cc27493febbab1f492f57ec2656c3b9cedbfc3a2235821fb230e4160b52",
+    "stats/rh.aparc.stats": "c8d6a32dc4b4142cf8d65303153a824fb3be90b2f164ac67a68ede4b5e5a85ab",
+    "stats/rh.curv.stats": "9ce259df6a18b00b23ebe739fc389ed2f4189436fff20d9931f9deca9a3544d4",
+    "stats/rh.w-g.pct.stats": "3f3f35d1f338910aae3a9d36e1978f57130c69dfb5fbdfec1031944d8e4eeeac",
+    "stats/synthseg.tiv.dat": "69821991c6496182caa1f1a684a7d89d195d9e8985781b67c4533406d3c8c25f",
+    "stats/synthseg.vol.csv": "24568376856fe06e238b7c204444d4bb11b26a582eefaffdf1902c593a93ea67",
+    "stats/vsinus.stats": "eb879b1a5ef5ef9674e8af854cfa0f540b99853d25ed65ecd165b18f96f6c20b",
+    "stats/wmparc.stats": "2bf4db9990d30373805b2f757efd6f64d244cd64d05240c6b442b8322fcd14bb",
+    "assets/FreeSurferColorLUT.txt": "da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b",
+    "assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif": "92f1dc820d778a67c143d4ea82597fd71a89ddc738dfa555b7ca32ed21e95c97",
+    "assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif": "1064e4c0ae0440f5071b4369f29a09860f1abf6eddc90a271d10cd0ff7e60043",
+    "weights/entowm.ctab": "fa46a74e7c5385b6e474553acbb34f536dac640c52586ec4193a0ea9739948f1",
+    "weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5": "9be55798498331f655acd75d4f0cd5036463e0f497bbb239be0167d6a9129a07",
+    "weights/mca-dura.both-lh.nstd21.fhs.h5": "da6a7b994e3e804cc3dc0e98e965c28a802ddcd38fd9b5c680d75cef285657b0",
+    "weights/synthmorph.affine.2.h5": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6",
+    "weights/synthmorph.deform.3.h5": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+    "weights/synthseg_2.0.h5": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+    "weights/synthseg_segmentation_labels_2.0.npy": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8",
+    "weights/synthseg_segmentation_names_2.0.npy": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc",
+    "weights/synthseg_topological_classes_2.0.npy": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a",
+    "weights/synthstrip.1.pt": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+    "weights/vsinus.no-sp.m.all.nstd10-070.h5": "3d78948741306a31337468c86be55821913edb73855116fcb063b61135b90f12",
+    "native/mrisp_paint": "0f00c54821a4eafb38d60cb627f98792a5480a4cac360ee0649a5aa24866e0cd"
+  },
+  "live_tensor_guard": "1024-element FP32 tensor checks allocator contract; not simulated MRI benchmark input",
+  "live_tensor_unchanged_in_both": true,
+  "outputs": {
+    "surf/lh.avg_curv": {
+      "shape": [
+        124092
+      ],
+      "decoded_bit_equal": true,
+      "max_absolute_difference": 0.0,
+      "all_finite": true,
+      "before_file_sha256": "cee3e7dc1730d0c697b22bc04329c40710475f4a4808d8c119953f2435d1c412",
+      "after_file_sha256": "cee3e7dc1730d0c697b22bc04329c40710475f4a4808d8c119953f2435d1c412",
+      "files_byte_equal": true
+    },
+    "surf/lh.sphere.reg": {
+      "points_shape": [
+        124092,
+        3
+      ],
+      "faces_shape": [
+        248180,
+        3
+      ],
+      "coordinates_bit_equal": true,
+      "ordered_faces_equal": true,
+      "absolute_coordinate_difference_mm": {
+        "max": 0.0,
+        "mean": 0.0,
+        "p99": 0.0
+      },
+      "all_finite": true,
+      "before_file_sha256": "0d5c4e493e1ddb1dcd4acf96d39dc91487d158481507cb77ae6a1d4d2c671572",
+      "after_file_sha256": "0d5c4e493e1ddb1dcd4acf96d39dc91487d158481507cb77ae6a1d4d2c671572",
+      "files_byte_equal": true
+    },
+    "surf/rh.avg_curv": {
+      "shape": [
+        124462
+      ],
+      "decoded_bit_equal": true,
+      "max_absolute_difference": 0.0,
+      "all_finite": true,
+      "before_file_sha256": "41c14d543f4e09b752b22479845028ee5afc5db19f86196c96a4b4ae16f8aeed",
+      "after_file_sha256": "41c14d543f4e09b752b22479845028ee5afc5db19f86196c96a4b4ae16f8aeed",
+      "files_byte_equal": true
+    },
+    "surf/rh.sphere.reg": {
+      "points_shape": [
+        124462,
+        3
+      ],
+      "faces_shape": [
+        248920,
+        3
+      ],
+      "coordinates_bit_equal": true,
+      "ordered_faces_equal": true,
+      "absolute_coordinate_difference_mm": {
+        "max": 0.0,
+        "mean": 0.0,
+        "p99": 0.0
+      },
+      "all_finite": true,
+      "before_file_sha256": "e3bec851b51d4ec29b256e0322d95d2f91925ed5bd5689f2c028982fddc7054c",
+      "after_file_sha256": "e3bec851b51d4ec29b256e0322d95d2f91925ed5bd5689f2c028982fddc7054c",
+      "files_byte_equal": true
+    }
+  },
+  "before": {
+    "group_wall_seconds": 252.03887921897694,
+    "worker_span_seconds": 244.9006313350983,
+    "worker_sum_seconds": 456.56353898206726,
+    "overlap_seconds": 211.66290764696896,
+    "copy_seconds_excluded_from_group": 2.378222386352718,
+    "warmup": {
+      "seconds_including_loading": 9.623993641231209,
+      "segmentation_array_sha256": "c65d7f9d0b1e5ea054d6d08ab1edf0a9827febb3391258f04d8a5bf082a51fff",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "int32",
+      "actual_forward_precision": {
+        "requested_cudnn_tf32": false,
+        "forwards": [
+          {
+            "pass": "original",
+            "device": "cuda:1",
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "input_dtype": "torch.float32",
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "autocast": {
+              "cpu": {
+                "enabled": false,
+                "dtype": "torch.bfloat16"
+              },
+              "cuda": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            },
+            "output_dtype": "torch.float32"
+          },
+          {
+            "pass": "flipped",
+            "device": "cuda:1",
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "input_dtype": "torch.float32",
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "autocast": {
+              "cpu": {
+                "enabled": false,
+                "dtype": "torch.bfloat16"
+              },
+              "cuda": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            },
+            "output_dtype": "torch.float32"
+          }
+        ],
+        "posterior_buffer_reused": true,
+        "posterior_ensemble_dtype": "torch.float32"
+      }
+    },
+    "parent_before_group": {
+      "allocated_bytes": 4096,
+      "reserved_bytes": 13547601920
+    },
+    "parent_after_group": {
+      "allocated_bytes": 4096,
+      "reserved_bytes": 13547601920
+    },
+    "parent_idle_cuda_cache": null,
+    "simultaneous_job_tree_peak_bytes": 15095300096,
+    "simultaneous_job_tree_peak_decimal_gb": 15.095300096,
+    "simultaneous_job_tree_peak_gib": 14.05859375,
+    "memory_sampling_interval_seconds": 0.5,
+    "memory_sample_count": 470,
+    "memory_sample_errors": [],
+    "total_thread_budget": 4,
+    "worker_threads": 2,
+    "workers_requested": 2,
+    "group_report_sha256": "2dc25aca4540cd2c5f869930104a3aaef2630a55bac6b38eabc0fa82e257a0e5",
+    "stage_report_sha256": "d7b9e5bcbdf74c520813634c70237c04dbcc2e9b6e37917ac6c2121da04fe349",
+    "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "maximum_observed_sampling_interval_seconds": 0.5513026579283178,
+    "external_shared_gpu_memory_bytes_range": [
+      49859788800,
+      49861885952
+    ],
+    "external_process_count_range": [
+      3,
+      3
+    ]
+  },
+  "after": {
+    "group_wall_seconds": 238.15550422901288,
+    "worker_span_seconds": 231.1431676922366,
+    "worker_sum_seconds": 446.7665411820635,
+    "overlap_seconds": 215.62337348982692,
+    "copy_seconds_excluded_from_group": 2.149068663828075,
+    "warmup": {
+      "seconds_including_loading": 8.982294729910791,
+      "segmentation_array_sha256": "c65d7f9d0b1e5ea054d6d08ab1edf0a9827febb3391258f04d8a5bf082a51fff",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "int32",
+      "actual_forward_precision": {
+        "requested_cudnn_tf32": false,
+        "forwards": [
+          {
+            "pass": "original",
+            "device": "cuda:1",
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "input_dtype": "torch.float32",
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "autocast": {
+              "cpu": {
+                "enabled": false,
+                "dtype": "torch.bfloat16"
+              },
+              "cuda": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            },
+            "output_dtype": "torch.float32"
+          },
+          {
+            "pass": "flipped",
+            "device": "cuda:1",
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "input_dtype": "torch.float32",
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "autocast": {
+              "cpu": {
+                "enabled": false,
+                "dtype": "torch.bfloat16"
+              },
+              "cuda": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            },
+            "output_dtype": "torch.float32"
+          }
+        ],
+        "posterior_buffer_reused": true,
+        "posterior_ensemble_dtype": "torch.float32"
+      }
+    },
+    "parent_before_group": {
+      "allocated_bytes": 4096,
+      "reserved_bytes": 13547601920
+    },
+    "parent_after_group": {
+      "allocated_bytes": 4096,
+      "reserved_bytes": 2097152
+    },
+    "parent_idle_cuda_cache": {
+      "status": "complete",
+      "device": "cuda:1",
+      "seconds": 0.016372127924114466,
+      "before": {
+        "allocated_bytes": 4096,
+        "reserved_bytes": 13547601920
+      },
+      "after": {
+        "allocated_bytes": 4096,
+        "reserved_bytes": 2097152
+      },
+      "cuda_context_created": null,
+      "cuda_context_measurement": "not measured; global initialization does not prove target-device context exists",
+      "scope": "parent PyTorch allocator counters; CUDA contexts, workers and external allocators excluded",
+      "method": "synchronize selected device then empty_cache on parent allocator; live tensors and allocator policy unchanged"
+    },
+    "simultaneous_job_tree_peak_bytes": 1549795328,
+    "simultaneous_job_tree_peak_decimal_gb": 1.549795328,
+    "simultaneous_job_tree_peak_gib": 1.443359375,
+    "memory_sampling_interval_seconds": 0.5,
+    "memory_sample_count": 442,
+    "memory_sample_errors": [],
+    "total_thread_budget": 4,
+    "worker_threads": 2,
+    "workers_requested": 2,
+    "group_report_sha256": "754401407f2dffedcacfcfa61ba5b3afd4d233ff8ac85fb069fd9eac8499b566",
+    "stage_report_sha256": "d305780bec0490b3202955c2b8246c989625d645edda7b14e6c12e464e6b89d6",
+    "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "maximum_observed_sampling_interval_seconds": 0.5519909439608455,
+    "external_shared_gpu_memory_bytes_range": [
+      49859788800,
+      49859788800
+    ],
+    "external_process_count_range": [
+      3,
+      3
+    ]
+  },
+  "failed_attempts": [
+    {
+      "attempt": "setup-v1",
+      "status": "setup_failed",
+      "MRI_launched": false,
+      "reason": "wrong source-directory name"
+    },
+    {
+      "attempt": "control-v2",
+      "status": "failed",
+      "reason": "launcher omitted existing FS_LICENSE environment; mrisp_paint exited after register; original attempt preserved"
+    }
+  ],
+  "timing_note": "One ordered A/B observation on shared H100 PCIe physical GPU1; external load and JIT/loading/preparation boundaries retained. Group wall includes private copies, optional synchronization/cache release, workers/bootstrap, output publication and cleanup; warmup/copy into initial control clone/guards are separate. No general speedup claim."
+}

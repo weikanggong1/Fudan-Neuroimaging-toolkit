@@ -333,16 +333,27 @@ def _cached_report(manifest, request, subject):
     if manifest.get("status") != "complete" or manifest.get("request") != request:
         return False
     try:
-        files = _validate_subject(subject)
-        checksums = manifest["files"]
-        if not set(files).issubset(checksums):
+        # Official recon-all creates hemi.pial -> hemi.pial.T1. Its internal
+        # link is a valid owned output, but neither the subject root nor any
+        # cached file may resolve outside that subject. Check this before
+        # loading geometry, including escapes through a parent directory.
+        if subject.is_symlink() or not subject.is_dir():
             return False
+        owned_subject = subject.resolve(strict=True)
+        checksums = manifest["files"]
         for name, entry in checksums.items():
             if PurePosixPath(name).is_absolute() or ".." in PurePosixPath(name).parts:
                 return False
             path = subject / name
-            if path.is_symlink() or path.stat().st_size != entry["size"] or _sha256(path) != entry["sha256"]:
+            resolved = path.resolve(strict=True)
+            if (not resolved.is_relative_to(owned_subject)
+                    or not stat.S_ISREG(resolved.stat().st_mode)
+                    or resolved.stat().st_size != entry["size"]
+                    or _sha256(resolved) != entry["sha256"]):
                 return False
+        files = _validate_subject(subject)
+        if not set(files).issubset(checksums):
+            return False
         for entry in manifest.get("commands", []) + manifest.get("native_binaries", []):
             binary = Path(entry["binary"])
             if not binary.is_file() or _sha256(binary) != entry["sha256"]:

@@ -125,6 +125,30 @@ recon-all -i "$raw_t1w_image" -s "$official_subject_id" \
 
 ## 最新真实精度、耗时与脑图
 
+2026-10-03，公开 ds001226 v5.0.1（CC0）CON03 的[真实同输入阶段控制](../../validation/fmri/public_ten_20261003/parent_cuda_cache_same_input.json)已完成。两遍在同一 H100 PCIe 物理 GPU1 上各用新 Python 进程，从已有完整重建的私有副本开始；真实 SynthSeg 先使用 `cuda:1`，随后执行完整双侧 register/avg_curv。两套源码以 `19c8e0a3` 为基础，只改变半球调度模块；新模块与冻结 `96859a4f` 字节一致。这是阶段控制，未执行原始 T1w 的完整重建或 fMRI 整链。
+
+| 同输入阶段范围 | 释放前 | 加入释放后 |
+|---|---:|---:|
+| register/avg_curv 完整组墙钟 | 252.038879 s | 238.155504 s |
+| worker 执行期间父子进程同时占用的采样峰值 | 15,095,300,096 bytes（15.095 GB） | 1,549,795,328 bytes（1.550 GB） |
+| 父进程组前 `allocated_bytes` | 4,096 | 4,096 |
+| 父进程组前 `reserved_bytes` | 13,547,601,920 | 13,547,601,920 |
+| 父进程组后 `allocated_bytes` | 4,096 | 4,096 |
+| 父进程组后 `reserved_bytes` | 13,547,601,920 | 2,097,152 |
+| helper 同步、释放及查询 | 未调用 | 0.016372 s |
+| SynthSeg warmup，含模型加载 | 9.623994 s | 8.982295 s |
+| 创建初始控制副本；不在组墙钟内 | 2.378222 s | 2.149069 s |
+
+组墙钟包含内部左右私有副本、可选缓存同步/释放、新 worker 启动、双侧计算、发布和清理。warmup、初始控制副本及外层 SHA/输出分析分别计时，不追加为整链时间；worker 墙钟存在重叠，不将两侧之和当作完整组时间。峰值以 0.5 s 采样，实际最大间隔分别为 0.551303/0.551991 s，有效样本 470/442、失败样本均为 0；可漏过更短的瞬时峰值。同 GPU 另有 3 个外部进程、约 49.86 GB 占用，独立记录并排除在本任务树峰值外。这是共享 GPU 上一次顺序 A/B 观察，耗时不推导固定加速比；两个阶段峰值都低于 20 GB，也不证明新的完整整链已经达到 20 GB 目标。
+
+四份最终科学输出 `lh/rh.sphere.reg` 与 `lh/rh.avg_curv` 的文件 SHA 两遍相同；解码后全部坐标、曲率和有序面也逐 bit 相同，最大坐标/曲率差均为 0。左/右球面为 124,092/124,462 顶点、248,180/248,920 面。两遍真实 SynthSeg 分割数组 SHA 相同，网络输入、权重及输出均为 FP32，实际 `matmul_tf32=True`、`cudnn_tf32=False`、autocast 关闭；这保留成熟 SynthSeg 的精度例外。1024 元素 FP32 活张量也保持不变，它只检验 allocator 合同。
+
+报告绑定 272 个输入/资源/程序 SHA，并确认两遍输入、源码、driver 和活张量守卫均通过。旧模块 SHA 为 `74ae787046ef068a9943a75c50e6972f540d523bb848e0b22cf8bcee1ed4806c`，新模块为 `a2305d820661cc87a30086399a8960f89461ee1b755f12fc3bc4c852e4525b82`，实际[阶段驱动](../../validation/fmri/public_ten_20261003/benchmark_parent_cache.py)为 `59399e5759458b262a4f6d1b11b72b3398283e1eb6989ff923636f61bd3039c1`；新模块与 `96859a4f`、旧模块与 `19c8e0a3` 独立核对一致。缓存控制 v2 曾因 launcher 缺少已有合法 `FS_LICENSE`，在 register 后的源码构建 `mrisp_paint` 失败；保留该 attempt，fresh 控制 v3 使用正确许可环境和增强的实际导入/driver 守卫。此控制 v3 与正式整链 candidate_v3 是不同记录，许可内容不读取或哈希。
+
+缓存函数没有脑影像输出，注册球面也不作为皮层脑图几何。十例 fMRI 图仍由修复后正式批次的真实完整结果生成。
+
+此前完整整链的诊断用于定位显存问题，不与上述阶段数字合并：
+
 2026-10-03 的公开 ds001226 v5.0.1（CC0）诊断使用真实原始 T1w＋完整 180 帧 BOLD。旧候选 `01de7f30` 的父子进程同期采样如下；JSON 保留源码与输入 SHA，见[诊断原始记录](../../validation/fmri/public_ten_20261003/runtime_snapshot.public.json)：
 
 | 旧诊断例 | 实际执行状态 | 父子进程同时峰值 | 对 20,000,000,000 bytes 目标 |
@@ -134,14 +158,13 @@ recon-all -i "$raw_t1w_image" -s "$official_subject_id" \
 
 定位时父进程曾有 16,530 MiB 的瞬时占用，包含前段后仍保留的空闲缓存；它也可能包含活张量、context 与库内存，不能将整个值视为可释放缓存。修复在半球启动边界增加上述缓存处理，科学算法和输出规则不变。
 
-**新同输入对照正在运行，结果待核验。** CON03 真实 register-stage 的旧/新控制已独立启动：同一主机/GPU、固定输入网格及资源 SHA，目标设备为已被真实 SynthSeg 使用的 `cuda:1`，新进程启用缓存，再比较缓存前后计数、父子同时峰值、含双侧 register/avg_curv 的完整组墙钟及输出。两套源码从冻结 `19c8e0a3` 建立，仅半球调度模块不同；SynthSeg warmup、外层复制与输入守卫时间单列，不加入组墙钟。实际运行绑定冻结 harness 和模块 SHA；仓库随后增强的导入来源守卫不改标为此次已执行驱动。新测量 JSON 未完成，当前没有新精度、耗时、20 GB 达标或完整整链结论。缓存函数本身不产生脑图；新阶段图与完整 fMRI 图只由对应真实结果生成。
-
 ## 最近版本与 benchmark 记录
 
 | 来源/日期 | 改动与真实验证范围 |
 |---|---|
-| 2026-10-03，本次工作版 | 在成熟双侧 exec 调度前同步并释放父进程空闲缓存；新增前后 allocated/reserved 和独立 context 未测量说明。17 项调度/失败传播/计数合同测试通过；真实 warm SynthSeg＋register 配对仍待结果绑定，不以测试代替 MRI benchmark。 |
+| `96859a4f` 的模块字节，2026-10-03 | 成熟双侧 exec 调度前同步并释放父进程空闲缓存；17 项调度/失败传播/计数合同测试通过。真实 CON03 warm SynthSeg＋双侧 register/avg_curv：组墙钟 252.039→238.156 s、任务树采样峰值 15.095→1.550 GB，四个科学输出文件逐字节及解码值相同，见[完整配对报告](../../validation/fmri/public_ten_20261003/parent_cuda_cache_same_input.json)。仅该模块以此版本字节绑定，不将整个 `96859a4f` 称为两遍执行源码。 |
 | `01de7f30`，2026-10-03 v2 诊断 | CON01 失败；CON03 complete 但峰值超 20 GB。保留两例真实峰值与失败/完成边界，不计入最终正式十例统计。 |
+| 2026-10-03，独立缓存控制 v2 / v3 | v2 因 launcher 缺少合法许可环境，在 `mrisp_paint` 失败；fresh v3 已完成真实完整阶段配对，输入/源码/driver/活张量守卫均通过。与正式整链 candidate v2/v3 属于不同记录，失败 attempt 保留。 |
 | `8d750e2`，2026-10-02 | [已有两例并行整例](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)测过独立半球进程与确定性发布；其输入和父进程生命周期不同，不代替自动 volume 后的缓存控制。 |
 
 当前修改只处理父进程与新 worker 的显存生命周期；成熟 MCFLIRT 的 no-cache/CUDA graph 兼容修复另在 [MCFLIRT 功能页](../mcflirt/README.md)记录，两项措施分别验收。

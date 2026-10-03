@@ -248,6 +248,74 @@ def test_explicit_freesurfer_uses_safe_argv_and_selected_license(tmp_path, nativ
     assert "fixture only" not in json.dumps(result.metadata)
 
 
+def test_official_pial_internal_links_reuse_the_complete_adapter_cache(tmp_path, native, monkeypatch):
+    source = _source(tmp_path)
+    source_sha = adapter._sha256(source)
+    command = _binary(tmp_path, "recon-all")
+    original_run = adapter._run_command
+
+    def run(argv, **kwargs):
+        original_run(argv, **kwargs)
+        if "-all" in argv:
+            subject = Path(argv[argv.index("-sd") + 1]) / argv[argv.index("-s") + 1]
+            # recon-all 8.2 uses this exact link layout after T1 pial placement.
+            for hemi in ("lh", "rh"):
+                pial = subject / "surf" / f"{hemi}.pial"
+                target = pial.with_name(f"{hemi}.pial.T1")
+                pial.rename(target)
+                pial.symlink_to(target.name)
+
+    monkeypatch.setattr(adapter, "_run_command", run)
+    kwargs = {"backend": "freesurfer", "options": {"command": command, "threads": 2}}
+    first = adapter.prepare_surface_reconstruction(source, tmp_path / "work", **kwargs)
+    before = _tree_hash(first.subject_dir)
+    calls_before = len(native[1])
+    second = adapter.prepare_surface_reconstruction(source, tmp_path / "work", **kwargs)
+    assert not first.reused and second.reused
+    assert len(native[1]) == calls_before == 3
+    assert _tree_hash(first.subject_dir) == before and adapter._sha256(source) == source_sha
+    for hemi in ("lh", "rh"):
+        pial = second.subject_dir / "surf" / f"{hemi}.pial"
+        assert pial.is_symlink() and pial.readlink() == Path(f"{hemi}.pial.T1")
+
+
+@pytest.mark.parametrize("unsafe", ["external_file", "parent_escape", "subject_link", "broken", "directory", "changed_bytes"])
+def test_cached_output_links_reject_escapes_invalid_targets_and_changed_bytes(tmp_path, native, unsafe):
+    source = _source(tmp_path)
+    original = _subject(tmp_path / "provided", source)
+    result = adapter.prepare_surface_reconstruction(source, tmp_path / "work", recon_all=original)
+    subject = result.subject_dir
+    pial = subject / "surf/lh.pial"
+    original_before = _tree_hash(original)
+    assert adapter._cached_report(result.metadata, result.metadata["request"], subject)
+    external = tmp_path / "external"
+    if unsafe == "parent_escape":
+        (subject / "surf").rename(external)
+        (subject / "surf").symlink_to(external, target_is_directory=True)
+    elif unsafe == "subject_link":
+        subject.rename(external)
+        subject.symlink_to(external, target_is_directory=True)
+    else:
+        if unsafe in ("external_file", "changed_bytes"):
+            target = external if unsafe == "external_file" else pial.with_name("lh.pial.T1")
+            pial.rename(target)
+            if unsafe == "changed_bytes":
+                target.write_bytes(target.read_bytes() + b"changed output")
+        else:
+            pial.unlink()
+            target = subject / "missing"
+            if unsafe == "directory":
+                target.mkdir()
+        pial.symlink_to(target)
+    external_before = _tree_hash(external) if external.is_dir() else (
+        adapter._sha256(external) if external.is_file() else None)
+    assert not adapter._cached_report(result.metadata, result.metadata["request"], subject)
+    assert _tree_hash(original) == original_before
+    external_after = _tree_hash(external) if external.is_dir() else (
+        adapter._sha256(external) if external.is_file() else None)
+    assert external_before == external_after
+
+
 def test_cache_checks_source_options_binary_and_actual_output(tmp_path, native):
     source = _source(tmp_path)
     original = _subject(tmp_path / "provided", source)
