@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/tools_source/tools/analyze_connectome_accuracy_cohort.py", line 181, in <module>
+    main()
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/tools_source/tools/analyze_connectome_accuracy_cohort.py", line 176, in main
+    result = execute(args.configuration, args.output_dir, args.case_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/tools_source/tools/analyze_connectome_accuracy_cohort.py", line 139, in execute
+    baseline, _, _ = completed_run(config, cases[case_id], "baseline", actual_case["anatomy"]["directory"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/tools_source/tools/analyze_connectome_accuracy_cohort.py", line 50, in completed_run
+    gpu, wall = json.loads(gpu_path.read_bytes()), json.loads(wall_path.read_bytes())
+                                                              ^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/anaconda3/lib/python3.11/pathlib.py", line 1050, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/anaconda3/lib/python3.11/pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/baseline/sub-CON03/raw_bids_wall.json'

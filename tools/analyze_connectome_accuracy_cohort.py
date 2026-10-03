@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -62,6 +63,42 @@ def completed_run(config, case, version, anatomy_directory):
     require(gpu["raw_dwi_cli_total_runtime_seconds"] == wall["total_runtime_seconds"],
             "actual GPU/wall timer binding differs")
     return gpu, wall, gpu_path
+
+
+def optional_baseline_timing(config, case, anatomy_directory, candidate_seconds):
+    """Assess timing only after this case's scheduled baseline is completed.
+
+    A running/failed/missing baseline does not block completed candidate
+    precision analysis. Completed baselines retain every completed_run gate.
+    """
+    timing = {"baseline_scope": "not_measured_this_case", "baseline_timing_status": "not_assessed",
+              "baseline_status": "not_scheduled"}
+    case_id = case["case_id"]
+    if {"version": "baseline", "case_id": case_id} not in config["execution_order"]:
+        return timing
+    baseline_path = Path(config["run_root"]) / "baseline" / case_id / "gpu_report.json"
+    if not baseline_path.is_file():
+        timing["baseline_status"] = "not_started"
+        return timing
+    # The producer publishes atomic snapshots. Do not read its wall or any
+    # timing fields until this snapshot says completed; final cohort analysis
+    # can assess a baseline that completes after the single-case snapshot.
+    baseline_bytes = baseline_path.read_bytes()
+    observed = json.loads(baseline_bytes)
+    require(isinstance(observed, dict) and observed.get("status") in {"running", "failed", "completed"},
+            "actual baseline report has an invalid status")
+    timing.update(baseline_status=observed["status"],
+                  baseline_observation={"path": str(baseline_path),
+                                        "sha256": hashlib.sha256(baseline_bytes).hexdigest()})
+    if observed.get("status") != "completed":
+        return timing
+    baseline, _, _ = completed_run(config, case, "baseline", anatomy_directory)
+    timing.update(baseline_scope="this_phase_same_raw_case_same_parameters",
+                  baseline_timing_status="assessed",
+                  baseline_raw_dwi_cli_seconds=baseline["raw_dwi_cli_total_runtime_seconds"],
+                  baseline_memory=baseline["memory_budget"],
+                  candidate_to_baseline_ratio=candidate_seconds / baseline["raw_dwi_cli_total_runtime_seconds"])
+    return timing
 
 
 def execute(configuration, output_dir, case_ids=None):
@@ -133,15 +170,9 @@ def execute(configuration, output_dir, case_ids=None):
                              for value in profile["ranges"].values()]
             timing = {"candidate_raw_dwi_cli_seconds": gpu["raw_dwi_cli_total_runtime_seconds"],
                       "candidate_export_seconds": wall["post_timing_result_export"]["seconds"],
-                      "candidate_memory": gpu["memory_budget"], "baseline_scope": "not_measured_this_case"}
-            baseline_path = Path(config["run_root"]) / "baseline" / case_id / "gpu_report.json"
-            if baseline_path.is_file():
-                baseline, _, _ = completed_run(config, cases[case_id], "baseline", actual_case["anatomy"]["directory"])
-                timing.update(baseline_scope="this_phase_same_raw_case_same_parameters",
-                              baseline_raw_dwi_cli_seconds=baseline["raw_dwi_cli_total_runtime_seconds"],
-                              baseline_memory=baseline["memory_budget"],
-                              candidate_to_baseline_ratio=timing["candidate_raw_dwi_cli_seconds"] /
-                              baseline["raw_dwi_cli_total_runtime_seconds"])
+                      "candidate_memory": gpu["memory_budget"]}
+            timing.update(optional_baseline_timing(config, cases[case_id], actual_case["anatomy"]["directory"],
+                                                  timing["candidate_raw_dwi_cli_seconds"]))
             report["cases"][case_id] = {
                 "actual_gpu_report": {"path": str(gpu_path), "sha256": driver.cohort.sha256(gpu_path)},
                 "actual_wall_report": {"path": str(wall_path), "sha256": driver.cohort.sha256(wall_path)},
