@@ -66,7 +66,14 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
 | [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
 | [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、GPU `eddy`、`dtifit`、TBSS/MMORF） | 原始 AP/PA 或 BIDS DWI → 九张 native/标准参数图；可选 TBSS/FNIRT 或配对 T1/tensor MMORF。PyTorch SynthStrip 脑 mask＋TOPUP；[固定公开十人双分支 benchmark](validation/dmri_pipeline/public10_20261002/README.md)记录原软件对照、逐图误差、分步骤时间与脑图。FNIT 20/20 完成，原软件 19/20 完成；TBSS/配对 T1 MMORF 的完整命令中位耗时为 759.91/571.32 秒，对照 2606.87/2113.98 秒（n=10/9）。逐图误差与原 GPU EDDY 失败记录已公布，输出尚非数值等价。 |
-| [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 从原始 BIDS 自动执行 TOPUP、EDDY、必要时的官方 recon-all，并从一次追踪输出单套或多套 atlas 矩阵；[真实数据对照](validation/connectome/ds004666/README.md)。 |
+| [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 从原始 BIDS 自动执行 TOPUP、EDDY、必要时的官方 recon-all，并从一次追踪输出单套或多套 atlas 矩阵；[本轮精度验收](docs/connectome/ACCURACY_OPTIMIZATION_20261003.md)与[前轮真实结果](docs/connectome/actual_cohort_comparison.md)分开记录。 |
+
+### Connectome 两轮验证
+
+- **前轮数据流加速（2026-10-02 轮）**：十例两版的 320 张矩阵逐值一致，raw-DWI CLI 中位数 761.722→643.623 s；共享 GPU 下的实测时间见[前轮十例报告](docs/connectome/actual_cohort_comparison.md)。对独立官方 raw 链的通过率为 57.96%，整体未进入官方重复范围，见[前轮完整矩阵判定](docs/connectome/FINAL_RAW_MATRIX_RESULTS.md)。
+- **本轮精度优化（2026-10-03）**：复用相同十例原始 BIDS 与已完成的官方 FreeSurfer subject，正式候选保留梯度/张量解释、归一化四分位索引及 ACT 的 SGM 弦方向修正。十例候选及 CON01/03 两组基线配对已完成：矩阵 1388/2400、轨迹分布 85/250 项通过，整体仍未匹配；配对总耗时观测减少 2.80%。原 CON09/10 监测缺口保留，两例独立 NVML 补测及权重末位差另列，见[本轮总说明](docs/connectome/ACCURACY_OPTIMIZATION_20261003.md)。
+
+本轮组件记录：[1 TOPUP/EDDY](validation/connectome/accuracy_20261003/task_01/README.md)、[2 梯度/建模](validation/connectome/accuracy_20261003/task_02/README.md)、[3 iFOD2/ACT](validation/connectome/accuracy_20261003/task_03/README.md)、[4 解剖/atlas](validation/connectome/accuracy_20261003/task_04/README.md)、[5 固定轨迹矩阵](validation/connectome/accuracy_20261003/task_05/README.md)。各项保留实际采用或拒绝的候选、官方对照、耗时和脑图。
 
 ### 后续分析（Post analysis）
 

@@ -1,0 +1,87 @@
+{
+  "scope": "two actually completed formal AB/BA case pairs; shared-GPU wall observations, not a controlled speed proof",
+  "cases": {
+    "sub-CON01": {
+      "baseline_CLI_seconds": 2200.8111930177547,
+      "candidate_CLI_seconds": 2072.132814221084,
+      "baseline_export_seconds": 5.38254260411486,
+      "candidate_export_seconds": 5.07970255613327,
+      "baseline_memory": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14681594880,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "candidate_memory": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14681651200,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "baseline_gpu_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/baseline/sub-CON01/gpu_report.json",
+        "sha256": "394ad52d80018b0bd3877b19049c8e3b89bda61664366ee4d7e7bf2314f35a9a"
+      },
+      "candidate_gpu_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/gpu_report.json",
+        "sha256": "82b69c8f02c460d3e61cea52f7f152ef92c6ee8820d9973485b0739ebb99afcb"
+      },
+      "candidate_minus_baseline_CLI_seconds": -128.6783787966706,
+      "candidate_vs_baseline_CLI_percent": -5.846861339351273
+    },
+    "sub-CON03": {
+      "baseline_CLI_seconds": 2033.586430602707,
+      "candidate_CLI_seconds": 2043.8392053968273,
+      "baseline_export_seconds": 5.080962425563484,
+      "candidate_export_seconds": 4.849101545289159,
+      "baseline_memory": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14679795712,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "candidate_memory": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14679790592,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "baseline_gpu_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/baseline/sub-CON03/gpu_report.json",
+        "sha256": "98c9c5e792adc39bf6ee31c63b8d9164bff0b25685f76d0a3d74fcf387825be1"
+      },
+      "candidate_gpu_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON03/gpu_report.json",
+        "sha256": "18614adf911a2975a8d99d2008063f3e4ce06f9d4fcffd78643eaecf8011773e"
+      },
+      "candidate_minus_baseline_CLI_seconds": 10.252774794120342,
+      "candidate_vs_baseline_CLI_percent": 0.5041720695924123
+    }
+  },
+  "baseline_CLI_sum_seconds": 4234.397623620462,
+  "candidate_CLI_sum_seconds": 4115.972019617911,
+  "candidate_minus_baseline_CLI_sum_seconds": -118.42560400255024,
+  "candidate_vs_baseline_CLI_sum_percent": -2.796752089174259,
+  "memory_interpretation": "四次allocator allocated/reserved与同时process-tree采样最大值均<20e9；process采样不是连续显存上界。",
+  "speed_interpretation": "CON03候选CLI约+0.504%，须保留；两例合计降低是共享负载观察，不代表controlled speedproof。"
+}

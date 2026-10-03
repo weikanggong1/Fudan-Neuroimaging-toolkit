@@ -27,12 +27,17 @@ from .fod import fit_mrtrix_msmt_csd
 from .masks import dwi2mask_legacy, maskfilter_six_connected
 from .mtnormalise import normalise_mrtrix_three_tissue
 from .response import (
+    _mrtrix_interpret_tensor_gradients,
     estimate_mrtrix_dhollander, fit_mrtrix_dhollander_tensor,
     mrtrix_shell_centres,
 )
 from .sift2 import estimate_sift2_weights
 from .tcksample_precise import sample_streamline_mean_precise
 from .tracking import Tractogram, probabilistic_tractography
+
+# Saved BIDS matrices must be recalculated after numerical fixes even when
+# the package version and original image paths remain unchanged.
+CONNECTOME_NUMERICAL_REVISION = "accuracy-20261003-v1"
 
 SCHAEFER_TIAN_ATLASES = {
     "schaefer200+tian-s1": (200, 1),
@@ -99,23 +104,36 @@ def _gradients(bvals_path: str | Path, bvecs_path: str | Path,
                device: torch.device) -> tuple[torch.Tensor, torch.Tensor]:
     """Convert FSL eddy-rotated gradients to MRtrix RAS gradient frame.
 
-    Input bvals is N values; bvecs is 3×N or N×3. Returns float32 bvals [N]
-    and unit world-frame bvecs [N,3]. Matches ``mrconvert -fslgrad`` for
-    non-b0 directions; MRtrix may retain a nonzero arbitrary b0 vector.
+    Input bvals is N values; bvecs is 3×N or N×3. Returns Float64 bvals [N]
+    and unit world-frame bvecs [N,3]. NIfTI affine columns are normalised
+    before Double polar decomposition, following MRtrix FSL import.
+    The native default Auto policy scales b-values by original norm² only
+    when max(abs(log(norm²))) > 0.01. Directions and b-values remain Double
+    until the downstream solver; no DWI or tensor-image precision changes.
+    The existing b<50 zero-vector rule and rejection of zero diffusion
+    directions are retained; MRtrix can retain an arbitrary nonzero b0
+    vector and warn about ambiguous zero diffusion directions.
     """
     bvals = torch.as_tensor(np.loadtxt(bvals_path).reshape(-1),
-                            device=device, dtype=torch.float32)
+                            device=device, dtype=torch.float64)
     array = np.loadtxt(bvecs_path)
     if array.shape == (3, n_volumes):
         array = array.T
     if bvals.shape != (n_volumes,) or array.shape != (n_volumes, 3):
         raise ValueError("bvals/bvecs must match the DWI volume count")
-    bvecs = torch.as_tensor(array, device=device, dtype=torch.float32).clone()
+    bvecs = torch.as_tensor(array, device=device, dtype=torch.float64).clone()
+    nonzero = bvals >= 50
+    bvecs[~nonzero] = 0
+    interpreted = _mrtrix_interpret_tensor_gradients(
+        torch.cat((bvecs, bvals[:, None]), dim=1),
+    )
+    bvecs, bvals = interpreted[:, :3], interpreted[:, 3]
     if bool(torch.linalg.det(affine[:3, :3]) > 0):
         bvecs[:, 0] = -bvecs[:, 0]
-    u, _, vh = torch.linalg.svd(affine[:3, :3].float())
+    linear = affine[:3, :3].double()
+    cosine = linear / torch.linalg.vector_norm(linear, dim=0)[None, :]
+    u, _, vh = torch.linalg.svd(cosine)
     bvecs = bvecs @ (u @ vh).T
-    nonzero = bvals >= 50
     bvecs[nonzero] = torch.nn.functional.normalize(bvecs[nonzero], dim=-1)
     bvecs[~nonzero] = 0
     if bool((torch.linalg.vector_norm(bvecs[nonzero], dim=-1) < 0.9).any()):

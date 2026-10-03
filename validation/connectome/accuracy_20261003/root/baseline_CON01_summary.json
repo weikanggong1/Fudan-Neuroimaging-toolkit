@@ -1,0 +1,458 @@
+{
+  "original_components": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_components_CON01_baseline_v2/components.json",
+    "sha256": "1fa40b59e1e7e4db893a62737e388b1873cc4058cfaffe705dc1fb29ce6b335b"
+  },
+  "helper": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py",
+    "sha256": "08015c11c2662cb2f8115843414ed9148c1dadc60c175b66dcf20f51381c18ce"
+  },
+  "coverage": {
+    "requested_cases": [
+      "sub-CON01"
+    ],
+    "requested_versions": [
+      "baseline"
+    ],
+    "actually_compared": [
+      "baseline/sub-CON01"
+    ],
+    "not_compared": {}
+  },
+  "scientific_parity": "not_assessed",
+  "candidate_producer": {
+    "gpu_report": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/baseline/sub-CON01/gpu_report.json",
+      "sha256": "394ad52d80018b0bd3877b19049c8e3b89bda61664366ee4d7e7bf2314f35a9a",
+      "size_bytes": 359785
+    },
+    "wall_report": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/baseline/sub-CON01/raw_bids_wall.json",
+      "sha256": "b7a3e2b2540e551dc1264a717dc98ba5b0f6458db6bd95bf6c453df444a78edc",
+      "size_bytes": 110686
+    },
+    "source_fingerprint": "328c398496c5b90f459381ca462ba6597cbbe5f2e9700f0b1a273f1408962bac",
+    "source_commit": "7af34e6d072e843fb2558c931bb2781f1d4b0be9",
+    "total_runtime_seconds": 2200.8111930177547,
+    "memory_budget": {
+      "limit_bytes": 20000000000,
+      "criterion": "strictly_less",
+      "allocated_observed_below_limit": true,
+      "reserved_observed_below_limit": true,
+      "allocator_observed_below_limit": true,
+      "process_tree_sampled_below_limit": true,
+      "continuous_process_tree_bound_verified": false,
+      "note": "allocator and sampled driver peaks have distinct scopes; missing samples or gaps do not prove a strict continuous whole-pipeline memory bound"
+    }
+  },
+  "official_producer": {
+    "reference_manifest": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON01/reference_manifest.json",
+      "sha256": "64b9066e465ddc1ae8e688c1fec48b2a5611a6312b8637a302fb5404e7d7ca5a"
+    },
+    "DWI_consumer": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/consumer_contract.json",
+      "sha256": "36b56d7d8e218464e4440c99a75a3fe12a7d71f984912f743fa343e42d57a07b"
+    },
+    "rawprep_report": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/report.json",
+      "sha256": "f83d232acb43ad0899cff205ed15fcd5b30a05b38550fc12489640cec3af95a4"
+    },
+    "modeling_report": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/report.json",
+      "sha256": "e5292dc2432475f096d0b92e741ae0fdecc224b326e66a6df0c1738d1ed61e88"
+    },
+    "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+    "official_FA_command": [
+      "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz",
+      "-fa",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
+      "-vector",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/direction.nii.gz",
+      "-modulate",
+      "none",
+      "-mask",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
+      "-nthreads",
+      "8"
+    ],
+    "official_gradient_command": [
+      "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
+      "-fslgrad",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.eddy_rotated_bvecs",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/raw/AP.bval",
+      "-bvalue_scaling",
+      "no",
+      "-export_grad_mrtrix",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt",
+      "-nthreads",
+      "8"
+    ]
+  },
+  "CPU_comparison_wall_seconds": 20.223094128072262,
+  "bound_files_before_after_count": 1319,
+  "corrected_dwi": {
+    "frames_retained": 102,
+    "spatial_voxels_all": 552960,
+    "official_brain_mask_voxels": 115226,
+    "whole_volume": {
+      "count_all_values": 56401920,
+      "finite_pair_count": 56401920,
+      "all_values_finite": true,
+      "unequal_ieee": 51732133,
+      "nonfinite_state_mismatch": 0,
+      "candidate_nan": 0,
+      "candidate_posinf": 0,
+      "candidate_neginf": 0,
+      "reference_nan": 0,
+      "reference_posinf": 0,
+      "reference_neginf": 0,
+      "candidate_negative": 247759,
+      "reference_negative": 250501,
+      "zero_support_mismatch": 1553256,
+      "metrics_all_values": {
+        "mae": 0.5437195124756538,
+        "rmse": 1.567376622959973,
+        "max_absolute": 144.93297576904297,
+        "signed_mean_error": -0.2057674463674149,
+        "relative_rmse_reference_rms": 0.03948376851302162,
+        "pearson": 0.9990870125128867
+      },
+      "finite_pair_diagnostic": {
+        "count": 56401920,
+        "mae": 0.5437195124756538,
+        "rmse": 1.567376622959973,
+        "max_absolute": 144.93297576904297,
+        "signed_mean_error": -0.2057674463674149,
+        "relative_rmse_reference_rms": 0.03948376851302162,
+        "pearson": 0.9990870125128867,
+        "count_absolute_gt": {
+          "1e-06": 51731819,
+          "1e-05": 51728872,
+          "0.0001": 51699258,
+          "0.001": 51467502
+        }
+      },
+      "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+    },
+    "official_brain_mask": {
+      "count_all_values": 11753052,
+      "finite_pair_count": 11753052,
+      "all_values_finite": true,
+      "unequal_ieee": 11749236,
+      "nonfinite_state_mismatch": 0,
+      "candidate_nan": 0,
+      "candidate_posinf": 0,
+      "candidate_neginf": 0,
+      "reference_nan": 0,
+      "reference_posinf": 0,
+      "reference_neginf": 0,
+      "candidate_negative": 37947,
+      "reference_negative": 37395,
+      "zero_support_mismatch": 0,
+      "metrics_all_values": {
+        "mae": 0.570964287714449,
+        "rmse": 1.0674688080663635,
+        "max_absolute": 134.59063720703125,
+        "signed_mean_error": -0.0069218254206051405,
+        "relative_rmse_reference_rms": 0.012831911851978952,
+        "pearson": 0.9998692511931546
+      },
+      "finite_pair_diagnostic": {
+        "count": 11753052,
+        "mae": 0.570964287714449,
+        "rmse": 1.0674688080663635,
+        "max_absolute": 134.59063720703125,
+        "signed_mean_error": -0.0069218254206051405,
+        "relative_rmse_reference_rms": 0.012831911851978952,
+        "pearson": 0.9998692511931546,
+        "count_absolute_gt": {
+          "1e-06": 11749231,
+          "1e-05": 11749062,
+          "0.0001": 11747167,
+          "0.001": 11727970
+        }
+      },
+      "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+    }
+  },
+  "FA": {
+    "spatial_voxels_all": 552960,
+    "official_brain_mask_voxels": 115226,
+    "whole_volume": {
+      "count_all_values": 552960,
+      "finite_pair_count": 552922,
+      "all_values_finite": false,
+      "unequal_ieee": 115707,
+      "nonfinite_state_mismatch": 3,
+      "candidate_nan": 36,
+      "candidate_posinf": 0,
+      "candidate_neginf": 0,
+      "reference_nan": 37,
+      "reference_posinf": 0,
+      "reference_neginf": 0,
+      "candidate_negative": 0,
+      "reference_negative": 0,
+      "zero_support_mismatch": 1083,
+      "metrics_all_values": {
+        "mae": null,
+        "rmse": null,
+        "max_absolute": null,
+        "signed_mean_error": null,
+        "relative_rmse_reference_rms": null,
+        "pearson": null
+      },
+      "finite_pair_diagnostic": {
+        "count": 552922,
+        "mae": 0.0031884598995912086,
+        "rmse": 0.030724827688465753,
+        "max_absolute": 1.2247437238693237,
+        "signed_mean_error": 4.882348383932482e-05,
+        "relative_rmse_reference_rms": 0.17165025610498635,
+        "pearson": 0.9831151967422544,
+        "count_absolute_gt": {
+          "1e-06": 115655,
+          "1e-05": 115489,
+          "0.0001": 113686,
+          "0.001": 96598
+        }
+      },
+      "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+    },
+    "official_brain_mask": {
+      "count_all_values": 115226,
+      "finite_pair_count": 115189,
+      "all_values_finite": false,
+      "unequal_ieee": 115226,
+      "nonfinite_state_mismatch": 2,
+      "candidate_nan": 35,
+      "candidate_posinf": 0,
+      "candidate_neginf": 0,
+      "reference_nan": 37,
+      "reference_posinf": 0,
+      "reference_neginf": 0,
+      "candidate_negative": 0,
+      "reference_negative": 0,
+      "zero_support_mismatch": 602,
+      "metrics_all_values": {
+        "mae": null,
+        "rmse": null,
+        "max_absolute": null,
+        "signed_mean_error": null,
+        "relative_rmse_reference_rms": null,
+        "pearson": null
+      },
+      "finite_pair_diagnostic": {
+        "count": 115189,
+        "mae": 0.013117763739878892,
+        "rmse": 0.05449217160230718,
+        "max_absolute": 1.2246956825256348,
+        "signed_mean_error": -0.001952894450316031,
+        "relative_rmse_reference_rms": 0.13895132238389418,
+        "pearson": 0.9748413886937088,
+        "count_absolute_gt": {
+          "1e-06": 115175,
+          "1e-05": 115009,
+          "0.0001": 113206,
+          "0.001": 96118
+        }
+      },
+      "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+    }
+  },
+  "rotated_gradients": {
+    "FSL_shape": [
+      3,
+      102
+    ],
+    "frames_retained": 102,
+    "bvec_components": {
+      "count_all_values": 306,
+      "finite_pair_count": 306,
+      "all_values_finite": true,
+      "unequal_ieee": 288,
+      "nonfinite_state_mismatch": 0,
+      "candidate_nan": 0,
+      "candidate_posinf": 0,
+      "candidate_neginf": 0,
+      "reference_nan": 0,
+      "reference_posinf": 0,
+      "reference_neginf": 0,
+      "candidate_negative": 138,
+      "reference_negative": 138,
+      "zero_support_mismatch": 0,
+      "metrics_all_values": {
+        "mae": 0.0005972710905620919,
+        "rmse": 0.0008658725082583371,
+        "max_absolute": 0.004052603000000099,
+        "signed_mean_error": -3.703570039216064e-06,
+        "relative_rmse_reference_rms": 0.001545891636493194,
+        "pearson": 0.999998805130838
+      },
+      "finite_pair_diagnostic": {
+        "count": 306,
+        "mae": 0.0005972710905620919,
+        "rmse": 0.0008658725082583371,
+        "max_absolute": 0.004052603000000099,
+        "signed_mean_error": -3.703570039216064e-06,
+        "relative_rmse_reference_rms": 0.001545891636493194,
+        "pearson": 0.999998805130838,
+        "count_absolute_gt": {
+          "1e-06": 288,
+          "1e-05": 284,
+          "0.0001": 252,
+          "0.001": 55
+        }
+      },
+      "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+    },
+    "bvals": {
+      "count_all_values": 102,
+      "finite_pair_count": 102,
+      "all_values_finite": true,
+      "unequal_ieee": 0,
+      "nonfinite_state_mismatch": 0,
+      "candidate_nan": 0,
+      "candidate_posinf": 0,
+      "candidate_neginf": 0,
+      "reference_nan": 0,
+      "reference_posinf": 0,
+      "reference_neginf": 0,
+      "candidate_negative": 0,
+      "reference_negative": 0,
+      "zero_support_mismatch": 0,
+      "metrics_all_values": {
+        "mae": 0.0,
+        "rmse": 0.0,
+        "max_absolute": 0.0,
+        "signed_mean_error": 0.0,
+        "relative_rmse_reference_rms": 0.0,
+        "pearson": 1.0
+      },
+      "finite_pair_diagnostic": {
+        "count": 102,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "max_absolute": 0.0,
+        "signed_mean_error": 0.0,
+        "relative_rmse_reference_rms": 0.0,
+        "pearson": 1.0,
+        "count_absolute_gt": {
+          "1e-06": 0,
+          "1e-05": 0,
+          "0.0001": 0,
+          "0.001": 0
+        }
+      },
+      "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+    },
+    "norms": {
+      "count_all_values": 102,
+      "finite_pair_count": 102,
+      "all_values_finite": true,
+      "unequal_ieee": 96,
+      "nonfinite_state_mismatch": 0,
+      "candidate_nan": 0,
+      "candidate_posinf": 0,
+      "candidate_neginf": 0,
+      "reference_nan": 0,
+      "reference_posinf": 0,
+      "reference_neginf": 0,
+      "candidate_negative": 0,
+      "reference_negative": 0,
+      "zero_support_mismatch": 0,
+      "metrics_all_values": {
+        "mae": 2.765205317773021e-08,
+        "rmse": 3.509295636272177e-08,
+        "max_absolute": 7.610978325356399e-08,
+        "signed_mean_error": 2.0417420110816746e-08,
+        "relative_rmse_reference_rms": 3.6172991449690754e-08,
+        "pearson": 0.9999999999999929
+      },
+      "finite_pair_diagnostic": {
+        "count": 102,
+        "mae": 2.765205317773021e-08,
+        "rmse": 3.509295636272177e-08,
+        "max_absolute": 7.610978325356399e-08,
+        "signed_mean_error": 2.0417420110816746e-08,
+        "relative_rmse_reference_rms": 3.6172991449690754e-08,
+        "pearson": 0.9999999999999929,
+        "count_absolute_gt": {
+          "1e-06": 0,
+          "1e-05": 0,
+          "0.0001": 0,
+          "0.001": 0
+        }
+      },
+      "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+    },
+    "zero_vector_support_mismatch": 0,
+    "b0_support_lt50_mismatch": 0
+  },
+  "rotated_gradients_max_directed_angle_degrees": 0.31409390627381845,
+  "ancillary_geometry": {
+    "wm_fod": "same_grid_not_numerically_assessed",
+    "five_tissue": "not_comparable_grid",
+    "atlases": {
+      "fs-aparc": "same_grid_not_numerically_assessed",
+      "aparc+tian-s1": "same_grid_not_numerically_assessed",
+      "aparc.a2009s+tian-s1": "same_grid_not_numerically_assessed",
+      "glasser+tian-s1": "same_grid_not_numerically_assessed",
+      "glasser+tian-s4": "same_grid_not_numerically_assessed",
+      "schaefer200+tian-s1": "same_grid_not_numerically_assessed",
+      "schaefer500+tian-s4": "same_grid_not_numerically_assessed",
+      "schaefer1000+tian-s4": "same_grid_not_numerically_assessed"
+    }
+  },
+  "scope": "independent end-to-end raw acquisitions; downstream FA can differ because corrected DWI/mask/rotated gradients differ; not fixed-input DTI parity",
+  "brain_image": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_components_CON01_baseline_v2/baseline_CON01_components_brain.png",
+    "sha256": "e340abfad2709ad84679a18db5139bc5642ee0e050ac79a0de45e30dac9c3281",
+    "input_records": [
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/baseline/sub-CON01/connectome/preproc/eddy/data.nii.gz",
+        "sha256": "c08251e3610808f79b93e62152449c7c93092d94b9196ba9ccdef4e3661e61e9",
+        "size_bytes": 184196000
+      },
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-AP_dwi.bval",
+        "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+        "size_bytes": 476
+      },
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/baseline/sub-CON01/connectome/fa_dwi.nii.gz",
+        "sha256": "e0564cb46552a47d30899bf88c58389e45a1b49304a9f6429d5ffd9c3cbd159e",
+        "size_bytes": 440799
+      },
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/baseline/sub-CON01/connectome/brain_mask_dwi.nii.gz",
+        "sha256": "f6cc2e1124e89801d2b7d962374e5be7ca28b8f8d3f81bd0186fad01cda22c0c",
+        "size_bytes": 16994
+      },
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
+        "sha256": "27965c4079c022d60df9db32bc1b705519e4259331f855c32d8efaf5981a69bf",
+        "size_bytes": 188118748
+      },
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-AP_dwi.bval",
+        "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+        "size_bytes": 476
+      },
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
+        "sha256": "cf112d909c5f204191e73c4d719efda8ba9b0d173b57972fe8ab85f5792fb31f",
+        "size_bytes": 431072
+      },
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
+        "sha256": "00cdc215748b4d1452fba19fccb84cb2cfa976fbc626e3a4f229ca9e607671c6",
+        "size_bytes": 16621
+      }
+    ],
+    "plane_k": 30,
+    "policy": "original stored voxel slice; no resampling; nearest display enlargement only; NaN explicitly magenta; display clipping does not change full-volume metrics"
+  }
+}

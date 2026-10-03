@@ -1,0 +1,714 @@
+{
+  "scope": "fixed original official CSD inputs; no tensor/response/CSD or raw processing rerun",
+  "source_sha256": "30be5a75c2a0f5f7e30738099b13150b7c70df6505d444079b90005ffebdaa44",
+  "harness_sha256": "d35aec575bfed1a476389ce4f47437974dfe9da1d64a54f633a05a646f2c97ce",
+  "case_map_sha256": "ad8d9e1fa7f4e4f14c8f260dcc9fd6f835ddaf5c257e2413d07db9df39ab46c2",
+  "device": "cpu",
+  "torch": "2.5.1",
+  "cases": {
+    "CON03": {
+      "contract_sha256": "153ca1e43815b6ed630630869b3ea64e7eaadde27b12cfd5748806633b917052",
+      "inputs": {
+        "wm_fod_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/wm.nii.gz",
+          "sha256": "6b737c07a03be5702f9062fc7175f7a85cef2fc7147843fe7b04109e4b01fd50"
+        },
+        "gm_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gm.nii.gz",
+          "sha256": "a17c7e9c6e80d524fc94903e7d34c795db39a89d7b963c1788366cfb87781a4d"
+        },
+        "csf_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/csf.nii.gz",
+          "sha256": "b8eb74355f81d9b49dc39e1f612afc3532bed78eca041b6b97fdc39f6434cb13"
+        },
+        "normalise_mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/normalise_mask.nii.gz",
+          "sha256": "3ee78973a63aed1ce4a3872857b6decaf513d08e1c596ea2007f82ab984f89e5"
+        },
+        "wm_fod_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/wm_norm.nii.gz",
+          "sha256": "f96cb2432e94fca10afa55552bc52d569713cbde8957dbf72e706b73ac545f6c"
+        },
+        "gm_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gm_norm.nii.gz",
+          "sha256": "22ea2897d5fe74a895957ed56a1c4ec89b2dbb99544085285214f8440a7d7446"
+        },
+        "csf_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/csf_norm.nii.gz",
+          "sha256": "01e309b7753cfafc6244a3d344c9b48d85c0328174cc580569476d1c09c65437"
+        },
+        "normalise_field": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/field.nii.gz",
+          "sha256": "07273184e2ff23dda8196cdc8077ca0942361e4f2677f03aaeb953bdcbeb6b56"
+        },
+        "accepted_mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/accepted_mask.nii.gz",
+          "sha256": "f35b4b459c2d26a6a8fd9bb839fb1b5b236644d9c0349d32677241633cb4389e"
+        },
+        "balance_factors": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/balance_factors.txt",
+          "sha256": "daa74db96500b76c3b9c97cb913d7bfa7badef8a834bf55b074a55790707e9b2"
+        }
+      },
+      "mask_voxels": 80422,
+      "quartile_zero_based": {
+        "baseline": [
+          20106,
+          60316
+        ],
+        "half_up": [
+          20106,
+          60317
+        ]
+      },
+      "versions": {
+        "baseline": {
+          "wall_s": 0.2483678236603737,
+          "errors": {
+            "wm": {
+              "finite_elements": 24883200,
+              "neq": 840534,
+              "max": 5.960464477539063e-08,
+              "p99": 9.313225746154785e-10,
+              "p999": 7.450580596923828e-09,
+              "rmse": 6.661412300160752e-10,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "gm": {
+              "finite_elements": 552960,
+              "neq": 18764,
+              "max": 5.960464477539063e-08,
+              "p99": 1.4901161193847656e-08,
+              "p999": 2.9802322387695312e-08,
+              "rmse": 1.9920280755022144e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "csf": {
+              "finite_elements": 552960,
+              "neq": 18644,
+              "max": 5.960464477539063e-08,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 1.0429463390475886e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "field": {
+              "finite_elements": 552960,
+              "neq": 98349,
+              "max": 0.000244140625,
+              "p99": 1.9073486328125e-06,
+              "p999": 1.52587890625e-05,
+              "rmse": 1.6554084243586066e-06,
+              "abs_gt_1e_minus5": 959,
+              "nonfinite_mismatch": 0
+            },
+            "accepted_mask": {
+              "finite_elements": 552960,
+              "neq": 0,
+              "max": 0.0,
+              "p99": 0.0,
+              "p999": 0.0,
+              "rmse": 0.0,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "balance_factors": {
+              "max_abs": 4.970519750902014e-06
+            }
+          },
+          "output_sha256": "40c740d7f8efe5f099f443a0d57167f9dd7377441dd0cdf2b63430e7b0d93eb0"
+        },
+        "half_up": {
+          "wall_s": 0.3074576035141945,
+          "errors": {
+            "wm": {
+              "finite_elements": 24883200,
+              "neq": 840534,
+              "max": 5.960464477539063e-08,
+              "p99": 9.313225746154785e-10,
+              "p999": 7.450580596923828e-09,
+              "rmse": 6.661412300160752e-10,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "gm": {
+              "finite_elements": 552960,
+              "neq": 18764,
+              "max": 5.960464477539063e-08,
+              "p99": 1.4901161193847656e-08,
+              "p999": 2.9802322387695312e-08,
+              "rmse": 1.9920280755022144e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "csf": {
+              "finite_elements": 552960,
+              "neq": 18644,
+              "max": 5.960464477539063e-08,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 1.0429463390475886e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "field": {
+              "finite_elements": 552960,
+              "neq": 98349,
+              "max": 0.000244140625,
+              "p99": 1.9073486328125e-06,
+              "p999": 1.52587890625e-05,
+              "rmse": 1.6554084243586066e-06,
+              "abs_gt_1e_minus5": 959,
+              "nonfinite_mismatch": 0
+            },
+            "accepted_mask": {
+              "finite_elements": 552960,
+              "neq": 0,
+              "max": 0.0,
+              "p99": 0.0,
+              "p999": 0.0,
+              "rmse": 0.0,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "balance_factors": {
+              "max_abs": 4.970519750902014e-06
+            }
+          },
+          "output_sha256": "40c740d7f8efe5f099f443a0d57167f9dd7377441dd0cdf2b63430e7b0d93eb0"
+        }
+      }
+    },
+    "CON04": {
+      "contract_sha256": "8ecc97e074bf3fe01bdd78d87b31b1a12e2bf9b1934274829a8c369eb210d69d",
+      "inputs": {
+        "wm_fod_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/wm.nii.gz",
+          "sha256": "355edeffe8f5871dbad5af25caf1649b77853f68463047baf1657c65c16e0ed2"
+        },
+        "gm_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gm.nii.gz",
+          "sha256": "edc25acb7c3301ae6a040b33c98326fa7542bbf191d7f29f95aa7e5961a84355"
+        },
+        "csf_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/csf.nii.gz",
+          "sha256": "7da0db6b9f5e566e5d59aaac2de3fdad125ee6722300a6ab1e0c669cca6f8318"
+        },
+        "normalise_mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/normalise_mask.nii.gz",
+          "sha256": "dd28be3b9326bb0bca95f9a55878fb8e55046e2330957d8a08c8ee0c3e371aed"
+        },
+        "wm_fod_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/wm_norm.nii.gz",
+          "sha256": "ff9ad0c9f6bfaa8957936ce94918b7189bf956058d75b22716db1a7458ebdfe4"
+        },
+        "gm_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gm_norm.nii.gz",
+          "sha256": "b4d848935775ebf73a8da8cbe26f831926b3519adf070fe01b00f6c2162b8a46"
+        },
+        "csf_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/csf_norm.nii.gz",
+          "sha256": "52d3859d0eb94c1c627b1c0fb7c1d298478c82993a4a3c1c52cf8f894de5d1a6"
+        },
+        "normalise_field": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/field.nii.gz",
+          "sha256": "f14a503057a713fdc94fe2b9a410a04654caba8b51929a42c0e909d3bd060d9f"
+        },
+        "accepted_mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/accepted_mask.nii.gz",
+          "sha256": "b775812d84777b99d6b5df724f83850a5f5650c7d8e826111ff45cf5cb449d80"
+        },
+        "balance_factors": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/balance_factors.txt",
+          "sha256": "286684596d3159585e2a1b046d2c85a462923b55486c2c63ec11f0879456ab79"
+        }
+      },
+      "mask_voxels": 82830,
+      "quartile_zero_based": {
+        "baseline": [
+          20708,
+          62122
+        ],
+        "half_up": [
+          20708,
+          62123
+        ]
+      },
+      "versions": {
+        "baseline": {
+          "wall_s": 0.23279839754104614,
+          "errors": {
+            "wm": {
+              "finite_elements": 24883200,
+              "neq": 861536,
+              "max": 5.960464477539063e-08,
+              "p99": 9.313225746154785e-10,
+              "p999": 7.450580596923828e-09,
+              "rmse": 6.678843965880173e-10,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "gm": {
+              "finite_elements": 552960,
+              "neq": 19208,
+              "max": 5.960464477539063e-08,
+              "p99": 1.4901161193847656e-08,
+              "p999": 2.9802322387695312e-08,
+              "rmse": 1.8811821664718392e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "csf": {
+              "finite_elements": 552960,
+              "neq": 19166,
+              "max": 5.960464477539063e-08,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 1.2417149452114034e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "field": {
+              "finite_elements": 552960,
+              "neq": 97527,
+              "max": 0.000244140625,
+              "p99": 3.814697265625e-06,
+              "p999": 3.0517578125e-05,
+              "rmse": 2.4378960561163464e-06,
+              "abs_gt_1e_minus5": 1787,
+              "nonfinite_mismatch": 0
+            },
+            "accepted_mask": {
+              "finite_elements": 552960,
+              "neq": 0,
+              "max": 0.0,
+              "p99": 0.0,
+              "p999": 0.0,
+              "rmse": 0.0,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "balance_factors": {
+              "max_abs": 1.2360283447865328e-06
+            }
+          },
+          "output_sha256": "fb5a9433ee4309331630588e31da29c70a51a61655d228549563bbd0fb979542"
+        },
+        "half_up": {
+          "wall_s": 0.25422239303588867,
+          "errors": {
+            "wm": {
+              "finite_elements": 24883200,
+              "neq": 861536,
+              "max": 5.960464477539063e-08,
+              "p99": 9.313225746154785e-10,
+              "p999": 7.450580596923828e-09,
+              "rmse": 6.678843965880173e-10,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "gm": {
+              "finite_elements": 552960,
+              "neq": 19208,
+              "max": 5.960464477539063e-08,
+              "p99": 1.4901161193847656e-08,
+              "p999": 2.9802322387695312e-08,
+              "rmse": 1.8811821664718392e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "csf": {
+              "finite_elements": 552960,
+              "neq": 19166,
+              "max": 5.960464477539063e-08,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 1.2417149452114034e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "field": {
+              "finite_elements": 552960,
+              "neq": 97527,
+              "max": 0.000244140625,
+              "p99": 3.814697265625e-06,
+              "p999": 3.0517578125e-05,
+              "rmse": 2.4378960561163464e-06,
+              "abs_gt_1e_minus5": 1787,
+              "nonfinite_mismatch": 0
+            },
+            "accepted_mask": {
+              "finite_elements": 552960,
+              "neq": 0,
+              "max": 0.0,
+              "p99": 0.0,
+              "p999": 0.0,
+              "rmse": 0.0,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "balance_factors": {
+              "max_abs": 1.2360283427881313e-06
+            }
+          },
+          "output_sha256": "77350590df8af21435baff28937a3766d99d2722829881f051972f36c2a401d9"
+        }
+      }
+    },
+    "CON07": {
+      "contract_sha256": "7a69487a384385518c2f03b1ef2bcf574ed178241d6de156cd5045661556561a",
+      "inputs": {
+        "wm_fod_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm.nii.gz",
+          "sha256": "14f875e11e234895c42ce359e00a3e55025a0cd42bd34e530000083f8aa43d4c"
+        },
+        "gm_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm.nii.gz",
+          "sha256": "5a000716adcb4d4dfd595ccbb5d6aa1b5fd20a261a3f67afd07ecd278b39852d"
+        },
+        "csf_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf.nii.gz",
+          "sha256": "4fb6c0563bb616905bd87b2c0e34acdf0bfba1874d55966bf5e1511b6551cec9"
+        },
+        "normalise_mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/normalise_mask.nii.gz",
+          "sha256": "9a29c67834e85fbd6ae39dc5c9647e2c1844c09c371d6f20cd93938c6f11c8ad"
+        },
+        "wm_fod_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm_norm.nii.gz",
+          "sha256": "63a1a45cc91306b6d71ae5bc4c42e6e58c2d4f78d0f9f277b60d1076db4ce3eb"
+        },
+        "gm_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm_norm.nii.gz",
+          "sha256": "e93ff7197a7cc1212d61146c30393ec30b8efc999905e3ea149e3f2e9752bdf0"
+        },
+        "csf_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf_norm.nii.gz",
+          "sha256": "8eb6f0b0907a7597c7648262750def20572208a3f26254eeb6a6ab2f64590c11"
+        },
+        "normalise_field": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/field.nii.gz",
+          "sha256": "529833583ee4d1d76f8752bea318b6ddc98ed0c3aeb51dfb049f6904862d42e7"
+        },
+        "accepted_mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/accepted_mask.nii.gz",
+          "sha256": "c59ee6f4dfdc0b67e5762f8d13f0744dea50100ba9f447d92f21fc34ae176f4a"
+        },
+        "balance_factors": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/balance_factors.txt",
+          "sha256": "6efb548ce27da7ac832aba57e98af68a078f432581b0bf20c4b4b638cea8411e"
+        }
+      },
+      "mask_voxels": 89722,
+      "quartile_zero_based": {
+        "baseline": [
+          22430,
+          67292
+        ],
+        "half_up": [
+          22431,
+          67292
+        ]
+      },
+      "versions": {
+        "baseline": {
+          "wall_s": 0.23112015426158905,
+          "errors": {
+            "wm": {
+              "finite_elements": 24883200,
+              "neq": 915394,
+              "max": 1.1920928955078125e-07,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 7.723169134579661e-10,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "gm": {
+              "finite_elements": 552960,
+              "neq": 20441,
+              "max": 5.960464477539063e-08,
+              "p99": 1.4901161193847656e-08,
+              "p999": 2.9802322387695312e-08,
+              "rmse": 2.1539811859049474e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "csf": {
+              "finite_elements": 552960,
+              "neq": 20295,
+              "max": 5.960464477539063e-08,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 1.0344933850623532e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "field": {
+              "finite_elements": 552960,
+              "neq": 97868,
+              "max": 0.0001220703125,
+              "p99": 1.9073486328125e-06,
+              "p999": 1.52587890625e-05,
+              "rmse": 1.2587359460814419e-06,
+              "abs_gt_1e_minus5": 665,
+              "nonfinite_mismatch": 0
+            },
+            "accepted_mask": {
+              "finite_elements": 552960,
+              "neq": 0,
+              "max": 0.0,
+              "p99": 0.0,
+              "p999": 0.0,
+              "rmse": 0.0,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "balance_factors": {
+              "max_abs": 7.397479100390569e-07
+            }
+          },
+          "output_sha256": "d24eee2ef76c8c96c6d6552e2a5ce889d9a5524f012442aa677d7178d9049251"
+        },
+        "half_up": {
+          "wall_s": 0.2726815715432167,
+          "errors": {
+            "wm": {
+              "finite_elements": 24883200,
+              "neq": 915394,
+              "max": 1.1920928955078125e-07,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 7.723169134579661e-10,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "gm": {
+              "finite_elements": 552960,
+              "neq": 20441,
+              "max": 5.960464477539063e-08,
+              "p99": 1.4901161193847656e-08,
+              "p999": 2.9802322387695312e-08,
+              "rmse": 2.1539811859049474e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "csf": {
+              "finite_elements": 552960,
+              "neq": 20295,
+              "max": 5.960464477539063e-08,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 1.0344933850623532e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "field": {
+              "finite_elements": 552960,
+              "neq": 97868,
+              "max": 0.0001220703125,
+              "p99": 1.9073486328125e-06,
+              "p999": 1.52587890625e-05,
+              "rmse": 1.2587359460814419e-06,
+              "abs_gt_1e_minus5": 665,
+              "nonfinite_mismatch": 0
+            },
+            "accepted_mask": {
+              "finite_elements": 552960,
+              "neq": 0,
+              "max": 0.0,
+              "p99": 0.0,
+              "p999": 0.0,
+              "rmse": 0.0,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "balance_factors": {
+              "max_abs": 7.397481023296848e-07
+            }
+          },
+          "output_sha256": "256610e77515d9618525fc15a973d5ac5ad38cb62f15cfb74b7564a706bb7705"
+        }
+      }
+    },
+    "CON11": {
+      "contract_sha256": "bb5ab1b71c2cbda4387cf918edadf292305e6af466042db0b4e9431bd9a15339",
+      "inputs": {
+        "wm_fod_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/wm.nii.gz",
+          "sha256": "f7519999c24d47629f2917084bedff60edb7e2c6dc4f0a0399cde399da74337e"
+        },
+        "gm_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gm.nii.gz",
+          "sha256": "cf2d99cf820ba967f2e410475f43102a7fb125cf91c04e117f5452e43d5d998e"
+        },
+        "csf_raw": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/csf.nii.gz",
+          "sha256": "c71064752b5e200e5b4cd624b7adb3992b1a69ca29a4b5302807bf423798f701"
+        },
+        "normalise_mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/normalise_mask.nii.gz",
+          "sha256": "7101bab75808a66eb06bcdbd1539c7aa96896e3a023494e0ca6c7703b3f0c6fa"
+        },
+        "wm_fod_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/wm_norm.nii.gz",
+          "sha256": "8a3a33770be84645e4a678223b4ea4ceceddf931e1a34904db38c3cdd50914e9"
+        },
+        "gm_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gm_norm.nii.gz",
+          "sha256": "de50f6128e846387a131649d90856a8e821877c0137c6b3adc81ed12d12fc28c"
+        },
+        "csf_normalized": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/csf_norm.nii.gz",
+          "sha256": "574fe64beb8a643ed1aed182c9c6443bf078eb7273195ea5424344b0aaa2dc2e"
+        },
+        "normalise_field": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/field.nii.gz",
+          "sha256": "b2e5c9130a7aa150edc51f7fc767565dc906e30b1d5c2b45ef7fcd2d5dfb5a3d"
+        },
+        "accepted_mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/accepted_mask.nii.gz",
+          "sha256": "e8234e42e90b7d9c1d9b36cc9b6eab5ae023351868071c5ad34ab5fcfd11a407"
+        },
+        "balance_factors": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/balance_factors.txt",
+          "sha256": "4d25aa2eb5e10ae0de952b57bbda33019e4cc00a78cc71a93f161205d28b4839"
+        }
+      },
+      "mask_voxels": 86082,
+      "quartile_zero_based": {
+        "baseline": [
+          21520,
+          64562
+        ],
+        "half_up": [
+          21521,
+          64562
+        ]
+      },
+      "versions": {
+        "baseline": {
+          "wall_s": 0.23021096736192703,
+          "errors": {
+            "wm": {
+              "finite_elements": 24883200,
+              "neq": 902456,
+              "max": 1.1920928955078125e-07,
+              "p99": 9.313225746154785e-10,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 7.656219100076668e-10,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "gm": {
+              "finite_elements": 552960,
+              "neq": 20164,
+              "max": 5.960464477539063e-08,
+              "p99": 1.4901161193847656e-08,
+              "p999": 2.9802322387695312e-08,
+              "rmse": 1.951354501074768e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "csf": {
+              "finite_elements": 552960,
+              "neq": 20085,
+              "max": 5.960464477539063e-08,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 1.167447379825639e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "field": {
+              "finite_elements": 552960,
+              "neq": 98718,
+              "max": 0.000244140625,
+              "p99": 3.814697265625e-06,
+              "p999": 3.0517578125e-05,
+              "rmse": 2.0925521369032036e-06,
+              "abs_gt_1e_minus5": 1632,
+              "nonfinite_mismatch": 0
+            },
+            "accepted_mask": {
+              "finite_elements": 552960,
+              "neq": 0,
+              "max": 0.0,
+              "p99": 0.0,
+              "p999": 0.0,
+              "rmse": 0.0,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "balance_factors": {
+              "max_abs": 3.840531592080865e-06
+            }
+          },
+          "output_sha256": "639ac4e94d9461d9c133aa531bceb7510cb3ac1e78edd93e309b53191e753952"
+        },
+        "half_up": {
+          "wall_s": 0.22910749167203903,
+          "errors": {
+            "wm": {
+              "finite_elements": 24883200,
+              "neq": 902456,
+              "max": 1.1920928955078125e-07,
+              "p99": 9.313225746154785e-10,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 7.656219100076668e-10,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "gm": {
+              "finite_elements": 552960,
+              "neq": 20164,
+              "max": 5.960464477539063e-08,
+              "p99": 1.4901161193847656e-08,
+              "p999": 2.9802322387695312e-08,
+              "rmse": 1.951354501074768e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "csf": {
+              "finite_elements": 552960,
+              "neq": 20085,
+              "max": 5.960464477539063e-08,
+              "p99": 1.862645149230957e-09,
+              "p999": 1.4901161193847656e-08,
+              "rmse": 1.167447379825639e-09,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "field": {
+              "finite_elements": 552960,
+              "neq": 98718,
+              "max": 0.000244140625,
+              "p99": 3.814697265625e-06,
+              "p999": 3.0517578125e-05,
+              "rmse": 2.0925521369032036e-06,
+              "abs_gt_1e_minus5": 1632,
+              "nonfinite_mismatch": 0
+            },
+            "accepted_mask": {
+              "finite_elements": 552960,
+              "neq": 0,
+              "max": 0.0,
+              "p99": 0.0,
+              "p999": 0.0,
+              "rmse": 0.0,
+              "abs_gt_1e_minus5": 0,
+              "nonfinite_mismatch": 0
+            },
+            "balance_factors": {
+              "max_abs": 3.840531592080865e-06
+            }
+          },
+          "output_sha256": "639ac4e94d9461d9c133aa531bceb7510cb3ac1e78edd93e309b53191e753952"
+        }
+      }
+    }
+  }
+}

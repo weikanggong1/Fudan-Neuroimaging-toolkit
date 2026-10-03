@@ -136,6 +136,26 @@ def test_wall_keeps_function_outputs_and_has_no_new_cuda_sync(tmp_path):
     assert bids.TorchEDDY.run is original_eddy
 
 
+def test_wall_result_capture_keeps_original_object_without_export_or_sync(tmp_path):
+    module = tool()
+    bids, pipeline, _ = fake_modules()
+    cuda = CUDA()
+    export_path = tmp_path / "post_timing_result"
+    parsed = options(module, tmp_path, device="cuda:0",
+                     extra=("--result-export-dir", str(export_path)))
+    original = pipeline.UKBConnectome_pipeline.__call__
+    result = object()
+    with module.Measure(SimpleNamespace(cuda=cuda), bids, pipeline, parsed) as measure:
+        assert pipeline.UKBConnectome_pipeline()(result) is result
+        assert measure.returned_result is result
+        assert not export_path.exists()
+    assert pipeline.UKBConnectome_pipeline.__call__ is original
+    assert cuda.syncs == []
+    with pytest.raises(SystemExit):
+        options(module, tmp_path, mode="diagnostic",
+                extra=("--result-export-dir", str(export_path)))
+
+
 def test_diagnostic_runs_original_function_and_restores_after_exception(tmp_path):
     module = tool()
     bids, pipeline, _ = fake_modules()

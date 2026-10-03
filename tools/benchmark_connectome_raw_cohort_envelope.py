@@ -153,7 +153,7 @@ def compare(official_root, fnit_dirs, fnit_reports, manifest_path, manifest_sha2
         'official_seeds': official_seeds, 'fnit_seeds': fnit_seeds,
         'metric_policy': {**METRIC_POLICY, 'scope': 'wholechain final matrices; includes upstream algorithm differences'},
         'profiles': {}, 'population_envelope_status': 'not_assessed',
-        'population_reason': 'formal FNIT CLI does not retain TCK/FOD; no tractogram or population metrics fabricated'}
+        'population_reason': 'this matrix comparator does not compute tractogram population metrics; assess retained same-run TCK separately'}
     for name in names:
         left, right = [item[name] for item in official], [item[name] for item in fnit]
         identity = semantic_identity(left, right, name)

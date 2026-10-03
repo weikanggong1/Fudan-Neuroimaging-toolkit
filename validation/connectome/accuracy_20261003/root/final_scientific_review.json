@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "review_utc": "2026-10-03T06:35:05.466628+00:00",
+  "status": "completed_readonly_scientific_review",
+  "conclusion": "正式 candidate 与 integration 科学源码指纹完全一致；未发现本次科学范围以外的生产修改。SGM 修复不修改固定输入的路径概率、播种或采样预算；整体精度、速度及三类显存验收等待实际正式 raw12 结果。",
+  "review_actions": {
+    "new_GPU_execution": false,
+    "frozen_files_modified": false,
+    "new_scientific_outputs": false,
+    "CPU_validation": "stdlib AST 比较、实际源码/JSON SHA、已完成真实输入 oracle 和 GPU 产物只读复核"
+  },
+  "identity": {
+    "baseline_commit": "7af34e6d072e843fb2558c931bb2781f1d4b0be9",
+    "integration_head": "41b23c36558da9f5a14d02a7512d098e3b75006a",
+    "formal_candidate_origin_commit": "1fe86ab8347b29d9c47be8109627736576222912",
+    "configuration": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/accuracy_configuration.json",
+      "sha256": "f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c"
+    },
+    "integration_source_fingerprint": "a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82",
+    "actual_formal_candidate_source_fingerprint": "a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82",
+    "source_fingerprint_equal": true,
+    "actual_remote_inventory_rechecked": true,
+    "actual_remote_tool_identity_rechecked": true,
+    "changed_production_files": {
+      "src/fnit/cli.py": {
+        "baseline_sha256": "07d3485bc0bae1356911049223ac66070bd41401ef353ccb92c56815df621939",
+        "current_sha256": "e804eb63d35d39451f1f2795dc87fd3534e888e80105e91ed45bdaceb9f29598",
+        "actual_formal_candidate_sha256": "e804eb63d35d39451f1f2795dc87fd3534e888e80105e91ed45bdaceb9f29598"
+      },
+      "src/fnit/connectome/mtnormalise.py": {
+        "baseline_sha256": "30be5a75c2a0f5f7e30738099b13150b7c70df6505d444079b90005ffebdaa44",
+        "current_sha256": "549a899aa19a1865860008fbce133e7197b942550ae074aace88b93adec96a4d",
+        "actual_formal_candidate_sha256": "549a899aa19a1865860008fbce133e7197b942550ae074aace88b93adec96a4d"
+      },
+      "src/fnit/connectome/pipeline.py": {
+        "baseline_sha256": "2136074050afd5e1c1b1a2506332e792903fab3b273ac6e0bbe3e3c72ba6245c",
+        "current_sha256": "d5a46ecddb9c011608b07e1c779405ff2a9f674530f7ae9a82b132016782328a",
+        "actual_formal_candidate_sha256": "d5a46ecddb9c011608b07e1c779405ff2a9f674530f7ae9a82b132016782328a"
+      },
+      "src/fnit/connectome/response.py": {
+        "baseline_sha256": "258938a5f20ee7a6efc2fc1c50af5c93412030a60b78036438e8473f072e3b91",
+        "current_sha256": "2a595044ff31a6497df5efcdeb5df7fe5a651c89a00f629dd819105707e40ebb",
+        "actual_formal_candidate_sha256": "2a595044ff31a6497df5efcdeb5df7fe5a651c89a00f629dd819105707e40ebb"
+      },
+      "src/fnit/connectome/tracking.py": {
+        "baseline_sha256": "8ddbe84037a7c734cd146d72bbebf43375ca57c34757aabb4879de519c2e6c10",
+        "current_sha256": "eedff23412eca8b203c05a6252630efb0cf9effb98e5a652f816ca0aa45f4753",
+        "actual_formal_candidate_sha256": "eedff23412eca8b203c05a6252630efb0cf9effb98e5a652f816ca0aa45f4753"
+      }
+    },
+    "source_scope": "fingerprint 包含 src/fnit 完整源码及 pyproject/environment；integration 后续 validation/docs 提交不改变该科学指纹。"
+  },
+  "scientific_changes": [
+    {
+      "name": "FSL 梯度导入",
+      "file": "src/fnit/connectome/pipeline.py",
+      "function": "_gradients",
+      "line": 103,
+      "change": "bval/bvec 元数据保持 Float64；归一化 affine 列后作 Double polar decomposition；按 MRtrix Auto 规则规范方向与必要的 norm² b 值缩放。",
+      "retained": "原 b<50 零方向规则、FSL x 轴翻转、原始 DWI/掩膜/体素及下游模型预算保留。"
+    },
+    {
+      "name": "Tensor 梯度解释与 FA 输入",
+      "file": "src/fnit/connectome/response.py",
+      "functions": [
+        "_mrtrix_interpret_tensor_gradients",
+        "fit_mrtrix_dhollander_tensor"
+      ],
+      "change": "Double 梯度非零方向单位化；max(abs(log(norm²)))>0.01 才缩放 b 值。",
+      "retained": "FA 定义、tensor solver/IWLS 次数、信号精度、完整掩膜及输出 Float32 未改；FA 改善来自梯度解释，不是重定义 FA。",
+      "evidence": {
+        "path": "/tmp/fnit-connectome-accuracy-20261003_v1/integration/validation/connectome/accuracy_20261003/task_02/results/formal_tensor_gradient_gpu_v1/report.json",
+        "sha256": "884f622c60cd17f5c23f31476b7aaf63e3c2f833471c0574021b124088c3d622"
+      },
+      "actual_formal_corrected_input_FA": {
+        "CON03": {
+          "baseline_response_baseline_grad_vs_native_fslgrad": {
+            "finite_elements": 98625,
+            "neq": 75457,
+            "max": 0.04624885320663452,
+            "p99": 2.384185791015625e-07,
+            "p999": 3.604602813720749e-05,
+            "rmse": 0.00014754822773832178,
+            "abs_gt_1e_minus5": 196,
+            "nonfinite_mismatch": 0
+          },
+          "candidate_response_candidate_grad_vs_native_fslgrad": {
+            "finite_elements": 98625,
+            "neq": 0,
+            "max": 0.0,
+            "p99": 0.0,
+            "p999": 0.0,
+            "rmse": 0.0,
+            "abs_gt_1e_minus5": 0,
+            "nonfinite_mismatch": 0
+          }
+        },
+        "CON10": {
+          "baseline_response_baseline_grad_vs_native_fslgrad": {
+            "finite_elements": 115626,
+            "neq": 115580,
+            "max": 0.9211687296628952,
+            "p99": 0.00017175078392028809,
+            "p999": 0.0006509199738502502,
+            "rmse": 0.0029070929395831635,
+            "abs_gt_1e_minus5": 70227,
+            "nonfinite_mismatch": 0
+          },
+          "candidate_response_candidate_grad_vs_native_fslgrad": {
+            "finite_elements": 115626,
+            "neq": 2,
+            "max": 5.364418029785156e-06,
+            "p99": 0.0,
+            "p999": 0.0,
+            "rmse": 1.57761695317843e-08,
+            "abs_gt_1e_minus5": 0,
+            "nonfinite_mismatch": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "mtnormalise 四分位下标",
+      "file": "src/fnit/connectome/mtnormalise.py",
+      "function": "_mrtrix_quartile_indices",
+      "change": "正数 std::round 语义：floor(n*0.25+0.5)、floor(n*0.75+0.5)；仍用 kthvalue。",
+      "retained": "原 15 主更新、最多7组织平衡更新和 accepted-mask 定义未改。",
+      "evidence": {
+        "path": "/tmp/fnit-connectome-accuracy-20261003_v1/integration/validation/connectome/accuracy_20261003/task_02/results/normalise_quartile_cpu_v2/report.json",
+        "sha256": "abcd84c0e0fd25824428115b497f3d771b8ce1ecb74d006856589a05498dcfec"
+      },
+      "actual_scope": "CON03/04/07/11 固定官方 CSD 全场 WM/GM/CSF/field/accepted mask 修改前后逐位相同；属于算子契约修复，不宣称四例最终图精度提高。"
+    },
+    {
+      "name": "SGM incoming chord",
+      "file": "src/fnit/connectome/tracking.py",
+      "functions": [
+        "_ifod2_sgm_chord_metrics",
+        "_grow"
+      ],
+      "change": "只对选中的 SGM 内部顶点，以该顶点减前一内部顶点的 chord 方向计算 FOD 指标，选择 EXIT_SGM 最佳截断点。",
+      "changed_outputs": "退出截断点、counts、lengths；长度验收可改变保留轨迹/accepted seeds，随后 FA 采样、SIFT2 和 SC 可变。"
+    },
+    {
+      "name": "完整连接组缓存 revision",
+      "files": [
+        "src/fnit/cli.py",
+        "src/fnit/connectome/pipeline.py"
+      ],
+      "value": "accuracy-20261003-v1",
+      "change": "完整 run fingerprint 纳入 numerical_revision，防止旧 complete SC 被直接复用。",
+      "scientific_effect": "不增加算法预算或改变矩阵定义；新鲜正式输出目录没有旧 complete SC 可复用。"
+    }
+  ],
+  "sgm_static_proof": {
+    "unchanged_function_AST": {
+      "_VolumeSampler": true,
+      "_sample": true,
+      "_initial_directions": true,
+      "_find_gmwmi": true,
+      "sample_gmwmi_seeds": true,
+      "_act_seed_direction": true,
+      "_ifod2_calibration": true,
+      "_ifod2_arc_probability": true,
+      "_act_structural_step": true,
+      "_five_tissue_mrtrix": true,
+      "_collect_tracks": true
+    },
+    "outer_probabilistic_tractography_executable_AST_equal": true,
+    "grow_reverting_only_SGM_metric_block_and_metric_names_matches_baseline_AST": true,
+    "new_SGM_block_or_helper_has_random_calls": false,
+    "helper_AST_equal_to_previous_exact_source_oracle_candidate": true,
+    "helper_AST_sha256": "69391361b4d644e6de867bad0ffa9ac2c1042c420748e7b12376875ab3b78aa2",
+    "probability_state": "原 end_metric 在新结构指标之前更新 half_log_start；新指标仅进入 best_sgm_*，不反馈 moving/active/positions/prior/seed_to_wm。",
+    "RNG_scope": "固定相同 FOD/5TT/seed 输入下，外层 batch/两方向 grow/采样控制流原样，新增块无随机消费；不同上游 FOD 的整个 candidate 与 baseline 不保证同 RNG 消费或同轨迹。",
+    "budget": {
+      "n_seeds": 100000,
+      "seed": 0,
+      "eddy_gp_seed": 12345,
+      "compile_arc": false,
+      "arc_trial_limit": 1000,
+      "initial_direction_attempt_limit": 1000,
+      "samples_per_arc": 3,
+      "max_steps_rule": "ceil(max_length_mm/step_mm)，与7af相同",
+      "default_max_length_mm": 250,
+      "step_and_min_length": "原 spacing 推导规则，无变化"
+    }
+  },
+  "sgm_real_oracle": {
+    "baseline": {
+      "path": "/tmp/fnit-connectome-accuracy-20261003_v1/integration/validation/connectome/accuracy_20261003/task_03/evidence/baseline_chord_comparison_v3.json",
+      "sha256": "1d54000478bc4500cdadb33c83711e16813d8939133d282fb639024a59f48662"
+    },
+    "candidate": {
+      "path": "/tmp/fnit-connectome-accuracy-20261003_v1/integration/validation/connectome/accuracy_20261003/task_03/evidence/candidate_chord_comparison.json",
+      "sha256": "4504ecfe5c58644fe3bb3296add810dd0b14bf87d6f0c44da59aaad82ef843b4"
+    },
+    "source_provenance": {
+      "path": "/tmp/fnit-connectome-accuracy-20261003_v1/integration/validation/connectome/accuracy_20261003/task_03/evidence/source_provenance.json",
+      "sha256": "15d139e9d5fe93d7f6edd93d07c2fce6bb4bb4f3a0a3230ff78efd7ba5d5530b"
+    },
+    "actual_reference_version": "3.0.3-103-g026e850d",
+    "actual_reference_full_commit": "026e850d171ec2a12f09865d31b8332d23d7ecf6",
+    "scope": "真实 CON03 固定 FOD/5TT 与3000真实arc点的独立exact-source函数oracle；不是完整population/SC验收。",
+    "arcs": 3000,
+    "both_points_in_SGM": 324,
+    "baseline_wrong_minimum_choices": 20,
+    "candidate_wrong_minimum_choices": 0,
+    "SGM_metric_abs_error_P99_before": 0.15321596052621644,
+    "SGM_metric_abs_error_P99_after": 1.997965085606678e-06,
+    "arc_probability_error_quantiles_identical_before_after": true,
+    "oracle_source_scope": "旧证据 tracking 完整SHA包含随后撤回的active-only；本次AST证明所评SGM helper与最终helper完全相同，arc概率函数亦同7af。",
+    "residual_GMWMI": "10000固定真实候选点有997投影validity差异，本次未改GMWMI；不能称整个ACT/GMWMI或SC已等价。"
+  },
+  "runtime_risks": [
+    "SGM修复每步新增2B位置/5TT拼接、组织判定和nonzero动态索引；CUDA nonzero含设备到主机同步风险。",
+    "移动SGM顶点额外执行FOD插值、chord归一化与SH评价；不增加proposal/迭代预算，但增加实际运算。",
+    "截断长度和保留轨迹/总点数可变，可能增加路径后处理、FA采样和SIFT2成本；方向与幅度以正式结果为准。",
+    "Double梯度解释有少量GPU标量判断/同步；旧CON01/03算子ABBA观察约多0.095/0.097秒，不能预判整链不慢。"
+  ],
+  "rejected_or_unchanged": {
+    "active_only_calibration": "未纳入正式源；旧100k bitwise对照约慢1.38%，不能作为本修复的速度抵消证据。",
+    "EDDY_rotation_and_fused": "均未纳入；geometry/spline/BIDS与7af相同。",
+    "anatomy_atlas_assignment": "本次无生产修改；矩阵定义/节点保留规则/endpoint assignment/FA采样/SIFT2算法未改。",
+    "precision_and_resources": "无FP16、全局TF32策略改动、新依赖、增seed/trial/样本/迭代、删除体素或运行时原软件调用。"
+  },
+  "limitations_and_gate": {
+    "tensor_tail": "独立官方corrected十例仍有少量负信号体素的FA/方向尾部误差，CON07/CON11未完全解决；保留原体素与非有限状态记录。",
+    "formal_acceptance": "raw12已启动；本审查不读取未完成结果作验收。最终需要十例实际自产FOD/FA/TCK/SC与原repeat envelope、CON01 AB/CON03 BA真实CLI/分阶段wall、三类峰值<20e9。",
+    "speed_decision": "存在具体新增成本；不把局部oracle改善或较少截断误选写成速度保持已经通过。",
+    "FS_origin": "正式两臂复用同一个已完成candidate FS；独立official使用先前baseline FS，文件SHA不同。旧真实10×13科学比较精确绑定双方当前声明目录/文件SHA并通过；不宣称整个文件字节相同。"
+  }
+}

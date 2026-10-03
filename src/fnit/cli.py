@@ -288,6 +288,18 @@ def _run_fast_vbm(args):
     print(report_path)
 
 
+def _connectome_run_options(args, atlas_names):
+    """Bind cached matrices to inputs, parameters and numerical implementation."""
+    from .connectome.pipeline import CONNECTOME_NUMERICAL_REVISION
+
+    return {
+        "fnit_version": __version__, "numerical_revision": CONNECTOME_NUMERICAL_REVISION,
+        "atlas": list(atlas_names), "n_seeds": args.n_seeds, "seed": args.seed,
+        "device": args.device, "eddy_gp_seed": args.eddy_gp_seed,
+        "shell_bvals": args.shell_bvals, "compile_arc": args.compile_arc,
+    }
+
+
 def _run_connectome(args):
     import nibabel as nib
     import numpy as np
@@ -441,12 +453,7 @@ def _run_connectome(args):
     run_state = output_dir / "run_state.json"
     if args.bids_root:
         from .connectome.bids import _fingerprint, _record, _reusable
-        run_key = _fingerprint(tuple(inputs), {
-            "fnit_version": __version__, "atlas": list(atlas_names),
-            "n_seeds": args.n_seeds, "seed": args.seed, "device": args.device,
-            "eddy_gp_seed": args.eddy_gp_seed,
-            "shell_bvals": args.shell_bvals, "compile_arc": args.compile_arc,
-        })
+        run_key = _fingerprint(tuple(inputs), _connectome_run_options(args, atlas_names))
         if not args.overwrite and _reusable(run_state, run_key, output_paths):
             print("connectome=skipped (matching inputs and complete outputs)")
             return

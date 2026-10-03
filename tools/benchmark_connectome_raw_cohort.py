@@ -418,7 +418,8 @@ def load_recon_for_gpu(config, case, version, job):
     return original
 
 
-def worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_arguments=()):
+def worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_arguments=(),
+           extra_wall_arguments=()):
     """Execute a cohort stage; private staged drivers may bind verified anatomy.
 
     The default path remains fresh official reconstruction in this cohort.
@@ -531,6 +532,7 @@ def worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_argu
                            "--report", str(job / "raw_bids_wall.json")]
                 if config.get("gpu_uuid"):
                     command += ["--gpu-uuid", config["gpu_uuid"]]
+                command += list(extra_wall_arguments)
                 command += ["--", *cli_command(config, case, job, anatomy_subject=subject), *extra_cli_arguments]
                 environment = os.environ.copy()
                 environment["PYTHONPATH"] = str(Path(config["sources"][version]) / "src")
@@ -583,6 +585,9 @@ def worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_argu
                     raise RuntimeError("source changed during the actual raw-DWI run")
                 report["source_after"] = after
                 report["input_verification_after"] = verify_inputs(case)
+                report["anatomy_after"] = check_anatomy(subject, config["atlases"])
+                if report["anatomy_after"] != report["anatomy"]:
+                    raise RuntimeError("official anatomy changed during actual raw-DWI execution")
                 if sha256(config["wall_script"]) != config["wall_script_sha256"]:
                     raise RuntimeError("raw-DWI wall script changed during execution")
                 if recon.get("recovery"):

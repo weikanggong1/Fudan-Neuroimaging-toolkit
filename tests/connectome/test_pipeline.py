@@ -19,8 +19,9 @@ def test_fsl_gradient_x_flip_matches_mrconvert(tmp_path):
     np.savetxt(bvec, np.array([[0., .6], [0., .8], [0., 0.]]))
     for affine in (torch.eye(4), torch.diag(torch.tensor([-1., 1., 1., 1.]))):
         _, direction = _gradients(bval, bvec, 2, affine, torch.device("cpu"))
-        torch.testing.assert_close(direction[0], torch.zeros(3))
-        torch.testing.assert_close(direction[1], torch.tensor([-.6, .8, 0.]))
+        torch.testing.assert_close(direction[0], torch.zeros(3, dtype=torch.float64))
+        torch.testing.assert_close(direction[1], torch.tensor([-.6, .8, 0.], dtype=torch.float64),
+                                   rtol=1e-14, atol=1e-15)
 
 
 def test_scalar_mask_accepts_axis_flip_and_rejects_shift(tmp_path):
