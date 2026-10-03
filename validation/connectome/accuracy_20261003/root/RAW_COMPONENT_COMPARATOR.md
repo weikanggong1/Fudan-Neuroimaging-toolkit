@@ -135,7 +135,7 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 
 ## 5. 最新精度、耗时和真实脑图
 
-**目前完成本轮 CON01 baseline 与 candidate 的实际阶段比较；其它九例尚未由本工具分析。** 结果来自已经完成的 raw-DWI CLI，未重新运行求解或官方软件。下面区分协议核验和 MRI 输出比较：
+**本页已保存本轮 CON01 与 CON03 的 baseline/candidate 配对阶段证据。** 结果来自已经完成的 raw-DWI CLI，未重新运行求解或官方软件；其它病例随真实后台完成状态推进，本页不为未完成病例填数，也不代表十例验收。下面区分协议核验和 MRI 输出比较：
 
 |实际核验|覆盖|结果与 CPU 墙钟|
 |---|---|---|
@@ -149,6 +149,8 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 |原 eeb 脚本的官方真实 producer 与文件核验 v2|同十例|325 个实际文件 before/after SHA，6.56676 s；`reference_gate_v2.json`。|
 |实际 baseline CON01 MRI 比较|全部 102 帧、全 552,960 体素、官方 mask 115,226 体素|1,319 个文件 before/after SHA；比较器内计时 20.22309 s，nodecw10 进程墙钟 20.34487 s。|
 |实际 candidate CON01 MRI 比较|同一完整采集及同一实际官方参考|1,319 个文件 before/after SHA；比较器内计时 20.45769 s，CPU 控制器记录进程墙钟 20.62075 s。|
+|实际 baseline / candidate CON03 MRI 比较|全部 102 帧、全 552,960 体素、官方 mask 98,701 体素|后台控制器记录 CPU 进程墙钟分别 20.91344 / 21.37488 s；原成功报告均由原 receipt 绑定。|
+|CON03 真实完成配对的严格原 bytes 收集|仅 B03 / C03，原报告、summary、receipt 与全部绑定源文件|2,562 个原文件 before/after SHA；collector 内计时 24.79444 s，nodecw10 进程墙钟 24.87445 s，exit 0。|
 
 **当前 helper SHA**：`08015c11c2662cb2f8115843414ed9148c1dadc60c175b66dcf20f51381c18ce`。成功原报告 `baseline_CON01_components_v2.json` 的 SHA 为 `1fa40b59e1e7e4db893a62737e388b1873cc4058cfaffe705dc1fb29ce6b335b`，远端原目录为 `root_components_CON01_baseline_v2`，本地副本保留原字节。冻结配置 SHA 为 `f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c`。
 
@@ -198,6 +200,49 @@ candidate 的同一原网格、同一 `k=30` 示例直接读取实际成功报�
 
 同例 raw CLI 实际耗时 baseline `2200.811193 s`、candidate `2072.132814 s`，单次顺序观测下降 `5.84686%`；共享负载下该数值不能独自归因于代码优化，也不是全十例的速度验收。双方报告的 allocator 与 sampled process-tree 均观察到低于预算；连续 process-tree 严格上界未证明。两次组件 CPU 比较的约 20 s 不计入 raw CLI 速度结论。
 
+### CON03 完整 raw 输出的实际配对
+
+CON03 两次 FNIT 输出的 corrected DWI、bval、全部 bvec 和 brain mask 文件 SHA 分别相同；所使用的官方 producer 与所有官方文件身份也相同。两臂 DWI 全 volume / 官方 mask 的完整统计与全部梯度行均逐项相同。FA 文件 SHA 不同。以下 DWI 和梯度数字为两臂对同一官方原输出的结果：
+
+|CON03 DWI 全值比较|全 volume|官方 brain mask|
+|---|---:|---:|
+|完整数值分母|56,401,920|10,067,502|
+|RMSE|1.47326158148|0.871450519474|
+|相对 RMSE|3.22531500%|0.853435046%|
+|Pearson r|0.999397620625|0.999942025363|
+|最大绝对误差|117.497550964|117.497550964|
+|FNIT / 官方 NaN、正 Inf、负 Inf|均 0 / 0|均 0 / 0|
+|exact-zero 支持不一致|1,265,718|0|
+
+全部 102 帧 bval 逐值相同；全部 306 个 bvec 分量及所有 bval/norm 为 finite。exact-zero 向量及 `b<50` 支持不一致均为 0，96 帧具有方向夹角定义。bvec 分量 RMSE `0.000553258005112`、最大分量差 `0.0036802904`、最大有向夹角 `0.240437639°`；norm 最大差 `8.07206570475e-8`。
+
+|CON03 raw 全链 FA 对同一官方输出的比较|baseline|candidate|候选减基线|
+|---|---:|---:|---:|
+|全 volume / mask：FNIT NaN|1 / 1|1 / 1|数量与逐体素位置不变|
+|全 volume / mask：官方 NaN|6 / 6|6 / 6|同一原参考|
+|全 volume / mask 非有限状态不一致|5 / 5|5 / 5|0 / 0|
+|正 Inf / 负 Inf，双方各自|均 0|均 0|0|
+|全值主统计 MAE、RMSE、max、相关性|均 `null`|均 `null`|不计算|
+|全 volume 有限对分母|552,954|552,954|0|
+|全 volume **有限对诊断** RMSE|0.0255671232069|0.0255676479470|+5.24740064e-7|
+|全 volume **有限对诊断** MAE|0.00206774030109|0.00206789160521|+1.51304124e-7|
+|官方 mask 有限对分母|98,695|98,695|0|
+|官方 mask **有限对诊断** RMSE|0.0477149286388|0.0477166456994|+1.71706058e-6|
+|官方 mask **有限对诊断** MAE|0.00948725485334|0.00948811718816|+8.62334828e-7|
+|全 volume / mask **有限对诊断** 最大误差|1.22461998463 / 1.22461998463|1.22461998463 / 1.22461998463|0 / 0|
+
+另行读取原保存完整 FA 数组，确认 B03/C03 的 NaN、全部非有限、正 Inf、负 Inf 空间支持均逐体素相同；它们与官方的 NaN / 非有限支持不一致均为全空间 5、官方 mask 内 5。CON03 候选有限对 MAE/RMSE 有轻微变差，最大误差不变；不能将 CON01 的小幅改善概括为两例均改善。FA 的全部非有限值仍计入原分母，主统计和全值误差分位数保持 `null`。上述 full raw FA 差异包含 FNIT 与官方各自 corrected DWI / mask / rotated gradients 的差异，不能解释成固定输入 DTI 的算子误差。
+
+小配对报告 [`CON03_baseline_candidate_comparison.json`](CON03_baseline_candidate_comparison.json) SHA 为 `bd7726ddab597842ceb7b7f46fbe297b2f7d41d15d35fbe9fe63b3640879e249`。原 bytes 的 [`baseline summary`](baseline_CON03_component_summary.json) / [`candidate summary`](candidate_CON03_component_summary.json) 与 [`baseline receipt`](baseline_CON03_receipt.json) / [`candidate receipt`](candidate_CON03_receipt.json) 随提交保留。完整原报告保留在远端实际 `root_component_analysis_v1/results/{baseline,candidate}/sub-CON03/components.json`，SHA 分别为 `988940596900a2b9db680b8e0858e8818107e49d68e99e63a52b389e041c97b4` 与 `44b2001d99dd2b3613c7de043660c3b5a08049c950dec90371753e6885574e17`；本次不再复制完整 JSON inventory。
+
+原完整收集清单 SHA `027776fda00f591aad290d713405af1e264426a110c4679bfc94fd97e4cc56c8`；[`小收集收据`](CON03_pair_collection_receipt.json) 保留其绝对路径、SHA、coverage、成功原 report/summary/receipt 身份及 2,562 文件核验数量，[`实际执行记录`](CON03_pair_collector_execution.json) 保留原命令、CPU 环境和 exit 0。派生脑图与小 summary 前后再次核验同一批原文件，并确认两臂实际完成行未变；没有更改原 controller、reports、冻结配置或科学源码。
+
+下图直接读取两次成功报告绑定的原 FA 与 corrected DWI，显示原存储网格 `k=30` 切片，紫色表示非有限值。只对显示像素作 nearest 放大，原体积没有重采样、重排轴、删除体素或补值。图像及显示策略保存在 [`脑图收据`](CON03_paired_brain_receipt.json)，PNG SHA `741e5ea6d3c519ffbe250f9fcafe3b9ff0af5cfe5774a77cb917c0a20ec21a3b`。
+
+![本轮实际 CON03 baseline、candidate 与同一官方输出的原网格脑切片](CON03_paired_components_brain.png)
+
+CON03 raw CLI 的真实单次墙钟为 baseline `2033.586431 s`、candidate `2043.839205 s`，候选增加 `10.252775 s`（`0.504172%`）。共享负载下不能由这一单次顺序观测证明稳定退化或归因；约 21 s 的 CPU 组件比较与 24.87 s 的原 bytes 收集均是独立验证耗时。双方 allocator 和 sampled process-tree 观察到低于预算，连续 process-tree 严格上界仍未证明。
+
 这些结果是不同校正 DWI/mask/旋转梯度的 **raw 全链阶段差异**，不代表固定输入 DTI 的误差。本工具不定义额外科学验收门槛，`scientific_parity=not_assessed`；完整 raw10 与原官方链的重复性、速度和 `<20e9` 显存验收由总控制执行。
 
 ## 6. 最近版本和 benchmark 记录
@@ -212,6 +257,7 @@ candidate 的同一原网格、同一 `k=30` 示例直接读取实际成功报�
 - CPU 后台控制器实际启动于 nodecw10，PID 185524，使用最终 helper/configuration SHA。bootstrap 时原 CON01 baseline 报告及全部 1,319 个绑定文件复核完成，4.98121 s；candidate CON01 当时仍在运行，其余 producer 未启动，`all10_summary=null`。`controller_v1_bootstrap_snapshot.json` 是该时刻的实际状态快照，不能当未来完成结果；运行中的实际状态以远端 `status.json` 为准。
 - CON01 candidate 的实际 producer 完成后，后台控制器于 UTC `2026-10-03T07:29:09` 启动 CPU 比较，UTC `07:29:30` 完成。原报告、summary 与 receipt 复制保留原字节；公开示例仅包含原网格脑切片，没有复制发布完整 MRI 数组。控制器和科学冻结源码/配置没有改动，继续等待其它病例；此处覆盖仍为 CON01 baseline + candidate，不代表十例完成或整链匹配。
 - 准备原 bytes 收集器：独立 nodecw10 CPU 工具目录，复用相同 SHA 的 controller source gates；14 项 CPU 协议回归通过。真实全十例请求在 `all10_summary=null` 时明确拒绝，保留原 log/receipt 且没有创建集合目录。CON03 候选已完成的数据只作只读核验汇报；其配对 baseline 未完成时不在这里添加配对数字或重复复制大 JSON。完整配对与十例收集等待真实 producer 完成。
+- CON03 baseline 与 candidate 均实际完成后，严格 subset collector 于 UTC `2026-10-03T09:11:11` 成功收集其原 bytes：2,562 个原文件 before/after SHA，CPU 24.87445 s。另作 CPU 原 FA 支持与真实 paired 脑图派生，完整复核同一批文件与两臂完成行；只保存小 summary/receipt/PNG 及原 summary/receipt 的完整字节，不重复复制大报告。CON03 有限对诊断 MAE/RMSE 小幅变差、尾部最大值不变，明确保留反证。收集时 `all10_summary=null`，本提交只覆盖已完成的 CON03 配对，不宣布十例或科学验收完成。
 
 ## 7. 参考文献与原软件代码库
 
