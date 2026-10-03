@@ -1,5 +1,10 @@
 # Fixed `mri_segstats` aseg statistics
 
+This page preserves the 2026-09-28 same-input measurement. The production
+runner now calls this function; current Chinese API, CLI, inputs, outputs and
+the real single-voxel warning regression are documented in
+[segmentation statistics](../../../docs/recon_all/SEGMENTATION_STATS.md).
+
 `segstats_aseg_python.py` replays the fixed FreeSurfer 8.2 command using
 `aseg.mgz`, `norm.mgz`, `brainvol.stats`, the original uncorrected bilateral
 surfaces, Talairach XFM, SynthSeg sTIV scalar, and the downloaded
@@ -39,5 +44,6 @@ python -m fnit.recon_all.segstats_aseg_python \
   /path/to/subjects/fs_sub01/stats/aseg.stats
 ```
 
-This stage still consumes official upstream surfaces and segmentation in its
-isolated validation; it is not yet a complete native-free subject run.
+This historical isolated validation consumes official upstream surfaces and
+segmentation. Its same-input fields and timings remain distinct from the
+current raw-input whole-subject measurements.

@@ -1,5 +1,9 @@
 # `mri_segstats` wmparc statistics: fs_sub01
 
+This page preserves the original fixed-input experiment. Current production
+API, CLI and the complete real-data warning regression are documented in
+[segmentation statistics](../../../../docs/recon_all/SEGMENTATION_STATS.md).
+
 ## Fixed command and source
 
 The actual `recon-all` call is:
@@ -15,7 +19,7 @@ mri_segstats --seed 1234 --seg mri/wmparc.mgz --sum stats/wmparc.stats \
 Source is FreeSurfer 8.2.0 commit `d932c45b7941662ea380a05efef580568b98d41a`:
 [`mri_segstats/mri_segstats.cpp`](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mri_segstats/mri_segstats.cpp) SHA-256 `3347ee0f4e679f293e2ad3a38ece2479df12e6eba98cdb405261f6747e46623d`, [`utils/mri.cpp`](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mri.cpp) SHA-256 `2d2d71d4e15d339f92c1eab4072761bb82dfe97d2adde76cef587bc983645c59`, [`utils/mri2.cpp`](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mri2.cpp) SHA-256 `f6f01c07a2e44c127eb1b22bca61d0e6e87a6065f538fbafc8de343bcec84ed4`, and [`utils/stats.cpp`](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/stats.cpp) SHA-256 `0627fa0ddb0ca6c7f9c11433bc2b4e372de9a10460a4a4d72ca3d26489798989`.
 
-`segstats_wmparc_python.py` implements the fixed branch with NumPy, Numba and nibabel. For each border voxel it reproduces FreeSurfer's 6-face border, 3×3×3 candidate labels, clamped 15×15×15 intensity neighborhood, ascending-label tie rule, and float32 PV accumulation. Unlike the native routine's one full-volume scan per segmentation, it visits each voxel once and updates all affected labels in the same spatial order. It also reproduces the source's float32 intermediate in sample standard deviation. It reads the cached 16-element `brainvol.stats`, the Talairach XFM for eTIV, the SynthSeg sTIV scalar, and the small WM LUT. The fixed `--brainmask` only triggers a `MaskVol` summary from the cached brain-volume statistics in this command. The Python production path does not execute or read a FreeSurfer binary/runtime package. This stage currently computes on CPU; it has not been integrated into the main recon-all entry point.
+`segstats_wmparc_python.py` implements the fixed branch with NumPy, Numba and nibabel. For each border voxel it reproduces FreeSurfer's 6-face border, 3×3×3 candidate labels, clamped 15×15×15 intensity neighborhood, ascending-label tie rule, and float32 PV accumulation. Unlike the native routine's one full-volume scan per segmentation, it visits each voxel once and updates all affected labels in the same spatial order. It also reproduces the source's float32 intermediate in sample standard deviation. It reads the cached 16-element `brainvol.stats`, the Talairach XFM for eTIV, the SynthSeg sTIV scalar, and the small WM LUT. The fixed `--brainmask` only triggers a `MaskVol` summary from the cached brain-volume statistics in this command. The Python production path does not execute or read a FreeSurfer binary/runtime package. This stage computes on CPU and is called by the current recon-all entry point.
 
 ## Frozen inputs
 

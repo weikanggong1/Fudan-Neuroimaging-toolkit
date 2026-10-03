@@ -133,6 +133,8 @@ python validation/recon_all/python_gpu_port/compare_complete_subject.py \
 
 各阶段的输入、输出、官方命令和真实数据记录见[阶段索引](CONDA_CPP_STAGES.md)。
 
+`aseg.stats`、`wmparc.stats` 的参数、原软件命令及真实 CON04 单体素警告修复见[体积与强度统计](SEGMENTATION_STATS.md)。修复后完整统计文件与冻结 `1128bc52` 的原保存文件逐字节相同；正式十人执行来源仍保留该冻结版本。
+
 ## 参考文献与原实现
 
 - Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。

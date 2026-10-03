@@ -177,10 +177,15 @@ def _statistics(seg: np.ndarray, intensity: np.ndarray, ids: list[int],
         own_values = values[seg_flat == label]
         mean = np.float32(sums[label] / count)
         # MRIsegStats retains a float mean, then calculates sample variance.
-        first_term = float(np.float32(np.float32(count * mean) * mean))
-        variance = (first_term -
-                    2 * float(mean) * sums[label] + squared[label]) / (count - 1)
-        std = np.float32(np.sqrt(max(variance, 0))) if count > 1 else np.float32(0)
+        # A single voxel has the existing zero standard deviation; avoid
+        # evaluating its unused division by zero before selecting that value.
+        if count > 1:
+            first_term = float(np.float32(np.float32(count * mean) * mean))
+            variance = (first_term -
+                        2 * float(mean) * sums[label] + squared[label]) / (count - 1)
+            std = np.float32(np.sqrt(max(variance, 0)))
+        else:
+            std = np.float32(0)
         lower = float(own_values.min())
         upper = float(own_values.max())
         rows.append((label, count, float(volumes[label]), float(mean),
