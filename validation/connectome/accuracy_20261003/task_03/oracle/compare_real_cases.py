@@ -1,0 +1,25 @@
+import argparse, importlib.util, json, sys, types, hashlib, time
+from pathlib import Path
+import numpy as np, nibabel as nib, torch
+p=argparse.ArgumentParser();p.add_argument('--images',type=Path,required=True);p.add_argument('--cases',type=Path,required=True);p.add_argument('--source',type=Path,required=True);p.add_argument('--official',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args(); torch.set_num_threads(8)
+pkg=types.ModuleType('oracle_candidate');pkg.__path__=[str(a.source)];sys.modules[pkg.__name__]=pkg
+for name in ('fod','tracking'):
+ spec=importlib.util.spec_from_file_location('oracle_candidate.'+name,a.source/(name+'.py'));m=importlib.util.module_from_spec(spec);sys.modules[spec.name]=m;spec.loader.exec_module(m)
+five_im=nib.load(a.images/'five_tissue_act.nii.gz');fod_im=nib.load(a.images/'wm_fod.nii.gz');five=torch.tensor(np.asarray(five_im.dataobj,dtype=np.float32));fod=torch.tensor(np.asarray(fod_im.dataobj,dtype=np.float32));inv=torch.linalg.inv(torch.tensor(five_im.affine,dtype=torch.float64));finv=torch.linalg.inv(torch.tensor(fod_im.affine,dtype=torch.float64))
+c=np.load(a.cases/'cases.npz');gp=torch.tensor(c['gmwmi_candidates']);ar=torch.tensor(c['arc_cases']);lines=a.official.read_text().splitlines();official_g=np.array([[float(x) for x in t.split()[1:]] for t in lines if t.startswith('G ')]);official_a=np.array([[float(x) for x in t.split()[1:]] for t in lines if t.startswith('A ')])
+t=time.perf_counter();positions,valid=m._find_gmwmi(five,gp,inv,float(min(five_im.header.get_zooms()[:3])));gwall=time.perf_counter()-t;official_valid=official_g[:,0]>0;both=valid.numpy()&official_valid;error=np.linalg.norm(positions.numpy()[both]-official_g[both,1:4],axis=-1)
+prior=torch.nn.functional.normalize(ar[:,3:6],dim=-1);directions=torch.nn.functional.normalize(ar[:,6:9],dim=-1);start=(m._sample(fod,ar[:,:3],finv)*m.tracking_sh_precomputed(prior,8)).sum(-1);prob,mid,end,ma,ea=m._ifod2_arc_probability(ar[:,:3],prior,directions[:,None],.5*start.clamp_min(1e-20).log(),fod,five,finv,inv,lmax=8,step_mm=1.2500000175865187,cutoff=.1,power=.5)
+finite=np.isfinite(official_a[:,2])&np.isfinite(prob[:,0].numpy());delta=np.abs(prob[:,0].numpy()[finite]-official_a[finite,2]);tissues=m._five_tissue_mrtrix(five,torch.cat((mid[:,0],end[:,0])),inv).numpy();sgm=(tissues[:,1]>tissues[:,0])&((tissues[:,0]+tissues[:,1])>=tissues[:,2])
+# Each official arc output contains two points with xyz/tangent/metric(tangent)/metric(chord).
+sgm_pair=sgm[:len(ar)]&sgm[len(ar):];tangent_metrics=official_a[:,[9,17]];chord_metrics=official_a[:,[10,18]];choice_diff=(np.argmin(tangent_metrics,axis=1)!=np.argmin(chord_metrics,axis=1))&sgm_pair
+if hasattr(m, '_ifod2_sgm_chord_metrics'):
+ chord_metrics_candidate = m._ifod2_sgm_chord_metrics(
+   torch.cat((mid[:,0],end[:,0])),torch.cat((mid[:,0]-ar[:,:3],end[:,0]-mid[:,0])),
+   lambda q: m._sample(fod,q,finv),lmax=8).numpy().reshape(2,-1).T
+else:
+ chord_metrics_candidate = np.stack((ma[:,0].numpy(),ea[:,0].numpy()),-1)
+metric_delta = np.abs(chord_metrics_candidate[sgm_pair]-chord_metrics[sgm_pair])
+sgm_choice_wrong = (np.argmin(chord_metrics_candidate,axis=1)!=np.argmin(chord_metrics,axis=1))&sgm_pair
+source_sha={name:hashlib.sha256((a.source/(name+'.py')).read_bytes()).hexdigest() for name in ('tracking','fod')}
+result={'scope':'real CON03 fixed GMWMI candidates and arc points; explicit 026e850d C++ oracle, not population/matrix acceptance','source_sha256':source_sha,'official_sha256':hashlib.sha256(a.official.read_bytes()).hexdigest(),'gmwmi':{'cases':len(gp),'official_valid':int(official_valid.sum()),'candidate_valid':int(valid.sum()),'validity_disagreements':int((valid.numpy()!=official_valid).sum()),'candidate_only_valid':int((valid.numpy()&~official_valid).sum()),'official_only_valid':int((~valid.numpy()&official_valid).sum()),'shared_valid':int(both.sum()),'shared_projection_error_mm_quantiles_50_90_99_100':np.quantile(error,[.5,.9,.99,1]).tolist(),'projection_seconds_cpu':gwall},'arcs':{'cases':len(ar),'official_nan_probability':int(np.isnan(official_a[:,2]).sum()),'candidate_nan_probability':int(torch.isnan(prob).sum()),'nan_state_disagreement':int((np.isnan(official_a[:,2])!=np.isnan(prob[:,0].numpy())).sum()),'finite_probability_abs_error_quantiles_50_90_99_100':np.quantile(delta,[.5,.9,.99,1]).tolist(),'sgm_at_both_sample_points':int(sgm_pair.sum()),'sgm_min_metric_choice_tangent_vs_chord_disagreement':int(choice_diff.sum()),'changed_sgm_cases':np.flatnonzero(choice_diff)[:20].tolist(),'candidate_sgm_metric_choice_vs_official_chord_disagreement':int(sgm_choice_wrong.sum()),'candidate_sgm_metric_abs_error_quantiles_50_90_99_100':np.quantile(metric_delta,[.5,.9,.99,1]).tolist()}}
+a.output.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2));np.savez(a.output.with_suffix('.npz'),projected_positions=positions.numpy(),valid=valid.numpy(),arc_probability=prob.numpy(),arc_mid=mid.numpy(),arc_end=end.numpy(),sgm_choice_disagreement=choice_diff)
