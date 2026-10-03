@@ -6,7 +6,7 @@
 
 对应实际参考二进制为 MRtrix3 `3.0.3-103-g026e850d`，精确源提交为 `026e850d171ec2a12f09865d31b8332d23d7ecf6`。`Exec::truncate_exit_sgm` 在降采样之前使用相邻内部顶点的差；`iFOD2::get_metric` 在该方向评价 FOD。本次沿用现有 Torch 采样和 SH 算子，只对实际移动、处于 SGM 的顶点评价弦方向 FOD。
 
-另将每步校准限制在仍活跃的行。校准不消费随机数；提案、拒绝采样及 Generator 消费位置保持原规则。100k 配对用于单独检查这项优化的逐值一致性与耗时。当前已使用连续初始方向和校准拒绝采样：`arc_proposals=16` 是 GPU 候选块宽度，每弧仍至多尝试 1000 次。
+另将每步校准限制在仍活跃的行。校准不消费随机数；提案、拒绝采样及 Generator 消费位置保持原规则。100k 配对已确认五个公开数组逐值一致；本次共享负载下慢 1.38%，未证明速度收益。当前已使用连续初始方向和校准拒绝采样：`arc_proposals=16` 是 GPU 候选块宽度，每弧仍至多尝试 1000 次。
 
 运行时保持 PyTorch float32、仿射 float64、CUDA TF32，未引入依赖。路径概率仍使用起点半份、中点一份、终点半份贡献；圆弧概率继续用切线，SGM 截断单独用弦。本页是组件修正报告，最终流线分布、SIFT2 和 SC 的五次官方重复范围由整链报告验收。
 
@@ -144,21 +144,21 @@ MRTRIX_RNG_SEED=0 tckgen wm_fod.nii.gz reference_tracks.tck \
 
 | CON03 raw-FNIT 100k 性能隔离 | baseline | active-only |
 | --- | ---: | ---: |
-| tracking 同步墙钟 | 762.751 秒 | 配对进行中 |
-| 完整 worker 墙钟（依赖导入后） | 764.947 秒 | 配对进行中 |
-| 完整子进程墙钟 | 767.613 秒 | 配对进行中 |
-| allocated / reserved 峰值 | 0.891 / 0.904 GB | 配对进行中 |
-| 本进程 NVML 峰值 | 2.802 GB | 配对进行中 |
-| 接受流线 | 11606 / 100000 | 配对进行中 |
+| tracking 同步墙钟 | 762.751 秒 | 773.253 秒 |
+| 完整 worker 墙钟（依赖导入后） | 764.947 秒 | 775.272 秒 |
+| 完整子进程墙钟 | 767.613 秒 | 777.729 秒 |
+| allocated / reserved 峰值 | 0.891 / 0.904 GB | 0.891 / 0.904 GB |
+| 本进程 NVML 峰值 | 2.802 GB | 2.802 GB |
+| 接受流线 | 11606 / 100000 | 11606 / 100000 |
 
-baseline 原始结果见 [active_only_baseline_report.json](evidence/active_only_baseline_report.json)。全过程按共享锁串行；锁等待 442.600 秒另记，不计入 tracking。GPU UUID 固定 `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`，8 CPU threads、TF32=True、所有输入显式送 CUDA、未启用 profiler、worker 仅调用一次追踪。同卡外部进程约占 35.17 GiB，GPU 利用率持续 100%；历史约 165 秒来自另一负载条件，不能与本次直接作速度比。active-only 逐值与墙钟报告待本次配对结束补入；候选 tracking+SIFT2、五次官方 SC/流线分布及十例 raw 的整体速度/精度 gate 由 root 统一验收。本页不宣告整个 gate 已通过。
+baseline 原始结果见 [active_only_baseline_report.json](evidence/active_only_baseline_report.json)。全过程按共享锁串行；锁等待 442.600 秒另记，不计入 tracking。GPU UUID 固定 `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`，8 CPU threads、TF32=True、所有输入显式送 CUDA、未启用 profiler、worker 仅调用一次追踪。同卡外部进程约占 35.17 GiB，GPU 利用率持续 100%；历史约 165 秒来自另一负载条件，不能与本次直接作速度比。[active-only 配对摘要](evidence/active_only_pair_summary.json)和[公开数组 strict](evidence/CON03/strict_after_cancel.json)已落盘，五个数组全部 neq=0。本次 tracking 慢 1.38%，未展示速度改善；CON01 在开始前取消。候选 tracking+SIFT2、五次官方 SC/流线分布及十例 raw 的整体速度/精度 gate 由 root 统一验收。本页不宣告整个 gate 已通过。
 
 ## 6. 近期更新与保留的失败原因
 
 | 版本 / 诊断 | 更新与结果 |
 | --- | --- |
 | `7af34e6d` 基线 | 已有连续方向、校准拒绝采样、Masked 5TT；SGM 最小点使用圆弧切线。 |
-| active-only 隔离 | 校准仅评价 active 行；随机数规则不变，100k bitwise/time 配对待补。 |
+| active-only 隔离 | 校准仅评价 active 行；随机数规则不变，100k 五个公开数组逐值相同；本次共享负载下 tracking 慢 1.38%，未证明速度收益。 |
 | 本次 SGM 最小候选 | 使用降采样前内部弦，324 个真实 SGM 局部弧从 20 个位置差异降为零；聚焦 CPU 回归通过。 |
 | GMWMI 独立实验，未纳入 | 改累计 overshoot 与 unmasked tissue 后，10000 固定候选的 validity 差异仅从 997 降到 990；缺少解释剩余差异的因果证据。当前候选仍为 997 / 10000，共享有效投影的 P99 坐标误差仍为 1.285mm。 |
 | image-exit / NaN，未纳入 | 精确源校准遇 NaN 按 EXIT_IMAGE 结束，当前代码可能映为零；本组 3000 实际弧没有 NaN，尚无足够真实点证据。 |
