@@ -1,0 +1,2926 @@
+{
+  "schema_version": 1,
+  "scope": "actual official ten-case provenance and byte audit only; no scientific solver/metrics/GPU",
+  "configuration": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/accuracy_configuration.json",
+    "sha256": "f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c"
+  },
+  "script": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py",
+    "sha256": "eebd3ebe7308c0caf2d36bd0e6a501aef8a350017fe7261f9348fafe1a6a1e0f"
+  },
+  "host": "gpucw1",
+  "pid": 98567,
+  "CUDA_VISIBLE_DEVICES": "",
+  "cases": {
+    "sub-CON01": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON01/reference_manifest.json",
+          "sha256": "64b9066e465ddc1ae8e688c1fec48b2a5611a6312b8637a302fb5404e7d7ca5a"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/consumer_contract.json",
+          "sha256": "36b56d7d8e218464e4440c99a75a3fe12a7d71f984912f743fa343e42d57a07b"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/report.json",
+          "sha256": "f83d232acb43ad0899cff205ed15fcd5b30a05b38550fc12489640cec3af95a4"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/report.json",
+          "sha256": "e5292dc2432475f096d0b92e741ae0fdecc224b326e66a6df0c1738d1ed61e88"
+        },
+        "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
+          "sha256": "27965c4079c022d60df9db32bc1b705519e4259331f855c32d8efaf5981a69bf",
+          "size_bytes": 188118748
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.eddy_rotated_bvecs",
+          "sha256": "11cfdaaf7265c06eb18756e3b5c715263a3a78105d6d3d8f749e84cb329e4f4e",
+          "size_bytes": 4235
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
+          "sha256": "00cdc215748b4d1452fba19fccb84cb2cfa976fbc626e3a4f229ca9e607671c6",
+          "size_bytes": 16621
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
+          "sha256": "cf112d909c5f204191e73c4d719efda8ba9b0d173b57972fe8ab85f5792fb31f",
+          "size_bytes": 431072
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/wm_norm.nii.gz",
+          "sha256": "d34ff365afd97eca1d8a86d6b5564b8bf0e4943e92473b9c7bf36713e559f8e7",
+          "size_bytes": 24312585
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "429780bc43118e45064a00ab9dcace79d4240b2a22410abe1bac8d8d53e81eea",
+          "size_bytes": 896822
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "8a426d026fb9ffb5af52f69985ebe7a4917ce995156e21066df69d0e19d22443",
+            "size_bytes": 39986
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "346a1d22f67f01463ab0dc0711e8204e76d9fcef85b8a223f880d180e6308402",
+            "size_bytes": 37843
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "c254fb2a8533a87bd839135685a20faf984d08f69bf8fa40004caf8763ebb6bc",
+            "size_bytes": 40952
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "8de37f748a48c005701f304d4bf8a9a40ed392cf936b7772d52aa28b8097e1d7",
+            "size_bytes": 44191
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "c168f88665757fc616257f450a7131413d08709d3341a6f653656ee208a166b9",
+            "size_bytes": 44812
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "1db43d8d3af5bb202ed95dcac7cd038d2844832e6a6868c35477f1e9210357d1",
+            "size_bytes": 40662
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "6f06eda6e91fc3b8d2122ba265c3c25b0e4a2b3793c4e2b2db3e077ce12409e0",
+            "size_bytes": 45945
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "f3b88efb07c33942d89d92e124433cf13389c4882ed65a525c318cf02f676dba",
+            "size_bytes": 50261
+          }
+        }
+      }
+    },
+    "sub-CON03": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/reference_manifest.json",
+          "sha256": "60b4e0a48c194e0e7a0b9e764af153415b699b487c019632b325cb4937e6d85a"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/consumer_contract.json",
+          "sha256": "153ca1e43815b6ed630630869b3ea64e7eaadde27b12cfd5748806633b917052"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/report.json",
+          "sha256": "09369c58c646e780a0605f6c854fbc7500889c4515c0acf2b708e1c567067658"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/report.json",
+          "sha256": "708c792e487e592d714ce1269ab093e8baf162a30f3d666633601b24d91bd844"
+        },
+        "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.nii.gz",
+          "sha256": "893308e9800e8efbe3baf1fc596cfa96de1a8e54eadf8401f1e11259135d9dc1",
+          "size_bytes": 193792580
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.eddy_rotated_bvecs",
+          "sha256": "5893bae2ba7250f64317edda7224eeec581298e7b64ad99c57026f6bf6c7dcb7",
+          "size_bytes": 4233
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/brain_mask.nii.gz",
+          "sha256": "b488dcc6ee34e738cb4120551f198d57c060c0faf19ebe04f05c478edf30523c",
+          "size_bytes": 15934
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/fa.nii.gz",
+          "sha256": "20966c564dad691b82b0daea5e63acc19dc7785a9865f126b1bf156cdc8695c2",
+          "size_bytes": 369957
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/wm_norm.nii.gz",
+          "sha256": "f96cb2432e94fca10afa55552bc52d569713cbde8957dbf72e706b73ac545f6c",
+          "size_bytes": 21041925
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "206fdf25bd65ecc05d3cd3f28b53d1fc074e31045d2370fe9b75b5f6cc67265b",
+          "size_bytes": 823147
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "1ff85b5442f55ea20bdf95687f54f8af0aa13f96875a94a96a03429e22c3b291",
+            "size_bytes": 35443
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "6b5d6070e393a009b66332984f93146d2e07f627296cccf9667235a5421e9b22",
+            "size_bytes": 33142
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "fc9e440447a357690287374debaea0f377e2705b7edb985e8c00069c5f8ecc8e",
+            "size_bytes": 36173
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "a310f33b915a44cf3443527844c1d4b874eddb549d1aa74eeb8356e55da57006",
+            "size_bytes": 39005
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "3ebe83cade24ef1b1121f81fc0335c8be6f6c645b27536ff1726e975395e08ff",
+            "size_bytes": 39546
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "f26d1b6aca60e95fb64a34392e0016427ac2c3e13fb3b0fc81808744bfb6933a",
+            "size_bytes": 35968
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "aabb6d410cc9ca724fab79e5da70d3a0d1b6abd9c0d90ab516d355a556cb5bec",
+            "size_bytes": 40976
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "cad5e818e018372250bde3737fcc902e004298eb8285bd960ed6b1c0c45ee006",
+            "size_bytes": 44569
+          }
+        }
+      }
+    },
+    "sub-CON04": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON04/reference_manifest.json",
+          "sha256": "c447654ade0372e7805ccfcaab902316cd01e11ced76b924c6d3fdadb2b415d1"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/consumer_contract.json",
+          "sha256": "8ecc97e074bf3fe01bdd78d87b31b1a12e2bf9b1934274829a8c369eb210d69d"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/report.json",
+          "sha256": "ae066f14fbf84142d252bd103fafa2f72d4eaeda9d4794586b2f0710c015662f"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/report.json",
+          "sha256": "f0ba54f92be232ee9dd1481ae495fe7ab18905fe1426ebc9f274a037a5ddb8f8"
+        },
+        "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.nii.gz",
+          "sha256": "48e566b587b0bc1b07fcf63a7472d3b544f2f28f39598ed9a504f5c40054fae3",
+          "size_bytes": 193142866
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.eddy_rotated_bvecs",
+          "sha256": "2d636e3191edf3b42531c5866f39babb9d921e74dddcb9f166b92a79fd91c531",
+          "size_bytes": 4223
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/dwi/sub-CON04_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/brain_mask.nii.gz",
+          "sha256": "4faa75ff0f4e6479896c30ab182cd1961dbf6a767b7ea735ca649da14574508f",
+          "size_bytes": 15418
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/fa.nii.gz",
+          "sha256": "3e6a4f32a22b6f44c8fbbb614b629f2c780cf6f65a14dae680fda659884422b1",
+          "size_bytes": 383378
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/wm_norm.nii.gz",
+          "sha256": "ff9ad0c9f6bfaa8957936ce94918b7189bf956058d75b22716db1a7458ebdfe4",
+          "size_bytes": 21840573
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "b0840c2fdd30152660cfa4b494c26f3a37302820d9e3633936f78e5506fbc397",
+          "size_bytes": 837806
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "beeb2ace48808cd3959cec8382a3b02d4f247dc30985b90afad41edc9daf338c",
+            "size_bytes": 36025
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "9c491c4cc4eeb798926fb30dba09f08c9d2dc0c81b3c6bc42d25c1ecce0c08cf",
+            "size_bytes": 33380
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "2d27a151300695622e63a82c4921e2d5583d84c58dc14646f6d78cbe115c08db",
+            "size_bytes": 36317
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "99cc7277b72c3361a52aa22fb524637d51d4a30f6f950cc2023bd3efe59f5ba9",
+            "size_bytes": 39464
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "3e15e7d7963868c4fd6fea9db91fbb21da9ba4e83d3e596ed334b0ffc6e1cae6",
+            "size_bytes": 40013
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "f968f57d0d2a00367c7d3bba45b5d45991e2c5e9d7708d80043397e793db7822",
+            "size_bytes": 36185
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "bde89feade09a56bd2682f4fe7917dcf193cedb429388603f6e7c5d24217e35c",
+            "size_bytes": 41316
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "90f04cc678a76e3b0e08226c6ad77e9fd75d0488b64da471c6deb8d319c50432",
+            "size_bytes": 45050
+          }
+        }
+      }
+    },
+    "sub-CON05": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON05/reference_manifest.json",
+          "sha256": "fba17dd7f556a5ea36f59d80b10fadf666dbf45fc734770c9a1498fa31690b58"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/consumer_contract.json",
+          "sha256": "cceb8cfabd318871b1bc7343f79108ccf8efc605ac0507c261377fdfb4aced88"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/report.json",
+          "sha256": "38cab17e1025a378f482cdd832f2371eafef4b08aa48ac0e61554dc98c905e05"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/report.json",
+          "sha256": "d9fcd03d146c714688f31697b46cb472fc715a0ea595c658627141d4d5e1e5aa"
+        },
+        "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.nii.gz",
+          "sha256": "e102c6cdc274a006e4aa28143c18f04d70fc05b1be758584f91b189461e3852a",
+          "size_bytes": 194129131
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.eddy_rotated_bvecs",
+          "sha256": "0e4d36ea3e1c4fee467079ce591a877eafca6b9015dcfe138af35a55ffb63dc1",
+          "size_bytes": 4217
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/dwi/sub-CON05_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/brain_mask.nii.gz",
+          "sha256": "8d7f0dd70dc17d1e19dcb25439fcac4cba45bc1ea5a9ee87b810ce88f5a323cd",
+          "size_bytes": 17061
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/fa.nii.gz",
+          "sha256": "4b46b0bcb60cb1c0a154699f4814a7c4ee5b370ad0897aea0c0f839b3e179772",
+          "size_bytes": 422669
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/wm_norm.nii.gz",
+          "sha256": "e0e97c034a85fa684a9e6a293521f16d26a320b07f09c6cf730f6cc03b06f6b5",
+          "size_bytes": 23790831
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "04199b036e2eeca2b015358c3e60116cc61ab0c8b18e0d9cefd19d579ebf33aa",
+          "size_bytes": 900277
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "0367e38961180cc69dd63e0872bf9f709c3bee1211a294c05018659784eaa464",
+            "size_bytes": 39753
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "8ebf99d5771033f64757b6ecba05ca7a7ed456ba86ed7a325e38b418a5c5006f",
+            "size_bytes": 37164
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "f0b36b76257551464ba374be5f9a823aecc1ca238ea3d5232e160941896d798f",
+            "size_bytes": 40319
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "3decd08757a05c268992f7f0c0df7c8bb007bbce12a4fef9d73c538c6f435b80",
+            "size_bytes": 43826
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "b3c0cf12585046f22da794083b79738132246bc939293e96a91e8fa63511d5a0",
+            "size_bytes": 44430
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "041c25b382d5e2b1f12a1d8349ab05e32da9f8ac23b3e421c9d38d874fcf7d22",
+            "size_bytes": 39924
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "1f2fab1c4d6887441566fc596701fbb6bb5a5a45056329a75bca9702c72f83e9",
+            "size_bytes": 45199
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "4978638ffc6142687e6ba64db6d1c631481c1bccd705b2381feb3b768cb2dab0",
+            "size_bytes": 49279
+          }
+        }
+      }
+    },
+    "sub-CON06": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON06/reference_manifest.json",
+          "sha256": "f34c354bf817a9119e910b256934afc0e004a2bc5b748e214ed38f9fc0bbfc89"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/consumer_contract.json",
+          "sha256": "b376a94644a128501c68f89aaa64e52c1cb58db270454bb7fc94ed619fdee11b"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/report.json",
+          "sha256": "f2b6db747ebbb7ad418854c9fae1d7cd1a3e7b7e95084f4199878914bd70ad54"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/report.json",
+          "sha256": "49471987f4789a2f8bc553cf98b248f1962b1767d13808ac85b614b7be48746c"
+        },
+        "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.nii.gz",
+          "sha256": "98c0f42f85d08aeddc276b14d5021a6745492f0b84f450ff0f8f8b8e6cffc6e4",
+          "size_bytes": 194040850
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.eddy_rotated_bvecs",
+          "sha256": "51d7263748a09dc7bdbe8ab3fd839c167e6274f6d9421e60b93af173fba65975",
+          "size_bytes": 4222
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/dwi/sub-CON06_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/brain_mask.nii.gz",
+          "sha256": "6badfdb016ce3acc67caf410f49cd2b8e11c4f40465fafecbc98a4fb98b53a99",
+          "size_bytes": 17778
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/fa.nii.gz",
+          "sha256": "f1222b911ff70c0feb4a02fb3392447c7003501cee0ded5cfe841deb6ca78256",
+          "size_bytes": 439900
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/wm_norm.nii.gz",
+          "sha256": "055922d56a69b9c7778b9857df787766623260fa8db853e0b223e75fbce7f1b4",
+          "size_bytes": 24873421
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "ee3bf3e17e5c8196633c6fe0bc39eec568952b6a5961089328354b448ba48530",
+          "size_bytes": 908364
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "d7a13252a61ddc6b4ee980ad76a684e9cafba637a694463dde47cd12c30782f1",
+            "size_bytes": 39572
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "cd3724af8c68d3803c7897cb53e3482245467c94daff66d2a6335382a080aa66",
+            "size_bytes": 37346
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "e14fc5a4421f4c68b238eee07a1f03d313485849dd9329042efdea8c7be5f636",
+            "size_bytes": 40699
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "8219d3971ba60dd2ec5971e1c7928790c85032e7c54426a6a1356ce957a646b2",
+            "size_bytes": 43592
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "cc8b47b3ac3d5219279a169d96038af2f5ab746fb3f80bc1e4e1281f96939479",
+            "size_bytes": 44143
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "abf1497b0b51c09bf0bbf08bd04575c21d247401505eddf0ed8e736f74034d67",
+            "size_bytes": 40821
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "b63af5cda093735e0a1b33d5cf58c317858420a4ecb033ee82165f4951e5b6a7",
+            "size_bytes": 45628
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "a68e31ff92911b7bde26430e1f9d0f95081666ee533dbde725114bc8198de2af",
+            "size_bytes": 49669
+          }
+        }
+      }
+    },
+    "sub-CON07": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON07/reference_manifest.json",
+          "sha256": "4870ed21b86996de55299070ac4b8b994f88a577b939c88f378c45c44263e7f7"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/consumer_contract.json",
+          "sha256": "7a69487a384385518c2f03b1ef2bcf574ed178241d6de156cd5045661556561a"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/report.json",
+          "sha256": "07d5d8f08d68b8860ef29c56d068284f043d1617ff4eb4cb300aa1a4c2e74be2"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/report.json",
+          "sha256": "64c4b7a95311adccb2765f62c521107af512834163035929848611cff8ae0638"
+        },
+        "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+          "sha256": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+          "size_bytes": 196402840
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.eddy_rotated_bvecs",
+          "sha256": "b753583fb2058ee2b415fbb56010fc1ca2425b6946df09d72b1030ef2657b11b",
+          "size_bytes": 4246
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/dwi/sub-CON07_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+          "sha256": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277",
+          "size_bytes": 17540
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz",
+          "sha256": "6ef292d2a676a478fe24c7c7854f6c4a45811d7c9dbbebb11ac24f04a0a3a764",
+          "size_bytes": 410881
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm_norm.nii.gz",
+          "sha256": "63a1a45cc91306b6d71ae5bc4c42e6e58c2d4f78d0f9f277b60d1076db4ce3eb",
+          "size_bytes": 23085956
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "a46fdd1ce7e248b140b4b5d72ef96ccd087f1bed4b66a4d40b9dec6fc9bcc6c7",
+          "size_bytes": 901263
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "00c2931b4a10f4e4d368021e231570704c3f60dde3bad7c9f0d0d9484bbe846c",
+            "size_bytes": 39988
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "88eed70eda8a034715f61b198be6fd3b407e01d19744d49e5bb2adbd8e66c7aa",
+            "size_bytes": 37760
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "7d299157333a5b825af9d4c4e224963b6663e7ed3c4b5ec84eb415c0dd41de19",
+            "size_bytes": 41132
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "5c03c5a176c2d395230250bd08eb3017bdf51a31a63f18e5a1b04cdc3224fad3",
+            "size_bytes": 43932
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "d22182f01375aaf8e164a86cbc67078a0b2436f9bd0d32c0b39f14d910093619",
+            "size_bytes": 44510
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "b6132c25a295ae77497104f005fe42ed9d359a352201e3c2be9bd5eee6646e5c",
+            "size_bytes": 40706
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "c4b1397a74855b3c832fd74153a787f2a8b36c5f3311928378beb91efa66012a",
+            "size_bytes": 46076
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "5abf219fb2c2c6a0d22c500ac00c535d76d627489db7b623c0140d70e3d7e901",
+            "size_bytes": 50093
+          }
+        }
+      }
+    },
+    "sub-CON08": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON08/reference_manifest.json",
+          "sha256": "333156f0926faa1ec06606cf99275acc08c454f5d545d2057b23ebdd7d513519"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/consumer_contract.json",
+          "sha256": "63df6afc82b223c0e03ee7b60c862dfa4fbefd754c12701a3f64c60ec3ef4320"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/report.json",
+          "sha256": "fb2725ee7d0048c2ff751d9200739ba593e3a33f15c4804117ed4de234eff65c"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/report.json",
+          "sha256": "011c64e5c2c793e55c114de7a6c08223791306b4bd95476c3fd39f1779db1c27"
+        },
+        "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.nii.gz",
+          "sha256": "784b1da48bddad2b248b2c789b54229d4ab71afab76999325199e11d1229ae41",
+          "size_bytes": 193635338
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.eddy_rotated_bvecs",
+          "sha256": "1f952e3df2362644fc3440225bc985aa741d416a63c04cb947f60f41274fd5e6",
+          "size_bytes": 4226
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/dwi/sub-CON08_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/brain_mask.nii.gz",
+          "sha256": "ed723db9c257b67f6d22e1defd95be128e6e4c94cec64c257dc2439394afaf42",
+          "size_bytes": 16235
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/fa.nii.gz",
+          "sha256": "e66e7d838a51eb7c17ae3a37c9ea22fcd4de673c3d897df1e1b69f64e1f7ae9a",
+          "size_bytes": 399663
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/wm_norm.nii.gz",
+          "sha256": "70c023d0f08f1662d4f0442050b415b76f39c07449cc18f1008a86a4e79a41da",
+          "size_bytes": 22492781
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "cfe923bff1c6e2888f8c73d9d974faec67cf637672960b565d51d9df8f8555a1",
+          "size_bytes": 859653
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "afffe2f3c7df3123de7beeda878582373baf0cb2d97fbca918f060f5b6e09465",
+            "size_bytes": 36482
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "95e1cb6c8ad7b325bf457b52bfb6d2d80527f562fd5ab9fce6cbc260f50e1f92",
+            "size_bytes": 34127
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "4879197ac4ae3c2b43eeb21c73785266a85a771272d72d7812ce5d76d94815f5",
+            "size_bytes": 37402
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "48d0b7ef77b2721c1aff9c07a0171f5016f53f355a6cbc09969fe4213bc8fa29",
+            "size_bytes": 40134
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "847e4ffe9a26332dc45bffdbdbd709ee1f10c83ada954d4c356324d1e6f97a75",
+            "size_bytes": 40746
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "c19163460f729268738a03a494e358d55aa010684748ff974c23ebacec89a364",
+            "size_bytes": 37153
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "4782939c7860fa2370d9075ad026c52e2d071f6e86c01f179972313f57c6d989",
+            "size_bytes": 42331
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "4272c725ce76e72bf6cee7a0fdfc1f0b52c054c50f94136fe46739f220dcb094",
+            "size_bytes": 45825
+          }
+        }
+      }
+    },
+    "sub-CON09": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON09/reference_manifest.json",
+          "sha256": "045ea5082ae1953e7596241945e450c4af2d589596058595f3a9fcd53c64cf81"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/consumer_contract.json",
+          "sha256": "342683a301194aacf7538a12c5c0dd6f4506712d84ddfb2ae16d52d9c9f77f8a"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/report.json",
+          "sha256": "4ab5c83c29beeeaf30fe10f3c073478ef18b5f85f42bedf04cdcc1e3a828a55d"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/report.json",
+          "sha256": "f43c4b9eb26a6003f07e499be346744f9235e63a2f69747367855cc1ab116daf"
+        },
+        "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.nii.gz",
+          "sha256": "6f7f2695efe02c542c30e9e5e1954fd355a8c208b6bdf33824ea3272c5e0ab3e",
+          "size_bytes": 194814416
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.eddy_rotated_bvecs",
+          "sha256": "ee4924996601045b15e97cd5177c4dace29a41cba52ddfabed0c5b0ccf09638f",
+          "size_bytes": 4218
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/brain_mask.nii.gz",
+          "sha256": "e2f60fabfbc2c93638afee7e5a5c7869414d82a5fe8eafbeb29bfe870c6fc07e",
+          "size_bytes": 18949
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/fa.nii.gz",
+          "sha256": "971257bc52ff60e5a639ce6ef664657134df783ba35ca46d24d372993813a4a1",
+          "size_bytes": 476145
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/wm_norm.nii.gz",
+          "sha256": "0cca6f181b67ff0cd9c23bc7b7645898b1a2229001d8478ea716804545fcaebc",
+          "size_bytes": 26616571
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "494afd3b732bc898b58c74577655a7f19eba7bfb39956aebd46462c752f3ae21",
+          "size_bytes": 986034
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "34d55093aa9801594e4728d7ebcdbfbecb3642e8df2ae08d8ddc10475213e42e",
+            "size_bytes": 43666
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "992c86ae373410977b6ec5d640f7021d66048077acd1477278e2e33a24fbe707",
+            "size_bytes": 41221
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "bcb409cd550c599ebff9990953a23ab36666660daf81b5de50d19f83542ee806",
+            "size_bytes": 44942
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "38c877b9ce86b65acf2a505bca527dbb5d28c1ff668a39b8ccf63c136f09a5a7",
+            "size_bytes": 48101
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "734d0bfaf5fd746654a11f2d46fab7cec05c8874b3aab22dc61b54f2c5f16ffe",
+            "size_bytes": 48721
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "d72c956df80f60c078174e9dc59db7694d8bc1c27fa5907131162cc872057259",
+            "size_bytes": 44562
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "7153da0e397a3aaf8f57edff30eb94f6f37f8cbf8fa74fbea7b415693faccb06",
+            "size_bytes": 49876
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "a554744d6f565109d7b3ed2fc8fa25d98c3692e8bb324315546f7d5e4ba266b8",
+            "size_bytes": 54510
+          }
+        }
+      }
+    },
+    "sub-CON10": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON10/reference_manifest.json",
+          "sha256": "88cf84149f7c284baa2ec74c217bb8a30226e1016172aadc1961bb5799c958d1"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/consumer_contract.json",
+          "sha256": "e887c400881b1e85e2a23ca15f376025b42d7a1588e999ea2e93bf5eff700bfb"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/report.json",
+          "sha256": "3ecd72744f6281599cbe8295f17b77c36fc3a7f31904d1ff73b8b78484bfdf28"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/report.json",
+          "sha256": "daaf89a02751637b49b77471053688473424e130e0625a161f1c56dc41497688"
+        },
+        "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.nii.gz",
+          "sha256": "fab7b623b3edfe3bcaacb4017c3f1506d6d9d5527d44182a810014a1737fa16a",
+          "size_bytes": 195065811
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.eddy_rotated_bvecs",
+          "sha256": "c492292b1227a20584df90b22342325737c112e6b5be205e4a8a8b7e406586cc",
+          "size_bytes": 4228
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/brain_mask.nii.gz",
+          "sha256": "485969a52e054c1915a9b2c48837d5d5771d4c69d5e295effebac8639ba8b876",
+          "size_bytes": 19013
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/fa.nii.gz",
+          "sha256": "5304050cf640604d7e7f91a7c1317d2758308c21f803c735b602d8db8032fc30",
+          "size_bytes": 434271
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/wm_norm.nii.gz",
+          "sha256": "acd64917466bf74e63b0e82e8434864b0c49b8acf27cea3998e591a460da7e25",
+          "size_bytes": 24541097
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "7ab951355927bb55b0bf894b16ae79a6fa604b2ad28850069b7dc9a307f37388",
+          "size_bytes": 921087
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "ce9b27d9967c39cf73a033d168ef04e22d4fce25627491a18c3382e65a917ea0",
+            "size_bytes": 40546
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "dae950a59b834ad7caa3b6304be4755f7e4ae75a34d06279a4770419caaec8b1",
+            "size_bytes": 37844
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "bc8558b6ce2d20324ef10afc6e87a86ffee51acc658eed993cd206a58103be0b",
+            "size_bytes": 41446
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "351547363b9d1dc4d3f4632b8ba728e159290726dede166e903c2675536b2cae",
+            "size_bytes": 44716
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "9e9d362e5cf3121566bec601d910afca3d4e3fe7999c9d9ef280e33d256436d6",
+            "size_bytes": 45247
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "cc4555175e8fad4df6fd88d9ea53958bb1ba7590191521d5fb9f8a2b405f5f78",
+            "size_bytes": 41613
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "dcbc600c76b41304bd533115f2d0a076aae92d2cad169a77053d9775434d4a01",
+            "size_bytes": 46647
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "4b8ec87c191ba81161ada09edd9c9f30e33a73355f869ebb127f126f9debff66",
+            "size_bytes": 50851
+          }
+        }
+      }
+    },
+    "sub-CON11": {
+      "state": "verified_actual_official_producer_files",
+      "official_producer": {
+        "reference_manifest": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw_CON11_selected_CPU_v1/sub-CON11/reference_manifest.json",
+          "sha256": "09ef1e4904dbe307cd817f8dd5ba84cc25034674cc98cbbec24584e615115193"
+        },
+        "DWI_consumer": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/consumer_contract.json",
+          "sha256": "bb5ab1b71c2cbda4387cf918edadf292305e6af466042db0b4e9431bd9a15339"
+        },
+        "rawprep_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/report.json",
+          "sha256": "8908330fa63932dda0a2f7cc997a31d83d5e5144fd3bbf44843f1f1132bc0a2d"
+        },
+        "modeling_report": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/report.json",
+          "sha256": "69142f4c42606f75508e7680e596a73806ea37239f988303da278c7e81d8429a"
+        },
+        "rawprep_timing_policy": "whole subject measured wall; queue wait separately recorded. CPU stages run on declared host, not nodecw10. Stage times not medians; hash/read/write and startup included.",
+        "official_FA_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/tensor.nii.gz",
+          "-fa",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/fa.nii.gz",
+          "-vector",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/direction.nii.gz",
+          "-modulate",
+          "none",
+          "-mask",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/brain_mask.nii.gz",
+          "-nthreads",
+          "8"
+        ],
+        "official_gradient_command": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.nii.gz",
+          "-fslgrad",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.eddy_rotated_bvecs",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/raw/AP.bval",
+          "-bvalue_scaling",
+          "no",
+          "-export_grad_mrtrix",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gradient_mrtrix.txt",
+          "-nthreads",
+          "8"
+        ]
+      },
+      "files": {
+        "dwi": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.nii.gz",
+          "sha256": "1dcbf6cd4bde5969f08c06020c1e9a967f5c8c153044d610d583820934af5fbc",
+          "size_bytes": 193918711
+        },
+        "bvecs": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.eddy_rotated_bvecs",
+          "sha256": "0924db0cfa57e81481e4bd23f57d61748b1e6d25738c1c92d69c597d9e315bb4",
+          "size_bytes": 4242
+        },
+        "bvals": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/dwi/sub-CON11_ses-preop_acq-AP_dwi.bval",
+          "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+          "size_bytes": 476
+        },
+        "mask": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/brain_mask.nii.gz",
+          "sha256": "694ecfefe2a610b2d83c8bf5e777610841c182a7621b01b265a205a1968cf807",
+          "size_bytes": 16317
+        },
+        "fa": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/fa.nii.gz",
+          "sha256": "c4938b08b11ad8c5cc59e42c5e53540b6845a45fff6d2c67c1c27da038285735",
+          "size_bytes": 396253
+        },
+        "wm_fod": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/wm_norm.nii.gz",
+          "sha256": "8a3a33770be84645e4a678223b4ea4ceceddf931e1a34904db38c3cdd50914e9",
+          "size_bytes": 22565711
+        },
+        "five_tissue": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "063d72bb0745f706bffaf87ed56ee5223a95aede16c26d973af4a3abf03d6207",
+          "size_bytes": 850572
+        },
+        "atlases": {
+          "fs-aparc": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "2ea5bd11b137e87cd472ad3e89d0d561f81c42387f712354bde176ee56b5d9ee",
+            "size_bytes": 37441
+          },
+          "aparc+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "55a0a049d68770ec345a2e0446aeb91dafbafffbc3c475bfc49274849d79b9fe",
+            "size_bytes": 35175
+          },
+          "aparc.a2009s+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "280892b0eaee677b1b73b1eebb3f1ab377157d22fcf823a3ebc63c5e1478d2ae",
+            "size_bytes": 38198
+          },
+          "glasser+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "55b67de1ad7342b574f4990df6ef173f9a343802fa06b613a2f7a6a1ee79fb9a",
+            "size_bytes": 41199
+          },
+          "glasser+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "b28f5e7a0932f16883b3cafa06584745678baac5065b2857d219d05a705341c5",
+            "size_bytes": 41761
+          },
+          "schaefer200+tian-s1": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "0a365a9e8adba723bc9389345ea035ba089685e992d9cc9936faa868b75d111e",
+            "size_bytes": 37997
+          },
+          "schaefer500+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "5dc5652ed561d0a67cc79da9ec8bff1a6d471761e3db6822ee1266434da870d1",
+            "size_bytes": 43416
+          },
+          "schaefer1000+tian-s4": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "c79bd51ef7a924be55d96b61aa020df0402b569f2613056519e52b7c920b9733",
+            "size_bytes": 47166
+          }
+        }
+      }
+    }
+  },
+  "verified_file_sha256": [
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/accuracy_configuration.json",
+      "sha256": "f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c",
+      "size_bytes": 318796
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_tools_v1/input_bindings_v1.json",
+      "sha256": "1ee5145471a76d345cf85a18750bed85bd53f967a410ac36ddad7bfd252bc940",
+      "size_bytes": 95114
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_baseline_raw_v2/input_manifest.json",
+      "sha256": "cc33e925a9e07362103b51f7bb70363a380d89b11a19545837676ba9a4ffae70",
+      "size_bytes": 73024
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/anat/sub-CON01_ses-preop_T1w.json",
+      "sha256": "4fcd56ba07e48a1801cdac69a46b11e2a5fe5e4aef72ac9e088b1d6fcdf0d0c2",
+      "size_bytes": 902
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/anat/sub-CON01_ses-preop_T1w.nii.gz",
+      "sha256": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+      "size_bytes": 6887418
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "9acf593a007257320237451fa36244a34b81f8efad0b3095fff21f1a37a0a5c3",
+      "size_bytes": 2777
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-AP_dwi.json",
+      "sha256": "e3eb342af25a67ffc4ea6ceb2caa9912ee7eb6905bc852e81d3687b68a615fb9",
+      "size_bytes": 1623
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "512094965612f218b45778523edbb9f9db83f28ecc0afa9676bcc29ff9c9d1f8",
+      "size_bytes": 44977658
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-PA_dwi.json",
+      "sha256": "28a766f15dc2ad5b15b160d416e78241e4ebaa518a0b2bdae960751bf753a5cd",
+      "size_bytes": 1045
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON01/ses-preop/dwi/sub-CON01_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "1b5d7ae2119bdfe1b5eeff8457b31e9bdc7d9ea9459dddd6c7cb93941434029d",
+      "size_bytes": 1091950
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/dataset_description.json",
+      "sha256": "84185f9c387ae232ddbe87e20b329bacf82b9b5dafe9bde63b64c9bc78bed6f2",
+      "size_bytes": 1209
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON01/reference_manifest.json",
+      "sha256": "64b9066e465ddc1ae8e688c1fec48b2a5611a6312b8637a302fb5404e7d7ca5a",
+      "size_bytes": 3728834
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_baseline_common_v3_raw_rerun_v1/input_manifest.json",
+      "sha256": "cc33e925a9e07362103b51f7bb70363a380d89b11a19545837676ba9a4ffae70",
+      "size_bytes": 73024
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/report.json",
+      "sha256": "f83d232acb43ad0899cff205ed15fcd5b30a05b38550fc12489640cec3af95a4",
+      "size_bytes": 726855
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/consumer_contract.json",
+      "sha256": "36b56d7d8e218464e4440c99a75a3fe12a7d71f984912f743fa343e42d57a07b",
+      "size_bytes": 86859
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/report.json",
+      "sha256": "e5292dc2432475f096d0b92e741ae0fdecc224b326e66a6df0c1738d1ed61e88",
+      "size_bytes": 142484
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/completed_contract.json",
+      "sha256": "8a41d809d3ff2a8b2a29c29111b066c09a555d80ef135c0796035798ce46059d",
+      "size_bytes": 6178
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/completed_contract_verified.json",
+      "sha256": "3ff08e64a8231da79293efdaa91082811ce01dc58f37b7a8e7788294626e9615",
+      "size_bytes": 11716
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
+      "sha256": "27965c4079c022d60df9db32bc1b705519e4259331f855c32d8efaf5981a69bf",
+      "size_bytes": 188118748
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.eddy_rotated_bvecs",
+      "sha256": "11cfdaaf7265c06eb18756e3b5c715263a3a78105d6d3d8f749e84cb329e4f4e",
+      "size_bytes": 4235
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
+      "sha256": "00cdc215748b4d1452fba19fccb84cb2cfa976fbc626e3a4f229ca9e607671c6",
+      "size_bytes": 16621
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
+      "sha256": "cf112d909c5f204191e73c4d719efda8ba9b0d173b57972fe8ab85f5792fb31f",
+      "size_bytes": 431072
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt",
+      "sha256": "419e9b1b8d191aa8688622718a1326e3495443676da0945ba947b34c87178ef3",
+      "size_bytes": 5149
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz",
+      "sha256": "f273ecd96dbfa4b9f670907d105b34cea976a54db0aea4add8410fd4f11c58eb",
+      "size_bytes": 2632003
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/wm_norm.nii.gz",
+      "sha256": "d34ff365afd97eca1d8a86d6b5564b8bf0e4943e92473b9c7bf36713e559f8e7",
+      "size_bytes": 24312585
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "429780bc43118e45064a00ab9dcace79d4240b2a22410abe1bac8d8d53e81eea",
+      "size_bytes": 896822
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "8a426d026fb9ffb5af52f69985ebe7a4917ce995156e21066df69d0e19d22443",
+      "size_bytes": 39986
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "346a1d22f67f01463ab0dc0711e8204e76d9fcef85b8a223f880d180e6308402",
+      "size_bytes": 37843
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "c254fb2a8533a87bd839135685a20faf984d08f69bf8fa40004caf8763ebb6bc",
+      "size_bytes": 40952
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "8de37f748a48c005701f304d4bf8a9a40ed392cf936b7772d52aa28b8097e1d7",
+      "size_bytes": 44191
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "c168f88665757fc616257f450a7131413d08709d3341a6f653656ee208a166b9",
+      "size_bytes": 44812
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "1db43d8d3af5bb202ed95dcac7cd038d2844832e6a6868c35477f1e9210357d1",
+      "size_bytes": 40662
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "6f06eda6e91fc3b8d2122ba265c3c25b0e4a2b3793c4e2b2db3e077ce12409e0",
+      "size_bytes": 45945
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "f3b88efb07c33942d89d92e124433cf13389c4882ed65a525c318cf02f676dba",
+      "size_bytes": 50261
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/anat/sub-CON03_ses-preop_T1w.json",
+      "sha256": "77b9330905ce69303ff30b0492aa184dc1c997aa63e8c35812aff4df74015dae",
+      "size_bytes": 910
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/anat/sub-CON03_ses-preop_T1w.nii.gz",
+      "sha256": "bf0a72d3f17781d2a178b629b72563b4b1423c52b7866fa88e5ae393f97b6f81",
+      "size_bytes": 7138339
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "d980d7634e25ae4ac859c9886ab87ee69fb5f4f00b5f4d7b92a38bf5471efccc",
+      "size_bytes": 2769
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.json",
+      "sha256": "063268ed77440990f911968bef4e0329460e37ce5b34803bb92317e714d7ef2d",
+      "size_bytes": 1633
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "508abf39e1595475a8e87edd64d5a70a56676f937d0af9017bdeea9f0bc62647",
+      "size_bytes": 45977608
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-PA_dwi.json",
+      "sha256": "d91f89f6372dcd2a12c7cb4cfb8e7909a4575a046b4af4725a68e13ca73f7c81",
+      "size_bytes": 1053
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "f1d98424127ba53d7ae9fe26d469472955d600c04b47dad8044dff482bc0e8a5",
+      "size_bytes": 1088169
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/reference_manifest.json",
+      "sha256": "60b4e0a48c194e0e7a0b9e764af153415b699b487c019632b325cb4937e6d85a",
+      "size_bytes": 3729822
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/report.json",
+      "sha256": "09369c58c646e780a0605f6c854fbc7500889c4515c0acf2b708e1c567067658",
+      "size_bytes": 727553
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/consumer_contract.json",
+      "sha256": "153ca1e43815b6ed630630869b3ea64e7eaadde27b12cfd5748806633b917052",
+      "size_bytes": 86932
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/report.json",
+      "sha256": "708c792e487e592d714ce1269ab093e8baf162a30f3d666633601b24d91bd844",
+      "size_bytes": 142556
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/completed_contract.json",
+      "sha256": "122d01ddd9a3a604a020595a33565d64733d1e3a37b27a66afcbe37025e2d6cc",
+      "size_bytes": 6177
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/completed_contract_verified.json",
+      "sha256": "77805c1168745803a929659aadd20af056375ee1213d000b980b2b8a6ca2e0a7",
+      "size_bytes": 11715
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.nii.gz",
+      "sha256": "893308e9800e8efbe3baf1fc596cfa96de1a8e54eadf8401f1e11259135d9dc1",
+      "size_bytes": 193792580
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.eddy_rotated_bvecs",
+      "sha256": "5893bae2ba7250f64317edda7224eeec581298e7b64ad99c57026f6bf6c7dcb7",
+      "size_bytes": 4233
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/brain_mask.nii.gz",
+      "sha256": "b488dcc6ee34e738cb4120551f198d57c060c0faf19ebe04f05c478edf30523c",
+      "size_bytes": 15934
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/fa.nii.gz",
+      "sha256": "20966c564dad691b82b0daea5e63acc19dc7785a9865f126b1bf156cdc8695c2",
+      "size_bytes": 369957
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gradient_mrtrix.txt",
+      "sha256": "82af95c721d71e5c9fc55a3adf90e22aa8a189506ab4c6cc6ee94bed98a537bd",
+      "size_bytes": 5162
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/tensor.nii.gz",
+      "sha256": "a7269820cc71b5d2d6a5519ce915df2ea5b17afd5398af65343e48f3d46365d9",
+      "size_bytes": 2262703
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/wm_norm.nii.gz",
+      "sha256": "f96cb2432e94fca10afa55552bc52d569713cbde8957dbf72e706b73ac545f6c",
+      "size_bytes": 21041925
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "206fdf25bd65ecc05d3cd3f28b53d1fc074e31045d2370fe9b75b5f6cc67265b",
+      "size_bytes": 823147
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "1ff85b5442f55ea20bdf95687f54f8af0aa13f96875a94a96a03429e22c3b291",
+      "size_bytes": 35443
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "6b5d6070e393a009b66332984f93146d2e07f627296cccf9667235a5421e9b22",
+      "size_bytes": 33142
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "fc9e440447a357690287374debaea0f377e2705b7edb985e8c00069c5f8ecc8e",
+      "size_bytes": 36173
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "a310f33b915a44cf3443527844c1d4b874eddb549d1aa74eeb8356e55da57006",
+      "size_bytes": 39005
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "3ebe83cade24ef1b1121f81fc0335c8be6f6c645b27536ff1726e975395e08ff",
+      "size_bytes": 39546
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "f26d1b6aca60e95fb64a34392e0016427ac2c3e13fb3b0fc81808744bfb6933a",
+      "size_bytes": 35968
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "aabb6d410cc9ca724fab79e5da70d3a0d1b6abd9c0d90ab516d355a556cb5bec",
+      "size_bytes": 40976
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON03/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "cad5e818e018372250bde3737fcc902e004298eb8285bd960ed6b1c0c45ee006",
+      "size_bytes": 44569
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/anat/sub-CON04_ses-preop_T1w.json",
+      "sha256": "71b80dc03f98d4ba09ef47190709c17b39fca99a9ed6a463b7296e48b77b5f84",
+      "size_bytes": 911
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/anat/sub-CON04_ses-preop_T1w.nii.gz",
+      "sha256": "a2cc3339da4f6f3d2ceb2ceb777645c8a96376f02fae35994fa688d54b3172e4",
+      "size_bytes": 6988515
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/dwi/sub-CON04_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/dwi/sub-CON04_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "027662f1fba4e1aac0f7297e25f1a2e33cc73f6bb6f105e3a1492d680b737605",
+      "size_bytes": 2771
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/dwi/sub-CON04_ses-preop_acq-AP_dwi.json",
+      "sha256": "e356a7aefe1031102d5794d06f22140e4ae47f5a50004ca42d9867bb3f62be97",
+      "size_bytes": 1633
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/dwi/sub-CON04_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "d491a39dbff709e7563294e8092867c560a7b66aa49e3c0c734ea55f10d8cb91",
+      "size_bytes": 45403362
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/dwi/sub-CON04_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/dwi/sub-CON04_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/dwi/sub-CON04_ses-preop_acq-PA_dwi.json",
+      "sha256": "f1710ed97ea40880d7cddf0dcd6437192c4c14960c28c98fad5684394ad8c552",
+      "size_bytes": 1054
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON04/ses-preop/dwi/sub-CON04_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "f5bf8802019841a445783d5f4651b3195d588a87f263f8934863aaa4564926cd",
+      "size_bytes": 1081263
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON04/reference_manifest.json",
+      "sha256": "c447654ade0372e7805ccfcaab902316cd01e11ced76b924c6d3fdadb2b415d1",
+      "size_bytes": 3753057
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/report.json",
+      "sha256": "ae066f14fbf84142d252bd103fafa2f72d4eaeda9d4794586b2f0710c015662f",
+      "size_bytes": 749988
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/consumer_contract.json",
+      "sha256": "8ecc97e074bf3fe01bdd78d87b31b1a12e2bf9b1934274829a8c369eb210d69d",
+      "size_bytes": 85253
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/report.json",
+      "sha256": "f0ba54f92be232ee9dd1481ae495fe7ab18905fe1426ebc9f274a037a5ddb8f8",
+      "size_bytes": 140873
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/completed_contract.json",
+      "sha256": "8e20e8c73ee030e162c1702275c747c491a7ca1a39b36833228c8caf031cb1dc",
+      "size_bytes": 6178
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/completed_contract_verified.json",
+      "sha256": "62f62c86d0ffaeddeafd35ee5a8822a1d77df02b4f82d469c7fc1a1463ec0a78",
+      "size_bytes": 11790
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.nii.gz",
+      "sha256": "48e566b587b0bc1b07fcf63a7472d3b544f2f28f39598ed9a504f5c40054fae3",
+      "size_bytes": 193142866
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.eddy_rotated_bvecs",
+      "sha256": "2d636e3191edf3b42531c5866f39babb9d921e74dddcb9f166b92a79fd91c531",
+      "size_bytes": 4223
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/brain_mask.nii.gz",
+      "sha256": "4faa75ff0f4e6479896c30ab182cd1961dbf6a767b7ea735ca649da14574508f",
+      "size_bytes": 15418
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/fa.nii.gz",
+      "sha256": "3e6a4f32a22b6f44c8fbbb614b629f2c780cf6f65a14dae680fda659884422b1",
+      "size_bytes": 383378
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gradient_mrtrix.txt",
+      "sha256": "6e9639a18f219306773370398c4a4163b0a97a377b1f45e917e5c3d23fbbbff1",
+      "size_bytes": 5145
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/tensor.nii.gz",
+      "sha256": "aec96768d28868ce5fe3044146a3e98dd2dfc3ee94a36b2b0dd00bd05f3e0c82",
+      "size_bytes": 2337749
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/wm_norm.nii.gz",
+      "sha256": "ff9ad0c9f6bfaa8957936ce94918b7189bf956058d75b22716db1a7458ebdfe4",
+      "size_bytes": 21840573
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "b0840c2fdd30152660cfa4b494c26f3a37302820d9e3633936f78e5506fbc397",
+      "size_bytes": 837806
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "beeb2ace48808cd3959cec8382a3b02d4f247dc30985b90afad41edc9daf338c",
+      "size_bytes": 36025
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "9c491c4cc4eeb798926fb30dba09f08c9d2dc0c81b3c6bc42d25c1ecce0c08cf",
+      "size_bytes": 33380
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "2d27a151300695622e63a82c4921e2d5583d84c58dc14646f6d78cbe115c08db",
+      "size_bytes": 36317
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "99cc7277b72c3361a52aa22fb524637d51d4a30f6f950cc2023bd3efe59f5ba9",
+      "size_bytes": 39464
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "3e15e7d7963868c4fd6fea9db91fbb21da9ba4e83d3e596ed334b0ffc6e1cae6",
+      "size_bytes": 40013
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "f968f57d0d2a00367c7d3bba45b5d45991e2c5e9d7708d80043397e793db7822",
+      "size_bytes": 36185
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "bde89feade09a56bd2682f4fe7917dcf193cedb429388603f6e7c5d24217e35c",
+      "size_bytes": 41316
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON04/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "90f04cc678a76e3b0e08226c6ad77e9fd75d0488b64da471c6deb8d319c50432",
+      "size_bytes": 45050
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/anat/sub-CON05_ses-preop_T1w.json",
+      "sha256": "058c670080a3b22e557c6710edd53b3b72cf40865d419e44f8e7d9bee4009318",
+      "size_bytes": 911
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/anat/sub-CON05_ses-preop_T1w.nii.gz",
+      "sha256": "0189151160abe4bece3c09cc350d76a4192cb8bdaeba90ca4f2077a18033a729",
+      "size_bytes": 7871825
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/dwi/sub-CON05_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/dwi/sub-CON05_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "182ae1db1570ef9268a90cbf4ad8a1ee848c3f8a9fc34627158021095f4e00b1",
+      "size_bytes": 2755
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/dwi/sub-CON05_ses-preop_acq-AP_dwi.json",
+      "sha256": "6b8f99f99b47ebce26db50d00c9d70ad4c6ad2ce5cfcba883a4af6085e9b2eb4",
+      "size_bytes": 1629
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/dwi/sub-CON05_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "518038bfc73494ef33e6476277d8afeb890f9ee874149b36d4e41643dd1f1323",
+      "size_bytes": 47841052
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/dwi/sub-CON05_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/dwi/sub-CON05_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/dwi/sub-CON05_ses-preop_acq-PA_dwi.json",
+      "sha256": "901653514849b94eedf4adce6daaa48f1410a2eb4e1a0f7b204bec947714bfe2",
+      "size_bytes": 1054
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON05/ses-preop/dwi/sub-CON05_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "2751b0a23835f97ac055f42f1b00ea21e3ad0c7281388f0e4256addc389b529e",
+      "size_bytes": 1139273
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON05/reference_manifest.json",
+      "sha256": "fba17dd7f556a5ea36f59d80b10fadf666dbf45fc734770c9a1498fa31690b58",
+      "size_bytes": 3738013
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/report.json",
+      "sha256": "38cab17e1025a378f482cdd832f2371eafef4b08aa48ac0e61554dc98c905e05",
+      "size_bytes": 735137
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/consumer_contract.json",
+      "sha256": "cceb8cfabd318871b1bc7343f79108ccf8efc605ac0507c261377fdfb4aced88",
+      "size_bytes": 87026
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/report.json",
+      "sha256": "d9fcd03d146c714688f31697b46cb472fc715a0ea595c658627141d4d5e1e5aa",
+      "size_bytes": 142642
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/completed_contract.json",
+      "sha256": "d9e4c3e0535e3b510cbbfd77ebc337bde0196672f8de225a3bc020e6a2adc744",
+      "size_bytes": 6178
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/completed_contract_verified.json",
+      "sha256": "105cc461202bd9e64ad82256cb2bc8c87fa9106737d5b24d2072a59eec0a1140",
+      "size_bytes": 11790
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.nii.gz",
+      "sha256": "e102c6cdc274a006e4aa28143c18f04d70fc05b1be758584f91b189461e3852a",
+      "size_bytes": 194129131
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.eddy_rotated_bvecs",
+      "sha256": "0e4d36ea3e1c4fee467079ce591a877eafca6b9015dcfe138af35a55ffb63dc1",
+      "size_bytes": 4217
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/brain_mask.nii.gz",
+      "sha256": "8d7f0dd70dc17d1e19dcb25439fcac4cba45bc1ea5a9ee87b810ce88f5a323cd",
+      "size_bytes": 17061
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/fa.nii.gz",
+      "sha256": "4b46b0bcb60cb1c0a154699f4814a7c4ee5b370ad0897aea0c0f839b3e179772",
+      "size_bytes": 422669
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/gradient_mrtrix.txt",
+      "sha256": "471d9a07b688da9d275fed258d5b427c8eb9489d6bcf9911e01f5212ced1e5e1",
+      "size_bytes": 5147
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/tensor.nii.gz",
+      "sha256": "fb6f03ff70e25b783a9e4bec200f339ebb8f934fa3f031b960c86b854075ceb9",
+      "size_bytes": 2580864
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/wm_norm.nii.gz",
+      "sha256": "e0e97c034a85fa684a9e6a293521f16d26a320b07f09c6cf730f6cc03b06f6b5",
+      "size_bytes": 23790831
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "04199b036e2eeca2b015358c3e60116cc61ab0c8b18e0d9cefd19d579ebf33aa",
+      "size_bytes": 900277
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "0367e38961180cc69dd63e0872bf9f709c3bee1211a294c05018659784eaa464",
+      "size_bytes": 39753
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "8ebf99d5771033f64757b6ecba05ca7a7ed456ba86ed7a325e38b418a5c5006f",
+      "size_bytes": 37164
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "f0b36b76257551464ba374be5f9a823aecc1ca238ea3d5232e160941896d798f",
+      "size_bytes": 40319
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "3decd08757a05c268992f7f0c0df7c8bb007bbce12a4fef9d73c538c6f435b80",
+      "size_bytes": 43826
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "b3c0cf12585046f22da794083b79738132246bc939293e96a91e8fa63511d5a0",
+      "size_bytes": 44430
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "041c25b382d5e2b1f12a1d8349ab05e32da9f8ac23b3e421c9d38d874fcf7d22",
+      "size_bytes": 39924
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "1f2fab1c4d6887441566fc596701fbb6bb5a5a45056329a75bca9702c72f83e9",
+      "size_bytes": 45199
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON05/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "4978638ffc6142687e6ba64db6d1c631481c1bccd705b2381feb3b768cb2dab0",
+      "size_bytes": 49279
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/anat/sub-CON06_ses-preop_T1w.json",
+      "sha256": "613cb9dbe88f1db980903ad73601c89ed2fe9f9396c7c8a677610fd261815830",
+      "size_bytes": 911
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/anat/sub-CON06_ses-preop_T1w.nii.gz",
+      "sha256": "4fdf03a4b695831657a47eb11f6775ec0c37700caa350cc4adb052037436b9d9",
+      "size_bytes": 7596244
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/dwi/sub-CON06_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/dwi/sub-CON06_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "ec57d6df30f6562477ef4f562d10e69d7873ec4c465b8c476298df5edf4cc007",
+      "size_bytes": 2766
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/dwi/sub-CON06_ses-preop_acq-AP_dwi.json",
+      "sha256": "491f8211bd933b1bf1edf6fba2e7e02fa65226c7e80fbeed192e24140f2d1709",
+      "size_bytes": 1630
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/dwi/sub-CON06_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "2450f9f1a2d9af19803d88007ccc9d2f1d9e9b54e54e55dc855f945e970f7fbb",
+      "size_bytes": 46809785
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/dwi/sub-CON06_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/dwi/sub-CON06_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/dwi/sub-CON06_ses-preop_acq-PA_dwi.json",
+      "sha256": "1416edcc7cb7890c373eb49ad8b9491644958f157319d55f32f79d407d42e4e5",
+      "size_bytes": 1054
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON06/ses-preop/dwi/sub-CON06_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "f8eed18dcf1007202cb68bc454ecc835f0bbc0f1c768e0de788b2f7c038411da",
+      "size_bytes": 1151780
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON06/reference_manifest.json",
+      "sha256": "f34c354bf817a9119e910b256934afc0e004a2bc5b748e214ed38f9fc0bbfc89",
+      "size_bytes": 3770727
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/report.json",
+      "sha256": "f2b6db747ebbb7ad418854c9fae1d7cd1a3e7b7e95084f4199878914bd70ad54",
+      "size_bytes": 762944
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/consumer_contract.json",
+      "sha256": "b376a94644a128501c68f89aaa64e52c1cb58db270454bb7fc94ed619fdee11b",
+      "size_bytes": 86946
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/report.json",
+      "sha256": "49471987f4789a2f8bc553cf98b248f1962b1767d13808ac85b614b7be48746c",
+      "size_bytes": 142564
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/completed_contract.json",
+      "sha256": "99e3a216cef6743d40e1925f32d8218171d98aefa1d4d1e4b2e63b3f9ffc152c",
+      "size_bytes": 6177
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/completed_contract_verified.json",
+      "sha256": "f8449603c336ed22a5a633e50f4047ca43638e870af2c948346088bbd9efcc03",
+      "size_bytes": 11789
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.nii.gz",
+      "sha256": "98c0f42f85d08aeddc276b14d5021a6745492f0b84f450ff0f8f8b8e6cffc6e4",
+      "size_bytes": 194040850
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.eddy_rotated_bvecs",
+      "sha256": "51d7263748a09dc7bdbe8ab3fd839c167e6274f6d9421e60b93af173fba65975",
+      "size_bytes": 4222
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/brain_mask.nii.gz",
+      "sha256": "6badfdb016ce3acc67caf410f49cd2b8e11c4f40465fafecbc98a4fb98b53a99",
+      "size_bytes": 17778
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/fa.nii.gz",
+      "sha256": "f1222b911ff70c0feb4a02fb3392447c7003501cee0ded5cfe841deb6ca78256",
+      "size_bytes": 439900
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/gradient_mrtrix.txt",
+      "sha256": "caecf101e9c20b412421aa220e1e5ded65a217918cb809807dc7af7696a72e34",
+      "size_bytes": 5157
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/tensor.nii.gz",
+      "sha256": "0e43b8d3c76fbc081e364fd6e3e8da91ec35e9742363f4511a3078268b90380e",
+      "size_bytes": 2686092
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/wm_norm.nii.gz",
+      "sha256": "055922d56a69b9c7778b9857df787766623260fa8db853e0b223e75fbce7f1b4",
+      "size_bytes": 24873421
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "ee3bf3e17e5c8196633c6fe0bc39eec568952b6a5961089328354b448ba48530",
+      "size_bytes": 908364
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "d7a13252a61ddc6b4ee980ad76a684e9cafba637a694463dde47cd12c30782f1",
+      "size_bytes": 39572
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "cd3724af8c68d3803c7897cb53e3482245467c94daff66d2a6335382a080aa66",
+      "size_bytes": 37346
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "e14fc5a4421f4c68b238eee07a1f03d313485849dd9329042efdea8c7be5f636",
+      "size_bytes": 40699
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "8219d3971ba60dd2ec5971e1c7928790c85032e7c54426a6a1356ce957a646b2",
+      "size_bytes": 43592
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "cc8b47b3ac3d5219279a169d96038af2f5ab746fb3f80bc1e4e1281f96939479",
+      "size_bytes": 44143
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "abf1497b0b51c09bf0bbf08bd04575c21d247401505eddf0ed8e736f74034d67",
+      "size_bytes": 40821
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "b63af5cda093735e0a1b33d5cf58c317858420a4ecb033ee82165f4951e5b6a7",
+      "size_bytes": 45628
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON06/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "a68e31ff92911b7bde26430e1f9d0f95081666ee533dbde725114bc8198de2af",
+      "size_bytes": 49669
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/anat/sub-CON07_ses-preop_T1w.json",
+      "sha256": "2ebe614f465cdf88c8a454a1086deaa83b2221a644676a96d7082a756a751aa0",
+      "size_bytes": 911
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/anat/sub-CON07_ses-preop_T1w.nii.gz",
+      "sha256": "11fd6ba345b8eccfc6fc57c58a05c8edb3cb2464644901bd6210c78c9ac86aa7",
+      "size_bytes": 7504069
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/dwi/sub-CON07_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/dwi/sub-CON07_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "8ab370c44bc6f03fd9d8a580e3dc6d4d12bc70af3f41d041c10ac63885844af1",
+      "size_bytes": 2767
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/dwi/sub-CON07_ses-preop_acq-AP_dwi.json",
+      "sha256": "e60a3eb1876971a9a7d094657941848d4a87787b5ff32e1ee1af7015520ced8f",
+      "size_bytes": 1631
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/dwi/sub-CON07_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "eea734863f7bb20c689c9fe91cfc589a0bb49582090847cab093f7938fa07a2e",
+      "size_bytes": 47781724
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/dwi/sub-CON07_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/dwi/sub-CON07_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/dwi/sub-CON07_ses-preop_acq-PA_dwi.json",
+      "sha256": "9f330e00be7f567d06d0c079cf59db45b7ae99e1954a65d70107baaa2126e75b",
+      "size_bytes": 1054
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON07/ses-preop/dwi/sub-CON07_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "a7239104f4388eef67f59614765d4c056317a4da1e94ce29c5d0284ff8512fa5",
+      "size_bytes": 1125702
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON07/reference_manifest.json",
+      "sha256": "4870ed21b86996de55299070ac4b8b994f88a577b939c88f378c45c44263e7f7",
+      "size_bytes": 3770260
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/report.json",
+      "sha256": "07d5d8f08d68b8860ef29c56d068284f043d1617ff4eb4cb300aa1a4c2e74be2",
+      "size_bytes": 762536
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/consumer_contract.json",
+      "sha256": "7a69487a384385518c2f03b1ef2bcf574ed178241d6de156cd5045661556561a",
+      "size_bytes": 86919
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/report.json",
+      "sha256": "64c4b7a95311adccb2765f62c521107af512834163035929848611cff8ae0638",
+      "size_bytes": 142537
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/completed_contract.json",
+      "sha256": "96315e533ea5d0ecc0732b32c6f9d4312b9f40ac866743dea05bcefe3fb1f740",
+      "size_bytes": 6177
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/completed_contract_verified.json",
+      "sha256": "927c58061be765744ffcf459e9293c2f9289adbab7e4259df9a88ad14962b487",
+      "size_bytes": 11789
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+      "sha256": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+      "size_bytes": 196402840
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.eddy_rotated_bvecs",
+      "sha256": "b753583fb2058ee2b415fbb56010fc1ca2425b6946df09d72b1030ef2657b11b",
+      "size_bytes": 4246
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+      "sha256": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277",
+      "size_bytes": 17540
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz",
+      "sha256": "6ef292d2a676a478fe24c7c7854f6c4a45811d7c9dbbebb11ac24f04a0a3a764",
+      "size_bytes": 410881
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+      "sha256": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230",
+      "size_bytes": 5149
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz",
+      "sha256": "1613d6ddcd3e3c58d23ccc86cf25c8a3051e4c2adce0202fbd8f05018f0a5e31",
+      "size_bytes": 2506192
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm_norm.nii.gz",
+      "sha256": "63a1a45cc91306b6d71ae5bc4c42e6e58c2d4f78d0f9f277b60d1076db4ce3eb",
+      "size_bytes": 23085956
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "a46fdd1ce7e248b140b4b5d72ef96ccd087f1bed4b66a4d40b9dec6fc9bcc6c7",
+      "size_bytes": 901263
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "00c2931b4a10f4e4d368021e231570704c3f60dde3bad7c9f0d0d9484bbe846c",
+      "size_bytes": 39988
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "88eed70eda8a034715f61b198be6fd3b407e01d19744d49e5bb2adbd8e66c7aa",
+      "size_bytes": 37760
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "7d299157333a5b825af9d4c4e224963b6663e7ed3c4b5ec84eb415c0dd41de19",
+      "size_bytes": 41132
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "5c03c5a176c2d395230250bd08eb3017bdf51a31a63f18e5a1b04cdc3224fad3",
+      "size_bytes": 43932
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "d22182f01375aaf8e164a86cbc67078a0b2436f9bd0d32c0b39f14d910093619",
+      "size_bytes": 44510
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "b6132c25a295ae77497104f005fe42ed9d359a352201e3c2be9bd5eee6646e5c",
+      "size_bytes": 40706
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "c4b1397a74855b3c832fd74153a787f2a8b36c5f3311928378beb91efa66012a",
+      "size_bytes": 46076
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON07/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "5abf219fb2c2c6a0d22c500ac00c535d76d627489db7b623c0140d70e3d7e901",
+      "size_bytes": 50093
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/anat/sub-CON08_ses-preop_T1w.json",
+      "sha256": "6afda0214aa2f770e25118309fa2fe204bbddb23d759a12b56ebbd50c214f192",
+      "size_bytes": 902
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/anat/sub-CON08_ses-preop_T1w.nii.gz",
+      "sha256": "2cf6d2f2afc65cb7e87ef68ac95a645387ab5c397f93e080a6b25ac485b810b6",
+      "size_bytes": 7709809
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/dwi/sub-CON08_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/dwi/sub-CON08_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "cd91c33d2f98d8ffd0ccd6b7609abb819def7331af2dd2cc97f29d85fd454de3",
+      "size_bytes": 2778
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/dwi/sub-CON08_ses-preop_acq-AP_dwi.json",
+      "sha256": "057d04124f06191261d8b61f6803566f629e06e76c6f81ecf94712bc8ee94298",
+      "size_bytes": 1623
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/dwi/sub-CON08_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "99565d2c5a8155e8ec1c9f91054a34eb9d4f17af929cb20b1dc2448d86f6666c",
+      "size_bytes": 46585198
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/dwi/sub-CON08_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/dwi/sub-CON08_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/dwi/sub-CON08_ses-preop_acq-PA_dwi.json",
+      "sha256": "804dea21393e32b69ee5fdb1f191fc56f5c51f09c74782a804d4958df7ac8c8a",
+      "size_bytes": 1044
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON08/ses-preop/dwi/sub-CON08_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "b418f0a2bddaf916df7c1556b02267ca03816d0b10ac418faec05cd1f041d18e",
+      "size_bytes": 1136156
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON08/reference_manifest.json",
+      "sha256": "333156f0926faa1ec06606cf99275acc08c454f5d545d2057b23ebdd7d513519",
+      "size_bytes": 3770119
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/report.json",
+      "sha256": "fb2725ee7d0048c2ff751d9200739ba593e3a33f15c4804117ed4de234eff65c",
+      "size_bytes": 762373
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/consumer_contract.json",
+      "sha256": "63df6afc82b223c0e03ee7b60c862dfa4fbefd754c12701a3f64c60ec3ef4320",
+      "size_bytes": 92406
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/report.json",
+      "sha256": "011c64e5c2c793e55c114de7a6c08223791306b4bd95476c3fd39f1779db1c27",
+      "size_bytes": 148022
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/completed_contract.json",
+      "sha256": "4b77dab81b6b979538b628b617874e867e98dbe5988c0ddb7b855b0fd22b64b0",
+      "size_bytes": 6177
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/completed_contract_verified.json",
+      "sha256": "6da76a974dff250f8988d3411bd96646be5de22810bf88b829d18b63d3820399",
+      "size_bytes": 11788
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.nii.gz",
+      "sha256": "784b1da48bddad2b248b2c789b54229d4ab71afab76999325199e11d1229ae41",
+      "size_bytes": 193635338
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.eddy_rotated_bvecs",
+      "sha256": "1f952e3df2362644fc3440225bc985aa741d416a63c04cb947f60f41274fd5e6",
+      "size_bytes": 4226
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/brain_mask.nii.gz",
+      "sha256": "ed723db9c257b67f6d22e1defd95be128e6e4c94cec64c257dc2439394afaf42",
+      "size_bytes": 16235
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/fa.nii.gz",
+      "sha256": "e66e7d838a51eb7c17ae3a37c9ea22fcd4de673c3d897df1e1b69f64e1f7ae9a",
+      "size_bytes": 399663
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/gradient_mrtrix.txt",
+      "sha256": "84e5512e0f48be8e67eba510fbcd42b2d803148f036ec0c4c1c2a163fd08329c",
+      "size_bytes": 5157
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/tensor.nii.gz",
+      "sha256": "9306c3eddc93603ac6f0312dad0b5251a8c1d16a137f43d1030a5d92f43fc548",
+      "size_bytes": 2441050
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/wm_norm.nii.gz",
+      "sha256": "70c023d0f08f1662d4f0442050b415b76f39c07449cc18f1008a86a4e79a41da",
+      "size_bytes": 22492781
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "cfe923bff1c6e2888f8c73d9d974faec67cf637672960b565d51d9df8f8555a1",
+      "size_bytes": 859653
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "afffe2f3c7df3123de7beeda878582373baf0cb2d97fbca918f060f5b6e09465",
+      "size_bytes": 36482
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "95e1cb6c8ad7b325bf457b52bfb6d2d80527f562fd5ab9fce6cbc260f50e1f92",
+      "size_bytes": 34127
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "4879197ac4ae3c2b43eeb21c73785266a85a771272d72d7812ce5d76d94815f5",
+      "size_bytes": 37402
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "48d0b7ef77b2721c1aff9c07a0171f5016f53f355a6cbc09969fe4213bc8fa29",
+      "size_bytes": 40134
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "847e4ffe9a26332dc45bffdbdbd709ee1f10c83ada954d4c356324d1e6f97a75",
+      "size_bytes": 40746
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "c19163460f729268738a03a494e358d55aa010684748ff974c23ebacec89a364",
+      "size_bytes": 37153
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "4782939c7860fa2370d9075ad026c52e2d071f6e86c01f179972313f57c6d989",
+      "size_bytes": 42331
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON08/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "4272c725ce76e72bf6cee7a0fdfc1f0b52c054c50f94136fe46739f220dcb094",
+      "size_bytes": 45825
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/anat/sub-CON09_ses-preop_T1w.json",
+      "sha256": "c8cdcccd218c9a7bf6b8f35e4c927a41d0c67c4ea7ba65f35f10e0c5779ed7a9",
+      "size_bytes": 911
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/anat/sub-CON09_ses-preop_T1w.nii.gz",
+      "sha256": "6559a4bb00a2b3fcd82f2bd04bb4bdb8ba9db96d515fe78f93478b39ccfb26c0",
+      "size_bytes": 7889426
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "30f132b83c77fc456ea4156fcd9fcaed39eeccf72a97462885ea9801238f1c21",
+      "size_bytes": 2760
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.json",
+      "sha256": "501168c0c993967003d28eaebde750cefc29e8fc55b162e6eb2c370e8ea981b4",
+      "size_bytes": 1633
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "5d3e180c2d448156999d9d1f93155d455001bb5df1d329800a50a5224391f408",
+      "size_bytes": 47261862
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-PA_dwi.json",
+      "sha256": "842ed0078a5955e79e06402b602d0f3800274e52be7b9f73a121b714058fa6a2",
+      "size_bytes": 1053
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "48c0c531ec02982d25322aa7f1c96db03d3c2a68040e71e7d4095c9afc37f9bd",
+      "size_bytes": 1147395
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON09/reference_manifest.json",
+      "sha256": "045ea5082ae1953e7596241945e450c4af2d589596058595f3a9fcd53c64cf81",
+      "size_bytes": 3740336
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/report.json",
+      "sha256": "4ab5c83c29beeeaf30fe10f3c073478ef18b5f85f42bedf04cdcc1e3a828a55d",
+      "size_bytes": 735842
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/consumer_contract.json",
+      "sha256": "342683a301194aacf7538a12c5c0dd6f4506712d84ddfb2ae16d52d9c9f77f8a",
+      "size_bytes": 92466
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/report.json",
+      "sha256": "f43c4b9eb26a6003f07e499be346744f9235e63a2f69747367855cc1ab116daf",
+      "size_bytes": 148083
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/completed_contract.json",
+      "sha256": "a1793eb3ba82f03bb6148f41b8bb2ff69cb97eb5231184179f1481ec7f69761e",
+      "size_bytes": 6177
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/completed_contract_verified.json",
+      "sha256": "27a94a114fc982299b7cd3dd4f548599c80e0a283b1ada216b54e795c15444f8",
+      "size_bytes": 11789
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.nii.gz",
+      "sha256": "6f7f2695efe02c542c30e9e5e1954fd355a8c208b6bdf33824ea3272c5e0ab3e",
+      "size_bytes": 194814416
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.eddy_rotated_bvecs",
+      "sha256": "ee4924996601045b15e97cd5177c4dace29a41cba52ddfabed0c5b0ccf09638f",
+      "size_bytes": 4218
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/brain_mask.nii.gz",
+      "sha256": "e2f60fabfbc2c93638afee7e5a5c7869414d82a5fe8eafbeb29bfe870c6fc07e",
+      "size_bytes": 18949
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/fa.nii.gz",
+      "sha256": "971257bc52ff60e5a639ce6ef664657134df783ba35ca46d24d372993813a4a1",
+      "size_bytes": 476145
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/gradient_mrtrix.txt",
+      "sha256": "9762c916539922383d624067c9e7e83d31cfd6016db177630dd22f779ad697f5",
+      "size_bytes": 5153
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/tensor.nii.gz",
+      "sha256": "78748d685596ef592c286e3bc679e70899efde873097187c094d16f015879f61",
+      "size_bytes": 2902003
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/wm_norm.nii.gz",
+      "sha256": "0cca6f181b67ff0cd9c23bc7b7645898b1a2229001d8478ea716804545fcaebc",
+      "size_bytes": 26616571
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "494afd3b732bc898b58c74577655a7f19eba7bfb39956aebd46462c752f3ae21",
+      "size_bytes": 986034
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "34d55093aa9801594e4728d7ebcdbfbecb3642e8df2ae08d8ddc10475213e42e",
+      "size_bytes": 43666
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "992c86ae373410977b6ec5d640f7021d66048077acd1477278e2e33a24fbe707",
+      "size_bytes": 41221
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "bcb409cd550c599ebff9990953a23ab36666660daf81b5de50d19f83542ee806",
+      "size_bytes": 44942
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "38c877b9ce86b65acf2a505bca527dbb5d28c1ff668a39b8ccf63c136f09a5a7",
+      "size_bytes": 48101
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "734d0bfaf5fd746654a11f2d46fab7cec05c8874b3aab22dc61b54f2c5f16ffe",
+      "size_bytes": 48721
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "d72c956df80f60c078174e9dc59db7694d8bc1c27fa5907131162cc872057259",
+      "size_bytes": 44562
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "7153da0e397a3aaf8f57edff30eb94f6f37f8cbf8fa74fbea7b415693faccb06",
+      "size_bytes": 49876
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON09/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "a554744d6f565109d7b3ed2fc8fa25d98c3692e8bb324315546f7d5e4ba266b8",
+      "size_bytes": 54510
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/anat/sub-CON10_ses-preop_T1w.json",
+      "sha256": "6e100c0fed6c4635f6e7a79259201655a6e70b401595eff8129c5dfb725326d2",
+      "size_bytes": 906
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/anat/sub-CON10_ses-preop_T1w.nii.gz",
+      "sha256": "8426862e3b867c8054ca18713651f74bd87663e8fbac02c4ebf4a54d23780813",
+      "size_bytes": 7966319
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "f4ca4e3915c7d66e96785011d2939aec38e9769f122af922ced3be18826429df",
+      "size_bytes": 2783
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.json",
+      "sha256": "b04e49c6690d546fd6784c2859634f2a6fdf83fd666ed30c0c5505e2d88fd75f",
+      "size_bytes": 1625
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "77794f2d9265327168d3bbc3708dd266c8683865a8941c37b8dc28bce8b825a5",
+      "size_bytes": 47497872
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-PA_dwi.json",
+      "sha256": "ecd91d4c58d63c1e4ae8b91daf3cb45b3b52a064141957ced948c5cfc462800f",
+      "size_bytes": 1050
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "ea33bb51126c64fd80c61d50e512a7f313c67160c66b61f163526e38f9a5324b",
+      "size_bytes": 1140917
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON10/reference_manifest.json",
+      "sha256": "88cf84149f7c284baa2ec74c217bb8a30226e1016172aadc1961bb5799c958d1",
+      "size_bytes": 4145208
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/report.json",
+      "sha256": "3ecd72744f6281599cbe8295f17b77c36fc3a7f31904d1ff73b8b78484bfdf28",
+      "size_bytes": 1079716
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/consumer_contract.json",
+      "sha256": "e887c400881b1e85e2a23ca15f376025b42d7a1588e999ea2e93bf5eff700bfb",
+      "size_bytes": 92497
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/report.json",
+      "sha256": "daaf89a02751637b49b77471053688473424e130e0625a161f1c56dc41497688",
+      "size_bytes": 148113
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/completed_contract.json",
+      "sha256": "f9a4a44cbc823db75befc4cb50205e719a0c4262c525f2b9dce02a4117d002ee",
+      "size_bytes": 6177
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/completed_contract_verified.json",
+      "sha256": "f914d35e8eeed9904f072030c6854365665d0049a48994402cd83022b8245289",
+      "size_bytes": 11788
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.nii.gz",
+      "sha256": "fab7b623b3edfe3bcaacb4017c3f1506d6d9d5527d44182a810014a1737fa16a",
+      "size_bytes": 195065811
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.eddy_rotated_bvecs",
+      "sha256": "c492292b1227a20584df90b22342325737c112e6b5be205e4a8a8b7e406586cc",
+      "size_bytes": 4228
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/brain_mask.nii.gz",
+      "sha256": "485969a52e054c1915a9b2c48837d5d5771d4c69d5e295effebac8639ba8b876",
+      "size_bytes": 19013
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/fa.nii.gz",
+      "sha256": "5304050cf640604d7e7f91a7c1317d2758308c21f803c735b602d8db8032fc30",
+      "size_bytes": 434271
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/gradient_mrtrix.txt",
+      "sha256": "bc2f93607c495400798975d5a704922df777e6dd14afba53add7d231f81ea67c",
+      "size_bytes": 5159
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/tensor.nii.gz",
+      "sha256": "818fc79c0d6f5ffc5aaa41b53c3fa0f6ea2d5cc82031f8c70e6a465158f913ba",
+      "size_bytes": 2649654
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/wm_norm.nii.gz",
+      "sha256": "acd64917466bf74e63b0e82e8434864b0c49b8acf27cea3998e591a460da7e25",
+      "size_bytes": 24541097
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "7ab951355927bb55b0bf894b16ae79a6fa604b2ad28850069b7dc9a307f37388",
+      "size_bytes": 921087
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "ce9b27d9967c39cf73a033d168ef04e22d4fce25627491a18c3382e65a917ea0",
+      "size_bytes": 40546
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "dae950a59b834ad7caa3b6304be4755f7e4ae75a34d06279a4770419caaec8b1",
+      "size_bytes": 37844
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "bc8558b6ce2d20324ef10afc6e87a86ffee51acc658eed993cd206a58103be0b",
+      "size_bytes": 41446
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "351547363b9d1dc4d3f4632b8ba728e159290726dede166e903c2675536b2cae",
+      "size_bytes": 44716
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "9e9d362e5cf3121566bec601d910afca3d4e3fe7999c9d9ef280e33d256436d6",
+      "size_bytes": 45247
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "cc4555175e8fad4df6fd88d9ea53958bb1ba7590191521d5fb9f8a2b405f5f78",
+      "size_bytes": 41613
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "dcbc600c76b41304bd533115f2d0a076aae92d2cad169a77053d9775434d4a01",
+      "size_bytes": 46647
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON10/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "4b8ec87c191ba81161ada09edd9c9f30e33a73355f869ebb127f126f9debff66",
+      "size_bytes": 50851
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/anat/sub-CON11_ses-preop_T1w.json",
+      "sha256": "155a34ff79b0766ecaf712062435d4bd384c0e71c8e534ca8d2f2c458b0ce40e",
+      "size_bytes": 906
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/anat/sub-CON11_ses-preop_T1w.nii.gz",
+      "sha256": "84f2ec0f1b68931fb449308e8e16a83f04f9374d8215ee55331e59c6fa3b9b18",
+      "size_bytes": 7643134
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/dwi/sub-CON11_ses-preop_acq-AP_dwi.bval",
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "size_bytes": 476
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/dwi/sub-CON11_ses-preop_acq-AP_dwi.bvec",
+      "sha256": "2deacab355c0281d09e1f9a9ddd3bd3b7d48e5381027331eb4fb7e7f4e37921d",
+      "size_bytes": 2776
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/dwi/sub-CON11_ses-preop_acq-AP_dwi.json",
+      "sha256": "f7aa77251fff33fa7f23b070ee09fac159ecd6158202761e88bb526ab96ae799",
+      "size_bytes": 1627
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/dwi/sub-CON11_ses-preop_acq-AP_dwi.nii.gz",
+      "sha256": "0cf9c12c499959977bb53e066fa4121e792c678a15d8078a41e18cc089101c35",
+      "size_bytes": 45815093
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/dwi/sub-CON11_ses-preop_acq-PA_dwi.bval",
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101",
+      "size_bytes": 4
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/dwi/sub-CON11_ses-preop_acq-PA_dwi.bvec",
+      "sha256": "1097c9882126db5f7d6f7a4856ec9d3db40cc1dd03515d68ac46f454a9bf1ae4",
+      "size_bytes": 12
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/dwi/sub-CON11_ses-preop_acq-PA_dwi.json",
+      "sha256": "fbd256332c32f70a784af1f127df126d7964bde1127abdbe772e65be856d7e0e",
+      "size_bytes": 1050
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON11/ses-preop/dwi/sub-CON11_ses-preop_acq-PA_dwi.nii.gz",
+      "sha256": "a7e788085a051eeb8965bff63959714a3741442df0d6215c2eba64ea35ffbf47",
+      "size_bytes": 1100438
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw_CON11_selected_CPU_v1/sub-CON11/reference_manifest.json",
+      "sha256": "09ef1e4904dbe307cd817f8dd5ba84cc25034674cc98cbbec24584e615115193",
+      "size_bytes": 4167669
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/report.json",
+      "sha256": "8908330fa63932dda0a2f7cc997a31d83d5e5144fd3bbf44843f1f1132bc0a2d",
+      "size_bytes": 1089664
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/consumer_contract.json",
+      "sha256": "bb5ab1b71c2cbda4387cf918edadf292305e6af466042db0b4e9431bd9a15339",
+      "size_bytes": 90102
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/report.json",
+      "sha256": "69142f4c42606f75508e7680e596a73806ea37239f988303da278c7e81d8429a",
+      "size_bytes": 144899
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/completed_contract.json",
+      "sha256": "1d22caf307a4a822ce36f55bcdd26355fa8328d9bdefa5b78c9eb14cef0425c2",
+      "size_bytes": 6147
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/completed_contract_verified.json",
+      "sha256": "d1e6d011f93cc288701ad593365ce01132048f254c17fbf50a1c144640221332",
+      "size_bytes": 7529
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.nii.gz",
+      "sha256": "1dcbf6cd4bde5969f08c06020c1e9a967f5c8c153044d610d583820934af5fbc",
+      "size_bytes": 193918711
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.eddy_rotated_bvecs",
+      "sha256": "0924db0cfa57e81481e4bd23f57d61748b1e6d25738c1c92d69c597d9e315bb4",
+      "size_bytes": 4242
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/brain_mask.nii.gz",
+      "sha256": "694ecfefe2a610b2d83c8bf5e777610841c182a7621b01b265a205a1968cf807",
+      "size_bytes": 16317
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/fa.nii.gz",
+      "sha256": "c4938b08b11ad8c5cc59e42c5e53540b6845a45fff6d2c67c1c27da038285735",
+      "size_bytes": 396253
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gradient_mrtrix.txt",
+      "sha256": "2d7f86c885a8511004da4b9d8de0d8b6c63d4b70e6fbef6253327c7d632edf69",
+      "size_bytes": 5148
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/tensor.nii.gz",
+      "sha256": "59fd314fe96bba4171645b079f71b095337ac739cfd4bd2cec510f604fbe1100",
+      "size_bytes": 2419995
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/wm_norm.nii.gz",
+      "sha256": "8a3a33770be84645e4a678223b4ea4ceceddf931e1a34904db38c3cdd50914e9",
+      "size_bytes": 22565711
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/five_tissue_dwi_world.nii.gz",
+      "sha256": "063d72bb0745f706bffaf87ed56ee5223a95aede16c26d973af4a3abf03d6207",
+      "size_bytes": 850572
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+      "sha256": "2ea5bd11b137e87cd472ad3e89d0d561f81c42387f712354bde176ee56b5d9ee",
+      "size_bytes": 37441
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "55a0a049d68770ec345a2e0446aeb91dafbafffbc3c475bfc49274849d79b9fe",
+      "size_bytes": 35175
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "280892b0eaee677b1b73b1eebb3f1ab377157d22fcf823a3ebc63c5e1478d2ae",
+      "size_bytes": 38198
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "55b67de1ad7342b574f4990df6ef173f9a343802fa06b613a2f7a6a1ee79fb9a",
+      "size_bytes": 41199
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "b28f5e7a0932f16883b3cafa06584745678baac5065b2857d219d05a705341c5",
+      "size_bytes": 41761
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+      "sha256": "0a365a9e8adba723bc9389345ea035ba089685e992d9cc9936faa868b75d111e",
+      "size_bytes": 37997
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "5dc5652ed561d0a67cc79da9ec8bff1a6d471761e3db6822ee1266434da870d1",
+      "size_bytes": 43416
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON11_selected_CPU_v1/sub-CON11/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+      "sha256": "c79bd51ef7a924be55d96b61aa020df0402b569f2613056519e52b7c920b9733",
+      "size_bytes": 47166
+    }
+  ],
+  "CPU_wall_seconds": 6.566755882930011,
+  "scientific_parity": "not_assessed"
+}
