@@ -1,0 +1,966 @@
+{
+  "scope": "isolated official CPU fixed-TCK matrix/reference, not production or independent tracking",
+  "case": "sub-CON03",
+  "seed": 0,
+  "host": "nodecw10",
+  "harness_sha256": "f57ae2d41769d960d9cb6154b9b5ee462dedf1bbcff5c0bba7a52914739a595f",
+  "bindings_sha256": "1ee5145471a76d345cf85a18750bed85bd53f967a410ac36ddad7bfd252bc940",
+  "producer": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/reference_manifest.json",
+    "sha256": "60b4e0a48c194e0e7a0b9e764af153415b699b487c019632b325cb4937e6d85a"
+  },
+  "program": {
+    "path": "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+    "sha256": "58761cbb76619a70e6c31fefc35df5557967a2acd8a989e06884b6334249d2c8",
+    "version": "== tck2connectome 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Robert E. Smith (robert.smith@florey.edu.au)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n"
+  },
+  "inputs": {
+    "tracks.tck": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+      "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+    },
+    "sift2_weights.txt": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+      "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+    },
+    "lengths.txt": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+      "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+    }
+  },
+  "commands": [
+    {
+      "profile": "aparc+tian-s1",
+      "kind": "count",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-out_assignments",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc+tian-s1/assignments.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc+tian-s1/count.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.04356551915407181,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+          "sha256": "6b5d6070e393a009b66332984f93146d2e07f627296cccf9667235a5421e9b22"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc+tian-s1/count.csv",
+        "sha256": "8bbd5ced43671d3e0b2ef7cf27ee8822ce7a281935e443d64b8c7812c658e0b5"
+      },
+      "assignments": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc+tian-s1/assignments.txt",
+        "sha256": "373822993c24974f321fae44d3fe9852f4e1cedfab08f8be46b69550b521803e"
+      }
+    },
+    {
+      "profile": "aparc+tian-s1",
+      "kind": "mean_length",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-tck_weights_in",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+        "-scale_file",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+        "-stat_edge",
+        "mean",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc+tian-s1/mean_length.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.05477374047040939,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+          "sha256": "6b5d6070e393a009b66332984f93146d2e07f627296cccf9667235a5421e9b22"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc+tian-s1/mean_length.csv",
+        "sha256": "65880169543a599ed200c8aa803f858e1a3bb1e2204e31c859016e9e78448964"
+      }
+    },
+    {
+      "profile": "aparc.a2009s+tian-s1",
+      "kind": "count",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-out_assignments",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc.a2009s+tian-s1/assignments.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc.a2009s+tian-s1/count.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.050692975521087646,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+          "sha256": "fc9e440447a357690287374debaea0f377e2705b7edb985e8c00069c5f8ecc8e"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc.a2009s+tian-s1/count.csv",
+        "sha256": "0cf4ee5b180f79c8da24f2a7052a68a9d35d9d6be99644d49202bc9e6ca07c54"
+      },
+      "assignments": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc.a2009s+tian-s1/assignments.txt",
+        "sha256": "2e01cb3ad9b06d5feb666e5e75e8dd382d3aa5be7097b703172b5083a5fee248"
+      }
+    },
+    {
+      "profile": "aparc.a2009s+tian-s1",
+      "kind": "mean_length",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-tck_weights_in",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+        "-scale_file",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+        "-stat_edge",
+        "mean",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc.a2009s+tian-s1/mean_length.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.0621102973818779,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+          "sha256": "fc9e440447a357690287374debaea0f377e2705b7edb985e8c00069c5f8ecc8e"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc.a2009s+tian-s1/mean_length.csv",
+        "sha256": "899b6d07d26c3767ba17d69a4ea67e7ecf171dc4bacd2210985c333e87cfc0b0"
+      }
+    },
+    {
+      "profile": "fs-aparc",
+      "kind": "count",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-out_assignments",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/fs-aparc/assignments.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/fs-aparc/count.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.04298096150159836,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "sha256": "1ff85b5442f55ea20bdf95687f54f8af0aa13f96875a94a96a03429e22c3b291"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/fs-aparc/count.csv",
+        "sha256": "5d4cb5b625d158feb9375329873a4682f15eb9a81d6e678d5d0738b3e501411e"
+      },
+      "assignments": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/fs-aparc/assignments.txt",
+        "sha256": "9cf46daa2776c7a280f37a95fbe1b1465daab61efc4154ef17a19e9de958f062"
+      }
+    },
+    {
+      "profile": "fs-aparc",
+      "kind": "mean_length",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-tck_weights_in",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+        "-scale_file",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+        "-stat_edge",
+        "mean",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/fs-aparc/mean_length.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.0708705335855484,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "sha256": "1ff85b5442f55ea20bdf95687f54f8af0aa13f96875a94a96a03429e22c3b291"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/fs-aparc/mean_length.csv",
+        "sha256": "3591cf14cab3cdc2841c0b5fab89e35153e38e8a0bc1c5edb2c8209c9fd55e72"
+      }
+    },
+    {
+      "profile": "glasser+tian-s1",
+      "kind": "count",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-out_assignments",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s1/assignments.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s1/count.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.07879049330949783,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+          "sha256": "a310f33b915a44cf3443527844c1d4b874eddb549d1aa74eeb8356e55da57006"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s1/count.csv",
+        "sha256": "bb9e14229bd3a8644701b952ecc448a674860b3f04d45a96cf0694e6630e4b69"
+      },
+      "assignments": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s1/assignments.txt",
+        "sha256": "a7117d692808974ab6baf0c0178540b872e3d13b89364d2f53d5a2226b5e641d"
+      }
+    },
+    {
+      "profile": "glasser+tian-s1",
+      "kind": "mean_length",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-tck_weights_in",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+        "-scale_file",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+        "-stat_edge",
+        "mean",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s1/mean_length.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.09176021814346313,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+          "sha256": "a310f33b915a44cf3443527844c1d4b874eddb549d1aa74eeb8356e55da57006"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s1/mean_length.csv",
+        "sha256": "ab2cb96b2ccf0b5417dba63147ffd880004a6f94082333e964af6e839e88a1ad"
+      }
+    },
+    {
+      "profile": "glasser+tian-s4",
+      "kind": "count",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-out_assignments",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s4/assignments.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s4/count.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.08671489357948303,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+          "sha256": "3ebe83cade24ef1b1121f81fc0335c8be6f6c645b27536ff1726e975395e08ff"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s4/count.csv",
+        "sha256": "c90dba303a126268e6ef123d32681cad864415ed16f72f283643fa17001d7538"
+      },
+      "assignments": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s4/assignments.txt",
+        "sha256": "eaec7d4f471cf65f87a17871ecdb481b3e2fdacbcdb74e333984221f3fe65a26"
+      }
+    },
+    {
+      "profile": "glasser+tian-s4",
+      "kind": "mean_length",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-tck_weights_in",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+        "-scale_file",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+        "-stat_edge",
+        "mean",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s4/mean_length.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.10095946490764618,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+          "sha256": "3ebe83cade24ef1b1121f81fc0335c8be6f6c645b27536ff1726e975395e08ff"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s4/mean_length.csv",
+        "sha256": "918425b71c532c17b4f2bc807b32976d434a83bb8573665bfc18d1f292c323a2"
+      }
+    },
+    {
+      "profile": "schaefer1000+tian-s4",
+      "kind": "count",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-out_assignments",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer1000+tian-s4/assignments.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer1000+tian-s4/count.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.2972000241279602,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+          "sha256": "cad5e818e018372250bde3737fcc902e004298eb8285bd960ed6b1c0c45ee006"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer1000+tian-s4/count.csv",
+        "sha256": "147d1384b9bf8514d95c758244febeefa9835b88da22ccf231eae6da5cce8fb0"
+      },
+      "assignments": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer1000+tian-s4/assignments.txt",
+        "sha256": "e597b609ae9ced84ee12402f16e4653a9c315ebeb62a514c3f305ec3499488c6"
+      }
+    },
+    {
+      "profile": "schaefer1000+tian-s4",
+      "kind": "mean_length",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-tck_weights_in",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+        "-scale_file",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+        "-stat_edge",
+        "mean",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer1000+tian-s4/mean_length.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.3127278685569763,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+          "sha256": "cad5e818e018372250bde3737fcc902e004298eb8285bd960ed6b1c0c45ee006"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer1000+tian-s4/mean_length.csv",
+        "sha256": "b71c8a9678530907506f4feb10539e6f4bc35cd11d25e34643652122cc4ab6ce"
+      }
+    },
+    {
+      "profile": "schaefer200+tian-s1",
+      "kind": "count",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-out_assignments",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer200+tian-s1/assignments.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer200+tian-s1/count.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.07847538590431213,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+          "sha256": "f26d1b6aca60e95fb64a34392e0016427ac2c3e13fb3b0fc81808744bfb6933a"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer200+tian-s1/count.csv",
+        "sha256": "b3feb4417386351cf41659ed35ddc76f77f253e2eefa6a41c23e2df102d967b4"
+      },
+      "assignments": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer200+tian-s1/assignments.txt",
+        "sha256": "5695495ed84d17d585590cc6d16ba63312fc6805429cbfbd536222ffbf3f92e5"
+      }
+    },
+    {
+      "profile": "schaefer200+tian-s1",
+      "kind": "mean_length",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-tck_weights_in",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+        "-scale_file",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+        "-stat_edge",
+        "mean",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer200+tian-s1/mean_length.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.06474997848272324,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+          "sha256": "f26d1b6aca60e95fb64a34392e0016427ac2c3e13fb3b0fc81808744bfb6933a"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer200+tian-s1/mean_length.csv",
+        "sha256": "73fe8f8fbdacceb64ef5426af59ae6c20ae1f28bebd2cec1f0f369ad20845879"
+      }
+    },
+    {
+      "profile": "schaefer500+tian-s4",
+      "kind": "count",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-out_assignments",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer500+tian-s4/assignments.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer500+tian-s4/count.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.12434466928243637,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+          "sha256": "aabb6d410cc9ca724fab79e5da70d3a0d1b6abd9c0d90ab516d355a556cb5bec"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer500+tian-s4/count.csv",
+        "sha256": "3417311a89000c2de956066fea18d41956f28d9ffecd85343a2e4ca313c0c49e"
+      },
+      "assignments": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer500+tian-s4/assignments.txt",
+        "sha256": "1d01ecffe955a5b123d6d82892b148bfb9c6ba18c118c823d57eb9df72b09e4d"
+      }
+    },
+    {
+      "profile": "schaefer500+tian-s4",
+      "kind": "mean_length",
+      "argv": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+        "-symmetric",
+        "-assignment_radial_search",
+        "4",
+        "-tck_weights_in",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+        "-scale_file",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+        "-stat_edge",
+        "mean",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer500+tian-s4/mean_length.csv",
+        "-nthreads",
+        "8",
+        "-config",
+        "NIfTIUseSform",
+        "1"
+      ],
+      "wall_s": 0.1389303132891655,
+      "returncode": 0,
+      "inputs": {
+        "tracks.tck": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/tracks.tck",
+          "sha256": "43346fddddbfa0f5f17d2dd01e8b5dc3fe725a8b98dd6ae297ac484177cf7307"
+        },
+        "sift2_weights.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/sift2_weights.txt",
+          "sha256": "7bb95ba38422d2a52c96de9628a6028ba6d0707a05abef188e3e052ee9e89c8f"
+        },
+        "lengths.txt": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/seed-0/lengths.txt",
+          "sha256": "f1b177baed620acb346c724ac6d864033054d681eacfb24928ee321444dcb225"
+        },
+        "atlas": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+          "sha256": "aabb6d410cc9ca724fab79e5da70d3a0d1b6abd9c0d90ab516d355a556cb5bec"
+        }
+      },
+      "output": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer500+tian-s4/mean_length.csv",
+        "sha256": "f57217be4a8c28a8d80593b2ca8f2f63e34851c7bc3c6335e5431de4a56c39e0"
+      }
+    }
+  ],
+  "profiles": {
+    "aparc+tian-s1": {
+      "atlas": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+        "sha256": "6b5d6070e393a009b66332984f93146d2e07f627296cccf9667235a5421e9b22"
+      },
+      "outputs": {
+        "count": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc+tian-s1/count.csv",
+          "sha256": "8bbd5ced43671d3e0b2ef7cf27ee8822ce7a281935e443d64b8c7812c658e0b5"
+        },
+        "assignments": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc+tian-s1/assignments.txt",
+          "sha256": "373822993c24974f321fae44d3fe9852f4e1cedfab08f8be46b69550b521803e"
+        },
+        "mean_length": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc+tian-s1/mean_length.csv",
+          "sha256": "65880169543a599ed200c8aa803f858e1a3bb1e2204e31c859016e9e78448964"
+        }
+      }
+    },
+    "aparc.a2009s+tian-s1": {
+      "atlas": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+        "sha256": "fc9e440447a357690287374debaea0f377e2705b7edb985e8c00069c5f8ecc8e"
+      },
+      "outputs": {
+        "count": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc.a2009s+tian-s1/count.csv",
+          "sha256": "0cf4ee5b180f79c8da24f2a7052a68a9d35d9d6be99644d49202bc9e6ca07c54"
+        },
+        "assignments": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc.a2009s+tian-s1/assignments.txt",
+          "sha256": "2e01cb3ad9b06d5feb666e5e75e8dd382d3aa5be7097b703172b5083a5fee248"
+        },
+        "mean_length": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/aparc.a2009s+tian-s1/mean_length.csv",
+          "sha256": "899b6d07d26c3767ba17d69a4ea67e7ecf171dc4bacd2210985c333e87cfc0b0"
+        }
+      }
+    },
+    "fs-aparc": {
+      "atlas": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+        "sha256": "1ff85b5442f55ea20bdf95687f54f8af0aa13f96875a94a96a03429e22c3b291"
+      },
+      "outputs": {
+        "count": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/fs-aparc/count.csv",
+          "sha256": "5d4cb5b625d158feb9375329873a4682f15eb9a81d6e678d5d0738b3e501411e"
+        },
+        "assignments": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/fs-aparc/assignments.txt",
+          "sha256": "9cf46daa2776c7a280f37a95fbe1b1465daab61efc4154ef17a19e9de958f062"
+        },
+        "mean_length": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/fs-aparc/mean_length.csv",
+          "sha256": "3591cf14cab3cdc2841c0b5fab89e35153e38e8a0bc1c5edb2c8209c9fd55e72"
+        }
+      }
+    },
+    "glasser+tian-s1": {
+      "atlas": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+        "sha256": "a310f33b915a44cf3443527844c1d4b874eddb549d1aa74eeb8356e55da57006"
+      },
+      "outputs": {
+        "count": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s1/count.csv",
+          "sha256": "bb9e14229bd3a8644701b952ecc448a674860b3f04d45a96cf0694e6630e4b69"
+        },
+        "assignments": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s1/assignments.txt",
+          "sha256": "a7117d692808974ab6baf0c0178540b872e3d13b89364d2f53d5a2226b5e641d"
+        },
+        "mean_length": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s1/mean_length.csv",
+          "sha256": "ab2cb96b2ccf0b5417dba63147ffd880004a6f94082333e964af6e839e88a1ad"
+        }
+      }
+    },
+    "glasser+tian-s4": {
+      "atlas": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+        "sha256": "3ebe83cade24ef1b1121f81fc0335c8be6f6c645b27536ff1726e975395e08ff"
+      },
+      "outputs": {
+        "count": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s4/count.csv",
+          "sha256": "c90dba303a126268e6ef123d32681cad864415ed16f72f283643fa17001d7538"
+        },
+        "assignments": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s4/assignments.txt",
+          "sha256": "eaec7d4f471cf65f87a17871ecdb481b3e2fdacbcdb74e333984221f3fe65a26"
+        },
+        "mean_length": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/glasser+tian-s4/mean_length.csv",
+          "sha256": "918425b71c532c17b4f2bc807b32976d434a83bb8573665bfc18d1f292c323a2"
+        }
+      }
+    },
+    "schaefer1000+tian-s4": {
+      "atlas": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+        "sha256": "cad5e818e018372250bde3737fcc902e004298eb8285bd960ed6b1c0c45ee006"
+      },
+      "outputs": {
+        "count": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer1000+tian-s4/count.csv",
+          "sha256": "147d1384b9bf8514d95c758244febeefa9835b88da22ccf231eae6da5cce8fb0"
+        },
+        "assignments": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer1000+tian-s4/assignments.txt",
+          "sha256": "e597b609ae9ced84ee12402f16e4653a9c315ebeb62a514c3f305ec3499488c6"
+        },
+        "mean_length": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer1000+tian-s4/mean_length.csv",
+          "sha256": "b71c8a9678530907506f4feb10539e6f4bc35cd11d25e34643652122cc4ab6ce"
+        }
+      }
+    },
+    "schaefer200+tian-s1": {
+      "atlas": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+        "sha256": "f26d1b6aca60e95fb64a34392e0016427ac2c3e13fb3b0fc81808744bfb6933a"
+      },
+      "outputs": {
+        "count": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer200+tian-s1/count.csv",
+          "sha256": "b3feb4417386351cf41659ed35ddc76f77f253e2eefa6a41c23e2df102d967b4"
+        },
+        "assignments": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer200+tian-s1/assignments.txt",
+          "sha256": "5695495ed84d17d585590cc6d16ba63312fc6805429cbfbd536222ffbf3f92e5"
+        },
+        "mean_length": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer200+tian-s1/mean_length.csv",
+          "sha256": "73fe8f8fbdacceb64ef5426af59ae6c20ae1f28bebd2cec1f0f369ad20845879"
+        }
+      }
+    },
+    "schaefer500+tian-s4": {
+      "atlas": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_B_v3/sub-CON03/inputs/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+        "sha256": "aabb6d410cc9ca724fab79e5da70d3a0d1b6abd9c0d90ab516d355a556cb5bec"
+      },
+      "outputs": {
+        "count": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer500+tian-s4/count.csv",
+          "sha256": "3417311a89000c2de956066fea18d41956f28d9ffecd85343a2e4ca313c0c49e"
+        },
+        "assignments": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer500+tian-s4/assignments.txt",
+          "sha256": "1d01ecffe955a5b123d6d82892b148bfb9c6ba18c118c823d57eb9df72b09e4d"
+        },
+        "mean_length": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/schaefer500+tian-s4/mean_length.csv",
+          "sha256": "f57217be4a8c28a8d80593b2ca8f2f63e34851c7bc3c6335e5431de4a56c39e0"
+        }
+      }
+    }
+  },
+  "state": "completed",
+  "execution_completed": true,
+  "length_definition": "same lengths.txt -scale_file in both arms; previous full chain -scale_length computes lengths directly and text export can round"
+}
