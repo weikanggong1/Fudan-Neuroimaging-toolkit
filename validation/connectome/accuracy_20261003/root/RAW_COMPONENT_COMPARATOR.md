@@ -4,6 +4,8 @@
 
 `compare_raw_components.py` 读取本轮已经完成的 FNIT raw-DWI 运行，比较完整校正 DWI、全部旋转梯度及 FA。官方参考从每个病例实际使用的 `reference_manifest` 取得 DWI consumer、rawprep 和 modeling report，并核对实际路径、SHA 和成功命令。CON11 沿自己的 producer 目录读取，不套用另外九例的目录。
 
+服务器统一入口为 `/cwStorage/home/gongwk/Notebook_code/FNIT`。先读该目录的 `README.md` / `INDEX.md` / `INDEX.json`；本轮索引入口 `workspaces/fnit_connectome_accuracy_20261003_v1` 和上一轮 `workspaces/fnit_connectome_tenraw_20261002` 均以 `register_link_keep_original` 指向各自原实体。已现场核对两个链接；冻结任务继续使用原 configuration / receipt 中的绝对路径，没有移动运行、切换源码或修改中央索引。本次实际索引读取版本见 [`最终收集收据`](all10_component_collection_receipt.json)。
+
 ```mermaid
 flowchart TD
   A[冻结 accuracy_configuration 和 input_bindings] --> B[核对真实 controller 的病例完成行]
@@ -116,6 +118,8 @@ CUDA_VISIBLE_DEVICES= python validation/connectome/accuracy_20261003/root/collec
 
 输出每组合的原 bytes、`collection.json` 的原/复制文件 SHA、精确完成 coverage 和原非有限值统计；`scientific_parity` 仍为 `not_assessed`。该工具没有改原 reports、controller、冻结配置或科学源码。
 
+本轮上述十例收集已实际完成，原目录不再用于重跑。独立 readiness watcher 源码 [`watch_raw_all10_component_collection_v1.py`](watch_raw_all10_component_collection_v1.py) SHA 为 `3277f89b0c5d22e4fc05af9059d1703b1fb1bbd5fbb6e7661ebf28e4ae714d15`：CPU 线程均 1、CUDA 隐藏，每 45 秒只读检查状态；只有原 12 个 raw 完成行和原十例 aggregate 同时存在才调用现有严格收集器。任一 producer / analysis 失败即保留失败并停止，不制造完成结果。该脚本是本轮私有验证入口，固定服务器路径，不属于 FNIT 公共 CLI。独立复核须使用另一个全新输出 namespace。
+
 ## 4. 对应原软件调用
 
 比较器不调用官方程序。实际官方命令和哈希来自成功的 producer，写入每例报告中的 `official_gradient_command`、`official_FA_command`。本轮原参考命令结构为：
@@ -135,7 +139,7 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 
 ## 5. 最新精度、耗时和真实脑图
 
-**本页已保存本轮 CON01 与 CON03 的 baseline/candidate 配对阶段证据。** 结果来自已经完成的 raw-DWI CLI，未重新运行求解或官方软件；其它病例随真实后台完成状态推进，本页不为未完成病例填数，也不代表十例验收。下面区分协议核验和 MRI 输出比较：
+**本轮原 12/12 raw 调用及组件分析已经实际完成；本页保留十例 candidate 的原 aggregate、紧凑表，以及 CON01 / CON03 的两组配对证据。** 结果来自已完成的实际 raw-DWI CLI；组件收集没有重新运行科学计算。完成运行和收集不代表精度或显存资格通过。下面区分协议核验和 MRI 输出比较：
 
 |实际核验|覆盖|结果与 CPU 墙钟|
 |---|---|---|
@@ -151,6 +155,7 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 |实际 candidate CON01 MRI 比较|同一完整采集及同一实际官方参考|1,319 个文件 before/after SHA；比较器内计时 20.45769 s，CPU 控制器记录进程墙钟 20.62075 s。|
 |实际 baseline / candidate CON03 MRI 比较|全部 102 帧、全 552,960 体素、官方 mask 98,701 体素|后台控制器记录 CPU 进程墙钟分别 20.91344 / 21.37488 s；原成功报告均由原 receipt 绑定。|
 |CON03 真实完成配对的严格原 bytes 收集|仅 B03 / C03，原报告、summary、receipt 与全部绑定源文件|2,562 个原文件 before/after SHA；collector 内计时 24.79444 s，nodecw10 进程墙钟 24.87445 s，exit 0。|
+|最终真实十例原 bytes 收集|CON01/03/04/05/06/07/08/09/10/11；原 12 次 raw 均完成后启动|2,059 个原文件 before/after SHA，51 份原文件副本；collector 内计时 107.71187 s，nodecw10 进程墙钟 107.82284 s，exit 0。|
 
 **当前 helper SHA**：`08015c11c2662cb2f8115843414ed9148c1dadc60c175b66dcf20f51381c18ce`。成功原报告 `baseline_CON01_components_v2.json` 的 SHA 为 `1fa40b59e1e7e4db893a62737e388b1873cc4058cfaffe705dc1fb29ce6b335b`，远端原目录为 `root_components_CON01_baseline_v2`，本地副本保留原字节。冻结配置 SHA 为 `f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c`。
 
@@ -243,6 +248,35 @@ CON03 两次 FNIT 输出的 corrected DWI、bval、全部 bvec 和 brain mask �
 
 CON03 raw CLI 的真实单次墙钟为 baseline `2033.586431 s`、candidate `2043.839205 s`，候选增加 `10.252775 s`（`0.504172%`）。共享负载下不能由这一单次顺序观测证明稳定退化或归因；约 21 s 的 CPU 组件比较与 24.87 s 的原 bytes 收集均是独立验证耗时。双方 allocator 和 sampled process-tree 观察到低于预算，连续 process-tree 严格上界仍未证明。
 
+### 最终十例原组件结果
+
+原十例摘要 [`all10_candidate_component_summary_original.json`](all10_candidate_component_summary_original.json) 保留远端原 bytes，SHA `950d1cba52d9dffd921c9a63e47e0720dd632697dc01cfd7175b15765a33fe77`。下表和 [`完整紧凑 JSON`](all10_raw_component_compact_summary.json) / [`CSV`](all10_raw_component_table.csv) 只摘取其中已保存的数值，不重算或更改冻结指标。每例保留完整 DWI 全体素及官方 mask 统计、全部梯度统计、FA 主统计和非有限数量、有限对诊断分母及原 producer / receipt / report SHA。
+
+|病例|DWI 全 volume RMSE|DWI 官方 mask RMSE|bvec 最大有向夹角 °|FA NaN 全 volume，FNIT/官方|FA NaN mask，FNIT/官方|FA 非有限状态不一致，全/mask|FA mask **有限对诊断** RMSE|
+|---|---:|---:|---:|---:|---:|---:|---:|
+|CON01|1.567377|1.067469|0.314094|36/37|35/37|3/2|0.05448937|
+|CON03|1.473262|0.871451|0.240438|1/6|1/6|5/5|0.04771665|
+|CON04|1.634836|1.532195|0.170419|32/32|32/32|0/0|0.05020659|
+|CON05|1.870640|1.574150|0.178476|151/168|150/168|19/18|0.05223750|
+|CON06|2.611279|2.348248|0.490351|35/33|32/33|4/1|0.05816172|
+|CON07|4.059187|4.851238|0.600362|75/0|61/0|75/61|0.07235742|
+|CON08|2.067234|2.063514|0.387527|259/265|242/265|40/23|0.05677459|
+|CON09|1.684152|1.094801|0.254338|96/91|82/91|23/9|0.05094249|
+|CON10|2.305552|2.613027|0.423580|6/1|1/1|5/0|0.06362539|
+|CON11|2.418602|3.041162|0.586974|25/29|24/29|6/5|0.06756293|
+
+十例的完整 DWI 双方均 finite；全部 bval 逐值相同，梯度均 finite，exact-zero 和 `b<50` 支持不一致均为 0。表内 bvec 夹角保留原有向定义。十例 FA 的全 volume / 官方 mask 主统计 **全部为 `null`**，全值误差分位数也为 `null`；没有填值或移除异常体素后改写主统计。全部 NaN、正负 Inf、非有限状态不一致与有限对分母仍保留在 JSON。CON07 的 FNIT / 官方 FA NaN 为全 volume `75 / 0`、官方 mask `61 / 0`；不能用有限对相关性代替这一差异。FOD 和 atlas 仍仅为 `same_grid_not_numerically_assessed`；5TT 为 `not_comparable_grid`，没有偷偷重采样后宣称逐体素一致。
+
+**原显存资格保持原状态。** 八例原 GPU report 为 `observed_below_budget`；CON09、CON10 均为 `not_fully_measured`，各有 1 个失败采样及 1 条原监测错误。CON09 原 `monitor_issues` 为 `failed_samples` / `errors`；CON10 另外保留 `sampling_gap`。CSV 和紧凑 JSON 保留原 GPU budget、原 wall budget 与原 monitor 的不同 scope。allocator 和 sampled process-tree 的 below-limit 布尔值没有被改成资格通过；十例的 `continuous_process_tree_bound_verified` 均为 false。根控制器独立补测不替换这里的原科学输出、原耗时或原失败监测记录。
+
+严格原 collection SHA `f5aed4edb53816a49ad9a9100443378efed5715dc4338a7e57f6ff221449fd67`。[`最终收集收据`](all10_component_collection_receipt.json) 给出原 collection 的路径和 SHA、51 份字节复制清单及十例 report/summary/receipt 身份；原 [`watcher 完成状态`](all10_component_collector_status_original.json)、[`启动记录`](all10_component_watcher_launch_original.json) 与 [`collector stdout`](all10_component_collector_stdout_original.log) 保留原 bytes。全部 51 份副本留在远端；本提交只复制一份 667,065 字节的原十例 aggregate 和必要小型证据，没有复制十份完整 components 报告或 MRI 数组。最终导出和脑图生成再次核验同一批 2,059 个原文件、51 份副本及原完成行，原产物保持不变。
+
+下图对十例逐个读取成功原报告绑定的原 FA，显示各自保存网格 `k=30` 切片。显示 FA 范围 `[0,1]`、绝对差 `[0,0.2]`；仅用于 RGB 显示，不参与冻结误差计算。只放大显示像素，未对体积重采样或换轴；紫色明确表示非有限值。完整输入 path/SHA 和图像 SHA 见 [`十例脑图收据`](all10_candidate_FA_brain_receipt.json)，PNG SHA `a1dc141090d1ba0d9344091517b5df9d37212b6af7ff49d55c1354dcb15d5719`。
+
+![十例实际 candidate 与各自官方输出的原网格 FA 及差值](all10_candidate_official_FA_brain.png)
+
+组件收集结论为实际完成、来源和原字节核验通过，`scientific_parity` 仍是 `not_assessed`。整体矩阵与 tracking population 的原验收失败保留在 [根控制器完整十例报告](../final_cohort_summary_v1/actual_completed/full_cohort_report.json)；本组件文件不修改其门槛或结论。CON01 有限对 FA 诊断小幅改善、CON03 小幅变差的配对事实均继续保留，不概括为全部改善。
+
 这些结果是不同校正 DWI/mask/旋转梯度的 **raw 全链阶段差异**，不代表固定输入 DTI 的误差。本工具不定义额外科学验收门槛，`scientific_parity=not_assessed`；完整 raw10 与原官方链的重复性、速度和 `<20e9` 显存验收由总控制执行。
 
 ## 6. 最近版本和 benchmark 记录
@@ -258,6 +292,8 @@ CON03 raw CLI 的真实单次墙钟为 baseline `2033.586431 s`、candidate `204
 - CON01 candidate 的实际 producer 完成后，后台控制器于 UTC `2026-10-03T07:29:09` 启动 CPU 比较，UTC `07:29:30` 完成。原报告、summary 与 receipt 复制保留原字节；公开示例仅包含原网格脑切片，没有复制发布完整 MRI 数组。控制器和科学冻结源码/配置没有改动，继续等待其它病例；此处覆盖仍为 CON01 baseline + candidate，不代表十例完成或整链匹配。
 - 准备原 bytes 收集器：独立 nodecw10 CPU 工具目录，复用相同 SHA 的 controller source gates；14 项 CPU 协议回归通过。真实全十例请求在 `all10_summary=null` 时明确拒绝，保留原 log/receipt 且没有创建集合目录。CON03 候选已完成的数据只作只读核验汇报；其配对 baseline 未完成时不在这里添加配对数字或重复复制大 JSON。完整配对与十例收集等待真实 producer 完成。
 - CON03 baseline 与 candidate 均实际完成后，严格 subset collector 于 UTC `2026-10-03T09:11:11` 成功收集其原 bytes：2,562 个原文件 before/after SHA，CPU 24.87445 s。另作 CPU 原 FA 支持与真实 paired 脑图派生，完整复核同一批文件与两臂完成行；只保存小 summary/receipt/PNG 及原 summary/receipt 的完整字节，不重复复制大报告。CON03 有限对诊断 MAE/RMSE 小幅变差、尾部最大值不变，明确保留反证。收集时 `all10_summary=null`，本提交只覆盖已完成的 CON03 配对，不宣布十例或科学验收完成。
+- 原 12 次调用与 12 次组件分析全部完成后，readiness watcher 于 UTC `2026-10-03T11:51:14` 启动现有严格十例 collector，UTC `11:53:02` 实际完成，exit 0、CPU 107.82284 s。原 aggregate SHA `950d1cba…`、原 collection SHA `f5aed4ed…`；2,059 个原文件与 51 份副本均通过核验。首次启动 watcher 的 launcher 有一次字符串换行 SyntaxError，在编译前退出，未创建目录或启动进程；修复 launcher 后 watcher 正常执行至此，没有更改科学来源。本最终证据只复制原 aggregate 与紧凑收据/表/脑图，完整 before/after 与非有限值、primary-null、CON09/10 原监测资格均保留；原 17/21/23/30/14 项 CPU 协议测试与早期未完成保护记录没有改标为新的科学结果。
+- 最终本地证据核验第一次误假设 CON09 与 CON10 的 `monitor_issues` 完全相同，触发 AssertionError；实际 CON10 另有 `sampling_gap`。保留 [`失败记录`](all10_component_evidence_validation_failure_v1.json) 和原空 stdout，修正元数据检查后重新核验原 bytes、紧凑摘录、CSV 的原指标和 `null`、十例脑图 receipt 以及文档链接，成功日志见 [`v2`](all10_component_evidence_validation_v2.log)。原数据、原显存资格及来源门槛没有改变。
 
 ## 7. 参考文献与原软件代码库
 
