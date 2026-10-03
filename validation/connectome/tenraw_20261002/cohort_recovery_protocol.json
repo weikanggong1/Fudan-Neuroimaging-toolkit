@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "dataset": "OpenNeuro ds001226",
+  "subject": "CON03",
+  "scope": "actual CPU anatomy reread and JSON serialization fix; not raw-DWI completion or MRI numerical parity",
+  "original_failure": "official recon-all exited 0; subsequent anatomy JSON encoding of numpy.int32 dimensions failed",
+  "protocol_tests": {
+    "existing_cohort": 29,
+    "private_recovery": 36,
+    "total": 65,
+    "status": "passed",
+    "fixture_scope": "protocol and IO only"
+  },
+  "real_anatomy_validation": {
+    "status": "completed_real_anatomy_serialization",
+    "host": "nodecw10",
+    "cpu_threads": 8,
+    "actual_geometry_status": "actual_images_surfaces_annotations_read",
+    "nibabel_version": "5.4.2",
+    "numpy_version": "1.26.4",
+    "original_failure_report_sha256": "0fcce31d716d1ae9d9c0f6118c58ad6b4245dcf90078cc57cd6c142739614506",
+    "original_report_unchanged": true,
+    "anatomy_hashes_unchanged": true,
+    "official_recon_exit_code": 0,
+    "official_recon_command_seconds": 4241.2467591241,
+    "image_shapes": {
+      "mri/brain.mgz": [
+        256,
+        256,
+        256
+      ],
+      "mri/aparc+aseg.mgz": [
+        256,
+        256,
+        256
+      ],
+      "mri/ribbon.mgz": [
+        256,
+        256,
+        256
+      ]
+    },
+    "surfaces": {
+      "surf/lh.white": {
+        "vertices": 124482,
+        "faces": 248960,
+        "full_arrays_read": true
+      },
+      "surf/rh.white": {
+        "vertices": 124565,
+        "faces": 249126,
+        "full_arrays_read": true
+      },
+      "surf/lh.pial": {
+        "vertices": 124482,
+        "faces": 248960,
+        "full_arrays_read": true
+      },
+      "surf/rh.pial": {
+        "vertices": 124565,
+        "faces": 249126,
+        "full_arrays_read": true
+      },
+      "surf/lh.sphere.reg": {
+        "vertices": 124482,
+        "faces": 248960,
+        "full_arrays_read": true
+      },
+      "surf/rh.sphere.reg": {
+        "vertices": 124565,
+        "faces": 249126,
+        "full_arrays_read": true
+      }
+    },
+    "annotation_counts": {
+      "label/lh.aparc.annot": {
+        "vertices": 124482,
+        "color_table_entries": 36
+      },
+      "label/rh.aparc.annot": {
+        "vertices": 124565,
+        "color_table_entries": 36
+      },
+      "label/lh.aparc.a2009s.annot": {
+        "vertices": 124482,
+        "color_table_entries": 76
+      },
+      "label/rh.aparc.a2009s.annot": {
+        "vertices": 124565,
+        "color_table_entries": 76
+      }
+    },
+    "full_anatomy_files": 14,
+    "read_validation_seconds": 2.2721481919288635,
+    "cohort_worker_sha256": "46bb30a82c1c09f9ffd230a0a96d6c99ca7e976289565958c6ebba1a060d62b6",
+    "gpu_run": false,
+    "scientific_parity": "not_assessed"
+  },
+  "recovery_execution_design": {
+    "recon_all_rerun": false,
+    "original_report_overwritten": false,
+    "gpu_preprocessing_resumed": false,
+    "raw_gpu_downstream_required": "full original-BIDS TOPUP/EDDY through tracking/SIFT2/all selected atlas matrices",
+    "timing": "original driver start to recovered completion UTC includes tool failure and repair gap; separate stage and queue timers; no pristine cold timing claim"
+  },
+  "tool_sha256": {
+    "benchmark_connectome_raw_cohort.py": "46bb30a82c1c09f9ffd230a0a96d6c99ca7e976289565958c6ebba1a060d62b6",
+    "benchmark_connectome_raw_recovery.py": "8ae11666573be0c1c3315b502a07f6f3e6ce3784951a62fdd58a842548c58f43"
+  },
+  "ten_case_completion": "pending",
+  "scientific_parity": "not_assessed",
+  "speedup": "not_assessed"
+}

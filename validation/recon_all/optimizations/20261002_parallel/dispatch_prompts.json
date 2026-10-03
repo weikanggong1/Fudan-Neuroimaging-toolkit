@@ -1,0 +1,75 @@
+{
+  "status": "dispatched_running",
+  "baseline_commit": "6f67cc06ee8c5108ef3640cbfc289f3e5a742f65",
+  "timing_code_commit": "ff372d73f106e850b999fbc95ae0b324cd315cbf",
+  "common_prompt": "仓库 https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit。规划时已核对 origin/main=6f67cc06ee8c5108ef3640cbfc289f3e5a742f65；实际开工由协调者冻结最新 main，并给五个会话相同基线。规划耗时来自绑定 ff372d73f106e850b999fbc95ae0b324cd315cbf 的两例原始 T1 整例，不作为你的新版本结果。\n读取 AGENTS.md 和更具体规范；本轮用户已改为五会话协作，旧“五阶段串行”规定由协调者同步。各自独立 worktree、分支、输出及报告目录；保护其他人的修改。先核对已有代码、manifest、数据、权重和程序 SHA-256，复用授权持久 SSH 路径。不得记录凭据、许可证或发布真实影像。\n优先复用成熟 FNIT PyTorch/Numba。生产仅运行 FNIT 与固定源码在 Conda 独立构建的必要组件；不调用系统预装脑影像软件和封装包；官方参考只用于隔离 benchmark。允许使用不调用命令的 Surfa、Workbench、ANTsPy。读写优先 nibabel，默认 TF32，保留已有经验证的局部 FP32，禁止擅自 FP16/BF16。\n固定线程总预算 4、目标 GPU 与 UUID；性能测量统一向协调者申请运行时间窗，不在同一 GPU 同时运行不同任务的计时 benchmark。记录冷热/JIT、加载/传输/读写、同步 GPU 时间、实际全进程树同一时刻显存，目标低于 20,000,000,000 字节。并行实现仍须满足总预算。\n先同输入阶段回归，再自产受影响连续链，最终由协调者执行两例原始 T1+空目录整例。保留 138 严格诊断，算子容差在测量前声明，沿用已建立门槛，不事后放宽。分别报告严格复现、新增退化、整体指标等效；整体等效无正式阈值时 not_assessed。检查坐标/单位/dtype/标签、拓扑与局部异常；分割用逐标签 Dice，有对应顶点才做同索引比较，否则用双向点到三角面距离，统计逐区厚度/面积/体积。\n中文文档包含输入输出/结构/空间/单位/全部参数及默认限制/失败行为，具名参数逐项中文注释示例、CLI/官方命令、原代码/参考文献、真实数据耗时精度和版本。报告绑定实际 commit、源码/程序/资源哈希。提供代码、专项测试、JSON/CSV、复现脚本、中文说明和分支提交；未执行内容明确写出。\n只修改指定范围。native_free.py/batch.py/CLI/全局精度/profiling 的生产调度由任务1负责，其余任务提供兼容 callable、后端选择接口和准确接入说明，不同时改调度。共有 place_surface_normals.py 归任务4，保持向后兼容；任务2补 surface placement 回归。共享安装、根 AGENTS、README 和总报告由协调者合并。新增构建或依赖须提供安装补丁给协调者。\n子任务只提交各自工作分支，不推 main、不强制推送。协调者合并最新 main、独立检查与两例整例验证后统一普通推送 main。",
+  "tasks": [
+    {
+      "number": 1,
+      "title": "左右半球并行调度与共享输出安全",
+      "branch": "recon-perf/20261002-01-hemi",
+      "scope": [
+        "src/fnit/recon_all/native_free.py",
+        "src/fnit/recon_all/batch.py",
+        "recon-all CLI参数入口",
+        "半球进程调度专属新增模块及测试",
+        "src/fnit/recon_all/profiling.py（仅并行计时与设备统计接线）"
+      ],
+      "prompt": "实现真正可测的左右半球并行，覆盖 surface、sphere registration、annotation、final white/pial 等独立计算，保持阶段依赖屏障。\n先沿调用链列出所有共享读写、日志/统计文件、全局随机数与精度状态。已确认 surface.defects.mgz 是左侧生成、右侧读取并累计；mrisps.wpa.mgz、mrisps.white.mgz 也存在共享输出。采用半球私有临时文件和统一发布，或将有依赖的写入保留串行，保持旧流程覆盖/累计语义。审计是否有其他固定文件名。\n使用适合已初始化 CUDA API 的 spawn/独立进程方案，不能 fork 已初始化 CUDA，也不能直接线程池并发修改全局 TF32。统一资源调度，比较串行4线程与两worker每个2线程，总预算相同，保留必要单线程算法规则；不得用8线程对4线程宣称并行收益。实测决定允许哪些 GPU 阶段重叠，不能简单将两个历史峰值相加。\nworker返回独立结构化报告，父进程确定性汇总。修正并行计时定义：记录起止/重叠/关键路径/组墙钟，各worker耗时之和不是整例时间。失败传播到主报告，取消/收尾不能留下伪成功文件。\n先两个半球同输入比较串行/并行输出、共享MRI和网格/指标，再覆盖CLI与CUDA已初始化Python API。完成实际生产接入；与任务2—5使用稳定后端接口。交付并行vs串行实际组墙钟、线程、同期父子显存和全部输出差异。"
+    },
+    {
+      "number": 2,
+      "title": "white.preaparc、最终 white 与 pial 热点的 GPU 友好加速",
+      "branch": "recon-perf/20261002-02-placement",
+      "scope": [
+        "src/fnit/recon_all/place_surface_*.py（不含place_surface_normals.py）",
+        "src/fnit/recon_all/place_white_preaparc_python.py",
+        "src/fnit/recon_all/place_pial_python.py",
+        "src/fnit/recon_all/white_preaparc_conda.py",
+        "src/fnit/recon_all/final_white_conda.py",
+        "表面放置专属自有C++/CUDA内核"
+      ],
+      "prompt": "优先优化仍由Conda固定FS源码CPU执行的三个放置步骤：white.preaparc约188—249秒/半球，final white约171—231秒/半球，pial约182—229秒/半球。这些范围是已发布两例观察，开工重新剖析。\n检索并复用已有完整Python pial和white候选，区分完整函数与首轮诊断。对完全相同输入分别跑官方参考、当前Conda产物和完整自有实现，先一个半球逐轮比较再另一半球和第二例；不能把某个构建自动视为正确。\n优先把固定快照上的MRI采样、边界/目标强度、法向与梯度、候选窄相碰撞判定移至批量PyTorch GPU；复用已有空间桶和编译谓词，减少逐顶点Python、bool()/float()同步与重复读写。动态坐标/空间索引按版本失效。异步顶点接受、Gauss-Seidel依赖、候选扩展、步长拒绝恢复、四轮状态、固定顶点与最终相交清理必须保持。\n不能将动态有序更新改成整批Jacobi，也不能将完整pial替换为法线射线。若自有完整实现仍慢，保留成熟Conda完整控制流程，单独实现可独立验证的自有C++/CUDA热点并给出实际收益；不强行切默认。\n提供可兼容调用和后端选择说明供任务1接入。验收逐轮及最终坐标、局部异常/white-pial穿越/自相交，确认相对当前基线无新退化和完整阶段含I/O的收益。"
+    },
+    {
+      "number": 3,
+      "title": "GCA 注册与 WM 链的 GPU 友好实现；N4 次级剖析",
+      "branch": "recon-perf/20261002-03-volume",
+      "scope": [
+        "src/fnit/recon_all/mri_em_register*.py",
+        "GCA/WM segmentation/edit专属模块",
+        "src/fnit/recon_all/n4_itk.py",
+        "src/fnit/recon_all/n4_wrapper.py",
+        "tools/n4_itk/",
+        "体积前段专属自有内核"
+      ],
+      "prompt": "主要目标是mri_em_register：当前固定FS源码Conda CPU约186—216秒。次级检查mri_segment约51秒、mri_edit_wm_with_aseg约26秒；N4约123秒，明确它是ITK组件而非FS算法。\n先剖析GCA采样/候选搜索/似然/梯度/线搜索的实际比例，复用已有Python/Numba实现。当前Python注册只有首个EM方向及线搜索，不能直接设为完整默认。保留全优化循环、初始化、目标/梯度、样本/概率定义、接受/拒绝、终止规则和LTA空间。\n采用候选矩阵和样本分块GPU打分、静态GCA数据/采样/插值缓存，减少反复numpy↔CUDA；有序或高精度规约按验证要求保留CPU/必要FP32或FP64。若整函数未完整或无收益，可在独立构建的现有流程内替换可验证热点，不复制系统程序。\nWM segmentation/edit按真实热点迁移点算子，严格保持阈值、更新顺序、邻域、标签和量化。N4先核对当前线程/拟合剖析成果，只有新的证据支持才改；n4_gpu.py的平滑残差不等于ITK N4，禁止直接替换。\n两例冻结输入比较LTA、强度体素/几何、标签Dice、耗时和显存；再用候选自产nu/brainmask连续运行到filled。记录已有精度问题及优化新增差异，提供任务1接入API与完整/实验后端状态。"
+    },
+    {
+      "number": 4,
+      "title": "remesh、标准球面、配准与拓扑热点优化",
+      "branch": "recon-perf/20261002-04-geometry",
+      "scope": [
+        "src/fnit/recon_all/mris_remesh_python.py",
+        "src/fnit/recon_all/sphere_*.py",
+        "src/fnit/recon_all/mris_register_*.py",
+        "src/fnit/recon_all/topology_*.py",
+        "src/fnit/recon_all/place_surface_normals.py",
+        "拓扑/网格专属自有内核"
+      ],
+      "prompt": "主要目标：remesh约112—146秒/半球、标准sphere约105—157秒/半球、sphere registration约111—145秒/半球。还检查固定FS源码Conda拓扑GA约84—123秒；mris_inflate约7—10秒，优先级低于已实测热点。\n复用已有CSR、Numba、PyTorch/Triton有序平均和空间索引。剖析反复邻接构建、重复metric/目标计算、CPU↔GPU搬运和Python循环；常驻静态拓扑/原面积/图谱，动态几何/法向按更新失效，GPU批量计算独立的目标/梯度/采样及blur候选并实测。\n保持remesh动态拓扑、Gauss-Seidel更新、同长边排序与确定性tie-break、步长试探/拒绝、sphere投影、注册两pass及翻折处理。不能减少迭代或改变停止规则。\n对Conda拓扑GA先剖析可独立并行的fitness/采样，不把已有部分评分冒充完整GA；随机种子和决策顺序固定。只有完整且经验证的自有实现更快时替换整个原生阶段，否则保留完整控制器并加速独立内核。inflate低耗时可以保留并说明。\n同输入检查顶点/有序面/轨迹/坐标，补非流形、连通性、自相交与sphere/sphere.reg翻折。place_surface_normals.py共享接口向后兼容，主动提供版本接口与任务2共享测试说明；不要跨任务直接改其放置模块。提供后端接入API和两例双侧耗时/误差。\n将仍由原生程序承担的mri_label2vol缺陷映射、mrisp_paint图谱曲率、mris_curvature_stats列入完整组件清单，核对已有自有函数是否完整；这些步骤当前耗时低，记录替换可行性和保留依据，不挤占上述百秒热点的优化。缺陷体积共享顺序由任务1处理。"
+    },
+    {
+      "number": 5,
+      "title": "MNI 非线性链的 warp 转换、求逆与重采样 GPU 化",
+      "branch": "recon-perf/20261002-05-warp",
+      "scope": [
+        "src/fnit/recon_all/mni_nonlinear_chain.py",
+        "MNI warp专属新增模块及测试",
+        "已有变换/采样函数必要的兼容修改（事先明确具体文件）"
+      ],
+      "prompt": "当前MNI非线性链约188—196秒；SynthMorph自有GPU前向/保存约76—77秒，Conda mri_warp_convert约15—18秒，mri_ca_register求逆约86—94秒，mri_convert检查图约7—10秒。优先替换后三项原生CPU后处理，保留已经接入的自有SynthMorph GPU网络。\n检索复用FNIT既有变换、warp inverse与图像采样函数，先确认算法完整性、source/target方向、裁剪/full网格和坐标约定。明确scanner RAS/world-mm位移与体素位移、LTA composition、NIfTI(*shape,1,3)向量分量、边界/越界和最近邻量化。\n对warp conversion与检查图实现分块/缓存GPU采样；逆场必须保留原定义和完整求解、边界、停止规则，不能简单用负位移、反向网络输出或未经验证的固定点替代。对现有逆场全域局部残差单列排错，不能通过掩膜剔除/少迭代或吞掉失败提高速度。\n模型两次反对称前向和已有局部FP32例外保留，不删除完整必要输出。固定同一forward为三方求逆输入，比较官方/Conda/自有实现，报告全域和脑内残差P99/max、异常区域、输出几何、反向warp与check图差异和保存性能。\n减少不必要格式中间文件/加载/CPU-GPU搬运但保留复现能力。交付完整可调用后端、真实同输入回归和自产链收益，供任务1接入。已有厚度/面积/曲率已是GPU、厚度约3—4秒，不重复迁移。"
+    }
+  ],
+  "working_baseline_commit": "f07cf59c7f51ae1393e2578f141b4d130ed7801a"
+}

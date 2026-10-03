@@ -48,6 +48,22 @@ def test_constant_series_are_null_and_json_finite(comparison):
     json.dumps(metrics, allow_nan=False)
 
 
+def test_bold_fixed_mask_retains_missing_coverage_in_error(comparison, tmp_path):
+    first = np.asarray([[[[1., 2.]]], [[[0., 0.]]]])
+    second = np.asarray([[[[1., 2.]]], [[[2., 4.]]]])
+    left = image(tmp_path / 'candidate.nii.gz', first)
+    right = image(tmp_path / 'reference.nii.gz', second)
+    mask = image(tmp_path / 'fixed_mask.nii.gz', np.ones((2, 1, 1)))
+    result = comparison.image_pair({'kind': 'bold', 'candidate': left,
+                                    'reference': right, 'mask': mask}, tmp_path)
+    assert result['mask_voxels'] == 2
+    assert result['metrics']['rmse'] == pytest.approx(np.sqrt(5.))
+    assert result['metrics']['evaluated_values'] == 4
+    assert result['nonzero_series_coverage']['reference_only_voxels'] == 1
+    assert result['common_nonzero_series_metrics']['rmse'] == 0
+    assert result['common_nonzero_series_metrics']['evaluated_values'] == 2
+
+
 def test_nonfinite_outside_comparison_region_is_rejected(comparison, tmp_path):
     array = np.ones((2, 2, 2))
     array[0, 0, 0] = np.nan

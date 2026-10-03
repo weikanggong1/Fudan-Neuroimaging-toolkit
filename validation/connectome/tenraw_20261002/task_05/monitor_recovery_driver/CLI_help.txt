@@ -1,0 +1,23 @@
+usage: benchmark_connectome_selected_raw_recovery.py [-h] --selection
+                                                     SELECTION
+                                                     --runtime-declaration
+                                                     RUNTIME_DECLARATION
+                                                     --run-root RUN_ROOT
+                                                     --report-dir REPORT_DIR
+                                                     [--plan-only | --execute]
+
+Explicit selected-case monitor recovery; immutable original guards, fresh raw
+DWI. Private benchmark orchestration only. Default is CPU preflight. GPU
+execution requires --execute and an explicit, nonempty (arm, case) selection
+from root.
+
+options:
+  -h, --help            show this help message and exit
+  --selection SELECTION
+  --runtime-declaration RUNTIME_DECLARATION
+  --run-root RUN_ROOT
+  --report-dir REPORT_DIR
+  --plan-only           Only validate explicit declaration/config shapes and
+                        create snapshots; no remote worker or GPU
+  --execute             Root deployment only: execute selected raw-DWI cases;
+                        default CPU preflight

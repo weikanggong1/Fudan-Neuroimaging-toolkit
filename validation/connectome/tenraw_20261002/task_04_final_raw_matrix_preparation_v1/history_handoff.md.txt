@@ -1,0 +1,70 @@
+当前最终实际20组比较已完成，2782/4800被接受、全部20组整体failed。见[最终结果](FINAL_RAW_MATRIX_RESULTS.md)。下文为保留的历史交接记录。
+
+# 最终 raw 矩阵比较交接：v9实际来源与启动条件
+
+## 1. 状态与任务
+
+v1实际preflight曾通过冻结文件SHA检查；nodecw10旧PID52792已于2026-10-03 01:17:10 UTC按完整进程身份和pending记录停止，旧输出/启动/停止证据保留，未产生最终比较报告。当前v2加入完整official explicit map、命名空间与结束SHA guard，等待真实mapper交接，尚无v2 active waiter。早期七份failed报告原样保留，不覆盖root正在精简的专属docs/payload。
+
+最终范围为20个实际FNIT arm/case×8atlas。每条FNIT链仅seed0，对官方独立同raw五seed；每臂240项，总4800项单侧判定。FNITself与population均不评估，不混入固定输入5FNIT重复。
+
+## 2. 所需final mapping schema
+
+直接复用Task5 v9的真实文件：`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_mixed_GPU_origins_v1/origins.json`。
+
+```json
+{
+  "schema_version": 1,
+  "scope": "explicit_actual_GPU_monitor_recovery",
+  "bindings": ["10份唯一的实际override origin declarations"]
+}
+```
+
+上例bindings字符串仅说明结构，不能作为实际配置。真实declaration需原有`arm/case_id/reason/original/replacement`及选定recovery的`science_worker/recovery_worker/resources_manifest`身份。v3六份另含`completed_case_subset_receipt={path,sha256}`，v4四份使用实际completed immutable driver，不借用v3 receipt。字段由v9 reader原有schema校验，不能伪造completed控制器或推断缺失SHA。所有JSON/file identity均为绝对路径+完整原字节SHA。
+
+v3六份：baseline05/11、candidate04/05/06/07；receipt SHA固定`07678861e9255ab526a8c9ddf44a3e7e959aaced16e10f2ed37858c83eea815d`，保留整份v3 failed terminal及candidate08失败。v4四份：candidate08/09/10/11，必须全部真实completed且eligible；failed v3 candidate08不采用。
+
+其余旧baseline八份及旧candidate01/03由原formal根/terminal driver读取，不放入override列表。v9的`selected_origin`与`validate_gpu_run`核对全部20份GPU/wall/output/raw/source/memory/FS资格，再把实际logical来源写入本任务新observation；不写回Task5 mapping或driver。
+
+## 3. 实际源版本与冻结文件
+
+数值定义仍使用原raw工具SHA `120a3e1a431ad23177bc9a4a7c17291e52e374085e0fe7314115b656de8db676`，repeat-common为`9581300f2db3e96aca6914493e8f6dab7b2bff9efdbfd15ada47d744bac9802c`。固定官方五seed、finite单侧规则、矩阵/节点/原始SHA/output绑定guard均未改。
+
+资格reader为`formal_actual_comparison_helper_v9`：origin reader SHA `7c19f5078e743656d5eea63d196197dce4931c1eea5cae348eefc77928bdc352`；completed-subset reader SHA `9f74c83790ff14ad19bc7b432dd8d21b9245daf6fa67a4cdc8c54eeb0197220c`。baseline实际source fingerprint仍 `deefeb6908c3c14a9aa7b4cf154c8df941a56abffd4a4e893045a1c4d1ddfd4a`；candidate仍 `9fd44cbc49c9cdfc16c9a8cff2971fec3239b450dce41222e6ef059861eb0dc7`。不用最新main的完整source fingerprint替换这两份实际benchmark源。
+
+配置SHA `bec71f47418e78ed1830e29da96eff66526d272e16c39f03b7f8cdc276d5b07e`；本runner SHA `4a64b8492f95c5f204a18f70e7e8113c6d541ea6c5ef1d6f3655bb8d06d1d24c`。全部helper/原raw工具/CPU解释器源身份见[冻结配置](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v1/configuration.json)，实际v9配置原字节见[mixed configuration](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v1/mixed_configuration.original.json)。未修改原scientific producer或solver。
+
+## 4. 输入输出与guard顺序
+
+输入：canonical raw manifest SHA `cc33e925a9e07362103b51f7bb70363a380d89b11a19545837676ba9a4ffae70`、实际v9 mixed配置、最终origin map、v3 receipt、官方`task_04/official_raw10_cpu_view_v3`十例参考与20份FNIT已有矩阵。
+
+启动顺序：检查全部冻结source/config SHA；等待最终map文件与10个reference manifests；调用v9完成来源资格校验；逐例核对官方completed/五seed；调用原raw工具完成原始来源、node语义、atlas、matrix finite、GPU输出绑定guard与单侧统计；全部完成后复核报告/map SHA未变化。官方各病例reference_manifest scope和完整原命令合同由原raw工具核对。任一异常在新目录保留failure，不放宽门槛。
+
+输出新目录`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_twenty_watch_v1`：不可覆盖的observation、每臂`actual_inputs.json/envelope.json/execution.json`及最后`final_report.json`。仅20份全部实际完成时标比较coverage完成；科学通过另读每份matrix状态。所有等待、资格失败和实际只读wall time保留。
+
+## 5. 命令行与参数
+
+```bash
+# 历史v1实际启动命令（进程现已停止）；禁止重复使用同一output-root。
+CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+  /cwStorage/home/gongwk/anaconda3/bin/python3.11 \
+  /cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_tools_v1/benchmark_connectome_final_raw_envelope.py \
+  --config /cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_tools_v1/configuration.json \
+  --config-sha256 bec71f47418e78ed1830e29da96eff66526d272e16c39f03b7f8cdc276d5b07e \
+  --output-root /cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_twenty_watch_v1 \
+  --watch --poll-seconds 60 --timeout-hours 72
+```
+
+`--config/--config-sha256`绑定原字节配置；`--output-root`要求新的绝对目录并禁止与受保护输入/source重叠；`--watch`在输入未齐时观察；`--poll-seconds`为1–60秒；`--timeout-hours`为0–168小时内正数；`--check-only`仅资格/准备状态核验，不执行矩阵统计。Python入口`main(argv)`使用同一参数；数值函数仍是原raw工具的`compare`，未新增科学函数或运行时依赖。
+
+## 6. 实际验证与当前界限
+
+[实际preflight](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v1/actual_preflight/observation_000000.json)记录缺少CON11、final origins不可用、matrix_comparison_started=false。随后实际PID/argv曾核对运行；01:17:10 UTC精确停止旧waiter，01:26:09 UTC实际hostname=nodecw10且PID已不存在，仍无final_report或failure。解释器、源/config SHA和syntax均已核验；20来源ready分支尚未在本轮运行，不把这些准备检查说成最终科学验收。Task5的151项CPU协议检查是其v9 reader验证，不充当本任务20实际报告。
+
+最终runner不会运行原软件命令，消费各例实际reference_manifest中的官方命令与报告。每臂输出FP、node数、原始SHA、科学差异及原软件self范围按真实结果报告；此时不填预期值或模拟结果。不新增脑图，待最终实际保存矩阵需要展示时再读取。
+
+## 7. 版本、交接与文献
+
+2026-10-03：在独立task_04分支准备新runner、完成实际CPUpreflight并启动只读等待进程。原早期七份failed、原fixed5×5failed、被拒绝SIFT2 bitwise候选均保持独立命名空间和科学结论。
+
+[交接字段](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v1/handoff_requirements.json)与[实际启动receipt](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v1/launch.json)可供root核对，包含PID/start_ticks/argv/source/config身份。实际旧source deef/9fd、v9 receipt及最终map是必要输入；无需Task5改变producer、selecteddriver或failed记录。本任务只追加自己的最终矩阵报告，root完成后再采用最终链接。原软件版本/原实现/资源来源/文献沿用实际官方manifest及项目现有raw参考文档，不引入新外部资源。

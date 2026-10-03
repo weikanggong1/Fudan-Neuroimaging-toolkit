@@ -1,0 +1,106 @@
+{
+  "scope": "formal 10 fresh raw subjects; default SynthMorph joint; no prior subject transforms",
+  "option_value_pairs": [
+    {
+      "option": "--atlas-templates-dir",
+      "value": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases"
+    },
+    {
+      "option": "--fsaverage-dir",
+      "value": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/freesurfer_reference/subjects/fsaverage"
+    },
+    {
+      "option": "--mni-template",
+      "value": "/cwStorage/home/gongwk/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz"
+    },
+    {
+      "option": "--synthmorph-weights",
+      "value": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights"
+    }
+  ],
+  "atlases": [
+    "fs-aparc",
+    "aparc+tian-s1",
+    "aparc.a2009s+tian-s1",
+    "glasser+tian-s1",
+    "glasser+tian-s4",
+    "schaefer200+tian-s1",
+    "schaefer500+tian-s4",
+    "schaefer1000+tian-s4"
+  ],
+  "excluded_options": [
+    "--tian-fnirt-coeff",
+    "--mni-to-t1-warp"
+  ],
+  "release": {
+    "tag": "assets-v1",
+    "manifest_asset": "asset-manifest.json",
+    "manifest_size": 28717,
+    "manifest_sha256": "24a292cc79b0e9530559b7edb3fc09c7b157d0023b06335798ca4a902d5c1a3f",
+    "url": "https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1",
+    "weights": [
+      {
+        "name": "synthmorph.affine.2.h5",
+        "size": 51455312,
+        "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6",
+        "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.affine.2.h5",
+        "license": "CC BY 4.0",
+        "release_assets": [
+          {
+            "name": "synthmorph.affine.2.h5",
+            "size": 51455312,
+            "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+          }
+        ]
+      },
+      {
+        "name": "synthmorph.deform.3.h5",
+        "size": 3508630424,
+        "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+        "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5",
+        "license": "CC BY 4.0",
+        "release_assets": [
+          {
+            "name": "synthmorph.deform.3.h5.part00",
+            "size": 1900000000,
+            "sha256": "1960594f0929801321de64eaa9b2f116a7d4205cd74c778e55225101e6f1d290"
+          },
+          {
+            "name": "synthmorph.deform.3.h5.part01",
+            "size": 1608630424,
+            "sha256": "dc4c53b5014ad60c5be82d3d8d275d46f2f1d32dd0ab01bcfdec20b65c9f1b48"
+          }
+        ]
+      }
+    ]
+  },
+  "verified_local_files": [
+    {
+      "path": "/cwStorage/home/gongwk/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz",
+      "size": 414185,
+      "sha256": "09c925ad165dfbe6b41b572876d67e9bbf8c5e26517e7817f9b43a8256227f53",
+      "Tian_grid_exact": true
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/synthmorph.affine.2.h5",
+      "size": 51455312,
+      "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6",
+      "verified": true
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/synthmorph.deform.3.h5",
+      "size": 3508630424,
+      "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+      "verified": true
+    }
+  ],
+  "MNI_policy": "Local original FSL-distribution template; absent fixed Release, no new mirror or redistribution; exact Tian 2 mm grid verified. Use this same brain template in both formal arms.",
+  "deform_note": "Local merged complete file SHA verified against manifest; the Release stores part00 then part01. Existing part files were not re-downloaded or checked; merged content is the acceptance evidence.",
+  "resource_manifest": "task_05_resources.json",
+  "workbench_version": "2.0.0",
+  "environment": {
+    "PATH_prepend": "/cwStorage/home/gongwk/workbench/bin_rh_linux64"
+  },
+  "workbench_command": "/cwStorage/home/gongwk/workbench/bin_rh_linux64/wb_command",
+  "workbench_note": "Current pipeline/CLI has no workbench-command flag; glasser_to_t1 uses wb_command from PATH. Prepend the verified directory; do not pass an invented CLI option."
+}

@@ -1,0 +1,50 @@
+{
+  "scope": "independent official rawprep, not full anatomical/downstream connectome",
+  "host": "gpucw1",
+  "created_utc": "2026-10-02T18:04:56.394599+00:00",
+  "manifest_sha256": "d707f7a990372e50fb27de0023b2cddfc4eb74c7e5cdd9d909e41b90c2fa1b88",
+  "subjects": [
+    "CON01",
+    "CON03"
+  ],
+  "raw_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw",
+  "output_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_pilots_v1",
+  "source_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/run_official_rawprep_v1.py": "9bf2a984fb0e62d492f0a941351989788d5a3b8e1f980b76fd57d498f504cf8d",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/baseline_raw_compatible_v3/src/fnit/topup/ukb.py": "ee6542debdf58fe8212ec313cb680a10def17eda4f4f895c24934d0611702c8b",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/baseline_raw_compatible_v3/src/fnit/topup/core.py": "d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8",
+    "/public/software/apps/FSL/6.0.7.4/etc/flirtsch/b02b0.cnf": "9833bcbaa60c1550457dd7149a15b88040562afecd1e05aae908af1517a8dcb9",
+    "/public/software/apps/Freesurfer/8.2.0-1/python/scripts/mri_synthstrip": "bbc2ff8f8779862039401b05d5cd6039fb4f3583e0032a793ac9adb3f4521590",
+    "/public/software/apps/Freesurfer/8.2.0-1/bin/fspython": "42a0a4e35c84d76abcc3111038324bf643caf16245f2972593d46677aec19424",
+    "/public/software/apps/Freesurfer/8.2.0-1/models/synthstrip.1.pt": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+    "/public/software/apps/FSL/6.0.7.4/bin/fslroi": "a4c09da565cfd71068cc2b71faf27703dd46facd182bbc3dff87ed03b03baa79",
+    "/public/software/apps/FSL/6.0.7.4/bin/fslmerge": "acb950a0c3bd62522fc1c9fda2b00369ddfe640083c477e60ebb0747645fc4ea",
+    "/public/software/apps/FSL/6.0.7.4/bin/topup": "a1592181903033a6215fb75cb3f2b52b913efa3f4fb55d589fc382180529fc76",
+    "/public/software/apps/FSL/6.0.7.4/bin/fslmaths": "4a7dc672c6c2b432ba00cb3cecf0b3a260f1ee52d01c61fab4973f4fb4979feb",
+    "/public/software/apps/FSL/6.0.7.4/bin/eddy_cuda10.2": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591",
+    "/public/software/apps/Freesurfer/8.2.0-1/bin/mri_synthstrip": "580c3e14c8f69a00b1b1d90c61a0cda936de246f99573ef80c8180781861c8db",
+    "/public/software/apps/Freesurfer/8.2.0-1/build-stamp.txt": "8a1600fb20972b7518249f8f714a6fed51b1d1f21e17430f60f85c0eea48e277"
+  },
+  "CPU_threads_per_subject": 8,
+  "CPU_concurrency": 2,
+  "parent_CUDA_VISIBLE_DEVICES": "",
+  "GPU_UUID": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+  "GPU_lock": "/tmp/fnit-connectome-tenraw-gongwk.gpu0.lock",
+  "EDDY_flags": [
+    "--flm=quadratic",
+    "--resamp=jac",
+    "--slm=linear",
+    "--niter=8",
+    "--fwhm=10,8,4,2,0,0,0,0",
+    "--ff=10",
+    "--sep_offs_move",
+    "--nvoxhp=1000",
+    "--repol",
+    "--rms",
+    "--initrand=12345"
+  ],
+  "b0_selection_policy": "FNIT CPU FP32 pairwise rigid; b<100; first if score>=0.98 else best; both pilots must match recorded indices; official ROI/merge voxel+affine check",
+  "pair_geometry": "fslmerge-first; rigid/no shear/same spacing/matrix/handedness; no resampling",
+  "readout_policy": "FNIT floor(TotalReadoutTime*10000)/10000, original JSON retained",
+  "model_SHA_expected": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+}

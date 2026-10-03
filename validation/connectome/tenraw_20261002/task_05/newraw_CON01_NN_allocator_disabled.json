@@ -1,0 +1,212 @@
+{
+  "scope": "newly downloaded raw T1 NN component only; not recon/raw end-to-end",
+  "declared_tolerance": {
+    "label_neq": 0
+  },
+  "inputs": {
+    "t1": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+    "mni": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+    "tian_s1": "5a6ab101308a7d8582fe8335c97a41296974656aaae8efa6833c7796c0061e08",
+    "tian_s4": "15930ca9cf9551a4b34875589588d0c24c0a704f0a14eb983c2b05131c3976e1"
+  },
+  "source_sha256": {
+    "synthmorph_pipeline": "bc3681a7693eb97cf6fddbdb4eb1deb4db343319443f2a92c00ae70383d975cc",
+    "benchmark_tool": "a442e551aa639bedf5238cdbbde406c4a4ca54224c52afe0ba1fb34bc21daee7"
+  },
+  "runs": [
+    {
+      "level": 1,
+      "device": "cpu",
+      "wall_seconds": 0.48169938288629055
+    },
+    {
+      "level": 1,
+      "device": "cuda:0",
+      "wall_seconds": 0.4821143918670714
+    },
+    {
+      "level": 1,
+      "device": "cuda:0",
+      "wall_seconds": 0.5556189599446952
+    },
+    {
+      "level": 1,
+      "device": "cpu",
+      "wall_seconds": 0.4703250420279801
+    },
+    {
+      "level": 4,
+      "device": "cpu",
+      "wall_seconds": 0.4918283582665026
+    },
+    {
+      "level": 4,
+      "device": "cuda:0",
+      "wall_seconds": 0.5093499100767076
+    },
+    {
+      "level": 4,
+      "device": "cuda:0",
+      "wall_seconds": 0.5289681991562247
+    },
+    {
+      "level": 4,
+      "device": "cpu",
+      "wall_seconds": 0.49564116168767214
+    }
+  ],
+  "differences": {
+    "s1": {
+      "neq": 0,
+      "voxels": 9437184,
+      "shape": [
+        144,
+        256,
+        256
+      ],
+      "dtype": "int16",
+      "foreground_voxels": 53257,
+      "positive_labels": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    "s4": {
+      "neq": 0,
+      "voxels": 9437184,
+      "shape": [
+        144,
+        256,
+        256
+      ],
+      "dtype": "int16",
+      "foreground_voxels": 53257,
+      "positive_labels": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54
+      ]
+    }
+  },
+  "verified_weights": {
+    "synthmorph.affine.2.h5": {
+      "size": 51455312,
+      "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+    },
+    "synthmorph.deform.3.h5": {
+      "size": 3508630424,
+      "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"
+    }
+  },
+  "torch_version": "2.5.1",
+  "threads": 8,
+  "allocator_no_cache_environment": "1",
+  "torch_memory_stats_valid": false,
+  "timing_note": "Weight SHA verification precedes registration timing; model load is included. Lock wait excluded.",
+  "registration_seconds": 15.502260426059365,
+  "precision": [
+    {
+      "model": "joint",
+      "compute_inverse": true,
+      "device": "cuda:0",
+      "input_dtype": "torch.float32",
+      "model_devices": [
+        "cuda:0"
+      ],
+      "model_dtypes": [
+        "torch.float32"
+      ],
+      "matmul_tf32": true,
+      "cudnn_tf32": true,
+      "cudnn_enabled": true,
+      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "autocast": {
+        "enabled": false,
+        "dtype": "torch.float16"
+      }
+    }
+  ],
+  "torch_peak_bytes": {
+    "allocated": 0,
+    "reserved": 0
+  },
+  "nvml": {
+    "peak_process_bytes": 11001659392,
+    "samples": 76,
+    "sampler": "nvidia-smi NVML process query across GPUs; MiB resolution",
+    "gpu_uuids": [
+      "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+    ],
+    "max_interval_seconds": 0.6902884379960597,
+    "failures": []
+  },
+  "label_parity_passed": true,
+  "memory_budget_passed": true,
+  "passed": true
+}

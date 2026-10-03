@@ -44,7 +44,7 @@ def _valid(path: Path, *, size: int, sha256: str) -> bool:
 
 def install_connectome_atlases(atlases: tuple[str, ...] | list[str],
                                output_dir: str | Path) -> Path:
-    """Mirror selected Tian/Schaefer files with pinned size and SHA-256 checks."""
+    """Download pinned, licensed Tian/Schaefer files; verify size/SHA."""
     manifest = json.loads(files("fnit.connectome").joinpath(
         "atlas_manifest.json").read_text())
     root = Path(output_dir).expanduser().resolve()
@@ -59,7 +59,7 @@ def install_connectome_atlases(atlases: tuple[str, ...] | list[str],
             raise ValueError(f"atlas file has unexpected size or SHA-256: {target}")
         temporary = None
         try:
-            with urlopen(manifest["mirror"] + name, timeout=120) as source:
+            with urlopen(entry["url"], timeout=120) as source:
                 with tempfile.NamedTemporaryFile(dir=root, delete=False) as stream:
                     temporary = Path(stream.name)
                     for chunk in iter(lambda: source.read(1024 * 1024), b""):

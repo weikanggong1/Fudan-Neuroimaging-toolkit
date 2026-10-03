@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+from functools import partial
 
 import torch
 from torch.nn import functional as F
@@ -27,6 +28,27 @@ class Tractogram:
     mean_fa: torch.Tensor | None
     seeds_attempted: int
     accepted_seeds: torch.Tensor
+
+
+@dataclass
+class _VolumeSampler:
+    """Call-scoped grid/affine views; input tensors must not change layout."""
+
+    volume: torch.Tensor
+    inverse_affine: torch.Tensor
+
+    def __post_init__(self):
+        self.linear = self.inverse_affine[:3, :3].double().T
+        self.translation = self.inverse_affine[:3, 3].double()
+        self.scale = self.inverse_affine.new_tensor(
+            [max(size - 1, 1) for size in self.volume.shape[:3]], dtype=torch.float64)
+        self.image = self.volume.permute(3, 2, 1, 0)[None]
+
+    def __call__(self, points: torch.Tensor) -> torch.Tensor:
+        voxel = points.double() @ self.linear + self.translation
+        grid = (2 * voxel / self.scale - 1).float().reshape(1, 1, 1, -1, 3)
+        return F.grid_sample(self.image, grid, mode='bilinear', padding_mode='zeros',
+                             align_corners=True).reshape(self.volume.shape[-1], -1).T
 
 
 def _sample(volume: torch.Tensor, points: torch.Tensor, inverse_affine: torch.Tensor) -> torch.Tensor:
@@ -318,6 +340,7 @@ def _ifod2_arc_probability(
     half_log_start: torch.Tensor, fod: torch.Tensor, five_tissue: torch.Tensor,
     fod_inverse: torch.Tensor, five_inverse: torch.Tensor, *,
     lmax: int, step_mm: float, cutoff: float, power: float,
+    _fod_sampler=None,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """Evaluate candidate arcs ``[B,K,3]`` against FOD and endpoint CSF.
 
@@ -327,6 +350,8 @@ def _ifod2_arc_probability(
     MRtrix operations: ``iFOD2::get_path`` and ``iFOD2::path_prob``.
     """
     batch, count = directions.shape[:2]
+    sample_fod = (partial(_sample, fod, inverse_affine=fod_inverse)
+                  if _fod_sampler is None else _fod_sampler)
     cosine = (prior[:, None] * directions).sum(-1).clamp(-1, 1)
     angle = cosine.acos()
     curvature = F.normalize(directions - cosine[..., None] * prior[:, None], dim=-1)
@@ -346,10 +371,10 @@ def _ifod2_arc_probability(
     endpoint = torch.where(straight[..., None],
                            position[:, None] + step_mm * prior[:, None], endpoint)
     mid_tangent = torch.where(straight[..., None], prior[:, None], mid_tangent)
-    mid_amplitude = (_sample(fod, midpoint.reshape(-1, 3), fod_inverse).reshape(
+    mid_amplitude = (sample_fod(midpoint.reshape(-1, 3)).reshape(
         batch, count, -1) * tracking_sh_precomputed(mid_tangent.reshape(-1, 3), lmax).reshape(
             batch, count, -1)).sum(-1)
-    end_amplitude = (_sample(fod, endpoint.reshape(-1, 3), fod_inverse).reshape(
+    end_amplitude = (sample_fod(endpoint.reshape(-1, 3)).reshape(
         batch, count, -1) * tracking_sh_precomputed(directions.reshape(-1, 3), lmax).reshape(
             batch, count, -1)).sum(-1)
     csf = _five_tissue_mrtrix(five_tissue, endpoint.reshape(-1, 3), five_inverse)[
@@ -382,6 +407,7 @@ def _grow(
     calibration_ratio: float | None = None,
     seed_to_wm_initial: torch.Tensor | None = None,
     arc_probability_fn=None,
+    _fod_sampler=None,
 ):
     """Propagate iFOD2 arcs with calibrated batched rejection sampling.
 
@@ -404,11 +430,13 @@ def _grow(
         )
     if arc_probability_fn is None:
         arc_probability_fn = _ifod2_arc_probability
+    sample_fod = (partial(_sample, fod, inverse_affine=fod_inverse)
+                  if _fod_sampler is None else _fod_sampler)
     batch = seeds.shape[0]
     paths = seeds.new_zeros((batch, max_steps + 1, 3))
     paths[:, 0] = seeds
     counts = torch.ones(batch, dtype=torch.long, device=seeds.device)
-    start_amp = (_sample(fod, seeds, fod_inverse) * tracking_sh_precomputed(tangents, lmax)).sum(-1)
+    start_amp = (sample_fod(seeds) * tracking_sh_precomputed(tangents, lmax)).sum(-1)
     active = torch.isfinite(start_amp) & (start_amp > cutoff)
     half_log_start = .5 * start_amp.clamp_min(1e-20).log()
     ended_in_gm = torch.zeros_like(active)
@@ -601,17 +629,22 @@ def _five_tissue_mrtrix(
     nonzero = (five_tissue[nearest[:, 0], nearest[:, 1], nearest[:, 2]] != 0).any(-1)
     lower = torch.floor(voxel).long()
     fraction = (voxel - lower).float()
+    # Reuse axis indices and weights; accumulate the same eight corners in
+    # dz -> dy -> dx order with the original FP32 multiplication grouping.
+    indices = tuple(tuple((lower[:, axis] + offset).clamp(0, shape[axis] - 1)
+                          for offset in (0, 1)) for axis in range(3))
+    weights = tuple((1 - fraction[:, axis], fraction[:, axis]) for axis in range(3))
     result = five_tissue.new_zeros((len(points), 5))
     for dz in (0, 1):
-        iz = (lower[:, 2] + dz).clamp(0, shape[2] - 1)
-        wz = fraction[:, 2] if dz else 1 - fraction[:, 2]
+        iz = indices[2][dz]
+        wz = weights[2][dz]
         for dy in (0, 1):
-            iy = (lower[:, 1] + dy).clamp(0, shape[1] - 1)
-            wy = fraction[:, 1] if dy else 1 - fraction[:, 1]
+            iy = indices[1][dy]
+            wy = weights[1][dy]
             partial = wy * wz
             for dx in (0, 1):
-                ix = (lower[:, 0] + dx).clamp(0, shape[0] - 1)
-                wx = fraction[:, 0] if dx else 1 - fraction[:, 0]
+                ix = indices[0][dx]
+                wx = weights[0][dx]
                 weight = wx * partial
                 result += five_tissue[ix, iy, iz] * torch.where(weight < 1e-6, 0., weight)[:, None]
     return torch.where((inside & nonzero)[:, None], result.clamp(0, 1), 0.)
@@ -801,6 +834,9 @@ def probabilistic_tractography(
     generator = torch.Generator(device=device).manual_seed(seed)
     arc_probability_fn = (torch.compile(_ifod2_arc_probability, fullgraph=True,
                                         dynamic=True) if compile_arc else None)
+    fod_sampler = _VolumeSampler(wm_sh, fod_inverse)
+    if not compile_arc:
+        arc_probability_fn = partial(_ifod2_arc_probability, _fod_sampler=fod_sampler)
     seeds = sample_gmwmi_seeds(gmwmi, five_tissue, five_tissue_affine,
                                n_seeds, generator)
     collected = []
@@ -812,7 +848,7 @@ def probabilistic_tractography(
     for first in range(0, n_seeds, batch_size):
         batch_seeds = seeds[first:first + batch_size]
         initial, valid_seed, _ = _initial_directions(
-            _sample(wm_sh, batch_seeds, fod_inverse), generator, lmax=lmax, cutoff=cutoff,
+            fod_sampler(batch_seeds), generator, lmax=lmax, cutoff=cutoff,
         )
         valid_act, one_way, initial = _act_seed_direction(
             five_tissue, batch_seeds, initial, act_inverse,
@@ -822,7 +858,7 @@ def probabilistic_tractography(
             batch_seeds, initial, wm_sh, five_tissue, fod_inverse, act_inverse,
             generator, lmax=lmax, proposals_per_step=arc_proposals,
             calibration_local=calibration_local, calibration_ratio=calibration_ratio,
-            arc_probability_fn=arc_probability_fn,
+            arc_probability_fn=arc_probability_fn, _fod_sampler=fod_sampler,
             step_mm=step_mm, max_steps=max_steps,
             max_angle_degrees=max_angle_degrees, cutoff=cutoff, power=power,
         )
@@ -830,7 +866,7 @@ def probabilistic_tractography(
             batch_seeds, -initial, wm_sh, five_tissue, fod_inverse, act_inverse,
             generator, lmax=lmax, proposals_per_step=arc_proposals,
             calibration_local=calibration_local, calibration_ratio=calibration_ratio,
-            arc_probability_fn=arc_probability_fn,
+            arc_probability_fn=arc_probability_fn, _fod_sampler=fod_sampler,
             seed_to_wm_initial=wf,
             step_mm=step_mm, max_steps=max_steps,
             max_angle_degrees=max_angle_degrees, cutoff=cutoff, power=power,

@@ -1,0 +1,738 @@
+{
+  "kind": "official reference only; independent response and matched-response CSD listed separately",
+  "subject": "sub-CON03",
+  "threads": 8,
+  "hostname": "nodecw10",
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187,
+    188,
+    189,
+    190,
+    191
+  ],
+  "loadavg_at_start": [
+    14.7,
+    9.84,
+    6.31
+  ],
+  "commands": [
+    {
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/data.nii.gz",
+        "results/sub-CON03/reference_nodecw10/tensor.nii.gz",
+        "-grad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/inputs/gradient.txt",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/inputs/brain_mask.nii.gz",
+        "-iter",
+        "2",
+        "-nthreads",
+        "8"
+      ],
+      "wall_s": 2.1063704937696457,
+      "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
+      "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n"
+    },
+    {
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+        "results/sub-CON03/reference_nodecw10/tensor.nii.gz",
+        "-fa",
+        "results/sub-CON03/reference_nodecw10/fa.nii.gz",
+        "-vector",
+        "results/sub-CON03/reference_nodecw10/direction.nii.gz",
+        "-modulate",
+        "none",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/inputs/brain_mask.nii.gz",
+        "-nthreads",
+        "8"
+      ],
+      "wall_s": 0.16264627873897552,
+      "binary_sha256": "658b3c6e203edad601d3a7bcd940c355f66e63e11800e3de5e0ef13fc80c4a9e",
+      "version": "== tensor2metric 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Thijs Dhollander (thijs.dhollander@gmail.com) & Ben Jeurissen (ben.jeurissen@uantwerpen.be) & J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n"
+    },
+    {
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/dwi2response",
+        "dhollander",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/data.nii.gz",
+        "results/sub-CON03/reference_nodecw10/wmrf.txt",
+        "results/sub-CON03/reference_nodecw10/gmrf.txt",
+        "results/sub-CON03/reference_nodecw10/csfrf.txt",
+        "-grad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/inputs/gradient.txt",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/inputs/response_mask.nii.gz",
+        "-scratch",
+        "results/sub-CON03/reference_nodecw10/response_scratch",
+        "-nocleanup",
+        "-nthreads",
+        "8"
+      ],
+      "wall_s": 12.567486345767975,
+      "binary_sha256": "af12afd949ecb1b8093fe8dcd93257189b2e223059728035f9acacd32446c6c9",
+      "version": "== dwi2response 3.0.3-103-g026e850d ==\nAuthor(s): Robert E. Smith (robert.smith@florey.edu.au) and Thijs Dhollander (thijs.dhollander@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n"
+    },
+    {
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/dwi2fod",
+        "msmt_csd",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/data.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/recovered_baseline/baseline_wmrf.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/reference_nodecw10/wm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/recovered_baseline/baseline_gmrf.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/reference_nodecw10/gm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/recovered_baseline/baseline_csfrf.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/reference_nodecw10/csf.nii.gz",
+        "-grad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/inputs/gradient.txt",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/inputs/fod_mask.nii.gz",
+        "-nthreads",
+        "8"
+      ],
+      "wall_s": 58.13168156892061,
+      "binary_sha256": "66048180bd0844addd1c067151ff0311a1bd8619aac02906bbb3e01ee045479d",
+      "version": "== dwi2fod 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): J-Donald Tournier (jdtournier@gmail.com) and Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n"
+    },
+    {
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mtnormalise",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/recovered_baseline/baseline_wm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/reference_nodecw10/wm_norm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/recovered_baseline/baseline_gm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/reference_nodecw10/gm_norm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/recovered_baseline/baseline_csf.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/reference_nodecw10/csf_norm.nii.gz",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/inputs/normalise_mask.nii.gz",
+        "-check_norm",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/reference_nodecw10/field.nii.gz",
+        "-check_mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results/sub-CON03/reference_nodecw10/accepted_mask.nii.gz",
+        "-nthreads",
+        "8"
+      ],
+      "wall_s": 2.729906439781189,
+      "binary_sha256": "25364901efe10fbdbaa9d280e928825aba238f7dc4f44c8d72ca69f29ac83255",
+      "version": "== mtnormalise 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Thijs Dhollander (thijs.dhollander@gmail.com), Rami Tabbara (rami.tabbara@florey.edu.au), David Raffelt (david.raffelt@florey.edu.au), Jonas Rosnarho-Tornstrand (jonas.rosnarho-tornstrand@kcl.ac.uk) and J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n"
+    }
+  ],
+  "comparisons": {
+    "fa": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60
+        ],
+        [
+          96,
+          96,
+          60
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60
+      ],
+      "neq": 65487,
+      "max": 0.04624861478805542,
+      "p99": 6.705522537231445e-08,
+      "rmse": 6.23130346779677e-05,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "4c5ad827cc1bbb3b52f52312ef37479c430dd10520840aa753b5c0af6363c565",
+        "voxel_count": 98626,
+        "finite_value_count": 98625,
+        "neq": 65487,
+        "max": 0.04624861478805542,
+        "p99": 1.7881393432617188e-07,
+        "rmse": 0.0001475475014337996,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "direction": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60,
+          3
+        ],
+        [
+          96,
+          96,
+          60,
+          3
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60,
+        3
+      ],
+      "neq": 238657,
+      "max": 1.9999781847000122,
+      "p99": 1.7081100487709042,
+      "rmse": 0.2922780631941692,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "4c5ad827cc1bbb3b52f52312ef37479c430dd10520840aa753b5c0af6363c565",
+        "voxel_count": 98626,
+        "finite_value_count": 295875,
+        "neq": 238657,
+        "max": 1.9999781847000122,
+        "p99": 1.9485882139205932,
+        "rmse": 0.692068652587349,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "wm": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60,
+          45
+        ],
+        [
+          96,
+          96,
+          60,
+          45
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60,
+        45
+      ],
+      "neq": 412795,
+      "max": 3.897228140203879e-08,
+      "p99": 1.3211653993039363e-14,
+      "rmse": 1.5185556376560766e-11,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "b11d889a3e68d736ee6d5f86b04a04491f2c1983f5b6c448f65e47947dbbd4b7",
+        "voxel_count": 118710,
+        "finite_value_count": 5341950,
+        "neq": 412795,
+        "max": 3.897228140203879e-08,
+        "p99": 6.428191312579656e-14,
+        "rmse": 3.277433693931034e-11,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "gm": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60
+        ],
+        [
+          96,
+          96,
+          60,
+          1
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60
+      ],
+      "neq": 31695,
+      "max": 2.9802322387695312e-08,
+      "p99": 3.729655473350135e-17,
+      "rmse": 4.4808278263055797e-11,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "b11d889a3e68d736ee6d5f86b04a04491f2c1983f5b6c448f65e47947dbbd4b7",
+        "voxel_count": 118710,
+        "finite_value_count": 118710,
+        "neq": 31695,
+        "max": 2.9802322387695312e-08,
+        "p99": 1.5047994317632402e-16,
+        "rmse": 9.670779081433744e-11,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "csf": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60
+        ],
+        [
+          96,
+          96,
+          60,
+          1
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60
+      ],
+      "neq": 25065,
+      "max": 7.450580596923828e-09,
+      "p99": 6.776263578034403e-18,
+      "rmse": 1.0019435615091156e-11,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "b11d889a3e68d736ee6d5f86b04a04491f2c1983f5b6c448f65e47947dbbd4b7",
+        "voxel_count": 118710,
+        "finite_value_count": 118710,
+        "neq": 25065,
+        "max": 7.450580596923828e-09,
+        "p99": 1.5612511283791264e-17,
+        "rmse": 2.162451942146723e-11,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "wm_norm": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60,
+          45
+        ],
+        [
+          96,
+          96,
+          60,
+          45
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60,
+        45
+      ],
+      "neq": 846439,
+      "max": 5.960464477539063e-08,
+      "p99": 9.313225746154785e-10,
+      "rmse": 6.632809246083183e-10,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "b11d889a3e68d736ee6d5f86b04a04491f2c1983f5b6c448f65e47947dbbd4b7",
+        "voxel_count": 118710,
+        "finite_value_count": 5341950,
+        "neq": 846439,
+        "max": 5.960464477539063e-08,
+        "p99": 7.450580596923828e-09,
+        "rmse": 1.4315308553385854e-09,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "gm_norm": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60
+        ],
+        [
+          96,
+          96,
+          60
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60
+      ],
+      "neq": 18978,
+      "max": 5.960464477539063e-08,
+      "p99": 1.4901161193847656e-08,
+      "rmse": 2.0633104926626695e-09,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "b11d889a3e68d736ee6d5f86b04a04491f2c1983f5b6c448f65e47947dbbd4b7",
+        "voxel_count": 118710,
+        "finite_value_count": 118710,
+        "neq": 18978,
+        "max": 5.960464477539063e-08,
+        "p99": 1.4901161193847656e-08,
+        "rmse": 4.4531548018431064e-09,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "csf_norm": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60
+        ],
+        [
+          96,
+          96,
+          60
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60
+      ],
+      "neq": 18775,
+      "max": 5.960464477539063e-08,
+      "p99": 1.862645149230957e-09,
+      "rmse": 1.0087250444186941e-09,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "b11d889a3e68d736ee6d5f86b04a04491f2c1983f5b6c448f65e47947dbbd4b7",
+        "voxel_count": 118710,
+        "finite_value_count": 118710,
+        "neq": 18775,
+        "max": 5.960464477539063e-08,
+        "p99": 1.4901161193847656e-08,
+        "rmse": 2.177088126710218e-09,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "field": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60
+        ],
+        [
+          96,
+          96,
+          60
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60
+      ],
+      "neq": 98510,
+      "max": 0.000244140625,
+      "p99": 1.9073486328125e-06,
+      "rmse": 1.5632229357960426e-06,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "e761235224a2824574eea5535bff3c2a8200164d0e2ba3915fe42025115df7ab",
+        "voxel_count": 80339,
+        "finite_value_count": 80339,
+        "neq": 14110,
+        "max": 2.384185791015625e-07,
+        "p99": 1.1920928955078125e-07,
+        "rmse": 4.195202929185358e-08,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "accepted_mask": {
+      "stored_shapes": [
+        [
+          96,
+          96,
+          60
+        ],
+        [
+          96,
+          96,
+          60
+        ]
+      ],
+      "compared_shape": [
+        96,
+        96,
+        60
+      ],
+      "neq": 0,
+      "max": 0.0,
+      "p99": 0.0,
+      "rmse": 0.0,
+      "nonfinite_mismatch": 0,
+      "within_processing_mask": {
+        "mask_sha256": "e761235224a2824574eea5535bff3c2a8200164d0e2ba3915fe42025115df7ab",
+        "voxel_count": 80339,
+        "finite_value_count": 80339,
+        "neq": 0,
+        "max": 0.0,
+        "p99": 0.0,
+        "rmse": 0.0,
+        "nonfinite_mismatch": 0
+      }
+    },
+    "direction_antipodal_degrees": {
+      "count": 98625,
+      "max": 0.002742805742026362,
+      "p99": 0.00011898431646615623
+    },
+    "wmrf": {
+      "neq": 19,
+      "max": 1.2973401375404592e-07,
+      "p99": 1.1820459148159655e-07,
+      "rmse": 3.4856794586975436e-08
+    },
+    "gmrf": {
+      "neq": 4,
+      "max": 3.410605131648481e-12,
+      "p99": 3.325340003357268e-12,
+      "rmse": 1.7374477142286565e-12
+    },
+    "csfrf": {
+      "neq": 4,
+      "max": 4.547473508864641e-13,
+      "p99": 4.485656290853512e-13,
+      "rmse": 2.8446678480548724e-13
+    }
+  },
+  "input_sha256": {
+    "manifest": "ab1b602cf5324eaad540bb7f62338a7501557f317fe919ffd7da429091da3054",
+    "dwi": "380daf69bd9511703d15bbe89fb3a80a46762659159570d1f05c79c6e92431e9",
+    "gradient": "f23baf50c3ff1980c5886ba3846fd63f78145efd351e4e9275758f4b2496c9d8",
+    "brain_mask": "4c5ad827cc1bbb3b52f52312ef37479c430dd10520840aa753b5c0af6363c565",
+    "response_mask": "a04308907c66da0150cbbf776c9eea2f678a1b6b1e8192ad6029427ea6916814",
+    "fod_mask": "b11d889a3e68d736ee6d5f86b04a04491f2c1983f5b6c448f65e47947dbbd4b7",
+    "normalise_mask": "e761235224a2824574eea5535bff3c2a8200164d0e2ba3915fe42025115df7ab"
+  },
+  "prepared_output_sha256": {
+    "tensor.nii.gz": "f8840725a6c3fe892739534eff6eee7068a6b9e931c532e6fdc2ff004a5d3385",
+    "fa.nii.gz": "6abbbfd13a4b4b39eaa2c416e1d979559fb67a12c338df9f7dfc55a61e220f32",
+    "direction.nii.gz": "f667728fed6f83fffcf4dba289c02353b981018505fec2d776dbf3dcddf6bda1",
+    "wmrf.txt": "eab5a7ea4045c328699a17d9dcac71be0dee685c6aaa3f3cc0ce315ec99bf961",
+    "gmrf.txt": "84f0beeafd17f3b5a09ec7f4b3b69a72230cb2e86e77838193b15c2cf19efb1a",
+    "csfrf.txt": "61ae2a6ccf3b18d2a6c2d9cb34a60b3d3bb8d23d9702067892b5025c956c6e6c"
+  },
+  "state": "official_component_comparisons_completed",
+  "comparison_harness_sha256": "df0b6146477ab86d9a6474f60193a7530c08fc8a2facd2d40e909a3fecd808fd",
+  "baseline_output_sha256": {
+    "baseline_csf.nii.gz": "62b9756bbe74224aa01c9ecd0756d5d49d5a6f7e17373c3c5fe93237047c44dc",
+    "baseline_gm_norm.nii.gz": "d1566db437c987cc69f85bc5b32884dd59b3c768f4209dd63b394b74ed2fe37e",
+    "baseline_csf_norm.nii.gz": "ff74015c0e3af6087263d3d433b973ef94bea4622b630c8d5fd95fe34c27f302",
+    "baseline_accepted_mask.nii.gz": "d512963fc978f8afa11d1dcdd3242efb08bf7982f78c2abfb0a71af18954ae66",
+    "baseline_direction.nii.gz": "c8d13c3158c5cf96fa1b833b19597406bfb097b55fb47d7bf5ab34547977adca",
+    "baseline_field.nii.gz": "596c3775d10809714254573c39d0630f5f9a2fa81a9fbc383e7faa923d8810a8",
+    "baseline_fa.nii.gz": "6c1b70dccfe64c783a4aa39e547da336d69c7ae43cb269806c99e28505c43aa6",
+    "baseline_wm.nii.gz": "10aff44fbd499f2b69a5a43986bc6f1a5a2cffda68c6d3eaeaebd05a955ce347",
+    "baseline_wmrf.txt": "43a99448c4d7fee09ac4042f2f155c0d7f12f6ffc3dd642359617d191a5cc336",
+    "baseline_gmrf.txt": "9e62c148bfbd454da3b23df63c32bfbd8ff37a742f748e4f235484a6322db668",
+    "baseline_gm.nii.gz": "4cfb1cd5ca261708343ddf467362347c819c841da001d2cf45ee28bef2dd221a",
+    "baseline_csfrf.txt": "ec8f6d9d9bb92bc30463d2ad92119b6ebd59273cfc24f5bc0c9e241d39d15e5f",
+    "baseline_wm_norm.nii.gz": "b412f1a33994eb25e0714e941efbf15a6be49b33209361ddf03562ea7db5db87"
+  },
+  "official_output_sha256": {
+    "tensor.nii.gz": "f8840725a6c3fe892739534eff6eee7068a6b9e931c532e6fdc2ff004a5d3385",
+    "wm.nii.gz": "330871acce7dff034668a791eeb192cbc00c9c0347483f23b007221094138343",
+    "fa.nii.gz": "6abbbfd13a4b4b39eaa2c416e1d979559fb67a12c338df9f7dfc55a61e220f32",
+    "field.nii.gz": "e473fc7ba77fc7e92c8679effe88f50535d79cc536d4fae57a0f7d0ecf29c8b2",
+    "direction.nii.gz": "f667728fed6f83fffcf4dba289c02353b981018505fec2d776dbf3dcddf6bda1",
+    "accepted_mask.nii.gz": "1e7f5a5a4e003617b8f1cd07ed82d77228bb98500fc37e413654800eb336da5b",
+    "csf.nii.gz": "31e69fd5c6ea2fb90be7d7cb0395aa7d7eeec7d8d68e3c9be98331e689fcab98",
+    "gm.nii.gz": "104eb7e90ba03d5b80650835085d478ac32e63a24e521524a595d936f0d282d9",
+    "wm_norm.nii.gz": "785e35ef73fe6ffcc0760ef6b8e14f6d2088a652217f14f8b03a126c15d581f0",
+    "gm_norm.nii.gz": "39dee18be0d1d0773a1490b302802cf241d7dce5443256164b46513fe1695388",
+    "csf_norm.nii.gz": "0247b6827d89b8856075277d193901a3a914af966e6fa7644b4aa9f43434e46a"
+  },
+  "loadavg_at_end": [
+    8.5,
+    6.64,
+    8.14
+  ]
+}

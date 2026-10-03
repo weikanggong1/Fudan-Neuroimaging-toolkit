@@ -25,7 +25,7 @@ bash tools/build_recon_all_fs_cpp_conda.sh \
 
 外部图谱服务器曾在全新安装中途断开；再次运行同一安装器后从断点续传，当前源码 `--verify-only` 对全新目录的 98 项标准资产全部通过。下载失败时可重试同一 `--dest`；安装器仍核对大小及 SHA-256。
 
-原生程序包括 `mri_em_register`、`mri_segment`、`mri_edit_wm_with_aseg`、`mris_fix_topology_fnit`、`mris_remove_intersection`、`mris_inflate`、`mris_place_surface`、`mrisp_paint`、`mris_curvature_stats`、`mri_label2vol`、`mri_warp_convert`、`mri_ca_register` 和 `mri_convert`；N4 从 FNIT 源码另行编译。球面优化与配准调用 FNIT Python/Numba 实现。`mris_fix_topology_fnit` 使用构建脚本记录的有限源码补丁；未修改的上游 `mris_fix_topology` 仅留作诊断，不进入标准运行路径。MNI152 非线性模型还需外置约 3.5 GB 的 `synthmorph.deform.3.h5`；项目安装器从固定 FNIT Release 分卷下载、合并并核对完整 SHA-256，参见[该阶段说明](MNI_NONLINEAR_CHAIN.md)。
+原生程序包括 `mri_em_register`、`mri_segment`、`mri_edit_wm_with_aseg`、`mris_fix_topology_fnit`、`mris_remove_intersection`、`mris_inflate`、`mris_place_surface`、`mris_place_surface_white_fast`、`mrisp_paint`、`mris_curvature_stats`、`mri_label2vol`、`mri_warp_convert`、`mri_ca_register` 和 `mri_convert`；N4从FNIT源码另行编译，共15项安装产物。`mris_place_surface_white_fast`仅移除white未消费的面哈希构建，pial仍调用原放置程序。球面优化与配准调用FNIT Python/Numba实现。`mris_fix_topology_fnit`使用构建脚本记录的有限源码补丁；未修改的上游 `mris_fix_topology` 仅留作诊断，不进入标准运行路径。当前CUDA recon-all的MNI后处理已调用FNIT GPU实现，独立API默认及CPU链仍保留Conda路径。MNI152非线性模型还需外置约3.5 GB的 `synthmorph.deform.3.h5`；项目安装器从固定FNIT Release分卷下载、合并并核对完整SHA-256，参见[该阶段说明](MNI_NONLINEAR_CHAIN.md)。
 
 ## 运行时检查
 
@@ -44,11 +44,13 @@ fnit-recon-all /data/sub01_T1w.nii.gz /data/subjects/sub01 \
 
 已有[2026-09-27 环境安装记录](../../validation/recon_all/python_gpu_port/conda_yaml_install_20260927/README.md)只对应当时的独立 `environment-recon-all-cpp.yml`。现版主页环境已完成安装、程序发现和[两例真实 T1 连续运行](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)；138 项均存在且当时的标准mesh_validation通过（未覆盖后续发现的white/pial穿越），但严格数值比较仅通过 5/138 和 2/138 项。无预装 FreeSurfer/FSL 环境中的整例隔离验收仍待完成。各程序输入输出、官方命令和阶段数据见[阶段索引](CONDA_CPP_STAGES.md)。
 
-## 当前N4构建与安装范围
+## N4构建与各轮安装范围
 
 五阶段串行优化新增N4能力查询、内部拟合/重建计时和可选重建线程，接口见[N4说明](N4_ITK_CONDA.md)。主页安装脚本已经调用同一build_n4_itk_conda.sh；显式CMake配置后关闭Ninja自动重生成，避免共享文件系统时间戳造成反复配置。实际新产物已在现有主页Conda环境独立编译，两例量化前后与旧程序零差异，1/4重建线程没有整段收益，默认保留1。生产原生程序束只连接源码构建产物；[清单](../../validation/recon_all/optimizations/20261001_serial/native_bundle_manifest.json)与[实际构建](../../validation/recon_all/optimizations/20261001_serial/stage4/build.json)绑定哈希。
 
-本轮复用了已有环境与13项原生程序，没有重新创建干净环境或重编全部程序。整合版本ff372d7另在同一主页Conda环境构建wheel、编译FNIT FastPD扩展、安装至独立目标目录并验证API导入与CLI帮助；[安装报告](../../validation/recon_all/optimizations/20261001_serial/whole/integrated_main/reports/installation/report.json)保留编译器、日志与产物SHA。最新原始T1整例见[本轮结果](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)。干净隔离验收仍未验证，哈希、启动和ldd检查不代替这一项。
+2026-10-01串行轮复用了已有环境与13项原生程序，没有重新创建干净环境或重编全部程序。该轮整合版本ff372d7在同一主页Conda环境构建wheel、编译FNIT FastPD扩展、安装至独立目标目录并验证API导入与CLI帮助；[历史安装报告](../../validation/recon_all/optimizations/20261001_serial/whole/integrated_main/reports/installation/report.json)和[历史整例](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)保留各自版本证据。
+
+2026-10-02五任务运行源码8d750e2的wheel私有target安装通过，171项recon-all Python源码SHA一致；15项原生产物的来源、SHA及运行依赖核验通过。GCA本轮有限重编，white复用任务2独立固定源码Conda构建，其余13项复用既有独立构建；GCA/white另有专项能力查询。[本轮安装报告](../../validation/recon_all/optimizations/20261002_parallel/root_install/REPORT.md)及[当前两例原始T1整例](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)绑定实际产物。主页安装脚本已纳入这些优化，但完整全新Conda创建、全部15项从头构建和无预装脑影像软件环境的物理隔离尚未验证；哈希、启动和ldd检查不代替这些验收。
 
 ## 参考文献与原实现
 

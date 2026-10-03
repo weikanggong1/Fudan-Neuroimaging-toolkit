@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "validated_on": "2026-10-02",
+  "candidate_revision": "ac692bb4f7868a24ea4bd67180162e81726de9b4",
+  "frames": 490,
+  "tr_seconds": 0.735,
+  "protocol": "Original FSL4D applywarp: one frame-specific MCFLIRT+BBR premat, optional original FNIRT coefficients, one spline interpolation of raw 4D BOLD per target.",
+  "timing_boundary": "Stage-only sampling from freshly estimated original registration. Original child programs completed; the benchmark driver incorrectly rejected padded strace PID whitespace after the T1 command. T1 wall and combined stage wall were not saved and remain null. No timestamp-derived or summed replacement wall time.",
+  "stage_only_wall_seconds": null,
+  "timings": {
+    "sampling_reference": {
+      "wall_seconds_including_io": 8.363522867206484,
+      "exit_evidence": {
+        "launcher_exit_code": 0
+      }
+    },
+    "preproc_MNI": {
+      "wall_seconds_including_io": 580.2589781382121,
+      "exit_evidence": {
+        "launcher_exit_code": 255,
+        "trace_enabled": true,
+        "exit255_records": [
+          {
+            "launcher_exit_code": 255,
+            "successful_direct_child_exec_count": 1,
+            "direct_child_exit_codes": [
+              0
+            ],
+            "direct_child_sigchld_statuses": [
+              0
+            ],
+            "inner_success_proven": true
+          }
+        ],
+        "all_exit255_have_inner_success": true,
+        "original_process_accepted": true,
+        "exit_code_was_rewritten": false
+      }
+    },
+    "preproc_T1w": {
+      "wall_seconds_including_io": null,
+      "exit_evidence": {
+        "launcher_exit_code": 255,
+        "trace_enabled": true,
+        "exit255_records": [
+          {
+            "launcher_exit_code": 255,
+            "successful_direct_child_exec_count": 1,
+            "direct_child_exit_codes": [
+              0
+            ],
+            "direct_child_sigchld_statuses": [
+              0
+            ],
+            "inner_success_proven": true
+          }
+        ],
+        "all_exit255_have_inner_success": true,
+        "original_process_accepted": true,
+        "exit_code_was_rewritten": false
+      }
+    }
+  },
+  "checks": {
+    "preproc_mni": {
+      "shape": [
+        91,
+        109,
+        91,
+        490
+      ],
+      "dtype": "float32",
+      "tr_seconds": 0.7350000143051147,
+      "time_unit": "sec",
+      "all_finite": true,
+      "finite_value_count": 442288210,
+      "sha256": "6fdf5f0d003e15ff7b11b78e2e5105185ece2e106444b302088f84b1cf91d18d"
+    },
+    "preproc_t1w": {
+      "shape": [
+        59,
+        75,
+        64,
+        490
+      ],
+      "dtype": "float32",
+      "tr_seconds": 0.7350000143051147,
+      "time_unit": "sec",
+      "all_finite": true,
+      "finite_value_count": 138768000,
+      "sha256": "529a20ee6da97665d13cca696a136a719c730b46558940f00dec3045082716d2"
+    }
+  },
+  "post_validation_recovery": {
+    "original_driver_completed": false,
+    "reason": "strace PID padding was rejected by benchmark evidence parser; original T1 applywarp child exited zero",
+    "original_child_commands_completed": true,
+    "exit_codes_rewritten": false,
+    "failed_controller_log_sha256": "38b70de6883ff5792ea3117590aad6e6e51e4833245a37e810633b46a7c8e61e",
+    "original_trace_sha256": {
+      "preproc_MNI": "f1a93e10c68d223ec81f8cd1493d215c58d64ba328226861d9e971ab3bcae8d8",
+      "preproc_T1w": "6f26309b81f85764e8feb574845d92130a2b3cda02489fc47de0e126051a383a"
+    },
+    "recovery_script_sha256": "5ad2e2276f86d7d0f778d1d7439efea5e2d61155e071cdbefd822d4cc792f700",
+    "corrected_evidence_parser_sha256": "9c7e3d300005f78c5c7f402a911ae77a6ec17275d1919b12684260988137028e",
+    "full_output_validation_seconds": 24.254462298937142
+  },
+  "original_sampling_reference": {
+    "implementation": "original niworkflows.interfaces.nibabel.GenerateSamplingReference",
+    "niworkflows_version": "1.14.4",
+    "nilearn_version": "0.11.1",
+    "nibabel_version": "5.3.2",
+    "keep_native": true,
+    "fov_mask": "fresh original T1 SynthStrip mask",
+    "output_copied_without_header_changes": true
+  },
+  "input_sha256": {
+    "bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "sbref": "ff4e0e49a504527468234456cba6ad367d63c1f3f529d8ff3519bc78e2076323",
+    "t1w": "762cb85469a27f8c64555252f97130d2ecb964f8c0d8f67e6c245ca7d9aa17f3",
+    "mni_template": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+    "mni_mask": "b71a9f2015bd10262c37e51b4d17a655d0eb0a0dec4ba48322fb5af55c86b97c"
+  },
+  "reused_fresh_registration_sha256": {
+    "bbr": "3248b4b4284148aa0d59b2bfbaa69b045c2539370e97fdb3ee8267b48f080ee3",
+    "fnirt_coefficients": "f11ad3aba5782187ca4c9dfa5825e3814df15289923cd986a2ed72fee30adae2",
+    "motion_sequence": "3432d9dee81a5cecec5d73cf242b34c686d5933f31a7e8bc31e6865218537e89",
+    "registration_report": "9b36f8ea8896d35411351911c2fad5c223c39def1ef9e34fc27b68f525f5d961"
+  },
+  "matrix_series_sha256": {
+    "MNI": "a417969de390490bfe8979073cdda5266cf0faf8c6129701e1d597ccbc747e4e",
+    "T1w": "f7cdbfa62c5d016e1986178bca7914bbb913bef53df25a3227a72c10af4f3edc"
+  },
+  "executables_sha256": {
+    "applywarp_launcher": "fe05b2ec68cbd876c85872e5e71281180885ebbd3d44ef98d048e982ceab88bb"
+  },
+  "original_driver_sha256": {
+    "e2e_latest/run_native_preproc.py": "e58461ca02566ecad04268aac06d4d9ff19086fbef8856fd99f6d2a689b98804",
+    "e2e_latest/make_original_sampling_reference.py": "8eb1b7a574c6c394cbcc26629d6c1eb61e66a2e317e6813bdc12cd5a2c845cfa",
+    "native_exec.py": "52ac26b86b126231d8a18bcc0df89e2c6d9a4b8cb929f9018657ac42c0c905b1"
+  },
+  "limits": [
+    "Stage-only recovered outputs; not a successful continuous raw-to-CIFTI run.",
+    "FSL NEWIMAGE spline/extraslice edge rules differ from FNIT preproc grid-constant sampling.",
+    "One real subject on a shared host; native FSL uses CPU, configured thread environment eight."
+  ],
+  "privacy": "Anonymous scalar checks and hashes only; raw paths, matrices, traces and 4D data remain private."
+}

@@ -67,10 +67,10 @@ def run_feat_core(
     warp-reference-to-BOLD FLIRT matrix. If neither is given, this stage
     performs motion-only resampling. It never manufactures a missing B0
     fieldmap or GDC warp. ``motion_iterations`` counts coordinate-optimizer
-    sweeps at 8/4/4 mm, one per stage as in MCFLIRT; it no longer counts
-    the removed Adam steps. The optional `brain_mask` must already be in the
-    reference grid. Without one, SynthStrip extracts the corrected EPI mean
-    by default; ``brain_extraction='otsu'`` selects the older independent mask.
+    sweeps at 8/4/4 mm, one per stage as in MCFLIRT. The optional
+    ``brain_mask`` must already be in the reference grid. Without one,
+    SynthStrip extracts the corrected EPI mean by default;
+    ``brain_extraction='otsu'`` selects an independent Otsu mask.
     """
     inputs = locate_bids_inputs(
         bids_root, subject=subject, session=session, task=task, run=run,

@@ -1,0 +1,85 @@
+{
+  "baseline_commit": "f436de588647a0de80735e4a98d53df5d88e502d",
+  "state": "two_actual_new_public_pilots_completed_optimizer_not_adopted",
+  "host": "gpucw1",
+  "python": "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python",
+  "tests": [
+    {
+      "suite": "optimizer frozen differential and mapping/FMLS/orchestration/FA",
+      "result": "22 passed in 6.37s",
+      "scope": "unit regression; initial CPU optimizer fixture plus existing component tests"
+    },
+    {
+      "suite": "optimizer CPU frozen differential",
+      "result": "6 passed, 6 deselected in 2.97s"
+    },
+    {
+      "suite": "FA global cumsum cancellation and affine translation",
+      "result": "2 passed, 2 deselected in 2.40s"
+    },
+    {
+      "suite": "extended CPU/CUDA frozen optimizer + mapping/FMLS/orchestration/FA including global-cumsum cancellation",
+      "result": "29 passed in 5.80s",
+      "scope": "unit regression, not real-data benchmark"
+    },
+    {
+      "suite": "benchmark original float64 geometry and invalid geometry rejection",
+      "result": "4 passed in 2.77s on gpucw1",
+      "scope": "geometry unit regression; real pilot pending"
+    },
+    {
+      "suite": "actual PT bitwise geometry/voxel validation and exact NIfTI-2 conversion",
+      "result": "7 passed in 4.55s gpucw1",
+      "scope": "unit regression only; no synthetic benchmark"
+    }
+  ],
+  "cuda_extended_regression": "29 passed in 5.80s under shared GPU flock; CPU and CUDA frozen differential cases exact",
+  "real_new_download_benchmark": "CON03+CON01 actual GPU0 paired ABBA complete; both strict gate failed",
+  "official_comparison": "Completed CON03_official_comparison.json; both baseline and candidate differ from official; no equivalence claim",
+  "memory_budget": "Observed fixed-TCK component budget pass; no 1M or complete production padded backing assessment",
+  "speedup": "CON03 optimizer-only positive0.019615s observation; CON01 shared-GPU-contaminated negative0.083321s observation; no stable/whole-chain gain claim; candidate not adopted",
+  "source_sha256": {
+    "src/fnit/connectome/sift2_optimizer.py": "043c701f971b586462c57ef514d623667dd509f45a5dbae474f3c59e128caadd",
+    "tools/connectome/benchmark_sift2_sameinput.py": "ce2e53c3cba171590023290e6dd4c59f98e7f8c50013024c10cd5276d4082bb2",
+    "tests/connectome/test_sift2_optimizer_hoist.py": "a9da320aa8f357f4d17027b5ce7c562087b9b10f5debf9bd7257974c0217bcc4",
+    "tests/connectome/test_tcksample_precise.py": "ea4bfa412af7edcb549a2e3b8bf1bce9c244a0bd018c86933086968c0f2499db",
+    "tests/connectome/test_sift2_benchmark_geometry.py": "9f259320a7afec21407d89d6f97dc6bcf7bf38cecedf802af779aa921865189a",
+    "tools/connectome/prepare_sift2_official_inputs.py": "e0ceab58c5b6721b05ff63c16fcd5b2dc4d065150cf10cd1104787f026c36911",
+    "tools/connectome/run_sift2_official_reference.py": "f9b7680d01013530c6284132b24301395e260a2c1678f4947ae091b62786b89b",
+    "tools/connectome/wait_sift2_pilot.py": "8fd02bbb4b6a3c4ed77f7411c42bd2f6492092dba77af2fa1024f26742dabadf",
+    "tools/connectome/compare_sift2_official_outputs.py": "d3618267c91cad98b771ca21f847ffcbf87dd58c9a101b821679064df42de105"
+  },
+  "geometry_contract": {
+    "required": "raw diagnostic geometry.npz",
+    "FOD_FA_atlas": "original float64 dwi_affine; atlas unused by component runner",
+    "five_tissue": "original float64 five_tissue_affine",
+    "affine_header_roundtrip": false,
+    "tracking_inputs": "actual PT FOD/5TT tensors verified bitwise against exports; affine verified bitwise against geometry.npz; original spacing retained",
+    "official_NIfTI2": "Exact original first 3 sform rows and voxels; cannot represent noncanonical original fourth row. Actual conversion explicitly reports both matrices and bit/max differences; full 4x4 official identity not claimed."
+  },
+  "optimizer_cache_budget": {
+    "persistent_all_hoisted_records_bytes": "96 * P",
+    "new_gathers_increment_bytes": "40 * P",
+    "gradient_hessian_buffers_bytes": "16 * T",
+    "P": "mapped.length_mm.numel()",
+    "T": "accepted tracks",
+    "1M_full_resident_peak": "pending actual run"
+  },
+  "memory_budget_scope": "Fixed TCK component excludes production tracking padded buffers; rounded NVML sampled maximum can miss transients, no continuous-time upper bound. PyTorch allocator peaks also recorded. Root raw wall run owns whole-chain measurement.",
+  "official_reference_programs": {
+    "version": "MRtrix 3.0.3 built 2026-09-27 on nodecw10",
+    "tcksift2_sha256": "b5838c1d610ac397387c2938ed66fc3accbb08d4a2a503afad53f8735e420871",
+    "tcksample_sha256": "a238214b5d7a60b461a87544e250a581e958286ed6d01cb21a614f89a314a902"
+  },
+  "source_sha256_scope": "Earlier recorded regression/tooling snapshot; preserved rather than relabelled as latest tooling tested.",
+  "current_tooling_sha256": {
+    "tools/connectome/benchmark_sift2_sameinput.py": "2351a35d564648e37007dbfc99e74362c6a2dbcfb9c30ce7688265579317af49",
+    "tools/connectome/compare_sift2_official_outputs.py": "3bafdc000a48c62a52a29ee035ede6795b53039f0eda3e779bf9d17b9dacbbaa",
+    "tools/connectome/plot_sift2_real_brain.py": "88fa0897abc3b9bb46f61c66313b615157e4949bed1d5aca4eef25973bd64dc7",
+    "tools/connectome/prepare_sift2_official_inputs.py": "b724f388393c636a9f45df3743cbda3972968c48f0472b6f54e9afe90c13a1ac",
+    "tools/connectome/report_sift2_all_pairs.py": "40ecdf721956d6093a33c7edd32039647a7ee361762ec007f899e9020e5af4ef",
+    "tools/connectome/run_sift2_official_reference.py": "f9b7680d01013530c6284132b24301395e260a2c1678f4947ae091b62786b89b",
+    "tools/connectome/wait_sift2_pilot.py": "8f160d80a1764d0d709dfeecea92e052689718f92b277623bccf37e881b0fd3e"
+  },
+  "current_tooling_validation": "Waiting success gate compiled and diff checked; full real-data execution pending. Extended frozen optimizer regressions remain tied to recorded source SHA."
+}

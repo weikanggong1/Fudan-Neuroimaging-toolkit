@@ -1,0 +1,47 @@
+{
+  "scope": "official same fixed-TCK reference; CPU 8 threads; not raw full pipeline",
+  "inputs": {
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/tracks.tck": "8c488fc7b6a01fbb4bea04cfe3dc6535037b2b2cc2fab9c19353bdffaf37f9ca",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_inputs/wm_fod_float64_geometry.nii": "b755a6fdf356cf5907c8855c333d01423581c480d24e8aa4f4c3dd0a4828e77c",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_inputs/five_tissue_float64_geometry.nii": "ff2875d2bec24d086853d0d6f85e4a5bd6ed172dbf183405258019416f859680",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_inputs/fa_float64_geometry.nii": "6ef8dbe69050288c482281258d90c81da6a84c09701a69ff114001d83b453a15"
+  },
+  "stages": {
+    "sift2": {
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/mrtrix_eeab681_compat_src/bin/tcksift2",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_inputs/wm_fod_float64_geometry.nii",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_reference/sift2_weights.txt",
+        "-act",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_inputs/five_tissue_float64_geometry.nii",
+        "-nthreads",
+        "8",
+        "-csv",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_reference/sift2_stats.csv"
+      ],
+      "program_sha256": "b5838c1d610ac397387c2938ed66fc3accbb08d4a2a503afad53f8735e420871",
+      "version": "== tcksift2 3.0.3 ==\n64 bit release version with nogui, built Sep 27 2026, using Eigen 3.4.0\nAuthor(s): Robert E. Smith (robert.smith@florey.edu.au)\nCopyright (c) 2008-2021 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "wall_s": 9.39142606407404,
+      "returncode": 0
+    },
+    "fa": {
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/mrtrix_eeab681_compat_src/bin/tcksample",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/tracks.tck",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_inputs/fa_float64_geometry.nii",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_reference/mean_fa.txt",
+        "-precise",
+        "-stat_tck",
+        "mean",
+        "-nthreads",
+        "8"
+      ],
+      "program_sha256": "a238214b5d7a60b461a87544e250a581e958286ed6d01cb21a614f89a314a902",
+      "version": "== tcksample 3.0.3 ==\n64 bit release version with nogui, built Sep 27 2026, using Eigen 3.4.0\nAuthor(s): Robert E. Smith (robert.smith@florey.edu.au)\nCopyright (c) 2008-2021 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "wall_s": 0.03531656414270401,
+      "returncode": 0
+    }
+  },
+  "completed": true
+}

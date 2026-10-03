@@ -299,6 +299,20 @@ def worker(args):
     start = time.perf_counter()
     graph = workflow.run(plugin="Linear")
     wall = time.perf_counter() - start
+    # Read each completed interface's own wall time. These nested intervals
+    # exclude workflow scheduling, input hashing and final output staging.
+    interface_times = []
+    for node in sorted(graph.nodes, key=lambda item: item.fullname):
+        runtime = node.result.runtime
+        runtimes = runtime if isinstance(runtime, (list, tuple)) else [runtime]
+        durations = [float(item.duration) if getattr(item, "duration", None) is not None
+                     else None for item in runtimes]
+        if any(value is not None and (not np.isfinite(value) or value < 0)
+               for value in durations):
+            raise ValueError("completed reference interface has an invalid duration")
+        interface_times.append({"node": node.fullname,
+                                "interface": type(node.interface).__name__,
+                                "duration_seconds": durations})
     cifti_nodes = [node for node in graph.nodes if node.name == "gen_cifti"]
     masked_nodes = [node for node in graph.nodes if node.name == "mask_fsLR"]
     if len(cifti_nodes) != 1 or len(masked_nodes) != 2:
@@ -355,6 +369,10 @@ def worker(args):
                           "MNI": {"shape": list(mni.shape), "affine": mni.affine.tolist()}},
         "actual_template_resources": templates_before, "templates_unchanged": True,
         "input_files_unchanged": True, "workflow_wall_seconds": wall,
+        "completed_interface_timing_seconds": interface_times,
+        "interface_timing_boundary": "Native interface runtime duration; nested inside workflow wall time. "
+                                     "MapNode durations are per completed execution and must not be added "
+                                     "to workflow wall time.",
         "threads": args.threads, "execution_plugin": "Linear", "uses_gpu": False,
         "projection_output_checks": checks,
         "cifti_output_checks": {"shape": list(image.shape), "all_finite": True,

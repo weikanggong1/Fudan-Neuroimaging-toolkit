@@ -1,0 +1,37 @@
+{
+  "started_utc": "2026-10-02T18:46:27.588935+00:00",
+  "pid": 90248,
+  "threads": 2,
+  "staged": false,
+  "status": "failed",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "CUDA_MODULE_LOADING": null,
+    "CUDA_DEVICE_ORDER": null,
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "OMP_NUM_THREADS": "2",
+    "NUMBA_NUM_THREADS": "2",
+    "PYTHONPATH": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src"
+  },
+  "meminfo_before": "MemTotal:       1056253672 kB\nMemFree:         3849020 kB\nMemAvailable:   1011751424 kB\nBuffers:               0 kB\nCached:         997980164 kB\nSwapCached:            0 kB\nActive:         411269012 kB\nInactive:       608053196 kB\nActive(anon):   26041100 kB\nInactive(anon):  1393564 kB\nActive(file):   385227912 kB\nInactive(file): 606659632 kB\nUnevictable:           0 kB\nMlocked:               0 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nDirty:               436 kB\nWriteback:             0 kB\nAnonPages:      21347272 kB\nMapped:          1439488 kB\nShmem:           6088580 kB\nSlab:           19505204 kB\nSReclaimable:   17956160 kB\nSUnreclaim:      1549044 kB\nKernelStack:       46496 kB\nPageTables:       104588 kB\nNFS_Unstable:       1324 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    528126836 kB\nCommitted_AS:   140042548 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:     2281020 kB\nVmallocChunk:   33820401660 kB\nPercpu:            36352 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:    368640 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nDirectMap4k:    1031121528 kB\nDirectMap2M:    19175424 kB\nDirectMap1G:    25165824 kB\n",
+  "phase": "allocation",
+  "torch_version": "2.5.1",
+  "cuda_version": "11.8",
+  "cuda_initialized_before": false,
+  "allocator": {
+    "requested": "disabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "error": "RuntimeError('CUDA error: out of memory\\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\\n')",
+  "traceback": "Traceback (most recent call last):\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/coordinator/diagnose_cuda_bootstrap.py\", line 36, in child\n    report['phase']='allocation';x=torch.empty(1,dtype=torch.float32,device='cuda:0')\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+  "finished_utc": "2026-10-02T18:46:32.002882+00:00",
+  "seconds": 4.4138020179234445,
+  "exit_code": 1,
+  "meminfo_after": "MemTotal:       1056253672 kB\nMemFree:         3715964 kB\nMemAvailable:   1011541192 kB\nBuffers:               0 kB\nCached:         997900160 kB\nSwapCached:            0 kB\nActive:         411474584 kB\nInactive:       607982228 kB\nActive(anon):   26252416 kB\nInactive(anon):  1393572 kB\nActive(file):   385222168 kB\nInactive(file): 606588656 kB\nUnevictable:           0 kB\nMlocked:               0 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nDirty:              4608 kB\nWriteback:            28 kB\nAnonPages:      21557592 kB\nMapped:          2072844 kB\nShmem:           6088588 kB\nSlab:           19505892 kB\nSReclaimable:   17955704 kB\nSUnreclaim:      1550188 kB\nKernelStack:       46688 kB\nPageTables:       108176 kB\nNFS_Unstable:       2876 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    528126836 kB\nCommitted_AS:   140981856 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:     2281020 kB\nVmallocChunk:   33820401660 kB\nPercpu:            36352 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:    368640 kB\nCmaTotal:              0 kB\nCmaFree:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nDirectMap4k:    1031121528 kB\nDirectMap2M:    19175424 kB\nDirectMap1G:    25165824 kB\n"
+}

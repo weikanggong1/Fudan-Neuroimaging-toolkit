@@ -44,7 +44,8 @@ def test_bids_eddy_reuses_complete_stage_and_recomputes_after_input_change(
     subject = _subject(tmp_path / "freesurfer")
     calls = []
 
-    def prepare(raw, output, *, overwrite):
+    def prepare(raw, output, *, overwrite, device):
+        assert device == "cpu"
         calls.append("prepare")
         return {}
 
@@ -52,7 +53,8 @@ def test_bids_eddy_reuses_complete_stage_and_recomputes_after_input_change(
         def __init__(self, *, device):
             pass
 
-        def run(self, *, out, overwrite):
+        def run(self, *, out, overwrite, gp_seed):
+            assert gp_seed is None
             calls.append("eddy")
             out.parent.mkdir(parents=True, exist_ok=True)
             (out.parent / "data.nii.gz").write_bytes(b"corrected")
@@ -127,7 +129,7 @@ def test_bids_recon_all_runs_once_then_skips_completed_subject(tmp_path, monkeyp
     def run(command, *, check):
         commands.append(command)
         subject = _subject(tmp_path / "output/freesurfer/sub-01")
-        (subject / "scripts").mkdir()
+        (subject / "scripts").mkdir(exist_ok=True)
         (subject / "scripts/recon-all.done").write_text("done")
 
     monkeypatch.setattr(module.subprocess, "run", run)
@@ -136,6 +138,92 @@ def test_bids_recon_all_runs_once_then_skips_completed_subject(tmp_path, monkeyp
     second = prepare_bids_connectome(image.parents[2], tmp_path / "output", **options)
     assert first.stages["recon_all"] == "completed"
     assert second.stages["recon_all"] == "skipped"
+    t1.touch()
+    original = tmp_path / "output/freesurfer/sub-01/mri/orig/001.mgz"
+    original.parent.mkdir(parents=True)
+    original.write_bytes(b"orig")
+    with pytest.raises(ValueError, match="input changed"):
+        prepare_bids_connectome(image.parents[2], tmp_path / "output", **options)
     assert commands == [["/usr/bin/recon-all", "-sd",
                          str(tmp_path / "output/freesurfer"), "-s", "sub-01",
                          "-i", str(t1), "-all"]]
+
+@pytest.mark.parametrize("seed", [True, 0, -1, 2**32, 1.5])
+def test_bids_rejects_invalid_gp_seed_before_staging(tmp_path, seed):
+    with pytest.raises(ValueError, match="eddy_gp_seed"):
+        prepare_bids_connectome(tmp_path, tmp_path / "out", subject="01", eddy_gp_seed=seed)
+
+
+def test_fixed_gp_seed_invalidates_cached_eddy(tmp_path, monkeypatch):
+    import fnit.connectome.bids as module
+    image, _ = _inputs(tmp_path / "bids")
+    subject = _subject(tmp_path / "freesurfer")
+    seeds = []
+    monkeypatch.setattr(module, "_prepare_ap_only", lambda *a, **kw: {})
+    class Eddy:
+        def __init__(self, **kwargs): pass
+        def run(self, *, out, overwrite, gp_seed):
+            seeds.append(gp_seed)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            (out.parent / "data.nii.gz").write_bytes(b"corrected")
+            (out.parent / "data.eddy_rotated_bvecs").write_bytes(b"rotated")
+    monkeypatch.setattr(module, "TorchEDDY", Eddy)
+    options = dict(subject="01", freesurfer_subject_dir=subject, device="cpu")
+    for seed in [12345, 12345, 54321]:
+        prepare_bids_connectome(image.parents[2], tmp_path / "out", eddy_gp_seed=seed, **options)
+    assert seeds == [12345, 54321]
+
+
+def test_topup_selected_b0_is_reused_by_eddy(tmp_path, monkeypatch):
+    import fnit.connectome.bids as module
+    image, bvals = _inputs(tmp_path / "bids")
+    subject = _subject(tmp_path / "freesurfer")
+    selected = module.locate_bids_dwi(image.parents[2], subject="01", select_t1=False)
+    selected = SimpleNamespace(**{name: getattr(selected, name) for name in selected.__dataclass_fields__})
+    selected.reverse = image
+    selected.reverse_bval = bvals
+    selected.reverse_metadata = {"PhaseEncodingDirection": "j-", "TotalReadoutTime": .05}
+    monkeypatch.setattr(module, "locate_bids_dwi", lambda *a, **kw: selected)
+    def topup(raw, output, **kwargs):
+        output.mkdir(parents=True)
+        for name in ['fieldmap_out_fieldcoef.nii.gz', 'fieldmap_iout.nii.gz', 'acqparams.txt']:
+            (output / name).write_bytes(b"topup")
+        return None, {"ap_index": 0}
+    refs = []
+    monkeypatch.setattr(module, "run_ukb_topup", topup)
+    monkeypatch.setattr(module, "prepare_ukb_eddy", lambda *a, **kw: refs.append(kw['ref_scan_no']) or {})
+    class Eddy:
+        def __init__(self, **kw): pass
+        def run(self, *, out, **kw):
+            out.parent.mkdir(parents=True, exist_ok=True)
+            (out.parent / "data.nii.gz").write_bytes(b"dwi")
+            (out.parent / "data.eddy_rotated_bvecs").write_bytes(b"bvecs")
+    monkeypatch.setattr(module, "TorchEDDY", Eddy)
+    module.prepare_bids_connectome(image.parents[2], tmp_path / 'out', subject='01', freesurfer_subject_dir=subject)
+    assert refs == [0]
+
+
+def test_recon_partial_failure_resumes_only_same_t1(tmp_path, monkeypatch):
+    import fnit.connectome.bids as module
+    image, _ = _inputs(tmp_path / 'bids')
+    anatomy=image.parents[1]/'anat'; anatomy.mkdir()
+    t1=anatomy/'sub-01_T1w.nii.gz'
+    nib.save(nib.Nifti1Image(np.ones((6,6,6),np.float32),np.eye(4)),t1)
+    rotated=tmp_path/'rotated.bvec';rotated.write_text('0 1\n0 0\n0 0\n')
+    commands=[]
+    monkeypatch.setattr(module.shutil,'which',lambda cmd:'/fake/recon-all')
+    subject=tmp_path/'out/freesurfer/sub-01'
+    def run(command, *, check):
+        commands.append(command)
+        orig=subject/'mri/orig/001.mgz';orig.parent.mkdir(parents=True,exist_ok=True);orig.write_bytes(b'orig')
+        if len(commands)==1:raise module.subprocess.CalledProcessError(1,command)
+        _subject(subject);(subject/'scripts/recon-all.done').write_text('done')
+    monkeypatch.setattr(module.subprocess,'run',run)
+    options=dict(subject='01',corrected_dwi=image,rotated_bvecs=rotated)
+    with pytest.raises(module.subprocess.CalledProcessError):
+        prepare_bids_connectome(image.parents[2],tmp_path/'out',**options)
+    state=json.loads((subject/'scripts/fnit_input_state.json').read_text())
+    assert len(state['options']['t1_sha256'])==64
+    result=prepare_bids_connectome(image.parents[2],tmp_path/'out',**options)
+    assert result.stages['recon_all']=='completed'
+    assert '-i' in commands[0] and '-i' not in commands[1]

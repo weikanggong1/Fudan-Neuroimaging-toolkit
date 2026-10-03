@@ -1,0 +1,34 @@
+{
+  "status": "actual_two_pilot_100k_tracking_ABBA_accepted",
+  "precision": "five full array payloads in all six run pairs each pilot, shape/dtype/uint8 bits exact",
+  "audit_path": "/mnt/c/Users/admin/Documents/Codex/2026-09-27/new-chat-2/work/fnit-connectome-tenraw-20261002/coordination/tracking_two_pilot_root_audit_v1.json",
+  "audit_sha256": "13c8bd232ac2f9d431f4612d62f9f3ea8625f07e0abd1f63a5bb057a9b35d455",
+  "combined_source_cpu_test": {
+    "source": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_combined_tracking_cpu_v1",
+    "archive_sha256": "d96c86dc83efbb59eeea40fd1aa9f5842fdc8ffb439e7b9088dd55cf9b3acadb",
+    "test_argv": [
+      "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/connectome/test_tracking_sampling_context.py",
+      "tests/connectome/test_tracking_sh_precomputed.py",
+      "tests/connectome/test_tracking_act_seed.py",
+      "tests/connectome/test_act_seed_direction.py",
+      "tests/connectome/test_initial_directions.py",
+      "tests/connectome/test_tracking_collection.py",
+      "tests/connectome/test_response_fod_mrtrix.py"
+    ],
+    "returncode": 0,
+    "log": ".s.s.s.s.s.s.s..s.s.s.s.s.s..s.s.s.s..........                           [100%]\n29 passed, 17 skipped in 4.31s\n"
+  },
+  "adopted_optimization": "tracking c481 source hunks preserving earlier ordered CSD row reuse",
+  "throughput_adoption_evidence": {
+    "CON03_observed_reduction_percent": 18.750035073424552,
+    "CON03_scope": "same-input component ABBA on shared GPU, not isolated kernel or full raw pipeline gain",
+    "CON01_inference": "strict output bits passed; A2 background load varied strongly; 60.27 percent arithmetic difference not used as optimization speedup"
+  },
+  "formal_raw10_status": "not_started",
+  "wholechain_scientific_parity": "not_assessed",
+  "one_million_size_status": "only CON03 baseline A1 actual completed; full comparisons pending"
+}

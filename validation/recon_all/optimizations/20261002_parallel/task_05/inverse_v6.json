@@ -1,0 +1,410 @@
+{
+  "code_commit": "c160cdd59ad850824c42d4849b0b65a8a973788c",
+  "mode": "inverse",
+  "script_sha256": "a31e2e29cb9868cd1d7577f6f89ee7c59e99bda303a5d3cb7c21ee8cc4615e5e",
+  "early_cuda_prime_diagnostic": true,
+  "operator_tolerance_predeclared": {
+    "strict": "zero different numerical elements; geometry exact",
+    "forward_diagnostic_mm": 0.0001,
+    "inverse": "zero different numerical elements on identical forward",
+    "check": "zero different voxels on identical forward",
+    "overall_equivalence": "not_assessed"
+  },
+  "threads": 4,
+  "torch": "2.5.1",
+  "dtype": "FP32 fields; FP64 native matrix accumulation and stop tests",
+  "tf32_matmul": false,
+  "tf32_cudnn": true,
+  "pid": 38262,
+  "cpu_load_before": [
+    33.18,
+    34.72,
+    35.55
+  ],
+  "cases": {
+    "sub01": {
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz": "54d06a2131ebe11f78a335c1d18b9bae7d78f8bfe7024717d783b48873649a24",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": "a9f8cbce4d6511f134c047bb54e6e9f10719407c96abbf6fadfcd6d71837b9cf",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/orig.mgz": "15dacae9cec18aec4f0f7dfe3a5ccd5a8dfe83e16111fdc700621e3abc54c2a2",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "4a38fed518e638466ac7092793a759401bc856f4ef62b8b215c69b6199a427c0",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz": "751a6556be9a4fc3e8dbfb40bce2bcbd11a644069c53d59b1d119b792a156787",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-invol.lta": "43a15c2b23fe28f7a25fc000d5b31415e80274638110f39c544584c37652d1e4",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-full.lta": "0aa7a34ed0c52da4b4d6271c6842372af90dba68e955105540945715a98c844c"
+      },
+      "comparisons": {
+        "inverse_gpu_vs_frozen": {
+          "different_elements": 0,
+          "elements": 50331648,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            256,
+            256,
+            256,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "a9f8cbce4d6511f134c047bb54e6e9f10719407c96abbf6fadfcd6d71837b9cf",
+          "sha256_right": "a9f8cbce4d6511f134c047bb54e6e9f10719407c96abbf6fadfcd6d71837b9cf"
+        },
+        "inverse_cold_vs_warm": {
+          "different_elements": 0,
+          "elements": 50331648,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            256,
+            256,
+            256,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "a9f8cbce4d6511f134c047bb54e6e9f10719407c96abbf6fadfcd6d71837b9cf",
+          "sha256_right": "a9f8cbce4d6511f134c047bb54e6e9f10719407c96abbf6fadfcd6d71837b9cf"
+        }
+      },
+      "timings": {
+        "inverse_gpu_cold": {
+          "voronoi_iterations": 91,
+          "soap_iterations_xyz": [
+            50,
+            50,
+            50
+          ],
+          "splat": "ordered CPU Numba FP32 (no atomics)",
+          "fill": "CUDA Triton ordered FP32; FP64 stopping test",
+          "timings_seconds": {
+            "load_convert_ordered_splat": 3.1492494991980493,
+            "transfer_fill_soap_download": 15.936178005300462,
+            "displacement_conversion": 4.268598794005811,
+            "save": 11.432996035553515
+          },
+          "total_seconds": 34.81915342528373,
+          "device": "cuda:0",
+          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/inverse_v6/sub01/inverse_cold.nii.gz",
+          "full_grid": true
+        },
+        "inverse_gpu_warm": {
+          "voronoi_iterations": 91,
+          "soap_iterations_xyz": [
+            50,
+            50,
+            50
+          ],
+          "splat": "ordered CPU Numba FP32 (no atomics)",
+          "fill": "CUDA Triton ordered FP32; FP64 stopping test",
+          "timings_seconds": {
+            "load_convert_ordered_splat": 2.839914103038609,
+            "transfer_fill_soap_download": 0.5198632483370602,
+            "displacement_conversion": 4.3388628088869154,
+            "save": 11.53954027313739
+          },
+          "total_seconds": 19.27299515902996,
+          "device": "cuda:0",
+          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/inverse_v6/sub01/inverse_warm.nii.gz",
+          "full_grid": true
+        }
+      },
+      "residual_gpu": {
+        "full_grid": {
+          "maximum_mm": 243.19094848632812,
+          "p99_mm": 127.4472370147705,
+          "mean_mm": 42.951229095458984,
+          "over_0_1_mm": 14235653,
+          "voxels": 16777216
+        },
+        "brain": {
+          "maximum_mm": 11.080381393432617,
+          "p99_mm": 0.2560411748290059,
+          "mean_mm": 0.06979768723249435,
+          "over_0_1_mm": 145947,
+          "voxels": 1269264
+        },
+        "maximum_index": [
+          0,
+          0,
+          1
+        ],
+        "maximum_in_brain": false,
+        "inverse_sample_outside_forward_grid": 0,
+        "excluded_voxels": 0,
+        "bin_0_1_mm_is_diagnostic_only": true
+      },
+      "residual_frozen": {
+        "full_grid": {
+          "maximum_mm": 243.19094848632812,
+          "p99_mm": 127.4472370147705,
+          "mean_mm": 42.951229095458984,
+          "over_0_1_mm": 14235653,
+          "voxels": 16777216
+        },
+        "brain": {
+          "maximum_mm": 11.080381393432617,
+          "p99_mm": 0.2560411748290059,
+          "mean_mm": 0.06979768723249435,
+          "over_0_1_mm": 145947,
+          "voxels": 1269264
+        },
+        "maximum_index": [
+          0,
+          0,
+          1
+        ],
+        "maximum_in_brain": false,
+        "inverse_sample_outside_forward_grid": 0,
+        "excluded_voxels": 0,
+        "bin_0_1_mm_is_diagnostic_only": true
+      },
+      "cpu_load_after": [
+        38.06,
+        35.63,
+        35.78
+      ],
+      "torch_memory_status": "unavailable_disabled_allocator",
+      "torch_peak_allocated": null,
+      "torch_peak_reserved": null
+    },
+    "sub02": {
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz": "83a5558f5d218ff8615196a7e120ec46badb3c973e816d9968775154584810f5",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": "da0fbc6d0c9f99bdcb693cd459f518d680395e3ce090d51d5f345b497f055e85",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/orig.mgz": "5c7cac921ddd29876e400cf241fa259d1ac239f9d8189e5ffb37a7d463265a9f",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "be676f9794dead459246e27f1e5834c1b078ebc6c4cfdde9b0db92b79b3fec21",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz": "41233afd190c45a261cfab471d570d66c03aafa2dd26c77afdfbfe661e18a61c",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-invol.lta": "bb10c722a1626dd555f4b4e81d651e76e806b7124c07d0f2803210ec1cc319b6",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-full.lta": "0aa7a34ed0c52da4b4d6271c6842372af90dba68e955105540945715a98c844c"
+      },
+      "comparisons": {
+        "inverse_gpu_vs_frozen": {
+          "different_elements": 0,
+          "elements": 50331648,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            256,
+            256,
+            256,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "da0fbc6d0c9f99bdcb693cd459f518d680395e3ce090d51d5f345b497f055e85",
+          "sha256_right": "da0fbc6d0c9f99bdcb693cd459f518d680395e3ce090d51d5f345b497f055e85"
+        },
+        "inverse_cold_vs_warm": {
+          "different_elements": 0,
+          "elements": 50331648,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            256,
+            256,
+            256,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "da0fbc6d0c9f99bdcb693cd459f518d680395e3ce090d51d5f345b497f055e85",
+          "sha256_right": "da0fbc6d0c9f99bdcb693cd459f518d680395e3ce090d51d5f345b497f055e85"
+        }
+      },
+      "timings": {
+        "inverse_gpu_cold": {
+          "voronoi_iterations": 73,
+          "soap_iterations_xyz": [
+            50,
+            50,
+            50
+          ],
+          "splat": "ordered CPU Numba FP32 (no atomics)",
+          "fill": "CUDA Triton ordered FP32; FP64 stopping test",
+          "timings_seconds": {
+            "load_convert_ordered_splat": 2.8890530350618064,
+            "transfer_fill_soap_download": 1.4179702899418771,
+            "displacement_conversion": 4.524892374873161,
+            "save": 13.466409301850945
+          },
+          "total_seconds": 22.335556446108967,
+          "device": "cuda:0",
+          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/inverse_v6/sub02/inverse_cold.nii.gz",
+          "full_grid": true
+        },
+        "inverse_gpu_warm": {
+          "voronoi_iterations": 73,
+          "soap_iterations_xyz": [
+            50,
+            50,
+            50
+          ],
+          "splat": "ordered CPU Numba FP32 (no atomics)",
+          "fill": "CUDA Triton ordered FP32; FP64 stopping test",
+          "timings_seconds": {
+            "load_convert_ordered_splat": 2.885674470104277,
+            "transfer_fill_soap_download": 0.6613656538538635,
+            "displacement_conversion": 4.512105617672205,
+            "save": 13.064954191911966
+          },
+          "total_seconds": 21.162687350064516,
+          "device": "cuda:0",
+          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/inverse_v6/sub02/inverse_warm.nii.gz",
+          "full_grid": true
+        }
+      },
+      "residual_gpu": {
+        "full_grid": {
+          "maximum_mm": 201.52195739746094,
+          "p99_mm": 100.1673355102539,
+          "mean_mm": 34.45664978027344,
+          "over_0_1_mm": 13851124,
+          "voxels": 16777216
+        },
+        "brain": {
+          "maximum_mm": 4.8967366218566895,
+          "p99_mm": 0.26975966602563817,
+          "mean_mm": 0.068674236536026,
+          "over_0_1_mm": 190816,
+          "voxels": 1478712
+        },
+        "maximum_index": [
+          0,
+          1,
+          0
+        ],
+        "maximum_in_brain": false,
+        "inverse_sample_outside_forward_grid": 0,
+        "excluded_voxels": 0,
+        "bin_0_1_mm_is_diagnostic_only": true
+      },
+      "residual_frozen": {
+        "full_grid": {
+          "maximum_mm": 201.52195739746094,
+          "p99_mm": 100.1673355102539,
+          "mean_mm": 34.45664978027344,
+          "over_0_1_mm": 13851124,
+          "voxels": 16777216
+        },
+        "brain": {
+          "maximum_mm": 4.8967366218566895,
+          "p99_mm": 0.26975966602563817,
+          "mean_mm": 0.068674236536026,
+          "over_0_1_mm": 190816,
+          "voxels": 1478712
+        },
+        "maximum_index": [
+          0,
+          1,
+          0
+        ],
+        "maximum_in_brain": false,
+        "inverse_sample_outside_forward_grid": 0,
+        "excluded_voxels": 0,
+        "bin_0_1_mm_is_diagnostic_only": true
+      },
+      "cpu_load_after": [
+        40.21,
+        36.64,
+        36.12
+      ],
+      "torch_memory_status": "unavailable_disabled_allocator",
+      "torch_peak_allocated": null,
+      "torch_peak_reserved": null
+    }
+  },
+  "source_sha256": {
+    "mni_warp_inverse.py": "bba7ece7d49a07c909b3123ac1339f362b96b8a71b4d7358096b4be9cceb758c",
+    "ca_register_inverse.py": "f1c694f154376bcc6b74c37b91cb97f58da70464d30333444dd7d3df1b0f4227",
+    "mni_warp_kernels.py": "4fef5d84da94e1e5b81b1e1bb11aa7e5d14024117de05d07df4632cd853d69e8",
+    "mni_warp_io.py": "72f5c005131605508f35a6475139c155860f65c70bc340a0a544e7820446f6cd",
+    "mni_warp_postprocess.py": "dd5f3e298810ca6b361ee0472cbf0478930552e73bd3ad571c6d142212947ffd",
+    "ca_register_inverse_fill.py": "4154457be88a77e1aac4e06d94babcb9716006a3dc704a7bcfe2c6a859dcd395",
+    "mni_warp_sampling.py": "5e7604b6903aa96b94c3e8afdc4b7d10197ecd2928fe340cb60974f3b3fa627b",
+    "ca_register_inverse_output.py": "29d4280a8698631908b38a128ce2945bfcb7002789ed3f569142b9a1518551c2"
+  }
+}

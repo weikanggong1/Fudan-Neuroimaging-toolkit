@@ -319,6 +319,7 @@ def _run_connectome(args):
             freesurfer_subject_dir=args.freesurfer_subject_dir,
             corrected_dwi=args.corrected_dwi,
             rotated_bvecs=args.rotated_bvecs,
+            eddy_gp_seed=args.eddy_gp_seed,
             device=args.device, overwrite=args.overwrite,
         )
         args.dwi, args.bvals, args.bvecs = selected.dwi, selected.bvals, selected.bvecs
@@ -443,6 +444,7 @@ def _run_connectome(args):
         run_key = _fingerprint(tuple(inputs), {
             "fnit_version": __version__, "atlas": list(atlas_names),
             "n_seeds": args.n_seeds, "seed": args.seed, "device": args.device,
+            "eddy_gp_seed": args.eddy_gp_seed,
             "shell_bvals": args.shell_bvals, "compile_arc": args.compile_arc,
         })
         if not args.overwrite and _reusable(run_state, run_key, output_paths):
@@ -799,6 +801,8 @@ def main(argv=None):
                             help='existing corrected DWI for BIDS mode; requires --rotated-bvecs')
     connectome.add_argument('--rotated-bvecs',
                             help='eddy-rotated FSL bvecs for --corrected-dwi')
+    connectome.add_argument('--eddy-gp-seed', type=int,
+                            help='fixed EDDY GP sampling seed (1..2**32-1); independent of tracking --seed; default time-based')
     connectome.add_argument('--dwi', help='corrected 4D DWI NIfTI in explicit mode')
     connectome.add_argument('--bvals')
     connectome.add_argument('--bvecs', help='eddy-rotated FSL bvecs in explicit mode')

@@ -80,6 +80,22 @@ def _tracking_sh_table(lmax: int, device: torch.device) -> torch.Tensor:
     return table
 
 
+
+@lru_cache(maxsize=8)
+def _tracking_sh_indices(lmax: int, device: torch.device):
+    """Cache coefficient columns without changing SH recurrence or ordering."""
+    centres = torch.tensor([l * (l - 1) // 2 + l
+                            for l in range(0, lmax + 1, 2)],
+                           dtype=torch.long, device=device)
+    orders = []
+    for m in range(1, lmax + 1):
+        positive = torch.tensor([l * (l - 1) // 2 + l + m
+                                 for l in range(m + (m & 1), lmax + 1, 2)],
+                                dtype=torch.long, device=device)
+        orders.append((positive, positive - 2 * m))
+    return centres, tuple(orders)
+
+
 def tracking_sh_precomputed(directions: torch.Tensor, lmax: int = 8) -> torch.Tensor:
     """Evaluate tracking SH via MRtrix iFOD2's 512-elevation lookup rule.
 
@@ -106,18 +122,16 @@ def tracking_sh_precomputed(directions: torch.Tensor, lmax: int = 8) -> torch.Te
     cosine = torch.where(radius > 0, unit[:, 0] / radius.clamp_min(1e-20), 1)
     sine = torch.where(radius > 0, unit[:, 1] / radius.clamp_min(1e-20), 0)
     output = torch.zeros_like(basis)
-    for l in range(0, lmax + 1, 2):
-        index = l * (l - 1) // 2 + l
-        output[:, index] = basis[:, index]
+    centres, orders = _tracking_sh_indices(lmax, unit.device)
+    output.index_copy_(1, centres, basis.index_select(1, centres))
     cos_m = torch.ones_like(cosine)
     sin_m = torch.zeros_like(sine)
-    for m in range(1, lmax + 1):
+    for positive, negative in orders:
         next_cos = cos_m * cosine - sin_m * sine
         next_sin = sin_m * cosine + cos_m * sine
-        for l in range(m + (m & 1), lmax + 1, 2):
-            index = l * (l - 1) // 2 + l + m
-            output[:, index] = basis[:, index] * next_cos
-            output[:, index - 2 * m] = basis[:, index] * next_sin
+        values = basis.index_select(1, positive)
+        output.index_copy_(1, positive, values * next_cos[:, None])
+        output.index_copy_(1, negative, values * next_sin[:, None])
         cos_m, sin_m = next_cos, next_sin
     return output.reshape(*shape, -1)
 
@@ -322,7 +336,10 @@ def _mrtrix_icls_batch(
         if not bool(step.any()):
             break
         was_active = active[rows, index]
-        active[rows[step], index[step]] = True
+        # Reuse ordered integer indices: boolean indexing otherwise repeats
+        # nonzero (and CUDA host synchronisation) for the same selection.
+        step_rows = torch.nonzero(step, as_tuple=True)[0]
+        active[step_rows, index[step_rows]] = True
         changed = step & ~was_active
         pending = step.clone()
         for _ in range(constraints.shape[0] + 1):
@@ -347,19 +364,21 @@ def _mrtrix_icls_batch(
             negative = (multipliers < 0) & valid & pending[:, None]
             needs_removal = negative.any(dim=1)
             completed = pending & ~needs_removal
-            if bool(completed.any()):
-                solution[completed] = (
-                    y[completed]
-                    + (selected_rows[completed].transpose(1, 2)
-                       @ multipliers[completed, :, None]).squeeze(-1)
+            completed_rows = torch.nonzero(completed, as_tuple=True)[0]
+            if completed_rows.numel():
+                solution[completed_rows] = (
+                    y[completed_rows]
+                    + (selected_rows[completed_rows].transpose(1, 2)
+                       @ multipliers[completed_rows, :, None]).squeeze(-1)
                 )
-                updated = torch.zeros_like(prior_multipliers[completed])
+                updated = torch.zeros_like(prior_multipliers[completed_rows])
                 updated.scatter_add_(
-                    1, selected[completed],
-                    multipliers[completed] * valid[completed],
+                    1, selected[completed_rows],
+                    multipliers[completed_rows] * valid[completed_rows],
                 )
-                prior_multipliers[completed] = updated
-            if bool(needs_removal.any()):
+                prior_multipliers[completed_rows] = updated
+            removal_rows = torch.nonzero(needs_removal, as_tuple=True)[0]
+            if removal_rows.numel():
                 prior = prior_multipliers.gather(1, selected)
                 ratio = torch.where(
                     negative,
@@ -368,7 +387,7 @@ def _mrtrix_icls_batch(
                 )
                 remove = ratio.argmin(dim=1)
                 constraint_to_remove = selected.gather(1, remove[:, None]).squeeze(1)
-                active[rows[needs_removal], constraint_to_remove[needs_removal]] = False
+                active[removal_rows, constraint_to_remove[removal_rows]] = False
                 changed |= needs_removal
             pending = needs_removal
         else:

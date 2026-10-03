@@ -1,0 +1,152 @@
+{
+  "profile": {
+    "kind": "independent_official_fnit_mask_definitions",
+    "brain_mask": "own official corrected DWI b<50 mean; LAS FSL BET -m -f0.2 -g-0.05 -R; native-grid return",
+    "response_mask": "pinned MRtrix3.0.3 dwi2mask legacy default on own corrected DWI",
+    "FOD_mask": "official BET brain mask, six-neighbour dilation2",
+    "normalise_mask": "official BET brain mask, six-neighbour erosion2",
+    "shells": "own official mrinfo shell clustering; bvalue_scaling no; exported rotated FSL gradients",
+    "WM_lmax": 8,
+    "GM_CSF_lmax": 0,
+    "DTI_predicted_iterations": 2,
+    "normalise_order": 3,
+    "normalise_iterations": [
+      15,
+      7
+    ],
+    "normalise_reference": 0.28209479177,
+    "normalise_balanced": false,
+    "response_lmax": "pinned Dhollander defaults matching frozen response shape; actual response tables retained",
+    "comparison_scope": "independent stage lineage with matching parameter/mask definitions, not matching mask voxel values or isolated solver inputs",
+    "upstream_EDDY_solver": "official FSL eddy_cpu, GPU_UUID=null; CPU wall separate from failed GPU attempts"
+  },
+  "manifest": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/final_manifest.json",
+  "manifest_sha256": "d707f7a990372e50fb27de0023b2cddfc4eb74c7e5cdd9d909e41b90c2fa1b88",
+  "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+  "upstream_discovery_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01",
+  "output_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1",
+  "mrtrix_bin": "/public/software/apps/MRtrix3/3.0.3/bin",
+  "fsl_root": "/public/software/apps/FSL/6.0.7.4",
+  "forbidden_input_roots": [
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/reference_eddy_gpu_CON03",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/reference_eddy_cpu_CON03",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/results",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_baseline_raw_v2"
+  ],
+  "subjects": [
+    {
+      "subject": "CON01",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/report.json",
+      "binding_ready": true,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": {
+        "ap_index": 76,
+        "pa_index": 0
+      }
+    },
+    {
+      "subject": "CON03",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/report.json",
+      "binding_ready": true,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": {
+        "ap_index": 0,
+        "pa_index": 0
+      }
+    },
+    {
+      "subject": "CON04",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/report.json",
+      "binding_ready": true,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": {
+        "ap_index": 26,
+        "pa_index": 0
+      }
+    },
+    {
+      "subject": "CON05",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/report.json",
+      "binding_ready": true,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": {
+        "ap_index": 26,
+        "pa_index": 0
+      }
+    },
+    {
+      "subject": "CON06",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/report.json",
+      "binding_ready": true,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": {
+        "ap_index": 0,
+        "pa_index": 0
+      }
+    },
+    {
+      "subject": "CON07",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/report.json",
+      "binding_ready": true,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": {
+        "ap_index": 0,
+        "pa_index": 0
+      }
+    },
+    {
+      "subject": "CON08",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/report.json",
+      "binding_ready": false,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": null
+    },
+    {
+      "subject": "CON09",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/report.json",
+      "binding_ready": false,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": null
+    },
+    {
+      "subject": "CON10",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/report.json",
+      "binding_ready": false,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": null
+    },
+    {
+      "subject": "CON11",
+      "ready_contract": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON11/report.json",
+      "binding_ready": false,
+      "expected_upstream_solver": "cpu",
+      "upstream_runner_sha256": "b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a",
+      "expected_selection": null
+    }
+  ],
+  "raw_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw",
+  "binding_note": "Actual budget CPU producer, activation SHA and six source-confirmed raw AP/PA frames pinned; CON08\u201311 pending actual bindings. Only true completed report+verified sidecar trigger modeling. Restored successful own TOPUP/SS lineage preserved; no uninterrupted raw total claimed. Pending CON08\u201311: promote only using same explicit producer true verified completed contract and independently validated raw/actual formal packing, persist write-once immutable alignment sidecar; frozen config unchanged at runtime.",
+  "expected_upstream_solver": "cpu",
+  "CPU_fallback_activation_report": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/activation.json",
+  "previous_modeling_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_raw10_v2",
+  "upstream_activation_format": "official_CPU_budget_reference_v1",
+  "upstream_activation_sha256": "e96b0a2f00c9cebaf6ac6787380e492810cc6d3ec68dc37095fed373ec4b4248",
+  "upstream_runner_path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_cpu_budget_tools_v1/run_cpu_budget_reference.py",
+  "GPU_budget_evidence_path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/v2_GPU_budget_termination_evidence.json",
+  "activation_policy": "explicit_authorized_GPU_budget_stop_CPU_reference",
+  "explicit_CPU_budget_reference_authorization": true,
+  "upstream_producer_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1",
+  "approved_restored_heldout_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2",
+  "formal_FNIT_packing_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_baseline_common_v3_raw_rerun_v1/baseline",
+  "pending_alignment_binding_root": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/CPU_budget_pending_alignment_bindings_v1"
+}

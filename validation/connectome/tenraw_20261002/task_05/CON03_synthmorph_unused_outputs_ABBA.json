@@ -1,0 +1,621 @@
+{
+  "scope": "new CON03 official FS brain SynthMorph/Tian component ABBA; not raw full pipeline wall",
+  "tolerance": {
+    "warp_neq": 0,
+    "warp_max_abs": 0.0,
+    "label_neq": 0,
+    "affine_equal": true,
+    "dtype_equal": true,
+    "speed_criterion": "candidate registration_seconds faster in both AB and BA pairs; model+registration mean faster"
+  },
+  "runs": [
+    {
+      "arm": "baseline",
+      "verified_weights": {
+        "synthmorph.affine.2.h5": {
+          "size": 51455312,
+          "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+        },
+        "synthmorph.deform.3.h5": {
+          "size": 3508630424,
+          "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"
+        }
+      },
+      "inputs": {
+        "t1": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/baseline/sub-CON03/freesurfer/sub-CON03_ses-preop/mri/brain.mgz",
+          "sha256": "c9c08a9b6ab598470c4be816564c99e98e635ed2726e2a570577d174256b50a8"
+        },
+        "mni": {
+          "path": "/cwStorage/home/gongwk/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz",
+          "sha256": "09c925ad165dfbe6b41b572876d67e9bbf8c5e26517e7817f9b43a8256227f53"
+        },
+        "tian_s1": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S1_3T.nii.gz",
+          "sha256": "5a6ab101308a7d8582fe8335c97a41296974656aaae8efa6833c7796c0061e08"
+        },
+        "tian_s4": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S4_3T.nii.gz",
+          "sha256": "15930ca9cf9551a4b34875589588d0c24c0a704f0a14eb983c2b05131c3976e1"
+        }
+      },
+      "sources": {
+        "src/fnit/synthmorph/pipeline.py": "bc3681a7693eb97cf6fddbdb4eb1deb4db343319443f2a92c00ae70383d975cc",
+        "src/fnit/synthmorph/models.py": "8ff86d8d7afb64d57d5edebc1138f24631d2aab6f47c0f978f53586c80a08cd6"
+      },
+      "benchmark_sha256": "f67f677cd6a48c585fe2f47b22fb97f9ce78a80b611b20cf5375da07d74659d4",
+      "torch_version": "2.5.1",
+      "threads": 8,
+      "allocator": "1",
+      "torch_memory_stats_valid": false,
+      "parameters": {
+        "model": "joint",
+        "extent": 256,
+        "hyper": 0.5,
+        "steps": 7,
+        "device": "cuda:0",
+        "dtype": "float32",
+        "TF32": true,
+        "autocast": false
+      },
+      "timing_scope": "model load and registration synchronized; image files opened before timer, voxel decoding/H2D inside call included; hashes/write excluded; CPU NN separately timed",
+      "gpu_state_before": [
+        "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 0, 813",
+        "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 0, 813"
+      ],
+      "model_load_seconds": 9.970813747961074,
+      "registration_seconds": 3.0544585580937564,
+      "registration_with_model_load_seconds": 13.02527230605483,
+      "precision": [
+        {
+          "model": "joint",
+          "compute_inverse": true,
+          "device": "cuda:0",
+          "input_dtype": "torch.float32",
+          "model_devices": [
+            "cuda:0"
+          ],
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "cudnn_enabled": true,
+          "cudnn_benchmark": false,
+          "cudnn_deterministic": false,
+          "autocast": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        }
+      ],
+      "omitted_outputs": {
+        "inverse": false,
+        "moved": false,
+        "fixed_moved": false
+      },
+      "NN_cpu_seconds": {
+        "s1": 0.9794728942215443,
+        "s4": 0.9722418952733278
+      },
+      "torch_peak_bytes": {
+        "allocated": 0,
+        "reserved": 0
+      },
+      "nvml": {
+        "peak_process_bytes": 11031019520,
+        "samples": 62,
+        "failures": [],
+        "gpu_uuids": [
+          "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+        ],
+        "max_interval_seconds": 0.6703316736966372
+      },
+      "gpu_state_after": [
+        "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 0, 813",
+        "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 0, 2838"
+      ],
+      "other_processes_on_target_gpu_peak_bytes": 843055104,
+      "shared_gpu_timing_contaminated": true,
+      "memory_budget_passed": true
+    },
+    {
+      "arm": "candidate",
+      "verified_weights": {
+        "synthmorph.affine.2.h5": {
+          "size": 51455312,
+          "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+        },
+        "synthmorph.deform.3.h5": {
+          "size": 3508630424,
+          "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"
+        }
+      },
+      "inputs": {
+        "t1": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/baseline/sub-CON03/freesurfer/sub-CON03_ses-preop/mri/brain.mgz",
+          "sha256": "c9c08a9b6ab598470c4be816564c99e98e635ed2726e2a570577d174256b50a8"
+        },
+        "mni": {
+          "path": "/cwStorage/home/gongwk/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz",
+          "sha256": "09c925ad165dfbe6b41b572876d67e9bbf8c5e26517e7817f9b43a8256227f53"
+        },
+        "tian_s1": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S1_3T.nii.gz",
+          "sha256": "5a6ab101308a7d8582fe8335c97a41296974656aaae8efa6833c7796c0061e08"
+        },
+        "tian_s4": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S4_3T.nii.gz",
+          "sha256": "15930ca9cf9551a4b34875589588d0c24c0a704f0a14eb983c2b05131c3976e1"
+        }
+      },
+      "sources": {
+        "src/fnit/synthmorph/pipeline.py": "bc3681a7693eb97cf6fddbdb4eb1deb4db343319443f2a92c00ae70383d975cc",
+        "src/fnit/synthmorph/models.py": "8ff86d8d7afb64d57d5edebc1138f24631d2aab6f47c0f978f53586c80a08cd6"
+      },
+      "benchmark_sha256": "f67f677cd6a48c585fe2f47b22fb97f9ce78a80b611b20cf5375da07d74659d4",
+      "torch_version": "2.5.1",
+      "threads": 8,
+      "allocator": "1",
+      "torch_memory_stats_valid": false,
+      "parameters": {
+        "model": "joint",
+        "extent": 256,
+        "hyper": 0.5,
+        "steps": 7,
+        "device": "cuda:0",
+        "dtype": "float32",
+        "TF32": true,
+        "autocast": false
+      },
+      "timing_scope": "model load and registration synchronized; image files opened before timer, voxel decoding/H2D inside call included; hashes/write excluded; CPU NN separately timed",
+      "gpu_state_before": [
+        "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 0, 813",
+        "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 0, 813"
+      ],
+      "model_load_seconds": 5.138328725937754,
+      "registration_seconds": 4.161311621777713,
+      "registration_with_model_load_seconds": 9.299640347715467,
+      "precision": [
+        {
+          "model": "joint",
+          "compute_inverse": false,
+          "device": "cuda:0",
+          "input_dtype": "torch.float32",
+          "model_devices": [
+            "cuda:0"
+          ],
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "cudnn_enabled": true,
+          "cudnn_benchmark": false,
+          "cudnn_deterministic": false,
+          "autocast": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        }
+      ],
+      "omitted_outputs": {
+        "inverse": true,
+        "moved": true,
+        "fixed_moved": true
+      },
+      "NN_cpu_seconds": {
+        "s1": 1.0529849277809262,
+        "s4": 1.0171347977593541
+      },
+      "torch_peak_bytes": {
+        "allocated": 0,
+        "reserved": 0
+      },
+      "nvml": {
+        "peak_process_bytes": 11031019520,
+        "samples": 45,
+        "failures": [],
+        "gpu_uuids": [
+          "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+        ],
+        "max_interval_seconds": 1.4833633890375495
+      },
+      "gpu_state_after": [
+        "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 0, 813",
+        "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 0, 2838"
+      ],
+      "other_processes_on_target_gpu_peak_bytes": 843055104,
+      "shared_gpu_timing_contaminated": true,
+      "memory_budget_passed": true
+    },
+    {
+      "arm": "candidate",
+      "verified_weights": {
+        "synthmorph.affine.2.h5": {
+          "size": 51455312,
+          "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+        },
+        "synthmorph.deform.3.h5": {
+          "size": 3508630424,
+          "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"
+        }
+      },
+      "inputs": {
+        "t1": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/baseline/sub-CON03/freesurfer/sub-CON03_ses-preop/mri/brain.mgz",
+          "sha256": "c9c08a9b6ab598470c4be816564c99e98e635ed2726e2a570577d174256b50a8"
+        },
+        "mni": {
+          "path": "/cwStorage/home/gongwk/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz",
+          "sha256": "09c925ad165dfbe6b41b572876d67e9bbf8c5e26517e7817f9b43a8256227f53"
+        },
+        "tian_s1": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S1_3T.nii.gz",
+          "sha256": "5a6ab101308a7d8582fe8335c97a41296974656aaae8efa6833c7796c0061e08"
+        },
+        "tian_s4": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S4_3T.nii.gz",
+          "sha256": "15930ca9cf9551a4b34875589588d0c24c0a704f0a14eb983c2b05131c3976e1"
+        }
+      },
+      "sources": {
+        "src/fnit/synthmorph/pipeline.py": "bc3681a7693eb97cf6fddbdb4eb1deb4db343319443f2a92c00ae70383d975cc",
+        "src/fnit/synthmorph/models.py": "8ff86d8d7afb64d57d5edebc1138f24631d2aab6f47c0f978f53586c80a08cd6"
+      },
+      "benchmark_sha256": "f67f677cd6a48c585fe2f47b22fb97f9ce78a80b611b20cf5375da07d74659d4",
+      "torch_version": "2.5.1",
+      "threads": 8,
+      "allocator": "1",
+      "torch_memory_stats_valid": false,
+      "parameters": {
+        "model": "joint",
+        "extent": 256,
+        "hyper": 0.5,
+        "steps": 7,
+        "device": "cuda:0",
+        "dtype": "float32",
+        "TF32": true,
+        "autocast": false
+      },
+      "timing_scope": "model load and registration synchronized; image files opened before timer, voxel decoding/H2D inside call included; hashes/write excluded; CPU NN separately timed",
+      "gpu_state_before": [
+        "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 0, 813",
+        "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 0, 813"
+      ],
+      "model_load_seconds": 4.92633482022211,
+      "registration_seconds": 2.17719272011891,
+      "registration_with_model_load_seconds": 7.10352754034102,
+      "precision": [
+        {
+          "model": "joint",
+          "compute_inverse": false,
+          "device": "cuda:0",
+          "input_dtype": "torch.float32",
+          "model_devices": [
+            "cuda:0"
+          ],
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "cudnn_enabled": true,
+          "cudnn_benchmark": false,
+          "cudnn_deterministic": false,
+          "autocast": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        }
+      ],
+      "omitted_outputs": {
+        "inverse": true,
+        "moved": true,
+        "fixed_moved": true
+      },
+      "NN_cpu_seconds": {
+        "s1": 0.9277652706950903,
+        "s4": 0.968103997875005
+      },
+      "torch_peak_bytes": {
+        "allocated": 0,
+        "reserved": 0
+      },
+      "nvml": {
+        "peak_process_bytes": 11031019520,
+        "samples": 41,
+        "failures": [],
+        "gpu_uuids": [
+          "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+        ],
+        "max_interval_seconds": 0.731565766967833
+      },
+      "gpu_state_after": [
+        "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 0, 813",
+        "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 0, 2838"
+      ],
+      "other_processes_on_target_gpu_peak_bytes": 843055104,
+      "shared_gpu_timing_contaminated": true,
+      "memory_budget_passed": true
+    },
+    {
+      "arm": "baseline",
+      "verified_weights": {
+        "synthmorph.affine.2.h5": {
+          "size": 51455312,
+          "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+        },
+        "synthmorph.deform.3.h5": {
+          "size": 3508630424,
+          "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"
+        }
+      },
+      "inputs": {
+        "t1": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/baseline/sub-CON03/freesurfer/sub-CON03_ses-preop/mri/brain.mgz",
+          "sha256": "c9c08a9b6ab598470c4be816564c99e98e635ed2726e2a570577d174256b50a8"
+        },
+        "mni": {
+          "path": "/cwStorage/home/gongwk/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz",
+          "sha256": "09c925ad165dfbe6b41b572876d67e9bbf8c5e26517e7817f9b43a8256227f53"
+        },
+        "tian_s1": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S1_3T.nii.gz",
+          "sha256": "5a6ab101308a7d8582fe8335c97a41296974656aaae8efa6833c7796c0061e08"
+        },
+        "tian_s4": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S4_3T.nii.gz",
+          "sha256": "15930ca9cf9551a4b34875589588d0c24c0a704f0a14eb983c2b05131c3976e1"
+        }
+      },
+      "sources": {
+        "src/fnit/synthmorph/pipeline.py": "bc3681a7693eb97cf6fddbdb4eb1deb4db343319443f2a92c00ae70383d975cc",
+        "src/fnit/synthmorph/models.py": "8ff86d8d7afb64d57d5edebc1138f24631d2aab6f47c0f978f53586c80a08cd6"
+      },
+      "benchmark_sha256": "f67f677cd6a48c585fe2f47b22fb97f9ce78a80b611b20cf5375da07d74659d4",
+      "torch_version": "2.5.1",
+      "threads": 8,
+      "allocator": "1",
+      "torch_memory_stats_valid": false,
+      "parameters": {
+        "model": "joint",
+        "extent": 256,
+        "hyper": 0.5,
+        "steps": 7,
+        "device": "cuda:0",
+        "dtype": "float32",
+        "TF32": true,
+        "autocast": false
+      },
+      "timing_scope": "model load and registration synchronized; image files opened before timer, voxel decoding/H2D inside call included; hashes/write excluded; CPU NN separately timed",
+      "gpu_state_before": [
+        "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 0, 813",
+        "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 0, 813"
+      ],
+      "model_load_seconds": 4.883610639721155,
+      "registration_seconds": 3.2174002462998033,
+      "registration_with_model_load_seconds": 8.101010886020958,
+      "precision": [
+        {
+          "model": "joint",
+          "compute_inverse": true,
+          "device": "cuda:0",
+          "input_dtype": "torch.float32",
+          "model_devices": [
+            "cuda:0"
+          ],
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "cudnn_enabled": true,
+          "cudnn_benchmark": false,
+          "cudnn_deterministic": false,
+          "autocast": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        }
+      ],
+      "omitted_outputs": {
+        "inverse": false,
+        "moved": false,
+        "fixed_moved": false
+      },
+      "NN_cpu_seconds": {
+        "s1": 0.9632670148275793,
+        "s4": 0.9097975669428706
+      },
+      "torch_peak_bytes": {
+        "allocated": 0,
+        "reserved": 0
+      },
+      "nvml": {
+        "peak_process_bytes": 11291066368,
+        "samples": 43,
+        "failures": [],
+        "gpu_uuids": [
+          "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+        ],
+        "max_interval_seconds": 0.7174339247867465
+      },
+      "gpu_state_after": [
+        "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 0, 813",
+        "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 0, 2838"
+      ],
+      "other_processes_on_target_gpu_peak_bytes": 843055104,
+      "shared_gpu_timing_contaminated": true,
+      "memory_budget_passed": true
+    }
+  ],
+  "comparisons": {
+    "baseline0_vs_1_candidate/forward.nii.gz": {
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "header_equal": true,
+      "extensions_equal": true,
+      "shape": [
+        256,
+        256,
+        256,
+        3
+      ],
+      "dtype": "float32",
+      "neq": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "rmse": 0.0,
+      "passed": true
+    },
+    "baseline0_vs_2_candidate/forward.nii.gz": {
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "header_equal": true,
+      "extensions_equal": true,
+      "shape": [
+        256,
+        256,
+        256,
+        3
+      ],
+      "dtype": "float32",
+      "neq": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "rmse": 0.0,
+      "passed": true
+    },
+    "baseline0_vs_3_baseline/forward.nii.gz": {
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "header_equal": true,
+      "extensions_equal": true,
+      "shape": [
+        256,
+        256,
+        256,
+        3
+      ],
+      "dtype": "float32",
+      "neq": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "rmse": 0.0,
+      "passed": true
+    },
+    "baseline0_vs_1_candidate/tian_s1.nii.gz": {
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "header_equal": true,
+      "extensions_equal": true,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "int16",
+      "neq": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "rmse": 0.0,
+      "passed": true
+    },
+    "baseline0_vs_2_candidate/tian_s1.nii.gz": {
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "header_equal": true,
+      "extensions_equal": true,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "int16",
+      "neq": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "rmse": 0.0,
+      "passed": true
+    },
+    "baseline0_vs_3_baseline/tian_s1.nii.gz": {
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "header_equal": true,
+      "extensions_equal": true,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "int16",
+      "neq": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "rmse": 0.0,
+      "passed": true
+    },
+    "baseline0_vs_1_candidate/tian_s4.nii.gz": {
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "header_equal": true,
+      "extensions_equal": true,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "int16",
+      "neq": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "rmse": 0.0,
+      "passed": true
+    },
+    "baseline0_vs_2_candidate/tian_s4.nii.gz": {
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "header_equal": true,
+      "extensions_equal": true,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "int16",
+      "neq": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "rmse": 0.0,
+      "passed": true
+    },
+    "baseline0_vs_3_baseline/tian_s4.nii.gz": {
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "header_equal": true,
+      "extensions_equal": true,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "int16",
+      "neq": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "rmse": 0.0,
+      "passed": true
+    }
+  },
+  "parity_passed": true,
+  "memory_budget_passed": true,
+  "passed": true,
+  "baseline_mean_seconds": 10.563141596037894,
+  "candidate_mean_seconds": 8.201583944028243,
+  "registration_pairs_faster": false,
+  "speed_gain_observed": false,
+  "registration_with_load_speedup_ratio": 1.2879392161472851,
+  "timing_clean_observed": false,
+  "adoption_evidence_passed": false
+}

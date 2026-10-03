@@ -229,6 +229,7 @@ class UKBConnectome_pipeline:
         freesurfer_subject_dir: str | Path | None = None,
         corrected_dwi: str | Path | None = None,
         rotated_bvecs: str | Path | None = None,
+        eddy_gp_seed: int | None = None,
         overwrite: bool = False,
         **connectome_options,
     ) -> ConnectomeResult:
@@ -237,6 +238,8 @@ class UKBConnectome_pipeline:
         ``output_dir`` stores resumable DWI and recon-all intermediates;
         ``connectome_options`` are the optional arguments of ``__call__``.
         The Python result remains in memory; use the CLI to write matrices.
+        ``eddy_gp_seed`` fixes EDDY's GP voxel sampling independently of the
+        tractography ``seed``. ``None`` retains time-based EDDY sampling.
         """
         from .bids import prepare_bids_connectome
 
@@ -245,6 +248,7 @@ class UKBConnectome_pipeline:
             acquisition=acquisition, direction=direction, t1=t1,
             freesurfer_subject_dir=freesurfer_subject_dir,
             corrected_dwi=corrected_dwi, rotated_bvecs=rotated_bvecs,
+            eddy_gp_seed=eddy_gp_seed,
             device=str(self.device), overwrite=overwrite,
         )
         return self(

@@ -1,0 +1,77 @@
+{
+  "collected": 309,
+  "passed": 298,
+  "skipped": 11,
+  "failed": 0,
+  "errors": 0,
+  "junit_seconds": 34.22,
+  "private_junit_sha256": "db2bcad5b88b9c73037a02e579b40e4dc1b4bbb7d548c45592ad4dc7a86fc550",
+  "skipped_tests": [
+    {
+      "test": "tests.test_fmri_surface_contracts.test_modified_dseg_cannot_emit_mislabeled_91k[empty]",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_fmri_surface_contracts.test_modified_dseg_cannot_emit_mislabeled_91k[nan]",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_fmri_surface_contracts.test_modified_dseg_cannot_emit_mislabeled_91k[fractional]",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_fmri_surface_contracts.test_nonfinite_mni_bold_cannot_emit_a_cifti",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_fmri_surface_contracts.test_cifti_embeds_same_metadata_and_original_tr_as_public_sidecar",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_fmri_surface_contracts.test_failed_workbench_leaves_previous_outputs_intact",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_fmri_surface_contracts.test_wrong_standard_space_grid_is_rejected",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_fmri_surface_contracts.test_generated_cifti_has_no_live_mapping_at_temp_cleanup[False]",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_fmri_surface_contracts.test_generated_cifti_has_no_live_mapping_at_temp_cleanup[True]",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_fmri_surface_pipeline.test_cifti_uses_templateflow_vertex_and_fortran_voxel_order",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    },
+    {
+      "test": "tests.test_surface_parallel_execution.test_parallel_projection_keeps_cifti_values_axes_and_metadata",
+      "reason": "Set FNIT_TEST_FMRI_SURFACE_ASSETS to verified public templates"
+    }
+  ],
+  "schema_version": 1,
+  "date": "2026-10-02",
+  "scope": "Targeted fMRI cleanup regression. Not an MRI accuracy or performance benchmark.",
+  "device": "CUDA_VISIBLE_DEVICES=0",
+  "environment": "Existing clean FNIT Conda environment",
+  "pytest_summary_seconds": 34.23,
+  "command": "PYTHONPATH=src CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 python -m pytest -q tests/test_fmri*.py tests/test_surface_parallel_execution.py tests/test_msmall_surface_composition.py tests/test_msmsulc_benchmark.py --junitxml=<private-test-report.xml>",
+  "changed_python_file_sha256": {
+    "src/fnit/fmri/normalization.py": "d3fb613a58833a31f5f2e05e443099202affb7bf4368194775c528e9e3ab4afc",
+    "src/fnit/fmri/pipeline.py": "07e38cad7ad1cd0049208306698e8451af7eed2f3a76f7540da9fcff8b5a1269",
+    "validation/fmri/benchmark_bids.py": "ac0b3ba2f952bee4ff9f882bb9c8eefb4e32eecb4f426bdb1b7fee5aeeea964d",
+    "tests/test_fmri_benchmark_reference.py": "33c9cf40643c2042dcb954b58845680b61617897b5c160beed415035038c577b",
+    "tests/test_fmri_normalization.py": "7ae66a38c7561519a3d6a8e16cc52c3038b61fb138e5b04b836409407dbad9ba"
+  },
+  "documentation_checks": {
+    "pages": 10,
+    "valid_relative_links_and_cross_page_anchors": 233,
+    "python_examples_ast_passed": 10,
+    "bash_examples_syntax_passed": 12,
+    "current_cli_examples_argparse_passed": 7,
+    "result": "passed"
+  }
+}

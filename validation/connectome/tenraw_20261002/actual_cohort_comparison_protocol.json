@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "dataset": "OpenNeuro ds001226",
+  "scope": "Actual CPU comparisons of independent official recon-all outputs; full downstream comparisons await genuinely completed baseline and candidate outputs.",
+  "observed_utc": "2026-10-02T19:28:45.867743+00:00",
+  "protocol_tests": {
+    "count": 45,
+    "passed": 45,
+    "failed": 0,
+    "skipped": 0,
+    "runtime_seconds": 0.618,
+    "host": "headcw",
+    "environment": "Original FNIT conda environment with nibabel and NumPy",
+    "scope": "Reader and provenance guard tests only; tiny test fixtures are not an MRI benchmark"
+  },
+  "frozen_helpers": [
+    {
+      "name": "tools/reference/compare_freesurfer_recon_outputs.py",
+      "sha256": "f16989146e29e4893b119b8d9d35fca880bb97e21ddf26ef15b3f636e3d03b74"
+    },
+    {
+      "name": "tools/reference/benchmark_connectome_cohort_compare.py",
+      "sha256": "9b69862da5755d8f8e184bb702d0b2f08267906f9476bc12fbd7b5ec705240c7"
+    },
+    {
+      "name": "tests/connectome/test_actual_cohort_comparison_tools.py",
+      "sha256": "9e6f827ed93d5c97e3f88d4d6f1e592393ff1ce3cd4949853916ea2110721135"
+    }
+  ],
+  "actual_public_two_case_FS_pilots": [
+    {
+      "case_id": "sub-CON01",
+      "files": 13,
+      "strict_scientific_equal": true,
+      "comparison_CPU_wall_seconds": 4.5577051024883986,
+      "enclosing_CPU_command_wall_seconds": 5.728656642138958,
+      "actual_report_sha256": "3c3ee582088ed63085dd09ba89c2aa1ba929140bf3d9b910173f39592c0b0b29"
+    },
+    {
+      "case_id": "sub-CON03",
+      "files": 13,
+      "strict_scientific_equal": true,
+      "comparison_CPU_wall_seconds": 3.826523384079337,
+      "enclosing_CPU_command_wall_seconds": 4.503895626403391,
+      "actual_report_sha256": "3c28227ab4c38875d61ac42552f90b59f4d30e083110680b8c57388bfc6240b5"
+    }
+  ],
+  "official_anatomy": {
+    "version": "freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45",
+    "threads_per_case": 8,
+    "command": "recon-all -sd NEW_SUBJECTS_DIR -s SUBJECT_ID -i RAW_T1W.nii.gz -all -openmp 8",
+    "actual_compared_cases": [
+      {
+        "case_id": "sub-CON01",
+        "raw_t1_sha256": "584b28f71af1c0972844122d1bc32715f3d675e2b05cf460449438a892324666",
+        "baseline_recon_command_seconds": 4797.502608783543,
+        "candidate_recon_command_seconds": 4868.840657673776,
+        "strict_equal": true,
+        "report_sha256": "7e1475ef5ba55c52342d9e030f80c5105c89af8403908d12b9fa669c6a33a84f",
+        "comparison_cpu_wall_seconds": 12.961763164959848
+      },
+      {
+        "case_id": "sub-CON03",
+        "raw_t1_sha256": "bf0a72d3f17781d2a178b629b72563b4b1423c52b7866fa88e5ae393f97b6f81",
+        "baseline_recon_command_seconds": 4241.2467591241,
+        "candidate_recon_command_seconds": 4334.311536878347,
+        "strict_equal": true,
+        "report_sha256": "4d53e20223f760658da45628a08d542c4c9b586aad9aa145ab4471fe0c6c7521",
+        "comparison_cpu_wall_seconds": 4.310161845758557
+      },
+      {
+        "case_id": "sub-CON04",
+        "raw_t1_sha256": "a2cc3339da4f6f3d2ceb2ceb777645c8a96376f02fae35994fa688d54b3172e4",
+        "baseline_recon_command_seconds": 4030.821621976793,
+        "candidate_recon_command_seconds": 3866.316537424922,
+        "strict_equal": true,
+        "report_sha256": "b14bfde870000b8f9b3b5e65216303d8a7978f0e02470a292d4becf668ddebb8",
+        "comparison_cpu_wall_seconds": 4.72747771628201
+      },
+      {
+        "case_id": "sub-CON05",
+        "raw_t1_sha256": "0189151160abe4bece3c09cc350d76a4192cb8bdaeba90ca4f2077a18033a729",
+        "baseline_recon_command_seconds": 4447.556510873139,
+        "candidate_recon_command_seconds": 4402.242958568037,
+        "strict_equal": true,
+        "report_sha256": "700f1df327c367975ddfb65bd6f11e56e563379adcc59ec830c106e9861bf344",
+        "comparison_cpu_wall_seconds": 3.7808724408969283
+      },
+      {
+        "case_id": "sub-CON06",
+        "raw_t1_sha256": "4fdf03a4b695831657a47eb11f6775ec0c37700caa350cc4adb052037436b9d9",
+        "baseline_recon_command_seconds": 4418.653580836952,
+        "candidate_recon_command_seconds": 4267.792084172368,
+        "strict_equal": true,
+        "report_sha256": "01972367bcb94153bcfda385d6790c0757802252bea94832a1eb9b123f7185c8",
+        "comparison_cpu_wall_seconds": 3.787378303706646
+      },
+      {
+        "case_id": "sub-CON07",
+        "raw_t1_sha256": "11fd6ba345b8eccfc6fc57c58a05c8edb3cb2464644901bd6210c78c9ac86aa7",
+        "baseline_recon_command_seconds": 4598.124663181603,
+        "candidate_recon_command_seconds": 4596.250761114061,
+        "strict_equal": true,
+        "report_sha256": "cd03f1ed1c0e05fb4c8b694bc4bebb52e73e04076fa0b461683b1834957ab3a9",
+        "comparison_cpu_wall_seconds": 3.616042031906545
+      },
+      {
+        "case_id": "sub-CON08",
+        "raw_t1_sha256": "2cf6d2f2afc65cb7e87ef68ac95a645387ab5c397f93e080a6b25ac485b810b6",
+        "baseline_recon_command_seconds": 4025.2584252133965,
+        "candidate_recon_command_seconds": 3946.825328670442,
+        "strict_equal": true,
+        "report_sha256": "aa0ffd1b1cf99d9a81db79e6d6b12299de012f44737a1c6ca044c98dc68c3032",
+        "comparison_cpu_wall_seconds": 3.849414801225066
+      }
+    ],
+    "metadata_policy": "Whole-file compression, creation comments and footer metadata are provenance only; scalar values, stored coordinate/faces payload, annotation semantics and geometry decide equality."
+  },
+  "preserved_previous_evidence": {
+    "private_v1_failed": true,
+    "private_v1_reason": "Overstrict rejection of an official pial link inside its own subject; original data not modified",
+    "private_v2_actual_report_sha256": "99a787c5abfb4c0151a90ebfe290a698af828fb0302a31b29474ed5c9b90642f",
+    "private_v2_byte_structure_audit_sha256": "212edeab415bce77d7dba8ccbf2f4a3ca2ca9b3533e6f13f031921863ec6bc0d",
+    "original_baseline_int32_validation_failures_preserved": true
+  },
+  "actual_controller": {
+    "host": "headcw",
+    "pid": 1252533,
+    "tmux": "fnit-connectome-actual-comparison-v1",
+    "namespace_label": "root_actual_cohort_comparison_v1",
+    "helper_namespace_label": "formal_actual_comparison_helper_v4",
+    "observed_running": true,
+    "start_utc": "2026-10-02T19:17:01.781236+00:00",
+    "status": "waiting_actual_outputs",
+    "requested_cases": 10,
+    "anatomy_compared_cases": 7,
+    "completed_downstream_comparisons": 0,
+    "failed_comparisons": 0,
+    "actual_pending_reasons": {
+      "sub-CON01": "actual candidate/sub-CON01 is gpu_queued",
+      "sub-CON03": "actual candidate/sub-CON03 is waiting_original_preparation_report",
+      "sub-CON04": "actual candidate/sub-CON04 is waiting_original_preparation_report",
+      "sub-CON05": "actual candidate/sub-CON05 is waiting_original_preparation_report",
+      "sub-CON06": "actual candidate/sub-CON06 is waiting_original_preparation_report",
+      "sub-CON07": "actual candidate/sub-CON07 is waiting_original_preparation_report",
+      "sub-CON08": "actual baseline/sub-CON08 is gpu_queued",
+      "sub-CON09": "actual candidate/sub-CON09 is cpu_running",
+      "sub-CON10": "baseline official reconstruction/revalidation is not yet complete",
+      "sub-CON11": "baseline official reconstruction/revalidation is not yet complete"
+    },
+    "GPU_used": false,
+    "original_namespaces_modified": false,
+    "timing_scope": "This CPU observer runtime includes actual reads and waiting; it is not MRI pipeline runtime"
+  },
+  "actual_runtime_sources": {
+    "baseline_source_fingerprint": "deefeb6908c3c14a9aa7b4cf154c8df941a56abffd4a4e893045a1c4d1ddfd4a",
+    "candidate_source_fingerprint": "9fd44cbc49c9cdfc16c9a8cff2971fec3239b450dce41222e6ef059861eb0dc7",
+    "candidate_actual_file_count": 1194,
+    "candidate_current_git_metadata": null,
+    "candidate_source_verification": "Actual full frozen file inventory independently rehashed on CPU; no inferred git commit is assigned to the archive",
+    "candidate_config_sha256": "4c4115b31c08a007fc29d80b1fdc31d3076b4456a3b35ba8baf9a99fd8553b57",
+    "candidate_read_only_source_observation_sha256": "8999bda6f53a6e589e187cd45de1f698e1641133e01126ae60325391470aeb31"
+  },
+  "downstream_scientific_acceptance": "not_decided; zero actual baseline/candidate downstream comparisons were complete at this observation",
+  "strict_count_equivalence": "not_yet_measured_on_completed_paired_downstream_outputs",
+  "MRtrix_repeat_envelope_acceptance": "Separate official reference repeat harness; comparison coverage is not scientific acceptance",
+  "public_artifact_policy": "No credentials, license contents or controlled absolute input paths in this summary; original full private evidence remains immutable in its separate namespaces."
+}

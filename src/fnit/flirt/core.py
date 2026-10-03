@@ -1690,22 +1690,32 @@ def _edge_background(data):
     return values.kthvalue(values.numel() // 10 + 1).values
 
 
+def _spatial_forms(image):
+    """Read NIfTI forms, or retain a non-NIfTI image's scanner affine."""
+    if hasattr(image, "get_qform") and hasattr(image, "get_sform"):
+        return (image.get_qform(), int(image.header["qform_code"]),
+                image.get_sform(), int(image.header["sform_code"]))
+    # MGH/MGZ records scanner RAS directly and has no NIfTI form codes.
+    # Code 1 represents this geometry in the NIfTI output; code 0 would
+    # silently replace it with nibabel's default centered voxel grid.
+    return image.affine, 1, image.affine, 1
+
+
 def _output_image(data, moving, fixed, pull_voxel, *, applyxfm=False):
     """Preserve FSL's output dtype and reference qform/sform rules."""
     dtype = moving.get_data_dtype()
     if not np.issubdtype(dtype, np.floating) and np.ptp(data) < 1.5:
         dtype = np.dtype("float32")  # Preserve fractional resampled masks.
     image = new_image(data.astype(dtype, copy=False), fixed)
-    qform, qcode = fixed.get_qform(), int(fixed.header["qform_code"])
-    sform, scode = fixed.get_sform(), int(fixed.header["sform_code"])
+    qform, qcode, sform, scode = _spatial_forms(fixed)
     if not applyxfm and not qcode and scode:
         qform, qcode = sform, scode
     if not applyxfm and not scode and qcode:
         sform, scode = qform, qcode
     if not applyxfm and not qcode and not scode:
-        source, code = moving.get_sform(coded=True)
+        source_qform, source_qcode, source, code = _spatial_forms(moving)
         if not code:
-            source, code = moving.get_qform(coded=True)
+            source, code = source_qform, source_qcode
         if code:
             qform = sform = source @ pull_voxel
             qcode = scode = code

@@ -18,6 +18,8 @@ import time
 import nibabel as nib
 import numpy as np
 
+from native_exec import run_traced
+
 
 def sha256(path):
     digest = hashlib.sha256()
@@ -87,9 +89,19 @@ class NativeRun:
         log = self.output / f"{name}.log"
         started = time.perf_counter()
         with log.open("w") as stream:
-            process = subprocess.run([str(value) for value in argv], env=self.env, stdout=stream, stderr=subprocess.STDOUT)
+            if self.args.trace_original_exits:
+                process, exit_evidence = run_traced(
+                    argv, trace_path=self.output / f"{name}.exec.private.log",
+                    env=self.env, stdout=stream, stderr=subprocess.STDOUT)
+            else:
+                process = subprocess.run([str(value) for value in argv], env=self.env, stdout=stream, stderr=subprocess.STDOUT)
+                exit_evidence = None
         elapsed = time.perf_counter() - started
         row = {"name": name, "process_wall_seconds": elapsed, "exit_code": process.returncode}
+        if exit_evidence is not None:
+            row["exit_evidence"] = exit_evidence
+            if not exit_evidence["original_process_accepted"]:
+                raise RuntimeError(f"{name} has no successful native process evidence")
         self.rows.append(row)
         self.commands.append({"name": name, "argv": [str(value) for value in argv]})
         (self.output / f"{self.args.stage}.commands.private.json").write_text(json.dumps(
@@ -108,7 +120,15 @@ class NativeRun:
         executable = self.args.fsl_root / "bin/fslstats"
         self.public["component_sha256"]["fslstats"] = sha256(executable)
         started = time.perf_counter()
-        result = subprocess.run([str(executable), *map(str, arguments)], env=self.env, capture_output=True, text=True)
+        if self.args.trace_original_exits:
+            result, exit_evidence = run_traced(
+                [executable, *arguments], trace_path=self.output / f"{name}.exec.private.log",
+                env=self.env, capture_output=True, text=True)
+            if not exit_evidence["original_process_accepted"]:
+                raise RuntimeError(f"{name} has no successful native process evidence")
+        else:
+            result = subprocess.run([str(executable), *map(str, arguments)], env=self.env, capture_output=True, text=True)
+            exit_evidence = None
         seconds = time.perf_counter() - started
         try:
             value = float(result.stdout.strip())
@@ -116,8 +136,11 @@ class NativeRun:
             raise RuntimeError(f"Invalid {name} result") from error
         if result.returncode not in (0, 255) or not np.isfinite(value) or value <= 0:
             raise RuntimeError(f"{name} failed: exit {result.returncode}")
-        self.rows.append({"name": name, "process_wall_seconds": seconds,
-                          "exit_code": result.returncode, "value": value})
+        row = {"name": name, "process_wall_seconds": seconds,
+               "exit_code": result.returncode, "value": value}
+        if exit_evidence is not None:
+            row["exit_evidence"] = exit_evidence
+        self.rows.append(row)
         return value
 
     def save_report(self):
@@ -227,6 +250,8 @@ def main():
     parser.add_argument("--highpass-seconds", type=float, default=100.0)
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--report-out", type=Path)
+    parser.add_argument("--trace-original-exits", action="store_true",
+                        help="记录原 launcher 与直接子进程退出；255须有真实子进程0证据")
     args = parser.parse_args()
     if args.stage == "anatomy" and (args.t1w is None or args.synthstrip_weights is None):
         parser.error("anatomy requires --t1w and --synthstrip-weights")

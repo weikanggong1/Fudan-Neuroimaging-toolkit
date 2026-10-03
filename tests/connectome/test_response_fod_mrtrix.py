@@ -180,3 +180,36 @@ def test_mrtrix_tensor_marks_all_nonpositive_voxel_nan(device):
     assert torch.isfinite(fa[0, 0, 0])
     assert torch.isnan(fa[1, 0, 0])
     assert torch.isnan(direction[1, 0, 0]).all()
+
+
+@pytest.mark.parametrize("device", ["cpu", "cuda"] if torch.cuda.is_available() else ["cpu"])
+def test_icls_handles_mixed_finished_and_negative_constraint_rows(device):
+    """Exercise no-step rows, adding constraints, and dropping negative multipliers."""
+    from fnit.connectome.fod import _mrtrix_icls_batch
+    generator = torch.Generator().manual_seed(8129)
+    design = torch.randn((19, 5), generator=generator, dtype=torch.float64).to(device)
+    # Positivity constraints admit the zero solution, including for negative data.
+    constraints = torch.cat((torch.eye(5), torch.ones((1, 5))), dim=0).double().to(device)
+    signal = torch.randn((13, 19), generator=generator, dtype=torch.float64).to(device)
+    signal[0] = 0
+    result = _mrtrix_icls_batch(signal, design, constraints)
+    assert torch.equal(result[0], torch.zeros_like(result[0]))
+    assert torch.isfinite(result).all()
+    assert (result @ constraints.T).min() >= -1e-8
+    # Independently enumerate all feasible active faces of the small NNLS system.
+    import itertools
+    gram = design.T @ design
+    gram.diagonal().add_(1e-10 * gram.diagonal().max())
+    right = signal @ design
+    for row in range(1, len(signal)):
+        costs = []
+        for size in range(6):
+            for free in itertools.combinations(range(5), size):
+                x = torch.zeros(5, dtype=torch.float64, device=device)
+                if free:
+                    indices = torch.tensor(free, device=device)
+                    x[indices] = torch.linalg.solve(gram[indices][:, indices], right[row, indices])
+                if bool((x >= -1e-10).all()):
+                    costs.append((.5 * x @ gram @ x - right[row] @ x, x))
+        expected = min(costs, key=lambda pair: float(pair[0]))[1]
+        torch.testing.assert_close(result[row], expected, atol=1e-8, rtol=0)

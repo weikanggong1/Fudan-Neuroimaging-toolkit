@@ -15,23 +15,28 @@ def _grid_values(lower, upper, steps):
         value += delta
 
 
-def find_optimal_translation_source(samples, source, base_transform):
+def find_optimal_translation_source(samples, source, base_transform, *, scorer=None):
+    score_one = log_sample_probability_jit if scorer is None else scorer
     matrix = np.asarray(base_transform, np.float32).copy()
     lower, upper = np.float32(-200.), np.float32(200.)
     history = []
-    maximum = log_sample_probability_jit(samples, source, matrix)
+    maximum = score_one(samples, source, matrix)
     for _ in range(8):
         best = (0., 0., 0.)
-        for x in _grid_values(lower, upper, 19):
-            for y in _grid_values(lower, upper, 19):
-                for z in _grid_values(lower, upper, 19):
-                    trial = matrix.copy()
-                    trial[:3, 3] += np.asarray((x, y, z), np.float32)
-                    score = log_sample_probability_jit(samples, source, trial)
-                    if score > maximum:
-                        maximum, best = score, (x, y, z)
+        def candidates():
+            for x in _grid_values(lower, upper, 19):
+                for y in _grid_values(lower, upper, 19):
+                    for z in _grid_values(lower, upper, 19):
+                        trial = matrix.copy()
+                        trial[:3, 3] += np.asarray((x, y, z), np.float32)
+                        yield (x, y, z), trial
+
+        from .mri_em_register_search_source import score_candidates
+        for parameters, score in score_candidates(samples, source, candidates(), scorer):
+            if score > maximum:
+                maximum, best = score, parameters
         matrix[:3, 3] += np.asarray(best, np.float32)
-        maximum = log_sample_probability_jit(samples, source, matrix)
+        maximum = score_one(samples, source, matrix)
         history.append((maximum, best, matrix.copy()))
         # mean and quarter width are stored as double after float arithmetic.
         middle = float(np.float32(

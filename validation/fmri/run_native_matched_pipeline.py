@@ -16,6 +16,8 @@ import time
 import nibabel as nib
 import numpy as np
 
+from native_exec import run_traced
+
 
 def sha256(path):
     digest = hashlib.sha256()
@@ -31,6 +33,8 @@ def main():
                         help="私有单例配置，包含输入、原软件和外置AROMA路径")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--source-revision", required=True)
+    parser.add_argument("--trace-original-exits", action="store_true",
+                        help="原FSL返回255时，还须核对真实子进程退出0")
     args = parser.parse_args()
     case = json.loads(args.case_json.read_text())
     output = args.output_dir.resolve()
@@ -67,6 +71,8 @@ def main():
               "--freesurfer-root", case["freesurfer_root"], "--sbref", case["sbref"], "--threads", threads]
     if case.get("synthstrip_python"):
         common += ["--synthstrip-python", case["synthstrip_python"]]
+    if args.trace_original_exits:
+        common += ["--trace-original-exits"]
     run("anatomy", [sys.executable, directory / "run_native_matched.py", "anatomy", *common,
                     "--t1w", case["t1w"], "--synthstrip-weights", case["synthstrip_weights"]])
     run("feat", [sys.executable, directory / "run_native_matched.py", "feat", *common,
@@ -84,7 +90,7 @@ def main():
                           "--manifest-out", registration / "manifest.private.json",
                           "--source-revision", args.source_revision])
     clean_native = output / "clean_native_fnirt.nii.gz"
-    run("denoising", [sys.executable, directory / "official_denoising.py", "--phase", "all",
+    denoising_command = [sys.executable, directory / "official_denoising.py", "--phase", "all",
                        "--input-bold", output / "feat/filtered_func_data.nii.gz",
                        "--brain-mask", output / "masks/epi_mask.nii.gz",
                        "--motion", output / "feat/mc/prefiltered_func_data_mcf.par",
@@ -98,7 +104,10 @@ def main():
                        "--t1-to-mni-warp", registration / "T1_to_MNI_coeff.nii.gz",
                        "--warp-convention", "auto", "--clean-native", clean_native,
                        "--tr", case["tr"], "--source-revision", args.source_revision,
-                       "--allow-complete-exit255"])
+                       "--allow-complete-exit255"]
+    if args.trace_original_exits:
+        denoising_command.append("--trace-original-exits")
+    run("denoising", denoising_command)
     # This original FSL call samples the original-native result, using the same
     # registration estimated above. The coefficient already includes T1 affine.
     command = [fsl / "bin/applywarp", "--in=" + str(clean_native),
@@ -111,12 +120,20 @@ def main():
     (output / "status.private.json").write_text(json.dumps({"stage": "mni_resampling", "status": "running"}) + "\n")
     process_start = time.perf_counter()
     with (output / "mni_resampling.log").open("w") as stream:
-        result = subprocess.run(list(map(str, command)), env=environment, stdout=stream, stderr=subprocess.STDOUT)
+        if args.trace_original_exits:
+            result, exit_evidence = run_traced(
+                command, trace_path=output / "mni_resampling.exec.private.log",
+                env=environment, stdout=stream, stderr=subprocess.STDOUT)
+        else:
+            result = subprocess.run(list(map(str, command)), env=environment, stdout=stream, stderr=subprocess.STDOUT)
+            exit_evidence = None
     native_wall = time.perf_counter() - started
     sampling_wall = time.perf_counter() - process_start
     destination = output / "clean_mni_fnirt.nii.gz"
     if result.returncode not in (0, 255) or not destination.is_file():
         raise RuntimeError("Original final applywarp failed")
+    if exit_evidence is not None and not exit_evidence["original_process_accepted"]:
+        raise RuntimeError("Original final applywarp has no successful native process evidence")
     subprocess.run(["gzip", "-t", str(destination)], check=True)
     image = nib.load(destination)
     reference = nib.load(case["mni_template"])
@@ -132,10 +149,13 @@ def main():
                                 "complete_output_checks_passed": True,
                                 "shape": list(image.shape), "sha256": sha256(destination),
                                 "all_finite": True, "outside_mask_max_abs": 0.0}
+    if exit_evidence is not None:
+        stages["mni_resampling"]["exit_evidence"] = exit_evidence
     report = {"schema_version": 1, "source_revision": args.source_revision,
               "registration_backend": "fnirt", "stages": stages,
               "whole_workflow_wall_seconds": native_wall, "input_sha256": input_hashes,
               "output_sha256": {"clean_native": sha256(clean_native), "clean_mni": sha256(destination)},
+              "trace_original_exits_enabled": args.trace_original_exits,
               "script_sha256": {name: sha256(directory / name) for name in
                                   ("run_native_matched.py", "official_registration.py", "official_denoising.py", "run_native_matched_pipeline.py")},
               "timing_boundary": "Continuous sequential workflow, including stage interpreter startup and in-stage integrity checks; input preflight hashing and final MNI integrity checks excluded. No skipped/reused computational stage.",

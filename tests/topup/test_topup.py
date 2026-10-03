@@ -147,3 +147,42 @@ def test_cubic_sampler_reconstructs_integer_grid():
     )
     torch.testing.assert_close(sampled, volume, atol=5e-4, rtol=1e-6)
     assert bool(valid.all())
+
+
+def test_fslmerge_first_keeps_raw_voxels_and_ap_geometry(tmp_path, monkeypatch):
+    import fnit.topup.ukb as module
+    raw = tmp_path / 'raw'
+    raw.mkdir()
+    ap = np.arange(8*8*8, dtype=np.float32).reshape(8,8,8,1)
+    pa = ap + 10
+    for stem, array, shift, direction in [('AP', ap, 0, 'j-'), ('PA', pa, 1.2, 'j')]:
+        affine = np.diag([2.,2.,2.,1.]); affine[0,3] = shift
+        nib.save(nib.Nifti1Image(array, affine), raw / (stem+'.nii.gz'))
+        (raw / (stem+'.bval')).write_text('0')
+        (raw / (stem+'.json')).write_text(json.dumps({'PhaseEncodingDirection':direction,'TotalReadoutTime':.05}))
+    monkeypatch.setattr(module, '_best_b0', lambda *args: (0,np.ones(1)))
+    with pytest.raises(ValueError, match='voxel-to-world'):
+        prepare_ukb_topup(raw, tmp_path/'strict', device='cpu')
+    result=prepare_ukb_topup(raw,tmp_path/'merge',device='cpu',pair_geometry='fslmerge-first')
+    merged=nib.load(result['imain'])
+    np.testing.assert_array_equal(merged.dataobj[...,0],ap[...,0])
+    np.testing.assert_array_equal(merged.dataobj[...,1],pa[...,0])
+    np.testing.assert_array_equal(merged.affine,nib.load(raw/'AP.nii.gz').affine)
+    record=json.loads((tmp_path/'merge/pair_geometry.json').read_text())
+    assert record['resampled'] is False and record['policy']=='fslmerge-first'
+    assert record['PA']['affine'][0][3] == pytest.approx(1.2)
+
+
+def test_fslmerge_first_rejects_shear_and_invalid_policy(tmp_path):
+    raw=tmp_path/'raw';raw.mkdir()
+    array=np.ones((8,8,8,1),np.float32)
+    for stem,direction in [('AP','j-'),('PA','j')]:
+        affine=np.diag([2.,2.,2.,1.])
+        if stem=='PA':affine[0,1]=.4;affine[1,1]=np.sqrt(4-.16)
+        nib.save(nib.Nifti1Image(array,affine),raw/(stem+'.nii.gz'))
+        (raw/(stem+'.bval')).write_text('0')
+        (raw/(stem+'.json')).write_text(json.dumps({'PhaseEncodingDirection':direction,'TotalReadoutTime':.05}))
+    with pytest.raises(ValueError,match='without shear'):
+        prepare_ukb_topup(raw,tmp_path/'out',pair_geometry='fslmerge-first')
+    with pytest.raises(ValueError,match='pair_geometry'):
+        prepare_ukb_topup(raw,tmp_path/'out',pair_geometry='guess')

@@ -1,0 +1,632 @@
+{
+  "schema_version": 1,
+  "scope": "official_atlas_signed_integer_layout_proof_and_completed_prefix_binding",
+  "state": "completed",
+  "generated_utc": "2026-10-02T21:35:17.984321+00:00",
+  "source": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/prove_official_anatomy_lattice_CON01_CON03_v1.py",
+    "size_bytes": 6026,
+    "sha256": "a4f6ed555b7f1e87b93f9be94843085d8c6af47fb5be8681e4c1e1a410e23310"
+  },
+  "gpu_used": false,
+  "threads": 8,
+  "MRI_interpolation_performed": false,
+  "cases": {
+    "sub-CON01": {
+      "case_id": "sub-CON01",
+      "failed_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/reference_anatomy.json",
+        "size_bytes": 63117,
+        "sha256": "02c3baeb2d30137abdd9e45c2bd1afb21d1f9dd37e7bdb823ea0b8e3a79de063"
+      },
+      "prepared_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_v1/sub-CON01/prepare/reference_anatomy.json",
+        "size_bytes": 188304,
+        "sha256": "1c3079cc14af65508e00e43262c8435a94921dd02a18c494196a9c8d432590db"
+      },
+      "official_dwi_contract": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/consumer_contract.json",
+        "size_bytes": 86859,
+        "sha256": "36b56d7d8e218464e4440c99a75a3fe12a7d71f984912f743fa343e42d57a07b"
+      },
+      "original_source": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_reference_58aaa6ed/tools/reference/benchmark_connectome_anatomy_official.py",
+        "size_bytes": 50020,
+        "sha256": "28eadabb35cf4a6ef5c6d30ab6af6e31e5932d863efee0c8762f19ae39c90a6b"
+      },
+      "original_commands": [
+        {
+          "stage": "brain_to_nifti",
+          "argv": [
+            "/public/software/apps/Freesurfer/8.2.0-1/bin/mri_convert",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_baseline_raw_v2/baseline/sub-CON01/freesurfer/sub-CON01_ses-preop/mri/brain.mgz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/brain.nii.gz"
+          ],
+          "program": {
+            "path": "/public/software/apps/Freesurfer/8.2.0-1/bin/mri_convert",
+            "size_bytes": 3325104,
+            "sha256": "2be5e8594b355889d76cfe955aad5e34d630813cca2445bb3b8ae601e2b8763d"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/000_brain_to_nifti.log",
+          "seconds_inclusive": 0.3747662049718201,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/000_brain_to_nifti.time",
+          "time_text": "wall_seconds=0.37 peak_rss_kib=20680\n"
+        },
+        {
+          "stage": "flirt",
+          "argv": [
+            "/public/software/apps/FSL/6.0.7.4/bin/flirt",
+            "-in",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/mean_bzero_brain.nii.gz",
+            "-ref",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/brain.nii.gz",
+            "-cost",
+            "normmi",
+            "-dof",
+            "6",
+            "-omat",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/dwi_to_t1_fsl.txt"
+          ],
+          "program": {
+            "path": "/public/software/apps/FSL/6.0.7.4/bin/flirt",
+            "size_bytes": 551408,
+            "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/001_flirt.log",
+          "seconds_inclusive": 13.165992656257004,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/001_flirt.time",
+          "time_text": "wall_seconds=13.16 peak_rss_kib=206344\n"
+        },
+        {
+          "stage": "transformconvert",
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/transformconvert",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/dwi_to_t1_fsl.txt",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/mean_bzero_brain.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/brain.nii.gz",
+            "flirt_import",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/dwi_to_t1_mrtrix.txt",
+            "-nthreads",
+            "8"
+          ],
+          "program": {
+            "path": "/public/software/apps/MRtrix3/3.0.3/bin/transformconvert",
+            "size_bytes": 106288,
+            "sha256": "33b3f43d4f0f37f11f4001a20f19b2c35f871c04fde29fb23e57e8963dff8d28"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/002_transformconvert.log",
+          "seconds_inclusive": 0.01747872307896614,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/002_transformconvert.time",
+          "time_text": "wall_seconds=0.01 peak_rss_kib=3144\n"
+        },
+        {
+          "stage": "five_tissue_world",
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_v1/sub-CON01/prepare/five_tissue_t1.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/five_tissue_dwi_world.nii.gz",
+            "-linear",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/dwi_to_t1_mrtrix.txt",
+            "-inverse",
+            "-nthreads",
+            "8"
+          ],
+          "program": {
+            "path": "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "size_bytes": 1752328,
+            "sha256": "d4e508e6c60d2ba19b41ac4b4dd772ef89389f92047e93ddbfd3418ba3537106"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/003_five_tissue_world.log",
+          "seconds_inclusive": 2.8224403159692883,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/003_five_tissue_world.time",
+          "time_text": "wall_seconds=2.81 peak_rss_kib=659136\n"
+        },
+        {
+          "stage": "gmwmi_world",
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_v1/sub-CON01/prepare/gmwmi_t1.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/gmwmi_dwi_world.nii.gz",
+            "-linear",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/dwi_to_t1_mrtrix.txt",
+            "-inverse",
+            "-nthreads",
+            "8"
+          ],
+          "program": {
+            "path": "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "size_bytes": 1752328,
+            "sha256": "d4e508e6c60d2ba19b41ac4b4dd772ef89389f92047e93ddbfd3418ba3537106"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/004_gmwmi_world.log",
+          "seconds_inclusive": 0.6558057451620698,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/004_gmwmi_world.time",
+          "time_text": "wall_seconds=0.65 peak_rss_kib=134644\n"
+        },
+        {
+          "stage": "atlas_fs-aparc_nn",
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_v1/sub-CON01/prepare/atlases/fs-aparc/atlas_t1.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "-linear",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/dwi_to_t1_mrtrix.txt",
+            "-inverse",
+            "-template",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/mean_bzero.nii.gz",
+            "-interp",
+            "nearest",
+            "-datatype",
+            "uint32",
+            "-nthreads",
+            "8"
+          ],
+          "program": {
+            "path": "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "size_bytes": 1752328,
+            "sha256": "d4e508e6c60d2ba19b41ac4b4dd772ef89389f92047e93ddbfd3418ba3537106"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/005_atlas_fs-aparc_nn.log",
+          "seconds_inclusive": 0.33900973619893193,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/logs/005_atlas_fs-aparc_nn.time",
+          "time_text": "wall_seconds=0.33 peak_rss_kib=139012\n"
+        }
+      ],
+      "original_successful_command_seconds": 17.37549338163808,
+      "files": {
+        "brain": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/brain.nii.gz",
+          "size_bytes": 1244630,
+          "sha256": "40b77523d08e21e74bafcc267d00bd21bb7c73e6a4f2bc26d79a25a088d67b22"
+        },
+        "dwi_to_t1_fsl": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/dwi_to_t1_fsl.txt",
+          "size_bytes": 188,
+          "sha256": "51fa421c82787d26dafa82c3b48eb23fa454035b9c383e502170f0ccb38c49ca"
+        },
+        "dwi_to_t1_mrtrix": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/dwi_to_t1_mrtrix.txt",
+          "size_bytes": 937,
+          "sha256": "1c6d499004a3fc72129e94ff5550ce240e93ee7b106baa3b9deec7d9c9f52e57"
+        },
+        "five_tissue_world": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/five_tissue_dwi_world.nii.gz",
+          "size_bytes": 896822,
+          "sha256": "429780bc43118e45064a00ab9dcace79d4240b2a22410abe1bac8d8d53e81eea"
+        },
+        "gmwmi_world": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/gmwmi_dwi_world.nii.gz",
+          "size_bytes": 406350,
+          "sha256": "a44a4abca669542d4165fea722bf1ba82eeb33bbea7b2c48b2411bfd66b52fc2"
+        },
+        "fs-aparc_original_layout": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "size_bytes": 37050,
+          "sha256": "702d78fe159da9bdb45b05923350dd70d6955fb7ddf5fc93e210af2c8939e052"
+        },
+        "fs-aparc_matched_layout": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_lattice_proof_CON01_CON03_v1/sub-CON01/atlas_dwi_strides.nii.gz",
+          "size_bytes": 39986,
+          "sha256": "8a426d026fb9ffb5af52f69985ebe7a4917ce995156e21066df69d0e19d22443"
+        }
+      },
+      "new_file_identity_observation_scope": "Transforms/brain/original atlas identities first observed by this post-failure proof; original report remains unchanged, no retrospective fields",
+      "template": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/mean_bzero.nii.gz",
+        "size_bytes": 1851043,
+        "sha256": "be861e7b6faed466e79e0e78aac339d4e08ee1d5b9a6cb901b03f89f4104b089"
+      },
+      "lattice_proof": {
+        "signed_integer_mapping_from_template_to_original": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            -1,
+            59
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ]
+        ],
+        "mapping_integer_max_abs_error": 7.51985815838907e-07,
+        "all_grid_world_max_abs_displacement_mm": 1.9669532775878906e-06,
+        "original_shape": [
+          96,
+          60,
+          96
+        ],
+        "template_shape": [
+          96,
+          96,
+          60
+        ],
+        "axis_orientation_transform": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            2.0,
+            -1.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "official_strides_shape": [
+          96,
+          96,
+          60
+        ],
+        "official_strides_max_affine_delta": 0.0,
+        "array_dtype": "uint32",
+        "positive_IDs_preserved": true,
+        "voxel_bits_exact_after_permutation": true,
+        "all_voxel_bits_exact_after_inverse": true,
+        "interpolation_performed": false
+      },
+      "formatting_command": {
+        "stage": "atlas_fs-aparc_output_strides",
+        "argv": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrconvert",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON01/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_lattice_proof_CON01_CON03_v1/sub-CON01/atlas_dwi_strides.nii.gz",
+          "-strides",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/mean_bzero.nii.gz",
+          "-datatype",
+          "uint32",
+          "-nthreads",
+          "8"
+        ],
+        "program": {
+          "path": "/public/software/apps/MRtrix3/3.0.3/bin/mrconvert",
+          "size_bytes": 987984,
+          "sha256": "b115dc477774314f48834898e5e39d3937ca9d820dca532c94b02bb67af6fe7f"
+        },
+        "returncode": 0,
+        "seconds_inclusive": 0.198095568921417,
+        "log": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_lattice_proof_CON01_CON03_v1/sub-CON01/mrconvert.log",
+          "size_bytes": 654,
+          "sha256": "5a4e6fe1d690be6c4956e686aac687e64414f12e0b07e46d1a0a6b29efd4b591"
+        },
+        "time": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_lattice_proof_CON01_CON03_v1/sub-CON01/mrconvert.time",
+          "size_bytes": 36,
+          "sha256": "e3facdbb96eb20097cd60f62b201190fb32a88b2db6bd1391c72cc0e4fe88155"
+        },
+        "time_text": "wall_seconds=0.19 peak_rss_kib=8056\n"
+      }
+    },
+    "sub-CON03": {
+      "case_id": "sub-CON03",
+      "failed_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/reference_anatomy.json",
+        "size_bytes": 63113,
+        "sha256": "1c962a7e4e7ca0dc6e5689a1761db194046bec1f8dbab42a33f0fd75d8f3be9d"
+      },
+      "prepared_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON03_prepare_recovered_v5/reference_anatomy.json",
+        "size_bytes": 191094,
+        "sha256": "cf377a013ca178ef557f54f85c78579c3c8d74e094b1f8cb7d32801708430d1e"
+      },
+      "official_dwi_contract": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/consumer_contract.json",
+        "size_bytes": 86932,
+        "sha256": "153ca1e43815b6ed630630869b3ea64e7eaadde27b12cfd5748806633b917052"
+      },
+      "original_source": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_reference_58aaa6ed/tools/reference/benchmark_connectome_anatomy_official.py",
+        "size_bytes": 50020,
+        "sha256": "28eadabb35cf4a6ef5c6d30ab6af6e31e5932d863efee0c8762f19ae39c90a6b"
+      },
+      "original_commands": [
+        {
+          "stage": "brain_to_nifti",
+          "argv": [
+            "/public/software/apps/Freesurfer/8.2.0-1/bin/mri_convert",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_baseline_raw_v2/baseline/sub-CON03/freesurfer/sub-CON03_ses-preop/mri/brain.mgz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/brain.nii.gz"
+          ],
+          "program": {
+            "path": "/public/software/apps/Freesurfer/8.2.0-1/bin/mri_convert",
+            "size_bytes": 3325104,
+            "sha256": "2be5e8594b355889d76cfe955aad5e34d630813cca2445bb3b8ae601e2b8763d"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/000_brain_to_nifti.log",
+          "seconds_inclusive": 0.4052914339117706,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/000_brain_to_nifti.time",
+          "time_text": "wall_seconds=0.40 peak_rss_kib=20680\n"
+        },
+        {
+          "stage": "flirt",
+          "argv": [
+            "/public/software/apps/FSL/6.0.7.4/bin/flirt",
+            "-in",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/mean_bzero_brain.nii.gz",
+            "-ref",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/brain.nii.gz",
+            "-cost",
+            "normmi",
+            "-dof",
+            "6",
+            "-omat",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/dwi_to_t1_fsl.txt"
+          ],
+          "program": {
+            "path": "/public/software/apps/FSL/6.0.7.4/bin/flirt",
+            "size_bytes": 551408,
+            "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/001_flirt.log",
+          "seconds_inclusive": 9.832594397012144,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/001_flirt.time",
+          "time_text": "wall_seconds=9.82 peak_rss_kib=206340\n"
+        },
+        {
+          "stage": "transformconvert",
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/transformconvert",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/dwi_to_t1_fsl.txt",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/mean_bzero_brain.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/brain.nii.gz",
+            "flirt_import",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/dwi_to_t1_mrtrix.txt",
+            "-nthreads",
+            "8"
+          ],
+          "program": {
+            "path": "/public/software/apps/MRtrix3/3.0.3/bin/transformconvert",
+            "size_bytes": 106288,
+            "sha256": "33b3f43d4f0f37f11f4001a20f19b2c35f871c04fde29fb23e57e8963dff8d28"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/002_transformconvert.log",
+          "seconds_inclusive": 0.019084888976067305,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/002_transformconvert.time",
+          "time_text": "wall_seconds=0.01 peak_rss_kib=3144\n"
+        },
+        {
+          "stage": "five_tissue_world",
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON03_prepare_recovered_v5/five_tissue_t1.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/five_tissue_dwi_world.nii.gz",
+            "-linear",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/dwi_to_t1_mrtrix.txt",
+            "-inverse",
+            "-nthreads",
+            "8"
+          ],
+          "program": {
+            "path": "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "size_bytes": 1752328,
+            "sha256": "d4e508e6c60d2ba19b41ac4b4dd772ef89389f92047e93ddbfd3418ba3537106"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/003_five_tissue_world.log",
+          "seconds_inclusive": 2.853376306127757,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/003_five_tissue_world.time",
+          "time_text": "wall_seconds=2.84 peak_rss_kib=659136\n"
+        },
+        {
+          "stage": "gmwmi_world",
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON03_prepare_recovered_v5/gmwmi_t1.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/gmwmi_dwi_world.nii.gz",
+            "-linear",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/dwi_to_t1_mrtrix.txt",
+            "-inverse",
+            "-nthreads",
+            "8"
+          ],
+          "program": {
+            "path": "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "size_bytes": 1752328,
+            "sha256": "d4e508e6c60d2ba19b41ac4b4dd772ef89389f92047e93ddbfd3418ba3537106"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/004_gmwmi_world.log",
+          "seconds_inclusive": 0.6427085725590587,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/004_gmwmi_world.time",
+          "time_text": "wall_seconds=0.63 peak_rss_kib=134644\n"
+        },
+        {
+          "stage": "atlas_fs-aparc_nn",
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_CON03_prepare_recovered_v5/atlases/fs-aparc/atlas_t1.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "-linear",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/dwi_to_t1_mrtrix.txt",
+            "-inverse",
+            "-template",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/mean_bzero.nii.gz",
+            "-interp",
+            "nearest",
+            "-datatype",
+            "uint32",
+            "-nthreads",
+            "8"
+          ],
+          "program": {
+            "path": "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "size_bytes": 1752328,
+            "sha256": "d4e508e6c60d2ba19b41ac4b4dd772ef89389f92047e93ddbfd3418ba3537106"
+          },
+          "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/005_atlas_fs-aparc_nn.log",
+          "seconds_inclusive": 0.2860743226483464,
+          "returncode": 0,
+          "time_file": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/logs/005_atlas_fs-aparc_nn.time",
+          "time_text": "wall_seconds=0.28 peak_rss_kib=139012\n"
+        }
+      ],
+      "original_successful_command_seconds": 14.039129921235144,
+      "files": {
+        "brain": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/brain.nii.gz",
+          "size_bytes": 1085185,
+          "sha256": "9ef86ce5a123c0e773f7fb00d930d43fab0ac9a92e8d7c56b295bd240ae95f48"
+        },
+        "dwi_to_t1_fsl": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/dwi_to_t1_fsl.txt",
+          "size_bytes": 179,
+          "sha256": "f24b0f8c28a2308502ed344056cfdcf9e9856967feaef6d5caf1734ea256280b"
+        },
+        "dwi_to_t1_mrtrix": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/dwi_to_t1_mrtrix.txt",
+          "size_bytes": 942,
+          "sha256": "fb40c9f367c43c2efa060007f11283259fc1bf640733abd26e0a5490762c9f6d"
+        },
+        "five_tissue_world": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/five_tissue_dwi_world.nii.gz",
+          "size_bytes": 823147,
+          "sha256": "206fdf25bd65ecc05d3cd3f28b53d1fc074e31045d2370fe9b75b5f6cc67265b"
+        },
+        "gmwmi_world": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/gmwmi_dwi_world.nii.gz",
+          "size_bytes": 364698,
+          "sha256": "b04a2768e19847d0be7ced1d2bfccdce12767d539f9ed2febae2a9dd499d6999"
+        },
+        "fs-aparc_original_layout": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "size_bytes": 32926,
+          "sha256": "0238e887f0927348144cbf6d231acba75418b26340eb5491f5f2aba939dc393b"
+        },
+        "fs-aparc_matched_layout": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_lattice_proof_CON01_CON03_v1/sub-CON03/atlas_dwi_strides.nii.gz",
+          "size_bytes": 35443,
+          "sha256": "1ff85b5442f55ea20bdf95687f54f8af0aa13f96875a94a96a03429e22c3b291"
+        }
+      },
+      "new_file_identity_observation_scope": "Transforms/brain/original atlas identities first observed by this post-failure proof; original report remains unchanged, no retrospective fields",
+      "template": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/mean_bzero.nii.gz",
+        "size_bytes": 1906381,
+        "sha256": "8d9664ffaf69759c881e94767b1a19784c0d5f99216ceaaf5ce4599590ca16ea"
+      },
+      "lattice_proof": {
+        "signed_integer_mapping_from_template_to_original": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            -1,
+            59
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ]
+        ],
+        "mapping_integer_max_abs_error": 1.3872080444343737e-06,
+        "all_grid_world_max_abs_displacement_mm": 3.4049153327941895e-06,
+        "original_shape": [
+          96,
+          60,
+          96
+        ],
+        "template_shape": [
+          96,
+          96,
+          60
+        ],
+        "axis_orientation_transform": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            2.0,
+            -1.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "official_strides_shape": [
+          96,
+          96,
+          60
+        ],
+        "official_strides_max_affine_delta": 2.9802322387695312e-08,
+        "array_dtype": "uint32",
+        "positive_IDs_preserved": true,
+        "voxel_bits_exact_after_permutation": true,
+        "all_voxel_bits_exact_after_inverse": true,
+        "interpolation_performed": false
+      },
+      "formatting_command": {
+        "stage": "atlas_fs-aparc_output_strides",
+        "argv": [
+          "/public/software/apps/MRtrix3/3.0.3/bin/mrconvert",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v3/sub-CON03/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_lattice_proof_CON01_CON03_v1/sub-CON03/atlas_dwi_strides.nii.gz",
+          "-strides",
+          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/mean_bzero.nii.gz",
+          "-datatype",
+          "uint32",
+          "-nthreads",
+          "8"
+        ],
+        "program": {
+          "path": "/public/software/apps/MRtrix3/3.0.3/bin/mrconvert",
+          "size_bytes": 987984,
+          "sha256": "b115dc477774314f48834898e5e39d3937ca9d820dca532c94b02bb67af6fe7f"
+        },
+        "returncode": 0,
+        "seconds_inclusive": 0.04901693435385823,
+        "log": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_lattice_proof_CON01_CON03_v1/sub-CON03/mrconvert.log",
+          "size_bytes": 654,
+          "sha256": "168c21adacdd17839242be281c7cba9c097fa4bd3074a1e9c8f88751ff54d5f1"
+        },
+        "time": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_lattice_proof_CON01_CON03_v1/sub-CON03/mrconvert.time",
+          "size_bytes": 36,
+          "sha256": "741a0d4051c7f9b855a67a0a88a6ea04c8f4d05911d5c16bd57830f5b8b16a05"
+        },
+        "time_text": "wall_seconds=0.04 peak_rss_kib=8056\n"
+      }
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "scope": "CPU-only validation of an explicit selected-recovery reader; protocol fixtures are not MRI or performance benchmarks",
+  "helper": "formal_actual_comparison_helper_v8",
+  "status": "tested_CPU_only_not_started",
+  "tests": 138,
+  "skipped": 0,
+  "failures": 0,
+  "errors": 0,
+  "CPU_test_seconds": 5.479434982873499,
+  "helper_file_sha256": {
+    "tools/reference/compare_freesurfer_recon_outputs.py": "a924cea77b861c5433b1b679e32dc16a3e0bc03324e580200161e60efc7b8b06",
+    "tools/reference/benchmark_connectome_cohort_compare.py": "55fe437ab4b02d09e1855293749420ad0acedc42b28b203fe13f08c7cb78427f",
+    "tools/reference/connectome_actual_gpu_origins.py": "a47138a76a92d19527274d5be51ed19c1aaec31ec0a183aac98e2e9a800cd7dd",
+    "tools/reference/summarize_connectome_actual_cohort.py": "ea4d10b21ed4300492491d876f1408fc4eda1af4a04d7cd98b36fe1426d1fd88",
+    "tools/reference/export_connectome_actual_cohort.py": "e4753d1c2d0b43ed1e2ba29f8ef06080d9364751cbd14ed909c51eb80d0721f0",
+    "tests/connectome/test_actual_cohort_comparison_tools.py": "b2dae3522623a428fd99b173b57ad4c4689873986af1ec345d7dbf4aa5c0cdbb",
+    "tests/connectome/test_actual_cohort_summary_tables.py": "206f7650359264f54fabbe277a00a40371fe40fff352e1bd6c5ea0ee2b77aed5",
+    "tests/connectome/test_actual_gpu_origin_bindings.py": "fee48249a19604af4418efb592d647d4dfd66d41874fd65e126fdf6b4ce4abb8",
+    "tests/connectome/test_actual_cohort_final_export.py": "546fc0f5c63d956770301f4ad136a4a5061c89b3d6e809e08f3c9ef9ae481018",
+    "tests/connectome/test_actual_selected_gpu_origin_reader.py": "f2da7da72097a968217750190af998f78346a65da433f08616431c0d1e8fd14b"
+  },
+  "environment": {
+    "host": "headcw",
+    "python_sha256": "25e7aaedbaba0fc87ef272b60a4988d20c1cb714dc0628fe8f62ebce8f3b34f2",
+    "python_version": "3.11.7 (main, Dec 15 2023, 18:12:31) [GCC 11.2.0]",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.0",
+    "matplotlib": "3.8.0"
+  },
+  "actual_NVML_preflight_sha256": "a67c203afc9b7a74da52fa3a5003dc16c70cd04e3a3e13f98db09ea6ec02054e",
+  "actual_plot_input_reads": [
+    {
+      "case_id": "sub-CON01",
+      "arm": "baseline",
+      "K": 84,
+      "shape": [
+        96,
+        96,
+        60
+      ],
+      "undefined_counts": {
+        "NaN": 36,
+        "positive_Inf": 0,
+        "negative_Inf": 0
+      },
+      "all_current_input_hashes_checked": true,
+      "images_generated": false
+    },
+    {
+      "case_id": "sub-CON01",
+      "arm": "candidate",
+      "K": 84,
+      "shape": [
+        96,
+        96,
+        60
+      ],
+      "undefined_counts": {
+        "NaN": 36,
+        "positive_Inf": 0,
+        "negative_Inf": 0
+      },
+      "all_current_input_hashes_checked": true,
+      "images_generated": false
+    },
+    {
+      "case_id": "sub-CON03",
+      "arm": "baseline",
+      "K": 84,
+      "shape": [
+        96,
+        96,
+        60
+      ],
+      "undefined_counts": {
+        "NaN": 1,
+        "positive_Inf": 0,
+        "negative_Inf": 0
+      },
+      "all_current_input_hashes_checked": true,
+      "images_generated": false
+    },
+    {
+      "case_id": "sub-CON03",
+      "arm": "candidate",
+      "K": 84,
+      "shape": [
+        96,
+        96,
+        60
+      ],
+      "undefined_counts": {
+        "NaN": 1,
+        "positive_Inf": 0,
+        "negative_Inf": 0
+      },
+      "all_current_input_hashes_checked": true,
+      "images_generated": false
+    }
+  ],
+  "actual_incomplete_final_render_gate": {
+    "rejected": true,
+    "message": "ten actual paired cases are not complete",
+    "images_generated": false
+  },
+  "original_terminal_driver_sha256": {
+    "baseline": "abd6f82569372577067c700d6822f7e0ea445cb17dcf7cbbdfdffab611bf0cb3",
+    "candidate": "23d89316af635d123d4c13569272f4b0a8dc1b9151ab0a318970f9fe2bddb322"
+  },
+  "original_configuration_sha256": {
+    "baseline": "66cc031d633f050e8dcd478671010b19b4459464104ab3cb24a1d6428894d5f9",
+    "candidate": "4c4115b31c08a007fc29d80b1fdc31d3076b4456a3b35ba8baf9a99fd8553b57"
+  },
+  "actual_original_queued_stop": {
+    "report_sha256": "48d5a0a5ef9cb16b300018ad98a50962d04d7b5ad5ae3fc14f16d9bbe30a25d6",
+    "error": {
+      "type": "RuntimeError",
+      "message": "STOP_DISPATCH prevents starting the queued raw-DWI computation"
+    },
+    "status": "failed",
+    "raw_file_count": 11,
+    "fields": [
+      "action",
+      "case_id",
+      "end_utc",
+      "error",
+      "execution_scope",
+      "gpu_lock_queue_seconds",
+      "identity",
+      "raw_input_provenance",
+      "schema_version",
+      "source_before",
+      "staged_anatomy",
+      "start_utc",
+      "status",
+      "subject",
+      "version",
+      "worker_wall_seconds"
+    ],
+    "command_present": false,
+    "wall_present": false,
+    "connectome_present": false
+  },
+  "selected_recovery_controller_started_by_this_tool": false,
+  "GPU_used": false,
+  "original_namespaces_modified": false,
+  "ten_actual_case_comparison_completed": false,
+  "pending": "Actual selected-recovery results and immutable terminal binding map must exist before the new reader starts; then all ten full paired outputs, independent FS and memory eligibility are verified."
+}

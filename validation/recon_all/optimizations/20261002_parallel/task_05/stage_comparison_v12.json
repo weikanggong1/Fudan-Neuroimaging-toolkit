@@ -1,0 +1,327 @@
+{
+  "code_commit": "ed4901f6162534a9e06254f2a786eaf6013c8256",
+  "script_sha256": "5ed84bd4619bc6acd4f43a08affdb7316fded8f770ba52d7d64cc2a85e84e768",
+  "source_report_sha256": "cd5e0aedd4feb4b3c477e52ae076db0dfd8b028d1366a5893f7ff39f4f175315",
+  "case_order": "sub01 GPU\u2192Conda; sub02 Conda\u2192GPU",
+  "overall_equivalence": "not_assessed",
+  "strict_138": "unchanged; not rerun",
+  "timing_scope": "stage functions include model construction, HDF5, two FP32 forwards and postprocess I/O; comparisons excluded",
+  "torch_peak_scope": "cumulative since command CUDA initialization; not independent stage peaks",
+  "cache_scope": "same initialized context; fresh models; filesystem/JIT caches not cleared; explicit empty_cache between stages",
+  "cases": {
+    "sub01": {
+      "gpu_stage_seconds": 37.36572821298614,
+      "conda_stage_seconds": 123.09384109498933,
+      "conda_over_gpu_speedup": 3.2942979297325485,
+      "gpu_step_seconds": {
+        "deform_model_and_save": 12.3800287717022,
+        "warp_convert": 4.309824196156114,
+        "warp_inverse": 18.704451483208686,
+        "resample_check": 1.3011320061050355
+      },
+      "conda_step_seconds": {
+        "deform_model_and_save": 10.653779779095203,
+        "warp_convert": 16.65607053413987,
+        "warp_inverse": 88.02234068792313,
+        "resample_check": 7.261018881108612
+      },
+      "comparisons": {
+        "forward": {
+          "different_elements": 0,
+          "elements": 25590063,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            193,
+            229,
+            193,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "8869a9dd5fd1faee8340d7f99741a3250317e65ba77dfb0ceb7057174d13e2af",
+          "sha256_right": "54d06a2131ebe11f78a335c1d18b9bae7d78f8bfe7024717d783b48873649a24"
+        },
+        "inverse": {
+          "different_elements": 0,
+          "elements": 50331648,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            256,
+            256,
+            256,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "4aa4f1b58d7f375bb232cca2f27552deae62fa6ad9f7123c438923b4e1063d9f",
+          "sha256_right": "a9f8cbce4d6511f134c047bb54e6e9f10719407c96abbf6fadfcd6d71837b9cf"
+        },
+        "check": {
+          "different_elements": 0,
+          "elements": 8530021,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            193,
+            229,
+            193
+          ],
+          "dtype_left": "uint8",
+          "dtype_right": "uint8",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "none",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "none",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "e97d2f1eb80ff4fc8a23feb823690451585ccc6a80b38d77923b67d9f1df332b",
+          "sha256_right": "7d953c4180c494babd899db28400fcc569573b69eea6cc01fcae079ab852c475"
+        },
+        "self_deform": {
+          "shape": [
+            152,
+            189,
+            162,
+            3
+          ],
+          "elements": 13961808,
+          "different_elements": 0,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "affine_maximum": 0.0,
+          "dtype_left": ">f4",
+          "dtype_right": ">f4",
+          "intent_left": null,
+          "intent_right": null,
+          "units_left": null,
+          "units_right": null,
+          "intent_units_scope": "not applicable to MGH header; scanner RAS transform uses mm",
+          "sha256_left": "751a6556be9a4fc3e8dbfb40bce2bcbd11a644069c53d59b1d119b792a156787",
+          "sha256_right": "751a6556be9a4fc3e8dbfb40bce2bcbd11a644069c53d59b1d119b792a156787"
+        }
+      },
+      "strict_numeric_passed": true,
+      "strict_geometry_passed": true,
+      "dtype_intent_units_passed": true,
+      "internal_forward_contract_passed": {
+        "stage": "not_observed_in_this_snapshot",
+        "stage-conda": "not_observed_in_this_snapshot"
+      }
+    },
+    "sub02": {
+      "gpu_stage_seconds": 37.820770929567516,
+      "conda_stage_seconds": 122.81286169309169,
+      "conda_over_gpu_speedup": 3.247233165125121,
+      "gpu_step_seconds": {
+        "deform_model_and_save": 11.280622850637883,
+        "warp_convert": 4.071648822166026,
+        "warp_inverse": 20.639196693897247,
+        "resample_check": 1.34957623668015
+      },
+      "conda_step_seconds": {
+        "deform_model_and_save": 10.989069821778685,
+        "warp_convert": 24.22387643903494,
+        "warp_inverse": 80.1887348848395,
+        "resample_check": 6.599326388910413
+      },
+      "comparisons": {
+        "forward": {
+          "different_elements": 0,
+          "elements": 25590063,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            193,
+            229,
+            193,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "b2ee02bf9cb491cf420ff8e4b9d1b536b807f538a7c173afe1b75fdebff4be19",
+          "sha256_right": "83a5558f5d218ff8615196a7e120ec46badb3c973e816d9968775154584810f5"
+        },
+        "inverse": {
+          "different_elements": 0,
+          "elements": 50331648,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            256,
+            256,
+            256,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "21114c5fcd53b870d70707e93f33e3813ac4751e4bec9a4a527c0e5312a149ee",
+          "sha256_right": "da0fbc6d0c9f99bdcb693cd459f518d680395e3ce090d51d5f345b497f055e85"
+        },
+        "check": {
+          "different_elements": 0,
+          "elements": 8530021,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            193,
+            229,
+            193
+          ],
+          "dtype_left": "uint8",
+          "dtype_right": "uint8",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "none",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "none",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "17ca423cbec2dae63ebf80fb72c5b926ecd0797a6d031b061135ad95567bdaec",
+          "sha256_right": "a7a7bc488dc702e5a8c0e2caf3915216d43759b7619d470c2c483795ade354e5"
+        },
+        "self_deform": {
+          "shape": [
+            152,
+            189,
+            162,
+            3
+          ],
+          "elements": 13961808,
+          "different_elements": 0,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "affine_maximum": 0.0,
+          "dtype_left": ">f4",
+          "dtype_right": ">f4",
+          "intent_left": null,
+          "intent_right": null,
+          "units_left": null,
+          "units_right": null,
+          "intent_units_scope": "not applicable to MGH header; scanner RAS transform uses mm",
+          "sha256_left": "41233afd190c45a261cfab471d570d66c03aafa2dd26c77afdfbfe661e18a61c",
+          "sha256_right": "41233afd190c45a261cfab471d570d66c03aafa2dd26c77afdfbfe661e18a61c"
+        }
+      },
+      "strict_numeric_passed": true,
+      "strict_geometry_passed": true,
+      "dtype_intent_units_passed": true,
+      "internal_forward_contract_passed": {
+        "stage-conda": "not_observed_in_this_snapshot",
+        "stage": "not_observed_in_this_snapshot"
+      }
+    }
+  }
+}

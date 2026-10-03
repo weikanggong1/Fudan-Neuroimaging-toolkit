@@ -1,0 +1,41 @@
+{
+  "observed_utc": "2026-10-03T01:30:01.449148+00:00",
+  "scope": "Two stdlib CPU protocol diagnostics of frozen 4f46097f metadata wrapper.\n\nPassing means two remaining guard gaps were reproduced, not that the wrapper is\nsafe or that scientific output matched. Real data/solvers are never used here.",
+  "frozen_tool_source_commit": "4f46097f",
+  "frozen_tool_sha256": "4a64b8492f95c5f204a18f70e7e8113c6d541ea6c5ef1d6f3655bb8d06d1d24c",
+  "diagnostic_source_sha256": "eba3942d61aaaecc1248967a8feea4536ab1c6f6fa60d3c81e78e15f035bea34",
+  "tests_run": 2,
+  "returncode": 0,
+  "wall_seconds": 0.019910312024876475,
+  "output": "test_terminal_checks_do_not_detect_numeric_source_change (__main__.FrozenGuardDiagnostics) ... ok\ntest_unprotected_actual_input_namespaces_are_accepted (__main__.FrozenGuardDiagnostics) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.020s\n\nOK\n",
+  "observations": [
+    {
+      "fixture": "source_changed_after_ready_during_stub_statistics",
+      "observed": "terminal_source_change_not_rejected",
+      "remaining_guard_required": true,
+      "scope": "statistics stub only; no matrix/subject/seed benchmark"
+    },
+    {
+      "fixture": "raw_actual_parent",
+      "observed": "fresh_output_inside_input_namespace_accepted",
+      "remaining_guard_required": true
+    },
+    {
+      "fixture": "selected_actual_job",
+      "observed": "fresh_output_inside_input_namespace_accepted",
+      "remaining_guard_required": true
+    },
+    {
+      "fixture": "resolved_official_producer",
+      "observed": "fresh_output_inside_input_namespace_accepted",
+      "remaining_guard_required": true
+    },
+    {
+      "fixture": "already_protected_mixed_tools_control",
+      "observed": "overlap_rejected"
+    }
+  ],
+  "state": "two_concrete_metadata_guard_gaps_reproduced",
+  "MRI_solver_commands": 0,
+  "GPU_commands": 0
+}

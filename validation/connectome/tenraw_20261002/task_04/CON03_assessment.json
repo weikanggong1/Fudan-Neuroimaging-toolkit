@@ -1,0 +1,156 @@
+{
+  "scope": "Actual new ds001226 CON03 100k fixed-TCK component assessment; root owns complete raw pipeline",
+  "recorded_utc": "2026-10-02T17:53:13.845079+00:00",
+  "optimizer_gain": {
+    "scope": "Optimizer only, same sparse map; not end-to-end pipeline",
+    "baseline_ABBA_mean_wall_s": 0.10094114509411156,
+    "candidate_ABBA_mean_wall_s": 0.08132656314410269,
+    "saved_wall_s": 0.01961458195000887,
+    "wall_reduction_percent": 19.431701445155383,
+    "speedup": 1.2411829689059128,
+    "A1_B1_saved_wall_s": 0.01815478503704071,
+    "A2_B2_saved_wall_s": 0.021074378862977028,
+    "positive_mean_gain": true,
+    "eligible_same_map_candidate": false,
+    "whole_chain_memory_and_wall_assessed": false
+  },
+  "strict_same_map_equality_pass": false,
+  "comparisons": {
+    "A1_B1": {
+      "weights": {
+        "neq": 4268,
+        "nonfinite_mismatch": 0,
+        "max": 8.881784197001252e-16,
+        "p99": 2.220446049250313e-16,
+        "rmse": 7.463263149634182e-17
+      },
+      "density": {
+        "neq": 17534,
+        "nonfinite_mismatch": 0,
+        "max": 1.4210854715202004e-14,
+        "p99": 3.552713678800501e-15,
+        "rmse": 7.502825709286642e-16
+      },
+      "excluded_equal": true,
+      "iterations_equal": true,
+      "mu_equal": true
+    },
+    "A2_B2": {
+      "weights": {
+        "neq": 4262,
+        "nonfinite_mismatch": 0,
+        "max": 8.881784197001252e-16,
+        "p99": 2.220446049250313e-16,
+        "rmse": 7.60619694280404e-17
+      },
+      "density": {
+        "neq": 17223,
+        "nonfinite_mismatch": 0,
+        "max": 1.4210854715202004e-14,
+        "p99": 3.552713678800501e-15,
+        "rmse": 7.424495813982865e-16
+      },
+      "excluded_equal": true,
+      "iterations_equal": true,
+      "mu_equal": true
+    },
+    "A1_A2": {
+      "weights": {
+        "neq": 4394,
+        "nonfinite_mismatch": 0,
+        "max": 1.3322676295501878e-15,
+        "p99": 2.220446049250313e-16,
+        "rmse": 7.919239807362761e-17
+      },
+      "density": {
+        "neq": 17345,
+        "nonfinite_mismatch": 0,
+        "max": 1.0658141036401503e-14,
+        "p99": 3.552713678800501e-15,
+        "rmse": 7.175342414352374e-16
+      },
+      "excluded_equal": true,
+      "iterations_equal": true,
+      "mu_equal": true
+    },
+    "B1_B2": {
+      "weights": {
+        "neq": 4216,
+        "nonfinite_mismatch": 0,
+        "max": 8.881784197001252e-16,
+        "p99": 2.220446049250313e-16,
+        "rmse": 7.359281341871789e-17
+      },
+      "density": {
+        "neq": 16922,
+        "nonfinite_mismatch": 0,
+        "max": 1.4210854715202004e-14,
+        "p99": 3.552713678800501e-15,
+        "rmse": 7.248889837462153e-16
+      },
+      "excluded_equal": true,
+      "iterations_equal": true,
+      "mu_equal": true
+    }
+  },
+  "sampled_component_budget_pass": true,
+  "actual_GPU_UUID": [
+    "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+  ],
+  "allocator": "expandable_segments:True",
+  "precision": {
+    "matmul_TF32": true,
+    "cudnn_TF32": true
+  },
+  "official_weights_baseline": {
+    "neq": 11549,
+    "nonfinite_mismatch": 0,
+    "max": 0.4947942481080272,
+    "p99": 0.026944526830253442,
+    "rmse": 0.009947777538203032
+  },
+  "official_weights_candidate": {
+    "neq": 11549,
+    "nonfinite_mismatch": 0,
+    "max": 0.4947942481080272,
+    "p99": 0.02694452683025345,
+    "rmse": 0.009947777538203032
+  },
+  "official_FA": {
+    "neq": 11606,
+    "nonfinite_mismatch": 0,
+    "max": 0.0005315840304015995,
+    "p99": 2.3829892337290554e-05,
+    "rmse": 1.2991217878883651e-05
+  },
+  "conclusion": "Candidate not eligible under unchanged strict bit-equality gate. Positive optimizer-only gain of 0.019615 seconds does not establish whole-chain speedup. Repeated baseline also varies; no causal attribution or tolerance relaxation.",
+  "pending": [
+    "second pilot",
+    "actual 1M-seed sparse record/combined production memory",
+    "complete candidate raw pipeline wall and official acceptance"
+  ],
+  "brain_metadata": {
+    "scope": "Real-data illustration only; no benchmark calculation or resampling",
+    "accepted_tracks": 11606,
+    "section_voxel_z": 36,
+    "slab_half_width_voxels": 1.5,
+    "displayed_segments": 64137,
+    "weight_difference_max": 8.881784197001252e-16,
+    "input_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/tracks.tck": "8c488fc7b6a01fbb4bea04cfe3dc6535037b2b2cc2fab9c19353bdffaf37f9ca",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/geometry.npz": "3355f983b842a69d8787f11f6f3b9c2644b147d8f67ecc447e282c4f716f260f",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/fa.nii.gz": "2f217e45d80a691ebe173a61dd020c6d42109d17ce1c4f08461be9df85e9e5de",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/CON03_sameinput.json": "256a74791b781bb4be58025e990e2a6fa40eede53a824557bb7c46c3482459d4",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/CON03_sameinput.npz": "e171bce8648bb9c0eecf56b2e81ac598639e611b6584c1fd63ed6371fcf8de36"
+    }
+  },
+  "local_artifact_sha256": {
+    "CON03_official_comparison.json": "13856ab26dd35151986b512c054045d731b3f4c60d463e5630dd05527cc0386a",
+    "CON03_official_reference.json": "e4e838164f2c890011e70119d6e4096354d61d2146f04ccbbded94c8dfd383e0",
+    "CON03_reference_geometry_conversion.json": "58a3f171b9ef9004a4162ea76f4e8e3693bbf53c9c45a6d87b0db34e85f51440",
+    "CON03_sameinput.json": "256a74791b781bb4be58025e990e2a6fa40eede53a824557bb7c46c3482459d4",
+    "CON03_sift2_brain.json": "83b7b27e1b6cd11ab21885907ee79d0bdb4869f5e4f5ecf60e66e79299efa00a",
+    "CON03_sift2_brain.png": "3a9a9b85ca1cfe9a0309828475792cb98e64eebd91f6aa4a1f29c622d2e9df8a",
+    "CON03_v2_validation_failure.json": "25a7c5250ab6d1b28e8321400bcfc9f3c49dca487d4bb6c5139d87b7159422d1"
+  }
+}

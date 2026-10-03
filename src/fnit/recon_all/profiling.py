@@ -165,3 +165,114 @@ class StageProfiler:
                              **memory}
             if error is not None:
                 self.last_row["error"] = error
+
+
+def parallel_intervals(workers: dict) -> dict:
+    """按跨进程 monotonic 时钟计算执行跨度/双侧重叠，单位秒。
+
+    workers 每项含 started_monotonic/finished_monotonic。worker 总秒数
+    仅为计算量诊断；组墙钟由调用方另计，包含准备、exec 导入和发布。
+    """
+    intervals = [(row['started_monotonic'], row['finished_monotonic'])
+                 for row in workers.values()]
+    if not intervals:
+        return {'worker_span_seconds': 0., 'worker_sum_seconds': 0., 'overlap_seconds': 0.}
+    return {'worker_span_seconds': max(b for a, b in intervals) - min(a for a, b in intervals),
+            'worker_sum_seconds': sum(b - a for a, b in intervals),
+            'overlap_seconds': max(0., min(b for a, b in intervals) - max(a for a, b in intervals)),
+            'critical_path_scope': 'worker execution span; group wall includes copy, exec and publication'}
+
+
+class ProcessTreeDeviceSampler:
+    """采样父进程及其存活子树在目标 GPU 的同期显存，字节/秒。
+
+    device 为逻辑 CUDA 设备，尊重 CUDA_VISIBLE_DEVICES；CPU 不调用
+    nvidia-smi。interval 默认 0.5 秒，失败另计，未观测不记为零。
+    子树信息从 /proc 读取；显存来自一次 nvidia-smi 全进程快照，
+    不相加各进程的历史峰值。采样与瞬时尖峰之间可能有遗漏。
+    """
+    def __init__(self, *, device: str, parent_pid: int, interval: float = .5):
+        self.device, self.parent_pid, self.interval = device, parent_pid, interval
+        self.last = 0.
+        self.samples, self.errors, self.worker_pids = [], [], []
+        self.uuid = None
+
+    def add_worker(self, pid):
+        self.worker_pids.append(pid)
+
+    @staticmethod
+    def _tree(pid):
+        from pathlib import Path
+        found, pending = set(), [pid]
+        while pending:
+            current = pending.pop()
+            if current in found:
+                continue
+            found.add(current)
+            # 子进程可由非主线程创建，遍历所有 task/children。
+            for path in Path(f'/proc/{current}/task').glob('*/children'):
+                try:
+                    pending.extend(int(value) for value in path.read_text().split())
+                except (OSError, ValueError):
+                    pass
+        return found
+
+    def sample_if_due(self, *, force=False):
+        import subprocess
+        now = time.monotonic()
+        if not self.device.startswith('cuda') or (not force and now - self.last < self.interval):
+            return
+        self.last = now
+        try:
+            if self.uuid is None:
+                gpu_list = subprocess.check_output(['nvidia-smi', '--query-gpu=index,uuid',
+                    '--format=csv,noheader,nounits'], text=True, timeout=3)
+                devices = {index.strip(): uuid.strip() for index, uuid in
+                           (line.split(',') for line in gpu_list.strip().splitlines())}
+                logical = int(self.device.split(':')[1]) if ':' in self.device else 0
+                # 已初始化的父API优先核对实际CUDA枚举；不建立新context。
+                if torch.cuda.is_initialized():
+                    actual = str(getattr(torch.cuda.get_device_properties(torch.device(self.device)), 'uuid', ''))
+                    canonical = actual if actual.startswith('GPU-') else 'GPU-' + actual
+                    if canonical in devices.values():
+                        self.uuid = canonical
+                if self.uuid is None:
+                    visible = os.environ.get('CUDA_VISIBLE_DEVICES')
+                    selector = visible.split(',')[logical].strip() if visible is not None else str(logical)
+                    if selector.startswith('GPU-'):
+                        matches = [uuid for uuid in devices.values() if uuid.lower().startswith(selector.lower())]
+                        if len(matches) != 1:
+                            raise ValueError('GPU UUID selector must match one complete UUID: ' + selector)
+                        self.uuid = matches[0]
+                    elif selector.startswith('MIG-'):
+                        raise ValueError('MIG process memory UUID mapping is not supported; memory unavailable')
+                    else:
+                        self.uuid = devices[selector]
+            tree = self._tree(self.parent_pid)
+            raw = subprocess.check_output(['nvidia-smi', '--query-compute-apps=pid,gpu_uuid,used_gpu_memory',
+                '--format=csv,noheader,nounits'], text=True, timeout=3)
+            entries, external = [], []
+            for line in raw.strip().splitlines():
+                if not line:
+                    continue
+                pid, uuid, memory = (value.strip() for value in line.split(','))
+                if uuid != self.uuid:
+                    continue
+                entry = {'pid': int(pid), 'bytes': int(memory) * 1024 * 1024}
+                (entries if int(pid) in tree else external).append(entry)
+            self.samples.append({'monotonic': now, 'processes': entries,
+                                 'tree_total_bytes': sum(row['bytes'] for row in entries),
+                                 'external_processes': external})
+        except Exception as error:
+            self.errors.append({'monotonic': now, 'error': repr(error)})
+
+    def report(self):
+        gaps = [b['monotonic'] - a['monotonic'] for a, b in zip(self.samples, self.samples[1:])]
+        return {'status': 'not_applicable' if not self.device.startswith('cuda') else
+                         'available' if self.samples else 'unavailable',
+                'target_gpu_uuid': self.uuid, 'sampling_interval_seconds': self.interval,
+                'max_observed_interval_seconds': max(gaps, default=None),
+                'failed_samples': self.errors, 'samples': self.samples,
+                'peak_tree_total_bytes': max((row['tree_total_bytes'] for row in self.samples), default=None),
+                'scope': 'simultaneous parent and all live descendants on target GPU; external load separate',
+                'worker_pids': self.worker_pids}

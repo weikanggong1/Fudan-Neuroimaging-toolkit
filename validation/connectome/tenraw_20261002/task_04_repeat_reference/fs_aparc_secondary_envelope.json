@@ -1,0 +1,5756 @@
+{
+  "dataset": "OpenNeuro ds001226 CON03",
+  "n_seed_attempts": 100000,
+  "design": "5 supplied official repeats and 1 FNIT runs; supplied existing matrices",
+  "official_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "fnit_seeds": [
+    0
+  ],
+  "metric_policy": {
+    "edges": "strict upper triangle, excluding diagonal; diagonal errors reported separately",
+    "count_and_fbc": "all off-diagonal edges",
+    "length_and_fa": "value metrics only on common nonzero count edges",
+    "normalization": "first matrix is the reference; cross pairs start with official, unordered within-arm pairs use supplied directory order",
+    "acceptance": "errors <= maximum observed official-pair error; similarities >= minimum observed official-pair similarity",
+    "undefined": "null and not_assessed, never zero or a pass",
+    "scope": "matrix repeat envelope; not a proof of identical random streams or anatomical pipeline equivalence",
+    "sampling": "finite observed repeat range, not a population confidence interval; criterion is fixed before examining real cross results",
+    "independence": "caller-declared repeats; unique resolved directories and supplied seed labels are checked, but different directories alone do not prove independent execution",
+    "relative_l1_full_upper": "all upper-triangle values, also recorded for FA/length as a support-sensitive secondary measure",
+    "nonzero_mean_scaled_mae": "evaluated-edge MAE / mean absolute nonzero reference value on evaluated edges"
+  },
+  "official_input_sha256": [
+    {
+      "count": "e5ec79bd7d95eeb821077fa8a224f7613444e9b112c4dc1dcbb874403d90f1d4",
+      "sift2_fbc": "7774039bba0fbeb21b4f5a7949f289c35a03fa7132bd04e2fea945b073482cd9",
+      "mean_length": "91787492bb2d0795ab8a3ea9821a354dbf5b9101a7451e25256916187a08210f",
+      "mean_fa": "3663ffd426fc696858422e0c764d0eb017bb264f03d731dca1d5d9165c5a2a8a"
+    },
+    {
+      "count": "275775a8a90cbb51ff36074d5f79c6c903e14039dc5688a16a9b516f1e8a6a8b",
+      "sift2_fbc": "7a0974d009c4a909b3d47c70e2aeba7f0bb6ff87f5453ac23f863b0326298274",
+      "mean_length": "ba65d272b1d7d839f432b77324f2b7be812d439c3587b6e481d9a95ce1a419eb",
+      "mean_fa": "9fd5e1625cd753d3efe04bb6b90c6aca5814ad888ba05a76654cec98e129f185"
+    },
+    {
+      "count": "1b9d787c8c71da9d9e207c4fc8401584ffccc685aa96a029ab52cea50c09e83b",
+      "sift2_fbc": "8d577846fe2c5ebd60b73064cebd6295639d8b975ca4bc91d6e3a84d609188f6",
+      "mean_length": "9d77d973120e281ab01c2d7a57d227b024502185ec8e7c23a6eca508b544c1f8",
+      "mean_fa": "6c04e78cfdba18e960de5ca271335d079d14d5c977799e878bc1a4788c4be6cd"
+    },
+    {
+      "count": "c94b7d26f5dc2b4071256ef4e7812386dc4f0f0d5889da45bd2c1c00efb4d31c",
+      "sift2_fbc": "0167af6c7decf3d795aadc803ceb20aef42468dc75ea65928c59e4bbb916682e",
+      "mean_length": "578a1ad5fa0dbce974031483c9e06c9508dfbc4968ce6e4f3ab9bc9647f33a54",
+      "mean_fa": "543186d9c692ab1183bd37a9b1720fb93e0b795d7904cb55f34c1cfc1ca8d1f3"
+    },
+    {
+      "count": "1b91143163933bc9ccadf3e4ee129d7b176b68281b339d1e316245a2d4576dd6",
+      "sift2_fbc": "63b09f3d3ece0dd0513507ecf90a4f1b006366e6d3faf7fcab1f4f226adb1f9b",
+      "mean_length": "ca8fade9e6d0657952dd7bd78439cb4277fa00ba4040bae033bf14bfa7179a97",
+      "mean_fa": "b65095777bee5d5afb5dbd3d6ce812de1ba25f64e97c882a0e2cd0ca5c758315"
+    }
+  ],
+  "fnit_input_sha256": {
+    "count": "02780fef57144f630d4670247360f3467ac04e6ce0eca9f89bbf77454a94d618",
+    "sift2_fbc": "e6540bced26a9397116618eb68edffbaa2375be04e9a0e90dffb327b07aceaa1",
+    "mean_length": "a3085fb1c73130c444e48ebd1bb326849207068ddcce251ceb682122237531b6",
+    "mean_fa": "936e0d14ba8f429e02f6a180d3efa3f23e27908b48fc8ce5c9c653ac0c051dfd"
+  },
+  "provenance": {
+    "official": [
+      {
+        "directory": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/seed-0/atlases/fs-aparc",
+        "matrix_sha256": {
+          "count": "e5ec79bd7d95eeb821077fa8a224f7613444e9b112c4dc1dcbb874403d90f1d4",
+          "sift2_fbc": "7774039bba0fbeb21b4f5a7949f289c35a03fa7132bd04e2fea945b073482cd9",
+          "mean_length": "91787492bb2d0795ab8a3ea9821a354dbf5b9101a7451e25256916187a08210f",
+          "mean_fa": "3663ffd426fc696858422e0c764d0eb017bb264f03d731dca1d5d9165c5a2a8a"
+        },
+        "nodes": 84,
+        "atlas_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+        "node_rows": [
+          [
+            "1",
+            "1001",
+            "L",
+            "ctx-lh-bankssts"
+          ],
+          [
+            "2",
+            "1002",
+            "L",
+            "ctx-lh-caudalanteriorcingulate"
+          ],
+          [
+            "3",
+            "1003",
+            "L",
+            "ctx-lh-caudalmiddlefrontal"
+          ],
+          [
+            "4",
+            "1005",
+            "L",
+            "ctx-lh-cuneus"
+          ],
+          [
+            "5",
+            "1006",
+            "L",
+            "ctx-lh-entorhinal"
+          ],
+          [
+            "6",
+            "1007",
+            "L",
+            "ctx-lh-fusiform"
+          ],
+          [
+            "7",
+            "1008",
+            "L",
+            "ctx-lh-inferiorparietal"
+          ],
+          [
+            "8",
+            "1009",
+            "L",
+            "ctx-lh-inferiortemporal"
+          ],
+          [
+            "9",
+            "1010",
+            "L",
+            "ctx-lh-isthmuscingulate"
+          ],
+          [
+            "10",
+            "1011",
+            "L",
+            "ctx-lh-lateraloccipital"
+          ],
+          [
+            "11",
+            "1012",
+            "L",
+            "ctx-lh-lateralorbitofrontal"
+          ],
+          [
+            "12",
+            "1013",
+            "L",
+            "ctx-lh-lingual"
+          ],
+          [
+            "13",
+            "1014",
+            "L",
+            "ctx-lh-medialorbitofrontal"
+          ],
+          [
+            "14",
+            "1015",
+            "L",
+            "ctx-lh-middletemporal"
+          ],
+          [
+            "15",
+            "1016",
+            "L",
+            "ctx-lh-parahippocampal"
+          ],
+          [
+            "16",
+            "1017",
+            "L",
+            "ctx-lh-paracentral"
+          ],
+          [
+            "17",
+            "1018",
+            "L",
+            "ctx-lh-parsopercularis"
+          ],
+          [
+            "18",
+            "1019",
+            "L",
+            "ctx-lh-parsorbitalis"
+          ],
+          [
+            "19",
+            "1020",
+            "L",
+            "ctx-lh-parstriangularis"
+          ],
+          [
+            "20",
+            "1021",
+            "L",
+            "ctx-lh-pericalcarine"
+          ],
+          [
+            "21",
+            "1022",
+            "L",
+            "ctx-lh-postcentral"
+          ],
+          [
+            "22",
+            "1023",
+            "L",
+            "ctx-lh-posteriorcingulate"
+          ],
+          [
+            "23",
+            "1024",
+            "L",
+            "ctx-lh-precentral"
+          ],
+          [
+            "24",
+            "1025",
+            "L",
+            "ctx-lh-precuneus"
+          ],
+          [
+            "25",
+            "1026",
+            "L",
+            "ctx-lh-rostralanteriorcingulate"
+          ],
+          [
+            "26",
+            "1027",
+            "L",
+            "ctx-lh-rostralmiddlefrontal"
+          ],
+          [
+            "27",
+            "1028",
+            "L",
+            "ctx-lh-superiorfrontal"
+          ],
+          [
+            "28",
+            "1029",
+            "L",
+            "ctx-lh-superiorparietal"
+          ],
+          [
+            "29",
+            "1030",
+            "L",
+            "ctx-lh-superiortemporal"
+          ],
+          [
+            "30",
+            "1031",
+            "L",
+            "ctx-lh-supramarginal"
+          ],
+          [
+            "31",
+            "1032",
+            "L",
+            "ctx-lh-frontalpole"
+          ],
+          [
+            "32",
+            "1033",
+            "L",
+            "ctx-lh-temporalpole"
+          ],
+          [
+            "33",
+            "1034",
+            "L",
+            "ctx-lh-transversetemporal"
+          ],
+          [
+            "34",
+            "1035",
+            "L",
+            "ctx-lh-insula"
+          ],
+          [
+            "35",
+            "8",
+            "L",
+            "Left-Cerebellum-Cortex"
+          ],
+          [
+            "36",
+            "10",
+            "L",
+            "Left-Thalamus"
+          ],
+          [
+            "37",
+            "11",
+            "L",
+            "Left-Caudate"
+          ],
+          [
+            "38",
+            "12",
+            "L",
+            "Left-Putamen"
+          ],
+          [
+            "39",
+            "13",
+            "L",
+            "Left-Pallidum"
+          ],
+          [
+            "40",
+            "17",
+            "L",
+            "Left-Hippocampus"
+          ],
+          [
+            "41",
+            "18",
+            "L",
+            "Left-Amygdala"
+          ],
+          [
+            "42",
+            "26",
+            "L",
+            "Left-Accumbens-area"
+          ],
+          [
+            "43",
+            "49",
+            "R",
+            "Right-Thalamus"
+          ],
+          [
+            "44",
+            "50",
+            "R",
+            "Right-Caudate"
+          ],
+          [
+            "45",
+            "51",
+            "R",
+            "Right-Putamen"
+          ],
+          [
+            "46",
+            "52",
+            "R",
+            "Right-Pallidum"
+          ],
+          [
+            "47",
+            "53",
+            "R",
+            "Right-Hippocampus"
+          ],
+          [
+            "48",
+            "54",
+            "R",
+            "Right-Amygdala"
+          ],
+          [
+            "49",
+            "58",
+            "R",
+            "Right-Accumbens-area"
+          ],
+          [
+            "50",
+            "2001",
+            "R",
+            "ctx-rh-bankssts"
+          ],
+          [
+            "51",
+            "2002",
+            "R",
+            "ctx-rh-caudalanteriorcingulate"
+          ],
+          [
+            "52",
+            "2003",
+            "R",
+            "ctx-rh-caudalmiddlefrontal"
+          ],
+          [
+            "53",
+            "2005",
+            "R",
+            "ctx-rh-cuneus"
+          ],
+          [
+            "54",
+            "2006",
+            "R",
+            "ctx-rh-entorhinal"
+          ],
+          [
+            "55",
+            "2007",
+            "R",
+            "ctx-rh-fusiform"
+          ],
+          [
+            "56",
+            "2008",
+            "R",
+            "ctx-rh-inferiorparietal"
+          ],
+          [
+            "57",
+            "2009",
+            "R",
+            "ctx-rh-inferiortemporal"
+          ],
+          [
+            "58",
+            "2010",
+            "R",
+            "ctx-rh-isthmuscingulate"
+          ],
+          [
+            "59",
+            "2011",
+            "R",
+            "ctx-rh-lateraloccipital"
+          ],
+          [
+            "60",
+            "2012",
+            "R",
+            "ctx-rh-lateralorbitofrontal"
+          ],
+          [
+            "61",
+            "2013",
+            "R",
+            "ctx-rh-lingual"
+          ],
+          [
+            "62",
+            "2014",
+            "R",
+            "ctx-rh-medialorbitofrontal"
+          ],
+          [
+            "63",
+            "2015",
+            "R",
+            "ctx-rh-middletemporal"
+          ],
+          [
+            "64",
+            "2016",
+            "R",
+            "ctx-rh-parahippocampal"
+          ],
+          [
+            "65",
+            "2017",
+            "R",
+            "ctx-rh-paracentral"
+          ],
+          [
+            "66",
+            "2018",
+            "R",
+            "ctx-rh-parsopercularis"
+          ],
+          [
+            "67",
+            "2019",
+            "R",
+            "ctx-rh-parsorbitalis"
+          ],
+          [
+            "68",
+            "2020",
+            "R",
+            "ctx-rh-parstriangularis"
+          ],
+          [
+            "69",
+            "2021",
+            "R",
+            "ctx-rh-pericalcarine"
+          ],
+          [
+            "70",
+            "2022",
+            "R",
+            "ctx-rh-postcentral"
+          ],
+          [
+            "71",
+            "2023",
+            "R",
+            "ctx-rh-posteriorcingulate"
+          ],
+          [
+            "72",
+            "2024",
+            "R",
+            "ctx-rh-precentral"
+          ],
+          [
+            "73",
+            "2025",
+            "R",
+            "ctx-rh-precuneus"
+          ],
+          [
+            "74",
+            "2026",
+            "R",
+            "ctx-rh-rostralanteriorcingulate"
+          ],
+          [
+            "75",
+            "2027",
+            "R",
+            "ctx-rh-rostralmiddlefrontal"
+          ],
+          [
+            "76",
+            "2028",
+            "R",
+            "ctx-rh-superiorfrontal"
+          ],
+          [
+            "77",
+            "2029",
+            "R",
+            "ctx-rh-superiorparietal"
+          ],
+          [
+            "78",
+            "2030",
+            "R",
+            "ctx-rh-superiortemporal"
+          ],
+          [
+            "79",
+            "2031",
+            "R",
+            "ctx-rh-supramarginal"
+          ],
+          [
+            "80",
+            "2032",
+            "R",
+            "ctx-rh-frontalpole"
+          ],
+          [
+            "81",
+            "2033",
+            "R",
+            "ctx-rh-temporalpole"
+          ],
+          [
+            "82",
+            "2034",
+            "R",
+            "ctx-rh-transversetemporal"
+          ],
+          [
+            "83",
+            "2035",
+            "R",
+            "ctx-rh-insula"
+          ],
+          [
+            "84",
+            "47",
+            "R",
+            "Right-Cerebellum-Cortex"
+          ]
+        ],
+        "nodes_tsv_sha256": "ef0633831a8a0b299d29522f2f1bb21ca76aafdf6fd1c75e4b116413cfab3fcf",
+        "reference_atlas_export": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "sha256": "e03aeb9a188905d45ac0ee1d9ad2ff00c4f555f46194446ae988549df1709a42",
+          "dtype": "int32",
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "file_affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_serialization": {
+            "source_dtype": "float64",
+            "source_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "implicit_file_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "bottom_row_max_abs_difference": 0.0,
+            "machine_epsilon": 2.220446049250313e-16,
+            "machine_bound_gamma4": 8.88178419700126e-16,
+            "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+          },
+          "sform_3x4_bits_verified_equal": true,
+          "header_spacing": [
+            2.4999999936440336,
+            2.5000001137724035,
+            2.4999999981026777
+          ],
+          "voxel_bits_verified_equal": true,
+          "nonfinite_count": 0,
+          "nonfinite_coordinates": [],
+          "nonfinite_coordinates_complete": true,
+          "original_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+          "maximum_present_label": 84,
+          "original_affine_max_abs_difference": 0.0
+        },
+        "canonical_matrix_alignment": null,
+        "atlas_hash_scope": "source CLI atlas file"
+      },
+      {
+        "directory": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/seed-1/atlases/fs-aparc",
+        "matrix_sha256": {
+          "count": "275775a8a90cbb51ff36074d5f79c6c903e14039dc5688a16a9b516f1e8a6a8b",
+          "sift2_fbc": "7a0974d009c4a909b3d47c70e2aeba7f0bb6ff87f5453ac23f863b0326298274",
+          "mean_length": "ba65d272b1d7d839f432b77324f2b7be812d439c3587b6e481d9a95ce1a419eb",
+          "mean_fa": "9fd5e1625cd753d3efe04bb6b90c6aca5814ad888ba05a76654cec98e129f185"
+        },
+        "nodes": 84,
+        "atlas_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+        "node_rows": [
+          [
+            "1",
+            "1001",
+            "L",
+            "ctx-lh-bankssts"
+          ],
+          [
+            "2",
+            "1002",
+            "L",
+            "ctx-lh-caudalanteriorcingulate"
+          ],
+          [
+            "3",
+            "1003",
+            "L",
+            "ctx-lh-caudalmiddlefrontal"
+          ],
+          [
+            "4",
+            "1005",
+            "L",
+            "ctx-lh-cuneus"
+          ],
+          [
+            "5",
+            "1006",
+            "L",
+            "ctx-lh-entorhinal"
+          ],
+          [
+            "6",
+            "1007",
+            "L",
+            "ctx-lh-fusiform"
+          ],
+          [
+            "7",
+            "1008",
+            "L",
+            "ctx-lh-inferiorparietal"
+          ],
+          [
+            "8",
+            "1009",
+            "L",
+            "ctx-lh-inferiortemporal"
+          ],
+          [
+            "9",
+            "1010",
+            "L",
+            "ctx-lh-isthmuscingulate"
+          ],
+          [
+            "10",
+            "1011",
+            "L",
+            "ctx-lh-lateraloccipital"
+          ],
+          [
+            "11",
+            "1012",
+            "L",
+            "ctx-lh-lateralorbitofrontal"
+          ],
+          [
+            "12",
+            "1013",
+            "L",
+            "ctx-lh-lingual"
+          ],
+          [
+            "13",
+            "1014",
+            "L",
+            "ctx-lh-medialorbitofrontal"
+          ],
+          [
+            "14",
+            "1015",
+            "L",
+            "ctx-lh-middletemporal"
+          ],
+          [
+            "15",
+            "1016",
+            "L",
+            "ctx-lh-parahippocampal"
+          ],
+          [
+            "16",
+            "1017",
+            "L",
+            "ctx-lh-paracentral"
+          ],
+          [
+            "17",
+            "1018",
+            "L",
+            "ctx-lh-parsopercularis"
+          ],
+          [
+            "18",
+            "1019",
+            "L",
+            "ctx-lh-parsorbitalis"
+          ],
+          [
+            "19",
+            "1020",
+            "L",
+            "ctx-lh-parstriangularis"
+          ],
+          [
+            "20",
+            "1021",
+            "L",
+            "ctx-lh-pericalcarine"
+          ],
+          [
+            "21",
+            "1022",
+            "L",
+            "ctx-lh-postcentral"
+          ],
+          [
+            "22",
+            "1023",
+            "L",
+            "ctx-lh-posteriorcingulate"
+          ],
+          [
+            "23",
+            "1024",
+            "L",
+            "ctx-lh-precentral"
+          ],
+          [
+            "24",
+            "1025",
+            "L",
+            "ctx-lh-precuneus"
+          ],
+          [
+            "25",
+            "1026",
+            "L",
+            "ctx-lh-rostralanteriorcingulate"
+          ],
+          [
+            "26",
+            "1027",
+            "L",
+            "ctx-lh-rostralmiddlefrontal"
+          ],
+          [
+            "27",
+            "1028",
+            "L",
+            "ctx-lh-superiorfrontal"
+          ],
+          [
+            "28",
+            "1029",
+            "L",
+            "ctx-lh-superiorparietal"
+          ],
+          [
+            "29",
+            "1030",
+            "L",
+            "ctx-lh-superiortemporal"
+          ],
+          [
+            "30",
+            "1031",
+            "L",
+            "ctx-lh-supramarginal"
+          ],
+          [
+            "31",
+            "1032",
+            "L",
+            "ctx-lh-frontalpole"
+          ],
+          [
+            "32",
+            "1033",
+            "L",
+            "ctx-lh-temporalpole"
+          ],
+          [
+            "33",
+            "1034",
+            "L",
+            "ctx-lh-transversetemporal"
+          ],
+          [
+            "34",
+            "1035",
+            "L",
+            "ctx-lh-insula"
+          ],
+          [
+            "35",
+            "8",
+            "L",
+            "Left-Cerebellum-Cortex"
+          ],
+          [
+            "36",
+            "10",
+            "L",
+            "Left-Thalamus"
+          ],
+          [
+            "37",
+            "11",
+            "L",
+            "Left-Caudate"
+          ],
+          [
+            "38",
+            "12",
+            "L",
+            "Left-Putamen"
+          ],
+          [
+            "39",
+            "13",
+            "L",
+            "Left-Pallidum"
+          ],
+          [
+            "40",
+            "17",
+            "L",
+            "Left-Hippocampus"
+          ],
+          [
+            "41",
+            "18",
+            "L",
+            "Left-Amygdala"
+          ],
+          [
+            "42",
+            "26",
+            "L",
+            "Left-Accumbens-area"
+          ],
+          [
+            "43",
+            "49",
+            "R",
+            "Right-Thalamus"
+          ],
+          [
+            "44",
+            "50",
+            "R",
+            "Right-Caudate"
+          ],
+          [
+            "45",
+            "51",
+            "R",
+            "Right-Putamen"
+          ],
+          [
+            "46",
+            "52",
+            "R",
+            "Right-Pallidum"
+          ],
+          [
+            "47",
+            "53",
+            "R",
+            "Right-Hippocampus"
+          ],
+          [
+            "48",
+            "54",
+            "R",
+            "Right-Amygdala"
+          ],
+          [
+            "49",
+            "58",
+            "R",
+            "Right-Accumbens-area"
+          ],
+          [
+            "50",
+            "2001",
+            "R",
+            "ctx-rh-bankssts"
+          ],
+          [
+            "51",
+            "2002",
+            "R",
+            "ctx-rh-caudalanteriorcingulate"
+          ],
+          [
+            "52",
+            "2003",
+            "R",
+            "ctx-rh-caudalmiddlefrontal"
+          ],
+          [
+            "53",
+            "2005",
+            "R",
+            "ctx-rh-cuneus"
+          ],
+          [
+            "54",
+            "2006",
+            "R",
+            "ctx-rh-entorhinal"
+          ],
+          [
+            "55",
+            "2007",
+            "R",
+            "ctx-rh-fusiform"
+          ],
+          [
+            "56",
+            "2008",
+            "R",
+            "ctx-rh-inferiorparietal"
+          ],
+          [
+            "57",
+            "2009",
+            "R",
+            "ctx-rh-inferiortemporal"
+          ],
+          [
+            "58",
+            "2010",
+            "R",
+            "ctx-rh-isthmuscingulate"
+          ],
+          [
+            "59",
+            "2011",
+            "R",
+            "ctx-rh-lateraloccipital"
+          ],
+          [
+            "60",
+            "2012",
+            "R",
+            "ctx-rh-lateralorbitofrontal"
+          ],
+          [
+            "61",
+            "2013",
+            "R",
+            "ctx-rh-lingual"
+          ],
+          [
+            "62",
+            "2014",
+            "R",
+            "ctx-rh-medialorbitofrontal"
+          ],
+          [
+            "63",
+            "2015",
+            "R",
+            "ctx-rh-middletemporal"
+          ],
+          [
+            "64",
+            "2016",
+            "R",
+            "ctx-rh-parahippocampal"
+          ],
+          [
+            "65",
+            "2017",
+            "R",
+            "ctx-rh-paracentral"
+          ],
+          [
+            "66",
+            "2018",
+            "R",
+            "ctx-rh-parsopercularis"
+          ],
+          [
+            "67",
+            "2019",
+            "R",
+            "ctx-rh-parsorbitalis"
+          ],
+          [
+            "68",
+            "2020",
+            "R",
+            "ctx-rh-parstriangularis"
+          ],
+          [
+            "69",
+            "2021",
+            "R",
+            "ctx-rh-pericalcarine"
+          ],
+          [
+            "70",
+            "2022",
+            "R",
+            "ctx-rh-postcentral"
+          ],
+          [
+            "71",
+            "2023",
+            "R",
+            "ctx-rh-posteriorcingulate"
+          ],
+          [
+            "72",
+            "2024",
+            "R",
+            "ctx-rh-precentral"
+          ],
+          [
+            "73",
+            "2025",
+            "R",
+            "ctx-rh-precuneus"
+          ],
+          [
+            "74",
+            "2026",
+            "R",
+            "ctx-rh-rostralanteriorcingulate"
+          ],
+          [
+            "75",
+            "2027",
+            "R",
+            "ctx-rh-rostralmiddlefrontal"
+          ],
+          [
+            "76",
+            "2028",
+            "R",
+            "ctx-rh-superiorfrontal"
+          ],
+          [
+            "77",
+            "2029",
+            "R",
+            "ctx-rh-superiorparietal"
+          ],
+          [
+            "78",
+            "2030",
+            "R",
+            "ctx-rh-superiortemporal"
+          ],
+          [
+            "79",
+            "2031",
+            "R",
+            "ctx-rh-supramarginal"
+          ],
+          [
+            "80",
+            "2032",
+            "R",
+            "ctx-rh-frontalpole"
+          ],
+          [
+            "81",
+            "2033",
+            "R",
+            "ctx-rh-temporalpole"
+          ],
+          [
+            "82",
+            "2034",
+            "R",
+            "ctx-rh-transversetemporal"
+          ],
+          [
+            "83",
+            "2035",
+            "R",
+            "ctx-rh-insula"
+          ],
+          [
+            "84",
+            "47",
+            "R",
+            "Right-Cerebellum-Cortex"
+          ]
+        ],
+        "nodes_tsv_sha256": "ef0633831a8a0b299d29522f2f1bb21ca76aafdf6fd1c75e4b116413cfab3fcf",
+        "reference_atlas_export": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "sha256": "e03aeb9a188905d45ac0ee1d9ad2ff00c4f555f46194446ae988549df1709a42",
+          "dtype": "int32",
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "file_affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_serialization": {
+            "source_dtype": "float64",
+            "source_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "implicit_file_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "bottom_row_max_abs_difference": 0.0,
+            "machine_epsilon": 2.220446049250313e-16,
+            "machine_bound_gamma4": 8.88178419700126e-16,
+            "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+          },
+          "sform_3x4_bits_verified_equal": true,
+          "header_spacing": [
+            2.4999999936440336,
+            2.5000001137724035,
+            2.4999999981026777
+          ],
+          "voxel_bits_verified_equal": true,
+          "nonfinite_count": 0,
+          "nonfinite_coordinates": [],
+          "nonfinite_coordinates_complete": true,
+          "original_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+          "maximum_present_label": 84,
+          "original_affine_max_abs_difference": 0.0
+        },
+        "canonical_matrix_alignment": null,
+        "atlas_hash_scope": "source CLI atlas file"
+      },
+      {
+        "directory": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/seed-2/atlases/fs-aparc",
+        "matrix_sha256": {
+          "count": "1b9d787c8c71da9d9e207c4fc8401584ffccc685aa96a029ab52cea50c09e83b",
+          "sift2_fbc": "8d577846fe2c5ebd60b73064cebd6295639d8b975ca4bc91d6e3a84d609188f6",
+          "mean_length": "9d77d973120e281ab01c2d7a57d227b024502185ec8e7c23a6eca508b544c1f8",
+          "mean_fa": "6c04e78cfdba18e960de5ca271335d079d14d5c977799e878bc1a4788c4be6cd"
+        },
+        "nodes": 84,
+        "atlas_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+        "node_rows": [
+          [
+            "1",
+            "1001",
+            "L",
+            "ctx-lh-bankssts"
+          ],
+          [
+            "2",
+            "1002",
+            "L",
+            "ctx-lh-caudalanteriorcingulate"
+          ],
+          [
+            "3",
+            "1003",
+            "L",
+            "ctx-lh-caudalmiddlefrontal"
+          ],
+          [
+            "4",
+            "1005",
+            "L",
+            "ctx-lh-cuneus"
+          ],
+          [
+            "5",
+            "1006",
+            "L",
+            "ctx-lh-entorhinal"
+          ],
+          [
+            "6",
+            "1007",
+            "L",
+            "ctx-lh-fusiform"
+          ],
+          [
+            "7",
+            "1008",
+            "L",
+            "ctx-lh-inferiorparietal"
+          ],
+          [
+            "8",
+            "1009",
+            "L",
+            "ctx-lh-inferiortemporal"
+          ],
+          [
+            "9",
+            "1010",
+            "L",
+            "ctx-lh-isthmuscingulate"
+          ],
+          [
+            "10",
+            "1011",
+            "L",
+            "ctx-lh-lateraloccipital"
+          ],
+          [
+            "11",
+            "1012",
+            "L",
+            "ctx-lh-lateralorbitofrontal"
+          ],
+          [
+            "12",
+            "1013",
+            "L",
+            "ctx-lh-lingual"
+          ],
+          [
+            "13",
+            "1014",
+            "L",
+            "ctx-lh-medialorbitofrontal"
+          ],
+          [
+            "14",
+            "1015",
+            "L",
+            "ctx-lh-middletemporal"
+          ],
+          [
+            "15",
+            "1016",
+            "L",
+            "ctx-lh-parahippocampal"
+          ],
+          [
+            "16",
+            "1017",
+            "L",
+            "ctx-lh-paracentral"
+          ],
+          [
+            "17",
+            "1018",
+            "L",
+            "ctx-lh-parsopercularis"
+          ],
+          [
+            "18",
+            "1019",
+            "L",
+            "ctx-lh-parsorbitalis"
+          ],
+          [
+            "19",
+            "1020",
+            "L",
+            "ctx-lh-parstriangularis"
+          ],
+          [
+            "20",
+            "1021",
+            "L",
+            "ctx-lh-pericalcarine"
+          ],
+          [
+            "21",
+            "1022",
+            "L",
+            "ctx-lh-postcentral"
+          ],
+          [
+            "22",
+            "1023",
+            "L",
+            "ctx-lh-posteriorcingulate"
+          ],
+          [
+            "23",
+            "1024",
+            "L",
+            "ctx-lh-precentral"
+          ],
+          [
+            "24",
+            "1025",
+            "L",
+            "ctx-lh-precuneus"
+          ],
+          [
+            "25",
+            "1026",
+            "L",
+            "ctx-lh-rostralanteriorcingulate"
+          ],
+          [
+            "26",
+            "1027",
+            "L",
+            "ctx-lh-rostralmiddlefrontal"
+          ],
+          [
+            "27",
+            "1028",
+            "L",
+            "ctx-lh-superiorfrontal"
+          ],
+          [
+            "28",
+            "1029",
+            "L",
+            "ctx-lh-superiorparietal"
+          ],
+          [
+            "29",
+            "1030",
+            "L",
+            "ctx-lh-superiortemporal"
+          ],
+          [
+            "30",
+            "1031",
+            "L",
+            "ctx-lh-supramarginal"
+          ],
+          [
+            "31",
+            "1032",
+            "L",
+            "ctx-lh-frontalpole"
+          ],
+          [
+            "32",
+            "1033",
+            "L",
+            "ctx-lh-temporalpole"
+          ],
+          [
+            "33",
+            "1034",
+            "L",
+            "ctx-lh-transversetemporal"
+          ],
+          [
+            "34",
+            "1035",
+            "L",
+            "ctx-lh-insula"
+          ],
+          [
+            "35",
+            "8",
+            "L",
+            "Left-Cerebellum-Cortex"
+          ],
+          [
+            "36",
+            "10",
+            "L",
+            "Left-Thalamus"
+          ],
+          [
+            "37",
+            "11",
+            "L",
+            "Left-Caudate"
+          ],
+          [
+            "38",
+            "12",
+            "L",
+            "Left-Putamen"
+          ],
+          [
+            "39",
+            "13",
+            "L",
+            "Left-Pallidum"
+          ],
+          [
+            "40",
+            "17",
+            "L",
+            "Left-Hippocampus"
+          ],
+          [
+            "41",
+            "18",
+            "L",
+            "Left-Amygdala"
+          ],
+          [
+            "42",
+            "26",
+            "L",
+            "Left-Accumbens-area"
+          ],
+          [
+            "43",
+            "49",
+            "R",
+            "Right-Thalamus"
+          ],
+          [
+            "44",
+            "50",
+            "R",
+            "Right-Caudate"
+          ],
+          [
+            "45",
+            "51",
+            "R",
+            "Right-Putamen"
+          ],
+          [
+            "46",
+            "52",
+            "R",
+            "Right-Pallidum"
+          ],
+          [
+            "47",
+            "53",
+            "R",
+            "Right-Hippocampus"
+          ],
+          [
+            "48",
+            "54",
+            "R",
+            "Right-Amygdala"
+          ],
+          [
+            "49",
+            "58",
+            "R",
+            "Right-Accumbens-area"
+          ],
+          [
+            "50",
+            "2001",
+            "R",
+            "ctx-rh-bankssts"
+          ],
+          [
+            "51",
+            "2002",
+            "R",
+            "ctx-rh-caudalanteriorcingulate"
+          ],
+          [
+            "52",
+            "2003",
+            "R",
+            "ctx-rh-caudalmiddlefrontal"
+          ],
+          [
+            "53",
+            "2005",
+            "R",
+            "ctx-rh-cuneus"
+          ],
+          [
+            "54",
+            "2006",
+            "R",
+            "ctx-rh-entorhinal"
+          ],
+          [
+            "55",
+            "2007",
+            "R",
+            "ctx-rh-fusiform"
+          ],
+          [
+            "56",
+            "2008",
+            "R",
+            "ctx-rh-inferiorparietal"
+          ],
+          [
+            "57",
+            "2009",
+            "R",
+            "ctx-rh-inferiortemporal"
+          ],
+          [
+            "58",
+            "2010",
+            "R",
+            "ctx-rh-isthmuscingulate"
+          ],
+          [
+            "59",
+            "2011",
+            "R",
+            "ctx-rh-lateraloccipital"
+          ],
+          [
+            "60",
+            "2012",
+            "R",
+            "ctx-rh-lateralorbitofrontal"
+          ],
+          [
+            "61",
+            "2013",
+            "R",
+            "ctx-rh-lingual"
+          ],
+          [
+            "62",
+            "2014",
+            "R",
+            "ctx-rh-medialorbitofrontal"
+          ],
+          [
+            "63",
+            "2015",
+            "R",
+            "ctx-rh-middletemporal"
+          ],
+          [
+            "64",
+            "2016",
+            "R",
+            "ctx-rh-parahippocampal"
+          ],
+          [
+            "65",
+            "2017",
+            "R",
+            "ctx-rh-paracentral"
+          ],
+          [
+            "66",
+            "2018",
+            "R",
+            "ctx-rh-parsopercularis"
+          ],
+          [
+            "67",
+            "2019",
+            "R",
+            "ctx-rh-parsorbitalis"
+          ],
+          [
+            "68",
+            "2020",
+            "R",
+            "ctx-rh-parstriangularis"
+          ],
+          [
+            "69",
+            "2021",
+            "R",
+            "ctx-rh-pericalcarine"
+          ],
+          [
+            "70",
+            "2022",
+            "R",
+            "ctx-rh-postcentral"
+          ],
+          [
+            "71",
+            "2023",
+            "R",
+            "ctx-rh-posteriorcingulate"
+          ],
+          [
+            "72",
+            "2024",
+            "R",
+            "ctx-rh-precentral"
+          ],
+          [
+            "73",
+            "2025",
+            "R",
+            "ctx-rh-precuneus"
+          ],
+          [
+            "74",
+            "2026",
+            "R",
+            "ctx-rh-rostralanteriorcingulate"
+          ],
+          [
+            "75",
+            "2027",
+            "R",
+            "ctx-rh-rostralmiddlefrontal"
+          ],
+          [
+            "76",
+            "2028",
+            "R",
+            "ctx-rh-superiorfrontal"
+          ],
+          [
+            "77",
+            "2029",
+            "R",
+            "ctx-rh-superiorparietal"
+          ],
+          [
+            "78",
+            "2030",
+            "R",
+            "ctx-rh-superiortemporal"
+          ],
+          [
+            "79",
+            "2031",
+            "R",
+            "ctx-rh-supramarginal"
+          ],
+          [
+            "80",
+            "2032",
+            "R",
+            "ctx-rh-frontalpole"
+          ],
+          [
+            "81",
+            "2033",
+            "R",
+            "ctx-rh-temporalpole"
+          ],
+          [
+            "82",
+            "2034",
+            "R",
+            "ctx-rh-transversetemporal"
+          ],
+          [
+            "83",
+            "2035",
+            "R",
+            "ctx-rh-insula"
+          ],
+          [
+            "84",
+            "47",
+            "R",
+            "Right-Cerebellum-Cortex"
+          ]
+        ],
+        "nodes_tsv_sha256": "ef0633831a8a0b299d29522f2f1bb21ca76aafdf6fd1c75e4b116413cfab3fcf",
+        "reference_atlas_export": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "sha256": "e03aeb9a188905d45ac0ee1d9ad2ff00c4f555f46194446ae988549df1709a42",
+          "dtype": "int32",
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "file_affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_serialization": {
+            "source_dtype": "float64",
+            "source_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "implicit_file_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "bottom_row_max_abs_difference": 0.0,
+            "machine_epsilon": 2.220446049250313e-16,
+            "machine_bound_gamma4": 8.88178419700126e-16,
+            "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+          },
+          "sform_3x4_bits_verified_equal": true,
+          "header_spacing": [
+            2.4999999936440336,
+            2.5000001137724035,
+            2.4999999981026777
+          ],
+          "voxel_bits_verified_equal": true,
+          "nonfinite_count": 0,
+          "nonfinite_coordinates": [],
+          "nonfinite_coordinates_complete": true,
+          "original_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+          "maximum_present_label": 84,
+          "original_affine_max_abs_difference": 0.0
+        },
+        "canonical_matrix_alignment": null,
+        "atlas_hash_scope": "source CLI atlas file"
+      },
+      {
+        "directory": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/seed-3/atlases/fs-aparc",
+        "matrix_sha256": {
+          "count": "c94b7d26f5dc2b4071256ef4e7812386dc4f0f0d5889da45bd2c1c00efb4d31c",
+          "sift2_fbc": "0167af6c7decf3d795aadc803ceb20aef42468dc75ea65928c59e4bbb916682e",
+          "mean_length": "578a1ad5fa0dbce974031483c9e06c9508dfbc4968ce6e4f3ab9bc9647f33a54",
+          "mean_fa": "543186d9c692ab1183bd37a9b1720fb93e0b795d7904cb55f34c1cfc1ca8d1f3"
+        },
+        "nodes": 84,
+        "atlas_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+        "node_rows": [
+          [
+            "1",
+            "1001",
+            "L",
+            "ctx-lh-bankssts"
+          ],
+          [
+            "2",
+            "1002",
+            "L",
+            "ctx-lh-caudalanteriorcingulate"
+          ],
+          [
+            "3",
+            "1003",
+            "L",
+            "ctx-lh-caudalmiddlefrontal"
+          ],
+          [
+            "4",
+            "1005",
+            "L",
+            "ctx-lh-cuneus"
+          ],
+          [
+            "5",
+            "1006",
+            "L",
+            "ctx-lh-entorhinal"
+          ],
+          [
+            "6",
+            "1007",
+            "L",
+            "ctx-lh-fusiform"
+          ],
+          [
+            "7",
+            "1008",
+            "L",
+            "ctx-lh-inferiorparietal"
+          ],
+          [
+            "8",
+            "1009",
+            "L",
+            "ctx-lh-inferiortemporal"
+          ],
+          [
+            "9",
+            "1010",
+            "L",
+            "ctx-lh-isthmuscingulate"
+          ],
+          [
+            "10",
+            "1011",
+            "L",
+            "ctx-lh-lateraloccipital"
+          ],
+          [
+            "11",
+            "1012",
+            "L",
+            "ctx-lh-lateralorbitofrontal"
+          ],
+          [
+            "12",
+            "1013",
+            "L",
+            "ctx-lh-lingual"
+          ],
+          [
+            "13",
+            "1014",
+            "L",
+            "ctx-lh-medialorbitofrontal"
+          ],
+          [
+            "14",
+            "1015",
+            "L",
+            "ctx-lh-middletemporal"
+          ],
+          [
+            "15",
+            "1016",
+            "L",
+            "ctx-lh-parahippocampal"
+          ],
+          [
+            "16",
+            "1017",
+            "L",
+            "ctx-lh-paracentral"
+          ],
+          [
+            "17",
+            "1018",
+            "L",
+            "ctx-lh-parsopercularis"
+          ],
+          [
+            "18",
+            "1019",
+            "L",
+            "ctx-lh-parsorbitalis"
+          ],
+          [
+            "19",
+            "1020",
+            "L",
+            "ctx-lh-parstriangularis"
+          ],
+          [
+            "20",
+            "1021",
+            "L",
+            "ctx-lh-pericalcarine"
+          ],
+          [
+            "21",
+            "1022",
+            "L",
+            "ctx-lh-postcentral"
+          ],
+          [
+            "22",
+            "1023",
+            "L",
+            "ctx-lh-posteriorcingulate"
+          ],
+          [
+            "23",
+            "1024",
+            "L",
+            "ctx-lh-precentral"
+          ],
+          [
+            "24",
+            "1025",
+            "L",
+            "ctx-lh-precuneus"
+          ],
+          [
+            "25",
+            "1026",
+            "L",
+            "ctx-lh-rostralanteriorcingulate"
+          ],
+          [
+            "26",
+            "1027",
+            "L",
+            "ctx-lh-rostralmiddlefrontal"
+          ],
+          [
+            "27",
+            "1028",
+            "L",
+            "ctx-lh-superiorfrontal"
+          ],
+          [
+            "28",
+            "1029",
+            "L",
+            "ctx-lh-superiorparietal"
+          ],
+          [
+            "29",
+            "1030",
+            "L",
+            "ctx-lh-superiortemporal"
+          ],
+          [
+            "30",
+            "1031",
+            "L",
+            "ctx-lh-supramarginal"
+          ],
+          [
+            "31",
+            "1032",
+            "L",
+            "ctx-lh-frontalpole"
+          ],
+          [
+            "32",
+            "1033",
+            "L",
+            "ctx-lh-temporalpole"
+          ],
+          [
+            "33",
+            "1034",
+            "L",
+            "ctx-lh-transversetemporal"
+          ],
+          [
+            "34",
+            "1035",
+            "L",
+            "ctx-lh-insula"
+          ],
+          [
+            "35",
+            "8",
+            "L",
+            "Left-Cerebellum-Cortex"
+          ],
+          [
+            "36",
+            "10",
+            "L",
+            "Left-Thalamus"
+          ],
+          [
+            "37",
+            "11",
+            "L",
+            "Left-Caudate"
+          ],
+          [
+            "38",
+            "12",
+            "L",
+            "Left-Putamen"
+          ],
+          [
+            "39",
+            "13",
+            "L",
+            "Left-Pallidum"
+          ],
+          [
+            "40",
+            "17",
+            "L",
+            "Left-Hippocampus"
+          ],
+          [
+            "41",
+            "18",
+            "L",
+            "Left-Amygdala"
+          ],
+          [
+            "42",
+            "26",
+            "L",
+            "Left-Accumbens-area"
+          ],
+          [
+            "43",
+            "49",
+            "R",
+            "Right-Thalamus"
+          ],
+          [
+            "44",
+            "50",
+            "R",
+            "Right-Caudate"
+          ],
+          [
+            "45",
+            "51",
+            "R",
+            "Right-Putamen"
+          ],
+          [
+            "46",
+            "52",
+            "R",
+            "Right-Pallidum"
+          ],
+          [
+            "47",
+            "53",
+            "R",
+            "Right-Hippocampus"
+          ],
+          [
+            "48",
+            "54",
+            "R",
+            "Right-Amygdala"
+          ],
+          [
+            "49",
+            "58",
+            "R",
+            "Right-Accumbens-area"
+          ],
+          [
+            "50",
+            "2001",
+            "R",
+            "ctx-rh-bankssts"
+          ],
+          [
+            "51",
+            "2002",
+            "R",
+            "ctx-rh-caudalanteriorcingulate"
+          ],
+          [
+            "52",
+            "2003",
+            "R",
+            "ctx-rh-caudalmiddlefrontal"
+          ],
+          [
+            "53",
+            "2005",
+            "R",
+            "ctx-rh-cuneus"
+          ],
+          [
+            "54",
+            "2006",
+            "R",
+            "ctx-rh-entorhinal"
+          ],
+          [
+            "55",
+            "2007",
+            "R",
+            "ctx-rh-fusiform"
+          ],
+          [
+            "56",
+            "2008",
+            "R",
+            "ctx-rh-inferiorparietal"
+          ],
+          [
+            "57",
+            "2009",
+            "R",
+            "ctx-rh-inferiortemporal"
+          ],
+          [
+            "58",
+            "2010",
+            "R",
+            "ctx-rh-isthmuscingulate"
+          ],
+          [
+            "59",
+            "2011",
+            "R",
+            "ctx-rh-lateraloccipital"
+          ],
+          [
+            "60",
+            "2012",
+            "R",
+            "ctx-rh-lateralorbitofrontal"
+          ],
+          [
+            "61",
+            "2013",
+            "R",
+            "ctx-rh-lingual"
+          ],
+          [
+            "62",
+            "2014",
+            "R",
+            "ctx-rh-medialorbitofrontal"
+          ],
+          [
+            "63",
+            "2015",
+            "R",
+            "ctx-rh-middletemporal"
+          ],
+          [
+            "64",
+            "2016",
+            "R",
+            "ctx-rh-parahippocampal"
+          ],
+          [
+            "65",
+            "2017",
+            "R",
+            "ctx-rh-paracentral"
+          ],
+          [
+            "66",
+            "2018",
+            "R",
+            "ctx-rh-parsopercularis"
+          ],
+          [
+            "67",
+            "2019",
+            "R",
+            "ctx-rh-parsorbitalis"
+          ],
+          [
+            "68",
+            "2020",
+            "R",
+            "ctx-rh-parstriangularis"
+          ],
+          [
+            "69",
+            "2021",
+            "R",
+            "ctx-rh-pericalcarine"
+          ],
+          [
+            "70",
+            "2022",
+            "R",
+            "ctx-rh-postcentral"
+          ],
+          [
+            "71",
+            "2023",
+            "R",
+            "ctx-rh-posteriorcingulate"
+          ],
+          [
+            "72",
+            "2024",
+            "R",
+            "ctx-rh-precentral"
+          ],
+          [
+            "73",
+            "2025",
+            "R",
+            "ctx-rh-precuneus"
+          ],
+          [
+            "74",
+            "2026",
+            "R",
+            "ctx-rh-rostralanteriorcingulate"
+          ],
+          [
+            "75",
+            "2027",
+            "R",
+            "ctx-rh-rostralmiddlefrontal"
+          ],
+          [
+            "76",
+            "2028",
+            "R",
+            "ctx-rh-superiorfrontal"
+          ],
+          [
+            "77",
+            "2029",
+            "R",
+            "ctx-rh-superiorparietal"
+          ],
+          [
+            "78",
+            "2030",
+            "R",
+            "ctx-rh-superiortemporal"
+          ],
+          [
+            "79",
+            "2031",
+            "R",
+            "ctx-rh-supramarginal"
+          ],
+          [
+            "80",
+            "2032",
+            "R",
+            "ctx-rh-frontalpole"
+          ],
+          [
+            "81",
+            "2033",
+            "R",
+            "ctx-rh-temporalpole"
+          ],
+          [
+            "82",
+            "2034",
+            "R",
+            "ctx-rh-transversetemporal"
+          ],
+          [
+            "83",
+            "2035",
+            "R",
+            "ctx-rh-insula"
+          ],
+          [
+            "84",
+            "47",
+            "R",
+            "Right-Cerebellum-Cortex"
+          ]
+        ],
+        "nodes_tsv_sha256": "ef0633831a8a0b299d29522f2f1bb21ca76aafdf6fd1c75e4b116413cfab3fcf",
+        "reference_atlas_export": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "sha256": "e03aeb9a188905d45ac0ee1d9ad2ff00c4f555f46194446ae988549df1709a42",
+          "dtype": "int32",
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "file_affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_serialization": {
+            "source_dtype": "float64",
+            "source_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "implicit_file_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "bottom_row_max_abs_difference": 0.0,
+            "machine_epsilon": 2.220446049250313e-16,
+            "machine_bound_gamma4": 8.88178419700126e-16,
+            "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+          },
+          "sform_3x4_bits_verified_equal": true,
+          "header_spacing": [
+            2.4999999936440336,
+            2.5000001137724035,
+            2.4999999981026777
+          ],
+          "voxel_bits_verified_equal": true,
+          "nonfinite_count": 0,
+          "nonfinite_coordinates": [],
+          "nonfinite_coordinates_complete": true,
+          "original_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+          "maximum_present_label": 84,
+          "original_affine_max_abs_difference": 0.0
+        },
+        "canonical_matrix_alignment": null,
+        "atlas_hash_scope": "source CLI atlas file"
+      },
+      {
+        "directory": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/seed-4/atlases/fs-aparc",
+        "matrix_sha256": {
+          "count": "1b91143163933bc9ccadf3e4ee129d7b176b68281b339d1e316245a2d4576dd6",
+          "sift2_fbc": "63b09f3d3ece0dd0513507ecf90a4f1b006366e6d3faf7fcab1f4f226adb1f9b",
+          "mean_length": "ca8fade9e6d0657952dd7bd78439cb4277fa00ba4040bae033bf14bfa7179a97",
+          "mean_fa": "b65095777bee5d5afb5dbd3d6ce812de1ba25f64e97c882a0e2cd0ca5c758315"
+        },
+        "nodes": 84,
+        "atlas_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+        "node_rows": [
+          [
+            "1",
+            "1001",
+            "L",
+            "ctx-lh-bankssts"
+          ],
+          [
+            "2",
+            "1002",
+            "L",
+            "ctx-lh-caudalanteriorcingulate"
+          ],
+          [
+            "3",
+            "1003",
+            "L",
+            "ctx-lh-caudalmiddlefrontal"
+          ],
+          [
+            "4",
+            "1005",
+            "L",
+            "ctx-lh-cuneus"
+          ],
+          [
+            "5",
+            "1006",
+            "L",
+            "ctx-lh-entorhinal"
+          ],
+          [
+            "6",
+            "1007",
+            "L",
+            "ctx-lh-fusiform"
+          ],
+          [
+            "7",
+            "1008",
+            "L",
+            "ctx-lh-inferiorparietal"
+          ],
+          [
+            "8",
+            "1009",
+            "L",
+            "ctx-lh-inferiortemporal"
+          ],
+          [
+            "9",
+            "1010",
+            "L",
+            "ctx-lh-isthmuscingulate"
+          ],
+          [
+            "10",
+            "1011",
+            "L",
+            "ctx-lh-lateraloccipital"
+          ],
+          [
+            "11",
+            "1012",
+            "L",
+            "ctx-lh-lateralorbitofrontal"
+          ],
+          [
+            "12",
+            "1013",
+            "L",
+            "ctx-lh-lingual"
+          ],
+          [
+            "13",
+            "1014",
+            "L",
+            "ctx-lh-medialorbitofrontal"
+          ],
+          [
+            "14",
+            "1015",
+            "L",
+            "ctx-lh-middletemporal"
+          ],
+          [
+            "15",
+            "1016",
+            "L",
+            "ctx-lh-parahippocampal"
+          ],
+          [
+            "16",
+            "1017",
+            "L",
+            "ctx-lh-paracentral"
+          ],
+          [
+            "17",
+            "1018",
+            "L",
+            "ctx-lh-parsopercularis"
+          ],
+          [
+            "18",
+            "1019",
+            "L",
+            "ctx-lh-parsorbitalis"
+          ],
+          [
+            "19",
+            "1020",
+            "L",
+            "ctx-lh-parstriangularis"
+          ],
+          [
+            "20",
+            "1021",
+            "L",
+            "ctx-lh-pericalcarine"
+          ],
+          [
+            "21",
+            "1022",
+            "L",
+            "ctx-lh-postcentral"
+          ],
+          [
+            "22",
+            "1023",
+            "L",
+            "ctx-lh-posteriorcingulate"
+          ],
+          [
+            "23",
+            "1024",
+            "L",
+            "ctx-lh-precentral"
+          ],
+          [
+            "24",
+            "1025",
+            "L",
+            "ctx-lh-precuneus"
+          ],
+          [
+            "25",
+            "1026",
+            "L",
+            "ctx-lh-rostralanteriorcingulate"
+          ],
+          [
+            "26",
+            "1027",
+            "L",
+            "ctx-lh-rostralmiddlefrontal"
+          ],
+          [
+            "27",
+            "1028",
+            "L",
+            "ctx-lh-superiorfrontal"
+          ],
+          [
+            "28",
+            "1029",
+            "L",
+            "ctx-lh-superiorparietal"
+          ],
+          [
+            "29",
+            "1030",
+            "L",
+            "ctx-lh-superiortemporal"
+          ],
+          [
+            "30",
+            "1031",
+            "L",
+            "ctx-lh-supramarginal"
+          ],
+          [
+            "31",
+            "1032",
+            "L",
+            "ctx-lh-frontalpole"
+          ],
+          [
+            "32",
+            "1033",
+            "L",
+            "ctx-lh-temporalpole"
+          ],
+          [
+            "33",
+            "1034",
+            "L",
+            "ctx-lh-transversetemporal"
+          ],
+          [
+            "34",
+            "1035",
+            "L",
+            "ctx-lh-insula"
+          ],
+          [
+            "35",
+            "8",
+            "L",
+            "Left-Cerebellum-Cortex"
+          ],
+          [
+            "36",
+            "10",
+            "L",
+            "Left-Thalamus"
+          ],
+          [
+            "37",
+            "11",
+            "L",
+            "Left-Caudate"
+          ],
+          [
+            "38",
+            "12",
+            "L",
+            "Left-Putamen"
+          ],
+          [
+            "39",
+            "13",
+            "L",
+            "Left-Pallidum"
+          ],
+          [
+            "40",
+            "17",
+            "L",
+            "Left-Hippocampus"
+          ],
+          [
+            "41",
+            "18",
+            "L",
+            "Left-Amygdala"
+          ],
+          [
+            "42",
+            "26",
+            "L",
+            "Left-Accumbens-area"
+          ],
+          [
+            "43",
+            "49",
+            "R",
+            "Right-Thalamus"
+          ],
+          [
+            "44",
+            "50",
+            "R",
+            "Right-Caudate"
+          ],
+          [
+            "45",
+            "51",
+            "R",
+            "Right-Putamen"
+          ],
+          [
+            "46",
+            "52",
+            "R",
+            "Right-Pallidum"
+          ],
+          [
+            "47",
+            "53",
+            "R",
+            "Right-Hippocampus"
+          ],
+          [
+            "48",
+            "54",
+            "R",
+            "Right-Amygdala"
+          ],
+          [
+            "49",
+            "58",
+            "R",
+            "Right-Accumbens-area"
+          ],
+          [
+            "50",
+            "2001",
+            "R",
+            "ctx-rh-bankssts"
+          ],
+          [
+            "51",
+            "2002",
+            "R",
+            "ctx-rh-caudalanteriorcingulate"
+          ],
+          [
+            "52",
+            "2003",
+            "R",
+            "ctx-rh-caudalmiddlefrontal"
+          ],
+          [
+            "53",
+            "2005",
+            "R",
+            "ctx-rh-cuneus"
+          ],
+          [
+            "54",
+            "2006",
+            "R",
+            "ctx-rh-entorhinal"
+          ],
+          [
+            "55",
+            "2007",
+            "R",
+            "ctx-rh-fusiform"
+          ],
+          [
+            "56",
+            "2008",
+            "R",
+            "ctx-rh-inferiorparietal"
+          ],
+          [
+            "57",
+            "2009",
+            "R",
+            "ctx-rh-inferiortemporal"
+          ],
+          [
+            "58",
+            "2010",
+            "R",
+            "ctx-rh-isthmuscingulate"
+          ],
+          [
+            "59",
+            "2011",
+            "R",
+            "ctx-rh-lateraloccipital"
+          ],
+          [
+            "60",
+            "2012",
+            "R",
+            "ctx-rh-lateralorbitofrontal"
+          ],
+          [
+            "61",
+            "2013",
+            "R",
+            "ctx-rh-lingual"
+          ],
+          [
+            "62",
+            "2014",
+            "R",
+            "ctx-rh-medialorbitofrontal"
+          ],
+          [
+            "63",
+            "2015",
+            "R",
+            "ctx-rh-middletemporal"
+          ],
+          [
+            "64",
+            "2016",
+            "R",
+            "ctx-rh-parahippocampal"
+          ],
+          [
+            "65",
+            "2017",
+            "R",
+            "ctx-rh-paracentral"
+          ],
+          [
+            "66",
+            "2018",
+            "R",
+            "ctx-rh-parsopercularis"
+          ],
+          [
+            "67",
+            "2019",
+            "R",
+            "ctx-rh-parsorbitalis"
+          ],
+          [
+            "68",
+            "2020",
+            "R",
+            "ctx-rh-parstriangularis"
+          ],
+          [
+            "69",
+            "2021",
+            "R",
+            "ctx-rh-pericalcarine"
+          ],
+          [
+            "70",
+            "2022",
+            "R",
+            "ctx-rh-postcentral"
+          ],
+          [
+            "71",
+            "2023",
+            "R",
+            "ctx-rh-posteriorcingulate"
+          ],
+          [
+            "72",
+            "2024",
+            "R",
+            "ctx-rh-precentral"
+          ],
+          [
+            "73",
+            "2025",
+            "R",
+            "ctx-rh-precuneus"
+          ],
+          [
+            "74",
+            "2026",
+            "R",
+            "ctx-rh-rostralanteriorcingulate"
+          ],
+          [
+            "75",
+            "2027",
+            "R",
+            "ctx-rh-rostralmiddlefrontal"
+          ],
+          [
+            "76",
+            "2028",
+            "R",
+            "ctx-rh-superiorfrontal"
+          ],
+          [
+            "77",
+            "2029",
+            "R",
+            "ctx-rh-superiorparietal"
+          ],
+          [
+            "78",
+            "2030",
+            "R",
+            "ctx-rh-superiortemporal"
+          ],
+          [
+            "79",
+            "2031",
+            "R",
+            "ctx-rh-supramarginal"
+          ],
+          [
+            "80",
+            "2032",
+            "R",
+            "ctx-rh-frontalpole"
+          ],
+          [
+            "81",
+            "2033",
+            "R",
+            "ctx-rh-temporalpole"
+          ],
+          [
+            "82",
+            "2034",
+            "R",
+            "ctx-rh-transversetemporal"
+          ],
+          [
+            "83",
+            "2035",
+            "R",
+            "ctx-rh-insula"
+          ],
+          [
+            "84",
+            "47",
+            "R",
+            "Right-Cerebellum-Cortex"
+          ]
+        ],
+        "nodes_tsv_sha256": "ef0633831a8a0b299d29522f2f1bb21ca76aafdf6fd1c75e4b116413cfab3fcf",
+        "reference_atlas_export": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+          "sha256": "e03aeb9a188905d45ac0ee1d9ad2ff00c4f555f46194446ae988549df1709a42",
+          "dtype": "int32",
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "file_affine": [
+            [
+              -2.4994916915893555,
+              -1.2045921948811156e-07,
+              0.05041082948446274,
+              120.45989990234375
+            ],
+            [
+              -0.004988736938685179,
+              2.4877288341522217,
+              -0.24734780192375183,
+              -94.40888977050781
+            ],
+            [
+              0.050163377076387405,
+              0.24739809334278107,
+              2.487222909927368,
+              -64.85044860839844
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_serialization": {
+            "source_dtype": "float64",
+            "source_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "implicit_file_bottom_row": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "bottom_row_max_abs_difference": 0.0,
+            "machine_epsilon": 2.220446049250313e-16,
+            "machine_bound_gamma4": 8.88178419700126e-16,
+            "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+          },
+          "sform_3x4_bits_verified_equal": true,
+          "header_spacing": [
+            2.4999999936440336,
+            2.5000001137724035,
+            2.4999999981026777
+          ],
+          "voxel_bits_verified_equal": true,
+          "nonfinite_count": 0,
+          "nonfinite_coordinates": [],
+          "nonfinite_coordinates_complete": true,
+          "original_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+          "maximum_present_label": 84,
+          "original_affine_max_abs_difference": 0.0
+        },
+        "canonical_matrix_alignment": null,
+        "atlas_hash_scope": "source CLI atlas file"
+      }
+    ],
+    "fnit": [
+      {
+        "directory": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/connectome/atlases/fs-aparc",
+        "matrix_sha256": {
+          "count": "02780fef57144f630d4670247360f3467ac04e6ce0eca9f89bbf77454a94d618",
+          "sift2_fbc": "e6540bced26a9397116618eb68edffbaa2375be04e9a0e90dffb327b07aceaa1",
+          "mean_length": "a3085fb1c73130c444e48ebd1bb326849207068ddcce251ceb682122237531b6",
+          "mean_fa": "936e0d14ba8f429e02f6a180d3efa3f23e27908b48fc8ce5c9c653ac0c051dfd"
+        },
+        "nodes": 84,
+        "atlas_sha256": "d019c45726a07ce613fd5e3d0ac4e8ec788223125f4dfee63b30b1c77ef384f2",
+        "node_rows": [
+          [
+            "1",
+            "1001",
+            "L",
+            "ctx-lh-bankssts"
+          ],
+          [
+            "2",
+            "1002",
+            "L",
+            "ctx-lh-caudalanteriorcingulate"
+          ],
+          [
+            "3",
+            "1003",
+            "L",
+            "ctx-lh-caudalmiddlefrontal"
+          ],
+          [
+            "4",
+            "1005",
+            "L",
+            "ctx-lh-cuneus"
+          ],
+          [
+            "5",
+            "1006",
+            "L",
+            "ctx-lh-entorhinal"
+          ],
+          [
+            "6",
+            "1007",
+            "L",
+            "ctx-lh-fusiform"
+          ],
+          [
+            "7",
+            "1008",
+            "L",
+            "ctx-lh-inferiorparietal"
+          ],
+          [
+            "8",
+            "1009",
+            "L",
+            "ctx-lh-inferiortemporal"
+          ],
+          [
+            "9",
+            "1010",
+            "L",
+            "ctx-lh-isthmuscingulate"
+          ],
+          [
+            "10",
+            "1011",
+            "L",
+            "ctx-lh-lateraloccipital"
+          ],
+          [
+            "11",
+            "1012",
+            "L",
+            "ctx-lh-lateralorbitofrontal"
+          ],
+          [
+            "12",
+            "1013",
+            "L",
+            "ctx-lh-lingual"
+          ],
+          [
+            "13",
+            "1014",
+            "L",
+            "ctx-lh-medialorbitofrontal"
+          ],
+          [
+            "14",
+            "1015",
+            "L",
+            "ctx-lh-middletemporal"
+          ],
+          [
+            "15",
+            "1016",
+            "L",
+            "ctx-lh-parahippocampal"
+          ],
+          [
+            "16",
+            "1017",
+            "L",
+            "ctx-lh-paracentral"
+          ],
+          [
+            "17",
+            "1018",
+            "L",
+            "ctx-lh-parsopercularis"
+          ],
+          [
+            "18",
+            "1019",
+            "L",
+            "ctx-lh-parsorbitalis"
+          ],
+          [
+            "19",
+            "1020",
+            "L",
+            "ctx-lh-parstriangularis"
+          ],
+          [
+            "20",
+            "1021",
+            "L",
+            "ctx-lh-pericalcarine"
+          ],
+          [
+            "21",
+            "1022",
+            "L",
+            "ctx-lh-postcentral"
+          ],
+          [
+            "22",
+            "1023",
+            "L",
+            "ctx-lh-posteriorcingulate"
+          ],
+          [
+            "23",
+            "1024",
+            "L",
+            "ctx-lh-precentral"
+          ],
+          [
+            "24",
+            "1025",
+            "L",
+            "ctx-lh-precuneus"
+          ],
+          [
+            "25",
+            "1026",
+            "L",
+            "ctx-lh-rostralanteriorcingulate"
+          ],
+          [
+            "26",
+            "1027",
+            "L",
+            "ctx-lh-rostralmiddlefrontal"
+          ],
+          [
+            "27",
+            "1028",
+            "L",
+            "ctx-lh-superiorfrontal"
+          ],
+          [
+            "28",
+            "1029",
+            "L",
+            "ctx-lh-superiorparietal"
+          ],
+          [
+            "29",
+            "1030",
+            "L",
+            "ctx-lh-superiortemporal"
+          ],
+          [
+            "30",
+            "1031",
+            "L",
+            "ctx-lh-supramarginal"
+          ],
+          [
+            "31",
+            "1032",
+            "L",
+            "ctx-lh-frontalpole"
+          ],
+          [
+            "32",
+            "1033",
+            "L",
+            "ctx-lh-temporalpole"
+          ],
+          [
+            "33",
+            "1034",
+            "L",
+            "ctx-lh-transversetemporal"
+          ],
+          [
+            "34",
+            "1035",
+            "L",
+            "ctx-lh-insula"
+          ],
+          [
+            "35",
+            "8",
+            "L",
+            "Left-Cerebellum-Cortex"
+          ],
+          [
+            "36",
+            "10",
+            "L",
+            "Left-Thalamus"
+          ],
+          [
+            "37",
+            "11",
+            "L",
+            "Left-Caudate"
+          ],
+          [
+            "38",
+            "12",
+            "L",
+            "Left-Putamen"
+          ],
+          [
+            "39",
+            "13",
+            "L",
+            "Left-Pallidum"
+          ],
+          [
+            "40",
+            "17",
+            "L",
+            "Left-Hippocampus"
+          ],
+          [
+            "41",
+            "18",
+            "L",
+            "Left-Amygdala"
+          ],
+          [
+            "42",
+            "26",
+            "L",
+            "Left-Accumbens-area"
+          ],
+          [
+            "43",
+            "49",
+            "R",
+            "Right-Thalamus"
+          ],
+          [
+            "44",
+            "50",
+            "R",
+            "Right-Caudate"
+          ],
+          [
+            "45",
+            "51",
+            "R",
+            "Right-Putamen"
+          ],
+          [
+            "46",
+            "52",
+            "R",
+            "Right-Pallidum"
+          ],
+          [
+            "47",
+            "53",
+            "R",
+            "Right-Hippocampus"
+          ],
+          [
+            "48",
+            "54",
+            "R",
+            "Right-Amygdala"
+          ],
+          [
+            "49",
+            "58",
+            "R",
+            "Right-Accumbens-area"
+          ],
+          [
+            "50",
+            "2001",
+            "R",
+            "ctx-rh-bankssts"
+          ],
+          [
+            "51",
+            "2002",
+            "R",
+            "ctx-rh-caudalanteriorcingulate"
+          ],
+          [
+            "52",
+            "2003",
+            "R",
+            "ctx-rh-caudalmiddlefrontal"
+          ],
+          [
+            "53",
+            "2005",
+            "R",
+            "ctx-rh-cuneus"
+          ],
+          [
+            "54",
+            "2006",
+            "R",
+            "ctx-rh-entorhinal"
+          ],
+          [
+            "55",
+            "2007",
+            "R",
+            "ctx-rh-fusiform"
+          ],
+          [
+            "56",
+            "2008",
+            "R",
+            "ctx-rh-inferiorparietal"
+          ],
+          [
+            "57",
+            "2009",
+            "R",
+            "ctx-rh-inferiortemporal"
+          ],
+          [
+            "58",
+            "2010",
+            "R",
+            "ctx-rh-isthmuscingulate"
+          ],
+          [
+            "59",
+            "2011",
+            "R",
+            "ctx-rh-lateraloccipital"
+          ],
+          [
+            "60",
+            "2012",
+            "R",
+            "ctx-rh-lateralorbitofrontal"
+          ],
+          [
+            "61",
+            "2013",
+            "R",
+            "ctx-rh-lingual"
+          ],
+          [
+            "62",
+            "2014",
+            "R",
+            "ctx-rh-medialorbitofrontal"
+          ],
+          [
+            "63",
+            "2015",
+            "R",
+            "ctx-rh-middletemporal"
+          ],
+          [
+            "64",
+            "2016",
+            "R",
+            "ctx-rh-parahippocampal"
+          ],
+          [
+            "65",
+            "2017",
+            "R",
+            "ctx-rh-paracentral"
+          ],
+          [
+            "66",
+            "2018",
+            "R",
+            "ctx-rh-parsopercularis"
+          ],
+          [
+            "67",
+            "2019",
+            "R",
+            "ctx-rh-parsorbitalis"
+          ],
+          [
+            "68",
+            "2020",
+            "R",
+            "ctx-rh-parstriangularis"
+          ],
+          [
+            "69",
+            "2021",
+            "R",
+            "ctx-rh-pericalcarine"
+          ],
+          [
+            "70",
+            "2022",
+            "R",
+            "ctx-rh-postcentral"
+          ],
+          [
+            "71",
+            "2023",
+            "R",
+            "ctx-rh-posteriorcingulate"
+          ],
+          [
+            "72",
+            "2024",
+            "R",
+            "ctx-rh-precentral"
+          ],
+          [
+            "73",
+            "2025",
+            "R",
+            "ctx-rh-precuneus"
+          ],
+          [
+            "74",
+            "2026",
+            "R",
+            "ctx-rh-rostralanteriorcingulate"
+          ],
+          [
+            "75",
+            "2027",
+            "R",
+            "ctx-rh-rostralmiddlefrontal"
+          ],
+          [
+            "76",
+            "2028",
+            "R",
+            "ctx-rh-superiorfrontal"
+          ],
+          [
+            "77",
+            "2029",
+            "R",
+            "ctx-rh-superiorparietal"
+          ],
+          [
+            "78",
+            "2030",
+            "R",
+            "ctx-rh-superiortemporal"
+          ],
+          [
+            "79",
+            "2031",
+            "R",
+            "ctx-rh-supramarginal"
+          ],
+          [
+            "80",
+            "2032",
+            "R",
+            "ctx-rh-frontalpole"
+          ],
+          [
+            "81",
+            "2033",
+            "R",
+            "ctx-rh-temporalpole"
+          ],
+          [
+            "82",
+            "2034",
+            "R",
+            "ctx-rh-transversetemporal"
+          ],
+          [
+            "83",
+            "2035",
+            "R",
+            "ctx-rh-insula"
+          ],
+          [
+            "84",
+            "47",
+            "R",
+            "Right-Cerebellum-Cortex"
+          ]
+        ],
+        "nodes_tsv_sha256": "ef0633831a8a0b299d29522f2f1bb21ca76aafdf6fd1c75e4b116413cfab3fcf",
+        "reference_atlas_export": null,
+        "canonical_matrix_alignment": null,
+        "atlas_hash_scope": "supplied atlas file"
+      }
+    ]
+  },
+  "input_identity": {
+    "atlas_sha256": {
+      "status": "verified_equal",
+      "available_runs": 6,
+      "total_runs": 6,
+      "scope": "source atlas identity; exported reference representation is recorded separately"
+    },
+    "node_rows": {
+      "status": "verified_equal",
+      "available_runs": 6,
+      "total_runs": 6
+    }
+  },
+  "pairwise": {
+    "official": [
+      {
+        "first_run": 0,
+        "second_run": 1,
+        "metrics": {
+          "count": {
+            "pearson": 0.9744265971243743,
+            "nonzero_mean_scaled_mae": 0.0841261759563165,
+            "relative_l1_full_upper": 0.330624407422457,
+            "relative_l1_common_nonzero": 0.2607895853969152,
+            "support_dice": 0.7568807339449541,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 660,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 78,
+              "mae": 5.571428571428571,
+              "rmse": 8.17807754799087
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.963430130892086,
+            "nonzero_mean_scaled_mae": 0.09604139715368945,
+            "relative_l1_full_upper": 0.37745243571337256,
+            "relative_l1_common_nonzero": 0.2871922605810639,
+            "support_dice": 0.7568807339449541,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 660,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 78,
+              "mae": 5.647295070723409,
+              "rmse": 9.640869333500072
+            }
+          },
+          "mean_length": {
+            "pearson": 0.8993165229217798,
+            "nonzero_mean_scaled_mae": 0.15239772982116034,
+            "relative_l1_full_upper": 0.7317537968401104,
+            "relative_l1_common_nonzero": 0.15239772982116034,
+            "support_dice": 0.7568807339449541,
+            "evaluated_edges": 660,
+            "shared_support_edges": 660,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 78,
+              "mae": 2.074225893168004,
+              "rmse": 2.79778913950361
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8855189389367096,
+            "nonzero_mean_scaled_mae": 0.06027892982007715,
+            "relative_l1_full_upper": 0.5428632209042745,
+            "relative_l1_common_nonzero": 0.06027892982007715,
+            "support_dice": 0.7568807339449541,
+            "evaluated_edges": 660,
+            "shared_support_edges": 660,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 78,
+              "mae": 0.034045138819629436,
+              "rmse": 0.07823667328661538
+            }
+          }
+        }
+      },
+      {
+        "first_run": 0,
+        "second_run": 2,
+        "metrics": {
+          "count": {
+            "pearson": 0.9690550524792936,
+            "nonzero_mean_scaled_mae": 0.08740023851913915,
+            "relative_l1_full_upper": 0.3434918054991196,
+            "relative_l1_common_nonzero": 0.2810347251511317,
+            "support_dice": 0.7731376975169301,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 685,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 79,
+              "mae": 6.321428571428571,
+              "rmse": 10.684323184215362
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9605796736175681,
+            "nonzero_mean_scaled_mae": 0.09899617573565234,
+            "relative_l1_full_upper": 0.389065015348911,
+            "relative_l1_common_nonzero": 0.3079950308819032,
+            "support_dice": 0.7731376975169301,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 685,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 79,
+              "mae": 4.700269905938988,
+              "rmse": 8.538188404993157
+            }
+          },
+          "mean_length": {
+            "pearson": 0.8806959849656001,
+            "nonzero_mean_scaled_mae": 0.1598364601297729,
+            "relative_l1_full_upper": 0.7032553528011724,
+            "relative_l1_common_nonzero": 0.1598364601297729,
+            "support_dice": 0.7731376975169301,
+            "evaluated_edges": 685,
+            "shared_support_edges": 685,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 79,
+              "mae": 1.840701132612288,
+              "rmse": 2.522681958127973
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.869001295221384,
+            "nonzero_mean_scaled_mae": 0.06292335516375581,
+            "relative_l1_full_upper": 0.5196081271258599,
+            "relative_l1_common_nonzero": 0.06292335516375581,
+            "support_dice": 0.7731376975169301,
+            "evaluated_edges": 685,
+            "shared_support_edges": 685,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 79,
+              "mae": 0.027986630474557617,
+              "rmse": 0.05743351448525949
+            }
+          }
+        }
+      },
+      {
+        "first_run": 0,
+        "second_run": 3,
+        "metrics": {
+          "count": {
+            "pearson": 0.9708195949573754,
+            "nonzero_mean_scaled_mae": 0.08567704769660092,
+            "relative_l1_full_upper": 0.33671949072192875,
+            "relative_l1_common_nonzero": 0.275215122020031,
+            "support_dice": 0.7743055555555556,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 669,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 78,
+              "mae": 7.309523809523809,
+              "rmse": 10.679307985427663
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9632971027001409,
+            "nonzero_mean_scaled_mae": 0.09360110172899926,
+            "relative_l1_full_upper": 0.36786182708826537,
+            "relative_l1_common_nonzero": 0.2867856352147622,
+            "support_dice": 0.7743055555555556,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 669,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 78,
+              "mae": 4.473841171179491,
+              "rmse": 6.274061646834133
+            }
+          },
+          "mean_length": {
+            "pearson": 0.9109136039814663,
+            "nonzero_mean_scaled_mae": 0.1512590110240059,
+            "relative_l1_full_upper": 0.6667208957550945,
+            "relative_l1_common_nonzero": 0.1512590110240059,
+            "support_dice": 0.7743055555555556,
+            "evaluated_edges": 669,
+            "shared_support_edges": 669,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 78,
+              "mae": 1.8184161805543284,
+              "rmse": 2.3969632723147116
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8880270642569753,
+            "nonzero_mean_scaled_mae": 0.059703042132518036,
+            "relative_l1_full_upper": 0.5059464497302818,
+            "relative_l1_common_nonzero": 0.059703042132518036,
+            "support_dice": 0.7743055555555556,
+            "evaluated_edges": 669,
+            "shared_support_edges": 669,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 78,
+              "mae": 0.029311569994576424,
+              "rmse": 0.06901903602940285
+            }
+          }
+        }
+      },
+      {
+        "first_run": 0,
+        "second_run": 4,
+        "metrics": {
+          "count": {
+            "pearson": 0.968890540340561,
+            "nonzero_mean_scaled_mae": 0.08764148523429449,
+            "relative_l1_full_upper": 0.3444399295679263,
+            "relative_l1_common_nonzero": 0.27886247877758913,
+            "support_dice": 0.7656427758816837,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 673,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 79,
+              "mae": 6.154761904761905,
+              "rmse": 8.649938067490922
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9648701335221868,
+            "nonzero_mean_scaled_mae": 0.09550555063913599,
+            "relative_l1_full_upper": 0.3753465045411816,
+            "relative_l1_common_nonzero": 0.2931938086996117,
+            "support_dice": 0.7656427758816837,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 673,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 79,
+              "mae": 4.834640695048243,
+              "rmse": 6.915206613282013
+            }
+          },
+          "mean_length": {
+            "pearson": 0.8924585631043427,
+            "nonzero_mean_scaled_mae": 0.15233445574039672,
+            "relative_l1_full_upper": 0.7011297132372251,
+            "relative_l1_common_nonzero": 0.15233445574039672,
+            "support_dice": 0.7656427758816837,
+            "evaluated_edges": 673,
+            "shared_support_edges": 673,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 79,
+              "mae": 2.397959572408947,
+              "rmse": 3.224840610855841
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8740656664138257,
+            "nonzero_mean_scaled_mae": 0.061853236469503144,
+            "relative_l1_full_upper": 0.5284921756754337,
+            "relative_l1_common_nonzero": 0.061853236469503144,
+            "support_dice": 0.7656427758816837,
+            "evaluated_edges": 673,
+            "shared_support_edges": 673,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 79,
+              "mae": 0.03617676250056293,
+              "rmse": 0.08414249293014464
+            }
+          }
+        }
+      },
+      {
+        "first_run": 1,
+        "second_run": 2,
+        "metrics": {
+          "count": {
+            "pearson": 0.9696747583258079,
+            "nonzero_mean_scaled_mae": 0.08115867114391692,
+            "relative_l1_full_upper": 0.3301273367651043,
+            "relative_l1_common_nonzero": 0.2578191039729501,
+            "support_dice": 0.7600459242250287,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 662,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 5.940476190476191,
+              "rmse": 9.683687805986391
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9667729058169826,
+            "nonzero_mean_scaled_mae": 0.09089296692755357,
+            "relative_l1_full_upper": 0.36972331704720157,
+            "relative_l1_common_nonzero": 0.27708866634334034,
+            "support_dice": 0.7600459242250287,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 662,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 4.590974249477883,
+              "rmse": 7.474218802498295
+            }
+          },
+          "mean_length": {
+            "pearson": 0.8967125046467813,
+            "nonzero_mean_scaled_mae": 0.1558386665526524,
+            "relative_l1_full_upper": 0.7718515550898823,
+            "relative_l1_common_nonzero": 0.1558386665526524,
+            "support_dice": 0.7600459242250287,
+            "evaluated_edges": 662,
+            "shared_support_edges": 662,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 1.6002774726473121,
+              "rmse": 2.2474619883775584
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8570826223316041,
+            "nonzero_mean_scaled_mae": 0.0647736251099376,
+            "relative_l1_full_upper": 0.5662833720215125,
+            "relative_l1_common_nonzero": 0.0647736251099376,
+            "support_dice": 0.7600459242250287,
+            "evaluated_edges": 662,
+            "shared_support_edges": 662,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 0.03325213000737425,
+              "rmse": 0.06672244009266357
+            }
+          }
+        }
+      },
+      {
+        "first_run": 1,
+        "second_run": 3,
+        "metrics": {
+          "count": {
+            "pearson": 0.9665884655773314,
+            "nonzero_mean_scaled_mae": 0.08468875696306144,
+            "relative_l1_full_upper": 0.3444865890002709,
+            "relative_l1_common_nonzero": 0.2766017499294383,
+            "support_dice": 0.7550058892815077,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 641,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 78,
+              "mae": 7.595238095238095,
+              "rmse": 11.882359874640905
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9622388979332733,
+            "nonzero_mean_scaled_mae": 0.09434116769785002,
+            "relative_l1_full_upper": 0.3837494872750352,
+            "relative_l1_common_nonzero": 0.2963518410328894,
+            "support_dice": 0.7550058892815077,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 641,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 78,
+              "mae": 5.453649054503156,
+              "rmse": 8.435557001313907
+            }
+          },
+          "mean_length": {
+            "pearson": 0.9206864227818092,
+            "nonzero_mean_scaled_mae": 0.14439281350986954,
+            "relative_l1_full_upper": 0.7265005112065264,
+            "relative_l1_common_nonzero": 0.14439281350986957,
+            "support_dice": 0.7550058892815077,
+            "evaluated_edges": 641,
+            "shared_support_edges": 641,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 78,
+              "mae": 1.6450355204957137,
+              "rmse": 2.258750228601567
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8871165508136433,
+            "nonzero_mean_scaled_mae": 0.061589165696843015,
+            "relative_l1_full_upper": 0.5569113099204533,
+            "relative_l1_common_nonzero": 0.06158916569684302,
+            "support_dice": 0.7550058892815077,
+            "evaluated_edges": 641,
+            "shared_support_edges": 641,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 78,
+              "mae": 0.030695313971946397,
+              "rmse": 0.07158101568024657
+            }
+          }
+        }
+      },
+      {
+        "first_run": 1,
+        "second_run": 4,
+        "metrics": {
+          "count": {
+            "pearson": 0.9685038481903834,
+            "nonzero_mean_scaled_mae": 0.08525490280198085,
+            "relative_l1_full_upper": 0.3467894879436467,
+            "relative_l1_common_nonzero": 0.2762898223851142,
+            "support_dice": 0.7546296296296297,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 652,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 5.988095238095238,
+              "rmse": 8.194800906963017
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9681559127481195,
+            "nonzero_mean_scaled_mae": 0.08955794862834,
+            "relative_l1_full_upper": 0.364292892553551,
+            "relative_l1_common_nonzero": 0.2725371788822952,
+            "support_dice": 0.7546296296296297,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 652,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 5.31722089328936,
+              "rmse": 7.720312200617853
+            }
+          },
+          "mean_length": {
+            "pearson": 0.9021948563532063,
+            "nonzero_mean_scaled_mae": 0.15238278139859798,
+            "relative_l1_full_upper": 0.7527783209565997,
+            "relative_l1_common_nonzero": 0.15238278139859798,
+            "support_dice": 0.7546296296296297,
+            "evaluated_edges": 652,
+            "shared_support_edges": 652,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 2.0196088472052653,
+              "rmse": 3.0674910476000417
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8616486768466008,
+            "nonzero_mean_scaled_mae": 0.06367428189767674,
+            "relative_l1_full_upper": 0.5720224382834849,
+            "relative_l1_common_nonzero": 0.06367428189767674,
+            "support_dice": 0.7546296296296297,
+            "evaluated_edges": 652,
+            "shared_support_edges": 652,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 0.027588240517602558,
+              "rmse": 0.05571796180836243
+            }
+          }
+        }
+      },
+      {
+        "first_run": 2,
+        "second_run": 3,
+        "metrics": {
+          "count": {
+            "pearson": 0.9694024165407146,
+            "nonzero_mean_scaled_mae": 0.08653407227597298,
+            "relative_l1_full_upper": 0.3408562440158665,
+            "relative_l1_common_nonzero": 0.27613749821708744,
+            "support_dice": 0.7636152954808807,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 659,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 78,
+              "mae": 7.821428571428571,
+              "rmse": 13.162446581088183
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9621246038004282,
+            "nonzero_mean_scaled_mae": 0.09660816427617323,
+            "relative_l1_full_upper": 0.3805379216573332,
+            "relative_l1_common_nonzero": 0.29663121879286986,
+            "support_dice": 0.7636152954808807,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 659,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 78,
+              "mae": 5.4535040802189165,
+              "rmse": 8.82402834474647
+            }
+          },
+          "mean_length": {
+            "pearson": 0.9095870551845343,
+            "nonzero_mean_scaled_mae": 0.14799245723584903,
+            "relative_l1_full_upper": 0.695473262590037,
+            "relative_l1_common_nonzero": 0.14799245723584903,
+            "support_dice": 0.7636152954808807,
+            "evaluated_edges": 659,
+            "shared_support_edges": 659,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 78,
+              "mae": 1.5421645874300627,
+              "rmse": 2.1344417977154158
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8563749867709141,
+            "nonzero_mean_scaled_mae": 0.06263786512329858,
+            "relative_l1_full_upper": 0.5337511372293957,
+            "relative_l1_common_nonzero": 0.0626378651232986,
+            "support_dice": 0.7636152954808807,
+            "evaluated_edges": 659,
+            "shared_support_edges": 659,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 78,
+              "mae": 0.029220227582854134,
+              "rmse": 0.060624999303490884
+            }
+          }
+        }
+      },
+      {
+        "first_run": 2,
+        "second_run": 4,
+        "metrics": {
+          "count": {
+            "pearson": 0.9682247622682977,
+            "nonzero_mean_scaled_mae": 0.08767998896341565,
+            "relative_l1_full_upper": 0.3453699904253864,
+            "relative_l1_common_nonzero": 0.28193079880392996,
+            "support_dice": 0.7813211845102506,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 686,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 79,
+              "mae": 6.809523809523809,
+              "rmse": 10.24811248590732
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9654806098413242,
+            "nonzero_mean_scaled_mae": 0.09460416903130231,
+            "relative_l1_full_upper": 0.37264421835380773,
+            "relative_l1_common_nonzero": 0.2903431998190366,
+            "support_dice": 0.7813211845102506,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 686,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 79,
+              "mae": 4.129828304229746,
+              "rmse": 6.013215372547089
+            }
+          },
+          "mean_length": {
+            "pearson": 0.9004957194068898,
+            "nonzero_mean_scaled_mae": 0.15063899548183463,
+            "relative_l1_full_upper": 0.667318108136123,
+            "relative_l1_common_nonzero": 0.1506389954818346,
+            "support_dice": 0.7813211845102506,
+            "evaluated_edges": 686,
+            "shared_support_edges": 686,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 79,
+              "mae": 1.9787366860399844,
+              "rmse": 2.8505827275853104
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8620473596496204,
+            "nonzero_mean_scaled_mae": 0.0625059095959363,
+            "relative_l1_full_upper": 0.5021306017989493,
+            "relative_l1_common_nonzero": 0.0625059095959363,
+            "support_dice": 0.7813211845102506,
+            "evaluated_edges": 686,
+            "shared_support_edges": 686,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 79,
+              "mae": 0.03155168956848407,
+              "rmse": 0.07394950120098433
+            }
+          }
+        }
+      },
+      {
+        "first_run": 3,
+        "second_run": 4,
+        "metrics": {
+          "count": {
+            "pearson": 0.9697318727824986,
+            "nonzero_mean_scaled_mae": 0.08155947771744851,
+            "relative_l1_full_upper": 0.33806936899289597,
+            "relative_l1_common_nonzero": 0.2771049596309112,
+            "support_dice": 0.7908878504672897,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 677,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 7.321428571428571,
+              "rmse": 10.762036450943128
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9629309683965457,
+            "nonzero_mean_scaled_mae": 0.09163967076958461,
+            "relative_l1_full_upper": 0.37985242842184536,
+            "relative_l1_common_nonzero": 0.30070069957013584,
+            "support_dice": 0.7908878504672897,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 677,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 4.275976924846568,
+              "rmse": 6.253642224020662
+            }
+          },
+          "mean_length": {
+            "pearson": 0.9213758833292172,
+            "nonzero_mean_scaled_mae": 0.14704102686051615,
+            "relative_l1_full_upper": 0.6703607700329425,
+            "relative_l1_common_nonzero": 0.14704102686051615,
+            "support_dice": 0.7908878504672897,
+            "evaluated_edges": 677,
+            "shared_support_edges": 677,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 1.9941220846651284,
+              "rmse": 2.810193793514416
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.888396576326064,
+            "nonzero_mean_scaled_mae": 0.06023915777393869,
+            "relative_l1_full_upper": 0.4989745694172106,
+            "relative_l1_common_nonzero": 0.060239157773938685,
+            "support_dice": 0.7908878504672897,
+            "evaluated_edges": 677,
+            "shared_support_edges": 677,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 79,
+              "mae": 0.0324647150235536,
+              "rmse": 0.06669341963641326
+            }
+          }
+        }
+      }
+    ],
+    "fnit": [],
+    "cross": [
+      {
+        "official_run": 0,
+        "fnit_run": 0,
+        "metrics": {
+          "count": {
+            "pearson": 0.9729923115036808,
+            "nonzero_mean_scaled_mae": 0.08291994238053975,
+            "relative_l1_full_upper": 0.3258837870784234,
+            "relative_l1_common_nonzero": 0.25943661971830984,
+            "support_dice": 0.766248574686431,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 672,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 77,
+              "mae": 5.630952380952381,
+              "rmse": 7.625926953804495
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9624362250535604,
+            "nonzero_mean_scaled_mae": 0.09454304179297494,
+            "relative_l1_full_upper": 0.37156374711421725,
+            "relative_l1_common_nonzero": 0.29040970135903177,
+            "support_dice": 0.766248574686431,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 672,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 77,
+              "mae": 3.8708250715019736,
+              "rmse": 5.779379255038899
+            }
+          },
+          "mean_length": {
+            "pearson": 0.8890686622010923,
+            "nonzero_mean_scaled_mae": 0.15361810595315534,
+            "relative_l1_full_upper": 0.7146678395400544,
+            "relative_l1_common_nonzero": 0.15361810595315534,
+            "support_dice": 0.766248574686431,
+            "evaluated_edges": 672,
+            "shared_support_edges": 672,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 77,
+              "mae": 2.0527861673464067,
+              "rmse": 2.909919846152597
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8690464978811426,
+            "nonzero_mean_scaled_mae": 0.0622172238450729,
+            "relative_l1_full_upper": 0.5291759262762119,
+            "relative_l1_common_nonzero": 0.0622172238450729,
+            "support_dice": 0.766248574686431,
+            "evaluated_edges": 672,
+            "shared_support_edges": 672,
+            "diagonal": {
+              "reference_nonzero_nodes": 80,
+              "candidate_nonzero_nodes": 77,
+              "mae": 0.0361800910584653,
+              "rmse": 0.0996269002744971
+            }
+          }
+        }
+      },
+      {
+        "official_run": 1,
+        "fnit_run": 0,
+        "metrics": {
+          "count": {
+            "pearson": 0.9707774175646141,
+            "nonzero_mean_scaled_mae": 0.08089224957266074,
+            "relative_l1_full_upper": 0.3290436196152804,
+            "relative_l1_common_nonzero": 0.2607409494294971,
+            "support_dice": 0.7645011600928074,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 659,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 77,
+              "mae": 5.130952380952381,
+              "rmse": 8.391463916782737
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.964043598151066,
+            "nonzero_mean_scaled_mae": 0.09154814444634948,
+            "relative_l1_full_upper": 0.37238836819133525,
+            "relative_l1_common_nonzero": 0.2859010005602048,
+            "support_dice": 0.7645011600928074,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 659,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 77,
+              "mae": 4.8231426394329375,
+              "rmse": 7.546185198984484
+            }
+          },
+          "mean_length": {
+            "pearson": 0.9116133865526802,
+            "nonzero_mean_scaled_mae": 0.1480849361542365,
+            "relative_l1_full_upper": 0.7353440581173539,
+            "relative_l1_common_nonzero": 0.1480849361542365,
+            "support_dice": 0.7645011600928074,
+            "evaluated_edges": 659,
+            "shared_support_edges": 659,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 77,
+              "mae": 1.9933900545627496,
+              "rmse": 2.8969166514756797
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8671746478730121,
+            "nonzero_mean_scaled_mae": 0.06378455742122956,
+            "relative_l1_full_upper": 0.5479107964082098,
+            "relative_l1_common_nonzero": 0.06378455742122956,
+            "support_dice": 0.7645011600928074,
+            "evaluated_edges": 659,
+            "shared_support_edges": 659,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 77,
+              "mae": 0.03506730838807217,
+              "rmse": 0.08623571602483135
+            }
+          }
+        }
+      },
+      {
+        "official_run": 2,
+        "fnit_run": 0,
+        "metrics": {
+          "count": {
+            "pearson": 0.9692459486231891,
+            "nonzero_mean_scaled_mae": 0.0863951732835557,
+            "relative_l1_full_upper": 0.340309123238955,
+            "relative_l1_common_nonzero": 0.27400968937019093,
+            "support_dice": 0.7648401826484018,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 670,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 77,
+              "mae": 7.023809523809524,
+              "rmse": 11.70978426868094
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9637063429859732,
+            "nonzero_mean_scaled_mae": 0.09414459656620582,
+            "relative_l1_full_upper": 0.37083397020315645,
+            "relative_l1_common_nonzero": 0.2865234950890378,
+            "support_dice": 0.7648401826484018,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 670,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 77,
+              "mae": 4.591931393802282,
+              "rmse": 7.031204522664811
+            }
+          },
+          "mean_length": {
+            "pearson": 0.9177358970196954,
+            "nonzero_mean_scaled_mae": 0.14372777493307132,
+            "relative_l1_full_upper": 0.7009865921221962,
+            "relative_l1_common_nonzero": 0.14372777493307134,
+            "support_dice": 0.7648401826484018,
+            "evaluated_edges": 670,
+            "shared_support_edges": 670,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 77,
+              "mae": 1.8369293593379858,
+              "rmse": 2.6557512557066807
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8708709510686894,
+            "nonzero_mean_scaled_mae": 0.06280170761801206,
+            "relative_l1_full_upper": 0.5367074892844241,
+            "relative_l1_common_nonzero": 0.06280170761801206,
+            "support_dice": 0.7648401826484018,
+            "evaluated_edges": 670,
+            "shared_support_edges": 670,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 77,
+              "mae": 0.030885861574299272,
+              "rmse": 0.08160726688783064
+            }
+          }
+        }
+      },
+      {
+        "official_run": 3,
+        "fnit_run": 0,
+        "metrics": {
+          "count": {
+            "pearson": 0.9740820030999159,
+            "nonzero_mean_scaled_mae": 0.0770227947789007,
+            "relative_l1_full_upper": 0.31926452152110324,
+            "relative_l1_common_nonzero": 0.2535740072202166,
+            "support_dice": 0.7728337236533958,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 660,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 77,
+              "mae": 6.678571428571429,
+              "rmse": 9.556224598209722
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9639890978238641,
+            "nonzero_mean_scaled_mae": 0.08951125309383838,
+            "relative_l1_full_upper": 0.37102999796090436,
+            "relative_l1_common_nonzero": 0.2867969996777805,
+            "support_dice": 0.7728337236533958,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 660,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 77,
+              "mae": 4.30791731354537,
+              "rmse": 6.263309551486905
+            }
+          },
+          "mean_length": {
+            "pearson": 0.9180278826648287,
+            "nonzero_mean_scaled_mae": 0.14313159349006513,
+            "relative_l1_full_upper": 0.7170172237726152,
+            "relative_l1_common_nonzero": 0.14313159349006513,
+            "support_dice": 0.7728337236533958,
+            "evaluated_edges": 660,
+            "shared_support_edges": 660,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 77,
+              "mae": 1.8358299931605029,
+              "rmse": 2.9018319518083344
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.876408253336167,
+            "nonzero_mean_scaled_mae": 0.06294158664662977,
+            "relative_l1_full_upper": 0.5361207732312128,
+            "relative_l1_common_nonzero": 0.06294158664662977,
+            "support_dice": 0.7728337236533958,
+            "evaluated_edges": 660,
+            "shared_support_edges": 660,
+            "diagonal": {
+              "reference_nonzero_nodes": 78,
+              "candidate_nonzero_nodes": 77,
+              "mae": 0.0322629109908218,
+              "rmse": 0.07398788909364701
+            }
+          }
+        }
+      },
+      {
+        "official_run": 4,
+        "fnit_run": 0,
+        "metrics": {
+          "count": {
+            "pearson": 0.966685372713465,
+            "nonzero_mean_scaled_mae": 0.086144578313253,
+            "relative_l1_full_upper": 0.3447761194029851,
+            "relative_l1_common_nonzero": 0.2777777777777778,
+            "support_dice": 0.7652474108170311,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 665,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 77,
+              "mae": 6.0,
+              "rmse": 8.517489010713136
+            }
+          },
+          "sift2_fbc": {
+            "pearson": 0.9632164629881065,
+            "nonzero_mean_scaled_mae": 0.09375721970055352,
+            "relative_l1_full_upper": 0.3752441651849938,
+            "relative_l1_common_nonzero": 0.2941947738595532,
+            "support_dice": 0.7652474108170311,
+            "evaluated_edges": 3486,
+            "shared_support_edges": 665,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 77,
+              "mae": 4.697776553733035,
+              "rmse": 6.189537971598051
+            }
+          },
+          "mean_length": {
+            "pearson": 0.8882389698023673,
+            "nonzero_mean_scaled_mae": 0.15583305091167088,
+            "relative_l1_full_upper": 0.7151712872584309,
+            "relative_l1_common_nonzero": 0.15583305091167088,
+            "support_dice": 0.7652474108170311,
+            "evaluated_edges": 665,
+            "shared_support_edges": 665,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 77,
+              "mae": 1.905567199235174,
+              "rmse": 2.8617319865944304
+            }
+          },
+          "mean_fa": {
+            "pearson": 0.8766330132878936,
+            "nonzero_mean_scaled_mae": 0.06199152290095207,
+            "relative_l1_full_upper": 0.5414496175504705,
+            "relative_l1_common_nonzero": 0.06199152290095207,
+            "support_dice": 0.7652474108170311,
+            "evaluated_edges": 665,
+            "shared_support_edges": 665,
+            "diagonal": {
+              "reference_nonzero_nodes": 79,
+              "candidate_nonzero_nodes": 77,
+              "mae": 0.030701863970798875,
+              "rmse": 0.07967600640376785
+            }
+          }
+        }
+      }
+    ]
+  },
+  "ranges": {
+    "count": {
+      "relative_l1_full_upper": {
+        "official_min_max": [
+          0.3301273367651043,
+          0.3467894879436467
+        ],
+        "official_values": [
+          0.330624407422457,
+          0.3434918054991196,
+          0.33671949072192875,
+          0.3444399295679263,
+          0.3301273367651043,
+          0.3444865890002709,
+          0.3467894879436467,
+          0.3408562440158665,
+          0.3453699904253864,
+          0.33806936899289597
+        ],
+        "fnit_vs_official": [
+          0.3258837870784234,
+          0.3290436196152804,
+          0.340309123238955,
+          0.31926452152110324,
+          0.3447761194029851
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 2,
+        "criterion": "<= official_max",
+        "threshold": 0.3467894879436467,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "nonzero_mean_scaled_mae": {
+        "official_min_max": [
+          0.08115867114391692,
+          0.08767998896341565
+        ],
+        "official_values": [
+          0.0841261759563165,
+          0.08740023851913915,
+          0.08567704769660092,
+          0.08764148523429449,
+          0.08115867114391692,
+          0.08468875696306144,
+          0.08525490280198085,
+          0.08653407227597298,
+          0.08767998896341565,
+          0.08155947771744851
+        ],
+        "fnit_vs_official": [
+          0.08291994238053975,
+          0.08089224957266074,
+          0.0863951732835557,
+          0.0770227947789007,
+          0.086144578313253
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 3,
+        "criterion": "<= official_max",
+        "threshold": 0.08767998896341565,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "support_dice": {
+        "official_min_max": [
+          0.7546296296296297,
+          0.7908878504672897
+        ],
+        "official_values": [
+          0.7568807339449541,
+          0.7731376975169301,
+          0.7743055555555556,
+          0.7656427758816837,
+          0.7600459242250287,
+          0.7550058892815077,
+          0.7546296296296297,
+          0.7636152954808807,
+          0.7813211845102506,
+          0.7908878504672897
+        ],
+        "fnit_vs_official": [
+          0.766248574686431,
+          0.7645011600928074,
+          0.7648401826484018,
+          0.7728337236533958,
+          0.7652474108170311
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": ">= official_min",
+        "threshold": 0.7546296296296297,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "pearson": {
+        "official_min_max": [
+          0.9665884655773314,
+          0.9744265971243743
+        ],
+        "official_values": [
+          0.9744265971243743,
+          0.9690550524792936,
+          0.9708195949573754,
+          0.968890540340561,
+          0.9696747583258079,
+          0.9665884655773314,
+          0.9685038481903834,
+          0.9694024165407146,
+          0.9682247622682977,
+          0.9697318727824986
+        ],
+        "fnit_vs_official": [
+          0.9729923115036808,
+          0.9707774175646141,
+          0.9692459486231891,
+          0.9740820030999159,
+          0.966685372713465
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": ">= official_min",
+        "threshold": 0.9665884655773314,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      }
+    },
+    "sift2_fbc": {
+      "relative_l1_full_upper": {
+        "official_min_max": [
+          0.364292892553551,
+          0.389065015348911
+        ],
+        "official_values": [
+          0.37745243571337256,
+          0.389065015348911,
+          0.36786182708826537,
+          0.3753465045411816,
+          0.36972331704720157,
+          0.3837494872750352,
+          0.364292892553551,
+          0.3805379216573332,
+          0.37264421835380773,
+          0.37985242842184536
+        ],
+        "fnit_vs_official": [
+          0.37156374711421725,
+          0.37238836819133525,
+          0.37083397020315645,
+          0.37102999796090436,
+          0.3752441651849938
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": "<= official_max",
+        "threshold": 0.389065015348911,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "nonzero_mean_scaled_mae": {
+        "official_min_max": [
+          0.08955794862834,
+          0.09899617573565234
+        ],
+        "official_values": [
+          0.09604139715368945,
+          0.09899617573565234,
+          0.09360110172899926,
+          0.09550555063913599,
+          0.09089296692755357,
+          0.09434116769785002,
+          0.08955794862834,
+          0.09660816427617323,
+          0.09460416903130231,
+          0.09163967076958461
+        ],
+        "fnit_vs_official": [
+          0.09454304179297494,
+          0.09154814444634948,
+          0.09414459656620582,
+          0.08951125309383838,
+          0.09375721970055352
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 4,
+        "criterion": "<= official_max",
+        "threshold": 0.09899617573565234,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "support_dice": {
+        "official_min_max": [
+          0.7546296296296297,
+          0.7908878504672897
+        ],
+        "official_values": [
+          0.7568807339449541,
+          0.7731376975169301,
+          0.7743055555555556,
+          0.7656427758816837,
+          0.7600459242250287,
+          0.7550058892815077,
+          0.7546296296296297,
+          0.7636152954808807,
+          0.7813211845102506,
+          0.7908878504672897
+        ],
+        "fnit_vs_official": [
+          0.766248574686431,
+          0.7645011600928074,
+          0.7648401826484018,
+          0.7728337236533958,
+          0.7652474108170311
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": ">= official_min",
+        "threshold": 0.7546296296296297,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "pearson": {
+        "official_min_max": [
+          0.9605796736175681,
+          0.9681559127481195
+        ],
+        "official_values": [
+          0.963430130892086,
+          0.9605796736175681,
+          0.9632971027001409,
+          0.9648701335221868,
+          0.9667729058169826,
+          0.9622388979332733,
+          0.9681559127481195,
+          0.9621246038004282,
+          0.9654806098413242,
+          0.9629309683965457
+        ],
+        "fnit_vs_official": [
+          0.9624362250535604,
+          0.964043598151066,
+          0.9637063429859732,
+          0.9639890978238641,
+          0.9632164629881065
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": ">= official_min",
+        "threshold": 0.9605796736175681,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      }
+    },
+    "mean_length": {
+      "relative_l1_full_upper": {
+        "official_min_max": [
+          0.6667208957550945,
+          0.7718515550898823
+        ],
+        "official_values": [
+          0.7317537968401104,
+          0.7032553528011724,
+          0.6667208957550945,
+          0.7011297132372251,
+          0.7718515550898823,
+          0.7265005112065264,
+          0.7527783209565997,
+          0.695473262590037,
+          0.667318108136123,
+          0.6703607700329425
+        ],
+        "fnit_vs_official": [
+          0.7146678395400544,
+          0.7353440581173539,
+          0.7009865921221962,
+          0.7170172237726152,
+          0.7151712872584309
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": "<= official_max",
+        "threshold": 0.7718515550898823,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "nonzero_mean_scaled_mae": {
+        "official_min_max": [
+          0.14439281350986954,
+          0.1598364601297729
+        ],
+        "official_values": [
+          0.15239772982116034,
+          0.1598364601297729,
+          0.1512590110240059,
+          0.15233445574039672,
+          0.1558386665526524,
+          0.14439281350986954,
+          0.15238278139859798,
+          0.14799245723584903,
+          0.15063899548183463,
+          0.14704102686051615
+        ],
+        "fnit_vs_official": [
+          0.15361810595315534,
+          0.1480849361542365,
+          0.14372777493307132,
+          0.14313159349006513,
+          0.15583305091167088
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 3,
+        "criterion": "<= official_max",
+        "threshold": 0.1598364601297729,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "support_dice": {
+        "official_min_max": [
+          0.7546296296296297,
+          0.7908878504672897
+        ],
+        "official_values": [
+          0.7568807339449541,
+          0.7731376975169301,
+          0.7743055555555556,
+          0.7656427758816837,
+          0.7600459242250287,
+          0.7550058892815077,
+          0.7546296296296297,
+          0.7636152954808807,
+          0.7813211845102506,
+          0.7908878504672897
+        ],
+        "fnit_vs_official": [
+          0.766248574686431,
+          0.7645011600928074,
+          0.7648401826484018,
+          0.7728337236533958,
+          0.7652474108170311
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": ">= official_min",
+        "threshold": 0.7546296296296297,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "pearson": {
+        "official_min_max": [
+          0.8806959849656001,
+          0.9213758833292172
+        ],
+        "official_values": [
+          0.8993165229217798,
+          0.8806959849656001,
+          0.9109136039814663,
+          0.8924585631043427,
+          0.8967125046467813,
+          0.9206864227818092,
+          0.9021948563532063,
+          0.9095870551845343,
+          0.9004957194068898,
+          0.9213758833292172
+        ],
+        "fnit_vs_official": [
+          0.8890686622010923,
+          0.9116133865526802,
+          0.9177358970196954,
+          0.9180278826648287,
+          0.8882389698023673
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": ">= official_min",
+        "threshold": 0.8806959849656001,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      }
+    },
+    "mean_fa": {
+      "relative_l1_full_upper": {
+        "official_min_max": [
+          0.4989745694172106,
+          0.5720224382834849
+        ],
+        "official_values": [
+          0.5428632209042745,
+          0.5196081271258599,
+          0.5059464497302818,
+          0.5284921756754337,
+          0.5662833720215125,
+          0.5569113099204533,
+          0.5720224382834849,
+          0.5337511372293957,
+          0.5021306017989493,
+          0.4989745694172106
+        ],
+        "fnit_vs_official": [
+          0.5291759262762119,
+          0.5479107964082098,
+          0.5367074892844241,
+          0.5361207732312128,
+          0.5414496175504705
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": "<= official_max",
+        "threshold": 0.5720224382834849,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "nonzero_mean_scaled_mae": {
+        "official_min_max": [
+          0.059703042132518036,
+          0.0647736251099376
+        ],
+        "official_values": [
+          0.06027892982007715,
+          0.06292335516375581,
+          0.059703042132518036,
+          0.061853236469503144,
+          0.0647736251099376,
+          0.061589165696843015,
+          0.06367428189767674,
+          0.06263786512329858,
+          0.0625059095959363,
+          0.06023915777393869
+        ],
+        "fnit_vs_official": [
+          0.0622172238450729,
+          0.06378455742122956,
+          0.06280170761801206,
+          0.06294158664662977,
+          0.06199152290095207
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": "<= official_max",
+        "threshold": 0.0647736251099376,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "support_dice": {
+        "official_min_max": [
+          0.7546296296296297,
+          0.7908878504672897
+        ],
+        "official_values": [
+          0.7568807339449541,
+          0.7731376975169301,
+          0.7743055555555556,
+          0.7656427758816837,
+          0.7600459242250287,
+          0.7550058892815077,
+          0.7546296296296297,
+          0.7636152954808807,
+          0.7813211845102506,
+          0.7908878504672897
+        ],
+        "fnit_vs_official": [
+          0.766248574686431,
+          0.7645011600928074,
+          0.7648401826484018,
+          0.7728337236533958,
+          0.7652474108170311
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": ">= official_min",
+        "threshold": 0.7546296296296297,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      },
+      "pearson": {
+        "official_min_max": [
+          0.8563749867709141,
+          0.888396576326064
+        ],
+        "official_values": [
+          0.8855189389367096,
+          0.869001295221384,
+          0.8880270642569753,
+          0.8740656664138257,
+          0.8570826223316041,
+          0.8871165508136433,
+          0.8616486768466008,
+          0.8563749867709141,
+          0.8620473596496204,
+          0.888396576326064
+        ],
+        "fnit_vs_official": [
+          0.8690464978811426,
+          0.8671746478730121,
+          0.8708709510686894,
+          0.876408253336167,
+          0.8766330132878936
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 5,
+        "criterion": ">= official_min",
+        "threshold": 0.8563749867709141,
+        "comparison_accepted": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "accepted_count": 5,
+        "status": "passed"
+      }
+    }
+  },
+  "comparison_counts": {
+    "official": 10,
+    "fnit": 0,
+    "cross": 5
+  },
+  "matrix_envelope_status": "passed",
+  "fnit_reproducibility_ranges": {
+    "count": {
+      "relative_l1_full_upper": {
+        "official_min_max": [
+          0.3301273367651043,
+          0.3467894879436467
+        ],
+        "official_values": [
+          0.330624407422457,
+          0.3434918054991196,
+          0.33671949072192875,
+          0.3444399295679263,
+          0.3301273367651043,
+          0.3444865890002709,
+          0.3467894879436467,
+          0.3408562440158665,
+          0.3453699904253864,
+          0.33806936899289597
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": "<= official_max",
+        "threshold": 0.3467894879436467,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "nonzero_mean_scaled_mae": {
+        "official_min_max": [
+          0.08115867114391692,
+          0.08767998896341565
+        ],
+        "official_values": [
+          0.0841261759563165,
+          0.08740023851913915,
+          0.08567704769660092,
+          0.08764148523429449,
+          0.08115867114391692,
+          0.08468875696306144,
+          0.08525490280198085,
+          0.08653407227597298,
+          0.08767998896341565,
+          0.08155947771744851
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": "<= official_max",
+        "threshold": 0.08767998896341565,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "support_dice": {
+        "official_min_max": [
+          0.7546296296296297,
+          0.7908878504672897
+        ],
+        "official_values": [
+          0.7568807339449541,
+          0.7731376975169301,
+          0.7743055555555556,
+          0.7656427758816837,
+          0.7600459242250287,
+          0.7550058892815077,
+          0.7546296296296297,
+          0.7636152954808807,
+          0.7813211845102506,
+          0.7908878504672897
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": ">= official_min",
+        "threshold": 0.7546296296296297,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "pearson": {
+        "official_min_max": [
+          0.9665884655773314,
+          0.9744265971243743
+        ],
+        "official_values": [
+          0.9744265971243743,
+          0.9690550524792936,
+          0.9708195949573754,
+          0.968890540340561,
+          0.9696747583258079,
+          0.9665884655773314,
+          0.9685038481903834,
+          0.9694024165407146,
+          0.9682247622682977,
+          0.9697318727824986
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": ">= official_min",
+        "threshold": 0.9665884655773314,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      }
+    },
+    "sift2_fbc": {
+      "relative_l1_full_upper": {
+        "official_min_max": [
+          0.364292892553551,
+          0.389065015348911
+        ],
+        "official_values": [
+          0.37745243571337256,
+          0.389065015348911,
+          0.36786182708826537,
+          0.3753465045411816,
+          0.36972331704720157,
+          0.3837494872750352,
+          0.364292892553551,
+          0.3805379216573332,
+          0.37264421835380773,
+          0.37985242842184536
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": "<= official_max",
+        "threshold": 0.389065015348911,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "nonzero_mean_scaled_mae": {
+        "official_min_max": [
+          0.08955794862834,
+          0.09899617573565234
+        ],
+        "official_values": [
+          0.09604139715368945,
+          0.09899617573565234,
+          0.09360110172899926,
+          0.09550555063913599,
+          0.09089296692755357,
+          0.09434116769785002,
+          0.08955794862834,
+          0.09660816427617323,
+          0.09460416903130231,
+          0.09163967076958461
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": "<= official_max",
+        "threshold": 0.09899617573565234,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "support_dice": {
+        "official_min_max": [
+          0.7546296296296297,
+          0.7908878504672897
+        ],
+        "official_values": [
+          0.7568807339449541,
+          0.7731376975169301,
+          0.7743055555555556,
+          0.7656427758816837,
+          0.7600459242250287,
+          0.7550058892815077,
+          0.7546296296296297,
+          0.7636152954808807,
+          0.7813211845102506,
+          0.7908878504672897
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": ">= official_min",
+        "threshold": 0.7546296296296297,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "pearson": {
+        "official_min_max": [
+          0.9605796736175681,
+          0.9681559127481195
+        ],
+        "official_values": [
+          0.963430130892086,
+          0.9605796736175681,
+          0.9632971027001409,
+          0.9648701335221868,
+          0.9667729058169826,
+          0.9622388979332733,
+          0.9681559127481195,
+          0.9621246038004282,
+          0.9654806098413242,
+          0.9629309683965457
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": ">= official_min",
+        "threshold": 0.9605796736175681,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      }
+    },
+    "mean_length": {
+      "relative_l1_full_upper": {
+        "official_min_max": [
+          0.6667208957550945,
+          0.7718515550898823
+        ],
+        "official_values": [
+          0.7317537968401104,
+          0.7032553528011724,
+          0.6667208957550945,
+          0.7011297132372251,
+          0.7718515550898823,
+          0.7265005112065264,
+          0.7527783209565997,
+          0.695473262590037,
+          0.667318108136123,
+          0.6703607700329425
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": "<= official_max",
+        "threshold": 0.7718515550898823,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "nonzero_mean_scaled_mae": {
+        "official_min_max": [
+          0.14439281350986954,
+          0.1598364601297729
+        ],
+        "official_values": [
+          0.15239772982116034,
+          0.1598364601297729,
+          0.1512590110240059,
+          0.15233445574039672,
+          0.1558386665526524,
+          0.14439281350986954,
+          0.15238278139859798,
+          0.14799245723584903,
+          0.15063899548183463,
+          0.14704102686051615
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": "<= official_max",
+        "threshold": 0.1598364601297729,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "support_dice": {
+        "official_min_max": [
+          0.7546296296296297,
+          0.7908878504672897
+        ],
+        "official_values": [
+          0.7568807339449541,
+          0.7731376975169301,
+          0.7743055555555556,
+          0.7656427758816837,
+          0.7600459242250287,
+          0.7550058892815077,
+          0.7546296296296297,
+          0.7636152954808807,
+          0.7813211845102506,
+          0.7908878504672897
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": ">= official_min",
+        "threshold": 0.7546296296296297,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "pearson": {
+        "official_min_max": [
+          0.8806959849656001,
+          0.9213758833292172
+        ],
+        "official_values": [
+          0.8993165229217798,
+          0.8806959849656001,
+          0.9109136039814663,
+          0.8924585631043427,
+          0.8967125046467813,
+          0.9206864227818092,
+          0.9021948563532063,
+          0.9095870551845343,
+          0.9004957194068898,
+          0.9213758833292172
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": ">= official_min",
+        "threshold": 0.8806959849656001,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      }
+    },
+    "mean_fa": {
+      "relative_l1_full_upper": {
+        "official_min_max": [
+          0.4989745694172106,
+          0.5720224382834849
+        ],
+        "official_values": [
+          0.5428632209042745,
+          0.5196081271258599,
+          0.5059464497302818,
+          0.5284921756754337,
+          0.5662833720215125,
+          0.5569113099204533,
+          0.5720224382834849,
+          0.5337511372293957,
+          0.5021306017989493,
+          0.4989745694172106
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": "<= official_max",
+        "threshold": 0.5720224382834849,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "nonzero_mean_scaled_mae": {
+        "official_min_max": [
+          0.059703042132518036,
+          0.0647736251099376
+        ],
+        "official_values": [
+          0.06027892982007715,
+          0.06292335516375581,
+          0.059703042132518036,
+          0.061853236469503144,
+          0.0647736251099376,
+          0.061589165696843015,
+          0.06367428189767674,
+          0.06263786512329858,
+          0.0625059095959363,
+          0.06023915777393869
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": "<= official_max",
+        "threshold": 0.0647736251099376,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "support_dice": {
+        "official_min_max": [
+          0.7546296296296297,
+          0.7908878504672897
+        ],
+        "official_values": [
+          0.7568807339449541,
+          0.7731376975169301,
+          0.7743055555555556,
+          0.7656427758816837,
+          0.7600459242250287,
+          0.7550058892815077,
+          0.7546296296296297,
+          0.7636152954808807,
+          0.7813211845102506,
+          0.7908878504672897
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": ">= official_min",
+        "threshold": 0.7546296296296297,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      },
+      "pearson": {
+        "official_min_max": [
+          0.8563749867709141,
+          0.888396576326064
+        ],
+        "official_values": [
+          0.8855189389367096,
+          0.869001295221384,
+          0.8880270642569753,
+          0.8740656664138257,
+          0.8570826223316041,
+          0.8871165508136433,
+          0.8616486768466008,
+          0.8563749867709141,
+          0.8620473596496204,
+          0.888396576326064
+        ],
+        "official_defined_count": 10,
+        "official_comparison_count": 10,
+        "inside_count": 0,
+        "criterion": ">= official_min",
+        "threshold": 0.8563749867709141,
+        "comparison_accepted": [],
+        "accepted_count": 0,
+        "status": "not_assessed",
+        "fnit_within": []
+      }
+    }
+  },
+  "fnit_reproducibility_status": "not_assessed"
+}

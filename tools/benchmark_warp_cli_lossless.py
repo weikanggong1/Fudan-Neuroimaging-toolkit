@@ -239,6 +239,7 @@ def main(argv=None):
     write_json(private / "cases.json", configuration, private=True)
     source_files = ["src/fnit/__init__.py", "src/fnit/cli.py", "src/fnit/_nib.py",
                     "src/fnit/_sampling_plan.py", "src/fnit/_transforms.py",
+                    "src/fnit/_world_resampling.py",
                     "src/fnit/applywarp/core.py", "src/fnit/synthmorph/pipeline.py",
                     "src/fnit/synthmorph/spatial.py", "tools/validate_fnirt_pipeline_lossless.py",
                     "tools/benchmark_warp_cli_lossless.py"]

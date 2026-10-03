@@ -6,6 +6,34 @@ import pytest
 from fnit.flirt import core
 
 
+@pytest.mark.parametrize("applyxfm", (False, True))
+def test_mgz_reference_preserves_scanner_geometry_and_voxels(applyxfm):
+    data = np.arange(7 * 8 * 9, dtype=np.float32).reshape(7, 8, 9)
+    affine = np.array([[0., 0., -2., 17.], [-1.5, 0., 0., 23.],
+                       [0., 1., 0., -9.], [0., 0., 0., 1.]])
+    moving = nib.Nifti1Image(data, affine)
+    fixed = nib.MGHImage(np.zeros_like(data), affine)
+    result = core._output_image(data, moving, fixed, np.eye(4), applyxfm=applyxfm)
+    np.testing.assert_array_equal(result.dataobj, data)
+    np.testing.assert_array_equal(result.affine, fixed.affine)
+    np.testing.assert_allclose(result.get_qform(), fixed.affine, atol=1e-6)
+    assert result.header.get_zooms() == fixed.header.get_zooms()[:3]
+    assert int(result.header["qform_code"]) == int(result.header["sform_code"]) == 1
+
+
+def test_mgz_moving_supplies_scanner_form_to_uncoded_reference():
+    data = np.ones((5, 5, 5), dtype=np.float32)
+    moving = nib.MGHImage(data, np.diag([-2., 2., 2., 1.]))
+    fixed = nib.Nifti1Image(data, np.eye(4))
+    fixed.set_qform(np.eye(4), 0)
+    fixed.set_sform(np.eye(4), 0)
+    pull_voxel = np.eye(4)
+    pull_voxel[0, 3] = 3
+    result = core._output_image(data, moving, fixed, pull_voxel)
+    np.testing.assert_array_equal(result.affine, moving.affine @ pull_voxel)
+    assert int(result.header["qform_code"]) == int(result.header["sform_code"]) == 1
+
+
 def test_registration_fills_missing_qform_from_reference_sform():
     affine = np.diag([-2., 2., 2., 1.])
     moving = nib.Nifti1Image(np.ones((5, 5, 5), dtype=np.float32), affine)

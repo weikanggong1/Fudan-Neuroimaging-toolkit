@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import hashlib
+from numbers import Integral
 from pathlib import Path
 import shutil
 import subprocess
@@ -68,6 +70,7 @@ def prepare_bids_connectome(
     rotated_bvecs: str | Path | None = None,
     device: str = "cuda:0",
     overwrite: bool = False,
+    eddy_gp_seed: int | None = None,
 ) -> BIDSConnectomeInputs:
     """Select one BIDS DWI/T1 and run only missing TOPUP, EDDY and recon-all stages.
 
@@ -76,6 +79,13 @@ def prepare_bids_connectome(
     paths, sizes, modification times, and options. An external corrected DWI
     must be supplied together with its rotated bvec file.
     """
+    if eddy_gp_seed is not None and (
+        isinstance(eddy_gp_seed, bool) or not isinstance(eddy_gp_seed, Integral)
+        or not 1 <= eddy_gp_seed <= 2**32 - 1
+    ):
+        raise ValueError("eddy_gp_seed must be None or an integer in [1, 2**32-1]")
+    if eddy_gp_seed is not None:
+        eddy_gp_seed = int(eddy_gp_seed)
     if t1 is not None and freesurfer_subject_dir is not None:
         raise ValueError("t1 and freesurfer_subject_dir are alternative anatomy inputs")
     selected = locate_bids_dwi(
@@ -116,18 +126,22 @@ def prepare_bids_connectome(
             _record(stage_state, stage_key)
 
         topup_dir = preproc / "topup"
+        topup_prepared = None
         if selected.reverse is not None:
             topup_state = topup_dir / "state.json"
             topup_key = _fingerprint((raw / "AP.nii.gz", raw / "AP.bval",
                                       raw / "AP.json", raw / "PA.nii.gz",
-                                      raw / "PA.bval", raw / "PA.json"), {})
+                                      raw / "PA.bval", raw / "PA.json"),
+                                     {"pair_geometry": "fslmerge-first"})
             topup_outputs = (topup_dir / "fieldmap_out_fieldcoef.nii.gz",
                              topup_dir / "fieldmap_iout.nii.gz",
                              topup_dir / "acqparams.txt")
             if not overwrite and _reusable(topup_state, topup_key, topup_outputs):
                 stages["topup"] = "skipped"
             else:
-                run_ukb_topup(raw, topup_dir, device=device, overwrite=True)
+                _, topup_prepared = run_ukb_topup(
+                    raw, topup_dir, device=device, overwrite=True,
+                    pair_geometry="fslmerge-first")
                 _record(topup_state, topup_key)
                 stages["topup"] = "completed"
         else:
@@ -141,17 +155,19 @@ def prepare_bids_connectome(
                         raw / "AP.json")
         if selected.reverse is not None:
             eddy_sources += (topup_dir / "fieldmap_out_fieldcoef.nii.gz",)
-        eddy_key = _fingerprint(eddy_sources, {"topup": selected.reverse is not None})
+        eddy_key = _fingerprint(eddy_sources, {"topup": selected.reverse is not None, "gp_seed": eddy_gp_seed})
         if not overwrite and _reusable(eddy_state, eddy_key, (dwi, bvecs)):
             stages["eddy"] = "skipped"
         else:
             if selected.reverse is not None:
                 eddy_inputs = prepare_ukb_eddy(
-                    raw, topup_dir, eddy_dir, device=device, overwrite=True)
+                    raw, topup_dir, eddy_dir, device=device, overwrite=True,
+                    ref_scan_no=(topup_prepared["ap_index"]
+                                 if topup_prepared is not None else None))
             else:
-                eddy_inputs = _prepare_ap_only(raw, eddy_dir, overwrite=True)
+                eddy_inputs = _prepare_ap_only(raw, eddy_dir, overwrite=True, device=device)
             TorchEDDY(device=device).run(
-                **eddy_inputs, out=eddy_dir / "data", overwrite=True)
+                **eddy_inputs, out=eddy_dir / "data", overwrite=True, gp_seed=eddy_gp_seed)
             _record(eddy_state, eddy_key)
             stages["eddy"] = "completed"
 
@@ -170,7 +186,18 @@ def prepare_bids_connectome(
             name += f"_ses-{session_label.removeprefix('ses-')}"
         subjects_dir = root / "freesurfer"
         fs_subject = subjects_dir / name
-        if _recon_complete(fs_subject) and (fs_subject / "scripts/recon-all.done").is_file() and not overwrite:
+        recon_state = fs_subject / "scripts/fnit_input_state.json"
+        recon_key = _fingerprint((selected.t1w,), {
+            "command": "recon-all -all",
+            "t1_sha256": hashlib.sha256(selected.t1w.read_bytes()).hexdigest(),
+        })
+        recon_outputs = (fs_subject / "scripts/recon-all.done",)
+        has_orig = (fs_subject / "mri/orig/001.mgz").is_file()
+        if has_orig and (not recon_state.is_file() or
+                         json.loads(recon_state.read_text()) != recon_key):
+            raise ValueError("recon-all anatomy input changed or has no FNIT input fingerprint; "
+                             "use a fresh output_dir or explicitly supply freesurfer_subject_dir")
+        if _recon_complete(fs_subject) and _reusable(recon_state, recon_key, recon_outputs) and not overwrite:
             stages["recon_all"] = "skipped"
         else:
             executable = shutil.which("recon-all")
@@ -179,6 +206,13 @@ def prepare_bids_connectome(
             command = [executable, "-sd", str(subjects_dir), "-s", name]
             if not (fs_subject / "mri/orig/001.mgz").is_file():
                 command += ["-i", str(selected.t1w)]
+            recon_state.parent.mkdir(parents=True, exist_ok=True)
+            _record(recon_state, recon_key)
+            _record(fs_subject / "scripts/fnit_recon_program.json", {
+                "executable": executable,
+                "sha256": (hashlib.sha256(Path(executable).read_bytes()).hexdigest()
+                           if Path(executable).is_file() else None),
+            })
             subprocess.run([*command, "-all"], check=True)
             if not _recon_complete(fs_subject):
                 raise RuntimeError(f"recon-all did not produce complete anatomy: {fs_subject}")

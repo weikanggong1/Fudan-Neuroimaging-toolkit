@@ -1,4 +1,4 @@
-# FNIT：项目规则与 recon-all 五阶段串行优化
+# FNIT：项目规则与 recon-all 五会话性能优化
 
 本文件适用于本仓库。用户当前指令优先于本文件；任务专属提示词确定本轮目标。
 先核对当前代码、已有实现、真实数据和资源许可。用户要求实现时直接修改、验证和交付；用户仅要求规划时按其指定范围规划。
@@ -6,7 +6,7 @@
 ## 1. 开始工作与版本绑定
 
 - 先确认仓库根目录、当前分支和 `git status --short`；读取适用的项目规范与最新源码。保护其他人的未提交修改。
-- 本轮由同一执行者在一个工作分支串行完成五阶段：全部 Synth GPU → 归一化 → 网格/球面/拓扑 → N4/GCA → white/pial。阶段分别提交，输出与报告目录隔离，保留既有修改。
+- 用户2026-10-02已明确授权五个独立会话并行开发及协调者最终验收后推送main。五个会话使用独立worktree、分支与报告目录；协调者统一合并和维护安装入口，保留既有修改。
 - 固定本轮初始基线，并为每阶段记录上一阶段的实际提交与资源配置；同设备的配对顺序运行，阶段收益不能简单相加。
 - 每次验证记录实际 Git commit、未提交代码差异、源码 SHA-256、输入/权重/资产/程序 SHA-256；不得把旧报告改标为当前实测。
 - 本轮已有起点见 `validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md`；对应两例报告在其 `whole/sub01/`、`whole/sub02/`。这些记录绑定各自测试版本，不能代替后续候选验证。
@@ -35,31 +35,32 @@
 - 当前模型构造/精度上下文可能修改进程全局状态，不能直接在线程中并发不同策略。先测串行生命周期或进程隔离，再决定并行方案。
 - 记录 CPU 读写、必要后处理与 GPU 搬运；优先优化已有适合 GPU 的计算。父进程模型和子进程同时占用必须监测。
 
-## 4. 本轮五阶段串行范围
+## 4. 本轮五会话范围
 
-用户已取消五任务并行协作，并授权同一执行者依次完成以下五阶段及共享接入。以下范围用于追踪修改与回归，不构成跨阶段编辑限制。
+五会话均从协调者冻结的同一源码基线开始。开发可以并行；同一GPU的计时benchmark必须取得共用锁，避免相互抢占污染结果。整例验证由协调者统一执行。
 
-| 阶段 | 主要代码范围 | 重点 |
+| 任务 | 独占修改范围 | 重点 |
 | --- | --- | --- |
-| 1：全部 Synth/辅助网络 GPU | `src/fnit/synthstrip/`、`src/fnit/synthseg_parc/`、`src/fnit/synthmorph/`；`recon_all/input_talairach_chain.py`、`talairach_synthmorph.py`、`mni_aux_chain.py`、`mni_nonlinear_chain.py`、`sclimbic.py`、`aux_seg.py` | 全部实际网络调用 GPU 接入；模型、缓冲、精度、MNI warp 链 |
-| 2：强度归一化 | `src/fnit/recon_all/normalization/` 及该链专属新增模块 | 控制点、Voronoi、平滑、量化及设备搬运 |
-| 3：网格/球面/拓扑 | `recon_all/mris_remesh_python.py`、`sphere_standard_*.py`、`mris_register_*.py`、`topology_*.py`、`place_surface_normals.py` | 静态 CSR/邻接、目标函数、动态网格、GPU 平均及拓扑评分 |
-| 4：N4/GCA | `tools/n4_itk/`；`recon_all/n4_itk.py`、`n4_wrapper.py`、`mri_em_register_*.py` 与 GCA 专属模块 | 独立 ITK 内部剖析、线程、分块 GPU 打分 |
-| 5：white/pial | `recon_all/place_surface_*`，但不包括 `place_surface_normals.py`；`place_white_preaparc_python.py`、`place_pial_python.py`、`white_preaparc_conda.py`、`final_white_conda.py` | 完整轮次、边界/梯度、动态碰撞、清理与固定快照 GPU 计算 |
+| 1：半球并行 | native_free.py、batch.py、CLI、并行调度新增模块、profiling并行统计 | spawn worker、共享文件依赖与确定性发布、总线程4、真实组墙钟 |
+| 2：white/pial | place_surface_*（除normals）、place_white_preaparc_python.py、place_pial_python.py、white_preaparc_conda.py、final_white_conda.py | 采样、边界、梯度、动态碰撞、有序更新及完整清理 |
+| 3：GCA/WM/N4 | mri_em_register*、GCA/WM专属模块、n4_itk.py、n4_wrapper.py、tools/n4_itk | 分块GPU评分、完整优化器与标签语义、ITK热点 |
+| 4：网格/球面/拓扑 | mris_remesh_python.py、sphere_*、mris_register_*、topology_*、place_surface_normals.py | CSR/空间索引、目标与梯度、GA评分；审查低耗时原生组件 |
+| 5：MNI warp | mni_nonlinear_chain.py、warp专属模块、明确归属的变换兼容修改 | world/voxel变换、完整逆场及重采样 |
 
-- 上表 `recon_all/` 均指 `src/fnit/recon_all/`。各阶段分别保留专项测试、benchmark 和说明。
-- `place_surface_normals.py` 的共享修改保持公共行为兼容；阶段 3 验证球面/配准，阶段 5 补 white/pial 回归。缓存通过显式上下文传递。
-- 同一执行者负责 `native_free.py`、`batch.py`、公共设备/精度、主页文档、环境和构建入口的实际接入，不把必要接入留给其他任务。
-- 五阶段统一复用 Synth 模型、权重缓存与精度策略，避免重复实现。
-- 验证产物使用独立命名空间，例如 `validation/recon_all/optimizations/<日期>/task_<编号>/`；避免共享日志、缓存目录和被试输出目录。
+- 各任务提供可兼容的函数/后端入口和接入说明，任务1维护生产调度；其他任务不同时编辑调度。
+- place_surface_normals.py归任务4，保持公共行为兼容；任务2补表面放置回归。缓存以显式上下文传递，动态状态按真实版本失效。
+- 协调者独占根AGENTS.md、主页README、共享环境/安装入口和总报告；各任务提交专属文档、测试及验证报告。
+- 各任务不推main；协调者审查、合并最新main、相同输入回归及两例原始T1空目录整例后普通推送。
+- 具体已批准的提示词见 validation/recon_all/optimizations/20261002_parallel/dispatch_prompts.json；协调状态写入任务提示词给定目录。
+- 完整GPU模式维持既有Synth GPU实现；当前厚度/面积/曲率也已经GPU接入，不重复实现。
 
 ## 5. 各任务必须保持的算法边界
 
-- 任务 1：保留 SynthSeg 原图/翻转集成和标签语义；保留 SynthMorph 反对称 velocity 所需的两次网络前向。仅省去确实未消费的输出；网络反向形变不能直接替代既有数值求逆。
-- 任务 2：保持传播距离、同分选择、控制点、平滑边界、舍入和更新依赖；已有有序 Numba 控制点清理优先复用，不重复实现。
-- 任务 3：remesh 动态拓扑与 Gauss-Seidel 不能改成同时更新；静态邻接可缓存，法向随坐标更新。保持同长边排序、目标函数、步长接受/拒绝及停止规则。现有部分拓扑评分不等于完整 GA。
-- 任务 4：`n4_gpu.py` 的平滑残差算法不等于 ITK N4，不能直接替换。现有 Python GCA 首次 EM 线搜索不等于完整注册；完整默认替换须补齐后续优化和终止流程。
-- 任务 5：完整 Python pial 优先复用；现有 white 首轮诊断不能冒充完整 white。异步顶点接受、候选扩展、拒绝试步状态、固定顶点及最终清理必须保留。
+- Synth链：保留 SynthSeg 原图/翻转集成和标签语义；保留 SynthMorph 反对称 velocity 所需的两次网络前向。仅省去确实未消费的输出；网络反向形变不能直接替代既有数值求逆。
+- 归一化链：保持传播距离、同分选择、控制点、平滑边界、舍入和更新依赖；已有有序 Numba 控制点清理优先复用，不重复实现。
+- 网格/球面链：remesh 动态拓扑与 Gauss-Seidel 不能改成同时更新；静态邻接可缓存，法向随坐标更新。保持同长边排序、目标函数、步长接受/拒绝及停止规则。现有部分拓扑评分不等于完整 GA。
+- N4/GCA链：`n4_gpu.py` 的平滑残差算法不等于 ITK N4，不能直接替换。现有 Python GCA 首次 EM 线搜索不等于完整注册；完整默认替换须补齐后续优化和终止流程。
+- white/pial链：完整 Python pial 优先复用；现有 white 首轮诊断不能冒充完整 white。异步顶点接受、候选扩展、拒绝试步状态、固定顶点及最终清理必须保留。
 - 缓存按原始/white.preaparc/final white/pial 及各轮真实版本区分，不能跨网格状态复用失效数据。TH3 顶点体积不能直接替代 `-no-th3` 脑区体积。
 - 保持半球共享文件、覆盖顺序和资源预算；双侧并行须隔离临时输出并验证共享语义，不能直接对同一被试目录启动线程池。
 
@@ -86,11 +87,11 @@
 - 修复成熟子函数 bug 时，特别记录修复原因、影响、接口兼容性及真实回归。
 - 替换通过后清理被替代代码及过时现版说明，同步链接与测试；仍承担验证作用的参考实现保留。禁止删除真实影像、权重、许可证及其他人的工作。
 - 各阶段交付工作分支提交、实际接入、完整 JSON/CSV、复现命令和中文说明。报告绑定实际运行源码和程序，注明未执行项。
-- 五阶段顺序推进，完成共享接口、安装及阶段回归后，跑两例原始 T1 空目录整例，报告实际总提速、指标及显存。用户2026-10-02已明确授权验证后推送main。先保存工作分支并合并最新main，完成相同输入回归和真实整例后普通推送；保留其他人的修改，禁止强制覆盖。
+- 五会话开发完成共享接口和阶段回归；协调者统一安装及接入、跑两例原始T1空目录整例，报告实际总提速、指标及同期显存。用户2026-10-02已明确授权验证后推送main；先合并最新main，再普通推送，禁止强制覆盖。
 
 ## 8. 指令文件的使用
 
-- 本文件位于当前执行仓库根目录，与 `pyproject.toml` 同级。本轮不创建五个并行优化任务。
+- 本文件位于仓库根目录，与 `pyproject.toml` 同级。本轮已获用户授权创建五个并行会话，用户最新指令优先。
 - 独立 worktree 不会继承其他工作树的未提交文件；确认每个工作树都具有本文件。若已有 `AGENTS.md`，保留既有内容并合并规则。
 - 检查上层/下层 `AGENTS.override.md` 或更具体规范；处理适用冲突时遵守用户当前明确要求。继续执行前确认实际读取的规则和当前阶段。
 - 指令文件指导协作，不是验收证据；成功返回、配置正确或测试启动都不等于任务完成。

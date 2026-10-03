@@ -1,13 +1,45 @@
-# T1→MNI152 2 mm 配准与 BOLD 重采样
+# T1→MNI152 2 mm 配准与公共 BOLD 重采样
 
-`register_t1_to_mni` 先用 FNIT `TorchFLIRT` 求 T1→模板的 12 自由度初始矩阵，再从 `SynthMorph` 或 `TorchFNIRT` 中选一个方法估计非线性形变。两个后端都写出 **MNI 网格上指向 T1 的位移场**，供共享的 `resample_world` 与 EPI→T1 BBR、逐帧运动变换组合。影像由 NiBabel 读写，重采样由 PyTorch 完成。
+## 功能简介与流程图
 
-`resample_world` 同时用于以下两种输出：
+`register_t1_to_mni` 先用 FNIT `TorchFLIRT` 求 T1→模板的 12 自由度初始矩阵，再从 `SynthMorph` 或 `TorchFNIRT` 中选择非线性配准。两者都输出 **MNI 网格上指向 T1 的 RAS 毫米位移场**。
 
-- `preproc`：从原始或 minimal BOLD 直接采样到 T1w/MNI，将每帧 HMC 与固定变换组合，只做一次空间插值。FNIT 默认关闭 slice timing；显式开启时，minimal BOLD 是已完成 STC、尚未做 HMC 的序列。
-- `clean`：读取已在原生 EPI 空间完成运动校正和去噪的 BOLD，再采样到目标网格；这一步不再次应用 HMC。
+volume 的四个最终空间采样节点随配准后端调用公共组件：FNIRT 分支使用 `TorchApplyWarp.run_world` / `apply_world`，SynthMorph 分支使用 `apply_transform(WorldTransformChain)`。两种入口共用从成熟 fMRI 实现抽出的 `fnit._world_resampling.resample_world_image`，按原顺序组合形变、BBR 与逐帧运动，只对源 BOLD 插值一次。运行时由 nibabel 读写、NumPy/PyTorch 计算，不调用 FSL、FreeSurfer 或 fMRIPrep。
 
-## 输入与输出
+```mermaid
+flowchart TD
+    T1["3D T1 brain + 3D MNI brain"] --> FLIRT["TorchFLIRT：T1→MNI 初始仿射"]
+    FLIRT --> REG{"非线性配准后端"}
+    REG -- fnirt --> FN["TorchFNIRT"] --> PULL["MNI→T1 RAS pull：含初始仿射与非线性形变"]
+    REG -- synthmorph --> SM["SynthMorph deform"] --> PULL
+    EPI["EPI→T1 BBR world 仿射"] --> INV["求逆：T1→参考 EPI world"]
+    PULL --> CHAIN["WorldTransformChain：目标 grid → RAS pull → BBR inverse → 可选 HMC"]
+    INV --> CHAIN
+    HMC["原始/minimal BOLD：每帧 motion pull"] --> CHAIN
+    CHAIN --> ROUTE{"volume 最终采样后端"}
+    REG -. 后端选择 .-> ROUTE
+    ROUTE -- fnirt --> AW["TorchApplyWarp.run_world → apply_world"]
+    ROUTE -- synthmorph --> SA["apply_transform：WorldTransformChain"]
+    AW --> CORE["共享 world sampler：一次插值，全部帧"]
+    SA --> CORE
+    MASK["EPI mask：nearest；无 HMC"] --> CORE
+    CLEAN["已完成 HMC 的 clean：periodic spline；不重复 HMC"] --> CORE
+    PRE["原始或 STC BOLD：grid-constant spline；组合 HMC"] --> CORE
+    CORE --> OUT["3D MNI mask / 4D MNI clean / 4D T1w preproc / 4D MNI preproc"]
+```
+
+| volume 最终节点 | 目标与输入 | 插值与坐标规则 |
+|---|---|---|
+| `mask_mni` | EPI mask→MNI | nearest、grid-constant、float64 world；随后阈值并交模板脑 mask，无逐帧 HMC。 |
+| `clean_mni` | 已校正、已去噪的原生 EPI BOLD→MNI | spline、periodic、float64 world；应用输出 mask，不重复 HMC。 |
+| `preproc_t1w` | 原始或 minimal BOLD→T1w 原生 BOLD 分辨率 | spline、grid-constant、fmriprep 坐标顺序；组合每帧 HMC。 |
+| `preproc_mni` | 原始或 minimal BOLD→MNI | spline、grid-constant、fmriprep 坐标顺序；组合 MNI→T1 pull 与每帧 HMC。 |
+
+FNIT 默认关闭 STC；显式开启时，minimal BOLD 是已完成 STC、尚未做 HMC 的完整序列。pipeline 内部 `_resample_final_volume` 路由这四个节点，其他既有调用仍可使用 `fnit.fmri.normalization.resample_world` 兼容 wrapper。
+
+## Python 调用、输入输出与参数
+
+### T1→MNI 配准
 
 | `register_t1_to_mni` 参数 | 含义 |
 |---|---|
@@ -23,133 +55,166 @@
 
 返回 `T1MNIResult`。`affine` 是 **T1→MNI 的 FSL scaled-mm 初始矩阵文件** `T1_to_MNI152_2mm_affine.mat`；`moving_to_fixed_world` 是对应的 RAS world 4×4 NumPy 数组。`pull_ras` 是 `MNI152_2mm_to_T1_pull_ras.nii.gz`，shape 为 MNI `X×Y×Z×3`，三个分量单位是 RAS 毫米。对某个 MNI world 坐标 `p`，对应 T1 world 坐标为 `p + pull_ras(p)`。这个位移场已经包含初始仿射与非线性形变；应用它时**不要再叠加 `affine`**。`backend` 记录选择的方法；`qc` 在 FNIRT 分支返回逐层优化、强度多项式、偏置场范围和显存精度设置，SynthMorph 分支为 `None`。`timing_seconds` 分开返回 `t1_to_mni_affine`、`t1_to_mni_nonlinear`、`warp_conversion`，仅在阶段边界同步 GPU。完整流程在 BIDS BOLD 的 JSON 中记录 QC 与这些阶段耗时。
 
-| `resample_world` 参数 | 含义与默认值 |
+### WorldTransformChain：明确的 world 变换链
+
+`WorldTransformChain` 可从 `fnit.applywarp` 或 `fnit.synthmorph` 导入，两处导出同一类型。
+
+| 字段 | 输入结构、含义与默认值 |
 |---|---|
-| `source` | 要重采样的有限值 3D/4D NIfTI。`preproc` 使用原始/minimal BOLD；`clean` 使用已校正、已去噪的原生 EPI 序列。 |
-| `reference` | 3D 目标 NIfTI，定义输出的空间 shape、affine 和体素大小；图像强度不参与采样。 |
-| `reference_to_source_world` | 有限的 4×4 RAS 毫米矩阵。EPI 输入传 `np.linalg.inv(bbr.moving_to_fixed_world)`；T1 输入应用 MNI→T1 位移时传单位矩阵。 |
-| `output` | 输出 NIfTI 路径，父目录自动创建；返回写出的绝对 `Path`。 |
-| `pre_affine_pull_ras` | 默认 `None`。目标网格 `X×Y×Z×3` 位移 NIfTI，三个分量为 RAS 毫米；先加到目标 world 坐标，再应用固定矩阵。可传 `T1MNIResult.pull_ras`。原生场保持 float32；外部 float64 场读入既有 float64 坐标张量时保留原值。 |
-| `output_mask` | 默认 `None`。与目标同网格的 3D NIfTI，值大于 0.5 的体素保留；其余位置强制输出零。 |
-| `interpolation` | 默认 `"linear"`；也可用 `"nearest"` 或 `"spline"`。BOLD 的 `preproc`/`clean` 用三次 B 样条，连续组织图用线性，标签和二值掩膜用最近邻。 |
-| `boundary` | 默认 `"grid-constant"`，源图像外按零扩展。`"periodic"` 保留既有 clean/FSL 样条系数边界及源 FOV 裁剪行为，见下文。 |
-| `motion_pull_world` | 默认 `None`，不应用逐帧运动。需要 HMC 时传 `(帧数, 4, 4)` 有限数组，每个矩阵从参考 EPI world 指向该原始帧 world；3D 输入对应一帧。源文件应尚未做 HMC，避免重复校正。 |
-| `coordinate_precision` | 默认 `"float64"`，保持既有 world 坐标组合。`"fmriprep"` 遵循固定 fMRIPrep 25.2.4/nitransforms 25.1.0 的坐标顺序：目标 world 和每次仿射入口转 float32，形变查询使用网格 deformation，逐帧 HMC 在源体素坐标中组合。FNIT 运行时只使用 NumPy/PyTorch。 |
-| `spatial_chunk_size` | 默认 `262144`，每次样条查询的目标空间体素数，必须为正整数；只改变查询分块，不改变输出网格。 |
-| `batch_size` | 默认 `8`，每批处理的时间帧数，必须为正整数；不混合或过滤时间轴。 |
-| `device` | PyTorch 设备，如 `"cuda:0"` 或 `"cpu"`；默认 `None` 时优先 CUDA。 |
+| `reference` | 必填，3D NIfTI 路径或 nibabel image；定义最终目标 shape、affine、空间体素尺寸和 header。 |
+| `reference_to_source_world` | 必填，有限的 4×4 NumPy RAS world pull 矩阵；在可选位移场之后应用。EPI 输入采用 `np.linalg.inv(bbr.moving_to_fixed_world)`；T1 输入采用完整 MNI→T1 场时传单位矩阵。它不是 FSL scaled-mm 文件。 |
+| `pre_affine_pull_ras` | 默认 `None`；与 `reference` 同网格的 X×Y×Z×3 位移 NIfTI 路径或 image，三个分量是 RAS 毫米。先加到目标 world 点，再应用固定矩阵。外部 float64 场保留原值进入 FP64 坐标张量。 |
+| `motion_pull_world` | 默认 `None`；需要 HMC 时传 T×4×4 有限数组，每个矩阵从参考 EPI world 指向相应原始帧 world；3D 输入对应 T=1。顺序必须与源影像帧完全对应。 |
+| `coordinate_precision` | 默认 `"float64"`，保留原 world 组合顺序；`"fmriprep"` 沿用固定 fMRIPrep 25.2.4/nitransforms 25.1.0 的舍入节点、deformation 查询和源体素空间 HMC 组合。运行时只用本包 NumPy/PyTorch。 |
 
-3D 输入生成 3D float32 NIfTI，4D 输入生成同帧数的 float32 NIfTI。空间 header 来自 `reference`，4D 的 TR 和时间单位来自 `source`。位移场和输出 mask 的 shape、affine 必须与目标一致；位移和源影像中的非有限值会报错。BOLD 的有限负值保留。
+两种场的契约分别定义：`WorldTransformChain.pre_affine_pull_ras` 表示 RAS world 位移；`TorchApplyWarp(input, reference, warp=...)` 常规入口读取 FSL scaled-mm 相对/绝对场或 FNIRT coefficient。文件为 NIfTI 不意味着它们可以互换。常规 FSL `premat`、`postmat` 的 scaled-mm 矩阵也不能作为本链的 world 仿射。原 `T1MNIResult.pull_ras` 已含初始 affine，不再叠加 `T1MNIResult.affine`。
 
-MSMAll 整链验证发现，共享 `resample_world` 在生成的目标网格未填写空间单位时会丢失源影像明确的毫米单位，导致后续 surface 输入检查报错。现已修复：此 API 的变换使用 RAS 毫米；目标单位为 `unknown`、源单位明确为 `mm` 时，输出保留 `mm`。目标已有单位时仍采用目标单位，两者均未知时不猜测。修复只改变 header 单位标记，3D/4D 身份重采样测试验证影像值、affine 和 4D TR 不变。历史文件仍须先核实其毫米网格来源，不能直接修改未知单位。
+### 公共重采样参数与返回值
 
-`grid-constant` 样条按 SciPy 的三次 B 样条零扩展定义：先在三个空间轴补 12 个零体素，再用 float64 镜像系统求系数和查询；输入影像及保存结果为 float32。`linear`/`nearest` 使用零扩展的 `grid_sample`。这一分支不把微小图像外坐标夹回边界。
+| 参数 | `TorchApplyWarp.apply_world` / `run_world` | `apply_transform` 的 WorldTransformChain 分支 |
+|---|---|---|
+| 源影像 | `input`：有限值 3D/4D NIfTI 路径或 image。 | `image`：相同源影像定义。 |
+| 变换链 | `transformation`：上述 `WorldTransformChain`。 | `transformation`：相同类型。 |
+| 插值 | `interpolation="spline"`；可选 `linear`、`nearest`、`spline`。 | `method="linear"`；volume 显式传 `spline`，可选相同三种方法。 |
+| 边界 | `boundary="grid-constant"`；可显式选 `periodic`。 | 相同参数与默认值，仅 WorldTransformChain 分支接受此扩展。 |
+| 输出 mask | `output_mask=None`；可传目标同网格 3D NIfTI，值>0.5的位置保留。 | 相同参数；全部帧使用同一目标 mask。 |
+| 时间帧 batch | `batch_size=8`，每批帧数，正整数。 | `frame_chunk_size=None` 在本链中表示 8 帧；正整数覆盖。与独立 affine/dense sampler 的自动通道政策分别定义。 |
+| 空间查询块 | `spatial_chunk_size=262144`，每批查询体素数，正整数。 | 相同参数与默认值。 |
+| 设备 | `TorchApplyWarp(device=None)` 构造时指定；默认优先 CUDA。 | `device="cpu"`；volume 显式传 pipeline 选定设备。 |
+| 输出文件 | `run_world` 的 `output` 是 NIfTI 路径，自动创建父目录，返回绝对 `Path`；`apply_world` 不写盘。 | 返回 image，调用者用 `nib.save(image, output_path)` 保存。 |
+| 输出类型 | world 分支固定 float32 影像。构造函数的 FSL `frame_chunk_size` 不控制 world batch。 | `dtype="float32"`；volume 固定这个值，其他 dtype 是输出转换，不改变内部插值精度。 |
+| 填充值 / header-only | world 分支填充值固定为 0，没有这两个参数。 | `fill=0`、`header_only=False`；WorldTransformChain 不接受非零/None fill 或 header-only。 |
 
-`periodic` 样条使用 float32 周期系数。三种插值在这个显式分支都保留源 FOV 规则：源体素坐标落在 `[−1e-6, N−1+1e-6]` 时夹回 `[0, N−1]`，更远的图像外位置置零。该规则消除斜切 affine 求逆产生的边界舍入误差；[既有 clean 重采样报告](../../validation/fmri/resampling.md#边界回归测试)使用这个分支。
+`apply_world` 和默认 float32 的 `apply_transform` 返回 nibabel NIfTI image；不是 `ApplyWarpResult`，也不推断一个适用于逐帧 motion 的静态 FSL `valid_mask`。输出 mask 由上述参数显式指定。`run_world` 保存同一完整影像，返回文件路径。
 
-共享子函数 `sample_cubic_periodic_fast` 原先在长度为 1/2 的镜像轴、长度为 1 的周期轴上会因两体素 padding 报错；长度为 1 的镜像坐标还会产生零周期。现在这些短轴使用显式反射/环绕索引，单体素镜像轴保持常数。常规尺寸仍执行原来的 `F.pad`，FSL 负坐标索引规则保持原实现定义。三个短轴网格和一个常规网格、两种边界共 8 项独立 SciPy 系数查询对照通过；另有 2 项仿射/HMC 与形变网格精度控制通过。该修复同时作用于复用这个子函数的 EDDY 与 fMRI 路径。
+3D 输入输出 3D；4D 输入输出 Xo×Yo×Zo×T，包括 T=1 时保留时间轴，全部源帧与有限负值保留。输出空间 shape、affine、qform/sform 及其 code、空间 zoom 和 extensions 来自目标；4D 的 TR 和时间单位来自源。目标空间单位未知、源明确为 mm 时沿用 mm，其他已声明目标单位保留。错位的 field/mask、非有限输入和不匹配的逐帧矩阵会报错。
 
-`resample_world` 读入外部位移场时曾一律转 float32，丢失 float64 场的坐标精度；现在保留原值后进入既有 float64 坐标张量。内部生成的 float32 场仍取完全相同的数值。对默认关闭 STC 的真实 490 帧完整流程，使用同一原始 BOLD、HMC、BBR 和 MNI 场，仅重跑修改后的两个 `preproc` 插值阶段：T1w 的 136,917,760 个样本与 MNI 的 442,288,210 个样本均逐值复现已完成输出，RMSE 和最大绝对差均为 0。两个阶段另与镜像内串行 `resample_image` 比较，最大绝对差均为 0.00048828125。输入、源码 SHA 和完整指标见[float32 原生场不变性报告](../../validation/fmri/fmriprep/native_float32_resampler_invariance_full490.public.json)。
+`grid-constant` 样条先在三个空间轴补 12 个零体素，再用 float64 镜像系统求系数和查询；源图像及输出仍为 float32。`linear`/`nearest` 使用零扩展的 `grid_sample`，该分支不夹回微小图像外坐标。`periodic` 样条保留 float32 周期系数，三种插值均将 `[−1e-6, N−1+1e-6]` 内的舍入偏差夹回源 FOV，更远位置置零。mask 仍按原乘法应用，保留零的符号位。
 
-2026-10-01 复核了历史 clean 整链 `3b9b0f8` 的实际输出（`boundary="periodic"`）：取前 8 个真实 BOLD 时间点，固定该版本估计的 BBR、非线性位移场及目标脑掩膜，与原 FSL `applywarp --rel --interp=spline` 比较。脑掩膜内 r=0.999999999929，MAE=0.001461、RMSE=0.002063，最大绝对差 0.05496；输出网格、float32、TR 0.735 s、有限值及掩膜外零值均通过检查。对应的[8 帧报告](../../validation/fmri/volume_fixed_resampling.public.json)记录输入和源码哈希、FSL 耗时及退出码。该报告验证固定变换下的插值；当前 BBR/FNIRT 执行优化与解剖缓存的测量见[当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。
+world 路径默认每批 8 帧、每批空间查询 262,144 点，不沿时间轴做系数滤波。样条的 FP64 系数、FFT 和查询缓冲按原数据流分块；它不采用独立线性 sampler 的 8 GiB 自动帧预算。本轮 <20 GB 验收的 allocated/reserved 峰值由新验证报告记录。
+
+### FNIRT 分支：配准与 clean 公共调用
 
 ```python
 import numpy as np
 from fnit.fmri.bbr import register_bbr
-from fnit.fmri.normalization import register_t1_to_mni, resample_world
+from fnit.fmri.normalization import register_t1_to_mni
+from fnit.applywarp import TorchApplyWarp, WorldTransformChain
 
-bbr = register_bbr(
-    epi="/absolute/path/example_func.nii.gz",  # 同被试 3D EPI 参考影像
-    t1="/absolute/path/sub-0001_T1w_brain.nii.gz",  # 同被试 3D 去颅骨 T1
-    wmseg="/absolute/path/sub-0001_T1w_wmseg.nii.gz",  # T1 网格 3D 白质二值分割
-    init=None,  # EPI→T1 初始 FLIRT 矩阵；None 由 TorchFLIRT 估计
-    device="cuda:0",  # BBR 的计算设备
-    grid_search=True,  # 先进行白质边界粗网格搜索
-    execution="batched",  # 在 GPU 上同时计算相互独立的候选矩阵代价
-    candidate_batch_size=128,  # 每批候选矩阵数量
+bbr_result = register_bbr(
+    epi="/absolute/path/example_func.nii.gz",  # 同一 run 的 3D EPI reference
+    t1="/absolute/path/sub-0001_T1w_brain.nii.gz",  # 同被试 T1 brain
+    wmseg="/absolute/path/sub-0001_T1w_wmseg.nii.gz",  # T1 网格白质二值图
+    init=None,  # 由 TorchFLIRT 估计初始 EPI→T1 矩阵
+    device="cuda:0",
+    grid_search=True,
+    execution="batched",
+    candidate_batch_size=128,
 )
-registration = register_t1_to_mni(
-    t1_brain="/absolute/path/sub-0001_T1w_brain.nii.gz",  # 同被试 3D 去颅骨 T1
-    mni_brain="/absolute/path/MNI152_T1_2mm_brain.nii.gz",  # 3D MNI152 2 mm 脑模板
-    output_dir="/absolute/path/sub-0001/reg",  # 仿射矩阵、MNI→T1 位移场输出目录
-    backend="fnirt",  # 使用 T1FNIRTConfig；改成 "synthmorph" 使用 deform 网络
-    synthmorph_weights=None,  # fnirt 不读取该权重；synthmorph 分支填写 deform 权重或使用缓存
-    reference_mask="/absolute/path/MNI152_T1_2mm_brain_mask.nii.gz",  # fnirt 使用的模板脑掩膜
-    fnirt_config="t1",  # FNIRT 预设；省略时仍为 t1，可传修改后的 T1FNIRTConfig 对象
-    fnirt_execution="optimized",  # GPU 执行优化；reference 可逐项复核同一算法
-    device="cuda:0",  # 计算设备；无 GPU 时填写 "cpu"
+registration_result = register_t1_to_mni(
+    t1_brain="/absolute/path/sub-0001_T1w_brain.nii.gz",
+    mni_brain="/absolute/path/MNI152_T1_2mm_brain.nii.gz",
+    output_dir="/absolute/path/reg",
+    backend="fnirt",  # 配准后用下面的 TorchApplyWarp world 入口
+    reference_mask="/absolute/path/MNI152_T1_2mm_brain_mask.nii.gz",
+    fnirt_config="t1",  # T1 六级预设
+    fnirt_execution="optimized",
+    device="cuda:0",
 )
-
-clean_mni = resample_world(
-    source="/absolute/path/filtered_func_data_clean_epi.nii.gz",  # 原生 EPI 空间的清理后 4D BOLD
-    reference="/absolute/path/MNI152_T1_2mm.nii.gz",  # 3D MNI152 2 mm 最终输出网格
-    reference_to_source_world=np.linalg.inv(bbr.moving_to_fixed_world),  # T1 world→EPI world 的 BBR 逆矩阵
-    output="/absolute/path/filtered_func_data_clean_MNI152_2mm.nii.gz",  # 输出 4D BOLD 文件
-    pre_affine_pull_ras=registration.pull_ras,  # MNI world→T1 world 的完整位移场
-    output_mask="/absolute/path/MNI152_2mm_brain_mask.nii.gz",  # 目标网格二值掩膜，掩膜外置零
-    interpolation="spline",  # 三次 B 样条
-    boundary="periodic",  # 显式保留上述 clean/FSL 对照的边界口径
-    motion_pull_world=None,  # clean 输入已做 HMC，这里不重复应用
-    coordinate_precision="float64",  # 保留原 clean 的 world 坐标组合
-    spatial_chunk_size=262144,  # 每批空间查询的体素数
-    batch_size=8,  # 每批 8 个时间帧；显存紧张可减小
-    device="cuda:0",  # 与配准相同的 GPU，也可使用 CPU
+clean_transform_chain = WorldTransformChain(
+    reference="/absolute/path/MNI152_T1_2mm.nii.gz",  # 最终 3D 输出网格
+    reference_to_source_world=np.linalg.inv(bbr_result.moving_to_fixed_world),
+    pre_affine_pull_ras=registration_result.pull_ras,  # 已含 T1 初始 affine
+    motion_pull_world=None,  # clean 已完成 HMC，不再次应用运动
+    coordinate_precision="float64",  # 原 clean 的 world 组合
 )
+world_warper = TorchApplyWarp(device="cuda:0")
+clean_mni_output = world_warper.run_world(
+    input="/absolute/path/filtered_func_data_clean_epi.nii.gz",
+    transformation=clean_transform_chain,
+    output="/absolute/path/filtered_func_data_clean_MNI152_2mm.nii.gz",
+    interpolation="spline",
+    boundary="periodic",  # 保留既有 clean 边界规则
+    output_mask="/absolute/path/MNI152_2mm_brain_mask.nii.gz",
+    batch_size=8,
+    spatial_chunk_size=262144,
+)
+print(clean_mni_output)  # 绝对 Path；影像保留完整 T 与源 TR
 ```
 
-### 原始/minimal BOLD 的单次空间插值
+### SynthMorph 分支：原始/minimal BOLD 的单次采样
 
-下面复用上例的 `bbr` 和 `registration`，将尚未做 HMC 的同一 run 直接采样到 MNI。运动矩阵须由同一 run 生成，并与全部源帧一一对应。
+完整 pipeline 在 `registration_backend="synthmorph"` 下先生成自己的配准结果。独立示例用同后端结果及该 run 的 BBR、运动矩阵建立如下链；`bbr_result` 的含义与上例相同。
 
 ```python
-motion_pull_world = np.load(
-    "/absolute/path/motion_pull_world.npy",  # shape 为 (时间帧数, 4, 4)
+from pathlib import Path
+import nibabel as nib
+import numpy as np
+from fnit.fmri.normalization import register_t1_to_mni
+from fnit.synthmorph import WorldTransformChain, apply_transform
+
+synthmorph_registration_result = register_t1_to_mni(
+    t1_brain="/absolute/path/sub-0001_T1w_brain.nii.gz",
+    mni_brain="/absolute/path/MNI152_T1_2mm_brain.nii.gz",
+    output_dir="/absolute/path/synthmorph_reg",
+    backend="synthmorph",
+    synthmorph_weights=None,  # 按 FNIT 已校验的权重配置解析
+    device="cuda:0",
+)
+frame_motion_pull_world = np.load(
+    "/absolute/path/motion_pull_world.npy",  # shape 为 (T, 4, 4)，与源帧一一对应
     allow_pickle=False,
 )
-preproc_mni = resample_world(
-    source="/absolute/path/minimal_bold.nii.gz",  # 默认使用原始 BOLD；主动开启 STC 时使用 STC 后序列
-    reference="/absolute/path/MNI152_T1_2mm.nii.gz",  # 最终 3D 目标网格
-    reference_to_source_world=np.linalg.inv(bbr.moving_to_fixed_world),  # T1 world→参考 EPI world
-    output="/absolute/path/preproc_MNI152_2mm_bold.nii.gz",  # 保留全部源帧和 TR
-    pre_affine_pull_ras=registration.pull_ras,  # MNI world→T1 world
-    output_mask=None,  # 保留完整目标网格的插值结果
-    interpolation="spline",  # 三次 B 样条空间采样
-    boundary="grid-constant",  # 源图像外零扩展
-    motion_pull_world=motion_pull_world,  # 固定变换之后应用每帧 HMC
-    coordinate_precision="fmriprep",  # 按固定官方 resampler 的坐标精度与组合顺序
-    spatial_chunk_size=262144,  # 查询分块
-    batch_size=4,  # 每批四帧
-    device="cuda:0",  # 计算设备
+preproc_transform_chain = WorldTransformChain(
+    reference="/absolute/path/MNI152_T1_2mm.nii.gz",
+    reference_to_source_world=np.linalg.inv(bbr_result.moving_to_fixed_world),
+    pre_affine_pull_ras=synthmorph_registration_result.pull_ras,
+    motion_pull_world=frame_motion_pull_world,  # 固定配准之后组合每帧 HMC
+    coordinate_precision="fmriprep",  # 保留 preproc 的舍入与 HMC 顺序
 )
+preproc_mni_image = apply_transform(
+    image="/absolute/path/minimal_bold.nii.gz",  # 原始 BOLD，或主动开启 STC 后尚未 HMC 的序列
+    transformation=preproc_transform_chain,
+    method="spline",
+    fill=0,
+    dtype="float32",
+    header_only=False,
+    device="cuda:0",
+    frame_chunk_size=8,  # world 分支的时间 batch
+    boundary="grid-constant",
+    output_mask=None,  # preproc 保留完整目标网格
+    spatial_chunk_size=262144,
+)
+preproc_mni_output = Path("/absolute/path/preproc_MNI152_2mm_bold.nii.gz")
+preproc_mni_output.parent.mkdir(parents=True, exist_ok=True)
+nib.save(preproc_mni_image, str(preproc_mni_output))
 ```
 
-这段示例定义固定变换的组合和插值。`preproc` 在完整 volume 流程中使用此模式；`clean` 保留上述显式 `periodic` 与 float64 world 组合。
+T1w preproc 使用 T1w 原生 BOLD 分辨率参考、同一 BBR inverse 和逐帧 HMC，`pre_affine_pull_ras=None`。mask 使用 nearest 和无 HMC。四个节点的实际后端由 volume 的 `registration_backend` 统一选择。
 
-### 固定变换的真实 490 帧对照
+### 既有兼容调用
 
-2026-10-01，固定默认关闭 STC 的真实 run 全部 490 帧、FNIT 已估计的 HMC/BBR/MNI 变换与目标网格，比较更新后的 GPU 单次插值和用户提供的 fMRIPrep 25.2.4 镜像内串行 `resample_image`。输入为原始 BOLD，未重建 STC 文件。两个阶段同时逐值复现 `c3c921cc` 已完成的 `preproc`，最大绝对差均为 0。
+`fnit.fmri.normalization.resample_world(source, reference, reference_to_source_world, output, ...)` 仍保存影像并返回绝对 `Path`，参数名和默认值保留。其其余参数对应上表同名 chain 字段与 sampler 选项，插值默认 `linear`、时间 batch 参数名为 `batch_size=8`、设备默认 `None`。新 volume 最终节点使用上述公共组件；其他已有代码可以继续调用这个 wrapper。
 
-| 目标网格 | 完整样本数 | Pearson r | RMSE，原强度单位 | 最大绝对差 | FNIT 耗时，含读写 | PyTorch 峰值 allocation | 官方函数线程 |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| T1w，59×74×64×490 | 136,917,760 | ≈1.0 | 4.80×10⁻⁸ | 0.00048828125 | 37.97 s | 0.922 GB | 1 |
-| MNI 2 mm，91×109×91×490 | 442,288,210 | ≈1.0 | 5.51×10⁻⁸ | 0.00048828125 | 99.19 s | 1.062 GB | 1 |
+## 命令行调用
 
-两张输出均通过完整帧数、目标 shape/affine、float32、有限值和原 BIDS TR 0.735 s 检查；预设门禁为最大绝对差 ≤0.01、相对 RMSE ≤10⁻⁶、r ≥0.999999。候选使用共享 H100 PCIe、8 CPU 线程、TF32 和 20 GB allocator 上限。此表绑定更新后的 `normalization` SHA `268f61b2`；原完整 API 的 697.313 s 绑定 `c3c921cc`。逐文件 SHA、坐标模式和各空间指标见[默认关闭 STC 的聚合报告](../../validation/fmri/fmriprep/native_float32_resampler_invariance_full490.public.json)。
+volume 命令的后端选项未变；选择后端同时选择配准及四个最终重采样节点。
 
-另从真正完成的官方流程读取两个保留的 `resample` 节点，固定其输入、目标网格、变换文件及逆向参数。官方 `in_file` 与原始 BOLD 的完整有序 float32 数组 SHA 相同，490 帧逐值一致、affine 相同。导出的 float64 场在整个目标网格恢复有效 float32 world 坐标和源体素坐标的误差均为 0。该控制使用官方 T1w 目标 57×73×60，与上表 FNIT 的 T1w 网格不同。
+```bash
+fnit-fmri volume \
+  --bids-root /absolute/path/bids \
+  --derivatives-root /absolute/path/bids/derivatives/fnit \
+  --subject 0001 \
+  --mni-template /absolute/path/fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz \
+  --mni-brain-mask /absolute/path/fmriprep/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz \
+  --registration-backend fnirt --fnirt-preset t1 \
+  --device cuda:0 --batch-size 8
+# 改为 --registration-backend synthmorph，使用 SynthMorph 配准和公共 apply_transform。
+```
 
-| 固定官方目标及变换 | FNIT 对实际保存节点的 r | RMSE | 最大绝对差 | 原预设数值门禁 | FNIT 耗时，含读写 |
-|---|---:|---:|---:|---|---:|
-| T1w，57×73×60×490 | 1.0 | 8.86×10⁻⁸ | 0.0009765625 | 通过 | 32.96 s |
-| MNI 2 mm，91×109×91×490 | 0.999958709 | 33.6142 | 22930.4144 | 未通过 | 107.94 s |
+完整入口仍要求固定 TemplateFlow MNI152NLin6Asym res-02 模板身份，获取方式见 [volume 资源](README.md#输入安装和模板)。上述独立 Python 函数只要求 3D reference。`--fnirt-execution reference/optimized`、`--bbr-execution reference/batched` 与原来一致。`WorldTransformChain` 以 Python 对象显式传递；常规 `fnit applywarp` / `fnit apply` 命令沿用各自 FSL/RAS 场契约。
 
-T1w 的独立串行源码回放与实际节点 8 线程输出逐值一致。MNI 的实际输出有 12/490 帧无法由相同保留输入和源码严格复现；这些帧均有限且不为空，没有排除任何帧。最差帧索引 22（从 0 计）在 BLAS 1/8 线程的直接函数控制中均逐值复现串行回放，有限空间采样未检出精确换帧，原因尚未确定。FNIT 对独立串行 MNI 回放的 r=1、RMSE=1.46×10⁻⁸、最大绝对差 0.000244140625；对实际保存节点的验收仍记为未通过。
-
-[实际节点完整报告](../../validation/fmri/fmriprep/actual_node_interpolation_full490.public.json)分开记录两个空间的门禁；[MNI 失败诊断](../../validation/fmri/fmriprep/actual_node_mni_replay_failure.public.json)保留全部输入与变换哈希、12 帧质量统计和有限控制。上述测试固定变换，仅检验组合与插值。早期显式开启 STC 的控制及其参考可重复性记录见[历史报告](../../validation/fmri/fmriprep/held_interpolation_full490.public.json)。
-
-上例的 `bbr.moving_to_fixed_world` 是 EPI→T1 的 4×4 RAS world NumPy 数组。`reference` 和 `mni_brain` 可以是整头模板及去颅骨模板，但两者必须处于**同一体素网格**。`registration.affine` 是初始配准记录，不能同时代入 `resample_world` 的第三个参数。
-
-## 官方对照命令
+## 原软件调用
 
 FSL 的常规 T1→MNI 流程使用整头 T1 和整头 MNI 模板，并以两张去颅骨影像求 FLIRT 初始矩阵。以下命令中的 FSL 仅用于独立 benchmark；FNIT 运行时不调用它。FSL [FNIRT 指南](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/fnirt/user_guide.html)推荐整头输入，`T1_2_MNI152_2mm.cnf` 包含多尺度、强度映射和偏置场参数。
 
@@ -169,38 +234,48 @@ applywarp --in=filtered_func_data_clean_epi.nii.gz \
 
 固定**与 FNIT 完全相同的两张去颅骨输入**时，可把上面 `fnirt` 的 `--in`、`--ref` 换成 `T1_brain.nii.gz`、`MNI152_T1_2mm_brain.nii.gz`，并添加 `--refmask=MNI152_T1_2mm_brain_mask.nii.gz`。下面的实测对照使用这一组输入；它与 FSL 推荐的整头 FNIRT 输入不同。
 
-## 两个后端的对应边界
-
 SynthMorph 使用学习得到的 deform 网络。PyTorch FNIRT 复用 FNIT 的 B 样条和 Gauss–Newton/LM 核心，`T1FNIRTConfig` 采用官方六级采样、平滑、正则化及 `intorder=5` 的强度设置；后者表示常数项至四次项共 5 个系数。T1 分支在前五级用同一 LM/PCG 法方程联合优化形变、强度多项式和 50 mm 三次 B 样条乘性偏置场，最后一级固定强度参数。两后端共享输出网格及位移场定义，实际形变差异用下面的配准后 T1 强度、脑支持区和 RAS 坐标差量化。
 
-## 最新真实数据 benchmark
+<a id="最新真实数据-benchmark"></a>
 
-2026-10-02 的 FNIRT 固定输入比较与完整 volume API 复测见[本轮统一报告](../../validation/registration_lossless_20261002/README.md)。三条完整 pipeline 均实际执行 FNIRT；volume 关闭解剖缓存复用，不用缓存命中替代非线性配准。
+## 最新真实数据精度、耗时与脑图
 
-### 2026-10-01 固定 T1 历史对照
+### 当前公共入口与完整 volume
 
-固定一例真实已处理、去颅骨 T1 与 MNI152 2 mm 脑模板，使用完全相同的 FSL 初始矩阵和模板掩膜，2026-10-01 重跑官方 FSL 6.0.7.22 与 FNIT T1 六级非线性阶段。该 T1 的更早处理来源未知，不能视为扫描仪原始 T1。
+`81f1bb3` 的 FNIRT/SynthMorph 四个最终节点实际路由、完整 **490 帧**新旧 FNIT 逐位精度、分步骤时间和 allocated/reserved 均已验证，集中见[volume 当前实测](README.md#latest-real-benchmark)与[独立报告](../../validation/fmri/public_resamplers_20261002/README.md)。FNIRT API 含保存为 **542.12 s**，SynthMorph 为 **461.54 s**；峰值 allocated 为 **6.50 / 13.31 GB**。此入口重构保留原有机制，不新增官方等价结论。
 
-| 指标 | 修改前 | 当前 optimized |
-|---|---:|---:|
-| FNIRT 首次 / 热调用 | 69.350 / 71.501 s | 32.595 / 30.422 s |
-| 与 FSL warped T1 的 Pearson r | 0.99784173 | 0.99771788 |
-| MAE / RMSE，原强度单位 | 4.97974 / 16.37197 | 4.87159 / 16.83218 |
-| 脑支持 Dice | 0.99924899 | 0.99922162 |
-| 完整 MNI→T1 pull median / p95 | 0.05322 / 0.23351 mm | 0.05176 / 0.23294 mm |
-| 热调用峰值 allocated / reserved | 1.091 / 1.474 GB | 1.178 / 1.491 GB |
+![当前 FNIRT volume 公共入口：首帧与零差](../../validation/fmri/public_resamplers_20261002/figures/volume_fnirt.png)
 
-此表隔离 FNIRT，不包含 FLIRT 初始化或最终 4D BOLD 重采样。FSL CPU 命令观测为 217.558 s，实际子进程退出 0、输出与固定参照逐位一致；包装器 255 单独记录。FNIT 在共享 H100 上运行，函数钟包括输入解压和 CPU 输出转换，排除写盘/事后比较，不能与 CPU 命令直接计算稳定加速倍数。
+### 官方配准与固定变换采样
 
-该历史版本的 `reference` 在本例复现修改前的图像、系数、pull 和完整 Jacobian；默认 optimized 的 Gram 弯曲算子改变 FP64 求和顺序。图像 r/Dice 略降、RMSE 略增，MAE、pull median/p95 和 nonlinear Jacobian 改善，保留完整精度表及仅换回 dense 算子的逐位消融。需要原优化轨迹可设置 `fnirt_execution="reference"`。指标定义、系数/header 契约、profile 与局限见 [FNIRT 功能页](../fnirt/README.md#t1w-专用预设当前-gpu-修复版)及 [当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。
+| 验证范围 | 指标与计时 | 报告 |
+|---|---|---|
+| 2026-10-01，同一真实已处理 T1、FSL 初始 affine 和 mask，仅六级 FNIRT | 当时 optimized 首次/热调用 **32.595 / 30.422 s**；FSL CPU **217.558 s**。warped T1 r **0.99771788**、RMSE **16.83218**；pull median/p95 **0.05176 / 0.23294 mm**，脑支持 Dice **0.99922162**。 | [配准报告](../../validation/fmri/registration_gpu.current.public.json)、[FNIRT 独立页](../fnirt/README.md#t1w-专用预设当前-gpu-修复版) |
+| 2026-10-02，FNIRT 无损算子优化 | 三条完整 pipeline 实际执行 FNIRT；完整 volume 对此前候选和集成版科学输出逐位相同。 | [版本绑定的完整报告](../../validation/registration_lossless_20261002/README.md) |
+| 固定 FNIT 变换与目标网格，490 帧 preproc 对官方串行函数 | T1w **37.97 s**、MNI **99.19 s**（含读写）；两者最大差 **0.00048828125**，原数值门通过。 | [全帧控制](../../validation/fmri/fmriprep/native_float32_resampler_invariance_full490.public.json) |
+| 固定官方实际目标与变换，490 帧 preproc | T1w **32.96 s**，max **0.0009765625**，通过；MNI **107.94 s**，RMSE **33.6142**、max **22930.4144**，未通过。 | [实际节点报告](../../validation/fmri/fmriprep/actual_node_interpolation_full490.public.json) |
 
-### 跨 BOLD run 复用解剖预处理
+FNIRT CPU 命令包括启动和读写；FNIT 函数计时排除最终写盘；共享资源与计时范围不同。固定 T1 的更早处理来源未知，也不等于扫描仪原始 T1。最新 FNIRT 性能与 profile 应读取版本绑定的独立功能页，不用旧单函数时间代替完整 pipeline。
 
-完整 `fMRIVolume_pipeline` 默认缓存当前被试/会话的 T1 SynthStrip、FAST、模板准备与 T1→MNI。真实 T1 的首次解剖调用为 41.118 s，第二次完整输入/权重/输出哈希核验为 0.0785 s；所有产物 SHA-256 相同，命中后上述计算阶段均为 0。首次分段为 T1 提取 5.042 s、模板准备 0.081 s、FAST 1.957 s、T1→MNI affine 4.331 s、FNIRT 29.041 s、warp 转换/保存 0.502 s；峰值分配 4.683 GB。
+官方实际 MNI 产物有 **12/490 帧**不等于同输入串行源码回放，原因仍未确定；FNIT 对串行回放最大差 **0.000244140625**。保留实际产物未通过的门，见[失败诊断](../../validation/fmri/fmriprep/actual_node_mni_replay_failure.public.json)。
 
-该缓存测试包含 FNIT 自身的 FLIRT 初始化，因此不是上面固定 FSL affine 的同输入 FNIRT 比较。BBR 按 BOLD run 单独计算。缓存位置、失效条件与 `reuse_anatomical=False` 见[volume 输入输出](README.md#输出)。本节独立 FNIRT 与缓存测试未测量 SynthMorph；当前 SynthMorph 完整 volume 的重跑结果见[全流程 benchmark](README.md#全流程-benchmark)，两者分别计时。
+当前 clean 的周期系数边界、World 最近邻半整数取偶与 FSL 对应规则不同；SynthMorph World 样条也不是官方默认线性 apply。固定 warp 的历史高度相关结果不能关闭这些机制差异，详见[重采样审计](../../validation/fmri/resampling_audit_20261002/README.md)。本次整理保持原算法。
 
-## 原实现与参考文献
+跨 run 解剖缓存的真实测试：首次 **41.118 s**，哈希核验命中 **0.0785 s**，产物 SHA 相同。缓存包括本包 FLIRT 初始化，不是固定 FSL affine 的 FNIRT 控制；范围与失效条件见[volume 输出](README.md#输出结构与来源)。
+
+## 最近版本与 benchmark 记录
+
+| 版本/日期 | 更新与保留证据 |
+|---|---|
+| 2026-10-02 文档整理 | 统一当前公共入口及参数说明；历史表转专属报告，算法不变。 |
+| `81f1bb3` | FNIRT 用 `TorchApplyWarp.run_world`，SynthMorph 用 `apply_transform(WorldTransformChain)`；四个最终节点与原 FNIT 完整输出逐位相同。 |
+| 2026-10-02 FNIRT 优化 | 固定输入及真实 volume/fastvbm/dMRI 连续调用验收，见[统一报告](../../validation/registration_lossless_20261002/README.md)。 |
+| 2026-10-01 共享采样子函数修正 | 保留 RAS mm 单位、外部 float64 场精度及长度 1/2 的镜像/周期短轴支持；原生 float32 场的完整 490 帧输出不变。见[全帧报告](../../validation/fmri/fmriprep/native_float32_resampler_invariance_full490.public.json)、[短轴控制](../../tests/test_spline_small_axes.py)。 |
+| `3b9b0f8` clean 固定变换 | 8 帧对 FSL max 0.05496，未逐值一致；[原报告](../../validation/fmri/volume_fixed_resampling.public.json)保留输入哈希、退出码和验收条件。 |
+
+历史 STC、实际官方节点与 clean 完整对照从[验证索引](../../validation/fmri/README.md)进入；时间和精度均保持实际版本，不改标为本次新实测。
+
+## 参考文献与原实现
 
 - 固定 fMRIPrep 25.2.4 [单次重采样源码](https://github.com/nipreps/fmriprep/blob/25.2.4/fmriprep/interfaces/resampling.py)。其原始文件 SHA 与实际镜像一致；官方软件只作为上述独立对照。
 - 固定 NiTransforms 25.1.0 [仿射坐标精度与映射](https://github.com/nipy/nitransforms/blob/25.1.0/nitransforms/linear.py)、[形变网格查询](https://github.com/nipy/nitransforms/blob/25.1.0/nitransforms/nonlinear.py)。FNIT 用自己的 NumPy/PyTorch 路径实现对应坐标组合，运行时不导入 NiTransforms。

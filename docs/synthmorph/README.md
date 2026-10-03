@@ -83,7 +83,7 @@ labels = apply_transform(
 labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采样后的标签图
 ```
 
-`from fnit.synthmorph import SynthMorph, RegistrationResult, apply_transform, convert_warp_to_fsl` 是等价的功能模块入口。模型实例可重复用于后续影像对。
+`from fnit.synthmorph import SynthMorph, RegistrationResult, WorldTransformChain, apply_transform, convert_warp_to_fsl` 是功能模块入口。模型实例可重复用于后续影像对。
 
 ### 模型构造
 
@@ -131,20 +131,24 @@ labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采
 
 ### 应用已有变换
 
-`apply_transform(image, transformation, method="linear", fill=0, dtype="float32", header_only=False, *, device="cpu", frame_chunk_size=None)`：
+`apply_transform(image, transformation, method="linear", fill=0, dtype="float32", header_only=False, *, device="cpu", frame_chunk_size=None, boundary="grid-constant", output_mask=None, spatial_chunk_size=262144)`：
 
 | 参数 | 含义 |
 |---|---|
 | `image` | 路径或 `nibabel.spatialimages.SpatialImage`；接受 3D 和末维为 frame 的 4D |
-| `transformation` | `.lta` 路径、warp 文件路径、`AffineTransform` 或 `DenseWarp` |
-| `method` | `linear` 或 `nearest`，标签使用 `nearest` |
-| `fill` | 整个越界采样点的填充值，默认 0；Python 可用 `None` 选择边界扩展 |
-| `dtype` | 输出 NumPy dtype，默认 float32；插值本身始终 float32，float64 输出不会提高插值精度 |
-| `header_only` | 只更新头信息，限 affine；`dtype` 转换仍生效 |
-| `device` | keyword-only；默认 `"cpu"`，CUDA 必须显式选择；坐标按原 CPU float32 运算顺序建立，再一次搬到所选设备 |
-| `frame_chunk_size` | keyword-only；正整数为每次 frame 上限，并先限制到实际 frame 数；None 时 CPU 每次最多32帧，CUDA 在坐标计划驻留后，按最多8 GiB的变化缓冲预算与 `20,000,000,000 − 当前CUDA allocated − 512 MiB` 两者较小值自动选择；每帧按一个输入加两个 float32 输出缓冲计费。显式CUDA分块也检查剩余20 GB预算；无法容纳一帧或指定分块超预算时报错 |
+| `transformation` | `.lta` 路径、warp 文件路径、`AffineTransform`、`DenseWarp` 或 `WorldTransformChain` |
+| `method` | `linear` 或 `nearest`，标签使用 `nearest`；`WorldTransformChain` 另支持 `spline` 三次B-spline影像插值 |
+| `fill` | 普通Affine/DenseWarp默认0，Python可用 `None` 选择边界扩展；World链固定 `fill=0`，非零及 `None` 报错 |
+| `dtype` | 输出NumPy dtype，默认float32；修改输出类型不改变采样计算精度。普通Affine/DenseWarp使用float32插值；World链使用公共volume采样器的既有精度，grid-constant spline的系数和坐标为float64，输出仍float32 |
+| `header_only` | 只更新头信息，限Affine；World链不支持，`dtype` 转换仍生效 |
+| `device` | keyword-only；默认 `"cpu"`，CUDA显式选择。普通Affine/DenseWarp按原CPU float32顺序建立坐标再搬到所选设备；World链依其 `coordinate_precision` 在公共采样器中组合坐标 |
+| `frame_chunk_size` | 普通Affine/DenseWarp：keyword-only；正整数为每次 frame 上限，并先限制到实际 frame 数；None 时 CPU 每次最多32帧，CUDA 在坐标计划驻留后，按最多8 GiB的变化缓冲预算与 `20,000,000,000 − 当前CUDA allocated − 512 MiB` 两者较小值自动选择；每帧按一个输入加两个 float32 输出缓冲计费。显式CUDA分块也检查剩余20 GB预算；无法容纳一帧或指定分块超预算时报错 |
+| `frame_chunk_size`（World链） | 公共volume sampler的 `batch_size`；默认None→8，正整数指定每批帧数；沿用现有volume采样的数据流 |
+| `boundary` | 仅World链生效：`grid-constant` 为默认零扩展，`periodic` 为既有clean volume的周期样条边界；普通Affine/DenseWarp传入非默认值时报错 |
+| `output_mask` | 仅World链：可选3D路径或nibabel image，必须与reference shape/affine一致；输出mask外清零。默认None |
+| `spatial_chunk_size` | 仅World链：每次空间采样点上限，正整数，默认262144；普通Affine/DenseWarp仅接受默认值 |
 
-返回 `FNITNifti1Image`，空间网格来自变换 target。4D 输入保留 frame 轴、顺序和时间头信息，包括 `(X,Y,Z,1)`。warp 的 source geometry 必须与输入图像一致；普通文件不保存 FNIT source 几何，调用者需保证输入为原变换的 source 网格。其他模态若与 moving 不同网格，应先正确组合变换。
+普通Affine/DenseWarp返回 `FNITNifti1Image`，空间网格来自变换target；World链默认float32直接返回公共采样器的 `nibabel.Nifti1Image`，不重建其header。4D 输入保留 frame 轴、顺序和时间头信息，包括 `(X,Y,Z,1)`。warp 的 source geometry 必须与输入图像一致；普通文件不保存 FNIT source 几何，调用者需保证输入为原变换的 source 网格。其他模态若与 moving 不同网格，应先正确组合变换。
 
 #### 4D 影像示例
 
@@ -168,6 +172,55 @@ warped_timeseries.save("results/timeseries_in_fixed.nii.gz")
 CPU默认在frame数≤32时仍一次采样，返回张量的NumPy视图以避免输出拷贝；更多frame使用现有分块输出缓冲。CUDA的8 GiB仅指变化帧缓冲上限，坐标与已有分配计入剩余20 GB额度，512 MiB用于留出采样器和运行时空间。
 
 nearest 保留 Surfa 0.6.3 的 `floor(x+0.5)` 与 `[0,n)` 有效域；linear 使用 `[0,n-1]`。frame 切块不改变插值权重或图像范围。CPU与CUDA linear内核可能因舍入产生不同结果；本轮完整490帧的跨设备误差见第5节。
+
+### 固定场、BBR与逐帧运动的一次采样
+
+`WorldTransformChain(reference, reference_to_source_world, pre_affine_pull_ras=None, motion_pull_world=None, coordinate_precision="float64")` 是不可重新赋值的变换链对象，由 `fnit.synthmorph` 导出：
+
+| 字段 | 输入与含义 |
+|---|---|
+| `reference` | 3D路径或nibabel image；定义输出网格 |
+| `reference_to_source_world` | 有限可逆4×4 RAS-mm pull affine；将加上固定位移后的world坐标映射到源参考空间；例如inverse(EPI→T1 BBR)。不是FLIRT scaled-mm矩阵 |
+| `pre_affine_pull_ras` | 可选reference网格的 `(X,Y,Z,3)` RAS-mm位移场路径或image；在world affine之前相加，例如 `T1_world − MNI_world` |
+| `motion_pull_world` | 可选 `(T,4,4)` RAS-mm矩阵数组；源参考world→每个原始frame的world。None为逐帧identity |
+| `coordinate_precision` | `"float64"` 为既有clean组合顺序；`"fmriprep"` 为既有preproc的float32坐标舍入、dense-field查询及源voxel空间HMC顺序 |
+
+公共底层直接复用已实现的volume采样器。采样顺序为reference world → 固定RAS pull → world affine → 每帧motion pull → source voxel → 一次影像插值；时间轴不做空间样条滤波。输出保留全部frame和TR，源为4D单帧时保留 `(X,Y,Z,1)`。
+
+```python
+import numpy as np
+from fnit.synthmorph import WorldTransformChain, apply_transform
+
+source_bold_path = "minimal_bold.nii.gz"  # 原始BOLD或只做过STC的(X,Y,Z,T)影像
+mni_reference_path = "MNI152_T1_2mm.nii.gz"  # 输出3D网格
+mni_to_t1_pull_path = "MNI152_2mm_to_T1_pull_ras.nii.gz"  # 固定网格RAS-mm位移
+# 此处文件是已经转换好的world-RAS BBR，不能直接传FLIRT scaled-mm .mat。
+epi_to_t1_world_affine = np.load("EPI_to_T1_world.npy")  # (4,4)，EPI→T1
+reference_to_epi_world_affine = np.linalg.inv(epi_to_t1_world_affine)
+frame_motion_pull_world = np.load("motion_pull_world.npy")  # (T,4,4)，参考EPI→原frame
+world_transform_chain = WorldTransformChain(
+    reference=mni_reference_path,
+    reference_to_source_world=reference_to_epi_world_affine,
+    pre_affine_pull_ras=mni_to_t1_pull_path,
+    motion_pull_world=frame_motion_pull_world,
+    coordinate_precision="fmriprep",  # 匹配既有preproc坐标顺序
+)
+preproc_mni_image = apply_transform(
+    image=source_bold_path,
+    transformation=world_transform_chain,
+    method="spline",  # 三次B-spline影像插值
+    boundary="grid-constant",  # 12体素零prepad对应的既有preproc边界
+    output_mask=None,  # 可选与MNI网格完全一致的3D输出mask
+    fill=0,
+    dtype="float32",  # 直接返回公共采样器的图像与完整header
+    frame_chunk_size=8,  # 每批8帧；None同样使用8帧
+    spatial_chunk_size=262144,  # 每批空间查询点上限
+    device="cuda:0",  # 采样和大型坐标组合使用该设备
+)
+preproc_mni_image.to_filename("results/preproc_MNI.nii.gz")
+```
+
+clean volume使用已经运动校正的clean原生EPI作为源，World链设置 `motion_pull_world=None`、`coordinate_precision="float64"`，应用时设置 `method="spline"`、`boundary="periodic"` 及MNI输出mask。普通LTA/DenseWarp的nearest/linear默认值与边界行为保持原样，`spline`仅用于World链。
 
 ### 转成 FSL warp 并应用
 
@@ -230,7 +283,7 @@ fnit apply results/moving_to_fixed.mgz moving_4d.nii.gz \
 | `-j`, `--threads` | Torch 线程数，CLI 默认 4 |
 | `-d`, `--output-dir` | 调试目录 |
 
-配准至少请求一个影像、变换、FSL warp 或调试输出。统一 CLI 会创建输出父目录。`fnit apply` 的位置参数依次是变换、影像、输出；支持 `--method`、`--fill`、`--dtype`、`--header-only`、`--device` 和 `--frame-chunk-size`，含义和默认值同 API。CLI dtype 选择为 `uint8`、`uint16`、`int16`、`int32`、`float32`，默认 `float32`。apply 默认使用 CPU；`--device cuda:0` 显式选择 GPU sampler，`--frame-chunk-size` 限制每次 frame 数量；省略时CPU最多32帧，CUDA按上述8 GiB缓冲与剩余20 GB额度自动选择。当前 apply CLI 与 Python 每次均处理一对 image/output。
+配准至少请求一个影像、变换、FSL warp 或调试输出。统一 CLI 会创建输出父目录。`fnit apply` 的位置参数依次是变换、影像、输出；支持 `--method`、`--fill`、`--dtype`、`--header-only`、`--device` 和 `--frame-chunk-size`，含义和默认值同 API。CLI dtype 选择为 `uint8`、`uint16`、`int16`、`int32`、`float32`，默认 `float32`。apply 默认使用 CPU；`--device cuda:0` 显式选择 GPU sampler，`--frame-chunk-size` 限制每次 frame 数量；省略时CPU最多32帧，CUDA按上述8 GiB缓冲与剩余20 GB额度自动选择。当前 apply CLI 与 Python 每次均处理一对 image/output。`WorldTransformChain` 目前通过Python构建；此处CLI仍接收LTA或RAS warp文件。
 
 ## 4. 原软件调用
 
@@ -265,6 +318,10 @@ mri_synthmorph apply -m linear -t float32 -f 0 \
 FNIT 的 NIfTI RAS场为 `(X,Y,Z,3)`、intent vector 1007，不包含 FreeSurfer source/target extension。官方NIfTI warp为 `(X,Y,Z,1,3)`、intent displacement-vector 1006，并保存source/target几何。官方同场benchmark需用 `sf.Warp(..., source=..., target=..., format=sf.Warp.Format.disp_ras)` 重保存同一数组，核查数组逐值不变及两份几何；只改intent无法补全source信息。具体步骤见[本轮验证说明](../../validation/registration_lossless_20261002/README.md)。
 
 ## 5. 精度、运行时间与脑图
+
+### 公共world变换链的验证范围
+
+新World链入口复用原volume算法，不添加另一套样条实现。专项测试核对完整参数转发、默认float32图像/header原样返回、frame轴与TR、dtype转换及不支持的参数；真实完整 volume 的逐位对照与计时见[公共入口验证](../../validation/fmri/public_resamplers_20261002/README.md)。完整新旧 SynthMorph volume API 为 499.55→461.54 s；7 幅影像逐位相同，包括全部 490 帧、正负零、完整 header/扩展，实际四个节点均通过 `apply_transform()`。allocated / reserved 峰值 13.31 / 15.06 GB，包含非线性配准。单次共享服务器观测没有稳定提速证据。下面的 490 帧 linear 计时属于此前普通 DenseWarp 入口，不作为新 World 链 spline 的性能测量。
 
 ### 5.1 本轮4D数据流优化的验收
 
@@ -357,6 +414,7 @@ python validation/synthmorph/validate_fsl_warp.py --help
 
 | 日期 | 更新 | 验证记录 |
 |---|---|---|
+| 2026-10-02 | `WorldTransformChain` 接入公共volume采样器，支持同一次插值中的固定场、BBR与逐帧HMC，新增spline/边界/mask参数 | `tests/synthmorph/test_world_transform.py` 契约测试；[完整 490 帧 API、矩阵/调用门与脑图](../../validation/fmri/public_resamplers_20261002/README.md)通过 |
 | 2026-10-02 | 独立apply一次解码、float32输入复用、坐标复用、可选CUDA与frame chunk，仿射准备复用voxel grid | [本轮真实影像报告](../../validation/registration_lossless_20261002/README.md)；完整490帧同设备位模式、header与保存重读均通过 |
 | 2026-10-02 | 修复既有 `(X,Y,Z,1)` 输入重采样后折叠为3D的bug；现在保留单例frame轴，registration的3D返回不变 | `test_apply_preserves_singleton_frame_dimension` |
 | 2026-09-28 | 归档公开去面部T1w图例及固定测量源码关系 | [公开例子](../../validation/synthmorph/public_example.current.json)、[历史说明](../../validation/synthmorph/README.md) |
@@ -369,6 +427,7 @@ python validation/synthmorph/validate_fsl_warp.py --help
 
 - [SynthMorph论文全文](https://pmc.ncbi.nlm.nih.gov/articles/PMC11247402/)；[官方CLI源码](https://github.com/freesurfer/freesurfer/blob/dev/mri_synthmorph/mri_synthmorph)、[官方registration wrapper](https://github.com/freesurfer/freesurfer/blob/dev/mri_synthmorph/synthmorph/registration.py)。开发分支用于浏览，复现依据为本页固定构建和provenance哈希。
 - [Surfa原代码库](https://github.com/freesurfer/surfa)：官方apply的几何、warp格式与多frame插值；独立参考为FreeSurfer 8.2附带的Surfa 0.6.3。
+- World链的preproc/clean原软件参照、坐标和样条依据沿用[volume原实现说明](../fmri/normalization.md#原实现与参考文献)；原软件运行命令见[volume对照](../fmri/README.md#原软件调用)。
 
 ### FNIT源码组织
 
@@ -379,4 +438,5 @@ python validation/synthmorph/validate_fsl_warp.py --help
 | [spatial.py](../../src/fnit/synthmorph/spatial.py) | 复用坐标的采样计划、仿射/位移组合和积分 |
 | [fsl_warp.py](../../src/fnit/synthmorph/fsl_warp.py) | RAS 位移转换为 fixed 网格 FSL relative warp |
 | [_transforms.py](../../src/fnit/_transforms.py) | 带 source/target geometry 的 `AffineTransform`、`DenseWarp` 及 LTA 读写 |
+| [_world_resampling.py](../../src/fnit/_world_resampling.py) | 从成熟volume实现抽取的world坐标链及共享linear/nearest/cubic采样器 |
 | [__init__.py](../../src/fnit/synthmorph/__init__.py) | 功能公开导出 |

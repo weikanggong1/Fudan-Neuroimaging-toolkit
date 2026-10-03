@@ -199,11 +199,11 @@ def compare_trees(first, second):
     # FNIRT snapshots cover coefficients, both Jacobians, pull field and solver QC.
     def numerical_paths(root):
         return {str(p.relative_to(root)): p for p in root.rglob("*")
-                if p.is_file() and p.name.endswith((
+                if p.is_file() and (p.name.endswith("_xfm.txt") or p.name.endswith((
                     ".nii.gz", ".nii", ".mat", ".npy", ".tsv", ".bval", ".bvec",
                     ".eddy_parameters", ".eddy_rotated_bvecs", ".eddy_movement_rms",
                     ".eddy_restricted_movement_rms", ".eddy_outlier_map",
-                ))}
+                )))}
     left, right = numerical_paths(first), numerical_paths(second)
     checks = {}
     for index, name in enumerate(sorted(left.keys() & right.keys()), start=1):
@@ -214,7 +214,7 @@ def compare_trees(first, second):
             a, b = np.load(left[name]), np.load(right[name])
             checks[role] = {"bitwise_equal": a.dtype == b.dtype and a.shape == b.shape
                            and a.tobytes() == b.tobytes()}
-        elif name.endswith(".mat"):
+        elif name.endswith((".mat", "_xfm.txt")):
             a, b = np.loadtxt(left[name]), np.loadtxt(right[name])
             checks[role] = {"bitwise_equal": a.shape == b.shape and a.tobytes() == b.tobytes()}
         else:
