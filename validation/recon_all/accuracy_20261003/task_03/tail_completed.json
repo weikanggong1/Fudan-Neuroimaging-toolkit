@@ -1,0 +1,2125 @@
+{
+  "commit": "816e5610417a4c587caf321049438a9554139016",
+  "host": "gpucw1",
+  "pid": 98758,
+  "scope": "official_frozen_same_input_component_only",
+  "overall_equivalence": "not_assessed",
+  "tf32": {
+    "matmul": true,
+    "cudnn": true
+  },
+  "device": "cuda:0",
+  "cases": [
+    {
+      "id": "sub01",
+      "input_sha256": {
+        "norm.mgz": "0727b6cbb7c2bbc07ecfc252e02b3b74912a5d6726a0d8f49a952c2dd0975885",
+        "brainmask.mgz": "8a07cd1502af6c4ed038370bad15323a2dfece9e4cfaa73adf177c8430f2b629",
+        "aseg.presurf.mgz": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c",
+        "brain.mgz": "62d36570fb01a0720cb8bc8bf76e834943946b4ea75c0b80beb8f6ea44d0871f",
+        "wm.mgz": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+        "transforms/talairach.lta": "ca0e7455d909e1b6d3ea5f3eddba180f981556512a1313555bb57d14a06024d3"
+      },
+      "stages": [
+        {
+          "name": "brain",
+          "seconds_including_io": 61.100819903891534,
+          "details": {
+            "device": "cuda:0",
+            "three_d_iterations": 2,
+            "ridge_seconds": 15.070637331809849,
+            "initial_bias_seconds": 16.02699350286275,
+            "ridge": {
+              "marching": [
+                [
+                  130964,
+                  16295657
+                ],
+                [
+                  127477,
+                  223118
+                ]
+              ],
+              "ridge_voxels": 45325
+            },
+            "removed_controls": 8352,
+            "wm_peak": 104,
+            "completion": {
+              "steps": {
+                "gentle_controls_seconds": 1.9476602342911065,
+                "gentle_bias_seconds": 2.6760918414220214,
+                "three_d_1_controls_seconds": 10.586652477271855,
+                "three_d_1_bias_seconds": 1.6799699780531228,
+                "three_d_1_controls": {
+                  "initial_7": 15727,
+                  "initial_5": 29173,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 109.68497467041016,
+                    "wm_index": 109,
+                    "gm_index": 56,
+                    "wm_peak": 108.93342590332031,
+                    "gm_peak": 55.965797424316406,
+                    "bin_size": 0.9993892312049866
+                  },
+                  "adaptive_7": 15727,
+                  "adaptive_5": 33358,
+                  "three_added": 42305,
+                  "six_added": 45173,
+                  "before_outlier_removal": 120836,
+                  "after_outlier_removal": 120836
+                },
+                "three_d_2_controls_seconds": 9.93101716414094,
+                "three_d_2_bias_seconds": 1.522934169974178,
+                "three_d_2_controls": {
+                  "initial_7": 16414,
+                  "initial_5": 31302,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 110.40470123291016,
+                    "wm_index": 110,
+                    "gm_index": 45,
+                    "wm_peak": 109.94454193115234,
+                    "gm_peak": 44.97731018066406,
+                    "bin_size": 0.999495804309845
+                  },
+                  "adaptive_7": 16414,
+                  "adaptive_5": 42806,
+                  "three_added": 50146,
+                  "six_added": 44392,
+                  "before_outlier_removal": 137344,
+                  "after_outlier_removal": 137344
+                }
+              },
+              "gentle_controls": {
+                "first_7x7x7": 7746,
+                "after_5x5x5": 18878,
+                "after_outlier_removal": 18799
+              }
+            },
+            "total_seconds": 60.90266909543425
+          },
+          "comparison": {
+            "paths": [
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub01/brain.mgz",
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.mgz"
+            ],
+            "sha256": [
+              "7f74e7e03d563a1c3633f4b8eda7d2ecfa427fb947c5ff35ab78c5b915396b5b",
+              "62d36570fb01a0720cb8bc8bf76e834943946b4ea75c0b80beb8f6ea44d0871f"
+            ],
+            "shape": [
+              [
+                256,
+                256,
+                256
+              ],
+              [
+                256,
+                256,
+                256
+              ]
+            ],
+            "dtype": [
+              "uint8",
+              "uint8"
+            ],
+            "affine_max_abs": 0.0,
+            "same_grid": true,
+            "different_voxels": 0,
+            "max_abs": 0.0,
+            "p99_abs": 0.0,
+            "p99_changed_abs": 0
+          },
+          "allocated_bytes": 721425408,
+          "reserved_bytes": 773849088
+        },
+        {
+          "name": "antsdn.brain",
+          "seconds_including_io": 20.84222843265161,
+          "details": {
+            "voxels": 16777216,
+            "total_seconds": 20.836267967242748
+          },
+          "comparison": {
+            "paths": [
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub01/antsdn.brain.mgz",
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/antsdn.brain.mgz"
+            ],
+            "sha256": [
+              "8cfbf4fa8f4253b924b6ef1110429fe6542cf1df27ea99114b46fecc1fc0cd85",
+              "2fa0e31fff25e3258627f9284f5080a03d4492f54a107e1a94b66960689efcd2"
+            ],
+            "shape": [
+              [
+                256,
+                256,
+                256
+              ],
+              [
+                256,
+                256,
+                256
+              ]
+            ],
+            "dtype": [
+              "uint8",
+              "uint8"
+            ],
+            "affine_max_abs": 0.0,
+            "same_grid": true,
+            "different_voxels": 0,
+            "max_abs": 0.0,
+            "p99_abs": 0.0,
+            "p99_changed_abs": 0
+          },
+          "allocated_bytes": 721425408,
+          "reserved_bytes": 773849088
+        },
+        {
+          "name": "filled",
+          "seconds_including_io": 50.865074064116925,
+          "details": [
+            124,
+            109,
+            92
+          ],
+          "comparison": {
+            "paths": [
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub01/filled.mgz",
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/filled.mgz"
+            ],
+            "sha256": [
+              "54fe32283593948779d18ad58f1fbc4767b4520c85341e59563a3e96e952275b",
+              "56caaf1b9c7bec1bc406c1d671f963453994e23438a8e4487d3afc89ab686b43"
+            ],
+            "shape": [
+              [
+                256,
+                256,
+                256
+              ],
+              [
+                256,
+                256,
+                256
+              ]
+            ],
+            "dtype": [
+              "uint8",
+              "uint8"
+            ],
+            "affine_max_abs": 0.0,
+            "same_grid": true,
+            "different_voxels": 0,
+            "max_abs": 0.0,
+            "p99_abs": 0.0,
+            "p99_changed_abs": 0,
+            "dice": {
+              "0": 1.0,
+              "127": 1.0,
+              "255": 1.0
+            }
+          },
+          "allocated_bytes": 721425408,
+          "reserved_bytes": 773849088
+        }
+      ]
+    },
+    {
+      "id": "sub02",
+      "input_sha256": {
+        "norm.mgz": "f4a90bcc73ea47fdf6829ae53f707288631a05753721dce3400660c1e813df48",
+        "brainmask.mgz": "b95ddba19c25fae4199190731fd8c003299d7d494501cf24384bb22f56db34aa",
+        "aseg.presurf.mgz": "a917b8f60aafed63f30b21096e20ad822ef9dea1b463dbcdbce3e4b57c5da0d4",
+        "brain.mgz": "4a38ea2909ef07de9b9171e1d37277bff10320b1cd5f2786e1d633d38dd623b9",
+        "wm.mgz": "9de6f37b922c525fcd24059449c78dfd858661e6d55a87aa4b18c62af94ebe40",
+        "transforms/talairach.lta": "8187f989fd083116f170be0cb271bedbbca0286899faa0b5e84ae86f606b8e1c"
+      },
+      "stages": [
+        {
+          "name": "brain",
+          "seconds_including_io": 61.359869382344186,
+          "details": {
+            "device": "cuda:0",
+            "three_d_iterations": 2,
+            "ridge_seconds": 12.016737329307944,
+            "initial_bias_seconds": 15.398713531903923,
+            "ridge": {
+              "marching": [
+                [
+                  143877,
+                  16205134
+                ],
+                [
+                  140166,
+                  288039
+                ]
+              ],
+              "ridge_voxels": 47785
+            },
+            "removed_controls": 3211,
+            "wm_peak": 102,
+            "completion": {
+              "steps": {
+                "gentle_controls_seconds": 1.6985455239191651,
+                "gentle_bias_seconds": 1.5184591887518764,
+                "three_d_1_controls_seconds": 13.22758068004623,
+                "three_d_1_bias_seconds": 1.5385678187012672,
+                "three_d_1_controls": {
+                  "initial_7": 37815,
+                  "initial_5": 65818,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 110.2261734008789,
+                    "wm_index": 110,
+                    "gm_index": 56,
+                    "wm_peak": 109.92890167236328,
+                    "gm_peak": 55.96380615234375,
+                    "bin_size": 0.9993536472320557
+                  },
+                  "adaptive_7": 37815,
+                  "adaptive_5": 71442,
+                  "three_added": 68014,
+                  "six_added": 65015,
+                  "before_outlier_removal": 204471,
+                  "after_outlier_removal": 204470
+                },
+                "three_d_2_controls_seconds": 12.804092877078801,
+                "three_d_2_bias_seconds": 1.5780625031329691,
+                "three_d_2_controls": {
+                  "initial_7": 40686,
+                  "initial_5": 70630,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 110.07049560546875,
+                    "wm_index": 110,
+                    "gm_index": 56,
+                    "wm_peak": 110.170166015625,
+                    "gm_peak": 56.086631774902344,
+                    "bin_size": 1.0015469789505005
+                  },
+                  "adaptive_7": 40686,
+                  "adaptive_5": 78210,
+                  "three_added": 69597,
+                  "six_added": 66260,
+                  "before_outlier_removal": 214067,
+                  "after_outlier_removal": 214067
+                }
+              },
+              "gentle_controls": {
+                "first_7x7x7": 22889,
+                "after_5x5x5": 46028,
+                "after_outlier_removal": 45948
+              }
+            },
+            "total_seconds": 61.12309111468494
+          },
+          "comparison": {
+            "paths": [
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub02/brain.mgz",
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/brain.mgz"
+            ],
+            "sha256": [
+              "ebfbf1fc93505a0826771a601f1b754db3a1f490f5ea9c6826a4ec2f279c31cd",
+              "4a38ea2909ef07de9b9171e1d37277bff10320b1cd5f2786e1d633d38dd623b9"
+            ],
+            "shape": [
+              [
+                256,
+                256,
+                256
+              ],
+              [
+                256,
+                256,
+                256
+              ]
+            ],
+            "dtype": [
+              "uint8",
+              "uint8"
+            ],
+            "affine_max_abs": 0.0,
+            "same_grid": true,
+            "different_voxels": 0,
+            "max_abs": 0.0,
+            "p99_abs": 0.0,
+            "p99_changed_abs": 0
+          },
+          "allocated_bytes": 721425408,
+          "reserved_bytes": 773849088
+        },
+        {
+          "name": "antsdn.brain",
+          "seconds_including_io": 18.778834438882768,
+          "details": {
+            "voxels": 16777216,
+            "total_seconds": 18.77259272709489
+          },
+          "comparison": {
+            "paths": [
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub02/antsdn.brain.mgz",
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/antsdn.brain.mgz"
+            ],
+            "sha256": [
+              "12a29c501f348b9b1828f0e2c7ab0ca8f8066ba91d5679fefdeca03a746ebba4",
+              "431d08a835c54644027ec1d3de8034c9ac73f3fd8be41893c63e9b684ee6de24"
+            ],
+            "shape": [
+              [
+                256,
+                256,
+                256
+              ],
+              [
+                256,
+                256,
+                256
+              ]
+            ],
+            "dtype": [
+              "uint8",
+              "uint8"
+            ],
+            "affine_max_abs": 0.0,
+            "same_grid": true,
+            "different_voxels": 0,
+            "max_abs": 0.0,
+            "p99_abs": 0.0,
+            "p99_changed_abs": 0
+          },
+          "allocated_bytes": 721425408,
+          "reserved_bytes": 773849088
+        },
+        {
+          "name": "filled",
+          "seconds_including_io": 54.1243228809908,
+          "details": [
+            127,
+            111,
+            92
+          ],
+          "comparison": {
+            "paths": [
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub02/filled.mgz",
+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/filled.mgz"
+            ],
+            "sha256": [
+              "273172f3e78e6774fc443c6188a186dc57505385aaf79847277f6e79599000b0",
+              "d65907400df1363fcdbed93593a8929e231e1eb5ae4d0ca88d64fe3db9bbd0dd"
+            ],
+            "shape": [
+              [
+                256,
+                256,
+                256
+              ],
+              [
+                256,
+                256,
+                256
+              ]
+            ],
+            "dtype": [
+              "uint8",
+              "uint8"
+            ],
+            "affine_max_abs": 0.0,
+            "same_grid": true,
+            "different_voxels": 0,
+            "max_abs": 0.0,
+            "p99_abs": 0.0,
+            "p99_changed_abs": 0,
+            "dice": {
+              "0": 1.0,
+              "127": 1.0,
+              "255": 1.0
+            }
+          },
+          "allocated_bytes": 721425408,
+          "reserved_bytes": 773849088
+        }
+      ]
+    }
+  ],
+  "gpu_samples": [
+    {
+      "time": 1790991539.6220477,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 1573\n"
+    },
+    {
+      "time": 1790991540.4584587,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991541.1025627,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991541.7731774,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991542.4038014,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991554.0667129,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2014\n"
+    },
+    {
+      "time": 1790991555.145026,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991555.9784353,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991556.5525525,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991557.1283104,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991557.7719421,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991558.4283435,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2010\n"
+    },
+    {
+      "time": 1790991559.0657504,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991559.7070112,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991560.3584232,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991560.987053,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991561.6400988,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991562.2878087,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991562.9192765,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991563.5683599,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991564.1924407,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991564.8290653,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991565.4666464,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991566.1218376,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991566.7570884,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991567.4068344,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991568.0541213,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991568.6756656,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991569.3321886,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991569.965559,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991570.6058025,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991571.2605937,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2010\n"
+    },
+    {
+      "time": 1790991571.8878584,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 448\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2010\n"
+    },
+    {
+      "time": 1790991572.5472374,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 512\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 4, 2074\n"
+    },
+    {
+      "time": 1790991573.1742933,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 512\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2074\n"
+    },
+    {
+      "time": 1790991573.8199494,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 512\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2074\n"
+    },
+    {
+      "time": 1790991574.4993367,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 622\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2184\n"
+    },
+    {
+      "time": 1790991575.136086,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 622\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2184\n"
+    },
+    {
+      "time": 1790991575.7753174,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 750\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2312\n"
+    },
+    {
+      "time": 1790991576.4459364,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 878\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2440\n"
+    },
+    {
+      "time": 1790991577.0640917,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 4, 2572\n"
+    },
+    {
+      "time": 1790991577.7170398,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2568\n"
+    },
+    {
+      "time": 1790991578.361858,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2568\n"
+    },
+    {
+      "time": 1790991579.004481,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2568\n"
+    },
+    {
+      "time": 1790991579.650047,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2568\n"
+    },
+    {
+      "time": 1790991580.292398,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2568\n"
+    },
+    {
+      "time": 1790991580.9349134,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2568\n"
+    },
+    {
+      "time": 1790991581.5658221,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2568\n"
+    },
+    {
+      "time": 1790991582.1925232,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2568\n"
+    },
+    {
+      "time": 1790991582.8504725,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2568\n"
+    },
+    {
+      "time": 1790991583.4992814,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2568\n"
+    },
+    {
+      "time": 1790991584.142545,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2568\n"
+    },
+    {
+      "time": 1790991584.8074548,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2568\n"
+    },
+    {
+      "time": 1790991585.427334,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2556\n"
+    },
+    {
+      "time": 1790991586.0744014,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 750\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2568\n"
+    },
+    {
+      "time": 1790991586.794063,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2568\n"
+    },
+    {
+      "time": 1790991587.535717,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2568\n"
+    },
+    {
+      "time": 1790991588.1276422,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2568\n"
+    },
+    {
+      "time": 1790991588.7731085,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1006\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2568\n"
+    },
+    {
+      "time": 1790991589.4215777,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2824\n"
+    },
+    {
+      "time": 1790991590.061936,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 738\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2824\n"
+    },
+    {
+      "time": 1790991590.6985302,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 750\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 10, 2832\n"
+    },
+    {
+      "time": 1790991591.360918,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 714\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 3, 2844\n"
+    },
+    {
+      "time": 1790991592.018919,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 714\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2800\n"
+    },
+    {
+      "time": 1790991592.6534483,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 714\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 6, 2800\n"
+    },
+    {
+      "time": 1790991593.303286,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 710\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 7, 2796\n"
+    },
+    {
+      "time": 1790991593.9405162,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1010\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 18, 3268\n"
+    },
+    {
+      "time": 1790991594.6183195,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1186\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 16, 3268\n"
+    },
+    {
+      "time": 1790991595.258354,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1182\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 5, 3268\n"
+    },
+    {
+      "time": 1790991595.8927143,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 734\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 5, 2820\n"
+    },
+    {
+      "time": 1790991596.5294907,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 734\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 7, 2820\n"
+    },
+    {
+      "time": 1790991597.187525,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 734\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2820\n"
+    },
+    {
+      "time": 1790991597.8313122,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 734\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2804\n"
+    },
+    {
+      "time": 1790991598.4597747,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 734\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 4, 2860\n"
+    },
+    {
+      "time": 1790991599.1525364,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 734\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 6, 2820\n"
+    },
+    {
+      "time": 1790991599.790414,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 730\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2820\n"
+    },
+    {
+      "time": 1790991600.4179757,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 734\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 6, 2820\n"
+    },
+    {
+      "time": 1790991601.1518443,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 734\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 8, 2824\n"
+    },
+    {
+      "time": 1790991601.7897308,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n73253, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 706\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2788\n"
+    },
+    {
+      "time": 1790991868.5333087,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2080\n"
+    },
+    {
+      "time": 1790991869.8075333,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2080\n"
+    },
+    {
+      "time": 1790991870.5463202,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2080\n"
+    },
+    {
+      "time": 1790991871.2066538,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2080\n"
+    },
+    {
+      "time": 1790991871.8702836,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2080\n"
+    },
+    {
+      "time": 1790991888.734893,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991889.7294137,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991935.4090588,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991935.9897842,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991936.5587087,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991937.1594894,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991937.7990923,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991938.4393725,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991939.0700555,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991939.766191,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991940.4294007,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991941.0541294,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991941.6818402,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991942.3072803,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991942.9297903,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991943.5773149,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991944.1994581,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 8, 2578\n"
+    },
+    {
+      "time": 1790991944.8413134,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 492\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 3, 2620\n"
+    },
+    {
+      "time": 1790991945.47779,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 492\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 5, 2538\n"
+    },
+    {
+      "time": 1790991946.1150818,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 510\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 17, 2628\n"
+    },
+    {
+      "time": 1790991946.740509,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 458\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 10, 2556\n"
+    },
+    {
+      "time": 1790991947.394233,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 494\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 9, 2596\n"
+    },
+    {
+      "time": 1790991948.0463464,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 480\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 4, 2614\n"
+    },
+    {
+      "time": 1790991948.7180207,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 486\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 11, 2588\n"
+    },
+    {
+      "time": 1790991949.3681772,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 470\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 26, 2574\n"
+    },
+    {
+      "time": 1790991950.0213015,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991950.6427476,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991951.2682345,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991951.863616,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991952.5053587,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991953.1431782,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2538\n"
+    },
+    {
+      "time": 1790991953.8002,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991954.4357264,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991955.0648453,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991955.6937878,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991956.3366802,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991957.022137,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991957.6438973,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991958.2713082,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991958.920646,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991959.5439482,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991960.1645865,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991960.8189185,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991961.4406543,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991962.077811,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991962.6992955,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991963.3072014,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991963.9493935,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 3, 2538\n"
+    },
+    {
+      "time": 1790991964.6152904,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991965.2519317,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991965.887664,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991966.5119169,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991967.1424332,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991967.7750425,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 492\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991968.424151,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 534\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 5, 2538\n"
+    },
+    {
+      "time": 1790991969.0439482,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2620\n"
+    },
+    {
+      "time": 1790991969.6914437,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2538\n"
+    },
+    {
+      "time": 1790991970.3448927,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 506\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 36, 2592\n"
+    },
+    {
+      "time": 1790991970.9778118,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 614\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 17, 2672\n"
+    },
+    {
+      "time": 1790991971.6160982,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 546\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 3, 2592\n"
+    },
+    {
+      "time": 1790991972.2545834,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2538\n"
+    },
+    {
+      "time": 1790991972.9157555,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 518\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2592\n"
+    },
+    {
+      "time": 1790991973.5480351,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 592\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 4, 2664\n"
+    },
+    {
+      "time": 1790991974.2140684,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 546\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 4, 2672\n"
+    },
+    {
+      "time": 1790991974.848604,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 492\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 3, 2540\n"
+    },
+    {
+      "time": 1790991975.492151,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2, 2592\n"
+    },
+    {
+      "time": 1790991976.1491878,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 600\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 4, 2646\n"
+    },
+    {
+      "time": 1790991976.7557433,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 506\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 28, 2592\n"
+    },
+    {
+      "time": 1790991977.3897536,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 512\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 2538\n"
+    },
+    {
+      "time": 1790991978.0432293,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 3, 2548\n"
+    },
+    {
+      "time": 1790991978.690876,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 530\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 37, 2592\n"
+    },
+    {
+      "time": 1790991979.3429072,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 614\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 16, 2700\n"
+    },
+    {
+      "time": 1790991980.0146484,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 492\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 3, 2546\n"
+    },
+    {
+      "time": 1790991980.749032,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2592\n"
+    },
+    {
+      "time": 1790991981.3192554,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 560\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 5, 2646\n"
+    },
+    {
+      "time": 1790991981.9429362,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 546\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 18, 2602\n"
+    },
+    {
+      "time": 1790991982.5720475,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 538\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 3, 2592\n"
+    },
+    {
+      "time": 1790991983.23261,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991983.8688242,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991984.4817386,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991985.1642258,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991985.76722,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991986.4035847,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991987.0418448,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790991987.6724043,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n126917, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 452\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 2538\n"
+    },
+    {
+      "time": 1790992736.3171046,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992736.8735812,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992748.1029716,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 71, 15084\n"
+    },
+    {
+      "time": 1790992749.2251863,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 79, 15084\n"
+    },
+    {
+      "time": 1790992749.8773263,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 73, 15084\n"
+    },
+    {
+      "time": 1790992750.5323055,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 78, 15084\n"
+    },
+    {
+      "time": 1790992751.2058525,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 77, 15084\n"
+    },
+    {
+      "time": 1790992751.8517113,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 74, 15084\n"
+    },
+    {
+      "time": 1790992752.4978824,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 79, 15084\n"
+    },
+    {
+      "time": 1790992753.1363416,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 15084\n"
+    },
+    {
+      "time": 1790992753.7847917,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 71, 15084\n"
+    },
+    {
+      "time": 1790992754.4291396,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 78, 15084\n"
+    },
+    {
+      "time": 1790992755.079884,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 15084\n"
+    },
+    {
+      "time": 1790992755.7734623,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 74, 15084\n"
+    },
+    {
+      "time": 1790992756.3893116,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 78, 15084\n"
+    },
+    {
+      "time": 1790992757.0539353,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 71, 15084\n"
+    },
+    {
+      "time": 1790992757.705194,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 15084\n"
+    },
+    {
+      "time": 1790992758.3543084,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 75, 15084\n"
+    },
+    {
+      "time": 1790992758.9995172,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 15084\n"
+    },
+    {
+      "time": 1790992759.6356978,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 73, 15084\n"
+    },
+    {
+      "time": 1790992760.2790403,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 75, 15084\n"
+    },
+    {
+      "time": 1790992760.9124002,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 71, 15084\n"
+    },
+    {
+      "time": 1790992761.5603297,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 78, 15084\n"
+    },
+    {
+      "time": 1790992762.20891,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 78, 15084\n"
+    },
+    {
+      "time": 1790992762.8607912,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 71, 15084\n"
+    },
+    {
+      "time": 1790992763.5008628,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 74, 15084\n"
+    },
+    {
+      "time": 1790992764.162889,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 74, 15084\n"
+    },
+    {
+      "time": 1790992764.8020823,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 73, 15084\n"
+    },
+    {
+      "time": 1790992765.4568799,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 74, 15084\n"
+    },
+    {
+      "time": 1790992766.096187,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 75, 15084\n"
+    },
+    {
+      "time": 1790992766.769888,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 71, 15084\n"
+    },
+    {
+      "time": 1790992767.382317,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 15084\n"
+    },
+    {
+      "time": 1790992768.0396795,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992768.6750388,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992769.304343,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992769.951069,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992770.5942023,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992771.2245557,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992771.9272528,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992772.590726,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992773.2381873,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992773.8671114,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 78, 15084\n"
+    },
+    {
+      "time": 1790992774.4242616,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 54, 15084\n"
+    },
+    {
+      "time": 1790992775.1103055,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 54, 15084\n"
+    },
+    {
+      "time": 1790992775.7762837,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 53, 15084\n"
+    },
+    {
+      "time": 1790992776.4349577,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 53, 15084\n"
+    },
+    {
+      "time": 1790992777.0663216,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 54, 15084\n"
+    },
+    {
+      "time": 1790992777.6893823,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 55, 15084\n"
+    },
+    {
+      "time": 1790992778.334318,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 54, 15084\n"
+    },
+    {
+      "time": 1790992778.9561577,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 55, 15084\n"
+    },
+    {
+      "time": 1790992779.6047144,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 54, 15084\n"
+    },
+    {
+      "time": 1790992780.2307005,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 53, 15084\n"
+    },
+    {
+      "time": 1790992780.86416,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 55, 15084\n"
+    },
+    {
+      "time": 1790992781.5095325,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 56, 15084\n"
+    },
+    {
+      "time": 1790992782.1351483,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 54, 15084\n"
+    },
+    {
+      "time": 1790992782.7717679,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 59, 15084\n"
+    },
+    {
+      "time": 1790992783.4057927,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 56, 15084\n"
+    },
+    {
+      "time": 1790992784.0590992,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 54, 15084\n"
+    },
+    {
+      "time": 1790992784.6929915,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 56, 15084\n"
+    },
+    {
+      "time": 1790992785.3391142,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992785.9710054,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992786.6071389,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992787.251176,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992787.8868957,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992788.5242999,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 47, 15084\n"
+    },
+    {
+      "time": 1790992789.1872053,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992789.8121903,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992790.4563928,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 48, 15084\n"
+    },
+    {
+      "time": 1790992791.0837414,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 80, 15084\n"
+    },
+    {
+      "time": 1790992791.7370617,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 74, 15084\n"
+    },
+    {
+      "time": 1790992792.3770707,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 15084\n"
+    },
+    {
+      "time": 1790992793.0008783,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 77, 15084\n"
+    },
+    {
+      "time": 1790992793.677855,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 78, 15084\n"
+    },
+    {
+      "time": 1790992794.3384013,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 74, 15084\n"
+    },
+    {
+      "time": 1790992795.034345,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 15084\n"
+    },
+    {
+      "time": 1790992795.6812403,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 81, 15084\n"
+    },
+    {
+      "time": 1790992796.3480098,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 73, 15084\n"
+    },
+    {
+      "time": 1790992797.005731,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 73, 15084\n"
+    },
+    {
+      "time": 1790992797.7050307,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 15084\n"
+    },
+    {
+      "time": 1790992798.353651,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 12998\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 80, 15084\n"
+    },
+    {
+      "time": 1790993191.4116533,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 15250\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 17336\n"
+    },
+    {
+      "time": 1790993192.2740817,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 15250\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1, 17336\n"
+    },
+    {
+      "time": 1790993210.09511,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 15250\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 17336\n"
+    },
+    {
+      "time": 1790993210.6782672,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n26780, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 15250\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 0, 17336\n"
+    },
+    {
+      "time": 1791002054.7774642,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002055.4584894,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 76, 37256\n"
+    },
+    {
+      "time": 1791002056.2052357,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002056.8491611,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002057.547602,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 39, 37256\n"
+    },
+    {
+      "time": 1791002058.1893284,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002058.8707335,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 37256\n"
+    },
+    {
+      "time": 1791002059.5384552,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002060.187369,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 97, 37256\n"
+    },
+    {
+      "time": 1791002060.85216,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 97, 37256\n"
+    },
+    {
+      "time": 1791002061.4885795,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 55, 37256\n"
+    },
+    {
+      "time": 1791002062.1755478,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 55, 37256\n"
+    },
+    {
+      "time": 1791002062.8962975,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 74, 37256\n"
+    },
+    {
+      "time": 1791002063.5273957,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002064.1860223,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002064.848688,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 65, 37256\n"
+    },
+    {
+      "time": 1791002065.5202363,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 87, 37256\n"
+    },
+    {
+      "time": 1791002066.1889684,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002066.8547044,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 95, 37256\n"
+    },
+    {
+      "time": 1791002067.5071473,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 56, 37256\n"
+    },
+    {
+      "time": 1791002068.2169092,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 68, 37256\n"
+    },
+    {
+      "time": 1791002068.868562,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 98, 37256\n"
+    },
+    {
+      "time": 1791002069.518202,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 71, 37256\n"
+    },
+    {
+      "time": 1791002070.1812952,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 77, 37256\n"
+    },
+    {
+      "time": 1791002070.844641,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 71, 37256\n"
+    },
+    {
+      "time": 1791002071.4996479,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 81, 37256\n"
+    },
+    {
+      "time": 1791002072.2058127,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002072.8451,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002073.5434942,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 73, 37256\n"
+    },
+    {
+      "time": 1791002074.205358,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 86, 37256\n"
+    },
+    {
+      "time": 1791002074.8630385,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 14, 37256\n"
+    },
+    {
+      "time": 1791002075.5085886,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 71, 37256\n"
+    },
+    {
+      "time": 1791002076.1915305,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 75, 37256\n"
+    },
+    {
+      "time": 1791002076.841335,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 83, 37256\n"
+    },
+    {
+      "time": 1791002077.4929574,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002078.1484818,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 98, 37256\n"
+    },
+    {
+      "time": 1791002078.8338134,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002079.473073,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 97, 37256\n"
+    },
+    {
+      "time": 1791002080.1423075,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002080.81408,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002081.4878285,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 98, 37256\n"
+    },
+    {
+      "time": 1791002082.1570013,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002082.811437,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002083.4826877,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002084.18255,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 99, 37256\n"
+    },
+    {
+      "time": 1791002084.8434386,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 70, 37256\n"
+    },
+    {
+      "time": 1791002085.5061421,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 87, 37256\n"
+    },
+    {
+      "time": 1791002086.165893,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 79, 37256\n"
+    },
+    {
+      "time": 1791002086.8170874,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 69, 37256\n"
+    },
+    {
+      "time": 1791002087.4793909,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 85, 37256\n"
+    },
+    {
+      "time": 1791002088.1696756,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002088.8197944,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 85, 37256\n"
+    },
+    {
+      "time": 1791002089.5045693,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 89, 37256\n"
+    },
+    {
+      "time": 1791002090.1601064,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 98, 37256\n"
+    },
+    {
+      "time": 1791002090.8036475,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 98, 37256\n"
+    },
+    {
+      "time": 1791002091.484473,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 86, 37256\n"
+    },
+    {
+      "time": 1791002092.1620586,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002092.8303688,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002093.5110347,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 12\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 99, 37256\n"
+    },
+    {
+      "time": 1791002094.4410894,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 448\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002095.0725608,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 448\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002095.6901045,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 448\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 83, 37256\n"
+    },
+    {
+      "time": 1791002096.391241,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 448\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002097.05141,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 448\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 85, 37256\n"
+    },
+    {
+      "time": 1791002097.7263048,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 448\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002098.3829124,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 526\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002099.0506506,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 1088\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 66, 37256\n"
+    },
+    {
+      "time": 1791002099.734858,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 1108\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 67, 37256\n"
+    },
+    {
+      "time": 1791002100.3461215,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 1108\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 37256\n"
+    },
+    {
+      "time": 1791002100.9838316,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 1108\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002101.6514564,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 1108\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 85, 37256\n"
+    },
+    {
+      "time": 1791002102.309466,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 1108\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002102.9693544,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2134\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 90, 37256\n"
+    },
+    {
+      "time": 1791002103.6618762,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 92, 37256\n"
+    },
+    {
+      "time": 1791002104.3070002,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002104.9881334,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 72, 37256\n"
+    },
+    {
+      "time": 1791002105.6645734,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 99, 37256\n"
+    },
+    {
+      "time": 1791002106.3544292,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 83, 37256\n"
+    },
+    {
+      "time": 1791002106.99984,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002107.663167,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 100, 37256\n"
+    },
+    {
+      "time": 1791002108.3180988,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 65, 37256\n"
+    },
+    {
+      "time": 1791002108.9855504,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 79, 37256\n"
+    },
+    {
+      "time": 1791002109.63468,
+      "apps": "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804\n98758, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 1262\n70937, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 35170\n31685, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 804\n70938, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 35170\n104151, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 2138\n",
+      "gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 99, 37256\n"
+    }
+  ],
+  "complete": true
+}

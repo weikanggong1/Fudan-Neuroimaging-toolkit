@@ -1,0 +1,170 @@
+{
+  "schema": "fnit-task03-completed-isolation-v1",
+  "scope": "two_old_real_cases_frozen_stage_diagnostics_only",
+  "baseline_commit": "816e5610417a4c587caf321049438a9554139016",
+  "production_patch_source_sha256": "167be9d72496b7279b98e52b8f0d6c0808d2c09d02df24af1fed0fd331100b9b",
+  "overall_equivalence": "not_assessed",
+  "cross_complete": true,
+  "tail_complete": true,
+  "coordinate_diagnostic_complete": true,
+  "receipt_sha256": {
+    "cross": "8455a8a50256f4df21b99a765237349638d2ac57a1e7a0405a20f6a454908a2a",
+    "tail": "1cc2557170f3e30e507393e746a513c76b508043c032f64c8716ebd52bc47da1",
+    "coordinates_fp32": "40326ff8edd2edd1105f8caf027b0695bb6426186095fa9d3ca79167dd28339c"
+  },
+  "cross": [
+    {
+      "id": "sub01",
+      "nu": "official",
+      "mask": "official",
+      "em_seconds": 188.23851768579334,
+      "ca_seconds": 27.737120101228356,
+      "lta_max_abs": 0.0,
+      "norm_different_voxels": 0,
+      "norm_max_abs": 0.0,
+      "ctrl_different_elements": 0
+    },
+    {
+      "id": "sub01",
+      "nu": "fnit",
+      "mask": "official",
+      "em_seconds": 190.77300990000367,
+      "ca_seconds": 25.20254170987755,
+      "lta_max_abs": 0.0005735158920288086,
+      "norm_different_voxels": 490692,
+      "norm_max_abs": 8.0,
+      "ctrl_different_elements": 10617
+    },
+    {
+      "id": "sub01",
+      "nu": "official",
+      "mask": "fnit",
+      "em_seconds": 221.68676189193502,
+      "ca_seconds": 25.8880393570289,
+      "lta_max_abs": 0.0,
+      "norm_different_voxels": 0,
+      "norm_max_abs": 0.0,
+      "ctrl_different_elements": 0
+    },
+    {
+      "id": "sub01",
+      "nu": "fnit",
+      "mask": "fnit",
+      "em_seconds": 242.32156900735572,
+      "ca_seconds": 25.34144620085135,
+      "lta_max_abs": 0.0005735158920288086,
+      "norm_different_voxels": 490692,
+      "norm_max_abs": 8.0,
+      "ctrl_different_elements": 10617
+    },
+    {
+      "id": "sub02",
+      "nu": "official",
+      "mask": "official",
+      "em_seconds": 206.1386658246629,
+      "ca_seconds": 25.58271000208333,
+      "lta_max_abs": 0.0,
+      "norm_different_voxels": 11,
+      "norm_max_abs": 1.0,
+      "ctrl_different_elements": 6
+    },
+    {
+      "id": "sub02",
+      "nu": "fnit",
+      "mask": "official",
+      "em_seconds": 163.85407341038808,
+      "ca_seconds": 26.2239904650487,
+      "lta_max_abs": 7.450580603862722e-09,
+      "norm_different_voxels": 41,
+      "norm_max_abs": 3.0,
+      "ctrl_different_elements": 6
+    },
+    {
+      "id": "sub02",
+      "nu": "official",
+      "mask": "fnit",
+      "em_seconds": 175.6374660921283,
+      "ca_seconds": 25.894503858406097,
+      "lta_max_abs": 0.0,
+      "norm_different_voxels": 11,
+      "norm_max_abs": 1.0,
+      "ctrl_different_elements": 6
+    },
+    {
+      "id": "sub02",
+      "nu": "fnit",
+      "mask": "fnit",
+      "em_seconds": 148.22741669369861,
+      "ca_seconds": 24.8994181137532,
+      "lta_max_abs": 7.450580603862722e-09,
+      "norm_different_voxels": 41,
+      "norm_max_abs": 3.0,
+      "ctrl_different_elements": 6
+    }
+  ],
+  "coordinate_result": [
+    {
+      "id": "sub01",
+      "seconds": 28.00984625890851,
+      "norm_different": 0,
+      "ctrl_different": 0,
+      "same_grid": true,
+      "same_dtype": true
+    },
+    {
+      "id": "sub02",
+      "seconds": 25.545517734717578,
+      "norm_different": 0,
+      "ctrl_different": 0,
+      "same_grid": true,
+      "same_dtype": true
+    }
+  ],
+  "tail_result": [
+    {
+      "id": "sub01",
+      "stage": "brain",
+      "seconds": 61.100819903891534,
+      "different_voxels": 0
+    },
+    {
+      "id": "sub01",
+      "stage": "antsdn.brain",
+      "seconds": 20.84222843265161,
+      "different_voxels": 0
+    },
+    {
+      "id": "sub01",
+      "stage": "filled",
+      "seconds": 50.865074064116925,
+      "different_voxels": 0
+    },
+    {
+      "id": "sub02",
+      "stage": "brain",
+      "seconds": 61.359869382344186,
+      "different_voxels": 0
+    },
+    {
+      "id": "sub02",
+      "stage": "antsdn.brain",
+      "seconds": 18.778834438882768,
+      "different_voxels": 0
+    },
+    {
+      "id": "sub02",
+      "stage": "filled",
+      "seconds": 54.1243228809908,
+      "different_voxels": 0
+    }
+  ],
+  "production_fix_regression": {
+    "state": "queued",
+    "pid": 115793,
+    "session": 83207,
+    "receipt": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1/report.json",
+    "runs_required": 8,
+    "lock_scope": "one_function_call_plus_result_compare"
+  },
+  "ten_new_cases_full_chain": "pending_coordinator_not_assessed_by_this_diagnostic"
+}

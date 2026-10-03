@@ -11,7 +11,8 @@ import numpy as np
 from numba import njit, prange
 from scipy.ndimage import maximum_filter, minimum_filter
 
-from .mri_em_register import GCA, atlas_label_peak, estimate_image_white_matter_peak, read_gca
+from .mri_em_register import (GCA, atlas_label_peak, estimate_image_white_matter_peak,
+                              read_gca, _vnl_affine_inverse)
 
 
 NORMALIZATION_LABELS = (2, 41, 7, 46, 16)
@@ -77,12 +78,63 @@ def atlas_samples(gca: GCA, voxel_lta: np.ndarray) -> AtlasSamples:
     selected = occupied & ((labels != 0) | nonunknown_nearby)
     chosen = np.flatnonzero(selected)
     prior = np.column_stack(np.unravel_index(chosen, gca.prior_shape)).astype(np.int32)
-    atlas = np.column_stack((prior.astype(np.float64) * gca.prior_spacing,
-                             np.ones(len(prior), np.float64)))
-    source_float = (atlas @ np.linalg.inv(voxel_lta).T)[:, :3]
-    source = np.where(source_float >= 0, np.floor(source_float + .5),
-                      np.ceil(source_float - .5)).astype(np.int32)
+    source = prior_to_source_coordinates(prior, voxel_lta, gca.prior_spacing,
+                                         source_shape=gca.volume_shape)
     return AtlasSamples(prior, source, labels[chosen], gca.prior_values[best[chosen]])
+
+
+def prior_to_source_coordinates(prior: np.ndarray, voxel_lta: np.ndarray,
+                                prior_spacing: float, *,
+                                source_shape: tuple[int, int, int] | None = None) -> np.ndarray:
+    """固定 GCA 的 prior voxel→source voxel；保持原生 FP32 和 nint 契约。
+
+    prior 为 N×3 整数坐标；voxel_lta 为 source→atlas 4×4 affine；
+    prior_spacing 为 prior 到 atlas voxel 的固定缩放（当前图谱为 2）。
+    输出 N×3 int32 源体素索引，不做 world/RAS 变换。source_shape 为
+    可选源网格；给定时按原生浮点边界 [0, size-1] 判断，越界保留
+    GCAfindAllSamples 的初始 atlas 体素坐标，不截到边缘。
+    复用 VNL affine inverse，每项乘积和累计都舍入 FP32；nint 前
+    将已经得到的 FP32 坐标提升为 double，避免 +0.5 再被 FP32 舍入。
+    本函数不修改 TF32、设备或调用方数组；非法 affine/坐标明确拒绝。
+    """
+    coordinates = np.asarray(prior)
+    matrix = np.asarray(voxel_lta, dtype=np.float32)
+    if (coordinates.ndim != 2 or coordinates.shape[1] != 3
+            or not np.issubdtype(coordinates.dtype, np.integer)
+            or matrix.shape != (4, 4) or not np.isfinite(matrix).all()
+            or not np.array_equal(matrix[3], np.array([0, 0, 0, 1], np.float32))
+            or not np.isfinite(prior_spacing) or prior_spacing <= 0):
+        raise ValueError("Expected integer prior coordinates and finite voxel affine")
+    if np.linalg.det(matrix[:3, :3].astype(np.float64)) == 0:
+        raise ValueError("Singular source-to-atlas affine")
+    with np.errstate(divide="raise", invalid="raise", over="raise"):
+        mapping = _vnl_affine_inverse(matrix)
+        mapping[:, :3] = np.float32(mapping[:, :3] * np.float32(prior_spacing))
+        points = coordinates.astype(np.float32)
+        source_float = np.zeros((len(points), 3), dtype=np.float32)
+        for axis in range(3):
+            for component in range(3):
+                source_float[:, axis] = np.float32(
+                    source_float[:, axis]
+                    + np.float32(mapping[axis, component] * points[:, component]))
+            source_float[:, axis] = np.float32(source_float[:, axis] + mapping[axis, 3])
+    # Native MatrixMultiply outputs float, promoted to double before nint.
+    values = source_float.astype(np.float64)
+    rounded = np.where(values >= 0, np.floor(values + .5), np.ceil(values - .5))
+    bounds = np.iinfo(np.int32)
+    if not np.isfinite(rounded).all() or np.any((rounded < bounds.min) | (rounded > bounds.max)):
+        raise ValueError("Source coordinates exceed int32 index range")
+    result = rounded.astype(np.int32)
+    if source_shape is not None:
+        shape = np.asarray(source_shape)
+        if shape.shape != (3,) or not np.issubdtype(shape.dtype, np.integer) or np.any(shape <= 0):
+            raise ValueError("Expected positive integer source shape")
+        inside = np.all((values >= 0) & (values <= shape - 1), axis=1)
+        # GCAcomputeSampleCoords only replaces the initial atlas coordinate
+        # when GCApriorToSourceVoxel succeeds. The fixed GCA atlas voxels are 1 mm.
+        initial = np.float32(points * np.float32(prior_spacing))
+        result[~inside] = initial[~inside].astype(np.int32)
+    return result
 
 
 def scale_masked_input(voxels: np.ndarray, atlas_peak: int, image_peak: int) -> np.ndarray:
