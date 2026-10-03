@@ -38,9 +38,10 @@ def source_hashes(root):
 
 
 def process_tree():
-    rows = subprocess.run(["ps", "-e", "-o", "pid=,ppid="], capture_output=True,
+    rows = subprocess.run(["ps", "-e", "-o", "pid=", "-o", "ppid="], capture_output=True,
                           text=True, check=True).stdout.splitlines()
-    edges = [tuple(map(int, row.split())) for row in rows]
+    edges = [tuple(map(int, row.split())) for row in rows
+             if len(row.split()) == 2 and all(field.isdigit() for field in row.split())]
     pids = {os.getpid()}
     while True:
         expanded = pids | {pid for pid, parent in edges if parent in pids}
@@ -183,7 +184,8 @@ def main():
             monitor.thread.join(timeout=10)
         report.update(source_unchanged_during_run=before == source_hashes(args.source_root),
                       owned_tree_peak_bytes=monitor.peak,
-                      owned_tree_under_20gb=monitor.peak <= 20_000_000_000,
+                      owned_tree_memory_measured=monitor.peak > 0,
+                      owned_tree_under_20gb=monitor.peak <= 20_000_000_000 if monitor.peak > 0 else None,
                       memory_sampling_errors=monitor.errors)
         # Reconstruction provenance can contain local source paths/command
         # arguments. Keep the full record private; public metrics are anonymous.

@@ -108,6 +108,34 @@ def _standard_template_identity(path):
             "StandardTemplateIdentity": "TemplateFlow:MNI152NLin6Asym:res-02"}
 
 
+def _classification_masks_on_template(template, mask_paths, output_dir):
+    """Use exact axis permutations/flips for masks on the same physical grid.
+
+    TemplateFlow can store the verified template in RAS while the original
+    ICA-AROMA masks use LAS. Reorientation changes storage order only; it
+    neither interpolates nor changes anatomical support or mask values.
+    Different physical grids still fail before volume computation.
+    """
+    aligned = []
+    target_orientation = nib.orientations.io_orientation(template.affine)
+    for mask_path in mask_paths:
+        image = nib.load(str(mask_path))
+        if image.shape == template.shape and np.allclose(image.affine, template.affine, rtol=0, atol=1e-4):
+            aligned.append(mask_path)
+            continue
+        transform = nib.orientations.ornt_transform(
+            nib.orientations.io_orientation(image.affine), target_orientation)
+        reoriented = image.as_reoriented(transform)
+        if (reoriented.shape != template.shape or not np.allclose(
+                reoriented.affine, template.affine, rtol=0, atol=1e-4)):
+            raise ValueError("mni_template must match the ICA-AROMA MNI152 2-mm mask grid")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        destination = output_dir / Path(mask_path).name
+        nib.save(reoriented, str(destination))
+        aligned.append(destination)
+    return tuple(aligned)
+
+
 def _motion_world_pulls(raw, reference, matrices_dir):
     matrices = sorted(Path(matrices_dir).glob("MAT_*"))
     if len(matrices) != raw.shape[3]:
@@ -305,12 +333,8 @@ def fMRIVolume_pipeline(
         raise ValueError("mni_template must be a 3D MNI152 2-mm image")
     asset_dir = Path(__file__).parent / "assets"
     classification_masks = tuple(asset_dir / f"mask_{name}.nii.gz" for name in ("csf", "edge", "out"))
-    for mask_path in classification_masks:
-        mask_image = nib.load(str(mask_path))
-        if mask_image.shape != template.shape or not np.allclose(
-            mask_image.affine, template.affine, atol=1e-4
-        ):
-            raise ValueError("mni_template must match the ICA-AROMA MNI152 2-mm mask grid")
+    classification_masks = _classification_masks_on_template(
+        template, classification_masks, output / "classification_masks")
     mask_dir = output / "masks"
     mask_dir.mkdir(exist_ok=True)
     reference = _reference_image(inputs, output / "reference_epi.nii.gz")

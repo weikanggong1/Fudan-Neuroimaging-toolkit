@@ -353,7 +353,9 @@ def test_surface_uses_selected_t1_before_checking_anatomical_derivative(volume_d
     sidecar(paths.clean_native).write_text(json.dumps(_handoff_metadata(inputs)))
     monkeypatch.setattr(surface_pipeline, "locate_bids_inputs", lambda *args, **kwargs: inputs)
     # Passing handoff validation reaches the missing asset, not the first T1's nonexistent derivative.
-    with pytest.raises(FileNotFoundError, match="atlasroi"):
+    # The read-only inspector now reports missing external assets as an
+    # invalid handoff; it still resolves the metadata-selected T1 first.
+    with pytest.raises(ValueError, match="atlasroi"):
         surface_pipeline.fMRISurface_pipeline(inputs.bids_root, root, subject="01", recon_all=tmp_path / "recon", hcp_assets_dir=tmp_path / "assets", device="cpu", signal="clean")
 
 
