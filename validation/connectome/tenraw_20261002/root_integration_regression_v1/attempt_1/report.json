@@ -1,0 +1,27 @@
+{
+  "state": "related_CPU_tests_failed",
+  "returncode": 2,
+  "wall_s": 9.91313576232642,
+  "observed_utc": "2026-10-03T00:42:28.972320+00:00",
+  "source_commit": "7a9b369bd8fc55996a80d1cb17222cc8e1ce395c",
+  "archive_sha256": "d82691c65b3ceaab386083cc3957eb37ea6b70b4641a421821515eb1da0bc301",
+  "launch_sha256": "5a8848f1420972837e32579af75ca4c6cf5dab06c6521fd59473211c83673a3a",
+  "command": [
+    "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/connectome",
+    "tests/eddy/test_ukb_reference_reuse.py",
+    "tests/eddy/test_ukb_synthstrip_mask.py",
+    "tests/recon_all/test_mgh_new_image_geometry.py",
+    "tests/flirt/test_output_semantics.py"
+  ],
+  "CUDA_VISIBLE_DEVICES": "",
+  "stdout_sha256": "ea3cbe05d1664609b11e991241a67a5ac8575564a7869a3050ef296114175c63",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "output_summary": "\n==================================== ERRORS ====================================\n_ ERROR collecting Notebook_code/fnit_connectome_tenraw_20261002/root_related_CPU_tests_7a9b369b_v1/source/tests/connectome/test_tenraw_download_integrity.py _\ntests/connectome/test_tenraw_download_integrity.py:10: in <module>\n    spec.loader.exec_module(module)\n<frozen importlib._bootstrap_external>:936: in exec_module\n    ???\n<frozen importlib._bootstrap_external>:1073: in get_code\n    ???\n<frozen importlib._bootstrap_external>:1130: in get_data\n    ???\nE   FileNotFoundError: [Errno 2] No such file or directory: '/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_related_CPU_tests_7a9b369b_v1/source/validation/connectome/tenraw_20261002/task_01/download_new_raw.py'\n=========================== short test summary info ============================\nERROR tests/connectome/test_tenraw_download_integrity.py - FileNotFoundError:...\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 8.32s\n",
+  "scope": "scoped CPU regression tests of connectome and directly affected BIDS/EDDY/geometry APIs; GPU tests skip with CUDA invisible; not an MRI benchmark or whole repository test claim"
+}

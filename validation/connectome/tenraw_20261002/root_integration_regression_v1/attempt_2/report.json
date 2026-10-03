@@ -1,0 +1,27 @@
+{
+  "state": "related_CPU_tests_failed",
+  "returncode": 1,
+  "wall_s": 42.27628906723112,
+  "observed_utc": "2026-10-03T00:53:02.510462+00:00",
+  "source_commit": "7a9b369bd8fc55996a80d1cb17222cc8e1ce395c",
+  "archive_sha256": "df142bf7343387c30401bec198876a756bd87fe605da24973f4c6e65cded313b",
+  "launch_sha256": "cd3c7cf4b0e066cdaa0df4d5402e2461747d9765e6e9322769e184f7c5966a56",
+  "command": [
+    "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/connectome",
+    "tests/eddy/test_ukb_reference_reuse.py",
+    "tests/eddy/test_ukb_synthstrip_mask.py",
+    "tests/recon_all/test_mgh_new_image_geometry.py",
+    "tests/flirt/test_output_semantics.py"
+  ],
+  "CUDA_VISIBLE_DEVICES": "",
+  "stdout_sha256": "aa80af79424671d4f86e3f840e1d8483757369e99ab2d91e59121d5696e217b9",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "output_summary": "_detection _____________\n\ntmp_path = PosixPath('/tmp/pytest-of-gongwk/pytest-275/test_selected_atlas_installati0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fbd7f342710>\n\n    def test_selected_atlas_installation_and_tamper_detection(tmp_path, monkeypatch):\n        source = Path(__file__).resolve().parents[2] / \"assets/connectome\"\n        downloads = []\n    \n        def open_asset(url, *, timeout):\n            assert url.startswith((\"https://raw.githubusercontent.com/yetianmed/subcortex/\",\n                                   \"https://raw.githubusercontent.com/ThomasYeoLab/CBIG/\",\n                                   \"https://raw.githubusercontent.com/weikanggong1/Fudan-Neuroimaging-toolkit/f436de588647a0de80735e4a98d53df5d88e502d/\"))\n            name = url.rsplit(\"/\", 1)[-1]\n            downloads.append(name)\n            return BytesIO((source / name).read_bytes())\n    \n        monkeypatch.setattr(assets, \"urlopen\", open_asset)\n>       root = assets.install_connectome_atlases(\n            [\"fs-aparc\", \"fs-aparc-a2009s\", \"schaefer200+tian-s1\"], tmp_path)\n\ntests/connectome/test_assets.py:24: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nsrc/fnit/connectome/assets.py:62: in install_connectome_atlases\n    with urlopen(entry[\"url\"], timeout=120) as source:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/connectome/test_assets.py:21: in open_asset\n    return BytesIO((source / name).read_bytes())\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n../../../fnit_conda_env_956b1a9/lib/python3.11/pathlib.py:1050: in read_bytes\n    with self.open(mode='rb') as f:\n         ^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_related_CPU_tests_7a9b369b_v2/source/assets/connectome/Tian_Subcortex_S1_3T.nii.gz')\nmode = 'rb', buffering = -1, encoding = None, errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_related_CPU_tests_7a9b369b_v2/source/assets/connectome/Tian_Subcortex_S1_3T.nii.gz'\n\n../../../fnit_conda_env_956b1a9/lib/python3.11/pathlib.py:1044: FileNotFoundError\n=========================== short test summary info ============================\nFAILED tests/connectome/test_assets.py::test_selected_atlas_installation_and_tamper_detection\n1 failed, 641 passed, 28 skipped, 354 subtests passed in 41.51s\n",
+  "scope": "scoped CPU regression tests of connectome and directly affected BIDS/EDDY/geometry APIs; GPU tests skip with CUDA invisible; not an MRI benchmark or whole repository test claim"
+}
