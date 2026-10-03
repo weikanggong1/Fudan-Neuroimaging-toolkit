@@ -130,7 +130,7 @@ OUTPUT_DIR/
 | `--shell-bvals`、`--dwi-to-t1-world` | 可选 shell 中心序列和 4×4 DWI→T1 RAS-mm 矩阵；省略则估计 shell 并运行 TorchFLIRT。 |
 | `--n-seeds`、`--seed` | 播种尝试数必选；随机种子默认 0。PyTorch 与 MRtrix 相同数值 seed 不生成同一流线。 |
 | `--eddy-gp-seed` | 可选整数 1..2³²−1；固定 EDDY GP 体素选点，与追踪 `--seed` 独立。默认省略，沿用 EDDY 原有的时间种子。改变此参数会重新计算自动管理的 EDDY 输出。 |
-| `--device`、`--compile-arc` | 设备默认 `cuda:0`；可选编译 iFOD2 CUDA 核。CUDA 默认 TF32，不自动用半精度。 |
+| `--device`、`--compile-arc` | 设备默认 `cuda:0`；CUDA 默认 TF32，不自动用半精度。编译圆弧核为可选项，本轮无损比较关闭它：已测编译输出存在逐值差异，未作为无损优化采用。 |
 | `--output-dir`、`--overwrite` | 结果目录必选；后者强制重算和覆盖。 |
 
 ## 3. 命令行调用
@@ -138,6 +138,10 @@ OUTPUT_DIR/
 ```bash
 conda env create -f environment.yml
 conda activate fnit
+
+# 本轮 100k 播种、八套 atlas 的实测采用此 allocator 配置。
+# 在启动 Python 进程前设置；两个比较版本使用相同配置。
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 BIDS_ROOT=/data/study_bids                   # 原始 BIDS 根目录，含 dataset_description.json
 OUTPUT_DIR=/data/derivatives/fnit_connectome # 本次结果与可恢复的预处理目录
@@ -154,6 +158,8 @@ fnit UKBConnectome_pipeline \
 省略 `--freesurfer-subject-dir` 时，命令读取 BIDS `anat/*_T1w.nii[.gz]` 并调用用户安装的官方 `recon-all -sd OUTPUT_DIR/freesurfer -s sub-01 -i T1w -all`。自动管理的 subject 记录原始 T1 SHA-256；仅同输入的部分失败可用不带 `-i` 的 `-all` 续跑。输入改变或既有 subject 没有对应记录时，使用新输出目录，或显式提供已完成的 `freesurfer_subject_dir`。用户需自行安装并许可 FreeSurfer。FNIT 后续计算仅读取其图像和表面。
 
 对照评测同时固定 `seed` 和 `eddy_gp_seed`。若只固定追踪种子，EDDY 选点仍可能改变校正 DWI，后续模型和流线也会随之改变。
+
+显存记录区分 PyTorch 已分配、预留与整个 GPU 父子进程占用；本轮采用十进制 20 GB 门槛。采样完整且三个峰值都低于门槛的运行才纳入合格汇总。具体参数与实际记录见[十例评测协议](raw_cohort_benchmark.md)，不能把某个追踪组件的显存代替完整原始 DWI 流程的峰值。
 
 多个 DWI run/session 时用 `--session`、`--run`、`--acquisition`、`--direction` 明确选片。DWI 需要 `.bval`、`.bvec`、JSON 中的 `PhaseEncodingDirection` 以及 `TotalReadoutTime` 或 `EffectiveEchoSpacing`。有反向相位编码 EPI/DWI 时通过 `B0FieldSource`/`B0FieldIdentifier` 或 `IntendedFor` 配对；没有反向图像时跳过 TOPUP，EDDY 无场图运行。侧车支持 BIDS 继承规则，约定依据 [BIDS MRI 规范](https://bids-specification.readthedocs.io/en/stable/modality-specific-files/magnetic-resonance-imaging-data.html)。
 
