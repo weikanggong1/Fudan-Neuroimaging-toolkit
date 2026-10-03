@@ -74,13 +74,30 @@ CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 python -u run_CON11_official_f
   --config configuration_v3.json --config-sha256 ACTUAL_CONFIGURATION_SHA256
 ```
 
+`launch_CON11_followon_v2.py`封存一次真实启动：`--source/--source-sha256`指定本调度器及摘要，`--config/--config-sha256`指定其配置及摘要，`--source-commit`记录实际提交，`--python`指定现有解释器，`--receipt`是必须不存在的启动JSON。它保存PID、UID、start ticks、完整argv、环境及工具SHA；旧目录与进程不参与启动。
+
+`audit_actual_CON11_followon_v1.py`只读审计实际完成结果：`--config/--config-sha256`与上项一致，`--launch/--launch-sha256`是原真实launch receipt及摘要。输出JSON到stdout；它读取现有结果和原矩阵reader，不运行solver。
+
+`retire_owned_idle_waiter_v2.py`仅用于本次空闲旧元数据waiter的来源切换：`--launch/--launch-sha256`绑定旧真实启动，`--status`绑定旧状态，`--replacement-config/--replacement-config-sha256`与`--replacement-source/--replacement-source-sha256`绑定新只读核验版本，`--receipt`是新增退出记录。它核验完整进程身份与没有数值child，随后只发送一次SIGTERM；实际执行记录见[actual_retirement_v2.json](actual_retirement_v2.json)。
+
 ## 4. 原软件调用
 
 复用原官方结构prepare。新complete仍使用官方FLIRT `-cost normmi -dof 6`、MRtrix transformconvert/transformcalc、八atlas最近邻mrtransform，具体完整argv由原worker报告保存。追踪保留iFOD2/ACT/GMWMI、`-seeds 100000 -select 0 -maxlength 250 -angle 45 -cutoff 0.1 -power 0.5 -samples 3 -trials 1000`，随后官方SIFT2、FA precise采样和endpoint/matrix构造。原入口及SHA见配置，不新增数值solver。
 
 ## 5. 本次状态与benchmark
 
-v3已经真实只读核验CON11模型：13项官方命令全部exit0、29个产物及原39源通过；结构27项准备复用。尚未声明新解剖完成或追踪完成。已有27项prepare、旧九例完成及39源/输入身份先做真实只读检查；实际launch与readback会独立保存。六例rawprep已发布的数值/脑图见[官方CPU预处理](../task_01/official_rawprep_v1/README.md)。末例新数值由root完成交接核验后聚合，不借旧九例时间替代。
+CON11 已完成独立官方链的末例衔接：模型13条命令成功；结构27项准备直接复用；新解剖完成阶段20项输出通过；五种子、八atlas的198条官方追踪及下游命令全部成功。2026-10-03 01:54:54 UTC，最终审计在 gpucw1 重读139个直接绑定文件、160个矩阵及40个节点表，SHA、节点语义、shape和原矩阵 reader 检查均通过。
+
+| 本次真实阶段 | wall（秒） | 范围 |
+| --- | ---: | --- |
+| 官方解剖完成 controller | 30.9793 | 原27项准备复用后的配准、八atlas与合同发布 |
+| 官方 reference worker | 491.8555 | 五次100k attempted seeds及全部下游；原追踪threads=0，下游threads=8 |
+| 官方 reference controller | 493.4548 | 上项含单例调度与退出读取 |
+| 最终只读审计 | 3.6303 | SHA及原矩阵 reader；未运行MRI solver |
+
+seed0–4分别接受19473、19539、19424、19313、19195条轨迹。八atlas节点数依次为 fs-aparc 84、aparc+Tian-S1 84、a2009s+Tian-S1 164、Glasser+S1 376、Glasser+S4 414、Schaefer200+S1 216、Schaefer500+S4 554、Schaefer1000+S4 1054。
+
+[compact_completed_handoff.json](compact_completed_handoff.json)给出真实model/anatomy/reference合同与原controller配置的完整路径和SHA；[actual_final_readonly_audit.json](actual_final_readonly_audit.json)保存逐文件和逐矩阵审计。模型、既有prepare、等待、此次完成和追踪时间分列，此表不表示连续cold raw pipeline时间。FNIT对官方的统计重复范围由十例总控按原验收规则汇总；此来源审计只确认实际执行与文件一致性。预处理数值与脑图见[官方CPU预处理](../task_01/official_rawprep_v1/README.md)。
 
 ## 6. 更新记录
 
@@ -91,6 +108,6 @@ v3已经真实只读核验CON11模型：13项官方命令全部exit0、29个产�
 
 ## 7. 原实现与参考
 
-- [原独立官方参考工具](../../../../../tools/reference/benchmark_connectome_raw_official.md)与[anatomy worker](../../../../../tools/reference/benchmark_connectome_anatomy_official.py)。
+- [原独立官方参考工具](../../../../tools/reference/benchmark_connectome_raw_official.md)与[anatomy worker](../../../../tools/reference/benchmark_connectome_anatomy_official.py)。
 - [UKB-connectomics](https://github.com/sina-mansour/UKB-connectomics)、[MRtrix3](https://github.com/MRtrix3/mrtrix3)、[FSL](https://fsl.fmrib.ox.ac.uk/fsl/docs/)。
 - [原始数据和许可](../task_01/README.md)。本次不复制官方程序、权重或MRI，不读取许可证内容。
