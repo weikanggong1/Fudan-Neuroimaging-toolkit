@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "task": "paired connectome input protection and MNI reference cache",
+  "tested_source_commit": "2dcbdda91f7fb5fd52e51adb378db74b43d89d72",
+  "base_commit": "bc6ad430201779d46716bfefb5822e15ee1653c4",
+  "source_binding": {
+    "remote_files_match_tested_commit": true,
+    "source_python_tree_sha256": "549294d46da81ec3bdb5b1c917d9b72c18ca8cbd45cc9cae70cedf27d3593c8d",
+    "source_python_file_count": 464,
+    "focused_code_sha256": {
+      "src/fnit/connectome/input_protection.py": "19818f2e4e9b5f5e2440bde430f36bdc2aa2a5cf21e14c5546580278b5b7c042",
+      "src/fnit/connectome/bids.py": "c75b3b68d0fbdc3a41d350fd9f590778634735b0aedf89833ded5f1acbae2ddf",
+      "src/fnit/connectome/paired_cli.py": "bf5b73870787f1dda6ce221121a062f9f925c5a771c6213b122bb00d6005fd0a",
+      "src/fnit/connectome/paired_pipeline.py": "f662b7d7bf8873ec8f8dd3e290bcf481982d7350137e1b2f238b0718df128947",
+      "src/fnit/connectome/pipeline.py": "8709c6d337b737bce1c8626bf6f1667155aa7f1c0fa395a1c457655e5a8f923e",
+      "src/fnit/connectome/checkpoints.py": "6584025922e8318106f3003a15c88095d95e7d96a7c3b6a87fee94d47c9c4d65",
+      "tests/connectome/test_input_namespace_protection.py": "fb3126ece2a95ab04207406048a2242db64c6269995ea42777a944381bb01771",
+      "tests/connectome/test_paired_mni_reference_cache.py": "03241a814770e5498c25a87cc636c602b43ce74c3e92b4a51393600bdf7833d3",
+      "tests/connectome/test_paired_e2e.py": "2e8d31e04782d1fd600740a831b2091c134eda6ab5342733fdb1fe2502d18a22",
+      "tests/connectome/test_paired_mni_grid.py": "25be1c2036122547e26aba07d9a91914bef87d3813ba14f6134ca37109991e97",
+      "tests/connectome/test_paired_nan_statistics.py": "9a955bbabaecee78a9ad990c3b0a49a23a7f57b01693c6cd0b94118f108b6221",
+      "tests/connectome/test_checkpoints.py": "e9aea2c72bdc2774adad2312230cfee2c24e8b9f3ed86fd9caf8281065c63616",
+      "tests/connectome/test_pipeline_checkpoints.py": "81be4791d7f35a3915ee9f3cd3791b865f9810bdf54c8dfc39bc5285dc5b3205",
+      "tests/connectome/test_bids.py": "7fe29d08e60bb8d9bdab9cf6354304357b718d3e4fa59a9a86d928f84ea54b88"
+    }
+  },
+  "execution": {
+    "device": "cpu",
+    "intra_threads": 4,
+    "interop_threads": 4,
+    "cpu_affinity": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": 4,
+    "MKL_NUM_THREADS": 4,
+    "OPENBLAS_NUM_THREADS": 4,
+    "tests": [
+      "tests/connectome/test_input_namespace_protection.py",
+      "tests/connectome/test_paired_mni_reference_cache.py",
+      "tests/connectome/test_paired_e2e.py",
+      "tests/connectome/test_paired_mni_grid.py",
+      "tests/connectome/test_paired_nan_statistics.py",
+      "tests/connectome/test_checkpoints.py",
+      "tests/connectome/test_pipeline_checkpoints.py",
+      "tests/connectome/test_bids.py"
+    ],
+    "command": "PYTHONPATH=./src CUDA_VISIBLE_DEVICES=\"\" OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 taskset -c 4-7 python -c \"import torch, pytest; torch.set_num_threads(4); torch.set_num_interop_threads(4); raise SystemExit(pytest.main(['-q', 'tests/connectome/test_input_namespace_protection.py', 'tests/connectome/test_paired_mni_reference_cache.py', 'tests/connectome/test_paired_e2e.py', 'tests/connectome/test_paired_mni_grid.py', 'tests/connectome/test_paired_nan_statistics.py', 'tests/connectome/test_checkpoints.py', 'tests/connectome/test_pipeline_checkpoints.py', 'tests/connectome/test_bids.py']))\"",
+    "runtime": {
+      "python": "3.11.16",
+      "torch": "2.5.1",
+      "numpy": "1.26.4",
+      "nibabel": "5.4.2",
+      "pytest": "9.1.1"
+    }
+  },
+  "result": {
+    "passed": 86,
+    "failed": 0,
+    "pytest_seconds": 10.93,
+    "log_file": "protection_mni_cpu_gate.log",
+    "log_sha256": "7874ed7090754dfbc34532820d51c58942119c9c56e5897feba0f9955f1bc05d"
+  },
+  "scope": [
+    "Write-before-preparation protection: templates, explicit T1, original BIDS inputs; normal repeated production symlink staging and manually supplied hardlink aliases preserve original files.",
+    "Existing corrected DWI and rotated bvec under previous preproc/eddy remain readonly reusable.",
+    "MNI reference content invalidates mapping; A-to-B-to-A restores exact cached matrices; mismatched target grid rejects cache hits.",
+    "MNI reference mutation during mapping, template restore, matrix computation or matrix restore cannot publish or return a stale result.",
+    "Focused CPU correctness regressions, including unit fixtures and mocked numerical core; not a new real-subject or MRtrix benchmark."
+  ],
+  "integration_notes": [
+    "Root merged repair as 0bb7f268. This receipt binds the actually tested pre-merge source 2dcbdda9, not later schema2 integration.",
+    "Schema2 stage markers now use unique exclusive temporary files. Root should remove obsolete raw/state.tmp, eddy/state.tmp and topup/state.tmp entries from input_protection inplace_output_paths; those fixed targets no longer correspond to actual writes."
+  ],
+  "public_data_boundary": "Only source-code checksums and test/runtime evidence are exported. No patient/neuroimaging input checksums, image paths, license data or credentials are included."
+}

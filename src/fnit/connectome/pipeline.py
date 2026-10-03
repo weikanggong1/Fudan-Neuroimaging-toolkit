@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import ast
+import hashlib
+import math
 from pathlib import Path
-from typing import Sequence
+from typing import Mapping, Sequence
 
 import nibabel as nib
 from nibabel.orientations import (
@@ -34,6 +37,9 @@ from .response import (
 from .sift2 import estimate_sift2_weights
 from .tcksample_precise import sample_streamline_mean_precise
 from .tracking import Tractogram, probabilistic_tractography
+from .checkpoints import (
+    CheckpointStore, StreamlinePoints, fingerprint_paths, tensor_fingerprint,
+)
 
 # Saved BIDS matrices must be recalculated after numerical fixes even when
 # the package version and original image paths remain unchanged.
@@ -196,6 +202,9 @@ class ConnectomeResult:
     dwi_to_t1_world: torch.Tensor
     nodes: tuple[ConnectomeNode, ...] | None = None
     atlas_results: dict[str, "AtlasResult"] | None = None
+    cache_status: dict | None = None
+    preparation_stages: dict | None = None
+    pair_results: dict | None = None
 
 
 @dataclass
@@ -209,11 +218,257 @@ class AtlasResult:
     nodes: tuple[ConnectomeNode, ...] | None
 
 
+def _checkpoint_policy(device: torch.device) -> dict:
+    """Record the actual compute policy without changing process settings."""
+    policy = dict(device=str(device), torch=str(torch.__version__),
+                  numpy=str(np.__version__), nibabel=str(nib.__version__),
+                  tf32_matmul=torch.backends.cuda.matmul.allow_tf32,
+                  tf32_cudnn=torch.backends.cudnn.allow_tf32,
+                  matmul_precision=torch.get_float32_matmul_precision(),
+                  deterministic_algorithms=torch.are_deterministic_algorithms_enabled(),
+                  cudnn_deterministic=torch.backends.cudnn.deterministic,
+                  cudnn_benchmark=torch.backends.cudnn.benchmark,
+                  cpu_threads=torch.get_num_threads(),
+                  cpu_interop_threads=torch.get_num_interop_threads(),
+                  autocast_cuda=torch.is_autocast_enabled("cuda"),
+                  autocast_cpu=torch.is_autocast_enabled("cpu"),
+                  autocast_cuda_dtype=str(torch.get_autocast_dtype("cuda")),
+                  autocast_cpu_dtype=str(torch.get_autocast_dtype("cpu")),
+                  cuda_runtime=torch.version.cuda,
+                  cudnn_version=torch.backends.cudnn.version())
+    if device.type == "cuda":
+        properties = torch.cuda.get_device_properties(device)
+        policy.update(gpu_name=properties.name,
+                      gpu_capability=[properties.major, properties.minor],
+                      gpu_uuid=str(getattr(properties, "uuid", "unavailable")))
+    return policy
+
+
+def _core_source_fingerprint(*, registration: bool) -> dict:
+    """Hash core workers, packaged numerical assets and its orchestration.
+
+    The atlas portion of this file is deliberately excluded. Its own keys
+    are managed by the template stage, so edits there do not rerun tracking.
+    """
+    package = Path(__file__).parent
+    names = ("anatomy", "bet", "response", "fod", "masks", "mtnormalise",
+             "tracking", "sift2", "sift2_fixels", "sift2_mapping",
+             "sift2_optimizer", "sift2_proc_mask", "tcksample_precise")
+    paths = {name: package / (name + ".py") for name in names}
+    paths.update(act_lut=package / "FreeSurfer2ACT_sgm_amyg_hipp_ids.tsv",
+                 sift2_sphere=package / "data/mrtrix_sift2_1281.npz",
+                 mask_components=package.parent / "synthseg_parc/postprocess.py")
+    if registration:
+        # Imported __pycache__ and other runtime files are not numerical source.
+        paths.update({"flirt_" + str(path.relative_to(package.parent / "flirt")):
+                      path for path in sorted((package.parent / "flirt").rglob("*.py"))})
+        paths.update(shared_sampling=package.parent / "_sampling_plan.py",
+                     shared_transforms=package.parent / "_transforms.py",
+                     shared_nibabel=package.parent / "_nib.py",
+                     shared_world_resampling=package.parent / "_world_resampling.py")
+    # AST source segments are stable when unrelated atlas orchestration changes.
+    text = Path(__file__).read_text()
+    functions = {node.name: ast.get_source_segment(text, node) for node in ast.parse(text).body
+                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))}
+    helper_names = ("_image", "_scalar_on_grid", "_gradients", "_bet_on_dwi_grid",
+                    "_compute_shared_core") + (("_registration",) if registration else ())
+    helpers = {name: hashlib.sha256(functions[name].encode()).hexdigest()
+               for name in helper_names}
+    return dict(files=fingerprint_paths(paths), orchestration=helpers)
+
+
+_CORE_ARRAYS = ("seg", "seg_affine", "five", "gmwmi", "transform", "five_affine",
+                "wm_sh", "fa", "mask", "weights", "dwi_affine")
+
+
+def _pack_core(core: dict) -> tuple[dict, dict]:
+    tracks = core["tracks"]
+    counts = np.asarray([len(path) for path in tracks.paths], dtype=np.int64)
+    offsets = np.r_[np.int64(0), np.cumsum(counts, dtype=np.int64)]
+    arrays = {name: core[name] for name in _CORE_ARRAYS}
+    arrays.update(track_points=StreamlinePoints(tracks.paths), track_offsets=offsets,
+                  track_endpoints=tracks.endpoints, track_lengths=tracks.lengths_mm,
+                  track_mean_fa=tracks.mean_fa, track_seeds=tracks.accepted_seeds)
+    metadata = dict(dwi_shape=list(core["dwi_shape"]), track_count=len(tracks.paths),
+                    seeds_attempted=tracks.seeds_attempted, format_revision=1)
+    return arrays, metadata
+
+
+def _restore_core(arrays: dict, metadata: dict, device: torch.device) -> dict:
+    """Validate stage structure before any transfer; retain all numeric values."""
+    expected = {*_CORE_ARRAYS, "track_points", "track_offsets", "track_endpoints",
+                "track_lengths", "track_mean_fa", "track_seeds"}
+    if set(arrays) != expected or metadata["format_revision"] != 1:
+        raise ValueError("incomplete shared-core checkpoint")
+    shape = tuple(metadata["dwi_shape"])
+    n = metadata["track_count"]
+    if (len(shape) != 3 or any(type(x) is not int or x <= 0 for x in shape)
+            or type(n) is not int or n <= 0 or type(metadata["seeds_attempted"]) is not int
+            or metadata["seeds_attempted"] < n):
+        raise ValueError("invalid shared-core metadata")
+    offsets, points = arrays["track_offsets"], arrays["track_points"]
+    if (offsets.dtype != torch.int64 or offsets.shape != (n + 1,)
+            or points.ndim != 2 or points.shape[1] != 3
+            or offsets[0] != 0 or offsets[-1] != len(points)
+            or not bool(((offsets[1:] - offsets[:-1]) >= 2).all())):
+        raise ValueError("invalid packed streamline offsets/points")
+    for name, expected_shape in (("track_endpoints", (n, 2, 3)),
+                                 ("track_seeds", (n, 3)), ("track_lengths", (n,)),
+                                 ("track_mean_fa", (n,)), ("weights", (n,)),
+                                 ("fa", shape), ("mask", shape), ("wm_sh", (*shape, 45))):
+        if tuple(arrays[name].shape) != expected_shape:
+            raise ValueError(f"invalid shared-core shape: {name}")
+    seg_shape = tuple(arrays["seg"].shape)
+    if (len(seg_shape) != 3 or tuple(arrays["five"].shape) != (*seg_shape, 5)
+            or tuple(arrays["gmwmi"].shape) != seg_shape):
+        raise ValueError("invalid shared-core anatomy grid")
+    for name in ("seg_affine", "transform", "five_affine", "dwi_affine"):
+        if arrays[name].shape != (4, 4) or arrays[name].dtype != torch.float64:
+            raise ValueError(f"invalid shared-core affine: {name}")
+    if arrays["weights"].dtype != torch.float64 or arrays["mask"].dtype != torch.bool:
+        raise ValueError("invalid shared-core weight/mask dtype")
+    for name in ("seg", "five", "gmwmi", "wm_sh", "fa", "track_points",
+                 "track_endpoints", "track_lengths", "track_mean_fa", "track_seeds"):
+        if arrays[name].dtype != torch.float32:
+            raise ValueError(f"invalid shared-core field dtype: {name}")
+    # No isfinite gate on FA/statistics: preserve legitimate NaN/Inf diagnostics.
+    boundary = offsets.tolist()
+    core = {name: arrays[name].to(device) for name in _CORE_ARRAYS}
+    points = points.to(device)
+    core["tracks"] = Tractogram(
+        tuple(points[begin:end] for begin, end in zip(boundary[:-1], boundary[1:])),
+        arrays["track_endpoints"].to(device), arrays["track_lengths"].to(device),
+        arrays["track_mean_fa"].to(device), metadata["seeds_attempted"],
+        arrays["track_seeds"].to(device),
+    )
+    core["dwi_shape"] = shape
+    return core
+
+
+def _shared_core_checkpoint(options: dict, *, checkpoint_dir, overwrite: bool):
+    if checkpoint_dir is None:
+        return _compute_shared_core(**options), {"status": "completed", "enabled": False}, None
+    paths = {name: options[name] for name in (
+        "dwi", "bvals", "bvecs", "t1_brain", "t1_segmentation", "brain_mask",
+        "response_mask", "fod_mask", "normalise_mask", "fa_map")}
+    inputs = fingerprint_paths(paths)
+    parameters = dict(n_seeds=options["n_seeds"], seed=options["seed"],
+                      compile_arc=options["compile_arc"],
+                      shell_bvals=tensor_fingerprint(options["shell_bvals"]),
+                      dwi_to_t1_world=tensor_fingerprint(options["dwi_to_t1_world"]))
+    device = options["device"]
+    policy = _checkpoint_policy(device)
+    source = _core_source_fingerprint(registration=options["dwi_to_t1_world"] is None)
+    store = CheckpointStore(Path(checkpoint_dir) / "shared", numerical_revision=CONNECTOME_NUMERICAL_REVISION,
+                            device_policy=policy, source_fingerprint=source, overwrite=overwrite)
+    key = store.make_key("core", inputs=inputs, parameters=parameters)
+    restored = store.load("core", key, device="cpu")
+    if restored is not None:
+        try:
+            core = _restore_core(*restored, device)
+        except (ValueError, KeyError, TypeError) as exc:
+            store.events.append(dict(stage="core", key=key, status="miss",
+                                     reason=f"invalid_core_schema: {exc}"))
+        else:
+            # Inputs must still match after restoration as well as before it.
+            if (fingerprint_paths(paths) != inputs or _checkpoint_policy(device) != policy
+                    or _core_source_fingerprint(registration=options["dwi_to_t1_world"] is None) != source):
+                raise RuntimeError("shared-core input/source/device policy changed during restoration")
+            return core, dict(status="skipped", enabled=True, key=key), store
+    core = _compute_shared_core(**options)
+    def validate_publication():
+        if (fingerprint_paths(paths) != inputs or _checkpoint_policy(device) != policy
+                or _core_source_fingerprint(registration=options["dwi_to_t1_world"] is None) != source):
+            raise RuntimeError("shared-core input/source/device policy changed during computation; not publishing")
+    validate_publication()
+    arrays, metadata = _pack_core(core)
+    store.publish("core", key, arrays=arrays, metadata=metadata,
+                  before_publish=validate_publication)
+    return core, dict(status="completed", enabled=True, key=key), store
+
+
+def _compute_shared_core(*, dwi, bvals, bvecs, t1_brain, t1_segmentation,
+                         brain_mask, shell_bvals, response_mask, fod_mask,
+                         normalise_mask, fa_map, dwi_to_t1_world, n_seeds,
+                         seed, compile_arc, device):
+    """Run the unchanged numerical chain through precise per-track FA."""
+    reference = nib.load(str(dwi))
+    dwi_data, dwi_affine = _image(dwi, device)
+    if dwi_data.ndim != 4:
+        raise ValueError("DWI must have shape [X,Y,Z,N]")
+    bval, bvec = _gradients(bvals, bvecs, dwi_data.shape[-1],
+                            dwi_affine, device)
+    gradient = torch.cat((bvec.double(), bval.double()[:, None]), dim=1)
+    if shell_bvals is None:
+        _, _, shells, _ = mrtrix_shell_centres(gradient)
+    else:
+        shells = torch.as_tensor(shell_bvals, device=device, dtype=torch.float64)
+    if shells.ndim != 1 or len(shells) < 2 or not bool((shells[1:] > shells[:-1]).all()):
+        raise ValueError("shell_bvals must be ordered MRtrix shell centers")
+    mean_b0 = mean_bzero(dwi=dwi_data, bvalues=bval)
+    if brain_mask is None:
+        mask = _bet_on_dwi_grid(mean_b0, reference, device)
+    else:
+        mask = _scalar_on_grid(brain_mask, reference, device, binary=True)
+    response_selection = (dwi2mask_legacy(dwi_data, gradient[:, 3], shells) if response_mask is None else
+                          _scalar_on_grid(response_mask, reference, device, binary=True))
+    fod_selection = (maskfilter_six_connected(mask, "dilate") if fod_mask is None else
+                     _scalar_on_grid(fod_mask, reference, device, binary=True))
+    norm_selection = (maskfilter_six_connected(mask, "erode") if normalise_mask is None else
+                      _scalar_on_grid(normalise_mask, reference, device, binary=True))
+    if fa_map is None:
+        fa, _ = fit_mrtrix_dhollander_tensor(dwi_data, gradient, mask)
+    else:
+        fa = _scalar_on_grid(fa_map, reference, device)
+    seg, seg_affine = _image(t1_segmentation, device)
+    if seg.ndim != 3:
+        raise ValueError("FreeSurfer aparc+aseg must be a 3D label image")
+    five = freesurfer_five_tissue(seg)
+    gmwmi = gmwmi_from_five_tissue(five)
+    if dwi_to_t1_world is None:
+        b0_brain = mean_b0 * mask
+        transform = _registration(b0_brain, dwi_affine, t1_brain, device)
+    else:
+        transform = torch.as_tensor(dwi_to_t1_world, device=device,
+                                     dtype=torch.float64)
+        if transform.shape != (4, 4):
+            raise ValueError("dwi_to_t1_world must be 4x4")
+    five_affine = torch.linalg.inv(transform) @ seg_affine
+    shells, wm_response, gm_response, csf_response, _ = estimate_mrtrix_dhollander(
+        dwi_data, gradient, shells, response_selection,
+    )
+    wm_raw, gm_raw, csf_raw = fit_mrtrix_msmt_csd(
+        dwi_data, gradient, shells, wm_response, gm_response, csf_response,
+        fod_selection,
+    )
+    wm_sh = normalise_mrtrix_three_tissue(
+        wm_raw, gm_raw, csf_raw, norm_selection, dwi_affine,
+    ).wm
+    tracks = probabilistic_tractography(
+        wm_sh, dwi_affine, five, five_affine, gmwmi,
+        n_seeds=n_seeds, seed=seed,
+        compile_arc=compile_arc,
+        five_tissue_spacing_mm=nib.load(str(t1_segmentation)).header.get_zooms()[:3],
+    )
+    if not tracks.paths:
+        raise RuntimeError("ACT tracking accepted no streamlines")
+    step_size_mm = float(torch.linalg.vector_norm(dwi_affine[:3, :3], dim=0).prod().pow(1 / 3)) / 2
+    weights = estimate_sift2_weights(
+        tracks.paths, wm_sh, dwi_affine, five, five_affine,
+        step_size_mm=step_size_mm,
+    )
+    tracks.mean_fa = sample_streamline_mean_precise(tracks.paths, fa, dwi_affine)
+    return dict(seg=seg, seg_affine=seg_affine, five=five, gmwmi=gmwmi,
+                transform=transform, five_affine=five_affine, wm_sh=wm_sh,
+                fa=fa, mask=mask, tracks=tracks, weights=weights,
+                dwi_affine=dwi_affine, dwi_shape=tuple(dwi_data.shape[:3]))
+
+
 class UKBConnectome_pipeline:
     """Compute UKB-style connectomes from corrected DWI and FreeSurfer T1.
 
-    The paired T1 segmentation must be official ``recon-all`` aparc+aseg;
-    FreeSurfer itself remains the user's established external stage. PyTorch
+    The paired T1 segmentation uses completed FreeSurfer-format ``recon-all``
+    aparc+aseg. ``run_bids`` selects or reuses its reconstruction backend. PyTorch
     computes response, FOD, mtnormalise, 5TT/GMWMI, ACT tracking, SIFT2,
     precise per-track FA and the four matrices. A completed FreeSurfer subject
     directory supplies T1 and one or more atlas choices; explicit T1/atlas inputs
@@ -248,6 +503,9 @@ class UKBConnectome_pipeline:
         corrected_dwi: str | Path | None = None,
         rotated_bvecs: str | Path | None = None,
         eddy_gp_seed: int | None = None,
+        recon_backend: str = "auto",
+        recon_options: Mapping | None = None,
+        checkpoint_dir: str | Path | None = None,
         overwrite: bool = False,
         **connectome_options,
     ) -> ConnectomeResult:
@@ -258,8 +516,25 @@ class UKBConnectome_pipeline:
         The Python result remains in memory; use the CLI to write matrices.
         ``eddy_gp_seed`` fixes EDDY's GP voxel sampling independently of the
         tractography ``seed``. ``None`` retains time-based EDDY sampling.
+        ``recon_backend``/``recon_options`` are passed to BIDS preparation.
+        Shared reconstruction checkpoints default to ``output_dir/checkpoints``;
+        template changes reuse that core. ``overwrite=True`` recomputes stages
+        into new generations and preserves earlier checkpoint generations.
         """
         from .bids import prepare_bids_connectome
+        from .template_inputs import preflight_template_pairs, validate_readonly_subject_outputs
+        from .input_protection import template_readonly_paths
+        if connectome_options.get("template_pairs") is not None:
+            connectome_options["template_pairs"] = preflight_template_pairs(
+                connectome_options["template_pairs"], subject_dir=freesurfer_subject_dir)
+        validate_readonly_subject_outputs(
+            freesurfer_subject_dir, output_dir=output_dir,
+            checkpoint_dir=checkpoint_dir or Path(output_dir) / "checkpoints")
+        readonly = list(template_readonly_paths(connectome_options.get("template_pairs"),
+                                                freesurfer_subject_dir))
+        readonly.extend(value for name in ("brain_mask", "response_mask", "fod_mask", "normalise_mask",
+                                            "fa_map", "mni_template", "mni_to_t1_transform", "synthmorph_weights")
+                        if isinstance(value := connectome_options.get(name), (str, Path)))
 
         selected = prepare_bids_connectome(
             bids_root, output_dir, subject=subject, session=session, run=run,
@@ -267,13 +542,20 @@ class UKBConnectome_pipeline:
             freesurfer_subject_dir=freesurfer_subject_dir,
             corrected_dwi=corrected_dwi, rotated_bvecs=rotated_bvecs,
             eddy_gp_seed=eddy_gp_seed,
+            recon_backend=recon_backend, recon_options=recon_options,
             device=str(self.device), overwrite=overwrite,
+            readonly_inputs=tuple(readonly),
         )
-        return self(
+        result = self(
             selected.dwi, selected.bvals, selected.bvecs,
             freesurfer_subject_dir=selected.freesurfer_subject_dir,
-            atlas=atlas, n_seeds=n_seeds, **connectome_options,
+            atlas=atlas, n_seeds=n_seeds,
+            checkpoint_dir=(Path(output_dir) / "checkpoints" if checkpoint_dir is None else checkpoint_dir),
+            overwrite=overwrite, **connectome_options,
         )
+        if hasattr(selected, "stages"):
+            result.preparation_stages = selected.stages
+        return result
 
     @torch.inference_mode()
     def __call__(
@@ -302,6 +584,11 @@ class UKBConnectome_pipeline:
         dwi_to_t1_world: np.ndarray | torch.Tensor | None = None,
         seed: int = 0,
         compile_arc: bool = False,
+        template_pairs: Sequence | None = None,
+        assignment_radius: float = 4.0,
+        mni_to_t1_transform=None,
+        checkpoint_dir: str | Path | None = None,
+        overwrite: bool = False,
     ) -> ConnectomeResult:
         """Run one subject; all images/gradients must describe the same scan.
 
@@ -341,6 +628,13 @@ class UKBConnectome_pipeline:
         seeds the PyTorch generator, whose sequence differs from MRtrix.
         ``compile_arc`` compiles the CUDA iFOD2 probability kernel on first
         use, with startup cost but lower steady propagation time.
+        ``checkpoint_dir=None`` disables core checkpoints for this direct call;
+        a directory enables SHA-verified, atomic stage reuse. ``overwrite=True``
+        bypasses valid checkpoints while preserving their old generations.
+        Template choices, MNI template mapping and ``assignment_radius`` (4 mm
+        by default) do not enter the shared-core key. ``template_pairs`` adds
+        paired matrices through the separate template builder; a supplied
+        ``mni_to_t1_transform`` is consumed there, not by DWI registration.
 
         Output ``ConnectomeResult.matrices`` describes the first selected atlas;
         ``atlas_results[name]`` holds each atlas without rerunning tracking.
@@ -360,6 +654,8 @@ class UKBConnectome_pipeline:
             raise ValueError("atlas must contain one or more distinct names")
         if n_seeds < 1:
             raise ValueError("n_seeds must be positive")
+        if not math.isfinite(assignment_radius) or assignment_radius <= 0:
+            raise ValueError("assignment_radius must be finite and positive")
         if freesurfer_subject_dir is not None:
             if any(value is not None for value in (t1_brain, t1_segmentation, atlas_dwi)):
                 raise ValueError("freesurfer_subject_dir cannot be combined with explicit T1/atlas inputs")
@@ -384,72 +680,27 @@ class UKBConnectome_pipeline:
             raise ValueError("provide freesurfer_subject_dir or all of t1_brain, t1_segmentation, atlas_dwi")
         elif atlas_names != ("fs-aparc",):
             raise ValueError("a named atlas requires freesurfer_subject_dir")
-        reference = nib.load(str(dwi))
-        dwi_data, dwi_affine = _image(dwi, self.device)
-        if dwi_data.ndim != 4:
-            raise ValueError("DWI must have shape [X,Y,Z,N]")
-        bval, bvec = _gradients(bvals, bvecs, dwi_data.shape[-1],
-                                dwi_affine, self.device)
-        gradient = torch.cat((bvec.double(), bval.double()[:, None]), dim=1)
-        if shell_bvals is None:
-            _, _, shells, _ = mrtrix_shell_centres(gradient)
-        else:
-            shells = torch.as_tensor(shell_bvals, device=self.device, dtype=torch.float64)
-        if shells.ndim != 1 or len(shells) < 2 or not bool((shells[1:] > shells[:-1]).all()):
-            raise ValueError("shell_bvals must be ordered MRtrix shell centers")
-        mean_b0 = mean_bzero(dwi=dwi_data, bvalues=bval)
-        if brain_mask is None:
-            mask = _bet_on_dwi_grid(mean_b0, reference, self.device)
-        else:
-            mask = _scalar_on_grid(brain_mask, reference, self.device, binary=True)
-        response_selection = (dwi2mask_legacy(dwi_data, gradient[:, 3], shells) if response_mask is None else
-                              _scalar_on_grid(response_mask, reference, self.device, binary=True))
-        fod_selection = (maskfilter_six_connected(mask, "dilate") if fod_mask is None else
-                         _scalar_on_grid(fod_mask, reference, self.device, binary=True))
-        norm_selection = (maskfilter_six_connected(mask, "erode") if normalise_mask is None else
-                          _scalar_on_grid(normalise_mask, reference, self.device, binary=True))
-        if fa_map is None:
-            fa, _ = fit_mrtrix_dhollander_tensor(dwi_data, gradient, mask)
-        else:
-            fa = _scalar_on_grid(fa_map, reference, self.device)
-        seg, seg_affine = _image(t1_segmentation, self.device)
-        if seg.ndim != 3:
-            raise ValueError("FreeSurfer aparc+aseg must be a 3D label image")
-        five = freesurfer_five_tissue(seg)
-        gmwmi = gmwmi_from_five_tissue(five)
-        if dwi_to_t1_world is None:
-            b0_brain = mean_b0 * mask
-            transform = _registration(b0_brain, dwi_affine, t1_brain, self.device)
-        else:
-            transform = torch.as_tensor(dwi_to_t1_world, device=self.device,
-                                         dtype=torch.float64)
-            if transform.shape != (4, 4):
-                raise ValueError("dwi_to_t1_world must be 4x4")
-        five_affine = torch.linalg.inv(transform) @ seg_affine
-        shells, wm_response, gm_response, csf_response, _ = estimate_mrtrix_dhollander(
-            dwi_data, gradient, shells, response_selection,
+        from .template_inputs import preflight_template_pairs, validate_readonly_subject_outputs
+        if template_pairs is not None:
+            template_pairs = preflight_template_pairs(template_pairs, subject_dir=freesurfer_subject_dir)
+        validate_readonly_subject_outputs(freesurfer_subject_dir, checkpoint_dir=checkpoint_dir)
+        core_options = dict(
+            dwi=dwi, bvals=bvals, bvecs=bvecs, t1_brain=t1_brain,
+            t1_segmentation=t1_segmentation, brain_mask=brain_mask,
+            shell_bvals=shell_bvals, response_mask=response_mask,
+            fod_mask=fod_mask, normalise_mask=normalise_mask, fa_map=fa_map,
+            dwi_to_t1_world=dwi_to_t1_world, n_seeds=n_seeds,
+            seed=seed, compile_arc=compile_arc, device=self.device,
         )
-        wm_raw, gm_raw, csf_raw = fit_mrtrix_msmt_csd(
-            dwi_data, gradient, shells, wm_response, gm_response, csf_response,
-            fod_selection,
+        core, core_status, store = _shared_core_checkpoint(
+            core_options, checkpoint_dir=checkpoint_dir, overwrite=overwrite,
         )
-        wm_sh = normalise_mrtrix_three_tissue(
-            wm_raw, gm_raw, csf_raw, norm_selection, dwi_affine,
-        ).wm
-        tracks = probabilistic_tractography(
-            wm_sh, dwi_affine, five, five_affine, gmwmi,
-            n_seeds=n_seeds, seed=seed,
-            compile_arc=compile_arc,
-            five_tissue_spacing_mm=nib.load(str(t1_segmentation)).header.get_zooms()[:3],
-        )
-        if not tracks.paths:
-            raise RuntimeError("ACT tracking accepted no streamlines")
-        step_size_mm = float(torch.linalg.vector_norm(dwi_affine[:3, :3], dim=0).prod().pow(1 / 3)) / 2
-        weights = estimate_sift2_weights(
-            tracks.paths, wm_sh, dwi_affine, five, five_affine,
-            step_size_mm=step_size_mm,
-        )
-        tracks.mean_fa = sample_streamline_mean_precise(tracks.paths, fa, dwi_affine)
+        seg, seg_affine = core["seg"], core["seg_affine"]
+        five, gmwmi = core["five"], core["gmwmi"]
+        transform, five_affine = core["transform"], core["five_affine"]
+        wm_sh, fa, mask = core["wm_sh"], core["fa"], core["mask"]
+        tracks, weights = core["tracks"], core["weights"]
+        dwi_affine, dwi_shape = core["dwi_affine"], core["dwi_shape"]
         atlas_results = {}
         tian_transform = None
         # These images depend on this subject and template choice, not on the
@@ -532,7 +783,7 @@ class UKBConnectome_pipeline:
                     )
                 atlas_data = resample_labels_nearest(
                     labels=atlas_t1, source_affine=atlas_source_affine,
-                    target_shape=tuple(dwi_data.shape[:3]), target_affine=dwi_affine,
+                    target_shape=dwi_shape, target_affine=dwi_affine,
                     target_to_source_world=transform,
                 )
                 atlas_affine = dwi_affine
@@ -551,16 +802,32 @@ class UKBConnectome_pipeline:
                 tracks.endpoints, atlas_data, atlas_affine, weights=weights,
                 lengths=tracks.lengths_mm, fa=tracks.mean_fa,
                 node_count=len(nodes) if nodes is not None else None,
+                radius=assignment_radius,
             )
             atlas_results[atlas_name] = AtlasResult(
                 matrices, region_labels, atlas_data, atlas_affine, nodes,
             )
         first = atlas_results[atlas_names[0]]
-        return ConnectomeResult(
+        result = ConnectomeResult(
             first.matrices, first.region_labels, first.atlas, five, five_affine, gmwmi,
             wm_sh, fa, mask, tracks, weights, dwi_affine, first.atlas_affine,
             transform, first.nodes, atlas_results,
         )
+        result.cache_status = dict(core=core_status["status"],
+                                   core_key=core_status.get("key"),
+                                   enabled=core_status["enabled"],
+                                   atlas={name: "completed" for name in atlas_names},
+                                   events=[] if store is None else store.events)
+        if template_pairs is not None:
+            from .paired_pipeline import build_template_pairs
+            result.pair_results = build_template_pairs(
+                result, template_pairs, subject_dir=freesurfer_subject_dir,
+                t1_reference_path=t1_brain, mni_to_t1_transform=mni_to_t1_transform,
+                mni_template=mni_template, synthmorph_weights=synthmorph_weights,
+                checkpoint_dir=checkpoint_dir, overwrite=overwrite,
+                assignment_radius=assignment_radius, device=str(self.device),
+            )
+        return result
 
 
 UKBConnectome = UKBConnectome_pipeline

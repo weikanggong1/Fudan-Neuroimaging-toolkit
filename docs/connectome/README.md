@@ -1,229 +1,270 @@
-# UKBConnectome_pipeline：从 BIDS DWI/T1 到结构连接矩阵
+# UKBConnectome_pipeline：BIDS DWI/T1 与用户模板的结构连接
 
-[返回首页](../../README.md) · [源码](../../src/fnit/connectome/) · [本轮精度优化与验收状态](ACCURACY_OPTIMIZATION_20261003.md) · [既有逐阶段验证](../../validation/connectome/ds004666/README.md)
+[返回首页](../../README.md) · [recon 三种来源](recon_backends.md) · [模板输入与配对](template_pairs.md) · [阶段 checkpoint](checkpoints.md) · [本轮评测范围](../../validation/connectome/paired_pipeline_20261003/README.md)
 
-输入原始 BIDS DWI、可选反向相位编码图像和配对 T1w，流程依次运行 PyTorch TOPUP、SynthStrip 脑掩膜、PyTorch EDDY、官方 FreeSurfer `recon-all`、响应估计、MSMT-CSD、ACT/iFOD2 追踪、SIFT2 和 atlas 端点赋值。已有完整 FreeSurfer subject 或已校正 DWI 时跳过相应阶段。多个 atlas 共用一次追踪和 SIFT2，各输出 count、SIFT2 FBC、mean length、mean FA 四张矩阵。
+当前接口接受原始 BIDS DWI/T1w，或已有校正 DWI 与旋转梯度；解剖可以来自用户已完成的 subject、显式选择的官方 FreeSurfer，或 FNIT recon-all。一次全脑 ACT 追踪与 SIFT2 可服务一对或多对用户模板，输出 surface–surface（SS）、volume–volume（VV）、surface–volume（SV）的四种连接矩阵。
 
-验证记录分为前轮数据流加速和本轮精度优化。前轮十例结果已完成，raw-DWI CLI 中位数 643.623 s、官方重复范围通过率 57.96% 均对应前轮实际版本。本轮从 `7af34e6d` 开始，十二次 raw 调用与十例比较已完成：矩阵 1388/2400、轨迹分布 85/250，十例整体仍未匹配。CON09/10 独立 NVML 补测采样健康，原监测缺口和补测中的 SIFT2 权重末位差分别保留，见第 5 节及[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)。
+默认 `recon_backend="auto"`：有 `freesurfer_subject_dir` 时读取该目录，没有时选择 FNIT。FNIT 重建必须给出权重与结构像资源；缺失时明确报错。官方重建须显式选择 `freesurfer`。当前接口、组件测试、历史科学对照和本轮整链评测分别记录；第 5 节保留历史版本的精度结论，模板和缓存接入不表示已匹配原 UKB 全链。
 
 ## 1. 功能和流程
 
-以同一次扫描的 BIDS 元数据确定 DWI、梯度和可选反向相位编码图像；已提供校正 DWI 与旋转 bvec 时直接使用。T1w 的结构重建采用已完成的官方 `recon-all` subject，缺失时才运行官方命令。FNIT 从这些输入计算 DWI 模型、5TT/GMWMI、配准和追踪；先完成**一次全脑追踪与 SIFT2**，再让所选的一套或多套 atlas 分别给同一批流线端点赋值。atlas 的节点编号以各自的 `nodes.tsv` 为准。
+先完成或验证解剖重建，再进入 DWI GPU 阶段，避免父进程的 EDDY allocator 与 FNIT 重建子进程同时驻留。DWI 准备根据已有校正输入、反向相位编码数据和阶段状态选择路径。共享核心的内容 checkpoint 独立于模板；换模板不重新播种，换半径只使相应矩阵失效。
 
 ```mermaid
 flowchart TD
-    B["BIDS DWI、bval/bvec、JSON"] --> SEL["选定受试者、session 和 run"]
-    SEL --> CORR{"已提供校正 DWI 与旋转 bvec？"}
-    CORR -- 是 --> DWI["校正 DWI 与旋转梯度"]
-    CORR -- 否 --> REV{"有配对的反向相位编码图像？"}
-    REV -- 有 --> TOP["PyTorch TOPUP"]
-    TOP -- 校正 b0 --> STRIP["PyTorch SynthStrip：EDDY 脑掩膜"]
-    REV -- 无 --> APB0["原 AP 的 b0 均值"] --> STRIP
-    TOP -- 场系数 --> EDDY["PyTorch EDDY"]
-    STRIP --> EDDY
-    EDDY --> DWI
-
-    T1["BIDS T1w 或已完成的 subject"] --> FS{"recon-all 已完成？"}
-    FS -- 否 --> RECON["官方 FreeSurfer recon-all"] --> ANAT["读取分割、表面与注释"]
-    FS -- 是 --> ANAT
-
-    DWI --> B0["mean b0、脑掩膜"] --> REG["TorchFLIRT：DWI 到 T1"]
-    DWI --> FOD["Dhollander → MSMT-CSD → mtnormalise"]
-    DWI --> FA["张量拟合 → FA"]
-    ANAT --> TISSUE["5TT 与 GMWMI"]
-    ANAT --> ATL["构建所选 1..N 套 atlas"]
-    REG --> TISSUE_ALIGN["将 5TT/GMWMI 对齐 DWI 世界"]
-    TISSUE --> TISSUE_ALIGN
-    REG --> ATLAS_DWI["每套 atlas 映射至 DWI"]
-    ATL --> ATLAS_DWI
-
-    FOD --> TRACK["一次 iFOD2 + ACT 追踪"]
-    TISSUE_ALIGN --> TRACK
-    TRACK --> SIFT["一次 SIFT2 估计"]
-    FOD --> SIFT
-    TISSUE_ALIGN --> SIFT
-    TRACK --> METRIC["逐流线长度与平均 FA"]
-    FA --> METRIC
-    TRACK --> MATRIX["每套 atlas 分别做端点赋值与矩阵汇总"]
-    SIFT --> MATRIX
-    METRIC --> MATRIX
-    ATLAS_DWI --> MATRIX
-    MATRIX --> OUT["每套 atlas：nodes.tsv、count、FBC、mean length、mean FA"]
-    classDef default fill:#ffffff,stroke:#000000,color:#000000;
+    B[标准 BIDS DWI / 梯度 / JSON / 可选 T1w] --> SEL[选择 subject / session / run]
+    SEL --> CHOOSE{解剖来源}
+    U[已完成的官方或 FNIT subject] --> CHOOSE
+    CHOOSE -->|provided 或 auto有subject| READ[只读检查图像 / 表面 / 几何]
+    CHOOSE -->|显式 freesurfer| FS[官方 recon-all]
+    CHOOSE -->|fnit 或 auto无subject| FNIT[FNIT recon-all / 必填资源]
+    FS --> DONE[成功后验证并发布解剖完成状态]
+    FNIT --> DONE
+    READ --> PREP[解剖完成后准备 DWI]
+    DONE --> PREP
+    PREP --> C{已提供 corrected DWI + rotated bvec?}
+    C -->|是| D[使用已校正 DWI / 跳过 TOPUP EDDY]
+    C -->|否| REV{有匹配反向相位编码图像?}
+    REV -->|有| TOP[TOPUP 或有效准备状态]
+    REV -->|无| B0[原始 b0 均值 / 无场图]
+    TOP --> MASK[SynthStrip EDDY 脑掩膜]
+    B0 --> MASK
+    TOP --> EDDY[EDDY 或有效准备状态]
+    MASK --> EDDY
+    EDDY --> D
+    D --> HASH{共享核心内容 SHA / 参数 / 数值版本一致?}
+    HASH -->|是| CORE[恢复 FA FOD 5TT GMWMI / 配准 / 全脑轨迹 / SIFT2]
+    HASH -->|否| RUN[同一数值核心重新计算 / 原子发布 checkpoint]
+    RUN --> CORE
+    X[用户第一套与第二套模板 / 每对定义行与列] --> T[模板独立映射至 DWI / 连续 ROI 编号]
+    CORE --> T
+    T --> M[SS / VV / SV 两方向端点赋值]
+    CORE --> M
+    R[assignment_radius / 默认4 mm] --> M
+    M --> O[每对 K_first × K_second / count FBC length FA]
 ```
 
-Tian 路径还需将 MNI 模板标签映射到个体 T1：默认使用 FNIT SynthMorph，提供 `--tian-fnirt-coeff` 时使用已有变形系数；这一分支只影响相应 atlas 的构建。图中官方 `recon-all` 是用户已许可的结构像前置程序，其他计算由 FNIT 完成；Glasser 模板目前另有下文说明的 Workbench 依赖。
+这里的共享核心是一个完整阶段，从 mean b0/mask/tensor FA 到 response、MSMT-CSD、mtnormalise、5TT/GMWMI、DWI→T1、iFOD2/ACT、SIFT2 和 precise FA sampling。它暂不逐子算子恢复。用户模板准备与矩阵分别缓存；兼容的命名 atlas 接口仍可用，旧 `atlas_results` 在调用中构建。
+
+播种、传播、ACT 约束与尝试次数由全脑共享核心确定。两套模板配对在追踪完成后筛选已接受流线的端点，不触发 ROI 播种、waypoint 约束或重新追踪。端点分别在两张模板内做默认 4 mm 严格径向搜索，按 `(A(p0),B(p1))` 与 `(A(p1),B(p0))` 汇总，同一单元只计一次。跨模板矩阵是 `K_first×K_second`，不强制对称或清零对角；交换两张模板得到转置。相同 `TemplateSpec` 使用原 square builder，保持已有的对称矩阵和 self-connections。
 
 ## 2. Python 调用、输入与输出
 
 ```python
-from pathlib import Path
 from fnit.connectome import UKBConnectome_pipeline
+from fnit.connectome.template_inputs import TemplatePair, TemplateSpec
 
-bids_root = Path("/data/study_bids")                  # 标准 BIDS DWI、梯度和 JSON
-output_directory = Path("/data/derivatives/fnit_sc")  # 可恢复的预处理文件
-freesurfer_subject = Path("/data/freesurfer/sub-01")  # 已完成的 recon-all subject
+surface_a = TemplateSpec(
+    name="cortex_A", kind="surface", space="native",
+    left_path="templates/lh.A.annot",       # 同一个 subject 左半球注释
+    right_path="templates/rh.A.annot",      # 同一个 subject 右半球注释
+    nodes_tsv="templates/A_nodes.tsv",      # 跨被试固定行节点定义
+)
+volume_b = TemplateSpec(
+    name="subcortex_B", kind="volume", space="t1",
+    volume_path="templates/B_t1.nii.gz",    # subject brain 的 scanner RAS
+    nodes_tsv="templates/B_nodes.tsv",      # 跨被试固定列顺序与缺失节点
+)
+pairs = [TemplatePair(name="cortex_to_subcortex", first=surface_a, second=volume_b)]
 
 pipeline = UKBConnectome_pipeline(device="cuda:0")
 result = pipeline.run_bids(
-    bids_root=bids_root,
-    output_dir=output_directory,
-    subject="01",
-    freesurfer_subject_dir=freesurfer_subject,
-    atlas=("fs-aparc", "fs-aparc-a2009s"),            # 两套 atlas 共用一次追踪
-    n_seeds=10000,                                    # 播种尝试数
-    seed=0,
-    eddy_gp_seed=12345,                              # 固定 EDDY GP 选点；与追踪 seed 独立
+    bids_root="/data/study_bids",            # 原始 BIDS DWI / bval / bvec / JSON
+    output_dir="/data/derivatives/sc/sub-01", # 该被试的准备输出和 checkpoint
+    subject="01",                           # 有多个 session/run 时明确选择
+    freesurfer_subject_dir="/data/subjects/sub-01",
+    recon_backend="provided",               # 读取已完成官方或 FNIT subject
+    template_pairs=pairs,                    # 一对或多对，共用全脑流线集
+    n_seeds=100000, seed=0,                  # 尝试播种数和追踪种子
+    eddy_gp_seed=12345,                      # 独立的 EDDY GP 选点种子
+    assignment_radius=4.0,                   # mm，不影响共享核心 checkpoint
 )
-aparc_result = result.atlas_results["fs-aparc"]
-count_matrix = aparc_result.matrices["count"]         # K×K int64
-nodes = aparc_result.nodes                            # 行列与 nodes.tsv 对应
+pair_result = result.pair_results["cortex_to_subcortex"]
+print(pair_result.matrices["count"].shape)    # K_first × K_second
+print(result.preparation_stages, result.cache_status)
 ```
 
-Python 返回内存中的 `ConnectomeResult`，`run_bids` 保存可恢复的预处理图像；CLI 另将矩阵和节点表写盘。已校正 DWI 可同时传入 `corrected_dwi` 和 `rotated_bvecs`；显式影像接口为 `pipeline(dwi=..., bvals=..., bvecs=..., freesurfer_subject_dir=..., atlas=..., n_seeds=...)`。
+执行新重建时不传 `freesurfer_subject_dir`。原生注释必须对应实际生成 subject 的顶点顺序；来自另一份重建的 native 文件应先映射到新网格。下面使用 fsaverage 表面模板和 MNI volume 模板，供新 FNIT 或官方重建消费：
 
-- **DWI**：4D NIfTI `[X,Y,Z,N]`；bval 为 N 值，bvec 为 `3×N` 或 `N×3`，校正入口须用 EDDY 旋转后的梯度。原始 BIDS 侧车需定义相位编码方向和读出时间。
-- **结构输入**：配对 T1w 或完整 FreeSurfer subject。核心解剖链读取 `mri/brain.mgz`、`mri/aparc+aseg.mgz`；表面 atlas 另读取 ribbon、white/pial、sphere.reg 和相应 annot。所有输入须来自同一受试者。
-- **模板**：按所选 atlas 提供 Tian/Schaefer 模板、fsaverage 与 MNI T1。逐文件许可与 SHA-256 见[资源说明](atlas-assets.md)。
-- **矩阵**：每个 `atlas_results[name].matrices` 含 `count`、`sift2_fbc`、`mean_length`、`mean_fa`；后三项为 float32。矩阵对称，长度单位 mm，mean length/FA 按 SIFT2 权重求均值，零连接边为零。
-- **节点**：`nodes`、`region_labels` 固定矩阵行列顺序，缺失节点保留零行列。首个 atlas 同时对应 `result.matrices`、`result.atlas`。
-- **共享结果**：`wm_sh` 为 `[X,Y,Z,45]` FOD；`fa`、`brain_mask` 位于 DWI 网格；`five_tissue`、`gmwmi` 保留 T1 网格，其 affine 映射到 DWI 世界空间。`tractogram` 含路径、端点和长度；`sift2_weights` 是按流线顺序的 float64 向量。
+```python
+standard_surface = TemplateSpec(
+    name="cortex_A", kind="surface", space="fsaverage",
+    left_path="/data/templates/lh.A.annot",  # 与下方 fsaverage 顶点对应
+    right_path="/data/templates/rh.A.annot",
+    fsaverage_dir="/data/subjects/fsaverage",
+    nodes_tsv="/data/templates/A_nodes.tsv",
+)
+standard_volume = TemplateSpec(
+    name="volume_B", kind="volume", space="mni",
+    volume_path="/data/templates/B_mni.nii.gz",  # 与 MNI reference 同一 RAS 空间
+    nodes_tsv="/data/templates/B_nodes.tsv",
+)
+generated_pairs = [TemplatePair("cortex_to_subcortex", standard_surface, standard_volume)]
 
-### 输出目录
+# FNIT：auto 在没有 subject 时也解析成此 backend；资源仍须显式提供。
+fnit_recon = dict(recon_backend="fnit", recon_options={
+    "weights_dir": "/data/fnit-weights",     # 已校验的模型权重
+    "assets_dir": "/data/fnit-recon-assets", # 固定结构像图谱和资产
+    "native_bin_dir": "/opt/conda/envs/fnit/bin", # FNIT 独立构建程序，可省略
+    "threads": 4, "hemisphere_workers": 1,
+})
+# 官方：用户已安装并许可；FS_LICENSE 从环境继承。
+official_recon = dict(recon_backend="freesurfer", recon_options={
+    "executable": "/opt/freesurfer/bin/recon-all",
+    "freesurfer_home": "/opt/freesurfer", "threads": 4,
+})
+fnit_result = pipeline.run_bids(
+    bids_root="/data/study_bids", output_dir="/data/sc/sub-01-fnit",
+    subject="01", n_seeds=100000, seed=0, eddy_gp_seed=12345,
+    template_pairs=generated_pairs, mni_template="/data/templates/MNI_T1w.nii.gz",
+    **fnit_recon,
+)
+official_result = pipeline.run_bids(
+    bids_root="/data/study_bids", output_dir="/data/sc/sub-01-official",
+    subject="01", n_seeds=100000, seed=0, eddy_gp_seed=12345,
+    template_pairs=generated_pairs, mni_template="/data/templates/MNI_T1w.nii.gz",
+    **official_recon,
+)
+```
+
+已有校正输入时，在 BIDS 调用中同时传 `corrected_dwi` 与 `rotated_bvecs`；原始所选 BIDS bval 定义每帧 b 值。直接接口 `pipeline(dwi=..., bvals=..., bvecs=..., freesurfer_subject_dir=..., template_pairs=pairs, n_seeds=...)` 消费已校正输入。直接调用默认不启用 checkpoint；需要时显式传 `checkpoint_dir`。
+
+| 输入 / 参数 | 格式、默认值和空间 |
+|---|---|
+| BIDS DWI / bval / bvec / JSON | DWI `[X,Y,Z,N]`；bval 为 N 值，bvec 为 3×N 或 N×3。侧车定义 PE 方向和读出时间；支持 BIDS 继承和反向图像关联。 |
+| `subject` / `session` / `run` / `acquisition` / `direction` | subject 必填，其他用于候选不唯一时选片。 |
+| `t1` 或 `freesurfer_subject_dir` | 可用 BIDS T1w 或显式 T1；与已完成 subject 互斥。subject 读取 brain/aparc+aseg/ribbon/双侧 white/pial；表面模板另检查所需注释和球面。 |
+| `recon_backend` / `recon_options` | 默认 auto；provided 不接受执行资源选项。FNIT 必填 weights_dir/assets_dir；官方需显式选 freesurfer。未知键、资源缺失或输出检查失败时报错。 |
+| `template_pairs` | 非空一对或多对，名字不同；每对 first 定义行、second 定义列。 |
+| surface 模板 | 双半球 `.annot` 或 `.label.gii`；native 顶点须匹配本 subject，fsaverage 须给 fsaverage_dir。 |
+| volume 模板 | 3D 整数 NIfTI/MGH/MGZ；明确 `space=dwi/t1/mni`。不能由文件名猜空间或混用 surface RAS、voxel 坐标。 |
+| `nodes_tsv` | 单人可省略；跨被试为每套模板提供固定 index/original_label/hemisphere/name。声明但未出现的节点保留；未声明的非背景 ID 报错。 |
+| `mni_template` / `mni_to_t1_transform` | MNI volume 模板提供 MNI T1 reference，或已有 SynthMorph MNI→T1 warp；标签可与配准用 MNI intensity 不同体素网格，但必须在同一 MNI/RAS 坐标空间。目标须匹配 T1。 |
+| `n_seeds` / `seed` | n_seeds 必填；seed 默认0。PyTorch 与 MRtrix 相同数值 seed 不生成相同流线。 |
+| `eddy_gp_seed` | 默认 None，EDDY 原有时间种子；可选 1..2³²−1，固定 GP 体素选点，与追踪种子独立。 |
+| `assignment_radius` | 默认4.0 mm，有限且正；边界用严格小于。改变只使对应矩阵失效。 |
+| `checkpoint_dir` | run_bids 和配对 CLI 默认 OUTPUT_DIR/checkpoints；直接 Python 默认 None。 |
+| `device` / `compile_arc` | 默认 cuda:0 / False；默认 TF32，不自动用半精度。可选编译核的历史差异见第5节。 |
+| 可选 mask / FA / shell / DWI→T1 transform | 固定同输入诊断参数沿用；改变属于核心依赖，会重新计算共享核心。 |
+| `overwrite` | 默认 False；True 强制计算新 generation/解剖 attempt，不用它请求模板缓存复用。 |
+
+跨被试比较时，两轴各使用相同模板版本的固定节点表，并核对 `rows.tsv`、`columns.tsv` 的 ROI 含义和顺序。没有 `nodes_tsv` 的 volume 按源标签图实际存在的 ID 建轴：一人只有 `10,30`，另一人有 `10,20,30`，会得到不同轴。共同表声明全部三节点后，缺失 ROI 保留零行/列。Surface 原始 ID 按 `(hemisphere, original_label)` 区分；相同矩阵形状不足以证明节点相同。具体格式见[固定节点表](template_pairs.md#跨被试比较的固定节点表)。
+
+每个 `pair_results[name]` 返回四矩阵和两轴节点表。count 为 Int64，FBC/mean length/mean FA 为 Float32；FBC 是 Σw，均值按 SIFT2 权重计算，长度单位 mm，空单元为零。Float64 SIFT2 权重保留原接口；FA 中原有非有限值不填零、不删除。模板重叠时，一条流线可能进入两个不同单元，矩阵 count 总和不必等于流线条数。
+
+MNI 标签改变网格时，DenseWarp 的位移 field 保持原 T1 目标网格和 RAS-mm 数据不变，只将 source metadata 绑定到标签图网格。标签用 `apply_transform(method="nearest", dtype="int32")` 一次采样到 T1，再用既有 T1→DWI 整数最近邻映射；不先把标签插值到配准 intensity 网格。不同 MNI 坐标空间仍须用户提供正确变换，不能只改 metadata。
+
+兼容的 `atlas="fs-aparc"` 等命名 atlas 仍返回 `atlas_results`，首张同时对应 `result.matrices`。用户配对结果在 `pair_results`；CLI 配对模式不与非默认 `--atlas` 混用。共享 `wm_sh` 为 DWI 网格 `[X,Y,Z,45]`，FA/mask 位于 DWI 网格；5TT/GMWMI 保留 T1 网格、affine 映到 DWI RAS mm。完整轨迹、长度、每轨迹 FA、接受种子、配准与权重均可从 checkpoint 恢复。
+
+### 输出结构
+
+以下为配对 CLI 保存的文件。Python `run_bids()` 返回内存中的 `result.pair_results`，并写入准备阶段与 checkpoint；它不自动写出这些矩阵 CSV、节点 TSV、标签图和 `pairs_run_state.json`。
 
 ```text
 OUTPUT_DIR/
-  dataset_description.json       # BIDS derivative 数据集说明
-  run_state.json                 # 完整运行的输入与参数记录
-  preproc/raw/                  # BIDS 选片的 AP/PA 入口
-  preproc/topup/                # 有反向图像时出现
-  preproc/eddy/data.nii.gz      # 校正 DWI
+  preproc/raw/                       # 所选 AP / 可选 PA
+  preproc/topup/                     # 有匹配反向 PE 时
+  preproc/eddy/data.nii.gz
   preproc/eddy/data.eddy_rotated_bvecs
-  freesurfer/sub-01/            # 自动运行 recon-all 时出现
-  five_tissue_dwi_world.nii.gz  # cGM/sGM/WM/CSF/path，T1 网格
-  gmwmi_dwi_world.nii.gz
-  fa_dwi.nii.gz
-  brain_mask_dwi.nii.gz
-  dwi_to_t1_world.csv           # 4×4 DWI RAS mm → T1 RAS mm
-  atlases/fs-aparc/
-    atlas_dwi.nii.gz            # 0 背景、1..K 连续节点
-    nodes.tsv                   # index/original_label/hemisphere/name
-    region_labels.csv
-    connectome_count.csv        # K×K int64，流线条数
-    connectome_sift2_fbc.csv    # K×K，SIFT2 权重和
-    connectome_mean_length.csv  # K×K，SIFT2 加权平均长度，mm
-    connectome_mean_fa.csv      # K×K，SIFT2 加权平均 FA
-  atlases/<other-atlas>/...      # 每个 atlas 各一套
+  anatomy/<fnit|freesurfer>/<subject>-<identity>[-attempt-N]/
+  anatomy/state/                     # 成功后发布的重建完成记录
+  checkpoints/shared/core/<key>/     # 数值数组与原子完成 marker
+  checkpoints/pairs/                 # MNI warp / 模板 / 配对矩阵
+  pairs/<pair-name>/
+    rows.tsv                        # 第一套模板的行节点
+    columns.tsv                     # 第二套模板的列节点
+    first_atlas_dwi.nii.gz
+    second_atlas_dwi.nii.gz
+    connectome_count.csv
+    connectome_sift2_fbc.csv
+    connectome_mean_length.csv
+    connectome_mean_fa.csv
+    pair.json
+  pairs_run_state.json               # 本次输出 SHA、准备与缓存状态
 ```
 
-旧显式 `--dwi/--bvals/--bvecs` 单 atlas 入口保留平铺输出；BIDS 或多 atlas 入口按 `atlases/<name>/` 分开。矩阵行列以同目录的 `nodes.tsv` 为准。零连接边的均值为零。
+用户 provided subject 保持只读，不复制到 anatomy。未选的旧 pair 输出可能保留，本次列表以 `pairs_run_state.json.outputs` 为准。命名 atlas 的 CLI 输出仍位于 `atlases/<name>/`；旧显式单 atlas 保留平铺格式。
 
-BIDS 的完成记录同时绑定连接组数值实现修订号。更换已采用的梯度解释或追踪实现时，旧矩阵需重新计算；使用新的输出目录，或显式 `--overwrite` 重算。`--overwrite` 沿用原有强制重算规则，原始 MRI 不改写。
+## 3. CLI、JSON 和复用
 
-### 参数
+`--template-pairs` 接受 JSON 文件：非空数组，或只含 `pairs` 键的对象。下面是一对 SV 模板；从配置目录解析其相对路径。
 
-| 参数 | 输入和默认值 |
+```json
+{
+  "pairs": [
+    {
+      "name": "cortex_to_subcortex",
+      "first": {"name": "cortex_A", "kind": "surface", "space": "native",
+                "left_path": "lh.A.annot", "right_path": "rh.A.annot", "nodes_tsv": "A_nodes.tsv"},
+      "second": {"name": "volume_B", "kind": "volume", "space": "t1",
+                 "volume_path": "B_t1.nii.gz", "nodes_tsv": "B_nodes.tsv"}
+    }
+  ]
+}
+```
+
+同一数组可选多对。以下同时输出 SS、VV、SV，所有配对复用同一批全脑流线：
+
+```json
+{
+  "pairs": [
+    {"name": "SS", "first": {"name": "A", "kind": "surface", "space": "native", "left_path": "lh.A.annot", "right_path": "rh.A.annot", "nodes_tsv": "A_nodes.tsv"},
+     "second": {"name": "B", "kind": "surface", "space": "native", "left_path": "lh.B.annot", "right_path": "rh.B.annot", "nodes_tsv": "B_nodes.tsv"}},
+    {"name": "VV", "first": {"name": "C", "kind": "volume", "space": "t1", "volume_path": "C_t1.nii.gz", "nodes_tsv": "C_nodes.tsv"},
+     "second": {"name": "D", "kind": "volume", "space": "t1", "volume_path": "D_t1.nii.gz", "nodes_tsv": "D_nodes.tsv"}},
+    {"name": "SV", "first": {"name": "A", "kind": "surface", "space": "native", "left_path": "lh.A.annot", "right_path": "rh.A.annot", "nodes_tsv": "A_nodes.tsv"},
+     "second": {"name": "D", "kind": "volume", "space": "t1", "volume_path": "D_t1.nii.gz", "nodes_tsv": "D_nodes.tsv"}}
+  ]
+}
+```
+
+```bash
+# 1. 已完成 subject：auto 也会选 provided。
+fnit UKBConnectome_pipeline \
+  --bids-root /data/bids --subject 01 \
+  --freesurfer-subject-dir /data/subjects/sub-01 --recon-backend provided \
+  --template-pairs /data/templates/pairs.json \
+  --n-seeds 100000 --seed 0 --eddy-gp-seed 12345 \
+  --device cuda:0 --output-dir /data/sc/sub-01
+
+# 2. FNIT 自动重建：无 subject 时默认 auto 选 FNIT，仍需资源。
+fnit UKBConnectome_pipeline \
+  --bids-root /data/bids --subject 01 --recon-backend fnit \
+  --recon-options '{"weights_dir":"/data/fnit-weights","assets_dir":"/data/fnit-recon-assets","threads":4}' \
+  --template-pairs /data/templates/pairs_standard.json \
+  --mni-template /data/templates/MNI_T1w.nii.gz \
+  --n-seeds 100000 --seed 0 --eddy-gp-seed 12345 \
+  --device cuda:0 --output-dir /data/sc/sub-01-fnit
+
+# 3. 显式选择官方：用户安装并许可 FreeSurfer。
+fnit UKBConnectome_pipeline \
+  --bids-root /data/bids --subject 01 --recon-backend freesurfer \
+  --recon-options '{"executable":"/opt/freesurfer/bin/recon-all","freesurfer_home":"/opt/freesurfer","threads":4}' \
+  --template-pairs /data/templates/pairs_standard.json \
+  --mni-template /data/templates/MNI_T1w.nii.gz \
+  --n-seeds 100000 --seed 0 --eddy-gp-seed 12345 \
+  --device cuda:0 --output-dir /data/sc/sub-01-official
+```
+
+`--recon-options` 支持内联 JSON 或 JSON 文件。文件中的资源路径相对该文件目录；内联 JSON 的资源路径相对当前工作目录。Python mapping 的路径也相对调用工作目录。FNIT 的 native_bin_dir 未给出时沿既有安装入口定位；权重、结构像资产、原生构建程序仍按 [recon 安装说明](../recon_all/CONDA_CPP_BUILD.md)准备。官方分支继承许可证环境，未显式选择时不会因 FNIT 资源缺失自动切换到官方。
+
+`pairs_standard.json` 将上述 `standard_surface`/`standard_volume` 按相同字段写为一对 JSON：surface 为 `space="fsaverage"` 并给 `fsaverage_dir`，volume 为 `space="mni"`，两端提供固定节点表。它们由管线映射到新生成的 subject；provided 例子的 `pairs.json` 使用与既有 subject 对应的 native 模板。
+
+BIDS 中已有校正结果可加 `--corrected-dwi corrected.nii.gz --rotated-bvecs eddy_rotated.bvec`。完全显式的配对入口必须同时给 `--dwi/--bvals/--bvecs/--freesurfer-subject-dir`；它不执行 recon，也不接受 raw 选片选项。MNI 模板需 `--mni-template` 或 `--mni-to-t1-transform`。用户配对不使用 `--download-atlases`；内置命名 atlas 的 Tian/Schaefer 下载、Glasser 兼容限制见 [资源说明](atlas-assets.md)。
+
+### 跳过与重新计算
+
+| 阶段 | 实际判定与失效边界 |
 |---|---|
-| `--bids-root`、`--subject` | 原始 BIDS 根目录与受试者编号；BIDS 入口必选，不能与显式 DWI 三件套混用。 |
-| `--session`、`--run`、`--acquisition`、`--direction` | 可选 BIDS 实体，候选不唯一时用于精确选片。 |
-| `--t1`、`--freesurfer-subject-dir` | 可选 T1w 路径和已完成 recon-all subject；无 subject 时使用 BIDS T1w 启动官方重建。 |
-| `--corrected-dwi`、`--rotated-bvecs` | BIDS 模式下已有校正 4D 图像及逐卷旋转梯度，必须成对给出。 |
-| `--dwi`、`--bvals`、`--bvecs` | 旧显式入口：已校正 4D NIfTI、每卷 b 值、eddy 旋转后的 3×N/N×3 FSL 梯度，须同时提供。 |
-| `--atlas` | 一个或多个上述名称；默认 `fs-aparc`，顺序决定 Python 返回结果的主 atlas。 |
-| `--atlas-templates-dir`、`--fsaverage-dir` | Tian/Schaefer/Glasser 模板目录；Schaefer、Glasser 另需 fsaverage subject。 |
-| `--download-atlases` | 可选；只下载所选 Tian/Schaefer 文件，按固定清单校验大小和 SHA-256；Glasser 暂不支持镜像下载。 |
-| `--mni-template`、`--synthmorph-weights`、`--tian-fnirt-coeff` | Tian 同网格 MNI T1；可选 SynthMorph 权重目录；已有 FNIRT 前向 coefficient 可替代 SynthMorph。 |
-| `--brain-mask`、`--response-mask`、`--fod-mask`、`--normalise-mask`、`--fa-map` | 可选同 DWI 网格掩膜/FA；省略时 FNIT 计算。BET 内部临时转 LAS 后将掩膜映回原网格。 |
-| `--shell-bvals`、`--dwi-to-t1-world` | 可选 shell 中心序列和 4×4 DWI→T1 RAS-mm 矩阵；省略则估计 shell 并运行 TorchFLIRT。 |
-| `--n-seeds`、`--seed` | 播种尝试数必选；随机种子默认 0。PyTorch 与 MRtrix 相同数值 seed 不生成同一流线。 |
-| `--eddy-gp-seed` | 可选整数 1..2³²−1；固定 EDDY GP 体素选点，与追踪 `--seed` 独立。默认省略，沿用 EDDY 原有的时间种子。改变此参数会重新计算自动管理的 EDDY 输出。 |
-| `--device`、`--compile-arc` | 设备默认 `cuda:0`；CUDA 默认 TF32，不自动用半精度。编译圆弧核为可选项；前轮同输入比较发现编译输出存在逐值差异，本轮精度验收继续关闭该选项。 |
-| `--output-dir`、`--overwrite` | 结果目录必选；后者强制重算和覆盖。 |
+| BIDS 选片与 staging | 原输入内容 SHA、路径与侧车元数据一致；schema 2 完成记录逐文件校验全部 staged 产物的 SHA 和大小。 |
+| TOPUP / EDDY | 输入与选项一致，全部必要输出 SHA 和大小一致；EDDY 同时绑定 TOPUP 的系数、运动参数、corrected b0 pair 与 acquisition parameters。外部校正结果标 supplied，无反向 PE 标 no_reverse_pe。 |
+| recon | provided 检查实际图像和表面；自产需输入/源码/资源/程序一致及完成后内容/几何检查。不完整尝试不落成功缓存，新尝试用空目录并保留旧记录。 |
+| 共享核心 | 实际校正 DWI/梯度、解剖、mask/FA/变换的 SHA、数值 revision/源码、参数和实际设备精度策略一致；完整 NPY payload/marker/结构校验。 |
+| 用户模板 | 对应文件、空间与 DWI/T1/MNI 映射依赖一致。改其中一套只使相关模板及配对矩阵失效。 |
+| 配对矩阵 | 端点、权重、长度、FA、两模板 key 和 radius 一致。改 radius 不重算模板或共享核心。 |
+| 配对 CLI 输出 | 原已管理输出 SHA 一致时可在同目录更新；未知或被外部改动的输出报错。 |
 
-## 3. 命令行调用
-
-```bash
-conda env create -f environment.yml
-conda activate fnit
-
-# 前轮十例评测和本轮精度验收均使用此 allocator 配置。
-# 在启动 Python 进程前设置；两个比较版本使用相同配置。
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-
-BIDS_ROOT=/data/study_bids                   # 原始 BIDS 根目录，含 dataset_description.json
-OUTPUT_DIR=/data/derivatives/fnit_connectome # 本次结果与可恢复的预处理目录
-FREESURFER_SUBJECT=/data/freesurfer/sub-01   # 已完成的官方 recon-all subject；可省略
-
-fnit UKBConnectome_pipeline \
-  --bids-root "$BIDS_ROOT" --subject 01 \
-  --freesurfer-subject-dir "$FREESURFER_SUBJECT" \
-  --atlas fs-aparc --n-seeds 10000 --seed 0 \
-  --eddy-gp-seed 12345 \
-  --device cuda:0 --output-dir "$OUTPUT_DIR"
-```
-
-省略 `--freesurfer-subject-dir` 时，命令读取 BIDS `anat/*_T1w.nii[.gz]` 并调用用户安装的官方 `recon-all -sd OUTPUT_DIR/freesurfer -s sub-01 -i T1w -all`。自动管理的 subject 记录原始 T1 SHA-256；仅同输入的部分失败可用不带 `-i` 的 `-all` 续跑。输入改变或既有 subject 没有对应记录时，使用新输出目录，或显式提供已完成的 `freesurfer_subject_dir`。用户需自行安装并许可 FreeSurfer。FNIT 后续计算仅读取其图像和表面。
-
-对照评测同时固定 `seed` 和 `eddy_gp_seed`。若只固定追踪种子，EDDY 选点仍可能改变校正 DWI，后续模型和流线也会随之改变。
-
-显存记录区分 PyTorch 已分配、预留与整个 GPU 父子进程占用，采用十进制 20 GB 门槛。采样完整且三个峰值都低于门槛的运行才纳入合格汇总。前轮参数见[十例评测协议](raw_cohort_benchmark.md)，本轮验收见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)；追踪组件和完整原始 DWI 流程的峰值分别报告。
-
-多个 DWI run/session 时用 `--session`、`--run`、`--acquisition`、`--direction` 明确选片。DWI 需要 `.bval`、`.bvec`、JSON 中的 `PhaseEncodingDirection` 以及 `TotalReadoutTime` 或 `EffectiveEchoSpacing`。有反向相位编码 EPI/DWI 时通过 `B0FieldSource`/`B0FieldIdentifier` 或 `IntendedFor` 配对；没有反向图像时跳过 TOPUP，EDDY 无场图运行。侧车支持 BIDS 继承规则，约定依据 [BIDS MRI 规范](https://bids-specification.readthedocs.io/en/stable/modality-specific-files/magnetic-resonance-imaging-data.html)。
-
-### 多 atlas 示例
-
-只用已完成的 FreeSurfer subject 时，可直接选择两套原生全脑 atlas；`fs-aparc-a2009s` 另外读取 `mri/aparc.a2009s+aseg.mgz` 与双半球 `label/*.aparc.a2009s.annot`，不需要 MNI 模板或配准权重：
-
-```bash
-BIDS_ROOT=/data/study_bids                         # 原始 BIDS 根目录
-OUTPUT_DIR=/data/derivatives/fnit_connectome       # 输出和续跑目录
-FREESURFER_SUBJECT=/data/freesurfer/sub-01          # 含两个 aparc 分割的 recon-all subject
-fnit UKBConnectome_pipeline \
-  --bids-root "$BIDS_ROOT" --subject 01 \
-  --freesurfer-subject-dir "$FREESURFER_SUBJECT" \
-  --atlas fs-aparc fs-aparc-a2009s \
-  --n-seeds 10000 --device cuda:0 --output-dir "$OUTPUT_DIR"
-```
-
-该体积由官方 [`mri_aparc2aseg --s SUBJECT --annot aparc.a2009s --o aparc.a2009s+aseg.mgz`](https://surfer.nmr.mgh.harvard.edu/fswiki/mri_aparc2aseg) 产生；FNIT 根据受试者注释名称和 [FreeSurferColorLUT 的 11100/12100 系列原始编号](https://github.com/freesurfer/freesurfer/blob/dev/distribution/FreeSurferColorLUT.txt)转成 `1..K`，再使用与 `fs-aparc` 相同的 16 个皮层下/小脑节点。参考文献：[Destrieux 等，*NeuroImage* 2010](https://doi.org/10.1016/j.neuroimage.2010.06.010)。
-
-使用 Tian/Schaefer 模板的多 atlas 示例：
-
-```bash
-BIDS_ROOT=/data/study_bids                         # 同一组 DWI 与 T1w
-OUTPUT_DIR=/data/derivatives/fnit_connectome       # 结果目录
-FREESURFER_SUBJECT=/data/freesurfer/sub-01          # 官方 recon-all 结果
-ATLAS_TEMPLATES=/data/atlas/ukb                     # Tian S1/S4 和 Schaefer 注释
-FSAVERAGE_SUBJECT=/opt/freesurfer/subjects/fsaverage # fsaverage sphere.reg
-MNI_TEMPLATE=/data/templates/MNI152_T1_2mm_brain.nii.gz # Tian 同网格 MNI T1
-
-fnit UKBConnectome_pipeline \
-  --bids-root "$BIDS_ROOT" --subject 01 \
-  --freesurfer-subject-dir "$FREESURFER_SUBJECT" \
-  --atlas fs-aparc schaefer200+tian-s1 schaefer500+tian-s4 \
-  --atlas-templates-dir "$ATLAS_TEMPLATES" \
-  --fsaverage-dir "$FSAVERAGE_SUBJECT" --mni-template "$MNI_TEMPLATE" \
-  --n-seeds 10000 --seed 0 --device cuda:0 \
-  --output-dir "$OUTPUT_DIR"
-```
-
-可选名称：`fs-aparc`、`fs-aparc-a2009s`、`aparc+tian-s1`、`aparc.a2009s+tian-s1`、`glasser+tian-s1`、`glasser+tian-s4`、`schaefer200+tian-s1`、`schaefer500+tian-s4`、`schaefer1000+tian-s4`。前两套从个体 FreeSurfer 分割直接生成；`fs-aparc-a2009s` 由本人的 `.annot` 定义名称，按左皮层、右皮层、16 个皮层下与小脑节点连续编号，行列以 `nodes.tsv` 为准。Tian 默认用 FNIT PyTorch SynthMorph；已有原 UKB 的 T1→MNI FNIRT coefficient 时可以 `--tian-fnirt-coeff` 替换。Glasser 的 32k→164k 标签重采样目前仍依赖 Connectome Workbench `wb_command`，故该 atlas 还不满足仅官方 recon-all 为外部运行时程序的约束。
-
-资源许可、模板结构与按需下载见[atlas 资源说明](atlas-assets.md)。固定 FNIT Release `assets-v1` 暂无这组 atlas；有明确许可的 Tian/Schaefer 文件已镜像于仓库，命令可加 `--download-atlases` 自动获取并校验。fsaverage 和 MNI T1 仍由用户提供。
-
-### 跳过与续跑
-
-| 阶段 | 判定 | 主要输出 |
-|---|---|---|
-| BIDS 选片 | 输入路径、大小、修改时间和元数据与记录相同 | `preproc/raw/AP.*`、可选 `PA.*`、`bids_selection.json` |
-| TOPUP | 状态记录匹配且场系数、校正 b0、采集参数完整；无反向图像时不运行 | `preproc/topup/fieldmap_out_*` |
-| EDDY | 状态记录匹配且校正 DWI、旋转 bvec 完整 | `preproc/eddy/data.nii.gz`、`data.eddy_rotated_bvecs` |
-| recon-all | 显式提供完整 subject，或 `recon-all.done`、脑图、分割及双半球表面存在 | `freesurfer/sub-01/` |
-| connectome | BIDS 模式下运行记录匹配且所有矩阵完整 | `atlases/<name>/` 和共用图像 |
-
-状态记录用文件大小、mtime 和参数核对 FNIT 自己产生的中间结果，不是内容哈希。外部替换了文件但保留原大小/mtime 时加 `--overwrite`。在其他软件中已完成 TOPUP/EDDY 时，同时给 `--corrected-dwi` 和 `--rotated-bvecs`；原始 BIDS bval 仍定义每卷 b 值。`--overwrite` 强制重算并覆盖同名结果。
-
-connectome 完成记录还包含数值实现版本。本轮梯度及 ACT 精度修正使用 `accuracy-20261003-v1`，因此旧版矩阵不再判定完成；当前版本同输入、同参数且产物完整时继续跳过。重算请使用新输出目录，或在原目录显式 `--overwrite`；后者也重算 TOPUP/EDDY。只重算连接组时，可通过 `--corrected-dwi`、`--rotated-bvecs` 将已有校正输入提供给新输出目录。普通同版本调用的 TOPUP/EDDY 仍依据各自阶段记录复用。
+同一输出目录换 `--template-pairs` 或 `--assignment-radius`，不加 `--overwrite` 即可依赖复用。`--overwrite` 请求强制计算，可能同时重做准备、recon 和核心；core 旧 generation 与旧解剖 attempt 保留。核心损坏或半写 checkpoint 不会复用；NaN/Inf 原值保留。原始准备的旧 marker 未保存输出哈希，首次会重新建立一次完成记录；显式提供校正 DWI 的分支保持 supplied。准备、核心、模板和矩阵的各自失效范围见 [checkpoint 说明](checkpoints.md)。
 
 ## 4. 原软件调用
 
@@ -231,11 +272,11 @@ connectome 完成记录还包含数值实现版本。本轮梯度及 ACT 精度�
 
 | 阶段 | FNIT 实际调用 | 官方对应与输入/输出 |
 |---|---|---|
-| AP/PA 组织与选 b0 | BIDS 配对、选片、`prepare_ukb_topup_pair` | `fslroi`/`fslmerge -t`；保留第一幅 AP 网格与两幅选定 b0，生成 `acqparams.txt` |
+| AP/PA 组织与选 b0 | BIDS 配对、选片、`prepare_ukb_topup` | `fslroi`/`fslmerge -t`；保留第一幅 AP 网格与两幅选定 b0，生成 `acqparams.txt` |
 | 畸变校正 | `TorchTOPUP` | `topup --imain --datain`；场系数、运动参数、校正 b0 |
 | EDDY 脑掩膜 | b0 均值与 PyTorch `SynthStrip`，保留 AP 网格 | `mri_synthstrip -i b0_mean.nii.gz -m nodif_brain_mask.nii.gz`；原网格二值掩膜 |
 | 涡流/运动校正 | `TorchEDDY`，固定评测的 `eddy_gp_seed` | `eddy`/`eddy_cuda`；校正完整 DWI、旋转 bvec、运动与异常切片记录 |
-| T1 重建 | 官方 `recon-all`；已有完整 subject 则读取 | `recon-all -i T1w -all`；分割、脑图、双半球表面和注释 |
+| T1 重建 | provided / FNIT `run_recon_all_python_batch` / 显式官方 `recon-all` | `recon-all -i T1w -all`；分割、脑图、双半球表面和注释 |
 | b0、掩膜、FA | `mean_bzero`、BET、`dwi2mask_legacy`、张量 IWLS | `dwiextract -bzero`/`mrmath mean`、`bet`、`dwi2mask`、`dwi2tensor`/`tensor2metric -fa` |
 | 5TT/GMWMI | `freesurfer_five_tissue`、`gmwmi_from_five_tissue` | `5ttgen freesurfer`/`5tt2gmwmi`；五组织通道和灰白质界面 |
 | DWI→T1 | `TorchFLIRT(dof=6, cost="normmi")` | `flirt -dof 6 -cost normmi`；DWI→T1 RAS-mm 矩阵 |
@@ -246,8 +287,9 @@ connectome 完成记录还包含数值实现版本。本轮梯度及 ACT 精度�
 | Tian→T1 | SynthMorph joint + `apply_transform` 最近邻；可读既有 FNIRT coefficient | 默认对应 SynthMorph；兼容分支对应 `invwarp`/`applywarp --interp=nn` |
 | atlas→DWI | `resample_labels_nearest`，保留整数标签 | `mrtransform -linear ... -template ... -interp nearest` |
 | 矩阵 | `build_connectomes`，严格 4 mm 径向赋值 | `tck2connectome -symmetric -assignment_radial_search 4`；count、Σw、加权长度与 FA |
+| 两套用户模板 | `build_pair_connectomes`，两方向端点分配及同单元去重 | 相同模板复用原 square 参考；任意两张重叠模板没有单个同定义 MRtrix 命令，用同 TCK 逐轨迹端点 oracle 验证 |
 
-默认解剖由 FreeSurfer 单独构建 5TT，Tian 默认采用 SynthMorph；原 UKB 脚本另外使用 FIRST 与 FNIRT。两条解剖路径不同，固定输入组件 oracle 复用同一实际 5TT/变换/atlas；前轮独立 raw 官方链自行生成这些产物，本轮复用已核验的完成结果。两类验证分开报告，默认路径不能称为原 UKB 全链逐值复现。Glasser 的 Workbench 依赖见上文；官方 FSL/MRtrix 命令仅在独立 benchmark 中执行。
+解剖来源按 provided/FNIT/显式官方三路选择，默认从完成的 aparc+aseg 构建不含 FIRST 的 5TT，Tian 默认采用 SynthMorph；原 UKB 脚本另外使用 FIRST 与 FNIRT。两条解剖路径不同，固定输入组件 oracle 复用同一实际 5TT/变换/atlas；历史独立 raw 官方链自行生成这些产物，其精度轮复用已核验的完成结果。两类验证分开报告，默认路径不能称为原 UKB 全链逐值复现。Glasser 命名 atlas 仍有 Workbench 依赖；官方 FSL/MRtrix 命令仅在独立 benchmark 中执行。
 
 以下命令用于独立 MRtrix 对照，输入须与 FNIT 使用同一 FOD、5TT、GMWMI、FA 与 atlas；完整前处理和七模板命令在[逐阶段验证](../../validation/connectome/ds004666/README.md)中。
 
@@ -266,13 +308,17 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 
 ## 5. 精度、运行时间与脑图
 
-### 本轮精度优化：2026-10-03，完整 raw 比较已完成
+当前模板配对与三路 recon 接入的评测范围见[本轮 paired pipeline 记录](../../validation/connectome/paired_pipeline_20261003/README.md)。本节以下为已完成的历史版本数值结果，保留其原输入、版本、失败项与计时范围；不能改标为本次接入的端到端结果。新接口的组件证据分别见 [recon 来源](recon_backends.md)、[用户模板](template_pairs.md)、[checkpoint](checkpoints.md)。
 
-本轮从已发布基线 `7af34e6d` 开始，复用前轮 ds001226 十例原始 BIDS 及已完成的官方 FreeSurfer subject。正式科学候选为 `1fe86ab8` 的代码内容，保留梯度/张量解释、四分位索引及 ACT 的 SGM 弦方向修正；其余未取得联合收益的候选撤回。每例仍为 100,000 次尝试播种、八套 atlas、四类矩阵，默认 TF32、`compile_arc=False`，原始 MRI 与旧结果保持原样。
+十例真实四阶段全部完成，共40次正常CLI调用、400个统计数组核对；首次 1111.52 s、同模板复用 18.83 s、换模板 13.21 s、改半径 19.28 s（逐例范围见报告）。30次核心恢复逐值一致、十例同模板对旧square builder一致；本进程采样峰值5.2995 GB，PyTorch allocated/reserved峰值2.9191/3.3848 GB。每例使用supplied corrected DWI、rotated bvec和provided官方subject；本轮未重做TOPUP/EDDY。官方来源另完成一例新T1重建与缓存/同源数值验证。完整分步表、真实脑图与范围见[新十例报告](../../validation/connectome/paired_pipeline_20261003/README.md)。最终整合代码完整CPU门槛为**890 passed、29 skipped、362 subtests passed、1 warning，61.26 s**；[公开测试收据](../../validation/connectome/paired_pipeline_20261003/final_cpu_validation.public.json)和[冻结数值源码核对](../../validation/connectome/paired_pipeline_20261003/source_equivalence.public.json)绑定各自源版本。
 
-完整 raw 共 12 次 CLI：十例正式候选，加 CON01/03 的两次基线配对；实际运行与 CPU 比较均已完成。**矩阵 1388/2400、轨迹分布 85/250 项通过，十例整体均 failed；前轮同十例矩阵为 1391/2400，本轮未显示总体 SC 改善。**相同阶段两组配对合计耗时 −2.80%（CON03 单例 +0.50%），属于共享负载观察。原 CON09/10 显存监测缺口与独立补测另列；完整原值、门槛和失败明细见[最终证据](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/README.md)。分项组件结果如下；汇总由[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)维护。
+### 前一轮精度优化：2026-10-03，历史 raw 比较已完成
 
-| 子任务 | 本轮组件核对与处理 | 输入、参数、官方对照、耗时和脑图 |
+该历史精度轮从已发布基线 `7af34e6d` 开始，复用更早一轮 ds001226 十例原始 BIDS 及已完成的官方 FreeSurfer subject。正式科学候选为 `1fe86ab8` 的代码内容，保留梯度/张量解释、四分位索引及 ACT 的 SGM 弦方向修正；其余未取得联合收益的候选撤回。每例仍为 100,000 次尝试播种、八套 atlas、四类矩阵，默认 TF32、`compile_arc=False`，原始 MRI 与旧结果保持原样。
+
+该轮完整 raw 共 12 次 CLI：十例正式候选，加 CON01/03 的两次基线配对；实际运行与 CPU 比较均已完成。**矩阵 1388/2400、轨迹分布 85/250 项通过，十例整体均 failed；更早一轮同十例矩阵为 1391/2400，该精度轮未显示总体 SC 改善。**相同阶段两组配对合计耗时 −2.80%（CON03 单例 +0.50%），属于共享负载观察。原 CON09/10 显存监测缺口与独立补测另列；完整原值、门槛和失败明细见[最终证据](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/README.md)。分项组件结果如下；汇总由[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)维护。
+
+| 子任务 | 该历史精度轮的组件核对与处理 | 输入、参数、官方对照、耗时和脑图 |
 |---|---|---|
 | 1 TOPUP / EDDY | 固定参数渲染改善，完整 CON03 EDDY 图像却退化；两种候选均拒绝，保持原生产实现 | [task 1 验证](../../validation/connectome/accuracy_20261003/task_01/README.md) |
 | 2 梯度 / DTI / CSD / 归一化 | 同正式 FNIT 校正 DWI 的 FA 差异减少；Double 梯度解释、affine 极分解及四分位索引修正进入正式候选 | [task 2 验证](../../validation/connectome/accuracy_20261003/task_02/README.md) |
@@ -303,7 +349,7 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 | 十例，独立官方解剖与 connectome | 官方 SynthMorph、FreeSurfer/MRtrix 与原 UKB atlas 脚本完成结构准备、DWI 配准、五种子追踪及八 atlas 矩阵；各例实际 producer 与恢复来源分别核验。独立 raw 链的矩阵验收另列，完成不等于科学匹配 | [结构像实际报告与脑图](raw_official_anatomy_reference.md) |
 | 十例，两版各一个 FNIT seed 对官方五种子 raw 链 | 20 组 × 240 = 4800 项判定，通过 2782（57.96%）；两版各 1391/2400，20 组整体均未进入官方重复范围。前轮 FNIT 自身重复与群体分布未评估 | [最终结果与 2018 项失败明细](FINAL_RAW_MATRIX_RESULTS.md) |
 
-前轮报告记录的验证缺口：正式十例 CLI 未保存响应、FOD 和归一化中间产物，当时没有这些阶段的十例同输入官方比较；已保存的 CON03 组件结果不能替代它们。同输入 CPU DTI 诊断还保留 CON07 方向最大差 41.632306°、CON10 FA 最大差 0.245623，当时原因尚未完全定位，见[十例建模诊断](../../validation/connectome/tenraw_20261002/task_02/README_official_chain.md#5-实际精度耗时与脑图)。本轮对应组件更新见上表；完整 raw 链精度与两例配对时间已完成，见[本轮最终结果](ACCURACY_OPTIMIZATION_20261003.md#5-已发布基线验收与当前状态)。本轮保存的 FOD 网格检查不等于十例同输入数值验证。
+前轮报告记录的验证缺口：正式十例 CLI 未保存响应、FOD 和归一化中间产物，当时没有这些阶段的十例同输入官方比较；已保存的 CON03 组件结果不能替代它们。同输入 CPU DTI 诊断还保留 CON07 方向最大差 41.632306°、CON10 FA 最大差 0.245623，当时原因尚未完全定位，见[十例建模诊断](../../validation/connectome/tenraw_20261002/task_02/README_official_chain.md#5-实际精度耗时与脑图)。该历史精度轮对应组件更新见上表；完整 raw 链精度与两例配对时间已完成，见[该轮最终结果](ACCURACY_OPTIMIZATION_20261003.md#5-已发布基线验收与当前状态)。其保存的 FOD 网格检查不等于十例同输入数值验证。
 
 下表是既有 ds004666/UKB 结果，保留对应版本与输入范围。
 
@@ -366,7 +412,8 @@ FNIT 已有独立的 [TorchBEDPOSTX](../bedpostx/README.md) 和 [TorchProbtrackX
 
 | 日期 | 更新与证据 |
 |---|---|
-| 2026-10-03：本轮精度优化 | 从 `7af34e6d` 核对五项组件，正式候选保留梯度/张量和 SGM 修正；12 次完整 raw CLI 与十例比较已完成，矩阵 1388/2400、轨迹分布 85/250、整体未匹配；原监测缺口和独立补测另列，见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md) |
+| 2026-10-03：模板配对与 checkpoint 接入 | 三路 recon、先完成解剖再进入 DWI、SS/VV/SV 一或多对用户模板、共享核心/模板/矩阵分层复用；评测范围见[本轮记录](../../validation/connectome/paired_pipeline_20261003/README.md)。实际端到端数字由该版本报告记录，不复用下列历史值。 |
+| 2026-10-03：前一轮精度优化 | 从 `7af34e6d` 核对五项组件，正式候选保留梯度/张量和 SGM 修正；12 次完整 raw CLI 与十例比较已完成，矩阵 1388/2400、轨迹分布 85/250、整体未匹配；原监测缺口和独立补测另列，见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md) |
 | 2026-10-03：前轮结果汇总 | 前轮下载十例原始 AP/PA/T1，完成 20 次独立 recon-all 与 20 次 raw-DWI 两版运行；320 矩阵/130 解剖数据严格一致，保留所有官方重复范围失败项，见[前轮十例结果](actual_cohort_comparison.md) |
 | 2026-10-02 | 批量整理轨迹、原点打包、多 atlas 复用；真实逐值一致性和计时见[无损优化报告](../../validation/connectome/ds004666/lossless_20261002/README.md) |
 | 2026-09-30 | 原始 BIDS、TOPUP/EDDY 自动跳过、单/多 atlas；[真实 UKB 流程与续跑](../../validation/connectome/ukb_bids_e2e_20260930.md) |

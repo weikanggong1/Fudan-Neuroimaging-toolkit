@@ -28,11 +28,17 @@ def _inputs(root):
 
 
 def _subject(root):
-    for name in ("mri/brain.mgz", "mri/aparc+aseg.mgz", "mri/ribbon.mgz",
-                 "surf/lh.white", "surf/rh.white", "surf/lh.pial", "surf/rh.pial"):
-        path = root / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(b"complete")
+    """Readable anatomy fixtures, rather than filename-only placeholders."""
+    (root / "mri").mkdir(parents=True, exist_ok=True)
+    (root / "surf").mkdir(parents=True, exist_ok=True)
+    for name in ("brain", "aparc+aseg", "ribbon"):
+        nib.save(nib.MGHImage(np.ones((6, 6, 6), np.float32), np.eye(4)),
+                 root / f"mri/{name}.mgz")
+    vertices = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]], float)
+    faces = np.array([[0, 2, 1], [0, 1, 3], [0, 3, 2], [1, 2, 3]], int)
+    for hemi in ("lh", "rh"):
+        for surface in ("white", "pial"):
+            nib.freesurfer.write_geometry(str(root / f"surf/{hemi}.{surface}"), vertices, faces)
     return root
 
 
@@ -114,7 +120,7 @@ def test_python_bids_entry_passes_selected_corrected_inputs_once(monkeypatch):
 
 
 def test_bids_recon_all_runs_once_then_skips_completed_subject(tmp_path, monkeypatch):
-    import fnit.connectome.bids as module
+    import fnit.connectome.recon_backend as backend
 
     image, _ = _inputs(tmp_path / "bids")
     anatomy = image.parents[1] / "anat"
@@ -123,30 +129,34 @@ def test_bids_recon_all_runs_once_then_skips_completed_subject(tmp_path, monkeyp
     nib.save(nib.Nifti1Image(np.ones((6, 6, 6), np.float32), np.eye(4)), t1)
     rotated = tmp_path / "rotated.bvec"
     rotated.write_text("0 1\n0 0\n0 0\n")
+    (tmp_path / "SetUpFreeSurfer.sh").write_text('. "$FREESURFER_HOME/FreeSurferEnv.sh"\n')
+    (tmp_path / "FreeSurferEnv.sh").write_text('export FREESURFER="$FREESURFER_HOME"\n')
+    executable = tmp_path / "recon-all"
+    executable.write_text("#!/bin/sh\nexit 0\n")
+    executable.chmod(0o755)
     commands = []
-    monkeypatch.setattr(module.shutil, "which", lambda command: "/usr/bin/recon-all")
 
-    def run(command, *, check):
+    def run(command, *, check, env):
         commands.append(command)
-        subject = _subject(tmp_path / "output/freesurfer/sub-01")
+        subject = _subject(backend.Path(command[command.index("-sd") + 1]) /
+                           command[command.index("-s") + 1])
         (subject / "scripts").mkdir(exist_ok=True)
         (subject / "scripts/recon-all.done").write_text("done")
 
-    monkeypatch.setattr(module.subprocess, "run", run)
-    options = dict(subject="01", corrected_dwi=image, rotated_bvecs=rotated)
+    monkeypatch.setattr(backend.subprocess, "run", run)
+    options = dict(subject="01", corrected_dwi=image, rotated_bvecs=rotated,
+                   recon_backend="freesurfer", recon_options={"executable": executable, "freesurfer_home": tmp_path})
     first = prepare_bids_connectome(image.parents[2], tmp_path / "output", **options)
     second = prepare_bids_connectome(image.parents[2], tmp_path / "output", **options)
     assert first.stages["recon_all"] == "completed"
     assert second.stages["recon_all"] == "skipped"
-    t1.touch()
-    original = tmp_path / "output/freesurfer/sub-01/mri/orig/001.mgz"
-    original.parent.mkdir(parents=True)
-    original.write_bytes(b"orig")
-    with pytest.raises(ValueError, match="input changed"):
-        prepare_bids_connectome(image.parents[2], tmp_path / "output", **options)
-    assert commands == [["/usr/bin/recon-all", "-sd",
-                         str(tmp_path / "output/freesurfer"), "-s", "sub-01",
-                         "-i", str(t1), "-all"]]
+    t1.touch()  # Metadata changes alone do not invalidate content-addressed reuse.
+    third = prepare_bids_connectome(image.parents[2], tmp_path / "output", **options)
+    assert third.stages["recon_all"] == "skipped"
+    assert len(commands) == 1
+    assert commands[0][-4:] == ["-all", "-parallel", "-openmp", "4"]
+    assert commands[0][commands[0].index("-i") + 1] == str(t1)
+
 
 @pytest.mark.parametrize("seed", [True, 0, -1, 2**32, 1.5])
 def test_bids_rejects_invalid_gp_seed_before_staging(tmp_path, seed):
@@ -186,7 +196,7 @@ def test_topup_selected_b0_is_reused_by_eddy(tmp_path, monkeypatch):
     monkeypatch.setattr(module, "locate_bids_dwi", lambda *a, **kw: selected)
     def topup(raw, output, **kwargs):
         output.mkdir(parents=True)
-        for name in ['fieldmap_out_fieldcoef.nii.gz', 'fieldmap_iout.nii.gz', 'acqparams.txt']:
+        for name in ['fieldmap_out_fieldcoef.nii.gz', 'fieldmap_out_movpar.txt', 'fieldmap_iout.nii.gz', 'acqparams.txt']:
             (output / name).write_bytes(b"topup")
         return None, {"ap_index": 0}
     refs = []
@@ -203,27 +213,55 @@ def test_topup_selected_b0_is_reused_by_eddy(tmp_path, monkeypatch):
     assert refs == [0]
 
 
-def test_recon_partial_failure_resumes_only_same_t1(tmp_path, monkeypatch):
+def test_recon_partial_failure_is_never_cached_as_complete(tmp_path, monkeypatch):
+    import fnit.connectome.recon_backend as backend
+    image, _ = _inputs(tmp_path / "bids")
+    anatomy = image.parents[1] / "anat"; anatomy.mkdir()
+    t1 = anatomy / "sub-01_T1w.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones((6, 6, 6), np.float32), np.eye(4)), t1)
+    rotated = tmp_path / "rotated.bvec"; rotated.write_text("0 1\n0 0\n0 0\n")
+    (tmp_path / "SetUpFreeSurfer.sh").write_text('. "$FREESURFER_HOME/FreeSurferEnv.sh"\n')
+    (tmp_path / "FreeSurferEnv.sh").write_text('export FREESURFER="$FREESURFER_HOME"\n')
+    executable = tmp_path / "recon-all"
+    executable.write_text("#!/bin/sh\nexit 0\n"); executable.chmod(0o755)
+    subjects = []
+    def run(command, *, check, env):
+        subject = backend.Path(command[command.index("-sd") + 1]) / command[command.index("-s") + 1]
+        subjects.append(subject)
+        (subject / "scripts").mkdir(parents=True)
+        if len(subjects) == 1:
+            raise backend.subprocess.CalledProcessError(1, command)
+        _subject(subject); (subject / "scripts/recon-all.done").write_text("done")
+    monkeypatch.setattr(backend.subprocess, "run", run)
+    options = dict(subject="01", corrected_dwi=image, rotated_bvecs=rotated,
+                   recon_backend="freesurfer", recon_options={"executable": executable, "freesurfer_home": tmp_path})
+    with pytest.raises(backend.subprocess.CalledProcessError):
+        prepare_bids_connectome(image.parents[2], tmp_path / "out", **options)
+    assert not list((tmp_path / "out").rglob("state/*freesurfer*.json"))
+    result = prepare_bids_connectome(image.parents[2], tmp_path / "out", **options)
+    assert result.stages["recon_all"] == "completed"
+    assert subjects[0] != subjects[1] and subjects[0].exists()
+
+
+def test_reconstruction_finishes_before_dwi_cuda_stages(tmp_path, monkeypatch):
     import fnit.connectome.bids as module
-    image, _ = _inputs(tmp_path / 'bids')
-    anatomy=image.parents[1]/'anat'; anatomy.mkdir()
-    t1=anatomy/'sub-01_T1w.nii.gz'
-    nib.save(nib.Nifti1Image(np.ones((6,6,6),np.float32),np.eye(4)),t1)
-    rotated=tmp_path/'rotated.bvec';rotated.write_text('0 1\n0 0\n0 0\n')
-    commands=[]
-    monkeypatch.setattr(module.shutil,'which',lambda cmd:'/fake/recon-all')
-    subject=tmp_path/'out/freesurfer/sub-01'
-    def run(command, *, check):
-        commands.append(command)
-        orig=subject/'mri/orig/001.mgz';orig.parent.mkdir(parents=True,exist_ok=True);orig.write_bytes(b'orig')
-        if len(commands)==1:raise module.subprocess.CalledProcessError(1,command)
-        _subject(subject);(subject/'scripts/recon-all.done').write_text('done')
-    monkeypatch.setattr(module.subprocess,'run',run)
-    options=dict(subject='01',corrected_dwi=image,rotated_bvecs=rotated)
-    with pytest.raises(module.subprocess.CalledProcessError):
-        prepare_bids_connectome(image.parents[2],tmp_path/'out',**options)
-    state=json.loads((subject/'scripts/fnit_input_state.json').read_text())
-    assert len(state['options']['t1_sha256'])==64
-    result=prepare_bids_connectome(image.parents[2],tmp_path/'out',**options)
-    assert result.stages['recon_all']=='completed'
-    assert '-i' in commands[0] and '-i' not in commands[1]
+    from fnit.connectome.recon_backend import ReconSubjectResult
+    image, _ = _inputs(tmp_path / "bids")
+    subject = _subject(tmp_path / "provided")
+    calls = []
+    def reconstruct(*args, **kwargs):
+        calls.append("recon-finished")
+        return ReconSubjectResult(subject, "supplied", {})
+    monkeypatch.setattr(module, "prepare_recon_subject", reconstruct)
+    monkeypatch.setattr(module, "_prepare_ap_only", lambda *args, **kwargs: {})
+    class Eddy:
+        def __init__(self, **kwargs):
+            assert calls == ["recon-finished"]
+        def run(self, *, out, **kwargs):
+            calls.append("eddy")
+            out.parent.mkdir(parents=True, exist_ok=True)
+            (out.parent / "data.nii.gz").write_bytes(b"dwi")
+            (out.parent / "data.eddy_rotated_bvecs").write_bytes(b"bvecs")
+    monkeypatch.setattr(module, "TorchEDDY", Eddy)
+    prepare_bids_connectome(image.parents[2], tmp_path / "out", subject="01", freesurfer_subject_dir=subject)
+    assert calls == ["recon-finished", "eddy"]

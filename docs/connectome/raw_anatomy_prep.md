@@ -1,5 +1,7 @@
 # 十例原始 T1 的独立官方解剖准备
 
+> 这是 2026-10-02～03 的历史协议与阶段记录，文中的启动状态及接口示例绑定当时版本。当前三种 recon 来源、BIDS 输入与调用示例见[现行 pipeline 说明](README.md)；已完成十例原始 DWI→SC 的对照结论见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)，新模板配对与缓存评测见[本轮记录](../../validation/connectome/paired_pipeline_20261003/README.md)。
+
 ## 1. 功能与流程
 
 `tools/benchmark_connectome_anatomy_prep.py` 为本轮新下载的十例公开 BIDS 数据，分别从原始 T1w 完整执行官方 FreeSurfer `recon-all`。它复用现有 cohort 的官方重建命令、环境与 nibabel 产物检查。默认 CPU 同时运行两例，每例八线程；显式选择尚未启动的 case 子集时可使用最多八个并发 CPU 任务。

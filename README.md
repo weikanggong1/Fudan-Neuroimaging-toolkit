@@ -2,7 +2,7 @@
 
 **本工具包仍处于开发阶段，部分算法尚未完成严格验证，目前不宜作为常规数据处理与分析的默认工具。**
 
-FNIT 提供人脑磁共振（MRI）处理和群体分析的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel。Python 包名为 `fnit`，统一命令行入口为 `fnit`。各功能的运行依赖与安装要求见对应功能页；当前 Connectome 的自动结构重建仍需用户安装并许可的官方 FreeSurfer `recon-all`。
+FNIT 提供人脑磁共振（MRI）处理和群体分析的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel。Python 包名为 `fnit`，统一命令行入口为 `fnit`。各功能的运行依赖与安装要求见对应功能页。Connectome 支持读取已完成 subject、FNIT recon-all 或显式选择的官方 FreeSurfer；默认 auto 有 subject 时读取，没有时选 FNIT，后者须提供已校验的权重与结构像资源。
 
 CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹配原版统计结果，使用普通 float32 连接计算和 QR 正交化回归。模型、影像张量与 NIfTI 输出保持 float32，不自动使用 float16 或 bfloat16。
 
@@ -66,7 +66,15 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
 | [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
 | [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、GPU `eddy`、`dtifit`、TBSS/MMORF） | 原始 AP/PA 或 BIDS DWI → 九张 native/标准参数图；可选 TBSS/FNIRT 或配对 T1/tensor MMORF。PyTorch SynthStrip 脑 mask＋TOPUP；[固定公开十人双分支 benchmark](validation/dmri_pipeline/public10_20261002/README.md)记录原软件对照、逐图误差、分步骤时间与脑图。FNIT 20/20 完成，原软件 19/20 完成；TBSS/配对 T1 MMORF 的完整命令中位耗时为 759.91/571.32 秒，对照 2606.87/2113.98 秒（n=10/9）。逐图误差与原 GPU EDDY 失败记录已公布，输出尚非数值等价。 |
-| [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 从原始 BIDS 自动执行 TOPUP、EDDY、必要时的官方 recon-all，并从一次追踪输出单套或多套 atlas 矩阵；[本轮精度验收](docs/connectome/ACCURACY_OPTIMIZATION_20261003.md)与[前轮真实结果](docs/connectome/actual_cohort_comparison.md)分开记录。 |
+| [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 标准 BIDS DWI/T1 或已有校正 DWI；provided/FNIT/显式官方 recon 三路，一次全脑 ACT＋SIFT2 输出一或多对 SS/VV/SV 用户模板的四矩阵。换模板复用内容 checkpoint；[本轮评测范围](validation/connectome/paired_pipeline_20261003/README.md)。 |
+
+### Connectome 当前接口
+
+- 解剖先于 DWI GPU 阶段完成：已有 subject 用 provided；无 subject 的 auto 用 FNIT，须给权重与结构像资源；官方 FreeSurfer 须显式选择。见 [recon 三路选择](docs/connectome/recon_backends.md)。
+- 一对或多对用户 surface/volume 模板定义矩阵的行与列，支持 SS、VV、SV；跨模板输出为矩形，不强制对称。同模板复用原 square 统计。JSON、三路 CLI 与 Python 示例见 [主流程](docs/connectome/README.md)和[模板说明](docs/connectome/template_pairs.md)。
+- [共享 checkpoint](docs/connectome/checkpoints.md)绑定内容 SHA、数值源码与参数；换模板不重新追踪，换 assignment 半径只重算矩阵。默认半径仍为4 mm，不改变原精度或统计定义。
+- MNI volume 标签可与配准用 MNI intensity 不同体素网格，但须属于同一 MNI/RAS 坐标空间。DenseWarp 保持目标 T1 网格的 RAS-mm field，只更新 source metadata；标签一次 nearest 采样到 T1，再用既有 T1→DWI nearest。
+- 新增接入的真实评测范围见 [paired pipeline 记录](validation/connectome/paired_pipeline_20261003/README.md)；下面历史精度段保留原版本结论，不作为新版本的整链验收。
 
 ### Connectome 两轮验证
 

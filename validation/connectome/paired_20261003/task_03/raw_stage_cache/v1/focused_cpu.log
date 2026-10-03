@@ -1,0 +1,44 @@
+.........F...F......................................                     [100%]
+=================================== FAILURES ===================================
+________________ test_changed_output_during_hash_cannot_publish ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-gongwk/pytest-675/test_changed_output_during_has0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc3b4af6ed0>
+
+    def test_changed_output_during_hash_cannot_publish(tmp_path, monkeypatch):
+        _, output, state, key = _key(tmp_path)
+        original = bids.file_fingerprint
+        def mutate(path):
+            record = original(path)
+            if bids.Path(path).resolve() == output.resolve():
+                before = output.stat()
+                output.write_bytes(b"modified")
+                os.utime(output, ns=(before.st_atime_ns, before.st_mtime_ns))
+            return record
+        monkeypatch.setattr(bids, "file_fingerprint", mutate)
+>       with pytest.raises(RuntimeError, match="output changed while hashing"):
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/connectome/test_raw_stage_cache_integrity.py:96: Failed
+____ test_staging_damage_is_restored_without_repeating_identical_downstream ____
+
+raw_case = {'root': PosixPath('/tmp/pytest-of-gongwk/pytest-675/test_staging_damage_is_restore0/bids'), 'output': PosixPath('/tmp...01_dwi.nii.gz'), 'subject': PosixPath('/tmp/pytest-of-gongwk/pytest-675/test_staging_damage_is_restore0/subject'), ...}
+
+    def test_staging_damage_is_restored_without_repeating_identical_downstream(raw_case):
+        _run(raw_case)
+        raw = raw_case["output"] / "preproc/raw"
+        (raw / "AP.bval").write_text("0 1001\n")
+        result = _run(raw_case)
+>       assert (raw / "AP.bval").read_text() == "0 1000\n"
+E       AssertionError: assert '0 1001\n' == '0 1000\n'
+E         
+E         - 0 1000
+E         ?      ^
+E         + 0 1001
+E         ?      ^
+
+tests/connectome/test_raw_stage_cache_integrity.py:194: AssertionError
+=========================== short test summary info ============================
+FAILED tests/connectome/test_raw_stage_cache_integrity.py::test_changed_output_during_hash_cannot_publish
+FAILED tests/connectome/test_raw_stage_cache_integrity.py::test_staging_damage_is_restored_without_repeating_identical_downstream
+2 failed, 50 passed in 5.72s

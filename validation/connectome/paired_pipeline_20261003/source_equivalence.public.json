@@ -1,0 +1,49 @@
+{
+  "freeze_commit": "8bc337c4ec688e64385ef5c2300d369281bf1a02",
+  "candidate_commit": "7ba73de2f55bb17b1ff16894261619739a2c7f79",
+  "shared_core_ast_exact": true,
+  "raw_numerical_producer_calls_ast_exact": true,
+  "canonical_nonempty_tensor_branch_ast_exact": true,
+  "prepare_template_computation_ast_exact": true,
+  "byte_identical_workers_sha256": {
+    "src/fnit/connectome/anatomy.py": "49dcf7dd05bd83d8c83e383c1749a63a0d3f3662ea7658795052b7c1d24aa516",
+    "src/fnit/connectome/bet.py": "aa42b1ab45321257e56aebf3b3472b283df9b5b6b577fdbee16740834926f6ee",
+    "src/fnit/connectome/response.py": "2a595044ff31a6497df5efcdeb5df7fe5a651c89a00f629dd819105707e40ebb",
+    "src/fnit/connectome/fod.py": "f82d2174109d05b9f820b6abe98e3792e48ae63e02ace2f2640f10c4c2052aaa",
+    "src/fnit/connectome/masks.py": "fb8c0a8753e71c342cfb40b19532fb9441f7c13afa230ba153fb6c6b70f1b809",
+    "src/fnit/connectome/mtnormalise.py": "549a899aa19a1865860008fbce133e7197b942550ae074aace88b93adec96a4d",
+    "src/fnit/connectome/tracking.py": "eedff23412eca8b203c05a6252630efb0cf9effb98e5a652f816ca0aa45f4753",
+    "src/fnit/connectome/sift2.py": "8481bc75ac482c99b6768f4adf946df3dcd49bfc4d81e7b45972fb69e1cf06a1",
+    "src/fnit/connectome/sift2_fixels.py": "c23e376c4c33df2bb49f1af9eece1aea0531ad5f8e66db622e9372f719e0bba4",
+    "src/fnit/connectome/sift2_mapping.py": "64ed607d612dc157c1f91006f511ee73c07a1afd0f2ad53913828bcfca48d826",
+    "src/fnit/connectome/sift2_optimizer.py": "810615c533141f7ac145f563fa35712705225cc1683de5283b901a6f63c01281",
+    "src/fnit/connectome/sift2_proc_mask.py": "03f2e6ea47fb42168768c540a9a2bac08b75b4db53a47683fb1eed8e15a28ca1",
+    "src/fnit/connectome/tcksample_precise.py": "f428520f1f804008007f61ea58f00c47ca05cd01fe915fe6582dfcc3143fa0ee",
+    "src/fnit/connectome/assignment.py": "c8b21b5aedd0ef63520d5429d7defa39532c9f4a05c1b414b653a04384dc50e0",
+    "src/fnit/connectome/paired_assignment.py": "17ca7913215a1ad1500303d8fc2dd39f5fedfcb30808346732e9a023848b938d"
+  },
+  "remaining_changes": [
+    "Official recon-all setup and source validation",
+    "Raw stage output integrity checks; no changes to solver calls; corrected inputs remain supplied",
+    "Input path protection before preparation and output writing",
+    "Unilateral background-only hemisphere acceptance; existing bilateral tensor branch unchanged",
+    "MNI cache T1 reference content/geometry and unchanged-input guards"
+  ],
+  "benchmark_scope": "The frozen ten-case benchmark uses supplied corrected DWI, supplied official anatomy and existing bilateral native SS/VV/SV templates; it does not exercise new recon execution or MNI templates.",
+  "benchmark_collector_commit": "f11e6dffe13b9f2bbd465adf484c535e3c62a372",
+  "benchmark_numerical_harness_ast_exact": {
+    "worker": true,
+    "Observe": true,
+    "cpu_pair_oracle": true,
+    "phase_arguments": true,
+    "source_identity": true
+  },
+  "benchmark_memory_monitor_byte_exact": true,
+  "fresh_official_backend_byte_exact_to_candidate": {
+    "tested_source_commit": "3b697657919347281d02285b3cd634008635a4c0",
+    "file": "src/fnit/connectome/recon_backend.py",
+    "sha256": "15762bad8691d632cedb39c3388de17766a24c40bfd626b45a18456d2207b182",
+    "byte_exact": true,
+    "scope": "The exact backend module that completed the fresh official T1 run is unchanged in the final CPU-tested/published source; separate input-protection changes are CPU regression-tested."
+  }
+}
