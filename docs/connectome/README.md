@@ -1,8 +1,10 @@
 # UKBConnectome_pipeline：从 BIDS DWI/T1 到结构连接矩阵
 
-[返回首页](../../README.md) · [源码](../../src/fnit/connectome/) · [逐阶段验证](../../validation/connectome/ds004666/README.md)
+[返回首页](../../README.md) · [源码](../../src/fnit/connectome/) · [本轮精度优化与验收状态](ACCURACY_OPTIMIZATION_20261003.md) · [既有逐阶段验证](../../validation/connectome/ds004666/README.md)
 
-输入原始 BIDS DWI、可选反向相位编码图像和配对 T1w，流程依次运行 PyTorch TOPUP、PyTorch EDDY、官方 FreeSurfer `recon-all`、响应估计、MSMT-CSD、ACT/iFOD2 追踪、SIFT2 和 atlas 端点赋值。已有完整 FreeSurfer subject 或已校正 DWI 时跳过相应阶段。多个 atlas 共用一次追踪和 SIFT2，各输出 count、SIFT2 FBC、mean length、mean FA 四张矩阵。
+输入原始 BIDS DWI、可选反向相位编码图像和配对 T1w，流程依次运行 PyTorch TOPUP、SynthStrip 脑掩膜、PyTorch EDDY、官方 FreeSurfer `recon-all`、响应估计、MSMT-CSD、ACT/iFOD2 追踪、SIFT2 和 atlas 端点赋值。已有完整 FreeSurfer subject 或已校正 DWI 时跳过相应阶段。多个 atlas 共用一次追踪和 SIFT2，各输出 count、SIFT2 FBC、mean length、mean FA 四张矩阵。
+
+验证记录分为前轮数据流加速和本轮精度优化。前轮十例结果已完成，raw-DWI CLI 中位数 643.623 s、官方重复范围通过率 57.96% 均对应前轮实际版本。本轮从 `7af34e6d` 开始，完整 raw 验收正在运行；精度、配对耗时和显存结论待实际比较完成，见第 5 节及[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)。
 
 ## 1. 功能和流程
 
@@ -14,8 +16,11 @@ flowchart TD
     SEL --> CORR{"已提供校正 DWI 与旋转 bvec？"}
     CORR -- 是 --> DWI["校正 DWI 与旋转梯度"]
     CORR -- 否 --> REV{"有配对的反向相位编码图像？"}
-    REV -- 有 --> TOP["PyTorch TOPUP"] --> EDDY["PyTorch EDDY"]
-    REV -- 无 --> EDDY
+    REV -- 有 --> TOP["PyTorch TOPUP"]
+    TOP -- 校正 b0 --> STRIP["PyTorch SynthStrip：EDDY 脑掩膜"]
+    REV -- 无 --> APB0["原 AP 的 b0 均值"] --> STRIP
+    TOP -- 场系数 --> EDDY["PyTorch EDDY"]
+    STRIP --> EDDY
     EDDY --> DWI
 
     T1["BIDS T1w 或已完成的 subject"] --> FS{"recon-all 已完成？"}
@@ -113,7 +118,7 @@ OUTPUT_DIR/
 
 旧显式 `--dwi/--bvals/--bvecs` 单 atlas 入口保留平铺输出；BIDS 或多 atlas 入口按 `atlases/<name>/` 分开。矩阵行列以同目录的 `nodes.tsv` 为准。零连接边的均值为零。
 
-BIDS 的完成记录同时绑定数值实现修订号。升级本轮精度修正后，旧矩阵不能仅凭文件存在被跳过；需使用新的输出目录，或显式 `--overwrite` 重算。`--overwrite` 沿用原有强制重算规则，原始 MRI 不改写。
+BIDS 的完成记录同时绑定连接组数值实现修订号。更换已采用的梯度解释或追踪实现时，旧矩阵需重新计算；使用新的输出目录，或显式 `--overwrite` 重算。`--overwrite` 沿用原有强制重算规则，原始 MRI 不改写。
 
 ### 参数
 
@@ -132,7 +137,7 @@ BIDS 的完成记录同时绑定数值实现修订号。升级本轮精度修正
 | `--shell-bvals`、`--dwi-to-t1-world` | 可选 shell 中心序列和 4×4 DWI→T1 RAS-mm 矩阵；省略则估计 shell 并运行 TorchFLIRT。 |
 | `--n-seeds`、`--seed` | 播种尝试数必选；随机种子默认 0。PyTorch 与 MRtrix 相同数值 seed 不生成同一流线。 |
 | `--eddy-gp-seed` | 可选整数 1..2³²−1；固定 EDDY GP 体素选点，与追踪 `--seed` 独立。默认省略，沿用 EDDY 原有的时间种子。改变此参数会重新计算自动管理的 EDDY 输出。 |
-| `--device`、`--compile-arc` | 设备默认 `cuda:0`；CUDA 默认 TF32，不自动用半精度。编译圆弧核为可选项，本轮无损比较关闭它：已测编译输出存在逐值差异，未作为无损优化采用。 |
+| `--device`、`--compile-arc` | 设备默认 `cuda:0`；CUDA 默认 TF32，不自动用半精度。编译圆弧核为可选项；前轮同输入比较发现编译输出存在逐值差异，本轮精度验收继续关闭该选项。 |
 | `--output-dir`、`--overwrite` | 结果目录必选；后者强制重算和覆盖。 |
 
 ## 3. 命令行调用
@@ -141,7 +146,7 @@ BIDS 的完成记录同时绑定数值实现修订号。升级本轮精度修正
 conda env create -f environment.yml
 conda activate fnit
 
-# 本轮 100k 播种、八套 atlas 的实测采用此 allocator 配置。
+# 前轮十例评测和本轮精度验收均使用此 allocator 配置。
 # 在启动 Python 进程前设置；两个比较版本使用相同配置。
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
@@ -161,7 +166,7 @@ fnit UKBConnectome_pipeline \
 
 对照评测同时固定 `seed` 和 `eddy_gp_seed`。若只固定追踪种子，EDDY 选点仍可能改变校正 DWI，后续模型和流线也会随之改变。
 
-显存记录区分 PyTorch 已分配、预留与整个 GPU 父子进程占用；本轮采用十进制 20 GB 门槛。采样完整且三个峰值都低于门槛的运行才纳入合格汇总。具体参数与实际记录见[十例评测协议](raw_cohort_benchmark.md)，不能把某个追踪组件的显存代替完整原始 DWI 流程的峰值。
+显存记录区分 PyTorch 已分配、预留与整个 GPU 父子进程占用，采用十进制 20 GB 门槛。采样完整且三个峰值都低于门槛的运行才纳入合格汇总。前轮参数见[十例评测协议](raw_cohort_benchmark.md)，本轮验收见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)；追踪组件和完整原始 DWI 流程的峰值分别报告。
 
 多个 DWI run/session 时用 `--session`、`--run`、`--acquisition`、`--direction` 明确选片。DWI 需要 `.bval`、`.bvec`、JSON 中的 `PhaseEncodingDirection` 以及 `TotalReadoutTime` 或 `EffectiveEchoSpacing`。有反向相位编码 EPI/DWI 时通过 `B0FieldSource`/`B0FieldIdentifier` 或 `IntendedFor` 配对；没有反向图像时跳过 TOPUP，EDDY 无场图运行。侧车支持 BIDS 继承规则，约定依据 [BIDS MRI 规范](https://bids-specification.readthedocs.io/en/stable/modality-specific-files/magnetic-resonance-imaging-data.html)。
 
@@ -226,6 +231,7 @@ fnit UKBConnectome_pipeline \
 |---|---|---|
 | AP/PA 组织与选 b0 | BIDS 配对、选片、`prepare_ukb_topup_pair` | `fslroi`/`fslmerge -t`；保留第一幅 AP 网格与两幅选定 b0，生成 `acqparams.txt` |
 | 畸变校正 | `TorchTOPUP` | `topup --imain --datain`；场系数、运动参数、校正 b0 |
+| EDDY 脑掩膜 | b0 均值与 PyTorch `SynthStrip`，保留 AP 网格 | `mri_synthstrip -i b0_mean.nii.gz -m nodif_brain_mask.nii.gz`；原网格二值掩膜 |
 | 涡流/运动校正 | `TorchEDDY`，固定评测的 `eddy_gp_seed` | `eddy`/`eddy_cuda`；校正完整 DWI、旋转 bvec、运动与异常切片记录 |
 | T1 重建 | 官方 `recon-all`；已有完整 subject 则读取 | `recon-all -i T1w -all`；分割、脑图、双半球表面和注释 |
 | b0、掩膜、FA | `mean_bzero`、BET、`dwi2mask_legacy`、张量 IWLS | `dwiextract -bzero`/`mrmath mean`、`bet`、`dwi2mask`、`dwi2tensor`/`tensor2metric -fa` |
@@ -239,7 +245,7 @@ fnit UKBConnectome_pipeline \
 | atlas→DWI | `resample_labels_nearest`，保留整数标签 | `mrtransform -linear ... -template ... -interp nearest` |
 | 矩阵 | `build_connectomes`，严格 4 mm 径向赋值 | `tck2connectome -symmetric -assignment_radial_search 4`；count、Σw、加权长度与 FA |
 
-默认解剖由 FreeSurfer 单独构建 5TT，Tian 默认采用 SynthMorph；原 UKB 脚本另外使用 FIRST 与 FNIRT。两条解剖路径不同，固定输入组件 oracle 复用同一实际 5TT/变换/atlas；本轮独立 raw 官方链自行生成这些产物。两类验证分开报告，默认路径不能称为原 UKB 全链逐值复现。Glasser 的 Workbench 依赖见上文；官方 FSL/MRtrix 命令仅在独立 benchmark 中执行。
+默认解剖由 FreeSurfer 单独构建 5TT，Tian 默认采用 SynthMorph；原 UKB 脚本另外使用 FIRST 与 FNIRT。两条解剖路径不同，固定输入组件 oracle 复用同一实际 5TT/变换/atlas；前轮独立 raw 官方链自行生成这些产物，本轮复用已核验的完成结果。两类验证分开报告，默认路径不能称为原 UKB 全链逐值复现。Glasser 的 Workbench 依赖见上文；官方 FSL/MRtrix 命令仅在独立 benchmark 中执行。
 
 以下命令用于独立 MRtrix 对照，输入须与 FNIT 使用同一 FOD、5TT、GMWMI、FA 与 atlas；完整前处理和七模板命令在[逐阶段验证](../../validation/connectome/ds004666/README.md)中。
 
@@ -258,11 +264,31 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 
 ## 5. 精度、运行时间与脑图
 
-本轮重新下载 ds001226 的十例原始配对数据：CON01、CON03、CON04–CON11，快照 `fb4d0fda44f2ab7a732fb4ab6cd62add09dc1cd7`，许可 CC0。逐文件来源、大小和 SHA 见[原始数据来源与预处理](../../validation/connectome/tenraw_20261002/task_01/README.md)。解剖从这些新下载 T1 独立执行官方 `recon-all`；DWI 从原始 AP/PA 开始校正。正式十例使用每例 100,000 次尝试播种、八套 atlas、32 张矩阵。原始 DWI 运行、官方重建、分步骤诊断和 GPU 排队时间分别记录，协议见[十例正式评测](raw_cohort_benchmark.md)。
+### 本轮精度优化：2026-10-03，完整 raw 验收正在执行
+
+本轮从已发布基线 `7af34e6d` 开始，复用前轮 ds001226 十例原始 BIDS 及已完成的官方 FreeSurfer subject。正式科学候选为 `1fe86ab8` 的代码内容，保留梯度/张量解释、四分位索引及 ACT 的 SGM 弦方向修正；其余未取得联合收益的候选撤回。每例仍为 100,000 次尝试播种、八套 atlas、四类矩阵，默认 TF32、`compile_arc=False`，原始 MRI 与旧结果保持原样。
+
+当前完整 raw 验收共 12 次 CLI：十例正式候选，加 CON01/03 的两次基线配对。**完整矩阵精度、配对耗时和三类显存结论待实际运行与比较完成。**分项组件结果如下；整链状态由[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)维护。
+
+| 子任务 | 本轮组件核对与处理 | 输入、参数、官方对照、耗时和脑图 |
+|---|---|---|
+| 1 TOPUP / EDDY | 固定参数渲染改善，完整 CON03 EDDY 图像却退化；两种候选均拒绝，保持原生产实现 | [task 1 验证](../../validation/connectome/accuracy_20261003/task_01/README.md) |
+| 2 梯度 / DTI / CSD / 归一化 | 同正式 FNIT 校正 DWI 的 FA 差异减少；Double 梯度解释、affine 极分解及四分位索引修正进入正式候选 | [task 2 验证](../../validation/connectome/accuracy_20261003/task_02/README.md) |
+| 3 iFOD2 / ACT | 真实 CON03 解剖位置的 SGM 局部弧诊断：最小点选择差异 20/324→0/324；保留弦方向修正，撤回无速度收益的 active-only 校准 | [task 3 验证](../../validation/connectome/accuracy_20261003/task_03/README.md) |
+| 4 5TT / GMWMI / atlas | 两例真实完整组织图和自然刚体标签重采样已逐值一致，保持成熟实现 | [task 4 验证](../../validation/connectome/accuracy_20261003/task_04/README.md) |
+| 5 SIFT2 / FA 采样 / 矩阵 | 同官方 TCK 的八套 atlas count 一致，Double 权重候选使多数浮点矩阵误差增加，保持成熟实现 | [task 5 验证](../../validation/connectome/accuracy_20261003/task_05/README.md) |
+
+![本轮同正式 FNIT 校正 DWI 的 CON10 FA 组件对照](../../validation/connectome/accuracy_20261003/task_02/formal_CON10_FA_precision.png)
+
+该图及其完整体素指标属于同输入张量组件，来源和色标见 task 2。前轮的 643.623 s 与 57.96% 保留在下节对应版本的实际记录中。
+
+### 前轮数据流加速：2026-10-02 轮实际结果
+
+前轮重新下载 ds001226 的十例原始配对数据：CON01、CON03、CON04–CON11，快照 `fb4d0fda44f2ab7a732fb4ab6cd62add09dc1cd7`，许可 CC0。逐文件来源、大小和 SHA 见[原始数据来源与预处理](../../validation/connectome/tenraw_20261002/task_01/README.md)。解剖从这些新下载 T1 独立执行官方 `recon-all`；DWI 从原始 AP/PA 开始校正。正式十例使用每例 100,000 次尝试播种、八套 atlas、32 张矩阵。原始 DWI 运行、官方重建、分步骤诊断和 GPU 排队时间分别记录，协议见[十例正式评测](raw_cohort_benchmark.md)。
 
 十例两版本完整运行与比较已完成：320 张矩阵逐值及解析后标量 bits 一致，130 项独立官方解剖数据一致；所有合格运行的三类实测显存峰值均低于 20 GB。组件配对实验与十例共享 GPU 整链观测分列如下。
 
-| 本轮真实输入 | 已完成的比较 | 证据 |
+| 前轮真实输入 | 已完成的比较 | 证据 |
 |---|---|---|
 | CON01/CON03，同输入 CSD | 12 组实际中间张量、30 项数组比较逐位一致；观测耗时分别下降约 6.92%/3.45%，CON03 第二轮负载不稳定 | [建模优化与时间边界](../../validation/connectome/tenraw_20261002/task_02/README.md) |
 | CON03，同输入的官方建模组件 | WM response 最大差 1.29734e-7；处理 mask 内 WM CSD/归一化 WM 最大差 3.89723e-8/5.96046e-8，偏置场全网格最大差 2.44141e-4。另一次 CPU DTI 诊断的 FA 最大差 0.0462486，196 体素误差超过 1e-5；该诊断不作为十例 GPU 整链指标 | [同输入精度、原命令和脑图](../../validation/connectome/tenraw_20261002/task_02/README.md#5-本轮精度耗时与脑图) |
@@ -273,9 +299,9 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 | CON01/CON03，固定 TCK 的 SIFT2 候选 | 两例严格逐值门槛均未通过，未采用优化器缓存。保留全部配对、原软件耗时及逐值误差 | [SIFT2/精确 FA 组件说明](SIFT2_SAMEINPUT_OPTIMIZATION.md) |
 | CON01/CON03，同输入 100 万播种的追踪组件 | 分别接受 144,343/116,285 条流线，五类数组 SHA 全相同；耗时 CON01 2073.123→1901.716 s、CON03 2250.341→5220.029 s，未宣称稳定提速。三种观测显存峰值均低于 5.027 GB；CON03 候选最大采样间隔 8.709 s，组件观测不替代正式整链显存验收 | [完整参数、耗时及容量记录](TRACKING_OPERATORS.md) |
 | 十例，独立官方解剖与 connectome | 官方 SynthMorph、FreeSurfer/MRtrix 与原 UKB atlas 脚本完成结构准备、DWI 配准、五种子追踪及八 atlas 矩阵；各例实际 producer 与恢复来源分别核验。独立 raw 链的矩阵验收另列，完成不等于科学匹配 | [结构像实际报告与脑图](raw_official_anatomy_reference.md) |
-| 十例，两版各一个 FNIT seed 对官方五种子 raw 链 | 20 组 × 240 = 4800 项判定，通过 2782（57.96%）；两版各 1391/2400，20 组整体均未进入官方重复范围。本轮 FNIT 自身重复与群体分布未评估 | [最终结果与 2018 项失败明细](FINAL_RAW_MATRIX_RESULTS.md) |
+| 十例，两版各一个 FNIT seed 对官方五种子 raw 链 | 20 组 × 240 = 4800 项判定，通过 2782（57.96%）；两版各 1391/2400，20 组整体均未进入官方重复范围。前轮 FNIT 自身重复与群体分布未评估 | [最终结果与 2018 项失败明细](FINAL_RAW_MATRIX_RESULTS.md) |
 
-仍需补齐的验证：正式十例 CLI 未保存响应、FOD 和归一化中间产物，当前没有这些阶段的十例同输入官方比较；已保存的 CON03 组件结果不能替代它们。同输入 CPU DTI 诊断还保留 CON07 方向最大差 41.632306°、CON10 FA 最大差 0.245623，原因尚未完全定位，见[十例建模诊断](../../validation/connectome/tenraw_20261002/task_02/README_official_chain.md#5-实际精度耗时与脑图)。后续应分别定位前处理、DTI 与固定 FOD 追踪的差异，并补正式 raw 链的 FNIT 多种子重复。
+前轮报告记录的验证缺口：正式十例 CLI 未保存响应、FOD 和归一化中间产物，当时没有这些阶段的十例同输入官方比较；已保存的 CON03 组件结果不能替代它们。同输入 CPU DTI 诊断还保留 CON07 方向最大差 41.632306°、CON10 FA 最大差 0.245623，当时原因尚未完全定位，见[十例建模诊断](../../validation/connectome/tenraw_20261002/task_02/README_official_chain.md#5-实际精度耗时与脑图)。本轮对应组件更新见上表；完整 raw 链精度与配对时间随新运行继续核对。
 
 下表是既有 ds004666/UKB 结果，保留对应版本与输入范围。
 
@@ -289,7 +315,7 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 | 固定同一 100k TCK/权重/atlas | 七套 count 逐元素相同；FBC 最大绝对误差 ≤5.07e-5 | [七 atlas 矩阵和脑图](../../validation/connectome/ds004666/seven_atlas_100k_20260929.md) |
 | 独立 100k 追踪 | 部分 count/support 落入 MRtrix 自身三次重复范围；长度、8 mm 端点和 TDI 未全面进入 | [三次对照和脑图](../../validation/connectome/ds004666/tracking_100k_three_seed_20260929.md) |
 
-最终随机追踪验收采用**MRtrix 自身重复范围**：双方固定同一输入，各运行多个种子，比较接受率、长度分布、端点、TDI 及每套 atlas 的四张矩阵；误差不高于官方重复最大值、相似度不低于官方重复最小值即通过，优于该范围也通过。未定义的相关性保留为空值。固定轨迹矩阵精度已高，独立追踪仍有指标未达成；BIDS 编排的加入不等于原 UKB 全链数值一致。现有五种子结论与实际失败项见[重复性结论](REPEATABILITY_CONCLUSIONS.md)。两例 100 万播种 A/B 已完成逐位核对；正式十例的无损优化比较已全部完成；独立 raw 官方链通过 2782/4800 项指标、20 组整体失败；它与固定 FOD 的追踪验收分别记录，仍不能宣称全流程匹配。1,000 万播种尚无实测。
+最终随机追踪验收采用**MRtrix 自身重复范围**：双方固定同一输入，各运行多个种子，比较接受率、长度分布、端点、TDI 及每套 atlas 的四张矩阵；误差不高于官方重复最大值、相似度不低于官方重复最小值即通过，优于该范围也通过。未定义的相关性保留为空值。固定轨迹矩阵精度已高，独立追踪仍有指标未达成；BIDS 编排的加入不等于原 UKB 全链数值一致。现有五种子结论与实际失败项见[重复性结论](REPEATABILITY_CONCLUSIONS.md)。两例 100 万播种 A/B 已完成逐位核对；前轮正式十例的数据流加速比较已全部完成；独立 raw 官方链通过 2782/4800 项指标、20 组整体失败；它与固定 FOD 的追踪验收分别记录，仍不能宣称全流程匹配。1,000 万播种尚无实测。
 
 历史 ds004666 组件优化保持原数值与 RNG 操作；其 Torch 已分配/预留峰值 2.544/2.938 GB 仅对应固定已有配准的组件范围，不能作为新的原始 BIDS 整链峰值。完整精确 FA 只从 109.81 降至 106.82 ms，收益很小；追踪的 SH、组织采样与圆弧概率仍是后续主要优化对象。
 
@@ -297,9 +323,9 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 
 ![CON09 优化前后真实 FA 与 atlas](../../validation/connectome/tenraw_20261002/task_05/final_actual_chain/figures/sub-CON09.fs-aparc.brain.png)
 
-本轮新下载 CON03 的五次追踪平均分布如下。这里显示保存点的访问次数与差异，不等同于 MRtrix `tckmap`；完整来源、分箱和矩阵脑图见五种子报告。
+前轮新下载 CON03 的五次追踪平均分布如下。这里显示保存点的访问次数与差异，不等同于 MRtrix `tckmap`；完整来源、分箱和矩阵脑图见五种子报告。
 
-![本轮 CON03 五次实际追踪分布](../../validation/connectome/tenraw_20261002/task_04_repeat_fivefnit_reference/point_visit_brain.png)
+![前轮 CON03 五次实际追踪分布](../../validation/connectome/tenraw_20261002/task_04_repeat_fivefnit_reference/point_visit_brain.png)
 
 既有 ds004666 的[配对 T1、校正前后 b0 与 atlas 示例](figures/ds004666_t1_raw_vs_topup_eddy_atlas.png)仅对应原报告的输入和版本。
 
@@ -338,7 +364,8 @@ FNIT 已有独立的 [TorchBEDPOSTX](../bedpostx/README.md) 和 [TorchProbtrackX
 
 | 日期 | 更新与证据 |
 |---|---|
-| 2026-10-03 | 新下载十例原始 AP/PA/T1，完成 20 次独立 recon-all 与 20 次 raw-DWI 两版运行；320 矩阵/130 解剖数据严格一致，保留所有官方重复范围失败项，见[十例结果](actual_cohort_comparison.md) |
+| 2026-10-03：本轮精度优化 | 从 `7af34e6d` 核对五项组件，正式候选保留梯度/张量和 SGM 修正；12 次完整 raw CLI 正在执行，联合验收待实际结果，见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md) |
+| 2026-10-03：前轮结果汇总 | 前轮下载十例原始 AP/PA/T1，完成 20 次独立 recon-all 与 20 次 raw-DWI 两版运行；320 矩阵/130 解剖数据严格一致，保留所有官方重复范围失败项，见[前轮十例结果](actual_cohort_comparison.md) |
 | 2026-10-02 | 批量整理轨迹、原点打包、多 atlas 复用；真实逐值一致性和计时见[无损优化报告](../../validation/connectome/ds004666/lossless_20261002/README.md) |
 | 2026-09-30 | 原始 BIDS、TOPUP/EDDY 自动跳过、单/多 atlas；[真实 UKB 流程与续跑](../../validation/connectome/ukb_bids_e2e_20260930.md) |
 | 2026-09-29 | iFOD2/ACT、可选编译核、100k 三种子和七模板对照；[验证索引](../../validation/connectome/ds004666/README.md) |

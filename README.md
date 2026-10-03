@@ -66,7 +66,14 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
 | [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
 | [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 原始 AP/PA 或 BIDS DWI → 九张 native/标准参数图；无 T1w 用 TBSS，有 T1w 可选 MMORF。PyTorch SynthStrip 脑 mask＋新版 TOPUP。[最新同 raw 整链](validation/dmri_pipeline/end_to_end_synthstrip_topup_20261002.md)：FNIT 6.75 分钟、独立官方 SynthStrip＋FSL/AMICO 34.26 分钟；标准九图固定 ROI r=0.9880–0.9987。对旧 BET 协议 r=0.8465–0.9597；尚非逐值相等。 |
-| [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 从原始 BIDS 自动执行 TOPUP、EDDY、必要时的官方 recon-all，并从一次追踪输出单套或多套 atlas 矩阵；[真实数据对照](validation/connectome/ds004666/README.md)。 |
+| [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 从原始 BIDS 自动执行 TOPUP、EDDY、必要时的官方 recon-all，并从一次追踪输出单套或多套 atlas 矩阵；[本轮精度验收](docs/connectome/ACCURACY_OPTIMIZATION_20261003.md)与[前轮真实结果](docs/connectome/actual_cohort_comparison.md)分开记录。 |
+
+### Connectome 两轮验证
+
+- **前轮数据流加速（2026-10-02 轮）**：十例两版的 320 张矩阵逐值一致，raw-DWI CLI 中位数 761.722→643.623 s；共享 GPU 下的实测时间见[前轮十例报告](docs/connectome/actual_cohort_comparison.md)。对独立官方 raw 链的通过率为 57.96%，整体未进入官方重复范围，见[前轮完整矩阵判定](docs/connectome/FINAL_RAW_MATRIX_RESULTS.md)。
+- **本轮精度优化（2026-10-03）**：复用相同十例原始 BIDS 与已完成的官方 FreeSurfer subject，正式候选保留梯度/张量解释、归一化四分位索引及 ACT 的 SGM 弦方向修正。十例候选与 CON01/03 两次基线配对正在运行，完整精度、耗时及显存结论待实际验收，见[本轮总说明](docs/connectome/ACCURACY_OPTIMIZATION_20261003.md)。
+
+本轮组件记录：[1 TOPUP/EDDY](validation/connectome/accuracy_20261003/task_01/README.md)、[2 梯度/建模](validation/connectome/accuracy_20261003/task_02/README.md)、[3 iFOD2/ACT](validation/connectome/accuracy_20261003/task_03/README.md)、[4 解剖/atlas](validation/connectome/accuracy_20261003/task_04/README.md)、[5 固定轨迹矩阵](validation/connectome/accuracy_20261003/task_05/README.md)。各项保留实际采用或拒绝的候选、官方对照、耗时和脑图。
 
 ### 后续分析（Post analysis）
 
