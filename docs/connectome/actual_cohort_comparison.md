@@ -264,7 +264,7 @@ export_helper="$benchmark_root/formal_actual_comparison_helper_v9/tools/referenc
 
 ```bash
 recovery_helper="$benchmark_root/formal_actual_comparison_helper_v9/tools/reference"
-# 以下为新运行实际就绪后的调用示例；当前尚未据此启动新比较。
+# 读取实际已完成来源的示例；报告写入全新目录，保留已有比较。
 "$benchmark_python" "$recovery_helper/benchmark_connectome_cohort_compare.py" \
   --manifest "$benchmark_root/formal_baseline_raw_v2/input_manifest.json" \
   --prep-bindings "$benchmark_root/formal_harness_staged_gpu_v2/candidate_prep_bindings.json" \
@@ -273,10 +273,9 @@ recovery_helper="$benchmark_root/formal_actual_comparison_helper_v9/tools/refere
   --candidate-root "$benchmark_root/formal_candidate_raw_staged_v1" \
   --baseline-driver "$benchmark_root/formal_baseline_common_v3_raw_rerun_v1_driver/status.json" \
   --candidate-driver "$benchmark_root/formal_candidate_raw_staged_v1_driver/status.json" \
-  --gpu-origin-bindings "$benchmark_root/recovery/actual_GPU_origin_bindings.json" \
   --prior-comparison-dir "$benchmark_root/root_actual_cohort_comparison_v3" \
   --gpu-origin-bindings "$benchmark_root/formal_actual_mixed_GPU_origins_v1/origins.json" \
-  --report-dir "$benchmark_root/root_actual_cohort_comparison_v3" \
+  --report-dir "$benchmark_root/root_actual_cohort_comparison_new" \
   --poll-seconds 60 --timeout-hours 72
 ```
 
@@ -317,7 +316,9 @@ JSON 记录实际 QC 和参数的逐项差异。wall 模式没有诊断 stage ho
 - **无损性**：320 张矩阵逐值及 CSV 解析后的标量 bits 一致，全部误差和 ULP 为 0。完整 corrected DWI、TOPUP coef/iout/acqparams、rotated bvec、DWI→T1、5TT/GMWMI、脑掩膜、FA、atlas 和节点顺序严格相同。FA 的原 NaN 位置和 payload 保留，未删除体素或填零。
 - **独立结构重建**：10 例 × 13 项指定科学数据全部一致，包括体素、坐标、faces、annotation 与几何；`brain.mgz` 和 surface 的非科学 metadata 可以不同，所以整文件 SHA 是否相同另列。
 - **显存**：20 次合格运行的最高 allocated 为 14,682,072,064 bytes、reserved 为 17,628,659,712 bytes、进程树采样峰值为 19,815,989,248 bytes，均严格低于十进制 20 GB。原监测失败和重试失败保留；只有真实完成且采样完整的独立新运行进入汇总。采样最大值不是连续显存上界。
-- **官方匹配**：以上无损性是 FNIT 优化前后比较。官方链的五种子矩阵重复范围、固定输入的五次 FNIT 追踪以及独立 raw 链分别验收，不能用优化前后一致代替与官方一致。当前仍有科学指标失败。
+- **官方匹配**：以上无损性是 FNIT 优化前后比较。官方链的五种子矩阵重复范围、固定输入的五次 FNIT 追踪以及独立 raw 链分别验收，不能用优化前后一致代替与官方一致。十例独立 raw 链按两版各一个 FNIT seed 与官方五种子比较，共 20 组/4800 项判定，通过 2782（57.96%），两版各 1391/2400；所有 20 组整体验收失败。本轮 FNIT 自身重复和轨迹群体分布为 `not_assessed`，不借固定 FOD 五种子结果补齐。
+
+[官方 raw 链最终结果](FINAL_RAW_MATRIX_RESULTS.md)包含逐例、逐指标接受数、960 行指标、2018 项失败明细和全部报告的文件 SHA。[只读 reader 独立复核](../../validation/connectome/tenraw_20261002/task_04_final_reader_review_v1/README.md)另列输入与源码的绑定检查。正式十例 CLI 未保存响应/FOD/归一化中间产物，也未分别导出所有阶段计时；这些十例同输入组件比较和计时仍缺失，不用旧检查点或总时间推算补齐。
 
 ### 每例实测时间
 
