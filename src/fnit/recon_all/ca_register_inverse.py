@@ -26,22 +26,60 @@ def _freesurfer_vox2ras(fields: tuple[int | float, ...]) -> np.ndarray:
 
 
 def read_warp_geometries(image: object) -> tuple[np.ndarray, np.ndarray, tuple[int, int, int]]:
-    """Read the source and atlas geometries in a fixed FreeSurfer NIfTI warp."""
+    """读取固定FS DISP_RAS warp的几何并验证编码、spacing=1及(X,Y,Z,1,3)。
+
+    image为nibabel NIfTI；source/target为scanner RAS voxel-to-mm矩阵。
+    不接受ABS_RAS/DISP_CRS、多个向量帧、非单位节点间距或损坏的FS扩展。
+    返回source矩阵、target矩阵和source网格；没有合法扩展时抛ValueError。
+    """
+    if len(image.shape) != 5 or tuple(image.shape[3:]) != (1, 3):
+        raise ValueError("FS warp must have complete shape (X,Y,Z,1,3)")
+    if int(image.header["intent_code"]) != 1006:
+        raise ValueError("FS warp must have displacement-vector NIfTI intent")
     for extension in image.header.extensions:
         if extension.get_code() != 14:
             continue
         payload = extension.get_content()
-        marker = struct.pack(">i", 15)  # TAG_GCAMORPH_GEOM_PLUSSHEAR
-        start = payload.find(marker, 0, min(len(payload), 4096))
-        if start < 0:
+        if payload[:4] != b">\x00\x03\x01":
             continue
-        source = struct.unpack_from(">4i18f", payload, start + 12)
-        source_name_length = struct.unpack_from(">i", payload, start + 12 + 88)[0]
-        target_start = start + 12 + 88 + 4 + source_name_length
+        cursor, tags = 4, {}
+        while cursor + 12 <= len(payload):
+            tag, length = struct.unpack_from(">iq", payload, cursor)
+            end = cursor + 12 + length
+            if length < 0 or end > len(payload):
+                raise ValueError("invalid FreeSurfer warp tag length")
+            if tag in tags:
+                raise ValueError("duplicate FreeSurfer warp metadata tag")
+            tags[tag] = (cursor + 12, length)
+            cursor = end
+            if tag == -1:
+                break
+        if 13 not in tags or tags[13][1] != 12:
+            raise ValueError("missing FreeSurfer warp format metadata")
+        encoding, spacing, exponent = struct.unpack_from(">iif", payload, tags[13][0])
+        if encoding != 3 or spacing != 1 or not np.isfinite(exponent):
+            raise ValueError("fixed FS warp requires DISP_RAS encoding and spacing=1")
+        if 15 not in tags:
+            raise ValueError("missing FreeSurfer warp geometry extension")
+        start, length = tags[15]
+        if length < 184:
+            raise ValueError("truncated FreeSurfer warp geometry")
+        source = struct.unpack_from(">4i18f", payload, start)
+        source_name_length = struct.unpack_from(">i", payload, start + 88)[0]
+        target_start = start + 92 + source_name_length
+        if source_name_length < 0 or target_start + 92 > start + length:
+            raise ValueError("invalid FreeSurfer source geometry length")
         target = struct.unpack_from(">4i18f", payload, target_start)
-        if source[0] != 1 or target[0] != 1 or tuple(target[1:4]) != image.shape[:3]:
+        target_name_length = struct.unpack_from(">i", payload, target_start + 88)[0]
+        if target_name_length < 0 or target_start + 92 + target_name_length != start + length:
+            raise ValueError("invalid FreeSurfer target geometry length")
+        if (source[0] != 1 or target[0] != 1 or
+                tuple(target[1:4]) != image.shape[:3] or min(source[1:4]) < 1):
             raise ValueError("invalid FreeSurfer warp geometry extension")
-        return _freesurfer_vox2ras(source), _freesurfer_vox2ras(target), tuple(source[1:4])
+        source_matrix, target_matrix = _freesurfer_vox2ras(source), _freesurfer_vox2ras(target)
+        if not np.isfinite(source_matrix).all() or not np.isfinite(target_matrix).all():
+            raise ValueError("nonfinite FreeSurfer warp geometry")
+        return source_matrix, target_matrix, tuple(source[1:4])
     raise ValueError("missing FreeSurfer warp geometry extension")
 
 
@@ -108,9 +146,16 @@ def _splat_counts(node_coordinates: np.ndarray, width: int, height: int, depth: 
     for z in range(node_coordinates.shape[2]):
         for y in range(node_coordinates.shape[1]):
             for x in range(node_coordinates.shape[0]):
-                xf = min(max(float(node_coordinates[x, y, z, 0]), 0.0), width - 1.0)
-                yf = min(max(float(node_coordinates[x, y, z, 1]), 0.0), height - 1.0)
-                zf = min(max(float(node_coordinates[x, y, z, 2]), 0.0), depth - 1.0)
+                # GCAMinvert clips only outside [0,size), then the native
+                # MRIinterpolateIntoVolume rejects by MRIindexNotInVolume/rint.
+                xf = max(float(node_coordinates[x, y, z, 0]), 0.0)
+                yf = max(float(node_coordinates[x, y, z, 1]), 0.0)
+                zf = max(float(node_coordinates[x, y, z, 2]), 0.0)
+                if xf >= width: xf = width - 1.0
+                if yf >= height: yf = height - 1.0
+                if zf >= depth: zf = depth - 1.0
+                if np.rint(xf) >= width or np.rint(yf) >= height or np.rint(zf) >= depth:
+                    continue
                 xm, ym, zm = int(xf), int(yf), int(zf)
                 xp, yp, zp = min(xm + 1, width - 1), min(ym + 1, height - 1), min(zm + 1, depth - 1)
                 xmd, ymd, zmd = xf - xm, yf - ym, zf - zm
@@ -140,9 +185,16 @@ def _splat_coordinate_sums(positions: np.ndarray, width: int, height: int, depth
     for z in range(positions.shape[2]):
         for y in range(positions.shape[1]):
             for x in range(positions.shape[0]):
-                xf = min(max(float(positions[x, y, z, 0]), 0.0), width - 1.0)
-                yf = min(max(float(positions[x, y, z, 1]), 0.0), height - 1.0)
-                zf = min(max(float(positions[x, y, z, 2]), 0.0), depth - 1.0)
+                # GCAMinvert clips only outside [0,size), then the native
+                # MRIinterpolateIntoVolume rejects by MRIindexNotInVolume/rint.
+                xf = max(float(positions[x, y, z, 0]), 0.0)
+                yf = max(float(positions[x, y, z, 1]), 0.0)
+                zf = max(float(positions[x, y, z, 2]), 0.0)
+                if xf >= width: xf = width - 1.0
+                if yf >= height: yf = height - 1.0
+                if zf >= depth: zf = depth - 1.0
+                if np.rint(xf) >= width or np.rint(yf) >= height or np.rint(zf) >= depth:
+                    continue
                 xm, ym, zm = int(xf), int(yf), int(zf)
                 xp, yp, zp = min(xm + 1, width - 1), min(ym + 1, height - 1), min(zm + 1, depth - 1)
                 xmd, ymd, zmd = xf - xm, yf - ym, zf - zm

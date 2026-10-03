@@ -1,0 +1,13 @@
+{
+  "scope": "same-input diagnostic report serialization regression; production source and thresholds unchanged",
+  "case": "sub01",
+  "status": "passed",
+  "seconds_excluding_common_lock_wait": 38.19814715720713,
+  "surfaces": 20,
+  "driver_sha256": "b26c747c8fd8fa87825f09ffe947b3472cb8d48a8080770f73bf212ece593448",
+  "report_sha256": "3b97132864f18a31771eef249cdc0f3bfa73c8a3621354845c08cfa40269378c",
+  "runtime_commit": "8d750e25d4d067a43edb788a96b2086a1c031ba0",
+  "executed_python_c_script": "import os,sys,json,hashlib,time,importlib.util\nfrom pathlib import Path\np=Path(\"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002\")\nos.environ.update(CUDA_VISIBLE_DEVICES=\"\",OMP_NUM_THREADS=\"4\",MKL_NUM_THREADS=\"4\",OPENBLAS_NUM_THREADS=\"4\",NUMBA_NUM_THREADS=\"4\")\nsys.path.insert(0,str(p/\"candidate_runtime_8d750e2/src\"))\ns=p/\"coordinator/compare_whole_cases_v3.py\"\nspec=importlib.util.spec_from_file_location(\"check_driver\",s); d=importlib.util.module_from_spec(spec);spec.loader.exec_module(d)\ncfg=d.read(p/\"coordinator/whole_comparison_config_retry_v4.json\")\nprint(\"CONFIG_FILE_CHECK\",cfg[\"cases\"][0][\"id\"],flush=True)\nwith d.common_lock(Path(\"/tmp/fnit-recon-five-20261002-gongwk.gpu.lock\")):\n d.configure_runtime()\n case=cfg[\"cases\"][0]\n a=Path(d.read(Path(case[\"baseline_config\"]))[\"output\"]);b=Path(d.read(Path(case[\"candidate_config\"]))[\"output\"])\n t=time.perf_counter();g=d.geometry(a,b,d.tool(\"compare_surface_chain\",Path(cfg[\"scripts_dir\"])))\n out=p/\"coordinator/geometry_json_regression_v3.json\";d.write(out,g);r=d.read(out)\n assert r==g\n assert all(type(v) is int for sh in r[\"conform_shape\"] for v in sh)\n assert all(type(t[\"valid\"]) is bool for row in r[\"surfaces\"].values() if \"topology\" in row for t in row[\"topology\"])\n print(json.dumps({\"status\":\"passed\",\"case\":case[\"id\"],\"seconds\":time.perf_counter()-t,\"surfaces\":len(g[\"surfaces\"]),\"driver_sha256\":d.digest(s),\"report_sha256\":d.digest(out),\"production_source_changed\":False}),flush=True)\n",
+  "tests": "full real geometry()->JSON write/read equality; all shape entries Python int and topology.valid Python bool",
+  "recorded_utc": "2026-10-02T21:24:26.269810+00:00"
+}

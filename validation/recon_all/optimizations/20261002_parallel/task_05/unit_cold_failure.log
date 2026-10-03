@@ -1,0 +1,149 @@
+FF...                                                                    [100%]
+=================================== FAILURES ===================================
+_____________ test_gpu_fill_retains_complete_cpu_algorithm[False] ______________
+
+edge = False
+
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="explicit CUDA regression")
+    @pytest.mark.parametrize("edge", [False, True])
+    def test_gpu_fill_retains_complete_cpu_algorithm(edge):
+        shape = (11, 9, 8)
+        mask = np.zeros(shape, bool)
+        if edge:
+            mask[0, :3, 0] = True
+            mask[-2, -2, -1] = True
+        else:
+            mask[4:7, 3:6, 2:5] = True
+        rng = np.random.default_rng(102)
+        seeds = np.where(mask[None], rng.uniform(0, 200, (3, *shape)).astype(np.float32), 0)
+        expected, iterations, shells = [], [], []
+        for seed in seeds:
+            expanded, shell = voronoi_fill(seed, mask)
+            result, count = soap_bubble_float(expanded, mask)
+            expected.append(result)
+            iterations.append(count)
+            shells.append(shell)
+>       actual, report = fill_inverse_fields(seeds, mask, device="cuda:0")
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/v3/tests/recon_all/test_mni_warp_gpu.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/utils/_contextlib.py:116: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+averages = array([[[[0., 0., 0., ..., 0., 0., 0.],
+         [0., 0., 0., ..., 0., 0., 0.],
+         [0., 0., 0., ..., 0., 0., 0.]...0., ..., 0., 0., 0.],
+         [0., 0., 0., ..., 0., 0., 0.],
+         [0., 0., 0., ..., 0., 0., 0.]]]], dtype=float32)
+control = array([[[False, False, False, False, False, False, False, False],
+        [False, False, False, False, False, False, F..., False, False, False, False, False, False, False],
+        [False, False, False, False, False, False, False, False]]])
+device = 'cuda:0'
+
+    @torch.inference_mode()
+    def fill_inverse_fields(averages, control, *, device="cuda:0"):
+        """填充三通道源体素网格；保留0.1控制点、完整壳层及50轮/1体素停止规则。
+    
+        averages: FP32 (3,X,Y,Z)目标体素绝对坐标；control: bool (X,Y,Z)。
+        device必须为可用CUDA；返回CPU FP32同形坐标及各轴迭代统计。
+        不减少迭代、不以负位移近似；没有控制点或CUDA时明确报错。
+        """
+        selected = torch.device(device)
+        if selected.type != "cuda" or not torch.cuda.is_available():
+            raise RuntimeError("GCAM GPU fill requires an available explicit CUDA device")
+        from .mni_warp_kernels import _expand, _soap
+        import triton
+        ctrl = np.asarray(control, dtype=bool)
+        values = np.asarray(averages, dtype=np.float32)
+        if values.shape != (3, *ctrl.shape) or ctrl.ndim != 3 or not ctrl.any():
+            raise ValueError("expected (3,X,Y,Z) coordinates and a nonempty control mask")
+        if not np.isfinite(values).all():
+            raise ValueError("inverse seeds must be finite")
+        w, h, d = ctrl.shape
+        n = ctrl.size
+>       fields = torch.as_tensor(np.ascontiguousarray(values), device=selected).clone()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       RuntimeError: CUDA error: out of memory
+E       CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+E       For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+E       Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/v3/src/fnit/recon_all/mni_warp_inverse.py:35: RuntimeError
+______________ test_gpu_fill_retains_complete_cpu_algorithm[True] ______________
+
+edge = True
+
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="explicit CUDA regression")
+    @pytest.mark.parametrize("edge", [False, True])
+    def test_gpu_fill_retains_complete_cpu_algorithm(edge):
+        shape = (11, 9, 8)
+        mask = np.zeros(shape, bool)
+        if edge:
+            mask[0, :3, 0] = True
+            mask[-2, -2, -1] = True
+        else:
+            mask[4:7, 3:6, 2:5] = True
+        rng = np.random.default_rng(102)
+        seeds = np.where(mask[None], rng.uniform(0, 200, (3, *shape)).astype(np.float32), 0)
+        expected, iterations, shells = [], [], []
+        for seed in seeds:
+            expanded, shell = voronoi_fill(seed, mask)
+            result, count = soap_bubble_float(expanded, mask)
+            expected.append(result)
+            iterations.append(count)
+            shells.append(shell)
+>       actual, report = fill_inverse_fields(seeds, mask, device="cuda:0")
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/v3/tests/recon_all/test_mni_warp_gpu.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/utils/_contextlib.py:116: in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+averages = array([[[[ 31.998228 ,   0.       ,   0.       , ...,   0.       ,
+            0.       ,   0.       ],
+         [198....       [  0.       ,   0.       ,   0.       , ...,   0.       ,
+            0.       ,   0.       ]]]], dtype=float32)
+control = array([[[ True, False, False, False, False, False, False, False],
+        [ True, False, False, False, False, False, F..., False, False, False, False, False, False, False],
+        [False, False, False, False, False, False, False, False]]])
+device = 'cuda:0'
+
+    @torch.inference_mode()
+    def fill_inverse_fields(averages, control, *, device="cuda:0"):
+        """填充三通道源体素网格；保留0.1控制点、完整壳层及50轮/1体素停止规则。
+    
+        averages: FP32 (3,X,Y,Z)目标体素绝对坐标；control: bool (X,Y,Z)。
+        device必须为可用CUDA；返回CPU FP32同形坐标及各轴迭代统计。
+        不减少迭代、不以负位移近似；没有控制点或CUDA时明确报错。
+        """
+        selected = torch.device(device)
+        if selected.type != "cuda" or not torch.cuda.is_available():
+            raise RuntimeError("GCAM GPU fill requires an available explicit CUDA device")
+        from .mni_warp_kernels import _expand, _soap
+        import triton
+        ctrl = np.asarray(control, dtype=bool)
+        values = np.asarray(averages, dtype=np.float32)
+        if values.shape != (3, *ctrl.shape) or ctrl.ndim != 3 or not ctrl.any():
+            raise ValueError("expected (3,X,Y,Z) coordinates and a nonempty control mask")
+        if not np.isfinite(values).all():
+            raise ValueError("inverse seeds must be finite")
+        w, h, d = ctrl.shape
+        n = ctrl.size
+>       fields = torch.as_tensor(np.ascontiguousarray(values), device=selected).clone()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       RuntimeError: CUDA error: out of memory
+E       CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+E       For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+E       Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/v3/src/fnit/recon_all/mni_warp_inverse.py:35: RuntimeError
+=========================== short test summary info ============================
+FAILED Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/v3/tests/recon_all/test_mni_warp_gpu.py::test_gpu_fill_retains_complete_cpu_algorithm[False]
+FAILED Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_05/v3/tests/recon_all/test_mni_warp_gpu.py::test_gpu_fill_retains_complete_cpu_algorithm[True]
+2 failed, 3 passed in 5.54s

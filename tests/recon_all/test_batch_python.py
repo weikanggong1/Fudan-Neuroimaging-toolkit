@@ -39,12 +39,17 @@ class BatchPythonTest(unittest.TestCase):
             with patch("fnit.recon_all.batch.subprocess.run", side_effect=fake_run):
                 reports = run_recon_all_python_batch(
                     jobs, weights, assets, devices=("cuda:0", "cuda:1"),
-                    native_bin_dir=native_dir)
+                    native_bin_dir=native_dir, native_optimizations="original",
+                    hemisphere_workers=2)
             self.assertTrue(all(command[-2:] == ["--native-bin-dir", str(native_dir)]
                                 for command in calls))
             self.assertEqual([row["subject_dir"] for row in reports],
                              [str(job["subject_dir"]) for job in jobs])
             self.assertEqual({command[10] for command in calls}, {"cuda:0", "cuda:1"})
+            self.assertTrue(all(command[command.index("--native-optimizations") + 1] == "original"
+                                for command in calls))
+            self.assertTrue(all(command[command.index("--hemisphere-workers") + 1] == "2"
+                                for command in calls))
 
     def test_rejects_overlapping_outputs_before_dispatch(self):
         with tempfile.TemporaryDirectory() as directory:

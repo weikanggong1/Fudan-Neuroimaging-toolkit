@@ -28,6 +28,8 @@ class WhiteMriDeviceWiringTest(unittest.TestCase):
                     self.assertTrue(torch.backends.cudnn.allow_tf32)
                 self.assertEqual(result, {"device": device})
                 self.assertEqual(calls["mni_nonlinear"]["device"], device)
+                self.assertEqual(calls["mni_nonlinear"]["postprocess_backend"],
+                                 "gpu" if device.startswith("cuda") else "conda")
                 self.assertEqual(calls["mni_aux"]["device"], device)
                 self.assertEqual(calls["brain_finalsurfs"]["device"], "cpu")
                 self.assertFalse(calls["mni_aux"]["actual_cudnn_tf32"])

@@ -15,6 +15,8 @@ def run_recon_all_python_batch(
     *, devices: tuple[str, ...] = ("cuda:0",), threads: int = 4,
     native_bin_dir: str | Path | None = None,
     profile_stages: bool = False, cuda_allocator_cache: str = "auto",
+    hemisphere_workers: int = 1,
+    native_optimizations: str = "auto",
 ) -> list[dict]:
     """每设备独立子进程执行单 T1，按 jobs 顺序返回完整报告列表。
 
@@ -25,8 +27,13 @@ def run_recon_all_python_batch(
     延续低显存默认，也可在子进程初始化前选择 enabled/disabled。
     输出体积为 conform 网格，表面为 surface RAS/mm；输出/错误语义同
     单例入口。输入非法抛 ValueError/FileNotFoundError，任务失败汇总为
-    RuntimeError。每设备仅执行一个被试，不在本函数内并行双侧表面。
+    RuntimeError。每设备仅执行一个被试；hemisphere_workers 默认1，设2时被试内部
+    独立进程并行双侧，threads 在双侧之间分配（总预算不翻倍）。
+    native_optimizations=auto按已验证能力选择完整GCA缓存及white快速程序；
+    original用于原生阶段配对控制，原样传递给每个被试CLI。
     """
+    from .hemisphere_parallel import validate_hemisphere_workers
+    validate_hemisphere_workers(hemisphere_workers, threads)
     if not devices or len(set(devices)) != len(devices) or any(
         device != "cpu" and re.fullmatch(r"cuda:\d+", device) is None for device in devices
     ):
@@ -35,6 +42,8 @@ def run_recon_all_python_batch(
         raise ValueError("threads must be positive")
     if cuda_allocator_cache not in {"auto", "enabled", "disabled"}:
         raise ValueError("cuda_allocator_cache must be auto, enabled, or disabled")
+    if native_optimizations not in {"auto", "original"}:
+        raise ValueError("native_optimizations must be auto or original")
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
     if not weights.is_dir() or not assets.is_dir():
         raise FileNotFoundError("weights_dir and assets_dir must exist")
@@ -59,6 +68,10 @@ def run_recon_all_python_batch(
                        str(t1), str(subject), "--weights-dir", str(weights),
                        "--assets-dir", str(assets), "--device", device,
                        "--threads", str(threads), "--cuda-allocator-cache", cuda_allocator_cache]
+            if hemisphere_workers != 1:
+                command += ["--hemisphere-workers", str(hemisphere_workers)]
+            if native_optimizations != "auto":
+                command += ["--native-optimizations", native_optimizations]
             if profile_stages:
                 command.append("--profile-stages")
             if native_bin_dir is not None:

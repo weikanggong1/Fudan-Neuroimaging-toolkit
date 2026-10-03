@@ -56,6 +56,10 @@ def place_pial_t1(
     output: str | Path | None = None,
     *,
     max_steps: int = 200,
+    sampling_backend: str = "cpu",
+    candidate_backend: str = "tree",
+    device: str | None = None,
+    trace_callback=None,
 ) -> dict:
     """Place and save one hemisphere's pial.T1 using the native four-pass order.
 
@@ -63,8 +67,18 @@ def place_pial_t1(
     ``label/{hemi}.cortex.label``, ``label/{hemi}.cortex+hipamyg.label``,
     and ``mri/{brain.finalsurfs,wm,aseg.presurf}.mgz``. The return value gives
     the output path, accepted step count, pass boundaries, cleanup, and seconds.
+    ``sampling_backend`` defaults to cpu; torch/triton select explicit CUDA MRI
+    sampling through ``device``. Ordered updates and objective remain CPU.
+    ``trace_callback(step, pass_index, coordinates_copy, diagnostics)`` is an
+    optional read-only diagnostic sink called after every accepted step.
     ``max_steps`` guards against non-convergence; hitting it raises an error.
     """
+    if candidate_backend not in ("tree", "snapshot"):
+        raise ValueError("candidate_backend must be tree or snapshot")
+    if sampling_backend not in ("cpu", "torch", "triton"):
+        raise ValueError("sampling_backend must be cpu, torch or triton")
+    if sampling_backend != "cpu" and device is None:
+        raise ValueError("GPU sampling requires an explicit device")
     started = time.perf_counter()
     subject = Path(subject)
     if hemisphere not in ("lh", "rh"):
@@ -100,6 +114,11 @@ def place_pial_t1(
     placement = volume.copy()
     placement[bright == 130] = 0
     affine = surface_ras_to_voxel(brain.header, metadata)
+    sampler = None
+    if sampling_backend != "cpu":
+        from .place_surface_sampling import PlacementSampling
+        sampler = PlacementSampling(placement, affine, device=device,
+                                    implementation=sampling_backend)
     thresholds = np.array([float(stats[f"pial_{name}"]) for name in
                            ("inside_hi", "border_hi", "border_low", "outside_low", "outside_hi")])
     normal_topology = FaceNormalTopology(faces, len(xyz))
@@ -131,10 +150,16 @@ def place_pial_t1(
 
     def gradient(current: np.ndarray, cropped: np.ndarray) -> np.ndarray:
         current_normals = normal_topology.evaluate(current)
-        intensity = intensity_gradient(
-            placement, current, current_normals, ripped, values, border[5],
-            affine, brain.header.get_zooms()[:3], weight=0.2, sigma_global=sigma,
-        )
+        if sampler is None:
+            intensity = intensity_gradient(
+                placement, current, current_normals, ripped, values, border[5],
+                affine, brain.header.get_zooms()[:3], weight=0.2, sigma_global=sigma,
+            )
+        else:
+            intensity = sampler.gradient(
+                current, current_normals, ripped, values, border[5],
+                brain.header.get_zooms()[:3], weight=0.2, sigma_global=sigma,
+            )
         offsets, candidates = repulsion_index.query(current)
         repulsion = surface_repulsion_gradient(
             current, current_normals, xyz, fixed_normals, ripped,
@@ -170,7 +195,8 @@ def place_pial_t1(
             candidate, _ = asynchronous_first_step(
                 current, faces, proposal, ripped, fast=True,
                 offsets=displacement, accepted_offsets=momentum,
-                stale_mht_trial=stale_trial, ordered_neighbors=ordered)
+                stale_mht_trial=stale_trial, ordered_neighbors=ordered,
+                candidate_backend=candidate_backend)
             blocked = np.any(proposal != current, axis=1) & np.all(
                 candidate == current, axis=1)
             trial_cropped = np.where(
@@ -190,6 +216,10 @@ def place_pial_t1(
         if accepted is None:
             raise RuntimeError(f"pial optimizer rejected every trial at step {step}")
         current = accepted
+        if trace_callback is not None:
+            trace_callback(step, outer_pass, current.copy(),
+                           {"sse": last_sse, "rms": last_rms, "dt": dt,
+                            "reductions": reductions, "stop": bool(stop)})
         if stop:
             pass_ends.append(step)
             if outer_pass == 3:
@@ -216,4 +246,6 @@ def place_pial_t1(
     _write_vertices_like(white, output, repaired)
     return {"output": str(output), "hemisphere": hemi, "steps": step,
             "pass_ends": pass_ends, "cleanup": cleanup,
+            "sampling_backend": sampling_backend, "device": device,
+            "candidate_backend": candidate_backend,
             "seconds": time.perf_counter() - started}

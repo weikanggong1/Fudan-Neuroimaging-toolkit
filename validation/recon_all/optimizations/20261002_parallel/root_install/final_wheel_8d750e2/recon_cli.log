@@ -1,0 +1,30 @@
+usage: native_free.py [-h] --weights-dir WEIGHTS_DIR --assets-dir ASSETS_DIR
+                      [--device DEVICE] [--threads THREADS]
+                      [--native-bin-dir NATIVE_BIN_DIR]
+                      [--hemisphere-workers {1,2}]
+                      [--native-optimizations {auto,original}]
+                      [--profile-stages]
+                      [--cuda-allocator-cache {auto,enabled,disabled}]
+                      t1 subject_dir
+
+单幅 T1 的 FNIT 皮层重建。必要表面阶段使用固定的完整调用链。
+
+positional arguments:
+  t1
+  subject_dir
+
+options:
+  -h, --help            show this help message and exit
+  --weights-dir WEIGHTS_DIR
+  --assets-dir ASSETS_DIR
+  --device DEVICE
+  --threads THREADS
+  --native-bin-dir NATIVE_BIN_DIR
+  --hemisphere-workers {1,2}
+                        independent hemisphere processes; total threads split
+                        across two workers
+  --native-optimizations {auto,original}
+                        validated Conda native hotspot selection; original is
+                        the paired control
+  --profile-stages      record CUDA synchronization and parent/child CPU time
+  --cuda-allocator-cache {auto,enabled,disabled}

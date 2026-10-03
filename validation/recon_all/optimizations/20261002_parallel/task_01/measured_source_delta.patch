@@ -1,0 +1,14 @@
+diff --git a/src/fnit/recon_all/hemisphere_parallel.py b/src/fnit/recon_all/hemisphere_parallel.py
+index 6c9206d..6560467 100644
+--- a/src/fnit/recon_all/hemisphere_parallel.py
++++ b/src/fnit/recon_all/hemisphere_parallel.py
+@@ -127,6 +127,9 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
+                            'profile_stages': profile_stages}
+                 request_path.write_text(json.dumps(request))
+                 env, environment_report = native_thread_environment(threads=threads // workers)
++                # API 调用者可从 sys.path 导入候选源码；worker 必须导入同一包。
++                source_root = str(Path(__file__).resolve().parents[2])
++                env['PYTHONPATH'] = source_root + os.pathsep + env.get('PYTHONPATH', '')
+                 log_path = subject / 'scripts' / f'{operation}.{hemi}.worker.log'
+                 stream = log_path.open('w')
+                 streams.append(stream)

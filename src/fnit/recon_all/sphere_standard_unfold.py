@@ -10,12 +10,12 @@ from __future__ import annotations
 import math
 
 import numpy as np
-from numba import njit
+from numba import njit, prange
 
 from .place_surface_normals import initial_vertex_normals
 
 
-@njit
+@njit(cache=True, fastmath=False)
 def _sphere_radius_units(xyz: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     radius = np.empty(len(xyz), np.float32)
     unit = np.empty_like(xyz)
@@ -32,7 +32,7 @@ def _sphere_radius_units(xyz: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return radius, unit
 
 
-@njit
+@njit(cache=True, inline="always", fastmath=False)
 def _spherical_distance(xyz: np.ndarray, radius: np.ndarray,
                         unit: np.ndarray, first: int, second: int) -> np.float32:
     normalizer = radius[second]
@@ -50,7 +50,7 @@ def _spherical_distance(xyz: np.ndarray, radius: np.ndarray,
     return np.float32(angle * radius[first])
 
 
-@njit
+@njit(parallel=True, cache=True, fastmath=False)
 def _distance_force(xyz: np.ndarray, normals: np.ndarray,
                     offsets: np.ndarray, neighbors: np.ndarray,
                     original_distances: np.ndarray, scale: np.float32,
@@ -61,7 +61,7 @@ def _distance_force(xyz: np.ndarray, normals: np.ndarray,
     if average_neighbors <= 0:
         average_neighbors = np.float32(len(neighbors) / len(xyz))
     norm = np.float32(np.float32(1) / average_neighbors)
-    for vertex in range(len(xyz)):
+    for vertex in prange(len(xyz)):
         dx = np.float32(0)
         dy = np.float32(0)
         dz = np.float32(0)
@@ -95,12 +95,12 @@ def _distance_force(xyz: np.ndarray, normals: np.ndarray,
     return gradient
 
 
-@njit
+@njit(parallel=True, cache=True, fastmath=False)
 def _face_geometry(xyz: np.ndarray, faces: np.ndarray,
                    ) -> tuple[np.ndarray, np.ndarray]:
     area = np.empty(len(faces), np.float32)
     normals = np.empty((len(faces), 3), np.float32)
-    for fno in range(len(faces)):
+    for fno in prange(len(faces)):
         a, b, c = faces[fno]
         u0 = np.float32(xyz[b, 0] - xyz[a, 0])
         u1 = np.float32(xyz[b, 1] - xyz[a, 1])
@@ -133,7 +133,7 @@ def _face_geometry(xyz: np.ndarray, faces: np.ndarray,
     return area, normals
 
 
-@njit
+@njit(cache=True, fastmath=False)
 def _area_force(xyz: np.ndarray, faces: np.ndarray, normals: np.ndarray,
                 area: np.ndarray, original_area: np.ndarray,
                 scale: np.float32, initial_gradient: np.ndarray) -> np.ndarray:
