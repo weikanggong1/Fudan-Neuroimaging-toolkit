@@ -98,6 +98,24 @@ python validation/connectome/accuracy_20261003/root/compare_raw_components.py \
 
 复现启动参数由 `controller_v1_launch.json` 完整记录，包括正式配置 SHA、helper SHA、控制器 SHA、原 CON01 baseline v2 报告 SHA 和独立输出目录。启动需要 `CUDA_VISIBLE_DEVICES` 为空，CPU 线程各 1；输出目录必须全新，拒绝覆盖任何既有运行证据。
 
+### 原报告的 CPU 收集器
+
+`collect_raw_component_evidence.py` 只收集成功原报告，源码 SHA 为 `35496ed07b66e269e97b50efaaaad4d2ce4081fe78ce25b61dbbe22dead64a99`。它沿实际 controller status 中的 path/SHA 读取原 `components.json`、case summary、receipt 和 stdout/stderr，逐字节复制到独立的新目录；不按文件名猜 producer，不读取 MRI 数组、不执行求解或重采样。
+
+默认请求十例 candidate，必须等实际 `all10_summary` 存在并精确覆盖十例，才收集。显式 `--case-id` / `--version` 可请求已经完成的子集或 CON03 配对；任一所请求组合未完成即拒绝，不为缺失病例填数。所有原 receipt 必须 exit 0、helper 前后 SHA 一致，且 producer 完成行和原报告 snapshot 相同。case summary 与原报告的非有限值统计逐项核对；原审核的全部 source/input/output 再做文件 SHA before/after 核验。
+
+```bash
+# 正式十例实际完成后，使用全新 output-dir；这是收集命令，不是 MRI pipeline 命令。
+CUDA_VISIBLE_DEVICES= python validation/connectome/accuracy_20261003/root/collect_raw_component_evidence.py \
+  --analysis-dir /absolute/new_accuracy_phase/root_component_analysis_v1 \
+  --configuration /absolute/new_accuracy_phase/formal_frozen_v1/accuracy_configuration.json \
+  --configuration-sha256 f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c \
+  --helper-sha256 08015c11c2662cb2f8115843414ed9148c1dadc60c175b66dcf20f51381c18ce \
+  --output-dir /absolute/new_accuracy_phase/root_component_evidence_collection_all10_v1
+```
+
+输出每组合的原 bytes、`collection.json` 的原/复制文件 SHA、精确完成 coverage 和原非有限值统计；`scientific_parity` 仍为 `not_assessed`。该工具没有改原 reports、controller、冻结配置或科学源码。
+
 ## 4. 对应原软件调用
 
 比较器不调用官方程序。实际官方命令和哈希来自成功的 producer，写入每例报告中的 `official_gradient_command`、`official_FA_command`。本轮原参考命令结构为：
@@ -125,6 +143,8 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 |真实 source 空包标记问题的回归|21 项|21 passed，0.45 s；`focused_cpu_v4.log`。|
 |真实 5TT undefined channel spacing 问题的回归|23 项|23 passed，0.51 s；`focused_cpu_v5.log`。受控 Inf affine 测试产生一条预期 NumPy warning，网格仍明确不可比较。|
 |CPU 后台控制器与比较器协议回归|7 项控制器 + 23 项比较器|30 passed，0.46 s；`controller_cpu_v1.log`。包含未完成/失败不能汇总、原报告不可改标、非有限主统计保持 null 的回归。|
+|原 bytes 收集器协议回归|7 项收集器 + 7 项控制器|14 passed，0.23 s；`collector_cpu_v1.log`。覆盖未完成 producer、篡改 summary、错误 helper SHA、输出隔离及 byte-for-byte 复制。|
+|真实当前 all10 尚未完成的保护检查|真实冻结配置、controller source 和当前状态|按预期拒绝，输出目录未创建；`collector_all10_not_completed_guard_v1.json`。这是协议核验，不是十例收集结果。|
 |官方真实 producer 与文件核验 v1|十例 CON01/03/04/05/06/07/08/09/10/11|325 个实际文件 before/after SHA，6.71859 s。|
 |原 eeb 脚本的官方真实 producer 与文件核验 v2|同十例|325 个实际文件 before/after SHA，6.56676 s；`reference_gate_v2.json`。|
 |实际 baseline CON01 MRI 比较|全部 102 帧、全 552,960 体素、官方 mask 115,226 体素|1,319 个文件 before/after SHA；比较器内计时 20.22309 s，nodecw10 进程墙钟 20.34487 s。|
@@ -191,6 +211,7 @@ candidate 的同一原网格、同一 `k=30` 示例直接读取实际成功报�
 - 最新 23 项 CPU 回归后，在全新 `root_components_CON01_baseline_v2` 完整重做来源及文件 before/after 核验，成功返回 exit 0。本地完整原报告、执行日志和摘要均保存实际 SHA；没有为失败目录补造完成记录。
 - CPU 后台控制器实际启动于 nodecw10，PID 185524，使用最终 helper/configuration SHA。bootstrap 时原 CON01 baseline 报告及全部 1,319 个绑定文件复核完成，4.98121 s；candidate CON01 当时仍在运行，其余 producer 未启动，`all10_summary=null`。`controller_v1_bootstrap_snapshot.json` 是该时刻的实际状态快照，不能当未来完成结果；运行中的实际状态以远端 `status.json` 为准。
 - CON01 candidate 的实际 producer 完成后，后台控制器于 UTC `2026-10-03T07:29:09` 启动 CPU 比较，UTC `07:29:30` 完成。原报告、summary 与 receipt 复制保留原字节；公开示例仅包含原网格脑切片，没有复制发布完整 MRI 数组。控制器和科学冻结源码/配置没有改动，继续等待其它病例；此处覆盖仍为 CON01 baseline + candidate，不代表十例完成或整链匹配。
+- 准备原 bytes 收集器：独立 nodecw10 CPU 工具目录，复用相同 SHA 的 controller source gates；14 项 CPU 协议回归通过。真实全十例请求在 `all10_summary=null` 时明确拒绝，保留原 log/receipt 且没有创建集合目录。CON03 候选已完成的数据只作只读核验汇报；其配对 baseline 未完成时不在这里添加配对数字或重复复制大 JSON。完整配对与十例收集等待真实 producer 完成。
 
 ## 7. 参考文献与原软件代码库
 
