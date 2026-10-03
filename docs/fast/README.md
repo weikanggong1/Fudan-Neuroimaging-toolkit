@@ -2,7 +2,7 @@
 
 [返回首页](../../README.md) · [源码目录](../../src/fnit/fast/) · [当前验证](../../validation/fast/README.md)
 
-输入脑提取后的单帧 T1w，输出 CSF、GM、WM 三张部分体积图、三种分类图、乘性偏置场和校正图。计算使用 PyTorch；CUDA 的顺序扫描使用 Triton。运行时不调用 FSL，不需要权重。
+输入脑提取后的单帧 T1w，输出 CSF、GM、WM 三张部分体积图、三种分类图、乘性偏置场和校正图。计算使用 PyTorch；CUDA 的顺序扫描使用 Triton，CPU 的顺序扫描、随机流、卷积和 PVE 使用 Numba 编译内核。运行时不调用 FSL，不需要权重。
 
 `execution="fsl"` 对应 FAST4 的三分类 T1、无先验路径，保留其原位更新顺序。独立接口默认仍为 `execution="tensor"`，使用同步更新；需要复现 FSL 时请显式选择 `fsl`。当前 fMRI volume 流程已显式选择 `fsl`。
 
@@ -69,7 +69,7 @@ fast -t 1 -n 3 -I 4 -W 15 -O 4 -f 0.02 -l 20 -H 0.1 -R 0.3 \
 | Python 参数 | 默认值 | CLI / 原 FAST | 作用 |
 |---|---:|---|---|
 | `device` | `cpu` | `--device` / 无 | CPU 或 CUDA 设备 |
-| `threads` | 不调整 | `--threads`（CLI 默认 1）/ 无 | PyTorch CPU 线程数 |
+| `threads` | 不调整 | `--threads`（CLI 默认 1）/ 无 | PyTorch CPU 线程数；CPU `fsl` 的 Numba 并行线程不超过此预算和安装时的 Numba 上限，调用后恢复原 Numba 线程设置 |
 | `execution` | `tensor` | `--execution` / 无 | `fsl` 保留原顺序；`tensor` 同步更新 |
 | `init_iterations` | 15 | `-W` | 初始更新次数；实际初始 GMM 为本值加 fixed_iterations，即 19 次 |
 | `bias_iterations` | 4 | `-I` | 分割与 bias 联合更新次数 |
@@ -80,7 +80,7 @@ fast -t 1 -n 3 -I 4 -W 15 -O 4 -f 0.02 -l 20 -H 0.1 -R 0.3 \
 | `mixel_mrf` | 0.3 | `-R` | 纯组织/混合类型的空间权重 |
 | `pve_steps` | 100 | `--pve-steps` / 原内部 iterationspve | 最终 PVE 网格步数；mixel evidence 固定按 0.01 积分 |
 | `mean_field_iterations` | 5 | Python / 原固定为 5 | 每个 HMRF 外循环的扫描遍数；对照原默认时保持 5 |
-| `pve_chunk_size` | 8 | Python / 无 | 并行计算 PVE 候选比例的块大小 |
+| `pve_chunk_size` | 8 | Python / 无 | tensor/CUDA 路径计算 PVE 候选比例的块大小；CPU `fsl` 逐体素按原序检查候选，此参数不改变该内核的分块 |
 
 `FASTConfig.variance_floor_fraction=1e-6` 仅用于 `tensor` 路径。`fsl` 使用原矩估计，不替换非正方差；遇到退化类别会明确报错。原软件的 T2/PD、多通道、其他类别数、先验、手工均值和 `--nopve` 没有对应实现。
 
@@ -92,7 +92,19 @@ fast -t 1 -n 3 -I 4 -W 15 -O 4 -f 0.02 -l 20 -H 0.1 -R 0.3 \
 
 顺序路径同时保留 float32 乘积和逐项 bias 卷积累积、double 矩归约、连续随机流、float32 反复加步长的 PVE 候选网格。初始化指数的精度以本轮原 FAST 二进制同脑控制为准；额外 float32 指数试验未改善匹配，见[精度审计](../../validation/fast/initclass_expf_control.public.json)。
 
-## 当前真实数据 benchmark
+CPU `fsl` 使用连续 X 行的 z→y→x 原序扫描，避免为每个波前和邻居派发大量小型 PyTorch 运算。它保留更新依赖、随机数赋值方向和相等 PVE 能量的首次候选选择；所有 Numba 内核关闭 `fastmath`。首轮包含即时编译，之后使用 Numba 磁盘缓存。CUDA 和 `tensor` 分支没有启用这些 CPU 内核。Numba 已包含在项目 Conda 环境中，无需安装 FSL 或 C++ 编译器。
+
+## 2026-10-04 CPU 优化与 CUDA 回归
+
+本轮在 nodecw10 的同一组 8 个物理核心上串行测量。输入为公开 ds003138 的一例真实 T1w，以本包 SynthStrip 生成固定脑图和 mask，交给两侧相同的 FAST 阶段；因此本轮隔离的是组织分割，不是脑提取流程。[运行协议、完整输出检查和待测功能](../../validation/smri_cpu_20261004/task04/README.md)单独记录。
+
+真实图像中央 24×26×28 区域用于定位 CPU 热点：旧 `fsl` 的两次 API 时间为 10.493 / 8.479 s，95% 用于组织后验顺序扫描。编译版本首次 API 为 4.366 s，缓存建立后的新进程为 1.553 s；完整冷进程分别为 6.765 / 4.258 s。该区域的八张输出全部逐位相同。这些小区域数字用于定位瓶颈，不用于估算全脑加速。
+
+完整同脑官方 CPU 参考为 357.197 s，FNIT CPU `fsl` 新进程加载编译缓存为 97.349 s（API 91.947 s，保存 3.087 s）。同 8 核预算下本次观测约 3.67 倍速度；原 FAST 实际仅 1 个活跃线程，且节点有其他计算负载，单线程候选敏感性测量仍待完成。2,843,723 脑体素上 seg / mixeltype 全相同，CSF / GM / WM PVE 仅 10 / 47 / 37 体素不同（最大约 0.01），pveseg 有 1 个 GM/WM 临界体素不同；bias / restore 最大差为 1.192×10⁻⁷ / 2.441×10⁻⁴。八图 shape、affine、dtype 和关键 header 字段相同。本轮未宣称八图逐点完全一致；[逐图指标和完整计时](../../validation/smri_cpu_20261004/task04/report.public.json)保留全部差异。
+
+同一完整脑图上的 CUDA 回归以 H100 PCIe、8 个 CPU 核心及 20 GB PyTorch 显存预算运行。`fsl`、`tensor` 各做两次冻结 main / 候选对照，共 32 对压缩 NIfTI 文件，SHA-256 全部相同。峰值 allocated / reserved 分别为 `fsl` 2.643 / 3.379 GB、`tensor` 3.875 / 5.524 GB，两版本相同。两次 `fsl` API 对照为 32.257→32.296 s 和 17.721→18.066 s；`tensor` 为 2.614→2.522 s 和 2.610→2.531 s。首次 CUDA 编译缓存和共享机器波动影响这些秒数；本轮没有改动 CUDA 内核。
+
+## 既有官方精度 benchmark：不同输入与环境
 
 一例真实 T1，固定原程序脑提取输出，脑区 1,397,628 个正体素。原参考为 FSL 6.0.7.22 中 FAST4 2111.3；FNIT 没有启动原程序。下面在同输入的正脑区统计。
 

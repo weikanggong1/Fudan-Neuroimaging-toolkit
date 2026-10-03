@@ -20,6 +20,53 @@ def test_glibc_seed_minus_one_and_continuous_stream():
     assert GlibcRandom(0).raw(5).tolist() == GlibcRandom(1).raw(5).tolist()
 
 
+@pytest.mark.parametrize("seed", [-1, 0, 1, 2 ** 31 + 17])
+def test_compiled_glibc_keeps_overflow_and_state_across_chunks(seed):
+    reference = GlibcRandom(seed)
+    candidate = GlibcRandom(seed, compiled=True)
+    for count in (0, 7, 255, 4097, 3):
+        np.testing.assert_array_equal(candidate.raw(count), reference.raw(count))
+
+
+@pytest.mark.parametrize("fails", [False, True])
+def test_public_cpu_threads_bound_numba_and_restore_caller_on_exit(monkeypatch, fails):
+    import numba
+    from fnit.fast import algorithm
+
+    previous_numba = numba.get_num_threads()
+    previous_torch = torch.get_num_threads()
+    caller_threads = min(2, numba.config.NUMBA_NUM_THREADS)
+    requested_threads = 3
+    observed = []
+    shape = (3, 4, 5)
+    image = nib.Nifti1Image(np.arange(1, 61, dtype=np.float32).reshape(shape), np.eye(4))
+
+    def probe(original, mask, voxel_size, config):
+        observed.append(numba.get_num_threads())
+        if fails:
+            raise RuntimeError("thread budget probe failure")
+        zeros = torch.zeros_like(original)
+        labels = zeros.long()
+        return FASTTensorResult(
+            torch.stack((zeros, zeros, zeros)), labels, labels, labels,
+            torch.ones_like(original), original, torch.ones(3), torch.ones(3))
+
+    monkeypatch.setattr(algorithm, "_segment_t1_fsl", probe)
+    try:
+        numba.set_num_threads(caller_threads)
+        model = TorchFAST(device="cpu", threads=requested_threads, execution="fsl")
+        if fails:
+            with pytest.raises(RuntimeError, match="thread budget probe"):
+                model(image)
+        else:
+            assert model(image).restored.shape == shape
+        assert observed == [min(requested_threads, numba.config.NUMBA_NUM_THREADS)]
+        assert numba.get_num_threads() == caller_threads
+    finally:
+        numba.set_num_threads(previous_numba)
+        torch.set_num_threads(previous_torch)
+
+
 def test_eighteen_neighbours_have_strict_directed_wavefront_order():
     scan = schedule(torch.ones((3, 4, 5), dtype=torch.bool), (1, 1.2, 1.5))
     assert len(scan.neighbours) == 18

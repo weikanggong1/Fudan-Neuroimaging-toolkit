@@ -98,6 +98,15 @@ def test_public_pipeline_has_no_affine_bypass_or_ignored_retired_options():
     assert removed.isdisjoint(constructor | call | run)
 
 
+def test_vbm_source_ordered_fast_is_explicit_and_default_stays_tensor():
+    default = FastVBM(device="cpu")
+    ordered = FastVBM(device="cpu", fast_execution="fsl")
+    assert default.fast.config.execution == "tensor"
+    assert ordered.fast.config.execution == "fsl"
+    with pytest.raises(ValueError, match="fast_execution"):
+        FastVBM(device="cpu", fast_execution="invalid")
+
+
 def test_fnirt_pipeline_uses_fsl_topology_failure_semantics_by_default(
     monkeypatch,
 ):

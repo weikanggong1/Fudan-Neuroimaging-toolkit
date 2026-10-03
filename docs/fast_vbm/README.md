@@ -149,6 +149,7 @@ FastVBM(
     device="cpu", threads=None,
     synthstrip_weights=None, synthmorph_weights=None,
     bias_correction=True,
+    fast_execution="tensor",
     registration_backend="synthmorph",
     synthmorph_extent=256,
     synthmorph_hyper=0.5,
@@ -169,6 +170,7 @@ FastVBM(
 | `synthstrip_weights` | SynthStrip checkpoint 或目录；提供 `brain_mask` 时不读取 |
 | `synthmorph_weights` | SynthMorph deform checkpoint 或目录；仅 SynthMorph 分支读取 |
 | `bias_correction` | 是否让 TorchFAST 估计平滑乘性 bias field，默认开启 |
+| `fast_execution` | `"tensor"`（默认）或 `"fsl"`；后者使用保留 FAST4 原序的三组织 T1 分割，CPU 使用 Numba 编译内核，CUDA 使用既有 Triton 内核 |
 | `registration_backend` | `"synthmorph"` 或 `"fnirt"` |
 | `synthmorph_extent` | 网络输入立方网格边长，默认 256；仅 SynthMorph 分支使用 |
 | `synthmorph_hyper` | 网络正则化超参数，默认 0.5；仅 SynthMorph 分支使用 |
@@ -181,6 +183,8 @@ FastVBM(
 | `fnirt_regularization` | 四层 bending-energy 权重 |
 
 公开 `FastVBM` 始终运行本包 `TorchFLIRT`，不接受外部 affine。固定 affine 仅用于仓库内部诊断，不属于公开 API。
+
+在 CPU 上显式选择原序分割时，构造为 `FastVBM(device="cpu", threads=8, registration_backend="fnirt", fast_execution="fsl")`，`run()` 的输入输出不变。默认 `fast_execution="tensor"` 延续已有 CPU 和 CUDA 行为；选择 `fsl` 会改变分割方法，不能把这项选择本身称为无损提速。Numba 首次编译和缓存加载时间计入相应进程的测量。
 
 ### 两个非线性后端
 
@@ -309,6 +313,7 @@ fnit fast-vbm \
 | 常用选项 | 作用 |
 |---|---|
 | `--brain-mask MASK` | 使用已有 input-grid mask，跳过 SynthStrip |
+| `--fast-execution {tensor,fsl}` | 选择 TorchFAST 的同步或原序实现，默认 `tensor`；与 Python `fast_execution` 对应 |
 | `--reference-mask MASK` | 指定 template-grid reference mask |
 | `--synthstrip-weights PATH` | 显式指定 SynthStrip checkpoint 或目录 |
 | `--synthmorph-weights PATH` | 显式指定 SynthMorph deform checkpoint 或目录 |
@@ -392,6 +397,7 @@ FSL 完整命令计时 3195.14 s 来自 2026-09-30，本轮没有重测原软件
 
 | 版本或日期 | 更新与验证范围 |
 |---|---|
+| 2026-10-04 CPU 审计 | 新增显式 `fast_execution` 选项，默认不变；FAST 的 CPU 原序热点改为 Numba。真实 FAST 小区域八图逐位相同，完整 CUDA `fsl` / `tensor` 两轮对照共 32 对文件 SHA-256 相同。原始 T1 到两个 VBM 后端的 CPU 官方对照仍待完成；这项阶段验证不改变既有 FSL 等价性状态。见[本轮报告](../../validation/smri_cpu_20261004/task04/README.md)。 |
 | 本轮 FNIRT 优化 | 跳过未使用的采样梯度，复用 T1 intensity mapping 与原始 float64 deformation field；真实 FastVBM 完整端到端 18 幅影像及科学 QC 逐位通过，含保存 API 212.67→204.58 s，见[统一验证页](../../validation/registration_lossless_20261002/README.md)。 |
 | 2026-09-30，`f958121` | 两个后端从 raw T1w 到全部 13 幅输出；FNIRT / SynthMorph 进程内含保存为 901.93 / 607.16 s。对 FSL 调制 GM 的 r 为 0.865489 / 0.616679，未达到数值等价；见[当次报告](../../validation/fast_vbm/e2e.public.json)。 |
 
