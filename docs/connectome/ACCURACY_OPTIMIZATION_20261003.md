@@ -90,7 +90,11 @@ flowchart TD
 
 候选 DWI、bvec、bval、mask 的文件 SHA 与本轮基线分别相同。FA 的 NaN 位置和状态差异不变，全值主指标仍为 `null`；有限对诊断 RMSE 全空间 0.03072482769→0.03072373794、官方 mask 0.05449217160→0.05448937207，mask 内最大误差 1.22469568 不变。完整原报告及候选脑图见[同次原始链比较](../../validation/connectome/accuracy_20261003/root/RAW_COMPONENT_COMPARATOR.md#5-最新精度耗时和真实脑图)。固定输入 DTI 的较大改进与此处 raw 链的小幅改进分别记录。
 
-CON01 候选的八 atlas 矩阵为 **187/240** 项判定通过，保存轨迹分布为 **13/25** 项通过，两个整体状态均为 `failed`。这不是“78% 解剖准确率”：分母是前述官方五次重复范围的比较判定。该结果没有证明完整 pipeline 已与官方一致。
+CON01 候选的八 atlas 矩阵为 **187/240** 项判定通过，保存轨迹分布为 **13/25** 项通过。分母是前述官方五次重复范围的比较判定；两个整体验收状态均为 `failed`。
+
+逐 atlas 的六项判定、全部失败值与阈值见[同次矩阵/轨迹原报告](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v2/README.md#5-最新实测部署完成与科学判定)。CON01 接受率和长度 KS 对五个官方 seed 均通过；端点直方图通过 2/5、原网格保存点分布 1/5、四体素块分布 0/5。该空间分布比较与官方 `tckmap` 定义不同，不能作为官方 TDI 精度结论。
+
+![本轮 CON01 候选与五个官方结果的真实长度和保存点分布](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v2/sub-CON01/population.png)
 
 ### 前轮已发布基线
 
