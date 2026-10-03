@@ -70,7 +70,9 @@ def place_pial_t1(
     ``sampling_backend`` defaults to cpu; torch/triton select explicit CUDA MRI
     sampling through ``device``. Ordered updates and objective remain CPU.
     ``trace_callback(step, pass_index, coordinates_copy, diagnostics)`` is an
-    optional read-only diagnostic sink called after every accepted step.
+    optional read-only diagnostic sink called after every completed step.
+    Its diagnostics include all trial decisions; a rejected terminal step
+    restores its starting coordinates and ends the pass, matching native.
     ``max_steps`` guards against non-convergence; hitting it raises an error.
     """
     if candidate_backend not in ("tree", "snapshot"):
@@ -189,7 +191,8 @@ def place_pial_t1(
         momentum = gradient(current, cropped)
         stale_trial = None
         accepted = None
-        for _ in range(3):
+        trial_trace = [] if trace_callback is not None else None
+        for trial_index in range(3):
             proposal, displacement = unconstrained_step_with_offsets(
                 current, momentum, ripped, dt=dt)
             candidate, _ = asynchronous_first_step(
@@ -202,12 +205,21 @@ def place_pial_t1(
             trial_cropped = np.where(
                 ripped, cropped, np.where(blocked, cropped + 1, 0)).astype(np.int32)
             sse, rms = objective(candidate)
-            dt, reductions, _, rejected, stop = pial_step_decision(
+            trial_dt = dt
+            dt, reductions, reduced, rejected, stop = pial_step_decision(
                 last_sse, last_rms, sse, rms, dt, reductions)
             cropped = trial_cropped
+            if trial_trace is not None:
+                trial_trace.append({"trial": trial_index, "dt_used": trial_dt,
+                                    "dt_next": dt, "sse": sse, "rms": rms,
+                                    "reduced": bool(reduced), "rejected": bool(rejected),
+                                    "stop": bool(stop), "reductions": reductions})
             if rejected:
                 stale_trial = candidate
                 if stop:
+                    # Native MRISpositionSurface restores TMP2_VERTICES, then
+                    # ends this pass after MAX_REDUCTIONS; it does not fail.
+                    accepted = current
                     break
                 continue
             accepted = candidate
@@ -219,7 +231,8 @@ def place_pial_t1(
         if trace_callback is not None:
             trace_callback(step, outer_pass, current.copy(),
                            {"sse": last_sse, "rms": last_rms, "dt": dt,
-                            "reductions": reductions, "stop": bool(stop)})
+                            "reductions": reductions, "stop": bool(stop),
+                            "trials": trial_trace})
         if stop:
             pass_ends.append(step)
             if outer_pass == 3:

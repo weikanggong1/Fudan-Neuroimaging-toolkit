@@ -1,0 +1,44 @@
+{
+  "baseline_commit": "816e5610417a4c587caf321049438a9554139016",
+  "scope": "second_phase_surface_operator_diagnostic",
+  "overall_equivalence": "not_assessed",
+  "pial_general_bug": "rejected terminal trial must restore coordinates and end pass, not raise",
+  "upstream_evidence": "MRISpositionSurface mrisurf_mri.cpp lines 813-849 at fixed d932c45b source",
+  "unit_tests": {
+    "passed": 7,
+    "seconds": 10.22,
+    "log": "pial_tests.log",
+    "synthetic_control_test_is_not_benchmark": true
+  },
+  "roi_real_result": {
+    "report": "roi_lh_v1.json",
+    "same_face_oracle_baseline_max_mm2": 9.09692607820034e-06,
+    "same_face_oracle_candidate_max_mm2": 0.0,
+    "official_stats_integer_rounding_limits_precision_assessment": true,
+    "gpu_speed_stability": "not_assessed; cold initialization and only one hot pair"
+  },
+  "source_sha256": {
+    "src/fnit/recon_all/place_pial_python.py": "2377f847610a935859935e7ecafdbbd52a74bd4e27ad372a8324b49249d18e33",
+    "tests/recon_all/test_pial_rejected_stop.py": "053cb67a8be1535213fa1a2f4ac1c59594d1f4cc815046e889f34f4fae3bd468",
+    "validation/recon_all/accuracy_20261003/task_05/placement_probe.py": "d853965e625d245bcc518cdce97aba1049e90ebe8910b412e64689f492b33be2",
+    "validation/recon_all/accuracy_20261003/task_05/compare_placement.py": "529406d7093ddcaf06f3e746c46b2ac73da27175d571dca8f32e553505e388c0",
+    "validation/recon_all/accuracy_20261003/task_05/run_placement_stages.sh": "5211619fc60d322bbeeab19be4d0851a9f3583726020e2cefb9cea1bfb4afb0b"
+  },
+  "persistent_placement": {
+    "pid": 78930,
+    "receipt": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/placement_receipt.json",
+    "status": "queued_lh_prewhite_conda",
+    "stage_order": "LH prewhite/white native pairs; LH pial three-way; RH same; lock released every stage"
+  },
+  "not_executed": [
+    "new_real_placement_results",
+    "same_input_pial_fix_before_after",
+    "ten_case_self_generated_surface_evaluation"
+  ],
+  "limitations": [
+    "Complete Python white unavailable; no fake third complete implementation",
+    "Official fixed CLI does not export complete coordinates per round; logs are scalar diagnostics",
+    "Point-to-triangle distances unnecessary only when ordered ancestry proof succeeds; otherwise comparison refuses",
+    "Self-intersection and white/pial triangle crossing remain separately unassessed"
+  ]
+}

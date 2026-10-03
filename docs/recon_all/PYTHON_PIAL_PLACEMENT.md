@@ -1,6 +1,6 @@
 # Python pial.T1 表面放置
 
-`fnit.recon_all.place_pial_python.place_pial_t1` 实现 FreeSurfer 8.2 `mris_place_surface --pial` 的四轮几何优化，以及内侧壁固定和表面相交修复。它在 CPU 上使用 NumPy、Numba 和 nibabel，可单独调用并用于同输入算法核对。标准 `fnit-recon-all` 在最终 white 放置后使用[Conda 源码构建的原生 pial](NATIVE_PIAL_PLACEMENT.md)；原因及同输入差异见该页。此 Python 阶段没有 CUDA 验证，不能用冻结官方上游的单阶段结果代替整例验收。
+`fnit.recon_all.place_pial_python.place_pial_t1` 实现 FreeSurfer 8.2 `mris_place_surface --pial` 的四轮几何优化，以及内侧壁固定和表面相交修复。它在 CPU 上使用 NumPy、Numba 和 nibabel，可单独调用并用于同输入算法核对。标准 `fnit-recon-all` 在最终 white 放置后使用[Conda 源码构建的原生 pial](NATIVE_PIAL_PLACEMENT.md)；原因及同输入差异见该页。GPU 采样后端和静态索引优化的历史验证分别记在本文后续章节及表面热点报告；本轮候选仍须绑定自己的完整阶段结果。
 
 ## 输入、输出与调用
 
@@ -26,7 +26,7 @@ report = place_pial_t1(
 )
 ```
 
-`output` 可省略，默认写入 `subject/surf/{hemi}.pial.T1`。函数输出一个 FreeSurfer 三角表面：保留输入 white 的**有序面、完整体积几何标签和辅助尾部**，以放置后的 pial 坐标替换顶点坐标。`report` 含 `output`（路径字符串）、`hemisphere`（半球）、`steps`（接受的优化步数）、`pass_ends`（四轮的累计步数）、`cleanup`（相交次数、轨迹和平滑次数）及 `seconds`（墙钟耗时）。`max_steps` 默认 200；未收敛时抛出异常，不写入未完成的表面。
+`output` 可省略，默认写入 `subject/surf/{hemi}.pial.T1`。函数输出一个 FreeSurfer 三角表面：保留输入 white 的**有序面、完整体积几何标签和辅助尾部**，以放置后的 pial 坐标替换顶点坐标。`report` 含 `output`（路径字符串）、`hemisphere`（半球）、`steps`（累计迭代步数；达到缩步上限的还原步也计一次）、`pass_ends`（四轮的累计步数）、`cleanup`（相交次数、轨迹和平滑次数）及 `seconds`（墙钟耗时）。`max_steps` 默认 200；未收敛时抛出异常，不写入未完成的表面。
 
 函数不生成厚度、面积、曲率、体积或 atlas 统计；这些指标须由后续阶段计算。它也不生成所需的 white、标签或 MRI 输入。标准 runner 已在上游完成最终 white 放置；自产上游连续输入仍需验收，不能据此沿用下述冻结同输入的逐点结果。按官方顺序，还需先完成 `white.preaparc` 放置、皮层和海马杏仁核标签、sphere 配准与 aparc 注释、最终 white 放置。本 pial 函数不直接读取 `white.preaparc` 或 `aparc.annot`，但它们属于上述上游流程。
 
@@ -125,3 +125,30 @@ _incident_faces_collide输入这些量及完整候选CSR并返回首次碰撞boo
 桶查询约0.016–0.027秒，旧代码0.222–0.369秒，准备成本另列；这是组件计时。
 候选完整无剖析冷JIT耗时1232.634秒，41步、四轮结束26/32/36/41及清理2→6→0均与优化前相同；有序面、全部坐标和文件SHA完全一致。无剖析、分别使用空JIT缓存的同主机4线程配对为1453.060→1232.634秒，单次观察减少15.17%（1.179倍），文件SHA相同。共享负载下只有一次新/旧顺序配对，未验证稳定吞吐；同输入三方结果已完成：Python的全部坐标及有序面与官方8.2.0完全相同，当前Conda与官方P99为0.225255mm、最大1.482209mm，与冻结Conda几何相同。原始报告见[三方JSON](../../validation/recon_all/optimizations/20261001_serial/stage5/native_reference.json)。Conda176.787秒、官方133.863秒；三者计时均含阶段读写与加载，Python另含冷JIT。当前Python明显较慢，不默认替换。生产仍保留完整Conda white/pial，整例提速单独测量。
 第一版只缓存整数索引的完整候选剖析已中止，保留日志，不计入性能结果。
+
+
+## 2026-10-03：缩步上限后的拒绝试步
+
+特别说明成熟完整 pial 子函数的控制流缺口：上游 `MRISpositionSurface` 的第三次缩步后若 RMS 仍升高，会恢复本步起始坐标并结束当前轮；原 Python 函数在相同情况下报“rejected every trial”。本轮候选保留当前坐标、进入下一轮，最后仍执行内侧壁固定和相交清理；非终止拒绝继续重试。未更换生产 Conda 程序，也未增加 GPU/CPU 回退或更改精度。默认无诊断回调时不建立试步轨迹列表。
+
+现有所有参数：`subject` 是含本文七项输入的目录；`hemisphere` 必须是 `lh` 或 `rh`；`output=None` 默认 `surf/{hemi}.pial.T1`；`max_steps=200` 是四轮累计上限，未收敛抛 `RuntimeError`；`sampling_backend="cpu"` 可选 `cpu/torch/triton`；`candidate_backend="tree"` 可选 `tree/snapshot`；`device=None` 仅CPU允许，GPU采样须显式指定；`trace_callback=None` 可指定只读函数 `(step, pass_index, coordinates_copy, diagnostics)`。坐标为 `(N,3)` float32、surface RAS/mm，面为输入 white 的 `(F,3)` 有序整数索引；MRI沿用其conform网格。诊断字典的 `trials` 列表新增 `trial`、`dt_used`、`dt_next`、`sse`、`rms`、`reduced`、`rejected`、`stop`、`reductions`，不改变已有诊断字段。终止拒绝时回调坐标是已还原的当前坐标，SSE/RMS保留该步起点值；拒绝试步本身的指标在 `trials` 内。最终报告结构及标准CLI不变，此内部优化器仍没有独立官方CLI。
+
+```python
+from fnit.recon_all.place_pial_python import place_pial_t1
+trial_records = []
+pial_report = place_pial_t1(
+    subject="/data/self/sub01",  # FNIT自产完整七项前置输入
+    hemisphere="lh",  # 当前半球
+    output="/data/diagnostics/sub01/lh.pial.T1",  # 独立输出表面，surface RAS/mm
+    max_steps=200,  # 四轮累计迭代上限
+    sampling_backend="triton",  # 已有GPU强度采样；不启用半精度
+    candidate_backend="snapshot",  # 完整动态碰撞候选
+    device="cuda:0",  # 显式GPU
+    trace_callback=lambda step, pass_index, coordinates_copy, diagnostics:
+        trial_records.append((step, pass_index, diagnostics)),  # 保存各试步接受/拒绝状态
+)
+```
+
+服务器7项单元回归通过（10.22 s，6项缓存+1项完整四轮控制流）；控制流测试强制终止拒绝，验证四轮均完成、顶点恢复、面和输出保留，不代替真实benchmark。初次测试因测试表面缺体积几何失败，补齐合法测试输入后通过，原失败记录仍保留服务器会话输出。同输入完整阶段序列已在 gpucw1 排队：white.preaparc/最终white分别比较官方与当前Conda；完整pial比较官方/Conda/Python，先LH后RH。Python white只有前缀，不参与完整white三方。各stage单独取得并释放共享锁，输入始终从同一旧自产冻结目录复制，官方输出不喂入下一项生产或候选。此处是算法诊断，不能冒充本轮10例整例。
+
+官方固定CLI不输出每轮完整坐标快照，因此本轮native报告逐轮步长、SSE/RMS、拒绝次数和清理消息；Python额外保存四轮结束表面与全部试步。仅有日志标量时不宣称完整坐标逐轮对应。机器报告和复现入口见 `validation/recon_all/accuracy_20261003/task_05/placement_probe.py` 与 `run_placement_stages.sh`；阶段真实结果、GPU速度及10例指标尚待返回，整体等效仍为 `not_assessed`。
