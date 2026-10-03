@@ -90,11 +90,30 @@ flowchart TD
 
 候选 DWI、bvec、bval、mask 的文件 SHA 与本轮基线分别相同。FA 的 NaN 位置和状态差异不变，全值主指标仍为 `null`；有限对诊断 RMSE 全空间 0.03072482769→0.03072373794、官方 mask 0.05449217160→0.05448937207，mask 内最大误差 1.22469568 不变。完整原报告及候选脑图见[同次原始链比较](../../validation/connectome/accuracy_20261003/root/RAW_COMPONENT_COMPARATOR.md#5-最新精度耗时和真实脑图)。固定输入 DTI 的较大改进与此处 raw 链的小幅改进分别记录。
 
-CON01 候选的八 atlas 矩阵为 **187/240** 项判定通过，保存轨迹分布为 **13/25** 项通过。分母是前述官方五次重复范围的比较判定；两个整体验收状态均为 `failed`。
+CON01 本轮基线与候选的八 atlas 矩阵分别为 **180/240→187/240** 项判定通过，保存轨迹分布分别为 **4/25→13/25** 项通过。分母是前述官方五次重复范围的比较判定；两版的两类整体验收状态均为 `failed`。同病例的全部官方成对指标与阈值，以及端点直方图的边界，已核对相同。
+
+| CON01 判定字段 | 本轮基线通过数 | 本轮候选通过数 |
+|---|---:|---:|
+| Count 相对 L1，/40 | 30 | 25 |
+| SIFT2 FBC 相对 L1，/40 | 36 | 29 |
+| Count 支持 Dice，/40 | 24 | 33 |
+| Count Pearson，/40 | 31 | 30 |
+| 共有连接长度归一化 MAE，/40 | 35 | 38 |
+| 共有连接 FA 归一化 MAE，/40 | 24 | 32 |
+
+不同字段的变化分别保留：本例总通过数增加，同时 count/FBC 的 L1 与 Pearson 通过数减少。来源为[本轮实际基线、候选和阈值身份比较](../../validation/connectome/accuracy_20261003/root_baseline_matrix_analysis_v1/README.md#5-最新实测)。此处评价独立随机轨迹的整体分布，固定 TCK 的后处理组件结果另列。
 
 逐 atlas 的六项判定、全部失败值与阈值见[同次矩阵/轨迹原报告](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v2/README.md#5-最新实测部署完成与科学判定)。CON01 接受率和长度 KS 对五个官方 seed 均通过；端点直方图通过 2/5、原网格保存点分布 1/5、四体素块分布 0/5。该空间分布比较与官方 `tckmap` 定义不同，不能作为官方 TDI 精度结论。
 
 ![本轮 CON01 候选与五个官方结果的真实长度和保存点分布](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v2/sub-CON01/population.png)
+
+### 本轮 CON03：候选已完成，基线仍在执行
+
+CON03 候选实际 raw-DWI CLI 为 **2043.839 s**，接受 **11,582** 条轨迹；矩阵 **190/240** 项通过，轨迹分布 **3/25** 项通过，两类整体状态均为 `failed`。allocated 为 14.679791 GB，reserved 为 17.607688 GB，进程树采样峰值为 19.795018 GB，采样未报错。实际报告见 [CPU v3](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v3/README.md)；源码与比较门槛保持冻结版本。
+
+CON03 的全 102 帧 DWI 为有限值；官方 brain mask 内 RMSE 为 **0.871451**，Pearson 为 **0.999942**。bval 逐值相等，bvec 最大分量差 **0.003680290**、最大夹角 **0.240438°**。FA 全空间及官方 brain mask 内均为 FNIT 1 NaN、官方 6 NaN，非有限状态差异 5，全部值主指标为 `null`；官方 mask 内 98,695 个有限对的诊断 RMSE 为 **0.047717**，最大误差 **1.224620**。这些是独立原始链比较，不能替代固定 DWI 的张量组件验证。
+
+当前基线计时与同阶段精度比较仍为 `not_assessed`，不使用前轮 CON03 的数值补齐。其完成后再更新真实配对结论。
 
 ### 前轮已发布基线
 
@@ -120,6 +139,7 @@ CON01 候选的八 atlas 矩阵为 **187/240** 项判定通过，保存轨迹分
 - 活跃轨迹校准实验：真实 CON03 100k 的路径、端点、长度与接受种子逐位一致；本次 tracking wall 为 762.751→773.253 秒，未展示速度收益。最终候选恢复原校准循环，只保留独立 oracle 支持的 ACT chord 精度修正；实验原报告及其实际源码 SHA 保留不改。
 - 正式科学源码冻结后，CPU 回归 752 passed、63 skipped；CUDA 回归 717 passed、7 skipped，两次均有 362 项子测试通过。CPU 范围为 connectome、EDDY、TOPUP，CUDA 范围为 connectome。额外 CPU 比较器 17 项通过；这些协议测试不代替真实 MRI 比较。
 - 测试部署曾缺少仓库内下载脚本和 Tian S1 asset，导致 collection / fixture 失败；补齐实际测试资源后通过。两次失败的原日志保留，科学源码未改变，失败状态没有改写为成功。
+- CPU 报告部署先补齐已有绘图环境，随后修复可选基线计时的状态判定：候选完成而同病例基线刚启动时，仅将配对耗时记为 `not_assessed`，待真正完成后执行原严格检查。38 项相关 CPU 回归通过；CON01/03 原矩阵、轨迹报告和 PNG 的 SHA 不变。当前使用 [v3 控制器](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v3/README.md)，v1/v2 的部署失败记录完整保留。
 - 正式计划共十二次 raw-DWI 运行：CON01 基线→候选、CON03 候选→基线，其余八例候选；使用同一套官方 FreeSurfer 输入、100k seeds、seed 0 与 EDDY GP seed 12345。完整矩阵和轨迹由同次返回对象在计时结束后导出。
 - 整链结论待实际新运行和 CPU 比较完成后填写。
 

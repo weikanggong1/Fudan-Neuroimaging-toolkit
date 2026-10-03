@@ -2,6 +2,8 @@
 
 ## 1. 功能简介
 
+本页保留 v2 首次恢复 CON01 报告时的实际快照。CON03 随后触发可选基线计时状态问题，控制器已由 [v3](../cpu_matrix_deployment_v3/README.md) 替代；下面的 PID 和运行状态均属于 v2 记录。
+
 2026-10-03，nodecw10 的 v1 只读报告控制器使用 FNIT GPU Python；CON01 在绘图处报 `ModuleNotFoundError: No module named 'matplotlib'`。本次将**分析进程**切换到已安装完整报告依赖的 Anaconda Python，另建 `root_matrix_analysis_v2`。生产 GPU 进程、科学比较工具、冻结配置和包环境未修改。
 
 v1 PID 163744 的实际命令和属主核对后，仅对此控制器发送 SIGTERM；其脚本、状态、失败报告与日志保留。v2 在 nodecw10 后台运行，启动 PID 为 **3130**。
