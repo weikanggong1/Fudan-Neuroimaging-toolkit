@@ -308,6 +308,9 @@ def _run_connectome(args):
 
     if args.n_seeds < 1:
         raise ValueError("--n-seeds must be positive")
+    if getattr(args, "template_pairs", None):
+        from .connectome.paired_cli import run_paired_connectome
+        return run_paired_connectome(args)
     atlas_names = tuple(args.atlas)
     if len(set(atlas_names)) != len(atlas_names):
         raise ValueError("--atlas names must be distinct")
@@ -324,6 +327,7 @@ def _run_connectome(args):
                (args.dwi, args.bvals, args.bvecs, args.t1_segmentation, args.atlas_dwi)):
             raise ValueError("--bids-root cannot be mixed with explicit DWI/T1 segmentation inputs")
         from .connectome.bids import prepare_bids_connectome
+        from .connectome.paired_cli import load_recon_options
         selected = prepare_bids_connectome(
             args.bids_root, args.output_dir, subject=args.subject,
             session=args.session, run=args.run, acquisition=args.acquisition,
@@ -333,6 +337,8 @@ def _run_connectome(args):
             rotated_bvecs=args.rotated_bvecs,
             eddy_gp_seed=args.eddy_gp_seed,
             device=args.device, overwrite=args.overwrite,
+            recon_backend=getattr(args, "recon_backend", "auto"),
+            recon_options=load_recon_options(getattr(args, "recon_options", None)),
         )
         args.dwi, args.bvals, args.bvecs = selected.dwi, selected.bvals, selected.bvecs
         args.t1 = None
@@ -491,6 +497,10 @@ def _run_connectome(args):
         n_seeds=args.n_seeds,
         seed=args.seed,
         compile_arc=args.compile_arc,
+        checkpoint_dir=(getattr(args, "checkpoint_dir", None) or
+                        output_dir / "checkpoints" if args.bids_root else
+                        getattr(args, "checkpoint_dir", None)),
+        overwrite=args.overwrite,
     )
     print(f"seed_attempts={result.tractogram.seeds_attempted} "
           f"accepted_streamlines={len(result.tractogram.paths)}")
@@ -819,6 +829,14 @@ def main(argv=None):
     connectome.add_argument('--atlas-dwi',
                             help='integer atlas in DWI RAS world coordinates')
     connectome.add_argument('--freesurfer-subject-dir', help='completed recon-all subject directory')
+    connectome.add_argument('--recon-backend', choices=('auto', 'provided', 'freesurfer', 'fnit'),
+                            default='auto', help='anatomy source: supplied subject or explicit reconstruction backend')
+    connectome.add_argument('--recon-options', help='JSON object with backend resources and thread options')
+    connectome.add_argument('--template-pairs', help='JSON list of user-provided first/second surface or volume templates')
+    connectome.add_argument('--assignment-radius', type=float, default=4.0,
+                            help='paired endpoint radial search radius in mm (default 4)')
+    connectome.add_argument('--checkpoint-dir', help='content-validated reconstruction checkpoint directory')
+    connectome.add_argument('--mni-to-t1-transform', help='existing SynthMorph MNI-to-T1 dense warp for MNI template pairs')
     connectome.add_argument('--atlas', nargs='+', default=['fs-aparc'],
                             choices=('fs-aparc', 'fs-aparc-a2009s',
                                      'aparc+tian-s1', 'aparc.a2009s+tian-s1',

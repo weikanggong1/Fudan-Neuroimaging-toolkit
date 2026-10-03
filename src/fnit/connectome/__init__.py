@@ -30,6 +30,10 @@ from .sift2_optimizer import SIFT2Optimization, optimize_sift2_fixels
 from .sift2_proc_mask import processing_mask_from_5tt
 from .tcksample_precise import sample_streamline_mean_precise
 from .tracking import Tractogram, probabilistic_tractography
+from .template_inputs import (
+    PreparedTemplate, TemplatePair, TemplateSpec, prepare_template, template_dependency_paths,
+)
+from .paired_assignment import build_pair_connectomes
 
 __all__ = [
     "AtlasResult", "ConnectomeNode", "ConnectomeResult", "FreeSurferSubject", "FixelSegmentation", "MTNormaliseResult",
@@ -50,4 +54,6 @@ __all__ = [
     "surface_annotation_to_volume", "fsaverage_annotation_to_t1", "native_annotation_to_t1",
     "schaefer_to_t1", "glasser_to_t1",
     "combine_cortical_tian",
+    "PreparedTemplate", "TemplatePair", "TemplateSpec", "prepare_template",
+    "template_dependency_paths", "build_pair_connectomes",
 ]

@@ -12,6 +12,103 @@ import math
 import torch
 
 
+class RadialEndpointAssigner:
+    """Reuse the existing MRtrix radial endpoint rule on one integer atlas.
+
+    ``atlas`` is [X,Y,Z] with background 0. ``affine`` maps its centres to
+    scanner RAS mm. Distances must be strictly smaller than ``radius``; ties
+    retain the original lexicographic voxel-offset order. This class is also
+    used by square and paired-template matrices, so their spatial rules are
+    identical. ``batch_size`` is reduced using the same candidate budget as
+    the original square builder. Call the instance with a [P,3] tensor.
+    """
+
+    def __init__(self, atlas: torch.Tensor, affine: torch.Tensor, *,
+                 radius: float = 4.0, batch_size: int = 1024) -> None:
+        atlas = torch.as_tensor(atlas)
+        device = atlas.device
+        affine = torch.as_tensor(affine, device=device, dtype=torch.float32)
+        if atlas.ndim != 3 or atlas.dtype not in (
+            torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64
+        ):
+            raise ValueError("atlas must be a 3D integer tensor")
+        if affine.shape != (4, 4):
+            raise ValueError("affine must have shape [4, 4]")
+        if not math.isfinite(radius) or radius <= 0 or batch_size < 1:
+            raise ValueError("radius and batch_size must be positive")
+        if torch.any(atlas < 0):
+            raise ValueError("atlas labels must be non-negative")
+        linear = affine[:3, :3]
+        inverse = torch.linalg.inv(linear)
+        # If a point lies within radius of a voxel centre, its voxel displacement
+        # from round(point in voxel coordinates) is at most radius*||inverse row||
+        # plus half a voxel. This bound also covers rotated and sheared affines.
+        extent = [math.ceil(radius * inverse[i].norm().item() + 0.5) for i in range(3)]
+        axes = [torch.arange(-e, e + 1, device=device) for e in extent]
+        offsets = torch.stack(torch.meshgrid(*axes, indexing="ij"), dim=-1).reshape(-1, 3)
+        # A rounded voxel centre differs from the endpoint by at most half a voxel
+        # on each axis. Discard offsets whose centres cannot reach the search ball.
+        half_voxel_bound = (0.5 * linear.abs().sum(dim=1)).norm()
+        offset_world = (offsets[:, 0:1] * linear[:, 0]
+                        + offsets[:, 1:2] * linear[:, 1]
+                        + offsets[:, 2:3] * linear[:, 2])
+        offsets = offsets[offset_world.norm(dim=1) <= radius + half_voxel_bound]
+        # Bound the temporary [endpoints x candidate voxels x 3] arrays.
+        batch_size = min(batch_size, max(1, 500_000 // offsets.shape[0]))
+        shape = atlas.shape
+        shape_tensor = torch.tensor(shape, device=device)
+        flat_atlas = atlas.reshape(-1)
+        self.affine_translation = affine[:3, 3]
+        self.device = device
+        self.linear, self.inverse, self.offsets = linear, inverse, offsets
+        self.shape, self.shape_tensor, self.flat_atlas = shape, shape_tensor, flat_atlas
+        self.radius, self.batch_size = radius, batch_size
+
+    def __call__(self, points: torch.Tensor) -> torch.Tensor:
+        points = torch.as_tensor(points, device=self.device, dtype=torch.float32)
+        if points.ndim != 2 or points.shape[1] != 3:
+            raise ValueError("points must have shape [P,3]")
+        if points.shape[0] == 0:
+            return torch.empty(0, device=self.device, dtype=self.flat_atlas.dtype)
+        affine_translation = self.affine_translation
+        linear, inverse, offsets = self.linear, self.inverse, self.offsets
+        shape, shape_tensor, flat_atlas = self.shape, self.shape_tensor, self.flat_atlas
+        radius = self.radius
+        shifted = points - affine_translation
+        ijk = (shifted[:, 0:1] * inverse[:, 0]
+               + shifted[:, 1:2] * inverse[:, 1]
+               + shifted[:, 2:3] * inverse[:, 2])
+        voxels = torch.round(ijk).to(torch.int64)[:, None, :] + offsets[None, :, :]
+        inside = ((voxels >= 0) & (voxels < shape_tensor)).all(dim=-1)
+        index = ((voxels[..., 0] * shape[1] + voxels[..., 1]) * shape[2]
+                 + voxels[..., 2]).clamp(0, flat_atlas.numel() - 1)
+        labels = torch.where(inside, flat_atlas[index], 0)
+        delta = voxels.to(torch.float32) - ijk[:, None, :]
+        world_delta = (delta[..., 0:1] * linear[:, 0]
+                       + delta[..., 1:2] * linear[:, 1]
+                       + delta[..., 2:3] * linear[:, 2])
+        distance2 = world_delta.square().sum(dim=-1)
+        distance2 = distance2.masked_fill((labels == 0) | (distance2 >= radius * radius), math.inf)
+        nearest = distance2.argmin(dim=1)
+        picked = labels.gather(1, nearest[:, None]).squeeze(1)
+        return torch.where(distance2.gather(1, nearest[:, None]).squeeze(1).isfinite(), picked, 0)
+
+
+
+def assign_endpoint_labels(
+    points: torch.Tensor, atlas: torch.Tensor, affine: torch.Tensor, *,
+    radius: float = 4.0, batch_size: int = 1024,
+) -> torch.Tensor:
+    """Return radial node labels for [P,3] endpoints with bounded temporaries."""
+    assigner = RadialEndpointAssigner(atlas, affine, radius=radius, batch_size=batch_size)
+    points = torch.as_tensor(points, device=assigner.device, dtype=torch.float32)
+    if points.ndim != 2 or points.shape[1] != 3:
+        raise ValueError("points must have shape [P,3]")
+    if len(points) == 0:
+        return assigner(points)
+    return torch.cat([assigner(part) for part in points.split(assigner.batch_size)])
+
+
 def build_connectomes(
     endpoints: torch.Tensor,
     atlas: torch.Tensor,
@@ -79,26 +176,8 @@ def build_connectomes(
     lengths = metric_vector(lengths, "lengths")
     fa = metric_vector(fa, "fa")
 
-    linear = affine[:3, :3]
-    inverse = torch.linalg.inv(linear)
-    # If a point lies within radius of a voxel centre, its voxel displacement
-    # from round(point in voxel coordinates) is at most radius*||inverse row||
-    # plus half a voxel. This bound also covers rotated and sheared affines.
-    extent = [math.ceil(radius * inverse[i].norm().item() + 0.5) for i in range(3)]
-    axes = [torch.arange(-e, e + 1, device=device) for e in extent]
-    offsets = torch.stack(torch.meshgrid(*axes, indexing="ij"), dim=-1).reshape(-1, 3)
-    # A rounded voxel centre differs from the endpoint by at most half a voxel
-    # on each axis. Discard offsets whose centres cannot reach the search ball.
-    half_voxel_bound = (0.5 * linear.abs().sum(dim=1)).norm()
-    offset_world = (offsets[:, 0:1] * linear[:, 0]
-                    + offsets[:, 1:2] * linear[:, 1]
-                    + offsets[:, 2:3] * linear[:, 2])
-    offsets = offsets[offset_world.norm(dim=1) <= radius + half_voxel_bound]
-    # Bound the temporary [endpoints x candidate voxels x 3] arrays.
-    batch_size = min(batch_size, max(1, 500_000 // offsets.shape[0]))
-    shape = atlas.shape
-    shape_tensor = torch.tensor(shape, device=device)
-    flat_atlas = atlas.reshape(-1)
+    assigner = RadialEndpointAssigner(atlas, affine, radius=radius, batch_size=batch_size)
+    batch_size = assigner.batch_size
     count = torch.zeros(count_nodes * count_nodes, dtype=torch.int64, device=device)
     fbc = torch.zeros_like(count, dtype=torch.float64) if weights is not None else None
     mean_denominator = (
@@ -108,29 +187,10 @@ def build_connectomes(
     length_sum = torch.zeros_like(mean_denominator) if lengths is not None else None
     fa_sum = torch.zeros_like(mean_denominator) if fa is not None else None
 
-    def nearest_labels(points: torch.Tensor) -> torch.Tensor:
-        shifted = points - affine[:3, 3]
-        ijk = (shifted[:, 0:1] * inverse[:, 0]
-               + shifted[:, 1:2] * inverse[:, 1]
-               + shifted[:, 2:3] * inverse[:, 2])
-        voxels = torch.round(ijk).to(torch.int64)[:, None, :] + offsets[None, :, :]
-        inside = ((voxels >= 0) & (voxels < shape_tensor)).all(dim=-1)
-        index = ((voxels[..., 0] * shape[1] + voxels[..., 1]) * shape[2]
-                 + voxels[..., 2]).clamp(0, flat_atlas.numel() - 1)
-        labels = torch.where(inside, flat_atlas[index], 0)
-        delta = voxels.to(torch.float32) - ijk[:, None, :]
-        world_delta = (delta[..., 0:1] * linear[:, 0]
-                       + delta[..., 1:2] * linear[:, 1]
-                       + delta[..., 2:3] * linear[:, 2])
-        distance2 = world_delta.square().sum(dim=-1)
-        distance2 = distance2.masked_fill((labels == 0) | (distance2 >= radius * radius), math.inf)
-        nearest = distance2.argmin(dim=1)
-        picked = labels.gather(1, nearest[:, None]).squeeze(1)
-        return torch.where(distance2.gather(1, nearest[:, None]).squeeze(1).isfinite(), picked, 0)
 
     for start in range(0, count_tracks, batch_size):
         stop = min(start + batch_size, count_tracks)
-        nodes = nearest_labels(endpoints[start:stop].reshape(-1, 3)).reshape(-1, 2)
+        nodes = assigner(endpoints[start:stop].reshape(-1, 3)).reshape(-1, 2)
         valid = (nodes[:, 0] > 0) & (nodes[:, 1] > 0)
         left = torch.minimum(nodes[valid, 0], nodes[valid, 1]) - 1
         right = torch.maximum(nodes[valid, 0], nodes[valid, 1]) - 1

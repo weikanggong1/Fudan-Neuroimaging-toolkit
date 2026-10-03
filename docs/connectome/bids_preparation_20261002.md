@@ -1,5 +1,7 @@
 # 原始 BIDS 连接组输入准备
 
+> 这是 2026-10-02～03 的历史协议与阶段记录，文中的启动状态及接口示例绑定当时版本。当前三种 recon 来源、BIDS 输入与调用示例见[现行 pipeline 说明](README.md)；已完成十例原始 DWI→SC 的对照结论见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)，新模板配对与缓存评测见[本轮记录](../../validation/connectome/paired_pipeline_20261003/README.md)。
+
 ## 1. 功能简介
 `prepare_bids_connectome` 选择同一受试者、session 的原始 DWI 与 T1w，运行 FNIT PyTorch TOPUP/EDDY 和官方 FreeSurfer recon-all，返回连接组计算所需路径。反向相位编码缺失时只运行 EDDY。已有外部校正影像或解剖可显式提供。
 
