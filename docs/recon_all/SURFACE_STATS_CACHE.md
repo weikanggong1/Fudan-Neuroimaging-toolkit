@@ -18,7 +18,7 @@ mean(thickness[face]) × (white_face_area + pial_face_area) / 6
 
 此基础量按原有角顺序累加到三个顶点，再按脑区求和。`lh.volume`/`rh.volume` 使用的 TH3 三四面体分解仍由 `vertex_th3_volume()` 独立计算，不能作为 `-no-th3` 脑区体积输入。
 
-顶点面积保留原 `norm(cross) * (0.5 / 3.0)` 的单次 float32 乘法；不能改为先乘 0.5 再除 3。主曲率保留原两跳邻域、2048 顶点分块、SVD 截断阈值及病态回退。CUDA 矩阵乘法默认 TF32，未使用 FP16/BF16。
+`.area` 顶点图保留原 `norm(cross) * (0.5 / 3.0)` 的单次 float32 乘法。脑区 `SurfArea` 使用独立的 `roi_vertex_area()`：面面积 float32 除以3后转为 float64，按面角累计；不读取已在 float32 中累计舍入的顶点面积图。主曲率保留原两跳邻域、2048 顶点分块、SVD 截断阈值及病态回退。CUDA 矩阵乘法默认 TF32，未使用 FP16/BF16。
 
 CPU 注释先确定脑区顶点和静态切片，保留每个脑区的原顶点顺序。GPU 对这些切片执行原 float64 sum/mean/std，并将整套面积、厚度和体积摘要一次回传；不再为每区读取 GPU bool/float。曲率列沿用原 NumPy 汇总公式和求和顺序。
 
@@ -165,3 +165,16 @@ subprocess.run(
 ```
 
 本页不以单阶段缓存命中数宣布整例加速；真实阶段与整例结果必须分别附机器可读报告。
+
+## 2026-10-03 脑区面积候选修复
+
+特别说明成熟子函数 `SurfaceStatsCache.roi_base()` 的精度问题：原函数复用了 `.area` 的 float32 顶点累加量，而上游 `mris_anatomical_stats.cpp` 逐面以 `f->area / VERTICES_PER_FACE` 累计到 double 脑区面积。两者数学定义相同，但舍入位置不同。候选新增 `roi_vertex_area(geometry)`，保留原 CUDA 计算和一次摘要回传，不改变公开面积图、厚度、no-th3 体积或主曲率。其输入 `geometry` 是由当前缓存 `geometry(path)` 读取的 `_Geometry`（surface RAS/mm，同路径文件版本）；输出是同顶点顺序 `(N,)` float64 设备张量，单位 mm²。缓存按该几何版本持有，退出上下文释放；无效输入仍由 `geometry()` 抛异常。该内部方法没有独立 CLI，Python、FNIT命令和官方命令沿用上文完整统计接口。
+
+```python
+from fnit.recon_all.surface_stats_cache import SurfaceStatsCache
+with SurfaceStatsCache(device="cuda:0") as statistics_cache:  # 显式GPU与缓存生命周期
+    surface_geometry = statistics_cache.geometry(path="/data/sub01/surf/lh.white")  # 最终white，mm
+    roi_vertex_areas = statistics_cache.roi_vertex_area(geometry=surface_geometry)  # (N,) double/mm²，供脑区汇总
+```
+
+本轮代码基线为 `816e5610417a4c587caf321049438a9554139016`。已完成源码公式核对、编译语法与差异检查；6项单元测试在服务器通过（2.61 s），覆盖面分摊及公开面积图兼容性、no-th3定义和版本失效。fnit_main_env缺少pytest，复用服务器已有同Python 3.11的pytest纯Python测试组件，关闭插件自动加载；计算依赖仍来自fnit_main_env。用户明确授权最小范围补丁和验证脚本上传后，候选已部署到独立验证副本。同输入GPU/官方验证已通过共享锁排队，不能把历史表格改标为本次候选结果。诊断脚本与报告保存在 `validation/recon_all/accuracy_20261003/task_05/`；未获真实验证前候选尚未验收。最终10例整例由协调者运行，整体指标等效为 `not_assessed`。

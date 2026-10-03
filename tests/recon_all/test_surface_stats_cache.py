@@ -42,7 +42,7 @@ def test_roi_summary_matches_ordered_scalar_reductions(files):
     with SurfaceStatsCache(device="cpu") as cache:
         basic, volumes = cache.roi_base(paths["white"], paths["aparc.annot"], paths["thickness"],
                                        white=paths["white"], pial=paths["pial"])
-        area = vertex_area(xyz, faces, device="cpu").astype(np.float64)
+        area = cache.roi_vertex_area(cache.geometry(paths["white"])).numpy()
         volume = cache.no_th3_volume(paths["white"], paths["pial"], paths["thickness"])
         for index, name in ((1, "A"), (2, "B")):
             selected = labels == index
@@ -54,7 +54,7 @@ def test_roi_summary_matches_ordered_scalar_reductions(files):
         cache.roi_base(paths["white"], paths["DKT.annot"], paths["thickness"],
                        white=paths["white"], pial=paths["pial"])
         assert cache.counters["geometry_reads"] == 2
-        assert cache.counters["vertex_area_computations"] == 1
+        assert cache.counters["roi_vertex_area_computations"] == 1
         assert cache.counters["no_th3_volume_computations"] == 1
         assert cache.counters["morph_reads"] == 1
         assert cache.counters["roi_summary_transfers"] == 2
@@ -126,3 +126,19 @@ def test_cache_rejects_incorrect_device(files):
     cache = SurfaceStatsCache(device="cpu")
     with pytest.raises(ValueError, match="device"):
         cache.check_device("meta")
+
+
+def test_roi_area_uses_face_shares_before_vertex_rounding(files):
+    paths, xyz, _, faces, _, labels = files
+    with SurfaceStatsCache(device="cpu") as cache:
+        geometry = cache.geometry(paths["white"])
+        shares = (cache.face_area(geometry) / 3).numpy()
+        basic, _ = cache.roi_base(paths["white"], paths["aparc.annot"], paths["thickness"])
+        for index, name in ((1, "A"), (2, "B")):
+            expected = sum(float(shares[face_index])
+                           for face_index, face in enumerate(faces)
+                           for vertex in face if labels[vertex] == index)
+            assert basic[name][1] == expected
+        # public .area remains the established float32 vertex accumulation.
+        np.testing.assert_array_equal(cache.vertex_area(geometry).numpy(),
+                                      vertex_area(xyz, faces, device="cpu").astype(np.float64))

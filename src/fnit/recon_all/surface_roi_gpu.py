@@ -55,7 +55,7 @@ def roi_area_thickness(surface: str | Path, annotation: str | Path,
     surface 是 surface RAS/mm 三角网格；thickness 是同序 (N,) morph；
     device 默认 cuda:0，cache 可复用同设备 SurfaceStatsCache。
     缺失文件、顶点数或设备不一致会抛异常。CUDA 摘要一次回传，
-    保持各区顶点原有顺序、float64 归约及原 vertex_area 的 float32 计算。
+    保持各区顶点原有顺序、float64 归约及官方逐面 float32 面积分摊。
     对应 mris_anatomical_stats -no-th3 的四列，不包含全局表头。
     """
     from .surface_stats_cache import SurfaceStatsCache

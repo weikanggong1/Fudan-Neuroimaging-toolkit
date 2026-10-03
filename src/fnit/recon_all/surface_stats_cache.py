@@ -163,6 +163,22 @@ class SurfaceStatsCache:
         return geometry.derived["vertex_area"]
 
     @torch.inference_mode()
+    def roi_vertex_area(self, geometry: _Geometry) -> torch.Tensor:
+        """脑区面积基础量，(N,) float64/mm²，按官方逐面 float32 分摊。
+
+        mris_anatomical_stats 累加 face.area / 3 到 double 脑区量。
+        不能复用已在 float32 累加舍入的 .area 顶点图；.area 计算不变。
+        """
+        if "roi_vertex_area" not in geometry.derived:
+            share = (self.face_area(geometry) / 3.0).to(torch.float64)
+            area = torch.zeros(len(geometry.xyz), dtype=torch.float64, device=self.device)
+            for corner in range(3):
+                area.index_add_(0, geometry.triangles[:, corner], share)
+            geometry.derived["roi_vertex_area"] = area
+            self.counters["roi_vertex_area_computations"] += 1
+        return geometry.derived["roi_vertex_area"]
+
+    @torch.inference_mode()
     def principal(self, geometry: _Geometry) -> tuple[np.ndarray, np.ndarray]:
         """缓存法线、两跳邻接及主曲率；返回两个 (N,) float32/mm⁻¹ 数组。"""
         from .surface_curvature_gpu import _neighbours
@@ -252,7 +268,7 @@ class SurfaceStatsCache:
         groups, indices = self._groups(annotation, len(values))
         if not groups:
             return {}, {}
-        grouped_area = self.vertex_area(geometry)[indices]
+        grouped_area = self.roi_vertex_area(geometry)[indices]
         grouped_thickness = values[indices]
         grouped_volume = (None if white is None else
                           self.no_th3_volume(white, pial, thickness)[indices])
