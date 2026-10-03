@@ -55,8 +55,9 @@ def main():
             started=time.perf_counter()
             with (out/(binary+'_'+str(len(record['commands']))+'.log')).open('w') as log:
                 result=subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,env={**__import__('os').environ,'CUDA_VISIBLE_DEVICES':''})
+            command_wall_s=time.perf_counter()-started
             version=subprocess.check_output([str(resolved),'-version'],stderr=subprocess.STDOUT,text=True)
-            row={'command':command,'returncode':result.returncode,'wall_s':time.perf_counter()-started,'binary_sha256':sha(resolved),
+            row={'command':command,'returncode':result.returncode,'wall_s':command_wall_s,'timing_scope':'actual command wall, excludes version probe','binary_sha256':sha(resolved),
                 'version':version,'input_sha256':{str(p):sha(p) for p in inputs},'output_sha256':{str(p):sha(p) for p in outputs if p.exists()}}
             record['commands'].append(row)
             if result.returncode or len(row['output_sha256'])!=len(outputs): raise RuntimeError('official reference failed')

@@ -158,6 +158,8 @@ basis 和 RHS 乘法次序候选在 CON10 GPU 使最大误差变为约 `0.00077`
 
 本轮当前 CPU focused/既有 response、CSD、pipeline 回归 `27 passed, 1 CUDA skipped`。正式十例 GPU tensor、CON01/03 四轮 ABBA、最新 CUDA 回归仍排共享锁；本报告不将排队或上述短诊断当作已完成端到端性能验收。全链时间、精度和严格 `<20e9` 三类显存验收由总控制实测补齐。
 
+`formal_tensor_reference_cpu_v1` 只用于精度；其验证脚本计时边界包含随后 `-version` 身份探测，不作为官方 solver 性能数字。脚本已修正未来运行的时间边界，原 v1 报告和 SHA 保留。成对 GPU 时间使用实际 solver 边界，与此问题无关。
+
 数据为新下载公开 OpenNeuro ds001226 十例 CON01/03/04/05/06/07/08/09/10/11；许可证与原始下载出处见前一轮实际来源记录。完整数组保留新服务器目录，不将受试者体积复制进仓库；提交报告、脚本及公开脑图。旧 frozen config、旧 producer 和旧路径未补写。
 
 ## 6. 更新与 benchmark 记录
