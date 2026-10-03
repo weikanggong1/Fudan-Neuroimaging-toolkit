@@ -4,7 +4,7 @@
 
 输入原始 BIDS DWI、可选反向相位编码图像和配对 T1w，流程依次运行 PyTorch TOPUP、SynthStrip 脑掩膜、PyTorch EDDY、官方 FreeSurfer `recon-all`、响应估计、MSMT-CSD、ACT/iFOD2 追踪、SIFT2 和 atlas 端点赋值。已有完整 FreeSurfer subject 或已校正 DWI 时跳过相应阶段。多个 atlas 共用一次追踪和 SIFT2，各输出 count、SIFT2 FBC、mean length、mean FA 四张矩阵。
 
-验证记录分为前轮数据流加速和本轮精度优化。前轮十例结果已完成，raw-DWI CLI 中位数 643.623 s、官方重复范围通过率 57.96% 均对应前轮实际版本。本轮从 `7af34e6d` 开始，十二次 raw 调用与十例比较已完成：矩阵 1388/2400、轨迹分布 85/250，十例整体仍未匹配；原 CON09/10 监测缺口独立补测另列，见第 5 节及[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)。
+验证记录分为前轮数据流加速和本轮精度优化。前轮十例结果已完成，raw-DWI CLI 中位数 643.623 s、官方重复范围通过率 57.96% 均对应前轮实际版本。本轮从 `7af34e6d` 开始，十二次 raw 调用与十例比较已完成：矩阵 1388/2400、轨迹分布 85/250，十例整体仍未匹配。CON09/10 独立 NVML 补测采样健康，原监测缺口和补测中的 SIFT2 权重末位差分别保留，见第 5 节及[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)。
 
 ## 1. 功能和流程
 

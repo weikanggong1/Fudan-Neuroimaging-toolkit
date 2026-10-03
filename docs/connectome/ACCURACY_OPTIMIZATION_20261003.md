@@ -87,7 +87,22 @@ flowchart TD
 
 完整逐例逐 atlas 的六字段、五个官方 seed 比较值、官方十对范围与原门槛、全部失败项见[最终原报告与摘录](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/README.md)。每 atlas 合计见[八套统计](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/actual_completed/atlas_cohort_counts.csv)，原值与明确覆盖数的描述性中位数见[完整矩阵统计](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/actual_completed/matrix_descriptive_medians.csv)。本轮每例一个 FNIT seed，自身随机重复性仍未评估。
 
+十例 raw 组件比较也已完成：完整校正 DWI 和梯度均有限，bval 逐值相等，零向量与 b0 支持差异为零。十例 FA 均存在非有限值，全部值主统计保留 `null`，有限对诊断另列分母；不能将该诊断解释为全图精度。逐例完整 DWI、梯度、FA 非有限状态、网格范围及真实脑图见[组件原报告归档](../../validation/connectome/accuracy_20261003/root/RAW_COMPONENT_COMPARATOR.md#5-最新精度耗时和真实脑图)。
+
 十二次原调用的 allocated/reserved/进程树记录值均低于 20e9 字节，但 **原显存监测门未通过**：CON09 有失败采样，CON10 另有采样间隔缺口，两者为 `not_fully_measured`。其余十次采样无报错。独立直接 NVML 补测另行保留资格和时间，原科学结果、wall、GPU 报告及其失败状态不替换。
+
+### 原监测缺口的独立补测
+
+CON09/10 使用同一冻结科学源码、原始输入、已完成的 FreeSurfer subject、参数与 GPU，以直接 NVML 采样重新执行。两例补测已完成，采样无报错，三类峰值均低于 20e9 字节。补测位于 `FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1`，计时单独记录，不并入原十二次或用于计算提速。完整来源、协议检查和原失败记录见[补测说明](../../validation/connectome/accuracy_20261003/memory_recovery_v1/README.md)。
+
+| 独立补测 | CLI 秒 | allocated GB | reserved GB | 进程树采样 GB | 最大实际采样间隔秒 |
+|---|---:|---:|---:|---:|---:|
+| CON09 | 679.307 | 14.681256 | 17.628660 | 19.815989 | 2.418230 |
+| CON10 | 579.509 | 14.681970 | 17.607688 | 19.795018 | 1.429691 |
+
+每例 82 项解析科学产物中 81 项逐位一致：全部 MRI/FOD/atlas、TCK 保存点与轨迹边界、长度/FA/端点及 32 张矩阵一致。唯一差异为 `track_metrics.npz.weights` 的 Float64 末位：CON09 有 8343/13089 值不同、最大绝对差 1.332268×10⁻¹⁵；CON10 有 6986/18179 值不同、最大绝对差 1.776357×10⁻¹⁵。因此 **全部科学数组逐位一致门未通过**，没有放宽容差或推断差异原因；其余独立时间/路径元数据差异分别记录。原十二次科学结果、时间、监测失败与所有源文件均保留。
+
+直接 NVML 的健康采样支持这两次独立运行的观测显存结论；采样最大值仍不是连续数学上界，不能改写原显存监测门。
 
 
 ### 本轮 CON01：基线与候选配对已完成
@@ -187,7 +202,8 @@ CON03 真实脑图直接读取同次校正 DWI/FA 的原保存网格，显示 `k
 - 测试部署曾缺少仓库内下载脚本和 Tian S1 asset，导致 collection / fixture 失败；补齐实际测试资源后通过。两次失败的原日志保留，科学源码未改变，失败状态没有改写为成功。
 - CPU 报告部署先补齐已有绘图环境，随后修复可选基线计时的状态判定：候选完成而同病例基线刚启动时，仅将配对耗时记为 `not_assessed`，待真正完成后执行原严格检查。38 项相关 CPU 回归通过；CON01/03 原矩阵、轨迹报告和 PNG 的 SHA 不变。当前使用 [v3 控制器](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v3/README.md)，v1/v2 的部署失败记录完整保留。
 - 正式计划共十二次 raw-DWI 运行：CON01 基线→候选、CON03 候选→基线，其余八例候选；使用同一套官方 FreeSurfer 输入、100k seeds、seed 0 与 EDDY GP seed 12345。完整矩阵和轨迹由同次返回对象在计时结束后导出。
-- 正式十二次 raw-DWI CLI 与十例 CPU 比较全部完成：矩阵 1388/2400、轨迹分布 85/250，十例整体均 failed；最终源码前后核验与原报告摘录真实 exit 0。CON09/10 原监测缺口保留，独立 NVML 资格补测另列。
+- 正式十二次 raw-DWI CLI 与十例 CPU 比较全部完成：矩阵 1388/2400、轨迹分布 85/250，十例整体均 failed；最终源码前后核验与原报告摘录真实 exit 0。十例 raw 组件原报告另行归档，非有限值及全值空指标保留。
+- CON09/10 独立 NVML 补测完成，采样无报错；原监测失败未改写。两次补测的 MRI、全部轨迹保存点和矩阵一致，但 Float64 SIFT2 权重最大差为 1.78×10⁻¹⁵，全部科学数组逐位一致门未通过。
 
 ## 7. 原实现与参考文献
 
