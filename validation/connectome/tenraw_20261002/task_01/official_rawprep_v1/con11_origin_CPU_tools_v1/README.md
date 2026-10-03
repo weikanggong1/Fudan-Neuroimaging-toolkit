@@ -7,3 +7,5 @@ launch_con11_after_prefix.py 等前九例实际 CPU 完成合同全部核验，�
 watch_con11_origin_completion.py 核验实际新结果，再与 origin 指向的新 FNIT 目录比较。publish_explicit_case_routes.py 按例发布路径和实际完成文件 SHA256；未完成例保持 waiting，不能据此声称十例已完成。
 
 前九例是恢复自身已完成 CPU TOPUP/SynthStrip 后的新 EDDY，CON11 是新的完整 CPU 运行，计时分别报告，不能伪造恢复 lineage。此目录不修改 FNIT 科学实现，不推送 main。
+
+当前十例完成结果与精简交付见[官方 rawprep 当前说明](../README.md)。本目录的 freeze/route 快照是原启动时的冻结凭据，保留其当时状态；完成时实际路径和 SHA 位于新交付。
