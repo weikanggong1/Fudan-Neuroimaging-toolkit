@@ -524,6 +524,9 @@ def prepare_surface_reconstruction(source_t1w, work_dir, *, recon_all=None, back
             environment["SUBJECTS_DIR"] = str(root)
             environment["FREESURFER_HOME"] = str(fs_command.parent.parent)
             fs_home = fs_command.parent.parent
+            # FreeSurferEnv.sh exports this alias; recon-all 8.2's default
+            # V8 options resolve $FREESURFER/etc before parsing -all/-sd.
+            environment["FREESURFER"] = str(fs_home)
             environment["PATH"] = os.pathsep.join(dict.fromkeys(
                 [str(fs_command.parent), str(fs_home / "bin"), str(fs_home / "mni/bin")]
                 + environment.get("PATH", "").split(os.pathsep)))

@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import stat
 import subprocess
@@ -215,11 +216,17 @@ def test_options_cannot_override_locked_inputs(tmp_path, key):
         adapter.prepare_surface_reconstruction(source, tmp_path, options={key: "/other"})
 
 
-def test_explicit_freesurfer_uses_safe_argv_and_selected_license(tmp_path, native):
+@pytest.mark.parametrize("prior_home", [None, "/other/freesurfer/version"])
+def test_explicit_freesurfer_uses_safe_argv_and_selected_license(tmp_path, native, monkeypatch, prior_home):
     source = _source(tmp_path)
     command = _binary(tmp_path, "recon-all")
     license_path = tmp_path / "personal-license.txt"
     license_path.write_text("fixture only")
+    for name in ("FREESURFER", "FREESURFER_HOME"):
+        if prior_home is None:
+            monkeypatch.delenv(name, raising=False)
+        else:
+            monkeypatch.setenv(name, prior_home)
     result = adapter.prepare_surface_reconstruction(
         source, tmp_path / "work", backend="freesurfer",
         options={"command": command, "threads": 2, "fs_license": license_path})
@@ -228,7 +235,15 @@ def test_explicit_freesurfer_uses_safe_argv_and_selected_license(tmp_path, nativ
                                  str(tmp_path / "work/reconstruction"), "-parallel", "-openmp", "2"]
     assert calls[0]["env"]["FS_LICENSE"] == str(license_path)
     assert calls[0]["env"]["OMP_NUM_THREADS"] == "2"
+    # Real recon-all 8.2 reads $FREESURFER/etc/global-expert-options.v8.txt
+    # before importing T1w. Both names must follow the explicitly selected installation.
+    assert calls[0]["env"]["FREESURFER"] == str(command.parent.parent)
+    assert calls[0]["env"]["FREESURFER_HOME"] == str(command.parent.parent)
+    assert calls[0]["env"]["SUBJECTS_DIR"] == str(result.subject_dir.parent)
     assert calls[0]["env"]["PATH"].split(":")[0] == str(command.parent)
+    assert str(command.parent.parent / "mni/bin") in calls[0]["env"]["PATH"].split(":")
+    assert os.environ.get("FREESURFER") == prior_home
+    assert os.environ.get("FREESURFER_HOME") == prior_home
     assert len(calls) == 3 and result.backend == "freesurfer"
     assert "fixture only" not in json.dumps(result.metadata)
 
