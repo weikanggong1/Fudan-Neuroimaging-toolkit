@@ -187,11 +187,13 @@ CON01/03 各四轮 ABBA（每版本 8 次）使用完整原函数、同驻留输
 
 四例 WM/GM/CSF/field/accepted-mask 修复前后逐位相同；CON04/07 平衡因子仅约 `2e-15 / 1.92e-13` 变化。此修复保证 C++ 下标语义，不声称该四例最终图精度提高或单轮速度提高。官方平衡因子文本为有限有效位数，报告中的几 e-6 差不能解释为真实求解误差；全场 field 最大差保留在 JSON，不只截取掩膜。
 
-最新完整 connectome CPU 测试：`653 passed, 29 skipped, 362 subtests passed`，51.21 秒；最新 focused CUDA 测试：`38 passed`，6.69 秒。测试源码绑定已合入的修复版本，测试环境补齐仓库已有工具及许可资产后完成；初次缺测试支持文件的失败不作为算法失败。十例 GPU tensor、CON01/03 ABBA 与正式 caller GPU 已完成。全链时间、精度和严格 `<20e9` 三类显存验收仍由总控制实测补齐。
+本组件阶段完整 connectome CPU 测试：`653 passed, 29 skipped, 362 subtests passed`，51.21 秒；该阶段 focused CUDA 测试：`38 passed`，6.69 秒。测试源码绑定已合入的修复版本，测试环境补齐仓库已有工具及许可资产后完成；初次缺测试支持文件的失败不作为算法失败。十例 GPU tensor、CON01/03 ABBA 与正式 caller GPU 已完成。最终整合版的 CPU 752 / CUDA 717 项通过及源码来源见[统一核验](../final_source_acceptance_v1/README.md)；整链科学与监测状态见本节下方最终证据。
 
 `formal_tensor_reference_cpu_v1` 只用于精度；其验证脚本计时边界包含随后 `-version` 身份探测，不作为官方 solver 性能数字。脚本已修正未来运行的时间边界，原 v1 报告和 SHA 保留。成对 GPU 时间使用实际 solver 边界，与此问题无关。
 
 数据为新下载公开 OpenNeuro ds001226 十例 CON01/03/04/05/06/07/08/09/10/11；许可证与原始下载出处见前一轮实际来源记录。完整数组保留新服务器目录，不将受试者体积复制进仓库；提交报告、脚本及公开脑图。旧 frozen config、旧 producer 和旧路径未补写。
+
+本轮统一整链比较已完成：十二次 raw CLI、十例候选；矩阵 **1388/2400**、轨迹分布 **85/250**，十例整体均 failed。局部组件结果与整链判定分列；同阶段两组配对耗时合计 −2.80%（CON03 +0.50%），为共享负载观察。原 CON09/10 显存监测缺口及独立补测另列，完整原值与来源见[最终证据](../final_cohort_summary_v1/README.md)。
 
 ## 6. 更新与 benchmark 记录
 

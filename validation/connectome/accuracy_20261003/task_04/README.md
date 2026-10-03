@@ -154,6 +154,8 @@ FNIT 时间从已在 CPU 内存中的标签/5TT 开始；native 时间包括进�
 
 当前五模块源码 SHA 与精确上游文件 SHA 见 [source provenance](evidence/source_provenance.json)；native 二进制 SHA 在原始 JSON，版本和图生成记录见 [日志](evidence/native_version_and_figures_v1.log)。四个现有 focused 测试文件共 **10 passed**；[日志](evidence/focused_cpu_tests_v1.log)明确打印实际加载文件路径和 SHA，避免误用环境中已安装版本。
 
+本轮统一整链比较已完成：十二次 raw CLI、十例候选；矩阵 **1388/2400**、轨迹分布 **85/250**，十例整体均 failed。局部组件结果与整链判定分列；同阶段两组配对耗时合计 −2.80%（CON03 +0.50%），为共享负载观察。原 CON09/10 显存监测缺口及独立补测另列，完整原值与来源见[最终证据](../final_cohort_summary_v1/README.md)。
+
 ## 6. 更新记录、成熟实现问题与候选取舍
 
 | 版本/候选 | 实测结果 | 取舍 |

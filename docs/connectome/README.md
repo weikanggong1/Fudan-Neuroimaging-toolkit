@@ -4,7 +4,7 @@
 
 输入原始 BIDS DWI、可选反向相位编码图像和配对 T1w，流程依次运行 PyTorch TOPUP、SynthStrip 脑掩膜、PyTorch EDDY、官方 FreeSurfer `recon-all`、响应估计、MSMT-CSD、ACT/iFOD2 追踪、SIFT2 和 atlas 端点赋值。已有完整 FreeSurfer subject 或已校正 DWI 时跳过相应阶段。多个 atlas 共用一次追踪和 SIFT2，各输出 count、SIFT2 FBC、mean length、mean FA 四张矩阵。
 
-验证记录分为前轮数据流加速和本轮精度优化。前轮十例结果已完成，raw-DWI CLI 中位数 643.623 s、官方重复范围通过率 57.96% 均对应前轮实际版本。本轮从 `7af34e6d` 开始，完整 raw 验收正在运行；精度、配对耗时和显存结论待实际比较完成，见第 5 节及[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)。
+验证记录分为前轮数据流加速和本轮精度优化。前轮十例结果已完成，raw-DWI CLI 中位数 643.623 s、官方重复范围通过率 57.96% 均对应前轮实际版本。本轮从 `7af34e6d` 开始，十二次 raw 调用与十例比较已完成：矩阵 1388/2400、轨迹分布 85/250，十例整体仍未匹配；原 CON09/10 监测缺口独立补测另列，见第 5 节及[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)。
 
 ## 1. 功能和流程
 
@@ -266,11 +266,11 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 
 ## 5. 精度、运行时间与脑图
 
-### 本轮精度优化：2026-10-03，完整 raw 验收正在执行
+### 本轮精度优化：2026-10-03，完整 raw 比较已完成
 
 本轮从已发布基线 `7af34e6d` 开始，复用前轮 ds001226 十例原始 BIDS 及已完成的官方 FreeSurfer subject。正式科学候选为 `1fe86ab8` 的代码内容，保留梯度/张量解释、四分位索引及 ACT 的 SGM 弦方向修正；其余未取得联合收益的候选撤回。每例仍为 100,000 次尝试播种、八套 atlas、四类矩阵，默认 TF32、`compile_arc=False`，原始 MRI 与旧结果保持原样。
 
-当前完整 raw 验收共 12 次 CLI：十例正式候选，加 CON01/03 的两次基线配对。**完整矩阵精度、配对耗时和三类显存结论待实际运行与比较完成。**分项组件结果如下；整链状态由[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)维护。
+完整 raw 共 12 次 CLI：十例正式候选，加 CON01/03 的两次基线配对；实际运行与 CPU 比较均已完成。**矩阵 1388/2400、轨迹分布 85/250 项通过，十例整体均 failed；前轮同十例矩阵为 1391/2400，本轮未显示总体 SC 改善。**相同阶段两组配对合计耗时 −2.80%（CON03 单例 +0.50%），属于共享负载观察。原 CON09/10 显存监测缺口与独立补测另列；完整原值、门槛和失败明细见[最终证据](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/README.md)。分项组件结果如下；汇总由[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)维护。
 
 | 子任务 | 本轮组件核对与处理 | 输入、参数、官方对照、耗时和脑图 |
 |---|---|---|
@@ -366,7 +366,7 @@ FNIT 已有独立的 [TorchBEDPOSTX](../bedpostx/README.md) 和 [TorchProbtrackX
 
 | 日期 | 更新与证据 |
 |---|---|
-| 2026-10-03：本轮精度优化 | 从 `7af34e6d` 核对五项组件，正式候选保留梯度/张量和 SGM 修正；12 次完整 raw CLI 正在执行，联合验收待实际结果，见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md) |
+| 2026-10-03：本轮精度优化 | 从 `7af34e6d` 核对五项组件，正式候选保留梯度/张量和 SGM 修正；12 次完整 raw CLI 与十例比较已完成，矩阵 1388/2400、轨迹分布 85/250、整体未匹配；原监测缺口和独立补测另列，见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md) |
 | 2026-10-03：前轮结果汇总 | 前轮下载十例原始 AP/PA/T1，完成 20 次独立 recon-all 与 20 次 raw-DWI 两版运行；320 矩阵/130 解剖数据严格一致，保留所有官方重复范围失败项，见[前轮十例结果](actual_cohort_comparison.md) |
 | 2026-10-02 | 批量整理轨迹、原点打包、多 atlas 复用；真实逐值一致性和计时见[无损优化报告](../../validation/connectome/ds004666/lossless_20261002/README.md) |
 | 2026-09-30 | 原始 BIDS、TOPUP/EDDY 自动跳过、单/多 atlas；[真实 UKB 流程与续跑](../../validation/connectome/ukb_bids_e2e_20260930.md) |

@@ -153,6 +153,8 @@ MRTRIX_RNG_SEED=0 tckgen wm_fod.nii.gz reference_tracks.tck \
 
 baseline 原始结果见 [active_only_baseline_report.json](evidence/active_only_baseline_report.json)。全过程按共享锁串行；锁等待 442.600 秒另记，不计入 tracking。GPU UUID 固定 `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`，8 CPU threads、TF32=True、所有输入显式送 CUDA、未启用 profiler、worker 仅调用一次追踪。同卡外部进程约占 35.17 GiB，GPU 利用率持续 100%；历史约 165 秒来自另一负载条件，不能与本次直接作速度比。[active-only 配对摘要](evidence/active_only_pair_summary.json)和[公开数组 strict](evidence/CON03/strict_after_cancel.json)已落盘，五个数组全部 neq=0。本次 tracking 慢 1.38%，未展示速度改善；CON01 在开始前取消。候选 tracking+SIFT2、五次官方 SC/流线分布及十例 raw 的整体速度/精度 gate 由 root 统一验收。本页不宣告整个 gate 已通过。
 
+本轮统一整链比较已完成：十二次 raw CLI、十例候选；矩阵 **1388/2400**、轨迹分布 **85/250**，十例整体均 failed。局部组件结果与整链判定分列；同阶段两组配对耗时合计 −2.80%（CON03 +0.50%），为共享负载观察。原 CON09/10 显存监测缺口及独立补测另列，完整原值与来源见[最终证据](../final_cohort_summary_v1/README.md)。
+
 ## 6. 近期更新与保留的失败原因
 
 | 版本 / 诊断 | 更新与结果 |

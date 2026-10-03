@@ -2,7 +2,7 @@
 
 ## 1. 功能与本轮目标
 
-本轮从已发布的 `7af34e6d072e843fb2558c931bb2781f1d4b0be9` 开始，优化原始 BIDS DWI、已有官方 FreeSurfer subject 到 structural connectome 的精度。复用前一轮新下载的 ds001226 十例原始 AP/PA/T1（CON01、CON03–CON11，CC0）；FreeSurfer 科学输入保持固定，原始 MRI 和旧产物不改写。
+本轮从已发布的 `7af34e6d072e843fb2558c931bb2781f1d4b0be9` 开始，优化原始 BIDS DWI、已有官方 FreeSurfer subject 到 structural connectome 的精度。复用前一轮新下载的 ds001226 十例原始 AP/PA/T1（CON01、CON03–CON11，CC0）；FreeSurfer 科学输入保持固定，原始 MRI 和旧产物不改写。 服务器先读 `/cwStorage/home/gongwk/Notebook_code/FNIT/README.md` 和索引；本任务入口为 `FNIT/workspaces/fnit_connectome_accuracy_20261003_v1`，链接至原运行实体，冻结源码与 Conda prefix 保持原路径。
 
 每例仍为 100,000 次尝试播种、八套 atlas、四种矩阵。精度以同输入官方组件及独立 raw 链的官方五次重复范围验收；耗时以相同硬件、参数和计时范围的配对基线验收。不能增加播种数、优化迭代或追踪样本数换取精度，不能改变 SC 的统计定义。
 
@@ -64,7 +64,29 @@ flowchart TD
 
 ## 5. 已发布基线、验收与当前状态
 
-本轮组件已完成，十例新整链正在执行，尚无完整 cohort 验收。CON01/03 的本轮基线、候选和 CPU 比较已完成；下面分别列本轮实测与前轮记录。
+### 本轮完整十例结果
+
+正式十二次 CLI 与十例 CPU 比较均已完成。候选矩阵 **1388/2400（57.83%）**、轨迹分布 **85/250** 项通过；十例两类整体均为 `failed`。前轮同十例矩阵为 **1391/2400（57.96%）**，本轮没有显示总体 SC 判定改善。该比例是比较准则的通过比例，不是生物学精度。
+
+| 病例 | raw-DWI CLI 秒 | 接受轨迹 | 矩阵通过 /240 | 轨迹分布通过 /25 | 原显存监测资格 |
+|---|---:|---:|---:|---:|---|
+| CON01 | 2072.133 | 14431 | 187 | 13 | observed_below_budget |
+| CON03 | 2043.839 | 11582 | 190 | 3 | observed_below_budget |
+| CON04 | 1918.747 | 12460 | 143 | 4 | observed_below_budget |
+| CON05 | 2015.201 | 19299 | 208 | 11 | observed_below_budget |
+| CON06 | 1628.955 | 19002 | 126 | 13 | observed_below_budget |
+| CON07 | 1514.716 | 14113 | 94 | 5 | observed_below_budget |
+| CON08 | 1659.903 | 17598 | 107 | 10 | observed_below_budget |
+| CON09 | 1477.911 | 13089 | 116 | 9 | not_fully_measured |
+| CON10 | 653.421 | 18179 | 93 | 1 | not_fully_measured |
+| CON11 | 580.182 | 19587 | 124 | 16 | observed_below_budget |
+
+候选 CLI 中位数为 **1644.429 s**，范围 **580.182–2072.133 s**。计时从原始 DWI 开始，读取已完成的官方 recon-all；不包含本轮重建、锁等待或计时后的结果导出。GPU 负载随运行变化，该中位数不能与前轮 643.623 s 计算稳定加速或退化比例。本轮同阶段两组配对另列。
+
+完整逐例逐 atlas 的六字段、五个官方 seed 比较值、官方十对范围与原门槛、全部失败项见[最终原报告与摘录](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/README.md)。每 atlas 合计见[八套统计](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/actual_completed/atlas_cohort_counts.csv)，原值与明确覆盖数的描述性中位数见[完整矩阵统计](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/actual_completed/matrix_descriptive_medians.csv)。本轮每例一个 FNIT seed，自身随机重复性仍未评估。
+
+十二次原调用的 allocated/reserved/进程树记录值均低于 20e9 字节，但 **原显存监测门未通过**：CON09 有失败采样，CON10 另有采样间隔缺口，两者为 `not_fully_measured`。其余十次采样无报错。独立直接 NVML 补测另行保留资格和时间，原科学结果、wall、GPU 报告及其失败状态不替换。
+
 
 ### 本轮 CON01：基线与候选配对已完成
 
@@ -151,7 +173,7 @@ CON03 真实脑图直接读取同次校正 DWI/FA 的原保存网格，显示 `k
 
 矩阵通过率的分母为逐项比较判定：每例八 atlas × 六项准则 × 候选对五个官方 seed，合计 240 项；十例合计 2400 项。另报告接受比例、长度 KS、保存点访问分布和端点分布的 250 项轨迹判定。保存点访问分布的定义沿用既有报告，没有将它改称官方 `tckmap` TDI。固定输入组件精度、独立 raw 链精度与候选自身重复性分别记录；本轮每例一个 FNIT seed，因此自身重复性尚无本轮实测。
 
-每项修改先通过真实同输入组件对照，再进行相同参数的基线/候选配对计时。保留实际提升精度且没有测得耗时退化的修改；三种显存均须低于 20,000,000,000 字节。共享负载不平衡时继续测量或明确未证明速度保持，不以旧 643.623 秒与另一负载下的新时间直接计算收益。完整 raw 链最终使用同一批十例与固定官方结果重新评估。
+每项修改先通过真实同输入组件对照，再进行相同参数的基线/候选配对计时。组件算法修正以同输入原实现对照支持，并记录完整配对的实际耗时变化；三种显存均须低于 20,000,000,000 字节，监测缺口须另行补测。共享负载不平衡时继续测量或明确未证明速度保持，不以旧 643.623 秒与另一负载下的新时间直接计算收益。完整 raw 链已使用同一批十例与固定官方结果重新评估，全部失败项保留。
 
 [原十例结果与脑图](actual_cohort_comparison.md) · [原独立 raw 链指标及失败明细](FINAL_RAW_MATRIX_RESULTS.md)
 
@@ -163,7 +185,7 @@ CON03 真实脑图直接读取同次校正 DWI/FA 的原保存网格，显示 `k
 - 测试部署曾缺少仓库内下载脚本和 Tian S1 asset，导致 collection / fixture 失败；补齐实际测试资源后通过。两次失败的原日志保留，科学源码未改变，失败状态没有改写为成功。
 - CPU 报告部署先补齐已有绘图环境，随后修复可选基线计时的状态判定：候选完成而同病例基线刚启动时，仅将配对耗时记为 `not_assessed`，待真正完成后执行原严格检查。38 项相关 CPU 回归通过；CON01/03 原矩阵、轨迹报告和 PNG 的 SHA 不变。当前使用 [v3 控制器](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v3/README.md)，v1/v2 的部署失败记录完整保留。
 - 正式计划共十二次 raw-DWI 运行：CON01 基线→候选、CON03 候选→基线，其余八例候选；使用同一套官方 FreeSurfer 输入、100k seeds、seed 0 与 EDDY GP seed 12345。完整矩阵和轨迹由同次返回对象在计时结束后导出。
-- 整链结论待实际新运行和 CPU 比较完成后填写。
+- 正式十二次 raw-DWI CLI 与十例 CPU 比较全部完成：矩阵 1388/2400、轨迹分布 85/250，十例整体均 failed；最终源码前后核验与原报告摘录真实 exit 0。CON09/10 原监测缺口保留，独立 NVML 资格补测另列。
 
 ## 7. 原实现与参考文献
 

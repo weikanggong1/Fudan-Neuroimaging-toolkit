@@ -201,6 +201,8 @@ CON03 v1 的退化不限于 outlier 不同切片：[只读隔离](outlier_isolat
 
 已确认 TF32 Euler products 影响固定参数渲染。更精确的局部渲染为何改变完整 IWLS/GP/shell/outlier 优化后的误差，尚未定位；其他刚体中心乘法、rereference、shell composition 及 bvec 产品仍有 TF32 使用点，未在本轮扩改。没有增加迭代、播种、改网格、梯度/S2V/GP solver 预算或精度下降来取得指标。
 
+本轮统一整链比较已完成：十二次 raw CLI、十例候选；矩阵 **1388/2400**、轨迹分布 **85/250**，十例整体均 failed。局部组件结果与整链判定分列；同阶段两组配对耗时合计 −2.80%（CON03 +0.50%），为共享负载观察。原 CON09/10 显存监测缺口及独立补测另列，完整原值与来源见[最终证据](../final_cohort_summary_v1/README.md)。
+
 ## 6. 最近版本和 benchmark 记录
 
 - 起点 `7af34e6d`：十例旧 raw 合同与官方结果保留。旧全链指标和本轮同官方 field/mask 的 EDDY 指标属于不同 scope，不合并比较。

@@ -153,6 +153,8 @@ CPU8 正式新官方 count 命令含加载、运算、写 CSV/assignment 为 0.0
 
 脑图只显示 native 第 28 层；紫色标识非有限 FA，显示不改变精度计算。SHA 和实际 affine 在同名 sidecar。成熟 assignment、SIFT2 mapping/组织掩膜/orchestration、precise FA 显式 CPU 回归 `18 passed, 4 CUDA skipped`，2.68 秒；固定 GPU UUID、共享锁内回归 `24 passed`（18 CPU＋6 CUDA），5.33 秒；与前轮冻结生产源码完全相同，不用模拟数据替代上述真实 benchmark。
 
+本轮统一整链比较已完成：十二次 raw CLI、十例候选；矩阵 **1388/2400**、轨迹分布 **85/250**，十例整体均 failed。局部组件结果与整链判定分列；同阶段两组配对耗时合计 −2.80%（CON03 +0.50%），为共享负载观察。原 CON09/10 显存监测缺口及独立补测另列，完整原值与来源见[最终证据](../final_cohort_summary_v1/README.md)。
+
 ## 6. 最近版本与 benchmark
 
 - 基线 `7af34e6d072e843fb2558c931bb2781f1d4b0be9`；本轮 assignment SHA `d8901752cda4e5b8007f7c318613b343ad3edbd7072d0e0a05539a5d42ac6313` 保持。
