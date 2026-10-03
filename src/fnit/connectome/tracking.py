@@ -475,17 +475,14 @@ def _grow(
     for step in range(max_steps):
         if not bool(active.any()):
             break
-        active_indices = active.nonzero(as_tuple=False).flatten()
         calibrated = _rotate_ifod2_directions(
-            prior[active_indices], calibration_local[None].expand(len(active_indices), -1, -1))
+            prior, calibration_local[None].expand(batch, -1, -1))
         calibration_probability, _, _, _, _ = arc_probability_fn(
-            positions[active_indices], prior[active_indices], calibrated,
-            half_log_start[active_indices], fod, five_tissue,
+            positions, prior, calibrated, half_log_start, fod, five_tissue,
             fod_inverse, five_inverse, lmax=lmax, step_mm=step_mm,
             cutoff=cutoff, power=power,
         )
-        maximum = seeds.new_zeros(batch)
-        maximum[active_indices] = calibration_probability.amax(-1) * calibration_ratio
+        maximum = calibration_probability.amax(-1) * calibration_ratio
         pending = active & (maximum > 0)
         direction = prior.clone()
         chosen_mid = positions.clone()
