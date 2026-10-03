@@ -2,6 +2,7 @@
 
 import argparse
 import hashlib
+import inspect
 import json
 import os
 from pathlib import Path
@@ -115,7 +116,10 @@ def main():
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--source-revision", required=True)
     args = parser.parse_args()
-    config = json.loads(args.config.read_text())
+    configuration_bytes = args.config.read_bytes()
+    config = json.loads(configuration_bytes)
+    imported_pipeline = Path(inspect.getfile(fMRISurface_pipeline)).resolve()
+    imported_pipeline.relative_to((args.source_root / "src").resolve())
     args.output.mkdir(parents=True, exist_ok=False, mode=0o700)
     output = args.output
     before = source_hashes(args.source_root)
@@ -123,7 +127,14 @@ def main():
     report = {"subject": config["subject"], "status": "initializing",
               "source_revision": args.source_revision, "source_sha256": sha256(output / "source.private.json"),
               "scope": "Fresh raw paired T1w and complete BOLD through automatic volume, complete reconstruction, MSMSulc, GIFTI/CIFTI, QC and final publication in one API call; excludes import, resource installation, queue and posthoc comparison.",
-              "driver_sha256": sha256(__file__), "failure": None}
+              "driver_sha256": sha256(__file__), "failure": None,
+              "cuda_allocator_environment": {
+                  "cache_disabled_flag_present": "PYTORCH_NO_CUDA_MEMORY_CACHING" in os.environ,
+                  "selection_at_fresh_process_entry": "disabled" if "PYTORCH_NO_CUDA_MEMORY_CACHING" in os.environ else "enabled"},
+              "configuration_sha256": hashlib.sha256(configuration_bytes).hexdigest()}
+    report["imported_pipeline"] = {
+        "relative_path": imported_pipeline.relative_to(args.source_root.resolve()).as_posix(),
+        "sha256": sha256(imported_pipeline)}
     write(output / "report.public.json", report)
     monitor = Monitor(output / "gpu_load.public.jsonl")
     started = None
@@ -132,6 +143,9 @@ def main():
                                     session=config.get("session"), task=config.get("task", "rest"))
         if len(inputs.t1w_images) != 1:
             raise ValueError("public paired benchmark requires exactly one T1w")
+        metadata_before = {p.relative_to(inputs.bids_root).as_posix(): sha256(p)
+                           for p in inputs.bold_sidecars}
+        report["bold_metadata_sha256_before"] = metadata_before
         raw = nib.load(str(inputs.bold))
         frames = raw.shape[3]
         paths = fmri_derivative_paths(inputs, inputs.t1w_images[0], config["derivatives_root"], signal="preproc")
@@ -170,11 +184,20 @@ def main():
             "recon_all": result.recon_all, "metadata": result.metadata,
             "qc_report": result.qc_report}.items()}
         write(output / "files.private.json", files)
+        after_raw = {"t1w": sha256(inputs.t1w_images[0]), "bold": sha256(inputs.bold)}
+        metadata_after = {p.relative_to(inputs.bids_root).as_posix(): sha256(p)
+                          for p in inputs.bold_sidecars}
+        if (after_raw != report["input_sha256"] or metadata_before != metadata_after
+                or report["configuration_sha256"] != sha256(args.config)):
+            raise RuntimeError("raw paired inputs changed during the full pipeline")
         report.update(status="complete", continuous_api_wall_seconds=whole,
+                      driver_through_saved_output_validation_seconds=time.perf_counter() - started,
+                      input_sha256_after=after_raw, raw_inputs_unchanged=True,
+                      bold_metadata_sha256_after=metadata_after, configuration_unchanged=True,
                       stage_seconds=result.timing_seconds, output_checks=checks,
                       volume_executed=result.volume_executed,
                       reconstruction=json.loads(result.metadata.read_text())["FNIT"]["Reconstruction"])
-    except Exception as error:
+    except BaseException as error:
         report.update(status="failed", failure={"type": type(error).__name__, "message": str(error)},
                       failed_attempt_wall_seconds=time.perf_counter() - started if started is not None else None)
         (output / "failure.private.txt").write_text(traceback.format_exc())
@@ -182,11 +205,23 @@ def main():
         monitor.stop.set()
         if monitor.thread.ident is not None:
             monitor.thread.join(timeout=10)
+        driver_sha_after = sha256(__file__)
+        configuration_sha_after = sha256(args.config)
         report.update(source_unchanged_during_run=before == source_hashes(args.source_root),
+                      driver_sha256_after=driver_sha_after,
+                      driver_unchanged=report["driver_sha256"] == driver_sha_after,
+                      configuration_sha256_after=configuration_sha_after,
+                      configuration_unchanged=report["configuration_sha256"] == configuration_sha_after,
                       owned_tree_peak_bytes=monitor.peak,
                       owned_tree_memory_measured=monitor.peak > 0,
-                      owned_tree_under_20gb=monitor.peak <= 20_000_000_000 if monitor.peak > 0 else None,
+                      owned_tree_under_20gb=monitor.peak <= 20_000_000_000 if monitor.peak > 0 and not monitor.errors else None,
                       memory_sampling_errors=monitor.errors)
+        report["provenance_guards_passed"] = (report["source_unchanged_during_run"]
+                                               and report["driver_unchanged"]
+                                               and report["configuration_unchanged"])
+        if report["status"] == "complete" and not report["provenance_guards_passed"]:
+            report.update(status="invalid_provenance", failure={
+                "type": "ProvenanceGuardFailure", "message": "Production source, driver or configuration changed during execution"})
         # Reconstruction provenance can contain local source paths/command
         # arguments. Keep the full record private; public metrics are anonymous.
         reconstruction = report.pop("reconstruction", None)
@@ -197,7 +232,8 @@ def main():
             report["failure"] = {"type": report["failure"]["type"], "details": "failure.private.json"}
         write(output / "report.public.json", report)
         print(json.dumps(report, allow_nan=False), flush=True)
-    return 0 if report["status"] == "complete" and report["source_unchanged_during_run"] else 1
+    return 0 if (report["status"] == "complete" and report["source_unchanged_during_run"]
+                 and report["driver_unchanged"] and report["configuration_unchanged"]) else 1
 
 
 if __name__ == "__main__":

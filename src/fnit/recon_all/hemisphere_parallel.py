@@ -68,6 +68,32 @@ def inherited_allocator_policy(environ):
     return 'disabled' if 'PYTORCH_NO_CUDA_MEMORY_CACHING' in environ else 'enabled'
 
 
+def release_idle_parent_cuda_cache(device):
+    """在新 worker 启动前释放父进程空闲缓存；保留 live tensor 与 allocator 策略。
+
+    CPU 或尚未初始化的 CUDA 不建立 context。计数只属于父进程选定设备的
+    PyTorch allocator，不包含 CUDA context、子进程或其他库的显存。
+    empty_cache 可释放父进程其他设备的空闲缓存；不从全局初始化状态
+    推断目标设备是否已经建立 context。
+    """
+    import torch
+    selected = torch.device(device)
+    if selected.type != 'cuda' or not torch.cuda.is_initialized():
+        return {'status': 'not_applicable', 'cuda_context_created': False}
+    tick = time.perf_counter()
+    torch.cuda.synchronize(selected)
+    before = {'allocated_bytes': int(torch.cuda.memory_allocated(selected)),
+              'reserved_bytes': int(torch.cuda.memory_reserved(selected))}
+    torch.cuda.empty_cache()
+    after = {'allocated_bytes': int(torch.cuda.memory_allocated(selected)),
+             'reserved_bytes': int(torch.cuda.memory_reserved(selected))}
+    return {'status': 'complete', 'device': str(selected), 'seconds': time.perf_counter() - tick,
+            'before': before, 'after': after, 'cuda_context_created': None,
+            'cuda_context_measurement': 'not measured; global initialization does not prove target-device context exists',
+            'scope': 'parent PyTorch allocator counters; CUDA contexts, workers and external allocators excluded',
+            'method': 'synchronize selected device then empty_cache on parent allocator; live tensors and allocator policy unchanged'}
+
+
 def _live_group(group):
     # leader已退出仍可能有原生孙进程；zombie不作为仍运行计算。
     try:
@@ -117,6 +143,7 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
     公共参数。threads 是总预算，workers=1/2 时分别分配全部/一半预算
     （奇数向下取整）。device 是显式 CPU/CUDA 设备；不 fork CUDA 状态。
     返回 values[lh/rh]、独立 workers 报告、组墙钟、重叠及同期显存记录。
+    启动 worker 前同步 CUDA 并释放父进程空闲缓存，不改变 live tensor 或缓存策略。
     发布失败不会生成成功状态；失败子树终止，保留 worker 日志和失败报告。
     不发布缺陷体积：父调用者必须按 lh、rh 顺序串行累计。
     """
@@ -157,6 +184,9 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
             private_roots[hemi] = private
             snapshots[hemi] = _snapshot(private)
         report['private_copy_seconds'] = time.monotonic() - preparation_tick
+        # Previously used volume/network buffers should not overlap the fresh
+        # hemisphere CUDA contexts when they are only held as idle cache.
+        report['parent_idle_cuda_cache'] = release_idle_parent_cuda_cache(device)
         for offset in range(0, 2, workers):
             active = []
             for hemi in HEMISPHERES[offset:offset + workers]:

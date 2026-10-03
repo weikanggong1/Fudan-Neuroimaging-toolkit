@@ -1,12 +1,23 @@
 # MCFLIRT 运动校正
 
+## 1. 功能与流程
+
 `TorchMCFLIRT` 将四维 BOLD 的每一帧配准到 SBRef，或默认的中间帧。估计和重采样均在 FNIT 内完成，运行时不启动 FSL。六自由度变换使用 FSL scaled-mm 坐标，每个矩阵的方向是 input frame → reference。
 
 实现按 [MCFLIRT 2111.0 源码](https://git.fmrib.ox.ac.uk/fsl/mcflirt/-/blob/2111.0/mcflirt.cc)的默认三阶段路径：参考图直接重采样到 8、4、4 mm；边缘使用 1 mm 降权；每阶段一次 Brent 坐标轮回，容差乘数依次为 0.8、0.8、0.1。8 mm 阶段沿时间传递上一帧的估计，后两阶段从各帧已有估计继续。使用外部参考图时，从第 0 帧开始。优化不使用脑掩膜。
 
 FSL `p_normcorr_smoothed` 的 `num` 和 `numA` 在行、层之间连续累加。FNIT 保留此计数定义及其方差公式；替换成常见的加权 Pearson 会改变优化目标。参考金字塔没有额外 Gaussian 预滤波，最终样条采样也不增加 FLIRT `applyxfm` 的降采样滤波。
 
-## 从 TorchFLIRT 复用的加速
+```mermaid
+flowchart LR
+    A[完整四维 BOLD 与三维参考] --> B[8 / 4 / 4 mm 参考]
+    B --> C[原 NCC 与 Brent 六自由度优化]
+    C --> D[逐帧 input 到 reference 矩阵与六列参数]
+    D --> E[可选原 linear / spline 最终采样]
+    E --> F[校正 BOLD 与 MAT / par / RMS 文件]
+```
+
+### 从 TorchFLIRT 复用的实现
 
 `TorchMCFLIRT` 复用项目中成熟的 `TorchFLIRT` 变换组合、Brent 坐标优化、三线性插值和精确 float32 CUDA 运算。MCFLIRT 的目标函数与 FLIRT 常用的相关比、互信息不同；本模块继续使用上述 NCC 定义，并保留每行有效 x 范围及逐次 float32 加法生成采样坐标的顺序。
 
@@ -23,9 +34,17 @@ CUDA 路径将行范围计算、坐标生成、三线性采样、1 mm 边界降�
 
 这些改动复用相同计算及固定数据，没有减少 cost 求值、放宽 Brent 容差、改变三阶段顺序或使用 float16。完整时序的精度及计时以本轮配对验证为准。
 
-Python、命令行参数及输出结构均无需调整。融合采样需要 Triton；项目 [Conda 环境](../../environment.yml)已包含与 PyTorch 2.5.1 对应的 `triton==3.1.0`。CPU 路径，以及无法导入 Triton 时的 CUDA cost 采样，使用既有 PyTorch 张量实现。本轮 H100 双卡 focused 检查 **74 项通过、0 跳过**，覆盖精确缓存、融合采样、原归约 graph 重放、最终采样及非默认 device/stream；实际源码、Git 及运行前后哈希核对见[测试报告](../../validation/mcflirt/review_tests_exact_latest.public.json)。完整真实数据的精度与耗时见下文。
+Python、命令行参数及输出结构均无需调整。融合采样需要 Triton；项目 [Conda 环境](../../environment.yml)已包含与 PyTorch 2.5.1 对应的 `triton==3.1.0`。CPU 路径，以及无法导入 Triton 时的 CUDA cost 采样，使用既有 PyTorch 张量实现。2026-10-02 正常缓存配置的 H100 双卡 focused 检查 **74 项通过、0 跳过**，覆盖精确缓存、融合采样、原归约 graph 重放、最终采样及非默认 device/stream；实际源码、Git 及运行前后哈希核对见[测试报告](../../validation/mcflirt/review_tests_exact_latest.public.json)。该历史检查未覆盖本轮发现的无缓存配置。
 
-## 输入、参数与输出
+### 2026-10-03 pipeline 接入暴露的成熟子函数 bug
+
+公开 CON03 的完整 volume 接入在禁用 CUDA allocator 缓存时，于 NCC graph capture 报 `operation not permitted when stream is capturing`。项目固定 PyTorch 2.5.1 的无缓存模式直接执行 `cudaMalloc`，原 cost 与最终 spline 两处 graph 都会在捕获区间申请临时张量。
+
+现在两处都在捕获前按 allocator 配置选路：正常缓存继续重放原 graph；无缓存配置复用相同采样缓冲区，直接执行原编译 NCC 归约与原样条函数。变换、cost 次数、三阶段顺序和计算精度保持原定义。
+
+配置应在启动 Python **之前**完成。`PYTORCH_NO_CUDA_MEMORY_CACHING` 按变量是否存在判定，`1`、`0` 和空字符串都表示禁用缓存；要启用缓存须移除变量。该语义来自 [PyTorch 2.5.1 allocator 原实现](https://github.com/pytorch/pytorch/blob/v2.5.1/c10/cuda/CUDACachingAllocator.cpp#L2913)。不在已初始化的 CUDA 进程中切换它。
+
+## 2. Python 调用、输入与输出
 
 `TorchMCFLIRT(device=None).run(...)` 或 `TorchMCFLIRT(...)(...)` 都可调用。
 
@@ -57,7 +76,7 @@ Python、命令行参数及输出结构均无需调整。融合采样需要 Trit
 
 整数图保存时沿用 NEWIMAGE 的向零截断；unsigned 16-bit 输入提升为 signed int32。uint32、int64 和 uint64 输入按原程序提升为 float32；int8 输出保存为 uint8，float64 输出保留 float64。这与把校正值四舍五入或始终保存 float32 不同。当前支持同网格三维参考、六自由度 Euler、默认 NCC、1–3 阶段和三线性/三阶样条最终采样。2D、小于 20 mm 的 z 向 FOV、`meanvol`、第四阶段 sinc 优化和其它 cost 不在本接口范围内，不能将上述结果推广为这些模式的等价性结论。
 
-## 单被试 Python 调用
+### 单被试 Python 调用
 
 ```python
 from fnit import TorchMCFLIRT
@@ -91,7 +110,7 @@ motion_result = TorchMCFLIRT(device="cuda:1").run(
 )
 ```
 
-## 单被试命令行及对应原命令
+## 3. 命令行调用
 
 ```bash
 # 将 raw BOLD 配准到 SBRef，最终用样条采样；保存矩阵、参数及两类 RMS。
@@ -100,6 +119,10 @@ fnit mcflirt -in sub-01_task-rest_bold.nii.gz \
   -out motion/prefiltered_func_data_mcf \
   -mats -plots -rmsrel -rmsabs -spline_final --device cuda:1
 ```
+
+正常缓存可用 `env -u PYTORCH_NO_CUDA_MEMORY_CACHING fnit mcflirt ...` 启动；无缓存模式可在启动前设置 `PYTORCH_NO_CUDA_MEMORY_CACHING=1`。该配置只改变 graph 的执行方式，CLI 参数含义同 Python 表。
+
+## 4. 对应原软件调用
 
 对应的原 FSL benchmark 命令：
 
@@ -112,7 +135,26 @@ mcflirt -in sub-01_task-rest_bold.nii.gz \
 
 省略 `-reffile` 使用中间帧；省略 `-spline_final` 使用三线性最终采样。`-mats`、`-plots` 和 RMS 开关只控制文件输出，不改变估计流程。
 
-## 真实数据核对
+## 5. 真实数据精度、耗时与脑图
+
+### 2026-10-03 公开 CON03 的无缓存修复回归
+
+同一公开 [OpenNeuro ds001226 v5.0.1](https://openneuro.org/datasets/ds001226/versions/5.0.1) 健康控制 CON03 的完整 `64×64×42×180` BOLD，参考为成熟 FEAT `_save` 保存的原第 90 帧。物理 GPU 0 上按正常缓存、无缓存顺序运行两个独立 Python 进程，均为 PyTorch 2.5.1、8 CPU 线程、TF32、原 float32 运算、8/4/4 mm 三阶段及完整 spline 校正。输入、参考、实际源码及验证函数的前后 SHA 一致；完整记录见[匿名真实回归报告](../../validation/mcflirt/nocache_public_con03_20261003.public.json)。
+
+| 完整 180 帧 `TorchMCFLIRT.run` | 正常 allocator 缓存 | 禁用 allocator 缓存 |
+| --- | ---: | ---: |
+| API 墙钟 | 52.151 s | 290.753 s |
+| NCC cost 次数 | 17,465 | 17,465 |
+| `180×4×4` 矩阵、`180×6` 参数 | 两组 float64 数组逐 bit 相同，最大差 0 | 同左 |
+| 校正 BOLD | 两组完整 int16 数组逐 bit 相同，最大差 0 | 同左 |
+| 本任务进程树显存采样峰值，十进制 GB | 1.327497 | 1.126171 |
+| 同一峰值，GiB | 1.236328 | 1.048828 |
+
+API 时间包括 NIfTI 解码、准备、该进程的正常延迟编译/graph 初始化、运动估计、最终采样和输出类型转换；包导入、参考准备、数组保存及保存后核验另计。两个进程共享私有 Inductor/Triton 磁盘缓存，缓存未清空；CUDA graph 由各自进程创建。测量发生在共享 H100 上，显存每 2 秒采样，完整 GPU 负载日志保留。此表是单次执行方式观察，计时不进入正式十例整链，也不据此给出通用性能比例。
+
+本轮回归比较 FNIT 的两种 allocator 执行配置；此前完整 490 帧的原 FSL 精度和耗时对照保留如下。无缓存修复保持相同计算与输出，新增的小体积 policy/stream 控制属于回归测试。
+
+### 前次正常缓存的完整 490 帧核对
 
 本轮候选源码 `8a3f2276` 与优化前主线 `de239711` 在同一真实 BOLD 的全部 490 帧上按基线/候选/候选/基线顺序测量。使用共享 H100 PCIe 的物理 GPU 1、8 线程、TF32 和完整 float32，参考为冻结 FEAT 保存的 `example_func.nii.gz`。三个阶段均为一次坐标轮回，最终样条采样。独立进程的 API 计时包含四维读取/解压、准备、首次编译/graph 捕获、估计、最终采样和 dtype 转换，不含写盘。输入及源码哈希、GPU 快照、未舍入数组哈希见[本轮配对报告](../../validation/mcflirt/paired_exact_latest.public.json)。
 
@@ -168,26 +210,29 @@ mcflirt -in sub-01_task-rest_bold.nii.gz \
 
 原软件核对所用 MCFLIRT 为 2111.0、NEWIMAGE 2601.0、MISCMATHS 2412.6；对应 `costfns.cc`、`optimise.cc` 与项目审计版本一致。相对原 FSL 的矩阵和校正图仍有上表所列余差；本轮位模式核对的对象为优化前 FNIT。上轮完整 fMRI 流程的处理边界、阶段耗时和原软件对照见[全流程验证](../../validation/fmri/mcflirt_optimization.md)，该整链耗时尚未包括本轮 graph 优化。
 
-## 真实数据图示
+### 前次正常缓存的原软件脑图
 
 ![原 FSL MCFLIRT 和 FNIT 的均值、temporal SD 与时间相关图](figures/motion_correction_mni.png)
 
 同一例 490 帧 BOLD。本轮原生对照的均值、temporal SD（`ddof=0`）及逐体素时间 r 先在 EPI 空间计算，再用同一原 BBR 和 FNIRT pull 将三维指标图变换到 MNI，仅用于展示。均值和 SD 使用各自统一的色阶；时间 r 的色阶为 0.995–1，低于下限的体素显示为下限颜色。这里的 SD 不是将四维 BOLD 重采样到 MNI 后重新计算的 SD。没有额外空间平滑，只有获授权的去标识化模板空间 PNG 被公开。复现命令见[独立验证说明](../../validation/mcflirt/README.md)，图示实现为 [render_comparison.py](../../validation/mcflirt/render_comparison.py)。
 
-## 最近版本更新记录
+## 6. 最近版本更新与 benchmark 记录
 
 | 版本与日期 | 功能变化 | 真实数据 benchmark 与核对 |
 |---|---|---|
+| 2026-10-03 无缓存兼容修复 | 成熟 cost 与最终 spline 在 capture 前按 flag presence 选路；正常配置保留 graph，无缓存直接执行相同归约和样条函数。`0`、空字符串和 `1` 均禁用 allocator 缓存；配置在启动进程前设置。 | 公开 CON03 完整 180 帧、两个独立进程：17,465 次 cost 不变，矩阵、参数及校正 int16 图逐 bit 相同；API **52.151 / 290.753 s**，范围见[本轮报告](../../validation/mcflirt/nocache_public_con03_20261003.public.json)。原 `19c8e0a3` 无缓存整链失败记录保留，新正式整链从原数据另起。 |
 | `8a3f2276`，2026-10-02 | 精确角度/旋转缓存和 pull 对角矩阵复用；每次调用按参考尺寸复用原 NCC graph；motion-only 样条采样 graph；按请求计算 RMS。 | 完整 490 帧两回合同卡配对，API 均值 **97.91 → 57.98 秒**；45,972 次 cost 不变，未舍入矩阵/参数和校正图逐 bit 相同，未截断样条 float32 全相同。同 TR 的高通结果全相同。原 FSL 本轮脑内时间 r 均值 0.999557；见[最新配对报告](../../validation/mcflirt/paired_exact_latest.public.json)。 |
 | `cfb7beee`，2026-10-01 | 最终合并主线后复测；MCFLIRT 运行时源码哈希与初次融合版本一致。 | 历史完整 490 帧、固定 FEAT 参考，物理 GPU 0 上 API **278.45 秒、45,972 次 cost**，其中样条采样 32.01 秒；矩阵/参数文本和校正/高通图与冻结 FNIT 逐值相同。详见[历史融合报告](../../validation/mcflirt/gpu_optimization_latest.public.json)。 |
 | 冻结状态 `1eb9c417`，2026-10-01 | 数值匹配修复后的基线：保留源 NCC 计数、逐次 float32 坐标累加及输出数据类型，保存完整 490 帧 GPU 对照。 | 相对原 FSL，脑内 pull RMS 均值 0.00881 mm，校正图脑内时间 r 均值 0.99957825。历史 **973.12 秒是 FEAT 阶段合计**，包含运动校正、掩膜准备、缩放和高通；MCFLIRT 估计与采样未单独计时。详见[冻结 GPU 报告](../../validation/mcflirt/full490_gpu.public.json)。 |
 
 固定变换的 CPU/冻结 CUDA/融合 CUDA 代价微基准见[标量报告](../../validation/mcflirt/cost_optimization.public.json)及[复现说明](../../validation/mcflirt/README.md#单次代价函数微基准)。该测量已预热、采用共享 GPU 上的交替调用，范围仅为单次 cost；完整运动 API 的计时边界以上表和各自报告为准。
 
-## 许可证与源码来源
+## 7. 参考文献、许可证与原实现
 
 本模块是基于 FSL 源码改写的 Python/PyTorch 实现，沿用 [FSL Software Licence, Release 6.0](../../licenses/FSL-6.0.txt) 的非商业使用条款。许可证要求在无财务回报的再分发中向接收者保留条款，并随产品提供原始及修改后的源代码。因此，本包同时提供改写后的 `src/fnit/mcflirt/` 和官方 tag `2111.0` 的[完整六文件源码快照](../../src/fnit/_vendor_fsl/sources/mcflirt-2111.0/)；原始文件未修改，FNIT 不编译或执行这些文件。
 
 官方提交为 `fa24cb88fba970fb9adc959713fee57bf3706d3e`，Git tree 为 `ee503629cf36f06a698eb4bfc516e2ad2df8feff`。官方仓库、无前缀 `git archive --format=tar` 的 SHA-256、逐文件大小及 SHA-256 见[源码清单](../../src/fnit/_vendor_fsl/manifest.json)；共享 NEWIMAGE/MISCMATHS 来源及许可见[vendor 说明](../../src/fnit/_vendor_fsl/README.md)和[第三方声明](../../THIRD_PARTY_NOTICES.md)。这些来源记录不将 FNIT 标记为官方 FSL，也不扩大上文已测量的数值范围。
 
 参考：[FSL MCFLIRT 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/mcflirt.html)；Jenkinson M, Bannister P, Brady M, Smith S. Improved optimization for the robust and accurate linear registration and motion correction of brain images. *NeuroImage* 17:825–841, 2002. [DOI](https://doi.org/10.1006/nimg.2002.1132)。
+
+CUDA allocator 的配置语义与 graph 私有内存池见 [PyTorch 2.5.1 CUDACachingAllocator](https://github.com/pytorch/pytorch/blob/v2.5.1/c10/cuda/CUDACachingAllocator.cpp#L80) 及其 [`forceUncachedAllocator`](https://github.com/pytorch/pytorch/blob/v2.5.1/c10/cuda/CUDACachingAllocator.cpp#L2913)。

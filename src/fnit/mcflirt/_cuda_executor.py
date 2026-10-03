@@ -3,6 +3,7 @@
 import torch
 
 from ._cost_cuda import FusedMotionSampler
+from ._cuda_graph import cuda_graph_capture_enabled
 
 
 class _DeviceMotionSampler(FusedMotionSampler):
@@ -30,6 +31,7 @@ class CudaMotionCostExecutor:
         self.graph = None
         self.output = None
         self.capture_stream = None
+        self.capture_enabled = cuda_graph_capture_enabled()
         self.set_moving(moving_contiguous)
 
     def set_moving(self, moving_contiguous):
@@ -67,6 +69,9 @@ class CudaMotionCostExecutor:
         if any(value is not buffer for value, buffer in zip(inputs, expected)):
             raise ValueError("motion executor reduction requires its sampler buffers")
         with torch.cuda.device(self.moving.device):
+            if not self.capture_enabled:
+                self.output = self.compiled_reducer(*inputs)
+                return self.output
             if self.graph is None:
                 self._capture(inputs)
             self.graph.replay()

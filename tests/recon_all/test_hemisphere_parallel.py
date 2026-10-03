@@ -14,6 +14,7 @@ from unittest.mock import patch
 from fnit.recon_all.hemisphere_parallel import (
     HemisphereGroupError, run_hemisphere_group, validate_hemisphere_workers,
     _cancel, _live_group, inherited_allocator_policy, resolve_worker_device,
+    release_idle_parent_cuda_cache,
 )
 from fnit.recon_all.profiling import parallel_intervals, ProcessTreeDeviceSampler
 from fnit.recon_all.native_free import main, _finish_cortical_surface
@@ -163,6 +164,30 @@ class HemisphereParallelTests(unittest.TestCase):
             report=self.run_group()
         self.assertEqual(report['worker_allocator_selection']['selected_policy'],'enabled')
         self.assertEqual(report['workers']['lh']['cuda_allocator']['requested'],'enabled')
+
+    def test_idle_cache_release_never_initializes_cpu_or_fresh_cuda(self):
+        with patch('torch.cuda.is_initialized', return_value=False), \
+             patch('torch.cuda.synchronize') as synchronize, \
+             patch('torch.cuda.empty_cache') as clear:
+            for device in ('cpu', 'cuda:0'):
+                self.assertEqual(release_idle_parent_cuda_cache(device)['status'], 'not_applicable')
+            synchronize.assert_not_called()
+            clear.assert_not_called()
+
+    def test_idle_cache_release_records_live_and_reserved_separately(self):
+        with patch('torch.cuda.is_initialized', return_value=True), \
+             patch('torch.cuda.synchronize') as synchronize, \
+             patch('torch.cuda.empty_cache') as clear, \
+             patch('torch.cuda.memory_allocated', side_effect=[1024, 1024]), \
+             patch('torch.cuda.memory_reserved', side_effect=[4096, 1024]):
+            result = release_idle_parent_cuda_cache('cuda:1')
+        self.assertEqual(result['before'], {'allocated_bytes': 1024, 'reserved_bytes': 4096})
+        self.assertEqual(result['after'], {'allocated_bytes': 1024, 'reserved_bytes': 1024})
+        self.assertEqual(result['status'], 'complete')
+        self.assertIsNone(result['cuda_context_created'])
+        self.assertIn('global initialization', result['cuda_context_measurement'])
+        clear.assert_called_once()
+        self.assertEqual(str(synchronize.call_args.args[0]), 'cuda:1')
 
     def test_short_gpu_uuid_is_canonicalized_and_unknown_is_unavailable(self):
         complete='GPU-abc12300-0000-0000-0000-000000000001'

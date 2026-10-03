@@ -6,7 +6,7 @@
 
 两例三方比较已经完成：相对优化前基线，最终white/pial、7类分割和脑区统计一致，部分顶点图浮点差通过既有门槛；严格135/138，3项仅为MNI输出头字节差。相对官方的严格结果为6/138、2/138，厚度MAE为0.04184、0.02169 mm。已有局部低Dice、非零white/pial穿越及双向距离极值均保留，整体指标等效尚未判定，详见本轮结果及脑图。
 
-[返回首页](../../README.md) · [安装与原生程序](CONDA_CPP_BUILD.md) · [阶段与官方命令](CONDA_CPP_STAGES.md) · [验收范围](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
+[返回首页](../../README.md) · [安装与原生程序](CONDA_CPP_BUILD.md) · [阶段与官方命令](CONDA_CPP_STAGES.md) · [验收范围](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md) · [半球启动前父进程缓存释放](HEMISPHERE_GPU_MEMORY.md)
 
 `fnit-recon-all` 从一幅 T1w 生成体积分割、双侧皮层表面、顶点指标、脑区标注和统计。标准路径依次执行[MNI152 非线性变换](MNI_NONLINEAR_CHAIN.md)、拓扑修复、`white.preaparc`、球面生成与配准、最终 white、[Conda 源码构建的四轮 pial 放置](NATIVE_PIAL_PLACEMENT.md)和后处理。必要程序或资产缺失时，入口在运行前报错；阶段失败时抛出异常并保存报告。当前支持单幅 T1w；多 T1、T2/FLAIR 和纵向重建不在此接口的范围内。
 

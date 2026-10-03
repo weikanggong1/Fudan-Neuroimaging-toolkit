@@ -28,6 +28,36 @@ def _images(device=None):
     return reference, moving
 
 
+@pytest.mark.parametrize("flag", ["", "0", "1"])
+def test_uncached_policy_runs_same_compiled_cost_without_capture(monkeypatch, flag):
+    from fnit.mcflirt._cost_cuda import FusedMotionSampler
+    from fnit.mcflirt._cuda_executor import CudaMotionCostExecutor
+
+    reference, moving = _images()
+    # These in-process controls test routing. Initialize the allocator with
+    # the process's original configuration before temporarily changing policy.
+    monkeypatch.setenv("PYTORCH_NO_CUDA_MEMORY_CACHING", flag)
+    reducer = torch.compile(_normcorr_reduce, fullgraph=True)
+    sizes = (1.8, 2.2, 2.0)
+    executor = CudaMotionCostExecutor(reference, moving, sizes, reducer)
+
+    def forbidden_capture(*args):
+        raise AssertionError("uncached policy attempted graph capture")
+
+    monkeypatch.setattr(executor, "_capture", forbidden_capture)
+    coefficients = np.eye(4, dtype=np.float32)[:3].copy()
+    for frame, translation in ((moving, (0, 0, 0)),
+                               (moving * 1.3 + 19, (-1.2, .3, .8)),
+                               (moving, (1000, -1000, 1000))):
+        coefficients[:, 3] = translation
+        original = FusedMotionSampler(reference, frame, sizes)
+        expected = reducer(*original.prepare(coefficients)).clone()
+        executor.set_moving(frame)
+        actual = executor.reduce(*executor.sampler.prepare(coefficients))
+        _assert_bits(actual, expected)
+        assert executor.graph is None and executor.capture_stream is None
+
+
 def test_graph_replay_preserves_compiled_cost_and_running_count():
     from fnit.mcflirt._cost_cuda import FusedMotionSampler
     from fnit.mcflirt._cuda_executor import CudaMotionCostExecutor

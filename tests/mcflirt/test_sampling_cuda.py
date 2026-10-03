@@ -39,6 +39,39 @@ def _matrices():
     return np.eye(4), rigid, outside
 
 
+@pytest.mark.parametrize("flag", ["", "0", "1"])
+def test_uncached_spline_policy_keeps_frame_bits_and_stream(monkeypatch, flag):
+    # Actual uncached allocation is verified in a fresh real-data process;
+    # this control must not latch its flag into the whole pytest process.
+    torch.empty(1, device="cuda")
+    monkeypatch.setenv("PYTORCH_NO_CUDA_MEMORY_CACHING", flag)
+
+    def forbidden_graph(*args, **kwargs):
+        raise AssertionError("uncached policy attempted graph capture")
+
+    monkeypatch.setattr(torch.cuda, "CUDAGraph", forbidden_graph)
+    image, reference, data = _images(-1, 1)
+    device = torch.device("cuda", torch.cuda.current_device())
+    stream = torch.cuda.Stream(device=device)
+    stream.wait_stream(torch.cuda.current_stream(device))
+    retained, expected_outputs = [], []
+    with torch.cuda.stream(stream):
+        sampler = CudaMotionFrameSampler(image, reference, device=device, interpolation="spline")
+        assert sampler._graph is None and torch.cuda.current_stream(device) == stream
+        for frame, matrix in enumerate(_matrices()):
+            expected = sample_motion_frame(data[..., frame], image, reference, matrix,
+                                          device=device, interpolation="spline").cpu().numpy()
+            actual = sampler.sample_numpy(data[..., frame], matrix)
+            np.testing.assert_array_equal(actual.view(np.uint32), expected.view(np.uint32))
+            assert torch.cuda.current_stream(device) == stream
+            retained.append(actual)
+            expected_outputs.append(expected.copy())
+    for actual, expected in zip(retained, expected_outputs):
+        np.testing.assert_array_equal(actual.view(np.uint32), expected.view(np.uint32))
+    assert all(not np.shares_memory(first, second) for index, first in enumerate(retained)
+               for second in retained[index + 1:])
+
+
 @pytest.mark.parametrize("interpolation", ["linear", "spline"])
 @pytest.mark.parametrize("input_sign,reference_sign", [(-1, -1), (1, 1), (-1, 1), (1, -1)])
 def test_graph_keeps_multiframe_bits_orientation_pixdim_and_prior_outputs(

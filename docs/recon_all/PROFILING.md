@@ -2,7 +2,7 @@
 
 PyTorch 2.5.1 的 native allocator 根据 `PYTORCH_NO_CUDA_MEMORY_CACHING` 是否存在决定绕过缓存，`0` 和空字符串也会关闭。`enabled` 在初始化前移除该变量；`auto` 保留已有值。已初始化 API 的实际策略仍标为未知，不能用后来修改的环境推断。依据为[实际安装提交的分配器源码](https://github.com/pytorch/pytorch/blob/a8d6afb511a69687bbb2b7e88a3cf67917e1697e/c10/cuda/CUDACachingAllocator.cpp#L3129-L3133)。本次整例使用值 `1`，这项报告边界修正没有改变其计算或缓存策略。
 
-[重建入口](README.md) · [线程预算](THREAD_BUDGET.md) · [SynthSeg 实际精度](SYNTHSEG_PRECISION.md)
+[重建入口](README.md) · [线程预算](THREAD_BUDGET.md) · [SynthSeg 实际精度](SYNTHSEG_PRECISION.md) · [半球启动前父进程缓存释放](HEMISPHERE_GPU_MEMORY.md)
 
 ## 默认运行与诊断运行
 

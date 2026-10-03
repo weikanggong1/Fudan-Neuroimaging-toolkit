@@ -6,6 +6,7 @@ import torch
 
 from ..flirt.core import _edge_background, _flip_to_radiological
 from .sampling import _coordinates, _cubic_coefficients, _sample_cubic, sample_motion_frame
+from ._cuda_graph import cuda_graph_capture_enabled
 
 
 class CudaMotionFrameSampler:
@@ -48,6 +49,8 @@ class CudaMotionFrameSampler:
             *(1 / np.asarray(source_sizes)), 1
         ])
         self._target_sampling = np.diag([*target_sizes, 1])
+        self._graph = None
+        self._capture_enabled = cuda_graph_capture_enabled()
         with torch.cuda.device(self.device):
             self._stream = torch.cuda.Stream(device=self.device)
             if interpolation == "linear":
@@ -57,13 +60,15 @@ class CudaMotionFrameSampler:
                                          device=self.device)
                 self._pull = torch.eye(4, dtype=torch.float32,
                                        device=self.device)[:3].clone()
-                for _ in range(3):
-                    self._sample()
+                if self._capture_enabled:
+                    for _ in range(3):
+                        self._sample()
             self._stream.synchronize()
-            self._graph = torch.cuda.CUDAGraph()
-            with torch.cuda.graph(self._graph, stream=self._stream):
-                self._output = self._sample()
-            self._stream.synchronize()
+            if self._capture_enabled:
+                self._graph = torch.cuda.CUDAGraph()
+                with torch.cuda.graph(self._graph, stream=self._stream):
+                    self._output = self._sample()
+                self._stream.synchronize()
 
     def _sample(self):
         coordinates = _coordinates(self._pull, self.output_shape, self.device)
@@ -96,6 +101,9 @@ class CudaMotionFrameSampler:
         with torch.cuda.device(self.device), torch.cuda.stream(self._stream):
             self._data.copy_(torch.as_tensor(data, device="cpu"))
             self._pull.copy_(coefficients)
-            self._graph.replay()
+            if self._graph is None:
+                self._output = self._sample()
+            else:
+                self._graph.replay()
             # GPU→CPU 每次分配独立 Tensor；numpy 保持该 Tensor 的所有权。
             return self._output.cpu().numpy()
