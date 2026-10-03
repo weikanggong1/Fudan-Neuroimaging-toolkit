@@ -1,0 +1,2028 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "state": "completed",
+  "case_id": "sub-CON07",
+  "scope": "official_self_produced_raw_dwi_chain",
+  "execution_completed": true,
+  "actualcommands": [
+    {
+      "label": "gradient",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+        "-fslgrad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.eddy_rotated_bvecs",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/raw/AP.bval",
+        "-bvalue_scaling",
+        "no",
+        "-export_grad_mrtrix",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.eddy_rotated_bvecs": "b753583fb2058ee2b415fbb56010fc1ca2425b6946df09d72b1030ef2657b11b",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/raw/AP.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2"
+      },
+      "binary_sha256": "c8b583a5791bb9e4aefaba85ac19df30fd1b77ae37dee842c0b1a8195e037e53",
+      "resolved_binary_sha256": "c8b583a5791bb9e4aefaba85ac19df30fd1b77ae37dee842c0b1a8195e037e53",
+      "version": "== mrinfo 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): J-Donald Tournier (d.tournier@brain.org.au) and Robert E. Smith (robert.smith@florey.edu.au)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:40:46.715139+00:00",
+      "wall_s": 0.009496122598648071,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230"
+      }
+    },
+    {
+      "label": "shells",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+        "-grad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+        "-shell_bvalues",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230"
+      },
+      "binary_sha256": "c8b583a5791bb9e4aefaba85ac19df30fd1b77ae37dee842c0b1a8195e037e53",
+      "resolved_binary_sha256": "c8b583a5791bb9e4aefaba85ac19df30fd1b77ae37dee842c0b1a8195e037e53",
+      "version": "== mrinfo 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): J-Donald Tournier (d.tournier@brain.org.au) and Robert E. Smith (robert.smith@florey.edu.au)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:40:46.901969+00:00",
+      "wall_s": 0.005304485559463501,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/shells.txt": "2773a8b4496eb38c671cf0bab35bd06a6bb61ebbe1e4cbbdf6e0a4371ccb647f"
+      }
+    },
+    {
+      "label": "bzero",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mrconvert",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/bzero.nii.gz",
+        "-coord",
+        "3",
+        "0,1,26,51,76,101",
+        "-datatype",
+        "float32",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/raw/AP.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2"
+      },
+      "binary_sha256": "b115dc477774314f48834898e5e39d3937ca9d820dca532c94b02bb67af6fe7f",
+      "resolved_binary_sha256": "b115dc477774314f48834898e5e39d3937ca9d820dca532c94b02bb67af6fe7f",
+      "version": "== mrconvert 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): J-Donald Tournier (jdtournier@gmail.com) and Robert E. Smith (robert.smith@florey.edu.au)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:40:47.089206+00:00",
+      "wall_s": 2.271469369530678,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/bzero.nii.gz": "677d89fb254324320f79453ddc52f037a1ce73506d6c4fa82f74dbb7fa53e6c7"
+      }
+    },
+    {
+      "label": "mean_bzero",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mrmath",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/bzero.nii.gz",
+        "mean",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/mean_bzero.nii.gz",
+        "-axis",
+        "3",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/bzero.nii.gz": "677d89fb254324320f79453ddc52f037a1ce73506d6c4fa82f74dbb7fa53e6c7"
+      },
+      "binary_sha256": "bd17faab269913c14a2b0d59a5f17c00b3351db0bc6e949a1b92c5c32d11697f",
+      "resolved_binary_sha256": "bd17faab269913c14a2b0d59a5f17c00b3351db0bc6e949a1b92c5c32d11697f",
+      "version": "== mrmath 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:40:49.409976+00:00",
+      "wall_s": 0.2601148709654808,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/mean_bzero.nii.gz": "8150cad0c3df0af93e16e8930857e54b871e3d488486a2ceb1bd21bd73107594"
+      }
+    },
+    {
+      "label": "BET",
+      "command": [
+        "/public/software/apps/FSL/6.0.7.4/bin/bet",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/mean_bzero_LAS.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/bet_LAS",
+        "-m",
+        "-f",
+        "0.2",
+        "-g",
+        "-0.05",
+        "-R"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/mean_bzero_LAS.nii.gz": "969fc0096917ad0653a36427e723c4feffd500007073aa1f386fb79e33d37ee9"
+      },
+      "binary_sha256": "16b852dc6c5b256fc059c4dd46ecad16550742d80b13a1fac91ed8982ab275b1",
+      "resolved_binary_sha256": "16b852dc6c5b256fc059c4dd46ecad16550742d80b13a1fac91ed8982ab275b1",
+      "version": "6.0.7.4",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:40:49.813017+00:00",
+      "wall_s": 3.286145381629467,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/bet_LAS_mask.nii.gz": "51f8d9038b9ae4ca1a16d4c57be0789487799e40ed679f5f46e3cdcd2e63667c",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/bet_LAS.nii.gz": "e0da3d3e3dc43ba16da7b5bce120d3c07a28e1b17d7f7a662807da81a229e07e"
+      }
+    },
+    {
+      "label": "dwi2mask",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/dwi2mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/response_mask.nii.gz",
+        "-grad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230"
+      },
+      "binary_sha256": "d40c228f86239c5e648c8853e557a086fe34212ed80ac7787604961bc66806e5",
+      "resolved_binary_sha256": "d40c228f86239c5e648c8853e557a086fe34212ed80ac7787604961bc66806e5",
+      "version": "== dwi2mask 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): David Raffelt (david.raffelt@florey.edu.au), Thijs Dhollander (thijs.dhollander@gmail.com) and Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:40:53.375780+00:00",
+      "wall_s": 7.443008735775948,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/response_mask.nii.gz": "2991ca8e9e12710bb9a8eb974ed16dd27c1f733620b02be62bc2dc5a7a892744"
+      }
+    },
+    {
+      "label": "fod_mask",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/maskfilter",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+        "dilate",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fod_mask.nii.gz",
+        "-npass",
+        "2",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277"
+      },
+      "binary_sha256": "75d2e70abad35b39cbe70c5cee0568875560cabdc4b14629d23b29a4879e62ef",
+      "resolved_binary_sha256": "75d2e70abad35b39cbe70c5cee0568875560cabdc4b14629d23b29a4879e62ef",
+      "version": "== maskfilter 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Robert E. Smith (robert.smith@florey.edu.au), David Raffelt (david.raffelt@florey.edu.au), Thijs Dhollander (thijs.dhollander@gmail.com) and J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:41:00.828874+00:00",
+      "wall_s": 0.04677063226699829,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fod_mask.nii.gz": "aa2e8c3909e57533298f6093e202c86cf877bbfa9e00eae9df49439a001ba3a1"
+      }
+    },
+    {
+      "label": "normalise_mask",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/maskfilter",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+        "erode",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/normalise_mask.nii.gz",
+        "-npass",
+        "2",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277"
+      },
+      "binary_sha256": "75d2e70abad35b39cbe70c5cee0568875560cabdc4b14629d23b29a4879e62ef",
+      "resolved_binary_sha256": "75d2e70abad35b39cbe70c5cee0568875560cabdc4b14629d23b29a4879e62ef",
+      "version": "== maskfilter 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Robert E. Smith (robert.smith@florey.edu.au), David Raffelt (david.raffelt@florey.edu.au), Thijs Dhollander (thijs.dhollander@gmail.com) and J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:41:00.883630+00:00",
+      "wall_s": 0.03939998149871826,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/normalise_mask.nii.gz": "9a29c67834e85fbd6ae39dc5c9647e2c1844c09c371d6f20cd93938c6f11c8ad"
+      }
+    },
+    {
+      "label": "DTI",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz",
+        "-grad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+        "-iter",
+        "2",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277"
+      },
+      "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
+      "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
+      "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:41:01.112870+00:00",
+      "wall_s": 2.015324831008911,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz": "1613d6ddcd3e3c58d23ccc86cf25c8a3051e4c2adce0202fbd8f05018f0a5e31"
+      }
+    },
+    {
+      "label": "FA",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz",
+        "-fa",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz",
+        "-vector",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/direction.nii.gz",
+        "-modulate",
+        "none",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz": "1613d6ddcd3e3c58d23ccc86cf25c8a3051e4c2adce0202fbd8f05018f0a5e31",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277"
+      },
+      "binary_sha256": "658b3c6e203edad601d3a7bcd940c355f66e63e11800e3de5e0ef13fc80c4a9e",
+      "resolved_binary_sha256": "658b3c6e203edad601d3a7bcd940c355f66e63e11800e3de5e0ef13fc80c4a9e",
+      "version": "== tensor2metric 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Thijs Dhollander (thijs.dhollander@gmail.com) & Ben Jeurissen (ben.jeurissen@uantwerpen.be) & J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:41:03.149688+00:00",
+      "wall_s": 0.16957056522369385,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz": "6ef292d2a676a478fe24c7c7854f6c4a45811d7c9dbbebb11ac24f04a0a3a764",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/direction.nii.gz": "0ebd8d291618ff04facd5997bf62b3bfc1058a4315b95966610ba7b7034ecb76"
+      }
+    },
+    {
+      "label": "Dhollander",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/dwi2response",
+        "dhollander",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wmrf.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gmrf.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csfrf.txt",
+        "-grad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/response_mask.nii.gz",
+        "-scratch",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/response_scratch",
+        "-nocleanup",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/response_mask.nii.gz": "2991ca8e9e12710bb9a8eb974ed16dd27c1f733620b02be62bc2dc5a7a892744"
+      },
+      "binary_sha256": "af12afd949ecb1b8093fe8dcd93257189b2e223059728035f9acacd32446c6c9",
+      "resolved_binary_sha256": "af12afd949ecb1b8093fe8dcd93257189b2e223059728035f9acacd32446c6c9",
+      "version": "== dwi2response 3.0.3-103-g026e850d ==\nAuthor(s): Robert E. Smith (robert.smith@florey.edu.au) and Thijs Dhollander (thijs.dhollander@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:41:06.045292+00:00",
+      "wall_s": 12.562626652419567,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wmrf.txt": "05f7dc223742a15489dbce03e0bd7cad07d3e730aeb7103fc46764349512f8f9",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gmrf.txt": "7bda091db9c83ec417628c5b04d2976ca57374c05e78d758d92dcc7ad6054b18",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csfrf.txt": "24da33fc402a9cbd05a59b354a3bedf465f2f42639b90938933f67d0605daa7c"
+      }
+    },
+    {
+      "label": "MSMT_CSD",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/dwi2fod",
+        "msmt_csd",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wmrf.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gmrf.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csfrf.txt",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf.nii.gz",
+        "-grad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fod_mask.nii.gz",
+        "-lmax",
+        "8,0,0",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wmrf.txt": "05f7dc223742a15489dbce03e0bd7cad07d3e730aeb7103fc46764349512f8f9",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gmrf.txt": "7bda091db9c83ec417628c5b04d2976ca57374c05e78d758d92dcc7ad6054b18",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csfrf.txt": "24da33fc402a9cbd05a59b354a3bedf465f2f42639b90938933f67d0605daa7c",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fod_mask.nii.gz": "aa2e8c3909e57533298f6093e202c86cf877bbfa9e00eae9df49439a001ba3a1"
+      },
+      "binary_sha256": "66048180bd0844addd1c067151ff0311a1bd8619aac02906bbb3e01ee045479d",
+      "resolved_binary_sha256": "66048180bd0844addd1c067151ff0311a1bd8619aac02906bbb3e01ee045479d",
+      "version": "== dwi2fod 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): J-Donald Tournier (jdtournier@gmail.com) and Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:41:18.802005+00:00",
+      "wall_s": 59.598507799208164,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm.nii.gz": "14f875e11e234895c42ce359e00a3e55025a0cd42bd34e530000083f8aa43d4c",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm.nii.gz": "5a000716adcb4d4dfd595ccbb5d6aa1b5fd20a261a3f67afd07ecd278b39852d",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf.nii.gz": "4fb6c0563bb616905bd87b2c0e34acdf0bfba1874d55966bf5e1511b6551cec9"
+      }
+    },
+    {
+      "label": "mtnormalise",
+      "command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mtnormalise",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm_norm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm_norm.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf_norm.nii.gz",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/normalise_mask.nii.gz",
+        "-order",
+        "3",
+        "-niter",
+        "15,7",
+        "-reference",
+        "0.28209479177",
+        "-check_norm",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/field.nii.gz",
+        "-check_mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/accepted_mask.nii.gz",
+        "-check_factors",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/balance_factors.txt",
+        "-nthreads",
+        "8"
+      ],
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm.nii.gz": "14f875e11e234895c42ce359e00a3e55025a0cd42bd34e530000083f8aa43d4c",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm.nii.gz": "5a000716adcb4d4dfd595ccbb5d6aa1b5fd20a261a3f67afd07ecd278b39852d",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf.nii.gz": "4fb6c0563bb616905bd87b2c0e34acdf0bfba1874d55966bf5e1511b6551cec9",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/normalise_mask.nii.gz": "9a29c67834e85fbd6ae39dc5c9647e2c1844c09c371d6f20cd93938c6f11c8ad"
+      },
+      "binary_sha256": "25364901efe10fbdbaa9d280e928825aba238f7dc4f44c8d72ca69f29ac83255",
+      "resolved_binary_sha256": "25364901efe10fbdbaa9d280e928825aba238f7dc4f44c8d72ca69f29ac83255",
+      "version": "== mtnormalise 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Thijs Dhollander (thijs.dhollander@gmail.com), Rami Tabbara (rami.tabbara@florey.edu.au), David Raffelt (david.raffelt@florey.edu.au), Jonas Rosnarho-Tornstrand (jonas.rosnarho-tornstrand@kcl.ac.uk) and J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+      "host": "nodecw10",
+      "started_utc": "2026-10-02T22:42:18.465239+00:00",
+      "wall_s": 2.869013875722885,
+      "returncode": 0,
+      "output_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm_norm.nii.gz": "63a1a45cc91306b6d71ae5bc4c42e6e58c2d4f78d0f9f277b60d1076db4ce3eb",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm_norm.nii.gz": "e93ff7197a7cc1212d61146c30393ec30b8efc999905e3ea149e3f2e9752bdf0",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf_norm.nii.gz": "8eb6f0b0907a7597c7648262750def20572208a3f26254eeb6a6ab2f64590c11",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/field.nii.gz": "529833583ee4d1d76f8752bea318b6ddc98ed0c3aeb51dfb049f6904862d42e7",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/accepted_mask.nii.gz": "c59ee6f4dfdc0b67e5762f8d13f0744dea50100ba9f447d92f21fc34ae176f4a",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/balance_factors.txt": "6efb548ce27da7ac832aba57e98af68a078f432581b0bf20c4b4b638cea8411e"
+      }
+    }
+  ],
+  "upstream_report": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/report.json",
+    "sha256": "07d5d8f08d68b8860ef29c56d068284f043d1617ff4eb4cb300aa1a4c2e74be2"
+  },
+  "kind": "independent_official_modeling_chain",
+  "output_id": "official_modeling_CPU_budget_raw10_v1/sub-CON07",
+  "subject": "CON07",
+  "actual_modeling_host": "nodecw10",
+  "CPU_threads": 8,
+  "profile": {
+    "kind": "independent_official_fnit_mask_definitions",
+    "brain_mask": "own official corrected DWI b<50 mean; LAS FSL BET -m -f0.2 -g-0.05 -R; native-grid return",
+    "response_mask": "pinned MRtrix3.0.3 dwi2mask legacy default on own corrected DWI",
+    "FOD_mask": "official BET brain mask, six-neighbour dilation2",
+    "normalise_mask": "official BET brain mask, six-neighbour erosion2",
+    "shells": "own official mrinfo shell clustering; bvalue_scaling no; exported rotated FSL gradients",
+    "WM_lmax": 8,
+    "GM_CSF_lmax": 0,
+    "DTI_predicted_iterations": 2,
+    "normalise_order": 3,
+    "normalise_iterations": [
+      15,
+      7
+    ],
+    "normalise_reference": 0.28209479177,
+    "normalise_balanced": false,
+    "response_lmax": "pinned Dhollander defaults matching frozen response shape; actual response tables retained",
+    "comparison_scope": "independent stage lineage with matching parameter/mask definitions, not matching mask voxel values or isolated solver inputs",
+    "upstream_EDDY_solver": "official FSL eddy_cpu, GPU_UUID=null; CPU wall separate from failed GPU attempts"
+  },
+  "upstream_official_rawprep_report": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/report.json",
+  "upstream_official_rawprep_report_sha256": "07d5d8f08d68b8860ef29c56d068284f043d1617ff4eb4cb300aa1a4c2e74be2",
+  "modeling_report": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/report.json",
+  "modeling_report_sha256": "64c4b7a95311adccb2765f62c521107af512834163035929848611cff8ae0638",
+  "actual_upstream_EDDY": {
+    "solver": "cpu",
+    "stage": "official_EDDY_CPU",
+    "GPU_UUID": null,
+    "binary": "/public/software/apps/FSL/6.0.7.4/bin/eddy_cpu",
+    "binary_sha256": "a5cf07367c42a6215ede24705ee8e10c6e76df8b170ac67fb8cb25f0c3d30f1f",
+    "actual_command": [
+      "/public/software/apps/FSL/6.0.7.4/bin/eddy_cpu",
+      "--imain=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/raw/AP.nii.gz",
+      "--mask=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/mask/nodif_brain_mask.nii.gz",
+      "--acqp=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/topup/acqparams.txt",
+      "--index=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/eddy_index.txt",
+      "--bvecs=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/raw/AP.bvec",
+      "--bvals=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/raw/AP.bval",
+      "--topup=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/topup/fieldmap_out",
+      "--out=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data",
+      "--flm=quadratic",
+      "--resamp=jac",
+      "--slm=linear",
+      "--niter=8",
+      "--fwhm=10,8,4,2,0,0,0,0",
+      "--ff=10",
+      "--sep_offs_move",
+      "--nvoxhp=1000",
+      "--repol",
+      "--rms",
+      "--initrand=12345",
+      "--ref_scan_no=0"
+    ],
+    "actual_host": "gpucw1",
+    "wall_seconds": 2649.568373773247,
+    "CPU_threads": 8
+  },
+  "completed_rawprep_sidecar": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/completed_contract.json",
+    "sha256": "96315e533ea5d0ecc0732b32c6f9d4312b9f40ac866743dea05bcefe3fb1f740",
+    "verified_path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/completed_contract_verified.json",
+    "verified_sha256": "927c58061be765744ffcf459e9293c2f9289adbab7e4259df9a88ad14962b487"
+  },
+  "raw_frame_selection": {
+    "imain": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/selection/B0_AP_PA.nii.gz",
+    "datain": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/selection/acqparams.txt",
+    "ap_index": 0,
+    "pa_index": 0,
+    "ap_scores": [
+      0.9881532311439514,
+      0.9891587734222412,
+      0.9940536618232727,
+      0.9910151839256287,
+      0.9905066847801208,
+      0.992486047744751
+    ],
+    "pa_scores": [
+      0.9983603358268738,
+      0.9983603358268738
+    ],
+    "device": "actual formal FNIT GPU/TF32 selection; raw frame index identified by exact native packing, CPU proposal preserved separately",
+    "original_JSON": {
+      "AP": {
+        "Modality": "MR",
+        "Manufacturer": "Siemens",
+        "ManufacturersModelName": "TrioTim",
+        "AcquisitionNumber": 1,
+        "InstitutionName": "UZ",
+        "InstitutionAddress": "De_Pintelaan_185_Gent_88C96F_District_BE_9000",
+        "DeviceSerialNumber": "35353",
+        "SoftwareVersions": "syngo_MR_B17",
+        "ProcedureStepDescription": "MR_hersenen_(structuur_alleen)",
+        "ScanningSequence": "EP",
+        "SequenceVariant": "SK_SP",
+        "SeriesDescription": "DTI_2.5_b2800_101dir",
+        "BodyPartExamined": "HEAD",
+        "ProtocolName": "DTI_2.5_b2800_101dir",
+        "SequenceName": "_ep_b0",
+        "ImageType": [
+          "ORIGINAL",
+          "PRIMARY",
+          "DIFFUSION",
+          "NONE",
+          "ND",
+          "MOSAIC"
+        ],
+        "AcquisitionTime": "17:38:54.645000",
+        "MagneticFieldStrength": 3,
+        "FlipAngle": 90,
+        "EchoTime": 0.11,
+        "RepetitionTime": 8.7,
+        "PhaseEncodingLines": 96,
+        "BandwidthPerPixelPhaseEncode": 27.412,
+        "EffectiveEchoSpacing": 0.000380004,
+        "TotalReadoutTime": 0.0266003,
+        "AccelFactPE": 2,
+        "TrueEchoSpacing": 0.000760008,
+        "SliceTiming": [
+          4.22,
+          8.5875,
+          4.075,
+          8.4425,
+          3.93,
+          8.2975,
+          3.785,
+          8.1525,
+          3.64,
+          8.005,
+          3.4925,
+          7.86,
+          3.3475,
+          7.715,
+          3.2025,
+          7.57,
+          3.0575,
+          7.4225,
+          2.91,
+          7.2775,
+          2.765,
+          7.1325,
+          2.62,
+          6.9875,
+          2.475,
+          6.8425,
+          2.3275,
+          6.695,
+          2.1825,
+          6.55,
+          2.0375,
+          6.405,
+          1.8925,
+          6.26,
+          1.7475,
+          6.1125,
+          1.6,
+          5.9675,
+          1.455,
+          5.8225,
+          1.31,
+          5.6775,
+          1.165,
+          5.53,
+          1.0175,
+          5.385,
+          0.8725,
+          5.24,
+          0.7275,
+          5.095,
+          0.5825,
+          4.95,
+          0.435,
+          4.8025,
+          0.29,
+          4.6575,
+          0.145,
+          4.5125,
+          0,
+          4.3675
+        ],
+        "PhaseEncodingDirection": "j-",
+        "ConversionSoftware": "dcm2niix",
+        "ConversionSoftwareVersion": "v1.0.20170724 GCC4.8.5"
+      },
+      "PA": {
+        "Modality": "MR",
+        "Manufacturer": "Siemens",
+        "ManufacturersModelName": "TrioTim",
+        "AcquisitionNumber": 1,
+        "InstitutionName": "UZ",
+        "InstitutionAddress": "De_Pintelaan_185_Gent_88C96F_District_BE_9000",
+        "DeviceSerialNumber": "35353",
+        "SoftwareVersions": "syngo_MR_B17",
+        "ProcedureStepDescription": "MR_hersenen_(structuur_alleen)",
+        "ScanningSequence": "EP",
+        "SequenceVariant": "SK_SP",
+        "SeriesDescription": "PA_2averages_MDDW_6dir",
+        "BodyPartExamined": "HEAD",
+        "ProtocolName": "PA_2averages_MDDW_6dir",
+        "SequenceName": "_ep_b0",
+        "ImageType": [
+          "ORIGINAL",
+          "PRIMARY",
+          "DIFFUSION",
+          "NONE",
+          "ND"
+        ],
+        "AcquisitionTime": "17:37:56.700000",
+        "MagneticFieldStrength": 3,
+        "FlipAngle": 90,
+        "EchoTime": 0.11,
+        "RepetitionTime": 8.7,
+        "PhaseEncodingLines": 96,
+        "BandwidthPerPixelPhaseEncode": 27.412,
+        "EffectiveEchoSpacing": 0.000380004,
+        "TotalReadoutTime": 0.0266003,
+        "AccelFactPE": 2,
+        "TrueEchoSpacing": 0.000760008,
+        "PhaseEncodingDirection": "j",
+        "ConversionSoftware": "dcm2niix",
+        "ConversionSoftwareVersion": "v1.0.20170724 GCC4.8.5"
+      }
+    },
+    "effective_acqparams": [
+      [
+        0.0,
+        -1.0,
+        0.0,
+        0.0266
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0266
+      ]
+    ]
+  },
+  "restored_CPU_stage_lineage": {
+    "source": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07",
+    "report": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/CPU_prepared_report.json",
+    "report_sha256": "3eac6cd7c63ad24239c1b6950fd7cb2d17a2e485c715b9bed6a67e7366b49b8a",
+    "CPU_stage_reexecuted": false,
+    "restored_successful_own_official_TOPUP_and_SynthStrip": true,
+    "original_CPU_wall_seconds": 200.82563518499956,
+    "original_started_utc": "2026-10-02T19:37:35.333797+00:00",
+    "actual_FNIT_packing": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_baseline_common_v3_raw_rerun_v1/baseline/sub-CON07/connectome/preproc/topup/B0_AP_PA.nii.gz",
+    "actual_FNIT_packing_sha256": "75b01abec9356ef1517a97e619d907b40ff02a9c265fbe4d183dcbe2777887fe",
+    "source_EDDY_inputs_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/raw/AP.nii.gz": "eea734863f7bb20c689c9fe91cfc589a0bb49582090847cab093f7938fa07a2e",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/mask/nodif_brain_mask.nii.gz": "37cac42387f998a939250ffcd0cd6aada167b91e8b1f110f4c3686b6117efbb7",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/topup/acqparams.txt": "8b52ac3e7bb343a36a07e304920767837843466d364e54705fd6ccc5e2301002",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/eddy/eddy_index.txt": "e7c3bd72554da85a9838a3d2a16a0cc6266d4bacf96f363dca782e3e78155e0e",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/raw/AP.bvec": "8ab370c44bc6f03fd9d8a580e3dc6d4d12bc70af3f41d041c10ac63885844af1",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/raw/AP.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/topup/fieldmap_out_fieldcoef.nii.gz": "df347532b24f5f3f4a5910f82b9620c150fde0f5cd2e18d3ab0f559851252be9",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_heldout_aligned_v2/sub-CON07/topup/fieldmap_out_movpar.txt": "549b18b7446dcf362bc17bf730d6cb293ccae669d78695955572a3fb1f823fc2"
+    },
+    "source_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_aligned_tools_v4/run_official_rawprep.py": "6d58dcc69c98e7772525075c49e5364f23869644c686ddec106bd5965f2d123e",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/baseline_raw_compatible_v3/src/fnit/topup/ukb.py": "ee6542debdf58fe8212ec313cb680a10def17eda4f4f895c24934d0611702c8b",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/baseline_raw_compatible_v3/src/fnit/topup/core.py": "d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8",
+      "/public/software/apps/FSL/6.0.7.4/etc/flirtsch/b02b0.cnf": "9833bcbaa60c1550457dd7149a15b88040562afecd1e05aae908af1517a8dcb9",
+      "/public/software/apps/Freesurfer/8.2.0-1/python/scripts/mri_synthstrip": "bbc2ff8f8779862039401b05d5cd6039fb4f3583e0032a793ac9adb3f4521590",
+      "/public/software/apps/Freesurfer/8.2.0-1/bin/fspython": "42a0a4e35c84d76abcc3111038324bf643caf16245f2972593d46677aec19424",
+      "/public/software/apps/Freesurfer/8.2.0-1/models/synthstrip.1.pt": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+      "/public/software/apps/FSL/6.0.7.4/bin/fslroi": "a4c09da565cfd71068cc2b71faf27703dd46facd182bbc3dff87ed03b03baa79",
+      "/public/software/apps/FSL/6.0.7.4/bin/fslmerge": "acb950a0c3bd62522fc1c9fda2b00369ddfe640083c477e60ebb0747645fc4ea",
+      "/public/software/apps/FSL/6.0.7.4/bin/topup": "a1592181903033a6215fb75cb3f2b52b913efa3f4fb55d589fc382180529fc76",
+      "/public/software/apps/FSL/6.0.7.4/bin/fslmaths": "4a7dc672c6c2b432ba00cb3cecf0b3a260f1ee52d01c61fab4973f4fb4979feb",
+      "/public/software/apps/FSL/6.0.7.4/bin/eddy_cuda10.2": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591",
+      "/public/software/apps/Freesurfer/8.2.0-1/bin/mri_synthstrip": "580c3e14c8f69a00b1b1d90c61a0cda936de246f99573ef80c8180781861c8db",
+      "/public/software/apps/Freesurfer/8.2.0-1/build-stamp.txt": "8a1600fb20972b7518249f8f714a6fed51b1d1f21e17430f60f85c0eea48e277"
+    }
+  },
+  "alignment_binding": null,
+  "harness_sha256": "616b3f01197447da8255c20592165f066f03bc20b48765b9612ea6ada29d11c1",
+  "files": {
+    "official_corrected_dwi": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+      "size_bytes": 196402840,
+      "sha256": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60,
+          102
+        ],
+        "affine": [
+          [
+            -2.4952569007873535,
+            6.574806832304603e-08,
+            0.15393051505088806,
+            118.64102172851562
+          ],
+          [
+            -0.03938741236925125,
+            2.4167726039886475,
+            -0.6384819746017456,
+            -82.12687683105469
+          ],
+          [
+            0.14880603551864624,
+            0.6396956443786621,
+            2.412187337875366,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5,
+          8.699999809265137
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 56401920,
+        "finite": 56401920,
+        "nonfinite": 0,
+        "finite_min": -134.22955322265625,
+        "finite_max": 3091.810546875
+      }
+    },
+    "official_rotated_bvecs": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.eddy_rotated_bvecs",
+      "size_bytes": 4246,
+      "sha256": "b753583fb2058ee2b415fbb56010fc1ca2425b6946df09d72b1030ef2657b11b",
+      "readback": {
+        "decoded": true,
+        "table_shape": [
+          3,
+          102
+        ],
+        "nonfinite": 0
+      }
+    },
+    "official_bvals": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/raw/AP.bval",
+      "size_bytes": 476,
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "readback": {
+        "decoded": true,
+        "table_shape": [
+          102
+        ],
+        "nonfinite": 0
+      }
+    },
+    "official_gradient_mrtrix": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+      "size_bytes": 5149,
+      "sha256": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230",
+      "readback": {
+        "decoded": true,
+        "table_shape": [
+          102,
+          4
+        ],
+        "nonfinite": 0
+      }
+    },
+    "official_shells": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/shells.txt",
+      "size_bytes": 17,
+      "sha256": "2773a8b4496eb38c671cf0bab35bd06a6bb61ebbe1e4cbbdf6e0a4371ccb647f",
+      "readback": {
+        "decoded": true,
+        "table_shape": [
+          4
+        ],
+        "nonfinite": 0
+      }
+    },
+    "official_mean_b0": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/mean_bzero.nii.gz",
+      "size_bytes": 1936292,
+      "sha256": "8150cad0c3df0af93e16e8930857e54b871e3d488486a2ceb1bd21bd73107594",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": -78.71279907226562,
+        "finite_max": 2459.4267578125
+      }
+    },
+    "official_mean_b0_brain": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/mean_bzero_brain.nii.gz",
+      "size_bytes": 420593,
+      "sha256": "1a5be933ef16f411dbc99b76b2135560efd25cc07dd1f5a5197cb4fc94520bf9",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": -78.71279907226562,
+        "finite_max": 2167.172119140625
+      }
+    },
+    "official_mean_b0_brain_mask": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+      "size_bytes": 17540,
+      "sha256": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "uint8",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": 0.0,
+        "finite_max": 1.0,
+        "nonzero_voxels": 109401
+      }
+    },
+    "brain_mask": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+      "size_bytes": 17540,
+      "sha256": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "uint8",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": 0.0,
+        "finite_max": 1.0,
+        "nonzero_voxels": 109401
+      }
+    },
+    "response_mask": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/response_mask.nii.gz",
+      "size_bytes": 8219,
+      "sha256": "2991ca8e9e12710bb9a8eb974ed16dd27c1f733620b02be62bc2dc5a7a892744",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "uint8",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": 0.0,
+        "finite_max": 1.0,
+        "nonzero_voxels": 88923
+      }
+    },
+    "fod_mask": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fod_mask.nii.gz",
+      "size_bytes": 8176,
+      "sha256": "aa2e8c3909e57533298f6093e202c86cf877bbfa9e00eae9df49439a001ba3a1",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "uint8",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": 0.0,
+        "finite_max": 1.0,
+        "nonzero_voxels": 130662
+      }
+    },
+    "normalise_mask": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/normalise_mask.nii.gz",
+      "size_bytes": 6777,
+      "sha256": "9a29c67834e85fbd6ae39dc5c9647e2c1844c09c371d6f20cd93938c6f11c8ad",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "uint8",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": 0.0,
+        "finite_max": 1.0,
+        "nonzero_voxels": 89722
+      }
+    },
+    "FA": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz",
+      "size_bytes": 410881,
+      "sha256": "6ef292d2a676a478fe24c7c7854f6c4a45811d7c9dbbebb11ac24f04a0a3a764",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": 0.0,
+        "finite_max": 1.2247434854507446
+      }
+    },
+    "principal_direction": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/direction.nii.gz",
+      "size_bytes": 1264172,
+      "sha256": "0ebd8d291618ff04facd5997bf62b3bfc1058a4315b95966610ba7b7034ecb76",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60,
+          3
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5,
+          NaN
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 1658880,
+        "finite": 1658880,
+        "nonfinite": 0,
+        "finite_min": -1.0,
+        "finite_max": 0.9999990463256836
+      }
+    },
+    "wm_response": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wmrf.txt",
+      "size_bytes": 567,
+      "sha256": "05f7dc223742a15489dbce03e0bd7cad07d3e730aeb7103fc46764349512f8f9",
+      "readback": {
+        "decoded": true,
+        "table_shape": [
+          4,
+          6
+        ],
+        "nonfinite": 0
+      }
+    },
+    "gm_response": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gmrf.txt",
+      "size_bytes": 297,
+      "sha256": "7bda091db9c83ec417628c5b04d2976ca57374c05e78d758d92dcc7ad6054b18",
+      "readback": {
+        "decoded": true,
+        "table_shape": [
+          4
+        ],
+        "nonfinite": 0
+      }
+    },
+    "csf_response": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csfrf.txt",
+      "size_bytes": 300,
+      "sha256": "24da33fc402a9cbd05a59b354a3bedf465f2f42639b90938933f67d0605daa7c",
+      "readback": {
+        "decoded": true,
+        "table_shape": [
+          4
+        ],
+        "nonfinite": 0
+      }
+    },
+    "wm_fod_raw": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm.nii.gz",
+      "size_bytes": 23057008,
+      "sha256": "14f875e11e234895c42ce359e00a3e55025a0cd42bd34e530000083f8aa43d4c",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60,
+          45
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5,
+          8.699999809265137
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 24883200,
+        "finite": 24883200,
+        "nonfinite": 0,
+        "finite_min": -0.6565385460853577,
+        "finite_max": 0.6940804719924927
+      }
+    },
+    "gm_raw": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm.nii.gz",
+      "size_bytes": 500203,
+      "sha256": "5a000716adcb4d4dfd595ccbb5d6aa1b5fd20a261a3f67afd07ecd278b39852d",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60,
+          1
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5,
+          8.699999809265137
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": -2.4929339148549445e-10,
+        "finite_max": 0.5507322549819946
+      }
+    },
+    "csf_raw": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf.nii.gz",
+      "size_bytes": 506921,
+      "sha256": "4fb6c0563bb616905bd87b2c0e34acdf0bfba1874d55966bf5e1511b6551cec9",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60,
+          1
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5,
+          8.699999809265137
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": -3.0732912742470475e-11,
+        "finite_max": 0.5385646224021912
+      }
+    },
+    "wm_fod_normalized": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/wm_norm.nii.gz",
+      "size_bytes": 23085956,
+      "sha256": "63a1a45cc91306b6d71ae5bc4c42e6e58c2d4f78d0f9f277b60d1076db4ce3eb",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60,
+          45
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5,
+          8.699999809265137
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 24883200,
+        "finite": 24883200,
+        "nonfinite": 0,
+        "finite_min": -0.7725843787193298,
+        "finite_max": 0.7569996118545532
+      }
+    },
+    "gm_normalized": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gm_norm.nii.gz",
+      "size_bytes": 500395,
+      "sha256": "e93ff7197a7cc1212d61146c30393ec30b8efc999905e3ea149e3f2e9752bdf0",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60,
+          1
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5,
+          8.699999809265137
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": -2.23359289397429e-10,
+        "finite_max": 0.506089448928833
+      }
+    },
+    "csf_normalized": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/csf_norm.nii.gz",
+      "size_bytes": 507226,
+      "sha256": "8eb6f0b0907a7597c7648262750def20572208a3f26254eeb6a6ab2f64590c11",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60,
+          1
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5,
+          8.699999809265137
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": -2.287464488659463e-11,
+        "finite_max": 0.39792707562446594
+      }
+    },
+    "normalise_field": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/field.nii.gz",
+      "size_bytes": 1976536,
+      "sha256": "529833583ee4d1d76f8752bea318b6ddc98ed0c3aeb51dfb049f6904862d42e7",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": 0.1352536529302597,
+        "finite_max": 2636.5810546875
+      }
+    },
+    "accepted_mask": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/accepted_mask.nii.gz",
+      "size_bytes": 14015,
+      "sha256": "c59ee6f4dfdc0b67e5762f8d13f0744dea50100ba9f447d92f21fc34ae176f4a",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": 0.0,
+        "finite_max": 1.0,
+        "nonzero_voxels": 84835
+      }
+    },
+    "balance_factors": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/balance_factors.txt",
+      "size_bytes": 27,
+      "sha256": "6efb548ce27da7ac832aba57e98af68a078f432581b0bf20c4b4b638cea8411e",
+      "readback": {
+        "decoded": true,
+        "table_shape": [
+          3
+        ],
+        "nonfinite": 0
+      }
+    },
+    "corrected_dwi": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+      "size_bytes": 196402840,
+      "sha256": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60,
+          102
+        ],
+        "affine": [
+          [
+            -2.4952569007873535,
+            6.574806832304603e-08,
+            0.15393051505088806,
+            118.64102172851562
+          ],
+          [
+            -0.03938741236925125,
+            2.4167726039886475,
+            -0.6384819746017456,
+            -82.12687683105469
+          ],
+          [
+            0.14880603551864624,
+            0.6396956443786621,
+            2.412187337875366,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5,
+          8.699999809265137
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 56401920,
+        "finite": 56401920,
+        "nonfinite": 0,
+        "finite_min": -134.22955322265625,
+        "finite_max": 3091.810546875
+      }
+    },
+    "mean_b0": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/mean_bzero.nii.gz",
+      "size_bytes": 1936292,
+      "sha256": "8150cad0c3df0af93e16e8930857e54b871e3d488486a2ceb1bd21bd73107594",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": -78.71279907226562,
+        "finite_max": 2459.4267578125
+      }
+    },
+    "mean_b0_brain": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/mean_bzero_brain.nii.gz",
+      "size_bytes": 420593,
+      "sha256": "1a5be933ef16f411dbc99b76b2135560efd25cc07dd1f5a5197cb4fc94520bf9",
+      "grid": {
+        "shape": [
+          96,
+          96,
+          60
+        ],
+        "affine": [
+          [
+            -2.4952566623687744,
+            6.574806832304603e-08,
+            0.15393050014972687,
+            118.64102172851562
+          ],
+          [
+            -0.03938740864396095,
+            2.4167726039886475,
+            -0.6384819149971008,
+            -82.12687683105469
+          ],
+          [
+            0.14880602061748505,
+            0.6396956443786621,
+            2.412187099456787,
+            -84.34517669677734
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "spacing": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "storage_dtype": "float32",
+        "axcodes": [
+          "L",
+          "A",
+          "S"
+        ]
+      },
+      "readback": {
+        "decoded": true,
+        "values": 552960,
+        "finite": 552960,
+        "nonfinite": 0,
+        "finite_min": -78.71279907226562,
+        "finite_max": 2167.172119140625
+      }
+    }
+  },
+  "lineage": "Own official rawprep -> own official response -> own official MSMT-CSD -> own official mtnormalise. No FNIT frozen PT/response/FOD."
+}
