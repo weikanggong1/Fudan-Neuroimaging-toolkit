@@ -117,7 +117,7 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 
 ## 5. 最新精度、耗时和真实脑图
 
-**目前完成本轮 baseline CON01 的实际阶段比较；candidate 与其它九例尚未由本工具分析。** 结果来自已经完成的 raw-DWI CLI，未重新运行求解或官方软件。下面区分协议核验和 MRI 输出比较：
+**目前完成本轮 CON01 baseline 与 candidate 的实际阶段比较；其它九例尚未由本工具分析。** 结果来自已经完成的 raw-DWI CLI，未重新运行求解或官方软件。下面区分协议核验和 MRI 输出比较：
 
 |实际核验|覆盖|结果与 CPU 墙钟|
 |---|---|---|
@@ -128,10 +128,13 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 |官方真实 producer 与文件核验 v1|十例 CON01/03/04/05/06/07/08/09/10/11|325 个实际文件 before/after SHA，6.71859 s。|
 |原 eeb 脚本的官方真实 producer 与文件核验 v2|同十例|325 个实际文件 before/after SHA，6.56676 s；`reference_gate_v2.json`。|
 |实际 baseline CON01 MRI 比较|全部 102 帧、全 552,960 体素、官方 mask 115,226 体素|1,319 个文件 before/after SHA；比较器内计时 20.22309 s，nodecw10 进程墙钟 20.34487 s。|
+|实际 candidate CON01 MRI 比较|同一完整采集及同一实际官方参考|1,319 个文件 before/after SHA；比较器内计时 20.45769 s，CPU 控制器记录进程墙钟 20.62075 s。|
 
 **当前 helper SHA**：`08015c11c2662cb2f8115843414ed9148c1dadc60c175b66dcf20f51381c18ce`。成功原报告 `baseline_CON01_components_v2.json` 的 SHA 为 `1fa40b59e1e7e4db893a62737e388b1873cc4058cfaffe705dc1fb29ce6b335b`，远端原目录为 `root_components_CON01_baseline_v2`，本地副本保留原字节。冻结配置 SHA 为 `f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c`。
 
 `reference_gate_v2.json` 仍绑定旧 eeb 脚本 `eebd3ebe7308c0caf2d36bd0e6a501aef8a350017fe7261f9348fafe1a6a1e0f`，audit JSON SHA `865378820202c39e64478123c69a151b962a8e6d1a2ea607ba6243af8daa5a00`；没有将旧核验改标为新脚本运行。v1 原 JSON 也保留。二者计时仅为文件核验。
+
+candidate 成功原报告 [`candidate_CON01_components_v1.json`](candidate_CON01_components_v1.json) SHA 为 `507cc3e8d99a57650521642f2ea98572308e794c9ab63c9a91b846c1f004e63c`。它的原 [`component summary`](candidate_CON01_component_summary.json) SHA 为 `264bf08cc71025705ef46e803452965ba49b2e46079ba3299a588ef2d13ac4c6`；原 [`receipt`](candidate_CON01_receipt.json) SHA 为 `b7dc25ce2f1c74a7aa15159749b3e461004fd691981dc3b3bfffdff972da451b`。三者均保留远端原 bytes；receipt 记录 exit 0、实际命令/CPU 环境、前后 helper SHA 及未变化的真实 producer 完成行。
 
 |CON01 baseline 与实际官方原链|全 volume|官方 brain mask|
 |---|---:|---:|
@@ -148,11 +151,32 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 
 全部 102 个 bval 逐值一致；全部 bvec/bval/norm 都是 finite，exact-zero 与 `b<50` 支持不一致均为 0。bvec 最大分量差 `0.004052603`，最大有向夹角 `0.314093906°`，norm 最大差 `7.61098e-8`。FA 的主统计保持 `null`，没有删除 NaN 后把有限对诊断冒充全值结果。FOD 与八个 atlas 仅核对同网格；5TT 为不同网格，不重采样比较。
 
+**CON01 candidate 与 baseline 的核对：** 官方 producer 和所有官方文件相同；FNIT 的 corrected DWI、全部 bvec、bval 与 mask 文件 SHA 也分别相同。因此 DWI 全 volume/官方 mask 的完整统计及全部梯度行、finite/norm/zero/b0 支持检查，与上表 baseline 逐项相同。
+
+|CON01 raw 全链 FA 对同一官方输出的比较|baseline|candidate|候选减基线|
+|---|---:|---:|---:|
+|全 volume：FNIT / 官方 NaN|36 / 37|36 / 37|数量和位置不变|
+|官方 mask：FNIT / 官方 NaN|35 / 37|35 / 37|数量和位置不变|
+|全 volume / mask 非有限状态不一致|3 / 2|3 / 2|0 / 0|
+|全值主统计 MAE、RMSE、max、相关性|均 `null`|均 `null`|不计算|
+|全 volume 有限对分母|552,922|552,922|0|
+|全 volume **有限对诊断** RMSE|0.0307248276885|0.0307237379371|-1.08975132e-6|
+|全 volume **有限对诊断** 最大误差|1.22474372387|1.22474265099|-1.07288361e-6|
+|官方 mask 有限对分母|115,189|115,189|0|
+|官方 mask **有限对诊断** RMSE|0.0544921716023|0.0544893720651|-2.79953720e-6|
+|官方 mask **有限对诊断** 最大误差|1.22469568253|1.22469568253|0|
+
+完整原 FA 数组另作 CPU 只读核对：baseline/candidate 的 NaN 支持和全部非有限支持均逐体素相同。该检查及误差差值保存在 [`candidate_CON01_baseline_comparison.json`](candidate_CON01_baseline_comparison.json)，SHA `ceac455b1edc42d3d255929983f4c204d36573192dd6b501eb8e93ae7bf71835`。有限对 RMSE 的下降很小，较大尾部仍存在；不能称 raw 全链已经与官方匹配。
+
 这张图直接读取成功报告绑定的 CON01 baseline 与原官方 DWI/FA/mask，显示原保存网格 `k=30` 切片；无重采样，紫色明确表示非有限 FA。显示范围仅用于图像，不参与全部体素误差计算。
 
 ![本轮实际 CON01 baseline 的原网格 mean b0、FA 和误差](baseline_CON01_components_brain.png)
 
-基线 raw CLI 实际耗时 `2200.811193 s`。其报告的 allocator 与 sampled process-tree 均观察到低于预算；连续 process-tree 严格上界未证明。本比较器的 20.34 s 不计入 raw CLI 速度结论。
+candidate 的同一原网格、同一 `k=30` 示例直接读取实际成功报告绑定的文件；图前后 SHA 核验、原图 SHA 和 slice/display 策略写入 [`candidate_CON01_brain_receipt.json`](candidate_CON01_brain_receipt.json)。PNG SHA 为 `a3056761195177c9cf154c2abfad348b811fa3305410b12bac9b63aaad013c2a`。
+
+![本轮实际 CON01 candidate 的原网格 mean b0、FA 和误差](candidate_CON01_components_brain.png)
+
+同例 raw CLI 实际耗时 baseline `2200.811193 s`、candidate `2072.132814 s`，单次顺序观测下降 `5.84686%`；共享负载下该数值不能独自归因于代码优化，也不是全十例的速度验收。双方报告的 allocator 与 sampled process-tree 均观察到低于预算；连续 process-tree 严格上界未证明。两次组件 CPU 比较的约 20 s 不计入 raw CLI 速度结论。
 
 这些结果是不同校正 DWI/mask/旋转梯度的 **raw 全链阶段差异**，不代表固定输入 DTI 的误差。本工具不定义额外科学验收门槛，`scientific_parity=not_assessed`；完整 raw10 与原官方链的重复性、速度和 `<20e9` 显存验收由总控制执行。
 
@@ -166,6 +190,7 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 - 修正后实际比较第二次失败：原官方 5TT header 的 channel spacing 为 NaN，严格 JSON 序列化拒绝。原中间 0f9 源码快照、真实 stderr 与 `baseline_CON01_serialization_failure.json` 保留；失败的空 `root_components_CON01_baseline_v1` 未覆盖。新 helper 只显式记录未定义元数据，并在创建输出目录前完成严格 JSON 序列化，不改 header、数组、网格判定或统计。
 - 最新 23 项 CPU 回归后，在全新 `root_components_CON01_baseline_v2` 完整重做来源及文件 before/after 核验，成功返回 exit 0。本地完整原报告、执行日志和摘要均保存实际 SHA；没有为失败目录补造完成记录。
 - CPU 后台控制器实际启动于 nodecw10，PID 185524，使用最终 helper/configuration SHA。bootstrap 时原 CON01 baseline 报告及全部 1,319 个绑定文件复核完成，4.98121 s；candidate CON01 当时仍在运行，其余 producer 未启动，`all10_summary=null`。`controller_v1_bootstrap_snapshot.json` 是该时刻的实际状态快照，不能当未来完成结果；运行中的实际状态以远端 `status.json` 为准。
+- CON01 candidate 的实际 producer 完成后，后台控制器于 UTC `2026-10-03T07:29:09` 启动 CPU 比较，UTC `07:29:30` 完成。原报告、summary 与 receipt 复制保留原字节；公开示例仅包含原网格脑切片，没有复制发布完整 MRI 数组。控制器和科学冻结源码/配置没有改动，继续等待其它病例；此处覆盖仍为 CON01 baseline + candidate，不代表十例完成或整链匹配。
 
 ## 7. 参考文献与原软件代码库
 
