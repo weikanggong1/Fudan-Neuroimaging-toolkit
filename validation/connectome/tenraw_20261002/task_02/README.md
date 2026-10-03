@@ -1,5 +1,7 @@
 # DWI 建模同输入优化记录（2026-10-02）
 
+当前独立 raw 链的十例官方建模、同输入 CPU 诊断和十张脑图见[独立官方十例建模说明](README_official_chain.md)。下文保留固定检查点的组件/优化记录，其输入范围与独立 raw 链分开。
+
 ## 1. 功能简介
 
 从校正后的原始信号估计全处理 mask 的 DTI/FA、Dhollander 三组织响应函数、MSMT-CSD 白质球谐系数与 GM/CSF，以及 mtnormalise 强度归一化结果。本轮候选仅复用 ICLS 每轮的有序行索引，减少同一布尔选择重复执行 `nonzero` 和 CUDA 同步。求解仍使用 Float64，输入输出 Float32；batch_size=4096、约束排序、负乘子删除、停止规则、迭代上限和浮点求和顺序保持原实现。

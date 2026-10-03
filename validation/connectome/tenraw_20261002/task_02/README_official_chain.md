@@ -2,9 +2,9 @@
 
 ## 1. 功能简介与流程
 
-当前入口是`official_modeling_cohort_cpu_v3.py`及冻结配置`official_modeling_CPU_budget_raw10_v2.config.json`。结果目录为`task_02/official_modeling_CPU_budget_raw10_v1`；`CPU_budget_modeling_dispatcher_v2`已真实启动modeling coordinator，nodecw10 PID122690每次处理一例、每例8线程，禁用GPU。2026-10-03 00:29:48 UTC的只读快照已核验CON01、CON03、CON04、CON05、CON06、CON07、CON08、CON09、CON10九例原consumer/report字节；CON11仍等待真实CPU前处理合同，模型目录尚未创建。当前精度、耗时比较及脑图报告覆盖前八例，CON10完成状态不改写为已完成精度评估。实际等待状态、PID/启动时间及source绑定见[root_followup_actual_delivery_audit.json](root_followup_actual_delivery_audit.json)。
+当前使用显式逐病例映射：原九例模型保留`official_modeling_CPU_budget_raw10_v1`，CON11独立使用`official_modeling_CON11_selected_recovery_v1`；共同调用SHA `616b3f01197447da8255c20592165f066f03bc20b48765b9612ea6ada29d11c1`的冻结`model_case`，CPU8、单case、无GPU。当前实际完成10/10：CON01、CON03、CON04、CON05、CON06、CON07、CON08、CON09、CON10、CON11。十例完成依据是原九例加新CON11的真实consumer映射；旧global cohort的CON11仍保持原状态，不补写或软链接旧路径。
 
-这是独立原软件reference工具，不进入FNIT生产调用图，不导入torch/FNIT。它消费task01实际`official_rawprep_cpu_budget_reference_v1`：恢复已有成功own TOPUP/SynthStrip字节并新运行eddy_cpu。每例自行生成brain/response/FOD/normalise掩膜、Dhollander响应、MSMT-CSD和归一化组织，并输出FA/方向。原CPU阶段来源和新EDDY时间分开保留。
+这是独立原软件reference工具，不进入FNIT生产调用图，不导入torch/FNIT。前九例消费task01的`official_rawprep_cpu_budget_reference_v1`：恢复已有成功own TOPUP/SynthStrip字节并新运行eddy_cpu；CON11消费新`official_CON11_CPU_fresh_origin_v1`连续完整链。每例自行生成brain/response/FOD/normalise掩膜、Dhollander响应、MSMT-CSD和归一化组织，并输出FA/方向。原CPU阶段来源和新EDDY时间分开保留。
 
 ```mermaid
 flowchart LR
@@ -22,7 +22,7 @@ flowchart LR
  J --> K
 ```
 
-CON08–11由同一个明确CPU producer的真实verified合同触发追加帧绑定。程序独立核对原始AP/PA实际帧、b<100及实际formal FNIT packing的路径、SHA、affine和全部voxel后，exclusive-create `CPU_budget_pending_alignment_bindings_v1/sub-CONxx.alignment_binding.json`。该证据记录索引、report/verified/activation/raw/pair/packing/source SHA，不覆盖已有内容，也不改冻结配置。逐病例消费者保存`alignment_binding`路径、SHA和证据。
+CON08–10由原CPU producer的实际verified合同触发不可变帧绑定。CON11经已核验新packing route和独立baseline lineage进入fresh CPU链，再由strict waiter逐项核对实际report/completed/verified/source/activation及canonical raw，才启动独立一例模型。所有来源保存实际路径和SHA，科学worker和旧配置保持不变。
 
 ## 2. Python调用、输入输出及参数
 
@@ -32,16 +32,14 @@ import hashlib
 import json
 
 reference_root = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002')
-modeling_directory = reference_root / 'task_02' / 'official_modeling_CPU_budget_raw10_v1'
-cohort_status = json.loads((modeling_directory / 'cohort_status.json').read_text())
-for subject_name, subject_status in cohort_status['subjects'].items():
-    if subject_status['state'] != 'completed':
-        continue  # 等待或运行不等于完成
-    consumer_contract_path = Path(subject_status['consumer_contract'])
+case_map_path = reference_root / 'task_02' / 'official_modeling_explicit_ten_delivery_v1' / 'completed_case_map.json'
+case_map = json.loads(case_map_path.read_text())
+for subject_name, actual_case in case_map['actual_completed_case_map'].items():
+    consumer_contract_path = Path(actual_case['consumer_contract']['path'])
+    assert hashlib.sha256(consumer_contract_path.read_bytes()).hexdigest() == actual_case['consumer_contract']['sha256']
     consumer_contract = json.loads(consumer_contract_path.read_text())
     fractional_anisotropy_path = Path(consumer_contract['files']['FA']['path'])
-    actual_digest = hashlib.sha256(fractional_anisotropy_path.read_bytes()).hexdigest()
-    assert actual_digest == consumer_contract['files']['FA']['sha256']
+    assert hashlib.sha256(fractional_anisotropy_path.read_bytes()).hexdigest() == consumer_contract['files']['FA']['sha256']
     print(subject_name, fractional_anisotropy_path, consumer_contract_path)
 ```
 
@@ -82,15 +80,20 @@ FA NaN和大于1的实际值不截断。方向第4轴是3个分量，没有物�
 |metadata launcher `--root`|只启动等待器与collector，exclusive launch receipt拒绝重复|
 |来源receipt `--root` / `--output`|真实参考根目录及exclusive新receipt文件；只执行packing守卫，modeling_ready仍false|
 |诊断 `--root` / `--output` / `--subjects`|真实参考根目录、新诊断目录、明确已完成病例列表；CPU8调用冻结response.py，同输入诊断|
+|显式评估/诊断 `--case-map`|必填实际collector status或completed_case_map；只消费actual_completed_case_map中的真实consumer，原九例及新CON11分别绑定|
 |评估 `--root` / `--output` / `--diagnostic-root`|实际参考根目录、新评估目录、一个或多个明确诊断目录；同病例多个诊断须消歧|
 
 `profile`固定brain=b<50均值+LAS BET f0.2/g-0.05/R；response mask=3.0.3默认dwi2mask；FOD/normalise mask分别六邻域膨胀2/侵蚀2；shells使用自身梯度且bvalue_scaling=no；tensor predicted迭代2；WM lmax8、GM/CSF lmax0；mtnormalise order3/niter15,7/reference0.28209479177，不加balanced。Dhollander采用本安装默认响应阶数与voxel选择；所有默认和实际argv在report中保留，不调整精度或算法。
 
-CON11新origin的衔接单独进行：旧`formal_FNIT_packing_root`中的CON11永不补写或软链接，旧cohort源码/配置保持冻结。实际新packing及独立source/config/driver lineage已通过`validate_CON11_packing_route_v1.py`完整只读核对：canonical十文件SHA、AP0/PA0全部voxel与AP affine、无旧路径/软链接。不可变receipt为`CON11_actual_origin_receipt_v1/receipt.json`，SHA `0ac569361a1d9d0eefaa88ef1d2cc5460db9378dca0e431d4b5b201cebeecc51`。该证明仍是modeling_ready=false；还须task01明确新CPU报告/verified合同/source/activation再冻结一例subset。模型输出计划为独立`official_modeling_CON11_selected_recovery_v1`，当前未创建或启动。等待器`CON11_subset_dispatcher_v1` PID33340已运行，仅读Task1 explicit route并等待真实verified完成；逐病例collector PID33341在`official_modeling_explicit_ten_delivery_v1`收集原九例与新CON11，5741d49a交付快照为8例；新的00:29:48 UTC只读快照为9例。原worker的fresh ready_contract不强制verified sidecar，新wrapper外层补严格核对，不热改旧源码。实际CON11完成consumer出现后，anatomy/repeat按case明确映射新来源，旧global cohort不伪称十例完成。接口和待交付字段见`CON11_origin_handoff.json`。
+CON11实际完成来源单独绑定：正式FNIT baseline为`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v3/baseline/sub-CON11`；官方fresh CPU使用`task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11`，原AP0/PA0 packing来源保持不变。verified CPU合同`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/completed_contract_verified.json`（SHA `d1e6d011f93cc288701ad593365ce01132048f254c17fbf50a1c144640221332`）通过strict外层守卫后，未改动的冻结model_case实际输出`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/consumer_contract.json`（SHA `bb5ab1b71c2cbda4387cf918edadf292305e6af466042db0b4e9431bd9a15339`）。原worker的fresh ready_contract不强制verified sidecar，这项严格检查由新wrapper完成。逐病例collector核查完整consumer/report/全部文件SHA及网格，anatomy/repeat消费最终显式case-map；9旧route和1新route分开保留。
+
+实际CON11 producer是`orchestrate_CON11_CPU_subset_v2.py`（SHA `bf62ce93000e79215317514fcd61ba0a15a06487ea1d775fb5342bd85f1206d4`），状态目录`CON11_subset_dispatcher_v2`，实际PID62745，模型wall104.563秒。v1/PID33340在科学模型启动前因将canonical AP raw链接的resolve目标误限在本病例目录而退出；原waiting status、终端错误和freeze保留。v2只允许AP DWI/bval/bvec链接到已逐项核验的canonical AP目标及SHA，自产field/mask/control仍严格在own目录；没有写入或链接旧CON11 FNIT目录。科学worker仍为`616b3f01197447da8255c20592165f066f03bc20b48765b9612ea6ada29d11c1`，原冻结配置SHA `7ec2008b29c077797c259cad1245c8d2f9999c86af621d0821c9bc7d52335627`未变；13条实际模型命令全部returncode0。新configuration SHA `96bbae28144cf4602e5fe5ff9edcccf53fbb15e41703d5fee9398fa223729a7f`、model freeze SHA `d27ed9a016db4c5938de69e5023a7de6448b731a7a95d23b83dcb09fb9f4e8b4`、launch SHA `d714f0adac1e9f5b46e610b87a0d1516ec2e77222a8afab6392639ef968e0bff`和status SHA `9cc71e53c7c5edf7485e71caac12e08fcf2c5052347c1decc69e2a7c0c0268c7`均经实际重哈希。
+
+原 dispatcher freeze SHA `12066e3cc3269cdd5d28e85115b4bb4ed505ab22c984690ac66df733e073a372` 是输入就绪前的 precursor：`output_root_planned` 指独立新目录，`subset_created=false`。原 model freeze `d27ed9…` 是其后绑定实际 configuration 和 raw/control inputs 的记录。二者均绑定 worker `616b…`、wrapper `bf62…` 与 base config `7ec2…`，但文件与含义不同；当前完成依据是 v2 status、13条成功命令及 consumer/report 的实际 SHA。原 freeze 字节均未补写。仓库保留经原 SHA 验证的完整字节于 `actual_CON11_model_metadata/`，包含启动前 dispatcher freeze 和输入就绪后的 model freeze。
 
 ## 3. 命令行调用
 
-以下是已执行的当前首次启动入口，当前coordinator已运行，不重复启动。dispatcher对已有state-root/new model namespace拒绝覆盖：
+以下记录实际 CPU budget 首次启动入口。当前十例已完成；原九例目录与独立 CON11 目录由完成映射连接。dispatcher 对已有 state-root/model namespace 拒绝覆盖：
 
 ```bash
 reference_root=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002
@@ -99,22 +102,35 @@ python_executable=/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bi
 CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8  "$python_executable" "$tool_directory/wait_launch_CPU_budget_modeling_v1.py"  --config "$tool_directory/official_modeling_CPU_budget_raw10_v2.config.json"  --state-root "$tool_directory/CPU_budget_modeling_dispatcher_v2"
 ```
 
-当前读取状态及重现只读评估：
+当前读取显式映射及重现只读评估（输出目录须全新，不启动模型）：
 
 ```bash
-cat "$tool_directory/official_modeling_CPU_budget_raw10_v1/cohort_status.json"
-# 评估目录须全新；只分析实际completed病例，不触发GPU或重新建模。
-CUDA_VISIBLE_DEVICES='' "$python_executable" "$tool_directory/summarize_actual_CPU_budget_modeling_v1.py"  --root "$reference_root" --output "$tool_directory/new_actual_modeling_evaluation"  --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v1"  --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v2"  --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v3"  --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v4"
+case_map_path="$tool_directory/official_modeling_explicit_ten_delivery_v1/completed_case_map.json"
+cat "$case_map_path"
+CUDA_VISIBLE_DEVICES='' "$python_executable" "$tool_directory/summarize_explicit_CPU_modeling_v4.py" --root "$reference_root" --case-map "$case_map_path" --output "$tool_directory/new_explicit_modeling_evaluation" --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v1" --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v2" --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v3" --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v4" --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v5" --diagnostic-root "$tool_directory/actual_CPU_budget_comparison_v6"
 ```
 
-CON11 metadata启动已执行（等待器与collector已运行，不重复启动）：
+读取当前已完成的 CON11 v2 和最终十例映射：
 
 ```bash
-CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 "$python_executable" "$tool_directory/launch_CON11_subset_metadata_v1.py" --root "$reference_root"
-cat "$tool_directory/CON11_subset_dispatcher_v1/status.json"
-cat "$tool_directory/official_modeling_explicit_ten_delivery_v1/status.json"
-# completed_case_map.json只在实际十个consumer完成并核验后出现；planned路径不是ready。
+cat "$tool_directory/CON11_subset_dispatcher_v2/status.json"
+cat "$tool_directory/official_modeling_explicit_ten_delivery_v1/completed_case_map.json"
 ```
+
+仓库当前文件布局：`actual_CPU_budget_modeling_10of10.json` 保留原始完整评估字节（SHA `228a3454…`），`actual_CPU_budget_modeling_10of10_summary.json` 是交付摘要；`actual_completed_modeling_9plus1_case_map.json` 保存原完成映射；`actual_official_CPU_models/CONxx/` 保存原 model report、consumer 合同和同输入 CPU 诊断；十张 `CONxx_independent_FA.png` 绑定实际 figure SHA。`actual_CON11_source_contract.json` 分开绑定实际 source、配置、输入、dispatcher/model freeze、launch、status 与完成 consumer。
+
+独立核验现有结果（只读取与重哈希，不启动模型）：
+
+```bash
+local_evidence_directory="validation/connectome/tenraw_20261002/task_02"
+python3 "$local_evidence_directory/audit_actual10_CPU_delivery.py" \
+  --local-root "$local_evidence_directory" \
+  --control-path /tmp/fnit-bwas-headcw.sock \
+  --host gongwk@10.190.248.228 --port 39516 \
+  --output /tmp/new_ten_model_CPU_readonly_proof.json
+```
+
+`--local-root` 指本地冻结十例摘要/source合同目录；`--control-path` 指已认证 SSH socket；`--host/port` 是 head 节点；`--output` 必须是新 proof 文件。核验用标准库读取实际 consumer、model report、诊断、图及全部唯一输出 SHA；缺失的原诊断 JSON 可从经 SHA 校验的原字节补齐，已有文件必须逐字节一致。当前实际 proof 见 `root_final10_actual_CPU_audit.json`；当前74项必要 payload/source/proof 索引见 `FINAL10_payload_SHA256.json`，不把历史快照索引当作当前目录索引。
 
 cohort/source/config/activation在首次启动时冻结；每步复用须input/output SHA相同。部分或未跟踪输出不覆盖。上游等待不计入model_case wall，命令wall、CPU轴重排、hash/readback另列。评估绘图复用项目已声明的matplotlib/nibabel和私有plot_runtime，实际解释器SHA/版本写入report，无新增生产依赖。
 
@@ -144,50 +160,71 @@ mtnormalise wm.nii.gz wm_norm.nii.gz gm.nii.gz gm_norm.nii.gz csf.nii.gz csf_nor
 
 ## 5. 实际精度、耗时与脑图
 
-当前八例实际完成快照为`actual_CPU_budget_modeling_8of10.json`，逐例保存原contract/report摘要、实际argv、binary/resolved binary SHA与version、case非有限值及坐标、fullgrid/掩膜交并集统计和脑图摘要。
+实际完成10/10例，当前[完整报告](actual_CPU_budget_modeling_10of10.json) SHA `228a34546bf90de07a79d5246b544d310511f834d5678e5a967ca0c5cdad9033`。逐病例保存consumer/modeling/upstream report摘要、canonical十文件、实际source/configuration/activation/选帧绑定、命令argv/binary SHA/version、FA非有限坐标和原header轴信息。原始消费者合同和结果不改写。
 
-|病例|模型总wall s|DTI+FA命令 s|Dhollander s|MSMT-CSD s|mtnormalise s|brain Dice|FA公共mask RMSE|官方/正式FNIT FA NaN|同输入CPU FA最大差|同输入非有限位置不符|
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-|CON01|115.309|2.205|14.488|68.157|2.972|0.995298|0.034035|37/36|0.007207394|0|
-|CON03|98.152|2.135|12.421|57.835|2.762|0.995333|0.024563|6/1|9.059906e-06|0|
-|CON04|96.248|2.137|12.312|57.067|2.779|0.995954|0.034185|32/32|0.03805137|0|
-|CON05|111.634|2.214|12.859|63.292|2.927|0.995019|0.031137|168/151|0.001022756|0|
-|CON06|103.035|2.200|12.157|62.060|3.050|0.993861|0.042233|33/35|0.010054827|0|
-|CON07|99.840|2.185|12.563|59.599|2.869|0.994460|0.060402|0/75|0.047824826|0|
-|CON08|97.145|2.143|12.473|56.592|2.798|0.996425|0.044188|265/259|0.00064897537|0|
-|CON09|116.573|2.231|12.788|73.234|3.112|0.995235|0.030782|91/96|0.0013519526|0|
+|病例|模型wall s|DTI+FA s|Dhollander s|MSMT-CSD s|mtnormalise s|brain Dice|独立链公共mask FA RMSE|官方/FNIT FA NaN|
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+|CON01|115.309|2.205|14.488|68.157|2.972|0.995298|0.034035|37/36|
+|CON03|98.152|2.135|12.421|57.835|2.762|0.995333|0.024563|6/1|
+|CON04|96.248|2.137|12.312|57.067|2.779|0.995954|0.034185|32/32|
+|CON05|111.634|2.214|12.859|63.292|2.927|0.995019|0.031137|168/151|
+|CON06|103.035|2.200|12.157|62.060|3.050|0.993861|0.042233|33/35|
+|CON07|99.840|2.185|12.563|59.599|2.869|0.994460|0.060402|0/75|
+|CON08|97.145|2.143|12.473|56.592|2.798|0.996425|0.044188|265/259|
+|CON09|116.573|2.231|12.788|73.234|3.112|0.995235|0.030782|91/96|
+|CON10|105.577|2.198|13.287|62.998|3.002|0.994219|0.043323|1/6|
+|CON11|104.563|2.197|14.601|62.979|2.819|0.994623|0.052910|29/25|
 
-独立链精度列比较两条各自拥有corrected DWI/rotated gradients/mask的raw链，不能归为同输入solver误差。最后两列另用冻结成熟FNIT response.py在同一官方DWI、gradient和完整官方brain mask上做CPU8 tensor诊断；八例finite-pair P99差均为0，非有限位置均完全匹配。这不等于正式FNIT GPU运行；正式FNIT FA NaN为36/1/32/151/35/75/259/96，官方为37/6/32/168/33/0/265/91，不能混写成同输入结果。
+独立raw链精度包含两条链各自corrected DWI、rotated gradients及mask的差异；不称为同输入solver误差。官方命令wall和整段model_case wall均为实测。正式FNIT wall是raw DWI至八atlas连接矩阵、supplied anatomy，未记录modeling-only wall，不能与模型wall相除宣称GPU加速。前九例恢复已有成功own TOPUP/SynthStrip并新跑CPU EDDY；CON11为fresh全流程CPU，其连续rawprep wall和原阶段wall分别保存在上游报告，不拼成同一种端到端时间。
 
-CON08/09同输入最大方向差分别0.000124027°/0.328767962°，P99均约0.000001207°，未认定其原因。
+|病例|同输入CPU FA RMSE|P99绝对差|最大绝对差|非有限位置不符|方向最大轴向角 °|
+|---|---:|---:|---:|---:|---:|
+|CON01|2.12412288e-05|0|0.00720739365|0|8.65643959e-05|
+|CON03|2.97118122e-08|0|9.05990601e-06|0|0.000615845461|
+|CON04|0.000130194958|0|0.0380513668|0|0.000215404908|
+|CON05|4.68033405e-06|0|0.0010227561|0|0.000105270671|
+|CON06|3.15075646e-05|0|0.0100548267|0|0.0195082303|
+|CON07|0.000144597894|0|0.0478248257|0|41.6323063|
+|CON08|1.99451816e-06|0|0.000648975372|0|0.000124026602|
+|CON09|3.8899149e-06|0|0.00135195255|0|0.328767962|
+|CON10|0.000721783987|0|0.245622754|0|6.30522098e-05|
+|CON11|1.20528383e-07|0|3.49879265e-05|0|0.341458123|
 
-同输入方向比较使用轴向夹角（正负方向等价）。CON06最大差0.019508°，CON07最大差41.632306°，两例P99均约0.000001207°。CON07只读定位见`CON07_direction_location.json`：109401个有效方向对中仅1点超过0.001°，零基voxel坐标[66,42,12]、世界坐标[-44.198749,9.116221,-18.710517] mm，位于brain mask内；P99.9为0.000006613°、P99.99为0.000038591°。该点也是同输入FA最大差所在：官方FA=0.047824826，CPU FA=3.72911646e-10。已有官方tensor特征值（升序）为[0.007041910424,0.007081279531,0.007662630879]，最大绝对特征值与次大的间隔0.000581351348、相对间隔0.075868374，官方主方向并非精确重根。官方向量[0.121572919,-0.992582500,0]与已有tensor的主特征向量轴向角为0°；CPU向量[-0.589302123,0.680830479,-0.434963018]产生上述差异。CPU FA极低符合近各向同性特征，但原诊断只保存FA/方向，没有CPU tensor或特征值，因此不能确认CPU eigengap或认定具体原因。实际DWI/gradient SHA及所有输出affine/网格一致，其余109400对均不超过0.001°，没有支持全局梯度/axis错配的证据。此定位未重新拟合张量或启动任何模型solver/GPU，未改数值或门槛。原六例report保持原SHA，附定位的报告为`actual_CPU_budget_modeling_6of10_with_direction_location.json`。独立raw链CON07公共mask内另有61个FA非有限位置不符，这与本段同输入比较分开记录。
+同输入CPU诊断实际完成10/10例，使用冻结成熟response.py及同一官方DWI/gradient/brain mask，CPU8、batch4096、原float64计算和float32 tensor roundtrip。它与正式FNIT GPU raw链分开，不补未完成数值。
 
-CON07原函数CPU单点trace见`CON07_tensor_point_trace.json`及`CON07_tensor_point_assessment.json`。实际102个measurement中97为负、5为正；冻结函数沿用原signal floor和三次拟合，初始Gram条件数8.12e17，第三次约1.85e23（单点）/4.21e23（原4096行批次），两次均走原lstsq fallback；第三次weighted design按float64 eps×max维数的描述性SVD秩为6/7。单点新trace特征值约[0.007086117749,0.007086117752,0.007086117755]，gap3.17e-12、FA3.729464e-10；原批次重放却得到FA0.975112319，未复现既有CPU FA3.729116e-10，不能将新trace特征值冒充旧诊断特征值。两次第0迭代参数相同、第1迭代已有微小差、第2迭代fallback明显分歧，已实证定位到该病态点的拟合数值敏感性；native逐迭代内部未保存，具体原软件差异步骤仍未最终定位。未截断负eigenvalues，主方向选abs最大特征值，flatten/mask rank/原4096块映射均记录。正式GPU另一条raw链同网格点FA实际为NaN，未保存tensor，不能由此宣称same-input GPU结果。首次trace计算完成但JSON因实际NaN保存失败，旧空文件保留；v2用明确nonfinite标签记录。未修改成熟response.py或任何已冻结结果。
+CON07历史同输入方向最大差41.632306°保留：[66,42,12]是109401有效方向对中唯一超过0.001°的点。原诊断只保存FA/方向，未保存其tensor。随后原函数单点trace得到近各向同性张量，但原4096行批次重放未复现历史FA/方向；因此不能将新trace特征值充作旧结果的特征值。实测102个measurement中97为负，第三次原拟合进入lstsq fallback，Gram条件数约1e23，观察到数值敏感性。native与Torch差异原因尚未定位或修复，不能宣称稳定等价；正式GPU另一raw链同坐标FA为NaN且无tensor产物，不据此推断same-input GPU误差。
 
-官方八例WM/GM/CSF raw和normalized组织及norm field均无非有限值；vector非有限分量数111/18/96/504/99/0/795/273与FA的37/6/32/168/33/0/265/91 voxel对应。原FA范围和NaN完整保留，异常不删除。
+同输入CPU诊断的FA P99绝对差均为0，但尾部仍有非零差：CON10最大FA差0.245623，CON07方向最大差41.632306°。这些尾差保留在原诊断中，尚未全部定位；本报告不宣称逐值等价。该诊断验证CPU tensor/FA/方向，不能代替同输入GPU或response/FOD/normalisation对照。
 
-正式FNIT wall含raw预处理至八atlas连接矩阵、 supplied anatomy，`stages={}`且未记录modeling-only时间，不能与上表模型wall相除宣称GPU加速。FNIT未保存本轮response/FOD/normalisation中间张量，不能用旧pilot代替本轮输出对照。官方modeling总wall是整段model_case实测；逐命令、readback/hash等开销分别保存。
+FA NaN与大于1的值不截断，方向extra轴NaN间隔按非空间分量metadata保留。WM/GM/CSF raw、normalized及norm field非有限计数逐项列在报告；正式FNIT未保存本轮response/FOD/normalisation中间产物，旧pilot不替代本轮对照。
 
-本轮实际FNIT加载source固定为response `258938a5f20ee7a6efc2fc1c50af5c93412030a60b78036438e8473f072e3b91`、fod `dc3168f90a009da07082c50b283003cf9601610fbf500a00b5be59b76b7e3752`、mtnormalise `30be5a75c2a0f5f7e30738099b13150b7c70df6505d444079b90005ffebdaa44`，已与实际源码再次校验。官方runtime source为`616b3f01197447da8255c20592165f066f03bc20b48765b9612ea6ada29d11c1`，冻结配置为`7ec2008b29c077797c259cad1245c8d2f9999c86af621d0821c9bc7d52335627`。科学模型和生产数学未改。
+真实脑图并排显示正式FNIT FA、官方FA、绝对差、两脑mask；magenta为非有限值：
 
-补充诊断的[完整trace](CON07_tensor_point_trace.json)、[解释记录](CON07_tensor_point_assessment.json)、[输入梯度来源](CON07_tensor_point_gradient_inputs.json)及[摘要](CON07_tensor_trace_summary.json)按原SHA保存。单点trace与原4096行批次trace是新的CPU调用；批次重放没有复现原保存FA/方向，不能把新trace特征值当作旧结果的特征值，也不能据此宣布已修复原软件差异。`actual_CPU_comparison_v4_diagnostic_freeze.json`是原CON08/09同输入诊断freeze，CON07 trace的实际来源由其内部源码和输入SHA绑定；该文件没有被解释成CON07启动合同。
+![CON01真实独立链FA比较](CON01_independent_FA.png)
 
-八幅真实脑图`CON01/03/04/05/06/07/08/09_independent_FA.png`在评估目录：正式FNIT FA、官方FA、绝对差与两脑mask并排，magenta表示nonfinite。图与JSON都只覆盖实际八例，不代表十例完成。
+![CON03真实独立链FA比较](CON03_independent_FA.png)
 
-当前八例完整记录为[实际八例报告](actual_CPU_budget_modeling_8of10.json)，逐病例原始命令报告、消费合同和同输入CPU诊断保存在[actual_official_CPU_models](actual_official_CPU_models/)；这些文件保留服务器原字节和SHA，没有重写科学结果。CON07方向异常的[原始定位记录](CON07_direction_location.json)与[摘要](CON07_direction_location_summary.json)分开保存。当前CON05图与报告仍绑定原运行来源，最终正式配对的恢复运行由总控制单独核验，不能直接把这份快照改标为新运行。
+![CON04真实独立链FA比较](CON04_independent_FA.png)
 
-![CON07独立原始链FA及脑mask比较](CON07_independent_FA.png)
+![CON05真实独立链FA比较](CON05_independent_FA.png)
 
-![CON08独立原始链FA及脑mask比较](CON08_independent_FA.png)
+![CON06真实独立链FA比较](CON06_independent_FA.png)
 
-这两张图展示各自校正DWI和掩膜产生的FA，不代表同输入tensor算子误差；其余六例图也随当前报告保存。服务器只读接入审计重新核对38份原report、consumer合同、CPU诊断、图像、freeze和CON11 receipt的实际字节，见[root_actual_official_CPU_delivery_audit.json](root_actual_official_CPU_delivery_audit.json)。本次接入另在headcw隔离临时目录运行44项CPU来源守卫，全部通过，CUDA禁用；实际记录见[curated_CPU_provenance_tests.json](curated_CPU_provenance_tests.json)。这些检查验证来源与调度边界，不代替MRI精度benchmark。
+![CON07真实独立链FA比较](CON07_independent_FA.png)
+
+![CON08真实独立链FA比较](CON08_independent_FA.png)
+
+![CON09真实独立链FA比较](CON09_independent_FA.png)
+
+![CON10真实独立链FA比较](CON10_independent_FA.png)
+
+![CON11真实独立链FA比较](CON11_independent_FA.png)
+
 
 ## 6. 最近版本与benchmark记录
 
-- Task2交付`5741d49a`补充严格CON11等待器、逐病例collector和CON07单点/原批次trace。实际source分别冻结为wrapper `471de29b...`、collector `053d4ea7...`、metadata launcher `1f1f917b...`及trace v2 `72f1256b...`；原科学worker和配置SHA保持不变。此次接入在headcw禁用CUDA独立验证20项subset metadata及packing守卫，全部通过（0.58秒；外层0.869秒），见[实际CPU验证记录](followup_CPU_provenance_tests.json)。没有在接入过程启动GPU或全脑MRI求解器。
-
-- 2026-10-03 00:29:48 UTC的[只读状态快照](root_followup_actual_delivery_audit.json)确认等待器PID33340和collector PID33341仍对应原argv/启动时间；九例consumer/report实际重哈希，CON11模型目录不存在。Task2最初交付的[orchestration合同](CON11_subset_orchestration_contract.json)保留其当时八例状态，不把它改标为新的九例或完成状态。最终十例合同仅在实际第十例通过后生成。
+- 十例实际收尾：原九例及新CON11分别绑定consumer/report/source/raw/control lineage，全部十例完成CPU同输入张量诊断和脑图。v1 canonical链接guard失败保留，新metadata v2严格核对后调用同616b worker一次完成；未重跑已完成MRI。13项新guard测试通过，科学算法/精度/掩膜不变。
+- 交付工具历史失败：explicit评估v2局部变量覆盖导致报告失败，保留目录并在v3/v4只读评估修复；文档idle旧waiter按PID精确退役并保留freeze/retirement。首次本地取回因跨文件系统replace失败，v4只修同文件系统scratch传输，不重新计算数据。
 
 - CON07只读异常定位：已有官方tensor、双方FA/方向和brain mask读回，重哈希同输入DWI/gradient并核对affine；保留top10坐标、特征值/间隔、向量、分位数和描述性计数。未生成CPU tensor、未重跑模型；CPU eigengap与具体差异原因尚不能由存量产物确定。
 
@@ -195,8 +232,9 @@ CON07原函数CPU单点trace见`CON07_tensor_point_trace.json`及`CON07_tensor_p
 
 - 当前CPU budget reference：实际上游`official_rawprep_cpu_budget_reference_v1`，producer SHA `b32a688318d68c63a1dd5e5fba2fdafb76b5418e1c1c4bad8f1468648c10e48a`，activation SHA `e96b0a2f00c9cebaf6ac6787380e492810cc6d3ec68dc37095fed373ec4b4248`。成功own TOPUP/SynthStrip字节恢复，新的eddy_cpu保持全部科学flags、initrand12345和真实ref。当前known帧CON01[76,0]、CON03[0,0]、CON04/05[26,0]、CON06/07[0,0]；后四例由同producer真实verified证据追加，禁止猜测。
 - 元数据调度修复：旧idle dispatcher117298在未启动模型时精确停止并保留freeze/status；dispatcher_v2 PID120790已实际启动modeling PID122690。35项来源守卫含完整verified合同读回、pending binding只写一次、raw/formal packing voxel变化拒绝；小夹具是provenance测试，不是MRI benchmark。
-- 实测快照：当前仓库保存八例[完整报告](actual_CPU_budget_modeling_8of10.json)及[摘要](actual_CPU_budget_modeling_8of10_summary.json)。两例、四例、六例历史快照保留在服务器task_02原评估目录及原交付记录，未重复复制到当前说明目录；各自source/时间/异常值仍按原SHA保留，不把最新启动状态写成全部完成。
+- 2026-10-03，Task2 `e4be3868`：十例模型、十例同输入CPU诊断和十张脑图完成。原八例 model report、consumer 和脑图与新交付字节完全一致并复用；新 CON10/11 补齐。当前仅保留十例评估/摘要与实际完成映射，删除被替代的本地8例重复快照和退休 curation helper，SHA/大小在 `CURATION_final10.json`；原服务器快照和 Git 历史保留。
 - 历史失败：原rawprep v1两例CUDA OOM；v2两例实测own峰值43,203,428,352 bytes，budget_exceeded=true后SIGTERM -15，属于预算中止。旧OOM条件没有激活。旧建模v1/v2完成均0，coordinator172836/51766已退役；失败原report、freeze、status snapshot与retirement在原namespace保留。对应已执行工具/配置仅为历史证据，没有旧启动教程。
+- 独立复核：headcw CPU标准库实际完成448项检查，250份唯一模型/上游输出及sidecar重哈希一致，十例 consumer/model report/原诊断/脑图 SHA一致。新metadata guard与packing guard在head隔离CPU临时副本22项通过，不运行MRI/GPU solver。所有CON07历史trace、未复现批次及真实失败/原waiting metadata保留；旧v1终端guard错误与文档waiter退役原记录见 `actual_failed_metadata/`。当前freeze/完成receipt分开记录。
 - 清理：删除从未使用的`official_modeling_cpu_raw10_v3.config.json`和`official_chain_CPU_fallback.schema.json`，当前文档仅保留实际CPU预算入口。旧固定输入及ABBA记录另见README.md，职责与本轮独立链分开。
 
 ## 7. 原实现、参考文献与资源许可

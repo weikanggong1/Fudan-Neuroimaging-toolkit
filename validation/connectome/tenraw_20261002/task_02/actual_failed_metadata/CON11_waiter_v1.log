@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/orchestrate_CON11_CPU_subset_v1.py", line 124, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/orchestrate_CON11_CPU_subset_v1.py", line 109, in main
+    result,state=ready(root,worker,config);save(a.state_root/'status.json',{'state':state,'UTC':utc(),'PID':os.getpid(),'host':socket.gethostname(),'modeling_ready':result is not None,'subset_launched':False,'planned_output_root':str(output)})
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/orchestrate_CON11_CPU_subset_v1.py", line 63, in ready
+    r=read(rp);v=read(vp);s=read(sp);validate_verified_records(r,s,v,rp,case_root,route)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/orchestrate_CON11_CPU_subset_v1.py", line 51, in validate_verified_records
+    if not Path(path).resolve().is_relative_to(case_root.resolve()) or sha(path)!=digest:raise ValueError('Own EDDY input differs')
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Own EDDY input differs
