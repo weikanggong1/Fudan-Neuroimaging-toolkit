@@ -48,7 +48,7 @@ flowchart TD
 
 不同候选在独立新目录执行；完整实际命令随报告保存，不覆盖旧完成或失败记录。尚未执行的命令不记作实测。
 
-本轮同时修正既有 BIDS 完成判定的问题：相同包版本、输入路径和参数会复用旧矩阵，无法识别数值实现已经更新。`run_state.json` 的参数指纹现包含 `CONNECTOME_NUMERICAL_REVISION="accuracy-20261003-v1"`；旧记录需重新计算 connectome，使用当前实现完成后仍可正常跳过。TOPUP/EDDY 的数值实现和阶段缓存规则保持原有版本。该修正已包含在正式科学源码及 CPU/CUDA 回归中。
+本轮同时修正既有 BIDS 完成判定的问题：相同包版本、输入路径和参数会复用旧矩阵，无法识别数值实现已经更新。`run_state.json` 的参数指纹现包含 `CONNECTOME_NUMERICAL_REVISION="accuracy-20261003-v1"`；旧记录不再判定完成，使用当前实现完成后仍可正常跳过。重算可选择新输出目录；原目录需显式 `--overwrite`，此参数也会重算 TOPUP/EDDY。只重算 connectome 时，可把已有校正 DWI 与旋转 bvec 通过 `--corrected-dwi`、`--rotated-bvecs` 提供给新输出目录。TOPUP/EDDY 的数值实现和阶段缓存规则保持原有版本。该修正已包含在正式科学源码及 CPU/CUDA 回归中。
 
 ## 4. 对应官方步骤
 
@@ -137,7 +137,7 @@ CON03 的全 102 帧 DWI 为有限值；官方 brain mask 内 RMSE 为 **0.87145
 
 - 2026-10-03：冻结 `7af34e6d` 基线，建立五个独立子任务和整合分支，核对 gpucw1/nodecw10 认证、真实输入和现有 GPU 负载。
 - 活跃轨迹校准实验：真实 CON03 100k 的路径、端点、长度与接受种子逐位一致；本次 tracking wall 为 762.751→773.253 秒，未展示速度收益。最终候选恢复原校准循环，只保留独立 oracle 支持的 ACT chord 精度修正；实验原报告及其实际源码 SHA 保留不改。
-- 正式科学源码冻结后，CPU 回归 752 passed、63 skipped；CUDA 回归 717 passed、7 skipped，两次均有 362 项子测试通过。CPU 范围为 connectome、EDDY、TOPUP，CUDA 范围为 connectome。额外 CPU 比较器 17 项通过；这些协议测试不代替真实 MRI 比较。
+- 正式科学源码冻结后，CPU 回归 752 passed、63 skipped；CUDA 回归 717 passed、7 skipped，两次均有 362 项子测试通过。CPU 范围为 connectome、EDDY、TOPUP，CUDA 范围为 connectome。额外 CPU 比较器 17 项通过；这些协议测试不代替真实 MRI 比较。[源码与测试来源核验](../../validation/connectome/accuracy_20261003/final_source_acceptance_v1/README.md) 记录原日志、现存测试目录与冻结版本的字节一致性；测试当时未保存源码前后清单，正式 raw 调用的清单另行逐次核对。
 - 测试部署曾缺少仓库内下载脚本和 Tian S1 asset，导致 collection / fixture 失败；补齐实际测试资源后通过。两次失败的原日志保留，科学源码未改变，失败状态没有改写为成功。
 - CPU 报告部署先补齐已有绘图环境，随后修复可选基线计时的状态判定：候选完成而同病例基线刚启动时，仅将配对耗时记为 `not_assessed`，待真正完成后执行原严格检查。38 项相关 CPU 回归通过；CON01/03 原矩阵、轨迹报告和 PNG 的 SHA 不变。当前使用 [v3 控制器](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v3/README.md)，v1/v2 的部署失败记录完整保留。
 - 正式计划共十二次 raw-DWI 运行：CON01 基线→候选、CON03 候选→基线，其余八例候选；使用同一套官方 FreeSurfer 输入、100k seeds、seed 0 与 EDDY GP seed 12345。完整矩阵和轨迹由同次返回对象在计时结束后导出。

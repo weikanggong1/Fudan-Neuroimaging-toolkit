@@ -223,7 +223,7 @@ fnit UKBConnectome_pipeline \
 
 状态记录用文件大小、mtime 和参数核对 FNIT 自己产生的中间结果，不是内容哈希。外部替换了文件但保留原大小/mtime 时加 `--overwrite`。在其他软件中已完成 TOPUP/EDDY 时，同时给 `--corrected-dwi` 和 `--rotated-bvecs`；原始 BIDS bval 仍定义每卷 b 值。`--overwrite` 强制重算并覆盖同名结果。
 
-connectome 完成记录还包含数值实现版本。本轮梯度及 ACT 精度修正使用 `accuracy-20261003-v1`，因此旧版矩阵会重新计算；当前版本同输入、同参数且产物完整时继续跳过。TOPUP/EDDY 各自依据原阶段记录复用。
+connectome 完成记录还包含数值实现版本。本轮梯度及 ACT 精度修正使用 `accuracy-20261003-v1`，因此旧版矩阵不再判定完成；当前版本同输入、同参数且产物完整时继续跳过。重算请使用新输出目录，或在原目录显式 `--overwrite`；后者也重算 TOPUP/EDDY。只重算连接组时，可通过 `--corrected-dwi`、`--rotated-bvecs` 将已有校正输入提供给新输出目录。普通同版本调用的 TOPUP/EDDY 仍依据各自阶段记录复用。
 
 ## 4. 原软件调用
 
@@ -280,7 +280,7 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 | 4 5TT / GMWMI / atlas | 两例真实完整组织图和自然刚体标签重采样已逐值一致，保持成熟实现 | [task 4 验证](../../validation/connectome/accuracy_20261003/task_04/README.md) |
 | 5 SIFT2 / FA 采样 / 矩阵 | 同官方 TCK 的八套 atlas count 一致，Double 权重候选使多数浮点矩阵误差增加，保持成熟实现 | [task 5 验证](../../validation/connectome/accuracy_20261003/task_05/README.md) |
 
-![本轮同正式 FNIT 校正 DWI 的 CON10 FA 组件对照](../../validation/connectome/accuracy_20261003/task_02/formal_CON10_FA_precision.png)
+![同正式 FNIT 校正 DWI 的 CON10 FA 对官方 CPU 参考](../../validation/connectome/accuracy_20261003/task_02/formal_CON10_FA_precision.png)
 
 该图及其完整体素指标属于同输入张量组件，来源和色标见 task 2。前轮的 643.623 s 与 57.96% 保留在下节对应版本的实际记录中。
 
