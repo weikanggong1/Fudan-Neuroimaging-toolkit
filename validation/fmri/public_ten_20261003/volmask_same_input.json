@@ -843,5 +843,11 @@
     "count": 9,
     "passed": true,
     "scope": "small closed/open geometry contracts and capacity; not a benchmark"
+  },
+  "timing_scope": {
+    "candidate_write_ribbon": "function wall time after independent inside-mask checks warmed Numba; all function input/output included; import and initial JIT compile excluded",
+    "reference": "fresh official CLI process, startup and input/output included; two parallel hemispheres with two OpenMP threads each",
+    "inside_masks": "per-call CPU predicate/fill timing, initial compiler/JIT included where it occurred; not separately equivalent CLI timing",
+    "whole_pipeline": "none of these isolated measurements are counted as formal raw ten-case whole pipeline timing"
   }
 }

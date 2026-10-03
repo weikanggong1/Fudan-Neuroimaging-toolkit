@@ -1,5 +1,10 @@
 # `mris_volmask` white and cortical ribbon replacement
 
+> This is the historical same-input validation of the former float32 rasterizer.
+> The current API, geometry-boundary fix and new real-input results are documented
+> in [the ribbon function documentation](../../../docs/recon_all/VOLMASK.md).
+> The times and exact matches below apply to these frozen inputs and this older implementation.
+
 `volmask_python.py` reads `aseg.presurf.mgz` for its voxel grid, the four
 bilateral white/pial surfaces, and the downloaded `FreeSurferColorLUT.txt`.
 A Numba rasterizer finds where each triangle
