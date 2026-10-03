@@ -193,93 +193,71 @@ MRtrix的`-template`决定输出物理网格，`-strides`决定输出文件数�
 
 FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚本按每个例的私有工作目录执行。原UKB转换脚本的颜色表随机生成；保留实际annot哈希，不能声称随机颜色字节逐值一致，体积节点语义另核对。
 
-## 5. 真实数据精度与运行时间
+## 5. 十例真实结果与运行时间
 
-**2026-10-03，十例官方结构准备已完成**：CON01、CON03、CON04–CON11均使用本轮baseline原始T1的fresh官方FreeSurfer，每例生成5TT、GMWMI和八套T1 atlas，共27个输出记录。不可变十例绑定SHA为`f1e722565953f032e822de42c2cfb499bbeb24d8edf377b85a0899135c9e904b`；[十例实际来源与耗时摘要](../../validation/connectome/raw10_official_anatomy_20261003/structure_prepare.public.json)再次核对各prepare报告的实际大小/SHA、完成状态、命令exit0和输出数量。影像字节与几何验证保留在各例原报告及该绑定中。本摘要只重新核对报告身份，没有重复计算MRI。
+**当前十例官方参照均已实际完成**（2026-10-03 02:14 UTC只读核验）：新下载的 OpenNeuro `ds001226`，固定快照 `fb4d0fda44f2ab7a732fb4ab6cd62add09dc1cd7`，受试者为CON01、CON03、CON04–CON11。每例使用本轮原始T1的fresh官方FreeSurfer，已有27个结构准备输出、20个DWI解剖输出，以及5次独立MRtrix追踪和八套atlas的四类矩阵。每例5次参照共198条官方命令，全部exit0；每次固定100,000个seed attempts，随机种子0–4。
 
-| 真实例 | prepare模式 | 新命令数（全部exit0） | 本次prepare entry wall秒 | 本次命令合计秒 | 复用的此前成功命令秒 |
-| --- | --- | ---: | ---: | ---: | ---: |
-| CON01 | prepare | 34 | 426.095 | 386.771 | 无 |
-| CON03 | recover-prepare | 31 | 161.363 | 119.949 | 403.782 |
-| CON04 | prepare | 34 | 424.715 | 384.126 | 无 |
-| CON05 | prepare | 34 | 393.881 | 354.633 | 无 |
-| CON06 | prepare | 34 | 390.616 | 350.825 | 无 |
-| CON07 | prepare | 34 | 367.595 | 326.419 | 无 |
-| CON08 | recover-atlas | 28 | 142.298 | 100.843 | 224.273 |
-| CON09 | recover-atlas | 28 | 146.390 | 105.430 | 272.558 |
-| CON10 | prepare | 34 | 429.375 | 390.161 | 无 |
-| CON11 | prepare | 34 | 444.170 | 403.759 | 无 |
+完成来源为**原目录九例＋新目录CON11**，通过逐例合同绑定汇合。旧调度的CON11仍为`waiting_official_dwi`，其状态和文件未改写；当前完成判定以新的实际来源表为准。
 
-这些是官方**结构准备阶段**的实际时间，不包含recon-all、DWI预处理、追踪或矩阵构造，也不与重建时间相加称连续冷调用。CON03/08/09明确复用此前成功阶段，原失败和新恢复目录均保留。CON11的实际recon-all exit0，但原报告在int32序列化时失败；只读重验证真实14个FS文件后完成prepare，没有再次运行recon-all。各例实际工具来源保留其原提交：常规prepare为`b9e48ef4`，CON03恢复为`608a68d8`，CON08/09恢复为`636b73c5`。
+| 真实例 | 官方DWI建模来源 | 官方解剖来源 | 官方五次参照来源 |
+| --- | --- | --- | --- |
+| CON01、04、06、08、10 | `task_02/official_modeling_CPU_budget_raw10_v1` | `official_anatomy_raw10_CPU_budget_v4` | `task_04/official_raw10_cpu_group_A_v3` |
+| CON03、05、07、09 | 同上 | 同上 | `task_04/official_raw10_cpu_group_B_v3` |
+| CON11 | `task_02/official_modeling_CON11_selected_recovery_v1` | `official_anatomy_CON11_selected_CPU_v1` | `task_04/official_raw_CON11_selected_CPU_v1` |
 
-此结构摘要生成时，官方原始DWI链的新输入冻结仍待上游完成核验，未产生官方FLIRT/DWI atlas、独立追踪和最终矩阵对照；后续真实DWI完成另由新合同记录。结构准备全部完成不等于十例raw end-to-end完成；下面保留CON03及两例背景恢复的具体过程。
+表中路径均相对于实际根目录`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002`。只读核验绑定最终逐例map的真实SHA `a12765a9dd1257ec1ba6281c61ebdebd6f654c12f173dfc597c025527d1446aa`，重新核对十例报告/合同SHA、同例原始T1、fresh FS官方exit0、各级消费路径和固定科学worker，见[十例实际完成与CON10核验](../../validation/connectome/raw10_official_anatomy_DWI_20261003/actual10_completion.public.json)。旧两例、四例和八例快照保留各自观察时刻，不能作为当前覆盖例数。
 
-2026-10-03：已实际核对FS8.2 `register/apply --help`及两h5完整大小/SHA；CPU仅用8线程，GPU未使用。官方原生Python3.8.13，TensorFlow2.13.1、surfa0.6.3、voxelmorph0.2、neurite0.2、numpy1.24.3；版本由官方fspython实际读回，无新增安装。
+### 分阶段计时
 
-CON03新鲜FS输入的官方CPU命令已真实完成：joint register 385.7606秒，Tian S1 NN apply 12.0240秒，Tian S4 NN apply 5.9971秒。之后普通nibabel影像读回器拒绝warp头，原v2目录保留为failed；独立官方Surfa只读验证该实际warp成功：float32、`[256,256,256,3]`、format3、非有限值0、MNI source与FS target几何吻合。这些是已完成的官方组件证据，**不是十例端到端benchmark**。
+| 例 | prepare模式 | prepare entry秒 | complete模式/新命令数 | complete entry秒 | complete新命令合计秒 | 5次官方参照worker秒 |
+| --- | --- | ---: | --- | ---: | ---: | ---: |
+| CON01 | prepare | 426.095 | recover-complete / 7 | 13.807 | 1.794 | 427.833 |
+| CON03 | recover-prepare | 161.363 | recover-complete / 7 | 13.912 | 1.755 | 406.840 |
+| CON04 | prepare | 424.715 | complete / 13 | 26.534 | 15.282 | 400.369 |
+| CON05 | prepare | 393.881 | complete / 13 | 27.207 | 14.693 | 444.362 |
+| CON06 | prepare | 390.616 | complete / 13 | 28.344 | 16.007 | 441.676 |
+| CON07 | prepare | 367.595 | complete / 13 | 27.757 | 15.775 | 441.178 |
+| CON08 | recover-atlas | 142.298 | complete / 13 | 27.384 | 15.224 | 416.060 |
+| CON09 | recover-atlas | 146.390 | complete / 13 | 27.038 | 15.121 | 419.802 |
+| CON10 | prepare | 429.375 | complete / 13 | 39.508 | 15.538 | 417.947 |
+| CON11 | prepare | 444.170 | complete / 13 | 27.342 | 15.111 | 491.855 |
 
-分阶段v3续跑的官方Surfa metadata命令完成12.9788秒；5ttgen随后因系统旧libstdc++缺少GLIBCXX_3.4.20/21/22启动失败，未产生5TT。原failed目录保留；既有Conda lib下实际`mrconvert -version`成功，识别3.0.3-103-g026e850d，后续新namespace显式绑定此运行时。参照程序字节与解剖输入不变。
+`entry`包括实际输入核验、命令执行、复制、读回和SHA；“新命令合计”只累加本阶段保存的官方命令wall。5次参照worker计时包括输入读回、追踪、SIFT2、采样、矩阵和保存核验，排除上游重建/预处理/建模。CPU结构与解剖每例8线程、最多两例并行；追踪使用原固定`-nthreads 0`，后处理8线程。
 
-v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒，随后原UKB脚本因指定环境缺pandas启动失败。保持原源码；使用服务器已存在的项目Python环境（pandas2.2.3/nibabel5.4.0/scipy1.11.4/numpy1.26.4）续新的独立namespace，不向正在运行的FNIT Conda环境安装或替换依赖。新增prepare Python import预检，避免运行配准后才发现此问题。
+CON03 prepare复用此前成功的SynthMorph三命令403.782秒；CON08/09复用此前九条成功命令224.273/272.558秒。CON01/03 complete复用原六条成功命令17.375/14.039秒，单独格式化轴顺序0.198/0.049秒，新七条NN分别1.794/1.755秒。这些阶段分开报告，不拼接成连续冷调用。原始recon-all、TOPUP/EDDY及建模时间由各自报告保留；[结构准备摘要](../../validation/connectome/raw10_official_anatomy_20261003/structure_prepare.public.json)、[两例恢复摘要](../../validation/connectome/raw10_official_anatomy_DWI_20261003/two_case_completion.public.json)和[四例历史摘要](../../validation/connectome/raw10_official_anatomy_DWI_20261003/four_case_completion.public.json)保持原字节。
 
-**CON03 v5结构准备已完成**：31条新官方命令全部exit0，27个输出完成SHA和几何读回。新续跑entry wall为161.363秒，命令合计119.949秒；此前成功的SynthMorph register/apply三命令为403.782秒，单独报告，不能相加声称连续冷调用。尚未衔接官方DWI/追踪，故不是完整connectome或十例精度结论。
+FNIT相对官方的精度、耗时和MRtrix重复范围结论见[十例实际比较](actual_cohort_comparison.md)及[raw评测](raw_cohort_benchmark.md)。本页报告官方链的完成、输入身份与几何核验，不替代最终矩阵统计验收。
 
-背景兼容修复的真实输入验证：CON08/09 双半球 aparc、a2009s 共八个 annotation 均完成实际读回；只有左 aparc 的1/2个unknown顶点需要适配，其余六个文件直接使用原字节。适配文件颜色表/名称/正ROI索引与原文件逐值一致，原背景顶点集合不变，完整结构像与资源前后SHA一致；此前九条成功官方命令分别合计224.273/272.558秒。22项focused契约/背景读回测试在实际服务器CPU环境通过（0.78秒）。这一步验证只检查输入兼容，下表另报真实atlas续跑。
+### CON10补充核验与CON11交接
 
-**CON08/09 背景兼容 atlas 续跑已完成**，新冻结工具提交`636b73c5`，两例各28条新命令全部exit0、27个输出读回成功。实际冻结部署再次运行22项测试通过（0.93秒）。旧两个failed目录、原始FS、原UKB脚本保持原SHA；临时协调只暂停已验证无child的本工具driver，完成后以相同argv/start_ticks身份恢复，见[实际来源与结果摘要](../../validation/connectome/raw10_official_annotation_background_20261003/official_reference_background.public.json)。
+CON10实际complete首次执行13条官方命令，全部exit0；FLIRT为9.345秒，全部命令合计15.538秒，entry为39.508秒。此次只读核验重新检查14个fresh FS文件、27个prepare输出、20个complete输出和四个实际消费的官方DWI文件SHA。corrected DWI为`96×96×60×102`，八atlas均为`96×96×60`完整网格，最大affine差`4.27e-14`，标签为合法整数，nodes索引连续。两套Glasser分别在体积中出现374/412个正节点，仍保留376/414行节点定义；缺席节点不改变矩阵维度。
 
-| 真实例 | 原9条成功命令秒 | 原失败converter秒 | 新续跑entry wall秒 | 新命令合计秒 | 实际背景副本读写/核验秒 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| CON08 | 224.273 | 0.595 | 142.298 | 100.843 | 0.353 |
-| CON09 | 272.558 | 0.667 | 146.390 | 105.430 | 0.458 |
+本次整体来源核验共139个唯一文件、463,321,306字节，CPU只读耗时1.272秒。它重新核对十例不可变报告/合同，并额外读取CON10影像；未重跑旧九例矩阵读回。原最终map已记录各例保存文件审核，CON11另有[独立完成审计](../../validation/connectome/tenraw_20261002/anatomy_CON11_explicit_followon_v1/compact_completed_handoff.json)。[只读核验源码](../../validation/connectome/raw10_official_anatomy_DWI_20261003/audit_actual10_completion_readonly.py)的执行SHA保存在新JSON中。
 
-各列是不同阶段，不能相加称连续冷调用或完整connectome。两例实际`aparc.a2009s+tian-s1`节点数为164/166：原UKB算法按左半球出现的正标签过滤双半球LUT，CON09索引42出现，保留该原节点语义；FNIT现有reader也采用此规则。逐例以`nodes.tsv`定义配对矩阵，不硬编码CON03的节点数；背景适配不会删减正脑区。
+CON11的新官方rawprep、建模、解剖及五次参照均使用实际新来源，旧CON11目录未补写或建立输入别名。复用已经核验的27个结构准备输出；新解剖worker entry为27.342秒，调度wall为30.979秒，五次参照worker为491.855秒。原`cb06c0ca`解剖worker及`0c6191ec`追踪worker字节和参数不变；160个矩阵SHA/shape/finite和40个节点表的独立审计通过。完整路径、配置/源码SHA、PID/start ticks、启动与完成报告见[CON11明确来源与交接](../../validation/connectome/tenraw_20261002/anatomy_CON11_explicit_followon_v1/README_v3.md)。
 
-| T1 atlas | 节点K | 实际存在节点 | 网格 |
-| --- | ---: | ---: | --- |
-| fs-aparc | 84 | 84 | 256×256×256 |
-| aparc+tian-s1 | 84 | 84 | 同上 |
-| aparc.a2009s+tian-s1 | 164 | 164 | 同上 |
-| glasser+tian-s1 | 376 | 376 | 同上 |
-| glasser+tian-s4 | 414 | 414 | 同上 |
-| schaefer200+tian-s1 | 216 | 216 | 同上 |
-| schaefer500+tian-s4 | 554 | 554 | 同上 |
-| schaefer1000+tian-s4 | 1054 | 1054 | 同上 |
+各例八套节点数为84、84、164、376、414、216、554、1054；CON09的`aparc.a2009s+tian-s1`为166，来自原UKB按实际正标签构造节点的规则。逐例使用`nodes.tsv`，不硬编码其他例的K。CON08/09背景适配仅影响左aparc的1/2个unknown顶点，正ROI、完整颜色表、名字及原背景集合逐值保持。
 
-`render_connectome_official_anatomy.py --reference-report COMPLETED_REPORT --output FRESH.png`读取实际已绑定结果，绘制brain、5TT、GMWMI与八套atlas，并写图像metadata/SHA；仅作轴排列显示，不重采样，图示本身不构成FNIT与官方匹配结论。
+### 脑图与保留的失败证据
 
-真实CON03实例与[公开结果摘要](../../validation/connectome/raw10_official_anatomy_CON03_20261003/con03_official_anatomy.public.json)；图像SHA与[绘图来源记录](../../validation/connectome/raw10_official_anatomy_CON03_20261003/official_con03_anatomy.json)已核验。此图仅展示官方结构准备输出，DWI/追踪/矩阵对照尚待完成。
+真实CON03图展示fresh FS brain、5TT白质、GMWMI和八套native T1 atlas；仅作轴排列显示，无重采样。图像SHA为`d8a404cf552f346681276636c0e84c0c2ce00b1fbbbefaa90f4fba58dc931edc`，[绘图来源](../../validation/connectome/raw10_official_anatomy_CON03_20261003/official_con03_anatomy.json)及[原结构结果](../../validation/connectome/raw10_official_anatomy_CON03_20261003/con03_official_anatomy.public.json)保留。本图不表示最终connectome矩阵匹配。
 
 ![CON03官方freshFS生成5TT、GMWMI与八套native atlas](../../validation/connectome/raw10_official_anatomy_CON03_20261003/official_con03_anatomy.png)
 
-以上已完成结构准备与图示；FNIT相对独立官方DWI、FLIRT和最终矩阵的精度/时间对照仍待实际完整上游结果，不填入旧ds004666数据。现有CON03 fixed-FNIT-input官方追踪参照属于另外的验证层级。
+| 原真实失败 | 新参照采用的处理 | 保留证据 |
+| --- | --- | --- |
+| CON03 SynthMorph三命令exit0后，普通nibabel拒绝warp专用MGZ `0x301`头 | 用官方Surfa读回原warp，在新目录恢复后续步骤；原三命令403.782秒单列 | 原v2 failed报告、三条argv/程序SHA、原warp/Tian SHA；结构来源摘要绑定恢复报告 |
+| 后续5ttgen遇到旧GLIBCXX；原UKB脚本遇到指定环境缺pandas | 绑定服务器已有Conda运行时和已有Python，先预检，不安装新软件 | 原failed日志、程序字节与各段计时；原FS/UKB代码不变 |
+| CON08/09原UKB converter真实`KeyError: 0` | 私有annotation将经名称确认的unknown0映射背景−1；28条新命令exit0 | [背景兼容与原失败摘要](../../validation/connectome/raw10_official_annotation_background_20261003/official_reference_background.public.json)，原输入SHA和完整正ROI读回；FNIT成熟reader未改 |
+| 首CON01 complete序列化复制未消费向量metadata的NaN，mri_convert0.35秒后退出 | 只记录实际消费的四文件，完整原上游合同保留路径和SHA | 原v2 failed报告和实际命令时间；缺失、坏SHA、错网格继续拒绝 |
+| CON01/03官方NN首atlas采用T1 strides，物理同网格但存储轴顺序不同 | 官方`-strides`使用实际mean b0；原六命令在新目录明确恢复 | [全voxel整数lattice proof](../../validation/connectome/raw10_official_layout_20261003/layout_proof.public.json)：全部uint32值和逆排序bits一致，world界`1.97e-6/3.40e-6 mm`；原v3失败及轴文件保留 |
+| 旧CON11上游目录等待，新的实际DWI来自单例恢复目录 | 冻结新CON11元数据配置和CPU调度，消费实际完成合同，按逐例map交接 | [CON11交接](../../validation/connectome/tenraw_20261002/anatomy_CON11_explicit_followon_v1/README_v3.md)保留旧v1/v2等待来源、实际退休记录和新v3完成审计 |
 
-首例实际官方CPU原始DWI/建模合同到达后，`official_anatomy_raw10_CPU_budget_v2`的CON01 complete遇到报告写出错误：完整上游合同未消费的`principal_direction.grid.spacing[3]`为NaN。原mri_convert日志及0.35秒time文件已保留；随后complete子进程exit1，尚未运行FLIRT。只在确认该调度无MRI child、argv/start_ticks/源SHA一致后退休其闲等进程，原目录及报告不改。新版本选择性记录实际消费的四个文件并保留完整合同原SHA，不改变任何MRI、配准或重采样。24项focused测试在实际CPU服务器通过（1.60秒），包含同结构的NaN附加metadata、缺失文件和错误SHA；实际CON01原合同SHA`36b56d7d8e218464e4440c99a75a3fe12a7d71f984912f743fa343e42d57a07b`的只读核验及严格JSON写出也通过，原合同SHA不变。这是报告交接修复的验证，完整FLIRT/八atlas结果另按实际运行报告记录。
-
-随后v3中CON01/03的前六条官方命令真实exit0（FLIRT分别13.166/9.833秒），首atlas存储轴检查失败。实际[整数lattice与全部voxel proof](../../validation/connectome/raw10_official_layout_20261003/layout_proof.public.json)给出同一映射`[[1,0,0,0],[0,0,-1,59],[0,1,0,0],[0,0,0,1]]`：全网格world误差最大界为`1.97e-6/3.40e-6 mm`，原LAS模板96×96×60与MRtrix LIA文件96×60×96物理等价。官方`mrconvert -strides`仅格式化，分别0.198/0.049秒，所有uint32 voxel值及逆排序全部bits一致、正ROI IDs不变，最终模板affine差0/`2.98e-8`。原六命令分别17.375/14.039秒，单独报告；布局proof不是最终矩阵匹配证据。v3失败/原输出保留，新的显式恢复复用已完成的配准与world/首atlas阶段，后续NN直接绑定模板strides，不放宽原网格检查。
-
-布局及恢复入口的28项focused测试在实际CPU服务器通过（0.80秒），覆盖真实模板strides argv、全部整数voxel逆排序、真实位移/ROI改变拒绝、错误例号和损坏原报告拒绝。对CON01/03原报告、六命令、source/program/artifact/合同SHA的实际恢复只读核验也通过；此核验没有重新执行FLIRT或NN。
-
-**CON01/03官方DWI空间解剖与八atlas完成**：新冻结提交`cb06c0ca`、namespace `official_anatomy_raw10_CPU_budget_v4`。两例实际complete exit0，各20个输出重新核SHA、八atlas为官方DWI的96×96×60完整网格，生成真实consumer合同。参照工具仍只占CPU8×最多两例；十例T1结构准备不重算。见[两例实际完成摘要](../../validation/connectome/raw10_official_anatomy_DWI_20261003/two_case_completion.public.json)。
-
-| 真实例 | 原六条成功命令秒 | 单独官方strides格式化秒 | 新恢复entry wall秒 | 新七条NN命令合计秒 | 完成输出数 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| CON01 | 17.375 | 0.198 | 13.807 | 1.794 | 20 |
-| CON03 | 14.039 | 0.049 | 13.912 | 1.755 | 20 |
-
-原六命令含FLIRT及native world变换，新七命令仅续其余atlas NN；entry wall另含真实输入核验、复制、读回和哈希，不能把各列拼成连续冷调用。原闲等driver在核对精确argv/start_ticks/source、确认无child及替代两例实际完成后退休，原报告字节保留。这个两例快照保留当时状态；独立追踪与最终矩阵由另一工具继续执行。
-
-**最新实际核验为4/10例DWI空间解剖完成**（2026-10-02 22:20 UTC）：CON04/05各自消费同例官方CPU原始DWI建模合同，首次执行官方FLIRT、native world变换和八atlas NN共13条命令，全部exit0。四例各20个输出重新核SHA、八atlas完整DWI网格和节点范围通过，见[四例实际完成摘要](../../validation/connectome/raw10_official_anatomy_DWI_20261003/four_case_completion.public.json)。冻结数值工具仍为`cb06c0ca`，不重跑十例T1结构准备。
-
-| 新完成例 | 方式 | 新命令数 | 本次entry wall秒 | 新命令合计秒 | 已核输出数 |
-| --- | --- | ---: | ---: | ---: | ---: |
-| CON04 | complete | 13 | 26.534 | 15.282 | 20 |
-| CON05 | complete | 13 | 27.207 | 14.693 | 20 |
-
-此时CON06–11等待真实上游合同。这些时间只属于解剖与DWI atlas衔接；四例解剖完成不代表十例最终connectome匹配。CON01/03的分阶段恢复时间与CON04/05的首次complete时间分别保留。
+恢复与格式适配都保存原失败、成功前缀、首次观察SHA和实际新耗时。它们没有修改生产配准、插值、统计定义或旧科学worker。既有focused CPU测试22/24/28项的真实结果及边界拒绝记录保留在各版本证据中；本次文档更新只执行来源/文件/网格核验，没有运行MRI程序或GPU。
 
 ## 6. 更新记录
 
+- 2026-10-03：当前官方链更新为原九例＋新CON11实际十例，逐例绑定各自DWI、fresh FS、解剖和五次参照；旧全局CON11等待状态保持。新增CON10完整DWI网格/整数节点及输入输出SHA只读核验，生产与冻结科学worker不变。
 - 2026-10-03：新增prepare/complete独立官方解剖参照和可审核契约；禁止覆盖原输出，锁定fresh T1/FS，逐例隔离public_0路径，保留官方world-geometry变换与NN atlas定义。
 - 2026-10-03：十例官方结构准备实际完成，发布逐例来源、节点表与分阶段耗时；修复首例DWI交接报告复制未消费NaN向量metadata的问题，保留原合同SHA及原缺失/损坏/网格检查。
 - 2026-10-03：两例真实MRtrix轴顺序差完成整数lattice和全部voxel逆映射验证；官方NN显式使用模板strides，增加绑定成功六命令前缀的分阶段complete恢复。配准、插值和目标网格检查不变。
