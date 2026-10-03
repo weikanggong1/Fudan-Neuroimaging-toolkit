@@ -99,6 +99,27 @@ class ActualOriginTests(unittest.TestCase):
         self.assertEqual(origins.selected_origin(self.options, "candidate", "sub-01", mapping)[:2],
             (self.options.candidate_root, self.options.candidate_driver))
 
+    def test_nonempty_output_ledger_preserves_original_binding_identity(self):
+        """Real output guards must not replace the map's immutable identity."""
+        import connectome_actual_gpu_origins_v9 as current_origins
+        output_root = self.options.candidate_root / "candidate/sub-00/connectome"
+        for name in ("first.bytes", "last.bytes"):
+            output_path = output_root / name
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_bytes(name.encode())
+            self.original_wall["outputs"]["files"][name] = {
+                **self.identity(output_path), "exists": True,
+            }
+        wall_path = Path(self.declaration["original"]["wall_report"]["path"])
+        self.write(wall_path, self.original_wall)
+        self.declaration["original"]["wall_report"] = self.identity(wall_path)
+        self.write(self.path, self.value)
+        for module in (origins, current_origins):
+            with self.subTest(reader=module.__name__):
+                mapping, map_identity = module.load_bindings(self.path, self.cases, self.options)
+                self.assertEqual(map_identity, self.identity(self.path))
+                self.assertEqual(mapping["candidate", "sub-00"]["binding_file"], map_identity)
+
     def test_unknown_wrong_error_is_rejected(self):
         value = copy.deepcopy(self.original_GPU); value["gpu_memory"]["process"]["errors"] = ["CUDA OOM"]
         with self.assertRaises(ValueError): origins.incomplete_monitor(value)

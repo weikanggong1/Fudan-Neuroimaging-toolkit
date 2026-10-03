@@ -158,10 +158,10 @@ def load_bindings(path, cases, options):
                           initial.get("preexisting_state_files") == [] and wall.get("preprocessing") == [{"topup": "completed", "eddy": "completed", "recon_all": "supplied"}],
                           "original computation was not a fresh complete raw-DWI run")
             output = root / arm / case_id / "connectome"
-            for relative, identity in wall["outputs"]["files"].items():
-                path = output / relative
-                compare.check(path.resolve().is_relative_to(output.resolve()) and identity.get("path") == str(path) and identity.get("exists") is True and
-                              compare.anatomy.sha(path) == identity["sha256"], "original scientific output changed after monitor failure")
+            for relative, output_identity in wall["outputs"]["files"].items():
+                output_path = output / relative
+                compare.check(output_path.resolve().is_relative_to(output.resolve()) and output_identity.get("path") == str(output_path) and output_identity.get("exists") is True and
+                              compare.anatomy.sha(output_path) == output_identity["sha256"], "original scientific output changed after monitor failure")
             compare.validate_input_ledger(GPU["input_verification"], canonical[case_id], "original GPU before")
             compare.validate_input_ledger(GPU["input_verification_after"], canonical[case_id], "original GPU after")
         elif declaration["reason"] == "original_not_dispatched":
