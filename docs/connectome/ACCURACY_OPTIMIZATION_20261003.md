@@ -22,11 +22,25 @@ flowchart TD
 
 五个子任务使用独立分支、代码范围和输出目录。受当前代理并发上限限制，三个子任务同时执行，其余两个排队；共享 GPU 的实际计算使用同一把锁串行运行。
 
+本轮五项组件验收已完成，正式科学候选固定为 `1fe86ab8347b29d9c47be8109627736576222912` 的代码内容。后续说明和反证提交不改变该科学源码；整链执行结果另列。
+
+| 子任务 | 核对结果 | 正式处理 |
+|---|---|---|
+| 1 TOPUP / EDDY | 固定参数渲染误差减小，但完整 CON03 EDDY RMSE 从 0.909807 增至 1.065940 / 1.315159 | 两种候选均拒绝，保留原生产实现与反证 |
+| 2 梯度 / 张量 / 归一化 | 同 FNIT 校正 DWI：CON03 FA 最大误差 0.046249→0；CON10 0.921169→5.36×10⁻⁶ | 修正 Double 梯度解释、FSL affine 极分解及 C++ 四分位索引舍入 |
+| 3 iFOD2 / ACT | 324 个真实 SGM 圆弧，最小 FOD 顶点与官方规则不同由 20→0 | 保留内部弦方向修正；撤回没有速度收益的 active-only 校准 |
+| 4 5TT / GMWMI / atlas | 两例真实完整 5TT、GMWMI、自然刚体标签重采样原版已逐值一致 | 保留成熟实现，半体素 header 试验不进入生产 |
+| 5 SIFT2 / 采样 / 汇总 | CON03 五次固定官方 TCK × 八 atlas count 全部一致；Double 权重候选多数浮点矩阵误差增大 | 保留成熟实现与 Float32 mapped-track 消费语义 |
+
+逐项输入、参数、原命令、精度、计时、脑图和失败原因见 [task 1](../../validation/connectome/accuracy_20261003/task_01/README.md)、[task 2](../../validation/connectome/accuracy_20261003/task_02/README.md)、[task 3](../../validation/connectome/accuracy_20261003/task_03/README.md)、[task 4](../../validation/connectome/accuracy_20261003/task_04/README.md)、[task 5](../../validation/connectome/accuracy_20261003/task_05/README.md)。归一化四分位修正没有改变四例真实 CSD 输出；不将它列为本轮实测图像收益。官方自估计 DWI 的病态负信号张量尾部仍有残余误差，完整记录保留在 task 2。
+
 ## 2. Python 调用、输入与输出
 
-产品调用沿用[主流程说明](README.md#2-python-调用输入与输出)，本轮尚未完成的候选不改变公开默认入口。阶段验证先固定实际 DWI、梯度、掩膜、FreeSurfer 分割、FOD、5TT 或 TCK，分别核对官方结果。
+产品调用沿用[主流程说明](README.md#2-python-调用输入与输出)，公开类名和 CLI 入口不变。阶段验证先固定实际 DWI、梯度、掩膜、FreeSurfer 分割、FOD、5TT 或 TCK，分别核对官方结果。
 
 每个子任务记录输入、源码、权重或模板及参考二进制的 SHA-256。输出包括真实精度报告、配对计时、allocated/reserved/进程树显存、候选是否采用，以及保留的失败项。整链 wall 评测在计时结束后保存同次返回的归一化 FOD、FA、5TT、GMWMI、变换与轨迹；atlas 已由 CLI 保存。response、归一化过程中间张量在独立组件诊断中记录，不冒充 wall 调用产物；导出时间与产品耗时分开。
+
+整链基线与候选读取同一份已完成的官方 FreeSurfer subject；独立官方参考链读取前一轮另一份官方重建。两份文件的整体 SHA 不全相同；已有绑定正确的十例 130 项科学结构检查确认图像数组、affine、表面坐标/面及注释一致。本轮再次核对来源报告，CON01/03 的 brain 和六份表面数组另做 CPU 回读。此处不宣称两边 FreeSurfer 文件字节相同，也不把重建时间计入本次 raw-DWI CLI。
 
 ## 3. 命令行与参数
 
@@ -48,7 +62,7 @@ flowchart TD
 
 ## 5. 已发布基线、验收与当前状态
 
-本轮候选尚未完成，下面仅列前一轮实际基线，不作为新候选结果。
+本轮组件已完成，十例新整链正在执行，尚无完整 cohort 验收。下面仅列前一轮实际基线，不作为新候选结果。
 
 | 项目 | 已发布基线 |
 |---|---|
@@ -68,7 +82,10 @@ flowchart TD
 
 - 2026-10-03：冻结 `7af34e6d` 基线，建立五个独立子任务和整合分支，核对 gpucw1/nodecw10 认证、真实输入和现有 GPU 负载。
 - 活跃轨迹校准实验：真实 CON03 100k 的路径、端点、长度与接受种子逐位一致；本次 tracking wall 为 762.751→773.253 秒，未展示速度收益。最终候选恢复原校准循环，只保留独立 oracle 支持的 ACT chord 精度修正；实验原报告及其实际源码 SHA 保留不改。
-- 组件精度报告已陆续完成；整链结论待实际新运行完成后填写。
+- 正式科学源码冻结后，CPU 回归 752 passed、63 skipped；CUDA 回归 717 passed、7 skipped，两次均有 362 项子测试通过。CPU 范围为 connectome、EDDY、TOPUP，CUDA 范围为 connectome。额外 CPU 比较器 17 项通过；这些协议测试不代替真实 MRI 比较。
+- 测试部署曾缺少仓库内下载脚本和 Tian S1 asset，导致 collection / fixture 失败；补齐实际测试资源后通过。两次失败的原日志保留，科学源码未改变，失败状态没有改写为成功。
+- 正式计划共十二次 raw-DWI 运行：CON01 基线→候选、CON03 候选→基线，其余八例候选；使用同一套官方 FreeSurfer 输入、100k seeds、seed 0 与 EDDY GP seed 12345。完整矩阵和轨迹由同次返回对象在计时结束后导出。
+- 整链结论待实际新运行和 CPU 比较完成后填写。
 
 ## 7. 原实现与参考文献
 
