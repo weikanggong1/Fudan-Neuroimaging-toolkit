@@ -101,7 +101,7 @@ CON01 本轮基线与候选的八 atlas 矩阵分别为 **180/240→187/240** �
 | 共有连接长度归一化 MAE，/40 | 35 | 38 |
 | 共有连接 FA 归一化 MAE，/40 | 24 | 32 |
 
-不同字段的变化分别保留：本例总通过数增加，同时 count/FBC 的 L1 与 Pearson 通过数减少。来源为[本轮实际基线、候选和阈值身份比较](../../validation/connectome/accuracy_20261003/root_baseline_matrix_analysis_v1/README.md#5-最新实测)。此处评价独立随机轨迹的整体分布，固定 TCK 的后处理组件结果另列。
+不同字段的变化分别保留：本例总通过数增加，同时 count/FBC 的 L1 与 Pearson 通过数减少。来源为[本轮实际基线、候选和阈值身份比较](../../validation/connectome/accuracy_20261003/root_baseline_matrix_analysis_v1/README.md#5-最新真实结果耗时与图)。此处评价独立随机轨迹的整体分布，固定 TCK 的后处理组件结果另列。
 
 逐 atlas 的六项判定、全部失败值与阈值见[同次矩阵/轨迹原报告](../../validation/connectome/accuracy_20261003/cpu_matrix_deployment_v2/README.md#5-最新实测部署完成与科学判定)。CON01 接受率和长度 KS 对五个官方 seed 均通过；端点直方图通过 2/5、原网格保存点分布 1/5、四体素块分布 0/5。该空间分布比较与官方 `tckmap` 定义不同，不能作为官方 TDI 精度结论。
 
