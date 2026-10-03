@@ -65,7 +65,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [TorchMMORF](docs/mmorf/README.md) | FSL `MMORF` | 多标量与扩散张量联合配准，自动估计线性初始化。 |
 | [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
 | [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
-| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 原始 AP/PA 或 BIDS DWI → 九张 native/标准参数图；无 T1w 用 TBSS，有 T1w 可选 MMORF。PyTorch SynthStrip 脑 mask＋新版 TOPUP。[最新同 raw 整链](validation/dmri_pipeline/end_to_end_synthstrip_topup_20261002.md)：FNIT 6.75 分钟、独立官方 SynthStrip＋FSL/AMICO 34.26 分钟；标准九图固定 ROI r=0.9880–0.9987。对旧 BET 协议 r=0.8465–0.9597；尚非逐值相等。 |
+| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、GPU `eddy`、`dtifit`、TBSS/MMORF） | 原始 AP/PA 或 BIDS DWI → 九张 native/标准参数图；可选 TBSS/FNIRT 或配对 T1/tensor MMORF。PyTorch SynthStrip 脑 mask＋TOPUP；[固定公开十人双分支 benchmark](validation/dmri_pipeline/public10_20261002/README.md)记录原软件对照、逐图误差、分步骤时间与脑图。FNIT 20/20 完成，原软件 19/20 完成；TBSS/配对 T1 MMORF 的完整命令中位耗时为 759.91/571.32 秒，对照 2606.87/2113.98 秒（n=10/9）。逐图误差与原 GPU EDDY 失败记录已公布，输出尚非数值等价。 |
 | [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 从原始 BIDS 自动执行 TOPUP、EDDY、必要时的官方 recon-all，并从一次追踪输出单套或多套 atlas 矩阵；[真实数据对照](validation/connectome/ds004666/README.md)。 |
 
 ### 后续分析（Post analysis）

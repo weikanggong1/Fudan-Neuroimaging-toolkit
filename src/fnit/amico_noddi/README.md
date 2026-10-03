@@ -38,6 +38,12 @@ result = model.run(
 
 真实 EDDY 输出上的[独立 NODDI 组件检查](../../../validation/dmri_pipeline/public10_20261002/check_noddi_memoryfix.py)已完成：`case01` 的五张 NODDI 图全部解码值、shape、affine 与旧版逐值一致，PyTorch allocated/reserved 峰值为 **3,674,249,216 / 3,829,399,552 bytes**。此前失败的 `case02` 在 **20,000,000,000 bytes** 上限内完成五张有限值图，allocated/reserved 峰值为 **5,391,976,448 / 6,490,685,440 bytes**；旧版没有完整输出，不能给该例新旧逐值一致结论。reserved 是 allocator 向 CUDA 保留的显存，包含 allocated，两列不相加，也不是完整 pipeline 或整张卡的显存峰值。
 
-这次组件检查绑定本地修复提交 `bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a`；`solver.py` SHA-256 为 `1d4887270f267a83967ee4cc9336b306110bf838dde78b6a00ea16e204a1f74e`，精度与参数保持原样。本记录更新时尚未推送 main。十人两个分支共 20 个 FNIT 完整流程将按同一修复源码重新运行；组件结果与耗时不代替端到端 benchmark，也不代表十人已经通过。完整摘要见[功能说明](../../../docs/amico_noddi/README.md#2026-10-02lut-填充行与临时求解矩阵的显存修复)，整链状态见[公开十人验收](../../../validation/dmri_pipeline/public10_20261002/README.md)。
+这次组件检查绑定修复提交 `bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a`；`solver.py` SHA-256 为 `1d4887270f267a83967ee4cc9336b306110bf838dde78b6a00ea16e204a1f74e`，精度与参数保持原样。截至 2026-10-03，固定十人两个分支的 **20/20 FNIT raw 完整流程均已完成**，每项 433 文件清单均与该冻结提交匹配。完整摘要见[功能说明](../../../docs/amico_noddi/README.md#2026-10-02lut-填充行与临时求解矩阵的显存修复)，源码和整链状态见[公开十人验收](../../../validation/dmri_pipeline/public10_20261002/README.md)。
 
-之后，[case02 MMORF 完整流程](../../../validation/dmri_pipeline/public10_20261002/case02_mmorf_memoryfix_full.public.json)已从原始输入完成，18 张指标图和所需文件检查通过；API 为 557.384 秒，GNU 完整命令为 562.24 秒，完整 pipeline allocated/reserved 峰值为 12.335/13.808 GB。该结果核验实际 EDDY→NODDI 衔接，不表示与原软件数值匹配；其余固定分支作业继续运行。
+[case02 MMORF 完整流程](../../../validation/dmri_pipeline/public10_20261002/case02_mmorf_memoryfix_full.public.json)首先完成了 raw 整链内存门：18 图及所需文件检查通过，API 557.384 秒、GNU 完整命令 562.24 秒，完整 pipeline allocated/reserved 峰值 12.335/13.808 GB。随后其余 19 项也完成；20 项最大 allocated/reserved 为 **12.335/13.810 GB**，均低于 20,000,000,000 bytes allocator 上限，没有新的 FNIT OOM。此峰值属于完整流程，区别于上面的组件检查。
+
+本轮最终原参考与配对比较均为 **19/20**（TBSS 10/10、MMORF 9/10），**432/450** 张图通过 shape、affine、有限值检查；没有数值等价阈值或等价结论。case05/10 TBSS 从 raw 恢复成功并比较；case10 MMORF 初次及 R1/R2 原 EDDY 分配失败均未到达 AMICO，没有完整官方图，本轮停止更多恢复。原参考观察 25 次（19 成功、6 失败），FNIT 21 次（20 成功、1 失败），旧 case01 两次成功单列 legacy。失败时间不进入配对耗时；独立链的 NODDI 差异还包含 TOPUP、mask、EDDY、梯度和配准的影响，不能仅归 solver。
+
+本轮合并核验记录的开发树合并 `origin/main` 的 `7af34e6d` 后为 `adf74371`；[73 项 CPU 回归](../../../validation/dmri_pipeline/public10_20261002/merge_integration.public.json)通过，没有按这个合并版本重跑十人影像。20 例实测继续绑定 bf339a0，组件与历史单被试耗时保持各自范围。
+
+整链中也有明显差异：case08 native FA 的 `r=0.856050004`、`NRMSE=0.285848576`，已在配准前出现；MMORF 标准 FA 九例中位 NRMSE 为 0.217009355，TBSS 十例为 0.060759006。这不是 AMICO 单组件误差，不能用首人脑图推广为全队列一致，见[具体差异与 ROI](../../../validation/dmri_pipeline/public10_20261002/COMPARISON.md#当前差异观察19-个配对)。

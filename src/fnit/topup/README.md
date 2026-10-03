@@ -40,9 +40,21 @@ H100 三次独立进程的 API 读取、计算和写盘为 `17.864061/6.704100/7
 - `core.py`：输入检查、官方九层 schedule、周期预滤和平滑、场/运动目标函数、解析梯度、联合矩阵无关 GN 与 LM/SCG、结果 QC。
 - `_sampling_cuda.py`：固定图像系数的周期 cubic 强度与三个空间导数融合计算；本路径使用 `official_precision=True` 的 double 权重/累加。
 - `io.py`：intent 2016 coefficient、intent 2018 Hz 场及 Analyze-style Jacobian header。
-- `ukb.py`：独立的 UKB b0 选择准备步骤，本次 TOPUP 核心修复未修改该文件。
+- `ukb.py`：独立的 UKB b0 选择准备步骤；2026-10-03 修复评分点，使用 LBFGS 最终接受参数处的 Pearson 相关，不再返回最后一次试探点的分数。
 - `cli.py`：`fnit topup`/`fnit-topup` 参数入口，仅选择 `b02b0.cnf`。
 
 无新增运行依赖或外置权重。上游实现、许可、输入输出结构、完整变量注释示例及历史 benchmark 见[功能说明](../../../docs/topup/README.md)。数值正确性的 CPU 数学测试不替代真实数据 benchmark；新版仍不声明 FSL 数值等价。
+
+## 2026-10-03 b0 选择器修复
+
+成熟选择器原先返回最后一次 LBFGS closure 的相关分数，而 Strong Wolfe 可能接受较早的试探点。本次源码让 closure 与最终评分共用同一计算，step 后用 `torch.no_grad()` 对接受参数重新评分；optimizer、pool、有效非零交集、选择器的 float32、float64 候选均值及 `0.98` 规则保持原设置，接口和文件结构不变。场核心既有 float64 求解与 `official_precision=True` double 采样未改。官方 `FLIRT`／`fslcc` 使用不同的注册与评分方法，修复不表示两者选择等价。
+
+Python 3.11.16／PyTorch 2.5.1 的 16 项 CPU 回归通过（3.82 s），覆盖末次拒绝点与接受点不同以及首帧阈值边界。H100 GPU0、TF32、8 线程、20 GB allocator 上限下的真实十人独立选择器检查也已完成：每人 AP `120×120×68×117` 的 b0 候选为 `[0,21,52]`，PA 为单 b0。新 30 个 AP pair 返回分数全部与最终接受点诊断相同，两模式最终参数也相同；唯一旧分数差为 case07 `(0,52)` 的 `−4.6253204345703125×10⁻⁵`。
+
+十人 AP/PA 选择都没有改变，旧、新均选择 0。已保存 pair 的逐值追踪证实 case02/08 冻结 FNIT 为 AP0/PA0、原参考为 AP21/PA0，两个分支一致；该评分修复没有消除 FLIRT/`fslcc` 选择方法的差异。只在取得全作业锁后运行选择组件，不估计场、不重跑 EDDY，不替换冻结 bf339a0 的整链输出或时钟。原报告见[十人选择器检查](../../../validation/dmri_pipeline/public10_20261002/b0_accepted_point_20261003.public.json)及[输入追踪](../../../validation/dmri_pipeline/public10_20261002/b0_input_trace_20261003.public.json)。
+
+十人 AP 三对同步函数计时之和的旧/新中位数为 1.177859/1.331550 秒；allocator allocated 上界 82,113,024/79,845,888、reserved 上界 98,566,144/96,468,992 bytes，内存含额外接受点诊断，非完整 pipeline 峰值。实际新 `ukb.py` SHA-256 为 `1b610bcf0fe1bd2cfa7d6ae1917701d4b106205afc1d36ecd2c57c20561712b9`，隔离诊断脚本 SHA-256 为 `336f7d367964ec1eb05248c7a3dc2837d278f81d6e1d6495a4a0efd9c83f38c2`；旧选择器和场核心来自冻结 bf339a0。匿名报告的 `Independent uncommitted...` 是测量时源码身份，不表示发布后的状态。现有 `prepare_ukb_topup(raw_dir, output_dir, device=..., overwrite=False, pair_geometry="strict")` 返回 `ap_index/pa_index` 与 `ap_scores/pa_scores`，输入、输出与示例见[修复原因与验收范围](../../../docs/topup/README.md#2026-10-03-b0-选择器接受点评分修复)。
+
+小组件采用每例一次 `old→new`，仅清 allocator 缓存，首个 old 可能含首次库初始化；原始读取和接受点诊断单列，不以观察时间宣布确定提速。旧 closure 的额外 host scalar 读取已去掉，LBFGS 自身的 loss 读取仍在，不据此推断整链速度。
 
 2026-10-02 最终源码删除未调用的 core helper 和旧 float CUDA 分支。`core.py` SHA-256 为 `d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8`，`_sampling_cuda.py` 为 `ee19a764849bda80137312ed3ab8f1bf0aaef5e13f852f49f435e511b40d2427`；上述数值及固定参数、初始梯度、sampler 检查均已在该源码重跑完成。真实 sampler 的全部强度、三个导数和 valid 精确匹配独立 double tensor 数学参照，暖采样时间比分别为 `89.002×/91.043×`，不代表 FSL 或整组件速度。[104 项组合回归](../../../validation/dmri_pipeline/regression_synthstrip_topup_20261002.public.json)通过；完整 dMRI 链的精度和计时单独记录。

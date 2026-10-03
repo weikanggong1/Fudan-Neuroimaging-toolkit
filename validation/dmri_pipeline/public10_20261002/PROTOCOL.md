@@ -25,6 +25,8 @@ flowchart TD
 
 修复后的全部 **20 个主候选**统一使用 `bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a`，从相同原始输入完整重跑。只有 `amico_noddi/solver.py` 相对基线变化：跳过全零 passive 填充行、约 128 MiB 临时分块和按原 group 广播 CG Gram；dtype、TF32 设置、字典和求解参数不变。[source_binding_memoryfix.public.json](source_binding_memoryfix.public.json) 已逐项核对新部署目录与该提交的 433 文件，清单 SHA-256 为 `f13a40989b96d9e3608a427a1fe10d1960b20f146c768a3dd101f84fe4deae1e`。
 
+截至 2026-10-03，这 20 个冻结候选均已完成。开发树的合并提交 `adf74371be6a4ca5f3390c74f9a11e2a518732a3` 纳入了 `origin/main` 的 `7af34e6d072e843fb2558c931bb2781f1d4b0be9`；[合并记录](merge_integration.public.json)中的 73 项 CPU 回归于 7.78 秒内通过，仅验证数值与工具契约。没有按合并源码重新运行十人全流程，不能把冻结版实测移到这个版本名下。
+
 八个仅供来源追踪的 `_vendor_fsl` 文件不属于运行时导入，不部署到 benchmark 包。每次运行另记录实际源码与验证脚本哈希。主候选保存在 `memoryfix_cohort/results/`，原参考保存在原 `results/`；旧5d两个成功和失败均不进入新主候选20。FNIT不调用原软件；原软件独立参考运行在另一输出目录。
 
 参考使用 FSL 6.0.7.4、其中的 GPU `eddy_cuda10.2` 与 GPU MMORF 0.3.2、FreeSurfer 8.2.0-1 原 SynthStrip、AMICO 2.0.3。原 SynthStrip 按默认 CPU 命令运行，FNIT 在 GPU 上使用同一经过大小和 SHA-256 核验的权重。参考环境中的 AMICO 依赖仅用于独立原软件对照。
@@ -38,7 +40,7 @@ flowchart TD
 - TBSS 使用 FMRIB58 FA 1 mm 与对应 skeleton；MMORF 使用 MNI152 T1 brain 1 mm、FMRIB58 FA 1 mm、FSL HCP1065 tensor 1 mm。逐文件 SHA-256 随结果记录。
 - MMORF 使用生产默认的 **一个 T1 标量 + 一个 tensor**；权重均为 1。FA 只用于 tensor affine 初始化。
 - MMORF 的 T1 brain→MNI T1 与 native FA→FMRIB58 FA 各做一次 12 DOF、correlation ratio 仿射。五个配准 level 的控制点间距为 `32, 32, 16, 8, 4 mm`，平滑 FWHM 为 `8, 8, 4, 2, 1 mm`，正则权重为 `4e5, 0.37, 0.31, 0.26, 0.22`，每 level 最多 5 次更新。原 MMORF 设置 `hires=6`，使用低分辨率 LM、高分辨率 MM；FNIT 使用带 strong-Wolfe 线搜索的 L-BFGS。两者更新方法不同，同样的迭代上限不表示进行了相同的数值求解。九张指标图经 FA 仿射和 MMORF 相对位移传播，原软件参考使用原 FSL `applywarp --rel --interp=trilinear`。
-- H100 上固定一张 GPU；新 20 个 FNIT、19 个原参考条目（含完整匹配的 case01 TBSS 整体复用）及 1 个 case01 MMORF 恢复作业共享全局 GPU 锁，完整作业互不重叠。新 FNIT controller 在释放锁后设置 0.25 秒间隔，位于作业时钟外；两个原 controller 沿用冻结旧版继续运行，没有该间隔，未停止或重启。新主候选先执行 case02 MMORF，再执行固定的其余 19 项。三队列实际开始/结束顺序按 UTC 记录，不保证 AB/BA 紧邻。外部用户 GPU 进程及设备负载按 5 秒记录，资源观察范围是所选 GPU。
+- H100 上固定一张 GPU；初始调度的新 20 个 FNIT、19 个原参考条目（含完整匹配的 case01 TBSS 整体复用）及 1 个 case01 MMORF 恢复作业共享全局 GPU 锁，完整作业互不重叠。新 FNIT controller 在释放锁后设置 0.25 秒间隔，位于作业时钟外；两个原 controller 使用冻结旧版，没有该间隔，未因 FNIT 修复停止或重启。新主候选先执行 case02 MMORF，再执行固定的其余 19 项。初始队列已结束，三个原 EDDY 失败另建恢复作业并使用同一锁。实际开始/结束顺序按 UTC 记录，不保证 AB/BA 紧邻。外部用户 GPU 进程及设备负载按 5 秒记录，资源观察范围是所选 GPU。
 - FNIT 使用 CUDA，保持生产默认数值设置；不启用 FP16/BF16。PyTorch allocator 限制为 20,000,000,000 bytes。报告实际 allocated/reserved 峰值，另记录含 CUDA context 的进程显存采样。
 - 每个完整流程从原始输入到全部输出实跑。重启调度器可跳过有匹配执行签名和完整报告的整个已完成作业，不复用中间阶段输出，不覆盖失败结果。
 
@@ -78,7 +80,7 @@ flowchart TD
 
 表中GB为十进制；显存数不包含CUDA context、reserved缓冲或其他进程。原5d84c7的case02 MMORF在NODDI申请约2.96 GiB padded矩阵时触发20,000,000,000 bytes自身上限；失败记录保留，不作为修复版成功或配对耗时。
 
-## 修复后的组件检查与主队列状态
+## 修复后的组件检查与主队列状态（2026-10-03）
 
 [case01 NODDI回归](case01_noddi_memoryfix.public.json)的五图decoded values、shape和affine与旧版逐值一致，allocated/reserved峰值为3,674,249,216/3,829,399,552 bytes；[case02组件恢复](case02_noddi_memoryfix.public.json)完成五张有限值图，峰值为5,391,976,448/6,490,685,440 bytes。两例都在20 GB上限内，case02没有旧版完整输出可逐值对照。这些checkpoint检查仅覆盖NODDI组件，不能替代从raw重跑的整链时间或整个pipeline峰值。
 
@@ -89,7 +91,28 @@ flowchart TD
 
 新 bf339a0 的 20 个 FNIT 完整作业统一重跑，固定十人每人两个分支。[case02 MMORF 完整运行](case02_mmorf_memoryfix_full.public.json)已通过从 raw 到全部 18 张指标图的完整性检查，API 为 557.3843406471424 秒，GNU 完整命令为 562.24 秒；allocated/reserved 峰值为 12,335,200,768/13,807,648,768 bytes。这一整链结果核验了显存修复和 EDDY→NODDI 衔接；所需文件存在、格式正确并不表示数值已匹配原软件。
 
-此时新 FNIT 完成 1/20，选定原参考完成 3/20（另包括 case02 MMORF，GNU 1924.22 秒）；其余作业继续运行。finalizer/renderer 的 20 个病例位置与 450 个指标图位置是完整计划分母，不能据行数认定完成。41 项 AMICO 与 18 项比较工具测试已通过，属于数值/报告契约测试。十人 20 个配对的精度、完整/阶段耗时、失败率及脑图仍待全部实跑与核验；当前没有十人完成或等价加速结论。
+全部 20 个新 FNIT 作业已从 raw 完成，TBSS 和 MMORF 各 10/10。最终选定原参考与比较均为 TBSS 10/10、MMORF 9/10，共 **19/20**；270 张 TBSS 图和 162 张 MMORF 图均通过 shape、affine、有限值检查，合计 **432/450**。case10 MMORF 缺少完整原参考，18 张图保留缺失状态，不记作已有数值图检查失败，也不删除分母。完整计划最终为 `incomplete`；未事前定义数值等价阈值。
+
+| 完整 FNIT pipeline；每分支 n=10 | 最大 peak allocated（bytes） | 最大 peak reserved（bytes） |
+|---|---:|---:|
+| TBSS | 6,972,323,328 | 11,456,741,376 |
+| MMORF | 12,335,200,768 | 13,809,745,920 |
+
+20 个作业均低于 20,000,000,000 bytes 的 allocator 上限，没有新的 FNIT 分配失败。表为完整候选流程，区别于前面的两例 NODDI checkpoint 检查；reserved 包含 allocated，不与其相加，也不包含 CUDA context 或其他用户进程。此前 41 项 AMICO、18 项比较工具测试与合并后的 73 项回归均属于数值/报告契约测试，不进入影像耗时表。
+
+## 三个原 EDDY 失败与全新参考恢复
+
+以下三个初次参考在原生 `eddy_cuda10.2` 返回退出码 1，日志均包含 `cudaErrorMemoryAllocation`。这些失败尝试未到达 DTIFIT、AMICO 与对应配准分支，不能用失败时间代表完整参考时间，也不将错误直接归因于整个设备显存耗尽。
+
+| 匿名位置 | 失败阶段 | 失败完整命令（GNU 秒） | 当前配对 |
+|---|---|---:|---|
+| case05 TBSS | EDDY | 995.64 | R1 完整恢复，27 图已比较 |
+| case10 TBSS | EDDY | 330.53 | R1 完整恢复，27 图已比较 |
+| case10 MMORF | EDDY | 2022.95 | R1/R2 再次失败，无完整原图 |
+
+三份恢复作业登记到新的独立运行目录，从相同 AP、PA、梯度和 T1 重新执行原软件完整流程，分别绑定脚本、程序、输入、模板、权重、seed、线程与 GPU。case05 TBSS、case10 TBSS 的 R1 全部成功，来源与 27 张图核验后进入最终 19 配对。case10 MMORF 的 R1、R2 均在原 EDDY 分配阶段失败；本轮停止更多恢复，不改用 CPU 或换人，初次和中间失败目录均保留，不复用失败中间产物。逐例程序、日志和时钟 SHA-256 见[匿名失败报告](official_cuda_failures.public.json)，诊断与恢复边界见[OFFICIAL_FAILURES.md](OFFICIAL_FAILURES.md)。
+
+这三例 EDDY 故障与 case01 原 MMORF 初次启动失败分别保留。case01 MMORF 已从 raw 恢复成功并包含在 19 个主参考中；其初次失败保留。最终原参考观察 25 次（19 成功、6 失败）：初次 20 次为 16 成功、4 失败，选定替代 4 次为 3 成功、1 失败，另保留 case10 MMORF 中间 R1 失败一次。FNIT 观察 21 次（20 成功、1 失败）：初次组包含旧 case02 OOM，修复后的新主运行为唯一恢复；旧 case01 两次成功另列 legacy。选定主运行完成率与初次尝试成功率分列，失败时间不加入成功耗时。
 
 ## 精度指标和图像
 
@@ -99,7 +122,11 @@ flowchart TD
 
 固定展示 `case01` 的 FA/MD/ICVF 和差异图，不按效果最好的被试挑图。汇总包括十人成功率、逐人数字、中位数、IQR、范围和配对耗时比。未事前定义逐点等价容差，因此结果只能直接说明测得的差异；较高相关或较短时间不能单独证明数值等价。
 
+最终 19 个配对中存在明显差异：case08 在 TOPUP 校正 b0、完整 EDDY DWI 和 native FA 的 NRMSE 分别为 0.137970132、0.136383849、0.285848576，差异在配准前已出现。MMORF 标准 FA 的九例中位 NRMSE 为 0.217009355，TBSS 的十例中位为 0.060759006；各自有效人数与 ROI 一并保留，具体值见[差异观察](COMPARISON.md#当前差异观察19-个配对)。不能用首人的结果概括整个队列或将全部差异归因于配准。
+
 两分支各绘制一张 3×3 图：三行分别为 FA、MD、ICVF，三列为 FNIT、原软件、绝对差。默认轴位世界坐标 `z=16 mm`，选取最近的实际切片，不对影像重新插值；坐标轴以 MNI 毫米标记。指标范围固定为 FA `[0,1]`、MD `[0,0.003] mm²/s`、ICVF `[0,1]`；绝对差范围固定为 FA `[0,0.25]`、MD `[0,0.00075] mm²/s`、ICVF `[0,0.4]`。caption JSON 记录实际显示的 z、模板 mask、各面板截断比例、输入 NIfTI 和绘图脚本 SHA-256。
+
+独立[输入追踪](b0_input_trace_20261003.public.json)和[十人选择器检查](b0_accepted_point_20261003.public.json)在取得同一全作业锁后执行，不计入整链时钟。case02/08 保存 pair 的全部解码值确认 FNIT AP0、原参考 AP21，PA 均为 0；当前接受点评分修复没有改变选择。本次组件源码 SHA、真实旧→新一次顺序、冷启动和内存范围另行记录，不能把它标为冻结 bf339a0 的整链修复重测，具体定位见[PRECISION.md](PRECISION.md)。
 
 ## 采集解释
 
@@ -120,6 +147,7 @@ flowchart TD
 | `finish_cohort.py` | 固定20配对、主要与附加队列状态 | 等待所有队列结束后形成最终aggregate；可调用renderer |
 | `render_report.py` | 匿名aggregate、可选公开数据清单 | 中文RESULTS.md、两份CSV与binding.json，不重跑影像处理 |
 | `plot_public10.py` | 固定 `case01` 的标准空间 FA、MD、ICVF 和模板 mask | 两分支各一张 FNIT/原软件/绝对差图及记录切片、截断比例、文件哈希的 caption JSON |
+| `plot_timing.py` | 固定 20 行匿名 aggregate；只消费完整且绑定匹配的 GNU 配对时钟 | 两分支完整命令耗时 PNG 和记录绘制门槛、配对数、时钟/文件哈希的 caption JSON；不运行影像流程 |
 
 原 MMORF 位移到 FSL applywarp 的单位、方向和仿射组合先用冻结的原 MMORF debug 输出独立核验，结果见 [mmorf_applywarp_frozen_oracle.public.json](mmorf_applywarp_frozen_oracle.public.json)。它限定标准 MNI 的负 determinant 正交网格，不能外推到任意参考坐标；两种原软件 sampler 仍非逐值相等。
 

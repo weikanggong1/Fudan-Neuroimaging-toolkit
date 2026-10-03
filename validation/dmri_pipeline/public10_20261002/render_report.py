@@ -173,6 +173,9 @@ def normalize_aggregate(aggregate):
             retained = raw.get("retained_initial_reference_attempt")
             if retained is not None and not isinstance(retained, dict):
                 raise ValueError("retained_reference_attempt_must_be_object")
+            intermediate = raw.get("retained_intermediate_reference_attempts", [])
+            if not isinstance(intermediate, list) or any(not isinstance(item, dict) for item in intermediate):
+                raise ValueError("retained_intermediate_reference_attempts_must_be_object_list")
             retained_candidate = raw.get("retained_initial_candidate_attempt")
             if retained_candidate is not None and not isinstance(retained_candidate, dict):
                 raise ValueError("retained_candidate_attempt_must_be_object")
@@ -183,7 +186,7 @@ def normalize_aggregate(aggregate):
                 "comparison_complete": raw.get("paired_comparison_complete") is True and gate_complete
                     and status["comparison"] == "complete" and not raw.get("binding_errors"),
                 "times": times, "ratios": ratios, "memory": numeric_dict(raw.get("memory"), MEMORY_KEYS),
-                "maps": maps, "retained": retained, "retained_candidate": retained_candidate,
+                "maps": maps, "retained": retained, "retained_intermediate": intermediate, "retained_candidate": retained_candidate,
                 "failure_types": {side: label(obj(raw.get("failure_types")).get(side), "")
                                   for side in ("candidate", "reference")},
                 "reports": obj(raw.get("reports")), "external": external,
@@ -250,7 +253,12 @@ def reference_attempt_counts(rows):
             groups["initial"].append(selected)
         if selected is not None:
             groups["selected_primary"].append(selected)
-    groups["all"] = groups["initial"] + groups["rerun"]
+        for attempt in row.get("retained_intermediate", []):
+            state = attempt_state(label(attempt.get("status")), attempt.get("report"),
+                                  attempt.get("external_process_metrics"), attempt.get("failure_type"))
+            if state is not None:
+                groups.setdefault("intermediate", []).append(state)
+    groups["all"] = groups["initial"] + groups.get("intermediate", []) + groups["rerun"]
     return {key: {"observed": len(values), "successful": values.count("successful"),
                   "failed": values.count("failed"), "pending": values.count("pending_or_unknown")}
             for key, values in groups.items()}
@@ -289,6 +297,31 @@ def startup_records(row):
                         "name": label(item.get("name"), ""),
                         "seconds": number(item.get("seconds")), "exit_code": number(item.get("exit_code")),
                         "retry_allowed": allowed if type(allowed) is bool else None})
+    return records
+
+
+
+def intermediate_reference_records(row):
+    """Anonymous per-attempt clocks/hashes; never copy report paths or argv."""
+    records = []
+    for item in row.get("retained_intermediate", []):
+        metrics, memory = obj(item.get("external_process_metrics")), obj(item.get("memory"))
+        timing = obj(item.get("timing_seconds"))
+        digest = obj(item.get("report")).get("sha256")
+        records.append({
+            "attempt_index": number(item.get("attempt_index")),
+            "status": label(item.get("status")), "failure_type": label(item.get("failure_type"), ""),
+            "report_sha256": digest if HASH.fullmatch(str(digest)) else None,
+            "processing_seconds": number(timing.get("processing")),
+            "full_process_seconds": number(timing.get("full_process")),
+            "observer_wall_seconds": number(metrics.get("observer_wall_seconds")),
+            "full_process_clock_source": label(metrics.get("wall_time_source")),
+            "exit_status": number(metrics.get("exit_status")),
+            "max_rss_kib": number(memory.get("max_rss_kib")),
+            "own_gpu_sampled_peak_mib": number(memory.get("own_gpu_sampled_peak_mib")),
+            "other_gpu_sampled_peak_mib": number(memory.get("other_gpu_sampled_peak_mib")),
+            "included_in_paired_speed_ratios": False,
+        })
     return records
 
 
@@ -333,6 +366,10 @@ def case_rows(rows):
             "retained_initial_candidate_report_sha256": obj(old_candidate.get("report")).get("sha256") if HASH.fullmatch(str(obj(old_candidate.get("report")).get("sha256", ""))) else None,
             "retained_initial_candidate_failure_used_for_ratio": False,
         })
+        intermediate = intermediate_reference_records(row)
+        entry.update({"retained_intermediate_reference_attempt_count": len(intermediate),
+                      "retained_intermediate_reference_attempts_json": json.dumps(intermediate, ensure_ascii=False, allow_nan=False),
+                      "retained_intermediate_reference_failure_used_for_ratio": False})
         entry.update({key + "_seconds": value for key, value in row["times"].items()})
         entry.update({key + "_reference_over_candidate": value for key, value in row["ratios"].items()})
         entry.update(row["memory"])
@@ -418,7 +455,7 @@ def markdown(aggregate, rows, maps, manifest, figures):
     lines += ["", "## 原软件完整运行尝试与保留失败", "",
               "这里统计完整原软件流程的首次运行和整链重跑；内部 MMORF 启动次数另列。选定运行用于配对，保留失败的时钟不替代恢复运行。", ""]
     counts = reference_attempt_counts(rows)
-    names = {"initial": "首次完整运行", "rerun": "恢复整链运行", "selected_primary": "当前选定参考", "all": "所有已观察完整运行"}
+    names = {"initial": "首次完整运行", "rerun": "恢复整链运行", "selected_primary": "当前选定参考", "intermediate": "中间失败的完整恢复运行", "all": "所有已观察完整运行"}
     lines += table(["类别", "已观察次数", "成功", "失败", "待定"],
                    [[names[k], v["observed"], v["successful"], v["failed"], v["pending"]] for k, v in counts.items()])
     retained = [r for r in rows if r["retained"] is not None]
@@ -429,6 +466,14 @@ def markdown(aggregate, rows, maps, manifest, figures):
                          label(r["retained"].get("failure_type")),
                          fmt(obj(r["retained"].get("timing_seconds")).get("processing")),
                          fmt(obj(r["retained"].get("timing_seconds")).get("full_process")), "否"] for r in retained])
+    intermediate = [(r, item) for r in rows for item in intermediate_reference_records(r)]
+    if intermediate:
+        lines += ["", "### 中间保留的参考恢复运行", "",
+                  "每条是从 raw 开始的独立完整尝试；失败时钟、报告 SHA 单列，既不累加到选定成功运行，也不参与配对时间比。完整 SHA、GNU/observer 时钟和采样内存保存在 cases.csv 的 JSON 列及 aggregate。", ""]
+        lines += table(["case", "分支", "中间序号", "状态", "异常类型", "处理秒", "完整命令秒", "退出码", "报告 SHA 前12位", "用于比值"],
+                       [[r["case_id"], r["backend"], item["attempt_index"], item["status"], item["failure_type"],
+                         fmt(item["processing_seconds"]), fmt(item["full_process_seconds"]), item["exit_status"],
+                         item["report_sha256"][:12] if item["report_sha256"] else "—", "否"] for r, item in intermediate])
     lines += ["", "### 原 MMORF 内部启动尝试", "",
               "缺少对应匿名记录时标为未记录，不记为零。启动重试及等待时间已包含在父阶段与完整时钟内。", ""]
     startup_rows = []

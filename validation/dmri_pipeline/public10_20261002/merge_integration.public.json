@@ -1,0 +1,34 @@
+{
+  "schema": "fnit_public10_merge_integration_v1",
+  "recorded_utc": "2026-10-03T10:31:48.978096+00:00",
+  "benchmark_runtime_commit": "bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a",
+  "benchmark_python_file_count": 433,
+  "benchmark_python_manifest_sha256": "f13a40989b96d9e3608a427a1fe10d1960b20f146c768a3dd101f84fe4deae1e",
+  "integration_commit": "adf74371be6a4ca5f3390c74f9a11e2a518732a3",
+  "merged_origin_main": "7af34e6d072e843fb2558c931bb2781f1d4b0be9",
+  "integration_test": {
+    "passed": 73,
+    "failed": 0,
+    "wall_seconds": 7.78,
+    "execution": "Python 3.11 existing FNIT Conda environment; PYTHONPATH=src; CPU pytest",
+    "scope": "AMICO numerical/memory regressions and public10 benchmark/reference/comparison/finalizer contracts; does not rerun the real imaging cohort",
+    "tests": [
+      "tests/amico_noddi/test_solver_memory.py",
+      "tests/amico_noddi/test_lossless_optimization.py",
+      "tests/amico_noddi/test_amico_noddi.py",
+      "tests/dmri_pipeline/test_public10_benchmark.py",
+      "tests/dmri_pipeline/test_public10_official_benchmark.py",
+      "tests/dmri_pipeline/test_public10_comparison.py",
+      "tests/dmri_pipeline/test_public10_finalizer.py"
+    ]
+  },
+  "solver_sha256": "1d4887270f267a83967ee4cc9336b306110bf838dde78b6a00ea16e204a1f74e",
+  "full_twenty_imaging_runs_at_integration_commit": false,
+  "numerical_equivalence_claimed": false,
+  "integration_changes_since_benchmark_in_dmri_dependencies": {
+    "applywarp": "Adds a separate RAS world-chain API; existing FSL apply entry remains the benchmark entry.",
+    "flirt": "Adds MGH geometry compatibility; NIfTI qform/sform branch remains.",
+    "topup_ukb": "Adds explicit pair geometry policy, voxel-spacing validation and pair_geometry.json provenance. Benchmark uses matched AP/PA geometry and existing strict policy."
+  },
+  "new_dependencies_added_by_this_task": []
+}

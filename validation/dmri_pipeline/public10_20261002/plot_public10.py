@@ -168,7 +168,8 @@ def make_figure(*, candidate_dir, original_dir, branch, mask_template,
                                        interpolation="nearest", aspect="equal")
             axis.set_title(f"{name} | {role}", fontsize=11)
             axis.set_xlabel("World x (mm)")
-            axis.set_ylabel("World y (mm)")
+            if column == 0:
+                axis.set_ylabel("World y (mm)")
             axis.text(0.02, 0.98, "L", transform=axis.transAxes,
                       color="white", va="top", ha="left", fontsize=9)
             axis.text(0.98, 0.98, "R", transform=axis.transAxes,
@@ -182,7 +183,8 @@ def make_figure(*, candidate_dir, original_dir, branch, mask_template,
     output.parent.mkdir(parents=True, exist_ok=True)
     caption_json.parent.mkdir(parents=True, exist_ok=True)
     try:
-        figure.savefig(output, dpi=160, facecolor="white", metadata={"Software": "FNIT public10 validation"})
+        figure.savefig(output, dpi=160, facecolor="white", bbox_inches="tight",
+                       pad_inches=0.1, metadata={"Software": "FNIT public10 validation"})
     finally:
         plt.close(figure)
     report["figure"] = file_record(output)

@@ -1,0 +1,691 @@
+{
+  "schema_version": 1,
+  "figure_type": "public10_paired_GNU_whole_process_timing",
+  "caption": "固定十人、TBSS与MMORF两个分支的独立完整运行耗时，单位为分钟。仅画两侧执行完成、输入及资源绑定匹配且GNU时钟可核验的配对，共19/20；其余位置仅显示失败或待完成状态。柱上比值直接采用aggregate中通过运行与绑定门槛的原软件/FNIT逐人比值，没有重新计算影像指标。共享H100的外部负载可能影响耗时，数值等价尚未确立。",
+  "source_commit": "bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a",
+  "source_manifest_hashes": [
+    "f13a40989b96d9e3608a427a1fe10d1960b20f146c768a3dd101f84fe4deae1e"
+  ],
+  "aggregate_status": "incomplete",
+  "planned_pairs": 20,
+  "plotted_pairs": 19,
+  "branch_counts": {
+    "tbss": {
+      "planned_pairs": 10,
+      "plotted_pairs": 10,
+      "candidate_status_counts": {
+        "complete": 10
+      },
+      "reference_status_counts": {
+        "complete": 10
+      },
+      "unpaired_case_ids": []
+    },
+    "mmorf": {
+      "planned_pairs": 10,
+      "plotted_pairs": 9,
+      "candidate_status_counts": {
+        "complete": 10
+      },
+      "reference_status_counts": {
+        "complete": 9,
+        "failed": 1
+      },
+      "unpaired_case_ids": [
+        "case10"
+      ]
+    }
+  },
+  "total_candidate_status_counts": {
+    "complete": 20
+  },
+  "total_reference_status_counts": {
+    "complete": 19,
+    "failed": 1
+  },
+  "timing_provenance": {
+    "clock": "GNU /usr/bin/time -v whole subprocess wall time",
+    "unit": "minutes",
+    "conversion": "aggregate GNU seconds / 60",
+    "includes": "Python startup/imports, complete pipeline, audits and report writing",
+    "excludes": "shared GPU-lock wait and queue admission; common download/input preparation",
+    "failed_or_unpaired_clock_policy": "no timing bars; no zero imputation",
+    "ratio": "aggregate.paired_ratios.full_process_reference_over_candidate, not recomputed",
+    "shared_device": "H100; independent jobs serialized by one GPU lock; other users are not controlled"
+  },
+  "numerical_equivalence_claimed": false,
+  "source_script": {
+    "bytes": 12151,
+    "sha256": "a5322f9d66475a522a4c9a60a0d2060127281b8955a86afb6d5a6bc7676e3cff"
+  },
+  "aggregate": {
+    "bytes": 1016236,
+    "sha256": "d848b6dcb4d7cf982f5f72a7931177c3043ee15f90d70f22808622347953f715"
+  },
+  "output_PNG": {
+    "bytes": 150097,
+    "sha256": "c86f75e6db1a90a15fc9c4d2286b04f5e6a421013f88bec4c4437463fc3c03c8"
+  },
+  "cases": [
+    {
+      "case_id": "case01",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 724.05,
+        "reference": 2480.47
+      },
+      "reference_over_FNIT_ratio": 3.4258269456529247,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "c733e525131ab20322d4f0ac171ada714462c93b2e9fcacea70a0acfa9f513d6"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "70739ab8006ba4463b0f9faf8033080582338db3f109e966b37583b4c2518fa8"
+        }
+      }
+    },
+    {
+      "case_id": "case02",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 795.77,
+        "reference": 2459.11
+      },
+      "reference_over_FNIT_ratio": 3.090227075662566,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "4fe9000740fa45fe4912c8d4d43504a9b6290ceb33fc83595ab05238c3062c05"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "21fcb277101812d83b60943ff547dba8aadbb41acfb3d02e6f4f6f4fd5fbc249"
+        }
+      }
+    },
+    {
+      "case_id": "case03",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 526.26,
+        "reference": 2104.38
+      },
+      "reference_over_FNIT_ratio": 3.998745867061909,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "4426f075066f4ac3a7159e2be123c6ad332234fb8c694cd4bc6a7db6ad2b7684"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "1685255d2ccd4fd898409a88e1da68fabe59ab0fe247f5fc126dcf13ad543398"
+        }
+      }
+    },
+    {
+      "case_id": "case04",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 1443.72,
+        "reference": 3770.0
+      },
+      "reference_over_FNIT_ratio": 2.6113096722356137,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "b6b43d97ef84b2810c4182b918e8543245d88207ff2b2c903ee2e865820ad107"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "665cc7e87905867f7bcf659b42a18356238a455155630b00a4705cdaa1574cec"
+        }
+      }
+    },
+    {
+      "case_id": "case05",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 479.12,
+        "reference": 3399.21
+      },
+      "reference_over_FNIT_ratio": 7.094694439806312,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "9ef7a6cbaf0cc77b547ad988b1710b446cfce595c16805a7687cfd4942beac76"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "098504aef569dd2970fb3c6b8f09bc68531b6eb2952a2bddef92ac560cddb19a"
+        }
+      }
+    },
+    {
+      "case_id": "case06",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 635.85,
+        "reference": 2995.35
+      },
+      "reference_over_FNIT_ratio": 4.710780844538806,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "62bf4a411ddf08ba97d211205a0ec6f91c8ffa2b870d2fe23b4e2a43c55715ea"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "1e9a0662cad6a225d2127257ccca38ca5b11d7aa627677443fd8cb687e53afd1"
+        }
+      }
+    },
+    {
+      "case_id": "case07",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 702.88,
+        "reference": 2534.97
+      },
+      "reference_over_FNIT_ratio": 3.6065473480537213,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "15ebe779b74ee2db7a2f11c6d43329afb7c18cc9413033857c08eac57c47dd30"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "09fd63f1edde2574c60f6a0f339f6361fd07136dcc0fb1113d0bd668d5368fb2"
+        }
+      }
+    },
+    {
+      "case_id": "case08",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 1109.49,
+        "reference": 2678.77
+      },
+      "reference_over_FNIT_ratio": 2.4144156324076826,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "3d5432c86e635532b07baca096fb7727424a0b12fb57939c2db54bec3b8ab157"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "0c4c2db1126b70b10dfb8d5153658c9187cda37dc258f082eebfcda981ae7bfb"
+        }
+      }
+    },
+    {
+      "case_id": "case09",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 848.25,
+        "reference": 2222.55
+      },
+      "reference_over_FNIT_ratio": 2.620159151193634,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "1b68f96abfc5ce085a2c09a45409358157fe1b14aca9dd0a67fab7a8a8128df3"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "edaf77090edb8bf0560118c02d7f9941785e9dbce69a74f4a9ff6460965335af"
+        }
+      }
+    },
+    {
+      "case_id": "case10",
+      "backend": "tbss",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 1115.37,
+        "reference": 3079.49
+      },
+      "reference_over_FNIT_ratio": 2.7609582470390994,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "fee864b5d86090c88b1aa114a3d063ffe1588fda384df0cafdfe3762697de77c"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "035b7e1e4d0bdedf6d0b6523056f0ec18487fc4048bb6cf4f26c2b49646c1d3d"
+        }
+      }
+    },
+    {
+      "case_id": "case01",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 478.65,
+        "reference": 2113.98
+      },
+      "reference_over_FNIT_ratio": 4.4165465371356945,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "3872904ff41ff86faa9b30f26848a071c9fcc9dd2a4817b327270dd2c9e5fa14"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "affce1ef1ebd9d45178b827ea39757afde406cf0a490785d9505d0f1ad6c0948"
+        }
+      }
+    },
+    {
+      "case_id": "case02",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 562.24,
+        "reference": 1924.22
+      },
+      "reference_over_FNIT_ratio": 3.422417472965282,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "584341fb9b0cb3b2a4d489a00ec5b1361df53d73276034f2b01217ce2b41fb81"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "f296dba123cdc70e56ecce96fde34195fb6ae19eec2398da20d3e46c022c13e3"
+        }
+      }
+    },
+    {
+      "case_id": "case03",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 880.34,
+        "reference": 2033.55
+      },
+      "reference_over_FNIT_ratio": 2.309959788263625,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "4f3d3bebc4112ba93efe8ddd329096597749a566fd0bfd945399e7ce245cbde9"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "4544c92c86be6d6d6dc7924f96de0da627b5fa156ac06ef0e5ee084d397878cb"
+        }
+      }
+    },
+    {
+      "case_id": "case04",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 545.17,
+        "reference": 2607.65
+      },
+      "reference_over_FNIT_ratio": 4.783186895830659,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "8b3d6c6be38de615e1ac189dfa20b990b398d6804518349a2a594b7ac385d604"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "42861a39bf7dd63b0840c85bab94b8ed469ad37bbdef8cea5504233dabe0a7d0"
+        }
+      }
+    },
+    {
+      "case_id": "case05",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 504.63,
+        "reference": 5151.0
+      },
+      "reference_over_FNIT_ratio": 10.20747874680459,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "496e430b6c05e3d9f392271778b863c0acc88c6f839fb4c529e0fac37c7c2967"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "5c00f99c409998a885702862e6e07933d9524b57cd081f0013d9c4ecb817f5ab"
+        }
+      }
+    },
+    {
+      "case_id": "case06",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 571.32,
+        "reference": 3407.04
+      },
+      "reference_over_FNIT_ratio": 5.963453056080655,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "0718a8fb9a3a92b6556b69f5586d995d7f8046606dbb22e5a785457041b586fe"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "ca8fdb095e92d432b1d74811c935fff852dd254aba449cae4ce15bf14365f70e"
+        }
+      }
+    },
+    {
+      "case_id": "case07",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 950.2,
+        "reference": 2218.84
+      },
+      "reference_over_FNIT_ratio": 2.33512944643233,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "c8671788badfca7c5b41dce4475128793027da17f86aa0cae9e092699bf7a0a9"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "46648259ac7cbd3d773c53f50734882531da47e0b31895ec3763792d87c88aa2"
+        }
+      }
+    },
+    {
+      "case_id": "case08",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 868.02,
+        "reference": 2035.82
+      },
+      "reference_over_FNIT_ratio": 2.3453607059745165,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "37cb6197f679a99d83452898001f23ee02a0b88e3311a014db31e7aae5fbe199"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "336503451b1f9f9a36797297a62cd89aa1001b2c460ce2bb37a245f13d13aff5"
+        }
+      }
+    },
+    {
+      "case_id": "case09",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "complete",
+      "paired_bars_plotted": true,
+      "gate_checks": {
+        "both_runs_complete": true,
+        "binding_matched": true,
+        "aggregate_pair_gate": true,
+        "aggregate_ratio_available": true,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": true
+      },
+      "unpaired_display_label": null,
+      "GNU_seconds": {
+        "candidate": 889.93,
+        "reference": 2056.21
+      },
+      "reference_over_FNIT_ratio": 2.3105300416886725,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "e987201614f463d9cf6ebac47a804dfbc6c1089628e8cdd9dc6c11b49a348f2a"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "fff0001fa753a891fd563d736071db98eba2e14fb96c83a06a9af08edaafca7e"
+        }
+      }
+    },
+    {
+      "case_id": "case10",
+      "backend": "mmorf",
+      "candidate_status": "complete",
+      "reference_status": "failed",
+      "paired_bars_plotted": false,
+      "gate_checks": {
+        "both_runs_complete": false,
+        "binding_matched": true,
+        "aggregate_pair_gate": false,
+        "aggregate_ratio_available": false,
+        "candidate_GNU_clock_valid": true,
+        "reference_GNU_clock_valid": false
+      },
+      "unpaired_display_label": "FNIT complete\nRef failed",
+      "GNU_seconds": {
+        "candidate": null,
+        "reference": null
+      },
+      "reference_over_FNIT_ratio": null,
+      "timing_provenance": {
+        "candidate": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "47a55f4cf5f4462135c783b99c98274bf7ff4047fcc9f406ed3e07ac3c0f2b5c"
+        },
+        "reference": {
+          "wall_time_source": "gnu_time_v",
+          "GNU_time_sha256": "dcd26bc164b405ed4b91dfa69cf4139dda0cf41f9454f024610c7a2246820815"
+        }
+      }
+    }
+  ]
+}

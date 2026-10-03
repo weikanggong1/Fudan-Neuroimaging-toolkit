@@ -631,6 +631,97 @@ def retained_initial_candidate(row, manifest_root):
     }
 
 
+
+def reference_attempt_history(row, manifest_root, candidate, selected_record):
+    """Bind unique failed recovery reports; export only anonymous attempt metadata."""
+    errors, retained = [], []
+    seen_paths, seen_hashes = set(), set()
+    selected_path = row.get("reference_report")
+    if selected_path:
+        seen_paths.add((manifest_root / selected_path).resolve())
+    if selected_record.get("available"):
+        seen_hashes.add(selected_record["sha256"])
+    initial = retained_initial_reference(row, manifest_root)
+    if initial is not None:
+        path = row.get("initial_failed_reference_report")
+        identity = (manifest_root / path).resolve() if path else None
+        digest = initial["report"].get("sha256")
+        if (identity is not None and identity in seen_paths) or (digest and digest in seen_hashes):
+            errors.append("initial_reference_duplicate_selected_report")
+            initial = None
+        else:
+            if identity is not None:
+                seen_paths.add(identity)
+            if digest:
+                seen_hashes.add(digest)
+            if path:
+                report, _ = read_report(manifest_root / path)
+                if report.get("case_id") not in (None, row.get("case_id")):
+                    errors.append("initial_reference_case_id_mismatch")
+                    initial = None
+                if report.get("registration_backend") not in (None, row.get("backend")):
+                    errors.append("initial_reference_backend_mismatch")
+                    initial = None
+    entries = row.get("intermediate_reference_attempts", [])
+    if not isinstance(entries, list):
+        return initial, [], errors + ["intermediate_reference_attempts_not_list"]
+    for index, entry in enumerate(entries, 1):
+        label = f"intermediate_reference_{index}_"
+        if not isinstance(entry, dict) or not isinstance(entry.get("report"), str) or not entry["report"]:
+            errors.append(label + "report_path_invalid")
+            continue
+        path = manifest_root / entry["report"]
+        identity = path.resolve()
+        report, record = read_report(path)
+        if identity in seen_paths or (record.get("sha256") and record["sha256"] in seen_hashes):
+            errors.append(label + "duplicate_report_identity")
+            continue
+        # Reserve even invalid identities so aliases never become another attempt.
+        seen_paths.add(identity)
+        if record.get("sha256"):
+            seen_hashes.add(record["sha256"])
+        if not record.get("available"):
+            errors.append(label + "report_unavailable")
+            continue
+        if report.get("case_id") != row.get("case_id"):
+            errors.append(label + "case_id_mismatch")
+            continue
+        if report.get("registration_backend") != row.get("backend"):
+            errors.append(label + "backend_mismatch")
+            continue
+        metrics_path = entry.get("process_metrics")
+        if metrics_path is not None and (not isinstance(metrics_path, str) or not metrics_path):
+            errors.append(label + "metrics_path_invalid")
+            continue
+        if metrics_path and (manifest_root / metrics_path).resolve().parent != identity.parent:
+            errors.append(label + "metrics_directory_mismatch")
+            continue
+        input_binding = paired_input_binding(candidate, report, row["backend"])
+        if input_binding["status"] != "matched":
+            errors.append(label + "input_or_resource_binding_" + input_binding["status"])
+            continue
+        candidate_seed = get_nested(candidate, "parameters", "eddy_gp_seed")
+        reference_seed = get_nested(report, "parameters", "gp_seed")
+        if candidate_seed is not None and reference_seed is not None and candidate_seed != reference_seed:
+            errors.append(label + "eddy_seed_mismatch")
+            continue
+        item = retained_initial_reference({
+            "initial_failed_reference_report": entry["report"],
+            "initial_failed_reference_process_metrics": metrics_path,
+            "reference_rerun_reason": entry.get("reason"),
+        }, manifest_root)
+        state = reference_attempt_state(item["status"], item["report"],
+                                        item["external_process_metrics"], item["failure_type"])
+        if state != "failed":
+            errors.append(label + "not_failed_terminal_attempt")
+            continue
+        item["attempt_index"] = index
+        item["reason"] = item.pop("reference_rerun_reason")
+        item["input_and_resource_binding_status"] = input_binding["status"]
+        retained.append(item)
+    return initial, retained, errors
+
+
 def reference_attempt_state(status, record, metrics, failure_type=None):
     observed = record.get("available", False) or metrics.get("status") == "loaded"
     if not observed:
@@ -642,7 +733,7 @@ def reference_attempt_state(status, record, metrics, failure_type=None):
 
 
 def reference_attempt_summary(rows):
-    initial, rerun, primary = [], [], []
+    initial, intermediate, rerun, primary = [], [], [], []
     retained_requested = 0
     for row in rows:
         selected = reference_attempt_state(row["run_status"]["reference"], row["reports"]["reference"],
@@ -662,16 +753,25 @@ def reference_attempt_summary(rows):
                 initial.append(original)
             if selected is not None:
                 rerun.append(selected)
-    all_attempts = initial + rerun
+        for attempt in row.get("retained_intermediate_reference_attempts", []):
+            state = reference_attempt_state(attempt["status"], attempt["report"],
+                                            attempt["external_process_metrics"], attempt["failure_type"])
+            if state is not None:
+                intermediate.append(state)
+    all_attempts = initial + intermediate + rerun
     def counts(values):
         return {"observed_attempts": len(values), "successful_attempts": values.count("successful"),
                 "failed_attempts": values.count("failed"),
                 "pending_or_unknown_attempts": values.count("pending_or_unknown"),
                 "success_fraction": values.count("successful") / len(values) if values else None}
-    return {"planned_primary_cases": len(rows), "retained_initial_attempts_requested": retained_requested,
+    result = {"planned_primary_cases": len(rows), "retained_initial_attempts_requested": retained_requested,
             "initial": counts(initial), "rerun": counts(rerun), "selected_primary": counts(primary),
             "all": counts(all_attempts),
-            "counting_rule": "initial attempt per case is retained original if configured, otherwise selected primary; selected replacements are reruns; selected primary reports define paired speed ratios, failed original clocks stay separate"}
+            "counting_rule": "initial attempt per case is retained original if configured, otherwise selected primary; unique intermediate failed raw reruns are counted separately; selected replacements are reruns; all includes initial plus intermediate plus selected reruns; selected primary reports alone define paired speed ratios"}
+    if intermediate:
+        result["intermediate"] = counts(intermediate)
+        result["retained_intermediate_attempts"] = len(intermediate)
+    return result
 
 
 def candidate_attempt_summary(rows):
@@ -809,6 +909,9 @@ def aggregate_plan(manifest, *, expected_case_count=10, manifest_root=Path("."))
         cp_seed, rp_seed = get_nested(candidate, "parameters", "eddy_gp_seed"), get_nested(reference, "parameters", "gp_seed")
         if cp_seed is not None and rp_seed is not None and cp_seed != rp_seed:
             binding_errors.append("eddy_seed_mismatch")
+        initial_reference, intermediate_references, history_errors = reference_attempt_history(
+            {**row, "case_id": case_id, "backend": backend}, manifest_root, candidate, records["reference"])
+        binding_errors.extend(history_errors)
         statuses = {role: value.get("status", "unavailable") for role, value in loaded.items()}
         complete_runs = statuses["candidate"] == statuses["reference"] == "complete" and not binding_errors
         comparison_complete = statuses["comparison"] == "complete" and not binding_errors
@@ -841,7 +944,8 @@ def aggregate_plan(manifest, *, expected_case_count=10, manifest_root=Path("."))
             "paired_input_and_resource_binding": input_binding,
             "paired_runs_complete": complete_runs, "paired_comparison_complete": comparison_complete,
             "reports": records, "failure_types": failures,
-            "retained_initial_reference_attempt": retained_initial_reference(row, manifest_root),
+            "retained_initial_reference_attempt": initial_reference,
+            "retained_intermediate_reference_attempts": intermediate_references,
             "reference_rerun_reason": public_rerun_reason(row.get("reference_rerun_reason")),
             "retained_initial_candidate_attempt": retained_initial_candidate(row, manifest_root),
             "candidate_rerun_reason": public_rerun_reason(row.get("candidate_rerun_reason")),

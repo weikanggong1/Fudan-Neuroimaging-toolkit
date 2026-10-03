@@ -2,15 +2,53 @@
 
 ## 功能与当前状态
 
-这组工具从同一份公开原始 DWI、梯度和配对 T1 出发，分别执行 FNIT 与独立原软件的完整流程，比较 **TBSS/FNIRT** 和 **T1 + tensor MMORF** 两个分支。固定十人各运行两个分支，主比较选定 **20 个 FNIT 完整作业、20 个原软件参考、20 个配对比较**；初次失败和历史运行另行保留，不通过换人补成功数。
+这组工具从同一份公开原始 DWI、梯度和配对 T1 出发，分别执行 FNIT 与独立原软件的完整流程，比较 **TBSS/FNIRT** 和 **T1 + tensor MMORF** 两个分支。固定十人各运行两个分支，事前计划 **20 个 FNIT 作业、20 个原软件参考、20 个配对比较**；初次失败和历史运行另行保留，不通过换人补成功数。
 
 十人的原始文件已完整下载并校验。最初的 `5d84c7ddec099f1b94772d273c0f76a79934c9bb` 冻结包有 433 个运行时 Python 文件，见 [基线源码绑定](source_binding.public.json)。该版本首人 TBSS/MMORF 成功只作为 **legacy 回归记录**；`case02` MMORF 的 NODDI 阶段申请约 2.96 GiB 填充行矩阵时被 20 GB 自身 allocator 上限拒绝，失败记录保留。
 
-主比较已改为统一使用修复提交 **`bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a`**，仅 `amico_noddi/solver.py` 的临时内存调度变化，dtype、TF32 设置及模型参数不变。新的 433 文件部署清单已逐项核对，相对路径与 SHA-256 完全匹配，清单 SHA-256 为 `f13a40989b96d9e3608a427a1fe10d1960b20f146c768a3dd101f84fe4deae1e`，见 [修复源码绑定](source_binding_memoryfix.public.json)。全部 20 个 FNIT 完整流程从原始输入统一重跑，写入新的 `memoryfix_cohort/results/`；旧版两次成功和 `case02` 失败不进入新主比较。
+主比较统一使用修复提交 **`bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a`**，仅 `amico_noddi/solver.py` 的临时内存调度变化，dtype、TF32 设置及模型参数不变。全部 20 个 FNIT 完整流程已从原始输入完成，写入新的 `memoryfix_cohort/results/`；每项报告均绑定 433 个运行时 Python 文件及清单 SHA-256 `f13a40989b96d9e3608a427a1fe10d1960b20f146c768a3dd101f84fe4deae1e`，见 [修复源码绑定](source_binding_memoryfix.public.json)。旧版两次成功和 `case02` 失败单列保留，不作为新主候选。
+
+本轮合并核验记录将 `origin/main` 的 `7af34e6d072e843fb2558c931bb2781f1d4b0be9` 合入 `adf74371be6a4ca5f3390c74f9a11e2a518732a3`，见 [合并核验](merge_integration.public.json)。合并后的 73 项 CPU 回归通过，覆盖 AMICO 数值/内存和验证工具契约；它没有重跑真实影像队列。这里的 20 例实测绑定冻结的 `bf339a0`，不能改标为合并后 main 的 20 例实测。
 
 原软件 `case01` TBSS 已完整完成，GNU time 为 **2480.47 秒**；`case01` MMORF 的全新 `official_recovered` 已完成 18 张指标图，GNU time 为 **2113.98 秒**，API 为 **2097.248599635903 秒**，observer 为 **2113.9841028 秒**，GNU 最大 RSS 为 **9,507,700 KiB**。各时钟分列记录。
 
-修正版 `case02` MMORF 已从 raw 全流程完成，18 张指标图的形状、affine、有限值及所需文件检查全部通过，见 [完整运行报告](case02_mmorf_memoryfix_full.public.json)。API 为 **557.384 秒**，GNU 完整命令为 **562.24 秒**；allocated/reserved 峰值为 **12.335/13.808 GB**，低于 20 GB 上限。这确认此前的 NODDI 显存问题在完整 EDDY→NODDI 衔接中得到解决，不能解读为输出已匹配原软件。此时固定主计划完成 FNIT **1/20**、原软件 **3/20**；十人精度、耗时与失败率仍待配对比较和其余运行完成。20 个病例位置和 450 个指标图位置是固定分母，不代表已完成行数。详细历史表和恢复规则见 [PROTOCOL.md](PROTOCOL.md)。
+修正版 `case02` MMORF 的首个完整内存门已从 raw 跑通，18 张指标图的形状、affine、有限值及所需文件检查通过，见 [完整运行报告](case02_mmorf_memoryfix_full.public.json)。API 为 **557.384 秒**，GNU 完整命令为 **562.24 秒**；allocated/reserved 峰值为 **12.335/13.808 GB**。随后固定其余 19 项也全部完成，核验了实际 EDDY→NODDI 衔接；这不等于输出逐值匹配原软件。
+
+### 2026-10-03 最终记录：FNIT 20/20，参考与比较 19/20
+
+| 分支 | FNIT 完整流程 | 选定原软件完整参考 | 完成配对比较 | 指标图格式检查通过 |
+|---|---:|---:|---:|---:|
+| TBSS/FNIRT | 10/10 | 10/10 | 10/10 | 270/270 |
+| T1 + tensor MMORF | 10/10 | 9/10 | 9/10 | 162/180 |
+| 合计 | **20/20** | **19/20** | **19/20** | **432/450** |
+
+case05 TBSS 与 case10 TBSS 已从相同 raw 输入完整恢复，全部 27 张图已纳入比较。case10 MMORF 的初次、R1 和 R2 原参考均在 `eddy_cuda10.2` 报 `cudaErrorMemoryAllocation` 后失败，没有完整官方指标图；其 18 张图保留缺失状态。本轮停止进一步原参考恢复，不换被试或改用 CPU 补成功数。最终汇总因此为 `incomplete`，20 配对、450 张图的计划分母不变。
+
+全部原参考共观察 **25 次：19 成功、6 失败**；其中初次 20 次为 16 成功、4 失败，3 次成功恢复、case10 MMORF 的 R1/R2 失败均单独保留。FNIT 共 **21 次：20 成功、1 失败**，包括旧 case02 MMORF OOM 和修复后的新主运行；旧 case01 两次成功另列为 legacy，不加入这 21 次。失败时钟不进入完整配对时间比，见[原软件失败与恢复记录](OFFICIAL_FAILURES.md)。新运行逐项绑定输入、程序、脚本、参数和资源，不重复运行已成功的参考或 20 个 FNIT 作业。
+
+20 个 FNIT 作业的完整 pipeline allocator 峰值上界为：TBSS allocated/reserved **6.972/11.457 GB**，MMORF **12.335/13.810 GB**；各分支 `n=10`，全部低于 **20,000,000,000 bytes** 上限。GB 为十进制，reserved 包含 allocated，不能相加；这不是整张 GPU 的总占用。432 张图通过的是 shape、affine 和有限值检查；尚未设置数值等价阈值，不将其称为 432 张精度验收通过。完整计划仍保留 20 配对和 450 张图的分母。历史失败、内存修复、恢复规则与计时范围见 [PROTOCOL.md](PROTOCOL.md) 和 [COMPARISON.md](COMPARISON.md)。
+
+### 当前精度观察：差异在部分病例配准前已存在
+
+当前 19 个配对的差异并非都很小。标准空间 FA 在固定 MNI152 T1 brain 非零 ROI 中的逐人中位数如下；NRMSE 定义为 `RMSE / 原参考 RMS`，两列分别汇总，不是由中位图计算。
+
+| 分支；当前有效人数 | Pearson r 中位数 | NRMSE 中位数 |
+|---|---:|---:|
+| TBSS；10/10 | 0.995808245 | 0.060759006 |
+| MMORF；9/10 | 0.929446724 | 0.217009355 |
+
+`case08` 的两个分支得到相同的配准前统计：在独立原软件脑 mask 的 168,935 个体素中，TOPUP 校正两张 b0 的 `r=0.957562846`、`NRMSE=0.137970132`，完整 117 帧 EDDY DWI 的 `r=0.982441559`、`NRMSE=0.136383849`，native FA 的 `r=0.856050004`、`NRMSE=0.285848576`。这些差异已经出现在配准之前，不能全部归因于 FNIRT 或 MMORF；现有证据也未将原因隔离到单个子函数。固定首人脑图保留作为示例，不能推广为十人均表现相同。逐图误差、ROI、分母和解释见 [COMPARISON.md 的差异观察](COMPARISON.md#当前差异观察19-个配对)。
+
+独立[保存输入追踪](b0_input_trace_20261003.public.json)逐值确认：case02/08 的 AP 候选为第 0、21、52 帧，冻结 FNIT 选择 AP0/PA0，原参考选择 AP21/PA0；两分支一致。因此同 raw 文件并不表示这两例使用同一 TOPUP pair。另行完成的[十人接受点评分检查](b0_accepted_point_20261003.public.json)确认当前修复的 30 个 AP pair 分数均来自最终接受参数，但十人选择都没有改变，case02/08 仍为 AP0。这是独立组件验收，没有替换冻结 bf339a0 的整链输出或时间；同 pair 场求解诊断与完整整链差异分开，见[差异定位](PRECISION.md)。
+
+### 完整流程耗时：仅汇总 19 个完整配对
+
+| 分支；有效配对数 | FNIT API 中位秒 | 原软件 API 中位秒 | FNIT GNU 中位秒 | 原软件 GNU 中位秒 | 逐人 GNU 比中位数 [Q25,Q75] |
+|---|---:|---:|---:|---:|---|
+| TBSS；10 | 754.926835 | 2593.340872 | 759.91 | 2606.87 | 3.258027 [2.655359,3.900696] |
+| MMORF；9 | 566.225101 | 2097.248600 | 571.32 | 2113.98 | 3.422417 [2.335129,4.783187] |
+
+API 为完整处理读写范围，GNU time 另含进程启动、导入和退出；比值先按同一人计算原软件/FNIT，再汇总，不是两个中位数相除。失败位置没有完整耗时比。任务共享 GPU 仍有其他进程负载，单次逐人运行不建立稳定性能或数值等价结论；阶段时钟与负载见[逐图及计时说明](COMPARISON.md)。
 
 - [PROTOCOL.md](PROTOCOL.md)：事前固定的流程、参数、资源和计时边界。
 - [DATASET.md](DATASET.md)：OpenNeuro ds003138 v1.0.1、CC0、十人清单和采集条件。
@@ -176,10 +214,8 @@ fa_skeleton_file="$template_assets_dir/FMRIB58_FA-skeleton_1mm.nii.gz"
 t1_template_file="$template_assets_dir/MNI152_T1_1mm_brain.nii.gz"
 tensor_template_file="$template_assets_dir/FSL_HCP1065_tensor_1mm.nii.gz"
 synthstrip_model_file="$model_weights_dir/synthstrip.1.pt"
-fnit_source_commit=bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a
-
-# 仅在实际 src 文件与所填提交对应时使用这个提交号。
-# 不同代码版本应填写自己的提交，并保留实际源码 SHA-256 报告。
+# 此处记录当前仓库实际提交，生产导入也来自当前仓库。
+fnit_source_commit="$(git rev-parse HEAD)"
 export PYTHONPATH="$PWD/src"
 
 fnit_tbss_job_dir="$benchmark_root_dir/memoryfix_cohort/results/case01/tbss/fnit"
@@ -216,6 +252,23 @@ python "$benchmark_scripts_dir/benchmark_fnit.py" \
 | `--memory-limit-bytes` | 默认 20,000,000,000 bytes 的 PyTorch allocator 上限，不是整张卡或原软件的显存上限 |
 
 单独 CLI 只产生内部 API 时钟；完整命令时间用 `/usr/bin/time -v` 或下节队列测量。驱动的嵌套子调用时间已经包含在父阶段里，不能重复相加。
+
+### 按冻结报告源码复现
+
+上面的通用示例使用当前仓库源码。要复现本页 bf339a0 队列，应先在仓库根目录另建冻结 worktree，再使用其 `src`；验证脚本仍取前面固定的 `benchmark_scripts_dir`，报告会分别记录脚本和实际导入的生产源码哈希。
+
+```bash
+benchmark_repository_dir="$PWD"
+frozen_fnit_commit=bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a
+frozen_fnit_source_dir="$benchmark_root_dir/frozen_fnit_bf339a0"
+# 目标目录必须尚未存在；此命令不修改当前仓库的 checkout。
+git -C "$benchmark_repository_dir" worktree add --detach \
+  "$frozen_fnit_source_dir" "$frozen_fnit_commit"
+export PYTHONPATH="$frozen_fnit_source_dir/src"
+fnit_source_commit="$(git -C "$frozen_fnit_source_dir" rev-parse HEAD)"
+```
+
+然后在新结果目录执行上面的两条 `benchmark_fnit.py` 命令，`--source-commit` 使用这里取得的实际提交。不要对合并后的 `src` 填写 bf339a0 标签；有未提交生产源码修改时，HEAD 也不能代替报告中的逐文件 SHA-256。冻结报告的 433 文件清单见 [source_binding_memoryfix.public.json](source_binding_memoryfix.public.json)。不同验证脚本版本和共享硬件负载可能改变观测时钟，新的结果应保留自己的完整绑定。
 
 ## 独立原软件调用
 
@@ -286,7 +339,7 @@ original_mmorf_job_dir="$benchmark_root_dir/results/case01/mmorf/official_recove
 | 原软件参考 | 19 | `case01` TBSS 复用签名、来源和完整报告匹配的整个已完成原参考；其余完整运行，保存在 `results/` |
 | 原 MMORF 恢复 | 1 | `case01` MMORF 从 raw 全新重跑，选定 `results/case01/mmorf/official_recovered/` |
 
-三个队列共享同一 GPU 锁；19 个原参考条目包括已完成 TBSS 的整体复用，不表示它需要再运行一次。新主候选先执行 `case02` MMORF，随后执行计划固定的其余 19 个 FNIT 作业。两个原软件 controller 保持其冻结旧版继续运行，没有因 FNIT 修复而停止或重启；其中剩余参考队列在状态核对时执行 `case02` MMORF。原失败尝试和 legacy FNIT 另行记录，不增加或替换固定被试/分支。新独立复现也可把全部 40 个位置写入单一固定作业计划；仍需保证每份结果源自独立的完整流程。
+初始三个队列共享同一 GPU 锁；19 个原参考条目包括已完成 TBSS 的整体复用，不表示它需要再运行一次。新主候选先执行 `case02` MMORF，随后执行计划固定的其余 19 个 FNIT 作业。两个原软件 controller 使用冻结旧版，没有因 FNIT 修复而停止或重启。初始队列现已结束，三个原 EDDY 失败另建恢复作业并继续使用同一锁；完整成功的作业不重复执行。原失败尝试和 legacy FNIT 另行记录，不增加或替换固定被试/分支。新独立复现也可把全部 40 个位置写入单一固定作业计划；仍需保证每份结果源自独立的完整流程。
 
 下面只展示作业 schema 的一行，路径是结构示例，**不可直接当成可执行计划**：
 
@@ -360,6 +413,26 @@ python "$benchmark_scripts_dir/finish_cohort.py" \
 
 `run_cohort.py --gpu-lock` 必填：锁在完整命令计时前获得，一个作业全部结束后释放。当前脚本会在释放锁后等待 0.25 秒再申请下一作业，这段间隔在每个作业时钟外。本次实际部署中，只有新 FNIT controller 使用此版本；两个已运行的原软件 controller 沿用冻结旧版，没有该间隔。三队列始终由同一全局锁串行，实际顺序由 UTC 记录确认，不保证 AB/BA 紧邻。上面的独立复现示例若都使用当前脚本，新启动的各队列都会采用该间隔，需记录各自脚本哈希。已完成作业只在执行签名和完整报告一致时跳过；失败原样保留，修复后在另有名称的新目录从 raw 完整重跑。`cohort_status.json` 位于每份作业计划同目录。
 
+三个参考恢复后，最终化必须使用**新的汇总目录**。`finish_cohort.py` 不覆盖已有 `aggregate.final.json`；直接复用原 17 配对的终态目录会再次渲染旧汇总。先另存固定 20 行清单，将三个选定参考指向新恢复结果，为这三行设置新的比较 JSON 路径，并保留 `initial_failed_reference_report`、`initial_failed_reference_process_metrics` 和 `reference_rerun_reason`；其余已核验的 17 个参考和 FNIT 作业不重跑。下面仅等待和比较已有输出，不启动恢复 pipeline，也不预先宣称其成功。
+
+```bash
+recovery_comparison_plan_file="$benchmark_root_dir/comparisons_recovery.private.json"
+recovery_cohort_status_file="$benchmark_root_dir/reference_recovery/cohort_status.json"
+final20_summary_dir="$benchmark_root_dir/summary_final20"  # 必须是新的汇总目录
+python "$benchmark_scripts_dir/finish_cohort.py" \
+  --manifest "$recovery_comparison_plan_file" \
+  --cohort-status "$benchmark_root_dir/memoryfix_cohort/cohort_status.json" \
+  --additional-cohort-status "$recovery_cohort_status_file" \
+  --comparator "$benchmark_scripts_dir/compare_public10.py" \
+  --reference-roi "$standard_roi_file" --fa-skeleton "$fa_skeleton_file" \
+  --inputs-root "$prepared_inputs_dir" --output-dir "$final20_summary_dir" \
+  --poll-seconds 30 --gpu-lock "$gpu_admission_lock_file" \
+  --report-renderer "$benchmark_scripts_dir/render_report.py" \
+  --dataset-manifest "$public_manifest_file"
+```
+
+恢复状态文件来自用户的新三作业计划；完整自动流程仍要求清单内实际路径为绝对路径。以新目录的 `aggregate.final.json` 的状态、20 个实际配对和全部图检查为准，文件名中的 `final20` 不代表验收已完成。最终脑图及耗时图也应从这份新汇总和选定结果生成。
+
 | `finish_cohort.py` 参数 | 含义 |
 |---|---|
 | `--manifest` | 固定 20 行的私密比较清单，指向新候选和选定参考 |
@@ -429,15 +502,24 @@ python "$benchmark_scripts_dir/plot_public10.py" \
   --branch tbss --mask-template "$standard_roi_file" \
   --output "$benchmark_root_dir/figures/case01_tbss.png" \
   --caption-json "$benchmark_root_dir/figures/case01_tbss.json" --z-mm 16 --case-label case01
+
+# 只读取已生成的匿名 aggregate，绘图不进入完整作业计时。
+python "$benchmark_scripts_dir/plot_timing.py" \
+  --aggregate "$benchmark_root_dir/comparisons/aggregate.manual.json" \
+  --output "$benchmark_root_dir/figures/timing.png" \
+  --caption-json "$benchmark_root_dir/figures/timing.json"
 ```
 
 MMORF 改对应结果目录与 `--backend/--branch mmorf`，比较不需要 `--fa-skeleton`。`plot_public10.py` 展示 FA、MD、ICVF 的 FNIT、原软件及绝对差；`--z-mm` 为世界坐标轴向平面，默认 16 mm，`--case-label` 默认为 case01。`--caption-json` 默认 PNG 同名 JSON，记录坐标、来源哈希和色标截断比例；PNG 不包含原始影像或文件路径。Python 入口 `make_figure(candidate_dir=..., original_dir=..., branch=..., mask_template=..., output=..., caption_json=None, z_mm=16.0, case_label="case01")` 与 CLI 相同。
+
+`plot_timing.py` 的 `--aggregate` 是固定 20 行匿名汇总，`--output` 是新的 PNG 路径，`--caption-json` 可选、默认 PNG 同名 JSON；Python 入口为 `make_timing_figure(aggregate=..., output=..., caption_json=None)`。它只绘制两侧完整、输入绑定匹配且 GNU time 来源齐全的配对，未完成或失败位置显示状态，不填成功耗时。caption 保存所画配对数、时钟来源和脚本/输入/PNG 哈希；该图不证明数值等价。
 
 比较结果包含逐图 Pearson、MAE、RMSE、p95、最大差、非零支持、掩膜 Dice 和可配对的上游变换差。主要 ROI 包含零值，共同非零区只作补充；无效或常数相关记为 `null`。完整队列的未完成、失败、来源不匹配均保留在十人分母内，见 [COMPARISON.md](COMPARISON.md#完整计划汇总)。
 
 ## 更新记录与解释范围
 
-- **2026-10-02（统一重跑）**：case02 的 padded Cholesky 分配触发自身 20 GB 上限；仅修复 AMICO solver 内存调度，部署 bf339a0 的 433 文件清单逐项匹配。case01/02 组件回归完成，20 个 FNIT 完整流程全部从 raw 重跑；三队列共享锁和 UTC 顺序、初次失败和原 MMORF 恢复分别保留。十人完整结果仍待验收。
+- **2026-10-03（本轮终稿）**：冻结 bf339a0 的 20 个 FNIT raw 整链全部完成；19 个完整原参考、19 个配对与 432/450 张图已比较，TBSS n=10、MMORF n=9。case05/10 TBSS 恢复成功；case10 MMORF 初次、R1、R2 EDDY 失败保留并停止继续恢复。原参考共 25 次（19 成功、6 失败），FNIT 共 21 次（20 成功、1 失败）。合并 adf74371 的 73 项 CPU 回归不作为合并源码的十人整链实测。新 b0 接受点评分只完成独立十人组件验证，不替换冻结整链统计。
+- **2026-10-02（显存修复）**：case02 的 padded Cholesky 分配触发自身 20 GB 上限；仅修复 AMICO solver 内存调度，部署 bf339a0 的 433 文件清单逐项匹配。case01/02 组件回归及 case02 raw 完整门通过；三队列共享锁和 UTC 顺序、初次失败和原 MMORF 恢复分别保留。
 - **2026-10-02（legacy）**：固定 CC0 十人清单和 117 帧输入，完成原5d84c7源码绑定、case01两个FNIT分支；这两次成功及case02失败保留为历史回归，不进入修复版20主候选统计。
 - 之前单被试 TOPUP/SynthStrip 修订的结果见[已发布单被试记录](../end_to_end_synthstrip_topup_20261002.md)。该结果来自另一输入，不能写入本队列十人统计。
 
