@@ -41,6 +41,29 @@ def decisions(ranges):
             "not_assessed": sum(item is None for item in values), "total": len(values)}
 
 
+def completed_run(config, case, version, anatomy_directory):
+    case_id = case["case_id"]
+    require({"version": version, "case_id": case_id} in config["execution_order"],
+            "actual run is outside the frozen phase plan")
+    job = Path(config["run_root"]) / version / case_id
+    gpu_path, wall_path = job / "gpu_report.json", job / "raw_bids_wall.json"
+    gpu, wall = json.loads(gpu_path.read_bytes()), json.loads(wall_path.read_bytes())
+    require(gpu.get("status") == "completed" and gpu.get("version") == version and
+            gpu.get("case_id") == case_id, "completed same-case same-version actual run required")
+    identity = config["declared_source_manifests"][version]["source_fingerprint"]
+    require(gpu["source_before"]["source_fingerprint"] == identity ==
+            gpu["source_after"]["source_fingerprint"], "actual before/after source differs")
+    require(Path(gpu["wall_report"]).resolve() == wall_path.resolve(), "actual wall binding differs")
+    driver.cohort.check_wall_report(wall, config, case)
+    driver.cohort.check_selected_inputs(wall, case)
+    expected_cli = driver.cohort.cli_command(config, case, job, anatomy_subject=anatomy_directory)
+    require(wall["cli_arguments"] == expected_cli, "actual CLI parameters differ from frozen case plan")
+    require(gpu.get("anatomy_after") == gpu["anatomy"], "actual anatomy before/after differs")
+    require(gpu["raw_dwi_cli_total_runtime_seconds"] == wall["total_runtime_seconds"],
+            "actual GPU/wall timer binding differs")
+    return gpu, wall, gpu_path
+
+
 def execute(configuration, output_dir, case_ids=None):
     require(os.environ.get("CUDA_VISIBLE_DEVICES") == "", "CPU analysis must explicitly hide GPUs")
     started = time.perf_counter()
@@ -61,16 +84,10 @@ def execute(configuration, output_dir, case_ids=None):
     try:
         for case_id in selected:
             job = Path(config["run_root"]) / "candidate" / case_id
-            gpu_path, wall_path = job / "gpu_report.json", job / "raw_bids_wall.json"
-            gpu, wall = json.loads(gpu_path.read_bytes()), json.loads(wall_path.read_bytes())
-            require(gpu.get("status") == "completed" and gpu.get("version") == "candidate" and
-                    gpu.get("case_id") == case_id and wall.get("status") == "completed",
-                    f"{case_id}: actual new candidate run is incomplete")
-            identity = config["declared_source_manifests"]["candidate"]["source_fingerprint"]
-            require(gpu["source_before"]["source_fingerprint"] == identity ==
-                    gpu["source_after"]["source_fingerprint"], "candidate source identity differs")
-            require(Path(gpu["wall_report"]).resolve() == wall_path.resolve(), "actual wall binding differs")
             actual_case = bindings["cases"][case_id]
+            gpu, wall, gpu_path = completed_run(config, cases[case_id], "candidate", actual_case["anatomy"]["directory"])
+            wall_path = job / "raw_bids_wall.json"
+            identity = config["declared_source_manifests"]["candidate"]["source_fingerprint"]
             official = driver.bound(actual_case["official_reference_manifest"])
             official_root = Path(actual_case["official_reference_manifest"]["path"]).parent
             case_output = output_dir / case_id
@@ -119,11 +136,7 @@ def execute(configuration, output_dir, case_ids=None):
                       "candidate_memory": gpu["memory_budget"], "baseline_scope": "not_measured_this_case"}
             baseline_path = Path(config["run_root"]) / "baseline" / case_id / "gpu_report.json"
             if baseline_path.is_file():
-                baseline = json.loads(baseline_path.read_bytes())
-                require(baseline.get("status") == "completed", "paired actual baseline did not complete")
-                require(baseline["source_before"]["source_fingerprint"] ==
-                        config["declared_source_manifests"]["baseline"]["source_fingerprint"],
-                        "paired baseline source differs")
+                baseline, _, _ = completed_run(config, cases[case_id], "baseline", actual_case["anatomy"]["directory"])
                 timing.update(baseline_scope="this_phase_same_raw_case_same_parameters",
                               baseline_raw_dwi_cli_seconds=baseline["raw_dwi_cli_total_runtime_seconds"],
                               baseline_memory=baseline["memory_budget"],

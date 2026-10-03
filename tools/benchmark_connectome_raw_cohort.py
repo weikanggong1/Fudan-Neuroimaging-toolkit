@@ -585,6 +585,9 @@ def worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_argu
                     raise RuntimeError("source changed during the actual raw-DWI run")
                 report["source_after"] = after
                 report["input_verification_after"] = verify_inputs(case)
+                report["anatomy_after"] = check_anatomy(subject, config["atlases"])
+                if report["anatomy_after"] != report["anatomy"]:
+                    raise RuntimeError("official anatomy changed during actual raw-DWI execution")
                 if sha256(config["wall_script"]) != config["wall_script_sha256"]:
                     raise RuntimeError("raw-DWI wall script changed during execution")
                 if recon.get("recovery"):

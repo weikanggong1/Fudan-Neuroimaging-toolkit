@@ -31,7 +31,7 @@ exit_code = execute(configuration_path)
 - `sources`：`baseline`、`candidate` 两个冻结源码目录。
 - `declared_source_manifests`：两目录的实际科学代码及环境文件清单，由现有 `source_manifest()` 产生。
 - `execution_order`：逐项 `version`、`case_id`；十例候选必须全部覆盖，计时基线必须有相应候选，不接受重复路径冒充重复实验。
-- `accuracy_coordinator_sha256`、`worker_script_sha256`、`wall_script`：冻结控制器与 wall worker 身份。
+- `accuracy_coordinator_sha256`、`worker_script`、`worker_script_sha256`、`wall_script`、`wall_script_sha256`：预先声明控制器、实际加载的 worker 和 wall 工具的路径及身份；启动时核对，不替换已声明的 SHA。
 - `run_root`：新的绝对输出目录。
 - 其余字段沿用 [raw cohort 工具](../docs/connectome/raw_cohort_benchmark.md)：GPU Python、UUID、共享锁、CPU 线程、权重及模板路径、atlas 列表、播种数、种子和 EDDY GP 种子。
 
@@ -56,7 +56,7 @@ CUDA_VISIBLE_DEVICES= python tools/analyze_connectome_accuracy_cohort.py \
   --output-dir /absolute/path/new_cpu_analysis
 ```
 
-`--output-dir` 必须为新目录；可选 `--case-id sub-CON03` 只分析已完成子集，明确不标为完整十例。它核对真实 source、原始文件、官方 TCK、计时后文件 SHA 和返回对象端点回读，保留原指标定义，输出逐例矩阵/population 报告、真实群体脑图和计时摘要。Python 对应为 `analyze_connectome_accuracy_cohort.execute(configuration, output_dir, case_ids=None)`。只有一个 FNIT seed 时，自身重复性保持未评估。
+`--output-dir` 必须为新目录；可选 `--case-id sub-CON03` 只分析已完成子集，明确不标为完整十例。候选和计时基线都须匹配冻结计划、病例、版本、运行前后 source、实际 CLI、wall 路径与计时；运行前后 FreeSurfer 文件 SHA 也须一致。工具另核对原始文件、官方 TCK、计时后文件 SHA 和返回对象端点回读，保留原指标定义，输出逐例矩阵/population 报告、真实群体脑图和计时摘要。Python 对应为 `analyze_connectome_accuracy_cohort.execute(configuration, output_dir, case_ids=None)`。只有一个 FNIT seed 时，自身重复性保持未评估。
 
 ## 4. 对应官方命令
 

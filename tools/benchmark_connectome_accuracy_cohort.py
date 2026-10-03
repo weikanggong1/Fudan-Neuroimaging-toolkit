@@ -47,13 +47,26 @@ def validate_plan(config, manifest, bindings):
     return by_case
 
 
+def verify_tools(config):
+    if cohort.sha256(__file__) != config["accuracy_coordinator_sha256"]:
+        raise ValueError("accuracy coordinator changed after freeze")
+    if Path(config["worker_script"]).resolve() != Path(cohort.__file__).resolve() or (
+        cohort.sha256(cohort.__file__) != config["worker_script_sha256"]
+    ):
+        raise ValueError("actual worker differs from declared frozen tool")
+    if cohort.sha256(config["wall_script"]) != config["wall_script_sha256"]:
+        raise ValueError("wall tool changed after freeze")
+
+
 def execute(config_path):
     config_path = Path(config_path).resolve()
     config = json.loads(config_path.read_bytes())
     manifest, bindings = bound(config["raw_manifest"]), bound(config["input_bindings"])
     cases = validate_plan(config, manifest, bindings)
-    if cohort.sha256(__file__) != config["accuracy_coordinator_sha256"]:
-        raise ValueError("accuracy coordinator changed after freeze")
+    verify_tools(config)
+    config["frozen_sources"] = {name: cohort.source_manifest(path) for name, path in config["sources"].items()}
+    if config["frozen_sources"] != config["declared_source_manifests"]:
+        raise ValueError("actual source inventories differ from frozen phase declaration")
     root = cohort.require_fresh(config["run_root"])
     state = {
         "status": "running", "start_utc": cohort.utc(), "cases": {},
@@ -66,16 +79,14 @@ def execute(config_path):
     state_path = root / "status.json"
     cohort.atomic_json(root / "configuration.json", config)
     cohort.atomic_json(state_path, state)
-    config["frozen_sources"] = {name: cohort.source_manifest(path) for name, path in config["sources"].items()}
-    config["wall_script_sha256"] = cohort.sha256(config["wall_script"])
-    if config["frozen_sources"] != config["declared_source_manifests"]:
-        raise ValueError("actual source inventories differ from frozen phase declaration")
     cohort.atomic_json(root / "frozen_sources.json", config["frozen_sources"])
 
     def supplied_anatomy(actual_config, case, version, job):
         record = bindings["cases"][case["case_id"]]
         prior = bound(record["prior_gpu_report"])
-        if prior.get("status") != "completed" or prior.get("anatomy") != record["anatomy"]["files"]:
+        if (prior.get("status") != "completed" or prior.get("case_id") != case["case_id"] or
+            prior.get("anatomy") != record["anatomy"]["files"] or
+            prior.get("raw_input_provenance") != case["input_files"]):
             raise ValueError("prior completed official anatomy contract differs")
         return {"anatomy": record["anatomy"]["files"]}
 
