@@ -96,6 +96,7 @@ fnit UKBConnectome_pipeline \
 |`diagnose_formal_gradient_fix.py`|`--reference-root` 上述成功 reference；`--baseline-response`/`--candidate-response`、`--baseline-pipeline`/`--candidate-pipeline` 为冻结文件；`--device` 默认 CPU；`--output` 新目录。实际 GPU table 若与 CPU oracle 不同，不借用该 oracle|
 |`diagnose_normalise_quartiles.py`|`--source` 必须为冻结旧 mtnormalise；`--case-map` 实际 consumer 映射；`--device` 默认 CPU；`--output` 新目录。只比较四例完整官方 CSD 输入|
 |`diagnose_tensor_arithmetic.py`|算术次序候选诊断，`--contract` 实际 completed consumer；`--source` 冻结旧 response；`--device`/`--batch-size`/`--threads`；`--modes` 候选；`--output` 新目录。basis/RHS 候选已拒绝，未进入产品|
+|`inspect_saved_tensor_tails.py`|`--report` 十例已保存 report；`--cases` 默认 CON07/11；`--output` 新 JSON。只读完整输出和原 DWI，在全部原掩膜中报告 worst FA/方向坐标、batch 行、信号有效性与保存 tensor|
 |`make_precision_images.py`|`--reference-root`/`--diagnostic-root` 为同例实际输出；`--output` 新 PNG；统一误差色标，不以模拟数据替代|
 
 GPU 评测遵守共享 flock，固定已核实 GPU UUID，`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`。监测 Torch allocated/reserved 和 NVML 本进程；tensor 运算不启动 CUDA 子进程。共享负载、采样间隔和失败采样保留在报告。
@@ -132,18 +133,48 @@ mtnormalise wm_raw.nii.gz wm_norm.nii.gz gm_raw.nii.gz gm_norm.nii.gz \
 |CON03，98,625 体素|0.002352715|0，逐值相同|172 / 0|0|0|
 |CON10，115,626 体素|1.015095688|0.0000120401|183 / 1|0|0|
 
+### 正式调用输入，最新 CUDA 同输入对照
+
+|实际正式输入|原 GPU FNIT 对官方 FA max|修复后 FA max|原/新 `abs(error)>1e-5` 体素|修复后 P99|
+|---|---:|---:|---:|---:|
+|CON03，98,625 体素|0.046248853|0，逐值相同|196 / 0|0|
+|CON10，115,626 体素|0.921168730|0.00000536442|70,227 / 0|0|
+
+两例非有限值错配均为 0。旧 GPU caller 的实际梯度表与冻结 CPU 表不同，`cpu_float32_oracle_table_identical=false`，因此没有借用 CPU table 的官方输出；直接比较实际 `dwi2tensor -fslgrad` 结果。CPU 和 GPU 新 Double 梯度表分别有 242 / 268 项尾数不同，最大 `6.11e-16 / 1.22e-15`。将元数据计算改至 CPU 不能满足最终 GPU 表逐值保持，本轮不采用该速度候选。
+
 仅冻结同一 Float32 caller table、单独修 response，CON03 FA 逐值相同，CON10 最大差 `1.90735e-6`。这将 tensor 解释和梯度导入两个差异分别验证。原 Float32 world 方向对官方单位化导出表最大差 `1.17e-7 / 1.53e-7`；Double 导入为 `5.89e-11 / 5.23e-11`，受官方十位文本导出精度限制。
 
 ![CON10 相同实际正式 corrected 输入的 FA 脑图](formal_CON10_FA_precision.png)
 
-### 官方 own-corrected 输入，真实 GPU 算子诊断
+### 官方 own-corrected 输入，十例真实 GPU tensor 隔离
 
-|病例|原 FA max|仅单位化修复 FA max|结论|
-|---|---:|---:|---|
-|CON03|9.059906e-6|0|本次输入没有复现旧历史 0.046；实际当次 official tensor 严格绑定|
-|CON10|0.2456678|0.0003737211|只剩 1 个大于 1e-5 的病态尾部体素；未填零、加正则或删数据|
+以下采用每例已完成官方 corrected DWI、十位梯度表及原脑掩膜，只测试梯度单位化修复，独立于上述正式 caller 对照。所有掩膜体素保留；CON11 有 29 个两侧一致的非有限 FA，主表同时记录其余 105,741 个有限体素。
 
-basis 和 RHS 乘法次序候选在 CON10 GPU 使最大误差变为约 `0.00077`，未采用。此前 CON07 历史方向 41.63° 未在新 trace 重现，不用其他输入的 trace 解释旧结果。
+|病例|原 FA max|单位化修复 FA max|原/新 `abs(error)>1e-5`|修复后主方向最大夹角，正负等价|
+|---|---:|---:|---:|---:|
+|CON01|0.00720798969|1.1920929e-06|7 / 0|2.95755867e-06°|
+|CON03|9.05990601e-06|0|0 / 0|1.20741827e-06°|
+|CON04|0.0373284817|0.00076341629|10 / 2|1.90909591e-06°|
+|CON05|0.0010227561|4.17232513e-07|12 / 0|2.49792634e-05°|
+|CON06|0.0100548267|4.75645065e-05|20 / 1|0.00714247913°|
+|CON07|0.0478248257|0.0478248261|19 / 1|83.0171111°|
+|CON08|0.000649094582|0|5 / 0|3.07832466e-06°|
+|CON09|0.00135159492|0.000366449356|18 / 1|1.58038526°|
+|CON10|0.245667815|0.000373721123|8 / 1|1.70754729e-06°|
+|CON11|3.27825546e-05|6.90817833e-05|2 / 1|0.533877145°|
+
+十例 FA P99 均为 0，非有限值错配均为 0。CON11 最大 FA 误差增大，CON07 最大 FA 没有改善；不能据此宣称所有尾部都已匹配。CON07 `(66,42,12)` 是 mask 行 98,970、4096 批的第 24 批第 666 行，102 个测量中有 97 个负值；候选 FA 约 `3.51e-15`、官方约 `0.047824826`，方向差 83.017°。CON11 `(24,37,16)` 是 mask 行 2,069、第 0 批第 2,069 行，102 个测量中有 101 个负值；候选/官方 FA 为 `0.895630717 / 0.895561635`、方向差 0.533877°。完整原信号有效性、三套保存 tensor/FA/方向和 eigenvalues 见 `tail_rows.json`；这些是保存 Float32 tensor 的复核，不冒充官方 LLT 求解状态 trace。
+
+basis/RHS 乘法次序候选在 CON10 GPU 将最大误差增至约 `0.00077`，未采用。旧历史数字与本次 saved tensor、掩膜及实际 batch 行分别报告，不跨输入归因。
+
+CON01/03 各四轮 ABBA（每版本 8 次）使用完整原函数、同驻留输入和边界同步；tensor 插桩抓取另行调用：
+
+|病例|原函数中位 s|单位化候选中位 s|变化|
+|---|---:|---:|---:|
+|CON01|0.753054|0.848510|增加 0.095456 s，12.7%|
+|CON03|0.726241|0.823080|增加 0.096840 s，13.3%|
+
+同期外部 GPU 作业持续满负载，报告保留所有进程采样；这些是共享环境算子观察，不能推断空闲设备速度。修复有明确精度收益，但本次 tiny GPU 梯度解释使该算子多约 0.1 秒，未宣称算子速度无回归。用户整链速度门槛由协调者真实整链比较决定。十例 Torch allocated 最大 581,333,504 字节、reserved 最大 660,602,880 字节、NVML 本进程最大 2,558,525,440 字节，均 `<20e9`；采样失败和最大间隔在 JSON 中保留，没有 CUDA 子进程。正式 caller CUDA 诊断未另做 NVML 采样，不把十例隔离的显存当作完整 pipeline 显存。
 
 ### mtnormalise，四例完整固定官方 CSD 输入
 
@@ -156,7 +187,7 @@ basis 和 RHS 乘法次序候选在 CON10 GPU 使最大误差变为约 `0.00077`
 
 四例 WM/GM/CSF/field/accepted-mask 修复前后逐位相同；CON04/07 平衡因子仅约 `2e-15 / 1.92e-13` 变化。此修复保证 C++ 下标语义，不声称该四例最终图精度提高或单轮速度提高。官方平衡因子文本为有限有效位数，报告中的几 e-6 差不能解释为真实求解误差；全场 field 最大差保留在 JSON，不只截取掩膜。
 
-本轮当前 CPU focused/既有 response、CSD、pipeline 回归 `27 passed, 1 CUDA skipped`。正式十例 GPU tensor、CON01/03 四轮 ABBA、最新 CUDA 回归仍排共享锁；本报告不将排队或上述短诊断当作已完成端到端性能验收。全链时间、精度和严格 `<20e9` 三类显存验收由总控制实测补齐。
+最新完整 connectome CPU 测试：`653 passed, 29 skipped, 362 subtests passed`，51.21 秒；最新 focused CUDA 测试：`38 passed`，6.69 秒。测试源码绑定已合入的修复版本，测试环境补齐仓库已有工具及许可资产后完成；初次缺测试支持文件的失败不作为算法失败。十例 GPU tensor、CON01/03 ABBA 与正式 caller GPU 已完成。全链时间、精度和严格 `<20e9` 三类显存验收仍由总控制实测补齐。
 
 `formal_tensor_reference_cpu_v1` 只用于精度；其验证脚本计时边界包含随后 `-version` 身份探测，不作为官方 solver 性能数字。脚本已修正未来运行的时间边界，原 v1 报告和 SHA 保留。成对 GPU 时间使用实际 solver 边界，与此问题无关。
 
@@ -168,7 +199,7 @@ basis 和 RHS 乘法次序候选在 CON10 GPU 使最大误差变为约 `0.00077`
 - 2026-10-03：实际 bin `3.0.3-103-g026e850d` 与安装目录陈旧 Git HEAD 分开审计，按精确 commit 核对。
 - 同日：拒绝 basis/RHS 数学相同但尾部变坏的算术候选；只采用已证实梯度解释修复。
 - 同日：闭合 CON03/10 正式 caller CPU 输入，修复私有 Double FSL 导入；四例 mtnormalise 半数舍入语义修复并保存全场结果。
-- 同日：GPU 十例和成对速度/显存仍待锁后实际完成，最终结果在后续证据提交追加，保留本轮状态。
+- 同日：完成十例 GPU tensor、CON01/03 四轮 ABBA、正式 CON03/10 caller GPU 和完整 CPU/CUDA 回归；保留 CON07/11 具体尾部与算子约 0.1 秒增加，不改历史报告。
 
 ## 7. 参考文献与原实现
 
