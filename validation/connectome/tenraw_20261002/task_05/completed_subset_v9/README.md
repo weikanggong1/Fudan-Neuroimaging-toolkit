@@ -81,3 +81,21 @@ NEW_RECEIPT='/absolute/new/receipt.json'
 ## 参考
 
 [Fudan Neuroimaging Toolkit](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit) 原冻结 reference tools。新 metadata 只用Python标准库，原 NumPy/nibabel/matplotlib Conda环境复用，不增科学依赖。精度矩阵、脑图和端到端/分步科学耗时待root最终真实对照；不以fixture或CPU元数据验证代替。
+
+## 条件 comparison / summary / export launch
+
+新增 `run_connectome_actual_mixed_final_cpu.py` 仅运行已固定的 mixed metadata waiter；十例比较及表格完成并通过320唯一矩阵/130唯一FS记录门槛后，调用原冻结 `export_connectome_actual_cohort.py`，代表病例CON01/09、atlas fs-aparc。原 export 自身继续执行完整 source/output/summary guards。pending、v4失败或 reader错误均不导出。
+
+Root 在 headcw 的持久 launch 已准备于：
+
+```bash
+CPU_PYTHON='/cwStorage/home/gongwk/anaconda3/bin/python3.11'
+ROOT_CPU_LAUNCHER='/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_mixed_final_CPU_tools_v1/launch_actual_mixed_final_cpu_v1.py'
+"$CPU_PYTHON" "$ROOT_CPU_LAUNCHER"
+```
+
+此命令本窗口未运行。launcher 固定 chain/common/mixed/config SHA，检查新输出namespace不存在，使用新进程组写PID/start_ticks/完整argv/来源receipt；它不提交科学worker。chain CLI参数 `--configuration` 是实际mixed配置，`--mixed-tool` 为该配置SHA清单中的元数据entrypoint，`--mixed-report-dir` 为全新waiter目录，`--report-dir` 为全新CPU chain目录，`--export-report-dir` 为全新export目录；`--representative-cases` 默认CON01/09，`--figure-atlas` 默认fs-aparc。基础 wait interval60秒、timeout72小时；元数据停止/timeout结果明确pending。
+
+固定输出：`root_actual_mixed_final_CPU_chain_v1/status.json` 为最终chain状态；`root_actual_mixed_waiter_driver_v1/status.json` 为真实混合元数据/compare/summary状态；`root_actual_cohort_comparison_v3`、`root_actual_cohort_summary_v3`、`root_actual_cohort_export_v3` 为各阶段独立输出。仅十个唯一病例真实完成且导出成功时chain返回 `completed_actual_ten_unique_comparison_summary_export`。原v3失败driver、失败08和三未派发记录仍以receipt身份保留至最终chain报告。
+
+3项附加CPU export门槛测试通过：pending/failed不导出、空coverage即使flagcomplete仍拒绝、320/130重复记录拒绝。现场freeze验证全部v9 helper和原bindings SHA相同，五个最终namespace均不存在，长时waiter未启动，见 `actual_final_CPU_chain_freeze_verified.json`。数值/summary/export四reader及生产source全程未改。

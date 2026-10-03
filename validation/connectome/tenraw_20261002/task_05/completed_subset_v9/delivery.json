@@ -4,7 +4,9 @@
     "tools/reference/connectome_actual_gpu_origins_v9.py": "7c19f5078e743656d5eea63d196197dce4931c1eea5cae348eefc77928bdc352",
     "tools/reference/connectome_actual_gpu_completed_subset.py": "9f74c83790ff14ad19bc7b432dd8d21b9245daf6fa67a4cdc8c54eeb0197220c",
     "tools/watch_connectome_actual_mixed_completion.py": "dfe59311f8015fc04e2286f7b72fd7df3690b832849f2d367fca269453eac21f",
-    "tests/connectome/test_actual_completed_subset_receipt.py": "df563df0de714ac21b2562f87460df54a5ba4d1cab176a5e89b66e7613bf5562"
+    "tests/connectome/test_actual_completed_subset_receipt.py": "df563df0de714ac21b2562f87460df54a5ba4d1cab176a5e89b66e7613bf5562",
+    "tools/run_connectome_actual_mixed_final_cpu.py": "5b09fd00d8967a1ff39968acb03e62c19ffe1b5b833fa0e2ce33ffd1b7e28c09",
+    "tests/connectome/test_actual_mixed_cpu_export_gate.py": "f05a13582620adb7c9bc7008ae658b0da5b9dae593e8cd996dba727a1ac2e4ee"
   },
   "CPU_tests_passed": 151,
   "actual_six_readonly_validation": {
@@ -240,15 +242,70 @@
   "long_waiter_started": false,
   "files": {
     "actual_completed_subset_receipt.json": "07678861e9255ab526a8c9ddf44a3e7e959aaced16e10f2ed37858c83eea815d",
+    "CPU_export_gate_tests.log": "494e949c2091caff21f57fec157fb182976633bc3aca77b131213a3587d0da7f",
     "CPU_all_151_guard_tests.log": "ce39aaf291abf3644bf2e5157b17a67dad725b4db7c6f36604d68191554796b5",
     "six_actual_origins.json": "d057573106e90f6f25bb8edf261ff2d1d1c207a59056b93a8eefc0c8cda69ac9",
     "CPU_subset_and_mixed_guard_tests.log": "58517e89452b97da0260b19575b1ec70ca6052faca5031959270ee92141354bb",
     "mixed_waiter_configuration_v1.json": "d4e443a6045aee2a475ba5b56051145acb209cb6ba5ff7405877449bf70d2dbe",
-    "README.md": "195c019bd6ea7e6c0932e5941abb9f83ee6e67ced2a76ef3f19ef221ef3d159d",
+    "README.md": "95b7def1c2801d59c67a14d68d850dc5f112fe2f6465959809574e08eb6146a5",
     "actual_v8_failed_driver_minrep.json": "c49d2e42556da3e63c99649b16b824a92f8ae212445ec4110718d8af597b1253",
     "actual_mixed_pending_observation_v1.json": "834268916bc67dbc7ed280f895dadf8b2a8b3d1825d8966e12574d30be828c35",
+    "launch_actual_mixed_final_cpu_v1.py": "bc38278f7fdb2bf07a551c293dfea061bf03633eb51af47c7edc1fa84baebf82",
     "actual_six_readonly_validation.json": "01ffab988a6517ef91236e2a58f2cf8d42edbf6acb856ad3f836ec420301b108",
     "reader_metadata_only_change_audit.json": "23bae701fd90371c93999a58f1a73386f45735a0fd1e69fdd7e1f589e4c8ab57",
+    "actual_final_CPU_chain_freeze_verified.json": "6c8becee47f19b6512b0173fe048e13188f0df84e525a7e2a000e641281b5c08",
     "CPU_all_v9_146_guard_tests.log": "5df487d120554104b20f62b06abc8d8295ae4d2078dc9a2e841f3753373c16e2"
+  },
+  "additional_CPU_export_gate_tests": 3,
+  "conditional_CPU_chain_deployment": {
+    "scope": "real readonly freeze verification; persistent launch NOT run",
+    "files": [
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_mixed_final_CPU_tools_v1/launch_actual_mixed_final_cpu_v1.py",
+        "sha256": "bc38278f7fdb2bf07a551c293dfea061bf03633eb51af47c7edc1fa84baebf82"
+      },
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_mixed_final_CPU_tools_v1/watch_connectome_actual_completion.py",
+        "sha256": "6a9bb15609fd1d1fddf2931f6b598ff344c0e1306cefc75420ae90f1bd390cf9"
+      },
+      {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_mixed_final_CPU_tools_v1/run_connectome_actual_mixed_final_cpu.py",
+        "sha256": "5b09fd00d8967a1ff39968acb03e62c19ffe1b5b833fa0e2ce33ffd1b7e28c09"
+      }
+    ],
+    "configuration": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_mixed_waiter_tools_v1/configuration.json",
+      "sha256": "d4e443a6045aee2a475ba5b56051145acb209cb6ba5ff7405877449bf70d2dbe"
+    },
+    "all_frozen_v9_helper_and_original_bindings_match": true,
+    "actual_pending_observation": {
+      "status": "pending_actual_v4_completed_subset",
+      "waiter_sha256": "6a9bb15609fd1d1fddf2931f6b598ff344c0e1306cefc75420ae90f1bd390cf9",
+      "configuration_sha256": "d4e443a6045aee2a475ba5b56051145acb209cb6ba5ff7405877449bf70d2dbe",
+      "MRI_or_GPU_started": false,
+      "v3_completed_subset_preserved": 6,
+      "v4_completed_observed": 0,
+      "v4_expected": 4,
+      "original_v3_driver_status": "selected_recovery_failed_or_ineligible",
+      "final_CPU_comparison_started": false,
+      "waiter_observation_seconds": 0.3048491468653083
+    },
+    "original_failed_v3driver": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_driver_v3/status.json",
+      "sha256": "dfb47c98dee06dd4062bb480dafce13f06e4d358e77460d03e636a6e85dfe7a8",
+      "status": "selected_recovery_failed_or_ineligible"
+    },
+    "final_and_waiter_namespaces_exist": {
+      "root_actual_mixed_final_CPU_chain_v1": false,
+      "root_actual_mixed_waiter_driver_v1": false,
+      "root_actual_cohort_comparison_v3": false,
+      "root_actual_cohort_summary_v3": false,
+      "root_actual_cohort_export_v3": false
+    },
+    "GPU_or_MRI_started_by_this_metadata_task": false
+  },
+  "root_launcher": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_mixed_final_CPU_tools_v1/launch_actual_mixed_final_cpu_v1.py",
+    "sha256": "bc38278f7fdb2bf07a551c293dfea061bf03633eb51af47c7edc1fa84baebf82"
   }
 }
