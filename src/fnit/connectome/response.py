@@ -315,6 +315,28 @@ def prepare_mrtrix_dhollander_sdm(
     return eroded, safe, safe_sdm
 
 
+def _mrtrix_interpret_tensor_gradients(gradient: torch.Tensor) -> torch.Tensor:
+    """Interpret a Double MRtrix gradient table as ``dwi2tensor -grad``.
+
+    Input/output are same-device Float64 ``[N,4]``: world-frame direction
+    and b-value. MRtrix always normalises nonzero directions, including the
+    small norm errors introduced by its ten-digit text export. Its default
+    Auto policy scales b-values only when max(abs(log(norm²))) > 0.01.
+    Zero direction rows are retained; the caller's tensor is never mutated.
+    No signal, mask, tensor estimator or precision policy is changed.
+    """
+    gradient = gradient.clone()
+    squared_norm = (gradient[:, 0].square() + gradient[:, 1].square()
+                    + gradient[:, 2].square())
+    nonzero = squared_norm > 0
+    divisor = torch.where(nonzero, squared_norm.sqrt(), 1.)
+    gradient[:, :3] /= divisor[:, None]
+    log_scaling = torch.where(nonzero, squared_norm.log().abs(), 0.)
+    if bool(log_scaling.max() > 0.01):
+        gradient[:, 3] *= squared_norm
+    return gradient
+
+
 def fit_mrtrix_dhollander_tensor(
     signal: torch.Tensor,
     grad_mrtrix: torch.Tensor,
@@ -326,6 +348,10 @@ def fit_mrtrix_dhollander_tensor(
     Inputs: corrected float32 DWI [X,Y,Z,N] on CPU/CUDA; MRtrix-exported
     gradient scheme [N,4] in the gradient frame with b-values in s/mm²;
     affine-aligned bool safe mask [X,Y,Z]; maximum voxels per solve.
+    The gradient table is interpreted with MRtrix's default Auto policy:
+    nonzero directions are normalised in Float64, including export rounding;
+    b-values scale by norm² only when the maximum absolute log scaling
+    exceeds 0.01. Neither caller gradients nor signal/mask are mutated.
     Returns (fa, principal_vector): float32 [X,Y,Z] and [X,Y,Z,3] on the
     input device, zero outside the mask. Vectors use the MRtrix gradient
     frame, have unit length within the mask and may have either antipodal
@@ -353,6 +379,7 @@ def fit_mrtrix_dhollander_tensor(
     mask = torch.as_tensor(safe_mask, device=device, dtype=torch.bool)
     if grad.shape != (signal.shape[-1], 4) or mask.shape != signal.shape[:3]:
         raise ValueError("gradient or safe mask shape differs from DWI")
+    grad = _mrtrix_interpret_tensor_gradients(grad)
     gx, gy, gz, b = grad.unbind(dim=1)
     design = torch.stack((
         -b * gx.square(), -b * gy.square(), -b * gz.square(),

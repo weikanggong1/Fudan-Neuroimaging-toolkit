@@ -34,6 +34,11 @@ def _basis(world: torch.Tensor) -> torch.Tensor:
     ), dim=-1)
 
 
+def _mrtrix_quartile_indices(count: int) -> tuple[int, int]:
+    """Zero-based nth_element indices using C++ positive half-up rounding."""
+    return math.floor(count * .25 + .5), math.floor(count * .75 + .5)
+
+
 @torch.inference_mode()
 def normalise_mrtrix_three_tissue(
     wm_sh: torch.Tensor,
@@ -55,6 +60,8 @@ def normalise_mrtrix_three_tissue(
     csf.mif csf_norm.mif -mask brain_mask.mif``. The default third-order
     polynomial, 15 main updates, up to 7 tissue balance updates, and reference
     0.28209479177 are fixed to match the original invocation.
+    Outlier quartile indices use C++ positive half-up rounding; Python's
+    ties-to-even ``round`` is not equivalent for mask sizes 2 modulo 4.
     """
     shape = wm_sh.shape[:3]
     if (wm_sh.ndim != 4 or wm_sh.shape[-1] < 1 or gm.shape != shape or
@@ -87,8 +94,9 @@ def normalise_mrtrix_three_tissue(
         logsum = ((data @ factors) / field).log()
         ordered = torch.where(torch.isnan(logsum), -float("inf"), logsum)
         n = len(ordered)
-        lower = ordered.kthvalue(round(n * .25) + 1).values
-        upper = ordered.kthvalue(round(n * .75) + 1).values
+        lower_index, upper_index = _mrtrix_quartile_indices(n)
+        lower = ordered.kthvalue(lower_index + 1).values
+        upper = ordered.kthvalue(upper_index + 1).values
         width = upper - lower
         revised = (torch.isfinite(logsum) &
                    (logsum >= lower - multiplier * width) &
