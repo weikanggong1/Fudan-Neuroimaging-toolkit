@@ -223,6 +223,8 @@ fnit UKBConnectome_pipeline \
 
 状态记录用文件大小、mtime 和参数核对 FNIT 自己产生的中间结果，不是内容哈希。外部替换了文件但保留原大小/mtime 时加 `--overwrite`。在其他软件中已完成 TOPUP/EDDY 时，同时给 `--corrected-dwi` 和 `--rotated-bvecs`；原始 BIDS bval 仍定义每卷 b 值。`--overwrite` 强制重算并覆盖同名结果。
 
+connectome 完成记录还包含数值实现版本。本轮梯度及 ACT 精度修正使用 `accuracy-20261003-v1`，因此旧版矩阵会重新计算；当前版本同输入、同参数且产物完整时继续跳过。TOPUP/EDDY 各自依据原阶段记录复用。
+
 ## 4. 原软件调用
 
 ### FNIT 步骤与官方步骤

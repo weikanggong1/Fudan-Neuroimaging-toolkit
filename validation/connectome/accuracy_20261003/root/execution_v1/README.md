@@ -37,7 +37,7 @@ print(accuracy_configuration["execution_order"])  # 实际十二次安排，不�
 - `inventory.json`：复制前后核验的原文件位置、大小和 SHA。正文记录的时间只取对应实际日志。
 - `regression/`：原失败与成功日志分别存放；没有将失败文件改名为成功。
 
-三个科学指纹：配置 SHA 如上；baseline `328c398496c5b90f459381ca462ba6597cbbe5f2e9700f0b1a273f1408962bac`；candidate `a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82`。输入 raw manifest SHA 为 `cc33e925a9e07362103b51f7bb70363a380d89b11a19545837676ba9a4ffae70`。
+配置 SHA 如上；两份科学源码指纹为 baseline `328c398496c5b90f459381ca462ba6597cbbe5f2e9700f0b1a273f1408962bac`、candidate `a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82`。输入 raw manifest SHA 为 `cc33e925a9e07362103b51f7bb70363a380d89b11a19545837676ba9a4ffae70`。
 
 ## 3. 命令行调用
 
