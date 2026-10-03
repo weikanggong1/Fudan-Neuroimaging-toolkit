@@ -45,12 +45,21 @@ def load_image(value, name: str = "image") -> nib.spatialimages.SpatialImage:
 
 
 def new_image(data, reference: nib.spatialimages.SpatialImage, *, affine=None):
-    """Create a float/int NIfTI while retaining the reference world geometry."""
+    """Create a NIfTI, retaining stored geometry when its grid is unchanged.
+
+    Re-encoding an unchanged qform can round pixdim across an integer field
+    of view boundary. Keep the reference NIfTI forms and zooms in that case;
+    an explicit new affine or a non-NIfTI reference receives new forms.
+    """
     array = np.asarray(data)
     header = nib.Nifti1Header.from_header(reference.header)
     header.set_data_dtype(array.dtype)
     target_affine = reference.affine if affine is None else affine
     image = FNITNifti1Image(array, target_affine, header)
+    if (isinstance(reference.header, nib.Nifti1Header)
+            and np.array_equal(target_affine, reference.affine)
+            and array.shape[:3] == reference.shape[:3]):
+        return image
     image.set_qform(target_affine, int(header["qform_code"]))
     # MGH has no NIfTI sform code. Code 0 would discard the supplied affine
     # and make nibabel fall back to a centered, axis-aligned voxel grid.
