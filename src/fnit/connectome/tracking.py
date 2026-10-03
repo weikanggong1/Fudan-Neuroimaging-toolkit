@@ -387,6 +387,21 @@ def _ifod2_arc_probability(
     return probability, midpoint, endpoint, mid_amplitude, end_amplitude
 
 
+def _ifod2_sgm_chord_metrics(
+    points: torch.Tensor, incoming: torch.Tensor, sample_fod, *, lmax: int,
+) -> torch.Tensor:
+    """Evaluate EXIT_SGM metrics at selected world-mm vertices ``[N,3]``.
+
+    ``incoming`` is the vertex minus the immediately preceding internal
+    vertex, before iFOD2 downsampling. ``sample_fod`` returns float32 SH
+    coefficients ``[N,C]``. Returns the float32 incoming-chord FOD amplitude
+    ``[N]`` required by MRtrix ``Exec::truncate_exit_sgm``. This direction
+    differs from the arc tangent used for rejection sampling.
+    """
+    chords = F.normalize(incoming, dim=-1)
+    return (sample_fod(points) * tracking_sh_precomputed(chords, lmax)).sum(-1)
+
+
 def _grow(
     seeds: torch.Tensor,
     tangents: torch.Tensor,
@@ -510,6 +525,28 @@ def _grow(
                                      half_log_start)
         mid_tissue = _five_tissue_mrtrix(five_tissue, chosen_mid, five_inverse)
         chosen_end_tissue = _five_tissue_mrtrix(five_tissue, chosen_end, five_inverse)
+        # EXIT_SGM selects the minimum model metric among the SGM vertices.
+        # MRtrix evaluates this with the incoming stored segment direction,
+        # rather than the iFOD2 tangent used in the arc probability. Sample
+        # only selected SGM vertices; the proposal distribution is unchanged.
+        metric_points = torch.cat((chosen_mid, chosen_end), dim=0)
+        metric_tissue = torch.cat((mid_tissue, chosen_end_tissue), dim=0)
+        cgm, sgm, wm, csf, pathology = metric_tissue.unbind(-1)
+        in_sgm = ((metric_tissue.sum(-1) >= .5) & (sgm > cgm) &
+                  (cgm + sgm >= wm) & (cgm + sgm > csf) &
+                  (cgm + sgm > pathology) &
+                  ~((csf >= cgm) & (csf >= sgm) & (csf >= wm) & (csf >= pathology)))
+        metric_rows = (in_sgm & moving.repeat(2)).nonzero(as_tuple=False).flatten()
+        if metric_rows.numel():
+            incoming = torch.cat((chosen_mid - positions,
+                                  chosen_end - chosen_mid), dim=0)
+            values = _ifod2_sgm_chord_metrics(
+                metric_points[metric_rows], incoming[metric_rows], sample_fod, lmax=lmax)
+            structural_metrics = torch.cat((mid_metric, end_metric), dim=0)
+            structural_metrics[metric_rows] = values
+            mid_structural_metric, end_structural_metric = structural_metrics.split(batch)
+        else:
+            mid_structural_metric, end_structural_metric = mid_metric, end_metric
         ended_in_gm |= active & ~moving & (sgm_depth > 0)
         previous_seed_to_wm = seed_to_wm
         mid_term, new_depth, new_to_wm, mid_sgm = _act_structural_step(
@@ -524,8 +561,8 @@ def _grow(
             ~previous_seed_to_wm & seed_to_wm,
             torch.full_like(best_sgm_metric, float('inf')), best_sgm_metric,
         )
-        better_mid = moving & mid_sgm & (mid_metric < best_sgm_metric)
-        best_sgm_metric = torch.where(better_mid, mid_metric, best_sgm_metric)
+        better_mid = moving & mid_sgm & (mid_structural_metric < best_sgm_metric)
+        best_sgm_metric = torch.where(better_mid, mid_structural_metric, best_sgm_metric)
         best_sgm_position = torch.where(better_mid[:, None], chosen_mid, best_sgm_position)
         best_sgm_count = torch.where(better_mid, counts + 1, best_sgm_count)
         best_sgm_length = torch.where(
@@ -546,8 +583,8 @@ def _grow(
             torch.full_like(best_sgm_metric, float('inf')), best_sgm_metric,
         )
         better_end = (end_active & end_sgm & (end_term == 0) &
-                      (end_metric < best_sgm_metric))
-        best_sgm_metric = torch.where(better_end, end_metric, best_sgm_metric)
+                      (end_structural_metric < best_sgm_metric))
+        best_sgm_metric = torch.where(better_end, end_structural_metric, best_sgm_metric)
         best_sgm_position = torch.where(better_end[:, None], chosen_end, best_sgm_position)
         best_sgm_count = torch.where(better_end, counts + 1, best_sgm_count)
         best_sgm_length = torch.where(
@@ -781,8 +818,10 @@ def probabilistic_tractography(
     is the 5TT header voxel spacing; if absent, affine column norms are used.
     Cortical GM-side ACT seeds are oriented toward WM and tracked one-way.
     iFOD2 propagation uses calibrated rejection sampling. ACT seed and
-    per-point structural states were checked on real inputs; full-track
-    truncation and image-exit parity are still under validation.
+    per-point structural states were checked on real inputs. SGM exit
+    truncation evaluates incoming internal chords before downsampling,
+    following MRtrix3 3.0.3-103-g026e850d. Full-track population and matrix
+    equivalence remain subject to independent stochastic-repeat validation.
     ``compile_arc=True`` compiles only the iFOD2 arc probability kernel with
     PyTorch Inductor on CUDA. It preserves float32/TF32 and spends additional
     time compiling on first use; choose it for high seed counts.

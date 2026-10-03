@@ -1,0 +1,438 @@
+{
+  "scope": "actual formal corrected DWI and actual native CPU FSL input; no raw or full pipeline rerun",
+  "device": "cuda:0",
+  "reference_report_sha256": "986fcabe63060d1fe4a96338338c1342fd61b797405dbdf0d816249e5cf8bc96",
+  "harness_sha256": "58120acbb51918320418202181d97aa79c58a899482cd1fe2014b0fc2021ed46",
+  "source_sha256": {
+    "baseline_response": "258938a5f20ee7a6efc2fc1c50af5c93412030a60b78036438e8473f072e3b91",
+    "candidate_response": "2a595044ff31a6497df5efcdeb5df7fe5a651c89a00f629dd819105707e40ebb",
+    "baseline_pipeline": "2136074050afd5e1c1b1a2506332e792903fab3b273ac6e0bbe3e3c72ba6245c",
+    "candidate_pipeline": "f34335fc8ad9974662c5736d2074adb031b7ad60017a4ca5d124d96687694b93"
+  },
+  "cases": {
+    "CON03": {
+      "cpu_float32_oracle_table_identical": false,
+      "mask_voxels": 98626,
+      "versions": {
+        "baseline_response_baseline_grad_vs_native_fslgrad": {
+          "instrumented_wall_s": 0.9161583781242371,
+          "errors": {
+            "all": {
+              "fa": {
+                "finite_elements": 98625,
+                "neq": 75457,
+                "max": 0.04624885320663452,
+                "p99": 2.384185791015625e-07,
+                "p999": 3.604602813720749e-05,
+                "rmse": 0.00014754822773832178,
+                "abs_gt_1e_minus5": 196,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 295875,
+                "neq": 263135,
+                "max": 1.9999781847000122,
+                "p99": 1.9485882914066315,
+                "p999": 1.995015677690506,
+                "rmse": 0.6920686525471115,
+                "abs_gt_1e_minus5": 106302,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 591750,
+                "neq": 490934,
+                "max": 2.165045589208603e-05,
+                "p99": 6.693881005048752e-10,
+                "p999": 1.3464855328493934e-08,
+                "rmse": 7.157421522342772e-08,
+                "abs_gt_1e_minus5": 9,
+                "nonfinite_mismatch": 0
+              }
+            },
+            "positive_measurements_reporting": {
+              "fa": {
+                "finite_elements": 86372,
+                "neq": 65848,
+                "max": 3.5762786865234375e-07,
+                "p99": 1.1920928955078125e-07,
+                "p999": 1.4901161193847656e-07,
+                "rmse": 3.885758075598073e-08,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 259116,
+                "neq": 230150,
+                "max": 1.9999781847000122,
+                "p99": 1.9485316514968871,
+                "p999": 1.9950928193330772,
+                "rmse": 0.6897954627807675,
+                "abs_gt_1e_minus5": 92487,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 518232,
+                "neq": 428723,
+                "max": 1.3969838619232178e-09,
+                "p99": 4.656612873077393e-10,
+                "p999": 9.313225746154785e-10,
+                "rmse": 1.0078052069509128e-10,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              }
+            },
+            "nonpositive_measurements_reporting": {
+              "fa": {
+                "finite_elements": 12253,
+                "neq": 9609,
+                "max": 0.04624885320663452,
+                "p99": 2.6941299438476562e-05,
+                "p999": 0.00022836685180663285,
+                "rmse": 0.00041860679676829373,
+                "abs_gt_1e_minus5": 196,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 36759,
+                "neq": 32985,
+                "max": 1.9999291896820068,
+                "p99": 1.9492517983913418,
+                "p999": 1.9946214588880535,
+                "rmse": 0.7078854220235216,
+                "abs_gt_1e_minus5": 13815,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 73518,
+                "neq": 62211,
+                "max": 2.165045589208603e-05,
+                "p99": 8.20233253762131e-09,
+                "p999": 2.8547650435939307e-07,
+                "rmse": 2.0306192981063309e-07,
+                "abs_gt_1e_minus5": 9,
+                "nonfinite_mismatch": 0
+              }
+            }
+          },
+          "direction_max_antipodal_degrees": 0.0026818972285278316,
+          "output_sha256": "89e66afffd1d2212e7df6acd0bf3d308da35fc050a8b316bff38d4ab41f91d0e"
+        },
+        "candidate_response_candidate_grad_vs_native_fslgrad": {
+          "instrumented_wall_s": 0.8195862574502826,
+          "errors": {
+            "all": {
+              "fa": {
+                "finite_elements": 98625,
+                "neq": 0,
+                "max": 0.0,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 0.0,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 295875,
+                "neq": 106284,
+                "max": 1.9999781847000122,
+                "p99": 1.9485884881019593,
+                "p999": 1.995015677690506,
+                "rmse": 0.6920686525918387,
+                "abs_gt_1e_minus5": 106283,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 591750,
+                "neq": 3,
+                "max": 1.4551915228366852e-11,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 2.006445113292043e-14,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              }
+            },
+            "positive_measurements_reporting": {
+              "fa": {
+                "finite_elements": 86372,
+                "neq": 0,
+                "max": 0.0,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 0.0,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 259116,
+                "neq": 92469,
+                "max": 1.9999781847000122,
+                "p99": 1.9485316514968871,
+                "p999": 1.9950928193330772,
+                "rmse": 0.6897954628248093,
+                "abs_gt_1e_minus5": 92469,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 518232,
+                "neq": 0,
+                "max": 0.0,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 0.0,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              }
+            },
+            "nonpositive_measurements_reporting": {
+              "fa": {
+                "finite_elements": 12253,
+                "neq": 0,
+                "max": 0.0,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 0.0,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 36759,
+                "neq": 13815,
+                "max": 1.9999291896820068,
+                "p99": 1.9492517638206477,
+                "p999": 1.9946215040683744,
+                "rmse": 0.7078854220729685,
+                "abs_gt_1e_minus5": 13814,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 73518,
+                "neq": 3,
+                "max": 1.4551915228366852e-11,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 5.692454597041812e-14,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              }
+            }
+          },
+          "direction_max_antipodal_degrees": 4.829673078902935e-06,
+          "output_sha256": "2cc87a870adc6007ab3f72015716b9f0fdda9397df7cec8b85806a9a678a5b67"
+        }
+      }
+    },
+    "CON10": {
+      "cpu_float32_oracle_table_identical": false,
+      "mask_voxels": 115632,
+      "versions": {
+        "baseline_response_baseline_grad_vs_native_fslgrad": {
+          "instrumented_wall_s": 1.156810323242098,
+          "errors": {
+            "all": {
+              "fa": {
+                "finite_elements": 115626,
+                "neq": 115580,
+                "max": 0.9211687296628952,
+                "p99": 0.00017175078392028809,
+                "p999": 0.0006509199738502502,
+                "rmse": 0.0029070929395831635,
+                "abs_gt_1e_minus5": 70227,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 346878,
+                "neq": 346791,
+                "max": 1.9999895691871643,
+                "p99": 1.94719908952713,
+                "p999": 1.9943268696069725,
+                "rmse": 0.693204195297311,
+                "abs_gt_1e_minus5": 314626,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 693756,
+                "neq": 693349,
+                "max": 0.01414100918918848,
+                "p99": 4.1922467062249644e-07,
+                "p999": 2.4376879810006225e-06,
+                "rmse": 2.9413530907898134e-05,
+                "abs_gt_1e_minus5": 105,
+                "nonfinite_mismatch": 0
+              }
+            },
+            "positive_measurements_reporting": {
+              "fa": {
+                "finite_elements": 102231,
+                "neq": 102190,
+                "max": 0.0006619691848754883,
+                "p99": 8.380413055419922e-05,
+                "p999": 0.00015589833259582568,
+                "rmse": 2.6302542640868017e-05,
+                "abs_gt_1e_minus5": 60429,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 306693,
+                "neq": 306613,
+                "max": 1.9999895691871643,
+                "p99": 1.9460502719879154,
+                "p999": 1.9943090372085575,
+                "rmse": 0.6892989981583835,
+                "abs_gt_1e_minus5": 276726,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 613386,
+                "neq": 613022,
+                "max": 1.2521632015705109e-06,
+                "p99": 2.3283282644115422e-07,
+                "p999": 4.6971777919679555e-07,
+                "rmse": 5.508370755715214e-08,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              }
+            },
+            "nonpositive_measurements_reporting": {
+              "fa": {
+                "finite_elements": 13395,
+                "neq": 13390,
+                "max": 0.9211687296628952,
+                "p99": 0.0005932068824768065,
+                "p999": 0.0022489215135574284,
+                "rmse": 0.00854082043273942,
+                "abs_gt_1e_minus5": 9798,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 40185,
+                "neq": 40178,
+                "max": 1.9998798370361328,
+                "p99": 1.9537213778495788,
+                "p999": 1.994461436271667,
+                "rmse": 0.7223136222705899,
+                "abs_gt_1e_minus5": 37900,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 80370,
+                "neq": 80327,
+                "max": 0.01414100918918848,
+                "p99": 2.2277701646089445e-06,
+                "p999": 1.1999106034634908e-05,
+                "rmse": 8.641773524060007e-05,
+                "abs_gt_1e_minus5": 105,
+                "nonfinite_mismatch": 0
+              }
+            }
+          },
+          "direction_max_antipodal_degrees": 89.99374350834597,
+          "output_sha256": "aa306d7ec989daac4174366a175af15cab174e91c8a530d4ed104eb5d65dd94b"
+        },
+        "candidate_response_candidate_grad_vs_native_fslgrad": {
+          "instrumented_wall_s": 0.7651067720726132,
+          "errors": {
+            "all": {
+              "fa": {
+                "finite_elements": 115626,
+                "neq": 2,
+                "max": 5.364418029785156e-06,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 1.57761695317843e-08,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 346878,
+                "neq": 125013,
+                "max": 1.9999889135360718,
+                "p99": 1.947200047969818,
+                "p999": 1.9943485674858095,
+                "rmse": 0.6931834040692558,
+                "abs_gt_1e_minus5": 125006,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 693756,
+                "neq": 17,
+                "max": 1.705484464764595e-08,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 3.538500837889745e-11,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              }
+            },
+            "positive_measurements_reporting": {
+              "fa": {
+                "finite_elements": 102231,
+                "neq": 0,
+                "max": 0.0,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 0.0,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 306693,
+                "neq": 109285,
+                "max": 1.9999889135360718,
+                "p99": 1.9460621738433839,
+                "p999": 1.994315610885621,
+                "rmse": 0.6892800801028879,
+                "abs_gt_1e_minus5": 109284,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 613386,
+                "neq": 0,
+                "max": 0.0,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 0.0,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              }
+            },
+            "nonpositive_measurements_reporting": {
+              "fa": {
+                "finite_elements": 13395,
+                "neq": 2,
+                "max": 5.364418029785156e-06,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 4.635087707532235e-08,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              },
+              "direction": {
+                "finite_elements": 40185,
+                "neq": 15728,
+                "max": 1.9998836517333984,
+                "p99": 1.9537325143814086,
+                "p999": 1.994457053184509,
+                "rmse": 0.7222791682292957,
+                "abs_gt_1e_minus5": 15722,
+                "nonfinite_mismatch": 0
+              },
+              "tensor": {
+                "finite_elements": 80370,
+                "neq": 17,
+                "max": 1.705484464764595e-08,
+                "p99": 0.0,
+                "p999": 0.0,
+                "rmse": 1.0396225588062802e-10,
+                "abs_gt_1e_minus5": 0,
+                "nonfinite_mismatch": 0
+              }
+            }
+          },
+          "direction_max_antipodal_degrees": 2.9575586669421963e-06,
+          "output_sha256": "0f5e86873e2fdb977fe39737e788274a538b9a409082b5244475bbc5b8f79b31"
+        }
+      }
+    }
+  }
+}

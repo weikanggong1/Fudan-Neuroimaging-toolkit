@@ -1,0 +1,306 @@
+{
+  "host": "nodecw10",
+  "scope": "official CPU tensor on actual formal FNIT corrected DWI; no raw rerun",
+  "pipeline_sha256": "2136074050afd5e1c1b1a2506332e792903fab3b273ac6e0bbe3e3c72ba6245c",
+  "harness_sha256": "837e8d29054378ac1b879eec1833f4b7127e1607e1ed3e8bf157e8eb1c17e2d4",
+  "cases": {
+    "CON03": {
+      "sources": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.nii.gz": "380daf69bd9511703d15bbe89fb3a80a46762659159570d1f05c79c6e92431e9",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.eddy_rotated_bvecs": "68290d47221029fa5e37f7fffe15219c35e2748cbb2ae652b4d30347747bff17",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/brain_mask_dwi.nii.gz": "4c5ad827cc1bbb3b52f52312ef37479c430dd10520840aa753b5c0af6363c565",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/gpu_report.json": "ebab0f0366de15b7010daa3e8a9a7dc2caea5b090a49bb1578f8326f89858823",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/raw_bids_wall.json": "28305eb0880aa6d722483b5d365a13084b3b5c82d70666eecae812382128d0aa"
+      },
+      "commands": [
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.nii.gz",
+            "-fslgrad",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.eddy_rotated_bvecs",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.bval",
+            "-bvalue_scaling",
+            "no",
+            "-export_grad_mrtrix",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad.txt",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 0.1956072673201561,
+          "binary_sha256": "c8b583a5791bb9e4aefaba85ac19df30fd1b77ae37dee842c0b1a8195e037e53",
+          "version": "== mrinfo 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): J-Donald Tournier (d.tournier@brain.org.au) and Robert E. Smith (robert.smith@florey.edu.au)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.nii.gz": "380daf69bd9511703d15bbe89fb3a80a46762659159570d1f05c79c6e92431e9",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.eddy_rotated_bvecs": "68290d47221029fa5e37f7fffe15219c35e2748cbb2ae652b4d30347747bff17",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad.txt": "8309047fc5f7bb06dbd4d7308acc326d8ed2b317aea6335a43d0e90069db2e10"
+          }
+        },
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad_tensor.nii.gz",
+            "-mask",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/brain_mask_dwi.nii.gz",
+            "-fslgrad",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.eddy_rotated_bvecs",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.bval",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 2.0582974329590797,
+          "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
+          "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.nii.gz": "380daf69bd9511703d15bbe89fb3a80a46762659159570d1f05c79c6e92431e9",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/brain_mask_dwi.nii.gz": "4c5ad827cc1bbb3b52f52312ef37479c430dd10520840aa753b5c0af6363c565",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.eddy_rotated_bvecs": "68290d47221029fa5e37f7fffe15219c35e2748cbb2ae652b4d30347747bff17",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON03/ses-preop/dwi/sub-CON03_ses-preop_acq-AP_dwi.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad_tensor.nii.gz": "54099c36dc7c73088e3fbceeb98e267ac90a16752a511cfc3826cc516d9208bc"
+          }
+        },
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad_tensor.nii.gz",
+            "-fa",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad_fa.nii.gz",
+            "-vector",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad_direction.nii.gz",
+            "-modulate",
+            "none",
+            "-mask",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/brain_mask_dwi.nii.gz",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 0.21237777173519135,
+          "binary_sha256": "658b3c6e203edad601d3a7bcd940c355f66e63e11800e3de5e0ef13fc80c4a9e",
+          "version": "== tensor2metric 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Thijs Dhollander (thijs.dhollander@gmail.com) & Ben Jeurissen (ben.jeurissen@uantwerpen.be) & J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad_tensor.nii.gz": "54099c36dc7c73088e3fbceeb98e267ac90a16752a511cfc3826cc516d9208bc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/brain_mask_dwi.nii.gz": "4c5ad827cc1bbb3b52f52312ef37479c430dd10520840aa753b5c0af6363c565"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad_fa.nii.gz": "ea9846e0aa165d3a7473bd5c08ed70d95f87d1b9fc90a94a451cea164e3f571f",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/native_fslgrad_direction.nii.gz": "c3f46bce2f7171e0d90efa2f2ebcf596405dc1f7396755c6caed2520dfcac3cf"
+          }
+        },
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_tensor.nii.gz",
+            "-mask",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/brain_mask_dwi.nii.gz",
+            "-grad",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_grad.txt",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 2.0417622551321983,
+          "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
+          "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/preproc/eddy/data.nii.gz": "380daf69bd9511703d15bbe89fb3a80a46762659159570d1f05c79c6e92431e9",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/brain_mask_dwi.nii.gz": "4c5ad827cc1bbb3b52f52312ef37479c430dd10520840aa753b5c0af6363c565",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_grad.txt": "2b51bb6baa36fb21e17450cc6264054520bace2fd41cd07260b1c86c80ca5536"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_tensor.nii.gz": "9236dc665025240d43640b501378be0f8af1314c9165044b039e6c1c05529377"
+          }
+        },
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_tensor.nii.gz",
+            "-fa",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_fa.nii.gz",
+            "-vector",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_direction.nii.gz",
+            "-modulate",
+            "none",
+            "-mask",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/brain_mask_dwi.nii.gz",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 0.16854140162467957,
+          "binary_sha256": "658b3c6e203edad601d3a7bcd940c355f66e63e11800e3de5e0ef13fc80c4a9e",
+          "version": "== tensor2metric 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Thijs Dhollander (thijs.dhollander@gmail.com) & Ben Jeurissen (ben.jeurissen@uantwerpen.be) & J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_tensor.nii.gz": "9236dc665025240d43640b501378be0f8af1314c9165044b039e6c1c05529377",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/connectome/brain_mask_dwi.nii.gz": "4c5ad827cc1bbb3b52f52312ef37479c430dd10520840aa753b5c0af6363c565"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_fa.nii.gz": "46f5c3e3f2f36e56f323886ae89053ca52a31c04cace825251b087b8c151e866",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON03/pipeline_cpu_float32_direction.nii.gz": "6da5d3abd66c7b901b5d1bc7206a35d575cdd6a1666a1db70c8b53903657aa24"
+          }
+        }
+      ],
+      "cpu_float32_gradient_max_abs_vs_native_normalized": 1.1723194082158273e-07,
+      "double_import_gradient_max_abs_vs_native_normalized": 5.889860821284287e-11
+    },
+    "CON10": {
+      "sources": {
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.nii.gz": "6b614d3d77a8dc9fa512013b2648569d2f3d081006d254de1310430f0600f718",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.eddy_rotated_bvecs": "b5e497d12bd0b023e14e8f5f0ef701edafbd04b0515852bb77ebdddb4e086c84",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/brain_mask_dwi.nii.gz": "dc9f0e3f121c63cb5e68170aa8674c2f35cfd5d4f8ca139babcfd29ef13cfc37",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/gpu_report.json": "c2650e2171d82dffae23a2e8931179162b0aacf5d0bf6f41aef3bf77830f1a22",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/raw_bids_wall.json": "9968cee099d933ac54e9b9f055b6208cb9355c5cb4249798c91a4e1042b33cc6"
+      },
+      "commands": [
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.nii.gz",
+            "-fslgrad",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.eddy_rotated_bvecs",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.bval",
+            "-bvalue_scaling",
+            "no",
+            "-export_grad_mrtrix",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad.txt",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 0.14752349257469177,
+          "binary_sha256": "c8b583a5791bb9e4aefaba85ac19df30fd1b77ae37dee842c0b1a8195e037e53",
+          "version": "== mrinfo 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): J-Donald Tournier (d.tournier@brain.org.au) and Robert E. Smith (robert.smith@florey.edu.au)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.nii.gz": "6b614d3d77a8dc9fa512013b2648569d2f3d081006d254de1310430f0600f718",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.eddy_rotated_bvecs": "b5e497d12bd0b023e14e8f5f0ef701edafbd04b0515852bb77ebdddb4e086c84",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad.txt": "e737976acc2c8311e1690eb4ba1982e6ae9a5f4664574fb41020b0c615c55ae5"
+          }
+        },
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad_tensor.nii.gz",
+            "-mask",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/brain_mask_dwi.nii.gz",
+            "-fslgrad",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.eddy_rotated_bvecs",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.bval",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 2.1798363253474236,
+          "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
+          "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.nii.gz": "6b614d3d77a8dc9fa512013b2648569d2f3d081006d254de1310430f0600f718",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/brain_mask_dwi.nii.gz": "dc9f0e3f121c63cb5e68170aa8674c2f35cfd5d4f8ca139babcfd29ef13cfc37",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.eddy_rotated_bvecs": "b5e497d12bd0b023e14e8f5f0ef701edafbd04b0515852bb77ebdddb4e086c84",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON10/ses-preop/dwi/sub-CON10_ses-preop_acq-AP_dwi.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad_tensor.nii.gz": "123361bbbadad47738d64ae325e68f300fb13ace6df9613dffa55d1a67e45f2e"
+          }
+        },
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad_tensor.nii.gz",
+            "-fa",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad_fa.nii.gz",
+            "-vector",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad_direction.nii.gz",
+            "-modulate",
+            "none",
+            "-mask",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/brain_mask_dwi.nii.gz",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 0.17956885695457458,
+          "binary_sha256": "658b3c6e203edad601d3a7bcd940c355f66e63e11800e3de5e0ef13fc80c4a9e",
+          "version": "== tensor2metric 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Thijs Dhollander (thijs.dhollander@gmail.com) & Ben Jeurissen (ben.jeurissen@uantwerpen.be) & J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad_tensor.nii.gz": "123361bbbadad47738d64ae325e68f300fb13ace6df9613dffa55d1a67e45f2e",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/brain_mask_dwi.nii.gz": "dc9f0e3f121c63cb5e68170aa8674c2f35cfd5d4f8ca139babcfd29ef13cfc37"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad_fa.nii.gz": "6b2b82aea72d03aaaaf6f31e6b52bc212cd892a2ec0ea3e2263ba375338c1af2",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/native_fslgrad_direction.nii.gz": "a4de8b162895a5a975f877f12b31c30a906d6de845ebe769e321c6e04ff277ca"
+          }
+        },
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_tensor.nii.gz",
+            "-mask",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/brain_mask_dwi.nii.gz",
+            "-grad",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_grad.txt",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 2.093301922082901,
+          "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
+          "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/preproc/eddy/data.nii.gz": "6b614d3d77a8dc9fa512013b2648569d2f3d081006d254de1310430f0600f718",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/brain_mask_dwi.nii.gz": "dc9f0e3f121c63cb5e68170aa8674c2f35cfd5d4f8ca139babcfd29ef13cfc37",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_grad.txt": "78f4bed40a791dc7a407c3783d922082b35de6697fccb1fb3a316965ab5eef3c"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_tensor.nii.gz": "af4800273bde99fd393fa14fe46b434a87546659a482096d8e7bac0418bed7db"
+          }
+        },
+        {
+          "command": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_tensor.nii.gz",
+            "-fa",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_fa.nii.gz",
+            "-vector",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_direction.nii.gz",
+            "-modulate",
+            "none",
+            "-mask",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/brain_mask_dwi.nii.gz",
+            "-nthreads",
+            "8"
+          ],
+          "returncode": 0,
+          "wall_s": 0.1869753897190094,
+          "binary_sha256": "658b3c6e203edad601d3a7bcd940c355f66e63e11800e3de5e0ef13fc80c4a9e",
+          "version": "== tensor2metric 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Thijs Dhollander (thijs.dhollander@gmail.com) & Ben Jeurissen (ben.jeurissen@uantwerpen.be) & J-Donald Tournier (jdtournier@gmail.com)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
+          "input_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_tensor.nii.gz": "af4800273bde99fd393fa14fe46b434a87546659a482096d8e7bac0418bed7db",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v4/candidate/sub-CON10/connectome/brain_mask_dwi.nii.gz": "dc9f0e3f121c63cb5e68170aa8674c2f35cfd5d4f8ca139babcfd29ef13cfc37"
+          },
+          "output_sha256": {
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_fa.nii.gz": "0158ada1ff13079cba9e77fb2a042255ee8da958696a6e34a75c72fee5cbd62c",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/formal_tensor_reference_cpu_v1/CON10/pipeline_cpu_float32_direction.nii.gz": "1684d5d108f6ded3baee3cece95b6a91c1fadbd3b70b6d096abe84a73013fd1a"
+          }
+        }
+      ],
+      "cpu_float32_gradient_max_abs_vs_native_normalized": 1.5346329037147638e-07,
+      "double_import_gradient_max_abs_vs_native_normalized": 5.2275628270592733e-11
+    }
+  }
+}

@@ -58,24 +58,27 @@ def _registered_correlation(moving, fixed, voxel_sizes, device):
         tolerance_grad=1e-6,
         tolerance_change=1e-7,
     )
-    latest = {}
-
-    def closure():
-        optimizer.zero_grad(set_to_none=True)
+    def correlation_at_parameters():
         coordinates = _rigid_coordinates(grid, parameters, sizes)
         sampled, valid = _sample(moving, coordinates)
         mask = valid & (fixed != 0) & (sampled != 0)
         left = sampled[mask] - sampled[mask].mean()
         right = fixed[mask] - fixed[mask].mean()
-        correlation = torch.dot(left, right) / (
+        return torch.dot(left, right) / (
             torch.linalg.vector_norm(left) * torch.linalg.vector_norm(right)
         ).clamp_min(torch.finfo(torch.float32).eps)
+
+    def closure():
+        optimizer.zero_grad(set_to_none=True)
+        correlation = correlation_at_parameters()
         (1 - correlation).backward()
-        latest["correlation"] = float(correlation.detach())
         return 1 - correlation
 
     optimizer.step(closure)
-    return latest["correlation"]
+    # Strong Wolfe can accept an earlier trial than the last closure evaluation.
+    # Score the accepted transform rather than a rejected line-search trial.
+    with torch.no_grad():
+        return float(correlation_at_parameters())
 
 
 def _best_b0(candidates, voxel_sizes, device):

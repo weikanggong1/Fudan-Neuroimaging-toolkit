@@ -85,6 +85,8 @@ def parse_options(argv=None):
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--eddy-gp-seed", type=int, default=12345)
     parser.add_argument("--checkpoint-dir", type=Path)
+    parser.add_argument("--result-export-dir", type=Path,
+                        help="export returned FOD/tracks after the wall timer and memory monitor stop")
     parser.add_argument("--gpu-uuid", help="physical target GPU UUID; recommended with CUDA_VISIBLE_DEVICES")
     parser.add_argument("--memory-sample-interval", type=float, default=0.5)
     parser.add_argument("cli_arguments", nargs=argparse.REMAINDER)
@@ -100,6 +102,10 @@ def parse_options(argv=None):
         parser.error("this tool requires the real --bids-root CLI path")
     if options.mode == "wall" and options.checkpoint_dir is not None:
         parser.error("--checkpoint-dir is diagnostic only; formal wall runs do not export checkpoints")
+    if options.checkpoint_dir is not None and options.result_export_dir is not None:
+        parser.error("select diagnostic checkpoints or post-timing result exports, not both")
+    if options.result_export_dir is not None and options.mode != "wall":
+        parser.error("--result-export-dir requires wall mode; diagnostic mode uses --checkpoint-dir")
     if not math.isfinite(options.memory_sample_interval) or options.memory_sample_interval <= 0:
         parser.error("--memory-sample-interval must be finite and positive")
     if not 1 <= options.eddy_gp_seed <= 2**32 - 1:
@@ -294,7 +300,7 @@ class GPUProcessMonitor:
 
 
 class Checkpoints:
-    """Export only real function results, one file at a time, diagnostic only."""
+    """Export real results one file at a time; callers specify the timing scope."""
 
     def __init__(self, directory):
         self.directory = Path(directory) if directory is not None else None
@@ -449,6 +455,7 @@ class Measure:
         self.qc, self.external_commands = {}, []
         self.corrected_dwi = None
         self.selected_inputs = {}
+        self.returned_result = None
 
     def synchronize(self):
         if self.device.startswith("cuda") and self.torch.cuda.is_initialized():
@@ -532,6 +539,17 @@ class Measure:
             self.stack.enter_context(patch.object(self.bids, "prepare_bids_connectome", prepare_wrapper))
             if self.options.mode == "diagnostic":
                 self._diagnostic()
+            elif getattr(self.options, "result_export_dir", None) is not None:
+                original_core = self.pipeline.UKBConnectome_pipeline.__call__
+                @functools.wraps(original_core)
+                def remember_result(*args, **kwargs):
+                    result = original_core(*args, **kwargs)
+                    # Keep the existing result object; no tensor copy, export,
+                    # or extra CUDA synchronization inside the CLI timer.
+                    self.returned_result = result
+                    return result
+                self.stack.enter_context(patch.object(
+                    self.pipeline.UKBConnectome_pipeline, "__call__", remember_result))
             return self
         except BaseException:
             self.stack.close()
@@ -809,6 +827,25 @@ def run(options):
     report["end_utc"] = datetime.now(timezone.utc).isoformat()
     report["exit_code"] = exit_code
     report["gpu_process_memory"] = monitor.finish() if monitor is not None else {"status": "not_measured"}
+    result_export = getattr(options, "result_export_dir", None)
+    if measure is not None and result_export is not None and report["status"] == "completed":
+        try:
+            if measure.returned_result is None:
+                raise RuntimeError("CLI returned without a new core result; refuse reused result exports")
+            exported = Checkpoints(result_export)
+            exported.core(measure.returned_result)
+            report["post_timing_result_export"] = {
+                "status": "completed", "seconds": exported.seconds,
+                "files": {str(path): {"size_bytes": path.stat().st_size,
+                                      "sha256": sha256(path)} for path in exported.paths},
+                "scope": "returned core result; after CLI wall timer and GPU monitor stop; no intermediate tracking-input checkpoint",
+            }
+        except Exception as error:
+            exit_code = 1
+            report.update(status="failed", exit_code=exit_code,
+                          result_export_error=f"{type(error).__name__}: {error}")
+        finally:
+            measure.returned_result = None
     if measure is not None:
         report.update(preprocessing=measure.preprocessing, actual_eddy_gp_seeds=measure.eddy_seeds,
                       stages=measure.stages, stage_qc=measure.qc,

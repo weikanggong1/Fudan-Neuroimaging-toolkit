@@ -1,0 +1,36 @@
+{
+  "host": "gpucw1",
+  "controller_pid": 16873,
+  "controller_sha256": "9df53c1852bc11303e048e1c16e2e2f33d994c2a2d7efe1229cce52afdd5e4f8",
+  "command": [
+    "flock",
+    "/tmp/fnit-recon-five-20261002-gongwk.gpu.lock",
+    "env",
+    "CUDA_VISIBLE_DEVICES=GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True",
+    "OMP_NUM_THREADS=8",
+    "MKL_NUM_THREADS=8",
+    "OPENBLAS_NUM_THREADS=8",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/current/validation/connectome/accuracy_20261003/task_05/compare_common_matrix_reference.py",
+    "--source",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/current/src/fnit/connectome/assignment.py",
+    "--reference",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/report.json",
+    "--device",
+    "cuda:0",
+    "--output",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/current_common_matrix_cuda_v1"
+  ],
+  "frozen_sources": {
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/current/validation/connectome/accuracy_20261003/task_05/compare_common_matrix_reference.py": "7331ff4e3814d96dc96a26f2e648f981fe978646acd4da3b372b575817bdbcc4",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/current/validation/connectome/accuracy_20261003/task_05/benchmark_assignment_weights.py": "488cd6ab5e868ce772701dbebc199072a970bab98e8db424c0c3307576524387",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/current/src/fnit/connectome/assignment.py": "d8901752cda4e5b8007f7c318613b343ad3edbd7072d0e0a05539a5d42ac6313",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/common_matrix_reference_cpu_v1/report.json": "f4cd41595ed963112c4a99b9559c255f7b564e3f761b7830142f5c1a105095f0"
+  },
+  "state": "completed",
+  "started_unix": 1791006011.7480931,
+  "returncode": 0,
+  "ended_unix": 1791006262.9231775,
+  "worker_log_sha256": "32068b9e2bf61122febb32ba9466555d2b21ef35722300fd21add855d3f84de5"
+}

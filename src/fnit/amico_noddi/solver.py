@@ -45,8 +45,19 @@ def _masked_cg(
     return x
 
 
+# Bound temporary passive-set matrices, not the model's persistent LUT/signal
+# buffers or PyTorch/cuSOLVER internal workspace. This is an internal scheduling
+# limit; dtype, dictionary, passive sets and convergence rules stay unchanged.
+_MASKED_SOLVE_WORKSPACE_BYTES = 128 * 1024 * 1024
+
+
 def _masked_solve(gram, rhs, mask, *, ridge=0.0, tolerance=1e-13):
-    """Solve the current passive-set systems as compact Cholesky batches."""
+    """Solve only nonempty passive rows, in bounded Cholesky/CG batches.
+
+    Keep one global compact width and the original topk options for every row.
+    LUT padding remains zero, and an active row retains its original direction
+    group even when all earlier padding rows have been omitted.
+    """
     columns = rhs.shape[-1]
     flat_mask = mask.reshape(-1, columns).bool()
     flat_rhs = rhs.reshape(-1, columns)
@@ -54,48 +65,75 @@ def _masked_solve(gram, rhs, mask, *, ridge=0.0, tolerance=1e-13):
     width = int(counts.max())
     if width == 0:
         return torch.zeros_like(rhs)
-    order = torch.topk(flat_mask.to(torch.uint8), width, dim=-1, sorted=False).indices
-    occupied = flat_mask.gather(-1, order)
-    if gram.ndim == 2:
-        block = gram[order[:, :, None], order[:, None, :]]
-    else:
-        slots = rhs.shape[-2]
-        groups = torch.arange(gram.shape[0], device=rhs.device).repeat_interleave(slots)
-        block = gram[groups[:, None, None], order[:, :, None], order[:, None, :]]
-    active_block = occupied[:, :, None] & occupied[:, None, :]
-    block = block * active_block
-    diagonal = torch.diagonal(block, dim1=-2, dim2=-1)
-    diagonal.add_(torch.where(occupied, float(ridge), 1.0))
-    compact_rhs = flat_rhs.gather(-1, order) * occupied
-    factor, info = torch.linalg.cholesky_ex(block, check_errors=False)
-    failed = info != 0
-    has_failed = bool(failed.any())
-    if has_failed:
-        identity = torch.eye(width, dtype=block.dtype, device=block.device)
-        block[failed] = identity
-        compact_rhs[failed] = 0
-        factor = torch.linalg.cholesky(block)
-    compact = torch.cholesky_solve(compact_rhs[..., None], factor).squeeze(-1)
+    active_rows = torch.nonzero(counts > 0, as_tuple=False).flatten()
     result = torch.zeros_like(flat_rhs)
-    result.scatter_(-1, order, compact * occupied)
-    if has_failed:
+    slots = rhs.shape[-2] if gram.ndim == 3 else None
+    element_bytes = rhs.element_size()
+    # Include simultaneous block/factor/replacement matrices, occupied mask,
+    # topk source masks/indices and compact RHS/solution. Persistent result and
+    # row/count indices are deliberately outside this temporary-work estimate.
+    bytes_per_row = (
+        width * width * (3 * element_bytes + 1)
+        + 2 * columns
+        + width * (16 + 2 * element_bytes + 1)
+    )
+    rows_per_chunk = max(1, _MASKED_SOLVE_WORKSPACE_BYTES // bytes_per_row)
+    # CG has full-column vectors, even for a small passive width. Bound its
+    # vector temporaries separately and broadcast one original Gram per group.
+    cg_rows_per_chunk = max(
+        1, _MASKED_SOLVE_WORKSPACE_BYTES // (12 * columns * element_bytes)
+    )
+    for start in range(0, active_rows.numel(), rows_per_chunk):
+        rows = active_rows[start : start + rows_per_chunk]
+        order = torch.topk(
+            flat_mask[rows].to(torch.uint8), width, dim=-1, sorted=False
+        ).indices
+        occupied = flat_mask[rows[:, None], order]
         if gram.ndim == 2:
-            result[failed] = _masked_cg(
-                gram,
-                flat_rhs[failed],
-                flat_mask[failed],
-                ridge=ridge,
-                tolerance=tolerance,
-            )
+            block = gram[order[:, :, None], order[:, None, :]]
         else:
-            failed_gram = gram[groups[failed]]
-            result[failed] = _masked_cg(
-                failed_gram,
-                flat_rhs[failed, None, :],
-                flat_mask[failed, None, :],
-                ridge=ridge,
-                tolerance=tolerance,
-            )[:, 0]
+            groups = rows // slots
+            block = gram[groups[:, None, None], order[:, :, None], order[:, None, :]]
+        active_block = occupied[:, :, None] & occupied[:, None, :]
+        block = block * active_block
+        diagonal = torch.diagonal(block, dim1=-2, dim2=-1)
+        diagonal.add_(torch.where(occupied, float(ridge), 1.0))
+        compact_rhs = flat_rhs[rows[:, None], order] * occupied
+        factor, info = torch.linalg.cholesky_ex(block, check_errors=False)
+        failed = info != 0
+        has_failed = bool(failed.any())
+        if has_failed:
+            identity = torch.eye(width, dtype=block.dtype, device=block.device)
+            block[failed] = identity
+            compact_rhs[failed] = 0
+            factor = torch.linalg.cholesky(block)
+        compact = torch.cholesky_solve(compact_rhs[..., None], factor).squeeze(-1)
+        result[rows[:, None], order] = compact * occupied
+        if has_failed:
+            failed_rows = rows[failed]
+            if gram.ndim == 2:
+                for offset in range(0, failed_rows.numel(), cg_rows_per_chunk):
+                    cg_rows = failed_rows[offset : offset + cg_rows_per_chunk]
+                    result[cg_rows] = _masked_cg(
+                        gram, flat_rhs[cg_rows], flat_mask[cg_rows],
+                        ridge=ridge, tolerance=tolerance,
+                    )
+            else:
+                failed_groups = failed_rows // slots
+                for group in torch.unique(failed_groups).tolist():
+                    group_rows = failed_rows[failed_groups == group]
+                    for offset in range(0, group_rows.numel(), cg_rows_per_chunk):
+                        cg_rows = group_rows[offset : offset + cg_rows_per_chunk]
+                        result[cg_rows] = _masked_cg(
+                            gram[group : group + 1],
+                            flat_rhs[cg_rows, None, :],
+                            flat_mask[cg_rows, None, :],
+                            ridge=ridge, tolerance=tolerance,
+                        )[:, 0]
+        # Drop the preceding chunk before allocating the next one: the diagonal
+        # view otherwise keeps its matrix alive while a new block is gathered.
+        del block, active_block, diagonal, compact_rhs, factor, info, compact
+        del order, occupied, failed
     return result.reshape_as(rhs)
 
 

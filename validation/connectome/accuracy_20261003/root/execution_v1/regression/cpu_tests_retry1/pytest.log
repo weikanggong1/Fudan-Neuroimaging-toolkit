@@ -1,0 +1,63 @@
+.............................s..................................................................................sssss...................... [ 17%]
+.................................................F.................................................... [ 29%]
+.........s................................................................................................. [ 42%]
+.................................................................................................................... [ 56%]
+.................................................. [ 63%]
+...............s....................................s.......................s.s...s.......................................................... [ 80%]
+.......s...........s.......s..s.s.s.s.s.s.s.s.s.s.s.s.s.s...... [ 88%]
+.......s.s.s..s.s.s.s.s.s.s.s.s.s.s..............................sssssss [ 96%]
+sssssssssssss............                                                [100%]
+=================================== FAILURES ===================================
+____________ test_selected_atlas_installation_and_tamper_detection _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-gongwk/pytest-16/test_selected_atlas_installati0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fee6783d190>
+
+    def test_selected_atlas_installation_and_tamper_detection(tmp_path, monkeypatch):
+        source = Path(__file__).resolve().parents[2] / "assets/connectome"
+        downloads = []
+    
+        def open_asset(url, *, timeout):
+            assert url.startswith(("https://raw.githubusercontent.com/yetianmed/subcortex/",
+                                   "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/",
+                                   "https://raw.githubusercontent.com/weikanggong1/Fudan-Neuroimaging-toolkit/f436de588647a0de80735e4a98d53df5d88e502d/"))
+            name = url.rsplit("/", 1)[-1]
+            downloads.append(name)
+            return BytesIO((source / name).read_bytes())
+    
+        monkeypatch.setattr(assets, "urlopen", open_asset)
+>       root = assets.install_connectome_atlases(
+            ["fs-aparc", "fs-aparc-a2009s", "schaefer200+tian-s1"], tmp_path)
+
+tests/connectome/test_assets.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/fnit/connectome/assets.py:62: in install_connectome_atlases
+    with urlopen(entry["url"], timeout=120) as source:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/connectome/test_assets.py:21: in open_asset
+    return BytesIO((source / name).read_bytes())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../fnit_conda_env_956b1a9/lib/python3.11/pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_integrated_tests_v3/assets/connectome/Tian_Subcortex_S1_3T.nii.gz')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_integrated_tests_v3/assets/connectome/Tian_Subcortex_S1_3T.nii.gz'
+
+../../fnit_conda_env_956b1a9/lib/python3.11/pathlib.py:1044: FileNotFoundError
+=========================== short test summary info ============================
+FAILED tests/connectome/test_assets.py::test_selected_atlas_installation_and_tamper_detection
+1 failed, 751 passed, 63 skipped, 362 subtests passed in 43.63s

@@ -28,3 +28,22 @@ result = model.run(
 2026-10-02 的更新在第一与第三阶段 NNLS 仅复用完整 float64 Gram，linear 每次按原形状重新计算，组织阶段独立求解；经典拟合接受数在设备端按 int64 精确累计、全部拟合完成后读取一次。最初同时缓存 Gram/linear 的候选未获耗时收益且增加显存，最终移除了跨组织阶段的 linear 缓存。LUT 批量仍为 400，dtype、阈值、迭代和输出契约使用原设置。
 
 最终版本与旧 FNIT 在同一 `104×104×72×105` 真实 DWI、242,261 个脑体素上完成 H100、20 GB 进程显存上限的 ABBA 比较。包含读写的 AMICO 中位耗时为 `30.76993`→`27.45137 s`，classic 为 `68.15137`→`79.80968 s`；allocated 峰值 `9.95255`→`10.02013 GB`。五张图的未舍入解码数组、保存文件、header、affine 和结果 QC 完全相同，classic 接受更新数均为 `3,710,053`。共享 GPU 耗时波动较大，本轮未建立稳定提速；保留改动的依据是该例没有数值回归且显存增量较小。固定初始化的 classic QC 单项对照也全部相同，支持消除逐轮主机读取，末次主机计时较高的原因未隔离，不据此推断大的加速。原始计时、源码和输入绑定见[本次真实验收报告](../../../validation/dmri_pipeline/lossless_20261002.md)，测试和内部 A/B hook 见[更新与验收说明](../../../docs/amico_noddi/README.md#计算复用更新与差分验收)。
+
+
+### 2026-10-02：passive-set 临时矩阵的显存修复
+
+公开十人流程的 `case02` 在 AMICO 阶段申请约 2.96 GiB 的 Cholesky 临时矩阵时触发 20 GB 进程分配上限。旧求解器为 LUT 的全零填充行也建立矩阵，方向体素数不均匀时会放大这部分占用。现在仅求解非空 passive 行，使用原始 flat row 计算方向 group；所有行仍用原全局 width 和相同 topk 设置。Cholesky 临时工作集按约 128 MiB 估计分块，上一块的矩阵与 diagonal view 在下一块前释放。失败方向的 CG 使用一份 Gram 广播，并单独按完整向量大小分块。
+
+该改动保持 solver float64、字典、LUT 批量、正则、阈值、迭代、TF32 设置、API/CLI 和输出契约。临时工作集目标不包括持续存活的模型/信号/结果张量及库内部 workspace，不能当作整函数显存上限。小尺寸旧算法差分检查见[测试](../../../tests/amico_noddi/test_solver_memory.py)。
+
+真实 EDDY 输出上的[独立 NODDI 组件检查](../../../validation/dmri_pipeline/public10_20261002/check_noddi_memoryfix.py)已完成：`case01` 的五张 NODDI 图全部解码值、shape、affine 与旧版逐值一致，PyTorch allocated/reserved 峰值为 **3,674,249,216 / 3,829,399,552 bytes**。此前失败的 `case02` 在 **20,000,000,000 bytes** 上限内完成五张有限值图，allocated/reserved 峰值为 **5,391,976,448 / 6,490,685,440 bytes**；旧版没有完整输出，不能给该例新旧逐值一致结论。reserved 是 allocator 向 CUDA 保留的显存，包含 allocated，两列不相加，也不是完整 pipeline 或整张卡的显存峰值。
+
+这次组件检查绑定修复提交 `bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a`；`solver.py` SHA-256 为 `1d4887270f267a83967ee4cc9336b306110bf838dde78b6a00ea16e204a1f74e`，精度与参数保持原样。截至 2026-10-03，固定十人两个分支的 **20/20 FNIT raw 完整流程均已完成**，每项 433 文件清单均与该冻结提交匹配。完整摘要见[功能说明](../../../docs/amico_noddi/README.md#2026-10-02lut-填充行与临时求解矩阵的显存修复)，源码和整链状态见[公开十人验收](../../../validation/dmri_pipeline/public10_20261002/README.md)。
+
+[case02 MMORF 完整流程](../../../validation/dmri_pipeline/public10_20261002/case02_mmorf_memoryfix_full.public.json)首先完成了 raw 整链内存门：18 图及所需文件检查通过，API 557.384 秒、GNU 完整命令 562.24 秒，完整 pipeline allocated/reserved 峰值 12.335/13.808 GB。随后其余 19 项也完成；20 项最大 allocated/reserved 为 **12.335/13.810 GB**，均低于 20,000,000,000 bytes allocator 上限，没有新的 FNIT OOM。此峰值属于完整流程，区别于上面的组件检查。
+
+本轮最终原参考与配对比较均为 **19/20**（TBSS 10/10、MMORF 9/10），**432/450** 张图通过 shape、affine、有限值检查；没有数值等价阈值或等价结论。case05/10 TBSS 从 raw 恢复成功并比较；case10 MMORF 初次及 R1/R2 原 EDDY 分配失败均未到达 AMICO，没有完整官方图，本轮停止更多恢复。原参考观察 25 次（19 成功、6 失败），FNIT 21 次（20 成功、1 失败），旧 case01 两次成功单列 legacy。失败时间不进入配对耗时；独立链的 NODDI 差异还包含 TOPUP、mask、EDDY、梯度和配准的影响，不能仅归 solver。
+
+本轮合并核验记录的开发树合并 `origin/main` 的 `7af34e6d` 后为 `adf74371`；[73 项 CPU 回归](../../../validation/dmri_pipeline/public10_20261002/merge_integration.public.json)通过，没有按这个合并版本重跑十人影像。20 例实测继续绑定 bf339a0，组件与历史单被试耗时保持各自范围。
+
+整链中也有明显差异：case08 native FA 的 `r=0.856050004`、`NRMSE=0.285848576`，已在配准前出现；MMORF 标准 FA 九例中位 NRMSE 为 0.217009355，TBSS 十例为 0.060759006。这不是 AMICO 单组件误差，不能用首人脑图推广为全队列一致，见[具体差异与 ROI](../../../validation/dmri_pipeline/public10_20261002/COMPARISON.md#当前差异观察19-个配对)。

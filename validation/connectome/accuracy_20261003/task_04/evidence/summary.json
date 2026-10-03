@@ -1,0 +1,83 @@
+{
+  "decision": "preserve baseline production; validation only",
+  "baseline_commit": "7af34e6d072e843fb2558c931bb2781f1d4b0be9",
+  "precision_claim": "Same natural transform, unchanged full real MRI: 0 observed nearest/5TT/GMWMI differences. No SC or full registration precision improvement claimed.",
+  "random_seed": "not applicable; deterministic operators",
+  "device": "CPU, nodecw10, 8 torch/native threads, no GPU job",
+  "memory_measurement": "No new GPU-memory measurement; no production changes or increased memory allocation. Prior GPU results are linked separately in documentation.",
+  "natural": [
+    {
+      "case": "sub-CON03_natural",
+      "voxels": 552960,
+      "fnit_cpu_seconds": 0.023760542273521423,
+      "native_process_seconds": 0.32889458537101746,
+      "disagreements": 0
+    },
+    {
+      "case": "sub-CON01_natural",
+      "voxels": 552960,
+      "fnit_cpu_seconds": 0.018851466476917267,
+      "native_process_seconds": 0.31255020946264267,
+      "disagreements": 0
+    }
+  ],
+  "tissue": [
+    {
+      "case": "sub-CON03",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "five_tissue": {
+        "cpu_seconds": 0.23393719643354416,
+        "nonzero_differences": 0,
+        "max_abs": 0.0
+      },
+      "gmwmi": {
+        "cpu_seconds": 0.4652217775583267,
+        "nonzero_differences": 0,
+        "max_abs": 0.0
+      },
+      "native_five_tissue_process_chain_seconds": 4.814498484134674,
+      "native_gmwmi_process_seconds": 1.3286974281072617
+    },
+    {
+      "case": "sub-CON01",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "five_tissue": {
+        "cpu_seconds": 0.26109184324741364,
+        "nonzero_differences": 0,
+        "max_abs": 0.0
+      },
+      "gmwmi": {
+        "cpu_seconds": 0.45258239656686783,
+        "nonzero_differences": 0,
+        "max_abs": 0.0
+      },
+      "native_five_tissue_process_chain_seconds": 5.050946183502674,
+      "native_gmwmi_process_seconds": 1.2886596024036407
+    }
+  ],
+  "rejected_candidates": [
+    {
+      "source_sha256": "71c870f89efacb2cebe16af114032b10f339abdfde26a59bb0852cfc041cdce3",
+      "algorithm": "floor(x+.5) and strict coordinate bounds in original NiBabel source grid",
+      "decision": "reject: worsens two original-MRI controlled axes, and no natural difference"
+    },
+    {
+      "source_sha256": "98d1e529d39e6684499c877e54fdd1f7d9a0cdb1db3fa57513ecef5dbaf6aa85",
+      "algorithm": "header-aware canonical source affine and once-composed mapping",
+      "decision": "reject: axis0 leaves 7506 disagreements on full real NIfTI controlled test"
+    },
+    {
+      "source_sha256": "08abe2be4e029933105d710b64c47cefbd56654e272eea733bfb0ec812efd1a5",
+      "algorithm": "header-aware sequential scanner mapping with inverse 3x3 linear block",
+      "decision": "reject: axis0 leaves 258081 disagreements on full real NIfTI controlled test"
+    }
+  ]
+}

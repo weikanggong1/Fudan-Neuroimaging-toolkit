@@ -1,0 +1,644 @@
+{
+  "schema_version": 1,
+  "checked_utc": "2026-10-03T10:28:52.044318+00:00",
+  "scope": "three retained failed independent original-software attempts in the fixed public10 benchmark",
+  "reference_driver": {
+    "basename": "benchmark_official.py",
+    "sha256": "2f152d537d79a603ab4516b7379c9500712b648e12eb21255d1cc408a7ed37f7"
+  },
+  "failed_attempts": [
+    {
+      "case_id": "case05",
+      "backend": "tbss",
+      "status": "failed",
+      "stage": "eddy",
+      "native_returncode": 1,
+      "native_binary": {
+        "basename": "eddy_cuda10.2",
+        "software": "FSL",
+        "version": "6.0.7.4",
+        "sha256": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591"
+      },
+      "error_markers": [
+        "CudaVolume::common_assignment_from_newimage_vol after resize()",
+        "cudaErrorMemoryAllocation",
+        "parallel_for failed",
+        "out of memory"
+      ],
+      "clocks_seconds": {
+        "GNU_full_failed": 995.64,
+        "pipeline_API_failed": 994.0454998449422,
+        "EDDY_subprocess_failed": 680.9856026889756
+      },
+      "gpu_samples": {
+        "interval_seconds": 5,
+        "own_peak_mib": 1186,
+        "other_peak_mib": 64348,
+        "device_peak_mib": 65386
+      },
+      "evidence_sha256": {
+        "report_json": "9db5080859f7229f44896ca1b36e6c269010454568e6b7f8dfc9e748434d84e6",
+        "GNU_time_txt": "1b64dbc63e6630e205aa15df2fcc6f609794106244fc418bb519b4ed79697d38",
+        "EDDY_log": "9f63d118f51e5b21a3572a570a4ae34745ee344097ed22646cc4a5baf2a2d50f"
+      }
+    },
+    {
+      "case_id": "case10",
+      "backend": "tbss",
+      "status": "failed",
+      "stage": "eddy",
+      "native_returncode": 1,
+      "native_binary": {
+        "basename": "eddy_cuda10.2",
+        "software": "FSL",
+        "version": "6.0.7.4",
+        "sha256": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591"
+      },
+      "error_markers": [
+        "cudaErrorMemoryAllocation",
+        "parallel_for failed",
+        "out of memory"
+      ],
+      "clocks_seconds": {
+        "GNU_full_failed": 330.53,
+        "pipeline_API_failed": 329.0281252451241,
+        "EDDY_subprocess_failed": 6.207924155052751
+      },
+      "gpu_samples": {
+        "interval_seconds": 5,
+        "own_peak_mib": 464,
+        "other_peak_mib": 73120,
+        "device_peak_mib": 73145
+      },
+      "evidence_sha256": {
+        "report_json": "d0645cb0f8f2fe273eda6120ca49e2244fa7f1e9e817d624e5112827dc91d772",
+        "GNU_time_txt": "45a07cf311c1b57e65f9ec9288f2757646ec6be77a4ce5020305296a23fe4141",
+        "EDDY_log": "00eceed1f8d3861c188abea5354f6c5b98d2e7e69c8adf5ef73d11c5abfd1b3c"
+      }
+    },
+    {
+      "case_id": "case10",
+      "backend": "mmorf",
+      "status": "failed",
+      "stage": "eddy",
+      "native_returncode": 1,
+      "native_binary": {
+        "basename": "eddy_cuda10.2",
+        "software": "FSL",
+        "version": "6.0.7.4",
+        "sha256": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591"
+      },
+      "error_markers": [
+        "CudaVolume::common_assignment_from_newimage_vol after resize()",
+        "cudaErrorMemoryAllocation",
+        "parallel_for failed",
+        "out of memory"
+      ],
+      "clocks_seconds": {
+        "GNU_full_failed": 2022.95,
+        "pipeline_API_failed": 2021.0872087809257,
+        "EDDY_subprocess_failed": 1718.8102612770163
+      },
+      "gpu_samples": {
+        "interval_seconds": 5,
+        "own_peak_mib": 1186,
+        "other_peak_mib": 72878,
+        "device_peak_mib": 73669
+      },
+      "evidence_sha256": {
+        "report_json": "20d8d531e278abddec97245306c986d2d7a2cba6fcaed72a70189d2daca4ce90",
+        "GNU_time_txt": "714b759e8111940ce9d711b9a21467a0c047449bc969fd8d9f5c07d66973f3bb",
+        "EDDY_log": "bc3014d759c298ab5f7732432fa2251f5d0fa3f20aff75001311427e92d09b22"
+      }
+    }
+  ],
+  "same_input_control": {
+    "case_id": "case05",
+    "failed_backend": "tbss",
+    "successful_backend": "mmorf",
+    "upstream_files_compared": 6,
+    "upstream_files_byte_identical": 6,
+    "upstream_file_roles": [
+      "SynthStrip_mask",
+      "EDDY_index",
+      "acquisition_parameters",
+      "TOPUP_field_coefficients",
+      "TOPUP_motion_parameters",
+      "TOPUP_corrected_b0_pair"
+    ],
+    "same_raw_and_EDDY_parameter_definition": true,
+    "conclusion": "A fixed malformed input or later TBSS registration cannot explain this retained EDDY failure."
+  },
+  "recovery": {
+    "controller_started_utc": "2026-10-03T10:25:34+00:00",
+    "planned_full_runs": 4,
+    "from_raw": true,
+    "same_frozen_binary_source_parameters_environment_and_GPU": true,
+    "shares_existing_full_job_GPU_lock": true,
+    "status": "terminal_incomplete_reference_19_of_20",
+    "purpose": "Repeatability verification with separate complete outputs; no algorithm change.",
+    "completed_full_runs": 2,
+    "completed_attempts": [
+      {
+        "case_id": "case05",
+        "backend": "tbss",
+        "status": "complete",
+        "full_process_exit_code": 0,
+        "finished_utc": "2026-10-03T11:22:14.136643+00:00",
+        "native_binary": {
+          "basename": "eddy_cuda10.2",
+          "software": "FSL",
+          "version": "6.0.7.4",
+          "sha256": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591"
+        },
+        "native_EDDY_exit_code": 0,
+        "clocks_seconds": {
+          "GNU_full_success": 3399.21,
+          "pipeline_API_success": 3382.1181803392246,
+          "EDDY_subprocess_success": 1947.2491416051053,
+          "observer_full_success": 3399.2240538350306
+        },
+        "GNU_max_rss_kib": 5854544,
+        "stages_seconds": {
+          "raw_preparation_and_b0_selection": 18.962165493052453,
+          "topup": 263.2376286550425,
+          "independent_SynthStrip_mask": 34.96503120334819,
+          "eddy": 1947.251279558055,
+          "shell_selection_and_dtifit": 12.29023412708193,
+          "AMICO_full_fit_and_save": 30.87898011924699,
+          "FA_preprocessing_and_weight": 0.9846708439290524,
+          "FLIRT_FNIRT_and_nine_map_propagation": 1073.5470890328288
+        },
+        "TBSS_nested_stages_seconds": {
+          "flirt": 16.799747626,
+          "fnirt_s1": 67.821123351,
+          "fnirt_s2": 553.427256483,
+          "fnirt_s3": 285.812451265,
+          "final_fa_applywarp": 5.750171306,
+          "fa_valid_skeleton_masking": 76.19760341,
+          "remaining_eight_map_propagation_masking": 28.593047512
+        },
+        "gpu_samples": {
+          "interval_seconds": 5,
+          "own_peak_mib": 1186,
+          "other_peak_mib": 45186,
+          "device_peak_mib": 45230
+        },
+        "outputs": {
+          "parameter_map_count": 27,
+          "all_maps_saved_and_finite": true
+        },
+        "reference_driver_sha256": "2f152d537d79a603ab4516b7379c9500712b648e12eb21255d1cc408a7ed37f7",
+        "evidence_sha256": {
+          "report_json": "56a183ae278f883763b34e56d840597fb34df91184313955c44e406819fb372b",
+          "GNU_time_txt": "098504aef569dd2970fb3c6b8f09bc68531b6eb2952a2bddef92ac560cddb19a",
+          "process_metrics_json": "a7423b70da47c6f6571abcb86f93bfd3e8f7b2577c28638ffd980f7e1d3cd453"
+        },
+        "initial_failure_retained": true,
+        "same_frozen_binary_and_driver_confirmed": true,
+        "FNIT_comparison_equivalence": "not_claimed_by_this_execution_record",
+        "conclusion": "Fresh unchanged raw-input reference pipeline completed; underlying allocation-failure cause and a source bug fix are not established."
+      },
+      {
+        "case_id": "case10",
+        "backend": "tbss",
+        "attempt": "R1",
+        "status": "complete",
+        "full_process_exit_code": 0,
+        "native_EDDY_exit_code": 0,
+        "finished_utc": "2026-10-03T12:21:02.146662+00:00",
+        "native_binary": {
+          "basename": "eddy_cuda10.2",
+          "software": "FSL",
+          "version": "6.0.7.4",
+          "sha256": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591"
+        },
+        "clocks_seconds": {
+          "GNU_full_success": 3079.49,
+          "pipeline_API_success": 3064.4394390489906,
+          "EDDY_subprocess_success": 1275.6639443822205,
+          "observer_full_success": 3079.5050715222023
+        },
+        "GNU_max_rss_kib": 5854400,
+        "stages_seconds": {
+          "raw_preparation_and_b0_selection": 17.76352813001722,
+          "topup": 265.7616325421259,
+          "independent_SynthStrip_mask": 34.049934250768274,
+          "eddy": 1275.666004539933,
+          "shell_selection_and_dtifit": 11.869622520171106,
+          "AMICO_full_fit_and_save": 30.536803075112402,
+          "FA_preprocessing_and_weight": 1.1711746309883893,
+          "FLIRT_FNIRT_and_nine_map_propagation": 1427.6196280461736
+        },
+        "gpu_samples": {
+          "interval_seconds": 5,
+          "own_peak_mib": 1186,
+          "other_peak_mib": 54300,
+          "device_peak_mib": 54980
+        },
+        "outputs": {
+          "parameter_map_count": 27,
+          "all_maps_saved_and_finite": true
+        },
+        "reference_driver_sha256": "2f152d537d79a603ab4516b7379c9500712b648e12eb21255d1cc408a7ed37f7",
+        "evidence_sha256": {
+          "report_json": "eaa7525c7b1772656849d64f4fd21d1273b5be11268265e73932aed4c430a52f",
+          "GNU_time_txt": "035b7e1e4d0bdedf6d0b6523056f0ec18487fc4048bb6cf4f26c2b49646c1d3d",
+          "process_metrics_json": "5b2ab09787eb9f7cc105b38740100b8c17e5beb33029e3a1583a59ab1d4310c0",
+          "exitcode": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        },
+        "initial_failure_retained": true,
+        "same_frozen_binary_and_driver_confirmed": true,
+        "FNIT_comparison_equivalence": "not_claimed_by_this_execution_record",
+        "conclusion": "Fresh unchanged raw-input original TBSS pipeline completed. Original EDDY allocation-failure cause remains unestablished."
+      }
+    ],
+    "pending_cases": [],
+    "last_verified_completion_utc": "2026-10-03T12:21:02.146662+00:00",
+    "failed_attempts": [
+      {
+        "case_id": "case10",
+        "backend": "mmorf",
+        "attempt": "R1",
+        "status": "failed",
+        "stage": "eddy",
+        "full_process_exit_code": 1,
+        "native_EDDY_exit_code": 1,
+        "finished_utc": "2026-10-03T11:29:14.872219+00:00",
+        "native_binary": {
+          "basename": "eddy_cuda10.2",
+          "software": "FSL",
+          "version": "6.0.7.4",
+          "sha256": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591"
+        },
+        "error_markers": [
+          "parallel_for failed",
+          "cudaErrorMemoryAllocation",
+          "out of memory"
+        ],
+        "clocks_seconds": {
+          "GNU_full_failed": 395.24,
+          "pipeline_API_failed": 392.96264792839065,
+          "EDDY_subprocess_failed": 5.763072086963803,
+          "observer_full_failed": 395.2532578636892
+        },
+        "GNU_max_rss_kib": 5854220,
+        "stages_seconds": {
+          "raw_preparation_and_b0_selection": 20.33879930432886,
+          "topup": 265.67697473429143,
+          "independent_SynthStrip_mask": 101.18109081825241,
+          "eddy": 5.765202988870442
+        },
+        "gpu_samples": {
+          "interval_seconds": 5,
+          "own_peak_mib": 0,
+          "other_peak_mib": 56218,
+          "device_peak_mib": 56262,
+          "last_two_samples": [
+            {
+              "seconds": 387.71883328584954,
+              "own_memory_mib": 0,
+              "other_memory_mib": 40104,
+              "device_used_mib": 40140
+            },
+            {
+              "seconds": 392.893953404855,
+              "own_memory_mib": 0,
+              "other_memory_mib": 40104,
+              "device_used_mib": 40140
+            }
+          ],
+          "zero_own_sample_does_not_mean_zero_GPU_usage": true
+        },
+        "reference_driver_sha256": "2f152d537d79a603ab4516b7379c9500712b648e12eb21255d1cc408a7ed37f7",
+        "evidence_sha256": {
+          "report_json": "1848aa03ca60da38767fdc31631eeaee8c352d727c2fba7cf8d2c280c24a4d45",
+          "GNU_time_txt": "7a0d33755c4a98adc3dc5a01bebcb1fe6c0151158688c57ec0d2c329b2c41bac",
+          "process_metrics_json": "0956160b1a3602251ab282eb463481f41f6a35fbf65aa4a262537dc9a7fe76aa",
+          "EDDY_log": "3fdef12ca4d561aee0d5b7f8ea402fa3e06ef1e8a5a01e737c2acf106cbda528"
+        },
+        "included_in_successful_paired_time_ratios": false,
+        "initial_failure_retained": true,
+        "exact_allocation_size_or_optimizer_iteration": "not_established",
+        "capacity_or_native_startup_failure_cause": "not_established"
+      },
+      {
+        "case_id": "case10",
+        "backend": "mmorf",
+        "attempt": "R2",
+        "status": "failed",
+        "stage": "eddy",
+        "full_process_exit_code": 1,
+        "native_EDDY_exit_code": 1,
+        "failure_type": "RuntimeError",
+        "finished_utc": "2026-10-03T12:28:44.270639+00:00",
+        "native_binary": {
+          "basename": "eddy_cuda10.2",
+          "software": "FSL",
+          "version": "6.0.7.4",
+          "sha256": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591"
+        },
+        "error_markers": [
+          "cudaErrorMemoryAllocation",
+          "out of memory",
+          "parallel_for failed"
+        ],
+        "clocks_seconds": {
+          "GNU_full_failed": 356.68,
+          "pipeline_API_failed": 354.39218458905816,
+          "EDDY_subprocess_failed": 5.665275332052261,
+          "observer_full_failed": 356.687026897911
+        },
+        "GNU_max_rss_kib": 5854540,
+        "stages_seconds": {
+          "raw_preparation_and_b0_selection": 19.374197234865278,
+          "topup": 263.79142342321575,
+          "independent_SynthStrip_mask": 65.55835114512593,
+          "eddy": 5.6676200539804995
+        },
+        "gpu_samples": {
+          "interval_seconds": 5,
+          "own_peak_mib": 0,
+          "other_peak_mib": 52424,
+          "device_peak_mib": 52444,
+          "last_two_samples": [
+            {
+              "seconds": 349.1649622521363,
+              "own_memory_mib": 0,
+              "other_memory_mib": 40656,
+              "device_used_mib": 40687
+            },
+            {
+              "seconds": 354.3047098708339,
+              "own_memory_mib": 0,
+              "other_memory_mib": 40656,
+              "device_used_mib": 40687
+            }
+          ],
+          "zero_own_sample_does_not_mean_zero_GPU_usage": true
+        },
+        "reference_driver_sha256": "2f152d537d79a603ab4516b7379c9500712b648e12eb21255d1cc408a7ed37f7",
+        "evidence_sha256": {
+          "report_json": "69435897606cb5163237b2aa9e7d559f505def93a24f4d3aee4c3044ecceaab5",
+          "GNU_time_txt": "dcd26bc164b405ed4b91dfa69cf4139dda0cf41f9454f024610c7a2246820815",
+          "process_metrics_json": "7fcc47158e445a44f265145d66346a24c03e975896f58991b08acb731a120750",
+          "EDDY_log": "a41d8f99b817f696b37ff49968abd5247de4277f78923f2aaf5abb73f10a1b7a",
+          "exitcode": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+        },
+        "included_in_successful_paired_time_ratios": false,
+        "initial_and_R1_failures_retained": true,
+        "corrected_DWI_present": false,
+        "rotated_bvecs_present": false,
+        "exact_allocation_size_or_optimizer_iteration": "not_established",
+        "capacity_or_native_startup_failure_cause": "not_established",
+        "further_recovery_planned": false
+      }
+    ],
+    "failed_full_runs": 2,
+    "last_diagnosis_checked_utc": "2026-10-03T12:31:11.203326+00:00",
+    "case10_R1_same_input_check": {
+      "checked_utc": "2026-10-03T11:47:26.903241+00:00",
+      "comparison_status": {
+        "mmorf": "failed",
+        "tbss": "complete_exit0_27_finite_maps"
+      },
+      "TOPUP_SynthStrip_EDDY_calls_match_after_output_prefix_normalization": true,
+      "normalized_call_sha256": {
+        "007_topup": "15242d415dc745a54a64677cdff0849acf63160ddbb6b1dd0c36a8675061142e",
+        "009_independent_official_synthstrip": "39e84c192084ee4d967ad248ba148ce5ceca93b75d703364a152303eb889efce",
+        "010_eddy": "7e495f05931b3bdfb92805dd5540d02e2e996a119e626d0cbbe3af7154dcfacf"
+      },
+      "generated_small_input_files_compared": 5,
+      "generated_small_input_files_byte_identical": 5,
+      "b0_selection_correlation_logs_compared": 3,
+      "b0_selection_correlation_logs_byte_identical": 3,
+      "parsed_EDDY_parameter_files_match_after_output_prefix_normalization": true,
+      "reference_scan_no": 0,
+      "AP_selected_original_b0_index": 0,
+      "PA_selected_original_b0_index": 0,
+      "EDDY_index_length": 117,
+      "EDDY_index_value": 1,
+      "gp_seed": 12345,
+      "iterations": 8,
+      "readout_seconds": 0.1261,
+      "read_scope": "Generated files below 1 MiB and command metadata; no full raw or corrected DWI/image array read."
+    },
+    "selected_reference_success_count": 19,
+    "selected_reference_planned_count": 20,
+    "R2_identity_check": {
+      "checked_utc": "2026-10-03T12:31:11.203326+00:00",
+      "case_id": "case10",
+      "backend": "mmorf",
+      "status": "failed_terminal",
+      "whole_report_status": "failed",
+      "stage": "eddy",
+      "R1_R2_argv_match_after_only_output_prefix_normalization": true,
+      "R1_R2_explicit_environment_identical": true,
+      "same_GPU_identity_verified": true,
+      "asset_identity_check_count": 21,
+      "all_assets_SHA256_match_R1_report": true,
+      "assets": [
+        {
+          "category": "native_binary",
+          "name": "flirt",
+          "bytes": 551408,
+          "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "fslcc",
+          "bytes": 100112,
+          "sha256": "b883df8d19fb69e5d787d37ee7bbf3134c52b2a32fbd55b07fd8e719199e293f",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "topup",
+          "bytes": 117456,
+          "sha256": "a1592181903033a6215fb75cb3f2b52b913efa3f4fb55d589fc382180529fc76",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "fslmaths",
+          "bytes": 916840,
+          "sha256": "4a7dc672c6c2b432ba00cb3cecf0b3a260f1ee52d01c61fab4973f4fb4979feb",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "bet",
+          "bytes": 13831,
+          "sha256": "16b852dc6c5b256fc059c4dd46ecad16550742d80b13a1fac91ed8982ab275b1",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "eddy_cuda10.2",
+          "bytes": 79978672,
+          "sha256": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "dtifit",
+          "bytes": 512640,
+          "sha256": "a5637aa108f47f4cbee8f6a68232f4843281cbea1f93137f357256dbd81d3e9b",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "fnirt",
+          "bytes": 980088,
+          "sha256": "af1aa4003680ac99db36d854bdd0b910d8ca6e7a7ec42de1d934c11910161f13",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "applywarp",
+          "bytes": 331296,
+          "sha256": "40721907ce0c2f0d05636e88cbe4ac7729bd09e0ff58c4407614653c8e853fdd",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "imcp",
+          "bytes": 250,
+          "sha256": "6953fbb23124bdd0e2c261055719b52d1ee6f1925969ce869113aa0a4db45c36",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "mmorf",
+          "bytes": 14141704,
+          "sha256": "a52229d1d44fb56c841432cff2a170a64714ca4fa7fe25e72dec835a91df1ce6",
+          "matched": true
+        },
+        {
+          "category": "native_binary",
+          "name": "bet2",
+          "bytes": 134664,
+          "sha256": "09562e3467f6114bc444d7b9eb5872f5755d886d49b5937bcba7ae7d5ec42205",
+          "matched": true
+        },
+        {
+          "category": "template",
+          "name": "FA_reference",
+          "bytes": 2641696,
+          "sha256": "1268fd84b658451c9a85799a636688bc1f6947fdf8de2d9cf7f62320de1b3837",
+          "matched": true
+        },
+        {
+          "category": "template",
+          "name": "T1_reference",
+          "bytes": 3219212,
+          "sha256": "32d5be33460f995a5d305507053c8862c823d9ca6bfb543381308df14590f212",
+          "matched": true
+        },
+        {
+          "category": "template",
+          "name": "tensor_reference",
+          "bytes": 48283074,
+          "sha256": "22eca3330011944bddafdbaf404d791beb54b49b27a0c8fc0ea0ef24a5d69b69",
+          "matched": true
+        },
+        {
+          "category": "source",
+          "name": "AMICO",
+          "bytes": 9732,
+          "sha256": "f723c28035481fe79d3f33c7e6e3e72a9a61fb8dd981aa4d8f38d7d35b9dd07f",
+          "matched": true
+        },
+        {
+          "category": "source",
+          "name": "MMORF",
+          "bytes": 20135,
+          "sha256": "52de885b3fa836c268b25e11b9cf3b52e7e1544f00ba20e69a8a6b6e3e5d91cd",
+          "matched": true
+        },
+        {
+          "category": "source",
+          "name": "end_to_end",
+          "bytes": 41835,
+          "sha256": "2f152d537d79a603ab4516b7379c9500712b648e12eb21255d1cc408a7ed37f7",
+          "matched": true
+        },
+        {
+          "category": "SynthStrip",
+          "name": "command",
+          "bytes": 203,
+          "sha256": "580c3e14c8f69a00b1b1d90c61a0cda936de246f99573ef80c8180781861c8db",
+          "matched": true
+        },
+        {
+          "category": "SynthStrip",
+          "name": "weights",
+          "bytes": 30851709,
+          "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+          "matched": true
+        },
+        {
+          "category": "configuration",
+          "name": "b02b0.cnf",
+          "bytes": 997,
+          "sha256": "9833bcbaa60c1550457dd7149a15b88040562afecd1e05aae908af1517a8dcb9",
+          "matched": true
+        }
+      ],
+      "generated_small_call_checks": 10,
+      "generated_small_file_checks": 7,
+      "all_current_small_checks_match": true,
+      "R2_gate_sha256": "a3a4aebdff1170fecada51d667a4785b3a54374229f7daeb6653dadc84ba43bd",
+      "R2_plan_sha256": "bdd4e2f9a62ac69d4c2fa0039d2c21bc5af77fc871a8e00fd41d7074353dc219",
+      "R2_manifest_sha256": "912c8a5106b019686642057bf1fc6bde99d1ec78fd46f84691a3c93233c4daf0",
+      "initial_and_R1_failed_reports_retained": true,
+      "images_reused_from_R1_or_TBSS": false,
+      "R2_success_claimed": false,
+      "next_recovery_if_R2_fails": "none; retain truthful incomplete selected reference, no further retry or native version/CPU substitution",
+      "read_scope": "Whole native executables, source, configuration, weights/templates for SHA identity; generated files <=1 MiB. No full subject raw or corrected DWI/image array read.",
+      "asset_SHA_checked_utc": "2026-10-03T12:26:15.878598+00:00",
+      "whole_exit_code": 1,
+      "b0_selection_log_checks": 3,
+      "normalized_EDDY_full_parameter_checks": 1,
+      "final_report_identity_checks": {
+        "parameters": true,
+        "input_files": true,
+        "FSL_binaries": true,
+        "configurations": true,
+        "templates": true,
+        "runner_sources": true,
+        "SynthStrip": true,
+        "choices": true,
+        "environment": true
+      },
+      "all_final_report_identity_checks_match": true,
+      "R2_report_sha256": "69435897606cb5163237b2aa9e7d559f505def93a24f4d3aee4c3044ecceaab5"
+    },
+    "planned_R1_full_runs": 3,
+    "planned_additional_R2_full_runs": 1,
+    "further_recovery_planned": false,
+    "R2_finalizer": {
+      "status": "incomplete",
+      "exit_code": 2,
+      "fixed_case_rows": 20,
+      "all_planned_results_complete": false,
+      "selected_reference_success_count": 19,
+      "selected_reference_planned_count": 20,
+      "aggregate_sha256": "d848b6dcb4d7cf982f5f72a7931177c3043ee15f90d70f22808622347953f715",
+      "binding_sha256": "b8793fe626c3ab9aa61e11e97b8fa6a4e08b1fb9b6e07a2ae0f821bf68b45ffb",
+      "finalizer_exitcode_sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+      "failed_times_used_in_paired_ratio": false
+    }
+  },
+  "interpretation": {
+    "downstream_fitting_and_registration_not_reached": true,
+    "exact_allocation_size_or_optimizer_iteration": "not_established",
+    "GPU_capacity_exhaustion": "not_established",
+    "source_bug_or_successful_repair": "not_established",
+    "sampling_limitation": "Five-second GPU samples may miss transient allocations; shared external load can affect observed runtime and allocation pressure.",
+    "iteration_log_limitation": "Successful frozen EDDY runs also have no iteration text in the recorded log. Absence of text cannot establish pre-optimization failure.",
+    "failed_clock_policy": "Keep all failed clocks as failure observations; exclude them from successful paired runtime ratios.",
+    "applies_to": "retained_initial_failed_attempts; the successful fresh repeat is recorded separately"
+  }
+}

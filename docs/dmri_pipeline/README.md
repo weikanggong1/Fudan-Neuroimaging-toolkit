@@ -387,7 +387,7 @@ fnit-dmri-pipeline \
 
 TOPUP 已计算的 AP b0 参考体积会直接供 EDDY 使用，避免对同一组 b0 再做一遍成对配准。独立调用 `prepare_ukb_eddy` 时省略 `ref_scan_no` 仍执行原选择流程；传入该参数时，它必须是 AP 中 b<100 体积的从零开始索引。
 
-有 PA 时，UKB TOPUP 输入准备对奇数 z 片数裁掉末片，但原 AP DWI 保持完整 z 网格。当前 EDDY 准备会因 TOPUP iout 与 AP 的 shape 不一致而在脑提取前报错，不会生成不同网格的 mask 后继续运行。因此这一 pipeline 组合仍要求偶数 z 片数；本次真实整链为 72 片。奇数片输入的恢复/padding 尚待实现与真实验收；AP-only 分支不执行这次 TOPUP 裁剪，见[剩余工作](../../validation/dmri_pipeline/lossless_20261002.md#5-后续工作与更新记录)。
+有 PA 时，UKB TOPUP 输入准备对奇数 z 片数裁掉末片，但原 AP DWI 保持完整 z 网格。当前 EDDY 准备会因 TOPUP iout 与 AP 的 shape 不一致而在脑提取前报错，不会生成不同网格的 mask 后继续运行。因此这一 pipeline 组合仍要求偶数 z 片数；公开十人数据为 68 片，前一独立单例为 72 片。奇数片输入的恢复/padding 尚待实现与真实验收；AP-only 分支不执行这次 TOPUP 裁剪，见[剩余工作](../../validation/dmri_pipeline/lossless_20261002.md#5-后续工作与更新记录)。
 
 ## 4. 原软件调用
 
@@ -496,6 +496,27 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 
 ## 5. 精度、运行时间与脑图
 
+
+### 2026-10-03：公开十人 TBSS 与 T1/tensor MMORF 对照
+
+[固定十人协议与复现](../../validation/dmri_pipeline/public10_20261002/README.md)使用 OpenNeuro ds003138 v1.0.1（CC0）首十人的 ses-1：每人 117 帧原始 AP、反向 PA b0 和配对 T1。保留原网格、存储缩放和所有扩散方向；两个分支各有十组独立原软件对照。原软件使用其自身 TOPUP 结果和官方 SynthStrip mask，EDDY 为 `eddy_cuda10.2`，MMORF 为原 GPU 0.3.2；两侧各自使用 EDDY 旋转梯度。
+
+全部 FNIT 作业采用冻结提交 `bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a`，433 个运行时 Python 文件逐项绑定清单 `f13a4098…`。真实整链触发的 AMICO 填充行临时矩阵显存问题已在公共 solver 中修复，接口、模型、dtype 和 TF32 策略保持不变；修正版 20/20 完整运行通过输出检查。最终完整配对为 TBSS 10/10、MMORF 9/10，共 432/450 张指标图通过几何和有限值检查。case05、case10 TBSS 的原参考已恢复成功；case10 MMORF 的原 GPU EDDY 初次、R1、R2 均报 CUDA 分配错误，停止重试并保留缺失的 18 张图。原参考共 25 次完整尝试，19 次成功、6 次失败；FNIT 共 21 次尝试，20 次成功、1 次失败，选定主结果 20/20 成功。详见[失败记录](../../validation/dmri_pipeline/public10_20261002/OFFICIAL_FAILURES.md)。
+
+最终完整配对的 GNU 命令时间中位数为 TBSS（n=10）：FNIT 759.91 s、原软件 2606.87 s；MMORF（n=9）：FNIT 571.32 s、原软件 2113.98 s。逐人原/FNIT 时间比中位数分别为 3.258 和 3.422。它们来自共享 H100，不包含排队与 GPU 锁等待；报告同时保留其他进程负载与失败时间。输出有非零误差，原 MMORF LM/MM 与 FNIT L-BFGS 优化器也有区别，时间比不代表数值等价的加速。
+
+本次结果绑定冻结源码，不能因随后合并 main 就改标为当前 main 重跑。主运行输入、模板、权重、时钟、逐图误差和失败分母见上述验证页；下面保留前一例独立验证的实际源码与结果。
+
+标准空间 FA 的逐人 Pearson r / NRMSE 中位数为 TBSS **0.995808 / 0.060759**，MMORF **0.929447 / 0.217009**；MMORF 的 MO 为 **0.771097 / 0.593847**。19 对中没有一张图在主要 ROI 内逐值相等。完整九指标和三个空间的结果见[精度审查](../../validation/dmri_pipeline/public10_20261002/PRECISION.md)，逐人及阶段时钟见[原始汇总](../../validation/dmri_pipeline/public10_20261002/summary/RESULTS.md)。
+
+独立补测把 case02/08 的 TOPUP 输入固定为原软件实际使用的同一张 AP/PA b0 对；场 MAE 分别降至 **0.00159/0.00723 Hz**，校正 b0 相关系数均大于 **0.999997**。这支持这两例的大场图差异主要由选帧不同造成。另已修复 b0 选择器返回最后一次 closure 评分而非最终接受参数评分的问题；十人核验中 30/30 个分数与最终参数的独立评分相同，选帧均未改变。case02/08 仍为 FNIT AP 第 0 帧、原参考第 21 帧，剩余选帧差异来自配准与评分方法。组件证据单独记录在[TOPUP 说明](../topup/README.md)，不覆盖冻结整链结果。相同 b0 输入下仍存在 EDDY 和 MMORF 差异，下一步应分别固定其输入继续对照。
+
+![固定十人完整命令耗时；失败配对保留空位](../../validation/dmri_pipeline/public10_20261002/figures/timing_public10.png)
+
+![case08 MMORF：参考、FNIT 和差图；固定世界坐标切面](../../validation/dmri_pipeline/public10_20261002/figures/case08_mmorf.png)
+
+
+
 ### 2026-10-02：原掩膜/TOPUP 版的 FNIRT 完整端到端验证
 
 该独立优化验证从真实原始 BIDS AP/PA DWI、bval/bvec 与采集 JSON 开始，完整运行原版 mask/TOPUP 准备、EDDY、DTIFIT、NODDI、TBSS 三阶段 FNIRT、九张参数图传播与 skeleton mask。GP seed 固定为 12345，使用新的输出目录，实际重新估计 FNIRT；与冻结 `7473452` 基线比较科学影像、网格和 FNIRT solver trace。FastVBM 与 volume 的完整真实流程同期验证；这组同 FNIT 基线比较与下方 SynthStrip＋匹配 TOPUP 的独立原软件比较分开记录。
@@ -504,13 +525,13 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 
 输入 SHA-256、源码范围、各阶段耗时、与原软件的参照范围及新脑图见[本轮完整验证](../../validation/registration_lossless_20261002/README.md)。
 
-### 2026-10-02：当前 main 的 SynthStrip＋匹配 TOPUP 整链
+### 2026-10-02：当时 main 的 SynthStrip＋匹配 TOPUP 单例整链
 
-当前 main 集成版从同一例真实 `104×104×72×105` raw AP/PA 重新完成全部阶段，在新目录保存九张 native、九张 standard、九张 skeleton 图。主要原软件参考复用本轮已经独立完成的官方 TOPUP → 官方 CPU SynthStrip → FSL GPU EDDY → FSL DTIFIT／官方 Python AMICO／FSL TBSS 结果；同 raw、官方环境和参考协议均未改变。脑提取输入分别为各自 TOPUP 校正 b0 均值，标准权重同哈希；DTIFIT 和 AMICO 分别使用各自 EDDY 产生的旋转梯度。参考仍保留 UKB 单被试流程的无 T1、无 GDC 适配。环境为 Python 3.11.16、Torch 2.5.1、FSL 6.0.7.4、AMICO 2.0.3；官方 AMICO 本例 protocol kernels 重建并计入其原测时间，全局 rotation cache 已存在。
+当时集成版从同一例真实 `104×104×72×105` raw AP/PA 重新完成全部阶段，在新目录保存九张 native、九张 standard、九张 skeleton 图。主要原软件参考复用本轮已经独立完成的官方 TOPUP → 官方 CPU SynthStrip → FSL GPU EDDY → FSL DTIFIT／官方 Python AMICO／FSL TBSS 结果；同 raw、官方环境和参考协议均未改变。脑提取输入分别为各自 TOPUP 校正 b0 均值，标准权重同哈希；DTIFIT 和 AMICO 分别使用各自 EDDY 产生的旋转梯度。参考仍保留 UKB 单被试流程的无 T1、无 GDC 适配。环境为 Python 3.11.16、Torch 2.5.1、FSL 6.0.7.4、AMICO 2.0.3；官方 AMICO 本例 protocol kernels 重建并计入其原测时间，全局 rotation cache 已存在。
 
 双方均使用 8 个 CPU 线程，原软件固定 CPU 0–7，FNIT 固定 CPU 8–15；本任务 GPU 阶段在同一张 H100 GPU 1 上串行运行。最新 main 在参考流程完成后执行，二者没有本任务时间重叠；只有下方早期合并前运行与参考 CPU 配准有重叠。处理计时从 raw 输入处理开始，到全部 27 图写盘结束；Python／CUDA 初始化、预检和验证报告统计另行记录。嵌套 TOPUP 子步骤包含在父步骤中，不重复累加。这里记录单被试共享系统上的实测耗时，数值差异按固定脑区及共同有效区域分别报告；较高相关性本身不构成数值等价结论。
 
-| 处理步骤，包含该阶段读写 / 秒 | 当前 main FNIT | 独立官方 SynthStrip 参考 |
+| 处理步骤，包含该阶段读写 / 秒 | 当时集成版 FNIT | 独立官方 SynthStrip 参考 |
 |---|---:|---:|
 | b0 选择、TOPUP、脑掩膜与 EDDY 输入准备 | 12.89 | 330.36 |
 | 完整八轮 EDDY | 331.41 | 645.88 |
@@ -533,7 +554,7 @@ FNIT 的 TOPUP 估计和保存子步骤为 5.58 s，原软件为 215.47 s；二�
 
 完整 EDDY 105 volume 在固定官方脑区 r=0.999764，MAE／RMSE=23.2314／43.0074（原信号单位）；100 个 DWI 旋转梯度的平均夹角为 0.05585°，离群图共有 1 个条目不同。FA FLIRT 在八个体素中心角点及图像中心的位移 RMS 为 0.24793 mm，属于九点检查。旧阈值/BET 整链的 r 和 6.49 mm 九点位移来自不同上游与掩膜输入，不能把新旧差值单独归因于某个修复，也没有由这些结果隔离 FNIRT 的残差贡献。
 
-当前实际运行的 433 个 Python 源文件哈希全部与集成提交 `b3ccafe0a48f4c1c396ae6285d0bdbe07a7664c9` 一致；TOPUP core／CUDA sampler 哈希仍以 `d6b9838c`／`ee19a764` 开头。集成版包含新 main 的共享 FNIRT／ApplyWarp 更新，已从 raw 完整重新运行。相对合并前清理版，27 张解码数组和 header binary block 全部相同；当前图像与参考的精度报告也重新生成并核对。
+该次实际运行的 433 个 Python 源文件哈希全部与集成提交 `b3ccafe0a48f4c1c396ae6285d0bdbe07a7664c9` 一致；TOPUP core／CUDA sampler 哈希仍以 `d6b9838c`／`ee19a764` 开头。集成版包含新 main 的共享 FNIRT／ApplyWarp 更新，已从 raw 完整重新运行。相对合并前清理版，27 张解码数组和 header binary block 全部相同；当前图像与参考的精度报告也重新生成并核对。
 
 | 同轮 FNIT 历史源码快照 | 处理 / 秒 | 完整进程 / 秒 |
 |---|---:|---:|

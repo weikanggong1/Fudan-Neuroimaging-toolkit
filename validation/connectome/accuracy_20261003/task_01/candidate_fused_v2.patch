@@ -1,0 +1,39 @@
+diff --git a/src/fnit/eddy/fsl2111_strict/spline.py b/src/fnit/eddy/fsl2111_strict/spline.py
+index fa234fa2..7855dbba 100644
+--- a/src/fnit/eddy/fsl2111_strict/spline.py
++++ b/src/fnit/eddy/fsl2111_strict/spline.py
+@@ -138,13 +138,16 @@ def _pad_cubic_coefficients(coeff: torch.Tensor, boundary: str) -> torch.Tensor:
+ def sample_cubic_periodic_fast(coeff: torch.Tensor, coordinates: torch.Tensor,
+                                boundary: str = 'periodic', *,
+                                padded_coeff: torch.Tensor | None = None) -> torch.Tensor:
+-    """Evaluate the cubic spline with eight trilinear GPU fetches.
++    """Evaluate periodic CUDA splines with FSL double taps and accumulation.
+ 
+     ``coeff`` contains prefiltered XxYxZ or BxXxYxZ coefficients;
+     ``coordinates`` contains Bx3xXoxYoxZo source voxel coordinates.
+     ``boundary`` selects periodic wrapping or whole-sample mirror edges.
+     ``padded_coeff`` can reuse the Bx1 two-voxel pad from
+     ``_pad_cubic_coefficients``. Single-voxel mirror axes stay constant.
++    Fixed float32 CUDA coefficients with periodic boundaries reuse TOPUP's
++    fused official-precision sampler. CPU, mirror and coefficient-gradient
++    calls retain the eight trilinear fetch implementation.
+     """
+     if coeff.ndim == 3:
+         coeff = coeff[None]
+@@ -155,6 +158,16 @@ def sample_cubic_periodic_fast(coeff: torch.Tensor, coordinates: torch.Tensor,
+     if coeff.shape[0] != coordinates.shape[0]:
+         raise ValueError("batch mismatch")
+     _, X, Y, Z = coeff.shape
++    if padded_coeff is not None and (
++        padded_coeff.shape != (coeff.shape[0], 1, X+4, Y+4, Z+4)
++        or padded_coeff.dtype != coeff.dtype or padded_coeff.device != coeff.device
++    ):
++        raise ValueError('padded_coeff must match the coefficient batch, dtype, device and two-voxel pad')
++    if (boundary == 'periodic' and coeff.is_cuda and coeff.dtype == torch.float32
++            and coordinates.dtype == torch.float32 and not coeff.requires_grad):
++        from ...topup._sampling_cuda import sample_cubic_cuda
++        return torch.stack([sample_cubic_cuda(volume, grid, 1)[0]
++                            for volume, grid in zip(coeff, coordinates)])
+     positions=[]; sums=[]
+     for axis,n in enumerate((X,Y,Z)):
+         x=coordinates[:,axis]

@@ -1,0 +1,286 @@
+{
+  "scope": "full real FS labels, unchanged 5TT/GMWMI functions; CPU native reference",
+  "reference_commit": "026e850d171ec2a12f09865d31b8332d23d7ecf6",
+  "source_sha256": "49dcf7dd05bd83d8c83e383c1749a63a0d3f3662ea7658795052b7c1d24aa516",
+  "resource_sha256": "752e35be8f5831f839e05218269ecb8136af8c298c606d1877736bf03f30de9e",
+  "bindings_sha256": "1ee5145471a76d345cf85a18750bed85bd53f967a410ac36ddad7bfd252bc940",
+  "lut_sha256": "b0d4c3006c749ae11f1b0fb2aaa72144f82155a66ab53f55dd4f9a030fa83544",
+  "FreeSurferColorLUT_sha256": "da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b",
+  "native_binary_sha256": {
+    "labelconvert": "5cd08151e63d4b43975463b6329be85c6dd6e7b763a35013823b7d87aab5f691",
+    "mrcalc": "21a4d0447838a47458378631628448a6032e1dc85a6fc3513f87aeebfe4bf11d",
+    "mrcat": "d168e809bebab51c3c50ef6521379ec718df91f40328532f230e9bcf5cba061a",
+    "mrconvert": "b115dc477774314f48834898e5e39d3937ca9d820dca532c94b02bb67af6fe7f",
+    "5tt2gmwmi": "62b79c585acdd29a349ae3b35dd93d492e221c42f0bfb9607081c63d439ca6fa"
+  },
+  "cases": [
+    {
+      "case": "sub-CON03",
+      "source": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v1/candidate/sub-CON03/freesurfer/sub-CON03_ses-preop/mri/aparc+aseg.mgz",
+      "source_sha256": "ca85a4ca2a0b39007f84861c1bcff9e3246e1d9d16f9a58c34fdf046803e8c82",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "native_commands": [
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/labelconvert",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v1/candidate/sub-CON03/freesurfer/sub-CON03_ses-preop/mri/aparc+aseg.mgz",
+            "/public/software/apps/Freesurfer/8.2.0-1/FreeSurferColorLUT.txt",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_03/oracle/mrtrix3-026e850d/share/mrtrix3/_5ttgen/FreeSurfer2ACT_sgm_amyg_hipp.txt",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/indices.nii.gz",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 1.0922344848513603,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/indices.nii.gz",
+            "1",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/cgm.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.3340178281068802,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/indices.nii.gz",
+            "2",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/sgm.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.3130720481276512,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/indices.nii.gz",
+            "3",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/wm.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.33793462067842484,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/indices.nii.gz",
+            "4",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/csf.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.3399941921234131,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/indices.nii.gz",
+            "5",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/path.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.3050851374864578,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcat",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/cgm.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/sgm.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/wm.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/csf.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/path.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/native_five_tissue.nii.gz",
+            "-axis",
+            "3",
+            "-datatype",
+            "float32",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 2.0921601727604866,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/5tt2gmwmi",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/native_five_tissue.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON03/native_gmwmi.nii.gz",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 1.3286974281072617,
+          "exit_code": 0
+        }
+      ],
+      "five_tissue": {
+        "cpu_seconds": 0.23393719643354416,
+        "nonzero_differences": 0,
+        "max_abs": 0.0
+      },
+      "gmwmi": {
+        "cpu_seconds": 0.4652217775583267,
+        "nonzero_differences": 0,
+        "max_abs": 0.0
+      },
+      "output_sha256": {
+        "native_five": "8f658afcf593578efd950038387ce5d01ee2d240938de180a98de7de556dd950",
+        "native_gmwmi": "ec34495b5198bb0cf00a90f6312069f467ed56496a5ec8b2925b88278470235e"
+      }
+    },
+    {
+      "case": "sub-CON01",
+      "source": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v1/candidate/sub-CON01/freesurfer/sub-CON01_ses-preop/mri/aparc+aseg.mgz",
+      "source_sha256": "c63255b891e3a662837324d3a30f8bac7452458d9ca8106055fc6f311f5b1157",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "native_commands": [
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/labelconvert",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v1/candidate/sub-CON01/freesurfer/sub-CON01_ses-preop/mri/aparc+aseg.mgz",
+            "/public/software/apps/Freesurfer/8.2.0-1/FreeSurferColorLUT.txt",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_03/oracle/mrtrix3-026e850d/share/mrtrix3/_5ttgen/FreeSurfer2ACT_sgm_amyg_hipp.txt",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/indices.nii.gz",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 1.180162563920021,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/indices.nii.gz",
+            "1",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/cgm.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.41648242622613907,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/indices.nii.gz",
+            "2",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/sgm.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.3190556913614273,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/indices.nii.gz",
+            "3",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/wm.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.33873455226421356,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/indices.nii.gz",
+            "4",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/csf.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.3292884826660156,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcalc",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/indices.nii.gz",
+            "5",
+            "-eq",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/path.mif",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 0.36472421884536743,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/mrcat",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/cgm.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/sgm.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/wm.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/csf.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/path.mif",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/native_five_tissue.nii.gz",
+            "-axis",
+            "3",
+            "-datatype",
+            "float32",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 2.10249824821949,
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/public/software/apps/MRtrix3/3.0.3/bin/5tt2gmwmi",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/native_five_tissue.nii.gz",
+            "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/tissue_reference_v1/sub-CON01/native_gmwmi.nii.gz",
+            "-nthreads",
+            "8"
+          ],
+          "wall_seconds": 1.2886596024036407,
+          "exit_code": 0
+        }
+      ],
+      "five_tissue": {
+        "cpu_seconds": 0.26109184324741364,
+        "nonzero_differences": 0,
+        "max_abs": 0.0
+      },
+      "gmwmi": {
+        "cpu_seconds": 0.45258239656686783,
+        "nonzero_differences": 0,
+        "max_abs": 0.0
+      },
+      "output_sha256": {
+        "native_five": "c753796946c9e690d1b6410ea19f220f95149eb7195f24e20988a04d7d9f770b",
+        "native_gmwmi": "07dbbe71653e01930459920bb64b19ff9edc832d592b5781f2b64685022e0df6"
+      }
+    }
+  ]
+}

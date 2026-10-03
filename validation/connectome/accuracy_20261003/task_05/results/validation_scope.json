@@ -1,0 +1,68 @@
+{
+  "scope": "unchanged mature downstream components; CPU focused regression and real fixed-TCK checks",
+  "baseline_commit": "7af34e6d072e843fb2558c931bb2781f1d4b0be9",
+  "production_changes": "none; Double-weight candidate rejected and reverted before final production validation",
+  "source_sha256": {
+    "src/fnit/connectome/assignment.py": "d8901752cda4e5b8007f7c318613b343ad3edbd7072d0e0a05539a5d42ac6313",
+    "src/fnit/connectome/tcksample_precise.py": "f428520f1f804008007f61ea58f00c47ca05cd01fe915fe6582dfcc3143fa0ee",
+    "src/fnit/connectome/sift2.py": "8481bc75ac482c99b6768f4adf946df3dcd49bfc4d81e7b45972fb69e1cf06a1",
+    "src/fnit/connectome/sift2_fixels.py": "c23e376c4c33df2bb49f1af9eece1aea0531ad5f8e66db622e9372f719e0bba4",
+    "src/fnit/connectome/sift2_mapping.py": "64ed607d612dc157c1f91006f511ee73c07a1afd0f2ad53913828bcfca48d826",
+    "src/fnit/connectome/sift2_optimizer.py": "810615c533141f7ac145f563fa35712705225cc1683de5283b901a6f63c01281",
+    "src/fnit/connectome/sift2_proc_mask.py": "03f2e6ea47fb42168768c540a9a2bac08b75b4db53a47683fb1eed8e15a28ca1"
+  },
+  "cpu_tests": {
+    "passed": 18,
+    "wall_s": 2.68,
+    "actual_exec_session": 9935,
+    "host": "gpucw1",
+    "python": "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python",
+    "tests": [
+      "test_assignment.py",
+      "test_tcksample_precise.py",
+      "test_sift2_mapping.py",
+      "test_sift2_orchestration.py",
+      "test_sift2_proc_mask.py"
+    ],
+    "source_snapshot": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/candidate_v2/src",
+    "owned_sources": "identical to task05 baseline; candidate_v2 changes response/pipeline/mtnormalise only",
+    "skipped": 4,
+    "cuda_visible_devices": "",
+    "log_path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_05/tests_cpu_explicit_v1.log",
+    "log_sha256": "11c7e225cd7dd773b09ffed8f40f2ea15a5f349c210a334711ca39c55435b6ed"
+  },
+  "exact_upstream_files": {
+    "src/dwi/tractography/connectome/tck2nodes.cpp": "2275c6d1fd96399e859753fdb5f203fed28104fc5ad09015aa6d1538e76af73b",
+    "src/dwi/tractography/connectome/tck2nodes.h": "c25d6ce1e35164da9145291e21cba55d73c4d9e93c136a5429d7f590ee58e109",
+    "src/dwi/tractography/connectome/mapped_track.h": "c7b3fbcf06c4bcb7c3ea742334e27d1047a2bc5455bb0d2634ff6d08562afe57",
+    "src/dwi/tractography/connectome/mapper.h": "3cb2db2014d3f654373303dbd610952535aa0b616c4009e18de3eef6b11f1846",
+    "src/dwi/tractography/connectome/matrix.h": "f7e610af68730fa376d40ff275b05d7bac90f78bc9ce6686addd1f362ea6dfcd",
+    "src/dwi/tractography/connectome/matrix.cpp": "5488f7709f9ec55e95c746a9eaea9b6fa7daa5e563ba3cb2172048ef329156cb",
+    "src/dwi/tractography/connectome/metric.h": "529b39e076bbf9cabd2241da90871c453c4d56f34a06ec20100841b276dc1824"
+  },
+  "brain_figure_sha256": "c7f0a0c920002128267ad10875e677723961e639902b89438148f326fb21dcfd",
+  "rejected_candidate_reproducer_sha_exact": true,
+  "prior_test_label_correction": {
+    "actual_exec_session": 67052,
+    "passed": 24,
+    "wall_s": 5.45,
+    "actual_scope": "CPU and automatically selected CUDA tests; CUDA was not explicitly hidden and lock was absent",
+    "used_as_benchmark": false,
+    "remedy": "explicit CPU rerun completed 18+4skip; independent locked real fixed-input CUDA component passed; fixed-UUID shared-lock short regression naturally completed24pass; no GPU process was cancelled"
+  },
+  "locked_cuda_tests": {
+    "passed": 24,
+    "CPU_items": 18,
+    "CUDA_items": 6,
+    "wall_s": 5.33,
+    "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "lock": "/tmp/fnit-recon-five-20261002-gongwk.gpu.lock",
+    "scope": "same five test files and source snapshot as explicit CPU",
+    "state": "naturally_completed",
+    "log_sha256": "a83f231db8fded0abdc59de3b855bdaf57c671ec1279bd77e8fae7dfab1c1a77",
+    "exit_record_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "raw_exit_record": "0\n",
+    "parsed_returncode": 0,
+    "exit_record_serialization": "printf retained literal backslash-n; original bytes preserved; decimal returncode is zero"
+  }
+}

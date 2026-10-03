@@ -1,0 +1,52 @@
+diff --git a/src/fnit/connectome/bids.py b/src/fnit/connectome/bids.py
+index 7eb3bc33..d2c9a150 100644
+--- a/src/fnit/connectome/bids.py
++++ b/src/fnit/connectome/bids.py
+@@ -18,6 +18,11 @@ from ..topup.ukb import run_ukb_topup
+ from .freesurfer_subject import FreeSurferSubject
+ 
+ 
++# Existing EDDY stages predate the local FP32 Euler rotation correction.
++# Keep TOPUP/anatomy reuse independent of this numerical output revision.
++_EDDY_NUMERICAL_REVISION = "rotation-fp32-20261003"
++
++
+ @dataclass(frozen=True)
+ class BIDSConnectomeInputs:
+     dwi: Path
+@@ -155,7 +160,11 @@ def prepare_bids_connectome(
+                         raw / "AP.json")
+         if selected.reverse is not None:
+             eddy_sources += (topup_dir / "fieldmap_out_fieldcoef.nii.gz",)
+-        eddy_key = _fingerprint(eddy_sources, {"topup": selected.reverse is not None, "gp_seed": eddy_gp_seed})
++        eddy_key = _fingerprint(eddy_sources, {
++            "topup": selected.reverse is not None,
++            "gp_seed": eddy_gp_seed,
++            "numerical_revision": _EDDY_NUMERICAL_REVISION,
++        })
+         if not overwrite and _reusable(eddy_state, eddy_key, (dwi, bvecs)):
+             stages["eddy"] = "skipped"
+         else:
+diff --git a/src/fnit/eddy/fsl2111_strict/geometry.py b/src/fnit/eddy/fsl2111_strict/geometry.py
+index 5b45b652..8a4ec8ca 100644
+--- a/src/fnit/eddy/fsl2111_strict/geometry.py
++++ b/src/fnit/eddy/fsl2111_strict/geometry.py
+@@ -32,7 +32,17 @@ def fsl_rotation_matrix(angles: torch.Tensor) -> torch.Tensor:
+         -torch.sin(rz), torch.cos(rz), zero,
+         zero, zero, one,
+     ), dim=-1).reshape(*angles.shape[:-1], 3, 3)
+-    return Rx @ Ry @ Rz
++    # Near-identity cosines must not be rounded before coordinate sampling.
++    # Protect both Euler products, as well as the downstream rigid-grid GEMM:
++    # TF32 here changes official-parameter b0 renders by up to 16.85 units.
++    tf32 = angles.is_cuda and torch.backends.cuda.matmul.allow_tf32
++    try:
++        if tf32:
++            torch.backends.cuda.matmul.allow_tf32 = False
++        return Rx @ Ry @ Rz
++    finally:
++        if tf32:
++            torch.backends.cuda.matmul.allow_tf32 = True
+ 
+ 
+ def movepar_to_matrix(mp: torch.Tensor, shape, voxel_sizes) -> torch.Tensor:

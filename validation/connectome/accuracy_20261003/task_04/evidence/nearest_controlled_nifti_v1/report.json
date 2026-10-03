@@ -1,0 +1,376 @@
+{
+  "scope": "real FS integer labels; natural transform and separately labelled controlled operator cases",
+  "bindings_sha256": "1ee5145471a76d345cf85a18750bed85bd53f967a410ac36ddad7bfd252bc940",
+  "native_binary": "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+  "native_binary_sha256": "d4e508e6c60d2ba19b41ac4b4dd772ef89389f92047e93ddbfd3418ba3537106",
+  "source_sha256": {
+    "baseline": "49dcf7dd05bd83d8c83e383c1749a63a0d3f3662ea7658795052b7c1d24aa516",
+    "candidate": "71c870f89efacb2cebe16af114032b10f339abdfde26a59bb0852cfc041cdce3",
+    "harness": "1793514523c57afe8918a8bd904038246863e42dc60058a10080bfdd9eccad7a"
+  },
+  "cases": [
+    {
+      "name": "sub-CON03_controlled_half_axis0",
+      "scope": "controlled +half source-voxel shift of full real CON03 label MRI, nifti; not natural registration or E2E",
+      "source": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+      "target": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+      "source_sha256": "d1b34c52be24509dfcde8d4627ba0141cd3e152d1cef65035e04070ec0f65392",
+      "target_sha256": "d1b34c52be24509dfcde8d4627ba0141cd3e152d1cef65035e04070ec0f65392",
+      "transform_sha256": "277039a28299fef3982fa980506ac8f204631710ba4ccdf7c43564f18a79d781",
+      "transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.5
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -4.774847184307873e-10
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_affine": [
+        [
+          -1.0,
+          -1.862645149230957e-09,
+          9.549694368615746e-10,
+          128.44873046875
+        ],
+        [
+          -9.549694368615746e-10,
+          0.0,
+          1.0,
+          -107.18578338623047
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          121.26396942138672
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "target_affine": [
+        [
+          -1.0,
+          -1.862645149230957e-09,
+          9.549694368615746e-10,
+          128.44873046875
+        ],
+        [
+          -9.549694368615746e-10,
+          0.0,
+          1.0,
+          -107.18578338623047
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          121.26396942138672
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "native_command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/sub-CON03_controlled_half_axis0/native.nii.gz",
+        "-linear",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/sub-CON03_controlled_half_axis0/target_to_source_world.txt",
+        "-template",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+        "-interp",
+        "nearest",
+        "-datatype",
+        "int32",
+        "-nthreads",
+        "8"
+      ],
+      "native_seconds": 0.8341614454984665,
+      "native_output_sha256": "00d289dac117135611cb52198d130535b6c50c30ffa82555216c1b5098a4c383",
+      "aligned_native_affine_max_error": 0.0,
+      "output_voxels": 16777216,
+      "results": {
+        "baseline": {
+          "seconds_cpu": 0.8442937135696411,
+          "disagreements": 130051,
+          "nonbackground_disagreements": 130051,
+          "output_array_sha256": "f7bc65008eedb98d85f544f965fbffca5394a51b8cc7c94fd44cf0cd96a13976"
+        },
+        "candidate": {
+          "seconds_cpu": 0.878244936466217,
+          "disagreements": 258081,
+          "nonbackground_disagreements": 258081,
+          "output_array_sha256": "ad84455fbe6d4faf2ac60d22fce04021a36b0b339b361cd5c99da7f22b18a78a"
+        }
+      },
+      "baseline_candidate_disagreements": 128030
+    },
+    {
+      "name": "sub-CON03_controlled_half_axis1",
+      "scope": "controlled +half source-voxel shift of full real CON03 label MRI, nifti; not natural registration or E2E",
+      "source": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+      "target": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+      "source_sha256": "d1b34c52be24509dfcde8d4627ba0141cd3e152d1cef65035e04070ec0f65392",
+      "target_sha256": "d1b34c52be24509dfcde8d4627ba0141cd3e152d1cef65035e04070ec0f65392",
+      "transform_sha256": "0a6fc482eb019e581fd53a6bb9fb2f7e3ffd85f53d2830396ec46aa923517cc7",
+      "transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -9.313225746154785e-10
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_affine": [
+        [
+          -1.0,
+          -1.862645149230957e-09,
+          9.549694368615746e-10,
+          128.44873046875
+        ],
+        [
+          -9.549694368615746e-10,
+          0.0,
+          1.0,
+          -107.18578338623047
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          121.26396942138672
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "target_affine": [
+        [
+          -1.0,
+          -1.862645149230957e-09,
+          9.549694368615746e-10,
+          128.44873046875
+        ],
+        [
+          -9.549694368615746e-10,
+          0.0,
+          1.0,
+          -107.18578338623047
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          121.26396942138672
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "native_command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/sub-CON03_controlled_half_axis1/native.nii.gz",
+        "-linear",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/sub-CON03_controlled_half_axis1/target_to_source_world.txt",
+        "-template",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+        "-interp",
+        "nearest",
+        "-datatype",
+        "int32",
+        "-nthreads",
+        "8"
+      ],
+      "native_seconds": 0.798233188688755,
+      "native_output_sha256": "00d289dac117135611cb52198d130535b6c50c30ffa82555216c1b5098a4c383",
+      "aligned_native_affine_max_error": 0.0,
+      "output_voxels": 16777216,
+      "results": {
+        "baseline": {
+          "seconds_cpu": 0.8674294576048851,
+          "disagreements": 96926,
+          "nonbackground_disagreements": 96926,
+          "output_array_sha256": "bf8292b41ca453127f0482b1af2c6ca57fc9a18a3e8b72f46824382852629556"
+        },
+        "candidate": {
+          "seconds_cpu": 0.9535289257764816,
+          "disagreements": 192034,
+          "nonbackground_disagreements": 192034,
+          "output_array_sha256": "d700f38b69fb03f5aca4b065b7bcae970b1cacf7699259e2784bb132b40ef919"
+        }
+      },
+      "baseline_candidate_disagreements": 95108
+    },
+    {
+      "name": "sub-CON03_controlled_half_axis2",
+      "scope": "controlled +half source-voxel shift of full real CON03 label MRI, nifti; not natural registration or E2E",
+      "source": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+      "target": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+      "source_sha256": "d1b34c52be24509dfcde8d4627ba0141cd3e152d1cef65035e04070ec0f65392",
+      "target_sha256": "d1b34c52be24509dfcde8d4627ba0141cd3e152d1cef65035e04070ec0f65392",
+      "transform_sha256": "fbc51d9339d91b4721350c2410899f3fee83de5060e4e17db092a5d17740015a",
+      "transform": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          4.774847184307873e-10
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_affine": [
+        [
+          -1.0,
+          -1.862645149230957e-09,
+          9.549694368615746e-10,
+          128.44873046875
+        ],
+        [
+          -9.549694368615746e-10,
+          0.0,
+          1.0,
+          -107.18578338623047
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          121.26396942138672
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "target_affine": [
+        [
+          -1.0,
+          -1.862645149230957e-09,
+          9.549694368615746e-10,
+          128.44873046875
+        ],
+        [
+          -9.549694368615746e-10,
+          0.0,
+          1.0,
+          -107.18578338623047
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          121.26396942138672
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "native_command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/sub-CON03_controlled_half_axis2/native.nii.gz",
+        "-linear",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/sub-CON03_controlled_half_axis2/target_to_source_world.txt",
+        "-template",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04/nearest_controlled_nifti_v1/CON03_real_labels_template.nii.gz",
+        "-interp",
+        "nearest",
+        "-datatype",
+        "int32",
+        "-nthreads",
+        "8"
+      ],
+      "native_seconds": 0.8047476783394814,
+      "native_output_sha256": "5d386f93c9e170a7e21b2f51a2010bcd9bf654cc6dee90e8cf8e0c9158f6d5b2",
+      "aligned_native_affine_max_error": 0.0,
+      "output_voxels": 16777216,
+      "results": {
+        "baseline": {
+          "seconds_cpu": 0.948913648724556,
+          "disagreements": 8805,
+          "nonbackground_disagreements": 8805,
+          "output_array_sha256": "f187ec456cf214a9a6261b4f28c6dfc425c3c9c6ddbdc6147df8b314bdf2680f"
+        },
+        "candidate": {
+          "seconds_cpu": 0.9719587042927742,
+          "disagreements": 0,
+          "nonbackground_disagreements": 0,
+          "output_array_sha256": "11e5ef59536585fbc32266db597051853c54f0b797bb8c23c53c85d2cfad3c36"
+        }
+      },
+      "baseline_candidate_disagreements": 8805
+    }
+  ]
+}

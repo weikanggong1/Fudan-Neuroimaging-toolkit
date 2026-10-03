@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "scope": "CPU read-only real old completed reports plus actual frozen producer source-schema audit; no MRI metric smoke/GPU/official solver",
+  "UTC": "2026-10-03T06:35:19.575099+00:00",
+  "host": "gpucw1",
+  "configuration": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/accuracy_configuration.json",
+    "size_bytes": 318796,
+    "sha256": "f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c"
+  },
+  "input_bindings": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_tools_v1/input_bindings_v1.json",
+    "size_bytes": 95114,
+    "sha256": "1ee5145471a76d345cf85a18750bed85bd53f967a410ac36ddad7bfd252bc940"
+  },
+  "helper": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py",
+    "size_bytes": 39148,
+    "sha256": "eebd3ebe7308c0caf2d36bd0e6a501aef8a350017fe7261f9348fafe1a6a1e0f"
+  },
+  "actual_frozen_worker": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/tools_source/tools/benchmark_connectome_raw_cohort.py",
+    "size_bytes": 57955,
+    "sha256": "5d8415ce3912721b4763ed31f61a846e8d08bab93573133c9655c121897fce90"
+  },
+  "actual_frozen_wall": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/tools_source/tools/benchmark_connectome_raw_bids.py",
+    "size_bytes": 45023,
+    "sha256": "c1715067883e7e04d9b953e509572227237efd27c712cc9887956d17ad13fe75"
+  },
+  "actual_frozen_accuracy_driver": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/tools_source/tools/benchmark_connectome_accuracy_cohort.py",
+    "size_bytes": 6846,
+    "sha256": "6aff551478f4062fe3a7821e3dd685d4c684047ca6bc9102750eb7c0a13841cd"
+  },
+  "assertions": {
+    "worker_inventory_matches_configuration": true,
+    "wall_inventory_matches_configuration": true,
+    "frozen_worker_saves_anatomy_after": true,
+    "frozen_worker_checks_anatomy_before_after": true,
+    "frozen_wall_has_real_post_timing_export": true,
+    "formal_driver_passes_result_export_dir": true,
+    "wall_records_memory_budget": true
+  },
+  "old_actual_schema": {
+    "sub-CON01": {
+      "actual_completed_old_gpu": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON01/gpu_report.json",
+        "size_bytes": 351945,
+        "sha256": "59b35f926879c61d1a56385e85ecc0b00ecb685a36d6a3034797f98702130fb9"
+      },
+      "actual_completed_old_wall": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON01/raw_bids_wall.json",
+        "size_bytes": 107556,
+        "sha256": "a5231cd061a66dd4f4468ccbe9468dde85b157dcee3495fc432856b13a84d7dd"
+      },
+      "gpu_schema_keys": [
+        "schema_version",
+        "action",
+        "case_id",
+        "subject",
+        "version",
+        "start_utc",
+        "identity",
+        "status",
+        "raw_input_provenance",
+        "staged_anatomy",
+        "execution_scope",
+        "gpu_lock_queue_seconds",
+        "source_before",
+        "anatomy",
+        "input_verification",
+        "command",
+        "wall_script_sha256",
+        "environment",
+        "workbench_program",
+        "gpu_command_wall_seconds",
+        "exit_code",
+        "outputs",
+        "source_after",
+        "input_verification_after",
+        "wall_report",
+        "raw_dwi_cli_total_runtime_seconds",
+        "gpu_memory",
+        "memory_budget",
+        "end_utc",
+        "worker_wall_seconds"
+      ],
+      "wall_schema_keys": [
+        "schema_version",
+        "mode",
+        "cli_arguments",
+        "eddy_gp_seed_default",
+        "initial_output_state",
+        "timing_scope",
+        "diagnostic_note",
+        "scientific_policy",
+        "start_utc",
+        "status",
+        "total_runtime_seconds",
+        "end_utc",
+        "exit_code",
+        "gpu_process_memory",
+        "preprocessing",
+        "actual_eddy_gp_seeds",
+        "stages",
+        "stage_qc",
+        "selected_inputs",
+        "official_recon_all_calls",
+        "cuda_allocator",
+        "checkpoint_export_seconds",
+        "checkpoints",
+        "provenance",
+        "inputs",
+        "outputs",
+        "hash_timing_scope",
+        "memory_budget"
+      ],
+      "wall_memory_budget_keys": [
+        "limit_bytes",
+        "criterion",
+        "allocated_observed_below_limit",
+        "reserved_observed_below_limit",
+        "allocator_observed_below_limit",
+        "process_tree_sampled_below_limit",
+        "continuous_process_tree_bound_verified",
+        "note"
+      ],
+      "wall_memory_budget": {
+        "limit_bytes": 20000000000,
+        "criterion": "strictly_less",
+        "allocated_observed_below_limit": true,
+        "reserved_observed_below_limit": true,
+        "allocator_observed_below_limit": true,
+        "process_tree_sampled_below_limit": true,
+        "continuous_process_tree_bound_verified": false,
+        "note": "allocator and sampled driver peaks have distinct scopes; missing samples or gaps do not prove a strict continuous whole-pipeline memory bound"
+      },
+      "prepared_roles_present": {
+        "prepared/dwi": true,
+        "prepared/bvals": true,
+        "prepared/bvecs": true
+      },
+      "outputs_status": "complete",
+      "raw_and_source_before_after_same": true,
+      "anatomy_before_matches_actual_binding": true,
+      "old_gpu_has_anatomy_after": false,
+      "old_wall_has_post_timing_export": false,
+      "interpretation": "historical report schema only; old reports are not relabeled as new accuracy completed producers"
+    },
+    "sub-CON03": {
+      "actual_completed_old_gpu": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/gpu_report.json",
+        "size_bytes": 351941,
+        "sha256": "ebab0f0366de15b7010daa3e8a9a7dc2caea5b090a49bb1578f8326f89858823"
+      },
+      "actual_completed_old_wall": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_staged_v1/candidate/sub-CON03/raw_bids_wall.json",
+        "size_bytes": 107574,
+        "sha256": "28305eb0880aa6d722483b5d365a13084b3b5c82d70666eecae812382128d0aa"
+      },
+      "gpu_schema_keys": [
+        "schema_version",
+        "action",
+        "case_id",
+        "subject",
+        "version",
+        "start_utc",
+        "identity",
+        "status",
+        "raw_input_provenance",
+        "staged_anatomy",
+        "execution_scope",
+        "gpu_lock_queue_seconds",
+        "source_before",
+        "anatomy",
+        "input_verification",
+        "command",
+        "wall_script_sha256",
+        "environment",
+        "workbench_program",
+        "gpu_command_wall_seconds",
+        "exit_code",
+        "outputs",
+        "source_after",
+        "input_verification_after",
+        "wall_report",
+        "raw_dwi_cli_total_runtime_seconds",
+        "gpu_memory",
+        "memory_budget",
+        "end_utc",
+        "worker_wall_seconds"
+      ],
+      "wall_schema_keys": [
+        "schema_version",
+        "mode",
+        "cli_arguments",
+        "eddy_gp_seed_default",
+        "initial_output_state",
+        "timing_scope",
+        "diagnostic_note",
+        "scientific_policy",
+        "start_utc",
+        "status",
+        "total_runtime_seconds",
+        "end_utc",
+        "exit_code",
+        "gpu_process_memory",
+        "preprocessing",
+        "actual_eddy_gp_seeds",
+        "stages",
+        "stage_qc",
+        "selected_inputs",
+        "official_recon_all_calls",
+        "cuda_allocator",
+        "checkpoint_export_seconds",
+        "checkpoints",
+        "provenance",
+        "inputs",
+        "outputs",
+        "hash_timing_scope",
+        "memory_budget"
+      ],
+      "wall_memory_budget_keys": [
+        "limit_bytes",
+        "criterion",
+        "allocated_observed_below_limit",
+        "reserved_observed_below_limit",
+        "allocator_observed_below_limit",
+        "process_tree_sampled_below_limit",
+        "continuous_process_tree_bound_verified",
+        "note"
+      ],
+      "wall_memory_budget": {
+        "limit_bytes": 20000000000,
+        "criterion": "strictly_less",
+        "allocated_observed_below_limit": true,
+        "reserved_observed_below_limit": true,
+        "allocator_observed_below_limit": true,
+        "process_tree_sampled_below_limit": true,
+        "continuous_process_tree_bound_verified": false,
+        "note": "allocator and sampled driver peaks have distinct scopes; missing samples or gaps do not prove a strict continuous whole-pipeline memory bound"
+      },
+      "prepared_roles_present": {
+        "prepared/dwi": true,
+        "prepared/bvals": true,
+        "prepared/bvecs": true
+      },
+      "outputs_status": "complete",
+      "raw_and_source_before_after_same": true,
+      "anatomy_before_matches_actual_binding": true,
+      "old_gpu_has_anatomy_after": false,
+      "old_wall_has_post_timing_export": false,
+      "interpretation": "historical report schema only; old reports are not relabeled as new accuracy completed producers"
+    }
+  },
+  "new_controller_snapshot": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/status.json",
+    "state_snapshot_sha256": "fdc862f77cac2c5689e7082faa969120a0a161951f562c0da91526b176e2f538",
+    "status": "running",
+    "cases": {
+      "baseline/sub-CON01": {
+        "status": "running",
+        "raw_dwi_cli_total_runtime_seconds": null
+      }
+    },
+    "policy": "mutable ongoing status snapshot; not an immutable completed scientific result"
+  },
+  "focused_CPU_test_log": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/focused_cpu_v3.log",
+    "size_bytes": 99,
+    "sha256": "15d2a5cb344ce83832e3de18b0ddd3f9580597078ddede1a3783946f059c6e0f"
+  },
+  "conclusion": "no confirmed helper/schema bug for the actual new frozen phase; old missing optional fields belong to different original worker/wall versions; keep new-phase strict anatomy-after and genuine returned-result export requirements",
+  "scientific_parity": "not_assessed",
+  "new_raw_component_results_computed": 0,
+  "scientific_sources_or_configuration_modified": false
+}

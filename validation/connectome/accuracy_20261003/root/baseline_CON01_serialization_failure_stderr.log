@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 610, in <module>
+    main()
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 605, in main
+    result = execute(args.configuration, args.configuration_sha256, args.output_dir, args.case_id, args.version)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 593, in execute
+    (output / "components.json").write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib/python3.11/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib/python3.11/json/encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib/python3.11/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  [Previous line repeated 4 more times]
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib/python3.11/json/encoder.py", line 317, in _iterencode_list
+    yield buf + _floatstr(value)
+                ^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib/python3.11/json/encoder.py", line 240, in floatstr
+    raise ValueError(
+ValueError: Out of range float values are not JSON compliant: nan

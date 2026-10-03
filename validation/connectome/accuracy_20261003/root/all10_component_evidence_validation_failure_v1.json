@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "status": "actual_CPU_artifact_assertion_failed",
+  "scientific_parity": "not_assessed",
+  "scope": "local published artifact/schema review only; not scientific producer failure",
+  "stderr_observed": "Traceback (most recent call last):\n  File \"<stdin>\", line 38, in <module>\nAssertionError\n",
+  "initial_assumption": "CON09 and CON10 monitor_issues both equal failed_samples/errors",
+  "actual_original_fields": {
+    "sub-CON09": {
+      "limit_bytes": 20000000000,
+      "measurements": {
+        "process_tree": 19815989248,
+        "allocated_bytes": 14681255936,
+        "reserved_bytes": 17628659712
+      },
+      "status": "not_fully_measured",
+      "monitor_issues": [
+        "failed_samples",
+        "errors"
+      ],
+      "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+    },
+    "sub-CON10": {
+      "limit_bytes": 20000000000,
+      "measurements": {
+        "process_tree": 19795017728,
+        "allocated_bytes": 14681969664,
+        "reserved_bytes": 17607688192
+      },
+      "status": "not_fully_measured",
+      "monitor_issues": [
+        "failed_samples",
+        "errors",
+        "sampling_gap"
+      ],
+      "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+    }
+  },
+  "stdout_empty_file": {
+    "path": "all10_component_evidence_validation.log",
+    "size_bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "action": "Correct local metadata expectation to retain original CON10 sampling_gap. No original report, scientific metric, memory qualification or frozen source/configuration changed."
+}

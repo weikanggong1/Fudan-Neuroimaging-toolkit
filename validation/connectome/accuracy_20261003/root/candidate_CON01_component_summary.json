@@ -1,0 +1,1830 @@
+{
+  "original_report": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_analysis_v1/results/candidate/sub-CON01/components.json",
+    "sha256": "507cc3e8d99a57650521642f2ea98572308e794c9ab63c9a91b846c1f004e63c",
+    "size_bytes": 911531
+  },
+  "components": {
+    "case_id": "sub-CON01",
+    "version": "candidate",
+    "status": "compared",
+    "scientific_parity": "not_assessed",
+    "comparison_scope": "independent end-to-end raw acquisitions; downstream FA can differ because corrected DWI/mask/rotated gradients differ; not fixed-input DTI parity",
+    "candidate_producer": {
+      "gpu_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/gpu_report.json",
+        "sha256": "82b69c8f02c460d3e61cea52f7f152ef92c6ee8820d9973485b0739ebb99afcb",
+        "size_bytes": 359861
+      },
+      "wall_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/raw_bids_wall.json",
+        "sha256": "e53215d11cbe14cb50e8171fc2838bf8886f12d9136541dc0f375ac88f8596a4",
+        "size_bytes": 110895
+      },
+      "source_fingerprint": "a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82",
+      "source_commit": "1fe86ab8347b29d9c47be8109627736576222912",
+      "total_runtime_seconds": 2072.132814221084,
+      "memory_budget": {
+        "limit_bytes": 20000000000,
+        "criterion": "strictly_less",
+        "allocated_observed_below_limit": true,
+        "reserved_observed_below_limit": true,
+        "allocator_observed_below_limit": true,
+        "process_tree_sampled_below_limit": true,
+        "continuous_process_tree_bound_verified": false,
+        "note": "allocator and sampled driver peaks have distinct scopes; missing samples or gaps do not prove a strict continuous whole-pipeline memory bound"
+      }
+    },
+    "official_producer": {
+      "reference_manifest": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/official_raw10_cpu_group_A_v3/sub-CON01/reference_manifest.json",
+        "sha256": "64b9066e465ddc1ae8e688c1fec48b2a5611a6312b8637a302fb5404e7d7ca5a"
+      },
+      "DWI_consumer": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/consumer_contract.json",
+        "sha256": "36b56d7d8e218464e4440c99a75a3fe12a7d71f984912f743fa343e42d57a07b"
+      },
+      "rawprep_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/report.json",
+        "sha256": "f83d232acb43ad0899cff205ed15fcd5b30a05b38550fc12489640cec3af95a4"
+      },
+      "modeling_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/report.json",
+        "sha256": "e5292dc2432475f096d0b92e741ae0fdecc224b326e66a6df0c1738d1ed61e88"
+      },
+      "rawprep_timing_policy": "Current activation wall measures input revalidation, own stage restoration, waiting and new CPU EDDY. Original CPU command walls retained separately. No sum presented as a fresh uninterrupted raw pipeline wall.",
+      "official_FA_command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/tensor2metric",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz",
+        "-fa",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
+        "-vector",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/direction.nii.gz",
+        "-modulate",
+        "none",
+        "-mask",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
+        "-nthreads",
+        "8"
+      ],
+      "official_gradient_command": [
+        "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
+        "-fslgrad",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.eddy_rotated_bvecs",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/raw/AP.bval",
+        "-bvalue_scaling",
+        "no",
+        "-export_grad_mrtrix",
+        "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt",
+        "-nthreads",
+        "8"
+      ]
+    },
+    "CPU_comparison_wall_seconds": 20.457687079906464,
+    "immutable_files_before_after_count": 1319,
+    "corrected_dwi": {
+      "status": "compared",
+      "geometry": {
+        "same_grid": true,
+        "shape_match": true,
+        "affine_max_absolute_mm": 0.0,
+        "affine_tolerance_mm": 1e-05,
+        "candidate": {
+          "shape": [
+            96,
+            96,
+            60,
+            102
+          ],
+          "affine": [
+            [
+              -2.4991140365600586,
+              0.026171596720814705,
+              0.061186470091342926,
+              116.02857208251953
+            ],
+            [
+              0.008417095988988876,
+              2.4044065475463867,
+              -0.6846591830253601,
+              -83.54573059082031
+            ],
+            [
+              0.06601431220769882,
+              0.6842105388641357,
+              2.4036426544189453,
+              -112.64435577392578
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_nonfinite_count": 0,
+          "spacing": [
+            2.5,
+            2.5,
+            2.5,
+            8.699999809265137
+          ],
+          "nonfinite_spacing_axes": [],
+          "undefined_spacing": [],
+          "storage_dtype": "float32"
+        },
+        "reference": {
+          "shape": [
+            96,
+            96,
+            60,
+            102
+          ],
+          "affine": [
+            [
+              -2.4991140365600586,
+              0.026171596720814705,
+              0.061186470091342926,
+              116.02857208251953
+            ],
+            [
+              0.008417095988988876,
+              2.4044065475463867,
+              -0.6846591830253601,
+              -83.54573059082031
+            ],
+            [
+              0.06601431220769882,
+              0.6842105388641357,
+              2.4036426544189453,
+              -112.64435577392578
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_nonfinite_count": 0,
+          "spacing": [
+            2.5,
+            2.5,
+            2.5,
+            8.699999809265137
+          ],
+          "nonfinite_spacing_axes": [],
+          "undefined_spacing": [],
+          "storage_dtype": "float32"
+        },
+        "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+      },
+      "mask_geometry": {
+        "same_grid": true,
+        "shape_match": true,
+        "affine_max_absolute_mm": 0.0,
+        "affine_tolerance_mm": 1e-05,
+        "candidate": {
+          "shape": [
+            96,
+            96,
+            60,
+            102
+          ],
+          "affine": [
+            [
+              -2.4991140365600586,
+              0.026171596720814705,
+              0.061186470091342926,
+              116.02857208251953
+            ],
+            [
+              0.008417095988988876,
+              2.4044065475463867,
+              -0.6846591830253601,
+              -83.54573059082031
+            ],
+            [
+              0.06601431220769882,
+              0.6842105388641357,
+              2.4036426544189453,
+              -112.64435577392578
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_nonfinite_count": 0,
+          "spacing": [
+            2.5,
+            2.5,
+            2.5,
+            8.699999809265137
+          ],
+          "nonfinite_spacing_axes": [],
+          "undefined_spacing": [],
+          "storage_dtype": "float32"
+        },
+        "reference": {
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4991140365600586,
+              0.026171596720814705,
+              0.061186470091342926,
+              116.02857208251953
+            ],
+            [
+              0.008417095988988876,
+              2.4044065475463867,
+              -0.6846591830253601,
+              -83.54573059082031
+            ],
+            [
+              0.06601431220769882,
+              0.6842105388641357,
+              2.4036426544189453,
+              -112.64435577392578
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_nonfinite_count": 0,
+          "spacing": [
+            2.5,
+            2.5,
+            2.5
+          ],
+          "nonfinite_spacing_axes": [],
+          "undefined_spacing": [],
+          "storage_dtype": "uint8"
+        },
+        "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+      },
+      "frames_retained": 102,
+      "spatial_voxels_all": 552960,
+      "official_brain_mask_voxels": 115226,
+      "whole_volume": {
+        "count_all_values": 56401920,
+        "finite_pair_count": 56401920,
+        "all_values_finite": true,
+        "unequal_ieee": 51732133,
+        "nonfinite_state_mismatch": 0,
+        "candidate_nan": 0,
+        "candidate_posinf": 0,
+        "candidate_neginf": 0,
+        "reference_nan": 0,
+        "reference_posinf": 0,
+        "reference_neginf": 0,
+        "candidate_negative": 247759,
+        "reference_negative": 250501,
+        "zero_support_mismatch": 1553256,
+        "metrics_all_values": {
+          "mae": 0.5437195124756538,
+          "rmse": 1.567376622959973,
+          "max_absolute": 144.93297576904297,
+          "signed_mean_error": -0.2057674463674149,
+          "relative_rmse_reference_rms": 0.03948376851302162,
+          "pearson": 0.9990870125128867
+        },
+        "finite_pair_diagnostic": {
+          "count": 56401920,
+          "mae": 0.5437195124756538,
+          "rmse": 1.567376622959973,
+          "max_absolute": 144.93297576904297,
+          "signed_mean_error": -0.2057674463674149,
+          "relative_rmse_reference_rms": 0.03948376851302162,
+          "pearson": 0.9990870125128867,
+          "count_absolute_gt": {
+            "1e-06": 51731819,
+            "1e-05": 51728872,
+            "0.0001": 51699258,
+            "0.001": 51467502
+          }
+        },
+        "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+      },
+      "official_brain_mask": {
+        "count_all_values": 11753052,
+        "finite_pair_count": 11753052,
+        "all_values_finite": true,
+        "unequal_ieee": 11749236,
+        "nonfinite_state_mismatch": 0,
+        "candidate_nan": 0,
+        "candidate_posinf": 0,
+        "candidate_neginf": 0,
+        "reference_nan": 0,
+        "reference_posinf": 0,
+        "reference_neginf": 0,
+        "candidate_negative": 37947,
+        "reference_negative": 37395,
+        "zero_support_mismatch": 0,
+        "metrics_all_values": {
+          "mae": 0.570964287714449,
+          "rmse": 1.0674688080663635,
+          "max_absolute": 134.59063720703125,
+          "signed_mean_error": -0.0069218254206051405,
+          "relative_rmse_reference_rms": 0.012831911851978952,
+          "pearson": 0.9998692511931546
+        },
+        "finite_pair_diagnostic": {
+          "count": 11753052,
+          "mae": 0.570964287714449,
+          "rmse": 1.0674688080663635,
+          "max_absolute": 134.59063720703125,
+          "signed_mean_error": -0.0069218254206051405,
+          "relative_rmse_reference_rms": 0.012831911851978952,
+          "pearson": 0.9998692511931546,
+          "count_absolute_gt": {
+            "1e-06": 11749231,
+            "1e-05": 11749062,
+            "0.0001": 11747167,
+            "0.001": 11727970
+          }
+        },
+        "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+      },
+      "CPU_comparison_seconds": 9.741818360984325
+    },
+    "FA": {
+      "status": "compared",
+      "geometry": {
+        "same_grid": true,
+        "shape_match": true,
+        "affine_max_absolute_mm": 0.0,
+        "affine_tolerance_mm": 1e-05,
+        "candidate": {
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4991140365600586,
+              0.026171596720814705,
+              0.061186470091342926,
+              116.02857208251953
+            ],
+            [
+              0.008417095988988876,
+              2.4044065475463867,
+              -0.6846591830253601,
+              -83.54573059082031
+            ],
+            [
+              0.06601431220769882,
+              0.6842105388641357,
+              2.4036426544189453,
+              -112.64435577392578
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_nonfinite_count": 0,
+          "spacing": [
+            2.5,
+            2.5,
+            2.5
+          ],
+          "nonfinite_spacing_axes": [],
+          "undefined_spacing": [],
+          "storage_dtype": "float32"
+        },
+        "reference": {
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4991140365600586,
+              0.026171596720814705,
+              0.061186470091342926,
+              116.02857208251953
+            ],
+            [
+              0.008417095988988876,
+              2.4044065475463867,
+              -0.6846591830253601,
+              -83.54573059082031
+            ],
+            [
+              0.06601431220769882,
+              0.6842105388641357,
+              2.4036426544189453,
+              -112.64435577392578
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_nonfinite_count": 0,
+          "spacing": [
+            2.5,
+            2.5,
+            2.5
+          ],
+          "nonfinite_spacing_axes": [],
+          "undefined_spacing": [],
+          "storage_dtype": "float32"
+        },
+        "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+      },
+      "mask_geometry": {
+        "same_grid": true,
+        "shape_match": true,
+        "affine_max_absolute_mm": 0.0,
+        "affine_tolerance_mm": 1e-05,
+        "candidate": {
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4991140365600586,
+              0.026171596720814705,
+              0.061186470091342926,
+              116.02857208251953
+            ],
+            [
+              0.008417095988988876,
+              2.4044065475463867,
+              -0.6846591830253601,
+              -83.54573059082031
+            ],
+            [
+              0.06601431220769882,
+              0.6842105388641357,
+              2.4036426544189453,
+              -112.64435577392578
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_nonfinite_count": 0,
+          "spacing": [
+            2.5,
+            2.5,
+            2.5
+          ],
+          "nonfinite_spacing_axes": [],
+          "undefined_spacing": [],
+          "storage_dtype": "float32"
+        },
+        "reference": {
+          "shape": [
+            96,
+            96,
+            60
+          ],
+          "affine": [
+            [
+              -2.4991140365600586,
+              0.026171596720814705,
+              0.061186470091342926,
+              116.02857208251953
+            ],
+            [
+              0.008417095988988876,
+              2.4044065475463867,
+              -0.6846591830253601,
+              -83.54573059082031
+            ],
+            [
+              0.06601431220769882,
+              0.6842105388641357,
+              2.4036426544189453,
+              -112.64435577392578
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "affine_nonfinite_count": 0,
+          "spacing": [
+            2.5,
+            2.5,
+            2.5
+          ],
+          "nonfinite_spacing_axes": [],
+          "undefined_spacing": [],
+          "storage_dtype": "uint8"
+        },
+        "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+      },
+      "frames_retained": 1,
+      "spatial_voxels_all": 552960,
+      "official_brain_mask_voxels": 115226,
+      "whole_volume": {
+        "count_all_values": 552960,
+        "finite_pair_count": 552922,
+        "all_values_finite": false,
+        "unequal_ieee": 115707,
+        "nonfinite_state_mismatch": 3,
+        "candidate_nan": 36,
+        "candidate_posinf": 0,
+        "candidate_neginf": 0,
+        "reference_nan": 37,
+        "reference_posinf": 0,
+        "reference_neginf": 0,
+        "candidate_negative": 0,
+        "reference_negative": 0,
+        "zero_support_mismatch": 1083,
+        "metrics_all_values": {
+          "mae": null,
+          "rmse": null,
+          "max_absolute": null,
+          "signed_mean_error": null,
+          "relative_rmse_reference_rms": null,
+          "pearson": null
+        },
+        "finite_pair_diagnostic": {
+          "count": 552922,
+          "mae": 0.0031877469250023256,
+          "rmse": 0.03072373793714818,
+          "max_absolute": 1.2247426509857178,
+          "signed_mean_error": 5.010018076242252e-05,
+          "relative_rmse_reference_rms": 0.1716441679962214,
+          "pearson": 0.9831171930820309,
+          "count_absolute_gt": {
+            "1e-06": 115646,
+            "1e-05": 115463,
+            "0.0001": 113717,
+            "0.001": 96621
+          }
+        },
+        "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+      },
+      "official_brain_mask": {
+        "count_all_values": 115226,
+        "finite_pair_count": 115189,
+        "all_values_finite": false,
+        "unequal_ieee": 115226,
+        "nonfinite_state_mismatch": 2,
+        "candidate_nan": 35,
+        "candidate_posinf": 0,
+        "candidate_neginf": 0,
+        "reference_nan": 37,
+        "reference_posinf": 0,
+        "reference_neginf": 0,
+        "candidate_negative": 0,
+        "reference_negative": 0,
+        "zero_support_mismatch": 602,
+        "metrics_all_values": {
+          "mae": null,
+          "rmse": null,
+          "max_absolute": null,
+          "signed_mean_error": null,
+          "relative_rmse_reference_rms": null,
+          "pearson": null
+        },
+        "finite_pair_diagnostic": {
+          "count": 115189,
+          "mae": 0.013114343222590722,
+          "rmse": 0.054489372065103986,
+          "max_absolute": 1.2246956825256348,
+          "signed_mean_error": -0.0019467642887047644,
+          "relative_rmse_reference_rms": 0.13894418375489467,
+          "pearson": 0.9748456584313753,
+          "count_absolute_gt": {
+            "1e-06": 115166,
+            "1e-05": 114983,
+            "0.0001": 113237,
+            "0.001": 96141
+          }
+        },
+        "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+      },
+      "CPU_comparison_seconds": 0.09646505117416382,
+      "absolute_error_percentiles_all_values": {
+        "whole_volume": null,
+        "official_brain_mask": null
+      }
+    },
+    "rotated_gradients": {
+      "status": "compared",
+      "FSL_shape": [
+        3,
+        102
+      ],
+      "frames_retained": 102,
+      "bvec_components": {
+        "count_all_values": 306,
+        "finite_pair_count": 306,
+        "all_values_finite": true,
+        "unequal_ieee": 288,
+        "nonfinite_state_mismatch": 0,
+        "candidate_nan": 0,
+        "candidate_posinf": 0,
+        "candidate_neginf": 0,
+        "reference_nan": 0,
+        "reference_posinf": 0,
+        "reference_neginf": 0,
+        "candidate_negative": 138,
+        "reference_negative": 138,
+        "zero_support_mismatch": 0,
+        "metrics_all_values": {
+          "mae": 0.0005972710905620919,
+          "rmse": 0.0008658725082583371,
+          "max_absolute": 0.004052603000000099,
+          "signed_mean_error": -3.703570039216064e-06,
+          "relative_rmse_reference_rms": 0.001545891636493194,
+          "pearson": 0.999998805130838
+        },
+        "finite_pair_diagnostic": {
+          "count": 306,
+          "mae": 0.0005972710905620919,
+          "rmse": 0.0008658725082583371,
+          "max_absolute": 0.004052603000000099,
+          "signed_mean_error": -3.703570039216064e-06,
+          "relative_rmse_reference_rms": 0.001545891636493194,
+          "pearson": 0.999998805130838,
+          "count_absolute_gt": {
+            "1e-06": 288,
+            "1e-05": 284,
+            "0.0001": 252,
+            "0.001": 55
+          }
+        },
+        "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+      },
+      "bvals": {
+        "count_all_values": 102,
+        "finite_pair_count": 102,
+        "all_values_finite": true,
+        "unequal_ieee": 0,
+        "nonfinite_state_mismatch": 0,
+        "candidate_nan": 0,
+        "candidate_posinf": 0,
+        "candidate_neginf": 0,
+        "reference_nan": 0,
+        "reference_posinf": 0,
+        "reference_neginf": 0,
+        "candidate_negative": 0,
+        "reference_negative": 0,
+        "zero_support_mismatch": 0,
+        "metrics_all_values": {
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_absolute": 0.0,
+          "signed_mean_error": 0.0,
+          "relative_rmse_reference_rms": 0.0,
+          "pearson": 1.0
+        },
+        "finite_pair_diagnostic": {
+          "count": 102,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_absolute": 0.0,
+          "signed_mean_error": 0.0,
+          "relative_rmse_reference_rms": 0.0,
+          "pearson": 1.0,
+          "count_absolute_gt": {
+            "1e-06": 0,
+            "1e-05": 0,
+            "0.0001": 0,
+            "0.001": 0
+          }
+        },
+        "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+      },
+      "norms": {
+        "count_all_values": 102,
+        "finite_pair_count": 102,
+        "all_values_finite": true,
+        "unequal_ieee": 96,
+        "nonfinite_state_mismatch": 0,
+        "candidate_nan": 0,
+        "candidate_posinf": 0,
+        "candidate_neginf": 0,
+        "reference_nan": 0,
+        "reference_posinf": 0,
+        "reference_neginf": 0,
+        "candidate_negative": 0,
+        "reference_negative": 0,
+        "zero_support_mismatch": 0,
+        "metrics_all_values": {
+          "mae": 2.765205317773021e-08,
+          "rmse": 3.509295636272177e-08,
+          "max_absolute": 7.610978325356399e-08,
+          "signed_mean_error": 2.0417420110816746e-08,
+          "relative_rmse_reference_rms": 3.6172991449690754e-08,
+          "pearson": 0.9999999999999929
+        },
+        "finite_pair_diagnostic": {
+          "count": 102,
+          "mae": 2.765205317773021e-08,
+          "rmse": 3.509295636272177e-08,
+          "max_absolute": 7.610978325356399e-08,
+          "signed_mean_error": 2.0417420110816746e-08,
+          "relative_rmse_reference_rms": 3.6172991449690754e-08,
+          "pearson": 0.9999999999999929,
+          "count_absolute_gt": {
+            "1e-06": 0,
+            "1e-05": 0,
+            "0.0001": 0,
+            "0.001": 0
+          }
+        },
+        "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"
+      },
+      "zero_vector_support_mismatch": 0,
+      "b0_support_lt50_mismatch": 0,
+      "policy": "compare original FSL voxel-frame vectors without normalization or sign alignment; b<50 only labels FNIT's b0 convention",
+      "all_frame_count": 102,
+      "nonfinite_frame_count": 0,
+      "max_directed_angle_degrees": 0.31409390627381845,
+      "directed_angle_defined_frame_count": 96
+    },
+    "ancillary_geometry": {
+      "wm_fod": {
+        "status": "same_grid_not_numerically_assessed",
+        "geometry": {
+          "same_grid": true,
+          "shape_match": true,
+          "affine_max_absolute_mm": 0.0,
+          "affine_tolerance_mm": 1e-05,
+          "candidate": {
+            "shape": [
+              96,
+              96,
+              60,
+              45
+            ],
+            "affine": [
+              [
+                -2.4991140365600586,
+                0.026171596720814705,
+                0.061186470091342926,
+                116.02857208251953
+              ],
+              [
+                0.008417095988988876,
+                2.4044065475463867,
+                -0.6846591830253601,
+                -83.54573059082031
+              ],
+              [
+                0.06601431220769882,
+                0.6842105388641357,
+                2.4036426544189453,
+                -112.64435577392578
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "affine_nonfinite_count": 0,
+            "spacing": [
+              2.5,
+              2.5,
+              2.5,
+              1.0
+            ],
+            "nonfinite_spacing_axes": [],
+            "undefined_spacing": [],
+            "storage_dtype": "float32"
+          },
+          "reference": {
+            "shape": [
+              96,
+              96,
+              60,
+              45
+            ],
+            "affine": [
+              [
+                -2.4991140365600586,
+                0.026171596720814705,
+                0.061186470091342926,
+                116.02857208251953
+              ],
+              [
+                0.008417095988988876,
+                2.4044065475463867,
+                -0.6846591830253601,
+                -83.54573059082031
+              ],
+              [
+                0.06601431220769882,
+                0.6842105388641357,
+                2.4036426544189453,
+                -112.64435577392578
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "affine_nonfinite_count": 0,
+            "spacing": [
+              2.5,
+              2.5,
+              2.5,
+              8.699999809265137
+            ],
+            "nonfinite_spacing_axes": [],
+            "undefined_spacing": [],
+            "storage_dtype": "float32"
+          },
+          "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+        },
+        "candidate_file": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/returned_result/wm_fod_normalized.nii.gz",
+          "sha256": "3054d9c9271b9fa3104381909321872eed46f3e51a224f008749c5ec08ebd619",
+          "size_bytes": 24686651
+        },
+        "reference_file": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/wm_norm.nii.gz",
+          "sha256": "d34ff365afd97eca1d8a86d6b5564b8bf0e4943e92473b9c7bf36713e559f8e7",
+          "size_bytes": 24312585
+        }
+      },
+      "five_tissue": {
+        "status": "not_comparable_grid",
+        "geometry": {
+          "same_grid": false,
+          "shape_match": true,
+          "affine_max_absolute_mm": 1.0163650512695312,
+          "affine_tolerance_mm": 1e-05,
+          "candidate": {
+            "shape": [
+              256,
+              256,
+              256,
+              5
+            ],
+            "affine": [
+              [
+                -0.9997966289520264,
+                -0.005641264840960503,
+                -0.01935906521975994,
+                131.85604858398438
+              ],
+              [
+                -0.018665127456188202,
+                -0.10434830188751221,
+                0.9943656325340271,
+                -84.12434387207031
+              ],
+              [
+                0.007629565428942442,
+                -0.9945247769355774,
+                -0.10422179102897644,
+                115.14041137695312
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "affine_nonfinite_count": 0,
+            "spacing": [
+              0.9999999403953552,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "nonfinite_spacing_axes": [],
+            "undefined_spacing": [],
+            "storage_dtype": "float32"
+          },
+          "reference": {
+            "shape": [
+              256,
+              256,
+              256,
+              5
+            ],
+            "affine": [
+              [
+                -0.9996705651283264,
+                -0.004817667882889509,
+                -0.02521049603819847,
+                132.4105224609375
+              ],
+              [
+                -0.024564610794186592,
+                -0.1051492840051651,
+                0.9941529631614685,
+                -83.10797882080078
+              ],
+              [
+                0.00744036678224802,
+                -0.994444727897644,
+                -0.10499631613492966,
+                115.22217559814453
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "affine_nonfinite_count": 0,
+            "spacing": [
+              1.0,
+              1.0,
+              1.0,
+              null
+            ],
+            "nonfinite_spacing_axes": [
+              3
+            ],
+            "undefined_spacing": [
+              {
+                "axis": 3,
+                "axis_type": "tissue_channel",
+                "stored_header_value": "nan"
+              }
+            ],
+            "storage_dtype": "float32"
+          },
+          "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+        },
+        "candidate_file": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/connectome/five_tissue_dwi_world.nii.gz",
+          "sha256": "c9653c63e41ea864706d14037acf7feaa8aeb628e8e972ae5a4f37e0a7875afe",
+          "size_bytes": 2580272
+        },
+        "reference_file": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/five_tissue_dwi_world.nii.gz",
+          "sha256": "429780bc43118e45064a00ab9dcace79d4240b2a22410abe1bac8d8d53e81eea",
+          "size_bytes": 896822
+        }
+      },
+      "atlases": {
+        "fs-aparc": {
+          "status": "same_grid_not_numerically_assessed",
+          "geometry": {
+            "same_grid": true,
+            "shape_match": true,
+            "affine_max_absolute_mm": 0.0,
+            "affine_tolerance_mm": 1e-05,
+            "candidate": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "int32"
+            },
+            "reference": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "uint32"
+            },
+            "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+          },
+          "candidate_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/connectome/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "7797b9f61490de01f6debddc284e10a59825e0a9b7d576b9ff3dbd1242adcd06",
+            "size_bytes": 61063
+          },
+          "reference_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/fs-aparc/atlas_dwi.nii.gz",
+            "sha256": "8a426d026fb9ffb5af52f69985ebe7a4917ce995156e21066df69d0e19d22443",
+            "size_bytes": 39986
+          }
+        },
+        "aparc+tian-s1": {
+          "status": "same_grid_not_numerically_assessed",
+          "geometry": {
+            "same_grid": true,
+            "shape_match": true,
+            "affine_max_absolute_mm": 0.0,
+            "affine_tolerance_mm": 1e-05,
+            "candidate": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "int32"
+            },
+            "reference": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "uint32"
+            },
+            "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+          },
+          "candidate_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/connectome/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "921c0485fe65137dfb74bfea7063214af37a2652b128ceaefadfb9b624ebe6f7",
+            "size_bytes": 57363
+          },
+          "reference_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "346a1d22f67f01463ab0dc0711e8204e76d9fcef85b8a223f880d180e6308402",
+            "size_bytes": 37843
+          }
+        },
+        "aparc.a2009s+tian-s1": {
+          "status": "same_grid_not_numerically_assessed",
+          "geometry": {
+            "same_grid": true,
+            "shape_match": true,
+            "affine_max_absolute_mm": 0.0,
+            "affine_tolerance_mm": 1e-05,
+            "candidate": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "int32"
+            },
+            "reference": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "uint32"
+            },
+            "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+          },
+          "candidate_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/connectome/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "e04ed00cf68cd97764fb8060031d1ea155005483e5dabda4fdfe71ae8fb84c76",
+            "size_bytes": 59944
+          },
+          "reference_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "c254fb2a8533a87bd839135685a20faf984d08f69bf8fa40004caf8763ebb6bc",
+            "size_bytes": 40952
+          }
+        },
+        "glasser+tian-s1": {
+          "status": "same_grid_not_numerically_assessed",
+          "geometry": {
+            "same_grid": true,
+            "shape_match": true,
+            "affine_max_absolute_mm": 0.0,
+            "affine_tolerance_mm": 1e-05,
+            "candidate": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "int32"
+            },
+            "reference": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "uint32"
+            },
+            "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+          },
+          "candidate_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/connectome/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "71420023b5da25b7d37651d66ceaa96071e97d756163d39c6dd9c978aa8b15ac",
+            "size_bytes": 62339
+          },
+          "reference_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "8de37f748a48c005701f304d4bf8a9a40ed392cf936b7772d52aa28b8097e1d7",
+            "size_bytes": 44191
+          }
+        },
+        "glasser+tian-s4": {
+          "status": "same_grid_not_numerically_assessed",
+          "geometry": {
+            "same_grid": true,
+            "shape_match": true,
+            "affine_max_absolute_mm": 0.0,
+            "affine_tolerance_mm": 1e-05,
+            "candidate": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "int32"
+            },
+            "reference": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "uint32"
+            },
+            "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+          },
+          "candidate_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/connectome/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "d949938a6b898f0537a2ca3c3f655944ad9085a82814be6c56cb6303cf91c984",
+            "size_bytes": 62810
+          },
+          "reference_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "c168f88665757fc616257f450a7131413d08709d3341a6f653656ee208a166b9",
+            "size_bytes": 44812
+          }
+        },
+        "schaefer200+tian-s1": {
+          "status": "same_grid_not_numerically_assessed",
+          "geometry": {
+            "same_grid": true,
+            "shape_match": true,
+            "affine_max_absolute_mm": 0.0,
+            "affine_tolerance_mm": 1e-05,
+            "candidate": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "int32"
+            },
+            "reference": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "uint32"
+            },
+            "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+          },
+          "candidate_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/connectome/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "371868907384a95a74c398941ebe2fae7369d0a3f733e29946f237eb3b398c2c",
+            "size_bytes": 59422
+          },
+          "reference_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+            "sha256": "1db43d8d3af5bb202ed95dcac7cd038d2844832e6a6868c35477f1e9210357d1",
+            "size_bytes": 40662
+          }
+        },
+        "schaefer500+tian-s4": {
+          "status": "same_grid_not_numerically_assessed",
+          "geometry": {
+            "same_grid": true,
+            "shape_match": true,
+            "affine_max_absolute_mm": 0.0,
+            "affine_tolerance_mm": 1e-05,
+            "candidate": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "int32"
+            },
+            "reference": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "uint32"
+            },
+            "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+          },
+          "candidate_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/connectome/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "6826d5cf71737c1635211e169c1625f7255d239f23f9c90170d09442168fcd9f",
+            "size_bytes": 63378
+          },
+          "reference_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "6f06eda6e91fc3b8d2122ba265c3c25b0e4a2b3793c4e2b2db3e077ce12409e0",
+            "size_bytes": 45945
+          }
+        },
+        "schaefer1000+tian-s4": {
+          "status": "same_grid_not_numerically_assessed",
+          "geometry": {
+            "same_grid": true,
+            "shape_match": true,
+            "affine_max_absolute_mm": 0.0,
+            "affine_tolerance_mm": 1e-05,
+            "candidate": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "int32"
+            },
+            "reference": {
+              "shape": [
+                96,
+                96,
+                60
+              ],
+              "affine": [
+                [
+                  -2.4991140365600586,
+                  0.026171596720814705,
+                  0.061186470091342926,
+                  116.02857208251953
+                ],
+                [
+                  0.008417095988988876,
+                  2.4044065475463867,
+                  -0.6846591830253601,
+                  -83.54573059082031
+                ],
+                [
+                  0.06601431220769882,
+                  0.6842105388641357,
+                  2.4036426544189453,
+                  -112.64435577392578
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "affine_nonfinite_count": 0,
+              "spacing": [
+                2.5,
+                2.5,
+                2.5
+              ],
+              "nonfinite_spacing_axes": [],
+              "undefined_spacing": [],
+              "storage_dtype": "uint32"
+            },
+            "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"
+          },
+          "candidate_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1/candidate/sub-CON01/connectome/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "27843efca9726811325eba119a4de8761add239d8ae4e59dc02adac3e2eaa7cc",
+            "size_bytes": 67162
+          },
+          "reference_file": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_anatomy_raw10_CPU_budget_v4/sub-CON01/complete/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+            "sha256": "f3b88efb07c33942d89d92e124433cf13389c4882ed65a525c318cf02f676dba",
+            "size_bytes": 50261
+          }
+        }
+      }
+    }
+  }
+}

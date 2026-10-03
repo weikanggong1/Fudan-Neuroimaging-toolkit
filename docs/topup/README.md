@@ -22,7 +22,7 @@
 
 NIfTI 第四维必须与对应 `.bval` 长度相同。JSON 需要 `PhaseEncodingDirection`，并提供 `TotalReadoutTime`，或提供可换算总读出时间的 `EffectiveEchoSpacing`。当前实现支持 `i/i-` 或 `j/j-`，AP 与 PA 必须方向相反、矩阵和几何一致。
 
-UKB 准备步骤会在 AP、PA 中分别找出 `b<100 s/mm²` 的候选帧，对候选帧执行 GPU 6-DOF 刚体 NCC 配准，计算两两相关均值，并执行 UKB 的选择规则：第一帧得分不低于 0.98 时选择第一帧，否则选择最高分帧。随后写出两帧 `B0_AP_PA.nii.gz` 和两行 `acqparams.txt`。这条 PyTorch 选择器没有调用 FLIRT；在本页的一例真实数据中，它与官方 FLIRT/`fslcc` 流程都选择 AP 第 0 帧和 PA 第 0 帧，但相关分数并不相同。
+UKB 准备步骤会在 AP、PA 中分别找出 `b<100 s/mm²` 的候选帧，对候选帧执行 GPU 6-DOF 刚体配准，以有效非零交集内的 Pearson 相关为目标，计算两两相关均值，并执行 UKB 的选择规则：第一帧得分不低于 0.98 时选择第一帧，否则选择最高分帧。2026-10-03 的本次修复源码在优化器最终接受的参数处计算相关分数。随后写出选中的两帧原始图像 `B0_AP_PA.nii.gz` 和两行 `acqparams.txt`。这条 PyTorch 选择器没有调用 FLIRT；在本页的一例真实数据中，它与官方 FLIRT/`fslcc` 流程都选择 AP 第 0 帧和 PA 第 0 帧，但相关分数并不相同。
 
 ## 单被试命令行
 
@@ -161,6 +161,79 @@ result = model(
 
 Python 参数仍要求九层；命令行只接受 `b02b0.cnf`。不支持 `k/k-`、多于两帧、其他正则模型或原软件全部配置选项。公开 Python 类、调用、结果和文件名保持原用途。旧的 `optimizer_steps_per_iteration` 是 L-BFGS 额外预算参数，已移除；调用方应删除该参数并用 `maximum_iterations` 表示官方层内预算。
 
+## 2026-10-03 b0 选择器接受点评分修复
+
+Pipeline 调用成熟的 `ukb.py` 选择器时发现一个评分点错误：旧代码保存最后一次 LBFGS closure 的相关分数，但 Strong Wolfe 线搜索可能接受较早的试探点。本次修复让 closure 与最终评分共用同一计算，在 `optimizer.step` 后用 `torch.no_grad()` 对最终参数重新评分。LBFGS 参数、二倍平均降采样、有效非零交集、选择器的 float32、候选均值的 float64 和 `0.98` 选择规则保持原设置，Python／CLI 参数和输出结构不变。场核心既有的 float64 系数与求解器，以及 `official_precision=True` 采样中的 double 权重和累加均未改动。
+
+这项修复纠正 PyTorch 选择器自身的评分点；官方比较链仍使用 `FLIRT -nosearch -dof 6` 后的 `fslcc` 分数，两种注册与评分方法不同。输入 raw 文件哈希相同也不能代替核对实际选中的 b0 pair。已完成的十人双分支整链记录仍绑定冻结提交 `bf339a0`，不会改标为这次评分修复。
+
+受支持本地 Python 3.11.16／PyTorch 2.5.1 的 16 项 CPU 回归通过（3.82 s）。新增测试让优化器最后评估一个拒绝点、再恢复接受点而不再调用 closure，覆盖不降采样和二倍平均池化，并检查 `>=0.98` 的首帧优先规则。
+
+2026-10-03 已在 H100 GPU0、TF32、8 个 PyTorch 线程、BLAS 1 线程、20,000,000,000 bytes allocator 上限下完成真实十人独立选择器对照。每人 AP 为 `120×120×68×117`，b0 候选为 `[0,21,52]`；PA 为同网格单 b0。取得整链共用的全作业锁后，逐人读取并只运行选择器，不估计 TOPUP 场、不运行 EDDY，也不替换冻结 `bf339a0` 的整链记录。新返回的 30 个 AP 两两相关分数全部与最终接受参数处的独立诊断逐值相同；旧、新两模式的最终参数与接受点分数也全部相同。唯一旧末次试点评分差是 case07 的 `(0,52)`：旧值 `0.9879414439201355`，接受点值 `0.9879876971244812`，差 `−4.6253204345703125×10⁻⁵`。
+
+十人 AP/PA 的选择均未改变，旧、新都为第 0 帧。另行[逐值追踪已保存输入](../../validation/dmri_pipeline/public10_20261002/b0_input_trace_20261003.public.json)确认 case02/08 冻结 FNIT 的 pair 为 AP0/PA0，原参考为 AP21/PA0；两个分支一致，原参考记录 EDDY `reference_scan_no=21`。因此本次评分点修复没有消除两例与官方 FLIRT/`fslcc` 的选择差异，也没有用新选择器重跑场估计或完整 pipeline。
+
+| 十人 AP 选择器；每模式每人三对 | 旧末次试点评分 | 新接受点评分 |
+|---|---:|---:|
+| 三对函数同步计时之和，中位数（秒） | 1.177859 | 1.331550 |
+| 同一时钟范围的最小–最大值（秒） | 0.399240–3.480379 | 0.705547–1.735043 |
+| allocator peak allocated 上界（bytes） | 82,113,024 | 79,845,888 |
+| allocator peak reserved 上界（bytes） | 98,566,144 | 96,468,992 |
+
+显存范围包含额外的接受点诊断，不含 CUDA context 或其他进程；不是整个 pipeline 峰值。原报告、参数、逐人索引和完整时钟边界见[匿名组件报告](../../validation/dmri_pipeline/public10_20261002/b0_accepted_point_20261003.public.json)。实际新 `ukb.py` SHA-256 为 `1b610bcf0fe1bd2cfa7d6ae1917701d4b106205afc1d36ecd2c57c20561712b9`；隔离诊断脚本 SHA-256 为 `336f7d367964ec1eb05248c7a3dc2837d278f81d6e1d6495a4a0efd9c83f38c2`，旧选择器与场核心来自冻结 bf339a0。该真实组件范围与已完成的 20 个旧冻结整链范围分别记录。报告中的 `Independent uncommitted...` 描述测量时的新源码身份，不表示发布后的提交状态。
+
+这项独立对照按每例 `old→new` 各一次执行，原始 b0 加载时间单列；两侧 pair 函数计时覆盖传输、池化、LBFGS 和返回评分，额外接受点诊断在计时外。每模式清理 allocator 缓存并重置峰值，没有清空系统、GPU 库或 kernel 缓存，首个 old 调用可能包含首次库初始化。结果只报告观察时间，不据一次顺序对照给出确定提速；新代码省去 closure 中额外的 `float(correlation.detach())`，LBFGS 自身的 `float(loss)` 仍保留，这不构成整链速度收益证据。
+
+现有 Python 入口可独立准备所选 pair 并读取候选均值；它只做 b0 准备，不估计场。输入要求仍为本页 AP/PA 的 NIfTI、bval、JSON，输出索引是原完整文件中的零起始帧号。
+
+```python
+from pathlib import Path
+from fnit.topup.ukb import prepare_ukb_topup
+
+raw_input_dir = Path("public10_work/inputs/case02/raw")  # 含 AP/PA 原始文件
+b0_preparation_dir = Path("public10_work/selector_case02")  # 使用新输出目录
+prepared_b0 = prepare_ukb_topup(
+    raw_dir=raw_input_dir,
+    output_dir=b0_preparation_dir,
+    device="cuda:0",  # 可改为 cpu；GPU 使用默认 TF32
+    overwrite=False,
+    pair_geometry="strict",  # 默认：要求 AP/PA 几何一致
+)
+print(prepared_b0["ap_index"], prepared_b0["pa_index"])
+print(prepared_b0["ap_scores"], prepared_b0["pa_scores"])
+# 同时保存 B0_AP_PA.nii.gz、acqparams.txt 和 pair_geometry.json。
+```
+
+线搜索返回接受 bracket 的行为见 [PyTorch 2.5.1 LBFGS 源码](https://github.com/pytorch/pytorch/blob/v2.5.1/torch/optim/lbfgs.py)。
+
+## 2026-10-03 两例相同 b0 对的独立诊断
+
+公开十人整链中，case02/08 两侧原始文件相同，但实际选出的 AP/PA b0 对不同。为单独检查场核心，这次直接读取原参考保存的 `B0_AP_PA.nii.gz` 和 `acqparams.txt`，绕过选择器，调用冻结 `bf339a0` 的 TorchTOPUP。`core.py` 与 `_sampling_cuda.py` 均为下节同输入验收的既有 SHA，算法、停止规则与 dtype 未改。两例实际 `b02b0.cnf` 的九层数值，以及运动估计、LM/SCG、double Hessian、样条和强度归一化选项逐项匹配 `TOPUPConfig()`，不只核对配置名。
+
+主要 ROI 是各例原软件 EDDY 脑 mask `>0.5`，保留内部零值。两帧 b0 在同一空间 ROI 中累计；Jacobian 使用原软件保存的两个 `jacout`，ROI 只按 TOPUP canonical storage 作轴反转，不插值。原软件未保存 Jacobian 时工具会记为不可用，不补跑原程序。
+
+| 病例；ROI 体素数 | Hz 场 r | 场 MAE（Hz） | 场 NRMSE | 校正 b0 r | b0 NRMSE | Jacobian 01/02 NRMSE |
+|---|---:|---:|---:|---:|---:|---:|
+| case02；217,660 | 0.999999992 | 0.001587076 | 0.000128703 | 0.999999118 | 0.000645118 | 0.000171698 / 0.000171739 |
+| case08；168,935 | 0.999999895 | 0.007225478 | 0.000470955 | 0.999997909 | 0.000916890 | 0.000508508 / 0.000500498 |
+
+NRMSE 为 `差值 RMS / 原参考 RMS`，不是逐体素百分误差。movpar 最大平移差为 `5.573898e-5 / 9.354730e-5 mm`，最大旋转差为 `9.744013e-6 / 2.474980e-5 rad`。相同输入时，场和校正图残差远小于此前两例不同 pair 的整链结果，支持选帧差异是较大场偏差的主要来源。结果仍非逐值相等，未重跑 EDDY 或完整 pipeline，也未替换十人整链指标。
+
+两例各在新进程和空 Triton cache 中执行一次，CUDA 0、TF32、8 个 CPU 线程、20,000,000,000 bytes allocator cap；锁等待在所有作业时钟之外。
+
+| 时钟；秒 | case02 | case08 |
+|---|---:|---:|
+| 同步 API 读取＋计算，含冷 JIT | 21.939751 | 20.332533 |
+| 内部模型同步时钟，仍含 JIT | 21.878661 | 20.276871 |
+| 观察到的 Triton 编译入口 | 10.960855 | 10.985266 |
+| API 减观察编译，仍含主机准备/传输 | 10.978896 | 9.347267 |
+| GNU 完整诊断进程，含验证和 JSON | 27.27 | 25.22 |
+| 原 TOPUP 既有历史阶段时钟 | 249.483662 | 262.257625 |
+
+compiler hook 只测原函数调用的墙钟，不改编译参数或 kernel；减去编译时间不代表纯 GPU 核时间。峰值 allocated 为 `489,079,296 / 489,088,512 bytes`，reserved 均为 `572,522,496 bytes`。5 秒采样的本作业显存均为 `2,356 MiB`，同时其他进程为 `40,656 MiB`，没有取得独占 GPU。原软件未在本次负载下重测，因此上表为历史观测对照，不给出同负载 AB 加速比。
+
+输入 pair、acqp、配置、模板、ROI、源码和输出 SHA，以及逐列 movpar、Jacobian、完整时钟和显存见[两例诊断报告](../../validation/dmri_pipeline/public10_20261002/matched_topup_pair_20261003.public.json)。完整双分支结果见[十人精度报告](../../validation/dmri_pipeline/public10_20261002/PRECISION.md)；其中 TBSS 10/10、MMORF 9/10，共 432/450 个格式有效位置，尚非数值等价。新增诊断的 7 项 CPU 契约检查只验证配置与观察器行为，不作真实精度或性能证据。
+
 ## 2026-10-02 数值修复与验收边界
 
 - 补齐原软件默认 `regrid=1`：源图每轴增加最大 subsampling 数，原图先以 cubic 重采样。源图 voxel size、刚体中心、位移采样和 alpha 导数比例按实际源网格计算；场与输出 Target 保留原几何。本例源图为 `106×106×74`，Target 为 `104×104×72`。
@@ -280,6 +353,7 @@ UKB AP/PA b0 准备顺序参考 UK Biobank brain imaging pipeline v1.5；场估�
 
 | 日期 | 代码与 benchmark 范围 |
 |---|---|
+| 2026-10-03 | 修复 UKB b0 选择器返回最后试探点评分的问题，改为最终接受点评分；16 项 CPU 回归与真实十人选择器检查完成。30 个新 AP pair 分数与接受点诊断相同，十人索引不变；case02/08 与官方的不同选帧未消除。冻结 20 个整链仍为 bf339a0，独立组件结果不改标旧输出或时钟。 |
 | 2026-10-02 | 补齐默认源图 regrid，修正目标函数支持区、周期平滑、图像插值精度及索引、层间场传递、FSL storage 约定，改为联合 LM/SCG；一例同输入真实场图信号区 RMSE 0.010799 Hz，固定参数脑内 iout RMSE 0.011135；当前源码三次 API 中位数 7.094846 s，104 项组合回归通过，独立估计非逐元素一致。 |
 | FNIT 0.16.0 | 与 0.14.0 数值文件逐字节相同；保留当时一例真实 pair 的 L-BFGS 对照。 |
 | FNIT 0.14.0 | 初版 AP/PA 路径、FSL 文件合同、单病例精度与三次共享节点计时；不声明数值等价。 |

@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 605, in <module>
+    main()
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 600, in main
+    result = execute(args.configuration, args.configuration_sha256, args.output_dir, args.case_id, args.version)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 568, in execute
+    reports[key] = compare_case(config, manifest, cases[case_id], bindings["cases"][case_id], version, row, audit)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 488, in compare_case
+    candidate, candidate_identity = candidate_inputs(config, raw_case, binding, version, row, audit)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 233, in candidate_inputs
+    audit.check({"path": str(Path(expected_source["directory"]) / name), "sha256": digest})
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 61, in check
+    require(size > 0 and record.get("exists", True) is True, f"empty/missing producer file: {path}")
+  File "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_component_tools_v1/validation/connectome/accuracy_20261003/root/compare_raw_components.py", line 36, in require
+    raise ValueError(message)
+ValueError: empty/missing producer file: /cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/baseline/src/fnit/_vendor_fsl/sources/ptx2-2608.0/fsl_streamlines/fsl_streamlines/test/__init__.py

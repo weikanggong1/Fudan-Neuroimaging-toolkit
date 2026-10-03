@@ -4,7 +4,11 @@
 
 [功能和调用方式](../../docs/dmri_pipeline/README.md) · [既有 UKB TBSS 对照报告](tbss_e2e.real.current.json) · [经典 NODDI 接入报告](pipeline_classic_real.public.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
 
-## 最新：2026-10-02，SynthStrip＋源码对应 TOPUP 整链
+## 最新：2026-10-03，公开十人双分支固定对照
+
+[十人协议、调用和结果入口](public10_20261002/README.md)覆盖完整 117 帧 AP、PA b0、配对 T1，以及 TBSS/FNIRT 与 T1/tensor MMORF 两个分支。冻结 `bf339a0` 的 FNIT 20/20 完成；原软件 19/20 完成，已核对 432/450 张图。TBSS 为 10 对，MMORF 为 9 对；case10 MMORF 的原 GPU EDDY 三次完整尝试均失败，保留其时钟及缺失分母。逐图误差、步骤时间、脑图和失败历史已公布；输出仍非数值等价。该数据集与下面的既有单例不同，源码、协议和时间不能合并。
+
+## 历史：2026-10-02，SynthStrip＋源码对应 TOPUP 单例整链
 
 当前 b0 掩膜使用 FNIT PyTorch SynthStrip；TOPUP 补齐默认 regrid 和源码对应的场/运动优化、周期平滑、样条采样。真实 raw AP/PA 的 FNIT 与独立官方 SynthStrip 参考链生成全部 27 张参数图。最新计时、精度、显存、源码、两种参考协议及脑图见[完整报告](end_to_end_synthstrip_topup_20261002.md)、[运行 JSON](report.synthstrip_topup_20261002.public.json)、[官方 SynthStrip 对照](comparison.synthstrip_topup_20261002.public.json)、[历史 BET 对照](comparison.historical_bet_20261002.public.json)与[上游检查](upstream.synthstrip_topup_20261002.public.json)。TOPUP 独立同输入验收见[分功能报告](../topup/README.md)。输出仍非逐值相等。
 
