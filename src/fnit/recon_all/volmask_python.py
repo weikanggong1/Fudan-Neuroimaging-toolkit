@@ -14,33 +14,66 @@ import numpy as np
 from numba import njit
 
 
+@njit(cache=True, inline="always")
+def _owns_projected_edge(dy: float, dz: float) -> bool:
+    """One owner for a shared edge after normalizing projected winding."""
+    return dz > 0 or (dz == 0 and dy < 0)
+
+
+@njit(cache=True, inline="always")
+def _projected_edge(first: np.ndarray, second: np.ndarray,
+                    first_id: int, second_id: int, yy: float, zz: float) -> float:
+    """Evaluate a shared edge in canonical vertex-ID order, then orient it."""
+    forward = first_id < second_id
+    low, high = (first, second) if forward else (second, first)
+    value = ((low[1] - yy) * (high[2] - zz)
+             - (low[2] - zz) * (high[1] - yy))
+    return value if forward else -value
+
+
 @njit(cache=True)
 def _inside_mesh(vertices: np.ndarray, faces: np.ndarray,
                  shape: tuple[int, int, int]) -> tuple[np.ndarray, int, int]:
+    # Keep saved surface coordinates; only the ray/triangle predicate and
+    # intersection arithmetic use float64. Mixed float32 determinants and
+    # float64 numerators can count both triangles next to a shared edge.
+    vertices = vertices.astype(np.float64)
     width, height, depth = shape
-    crossings = np.zeros((height, depth, 128), dtype=np.float32)
+    crossings = np.zeros((height, depth, 128), dtype=np.float64)
     counts = np.zeros((height, depth), dtype=np.int32)
+    offset = 1e-5
     for face in faces:
         a, b, c = vertices[face[0]], vertices[face[1]], vertices[face[2]]
         denominator = (b[1] - a[1]) * (c[2] - a[2]) - (c[1] - a[1]) * (b[2] - a[2])
-        if abs(denominator) < 1e-8:
+        # Only a zero projection is parallel/degenerate. A small nonzero
+        # projected triangle can still contain a sampled ray.
+        if denominator == 0:
             continue
-        y0 = max(0, int(np.ceil(min(a[1], b[1], c[1]))))
-        y1 = min(height - 1, int(np.floor(max(a[1], b[1], c[1]))))
-        z0 = max(0, int(np.ceil(min(a[2], b[2], c[2]))))
-        z1 = min(depth - 1, int(np.floor(max(a[2], b[2], c[2]))))
+        sign = 1.0 if denominator > 0 else -1.0
+        # Bounds must cover the actual sample (y + offset, z + offset).
+        y0 = max(0, int(np.ceil(min(a[1], b[1], c[1]) - offset)))
+        y1 = min(height - 1, int(np.floor(max(a[1], b[1], c[1]) - offset)))
+        z0 = max(0, int(np.ceil(min(a[2], b[2], c[2]) - offset)))
+        z1 = min(depth - 1, int(np.floor(max(a[2], b[2], c[2]) - offset)))
+        owns_a = _owns_projected_edge(sign * (c[1] - b[1]), sign * (c[2] - b[2]))
+        owns_b = _owns_projected_edge(sign * (a[1] - c[1]), sign * (a[2] - c[2]))
+        owns_c = _owns_projected_edge(sign * (b[1] - a[1]), sign * (b[2] - a[2]))
         for y in range(y0, y1 + 1):
-            yy = y + 1e-5
+            yy = y + offset
             for z in range(z0, z1 + 1):
-                zz = z + 1e-5
-                u = ((yy - a[1]) * (c[2] - a[2]) -
-                     (c[1] - a[1]) * (zz - a[2])) / denominator
-                v = ((b[1] - a[1]) * (zz - a[2]) -
-                     (yy - a[1]) * (b[2] - a[2])) / denominator
-                if u >= 0 and v >= 0 and u + v <= 1:
+                zz = z + offset
+                edge_a = _projected_edge(b, c, face[1], face[2], yy, zz)
+                edge_b = _projected_edge(c, a, face[2], face[0], yy, zz)
+                edge_c = _projected_edge(a, b, face[0], face[1], yy, zz)
+                sa, sb, sc = sign * edge_a, sign * edge_b, sign * edge_c
+                if ((sa > 0 or (sa == 0 and owns_a))
+                        and (sb > 0 or (sb == 0 and owns_b))
+                        and (sc > 0 or (sc == 0 and owns_c))):
                     count = counts[y, z]
                     if count < 128:
-                        crossings[y, z, count] = a[0] + u * (b[0] - a[0]) + v * (c[0] - a[0])
+                        crossings[y, z, count] = (
+                            edge_a * a[0] + edge_b * b[0] + edge_c * c[0]
+                        ) / (edge_a + edge_b + edge_c)
                     counts[y, z] += 1
     inside = np.zeros(shape, dtype=np.uint8)
     odd = overflow = 0
