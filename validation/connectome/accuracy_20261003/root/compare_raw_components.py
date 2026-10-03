@@ -47,7 +47,7 @@ class Audit:
     def __init__(self):
         self.records = {}
 
-    def check(self, record):
+    def check(self, record, *, allow_empty_source=False):
         path = Path(record["path"])
         digest = record["sha256"]
         require(path.is_absolute() and path.is_file(), f"missing absolute bound file: {path}")
@@ -58,7 +58,11 @@ class Audit:
         if previous is None:
             require(cohort.sha256(path) == digest, f"file bytes changed: {path}")
         size = path.stat().st_size
-        require(size > 0 and record.get("exists", True) is True, f"empty/missing producer file: {path}")
+        # Source inventories can include legitimate empty package markers.
+        # They still require the exact frozen SHA before and after. MRI,
+        # contracts and saved outputs retain the nonempty producer guard.
+        require((size > 0 or allow_empty_source) and record.get("exists", True) is True,
+                f"empty/missing producer file: {path}")
         require(record.get("size_bytes", size) == size, f"file size differs: {path}")
         result = {"path": key, "sha256": digest, "size_bytes": size}
         self.records[key] = result
@@ -230,7 +234,8 @@ def candidate_inputs(config, raw_case, binding, version, state_row, audit):
     require(state_row["actual_source_fingerprint"] == expected_source["source_fingerprint"],
             "controller source identity differs")
     for name, digest in expected_source["source_sha256"].items():
-        audit.check({"path": str(Path(expected_source["directory"]) / name), "sha256": digest})
+        audit.check({"path": str(Path(expected_source["directory"]) / name), "sha256": digest},
+                    allow_empty_source=True)
     audit.check(config["source_archives"][version])
     for key in ("worker_script", "wall_script"):
         audit.check({"path": config[key], "sha256": config[key + "_sha256"]})
@@ -245,7 +250,7 @@ def candidate_inputs(config, raw_case, binding, version, state_row, audit):
         relative = str(path.relative_to(Path(config["sources"][version]).resolve()))
         require(expected_source["source_sha256"].get(relative) == record["sha256"],
                 f"loaded module bytes differ: {path}")
-        audit.check(record)
+        audit.check(record, allow_empty_source=True)
     anatomy = binding["anatomy"]
     require(gpu["anatomy"] == gpu["anatomy_after"] == anatomy["files"] and
             cohort.check_anatomy(anatomy["directory"], config["atlases"]) == anatomy["files"]
@@ -370,14 +375,26 @@ class Statistics:
                 "finite_pair_scope": "secondary diagnostic only; nonfinite cells remain counted above"}
 
 
-def geometry(image):
+def geometry(image, *, nonspatial_axis_type=None):
     import numpy as np
-    return {"shape": [int(value) for value in image.shape], "affine": np.asarray(image.affine).tolist(),
-            "spacing": [float(value) for value in image.header.get_zooms()],
+    affine = np.asarray(image.affine, dtype=np.float64)
+    spacing = np.asarray(image.header.get_zooms(), dtype=np.float64)
+    # Tissue/SH channels can carry an undefined nonspatial zoom in the
+    # original MRtrix NIfTI header. Preserve that meaning as explicit null
+    # metadata, with its axis, rather than modifying the header or data.
+    return {"shape": [int(value) for value in image.shape],
+            "affine": [[float(value) if np.isfinite(value) else None for value in row] for row in affine],
+            "affine_nonfinite_count": int(np.count_nonzero(~np.isfinite(affine))),
+            "spacing": [float(value) if np.isfinite(value) else None for value in spacing],
+            "nonfinite_spacing_axes": np.flatnonzero(~np.isfinite(spacing)).astype(int).tolist(),
+            "undefined_spacing": [{"axis": int(axis),
+                                   "axis_type": "spatial" if axis < 3 else (nonspatial_axis_type or "unspecified_nonspatial"),
+                                   "stored_header_value": str(float(spacing[axis]))}
+                                  for axis in np.flatnonzero(~np.isfinite(spacing))],
             "storage_dtype": str(image.get_data_dtype())}
 
 
-def geometry_check(candidate, reference, *, spatial_only=False):
+def geometry_check(candidate, reference, *, spatial_only=False, nonspatial_axis_type=None):
     import numpy as np
     shape_match = (candidate.shape[:3] == reference.shape[:3] if spatial_only else candidate.shape == reference.shape)
     delta = float(np.max(np.abs(np.asarray(candidate.affine) - np.asarray(reference.affine))))
@@ -385,7 +402,8 @@ def geometry_check(candidate, reference, *, spatial_only=False):
     # Report header rounding tolerance explicitly; never interpolate or reorient arrays.
     return {"same_grid": bool(shape_match and finite and delta <= 1e-5), "shape_match": bool(shape_match),
             "affine_max_absolute_mm": delta if finite else None, "affine_tolerance_mm": 1e-5,
-            "candidate": geometry(candidate), "reference": geometry(reference),
+            "candidate": geometry(candidate, nonspatial_axis_type=nonspatial_axis_type),
+            "reference": geometry(reference, nonspatial_axis_type=nonspatial_axis_type),
             "array_policy": "original stored voxel/frame indices; no resampling or canonical reorientation"}
 
 
@@ -395,7 +413,7 @@ def compare_image(candidate_record, reference_record, mask_record, *, expected_n
     before = time.perf_counter()
     candidate = nib.load(candidate_record["path"], keep_file_open=True)
     reference = nib.load(reference_record["path"], keep_file_open=True)
-    grid = geometry_check(candidate, reference)
+    grid = geometry_check(candidate, reference, nonspatial_axis_type="time_frame" if expected_ndim == 4 else None)
     if not grid["same_grid"]:
         return {"status": "not_comparable_grid", "geometry": grid}
     require(len(candidate.shape) in (3, 4) and (expected_ndim is None or len(candidate.shape) == expected_ndim),
@@ -497,7 +515,7 @@ def compare_case(config, raw_manifest, raw_case, binding, version, row, audit):
     ancillary = {}
     for role in ("wm_fod", "five_tissue"):
         a, b = nib.load(candidate[role]["path"]), nib.load(reference[role]["path"])
-        grid = geometry_check(a, b)
+        grid = geometry_check(a, b, nonspatial_axis_type="tissue_channel" if role == "five_tissue" else "SH_coefficient")
         ancillary[role] = {"status": "same_grid_not_numerically_assessed" if grid["same_grid"] else "not_comparable_grid",
                            "geometry": grid, "candidate_file": candidate[role], "reference_file": reference[role]}
     ancillary["atlases"] = {}
@@ -584,8 +602,9 @@ def execute(configuration, digest, output_dir, case_ids=None, versions=None):
                                      "nonfinite": "all nonfinite states counted; primary metrics null; finite-pair diagnostics explicitly named and count retained",
                                      "mask": "the exact bound official modeling brain mask, binary nonzero support; no candidate intersection or error exclusion"},
               "total_CPU_wall_seconds": time.perf_counter() - before}
+    serialized = json.dumps(result, indent=2, allow_nan=False) + "\n"
     output.mkdir(parents=True, exist_ok=False)
-    (output / "components.json").write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
+    (output / "components.json").write_text(serialized)
     return result
 
 

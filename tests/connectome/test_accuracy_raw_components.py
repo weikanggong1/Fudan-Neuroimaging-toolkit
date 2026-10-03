@@ -248,3 +248,79 @@ def test_pending_and_unscheduled_pairs_never_become_scientific_results(tmp_path,
     assert pending["candidate/sub-CON03"]["status"] == "not_launched"
     assert pending["baseline/sub-CON03"]["status"] == "not_scheduled"
     assert result["coverage"]["actually_compared"] == []
+
+
+def test_exact_frozen_empty_source_marker_is_valid(tmp_path):
+    source = tmp_path / "__init__.py"
+    source.write_bytes(b"")
+    source_record = record(source)
+    audit = compare.Audit()
+    actual = audit.check(source_record, allow_empty_source=True)
+    assert actual["size_bytes"] == 0
+    assert actual["sha256"] == hashlib.sha256(b"").hexdigest()
+    audit.finish()
+
+
+def test_allow_empty_source_does_not_allow_wrong_sha_or_missing_file(tmp_path):
+    source = tmp_path / "__init__.py"
+    source.write_bytes(b"")
+    with pytest.raises(ValueError, match="file bytes changed"):
+        compare.Audit().check({"path": str(source), "sha256": "0" * 64}, allow_empty_source=True)
+    with pytest.raises(ValueError, match="missing absolute bound file"):
+        compare.Audit().check({"path": str(tmp_path / "absent.py"), "sha256": hashlib.sha256(b"").hexdigest()},
+                              allow_empty_source=True)
+
+
+def test_empty_producer_stays_rejected_even_after_source_audit(tmp_path):
+    source = tmp_path / "__init__.py"
+    source.write_bytes(b"")
+    source_record = record(source)
+    audit = compare.Audit()
+    with pytest.raises(ValueError, match="empty/missing producer"):
+        audit.check(source_record)
+    audit.check(source_record, allow_empty_source=True)
+    with pytest.raises(ValueError, match="empty/missing producer"):
+        audit.check(source_record)
+
+
+def test_empty_source_after_read_mutation_stays_rejected(tmp_path):
+    source = tmp_path / "__init__.py"
+    source.write_bytes(b"")
+    audit = compare.Audit()
+    audit.check(record(source), allow_empty_source=True)
+    source.write_text("# mutated\n")
+    with pytest.raises(ValueError, match="changed during comparison"):
+        audit.finish()
+
+
+def test_original_undefined_channel_spacing_is_json_safe_metadata(tmp_path):
+    array = np.ones((2, 3, 4, 5), dtype=np.float32)
+    original = nib.Nifti1Image(array, np.eye(4))
+    original.header["pixdim"][4] = np.nan
+    path = tmp_path / "original_5tt.nii"
+    nib.save(original, path)
+    image = nib.load(path)
+    result = compare.geometry(image, nonspatial_axis_type="tissue_channel")
+    assert result["spacing"] == [1.0, 1.0, 1.0, None]
+    assert result["nonfinite_spacing_axes"] == [3]
+    assert result["undefined_spacing"] == [{"axis": 3, "axis_type": "tissue_channel", "stored_header_value": "nan"}]
+    assert result["affine_nonfinite_count"] == 0
+    assert compare.geometry_check(image, image)["same_grid"] is True
+    assert np.isnan(image.header.get_zooms()[3])
+    np.testing.assert_array_equal(np.asanyarray(image.dataobj), array)
+    json.dumps(result, allow_nan=False)
+
+
+def test_invalid_affine_stays_explicitly_not_comparable_and_json_safe():
+    from types import SimpleNamespace
+    affine = np.eye(4)
+    affine[0, 3] = np.inf
+    image = SimpleNamespace(shape=(2, 3, 4), affine=affine,
+                            header=SimpleNamespace(get_zooms=lambda: (1.0, 1.0, 1.0)),
+                            get_data_dtype=lambda: np.dtype("float32"))
+    result = compare.geometry_check(image, image)
+    assert result["same_grid"] is False
+    assert result["candidate"]["affine"][0][3] is None
+    assert result["candidate"]["affine_nonfinite_count"] == 1
+    assert result["affine_max_absolute_mm"] is None
+    json.dumps(result, allow_nan=False)
