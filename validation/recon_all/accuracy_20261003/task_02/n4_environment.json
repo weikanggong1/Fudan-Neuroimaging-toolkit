@@ -1,0 +1,76 @@
+{
+  "host": "gpucw1",
+  "input_sha256": "18336675b248b38b32094482081dec9ab47efebe4cded9dfa4285adee88a28f9",
+  "official_binary_sha256": "9d77c96f6462e0f0f46a42b3ed59d7ed7364318d2006fb31dff96a953929d239",
+  "native_binary_sha256": "a609d7ddbcadff3834f41d060c7abcc284db4b653ffab738f99117e496ec3599",
+  "runs": [
+    {
+      "tag": "gcc48",
+      "wall_seconds": 204.95664595300332,
+      "command": [
+        "/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic/build4_gcc48_clean/fnit_n4_diagnostic",
+        "/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic/input.raw",
+        "/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic/gcc48.final.raw",
+        "256",
+        "256",
+        "256",
+        "1",
+        "1",
+        "1",
+        "4",
+        "/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic/gcc48.profile.json"
+      ]
+    },
+    {
+      "tag": "official",
+      "wall_seconds": 208.31221234891564,
+      "command": [
+        "/public/software/apps/Freesurfer/8.2.0-1/bin/AntsN4BiasFieldCorrectionFs",
+        "-i",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/orig.mgz",
+        "-o",
+        "/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic/official_repeat_float.mgz",
+        "--dtype",
+        "float"
+      ]
+    }
+  ],
+  "kind": "diagnostic_only_not_production_backend",
+  "official_repeat_vs_historical": {
+    "different": 0,
+    "max_abs": 0.0,
+    "p99_abs": 0.0
+  },
+  "gcc48_vs_official": {
+    "different": 0,
+    "max_abs": 0.0,
+    "p99_abs": 0.0
+  },
+  "gcc48_vs_itk5_conda": {
+    "different": 2496335,
+    "max_abs": 7.62939453125e-05,
+    "p99_abs": 2.6702880859375e-05
+  },
+  "uchar_gcc48_vs_official": {
+    "different": 0,
+    "max_abs": 0.0,
+    "p99_abs": 0.0
+  },
+  "gcc48_vs_itk5_fields": {
+    "lattice": {
+      "different": 1316,
+      "max_abs": 5.662441253662109e-07,
+      "p99_abs": 4.172325134277344e-07
+    },
+    "logfield": {
+      "different": 16777216,
+      "max_abs": 4.470348358154297e-07,
+      "p99_abs": 3.5762786865234375e-07
+    },
+    "expfield": {
+      "different": 16777216,
+      "max_abs": 5.960464477539062e-07,
+      "p99_abs": 3.5762786865234375e-07
+    }
+  }
+}

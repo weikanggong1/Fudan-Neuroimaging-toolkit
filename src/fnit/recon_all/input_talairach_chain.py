@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 import time
 
+import nibabel as nib
 import numpy as np
 import torch
 
@@ -63,6 +64,33 @@ def write_voxel_lta_from_ras(source_lta: str | Path, output_lta: str | Path) -> 
     output.write_text("\n".join(lines) + "\n")
 
 
+def save_synthstrip_mgh(source_file: str | Path, stripped_image,
+                        output_file: str | Path) -> None:
+    """将SynthStrip结果写成源conform网格和dtype的3D MGH/MGZ。
+
+    source_file为conform MGH/MGZ；stripped_image为同网格nibabel图像；
+    output_file为输出路径。整数输入要求输出可精确表示，避免截断强度。
+    形状、空间、非有限值或整数范围不符时抛ValueError；不改变模型精度。
+    """
+    source = nib.load(str(source_file))
+    values = np.asanyarray(stripped_image.dataobj)
+    if not isinstance(source, nib.MGHImage) or len(source.shape) != 3:
+        raise ValueError("expected a 3D conformed MGH/MGZ input")
+    if values.shape != source.shape or not np.array_equal(stripped_image.affine, source.affine):
+        raise ValueError("SynthStrip output must preserve the conformed grid")
+    dtype = source.get_data_dtype()
+    if not np.isfinite(values).all():
+        raise ValueError("SynthStrip output must be finite")
+    cast = values.astype(dtype)
+    if np.issubdtype(dtype, np.integer) and not np.array_equal(values, cast):
+        raise ValueError("SynthStrip output is not exactly representable in the source integer dtype")
+    header = source.header.copy()
+    header.set_data_dtype(dtype)
+    output = Path(output_file)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    nib.save(nib.MGHImage(cast, source.affine, header), str(output))
+
+
 def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
                               weights_dir: str | Path, assets_dir: str | Path,
                               *, device: str = "cpu", threads: int = 4) -> dict:
@@ -83,7 +111,9 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
         strip = SynthStrip(weights=weights, device=device, threads=threads, configure_precision=False)
         # 经验证的SynthStrip cuDNN FP32例外在模型构造后施加。
         torch.backends.cudnn.allow_tf32 = False
-        strip(result["conformed"], precision_report=forwards).image.save(str(strip_file))
+        stripped = strip(result["conformed"], precision_report=forwards)
+        save_synthstrip_mgh(source_file=result["conformed"],
+                           stripped_image=stripped.image, output_file=strip_file)
     finally:
         torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
     del strip
