@@ -1,0 +1,2239 @@
+{
+  "schema_version": 1,
+  "mode": "wall",
+  "cli_arguments": [
+    "UKBConnectome_pipeline",
+    "--bids-root",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw",
+    "--subject",
+    "CON09",
+    "--freesurfer-subject-dir",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop",
+    "--output-dir",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome",
+    "--device",
+    "cuda:0",
+    "--n-seeds",
+    "100000",
+    "--seed",
+    "0",
+    "--session",
+    "preop",
+    "--acquisition",
+    "AP",
+    "--atlas",
+    "fs-aparc",
+    "aparc+tian-s1",
+    "aparc.a2009s+tian-s1",
+    "glasser+tian-s1",
+    "glasser+tian-s4",
+    "schaefer200+tian-s1",
+    "schaefer500+tian-s4",
+    "schaefer1000+tian-s4",
+    "--atlas-templates-dir",
+    "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases",
+    "--fsaverage-dir",
+    "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/freesurfer_reference/subjects/fsaverage",
+    "--mni-template",
+    "/cwStorage/home/gongwk/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz",
+    "--synthmorph-weights",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights",
+    "--eddy-gp-seed",
+    "12345"
+  ],
+  "eddy_gp_seed_default": 12345,
+  "initial_output_state": {
+    "output_directory_existed": false,
+    "preexisting_state_files": [],
+    "preexisting_run_state": false
+  },
+  "timing_scope": "FNIT/torch CLI imports, instrumentation installation, real raw-BIDS preparation, official recon-all when needed, actual core and normal CLI output writes; excludes report/source/input hashing, report write, sampler shutdown and any external queue wait",
+  "diagnostic_note": "diagnostic stage boundaries synchronize the requested initialized CUDA device; inclusive nested timings cannot be summed; checkpoint exports introduce extra I/O and synchronization and are not formal wall benchmark results",
+  "scientific_policy": "actual FNIT functions and outputs; no reference substitution, voxel reduction or precision conversion; missing/None EDDY gp_seed gets the same declared default on both checkouts; explicit non-None seeds remain unchanged",
+  "start_utc": "2026-10-03T11:52:05.598915+00:00",
+  "status": "completed",
+  "total_runtime_seconds": 679.3069045906886,
+  "end_utc": "2026-10-03T12:03:24.905869+00:00",
+  "exit_code": 0,
+  "gpu_process_memory": {
+    "backend": "pynvml",
+    "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "uuid_source": "explicit",
+    "sample_interval_seconds": 0.5,
+    "max_observed_interval_seconds": 2.4182300022803247,
+    "samples": 1321,
+    "errors": [],
+    "failed_samples": 0,
+    "unresolved_device_samples": 0,
+    "observed_span_seconds": 676.2535900156945,
+    "peak_process_tree_bytes": 19815989248,
+    "peak_process_tree_gb": 19.815989248,
+    "peak_process_tree_gib": 18.455078125,
+    "status": "measured",
+    "scope": "simultaneous compute-process memory on the requested GPU for this PID and live descendants; sample maximum, not a continuous bound; excludes unrelated processes"
+  },
+  "post_timing_result_export": {
+    "status": "completed",
+    "seconds": 5.506402488797903,
+    "files": {
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/returned_result/geometry.npz": {
+        "size_bytes": 1188,
+        "sha256": "e3499b3001917e1f955850ad90096290a21e9cc7035e92f37562b3820cd80a57"
+      },
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/returned_result/wm_fod_normalized.nii.gz": {
+        "size_bytes": 27007449,
+        "sha256": "cf6eb3125bae1d1264ea57782ed0d27768c8ba4568f5608dd9431753d0d80b89"
+      },
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/returned_result/fa.nii.gz": {
+        "size_bytes": 486262,
+        "sha256": "7d1faa8fa7e4d1addea32181bb94caa414fdbeb78dfc5aca83df279aa5236861"
+      },
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/returned_result/brain_mask.nii.gz": {
+        "size_bytes": 18883,
+        "sha256": "0f16b450e4536e70c9699a4b5f69ed9308910f68c9a2fbae2a02eaabf1c589fa"
+      },
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/returned_result/five_tissue.nii.gz": {
+        "size_bytes": 2765313,
+        "sha256": "4e5200454db65d3c7846e73cca5853b574cc7dd0050c103c62fbe755849fb7f8"
+      },
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/returned_result/gmwmi.nii.gz": {
+        "size_bytes": 898886,
+        "sha256": "efa308814833fa76c95a0b3e7dfdc17e32a62372e5d9433c7c0d8fca9f079831"
+      },
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/returned_result/track_metrics.npz": {
+        "size_bytes": 524570,
+        "sha256": "0c73a9374cca2e9bab8e2ad3a79624ab7aab5760e4720cdd6867b47751a519b7"
+      },
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/returned_result/tracks.tck": {
+        "size_bytes": 5653147,
+        "sha256": "eb268f59c0d9ff521839e8f167fc645a12ebfe0bc2b14f754e71da53970b0410"
+      },
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/returned_result/dwi_to_t1_world.csv": {
+        "size_bytes": 259,
+        "sha256": "c355f1a960d2901d206d90a41304c10bcef0151e43ba6373c9262fd6c28fb8d2"
+      }
+    },
+    "scope": "returned core result; after CLI wall timer and GPU monitor stop; no intermediate tracking-input checkpoint"
+  },
+  "preprocessing": [
+    {
+      "topup": "completed",
+      "eddy": "completed",
+      "recon_all": "supplied"
+    }
+  ],
+  "actual_eddy_gp_seeds": [
+    12345
+  ],
+  "stages": {},
+  "stage_qc": {
+    "eddy": {
+      "backend": "fsl2111_strict",
+      "fsl_eddy_version": "2111.0",
+      "fsl_eddy_commit": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c",
+      "device": "cuda:0",
+      "tf32": true,
+      "elapsed_seconds": 301.3104219660163,
+      "iterations": [
+        {
+          "stage": "b0",
+          "iteration": 0,
+          "fwhm_mm": 10.0,
+          "mean_update_mss": 2.901953680773147
+        },
+        {
+          "stage": "b0",
+          "iteration": 1,
+          "fwhm_mm": 8.0,
+          "mean_update_mss": 0.7581720137410213
+        },
+        {
+          "stage": "b0",
+          "iteration": 2,
+          "fwhm_mm": 4.0,
+          "mean_update_mss": 3.0289672671932757
+        },
+        {
+          "stage": "b0",
+          "iteration": 3,
+          "fwhm_mm": 2.0,
+          "mean_update_mss": 25.311575972933145
+        },
+        {
+          "stage": "b0",
+          "iteration": 4,
+          "fwhm_mm": 0.0,
+          "mean_update_mss": 28.86295590593153
+        },
+        {
+          "stage": "b0",
+          "iteration": 5,
+          "fwhm_mm": 0.0,
+          "mean_update_mss": 28.655473765459092
+        },
+        {
+          "stage": "b0",
+          "iteration": 6,
+          "fwhm_mm": 0.0,
+          "mean_update_mss": 28.469906502444985
+        },
+        {
+          "stage": "b0",
+          "iteration": 7,
+          "fwhm_mm": 0.0,
+          "mean_update_mss": 28.32746340985643
+        },
+        {
+          "stage": "dwi",
+          "iteration": 0,
+          "fwhm_mm": 10.0,
+          "gp_seed": 12345,
+          "outliers": 13,
+          "mean_update_mss": 0.05921921450959128
+        },
+        {
+          "stage": "dwi",
+          "iteration": 1,
+          "fwhm_mm": 8.0,
+          "gp_seed": 12345,
+          "outliers": 17,
+          "mean_update_mss": 0.07695441795257162
+        },
+        {
+          "stage": "dwi",
+          "iteration": 2,
+          "fwhm_mm": 4.0,
+          "gp_seed": 12345,
+          "outliers": 18,
+          "mean_update_mss": 0.3909560122146887
+        },
+        {
+          "stage": "dwi",
+          "iteration": 3,
+          "fwhm_mm": 2.0,
+          "gp_seed": 12345,
+          "outliers": 13,
+          "mean_update_mss": 2.955117443646786
+        },
+        {
+          "stage": "dwi",
+          "iteration": 4,
+          "fwhm_mm": 0.0,
+          "gp_seed": 12345,
+          "outliers": 12,
+          "mean_update_mss": 3.3816309403859854
+        },
+        {
+          "stage": "dwi",
+          "iteration": 5,
+          "fwhm_mm": 0.0,
+          "gp_seed": 12345,
+          "outliers": 12,
+          "mean_update_mss": 3.3797421722998098
+        },
+        {
+          "stage": "dwi",
+          "iteration": 6,
+          "fwhm_mm": 0.0,
+          "gp_seed": 12345,
+          "outliers": 12,
+          "mean_update_mss": 3.38361770620601
+        },
+        {
+          "stage": "dwi",
+          "iteration": 7,
+          "fwhm_mm": 0.0,
+          "gp_seed": 12345,
+          "outliers": 12,
+          "mean_update_mss": 3.3826401413716507
+        }
+      ],
+      "gp_seed_override": 12345,
+      "peak_cuda_memory_bytes": 3394699264
+    }
+  },
+  "selected_inputs": {
+    "dwi": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/preproc/eddy/data.nii.gz",
+    "bvals": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.bval",
+    "bvecs": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/preproc/eddy/data.eddy_rotated_bvecs",
+    "freesurfer_subject_dir": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop"
+  },
+  "official_recon_all_calls": [],
+  "cuda_allocator": {
+    "allocated_bytes": 14681255936,
+    "reserved_bytes": 17628659712,
+    "allocated_gb": 14.681255936,
+    "allocated_gib": 13.672985076904297,
+    "reserved_gb": 17.628659712,
+    "reserved_gib": 16.41796875,
+    "intervals": [
+      {
+        "reason": "before_existing_reset",
+        "device": "cuda:0",
+        "allocated_bytes": 76122112,
+        "reserved_bytes": 94371840
+      },
+      {
+        "reason": "before_existing_reset",
+        "device": "cuda:0",
+        "allocated_bytes": 320024064,
+        "reserved_bytes": 371195904
+      },
+      {
+        "reason": "before_existing_reset",
+        "device": "cuda:0",
+        "allocated_bytes": 6570250240,
+        "reserved_bytes": 9835642880
+      },
+      {
+        "reason": "run_exit",
+        "device": "cuda:0",
+        "allocated_bytes": 14681255936,
+        "reserved_bytes": 17628659712
+      }
+    ],
+    "scope": "process PyTorch allocator maxima, collected before each existing reset and at exit; excludes CUDA context and native allocators"
+  },
+  "checkpoint_export_seconds": 0.0,
+  "checkpoints": {},
+  "provenance": {
+    "fnit_version": "0.16.0",
+    "fnit_package": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit",
+    "git_root": null,
+    "git_tracks_fnit_init": false,
+    "git_commit": null,
+    "git_status": null,
+    "git_diff_sha256": null,
+    "loaded_fnit_files": {
+      "fnit": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/__init__.py",
+        "sha256": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4"
+      },
+      "fnit.cli": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/cli.py",
+        "sha256": "e804eb63d35d39451f1f2795dc87fd3534e888e80105e91ed45bdaceb9f29598"
+      },
+      "fnit.connectome.anatomy": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/anatomy.py",
+        "sha256": "49dcf7dd05bd83d8c83e383c1749a63a0d3f3662ea7658795052b7c1d24aa516"
+      },
+      "fnit.connectome.assignment": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/assignment.py",
+        "sha256": "d8901752cda4e5b8007f7c318613b343ad3edbd7072d0e0a05539a5d42ac6313"
+      },
+      "fnit._nib": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/_nib.py",
+        "sha256": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+      },
+      "fnit._world_resampling": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/_world_resampling.py",
+        "sha256": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5"
+      },
+      "fnit._sampling_plan": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/_sampling_plan.py",
+        "sha256": "a44a7fedd476be3f41cd3d9426790eadfabef08eb72f45dba14db1ebd2a8d3c3"
+      },
+      "fnit.applywarp.core": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/applywarp/core.py",
+        "sha256": "0022b5a6386409f29bd9e513ab4f2192e9722eb5dd9bd8735eac0241a5d0928d"
+      },
+      "fnit.applywarp": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/applywarp/__init__.py",
+        "sha256": "959341360b1a6057cecfa3c98989a425d8a4c192ab7cb1cf2e221429f73452b5"
+      },
+      "fnit.connectome.atlas_tian": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/atlas_tian.py",
+        "sha256": "953813c8f62eef4e0ed1d6b250e710d3f8a02058299b25cf82907bd01d5df9b5"
+      },
+      "fnit.connectome.atlas_surface": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/atlas_surface.py",
+        "sha256": "1a322452dbc745f9043d07e29fc5822e91405536eb45ebc24abbe40820d481e7"
+      },
+      "fnit.connectome.freesurfer_subject": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/freesurfer_subject.py",
+        "sha256": "06bd75ae9b5433ecd09f351df3a6d583249e7dbbf5d3db3da06d0d24c570a688"
+      },
+      "fnit.connectome.atlas_builder": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/atlas_builder.py",
+        "sha256": "0e14c434148ac40e60d76b6d7947d9b78f259448da27250c82ab1d04eba5d42c"
+      },
+      "fnit.connectome.bet": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/bet.py",
+        "sha256": "aa42b1ab45321257e56aebf3b3472b283df9b5b6b577fdbee16740834926f6ee"
+      },
+      "fnit.connectome.fod": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/fod.py",
+        "sha256": "f82d2174109d05b9f820b6abe98e3792e48ae63e02ace2f2640f10c4c2052aaa"
+      },
+      "fnit._dmri": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/_dmri.py",
+        "sha256": "0862c7cefbd2b2811e9a56e3b617a209968d70c4e5a5b76c557630b1cd2f0117"
+      },
+      "fnit.synthseg_parc.model": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthseg_parc/model.py",
+        "sha256": "b44be3fe3332a6096141b7f1051370a8beb64d2e46c17b01b20d3942f0139c78"
+      },
+      "fnit.synthseg_parc.pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthseg_parc/pipeline.py",
+        "sha256": "7df985927ae9c01c751346ce5f48904d0dc74d4bedf6397edff483a58f85972b"
+      },
+      "fnit.synthseg_parc.postprocess": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthseg_parc/postprocess.py",
+        "sha256": "730cecec349015ea15d5ff6e203e4383b3060103797d1d805846d2bd97870b5e"
+      },
+      "fnit.synthseg_parc.preprocess": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthseg_parc/preprocess.py",
+        "sha256": "67159d8d1c646df82d7023c4dd5f4e57222fc94386673987b1c25e110c946d49"
+      },
+      "fnit.synthseg_parc.segment": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthseg_parc/segment.py",
+        "sha256": "b93b9df945ca998250d886761131f4c6ee1b5e41e8f2db734ece1afeebb14c2d"
+      },
+      "fnit.weights": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/weights.py",
+        "sha256": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "fnit.synthseg_parc.synthseg": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthseg_parc/synthseg.py",
+        "sha256": "5b6fc866076b1311e9960267daecf25084f59dbbea84644a83289853cf4c2601"
+      },
+      "fnit.synthseg_parc.labels": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthseg_parc/labels.py",
+        "sha256": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e"
+      },
+      "fnit.synthseg_parc.synthseg_plus": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthseg_parc/synthseg_plus.py",
+        "sha256": "b49cfbc26f4733e7b6c8ceffaceb102f0f5a6a57044dfb1a5f4a048b3f14786b"
+      },
+      "fnit.synthseg_parc": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthseg_parc/__init__.py",
+        "sha256": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a"
+      },
+      "fnit.connectome.response": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/response.py",
+        "sha256": "2a595044ff31a6497df5efcdeb5df7fe5a651c89a00f629dd819105707e40ebb"
+      },
+      "fnit.connectome.masks": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/masks.py",
+        "sha256": "fb8c0a8753e71c342cfb40b19532fb9441f7c13afa230ba153fb6c6b70f1b809"
+      },
+      "fnit.connectome.mtnormalise": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/mtnormalise.py",
+        "sha256": "549a899aa19a1865860008fbce133e7197b942550ae074aace88b93adec96a4d"
+      },
+      "fnit.connectome.sift2_fixels": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/sift2_fixels.py",
+        "sha256": "c23e376c4c33df2bb49f1af9eece1aea0531ad5f8e66db622e9372f719e0bba4"
+      },
+      "fnit.connectome.sift2_mapping": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/sift2_mapping.py",
+        "sha256": "64ed607d612dc157c1f91006f511ee73c07a1afd0f2ad53913828bcfca48d826"
+      },
+      "fnit.connectome.sift2_optimizer": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/sift2_optimizer.py",
+        "sha256": "810615c533141f7ac145f563fa35712705225cc1683de5283b901a6f63c01281"
+      },
+      "fnit.connectome.sift2_proc_mask": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/sift2_proc_mask.py",
+        "sha256": "03f2e6ea47fb42168768c540a9a2bac08b75b4db53a47683fb1eed8e15a28ca1"
+      },
+      "fnit.connectome.sift2": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/sift2.py",
+        "sha256": "8481bc75ac482c99b6768f4adf946df3dcd49bfc4d81e7b45972fb69e1cf06a1"
+      },
+      "fnit.connectome.tcksample_precise": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/tcksample_precise.py",
+        "sha256": "f428520f1f804008007f61ea58f00c47ca05cd01fe915fe6582dfcc3143fa0ee"
+      },
+      "fnit.connectome.tracking": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/tracking.py",
+        "sha256": "eedff23412eca8b203c05a6252630efb0cf9effb98e5a652f816ca0aa45f4753"
+      },
+      "fnit.connectome.pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/pipeline.py",
+        "sha256": "d5a46ecddb9c011608b07e1c779405ff2a9f674530f7ae9a82b132016782328a"
+      },
+      "fnit.connectome": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/__init__.py",
+        "sha256": "671a4688fc544fde4163869c3abfe3d5ca3bb3415bebceec6d888c10d7f1b526"
+      },
+      "fnit.amico_noddi.classic": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/amico_noddi/classic.py",
+        "sha256": "ee5292dc4a14b43736a9f105c8946a43f35f482faa8bb8259992e9de2d8193ea"
+      },
+      "fnit.amico_noddi.kernels": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/amico_noddi/kernels.py",
+        "sha256": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59"
+      },
+      "fnit.amico_noddi.solver": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/amico_noddi/solver.py",
+        "sha256": "0f04c492b61f91a60aede8d281a8c87d5aac0a7453eb15898a788d8a90e1497d"
+      },
+      "fnit.amico_noddi.core": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/amico_noddi/core.py",
+        "sha256": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26"
+      },
+      "fnit.amico_noddi": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/amico_noddi/__init__.py",
+        "sha256": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7"
+      },
+      "fnit.dtifit.core": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/dtifit/core.py",
+        "sha256": "23e0fb554be1e0b309af154f34f5b6f7139db6e06ca8f10b1bd08be09789dc39"
+      },
+      "fnit.dtifit": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/dtifit/__init__.py",
+        "sha256": "a38d642b2b5209e1bb10f155d42be85d9798a39db878e8a6f7cfce2d63e22d79"
+      },
+      "fnit.eddy.fsl2111_strict.config": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/config.py",
+        "sha256": "2440c28354d70fd40317584c2a1ff9d43dcc25d0ec83c173033a2f1f7653600d"
+      },
+      "fnit.eddy.fsl2111_strict": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/__init__.py",
+        "sha256": "82de3ea49caa7ac9460c0172621eef9c76b52074f54f5e9c71fa362178a06b46"
+      },
+      "fnit.eddy.fsl2111_strict.spline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/spline.py",
+        "sha256": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8"
+      },
+      "fnit.eddy.fsl2111_strict.geometry": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/geometry.py",
+        "sha256": "4933be355012c36aa281c5cbb309444f3d0e66a3dd493eaa737c1671384981ae"
+      },
+      "fnit.eddy.fsl2111_strict.gp": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/gp.py",
+        "sha256": "1b0cd8303eded816bf986703962f4644f8fb7435ddf25c72f22658c3e9fc8f2a"
+      },
+      "fnit.eddy.fsl2111_strict.outlier": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/outlier.py",
+        "sha256": "5b125641eaa882e02fe682a769a66b6ce171139e301f8d301b50834b51fb8d7d"
+      },
+      "fnit.eddy.fsl2111_strict.warp": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/warp.py",
+        "sha256": "d9e03b07016bad2bda750ffec3141352e9b17f327b5eb0ba2a66fd80ee14e8ee"
+      },
+      "fnit.eddy.fsl2111_strict.registration": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/registration.py",
+        "sha256": "064e0b4e92c6bee67149eb03f413be57f6ae0ebcf25c307629bee0077cff19b7"
+      },
+      "fnit.eddy.fsl2111_strict.shell_alignment": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/shell_alignment.py",
+        "sha256": "477028cecfebf0ba4ff1938f2b2228c0bca690450a5742a89b560ab7cbef1030"
+      },
+      "fnit.fnirt.spline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fnirt/spline.py",
+        "sha256": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad"
+      },
+      "fnit.fnirt.io": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fnirt/io.py",
+        "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+      },
+      "fnit.fnirt": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fnirt/__init__.py",
+        "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+      },
+      "fnit.eddy.topup_field": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/topup_field.py",
+        "sha256": "54d076b5187d70596db7778264326dbd797d9972c28f954aa32e43f6db2c6b74"
+      },
+      "fnit.eddy.fsl2111_strict.pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/fsl2111_strict/pipeline.py",
+        "sha256": "148335d9b4d314bcb216bbf95501e7574e3a8f30e50df60a965fbe9eca6bf0d4"
+      },
+      "fnit.synthstrip.model": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthstrip/model.py",
+        "sha256": "6afcff10848a8a2a57b9c00d4b637eda90e4c0e21f301d8a8031107d783a5f44"
+      },
+      "fnit.synthstrip.pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthstrip/pipeline.py",
+        "sha256": "c544245df42b58cc82ac6b049286ac2e03221f8159bdb58661dc9b07b2aaae14"
+      },
+      "fnit.synthstrip": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthstrip/__init__.py",
+        "sha256": "3eac7a2f37a3dd0009e38a7cf74c64aba481fb5638fff8766ce2a0b6322f5d1d"
+      },
+      "fnit.fnirt.optimizer": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fnirt/optimizer.py",
+        "sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd"
+      },
+      "fnit.topup.io": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/topup/io.py",
+        "sha256": "c87edab5c5369204d1a7ccfd2cb079dfd1a64e68279d8899f51755609038176a"
+      },
+      "fnit.topup.core": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/topup/core.py",
+        "sha256": "d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8"
+      },
+      "fnit.topup.ukb": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/topup/ukb.py",
+        "sha256": "ee6542debdf58fe8212ec313cb680a10def17eda4f4f895c24934d0611702c8b"
+      },
+      "fnit.topup": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/topup/__init__.py",
+        "sha256": "e15e503ddf68a59a8e36274ddfd6dc1609c38437885071049b8c9c37d813876d"
+      },
+      "fnit.eddy.ukb": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/ukb.py",
+        "sha256": "1138693b6edab00ad02a83b9b7c66a3db66a9863641e619576ee2f18fafe3d85"
+      },
+      "fnit.eddy": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/eddy/__init__.py",
+        "sha256": "e1239c07080954468a0d3060a0385275df55addfa243ac039f4bbcd65cea1908"
+      },
+      "fnit.flirt.coordinates": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/flirt/coordinates.py",
+        "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+      },
+      "fnit.flirt": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/flirt/__init__.py",
+        "sha256": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af"
+      },
+      "fnit.flirt.types": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/flirt/types.py",
+        "sha256": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21"
+      },
+      "fnit.flirt.core": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/flirt/core.py",
+        "sha256": "981b61d822a4bacb2aba05637f1001cdd3114d5d70139d1f31f859bb3011aba9"
+      },
+      "fnit._transforms": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/_transforms.py",
+        "sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33"
+      },
+      "fnit.fnirt.topology": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fnirt/topology.py",
+        "sha256": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900"
+      },
+      "fnit.fnirt.registration": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fnirt/registration.py",
+        "sha256": "e67c71a6d01b1e8b7b0de842680e9f3012cb5cb492e13e927b32b976f3320d6d"
+      },
+      "fnit.mmorf.core": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/mmorf/core.py",
+        "sha256": "1692d754c41139fbc61ce2d1fd1071790168e30ed2039dbb8d2e7bc256105338"
+      },
+      "fnit.mmorf.standalone": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/mmorf/standalone.py",
+        "sha256": "cfad1efe8703a620af4b196a98cad2b6b490b7a7d57daf2293e1bd7f0b816326"
+      },
+      "fnit.mmorf": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/mmorf/__init__.py",
+        "sha256": "6b44520b11f72192c1f78a5ba309b6f49e7cd767e4cff24e2b135748ae65c4ef"
+      },
+      "fnit.fmri.bids": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/bids.py",
+        "sha256": "7fce819c071fbf1ac7c67f32356129d9eda233484f701b5dc6fb113330ab166c"
+      },
+      "fnit.flirt.affine_batch": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/flirt/affine_batch.py",
+        "sha256": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f"
+      },
+      "fnit.fmri.bbr": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/bbr.py",
+        "sha256": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2"
+      },
+      "fnit.feat.temporal": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/feat/temporal.py",
+        "sha256": "b0a3fc14751a6a7cd9ce7c66ac8fe7b3fc4bea43f4039ef5b03d5af47e3d7b08"
+      },
+      "fnit.feat": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/feat/__init__.py",
+        "sha256": "ca860db873131d98eba9ed245ed9aed7770443e162ad2e43a1cbb688af1a5d84"
+      },
+      "fnit.fmri.mask": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/mask.py",
+        "sha256": "c73657b11aebf63242bacfae952e2f18207033dfdd70218e43b3692448a5d2d5"
+      },
+      "fnit.mcflirt._rigid": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/mcflirt/_rigid.py",
+        "sha256": "ea6ca9d4aa6f87d8b353cecdfdd1650a99f4e3dcd558290815a4004935c2158e"
+      },
+      "fnit.mcflirt.core": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/mcflirt/core.py",
+        "sha256": "2b344c34ecbc96d14a07132f6c5731a87ebe13178ab5fa1452222ed2299bae78"
+      },
+      "fnit.mcflirt": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/mcflirt/__init__.py",
+        "sha256": "793c2b2e08ae85bedf341df682225f7bc9eadd44069dbe6fd73356ccb985a1ec"
+      },
+      "fnit.fmri.spatial": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/spatial.py",
+        "sha256": "30588cba481622c057e55472853d6b9acdc0af35247ba7297f8163d87151dda4"
+      },
+      "fnit.fmri.pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/pipeline.py",
+        "sha256": "07e38cad7ad1cd0049208306698e8451af7eed2f3a76f7540da9fcff8b5a1269"
+      },
+      "fnit.melodic.ica": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/melodic/ica.py",
+        "sha256": "66b8cfeb887fbebb64cc37565141bf2009a8bbb089228774b8093086195fb228"
+      },
+      "fnit.melodic.bids": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/melodic/bids.py",
+        "sha256": "a272ad75955a6c1c19b5ce0e486f9609b32768d6df28e48760704cf641388aa3"
+      },
+      "fnit.melodic": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/melodic/__init__.py",
+        "sha256": "030149f321c2b083cca5352cb7ca6076311e085fca6168e1ef2c4e168dc9318d"
+      },
+      "fnit.fmri.confounds": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/confounds.py",
+        "sha256": "90ca47f85fc51ec89829d7a42df5f9465868e82f48b3330a4b43e2488ab13c0a"
+      },
+      "fnit.fmri.aroma": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/aroma.py",
+        "sha256": "d7a8d9a8436d2b1d1b4fe4899dd89bbf134ccefa25a66d601db8cc1a9481b28d"
+      },
+      "fnit.fmri.aroma_pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/aroma_pipeline.py",
+        "sha256": "a3dac1d8489ae2f28725712e64aeec58f5dba8af67d2e031d22c68e8aecff953"
+      },
+      "fnit.fmri.surface": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/surface.py",
+        "sha256": "b5b3c9712dcbaa6e63b93ce690374b25a28ad2f70a7ff22d4fbb36e231df70e2"
+      },
+      "fnit._hemisphere_parallel": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/_hemisphere_parallel.py",
+        "sha256": "2bca5a145a335dbcfd81f5af13f2cb1db7c5f639f250caf456a143023c64a6d7"
+      },
+      "fnit.fmri.assets_setup": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/assets_setup.py",
+        "sha256": "ddb854b53abc405c106b13306a9c97c16021c11cf02b649e850e294bba74ac8c"
+      },
+      "fnit.fmri.surface_fmriprep": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/surface_fmriprep.py",
+        "sha256": "f4b5eca407b12b050441f4a05e34e4bc78afec68bff633135b0743990ec612ae"
+      },
+      "fnit.msm.prepare": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/prepare.py",
+        "sha256": "a8f6ca261378768e38a13c53d85d58702a2f4e7f30928e6e2b6b6e1665fd9b11"
+      },
+      "fnit.msm._execution": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/_execution.py",
+        "sha256": "e67d43b972dd690c9ec86081c6d3e4fb783935def4bec8f264ab7d232916beae"
+      },
+      "fnit.msm._spatial": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/_spatial.py",
+        "sha256": "c7319ae9a616dbc2d741a8e8ecb0543cec6ffb7f54914f672f7b6947e6359204"
+      },
+      "fnit.msm._sphere_map": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/_sphere_map.py",
+        "sha256": "51bd19d1c12ef8be3427d4f9ef642dae5591ae8b0e0638b426d89e12173751be"
+      },
+      "fnit.msm._affine": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/_affine.py",
+        "sha256": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e"
+      },
+      "fnit.msm.config": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/config.py",
+        "sha256": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9"
+      },
+      "fnit.msm.msmsulc": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/msmsulc.py",
+        "sha256": "a4ff7112888d645497ddbcc003059a810231d60a60dd9f06602fa7a94601f924"
+      },
+      "fnit.msm.config_msmall": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/config_msmall.py",
+        "sha256": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467"
+      },
+      "fnit.msm.msmall": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/msmall.py",
+        "sha256": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b"
+      },
+      "fnit.msm.features": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/features.py",
+        "sha256": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2"
+      },
+      "fnit.msm": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/msm/__init__.py",
+        "sha256": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067"
+      },
+      "fnit.fmri.derivatives": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/derivatives.py",
+        "sha256": "b7c9e3ed0d8af3fa34a88a640192e0714e6a4895bb43c980a2a4c0db687ff15d"
+      },
+      "fnit.fmri.normalization": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/normalization.py",
+        "sha256": "d3fb613a58833a31f5f2e05e443099202affb7bf4368194775c528e9e3ab4afc"
+      },
+      "fnit.fmri.surface_prepare": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/surface_prepare.py",
+        "sha256": "57bedff1794977436f23ac11ab34f9aa9173dd25c9e0a2733327b7ce33ff7e99"
+      },
+      "fnit.fmri.surface_pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/surface_pipeline.py",
+        "sha256": "7719866bf61bf2edcb247f20b30ac85dce5affa95775996b0a4c77061d28d571"
+      },
+      "fnit.fmri": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fmri/__init__.py",
+        "sha256": "e3f2bb1fe0037087f9b97a246ed92b13d34737e43f9ae5cccd4be824ca1e69aa"
+      },
+      "fnit.dmri_pipeline.bids": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/dmri_pipeline/bids.py",
+        "sha256": "460c430159c3c3efd80a98a931977381959a996c8e7fab43b6f805a15d60afdd"
+      },
+      "fnit.dmri_pipeline.tbss": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/dmri_pipeline/tbss.py",
+        "sha256": "d814d4ab5fdb8e4fcecf4ae3629a9d12957c2143bb957e8893ed73264766086d"
+      },
+      "fnit.dmri_pipeline.pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/dmri_pipeline/pipeline.py",
+        "sha256": "c95465d06f7af97849762c87cbbb19c6a9bc459f76c8ea98fd796e31ac702cb4"
+      },
+      "fnit.dmri_pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/dmri_pipeline/__init__.py",
+        "sha256": "ebb576959a603e9c9ce7dc6ae052397a5a54b603d7b714deed4b40a6960a82cd"
+      },
+      "fnit.connectome.bids": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/connectome/bids.py",
+        "sha256": "654d06ae08943ea0b5298520ef3e9ac4b5c67c9c8752ec32b9d1049eb91079bb"
+      },
+      "fnit.flirt.cli": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/flirt/cli.py",
+        "sha256": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e"
+      },
+      "fnit.mcflirt.cli": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/mcflirt/cli.py",
+        "sha256": "855e192b26ced79517250bb7f406468e614c5da30922772c737f0b70062e08a9"
+      },
+      "fnit.fnirt.standalone": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fnirt/standalone.py",
+        "sha256": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6"
+      },
+      "fnit.fnirt.cli": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/fnirt/cli.py",
+        "sha256": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c"
+      },
+      "fnit.topup._sampling_cuda": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/topup/_sampling_cuda.py",
+        "sha256": "ee19a764849bda80137312ed3ab8f1bf0aaef5e13f852f49f435e511b40d2427"
+      },
+      "fnit.flirt.search": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/flirt/search.py",
+        "sha256": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c"
+      },
+      "fnit.flirt.batched": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/flirt/batched.py",
+        "sha256": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719"
+      },
+      "fnit.flirt._batched_cuda": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/flirt/_batched_cuda.py",
+        "sha256": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74"
+      },
+      "fnit.synthmorph.spatial": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthmorph/spatial.py",
+        "sha256": "2e5e6560d58afbc551b2bf88cfc994bebceb7dd5ae7b1fd55078047aa8aa4fe2"
+      },
+      "fnit.synthmorph.pipeline": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthmorph/pipeline.py",
+        "sha256": "bc3681a7693eb97cf6fddbdb4eb1deb4db343319443f2a92c00ae70383d975cc"
+      },
+      "fnit.synthmorph.fsl_warp": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthmorph/fsl_warp.py",
+        "sha256": "61177712062c536ec31e7e6985d1f7801c8992a1775312a74d058d8dd7124dd4"
+      },
+      "fnit.synthmorph": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthmorph/__init__.py",
+        "sha256": "20d3104475db4687e5823aba415693a694e339def984b0bd9882deea8d62304d"
+      },
+      "fnit.synthmorph.models": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/candidate/src/fnit/synthmorph/models.py",
+        "sha256": "8ff86d8d7afb64d57d5edebc1138f24631d2aab6f47c0f978f53586c80a08cd6"
+      }
+    },
+    "benchmark_sha256": "c1715067883e7e04d9b953e509572227237efd27c712cc9887956d17ad13fe75",
+    "python_executable": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/nvml_monitor_runtime_v1/venv/bin/python",
+      "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153"
+    },
+    "torch_version": "2.5.1",
+    "torch_cuda_version": "11.8",
+    "python_version": "3.11.16",
+    "platform": "Linux-3.10.0-1160.119.1.el7.x86_64-x86_64-with-glibc2.17",
+    "host": "gpucw1",
+    "pid": 78620,
+    "threads": {
+      "torch": 8,
+      "torch_interop": 64,
+      "OMP_NUM_THREADS": "8",
+      "MKL_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "8",
+      "NUMBA_NUM_THREADS": null
+    },
+    "cuda_environment": {
+      "CUDA_VISIBLE_DEVICES": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+      "CUDA_DEVICE_ORDER": null,
+      "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+      "PYTORCH_ALLOC_CONF": null,
+      "PYTORCH_NO_CUDA_MEMORY_CACHING": null
+    },
+    "precision_at_exit": {
+      "matmul_tf32": true,
+      "cudnn_tf32": true,
+      "default_dtype": "torch.float32",
+      "autocast_enabled": false
+    }
+  },
+  "inputs": {
+    "raw/image": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.nii.gz",
+      "exists": true,
+      "size_bytes": 47261862,
+      "sha256": "5d3e180c2d448156999d9d1f93155d455001bb5df1d329800a50a5224391f408"
+    },
+    "raw/bval": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.bval",
+      "exists": true,
+      "size_bytes": 476,
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2"
+    },
+    "raw/bvec": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.bvec",
+      "exists": true,
+      "size_bytes": 2760,
+      "sha256": "30f132b83c77fc456ea4156fcd9fcaed39eeccf72a97462885ea9801238f1c21"
+    },
+    "raw/reverse": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-PA_dwi.nii.gz",
+      "exists": true,
+      "size_bytes": 1147395,
+      "sha256": "48c0c531ec02982d25322aa7f1c96db03d3c2a68040e71e7d4095c9afc37f9bd"
+    },
+    "raw/reverse_bval": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-PA_dwi.bval",
+      "exists": true,
+      "size_bytes": 4,
+      "sha256": "0ccdb5a77ba5bf7687f2565a8ed97dfb9c1af45503c496fb646312239fab5101"
+    },
+    "raw/dataset_description": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/dataset_description.json",
+      "exists": true,
+      "size_bytes": 1209,
+      "sha256": "84185f9c387ae232ddbe87e20b329bacf82b9b5dafe9bde63b64c9bc78bed6f2"
+    },
+    "raw_metadata/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.json": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.json",
+      "exists": true,
+      "size_bytes": 1633,
+      "sha256": "501168c0c993967003d28eaebde750cefc29e8fc55b162e6eb2c370e8ea981b4"
+    },
+    "raw_metadata/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-PA_dwi.json": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-PA_dwi.json",
+      "exists": true,
+      "size_bytes": 1053,
+      "sha256": "842ed0078a5955e79e06402b602d0f3800274e52be7b9f73a121b714058fa6a2"
+    },
+    "prepared/dwi": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/preproc/eddy/data.nii.gz",
+      "exists": true,
+      "size_bytes": 191190475,
+      "sha256": "8187f85a62f71faf366332252a3256562ab07b85b736d50ed9d0845a6833c808"
+    },
+    "prepared/bvals": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/raw/sub-CON09/ses-preop/dwi/sub-CON09_ses-preop_acq-AP_dwi.bval",
+      "exists": true,
+      "size_bytes": 476,
+      "sha256": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2"
+    },
+    "prepared/bvecs": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/preproc/eddy/data.eddy_rotated_bvecs",
+      "exists": true,
+      "size_bytes": 3922,
+      "sha256": "f8dfceaed7b27e0b76c32e8ce3254435a20f6fc0661083552745035baced8ed0"
+    },
+    "anatomy/mri/brain.mgz": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/mri/brain.mgz",
+      "exists": true,
+      "size_bytes": 1435437,
+      "sha256": "2f4c0bbfdba30e01c0f7f0163ce386aacb8d7fdbada8bc952101a2defbe88f7b"
+    },
+    "anatomy/mri/aparc+aseg.mgz": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/mri/aparc+aseg.mgz",
+      "exists": true,
+      "size_bytes": 563463,
+      "sha256": "f9c36f4545074d0e0e9b635350c5f7edb8f187210d6c372aa97b796dc99073e1"
+    },
+    "anatomy/mri/aparc.DKTatlas+aseg.mgz": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/mri/aparc.DKTatlas+aseg.mgz",
+      "exists": true,
+      "size_bytes": 560804,
+      "sha256": "5c1b71cb7bd383c28f51f45226e74c15054d35651907233500d91a8ac0920c52"
+    },
+    "anatomy/mri/aparc.a2009s+aseg.mgz": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/mri/aparc.a2009s+aseg.mgz",
+      "exists": true,
+      "size_bytes": 597300,
+      "sha256": "70d99bd76df7b95eaa2a6031ee07f839ea58adc60aebd01d60858e0987d4be27"
+    },
+    "anatomy/mri/ribbon.mgz": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/mri/ribbon.mgz",
+      "exists": true,
+      "size_bytes": 260832,
+      "sha256": "cfe35380767f70f0cbc48731fa69a470e4b5bac3deda0b1a5b35c4faaf2a4364"
+    },
+    "anatomy/surf/lh.white": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/lh.white",
+      "exists": true,
+      "size_bytes": 5610692,
+      "sha256": "91e9bc7f18648c789f58e9e25f949ec785c89d2748a9490c8da16054428c196b"
+    },
+    "anatomy/surf/rh.white": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/rh.white",
+      "exists": true,
+      "size_bytes": 5696300,
+      "sha256": "21a61e00e8d0d1ad23939d406aefbb92a7c81f442e5d6b77096ce5eaf44a0f8c"
+    },
+    "anatomy/surf/lh.area.pial": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/lh.area.pial",
+      "exists": true,
+      "size_bytes": 623279,
+      "sha256": "7d7af3f91ccb668906740a6a2dab07ada8ef407e97cfa2c361cd59d3d4ecf532"
+    },
+    "anatomy/surf/lh.curv.pial": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/lh.curv.pial",
+      "exists": true,
+      "size_bytes": 623279,
+      "sha256": "3d764abda14df282faae963fb40a82603c88066ce63e9a0aa2054a147a9f2bbe"
+    },
+    "anatomy/surf/lh.pial": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/lh.pial.T1",
+      "exists": true,
+      "size_bytes": 5610692,
+      "sha256": "808fee46741d34229406ee2eb103be8aeebb6ddb92b7a92ad6538ebbde11cef8"
+    },
+    "anatomy/surf/rh.area.pial": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/rh.area.pial",
+      "exists": true,
+      "size_bytes": 632791,
+      "sha256": "2e43832572388ea168a2bfd51fddc9533cad290286cb6031f22e9f1995c6f002"
+    },
+    "anatomy/surf/rh.curv.pial": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/rh.curv.pial",
+      "exists": true,
+      "size_bytes": 632791,
+      "sha256": "f0a870ca6c1da62d1b09290a6cc52673e468a25568c8eb7410e0066e01a8bee4"
+    },
+    "anatomy/surf/rh.pial": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/rh.pial.T1",
+      "exists": true,
+      "size_bytes": 5696300,
+      "sha256": "81a49ff910dd6f07b36867188d6455fbf6efcc7aa0db16899865174fb3509eb8"
+    },
+    "anatomy/surf/lh.fsaverage.sphere.reg": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/lh.sphere.reg",
+      "exists": true,
+      "size_bytes": 5612777,
+      "sha256": "7e172425349a6c35a20629fad8bf5a494fbd99752d0dd2060b69860718af8a9d"
+    },
+    "anatomy/surf/lh.sphere.reg": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/lh.sphere.reg",
+      "exists": true,
+      "size_bytes": 5612777,
+      "sha256": "7e172425349a6c35a20629fad8bf5a494fbd99752d0dd2060b69860718af8a9d"
+    },
+    "anatomy/surf/rh.fsaverage.sphere.reg": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/rh.sphere.reg",
+      "exists": true,
+      "size_bytes": 5698385,
+      "sha256": "3b63de9bfa2ac4ad76ce8d8be61e30a32350a08bbb979785def368fbababe224"
+    },
+    "anatomy/surf/rh.sphere.reg": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/surf/rh.sphere.reg",
+      "exists": true,
+      "size_bytes": 5698385,
+      "sha256": "3b63de9bfa2ac4ad76ce8d8be61e30a32350a08bbb979785def368fbababe224"
+    },
+    "anatomy/label/lh.BA_exvivo.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/lh.BA_exvivo.annot",
+      "exists": true,
+      "size_bytes": 1247158,
+      "sha256": "68217c86ace518f997ba5ed134dd86efa2a173e437c07ffcca4395310e877ccf"
+    },
+    "anatomy/label/lh.BA_exvivo.thresh.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/lh.BA_exvivo.thresh.annot",
+      "exists": true,
+      "size_bytes": 1247263,
+      "sha256": "a903273f95f90c92ad27dddad0871d2fd060ddba1863edfc5af0503ce611f886"
+    },
+    "anatomy/label/lh.aparc.DKTatlas.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/lh.aparc.DKTatlas.annot",
+      "exists": true,
+      "size_bytes": 1248041,
+      "sha256": "c2bb085868bf5f00822ac24367a800807ab6384b5c72b964c7bfd95b742b9a23"
+    },
+    "anatomy/label/lh.aparc.a2009s.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/lh.aparc.a2009s.annot",
+      "exists": true,
+      "size_bytes": 1249784,
+      "sha256": "1d1817cb13fe1d0ad9c83a9f19bb31119f9563133f9cd1648587b06686271f8f"
+    },
+    "anatomy/label/lh.aparc.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/lh.aparc.annot",
+      "exists": true,
+      "size_bytes": 1248041,
+      "sha256": "e62942e2b0e17fc5588ab9da3b31be3c973a27b74a1420db9ce6075fd7884c50"
+    },
+    "anatomy/label/lh.mpm.vpnl.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/lh.mpm.vpnl.annot",
+      "exists": true,
+      "size_bytes": 1246923,
+      "sha256": "244c974f64085e7c963454ef73f08c08bf07d99eb7518401a96958490df54d70"
+    },
+    "anatomy/label/rh.BA_exvivo.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/rh.BA_exvivo.annot",
+      "exists": true,
+      "size_bytes": 1266182,
+      "sha256": "531f6786446f1943d3c1f194056fd2a2d3fb4ec2a8031eb8c393e8ec9cc2ef73"
+    },
+    "anatomy/label/rh.BA_exvivo.thresh.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/rh.BA_exvivo.thresh.annot",
+      "exists": true,
+      "size_bytes": 1266287,
+      "sha256": "b307a2600b85afa9901967be2c64ea6f4e505c4db68f8154f9934da21d3fb8e0"
+    },
+    "anatomy/label/rh.aparc.DKTatlas.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/rh.aparc.DKTatlas.annot",
+      "exists": true,
+      "size_bytes": 1267065,
+      "sha256": "770dda236eb2e91006f43bbebaa781449aff823a9809f16c09e66556254de142"
+    },
+    "anatomy/label/rh.aparc.a2009s.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/rh.aparc.a2009s.annot",
+      "exists": true,
+      "size_bytes": 1268808,
+      "sha256": "22f630035fed34a1ed13efab948cb32f5396149cad5e5b6c39d3f790760fb49d"
+    },
+    "anatomy/label/rh.aparc.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/rh.aparc.annot",
+      "exists": true,
+      "size_bytes": 1267065,
+      "sha256": "299ed4fb5b125226e7b221789714c8ca4c691a1c88d8d9d48fa27320ce98cd56"
+    },
+    "anatomy/label/rh.mpm.vpnl.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_candidate_raw_anatomy_prep_v3/candidate/sub-CON09/freesurfer/sub-CON09_ses-preop/label/rh.mpm.vpnl.annot",
+      "exists": true,
+      "size_bytes": 1265947,
+      "sha256": "f3aa52edf249818d5c4ddd4c76f3ea8fb9d4acd725210ed54215ca0b7a745e54"
+    },
+    "mni-template": {
+      "path": "/cwStorage/home/gongwk/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz",
+      "exists": true,
+      "size_bytes": 414185,
+      "sha256": "09c925ad165dfbe6b41b572876d67e9bbf8c5e26517e7817f9b43a8256227f53"
+    },
+    "synthmorph-weights/WMH-SynthSeg_v10_231110.pth": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/WMH-SynthSeg_v10_231110.pth",
+      "exists": true,
+      "size_bytes": 790531383,
+      "sha256": "0ece39dd651357aa95222fc4d45fa32d00f11e763d2583cae3f869989ce35988"
+    },
+    "synthmorph-weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+      "exists": true,
+      "size_bytes": 3296904,
+      "sha256": "9be55798498331f655acd75d4f0cd5036463e0f497bbb239be0167d6a9129a07"
+    },
+    "synthmorph-weights/mca-dura.both-lh.nstd21.fhs.h5": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/mca-dura.both-lh.nstd21.fhs.h5",
+      "exists": true,
+      "size_bytes": 3294856,
+      "sha256": "da6a7b994e3e804cc3dc0e98e965c28a802ddcd38fd9b5c680d75cef285657b0"
+    },
+    "synthmorph-weights/synthmorph.affine.2.h5": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/synthmorph.affine.2.h5",
+      "exists": true,
+      "size_bytes": 51455312,
+      "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+    },
+    "synthmorph-weights/synthmorph.deform.3.h5": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/synthmorph.deform.3.h5",
+      "exists": true,
+      "size_bytes": 3508630424,
+      "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"
+    },
+    "synthmorph-weights/synthmorph.rigid.1.h5": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/synthmorph.rigid.1.h5",
+      "exists": true,
+      "size_bytes": 51656152,
+      "sha256": "284c145fce47e98ecf3fdeda2163f646ac3ebb0240e87dd50d71d879f4d5b3af"
+    },
+    "synthmorph-weights/synthseg_2.0.h5": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/synthseg_2.0.h5",
+      "exists": true,
+      "size_bytes": 53079152,
+      "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+    },
+    "synthmorph-weights/synthstrip.1.pt": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/synthstrip.1.pt",
+      "exists": true,
+      "size_bytes": 30851709,
+      "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+    },
+    "synthmorph-weights/synthstrip.nocsf.1.pt": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/synthstrip.nocsf.1.pt",
+      "exists": true,
+      "size_bytes": 30851709,
+      "sha256": "62bf01137c45b5f0cc04d59dbaed5b9ac138b3f25b766c062a7c1a0d696ecb28"
+    },
+    "synthmorph-weights/vsinus.no-sp.m.all.nstd10-070.h5": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights/vsinus.no-sp.m.all.nstd10-070.h5",
+      "exists": true,
+      "size_bytes": 3296904,
+      "sha256": "3d78948741306a31337468c86be55821913edb73855116fcb063b61135b90f12"
+    },
+    "atlas-templates-dir/Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii",
+      "exists": true,
+      "size_bytes": 621968,
+      "sha256": "b7053a1852d75cd5999a1961149011153e2bb51864c39319f1b988d48c23db6d"
+    },
+    "atlas-templates-dir/Tian_Subcortex_S1_3T.nii.gz": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S1_3T.nii.gz",
+      "exists": true,
+      "size_bytes": 7442,
+      "sha256": "5a6ab101308a7d8582fe8335c97a41296974656aaae8efa6833c7796c0061e08"
+    },
+    "atlas-templates-dir/Tian_Subcortex_S1_3T_label.txt": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S1_3T_label.txt",
+      "exists": true,
+      "size_bytes": 113,
+      "sha256": "f8dc7acae3483952d41d49b9145b4d13c5bc28da1c410114a561a5efda55db8c"
+    },
+    "atlas-templates-dir/Tian_Subcortex_S4_3T.nii.gz": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S4_3T.nii.gz",
+      "exists": true,
+      "size_bytes": 8717,
+      "sha256": "15930ca9cf9551a4b34875589588d0c24c0a704f0a14eb983c2b05131c3976e1"
+    },
+    "atlas-templates-dir/Tian_Subcortex_S4_3T_label.txt": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/Tian_Subcortex_S4_3T_label.txt",
+      "exists": true,
+      "size_bytes": 591,
+      "sha256": "cf83c88cddc3254ced389be1788cd172db4a01cb00f205fdd428804d994b930b"
+    },
+    "atlas-templates-dir/labels/Schaefer7n200p.ColorLUT.txt": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/labels/Schaefer7n200p.ColorLUT.txt",
+      "exists": true,
+      "size_bytes": 8538,
+      "sha256": "5635f2bd0efe386fe8949bcd2bb6d50e53c0c91a7633eeb62e0bbecd4da3d0d8"
+    },
+    "atlas-templates-dir/lh.Schaefer2018_1000Parcels_7Networks_order.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/lh.Schaefer2018_1000Parcels_7Networks_order.annot",
+      "exists": true,
+      "size_bytes": 1336179,
+      "sha256": "ae529bddcb84b3ea8c5d7fdf577326a1e4922c9e0439ddf20e4052cf0497681b"
+    },
+    "atlas-templates-dir/lh.Schaefer2018_200Parcels_7Networks_order.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/lh.Schaefer2018_200Parcels_7Networks_order.annot",
+      "exists": true,
+      "size_bytes": 1315895,
+      "sha256": "c225937c31584c74d3e7c8fba7c17916ce4e730faa542ee61659041db136ac87"
+    },
+    "atlas-templates-dir/lh.Schaefer2018_500Parcels_7Networks_order.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/lh.Schaefer2018_500Parcels_7Networks_order.annot",
+      "exists": true,
+      "size_bytes": 1323436,
+      "sha256": "198b498889470f5efc2d55ebb1a056e3a44a4015ddda6d96d30141b684342edb"
+    },
+    "atlas-templates-dir/rh.Schaefer2018_1000Parcels_7Networks_order.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/rh.Schaefer2018_1000Parcels_7Networks_order.annot",
+      "exists": true,
+      "size_bytes": 1336303,
+      "sha256": "f0c93933c447616aff151d312074ee82189cf5a6de2f889cbbc186c2f3f7b097"
+    },
+    "atlas-templates-dir/rh.Schaefer2018_200Parcels_7Networks_order.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/rh.Schaefer2018_200Parcels_7Networks_order.annot",
+      "exists": true,
+      "size_bytes": 1315902,
+      "sha256": "5439cd1fb913cbb76366f9590b5733efcb7adf9cde25413f6e0b681ff0abdcf8"
+    },
+    "atlas-templates-dir/rh.Schaefer2018_500Parcels_7Networks_order.annot": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/atlas_seven_reference_20260929/data/templates/atlases/rh.Schaefer2018_500Parcels_7Networks_order.annot",
+      "exists": true,
+      "size_bytes": 1323575,
+      "sha256": "ee8951c4375feb922131a45121d949f274de976f41c7b79d081615978192ecb7"
+    }
+  },
+  "outputs": {
+    "status": "complete",
+    "files": {
+      "five_tissue_dwi_world.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/five_tissue_dwi_world.nii.gz",
+        "exists": true,
+        "size_bytes": 2765313,
+        "sha256": "4e5200454db65d3c7846e73cca5853b574cc7dd0050c103c62fbe755849fb7f8"
+      },
+      "gmwmi_dwi_world.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/gmwmi_dwi_world.nii.gz",
+        "exists": true,
+        "size_bytes": 898886,
+        "sha256": "efa308814833fa76c95a0b3e7dfdc17e32a62372e5d9433c7c0d8fca9f079831"
+      },
+      "fa_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/fa_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 486262,
+        "sha256": "7d1faa8fa7e4d1addea32181bb94caa414fdbeb78dfc5aca83df279aa5236861"
+      },
+      "brain_mask_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/brain_mask_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 18883,
+        "sha256": "0f16b450e4536e70c9699a4b5f69ed9308910f68c9a2fbae2a02eaabf1c589fa"
+      },
+      "dwi_to_t1_world.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/dwi_to_t1_world.csv",
+        "exists": true,
+        "size_bytes": 163,
+        "sha256": "2e6bd686468c6585e8160f4c2847b92559dc33a921d4f69cbec5880bff3f5dda"
+      },
+      "dataset_description.json": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/dataset_description.json",
+        "exists": true,
+        "size_bytes": 298,
+        "sha256": "2fdbde6e84ade2eb355e54fb24d181388fdde1605e31c58cde27c5e0b08d1e23"
+      },
+      "run_state.json": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/run_state.json",
+        "exists": true,
+        "size_bytes": 8161,
+        "sha256": "b9baa2ae16d7aa3ab1b05d3e996949de9c88e54e21ce469ac28f819b3840251a"
+      },
+      "atlases/fs-aparc/connectome_count.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/fs-aparc/connectome_count.csv",
+        "exists": true,
+        "size_bytes": 14572,
+        "sha256": "0e2cc8c08b5736c5fcc0d7d939c35c30cf3c5a376dfac1aa3498adc4ceff0df4"
+      },
+      "atlases/fs-aparc/connectome_sift2_fbc.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/fs-aparc/connectome_sift2_fbc.csv",
+        "exists": true,
+        "size_bytes": 30024,
+        "sha256": "519588905375d6388733208e2eaa01b87c2e903e62705f0d6811873c9a1bd455"
+      },
+      "atlases/fs-aparc/connectome_mean_length.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/fs-aparc/connectome_mean_length.csv",
+        "exists": true,
+        "size_bytes": 29535,
+        "sha256": "ef5cbb909a4eaf6563f89deae8f9c1f06ce0fbff293ed7a03b779d66be1003a1"
+      },
+      "atlases/fs-aparc/connectome_mean_fa.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/fs-aparc/connectome_mean_fa.csv",
+        "exists": true,
+        "size_bytes": 31274,
+        "sha256": "ed47eefd8745f0172ba08ad0a24115b1308fb2ade7ed518386ef6bde5412269c"
+      },
+      "atlases/fs-aparc/atlas_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/fs-aparc/atlas_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 67034,
+        "sha256": "9af8495fc59a5958cab34ffd9c79bee362c6a6c27e525988ab548befffbc5edc"
+      },
+      "atlases/fs-aparc/region_labels.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/fs-aparc/region_labels.csv",
+        "exists": true,
+        "size_bytes": 243,
+        "sha256": "4099382a64798a400d55f6217eb6b1ccaa5949c50b40cb0f439043faf882a5a7"
+      },
+      "atlases/fs-aparc/nodes.tsv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/fs-aparc/nodes.tsv",
+        "exists": true,
+        "size_bytes": 2603,
+        "sha256": "ef0633831a8a0b299d29522f2f1bb21ca76aafdf6fd1c75e4b116413cfab3fcf"
+      },
+      "atlases/aparc+tian-s1/connectome_count.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc+tian-s1/connectome_count.csv",
+        "exists": true,
+        "size_bytes": 14572,
+        "sha256": "ba3dbe84b2dac14e1fc4ab0ca9e24cae599d44f438327f4c56558cb195a8e3f0"
+      },
+      "atlases/aparc+tian-s1/connectome_sift2_fbc.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc+tian-s1/connectome_sift2_fbc.csv",
+        "exists": true,
+        "size_bytes": 30386,
+        "sha256": "5efd1df95aa26ff40646bf7df9ab932f427fcba4ad8717fe12205a286459b250"
+      },
+      "atlases/aparc+tian-s1/connectome_mean_length.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc+tian-s1/connectome_mean_length.csv",
+        "exists": true,
+        "size_bytes": 29876,
+        "sha256": "ed93074b7daa3542eb0024d14e5a95d23ec7bcce1b3d30f19ca8bbe38582a023"
+      },
+      "atlases/aparc+tian-s1/connectome_mean_fa.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc+tian-s1/connectome_mean_fa.csv",
+        "exists": true,
+        "size_bytes": 31644,
+        "sha256": "8e9d6c7419a25294e8ab38d013f7dbe475ad361103b61a0e6265ade0700ac586"
+      },
+      "atlases/aparc+tian-s1/atlas_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 63089,
+        "sha256": "47af6368878f41f13cd5f543007f2135d6d0ea27be7b907fc1d0b9432e028b2f"
+      },
+      "atlases/aparc+tian-s1/region_labels.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc+tian-s1/region_labels.csv",
+        "exists": true,
+        "size_bytes": 243,
+        "sha256": "4099382a64798a400d55f6217eb6b1ccaa5949c50b40cb0f439043faf882a5a7"
+      },
+      "atlases/aparc+tian-s1/nodes.tsv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc+tian-s1/nodes.tsv",
+        "exists": true,
+        "size_bytes": 2191,
+        "sha256": "d0d61d0bd8f978de82b4f41c7b819b8bd404ebd0d462c7eb9b4e83e97562ae70"
+      },
+      "atlases/aparc.a2009s+tian-s1/connectome_count.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc.a2009s+tian-s1/connectome_count.csv",
+        "exists": true,
+        "size_bytes": 55650,
+        "sha256": "010b384bdf760173e8476ded13c7caf1f011209f3a4233c66d70ed6ac956418e"
+      },
+      "atlases/aparc.a2009s+tian-s1/connectome_sift2_fbc.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc.a2009s+tian-s1/connectome_sift2_fbc.csv",
+        "exists": true,
+        "size_bytes": 87390,
+        "sha256": "a673c7fa02874956e71be689179b1d02952ed3db46617e4b2a5a7bcf2eb06d28"
+      },
+      "atlases/aparc.a2009s+tian-s1/connectome_mean_length.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc.a2009s+tian-s1/connectome_mean_length.csv",
+        "exists": true,
+        "size_bytes": 86147,
+        "sha256": "168d4925f66beb0bce8aa6c90036000edea44553c8016e5513c0c6ed8cc1d0b2"
+      },
+      "atlases/aparc.a2009s+tian-s1/connectome_mean_fa.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc.a2009s+tian-s1/connectome_mean_fa.csv",
+        "exists": true,
+        "size_bytes": 89588,
+        "sha256": "a845f88db5bcd47b063df84d98970e6e495e28fec131316284dc292333134be8"
+      },
+      "atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 65527,
+        "sha256": "3d861dd1e1ce95ae5fd10664cc5afc76f433be70424e935640e09010044cf327"
+      },
+      "atlases/aparc.a2009s+tian-s1/region_labels.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc.a2009s+tian-s1/region_labels.csv",
+        "exists": true,
+        "size_bytes": 556,
+        "sha256": "fabfe88185793439c3d44c03106d67121a2337a45f64e3e0b4c71b6615b81bb6"
+      },
+      "atlases/aparc.a2009s+tian-s1/nodes.tsv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/aparc.a2009s+tian-s1/nodes.tsv",
+        "exists": true,
+        "size_bytes": 5075,
+        "sha256": "4a33b8ad2a8684b6a1e0c47c95cab9cc5b82c1d65b32b5254339a2185e9cf205"
+      },
+      "atlases/glasser+tian-s1/connectome_count.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s1/connectome_count.csv",
+        "exists": true,
+        "size_bytes": 283162,
+        "sha256": "1b4cd04ce23a4ea232a1983f1ac49d2efef75338d1ed7f24695126e4beb82588"
+      },
+      "atlases/glasser+tian-s1/connectome_sift2_fbc.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s1/connectome_sift2_fbc.csv",
+        "exists": true,
+        "size_bytes": 340679,
+        "sha256": "21f30043b48456d3e83ead32ba5747351629f0680b16dc16c2a43c373cea1b0f"
+      },
+      "atlases/glasser+tian-s1/connectome_mean_length.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s1/connectome_mean_length.csv",
+        "exists": true,
+        "size_bytes": 337913,
+        "sha256": "fa1c9b4592ee9e6a3384fbf2e0c8441d55f4f183a4b20f857a4252bcaa67234b"
+      },
+      "atlases/glasser+tian-s1/connectome_mean_fa.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s1/connectome_mean_fa.csv",
+        "exists": true,
+        "size_bytes": 344197,
+        "sha256": "c1b38333cacd1dc34b16185c347f7952beae14a63fd3d27eefd1ad20fe14205d"
+      },
+      "atlases/glasser+tian-s1/atlas_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 67926,
+        "sha256": "175e58ab778174e324e8dbba890ee09018ae7c020da0890d577fda8a0e4d9d7c"
+      },
+      "atlases/glasser+tian-s1/region_labels.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s1/region_labels.csv",
+        "exists": true,
+        "size_bytes": 1396,
+        "sha256": "bf30f3d7bf8a594b2017174f3040a603fee29ac57c01ee795051ef69af532deb"
+      },
+      "atlases/glasser+tian-s1/nodes.tsv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s1/nodes.tsv",
+        "exists": true,
+        "size_bytes": 7360,
+        "sha256": "0c8788aa6e9c273b837667739744de6ddbb438d05c50ea4dc300902c84936986"
+      },
+      "atlases/glasser+tian-s4/connectome_count.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s4/connectome_count.csv",
+        "exists": true,
+        "size_bytes": 343169,
+        "sha256": "5933c864ebadbb913daf3ed04b03be520e5e1ea10a4b8bb06c89a496f9e0155b"
+      },
+      "atlases/glasser+tian-s4/connectome_sift2_fbc.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s4/connectome_sift2_fbc.csv",
+        "exists": true,
+        "size_bytes": 409638,
+        "sha256": "73760d09e4d9e0715aa673960f4e5d77e4dcb3e52b4fe5c4f5975747f0d76e18"
+      },
+      "atlases/glasser+tian-s4/connectome_mean_length.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s4/connectome_mean_length.csv",
+        "exists": true,
+        "size_bytes": 406193,
+        "sha256": "884428a4c3e00005cdfa64b6ff317b991a7155ee08982978d1b6f146c026230a"
+      },
+      "atlases/glasser+tian-s4/connectome_mean_fa.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s4/connectome_mean_fa.csv",
+        "exists": true,
+        "size_bytes": 413365,
+        "sha256": "ba600a782395882e77765e0de48b4a247d5aa1ac44b5587381fd71dfda7831fa"
+      },
+      "atlases/glasser+tian-s4/atlas_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 68573,
+        "sha256": "c563eb179a8d81acc995a77d5488f8ad0757731962d9da6a48ab9e51ec74a80f"
+      },
+      "atlases/glasser+tian-s4/region_labels.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s4/region_labels.csv",
+        "exists": true,
+        "size_bytes": 1548,
+        "sha256": "678b1f9b587041672caee97fa2eb53abbc728dca7121efcdabc740fbb4b23884"
+      },
+      "atlases/glasser+tian-s4/nodes.tsv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/glasser+tian-s4/nodes.tsv",
+        "exists": true,
+        "size_bytes": 8180,
+        "sha256": "519575cebbd4bc39290670d5605c847e0ce41c01637c9af0eefb1ea05e0db297"
+      },
+      "atlases/schaefer200+tian-s1/connectome_count.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer200+tian-s1/connectome_count.csv",
+        "exists": true,
+        "size_bytes": 93840,
+        "sha256": "988ed8d5e5113131a4eb224da4e8edba34214382f38637147e15a94f6ea8494b"
+      },
+      "atlases/schaefer200+tian-s1/connectome_sift2_fbc.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer200+tian-s1/connectome_sift2_fbc.csv",
+        "exists": true,
+        "size_bytes": 134441,
+        "sha256": "acbdcf5616219315acc611fa6b1c0a87a222da6ff06535f65e6f10a2cb680576"
+      },
+      "atlases/schaefer200+tian-s1/connectome_mean_length.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer200+tian-s1/connectome_mean_length.csv",
+        "exists": true,
+        "size_bytes": 132694,
+        "sha256": "9e5efdb26f6dc74603f3497ba9d99c6ecc35985103deb3f3e4a23be5639bec3f"
+      },
+      "atlases/schaefer200+tian-s1/connectome_mean_fa.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer200+tian-s1/connectome_mean_fa.csv",
+        "exists": true,
+        "size_bytes": 137083,
+        "sha256": "38873fec1fc03ab76612551935b9fd1f36cf4e83e5637bc4ffe53462b9cf5102"
+      },
+      "atlases/schaefer200+tian-s1/atlas_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 64937,
+        "sha256": "a4c9548c82c61417cc2f9219d75c7349a27667a68f2dac587d87ab368e84cf2f"
+      },
+      "atlases/schaefer200+tian-s1/region_labels.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer200+tian-s1/region_labels.csv",
+        "exists": true,
+        "size_bytes": 756,
+        "sha256": "00a6c2024eb0b68e9ce78f62e397ef67a8ba0efe53b4aa2cc5850563d525faeb"
+      },
+      "atlases/schaefer200+tian-s1/nodes.tsv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer200+tian-s1/nodes.tsv",
+        "exists": true,
+        "size_bytes": 7347,
+        "sha256": "20be82c35787c186705ba6ba855e260f3461be86f2dc419f9925d3bdaf6f0987"
+      },
+      "atlases/schaefer500+tian-s4/connectome_count.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer500+tian-s4/connectome_count.csv",
+        "exists": true,
+        "size_bytes": 614139,
+        "sha256": "a59b949883a64c1c06ae710278b153e1fedc8c8f3cc6cab2332301b8253ddfda"
+      },
+      "atlases/schaefer500+tian-s4/connectome_sift2_fbc.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer500+tian-s4/connectome_sift2_fbc.csv",
+        "exists": true,
+        "size_bytes": 696238,
+        "sha256": "fd842969e6275c39b9773e0569cf6d9dfe1cb29b058720596d4c063b23e0b98c"
+      },
+      "atlases/schaefer500+tian-s4/connectome_mean_length.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer500+tian-s4/connectome_mean_length.csv",
+        "exists": true,
+        "size_bytes": 691969,
+        "sha256": "060105ce3ab00342f9fb9b512522c64b468fe4697086a574a01c4fe3a3418692"
+      },
+      "atlases/schaefer500+tian-s4/connectome_mean_fa.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer500+tian-s4/connectome_mean_fa.csv",
+        "exists": true,
+        "size_bytes": 700702,
+        "sha256": "16599ceca1ba468473bba59f16f9d49669cf798edfbb9dc31e93f3577db25a19"
+      },
+      "atlases/schaefer500+tian-s4/atlas_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 69108,
+        "sha256": "e51a871d6f5fdb7378a43a60590128d260ce35d19aaf177906a846cb7b93cc55"
+      },
+      "atlases/schaefer500+tian-s4/region_labels.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer500+tian-s4/region_labels.csv",
+        "exists": true,
+        "size_bytes": 2108,
+        "sha256": "603f07d2f9ef8d1f5f9812479f12f941c2b28e5af4b0b9851992522a0bdf0df6"
+      },
+      "atlases/schaefer500+tian-s4/nodes.tsv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer500+tian-s4/nodes.tsv",
+        "exists": true,
+        "size_bytes": 19181,
+        "sha256": "d35db55c6de1f3038ecb2d6e2ec81c81f3046ec5619dcd699d782795878d09e7"
+      },
+      "atlases/schaefer1000+tian-s4/connectome_count.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer1000+tian-s4/connectome_count.csv",
+        "exists": true,
+        "size_bytes": 2221992,
+        "sha256": "24280c28d337c8b54fdb5dbedab40a0fc82e496f95bb47098eb4426637adf489"
+      },
+      "atlases/schaefer1000+tian-s4/connectome_sift2_fbc.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer1000+tian-s4/connectome_sift2_fbc.csv",
+        "exists": true,
+        "size_bytes": 2331461,
+        "sha256": "2431a4f9a9cc63100297aab92cbf84094900f1a7c91eceaa4fcb074b0d7329b1"
+      },
+      "atlases/schaefer1000+tian-s4/connectome_mean_length.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer1000+tian-s4/connectome_mean_length.csv",
+        "exists": true,
+        "size_bytes": 2325156,
+        "sha256": "144008c7c12b9ac2ebd28ad96bd62f8be1de56bdc31876b3641ef6cee9ad52fe"
+      },
+      "atlases/schaefer1000+tian-s4/connectome_mean_fa.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer1000+tian-s4/connectome_mean_fa.csv",
+        "exists": true,
+        "size_bytes": 2336758,
+        "sha256": "262540c532c89427a895adbef0b726d7aeb4094de0833cf3500fbab116745be0"
+      },
+      "atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+        "exists": true,
+        "size_bytes": 73068,
+        "sha256": "c861f759e58e3d9f17b587753d1827c408f092e515d72af39949b31ed21e70ac"
+      },
+      "atlases/schaefer1000+tian-s4/region_labels.csv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer1000+tian-s4/region_labels.csv",
+        "exists": true,
+        "size_bytes": 4163,
+        "sha256": "b59dcc1adcdc03deed48e3b1d7a7997b3c38171122e367cb0596aa985aa5b0dd"
+      },
+      "atlases/schaefer1000+tian-s4/nodes.tsv": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1/candidate/sub-CON09/connectome/atlases/schaefer1000+tian-s4/nodes.tsv",
+        "exists": true,
+        "size_bytes": 37706,
+        "sha256": "425736247c11afbf956917f8c2405c3ce294685b19fba398092195a14d7babf9"
+      }
+    },
+    "atlases": {
+      "fs-aparc": {
+        "nodes": 84,
+        "atlas_shape": [
+          96,
+          96,
+          60
+        ],
+        "atlas_affine": [
+          [
+            -2.4986023902893066,
+            8.205249457660102e-08,
+            0.08358549326658249,
+            122.39824676513672
+          ],
+          [
+            -0.014041443355381489,
+            2.4644718170166016,
+            -0.41974008083343506,
+            -96.96714782714844
+          ],
+          [
+            0.08239764720201492,
+            0.4199748933315277,
+            2.4630937576293945,
+            -95.39765167236328
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "node_table_rows_match": true,
+        "matrices": {
+          "count": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "sift2_fbc": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_length": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_fa": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          }
+        }
+      },
+      "aparc+tian-s1": {
+        "nodes": 84,
+        "atlas_shape": [
+          96,
+          96,
+          60
+        ],
+        "atlas_affine": [
+          [
+            -2.4986023902893066,
+            8.205249457660102e-08,
+            0.08358549326658249,
+            122.39824676513672
+          ],
+          [
+            -0.014041443355381489,
+            2.4644718170166016,
+            -0.41974008083343506,
+            -96.96714782714844
+          ],
+          [
+            0.08239764720201492,
+            0.4199748933315277,
+            2.4630937576293945,
+            -95.39765167236328
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "node_table_rows_match": true,
+        "matrices": {
+          "count": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "sift2_fbc": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_length": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_fa": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          }
+        }
+      },
+      "aparc.a2009s+tian-s1": {
+        "nodes": 166,
+        "atlas_shape": [
+          96,
+          96,
+          60
+        ],
+        "atlas_affine": [
+          [
+            -2.4986023902893066,
+            8.205249457660102e-08,
+            0.08358549326658249,
+            122.39824676513672
+          ],
+          [
+            -0.014041443355381489,
+            2.4644718170166016,
+            -0.41974008083343506,
+            -96.96714782714844
+          ],
+          [
+            0.08239764720201492,
+            0.4199748933315277,
+            2.4630937576293945,
+            -95.39765167236328
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "node_table_rows_match": true,
+        "matrices": {
+          "count": {
+            "shape": [
+              166,
+              166
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "sift2_fbc": {
+            "shape": [
+              166,
+              166
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_length": {
+            "shape": [
+              166,
+              166
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_fa": {
+            "shape": [
+              166,
+              166
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          }
+        }
+      },
+      "glasser+tian-s1": {
+        "nodes": 376,
+        "atlas_shape": [
+          96,
+          96,
+          60
+        ],
+        "atlas_affine": [
+          [
+            -2.4986023902893066,
+            8.205249457660102e-08,
+            0.08358549326658249,
+            122.39824676513672
+          ],
+          [
+            -0.014041443355381489,
+            2.4644718170166016,
+            -0.41974008083343506,
+            -96.96714782714844
+          ],
+          [
+            0.08239764720201492,
+            0.4199748933315277,
+            2.4630937576293945,
+            -95.39765167236328
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "node_table_rows_match": true,
+        "matrices": {
+          "count": {
+            "shape": [
+              376,
+              376
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "sift2_fbc": {
+            "shape": [
+              376,
+              376
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_length": {
+            "shape": [
+              376,
+              376
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_fa": {
+            "shape": [
+              376,
+              376
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          }
+        }
+      },
+      "glasser+tian-s4": {
+        "nodes": 414,
+        "atlas_shape": [
+          96,
+          96,
+          60
+        ],
+        "atlas_affine": [
+          [
+            -2.4986023902893066,
+            8.205249457660102e-08,
+            0.08358549326658249,
+            122.39824676513672
+          ],
+          [
+            -0.014041443355381489,
+            2.4644718170166016,
+            -0.41974008083343506,
+            -96.96714782714844
+          ],
+          [
+            0.08239764720201492,
+            0.4199748933315277,
+            2.4630937576293945,
+            -95.39765167236328
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "node_table_rows_match": true,
+        "matrices": {
+          "count": {
+            "shape": [
+              414,
+              414
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "sift2_fbc": {
+            "shape": [
+              414,
+              414
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_length": {
+            "shape": [
+              414,
+              414
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_fa": {
+            "shape": [
+              414,
+              414
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          }
+        }
+      },
+      "schaefer200+tian-s1": {
+        "nodes": 216,
+        "atlas_shape": [
+          96,
+          96,
+          60
+        ],
+        "atlas_affine": [
+          [
+            -2.4986023902893066,
+            8.205249457660102e-08,
+            0.08358549326658249,
+            122.39824676513672
+          ],
+          [
+            -0.014041443355381489,
+            2.4644718170166016,
+            -0.41974008083343506,
+            -96.96714782714844
+          ],
+          [
+            0.08239764720201492,
+            0.4199748933315277,
+            2.4630937576293945,
+            -95.39765167236328
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "node_table_rows_match": true,
+        "matrices": {
+          "count": {
+            "shape": [
+              216,
+              216
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "sift2_fbc": {
+            "shape": [
+              216,
+              216
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_length": {
+            "shape": [
+              216,
+              216
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_fa": {
+            "shape": [
+              216,
+              216
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          }
+        }
+      },
+      "schaefer500+tian-s4": {
+        "nodes": 554,
+        "atlas_shape": [
+          96,
+          96,
+          60
+        ],
+        "atlas_affine": [
+          [
+            -2.4986023902893066,
+            8.205249457660102e-08,
+            0.08358549326658249,
+            122.39824676513672
+          ],
+          [
+            -0.014041443355381489,
+            2.4644718170166016,
+            -0.41974008083343506,
+            -96.96714782714844
+          ],
+          [
+            0.08239764720201492,
+            0.4199748933315277,
+            2.4630937576293945,
+            -95.39765167236328
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "node_table_rows_match": true,
+        "matrices": {
+          "count": {
+            "shape": [
+              554,
+              554
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "sift2_fbc": {
+            "shape": [
+              554,
+              554
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_length": {
+            "shape": [
+              554,
+              554
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_fa": {
+            "shape": [
+              554,
+              554
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          }
+        }
+      },
+      "schaefer1000+tian-s4": {
+        "nodes": 1054,
+        "atlas_shape": [
+          96,
+          96,
+          60
+        ],
+        "atlas_affine": [
+          [
+            -2.4986023902893066,
+            8.205249457660102e-08,
+            0.08358549326658249,
+            122.39824676513672
+          ],
+          [
+            -0.014041443355381489,
+            2.4644718170166016,
+            -0.41974008083343506,
+            -96.96714782714844
+          ],
+          [
+            0.08239764720201492,
+            0.4199748933315277,
+            2.4630937576293945,
+            -95.39765167236328
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "node_table_rows_match": true,
+        "matrices": {
+          "count": {
+            "shape": [
+              1054,
+              1054
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "sift2_fbc": {
+            "shape": [
+              1054,
+              1054
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_length": {
+            "shape": [
+              1054,
+              1054
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          },
+          "mean_fa": {
+            "shape": [
+              1054,
+              1054
+            ],
+            "finite": true,
+            "symmetric": true,
+            "shape_matches_nodes": true
+          }
+        }
+      }
+    },
+    "scope": "normal CLI output completeness and finite symmetric matrix geometry; does not establish numerical equivalence or scientific validity"
+  },
+  "hash_timing_scope": "source/input/output/checkpoint hashing and output inspections happen after the recorded runtime; the external cohort manifest must freeze source inputs before execution",
+  "memory_budget": {
+    "limit_bytes": 20000000000,
+    "criterion": "strictly_less",
+    "allocated_observed_below_limit": true,
+    "reserved_observed_below_limit": true,
+    "allocator_observed_below_limit": true,
+    "process_tree_sampled_below_limit": true,
+    "continuous_process_tree_bound_verified": false,
+    "note": "allocator and sampled driver peaks have distinct scopes; missing samples or gaps do not prove a strict continuous whole-pipeline memory bound"
+  }
+}
