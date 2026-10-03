@@ -88,6 +88,16 @@ python validation/connectome/accuracy_20261003/root/compare_raw_components.py \
 
 `--case-id` 与 `--version` 可以重复。只有 `baseline` 和 `candidate` 两种版本。依赖为主页 Conda 已包含的 NumPy/nibabel；比较过程关闭 GPU 即可运行。
 
+### CPU 后台控制器
+
+`control_raw_components.py` 是本轮私有验证控制器，源码 SHA 为 `9499c20c21b313a008e115b4b25df413638fcfd648d7d1ac14e6b3828d15b999`。它读取同一冻结配置，按实际计划处理十例 candidate 和两个配对 baseline；每 45 秒检查完成状态，不运行 MRI 求解器。实际完成后才调用上面的比较器，并核对 helper/configuration SHA、原 producer 完成行及成功报告 SHA。
+
+本轮 CON01 baseline 的 v2 原报告复用；只复读其原报告、GPU/wall receipt 和全部 1,319 个绑定文件 SHA，不重新执行 MRI 计算。其它完成的组合各有独立 `results/<version>/<case>/components.json` 与 `receipts/<version>/<case>`，保存实际命令、CPU 环境、stdout/stderr、receipt 和 summary SHA。未完成或失败的 producer 保持 `not_assessed`，不读取 MRI 数组，不填结果。某次比较器自身失败为 `analysis_failed`，保留日志并不覆盖失败目录。
+
+控制器状态在新 namespace `root_component_analysis_v1/status.json`。只有十例 candidate 的实际成功报告、原完成行、helper/config 和报告字节均通过核验，才创建 `all10_candidate_summary.json`；它仍保留 `scientific_parity=not_assessed`，不代替科学验收。12 个实际组合全部成功才标记 `all_twelve_actual_pairs_compared`。
+
+复现启动参数由 `controller_v1_launch.json` 完整记录，包括正式配置 SHA、helper SHA、控制器 SHA、原 CON01 baseline v2 报告 SHA 和独立输出目录。启动需要 `CUDA_VISIBLE_DEVICES` 为空，CPU 线程各 1；输出目录必须全新，拒绝覆盖任何既有运行证据。
+
 ## 4. 对应原软件调用
 
 比较器不调用官方程序。实际官方命令和哈希来自成功的 producer，写入每例报告中的 `official_gradient_command`、`official_FA_command`。本轮原参考命令结构为：
@@ -114,6 +124,7 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 |初始 focused CPU tests，GPU 禁用|17 项|17 passed，1.16 s；原日志 `focused_cpu_v3.log`。|
 |真实 source 空包标记问题的回归|21 项|21 passed，0.45 s；`focused_cpu_v4.log`。|
 |真实 5TT undefined channel spacing 问题的回归|23 项|23 passed，0.51 s；`focused_cpu_v5.log`。受控 Inf affine 测试产生一条预期 NumPy warning，网格仍明确不可比较。|
+|CPU 后台控制器与比较器协议回归|7 项控制器 + 23 项比较器|30 passed，0.46 s；`controller_cpu_v1.log`。包含未完成/失败不能汇总、原报告不可改标、非有限主统计保持 null 的回归。|
 |官方真实 producer 与文件核验 v1|十例 CON01/03/04/05/06/07/08/09/10/11|325 个实际文件 before/after SHA，6.71859 s。|
 |原 eeb 脚本的官方真实 producer 与文件核验 v2|同十例|325 个实际文件 before/after SHA，6.56676 s；`reference_gate_v2.json`。|
 |实际 baseline CON01 MRI 比较|全部 102 帧、全 552,960 体素、官方 mask 115,226 体素|1,319 个文件 before/after SHA；比较器内计时 20.22309 s，nodecw10 进程墙钟 20.34487 s。|
@@ -154,6 +165,7 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 - 实际 baseline 首次比较失败：冻结 source inventory 含合法零字节 `__init__.py`，原通用非空 producer guard 误拒绝。现仅科学源码 inventory / loaded-source 允许零字节，仍要求 exact SHA 和 before/after 文件不变；raw、MRI、contract 和输出继续要求非空。原 eeb 源码快照与 `baseline_CON01_initial_failure.json` 保留。
 - 修正后实际比较第二次失败：原官方 5TT header 的 channel spacing 为 NaN，严格 JSON 序列化拒绝。原中间 0f9 源码快照、真实 stderr 与 `baseline_CON01_serialization_failure.json` 保留；失败的空 `root_components_CON01_baseline_v1` 未覆盖。新 helper 只显式记录未定义元数据，并在创建输出目录前完成严格 JSON 序列化，不改 header、数组、网格判定或统计。
 - 最新 23 项 CPU 回归后，在全新 `root_components_CON01_baseline_v2` 完整重做来源及文件 before/after 核验，成功返回 exit 0。本地完整原报告、执行日志和摘要均保存实际 SHA；没有为失败目录补造完成记录。
+- CPU 后台控制器实际启动于 nodecw10，PID 185524，使用最终 helper/configuration SHA。bootstrap 时原 CON01 baseline 报告及全部 1,319 个绑定文件复核完成，4.98121 s；candidate CON01 当时仍在运行，其余 producer 未启动，`all10_summary=null`。`controller_v1_bootstrap_snapshot.json` 是该时刻的实际状态快照，不能当未来完成结果；运行中的实际状态以远端 `status.json` 为准。
 
 ## 7. 参考文献与原软件代码库
 
