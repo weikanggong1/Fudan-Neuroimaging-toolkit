@@ -85,7 +85,7 @@ print(native_label_path)
 | `synthseg_weights` | `None` | SynthSeg 模型权重文件或目录。省略时解析 FNIT 权重配置，并在需要时下载和校验。 |
 | `synthseg_parc_weights` | `None` | SynthSeg+ 皮层分区权重文件或目录；仅在需要自动皮层分区时读取。 |
 | `device` | `"cuda:0"` | PyTorch 计算设备，例如 `"cuda:1"` 或 `"cpu"`。CUDA 默认启用 TF32。 |
-| `threads` | `4` | PyTorch CPU 线程数，必须至少为 1；GPU 运行中的 CPU 准备步骤也使用此设置。 |
+| `threads` | `4` | PyTorch CPU 线程数，必须至少为 1。CPU 调用还临时设置当前调用线程的 Numba 掩码，正常返回或失败均恢复调用者的两项设置；GPU 保留原有线程设置方式。BLAS、外部库线程和 CPU 亲和性由启动环境控制。 |
 | `optimization` | `"fast"` | `"fast"` 速度优先；`"balanced"` 使用更多网格更新和更严格的停止阈值。两者均保留工作网格和最终输出分辨率；更多迭代不保证每个区域的精度提高，详见下文。 |
 | `output_dir` | `None` | 自动保存目录。省略时返回内存结果，也可稍后调用 `subregion_result.save(output_dir)`。 |
 | `save_highres` | `True` | 保存每项结构的工作网格标签；仅在保存结果时生效。 |
@@ -127,6 +127,8 @@ sub-01_subregions/
 | 停止条件 | 速度优先 | 更严格 |
 
 图谱先验平滑、部分容积模拟、Gaussian EM 和网格拟合支持 GPU，默认环境已包含所需依赖。图谱加载、裁剪、三次插值、部分形态学、白质标签传播和最终 Nibabel 重采样仍在 CPU；阶段控制和线搜索也包含 CPU 判断及 GPU 同步。整例时间包含这些步骤。实现与逐组件耗时见 [TorchGEMS](../../src/fnit/gems/core.py)及 [GPU 组件验证](../../validation/subregions/speed_v16/layout_components/README.md)。
+
+CPU 入口复用现有线程预算助手，修复以前只设置 Torch、未约束 Numba且调用后不恢复线程设置的问题。它保持拟合规则、精度、标签和返回结构；Numba 请求超过导入时容量会明确报错，应在新进程启动前设置 `NUMBA_NUM_THREADS`。CPU/GPU 不应在同一进程的多个调用线程中并发修改全局 Torch 设置。`timings["compute_seconds"]` 为内部计算范围；公开 API 和进程墙钟另包含 CPU 线程设置及恢复。当前 CPU 同节点实测状态见[CPU 对照协议](../../validation/smri_cpu/task5/README.md)，GPU 历史时间不改标为 CPU 结果。
 
 合成标签拟合按各结构的阶段预算运行，脑干采用其独立配置；上表的 20/30 上限对应丘脑和海马/杏仁核的强度拟合。
 
