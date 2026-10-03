@@ -68,6 +68,11 @@ def public_case(tmp_path, monkeypatch):
     scanner = recon / "mri/orig/001.mgz"
     scanner.parent.mkdir(parents=True)
     nib.save(nib.MGHImage(values, affine), scanner)
+    # These tests exercise volume/surface control flow. Reconstruction mesh
+    # and read-only preparation contracts have their own adapter tests.
+    monkeypatch.setattr(pipeline, "prepare_surface_reconstruction", lambda *args, **kwargs:
+                        SimpleNamespace(subject_dir=recon, backend="provided", reused=True,
+                                        metadata={"Backend": "provided", "Reused": True}))
     files = tmp_path / "geometry"
     files.mkdir()
     field_paths = {}

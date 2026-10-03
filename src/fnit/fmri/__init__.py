@@ -12,6 +12,8 @@ from .surface_fmriprep import create_fmriprep_cifti, run_fmriprep_surface_projec
 from ..msm import MSMSulcInputs, prepare_msmsulc_inputs, run_msmsulc
 from ..msm.config import MSMSulcConfig
 from .surface_pipeline import FMRISurfaceResult, fMRISurface_pipeline
+from .surface_volume import SurfaceVolumeStatus, inspect_surface_volume
+from .surface_reconstruction import ReconstructionResult, prepare_surface_reconstruction
 from .surface_prepare import (T1SurfacePair, T1SurfaceGeometry, T1SurfacePreparation,
                               prepare_fmriprep_surface_inputs, prepare_t1w_surface_geometry)
 
@@ -36,6 +38,8 @@ __all__ = [
     "create_fmriprep_cifti", "run_fmriprep_surface_projection",
     "MSMSulcConfig", "MSMSulcInputs", "prepare_msmsulc_inputs", "run_msmsulc",
     "FMRISurfaceResult", "fMRISurface_pipeline",
+    "SurfaceVolumeStatus", "inspect_surface_volume",
+    "ReconstructionResult", "prepare_surface_reconstruction",
     "T1SurfacePair", "T1SurfaceGeometry", "T1SurfacePreparation",
     "prepare_fmriprep_surface_inputs", "prepare_t1w_surface_geometry",
 ]

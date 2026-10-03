@@ -1,6 +1,8 @@
 """BIDS fMRI volume and surface commands."""
 
 import argparse
+import json
+from pathlib import Path
 
 from .end_to_end import fMRIVolume_pipeline
 from .surface_pipeline import fMRISurface_pipeline
@@ -19,6 +21,15 @@ def _bids_options(parser):
     parser.add_argument("--echo")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--overwrite", action="store_true")
+
+
+def _options_json(path):
+    if path is None:
+        return {}
+    value = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError("options JSON must contain an object")
+    return value
 
 
 def main(argv=None):
@@ -58,9 +69,25 @@ def main(argv=None):
     volume.add_argument("--slice-time-reference", type=float, default=0.5)
     volume.add_argument("--n-splits", type=int, default=1000)
     volume.add_argument("--random-state", type=int, default=0)
-    surface = commands.add_parser("surface", help="已有 volume 到 fsLR32k GIFTI、91k CIFTI、球面及 QC")
+    surface = commands.add_parser("surface", help="原始 BIDS 自动 volume、三种重建选项，到 fsLR32k 与 91k CIFTI")
     _bids_options(surface)
-    surface.add_argument("--recon-all", required=True)
+    surface.add_argument("--recon-all", help="已有同源 subject 目录或 ZIP，只读输入")
+    surface.add_argument("--recon-all-backend", choices=("fnit", "freesurfer", "provided"),
+                         help="默认有 --recon-all 时 provided，否则 fnit")
+    surface.add_argument("--recon-all-output-dir", help="新重建的持久目录，与只读输入分开")
+    surface.add_argument("--recon-all-options-json", help="重建参数 JSON，完整参数见 surface 文档")
+    surface.add_argument("--recon-all-weights-dir", help="FNIT recon-all 模型目录")
+    surface.add_argument("--recon-all-assets-dir", help="FNIT recon-all GCA/atlas 目录")
+    surface.add_argument("--recon-all-native-bin-dir", help="Conda 独立源码编译的 native 目录")
+    surface.add_argument("--recon-all-threads", type=int, help="重建 CPU 线程数（默认 4）")
+    surface.add_argument("--freesurfer-recon-all-command", help="freesurfer 模式的原版 recon-all")
+    surface.add_argument("--fs-license", help="freesurfer 模式的个人许可证路径")
+    surface.add_argument("--mris-expand-command", help="补齐 graymid 的独立编译 mris_expand")
+    surface.add_argument("--require-volume", action="store_true", help="要求 volume 已完整，关闭自动运行")
+    surface.add_argument("--volume-options-json", help="自动 volume 全部科学参数的 JSON")
+    surface.add_argument("--mni-template", help="自动 volume 的 MNI res-2 T1w；默认读取 surface assets")
+    surface.add_argument("--mni-brain-mask", help="自动 volume 的 MNI 脑掩膜")
+    surface.add_argument("--t1w-image", help="显式选择配对 T1w，多 T1 时必需")
     surface.add_argument("--surface-assets-dir", required=True)
     surface.add_argument("--wb-command", default="wb_command")
     surface.add_argument("--threads", type=int,
@@ -108,6 +135,22 @@ def main(argv=None):
         )
         print(result.clean_mni)
     else:
+        volume_options = _options_json(args.volume_options_json)
+        for key in ("mni_template", "mni_brain_mask"):
+            if getattr(args, key) is not None:
+                volume_options[key] = getattr(args, key)
+        recon_options = _options_json(args.recon_all_options_json)
+        for key, value in {
+            "weights_dir": args.recon_all_weights_dir,
+            "assets_dir": args.recon_all_assets_dir,
+            "native_bin_dir": args.recon_all_native_bin_dir,
+            "threads": args.recon_all_threads,
+            "command": args.freesurfer_recon_all_command,
+            "fs_license": args.fs_license,
+            "mris_expand_command": args.mris_expand_command,
+        }.items():
+            if value is not None:
+                recon_options[key] = value
         result = fMRISurface_pipeline(
             **common, recon_all=args.recon_all,
             hcp_assets_dir=args.surface_assets_dir,
@@ -119,6 +162,10 @@ def main(argv=None):
             msmall_inputs=args.msmall_inputs_json,
             msmall_config=args.msmall_config,
             parallel=not args.serial_hemispheres, cpu_threads=args.threads,
+            recon_all_backend=args.recon_all_backend,
+            recon_all_output_dir=args.recon_all_output_dir,
+            recon_all_options=recon_options, t1w_image=args.t1w_image,
+            auto_volume=not args.require_volume, volume_options=volume_options,
         )
         print(result.dtseries)
     return 0

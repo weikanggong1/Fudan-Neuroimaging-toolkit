@@ -45,7 +45,7 @@ for source in "$build_dir"/bin/*; do
     exit 1
   fi
 done
-sha256sum "$CONDA_PREFIX"/bin/{fnit_n4_itk,mri_em_register,mri_segment,mri_edit_wm_with_aseg,mris_fix_topology_fnit,mris_remove_intersection,mris_inflate,mris_place_surface,mris_place_surface_white_fast,mrisp_paint,mris_curvature_stats,mri_label2vol,mri_warp_convert,mri_ca_register,mri_convert} \
+sha256sum "$CONDA_PREFIX"/bin/{fnit_n4_itk,mri_em_register,mri_segment,mri_edit_wm_with_aseg,mris_fix_topology_fnit,mris_remove_intersection,mris_inflate,mris_place_surface,mris_place_surface_white_fast,mrisp_paint,mris_curvature_stats,mri_label2vol,mri_warp_convert,mri_ca_register,mri_convert,mris_expand} \
   > "$build_dir/installed-bin.sha256"
 "$CONDA_PREFIX/bin/python" - "$build_dir" "$CONDA_PREFIX" <<'PYTHON'
 import hashlib, json, os, subprocess, sys

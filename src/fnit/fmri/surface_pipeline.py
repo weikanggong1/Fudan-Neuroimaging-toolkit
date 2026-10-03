@@ -4,10 +4,10 @@ from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import json
+import inspect
 import shutil
 import subprocess
 import time
-import zipfile
 
 import nibabel as nib
 import numpy as np
@@ -28,6 +28,8 @@ from .surface_fmriprep import (
     fmriprep_cifti_metadata, run_fmriprep_surface_projection,
 )
 from .surface_prepare import load_fsnative_to_t1w, prepare_fmriprep_surface_inputs
+from .surface_volume import inspect_surface_volume
+from .surface_reconstruction import prepare_surface_reconstruction
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,67 @@ class FMRISurfaceResult:
     timing_seconds: dict[str, float]
     qc_report: Path | None = None
     registered_spheres: tuple[Path, Path] | None = None
+    recon_all: Path | None = None
+    volume_executed: bool = False
+
+
+def _ensure_surface_volume(inputs, derivatives_root, *, signal, t1w_image,
+                           hcp_assets_dir, device, auto_volume, volume_options):
+    """Reuse verified inputs or run the mature volume entry once from raw BIDS."""
+    from .end_to_end import fMRIVolume_pipeline
+
+    options = dict(volume_options or {})
+    locked = {"bids_root", "derivatives_root", "subject", "session", "task", "run",
+              "acquisition", "direction", "reconstruction", "echo", "device", "t1w_image"}
+    unexpected = set(options) - (set(inspect.signature(fMRIVolume_pipeline).parameters) - locked)
+    if unexpected:
+        raise ValueError(f"volume_options cannot override run identity or unknown options: {sorted(unexpected)}")
+    template = options.get("mni_template")
+    if template is None:
+        candidate = Path(hcp_assets_dir).expanduser() / "fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz"
+        if candidate.is_file():
+            template = candidate
+            options["mni_template"] = candidate
+    status = inspect_surface_volume(
+        inputs, derivatives_root, signal=signal, t1w_image=t1w_image,
+        mni_template=template, hcp_assets_dir=hcp_assets_dir,
+    )
+    initial_state = status.state
+    elapsed = 0.0
+    executed = False
+    if status.state == "missing":
+        if not auto_volume:
+            raise FileNotFoundError("FNIT volume is missing and auto_volume=False: " + "; ".join(status.reasons))
+        if template is None:
+            raise FileNotFoundError("automatic volume requires volume_options['mni_template'] or the installed surface-assets MNI T1w template")
+        # Reuse the exact selected BIDS entities; a filename reconstruction is
+        # never used to guess a different run.
+        from .bids import _entities
+        parsed = _entities(inputs.bold)
+        if parsed is None:
+            raise ValueError("selected BIDS BOLD filename lacks entities")
+        entities, _ = parsed
+        started = time.perf_counter()
+        fMRIVolume_pipeline(
+            inputs.bids_root, derivatives_root, subject=inputs.subject,
+            session=inputs.session, task=entities.get("task", "rest"),
+            run=entities.get("run"), acquisition=entities.get("acq"),
+            direction=entities.get("dir"), reconstruction=entities.get("rec"),
+            echo=entities.get("echo"), t1w_image=status.source_t1w, device=device, **options,
+        )
+        elapsed = time.perf_counter() - started
+        executed = True
+        status = inspect_surface_volume(
+            inputs, derivatives_root, signal=signal, t1w_image=status.source_t1w,
+            mni_template=template, hcp_assets_dir=hcp_assets_dir,
+        )
+    if status.state != "ready":
+        if status.state == "partial":
+            hint = "; rerun volume or explicitly select signal='clean'" if signal == "preproc" else ""
+            raise FileNotFoundError("FNIT volume is partial: " + "; ".join(status.reasons) + hint)
+        raise ValueError(f"FNIT volume is {status.state}: " + "; ".join(status.reasons))
+    return status, {"InitialState": initial_state, "Executed": executed,
+                    "Reused": not executed, "Seconds": elapsed}
 
 
 def _world_affine(value):
@@ -212,7 +275,7 @@ def _refine_msmall(inputs, native_spheres, native_geometry, assets, output,
 
 def fMRISurface_pipeline(
     bids_root: str | Path, derivatives_root: str | Path, *,
-    subject: str, recon_all: str | Path, hcp_assets_dir: str | Path,
+    subject: str, hcp_assets_dir: str | Path, recon_all: str | Path | None = None,
     session: str | None = None, task: str = "rest", run: str | None = None,
     acquisition: str | None = None, direction: str | None = None,
     reconstruction: str | None = None, echo: str | None = None,
@@ -227,8 +290,22 @@ def fMRISurface_pipeline(
     signal: str = "preproc",
     fsnative_to_t1w: str | Path | np.ndarray | None = None,
     parallel: bool = True, cpu_threads: int | None = None,
+    recon_all_backend: str | None = None,
+    recon_all_output_dir: str | Path | None = None,
+    recon_all_options: dict | None = None,
+    t1w_image: str | Path | None = None,
+    auto_volume: bool = True,
+    volume_options: dict | None = None,
 ) -> FMRISurfaceResult:
-    """Project one verified volume run and publish its complete surface result.
+    """Run raw BIDS through verified volume, reconstruction and surface stages.
+
+    Missing volume is computed automatically; partial or invalid volume is
+    rejected without changing it. ``volume_options`` configures the existing
+    volume API while the selected BIDS run, T1w and device remain fixed.
+    ``recon_all_backend`` selects ``fnit``, ``freesurfer`` or ``provided``;
+    omission selects provided when recon_all is passed, otherwise FNIT.
+    ``recon_all`` remains a read-only input, and ``recon_all_output_dir``
+    stores a generated reconstruction with validated reuse provenance.
 
     ``signal='preproc'`` uses the volume's retained T1w/MNI preprocessed
     series, matching fMRIPrep's projection input. ``signal='clean'`` explicitly
@@ -245,6 +322,13 @@ def fMRISurface_pipeline(
     hemisphere_items(parallel=parallel, cpu_threads=budget)
     if signal not in ("preproc", "clean"):
         raise ValueError("signal must be 'preproc' or 'clean'")
+    selected_backend = recon_all_backend or ("provided" if recon_all is not None else "fnit")
+    if selected_backend not in ("fnit", "freesurfer", "provided"):
+        raise ValueError("recon_all_backend must be 'fnit', 'freesurfer' or 'provided'")
+    if selected_backend == "provided" and recon_all is None:
+        raise ValueError("provided reconstruction requires recon_all input")
+    if selected_backend != "provided" and recon_all is not None:
+        raise ValueError("recon_all is a provided input; use recon_all_output_dir for generated reconstruction")
     if registered_spheres is not None and len(registered_spheres) != 2:
         raise ValueError("registered_spheres must contain left and right paths")
     if registered_spheres is not None and msm_config is not None:
@@ -286,6 +370,28 @@ def fMRISurface_pipeline(
         bids_root, subject=subject, session=session, task=task, run=run,
         acquisition=acquisition, direction=direction, reconstruction=reconstruction, echo=echo,
     )
+    # Functional output names do not depend on T1 selection. Fail before
+    # expensive automatic prerequisites if their destination is protected.
+    preliminary = fmri_derivative_paths(inputs, inputs.t1w_images[0], derivatives_root, signal=signal)
+    preliminary_signal = signal
+    if msmall_inputs is not None:
+        preliminary_signal = f"MSMAll{signal}"
+        preliminary = replace(preliminary, **{
+            name: getattr(preliminary, name).with_name(getattr(preliminary, name).name.replace(
+                f"_desc-{signal}_bold", f"_desc-{preliminary_signal}_bold"))
+            for name in ("left", "right", "dtseries")
+        })
+    preliminary_data = (preliminary.left, preliminary.right, preliminary.dtseries)
+    report_path, sphere_files, sphere_json = _surface_extra_paths(preliminary, preliminary_signal)
+    _check_final_outputs((*preliminary_data, *(sidecar(path) for path in preliminary_data),
+                          report_path, *sphere_files, *sphere_json), overwrite)
+    volume_started = time.perf_counter()
+    volume_status, volume_details = _ensure_surface_volume(
+        inputs, derivatives_root, signal=signal, t1w_image=t1w_image,
+        hcp_assets_dir=hcp_assets_dir, device=device, auto_volume=auto_volume,
+        volume_options=volume_options,
+    )
+    volume_check_seconds = time.perf_counter() - volume_started - volume_details["Seconds"]
     # The run's functional paths are independent of which T1 was selected.
     # Resolve SourceT1w before checking any T1-specific derivative.
     probe = fmri_derivative_paths(inputs, inputs.t1w_images[0], derivatives_root, signal=signal)
@@ -401,27 +507,22 @@ def fMRISurface_pipeline(
             )
             t1_bold = work / "clean_T1w.nii.gz"
             resample_world(selected_t1w, paths.t1_brain, np.linalg.inv(epi_to_t1), t1_bold, device=device)
-        source = Path(recon_all).expanduser().resolve()
-        subject_dir = (source / "FreeSurfer" if (source / "FreeSurfer").is_dir() else source).resolve()
-        if source.is_file() and source.suffix.lower() == ".zip":
-            subject_dir = work / "recon_all" / "FreeSurfer"
-            required_recon = ("mri/orig.mgz", "mri/orig/001.mgz") + tuple(
-                f"surf/{hemi}.{name}" for hemi in ("lh", "rh")
-                for name in ("white", "pial", "sphere.reg", "thickness", "sphere", "sulc")
-            )
-            with zipfile.ZipFile(source) as archive:
-                names = set(archive.namelist())
-                for hemisphere in ("lh", "rh"):
-                    middle = next((f"surf/{hemisphere}.{name}" for name in ("midthickness", "graymid")
-                                   if f"FreeSurfer/surf/{hemisphere}.{name}" in names), None)
-                    if middle is None:
-                        raise FileNotFoundError(f"recon-all ZIP lacks {hemisphere}.midthickness or graymid")
-                    required_recon += (middle,)
-                for name in required_recon:
-                    target = subject_dir / name
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    with archive.open(f"FreeSurfer/{name}") as reader, target.open("wb") as writer:
-                        shutil.copyfileobj(reader, writer)
+        output_dir = recon_all_output_dir
+        if output_dir is None:
+            stem = source_t1.name.removesuffix(".nii.gz").removesuffix(".nii").removesuffix("_T1w")
+            output_dir = paths.anat_dir / f"{stem}_desc-{selected_backend}_reconall"
+        recon_options = dict(recon_all_options or {})
+        if world_affine is not None:
+            recon_options["fsnative_to_t1w"] = world_affine
+        recon_started = time.perf_counter()
+        recon_result = prepare_surface_reconstruction(
+            source_t1, work / "recon_all", recon_all=recon_all,
+            backend=recon_all_backend, output_dir=output_dir, device=device,
+            options=recon_options,
+        )
+        recon_seconds = time.perf_counter() - recon_started
+        subject_dir = recon_result.subject_dir
+        source = Path(recon_all).expanduser().resolve() if recon_all is not None else subject_dir
         identity = _matching_original_t1(subject_dir, source_t1, world_affine)
         preparation_started = time.perf_counter()
         prepared = prepare_fmriprep_surface_inputs(
@@ -550,8 +651,11 @@ def fMRISurface_pipeline(
                 "SHA256": _sha256(current),
                 "EstimatedHere": registered_spheres is None,
             }
-        timing = {**projection.timing_seconds, "total": time.perf_counter() - started}
+        timing = {**projection.timing_seconds, "total_before_publication": time.perf_counter() - started}
         timing["native_surface_preparation"] = preparation_seconds
+        timing["volume_status_validation"] = volume_check_seconds
+        timing["automatic_volume"] = volume_details["Seconds"]
+        timing["reconstruction_adapter"] = recon_seconds
         timing["atlas_area_surfaces"] = area_seconds
         if registration_seconds is not None:
             timing["msmsulc_preparation_and_registration"] = registration_seconds
@@ -570,6 +674,8 @@ def fMRISurface_pipeline(
                      "RegistrationDetails": registration_details,
                      "RegistrationQC": f"bids::{qc_report.relative_to(paths.root).as_posix()}",
                      "SourceT1w": source_label, "ReconAllSource": str(source), "Signal": signal,
+                     "VolumePrerequisite": volume_details,
+                     "Reconstruction": recon_result.metadata,
                      "VolumeProcessing": {key: space[key] for key in (
                          "TemporalFiltering", "IntensityNormalization", "Interpolation",
                          "SliceTimingCorrection", "SusceptibilityCorrection",
@@ -583,6 +689,7 @@ def fMRISurface_pipeline(
                      "StandardTemplateSHA256": template_hash,
                      "StandardTemplateIdentity": space["StandardTemplateIdentity"],
                      "TimingSeconds": timing, "Coverage": coverage, "Geometry": identity,
+                     "TimingScope": "Stage times and total_before_publication stop before final sidecar/QC serialization and atomic publication; returned timing_seconds.total includes publication and temporary cleanup.",
                      "SurfaceAssetsSHA256": {"LeftROI": _sha256(left_roi), "RightROI": _sha256(right_roi),
                                               "HCPdseg": _sha256(dseg)}},
         }
@@ -599,6 +706,7 @@ def fMRISurface_pipeline(
             "Sources": details["Sources"], "Registration": registration,
             "RegisteredSpheres": sphere_info, "Geometry": identity,
             "MSM": registration_qc,
+            "VolumePrerequisite": volume_details, "Reconstruction": recon_result.metadata,
             "Coverage": coverage, "TimingSeconds": timing,
         })
         for hemisphere, destination in zip(("L", "R"), sphere_sidecars):
@@ -607,5 +715,7 @@ def fMRISurface_pipeline(
                 "Geometry": identity, **sphere_info[hemisphere],
             })
         _publish_projection(publish, paths.func_dir, tuple(path.name for path in final_outputs), overwrite)
+    timing["total"] = time.perf_counter() - started
     return FMRISurfaceResult(paths.left, paths.right, paths.dtseries, sidecar(paths.dtseries),
-                             timing, qc_report, sphere_paths)
+                             timing, qc_report, sphere_paths, recon_result.subject_dir,
+                             volume_details["Executed"])
