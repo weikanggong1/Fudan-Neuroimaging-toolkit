@@ -15,7 +15,7 @@ flowchart TD
     G --> H[成功或失败 JSON]
 ```
 
-`wall` 是正式性能运行：不新增阶段 CUDA 同步，不导出检查点；只附加实际预处理状态、EDDY 种子默认策略、分配器峰值账本和独立显存采样。`diagnostic` 包装实际阶段，在阶段边界同步指定 GPU；嵌套父阶段已包含子阶段，不能求和。检查点只允许诊断模式，额外导出墙钟单列，诊断总耗时不能作为正式速度比。
+`wall` 是正式性能运行：计时内不新增阶段 CUDA 同步，不导出检查点；附加实际预处理状态、EDDY 种子默认策略、分配器峰值账本和独立显存采样。可用 `--result-export-dir` 在 CLI 计时与显存监测结束后导出真实返回的 FOD、路径和标量，导出时间另列。该选项只保留原返回对象引用，不复制张量，不导出中间 tracking 输入。`diagnostic` 包装实际阶段，在阶段边界同步指定 GPU；嵌套父阶段已包含子阶段，不能求和。中间检查点只允许诊断模式，诊断总耗时不能作为正式速度比。
 
 总计时从 `torch`/FNIT CLI 导入前开始，到真实 CLI 结束和必要包装退出为止，包含加载、实际计算与正常输出写盘。报告生成、输入/源码/输出 SHA-256、检查点哈希、输出检查、采样线程退出及外部 GPU 排队不计入。工具自己的 Python/标准库启动在计时前；完整进程启动成本由外层 cohort 编排另计。
 
@@ -54,6 +54,7 @@ exit_code = benchmark_module.main([
 | `--report` | 必填；私有 JSON，原子替换该路径；失败也写入 |
 | `--eddy-gp-seed` | 默认 12345，合法范围 1..2³²−1；仅为缺失/None 的实际 `TorchEDDY.run(gp_seed=...)` 补默认值；已显式提供的非 None 值保持原值并记录 |
 | `--checkpoint-dir` | 可选，仅诊断；要求不存在或为空，额外导出时间单列 |
+| `--result-export-dir` | 可选，仅 wall，不能与 `--checkpoint-dir` 合用；在计时及显存监测结束后导出真实返回结果，目录不存在或为空；不能在 core 已跳过时导出旧结果 |
 | `--gpu-uuid` | 可选物理目标 UUID；使用 `CUDA_VISIBLE_DEVICES` 时推荐显式填写；不指定时仅在生产自行初始化 CUDA 后读取 Torch device UUID，不主动初始化 |
 | `--memory-sample-interval` | 默认 0.5 s，必须有限且 >0；NVML/SMI独立线程的采样等待间隔 |
 | `--` 后参数 | 实际 `UKBConnectome_pipeline` CLI 参数，可带前缀 `fnit`；必须有 `--bids-root`，其余见正式 pipeline 文档 |
@@ -71,6 +72,7 @@ exit_code = benchmark_module.main([
 - `provenance`：实际载入 FNIT 模块路径/SHA、Git commit/工作区状态/diff SHA、工具/Python 程序 SHA、Torch/Python/CUDA、主机、线程配置与退出精度策略。
 - `inputs`、`outputs`：计时后输入/正常输出大小与 SHA；矩阵检查有限、对称及节点维度。`outputs.status=complete` 仅表示文件及基本矩阵契约，不表示官方一致性。
 - `checkpoints`、`checkpoint_export_seconds`：自产检查点清单、哈希及额外导出墙钟。`status=completed` 与输出完整、数值等价、性能收益分别判定。
+- `post_timing_result_export`：计时后真实返回结果的导出秒数、文件大小和 SHA；失败独立记录 `result_export_error`，不能把缺失 FOD/TCK 当成功。
 
 检查点保留原输出 dtype，二值 mask 用 uint8 无损编码；空间使用实际返回 affine：
 
@@ -121,6 +123,7 @@ PYTHONPATH="$FNIT_BASELINE_SOURCE" python tools/benchmark_connectome_raw_bids.py
 
 ## 6. 更新记录
 
+- 2026-10-03：增加正式 wall 结束后的结果导出，用于在同一次原始 DWI 运行中保留自产 FOD/TCK；CLI wall 与导出分别计时，计算及正常 CLI 输出保持原路径。
 - 2026-10-02：新增独立 raw BIDS 评测器；没有改标旧 corrected-DWI benchmark，没有改生产 pipeline。基线/候选共用固定 EDDY GP默认策略，阶段诊断与正式墙钟分开，峰值reset前汇聚、报告失败与完整性。
 
 ## 7. 源码和参考

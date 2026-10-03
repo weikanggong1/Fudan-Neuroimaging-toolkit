@@ -418,7 +418,8 @@ def load_recon_for_gpu(config, case, version, job):
     return original
 
 
-def worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_arguments=()):
+def worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_arguments=(),
+           extra_wall_arguments=()):
     """Execute a cohort stage; private staged drivers may bind verified anatomy.
 
     The default path remains fresh official reconstruction in this cohort.
@@ -531,6 +532,7 @@ def worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_argu
                            "--report", str(job / "raw_bids_wall.json")]
                 if config.get("gpu_uuid"):
                     command += ["--gpu-uuid", config["gpu_uuid"]]
+                command += list(extra_wall_arguments)
                 command += ["--", *cli_command(config, case, job, anatomy_subject=subject), *extra_cli_arguments]
                 environment = os.environ.copy()
                 environment["PYTHONPATH"] = str(Path(config["sources"][version]) / "src")

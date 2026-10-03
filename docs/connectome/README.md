@@ -113,6 +113,8 @@ OUTPUT_DIR/
 
 旧显式 `--dwi/--bvals/--bvecs` 单 atlas 入口保留平铺输出；BIDS 或多 atlas 入口按 `atlases/<name>/` 分开。矩阵行列以同目录的 `nodes.tsv` 为准。零连接边的均值为零。
 
+BIDS 的完成记录同时绑定数值实现修订号。升级本轮精度修正后，旧矩阵不能仅凭文件存在被跳过；需使用新的输出目录，或显式 `--overwrite` 重算。`--overwrite` 沿用原有强制重算规则，原始 MRI 不改写。
+
 ### 参数
 
 | 参数 | 输入和默认值 |

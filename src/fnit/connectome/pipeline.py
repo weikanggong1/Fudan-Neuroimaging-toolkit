@@ -35,6 +35,10 @@ from .sift2 import estimate_sift2_weights
 from .tcksample_precise import sample_streamline_mean_precise
 from .tracking import Tractogram, probabilistic_tractography
 
+# Saved BIDS matrices must be recalculated after numerical fixes even when
+# the package version and original image paths remain unchanged.
+CONNECTOME_NUMERICAL_REVISION = "accuracy-20261003-v1"
+
 SCHAEFER_TIAN_ATLASES = {
     "schaefer200+tian-s1": (200, 1),
     "schaefer500+tian-s4": (500, 4),
