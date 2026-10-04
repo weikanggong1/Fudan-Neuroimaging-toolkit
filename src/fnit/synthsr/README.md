@@ -1,30 +1,32 @@
 # SynthSR 源码目录
 
-本轮CPU首差定位：第一Conv+bias全值同，原ELU是第一处分歧；按实际TF/Eigen packet逐步FP32公式可恢复首ELU，第二Conv需同时转换输入/权重channels-last，随后BN仍有尾差。一次完整ELU原型更慢且固定浮点门失败，未进入默认；生产CPU/GPU网络保持原文件。[完整定位与拒绝记录](../../../validation/smri_cpu/synth_fixes_20261004/README.md)保留统计、实际源码SHA和复现。
+`model.py` 定义官方 HDF5 对应的成熟 PyTorch U-Net，`spatial.py` 处理重采样、方向和填充，`pipeline.py` 连接读图、推理、后处理和保存。输入单幅 3D MRI/CT，输出1 mm合成T1w；生产不调用FreeSurfer或TensorFlow。
 
-2026-10-04 的[相同 CPU 资源对照](../../../validation/smri_cpu/strip_sr_20261004/README.md)完成 9 个参数和 7 个域/格式场景，NIfTI 量化容差通过：最差 exact99.992227%、max1。默认 T1 浮点 NPZ 在固定 rtol1e−5/atol1e−3 下仍有3,522个超门槛点、max0.0191345。相同官方预测经过 FNIT 后处理可逐值恢复官方输出，误差已定位网络 FP32 计算。CPU channels-last/BN 原型未通过、不接入生产；CPU 构造保持调用方 CUDA 后端设置，GPU 路径不变。默认两例完整 CLI 中位数官方/FNIT62.810/42.800、80.869/45.947 s，但实际低场和 EPI 有慢于官方的场景。详细表格、阶段时间和脑图见[完整说明](../../../docs/synthsr/README.md)。下面的2026-09-27数据为历史对照。
+本轮特别修复 CPU FP32 网络尾差：`_cpu_inference.py` 延迟选择受保护的 CPU 推理，复用成熟卷积/池化/上采样及checkpoint，以临时CL3D权重视图保持公开参数stride；`_cpu_math.py` 为独立NumBa oneDNN ELU与Eigen BN公式。限Linux x86-64/SSE2/FMA、MKLDNN、CPU F32单volume/eval/no-grad。训练、autograd、CPU autocast、hooks和替换叶模块走原Module路径；NumBa线程mask返回后恢复。CUDA沿用原forward正文且不导入helper，主页Conda依赖不变。
 
-这里实现单幅 3D MRI/CT 到 1 mm 合成 T1w 的推理。`model.py` 定义与官方 HDF5 权重对应的 PyTorch U-Net，`spatial.py` 处理重采样、方向和填充，`pipeline.py` 连接读图、推理、后处理和写盘；`__init__.py` 导出公开接口。推理不调用 FreeSurfer 或 TensorFlow。
+2026-10-04的冻结`source_sr_v2`，同一真实原始T1在nodecw7相同8核/8线程CPU ABBA：两CNN共22,020,096值及最终9,072,000浮点/uint8全同官方冻结整图参考，原固定浮点门0失败，affine/header/NIfTI文件SHA同。正常CLI旧28.24/29.08 s、新29.91/26.77 s，基本持平；RSS旧约10.22GB、新7.50GB。H100默认TF32旧新完整CNN/float/uint8/header/输出文件SHA全同，allocated10,006,443,008/reserved13,845,397,504 B峰值相同，仍在20GB cap内。共享GPU97–100%利用率下时间只作观察。v1/低场/关闭翻转/关闭锐化及第二T1、FLAIR、真实CT、64mT和EPI首通道量化图均全同官方；EPI NPZ原浮点门通过但仍有尾差。参数分支、全部时钟、原型失败与融合证据见[本轮验证](../../../validation/smri_cpu/synth_fixes_20261004/sr_cpu_followup/README.md)。
+
+## Python 示例
 
 ```python
 from fnit.synthsr import SynthSR
 
 super_resolution_model = SynthSR(
-    weights=None,  # 权重输入：None 按 FNIT 配置查找官方 HDF5
-    device="cuda:0",  # 计算设备；可改为 "cpu"
-    lowfield=False,  # 是否使用低场专用模型
-    v1=False,  # False 使用默认 v2，而非 2021 年 v1
-    threads=4,  # 预处理和后处理使用的 CPU 线程数
+    weights=None,  # None 按 FNIT 固定权重配置查找；可给HDF5路径或目录
+    device="cuda:0",  # 显式计算设备；CPU用"cpu"
+    lowfield=False,  # 是否选择低场单输入模型
+    v1=False,  # 是否选择2021年v1，优先于lowfield
+    threads=8,  # CPU线程预算
 )
 super_resolution_result = super_resolution_model(
-    image="case_FLAIR.nii.gz",  # 输入：单幅 3D MRI 或 CT
-    ct=False,  # False 按 MRI 强度处理
-    disable_flipping=False,  # 保留左右翻转测试增强
-    disable_sharpening=False,  # 保留输出锐化
+    image="case_FLAIR.nii.gz",  # 输入路径或nibabel SpatialImage
+    ct=False,  # 真实HU CT为True，MRI为False
+    disable_flipping=False,  # 保留左右翻转预测平均
+    disable_sharpening=False,  # 保留末端锐化
 )
-super_resolution_result.image.save(path="case_synthsr.nii.gz")  # 输出路径：1 mm 合成 T1w
+super_resolution_result.image.save(path="case_synthsr.nii.gz")  # 1 mm uint8量化图
 ```
 
-`result.image.data` 是写盘前量化为 `uint8` 的 0–255 体素，`result.image.affine` 描述 1 mm 输出网格。MGZ 经 nibabel 保存后重新读入会报告 `float32` 存储类型，数值仍是这组量化值。构造时加载一次权重，可复用于后续单被试调用。接口参数、原版 `mri_synthsr` 对应关系、权重和输出格式见[完整说明](../../../docs/synthsr/README.md)。
+`result.image.data` 为0–255 uint8，`result.image.float_data` 为NPZ使用的量化前浮点，`result.image.affine` 描述1 mm输出RAS网格；MGZ保存后读取报告float32，但数值仍是量化值。构造只加载一次权重。完整七节说明包含每个参数、所有输入输出、CLI、原软件命令、最新版及历史精度/时间、脑图和文献，见[功能说明](../../../docs/synthsr/README.md)。
 
-2026-09-27 当时默认 TF32 和 Nibabel I/O 已在 12 幅真实临床 T1w 上重跑。对原版 CPU，shape、`uint8` 和 affine 全部一致，平均 MAE 为 0.02314 灰度级；GPU 完整命令中位数为 14.45 s。源码树 SHA-256 为 `7b5bc19e1afa806fe8698ea70b6358bacaab23b19877d20d21d2e7c5f3560543`，Torch 显存 allocated 峰值为 13,780 MiB。该历史命令、逐例指标和公开图见[完整说明](../../../docs/synthsr/README.md)与[验证记录](../../../validation/synthsr/README.md)。
+旧nodecw10的9参数/7域格式量化记录及默认浮点3,522点失败保留为修复前历史，[历史报告](../../../validation/smri_cpu/strip_sr_20261004/README.md)不代替本轮候选验收。较早ELU和Eigen完整原型未通过原浮点门，未接入生产。

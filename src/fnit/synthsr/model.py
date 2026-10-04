@@ -36,6 +36,11 @@ class SynthSRUNet(nn.Module):
         self.likelihood = nn.Conv3d(channels[0], 1, 1)
 
     def forward(self, image):
+        if image.device.type == "cpu" and image.dtype == torch.float32 and not torch.is_grad_enabled():
+            from ._cpu_inference import cpu_forward_if_supported
+            output = cpu_forward_if_supported(self, image)
+            if output is not None:
+                return output
         skips = []
         value = image
         for level, (convs, norm) in enumerate(zip(self.down, self.down_bn)):

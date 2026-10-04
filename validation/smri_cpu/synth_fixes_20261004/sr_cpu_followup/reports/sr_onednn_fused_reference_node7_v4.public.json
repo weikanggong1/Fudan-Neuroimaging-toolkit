@@ -1,0 +1,59 @@
+{
+  "report": {
+    "arm": "reference",
+    "scope": "Isolated explicitly fused oneDNN op on one captured complete real SR layer.\n\nThe input is the previously captured first ELU, not a replacement whole-graph\noracle. Both the fused Conv+Bias and fused Conv+Bias+ELU are separate graphs.\n",
+    "input_file_sha256": "0b42081d6940cf1e6c26cf7ff87b22724bfdf5ed2f99ade6926b6520946c425b",
+    "input_array_sha256": "9ff36584bbedefc43d9749b09105390b963dd09ccc47ec92d83d97f1b4e9f0f9",
+    "driver_sha256": "98f01b7f0a3f1f44055fc9840f2385d1aa901dd6a4ebb4e326515f840c018ed3",
+    "stages": {
+      "raw": {
+        "seconds": 1.440313438884914,
+        "array_sha256": "17cd7290c83a730b547a880a6db56cf64ac1c405e44a179967bdfe7efe2cd7b3",
+        "fused_ops": [
+          "BiasAdd"
+        ],
+        "shape": [
+          1,
+          24,
+          192,
+          224,
+          256
+        ],
+        "kernel_label": "MklNameChangeOp"
+      },
+      "elu": {
+        "seconds": 1.1964027164503932,
+        "array_sha256": "04795563e1d371f3fe1b9306d4c6b717b154c54bf3f3f5391e2286bdacdee980",
+        "fused_ops": [
+          "BiasAdd",
+          "Elu"
+        ],
+        "shape": [
+          1,
+          24,
+          192,
+          224,
+          256
+        ],
+        "kernel_label": "MklNameChangeOp"
+      }
+    },
+    "tensorflow_version": "2.13.1",
+    "registered_op_definition": "name: \"_MklNativeFusedConv3D\"\ninput_arg {\n  name: \"input\"\n  type_attr: \"T\"\n}\ninput_arg {\n  name: \"filter\"\n  type_attr: \"T\"\n}\ninput_arg {\n  name: \"args\"\n  type_attr: \"T\"\n  number_attr: \"num_args\"\n}\noutput_arg {\n  name: \"output\"\n  type_attr: \"T\"\n}\nattr {\n  name: \"T\"\n  type: \"type\"\n  allowed_values {\n    list {\n      type: DT_BFLOAT16\n      type: DT_FLOAT\n    }\n  }\n}\nattr {\n  name: \"num_args\"\n  type: \"int\"\n  has_minimum: true\n}\nattr {\n  name: \"strides\"\n  type: \"list(int)\"\n  has_minimum: true\n  minimum: 5\n}\nattr {\n  name: \"is_filter_const\"\n  type: \"bool\"\n  default_value {\n    b: false\n  }\n}\nattr {\n  name: \"padding\"\n  type: \"string\"\n  allowed_values {\n    list {\n      s: \"SAME\"\n      s: \"VALID\"\n    }\n  }\n}\nattr {\n  name: \"data_format\"\n  type: \"string\"\n  default_value {\n    s: \"NDHWC\"\n  }\n  allowed_values {\n    list {\n      s: \"NDHWC\"\n      s: \"NCDHW\"\n    }\n  }\n}\nattr {\n  name: \"dilations\"\n  type: \"list(int)\"\n  default_value {\n    list {\n      i: 1\n      i: 1\n      i: 1\n      i: 1\n      i: 1\n    }\n  }\n}\nattr {\n  name: \"padding_list\"\n  type: \"list(int)\"\n  default_value {\n    list {\n    }\n  }\n}\nattr {\n  name: \"fused_ops\"\n  type: \"list(string)\"\n  default_value {\n    list {\n    }\n  }\n}\nattr {\n  name: \"epsilon\"\n  type: \"float\"\n  default_value {\n    f: 0.0001\n  }\n}\nattr {\n  name: \"leakyrelu_alpha\"\n  type: \"float\"\n  default_value {\n    f: 0.2\n  }\n}\n",
+    "actual_execution_event_names": [
+      "isolated_fused_reference:_MklNativeFusedConv3D"
+    ],
+    "status": "complete"
+  },
+  "oneDNN_verbose_lines": [
+    "onednn_verbose,info,oneDNN v2.7.3 (commit N/A)",
+    "onednn_verbose,info,cpu,runtime:threadpool,nthr:8",
+    "onednn_verbose,info,cpu,isa:Intel AVX-512 with float16, Intel DL Boost and bfloat16 support ",
+    "onednn_verbose,info,gpu,runtime:none",
+    "onednn_verbose,info,prim_template:operation,engine,primitive,implementation,prop_kind,memory_descriptors,attributes,auxiliary,problem_desc,exec_time",
+    "onednn_verbose,exec,cpu,reorder,jit:uni,undef,src_f32::blocked:cdeba:f0 dst_f32:p:blocked:Acdeb32a:f0,,,24x24x3x3x3,0.0839844",
+    "onednn_verbose,exec,cpu,convolution,brgconv:avx512_core,forward_training,src_f32::blocked:acdeb:f0 wei_f32:p:blocked:Acdeb32a:f0 bia_f32::blocked:a:f0 dst_f32::blocked:acdeb:f0,attr-scratchpad:user ,alg:convolution_direct,mb1_ic24oc24_id192od192kd3sd1dd0pd1_ih224oh224kh3sh1dh0ph1_iw256ow256kw3sw1dw0pw1,764.075",
+    "onednn_verbose,exec,cpu,reorder,jit:uni,undef,src_f32::blocked:cdeba:f0 dst_f32:p:blocked:Acdeb32a:f0,,,24x24x3x3x3,0.072998",
+    "onednn_verbose,exec,cpu,convolution,brgconv:avx512_core,forward_training,src_f32::blocked:acdeb:f0 wei_f32:p:blocked:Acdeb32a:f0 bia_f32::blocked:a:f0 dst_f32::blocked:acdeb:f0,attr-scratchpad:user attr-post-ops:eltwise_elu:1 ,alg:convolution_direct,mb1_ic24oc24_id192od192kd3sd1dd0pd1_ih224oh224kh3sh1dh0ph1_iw256ow256kw3sw1dw0pw1,635.191"
+  ]
+}

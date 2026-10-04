@@ -1,0 +1,202 @@
+{
+  "scope": "candidate-only complete real function API, original saved uint8 oracle; no reference rerun",
+  "host": "nodecw7",
+  "cpu_affinity": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    28
+  ],
+  "torch_threads": 8,
+  "torch_version": "2.5.1",
+  "source_sha256": {
+    "model.py": "aa8c577eb728b68b90aa7703153c7156c3bad61e78e5803d0f295b94d60452b5",
+    "_cpu_inference.py": "2cbcbbf65b87c827bf7fa3665a508a4be5b1844d1de8474b1da1d1a1e430a148",
+    "_cpu_math.py": "b643d821b1c84d746656deb6809799dbd18a279dc82a000e710dfae9d9add18e"
+  },
+  "driver_sha256": "ab55f27f53b1ddf4b1d70f7be54c517c9da0c5671d7a80293bb8747f5e38a224",
+  "cases": [
+    {
+      "case": "case01_sr_v1",
+      "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+      "weight_size_bytes": 53075984,
+      "weight_sha256": "2fd59e96196388360eba95254fb6dfc9eb9eb8638018b590575e47e0a387f255",
+      "reference_file_sha256": "2608906ef657e2cc61c03f9c3c19698164a17aa0d49d31cd0b0d2aee798bebf5",
+      "output_file_sha256": "2608906ef657e2cc61c03f9c3c19698164a17aa0d49d31cd0b0d2aee798bebf5",
+      "options": {
+        "v1": true,
+        "lowfield": false,
+        "disable_flipping": false,
+        "disable_sharpening": false
+      },
+      "shape": [
+        180,
+        224,
+        225
+      ],
+      "dtype": "uint8",
+      "count": 9072000,
+      "different": 0,
+      "max_abs": 0,
+      "mae": 0.0,
+      "affine_exact": true,
+      "dtype_exact": true,
+      "old_different": 520,
+      "fixed_quantized_gate": {
+        "exact_fraction_min": 0.9999,
+        "max_abs_max": 1,
+        "mae_max": 0.0001,
+        "passes": true
+      },
+      "floating_gate": "not_assessed: no saved original per-function floating oracle",
+      "constructor_seconds": 17.38452946115285,
+      "api_seconds": 25.13763632811606,
+      "load_after": [
+        25.16,
+        25.45,
+        26.18
+      ],
+      "raw_pre_save_affine_exact": false,
+      "header_exact": true
+    },
+    {
+      "case": "case01_sr_lowfield_model",
+      "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+      "weight_size_bytes": 106163752,
+      "weight_sha256": "a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84",
+      "reference_file_sha256": "79214d18ed9a3d25e9da7bb5424b967a04e5e067e14dba92b65f61713a8d0fde",
+      "output_file_sha256": "79214d18ed9a3d25e9da7bb5424b967a04e5e067e14dba92b65f61713a8d0fde",
+      "options": {
+        "v1": false,
+        "lowfield": true,
+        "disable_flipping": false,
+        "disable_sharpening": false
+      },
+      "shape": [
+        180,
+        224,
+        225
+      ],
+      "dtype": "uint8",
+      "count": 9072000,
+      "different": 0,
+      "max_abs": 0,
+      "mae": 0.0,
+      "affine_exact": true,
+      "dtype_exact": true,
+      "old_different": 628,
+      "fixed_quantized_gate": {
+        "exact_fraction_min": 0.9999,
+        "max_abs_max": 1,
+        "mae_max": 0.0001,
+        "passes": true
+      },
+      "floating_gate": "not_assessed: no saved original per-function floating oracle",
+      "constructor_seconds": 0.38660720735788345,
+      "api_seconds": 20.53465082682669,
+      "load_after": [
+        24.91,
+        25.35,
+        26.13
+      ],
+      "raw_pre_save_affine_exact": false,
+      "header_exact": true
+    },
+    {
+      "case": "case01_sr_no_flip",
+      "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+      "weight_size_bytes": 106163752,
+      "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+      "reference_file_sha256": "26883d6f1652ba8da9033843a4cd5c272b8ec36d3ec05d7112a854f8993411f4",
+      "output_file_sha256": "26883d6f1652ba8da9033843a4cd5c272b8ec36d3ec05d7112a854f8993411f4",
+      "options": {
+        "v1": false,
+        "lowfield": false,
+        "disable_flipping": true,
+        "disable_sharpening": false
+      },
+      "shape": [
+        180,
+        224,
+        225
+      ],
+      "dtype": "uint8",
+      "count": 9072000,
+      "different": 0,
+      "max_abs": 0,
+      "mae": 0.0,
+      "affine_exact": true,
+      "dtype_exact": true,
+      "old_different": 668,
+      "fixed_quantized_gate": {
+        "exact_fraction_min": 0.9999,
+        "max_abs_max": 1,
+        "mae_max": 0.0001,
+        "passes": true
+      },
+      "floating_gate": "not_assessed: no saved original per-function floating oracle",
+      "constructor_seconds": 0.7691681385040283,
+      "api_seconds": 13.995636779814959,
+      "load_after": [
+        24.85,
+        25.31,
+        26.1
+      ],
+      "raw_pre_save_affine_exact": false,
+      "header_exact": true
+    },
+    {
+      "case": "case01_sr_no_sharpen",
+      "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+      "weight_size_bytes": 106163752,
+      "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+      "reference_file_sha256": "6935da5440a7874083901e04a0d2c636a87217b8246b9cd893eea15e7759eb7e",
+      "output_file_sha256": "6935da5440a7874083901e04a0d2c636a87217b8246b9cd893eea15e7759eb7e",
+      "options": {
+        "v1": false,
+        "lowfield": false,
+        "disable_flipping": false,
+        "disable_sharpening": true
+      },
+      "shape": [
+        180,
+        224,
+        225
+      ],
+      "dtype": "uint8",
+      "count": 9072000,
+      "different": 0,
+      "max_abs": 0,
+      "mae": 0.0,
+      "affine_exact": true,
+      "dtype_exact": true,
+      "old_different": 397,
+      "fixed_quantized_gate": {
+        "exact_fraction_min": 0.9999,
+        "max_abs_max": 1,
+        "mae_max": 0.0001,
+        "passes": true
+      },
+      "floating_gate": "not_assessed: no saved original per-function floating oracle",
+      "constructor_seconds": 0.24788365047425032,
+      "api_seconds": 19.30853912141174,
+      "load_after": [
+        24.97,
+        25.29,
+        26.08
+      ],
+      "raw_pre_save_affine_exact": false,
+      "header_exact": true
+    }
+  ],
+  "maximum_rss_bytes": 7487512576,
+  "all_passed": true,
+  "status": "complete",
+  "raw_harness_report_sha256": "b52aa1333e856daaf2022509902f1ae63b281476dcd434b54b888ab3550e06aa",
+  "posthoc_collector_sha256": "f0517952fe3457e87042e137a49b86195e8007d215d19d3fb19f6182e224e204",
+  "scoring_correction": "Compare saved candidate/reference NIfTI affine/header at the same serialization boundary. Raw v1 pre-save float64 affine flags retained separately; no repeated inference."
+}

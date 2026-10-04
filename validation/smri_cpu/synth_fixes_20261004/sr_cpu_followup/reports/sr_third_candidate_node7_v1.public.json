@@ -1,0 +1,81 @@
+{
+  "arm": "candidate",
+  "driver_sha256": "09fe375779912abd00030e6000396fc0688921612726958e5632246704dfea30",
+  "input_bn_sha256": "1bdc063c109dbaa9438b5aac8728941f611464876ce8e5163cda738e5768e417",
+  "scope": "full first maxpool and next 24-to-48 convolution; not complete inference timing",
+  "results": {
+    "contiguous": {
+      "pool": {
+        "count": 33030144,
+        "different": 0,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0
+      },
+      "convolution_seconds": 0.3132189726457,
+      "raw": {
+        "count": 66060288,
+        "different": 61475729,
+        "mae": 6.990727429645989e-07,
+        "rmse": 1.1163878773141105e-06,
+        "max_abs": 6.103515625e-05
+      },
+      "elu": {
+        "count": 66060288,
+        "different": 56445062,
+        "mae": 4.453592165272667e-07,
+        "rmse": 7.181094946365242e-07,
+        "max_abs": 3.4332275390625e-05
+      }
+    },
+    "channels_last": {
+      "pool": {
+        "count": 33030144,
+        "different": 0,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0
+      },
+      "convolution_seconds": 0.17041897773742676,
+      "raw": {
+        "count": 66060288,
+        "different": 0,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0
+      },
+      "elu": {
+        "count": 66060288,
+        "different": 0,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0
+      }
+    },
+    "channels_last_no_mkldnn": {
+      "pool": {
+        "count": 33030144,
+        "different": 0,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "max_abs": 0.0
+      },
+      "convolution_seconds": 1.1560826245695353,
+      "raw": {
+        "count": 66060288,
+        "different": 61729365,
+        "mae": 7.97167035661449e-07,
+        "rmse": 1.3070056359469908e-06,
+        "max_abs": 6.866455078125e-05
+      },
+      "elu": {
+        "count": 66060288,
+        "different": 56772609,
+        "mae": 4.944413494899368e-07,
+        "rmse": 8.041649692464901e-07,
+        "max_abs": 4.57763671875e-05
+      }
+    }
+  },
+  "status": "complete"
+}

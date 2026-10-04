@@ -1,0 +1,185 @@
+{
+  "schema": "fnit.synthsr.cpu.reference_fix.v1",
+  "base_commit": "626cab69555b2c281245268cf2f948da3a2cbb82",
+  "frozen_production_source": "source_sr_v2",
+  "source_sha256": {
+    "model.py": "aa8c577eb728b68b90aa7703153c7156c3bad61e78e5803d0f295b94d60452b5",
+    "pipeline.py": "c896d8e2e4a1a214546e6674ce3aacdcf84906d1b2010b5397ec1b076f502943",
+    "spatial.py": "962a2f0bd5b97db1f039efb67fa87d2f61aa5d8fc23512689f255b168b42dabe",
+    "_cpu_inference.py": "2cbcbbf65b87c827bf7fa3665a508a4be5b1844d1de8474b1da1d1a1e430a148",
+    "_cpu_math.py": "b643d821b1c84d746656deb6809799dbd18a279dc82a000e710dfae9d9add18e",
+    "__init__.py": "6519a5e1986dab5333aff90c8fa6a1e5603d38b8442a84528aabb2742bb80c51"
+  },
+  "cuda_original_forward_ast_identical": true,
+  "new_dispatch_only": "CPU F32 no-grad prelude; original forward body unchanged",
+  "cpu_whole_oracle": [
+    "sr_production_cpu_abba_node7_v1_new1.public.json",
+    "sr_production_cpu_abba_node7_v1_new2.public.json"
+  ],
+  "default_cpu_full_cnn_values": 22020096,
+  "default_final_values": 9072000,
+  "default_cpu_float_different": 0,
+  "default_cpu_quantized_different": 0,
+  "fixed_float_gate": {
+    "rtol": 1e-05,
+    "atol": 0.001,
+    "failed_values_old": 3522,
+    "failed_values_new": 0
+  },
+  "gpu_cnn_final_headers_files_exact_to_original": true,
+  "gpu_allocator_budget_bytes": 20000000000,
+  "gpu_peak_allocated_bytes": [
+    10006443008,
+    10006443008,
+    10006443008,
+    10006443008
+  ],
+  "gpu_peak_reserved_bytes": [
+    13845397504,
+    13845397504,
+    13845397504,
+    13845397504
+  ],
+  "cpu_normal_cli": {
+    "official": {
+      "gnu_wall_seconds": [
+        148.68,
+        75.17
+      ],
+      "median_seconds": 111.92500000000001
+    },
+    "old": {
+      "gnu_wall_seconds": [
+        28.24,
+        29.08
+      ],
+      "median_seconds": 28.659999999999997
+    },
+    "new": {
+      "gnu_wall_seconds": [
+        29.91,
+        26.77
+      ],
+      "median_seconds": 28.34
+    }
+  },
+  "gpu_normal_cli": {
+    "old": {
+      "gnu_wall_seconds": [
+        12.14,
+        11.25
+      ],
+      "median_seconds": 11.695
+    },
+    "new": {
+      "gnu_wall_seconds": [
+        11.36,
+        11.29
+      ],
+      "median_seconds": 11.325
+    }
+  },
+  "performance_conclusion": "Normal CPU old/new is approximately unchanged, with lower peak RSS. Original CLI GPFS/cold-import variation and shared GPU97-100% load preclude a stable general speedup assertion.",
+  "local_focused_tests": {
+    "passed": 22,
+    "skipped": 3,
+    "seconds": 15.31
+  },
+  "parent_independent_focused_tests": {
+    "passed": 22,
+    "skipped": 3,
+    "seconds": 10.23
+  },
+  "dtype": "FP32; unchanged TF32 default on CUDA",
+  "dependencies": "existing NumBa/LLVM; no new dependency or production TensorFlow",
+  "production_parameters_state_stride_rng_unchanged": "focused tests; actual CUDA weight strides identical",
+  "status": "complete: default CPU precision, original CUDA preservation, four CPU modes and six unique real-domain gates passed",
+  "additional_cpu_function_gate": {
+    "report": "sr_functions_node7_v2.public.json",
+    "all_passed": true,
+    "quantized_different": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "modes": [
+      "case01_sr_v1",
+      "case01_sr_lowfield_model",
+      "case01_sr_no_flip",
+      "case01_sr_no_sharpen"
+    ]
+  },
+  "additional_cpu_domain_gate": {
+    "report": "sr_domains_node7_v1.public.json",
+    "all_passed": true,
+    "cases": [
+      {
+        "case": "case02_synthsr_default",
+        "different": 0,
+        "max_abs": 0.0,
+        "fixed_original_gate": {
+          "exact_fraction_min": 0.9999,
+          "max_abs_max": 1,
+          "mae_max": 0.0001,
+          "passes": true
+        }
+      },
+      {
+        "case": "flair_sr_default",
+        "different": 0,
+        "max_abs": 0.0,
+        "fixed_original_gate": {
+          "exact_fraction_min": 0.9999,
+          "max_abs_max": 1,
+          "mae_max": 0.0001,
+          "passes": true
+        }
+      },
+      {
+        "case": "true_ct_sr",
+        "different": 0,
+        "max_abs": 0.0,
+        "fixed_original_gate": {
+          "exact_fraction_min": 0.9999,
+          "max_abs_max": 1,
+          "mae_max": 0.0001,
+          "passes": true
+        }
+      },
+      {
+        "case": "true_lowfield_sr",
+        "different": 0,
+        "max_abs": 0.0,
+        "fixed_original_gate": {
+          "exact_fraction_min": 0.9999,
+          "max_abs_max": 1,
+          "mae_max": 0.0001,
+          "passes": true
+        }
+      },
+      {
+        "case": "real_epi_first_channel_sr",
+        "different": 0,
+        "max_abs": 0.0,
+        "fixed_original_gate": {
+          "exact_fraction_min": 0.9999,
+          "max_abs_max": 1,
+          "mae_max": 0.0001,
+          "passes": true
+        }
+      },
+      {
+        "case": "real_epi_npz_sr",
+        "different": 922432,
+        "max_abs": 0.000339508056640625,
+        "fixed_original_gate": {
+          "rtol": 1e-05,
+          "atol": 0.001,
+          "failed_values": 0,
+          "passes": true
+        }
+      }
+    ]
+  }
+}
