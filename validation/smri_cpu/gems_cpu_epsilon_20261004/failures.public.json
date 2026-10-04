@@ -1,0 +1,31 @@
+{
+  "failures": [
+    {
+      "scope": "postfit figure rendering only; recipe already completed and scored",
+      "script": "private cpu-epsilon-v1/plot_stage.py (existing validation helper)",
+      "exception": "ModuleNotFoundError: No module named matplotlib",
+      "action": "export actual public-subject 2D slices through nibabel; render with existing local matplotlib; no environment or prefix mutation"
+    },
+    {
+      "scope": "read-only remote status request; no fit command or signal",
+      "host_route": "cpu7 via persistent head socket",
+      "timeout_seconds": 60,
+      "exception": "subprocess.TimeoutExpired",
+      "action": "preserve frozen server queue; verify head route separately"
+    },
+    {
+      "scope": "read-only hostname/id/collector status request",
+      "host_route": "head persistent socket",
+      "timeout_seconds": 30,
+      "exception": "subprocess.TimeoutExpired",
+      "action": "ssh -O check confirms only local master PID alive; no master reset or socket deletion; parent notified; current server fit status unverified after last successful read"
+    },
+    {
+      "scope": "read-only queue/collector status after parent-requested 60s backoff; one serial request",
+      "host_route": "cpu7 via persistent head socket",
+      "timeout_seconds": 90,
+      "exception": "subprocess.TimeoutExpired",
+      "action": "parent notified; defer further reads to avoid shared-route contention; no signal/source/socket mutation"
+    }
+  ]
+}

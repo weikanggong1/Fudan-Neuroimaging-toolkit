@@ -1,0 +1,15 @@
+{
+  "scope": "Explicit dense guard only after cpu-epsilon-v1 source freeze; original freeze preserved",
+  "source_changes": {
+    "fnit/gems/core.py": {
+      "frozen_recipe_sha256": "7f7c5eaa5bd56e32af52afd86bb0b35edb469b70aba2a50d30215554b89b5d77",
+      "local_final_sha256": "fb8c6030517bec5fd77abe85c318b1ae0df7fa5b4c4accff261ad371e6d3ffdd"
+    }
+  },
+  "equivalence_reason": "All four frozen recipes use compact=True/None. Added and compact is not False is True on every accepted input, before all numerical operations. Dense request remains on its original FP32 geometry path. CUDA first condition remains False.",
+  "focused_tests": {
+    "first_run": "38 passed, 16.82s; shared geometry/backtracking/precision and five new floor/owner tests including actual RTX3060 CUDA",
+    "guard_and_nonzero_run": "7 passed, 7.73s; complete epsilon derivative, CUDA exact cost+gradient, original FP32 owners, mixed nonzero prior, dense output dtypes"
+  },
+  "full_recipe_result_status": "running; no stable speed or complete segmentation equivalence claim"
+}

@@ -1,0 +1,887 @@
+{
+  "schema": "fnit.gems.cpu-epsilon.recipe-score.v1",
+  "scope": "fixed saved real norm/aseg/wmparc recipe; official fine labels loaded only after fitting",
+  "threshold": {"dice_minimum": 0.95, "hard_volume_relative_error_maximum": 0.05},
+  "both_empty_dice": null,
+  "baseline": {
+    "groups": [
+      {
+        "id": "brainstem_native",
+        "family": "brainstem",
+        "space": "native",
+        "grid": {
+          "shape": [256, 256, 256],
+          "affine": [
+            [-1.0, 0.0, 6.198881408181478e-10, 126.04774475097656],
+            [0.0, -1.4551915228366852e-11, 1.0, -105.93548583984375],
+            [-1.862645149230957e-09, -1.0, -1.8189894035458565e-12, 119.63069152832031],
+            [0.0, 0.0, 0.0, 1.0]
+          ],
+          "voxel_volume_mm3": 1.0,
+          "definition": {"like": "/cwStorage/home/gongwk/Notebook_code/FNIT/legacy/freesurfer_synth/work/fnit_subregions_unified_20260930/ten_public_t1_20261002/cases/sub-02/official/subjects/sub-02/mri/norm.mgz"},
+          "metric_crop_start": [106, 120, 102],
+          "metric_crop_stop": [151, 186, 142],
+          "metric_crop_rule": "Common union foreground bbox; removed voxels are background in every run, so all label counts/Dice/Jaccard/mismatch metrics are unchanged."
+        },
+        "runs": [
+          {
+            "method": "official",
+            "id": "official_frozen",
+            "labels": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/task5_official_stage_v1/brainstem/brainstemSsLabels.FSvoxelSpace.mgz",
+            "label_image_sha256": "95d7f37151e41cf3fff133bde82df2c26b53254078e7577ead1d28a1d930683c",
+            "label_image_bytes": 93235,
+            "resampled_array_sha256": "e8b4d03130dcf8ff25e07c873197e15d98848db33440b7537aefe5769f411f25",
+            "label_offset": 0,
+            "provenance": {},
+            "label_voxels": {"173": 5919, "174": 14241, "175": 4104, "178": 210},
+            "soft_volumes_mm3": {"175": 4161.573316, "174": 14232.999004, "178": 243.035903, "173": 5902.959985}
+          },
+          {
+            "method": "fnit",
+            "id": "candidate",
+            "labels": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/remaining_20261004/gems/nodecw7-cache-v1/baseline-f1cbdab/artifacts/subregions_native.nii.gz",
+            "label_image_sha256": "f9cfbf19aaf9589ad82c508a4ae8f38c2b1259731f274d6afe88b303e60ace88",
+            "label_image_bytes": 304308,
+            "resampled_array_sha256": "f9fc5d6d714a4333bad89f32dc23d4fbd9683d7d5b6ad0e53191ebdce77145ef",
+            "label_offset": 0,
+            "provenance": {},
+            "label_voxels": {"173": 5913, "174": 14169, "175": 4081, "178": 217},
+            "soft_volumes_mm3": {"175": 4049.60595703125, "174": 14154.0986328125, "178": 244.5865020751953, "173": 5894.04833984375}
+          }
+        ],
+        "warnings": ["official: fewer than three independent runs", "official: run provenance missing; caller must verify identical input/source/config", "fnit: fewer than three independent runs", "fnit: run provenance missing; caller must verify identical input/source/config"],
+        "pairs": [
+          {
+            "kind": "cross_method",
+            "first": "official_frozen",
+            "second": "candidate",
+            "different_voxels": 173,
+            "foreground_dice": 0.9969296270520326,
+            "symmetric_volume_weighted_label_dice": 0.995988046014656,
+            "first_reference_volume_weighted_label_dice": 0.9959937848215811,
+            "mean_label_dice": 0.9881430746942084,
+            "evaluated_labels": 4,
+            "both_empty_labels": 0,
+            "regions": [
+              {"label": 173, "first_voxels": 5919, "second_voxels": 5913, "intersection_voxels": 5885, "different_voxels": 62, "dice": 0.9947599729546991, "jaccard": 0.9895745754161762, "hard_status": "evaluated", "hard_volume_difference_mm3": 6.0, "hard_volume_relative_difference": 0.0010141987829614604, "first_soft_volume_mm3": 5902.959985, "second_soft_volume_mm3": 5894.04833984375, "soft_volume_difference_mm3": 8.911645156250415, "soft_volume_relative_difference": 0.0015108313753552341, "name": "Midbrain", "hard_volume_relative_to_official": 0.0010136847440446021, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 174, "first_voxels": 14241, "second_voxels": 14169, "intersection_voxels": 14162, "different_voxels": 86, "dice": 0.9969728968673003, "jaccard": 0.9939640651319483, "hard_status": "evaluated", "hard_volume_difference_mm3": 72.0, "hard_volume_relative_difference": 0.005068637803590285, "first_soft_volume_mm3": 14232.999004, "second_soft_volume_mm3": 14154.0986328125, "soft_volume_difference_mm3": 78.90037118749933, "soft_volume_relative_difference": 0.005558889619288238, "name": "Pons", "hard_volume_relative_to_official": 0.005055824731409311, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 175, "first_voxels": 4104, "second_voxels": 4081, "intersection_voxels": 4076, "different_voxels": 33, "dice": 0.9959682345754429, "jaccard": 0.9919688488683378, "hard_status": "evaluated", "hard_volume_difference_mm3": 23.0, "hard_volume_relative_difference": 0.00562003665241295, "first_soft_volume_mm3": 4161.573316, "second_soft_volume_mm3": 4049.60595703125, "soft_volume_difference_mm3": 111.96735896874998, "soft_volume_relative_difference": 0.027271931410995966, "name": "Medulla", "hard_volume_relative_to_official": 0.005604288499025341, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 178, "first_voxels": 210, "second_voxels": 217, "intersection_voxels": 206, "different_voxels": 15, "dice": 0.9648711943793911, "jaccard": 0.9321266968325792, "hard_status": "evaluated", "hard_volume_difference_mm3": 7.0, "hard_volume_relative_difference": 0.03278688524590164, "first_soft_volume_mm3": 243.035903, "second_soft_volume_mm3": 244.5865020751953, "soft_volume_difference_mm3": 1.550599075195322, "soft_volume_relative_difference": 0.006359835229294713, "name": "SCP", "hard_volume_relative_to_official": 0.03333333333333333, "preexisting_gate_passed": true, "nonempty": true}
+            ]
+          }
+        ],
+        "pair_summary": {
+          "official_repeat": {
+            "different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "first_reference_weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null}
+          },
+          "fnit_repeat": {
+            "different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "first_reference_weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null}
+          },
+          "cross_method": {
+            "different_voxels": {"n": 1, "min": 173.0, "median": 173.0, "mean": 173.0, "max": 173.0},
+            "weighted_label_dice": {"n": 1, "min": 0.995988046014656, "median": 0.995988046014656, "mean": 0.995988046014656, "max": 0.995988046014656},
+            "first_reference_weighted_label_dice": {"n": 1, "min": 0.9959937848215811, "median": 0.9959937848215811, "mean": 0.9959937848215811, "max": 0.9959937848215811}
+          }
+        },
+        "regions": [
+          {
+            "label": 173,
+            "name": "Midbrain",
+            "official_voxels": [5919],
+            "fnit_voxels": [5913],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9947599729546991, "median": 0.9947599729546991, "mean": 0.9947599729546991, "max": 0.9947599729546991},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 62.0, "median": 62.0, "mean": 62.0, "max": 62.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9895745754161762, "median": 0.9895745754161762, "mean": 0.9895745754161762, "max": 0.9895745754161762},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.0015108313753552341, "median": 0.0015108313753552341, "mean": 0.0015108313753552341, "max": 0.0015108313753552341},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 8.911645156250415, "median": 8.911645156250415, "mean": 8.911645156250415, "max": 8.911645156250415},
+            "official_soft_volumes_mm3": [5902.959985],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [5894.04833984375],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 174,
+            "name": "Pons",
+            "official_voxels": [14241],
+            "fnit_voxels": [14169],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9969728968673003, "median": 0.9969728968673003, "mean": 0.9969728968673003, "max": 0.9969728968673003},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 86.0, "median": 86.0, "mean": 86.0, "max": 86.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9939640651319483, "median": 0.9939640651319483, "mean": 0.9939640651319483, "max": 0.9939640651319483},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.005558889619288238, "median": 0.005558889619288238, "mean": 0.005558889619288238, "max": 0.005558889619288238},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 78.90037118749933, "median": 78.90037118749933, "mean": 78.90037118749933, "max": 78.90037118749933},
+            "official_soft_volumes_mm3": [14232.999004],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [14154.0986328125],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 175,
+            "name": "Medulla",
+            "official_voxels": [4104],
+            "fnit_voxels": [4081],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9959682345754429, "median": 0.9959682345754429, "mean": 0.9959682345754429, "max": 0.9959682345754429},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 33.0, "median": 33.0, "mean": 33.0, "max": 33.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9919688488683378, "median": 0.9919688488683378, "mean": 0.9919688488683378, "max": 0.9919688488683378},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.027271931410995966, "median": 0.027271931410995966, "mean": 0.027271931410995966, "max": 0.027271931410995966},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 111.96735896874998, "median": 111.96735896874998, "mean": 111.96735896874998, "max": 111.96735896874998},
+            "official_soft_volumes_mm3": [4161.573316],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [4049.60595703125],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 178,
+            "name": "SCP",
+            "official_voxels": [210],
+            "fnit_voxels": [217],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9648711943793911, "median": 0.9648711943793911, "mean": 0.9648711943793911, "max": 0.9648711943793911},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 15.0, "median": 15.0, "mean": 15.0, "max": 15.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9321266968325792, "median": 0.9321266968325792, "mean": 0.9321266968325792, "max": 0.9321266968325792},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.006359835229294713, "median": 0.006359835229294713, "mean": 0.006359835229294713, "max": 0.006359835229294713},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 1.550599075195322, "median": 1.550599075195322, "mean": 1.550599075195322, "max": 1.550599075195322},
+            "official_soft_volumes_mm3": [243.035903],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [244.5865020751953],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          }
+        ],
+        "gate_summary": {"pass": 4, "nonempty": 4, "both_empty": 0, "all_nonempty_passed": true}
+      },
+      {
+        "id": "brainstem_hr",
+        "family": "brainstem",
+        "space": "hr",
+        "grid": {
+          "shape": [144, 194, 156],
+          "affine": [
+            [-0.5, 0.0, 3.099440704090739e-10, 33.04774475097656],
+            [0.0, -7.275957614183426e-12, 0.5, -18.93548583984375],
+            [-9.313225746154785e-10, -0.5, -9.094947017729282e-13, 14.630691536702216],
+            [0.0, 0.0, 0.0, 1.0]
+          ],
+          "voxel_volume_mm3": 0.12500000000000003,
+          "definition": {"union_like": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/task5_official_stage_v1/brainstem/brainstemSsLabels.mgz"},
+          "metric_crop_start": [26, 30, 29],
+          "metric_crop_stop": [116, 161, 110],
+          "metric_crop_rule": "Common union foreground bbox; removed voxels are background in every run, so all label counts/Dice/Jaccard/mismatch metrics are unchanged."
+        },
+        "runs": [
+          {
+            "method": "official",
+            "id": "official_frozen",
+            "labels": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/task5_official_stage_v1/brainstem/brainstemSsLabels.mgz",
+            "label_image_sha256": "09953264324c9bb40d53ecbf489660f8eb66af9a97487249792cbbadd8a355fa",
+            "label_image_bytes": 62129,
+            "resampled_array_sha256": "aae307e17e1f876236f1c9577a08c8cf105927c1c544a23ee07a83aefeca70b2",
+            "label_offset": 0,
+            "provenance": {},
+            "label_voxels": {"173": 47457, "174": 113938, "175": 32522, "178": 1734},
+            "soft_volumes_mm3": {"175": 4161.573316, "174": 14232.999004, "178": 243.035903, "173": 5902.959985}
+          },
+          {
+            "method": "fnit",
+            "id": "candidate",
+            "labels": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/remaining_20261004/gems/nodecw7-cache-v1/baseline-f1cbdab/artifacts/highres/brainstem.nii.gz",
+            "label_image_sha256": "73d2ddc3a72e6c8da01ea01d61754facc4628e054b3549692bb0fd128c465cfe",
+            "label_image_bytes": 124935,
+            "resampled_array_sha256": "e1d19e5aac6c47213faa3f7eab2d1b64624ef1a7b95e192c5b0383fcb1e13bfc",
+            "label_offset": 0,
+            "provenance": {},
+            "label_voxels": {"173": 47352, "174": 113397, "175": 32316, "178": 1744},
+            "soft_volumes_mm3": {"175": 4049.60595703125, "174": 14154.0986328125, "178": 244.5865020751953, "173": 5894.04833984375}
+          }
+        ],
+        "warnings": ["official: fewer than three independent runs", "official: run provenance missing; caller must verify identical input/source/config", "fnit: fewer than three independent runs", "fnit: run provenance missing; caller must verify identical input/source/config"],
+        "pairs": [
+          {
+            "kind": "cross_method",
+            "first": "official_frozen",
+            "second": "candidate",
+            "different_voxels": 1389,
+            "foreground_dice": 0.9968908466936434,
+            "symmetric_volume_weighted_label_dice": 0.9959944680633099,
+            "first_reference_volume_weighted_label_dice": 0.9959960386802146,
+            "mean_label_dice": 0.9891154507834066,
+            "evaluated_labels": 4,
+            "both_empty_labels": 0,
+            "regions": [
+              {"label": 173, "first_voxels": 47457, "second_voxels": 47352, "intersection_voxels": 47161, "different_voxels": 487, "dice": 0.994863356854307, "jaccard": 0.9897792142377434, "hard_status": "evaluated", "hard_volume_difference_mm3": 13.125000000000004, "hard_volume_relative_difference": 0.0022149795905452014, "first_soft_volume_mm3": 5902.959985, "second_soft_volume_mm3": 5894.04833984375, "soft_volume_difference_mm3": 8.911645156250415, "soft_volume_relative_difference": 0.0015108313753552341, "name": "Midbrain", "hard_volume_relative_to_official": 0.002212529236993489, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 174, "first_voxels": 113938, "second_voxels": 113397, "intersection_voxels": 113323, "different_voxels": 689, "dice": 0.9969692304308619, "jaccard": 0.9939567764796688, "hard_status": "evaluated", "hard_volume_difference_mm3": 67.62500000000001, "hard_volume_relative_difference": 0.004759495898123914, "first_soft_volume_mm3": 14232.999004, "second_soft_volume_mm3": 14154.0986328125, "soft_volume_difference_mm3": 78.90037118749933, "soft_volume_relative_difference": 0.005558889619288238, "name": "Pons", "hard_volume_relative_to_official": 0.004748196387508996, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 175, "first_voxels": 32522, "second_voxels": 32316, "intersection_voxels": 32279, "different_voxels": 280, "dice": 0.9956815447731269, "jaccard": 0.9914002272797076, "hard_status": "evaluated", "hard_volume_difference_mm3": 25.750000000000007, "hard_volume_relative_difference": 0.006354298405256177, "first_soft_volume_mm3": 4161.573316, "second_soft_volume_mm3": 4049.60595703125, "soft_volume_difference_mm3": 111.96735896874998, "soft_volume_relative_difference": 0.027271931410995966, "name": "Medulla", "hard_volume_relative_to_official": 0.006334173790049812, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 178, "first_voxels": 1734, "second_voxels": 1744, "intersection_voxels": 1685, "different_voxels": 108, "dice": 0.9689476710753306, "jaccard": 0.939765755716676, "hard_status": "evaluated", "hard_volume_difference_mm3": 1.2500000000000002, "hard_volume_relative_difference": 0.005750431282346176, "first_soft_volume_mm3": 243.035903, "second_soft_volume_mm3": 244.5865020751953, "soft_volume_difference_mm3": 1.550599075195322, "soft_volume_relative_difference": 0.006359835229294713, "name": "SCP", "hard_volume_relative_to_official": 0.0057670126874279125, "preexisting_gate_passed": true, "nonempty": true}
+            ]
+          }
+        ],
+        "pair_summary": {
+          "official_repeat": {
+            "different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "first_reference_weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null}
+          },
+          "fnit_repeat": {
+            "different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "first_reference_weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null}
+          },
+          "cross_method": {
+            "different_voxels": {"n": 1, "min": 1389.0, "median": 1389.0, "mean": 1389.0, "max": 1389.0},
+            "weighted_label_dice": {"n": 1, "min": 0.9959944680633099, "median": 0.9959944680633099, "mean": 0.9959944680633099, "max": 0.9959944680633099},
+            "first_reference_weighted_label_dice": {"n": 1, "min": 0.9959960386802146, "median": 0.9959960386802146, "mean": 0.9959960386802146, "max": 0.9959960386802146}
+          }
+        },
+        "regions": [
+          {
+            "label": 173,
+            "name": "Midbrain",
+            "official_voxels": [47457],
+            "fnit_voxels": [47352],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.994863356854307, "median": 0.994863356854307, "mean": 0.994863356854307, "max": 0.994863356854307},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 487.0, "median": 487.0, "mean": 487.0, "max": 487.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9897792142377434, "median": 0.9897792142377434, "mean": 0.9897792142377434, "max": 0.9897792142377434},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.0015108313753552341, "median": 0.0015108313753552341, "mean": 0.0015108313753552341, "max": 0.0015108313753552341},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 8.911645156250415, "median": 8.911645156250415, "mean": 8.911645156250415, "max": 8.911645156250415},
+            "official_soft_volumes_mm3": [5902.959985],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [5894.04833984375],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 174,
+            "name": "Pons",
+            "official_voxels": [113938],
+            "fnit_voxels": [113397],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9969692304308619, "median": 0.9969692304308619, "mean": 0.9969692304308619, "max": 0.9969692304308619},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 689.0, "median": 689.0, "mean": 689.0, "max": 689.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9939567764796688, "median": 0.9939567764796688, "mean": 0.9939567764796688, "max": 0.9939567764796688},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.005558889619288238, "median": 0.005558889619288238, "mean": 0.005558889619288238, "max": 0.005558889619288238},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 78.90037118749933, "median": 78.90037118749933, "mean": 78.90037118749933, "max": 78.90037118749933},
+            "official_soft_volumes_mm3": [14232.999004],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [14154.0986328125],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 175,
+            "name": "Medulla",
+            "official_voxels": [32522],
+            "fnit_voxels": [32316],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9956815447731269, "median": 0.9956815447731269, "mean": 0.9956815447731269, "max": 0.9956815447731269},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 280.0, "median": 280.0, "mean": 280.0, "max": 280.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9914002272797076, "median": 0.9914002272797076, "mean": 0.9914002272797076, "max": 0.9914002272797076},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.027271931410995966, "median": 0.027271931410995966, "mean": 0.027271931410995966, "max": 0.027271931410995966},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 111.96735896874998, "median": 111.96735896874998, "mean": 111.96735896874998, "max": 111.96735896874998},
+            "official_soft_volumes_mm3": [4161.573316],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [4049.60595703125],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 178,
+            "name": "SCP",
+            "official_voxels": [1734],
+            "fnit_voxels": [1744],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9689476710753306, "median": 0.9689476710753306, "mean": 0.9689476710753306, "max": 0.9689476710753306},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 108.0, "median": 108.0, "mean": 108.0, "max": 108.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.939765755716676, "median": 0.939765755716676, "mean": 0.939765755716676, "max": 0.939765755716676},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.006359835229294713, "median": 0.006359835229294713, "mean": 0.006359835229294713, "max": 0.006359835229294713},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 1.550599075195322, "median": 1.550599075195322, "mean": 1.550599075195322, "max": 1.550599075195322},
+            "official_soft_volumes_mm3": [243.035903],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [244.5865020751953],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          }
+        ],
+        "gate_summary": {"pass": 4, "nonempty": 4, "both_empty": 0, "all_nonempty_passed": true}
+      }
+    ],
+    "official_label_sha256": {"brainstem/brainstemSsLabels.FSvoxelSpace.mgz": "95d7f37151e41cf3fff133bde82df2c26b53254078e7577ead1d28a1d930683c", "brainstem/brainstemSsLabels.mgz": "09953264324c9bb40d53ecbf489660f8eb66af9a97487249792cbbadd8a355fa"},
+    "candidate_report_sha256": "9d2119f6f3d4d17b4c29be9b723c093d76d8b6fb693da464d6adb5ac1f243cec"
+  },
+  "candidate": {
+    "groups": [
+      {
+        "id": "brainstem_native",
+        "family": "brainstem",
+        "space": "native",
+        "grid": {
+          "shape": [256, 256, 256],
+          "affine": [
+            [-1.0, 0.0, 6.198881408181478e-10, 126.04774475097656],
+            [0.0, -1.4551915228366852e-11, 1.0, -105.93548583984375],
+            [-1.862645149230957e-09, -1.0, -1.8189894035458565e-12, 119.63069152832031],
+            [0.0, 0.0, 0.0, 1.0]
+          ],
+          "voxel_volume_mm3": 1.0,
+          "definition": {"like": "/cwStorage/home/gongwk/Notebook_code/FNIT/legacy/freesurfer_synth/work/fnit_subregions_unified_20260930/ten_public_t1_20261002/cases/sub-02/official/subjects/sub-02/mri/norm.mgz"},
+          "metric_crop_start": [106, 120, 102],
+          "metric_crop_stop": [151, 186, 142],
+          "metric_crop_rule": "Common union foreground bbox; removed voxels are background in every run, so all label counts/Dice/Jaccard/mismatch metrics are unchanged."
+        },
+        "runs": [
+          {
+            "method": "official",
+            "id": "official_frozen",
+            "labels": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/task5_official_stage_v1/brainstem/brainstemSsLabels.FSvoxelSpace.mgz",
+            "label_image_sha256": "95d7f37151e41cf3fff133bde82df2c26b53254078e7577ead1d28a1d930683c",
+            "label_image_bytes": 93235,
+            "resampled_array_sha256": "e8b4d03130dcf8ff25e07c873197e15d98848db33440b7537aefe5769f411f25",
+            "label_offset": 0,
+            "provenance": {},
+            "label_voxels": {"173": 5919, "174": 14241, "175": 4104, "178": 210},
+            "soft_volumes_mm3": {"175": 4161.573316, "174": 14232.999004, "178": 243.035903, "173": 5902.959985}
+          },
+          {
+            "method": "fnit",
+            "id": "candidate",
+            "labels": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/remaining_20261004/gems/cpu-epsilon-v1/recipes/candidate-brainstem/artifacts/subregions_native.nii.gz",
+            "label_image_sha256": "dcb4253f2d8d6f10acc9ef1178bc934612664c30796b89e36d8364cab373b047",
+            "label_image_bytes": 304305,
+            "resampled_array_sha256": "1c7c45baeb0fac8d87160597a41c6b338484a84526add2ecbaba95ad1881701f",
+            "label_offset": 0,
+            "provenance": {},
+            "label_voxels": {"173": 5909, "174": 14170, "175": 4079, "178": 217},
+            "soft_volumes_mm3": {"175": 4047.76953125, "174": 14155.423828125, "178": 244.48472595214844, "173": 5892.859375}
+          }
+        ],
+        "warnings": ["official: fewer than three independent runs", "official: run provenance missing; caller must verify identical input/source/config", "fnit: fewer than three independent runs", "fnit: run provenance missing; caller must verify identical input/source/config"],
+        "pairs": [
+          {
+            "kind": "cross_method",
+            "first": "official_frozen",
+            "second": "candidate",
+            "different_voxels": 178,
+            "foreground_dice": 0.9968678990358042,
+            "symmetric_volume_weighted_label_dice": 0.9958443366292042,
+            "first_reference_volume_weighted_label_dice": 0.9958499315578219,
+            "mean_label_dice": 0.9880126388771686,
+            "evaluated_labels": 4,
+            "both_empty_labels": 0,
+            "regions": [
+              {"label": 173, "first_voxels": 5919, "second_voxels": 5909, "intersection_voxels": 5882, "different_voxels": 64, "dice": 0.9945891105850524, "jaccard": 0.9892364614867137, "hard_status": "evaluated", "hard_volume_difference_mm3": 10.0, "hard_volume_relative_difference": 0.0016909029421711193, "first_soft_volume_mm3": 5902.959985, "second_soft_volume_mm3": 5892.859375, "soft_volume_difference_mm3": 10.100610000000415, "soft_volume_relative_difference": 0.00171257454725899, "name": "Midbrain", "hard_volume_relative_to_official": 0.0016894745734076701, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 174, "first_voxels": 14241, "second_voxels": 14170, "intersection_voxels": 14161, "different_voxels": 89, "dice": 0.9968674105100137, "jaccard": 0.9937543859649123, "hard_status": "evaluated", "hard_volume_difference_mm3": 71.0, "hard_volume_relative_difference": 0.004998064130090458, "first_soft_volume_mm3": 14232.999004, "second_soft_volume_mm3": 14155.423828125, "soft_volume_difference_mm3": 77.57517587499933, "soft_volume_relative_difference": 0.0054652684535340555, "name": "Pons", "hard_volume_relative_to_official": 0.004985604943473071, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 175, "first_voxels": 4104, "second_voxels": 4079, "intersection_voxels": 4074, "different_voxels": 35, "dice": 0.9957228400342173, "jaccard": 0.9914821124361158, "hard_status": "evaluated", "hard_volume_difference_mm3": 25.0, "hard_volume_relative_difference": 0.006110228522546743, "first_soft_volume_mm3": 4161.573316, "second_soft_volume_mm3": 4047.76953125, "soft_volume_difference_mm3": 113.80378474999998, "soft_volume_relative_difference": 0.02772543110149735, "name": "Medulla", "hard_volume_relative_to_official": 0.0060916179337231965, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 178, "first_voxels": 210, "second_voxels": 217, "intersection_voxels": 206, "different_voxels": 15, "dice": 0.9648711943793911, "jaccard": 0.9321266968325792, "hard_status": "evaluated", "hard_volume_difference_mm3": 7.0, "hard_volume_relative_difference": 0.03278688524590164, "first_soft_volume_mm3": 243.035903, "second_soft_volume_mm3": 244.48472595214844, "soft_volume_difference_mm3": 1.448822952148447, "soft_volume_relative_difference": 0.005943637524682687, "name": "SCP", "hard_volume_relative_to_official": 0.03333333333333333, "preexisting_gate_passed": true, "nonempty": true}
+            ]
+          }
+        ],
+        "pair_summary": {
+          "official_repeat": {
+            "different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "first_reference_weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null}
+          },
+          "fnit_repeat": {
+            "different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "first_reference_weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null}
+          },
+          "cross_method": {
+            "different_voxels": {"n": 1, "min": 178.0, "median": 178.0, "mean": 178.0, "max": 178.0},
+            "weighted_label_dice": {"n": 1, "min": 0.9958443366292042, "median": 0.9958443366292042, "mean": 0.9958443366292042, "max": 0.9958443366292042},
+            "first_reference_weighted_label_dice": {"n": 1, "min": 0.9958499315578219, "median": 0.9958499315578219, "mean": 0.9958499315578219, "max": 0.9958499315578219}
+          }
+        },
+        "regions": [
+          {
+            "label": 173,
+            "name": "Midbrain",
+            "official_voxels": [5919],
+            "fnit_voxels": [5909],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9945891105850524, "median": 0.9945891105850524, "mean": 0.9945891105850524, "max": 0.9945891105850524},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 64.0, "median": 64.0, "mean": 64.0, "max": 64.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9892364614867137, "median": 0.9892364614867137, "mean": 0.9892364614867137, "max": 0.9892364614867137},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.00171257454725899, "median": 0.00171257454725899, "mean": 0.00171257454725899, "max": 0.00171257454725899},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 10.100610000000415, "median": 10.100610000000415, "mean": 10.100610000000415, "max": 10.100610000000415},
+            "official_soft_volumes_mm3": [5902.959985],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [5892.859375],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 174,
+            "name": "Pons",
+            "official_voxels": [14241],
+            "fnit_voxels": [14170],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9968674105100137, "median": 0.9968674105100137, "mean": 0.9968674105100137, "max": 0.9968674105100137},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 89.0, "median": 89.0, "mean": 89.0, "max": 89.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9937543859649123, "median": 0.9937543859649123, "mean": 0.9937543859649123, "max": 0.9937543859649123},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.0054652684535340555, "median": 0.0054652684535340555, "mean": 0.0054652684535340555, "max": 0.0054652684535340555},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 77.57517587499933, "median": 77.57517587499933, "mean": 77.57517587499933, "max": 77.57517587499933},
+            "official_soft_volumes_mm3": [14232.999004],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [14155.423828125],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 175,
+            "name": "Medulla",
+            "official_voxels": [4104],
+            "fnit_voxels": [4079],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9957228400342173, "median": 0.9957228400342173, "mean": 0.9957228400342173, "max": 0.9957228400342173},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 35.0, "median": 35.0, "mean": 35.0, "max": 35.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9914821124361158, "median": 0.9914821124361158, "mean": 0.9914821124361158, "max": 0.9914821124361158},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.02772543110149735, "median": 0.02772543110149735, "mean": 0.02772543110149735, "max": 0.02772543110149735},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 113.80378474999998, "median": 113.80378474999998, "mean": 113.80378474999998, "max": 113.80378474999998},
+            "official_soft_volumes_mm3": [4161.573316],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [4047.76953125],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 178,
+            "name": "SCP",
+            "official_voxels": [210],
+            "fnit_voxels": [217],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9648711943793911, "median": 0.9648711943793911, "mean": 0.9648711943793911, "max": 0.9648711943793911},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 15.0, "median": 15.0, "mean": 15.0, "max": 15.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9321266968325792, "median": 0.9321266968325792, "mean": 0.9321266968325792, "max": 0.9321266968325792},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.005943637524682687, "median": 0.005943637524682687, "mean": 0.005943637524682687, "max": 0.005943637524682687},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 1.448822952148447, "median": 1.448822952148447, "mean": 1.448822952148447, "max": 1.448822952148447},
+            "official_soft_volumes_mm3": [243.035903],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [244.48472595214844],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          }
+        ],
+        "gate_summary": {"pass": 4, "nonempty": 4, "both_empty": 0, "all_nonempty_passed": true}
+      },
+      {
+        "id": "brainstem_hr",
+        "family": "brainstem",
+        "space": "hr",
+        "grid": {
+          "shape": [144, 194, 156],
+          "affine": [
+            [-0.5, 0.0, 3.099440704090739e-10, 33.04774475097656],
+            [0.0, -7.275957614183426e-12, 0.5, -18.93548583984375],
+            [-9.313225746154785e-10, -0.5, -9.094947017729282e-13, 14.630691536702216],
+            [0.0, 0.0, 0.0, 1.0]
+          ],
+          "voxel_volume_mm3": 0.12500000000000003,
+          "definition": {"union_like": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/task5_official_stage_v1/brainstem/brainstemSsLabels.mgz"},
+          "metric_crop_start": [26, 30, 29],
+          "metric_crop_stop": [116, 161, 110],
+          "metric_crop_rule": "Common union foreground bbox; removed voxels are background in every run, so all label counts/Dice/Jaccard/mismatch metrics are unchanged."
+        },
+        "runs": [
+          {
+            "method": "official",
+            "id": "official_frozen",
+            "labels": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/task5_official_stage_v1/brainstem/brainstemSsLabels.mgz",
+            "label_image_sha256": "09953264324c9bb40d53ecbf489660f8eb66af9a97487249792cbbadd8a355fa",
+            "label_image_bytes": 62129,
+            "resampled_array_sha256": "aae307e17e1f876236f1c9577a08c8cf105927c1c544a23ee07a83aefeca70b2",
+            "label_offset": 0,
+            "provenance": {},
+            "label_voxels": {"173": 47457, "174": 113938, "175": 32522, "178": 1734},
+            "soft_volumes_mm3": {"175": 4161.573316, "174": 14232.999004, "178": 243.035903, "173": 5902.959985}
+          },
+          {
+            "method": "fnit",
+            "id": "candidate",
+            "labels": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/remaining_20261004/gems/cpu-epsilon-v1/recipes/candidate-brainstem/artifacts/highres/brainstem.nii.gz",
+            "label_image_sha256": "f9ec14a2cef052ce8c3ab734f40eb98aaa14575adeb5c623c0405e07edf2ecba",
+            "label_image_bytes": 125011,
+            "resampled_array_sha256": "8dd779d2afb31e00141fce241013bfc8f4ca6f073a15fd8a7786e82c8efae744",
+            "label_offset": 0,
+            "provenance": {},
+            "label_voxels": {"173": 47331, "174": 113402, "175": 32300, "178": 1744},
+            "soft_volumes_mm3": {"175": 4047.76953125, "174": 14155.423828125, "178": 244.48472595214844, "173": 5892.859375}
+          }
+        ],
+        "warnings": ["official: fewer than three independent runs", "official: run provenance missing; caller must verify identical input/source/config", "fnit: fewer than three independent runs", "fnit: run provenance missing; caller must verify identical input/source/config"],
+        "pairs": [
+          {
+            "kind": "cross_method",
+            "first": "official_frozen",
+            "second": "candidate",
+            "different_voxels": 1425,
+            "foreground_dice": 0.9968188756953907,
+            "symmetric_volume_weighted_label_dice": 0.9958814429292981,
+            "first_reference_volume_weighted_label_dice": 0.9958829796956665,
+            "mean_label_dice": 0.9887327706602992,
+            "evaluated_labels": 4,
+            "both_empty_labels": 0,
+            "regions": [
+              {"label": 173, "first_voxels": 47457, "second_voxels": 47331, "intersection_voxels": 47143, "different_voxels": 502, "dice": 0.9947039709667891, "jaccard": 0.9894637422604681, "hard_status": "evaluated", "hard_volume_difference_mm3": 15.750000000000004, "hard_volume_relative_difference": 0.002658564375237372, "first_soft_volume_mm3": 5902.959985, "second_soft_volume_mm3": 5892.859375, "soft_volume_difference_mm3": 10.100610000000415, "soft_volume_relative_difference": 0.00171257454725899, "name": "Midbrain", "hard_volume_relative_to_official": 0.0026550350843921864, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 174, "first_voxels": 113938, "second_voxels": 113402, "intersection_voxels": 113318, "different_voxels": 704, "dice": 0.996903316618281, "jaccard": 0.9938257529248742, "hard_status": "evaluated", "hard_volume_difference_mm3": 67.00000000000001, "hard_volume_relative_difference": 0.004715404240344858, "first_soft_volume_mm3": 14232.999004, "second_soft_volume_mm3": 14155.423828125, "soft_volume_difference_mm3": 77.57517587499933, "soft_volume_relative_difference": 0.0054652684535340555, "name": "Pons", "hard_volume_relative_to_official": 0.004704312871912795, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 175, "first_voxels": 32522, "second_voxels": 32300, "intersection_voxels": 32266, "different_voxels": 290, "dice": 0.9955262102372652, "jaccard": 0.9910922717778596, "hard_status": "evaluated", "hard_volume_difference_mm3": 27.750000000000007, "hard_volume_relative_difference": 0.0068495263953596, "first_soft_volume_mm3": 4161.573316, "second_soft_volume_mm3": 4047.76953125, "soft_volume_difference_mm3": 113.80378474999998, "soft_volume_relative_difference": 0.02772543110149735, "name": "Medulla", "hard_volume_relative_to_official": 0.006826148453354652, "preexisting_gate_passed": true, "nonempty": true},
+              {"label": 178, "first_voxels": 1734, "second_voxels": 1744, "intersection_voxels": 1683, "different_voxels": 112, "dice": 0.9677975848188615, "jaccard": 0.9376044568245125, "hard_status": "evaluated", "hard_volume_difference_mm3": 1.2500000000000002, "hard_volume_relative_difference": 0.005750431282346176, "first_soft_volume_mm3": 243.035903, "second_soft_volume_mm3": 244.48472595214844, "soft_volume_difference_mm3": 1.448822952148447, "soft_volume_relative_difference": 0.005943637524682687, "name": "SCP", "hard_volume_relative_to_official": 0.0057670126874279125, "preexisting_gate_passed": true, "nonempty": true}
+            ]
+          }
+        ],
+        "pair_summary": {
+          "official_repeat": {
+            "different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "first_reference_weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null}
+          },
+          "fnit_repeat": {
+            "different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "first_reference_weighted_label_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null}
+          },
+          "cross_method": {
+            "different_voxels": {"n": 1, "min": 1425.0, "median": 1425.0, "mean": 1425.0, "max": 1425.0},
+            "weighted_label_dice": {"n": 1, "min": 0.9958814429292981, "median": 0.9958814429292981, "mean": 0.9958814429292981, "max": 0.9958814429292981},
+            "first_reference_weighted_label_dice": {"n": 1, "min": 0.9958829796956665, "median": 0.9958829796956665, "mean": 0.9958829796956665, "max": 0.9958829796956665}
+          }
+        },
+        "regions": [
+          {
+            "label": 173,
+            "name": "Midbrain",
+            "official_voxels": [47457],
+            "fnit_voxels": [47331],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9947039709667891, "median": 0.9947039709667891, "mean": 0.9947039709667891, "max": 0.9947039709667891},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 502.0, "median": 502.0, "mean": 502.0, "max": 502.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9894637422604681, "median": 0.9894637422604681, "mean": 0.9894637422604681, "max": 0.9894637422604681},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.00171257454725899, "median": 0.00171257454725899, "mean": 0.00171257454725899, "max": 0.00171257454725899},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 10.100610000000415, "median": 10.100610000000415, "mean": 10.100610000000415, "max": 10.100610000000415},
+            "official_soft_volumes_mm3": [5902.959985],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [5892.859375],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 174,
+            "name": "Pons",
+            "official_voxels": [113938],
+            "fnit_voxels": [113402],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.996903316618281, "median": 0.996903316618281, "mean": 0.996903316618281, "max": 0.996903316618281},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 704.0, "median": 704.0, "mean": 704.0, "max": 704.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9938257529248742, "median": 0.9938257529248742, "mean": 0.9938257529248742, "max": 0.9938257529248742},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.0054652684535340555, "median": 0.0054652684535340555, "mean": 0.0054652684535340555, "max": 0.0054652684535340555},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 77.57517587499933, "median": 77.57517587499933, "mean": 77.57517587499933, "max": 77.57517587499933},
+            "official_soft_volumes_mm3": [14232.999004],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [14155.423828125],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 175,
+            "name": "Medulla",
+            "official_voxels": [32522],
+            "fnit_voxels": [32300],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9955262102372652, "median": 0.9955262102372652, "mean": 0.9955262102372652, "max": 0.9955262102372652},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 290.0, "median": 290.0, "mean": 290.0, "max": 290.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9910922717778596, "median": 0.9910922717778596, "mean": 0.9910922717778596, "max": 0.9910922717778596},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.02772543110149735, "median": 0.02772543110149735, "mean": 0.02772543110149735, "max": 0.02772543110149735},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 113.80378474999998, "median": 113.80378474999998, "mean": 113.80378474999998, "max": 113.80378474999998},
+            "official_soft_volumes_mm3": [4161.573316],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [4047.76953125],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          },
+          {
+            "label": 178,
+            "name": "SCP",
+            "official_voxels": [1734],
+            "fnit_voxels": [1744],
+            "official_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_dice": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_dice": {"n": 1, "min": 0.9677975848188615, "median": 0.9677975848188615, "mean": 0.9677975848188615, "max": 0.9677975848188615},
+            "fnit_repeat_not_below_official": null,
+            "cross_not_below_official": null,
+            "hard_geometry_status": "insufficient_repeats",
+            "official_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "official_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_different_voxels": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_jaccard": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_relative_difference": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "fnit_repeat_soft_difference_mm3": {"n": 0, "min": null, "median": null, "mean": null, "max": null},
+            "cross_method_different_voxels": {"n": 1, "min": 112.0, "median": 112.0, "mean": 112.0, "max": 112.0},
+            "cross_method_jaccard": {"n": 1, "min": 0.9376044568245125, "median": 0.9376044568245125, "mean": 0.9376044568245125, "max": 0.9376044568245125},
+            "cross_method_soft_relative_difference": {"n": 1, "min": 0.005943637524682687, "median": 0.005943637524682687, "mean": 0.005943637524682687, "max": 0.005943637524682687},
+            "cross_method_soft_difference_mm3": {"n": 1, "min": 1.448822952148447, "median": 1.448822952148447, "mean": 1.448822952148447, "max": 1.448822952148447},
+            "official_soft_volumes_mm3": [243.035903],
+            "official_soft_cv": null,
+            "fnit_soft_volumes_mm3": [244.48472595214844],
+            "fnit_soft_cv": null,
+            "soft_within_observed_official_range": null
+          }
+        ],
+        "gate_summary": {"pass": 4, "nonempty": 4, "both_empty": 0, "all_nonempty_passed": true}
+      }
+    ],
+    "official_label_sha256": {"brainstem/brainstemSsLabels.FSvoxelSpace.mgz": "95d7f37151e41cf3fff133bde82df2c26b53254078e7577ead1d28a1d930683c", "brainstem/brainstemSsLabels.mgz": "09953264324c9bb40d53ecbf489660f8eb66af9a97487249792cbbadd8a355fa"},
+    "candidate_report_sha256": "37abbafd491555c9b44e4f28ad7c6ff43bec1542fcbe6ebfb5d4004053a1253c"
+  },
+  "regional_changes": [
+    {
+      "id": "brainstem_native",
+      "regions": [
+        {"label": 173, "name": "Midbrain", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9947599729546991, "dice_after": 0.9945891105850524, "dice_delta": -0.000170862369646696, "hard_volume_error_before": 0.0010136847440446021, "hard_volume_error_after": 0.0016894745734076701, "hard_volume_error_delta": 0.000675789829363068, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 5902.959985, "soft_volume_before_mm3": 5894.04833984375, "soft_volume_after_mm3": 5892.859375, "soft_volume_absolute_error_before_mm3": 8.911645156250415, "soft_volume_absolute_error_after_mm3": 10.100610000000415, "soft_volume_absolute_error_delta_mm3": 1.18896484375, "soft_volume_error_before": 0.0015096909311423047, "soft_volume_error_after": 0.0017111093461021343, "soft_volume_error_delta": 0.0002014184149598296},
+        {"label": 174, "name": "Pons", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9969728968673003, "dice_after": 0.9968674105100137, "dice_delta": -0.00010548635728657718, "hard_volume_error_before": 0.005055824731409311, "hard_volume_error_after": 0.004985604943473071, "hard_volume_error_delta": -7.02197879362404e-05, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 14232.999004, "soft_volume_before_mm3": 14154.0986328125, "soft_volume_after_mm3": 14155.423828125, "soft_volume_absolute_error_before_mm3": 78.90037118749933, "soft_volume_absolute_error_after_mm3": 77.57517587499933, "soft_volume_absolute_error_delta_mm3": -1.3251953125, "soft_volume_error_before": 0.005543481817523167, "soft_volume_error_after": 0.005450374573426011, "soft_volume_error_delta": -9.310724409715594e-05},
+        {"label": 175, "name": "Medulla", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9959682345754429, "dice_after": 0.9957228400342173, "dice_delta": -0.00024539454122562976, "hard_volume_error_before": 0.005604288499025341, "hard_volume_error_after": 0.0060916179337231965, "hard_volume_error_delta": 0.0004873294346978557, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 4161.573316, "soft_volume_before_mm3": 4049.60595703125, "soft_volume_after_mm3": 4047.76953125, "soft_volume_absolute_error_before_mm3": 111.96735896874998, "soft_volume_absolute_error_after_mm3": 113.80378474999998, "soft_volume_absolute_error_delta_mm3": 1.83642578125, "soft_volume_error_before": 0.0269050550036615, "soft_volume_error_after": 0.02734633661563971, "soft_volume_error_delta": 0.00044128161197821286},
+        {"label": 178, "name": "SCP", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9648711943793911, "dice_after": 0.9648711943793911, "dice_delta": 0.0, "hard_volume_error_before": 0.03333333333333333, "hard_volume_error_after": 0.03333333333333333, "hard_volume_error_delta": 0.0, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 243.035903, "soft_volume_before_mm3": 244.5865020751953, "soft_volume_after_mm3": 244.48472595214844, "soft_volume_absolute_error_before_mm3": 1.550599075195322, "soft_volume_absolute_error_after_mm3": 1.448822952148447, "soft_volume_absolute_error_delta_mm3": -0.101776123046875, "soft_volume_error_before": 0.006380123496384491, "soft_volume_error_after": 0.005961353587121846, "soft_volume_error_delta": -0.00041876990926264547}
+      ],
+      "old_gate": {"pass": 4, "nonempty": 4, "both_empty": 0, "all_nonempty_passed": true},
+      "new_gate": {"pass": 4, "nonempty": 4, "both_empty": 0, "all_nonempty_passed": true},
+      "dice_delta_extremes": {
+        "minimum": {"label": 175, "name": "Medulla", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9959682345754429, "dice_after": 0.9957228400342173, "dice_delta": -0.00024539454122562976, "hard_volume_error_before": 0.005604288499025341, "hard_volume_error_after": 0.0060916179337231965, "hard_volume_error_delta": 0.0004873294346978557, "passed_before": true, "passed_after": true},
+        "maximum": {"label": 178, "name": "SCP", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9648711943793911, "dice_after": 0.9648711943793911, "dice_delta": 0.0, "hard_volume_error_before": 0.03333333333333333, "hard_volume_error_after": 0.03333333333333333, "hard_volume_error_delta": 0.0, "passed_before": true, "passed_after": true}
+      },
+      "volume_error_delta_extremes": {
+        "minimum": {"label": 174, "name": "Pons", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9969728968673003, "dice_after": 0.9968674105100137, "dice_delta": -0.00010548635728657718, "hard_volume_error_before": 0.005055824731409311, "hard_volume_error_after": 0.004985604943473071, "hard_volume_error_delta": -7.02197879362404e-05, "passed_before": true, "passed_after": true},
+        "maximum": {"label": 173, "name": "Midbrain", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9947599729546991, "dice_after": 0.9945891105850524, "dice_delta": -0.000170862369646696, "hard_volume_error_before": 0.0010136847440446021, "hard_volume_error_after": 0.0016894745734076701, "hard_volume_error_delta": 0.000675789829363068, "passed_before": true, "passed_after": true}
+      },
+      "lost_old_passed_labels": [],
+      "soft_volume_absolute_error_delta_mm3_extremes": {
+        "minimum": {"label": 174, "name": "Pons", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9969728968673003, "dice_after": 0.9968674105100137, "dice_delta": -0.00010548635728657718, "hard_volume_error_before": 0.005055824731409311, "hard_volume_error_after": 0.004985604943473071, "hard_volume_error_delta": -7.02197879362404e-05, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 14232.999004, "soft_volume_before_mm3": 14154.0986328125, "soft_volume_after_mm3": 14155.423828125, "soft_volume_absolute_error_before_mm3": 78.90037118749933, "soft_volume_absolute_error_after_mm3": 77.57517587499933, "soft_volume_absolute_error_delta_mm3": -1.3251953125, "soft_volume_error_before": 0.005543481817523167, "soft_volume_error_after": 0.005450374573426011, "soft_volume_error_delta": -9.310724409715594e-05},
+        "maximum": {"label": 175, "name": "Medulla", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9959682345754429, "dice_after": 0.9957228400342173, "dice_delta": -0.00024539454122562976, "hard_volume_error_before": 0.005604288499025341, "hard_volume_error_after": 0.0060916179337231965, "hard_volume_error_delta": 0.0004873294346978557, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 4161.573316, "soft_volume_before_mm3": 4049.60595703125, "soft_volume_after_mm3": 4047.76953125, "soft_volume_absolute_error_before_mm3": 111.96735896874998, "soft_volume_absolute_error_after_mm3": 113.80378474999998, "soft_volume_absolute_error_delta_mm3": 1.83642578125, "soft_volume_error_before": 0.0269050550036615, "soft_volume_error_after": 0.02734633661563971, "soft_volume_error_delta": 0.00044128161197821286}
+      },
+      "soft_volume_error_delta_extremes": {
+        "minimum": {"label": 178, "name": "SCP", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9648711943793911, "dice_after": 0.9648711943793911, "dice_delta": 0.0, "hard_volume_error_before": 0.03333333333333333, "hard_volume_error_after": 0.03333333333333333, "hard_volume_error_delta": 0.0, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 243.035903, "soft_volume_before_mm3": 244.5865020751953, "soft_volume_after_mm3": 244.48472595214844, "soft_volume_absolute_error_before_mm3": 1.550599075195322, "soft_volume_absolute_error_after_mm3": 1.448822952148447, "soft_volume_absolute_error_delta_mm3": -0.101776123046875, "soft_volume_error_before": 0.006380123496384491, "soft_volume_error_after": 0.005961353587121846, "soft_volume_error_delta": -0.00041876990926264547},
+        "maximum": {"label": 175, "name": "Medulla", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9959682345754429, "dice_after": 0.9957228400342173, "dice_delta": -0.00024539454122562976, "hard_volume_error_before": 0.005604288499025341, "hard_volume_error_after": 0.0060916179337231965, "hard_volume_error_delta": 0.0004873294346978557, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 4161.573316, "soft_volume_before_mm3": 4049.60595703125, "soft_volume_after_mm3": 4047.76953125, "soft_volume_absolute_error_before_mm3": 111.96735896874998, "soft_volume_absolute_error_after_mm3": 113.80378474999998, "soft_volume_absolute_error_delta_mm3": 1.83642578125, "soft_volume_error_before": 0.0269050550036615, "soft_volume_error_after": 0.02734633661563971, "soft_volume_error_delta": 0.00044128161197821286}
+      }
+    },
+    {
+      "id": "brainstem_hr",
+      "regions": [
+        {"label": 173, "name": "Midbrain", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.994863356854307, "dice_after": 0.9947039709667891, "dice_delta": -0.0001593858875179599, "hard_volume_error_before": 0.002212529236993489, "hard_volume_error_after": 0.0026550350843921864, "hard_volume_error_delta": 0.0004425058473986974, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 5902.959985, "soft_volume_before_mm3": 5894.04833984375, "soft_volume_after_mm3": 5892.859375, "soft_volume_absolute_error_before_mm3": 8.911645156250415, "soft_volume_absolute_error_after_mm3": 10.100610000000415, "soft_volume_absolute_error_delta_mm3": 1.18896484375, "soft_volume_error_before": 0.0015096909311423047, "soft_volume_error_after": 0.0017111093461021343, "soft_volume_error_delta": 0.0002014184149598296},
+        {"label": 174, "name": "Pons", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9969692304308619, "dice_after": 0.996903316618281, "dice_delta": -6.591381258092e-05, "hard_volume_error_before": 0.004748196387508996, "hard_volume_error_after": 0.004704312871912795, "hard_volume_error_delta": -4.388351559620092e-05, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 14232.999004, "soft_volume_before_mm3": 14154.0986328125, "soft_volume_after_mm3": 14155.423828125, "soft_volume_absolute_error_before_mm3": 78.90037118749933, "soft_volume_absolute_error_after_mm3": 77.57517587499933, "soft_volume_absolute_error_delta_mm3": -1.3251953125, "soft_volume_error_before": 0.005543481817523167, "soft_volume_error_after": 0.005450374573426011, "soft_volume_error_delta": -9.310724409715594e-05},
+        {"label": 175, "name": "Medulla", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9956815447731269, "dice_after": 0.9955262102372652, "dice_delta": -0.00015533453586169532, "hard_volume_error_before": 0.006334173790049812, "hard_volume_error_after": 0.006826148453354652, "hard_volume_error_delta": 0.0004919746633048399, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 4161.573316, "soft_volume_before_mm3": 4049.60595703125, "soft_volume_after_mm3": 4047.76953125, "soft_volume_absolute_error_before_mm3": 111.96735896874998, "soft_volume_absolute_error_after_mm3": 113.80378474999998, "soft_volume_absolute_error_delta_mm3": 1.83642578125, "soft_volume_error_before": 0.0269050550036615, "soft_volume_error_after": 0.02734633661563971, "soft_volume_error_delta": 0.00044128161197821286},
+        {"label": 178, "name": "SCP", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9689476710753306, "dice_after": 0.9677975848188615, "dice_delta": -0.0011500862564691738, "hard_volume_error_before": 0.0057670126874279125, "hard_volume_error_after": 0.0057670126874279125, "hard_volume_error_delta": 0.0, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 243.035903, "soft_volume_before_mm3": 244.5865020751953, "soft_volume_after_mm3": 244.48472595214844, "soft_volume_absolute_error_before_mm3": 1.550599075195322, "soft_volume_absolute_error_after_mm3": 1.448822952148447, "soft_volume_absolute_error_delta_mm3": -0.101776123046875, "soft_volume_error_before": 0.006380123496384491, "soft_volume_error_after": 0.005961353587121846, "soft_volume_error_delta": -0.00041876990926264547}
+      ],
+      "old_gate": {"pass": 4, "nonempty": 4, "both_empty": 0, "all_nonempty_passed": true},
+      "new_gate": {"pass": 4, "nonempty": 4, "both_empty": 0, "all_nonempty_passed": true},
+      "dice_delta_extremes": {
+        "minimum": {"label": 178, "name": "SCP", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9689476710753306, "dice_after": 0.9677975848188615, "dice_delta": -0.0011500862564691738, "hard_volume_error_before": 0.0057670126874279125, "hard_volume_error_after": 0.0057670126874279125, "hard_volume_error_delta": 0.0, "passed_before": true, "passed_after": true},
+        "maximum": {"label": 174, "name": "Pons", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9969692304308619, "dice_after": 0.996903316618281, "dice_delta": -6.591381258092e-05, "hard_volume_error_before": 0.004748196387508996, "hard_volume_error_after": 0.004704312871912795, "hard_volume_error_delta": -4.388351559620092e-05, "passed_before": true, "passed_after": true}
+      },
+      "volume_error_delta_extremes": {
+        "minimum": {"label": 174, "name": "Pons", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9969692304308619, "dice_after": 0.996903316618281, "dice_delta": -6.591381258092e-05, "hard_volume_error_before": 0.004748196387508996, "hard_volume_error_after": 0.004704312871912795, "hard_volume_error_delta": -4.388351559620092e-05, "passed_before": true, "passed_after": true},
+        "maximum": {"label": 175, "name": "Medulla", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9956815447731269, "dice_after": 0.9955262102372652, "dice_delta": -0.00015533453586169532, "hard_volume_error_before": 0.006334173790049812, "hard_volume_error_after": 0.006826148453354652, "hard_volume_error_delta": 0.0004919746633048399, "passed_before": true, "passed_after": true}
+      },
+      "lost_old_passed_labels": [],
+      "soft_volume_absolute_error_delta_mm3_extremes": {
+        "minimum": {"label": 174, "name": "Pons", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9969692304308619, "dice_after": 0.996903316618281, "dice_delta": -6.591381258092e-05, "hard_volume_error_before": 0.004748196387508996, "hard_volume_error_after": 0.004704312871912795, "hard_volume_error_delta": -4.388351559620092e-05, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 14232.999004, "soft_volume_before_mm3": 14154.0986328125, "soft_volume_after_mm3": 14155.423828125, "soft_volume_absolute_error_before_mm3": 78.90037118749933, "soft_volume_absolute_error_after_mm3": 77.57517587499933, "soft_volume_absolute_error_delta_mm3": -1.3251953125, "soft_volume_error_before": 0.005543481817523167, "soft_volume_error_after": 0.005450374573426011, "soft_volume_error_delta": -9.310724409715594e-05},
+        "maximum": {"label": 175, "name": "Medulla", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9956815447731269, "dice_after": 0.9955262102372652, "dice_delta": -0.00015533453586169532, "hard_volume_error_before": 0.006334173790049812, "hard_volume_error_after": 0.006826148453354652, "hard_volume_error_delta": 0.0004919746633048399, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 4161.573316, "soft_volume_before_mm3": 4049.60595703125, "soft_volume_after_mm3": 4047.76953125, "soft_volume_absolute_error_before_mm3": 111.96735896874998, "soft_volume_absolute_error_after_mm3": 113.80378474999998, "soft_volume_absolute_error_delta_mm3": 1.83642578125, "soft_volume_error_before": 0.0269050550036615, "soft_volume_error_after": 0.02734633661563971, "soft_volume_error_delta": 0.00044128161197821286}
+      },
+      "soft_volume_error_delta_extremes": {
+        "minimum": {"label": 178, "name": "SCP", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9689476710753306, "dice_after": 0.9677975848188615, "dice_delta": -0.0011500862564691738, "hard_volume_error_before": 0.0057670126874279125, "hard_volume_error_after": 0.0057670126874279125, "hard_volume_error_delta": 0.0, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 243.035903, "soft_volume_before_mm3": 244.5865020751953, "soft_volume_after_mm3": 244.48472595214844, "soft_volume_absolute_error_before_mm3": 1.550599075195322, "soft_volume_absolute_error_after_mm3": 1.448822952148447, "soft_volume_absolute_error_delta_mm3": -0.101776123046875, "soft_volume_error_before": 0.006380123496384491, "soft_volume_error_after": 0.005961353587121846, "soft_volume_error_delta": -0.00041876990926264547},
+        "maximum": {"label": 175, "name": "Medulla", "nonempty_before": true, "nonempty_after": true, "dice_before": 0.9956815447731269, "dice_after": 0.9955262102372652, "dice_delta": -0.00015533453586169532, "hard_volume_error_before": 0.006334173790049812, "hard_volume_error_after": 0.006826148453354652, "hard_volume_error_delta": 0.0004919746633048399, "passed_before": true, "passed_after": true, "soft_volume_official_mm3": 4161.573316, "soft_volume_before_mm3": 4049.60595703125, "soft_volume_after_mm3": 4047.76953125, "soft_volume_absolute_error_before_mm3": 111.96735896874998, "soft_volume_absolute_error_after_mm3": 113.80378474999998, "soft_volume_absolute_error_delta_mm3": 1.83642578125, "soft_volume_error_before": 0.0269050550036615, "soft_volume_error_after": 0.02734633661563971, "soft_volume_error_delta": 0.00044128161197821286}
+      }
+    }
+  ],
+  "scoring_sources_sha256": {"score_stage.py": "661bf1e6d3f9a62952599b1242451fe8a5dcd3a8e38c400dbc94c87e049e8e0c", "analyze_repeatability.py": "beef69670191f89ebf3a0d71395c274b54b7c61d02ed096abebebd7a5172f842", "score_recipe.py": "5b73a2fdb1fa2774455e4a46ecaef05a1a49aec0ae6fbe57b43fb3a49be39125"},
+  "derived_soft_volume_deltas_from_original_report_sha256": "5ac86d428bc4fdaaae1a8d20aef610e39cc25dee3f2bd962a3df9abe61093583",
+  "derivation_source_sha256": "10e631cb4e0675249cd6dd312574216d26e40c73229395b0427409812359e3f5"
+}
