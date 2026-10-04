@@ -181,6 +181,8 @@ segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects 
 官方参考在 CPU 上独立运行；本轮每例均从同一公开 T1 新建 subject，没有复用旧预处理。相同阶段对照向 FNIT 传入本例 fresh `norm/aseg/wmparc`；raw 则从公开 T1 自动预处理。[实际官方协议](../../validation/subregions/ten_public_t1_20261002/official_protocol.md)记录版本、环境、准备阶段与输出身份。原实现见 [FreeSurfer 源码](https://github.com/freesurfer/samseg/tree/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/samseg/subregions)和 [官方使用说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SubregionSegmentation)。
 
 
+<a id="最新精度运行时间与脑图"></a>
+
 ## 精度、运行时间与脑图
 
 ### 2026-10-04：同节点 CPU 与受影响 GPU 回归
