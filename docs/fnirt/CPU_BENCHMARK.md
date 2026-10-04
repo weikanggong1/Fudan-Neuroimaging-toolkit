@@ -194,7 +194,7 @@ v20 法方程 1,755 次调用累计 36.624 s；50 个线性化算子的布局准
 
 四项均为共享节点上的一次完整观察。default 两种预算的完整三图 SHA 与 v20 相同；T1 CPU1 的完整四图与固定 v20 轨迹相同。与独立官方求解器的图像/Jacobian 差异仍分别记录，不能以 CPU 优化前后的一致性代替官方精度。
 
-本轮真实 CPU 官方精度、端到端/分步骤耗时和 GPU 性能回归由统一报告记录；在报告完成前不把局部测试作为真实 benchmark 或加速证据。
+本轮真实 CPU 官方精度、端到端/分步骤耗时和 GPU 回归见[统一报告](../../validation/multimodal_cpu_20261004/README.md)；局部测试与完整真实 benchmark 分别记录。
 先前真实 FSL 差异见[历史验证页](../../validation/fnirt/README.md)，仍须单列，不能归为本次 CPU 缓冲优化。
 
 ### 最新 v27：nodecw8 的八项主要完整配对
@@ -232,6 +232,8 @@ v20 法方程 1,755 次调用累计 36.624 s；50 个线性化算子的布局准
 | [TBSS 六级/三阶段，v28](../../validation/multimodal_cpu_20261004/gpu_cpu_final_v28_ready_retry_20261004.public.json) | 14.866 / 13.365 s | 14.854 / 14.102 s | warmup 3,564,715,520 B；三个 measured repeat 各 3,565,562,368 B |
 
 每例四个进程各执行一次完整 warmup 与三次测量，共 16 次完整保存；default 核对三输出，TBSS 核对四输出。GPU 对照优化前 FNIT，CPU 官方表对照 FSL，不混用两个参照或范围。H100 默认 TF32、allocation 上限 20 GB；测量来自共享设备，不将上述波动称为稳定提速。
+
+合并最新 main 的公共 NIfTI 写出修复后，四个真实 FNIRT 参考网格构造及 24 个 CPU、40 个 GPU 已保存输出头部仍相同，见[共享头部核验](../../validation/multimodal_cpu_20261004/shared_header_latest_main_20261004.public.json)。这是构造与既有结果的兼容检查，没有新增配准计时；合并后定向 CPU/CUDA 回归另见[集成记录](../../validation/multimodal_cpu_20261004/integration_latest_main_20261004.public.json)。
 
 ### T1 单线程的同节点旧/新诊断
 

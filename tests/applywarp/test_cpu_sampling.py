@@ -80,4 +80,3 @@ def test_complete_cpu_4d_plan_keeps_metadata_mask_and_signed_zero(monkeypatch, f
     assert actual.image.header.binaryblock == baseline.image.header.binaryblock
     assert actual.image.header.extensions[0].get_content() == b"cpu-storage-contract"
     assert actual.qc == baseline.qc
-
