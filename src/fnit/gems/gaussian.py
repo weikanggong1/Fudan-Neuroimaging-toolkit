@@ -56,7 +56,7 @@ def update_gaussians(image: torch.Tensor, responsibilities: torch.Tensor, *,
         nh = n_hyper.to(device=flat_x.device, dtype=flat_x.dtype).reshape(-1)
         means = (weighted + nh[:, None] * mh) / (mass + nh + 1e-2)[:, None]
     else:
-        means = weighted / mass.clamp_min(1e-8)
+        means = weighted / mass.clamp_min(1e-8)[:, None]
     diff = flat_x[None] - means[:, None, :]
     scatter = torch.einsum("cn,cnm,cnp->cmp", r, diff, diff)
     if mean_hyper is not None and n_hyper is not None:

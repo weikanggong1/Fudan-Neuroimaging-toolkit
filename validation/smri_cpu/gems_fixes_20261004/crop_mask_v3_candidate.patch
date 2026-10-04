@@ -1,0 +1,133 @@
+diff --git a/src/fnit/gems/recipes/base.py b/src/fnit/gems/recipes/base.py
+index df64afa1..230240f7
+--- a/src/fnit/gems/recipes/base.py
++++ b/src/fnit/gems/recipes/base.py
+@@ -59,8 +59,10 @@ def working_image(context: SubregionContext, ids: tuple[int, ...],
+     shape = tuple(np.ceil((high - low) / step - 1e-5).astype(int))
+     origin = low + ((high - low) - np.asarray(shape) * step) / 2
+     scale = np.diag(step)
+-    data = ndimage.affine_transform(context.data, scale, offset=origin,
+-                                    output_shape=shape, order=3, mode="nearest").astype(np.float32)
++    # The original recipe crops before constructing cubic coefficients. Using
++    # the full T1 changes the boundary coefficients inside the working ROI.
++    crop = tuple(slice(int(a), int(b)) for a, b in zip(low, high))
++    data = _cropped_cubic_image(context.data[crop], step, origin - low, shape)
+     labels = ndimage.affine_transform(coarse, scale, offset=origin,
+                                       output_shape=shape, order=0, mode="nearest")
+     transform = np.eye(4)
+@@ -72,6 +74,67 @@ def working_image(context: SubregionContext, ids: tuple[int, ...],
+                            "working_shape": [int(v) for v in shape]}
+ 
+ 
++def _cropped_cubic_image(data: np.ndarray, step: np.ndarray,
++                         origin: np.ndarray, shape: tuple[int, ...]) -> np.ndarray:
++    """Cubic B-splines in the cropped image's domain, preserving source sign.
++
++    Each coefficient axis is stored as FP32, with whole-sample mirror edges.
++    Outside queries use the rounded-voxel support rule. Positive source images
++    cannot acquire negative intensity from spline ringing.
++    """
++    coefficients = np.asarray(data, dtype=np.float32)
++    for axis in range(3):
++        coefficients = ndimage.spline_filter1d(
++            coefficients, order=3, axis=axis, output=np.float32, mode="mirror")
++    sampled = ndimage.affine_transform(
++        coefficients, np.diag(step), offset=origin, output_shape=shape,
++        order=3, mode="mirror", prefilter=False).astype(np.float32)
++    if not np.any(data < 0):
++        np.maximum(sampled, 0, out=sampled)
++    for axis in range(3):
++        rounded = np.rint(origin[axis] + np.arange(shape[axis]) * step[axis])
++        outside = (rounded < 0) | (rounded >= data.shape[axis])
++        selector = [slice(None)] * 3
++        selector[axis] = outside
++        sampled[tuple(selector)] = 0
++    return sampled
++
++
++
++def _sample_working_mask(data: np.ndarray, source, target, order: int) -> np.ndarray:
++    """Recipe-only FP32 coordinates and nearest half-up rounding.
++
++    This validation candidate changes preparation masks only. Shared image
++    resampling and evaluation grids retain their existing definitions.
++    """
++    transform = np.linalg.inv(source.affine) @ target.affine
++    matrix, offset = transform[:3, :3], transform[:3, 3]
++    if np.max(np.abs(matrix - np.diag(np.diag(matrix)))) > 1e-8:
++        raise ValueError('working masks require parallel source/target axes')
++    axes = [np.float32(offset[d]) + np.arange(target.shape[d], dtype=np.float32)
++            * np.float32(matrix[d, d]) for d in range(3)]
++    valid = np.ones(target.shape, bool)
++    for dimension, axis in enumerate(axes):
++        rounded = np.rint(axis)
++        support = (rounded >= 0) & (rounded < data.shape[dimension])
++        shape = [1, 1, 1]
++        shape[dimension] = len(axis)
++        valid &= support.reshape(shape)
++    if order == 0:
++        indices = [np.clip(np.floor(axis + .5).astype(np.int64), 0, data.shape[d] - 1)
++                   for d, axis in enumerate(axes)]
++        sampled = np.asarray(data[np.ix_(*indices)], np.float32)
++    elif order == 1:
++        coordinates = np.stack(np.broadcast_arrays(axes[0][:, None, None],
++                                                   axes[1][None, :, None], axes[2][None, None, :]))
++        sampled = ndimage.map_coordinates(np.asarray(data, np.float32), coordinates,
++                                          order=1, mode='nearest', prefilter=False)
++    else:
++        raise ValueError('working mask interpolation must be nearest or linear')
++    sampled[~valid] = 0
++    return sampled
++
++
+ def _native(volume: np.ndarray, affine: np.ndarray, target, order: int) -> np.ndarray:
+     source = nib.Nifti1Image(volume, affine)
+     return np.asarray(resample_from_to(source, (target.shape, target.affine), order=order).dataobj)
+diff --git a/src/fnit/gems/recipes/thalamus.py b/src/fnit/gems/recipes/thalamus.py
+index 6cf12125..62e050ce
+--- a/src/fnit/gems/recipes/thalamus.py
++++ b/src/fnit/gems/recipes/thalamus.py
+@@ -7,7 +7,7 @@ import nibabel as nib
+ from scipy import ndimage
+ 
+ from .base import (GEMSRecipe, RecipeResult, _native, group_labels,
+-                   spherical_neighborhood, working_image)
++                   spherical_neighborhood, working_image, _sample_working_mask)
+ 
+ 
+ _NUCLEI = (
+@@ -89,7 +89,7 @@ class ThalamusRecipe(GEMSRecipe):
+         image, labels, report = working_image(context, self.alignment_ids, self.resolution_mm)
+         mask = ndimage.binary_dilation(self.synthetic_labels(context.coarse_segmentation) > 1,
+                                        structure=np.ones((3, 3, 3)), iterations=2)
+-        sampled = _native(mask.astype(np.uint8), context.image.affine, image, 0).astype(bool)
++        sampled = _sample_working_mask(mask.astype(np.uint8), context.image, image, 0).astype(bool)
+         data = np.asarray(image.dataobj).copy()
+         data[~sampled] = 0
+         return nib.Nifti1Image(data, image.affine), labels, report
+diff --git a/src/fnit/gems/recipes/hippo_amygdala.py b/src/fnit/gems/recipes/hippo_amygdala.py
+index bdd71240..36cbddd3
+--- a/src/fnit/gems/recipes/hippo_amygdala.py
++++ b/src/fnit/gems/recipes/hippo_amygdala.py
+@@ -9,7 +9,7 @@ from scipy.stats import gaussian_kde
+ import torch
+ 
+ from .base import (GEMSRecipe, RecipeResult, _native, group_labels,
+-                   spherical_neighborhood, working_image)
++                   spherical_neighborhood, working_image, _sample_working_mask)
+ from ..rasterize import rasterize_priors
+ 
+ 
+@@ -62,10 +62,10 @@ class HippoAmygdalaRecipe(GEMSRecipe):
+         roi = np.isin(context.coarse_segmentation, self.alignment_ids)
+         merged = ndimage.binary_dilation(self.synthetic_labels(context.coarse_segmentation) > 1,
+                                          structure=np.ones((3, 3, 3)), iterations=2)
+-        sampled = _native(roi.astype(np.float32), context.image.affine, image, 1) >= 0.5
++        sampled = _sample_working_mask(roi.astype(np.float32), context.image, image, 1) >= 0.5
+         sampled = ndimage.binary_dilation(sampled, structure=np.ones((3, 3, 3)),
+                                           iterations=int(round(3 / self.resolution_mm)))
+-        sampled &= _native(merged.astype(np.uint8), context.image.affine, image, 0).astype(bool)
++        sampled &= _sample_working_mask(merged.astype(np.uint8), context.image, image, 0).astype(bool)
+         data = np.asarray(image.dataobj).copy()
+         data[~sampled] = 0
+         return nib.Nifti1Image(data, image.affine), labels, report

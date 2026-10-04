@@ -1,0 +1,225 @@
+{
+  "probe_sha256": "8c98b13ccd2923608c684dc053e8e67b91453a0aad1f05b02a0a01476d8e7e80",
+  "probe_source": "fnirt-posthoc-v3",
+  "imported_source_freeze": "task5_candidate_cpu_v4",
+  "source_head": "6f1e2b38925a481df3fa622f925af076df5436a9",
+  "source_archive_sha256": "ffda47a74376fbaec07c3e8aedaacdc30f2a60398b919c0d5feae38e3beba0d9",
+  "source_files": {
+    "src/fnit/fast_vbm/pipeline.py": "6fbef2de2698c3c61d56034d8a2cb91f6c29a91e8048dcde292f23171979ad2a",
+    "src/fnit/fast_vbm/registration.py": "2a931f509543429d687792571c162283f67f49643d492b52096d2e1fcddb111b",
+    "src/fnit/fnirt/registration.py": "e67c71a6d01b1e8b7b0de842680e9f3012cb5cb492e13e927b32b976f3320d6d",
+    "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+    "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+    "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+    "src/fnit/applywarp/core.py": "0022b5a6386409f29bd9e513ab4f2192e9722eb5dd9bd8735eac0241a5d0928d"
+  },
+  "official_config_sha256": "3bc82d0ff4d8f53d89a741bd853a427607a5cb108e170b44d8835c4b542a4980",
+  "official_config_options": [
+    "--refmask=MNI152_T1_2mm_brain_mask_dil",
+    "--imprefm=0",
+    "--impinm=0",
+    "--imprefval=0",
+    "--impinval=0",
+    "--subsamp=4,2,1,1",
+    "--miter=5,5,10,5",
+    "--infwhm=6,4,2,2",
+    "--reffwhm=4,2,0,0",
+    "--lambda=150,75,50,30",
+    "--estint=1,1,1,0",
+    "--applyrefmask=0,0,0,1",
+    "--applyinmask=1",
+    "--warpres=10,10,10",
+    "--ssqlambda=1",
+    "--regmod=bending_energy",
+    "--intmod=global_linear",
+    "--intorder=5",
+    "--biasres=50,50,50",
+    "--biaslambda=10000",
+    "--refderiv=0",
+    "--jacrange=0.2,5"
+  ],
+  "actual_settings": {
+    "device": "cpu",
+    "tf32": {
+      "matmul": false,
+      "cudnn": true,
+      "reduced_precision_tensor_dtype": false
+    },
+    "mask_source": "synthstrip",
+    "bias_correction": true,
+    "linear_backend": "pytorch-fsl-flirt-default",
+    "linear_cost": "FSL correlation ratio",
+    "linear_optimizer": "MISCMATHS Brent coordinate search",
+    "linear_schedule": "FSL default 8/4/2/1 mm",
+    "linear_forward_convention": "moving-to-fixed-world-ras",
+    "linear_pull_convention": "fixed-to-moving-world-ras",
+    "registration_backend": "fnirt",
+    "registration_reference_mask_source": "explicit",
+    "nonlinear_backend": "pytorch-fnirt-gm-config",
+    "nonlinear_implementation": "fnit.fnirt.TorchFNIRT",
+    "synthmorph_implementation": null,
+    "synthmorph_extent": null,
+    "synthmorph_hyper": null,
+    "synthmorph_integration_steps": null,
+    "synthmorph_mid_space": null,
+    "synthmorph_warp_convention": null,
+    "warp_convention": "fixed-grid FSL scaled-mm relative displacement after common RAS-pull conversion",
+    "shared_registration_chain": "FAST GM -> FSL FLIRT -> nonlinear estimator -> FSL warp conversion -> GPU applywarp -> nonlinear Jacobian -> modulation",
+    "only_backend_specific_stage": "nonlinear pull-field estimation, including estimator-specific objective and mask use",
+    "reference_mask_role": "recorded for both backends and consumed by the FNIRT estimator; SynthMorph has no mask input",
+    "fnirt_style": false,
+    "fsl_fnirt_numerically_equivalent": false,
+    "fnirt_strides": [
+      4,
+      2,
+      1,
+      1
+    ],
+    "fnirt_steps": [
+      5,
+      5,
+      10,
+      5
+    ],
+    "fnirt_input_fwhm_mm": [
+      6.0,
+      4.0,
+      2.0,
+      2.0
+    ],
+    "fnirt_reference_fwhm_mm": [
+      4.0,
+      2.0,
+      0.0,
+      0.0
+    ],
+    "fnirt_warp_resolution_mm": 10.0,
+    "fnirt_regularization": [
+      150.0,
+      75.0,
+      50.0,
+      30.0
+    ],
+    "torch_threads": 8,
+    "fast": {
+      "init_iterations": 15,
+      "bias_iterations": 4,
+      "fixed_iterations": 4,
+      "bias_fwhm_mm": 20.0,
+      "init_mrf": 0.02,
+      "mrf": 0.1,
+      "mixel_mrf": 0.3,
+      "pve_steps": 100,
+      "mean_field_iterations": 5,
+      "pve_chunk_size": 8,
+      "variance_floor_fraction": 1e-06,
+      "execution": "fsl"
+    }
+  },
+  "native_jacobian_comparison": {
+    "reference": "estimator analytic nonlinear-only Jacobian",
+    "common_dense_mean_absolute_error": 0.0016186306696511638,
+    "common_dense_maximum_absolute_error": 0.049808502197265625,
+    "common_dense_correlation": 0.9998760644681989
+  },
+  "level_summary": [
+    {
+      "level": 1,
+      "stride": 4,
+      "mask_voxels": 14095,
+      "ssd": 57.194565337926875,
+      "cost": 59.92451793693409,
+      "intensity_scale": 0.6308647722468379,
+      "accepted_iterations": 5,
+      "attempts": 5,
+      "topology_projection_required": false
+    },
+    {
+      "level": 2,
+      "stride": 2,
+      "mask_voxels": 108529,
+      "ssd": 86.42162742107519,
+      "cost": 92.44909089051582,
+      "intensity_scale": 0.6238534502415976,
+      "accepted_iterations": 5,
+      "attempts": 5,
+      "topology_projection_required": false
+    },
+    {
+      "level": 3,
+      "stride": 1,
+      "mask_voxels": 858578,
+      "ssd": 121.64766062899024,
+      "cost": 139.03015949850084,
+      "intensity_scale": 0.6691304702105916,
+      "accepted_iterations": 10,
+      "attempts": 10,
+      "topology_projection_required": true
+    },
+    {
+      "level": 4,
+      "stride": 1,
+      "mask_voxels": 292019,
+      "ssd": 374.8095227916149,
+      "cost": 440.726148482642,
+      "intensity_scale": 0.6691304702105916,
+      "accepted_iterations": 5,
+      "attempts": 5,
+      "topology_projection_required": true
+    }
+  ],
+  "existing_same_official_field_jacobian_report": {
+    "scope": "same original FNIRT spline field; analytic native --jout versus independent dense finite differences; no registration rerun",
+    "seconds": 1.4645539224147797,
+    "residual_intent_code": 2006,
+    "original_dense_vs_original_analytic": {
+      "whole_grid": {
+        "values": 902629,
+        "mae": 0.0016224993589365735,
+        "rmse": 0.0033205992825459936,
+        "maximum_absolute_error": 0.04886319440307041,
+        "pearson_r": 0.9998764336201393
+      },
+      "template_brain": {
+        "values": 257125,
+        "mae": 0.004373632698951709,
+        "rmse": 0.00593141652416184,
+        "maximum_absolute_error": 0.04886319440307041,
+        "pearson_r": 0.9998767257433414
+      }
+    },
+    "candidate_dense_vs_original_dense": {
+      "whole_grid": {
+        "values": 902629,
+        "mae": 0.003156619820007265,
+        "rmse": 0.007437205893290539,
+        "maximum_absolute_error": 0.26589638382528946,
+        "pearson_r": 0.9989548717461367
+      },
+      "template_brain": {
+        "values": 257125,
+        "mae": 0.006400050568294268,
+        "rmse": 0.012275144735479582,
+        "maximum_absolute_error": 0.26589638382528946,
+        "pearson_r": 0.9989686026860183
+      }
+    }
+  },
+  "execution": {
+    "host": "nodecw7",
+    "cores": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "threads": 8,
+    "lock": "nodecw7.gems.cpu8.lock",
+    "CUDA_VISIBLE_DEVICES": "",
+    "purpose": "posthoc saved-array stage isolation, no benchmark timings"
+  }
+}

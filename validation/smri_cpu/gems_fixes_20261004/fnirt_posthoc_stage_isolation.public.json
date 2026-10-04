@@ -1,0 +1,445 @@
+{
+  "scope": "saved real GM, affine and original warp posthoc isolation; no optimization or benchmark",
+  "image_shape": [
+    224,
+    288,
+    288
+  ],
+  "template_shape": [
+    91,
+    109,
+    91
+  ],
+  "source_identity": {
+    "reference/T1_brain_pve_1.nii.gz": {
+      "sha256": "e29419b101603fc83f0d0a99771b9d7bf0e0f3d5228b8d9dc90b4e37e141816a",
+      "bytes": 2241083
+    },
+    "reference/gm_affine.mat": {
+      "sha256": "069fdf2dcecaaa3c9a02cc3661e09d41727dc32e0d0aa1f50e46a91e09b57af8",
+      "bytes": 189
+    },
+    "reference/gm_coeff.nii.gz": {
+      "sha256": "be0fd7fb455737c19cbf2b0d6231520185c54cc72feeec075e699a2e4c7f5867",
+      "bytes": 119207
+    },
+    "reference/gm_dense.nii.gz": {
+      "sha256": "7911bdb6874eb1f3a5b90e0814cdb8d225307176b9183624b21a14573c0d76b7",
+      "bytes": 9443720
+    },
+    "reference/T1_GM_to_template_GM.nii.gz": {
+      "sha256": "5fe7a5b312549bdb20e3811fc19abb3d541fe29a57cf4478907eb6cb0a272e01",
+      "bytes": 568922
+    },
+    "reference/T1_GM_JAC_nl.nii.gz": {
+      "sha256": "4d597612a1162a80fce39b031ad24dda3c2758ba2e490637d32037d00b4624a3",
+      "bytes": 2999883
+    },
+    "reference/T1_GM_to_template_GM_mod.nii.gz": {
+      "sha256": "5ae22abc4fdccb9947446b60df8141849156ab23585dbd667981cc811edbd747",
+      "bytes": 651049
+    },
+    "candidate/T1_brain_pve_1.nii.gz": {
+      "sha256": "e2da16dd71adddc0d46eef2c7354e21581b442bac3cade728d45536fedddb71d",
+      "bytes": 2725676
+    },
+    "candidate/T1_GM_to_template_GM.nii.gz": {
+      "sha256": "7ed3129c9d047fd72b10149641fb43cefbd56d9c70b5ce11fe3192371a592bd7",
+      "bytes": 613424
+    },
+    "candidate/T1_GM_JAC_nl.nii.gz": {
+      "sha256": "733f9483b4121be10b23c1e2de0a018e489e5bd4bd26037f90332c3ce7d44949",
+      "bytes": 3032339
+    },
+    "candidate/T1_GM_to_template_GM_mod.nii.gz": {
+      "sha256": "e652d0c9da6713bce3da37a1e57afa400de958addb9c5d6b6cae2acfbd1a4622",
+      "bytes": 679793
+    },
+    "candidate/fast_vbm_report.json": {
+      "sha256": "70274a3c91809fe34695459f31c273b8f1c479836434e3b5d97a40e4eb58f450",
+      "bytes": 35442
+    },
+    "template": {
+      "sha256": "ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77",
+      "bytes": 707776
+    },
+    "reference_mask": {
+      "sha256": "342d41e1c445d87a812ca288786a116306e96a5595a198e46ba7e7515d4f221c",
+      "bytes": 11132
+    }
+  },
+  "comparisons": {
+    "frozen_pipeline_warped_gm": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 143051,
+        "mae": 0.0017121781256656035,
+        "rmse": 0.010154538847368633,
+        "p99_absolute_error": 0.036821811199188176,
+        "maximum_absolute_error": 0.7161985039710999,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 0.010154538847368633
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 142438,
+        "mae": 0.00597896113931792,
+        "rmse": 0.018981106796452086,
+        "p99_absolute_error": 0.08084445476531983,
+        "maximum_absolute_error": 0.7161985039710999,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 0.018981106796452086
+      }
+    },
+    "same_original_coefficients_fnit_applywarp_vs_original": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 136031,
+        "mae": 4.833666761238985e-07,
+        "rmse": 1.8704603316313116e-06,
+        "p99_absolute_error": 9.387731552124023e-06,
+        "maximum_absolute_error": 4.0590763092041016e-05,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 1.8704603316313116e-06
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 135463,
+        "mae": 1.687531007642017e-06,
+        "rmse": 3.4921665973600712e-06,
+        "p99_absolute_error": 1.3887882232666016e-05,
+        "maximum_absolute_error": 4.0590763092041016e-05,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 3.4921665973600712e-06
+      }
+    },
+    "same_original_dense_fnit_applywarp_vs_original": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 136821,
+        "mae": 5.103166082943799e-07,
+        "rmse": 1.946723767249572e-06,
+        "p99_absolute_error": 9.775161743164062e-06,
+        "maximum_absolute_error": 4.029273986816406e-05,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 1.946723767249572e-06
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 136235,
+        "mae": 1.7817841594087123e-06,
+        "rmse": 3.6358192927118843e-06,
+        "p99_absolute_error": 1.4185905456542969e-05,
+        "maximum_absolute_error": 4.029273986816406e-05,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 3.6358192927118843e-06
+      }
+    },
+    "same_original_coefficients_vs_original_dense_fnit_applywarp": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 122567,
+        "mae": 4.0766045519240395e-07,
+        "rmse": 1.6474719899564944e-06,
+        "p99_absolute_error": 8.385181427001537e-06,
+        "maximum_absolute_error": 4.00543212890625e-05,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 1.6474719899564944e-06
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 122058,
+        "mae": 1.422655206962752e-06,
+        "rmse": 3.074204997251045e-06,
+        "p99_absolute_error": 1.2248754501342773e-05,
+        "maximum_absolute_error": 4.00543212890625e-05,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 3.074204997251045e-06
+      }
+    },
+    "only_frozen_fast_gm_change_same_original_coefficients": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 18,
+        "mae": 2.3032941197872336e-08,
+        "rmse": 9.538670604834112e-06,
+        "p99_absolute_error": 0.0,
+        "maximum_absolute_error": 0.007255911827087402,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 9.538670604834112e-06
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 18,
+        "mae": 8.085639545160645e-08,
+        "rmse": 1.7871884153695867e-05,
+        "p99_absolute_error": 0.0,
+        "maximum_absolute_error": 0.007255911827087402,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 1.7871884153695867e-05
+      }
+    },
+    "same_original_dense_ras_roundtrip_original_header_applywarp_vs_original": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 141612,
+        "mae": 2.781587562258558e-05,
+        "rmse": 0.00010373050979816019,
+        "p99_absolute_error": 0.0005264985561370845,
+        "maximum_absolute_error": 0.00164031982421875,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 0.00010373050979816019
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 141013,
+        "mae": 9.70997105899228e-05,
+        "rmse": 0.00019365496723097676,
+        "p99_absolute_error": 0.0007459902763366708,
+        "maximum_absolute_error": 0.00164031982421875,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 0.00019365496723097676
+      }
+    },
+    "same_original_dense_ras_roundtrip_actual_common_chain_vs_original": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 139190,
+        "mae": 6.360727909808825e-07,
+        "rmse": 2.349451290566191e-06,
+        "p99_absolute_error": 1.1622905731201172e-05,
+        "maximum_absolute_error": 5.066394805908203e-05,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 2.349451290566191e-06
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 138610,
+        "mae": 2.2212531509871944e-06,
+        "rmse": 4.38746903269655e-06,
+        "p99_absolute_error": 1.683831214904785e-05,
+        "maximum_absolute_error": 5.066394805908203e-05,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 4.38746903269655e-06
+      }
+    },
+    "only_recorded_flirt_change_same_original_gm_affine_only": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 142533,
+        "mae": 0.00012576116582390436,
+        "rmse": 0.00045490144495201465,
+        "p99_absolute_error": 0.00228804349899292,
+        "maximum_absolute_error": 0.007747232913970947,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 0.00045490144495201465
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 140848,
+        "mae": 0.00043316471825306574,
+        "rmse": 0.0008404514756477011,
+        "p99_absolute_error": 0.0032527971267700267,
+        "maximum_absolute_error": 0.007747232913970947,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 0.0008404514756477011
+      }
+    },
+    "only_frozen_fast_gm_change_same_original_affine": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 20,
+        "mae": 1.4814556961518622e-08,
+        "rmse": 5.541712177188801e-06,
+        "p99_absolute_error": 0.0,
+        "maximum_absolute_error": 0.004020094871520996,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 5.541712177188801e-06
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 20,
+        "mae": 5.2006023279022235e-08,
+        "rmse": 1.0383086086823351e-05,
+        "p99_absolute_error": 0.0,
+        "maximum_absolute_error": 0.004020094871520996,
+        "reference_p99_minus_p1": 1.0,
+        "nrmse": 1.0383086086823351e-05
+      }
+    },
+    "reference_saved_modulation_vs_float32_product": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 0,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "p99_absolute_error": 0.0,
+        "maximum_absolute_error": 0.0,
+        "reference_p99_minus_p1": 1.2897597646713255,
+        "nrmse": 0.0
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 0,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "p99_absolute_error": 0.0,
+        "maximum_absolute_error": 0.0,
+        "reference_p99_minus_p1": 1.5185830307006838,
+        "nrmse": 0.0
+      }
+    },
+    "candidate_saved_modulation_vs_float32_product": {
+      "whole_grid": {
+        "values": 902629,
+        "different_values": 0,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "p99_absolute_error": 0.0,
+        "maximum_absolute_error": 0.0,
+        "reference_p99_minus_p1": 1.2842038297653195,
+        "nrmse": 0.0
+      },
+      "template_brain": {
+        "values": 257125,
+        "different_values": 0,
+        "mae": 0.0,
+        "rmse": 0.0,
+        "p99_absolute_error": 0.0,
+        "maximum_absolute_error": 0.0,
+        "reference_p99_minus_p1": 1.5067905426025396,
+        "nrmse": 0.0
+      }
+    }
+  },
+  "original_coefficients_applywarp_qc": {
+    "device": "cpu",
+    "tf32": {
+      "matmul": false,
+      "cudnn": true,
+      "reduced_precision_tensor_dtype": false
+    },
+    "output_grid": "reference",
+    "matrix_coordinate_system": "FSL scaled-mm",
+    "transform_order": "premat then warp then postmat",
+    "warp_representation": "FNIRT cubic spline coefficients",
+    "warp_intent_code": 2007,
+    "warp_convention": "relative",
+    "warp_convention_source": "FSL coefficient intent 2007",
+    "interpolation": "trilinear",
+    "valid_fraction": 0.9524145722389221,
+    "output_dtype": "float32",
+    "supports_fnirt_cubic_coefficients": true,
+    "supports_fnirt_dct_or_quadratic_coefficients": false,
+    "covered_fsl_applywarp_subset": "dense relative/absolute field or FNIRT cubic coefficients, one premat, one postmat, trilinear/nearest, reference-grid output"
+  },
+  "original_dense_applywarp_qc": {
+    "device": "cpu",
+    "tf32": {
+      "matmul": false,
+      "cudnn": true,
+      "reduced_precision_tensor_dtype": false
+    },
+    "output_grid": "reference",
+    "matrix_coordinate_system": "FSL scaled-mm",
+    "transform_order": "premat then warp then postmat",
+    "warp_representation": "FSL dense field",
+    "warp_intent_code": 2006,
+    "warp_convention": "relative",
+    "warp_convention_source": "FSL intent 2006",
+    "interpolation": "trilinear",
+    "valid_fraction": 0.9524145722389221,
+    "output_dtype": "float32",
+    "supports_fnirt_cubic_coefficients": true,
+    "supports_fnirt_dct_or_quadratic_coefficients": false,
+    "covered_fsl_applywarp_subset": "dense relative/absolute field or FNIRT cubic coefficients, one premat, one postmat, trilinear/nearest, reference-grid output"
+  },
+  "same_original_field_ras_to_fsl_roundtrip": {
+    "maximum_component_error_mm": 0.0014901161193847656,
+    "component_rmse_mm": 0.0004981441287607086,
+    "moving_header_voxel_sizes": [
+      0.800000011920929,
+      0.7777777910232544,
+      0.7777777910232544
+    ],
+    "moving_affine_column_norms": [
+      0.800006816160053,
+      0.7777777757243421,
+      0.7777777591500216
+    ]
+  },
+  "original_dense_actual_common_chain_qc": {
+    "device": "cpu",
+    "tf32": {
+      "matmul": false,
+      "cudnn": true,
+      "reduced_precision_tensor_dtype": false
+    },
+    "output_grid": "reference",
+    "matrix_coordinate_system": "FSL scaled-mm",
+    "transform_order": "premat then warp then postmat",
+    "warp_representation": "FSL dense field",
+    "warp_intent_code": 2006,
+    "warp_convention": "relative",
+    "warp_convention_source": "FSL intent 2006",
+    "interpolation": "trilinear",
+    "valid_fraction": 0.9524145722389221,
+    "output_dtype": "float32",
+    "supports_fnirt_cubic_coefficients": true,
+    "supports_fnirt_dct_or_quadratic_coefficients": false,
+    "covered_fsl_applywarp_subset": "dense relative/absolute field or FNIRT cubic coefficients, one premat, one postmat, trilinear/nearest, reference-grid output"
+  },
+  "affine_sampling_scope": "independent full-template affine-only trilinear constant-zero diagnostic, not nonlinear sensitivity bound",
+  "original_flirt_matrix": [
+    [
+      1.105265197,
+      0.01567023506,
+      0.02550499587,
+      -13.98297448
+    ],
+    [
+      0.0002449968554,
+      1.073946986,
+      0.1116679483,
+      -15.76698653
+    ],
+    [
+      -0.02219321864,
+      -0.1569771166,
+      1.169396725,
+      -67.17150372
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "candidate_flirt_matrix_from_recorded_world_pull": [
+    [
+      1.1052630053443746,
+      0.015740833927801665,
+      0.025568772699330305,
+      -13.998639401891467
+    ],
+    [
+      0.000256925720696904,
+      1.0739430480112078,
+      0.11168016363842616,
+      -15.769265963475464
+    ],
+    [
+      -0.02219827884632925,
+      -0.15695513486009946,
+      1.1693380692437623,
+      -67.16475292561452
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ]
+}
