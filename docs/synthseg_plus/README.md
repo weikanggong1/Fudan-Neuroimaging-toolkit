@@ -5,6 +5,8 @@
 `SynthSegPlus` 在已有 PyTorch SynthSeg 2.0 的 33 类分割后运行官方 69 通道皮层分区网络，输出左右半球 68 个体积脑区标签。推理只依赖 FNIT 的 Python/Conda 环境和官方权重；对照测试才使用 FreeSurfer 8.2。这里的分区是体素标签，不是 recon-all 的表面 DKT 分区，因而不提供表面面积或厚度。
 [原版 `mri_synthseg` 源码](https://github.com/freesurfer/freesurfer/blob/v8.2.0/mri_synthseg/mri_synthseg)中的 `--parc` 网络输入、皮层背景重置和 `--vol` 后验求和，是这里的对应步骤。
 
+FNIT 的类名 `SynthSegPlus` 对应普通 SynthSeg 2.0 **加 `--parc`**。原论文中的 SynthSeg+ 是鲁棒分割方法，对应原版 `--robust`，使用不同模型和后处理；FNIT 当前没有实现这条模式。`fast=True` 对应普通 `--parc --fast`，不能代替 `--robust`。
+
 同一个 `SynthSegPlus` 对象会保留已经载入的两套网络权重。再次调用时无需重新读取 H5；每次调用仍只处理一幅 T1w。
 
 共享的 `SynthSegSegmenter` 已修正构造时覆盖调用方精度设置的问题，并复用
@@ -70,11 +72,17 @@ mri_synthseg --i sub-01_T1w.nii.gz --o sub-01_official_parc.nii.gz \
   --parc --vol sub-01_official_volumes.csv --threads 4
 ```
 
-`--i` 是输入 T1，`--o` 是合并后的标签图，`--parc-out` 是可选的皮层单独标签图，`--csv-vols` 指定软体积 CSV。`--weights` 指主网络目录，`--parc-weights` 指皮层网络目录，`--device` 指 PyTorch 设备，`--threads` 控制 CPU 线程数。命令行不加 `--keep-geometry` 与原版不加 `--keepgeom` 一样，输出在推理网格；两端同时加上对应参数才比较原 T1 网格输出。原版 `mri_synthseg --parc` 只输出合并标签图；FNIT 的三个 Python 返回图用于分别检查主分割和分区。
+`--i` 是输入 T1，`--o` 是合并后的标签图，`--parc-out` 是可选的皮层单独标签图，`--csv-vols` 指定软体积 CSV。`--weights` 指主网络目录，`--parc-weights` 指皮层网络目录，`--device` 指 PyTorch 设备，`--threads` 控制 CPU 线程数。`--fast` 仅能与 `--parc` 一起使用，对应原版普通 `--parc --fast`；普通 33 类入口传 `--fast` 会报错。命令行不加 `--keep-geometry` 与原版不加 `--keepgeom` 一样，输出在推理网格；两端同时加上对应参数才比较原 T1 网格输出。原版 `mri_synthseg --parc` 只输出合并标签图；FNIT 的三个 Python 返回图用于分别检查主分割和分区。
 
 `--csv-vols` 对应原版 `--vol`；两份 CSV 均以被试名开头，然后是颅内容积、32 个主分割软体积和 68 个皮层区软体积。不需要 CSV 时去掉这两个参数，FNIT 会省去概率体积的计算和传输。
 
 ## 真实数据对照
+
+### 2026-10-04 CPU 功能与 GPU 回归
+
+本次矩阵分别安排普通 `--parc`、`--parc --fast`、输入网格输出和软体积 CSV，完成状态及数值见[8 线程验证记录](../../validation/smri_cpu_20261004/t2_seg/README.md)。计时配对只保存原版也输出的合并标签图与 CSV；Python 返回的主分割、单独皮层图和 `mask()` 功能另作输出检查，不向计时流程添加额外写盘。
+
+共享预处理修复真实影像少一层问题，3 幅 CPU 网络输入 float32 数组 SHA 与官方相同；CPU 连通域使用 6 邻接 SciPy。最初将所有 CPU 卷积切片的候选使 fast 从旧 FNIT 56.33/52.57 秒变成 63.59/58.33 秒，因此最终选择在 Plus 保留既有完整 oneDNN 卷积，仅普通 SynthSeg 的既有保护上下文启用切片。fast 全层切片候选与同输入旧 FNIT 硬标签和 CSV 相同，与官方只差 1 个体素、最小 Dice 0.99990777、CSV 最大差 0.10 mm³；不能称官方逐值一致。最终选择策略另作公共 CLI 配对，未结束项目不会列为通过。CUDA 前向仍走原卷积；CPU 调用保留同进程的 CUDA 精度与性能开关。新版本和下列历史验证按源码和核组分别记录。
 
 公开 T1w 单例的详细命令、逐标签结果及计时范围见[验证记录](../../validation/synthseg_plus/README.md)。GPU 使用 TF32；未使用 float16 或 bfloat16。
 

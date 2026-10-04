@@ -14,12 +14,14 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from .cpu_conv import CPUInferenceConv3d
+
 
 class _Block(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.conv0 = nn.Conv3d(in_channels, out_channels, 3, padding=1)
-        self.conv1 = nn.Conv3d(out_channels, out_channels, 3, padding=1)
+        self.conv0 = CPUInferenceConv3d(in_channels, out_channels, 3, padding=1)
+        self.conv1 = CPUInferenceConv3d(out_channels, out_channels, 3, padding=1)
         self.bn = nn.BatchNorm3d(out_channels, eps=1e-3)
 
     def forward(self, x):
@@ -38,7 +40,7 @@ class ParcUNet(nn.Module):
                                   for i, width in enumerate(widths))
         self.up = nn.ModuleList(_Block(widths[i + 1] + widths[i], widths[i])
                                 for i in (3, 2, 1, 0))
-        self.likelihood = nn.Conv3d(24, 69, 1)
+        self.likelihood = CPUInferenceConv3d(24, 69, 1)
 
     def forward(self, x):
         if x.ndim != 5 or x.shape[1] != 3 or any(size % 32 for size in x.shape[2:]):

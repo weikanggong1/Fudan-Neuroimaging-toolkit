@@ -144,7 +144,8 @@ class SynthSeg:
         autocast）。计算失败或颜色表不存在时抛异常；不更改调用方 TF32 状态。
         """
         prepared = preprocess_t1(image, device=self.device)
-        # The large CPU 3D convolution can crash in oneDNN; native torch convolutions complete.
+        # Keep full-volume oneDNN disabled after the observed CPU crash. The
+        # convolution layers use restoring local contexts for bounded slabs.
         with torch.backends.mkldnn.flags(
                 enabled=self.device.type != "cpu" and torch.backends.mkldnn.enabled):
             posterior = self.segmenter.posterior(prepared.image)
@@ -169,7 +170,8 @@ class SynthSeg:
             color_lut = Path(color_lut)
             if not color_lut.is_file():
                 raise FileNotFoundError(color_lut)
-            segmentation.extra["color_lut"] = str(color_lut)
+            from .color_lut import attach_color_lut
+            attach_color_lut(segmentation, color_lut)
 
         values = _official_soft_volumes(posterior, prepared.volume_affine,
                                         prepared.voxel_volume_mm3)

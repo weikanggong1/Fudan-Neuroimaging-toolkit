@@ -15,12 +15,19 @@ def largest_connected_component(mask: torch.Tensor) -> torch.Tensor:
         raise ValueError("mask must be a 3-D boolean tensor")
     bounds = None
     if mask.device.type == "cpu":
-        occupied = [torch.where(mask.any(dim=tuple(i for i in range(3) if i != axis)))[0]
-                    for axis in range(3)]
-        if occupied[0].numel() == 0:
+        # Match the official CPU routine directly. Constructing the full
+        # voxel-edge graph and repeatedly scatter-reducing it costs far more
+        # memory/work on CPU; scipy.label has the same six-neighbor topology
+        # and assigns equal-size components in raster order.
+        import numpy as np
+        from scipy.ndimage import label
+
+        components, count = label(mask.numpy())
+        if count == 0:
             return mask.clone()
-        bounds = tuple(slice(int(index[0]), int(index[-1]) + 1) for index in occupied)
-        work = mask[bounds]
+        sizes = np.bincount(components.ravel(), minlength=count + 1)
+        selected = int(sizes[1:].argmax()) + 1
+        return torch.from_numpy(components == selected)
     else:
         if not bool(mask.any()):
             return mask.clone()

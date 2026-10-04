@@ -68,7 +68,15 @@ fnit wmh-synthseg --i case_FLAIR.nii.gz --o case_seg.nii.gz \
 
 这条命令的 `--i` 读取单幅 FLAIR，`--o` 写标签图；`--crop` 将正式预测限制在脑周围的区域；`--save_lesion_probabilities` 额外写 `case_seg.lesion_probs.nii.gz`；`--csv_vols` 写软体积 CSV；`--device` 指定 GPU，`--threads` 指定 Torch 的 CPU 线程。本包 CLI 每次处理单幅影像并创建输出父目录。
 
-## 当前源码验证
+## 真实数据验证与更新记录
+
+### 2026-10-04 CPU 对照
+
+本次 CPU 对照矩阵使用原始公开 T1 和 FLAIR，安排 `crop=True/False`、33 类标签、CSV 和 WMH 概率输出；同组两端固定 8 个物理核、8 个线程。[逐模式记录](../../validation/smri_cpu_20261004/t2_seg/README.md)列出完整命令耗时、各标签 Dice、硬/软体积和 WMH 概率差的完成状态，目前矩阵尚未全部结束。本轮没有修改 WMH 网络或算法。以下 2026-09-27 的 FLAIR 输入是经过预处理的公开样例，不能代替本次原始影像验证。
+
+测试发现 FreeSurfer 模块安装缺少 WMH checkpoint，原始参考调用因此在推理前失败。参考端通过私密运行目录链接同一经大小和 SHA-256 校验的权重恢复测试，保留原脚本和原 Python 环境；不改公共 FreeSurfer 安装，也不将参考程序作为 FNIT 运行依赖。FNIT CPU 构造与推理保留调用方 CUDA TF32、cuDNN benchmark/deterministic 设置；CUDA 默认行为保持原策略。
+
+### 2026-09-27 历史验证
 
 2026-09-27 使用三幅公开真实 FLAIR 重新运行当前源码，并与 FreeSurfer 8.2.0-1 CPU 输出比较。候选推理没有调用 FreeSurfer；两端使用同一官方权重和 `--crop`。当前 WMH 源码树 SHA-256 为 `39cd9b4c380a93370c1244e72eea4c3eaa9f277dd8d70ef44a4ec2293e6a5860`。
 

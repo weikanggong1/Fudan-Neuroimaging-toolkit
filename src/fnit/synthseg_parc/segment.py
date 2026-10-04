@@ -13,6 +13,7 @@ from torch.nn import functional as F
 
 from .._dmri import configure_device
 from .model import _Block
+from .cpu_conv import CPUInferenceConv3d, convolution_slabs, cpu_autocast_enabled
 from .pipeline import SynthSegParc
 from .postprocess import postprocess_segmentation
 from .preprocess import preprocess_t1
@@ -28,7 +29,7 @@ class SegmentUNet(nn.Module):
                                   for i, width in enumerate(widths))
         self.up = nn.ModuleList(_Block(widths[i + 1] + widths[i], widths[i])
                                 for i in (3, 2, 1, 0))
-        self.likelihood = nn.Conv3d(24, 33, 1)
+        self.likelihood = CPUInferenceConv3d(24, 33, 1)
 
     def forward(self, x):
         if x.ndim != 5 or x.shape[1] != 1 or any(size % 32 for size in x.shape[2:]):
@@ -87,6 +88,10 @@ def _blur(posterior):
     grid = torch.stack(torch.meshgrid(axis, axis, axis, indexing="ij"))
     kernel = torch.exp(-grid.square().sum(0) / (2 * 0.5 ** 2))
     kernel = (kernel / kernel.sum()).view(1, 1, 3, 3, 3)
+    if (posterior.device.type == "cpu" and not cpu_autocast_enabled()
+            and not torch.backends.mkldnn.enabled):
+        return convolution_slabs(posterior, kernel.expand(33, 1, 3, 3, 3),
+                                 padding=1, groups=33)
     return F.conv3d(posterior, kernel.expand(33, 1, 3, 3, 3), padding=1, groups=33)
 
 

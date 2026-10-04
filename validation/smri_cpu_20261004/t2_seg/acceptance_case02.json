@@ -1,0 +1,26 @@
+{
+  "schema": "fnit_smri_seg_prospective_acceptance/v1",
+  "case": "case02",
+  "input_sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21",
+  "scope": "candidate versus baseline with the same corrected preprocessing",
+  "cpu": {
+    "threads": 8,
+    "affinity": [1, 5, 9, 13, 17, 21, 25, 29],
+    "shape": "exact",
+    "affine": "exact",
+    "hard_labels": "array_equal",
+    "soft_volume_csv": {
+      "column_names_and_order": "exact",
+      "relative_tolerance": 0.00001,
+      "absolute_tolerance_mm3": 0.01,
+      "rule": "abs(candidate-reference) <= absolute_tolerance + relative_tolerance*abs(reference)"
+    }
+  },
+  "gpu": {
+    "same_prepared_tensor": "SHA256 identical",
+    "hard_labels": "array_equal",
+    "soft_volume_csv": "all numeric values equal"
+  },
+  "official_reference": "Report all labels and volume differences; no bitwise equivalence claim",
+  "case01_cpu_soft_volume_acceptance": "not_assessed; report observed differences without a post hoc gate"
+}
