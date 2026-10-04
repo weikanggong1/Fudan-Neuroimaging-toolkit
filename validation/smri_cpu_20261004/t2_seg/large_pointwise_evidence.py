@@ -57,6 +57,12 @@ def main():
         "official_equivalence": "per-label errors reported; no new bitwise acceptance threshold",
         "gpu_status": "pending_real_regression",
     }
+    launch = workspace / "t2_seg/task2_large_pointwise_gpu_v4.launch.private.json"
+    if launch.exists():
+        fields = [value.strip() for value in json.loads(launch.read_text())["gpu_before"].split(",")]
+        report["gpu_external_load_at_dispatch"] = {
+            "memory_used_mib": int(fields[2]), "utilization_percent": int(fields[3]),
+            "speed_interpretation": "shared-load wall observations, not stable speedup"}
     for label in ("task5_candidate_cpu_v4", "t2_seg/candidate_large_pointwise_v1",
                   "t2_seg/candidate_large_pointwise_v2", "t2_seg/candidate_large_pointwise_v3"):
         path = workspace / label / "SOURCE.private.json"
@@ -154,6 +160,12 @@ def main():
     gpu = [row for key, row in report["comparisons"].items() if "_gpu_" in key]
     if gpu and all(row["status"] != "pending" for row in gpu):
         report["gpu_status"] = "passed" if all(row["status"] == "passed" for row in gpu) else "failed"
+        memory = [row["gpu"] for row in report["records"] if row["device"] == "gpu" and "gpu" in row]
+        report["gpu_allocator_gate_passed"] = len(memory) == 4 and all(
+            row["memory_budget_bytes"] == 20_000_000_000
+            and row["max_allocated_bytes"] <= row["memory_budget_bytes"] for row in memory)
+        if not report["gpu_allocator_gate_passed"]:
+            report["gpu_status"] = "failed"
     payload = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
     for private_text in ("/cwStorage/", "/home/", "/mnt/", "sub-02", "FS_LICENSE"):
         if private_text in payload:

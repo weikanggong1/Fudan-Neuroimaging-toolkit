@@ -359,8 +359,19 @@ Dice 0.9998034977、101 列软体积最大差 0.683 mm³。候选自重复的硬
 
 最终状态与全部实测时间由 `large_pointwise_evidence.py` 从 receipt 和成熟
 `compare_outputs.py` 导出。该分析不重采样、不计入推理速度。
-GPU0 当前外部负载占满，最终 v3 的实际 fast/普通各一对旧新回归尚未运行；旧 GPU 完整
-回归属于旧冻结源码，本次不将其重标为已通过。没有改变 20 GB allocator 预算。
+外部 GPU0 负载释放显存后，最终 v3 的普通/fast 各一对真实旧新回归已完成，
+4/4 保存输出通过：硬标签、101 列数值 CSV、几何逐值相同。GPU0 UUID 与
+共同串行锁已核对；分配上限维持 20,000,000,000 B。每次实际 allocated 峰值
+均为 12,568,181,760 B，普通 reserved 为 18,205,376,512 B，fast 为
+18,899,533,824 B。旧 8-job 计划保留未运行，最终使用独立的 4-job 配对计划。
+
+| GPU 模式 | 原 FNIT v4 wall / API（秒） | 最终 v3 wall / API（秒） |
+|---|---:|---:|
+| 普通 | 15.034 / 9.991 | 12.533 / 9.865 |
+| fast | 10.035 / 7.207 | 10.032 / 7.391 |
+
+dispatch 时仍有外部 GPU0 负载（约 32,154 MiB、74% 利用率），这组短 wall/API
+是共享负载观测。CPU-only 分支的代码检查及本次保存输出精度回归已完成。
 本地针对性测试为 33 passed、3 subtests，涵盖 halo/bias/groups、CPU autocast、
 调用者 CUDA flags、异常恢复及两种 backend 的 4D 合同；它们不是速度 benchmark。
 
