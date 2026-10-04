@@ -1,4 +1,4 @@
-"""Read complete affine GPU arrays and headers from the frozen paired runs."""
+"""Read complete GPU arrays and headers from the frozen paired runs."""
 import argparse
 import hashlib
 import json
@@ -33,20 +33,21 @@ def main():
                          'extensions_equal': left.header.extensions == right.header.extensions,
                          'affine_equal': bool(np.array_equal(left.affine, right.affine)),
                          'shape_equal': left.shape == right.shape}
-    report = {'scope': 'full real affine GPU old/new arrays and complete saved headers; shared GPU timing observations',
+    report = {'scope': 'full real ' + records[0]['model'] + ' GPU old/new arrays and complete saved headers; shared GPU timing observations',
               'arrays': arrays, 'headers': headers,
               'same_input_sha256': records[0]['input_sha256'] == records[1]['input_sha256'],
               'source_sha256': {'baseline': records[0]['source_sha256'], 'candidate': records[1]['source_sha256']},
               'api_seconds': [row['api_seconds'] for row in records],
               'peak_cuda_reserved_bytes': [row['peak_cuda_reserved_bytes'] for row in records],
+              'model_equal': records[0]['model'] == records[1]['model'],
               'worker_sha256': digest(__file__)}
-    report['all_gates_passed'] = (report['same_input_sha256'] and
+    report['all_gates_passed'] = (report['same_input_sha256'] and report['model_equal'] and
         all(row['exact_equal'] for row in arrays.values()) and
         all(all(row.values()) for row in headers.values()) and
         all(value < 20_000_000_000 for value in report['peak_cuda_reserved_bytes']))
     Path(args.output).write_text(json.dumps(report, indent=2) + '\n')
     if not report['all_gates_passed']:
-        raise RuntimeError('affine GPU regression failed')
+        raise RuntimeError('GPU regression failed')
 
 
 if __name__ == '__main__':

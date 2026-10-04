@@ -34,13 +34,18 @@ def main():
             image = torch.from_numpy(np.load(path)).permute(0, 4, 1, 2, 3)
             expected = np.load(reference / ('Conv3D_conv3d_8_output_' + str(index) + '.npy'))
             variants = {}
-            for layout in ('established', 'temporary_channels_last'):
+            for layout in ('established', 'temporary_channels_last', 'explicit_mkldnn_channels_last'):
                 if layout == 'established':
                     actual = detector(image.contiguous())
                 else:
                     actual = image.contiguous(memory_format=torch.channels_last_3d)
                     for layer_index, layer in enumerate(detector.layers):
-                        actual = F.conv3d(actual, layer.weight.contiguous(memory_format=torch.channels_last_3d), layer.bias, padding=1)
+                        weight = layer.weight.contiguous(memory_format=torch.channels_last_3d)
+                        if layout == 'explicit_mkldnn_channels_last':
+                            actual = torch.mkldnn_convolution(actual, weight, layer.bias,
+                                                             [1, 1, 1], [1, 1, 1], [1, 1, 1], 1)
+                        else:
+                            actual = F.conv3d(actual, weight, layer.bias, padding=1)
                         if layer_index == 8:
                             actual = F.relu(actual)
                         else:

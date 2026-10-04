@@ -20,7 +20,7 @@ flowchart TD
     H --> I[目标网格 NIfTI；保留 frame 轴和顺序]
 ```
 
-2026-10-02 的独立 apply 优化复用解码后的 float32 数据、坐标与采样索引，并按 frame 限制 CUDA 缓冲。2026-10-04 修复 CPU 最终 linear 的有效域和 nearest 半体素舍入；续修统一 CPU 的 NIfTI 缩放解码，让 rigid/affine 配准图像按返回的仿射重采样，并修正 CPU joint 的置信 mass 与 barycenter 两种归约形状。配准模型仍只接受单帧 3D 输入，CUDA 沿用已验收的解码与采样路径。
+2026-10-02 的独立 apply 优化复用解码后的 float32 数据、坐标与采样索引，并按 frame 限制 CUDA 缓冲。2026-10-04 修复 CPU 最终 linear 的有效域和 nearest 半体素舍入；续修统一 CPU 的 NIfTI 缩放解码，让 rigid/affine 配准图像按返回的仿射重采样，并修正 CPU joint 的置信 mass 与 barycenter 两种归约形状。随后 CPU joint 续修原始坐标插值、显式 oneDNN 小网格卷积与仿射算术顺序，extent192/256 的完整固定门均通过。配准模型仍只接受单帧 3D 输入，CUDA 沿用已验收的解码与采样路径。
 
 ## 2. Python 调用、输入与输出
 
@@ -105,7 +105,7 @@ labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采
 | `steps` | scaling-and-squaring 次数，至少 5，默认 7 |
 | `configure_precision` | 默认 `True`：CUDA 构造允许 TF32 matmul/cuDNN；CPU 构造不改变 CUDA 的进程全局配置。`False` 保留调用方策略。recon-all 构造后应用其阶段 FP32 配置；不启用半精度。 |
 
-模型使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。不同 `hyper` 需构造另一实例；底层 `DeformNetwork.set_hyper()` 是显式重新计算特化权重的入口。改变实例的普通属性不会自动更新这些权重。Python 的 CPU 线程数可用 `torch.set_num_threads()` 设置；统一 CLI 提供 `-j` 参数。
+模型使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。CPU joint 的正式 eval 推理使用有序原始坐标插值、临时 channels_last_3d 及显式 oneDNN 卷积；训练、梯度、CPU autocast、禁用 oneDNN、自定义卷积或 leaf/global hooks 保留既有 CPU 调用路线。detector 本身的 forward/pre hooks 仍正常执行一次。不同 `hyper` 需构造另一实例；底层 `DeformNetwork.set_hyper()` 是显式重新计算特化权重的入口。改变实例的普通属性不会自动更新这些权重。Python 的 CPU 线程数可用 `torch.set_num_threads()` 设置；统一 CLI 提供 `-j` 参数。
 
 ### 配准调用与结果
 
@@ -325,28 +325,32 @@ FNIT 的 NIfTI RAS场为 `(X,Y,Z,3)`、intent vector 1007，不包含 FreeSurfer
 
 ## 5. 精度、运行时间与脑图
 
-### 5.1 当前 CPU 续修对照：2026-10-04
+### 5.1 最新 CPU joint 续修及其他模式回归：2026-10-04
 
-从已发布 main `f1cbdab1` 继续处理首次分歧：CPU NIfTI 默认缩放后再转 float32；CPU affine 按关联返回变换生成最终 pull；CPU rigid 返回其实际采样 pull 的精确逆；CPU joint 的 affine mid-space 阶段按原版分别归约置信 mass 和 XYZ moments。CNN、权重、速度积分、standalone affine/rigid barycenter 及所有 CUDA 公式保留。
+最新实现修复 CPU joint 的首次分歧：NIfTI 默认缩放后转 float32；初始网络输入按原始体素坐标有序八角插值；仿射特征显式采用 oneDNN 卷积；置信、XYZ moments、4×4 LU/solve、平方根与中心组合保留明确的 FP32 次序。既有 rigid/affine 返回变换与最终图像的 pull 契约保留。最终采样、权重、deform 网络、速度积分、standalone affine/rigid 以及全部 CUDA 公式保持。各入口、局部 hook、训练和 autocast 的保护条件另有回归。
 
-真实输入仍为 OpenNeuro `ds003138` v1.0.1 两幅完整 `224×288×288` T1w（CC0）。新进程 CLI、main 基线及原版均在 **nodecw7**，8 线程、同八物理核与同组锁；不与下节 nodecw10 时间混比。页面缓存未清空，节点及 GPU 存在外部任务，本次单次记录不支持稳定加速结论。
+真实输入为 OpenNeuro `ds003138` v1.0.1 的两幅完整 `224×288×288` T1w（CC0）。当前所有 CLI 在 **nodecw7**，8 线程、同八物理核及同组锁；没有使用 nodecw10 时间。页面缓存未清空，节点有大量外部内存任务与存储等待，以下是实际观测。
 
-| 默认 extent256 | main CLI（秒） | 原版 CLI（秒） | 修复 CLI（秒） | 固定双向精度门 |
-|---|---:|---:|---:|---|
-| rigid | 29.53 | 311.21 | 23.54 | 全 source 网格世界误差最大 `0.000142410 / 0.000961941 mm`；所有图像区域通过 |
-| affine | 20.53 | 65.10 | 26.53 | 世界误差最大 `0.000237338 / 0.000126700 mm`；inverse 上边界 NRMSE `1.11984e−5`；全部通过 |
-| deform | 155.53 | 168.80 | 143.15 | 场 RMSE `1.02277e−5 / 1.01477e−5 mm`；全部通过 |
-| joint | 148.24 | 174.97 | 148.17 | 场 RMSE `6.47982e−5 / 4.37923e−5 mm`；inverse 上边界 NRMSE `0.000389440`；全部通过 |
+| 默认 extent256 | 当前完整 CLI（秒） | 固定双向精度门 |
+|---|---:|---|
+| rigid | 22.791 | 完整两图/LTA 与已验收输出一致；原版完整 source 网格世界误差最大 `0.000142410 / 0.000961941 mm`，所有影像区域通过 |
+| affine | 21.536 | 完整两图/LTA 与已验收输出一致；世界误差最大 `0.000237338 / 0.000126700 mm`，inverse 上边界 NRMSE `1.11984e−5`，全部通过 |
+| deform | 162.754 | 两图两场与已验收输出逐值相同；场 RMSE `1.02277e−5 / 1.01477e−5 mm`，全部通过 |
+| joint | 184.288 | 场 RMSE `1.31021e−5 / 1.68163e−5 mm`，正向 27,653 个参考零边界点误差全为零，inverse 上边界 NRMSE `3.42879e−6`，全部通过 |
 
-沿用此前固定门：affine 全网格世界误差最大≤`0.001 mm`；dense 分量最大≤`0.001 mm`、RMSE≤`0.0001 mm`；全 FOV、官方脑 mask、坐标上边界连续影像 NRMSE≤`0.001`；零动态范围区域严格零误差。未调整容差。额外 `joint extent192 / hyper0.75 / steps5` 的 FNIT/原版 CLI 为 `97.35 / 169.15 s`，场、全 FOV、脑内和 inverse 上边界门通过；forward 参考全零边界有2个微值（最大 `0.00159934`），严格零门仍失败，列为当前未完成项。
+`joint extent192 / hyper0.75 / steps5` 的完整 CLI `100.162 s`、RSS `6.312 GB`；两向场 RMSE `9.85699e−6 / 1.05717e−5 mm`，32,866 个正向参考零边界点误差全为零，inverse 上边界 NRMSE `1.59068e−6`。extent256 RSS `11.763 GB`。两配置均通过完整全 FOV、官方脑 mask、上边界、图像和场的原门。仿射全 source 网格世界误差最大≤`0.001 mm`，dense 分量最大≤`0.001 mm`/RMSE≤`0.0001 mm`；连续图像 NRMSE≤`0.001`，零动态范围区域要求严格零误差。没有改容差或补零。
 
-rigid/affine 完全物化对象、路径 CLI 和应用返回 Affine 的两向结果逐值相同，完整 header 及几何相同；最终源码保存 LTA 回放再次验证。joint 物化 API 的两图、两场及完整 header/extensions/affine 与最终 CLI 逐值一致。真实两帧 DWI 的三个公共 World 入口×三种插值均通过，nearest 对独立 oracle 逐值相同；周期样条系数及有限源 FOV 的政策没有改变。
+当前相邻 A-C-R-C-A 顺序中，已发布 v7 CLI `182.312 / 170.276 s`，v29 `194.054 / 176.282 s`，中位数 `176.294 / 185.168 s`；新 CPU 约慢 `5.0%`。同节点原版完整 CLI 为 `691.550 s`，共享负载与 I/O 干扰显著，不宣称稳定加速倍数。分步骤、GNU time user/sys、上下文切换、缺页和 I/O 及实际时序保存在[最新 JSON](../../validation/synthmorph/cpu_fixes_20261004/joint_precision_v29.public.json)。历史 v7 四模式 main/原版对照和 v10–v23 未过候选分别归档，不作为新计时。
 
-当前源码的真实 H100 affine 旧/新四数组 SHA-256 和完整图像元数据相同，reserved 峰值 `5.91 GB`；源码 AST 审计确认原 CNN、积分、CUDA barycenter 与 paired sampler 保持。GPU 分步和完整 API 时间只列同场观测，本次未执行显存不足时的完整 joint GPU 回归。当前资源、源码/权重/输出指纹、过程峰值 RSS、分步骤 observer、历史未过候选和复现命令见[续修说明](../../validation/synthmorph/cpu_fixes_20261004/README.md)与[公共 JSON](../../validation/synthmorph/cpu_fixes_20261004/report.public.json)。
+完整物化 joint API 与路径 CLI 的两图、两场、完整 header/extensions/affine 相同，输入未修改：输入读取/物化 `1.003 s`、模型加载 `4.039 s`、API `146.031 s`、保存 `23.837 s`，完整 observer worker `194.019 s`。rigid/affine 保存 LTA 后由最终源码双向回放，图像与完整头再次一致。共享 World 源码未改，既有真实两帧 DWI 三入口×三插值回归保留。
 
-![当前真实 T1 原版 CPU、FNIT CPU 与脑内差图](../../validation/synthmorph/cpu_fixes_20261004/figures/cpu_official_brains.png)
+当前 H100 GPU1（实际 UUID 及公共锁记录见 JSON）完整 joint v7/v29 pair 的两图两场 SHA 和完整图像元数据相同，reserved 均 `17,836,277,760 bytes`，19 GB quota。旧/新 API `6.90588 / 6.83554 s`，完整 worker `45.1056 / 40.1046 s`；两入口均未加载 CPU helper。存在外部 GPU 任务，只列同场观测。最终 inference policy 的新增 guard 对这条 CUDA 路线直接返回，数学正文另经 AST 审计；同保存真实 CPU 输入的最终 guard 源码与 v29 features/矩阵逐值相同。
 
-仅在显示前应用官方脑 mask 并裁出脑部框；数值验收始终使用完整 FOV。每行差图色标为脑内绝对误差 P99，最低0.01，完整误差与源码版本见报告。
+CPU joint 的 Eigen 适配器是 FNIT 自有小段 C++，不调用原软件。主页 Conda 环境固定 `eigen=3.4.0`、GCC/GXX `11`；wheel/sdist 包含 `.cpp`。首次 CPU joint 推理懒编译，默认缓存 `~/.cache/fnit/synthmorph/cpu_eigen`；`FNIT_SYNTHMORPH_BUILD_CACHE` 可指定缓存，`CXX`/`FNIT_EIGEN_INCLUDE` 可指定独立 Conda compiler/headers。缺少依赖会报清晰错误。cache identity 绑定源码、Eigen headers、compiler/flags 和 binary SHA；编译无 native/fast-math/FMA contraction。首次含构建的阶段 `18.191 s`、完整 stage worker `20.526 s`，已有缓存阶段进程 `2.255 s`；上面 CLI 已有编译缓存。其他模式、CUDA、训练不加载该适配器。
+
+![最新真实 joint 两种 extent 的原版、FNIT 及脑内差图](../../validation/synthmorph/cpu_fixes_20261004/figures/cpu_joint_v29_brains.png)
+
+显示前应用独立原版脑 mask 并裁出脑部显示框；数值验收始终使用完整 FOV。差图色标为脑内绝对误差 P99，最低0.01；完整误差、版本、源码/权重/输出指纹、所有失败历史和复现命令见[续修说明](../../validation/synthmorph/cpu_fixes_20261004/README.md)。
 
 ### 5.1.1 已归档 CPU 初轮官方对照：2026-10-04
 
@@ -468,7 +472,8 @@ python validation/synthmorph/validate_fsl_warp.py --help
 
 | 日期 | 更新 | 验证记录 |
 |---|---|---|
-| 2026-10-04 续修 | CPU NIfTI 解码、rigid/affine 返回仿射契约、joint 两种归约形状；GPU 原公式保留 | [nodecw7 四模式全部固定门、物化对象/192明确未过项、H100 affine 当前源码和 shared World](../../validation/synthmorph/cpu_fixes_20261004/README.md) |
+| 2026-10-04 joint 续修 | 原始坐标输入、oneDNN 小网格卷积、有序仿射算术、Eigen3.4.0；保护训练/hooks/autocast，CUDA 保留 | [192/256 全门、物化 API、三模式输出保持、GPU joint pair、当前 CPU 约慢5%](../../validation/synthmorph/cpu_fixes_20261004/README.md) |
+| 2026-10-04 已归档 v7 | CPU NIfTI 解码、rigid/affine 返回仿射契约、joint 两种归约形状；GPU 原公式保留 | [nodecw7 四模式全部固定门、物化对象/192明确未过项、H100 affine 当前源码和 shared World](../../validation/synthmorph/cpu_fixes_20261004/README.md) |
 | 2026-10-04 | CPU 构造精度隔离、最终 linear 有效域/affine 坐标、nearest 半体素舍入、积分 grid 复用与 init debug 几何；GPU 原路径保留 | [四模式、参数、独立 apply、GPU 回归与明确未过项](../../validation/synthmorph/cpu_20261004/README.md)；历史 4D 的 CPU 逐位结论不作为本次边界修复版结论 |
 | 2026-10-02 | `WorldTransformChain` 接入公共volume采样器，支持同一次插值中的固定场、BBR与逐帧HMC，新增spline/边界/mask参数 | `tests/synthmorph/test_world_transform.py` 契约测试；[完整 490 帧 API、矩阵/调用门与脑图](../../validation/fmri/public_resamplers_20261002/README.md)通过 |
 | 2026-10-02 | 独立apply一次解码、float32输入复用、坐标复用、可选CUDA与frame chunk，仿射准备复用voxel grid | [本轮真实影像报告](../../validation/registration_lossless_20261002/README.md)；完整490帧同设备位模式、header与保存重读均通过 |
@@ -482,6 +487,7 @@ python validation/synthmorph/validate_fsl_warp.py --help
 - 原实现代码库：[FreeSurfer `mri_synthmorph`](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthmorph)；[VoxelMorph TensorFlow 分支](https://github.com/voxelmorph/voxelmorph/tree/dev-tensorflow)。
 
 - [SynthMorph论文全文](https://pmc.ncbi.nlm.nih.gov/articles/PMC11247402/)；[官方CLI源码](https://github.com/freesurfer/freesurfer/blob/dev/mri_synthmorph/mri_synthmorph)、[官方registration wrapper](https://github.com/freesurfer/freesurfer/blob/dev/mri_synthmorph/synthmorph/registration.py)。开发分支用于浏览，复现依据为本页固定构建和provenance哈希。
+- [PyTorch 2.5.1 卷积选择源码](https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/Convolution.cpp#L492-L516)；[Eigen 3.4 MatrixFunctions](https://eigen.tuxfamily.org/dox-3.4/unsupported/group__MatrixFunctions__Module.html)：CPU joint 小网格 primitive 及独立矩阵函数。
 - [Surfa原代码库](https://github.com/freesurfer/surfa)：官方apply的几何、warp格式与多frame插值；独立参考为FreeSurfer 8.2附带的Surfa 0.6.3。
 - World链的preproc/clean原软件参照、坐标和样条依据沿用[volume原实现说明](../fmri/normalization.md#参考文献与原实现)；原软件运行命令见[volume对照](../fmri/README.md#原软件调用)。
 
