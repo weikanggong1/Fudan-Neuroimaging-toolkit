@@ -171,7 +171,7 @@ warped_timeseries.save("results/timeseries_in_fixed.nii.gz")
 
 CPU默认在frame数≤32时仍一次采样，返回张量的NumPy视图以避免输出拷贝；更多frame使用现有分块输出缓冲。CUDA的8 GiB仅指变化帧缓冲上限，坐标与已有分配计入剩余20 GB额度，512 MiB用于留出采样器和运行时空间。
 
-nearest 保留 Surfa 0.6.3 的 `floor(x+0.5)` 与 `[0,n)` 有效域；linear 使用 `[0,n-1]`。frame 切块不改变插值权重或图像范围。CPU与CUDA linear内核可能因舍入产生不同结果；本轮完整490帧的跨设备误差见第5节。
+nearest 按半体素舍入，有效域为 `[0,n)`；CPU 先取 floor 再比较小数部分是否 ≥0.5，避免 FP32 加法将临界坐标推过边界。当前 CPU linear 对齐官方 `[0,n)` 有效域并限制边缘邻点索引；CUDA 保留此前 `[0,n-1]` 路径。frame 切块不改变各设备既定的插值权重或图像范围。CPU 与 CUDA linear 内核可能因边界和舍入产生不同结果；本轮完整 490 帧的跨设备误差见第5节，新 CPU 边界回归见本轮 CPU 对照。
 
 ### 固定场、BBR与逐帧运动的一次采样
 
@@ -453,7 +453,7 @@ python validation/synthmorph/validate_fsl_warp.py --help
 
 - [SynthMorph论文全文](https://pmc.ncbi.nlm.nih.gov/articles/PMC11247402/)；[官方CLI源码](https://github.com/freesurfer/freesurfer/blob/dev/mri_synthmorph/mri_synthmorph)、[官方registration wrapper](https://github.com/freesurfer/freesurfer/blob/dev/mri_synthmorph/synthmorph/registration.py)。开发分支用于浏览，复现依据为本页固定构建和provenance哈希。
 - [Surfa原代码库](https://github.com/freesurfer/surfa)：官方apply的几何、warp格式与多frame插值；独立参考为FreeSurfer 8.2附带的Surfa 0.6.3。
-- World链的preproc/clean原软件参照、坐标和样条依据沿用[volume原实现说明](../fmri/normalization.md#原实现与参考文献)；原软件运行命令见[volume对照](../fmri/README.md#原软件调用)。
+- World链的preproc/clean原软件参照、坐标和样条依据沿用[volume原实现说明](../fmri/normalization.md#参考文献与原实现)；原软件运行命令见[volume对照](../fmri/README.md#原软件调用)。
 
 ### FNIT源码组织
 

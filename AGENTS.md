@@ -16,7 +16,7 @@
 
 - 优先复用 FNIT 已有成熟 PyTorch/Numba 函数。pipeline 发现子函数 bug 时，在保持公共功能兼容的前提下修复子函数，并特别说明及同步其文档。
 - 生产不得调用系统预装 FSL、FreeSurfer、SPM、MRtrix3、AFNI；不得借助 Nipype、fMRIPrep、sMRIPrep、QSIPrep、QSIRecon、MRIQC、C-PAC、DIPY 等封装间接调用。
-- 允许固定版本的必要上游 C++/CUDA C++ 源码在 Conda 内独立编译、安装和运行；禁止复制预装软件二进制。允许不调用 FreeSurfer 命令的 Surfa、Connectome Workbench 和 ANTsPy。
+- 允许固定版本的必要上游 C++/CUDA C++ 源码在 Conda 内独立编译、安装和运行；禁止复制预装软件二进制。生产禁止 Surfa、ANTsPy、SimpleITK 和 DIPY；独立官方 benchmark 可使用原软件自身依赖，并与 FNIT 运行隔离。Connectome Workbench 的使用范围按对应功能页说明。
 - 读写优先 nibabel。保留 MRI 原始网格、conformed 网格、scanner RAS、surface RAS、voxel 位移与 world 位移的明确区别。
 - 默认 TF32；保留已验证的逐阶段 FP32 例外。FP16/BF16 等低精度须有用户明确授权，不能为提速自行开启。
 - 以 20,000,000,000 字节为显存预算，同时注明 GB/GiB。保留低显存措施，先比较缓冲复用、释放与阶段隔离再更改策略。

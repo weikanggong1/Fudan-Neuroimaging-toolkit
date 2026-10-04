@@ -4,7 +4,7 @@
 
 FNIT 提供人脑磁共振（MRI）处理和群体分析的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel。Python 包名为 `fnit`，统一命令行入口为 `fnit`。各功能的运行依赖与安装要求见对应功能页。Connectome 支持读取已完成 subject、FNIT recon-all 或显式选择的官方 FreeSurfer；默认 auto 有 subject 时读取，没有时选 FNIT，后者须提供已校验的权重与结构像资源。
 
-CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹配原版统计结果，使用普通 float32 连接计算和 QR 正交化回归。模型、影像张量与 NIfTI 输出保持 float32，不自动使用 float16 或 bfloat16。
+CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹配原版统计结果，使用普通 float32 连接计算和 QR 正交化回归。主要网络与影像计算默认使用 float32，不自动使用 float16 或 bfloat16；输出按各接口保存，标签为整数，部分脑图保留输入 dtype。
 
 影像处理以单被试 Python API 和命令行接口为主；多被试任务可在包外通过任务调度器、进程池或作业系统分配 CPU/GPU。recon-all、Connectome、BigFLICA 和 BWAS 的处理范围与调用方式见对应功能页。
 

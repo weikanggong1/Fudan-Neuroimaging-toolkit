@@ -61,6 +61,8 @@ def main():
     parser.add_argument("--wait-seconds", type=float, default=21600)
     parser.add_argument("--runner-record", type=Path,
                         help="timed process receipt; rejects stale running/complete pipeline metadata")
+    parser.add_argument("--source-root", type=Path)
+    parser.add_argument("--source-manifest", type=Path)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     started = time.monotonic()
@@ -78,6 +80,24 @@ def main():
         raise ValueError("expected the declared CPU8 subject")
     if run.get("output_validation", {}).get("present") != 138:
         raise ValueError("candidate did not produce all 138 expected outputs")
+    if (args.source_root is None) != (args.source_manifest is None):
+        raise ValueError("source root and manifest must be provided together")
+    source_receipt = None
+    if args.source_root is not None:
+        manifest = json.loads(args.source_manifest.read_text())
+        for name, expected in manifest["files"].items():
+            if Path(name).is_absolute() or ".." in Path(name).parts:
+                raise ValueError("invalid relative source member")
+            actual = hashlib.sha256((args.source_root / name).read_bytes()).hexdigest()
+            if actual != expected:
+                raise ValueError("frozen source changed: " + name)
+        worker = json.loads((args.candidate / "worker.json").read_text())
+        if Path(worker["fnit_import"]).resolve() != (args.source_root / "src/fnit/__init__.py").resolve():
+            raise ValueError("worker imported a different FNIT source")
+        source_receipt = {"files_verified": len(manifest["files"]),
+                          "archive_sha256": manifest["archive_sha256"],
+                          "source_head": manifest["head_commit"],
+                          "manifest_sha256": hashlib.sha256(args.source_manifest.read_bytes()).hexdigest()}
     # This is posthoc computation, separate from both timed reconstructions.
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
     import torch
@@ -125,6 +145,7 @@ def main():
         "status": "scored", "strict_passed": result["passed"], "strict_checked": result["checked"],
         "overall_numerical_equivalence": "not_assessed", "posthoc_commands": commands,
         "source_label": args.source_label,
+        "source_receipt": source_receipt,
         "comparator_sha256": {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
                               for path in [args.geometry_helper, *args.scripts_dir.glob("*.py")]}})
 

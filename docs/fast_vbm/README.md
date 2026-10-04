@@ -6,7 +6,7 @@
 
 `FastVBM` 接收一幅原始 3D T1w 和一幅 GM 模板，输出输入空间的脑提取及三组织分割结果，以及模板空间的 warped GM、nonlinear-only Jacobian 和 modulated GM。它是单被试接口，不负责批量调度。
 
-流程在 Python 进程内运行，不启动 FreeSurfer 或 FSL 可执行文件。CUDA 默认允许 TF32 matmul 和 cuDNN 内核；输入、模型权重、主要图像张量和 NIfTI 输出仍为 float32，不启用 float16 或 bfloat16。实际开关写入 `fast_vbm_report.json`。
+流程在 Python 进程内运行，不启动 FreeSurfer 或 FSL 可执行文件。CUDA 默认允许 TF32 matmul 和 cuDNN 内核；网络及主要连续图计算使用 float32，不启用 float16 或 bfloat16。实际开关写入 `fast_vbm_report.json`。脑图保留输入 dtype，mask 保存为 uint8，组织标签为 int32，PVE、bias、restore 与标准空间连续图为 float32。
 
 ```mermaid
 flowchart TD
@@ -231,7 +231,7 @@ SynthMorph 网络不消费 reference mask。
 
 | Python 键 | 文件名 | 网格 | 含义 |
 |---|---|---|---|
-| `brain` | `T1_brain.nii.gz` | 输入 T1 | mask 外清零的 T1 |
+| `brain` | `T1_brain.nii.gz` | 输入 T1 | 脑内保留输入；默认脑外背景为 `min(input.min(), 0)`，负值输入时为该最小值 |
 | `brain_mask` | `brain_mask.nii.gz` | 输入 T1 | 二值脑 mask |
 | `pve_csf` | `T1_brain_pve_0.nii.gz` | 输入 T1 | CSF PVE |
 | `pve_gm` | `T1_brain_pve_1.nii.gz` | 输入 T1 | GM PVE，配准 moving image |
@@ -424,7 +424,7 @@ FSL 完整命令计时 3195.14 s 来自 2026-09-30，本轮没有重测原软件
 
 | 版本或日期 | 更新与验证范围 |
 |---|---|
-| 2026-10-04 CPU 审计 | 新增显式 `fast_execution` 选项，默认不变；FAST 的 CPU 原序热点改为 Numba。真实 FAST 小区域八图逐位相同，完整 CUDA `fsl` / `tensor` 两轮对照共 32 对文件 SHA-256 相同。原始 T1 到两个 VBM 后端的 CPU 官方对照仍待完成；这项阶段验证不改变既有 FSL 等价性状态。见[本轮报告](../../validation/smri_cpu_20261004/task04/README.md)。 |
+| 2026-10-04 CPU 审计 | 新增显式 `fast_execution` 选项，默认不变；FAST 的 CPU 原序热点改为 Numba。真实 FAST 小区域八图逐位相同，完整 CUDA `fsl` / `tensor` 两轮对照共 32 对文件 SHA-256 相同。原始 T1 的冻结 v2 两条 CPU 链与各自官方对照已完成，输出尚非逐值相同；后续整合源未重新测量完整 VBM。见[FAST 结果](../../validation/smri_cpu_20261004/task04/README.md)和[VBM 独立报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/README.md)。 |
 | 本轮 FNIRT 优化 | 跳过未使用的采样梯度，复用 T1 intensity mapping 与原始 float64 deformation field；真实 FastVBM 完整端到端 18 幅影像及科学 QC 逐位通过，含保存 API 212.67→204.58 s，见[统一验证页](../../validation/registration_lossless_20261002/README.md)。 |
 | 2026-09-30，`f958121` | 两个后端从 raw T1w 到全部 13 幅输出；FNIRT / SynthMorph 进程内含保存为 901.93 / 607.16 s。对 FSL 调制 GM 的 r 为 0.865489 / 0.616679，未达到数值等价；见[当次报告](../../validation/fast_vbm/e2e.public.json)。 |
 
