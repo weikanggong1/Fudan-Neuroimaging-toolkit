@@ -69,6 +69,8 @@ def _run_wmh(args):
 
 
 def _run_synthseg(args):
+    if args.fast and not args.parc:
+        raise ValueError("--fast is currently implemented only with --parc")
     source, target = Path(args.i), Path(args.o)
     if not source.is_file():
         raise FileNotFoundError(source)
@@ -81,7 +83,7 @@ def _run_synthseg(args):
         from .synthseg_parc import SynthSegPlus
         result = SynthSegPlus(weights=args.weights, parc_weights=args.parc_weights,
                               device=args.device)(source, keep_geometry=args.keep_geometry,
-                                                  volumes=bool(args.csv_vols))
+                                                  volumes=bool(args.csv_vols), fast=args.fast)
         result.combined.save(target)
         if args.csv_vols:
             result.write_volumes_csv(source, args.csv_vols)
@@ -265,6 +267,7 @@ def _run_fast_vbm(args):
         synthstrip_weights=args.synthstrip_weights,
         synthmorph_weights=args.synthmorph_weights,
         bias_correction=not args.no_bias,
+        fast_execution=args.fast_execution,
         synthmorph_extent=args.synthmorph_extent,
         synthmorph_hyper=args.synthmorph_hyper,
         synthmorph_steps=args.synthmorph_steps,
@@ -655,6 +658,8 @@ def main(argv=None):
                           help='resample labels back to the input image grid')
     synthseg.add_argument('--color-lut', help='optional FreeSurfer color lookup table')
     synthseg.add_argument('--parc', action='store_true', help='SynthSeg 2.0 cortical parcellation')
+    synthseg.add_argument('--fast', action='store_true',
+                          help='SynthSeg --parc fast mode; requires --parc')
     synthseg.add_argument('--parc-weights', help='official synthseg_parc_2.0.h5 or directory')
     synthseg.add_argument('--parc-out', help='optional cortex-only parcel image')
     subregions = commands.add_parser('segment-4-subregions', help='end-to-end native T1 brainstem, thalamus, hippocampus and amygdala segmentation')
@@ -781,6 +786,9 @@ def main(argv=None):
                           help='nonlinear registration backend')
     fast_vbm.add_argument('--device', default='cpu')
     fast_vbm.add_argument('--threads', type=int)
+    fast_vbm.add_argument('--fast-execution', choices=('tensor', 'fsl'),
+                          default='tensor',
+                          help='FAST tissue update mode; fsl preserves source-ordered scans')
     fast_vbm.add_argument('--synthmorph-extent', type=int, choices=(192, 256),
                           default=256)
     fast_vbm.add_argument('--synthmorph-hyper', type=float, default=0.5)

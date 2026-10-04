@@ -753,8 +753,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     wm_edit_binary = _native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
     registration_atlases = {hemi: _folding_atlas(assets, hemi)
                             for hemi in ("lh", "rh")}
-    torch.backends.cuda.matmul.allow_tf32 = True
-    torch.backends.cudnn.allow_tf32 = True
+    if torch.device(device).type == "cuda":
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
     validation_seconds = time.perf_counter() - started
     pipeline_started = time.perf_counter()
     profile = "single-t1-standard"
@@ -765,6 +766,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                                   "sha256": n4_binary[1]}, "threads": threads,
                     "precision": {"matmul_tf32_default": True,
                                   "cudnn_tf32_default": True,
+                                  "cuda_policy_applied": torch.device(device).type == "cuda",
                                   "fp16_or_bf16_requested_by_fnit": False,
                                   "caller_autocast": caller_autocast,
                                   "fp16_or_bf16_enabled": any(

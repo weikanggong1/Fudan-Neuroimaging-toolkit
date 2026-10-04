@@ -14,6 +14,8 @@
 
 CUDA 默认允许 TF32，不自动使用 FP16/BF16。SynthStrip、SynthSeg、辅助网络的卷积及 Talairach/MNI 仿射矩阵乘法保留同输入验证后的局部 FP32 例外；MNI deform 的 CUDA 路径也保留矩阵乘法与 cuDNN 的 FP32 例外；作用域结束后恢复设置，其他 GPU 阶段继续允许 TF32。构造和前向实际设置见[SynthSeg 精度](SYNTHSEG_PRECISION.md)与[辅助 Synth 精度](SYNTH_AUX_PRECISION.md)。
 
+CPU 重建入口不修改调用者的 CUDA TF32 flags，报告以 `cuda_policy_applied=false` 标明未应用 CUDA 策略；CUDA 入口仍应用原有默认策略。此修复避免同进程的 CPU 调用改变其他 GPU 计算的精度设置，保持输入、输出、参数和阶段顺序。[CPU 同节点 benchmark](../../validation/smri_cpu/task5/README.md)另列实际 CPU 时间及官方差异。
+
 本轮复用并优化已有[有序归一化](NORMALIZATION.md)、[球面几何](CPU_GEOMETRY_PERFORMANCE.md)及[PyTorch 指标函数](SURFACE_METRICS.md)。多图谱共享[同版本几何缓存](SURFACE_STATS_CACHE.md)，厚度使用[完整空间候选](SURFACE_THICKNESS.md)。完整 Python pial 已做同输入回归，但仍比当前 C++ 慢，生产路径保留 Conda 源码构建实现。不得将冻结同输入加速写成整例提速。
 
 本轮复用已有PyTorch WM后编辑与MNI完整warp求逆，优化已有Numba有序网格/球面实现，接入半球独立进程和私有发布；GCA和white保留完整Conda源码构建流程并消除重复工作。默认半球worker仍为1，本页示例显式使用2；Python pial尚无生产速度优势，保留原生pial。
