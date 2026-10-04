@@ -42,3 +42,11 @@ nodecw7 同一 `0,4,8,12,16,20,24,28` 核组，公共 `nodecw7.synth.cpu8.lock`�
 [run_replay.sh](run_replay.sh) 记录固定索引定位的 v29 freeze、实际参考目录、线程、核组和锁。源码在 canonical `workspaces/.../remaining_20261004/synth/morph-raw-sampler`；私密产物在对应 `runs/.../synth/morph-raw-sampler`。未改变既有环境 prefix 或 Morph 活跃 freeze。
 
 root 已批准推进 CPU 限定安全 wrapper。Morph 任务负责复制新 helper 并作最小接入：保留现有 CPU/F32/no-grad/eval/hook/autocast 路径，原 einsum 坐标生成后懒调用；不可用、禁用、非有限或编译失败时继续原 Torch 八角正文。最终 helper 改名/安全包装后的 SHA 与本原型不同，须重做同 47,710,208 值门和 cold/warm 绑定；本页原型记录保持原样，不改标为正式生产源码验收。
+
+## 安全 wrapper 交接
+
+[_cpu_raw_sampler_ready.py](_cpu_raw_sampler_ready.py) SHA `041ac65195eac90e8c4d36bccf9764f69b0ea28c6b17fb4a696966b3ebf7696d` 交由 Morph 任务复制为正式新模块，此工作树仍只改 validation。它的 `try_sample(volume,locations,fill_value=0)` 返回新 Tensor，或返回 `None` 由调用者继续原 Torch 正文。保留上层模型 eval/hook guard；helper 检查 CPU/Linux x86/F32/no-grad/autocast-off、非有限值和采样网格大小，不接收 CUDA。
+
+小于 32,768 个位置、显式 `FNIT_SYNTHMORPH_CPU_RAW_NUMBA=0`、NumBa 缺失/JIT 禁用或编译/运行失败时保留 Torch；NumBa 错误本进程记录一次，后续不重复失败。新 wrapper 预算取进入前 NumBa mask 与当前 Torch 线程数的较小值，并在 `finally` 恢复 mask。私有 `backend_info()` 可验证实际后端与原因。
+
+[test_ready_helper.py](test_ready_helper.py) 本地 **21 passed，6.98 s**，覆盖真实采用的 NumBa kernel 路径、多 batch/channel、非连续数据、singleton 源轴、fill=None/custom、非有限/禁用/NumBa 不可用、grad/autocast、失败一次缓存和 mask 恢复。源数组实际 F64/F32 copy 都是 F-contiguous；硬件/ISA 与布局见 [platform.public.json](platform.public.json)。这些安全测试不替代最终生产 helper 的实际 full 输入门，下一份记录将绑定 Morph 复制后的 source SHA。
