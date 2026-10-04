@@ -1,0 +1,616 @@
+{
+  "schema": "fnit-ten-case-candidate-preparation-v1",
+  "observed_utc": "2026-10-04T12:27:15.807972+00:00",
+  "worktree": "/tmp/fnit-recon-accuracy-20261003/candidate_10case_20261004",
+  "branch": "recon-accuracy/20261004-ten-case-candidate-prep",
+  "main_creation_base": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+  "candidate_commit": "127eb30656ae60a639e44634b642bbb945bc93d1",
+  "source_commits": [
+    "127eb30656ae60a639e44634b642bbb945bc93d1 Match native GCA sample coordinate precision and retain boundary semantics",
+    "edd33e363412cce2363e2c0028dd0544e188bf50 fix(recon): finish pial passes after terminal rejected trials",
+    "4ae2858c4df767798cfe8ec8d252919a756e45b3 fix(recon): preserve face area precision in cortical ROI statistics",
+    "d904b0124a021a01c699c58624c3eb76cc0d485a fix(recon-all): preserve conformed dtype in SynthStrip MGH output",
+    "9f7ed77308224ef1bd5d5c7d3eb89cd648a1c949 fix(recon): gate hemisphere execution on actual CUDA startup readiness"
+  ],
+  "precision_candidates": [
+    {
+      "file": "src/fnit/recon_all/input_talairach_chain.py",
+      "sha256": "ab0a02eca9a738cf9c43e0cbcf179165fe187529bbc34ad1929b619fd60bc8d3",
+      "stage_receipt": "/tmp/fnit-recon-accuracy-20261003/coordinator/validation/recon_all/accuracy_20261003/task_02/synthstrip_writer.json",
+      "stage_receipt_sha256": "3ba7b879067d78d78ec1c34d5cca91c99ddd17391867f4e8fb13e12c4c400430",
+      "binding_field": "code_sha256",
+      "sha_match": true,
+      "scope_and_limits": "old two frozen real cases ABBA same-network-output writer; zero value/geometry difference; dtype uint8; not whole input chain",
+      "ten_case_candidate_end_to_end": "not_run"
+    },
+    {
+      "file": "src/fnit/recon_all/ca_normalize_python.py",
+      "sha256": "167be9d72496b7279b98e52b8f0d6c0808d2c09d02df24af1fed0fd331100b9b",
+      "stage_receipt": "/tmp/fnit-recon-accuracy-20261003/coordinator/validation/recon_all/accuracy_20261003/task_03/production_fix_abba_completed.json",
+      "stage_receipt_sha256": "46ffd3fa6bda76fac60afcc0bac469faeaf39eb008e7c73dbaf16d3afab73967",
+      "binding_field": "candidate_source_sha256",
+      "sha_match": true,
+      "scope_and_limits": "old two frozen real cases ABBA eight calls; all candidate norm/ctrl zero versus official; driver exit not recorded; sub02 performance stability unresolved",
+      "ten_case_candidate_end_to_end": "not_run"
+    },
+    {
+      "file": "src/fnit/recon_all/place_pial_python.py",
+      "sha256": "2377f847610a935859935e7ecafdbbd52a74bd4e27ad372a8324b49249d18e33",
+      "stage_receipt": "/tmp/fnit-recon-accuracy-20261003/coordinator/validation/recon_all/accuracy_20261003/task_05/placement_complete_v1/completion_summary.json",
+      "stage_receipt_sha256": "4d28dbf8a63e5e836dd027d586795b3dd3b78be1aaf183d289546cc4a520ad40",
+      "binding_field": "python_pial_source_sha256",
+      "sha_match": true,
+      "scope_and_limits": "one historical real case both hemispheres; Python pial full four passes; same 11 inputs and ordered faces; mean/p99/max0 versus official; no tree GPU peak",
+      "ten_case_candidate_end_to_end": "not_run"
+    },
+    {
+      "file": "src/fnit/recon_all/surface_stats_cache.py",
+      "sha256": "6f64b40773c61d46fd167c34a74530d9475dd7992b6607c99df14511826ab2a1",
+      "stage_receipt": "/tmp/fnit-recon-accuracy-20261003/coordinator/validation/recon_all/accuracy_20261003/task_05/roi_lh_v1.json",
+      "stage_receipt_sha256": "69bec63749b21ba4d762d27b77aa4f0cfa02c3f7addc7d0e48a643f5958a264c",
+      "binding_field": "source_sha256.candidate",
+      "sha_match": true,
+      "scope_and_limits": "one historical LH isolated same-input ROI ABBA; same-face-area oracle p99/max0; threads2 CUDA0; not whole surface",
+      "ten_case_candidate_end_to_end": "not_run"
+    },
+    {
+      "file": "src/fnit/recon_all/surface_roi_gpu.py",
+      "sha256": "5842a1a57ab0983b5735d3631826e9b89bd7123c271d18a4e4ad1161fb0ee758",
+      "stage_receipt": "/tmp/fnit-recon-accuracy-20261003/coordinator/validation/recon_all/accuracy_20261003/task_05/first_phase.json",
+      "stage_receipt_sha256": "001c543f1cd3a7f9c7effdd3bddcf3b0e3053d247a4ca26e6c012e94aea646da",
+      "binding_field": "candidate_source_sha256",
+      "sha_match": true,
+      "scope_and_limits": "docstring-only production diff; bound by first-phase source SHA, which was queued at that time; real cache/ROI evidence is completed roi_lh_v1.json",
+      "ten_case_candidate_end_to_end": "not_run"
+    }
+  ],
+  "main_production_preserved": [
+    {
+      "file": "src/fnit/recon_all/native_free.py",
+      "sha256": "fd02095d1fee2eca566090117e51f770e5fcc7deef68e47330a121a019bfd301",
+      "equal_to_pinned_main": true
+    },
+    {
+      "file": "src/fnit/recon_all/segstats_wmparc_python.py",
+      "sha256": "da987f95e5ea46893a8ba4ec5e97f63ac9d9bf9dd8943d77b5d5706af3044a27",
+      "equal_to_pinned_main": true
+    },
+    {
+      "file": "src/fnit/recon_all/volmask_python.py",
+      "sha256": "ec4a5f19a810471a1019d3959c1a907c8f19134d705498f7411e85833b8c4727",
+      "equal_to_pinned_main": true
+    },
+    {
+      "file": "src/fnit/recon_all/mris_register_average_numba.py",
+      "sha256": "488b2c2d1784a19e2b461419045482760233636df22c76a079d521f779c7f2c6",
+      "equal_to_pinned_main": true
+    }
+  ],
+  "pial_stage_details": {
+    "lh_pial_python": {
+      "status": "complete",
+      "native_returncode": null,
+      "queue_exit_code": 0,
+      "report_mtime_utc": "2026-10-03T05:21:10.024179+00:00",
+      "report_sha256": "f147650fd03c68e7b6813b7d9dbdeb9ffee212fe0964f8feefeee84c93825014",
+      "seconds_including_stage_io": 1182.5610081949271,
+      "input_files": 11,
+      "inputs_unchanged": true,
+      "threads": 2,
+      "execution_script_sha256": "d853965e625d245bcc518cdce97aba1049e90ebe8910b412e64689f492b33be2",
+      "ordered_faces_unchanged": true,
+      "mean_mm": 0.0,
+      "p99_mm": 0.0,
+      "max_mm": 0.0,
+      "vertices_over_0_1_mm": 0,
+      "completed_passes": 4,
+      "pass_ends": [
+        26,
+        32,
+        36,
+        41
+      ],
+      "steps": 41,
+      "cleanup": {
+        "intersecting_faces_before": 2,
+        "intersecting_faces_after": 0,
+        "intersecting_faces_trace": [
+          2,
+          6,
+          0
+        ],
+        "marked_vertices": 6,
+        "smoothed_vertices": 16,
+        "smoothing_cycles": 2,
+        "smoothing_iterations": 200
+      },
+      "terminal_rejected_trials": 0,
+      "source_sha_matches_candidate": true,
+      "gpu_allocator_peaks": {
+        "allocated": 21530112,
+        "reserved": 39845888
+      }
+    },
+    "rh_pial_python": {
+      "status": "complete",
+      "native_returncode": null,
+      "queue_exit_code": 0,
+      "report_mtime_utc": "2026-10-03T06:12:26.173297+00:00",
+      "report_sha256": "077e5bbca8b8f64e47cccedaa980c2865a50803f7749c78ac4740a32a0a1afe5",
+      "seconds_including_stage_io": 1007.9009539498948,
+      "input_files": 11,
+      "inputs_unchanged": true,
+      "threads": 2,
+      "execution_script_sha256": "d853965e625d245bcc518cdce97aba1049e90ebe8910b412e64689f492b33be2",
+      "ordered_faces_unchanged": true,
+      "mean_mm": 0.0,
+      "p99_mm": 0.0,
+      "max_mm": 0.0,
+      "vertices_over_0_1_mm": 0,
+      "completed_passes": 4,
+      "pass_ends": [
+        26,
+        32,
+        36,
+        41
+      ],
+      "steps": 41,
+      "cleanup": {
+        "intersecting_faces_before": 2,
+        "intersecting_faces_after": 0,
+        "intersecting_faces_trace": [
+          2,
+          0
+        ],
+        "marked_vertices": 6,
+        "smoothed_vertices": 6,
+        "smoothing_cycles": 1,
+        "smoothing_iterations": 100
+      },
+      "terminal_rejected_trials": 0,
+      "source_sha_matches_candidate": true,
+      "gpu_allocator_peaks": {
+        "allocated": 21488128,
+        "reserved": 39845888
+      }
+    }
+  },
+  "startup_proof": {
+    "main_tests": [
+      "test_allocator_inherits_presence_semantics",
+      "test_cancel_ended_leader_reaps_live_own_grandchild_only",
+      "test_cleanup_error_preserves_original_worker_failure",
+      "test_cleanup_failure_cannot_remain_complete",
+      "test_cli_opt_in",
+      "test_cuda_current_device_is_fixed_without_unneeded_initialization",
+      "test_failure_cancels_sibling_and_does_not_publish",
+      "test_idle_cache_release_never_initializes_cpu_or_fresh_cuda",
+      "test_idle_cache_release_records_live_and_reserved_separately",
+      "test_intervals_do_not_sum_into_wall",
+      "test_invalid_resource_budget",
+      "test_metadata_publication_failure_marks_report_failed",
+      "test_parallel_final_placement_defers_gpu_maps",
+      "test_real_exec_private_writes_and_right_overwrite",
+      "test_serial_exec_uses_four_threads_and_no_overlap",
+      "test_short_gpu_uuid_is_canonicalized_and_unknown_is_unavailable",
+      "test_undeclared_shared_mutation_is_rejected_before_publish"
+    ],
+    "validated_5f_tests": [
+      "test_allocator_inherits_presence_semantics",
+      "test_bootstrap_failure_records_phase_without_cuda_queries",
+      "test_cancel_ended_leader_reaps_live_own_grandchild_only",
+      "test_cleanup_error_preserves_original_worker_failure",
+      "test_cleanup_failure_cannot_remain_complete",
+      "test_cli_opt_in",
+      "test_cpu_and_zero_wait_disable_resource_retry",
+      "test_cuda_current_device_is_fixed_without_unneeded_initialization",
+      "test_failure_cancels_sibling_and_does_not_publish",
+      "test_interrupt_during_ready_wait_cancels_active_workers",
+      "test_intervals_do_not_sum_into_wall",
+      "test_invalid_resource_budget",
+      "test_invalid_startup_wait",
+      "test_metadata_publication_failure_marks_report_failed",
+      "test_missing_report_is_never_retried",
+      "test_missing_worker_report_retains_both_requests",
+      "test_non_bootstrap_phases_do_not_retry_even_if_oom",
+      "test_operation_or_post_sync_oom_is_never_retried",
+      "test_parallel_final_placement_defers_gpu_maps",
+      "test_pre_go_oom_restarts_only_failed_side_and_function_runs_once",
+      "test_ready_wait_exits_on_deadline_or_parent_death_even_with_go",
+      "test_real_exec_private_writes_and_right_overwrite",
+      "test_real_runtime_message_in_bootstrap_worker_report",
+      "test_real_runtime_oom_message_and_host_oom_classification",
+      "test_serial_exec_uses_four_threads_and_no_overlap",
+      "test_short_gpu_uuid_is_canonicalized_and_unknown_is_unavailable",
+      "test_startup_timeout_cancels_without_entering_function",
+      "test_undeclared_shared_mutation_is_rejected_before_publish"
+    ],
+    "union": [
+      "test_allocator_inherits_presence_semantics",
+      "test_bootstrap_failure_records_phase_without_cuda_queries",
+      "test_cancel_ended_leader_reaps_live_own_grandchild_only",
+      "test_cleanup_error_preserves_original_worker_failure",
+      "test_cleanup_failure_cannot_remain_complete",
+      "test_cli_opt_in",
+      "test_cpu_and_zero_wait_disable_resource_retry",
+      "test_cuda_current_device_is_fixed_without_unneeded_initialization",
+      "test_failure_cancels_sibling_and_does_not_publish",
+      "test_idle_cache_release_never_initializes_cpu_or_fresh_cuda",
+      "test_idle_cache_release_records_live_and_reserved_separately",
+      "test_interrupt_during_ready_wait_cancels_active_workers",
+      "test_intervals_do_not_sum_into_wall",
+      "test_invalid_resource_budget",
+      "test_invalid_startup_wait",
+      "test_metadata_publication_failure_marks_report_failed",
+      "test_missing_report_is_never_retried",
+      "test_missing_worker_report_retains_both_requests",
+      "test_non_bootstrap_phases_do_not_retry_even_if_oom",
+      "test_operation_or_post_sync_oom_is_never_retried",
+      "test_parallel_final_placement_defers_gpu_maps",
+      "test_pre_go_oom_restarts_only_failed_side_and_function_runs_once",
+      "test_ready_wait_exits_on_deadline_or_parent_death_even_with_go",
+      "test_real_exec_private_writes_and_right_overwrite",
+      "test_real_runtime_message_in_bootstrap_worker_report",
+      "test_real_runtime_oom_message_and_host_oom_classification",
+      "test_serial_exec_uses_four_threads_and_no_overlap",
+      "test_short_gpu_uuid_is_canonicalized_and_unknown_is_unavailable",
+      "test_startup_timeout_cancels_without_entering_function",
+      "test_undeclared_shared_mutation_is_rejected_before_publish"
+    ],
+    "candidate_tests": [
+      "test_allocator_inherits_presence_semantics",
+      "test_bootstrap_failure_records_phase_without_cuda_queries",
+      "test_cancel_ended_leader_reaps_live_own_grandchild_only",
+      "test_cleanup_error_preserves_original_worker_failure",
+      "test_cleanup_failure_cannot_remain_complete",
+      "test_cli_opt_in",
+      "test_cpu_and_zero_wait_disable_resource_retry",
+      "test_cuda_current_device_is_fixed_without_unneeded_initialization",
+      "test_failure_cancels_sibling_and_does_not_publish",
+      "test_idle_cache_release_never_initializes_cpu_or_fresh_cuda",
+      "test_idle_cache_release_records_live_and_reserved_separately",
+      "test_interrupt_during_ready_wait_cancels_active_workers",
+      "test_intervals_do_not_sum_into_wall",
+      "test_invalid_resource_budget",
+      "test_invalid_startup_wait",
+      "test_metadata_publication_failure_marks_report_failed",
+      "test_missing_report_is_never_retried",
+      "test_missing_worker_report_retains_both_requests",
+      "test_non_bootstrap_phases_do_not_retry_even_if_oom",
+      "test_operation_or_post_sync_oom_is_never_retried",
+      "test_parallel_final_placement_defers_gpu_maps",
+      "test_pre_go_oom_restarts_only_failed_side_and_function_runs_once",
+      "test_ready_wait_exits_on_deadline_or_parent_death_even_with_go",
+      "test_real_exec_private_writes_and_right_overwrite",
+      "test_real_runtime_message_in_bootstrap_worker_report",
+      "test_real_runtime_oom_message_and_host_oom_classification",
+      "test_serial_exec_uses_four_threads_and_no_overlap",
+      "test_short_gpu_uuid_is_canonicalized_and_unknown_is_unavailable",
+      "test_startup_timeout_cancels_without_entering_function",
+      "test_undeclared_shared_mutation_is_rejected_before_publish"
+    ],
+    "missing": [],
+    "main_cache_helper_ast_unchanged": true,
+    "parent_cache_call_count": 1,
+    "worker_ast_equals_validated_5f": true
+  },
+  "new_ten_case_status": "not_run_by_this_preparation_or_stage_task; coordinated raw-T1 next run retains distinct results",
+  "overall_official_equivalence": "not_assessed",
+  "frozen_8f_result": "separate_existing_evidence_not_modified",
+  "cpu_test_status": "passed_40_focused_tests_exit0",
+  "source_archive_sha256": "e94929cded6a0233678079558fd0a10a70fa33002d537139647d7d61f4ab8693",
+  "canonical_workspace": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/ten_case_candidate_cpu_v1",
+  "canonical_run": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/ten_case_candidate_cpu_v1",
+  "existing_input_policy": "reuse original verified real ten-case cohort and weight paths; no downloads performed",
+  "diff_sha256": "b6bc8fe5dba36d4f6eea258918e4fde35b149dd1dae98fe855d680e4a29224ca",
+  "cpu_test_receipt_local": "pytest_fixed_venv_receipt.json",
+  "cpu_tests_scope": "CPU unit tests only; not real-data benchmark or whole repository test suite",
+  "frozen_candidate_commit": "3a0c9aba6321b4981fd8174b4b191515459aa38b",
+  "preferred_frozen_archive_receipt": {
+    "archive": "/tmp/ten_case_candidate_frozen_3a0c9aba_gitarchive_v3.tar.gz",
+    "sha256": "03cc806fb449a8620c8caa78b1af86dfaff6b64ab9e9e7c5210cf12184aa7f31",
+    "bytes": 29894899,
+    "file_count": 1990,
+    "commit": "3a0c9aba6321b4981fd8174b4b191515459aa38b",
+    "manifest_sha256": "0207c1b50411b3c19e2d8a7cada9018d69e7a38e100070f052d719959e4ceaac",
+    "argv": [
+      "git",
+      "archive",
+      "--format=tar.gz",
+      "--output=/tmp/ten_case_candidate_frozen_3a0c9aba_gitarchive_v3.tar.gz",
+      "3a0c9aba6321b4981fd8174b4b191515459aa38b",
+      "src",
+      "docs",
+      "tests",
+      ".gitattributes",
+      ".gitignore",
+      "AGENTS.md",
+      "MANIFEST.in",
+      "README.md",
+      "THIRD_PARTY_NOTICES.md",
+      "environment-recon-all-cpp.yml",
+      "environment.yml",
+      "pyproject.toml",
+      "setup.py"
+    ]
+  },
+  "canonical_frozen_workspace": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/ten_case_candidate_frozen_3a0c9aba",
+  "annotation_stage_run": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/ten_case_candidate_annotation_stage_v1",
+  "annotation_stage_pid": 62850,
+  "annotation_stage_status": "four_complete_exit0_exact_regression_passed_12_annotations",
+  "annotation_plan_sha256": "fc0433575d1de63b137ceb3f7be56e88c4334db640137dbaae78bc2878790c03",
+  "original_f1_main_four_production_progress": [
+    {
+      "file": "src/fnit/recon_all/hemisphere_parallel.py",
+      "current_sha256": "231985ed7c3257595f2f9e9711fb26bdbbcac42c59e64634b4e73f75e3ff36e3",
+      "comment": "main full parent cache helper retained AST and exactly one call; READY/GO new capability merged; device/cancel/diagnostic tests union retained",
+      "functions": [
+        {
+          "name": "validate_hemisphere_workers",
+          "signature": "workers, threads"
+        },
+        {
+          "name": "_snapshot",
+          "signature": "root"
+        },
+        {
+          "name": "_owned",
+          "signature": "relative, hemi"
+        },
+        {
+          "name": "_normalize_paths",
+          "signature": "value, private, public, published_paths=None"
+        },
+        {
+          "name": "resolve_worker_device",
+          "signature": "device"
+        },
+        {
+          "name": "inherited_allocator_policy",
+          "signature": "environ"
+        },
+        {
+          "name": "release_idle_parent_cuda_cache",
+          "signature": "device"
+        },
+        {
+          "name": "_live_group",
+          "signature": "group"
+        },
+        {
+          "name": "_cancel",
+          "signature": "processes"
+        },
+        {
+          "name": "run_hemisphere_group",
+          "signature": "subject, operation, *, device, threads, workers=2, profile_stages=False, callable_path='fnit.recon_all.native_free:_hemisphere_operation', kwargs=None, startup_wait_seconds=30"
+        }
+      ]
+    },
+    {
+      "file": "src/fnit/recon_all/native_free.py",
+      "current_sha256": "fd02095d1fee2eca566090117e51f770e5fcc7deef68e47330a121a019bfd301",
+      "comment": "main failure timing/import preflight sphere dependency and precision restore preserved byte-for-byte",
+      "functions": [
+        {
+          "name": "_native_binary",
+          "signature": "native_bin_dir: str | Path, name: str"
+        },
+        {
+          "name": "_native_bin_directory",
+          "signature": "value: str | Path | None"
+        },
+        {
+          "name": "_native_em_register_binary",
+          "signature": "native_bin_dir: str | Path"
+        },
+        {
+          "name": "_native_topology_binary",
+          "signature": "native_bin_dir: str | Path"
+        },
+        {
+          "name": "_native_surface_metrics_binary",
+          "signature": "native_bin_dir: str | Path"
+        },
+        {
+          "name": "_native_inflate_binary",
+          "signature": "native_bin_dir: str | Path"
+        },
+        {
+          "name": "_validate_standard_python_dependencies",
+          "signature": ""
+        },
+        {
+          "name": "_run_native_wm_segment",
+          "signature": "binary: Path, mri: Path, assets: Path"
+        },
+        {
+          "name": "_run_native_wm_edit",
+          "signature": "binary: Path, mri: Path, assets: Path"
+        },
+        {
+          "name": "_folding_atlas",
+          "signature": "assets: Path, hemi: str"
+        },
+        {
+          "name": "_run_native_em_register",
+          "signature": "binary: Path, mri: Path, atlas: Path, assets: Path, *, backend: str='original', binary_sha256: str | None=None, threads: int=4"
+        },
+        {
+          "name": "_run_native_topology",
+          "signature": "binary: Path, subject: Path, hemi: str, assets: Path"
+        },
+        {
+          "name": "_run_native_sphere_step",
+          "signature": "binary: Path, subject: Path, assets: Path, arguments: list[str], outputs: tuple[Path, ...]"
+        },
+        {
+          "name": "_prepare_native_topology",
+          "signature": "binary: Path, subject: Path, hemi: str, assets: Path, device: str, native_inflate_binary: Path, intersection_binary: Path"
+        },
+        {
+          "name": "_run_accurate_sphere_pair",
+          "signature": "inflate_binary: Path, subject: Path, hemi: str, assets: Path, *, device: str='cpu'"
+        },
+        {
+          "name": "_run_surface_metrics",
+          "signature": "binary: Path, subject: Path, hemi: str, assets: Path, *, device: str"
+        },
+        {
+          "name": "_run_native_surface_metrics",
+          "signature": "binary: Path, subject: Path, hemi: str, assets: Path"
+        },
+        {
+          "name": "_run_avg_curv",
+          "signature": "binary: Path, subject: Path, hemi: str, atlas: Path, assets: Path"
+        },
+        {
+          "name": "_run_curvature_stats",
+          "signature": "binary: Path, subject: Path, hemi: str, assets: Path"
+        },
+        {
+          "name": "_run_defects_volume",
+          "signature": "binary: Path, subject: Path, hemi: str, assets: Path"
+        },
+        {
+          "name": "_run_white_mri_chain",
+          "signature": "subject: Path, weights: Path, assets: Path, threads: int, warp_binaries: tuple[Path, Path, Path], stage, *, device: str"
+        },
+        {
+          "name": "_place_preaparc_and_smooth",
+          "signature": "subject: Path, hemi: str, binary: Path, assets: Path, threads: int"
+        },
+        {
+          "name": "_run_native_pial",
+          "signature": "binary: Path, subject: Path, hemi: str, assets: Path, threads: int"
+        },
+        {
+          "name": "_write_principal_curvature_maps",
+          "signature": "surf: Path, hemi: str, device: str"
+        },
+        {
+          "name": "_surface_pair",
+          "signature": "subject: Path, hemi: str, filled: Path, norm: Path, *, device: str, threads: int, topology_binary: Path, inflate_binary: Path, intersection_binary: Path, place_binary: Path, defect_binary: Path, assets: Path, defer_defects: bool=False"
+        },
+        {
+          "name": "_finish_cortical_surface",
+          "signature": "subject: Path, hemi: str, binary: Path, assets: Path, *, device: str, threads: int, defer_metrics: bool=False, white_binary: Path | None=None"
+        },
+        {
+          "name": "_finish_cortical_metrics",
+          "signature": "subject: Path, hemi: str, binary: Path, assets: Path, *, device: str"
+        },
+        {
+          "name": "_project_parcels",
+          "signature": "subject: Path"
+        },
+        {
+          "name": "_project_exvivo_annotations",
+          "signature": "subject: Path, assets: Path"
+        },
+        {
+          "name": "_project_wmparc",
+          "signature": "subject: Path"
+        },
+        {
+          "name": "_segment_callosum",
+          "signature": "mri: Path"
+        },
+        {
+          "name": "_validate_meshes",
+          "signature": "subject: Path"
+        },
+        {
+          "name": "_write_hemisphere_stats",
+          "signature": "subject: Path, hemi: str, volumes: dict, cache, stage, device: str"
+        },
+        {
+          "name": "_hemisphere_operation",
+          "signature": "subject, hemi, device, threads, operation, *, assets, binaries=None, registration_atlases=None"
+        },
+        {
+          "name": "_run_recon_all_python",
+          "signature": "t1: str | Path, subject_dir: str | Path, weights_dir: str | Path, assets_dir: str | Path, *, device: str='cuda:0', threads: int=4, native_bin_dir: str | Path | None=None, profile_stages: bool=False, cuda_allocator_cache: str='auto', hemisphere_workers: int=1, native_optimizations: str='auto'"
+        },
+        {
+          "name": "run_recon_all_python",
+          "signature": "t1: str | Path, subject_dir: str | Path, weights_dir: str | Path, assets_dir: str | Path, *, device: str='cuda:0', threads: int=4, native_bin_dir: str | Path | None=None, profile_stages: bool=False, cuda_allocator_cache: str='auto', hemisphere_workers: int=1, native_optimizations: str='auto'"
+        },
+        {
+          "name": "main",
+          "signature": "argv: list[str] | None=None"
+        }
+      ]
+    },
+    {
+      "file": "src/fnit/recon_all/segstats_wmparc_python.py",
+      "current_sha256": "da987f95e5ea46893a8ba4ec5e97f63ac9d9bf9dd8943d77b5d5706af3044a27",
+      "comment": "main count=1 branch prevents unused variance division by zero; byte-for-byte main preserved",
+      "functions": [
+        {
+          "name": "_partial_volume",
+          "signature": "seg: np.ndarray, intensity: np.ndarray, selected: np.ndarray, voxel_volume: np.float32"
+        },
+        {
+          "name": "_lut",
+          "signature": "path: Path"
+        },
+        {
+          "name": "_statistics",
+          "signature": "seg: np.ndarray, intensity: np.ndarray, ids: list[int], voxel_volume: float"
+        },
+        {
+          "name": "write_wmparc_stats",
+          "signature": "subject: str | Path, wm_lut: str | Path, output: str | Path, *, brainvol_stats: str | Path | None=None, stiv: str | Path | None=None"
+        },
+        {
+          "name": "main",
+          "signature": ""
+        }
+      ]
+    },
+    {
+      "file": "src/fnit/recon_all/volmask_python.py",
+      "current_sha256": "ec4a5f19a810471a1019d3959c1a907c8f19134d705498f7411e85833b8c4727",
+      "comment": "main float64 ray/triangle intersections + canonical shared-edge single ownership retained byte-for-byte",
+      "functions": [
+        {
+          "name": "_owns_projected_edge",
+          "signature": "dy: float, dz: float"
+        },
+        {
+          "name": "_projected_edge",
+          "signature": "first: np.ndarray, second: np.ndarray, first_id: int, second_id: int, yy: float, zz: float"
+        },
+        {
+          "name": "_inside_mesh",
+          "signature": "vertices: np.ndarray, faces: np.ndarray, shape: tuple[int, int, int]"
+        },
+        {
+          "name": "ribbon_arrays",
+          "signature": "shape: tuple[int, int, int], vox2ras_tkr: np.ndarray, surfaces: dict[str, dict[str, tuple[np.ndarray, np.ndarray]]]"
+        },
+        {
+          "name": "_color_lut_tags",
+          "signature": "color_lut_file: str | Path"
+        },
+        {
+          "name": "write_ribbon",
+          "signature": "template_file: str | Path, surface_dir: str | Path, output_dir: str | Path, color_lut_file: str | Path"
+        },
+        {
+          "name": "main",
+          "signature": "argv: list[str] | None=None"
+        }
+      ]
+    }
+  ],
+  "annotation_stage_summary_local": "/tmp/fnit-recon-accuracy-20261003/candidate_10case_20261004/validation/recon_all/accuracy_20261004_candidate_preparation/annotation_stage_metadata_v1/measured_summary.json",
+  "annotation_stage_summary_sha256": "ecec2864b2bbbbc430638def8eb627fd065a5ac73734153c5568d6d72ee0e05e",
+  "annotation_reports_archive": {
+    "local": "/tmp/ten_case_candidate_annotation_stage_v1_reports.tar.gz",
+    "remote": "/cwStorage/home/gongwk/Notebook_code/FNIT/archive/transfers/ten_case_candidate_annotation_stage_v1_reports.tar.gz",
+    "sha256": "077f0a3040803f405eff137daa6749a7e14408fadb19a413a02f840219306117",
+    "bytes": 464694
+  }
+}
