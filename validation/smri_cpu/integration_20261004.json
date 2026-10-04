@@ -1,0 +1,41 @@
+{
+  "schema": "fnit-smri-cpu-integration-v1",
+  "date": "2026-10-04",
+  "base_commit": "f1cbdab10fbfd573c3aa1b3461aa086dab220cfb",
+  "production_commit_tested": "b0a8c56992f753800feea00dc902d2a02db66b52",
+  "command": "PYTHONPATH=src OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 NUMBA_NUM_THREADS=8 /home/wgong/anaconda3/envs/fnit/bin/python -m pytest tests/fast tests/gems tests/synthmorph tests/applywarp/test_world_transform.py tests/wmh_synthseg tests/synthsr tests/fast_vbm tests/recon_all/test_average_cpu_parallel.py tests/recon_all/test_mris_register_blur.py tests/recon_all/test_mris_register_nonlinear.py -q",
+  "result": {
+    "passed": 931,
+    "skipped": 3,
+    "warnings": 2,
+    "elapsed_seconds": 69.7,
+    "exit_code": 0
+  },
+  "warnings": "Existing mocked FastVBM profiler tests report no warmup; no profiler time is used as performance evidence.",
+  "scope": "Local integrated component regression. Actual-image official CPU and GPU comparisons are in linked component reports. This is not a new raw-T1 pipeline benchmark.",
+  "changed_source_and_test_sha256": {
+    "src/fnit/fast/_fsl_math.py": "52ba2fa82ad6e0115508b06597ea492188ca2bb4c9c04d995cdf02f5b2b76b90",
+    "src/fnit/fast/algorithm.py": "100bbf3ce147270cf8ab7d2f033f697d74ba5bc1b317d1fbea8820a5402ace1f",
+    "src/fnit/fast_vbm/registration.py": "9324fcfbb4c46525ee1020e9a8b4273f6c06dba4bce200a1e2b92e200ac26ce9",
+    "src/fnit/gems/gaussian.py": "67856df056e408572d243b5ebf35824573291f29276292cd75b31fc1d0f140c3",
+    "src/fnit/recon_all/mris_register_average_numba.py": "488b2c2d1784a19e2b461419045482760233636df22c76a079d521f779c7f2c6",
+    "src/fnit/synthmorph/models.py": "1a4cdfa3b348bcbb670a80db7003a20e9f1405dca9f7e63dc7d452aee691564b",
+    "src/fnit/synthmorph/pipeline.py": "75044d4484b0c5a73efe31949ae609e5920b514583d1ee067ee440ff4cbc1bfc",
+    "src/fnit/synthsr/README.md": "64967fd3c76968d2d3f809fc1f415546695edd68249e76176e1e768c5a6cf5c3",
+    "src/fnit/wmh_synthseg/README.md": "22fba6270ca43cace72ba786bfe647f1794952455b38c7016556f0ecdd81342b",
+    "src/fnit/wmh_synthseg/model.py": "0896ad2ac73e1f2ce110579cfb71719df1a45e9e422034c7127c59a488baf9cc",
+    "src/fnit/wmh_synthseg/pipeline.py": "b0cfe39ee0c1fc2a070cdba90265e9b6fbc4f652b484ed7b9db307c5a9fc3643",
+    "tests/fast/test_scalar_math.py": "49e9bbd91271704e8735e212465452104229c2cbd28123ccb5305c06a4f7d457",
+    "tests/fast_vbm/test_common_registration_chain.py": "f91f5d4f02635e94a8ae39a2941d5c97434c8ba65aca0e753a016c2ee30dcb0f",
+    "tests/gems/test_gaussian_class_mass.py": "e4bc38cb44a7985bdf64924a18e22ad2e401f1eed99d4b17852a1768f201a6fe",
+    "tests/recon_all/test_average_cpu_parallel.py": "f95c0a824d851c1f4abb198ab82469639296821f167cd874047ebbb99352a551",
+    "tests/synthmorph/test_cpu_policy.py": "9886dcbd7a6dd8d2e0f8a3f96a8c4e85e7efc1d1a50173327694124b03cfa84a",
+    "tests/synthmorph/test_world_periodic_boundary.py": "29a89784ab8de21cbfe0490aedd60c6834bf34d60f40f03a79020d5b306777d7",
+    "tests/wmh_synthseg/test_memory_lifetime.py": "438cfc6a8a6bd27ca72781421a11085c56a5bd67c4becd7d4bf4e15ecd46d464"
+  },
+  "audit": {
+    "json_errors": [],
+    "missing_local_markdown_targets": [],
+    "credentials_or_binary_assets": []
+  }
+}
