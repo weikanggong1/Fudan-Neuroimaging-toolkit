@@ -1,0 +1,866 @@
+{
+  "scope": "same corrected header; CPU layout module does not change CUDA path",
+  "runs": [
+    {
+      "source_revision": "strip_before_cpu_layout_header_policy_v2",
+      "production_cpu_channels_last": false,
+      "actual_precision": {
+        "cuda_matmul_tf32": true,
+        "cudnn_tf32": true,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": true,
+        "autocast_enabled": false,
+        "parameter_dtypes": [
+          "torch.float32"
+        ]
+      },
+      "gpu_hardware": {
+        "name": "NVIDIA H100 PCIe",
+        "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "visible_devices": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "total_memory_bytes": 84942979072
+      },
+      "gpu_peak_allocated_bytes": 6503141376,
+      "gpu_peak_reserved_bytes": 10800332800,
+      "id": "case01_production_layout_gpu_1_baseline",
+      "stages": [
+        {
+          "name": "model_constructor",
+          "parent": null,
+          "status": "complete",
+          "seconds": 0.0656722541898489
+        },
+        {
+          "name": "_resample_affine",
+          "parent": "_conform_lia_1mm",
+          "status": "complete",
+          "seconds": 0.38784786174073815
+        },
+        {
+          "name": "_conform_lia_1mm",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.39025280764326453
+        },
+        {
+          "name": "_crop_nonzero",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.21422734903171659
+        },
+        {
+          "name": "_reshape_center",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.019900605082511902
+        },
+        {
+          "name": "network_forward",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.18767481297254562
+        },
+        {
+          "name": "extend_sdt",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.004929054994136095
+        },
+        {
+          "name": "_resample_affine",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.06858589500188828
+        },
+        {
+          "name": "_largest_filled_component",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.9592558410950005
+        },
+        {
+          "name": "api_call_observed",
+          "parent": null,
+          "status": "complete",
+          "seconds": 3.1093506631441414
+        },
+        {
+          "name": "write_primary_outputs",
+          "parent": null,
+          "status": "complete",
+          "seconds": 3.2171115837991238
+        }
+      ]
+    },
+    {
+      "source_revision": "strip_module_6b7aeafd+shared_geometry_dc2fc052",
+      "production_cpu_channels_last": false,
+      "actual_precision": {
+        "cuda_matmul_tf32": true,
+        "cudnn_tf32": true,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": true,
+        "autocast_enabled": false,
+        "parameter_dtypes": [
+          "torch.float32"
+        ]
+      },
+      "gpu_hardware": {
+        "name": "NVIDIA H100 PCIe",
+        "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "visible_devices": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "total_memory_bytes": 84942979072
+      },
+      "gpu_peak_allocated_bytes": 6503141376,
+      "gpu_peak_reserved_bytes": 10800332800,
+      "id": "case01_production_layout_gpu_2_candidate",
+      "stages": [
+        {
+          "name": "model_constructor",
+          "parent": null,
+          "status": "complete",
+          "seconds": 0.08875133842229843
+        },
+        {
+          "name": "_resample_affine",
+          "parent": "_conform_lia_1mm",
+          "status": "complete",
+          "seconds": 0.41782695101574063
+        },
+        {
+          "name": "_conform_lia_1mm",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.42026626598089933
+        },
+        {
+          "name": "_crop_nonzero",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.21228705160319805
+        },
+        {
+          "name": "_reshape_center",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.028038466814905405
+        },
+        {
+          "name": "network_forward",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.19185490487143397
+        },
+        {
+          "name": "extend_sdt",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.004236259032040834
+        },
+        {
+          "name": "_resample_affine",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.06841888977214694
+        },
+        {
+          "name": "_largest_filled_component",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.9435359109193087
+        },
+        {
+          "name": "api_call_observed",
+          "parent": null,
+          "status": "complete",
+          "seconds": 3.145747184753418
+        },
+        {
+          "name": "write_primary_outputs",
+          "parent": null,
+          "status": "complete",
+          "seconds": 3.2344997320324183
+        }
+      ]
+    },
+    {
+      "source_revision": "strip_module_6b7aeafd+shared_geometry_dc2fc052",
+      "production_cpu_channels_last": false,
+      "actual_precision": {
+        "cuda_matmul_tf32": true,
+        "cudnn_tf32": true,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": true,
+        "autocast_enabled": false,
+        "parameter_dtypes": [
+          "torch.float32"
+        ]
+      },
+      "gpu_hardware": {
+        "name": "NVIDIA H100 PCIe",
+        "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "visible_devices": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "total_memory_bytes": 84942979072
+      },
+      "gpu_peak_allocated_bytes": 6503141376,
+      "gpu_peak_reserved_bytes": 10800332800,
+      "id": "case01_production_layout_gpu_3_candidate",
+      "stages": [
+        {
+          "name": "model_constructor",
+          "parent": null,
+          "status": "complete",
+          "seconds": 0.06249892199411988
+        },
+        {
+          "name": "_resample_affine",
+          "parent": "_conform_lia_1mm",
+          "status": "complete",
+          "seconds": 0.38334241788834333
+        },
+        {
+          "name": "_conform_lia_1mm",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.38588096387684345
+        },
+        {
+          "name": "_crop_nonzero",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.20835378393530846
+        },
+        {
+          "name": "_reshape_center",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.0197099968791008
+        },
+        {
+          "name": "network_forward",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.19779334822669625
+        },
+        {
+          "name": "extend_sdt",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.004263009876012802
+        },
+        {
+          "name": "_resample_affine",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.06789661012589931
+        },
+        {
+          "name": "_largest_filled_component",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.9560320009477437
+        },
+        {
+          "name": "api_call_observed",
+          "parent": null,
+          "status": "complete",
+          "seconds": 3.1578935091383755
+        },
+        {
+          "name": "write_primary_outputs",
+          "parent": null,
+          "status": "complete",
+          "seconds": 3.268337314017117
+        }
+      ]
+    },
+    {
+      "source_revision": "strip_before_cpu_layout_header_policy_v2",
+      "production_cpu_channels_last": false,
+      "actual_precision": {
+        "cuda_matmul_tf32": true,
+        "cudnn_tf32": true,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": true,
+        "autocast_enabled": false,
+        "parameter_dtypes": [
+          "torch.float32"
+        ]
+      },
+      "gpu_hardware": {
+        "name": "NVIDIA H100 PCIe",
+        "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "visible_devices": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "total_memory_bytes": 84942979072
+      },
+      "gpu_peak_allocated_bytes": 6503141376,
+      "gpu_peak_reserved_bytes": 10800332800,
+      "id": "case01_production_layout_gpu_4_baseline",
+      "stages": [
+        {
+          "name": "model_constructor",
+          "parent": null,
+          "status": "complete",
+          "seconds": 0.26449393574148417
+        },
+        {
+          "name": "_resample_affine",
+          "parent": "_conform_lia_1mm",
+          "status": "complete",
+          "seconds": 0.3869151151739061
+        },
+        {
+          "name": "_conform_lia_1mm",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.38939523603767157
+        },
+        {
+          "name": "_crop_nonzero",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.2107870550826192
+        },
+        {
+          "name": "_reshape_center",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.019590745214372873
+        },
+        {
+          "name": "network_forward",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.19025519397109747
+        },
+        {
+          "name": "extend_sdt",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.004293047823011875
+        },
+        {
+          "name": "_resample_affine",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.06705372221767902
+        },
+        {
+          "name": "_largest_filled_component",
+          "parent": "api_call_observed",
+          "status": "complete",
+          "seconds": 0.938384875189513
+        },
+        {
+          "name": "api_call_observed",
+          "parent": null,
+          "status": "complete",
+          "seconds": 3.134011259302497
+        },
+        {
+          "name": "write_primary_outputs",
+          "parent": null,
+          "status": "complete",
+          "seconds": 3.2247110111638904
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+      "feature": "synthstrip",
+      "case": "case01_production_layout_gpu_2_candidate",
+      "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+      "outputs": {
+        "mask": {
+          "reference_sha256": "d43dcd2d71ee1169751ab274aa7342383702cf5327e867438fff003269a9540c",
+          "candidate_sha256": "d43dcd2d71ee1169751ab274aa7342383702cf5327e867438fff003269a9540c",
+          "reference_shape": [
+            224,
+            288,
+            288
+          ],
+          "candidate_shape": [
+            224,
+            288,
+            288
+          ],
+          "reference_dtype": "uint8",
+          "candidate_dtype": "uint8",
+          "shape_matches": true,
+          "geometry_matches": true,
+          "dtype_matches": true,
+          "affine_max_abs_mm": 0.0,
+          "reference_finite": true,
+          "candidate_finite": true,
+          "valid_direct_comparison": true,
+          "whole_grid": {
+            "status": "measured",
+            "voxel_count": 18579456,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "nonzero_union_secondary": {
+            "status": "measured",
+            "voxel_count": 2843260,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "reference_binary": true,
+          "candidate_binary": true,
+          "reference_voxels": 2843260,
+          "candidate_voxels": 2843260,
+          "dice": 1.0,
+          "both_nonempty": true,
+          "voxel_mm3": 0.4839547277716253,
+          "reference_volume_mm3": 1376009.1192839514,
+          "candidate_volume_mm3": 1376009.1192839514,
+          "relative_volume_difference": 0.0
+        },
+        "distance": {
+          "reference_sha256": "35715ecd39459aeda7657a2ece9fbb0a169215cfb8760918a88f9bd0682b18a0",
+          "candidate_sha256": "35715ecd39459aeda7657a2ece9fbb0a169215cfb8760918a88f9bd0682b18a0",
+          "reference_shape": [
+            224,
+            288,
+            288
+          ],
+          "candidate_shape": [
+            224,
+            288,
+            288
+          ],
+          "reference_dtype": "float32",
+          "candidate_dtype": "float32",
+          "shape_matches": true,
+          "geometry_matches": true,
+          "dtype_matches": true,
+          "affine_max_abs_mm": 0.0,
+          "reference_finite": true,
+          "candidate_finite": true,
+          "valid_direct_comparison": true,
+          "whole_grid": {
+            "status": "measured",
+            "voxel_count": 18579456,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "fixed_allclose": {
+            "rtol": 1e-05,
+            "atol": 0.0001,
+            "passes": true
+          },
+          "mask_union_region": {
+            "status": "measured",
+            "voxel_count": 2843260,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          }
+        },
+        "image": {
+          "reference_sha256": "6d74e199af3b4ce741ff9fcaec7a7271a61dcf862e1079ab428d738cc6d06d66",
+          "candidate_sha256": "6d74e199af3b4ce741ff9fcaec7a7271a61dcf862e1079ab428d738cc6d06d66",
+          "reference_shape": [
+            224,
+            288,
+            288
+          ],
+          "candidate_shape": [
+            224,
+            288,
+            288
+          ],
+          "reference_dtype": "float64",
+          "candidate_dtype": "float64",
+          "shape_matches": true,
+          "geometry_matches": true,
+          "dtype_matches": true,
+          "affine_max_abs_mm": 0.0,
+          "reference_finite": true,
+          "candidate_finite": true,
+          "valid_direct_comparison": true,
+          "whole_grid": {
+            "status": "measured",
+            "voxel_count": 18579456,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "mask_union_region": {
+            "status": "measured",
+            "voxel_count": 2843260,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          }
+        }
+      },
+      "all_direct_comparisons_valid": true,
+      "numerical_equivalence": "fixed_gate_passed",
+      "fixed_gate": {
+        "name": "strip_candidate",
+        "passes": true,
+        "criterion": "mask and brain exactly equal; SDT rtol=1e-5, atol=1e-4 mm"
+      }
+    },
+    {
+      "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+      "feature": "synthstrip",
+      "case": "case01_production_layout_gpu_3_candidate",
+      "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+      "outputs": {
+        "mask": {
+          "reference_sha256": "d43dcd2d71ee1169751ab274aa7342383702cf5327e867438fff003269a9540c",
+          "candidate_sha256": "d43dcd2d71ee1169751ab274aa7342383702cf5327e867438fff003269a9540c",
+          "reference_shape": [
+            224,
+            288,
+            288
+          ],
+          "candidate_shape": [
+            224,
+            288,
+            288
+          ],
+          "reference_dtype": "uint8",
+          "candidate_dtype": "uint8",
+          "shape_matches": true,
+          "geometry_matches": true,
+          "dtype_matches": true,
+          "affine_max_abs_mm": 0.0,
+          "reference_finite": true,
+          "candidate_finite": true,
+          "valid_direct_comparison": true,
+          "whole_grid": {
+            "status": "measured",
+            "voxel_count": 18579456,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "nonzero_union_secondary": {
+            "status": "measured",
+            "voxel_count": 2843260,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "reference_binary": true,
+          "candidate_binary": true,
+          "reference_voxels": 2843260,
+          "candidate_voxels": 2843260,
+          "dice": 1.0,
+          "both_nonempty": true,
+          "voxel_mm3": 0.4839547277716253,
+          "reference_volume_mm3": 1376009.1192839514,
+          "candidate_volume_mm3": 1376009.1192839514,
+          "relative_volume_difference": 0.0
+        },
+        "distance": {
+          "reference_sha256": "35715ecd39459aeda7657a2ece9fbb0a169215cfb8760918a88f9bd0682b18a0",
+          "candidate_sha256": "35715ecd39459aeda7657a2ece9fbb0a169215cfb8760918a88f9bd0682b18a0",
+          "reference_shape": [
+            224,
+            288,
+            288
+          ],
+          "candidate_shape": [
+            224,
+            288,
+            288
+          ],
+          "reference_dtype": "float32",
+          "candidate_dtype": "float32",
+          "shape_matches": true,
+          "geometry_matches": true,
+          "dtype_matches": true,
+          "affine_max_abs_mm": 0.0,
+          "reference_finite": true,
+          "candidate_finite": true,
+          "valid_direct_comparison": true,
+          "whole_grid": {
+            "status": "measured",
+            "voxel_count": 18579456,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "fixed_allclose": {
+            "rtol": 1e-05,
+            "atol": 0.0001,
+            "passes": true
+          },
+          "mask_union_region": {
+            "status": "measured",
+            "voxel_count": 2843260,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          }
+        },
+        "image": {
+          "reference_sha256": "6d74e199af3b4ce741ff9fcaec7a7271a61dcf862e1079ab428d738cc6d06d66",
+          "candidate_sha256": "6d74e199af3b4ce741ff9fcaec7a7271a61dcf862e1079ab428d738cc6d06d66",
+          "reference_shape": [
+            224,
+            288,
+            288
+          ],
+          "candidate_shape": [
+            224,
+            288,
+            288
+          ],
+          "reference_dtype": "float64",
+          "candidate_dtype": "float64",
+          "shape_matches": true,
+          "geometry_matches": true,
+          "dtype_matches": true,
+          "affine_max_abs_mm": 0.0,
+          "reference_finite": true,
+          "candidate_finite": true,
+          "valid_direct_comparison": true,
+          "whole_grid": {
+            "status": "measured",
+            "voxel_count": 18579456,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "mask_union_region": {
+            "status": "measured",
+            "voxel_count": 2843260,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          }
+        }
+      },
+      "all_direct_comparisons_valid": true,
+      "numerical_equivalence": "fixed_gate_passed",
+      "fixed_gate": {
+        "name": "strip_candidate",
+        "passes": true,
+        "criterion": "mask and brain exactly equal; SDT rtol=1e-5, atol=1e-4 mm"
+      }
+    },
+    {
+      "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+      "feature": "synthstrip",
+      "case": "case01_production_layout_gpu_4_baseline",
+      "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+      "outputs": {
+        "mask": {
+          "reference_sha256": "d43dcd2d71ee1169751ab274aa7342383702cf5327e867438fff003269a9540c",
+          "candidate_sha256": "d43dcd2d71ee1169751ab274aa7342383702cf5327e867438fff003269a9540c",
+          "reference_shape": [
+            224,
+            288,
+            288
+          ],
+          "candidate_shape": [
+            224,
+            288,
+            288
+          ],
+          "reference_dtype": "uint8",
+          "candidate_dtype": "uint8",
+          "shape_matches": true,
+          "geometry_matches": true,
+          "dtype_matches": true,
+          "affine_max_abs_mm": 0.0,
+          "reference_finite": true,
+          "candidate_finite": true,
+          "valid_direct_comparison": true,
+          "whole_grid": {
+            "status": "measured",
+            "voxel_count": 18579456,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "nonzero_union_secondary": {
+            "status": "measured",
+            "voxel_count": 2843260,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "reference_binary": true,
+          "candidate_binary": true,
+          "reference_voxels": 2843260,
+          "candidate_voxels": 2843260,
+          "dice": 1.0,
+          "both_nonempty": true,
+          "voxel_mm3": 0.4839547277716253,
+          "reference_volume_mm3": 1376009.1192839514,
+          "candidate_volume_mm3": 1376009.1192839514,
+          "relative_volume_difference": 0.0
+        },
+        "distance": {
+          "reference_sha256": "35715ecd39459aeda7657a2ece9fbb0a169215cfb8760918a88f9bd0682b18a0",
+          "candidate_sha256": "35715ecd39459aeda7657a2ece9fbb0a169215cfb8760918a88f9bd0682b18a0",
+          "reference_shape": [
+            224,
+            288,
+            288
+          ],
+          "candidate_shape": [
+            224,
+            288,
+            288
+          ],
+          "reference_dtype": "float32",
+          "candidate_dtype": "float32",
+          "shape_matches": true,
+          "geometry_matches": true,
+          "dtype_matches": true,
+          "affine_max_abs_mm": 0.0,
+          "reference_finite": true,
+          "candidate_finite": true,
+          "valid_direct_comparison": true,
+          "whole_grid": {
+            "status": "measured",
+            "voxel_count": 18579456,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "fixed_allclose": {
+            "rtol": 1e-05,
+            "atol": 0.0001,
+            "passes": true
+          },
+          "mask_union_region": {
+            "status": "measured",
+            "voxel_count": 2843260,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          }
+        },
+        "image": {
+          "reference_sha256": "6d74e199af3b4ce741ff9fcaec7a7271a61dcf862e1079ab428d738cc6d06d66",
+          "candidate_sha256": "6d74e199af3b4ce741ff9fcaec7a7271a61dcf862e1079ab428d738cc6d06d66",
+          "reference_shape": [
+            224,
+            288,
+            288
+          ],
+          "candidate_shape": [
+            224,
+            288,
+            288
+          ],
+          "reference_dtype": "float64",
+          "candidate_dtype": "float64",
+          "shape_matches": true,
+          "geometry_matches": true,
+          "dtype_matches": true,
+          "affine_max_abs_mm": 0.0,
+          "reference_finite": true,
+          "candidate_finite": true,
+          "valid_direct_comparison": true,
+          "whole_grid": {
+            "status": "measured",
+            "voxel_count": 18579456,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          },
+          "mask_union_region": {
+            "status": "measured",
+            "voxel_count": 2843260,
+            "different_voxels": 0,
+            "exact_fraction": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "nrmse_reference_rms": 0.0,
+            "max_abs_difference": 0.0,
+            "mean_signed_difference": 0.0
+          }
+        }
+      },
+      "all_direct_comparisons_valid": true,
+      "numerical_equivalence": "fixed_gate_passed",
+      "fixed_gate": {
+        "name": "strip_candidate",
+        "passes": true,
+        "criterion": "mask and brain exactly equal; SDT rtol=1e-5, atol=1e-4 mm"
+      }
+    }
+  ]
+}

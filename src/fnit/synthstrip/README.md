@@ -1,5 +1,7 @@
 # SynthStrip 源码目录
 
+2026-10-04 的[相同 CPU 资源验证](../../../validation/smri_cpu/strip_sr_20261004/README.md)发现原始 NIfTI 的 `pixdim` 被共享图像构造重写，改变了 1 mm 网格。共享修复 `dc2fc052` 保留原头文件；本模块 `6b7aeafd` 在 CPU oneDNN 启用时使用 `channels_last_3d`，CPU 构造保持调用方 CUDA 后端设置。nodecw10 同 8 线程与 8 物理核，26 次 CLI、11 个真实场景全部通过：brain/mask 逐值同官方，SDT `rtol=1e-5, atol=1e-4 mm`，最大全场景差 `4.3392e-5 mm`。两例默认完整 CLI 中位数官方/FNIT 为 45.561/14.901、49.199/14.027 s；冷导入与卷积时间另列。相同修复输入的 GPU ABBA 三份输出逐值同、组件显存峰值同。详细参数、真实域输入、逐项结果与脑图见[功能说明](../../../docs/synthstrip/README.md)。下面的 `cfb7beee` 数据是既有 GPU 对照。
+
 这里实现脑提取。`model.py` 定义官方 U-Net，`pipeline.py` 实现影像处理及 `SynthStrip`、`StripResult`，`__init__.py` 导出接口。单被试命令使用统一的 `fnit synthstrip` 入口。
 
 ```python
