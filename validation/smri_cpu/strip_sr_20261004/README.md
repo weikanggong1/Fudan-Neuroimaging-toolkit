@@ -63,7 +63,7 @@ SynthSR 的 CPU channels-last 原型在第一例真实 T1 上缩短了网络耗�
 
 ```bash
 # 统一服务器入口与尚不存在的私有计划文件。
-fnit_server_root=/cwStorage/home/gongwk/Notebook_code/FNIT
+fnit_server_root=/absolute/path/to/FNIT
 private_job_plan=/path/to/fresh_strip_sr_jobs.private.json
 python validation/smri_cpu/strip_sr_20261004/make_jobs.py \
   --server-root "$fnit_server_root" \

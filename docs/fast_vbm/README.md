@@ -391,7 +391,7 @@ FNIRT 完整链尚未数值等价，测得的时间差不能称为等价重建�
 ![最终 v4 CPU 两分支的官方/FNIT 标准空间脑图与差值](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/final_v4/figures/standard_vbm.png)
 
 
-### 本轮 FNIRT 完整端到端验证
+### 2026-10-02：GPU FNIRT 完整端到端验证
 
 本轮从真实原始 T1w 开始，完整执行脑提取、FAST、FLIRT、FNIRT、重采样、Jacobian 与调制，并保存 13 幅影像；与冻结 `7473452` 的 FNIT 基线逐位比较科学输出、网格和 FNIRT solver trace。本轮 13 幅最终影像与 5 幅 FNIRT 捕获影像全部逐位相同，科学 header、affine 和完整科学求解记录也相同；仅将 QC 中执行耗时分开统计。进程内含保存的 API 为 212.67→204.58 s，当前进程峰值 allocated 6.50 GB。共享 H100 的一次完整配对观测不代表稳定加速比；阶段时间、输入/源码哈希与脑图见[本轮验证](../../validation/registration_lossless_20261002/README.md)。
 
@@ -425,7 +425,7 @@ FSL 完整命令计时 3195.14 s 来自 2026-09-30，本轮没有重测原软件
 | 版本或日期 | 更新与验证范围 |
 |---|---|
 | 2026-10-04 CPU 审计 | 新增显式 `fast_execution` 选项，默认不变；FAST 的 CPU 原序热点改为 Numba。完整 CUDA 两后端 32 对文件 SHA 相同。原始 T1 冻结 v2 两条 CPU 链完成官方对照；最终 v4 两链补测为 536.788 / 317.736 秒，各 13 图、科学 header、扩展与 v2 相同，官方误差复现。见[FAST 结果](../../validation/smri_cpu_20261004/task04/README.md)和[VBM 独立报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/README.md)。 |
-| 本轮 FNIRT 优化 | 跳过未使用的采样梯度，复用 T1 intensity mapping 与原始 float64 deformation field；真实 FastVBM 完整端到端 18 幅影像及科学 QC 逐位通过，含保存 API 212.67→204.58 s，见[统一验证页](../../validation/registration_lossless_20261002/README.md)。 |
+| 2026-10-02 GPU FNIRT 优化 | 跳过未使用的采样梯度，复用 T1 intensity mapping 与原始 float64 deformation field；真实 FastVBM 完整端到端 18 幅影像及科学 QC 逐位通过，含保存 API 212.67→204.58 s，见[统一验证页](../../validation/registration_lossless_20261002/README.md)。 |
 | 2026-09-30，`f958121` | 两个后端从 raw T1w 到全部 13 幅输出；FNIRT / SynthMorph 进程内含保存为 901.93 / 607.16 s。对 FSL 调制 GM 的 r 为 0.865489 / 0.616679，未达到数值等价；见[当次报告](../../validation/fast_vbm/e2e.public.json)。 |
 
 每条记录保留其测量源码、输入和计时边界；本轮与冻结 FNIT 的无损检查及既有 FSL 精度分别报告。

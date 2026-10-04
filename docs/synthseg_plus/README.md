@@ -12,8 +12,7 @@ FNIT 的类名 `SynthSegPlus` 对应普通 SynthSeg 2.0 **加 `--parc`**。原�
 共享的 `SynthSegSegmenter` 已修正构造时覆盖调用方精度设置的问题，并复用
 33 类后验缓冲；默认 GPU 卷积 TF32 保持开启，recon-all 的 FP32 例外不会
 改成此入口的默认策略。[子函数改动与同输入回归](../synthseg/README.md#recon-all-集成发现的精度设置覆盖)
-分别记录实际前向设置及测试版本。本页既有 SynthSeg+ 指标没有在本轮重跑，
-不作为共享子函数修正后的完整分区验证。
+分别记录实际前向设置及测试版本。2026-10-04 的 CPU 与 GPU 回归见下文单独小节；此前单例表保留历史源码与计时范围。
 
 ## 安装与权重
 
@@ -88,7 +87,9 @@ mri_synthseg --i sub-01_T1w.nii.gz --o sub-01_official_parc.nii.gz \
 
 对官方 fast 仍差 1 个体素、最小 Dice 0.99990777、CSV 最大差 0.10 mm³；非 fast 差 6 个体素、最小 Dice 0.99961215、CSV 最大差 0.90 mm³。第二例的原版剩余误差和更早全层分块变慢的结果均保留，不能称官方逐值一致。`--parc` 与 `--color-lut` 的组合尚不支持，最终共享 CLI 明确拒绝该组合。CUDA 前向仍走原卷积；CPU 调用保留同进程的 CUDA 精度与性能开关。新版本和下列历史验证按源码和核组分别记录。
 
-公开 T1w 单例的详细命令、逐标签结果及计时范围见[验证记录](../../validation/synthseg_plus/README.md)。GPU 使用 TF32；未使用 float16 或 bfloat16。
+### 此前公开 T1w 单例
+
+这份历史单例的详细命令、逐标签结果及计时范围见[验证记录](../../validation/synthseg_plus/README.md)。GPU 使用 TF32；未使用 float16 或 bfloat16。
 
 | 项目 | 与 FreeSurfer 8.2.0-1 的本例对照 |
 |---|---:|
@@ -99,7 +100,7 @@ mri_synthseg --i sub-01_T1w.nii.gz --o sub-01_official_parc.nii.gz \
 | 官方 GPU / FNIT GPU 完整命令 | `542.08 / 18.71 s`，同输入、同输出范围，H100 共享负载不同 |
 | FNIT H100 Python 调用，含软体积 | 首轮 `16.68 s`，同一对象复用权重后 `13.10 s`；不含写盘 |
 
-完整命令可以按输出范围对照，但共享 GPU 的负载不同，不能把单次结果作为稳定加速倍数。Python 调用不含写盘，与完整命令的计时范围不同。QC 输出尚未实现；本轮验证也未覆盖 `fast=True`。
+完整命令可以按输出范围对照，但共享 GPU 的负载不同，不能把单次结果作为稳定加速倍数。Python 调用不含写盘，与完整命令的计时范围不同。QC 输出尚未实现；此历史单例未覆盖 `fast=True`，2026-10-04 CPU 对照已覆盖 fast 与非 fast。
 
 ![公开 T1w 的原版与 FNIT SynthSeg+ 分区](figures/synthseg_plus_comparison.png)
 
