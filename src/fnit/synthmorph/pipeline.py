@@ -72,13 +72,26 @@ def _load(image, single_frame=True, check_finite=True):
     return out
 
 
+def _image_data(image, device):
+    """Decode CPU images before casting, preserving NIfTI scaling precision.
+
+    ArrayProxy can perform slope/intercept arithmetic in the requested output
+    dtype. The original reader and a fully materialized SpatialImage first
+    decode in the proxy's default dtype. Keep that order on CPU so both public
+    input routes use the same voxel values. CUDA retains its validated decode.
+    """
+    data = (np.asanyarray(image.dataobj)
+            if torch.device(device).type == "cpu" else image.dataobj)
+    return np.array(data, dtype=np.float32, copy=True)
+
+
 def _tensor(image, device):
-    data = np.array(image.dataobj, dtype=np.float32, copy=True)
+    data = _image_data(image, device)
     return torch.as_tensor(data, device=device)[None, None]
 
 
 def _tensor_frames(image, device):
-    data = np.array(image.dataobj, dtype=np.float32, copy=True)
+    data = _image_data(image, device)
     if data.ndim == 3:
         return torch.as_tensor(data, device=device)[None, None]
     data = np.moveaxis(data, -1, 0)
@@ -412,11 +425,32 @@ class SynthMorph:
             inverse = AffineTransform(
                 inverse_voxel, source=fix, target=mov, space="voxel"
             ).convert(space="world")
+            if self.device.type == "cpu" and self.model == "rigid":
+                # Associate each returned rigid affine with the exact inverse
+                # of its own image pull. Independently rounded FP32 reciprocal
+                # predictions need not be exact inverses after composition.
+                # Invert the already-associated world matrices in float64 so
+                # final sampling and public reapplication consume one map.
+                forward, inverse = (
+                    AffineTransform(np.linalg.inv(inverse.matrix),
+                                    source=mov, target=fix, space="world"),
+                    AffineTransform(np.linalg.inv(forward.matrix),
+                                    source=fix, target=mov, space="world"),
+                )
             if transform_only:
                 moved = fixed_moved = None
             elif header_only:
                 moved = _header_transform(mov, forward)
                 fixed_moved = _header_transform(fix, inverse)
+            elif self.device.type == "cpu":
+                # The original final affine sampler inverts the associated
+                # returned affine. The network's two float32 predictions are
+                # only approximately reciprocal; sampling with the opposite
+                # prediction can cross a fill boundary. Use the public affine
+                # application route for both CPU images and preserve CUDA's
+                # previously validated paired-prediction sampling below.
+                moved = apply_transform(mov, forward, device=self.device)
+                fixed_moved = apply_transform(fix, inverse, device=self.device)
             else:
                 moved = _resampled_image(
                     mov, forward_pull, fix, self.device, fill=0
