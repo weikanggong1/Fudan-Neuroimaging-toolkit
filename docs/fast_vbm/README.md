@@ -364,6 +364,33 @@ FastVBM 在 modulated GM 结束，不包含 UKB gradient distortion correction�
 
 ## 5. 精度、运行时间与脑图
 
+
+### 2026-10-04：CPU 官方完整链对照
+
+本次以公开 ds003138 v1.0.1 的真实原始 T1（224×288×288）为输入，固定同一 GM 模板、参考 mask 和权重。nodecw10 两端使用同一组 8 个物理核、8 线程配置，串行运行；节点同时有其他任务。本次候选冻结于 `task5_candidate_cpu_v2/src`，基线为 `1d31e7baaebbb644ab199471f7fe6282721455fd`，显式选择 `fast_execution="fsl"`。该配置使用 FNIT 内部 CPU 顺序分割实现，运行时不调用原版 FAST。后续整合版未在此报告重新测量完整链；源码 hash、实际负载和线程记录见[独立 CPU 报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/README.md)及[机器报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/report.public.json)。
+
+| 分支与处理范围 | FNIT 实际完整 CLI 墙钟 | 官方参考时间与范围 |
+|---|---:|---|
+| 原始 T1→SynthStrip/FAST/FLIRT/FNIRT→13 图 | **610.899 s** | **769.365 s**，独立完整链墙钟 |
+| 原始 T1→SynthStrip/FAST/FLIRT/SynthMorph→13 图 | **355.802 s** | **580.141 s**，复用官方自身上游和原版场后的实测阶段和；不是完整冷进程墙钟 |
+
+FNIT Morph API 总计 **347.725 s**，其中脑提取 **11.338 s**、FAST **135.719 s**、配准/Jacobian/调制合计 **200.106 s**；API 不含最终 `save()`。原版 Morph 实际网络阶段 **138.976 s**；最终参考后处理使用独立 NumPy 坐标适配器与原版 FSL。官方完整 FNIRT 链没有使用候选 GM 或仿射初始化。两条参考均采用 SynthStrip 前处理，因此不是 standard FSL-VBM 的 BET 流程。本轮各一次完整测量，没有 pipeline AB-BA 重复，不据复用阶段和计算正式 Morph 端到端加速比。
+
+三幅模板图的同估计方法脑内 NRMSE 为 `RMSE/(参考 P99−P1)`：
+
+| 模板图 | FNIT FNIRT vs 官方 FNIRT | FNIT Morph vs 官方 Morph |
+|---|---:|---:|
+| warped GM | **0.0189811** | **0.000561591** |
+| nonlinear-only Jacobian | **0.0100674** | **0.000352361** |
+| modulated GM | **0.0160380** | **0.000450764** |
+
+FNIRT 完整链尚未数值等价，不能将 769.365/610.899 的时间比称为等价重建加速。Morph 同算法三图脑内 NRMSE 均小于 10⁻³，但完整 13 图并非逐位同。原空间脑图、mask、seg、mixeltype 的数据完全相同；CSF/GM/WM PVE 分别有 **5/27/22** 个不同体素，pveseg 有 **2** 个。全 FOV、局部 max、软/硬体积、空间变换误差和 Jacobian 定义诊断分别见独立报告，不能只以整体积分体积判断匹配。
+
+13 图 shape、dtype、affine、sform 和空间 pixdim 相同，native qform 最大差 **2.98×10⁻⁹ mm**。非空间 header 仍有差：原空间候选 pixdim[5:8] 为 0、官方为 1；warped/mod 图候选 pixdim[4] 为 1、官方为 2.4（均为 3D 图）。本轮未重跑完整 FastVBM GPU pipeline；下列历史 GPU 结果保留各自冻结源码、输入与计时范围。
+
+![本次 CPU 两分支的官方/FNIT 标准空间脑图与差值](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/figures/standard_vbm.png)
+
+
 ### 本轮 FNIRT 完整端到端验证
 
 本轮从真实原始 T1w 开始，完整执行脑提取、FAST、FLIRT、FNIRT、重采样、Jacobian 与调制，并保存 13 幅影像；与冻结 `7473452` 的 FNIT 基线逐位比较科学输出、网格和 FNIRT solver trace。本轮 13 幅最终影像与 5 幅 FNIRT 捕获影像全部逐位相同，科学 header、affine 和完整科学求解记录也相同；仅将 QC 中执行耗时分开统计。进程内含保存的 API 为 212.67→204.58 s，当前进程峰值 allocated 6.50 GB。共享 H100 的一次完整配对观测不代表稳定加速比；阶段时间、输入/源码哈希与脑图见[本轮验证](../../validation/registration_lossless_20261002/README.md)。
