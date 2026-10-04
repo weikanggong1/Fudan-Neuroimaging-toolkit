@@ -23,6 +23,11 @@ def main():
     parser.add_argument("--candidate", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--family", choices=("brainstem", "thalamus", "hippo-amygdala"), default="brainstem")
+    parser.add_argument("--scope-title", default="Public T1, same norm/aseg/wmparc stage",
+                        help="Display title only; does not change the fixed-grid numerical scoring")
+    parser.add_argument("--display-grid-description",
+                        default="nearest-neighbor to norm; scoring uses independent fixed grids",
+                        help="Describe the supplied display reference without changing resampling")
     args = parser.parse_args()
     native = nib.load(args.like)
     # Only display resampling. Numeric scoring uses the separate fixed-grid audit.
@@ -100,14 +105,15 @@ def main():
                 "Bilateral hippocampal subfields and amygdala nuclei; matching colors"
                 if args.family == "hippo-amygdala" else
                 "Thalamic nuclei: matching label colors in both rows")
-    fig.suptitle("Public T1, same norm/aseg/wmparc stage\n" + subtitle)
+    fig.suptitle(args.scope_title + "\n" + subtitle)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     fig.tight_layout(rect=(0, 0, 1, .93))
     fig.savefig(args.output, dpi=150)
     plt.close(fig)
     manifest = {"display_only": True, "family": args.family, "display_labels": list(ids),
                 "right_ha_label_offset": 10000 if args.family == "hippo-amygdala" else None,
-                "display_resampling": "nearest-neighbor to norm; scoring uses independent fixed grids",
+                "scope_title": args.scope_title,
+                "display_resampling": args.display_grid_description,
                 "canonical_center_voxels": (center + low).tolist(),
                 "sha256": hashlib.sha256(args.output.read_bytes()).hexdigest(),
                 "input_sha256": {key: hashlib.sha256(path.read_bytes()).hexdigest()
