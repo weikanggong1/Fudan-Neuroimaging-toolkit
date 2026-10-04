@@ -26,6 +26,14 @@ def main():
             inputs = [Path(path) for path in job["inputs"]]
             if not all(path.is_file() and path.stat().st_size for path in inputs):
                 continue
+            # A growing .nii.gz may exist before the benchmark process has
+            # closed it. New plans also bind the completed inference records
+            # so analysis never reads an in-progress output.
+            records = [Path(path) for path in job.get("completed_records", [])]
+            if any(not path.is_file() or
+                   json.loads(path.read_text()).get("status") != "complete"
+                   for path in records):
+                continue
             clock = time.monotonic()
             result = subprocess.run(job["argv"], capture_output=True, text=True,
                                     timeout=job.get("timeout_seconds", 300))
