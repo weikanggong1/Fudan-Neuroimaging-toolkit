@@ -1,0 +1,1713 @@
+{
+  "schema": "fnit-recon-public-t1-cohort-v1",
+  "frozen_utc": "2026-10-03T00:56:37.039749+00:00",
+  "baseline_commit": "816e5610417a4c587caf321049438a9554139016",
+  "server_root": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003",
+  "selection_rule": "按固定快照中原始anat/*_T1w.nii.gz的被试ID词典序各选5人；ds000114固定ses-test，排除已发布样例sub-01/sub-02/sub-03。先冻结名单，后运行重建，不按影像或结果难度更换。",
+  "preselection_exclusions": [
+    {
+      "dataset": "ds000114",
+      "subject": "sub-01",
+      "reason": "旧recon-all诊断被试及仓库已发布示例"
+    },
+    {
+      "dataset": "ds000114",
+      "subject": "sub-02",
+      "reason": "旧recon-all诊断被试及仓库已发布示例"
+    },
+    {
+      "dataset": "ds000114",
+      "subject": "sub-03",
+      "reason": "仓库已发布示例；增加新的原始被试覆盖"
+    },
+    {
+      "dataset": "ds000114",
+      "session": "retest",
+      "reason": "每个被试只纳入ses-test以保证10个不同被试"
+    }
+  ],
+  "not_selected_rule": "排序后的其余被试不纳入此预先冻结10例；不按质量或重建结果排除",
+  "datasets": [
+    {
+      "id": "ds000030",
+      "name": "UCLA Consortium for Neuropsychiatric Phenomics LA5c Study",
+      "snapshot": "1.0.0",
+      "git_commit": "4070b6eea231517bfeff42527a46d9d166ac4e13",
+      "dataset_doi": "10.18112/openneuro.ds000030.v1.0.0",
+      "license": "CC0-1.0",
+      "license_field": "dataset_description.json:License=CC0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "official_dataset_url": "https://openneuro.org/datasets/ds000030/versions/1.0.0",
+      "metadata_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds000030/4070b6eea231517bfeff42527a46d9d166ac4e13/dataset_description.json",
+      "metadata_sha256": "9a360b4bbce9ae7af40eee3f7965c52be42b0369ae43cf8923788587ecab35fd",
+      "references": [
+        "https://www.nature.com/articles/sdata2016110",
+        "https://f1000research.com/articles/6-1262/v2"
+      ],
+      "acknowledgement": "This data was obtained from the OpenfMRI database (https://openfmri.org/dataset/ds000030/). Its accession number is ds000030. Please cite https://www.nature.com/articles/sdata2016110 and if you used derived data https://f1000research.com/articles/6-1262/v2.",
+      "license_file_in_snapshot": false,
+      "selected_subjects": [
+        "sub-10159",
+        "sub-10171",
+        "sub-10189",
+        "sub-10193",
+        "sub-10206"
+      ]
+    },
+    {
+      "id": "ds000114",
+      "name": "A test-retest fMRI dataset for motor, language and spatial attention functions.",
+      "snapshot": "1.0.2",
+      "git_commit": "6299834614e9ae7df1e2fc5922545331b5c7f022",
+      "dataset_doi": "doi:10.18112/openneuro.ds000114.v1.0.2",
+      "license": "CC0-1.0",
+      "license_field": "dataset_description.json:License=CC0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "official_dataset_url": "https://openneuro.org/datasets/ds000114/versions/1.0.2",
+      "metadata_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds000114/6299834614e9ae7df1e2fc5922545331b5c7f022/dataset_description.json",
+      "metadata_sha256": "5a4b7bd031bbf57fdab310b99d2327f7338e285baad42f953a59d9c9c4d5df33",
+      "references": [
+        "A test-retest fMRI dataset for motor, language and spatial attention functions, http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3641991/"
+      ],
+      "acknowledgement": "Please cite http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3641991/",
+      "license_file_in_snapshot": false,
+      "selected_subjects": [
+        "sub-04",
+        "sub-05",
+        "sub-06",
+        "sub-07",
+        "sub-08"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "ds000030_sub-10159",
+      "dataset": "ds000030",
+      "subject": "sub-10159",
+      "session": null,
+      "snapshot": "1.0.0",
+      "source_git_commit": "4070b6eea231517bfeff42527a46d9d166ac4e13",
+      "source_path": "sub-10159/anat/sub-10159_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10159/anat/sub-10159_T1w.nii.gz",
+      "source_annex_key": "MD5E-s11637742--75cab8005361c2504ba5a7f02ecbacd7",
+      "expected_bytes": 11637742,
+      "expected_md5": "75cab8005361c2504ba5a7f02ecbacd7",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000030/sub-10159/anat/sub-10159_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [
+        {
+          "source_path": "sub-10159/anat/sub-10159_T1w.json",
+          "metadata_repo_path": "validation/recon_all/accuracy_20261003/cohort/source_metadata/ds000030_sub-10159_T1w.json",
+          "sha256": "1b7c6bd90fc07a7105bd0a09670cfea6eb892bcc60d8d6b639a0c9b331e7b716",
+          "remote_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds000030/4070b6eea231517bfeff42527a46d9d166ac4e13/sub-10159/anat/sub-10159_T1w.json"
+        }
+      ],
+      "selection_rank": 1,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 11637742,
+      "sha256": "0cb8a28928917b452b516e4e4694b3b79eb96b4c558f47ac63603035d0072e8b",
+      "md5": "75cab8005361c2504ba5a7f02ecbacd7",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          176,
+          256,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -93.92587280273438
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -134.39767456054688
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -130.72836303710938
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -93.92587280273438
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -134.39767456054688
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -130.72836303710938
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -93.92587280273438
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -134.39767456054688
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -130.72836303710938
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 11534336,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 766.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10159/anat/sub-10159_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10159/anat/sub-10159_T1w.nii.gz?versionId=xZH9NrMLEiRpxXIS7D6gg7OEz3g85RlE",
+        "head": {
+          "etag": "\"75cab8005361c2504ba5a7f02ecbacd7\"",
+          "last-modified": "Mon, 24 Aug 2020 16:43:48 GMT",
+          "x-amz-version-id": "xZH9NrMLEiRpxXIS7D6gg7OEz3g85RlE",
+          "content-length": "11637742",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"75cab8005361c2504ba5a7f02ecbacd7\"",
+          "last-modified": "Mon, 24 Aug 2020 16:43:48 GMT",
+          "x-amz-version-id": "xZH9NrMLEiRpxXIS7D6gg7OEz3g85RlE",
+          "content-length": "11637742",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T00:59:43.939491+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T00:59:45.215188+00:00"
+    },
+    {
+      "id": "ds000030_sub-10171",
+      "dataset": "ds000030",
+      "subject": "sub-10171",
+      "session": null,
+      "snapshot": "1.0.0",
+      "source_git_commit": "4070b6eea231517bfeff42527a46d9d166ac4e13",
+      "source_path": "sub-10171/anat/sub-10171_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10171/anat/sub-10171_T1w.nii.gz",
+      "source_annex_key": "MD5E-s12104345--16f8ff606c121eb2c144823e2b43bb50",
+      "expected_bytes": 12104345,
+      "expected_md5": "16f8ff606c121eb2c144823e2b43bb50",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000030/sub-10171/anat/sub-10171_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [
+        {
+          "source_path": "sub-10171/anat/sub-10171_T1w.json",
+          "metadata_repo_path": "validation/recon_all/accuracy_20261003/cohort/source_metadata/ds000030_sub-10171_T1w.json",
+          "sha256": "eb25d9358ba1ca441f9b1cac7a85773a962ab89af21e1e6ad357de50214348e2",
+          "remote_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds000030/4070b6eea231517bfeff42527a46d9d166ac4e13/sub-10171/anat/sub-10171_T1w.json"
+        }
+      ],
+      "selection_rank": 2,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 12104345,
+      "sha256": "6f7587d216cc979940f9ecde0dbe9dd4546cb2f2ca8158cf7b80946c3fc67af0",
+      "md5": "16f8ff606c121eb2c144823e2b43bb50",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          176,
+          256,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -86.2417221069336
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -114.76040649414062
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -140.12008666992188
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -86.2417221069336
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -114.76040649414062
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -140.12008666992188
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -86.2417221069336
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -114.76040649414062
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -140.12008666992188
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 11534336,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 958.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10171/anat/sub-10171_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10171/anat/sub-10171_T1w.nii.gz?versionId=Ya._2bGWf36OLAa5A17egto8CGn6OMdc",
+        "head": {
+          "etag": "\"16f8ff606c121eb2c144823e2b43bb50\"",
+          "last-modified": "Mon, 24 Aug 2020 16:44:05 GMT",
+          "x-amz-version-id": "Ya._2bGWf36OLAa5A17egto8CGn6OMdc",
+          "content-length": "12104345",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"16f8ff606c121eb2c144823e2b43bb50\"",
+          "last-modified": "Mon, 24 Aug 2020 16:44:05 GMT",
+          "x-amz-version-id": "Ya._2bGWf36OLAa5A17egto8CGn6OMdc",
+          "content-length": "12104345",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T00:59:51.241412+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T00:59:51.763552+00:00"
+    },
+    {
+      "id": "ds000030_sub-10189",
+      "dataset": "ds000030",
+      "subject": "sub-10189",
+      "session": null,
+      "snapshot": "1.0.0",
+      "source_git_commit": "4070b6eea231517bfeff42527a46d9d166ac4e13",
+      "source_path": "sub-10189/anat/sub-10189_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10189/anat/sub-10189_T1w.nii.gz",
+      "source_annex_key": "MD5E-s11781292--f47a5b46fdf2fb2b90beb202f7c76f4f",
+      "expected_bytes": 11781292,
+      "expected_md5": "f47a5b46fdf2fb2b90beb202f7c76f4f",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000030/sub-10189/anat/sub-10189_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [
+        {
+          "source_path": "sub-10189/anat/sub-10189_T1w.json",
+          "metadata_repo_path": "validation/recon_all/accuracy_20261003/cohort/source_metadata/ds000030_sub-10189_T1w.json",
+          "sha256": "45619d3f3cb99874670a5f508b5f18ca0d4034a6071200c344726bd3fa09e6a6",
+          "remote_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds000030/4070b6eea231517bfeff42527a46d9d166ac4e13/sub-10189/anat/sub-10189_T1w.json"
+        }
+      ],
+      "selection_rank": 3,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 11781292,
+      "sha256": "ae1722144a5b0ac1cd87da8589965da367da1e4878e49de4ed0cd8d2b23b88dc",
+      "md5": "f47a5b46fdf2fb2b90beb202f7c76f4f",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          176,
+          256,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            0.9987185001373291,
+            1.0000000168623835e-16,
+            0.05059296637773514,
+            -90.15848541259766
+          ],
+          [
+            -9.987184824829674e-17,
+            1.0,
+            -1.0000000168623835e-16,
+            -113.96162414550781
+          ],
+          [
+            -0.05059292912483215,
+            0.0,
+            0.998719334602356,
+            -105.17686462402344
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          0.9999991655349731,
+          1.0,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            0.9987185224892077,
+            1.0120159681783825e-16,
+            0.05059296571153538,
+            -90.15848541259766
+          ],
+          [
+            -9.867024540246874e-17,
+            1.0,
+            -5.252964746269169e-17,
+            -113.96162414550781
+          ],
+          [
+            -0.0505929234934749,
+            4.747035117077038e-17,
+            0.9987193558855818,
+            -105.17686462402344
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            0.9987185001373291,
+            1.0000000168623835e-16,
+            0.05059296637773514,
+            -90.15848541259766
+          ],
+          [
+            -9.987184824829674e-17,
+            1.0,
+            -1.0000000168623835e-16,
+            -113.96162414550781
+          ],
+          [
+            -0.05059292912483215,
+            0.0,
+            0.998719334602356,
+            -105.17686462402344
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 11534336,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 776.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10189/anat/sub-10189_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10189/anat/sub-10189_T1w.nii.gz?versionId=qSGviE2LMF4gX1Hlqq1X8xJXyYElErr8",
+        "head": {
+          "etag": "\"f47a5b46fdf2fb2b90beb202f7c76f4f\"",
+          "last-modified": "Mon, 24 Aug 2020 16:44:24 GMT",
+          "x-amz-version-id": "qSGviE2LMF4gX1Hlqq1X8xJXyYElErr8",
+          "content-length": "11781292",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"f47a5b46fdf2fb2b90beb202f7c76f4f\"",
+          "last-modified": "Mon, 24 Aug 2020 16:44:24 GMT",
+          "x-amz-version-id": "qSGviE2LMF4gX1Hlqq1X8xJXyYElErr8",
+          "content-length": "11781292",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T01:00:00.934092+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T01:00:01.431621+00:00"
+    },
+    {
+      "id": "ds000030_sub-10193",
+      "dataset": "ds000030",
+      "subject": "sub-10193",
+      "session": null,
+      "snapshot": "1.0.0",
+      "source_git_commit": "4070b6eea231517bfeff42527a46d9d166ac4e13",
+      "source_path": "sub-10193/anat/sub-10193_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10193/anat/sub-10193_T1w.nii.gz",
+      "source_annex_key": "MD5E-s12252454--b2f879132f957c60510a209f260e6dd4",
+      "expected_bytes": 12252454,
+      "expected_md5": "b2f879132f957c60510a209f260e6dd4",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000030/sub-10193/anat/sub-10193_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [
+        {
+          "source_path": "sub-10193/anat/sub-10193_T1w.json",
+          "metadata_repo_path": "validation/recon_all/accuracy_20261003/cohort/source_metadata/ds000030_sub-10193_T1w.json",
+          "sha256": "e79ae5c10ed13d7939577842297fc62aef30ecfe448d7b72679c9420a7bfd8d1",
+          "remote_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds000030/4070b6eea231517bfeff42527a46d9d166ac4e13/sub-10193/anat/sub-10193_T1w.json"
+        }
+      ],
+      "selection_rank": 4,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 12252454,
+      "sha256": "0f7bcca733352f1ef0a953020a8faa79728178b00e4411426a02fcba0258142c",
+      "md5": "b2f879132f957c60510a209f260e6dd4",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          176,
+          256,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            0.981049120426178,
+            0.16245660185813904,
+            0.10557015985250473,
+            -109.7920913696289
+          ],
+          [
+            -0.16152365505695343,
+            0.9867156744003296,
+            -0.01738147623836994,
+            -110.17178344726562
+          ],
+          [
+            -0.10699116438627243,
+            7.003527979776436e-09,
+            0.9942599534988403,
+            -137.60423278808594
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          0.9999971985816956,
+          1.0,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            0.9810491335081198,
+            0.16245659849613817,
+            0.10557016024333438,
+            -109.7920913696289
+          ],
+          [
+            -0.16152363442436923,
+            0.9867156903612431,
+            -0.017381476902268055,
+            -110.17178344726562
+          ],
+          [
+            -0.10699116943257027,
+            6.88481433969077e-09,
+            0.994259938611072,
+            -137.60423278808594
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            0.981049120426178,
+            0.16245660185813904,
+            0.10557015985250473,
+            -109.7920913696289
+          ],
+          [
+            -0.16152365505695343,
+            0.9867156744003296,
+            -0.01738147623836994,
+            -110.17178344726562
+          ],
+          [
+            -0.10699116438627243,
+            7.003527979776436e-09,
+            0.9942599534988403,
+            -137.60423278808594
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 11534336,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 1136.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10193/anat/sub-10193_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10193/anat/sub-10193_T1w.nii.gz?versionId=GsbIuJ_B191cBV8IINIwIebcecgkJ4k1",
+        "head": {
+          "etag": "\"b2f879132f957c60510a209f260e6dd4\"",
+          "last-modified": "Mon, 24 Aug 2020 16:44:37 GMT",
+          "x-amz-version-id": "GsbIuJ_B191cBV8IINIwIebcecgkJ4k1",
+          "content-length": "12252454",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"b2f879132f957c60510a209f260e6dd4\"",
+          "last-modified": "Mon, 24 Aug 2020 16:44:37 GMT",
+          "x-amz-version-id": "GsbIuJ_B191cBV8IINIwIebcecgkJ4k1",
+          "content-length": "12252454",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T01:00:09.463195+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T01:00:10.989547+00:00"
+    },
+    {
+      "id": "ds000030_sub-10206",
+      "dataset": "ds000030",
+      "subject": "sub-10206",
+      "session": null,
+      "snapshot": "1.0.0",
+      "source_git_commit": "4070b6eea231517bfeff42527a46d9d166ac4e13",
+      "source_path": "sub-10206/anat/sub-10206_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10206/anat/sub-10206_T1w.nii.gz",
+      "source_annex_key": "MD5E-s11739646--6030da63e07436a7a196dd5ed2c4305d",
+      "expected_bytes": 11739646,
+      "expected_md5": "6030da63e07436a7a196dd5ed2c4305d",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000030/sub-10206/anat/sub-10206_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [
+        {
+          "source_path": "sub-10206/anat/sub-10206_T1w.json",
+          "metadata_repo_path": "validation/recon_all/accuracy_20261003/cohort/source_metadata/ds000030_sub-10206_T1w.json",
+          "sha256": "c9e4e635b6498a3a08127dca6f15a685a536dcd0f942ce0d64db437dc03294e3",
+          "remote_url": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds000030/4070b6eea231517bfeff42527a46d9d166ac4e13/sub-10206/anat/sub-10206_T1w.json"
+        }
+      ],
+      "selection_rank": 5,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 11739646,
+      "sha256": "1d1f71a21c9415aa8a91c55b8505eab16c0b091ad71263f0da976839a6bc9ab4",
+      "md5": "6030da63e07436a7a196dd5ed2c4305d",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          176,
+          256,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -97.68750762939453
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -114.76040649414062
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -138.915283203125
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -97.68750762939453
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -114.76040649414062
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -138.915283203125
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -97.68750762939453
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -114.76040649414062
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -138.915283203125
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 11534336,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 999.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10206/anat/sub-10206_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000030/sub-10206/anat/sub-10206_T1w.nii.gz?versionId=TuEMxOAyMFU_GsvlpWiPmoQqxcBLJnAD",
+        "head": {
+          "etag": "\"6030da63e07436a7a196dd5ed2c4305d\"",
+          "last-modified": "Mon, 24 Aug 2020 16:44:42 GMT",
+          "x-amz-version-id": "TuEMxOAyMFU_GsvlpWiPmoQqxcBLJnAD",
+          "content-length": "11739646",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"6030da63e07436a7a196dd5ed2c4305d\"",
+          "last-modified": "Mon, 24 Aug 2020 16:44:42 GMT",
+          "x-amz-version-id": "TuEMxOAyMFU_GsvlpWiPmoQqxcBLJnAD",
+          "content-length": "11739646",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T01:00:18.515489+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T01:00:20.407733+00:00"
+    },
+    {
+      "id": "ds000114_sub-04",
+      "dataset": "ds000114",
+      "subject": "sub-04",
+      "session": "test",
+      "snapshot": "1.0.2",
+      "source_git_commit": "6299834614e9ae7df1e2fc5922545331b5c7f022",
+      "source_path": "sub-04/ses-test/anat/sub-04_ses-test_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-04/ses-test/anat/sub-04_ses-test_T1w.nii.gz",
+      "source_annex_key": "MD5E-s9717713--7764ef9c3fb344f69f1c2eb34cd56046",
+      "expected_bytes": 9717713,
+      "expected_md5": "7764ef9c3fb344f69f1c2eb34cd56046",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000114/sub-04/ses-test/anat/sub-04_ses-test_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [],
+      "selection_rank": 6,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 9717713,
+      "sha256": "80a7ff45f5e25e2b63e9519ec7c663ac6a8c2d967887df775351bbc5883e8510",
+      "md5": "7764ef9c3fb344f69f1c2eb34cd56046",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          256,
+          156,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            0.9998980164527893,
+            -0.004164890851825476,
+            0.01391659677028656,
+            -132.93617248535156
+          ],
+          [
+            0.0015869600465521216,
+            1.2910159826278687,
+            0.11475098133087158,
+            -83.2426528930664
+          ],
+          [
+            -0.014190900139510632,
+            -0.14908677339553833,
+            0.9932968020439148,
+            -138.66465759277344
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          1.0,
+          1.2996025085449219,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            0.9998980341192526,
+            -0.004164947280463882,
+            0.013915844003393026,
+            -132.93617248535156
+          ],
+          [
+            0.0015869166263576034,
+            1.2910160621174573,
+            0.11475098012774619,
+            -83.2426528930664
+          ],
+          [
+            -0.014191654592576068,
+            -0.14908675590118003,
+            0.9932968145752783,
+            -138.66465759277344
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            0.9998980164527893,
+            -0.004164890851825476,
+            0.01391659677028656,
+            -132.93617248535156
+          ],
+          [
+            0.0015869600465521216,
+            1.2910159826278687,
+            0.11475098133087158,
+            -83.2426528930664
+          ],
+          [
+            -0.014190900139510632,
+            -0.14908677339553833,
+            0.9932968020439148,
+            -138.66465759277344
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 10223616,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 4075.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-04/ses-test/anat/sub-04_ses-test_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-04/ses-test/anat/sub-04_ses-test_T1w.nii.gz?versionId=D8zpehNj58GW7yaflxfxzP2L7TSjdhQC",
+        "head": {
+          "etag": "\"7764ef9c3fb344f69f1c2eb34cd56046\"",
+          "last-modified": "Fri, 21 Aug 2020 23:07:22 GMT",
+          "x-amz-version-id": "D8zpehNj58GW7yaflxfxzP2L7TSjdhQC",
+          "content-length": "9717713",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"7764ef9c3fb344f69f1c2eb34cd56046\"",
+          "last-modified": "Fri, 21 Aug 2020 23:07:22 GMT",
+          "x-amz-version-id": "D8zpehNj58GW7yaflxfxzP2L7TSjdhQC",
+          "content-length": "9717713",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T01:00:26.765451+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T01:00:27.399760+00:00"
+    },
+    {
+      "id": "ds000114_sub-05",
+      "dataset": "ds000114",
+      "subject": "sub-05",
+      "session": "test",
+      "snapshot": "1.0.2",
+      "source_git_commit": "6299834614e9ae7df1e2fc5922545331b5c7f022",
+      "source_path": "sub-05/ses-test/anat/sub-05_ses-test_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-05/ses-test/anat/sub-05_ses-test_T1w.nii.gz",
+      "source_annex_key": "MD5E-s9942928--e32c1d5fb1d6db6449b19be10b5efc67",
+      "expected_bytes": 9942928,
+      "expected_md5": "e32c1d5fb1d6db6449b19be10b5efc67",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000114/sub-05/ses-test/anat/sub-05_ses-test_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [],
+      "selection_rank": 7,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 9942928,
+      "sha256": "8844ba0bda838283a4b00d7e32d23139cbe7d6373a25db67b7bb73e11d6c1091",
+      "md5": "e32c1d5fb1d6db6449b19be10b5efc67",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          256,
+          156,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            0.9988616704940796,
+            -0.03193442523479462,
+            0.040894992649555206,
+            -131.9251251220703
+          ],
+          [
+            0.021393291652202606,
+            1.2960044145584106,
+            0.0762355849146843,
+            -88.29403686523438
+          ],
+          [
+            -0.04263398423790932,
+            -0.0978626012802124,
+            0.9962508678436279,
+            -136.220703125
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          1.0,
+          1.300086259841919,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            0.998861577858094,
+            -0.03193455056415151,
+            0.04089238579571194,
+            -131.9251251220703
+          ],
+          [
+            0.021393187952467654,
+            1.2960043875060885,
+            0.07623556103972509,
+            -88.29403686523438
+          ],
+          [
+            -0.04263660150702917,
+            -0.09786263370144767,
+            0.996250948314175,
+            -136.220703125
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            0.9988616704940796,
+            -0.03193442523479462,
+            0.040894992649555206,
+            -131.9251251220703
+          ],
+          [
+            0.021393291652202606,
+            1.2960044145584106,
+            0.0762355849146843,
+            -88.29403686523438
+          ],
+          [
+            -0.04263398423790932,
+            -0.0978626012802124,
+            0.9962508678436279,
+            -136.220703125
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 10223616,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 2635.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-05/ses-test/anat/sub-05_ses-test_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-05/ses-test/anat/sub-05_ses-test_T1w.nii.gz?versionId=07mH3IjLkTALuqwqJ_8swJ63yOV5C46f",
+        "head": {
+          "etag": "\"e32c1d5fb1d6db6449b19be10b5efc67\"",
+          "last-modified": "Fri, 21 Aug 2020 23:07:56 GMT",
+          "x-amz-version-id": "07mH3IjLkTALuqwqJ_8swJ63yOV5C46f",
+          "content-length": "9942928",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"e32c1d5fb1d6db6449b19be10b5efc67\"",
+          "last-modified": "Fri, 21 Aug 2020 23:07:56 GMT",
+          "x-amz-version-id": "07mH3IjLkTALuqwqJ_8swJ63yOV5C46f",
+          "content-length": "9942928",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T01:00:36.427712+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T01:00:36.922829+00:00"
+    },
+    {
+      "id": "ds000114_sub-06",
+      "dataset": "ds000114",
+      "subject": "sub-06",
+      "session": "test",
+      "snapshot": "1.0.2",
+      "source_git_commit": "6299834614e9ae7df1e2fc5922545331b5c7f022",
+      "source_path": "sub-06/ses-test/anat/sub-06_ses-test_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-06/ses-test/anat/sub-06_ses-test_T1w.nii.gz",
+      "source_annex_key": "MD5E-s10429286--0dcb4734fa4f0bccc2f7b953e630e24d",
+      "expected_bytes": 10429286,
+      "expected_md5": "0dcb4734fa4f0bccc2f7b953e630e24d",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000114/sub-06/ses-test/anat/sub-06_ses-test_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [],
+      "selection_rank": 8,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 10429286,
+      "sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "md5": "0dcb4734fa4f0bccc2f7b953e630e24d",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          256,
+          156,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            0.9928354620933533,
+            -0.14818830788135529,
+            0.03585870563983917,
+            -117.57283782958984
+          ],
+          [
+            0.11200405657291412,
+            1.290006160736084,
+            0.05319290980696678,
+            -96.57119750976562
+          ],
+          [
+            -0.04162752255797386,
+            -0.06343600898981094,
+            0.997940182685852,
+            -128.69314575195312
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          1.0,
+          1.300038456916809,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            0.9928351097928299,
+            -0.14818862806934058,
+            0.03584979633683399,
+            -117.57283782958984
+          ],
+          [
+            0.11200380316084452,
+            1.2900061672723007,
+            0.05319240973692956,
+            -96.57119750976562
+          ],
+          [
+            -0.04163643644893605,
+            -0.06343664850063836,
+            0.9979405591762398,
+            -128.69314575195312
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            0.9928354620933533,
+            -0.14818830788135529,
+            0.03585870563983917,
+            -117.57283782958984
+          ],
+          [
+            0.11200405657291412,
+            1.290006160736084,
+            0.05319290980696678,
+            -96.57119750976562
+          ],
+          [
+            -0.04162752255797386,
+            -0.06343600898981094,
+            0.997940182685852,
+            -128.69314575195312
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 10223616,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 4382.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-06/ses-test/anat/sub-06_ses-test_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-06/ses-test/anat/sub-06_ses-test_T1w.nii.gz?versionId=3c9nwDQmLO6ZH1e9ioEJmhXtuDxxAwA7",
+        "head": {
+          "etag": "\"0dcb4734fa4f0bccc2f7b953e630e24d\"",
+          "last-modified": "Fri, 21 Aug 2020 23:08:14 GMT",
+          "x-amz-version-id": "3c9nwDQmLO6ZH1e9ioEJmhXtuDxxAwA7",
+          "content-length": "10429286",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"0dcb4734fa4f0bccc2f7b953e630e24d\"",
+          "last-modified": "Fri, 21 Aug 2020 23:08:14 GMT",
+          "x-amz-version-id": "3c9nwDQmLO6ZH1e9ioEJmhXtuDxxAwA7",
+          "content-length": "10429286",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T01:00:43.773034+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T01:00:44.220680+00:00"
+    },
+    {
+      "id": "ds000114_sub-07",
+      "dataset": "ds000114",
+      "subject": "sub-07",
+      "session": "test",
+      "snapshot": "1.0.2",
+      "source_git_commit": "6299834614e9ae7df1e2fc5922545331b5c7f022",
+      "source_path": "sub-07/ses-test/anat/sub-07_ses-test_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-07/ses-test/anat/sub-07_ses-test_T1w.nii.gz",
+      "source_annex_key": "MD5E-s8580756--2f14ce817190386a6b4cbf77f89492e1",
+      "expected_bytes": 8580756,
+      "expected_md5": "2f14ce817190386a6b4cbf77f89492e1",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000114/sub-07/ses-test/anat/sub-07_ses-test_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [],
+      "selection_rank": 9,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 8580756,
+      "sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+      "md5": "2f14ce817190386a6b4cbf77f89492e1",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          256,
+          156,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            0.9998607039451599,
+            0.009811650030314922,
+            0.014862707816064358,
+            -134.64028930664062
+          ],
+          [
+            -0.008270607329905033,
+            1.2989977598190308,
+            0.04937952756881714,
+            -84.38140869140625
+          ],
+          [
+            -0.014496495015919209,
+            -0.0643753707408905,
+            0.9986695051193237,
+            -147.12220764160156
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          1.0,
+          1.300628900527954,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            0.9998608981062188,
+            0.009812049793313654,
+            0.014875190079330615,
+            -134.64028930664062
+          ],
+          [
+            -0.008270299046450954,
+            1.2989977148087009,
+            0.04937947253603836,
+            -84.38140869140625
+          ],
+          [
+            -0.014484011595819114,
+            -0.06437544166203117,
+            0.9986693128419268,
+            -147.12220764160156
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            0.9998607039451599,
+            0.009811650030314922,
+            0.014862707816064358,
+            -134.64028930664062
+          ],
+          [
+            -0.008270607329905033,
+            1.2989977598190308,
+            0.04937952756881714,
+            -84.38140869140625
+          ],
+          [
+            -0.014496495015919209,
+            -0.0643753707408905,
+            0.9986695051193237,
+            -147.12220764160156
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 10223616,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 3416.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-07/ses-test/anat/sub-07_ses-test_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-07/ses-test/anat/sub-07_ses-test_T1w.nii.gz?versionId=XHXM3eBCpSn0X7Trl57v.8I9u9_JCsst",
+        "head": {
+          "etag": "\"2f14ce817190386a6b4cbf77f89492e1\"",
+          "last-modified": "Fri, 21 Aug 2020 23:08:32 GMT",
+          "x-amz-version-id": "XHXM3eBCpSn0X7Trl57v.8I9u9_JCsst",
+          "content-length": "8580756",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"2f14ce817190386a6b4cbf77f89492e1\"",
+          "last-modified": "Fri, 21 Aug 2020 23:08:32 GMT",
+          "x-amz-version-id": "XHXM3eBCpSn0X7Trl57v.8I9u9_JCsst",
+          "content-length": "8580756",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T01:00:51.255074+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T01:00:51.672789+00:00"
+    },
+    {
+      "id": "ds000114_sub-08",
+      "dataset": "ds000114",
+      "subject": "sub-08",
+      "session": "test",
+      "snapshot": "1.0.2",
+      "source_git_commit": "6299834614e9ae7df1e2fc5922545331b5c7f022",
+      "source_path": "sub-08/ses-test/anat/sub-08_ses-test_T1w.nii.gz",
+      "source_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-08/ses-test/anat/sub-08_ses-test_T1w.nii.gz",
+      "source_annex_key": "MD5E-s9325328--35d0ce9fd75157df786d11c84b3c2178",
+      "expected_bytes": 9325328,
+      "expected_md5": "35d0ce9fd75157df786d11c84b3c2178",
+      "expected_sha256": null,
+      "sha256_status": "computed_and_frozen_after_snapshot_md5_verification",
+      "server_input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000114/sub-08/ses-test/anat/sub-08_ses-test_T1w.nii.gz",
+      "license": "CC0-1.0",
+      "sidecars": [],
+      "selection_rank": 10,
+      "initial_download_status": "pending",
+      "failure_policy": "retain_this_case_and_report_failure; no replacement",
+      "download_status": "complete",
+      "bytes": 9325328,
+      "sha256": "fecd8cd5f27f7639a70762352d543d75fcb8d10dde26ddb1b58818c3385756ca",
+      "md5": "35d0ce9fd75157df786d11c84b3c2178",
+      "snapshot_content_match": true,
+      "nifti": {
+        "shape": [
+          256,
+          156,
+          256
+        ],
+        "is_3d": true,
+        "stored_dtype": "float32",
+        "loaded_dtype": "float32",
+        "affine": [
+          [
+            0.9995752573013306,
+            -0.026098700240254402,
+            0.021118806675076485,
+            -125.1026840209961
+          ],
+          [
+            0.01788390427827835,
+            1.2929983139038086,
+            0.09952083975076675,
+            -91.7329330444336
+          ],
+          [
+            -0.02301100827753544,
+            -0.12879738211631775,
+            0.9948113560676575,
+            -146.10296630859375
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "affine_finite_nonsingular": true,
+        "axis_codes": [
+          "R",
+          "A",
+          "S"
+        ],
+        "voxel_sizes_mm": [
+          1.0,
+          1.2996593713760376,
+          1.0
+        ],
+        "xyzt_units": [
+          "mm",
+          "sec"
+        ],
+        "qform_code": 1,
+        "qform": [
+          [
+            0.9995752611070874,
+            -0.026098638231813125,
+            0.021119784774485707,
+            -125.1026840209961
+          ],
+          [
+            0.01788395341223531,
+            1.2929982896083685,
+            0.09952085190715315,
+            -91.7329330444336
+          ],
+          [
+            -0.023010032443416963,
+            -0.12879738257369977,
+            0.9948113161432945,
+            -146.10296630859375
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "sform_code": 1,
+        "sform": [
+          [
+            0.9995752573013306,
+            -0.026098700240254402,
+            0.021118806675076485,
+            -125.1026840209961
+          ],
+          [
+            0.01788390427827835,
+            1.2929983139038086,
+            0.09952083975076675,
+            -91.7329330444336
+          ],
+          [
+            -0.02301100827753544,
+            -0.12879738211631775,
+            0.9948113560676575,
+            -146.10296630859375
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite_count": 10223616,
+        "nonfinite_count": 0,
+        "intensity_min": 0.0,
+        "intensity_max": 3636.0,
+        "nibabel_version": "5.4.2",
+        "altered_or_resampled": false
+      },
+      "retrieval": {
+        "url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-08/ses-test/anat/sub-08_ses-test_T1w.nii.gz",
+        "pinned_url": "https://s3.amazonaws.com/openneuro.org/ds000114/sub-08/ses-test/anat/sub-08_ses-test_T1w.nii.gz?versionId=y1f1mptCugQa9xDJKw80orQT9t53E1m6",
+        "head": {
+          "etag": "\"35d0ce9fd75157df786d11c84b3c2178\"",
+          "last-modified": "Fri, 21 Aug 2020 23:08:49 GMT",
+          "x-amz-version-id": "y1f1mptCugQa9xDJKw80orQT9t53E1m6",
+          "content-length": "9325328",
+          "content-type": "application/gzip"
+        },
+        "get": {
+          "etag": "\"35d0ce9fd75157df786d11c84b3c2178\"",
+          "last-modified": "Fri, 21 Aug 2020 23:08:49 GMT",
+          "x-amz-version-id": "y1f1mptCugQa9xDJKw80orQT9t53E1m6",
+          "content-length": "9325328",
+          "content-type": "application/gzip"
+        },
+        "downloaded_utc": "2026-10-03T01:00:58.513823+00:00"
+      },
+      "attempt": 1,
+      "prior_errors": [],
+      "verified_utc": "2026-10-03T01:00:59.086703+00:00"
+    }
+  ],
+  "raw_data_policy": "直接使用OpenNeuro快照匹配的原始T1w，未经过FNIT示例deface/裁切/脑掩模；影像仅保留服务器700目录，不提交Git",
+  "overall_metric_equivalence": "not_assessed",
+  "frozen_manifest_sha256": "0e7ca51ea9840795a05db54c3eee9dc98edb2f072e0d7cfc37f8d2940aafb13c"
+}

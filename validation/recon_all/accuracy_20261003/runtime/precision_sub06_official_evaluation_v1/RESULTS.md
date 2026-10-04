@@ -1,0 +1,9 @@
+# 3a sub-06 官方对照完成回执
+
+18个比较阶段全部complete，严格138项检查通过6项（all_pass=false）。这是比较流程完成，不表示完整复现或整体官方等效；overall_metric_equivalence=not_assessed。
+
+源commit 3a0c9aba6321b4981fd8174b4b191515459aa38b，源码归档SHA 03cc806fb449a8620c8caa78b1af86dfaff6b64ab9e9e7c5210cf12184aa7f31。原T1 SHA 7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7，实际CLI整例、总4线程、同声明GPU UUID。正式比较工具fe653声明与实际evaluator/helperSHA均保存。
+
+保留全部严格/几何/逐脑区/Dice/质量/各surface比较JSON、CSV和实际PNG/SVG脑图；官方实际config/launch/completion/program manifest及候选actual config/launch/completion一并冻结。所有比较时间仅属于CPU评估，不加入整例算法时间。
+
+原文件只读；本收集没有新比较、GPU计算或读入MRI、曲面、权重和许可证内容。此前partial快照单独标记保留。

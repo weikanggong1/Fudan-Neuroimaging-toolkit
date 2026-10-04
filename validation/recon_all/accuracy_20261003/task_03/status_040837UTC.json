@@ -1,0 +1,82 @@
+{
+  "schema": "fnit-task03-live-status-v1",
+  "observed_server_utc": "2026-10-03T04:08:37Z",
+  "read_only": true,
+  "new_computation_started": false,
+  "production_algorithm_changed": false,
+  "overall_equivalence": "not_assessed",
+  "latest_collected_sha256": "c07310916e611d8a624dce76a32c230639cd1c1fcf6600432b5c9ee9100faeb9",
+  "receipt_modes": {
+    "normalize": {
+      "state": "complete",
+      "source_sha256": "8dc6dd970946c5761b8e7c225a25f85a4a2a6693a90320f8b860b27967dfc5df",
+      "commit": "816e5610417a4c587caf321049438a9554139016"
+    },
+    "cross": {
+      "state": "running_or_waiting",
+      "source_sha256": "d8037a9320650a5684e68f8442af8cec0bdc143df2c5c9222ee9ac11689b59c8",
+      "commit": "816e5610417a4c587caf321049438a9554139016"
+    },
+    "tail": {
+      "state": "running_or_waiting",
+      "source_sha256": "ee671e5de94238f830550916b6277af0301c3dc4dc7c179e2957723299f6af5e",
+      "commit": "816e5610417a4c587caf321049438a9554139016"
+    },
+    "coordinates_fp32": {
+      "state": "running_or_waiting",
+      "source_sha256": "a57398815e93faca03d9a0f0eb952d5aff81137d41e18efe6a43edb2a22ec9a6",
+      "commit": "816e5610417a4c587caf321049438a9554139016"
+    }
+  },
+  "delta_since_dd564c97": {
+    "new_completed_cross_combinations": 0,
+    "new_completed_tail_stages": 0,
+    "new_coordinate_results": 0,
+    "receipt_sha_changed": false
+  },
+  "completed": {
+    "normalize_cases": 2,
+    "cross_combinations": 5,
+    "cross_combinations_required": 8,
+    "tail_stages": 5,
+    "tail_stages_required": 6,
+    "coordinates_cases": 0,
+    "coordinates_cases_required": 2
+  },
+  "coordinate_hypothesis": {
+    "status": "unconfirmed_waiting_lock",
+    "measured_improvement": null,
+    "production_fix": null,
+    "script_sha256": "01bd6bf0ea79411dbe3e07cf468b4b373adad96c84cb361bbe24922365c9358d"
+  },
+  "live_processes": {
+    "cross": {
+      "pid": 94174,
+      "state": "S",
+      "waiting_flock": true,
+      "session": 59213
+    },
+    "tail": {
+      "pid": 98758,
+      "state": "S",
+      "waiting_flock": true,
+      "session": 77636
+    },
+    "coordinates": {
+      "pid": 114339,
+      "state": "S",
+      "waiting_flock": true,
+      "session": 62036
+    }
+  },
+  "current_lock_holder": {
+    "pid": 54960,
+    "scope": "coordinator_official_first_new_T1_ds000030_sub-10159"
+  },
+  "prior_baseline_lock_holder": {
+    "pid": 51564,
+    "state": "Z",
+    "complete_per_coordinator": true
+  },
+  "next_step": "Retain original queues; use existing collector read-only after official first-case releases lock. Resume attribution only when coordinates/cross receipts contain new results. No ten-case completion or final equivalence claim."
+}

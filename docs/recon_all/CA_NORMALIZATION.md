@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart LR
-    N[自产 nu 与 brainmask] --> M[关闭与掩膜/强度峰缩放]
+    N[自产 nu 与 brainmask] --> M[掩膜闭运算与强度峰缩放]
     L[完整 EM 自产 voxel LTA] --> C[prior 到 source 坐标]
     G[固定已校验 GCA] --> C
     M --> P[三轮控制点选择与偏置场]
@@ -67,7 +67,7 @@ mri_ca_normalize -c ctrl_pts.mgz -mask brainmask.mgz \
 | sub01 | 0 / 0 | 0 / 0 | 28.01 |
 | sub02 | 11 / 6 | 0 / 0 | 25.55 |
 
-[完整坐标诊断](../../validation/recon_all/accuracy_20261003/task_03/coordinates_fp32_completed.json)绑定输入、源码及输出哈希。生产 helper 还按原生完整链保留越界初始坐标；三项独立契约测试覆盖平移/spacing、负半整数、FP32 `.5` 提升和浮点边界。生产 helper 两例 ABBA（每例 baseline→candidate→candidate→baseline）短阶段回归已排队，完成结果将独立记录；不把诊断耗时当配对速度验收。目前没有脑图或新十例整例改善声明，138 项与全链由协调者统一评估，整体等效 `not_assessed`。
+[完整坐标诊断](../../validation/recon_all/accuracy_20261003/task_03/coordinates_fp32_completed.json)绑定输入、源码及输出哈希。生产 helper 还按原生完整链保留越界初始坐标；三项独立契约测试覆盖平移/spacing、负半整数、FP32 `.5` 提升和浮点边界。生产 helper 两例 ABBA（每例 baseline→candidate→candidate→baseline）已完成，四次候选 norm/ctrl 均零差，网格/dtype相同；含加载/计算/写出的均值 sub01 基线26.2825秒、候选25.9953秒（观察-1.09%），sub02 基线25.1052秒、候选26.5025秒（观察+5.57%）。sub02两次候选都慢于两次基线，分步骤差异分布在setup、selection、bias及写出；尚无隔离证据把成本归到坐标算子，也没有预先约定的速度容差，速度稳定未判通过。[完整ABBA报告](../../validation/recon_all/accuracy_20261003/task_03/production_fix_abba_completed.json)及[CSV](../../validation/recon_all/accuracy_20261003/task_03/production_fix_abba_completed.csv)保留八次原始计时；不把诊断耗时替代配对回归。目前没有脑图或新十例整例改善声明，138 项与全链由协调者统一评估，整体等效 `not_assessed`。
 
 完整八组 nu/mask 输入诊断证明：两例有效 mask 支持集都相同；sub01 两个 nu 体素使完整 EM LTA 和控制点改变，norm 扩展为 490692 个不同体素；这是上游传播。sub02 当前自产输入有 norm 41 个不同体素，其中同官方输入的 11 个残差由本次坐标诊断消除，剩余上游传播不能由同输入修复的结果推断已经解决。[八组实测 CSV](../../validation/recon_all/accuracy_20261003/task_03/cross_completed.csv)、[同输入尾段六项零差报告](../../validation/recon_all/accuracy_20261003/task_03/tail_completed.json)与[原始两例审计](../../validation/recon_all/accuracy_20261003/task_03/audit.json)分别记录诊断层级。
 
@@ -75,7 +75,7 @@ mri_ca_normalize -c ctrl_pts.mgz -mask brainmask.mgz \
 
 - 2026-09-27：早期 CA 同输入单例验证见 `validation/recon_all/python_gpu_port/native_cpp_conda_20260927/ca_normalize_same_input.json`；不能代替本轮两例或十例。
 - 基线 `816e5610`：sub02 冻结官方输入仍有 norm 11 / ctrl 6 残差；本轮完整八组诊断另存，不改写历史结果。
-- 2026-10-03：一般 FP32 prior→source 坐标修复；诊断两例零差。生产 ABBA 状态与源码 SHA 见任务3当前报告。
+- 2026-10-03：一般 FP32 prior→source 坐标修复；诊断两例零差。生产 ABBA 已完成同输入精度回归，sub02耗时增加观察仍需处理；源码 SHA 和全部读写计时见任务3当前报告。
 
 ## 原实现与参考文献
 

@@ -1,0 +1,586 @@
+{
+  "observed_utc": "2026-10-03T04:18:25.440452+00:00",
+  "host": "gpucw1",
+  "tasks": {
+    "task_02": {
+      "processes": [
+        {
+          "pid": 90754,
+          "ppid": 1,
+          "stat": "S",
+          "elapsed": "02:44:54",
+          "cpu_percent": "0.4",
+          "comm": "python",
+          "command": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python /tmp/fnit-recon-accuracy-20261003/task_02/diagnostic/cohort_prefix.py",
+          "children": []
+        },
+        {
+          "pid": 109621,
+          "ppid": 1,
+          "stat": "S",
+          "elapsed": "02:37:29",
+          "cpu_percent": "0.0",
+          "comm": "python",
+          "command": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python /tmp/fnit-recon-accuracy-20261003/task_02/diagnostic/run_n4_cross.py",
+          "children": []
+        },
+        {
+          "pid": 74294,
+          "ppid": 1,
+          "stat": "S",
+          "elapsed": "02:04:58",
+          "cpu_percent": "0.0",
+          "comm": "python",
+          "command": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python /tmp/fnit-recon-accuracy-20261003/task_02/diagnostic/repeat_prefix_timing.py",
+          "children": []
+        }
+      ],
+      "receipts": [
+        {
+          "file": "task_02/cohort_prefix/report.json",
+          "present": true,
+          "sha256": "2781d9fca8ccd3b2e362bd4f5a2f1efeeb88be00282df819ea4e900fb8d5ec6b",
+          "status": null,
+          "complete": null,
+          "keys": [
+            "source_commit",
+            "runtime_prefix_equivalence",
+            "cohort_sha256",
+            "gpu_uuid",
+            "threads",
+            "overall_equivalence",
+            "cases"
+          ],
+          "cases_completed": 8,
+          "ids": [
+            "ds000030_sub-10159",
+            "ds000030_sub-10171",
+            "ds000030_sub-10189",
+            "ds000030_sub-10193",
+            "ds000030_sub-10206",
+            "ds000114_sub-04",
+            "ds000114_sub-05",
+            "ds000114_sub-06"
+          ]
+        }
+      ]
+    },
+    "task_03": {
+      "processes": [
+        {
+          "pid": 94174,
+          "ppid": 93816,
+          "stat": "Sl",
+          "elapsed": "02:43:45",
+          "cpu_percent": "2.6",
+          "comm": "python",
+          "command": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python validation/recon_all/accuracy_20261003/task_03/volume_probe.py --config validation/recon_all/accuracy_20261003/task_03/frozen_config.json --mode cross",
+          "children": []
+        },
+        {
+          "pid": 98758,
+          "ppid": 98402,
+          "stat": "Sl",
+          "elapsed": "02:41:38",
+          "cpu_percent": "2.4",
+          "comm": "python",
+          "command": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python validation/recon_all/accuracy_20261003/task_03/tail_probe.py --config validation/recon_all/accuracy_20261003/task_03/frozen_config.json",
+          "children": []
+        },
+        {
+          "pid": 114339,
+          "ppid": 113986,
+          "stat": "S",
+          "elapsed": "01:44:55",
+          "cpu_percent": "0.0",
+          "comm": "python",
+          "command": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python validation/recon_all/accuracy_20261003/task_03/diagnose_ca_coordinates.py --config validation/recon_all/accuracy_20261003/task_03/frozen_config.json",
+          "children": []
+        }
+      ],
+      "receipts": [
+        {
+          "file": "task_03/frozen_v1/normalize/report.json",
+          "present": true,
+          "sha256": "8dc6dd970946c5761b8e7c225a25f85a4a2a6693a90320f8b860b27967dfc5df",
+          "status": null,
+          "complete": true,
+          "keys": [
+            "mode",
+            "hostname",
+            "commit",
+            "module",
+            "module_sha256",
+            "scope",
+            "equivalence",
+            "cases",
+            "complete"
+          ],
+          "summary": {
+            "mode": "normalize",
+            "hostname": "gpucw1",
+            "commit": "816e5610417a4c587caf321049438a9554139016",
+            "module": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/runtime/src/fnit/recon_all/ca_normalize_python.py",
+            "module_sha256": "abb436826e600101c2c5087e2367e8a36a7c038c99eda10bc4f5be1e7486661a",
+            "scope": "frozen_real_input_diagnostic",
+            "equivalence": "not_assessed",
+            "complete": true
+          }
+        },
+        {
+          "file": "task_03/frozen_v1/cross/report.json",
+          "present": true,
+          "sha256": "d8037a9320650a5684e68f8442af8cec0bdc143df2c5c9222ee9ac11689b59c8",
+          "status": null,
+          "complete": null,
+          "keys": [
+            "mode",
+            "hostname",
+            "commit",
+            "module",
+            "module_sha256",
+            "scope",
+            "equivalence",
+            "cases"
+          ],
+          "combinations_completed": 5
+        },
+        {
+          "file": "task_03/frozen_v1/tail/report.json",
+          "present": true,
+          "sha256": "ee671e5de94238f830550916b6277af0301c3dc4dc7c179e2957723299f6af5e",
+          "status": null,
+          "complete": null,
+          "keys": [
+            "commit",
+            "host",
+            "pid",
+            "scope",
+            "overall_equivalence",
+            "tf32",
+            "device",
+            "cases",
+            "gpu_samples"
+          ],
+          "stages_completed": 5
+        },
+        {
+          "file": "task_03/frozen_v1/coordinates_fp32/report.json",
+          "present": true,
+          "sha256": "a57398815e93faca03d9a0f0eb952d5aff81137d41e18efe6a43edb2a22ec9a6",
+          "status": null,
+          "complete": null,
+          "keys": [
+            "commit",
+            "scope",
+            "equivalence",
+            "module_sha256",
+            "script_sha256",
+            "cases"
+          ],
+          "cases_started": 1,
+          "cases_completed": 0
+        }
+      ]
+    },
+    "task_04": {
+      "processes": [
+        {
+          "pid": 23673,
+          "ppid": 23672,
+          "stat": "S",
+          "elapsed": "02:22:54",
+          "cpu_percent": "0.0",
+          "comm": "python",
+          "command": "../../fnit_main_env/bin/python run_frozen_queue.py",
+          "children": []
+        },
+        {
+          "pid": 34538,
+          "ppid": 34537,
+          "stat": "S",
+          "elapsed": "02:18:57",
+          "cpu_percent": "0.1",
+          "comm": "python",
+          "command": "../../fnit_main_env/bin/python assess_different_meshes.py --reference /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official --candidate ../../parallel_20261002/whole_sub01_candidate_8d750e2 --output-root different_meshes_sub01 --code-commit 816e5610417a4c587caf321049438a9554139016 --reference-distance-helper reference_surface_distance.py",
+          "children": []
+        }
+      ],
+      "receipts": [
+        {
+          "file": "task_04/queue_status.json",
+          "present": true,
+          "sha256": "a378ec33db505cfab194c067b58257612d59a1cd2b93073ebb835e73e7ccb53f",
+          "status": "running",
+          "complete": null,
+          "keys": [
+            "pid",
+            "started",
+            "code_commit",
+            "kind",
+            "checkpoint_code",
+            "overall_equivalence",
+            "status",
+            "commands"
+          ],
+          "commands": [
+            {
+              "stage": "tessellate",
+              "status": "complete",
+              "exit_code": 0,
+              "seconds": 1.1419856548309326
+            },
+            {
+              "stage": "extract",
+              "status": "complete",
+              "exit_code": 0,
+              "seconds": 0.6064062118530273
+            },
+            {
+              "stage": "remesh",
+              "status": "complete",
+              "exit_code": 0,
+              "seconds": 18.485302925109863
+            },
+            {
+              "stage": "remesh",
+              "status": "waiting_lock"
+            }
+          ]
+        },
+        {
+          "file": "task_04/different_meshes_sub01/report.json",
+          "present": true,
+          "sha256": "fd0c1d0964ec13cfe8eacdbce268985f7ced83038662c90e417a7bba081fe553",
+          "status": "running",
+          "complete": null,
+          "keys": [
+            "status",
+            "kind",
+            "host",
+            "pid",
+            "script_sha256",
+            "code_commit",
+            "reference",
+            "candidate",
+            "overall_equivalence",
+            "rows",
+            "annotation_metric"
+          ],
+          "summary": {
+            "status": "running",
+            "kind": "different-topology spatial diagnostic",
+            "host": "gpucw1",
+            "pid": 34538,
+            "script_sha256": "f683dec5a6a7e06f64a32ea811695785d1d55f01f14e226d1e6c5b01969d062a",
+            "code_commit": "816e5610417a4c587caf321049438a9554139016",
+            "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+            "candidate": "../../parallel_20261002/whole_sub01_candidate_8d750e2",
+            "overall_equivalence": "not_assessed",
+            "annotation_metric": "Each direction separately: closest closed triangle; vertex label at maximum closest-point barycentric weight, tie first triangle corner; area weights use source orig triangles. This is resampled Dice, not same-index Dice, and does not prove native vertex correspondence."
+          }
+        }
+      ]
+    },
+    "task_05": {
+      "processes": [
+        {
+          "pid": 78930,
+          "ppid": 1,
+          "stat": "S",
+          "elapsed": "02:03:01",
+          "cpu_percent": "0.0",
+          "comm": "bash",
+          "command": "bash /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/run_placement_stages.sh",
+          "children": [
+            {
+              "pid": 78932,
+              "ppid": 78930,
+              "stat": "S",
+              "elapsed": "02:03:01",
+              "cpu_percent": "0.0",
+              "comm": "flock",
+              "command": "flock 9"
+            }
+          ]
+        }
+      ],
+      "receipts": [
+        {
+          "file": "task_05/placement_receipt.json",
+          "present": true,
+          "sha256": "f0416688e5df4f50bb98310e4c54f9b6e24d5359659ad9a26d4c3696b5425d2a",
+          "status": "queued",
+          "complete": null,
+          "keys": [
+            "status",
+            "stage",
+            "overall_equivalence"
+          ],
+          "summary": {
+            "status": "queued",
+            "stage": "lh_prewhite_conda",
+            "overall_equivalence": "not_assessed"
+          }
+        },
+        {
+          "file": "task_05/receipt.json",
+          "present": true,
+          "sha256": "2373dea8d890eafd6f7d92bba1e724f1e00ff2b327af76355bc0a4036b61fbad",
+          "status": "finished",
+          "complete": null,
+          "keys": [
+            "status",
+            "exit_code",
+            "scope",
+            "overall_equivalence"
+          ],
+          "summary": {
+            "status": "finished",
+            "exit_code": 0,
+            "scope": "same_input_roi_diagnostic",
+            "overall_equivalence": "not_assessed"
+          }
+        }
+      ]
+    }
+  },
+  "whole": {
+    "baseline": [
+      {
+        "id": "ds000030_sub-10159",
+        "state": "complete",
+        "execution_status": "complete",
+        "code_commit": "816e5610417a4c587caf321049438a9554139016",
+        "source_archive_sha256": "0107e059153ff46ace5ab477539c232810f3309db0d569c861a02b6c69b460e7",
+        "strict_reproduction": "not_assessed",
+        "new_degradation": "not_assessed",
+        "overall_metric_equivalence": "not_assessed; no confirmed whole-case gates",
+        "child_exit_code": 0,
+        "pipeline_status": "complete",
+        "output_validation": {
+          "profile": "single-t1-138",
+          "expected": 138,
+          "present": 138,
+          "missing": [],
+          "status": "passed"
+        },
+        "pipeline_total_seconds": 2561.658305718098,
+        "exit_code": 0,
+        "command_seconds": 2565.5213555628434,
+        "finished_utc": "2026-10-03T02:53:52.522196+00:00"
+      },
+      {
+        "id": "ds000030_sub-10171",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000030_sub-10189",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000030_sub-10193",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000030_sub-10206",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-04",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-05",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-06",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-07",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-08",
+        "state": "not_started"
+      }
+    ],
+    "official": [
+      {
+        "id": "ds000030_sub-10159",
+        "state": "running"
+      },
+      {
+        "id": "ds000030_sub-10171",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000030_sub-10189",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000030_sub-10193",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000030_sub-10206",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-04",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-05",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-06",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-07",
+        "state": "not_started"
+      },
+      {
+        "id": "ds000114_sub-08",
+        "state": "not_started"
+      }
+    ]
+  },
+  "priority": {
+    "priority_v1/status.json": {
+      "status": "diagnostics_priority",
+      "drivers": [
+        {
+          "pid": 51563,
+          "starttime": "281455099",
+          "launch": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_queue_launch.json"
+        },
+        {
+          "pid": 54959,
+          "starttime": "281460696",
+          "launch": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/official_queue_launch.json"
+        }
+      ],
+      "diagnostics": {
+        "90754": "281257647",
+        "98758": "281277266",
+        "34538": "281413355",
+        "78930": "281508918",
+        "109621": "281302152",
+        "74294": "281497297",
+        "23673": "281389676",
+        "94174": "281264559"
+      },
+      "started_utc": "2026-10-03T02:26:50.265790+00:00",
+      "scope": "queue parents only; existing child commands continue",
+      "diagnostic_success": "not_inferred",
+      "timeout_seconds": 21600.0,
+      "remaining_pids": [
+        "90754",
+        "98758",
+        "34538",
+        "78930",
+        "109621",
+        "74294",
+        "23673",
+        "94174"
+      ],
+      "elapsed_seconds": 6690.7678788062185
+    }
+  },
+  "benchmark_lock_lines": [
+    "8: FLOCK  ADVISORY  WRITE 54960 fd:00:877016702 0 EOF",
+    "8: -> FLOCK  ADVISORY  WRITE 34538 fd:00:877016702 0 EOF",
+    "8: -> FLOCK  ADVISORY  WRITE 98758 fd:00:877016702 0 EOF",
+    "8: -> FLOCK  ADVISORY  WRITE 109621 fd:00:877016702 0 EOF",
+    "8: -> FLOCK  ADVISORY  WRITE 23673 fd:00:877016702 0 EOF",
+    "8: -> FLOCK  ADVISORY  WRITE 94174 fd:00:877016702 0 EOF",
+    "8: -> FLOCK  ADVISORY  WRITE 74294 fd:00:877016702 0 EOF",
+    "8: -> FLOCK  ADVISORY  WRITE 114339 fd:00:877016702 0 EOF",
+    "8: -> FLOCK  ADVISORY  WRITE 90754 fd:00:877016702 0 EOF"
+  ],
+  "official_active": [
+    {
+      "pid": 76478,
+      "ppid": 76477,
+      "stat": "Rl",
+      "elapsed": "00:10",
+      "cpu_percent": "103",
+      "comm": "mris_place_surf",
+      "command": "mris_place_surface --thickness ../surf/lh.white ../surf/lh.pial 20 5 ../surf/lh.thickness"
+    }
+  ],
+  "queue_processes": [
+    {
+      "pid": 51563,
+      "ppid": 1,
+      "stat": "Ts",
+      "elapsed": "02:12:00",
+      "cpu_percent": "0.0",
+      "comm": "python",
+      "command": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/validation/recon_all/optimizations/20261002_parallel/run_whole_queue.py --configs /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000030_sub-10159.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000030_sub-10171.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000030_sub-10189.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000030_sub-10193.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000030_sub-10206.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000114_sub-04.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000114_sub-05.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000114_sub-06.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000114_sub-07.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000114_sub-08.json --lock /tmp/fnit-shared-benchmark.lock --output /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline/queue_v1 --monitor /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/validation/recon_all/python_gpu_port/run_monitored.py --launcher /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/validation/recon_all/optimizations/20261002_parallel/execute_whole_case.py"
+    },
+    {
+      "pid": 54959,
+      "ppid": 1,
+      "stat": "Ts",
+      "elapsed": "02:11:04",
+      "cpu_percent": "0.0",
+      "comm": "python",
+      "command": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/validation/recon_all/optimizations/20261002_parallel/run_whole_queue.py --configs /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000030_sub-10159.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000030_sub-10171.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000030_sub-10189.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000030_sub-10193.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000030_sub-10206.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000114_sub-04.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000114_sub-05.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000114_sub-06.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000114_sub-07.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000114_sub-08.json --lock /tmp/fnit-shared-benchmark.lock --output /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/official/queue_v1 --monitor /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/validation/recon_all/python_gpu_port/run_monitored.py --launcher /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/coordinator_tools/run_official_case.py"
+    },
+    {
+      "pid": 104896,
+      "ppid": 1,
+      "stat": "Ss",
+      "elapsed": "01:51:35",
+      "cpu_percent": "0.0",
+      "comm": "python3",
+      "command": "python3 /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/coordinator_tools/prioritize_diagnostics.py --launches /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_queue_launch.json /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/official_queue_launch.json --watch-pids 90754 109621 74294 94174 98758 23673 34538 78930 --output /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/priority_v1 --timeout-seconds 21600"
+    }
+  ],
+  "task_sessions": {
+    "task_01": {
+      "agent": "/root/accuracy01_cohort_medium",
+      "state": "status_check_returned_idle",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "data_verified": 10,
+      "downloads_running": false
+    },
+    "task_02": {
+      "agent": "/root/accuracy02_prefix_medium",
+      "state": "phase_returned_idle",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "verified_by": "live agent list; previous phase handoff65723f1b"
+    },
+    "task_03": {
+      "agent": "/root/accuracy03_volume_medium",
+      "state": "phase_returned_idle",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "verified_by": "live agent list; previous phase handoff59bdc3d5"
+    },
+    "task_04": {
+      "agent": "/root/accuracy04_mesh_medium",
+      "state": "status_check_returned_idle",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "reported_errors": false
+    },
+    "task_05": {
+      "agent": "/root/accuracy05_surface_medium",
+      "state": "status_check_returned_idle",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "reported_errors": false,
+      "child_check_utc": "2026-10-03T04:17:46+00:00"
+    }
+  },
+  "capacity_note": "Task5 status contact was initially rejected by child thread capacity; retried successfully after Task1/4 returned. Existing server jobs were unaffected."
+}

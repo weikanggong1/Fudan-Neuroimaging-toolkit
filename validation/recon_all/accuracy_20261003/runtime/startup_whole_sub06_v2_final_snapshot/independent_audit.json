@@ -1,0 +1,644 @@
+{
+  "observed_utc": "2026-10-04T11:01:50.931285+00:00",
+  "snapshot": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2_followup_final_20261004T110036Z",
+  "scope": "completed raw-T1 whole-case metadata review; no algorithm/comparison run",
+  "completion": {
+    "execution_status": "complete",
+    "code_commit": "8f3e51f58c37d28e1283d5bb8e248e93530cd398",
+    "source_archive_sha256": "c9e1f475fa4cbfed20a55fb84bdf5c7201c1b1b3734b2e015072912bf6af18de",
+    "strict_reproduction": "not_assessed",
+    "new_degradation": "not_assessed",
+    "overall_metric_equivalence": "not_assessed; no confirmed whole-case gates",
+    "child_exit_code": 0,
+    "pipeline_status": "complete",
+    "output_validation": {
+      "profile": "single-t1-138",
+      "expected": 138,
+      "present": 138,
+      "missing": [],
+      "status": "passed"
+    },
+    "pipeline_total_seconds": 2752.4580629738048,
+    "exit_code": 0,
+    "command_seconds": 2755.7794497050345,
+    "finished_utc": "2026-10-04T10:58:44.253808+00:00"
+  },
+  "status": "complete",
+  "output_validation": {
+    "profile": "single-t1-138",
+    "expected": 138,
+    "present": 138,
+    "missing": [],
+    "status": "passed"
+  },
+  "mesh_validation": {
+    "lh": {
+      "vertices": 130346,
+      "faces": 260688,
+      "euler": 2,
+      "unclosed_edges": 0,
+      "ordered_faces_preserved": true,
+      "finite_coordinates": true,
+      "intersecting_faces": {
+        "white": 0,
+        "pial": 0
+      },
+      "status": "passed"
+    },
+    "rh": {
+      "vertices": 132837,
+      "faces": 265670,
+      "euler": 2,
+      "unclosed_edges": 0,
+      "ordered_faces_preserved": true,
+      "finite_coordinates": true,
+      "intersecting_faces": {
+        "white": 0,
+        "pial": 0
+      },
+      "status": "passed"
+    },
+    "status": "passed"
+  },
+  "source": {
+    "code_commit": "8f3e51f58c37d28e1283d5bb8e248e93530cd398",
+    "source_archive_sha256": "c9e1f475fa4cbfed20a55fb84bdf5c7201c1b1b3734b2e015072912bf6af18de",
+    "candidate_native_free_sha256": "439692523cfcba95b4ca241ce1bf80a4f460471257c89916d21dc94ba2272d58",
+    "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+    "threads": 4,
+    "invocation": "cli"
+  },
+  "precision": {
+    "matmul_tf32_default": true,
+    "cudnn_tf32_default": true,
+    "fp16_or_bf16_requested_by_fnit": false,
+    "caller_autocast": {
+      "cpu": {
+        "enabled": false,
+        "dtype": "torch.bfloat16"
+      },
+      "cuda": {
+        "enabled": false,
+        "dtype": "torch.float16"
+      }
+    },
+    "fp16_or_bf16_enabled": false,
+    "fp32_exceptions": [
+      "SynthStrip",
+      "SynthSeg",
+      "Talairach affine",
+      "MNI nonlinear CUDA",
+      "MNI152 affine matmul",
+      "EntoWM/MCA-dura/vsinus cuDNN"
+    ],
+    "auxiliary_convolution_policy": "scoped cuDNN FP32; same-input GPU/CPU label regression; matmul TF32 preserved",
+    "SynthSeg_actual_forward": {
+      "requested_cudnn_tf32": false,
+      "forwards": [
+        {
+          "pass": "original",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        },
+        {
+          "pass": "flipped",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        }
+      ],
+      "posterior_buffer_reused": true,
+      "posterior_ensemble_dtype": "torch.float32"
+    },
+    "EntoWM_actual_forwards": [
+      {
+        "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+        "device": "cuda:0",
+        "input_dtype": "torch.float32",
+        "model_devices": [
+          "cuda:0"
+        ],
+        "model_dtypes": [
+          "torch.float32"
+        ],
+        "matmul_tf32": true,
+        "cudnn_tf32": false,
+        "cudnn_enabled": true,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": false,
+        "autocast": {
+          "enabled": false,
+          "dtype": "torch.float16"
+        }
+      }
+    ]
+  },
+  "pipeline_total_seconds": 2752.4580629738048,
+  "timing_metadata": {
+    "profile_stages": true,
+    "total_scope": "API entry through validation, thread restoration, loading, transfers and output writes; excludes final public metadata write",
+    "validation_seconds": 5.433782264124602,
+    "pipeline_seconds": 2746.529304106254,
+    "thread_setup_and_restore_seconds": 0.4949786737561226,
+    "thread_setup_and_restore_scope": "public-wrapper residual including thread setup/restoration and internal final report write/return overhead"
+  },
+  "stage_seconds": [
+    {
+      "name": "input_talairach",
+      "seconds": 20.197510840836912,
+      "function_seconds": 20.197119095362723
+    },
+    {
+      "name": "n4",
+      "seconds": 128.5995846609585,
+      "function_seconds": 128.59922332316637
+    },
+    {
+      "name": "nu",
+      "seconds": 7.260918325278908,
+      "function_seconds": 7.2606036411598325
+    },
+    {
+      "name": "T1_normalize",
+      "seconds": 88.30008153291419,
+      "function_seconds": 88.29976033512503
+    },
+    {
+      "name": "brainmask",
+      "seconds": 2.00633039791137,
+      "function_seconds": 2.0061253597959876
+    },
+    {
+      "name": "SynthSeg",
+      "seconds": 11.192043046001345,
+      "function_seconds": 11.19176610512659
+    },
+    {
+      "name": "mri_em_register",
+      "seconds": 126.18933819234371,
+      "function_seconds": 126.18912500934675
+    },
+    {
+      "name": "mri_ca_normalize",
+      "seconds": 27.162909544073045,
+      "function_seconds": 27.162409733980894
+    },
+    {
+      "name": "mri_cc",
+      "seconds": 15.16683783987537,
+      "function_seconds": 15.16651797061786
+    },
+    {
+      "name": "brain_second_normalize",
+      "seconds": 64.13487672293559,
+      "function_seconds": 64.13466271571815
+    },
+    {
+      "name": "entowm",
+      "seconds": 1.1390227507799864,
+      "function_seconds": 1.1388779040426016
+    },
+    {
+      "name": "ants_denoise",
+      "seconds": 24.1988205332309,
+      "function_seconds": 24.198212258983403
+    },
+    {
+      "name": "mri_segment",
+      "seconds": 59.154601505957544,
+      "function_seconds": 59.154323196038604
+    },
+    {
+      "name": "mri_edit_wm_with_aseg",
+      "seconds": 26.039191250223666,
+      "function_seconds": 26.0389209180139
+    },
+    {
+      "name": "wm_pretess",
+      "seconds": 8.145680577959865,
+      "function_seconds": 8.145327468868345
+    },
+    {
+      "name": "wm_fix_ento",
+      "seconds": 1.3064926657825708,
+      "function_seconds": 1.306386539246887
+    },
+    {
+      "name": "wm_fix_acj",
+      "seconds": 1.4904419197700918,
+      "function_seconds": 1.4903318788856268
+    },
+    {
+      "name": "mri_fill",
+      "seconds": 60.738246113061905,
+      "function_seconds": 60.73792573483661
+    },
+    {
+      "name": "filled_auto_checkpoint",
+      "seconds": 0.0033881468698382378,
+      "function_seconds": 0.0033301948569715023
+    },
+    {
+      "name": "mni_aux",
+      "seconds": 5.146856318227947,
+      "function_seconds": 5.146681364625692
+    },
+    {
+      "name": "mni_nonlinear",
+      "seconds": 42.38671794300899,
+      "function_seconds": 42.386536333244294
+    },
+    {
+      "name": "brain_finalsurfs",
+      "seconds": 7.257630432024598,
+      "function_seconds": 7.257452551741153
+    },
+    {
+      "name": "surface_hemisphere_group",
+      "seconds": 900.9237153031863,
+      "function_seconds": 900.9233520757407
+    },
+    {
+      "name": "defects_lh",
+      "seconds": 2.053488704841584,
+      "function_seconds": 2.053184426855296
+    },
+    {
+      "name": "defects_rh",
+      "seconds": 1.5727401189506054,
+      "function_seconds": 1.5724330637603998
+    },
+    {
+      "name": "register_hemisphere_group",
+      "seconds": 315.95117799099535,
+      "function_seconds": 315.95082608703524
+    },
+    {
+      "name": "annotation_hemisphere_group",
+      "seconds": 140.3399349632673,
+      "function_seconds": 140.33948313910514
+    },
+    {
+      "name": "finish_surface_hemisphere_group",
+      "seconds": 463.7130726869218,
+      "function_seconds": 463.71262656804174
+    },
+    {
+      "name": "finish_metrics_lh",
+      "seconds": 4.457860379945487,
+      "function_seconds": 4.457632805686444
+    },
+    {
+      "name": "finish_metrics_rh",
+      "seconds": 3.7985343700274825,
+      "function_seconds": 3.798344597220421
+    },
+    {
+      "name": "exvivo_annotations",
+      "seconds": 2.3942106519825757,
+      "function_seconds": 2.3939056610688567
+    },
+    {
+      "name": "jacobian_lh",
+      "seconds": 0.041962949093431234,
+      "function_seconds": 0.04170216899365187
+    },
+    {
+      "name": "contrast_lh",
+      "seconds": 1.8422146472148597,
+      "function_seconds": 1.8419494652189314
+    },
+    {
+      "name": "jacobian_rh",
+      "seconds": 0.04082916723564267,
+      "function_seconds": 0.040637456346303225
+    },
+    {
+      "name": "contrast_rh",
+      "seconds": 1.8528339229524136,
+      "function_seconds": 1.852597227320075
+    },
+    {
+      "name": "ribbon",
+      "seconds": 4.254565861076117,
+      "function_seconds": 4.254164200741798
+    },
+    {
+      "name": "relabel_hypointensities",
+      "seconds": 4.324283642694354,
+      "function_seconds": 4.324014490004629
+    },
+    {
+      "name": "aseg_ribbon_fix",
+      "seconds": 6.11355996504426,
+      "function_seconds": 6.113125439733267
+    },
+    {
+      "name": "project_aparc_volumes",
+      "seconds": 15.95571402600035,
+      "function_seconds": 15.955328023992479
+    },
+    {
+      "name": "project_wmparc",
+      "seconds": 4.719374650623649,
+      "function_seconds": 4.7190250852145255
+    },
+    {
+      "name": "brain_volume_stats",
+      "seconds": 2.5996429789811373,
+      "function_seconds": 2.5993645354174078
+    },
+    {
+      "name": "aseg_stats",
+      "seconds": 15.031668439041823,
+      "function_seconds": 15.031380709260702
+    },
+    {
+      "name": "wmparc_stats",
+      "seconds": 11.939498079940677,
+      "function_seconds": 11.939161757938564
+    },
+    {
+      "name": "stats_lh_aparc",
+      "seconds": 0.5623276010155678,
+      "function_seconds": 0.5621477290987968
+    },
+    {
+      "name": "stats_lh_aparc.a2009s",
+      "seconds": 0.0686844252049923,
+      "function_seconds": 0.06851844768971205
+    },
+    {
+      "name": "stats_lh_aparc.DKTatlas",
+      "seconds": 0.038826243951916695,
+      "function_seconds": 0.0386585989035666
+    },
+    {
+      "name": "stats_lh_aparc.pial",
+      "seconds": 0.5461887768469751,
+      "function_seconds": 0.5460285083390772
+    },
+    {
+      "name": "stats_lh_BA_exvivo",
+      "seconds": 0.020678386092185974,
+      "function_seconds": 0.02053828490898013
+    },
+    {
+      "name": "stats_lh_BA_exvivo.thresh",
+      "seconds": 0.018496201373636723,
+      "function_seconds": 0.01837392197921872
+    },
+    {
+      "name": "stats_lh_w-g.pct",
+      "seconds": 0.02729551400989294,
+      "function_seconds": 0.02717958390712738
+    },
+    {
+      "name": "stats_lh_curv",
+      "seconds": 2.1879827710799873,
+      "function_seconds": 2.187789177056402
+    },
+    {
+      "name": "stats_rh_aparc",
+      "seconds": 0.5964767187833786,
+      "function_seconds": 0.5962929641827941
+    },
+    {
+      "name": "stats_rh_aparc.a2009s",
+      "seconds": 0.07052623992785811,
+      "function_seconds": 0.07030714303255081
+    },
+    {
+      "name": "stats_rh_aparc.DKTatlas",
+      "seconds": 0.04147535702213645,
+      "function_seconds": 0.04127402789890766
+    },
+    {
+      "name": "stats_rh_aparc.pial",
+      "seconds": 0.543939262162894,
+      "function_seconds": 0.5437056100927293
+    },
+    {
+      "name": "stats_rh_BA_exvivo",
+      "seconds": 0.021367786917835474,
+      "function_seconds": 0.02118135755881667
+    },
+    {
+      "name": "stats_rh_BA_exvivo.thresh",
+      "seconds": 0.01988375186920166,
+      "function_seconds": 0.019690958317369223
+    },
+    {
+      "name": "stats_rh_w-g.pct",
+      "seconds": 0.0276887072250247,
+      "function_seconds": 0.02747720293700695
+    },
+    {
+      "name": "stats_rh_curv",
+      "seconds": 2.4564798618666828,
+      "function_seconds": 2.45624342514202
+    },
+    {
+      "name": "mesh_validation",
+      "seconds": 100.77530557382852,
+      "function_seconds": 100.77486566081643
+    }
+  ],
+  "monitor": {
+    "command": [
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/startup_overlay_gpu1_v2/validation/recon_all/optimizations/20261002_parallel/execute_whole_case.py",
+      "--config",
+      "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/retry_config.json"
+    ],
+    "pid": 30554,
+    "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+    "exit_code": 0,
+    "command_wall_seconds": 2755.834855529014,
+    "sampling_interval_requested_seconds": 2.0,
+    "query_timeout_seconds": 5.0,
+    "samples": 1318,
+    "failed_app_queries": 0,
+    "maximum_sampling_gap_seconds": 3.21838007401675,
+    "peak_sampled_process_bytes": 10951327744,
+    "continuous_peak_verified": false,
+    "monitor_thread_finished": true,
+    "script_sha256": "d0760007a9733f63c5aa57de42ec49adf95ccae06d64addc737349e7d57cedb2"
+  },
+  "admission": {
+    "status": "complete",
+    "exit_code": 0,
+    "finished_utc": "2026-10-04T10:58:44.330809+00:00",
+    "cleanup_status": null,
+    "admission_wait_seconds": 9.762916482053697,
+    "algorithm_seconds": null,
+    "wrapper_seconds": 2765.7330059628002,
+    "algorithm_started_utc": "2026-10-04T10:12:48.360759+00:00"
+  },
+  "sampling": {
+    "scope": "NVML same-query own parent+descendants, not independent maxima summed; whole-card query separate",
+    "own_tree_peak_bytes": 10951327744,
+    "own_peak_sample_utc": "2026-10-04T10:24:23.335126+00:00",
+    "parent_bytes_at_own_peak": 0,
+    "children_bytes_at_own_peak": 10951327744,
+    "whole_card_peak_bytes": 68432166912,
+    "samples": 1318,
+    "failed_app_rows": 0,
+    "failed_gpu_rows": 0,
+    "continuous_peak_verified": false
+  },
+  "hemisphere_groups": [
+    {
+      "name": "annotation",
+      "group_wall_seconds": 140.3053445960395,
+      "worker_span_seconds": 134.68229221599177,
+      "operation_worker_span_seconds": 131.56305251689628,
+      "startup_wait_seconds_actual": 3.0390847199596465,
+      "startup_count_per_hemi": {
+        "lh": 1,
+        "rh": 1
+      },
+      "entered_per_hemi": {
+        "lh": [
+          true
+        ],
+        "rh": [
+          true
+        ]
+      },
+      "actual_cuda_devices": {
+        "lh": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+        },
+        "rh": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+        }
+      },
+      "sampled_group_tree_peak_bytes": 5955911680
+    },
+    {
+      "name": "finish_surface",
+      "group_wall_seconds": 463.66594678908587,
+      "worker_span_seconds": 457.49168396694586,
+      "operation_worker_span_seconds": 454.4452489190735,
+      "startup_wait_seconds_actual": 2.9648806992918253,
+      "startup_count_per_hemi": {
+        "lh": 1,
+        "rh": 1
+      },
+      "entered_per_hemi": {
+        "lh": [
+          true
+        ],
+        "rh": [
+          true
+        ]
+      },
+      "actual_cuda_devices": {
+        "lh": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+        },
+        "rh": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+        }
+      },
+      "sampled_group_tree_peak_bytes": 2885681152
+    },
+    {
+      "name": "register",
+      "group_wall_seconds": 315.8932035895996,
+      "worker_span_seconds": 309.99247416714206,
+      "operation_worker_span_seconds": 306.92791068181396,
+      "startup_wait_seconds_actual": 2.978041731286794,
+      "startup_count_per_hemi": {
+        "lh": 1,
+        "rh": 1
+      },
+      "entered_per_hemi": {
+        "lh": [
+          true
+        ],
+        "rh": [
+          true
+        ]
+      },
+      "actual_cuda_devices": {
+        "lh": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+        },
+        "rh": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+        }
+      },
+      "sampled_group_tree_peak_bytes": 2921332736
+    },
+    {
+      "name": "surface",
+      "group_wall_seconds": 900.8334905607626,
+      "worker_span_seconds": 895.8816822390072,
+      "operation_worker_span_seconds": 892.8336040792055,
+      "startup_wait_seconds_actual": 2.9856692627072334,
+      "startup_count_per_hemi": {
+        "lh": 1,
+        "rh": 1
+      },
+      "entered_per_hemi": {
+        "lh": [
+          true
+        ],
+        "rh": [
+          true
+        ]
+      },
+      "actual_cuda_devices": {
+        "lh": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+        },
+        "rh": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+        }
+      },
+      "sampled_group_tree_peak_bytes": 4806672384
+    }
+  ],
+  "official_equivalence": "not_assessed_by_this_metadata_audit"
+}

@@ -1,0 +1,13 @@
+# 归档入口
+
+完成主体：RESULTS.md、summary.json、metadata_manifest.json。
+
+真实恢复与显存窗口：README_RECOVERY_V3.md、startup_recovery_evidence_v3.json（real_recovery_exercised=true；算法失败未重试）。UTC是当前同host wall/monotonic锚回推估计；CSV UTC为实际采样时间。
+
+README_RECOVERY.md和startup_recovery_evidence.json是保留的错误mtime锚探索记录，被V3明确取代；其估计事件时间早于整例，未采用为有效UTC对齐证据。v1/v2/v3旧包未覆盖。
+
+v1主体包SHA 0bca68d775dc9fc883494f3f6f0b9ed1a31734764acc1a5fbbdac15535d8e6f8。含补充历史的v3完整包SHA 080b343e47cffb5cb5b3e7a399df9d5bfb00aaba523e825a1d8fe729debf0685，98文件。下载及所有清单SHA已核对。
+
+本目录未提交；不包含MRI、surf、权重或许可证内容。整体官方数值/等效未评估。
+
+本地衍生RESULTS.md和summary.json已按原timing字段澄清API总墙钟/pipeline/60个顺序父阶段求和；原包不动。最新字节SHA见derived_timing_correction.receipt.json，旧包清单对应归档时字节。

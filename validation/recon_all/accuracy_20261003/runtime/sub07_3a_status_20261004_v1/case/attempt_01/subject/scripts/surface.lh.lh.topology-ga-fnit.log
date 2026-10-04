@@ -1,0 +1,98 @@
+Setting OMP_NUM_THREADS=1
+reading spherical homeomorphism from 'qsphere.nofix'
+reading inflated coordinates from 'inflated.nofix'
+reading original coordinates from 'orig.nofix'
+using genetic algorithm with optimized parameters
+setting seed for random number genererator to 1234
+Setting OMP_NUM_THREADS=1
+
+*************************************************************
+Topology Correction Parameters
+retessellation mode:           genetic search
+number of patches/generation : 10
+number of generations :        10
+surface mri loglikelihood coefficient :         1.0
+volume mri loglikelihood coefficient :          10.0
+normal dot loglikelihood coefficient :          1.0
+quadratic curvature loglikelihood coefficient : 1.0
+volume resolution :                             2
+eliminate vertices during search :              1
+initial patch selection :                       1
+select all defect vertices :                    0
+ordering dependant retessellation:              0
+use precomputed edge table :                    0
+smooth retessellated patch :                    2
+match retessellated patch :                     1
+verbose mode :                                  0
+
+*************************************************************
+INFO: assuming .mgz format
+writing corrected surface to 'orig.premesh'
+gongwk-local
+  gongwk-local
+before topology correction, eno=-24 (nv=110532, nf=221112, ne=331668, g=13)
+using quasi-homeomorphic spherical map to tessellate cortical surface...
+
+Correction of the Topology
+Finding true center and radius of Spherical Surface...done
+Surface centered at (0,0,0) with radius 100.0 in 8 iterations
+FNIT_CENTERED_SUBSTITUTION_USED
+marking ambiguous vertices...
+3545 ambiguous faces found in tessellation
+segmenting defects...
+9 defects found, arbitrating ambiguous regions...
+analyzing neighboring defects...
+9 defects to be corrected 
+0 vertices coincident
+reading input surface /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000114_sub-07/attempt_01/subject/scripts/hemi-surface-4y1sfgxq/lh/subject/surf/lh.qsphere.nofix...
+reading brain volume from brain...
+reading wm segmentation from wm...
+Reading original properties of orig.nofix
+Reading vertex positions of inflated.nofix
+Computing Initial Surface Statistics
+      -face       loglikelihood: -9.6012  (-4.8006)
+      -vertex     loglikelihood: -6.8258  (-3.4129)
+      -normal dot loglikelihood: -3.6335  (-3.6335)
+      -quad curv  loglikelihood: -6.3415  (-3.1707)
+      Total Loglikelihood : -26.4019
+CORRECTING DEFECT 0 (vertices=70, convex hull=122, v0=170)
+After retessellation of defect 0 (v0=170), euler #=-6 (108636,325635,216993) : difference with theory (-6) = 0 
+CORRECTING DEFECT 1 (vertices=67, convex hull=47, v0=2186)
+After retessellation of defect 1 (v0=2186), euler #=-5 (108642,325674,217027) : difference with theory (-5) = 0 
+CORRECTING DEFECT 2 (vertices=9, convex hull=33, v0=6292)
+After retessellation of defect 2 (v0=6292), euler #=-4 (108645,325692,217043) : difference with theory (-4) = 0 
+CORRECTING DEFECT 3 (vertices=57, convex hull=38, v0=76113)
+After retessellation of defect 3 (v0=76113), euler #=-3 (108652,325727,217072) : difference with theory (-3) = 0 
+CORRECTING DEFECT 4 (vertices=1428, convex hull=169, v0=80528)
+After retessellation of defect 4 (v0=80528), euler #=-2 (108664,325839,217173) : difference with theory (-2) = 0 
+CORRECTING DEFECT 5 (vertices=199, convex hull=180, v0=84183)
+After retessellation of defect 5 (v0=84183), euler #=-1 (108705,326043,217337) : difference with theory (-1) = 0 
+CORRECTING DEFECT 6 (vertices=18, convex hull=52, v0=92136)
+After retessellation of defect 6 (v0=92136), euler #=0 (108715,326097,217382) : difference with theory (0) = 0 
+CORRECTING DEFECT 7 (vertices=45, convex hull=46, v0=99358)
+After retessellation of defect 7 (v0=99358), euler #=1 (108724,326142,217419) : difference with theory (1) = 0 
+CORRECTING DEFECT 8 (vertices=39, convex hull=67, v0=106377)
+After retessellation of defect 8 (v0=106377), euler #=2 (108735,326199,217466) : difference with theory (2) = 0 
+computing original vertex metric properties...
+storing new metric properties...
+computing tessellation statistics...
+vertex spacing 0.89 +- 0.23 (0.16-->20.25) (max @ vno 86117 --> 95705)
+face area -nan +- -nan (1000.00-->-1.00)
+performing soap bubble on retessellated vertices for 0 iterations...
+vertex spacing 0.89 +- 0.23 (0.16-->20.25) (max @ vno 86117 --> 95705)
+face area -nan +- -nan (1000.00-->-1.00)
+tessellation finished, orienting corrected surface...
+39 mutations (33.6%), 77 crossovers (66.4%), 136 vertices were eliminated
+building final representation...
+1797 vertices and 0 faces have been removed from triangulation
+after topology correction, eno=2 (nv=108735, nf=217466, ne=326199, g=0)
+writing corrected surface to /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000114_sub-07/attempt_01/subject/scripts/hemi-surface-4y1sfgxq/lh/subject/surf/lh.orig.premesh...
+
+0.000 % of the vertices (0 vertices) exhibit an orientation change
+removing intersecting faces
+000: 129 intersecting
+001: 2 intersecting
+terminating search with 0 intersecting
+topology fixing took 2.9 minutes
+FSRUNTIME@ mris_fix_topology lh  0.0490 hours 1 threads
+#VMPC# mris_fix_topology VmPeak  1084212

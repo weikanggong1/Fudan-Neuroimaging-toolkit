@@ -16,10 +16,20 @@ from fnit.recon_all.hemisphere_parallel import run_hemisphere_group
 # subject_directory 是 FNIT 自产被试目录，包含 mri/surf/label/stats/scripts。
 subject_directory = '/path/to/subject'
 report = run_hemisphere_group(
-    subject_directory, 'annotation', device='cuda:0', threads=4,
-    workers=2, startup_wait_seconds=30,
+    subject=subject_directory,  # FNIT自产目录，体积在conformed网格，表面为surface RAS毫米。
+    operation='annotation',  # 三套皮层图谱的双侧阶段。
+    device='cuda:0',  # 当前可见GPU的明确逻辑索引。
+    threads=4,  # 双侧总线程预算，每侧2。
+    workers=2,  # 私有输入副本中的两个独立exec进程。
+    profile_stages=True,  # 同步的阶段剖析。
+    kwargs={'assets': '/path/to/fnit_assets'},  # 已有固定图谱资产目录。
+    startup_wait_seconds=30,  # 仅函数进入前的资源启动期限，单位秒。
 )
 ```
+
+全部输入还包括`callable_path`（默认`fnit.recon_all.native_free:_hemisphere_operation`，内部阶段函数）、`kwargs=None`（可JSON序列化的阶段具名参数）、`profile_stages=False`（默认关闭逐阶段同步剖析）。`subject`必须有`mri/surf/label/stats/scripts`目录及operation需要的自产输入；`operation`决定已有算法。`device`和`threads`是必填具名参数；默认`workers=2`，总线程至少等于workers。调度本身没有坐标变换，输入输出格式沿用相应阶段。
+
+返回字典包括`values[lh/rh]`（原阶段结构）、`workers`、`startup_attempts`（每侧列表）、`published`（相对路径列表）、`startup_batches`、`group_wall_seconds`及显存采样。失败抛`HemisphereGroupError`，其`report`保存组报告，并写入subject/scripts。只有运行成功、文件写入审计和进程清理均通过时才标complete。
 
 只有可信 worker 报告明确 `operation_entered=False`、CUDA OOM，且失败阶段为 `first_allocation`、`sync` 或 `device_properties`，才允许启动重启。先回收失败进程及其自有后代。imports、policy、缺失报告、callable 导入、函数内失败及函数后的 sync 都直接失败。成功 READY 半球保持上下文等同批另一侧，不重复执行算法。worker 等 GO 时也检查同一启动期限及实际父进程身份；父进程消失或超时即退出，不给算法增加执行期限。CUDA OOM 必须带明确消息前缀 `CUDA error: out of memory` 或 `CUDA out of memory`；Torch OOM 异常类型本身不足以识别 CUDA，普通 host OOM 不重启。
 
@@ -33,4 +43,10 @@ report = run_hemisphere_group(
 
 本次 CPU 回归覆盖 READY 屏障、一次启动 OOM 后成功、算法/后同步 OOM 禁止重试、缺失报告、期限取消和资源等待关闭。模拟测试仅验证调度，真实 annotation 输入精度、总峰值和启动成功率须由独立 GPU 验证确认。
 
+2026-10-04两例真实annotation同输入回归已完成，六套分区逐标签Dice均1、差异0，色表与有序网格相同；实际GPU1、TF32、总4线程，完整阶段墙钟和同期显存见[实测报告](CUDA_STARTUP_BENCHMARK_20261004.md)。该两例annotation首次启动均成功，没有触发重试；后续8f及3a空目录整例已按独立回执评估，3a sub-06实际finish组双侧算法前OOM重启成功，见[候选整例报告](PRECISION_CANDIDATE_BENCHMARK_20261004.md)。不得将annotation的未重试范围推广到整例。
+
 实现：`src/fnit/recon_all/hemisphere_worker.py`、`hemisphere_parallel.py`。上游错误边界：[PyTorch 2.5.1 CUDAStream.cpp](https://github.com/pytorch/pytorch/blob/v2.5.1/c10/cuda/CUDAStream.cpp)、[NVIDIA CUDA primary context API](https://docs.nvidia.com/cuda/archive/12.4.1/cuda-driver-api/group__CUDA__PRIMARY__CTX.html)。
+
+## CPU回归与真实数据入口
+
+2026-10-04在原Conda环境隐藏GPU完成28项调度回归：测试25.560秒，包含解释器启动的墙钟27.712秒。实际worker SHA `95b21eb6`、parallel SHA `c19267f8`；补丁提交`5f75ed5c`。完整[回执](../../validation/recon_all/accuracy_20261003/runtime/cuda_startup_wait_cpu_v1_completion.json)、[原始日志](../../validation/recon_all/accuracy_20261003/runtime/cuda_startup_wait_cpu_v1_test.log)保留。模拟错误仅验证调度安全；真实CUDA及两例同输入annotation按[固定队列](../../validation/recon_all/accuracy_20261003/STARTUP_STAGE_QUEUE.md)独立评估。

@@ -1,0 +1,499 @@
+{
+  "scope": "read_only_sub06_retry_annotation_bootstrap_failure",
+  "observed_utc": "2026-10-04T07:42:34.490833+00:00",
+  "case": "ds000114_sub-06",
+  "attempt_root": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01",
+  "code_commit": "816e5610417a4c587caf321049438a9554139016",
+  "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+  "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+  "failure_stage": "annotation_hemisphere_group",
+  "failure_category": "CUDA_bootstrap_out_of_memory; not_original_brain_normalize_stage_recurrence",
+  "failure_location": {
+    "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_worker.py",
+    "line": 30,
+    "statement": "bootstrap = torch.empty(1, dtype=torch.float32, device=request['device'])"
+  },
+  "annotation_callable_reached": false,
+  "shape_error_observed": false,
+  "workers": {
+    "lh": {
+      "status": "failed",
+      "pid": 120314,
+      "started_monotonic": 2914952.67851609,
+      "cuda_allocator": {
+        "requested": "disabled",
+        "cuda_initialized_at_entry": false,
+        "environment_at_entry": "1",
+        "environment_after_selection": "1",
+        "effective": "disabled",
+        "torch_stats_known_valid": false,
+        "torch_stats_known_unavailable": true
+      },
+      "error": "RuntimeError('CUDA error: out of memory\\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\\n')",
+      "traceback": "Traceback (most recent call last):\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_worker.py\", line 30, in main\n    bootstrap = torch.empty(1, dtype=torch.float32, device=request['device'])\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+      "finished_monotonic": 2914956.501053969,
+      "total_seconds": 3.8225378789938986
+    },
+    "rh": {
+      "status": "failed",
+      "pid": 120315,
+      "started_monotonic": 2914952.671686667,
+      "cuda_allocator": {
+        "requested": "disabled",
+        "cuda_initialized_at_entry": false,
+        "environment_at_entry": "1",
+        "environment_after_selection": "1",
+        "effective": "disabled",
+        "torch_stats_known_valid": false,
+        "torch_stats_known_unavailable": true
+      },
+      "error": "RuntimeError('CUDA error: out of memory\\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\\n')",
+      "traceback": "Traceback (most recent call last):\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_worker.py\", line 30, in main\n    bootstrap = torch.empty(1, dtype=torch.float32, device=request['device'])\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+      "finished_monotonic": 2914956.470932664,
+      "total_seconds": 3.799245996866375
+    }
+  },
+  "device_process_tree": {
+    "status": "available",
+    "target_gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+    "sampling_interval_seconds": 0.5,
+    "max_observed_interval_seconds": 1.2689608512446284,
+    "failed_samples": [],
+    "samples": [
+      {
+        "monotonic": 2914952.596120047,
+        "processes": [
+          {
+            "pid": 99386,
+            "bytes": 1946157056
+          }
+        ],
+        "tree_total_bytes": 1946157056,
+        "external_processes": [
+          {
+            "pid": 31669,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2914953.112219925,
+        "processes": [
+          {
+            "pid": 99386,
+            "bytes": 1946157056
+          }
+        ],
+        "tree_total_bytes": 1946157056,
+        "external_processes": [
+          {
+            "pid": 31669,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2914953.653684439,
+        "processes": [
+          {
+            "pid": 99386,
+            "bytes": 1946157056
+          }
+        ],
+        "tree_total_bytes": 1946157056,
+        "external_processes": [
+          {
+            "pid": 31669,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2914954.200094403,
+        "processes": [
+          {
+            "pid": 99386,
+            "bytes": 1946157056
+          }
+        ],
+        "tree_total_bytes": 1946157056,
+        "external_processes": [
+          {
+            "pid": 31669,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2914954.740333314,
+        "processes": [
+          {
+            "pid": 99386,
+            "bytes": 1946157056
+          }
+        ],
+        "tree_total_bytes": 1946157056,
+        "external_processes": [
+          {
+            "pid": 31669,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2914955.289111863,
+        "processes": [
+          {
+            "pid": 99386,
+            "bytes": 1946157056
+          }
+        ],
+        "tree_total_bytes": 1946157056,
+        "external_processes": [
+          {
+            "pid": 31669,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2914956.558072714,
+        "processes": [
+          {
+            "pid": 99386,
+            "bytes": 1946157056
+          }
+        ],
+        "tree_total_bytes": 1946157056,
+        "external_processes": [
+          {
+            "pid": 31669,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2914956.924222442,
+        "processes": [
+          {
+            "pid": 99386,
+            "bytes": 1946157056
+          }
+        ],
+        "tree_total_bytes": 1946157056,
+        "external_processes": [
+          {
+            "pid": 31669,
+            "bytes": 843055104
+          }
+        ]
+      }
+    ],
+    "peak_tree_total_bytes": 1946157056,
+    "scope": "simultaneous parent and all live descendants on target GPU; external load separate",
+    "worker_pids": [
+      120314,
+      120315
+    ]
+  },
+  "monitor_count": 964,
+  "monitor_min_used_mib": 2672,
+  "monitor_max_used_mib": 26841,
+  "monitor_last20": [
+    {
+      "time_utc": "2026-10-04T05:59:13.845740+00:00",
+      "monotonic_seconds": "1972.7132463972084",
+      "apps_query_seconds": "0.043896456714719534",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.035509579349309206",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:15.928337+00:00",
+      "monotonic_seconds": "1974.7958308681846",
+      "apps_query_seconds": "0.043375193141400814",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.033522591926157475",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:18.011772+00:00",
+      "monotonic_seconds": "1976.8792490279302",
+      "apps_query_seconds": "0.0463050021789968",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.042674771044403315",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:20.100166+00:00",
+      "monotonic_seconds": "1978.9676739349961",
+      "apps_query_seconds": "0.042146619874984026",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.049871493596583605",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:22.199114+00:00",
+      "monotonic_seconds": "1981.0666240449063",
+      "apps_query_seconds": "0.04547085706144571",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.0341026047244668",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:24.276762+00:00",
+      "monotonic_seconds": "1983.1442790990695",
+      "apps_query_seconds": "0.03985172975808382",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.03676462499424815",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:26.360359+00:00",
+      "monotonic_seconds": "1985.2278617159463",
+      "apps_query_seconds": "0.043043699115514755",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.04251958290114999",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:28.450921+00:00",
+      "monotonic_seconds": "1987.3184122820385",
+      "apps_query_seconds": "0.04453552421182394",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.035484880674630404",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:30.539312+00:00",
+      "monotonic_seconds": "1989.4068137141876",
+      "apps_query_seconds": "0.04918041592463851",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.04085996700450778",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:32.627780+00:00",
+      "monotonic_seconds": "1991.495307234116",
+      "apps_query_seconds": "0.043886170256882906",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.0426679402589798",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:34.719036+00:00",
+      "monotonic_seconds": "1993.586537742056",
+      "apps_query_seconds": "0.04490794287994504",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.036369373090565205",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:36.790552+00:00",
+      "monotonic_seconds": "1995.6580524332821",
+      "apps_query_seconds": "0.0315115787088871",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.030509680043905973",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:38.868008+00:00",
+      "monotonic_seconds": "1997.7355087520555",
+      "apps_query_seconds": "0.043214954901486635",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2430599168",
+      "total_process_bytes": "2430599168",
+      "gpu_query_seconds": "0.036910572089254856",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3142",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:40.949305+00:00",
+      "monotonic_seconds": "1999.816809733864",
+      "apps_query_seconds": "0.040783986914902925",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "2415919104",
+      "total_process_bytes": "2415919104",
+      "gpu_query_seconds": "0.03821081295609474",
+      "gpu_status": "ok",
+      "gpu_total_mib": "3128",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:43.031758+00:00",
+      "monotonic_seconds": "2001.899283843115",
+      "apps_query_seconds": "0.04141101473942399",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "1946157056",
+      "total_process_bytes": "1946157056",
+      "gpu_query_seconds": "0.0397413419559598",
+      "gpu_status": "ok",
+      "gpu_total_mib": "2674",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:45.106595+00:00",
+      "monotonic_seconds": "2003.974100091029",
+      "apps_query_seconds": "0.032807155046612024",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "1946157056",
+      "total_process_bytes": "1946157056",
+      "gpu_query_seconds": "0.04323952319100499",
+      "gpu_status": "ok",
+      "gpu_total_mib": "2674",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:47.191070+00:00",
+      "monotonic_seconds": "2006.0585975409485",
+      "apps_query_seconds": "0.039200219325721264",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "1946157056",
+      "total_process_bytes": "1946157056",
+      "gpu_query_seconds": "0.038543303962796926",
+      "gpu_status": "ok",
+      "gpu_total_mib": "2674",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:49.273603+00:00",
+      "monotonic_seconds": "2008.1411060160026",
+      "apps_query_seconds": "0.0416469220072031",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "1946157056",
+      "total_process_bytes": "1946157056",
+      "gpu_query_seconds": "0.03537923004478216",
+      "gpu_status": "ok",
+      "gpu_total_mib": "2674",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:51.632057+00:00",
+      "monotonic_seconds": "2010.4995603528805",
+      "apps_query_seconds": "0.3204683638177812",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "1946157056",
+      "total_process_bytes": "1946157056",
+      "gpu_query_seconds": "0.031200403813272715",
+      "gpu_status": "ok",
+      "gpu_total_mib": "2674",
+      "gpu_utilization_percent": "0"
+    },
+    {
+      "time_utc": "2026-10-04T05:59:53.704448+00:00",
+      "monotonic_seconds": "2012.571952963248",
+      "apps_query_seconds": "0.03912264574319124",
+      "apps_status": "ok",
+      "parent_bytes": "0",
+      "children_bytes": "1946157056",
+      "total_process_bytes": "1946157056",
+      "gpu_query_seconds": "0.04563198424875736",
+      "gpu_status": "ok",
+      "gpu_total_mib": "2674",
+      "gpu_utilization_percent": "0"
+    }
+  ],
+  "original_failure_outputs_preserved": true,
+  "artifact_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/scripts/annotation.hemisphere-group.json": "9b8f910e0d047cb4890444ae5300551d78ae7a39d0ea0f39ccdae0a8fcf95765",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/monitor/gpu_samples.csv": "32dd741b3391eca1402c018948add9d2c8ab03f545a47ed49810902f3d25e77a",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/diagnostics/completion.json": "a660c0eccaa53f62b9bbd68e2cabba7ce2a2871b3bb002f708d2ed2d968fd0f0",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/scripts/annotation.lh.worker.log": "827cb98867395e4bd23a02914b41a0350de2f97b3eb8dc73dd42b593b49c8430",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/scripts/annotation.rh.worker.log": "827cb98867395e4bd23a02914b41a0350de2f97b3eb8dc73dd42b593b49c8430",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_worker.py": "181429ced4e13b2ff8b27114237ce8fb80f7054699216eb28f4a22e24ad6c217",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_parallel.py": "74ae787046ef068a9943a75c50e6972f540d523bb848e0b22cf8bcee1ed4806c"
+  },
+  "index_sha256": {
+    "README.md": "3cae7c1921af7638b9d48a13c1a0319a71496b10bec66e2379510ec11fd1a1a7",
+    "INDEX.json": "254da27ae39accd0789ea136c82edc63d7d38a79d30c4e413b7a15de2a1e9b80"
+  },
+  "root_cause": "Unresolved CUDA first-allocation/context bootstrap failure; available samples do not support device-full memory exhaustion. Both fresh workers fail before actual annotation imports/calls.",
+  "general_production_algorithm_bug_proven": false,
+  "remaining_case_risk": "All CUDA hemisphere operations use same fresh-worker bootstrap. Failure could affect sub08 but observed sub07 success prevents claiming deterministic failure.",
+  "next_diagnosis": "After current queue releases same shared lock, run a separate fresh-process minimal test under original UUID and declared env with explicit torch.cuda.init() followed by torch.empty(1,float32), TORCH_SHOW_CPP_STACKTRACES=1, recording each boundary and own cgroup/memlock/library bindings. This is an independent diagnostic, not a pipeline retry or frozen protocol modification.",
+  "limitations": [
+    "Monitor gpu_total_mib means memory.used, not total capacity.",
+    "Sampling can miss shorter transients; no complete historical environment or driver diagnostics available.",
+    "No GPU computation or production/source modification performed."
+  ],
+  "cuda_internal_failure_point": "Existing Python traceback stops at torch.empty; cannot distinguish torch lazy initialization/CUDA context creation from first cudaMalloc or other driver allocation.",
+  "historical_abi_library_binding": "launch records no ABI, libcuda resolved path/hash, LD_LIBRARY_PATH, or loaded CUDA libraries.",
+  "historical_host_limits": "No cgroup/memlock/driver environment receipt found in this attempt; historical launch environment is limited to four declared fields.",
+  "fault_window": {
+    "utc_start": "2026-10-04T05:59:43.031758+00:00",
+    "utc_end": "2026-10-04T05:59:53.704448+00:00",
+    "samples": 6,
+    "whole_gpu_used_mib": 2674,
+    "self_bytes": 1946157056,
+    "external_compute_app_bytes": 843055104,
+    "gpu_utilization_percent": 0
+  }
+}

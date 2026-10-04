@@ -1,0 +1,4354 @@
+{
+  "status": "comparison_complete",
+  "scope": "failed baseline common prefix vs startup-only candidate; CPU only",
+  "config_sha256": "385a38d98f171c52580bb5f4e725f7d74af156ce0b88c00354a0abd8ab734242",
+  "script_sha256": "ab89a5624cb3c2132c73f72f618f1b959e675fdd06d01550dfb1e7badac0ad6a",
+  "evaluated_role": "startup_only_candidate",
+  "baseline_whole_case_complete": false,
+  "overall_metric_equivalence": "not_assessed",
+  "fnit_index_sha256": "ef9a72a93bdf1e5efde7a58822d46fd96067220599288b0a8278321ae0c9e83f",
+  "lock_wait_seconds": 1.1045020073652267e-05,
+  "comparator_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/startup_prefix_tools_v3/compare_volume_prefix.py": "031d6007107271f366a92a25c257135a48d892bba1b15862817e7eb7081979aa",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/compare_subject.py": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921"
+  },
+  "execution_binding": {
+    "baseline_failed_checkpoint": {
+      "role": "baseline",
+      "execution_status": "failed",
+      "whole_case_complete": false,
+      "completion": {
+        "execution_status": "failed",
+        "code_commit": "816e5610417a4c587caf321049438a9554139016",
+        "source_archive_sha256": "0107e059153ff46ace5ab477539c232810f3309db0d569c861a02b6c69b460e7",
+        "strict_reproduction": "not_assessed",
+        "new_degradation": "not_assessed",
+        "overall_metric_equivalence": "not_assessed; no confirmed whole-case gates",
+        "child_exit_code": 1,
+        "exit_code": 1,
+        "error": "RuntimeError('whole-case child returned 1')",
+        "command_seconds": 2013.4916309919208,
+        "finished_utc": "2026-10-04T05:59:54.687164+00:00"
+      },
+      "config_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/retry_config.json",
+      "launch_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/diagnostics/launch.json",
+      "completion_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/diagnostics/completion.json",
+      "pipeline_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/fnit-native-free-run.json",
+      "config_sha256": "f2f64226b32dba225098228c807a0c9c6b58fe173d0b6fc706a15da5421f98be",
+      "launch_sha256": "8863ff3f69122476ddcce112b477374fe9bb9b754552fff216f087ebe966d890",
+      "completion_sha256": "a660c0eccaa53f62b9bbd68e2cabba7ce2a2871b3bb002f708d2ed2d968fd0f0",
+      "pipeline_sha256": "57100da50b8a634bbd19340d4131ec0b771ac06b38c5e06133e3514f305aab40",
+      "pipeline_status": "failed",
+      "precision": {
+        "matmul_tf32_default": true,
+        "cudnn_tf32_default": true,
+        "fp16_or_bf16_requested_by_fnit": false,
+        "caller_autocast": {
+          "cpu": {
+            "enabled": false,
+            "dtype": "torch.bfloat16"
+          },
+          "cuda": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        },
+        "fp16_or_bf16_enabled": false,
+        "fp32_exceptions": [
+          "SynthStrip",
+          "SynthSeg",
+          "Talairach affine",
+          "MNI nonlinear CUDA",
+          "MNI152 affine matmul",
+          "EntoWM/MCA-dura/vsinus cuDNN"
+        ],
+        "auxiliary_convolution_policy": "scoped cuDNN FP32; same-input GPU/CPU label regression; matmul TF32 preserved",
+        "SynthSeg_actual_forward": {
+          "requested_cudnn_tf32": false,
+          "forwards": [
+            {
+              "pass": "original",
+              "device": "cuda:0",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "input_dtype": "torch.float32",
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "autocast": {
+                "cpu": {
+                  "enabled": false,
+                  "dtype": "torch.bfloat16"
+                },
+                "cuda": {
+                  "enabled": false,
+                  "dtype": "torch.float16"
+                }
+              },
+              "output_dtype": "torch.float32"
+            },
+            {
+              "pass": "flipped",
+              "device": "cuda:0",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "input_dtype": "torch.float32",
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "autocast": {
+                "cpu": {
+                  "enabled": false,
+                  "dtype": "torch.bfloat16"
+                },
+                "cuda": {
+                  "enabled": false,
+                  "dtype": "torch.float16"
+                }
+              },
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "posterior_buffer_reused": true,
+          "posterior_ensemble_dtype": "torch.float32"
+        },
+        "EntoWM_actual_forwards": [
+          {
+            "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+            "device": "cuda:0",
+            "input_dtype": "torch.float32",
+            "model_devices": [
+              "cuda:0"
+            ],
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "cudnn_enabled": true,
+            "cudnn_benchmark": false,
+            "cudnn_deterministic": false,
+            "autocast": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          }
+        ]
+      },
+      "pipeline_total_seconds": 2009.8211530800909,
+      "output_validation": null,
+      "mesh_validation": null,
+      "numeric_validation": null,
+      "failure_evidence": {
+        "failed_stage": "annotation_hemisphere_group",
+        "error": "HemisphereGroupError('annotation hemisphere group failed: hemisphere worker failed; sibling cancelled')",
+        "stage": {
+          "name": "annotation_hemisphere_group",
+          "seconds": 9.40017555328086,
+          "function_seconds": 9.399929238017648,
+          "cuda_pre_sync_seconds": 3.0030962079763412e-05,
+          "cuda_post_sync_seconds": 0.0,
+          "cuda_synchronized": true,
+          "cuda_synchronization_requested": true,
+          "parent_cpu_seconds": 1.7743652060000272,
+          "child_cpu_seconds": 7.416095999999925,
+          "torch_memory_stats_status": "unavailable",
+          "error": "HemisphereGroupError('annotation hemisphere group failed: hemisphere worker failed; sibling cancelled')"
+        },
+        "worker_group": {
+          "operation": "annotation",
+          "workers_requested": 2,
+          "total_thread_budget": 4,
+          "worker_threads": 2,
+          "status": "failed",
+          "workers": {
+            "lh": {
+              "status": "failed",
+              "pid": 120314,
+              "started_monotonic": 2914952.67851609,
+              "cuda_allocator": {
+                "requested": "disabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": "1",
+                "environment_after_selection": "1",
+                "effective": "disabled",
+                "torch_stats_known_valid": false,
+                "torch_stats_known_unavailable": true
+              },
+              "error": "RuntimeError('CUDA error: out of memory\\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\\n')",
+              "traceback": "Traceback (most recent call last):\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_worker.py\", line 30, in main\n    bootstrap = torch.empty(1, dtype=torch.float32, device=request['device'])\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+              "finished_monotonic": 2914956.501053969,
+              "total_seconds": 3.8225378789938986
+            },
+            "rh": {
+              "status": "failed",
+              "pid": 120315,
+              "started_monotonic": 2914952.671686667,
+              "cuda_allocator": {
+                "requested": "disabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": "1",
+                "environment_after_selection": "1",
+                "effective": "disabled",
+                "torch_stats_known_valid": false,
+                "torch_stats_known_unavailable": true
+              },
+              "error": "RuntimeError('CUDA error: out of memory\\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\\n')",
+              "traceback": "Traceback (most recent call last):\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_worker.py\", line 30, in main\n    bootstrap = torch.empty(1, dtype=torch.float32, device=request['device'])\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+              "finished_monotonic": 2914956.470932664,
+              "total_seconds": 3.799245996866375
+            }
+          },
+          "values": {},
+          "published": [],
+          "caller_device": "cuda:0",
+          "worker_device": "cuda:0",
+          "worker_allocator_selection": {
+            "basis": "environment at fresh exec",
+            "selected_policy": "disabled",
+            "parent_preinitialized_actual_state": "not_inferred_from_environment"
+          },
+          "private_copy_seconds": 3.5822095102630556,
+          "error": "RuntimeError('hemisphere worker failed; sibling cancelled')",
+          "device_process_tree": {
+            "status": "available",
+            "target_gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+            "sampling_interval_seconds": 0.5,
+            "max_observed_interval_seconds": 1.2689608512446284,
+            "failed_samples": [],
+            "samples": [
+              {
+                "monotonic": 2914952.596120047,
+                "processes": [
+                  {
+                    "pid": 99386,
+                    "bytes": 1946157056
+                  }
+                ],
+                "tree_total_bytes": 1946157056,
+                "external_processes": [
+                  {
+                    "pid": 31669,
+                    "bytes": 843055104
+                  }
+                ]
+              },
+              {
+                "monotonic": 2914953.112219925,
+                "processes": [
+                  {
+                    "pid": 99386,
+                    "bytes": 1946157056
+                  }
+                ],
+                "tree_total_bytes": 1946157056,
+                "external_processes": [
+                  {
+                    "pid": 31669,
+                    "bytes": 843055104
+                  }
+                ]
+              },
+              {
+                "monotonic": 2914953.653684439,
+                "processes": [
+                  {
+                    "pid": 99386,
+                    "bytes": 1946157056
+                  }
+                ],
+                "tree_total_bytes": 1946157056,
+                "external_processes": [
+                  {
+                    "pid": 31669,
+                    "bytes": 843055104
+                  }
+                ]
+              },
+              {
+                "monotonic": 2914954.200094403,
+                "processes": [
+                  {
+                    "pid": 99386,
+                    "bytes": 1946157056
+                  }
+                ],
+                "tree_total_bytes": 1946157056,
+                "external_processes": [
+                  {
+                    "pid": 31669,
+                    "bytes": 843055104
+                  }
+                ]
+              },
+              {
+                "monotonic": 2914954.740333314,
+                "processes": [
+                  {
+                    "pid": 99386,
+                    "bytes": 1946157056
+                  }
+                ],
+                "tree_total_bytes": 1946157056,
+                "external_processes": [
+                  {
+                    "pid": 31669,
+                    "bytes": 843055104
+                  }
+                ]
+              },
+              {
+                "monotonic": 2914955.289111863,
+                "processes": [
+                  {
+                    "pid": 99386,
+                    "bytes": 1946157056
+                  }
+                ],
+                "tree_total_bytes": 1946157056,
+                "external_processes": [
+                  {
+                    "pid": 31669,
+                    "bytes": 843055104
+                  }
+                ]
+              },
+              {
+                "monotonic": 2914956.558072714,
+                "processes": [
+                  {
+                    "pid": 99386,
+                    "bytes": 1946157056
+                  }
+                ],
+                "tree_total_bytes": 1946157056,
+                "external_processes": [
+                  {
+                    "pid": 31669,
+                    "bytes": 843055104
+                  }
+                ]
+              },
+              {
+                "monotonic": 2914956.924222442,
+                "processes": [
+                  {
+                    "pid": 99386,
+                    "bytes": 1946157056
+                  }
+                ],
+                "tree_total_bytes": 1946157056,
+                "external_processes": [
+                  {
+                    "pid": 31669,
+                    "bytes": 843055104
+                  }
+                ]
+              }
+            ],
+            "peak_tree_total_bytes": 1946157056,
+            "scope": "simultaneous parent and all live descendants on target GPU; external load separate",
+            "worker_pids": [
+              120314,
+              120315
+            ]
+          },
+          "cleanup_seconds": 1.4308280018158257,
+          "group_wall_seconds": 9.39555339794606
+        }
+      },
+      "code_commit": "816e5610417a4c587caf321049438a9554139016",
+      "source_archive_sha256": "0107e059153ff46ace5ab477539c232810f3309db0d569c861a02b6c69b460e7",
+      "critical_source_sha256": {
+        "src/fnit/recon_all/native_free.py": "439692523cfcba95b4ca241ce1bf80a4f460471257c89916d21dc94ba2272d58",
+        "src/fnit/recon_all/hemisphere_worker.py": "181429ced4e13b2ff8b27114237ce8fb80f7054699216eb28f4a22e24ad6c217",
+        "src/fnit/recon_all/hemisphere_parallel.py": "74ae787046ef068a9943a75c50e6972f540d523bb848e0b22cf8bcee1ed4806c"
+      },
+      "subject": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject",
+      "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "host": "gpucw1",
+      "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+      "threads": 4
+    },
+    "startup_only_candidate": {
+      "role": "candidate",
+      "execution_status": "complete",
+      "whole_case_complete": true,
+      "completion": {
+        "execution_status": "complete",
+        "code_commit": "8f3e51f58c37d28e1283d5bb8e248e93530cd398",
+        "source_archive_sha256": "c9e1f475fa4cbfed20a55fb84bdf5c7201c1b1b3734b2e015072912bf6af18de",
+        "strict_reproduction": "not_assessed",
+        "new_degradation": "not_assessed",
+        "overall_metric_equivalence": "not_assessed; no confirmed whole-case gates",
+        "child_exit_code": 0,
+        "pipeline_status": "complete",
+        "output_validation": {
+          "profile": "single-t1-138",
+          "expected": 138,
+          "present": 138,
+          "missing": [],
+          "status": "passed"
+        },
+        "pipeline_total_seconds": 2752.4580629738048,
+        "exit_code": 0,
+        "command_seconds": 2755.7794497050345,
+        "finished_utc": "2026-10-04T10:58:44.253808+00:00"
+      },
+      "config_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/retry_config.json",
+      "launch_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/diagnostics/launch.json",
+      "completion_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/diagnostics/completion.json",
+      "pipeline_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/fnit-native-free-run.json",
+      "config_sha256": "a215ce3f1feb62096b6841166cf8aaf1e1542416a59cb504420f47d5e82a4a1f",
+      "launch_sha256": "40db12bd89e224c1941793ab495912ea0d1ec0d99be340d94d47abe283c6e69f",
+      "completion_sha256": "64b9cf0b2b299054f272340ff389a66ad9d37ef3a796ecbd894946647ecf44e4",
+      "pipeline_sha256": "715099d516b5457f9e309c321d921895fe0afb55776a32682b7cc8d60b62c0f8",
+      "pipeline_status": "complete",
+      "precision": {
+        "matmul_tf32_default": true,
+        "cudnn_tf32_default": true,
+        "fp16_or_bf16_requested_by_fnit": false,
+        "caller_autocast": {
+          "cpu": {
+            "enabled": false,
+            "dtype": "torch.bfloat16"
+          },
+          "cuda": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        },
+        "fp16_or_bf16_enabled": false,
+        "fp32_exceptions": [
+          "SynthStrip",
+          "SynthSeg",
+          "Talairach affine",
+          "MNI nonlinear CUDA",
+          "MNI152 affine matmul",
+          "EntoWM/MCA-dura/vsinus cuDNN"
+        ],
+        "auxiliary_convolution_policy": "scoped cuDNN FP32; same-input GPU/CPU label regression; matmul TF32 preserved",
+        "SynthSeg_actual_forward": {
+          "requested_cudnn_tf32": false,
+          "forwards": [
+            {
+              "pass": "original",
+              "device": "cuda:0",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "input_dtype": "torch.float32",
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "autocast": {
+                "cpu": {
+                  "enabled": false,
+                  "dtype": "torch.bfloat16"
+                },
+                "cuda": {
+                  "enabled": false,
+                  "dtype": "torch.float16"
+                }
+              },
+              "output_dtype": "torch.float32"
+            },
+            {
+              "pass": "flipped",
+              "device": "cuda:0",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "input_dtype": "torch.float32",
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "autocast": {
+                "cpu": {
+                  "enabled": false,
+                  "dtype": "torch.bfloat16"
+                },
+                "cuda": {
+                  "enabled": false,
+                  "dtype": "torch.float16"
+                }
+              },
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "posterior_buffer_reused": true,
+          "posterior_ensemble_dtype": "torch.float32"
+        },
+        "EntoWM_actual_forwards": [
+          {
+            "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+            "device": "cuda:0",
+            "input_dtype": "torch.float32",
+            "model_devices": [
+              "cuda:0"
+            ],
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "cudnn_enabled": true,
+            "cudnn_benchmark": false,
+            "cudnn_deterministic": false,
+            "autocast": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          }
+        ]
+      },
+      "pipeline_total_seconds": 2752.4580629738048,
+      "output_validation": {
+        "profile": "single-t1-138",
+        "expected": 138,
+        "present": 138,
+        "missing": [],
+        "status": "passed"
+      },
+      "mesh_validation": {
+        "lh": {
+          "vertices": 130346,
+          "faces": 260688,
+          "euler": 2,
+          "unclosed_edges": 0,
+          "ordered_faces_preserved": true,
+          "finite_coordinates": true,
+          "intersecting_faces": {
+            "white": 0,
+            "pial": 0
+          },
+          "status": "passed"
+        },
+        "rh": {
+          "vertices": 132837,
+          "faces": 265670,
+          "euler": 2,
+          "unclosed_edges": 0,
+          "ordered_faces_preserved": true,
+          "finite_coordinates": true,
+          "intersecting_faces": {
+            "white": 0,
+            "pial": 0
+          },
+          "status": "passed"
+        },
+        "status": "passed"
+      },
+      "numeric_validation": {
+        "status": "not_run",
+        "reason": "reference_subject_not_provided"
+      },
+      "failure_evidence": null,
+      "code_commit": "8f3e51f58c37d28e1283d5bb8e248e93530cd398",
+      "source_archive_sha256": "c9e1f475fa4cbfed20a55fb84bdf5c7201c1b1b3734b2e015072912bf6af18de",
+      "critical_source_sha256": {
+        "src/fnit/recon_all/native_free.py": "439692523cfcba95b4ca241ce1bf80a4f460471257c89916d21dc94ba2272d58",
+        "src/fnit/recon_all/hemisphere_worker.py": "95b21eb66e63c79be864bc971ad83ad49bd132f32deee78f3647926b60103c15",
+        "src/fnit/recon_all/hemisphere_parallel.py": "c19267f8313145932e8a2e6dfddfc47ed788075d3f5011bdfeea2d4888011873"
+      },
+      "subject": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject",
+      "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "host": "gpucw1",
+      "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+      "threads": 4
+    }
+  },
+  "files": {
+    "mri/orig/001.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/orig/001.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/orig/001.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "8780f288710c6672a56fbfe7aade779f954cc90fe3c75c29e3a94f81060e1077",
+      "candidate_sha256": "8780f288710c6672a56fbfe7aade779f954cc90fe3c75c29e3a94f81060e1077",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_affine": [
+        [
+          0.9928354620933533,
+          -0.14818830788135529,
+          0.03585870563983917,
+          -117.57283782958984
+        ],
+        [
+          0.11200405657291412,
+          1.290006160736084,
+          0.05319290980696678,
+          -96.57119750976562
+        ],
+        [
+          -0.04162752255797386,
+          -0.06343600898981094,
+          0.997940182685852,
+          -128.69314575195312
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          0.9928354620933533,
+          -0.14818830788135529,
+          0.03585870563983917,
+          -117.57283782958984
+        ],
+        [
+          0.11200405657291412,
+          1.290006160736084,
+          0.05319290980696678,
+          -96.57119750976562
+        ],
+        [
+          -0.04162752255797386,
+          -0.06343600898981094,
+          0.997940182685852,
+          -128.69314575195312
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        156,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        156,
+        256
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0
+    },
+    "mri/rawavg.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/rawavg.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/rawavg.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "8780f288710c6672a56fbfe7aade779f954cc90fe3c75c29e3a94f81060e1077",
+      "candidate_sha256": "8780f288710c6672a56fbfe7aade779f954cc90fe3c75c29e3a94f81060e1077",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_affine": [
+        [
+          0.9928354620933533,
+          -0.14818830788135529,
+          0.03585870563983917,
+          -117.57283782958984
+        ],
+        [
+          0.11200405657291412,
+          1.290006160736084,
+          0.05319290980696678,
+          -96.57119750976562
+        ],
+        [
+          -0.04162752255797386,
+          -0.06343600898981094,
+          0.997940182685852,
+          -128.69314575195312
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          0.9928354620933533,
+          -0.14818830788135529,
+          0.03585870563983917,
+          -117.57283782958984
+        ],
+        [
+          0.11200405657291412,
+          1.290006160736084,
+          0.05319290980696678,
+          -96.57119750976562
+        ],
+        [
+          -0.04162752255797386,
+          -0.06343600898981094,
+          0.997940182685852,
+          -128.69314575195312
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        156,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        156,
+        256
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0
+    },
+    "mri/orig.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/orig.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/orig.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "f3fdf3fadf2077e4bda611a9db09b365611d63446236ff2cf3cdd88120cf2da0",
+      "candidate_sha256": "2e9f8ec25eefa2c7580572603ba919666f5f2dd9f61c9ebbbe0fb07af8f76b74",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0
+    },
+    "mri/nu.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/nu.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/nu.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "da0b178e7eaeea62aa58449e34a86b1ec42238a6ca47570dbda63de49c5823da",
+      "candidate_sha256": "f2ee9015abbf5a6dd2807b88aa855e861a016fb22471d398e04af2768a6b4297",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0
+    },
+    "mri/T1.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/T1.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/T1.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "ad9a6657a5f674ce7dd37cc9fa17d49a3d4527c00ae173fabca895c62e33175b",
+      "candidate_sha256": "4bd922b2fde24bf2e602cf7a56f9257dc13b7e5c06fb20dbf4cedb1b90921a52",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0
+    },
+    "mri/brainmask.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/brainmask.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/brainmask.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "176a29af2ac1a206a8595696ec1d3315387588c1508e329a8467b9551771d907",
+      "candidate_sha256": "191099fc080bfd411c618d0815b4b6aac8e8c250d07983447a0875547a227378",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0,
+      "foreground_dice": 1.0
+    },
+    "mri/norm.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/norm.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/norm.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "4a8cf34630521fc797d8cec4b8a870ba3ea928264f208ccb2a01243dbcd4420e",
+      "candidate_sha256": "4a8cf34630521fc797d8cec4b8a870ba3ea928264f208ccb2a01243dbcd4420e",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0
+    },
+    "mri/brain.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/brain.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/brain.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "80e733e091131fc24bbb42bd4424e649c760c3242c4a2f1a1932e520d5e7f74f",
+      "candidate_sha256": "80e733e091131fc24bbb42bd4424e649c760c3242c4a2f1a1932e520d5e7f74f",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0
+    },
+    "mri/wm.seg.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/wm.seg.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/wm.seg.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "abbbf5376a19385e03cffd5f9cd691ff2dc31b5fb545e907f51463d260812697",
+      "candidate_sha256": "abbbf5376a19385e03cffd5f9cd691ff2dc31b5fb545e907f51463d260812697",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0,
+      "dice_by_label": {
+        "73": 1.0,
+        "74": 1.0,
+        "75": 1.0,
+        "76": 1.0,
+        "77": 1.0,
+        "78": 1.0,
+        "79": 1.0,
+        "80": 1.0,
+        "81": 1.0,
+        "82": 1.0,
+        "83": 1.0,
+        "84": 1.0,
+        "85": 1.0,
+        "86": 1.0,
+        "87": 1.0,
+        "88": 1.0,
+        "89": 1.0,
+        "90": 1.0,
+        "91": 1.0,
+        "92": 1.0,
+        "93": 1.0,
+        "94": 1.0,
+        "95": 1.0,
+        "96": 1.0,
+        "97": 1.0,
+        "98": 1.0,
+        "99": 1.0,
+        "100": 1.0,
+        "101": 1.0,
+        "102": 1.0,
+        "103": 1.0,
+        "104": 1.0,
+        "105": 1.0,
+        "106": 1.0,
+        "107": 1.0,
+        "108": 1.0,
+        "109": 1.0,
+        "110": 1.0,
+        "111": 1.0,
+        "112": 1.0,
+        "113": 1.0,
+        "114": 1.0,
+        "115": 1.0,
+        "116": 1.0,
+        "117": 1.0,
+        "118": 1.0,
+        "119": 1.0,
+        "120": 1.0,
+        "121": 1.0,
+        "122": 1.0,
+        "123": 1.0,
+        "124": 1.0,
+        "125": 1.0,
+        "126": 1.0,
+        "127": 1.0,
+        "128": 1.0,
+        "129": 1.0,
+        "200": 1.0,
+        "210": 1.0,
+        "230": 1.0,
+        "foreground": 1.0
+      }
+    },
+    "mri/wm.asegedit.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/wm.asegedit.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/wm.asegedit.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "83e036337c679f484a34385748dae623c78606b7a48ef40bf96a20ce93aedd34",
+      "candidate_sha256": "1899f3bee38f47799f8ce8e3d3afe622782c52d704e3a959ec16ad946cc6794c",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0,
+      "dice_by_label": {
+        "73": 1.0,
+        "74": 1.0,
+        "75": 1.0,
+        "76": 1.0,
+        "77": 1.0,
+        "78": 1.0,
+        "79": 1.0,
+        "80": 1.0,
+        "81": 1.0,
+        "82": 1.0,
+        "83": 1.0,
+        "84": 1.0,
+        "85": 1.0,
+        "86": 1.0,
+        "87": 1.0,
+        "88": 1.0,
+        "89": 1.0,
+        "90": 1.0,
+        "91": 1.0,
+        "92": 1.0,
+        "93": 1.0,
+        "94": 1.0,
+        "95": 1.0,
+        "96": 1.0,
+        "97": 1.0,
+        "98": 1.0,
+        "99": 1.0,
+        "100": 1.0,
+        "101": 1.0,
+        "102": 1.0,
+        "103": 1.0,
+        "104": 1.0,
+        "105": 1.0,
+        "106": 1.0,
+        "107": 1.0,
+        "108": 1.0,
+        "109": 1.0,
+        "110": 1.0,
+        "111": 1.0,
+        "112": 1.0,
+        "113": 1.0,
+        "114": 1.0,
+        "115": 1.0,
+        "116": 1.0,
+        "117": 1.0,
+        "118": 1.0,
+        "119": 1.0,
+        "120": 1.0,
+        "121": 1.0,
+        "122": 1.0,
+        "123": 1.0,
+        "124": 1.0,
+        "125": 1.0,
+        "126": 1.0,
+        "127": 1.0,
+        "128": 1.0,
+        "129": 1.0,
+        "200": 1.0,
+        "210": 1.0,
+        "230": 1.0,
+        "250": 1.0,
+        "255": 1.0,
+        "foreground": 1.0
+      }
+    },
+    "mri/wm.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/wm.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/wm.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "284b2504693f53d3e579f18fb9a8fa6bf55b8dfe0d02dcee9ddcb2afcd030fab",
+      "candidate_sha256": "eb4afcdb8f06e0f1b698a9d5e2c76c1f3c5c765a96f90092688459f5e1c817fe",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0,
+      "dice_by_label": {
+        "73": 1.0,
+        "74": 1.0,
+        "75": 1.0,
+        "76": 1.0,
+        "77": 1.0,
+        "78": 1.0,
+        "79": 1.0,
+        "80": 1.0,
+        "81": 1.0,
+        "82": 1.0,
+        "83": 1.0,
+        "84": 1.0,
+        "85": 1.0,
+        "86": 1.0,
+        "87": 1.0,
+        "88": 1.0,
+        "89": 1.0,
+        "90": 1.0,
+        "91": 1.0,
+        "92": 1.0,
+        "93": 1.0,
+        "94": 1.0,
+        "95": 1.0,
+        "96": 1.0,
+        "97": 1.0,
+        "98": 1.0,
+        "99": 1.0,
+        "100": 1.0,
+        "101": 1.0,
+        "102": 1.0,
+        "103": 1.0,
+        "104": 1.0,
+        "105": 1.0,
+        "106": 1.0,
+        "107": 1.0,
+        "108": 1.0,
+        "109": 1.0,
+        "110": 1.0,
+        "111": 1.0,
+        "112": 1.0,
+        "113": 1.0,
+        "114": 1.0,
+        "115": 1.0,
+        "116": 1.0,
+        "117": 1.0,
+        "118": 1.0,
+        "119": 1.0,
+        "120": 1.0,
+        "121": 1.0,
+        "122": 1.0,
+        "123": 1.0,
+        "124": 1.0,
+        "125": 1.0,
+        "126": 1.0,
+        "127": 1.0,
+        "128": 1.0,
+        "129": 1.0,
+        "200": 1.0,
+        "210": 1.0,
+        "215": 1.0,
+        "230": 1.0,
+        "250": 1.0,
+        "255": 1.0,
+        "foreground": 1.0
+      }
+    },
+    "mri/filled.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/filled.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/filled.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "5cf9a14ac98921a42ab5f742dabc3d6ff5a10a38f2d6a7f9dca653fd5d1cf46e",
+      "candidate_sha256": "4c4a941db4735d967fce0a7f7724b90f05dad6680e7e1fdcab40eabe7409a826",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": "uint8",
+      "candidate_dtype": "uint8",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0,
+      "dice_by_label": {
+        "127": 1.0,
+        "255": 1.0,
+        "foreground": 1.0
+      }
+    },
+    "mri/aseg.presurf.mgz": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/aseg.presurf.mgz",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/aseg.presurf.mgz",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "636a3c45a66b4fc66d6a9c1bbf4f1cb5cc9f7a1f77b07c72e03cee7e796e76b1",
+      "candidate_sha256": "636a3c45a66b4fc66d6a9c1bbf4f1cb5cc9f7a1f77b07c72e03cee7e796e76b1",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_affine": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        256,
+        256,
+        256
+      ],
+      "candidate_shape": [
+        256,
+        256,
+        256
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "same_voxel_grid": true,
+      "affine_difference": {
+        "reference_shape": [
+          4,
+          4
+        ],
+        "candidate_shape": [
+          4,
+          4
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "affine_max_absolute_mm": 0.0,
+      "different_voxels": 0,
+      "maximum_absolute_voxel_difference": 0.0,
+      "p99_absolute_voxel_difference": 0.0,
+      "dice_by_label": {
+        "2": 1.0,
+        "3": 1.0,
+        "4": 1.0,
+        "5": 1.0,
+        "7": 1.0,
+        "8": 1.0,
+        "10": 1.0,
+        "11": 1.0,
+        "12": 1.0,
+        "13": 1.0,
+        "14": 1.0,
+        "15": 1.0,
+        "16": 1.0,
+        "17": 1.0,
+        "18": 1.0,
+        "24": 1.0,
+        "26": 1.0,
+        "28": 1.0,
+        "41": 1.0,
+        "42": 1.0,
+        "43": 1.0,
+        "44": 1.0,
+        "46": 1.0,
+        "47": 1.0,
+        "49": 1.0,
+        "50": 1.0,
+        "51": 1.0,
+        "52": 1.0,
+        "53": 1.0,
+        "54": 1.0,
+        "58": 1.0,
+        "60": 1.0,
+        "251": 1.0,
+        "252": 1.0,
+        "253": 1.0,
+        "254": 1.0,
+        "255": 1.0,
+        "foreground": 1.0
+      }
+    },
+    "mri/transforms/talairach.lta": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/transforms/talairach.lta",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/transforms/talairach.lta",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "7f9fdd6b528a9ca6f5c936c93400cb8bf7c3b6ed222c420d418adbd0d8c5b6d3",
+      "candidate_sha256": "797742ff9ca07520d5e24b53459616c9e9219c90386ef365a64e1f9b2c5a75c9",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "different_elements": 0,
+      "maximum_absolute_element_difference": 0.0,
+      "reference_matrix": [
+        [
+          1.033335089683533,
+          -0.07821832597255707,
+          -0.03620785847306252,
+          5.663066864013672
+        ],
+        [
+          0.06774822622537613,
+          1.186367869377136,
+          -0.004466945305466652,
+          -21.64050674438477
+        ],
+        [
+          0.02925214543938637,
+          0.002516822889447212,
+          0.9666562676429749,
+          -13.69621086120605
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "candidate_matrix": [
+        [
+          1.033335089683533,
+          -0.07821832597255707,
+          -0.03620785847306252,
+          5.663066864013672
+        ],
+        [
+          0.06774822622537613,
+          1.186367869377136,
+          -0.004466945305466652,
+          -21.64050674438477
+        ],
+        [
+          0.02925214543938637,
+          0.002516822889447212,
+          0.9666562676429749,
+          -13.69621086120605
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "reference_shape": [
+        4,
+        4
+      ],
+      "candidate_shape": [
+        4,
+        4
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "p99_absolute_element_difference": 0.0,
+      "matrix_scope": "raw LTA 4x4 entries; transform header semantics are not asserted"
+    },
+    "mri/transforms/talairach_with_skull.lta": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/mri/transforms/talairach_with_skull.lta",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/mri/transforms/talairach_with_skull.lta",
+      "reference_exists": false,
+      "candidate_exists": false,
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/lh.orig.nofix": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.orig.nofix",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.orig.nofix",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "14cb832d91957c1143266f2858d378c0cedeb948b6b1e604f587c74bf6343d12",
+      "candidate_sha256": "14cb832d91957c1143266f2858d378c0cedeb948b6b1e604f587c74bf6343d12",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        126798,
+        3
+      ],
+      "candidate_shape": [
+        126798,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        253692,
+        3
+      ],
+      "candidate_faces_shape": [
+        253692,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 126798,
+          "faces": 253692,
+          "edges": 380538,
+          "euler": -48,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        },
+        {
+          "vertices": 126798,
+          "faces": 253692,
+          "edges": 380538,
+          "euler": -48,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/lh.orig.premesh": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.orig.premesh",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.orig.premesh",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "056d790761cd27cde103d21e33e4e2126bd2320f929b6469d7e3bcc7d8d4bec8",
+      "candidate_sha256": "b64d257004e0e0883c93cc7cbb659160d9e29fa4b99a30072c13fc79387af9bf",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        124498,
+        3
+      ],
+      "candidate_shape": [
+        124498,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        248992,
+        3
+      ],
+      "candidate_faces_shape": [
+        248992,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 124498,
+          "faces": 248992,
+          "edges": 373488,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 124498,
+          "faces": 248992,
+          "edges": 373488,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/lh.orig": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.orig",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.orig",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "e797888a4b725cbf220144dd645d0d308e94bef261a1e68ac0a84f9cd200803c",
+      "candidate_sha256": "f5fdfe39a81f0429d8409842868c422d88a6745551cf4d0be63272331672d79f",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346,
+        3
+      ],
+      "candidate_shape": [
+        130346,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        260688,
+        3
+      ],
+      "candidate_faces_shape": [
+        260688,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          130346,
+          3
+        ],
+        "candidate_shape": [
+          130346,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/lh.white.preaparc": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.white.preaparc",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.white.preaparc",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "8a8bcd0f599d01622a6d5b5baa2a98b79f59f442380b623879683e77dbfc42db",
+      "candidate_sha256": "81735ba146ed265c43778ebb7f498d2f17ac14c364778b2be4d3f3d4b5ceee3c",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346,
+        3
+      ],
+      "candidate_shape": [
+        130346,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        260688,
+        3
+      ],
+      "candidate_faces_shape": [
+        260688,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          130346,
+          3
+        ],
+        "candidate_shape": [
+          130346,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/lh.smoothwm": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "9f987ac6ff9566772e220c372d79585b1fd8d0010797e4a1f5ca4c61629f2309",
+      "candidate_sha256": "c3a79f899330888865e8a1c3e58dc58979f1d67b6efc3eab79672f822b934e76",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346,
+        3
+      ],
+      "candidate_shape": [
+        130346,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        260688,
+        3
+      ],
+      "candidate_faces_shape": [
+        260688,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          130346,
+          3
+        ],
+        "candidate_shape": [
+          130346,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/lh.smoothwm.nofix": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm.nofix",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm.nofix",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "9e7cf45a74e249bb441dce3f4a28227ffd4000ff3379580b47d6ba710eb1192e",
+      "candidate_sha256": "9e7cf45a74e249bb441dce3f4a28227ffd4000ff3379580b47d6ba710eb1192e",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        126798,
+        3
+      ],
+      "candidate_shape": [
+        126798,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        253692,
+        3
+      ],
+      "candidate_faces_shape": [
+        253692,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 126798,
+          "faces": 253692,
+          "edges": 380538,
+          "euler": -48,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        },
+        {
+          "vertices": 126798,
+          "faces": 253692,
+          "edges": 380538,
+          "euler": -48,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/lh.inflated": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.inflated",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.inflated",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "d59954260f80795fd814f68e4a2c9d38f0f24e26172d19dcf9b550ef0d324bbf",
+      "candidate_sha256": "d528e8462dd3fd3737e9ab96232ff8731e35703a060453eb88a46cbb0ddb22cd",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346,
+        3
+      ],
+      "candidate_shape": [
+        130346,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        260688,
+        3
+      ],
+      "candidate_faces_shape": [
+        260688,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          130346,
+          3
+        ],
+        "candidate_shape": [
+          130346,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/lh.inflated.nofix": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.inflated.nofix",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.inflated.nofix",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "f53925f180a43535dfa638fde0c8f43c1785063cdbd5d6dd5f20b9a1b3323bba",
+      "candidate_sha256": "0192d84c34529e2220d24f49624144fe6e81f93e678b680c30a8ec72cb53e608",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        126798,
+        3
+      ],
+      "candidate_shape": [
+        126798,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        253692,
+        3
+      ],
+      "candidate_faces_shape": [
+        253692,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 126798,
+          "faces": 253692,
+          "edges": 380538,
+          "euler": -48,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        },
+        {
+          "vertices": 126798,
+          "faces": 253692,
+          "edges": 380538,
+          "euler": -48,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/lh.qsphere.nofix": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.qsphere.nofix",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.qsphere.nofix",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "9214194a6e106d6d5a44303bc049bcd1623732d17faf025432d9abb1a6f676f7",
+      "candidate_sha256": "348e85ea7fd383a4f0ddb646f324f4a743a19cd392b378fba3fee24050a56978",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        126798,
+        3
+      ],
+      "candidate_shape": [
+        126798,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        253692,
+        3
+      ],
+      "candidate_faces_shape": [
+        253692,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 126798,
+          "faces": 253692,
+          "edges": 380538,
+          "euler": -48,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        },
+        {
+          "vertices": 126798,
+          "faces": 253692,
+          "edges": 380538,
+          "euler": -48,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/lh.sphere": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.sphere",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.sphere",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "c0025fc7a3b907b6a6f6b3dca3fa32c9e7626d77ee9f535625fced8e54c05f30",
+      "candidate_sha256": "3e30cbcc6b3a7d0960132993d405ca4055bcf6ba610d398355ebd5ee75b4d9b2",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346,
+        3
+      ],
+      "candidate_shape": [
+        130346,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        260688,
+        3
+      ],
+      "candidate_faces_shape": [
+        260688,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          130346,
+          3
+        ],
+        "candidate_shape": [
+          130346,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/lh.sphere.reg": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.sphere.reg",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.sphere.reg",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "379d12e05747b8e267aae1b6477ee3a9e387b7b7f2def64f340eb5206e43b6c1",
+      "candidate_sha256": "45727776e12e2371dda5581b3533b71620db32b6209cfc34bca0b39b86aaaaa2",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346,
+        3
+      ],
+      "candidate_shape": [
+        130346,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        260688,
+        3
+      ],
+      "candidate_faces_shape": [
+        260688,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 130346,
+          "faces": 260688,
+          "edges": 391032,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          130346,
+          3
+        ],
+        "candidate_shape": [
+          130346,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/lh.curv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.curv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.curv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "5f73745dd96ec1c36e2d5151eb4f165c34a9a57bd8cd6214b24ab636113358dc",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/lh.sulc": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.sulc",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.sulc",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "5f6117900c41c4d5b02b50c031400cb8c36ccab041ea87c17579ac2742795804",
+      "candidate_sha256": "5f6117900c41c4d5b02b50c031400cb8c36ccab041ea87c17579ac2742795804",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        130346
+      ],
+      "candidate_shape": [
+        130346
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 0,
+      "max_absolute_difference": 0.0,
+      "p99_absolute_difference": 0.0
+    },
+    "surf/lh.avg_curv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.avg_curv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.avg_curv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "043d4ace56c4cff8262990d59b4742c6000fcd3c912a501b85b8336f20a81ab8",
+      "candidate_sha256": "043d4ace56c4cff8262990d59b4742c6000fcd3c912a501b85b8336f20a81ab8",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        130346
+      ],
+      "candidate_shape": [
+        130346
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 0,
+      "max_absolute_difference": 0.0,
+      "p99_absolute_difference": 0.0
+    },
+    "surf/lh.white.H": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.white.H",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.white.H",
+      "reference_exists": false,
+      "candidate_exists": false,
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/lh.white.K": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.white.K",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.white.K",
+      "reference_exists": false,
+      "candidate_exists": false,
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/lh.inflated.H": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.inflated.H",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.inflated.H",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "9a765aef40c4423c760421c1822a792910591f700956e928f80ad49adccff070",
+      "candidate_sha256": "f210afda4dc23cb0f566ce79bf6a70f479393a92e18c7b2b02d97c7791ca4a70",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346
+      ],
+      "candidate_shape": [
+        130346
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 16273,
+      "max_absolute_difference": 0.00015014410018920898,
+      "p99_absolute_difference": 2.2351741790771484e-08
+    },
+    "surf/lh.inflated.K": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.inflated.K",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.inflated.K",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "63bc2ef5623a2378087852efe418f07244c0c2d12f98a1bab99b6df9281d90e3",
+      "candidate_sha256": "e99071d73b356ec733e4e8c8938c8d68b727fefc782be734421559323d8f3f47",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346
+      ],
+      "candidate_shape": [
+        130346
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 17927,
+      "max_absolute_difference": 1.0520219802856445e-05,
+      "p99_absolute_difference": 1.862645149230957e-09
+    },
+    "surf/lh.smoothwm.BE.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm.BE.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm.BE.crv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "e539b894769d6cd07d40724c1608a5ccfdbd2ebf13b549e3fc89b6353c8d72bc",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/lh.smoothwm.C.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm.C.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm.C.crv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "04e668beed624158feab4df097d5736c983b3d0b3e60ec96cd43bb11f78f793a",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/lh.smoothwm.FI.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm.FI.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm.FI.crv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "80161b3aff6f79bfccb2b2158723204b54a684ac8c7464fd4abafe51509bec74",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/lh.smoothwm.H.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm.H.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm.H.crv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "72b5e9758468dd66bf98f0349f1cdc511d51a6fad362170d8c6b412a6dc83ffa",
+      "candidate_sha256": "62fb26b1d3215183cbd36db3af49b3ea752c2fa51f4eedb8cefe28b942867095",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346
+      ],
+      "candidate_shape": [
+        130346
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 130346,
+      "max_absolute_difference": 22.04060459136963,
+      "p99_absolute_difference": 0.3983854800462724
+    },
+    "surf/lh.smoothwm.K.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm.K.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm.K.crv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "4e5b920f14c21f0faf737841d8e6344b5d73a8eb4a391be9444cf470c5ae58bf",
+      "candidate_sha256": "91eff1014974e7a2b94669ee9a16cc0c4679a88938d4e290c438d8206d481e01",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346
+      ],
+      "candidate_shape": [
+        130346
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 130346,
+      "max_absolute_difference": 468.06969451904297,
+      "p99_absolute_difference": 0.4427308902144433
+    },
+    "surf/lh.smoothwm.K1.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm.K1.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm.K1.crv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "bef6722f93caebe25d8e4a891e31dda668a0a9f91c0439d8d816aa684ce86a7b",
+      "candidate_sha256": "5fa913a51338784985a4838e6f52514f65d4d93b1e31df3545bb4eec19d0f03f",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346
+      ],
+      "candidate_shape": [
+        130346
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 130346,
+      "max_absolute_difference": 35.08249473571777,
+      "p99_absolute_difference": 0.7290943294763567
+    },
+    "surf/lh.smoothwm.K2.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm.K2.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm.K2.crv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "042af224c4e57219dbc211e3ea25c67e6b4fb9068736a056623b59449dbbaa9f",
+      "candidate_sha256": "0b24020f0fe31c179ceeffe325da84f0d2589bb582769f0e32f00ab632d84f75",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        130346
+      ],
+      "candidate_shape": [
+        130346
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 130346,
+      "max_absolute_difference": 8.998712062835693,
+      "p99_absolute_difference": 0.3393823318183423
+    },
+    "surf/lh.smoothwm.S.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.smoothwm.S.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/lh.smoothwm.S.crv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "fe9709645df7075a0dbb1494b331ccbc3bfc87eea1ee09f495d29f017247cf5e",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "label/lh.cortex.label": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/label/lh.cortex.label",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/label/lh.cortex.label",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "ac9d1d572549401a86b2f257e81622865e8cbe6608680a7f141d62d34d831778",
+      "candidate_sha256": "ac9d1d572549401a86b2f257e81622865e8cbe6608680a7f141d62d34d831778",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        121822
+      ],
+      "candidate_shape": [
+        121822
+      ],
+      "reference_dtype": "int64",
+      "candidate_dtype": "int64",
+      "vertex_correspondence": true,
+      "index_sequence_equal": true,
+      "label_semantics": "fix-ga concatenation; per-vertex multiplicity and idempotent membership",
+      "reference": {
+        "entries": 121822,
+        "unique_vertices": 121694,
+        "duplicate_entries": 128,
+        "repeated_vertex_count": 128
+      },
+      "candidate": {
+        "entries": 121822,
+        "unique_vertices": 121694,
+        "duplicate_entries": 128,
+        "repeated_vertex_count": 128
+      },
+      "label_vertex_dice": 1.0,
+      "different_vertex_memberships": 0,
+      "multiplicity_difference": {
+        "reference_shape": [
+          130346
+        ],
+        "candidate_shape": [
+          130346
+        ],
+        "reference_dtype": "int64",
+        "candidate_dtype": "int64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "membership_difference": {
+        "reference_shape": [
+          130346
+        ],
+        "candidate_shape": [
+          130346
+        ],
+        "reference_dtype": "bool",
+        "candidate_dtype": "bool",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      }
+    },
+    "surf/rh.orig.nofix": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.orig.nofix",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.orig.nofix",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "16310331ae2bb5f2c6468923f689252f46bb89b3a6766cb86f7b364ebe34f9ed",
+      "candidate_sha256": "16310331ae2bb5f2c6468923f689252f46bb89b3a6766cb86f7b364ebe34f9ed",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        127544,
+        3
+      ],
+      "candidate_shape": [
+        127544,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        255124,
+        3
+      ],
+      "candidate_faces_shape": [
+        255124,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 127544,
+          "faces": 255124,
+          "edges": 382686,
+          "euler": -18,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        },
+        {
+          "vertices": 127544,
+          "faces": 255124,
+          "edges": 382686,
+          "euler": -18,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/rh.orig.premesh": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.orig.premesh",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.orig.premesh",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "4a940046a6d252bf8bd6871fd7946760518333ed95e40b7bea7fe7985da00c92",
+      "candidate_sha256": "7daa24851f1c4f5a346280744fa75b3a7de9aaaafec865eec62bce22bc2d5356",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        126777,
+        3
+      ],
+      "candidate_shape": [
+        126777,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        253550,
+        3
+      ],
+      "candidate_faces_shape": [
+        253550,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 126777,
+          "faces": 253550,
+          "edges": 380325,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 126777,
+          "faces": 253550,
+          "edges": 380325,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/rh.orig": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.orig",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.orig",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "319db7f90d53e326c3e07c7a9bec759e3c8cce28c7101ed14eb03ecd98107a00",
+      "candidate_sha256": "198ecc76038c00f80006bc64efd936a7b4faff89d6f5dbdc50753b1ac13faab9",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837,
+        3
+      ],
+      "candidate_shape": [
+        132837,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        265670,
+        3
+      ],
+      "candidate_faces_shape": [
+        265670,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          132837,
+          3
+        ],
+        "candidate_shape": [
+          132837,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/rh.white.preaparc": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.white.preaparc",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.white.preaparc",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "e22016368d6d709fc185cac34b9794ff0e4013fdb7816a1ba090f650d5002159",
+      "candidate_sha256": "d3a7e5af7fb57ca7e1320e2d166c474b290ce948714990f8bc05565d34e7e393",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837,
+        3
+      ],
+      "candidate_shape": [
+        132837,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        265670,
+        3
+      ],
+      "candidate_faces_shape": [
+        265670,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          132837,
+          3
+        ],
+        "candidate_shape": [
+          132837,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/rh.smoothwm": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "4aac8cd6ee5f4bfbd401f16299381e6651a46309e7c50b7db3f5bd753aedc43b",
+      "candidate_sha256": "3079d147d8a29e2366d3faf078cfb22e5dfcb20510fbd10a439acd8cdb5fdfda",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837,
+        3
+      ],
+      "candidate_shape": [
+        132837,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        265670,
+        3
+      ],
+      "candidate_faces_shape": [
+        265670,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          132837,
+          3
+        ],
+        "candidate_shape": [
+          132837,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/rh.smoothwm.nofix": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm.nofix",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm.nofix",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "e790f23a5ce5550df70cac5973745caaab498c7e562fbb9cfa2ec22907e9b894",
+      "candidate_sha256": "e790f23a5ce5550df70cac5973745caaab498c7e562fbb9cfa2ec22907e9b894",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        127544,
+        3
+      ],
+      "candidate_shape": [
+        127544,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        255124,
+        3
+      ],
+      "candidate_faces_shape": [
+        255124,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 127544,
+          "faces": 255124,
+          "edges": 382686,
+          "euler": -18,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        },
+        {
+          "vertices": 127544,
+          "faces": 255124,
+          "edges": 382686,
+          "euler": -18,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/rh.inflated": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.inflated",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.inflated",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "11b48bdf03f2d8acc5f4e643a27e89c515e8fe234d3d6e6a0c8b93ee1c1fe8b7",
+      "candidate_sha256": "29e7e97178a26e9cf0ee8be1be0104b49c260f4f41002a4148ef1b843ec27e57",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837,
+        3
+      ],
+      "candidate_shape": [
+        132837,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        265670,
+        3
+      ],
+      "candidate_faces_shape": [
+        265670,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          132837,
+          3
+        ],
+        "candidate_shape": [
+          132837,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/rh.inflated.nofix": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.inflated.nofix",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.inflated.nofix",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "9db4b0e8b1e3ebfadafecfce8053cfa4200e3607d5d3858eab1c9ad955fe0d20",
+      "candidate_sha256": "efb0f30b82e670105ec47c4e9ccbac0a3ab0a0b26081217ac58096525493cc93",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        127544,
+        3
+      ],
+      "candidate_shape": [
+        127544,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        255124,
+        3
+      ],
+      "candidate_faces_shape": [
+        255124,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 127544,
+          "faces": 255124,
+          "edges": 382686,
+          "euler": -18,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        },
+        {
+          "vertices": 127544,
+          "faces": 255124,
+          "edges": 382686,
+          "euler": -18,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/rh.qsphere.nofix": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.qsphere.nofix",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.qsphere.nofix",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "55126996492ba705bef426aa21458b269d3ba7692ac9a96124a9a06f14209801",
+      "candidate_sha256": "ab43383b04b49bd69dba74b507d6b7c509fb26d4a49a38f071eabcd54255ef88",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        127544,
+        3
+      ],
+      "candidate_shape": [
+        127544,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        255124,
+        3
+      ],
+      "candidate_faces_shape": [
+        255124,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": false,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 127544,
+          "faces": 255124,
+          "edges": 382686,
+          "euler": -18,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        },
+        {
+          "vertices": 127544,
+          "faces": 255124,
+          "edges": 382686,
+          "euler": -18,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": false
+        }
+      ],
+      "vertex_correspondence": false,
+      "indexed_difference": null,
+      "status": "not_assessed_indexed_vertices_without_correspondence"
+    },
+    "surf/rh.sphere": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.sphere",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.sphere",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "3611af18b90b156b57a6b54569eacdb9ac52446265d299eb204b399def049236",
+      "candidate_sha256": "ee23f2123b903a7ef4e4d74aaa1fba33c6939f0aba1868de3aa9b02fa9276642",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837,
+        3
+      ],
+      "candidate_shape": [
+        132837,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        265670,
+        3
+      ],
+      "candidate_faces_shape": [
+        265670,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          132837,
+          3
+        ],
+        "candidate_shape": [
+          132837,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/rh.sphere.reg": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.sphere.reg",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.sphere.reg",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "d5f4385d158c1fbf09e1c779a4b121d39da504de434c5de434d738fb47564968",
+      "candidate_sha256": "fbb3a192d995f304b414ad956e4f4d64fda63163a07d2425508c173f9d3cddec",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837,
+        3
+      ],
+      "candidate_shape": [
+        132837,
+        3
+      ],
+      "reference_dtype": "float64",
+      "candidate_dtype": "float64",
+      "reference_faces_shape": [
+        265670,
+        3
+      ],
+      "candidate_faces_shape": [
+        265670,
+        3
+      ],
+      "reference_faces_dtype": ">i4",
+      "candidate_faces_dtype": ">i4",
+      "ordered_faces_equal": true,
+      "matches_own_white_preaparc_anchor": true,
+      "surface_footer_equal": true,
+      "surface_frame_equal": true,
+      "topology": [
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        },
+        {
+          "vertices": 132837,
+          "faces": 265670,
+          "edges": 398505,
+          "euler": 2,
+          "components": 1,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "degenerate_index_faces": 0,
+          "duplicate_faces": 0,
+          "valid": true
+        }
+      ],
+      "vertex_correspondence": true,
+      "indexed_difference": {
+        "reference_shape": [
+          132837,
+          3
+        ],
+        "candidate_shape": [
+          132837,
+          3
+        ],
+        "reference_dtype": "float64",
+        "candidate_dtype": "float64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "different_vertices": 0,
+        "max_vertex_distance_mm": 0.0,
+        "p99_vertex_distance_mm": 0.0
+      }
+    },
+    "surf/rh.curv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.curv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.curv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "7626d649aecf85c551a08ba45356bcb0ef1fcfda32a6ef3e965e4f46f2b09549",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/rh.sulc": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.sulc",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.sulc",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "6ca58ab82631f4a86101952cf65391231bc1051604cb30902d544b39623e0ed7",
+      "candidate_sha256": "6ca58ab82631f4a86101952cf65391231bc1051604cb30902d544b39623e0ed7",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        132837
+      ],
+      "candidate_shape": [
+        132837
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 0,
+      "max_absolute_difference": 0.0,
+      "p99_absolute_difference": 0.0
+    },
+    "surf/rh.avg_curv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.avg_curv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.avg_curv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "c832d2ffbbf6e83e9ff9040534333c72c7736dc7523c5ea4908f7e2f231e2c2d",
+      "candidate_sha256": "c832d2ffbbf6e83e9ff9040534333c72c7736dc7523c5ea4908f7e2f231e2c2d",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        132837
+      ],
+      "candidate_shape": [
+        132837
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 0,
+      "max_absolute_difference": 0.0,
+      "p99_absolute_difference": 0.0
+    },
+    "surf/rh.white.H": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.white.H",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.white.H",
+      "reference_exists": false,
+      "candidate_exists": false,
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/rh.white.K": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.white.K",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.white.K",
+      "reference_exists": false,
+      "candidate_exists": false,
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/rh.inflated.H": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.inflated.H",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.inflated.H",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "9bd3ab11a649d6c5073d35ce05cb4227155a378fd7db7d0bbb6c390c390f26bf",
+      "candidate_sha256": "e577b440f0ffd86cf833d6fa7fb418dad8b28056606cb8626476e1275947c340",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837
+      ],
+      "candidate_shape": [
+        132837
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 16120,
+      "max_absolute_difference": 7.241964340209961e-06,
+      "p99_absolute_difference": 2.2351741790771484e-08
+    },
+    "surf/rh.inflated.K": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.inflated.K",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.inflated.K",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "8094a5ea3b3c44a07354968c151f916277f9c77b82abc4469451fc305259d4c6",
+      "candidate_sha256": "1506dd04113e62f1b7741fd6acbf1cf3401fb14d066d1c46cdbdaf3ea142b797",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837
+      ],
+      "candidate_shape": [
+        132837
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 17730,
+      "max_absolute_difference": 7.62939453125e-06,
+      "p99_absolute_difference": 1.6298145055770874e-09
+    },
+    "surf/rh.smoothwm.BE.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm.BE.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm.BE.crv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "ac59b81ced2932a902609d5146276f584e5d576bffa9814de582a65d43bdd30a",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/rh.smoothwm.C.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm.C.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm.C.crv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "8c03ad97c4cc6cf3fbc608cc32b9a902145f2bb978dcd521bdeb33e1ed959cc7",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/rh.smoothwm.FI.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm.FI.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm.FI.crv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "48cb08ba08df8bed2181a0e61e526644a64b181a7b6fba11cb2de09766db9b1e",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "surf/rh.smoothwm.H.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm.H.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm.H.crv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "de1c028c83e11152c281105a9173d4d500453220bc563c44f1069c8c4968f53b",
+      "candidate_sha256": "1fedcad5de68c0dd23e366c990df6433c23467e07a5444896bc0128f2f453410",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837
+      ],
+      "candidate_shape": [
+        132837
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 132837,
+      "max_absolute_difference": 20.826231479644775,
+      "p99_absolute_difference": 0.4114810788631386
+    },
+    "surf/rh.smoothwm.K.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm.K.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm.K.crv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "92837478649ab697574734867068a30b3862f80101ee07191a2c8c479094d257",
+      "candidate_sha256": "039b3de35c22d188434054b9569949130289f25bd96df993983cd6574f9a1709",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837
+      ],
+      "candidate_shape": [
+        132837
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 132837,
+      "max_absolute_difference": 148.6196746826172,
+      "p99_absolute_difference": 0.4300386238098075
+    },
+    "surf/rh.smoothwm.K1.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm.K1.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm.K1.crv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "22a660b89885134ef72db76b10311508260afa625a20d4a5a5ca4246013999b6",
+      "candidate_sha256": "321ee7030fc6335bba2c2baaec635d33f73e15cc688d2b179bb5a937c9dfa340",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837
+      ],
+      "candidate_shape": [
+        132837
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 132837,
+      "max_absolute_difference": 41.40583574771881,
+      "p99_absolute_difference": 0.7778853988647434
+    },
+    "surf/rh.smoothwm.K2.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm.K2.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm.K2.crv",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "0abc243e47418ec8fd48ca086317aea4416c4cf9014dd1adb03aab41ba4f2bdf",
+      "candidate_sha256": "2d6a43b225a1b42884949d343a40934d2be91c6a8823266543e4c3f443cc2c4c",
+      "common": true,
+      "shared_file_sha_equal": false,
+      "reference_shape": [
+        132837
+      ],
+      "candidate_shape": [
+        132837
+      ],
+      "reference_dtype": ">f4",
+      "candidate_dtype": ">f4",
+      "vertex_correspondence": true,
+      "stage_scope": "current shared artifact; may have been overwritten by candidate finishing stages",
+      "nonfinite_elements": 0,
+      "different_elements": 132837,
+      "max_absolute_difference": 3.660294532775879,
+      "p99_absolute_difference": 0.332713965177535
+    },
+    "surf/rh.smoothwm.S.crv": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.smoothwm.S.crv",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/surf/rh.smoothwm.S.crv",
+      "reference_exists": false,
+      "candidate_exists": true,
+      "candidate_sha256": "21efd042c0228ab739b01eec922d6db0c27488cfdef406bf2aed42a274e57848",
+      "common": false,
+      "shared_file_sha_equal": null
+    },
+    "label/rh.cortex.label": {
+      "reference_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/label/rh.cortex.label",
+      "candidate_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/subject/label/rh.cortex.label",
+      "reference_exists": true,
+      "candidate_exists": true,
+      "reference_sha256": "8b91fbdfb819520455e9f2f52a3d5f496ae1b2f78e0b910c48a7225b60b802c0",
+      "candidate_sha256": "8b91fbdfb819520455e9f2f52a3d5f496ae1b2f78e0b910c48a7225b60b802c0",
+      "common": true,
+      "shared_file_sha_equal": true,
+      "reference_shape": [
+        123887
+      ],
+      "candidate_shape": [
+        123887
+      ],
+      "reference_dtype": "int64",
+      "candidate_dtype": "int64",
+      "vertex_correspondence": true,
+      "index_sequence_equal": true,
+      "label_semantics": "fix-ga concatenation; per-vertex multiplicity and idempotent membership",
+      "reference": {
+        "entries": 123887,
+        "unique_vertices": 123887,
+        "duplicate_entries": 0,
+        "repeated_vertex_count": 0
+      },
+      "candidate": {
+        "entries": 123887,
+        "unique_vertices": 123887,
+        "duplicate_entries": 0,
+        "repeated_vertex_count": 0
+      },
+      "label_vertex_dice": 1.0,
+      "different_vertex_memberships": 0,
+      "multiplicity_difference": {
+        "reference_shape": [
+          132837
+        ],
+        "candidate_shape": [
+          132837
+        ],
+        "reference_dtype": "int64",
+        "candidate_dtype": "int64",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      },
+      "membership_difference": {
+        "reference_shape": [
+          132837
+        ],
+        "candidate_shape": [
+          132837
+        ],
+        "reference_dtype": "bool",
+        "candidate_dtype": "bool",
+        "nonfinite_elements": 0,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0
+      }
+    }
+  },
+  "surface_frame": {
+    "common_conform_affine_and_tkras": true,
+    "affine_tolerance": 0
+  },
+  "summary": {
+    "compared_common_files": 54,
+    "missing_on_either_side": 15,
+    "numeric_not_assessed_files": 10,
+    "file_comparison_errors": 0,
+    "scope": "current artifacts only; failed baseline remains incomplete; no whole-case or precision equivalence"
+  },
+  "total_wall_seconds": 77.35074619902298
+}

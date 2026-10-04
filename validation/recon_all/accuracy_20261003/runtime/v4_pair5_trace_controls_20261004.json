@@ -1,0 +1,442 @@
+{
+  "observed_utc": "2026-10-04T08:42:41.221437+00:00",
+  "summary_status": "matrix_complete",
+  "pair5_gpu_before": {
+    "utc": "2026-10-04T08:37:46.477311+00:00",
+    "uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+    "total_bytes": 85520809984,
+    "used_bytes": 69392662528,
+    "free_bytes": 15549333504,
+    "utilization_percent": 93
+  },
+  "pair5_buddy_before": [
+    "Node 0, zone      DMA      2      2      2      1      3      0      1      0      1      1      3 ",
+    "Node 0, zone    DMA32     11      8      8      6      7      5      7      5      7      6    337 ",
+    "Node 0, zone   Normal  75489  50275  18990    950    152     31      0      0      0      0      0 ",
+    "Node 1, zone   Normal  86834    555    910    609    147      7      0      0      0      0      0 "
+  ],
+  "arms": [
+    {
+      "pair": 4,
+      "mode": "original_worker",
+      "exit_code": 0,
+      "trace": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_paired_context_v4/004_original_worker_vs_context_driver/0_original_worker.strace.log",
+      "trace_lines": 5751,
+      "driver_ioctl_count": 632,
+      "driver_ioctl_request_counts": {
+        "type=0x46 nr=0xd6 size=0x8": 3,
+        "type=0x46 nr=0xc8 size=0x900": 3,
+        "type=0x46 nr=0x2b size=0x20": 3,
+        "type=0x46 nr=0x2a size=0x20": 316,
+        "type=0x46 nr=0x29 size=0x10": 6,
+        "type=0x46 nr=0x2b size=0x30": 83,
+        "type=0x46 nr=0xc9 size=0x4": 16,
+        "type=0x46 nr=0xd7 size=0x230": 4,
+        "type=0x46 nr=0x4e size=0x38": 34,
+        "type=0x46 nr=0x5e size=0x28": 3,
+        "type=0x46 nr=0x4f size=0x20": 2,
+        "type=0x46 nr=0x4a size=0xb8": 47,
+        "type=0x46 nr=0xd2 size=0x48": 1,
+        "type=0x46 nr=0xce size=0x10": 8,
+        "type=0x46 nr=0x27 size=0x38": 4
+      },
+      "driver_ioctl_errno": [],
+      "host_ENOMEM_EAGAIN": [],
+      "brk_request_return_mismatch": [],
+      "mlock_call_count": 0,
+      "longest_driver_ioctls": [
+        "32952 1791103064.702301 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x4a, 0xb8), 0x7ffd1c98d3c0) = 0 <0.078889>",
+        "32952 1791103065.114674 ioctl(8, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x27, 0x38), 0x7ffd1c98dac0) = 0 <0.073915>",
+        "32952 1791103064.860368 ioctl(5, _IOC(0, 0, 0x1b, 0), 0x7ffd1c98e5b0) = 0 <0.027621>",
+        "32952 1791103065.260804 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x2a, 0x20), 0x7ffd1c98e380) = 0 <0.022988>"
+      ],
+      "raw_cuda_after_calls": []
+    },
+    {
+      "pair": 4,
+      "mode": "context_driver",
+      "exit_code": 0,
+      "trace": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_paired_context_v4/004_original_worker_vs_context_driver/1_context_driver.strace.log",
+      "trace_lines": 4988,
+      "driver_ioctl_count": 631,
+      "driver_ioctl_request_counts": {
+        "type=0x46 nr=0xd6 size=0x8": 3,
+        "type=0x46 nr=0xc8 size=0x900": 3,
+        "type=0x46 nr=0x2b size=0x20": 3,
+        "type=0x46 nr=0x2a size=0x20": 315,
+        "type=0x46 nr=0x29 size=0x10": 6,
+        "type=0x46 nr=0x2b size=0x30": 83,
+        "type=0x46 nr=0xc9 size=0x4": 16,
+        "type=0x46 nr=0xd7 size=0x230": 4,
+        "type=0x46 nr=0x4e size=0x38": 34,
+        "type=0x46 nr=0x5e size=0x28": 3,
+        "type=0x46 nr=0x4f size=0x20": 2,
+        "type=0x46 nr=0x4a size=0xb8": 47,
+        "type=0x46 nr=0xd2 size=0x48": 1,
+        "type=0x46 nr=0xce size=0x10": 8,
+        "type=0x46 nr=0x27 size=0x38": 4
+      },
+      "driver_ioctl_errno": [],
+      "host_ENOMEM_EAGAIN": [],
+      "brk_request_return_mismatch": [],
+      "mlock_call_count": 0,
+      "longest_driver_ioctls": [
+        "32957 1791103065.109910 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x4a, 0xb8), 0x7fff56d8c6c0) = 0 <0.078625>",
+        "32957 1791103064.702757 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x2a, 0x20), 0x7fff56d8acb0) = 0 <0.078459>",
+        "32957 1791103065.254186 ioctl(5, _IOC(0, 0, 0x1b, 0), 0x7fff56d8d8b0) = 0 <0.029604>",
+        "32957 1791103064.865657 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x2b, 0x30), 0x7fff56d8dd10) = 0 <0.022341>"
+      ],
+      "raw_cuda_after_calls": [
+        {
+          "boundary": "after_cuDeviceGet",
+          "utc": "2026-10-04T08:37:45.079865+00:00",
+          "monotonic": 2924429.957182331,
+          "native_thread_id": 32957,
+          "errorcode": 0,
+          "outputs": {
+            "device": 0
+          }
+        },
+        {
+          "boundary": "after_cuDeviceGetUuid_v2",
+          "utc": "2026-10-04T08:37:45.084769+00:00",
+          "monotonic": 2924429.962087394,
+          "native_thread_id": 32957,
+          "errorcode": 0,
+          "outputs": {
+            "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+          }
+        },
+        {
+          "boundary": "after_cuCtxGetCurrent",
+          "utc": "2026-10-04T08:37:45.089835+00:00",
+          "monotonic": 2924429.967154379,
+          "native_thread_id": 32957,
+          "errorcode": 0,
+          "outputs": {
+            "context": null
+          }
+        },
+        {
+          "boundary": "after_cuDevicePrimaryCtxRetain",
+          "utc": "2026-10-04T08:37:45.618602+00:00",
+          "monotonic": 2924430.495938109,
+          "native_thread_id": 32957,
+          "errorcode": 0,
+          "outputs": {
+            "context": 94898502061088
+          }
+        },
+        {
+          "boundary": "after_cuCtxSetCurrent",
+          "utc": "2026-10-04T08:37:45.624807+00:00",
+          "monotonic": 2924430.502126762,
+          "native_thread_id": 32957,
+          "errorcode": 0,
+          "outputs": null
+        },
+        {
+          "boundary": "after_cudaDeviceGetStreamPriorityRange",
+          "utc": "2026-10-04T08:37:45.652331+00:00",
+          "monotonic": 2924430.529660573,
+          "native_thread_id": 32957,
+          "errorcode": 0,
+          "outputs": {
+            "least_priority": 0,
+            "greatest_priority": -5
+          }
+        },
+        {
+          "boundary": "after_cleanup_restore_cuCtxSetCurrent",
+          "utc": "2026-10-04T08:37:45.687051+00:00",
+          "monotonic": 2924430.564370173,
+          "native_thread_id": 32957,
+          "errorcode": 0,
+          "outputs": null
+        },
+        {
+          "boundary": "after_cleanup_release_owned_primary_ctx",
+          "utc": "2026-10-04T08:37:45.692387+00:00",
+          "monotonic": 2924430.569703806,
+          "native_thread_id": 32957,
+          "errorcode": 0,
+          "outputs": null
+        }
+      ]
+    },
+    {
+      "pair": 5,
+      "mode": "context_driver",
+      "exit_code": 1,
+      "trace": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_paired_context_v4/005_direct_priority_vs_context_driver/0_context_driver.strace.log",
+      "trace_lines": 4711,
+      "driver_ioctl_count": 472,
+      "driver_ioctl_request_counts": {
+        "type=0x46 nr=0xd6 size=0x8": 3,
+        "type=0x46 nr=0xc8 size=0x900": 3,
+        "type=0x46 nr=0x2b size=0x20": 3,
+        "type=0x46 nr=0x2a size=0x20": 251,
+        "type=0x46 nr=0x29 size=0x10": 48,
+        "type=0x46 nr=0x2b size=0x30": 49,
+        "type=0x46 nr=0xc9 size=0x4": 9,
+        "type=0x46 nr=0xd7 size=0x230": 4,
+        "type=0x46 nr=0x4e size=0x38": 16,
+        "type=0x46 nr=0x5e size=0x28": 3,
+        "type=0x46 nr=0x4f size=0x20": 14,
+        "type=0x46 nr=0x4a size=0xb8": 17,
+        "type=0x46 nr=0xd2 size=0x48": 1,
+        "type=0x46 nr=0xce size=0x10": 1,
+        "type=0x46 nr=0xcf size=0x10": 1
+      },
+      "driver_ioctl_errno": [],
+      "host_ENOMEM_EAGAIN": [],
+      "brk_request_return_mismatch": [],
+      "mlock_call_count": 0,
+      "longest_driver_ioctls": [
+        "33663 1791103070.633951 ioctl(5, _IOC(0, 0, 0x21, 0), 0x7fff879761f0) = 0 <2.769620>",
+        "33663 1791103073.698616 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x2b, 0x30), 0x7fff879773c0) = 0 <1.689276>",
+        "33663 1791103069.719106 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x4a, 0xb8), 0x7fff87976370) = 0 <0.807855>",
+        "33663 1791103073.476827 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x2a, 0x20), 0x7fff87976020) = 0 <0.106618>"
+      ],
+      "raw_cuda_after_calls": [
+        {
+          "boundary": "after_cuDeviceGet",
+          "utc": "2026-10-04T08:37:49.658663+00:00",
+          "monotonic": 2924434.53598109,
+          "native_thread_id": 33663,
+          "errorcode": 0,
+          "outputs": {
+            "device": 0
+          }
+        },
+        {
+          "boundary": "after_cuDeviceGetUuid_v2",
+          "utc": "2026-10-04T08:37:49.663704+00:00",
+          "monotonic": 2924434.541022936,
+          "native_thread_id": 33663,
+          "errorcode": 0,
+          "outputs": {
+            "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+          }
+        },
+        {
+          "boundary": "after_cuCtxGetCurrent",
+          "utc": "2026-10-04T08:37:49.668453+00:00",
+          "monotonic": 2924434.545770563,
+          "native_thread_id": 33663,
+          "errorcode": 0,
+          "outputs": {
+            "context": null
+          }
+        },
+        {
+          "boundary": "after_cuDevicePrimaryCtxRetain",
+          "utc": "2026-10-04T08:37:55.564768+00:00",
+          "monotonic": 2924440.44215067,
+          "native_thread_id": 33663,
+          "errorcode": 2,
+          "outputs": null
+        }
+      ]
+    },
+    {
+      "pair": 5,
+      "mode": "direct_priority",
+      "exit_code": 1,
+      "trace": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_paired_context_v4/005_direct_priority_vs_context_driver/1_direct_priority.strace.log",
+      "trace_lines": 4832,
+      "driver_ioctl_count": 600,
+      "driver_ioctl_request_counts": {
+        "type=0x46 nr=0xd6 size=0x8": 3,
+        "type=0x46 nr=0xc8 size=0x900": 3,
+        "type=0x46 nr=0x2b size=0x20": 3,
+        "type=0x46 nr=0x2a size=0x20": 285,
+        "type=0x46 nr=0x29 size=0x10": 76,
+        "type=0x46 nr=0x2b size=0x30": 69,
+        "type=0x46 nr=0xc9 size=0x4": 11,
+        "type=0x46 nr=0xd7 size=0x230": 4,
+        "type=0x46 nr=0x4e size=0x38": 24,
+        "type=0x46 nr=0x5e size=0x28": 3,
+        "type=0x46 nr=0x4f size=0x20": 22,
+        "type=0x46 nr=0x4a size=0xb8": 25,
+        "type=0x46 nr=0xd2 size=0x48": 1,
+        "type=0x46 nr=0xce size=0x10": 3,
+        "type=0x46 nr=0xcf size=0x10": 3
+      },
+      "driver_ioctl_errno": [],
+      "host_ENOMEM_EAGAIN": [],
+      "brk_request_return_mismatch": [],
+      "mlock_call_count": 0,
+      "longest_driver_ioctls": [
+        "33665 1791103070.633750 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x2b, 0x30), 0x7ffe18b2a420) = 0 <2.771707>",
+        "33665 1791103073.698978 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x29, 0x10), 0x7ffe18b2a510) = 0 <1.690049>",
+        "33665 1791103069.719163 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x2b, 0x30), 0x7ffe18b2a010) = 0 <0.810456>",
+        "33665 1791103073.474804 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x2b, 0x30), 0x7ffe18b2a420) = 0 <0.108610>"
+      ],
+      "raw_cuda_after_calls": [
+        {
+          "boundary": "after_cudaDeviceGetStreamPriorityRange",
+          "utc": "2026-10-04T08:37:55.568011+00:00",
+          "monotonic": 2924440.44541352,
+          "native_thread_id": 33665,
+          "errorcode": 2,
+          "outputs": null
+        }
+      ]
+    },
+    {
+      "pair": 6,
+      "mode": "context_driver",
+      "exit_code": 0,
+      "trace": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_paired_context_v4/006_original_worker_vs_context_driver/0_context_driver.strace.log",
+      "trace_lines": 4982,
+      "driver_ioctl_count": 631,
+      "driver_ioctl_request_counts": {
+        "type=0x46 nr=0xd6 size=0x8": 3,
+        "type=0x46 nr=0xc8 size=0x900": 3,
+        "type=0x46 nr=0x2b size=0x20": 3,
+        "type=0x46 nr=0x2a size=0x20": 315,
+        "type=0x46 nr=0x29 size=0x10": 6,
+        "type=0x46 nr=0x2b size=0x30": 83,
+        "type=0x46 nr=0xc9 size=0x4": 16,
+        "type=0x46 nr=0xd7 size=0x230": 4,
+        "type=0x46 nr=0x4e size=0x38": 34,
+        "type=0x46 nr=0x5e size=0x28": 3,
+        "type=0x46 nr=0x4f size=0x20": 2,
+        "type=0x46 nr=0x4a size=0xb8": 47,
+        "type=0x46 nr=0xd2 size=0x48": 1,
+        "type=0x46 nr=0xce size=0x10": 8,
+        "type=0x46 nr=0x27 size=0x38": 4
+      },
+      "driver_ioctl_errno": [],
+      "host_ENOMEM_EAGAIN": [],
+      "brk_request_return_mismatch": [],
+      "mlock_call_count": 0,
+      "longest_driver_ioctls": [
+        "34604 1791103079.640824 ioctl(5, _IOC(0, 0, 0x21, 0), 0x7fff9fd884d0) = 0 <1.480773>",
+        "34604 1791103079.549149 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x4a, 0xb8), 0x7fff9fd88b20) = 0 <0.080607>",
+        "34604 1791103079.310249 ioctl(18, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0xd7, 0x230), 0x7fff9fd8a180) = 0 <0.079775>",
+        "34604 1791103081.228168 ioctl(5, _IOC(0, 0, 0x1b, 0), 0x7fff9fd89d10) = 0 <0.031230>"
+      ],
+      "raw_cuda_after_calls": [
+        {
+          "boundary": "after_cuDeviceGet",
+          "utc": "2026-10-04T08:37:59.444978+00:00",
+          "monotonic": 2924444.322296545,
+          "native_thread_id": 34604,
+          "errorcode": 0,
+          "outputs": {
+            "device": 0
+          }
+        },
+        {
+          "boundary": "after_cuDeviceGetUuid_v2",
+          "utc": "2026-10-04T08:37:59.449960+00:00",
+          "monotonic": 2924444.327279446,
+          "native_thread_id": 34604,
+          "errorcode": 0,
+          "outputs": {
+            "uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+          }
+        },
+        {
+          "boundary": "after_cuCtxGetCurrent",
+          "utc": "2026-10-04T08:37:59.454939+00:00",
+          "monotonic": 2924444.332256865,
+          "native_thread_id": 34604,
+          "errorcode": 0,
+          "outputs": {
+            "context": null
+          }
+        },
+        {
+          "boundary": "after_cuDevicePrimaryCtxRetain",
+          "utc": "2026-10-04T08:38:01.593015+00:00",
+          "monotonic": 2924446.470358521,
+          "native_thread_id": 34604,
+          "errorcode": 0,
+          "outputs": {
+            "context": 94249847381856
+          }
+        },
+        {
+          "boundary": "after_cuCtxSetCurrent",
+          "utc": "2026-10-04T08:38:01.598719+00:00",
+          "monotonic": 2924446.476038518,
+          "native_thread_id": 34604,
+          "errorcode": 0,
+          "outputs": null
+        },
+        {
+          "boundary": "after_cudaDeviceGetStreamPriorityRange",
+          "utc": "2026-10-04T08:38:01.625199+00:00",
+          "monotonic": 2924446.502525476,
+          "native_thread_id": 34604,
+          "errorcode": 0,
+          "outputs": {
+            "least_priority": 0,
+            "greatest_priority": -5
+          }
+        },
+        {
+          "boundary": "after_cleanup_restore_cuCtxSetCurrent",
+          "utc": "2026-10-04T08:38:01.661111+00:00",
+          "monotonic": 2924446.538431497,
+          "native_thread_id": 34604,
+          "errorcode": 0,
+          "outputs": null
+        },
+        {
+          "boundary": "after_cleanup_release_owned_primary_ctx",
+          "utc": "2026-10-04T08:38:01.666990+00:00",
+          "monotonic": 2924446.544308889,
+          "native_thread_id": 34604,
+          "errorcode": 0,
+          "outputs": null
+        }
+      ]
+    },
+    {
+      "pair": 6,
+      "mode": "original_worker",
+      "exit_code": 0,
+      "trace": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_paired_context_v4/006_original_worker_vs_context_driver/1_original_worker.strace.log",
+      "trace_lines": 5757,
+      "driver_ioctl_count": 632,
+      "driver_ioctl_request_counts": {
+        "type=0x46 nr=0xd6 size=0x8": 3,
+        "type=0x46 nr=0xc8 size=0x900": 3,
+        "type=0x46 nr=0x2b size=0x20": 3,
+        "type=0x46 nr=0x2a size=0x20": 316,
+        "type=0x46 nr=0x29 size=0x10": 6,
+        "type=0x46 nr=0x2b size=0x30": 83,
+        "type=0x46 nr=0xc9 size=0x4": 16,
+        "type=0x46 nr=0xd7 size=0x230": 4,
+        "type=0x46 nr=0x4e size=0x38": 34,
+        "type=0x46 nr=0x5e size=0x28": 3,
+        "type=0x46 nr=0x4f size=0x20": 2,
+        "type=0x46 nr=0x4a size=0xb8": 47,
+        "type=0x46 nr=0xd2 size=0x48": 1,
+        "type=0x46 nr=0xce size=0x10": 8,
+        "type=0x46 nr=0x27 size=0x38": 4
+      },
+      "driver_ioctl_errno": [],
+      "host_ENOMEM_EAGAIN": [],
+      "brk_request_return_mismatch": [],
+      "mlock_call_count": 0,
+      "longest_driver_ioctls": [
+        "34606 1791103079.643789 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x4a, 0xb8), 0x7fff1f9bdad0) = 0 <1.477720>",
+        "34606 1791103079.549106 ioctl(5, _IOC(0, 0, 0x1b, 0), 0x7fff1f9be990) = 0 <0.082122>",
+        "34606 1791103079.310240 ioctl(4, _IOC(_IOC_READ|_IOC_WRITE, 0x46, 0x4a, 0xb8), 0x7fff1f9bd7a0) = 0 <0.079094>",
+        "34606 1791103079.481390 ioctl(5, _IOC(0, 0, 0x1b, 0), 0x7fff1f9be990) = 0 <0.030784>"
+      ],
+      "raw_cuda_after_calls": []
+    }
+  ],
+  "dmesg": {
+    "returncode": 0,
+    "stderr": "",
+    "nvrm_uvm_xid_entries": []
+  },
+  "conclusion_boundary": "No syscall ENOMEM/EAGAIN/brk refusal or NVIDIA ioctl Linux errno found in inspected arms. ioctl buffers are pointers, proprietary reply status not decoded; syscall0 is not proof driver operation succeeded. Pair5 Node0 order1/2 were nonzero; fragmentation causality not established. dmesg current ring lacks relevant messages; historical journal access was denied."
+}

@@ -1,0 +1,128 @@
+diff --git a/validation/recon_all/accuracy_20261003/PRECISION_CANDIDATE_QUEUE.md b/validation/recon_all/accuracy_20261003/PRECISION_CANDIDATE_QUEUE.md
+index 78fa9754..7a54cf09 100644
+--- a/validation/recon_all/accuracy_20261003/PRECISION_CANDIDATE_QUEUE.md
++++ b/validation/recon_all/accuracy_20261003/PRECISION_CANDIDATE_QUEUE.md
+@@ -86,3 +86,12 @@ SIGINT/SIGTERM 对 admission 保持原清理协议；评估取消发送至自有
+ 
+ - 本项目 `cohort/pair/evaluate_pair.py` 与 `evaluated_role_bindings.py`
+ - [FreeSurfer recon-all 流程](https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all)
++
++
++## 实际队列状态持久化修正（2026-10-04）
++
++旧冻结工具SHA `681201b6606e31e5d008c0edb7f2611bb479a3059520b281dcee1d1b9ada10f3` 在raw completion核验后只更新内存，随后同步等待官方评估，直到评估结束才写磁盘queue。sub-07于14:52:32 UTC真正完成138项及网格检查，但15:16评估运行时旧queue仍显示admission_or_execution、execution_succeeded=false。这是持久化滞后，不是算法失败；实际记录见runtime/sub07_3a_status_20261004_v1，源码和原queue SHA保留。
++
++本地新工具在post-evaluation之前先保存原始整例完成状态，并在评估子进程启动后保存独立evaluation.status=running及pid。完成/失败/继续下一例与严格比较数量规则保持原语义。真实CPU子进程测试将评估阻塞在显式文件屏障，核验此时磁盘row已complete且execution_succeeded=true、evaluation仍running，解除屏障后队列正常完成；不执行影像或GPU计算。
++
++服务器正在运行的冻结队列不修改；下次新冻结工具才使用本修正。当前实时状态以admission、diagnostics/completion和实际评估checkpoint分别判断，不能只看旧queue行。priority guard的父T态只是排序，guard completion确认恢复和/proc实际状态另核对，不等同诊断成功。
+diff --git a/validation/recon_all/accuracy_20261003/run_resource_replay_queue.py b/validation/recon_all/accuracy_20261003/run_resource_replay_queue.py
+index 88484e6b..c680d50c 100644
+--- a/validation/recon_all/accuracy_20261003/run_resource_replay_queue.py
++++ b/validation/recon_all/accuracy_20261003/run_resource_replay_queue.py
+@@ -124,10 +124,13 @@ def main():
+             if Path(output).exists():
+                 raise FileExistsError('evaluation requires fresh output: ' + output)
+             evaluation_outputs.add(output)
+-        def evaluate(spec, case_id, actual):
++        def evaluate(spec, case_id, actual, case_row=None):
+             nonlocal child, child_kind
+             result = {'case': case_id, 'status': 'starting', 'evaluation_succeeded': False,
+                       'started_utc': now()}
++            if case_row is not None:
++                case_row['evaluation'] = result
++                save()
+             try:
+                 config = evaluation_config(spec, case_id, actual, plan['shared_lock'])
+                 # Actual completion/source/resource verification remains in the frozen evaluator.
+@@ -139,6 +142,9 @@ def main():
+                     child_kind = 'evaluation'
+                     child = subprocess.Popen(command, start_new_session=True, stdout=stream,
+                                              stderr=subprocess.STDOUT)
++                    result.update(status='running', pid=child.pid)
++                    if case_row is not None:
++                        save()
+                     if interrupted:
+                         stop(report['interrupt_signal'], None)
+                     result['exit_code'] = child.wait()
+@@ -200,9 +206,11 @@ def main():
+                            and result.get('exit_code') == 0 and result.get('pipeline_status') == 'complete')
+                 row.update(execution_succeeded=success,
+                            status='complete' if success else 'failed_or_not_admitted')
++                # Persist actual raw completion before the potentially long CPU evaluation.
++                save()
+                 if case.get('post_evaluation'):
+                     row['evaluation'] = (evaluate(case['post_evaluation'], case['id'],
+-                        str(Path(case['retry_root'])/'retry_config.json')) if success and not interrupted
++                        str(Path(case['retry_root'])/'retry_config.json'), case_row=row) if success and not interrupted
+                         else {'status': 'skipped_algorithm_not_complete', 'evaluation_succeeded': False})
+             except Exception as error:
+                 row.update(status='wrapper_failed', error=repr(error))
+diff --git a/validation/recon_all/accuracy_20261003/test_precision_validation_queue.py b/validation/recon_all/accuracy_20261003/test_precision_validation_queue.py
+index 9ea4a3ff..fee3fc98 100644
+--- a/validation/recon_all/accuracy_20261003/test_precision_validation_queue.py
++++ b/validation/recon_all/accuracy_20261003/test_precision_validation_queue.py
+@@ -5,6 +5,7 @@ from pathlib import Path
+ import subprocess
+ import sys
+ import tempfile
++import time
+ import unittest
+ 
+ HERE = Path(__file__).parent
+@@ -44,6 +45,56 @@ d={'status':'complete','case':c['case'],'evaluated_role':c['evaluated_role'],'co
+         proc=subprocess.run([sys.executable,str(HERE/'run_resource_replay_queue.py'),'--plan',str(path),'--report',str(report)],capture_output=True,text=True)
+         return proc.returncode,json.loads(report.read_text())
+ 
++    def test_raw_completion_is_persisted_while_evaluator_is_blocked(self):
++        with tempfile.TemporaryDirectory() as d:
++            root = Path(d)
++            plan, _, evaluator = self.fixture(root)
++            original = evaluator.read_text()
++            barrier = "import time\nwhile not pathlib.Path(c['release']).exists():time.sleep(0.02)\n"
++            evaluator.write_text(original.replace("if not c['ok']:sys.exit(1)", barrier + "if not c['ok']:sys.exit(1)"))
++            config_path = Path(plan['cases'][0]['post_evaluation']['config'])
++            config = json.loads(config_path.read_text())
++            config['release'] = str(root/'release')
++            config_path.write_text(json.dumps(config))
++            evaluation = plan['cases'][0]['post_evaluation']
++            evaluation.update(script_sha256=queue.digest(evaluator), config_sha256=queue.digest(config_path))
++            path = root/'plan.json'; path.write_text(json.dumps(plan)); report = root/'queue.json'
++            proc = subprocess.Popen([sys.executable, str(HERE/'run_resource_replay_queue.py'),
++                '--plan', str(path), '--report', str(report)], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
++            try:
++                deadline = time.monotonic() + 8
++                observed = None
++                while time.monotonic() < deadline:
++                    self.assertIsNone(proc.poll(), 'queue exited before evaluator barrier')
++                    if (root/'comparison/entered').exists():
++                        try:
++                            value = json.loads(report.read_text())
++                        except (FileNotFoundError, json.JSONDecodeError):
++                            time.sleep(0.02); continue
++                        row = value['cases'][0]
++                        if row.get('evaluation', {}).get('status') == 'running':
++                            observed = value; break
++                    time.sleep(0.02)
++                self.assertIsNotNone(observed, 'running evaluation was not persisted')
++                row = observed['cases'][0]
++                self.assertTrue(row['execution_succeeded'])
++                self.assertEqual(row['status'], 'complete')
++                self.assertEqual(row['execution_completion']['pipeline_status'], 'complete')
++                self.assertEqual(row['evaluation']['status'], 'running')
++                self.assertIsInstance(row['evaluation']['pid'], int)
++                self.assertFalse(observed['queue_finished'])
++                self.assertFalse((root/'comparison/checkpoint.json').exists())
++                (root/'release').write_text('continue')
++                _, error = proc.communicate(timeout=8)
++                self.assertEqual(proc.returncode, 0, error)
++                final = json.loads(report.read_text())
++                self.assertTrue(final['cases'][0]['execution_succeeded'])
++                self.assertEqual(final['cases'][0]['evaluation']['status'], 'complete')
++            finally:
++                if proc.poll() is None:
++                    (root/'release').write_text('cleanup')
++                    proc.communicate(timeout=8)
++
+     def test_default_role(self):
+         self.assertEqual(queue.execution_role({}), 'baseline')
+         with self.assertRaises(ValueError):queue.execution_role({'execution_role':'startup_only_candidate'})

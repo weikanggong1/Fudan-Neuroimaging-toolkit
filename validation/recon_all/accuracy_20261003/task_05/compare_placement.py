@@ -1,5 +1,5 @@
 """只读对照同输入放置报告；证明有序网格来源后比较坐标及逐脑区局部误差。"""
-import argparse, json
+import argparse, csv, hashlib, json
 from pathlib import Path
 import nibabel.freesurfer.io as fs
 import numpy as np
@@ -7,7 +7,8 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 p=argparse.ArgumentParser(description=__doc__); p.add_argument('--root',type=Path,required=True)
 p.add_argument('--output',type=Path,required=True); a=p.parse_args()
-summary={'overall_equivalence':'not_assessed','scope':'same_frozen_input_operator_diagnostic','hemispheres':{}}
+a.output.parent.mkdir(parents=True,exist_ok=True)
+summary={'analysis_script_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'overall_equivalence':'not_assessed','scope':'same_frozen_input_operator_diagnostic','hemispheres':{}}
 for h in ('lh','rh'):
  hemi={}
  for kind in ('prewhite','white','pial'):
@@ -29,14 +30,31 @@ for h in ('lh','rh'):
    regions={}
    for i,name in enumerate(names):
     mask=labels==i
-    if mask.any(): regions[name.decode()]={'count':int(mask.sum()),'mean_mm':float(d[mask].mean()),'p99_mm':float(np.quantile(d[mask],.99)),'max_mm':float(d[mask].max())}
+    if mask.any(): regions[name.decode()]={'count':int(mask.sum()),'mean_mm':float(d[mask].mean()),'p99_mm':float(np.quantile(d[mask],.99)),'max_mm':float(d[mask].max()),'vertices_over_0_1_mm':int(np.count_nonzero(d[mask]>.1))}
    edges=np.concatenate((faces[:,[0,1]],faces[:,[1,2]],faces[:,[2,0]])); edges.sort(axis=1)
    unique,counts=np.unique(edges,axis=0,return_counts=True)
    graph=coo_matrix((np.ones(len(unique)),(unique[:,0],unique[:,1])),shape=(len(xyz),len(xyz)))
    components,_=connected_components(graph,directed=False)
+   selected = np.flatnonzero(d > .1)
+   cortex = np.zeros(len(xyz), dtype=bool)
+   cortex[fs.read_label(str(Path(report['output']['path']).parents[1]/f'label/{h}.cortex.label'))] = True
+   clusters = []
+   if len(selected):
+    cluster_count, cluster_ids = connected_components(graph.tocsr()[selected][:,selected], directed=False)
+    for cluster in range(cluster_count):
+     vertex_ids = selected[cluster_ids==cluster]
+     clusters.append({'count':len(vertex_ids),'max_mm':float(d[vertex_ids].max()),
+                      'peak_vertex_id':int(vertex_ids[np.argmax(d[vertex_ids])])})
+    clusters.sort(key=lambda row:row['count'],reverse=True)
+   csv_path = a.output.parent/f'{h}_{kind}_{backend}_local_over_0_1mm.csv'
+   with csv_path.open('w',newline='') as stream:
+    writer=csv.writer(stream);writer.writerow(['vertex_id','region','in_cortex_label','displacement_mm','dx_mm','dy_mm','dz_mm'])
+    for vertex in selected:
+     delta=xyz[vertex]-refxyz[vertex]
+     writer.writerow([int(vertex),names[labels[vertex]].decode() if labels[vertex]>=0 else 'unannotated',bool(cortex[vertex]),float(d[vertex]),*map(float,delta)])
    result['comparisons'][backend]={'correspondence_proof':'identical complete input hashes + unchanged ordered faces + placement-only operators',
     'different_coordinate_components':int(np.count_nonzero(xyz!=refxyz)),'mean_mm':float(d.mean()),'p99_mm':float(np.quantile(d,.99)),
-    'max_mm':float(d.max()),'regional_displacement':regions,'largest_error_vertex_ids':np.argsort(d)[-20:][::-1].tolist(),
+    'max_mm':float(d.max()),'vertices_over_0_1_mm':len(selected),'cortex_vertices_over_0_1_mm':int(np.count_nonzero((d>.1)&cortex)),'outside_cortex_vertices_over_0_1_mm':int(np.count_nonzero((d>.1)&~cortex)),'over_0_1_mm_clusters':clusters,'local_csv':str(csv_path),'regional_displacement':regions,'largest_error_vertex_ids':np.argsort(d)[-20:][::-1].tolist(),
     'mesh_quality':{'connected_components':int(components),'boundary_edges':int(np.count_nonzero(counts==1)),
      'nonmanifold_edges':int(np.count_nonzero(counts>2)), 'self_intersection':'not_assessed_by_this_read_only_report',
      'white_pial_triangle_crossing':'not_assessed_by_this_read_only_report'},'seconds':report['seconds_including_io'],

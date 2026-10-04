@@ -1,0 +1,291 @@
+{
+  "observed_utc": "2026-10-04T04:47:56.025135+00:00",
+  "host": "gpucw1",
+  "base": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1",
+  "scope": "live first resource replay; not completion",
+  "queue_launch.json": {
+    "sha256": "21510c936c73a72f99dca4f756e893273afa94ed041ca4f54420cbf94523c89d",
+    "data": {
+      "started_utc": "2026-10-04T04:45:13.168658+00:00",
+      "host": "gpucw1",
+      "pid": 78104,
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/resource_replay_tools_v1/run_resource_replay_queue.py",
+        "--plan",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/resource_replay_tools_v1/replay_plan.json",
+        "--report",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/queue_status.json"
+      ],
+      "log": "/cwStorage/home/gongwk/Notebook_code/FNIT/logs/recon_accuracy_20261003/baseline_resource_replays_v1.log",
+      "archive_sha256": "61c0a0067063a840a9cb21a5bd8c1a260ae3c88b804bfd56d772a827ebdd8fe2",
+      "wrapper_commit": "a9a2aa71c1aede970aea926e225273b94c500bb4",
+      "production_code_commit": "816e5610417a4c587caf321049438a9554139016",
+      "plan_sha256": "3e724df898a3ba06bdba214923f27e37335d760ec6b64abf285c380e9d6e914e",
+      "bindings_report_sha256": "95c9ba94844ff83d6a764c376906f583f4674469a7905a1f25da7dc08247423e",
+      "tools_manifest_sha256": "926224bbd46c14dc7f63a5207a0792c97c105ad3d2f0826336b59fdd81531ae9",
+      "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+      "lock": "/tmp/fnit-shared-benchmark.lock",
+      "scope": "four original CUDA resource failures, raw T1 to new empty output, original parameters",
+      "timing_caveat": "shared GPU compute load; resource replay, not exclusive speed benchmark"
+    }
+  },
+  "queue_status.json": {
+    "sha256": "f96fd074795aaafd48491e1c9caff142db352f1456ce852e74e4b4d3e723bbd4",
+    "data": {
+      "schema": "fnit-original-baseline-resource-replays-v1",
+      "pid": 78104,
+      "host": "gpucw1",
+      "started_utc": "2026-10-04T04:45:13.239525+00:00",
+      "queue_script_sha256": "0dbeb032c9c4027f4eb47da168c4fdac94ccac19e3414eab9b53b0da9c95370d",
+      "status": "running",
+      "cases": [
+        {
+          "case": "ds000030_sub-10189",
+          "status": "admission_or_execution",
+          "execution_succeeded": false,
+          "started_utc": "2026-10-04T04:45:13.244519+00:00",
+          "command": [
+            "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+            "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/resource_replay_tools_v1/resource_admission.py",
+            "--config",
+            "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000030_sub-10189.json",
+            "--retry-root",
+            "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000030_sub-10189/attempt_01",
+            "--report",
+            "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000030_sub-10189/admission.json",
+            "--lock",
+            "/tmp/fnit-shared-benchmark.lock",
+            "--poll-seconds",
+            "30",
+            "--query-timeout",
+            "5",
+            "--maximum-wait-seconds",
+            "86400"
+          ],
+          "pid": 78105
+        }
+      ],
+      "queue_finished": false,
+      "all_cases_succeeded": false,
+      "meaning": "queue completion and per-case success are separate; original failures preserved",
+      "plan_sha256": "3e724df898a3ba06bdba214923f27e37335d760ec6b64abf285c380e9d6e914e",
+      "planned_cases": 4,
+      "current_case": "ds000030_sub-10189"
+    }
+  },
+  "deployed_bindings_verification.json": {
+    "sha256": "95c9ba94844ff83d6a764c376906f583f4674469a7905a1f25da7dc08247423e",
+    "data": {
+      "observed_utc": "2026-10-04T04:45:04.791840+00:00",
+      "host": "gpucw1",
+      "scope": "original frozen baseline resources; no GPU inference",
+      "code_commit": "816e5610417a4c587caf321049438a9554139016",
+      "index_sha256": {
+        "README.md": "3cae7c1921af7638b9d48a13c1a0319a71496b10bec66e2379510ec11fd1a1a7",
+        "INDEX.md": "e8c1b7a4112d983296fdd6524cb02866b23f31e3ebde6fff1bbdbaa9f87e0d1a",
+        "INDEX.json": "eb48f3dc6f59046b6ef783fb679e62384e02739780418cace314ac75a5cc2f07"
+      },
+      "mismatches": [],
+      "source_archive_sha256": "0107e059153ff46ace5ab477539c232810f3309db0d569c861a02b6c69b460e7",
+      "source_checked_files": 1212,
+      "gpu_snapshot": [
+        "0, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 81559, 33134, 47873, 63",
+        "1, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 81559, 25664, 55343, 62"
+      ],
+      "runtime_versions": {
+        "torch": "2.5.1",
+        "torch_cuda": "11.8",
+        "cudnn": 90100,
+        "numpy": "1.26.4",
+        "scipy": "1.17.1",
+        "nibabel": "5.4.2",
+        "numba": "0.67.0"
+      },
+      "version_differences": {},
+      "status": "passed"
+    }
+  },
+  "ds000030_sub-10189/admission.json": {
+    "sha256": "6ca54abd231b629915840a4e6659525e226cd3b774f6846b097789eb7f6ad871",
+    "data": {
+      "status": "running",
+      "started_utc": "2026-10-04T04:45:13.328102+00:00",
+      "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+      "minimum_free_bytes": 20000000000,
+      "samples": [
+        {
+          "time_utc": "2026-10-04T04:45:18.132112+00:00",
+          "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+          "total_bytes": 85520809984,
+          "used_bytes": 34743517184,
+          "free_bytes": 50198478848,
+          "measurement": "nvidia-smi integer MiB converted to bytes",
+          "phase": "before_lock"
+        },
+        {
+          "time_utc": "2026-10-04T04:45:22.805984+00:00",
+          "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+          "total_bytes": 85520809984,
+          "used_bytes": 34743517184,
+          "free_bytes": 50198478848,
+          "measurement": "nvidia-smi integer MiB converted to bytes",
+          "phase": "under_lock"
+        }
+      ],
+      "timing_scope": "admission waiting excluded from monitored algorithm time",
+      "limitation": "preflight and cooperative flock cannot exclude later external competitors",
+      "original_config": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/baseline_ds000030_sub-10189.json",
+      "original_config_sha256": "e47676f55f957d4f7db70f8d3b8bb7d6a758e8842182f876f2e43bb667e6879d",
+      "original_launch_sha256": "0494f8a1927b631e298aaecf51403290fc99201162c085c59d4d4bd198824cbd",
+      "config": {
+        "python": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "code_root": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610",
+        "code_commit": "816e5610417a4c587caf321049438a9554139016",
+        "source_archive_sha256": "0107e059153ff46ace5ab477539c232810f3309db0d569c861a02b6c69b460e7",
+        "weights": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights",
+        "assets": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets",
+        "native_bin_dir": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin",
+        "fs_license": "/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt",
+        "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/public_t1w/ds000030/sub-10189/anat/sub-10189_T1w.nii.gz",
+        "input_sha256": "ae1722144a5b0ac1cd87da8589965da367da1e4878e49de4ed0cd8d2b23b88dc",
+        "output": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000030_sub-10189/attempt_01/subject",
+        "diagnostic_root": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000030_sub-10189/attempt_01/diagnostics",
+        "device": "cuda:0",
+        "threads": 4,
+        "invocation": "initialized_cuda_api",
+        "pipeline_kwargs": {
+          "hemisphere_workers": 2
+        },
+        "pipeline_cli_args": [
+          "--hemisphere-workers",
+          "2"
+        ]
+      },
+      "admission_wait_seconds": 9.478388129267842,
+      "algorithm_started_utc": "2026-10-04T04:45:22.806520+00:00",
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/validation/recon_all/python_gpu_port/run_monitored.py",
+        "--gpu-uuid",
+        "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "--output",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000030_sub-10189/attempt_01/monitor",
+        "--",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/validation/recon_all/optimizations/20261002_parallel/execute_whole_case.py",
+        "--config",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000030_sub-10189/attempt_01/retry_config.json"
+      ]
+    },
+    "resource_file_count": 1341
+  },
+  "own_processes": [
+    {
+      "pid": 78104,
+      "status": {
+        "Name": "python",
+        "State": "S (sleeping)",
+        "PPid": "1",
+        "VmSize": "138548 kB",
+        "VmRSS": "13576 kB",
+        "Threads": "1"
+      },
+      "selected_resource_environment": {}
+    },
+    {
+      "pid": 78105,
+      "status": {
+        "Name": "python",
+        "State": "S (sleeping)",
+        "PPid": "78104",
+        "VmSize": "142448 kB",
+        "VmRSS": "17544 kB",
+        "Threads": "1"
+      },
+      "selected_resource_environment": {}
+    },
+    {
+      "pid": 78135,
+      "status": {
+        "Name": "python",
+        "State": "S (sleeping)",
+        "PPid": "78105",
+        "VmSize": "212460 kB",
+        "VmRSS": "13672 kB",
+        "Threads": "2"
+      },
+      "selected_resource_environment": {}
+    },
+    {
+      "pid": 78136,
+      "status": {
+        "Name": "python",
+        "State": "S (sleeping)",
+        "PPid": "78135",
+        "VmSize": "139712 kB",
+        "VmRSS": "13676 kB",
+        "Threads": "1"
+      },
+      "selected_resource_environment": {}
+    },
+    {
+      "pid": 78144,
+      "status": {
+        "Name": "python",
+        "State": "S (sleeping)",
+        "PPid": "78136",
+        "VmSize": "19907576 kB",
+        "VmRSS": "697420 kB",
+        "Threads": "36"
+      },
+      "selected_resource_environment": {
+        "OMP_NUM_THREADS": "4",
+        "OPENBLAS_NUM_THREADS": "4",
+        "MKL_NUM_THREADS": "4",
+        "CUDA_VISIBLE_DEVICES": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "PYTORCH_NO_CUDA_MEMORY_CACHING": "1"
+      }
+    },
+    {
+      "pid": 78435,
+      "status": {
+        "Name": "fnit_n4_itk",
+        "State": "R (running)",
+        "PPid": "78144",
+        "VmSize": "141424 kB",
+        "VmRSS": "107612 kB",
+        "Threads": "2"
+      },
+      "selected_resource_environment": {
+        "OMP_NUM_THREADS": "4",
+        "OPENBLAS_NUM_THREADS": "4",
+        "MKL_NUM_THREADS": "4",
+        "CUDA_VISIBLE_DEVICES": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+        "PYTORCH_NO_CUDA_MEMORY_CACHING": "1"
+      }
+    }
+  ],
+  "gpu": [
+    "0, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 535.216.03, 81559, 33717, 47290, 62",
+    "1, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 535.216.03, 81559, 25804, 55203, 65"
+  ],
+  "own_gpu_processes": [
+    "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 78144, 538"
+  ],
+  "ds000030_sub-10189/attempt_01/diagnostics/completion.json": {
+    "exists": false
+  },
+  "ds000030_sub-10189/attempt_01/subject/scripts/native_python_report.json": {
+    "exists": false
+  },
+  "ds000030_sub-10189/attempt_01/monitor/report.json": {
+    "exists": false
+  },
+  "generated_mri_files": [
+    "orig.mgz",
+    "rawavg.mgz",
+    "synthstrip.mgz"
+  ]
+}

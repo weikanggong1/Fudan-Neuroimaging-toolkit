@@ -1,0 +1,127 @@
+{
+  "schema": "fnit-volume-contribution-v1",
+  "code_commit": "816e5610417a4c587caf321049438a9554139016",
+  "input_checkpoints_commit": "8d750e25d4d067a43edb788a96b2086a1c031ba0",
+  "scope": "two_old_real_cases_diagnostic_only_not_new_ten_case_acceptance",
+  "overall_equivalence": "not_assessed",
+  "production_code_changed": false,
+  "resources_sha256": {
+    "GCA": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e",
+    "SubCorticalMassLUT": "65957c41244153d6614aeaf08c16ee956c09e2c8b5e198aa64c81946f75e93b6",
+    "upstream_gca.cpp": "52439c0c2218b4e685f03365ad6d4889be41fa5b2dff613897d6461be1b3a872",
+    "upstream_matrix.cpp": "14d64078a37252c0e1b8d3354140bab46e8c41601975e414d1fe78dea94fd52c",
+    "native_EM": "70911f6e3ed8f240f2fc745ad1060664c893da47ff3cb6d591d219760f59079f"
+  },
+  "rows": [
+    {
+      "case": "sub01",
+      "nu": "official",
+      "mask": "official",
+      "execution": "complete",
+      "em_seconds_including_io": 188.23851768579334,
+      "ca_seconds_including_io": 27.737120101228356,
+      "lta_max_abs_vs_official": 0.0,
+      "norm_different_voxels": 0,
+      "ctrl_different_elements": 0,
+      "atlas_peak": 107,
+      "image_peak": 112,
+      "per_pass_control_counts": [
+        1925,
+        2383,
+        2337
+      ]
+    },
+    {
+      "case": "sub01",
+      "nu": "fnit",
+      "mask": "official",
+      "execution": "complete",
+      "em_seconds_including_io": 190.77300990000367,
+      "ca_seconds_including_io": 25.20254170987755,
+      "lta_max_abs_vs_official": 0.0005735158920288086,
+      "norm_different_voxels": 490692,
+      "ctrl_different_elements": 10617,
+      "atlas_peak": 107,
+      "image_peak": 112,
+      "per_pass_control_counts": [
+        1940,
+        2329,
+        2386
+      ]
+    },
+    {
+      "case": "sub01",
+      "nu": "official",
+      "mask": "fnit",
+      "execution": "complete",
+      "em_seconds_including_io": 221.68676189193502,
+      "ca_seconds_including_io": 25.8880393570289,
+      "lta_max_abs_vs_official": 0.0,
+      "norm_different_voxels": 0,
+      "ctrl_different_elements": 0,
+      "atlas_peak": 107,
+      "image_peak": 112,
+      "per_pass_control_counts": [
+        1925,
+        2383,
+        2337
+      ]
+    },
+    {
+      "case": "sub01",
+      "nu": "fnit",
+      "mask": "fnit",
+      "execution": "complete",
+      "em_seconds_including_io": 242.32156900735572,
+      "ca_seconds_including_io": 25.34144620085135,
+      "lta_max_abs_vs_official": 0.0005735158920288086,
+      "norm_different_voxels": 490692,
+      "ctrl_different_elements": 10617,
+      "atlas_peak": 107,
+      "image_peak": 112,
+      "per_pass_control_counts": [
+        1940,
+        2329,
+        2386
+      ]
+    },
+    {
+      "case": "sub02",
+      "nu": "official",
+      "mask": "official",
+      "execution": "complete",
+      "em_seconds_including_io": 206.1386658246629,
+      "ca_seconds_including_io": 25.58271000208333,
+      "lta_max_abs_vs_official": 0.0,
+      "norm_different_voxels": 11,
+      "ctrl_different_elements": 6,
+      "atlas_peak": 107,
+      "image_peak": 107,
+      "per_pass_control_counts": [
+        5785,
+        6353,
+        6323
+      ]
+    },
+    {
+      "case": "sub02",
+      "nu": "fnit",
+      "mask": "official",
+      "execution": "running_or_waiting",
+      "em_seconds_including_io": null,
+      "ca_seconds_including_io": null,
+      "lta_max_abs_vs_official": null,
+      "norm_different_voxels": null,
+      "ctrl_different_elements": null,
+      "atlas_peak": null,
+      "image_peak": null,
+      "per_pass_control_counts": []
+    }
+  ],
+  "findings": {
+    "sub01": "nu switches determine LTA/control/norm differences; mask switches add no differences, same effective support. Official nu variants reproduce archived LTA and CA volumes exactly.",
+    "sub02": "frozen official LTA replay gives 11 norm differences and 6 ctrl elements from one extra right-WM control at (112,90,95) in three passes. Coordinate precision hypothesis pending.",
+    "tail": "same complete official inputs reproduce sub01 brain/denoise/filled and sub02 brain/denoise exactly; sub02 filled pending."
+  },
+  "performance": "stage timing includes load/compute/write, excludes lock wait and subsequent comparison. Cross is not a baseline/candidate paired speed acceptance; shared GPU allocations belong to unrelated paused/running jobs and are separate from own process."
+}

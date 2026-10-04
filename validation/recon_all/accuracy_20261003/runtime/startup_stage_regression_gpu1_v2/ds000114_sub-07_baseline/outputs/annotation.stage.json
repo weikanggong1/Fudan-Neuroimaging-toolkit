@@ -1,0 +1,6002 @@
+{
+  "status": "stage_complete",
+  "started_utc": "2026-10-04T09:44:28.807429+00:00",
+  "started_monotonic": 2928433.683392344,
+  "checkpoint": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject",
+  "assets": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets",
+  "output": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs",
+  "scope": "FNIT-produced checkpoint annotation stage only; not continuous chain or original-T1 whole case",
+  "caller_lock_requirement": "Caller must hold shared GPU lock and monitor/clean all owned descendants.",
+  "threads": {
+    "total": 4,
+    "workers": 2,
+    "per_worker": 2
+  },
+  "gpu_uuid_declared": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "device": "cuda:0",
+  "initialized_parent": false,
+  "initialized_parent_scope": "Optional FP32 scalar+sync reproduces an initialized API; it does not reconstruct historical parent1.946GB/context/model history.",
+  "startup_wait_seconds_argument": null,
+  "reference_policy": "No official images/results are consumed. Assets are declared existing resources; no download or redistribution is performed.",
+  "precision_policy": "FP32 scalar and TF32 true; no autocast; cache disabled",
+  "torch_memory_stats_status": "unavailable_cache_disabled",
+  "timings": {
+    "validation_seconds": 0.2421643380075693,
+    "copy_and_copied_hash_seconds": 2.8031822512857616,
+    "import_and_mesh_verification_seconds": 3.4207978970371187,
+    "group_wall_seconds": 140.8530391980894,
+    "semantic_output_and_post_hash_seconds": 1.3298432012088597,
+    "validation_to_before_summary_write_seconds": 149.05136267794296,
+    "validation_through_summary_write_seconds": 149.0629107337445
+  },
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "NUMEXPR_NUM_THREADS": "4",
+    "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4"
+  },
+  "numba_cache_before": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/diagnostics/numba_cache",
+    "exists": false,
+    "existing_files": []
+  },
+  "input_manifest": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_inputs_v1/ds000114_sub-07.json",
+    "size_bytes": 19060,
+    "sha256": "8c27776e24e0c06866bfc13031381addd38005fd6798b9ec8b0c92df4be76986"
+  },
+  "historical_source_receipts_not_candidate_gate": [
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/native_free.py",
+      "size_bytes": 70949,
+      "sha256": "439692523cfcba95b4ca241ce1bf80a4f460471257c89916d21dc94ba2272d58"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_worker.py",
+      "size_bytes": 3299,
+      "sha256": "181429ced4e13b2ff8b27114237ce8fb80f7054699216eb28f4a22e24ad6c217"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_parallel.py",
+      "size_bytes": 14995,
+      "sha256": "74ae787046ef068a9943a75c50e6972f540d523bb848e0b22cf8bcee1ed4806c"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/thread_budget.py",
+      "size_bytes": 5804,
+      "sha256": "bf0b40e5c6c7232d0de23dee3c491a3c27850d79922d81df71689933a9692fca"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_label_python.py",
+      "size_bytes": 6225,
+      "sha256": "2af06857386ca36f035b98e413a3a304224c43b52807c8844268170c828c3007"
+    }
+  ],
+  "original_inputs_before": [
+    {
+      "kind": "subject",
+      "relative": "mri/aseg.presurf.mgz",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/mri/aseg.presurf.mgz",
+      "size_bytes": 341922,
+      "sha256": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.smoothwm",
+      "size_bytes": 4118108,
+      "sha256": "11b4c03d273548b1e1bd285978fc6c6bdef1d1f80ed91483a06262976233a19b"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.sphere.reg",
+      "size_bytes": 4116958,
+      "sha256": "696b7d9b01efbf7542b6522d367e1231167b2a76a7f605609a71a53430fe1c7b"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/lh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/label/lh.cortex.label",
+      "size_bytes": 4721803,
+      "sha256": "38add960bb30bd300b93ecbf50879d141cb57ed1ebdf25a21f4c6eb34bc9da87"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18842086,
+      "sha256": "721d6f53e8e3edae2c3798d52c5878026f1cdbe6cb286659ae48b920651a4cb6"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21724500,
+      "sha256": "f726bca3747676e465aaad4572e525dc5370d0a073c435fd41c1beaff2ad6add"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 22003357,
+      "sha256": "6db52238d4c6c5867edd645daf23a7ce1bf753caffa792c9972db40af8229214"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.smoothwm",
+      "size_bytes": 4134549,
+      "sha256": "de76b8cdec330ac54d884f3312319b296cde344afadbcf417c5f3c15a97a4f2d"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.sphere.reg",
+      "size_bytes": 4134310,
+      "sha256": "b6fc0fbd8c1b7370fba6492baf93bfa74c8eb7793133e8d1cfd286ba86058ef5"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/rh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/label/rh.cortex.label",
+      "size_bytes": 4612395,
+      "sha256": "dbf0e417de9246e3077b57c08dbb45f5125ae65406565506882ddef54a161467"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18610793,
+      "sha256": "64e98c907af4242cb79b645a384c97ed37854b7b127a18ad406084b29dc486cf"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21898679,
+      "sha256": "878f4caae1f7d439ebeae5499537b9b5c1146bf7c369f5fb4cfc1df67e6d0b29"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21987412,
+      "sha256": "3f6e2ec1f24081f5a3ad2cafcdc1aaa156a2a635b78c30808dbeb8aaf9421498"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic4.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic4.tri",
+      "size_bytes": 207432,
+      "sha256": "95cc8e50f48df9b2a7a8558c9837becfa486f7562f2d9ae6fee4cc7aad341d13"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic7.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic7.tri",
+      "size_bytes": 13368214,
+      "sha256": "cdd2761f0921a05d4959eb5b200fc3c65c0344a575809b0b09458299d90a1e6d"
+    }
+  ],
+  "copied_inputs_before": [
+    {
+      "kind": "subject",
+      "relative": "mri/aseg.presurf.mgz",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/mri/aseg.presurf.mgz",
+      "size_bytes": 341922,
+      "sha256": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.smoothwm",
+      "size_bytes": 4118108,
+      "sha256": "11b4c03d273548b1e1bd285978fc6c6bdef1d1f80ed91483a06262976233a19b"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.sphere.reg",
+      "size_bytes": 4116958,
+      "sha256": "696b7d9b01efbf7542b6522d367e1231167b2a76a7f605609a71a53430fe1c7b"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/lh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/lh.cortex.label",
+      "size_bytes": 4721803,
+      "sha256": "38add960bb30bd300b93ecbf50879d141cb57ed1ebdf25a21f4c6eb34bc9da87"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18842086,
+      "sha256": "721d6f53e8e3edae2c3798d52c5878026f1cdbe6cb286659ae48b920651a4cb6"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21724500,
+      "sha256": "f726bca3747676e465aaad4572e525dc5370d0a073c435fd41c1beaff2ad6add"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 22003357,
+      "sha256": "6db52238d4c6c5867edd645daf23a7ce1bf753caffa792c9972db40af8229214"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.smoothwm",
+      "size_bytes": 4134549,
+      "sha256": "de76b8cdec330ac54d884f3312319b296cde344afadbcf417c5f3c15a97a4f2d"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.sphere.reg",
+      "size_bytes": 4134310,
+      "sha256": "b6fc0fbd8c1b7370fba6492baf93bfa74c8eb7793133e8d1cfd286ba86058ef5"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/rh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/rh.cortex.label",
+      "size_bytes": 4612395,
+      "sha256": "dbf0e417de9246e3077b57c08dbb45f5125ae65406565506882ddef54a161467"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18610793,
+      "sha256": "64e98c907af4242cb79b645a384c97ed37854b7b127a18ad406084b29dc486cf"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21898679,
+      "sha256": "878f4caae1f7d439ebeae5499537b9b5c1146bf7c369f5fb4cfc1df67e6d0b29"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21987412,
+      "sha256": "3f6e2ec1f24081f5a3ad2cafcdc1aaa156a2a635b78c30808dbeb8aaf9421498"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic4.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic4.tri",
+      "size_bytes": 207432,
+      "sha256": "95cc8e50f48df9b2a7a8558c9837becfa486f7562f2d9ae6fee4cc7aad341d13"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic7.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic7.tri",
+      "size_bytes": 13368214,
+      "sha256": "cdd2761f0921a05d4959eb5b200fc3c65c0344a575809b0b09458299d90a1e6d"
+    }
+  ],
+  "removed_copied_target_annotations": [
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/lh.aparc.annot",
+      "size_bytes": 916249,
+      "sha256": "4244436549506ac86750acd0a5349a94542459ac57ed7618197a89f9db511bf0"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/lh.aparc.a2009s.annot",
+      "size_bytes": 917992,
+      "sha256": "d63f61cba3fc8e521fe8d0bdd4b86849627a3d7a5d3d80adddb7a6e527758dbe"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/lh.aparc.DKTatlas.annot",
+      "size_bytes": 916249,
+      "sha256": "376fc550d3fe90754b7bf9f96cc6aab6488d211771cdc927c477c8ee98b31904"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/rh.aparc.annot",
+      "size_bytes": 920105,
+      "sha256": "df3c7f8d35aafd5372016737bb5a3f95728136019800cef409a55d1864d52ac8"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/rh.aparc.a2009s.annot",
+      "size_bytes": 921848,
+      "sha256": "5c85085224d7060c99e982692392e3dfbff57593448322c6cf24a0200af741dd"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/rh.aparc.DKTatlas.annot",
+      "size_bytes": 920105,
+      "sha256": "30c49f218a5124117d327eb59dca01ab723414a2f0ce684bace3db5f7c77bed6"
+    }
+  ],
+  "allocator": {
+    "requested": "disabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "runtime": {
+    "python": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python3.11",
+    "python_version": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+    "interpreter": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python3.11",
+      "size_bytes": 25916456,
+      "sha256": "327e9040263cb69bcce8b2e6f441931f399489ad7f5d2d86f5d6ec60983c724b"
+    },
+    "torch_version": "2.5.1",
+    "cuda_build": "11.8",
+    "nibabel_version": "5.4.2",
+    "numpy_version": "1.26.4",
+    "fnit_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/__init__.py",
+    "torch_threads": 4,
+    "torch_interop_threads": 1
+  },
+  "imported_fnit_sources_before": {
+    "fnit": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/__init__.py",
+      "size_bytes": 6351,
+      "sha256": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4"
+    },
+    "fnit.recon_all.batch": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/batch.py",
+      "size_bytes": 5380,
+      "sha256": "e39fdc238f1f6962970f4bc1701186a4ae59d44027e05223179839ac0cd2d523"
+    },
+    "fnit.recon_all": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/__init__.py",
+      "size_bytes": 156,
+      "sha256": "d9691fbe92139d94364422748de32dff8cbc7f9d3b8408e4d45dc2abf878108a"
+    },
+    "fnit.recon_all.hemisphere_parallel": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_parallel.py",
+      "size_bytes": 14995,
+      "sha256": "74ae787046ef068a9943a75c50e6972f540d523bb848e0b22cf8bcee1ed4806c"
+    },
+    "fnit.recon_all.profiling": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/profiling.py",
+      "size_bytes": 14782,
+      "sha256": "1304fdf287051f057c4753ea3361ef8382a34c4e80a3521e9679d4ad25c655f3"
+    },
+    "fnit.recon_all.native_free": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/native_free.py",
+      "size_bytes": 70949,
+      "sha256": "439692523cfcba95b4ca241ce1bf80a4f460471257c89916d21dc94ba2272d58"
+    },
+    "fnit.recon_all.gcsa_initial": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_initial.py",
+      "size_bytes": 8473,
+      "sha256": "56483f779c7d781931f704975f3a57e5aa0837fd90e174f1c603ab7c18150779"
+    },
+    "fnit.recon_all.gcsa_aseg": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_aseg.py",
+      "size_bytes": 2224,
+      "sha256": "b5b7e26e28bd912f30f59bc324675c20447fc15ed9a810cdda92da1b53814946"
+    },
+    "fnit.recon_all.surface_thickness_gpu": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/surface_thickness_gpu.py",
+      "size_bytes": 10070,
+      "sha256": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961"
+    },
+    "fnit.recon_all.surface_curvature_gpu": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/surface_curvature_gpu.py",
+      "size_bytes": 5182,
+      "sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0"
+    },
+    "fnit.recon_all.gcsa_feature": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_feature.py",
+      "size_bytes": 6336,
+      "sha256": "40cbb9931e456c92ef0d361a10dbba14eab2293aab8312e4ddc5d7af2c54540c"
+    },
+    "fnit.recon_all.gcsa_finalize": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_finalize.py",
+      "size_bytes": 4483,
+      "sha256": "d793b9ac972f3470892b6663cebf79b53c679b1c8893790841e388a5530037e4"
+    },
+    "fnit.recon_all.gcsa_gibbs": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_gibbs.py",
+      "size_bytes": 2984,
+      "sha256": "8924e8fbff3ae15f254629ac66ad33e41c7e5cdfe27e1e6f3a57d03f4617882f"
+    },
+    "fnit.recon_all.gcsa_islands": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_islands.py",
+      "size_bytes": 3450,
+      "sha256": "e69ee3ee96c48dce4bc948cfb2df9cd8e6db8789e71a49f79d7a4e45f3355376"
+    },
+    "fnit.recon_all.gcsa_permutation": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_permutation.py",
+      "size_bytes": 1463,
+      "sha256": "c8ffb051147f163b73960af34451204ed10c92db02a4f1f61285a34127fe625f"
+    },
+    "fnit.recon_all.gcsa_reclassify": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_reclassify.py",
+      "size_bytes": 2113,
+      "sha256": "8eb00ce4b40cc98e9d6a937c4aaf6386e107171e54ccedfb6c8f9bf0918b8678"
+    },
+    "fnit.recon_all.gcsa_label_python": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_label_python.py",
+      "size_bytes": 6225,
+      "sha256": "2af06857386ca36f035b98e413a3a304224c43b52807c8844268170c828c3007"
+    }
+  },
+  "script": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/startup_stage_tools_v2/replay_annotation_stage.py",
+    "size_bytes": 26503,
+    "sha256": "1fbad92fbdc2590130dfcdcbb9f1dd616188c4f69d7dc2466638794efaa9acc6"
+  },
+  "copied_meshes_before": {
+    "lh.smoothwm": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.smoothwm",
+        "size_bytes": 4118108,
+        "sha256": "11b4c03d273548b1e1bd285978fc6c6bdef1d1f80ed91483a06262976233a19b"
+      },
+      "vertices": 114342,
+      "faces": 228680,
+      "coordinate_array_sha256_le_f64": "878dd9afde68bb71877e4e06cd04811e2bebc495a8f519fd010bc17357f9dbcb",
+      "ordered_faces_sha256_le_i64": "314e04d39645db284bcf251e57a015c2b5d75fdbbae5b49288a782fab7168b6b",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    },
+    "lh.sphere.reg": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.sphere.reg",
+        "size_bytes": 4116958,
+        "sha256": "696b7d9b01efbf7542b6522d367e1231167b2a76a7f605609a71a53430fe1c7b"
+      },
+      "vertices": 114342,
+      "faces": 228680,
+      "coordinate_array_sha256_le_f64": "e552cf172f2455951bd0b040e4f13d7fca9db368761924f469f0f0dfaa8f2587",
+      "ordered_faces_sha256_le_i64": "314e04d39645db284bcf251e57a015c2b5d75fdbbae5b49288a782fab7168b6b",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    },
+    "rh.smoothwm": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.smoothwm",
+        "size_bytes": 4134549,
+        "sha256": "de76b8cdec330ac54d884f3312319b296cde344afadbcf417c5f3c15a97a4f2d"
+      },
+      "vertices": 114824,
+      "faces": 229644,
+      "coordinate_array_sha256_le_f64": "55affe7b305d04ec2ccf0e3b1b5e8038b2e29c3d697c65596134b18d0212103a",
+      "ordered_faces_sha256_le_i64": "bb4a1320ffb592da71ffdc7793100c8314dcb8acfb16d4365f734b0267374ccb",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    },
+    "rh.sphere.reg": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.sphere.reg",
+        "size_bytes": 4134310,
+        "sha256": "b6fc0fbd8c1b7370fba6492baf93bfa74c8eb7793133e8d1cfd286ba86058ef5"
+      },
+      "vertices": 114824,
+      "faces": 229644,
+      "coordinate_array_sha256_le_f64": "b34dfce3d90a1b79c9c8004568ef4b7e823d67b8d5d1a662290c38cc5cb7e930",
+      "ordered_faces_sha256_le_i64": "bb4a1320ffb592da71ffdc7793100c8314dcb8acfb16d4365f734b0267374ccb",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    }
+  },
+  "original_meshes_before": {
+    "lh.smoothwm": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.smoothwm",
+        "size_bytes": 4118108,
+        "sha256": "11b4c03d273548b1e1bd285978fc6c6bdef1d1f80ed91483a06262976233a19b"
+      },
+      "vertices": 114342,
+      "faces": 228680,
+      "coordinate_array_sha256_le_f64": "878dd9afde68bb71877e4e06cd04811e2bebc495a8f519fd010bc17357f9dbcb",
+      "ordered_faces_sha256_le_i64": "314e04d39645db284bcf251e57a015c2b5d75fdbbae5b49288a782fab7168b6b",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    },
+    "lh.sphere.reg": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.sphere.reg",
+        "size_bytes": 4116958,
+        "sha256": "696b7d9b01efbf7542b6522d367e1231167b2a76a7f605609a71a53430fe1c7b"
+      },
+      "vertices": 114342,
+      "faces": 228680,
+      "coordinate_array_sha256_le_f64": "e552cf172f2455951bd0b040e4f13d7fca9db368761924f469f0f0dfaa8f2587",
+      "ordered_faces_sha256_le_i64": "314e04d39645db284bcf251e57a015c2b5d75fdbbae5b49288a782fab7168b6b",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    },
+    "rh.smoothwm": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.smoothwm",
+        "size_bytes": 4134549,
+        "sha256": "de76b8cdec330ac54d884f3312319b296cde344afadbcf417c5f3c15a97a4f2d"
+      },
+      "vertices": 114824,
+      "faces": 229644,
+      "coordinate_array_sha256_le_f64": "55affe7b305d04ec2ccf0e3b1b5e8038b2e29c3d697c65596134b18d0212103a",
+      "ordered_faces_sha256_le_i64": "bb4a1320ffb592da71ffdc7793100c8314dcb8acfb16d4365f734b0267374ccb",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    },
+    "rh.sphere.reg": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.sphere.reg",
+        "size_bytes": 4134310,
+        "sha256": "b6fc0fbd8c1b7370fba6492baf93bfa74c8eb7793133e8d1cfd286ba86058ef5"
+      },
+      "vertices": 114824,
+      "faces": 229644,
+      "coordinate_array_sha256_le_f64": "b34dfce3d90a1b79c9c8004568ef4b7e823d67b8d5d1a662290c38cc5cb7e930",
+      "ordered_faces_sha256_le_i64": "bb4a1320ffb592da71ffdc7793100c8314dcb8acfb16d4365f734b0267374ccb",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    }
+  },
+  "source_default_startup_wait_seconds": null,
+  "group_call_arguments": {
+    "device": "cuda:0",
+    "threads": 4,
+    "workers": 2,
+    "profile_stages": true,
+    "kwargs": {
+      "assets": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets"
+    }
+  },
+  "parent_cuda_initialized_before_group": false,
+  "actual_parent_precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast_enabled": false
+  },
+  "group_execution_completed": true,
+  "group_report": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/annotation.group.json",
+    "size_bytes": 172806,
+    "sha256": "091fc35433ffa743375c2b77f1a8cd16c4cc27bd242066df3250ffa829738096"
+  },
+  "worker_device_validation": {
+    "expected_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "workers": {
+      "lh": {
+        "actual_uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "matches_declared": true,
+        "normalized_uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+      },
+      "rh": {
+        "actual_uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "matches_declared": true,
+        "normalized_uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+      }
+    },
+    "errors": [],
+    "verified": true
+  },
+  "copied_inputs_after": [
+    {
+      "kind": "subject",
+      "relative": "mri/aseg.presurf.mgz",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/mri/aseg.presurf.mgz",
+      "size_bytes": 341922,
+      "sha256": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.smoothwm",
+      "size_bytes": 4118108,
+      "sha256": "11b4c03d273548b1e1bd285978fc6c6bdef1d1f80ed91483a06262976233a19b"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.sphere.reg",
+      "size_bytes": 4116958,
+      "sha256": "696b7d9b01efbf7542b6522d367e1231167b2a76a7f605609a71a53430fe1c7b"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/lh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/lh.cortex.label",
+      "size_bytes": 4721803,
+      "sha256": "38add960bb30bd300b93ecbf50879d141cb57ed1ebdf25a21f4c6eb34bc9da87"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18842086,
+      "sha256": "721d6f53e8e3edae2c3798d52c5878026f1cdbe6cb286659ae48b920651a4cb6"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21724500,
+      "sha256": "f726bca3747676e465aaad4572e525dc5370d0a073c435fd41c1beaff2ad6add"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 22003357,
+      "sha256": "6db52238d4c6c5867edd645daf23a7ce1bf753caffa792c9972db40af8229214"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.smoothwm",
+      "size_bytes": 4134549,
+      "sha256": "de76b8cdec330ac54d884f3312319b296cde344afadbcf417c5f3c15a97a4f2d"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.sphere.reg",
+      "size_bytes": 4134310,
+      "sha256": "b6fc0fbd8c1b7370fba6492baf93bfa74c8eb7793133e8d1cfd286ba86058ef5"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/rh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/rh.cortex.label",
+      "size_bytes": 4612395,
+      "sha256": "dbf0e417de9246e3077b57c08dbb45f5125ae65406565506882ddef54a161467"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18610793,
+      "sha256": "64e98c907af4242cb79b645a384c97ed37854b7b127a18ad406084b29dc486cf"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21898679,
+      "sha256": "878f4caae1f7d439ebeae5499537b9b5c1146bf7c369f5fb4cfc1df67e6d0b29"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21987412,
+      "sha256": "3f6e2ec1f24081f5a3ad2cafcdc1aaa156a2a635b78c30808dbeb8aaf9421498"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic4.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic4.tri",
+      "size_bytes": 207432,
+      "sha256": "95cc8e50f48df9b2a7a8558c9837becfa486f7562f2d9ae6fee4cc7aad341d13"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic7.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic7.tri",
+      "size_bytes": 13368214,
+      "sha256": "cdd2761f0921a05d4959eb5b200fc3c65c0344a575809b0b09458299d90a1e6d"
+    }
+  ],
+  "original_inputs_after": [
+    {
+      "kind": "subject",
+      "relative": "mri/aseg.presurf.mgz",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/mri/aseg.presurf.mgz",
+      "size_bytes": 341922,
+      "sha256": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.smoothwm",
+      "size_bytes": 4118108,
+      "sha256": "11b4c03d273548b1e1bd285978fc6c6bdef1d1f80ed91483a06262976233a19b"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.sphere.reg",
+      "size_bytes": 4116958,
+      "sha256": "696b7d9b01efbf7542b6522d367e1231167b2a76a7f605609a71a53430fe1c7b"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/lh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/label/lh.cortex.label",
+      "size_bytes": 4721803,
+      "sha256": "38add960bb30bd300b93ecbf50879d141cb57ed1ebdf25a21f4c6eb34bc9da87"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18842086,
+      "sha256": "721d6f53e8e3edae2c3798d52c5878026f1cdbe6cb286659ae48b920651a4cb6"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21724500,
+      "sha256": "f726bca3747676e465aaad4572e525dc5370d0a073c435fd41c1beaff2ad6add"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 22003357,
+      "sha256": "6db52238d4c6c5867edd645daf23a7ce1bf753caffa792c9972db40af8229214"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.smoothwm",
+      "size_bytes": 4134549,
+      "sha256": "de76b8cdec330ac54d884f3312319b296cde344afadbcf417c5f3c15a97a4f2d"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.sphere.reg",
+      "size_bytes": 4134310,
+      "sha256": "b6fc0fbd8c1b7370fba6492baf93bfa74c8eb7793133e8d1cfd286ba86058ef5"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/rh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/label/rh.cortex.label",
+      "size_bytes": 4612395,
+      "sha256": "dbf0e417de9246e3077b57c08dbb45f5125ae65406565506882ddef54a161467"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18610793,
+      "sha256": "64e98c907af4242cb79b645a384c97ed37854b7b127a18ad406084b29dc486cf"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21898679,
+      "sha256": "878f4caae1f7d439ebeae5499537b9b5c1146bf7c369f5fb4cfc1df67e6d0b29"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21987412,
+      "sha256": "3f6e2ec1f24081f5a3ad2cafcdc1aaa156a2a635b78c30808dbeb8aaf9421498"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic4.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic4.tri",
+      "size_bytes": 207432,
+      "sha256": "95cc8e50f48df9b2a7a8558c9837becfa486f7562f2d9ae6fee4cc7aad341d13"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic7.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic7.tri",
+      "size_bytes": 13368214,
+      "sha256": "cdd2761f0921a05d4959eb5b200fc3c65c0344a575809b0b09458299d90a1e6d"
+    }
+  ],
+  "copied_meshes_after": {
+    "lh.smoothwm": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.smoothwm",
+        "size_bytes": 4118108,
+        "sha256": "11b4c03d273548b1e1bd285978fc6c6bdef1d1f80ed91483a06262976233a19b"
+      },
+      "vertices": 114342,
+      "faces": 228680,
+      "coordinate_array_sha256_le_f64": "878dd9afde68bb71877e4e06cd04811e2bebc495a8f519fd010bc17357f9dbcb",
+      "ordered_faces_sha256_le_i64": "314e04d39645db284bcf251e57a015c2b5d75fdbbae5b49288a782fab7168b6b",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    },
+    "lh.sphere.reg": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.sphere.reg",
+        "size_bytes": 4116958,
+        "sha256": "696b7d9b01efbf7542b6522d367e1231167b2a76a7f605609a71a53430fe1c7b"
+      },
+      "vertices": 114342,
+      "faces": 228680,
+      "coordinate_array_sha256_le_f64": "e552cf172f2455951bd0b040e4f13d7fca9db368761924f469f0f0dfaa8f2587",
+      "ordered_faces_sha256_le_i64": "314e04d39645db284bcf251e57a015c2b5d75fdbbae5b49288a782fab7168b6b",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    },
+    "rh.smoothwm": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.smoothwm",
+        "size_bytes": 4134549,
+        "sha256": "de76b8cdec330ac54d884f3312319b296cde344afadbcf417c5f3c15a97a4f2d"
+      },
+      "vertices": 114824,
+      "faces": 229644,
+      "coordinate_array_sha256_le_f64": "55affe7b305d04ec2ccf0e3b1b5e8038b2e29c3d697c65596134b18d0212103a",
+      "ordered_faces_sha256_le_i64": "bb4a1320ffb592da71ffdc7793100c8314dcb8acfb16d4365f734b0267374ccb",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    },
+    "rh.sphere.reg": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.sphere.reg",
+        "size_bytes": 4134310,
+        "sha256": "b6fc0fbd8c1b7370fba6492baf93bfa74c8eb7793133e8d1cfd286ba86058ef5"
+      },
+      "vertices": 114824,
+      "faces": 229644,
+      "coordinate_array_sha256_le_f64": "b34dfce3d90a1b79c9c8004568ef4b7e823d67b8d5d1a662290c38cc5cb7e930",
+      "ordered_faces_sha256_le_i64": "bb4a1320ffb592da71ffdc7793100c8314dcb8acfb16d4365f734b0267374ccb",
+      "space": "surface RAS, millimetres; sphere.reg retains ordered vertex correspondence"
+    }
+  },
+  "annotations": {
+    "lh.aparc": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/lh.aparc.annot",
+        "size_bytes": 916249,
+        "sha256": "4244436549506ac86750acd0a5349a94542459ac57ed7618197a89f9db511bf0"
+      },
+      "semantic_vectors": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/annotation_semantics/lh.aparc.npz",
+        "size_bytes": 269543,
+        "sha256": "3eba512ea6a27f72dec609cf21e2f7d52ad95d4113938d818c307f874998061c"
+      },
+      "vertex_count": 114342,
+      "vertex_order": "0..nvertices-1 verified",
+      "label_original_ids_sha256_le_i64": "f0f71c983bd21f2163c3dd38ab2d19a52723d29450c25e16c5d50ae4bf4cecfe",
+      "label_table_indices_sha256_le_i64": "dd44cc30d9cdf24dc8ba9ab2aa55197a6960ac19bffb83f2ad8131f986880cf8",
+      "color_table_sha256_le_i64": "66291d7acb753717d2bea05db0b0c91f7c0c039b5dc5972e7ea69c5d993befc8",
+      "color_table_names_sha256": "beec5d7fa781a961735a3be8670aa6eccde3b13c9f3972028880f47920c78f0e",
+      "color_table": [
+        {
+          "row": 0,
+          "name_hex": "756e6b6e6f776e",
+          "name": "unknown",
+          "rgba_transparency_and_packed_id": [
+            25,
+            5,
+            25,
+            0,
+            1639705
+          ]
+        },
+        {
+          "row": 1,
+          "name_hex": "62616e6b73737473",
+          "name": "bankssts",
+          "rgba_transparency_and_packed_id": [
+            25,
+            100,
+            40,
+            0,
+            2647065
+          ]
+        },
+        {
+          "row": 2,
+          "name_hex": "63617564616c616e746572696f7263696e67756c617465",
+          "name": "caudalanteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            125,
+            100,
+            160,
+            0,
+            10511485
+          ]
+        },
+        {
+          "row": 3,
+          "name_hex": "63617564616c6d6964646c6566726f6e74616c",
+          "name": "caudalmiddlefrontal",
+          "rgba_transparency_and_packed_id": [
+            100,
+            25,
+            0,
+            0,
+            6500
+          ]
+        },
+        {
+          "row": 4,
+          "name_hex": "636f7270757363616c6c6f73756d",
+          "name": "corpuscallosum",
+          "rgba_transparency_and_packed_id": [
+            120,
+            70,
+            50,
+            0,
+            3294840
+          ]
+        },
+        {
+          "row": 5,
+          "name_hex": "63756e657573",
+          "name": "cuneus",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            100,
+            0,
+            6558940
+          ]
+        },
+        {
+          "row": 6,
+          "name_hex": "656e746f7268696e616c",
+          "name": "entorhinal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            10,
+            0,
+            660700
+          ]
+        },
+        {
+          "row": 7,
+          "name_hex": "66757369666f726d",
+          "name": "fusiform",
+          "rgba_transparency_and_packed_id": [
+            180,
+            220,
+            140,
+            0,
+            9231540
+          ]
+        },
+        {
+          "row": 8,
+          "name_hex": "696e666572696f72706172696574616c",
+          "name": "inferiorparietal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            220,
+            0,
+            14433500
+          ]
+        },
+        {
+          "row": 9,
+          "name_hex": "696e666572696f7274656d706f72616c",
+          "name": "inferiortemporal",
+          "rgba_transparency_and_packed_id": [
+            180,
+            40,
+            120,
+            0,
+            7874740
+          ]
+        },
+        {
+          "row": 10,
+          "name_hex": "697374686d757363696e67756c617465",
+          "name": "isthmuscingulate",
+          "rgba_transparency_and_packed_id": [
+            140,
+            20,
+            140,
+            0,
+            9180300
+          ]
+        },
+        {
+          "row": 11,
+          "name_hex": "6c61746572616c6f636369706974616c",
+          "name": "lateraloccipital",
+          "rgba_transparency_and_packed_id": [
+            20,
+            30,
+            140,
+            0,
+            9182740
+          ]
+        },
+        {
+          "row": 12,
+          "name_hex": "6c61746572616c6f726269746f66726f6e74616c",
+          "name": "lateralorbitofrontal",
+          "rgba_transparency_and_packed_id": [
+            35,
+            75,
+            50,
+            0,
+            3296035
+          ]
+        },
+        {
+          "row": 13,
+          "name_hex": "6c696e6775616c",
+          "name": "lingual",
+          "rgba_transparency_and_packed_id": [
+            225,
+            140,
+            140,
+            0,
+            9211105
+          ]
+        },
+        {
+          "row": 14,
+          "name_hex": "6d656469616c6f726269746f66726f6e74616c",
+          "name": "medialorbitofrontal",
+          "rgba_transparency_and_packed_id": [
+            200,
+            35,
+            75,
+            0,
+            4924360
+          ]
+        },
+        {
+          "row": 15,
+          "name_hex": "6d6964646c6574656d706f72616c",
+          "name": "middletemporal",
+          "rgba_transparency_and_packed_id": [
+            160,
+            100,
+            50,
+            0,
+            3302560
+          ]
+        },
+        {
+          "row": 16,
+          "name_hex": "70617261686970706f63616d70616c",
+          "name": "parahippocampal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            60,
+            0,
+            3988500
+          ]
+        },
+        {
+          "row": 17,
+          "name_hex": "7061726163656e7472616c",
+          "name": "paracentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            220,
+            60,
+            0,
+            3988540
+          ]
+        },
+        {
+          "row": 18,
+          "name_hex": "706172736f70657263756c61726973",
+          "name": "parsopercularis",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            140,
+            0,
+            9221340
+          ]
+        },
+        {
+          "row": 19,
+          "name_hex": "706172736f72626974616c6973",
+          "name": "parsorbitalis",
+          "rgba_transparency_and_packed_id": [
+            20,
+            100,
+            50,
+            0,
+            3302420
+          ]
+        },
+        {
+          "row": 20,
+          "name_hex": "70617273747269616e67756c61726973",
+          "name": "parstriangularis",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            20,
+            0,
+            1326300
+          ]
+        },
+        {
+          "row": 21,
+          "name_hex": "7065726963616c636172696e65",
+          "name": "pericalcarine",
+          "rgba_transparency_and_packed_id": [
+            120,
+            100,
+            60,
+            0,
+            3957880
+          ]
+        },
+        {
+          "row": 22,
+          "name_hex": "706f737463656e7472616c",
+          "name": "postcentral",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            20,
+            0,
+            1316060
+          ]
+        },
+        {
+          "row": 23,
+          "name_hex": "706f73746572696f7263696e67756c617465",
+          "name": "posteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            220,
+            0,
+            14464220
+          ]
+        },
+        {
+          "row": 24,
+          "name_hex": "70726563656e7472616c",
+          "name": "precentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            20,
+            220,
+            0,
+            14423100
+          ]
+        },
+        {
+          "row": 25,
+          "name_hex": "70726563756e657573",
+          "name": "precuneus",
+          "rgba_transparency_and_packed_id": [
+            160,
+            140,
+            180,
+            0,
+            11832480
+          ]
+        },
+        {
+          "row": 26,
+          "name_hex": "726f737472616c616e746572696f7263696e67756c617465",
+          "name": "rostralanteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            80,
+            20,
+            140,
+            0,
+            9180240
+          ]
+        },
+        {
+          "row": 27,
+          "name_hex": "726f737472616c6d6964646c6566726f6e74616c",
+          "name": "rostralmiddlefrontal",
+          "rgba_transparency_and_packed_id": [
+            75,
+            50,
+            125,
+            0,
+            8204875
+          ]
+        },
+        {
+          "row": 28,
+          "name_hex": "7375706572696f7266726f6e74616c",
+          "name": "superiorfrontal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            160,
+            0,
+            10542100
+          ]
+        },
+        {
+          "row": 29,
+          "name_hex": "7375706572696f72706172696574616c",
+          "name": "superiorparietal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            180,
+            140,
+            0,
+            9221140
+          ]
+        },
+        {
+          "row": 30,
+          "name_hex": "7375706572696f7274656d706f72616c",
+          "name": "superiortemporal",
+          "rgba_transparency_and_packed_id": [
+            140,
+            220,
+            220,
+            0,
+            14474380
+          ]
+        },
+        {
+          "row": 31,
+          "name_hex": "73757072616d617267696e616c",
+          "name": "supramarginal",
+          "rgba_transparency_and_packed_id": [
+            80,
+            160,
+            20,
+            0,
+            1351760
+          ]
+        },
+        {
+          "row": 32,
+          "name_hex": "66726f6e74616c706f6c65",
+          "name": "frontalpole",
+          "rgba_transparency_and_packed_id": [
+            100,
+            0,
+            100,
+            0,
+            6553700
+          ]
+        },
+        {
+          "row": 33,
+          "name_hex": "74656d706f72616c706f6c65",
+          "name": "temporalpole",
+          "rgba_transparency_and_packed_id": [
+            70,
+            20,
+            170,
+            0,
+            11146310
+          ]
+        },
+        {
+          "row": 34,
+          "name_hex": "7472616e73766572736574656d706f72616c",
+          "name": "transversetemporal",
+          "rgba_transparency_and_packed_id": [
+            150,
+            150,
+            200,
+            0,
+            13145750
+          ]
+        },
+        {
+          "row": 35,
+          "name_hex": "696e73756c61",
+          "name": "insula",
+          "rgba_transparency_and_packed_id": [
+            255,
+            192,
+            32,
+            0,
+            2146559
+          ]
+        }
+      ],
+      "label_counts": [
+        {
+          "id": 0,
+          "vertices": 7706
+        },
+        {
+          "id": 6500,
+          "vertices": 2731
+        },
+        {
+          "id": 660700,
+          "vertices": 724
+        },
+        {
+          "id": 1316060,
+          "vertices": 5361
+        },
+        {
+          "id": 1326300,
+          "vertices": 1567
+        },
+        {
+          "id": 1351760,
+          "vertices": 4804
+        },
+        {
+          "id": 2146559,
+          "vertices": 3014
+        },
+        {
+          "id": 2647065,
+          "vertices": 1295
+        },
+        {
+          "id": 3296035,
+          "vertices": 3046
+        },
+        {
+          "id": 3302420,
+          "vertices": 824
+        },
+        {
+          "id": 3302560,
+          "vertices": 4017
+        },
+        {
+          "id": 3957880,
+          "vertices": 1936
+        },
+        {
+          "id": 3988500,
+          "vertices": 926
+        },
+        {
+          "id": 3988540,
+          "vertices": 1925
+        },
+        {
+          "id": 4924360,
+          "vertices": 2500
+        },
+        {
+          "id": 6553700,
+          "vertices": 316
+        },
+        {
+          "id": 6558940,
+          "vertices": 2352
+        },
+        {
+          "id": 7874740,
+          "vertices": 4469
+        },
+        {
+          "id": 8204875,
+          "vertices": 6166
+        },
+        {
+          "id": 9180240,
+          "vertices": 819
+        },
+        {
+          "id": 9180300,
+          "vertices": 1279
+        },
+        {
+          "id": 9182740,
+          "vertices": 7223
+        },
+        {
+          "id": 9211105,
+          "vertices": 3766
+        },
+        {
+          "id": 9221140,
+          "vertices": 7115
+        },
+        {
+          "id": 9221340,
+          "vertices": 1870
+        },
+        {
+          "id": 9231540,
+          "vertices": 4428
+        },
+        {
+          "id": 10511485,
+          "vertices": 760
+        },
+        {
+          "id": 10542100,
+          "vertices": 9116
+        },
+        {
+          "id": 11146310,
+          "vertices": 620
+        },
+        {
+          "id": 11832480,
+          "vertices": 4231
+        },
+        {
+          "id": 13145750,
+          "vertices": 532
+        },
+        {
+          "id": 14423100,
+          "vertices": 5806
+        },
+        {
+          "id": 14433500,
+          "vertices": 4733
+        },
+        {
+          "id": 14464220,
+          "vertices": 1422
+        },
+        {
+          "id": 14474380,
+          "vertices": 4943
+        }
+      ]
+    },
+    "lh.aparc.a2009s": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/lh.aparc.a2009s.annot",
+        "size_bytes": 917992,
+        "sha256": "d63f61cba3fc8e521fe8d0bdd4b86849627a3d7a5d3d80adddb7a6e527758dbe"
+      },
+      "semantic_vectors": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/annotation_semantics/lh.aparc.a2009s.npz",
+        "size_bytes": 291454,
+        "sha256": "078592ad6da3d7808a1acbdcb297aa9f51bd5ad462d8eb8462bfcbb358d3e8da"
+      },
+      "vertex_count": 114342,
+      "vertex_order": "0..nvertices-1 verified",
+      "label_original_ids_sha256_le_i64": "da953165cc2cf796d68180b0b38fa471cf2f9a2383ed6a0516745189f78ead05",
+      "label_table_indices_sha256_le_i64": "17c09ba42c3b60c7db3a00dc8129dd8a7290d5f5b24619a48e7ca04b371cd061",
+      "color_table_sha256_le_i64": "bd2ccdefc1c81bb6fe0c64dc4868da70d24487ab1d37383c03ec0e55e7a724a5",
+      "color_table_names_sha256": "9265d6849fc605afa205468f13756d123f8522d10c180ab8c0d5a245675c7c26",
+      "color_table": [
+        {
+          "row": 0,
+          "name_hex": "556e6b6e6f776e",
+          "name": "Unknown",
+          "rgba_transparency_and_packed_id": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "row": 1,
+          "name_hex": "475f616e645f535f66726f6e746f6d617267696e",
+          "name": "G_and_S_frontomargin",
+          "rgba_transparency_and_packed_id": [
+            23,
+            220,
+            60,
+            0,
+            3988503
+          ]
+        },
+        {
+          "row": 2,
+          "name_hex": "475f616e645f535f6f636369706974616c5f696e66",
+          "name": "G_and_S_occipital_inf",
+          "rgba_transparency_and_packed_id": [
+            23,
+            60,
+            180,
+            0,
+            11811863
+          ]
+        },
+        {
+          "row": 3,
+          "name_hex": "475f616e645f535f7061726163656e7472616c",
+          "name": "G_and_S_paracentral",
+          "rgba_transparency_and_packed_id": [
+            63,
+            100,
+            60,
+            0,
+            3957823
+          ]
+        },
+        {
+          "row": 4,
+          "name_hex": "475f616e645f535f73756263656e7472616c",
+          "name": "G_and_S_subcentral",
+          "rgba_transparency_and_packed_id": [
+            63,
+            20,
+            220,
+            0,
+            14423103
+          ]
+        },
+        {
+          "row": 5,
+          "name_hex": "475f616e645f535f7472616e73765f66726f6e746f706f6c",
+          "name": "G_and_S_transv_frontopol",
+          "rgba_transparency_and_packed_id": [
+            13,
+            0,
+            250,
+            0,
+            16384013
+          ]
+        },
+        {
+          "row": 6,
+          "name_hex": "475f616e645f535f63696e67756c2d416e74",
+          "name": "G_and_S_cingul-Ant",
+          "rgba_transparency_and_packed_id": [
+            26,
+            60,
+            0,
+            0,
+            15386
+          ]
+        },
+        {
+          "row": 7,
+          "name_hex": "475f616e645f535f63696e67756c2d4d69642d416e74",
+          "name": "G_and_S_cingul-Mid-Ant",
+          "rgba_transparency_and_packed_id": [
+            26,
+            60,
+            75,
+            0,
+            4930586
+          ]
+        },
+        {
+          "row": 8,
+          "name_hex": "475f616e645f535f63696e67756c2d4d69642d506f7374",
+          "name": "G_and_S_cingul-Mid-Post",
+          "rgba_transparency_and_packed_id": [
+            26,
+            60,
+            150,
+            0,
+            9845786
+          ]
+        },
+        {
+          "row": 9,
+          "name_hex": "475f63696e67756c2d506f73742d646f7273616c",
+          "name": "G_cingul-Post-dorsal",
+          "rgba_transparency_and_packed_id": [
+            25,
+            60,
+            250,
+            0,
+            16399385
+          ]
+        },
+        {
+          "row": 10,
+          "name_hex": "475f63696e67756c2d506f73742d76656e7472616c",
+          "name": "G_cingul-Post-ventral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            25,
+            25,
+            0,
+            1644860
+          ]
+        },
+        {
+          "row": 11,
+          "name_hex": "475f63756e657573",
+          "name": "G_cuneus",
+          "rgba_transparency_and_packed_id": [
+            180,
+            20,
+            20,
+            0,
+            1316020
+          ]
+        },
+        {
+          "row": 12,
+          "name_hex": "475f66726f6e745f696e662d4f70657263756c6172",
+          "name": "G_front_inf-Opercular",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            100,
+            0,
+            6558940
+          ]
+        },
+        {
+          "row": 13,
+          "name_hex": "475f66726f6e745f696e662d4f72626974616c",
+          "name": "G_front_inf-Orbital",
+          "rgba_transparency_and_packed_id": [
+            140,
+            60,
+            60,
+            0,
+            3947660
+          ]
+        },
+        {
+          "row": 14,
+          "name_hex": "475f66726f6e745f696e662d547269616e67756c",
+          "name": "G_front_inf-Triangul",
+          "rgba_transparency_and_packed_id": [
+            180,
+            220,
+            140,
+            0,
+            9231540
+          ]
+        },
+        {
+          "row": 15,
+          "name_hex": "475f66726f6e745f6d6964646c65",
+          "name": "G_front_middle",
+          "rgba_transparency_and_packed_id": [
+            140,
+            100,
+            180,
+            0,
+            11822220
+          ]
+        },
+        {
+          "row": 16,
+          "name_hex": "475f66726f6e745f737570",
+          "name": "G_front_sup",
+          "rgba_transparency_and_packed_id": [
+            180,
+            20,
+            140,
+            0,
+            9180340
+          ]
+        },
+        {
+          "row": 17,
+          "name_hex": "475f496e735f6c675f616e645f535f63656e745f696e73",
+          "name": "G_Ins_lg_and_S_cent_ins",
+          "rgba_transparency_and_packed_id": [
+            23,
+            10,
+            10,
+            0,
+            657943
+          ]
+        },
+        {
+          "row": 18,
+          "name_hex": "475f696e73756c61725f73686f7274",
+          "name": "G_insular_short",
+          "rgba_transparency_and_packed_id": [
+            225,
+            140,
+            140,
+            0,
+            9211105
+          ]
+        },
+        {
+          "row": 19,
+          "name_hex": "475f6f636369706974616c5f6d6964646c65",
+          "name": "G_occipital_middle",
+          "rgba_transparency_and_packed_id": [
+            180,
+            60,
+            180,
+            0,
+            11812020
+          ]
+        },
+        {
+          "row": 20,
+          "name_hex": "475f6f636369706974616c5f737570",
+          "name": "G_occipital_sup",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            60,
+            0,
+            3988500
+          ]
+        },
+        {
+          "row": 21,
+          "name_hex": "475f6f632d74656d705f6c61742d66757369666f72",
+          "name": "G_oc-temp_lat-fusifor",
+          "rgba_transparency_and_packed_id": [
+            60,
+            20,
+            140,
+            0,
+            9180220
+          ]
+        },
+        {
+          "row": 22,
+          "name_hex": "475f6f632d74656d705f6d65642d4c696e6775616c",
+          "name": "G_oc-temp_med-Lingual",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            140,
+            0,
+            9221340
+          ]
+        },
+        {
+          "row": 23,
+          "name_hex": "475f6f632d74656d705f6d65642d50617261686970",
+          "name": "G_oc-temp_med-Parahip",
+          "rgba_transparency_and_packed_id": [
+            65,
+            100,
+            20,
+            0,
+            1336385
+          ]
+        },
+        {
+          "row": 24,
+          "name_hex": "475f6f72626974616c",
+          "name": "G_orbital",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            20,
+            0,
+            1326300
+          ]
+        },
+        {
+          "row": 25,
+          "name_hex": "475f7061726965745f696e662d416e67756c6172",
+          "name": "G_pariet_inf-Angular",
+          "rgba_transparency_and_packed_id": [
+            20,
+            60,
+            220,
+            0,
+            14433300
+          ]
+        },
+        {
+          "row": 26,
+          "name_hex": "475f7061726965745f696e662d53757072616d6172",
+          "name": "G_pariet_inf-Supramar",
+          "rgba_transparency_and_packed_id": [
+            100,
+            100,
+            60,
+            0,
+            3957860
+          ]
+        },
+        {
+          "row": 27,
+          "name_hex": "475f706172696574616c5f737570",
+          "name": "G_parietal_sup",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            220,
+            0,
+            14464220
+          ]
+        },
+        {
+          "row": 28,
+          "name_hex": "475f706f737463656e7472616c",
+          "name": "G_postcentral",
+          "rgba_transparency_and_packed_id": [
+            20,
+            180,
+            140,
+            0,
+            9221140
+          ]
+        },
+        {
+          "row": 29,
+          "name_hex": "475f70726563656e7472616c",
+          "name": "G_precentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            140,
+            180,
+            0,
+            11832380
+          ]
+        },
+        {
+          "row": 30,
+          "name_hex": "475f70726563756e657573",
+          "name": "G_precuneus",
+          "rgba_transparency_and_packed_id": [
+            25,
+            20,
+            140,
+            0,
+            9180185
+          ]
+        },
+        {
+          "row": 31,
+          "name_hex": "475f726563747573",
+          "name": "G_rectus",
+          "rgba_transparency_and_packed_id": [
+            20,
+            60,
+            100,
+            0,
+            6568980
+          ]
+        },
+        {
+          "row": 32,
+          "name_hex": "475f73756263616c6c6f73616c",
+          "name": "G_subcallosal",
+          "rgba_transparency_and_packed_id": [
+            60,
+            220,
+            20,
+            0,
+            1367100
+          ]
+        },
+        {
+          "row": 33,
+          "name_hex": "475f74656d705f7375702d475f545f7472616e7376",
+          "name": "G_temp_sup-G_T_transv",
+          "rgba_transparency_and_packed_id": [
+            60,
+            60,
+            220,
+            0,
+            14433340
+          ]
+        },
+        {
+          "row": 34,
+          "name_hex": "475f74656d705f7375702d4c61746572616c",
+          "name": "G_temp_sup-Lateral",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            220,
+            0,
+            14433500
+          ]
+        },
+        {
+          "row": 35,
+          "name_hex": "475f74656d705f7375702d506c616e5f706f6c6172",
+          "name": "G_temp_sup-Plan_polar",
+          "rgba_transparency_and_packed_id": [
+            65,
+            220,
+            60,
+            0,
+            3988545
+          ]
+        },
+        {
+          "row": 36,
+          "name_hex": "475f74656d705f7375702d506c616e5f74656d706f",
+          "name": "G_temp_sup-Plan_tempo",
+          "rgba_transparency_and_packed_id": [
+            25,
+            140,
+            20,
+            0,
+            1346585
+          ]
+        },
+        {
+          "row": 37,
+          "name_hex": "475f74656d706f72616c5f696e66",
+          "name": "G_temporal_inf",
+          "rgba_transparency_and_packed_id": [
+            220,
+            220,
+            100,
+            0,
+            6610140
+          ]
+        },
+        {
+          "row": 38,
+          "name_hex": "475f74656d706f72616c5f6d6964646c65",
+          "name": "G_temporal_middle",
+          "rgba_transparency_and_packed_id": [
+            180,
+            60,
+            60,
+            0,
+            3947700
+          ]
+        },
+        {
+          "row": 39,
+          "name_hex": "4c61745f4669732d616e742d486f72697a6f6e74",
+          "name": "Lat_Fis-ant-Horizont",
+          "rgba_transparency_and_packed_id": [
+            61,
+            20,
+            220,
+            0,
+            14423101
+          ]
+        },
+        {
+          "row": 40,
+          "name_hex": "4c61745f4669732d616e742d566572746963616c",
+          "name": "Lat_Fis-ant-Vertical",
+          "rgba_transparency_and_packed_id": [
+            61,
+            20,
+            60,
+            0,
+            3937341
+          ]
+        },
+        {
+          "row": 41,
+          "name_hex": "4c61745f4669732d706f7374",
+          "name": "Lat_Fis-post",
+          "rgba_transparency_and_packed_id": [
+            61,
+            60,
+            100,
+            0,
+            6569021
+          ]
+        },
+        {
+          "row": 42,
+          "name_hex": "4d656469616c5f77616c6c",
+          "name": "Medial_wall",
+          "rgba_transparency_and_packed_id": [
+            25,
+            25,
+            25,
+            0,
+            1644825
+          ]
+        },
+        {
+          "row": 43,
+          "name_hex": "506f6c655f6f636369706974616c",
+          "name": "Pole_occipital",
+          "rgba_transparency_and_packed_id": [
+            140,
+            20,
+            60,
+            0,
+            3937420
+          ]
+        },
+        {
+          "row": 44,
+          "name_hex": "506f6c655f74656d706f72616c",
+          "name": "Pole_temporal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            20,
+            0,
+            1357020
+          ]
+        },
+        {
+          "row": 45,
+          "name_hex": "535f63616c636172696e65",
+          "name": "S_calcarine",
+          "rgba_transparency_and_packed_id": [
+            63,
+            180,
+            180,
+            0,
+            11842623
+          ]
+        },
+        {
+          "row": 46,
+          "name_hex": "535f63656e7472616c",
+          "name": "S_central",
+          "rgba_transparency_and_packed_id": [
+            221,
+            20,
+            10,
+            0,
+            660701
+          ]
+        },
+        {
+          "row": 47,
+          "name_hex": "535f63696e67756c2d4d617267696e616c6973",
+          "name": "S_cingul-Marginalis",
+          "rgba_transparency_and_packed_id": [
+            221,
+            20,
+            100,
+            0,
+            6558941
+          ]
+        },
+        {
+          "row": 48,
+          "name_hex": "535f63697263756c61725f696e73756c615f616e74",
+          "name": "S_circular_insula_ant",
+          "rgba_transparency_and_packed_id": [
+            221,
+            60,
+            140,
+            0,
+            9190621
+          ]
+        },
+        {
+          "row": 49,
+          "name_hex": "535f63697263756c61725f696e73756c615f696e66",
+          "name": "S_circular_insula_inf",
+          "rgba_transparency_and_packed_id": [
+            221,
+            20,
+            220,
+            0,
+            14423261
+          ]
+        },
+        {
+          "row": 50,
+          "name_hex": "535f63697263756c61725f696e73756c615f737570",
+          "name": "S_circular_insula_sup",
+          "rgba_transparency_and_packed_id": [
+            61,
+            220,
+            220,
+            0,
+            14474301
+          ]
+        },
+        {
+          "row": 51,
+          "name_hex": "535f636f6c6c61745f7472616e73765f616e74",
+          "name": "S_collat_transv_ant",
+          "rgba_transparency_and_packed_id": [
+            100,
+            200,
+            200,
+            0,
+            13158500
+          ]
+        },
+        {
+          "row": 52,
+          "name_hex": "535f636f6c6c61745f7472616e73765f706f7374",
+          "name": "S_collat_transv_post",
+          "rgba_transparency_and_packed_id": [
+            10,
+            200,
+            200,
+            0,
+            13158410
+          ]
+        },
+        {
+          "row": 53,
+          "name_hex": "535f66726f6e745f696e66",
+          "name": "S_front_inf",
+          "rgba_transparency_and_packed_id": [
+            221,
+            220,
+            20,
+            0,
+            1367261
+          ]
+        },
+        {
+          "row": 54,
+          "name_hex": "535f66726f6e745f6d6964646c65",
+          "name": "S_front_middle",
+          "rgba_transparency_and_packed_id": [
+            141,
+            20,
+            100,
+            0,
+            6558861
+          ]
+        },
+        {
+          "row": 55,
+          "name_hex": "535f66726f6e745f737570",
+          "name": "S_front_sup",
+          "rgba_transparency_and_packed_id": [
+            61,
+            220,
+            100,
+            0,
+            6609981
+          ]
+        },
+        {
+          "row": 56,
+          "name_hex": "535f696e7465726d5f7072696d2d4a656e73656e",
+          "name": "S_interm_prim-Jensen",
+          "rgba_transparency_and_packed_id": [
+            141,
+            60,
+            20,
+            0,
+            1326221
+          ]
+        },
+        {
+          "row": 57,
+          "name_hex": "535f696e7472617061726965745f616e645f505f7472616e73",
+          "name": "S_intrapariet_and_P_trans",
+          "rgba_transparency_and_packed_id": [
+            143,
+            20,
+            220,
+            0,
+            14423183
+          ]
+        },
+        {
+          "row": 58,
+          "name_hex": "535f6f635f6d6964646c655f616e645f4c756e61747573",
+          "name": "S_oc_middle_and_Lunatus",
+          "rgba_transparency_and_packed_id": [
+            101,
+            60,
+            220,
+            0,
+            14433381
+          ]
+        },
+        {
+          "row": 59,
+          "name_hex": "535f6f635f7375705f616e645f7472616e7376657273616c",
+          "name": "S_oc_sup_and_transversal",
+          "rgba_transparency_and_packed_id": [
+            21,
+            20,
+            140,
+            0,
+            9180181
+          ]
+        },
+        {
+          "row": 60,
+          "name_hex": "535f6f636369706974616c5f616e74",
+          "name": "S_occipital_ant",
+          "rgba_transparency_and_packed_id": [
+            61,
+            20,
+            180,
+            0,
+            11801661
+          ]
+        },
+        {
+          "row": 61,
+          "name_hex": "535f6f632d74656d705f6c6174",
+          "name": "S_oc-temp_lat",
+          "rgba_transparency_and_packed_id": [
+            221,
+            140,
+            20,
+            0,
+            1346781
+          ]
+        },
+        {
+          "row": 62,
+          "name_hex": "535f6f632d74656d705f6d65645f616e645f4c696e6775616c",
+          "name": "S_oc-temp_med_and_Lingual",
+          "rgba_transparency_and_packed_id": [
+            141,
+            100,
+            220,
+            0,
+            14443661
+          ]
+        },
+        {
+          "row": 63,
+          "name_hex": "535f6f72626974616c5f6c61746572616c",
+          "name": "S_orbital_lateral",
+          "rgba_transparency_and_packed_id": [
+            221,
+            100,
+            20,
+            0,
+            1336541
+          ]
+        },
+        {
+          "row": 64,
+          "name_hex": "535f6f72626974616c5f6d65642d6f6c66616374",
+          "name": "S_orbital_med-olfact",
+          "rgba_transparency_and_packed_id": [
+            181,
+            200,
+            20,
+            0,
+            1362101
+          ]
+        },
+        {
+          "row": 65,
+          "name_hex": "535f6f72626974616c2d485f536861706564",
+          "name": "S_orbital-H_Shaped",
+          "rgba_transparency_and_packed_id": [
+            101,
+            20,
+            20,
+            0,
+            1315941
+          ]
+        },
+        {
+          "row": 66,
+          "name_hex": "535f7061726965746f5f6f636369706974616c",
+          "name": "S_parieto_occipital",
+          "rgba_transparency_and_packed_id": [
+            101,
+            100,
+            180,
+            0,
+            11822181
+          ]
+        },
+        {
+          "row": 67,
+          "name_hex": "535f7065726963616c6c6f73616c",
+          "name": "S_pericallosal",
+          "rgba_transparency_and_packed_id": [
+            181,
+            220,
+            20,
+            0,
+            1367221
+          ]
+        },
+        {
+          "row": 68,
+          "name_hex": "535f706f737463656e7472616c",
+          "name": "S_postcentral",
+          "rgba_transparency_and_packed_id": [
+            21,
+            140,
+            200,
+            0,
+            13143061
+          ]
+        },
+        {
+          "row": 69,
+          "name_hex": "535f70726563656e7472616c2d696e662d70617274",
+          "name": "S_precentral-inf-part",
+          "rgba_transparency_and_packed_id": [
+            21,
+            20,
+            240,
+            0,
+            15733781
+          ]
+        },
+        {
+          "row": 70,
+          "name_hex": "535f70726563656e7472616c2d7375702d70617274",
+          "name": "S_precentral-sup-part",
+          "rgba_transparency_and_packed_id": [
+            21,
+            20,
+            200,
+            0,
+            13112341
+          ]
+        },
+        {
+          "row": 71,
+          "name_hex": "535f7375626f72626974616c",
+          "name": "S_suborbital",
+          "rgba_transparency_and_packed_id": [
+            21,
+            20,
+            60,
+            0,
+            3937301
+          ]
+        },
+        {
+          "row": 72,
+          "name_hex": "535f737562706172696574616c",
+          "name": "S_subparietal",
+          "rgba_transparency_and_packed_id": [
+            101,
+            60,
+            60,
+            0,
+            3947621
+          ]
+        },
+        {
+          "row": 73,
+          "name_hex": "535f74656d706f72616c5f696e66",
+          "name": "S_temporal_inf",
+          "rgba_transparency_and_packed_id": [
+            21,
+            180,
+            180,
+            0,
+            11842581
+          ]
+        },
+        {
+          "row": 74,
+          "name_hex": "535f74656d706f72616c5f737570",
+          "name": "S_temporal_sup",
+          "rgba_transparency_and_packed_id": [
+            223,
+            220,
+            60,
+            0,
+            3988703
+          ]
+        },
+        {
+          "row": 75,
+          "name_hex": "535f74656d706f72616c5f7472616e737665727365",
+          "name": "S_temporal_transverse",
+          "rgba_transparency_and_packed_id": [
+            221,
+            60,
+            60,
+            0,
+            3947741
+          ]
+        }
+      ],
+      "label_counts": [
+        {
+          "id": 0,
+          "vertices": 7706
+        },
+        {
+          "id": 15386,
+          "vertices": 1876
+        },
+        {
+          "id": 657943,
+          "vertices": 559
+        },
+        {
+          "id": 660701,
+          "vertices": 2632
+        },
+        {
+          "id": 1315941,
+          "vertices": 1093
+        },
+        {
+          "id": 1316020,
+          "vertices": 2031
+        },
+        {
+          "id": 1326221,
+          "vertices": 137
+        },
+        {
+          "id": 1326300,
+          "vertices": 1839
+        },
+        {
+          "id": 1336385,
+          "vertices": 1561
+        },
+        {
+          "id": 1336541,
+          "vertices": 259
+        },
+        {
+          "id": 1346585,
+          "vertices": 923
+        },
+        {
+          "id": 1346781,
+          "vertices": 791
+        },
+        {
+          "id": 1357020,
+          "vertices": 1418
+        },
+        {
+          "id": 1362101,
+          "vertices": 586
+        },
+        {
+          "id": 1367100,
+          "vertices": 683
+        },
+        {
+          "id": 1367221,
+          "vertices": 1030
+        },
+        {
+          "id": 1367261,
+          "vertices": 1692
+        },
+        {
+          "id": 1644860,
+          "vertices": 271
+        },
+        {
+          "id": 3937301,
+          "vertices": 514
+        },
+        {
+          "id": 3937341,
+          "vertices": 186
+        },
+        {
+          "id": 3937420,
+          "vertices": 2071
+        },
+        {
+          "id": 3947621,
+          "vertices": 751
+        },
+        {
+          "id": 3947660,
+          "vertices": 358
+        },
+        {
+          "id": 3947700,
+          "vertices": 2162
+        },
+        {
+          "id": 3947741,
+          "vertices": 304
+        },
+        {
+          "id": 3957823,
+          "vertices": 1620
+        },
+        {
+          "id": 3957860,
+          "vertices": 2395
+        },
+        {
+          "id": 3988500,
+          "vertices": 1587
+        },
+        {
+          "id": 3988503,
+          "vertices": 911
+        },
+        {
+          "id": 3988545,
+          "vertices": 768
+        },
+        {
+          "id": 3988703,
+          "vertices": 4844
+        },
+        {
+          "id": 4930586,
+          "vertices": 1207
+        },
+        {
+          "id": 6558861,
+          "vertices": 1259
+        },
+        {
+          "id": 6558940,
+          "vertices": 1044
+        },
+        {
+          "id": 6558941,
+          "vertices": 913
+        },
+        {
+          "id": 6568980,
+          "vertices": 912
+        },
+        {
+          "id": 6569021,
+          "vertices": 1093
+        },
+        {
+          "id": 6609981,
+          "vertices": 2322
+        },
+        {
+          "id": 6610140,
+          "vertices": 2065
+        },
+        {
+          "id": 9180181,
+          "vertices": 1304
+        },
+        {
+          "id": 9180185,
+          "vertices": 1970
+        },
+        {
+          "id": 9180220,
+          "vertices": 1963
+        },
+        {
+          "id": 9180340,
+          "vertices": 6073
+        },
+        {
+          "id": 9190621,
+          "vertices": 483
+        },
+        {
+          "id": 9211105,
+          "vertices": 616
+        },
+        {
+          "id": 9221140,
+          "vertices": 2016
+        },
+        {
+          "id": 9221340,
+          "vertices": 2708
+        },
+        {
+          "id": 9231540,
+          "vertices": 893
+        },
+        {
+          "id": 9845786,
+          "vertices": 1089
+        },
+        {
+          "id": 11801661,
+          "vertices": 572
+        },
+        {
+          "id": 11811863,
+          "vertices": 1368
+        },
+        {
+          "id": 11812020,
+          "vertices": 1895
+        },
+        {
+          "id": 11822181,
+          "vertices": 1969
+        },
+        {
+          "id": 11822220,
+          "vertices": 3421
+        },
+        {
+          "id": 11832380,
+          "vertices": 2059
+        },
+        {
+          "id": 11842581,
+          "vertices": 1676
+        },
+        {
+          "id": 11842623,
+          "vertices": 2323
+        },
+        {
+          "id": 13112341,
+          "vertices": 880
+        },
+        {
+          "id": 13143061,
+          "vertices": 2858
+        },
+        {
+          "id": 13158410,
+          "vertices": 381
+        },
+        {
+          "id": 13158500,
+          "vertices": 1201
+        },
+        {
+          "id": 14423101,
+          "vertices": 270
+        },
+        {
+          "id": 14423103,
+          "vertices": 1181
+        },
+        {
+          "id": 14423183,
+          "vertices": 2359
+        },
+        {
+          "id": 14423261,
+          "vertices": 1200
+        },
+        {
+          "id": 14433300,
+          "vertices": 1743
+        },
+        {
+          "id": 14433340,
+          "vertices": 421
+        },
+        {
+          "id": 14433381,
+          "vertices": 1132
+        },
+        {
+          "id": 14433500,
+          "vertices": 1642
+        },
+        {
+          "id": 14443661,
+          "vertices": 1657
+        },
+        {
+          "id": 14464220,
+          "vertices": 2505
+        },
+        {
+          "id": 14474301,
+          "vertices": 1489
+        },
+        {
+          "id": 15733781,
+          "vertices": 1438
+        },
+        {
+          "id": 16384013,
+          "vertices": 684
+        },
+        {
+          "id": 16399385,
+          "vertices": 530
+        }
+      ]
+    },
+    "lh.aparc.DKTatlas": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/lh.aparc.DKTatlas.annot",
+        "size_bytes": 916249,
+        "sha256": "376fc550d3fe90754b7bf9f96cc6aab6488d211771cdc927c477c8ee98b31904"
+      },
+      "semantic_vectors": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/annotation_semantics/lh.aparc.DKTatlas.npz",
+        "size_bytes": 267792,
+        "sha256": "c6714206f743f5fc0759d560e4382477756d9a0b8b03b4fafd7c31bb9ac59cc9"
+      },
+      "vertex_count": 114342,
+      "vertex_order": "0..nvertices-1 verified",
+      "label_original_ids_sha256_le_i64": "fd1927cbd66ebfe8f6c933f7bc19851bce5e8c550d2fd0f71619c2584192082d",
+      "label_table_indices_sha256_le_i64": "b63dfa529218d8346eca58263d23f653298d7b1d2c3efbfea2d83ef046f127e2",
+      "color_table_sha256_le_i64": "66291d7acb753717d2bea05db0b0c91f7c0c039b5dc5972e7ea69c5d993befc8",
+      "color_table_names_sha256": "beec5d7fa781a961735a3be8670aa6eccde3b13c9f3972028880f47920c78f0e",
+      "color_table": [
+        {
+          "row": 0,
+          "name_hex": "756e6b6e6f776e",
+          "name": "unknown",
+          "rgba_transparency_and_packed_id": [
+            25,
+            5,
+            25,
+            0,
+            1639705
+          ]
+        },
+        {
+          "row": 1,
+          "name_hex": "62616e6b73737473",
+          "name": "bankssts",
+          "rgba_transparency_and_packed_id": [
+            25,
+            100,
+            40,
+            0,
+            2647065
+          ]
+        },
+        {
+          "row": 2,
+          "name_hex": "63617564616c616e746572696f7263696e67756c617465",
+          "name": "caudalanteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            125,
+            100,
+            160,
+            0,
+            10511485
+          ]
+        },
+        {
+          "row": 3,
+          "name_hex": "63617564616c6d6964646c6566726f6e74616c",
+          "name": "caudalmiddlefrontal",
+          "rgba_transparency_and_packed_id": [
+            100,
+            25,
+            0,
+            0,
+            6500
+          ]
+        },
+        {
+          "row": 4,
+          "name_hex": "636f7270757363616c6c6f73756d",
+          "name": "corpuscallosum",
+          "rgba_transparency_and_packed_id": [
+            120,
+            70,
+            50,
+            0,
+            3294840
+          ]
+        },
+        {
+          "row": 5,
+          "name_hex": "63756e657573",
+          "name": "cuneus",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            100,
+            0,
+            6558940
+          ]
+        },
+        {
+          "row": 6,
+          "name_hex": "656e746f7268696e616c",
+          "name": "entorhinal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            10,
+            0,
+            660700
+          ]
+        },
+        {
+          "row": 7,
+          "name_hex": "66757369666f726d",
+          "name": "fusiform",
+          "rgba_transparency_and_packed_id": [
+            180,
+            220,
+            140,
+            0,
+            9231540
+          ]
+        },
+        {
+          "row": 8,
+          "name_hex": "696e666572696f72706172696574616c",
+          "name": "inferiorparietal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            220,
+            0,
+            14433500
+          ]
+        },
+        {
+          "row": 9,
+          "name_hex": "696e666572696f7274656d706f72616c",
+          "name": "inferiortemporal",
+          "rgba_transparency_and_packed_id": [
+            180,
+            40,
+            120,
+            0,
+            7874740
+          ]
+        },
+        {
+          "row": 10,
+          "name_hex": "697374686d757363696e67756c617465",
+          "name": "isthmuscingulate",
+          "rgba_transparency_and_packed_id": [
+            140,
+            20,
+            140,
+            0,
+            9180300
+          ]
+        },
+        {
+          "row": 11,
+          "name_hex": "6c61746572616c6f636369706974616c",
+          "name": "lateraloccipital",
+          "rgba_transparency_and_packed_id": [
+            20,
+            30,
+            140,
+            0,
+            9182740
+          ]
+        },
+        {
+          "row": 12,
+          "name_hex": "6c61746572616c6f726269746f66726f6e74616c",
+          "name": "lateralorbitofrontal",
+          "rgba_transparency_and_packed_id": [
+            35,
+            75,
+            50,
+            0,
+            3296035
+          ]
+        },
+        {
+          "row": 13,
+          "name_hex": "6c696e6775616c",
+          "name": "lingual",
+          "rgba_transparency_and_packed_id": [
+            225,
+            140,
+            140,
+            0,
+            9211105
+          ]
+        },
+        {
+          "row": 14,
+          "name_hex": "6d656469616c6f726269746f66726f6e74616c",
+          "name": "medialorbitofrontal",
+          "rgba_transparency_and_packed_id": [
+            200,
+            35,
+            75,
+            0,
+            4924360
+          ]
+        },
+        {
+          "row": 15,
+          "name_hex": "6d6964646c6574656d706f72616c",
+          "name": "middletemporal",
+          "rgba_transparency_and_packed_id": [
+            160,
+            100,
+            50,
+            0,
+            3302560
+          ]
+        },
+        {
+          "row": 16,
+          "name_hex": "70617261686970706f63616d70616c",
+          "name": "parahippocampal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            60,
+            0,
+            3988500
+          ]
+        },
+        {
+          "row": 17,
+          "name_hex": "7061726163656e7472616c",
+          "name": "paracentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            220,
+            60,
+            0,
+            3988540
+          ]
+        },
+        {
+          "row": 18,
+          "name_hex": "706172736f70657263756c61726973",
+          "name": "parsopercularis",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            140,
+            0,
+            9221340
+          ]
+        },
+        {
+          "row": 19,
+          "name_hex": "706172736f72626974616c6973",
+          "name": "parsorbitalis",
+          "rgba_transparency_and_packed_id": [
+            20,
+            100,
+            50,
+            0,
+            3302420
+          ]
+        },
+        {
+          "row": 20,
+          "name_hex": "70617273747269616e67756c61726973",
+          "name": "parstriangularis",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            20,
+            0,
+            1326300
+          ]
+        },
+        {
+          "row": 21,
+          "name_hex": "7065726963616c636172696e65",
+          "name": "pericalcarine",
+          "rgba_transparency_and_packed_id": [
+            120,
+            100,
+            60,
+            0,
+            3957880
+          ]
+        },
+        {
+          "row": 22,
+          "name_hex": "706f737463656e7472616c",
+          "name": "postcentral",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            20,
+            0,
+            1316060
+          ]
+        },
+        {
+          "row": 23,
+          "name_hex": "706f73746572696f7263696e67756c617465",
+          "name": "posteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            220,
+            0,
+            14464220
+          ]
+        },
+        {
+          "row": 24,
+          "name_hex": "70726563656e7472616c",
+          "name": "precentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            20,
+            220,
+            0,
+            14423100
+          ]
+        },
+        {
+          "row": 25,
+          "name_hex": "70726563756e657573",
+          "name": "precuneus",
+          "rgba_transparency_and_packed_id": [
+            160,
+            140,
+            180,
+            0,
+            11832480
+          ]
+        },
+        {
+          "row": 26,
+          "name_hex": "726f737472616c616e746572696f7263696e67756c617465",
+          "name": "rostralanteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            80,
+            20,
+            140,
+            0,
+            9180240
+          ]
+        },
+        {
+          "row": 27,
+          "name_hex": "726f737472616c6d6964646c6566726f6e74616c",
+          "name": "rostralmiddlefrontal",
+          "rgba_transparency_and_packed_id": [
+            75,
+            50,
+            125,
+            0,
+            8204875
+          ]
+        },
+        {
+          "row": 28,
+          "name_hex": "7375706572696f7266726f6e74616c",
+          "name": "superiorfrontal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            160,
+            0,
+            10542100
+          ]
+        },
+        {
+          "row": 29,
+          "name_hex": "7375706572696f72706172696574616c",
+          "name": "superiorparietal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            180,
+            140,
+            0,
+            9221140
+          ]
+        },
+        {
+          "row": 30,
+          "name_hex": "7375706572696f7274656d706f72616c",
+          "name": "superiortemporal",
+          "rgba_transparency_and_packed_id": [
+            140,
+            220,
+            220,
+            0,
+            14474380
+          ]
+        },
+        {
+          "row": 31,
+          "name_hex": "73757072616d617267696e616c",
+          "name": "supramarginal",
+          "rgba_transparency_and_packed_id": [
+            80,
+            160,
+            20,
+            0,
+            1351760
+          ]
+        },
+        {
+          "row": 32,
+          "name_hex": "66726f6e74616c706f6c65",
+          "name": "frontalpole",
+          "rgba_transparency_and_packed_id": [
+            100,
+            0,
+            100,
+            0,
+            6553700
+          ]
+        },
+        {
+          "row": 33,
+          "name_hex": "74656d706f72616c706f6c65",
+          "name": "temporalpole",
+          "rgba_transparency_and_packed_id": [
+            70,
+            20,
+            170,
+            0,
+            11146310
+          ]
+        },
+        {
+          "row": 34,
+          "name_hex": "7472616e73766572736574656d706f72616c",
+          "name": "transversetemporal",
+          "rgba_transparency_and_packed_id": [
+            150,
+            150,
+            200,
+            0,
+            13145750
+          ]
+        },
+        {
+          "row": 35,
+          "name_hex": "696e73756c61",
+          "name": "insula",
+          "rgba_transparency_and_packed_id": [
+            255,
+            192,
+            32,
+            0,
+            2146559
+          ]
+        }
+      ],
+      "label_counts": [
+        {
+          "id": 0,
+          "vertices": 7706
+        },
+        {
+          "id": 6500,
+          "vertices": 2873
+        },
+        {
+          "id": 660700,
+          "vertices": 716
+        },
+        {
+          "id": 1316060,
+          "vertices": 6179
+        },
+        {
+          "id": 1326300,
+          "vertices": 1837
+        },
+        {
+          "id": 1351760,
+          "vertices": 4445
+        },
+        {
+          "id": 2146559,
+          "vertices": 2440
+        },
+        {
+          "id": 3296035,
+          "vertices": 3454
+        },
+        {
+          "id": 3302420,
+          "vertices": 864
+        },
+        {
+          "id": 3302560,
+          "vertices": 5350
+        },
+        {
+          "id": 3957880,
+          "vertices": 1899
+        },
+        {
+          "id": 3988500,
+          "vertices": 989
+        },
+        {
+          "id": 3988540,
+          "vertices": 2276
+        },
+        {
+          "id": 4924360,
+          "vertices": 2025
+        },
+        {
+          "id": 6558940,
+          "vertices": 3104
+        },
+        {
+          "id": 7874740,
+          "vertices": 4428
+        },
+        {
+          "id": 8204875,
+          "vertices": 4429
+        },
+        {
+          "id": 9180240,
+          "vertices": 1294
+        },
+        {
+          "id": 9180300,
+          "vertices": 1243
+        },
+        {
+          "id": 9182740,
+          "vertices": 7270
+        },
+        {
+          "id": 9211105,
+          "vertices": 3879
+        },
+        {
+          "id": 9221140,
+          "vertices": 5585
+        },
+        {
+          "id": 9221340,
+          "vertices": 1736
+        },
+        {
+          "id": 9231540,
+          "vertices": 4079
+        },
+        {
+          "id": 10511485,
+          "vertices": 1215
+        },
+        {
+          "id": 10542100,
+          "vertices": 9829
+        },
+        {
+          "id": 11832480,
+          "vertices": 4104
+        },
+        {
+          "id": 13145750,
+          "vertices": 539
+        },
+        {
+          "id": 14423100,
+          "vertices": 5711
+        },
+        {
+          "id": 14433500,
+          "vertices": 4776
+        },
+        {
+          "id": 14464220,
+          "vertices": 1541
+        },
+        {
+          "id": 14474380,
+          "vertices": 6527
+        }
+      ]
+    },
+    "rh.aparc": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/rh.aparc.annot",
+        "size_bytes": 920105,
+        "sha256": "df3c7f8d35aafd5372016737bb5a3f95728136019800cef409a55d1864d52ac8"
+      },
+      "semantic_vectors": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/annotation_semantics/rh.aparc.npz",
+        "size_bytes": 271882,
+        "sha256": "48a24acd33f51bcfb0f27bf89229f9c355ac5e9b33073cbfe1fabeb133b63068"
+      },
+      "vertex_count": 114824,
+      "vertex_order": "0..nvertices-1 verified",
+      "label_original_ids_sha256_le_i64": "62c781fa38808d4b797a15db1ab9b6450ac5ebad889330f69626b669af08623e",
+      "label_table_indices_sha256_le_i64": "8831f73eba8f960d761a96956eddcb1e805e1a9510cbc86c02b6e17daf88a7d8",
+      "color_table_sha256_le_i64": "66291d7acb753717d2bea05db0b0c91f7c0c039b5dc5972e7ea69c5d993befc8",
+      "color_table_names_sha256": "beec5d7fa781a961735a3be8670aa6eccde3b13c9f3972028880f47920c78f0e",
+      "color_table": [
+        {
+          "row": 0,
+          "name_hex": "756e6b6e6f776e",
+          "name": "unknown",
+          "rgba_transparency_and_packed_id": [
+            25,
+            5,
+            25,
+            0,
+            1639705
+          ]
+        },
+        {
+          "row": 1,
+          "name_hex": "62616e6b73737473",
+          "name": "bankssts",
+          "rgba_transparency_and_packed_id": [
+            25,
+            100,
+            40,
+            0,
+            2647065
+          ]
+        },
+        {
+          "row": 2,
+          "name_hex": "63617564616c616e746572696f7263696e67756c617465",
+          "name": "caudalanteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            125,
+            100,
+            160,
+            0,
+            10511485
+          ]
+        },
+        {
+          "row": 3,
+          "name_hex": "63617564616c6d6964646c6566726f6e74616c",
+          "name": "caudalmiddlefrontal",
+          "rgba_transparency_and_packed_id": [
+            100,
+            25,
+            0,
+            0,
+            6500
+          ]
+        },
+        {
+          "row": 4,
+          "name_hex": "636f7270757363616c6c6f73756d",
+          "name": "corpuscallosum",
+          "rgba_transparency_and_packed_id": [
+            120,
+            70,
+            50,
+            0,
+            3294840
+          ]
+        },
+        {
+          "row": 5,
+          "name_hex": "63756e657573",
+          "name": "cuneus",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            100,
+            0,
+            6558940
+          ]
+        },
+        {
+          "row": 6,
+          "name_hex": "656e746f7268696e616c",
+          "name": "entorhinal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            10,
+            0,
+            660700
+          ]
+        },
+        {
+          "row": 7,
+          "name_hex": "66757369666f726d",
+          "name": "fusiform",
+          "rgba_transparency_and_packed_id": [
+            180,
+            220,
+            140,
+            0,
+            9231540
+          ]
+        },
+        {
+          "row": 8,
+          "name_hex": "696e666572696f72706172696574616c",
+          "name": "inferiorparietal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            220,
+            0,
+            14433500
+          ]
+        },
+        {
+          "row": 9,
+          "name_hex": "696e666572696f7274656d706f72616c",
+          "name": "inferiortemporal",
+          "rgba_transparency_and_packed_id": [
+            180,
+            40,
+            120,
+            0,
+            7874740
+          ]
+        },
+        {
+          "row": 10,
+          "name_hex": "697374686d757363696e67756c617465",
+          "name": "isthmuscingulate",
+          "rgba_transparency_and_packed_id": [
+            140,
+            20,
+            140,
+            0,
+            9180300
+          ]
+        },
+        {
+          "row": 11,
+          "name_hex": "6c61746572616c6f636369706974616c",
+          "name": "lateraloccipital",
+          "rgba_transparency_and_packed_id": [
+            20,
+            30,
+            140,
+            0,
+            9182740
+          ]
+        },
+        {
+          "row": 12,
+          "name_hex": "6c61746572616c6f726269746f66726f6e74616c",
+          "name": "lateralorbitofrontal",
+          "rgba_transparency_and_packed_id": [
+            35,
+            75,
+            50,
+            0,
+            3296035
+          ]
+        },
+        {
+          "row": 13,
+          "name_hex": "6c696e6775616c",
+          "name": "lingual",
+          "rgba_transparency_and_packed_id": [
+            225,
+            140,
+            140,
+            0,
+            9211105
+          ]
+        },
+        {
+          "row": 14,
+          "name_hex": "6d656469616c6f726269746f66726f6e74616c",
+          "name": "medialorbitofrontal",
+          "rgba_transparency_and_packed_id": [
+            200,
+            35,
+            75,
+            0,
+            4924360
+          ]
+        },
+        {
+          "row": 15,
+          "name_hex": "6d6964646c6574656d706f72616c",
+          "name": "middletemporal",
+          "rgba_transparency_and_packed_id": [
+            160,
+            100,
+            50,
+            0,
+            3302560
+          ]
+        },
+        {
+          "row": 16,
+          "name_hex": "70617261686970706f63616d70616c",
+          "name": "parahippocampal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            60,
+            0,
+            3988500
+          ]
+        },
+        {
+          "row": 17,
+          "name_hex": "7061726163656e7472616c",
+          "name": "paracentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            220,
+            60,
+            0,
+            3988540
+          ]
+        },
+        {
+          "row": 18,
+          "name_hex": "706172736f70657263756c61726973",
+          "name": "parsopercularis",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            140,
+            0,
+            9221340
+          ]
+        },
+        {
+          "row": 19,
+          "name_hex": "706172736f72626974616c6973",
+          "name": "parsorbitalis",
+          "rgba_transparency_and_packed_id": [
+            20,
+            100,
+            50,
+            0,
+            3302420
+          ]
+        },
+        {
+          "row": 20,
+          "name_hex": "70617273747269616e67756c61726973",
+          "name": "parstriangularis",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            20,
+            0,
+            1326300
+          ]
+        },
+        {
+          "row": 21,
+          "name_hex": "7065726963616c636172696e65",
+          "name": "pericalcarine",
+          "rgba_transparency_and_packed_id": [
+            120,
+            100,
+            60,
+            0,
+            3957880
+          ]
+        },
+        {
+          "row": 22,
+          "name_hex": "706f737463656e7472616c",
+          "name": "postcentral",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            20,
+            0,
+            1316060
+          ]
+        },
+        {
+          "row": 23,
+          "name_hex": "706f73746572696f7263696e67756c617465",
+          "name": "posteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            220,
+            0,
+            14464220
+          ]
+        },
+        {
+          "row": 24,
+          "name_hex": "70726563656e7472616c",
+          "name": "precentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            20,
+            220,
+            0,
+            14423100
+          ]
+        },
+        {
+          "row": 25,
+          "name_hex": "70726563756e657573",
+          "name": "precuneus",
+          "rgba_transparency_and_packed_id": [
+            160,
+            140,
+            180,
+            0,
+            11832480
+          ]
+        },
+        {
+          "row": 26,
+          "name_hex": "726f737472616c616e746572696f7263696e67756c617465",
+          "name": "rostralanteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            80,
+            20,
+            140,
+            0,
+            9180240
+          ]
+        },
+        {
+          "row": 27,
+          "name_hex": "726f737472616c6d6964646c6566726f6e74616c",
+          "name": "rostralmiddlefrontal",
+          "rgba_transparency_and_packed_id": [
+            75,
+            50,
+            125,
+            0,
+            8204875
+          ]
+        },
+        {
+          "row": 28,
+          "name_hex": "7375706572696f7266726f6e74616c",
+          "name": "superiorfrontal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            160,
+            0,
+            10542100
+          ]
+        },
+        {
+          "row": 29,
+          "name_hex": "7375706572696f72706172696574616c",
+          "name": "superiorparietal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            180,
+            140,
+            0,
+            9221140
+          ]
+        },
+        {
+          "row": 30,
+          "name_hex": "7375706572696f7274656d706f72616c",
+          "name": "superiortemporal",
+          "rgba_transparency_and_packed_id": [
+            140,
+            220,
+            220,
+            0,
+            14474380
+          ]
+        },
+        {
+          "row": 31,
+          "name_hex": "73757072616d617267696e616c",
+          "name": "supramarginal",
+          "rgba_transparency_and_packed_id": [
+            80,
+            160,
+            20,
+            0,
+            1351760
+          ]
+        },
+        {
+          "row": 32,
+          "name_hex": "66726f6e74616c706f6c65",
+          "name": "frontalpole",
+          "rgba_transparency_and_packed_id": [
+            100,
+            0,
+            100,
+            0,
+            6553700
+          ]
+        },
+        {
+          "row": 33,
+          "name_hex": "74656d706f72616c706f6c65",
+          "name": "temporalpole",
+          "rgba_transparency_and_packed_id": [
+            70,
+            20,
+            170,
+            0,
+            11146310
+          ]
+        },
+        {
+          "row": 34,
+          "name_hex": "7472616e73766572736574656d706f72616c",
+          "name": "transversetemporal",
+          "rgba_transparency_and_packed_id": [
+            150,
+            150,
+            200,
+            0,
+            13145750
+          ]
+        },
+        {
+          "row": 35,
+          "name_hex": "696e73756c61",
+          "name": "insula",
+          "rgba_transparency_and_packed_id": [
+            255,
+            192,
+            32,
+            0,
+            2146559
+          ]
+        }
+      ],
+      "label_counts": [
+        {
+          "id": 0,
+          "vertices": 8051
+        },
+        {
+          "id": 6500,
+          "vertices": 2422
+        },
+        {
+          "id": 660700,
+          "vertices": 753
+        },
+        {
+          "id": 1316060,
+          "vertices": 4955
+        },
+        {
+          "id": 1326300,
+          "vertices": 2095
+        },
+        {
+          "id": 1351760,
+          "vertices": 4763
+        },
+        {
+          "id": 2146559,
+          "vertices": 2939
+        },
+        {
+          "id": 2647065,
+          "vertices": 1073
+        },
+        {
+          "id": 3296035,
+          "vertices": 3010
+        },
+        {
+          "id": 3302420,
+          "vertices": 1098
+        },
+        {
+          "id": 3302560,
+          "vertices": 4475
+        },
+        {
+          "id": 3957880,
+          "vertices": 2143
+        },
+        {
+          "id": 3988500,
+          "vertices": 834
+        },
+        {
+          "id": 3988540,
+          "vertices": 2072
+        },
+        {
+          "id": 4924360,
+          "vertices": 2695
+        },
+        {
+          "id": 6553700,
+          "vertices": 434
+        },
+        {
+          "id": 6558940,
+          "vertices": 2176
+        },
+        {
+          "id": 7874740,
+          "vertices": 4351
+        },
+        {
+          "id": 8204875,
+          "vertices": 6219
+        },
+        {
+          "id": 9180240,
+          "vertices": 717
+        },
+        {
+          "id": 9180300,
+          "vertices": 1194
+        },
+        {
+          "id": 9182740,
+          "vertices": 6793
+        },
+        {
+          "id": 9211105,
+          "vertices": 4012
+        },
+        {
+          "id": 9221140,
+          "vertices": 6953
+        },
+        {
+          "id": 9221340,
+          "vertices": 1810
+        },
+        {
+          "id": 9231540,
+          "vertices": 3677
+        },
+        {
+          "id": 10511485,
+          "vertices": 946
+        },
+        {
+          "id": 10542100,
+          "vertices": 8147
+        },
+        {
+          "id": 11146310,
+          "vertices": 537
+        },
+        {
+          "id": 11832480,
+          "vertices": 4217
+        },
+        {
+          "id": 13145750,
+          "vertices": 482
+        },
+        {
+          "id": 14423100,
+          "vertices": 6070
+        },
+        {
+          "id": 14433500,
+          "vertices": 6705
+        },
+        {
+          "id": 14464220,
+          "vertices": 1321
+        },
+        {
+          "id": 14474380,
+          "vertices": 4685
+        }
+      ]
+    },
+    "rh.aparc.a2009s": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/rh.aparc.a2009s.annot",
+        "size_bytes": 921848,
+        "sha256": "5c85085224d7060c99e982692392e3dfbff57593448322c6cf24a0200af741dd"
+      },
+      "semantic_vectors": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/annotation_semantics/rh.aparc.a2009s.npz",
+        "size_bytes": 293387,
+        "sha256": "8d82526eedec41973a07262813d3ea898bd43c84c71f26c40bee46cf80c5aed2"
+      },
+      "vertex_count": 114824,
+      "vertex_order": "0..nvertices-1 verified",
+      "label_original_ids_sha256_le_i64": "a35602e65e10daf31ab099b4bb7b69c50220bb2504315c552b756660b0cc2501",
+      "label_table_indices_sha256_le_i64": "5e0769d7533fd2f20d8d4c8354fe4091ada11c1a726097270bafa314d5458950",
+      "color_table_sha256_le_i64": "bd2ccdefc1c81bb6fe0c64dc4868da70d24487ab1d37383c03ec0e55e7a724a5",
+      "color_table_names_sha256": "9265d6849fc605afa205468f13756d123f8522d10c180ab8c0d5a245675c7c26",
+      "color_table": [
+        {
+          "row": 0,
+          "name_hex": "556e6b6e6f776e",
+          "name": "Unknown",
+          "rgba_transparency_and_packed_id": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "row": 1,
+          "name_hex": "475f616e645f535f66726f6e746f6d617267696e",
+          "name": "G_and_S_frontomargin",
+          "rgba_transparency_and_packed_id": [
+            23,
+            220,
+            60,
+            0,
+            3988503
+          ]
+        },
+        {
+          "row": 2,
+          "name_hex": "475f616e645f535f6f636369706974616c5f696e66",
+          "name": "G_and_S_occipital_inf",
+          "rgba_transparency_and_packed_id": [
+            23,
+            60,
+            180,
+            0,
+            11811863
+          ]
+        },
+        {
+          "row": 3,
+          "name_hex": "475f616e645f535f7061726163656e7472616c",
+          "name": "G_and_S_paracentral",
+          "rgba_transparency_and_packed_id": [
+            63,
+            100,
+            60,
+            0,
+            3957823
+          ]
+        },
+        {
+          "row": 4,
+          "name_hex": "475f616e645f535f73756263656e7472616c",
+          "name": "G_and_S_subcentral",
+          "rgba_transparency_and_packed_id": [
+            63,
+            20,
+            220,
+            0,
+            14423103
+          ]
+        },
+        {
+          "row": 5,
+          "name_hex": "475f616e645f535f7472616e73765f66726f6e746f706f6c",
+          "name": "G_and_S_transv_frontopol",
+          "rgba_transparency_and_packed_id": [
+            13,
+            0,
+            250,
+            0,
+            16384013
+          ]
+        },
+        {
+          "row": 6,
+          "name_hex": "475f616e645f535f63696e67756c2d416e74",
+          "name": "G_and_S_cingul-Ant",
+          "rgba_transparency_and_packed_id": [
+            26,
+            60,
+            0,
+            0,
+            15386
+          ]
+        },
+        {
+          "row": 7,
+          "name_hex": "475f616e645f535f63696e67756c2d4d69642d416e74",
+          "name": "G_and_S_cingul-Mid-Ant",
+          "rgba_transparency_and_packed_id": [
+            26,
+            60,
+            75,
+            0,
+            4930586
+          ]
+        },
+        {
+          "row": 8,
+          "name_hex": "475f616e645f535f63696e67756c2d4d69642d506f7374",
+          "name": "G_and_S_cingul-Mid-Post",
+          "rgba_transparency_and_packed_id": [
+            26,
+            60,
+            150,
+            0,
+            9845786
+          ]
+        },
+        {
+          "row": 9,
+          "name_hex": "475f63696e67756c2d506f73742d646f7273616c",
+          "name": "G_cingul-Post-dorsal",
+          "rgba_transparency_and_packed_id": [
+            25,
+            60,
+            250,
+            0,
+            16399385
+          ]
+        },
+        {
+          "row": 10,
+          "name_hex": "475f63696e67756c2d506f73742d76656e7472616c",
+          "name": "G_cingul-Post-ventral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            25,
+            25,
+            0,
+            1644860
+          ]
+        },
+        {
+          "row": 11,
+          "name_hex": "475f63756e657573",
+          "name": "G_cuneus",
+          "rgba_transparency_and_packed_id": [
+            180,
+            20,
+            20,
+            0,
+            1316020
+          ]
+        },
+        {
+          "row": 12,
+          "name_hex": "475f66726f6e745f696e662d4f70657263756c6172",
+          "name": "G_front_inf-Opercular",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            100,
+            0,
+            6558940
+          ]
+        },
+        {
+          "row": 13,
+          "name_hex": "475f66726f6e745f696e662d4f72626974616c",
+          "name": "G_front_inf-Orbital",
+          "rgba_transparency_and_packed_id": [
+            140,
+            60,
+            60,
+            0,
+            3947660
+          ]
+        },
+        {
+          "row": 14,
+          "name_hex": "475f66726f6e745f696e662d547269616e67756c",
+          "name": "G_front_inf-Triangul",
+          "rgba_transparency_and_packed_id": [
+            180,
+            220,
+            140,
+            0,
+            9231540
+          ]
+        },
+        {
+          "row": 15,
+          "name_hex": "475f66726f6e745f6d6964646c65",
+          "name": "G_front_middle",
+          "rgba_transparency_and_packed_id": [
+            140,
+            100,
+            180,
+            0,
+            11822220
+          ]
+        },
+        {
+          "row": 16,
+          "name_hex": "475f66726f6e745f737570",
+          "name": "G_front_sup",
+          "rgba_transparency_and_packed_id": [
+            180,
+            20,
+            140,
+            0,
+            9180340
+          ]
+        },
+        {
+          "row": 17,
+          "name_hex": "475f496e735f6c675f616e645f535f63656e745f696e73",
+          "name": "G_Ins_lg_and_S_cent_ins",
+          "rgba_transparency_and_packed_id": [
+            23,
+            10,
+            10,
+            0,
+            657943
+          ]
+        },
+        {
+          "row": 18,
+          "name_hex": "475f696e73756c61725f73686f7274",
+          "name": "G_insular_short",
+          "rgba_transparency_and_packed_id": [
+            225,
+            140,
+            140,
+            0,
+            9211105
+          ]
+        },
+        {
+          "row": 19,
+          "name_hex": "475f6f636369706974616c5f6d6964646c65",
+          "name": "G_occipital_middle",
+          "rgba_transparency_and_packed_id": [
+            180,
+            60,
+            180,
+            0,
+            11812020
+          ]
+        },
+        {
+          "row": 20,
+          "name_hex": "475f6f636369706974616c5f737570",
+          "name": "G_occipital_sup",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            60,
+            0,
+            3988500
+          ]
+        },
+        {
+          "row": 21,
+          "name_hex": "475f6f632d74656d705f6c61742d66757369666f72",
+          "name": "G_oc-temp_lat-fusifor",
+          "rgba_transparency_and_packed_id": [
+            60,
+            20,
+            140,
+            0,
+            9180220
+          ]
+        },
+        {
+          "row": 22,
+          "name_hex": "475f6f632d74656d705f6d65642d4c696e6775616c",
+          "name": "G_oc-temp_med-Lingual",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            140,
+            0,
+            9221340
+          ]
+        },
+        {
+          "row": 23,
+          "name_hex": "475f6f632d74656d705f6d65642d50617261686970",
+          "name": "G_oc-temp_med-Parahip",
+          "rgba_transparency_and_packed_id": [
+            65,
+            100,
+            20,
+            0,
+            1336385
+          ]
+        },
+        {
+          "row": 24,
+          "name_hex": "475f6f72626974616c",
+          "name": "G_orbital",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            20,
+            0,
+            1326300
+          ]
+        },
+        {
+          "row": 25,
+          "name_hex": "475f7061726965745f696e662d416e67756c6172",
+          "name": "G_pariet_inf-Angular",
+          "rgba_transparency_and_packed_id": [
+            20,
+            60,
+            220,
+            0,
+            14433300
+          ]
+        },
+        {
+          "row": 26,
+          "name_hex": "475f7061726965745f696e662d53757072616d6172",
+          "name": "G_pariet_inf-Supramar",
+          "rgba_transparency_and_packed_id": [
+            100,
+            100,
+            60,
+            0,
+            3957860
+          ]
+        },
+        {
+          "row": 27,
+          "name_hex": "475f706172696574616c5f737570",
+          "name": "G_parietal_sup",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            220,
+            0,
+            14464220
+          ]
+        },
+        {
+          "row": 28,
+          "name_hex": "475f706f737463656e7472616c",
+          "name": "G_postcentral",
+          "rgba_transparency_and_packed_id": [
+            20,
+            180,
+            140,
+            0,
+            9221140
+          ]
+        },
+        {
+          "row": 29,
+          "name_hex": "475f70726563656e7472616c",
+          "name": "G_precentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            140,
+            180,
+            0,
+            11832380
+          ]
+        },
+        {
+          "row": 30,
+          "name_hex": "475f70726563756e657573",
+          "name": "G_precuneus",
+          "rgba_transparency_and_packed_id": [
+            25,
+            20,
+            140,
+            0,
+            9180185
+          ]
+        },
+        {
+          "row": 31,
+          "name_hex": "475f726563747573",
+          "name": "G_rectus",
+          "rgba_transparency_and_packed_id": [
+            20,
+            60,
+            100,
+            0,
+            6568980
+          ]
+        },
+        {
+          "row": 32,
+          "name_hex": "475f73756263616c6c6f73616c",
+          "name": "G_subcallosal",
+          "rgba_transparency_and_packed_id": [
+            60,
+            220,
+            20,
+            0,
+            1367100
+          ]
+        },
+        {
+          "row": 33,
+          "name_hex": "475f74656d705f7375702d475f545f7472616e7376",
+          "name": "G_temp_sup-G_T_transv",
+          "rgba_transparency_and_packed_id": [
+            60,
+            60,
+            220,
+            0,
+            14433340
+          ]
+        },
+        {
+          "row": 34,
+          "name_hex": "475f74656d705f7375702d4c61746572616c",
+          "name": "G_temp_sup-Lateral",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            220,
+            0,
+            14433500
+          ]
+        },
+        {
+          "row": 35,
+          "name_hex": "475f74656d705f7375702d506c616e5f706f6c6172",
+          "name": "G_temp_sup-Plan_polar",
+          "rgba_transparency_and_packed_id": [
+            65,
+            220,
+            60,
+            0,
+            3988545
+          ]
+        },
+        {
+          "row": 36,
+          "name_hex": "475f74656d705f7375702d506c616e5f74656d706f",
+          "name": "G_temp_sup-Plan_tempo",
+          "rgba_transparency_and_packed_id": [
+            25,
+            140,
+            20,
+            0,
+            1346585
+          ]
+        },
+        {
+          "row": 37,
+          "name_hex": "475f74656d706f72616c5f696e66",
+          "name": "G_temporal_inf",
+          "rgba_transparency_and_packed_id": [
+            220,
+            220,
+            100,
+            0,
+            6610140
+          ]
+        },
+        {
+          "row": 38,
+          "name_hex": "475f74656d706f72616c5f6d6964646c65",
+          "name": "G_temporal_middle",
+          "rgba_transparency_and_packed_id": [
+            180,
+            60,
+            60,
+            0,
+            3947700
+          ]
+        },
+        {
+          "row": 39,
+          "name_hex": "4c61745f4669732d616e742d486f72697a6f6e74",
+          "name": "Lat_Fis-ant-Horizont",
+          "rgba_transparency_and_packed_id": [
+            61,
+            20,
+            220,
+            0,
+            14423101
+          ]
+        },
+        {
+          "row": 40,
+          "name_hex": "4c61745f4669732d616e742d566572746963616c",
+          "name": "Lat_Fis-ant-Vertical",
+          "rgba_transparency_and_packed_id": [
+            61,
+            20,
+            60,
+            0,
+            3937341
+          ]
+        },
+        {
+          "row": 41,
+          "name_hex": "4c61745f4669732d706f7374",
+          "name": "Lat_Fis-post",
+          "rgba_transparency_and_packed_id": [
+            61,
+            60,
+            100,
+            0,
+            6569021
+          ]
+        },
+        {
+          "row": 42,
+          "name_hex": "4d656469616c5f77616c6c",
+          "name": "Medial_wall",
+          "rgba_transparency_and_packed_id": [
+            25,
+            25,
+            25,
+            0,
+            1644825
+          ]
+        },
+        {
+          "row": 43,
+          "name_hex": "506f6c655f6f636369706974616c",
+          "name": "Pole_occipital",
+          "rgba_transparency_and_packed_id": [
+            140,
+            20,
+            60,
+            0,
+            3937420
+          ]
+        },
+        {
+          "row": 44,
+          "name_hex": "506f6c655f74656d706f72616c",
+          "name": "Pole_temporal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            20,
+            0,
+            1357020
+          ]
+        },
+        {
+          "row": 45,
+          "name_hex": "535f63616c636172696e65",
+          "name": "S_calcarine",
+          "rgba_transparency_and_packed_id": [
+            63,
+            180,
+            180,
+            0,
+            11842623
+          ]
+        },
+        {
+          "row": 46,
+          "name_hex": "535f63656e7472616c",
+          "name": "S_central",
+          "rgba_transparency_and_packed_id": [
+            221,
+            20,
+            10,
+            0,
+            660701
+          ]
+        },
+        {
+          "row": 47,
+          "name_hex": "535f63696e67756c2d4d617267696e616c6973",
+          "name": "S_cingul-Marginalis",
+          "rgba_transparency_and_packed_id": [
+            221,
+            20,
+            100,
+            0,
+            6558941
+          ]
+        },
+        {
+          "row": 48,
+          "name_hex": "535f63697263756c61725f696e73756c615f616e74",
+          "name": "S_circular_insula_ant",
+          "rgba_transparency_and_packed_id": [
+            221,
+            60,
+            140,
+            0,
+            9190621
+          ]
+        },
+        {
+          "row": 49,
+          "name_hex": "535f63697263756c61725f696e73756c615f696e66",
+          "name": "S_circular_insula_inf",
+          "rgba_transparency_and_packed_id": [
+            221,
+            20,
+            220,
+            0,
+            14423261
+          ]
+        },
+        {
+          "row": 50,
+          "name_hex": "535f63697263756c61725f696e73756c615f737570",
+          "name": "S_circular_insula_sup",
+          "rgba_transparency_and_packed_id": [
+            61,
+            220,
+            220,
+            0,
+            14474301
+          ]
+        },
+        {
+          "row": 51,
+          "name_hex": "535f636f6c6c61745f7472616e73765f616e74",
+          "name": "S_collat_transv_ant",
+          "rgba_transparency_and_packed_id": [
+            100,
+            200,
+            200,
+            0,
+            13158500
+          ]
+        },
+        {
+          "row": 52,
+          "name_hex": "535f636f6c6c61745f7472616e73765f706f7374",
+          "name": "S_collat_transv_post",
+          "rgba_transparency_and_packed_id": [
+            10,
+            200,
+            200,
+            0,
+            13158410
+          ]
+        },
+        {
+          "row": 53,
+          "name_hex": "535f66726f6e745f696e66",
+          "name": "S_front_inf",
+          "rgba_transparency_and_packed_id": [
+            221,
+            220,
+            20,
+            0,
+            1367261
+          ]
+        },
+        {
+          "row": 54,
+          "name_hex": "535f66726f6e745f6d6964646c65",
+          "name": "S_front_middle",
+          "rgba_transparency_and_packed_id": [
+            141,
+            20,
+            100,
+            0,
+            6558861
+          ]
+        },
+        {
+          "row": 55,
+          "name_hex": "535f66726f6e745f737570",
+          "name": "S_front_sup",
+          "rgba_transparency_and_packed_id": [
+            61,
+            220,
+            100,
+            0,
+            6609981
+          ]
+        },
+        {
+          "row": 56,
+          "name_hex": "535f696e7465726d5f7072696d2d4a656e73656e",
+          "name": "S_interm_prim-Jensen",
+          "rgba_transparency_and_packed_id": [
+            141,
+            60,
+            20,
+            0,
+            1326221
+          ]
+        },
+        {
+          "row": 57,
+          "name_hex": "535f696e7472617061726965745f616e645f505f7472616e73",
+          "name": "S_intrapariet_and_P_trans",
+          "rgba_transparency_and_packed_id": [
+            143,
+            20,
+            220,
+            0,
+            14423183
+          ]
+        },
+        {
+          "row": 58,
+          "name_hex": "535f6f635f6d6964646c655f616e645f4c756e61747573",
+          "name": "S_oc_middle_and_Lunatus",
+          "rgba_transparency_and_packed_id": [
+            101,
+            60,
+            220,
+            0,
+            14433381
+          ]
+        },
+        {
+          "row": 59,
+          "name_hex": "535f6f635f7375705f616e645f7472616e7376657273616c",
+          "name": "S_oc_sup_and_transversal",
+          "rgba_transparency_and_packed_id": [
+            21,
+            20,
+            140,
+            0,
+            9180181
+          ]
+        },
+        {
+          "row": 60,
+          "name_hex": "535f6f636369706974616c5f616e74",
+          "name": "S_occipital_ant",
+          "rgba_transparency_and_packed_id": [
+            61,
+            20,
+            180,
+            0,
+            11801661
+          ]
+        },
+        {
+          "row": 61,
+          "name_hex": "535f6f632d74656d705f6c6174",
+          "name": "S_oc-temp_lat",
+          "rgba_transparency_and_packed_id": [
+            221,
+            140,
+            20,
+            0,
+            1346781
+          ]
+        },
+        {
+          "row": 62,
+          "name_hex": "535f6f632d74656d705f6d65645f616e645f4c696e6775616c",
+          "name": "S_oc-temp_med_and_Lingual",
+          "rgba_transparency_and_packed_id": [
+            141,
+            100,
+            220,
+            0,
+            14443661
+          ]
+        },
+        {
+          "row": 63,
+          "name_hex": "535f6f72626974616c5f6c61746572616c",
+          "name": "S_orbital_lateral",
+          "rgba_transparency_and_packed_id": [
+            221,
+            100,
+            20,
+            0,
+            1336541
+          ]
+        },
+        {
+          "row": 64,
+          "name_hex": "535f6f72626974616c5f6d65642d6f6c66616374",
+          "name": "S_orbital_med-olfact",
+          "rgba_transparency_and_packed_id": [
+            181,
+            200,
+            20,
+            0,
+            1362101
+          ]
+        },
+        {
+          "row": 65,
+          "name_hex": "535f6f72626974616c2d485f536861706564",
+          "name": "S_orbital-H_Shaped",
+          "rgba_transparency_and_packed_id": [
+            101,
+            20,
+            20,
+            0,
+            1315941
+          ]
+        },
+        {
+          "row": 66,
+          "name_hex": "535f7061726965746f5f6f636369706974616c",
+          "name": "S_parieto_occipital",
+          "rgba_transparency_and_packed_id": [
+            101,
+            100,
+            180,
+            0,
+            11822181
+          ]
+        },
+        {
+          "row": 67,
+          "name_hex": "535f7065726963616c6c6f73616c",
+          "name": "S_pericallosal",
+          "rgba_transparency_and_packed_id": [
+            181,
+            220,
+            20,
+            0,
+            1367221
+          ]
+        },
+        {
+          "row": 68,
+          "name_hex": "535f706f737463656e7472616c",
+          "name": "S_postcentral",
+          "rgba_transparency_and_packed_id": [
+            21,
+            140,
+            200,
+            0,
+            13143061
+          ]
+        },
+        {
+          "row": 69,
+          "name_hex": "535f70726563656e7472616c2d696e662d70617274",
+          "name": "S_precentral-inf-part",
+          "rgba_transparency_and_packed_id": [
+            21,
+            20,
+            240,
+            0,
+            15733781
+          ]
+        },
+        {
+          "row": 70,
+          "name_hex": "535f70726563656e7472616c2d7375702d70617274",
+          "name": "S_precentral-sup-part",
+          "rgba_transparency_and_packed_id": [
+            21,
+            20,
+            200,
+            0,
+            13112341
+          ]
+        },
+        {
+          "row": 71,
+          "name_hex": "535f7375626f72626974616c",
+          "name": "S_suborbital",
+          "rgba_transparency_and_packed_id": [
+            21,
+            20,
+            60,
+            0,
+            3937301
+          ]
+        },
+        {
+          "row": 72,
+          "name_hex": "535f737562706172696574616c",
+          "name": "S_subparietal",
+          "rgba_transparency_and_packed_id": [
+            101,
+            60,
+            60,
+            0,
+            3947621
+          ]
+        },
+        {
+          "row": 73,
+          "name_hex": "535f74656d706f72616c5f696e66",
+          "name": "S_temporal_inf",
+          "rgba_transparency_and_packed_id": [
+            21,
+            180,
+            180,
+            0,
+            11842581
+          ]
+        },
+        {
+          "row": 74,
+          "name_hex": "535f74656d706f72616c5f737570",
+          "name": "S_temporal_sup",
+          "rgba_transparency_and_packed_id": [
+            223,
+            220,
+            60,
+            0,
+            3988703
+          ]
+        },
+        {
+          "row": 75,
+          "name_hex": "535f74656d706f72616c5f7472616e737665727365",
+          "name": "S_temporal_transverse",
+          "rgba_transparency_and_packed_id": [
+            221,
+            60,
+            60,
+            0,
+            3947741
+          ]
+        }
+      ],
+      "label_counts": [
+        {
+          "id": 0,
+          "vertices": 8051
+        },
+        {
+          "id": 15386,
+          "vertices": 2415
+        },
+        {
+          "id": 657943,
+          "vertices": 480
+        },
+        {
+          "id": 660701,
+          "vertices": 2421
+        },
+        {
+          "id": 1315941,
+          "vertices": 1098
+        },
+        {
+          "id": 1316020,
+          "vertices": 2154
+        },
+        {
+          "id": 1326221,
+          "vertices": 319
+        },
+        {
+          "id": 1326300,
+          "vertices": 2307
+        },
+        {
+          "id": 1336385,
+          "vertices": 1379
+        },
+        {
+          "id": 1336541,
+          "vertices": 326
+        },
+        {
+          "id": 1346585,
+          "vertices": 680
+        },
+        {
+          "id": 1346781,
+          "vertices": 1100
+        },
+        {
+          "id": 1357020,
+          "vertices": 1474
+        },
+        {
+          "id": 1362101,
+          "vertices": 596
+        },
+        {
+          "id": 1367100,
+          "vertices": 432
+        },
+        {
+          "id": 1367221,
+          "vertices": 1261
+        },
+        {
+          "id": 1367261,
+          "vertices": 1872
+        },
+        {
+          "id": 1644860,
+          "vertices": 249
+        },
+        {
+          "id": 3937301,
+          "vertices": 202
+        },
+        {
+          "id": 3937341,
+          "vertices": 280
+        },
+        {
+          "id": 3937420,
+          "vertices": 3482
+        },
+        {
+          "id": 3947621,
+          "vertices": 728
+        },
+        {
+          "id": 3947660,
+          "vertices": 283
+        },
+        {
+          "id": 3947700,
+          "vertices": 2404
+        },
+        {
+          "id": 3947741,
+          "vertices": 263
+        },
+        {
+          "id": 3957823,
+          "vertices": 1313
+        },
+        {
+          "id": 3957860,
+          "vertices": 2174
+        },
+        {
+          "id": 3988500,
+          "vertices": 1692
+        },
+        {
+          "id": 3988503,
+          "vertices": 778
+        },
+        {
+          "id": 3988545,
+          "vertices": 757
+        },
+        {
+          "id": 3988703,
+          "vertices": 5337
+        },
+        {
+          "id": 4930586,
+          "vertices": 1199
+        },
+        {
+          "id": 6558861,
+          "vertices": 1405
+        },
+        {
+          "id": 6558940,
+          "vertices": 1151
+        },
+        {
+          "id": 6558941,
+          "vertices": 1203
+        },
+        {
+          "id": 6568980,
+          "vertices": 690
+        },
+        {
+          "id": 6569021,
+          "vertices": 1331
+        },
+        {
+          "id": 6609981,
+          "vertices": 2191
+        },
+        {
+          "id": 6610140,
+          "vertices": 2269
+        },
+        {
+          "id": 9180181,
+          "vertices": 1295
+        },
+        {
+          "id": 9180185,
+          "vertices": 1876
+        },
+        {
+          "id": 9180220,
+          "vertices": 1444
+        },
+        {
+          "id": 9180340,
+          "vertices": 5320
+        },
+        {
+          "id": 9190621,
+          "vertices": 503
+        },
+        {
+          "id": 9211105,
+          "vertices": 561
+        },
+        {
+          "id": 9221140,
+          "vertices": 1717
+        },
+        {
+          "id": 9221340,
+          "vertices": 2451
+        },
+        {
+          "id": 9231540,
+          "vertices": 966
+        },
+        {
+          "id": 9845786,
+          "vertices": 1232
+        },
+        {
+          "id": 11801661,
+          "vertices": 638
+        },
+        {
+          "id": 11811863,
+          "vertices": 996
+        },
+        {
+          "id": 11812020,
+          "vertices": 2065
+        },
+        {
+          "id": 11822181,
+          "vertices": 1676
+        },
+        {
+          "id": 11822220,
+          "vertices": 2806
+        },
+        {
+          "id": 11832380,
+          "vertices": 2314
+        },
+        {
+          "id": 11842581,
+          "vertices": 1172
+        },
+        {
+          "id": 11842623,
+          "vertices": 2257
+        },
+        {
+          "id": 13112341,
+          "vertices": 1154
+        },
+        {
+          "id": 13143061,
+          "vertices": 2278
+        },
+        {
+          "id": 13158410,
+          "vertices": 371
+        },
+        {
+          "id": 13158500,
+          "vertices": 1190
+        },
+        {
+          "id": 14423101,
+          "vertices": 399
+        },
+        {
+          "id": 14423103,
+          "vertices": 1237
+        },
+        {
+          "id": 14423183,
+          "vertices": 2972
+        },
+        {
+          "id": 14423261,
+          "vertices": 1088
+        },
+        {
+          "id": 14433300,
+          "vertices": 2632
+        },
+        {
+          "id": 14433340,
+          "vertices": 352
+        },
+        {
+          "id": 14433381,
+          "vertices": 636
+        },
+        {
+          "id": 14433500,
+          "vertices": 1481
+        },
+        {
+          "id": 14443661,
+          "vertices": 1559
+        },
+        {
+          "id": 14464220,
+          "vertices": 2370
+        },
+        {
+          "id": 14474301,
+          "vertices": 1312
+        },
+        {
+          "id": 15733781,
+          "vertices": 1444
+        },
+        {
+          "id": 16384013,
+          "vertices": 916
+        },
+        {
+          "id": 16399385,
+          "vertices": 398
+        }
+      ]
+    },
+    "rh.aparc.DKTatlas": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/rh.aparc.DKTatlas.annot",
+        "size_bytes": 920105,
+        "sha256": "30c49f218a5124117d327eb59dca01ab723414a2f0ce684bace3db5f7c77bed6"
+      },
+      "semantic_vectors": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/annotation_semantics/rh.aparc.DKTatlas.npz",
+        "size_bytes": 270313,
+        "sha256": "635748a7e9ebc98de362647571de338c69efaa33c90ab5afa9dca5f185490c8c"
+      },
+      "vertex_count": 114824,
+      "vertex_order": "0..nvertices-1 verified",
+      "label_original_ids_sha256_le_i64": "4ecfe14da8e03417a479c6cf505efca74623f9f7d8efde253b77546384ab1815",
+      "label_table_indices_sha256_le_i64": "0056f402556917b658a1e2a8cf24c1bac29fff002f215babfaa94e03d55c0dc0",
+      "color_table_sha256_le_i64": "66291d7acb753717d2bea05db0b0c91f7c0c039b5dc5972e7ea69c5d993befc8",
+      "color_table_names_sha256": "beec5d7fa781a961735a3be8670aa6eccde3b13c9f3972028880f47920c78f0e",
+      "color_table": [
+        {
+          "row": 0,
+          "name_hex": "756e6b6e6f776e",
+          "name": "unknown",
+          "rgba_transparency_and_packed_id": [
+            25,
+            5,
+            25,
+            0,
+            1639705
+          ]
+        },
+        {
+          "row": 1,
+          "name_hex": "62616e6b73737473",
+          "name": "bankssts",
+          "rgba_transparency_and_packed_id": [
+            25,
+            100,
+            40,
+            0,
+            2647065
+          ]
+        },
+        {
+          "row": 2,
+          "name_hex": "63617564616c616e746572696f7263696e67756c617465",
+          "name": "caudalanteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            125,
+            100,
+            160,
+            0,
+            10511485
+          ]
+        },
+        {
+          "row": 3,
+          "name_hex": "63617564616c6d6964646c6566726f6e74616c",
+          "name": "caudalmiddlefrontal",
+          "rgba_transparency_and_packed_id": [
+            100,
+            25,
+            0,
+            0,
+            6500
+          ]
+        },
+        {
+          "row": 4,
+          "name_hex": "636f7270757363616c6c6f73756d",
+          "name": "corpuscallosum",
+          "rgba_transparency_and_packed_id": [
+            120,
+            70,
+            50,
+            0,
+            3294840
+          ]
+        },
+        {
+          "row": 5,
+          "name_hex": "63756e657573",
+          "name": "cuneus",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            100,
+            0,
+            6558940
+          ]
+        },
+        {
+          "row": 6,
+          "name_hex": "656e746f7268696e616c",
+          "name": "entorhinal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            10,
+            0,
+            660700
+          ]
+        },
+        {
+          "row": 7,
+          "name_hex": "66757369666f726d",
+          "name": "fusiform",
+          "rgba_transparency_and_packed_id": [
+            180,
+            220,
+            140,
+            0,
+            9231540
+          ]
+        },
+        {
+          "row": 8,
+          "name_hex": "696e666572696f72706172696574616c",
+          "name": "inferiorparietal",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            220,
+            0,
+            14433500
+          ]
+        },
+        {
+          "row": 9,
+          "name_hex": "696e666572696f7274656d706f72616c",
+          "name": "inferiortemporal",
+          "rgba_transparency_and_packed_id": [
+            180,
+            40,
+            120,
+            0,
+            7874740
+          ]
+        },
+        {
+          "row": 10,
+          "name_hex": "697374686d757363696e67756c617465",
+          "name": "isthmuscingulate",
+          "rgba_transparency_and_packed_id": [
+            140,
+            20,
+            140,
+            0,
+            9180300
+          ]
+        },
+        {
+          "row": 11,
+          "name_hex": "6c61746572616c6f636369706974616c",
+          "name": "lateraloccipital",
+          "rgba_transparency_and_packed_id": [
+            20,
+            30,
+            140,
+            0,
+            9182740
+          ]
+        },
+        {
+          "row": 12,
+          "name_hex": "6c61746572616c6f726269746f66726f6e74616c",
+          "name": "lateralorbitofrontal",
+          "rgba_transparency_and_packed_id": [
+            35,
+            75,
+            50,
+            0,
+            3296035
+          ]
+        },
+        {
+          "row": 13,
+          "name_hex": "6c696e6775616c",
+          "name": "lingual",
+          "rgba_transparency_and_packed_id": [
+            225,
+            140,
+            140,
+            0,
+            9211105
+          ]
+        },
+        {
+          "row": 14,
+          "name_hex": "6d656469616c6f726269746f66726f6e74616c",
+          "name": "medialorbitofrontal",
+          "rgba_transparency_and_packed_id": [
+            200,
+            35,
+            75,
+            0,
+            4924360
+          ]
+        },
+        {
+          "row": 15,
+          "name_hex": "6d6964646c6574656d706f72616c",
+          "name": "middletemporal",
+          "rgba_transparency_and_packed_id": [
+            160,
+            100,
+            50,
+            0,
+            3302560
+          ]
+        },
+        {
+          "row": 16,
+          "name_hex": "70617261686970706f63616d70616c",
+          "name": "parahippocampal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            60,
+            0,
+            3988500
+          ]
+        },
+        {
+          "row": 17,
+          "name_hex": "7061726163656e7472616c",
+          "name": "paracentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            220,
+            60,
+            0,
+            3988540
+          ]
+        },
+        {
+          "row": 18,
+          "name_hex": "706172736f70657263756c61726973",
+          "name": "parsopercularis",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            140,
+            0,
+            9221340
+          ]
+        },
+        {
+          "row": 19,
+          "name_hex": "706172736f72626974616c6973",
+          "name": "parsorbitalis",
+          "rgba_transparency_and_packed_id": [
+            20,
+            100,
+            50,
+            0,
+            3302420
+          ]
+        },
+        {
+          "row": 20,
+          "name_hex": "70617273747269616e67756c61726973",
+          "name": "parstriangularis",
+          "rgba_transparency_and_packed_id": [
+            220,
+            60,
+            20,
+            0,
+            1326300
+          ]
+        },
+        {
+          "row": 21,
+          "name_hex": "7065726963616c636172696e65",
+          "name": "pericalcarine",
+          "rgba_transparency_and_packed_id": [
+            120,
+            100,
+            60,
+            0,
+            3957880
+          ]
+        },
+        {
+          "row": 22,
+          "name_hex": "706f737463656e7472616c",
+          "name": "postcentral",
+          "rgba_transparency_and_packed_id": [
+            220,
+            20,
+            20,
+            0,
+            1316060
+          ]
+        },
+        {
+          "row": 23,
+          "name_hex": "706f73746572696f7263696e67756c617465",
+          "name": "posteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            220,
+            180,
+            220,
+            0,
+            14464220
+          ]
+        },
+        {
+          "row": 24,
+          "name_hex": "70726563656e7472616c",
+          "name": "precentral",
+          "rgba_transparency_and_packed_id": [
+            60,
+            20,
+            220,
+            0,
+            14423100
+          ]
+        },
+        {
+          "row": 25,
+          "name_hex": "70726563756e657573",
+          "name": "precuneus",
+          "rgba_transparency_and_packed_id": [
+            160,
+            140,
+            180,
+            0,
+            11832480
+          ]
+        },
+        {
+          "row": 26,
+          "name_hex": "726f737472616c616e746572696f7263696e67756c617465",
+          "name": "rostralanteriorcingulate",
+          "rgba_transparency_and_packed_id": [
+            80,
+            20,
+            140,
+            0,
+            9180240
+          ]
+        },
+        {
+          "row": 27,
+          "name_hex": "726f737472616c6d6964646c6566726f6e74616c",
+          "name": "rostralmiddlefrontal",
+          "rgba_transparency_and_packed_id": [
+            75,
+            50,
+            125,
+            0,
+            8204875
+          ]
+        },
+        {
+          "row": 28,
+          "name_hex": "7375706572696f7266726f6e74616c",
+          "name": "superiorfrontal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            220,
+            160,
+            0,
+            10542100
+          ]
+        },
+        {
+          "row": 29,
+          "name_hex": "7375706572696f72706172696574616c",
+          "name": "superiorparietal",
+          "rgba_transparency_and_packed_id": [
+            20,
+            180,
+            140,
+            0,
+            9221140
+          ]
+        },
+        {
+          "row": 30,
+          "name_hex": "7375706572696f7274656d706f72616c",
+          "name": "superiortemporal",
+          "rgba_transparency_and_packed_id": [
+            140,
+            220,
+            220,
+            0,
+            14474380
+          ]
+        },
+        {
+          "row": 31,
+          "name_hex": "73757072616d617267696e616c",
+          "name": "supramarginal",
+          "rgba_transparency_and_packed_id": [
+            80,
+            160,
+            20,
+            0,
+            1351760
+          ]
+        },
+        {
+          "row": 32,
+          "name_hex": "66726f6e74616c706f6c65",
+          "name": "frontalpole",
+          "rgba_transparency_and_packed_id": [
+            100,
+            0,
+            100,
+            0,
+            6553700
+          ]
+        },
+        {
+          "row": 33,
+          "name_hex": "74656d706f72616c706f6c65",
+          "name": "temporalpole",
+          "rgba_transparency_and_packed_id": [
+            70,
+            20,
+            170,
+            0,
+            11146310
+          ]
+        },
+        {
+          "row": 34,
+          "name_hex": "7472616e73766572736574656d706f72616c",
+          "name": "transversetemporal",
+          "rgba_transparency_and_packed_id": [
+            150,
+            150,
+            200,
+            0,
+            13145750
+          ]
+        },
+        {
+          "row": 35,
+          "name_hex": "696e73756c61",
+          "name": "insula",
+          "rgba_transparency_and_packed_id": [
+            255,
+            192,
+            32,
+            0,
+            2146559
+          ]
+        }
+      ],
+      "label_counts": [
+        {
+          "id": 0,
+          "vertices": 8051
+        },
+        {
+          "id": 6500,
+          "vertices": 2577
+        },
+        {
+          "id": 660700,
+          "vertices": 679
+        },
+        {
+          "id": 1316060,
+          "vertices": 5421
+        },
+        {
+          "id": 1326300,
+          "vertices": 1987
+        },
+        {
+          "id": 1351760,
+          "vertices": 4582
+        },
+        {
+          "id": 2146559,
+          "vertices": 2581
+        },
+        {
+          "id": 3296035,
+          "vertices": 3322
+        },
+        {
+          "id": 3302420,
+          "vertices": 893
+        },
+        {
+          "id": 3302560,
+          "vertices": 5355
+        },
+        {
+          "id": 3957880,
+          "vertices": 2094
+        },
+        {
+          "id": 3988500,
+          "vertices": 875
+        },
+        {
+          "id": 3988540,
+          "vertices": 2157
+        },
+        {
+          "id": 4924360,
+          "vertices": 2013
+        },
+        {
+          "id": 6558940,
+          "vertices": 2635
+        },
+        {
+          "id": 7874740,
+          "vertices": 4662
+        },
+        {
+          "id": 8204875,
+          "vertices": 4584
+        },
+        {
+          "id": 9180240,
+          "vertices": 992
+        },
+        {
+          "id": 9180300,
+          "vertices": 1189
+        },
+        {
+          "id": 9182740,
+          "vertices": 6877
+        },
+        {
+          "id": 9211105,
+          "vertices": 3932
+        },
+        {
+          "id": 9221140,
+          "vertices": 5855
+        },
+        {
+          "id": 9221340,
+          "vertices": 2094
+        },
+        {
+          "id": 9231540,
+          "vertices": 3412
+        },
+        {
+          "id": 10511485,
+          "vertices": 1008
+        },
+        {
+          "id": 10542100,
+          "vertices": 10231
+        },
+        {
+          "id": 11832480,
+          "vertices": 4372
+        },
+        {
+          "id": 13145750,
+          "vertices": 465
+        },
+        {
+          "id": 14423100,
+          "vertices": 5816
+        },
+        {
+          "id": 14433500,
+          "vertices": 6628
+        },
+        {
+          "id": 14464220,
+          "vertices": 1414
+        },
+        {
+          "id": 14474380,
+          "vertices": 6071
+        }
+      ]
+    }
+  },
+  "output_complete": true,
+  "input_meshes_stable": true,
+  "whole_case_complete": false,
+  "official_equivalence": "not_assessed",
+  "paired_stage_equivalence": "requires other arm comparison",
+  "original_inputs_final": [
+    {
+      "kind": "subject",
+      "relative": "mri/aseg.presurf.mgz",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/mri/aseg.presurf.mgz",
+      "size_bytes": 341922,
+      "sha256": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.smoothwm",
+      "size_bytes": 4118108,
+      "sha256": "11b4c03d273548b1e1bd285978fc6c6bdef1d1f80ed91483a06262976233a19b"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.sphere.reg",
+      "size_bytes": 4116958,
+      "sha256": "696b7d9b01efbf7542b6522d367e1231167b2a76a7f605609a71a53430fe1c7b"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/lh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/label/lh.cortex.label",
+      "size_bytes": 4721803,
+      "sha256": "38add960bb30bd300b93ecbf50879d141cb57ed1ebdf25a21f4c6eb34bc9da87"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18842086,
+      "sha256": "721d6f53e8e3edae2c3798d52c5878026f1cdbe6cb286659ae48b920651a4cb6"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21724500,
+      "sha256": "f726bca3747676e465aaad4572e525dc5370d0a073c435fd41c1beaff2ad6add"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 22003357,
+      "sha256": "6db52238d4c6c5867edd645daf23a7ce1bf753caffa792c9972db40af8229214"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.smoothwm",
+      "size_bytes": 4134549,
+      "sha256": "de76b8cdec330ac54d884f3312319b296cde344afadbcf417c5f3c15a97a4f2d"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.sphere.reg",
+      "size_bytes": 4134310,
+      "sha256": "b6fc0fbd8c1b7370fba6492baf93bfa74c8eb7793133e8d1cfd286ba86058ef5"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/rh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/label/rh.cortex.label",
+      "size_bytes": 4612395,
+      "sha256": "dbf0e417de9246e3077b57c08dbb45f5125ae65406565506882ddef54a161467"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18610793,
+      "sha256": "64e98c907af4242cb79b645a384c97ed37854b7b127a18ad406084b29dc486cf"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21898679,
+      "sha256": "878f4caae1f7d439ebeae5499537b9b5c1146bf7c369f5fb4cfc1df67e6d0b29"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21987412,
+      "sha256": "3f6e2ec1f24081f5a3ad2cafcdc1aaa156a2a635b78c30808dbeb8aaf9421498"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic4.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic4.tri",
+      "size_bytes": 207432,
+      "sha256": "95cc8e50f48df9b2a7a8558c9837becfa486f7562f2d9ae6fee4cc7aad341d13"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic7.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic7.tri",
+      "size_bytes": 13368214,
+      "sha256": "cdd2761f0921a05d4959eb5b200fc3c65c0344a575809b0b09458299d90a1e6d"
+    }
+  ],
+  "copied_inputs_final": [
+    {
+      "kind": "subject",
+      "relative": "mri/aseg.presurf.mgz",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/mri/aseg.presurf.mgz",
+      "size_bytes": 341922,
+      "sha256": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.smoothwm",
+      "size_bytes": 4118108,
+      "sha256": "11b4c03d273548b1e1bd285978fc6c6bdef1d1f80ed91483a06262976233a19b"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/lh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/lh.sphere.reg",
+      "size_bytes": 4116958,
+      "sha256": "696b7d9b01efbf7542b6522d367e1231167b2a76a7f605609a71a53430fe1c7b"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/lh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/lh.cortex.label",
+      "size_bytes": 4721803,
+      "sha256": "38add960bb30bd300b93ecbf50879d141cb57ed1ebdf25a21f4c6eb34bc9da87"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18842086,
+      "sha256": "721d6f53e8e3edae2c3798d52c5878026f1cdbe6cb286659ae48b920651a4cb6"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21724500,
+      "sha256": "f726bca3747676e465aaad4572e525dc5370d0a073c435fd41c1beaff2ad6add"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 22003357,
+      "sha256": "6db52238d4c6c5867edd645daf23a7ce1bf753caffa792c9972db40af8229214"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.smoothwm",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.smoothwm",
+      "size_bytes": 4134549,
+      "sha256": "de76b8cdec330ac54d884f3312319b296cde344afadbcf417c5f3c15a97a4f2d"
+    },
+    {
+      "kind": "subject",
+      "relative": "surf/rh.sphere.reg",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/surf/rh.sphere.reg",
+      "size_bytes": 4134310,
+      "sha256": "b6fc0fbd8c1b7370fba6492baf93bfa74c8eb7793133e8d1cfd286ba86058ef5"
+    },
+    {
+      "kind": "subject",
+      "relative": "label/rh.cortex.label",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/label/rh.cortex.label",
+      "size_bytes": 4612395,
+      "sha256": "dbf0e417de9246e3077b57c08dbb45f5125ae65406565506882ddef54a161467"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 18610793,
+      "sha256": "64e98c907af4242cb79b645a384c97ed37854b7b127a18ad406084b29dc486cf"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21898679,
+      "sha256": "878f4caae1f7d439ebeae5499537b9b5c1146bf7c369f5fb4cfc1df67e6d0b29"
+    },
+    {
+      "kind": "asset",
+      "relative": "average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs",
+      "size_bytes": 21987412,
+      "sha256": "3f6e2ec1f24081f5a3ad2cafcdc1aaa156a2a635b78c30808dbeb8aaf9421498"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic4.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic4.tri",
+      "size_bytes": 207432,
+      "sha256": "95cc8e50f48df9b2a7a8558c9837becfa486f7562f2d9ae6fee4cc7aad341d13"
+    },
+    {
+      "kind": "asset",
+      "relative": "lib/bem/ic7.tri",
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/lib/bem/ic7.tri",
+      "size_bytes": 13368214,
+      "sha256": "cdd2761f0921a05d4959eb5b200fc3c65c0344a575809b0b09458299d90a1e6d"
+    }
+  ],
+  "numba_cache_after": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/diagnostics/numba_cache",
+    "exists": true,
+    "existing_files": []
+  },
+  "imported_fnit_sources_after": {
+    "fnit": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/__init__.py",
+      "size_bytes": 6351,
+      "sha256": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4"
+    },
+    "fnit.recon_all.batch": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/batch.py",
+      "size_bytes": 5380,
+      "sha256": "e39fdc238f1f6962970f4bc1701186a4ae59d44027e05223179839ac0cd2d523"
+    },
+    "fnit.recon_all": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/__init__.py",
+      "size_bytes": 156,
+      "sha256": "d9691fbe92139d94364422748de32dff8cbc7f9d3b8408e4d45dc2abf878108a"
+    },
+    "fnit.recon_all.hemisphere_parallel": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_parallel.py",
+      "size_bytes": 14995,
+      "sha256": "74ae787046ef068a9943a75c50e6972f540d523bb848e0b22cf8bcee1ed4806c"
+    },
+    "fnit.recon_all.profiling": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/profiling.py",
+      "size_bytes": 14782,
+      "sha256": "1304fdf287051f057c4753ea3361ef8382a34c4e80a3521e9679d4ad25c655f3"
+    },
+    "fnit.recon_all.native_free": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/native_free.py",
+      "size_bytes": 70949,
+      "sha256": "439692523cfcba95b4ca241ce1bf80a4f460471257c89916d21dc94ba2272d58"
+    },
+    "fnit.recon_all.gcsa_initial": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_initial.py",
+      "size_bytes": 8473,
+      "sha256": "56483f779c7d781931f704975f3a57e5aa0837fd90e174f1c603ab7c18150779"
+    },
+    "fnit.recon_all.gcsa_aseg": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_aseg.py",
+      "size_bytes": 2224,
+      "sha256": "b5b7e26e28bd912f30f59bc324675c20447fc15ed9a810cdda92da1b53814946"
+    },
+    "fnit.recon_all.surface_thickness_gpu": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/surface_thickness_gpu.py",
+      "size_bytes": 10070,
+      "sha256": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961"
+    },
+    "fnit.recon_all.surface_curvature_gpu": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/surface_curvature_gpu.py",
+      "size_bytes": 5182,
+      "sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0"
+    },
+    "fnit.recon_all.gcsa_feature": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_feature.py",
+      "size_bytes": 6336,
+      "sha256": "40cbb9931e456c92ef0d361a10dbba14eab2293aab8312e4ddc5d7af2c54540c"
+    },
+    "fnit.recon_all.gcsa_finalize": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_finalize.py",
+      "size_bytes": 4483,
+      "sha256": "d793b9ac972f3470892b6663cebf79b53c679b1c8893790841e388a5530037e4"
+    },
+    "fnit.recon_all.gcsa_gibbs": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_gibbs.py",
+      "size_bytes": 2984,
+      "sha256": "8924e8fbff3ae15f254629ac66ad33e41c7e5cdfe27e1e6f3a57d03f4617882f"
+    },
+    "fnit.recon_all.gcsa_islands": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_islands.py",
+      "size_bytes": 3450,
+      "sha256": "e69ee3ee96c48dce4bc948cfb2df9cd8e6db8789e71a49f79d7a4e45f3355376"
+    },
+    "fnit.recon_all.gcsa_permutation": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_permutation.py",
+      "size_bytes": 1463,
+      "sha256": "c8ffb051147f163b73960af34451204ed10c92db02a4f1f61285a34127fe625f"
+    },
+    "fnit.recon_all.gcsa_reclassify": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_reclassify.py",
+      "size_bytes": 2113,
+      "sha256": "8eb00ce4b40cc98e9d6a937c4aaf6386e107171e54ccedfb6c8f9bf0918b8678"
+    },
+    "fnit.recon_all.gcsa_label_python": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/gcsa_label_python.py",
+      "size_bytes": 6225,
+      "sha256": "2af06857386ca36f035b98e413a3a304224c43b52807c8844268170c828c3007"
+    },
+    "fnit.recon_all.thread_budget": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/thread_budget.py",
+      "size_bytes": 5804,
+      "sha256": "bf0b40e5c6c7232d0de23dee3c491a3c27850d79922d81df71689933a9692fca"
+    }
+  },
+  "changed_imported_sources": [],
+  "retained_stage_files": [
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/scripts/annotation.hemisphere-group.json",
+      "size_bytes": 172805,
+      "sha256": "3f2daa41f701424b6984b39795842c4900bccc80ee3301d40374666924273a90"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/scripts/annotation.lh.worker.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/ds000114_sub-07_baseline/outputs/subject/scripts/annotation.rh.worker.log",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "finished_utc": "2026-10-04T09:46:57.857406+00:00",
+  "timing_scope": "From validation entry through first final summary write; final timing receipt rewrite excluded. Outer run_monitored wall clock includes interpreter and all writes.",
+  "exit_code": 0
+}

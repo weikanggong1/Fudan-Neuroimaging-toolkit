@@ -27,6 +27,7 @@ CPU 注释先确定脑区顶点和静态切片，保留每个脑区的原顶点�
 | 接口 | 全部输入及默认值 | 输出 |
 |---|---|---|
 | `SurfaceStatsCache` | `device="cuda:0"`，显式目标 GPU 或 `cpu` | 可用 `with` 管理的缓存，`counters` 是读取/计算次数字典 |
+| `roi_vertex_area`（缓存内部方法） | `geometry`为同一缓存`geometry(path=...)`返回的网格对象，含`xyz (N,3)`和`triangles (F,3)`；无参数默认值 | 同设备`(N,) float64`张量，单位mm²；面面积分摊后累计，按该表面版本缓存。输入设备/索引不合法时由PyTorch抛异常。 |
 | `write_anatomical_stats` | `subject` 被试目录；`hemi` 为 lh/rh；`atlas` 注释名；`surface` 为 white/pial；`brainvol_stats` 为体积字典；`output` 路径；`device="cuda:0"`；`cache=None` | 创建父目录并写完整 .stats，返回 `Path`；None 使用临时缓存 |
 | `anatomical_stats_rows` | `white`、`pial`、`surface` 三个表面；`area_map`；`thickness`；`annotation`；`cortex_label` 或 None；`device="cuda:0"`；`cache=None` | `list[str]`，十列与原格式一致 |
 | `roi_area_thickness` | `surface`、`annotation`、`thickness`；`device="cuda:0"`；`cache=None` | `{脑区名: (NumVert, SurfArea, ThickAvg, ThickStd)}`；std 为总体标准差 |
@@ -53,6 +54,12 @@ brain_volume_measures = read_brain_volume_stats(
 )
 target_device = "cuda:0"  # 当前进程内明确的目标 GPU
 with SurfaceStatsCache(device=target_device) as statistics_cache:
+    surface_geometry = statistics_cache.geometry(
+        path=subject_directory / "surf" / "lh.white",  # 当前最终white的有序网格；覆盖文件会使缓存失效
+    )
+    regional_area_base = statistics_cache.roi_vertex_area(
+        geometry=surface_geometry,  # 同一缓存的几何对象；返回每顶点float64/mm²脑区面积基础量
+    )
     for atlas_name in ("aparc", "aparc.a2009s", "aparc.DKTatlas"):
         write_anatomical_stats(
             subject=subject_directory,  # 包含 surf/label/mri/stats 的目录
@@ -124,7 +131,7 @@ FreeSurfer 皮层表面方法背景：Dale, Fischl & Sereno, *NeuroImage* 9, 179
 0444db72c248fac01bf9385c615da4f0e9fbade94ebbe2ccd2a70942f0c2180f
 ```
 
-远端固定来源是 `volume_parity_20260930/fixes_20261001/stage1code`。实际执行的统计模块 SHA-256 如下，两例相同；整理此页时已确认这六个模块与当前工作区逐一匹配。
+远端固定来源是 `volume_parity_20260930/fixes_20261001/stage1code`。该轮实际执行的统计模块 SHA-256 如下，两例相同；它们标识2026-10-01快照，不代表后续ROI面积修复的源码。
 
 | 候选统计模块 | SHA-256 |
 |---|---|

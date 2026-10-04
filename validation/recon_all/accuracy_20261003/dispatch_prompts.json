@@ -1,0 +1,59 @@
+{
+  "schema": "fnit-recon-accuracy-dispatch-v1",
+  "baseline_commit": "816e5610417a4c587caf321049438a9554139016",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "medium",
+  "created_utc": "2026-10-03",
+  "parallel_capacity": {
+    "active_children": 1,
+    "total_tasks": 5,
+    "all_five_started": true,
+    "continuations": "reuse same medium agent after slot available"
+  },
+  "common_prompt": "本轮用户已授权控制五个子任务，目标是精度优化，在现有 GPU 速度稳定情况下提高与官方 recon-all 输出一致性，不以提速为目标。用户最新要求五任务全部 gpt-6.1-sol / medium；覆盖先前ultra要求。基线 main=816e5610417a4c587caf321049438a9554139016。旧性能轮 AGENTS 第4节分工由本轮提示词覆盖。\n开始先读自己 worktree 的 AGENTS.md、下层规范、当前实现及最新 validation/recon_all/optimizations/20261002_parallel/whole 记录。已有两例仅用于诊断线索；本轮统一下载10例公开原始T1w、10个不同被试，并对10例全部评估。不能使用旧两例替代新10例，不能根据结果筛掉困难输入。10例 manifest 由任务1建立，正式整例由协调者排队一次性执行基线、官方、最终候选，其他任务做受影响的阶段回归和连续链，避免每个任务重复启动10个整例。\n实现优先复用FNIT成熟PyTorch/Numba，GPU默认TF32，保留已验证逐阶段FP32例外，未经授权不用FP16/BF16或全局关闭TF32；所有Synth调用保持FNIT GPU。禁止为追求字节一致改成明显慢的CPU路径。生产不调用系统FS/FSL/SPM/MRtrix/AFNI或Nipype/DIPY等；允许固定上游源码在Conda独立编译。官方只在独立benchmark目录执行。生产不读取官方结果、不复制参考、不针对被试/体素修补、不降低门槛或删失败项。nibabel优先，显存预算20,000,000,000字节，记录实际父子进程同刻合计，不能把unavailable或缓存统计0视为0显存。\n每个修复先定位第一处差异、建立可解释算子回归；再同输入真实阶段、自产连续链；最终协调者从原始T1和空目录跑10例。固定输入/权重/资产/程序SHA、代码commit及diff、主机/CPU/GPU UUID、线程、种子和实际精度。保留138项严格复现诊断，并报告逐标签Dice、双向点到三角面距离、厚度/面积/体积逐脑区偏差、最大/P99误差和局部异常。先确认同网格对应才比较同索引；不得用标签Pearson r当Dice。整体等效阈值尚未确认，保持not_assessed，不凭新结果事后放宽。\n性能稳定须用同主机/同GPU/同输入/线程预算的前后配对计时及基线重复性判断，含校验/加载/传输/读写，GPU计时显式同步cuda:0；无预先授权的5%等容差，不自行设为正式标准。有可重复变慢的修改应继续优化或作为诊断后端暂不接入默认。对官方重复性优先核对已有证据，必要时同输入固定环境重跑；跨环境差异独立记录，不能一概归因于随机性。\n服务器连接复用 /tmp/fnit-recon-five-20261002/coordination/ssh_gpucw1.sh 和 scp_gpucw1.sh，共用已认证ControlMaster；先hostname/whoami/pwd。2026-10-03 root已实测gpucw1/gongwk，GPU0为H100 80GiB，UUID GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e。不要关共享连接、记录凭据或许可证内容。包装器/私有runtime文件可以读取配置但不能把敏感内容输出或提交。headcw联网，可使用已有head控制socket转发，不创建新密码连接。连接失败报root修复。\n所有计时和GPU计算取得服务器 /tmp/fnit-shared-benchmark.lock（flock本地锁，非GPFS）；总线程4，左右各2，GPU0显式。只读调查可独立进行，不取消别人作业或占用其他研究GPU。独立任务目录，不读写其他任务源码。\n本地exec必须 shell=/bin/bash, login=false, workdir=自己的实际worktree；默认执行入口有故障。需要时sandbox_permissions=require_escalated并明确理由，本轮SSH/下载/工作树编辑已获授权。根协调目录 /tmp/fnit-recon-accuracy-20261003/coordinator；你的报告目录 validation/recon_all/accuracy_20261003/task_0N。不编辑native_free.py/batch.py/CLI/根AGENTS/README/环境和共享安装入口；提出可兼容函数接口与接入补丁建议，交由root合并。只提交自己范围，保护他人工作，不推main。新增依赖/组件须向root给主页Conda接入说明。\n修改函数及子功能同步中文文档：功能、所有输入/输出结构、空间/单位、参数/默认/限制/异常、显式具名参数及中文注释例子、对应原软件命令（内部步骤说明无独立CLI）、源码链接/参考、真实阶段和整例精度/时间，历史与当前分开。成熟子函数bug特别解释。以机器可读JSON/CSV和脚本交付，可行时局部异常脑图。根总报告/整例/安装/最终合并由root负责。",
+  "tasks": {
+    "task_01": {
+      "prompt": "任务1：10例公开T1w数据、官方/基线固定与统一评估。worktree=/tmp/fnit-recon-accuracy-20261003/task_01，branch=recon-accuracy/20261003-task-01。\n选择并下载10个不同公开被试的真实原始T1w，优先两个公开BIDS数据集各5例以增加采集差异；只用明确许可、匿名无需凭据的原作者/OpenNeuro公开入口。浏览核实官方数据页、License、固定版本/快照和文件来源，先冻结被试列表和选择规则再看结果，不重用旧sub01/sub02作为新10例。只下载T1w及必要侧车/许可/manifest，不下载整个fMRI/dMRI数据集，不把影像或权重提交Git。下载放服务器私有accuracy_20261003/public_t1w目录，校验SHA、size、NIfTI 3D shape/dtype/affine/qform/sform，记录选择排除依据；10例失败者仍在报告显示失败。\n独占新增 validation/recon_all/accuracy_20261003/cohort 工具、manifest、下载复现脚本和中文说明。复用compare_whole_cases/compare_subject/表面距离和逐ROI比较工具，设计10例baseline当前main、官方固定FS8.2 d932c45、最终候选的隔离目录和机器可读评估schema。138项诊断不删，报告质量/严格复现/相对baseline退化/最终指标；等效not_assessed。\n本轮任务1第一阶段先完成许可审查、10例下载（或可持续tmux下载且manifest明确逐例pending）、评估/运行配置和状态文件，给root可执行命令。不要自己启动耗时数小时的10例整例；由root冻结所有版本并统一排队。第一阶段完成就返回，为另外两个子任务让出并发槽；后续root会唤醒你做10例结果统计。不得只给建议或用模拟T1补数量。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "data_phase_complete; ten_case_evaluation_pending",
+      "agent": "/root/accuracy01_cohort_medium"
+    },
+    "task_02": {
+      "prompt": "任务2：原始T1→conform→N4/nu→Synth/Talairach前段精度。worktree=/tmp/fnit-recon-accuracy-20261003/task_02，branch=recon-accuracy/20261003-task-02。\n独占 conform_gpu.py、N4封装/ITK源码(tools/n4_itk)、input_talairach_chain.py、前段强度缩放专属模块；Synth共有设备/精度子函数如确需修改先通知root协商，保留所有Synth GPU及FP32例外，MNI warp兼容/坐标修复也先通知root。不改任务3归一化/GCA/WM模块、不改任务4/5表面模块或共享调度。\n核对当前conform与N4真实差异，旧195个uint8体素/2个nu体素仅线索。conform按raw导入/rawavg、原网格缩放、目标网格变换、采样坐标、量化前插值、舍入写出定位；禁止体素特例。N4先证实输入、几何、参数、线程一致，再检查float输出/转换/程序环境，不先归因于编译器。Synth核对模型构造后实际forward TF32/dtype/设备及原图/翻转规则、仿射坐标契约；不改成CPU或全局关TF32换尾差。\n从首处可修复的系统差异着手，实现一般修复，先旧真实冻结输入同阶段回归，再使用任务1的10例受影响前段回归并把输出交任务3；计时共享锁与同机配对。为root提供公共接口接入说明及真实精度/耗时/显存报告。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "phase_checkpoint_complete; background_validation_pending",
+      "agent": "/root/accuracy02_prefix_medium"
+    },
+    "task_03": {
+      "prompt": "任务3：GCA注册、归一化、WM和filled精度。worktree=/tmp/fnit-recon-accuracy-20261003/task_03，branch=recon-accuracy/20261003-task-03。\n独占mri_em_register/GCA评分缓存及注册源码、GCA/CA normalize、normalize_t1相关、mri_cc、去噪、mri_segment/edit/pretess/fill和WM规则专属模块，不改conform/N4/inputTalairach、表面或共享调度。先用当前自产上游及同输入官方回放定位首处误差，不重复写已有GPU归一化。\nmri_em_register做官方nu+官方brainmask、FNITnu+官方mask、官方nu+FNITmask、FNITnu+FNITmask四组合隔离诊断，送相同后续归一化，区分nu/mask/LTA贡献；这些混合输入不得进入生产。核对cpu_cached与参考完整优化器的目标、缓存键、梯度/接受拒绝、终止和累计舍入；不把部分Python评分当完整注册，不直接换慢CPU或不等价N4。\n逐阶段orig/nu/T1/brainmask/talairach.lta/norm/brain/wm.seg/wm.asegedit/wm/filled报告不同体素、max/P99、geometry/dtype和逐标签Dice。任务2上游修复未合并时冻结版本并区分自有阶段误差与传播。阶段成熟后对10例受影响链回归（由root提供cohortmanifest），保持GPU/总线程4与现有速度。给root兼容接入说明、提交、中文文档及真实报告。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "second_phase_running",
+      "agent": "/root/accuracy03_volume_medium"
+    },
+    "task_04": {
+      "prompt": "任务4：网格、拓扑、球面、球面配准与皮层注释精度。worktree=/tmp/fnit-recon-accuracy-20261003/task_04，branch=recon-accuracy/20261003-task-04。\n独占tessellation/mesh/拓扑/remesh、sphere_*/mris_register_*、GCSA/atlas annotation专属模块；place_surface_normals.py归任务5，若需要变更先给root协商；不改white/pial放置、最终指标、体积前段或共享调度。\n从filled→orig.nofix→orig.premesh→orig的顶点/面数、有序faces/坐标找到网格首次变化；同索引比較前证明对应，拓扑不同用双向点到三角面距离及局部异常，不只最近顶点距。冻结同输入核对FNIT/Conda源码构建/官方球面、registration与注释，优先复用已通过函数，关注边排序、Gauss-Seidel、目标/梯度、平均邻接顺序、步长接受拒绝、停止和模板坐标，不把有序更新改成并发同时更新。\n网格质量检查连通/非流形/自相交、sphere与sphere.reg翻折，固定共享defects读写和并行发布语义；已有并行速度维持。10例完整自产网格/球面与分区Dice均须评估。先同输入阶段和已有两例异常定位，等待新10例后受影响回归；交付兼容补丁、程序版本、精度/耗时、中文说明和异常图。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "phase_checkpoint_complete; background_validation_pending",
+      "agent": "/root/accuracy04_mesh_medium"
+    },
+    "task_05": {
+      "prompt": "任务5：white/pial与厚度、面积、曲率、体积及脑区统计精度。worktree=/tmp/fnit-recon-accuracy-20261003/task_05，branch=recon-accuracy/20261003-task-05。\n独占place_surface_*、place_white_preaparc_python.py、place_pial_python.py、white_preaparc_conda.py/final_white_conda.py、表面GPU指标、脑区统计缓存/no-th3汇总及后处理投射专属模块。place_surface_normals.py由本任务维护，与任务4需要的接口保持兼容；不改网格/球面算法、体积前段或共享调度。\n区别网格/上游变化与放置算法误差；同完整输入对官方、Conda固定源码、已有完整Python实现三方对照，先一个半球逐轮定位再另一侧和新10例。核对边界搜索、目标强度、梯度、状态连续传递、试步接受拒绝、固定顶点及最终相交清理；不得因为Python与Conda不同就默认其中正确，保留完整pial四轮，white首轮不是完整实现。\n现有GPU厚度/面积/曲率优先修复，不退回慢CPU追尾差。重点空间候选扩展/20hop可达性、坐标单位、白/软膜顶点对应、TH3顶点与ROI-no-th3定义、不同表面版本缓存失效、原始/white.preaparc/final white/pial网格读取和曲率；不能跨版本缓存或把TH3当no-th3。\n报告逐脑区厚度/面积/体积绝对和相对偏差、P99/max及局部异常；检查white/pial穿越、连通/非流形、距离图。做固定输入阶段配对准确度/速度/显存，再10例自产输出评估。若需改CPP组件须固定源码Conda编译并给root主页安装接入清单，不替换整条流程为官方CPP。给root兼容接入、真实报告、中文子函数说明、图和提交。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "phase_checkpoint_complete; background_validation_pending",
+      "agent": "/root/accuracy05_surface_medium"
+    }
+  },
+  "reasoning_change": "用户先要求待启动任务试medium，随后明确要求任务1、2也以medium重新启动；五项任务均改为medium。",
+  "updated_utc": "2026-10-03T02:43:05.251398+00:00",
+  "observed_capacity": {
+    "active_children": 2,
+    "total_tasks": 5,
+    "all_five_started": true,
+    "continuations": "reuse same medium agent after slot available"
+  }
+}

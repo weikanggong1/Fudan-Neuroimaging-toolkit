@@ -1,0 +1,49 @@
+[W1004 21:01:17.519806966 Module.cpp:178] symbolizing C++ stack trace for exception; if this hangs, rerun with TORCH_DISABLE_ADDR2LINE=1...
+
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/ten_case_candidate_frozen_3a0c9aba/src/fnit/recon_all/hemisphere_worker.py", line 59, in main
+    bootstrap = torch.empty(1, dtype=torch.float32, device=request['device'])
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: CUDA error: out of memory
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+Exception raised from c10_cuda_check_implementation at /opt/conda/conda-bld/pytorch_1729647369228/work/c10/cuda/CUDAException.cpp:43 (most recent call first):
+C++ CapturedTraceback:
+#4 std::_Function_handler<std::shared_ptr<c10::LazyValue<std::string> const> (), c10::SetStackTraceFetcher(std::function<std::string ()>)::{lambda()#1}>::_M_invoke(std::_Any_data const&) from Logging.cpp:0
+#5 c10::Error::Error(c10::SourceLocation, std::string) from ??:0
+#6 c10::detail::torchCheckFail(char const*, char const*, unsigned int, std::string const&) from ??:0
+#7 c10::cuda::c10_cuda_check_implementation(int, char const*, char const*, int, bool) from ??:0
+#8 c10::cuda::(anonymous namespace)::initGlobalStreamState() from CUDAStream.cpp:0
+#9 c10::cuda::(anonymous namespace)::initCUDAStreamsOnce() from CUDAStream.cpp:0
+#10 c10::cuda::getCurrentCUDAStream(signed char) from ??:0
+#11 c10::cuda::CUDACachingAllocator::Native::NativeCachingAllocator::allocate(unsigned long) from :0
+#12 at::TensorBase at::detail::_empty_generic<long>(c10::ArrayRef<long>, c10::Allocator*, c10::DispatchKeySet, c10::ScalarType, std::optional<c10::MemoryFormat>) from :0
+#13 at::detail::empty_generic(c10::ArrayRef<long>, c10::Allocator*, c10::DispatchKeySet, c10::ScalarType, std::optional<c10::MemoryFormat>) from ??:0
+#14 at::detail::empty_cuda(c10::ArrayRef<long>, c10::ScalarType, std::optional<c10::Device>, std::optional<c10::MemoryFormat>) from ??:0
+#15 at::detail::empty_cuda(c10::ArrayRef<long>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>) from ??:0
+#16 at::native::empty_cuda(c10::ArrayRef<long>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>) from ??:0
+#17 at::(anonymous namespace)::(anonymous namespace)::wrapper_CUDA_memory_format_empty(c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>) from RegisterCUDA.cpp:0
+#18 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>), &at::(anonymous namespace)::(anonymous namespace)::wrapper_CUDA_memory_format_empty>, at::Tensor, c10::guts::typelist::typelist<c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat> > >, at::Tensor (c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>)>::call(c10::OperatorKernel*, c10::DispatchKeySet, c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>) from RegisterCUDA.cpp:0
+#19 at::_ops::empty_memory_format::redispatch(c10::DispatchKeySet, c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>) from ??:0
+#20 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>), &at::(anonymous namespace)::empty_memory_format>, at::Tensor, c10::guts::typelist::typelist<c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat> > >, at::Tensor (c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>)>::call(c10::OperatorKernel*, c10::DispatchKeySet, c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>) from RegisterBackendSelect.cpp:0
+#21 at::_ops::empty_memory_format::call(c10::ArrayRef<c10::SymInt>, std::optional<c10::ScalarType>, std::optional<c10::Layout>, std::optional<c10::Device>, std::optional<bool>, std::optional<c10::MemoryFormat>) from ??:0
+#22 torch::autograd::THPVariable_empty(_object*, _object*, _object*) from python_torch_functions_2.cpp:0
+#23 cfunction_call from :0
+#24 _PyObject_MakeTpCall.localalias from :0
+#25 _PyEval_EvalFrameDefault from ??:0
+#26 _PyEval_Vector from :0
+#27 PyEval_EvalCode from ??:0
+#28 builtin_exec from :0
+#29 cfunction_vectorcall_FASTCALL_KEYWORDS from :0
+#30 PyObject_Vectorcall from ??:0
+#31 _PyEval_EvalFrameDefault from ??:0
+#32 _PyFunction_Vectorcall from ??:0
+#33 pymain_run_module from :0
+#34 Py_RunMain.localalias from :0
+#35 Py_BytesMain from ??:0
+#36 __libc_start_main from ??:0
+#37 _start from ??:0
+
+

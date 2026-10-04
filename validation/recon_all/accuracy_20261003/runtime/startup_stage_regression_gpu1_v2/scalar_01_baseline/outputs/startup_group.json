@@ -1,0 +1,476 @@
+{
+  "status": "complete",
+  "started_utc": "2026-10-04T09:36:13.745769+00:00",
+  "pid": 68911,
+  "mode": "baseline_default",
+  "initialized_parent_requested": false,
+  "startup_wait_seconds_argument": null,
+  "device_requested": "cuda:0",
+  "workers": 2,
+  "threads": 4,
+  "scope": "scalar CUDA bootstrap only; no image, no algorithm retry; external lock/monitor",
+  "precision_requested": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "bootstrap_dtype": "float32"
+  },
+  "script_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/startup_stage_tools_v2/replay_startup_group.py": "5e0c5f0de84eda236dd2b4be3f6f41cc030ffe89e769586eaa12a217a4bc0a64"
+  },
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "CUDA_MODULE_LOADING": null,
+    "TORCH_SHOW_CPP_STACKTRACES": "1",
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4"
+  },
+  "source_manifest_sha256": "38ee0efd02f9940106bd84738f06ba479cd948d7ecccb39b75eefb2df72295e1",
+  "critical_source_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_parallel.py": "74ae787046ef068a9943a75c50e6972f540d523bb848e0b22cf8bcee1ed4806c",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/hemisphere_worker.py": "181429ced4e13b2ff8b27114237ce8fb80f7054699216eb28f4a22e24ad6c217",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610/src/fnit/recon_all/profiling.py": "1304fdf287051f057c4753ea3361ef8382a34c4e80a3521e9679d4ad25c655f3",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/startup_stage_tools_v2/cuda_bootstrap_target.py": "dfd39413c3596e4aed32fef0f53c5bc490b8e16b0680a3906252ac3bac7fd821"
+  },
+  "torch_version": "2.5.1",
+  "torch_cuda_version": "11.8",
+  "allocator": {
+    "requested": "disabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "precision_actual": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true
+  },
+  "parent_initialized_before_bootstrap": false,
+  "parent_initialized_before_group": false,
+  "group_call_parameters": {
+    "device": "cuda:0",
+    "threads": 4,
+    "workers": 2,
+    "callable_path": "cuda_bootstrap_target:noop"
+  },
+  "group": {
+    "operation": "scalar_startup",
+    "workers_requested": 2,
+    "total_thread_budget": 4,
+    "worker_threads": 2,
+    "status": "complete",
+    "workers": {
+      "lh": {
+        "status": "complete",
+        "pid": 69535,
+        "started_monotonic": 2927940.850426501,
+        "cuda_allocator": {
+          "requested": "disabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": "1",
+          "environment_after_selection": "1",
+          "effective": "disabled",
+          "torch_stats_known_valid": false,
+          "torch_stats_known_unavailable": true
+        },
+        "actual_cuda_device": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+        },
+        "cuda_bootstrap_seconds": 0.5176752940751612,
+        "value": {
+          "device": "0",
+          "initialized": true,
+          "torch_stats_status": "unavailable_allocator_disabled",
+          "allocated_bytes": null,
+          "free_total_bytes": [
+            82838159360,
+            84942979072
+          ]
+        },
+        "stage": {
+          "name": "scalar_startup",
+          "seconds": 0.00031212298199534416,
+          "function_seconds": 0.0002622939646244049,
+          "cuda_pre_sync_seconds": 0.0,
+          "cuda_post_sync_seconds": 0.0,
+          "cuda_synchronized": false,
+          "cuda_synchronization_requested": false,
+          "parent_cpu_seconds": 0.0010152310000002274,
+          "child_cpu_seconds": 0.0,
+          "torch_memory_stats_status": "unavailable"
+        },
+        "thread_budget": {
+          "requested_threads": 2,
+          "scope": "Torch process intraop and current caller Numba thread mask",
+          "torch": {
+            "before": 2,
+            "effective": 2,
+            "interop_unchanged": 1,
+            "restored": 2
+          },
+          "numba": {
+            "before": 2,
+            "effective": 2,
+            "initial_capacity": 2,
+            "mask_only": true,
+            "threading_layer": "tbb",
+            "restored": 2
+          },
+          "environment_modified": false,
+          "restoration_complete": true
+        },
+        "precision": {
+          "matmul_tf32": true,
+          "cudnn_tf32": true
+        },
+        "finished_monotonic": 2927943.428244455,
+        "total_seconds": 2.577817953657359,
+        "environment": {
+          "requested_threads": 2,
+          "scope": "fresh subprocess initialization only",
+          "environment_before": {
+            "OMP_NUM_THREADS": "4",
+            "OPENBLAS_NUM_THREADS": "4",
+            "MKL_NUM_THREADS": "4",
+            "NUMEXPR_NUM_THREADS": "4",
+            "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "4",
+            "NUMBA_NUM_THREADS": "4"
+          },
+          "environment_after": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "MKL_NUM_THREADS": "2",
+            "NUMEXPR_NUM_THREADS": "2",
+            "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "2",
+            "NUMBA_NUM_THREADS": "2"
+          },
+          "parent_environment_modified": false,
+          "active_worker_counts_verified": false
+        },
+        "private_subject": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/scalar_01_baseline/outputs/subject/scripts/hemi-scalar_startup-bxxg46z_/lh/subject"
+      },
+      "rh": {
+        "status": "complete",
+        "pid": 69536,
+        "started_monotonic": 2927940.864548505,
+        "cuda_allocator": {
+          "requested": "disabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": "1",
+          "environment_after_selection": "1",
+          "effective": "disabled",
+          "torch_stats_known_valid": false,
+          "torch_stats_known_unavailable": true
+        },
+        "actual_cuda_device": {
+          "name": "NVIDIA H100 PCIe",
+          "uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+        },
+        "cuda_bootstrap_seconds": 0.5950930877588689,
+        "value": {
+          "device": "0",
+          "initialized": true,
+          "torch_stats_status": "unavailable_allocator_disabled",
+          "allocated_bytes": null,
+          "free_total_bytes": [
+            82380587008,
+            84942979072
+          ]
+        },
+        "stage": {
+          "name": "scalar_startup",
+          "seconds": 0.00033908896148204803,
+          "function_seconds": 0.0002935766242444515,
+          "cuda_pre_sync_seconds": 0.0,
+          "cuda_post_sync_seconds": 0.0,
+          "cuda_synchronized": false,
+          "cuda_synchronization_requested": false,
+          "parent_cpu_seconds": 0.001240469999999938,
+          "child_cpu_seconds": 0.0,
+          "torch_memory_stats_status": "unavailable"
+        },
+        "thread_budget": {
+          "requested_threads": 2,
+          "scope": "Torch process intraop and current caller Numba thread mask",
+          "torch": {
+            "before": 2,
+            "effective": 2,
+            "interop_unchanged": 1,
+            "restored": 2
+          },
+          "numba": {
+            "before": 2,
+            "effective": 2,
+            "initial_capacity": 2,
+            "mask_only": true,
+            "threading_layer": "tbb",
+            "restored": 2
+          },
+          "environment_modified": false,
+          "restoration_complete": true
+        },
+        "precision": {
+          "matmul_tf32": true,
+          "cudnn_tf32": true
+        },
+        "finished_monotonic": 2927943.555538654,
+        "total_seconds": 2.6909901490435004,
+        "environment": {
+          "requested_threads": 2,
+          "scope": "fresh subprocess initialization only",
+          "environment_before": {
+            "OMP_NUM_THREADS": "4",
+            "OPENBLAS_NUM_THREADS": "4",
+            "MKL_NUM_THREADS": "4",
+            "NUMEXPR_NUM_THREADS": "4",
+            "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "4",
+            "NUMBA_NUM_THREADS": "4"
+          },
+          "environment_after": {
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "MKL_NUM_THREADS": "2",
+            "NUMEXPR_NUM_THREADS": "2",
+            "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "2",
+            "NUMBA_NUM_THREADS": "2"
+          },
+          "parent_environment_modified": false,
+          "active_worker_counts_verified": false
+        },
+        "private_subject": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_gpu1_v2/scalar_01_baseline/outputs/subject/scripts/hemi-scalar_startup-bxxg46z_/rh/subject"
+      }
+    },
+    "values": {
+      "lh": {
+        "device": "0",
+        "initialized": true,
+        "torch_stats_status": "unavailable_allocator_disabled",
+        "allocated_bytes": null,
+        "free_total_bytes": [
+          82838159360,
+          84942979072
+        ]
+      },
+      "rh": {
+        "device": "0",
+        "initialized": true,
+        "torch_stats_status": "unavailable_allocator_disabled",
+        "allocated_bytes": null,
+        "free_total_bytes": [
+          82380587008,
+          84942979072
+        ]
+      }
+    },
+    "published": [],
+    "caller_device": "cuda:0",
+    "worker_device": "cuda:0",
+    "worker_allocator_selection": {
+      "basis": "environment at fresh exec",
+      "selected_policy": "disabled",
+      "parent_preinitialized_actual_state": "not_inferred_from_environment"
+    },
+    "private_copy_seconds": 0.024814301170408726,
+    "worker_span_seconds": 2.7051121527329087,
+    "worker_sum_seconds": 5.268808102700859,
+    "overlap_seconds": 2.5636959499679506,
+    "critical_path_scope": "worker execution span; group wall includes copy, exec and publication",
+    "publish_seconds": 5.671754479408264e-07,
+    "device_process_tree": {
+      "status": "available",
+      "target_gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+      "sampling_interval_seconds": 0.5,
+      "max_observed_interval_seconds": 0.548149942420423,
+      "failed_samples": [],
+      "samples": [
+        {
+          "monotonic": 2927940.798145597,
+          "processes": [],
+          "tree_total_bytes": 0,
+          "external_processes": [
+            {
+              "pid": 31685,
+              "bytes": 843055104
+            },
+            {
+              "pid": 122495,
+              "bytes": 752877568
+            }
+          ]
+        },
+        {
+          "monotonic": 2927941.32890861,
+          "processes": [],
+          "tree_total_bytes": 0,
+          "external_processes": [
+            {
+              "pid": 31685,
+              "bytes": 843055104
+            },
+            {
+              "pid": 122495,
+              "bytes": 752877568
+            }
+          ]
+        },
+        {
+          "monotonic": 2927941.86960062,
+          "processes": [],
+          "tree_total_bytes": 0,
+          "external_processes": [
+            {
+              "pid": 31685,
+              "bytes": 843055104
+            },
+            {
+              "pid": 122495,
+              "bytes": 752877568
+            }
+          ]
+        },
+        {
+          "monotonic": 2927942.413856741,
+          "processes": [],
+          "tree_total_bytes": 0,
+          "external_processes": [
+            {
+              "pid": 31685,
+              "bytes": 843055104
+            },
+            {
+              "pid": 122495,
+              "bytes": 752877568
+            }
+          ]
+        },
+        {
+          "monotonic": 2927942.957970296,
+          "processes": [
+            {
+              "pid": 69535,
+              "bytes": 12582912
+            }
+          ],
+          "tree_total_bytes": 12582912,
+          "external_processes": [
+            {
+              "pid": 31685,
+              "bytes": 843055104
+            },
+            {
+              "pid": 122495,
+              "bytes": 752877568
+            }
+          ]
+        },
+        {
+          "monotonic": 2927943.466498194,
+          "processes": [
+            {
+              "pid": 69535,
+              "bytes": 469762048
+            },
+            {
+              "pid": 69536,
+              "bytes": 27262976
+            }
+          ],
+          "tree_total_bytes": 497025024,
+          "external_processes": [
+            {
+              "pid": 31685,
+              "bytes": 843055104
+            },
+            {
+              "pid": 122495,
+              "bytes": 752877568
+            }
+          ]
+        },
+        {
+          "monotonic": 2927944.014648136,
+          "processes": [
+            {
+              "pid": 69536,
+              "bytes": 469762048
+            }
+          ],
+          "tree_total_bytes": 469762048,
+          "external_processes": [
+            {
+              "pid": 31685,
+              "bytes": 843055104
+            },
+            {
+              "pid": 122495,
+              "bytes": 752877568
+            }
+          ]
+        },
+        {
+          "monotonic": 2927944.159200412,
+          "processes": [],
+          "tree_total_bytes": 0,
+          "external_processes": [
+            {
+              "pid": 31685,
+              "bytes": 843055104
+            },
+            {
+              "pid": 122495,
+              "bytes": 752877568
+            }
+          ]
+        }
+      ],
+      "peak_tree_total_bytes": 497025024,
+      "scope": "simultaneous parent and all live descendants on target GPU; external load separate",
+      "worker_pids": [
+        69535,
+        69536
+      ]
+    },
+    "cleanup_seconds": 0.018302413169294596,
+    "group_wall_seconds": 3.459629899356514
+  },
+  "function_entry_gate": {
+    "lh": {
+      "operation_entered_flags": [
+        null
+      ],
+      "reported_function_entries": 0,
+      "entry_count_known": false,
+      "callable_results": 1,
+      "at_most_once_verified_from_flags": false,
+      "failure_all_entries_proven_false": false
+    },
+    "rh": {
+      "operation_entered_flags": [
+        null
+      ],
+      "reported_function_entries": 0,
+      "entry_count_known": false,
+      "callable_results": 1,
+      "at_most_once_verified_from_flags": false,
+      "failure_all_entries_proven_false": false
+    }
+  },
+  "actual_worker_devices": {
+    "lh": {
+      "name": "NVIDIA H100 PCIe",
+      "uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+    },
+    "rh": {
+      "name": "NVIDIA H100 PCIe",
+      "uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+    }
+  },
+  "total_wall_seconds": 5.605687883682549,
+  "finished_utc": "2026-10-04T09:36:19.351465+00:00"
+}

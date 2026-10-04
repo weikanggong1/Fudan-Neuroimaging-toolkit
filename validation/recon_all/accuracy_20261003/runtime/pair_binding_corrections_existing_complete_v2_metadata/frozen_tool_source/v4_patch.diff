@@ -1,0 +1,182 @@
+diff --git a/validation/recon_all/accuracy_20261003/cohort/pair/PAIR_BINDING_METADATA_CORRECTION.md b/validation/recon_all/accuracy_20261003/cohort/pair/PAIR_BINDING_METADATA_CORRECTION.md
+index f7fff686..42235913 100644
+--- a/validation/recon_all/accuracy_20261003/cohort/pair/PAIR_BINDING_METADATA_CORRECTION.md
++++ b/validation/recon_all/accuracy_20261003/cohort/pair/PAIR_BINDING_METADATA_CORRECTION.md
+@@ -52,3 +52,20 @@
+ 2026-10-04 gpucw1 实际部署 `4c084d8a4714beccbcf670d54236d3454af5ee5d` 工具，原 sub-06 官方对照配置只改变 output 后，完整 `--verify-only` 入口 21.501 秒、exit 0。audit 再核验六份原/新实际回执和当前输入，`metadata_correction_verified`、exit 0，唯一差异为 input_sha256：原错误值 `8aa986c658663d2c26fa482a2ce303c4eecc28fbd69e4f6e9bace438be058200` 是原程序清单末项 SHA，正确输入为 `7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7`。没有重跑数值比较，原输入、运行和数值报告保持。完整[真实回执](../../runtime/startup_pair_binding_correction_v1/correction.json)与原/新 checkpoint、binding、配置、工具 SHA 一并归档，归档 SHA `fe809462507f630957060676061f06bdeee0767a5ca25c71ce9d58fed612ecba`。
+ 
+ 2026-10-04：修复SHA变量遮蔽，新增只核验模式与独立元数据纠正审计；不改生产源码，不改变已有数值比较和结论。
++
++
++## v4 角色协议补全（2026-10-04）
++
++现场检查发现，冻结 `startup_pair_binding_tools_v3`（`4c084d8a`）的 evaluator 已支持 baseline，但其 audit 仅支持 `startup_only_candidate`。上述18项旧测试中的“两个角色”指 evaluator，不代表 baseline audit 已通过；此前 sub-06 的真实审计属于启动候选，仍按原版本保留。10159/10171 的 baseline 修正尚待新工具部署、共享锁内真实核验和审计，不能引用旧启动候选结果替代。
++
++新 audit 明确支持 `baseline`、`startup_only_candidate` 和 `precision_candidate`。baseline checkpoint 按真实 evaluator 协议校验 `script_sha256`，不要求它未写出的 `role_helper_sha256`。baseline 资源证明使用 binding 的 `baseline_resources_sha256` 冻结清单，再核对 `mismatches=[]`、原比较/config/completion/binding 的 code commit 一致，逐项重新哈希 weights、assets、binaries 的 `resolved_path`。启动/精度候选继续要求对应非空 `startup_resource_verification` / `precision_resource_verification` 以及准确 helper SHA。
++
++两侧实际 config 和 launch 必须明确含 `input_sha256`，并与真实原始输入一致；不从缺失字段推测输入身份。新增 CPU 小文件测试实际经过 evaluator 的 baseline verify-only，再执行 audit，覆盖唯一纠正、三类资源实际重新读取、资源文件漂移、冻结资源清单漂移、官方 launch 缺少输入声明、候选 helper/资源证明缺失。测试用于元数据协议与拒绝门槛，不是脑数据 benchmark。
++
++```bash
++python3 -m unittest discover \
++  -s validation/recon_all/accuracy_20261003/cohort/pair \
++  -p 'test_*binding*.py' -v
++```
++
++新 v4 必须使用独立工具目录、冻结完整现有 evaluator/helper/audit SHA，以及新核验/审计输出目录；旧 v3 队列、失败日志和原18阶段数值均保留。审计不获取锁，调用方须持 `/tmp/fnit-shared-benchmark.lock`；verify-only 自行按原配置取得同一锁。当前文档是本地工具更新说明，不宣称两例真实纠正已经完成。
+diff --git a/validation/recon_all/accuracy_20261003/cohort/pair/audit_pair_binding_correction.py b/validation/recon_all/accuracy_20261003/cohort/pair/audit_pair_binding_correction.py
+index 952309cc..2db5d975 100644
+--- a/validation/recon_all/accuracy_20261003/cohort/pair/audit_pair_binding_correction.py
++++ b/validation/recon_all/accuracy_20261003/cohort/pair/audit_pair_binding_correction.py
+@@ -48,7 +48,6 @@ def audit(config_path):
+     if {k:v for k,v in original.items() if k != 'output'} != {k:v for k,v in verified.items() if k != 'output'}:
+         raise ValueError('verification config differs beyond output')
+     role = evaluation_spec(original)
+-    if role['role'] != 'startup_only_candidate': raise ValueError('correction audit requires startup_only_candidate role')
+     for prefix, root in (('original', original_root), ('verification', verified_root)):
+         for suffix, filename in (('checkpoint', 'checkpoint.json'), ('binding', 'execution_binding.json')):
+             if Path(config[prefix+'_'+suffix]['path']).resolve() != root/filename:
+@@ -69,14 +68,20 @@ def audit(config_path):
+     evaluator = Path(__file__).with_name('evaluate_pair.py')
+     helper = Path(__file__).with_name('evaluated_role_bindings.py')
+     tool_sha = {str(p.resolve()):digest(p) for p in (evaluator, helper, Path(__file__))}
+-    if state.get('script_sha256') != tool_sha[str(evaluator.resolve())] or state.get('role_helper_sha256') != tool_sha[str(helper.resolve())]:
+-        raise ValueError('verification evaluator/helper SHA differs from current audited tools')
++    if state.get('script_sha256') != tool_sha[str(evaluator.resolve())]:
++        raise ValueError('verification evaluator SHA differs from current audited tools')
++    # baseline evaluator does not publish role_helper_sha256; candidates must bind it.
++    if role['role'] != 'baseline' and state.get('role_helper_sha256') != tool_sha[str(helper.resolve())]:
++        raise ValueError('verification helper SHA differs from current audited tools')
+     before, after = rows['original_binding'], rows['verification_binding']
+     changed = sorted(k for k in set(before)|set(after) if before.get(k) != after.get(k))
+     if changed != ['input_sha256'] or set(before) != set(after):
+         raise ValueError('binding differs beyond input_sha256: ' + repr(changed))
+-    if 'startup_resource_verification' not in after:
+-        raise ValueError('full startup resource verification receipt missing')
++    if role['role'] != 'baseline':
++        resource_key = ('startup_resource_verification' if role['role'] == 'startup_only_candidate'
++                        else 'precision_resource_verification')
++        if not isinstance(after.get(resource_key), dict) or not after[resource_key]:
++            raise ValueError('full candidate resource verification receipt missing: ' + resource_key)
+     actual_configs = {}
+     actual_completions = {}
+     actual_launches = {}
+@@ -92,11 +97,32 @@ def audit(config_path):
+             raise ValueError('actual execution binding differs: ' + name)
+         actual_configs[name], actual_completions[name], actual_launches[name] = run_config, completion, launch
+     candidate, official = actual_configs[role['role']], actual_configs['official']
++    if role['role'] == 'baseline':
++        resources = load(original['baseline_resources'], after['baseline_resources_sha256'])
++        commit = candidate['code_commit']
++        if (resources.get('mismatches') != [] or resources.get('code_commit') != commit
++                or original['baseline_commit'] != commit or after.get('baseline_code_commit') != commit
++                or actual_completions['baseline'].get('code_commit') != commit):
++            raise ValueError('baseline resource freeze/code commit differs')
++        for category in ('weights', 'assets', 'binaries'):
++            if not isinstance(resources.get(category), dict):
++                raise ValueError('baseline resource category missing: ' + category)
++            for name, declaration in resources[category].items():
++                path = Path(declaration['resolved_path']).resolve()
++                expected = declaration['sha256']
++                if re.fullmatch(r'[0-9a-f]{64}', expected) is None or digest(path) != expected:
++                    raise ValueError('baseline resource changed: ' + category + '/' + name)
++                tracked[str(path)] = expected
+     raw_sha = digest(candidate['input']); tracked[str(Path(candidate['input']).resolve())] = raw_sha
+     cohort = load(original['cohort_manifest'], after['cohort_manifest_sha256'])
+     case = next(row for row in cohort['cases'] if row['id'] == original['case'])
++    for name in (role['role'], 'official'):
++        for kind, record in (('config', actual_configs[name]), ('launch', actual_launches[name])):
++            if 'input_sha256' not in record:
++                raise ValueError('actual raw input SHA declaration missing: ' + name + '/' + kind)
+     declarations = [after['input_sha256'], case['sha256'], candidate['input_sha256'], official['input_sha256'],
+-                    actual_launches[role['role']].get('input_sha256'), actual_completions['official'].get('input_sha256')]
++                    actual_launches[role['role']]['input_sha256'], actual_launches['official']['input_sha256'],
++                    actual_completions['official'].get('input_sha256')]
+     if candidate['input'] != official['input'] or any(value != raw_sha for value in declarations):
+         raise ValueError('actual input/config/launch/official completion SHA differs')
+     manifest = load(official['program_manifest'], after['official_program_manifest_sha256'])
+diff --git a/validation/recon_all/accuracy_20261003/cohort/pair/test_audit_pair_binding_correction.py b/validation/recon_all/accuracy_20261003/cohort/pair/test_audit_pair_binding_correction.py
+index 7aae4e2a..42c15e23 100644
+--- a/validation/recon_all/accuracy_20261003/cohort/pair/test_audit_pair_binding_correction.py
++++ b/validation/recon_all/accuracy_20261003/cohort/pair/test_audit_pair_binding_correction.py
+@@ -12,8 +12,17 @@ class CorrectionAuditTests(unittest.TestCase):
+     setUp = fixtures.PairInputBindingTests.setUp
+     run_verify_phase = fixtures.PairInputBindingTests.run_verify_phase
+ 
+-    def prepare(self):
+-        self.run_verify_phase(startup=True, verify_only=True)
++    def prepare(self, role='startup_only_candidate'):
++        if role == 'baseline':
++            resources_path = Path(self.config['baseline_resources'])
++            resources = json.loads(resources_path.read_text())
++            self.resource_files = {}
++            for category in ('weights', 'assets', 'binaries'):
++                path = self.put(category + '/fixture.dat', 'CPU metadata resource ' + category)
++                self.resource_files[category] = path
++                resources[category] = {'fixture': {'resolved_path': str(path), 'sha256': digest(path)}}
++            resources_path.write_text(json.dumps(resources))
++        self.run_verify_phase(startup=role != 'baseline', verify_only=True, role=role)
+         verified_root = Path(self.config['output'])
+         verified_binding = json.loads((verified_root/'execution_binding.json').read_text())
+         original_root = self.root/'original_comparison'
+@@ -67,5 +76,61 @@ class CorrectionAuditTests(unittest.TestCase):
+         self.refresh('verification_checkpoint')
+         with self.assertRaisesRegex(ValueError, 'did not stop'): audit(self.audit_path)
+ 
++    def test_baseline_unique_correction_rechecks_real_resource_files(self):
++        paths = self.prepare(role='baseline')
++        hashes = {key: digest(path) for key, path in paths.items()}
++        checkpoint = json.loads(paths['verification_checkpoint'].read_text())
++        self.assertNotIn('role_helper_sha256', checkpoint)
++        result = audit(self.audit_path)
++        self.assertEqual(result['evaluated_role'], 'baseline')
++        self.assertEqual(result['changed_fields'], ['input_sha256'])
++        self.assertEqual(result['corrected_input_sha256'], self.input_sha)
++        for path in self.resource_files.values():
++            self.assertEqual(result['read_file_sha256'][str(path.resolve())], digest(path))
++        self.assertEqual(hashes, {key: digest(path) for key, path in paths.items()})
++
++    def test_baseline_resource_drift_rejected_before_correction(self):
++        self.prepare(role='baseline')
++        self.resource_files['weights'].write_text('drift after actual verify-only')
++        with self.assertRaisesRegex(ValueError, 'baseline resource changed'):
++            audit(self.audit_path)
++        self.assertFalse(Path(self.audit_config['output']).exists())
++
++    def test_baseline_frozen_manifest_drift_rejected(self):
++        self.prepare(role='baseline')
++        path = Path(self.config['baseline_resources'])
++        resources = json.loads(path.read_text()); resources['code_commit'] = 'another commit'
++        path.write_text(json.dumps(resources))
++        with self.assertRaisesRegex(ValueError, 'frozen receipt SHA'):
++            audit(self.audit_path)
++
++    def test_baseline_missing_actual_launch_input_declaration_rejected(self):
++        launch = self.root/'official_diag/launch.json'
++        row = json.loads(launch.read_text()); del row['input_sha256']
++        launch.write_text(json.dumps(row))
++        self.prepare(role='baseline')
++        with self.assertRaisesRegex(ValueError, 'raw input SHA declaration missing'):
++            audit(self.audit_path)
++
++    def test_candidate_resource_receipt_cannot_be_missing(self):
++        paths = self.prepare(role='precision_candidate')
++        for name in ('original_binding', 'verification_binding'):
++            row = json.loads(paths[name].read_text())
++            del row['precision_resource_verification']
++            paths[name].write_text(json.dumps(row)); self.refresh(name)
++        with self.assertRaisesRegex(ValueError, 'resource verification receipt missing'):
++            audit(self.audit_path)
++
++    def test_precision_role_receipt_and_helper_are_required(self):
++        paths = self.prepare(role='precision_candidate')
++        result = audit(self.audit_path)
++        self.assertEqual(result['evaluated_role'], 'precision_candidate')
++        Path(self.audit_config['output']).unlink()
++        state = json.loads(paths['verification_checkpoint'].read_text())
++        del state['role_helper_sha256']; paths['verification_checkpoint'].write_text(json.dumps(state))
++        self.refresh('verification_checkpoint')
++        with self.assertRaisesRegex(ValueError, 'helper SHA'):
++            audit(self.audit_path)
++
+ 
+ if __name__ == '__main__': unittest.main()

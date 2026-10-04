@@ -1,0 +1,353 @@
+{
+  "baseline_commit": "816e5610417a4c587caf321049438a9554139016",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "medium",
+  "tasks": {
+    "task_01": {
+      "prompt": "任务1：10例公开T1w数据、官方/基线固定与统一评估。worktree=/tmp/fnit-recon-accuracy-20261003/task_01，branch=recon-accuracy/20261003-task-01。\n选择并下载10个不同公开被试的真实原始T1w，优先两个公开BIDS数据集各5例以增加采集差异；只用明确许可、匿名无需凭据的原作者/OpenNeuro公开入口。浏览核实官方数据页、License、固定版本/快照和文件来源，先冻结被试列表和选择规则再看结果，不重用旧sub01/sub02作为新10例。只下载T1w及必要侧车/许可/manifest，不下载整个fMRI/dMRI数据集，不把影像或权重提交Git。下载放服务器私有accuracy_20261003/public_t1w目录，校验SHA、size、NIfTI 3D shape/dtype/affine/qform/sform，记录选择排除依据；10例失败者仍在报告显示失败。\n独占新增 validation/recon_all/accuracy_20261003/cohort 工具、manifest、下载复现脚本和中文说明。复用compare_whole_cases/compare_subject/表面距离和逐ROI比较工具，设计10例baseline当前main、官方固定FS8.2 d932c45、最终候选的隔离目录和机器可读评估schema。138项诊断不删，报告质量/严格复现/相对baseline退化/最终指标；等效not_assessed。\n本轮任务1第一阶段先完成许可审查、10例下载（或可持续tmux下载且manifest明确逐例pending）、评估/运行配置和状态文件，给root可执行命令。不要自己启动耗时数小时的10例整例；由root冻结所有版本并统一排队。第一阶段完成就返回，为另外两个子任务让出并发槽；后续root会唤醒你做10例结果统计。不得只给建议或用模拟T1补数量。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "two_pair_evaluations_complete; resource_admission_tool_continuation_dispatched_not_deployed",
+      "agent": "/root/accuracy01_cohort_medium",
+      "continuation_agent": "/root/new_failures_audit_medium"
+    },
+    "task_02": {
+      "prompt": "任务2：原始T1→conform→N4/nu→Synth/Talairach前段精度。worktree=/tmp/fnit-recon-accuracy-20261003/task_02，branch=recon-accuracy/20261003-task-02。\n独占 conform_gpu.py、N4封装/ITK源码(tools/n4_itk)、input_talairach_chain.py、前段强度缩放专属模块；Synth共有设备/精度子函数如确需修改先通知root协商，保留所有Synth GPU及FP32例外，MNI warp兼容/坐标修复也先通知root。不改任务3归一化/GCA/WM模块、不改任务4/5表面模块或共享调度。\n核对当前conform与N4真实差异，旧195个uint8体素/2个nu体素仅线索。conform按raw导入/rawavg、原网格缩放、目标网格变换、采样坐标、量化前插值、舍入写出定位；禁止体素特例。N4先证实输入、几何、参数、线程一致，再检查float输出/转换/程序环境，不先归因于编译器。Synth核对模型构造后实际forward TF32/dtype/设备及原图/翻转规则、仿射坐标契约；不改成CPU或全局关TF32换尾差。\n从首处可修复的系统差异着手，实现一般修复，先旧真实冻结输入同阶段回归，再使用任务1的10例受影响前段回归并把输出交任务3；计时共享锁与同机配对。为root提供公共接口接入说明及真实精度/耗时/显存报告。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "stage_jobs_complete; collecting_diagnostics; final_ten_case_evaluation_pending",
+      "agent": "/root/accuracy02_prefix_medium"
+    },
+    "task_03": {
+      "prompt": "任务3：GCA注册、归一化、WM和filled精度。worktree=/tmp/fnit-recon-accuracy-20261003/task_03，branch=recon-accuracy/20261003-task-03。\n独占mri_em_register/GCA评分缓存及注册源码、GCA/CA normalize、normalize_t1相关、mri_cc、去噪、mri_segment/edit/pretess/fill和WM规则专属模块，不改conform/N4/inputTalairach、表面或共享调度。先用当前自产上游及同输入官方回放定位首处误差，不重复写已有GPU归一化。\nmri_em_register做官方nu+官方brainmask、FNITnu+官方mask、官方nu+FNITmask、FNITnu+FNITmask四组合隔离诊断，送相同后续归一化，区分nu/mask/LTA贡献；这些混合输入不得进入生产。核对cpu_cached与参考完整优化器的目标、缓存键、梯度/接受拒绝、终止和累计舍入；不把部分Python评分当完整注册，不直接换慢CPU或不等价N4。\n逐阶段orig/nu/T1/brainmask/talairach.lta/norm/brain/wm.seg/wm.asegedit/wm/filled报告不同体素、max/P99、geometry/dtype和逐标签Dice。任务2上游修复未合并时冻结版本并区分自有阶段误差与传播。阶段成熟后对10例受影响链回归（由root提供cohortmanifest），保持GPU/总线程4与现有速度。给root兼容接入说明、提交、中文文档及真实报告。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "production_coordinate_ABBA_complete; candidate_two_old_frozen_cases_zero_norm_and_control_differences",
+      "agent": "/root/accuracy03_volume_medium"
+    },
+    "task_04": {
+      "prompt": "任务4：网格、拓扑、球面、球面配准与皮层注释精度。worktree=/tmp/fnit-recon-accuracy-20261003/task_04，branch=recon-accuracy/20261003-task-04。\n独占tessellation/mesh/拓扑/remesh、sphere_*/mris_register_*、GCSA/atlas annotation专属模块；place_surface_normals.py归任务5，若需要变更先给root协商；不改white/pial放置、最终指标、体积前段或共享调度。\n从filled→orig.nofix→orig.premesh→orig的顶点/面数、有序faces/坐标找到网格首次变化；同索引比較前证明对应，拓扑不同用双向点到三角面距离及局部异常，不只最近顶点距。冻结同输入核对FNIT/Conda源码构建/官方球面、registration与注释，优先复用已通过函数，关注边排序、Gauss-Seidel、目标/梯度、平均邻接顺序、步长接受拒绝、停止和模板坐标，不把有序更新改成并发同时更新。\n网格质量检查连通/非流形/自相交、sphere与sphere.reg翻折，固定共享defects读写和并行发布语义；已有并行速度维持。10例完整自产网格/球面与分区Dice均须评估。先同输入阶段和已有两例异常定位，等待新10例后受影响回归；交付兼容补丁、程序版本、精度/耗时、中文说明和异常图。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "32_stage_commands_complete; seeded_LH_sphere_two_repeats_equal_FNIT_geometry",
+      "agent": "/root/accuracy04_mesh_medium"
+    },
+    "task_05": {
+      "prompt": "任务5：white/pial与厚度、面积、曲率、体积及脑区统计精度。worktree=/tmp/fnit-recon-accuracy-20261003/task_05，branch=recon-accuracy/20261003-task-05。\n独占place_surface_*、place_white_preaparc_python.py、place_pial_python.py、white_preaparc_conda.py/final_white_conda.py、表面GPU指标、脑区统计缓存/no-th3汇总及后处理投射专属模块。place_surface_normals.py由本任务维护，与任务4需要的接口保持兼容；不改网格/球面算法、体积前段或共享调度。\n区别网格/上游变化与放置算法误差；同完整输入对官方、Conda固定源码、已有完整Python实现三方对照，先一个半球逐轮定位再另一侧和新10例。核对边界搜索、目标强度、梯度、状态连续传递、试步接受拒绝、固定顶点及最终相交清理；不得因为Python与Conda不同就默认其中正确，保留完整pial四轮，white首轮不是完整实现。\n现有GPU厚度/面积/曲率优先修复，不退回慢CPU追尾差。重点空间候选扩展/20hop可达性、坐标单位、白/软膜顶点对应、TH3顶点与ROI-no-th3定义、不同表面版本缓存失效、原始/white.preaparc/final white/pial网格读取和曲率；不能跨版本缓存或把TH3当no-th3。\n报告逐脑区厚度/面积/体积绝对和相对偏差、P99/max及局部异常；检查white/pial穿越、连通/非流形、距离图。做固定输入阶段配对准确度/速度/显存，再10例自产输出评估。若需改CPP组件须固定源码Conda编译并给root主页安装接入清单，不替换整条流程为官方CPP。给root兼容接入、真实报告、中文子函数说明、图和提交。",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "status": "new_fifth_case_intersection_diagnostic_complete; true_crossing_witnesses; no_production_fix",
+      "agent": "/root/accuracy05_surface_medium"
+    }
+  },
+  "observed_capacity": {
+    "active_children": 0,
+    "total_tasks": 5,
+    "all_five_started": true,
+    "continuations": "reuse same medium agent after slot available",
+    "scope": "original five session agents absent from current live registry; two fresh read-only audits dispatched independently"
+  },
+  "evaluation_status": "original_baseline_5_success5_failure; new_replays_2_success1_new_bootstrap_oom1_waiting; 7_distinct_baseline_whole_successes; official10_success; candidate_not_frozen",
+  "restart": {
+    "interrupted_agents": [
+      "/root/accuracy01_cohort",
+      "/root/accuracy02_prefix"
+    ],
+    "started_agents": [
+      "/root/accuracy01_cohort_medium",
+      "/root/accuracy02_prefix_medium"
+    ],
+    "preserve_worktrees": true,
+    "preserve_data": true
+  },
+  "updated_utc": "2026-10-04T07:42:34.490833+00:00",
+  "cohort": {
+    "verified": 10,
+    "failed": 0,
+    "bytes": 107511490,
+    "source_snapshots": {
+      "ds000030": "4070b6eea231517bfeff42527a46d9d166ac4e13",
+      "ds000114": "6299834614e9ae7df1e2fc5922545331b5c7f022"
+    }
+  },
+  "queue_policy": {
+    "guard_pid": 104896,
+    "status": "queue_drivers_resumed",
+    "current_children_continue": true,
+    "guard_watched_pids": [
+      90754,
+      109621,
+      74294,
+      94174,
+      98758,
+      23673,
+      34538,
+      78930
+    ],
+    "extra_coordinate_diagnostic_pid": 114339,
+    "extra_pid_in_guard_watchlist": false,
+    "auto_resume_after_watched_pids_exit_or_seconds": 21600,
+    "additional_pids_not_in_guard_watchlist": [
+      115793,
+      4972,
+      32848
+    ],
+    "resumed_utc": "2026-10-03T07:32:40.628871+00:00"
+  },
+  "progress": {
+    "inputs_verified": 10,
+    "prefix_pairs_completed": 10,
+    "prefix_scope": "conform_SynthStrip_Talairach; not_N4_filled_or_whole",
+    "baseline_whole_completed": 7,
+    "official_whole_completed": 10,
+    "final_candidate_whole_completed": 0,
+    "overall_metric_equivalence": "not_assessed",
+    "baseline_first_case": {
+      "case": "ds000030_sub-10159",
+      "tested_commit": "816e5610417a4c587caf321049438a9554139016",
+      "entry_seconds": 2565.5213555628434,
+      "pipeline_seconds": 2561.658305718098,
+      "present_outputs": 138,
+      "mesh_validation": "passed",
+      "sampled_peak_bytes": 10947133440,
+      "continuous_peak_verified": false
+    },
+    "shared_lock_owner": null,
+    "official_first_case": {
+      "case": "ds000030_sub-10159",
+      "code_version": "FreeSurfer 8.2.0 d932c45",
+      "entry_seconds": 5811.068942066282,
+      "finished_utc": "2026-10-03T04:31:23.288456+00:00",
+      "exit_code": 0,
+      "strict_reproduction": "not_assessed",
+      "overall_metric_equivalence": "not_assessed"
+    },
+    "normalization_contract_tests_passed": 3,
+    "left_native_placement_comparisons_complete": 3,
+    "official_second_case": "complete",
+    "first_whole_pair_evaluation_complete": true,
+    "first_whole_pair_strict_checked": 138,
+    "first_whole_pair_strict_passed": 2,
+    "baseline_whole_failed": 2,
+    "official_whole_running": 0,
+    "official_current_case": null,
+    "baseline_next_case": null,
+    "baseline_failure": {
+      "case": "ds000114_sub-06",
+      "exit_code": 1,
+      "stage": "annotation_hemisphere_group bootstrap before callable",
+      "workers": [
+        "lh",
+        "rh"
+      ],
+      "error": "CUDA out of memory at first torch.empty(1,float32)",
+      "root_cause": "unresolved; six full GPU samples only2674MiB during failure",
+      "original_failures_preserved": true
+    },
+    "second_pair_evaluation": {
+      "case": "ds000030_sub-10171",
+      "pid": 100248,
+      "status": "complete_process_exited",
+      "strict_passed": 2,
+      "strict_checked": 138,
+      "report": "collected_20261004_1209CST/task_01/ds000030_sub-10171/metrics_summary.json",
+      "candidate": "not_frozen_not_evaluated"
+    },
+    "baseline_additional_failure": {
+      "case": "ds000030_sub-10206",
+      "exit_code": 1,
+      "stage": "final_mesh_validation",
+      "present_outputs": 138,
+      "lh_intersecting_faces": {
+        "white": 16,
+        "pial": 16
+      },
+      "rh_intersecting_faces": {
+        "white": 0,
+        "pial": 0
+      },
+      "root_cause": "unresolved: distinguish geometry from detector behavior",
+      "original_failure_preserved": true
+    },
+    "all_initial_whole_queue_processes_exited": true,
+    "completed_pair_evaluations": 2,
+    "baseline_failed_cases": [
+      "ds000030_sub-10206",
+      "ds000114_sub-06"
+    ],
+    "baseline_new_failure_errors": {
+      "ds000114_sub-06": "new CUDA bootstrap OOM in both annotation workers; original brain_second_normalize stage passed"
+    },
+    "baseline_original_queue_successes": 5,
+    "baseline_original_queue_failures": 5,
+    "baseline_replay_failed": 1,
+    "baseline_replay_waiting": 1,
+    "baseline_unique_subjects_not_complete": [
+      "ds000030_sub-10206",
+      "ds000114_sub-06",
+      "ds000114_sub-08"
+    ],
+    "baseline_whole_failed_attempts": 6,
+    "baseline_whole_attempts": 13,
+    "baseline_whole_waiting": 1,
+    "baseline_current_counts_scope": "latest known status per distinct subject:7complete2failed1waiting; all original and retry attempts retained separately",
+    "baseline_original_failed_cases": [
+      "ds000030_sub-10189",
+      "ds000030_sub-10206",
+      "ds000114_sub-06",
+      "ds000114_sub-07",
+      "ds000114_sub-08"
+    ],
+    "baseline_original_cuda_failure": {
+      "case": "ds000030_sub-10189",
+      "exit_code": 1,
+      "stage": "surface_hemisphere_group",
+      "worker": "rh",
+      "error": "CUDA out of memory reported at first torch.empty(1, float32); sibling cancelled",
+      "sampled_process_peak_bytes": 10949230592,
+      "root_cause": "unresolved; sampled memory alone does not prove device exhaustion or allocator cause",
+      "original_failure_preserved": true,
+      "latest_retry_status": "complete; both CUDA bootstraps passed in frozen original raw T1 replay"
+    },
+    "baseline_original_near_capacity_errors": {
+      "ds000114_sub-06": "CUDA OOM in brain_second_normalize; shared GPU near capacity in recorded samples",
+      "ds000114_sub-07": "CUDA OOM in input_talairach SynthStrip conv3d; shared GPU near capacity in recorded samples",
+      "ds000114_sub-08": "CUDA OOM in input_talairach SynthStrip conv3d; shared GPU near capacity in recorded samples"
+    }
+  },
+  "coordinator_commit_before_documentation": "75bbdc5a5c1a59c246408a6fc4e86b3341f1c643",
+  "latest_progress_report": "collected_20261004_1209CST/task_01/ds000030_sub-10171/metrics_summary.json",
+  "session_status_checks": {
+    "task_01": {
+      "state": "original_agent_absent; new_medium_continuation_running_resource_admission_tool",
+      "server_validation": "second_pair_all_phases_complete; original_PID100248_exited",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "source": "2026-10-04T04:08:50.003915+00:00 plus current local worktree audit"
+    },
+    "task_02": {
+      "state": "phase_handoff_complete; original_agent_not_in_current_live_registry",
+      "server_validation": "phase_complete; ten_prefix_pairs_and_n4_cross_repeat_collected",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "source": "2026-10-04T04:08:50.003915+00:00 plus current local worktree audit"
+    },
+    "task_03": {
+      "state": "phase_handoff_complete; original_agent_not_in_current_live_registry",
+      "server_validation": "coordinate_fix_merged; three_contract_tests_passed; production_ABBA_8_complete; sub02_mean_stage_time_plus_5.57_percent_unresolved",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "source": "2026-10-04T04:08:50.003915+00:00 plus current local worktree audit"
+    },
+    "task_04": {
+      "state": "phase_handoff_complete; original_agent_not_in_current_live_registry",
+      "server_validation": "initial32_commands_and_fixed_seed_LH_two_replays_complete",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "source": "2026-10-04T04:08:50.003915+00:00 plus current local worktree audit"
+    },
+    "task_05": {
+      "state": "phase_handoff_complete; original_agent_not_in_current_live_registry",
+      "server_validation": "six_saved_meshes_CPU_diagnostic_complete; exact_crossing_witnesses; no_general_production_bug_proven_or_fixed",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "medium",
+      "source": "2026-10-04T04:08:50.003915+00:00 plus current local worktree audit"
+    }
+  },
+  "latest_process_report": "runtime/five_tasks_20261004_040903UTC.json",
+  "server_layout": {
+    "root": "/cwStorage/home/gongwk/Notebook_code/FNIT",
+    "readme_sha256": "7ec6e16d031e0fca50e232d382219cf1d124dec2eb9a9b01cd0814eeb29d6fa4",
+    "index_json_sha256": "faac25f2bc237da05be7ecff999e56e7c0f80c9560f47af9d959934a05dbc484",
+    "main_observed": "1d31e7baaebbb644ab199471f7fe6282721455fd",
+    "rules": "SERVER_LAYOUT.md",
+    "existing_runtime_preserved": true,
+    "notice_delivery": {
+      "task_01": "message_sent",
+      "task_05": "message_sent",
+      "task_02": "agent_thread_limit; shared_worktree_rules_written",
+      "task_03": "agent_thread_limit; shared_worktree_rules_written",
+      "task_04": "agent_thread_limit; shared_worktree_rules_written"
+    },
+    "main_observed_utc": "2026-10-03T22:24:04.091512+00:00"
+  },
+  "latest_followup_report": "runtime/followup_summary_20261004_0624CST.json",
+  "resource_observation": {
+    "observed_utc": "2026-10-04T04:08:50.003915+00:00",
+    "gpu_csv_fields": "index,uuid,name,total_mib,used_mib,free_mib,utilization_percent",
+    "gpu_csv": "0, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, NVIDIA H100 PCIe, 81559, 80638, 369, 100\n1, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, NVIDIA H100 PCIe, 81559, 73390, 7617, 100",
+    "interpretation": "current observation; historical failure attribution uses per-case saved GPU samples separately"
+  },
+  "resource_admission_continuation": {
+    "status": "tested_and_deployed; queue_running",
+    "wrapper_tests_passed": 9,
+    "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+    "minimum_free_bytes": 20000000000,
+    "lock": "/tmp/fnit-shared-benchmark.lock",
+    "canonical_source": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/resource_replay_tools_v1",
+    "no_production_algorithm_changes": true
+  },
+  "latest_failure_audit": "runtime/new_failures_audit_20261004.json",
+  "resource_replays": {
+    "status": "two_complete; sub06_annotation_CUDA_bootstrap_failed; sub08_admission_waiting",
+    "planned_cases": [
+      "ds000030_sub-10189",
+      "ds000114_sub-06",
+      "ds000114_sub-07",
+      "ds000114_sub-08"
+    ],
+    "completed": 2,
+    "queue_pid": 78104,
+    "wrapper_commit": "a9a2aa71c1aede970aea926e225273b94c500bb4",
+    "production_code_commit": "816e5610417a4c587caf321049438a9554139016",
+    "output_root": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1",
+    "original_failures_preserved": true,
+    "under_lock_free_bytes": 50198478848,
+    "latest_live_report": "runtime/resource_replay_status_latest_20261004.json",
+    "queue_launch_report": "runtime/resource_replay_queue_launch_20261004.json",
+    "whole_candidate_status": "not_frozen_not_run",
+    "oom_reason_third": "unresolved; recorded device spare memory; distinct from later near-capacity cases",
+    "timing_scope": "shared GPU load; resource replay not exclusive speed benchmark",
+    "first_rh_cuda_bootstrap": "passed inferred from mandatory control flow and fresh generated RH orig/inflated outputs; final worker receipt pending",
+    "original_bootstrap_oom_reproduced": false,
+    "original_cause_confirmed": false,
+    "failed": 1,
+    "waiting": 1,
+    "cases": {
+      "ds000030_sub-10189": {
+        "execution": "complete",
+        "command_seconds": 2447.3921954478137,
+        "outputs_present": 138,
+        "mesh_validation": "passed",
+        "sampled_process_tree_peak_bytes": 11960057856
+      },
+      "ds000114_sub-06": {
+        "execution": "failed",
+        "command_seconds": 2013.4916309919208,
+        "stage": "annotation CUDA bootstrap; actual annotation callable not reached",
+        "original_brain_normalize_oom_recurrence": false,
+        "new_oom": true,
+        "root_cause": "unresolved; not explained by full device sampling",
+        "audit": "runtime/sub06_retry_annotation_bootstrap_audit_20261004.json"
+      },
+      "ds000114_sub-07": {
+        "execution": "complete",
+        "command_seconds": 2537.135697221849,
+        "outputs_present": 138,
+        "mesh_validation": "passed",
+        "sampled_process_tree_peak_bytes": 8791261184
+      },
+      "ds000114_sub-08": {
+        "execution": "not_started",
+        "admission": "waiting",
+        "admission_pid": 78420,
+        "free_bytes_last_checked": 15549333504,
+        "last_checked_utc": "2026-10-04T07:46:40.691343+00:00"
+      }
+    },
+    "baseline_distinct_whole_successes": 7,
+    "all_original_ooms_resolved": false
+  },
+  "latest_resource_environment_report": "runtime/resource_environment_readonly_20261004.json",
+  "latest_resource_failure_audit": "runtime/sub06_retry_annotation_bootstrap_audit_20261004.json"
+}

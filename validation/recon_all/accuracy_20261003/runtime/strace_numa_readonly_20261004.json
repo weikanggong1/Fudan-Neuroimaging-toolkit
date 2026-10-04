@@ -1,0 +1,90 @@
+{
+  "observed_utc": "2026-10-04T08:29:41.586040+00:00",
+  "scope": "read-only hardware/limits; no GPU process launched",
+  "strace_path": "/usr/bin/strace",
+  "strace_own_exec_probe": {
+    "returncode": 0,
+    "stderr_tail": "brk(NULL)                               = 0x161d000\nmmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f5344870000\nmmap(NULL, 61098, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f5344861000\nmmap(NULL, 3985920, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7f5344282000\nmprotect(0x7f5344446000, 2093056, PROT_NONE) = 0\nmmap(0x7f5344645000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1c3000) = 0x7f5344645000\nmmap(0x7f534464b000, 16896, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f534464b000\nmmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f5344860000\nmmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f534485e000\nmprotect(0x7f5344645000, 16384, PROT_READ) = 0\nmprotect(0x605000, 4096, PROT_READ)     = 0\nmprotect(0x7f5344871000, 4096, PROT_READ) = 0\n+++ exited with 0 +++\n",
+    "boundary": "Own /bin/true child only; no GPU init or external attach."
+  },
+  "/proc/sys/kernel/yama/ptrace_scope": "0",
+  "/proc/sys/kernel/perf_event_paranoid": "2",
+  "gpu_pci": {
+    "bus": "00000000:1F:00.0",
+    "uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+  },
+  "gpu_proc_information": {
+    "path": "/proc/driver/nvidia/gpus/0000:1f:00.0/information",
+    "text": "Model: \t\t NVIDIA H100 PCIe\nIRQ:   \t\t 16\nGPU UUID: \t GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e\nVideo BIOS: \t 96.00.74.00.1c\nBus Type: \t PCIe\nDMA Size: \t 52 bits\nDMA Mask: \t 0xfffffffffffff\nBus Location: \t 0000:1f:00.0\nDevice Minor: \t 0\nGPU Firmware: \t 535.216.03\nGPU Excluded:\t No\n"
+  },
+  "gpu_proc_registry": {
+    "path": "/proc/driver/nvidia/gpus/0000:1f:00.0/registry",
+    "text": "Binary: \"\"\n"
+  },
+  "numa_node": "0",
+  "pci_local_cpulist": "0-31,64-95",
+  "numa_memory": {
+    "path": "/sys/devices/system/node/node0/meminfo",
+    "selected_lines": [
+      "Node 0 MemTotal:       527798304 kB",
+      "Node 0 MemFree:         2220004 kB",
+      "Node 0 MemUsed:        525578300 kB",
+      "Node 0 Active:         246608792 kB",
+      "Node 0 Inactive:       263866172 kB",
+      "Node 0 AnonPages:       6409840 kB",
+      "Node 0 Slab:            8509204 kB"
+    ]
+  },
+  "self_rlimits": {
+    "RLIMIT_AS": [
+      -1,
+      -1
+    ],
+    "RLIMIT_DATA": [
+      -1,
+      -1
+    ],
+    "RLIMIT_NPROC": [
+      4096,
+      4124773
+    ],
+    "RLIMIT_MEMLOCK": [
+      65536,
+      65536
+    ],
+    "RLIMIT_STACK": [
+      8388608,
+      -1
+    ]
+  },
+  "host_memory": [
+    "MemTotal:       1056253672 kB",
+    "MemAvailable:   1016499536 kB",
+    "SwapTotal:             0 kB",
+    "SwapFree:              0 kB",
+    "CommitLimit:    528126836 kB",
+    "Committed_AS:   77616212 kB"
+  ],
+  "/sys/fs/cgroup/memory/memory.failcnt": "0",
+  "/sys/fs/cgroup/memory/memory.limit_in_bytes": "9223372036854771712",
+  "/sys/fs/cgroup/pids/pids.current": "2795",
+  "second_numa_observation": {
+    "node0_memfree_bytes": 1565335552,
+    "node0_filepages_bytes": 515791994880,
+    "node0_mlocked_bytes": 0,
+    "node1_memfree_bytes": 1019011072,
+    "node1_filepages_bytes": 506245976064,
+    "node1_mlocked_bytes": 0,
+    "buddyinfo": [
+      "Node 0 DMA: 2 2 2 1 3 0 1 0 1 1 3",
+      "Node 0 DMA32: 11 8 8 6 7 5 7 5 7 6 337",
+      "Node 0 Normal: 26486 0 0 0 0 0 0 0 0 0 0",
+      "Node 1 Normal: 170721 10548 7184 2334 466 64 0 0 0 0 0"
+    ],
+    "queue_allowed_cpu_list": "0-127",
+    "queue_allowed_memory_nodes": "0-1"
+  },
+  "diagnostic_implication": "Current NUMA0 Normal zone has no free order1..10 blocks, despite large reclaimable file cache and high host MemAvailable. This is a concrete fragmentation/host contiguous allocation investigation clue, not established cause of historical CUDA errors. Need same-failure-time strace and buddy/zone snapshot to correlate ENOMEM or driver error.",
+  "strace_command_template_not_executed": "strace -ff -tt -T -s 128 -e trace=ioctl,mmap,mprotect,munmap,brk,mlock,mlockall -o NEW_PRIVATE_TRACE_PREFIX ORIGINAL_AUTHORIZED_SCALAR_COMMAND",
+  "strace_limitations": "Verified own-child tracing only, not GPU execution. Trace only our newly launched diagnostic child. NVIDIA ioctl may return syscall success while proprietary payload reports driver failure; lack of syscall ENOMEM alone cannot exclude driver allocation failure. Do not dump other process argv/env."
+}

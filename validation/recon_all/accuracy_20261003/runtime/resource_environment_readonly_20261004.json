@@ -1,0 +1,112 @@
+{
+  "audit_utc": "2026-10-04T04:51:21.146343+00:00",
+  "mode": "read_only_no_gpu_computation",
+  "queue_pid": 78104,
+  "case": "ds000030_sub-10189",
+  "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+  "source_commit": "816e5610417a4c587caf321049438a9554139016",
+  "api_compute_pid_observed": 78144,
+  "under_lock_free_bytes": 50198478848,
+  "under_lock_utc": "2026-10-04T04:45:22.805984+00:00",
+  "observed_completed_stages": [
+    "input_talairach",
+    "n4",
+    "nu",
+    "T1_normalize",
+    "brainmask",
+    "SynthSeg",
+    "mri_em_register",
+    "mri_ca_normalize",
+    "mri_cc"
+  ],
+  "resource_constraints": {
+    "observed_queue_descendants": [
+      78104,
+      78105,
+      78135,
+      78136,
+      78144
+    ],
+    "mps_process_comm_matches": [],
+    "mps_resource_environment_variables_observed": {},
+    "api_resource_environment": {
+      "CUDA_VISIBLE_DEVICES": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+      "PYTORCH_NO_CUDA_MEMORY_CACHING": "1"
+    },
+    "compute_mode": "Default",
+    "address_space_bytes": "unlimited",
+    "data_size_bytes": "unlimited",
+    "resident_set_bytes": "unlimited",
+    "memlock_soft_bytes": 65536,
+    "memlock_hard_bytes": 65536,
+    "vm_locked_bytes": 0,
+    "vm_pinned_bytes": 0,
+    "cgroup_memory_path": "/sys/fs/cgroup/memory",
+    "cgroup_memory_limit_bytes": 9223372036854771712,
+    "cgroup_memsw_limit_bytes": 9223372036854771712,
+    "cgroup_memory_failcnt": 0,
+    "source_memory_fraction_hit": "src/fnit/bwas/core.py:421; outside inspected recon-all chain; not evidence of recon cap"
+  },
+  "xid_access": {
+    "journalctl_kernel_since": "2026-10-03 00:00:00",
+    "journalctl_kernel_until": "2026-10-04 05:00:00",
+    "journalctl_status": "No journal files were opened due to insufficient permissions.",
+    "var_log_messages": "PermissionError",
+    "var_log_kern_log": "not present",
+    "dmesg_returncode": 0,
+    "dmesg_current_ring_line_count": 10032,
+    "dmesg_xid_or_nvrm_matches": [],
+    "boundary": "Current ring lacks Xid/NVRM matches; full historical log inaccessible. Absence in current ring does not exclude historical faults or establish OOM cause."
+  },
+  "cuda_initialization_stages": {
+    "parent_api": {
+      "file": "validation/recon_all/optimizations/20261002_parallel/execute_whole_case.py",
+      "allocation_line": 125,
+      "synchronization_line": 126,
+      "allocation": "torch.ones(1,float32,device)",
+      "status": "passed inferred from later recorded completed stages"
+    },
+    "future_rh_worker": {
+      "file": "src/fnit/recon_all/hemisphere_worker.py",
+      "allocation_line": 30,
+      "synchronization_line": 31,
+      "allocation": "torch.empty(1,float32,device)",
+      "process_mode": "independent exec; start_new_session=True in hemisphere_parallel.py:183",
+      "status": "not reached at audit observation; parent success does not establish new RH CUDA context success"
+    }
+  },
+  "limitations": [
+    "No current explicit MPS cap or host address-space/cgroup memory limit found; this does not exclude unobservable driver/resource policies.",
+    "memlock limit is an observed host constraint, not evidence that prior scalar CUDA OOM was caused by pinned-memory exhaustion.",
+    "Original ds000030_sub-10189 worker CUDA bootstrap mechanism and three contemporaneous full-device failures remain distinct.",
+    "No runtime source change, GPU compute launch, process kill or credential/license reading performed."
+  ],
+  "progress_observed_utc": "2026-10-04T04:52:57.454489+00:00",
+  "progress_report": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000030_sub-10189/attempt_01/subject/fnit-native-free-run.json",
+  "progress_status": "running",
+  "completed_stage_seconds": {
+    "input_talairach": 26.509051715955138,
+    "n4": 130.52439408795908,
+    "nu": 2.3263158360496163,
+    "T1_normalize": 74.3350989036262,
+    "brainmask": 1.0990321850404143,
+    "SynthSeg": 11.396073644049466,
+    "mri_em_register": 135.45957154780626,
+    "mri_ca_normalize": 27.89994643209502,
+    "mri_cc": 21.102452418766916
+  },
+  "stage_storage_fields": [
+    "stages[].name",
+    "stages[].seconds",
+    "stages[].function_seconds",
+    "stages[].cuda_synchronized",
+    "stages[].error"
+  ],
+  "bootstrap_receipts": {
+    "surface_hemisphere_group_workers": {},
+    "group_list": [],
+    "worker_logs": [],
+    "expected_private_paths": "subject/scripts/hemi-surface-*/lh.report.json and rh.report.json",
+    "conclusion": "No surface hemisphere worker receipts or logs at observation. Previous RH bootstrap failure position not yet reached."
+  }
+}

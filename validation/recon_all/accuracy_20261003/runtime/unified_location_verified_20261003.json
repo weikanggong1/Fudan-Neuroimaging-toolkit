@@ -1,0 +1,146 @@
+{
+  "observed_utc": "2026-10-03T10:16:51.669147+00:00",
+  "host": "gpucw1",
+  "root": "/cwStorage/home/gongwk/Notebook_code/FNIT",
+  "documents": {
+    "README.md": {
+      "sha256": "7ec6e16d031e0fca50e232d382219cf1d124dec2eb9a9b01cd0814eeb29d6fa4",
+      "bytes": 3792,
+      "content": "# FNIT 服务器统一目录\n\n统一入口：`/cwStorage/home/gongwk/Notebook_code/FNIT`。\n\n开始任务先读根目录 `INDEX.md` 和本说明，从索引查找已有代码、工作树、快照、运行目录和环境。新目录统一在此根目录下创建；旧路径保留兼容入口。\n\n## 目录用途\n\n| 目录 | 用途 |\n|---|---|\n| `repo/` | 正式 Git 仓库。整理时通过校验完整 Git bundle 导入，干净 `main` 为 `7af34e6d072e843fb2558c931bb2781f1d4b0be9`。 |\n| `workspaces/` | 各任务的工作目录，保留原内部结构；新任务使用独立目录。 |\n| `snapshots/` | 历史 Git 源码树，按记录的版本和哈希复用。 |\n| `legacy/freesurfer_synth/` | 旧 FNIT 0.13.0 树，不能当作新的正式 `main`。 |\n| `runs/` | 新运行的日志、检查点、输出和验证产物。 |\n| `envs/` | 链接至两个原 Conda prefix；`default` 指向 `956b1a9` 环境，`legacy-venv` 指向旧 `freesurfer_synth/.venv`。 |\n| `assets/weights/` | 指向原权重目录；下载和使用仍按许可、大小及 SHA-256 校验。 |\n| `tools/legacy/`、`logs/legacy/` | 旧辅助脚本及旧日志。 |\n| `archive/transfers/`、`archive/builds/` | 传输文件及旧构建产物。 |\n| `admin/` | 私有迁移计划与 manifest；实际迁移状态和数量以最终 manifest 为准。 |\n\n`repo/` 是源码仓库，不是 pip 安装环境。归并代码不会自动改变环境中已安装或 editable 安装的 `fnit`；运行前必须检查实际导入位置。上述 `main` 是整理时的状态，后续可随远端推进，不能假设它一直是最新提交。\n\n旧目录通过兼容软链接或原地保留加统一入口链接的方式登记。冻结运行任务继续使用原源码和环境；不在任务运行中切换链接或替换文件。独立 SuperBigFLICA 与外部数据集不纳入本次归并。\n\n## 新任务的起点\n\n先核对 `INDEX.md` 是否已有可复用目录，再检查正式仓库的分支、工作树状态和远端。以下命令是使用示例，不表示已经执行：\n\n```bash\nFNIT_SERVER_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT\ngit -C \"$FNIT_SERVER_ROOT/repo\" status --short\ngit -C \"$FNIT_SERVER_ROOT/repo\" branch --show-current\ngit -C \"$FNIT_SERVER_ROOT/repo\" rev-parse HEAD\ngit -C \"$FNIT_SERVER_ROOT/repo\" remote -v\n\n# example-task 替换为新的任务名；先确认索引和目标目录未被占用。\nFNIT_WORKSPACE=\"$FNIT_SERVER_ROOT/workspaces/example-task\"\ngit -C \"$FNIT_SERVER_ROOT/repo\" worktree add --detach \"$FNIT_WORKSPACE\" main\n\n# 明确选用本工作树源码，再检查实际解释器和 fnit 导入路径。\ncd \"$FNIT_WORKSPACE\"\n# 解析环境目录，再用原 prefix 的解释器运行，保持其 sys.prefix。\nFNIT_ENV_PREFIX=\"$(readlink -f \"$FNIT_SERVER_ROOT/envs/default\")\"\nPYTHONPATH=\"$FNIT_WORKSPACE/src\" \"$FNIT_ENV_PREFIX/bin/python\" \\\n  -c \"import sys, fnit; print(sys.executable); print(fnit.__file__)\"\n```\n\n为任务登记实际工作树、commit、环境、源码哈希及 `runs/` 输出目录。需要原生扩展或额外依赖时按项目安装说明处理，不把历史 build 当作新源码的构建结果。准备修改时可为工作树建立独立分支；不要让多个任务共用同一个可写源码目录。\n\n## 维护规则\n\n- 先查索引再创建目录，新增或变更后及时更新索引。\n- 快照、报告和结果绑定实际运行版本，不能改标为当前 `main`。\n- 原 Conda prefix、冻结源码及运行产物保留其实际身份；未经授权不删除旧记录或兼容入口。\n- 私有影像、被试信息、凭据和许可证内容不写入公开文档；迁移 manifest 留在私有 `admin/`。\n- 使用权重和模板前核查固定 Release 或原作者来源；未获明确再分发许可的资源仍只从原站获取。\n"
+    },
+    "INDEX.md": {
+      "sha256": "11d70a172f08ea07616a6a7808291fc46e39b4b6a111399a42e901d486e9820a",
+      "bytes": 41965,
+      "relevant_lines": [
+        "固定入口：`/cwStorage/home/gongwk/Notebook_code/FNIT`。先读 [README.md](README.md)；机器可读索引见 [INDEX.json](INDEX.json)。",
+        "正式源码：`repo/`，整理时 main 为 `7af34e6d072e843fb2558c931bb2781f1d4b0be9`。后续使用前现场核对 Git 与实际 Python 导入路径。",
+        "| `repo/` | 正式 Git 主仓库 |",
+        "| `workspaces/` | 既有任务与新增工作树 |",
+        "| `runs/` | 新运行产物 |",
+        "| `envs/default` | 既有共享 Conda 环境；保留实际 prefix；不代表已安装 repo 当前版本。 |",
+        "| `freesurfer_synth` | [`freesurfer_synth`](legacy/freesurfer_synth) | 保留原实体；活跃任务或环境 prefix |"
+      ]
+    },
+    "INDEX.json": {
+      "sha256": "faac25f2bc237da05be7ecff999e56e7c0f80c9560f47af9d959934a05dbc484",
+      "bytes": 99062,
+      "schema_keys": [
+        "schema_version",
+        "updated_utc",
+        "root",
+        "repository",
+        "summary",
+        "curated_links",
+        "entries",
+        "excluded_scope",
+        "active_tasks"
+      ]
+    },
+    "repo/AGENTS.md": {
+      "sha256": "d55e554948d9e8db6f4251d7b494c4625abcc9c805f373e5d0bde1cec54bb180",
+      "content": "# FNIT：项目规则与 recon-all 五会话性能优化\n\n本文件适用于本仓库。用户当前指令优先于本文件；任务专属提示词确定本轮目标。\n先核对当前代码、已有实现、真实数据和资源许可。用户要求实现时直接修改、验证和交付；用户仅要求规划时按其指定范围规划。\n\n## 1. 开始工作与版本绑定\n\n- 先确认仓库根目录、当前分支和 `git status --short`；读取适用的项目规范与最新源码。保护其他人的未提交修改。\n- 用户2026-10-02已明确授权五个独立会话并行开发及协调者最终验收后推送main。五个会话使用独立worktree、分支与报告目录；协调者统一合并和维护安装入口，保留既有修改。\n- 固定本轮初始基线，并为每阶段记录上一阶段的实际提交与资源配置；同设备的配对顺序运行，阶段收益不能简单相加。\n- 每次验证记录实际 Git commit、未提交代码差异、源码 SHA-256、输入/权重/资产/程序 SHA-256；不得把旧报告改标为当前实测。\n- 本轮已有起点见 `validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md`；对应两例报告在其 `whole/sub01/`、`whole/sub02/`。这些记录绑定各自测试版本，不能代替后续候选验证。\n- 从 manifest 和已授权环境定位数据、权重、资产及参考，优先复用，不重复下载。复用已认证的持久 SSH/tmux 连接，先核对主机、账号和目录；不在脚本、日志、仓库中保存密码、令牌或许可证内容。\n\n## 2. 实现、依赖与资源\n\n- 优先复用 FNIT 已有成熟 PyTorch/Numba 函数。pipeline 发现子函数 bug 时，在保持公共功能兼容的前提下修复子函数，并特别说明及同步其文档。\n- 生产不得调用系统预装 FSL、FreeSurfer、SPM、MRtrix3、AFNI；不得借助 Nipype、fMRIPrep、sMRIPrep、QSIPrep、QSIRecon、MRIQC、C-PAC、DIPY 等封装间接调用。\n- 允许固定版本的必要上游 C++/CUDA C++ 源码在 Conda 内独立编译、安装和运行；禁止复制预装软件二进制。允许不调用 FreeSurfer 命令的 Surfa、Connectome Workbench 和 ANTsPy。\n- 读写优先 nibabel。保留 MRI 原始网格、conformed 网格、scanner RAS、surface RAS、voxel 位移与 world 位移的明确区别。\n- 默认 TF32；保留已验证的逐阶段 FP32 例外。FP16/BF16 等低精度须有用户明确授权，不能为提速自行开启。\n- 以 20,000,000,000 字节为显存预算，同时注明 GB/GiB。保留低显存措施，先比较缓冲复用、释放与阶段隔离再更改策略。\n- 新依赖、内核、原生程序及资产必须纳入主页 Conda 安装路径。公共安装入口由同一执行者同步修改，在最终接入前完成安装验证。\n- 权重和模板优先核对 FNIT 固定 GitHub Release 清单、大小和 SHA-256；没有明确再分发许可的资源从原作者网站获取。禁止发布许可证、凭据及未获许可的数据。\n\n## 3. 所有 Synth 调用的 GPU 要求\n\n- recon-all GPU 生产 profile 中，所有实际调用的 Synth 模型及相关辅助网络统一使用 FNIT 自有 PyTorch GPU 实现，不以阶段超过 100 秒作为接入条件。\n- 调用清单必须覆盖 SynthStrip、SynthSeg、Talairach SynthMorph affine、MNI152 SynthMorph affine/deform，以及 EntoWM、MCA/dura、vsinus；沿实际调用图检查其他组件。\n- 调用者显式传递目标 CUDA 设备。验证模型、输入及主要张量算子的实际设备，不以 `device` 参数或 CUDA 已初始化作为 GPU 执行证据。\n- GPU profile 缺少 CUDA 或执行失败时明确报错，不静默回退 CPU。库中显式 CPU 接口可用于兼容和诊断，但不能计为本轮 GPU 流程。\n- 模型构造后施加明确的前向精度策略，记录实际 TF32、dtype、autocast。设备选择与精度策略分离，构造函数不能覆盖已声明策略。\n- 现有精度例外保留：SynthStrip/SynthSeg 的 cuDNN FP32、Talairach affine 与 MNI deform 的已验证 FP32 策略。新迁移阶段先按默认 TF32 回归，新增例外须有真实数据依据。\n- 模型缓存至少按权重 SHA、模型类型、设备、精度及配置区分，限制驻留量。相同 affine 网络可复用，但 MNI305 与 MNI152 的变换必须分别计算。\n- 当前模型构造/精度上下文可能修改进程全局状态，不能直接在线程中并发不同策略。先测串行生命周期或进程隔离，再决定并行方案。\n- 记录 CPU 读写、必要后处理与 GPU 搬运；优先优化已有适合 GPU 的计算。父进程模型和子进程同时占用必须监测。\n\n## 4. 本轮五会话范围\n\n五会话均从协调者冻结的同一源码基线开始。开发可以并行；同一GPU的计时benchmark必须取得共用锁，避免相互抢占污染结果。整例验证由协调者统一执行。\n\n| 任务 | 独占修改范围 | 重点 |\n| --- | --- | --- |\n| 1：半球并行 | native_free.py、batch.py、CLI、并行调度新增模块、profiling并行统计 | spawn worker、共享文件依赖与确定性发布、总线程4、真实组墙钟 |\n| 2：white/pial | place_surface_*（除normals）、place_white_preaparc_python.py、place_pial_python.py、white_preaparc_conda.py、final_white_conda.py | 采样、边界、梯度、动态碰撞、有序更新及完整清理 |\n| 3：GCA/WM/N4 | mri_em_register*、GCA/WM专属模块、n4_itk.py、n4_wrapper.py、tools/n4_itk | 分块GPU评分、完整优化器与标签语义、ITK热点 |\n| 4：网格/球面/拓扑 | mris_remesh_python.py、sphere_*、mris_register_*、topology_*、place_surface_normals.py | CSR/空间索引、目标与梯度、GA评分；审查低耗时原生组件 |\n| 5：MNI warp | mni_nonlinear_chain.py、warp专属模块、明确归属的变换兼容修改 | world/voxel变换、完整逆场及重采样 |\n\n- 各任务提供可兼容的函数/后端入口和接入说明，任务1维护生产调度；其他任务不同时编辑调度。\n- place_surface_normals.py归任务4，保持公共行为兼容；任务2补表面放置回归。缓存以显式上下文传递，动态状态按真实版本失效。\n- 协调者独占根AGENTS.md、主页README、共享环境/安装入口和总报告；各任务提交专属文档、测试及验证报告。\n- 各任务不推main；协调者审查、合并最新main、相同输入回归及两例原始T1空目录整例后普通推送。\n- 具体已批准的提示词见 validation/recon_all/optimizations/20261002_parallel/dispatch_prompts.json；协调状态写入任务提示词给定目录。\n- 完整GPU模式维持既有Synth GPU实现；当前厚度/面积/曲率也已经GPU接入，不重复实现。\n\n## 5. 各任务必须保持的算法边界\n\n- Synth链：保留 SynthSeg 原图/翻转集成和标签语义；保留 SynthMorph 反对称 velocity 所需的两次网络前向。仅省去确实未消费的输出；网络反向形变不能直接替代既有数值求逆。\n- 归一化链：保持传播距离、同分选择、控制点、平滑边界、舍入和更新依赖；已有有序 Numba 控制点清理优先复用，不重复实现。\n- 网格/球面链：remesh 动态拓扑与 Gauss-Seidel 不能改成同时更新；静态邻接可缓存，法向随坐标更新。保持同长边排序、目标函数、步长接受/拒绝及停止规则。现有部分拓扑评分不等于完整 GA。\n- N4/GCA链：`n4_gpu.py` 的平滑残差算法不等于 ITK N4，不能直接替换。现有 Python GCA 首次 EM 线搜索不等于完整注册；完整默认替换须补齐后续优化和终止流程。\n- white/pial链：完整 Python pial 优先复用；现有 white 首轮诊断不能冒充完整 white。异步顶点接受、候选扩展、拒绝试步状态、固定顶点及最终清理必须保留。\n- 缓存按原始/white.preaparc/final white/pial 及各轮真实版本区分，不能跨网格状态复用失效数据。TH3 顶点体积不能直接替代 `-no-th3` 脑区体积。\n- 保持半球共享文件、覆盖顺序和资源预算；双侧并行须隔离临时输出并验证共享语义，不能直接对同一被试目录启动线程池。\n\n## 6. 验证、计时与验收\n\n- 验证分三层单列：冻结同输入阶段；FNIT 自产连续链；原始 T1 与空目录完整整例。诊断可使用带哈希检查点，手动补跑不能称连续整例。\n- 官方输入/结果仅用于隔离诊断或 benchmark，不进入生产。生产只读取原始影像、自产中间结果和声明的资源，禁止复制参考、针对被试修补或读取官方文件提高通过率。\n- 先定位与优化具体热点，做同输入回归，再验证受影响链。避免每改一行重跑整例；阶段回归合格后由同一执行者完成受影响连续链，最终统一完成原始 T1 整例。\n- 性能比较使用相同真实 T1、同一主机/设备、相同线程预算；尽可能 AB/BA 重复，区分冷加载/JIT和缓存。记录实际 Torch/Numba/ITK/OpenMP/BLAS 设置、CPU亲和性及共享负载。\n- GPU 阶段剖析同步显式目标设备；生产避免无必要同步。完整墙钟包含校验、导入、加载、传输、子进程与读写。嵌套步骤已包含在父阶段，不能重复累加。\n- 显式记录目标 GPU UUID、父子进程同一时刻合计占用、采样间隔、最大间隔、失败采样及 PyTorch allocated/reserved。零或 unavailable 不代表零显存；不同时间峰值不能相加。\n- 保留 138 项严格诊断及已有门槛，算子容差在测试前声明。无实质影响的浮点尾差用于排错，不自动阻断有依据的 GPU 优化；必须记录数值差异和实际影响。\n- 报告不同元素数、最大/P99误差、几何、dtype和空间。离散分割逐标签 Dice；同索引表面比较先证明有序面和顶点对应，否则报告双向点到三角面距离。\n- 检查必要步骤、完整输出、连通性、非流形、自相交、white/pial 穿越及 sphere/sphere.reg 翻折；比较逐脑区厚度、面积、体积偏差和局部异常，不以平均相关性或文件通过数代替指标。\n- 分别报告执行完成、输出完整、网格质量、严格复现、优化是否引入退化、整体指标等效。整体等效阈值尚未正式确认，保持 `not_assessed`；不得事后放宽、隐藏系统偏差或删除失败项。\n- 优先复用官方重复性记录。必要时固定输入、版本、硬件、线程和种子补测；跨环境差异单列，不能一概归因于随机性。\n- 模拟数据仅用于有意义的单元测试，不替代真实 benchmark。无干净环境整例及执行/动态库/文件访问证据时，隔离部署标为未验证；PATH/ldd 不足以宣布通过。\n\n## 7. 文档与交付\n\n- 每个修改功能提供简洁自然的中文说明：功能、全部输入输出与结构、空间/单位、每个参数、默认值、限制、失败行为，以及具名参数和逐项中文注释示例。\n- 子功能与 pipeline 说明依次包含：功能简介（pipeline 附流程图）；Python 调用和逐项输入输出；CLI；对应原软件调用；最新版端到端和分步骤真实精度/耗时及脑图；最近版本与 benchmark；原代码链接和参考文献。\n- 属于原软件内部步骤的函数明确说明没有独立 CLI，不编造官方命令。阶段、连续链、整例以及跨环境结果分开。\n- 修复成熟子函数 bug 时，特别记录修复原因、影响、接口兼容性及真实回归。\n- 替换通过后清理被替代代码及过时现版说明，同步链接与测试；仍承担验证作用的参考实现保留。禁止删除真实影像、权重、许可证及其他人的工作。\n- 各阶段交付工作分支提交、实际接入、完整 JSON/CSV、复现命令和中文说明。报告绑定实际运行源码和程序，注明未执行项。\n- 五会话开发完成共享接口和阶段回归；协调者统一安装及接入、跑两例原始T1空目录整例，报告实际总提速、指标及同期显存。用户2026-10-02已明确授权验证后推送main；先合并最新main，再普通推送，禁止强制覆盖。\n\n## 8. 指令文件的使用\n\n- 本文件位于仓库根目录，与 `pyproject.toml` 同级。本轮已获用户授权创建五个并行会话，用户最新指令优先。\n- 独立 worktree 不会继承其他工作树的未提交文件；确认每个工作树都具有本文件。若已有 `AGENTS.md`，保留既有内容并合并规则。\n- 检查上层/下层 `AGENTS.override.md` 或更具体规范；处理适用冲突时遵守用户当前明确要求。继续执行前确认实际读取的规则和当前阶段。\n- 指令文件指导协作，不是验收证据；成功返回、配置正确或测试启动都不等于任务完成。\n"
+    }
+  },
+  "relevant_index_entries": [
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default",
+      "target": "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9",
+      "note": "既有共享 Conda 环境；保留实际 prefix；不代表已安装 repo 当前版本。"
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/assets/weights",
+      "target": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights",
+      "note": "既有权重目录索引；使用前核对文件许可、大小和 SHA-256。"
+    },
+    {
+      "name": "freesurfer_synth",
+      "group": "legacy",
+      "kind": "directory",
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/legacy/freesurfer_synth",
+      "old_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth",
+      "action": "register_link_keep_original"
+    }
+  ],
+  "paths": {
+    "repo": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/repo",
+      "exists": true,
+      "is_symlink": false,
+      "resolved": "/cwStorage/home/gongwk/Notebook_code/FNIT/repo"
+    },
+    "env_default": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default",
+      "exists": true,
+      "is_symlink": true,
+      "resolved": "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9"
+    },
+    "existing_accuracy": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003",
+      "exists": true,
+      "is_symlink": false,
+      "resolved": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003"
+    },
+    "existing_env": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env",
+      "exists": true,
+      "is_symlink": false,
+      "resolved": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env"
+    }
+  },
+  "git": {
+    "version": {
+      "exit_code": 0,
+      "output": "git version 1.8.3.1",
+      "error": ""
+    },
+    "head": {
+      "exit_code": 0,
+      "output": "7af34e6d072e843fb2558c931bb2781f1d4b0be9",
+      "error": ""
+    },
+    "branch": {
+      "exit_code": 0,
+      "output": "main",
+      "error": ""
+    },
+    "working_tree": {
+      "exit_code": 0,
+      "output": "",
+      "error": ""
+    },
+    "origin_main": {
+      "exit_code": 0,
+      "output": "7af34e6d072e843fb2558c931bb2781f1d4b0be9",
+      "error": ""
+    }
+  },
+  "proposed_aliases": {
+    "workspaces/recon_accuracy_20261003": {
+      "lexists": false,
+      "resolved": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003"
+    },
+    "runs/recon_accuracy_20261003": {
+      "lexists": false,
+      "resolved": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003"
+    }
+  },
+  "index_top_level_types": {
+    "schema_version": "int",
+    "updated_utc": "str",
+    "root": "str",
+    "repository": "dict",
+    "summary": "dict",
+    "curated_links": "list",
+    "entries": "list",
+    "excluded_scope": "list",
+    "active_tasks": "dict"
+  },
+  "notice_delivery": {
+    "task_01": "message_sent",
+    "task_05": "message_sent",
+    "task_02": "agent_thread_limit; shared_worktree_rules_written",
+    "task_03": "agent_thread_limit; shared_worktree_rules_written",
+    "task_04": "agent_thread_limit; shared_worktree_rules_written"
+  },
+  "scope": "location_update_only; no benchmark started; existing frozen runtime unchanged"
+}

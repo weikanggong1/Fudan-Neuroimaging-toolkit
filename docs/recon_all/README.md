@@ -1,5 +1,9 @@
 # 单幅 T1w 的 recon-all 重建
 
+2026-10-04：[本次合并精度候选3a整例与官方对照](PRECISION_CANDIDATE_BENCHMARK_20261004.md)已完成首例原始T1：入口2948.559秒、自身父子同期采样峰13.571GB、138/138与生产网格检查通过；最终表面组双侧算法前CUDA OOM后安全重启成功，算法各进入一次。18个官方比较阶段完成，严格复现6/138，68个aparc脑区厚度MAE0.036015mm；整体指标等效未判定。相对8f单次观测慢约7%，原因仍需隔离，不宣称速度已稳定。
+
+[十例公开T1精度优化](ACCURACY_10_T1_20261003.md)当前合并候选2/10执行及完整官方数值对照完成，其余八例串行执行；两例严格诊断6/138、7/138，整体等效未判定。官方10/10，冻结816基线8/10。五例CLI及五例预初始化CUDA API须分别以实际回执验收。下面历史性能结果继续绑定各自版本。
+
 2026-10-04，[同节点完整 CPU 官方对照](../../validation/smri_cpu/task5/recon_complete_cpu_v3/README.md)已完成：同一原始 T1、同一八物理核预算，官方 **4600.035 秒**、FNIT 冻结 v3 **4829.697 秒**，本例慢 **4.99%**。138 项输出齐全；68 区厚度/面积/灰质体积 MAE 分别为 **0.017 mm / 30.559 mm² / 75.529 mm³**。顶点拓扑不同，44 份顶点图和 12 份注释的逐点误差为 NA；分区边界与表面距离仍有差异，整体数值等价未判定。报告包含逐标签数据、完整阶段计时和脑图，本次测量不重标为后续 main。
 
 2026-10-02 两例原始 T1 整例从 **3440.4→2248.7 秒、3669.0→2322.5 秒**，墙钟分别减少 **34.64% 和36.70%**；候选父子进程同期显存采样峰值 **8.75 GB、10.90 GB**。两例各输出138/138项，生产网格检查通过；严格复现与整体指标等效单独报告，不由输出数量推断。
@@ -147,3 +151,8 @@ python validation/recon_all/python_gpu_port/compare_complete_subject.py \
 - Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
 - [FreeSurfer 官方 recon-all 说明](https://www.freesurfer.net/fswiki/recon-all)。
 - [FreeSurfer 原实现代码库](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。
+
+
+## 2026-10-04 本轮诊断与版本绑定
+
+[CUDA启动诊断](CUDA_BOOTSTRAP_DIAGNOSTICS.md)、[启动修复实测](CUDA_STARTUP_BENCHMARK_20261004.md)、[候选精度报告](PRECISION_CANDIDATE_BENCHMARK_20261004.md)保留各自工具/源码/实际运行SHA；集成工作分支尚未运行新算法，不将3a实测重标为集成版。候选原有完整CPU比较、半球缓存释放、分割统计、volmask与十例准备说明仍保留。

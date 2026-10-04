@@ -1,0 +1,65 @@
+{
+  "schema": "fnit-precision-candidate-sequential-validation-v1",
+  "pid": 114563,
+  "host": "gpucw1",
+  "started_utc": "2026-10-04T13:46:39.025995+00:00",
+  "queue_script_sha256": "681201b6606e31e5d008c0edb7f2611bb479a3059520b281dcee1d1b9ada10f3",
+  "status": "running",
+  "cases": [
+    {
+      "case": "ds000114_sub-07",
+      "status": "admission_or_execution",
+      "execution_succeeded": false,
+      "started_utc": "2026-10-04T14:08:04.016905+00:00",
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/precision_whole_tools_v1/resource_admission.py",
+        "--config",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000114_sub-07/whole.config.json",
+        "--retry-root",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000114_sub-07/attempt_01",
+        "--report",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000114_sub-07/admission.json",
+        "--lock",
+        "/tmp/fnit-shared-benchmark.lock",
+        "--poll-seconds",
+        "30",
+        "--query-timeout",
+        "5",
+        "--maximum-wait-seconds",
+        "86400"
+      ],
+      "pid": 1612
+    }
+  ],
+  "queue_finished": false,
+  "all_cases_succeeded": false,
+  "meaning": "queue completion and per-case success are separate; original failures preserved",
+  "plan_sha256": "c23dcb446c5b18857ea7df4fccc5dc69326340bdf7378bee850048b1e444f288",
+  "execution_role": "precision_candidate",
+  "initial_evaluations": [
+    {
+      "case": "ds000114_sub-06",
+      "status": "complete",
+      "evaluation_succeeded": true,
+      "started_utc": "2026-10-04T13:46:39.038721+00:00",
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/precision_whole_tools_v1/evaluate_pair.py",
+        "--config",
+        "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_whole_sub06_v1/evaluation_precision_vs_official_v1.config.json"
+      ],
+      "log": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_whole_sub06_v1/evaluation_precision_vs_official_v1.config.json.queue-evaluation.log",
+      "exit_code": 0,
+      "checkpoint_sha256": "6a652665bcded4e7d19572a6deeed5728d787fe0ea50cadeacb5c1510c14fac6",
+      "strict_138": {
+        "checked": 138,
+        "passed": 6
+      },
+      "meaning": "comparison completed; strict passed count is not an equivalence gate",
+      "finished_utc": "2026-10-04T14:08:04.014722+00:00"
+    }
+  ],
+  "planned_cases": 9,
+  "current_case": "ds000114_sub-07"
+}
