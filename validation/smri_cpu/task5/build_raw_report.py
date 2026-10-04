@@ -28,7 +28,7 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def output_audit(comparison, report):
+def output_audit(comparison, report, candidate_dir):
     """Read saved geometries/namespaces; never refit or alter the scored maps."""
     import nibabel as nib
     import numpy as np
@@ -40,8 +40,20 @@ def output_audit(comparison, report):
                           if row["source"] == group["family"])
         sources, observed, centroids = {}, {}, {}
         for run in group["runs"]:
+            if run["method"] not in ("official", "fnit"):
+                raise ValueError("Unknown scored method")
             role = "official" if run["method"] == "official" else "candidate"
-            image = nib.load(run["labels"])
+            label_file = Path(run["labels"])
+            if digest(label_file) != run["label_image_sha256"]:
+                raise ValueError("Scored label image changed before publication")
+            if role == "candidate":
+                expected = (candidate_dir / "subregions_native.nii.gz" if group["space"] == "native"
+                            else candidate_dir / "highres" / (group["family"] + ".nii.gz"))
+                if label_file.resolve() != expected.resolve():
+                    raise ValueError("Comparison belongs to a different candidate output")
+            if role in sources:
+                raise ValueError("Expected one official and one candidate run per grid")
+            image = nib.load(label_file)
             affine = image.affine
             values = np.asanyarray(image.dataobj)
             offset = int(run.get("label_offset", 0))
@@ -150,16 +162,25 @@ def main():
     args = parser.parse_args()
     read = lambda path: json.loads(path.read_text())
     comparison = read(args.comparison)
+    if digest(args.candidate_dir / "report.json") != comparison["candidate_report_sha256"]:
+        raise ValueError("Comparison belongs to a different candidate report")
     metadata = {"candidate_report": read(args.candidate_dir / "report.json"),
                 "candidate_worker": read(args.candidate_dir / "worker.json"),
                 "candidate_record": read(args.candidate_record)}
+    source_manifest = read(args.source_manifest)
+    worker = metadata["candidate_worker"]
+    expected_import = args.source_manifest.parent / "src/fnit/__init__.py"
+    if Path(worker["fnit_import"]).resolve() != expected_import.resolve():
+        raise ValueError("Measured worker did not use this source freeze")
+    if worker["worker_sha256"] != source_manifest["files"]["validation/smri_cpu/task5/worker.py"]:
+        raise ValueError("Measured worker differs from the source manifest")
     for family in FAMILIES:
         for suffix in (".nii.gz", "_posterior.nii.gz"):
             if not (args.candidate_dir / "highres" / (family + suffix)).is_file():
                 raise ValueError("Requested high-resolution label/posterior output is missing")
-    geometry, checks = output_audit(comparison, metadata["candidate_report"])
+    geometry, checks = output_audit(comparison, metadata["candidate_report"], args.candidate_dir)
     metadata.update(output_geometry=geometry, scoring_checks=checks)
-    result = build_raw(comparison, metadata, read(args.source_manifest),
+    result = build_raw(comparison, metadata, source_manifest,
                        read(args.official_upstream_identity))
     result["evidence_sha256"] = {
         "comparison": digest(args.comparison), "worker": digest(args.candidate_dir / "worker.json"),
