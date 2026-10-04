@@ -13,6 +13,12 @@ CPU 有序平均的每轮只读旧梯度、写新梯度，轮间必须同步。�
 ```python
 import os
 from pathlib import Path
+import nibabel as nib
+import numpy as np
+import torch
+from fnit.recon_all.mris_register_nonlinear import (
+    prepare_registration_force_cache, first_distance_gradient, first_area_gradient,
+)
 
 frozen_average_source_path = Path("/data/frozen/src/fnit/recon_all/mris_register_average_numba.py")
 compiled_average_library_path = Path("/data/pilot/persistent_average.private.so")
@@ -21,6 +27,23 @@ os.environ["FNIT_AVERAGE_PILOT_LIBRARY"] = str(compiled_average_library_path)
 # 诊断模块所在目录须在 Python 搜索路径中；产品代码不导入此模块。
 from persistent_average_adapter import RegistrationGradientAverager
 
+torch.set_num_threads(8)  # 同官方八个 CPU 线程预算
+sphere_coordinates, surface_faces = nib.freesurfer.read_geometry("/data/subject/surf/lh.sphere")
+white_coordinates, white_faces = nib.freesurfer.read_geometry("/data/subject/surf/lh.smoothwm")
+assert np.array_equal(surface_faces, white_faces)  # 保证顶点与面编号对应
+sphere_positions = torch.from_numpy(sphere_coordinates.copy()).float()
+white_positions = torch.from_numpy(white_coordinates.copy()).float()
+surface_triangles = torch.from_numpy(surface_faces.astype(np.int64, copy=True))
+registration_cache = prepare_registration_force_cache(sphere_positions, white_positions, surface_triangles)
+input_gradient = first_distance_gradient(
+    sphere_positions, white_positions, sphere_positions, surface_triangles, cache=registration_cache,
+)
+input_gradient = first_area_gradient(
+    sphere_positions, white_positions, sphere_positions, surface_triangles, input_gradient,
+    cache=registration_cache,
+)
+ordered_neighbor_indices = registration_cache.neighbors
+vertex_degrees = registration_cache.degrees
 gradient_averager = RegistrationGradientAverager(ordered_neighbor_indices, vertex_degrees, device="cpu")
 averaged_gradient = gradient_averager(input_gradient, iterations=16384)
 ```
