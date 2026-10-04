@@ -29,6 +29,8 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 
 ### sMRI
 
+CPU 的功能覆盖、同节点精度与耗时，以及受影响组件的 GPU 回归见[2026-10-04 对照报告](validation/smri_cpu/README.md)。各函数的验收状态分别列出。
+
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
 | [SynthStrip](docs/synthstrip/README.md) | FreeSurfer `mri_synthstrip` | 脑图、脑掩膜和有符号距离场。 |

@@ -4,7 +4,7 @@
 
 输入一张三维 T1，一次完成脑干、双侧丘脑、双侧海马和杏仁核分割。返回与输入 T1 **形状和 affine 相同**的 `int32` 标签图，以及标签表、硬体积、软体积和各结构的高分辨率结果；设置 `output_dir` 后自动保存。默认全部结构共有 **110 项亚区统计**，其中某些小亚区在原始 T1 网格上可能没有硬标签体素。
 
-支持 CPU 和 GPU。CUDA 默认使用 FP32/TF32；脑干的小矩阵运算局部使用准确 FP32，梯度归约、标量累计和优化器状态使用 FP64，不使用 FP16。计算与读写分别使用项目的 PyTorch 实现和 Nibabel，运行时不调用 FreeSurfer 或 FSL。
+支持 CPU 和 GPU。CUDA 默认使用 FP32/TF32；脑干的小矩阵运算局部使用准确 FP32，部分梯度归约、标量累计和优化器状态使用 FP64，不使用 FP16。脑干 Adam 状态仍为 FP32；具体 recipe 的实际策略以报告为准。`precise_mesh_matrices` 字段目前仅记录请求，不能作为实际 FP64 矩阵计算的证据。计算与读写分别使用项目的 PyTorch 实现和 Nibabel，运行时不调用 FreeSurfer 或 FSL。
 
 ## 从一张 T1 到完整结果
 
@@ -296,6 +296,7 @@ main raw 的全部实际 timer 路径与值见[机器可读对照](../../validat
 
 | 版本与范围 | 官方参考 | 主要记录 |
 |---|---|---|
+| [2026-10-04 同节点 CPU](../../validation/smri_cpu/task5/README.md) | 相同 norm/aseg/wmparc，8 线程配置与 8 物理核预算 | 脑干两个网格均 4/4 区通过，764.691 对 205.553 秒；丘脑原网格 29/45 非空区通过，2464.294 对 275.893 秒；左右海马/杏仁核原网格 3/28、1/28 区通过，3455.410 对 442.305 秒。速度均未通过，全部逐区及脑图保留。CPU raw 整例继续验证，全部结构 GPU 旧新标签、后验和表格一致。 |
 | [当前 main 十例 raw 回归](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md) | 同病例本轮 fresh recon-all＋细分割 | f436de5 独立 raw 实测；与 ac692bb 的标签/几何逐值相同，另列新九例 |
 | [十例公开 T1 benchmark](../../validation/subregions/ten_public_t1_20261002/README.md) | 每例完整官方流程，输入/源码/资产哈希已核验 | 固定十例与新九例；110 分区、两类输入、两种评价网格；ac692bb stage 为实际条件测试 |
 | [单例开发重复性与精度修复](../../validation/subregions/reproducibility_20261002/README.md) | 开发病例三次全新官方细分割 | 同参数 all 流程重复性、丘脑完整积分、脑干固定梯度归约、稳定连通域选择；原单例指标、步骤与脑图保留在记录中 |

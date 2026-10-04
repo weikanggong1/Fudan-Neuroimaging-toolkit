@@ -90,10 +90,12 @@ CPU 原 PyTorch 图传播连通域改成 SciPy 6 邻接标记；等大连通域�
 约 47.21 秒；连通域约 11.86 秒。该 profile 使用修复前的较小网格，只用于定位
 热点，不作为正确尺寸的最终计时或阶段总量；嵌套计时不能直接相加。
 
-## 4. 正确网格的真实 CPU 结果
+## 4. 前期 oneDNN 候选的 CPU 记录
+
+本节保留前期测量。该 oneDNN 候选随后在第二例改变了两个 baseline 标签，未采用；最终生产为第6节的原后端分块。前期的速度收益不能套用到最终代码。
 
 `baseline_corrected` 仅给原 FNIT 修复相同预处理与共享 header，网络/连通域仍为
-原算法。`candidate_corrected` 是先前全 CPU 层分块候选；最终
+原算法。`candidate_corrected` 是先前全 CPU 层分块候选；本阶段的
 `candidate_selective` 只在既有禁用上下文中分块，Plus 保留原完整卷积。
 每个冻结目录的源码逐文件 SHA 见 `source_files`，不把后来的代码修改套用到旧时间。
 
@@ -136,7 +138,7 @@ ABBA 已完成，硬标签与数值 CSV 在所有配对/自重复中都逐值相
 
 ![实际同网格标签与 1 个差异体素位置](case01_labels.png)
 
-## 5. 正确输入的 GPU 回归
+## 5. 前期候选的 GPU 回归
 
 两类控制各做 33 类与非 fast 皮层的 baseline/candidate/candidate/baseline。
 prepared 控制使用同一官方预处理数组，加载后和 CUDA 上传前后 SHA 相同；其
@@ -151,9 +153,9 @@ prepared 控制使用同一官方预处理数组，加载后和 CUDA 上传前�
 差异均为 0，几何完全相同。正确尺寸 raw 33 类 GPU 峰值 allocated
 10,712,466,944 B、reserved 14,615,052,288 B。皮层及每次实际峰值见完整证据。
 这些控制证明 CPU 分支未改变 CUDA 网络数学；与官方 TensorFlow 的逐值一致
-不是该控制的结论。最终 selective 冻结源码的短 raw ABBA 也已完成 8/8：
+不是该控制的结论。本阶段 selective 冻结源码的短 raw ABBA 也已完成 8/8；原后端生产版本的最终回归另见第6节：
 
-| 最终 selective raw wall（秒） | 同输入 baseline 两次 | selective 两次 |
+| 本阶段 selective raw wall（秒） | 同输入 baseline 两次 | selective 两次 |
 |---|---|---|
 | 33 类 | 7.021 / 7.270 | 7.273 / 7.522 |
 | 非 fast 皮层 | 11.529 / 11.281 | 11.279 / 11.350 |
