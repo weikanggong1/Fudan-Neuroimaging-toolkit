@@ -50,3 +50,9 @@ root 已批准推进 CPU 限定安全 wrapper。Morph 任务负责复制新 help
 小于 32,768 个位置、显式 `FNIT_SYNTHMORPH_CPU_RAW_NUMBA=0`、NumBa 缺失/JIT 禁用或编译/运行失败时保留 Torch；NumBa 错误本进程记录一次，后续不重复失败。新 wrapper 预算取进入前 NumBa mask 与当前 Torch 线程数的较小值，并在 `finally` 恢复 mask。私有 `backend_info()` 可验证实际后端与原因。
 
 [test_ready_helper.py](test_ready_helper.py) 本地 **21 passed，6.98 s**，覆盖真实采用的 NumBa kernel 路径、多 batch/channel、非连续数据、singleton 源轴、fill=None/custom、非有限/禁用/NumBa 不可用、grad/autocast、失败一次缓存和 mask 恢复。源数组实际 F64/F32 copy 都是 F-contiguous；硬件/ISA 与布局见 [platform.public.json](platform.public.json)。这些安全测试不替代最终生产 helper 的实际 full 输入门，下一份记录将绑定 Morph 复制后的 source SHA。
+
+随后追加一项默认浮点政策下的 subnormal/signed-zero 合同，本地 **1 passed，21 deselected，4.46 s**：FP32 最小/最大 subnormal 的正负值与正负零组成输入，半整数坐标采样和原 Torch 八角结果逐位相同，输入及坐标位模式未改。该次核对使用已接入 helper 的 Morph 源码，并在 oracle 调用期间显式禁用 NumBa 路径，避免把候选自身当成对照。测试没有调用 `torch.set_flush_denormal` 或修改 worker 浮点政策；它只证明该运行环境的默认政策，不承诺调用者自行切换 FTZ/DAZ 后的跨线程行为。
+
+最终生产接入门由 [final_helper_probe.py](final_helper_probe.py) 执行。脚本要求显式给出 Morph 冻结的 preprocessing/helper SHA，仍从独立 v29 文件加载 Torch oracle；四幅真实输入的 raw/normalized 全数组、实际后端、NumBa 版本、请求 8 线程和 mask 恢复分别记录。输入与原 einsum locations 的 SHA 在未计时调用中核对，默认浮点合同在实际服务器 helper 上另行复核。单独 `cold256` 模式计入真正的懒模块导入和空 cache JIT；它与暖 ABBA 时钟分开。目前该最终门待新服务器连接和生产 freeze 完成，本页前述原型记录不代表其验收。
+
+已独立只读核对待上传的 Morph v31 源码：preprocessing SHA `1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b`，helper SHA `f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd`。helper 增加首次 `numba.get_num_threads()` 初始化异常的缓存回退；`_sample_impl` 与 ready041 的 AST 逐节点全等，canonical AST SHA `1b93ed9279559e0493658349a38fdd24717205004efacef0794ac31d7bf01cbe`。最终 driver 同时断言这一 kernel AST 绑定。Morph 任务报告生产副本 27 项合同通过；该项为其测试结果，本记录未将旧 ready 测试改标为 v31 测试。
