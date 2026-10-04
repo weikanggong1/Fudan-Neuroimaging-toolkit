@@ -124,6 +124,21 @@ def _header_transform(image, transformation, data=None):
     )
 
 
+def _network_input_images(inputs, moving, fixed, net_to_moving, net_to_fixed,
+                          device, *, has_init=False):
+    """Return the documented debug inputs in their preview geometries."""
+    moving_affine = moving.affine @ net_to_moving
+    if torch.device(device).type == "cpu" and has_init:
+        # Initial alignment moves voxel data into the fixed network grid.
+        # The original debug preview labels both inputs with that geometry.
+        moving_affine = fixed.affine @ net_to_fixed
+    return (
+        new_image(_numpy(inputs[0])[..., 0], moving, affine=moving_affine),
+        new_image(_numpy(inputs[1])[..., 0], fixed,
+                  affine=fixed.affine @ net_to_fixed),
+    )
+
+
 def _resampled_image(
     image,
     pull,
@@ -431,11 +446,9 @@ class SynthMorph:
         if output_dir:
             root = Path(output_dir)
             root.mkdir(parents=True, exist_ok=True)
-            net_mov = new_image(
-                _numpy(inputs[0])[..., 0], mov, affine=mov.affine @ net_to_mov
-            )
-            net_fix = new_image(
-                _numpy(inputs[1])[..., 0], fix, affine=fix.affine @ net_to_fix
+            net_mov, net_fix = _network_input_images(
+                inputs, mov, fix, net_to_mov, net_to_fix, self.device,
+                has_init=init is not None,
             )
             nib.save(net_mov, str(root / "inp_1.nii.gz"))
             nib.save(net_fix, str(root / "inp_2.nii.gz"))

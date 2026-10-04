@@ -107,3 +107,18 @@ def test_cpu_linear_affine_coordinates_do_not_cancel_at_fill_boundary():
     tensor = torch.from_numpy(np.asarray(image.dataobj))[None, None]
     previous = spatial.transform(tensor, torch.from_numpy(pull), fill_value=-7)
     assert previous[0, 0, 100, 0, 0].item() == 0
+
+
+@pytest.mark.parametrize('device,has_init,preview_translation', [
+    ('cpu', False, 14.), ('cpu', True, 0.), ('cuda:0', True, 14.),
+])
+def test_debug_input_geometry_after_initial_alignment(device, has_init, preview_translation):
+    moving_affine = np.eye(4); moving_affine[0, 3] = 14.
+    moving = FNITNifti1Image(np.zeros((3, 3, 3), dtype=np.float32), moving_affine)
+    fixed = FNITNifti1Image(np.zeros((3, 3, 3), dtype=np.float32), np.eye(4))
+    inputs = (torch.arange(27.).reshape(1, 1, 3, 3, 3), torch.ones(1, 1, 3, 3, 3))
+    first, second = pipeline._network_input_images(
+        inputs, moving, fixed, np.eye(4), np.eye(4), device, has_init=has_init)
+    assert first.affine[0, 3] == preview_translation
+    assert np.array_equal(second.affine, fixed.affine)
+    assert np.array_equal(np.asarray(first.dataobj), inputs[0][0, 0].numpy())
