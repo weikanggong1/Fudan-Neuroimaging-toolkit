@@ -116,7 +116,9 @@ python tools/benchmark_multimodal_cpu.py run \
 | v27 | FNIRT CPU 保序采样和 SCG 丢弃成本省略；26 项完整功能、8 项最新官方配对；接入后全 FNIRT 测试 **373 passed，31.31 s，无跳过**，含实际本机 CUDA。[源码](source_v27_20261004.public.json)、[接入后回归](regression_promoted_fnirt27_20261004.public.json) |
 | v26 | CPU prepared FP64 对角变换；187 项定向回归，完整反场及 DWI→MNI。[源码](source_v26_20261004.public.json)、[回归](regression_v26_20261004.public.json) |
 
-合并最新 main `f1cbdab1` 后，20 个多模态生产源码文件仍与冻结 v28 相同；共享重采样、NIfTI 头、SynthMorph、FastVBM、CLI 和多模态 CPU/CUDA 回归为 **1129 passed、2 skipped，66.95 s**。两项跳过仅因本地缺少 FSL applywarp，服务器官方对照另见上表，见[集成回归](integration_latest_main_20261004.public.json)。最新 main 的公共 NIfTI 同网格写出保留原存储 forms；四种真实 FNIRT 参考构造、24 个 CPU 与 40 个 GPU 已保存输出头部均与旧新构造相同，见[共享头部核验](shared_header_latest_main_20261004.public.json)。该核验没有重新运行配准或测量时间，原 benchmark 保留实际冻结来源。
+首轮合并 main `f1cbdab1` 后，20 个多模态生产源码文件仍与冻结 v28 相同；共享重采样、NIfTI 头、SynthMorph、FastVBM、CLI 和多模态 CPU/CUDA 回归为 **1129 passed、2 skipped，66.95 s**。两项跳过仅因本地缺少 FSL applywarp，服务器官方对照另见上表，见[集成回归](integration_latest_main_20261004.public.json)。main 的公共 NIfTI 同网格写出保留原存储 forms；四种真实 FNIRT 参考构造、24 个 CPU 与 40 个 GPU 已保存输出头部均与旧新构造相同，见[共享头部核验](shared_header_latest_main_20261004.public.json)。该核验没有重新运行配准或测量时间，原 benchmark 保留实际冻结来源。
+
+发布前又合入最新 main `eea929d4` 的 sMRI 修复；本轮 20 个生产文件和已核验公共 NIfTI helper 未变。针对新增 SynthMorph 图像解码/World 边界合同及 FastVBM CPU 解析 Jacobian 入口补检 **185 passed，13.55 s，无跳过**，见[后续集成记录](integration_main_followup_20261004.public.json)。这与上一轮测试有重叠，不将数量相加。
 
 更早权重/批统计/World 布局演进和失败诊断保留在相关子功能报告。不同版本测试范围重叠，不将数量相加。未采用的 FLIRT 有限域检查削减实验逐位通过但更慢，已拒绝并保留[结果](../../docs/flirt/cpu_finite_domain_diagnostic_rejected_20261004.public.json)。本机小网格 CUDA 核对只作为正确性回归，不替代真实服务器 benchmark。
 
