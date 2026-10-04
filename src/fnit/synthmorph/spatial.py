@@ -81,11 +81,14 @@ def _prepare_transform(
     use_surfa = method == 'nearest' and surfa_nearest_rule
     use_surfa_domain = use_surfa or (method == 'linear' and surfa_linear_rule)
     trans = torch.as_tensor(
-        trans, dtype=torch.float32 if use_surfa else dtype, device=device
+        trans, dtype=torch.float32 if use_surfa_domain else dtype, device=device
     )
     if trans.ndim == 2:
         shape = source_shape if shape is None else tuple(shape)
-        if use_surfa:
+        if use_surfa_domain:
+            # The original final image sampler evaluates the affine directly.
+            # Its float32 coordinates can change at the fill boundary if an
+            # intermediate displacement is subtracted and added again.
             coords = grid(shape, device, torch.float32)
             loc = torch.stack([
                 trans[row, 0] * coords[:, 0]

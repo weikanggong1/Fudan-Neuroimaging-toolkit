@@ -94,3 +94,16 @@ def test_legacy_prepared_nearest_policy_remains_explicit_for_cuda_plans():
                                 surfa_nearest_half_up=True)
     assert _sample_prepared(image, legacy).item() == 1
     assert _sample_prepared(image, strict).item() == 0
+
+
+def test_cpu_linear_affine_coordinates_do_not_cancel_at_fill_boundary():
+    image = FNITNifti1Image(np.arange(101, dtype=np.float32).reshape(101, 1, 1), np.eye(4))
+    pull = np.eye(4, dtype=np.float32)
+    pull[0, 0] = .1
+    pull[0, 3] = np.float32(-10.000001)
+    result = pipeline._resampled_image(image, pull, image, 'cpu', fill=-7)
+    assert np.asarray(result.dataobj)[100, 0, 0] == -7
+    # Network sampling keeps the old affine -> displacement -> coordinates.
+    tensor = torch.from_numpy(np.asarray(image.dataobj))[None, None]
+    previous = spatial.transform(tensor, torch.from_numpy(pull), fill_value=-7)
+    assert previous[0, 0, 100, 0, 0].item() == 0
