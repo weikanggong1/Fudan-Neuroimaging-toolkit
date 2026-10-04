@@ -26,6 +26,8 @@ flowchart TD
 
 文件输入支持 NIfTI（`.nii` / `.nii.gz`）和 MGH/MGZ；Python 也接受 nibabel spatial image。配准输入为有限值的单帧 `(X,Y,Z)`；apply 输入为 `(X,Y,Z)` 或 `(X,Y,Z,T)`，最后一轴为 frame。位移场的三分量不能作为时间序列输入。
 
+完全载入内存的对象可直接传入 `SynthMorph` 实例。对于从同一带缩放 NIfTI 构造、希望与路径输入匹配的对象，建议在 ArrayProxy 解码时直接指定模型的 float32：`nib.Nifti1Image(np.array(source_image.dataobj, dtype=np.float32, copy=True), source_image.affine.copy(), header=source_image.header.copy())`。先默认解码为 float64 再转 float32，可能改变 slope/intercept 的浮点运算顺序。2026-10-04 真实 CPU affine 对象完整调用已执行；该 float64 路线的输出与路径候选有微差。随后直接 float32 物化的无 CNN 控制证明张量和规范化网络输入逐值相同，完整网络输出尚未重跑；其他对象模式也未据此宣称通过。详见[内存对象核验与首处分歧](../../validation/synthmorph/cpu_20261004/in_memory_affine_20261004/README.md)。对用户已经计算好的内存图像，数据数组本身就是输入，不从 header 再附加一次缩放。
+
 ```python
 from pathlib import Path
 from fnit import SynthMorph, TorchApplyWarp, apply_transform, convert_warp_to_fsl
