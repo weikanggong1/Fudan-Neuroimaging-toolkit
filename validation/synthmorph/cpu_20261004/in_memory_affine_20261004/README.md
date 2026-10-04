@@ -7,7 +7,7 @@
 ## 1. 固定来源与实际调用路径
 
 - 输入为 OpenNeuro ds003138 v1.0.1、CC0 的原始 T1；moving/fixed 全图均为 `224×288×288`。SHA 分别为 `afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19`、`73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21`。没有裁剪或用派生脑图替代输入。
-- 本次冻结源 `task5_candidate_cpu_v4`，head `6f1e2b38925a481df3fa622f925af076df5436a9`，实际归档 `ffda47a74376fbaec07c3e8aedaacdc30f2a60398b919c0d5feae38e3beba0d9`，包含当时已审阅的未提交变化。此次核对 9 个实际导入相关模块的 SHA；不称为重新核验全部归档文件。SynthMorph 模块字节与原任务 3 v4 相同。
+- 本次冻结源 `task5_candidate_cpu_v4`，head `6f1e2b38925a481df3fa622f925af076df5436a9`，实际归档 `ffda47a74376fbaec07c3e8aedaacdc30f2a60398b919c0d5feae38e3beba0d9`，旧归档工具保留 `includes_reviewed_uncommitted_changes=true` 标记；该标记当时由工具固定写入，不作为工作树未提交改动的证据，源码身份以实际归档和模块 SHA 为准。此次核对 9 个实际导入相关模块的 SHA；不称为重新核验全部归档文件。SynthMorph 模块字节与原任务 3 v4 相同。
 - 现场重读 FNIT 统一 README/INDEX，INDEX SHA 为 `303f8879915c47523b94144827ef69820181559c057299fe667eecd5e07eeda2`；正式主仓库当时为 `1d31e7b`，它与本次冻结候选分别记录。
 - affine 权重 `synthmorph.affine.2.h5` 为 51,455,312 字节，SHA `1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6`，与已有固定 Release 校验清单一致；没有新增下载、再发布权重或改变环境。
 - nodecw10，8 线程，同原任务 3 核组 `2,6,10,14,18,22,26,30` 和原共享锁串行执行。CUDA 不可见，无 autocast、FP16/BF16，CPU 构造和调用未改变已有 CUDA TF32 全局设置。默认 extent/hyper/steps 为 256/0.5/7，`compute_inverse=True`。
@@ -46,7 +46,7 @@ NRMSE 分母为参考区域 `P99−P1`，沿用原 CPU 报告固定门槛；零�
 
 两个图相对原路径候选的 shape、dtype、affine、qform、sform、完整 header 字节及 extensions 相同。相对官方则保留 qform/pixdim、`regular`、`dim_info`、`descrip` 及 extensions 差异；不发布原描述字段内容，也不声称文件头完全匹配。
 
-全部数值、逐项门槛、源码/输入/权重 SHA 与五项正式收据见 [report.public.json](report.public.json)。已有 [CPU 脑图](../figures/cpu_official_brains.png)仅属于此前四模式测试，本补测没有另生成图，也没有将其图像重标为本次对象输出。
+全部数值、逐项门槛、源码/输入/权重 SHA 与五项进程收据（一次 CNN 对象调用，其余为现成结果比较或前处理控制）见 [report.public.json](report.public.json)。已有 [CPU 脑图](../figures/cpu_official_brains.png)仅属于此前四模式测试，本补测没有另生成图，也没有将其图像重标为本次对象输出。
 
 ## 4. 第一分歧：带缩放 NIfTI 的 dtype 路线
 
@@ -68,6 +68,10 @@ NRMSE 分母为参考区域 `P99−P1`，沿用原 CPU 报告固定门槛；零�
 import nibabel as nib
 import numpy as np
 from fnit.synthmorph import SynthMorph
+
+moving_t1_file = "/data/case01_T1w.nii.gz"  # 输入：待配准的原始单帧 T1
+fixed_t1_file = "/data/case02_T1w.nii.gz"   # 输入：目标 T1，保留其影像空间
+weight_directory = "/data/fnit_weights"   # 已按清单校验的 SynthMorph 权重目录
 
 moving_source = nib.load(moving_t1_file)  # 原始单帧 NIfTI 路径
 fixed_source = nib.load(fixed_t1_file)
