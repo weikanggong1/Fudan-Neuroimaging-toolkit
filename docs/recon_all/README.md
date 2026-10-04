@@ -47,6 +47,8 @@ flowchart TD
 
 在仓库根目录创建[主页 Conda 环境](../../environment.yml)，然后运行[原生程序安装脚本](../../tools/setup_recon_all_native_conda.sh)。脚本从固定 FreeSurfer 源码提交编译所需程序并安装至当前 Conda 环境；不会调用系统安装的 FreeSurfer。模型、模板及个人许可证单独提供。
 
+球面配准读取 TIFF 图谱，`tifffile` 已列入标准 Python 安装依赖和主页 Conda 环境。旧环境升级后应执行 `python -c "import tifffile; print(tifffile.__version__)"` 核查实际环境。本轮 CPU 验证发现部署前缀缺少该包，完整流程在进入球面配准前中断；补齐依赖后使用新空目录重测。阶段间异常的报告记录问题另行修复，失败不会记为完整耗时结果。
+
 ```bash
 conda env create -f environment.yml
 conda activate fnit
