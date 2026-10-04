@@ -205,18 +205,28 @@ class SynthStrip:
             raise RuntimeError("CUDA was requested but is not available")
         if threads is not None:
             torch.set_num_threads(threads)
-        # Fixed algorithm selection avoids cross-process boundary changes
-        # from timing-based autotuning on shared GPUs; retain TF32 below.
-        torch.backends.cudnn.benchmark = False
-        torch.backends.cudnn.deterministic = True
-        if configure_precision:
-            torch.backends.cuda.matmul.allow_tf32 = True
-            torch.backends.cudnn.allow_tf32 = True
+        if self.device.type == "cuda":
+            # CPU construction must preserve other models' CUDA policy in the
+            # same process. Keep SynthStrip's existing GPU defaults unchanged.
+            torch.backends.cudnn.benchmark = False
+            torch.backends.cudnn.deterministic = True
+            if configure_precision:
+                torch.backends.cuda.matmul.allow_tf32 = True
+                torch.backends.cudnn.allow_tf32 = True
         name = "synthstrip.nocsf.1.pt" if no_csf else "synthstrip.1.pt"
         self.model_path = Path(resolve_weights(name, explicit=weights))
         self.model = StripModel().to(self.device).eval()
         checkpoint = torch.load(self.model_path, map_location=self.device, weights_only=True)
         self.model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+        self._cpu_channels_last = (
+            self.device.type == "cpu"
+            and torch.backends.mkldnn.is_available()
+            and torch.backends.mkldnn.enabled
+        )
+        if self._cpu_channels_last:
+            # oneDNN avoids the repeated 3D convolution layout conversions.
+            # CUDA and callers that disable oneDNN keep their existing layout.
+            self.model.to(memory_format=torch.channels_last_3d)
 
     @torch.no_grad()
     def __call__(self, image, border=1, fill=None, *, precision_report=None):
@@ -241,6 +251,8 @@ class SynthStrip:
             tensor = torch.from_numpy(
                 np.ascontiguousarray(conformed_data[np.newaxis, np.newaxis])
             ).to(self.device)
+            if self._cpu_channels_last:
+                tensor = tensor.contiguous(memory_format=torch.channels_last_3d)
             if precision_report is not None:
                 from fnit.recon_all.profiling import record_network_forward
                 record_network_forward(self.model, tensor, precision_report, model="SynthStrip")
