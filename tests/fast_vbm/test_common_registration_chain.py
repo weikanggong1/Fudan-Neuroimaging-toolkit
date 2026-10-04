@@ -325,10 +325,16 @@ def test_real_backend_dispatch_uses_the_same_default_flirt_and_common_tail(
     np.testing.assert_array_equal(
         synth_result.warped_gm.data, fnirt_result.warped_gm.data
     )
-    np.testing.assert_array_equal(
-        synth_result.jacobian.data, fnirt_result.jacobian.data
-    )
-    np.testing.assert_array_equal(
-        synth_result.modulated_gm.data, fnirt_result.modulated_gm.data
-    )
     assert not np.allclose(synth_result.jacobian.data, 1.0)
+    # The fixed nonzero residual has a dense Jacobian different from the
+    # FNIRT fixture's declared analytic output. CPU must select the latter;
+    # it must preserve the same warped GM and multiply by the selected map.
+    np.testing.assert_array_equal(
+        fnirt_result.jacobian.data, np.ones(fixed.shape[:3], dtype=np.float32)
+    )
+    np.testing.assert_array_equal(fnirt_result.modulated_gm.data, fnirt_result.warped_gm.data)
+    np.testing.assert_array_equal(
+        synth_result.modulated_gm.data, synth_result.warped_gm.data * synth_result.jacobian.data
+    )
+    assert fnirt_result.qc["jacobian_method"] == "FSL coefficient analytic spline derivatives"
+    assert "centred finite differences" in synth_result.qc["jacobian_method"]

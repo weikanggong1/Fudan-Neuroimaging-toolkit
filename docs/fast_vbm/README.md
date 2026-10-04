@@ -188,7 +188,7 @@ FastVBM(
 
 ### 两个非线性后端
 
-两个后端共用同一份 TorchFAST GM、TorchFLIRT 结果、template grid、FSL 坐标转换、TorchApplyWarp、dense-field Jacobian 和 modulation。它们只在 nonlinear pull field 的估计方法上不同。
+两个后端共用同一份 TorchFAST GM、TorchFLIRT 结果、template grid、FSL 坐标转换、TorchApplyWarp 和 modulation。CPU FNIRT 使用其已计算的解析 coefficient Jacobian，对应官方 `fnirt --jout`；CUDA FNIRT、SynthMorph 继续使用 dense-field Jacobian。
 
 | 项目 | `registration_backend="synthmorph"` | `registration_backend="fnirt"` |
 |---|---|---|
@@ -355,7 +355,7 @@ fslmaths T1_GM_to_template_GM -mul T1_GM_JAC_nl \
 | affine | `fsl_reg` 内部 FLIRT | PyTorch `TorchFLIRT` | FSL scaled-mm matrix contract 对应；不能据此声明当前输入数值等价 |
 | nonlinear | FNIRT GM config | SynthMorph 或 TorchFNIRT GM config | FNIRT 分支接口角色对应；SynthMorph 是替代算法 |
 | 重采样 | FSL warp machinery | GPU `TorchApplyWarp` | template grid 和 pull 方向对应 |
-| Jacobian | FNIRT `--jout` | 共同 dense residual finite difference | nonlinear-only 角色对应 |
+| Jacobian | FNIRT `--jout` | CPU FNIRT：解析 coefficient derivative；CUDA FNIRT/SynthMorph：dense residual finite difference | nonlinear-only，不含 FLIRT affine determinant |
 | modulation | `fslmaths -mul` | `warped_gm * jacobian` | 公式一致 |
 
 FastVBM 在 modulated GM 结束，不包含 UKB gradient distortion correction、群体平滑、统计模型或结构 IDP。官方流程和模板来源见 [UKB/FSL 专页](../ukb_vbm/README.md)。
@@ -424,6 +424,7 @@ FSL 完整命令计时 3195.14 s 来自 2026-09-30，本轮没有重测原软件
 
 | 版本或日期 | 更新与验证范围 |
 |---|---|
+| 2026-10-04 CPU FNIRT Jacobian 修复 | 修复成熟组件的后处理定义：CPU 采用 TorchFNIRT 已有解析 nonlinear Jacobian；CUDA/SynthMorph 路径不变。同一官方 coeff 对 `jout` 脑内 RMSE 7.37e-8、最大差4.77e-7；固定真实 GM/affine 的受影响 stage 与 GPU 后处理回归见[专属报告](../../validation/smri_cpu/fnirt_jacobian_20261004/README.md)。没有据此声明 nonlinear 估计或完整 VBM 等价。 |
 | 2026-10-04 CPU 审计 | 新增显式 `fast_execution` 选项，默认不变；FAST 的 CPU 原序热点改为 Numba。完整 CUDA 两后端 32 对文件 SHA 相同。原始 T1 冻结 v2 两条 CPU 链完成官方对照；最终 v4 两链补测为 536.788 / 317.736 秒，各 13 图、科学 header、扩展与 v2 相同，官方误差复现。见[FAST 结果](../../validation/smri_cpu_20261004/task04/README.md)和[VBM 独立报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/README.md)。 |
 | 2026-10-02 GPU FNIRT 优化 | 跳过未使用的采样梯度，复用 T1 intensity mapping 与原始 float64 deformation field；真实 FastVBM 完整端到端 18 幅影像及科学 QC 逐位通过，含保存 API 212.67→204.58 s，见[统一验证页](../../validation/registration_lossless_20261002/README.md)。 |
 | 2026-09-30，`f958121` | 两个后端从 raw T1w 到全部 13 幅输出；FNIRT / SynthMorph 进程内含保存为 901.93 / 607.16 s。对 FSL 调制 GM 的 r 为 0.865489 / 0.616679，未达到数值等价；见[当次报告](../../validation/fast_vbm/e2e.public.json)。 |

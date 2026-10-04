@@ -1,0 +1,29 @@
+{
+  "scope": "fixed existing-real-GM stage and CPU/GPU full tail verification; no cold pipeline benchmark",
+  "transport_wait": {
+    "local_helper_timeout_seconds": 180,
+    "local_helper_exit_code": 1,
+    "remote_worker_verified_still_running_after_timeout": true,
+    "capture_status": "complete",
+    "remote_worker_exit_code": null,
+    "reason": "the 180-second relay wait expired; the existing remote worker continued and saved the complete state, so it was not restarted"
+  },
+  "tests": {
+    "command": "PYTHONPATH=src python -m pytest tests/fast_vbm/test_common_registration_chain.py tests/fast_vbm/test_fast_vbm_registration.py tests/fast_vbm/test_fast_vbm_pipeline.py tests/fast_vbm/test_fast_vbm_cli.py tests/fnirt/test_header_geometry.py tests/fnirt/test_coefficient_io.py -q",
+    "passed": 33,
+    "seconds": 10.31
+  },
+  "source_and_scripts_hash_matched": true,
+  "whole_pipeline_rerun": false,
+  "gpu_estimator_refit": false,
+  "cpu_estimator_fit_count": 1,
+  "gpu_replay_input": "complete actual CPU fitted pull/GM, affected tail only",
+  "runtime_original_software_calls": false,
+  "reports": {
+    "oracle.public.json": "56eb83ea8bc081256d88538fa843f49fb415feb3965ddd50a77d3d27b592e5b3",
+    "source.public.json": "24209c01179233fa1d1886b58582e9751f803244369a85d7b4fd0a41fe03ca60",
+    "capture.public.json": "25a2452499f0210150d49c18f24cb312b5e25087f5282937edd516be81c9a078",
+    "cpu.public.json": "5183c6734074c29e17f72a2f237993dade8733ac80eb480929dd32fc27669df2",
+    "gpu.public.json": "84eaf522e018fffc88539d57f7dbb9893730846cb57ef6642b7d27de9cd12b7d"
+  }
+}

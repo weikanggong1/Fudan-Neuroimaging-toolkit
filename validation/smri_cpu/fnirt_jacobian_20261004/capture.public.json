@@ -1,0 +1,856 @@
+{
+  "status": "complete",
+  "scope": "one existing-real-GM FNIRT fit; no SynthStrip, FAST or FLIRT refit",
+  "host": "nodecw7",
+  "cpu_affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "torch_threads": 8,
+  "device": "cpu",
+  "initial_forward_world": [
+    [
+      1.1028521634601454,
+      -0.07876158481149521,
+      0.0008861813897727944,
+      3.226289837242362
+    ],
+    [
+      0.05827231105285089,
+      1.0717650122969118,
+      0.11726183475818105,
+      8.342125510042962
+    ],
+    [
+      -0.015165984597686819,
+      -0.16247445754628578,
+      1.1686964304017653,
+      -13.976968614551993
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "initial_flirt": [
+    [
+      1.1052630053443746,
+      0.015740833927801665,
+      0.025568772699330305,
+      -13.998639401891467
+    ],
+    [
+      0.000256925720696904,
+      1.0739430480112078,
+      0.11168016363842616,
+      -15.769265963475464
+    ],
+    [
+      -0.02219827884632925,
+      -0.15695513486009946,
+      1.1693380692437623,
+      -67.16475292561452
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "inputs": {
+    "gm": "e2da16dd71adddc0d46eef2c7354e21581b442bac3cade728d45536fedddb71d",
+    "template": "ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77",
+    "reference_mask": "342d41e1c445d87a812ca288786a116306e96a5595a198e46ba7e7515d4f221c",
+    "prior_pipeline_report": "70274a3c91809fe34695459f31c273b8f1c479836434e3b5d97a40e4eb58f450"
+  },
+  "fit_qc": {
+    "backend": "pytorch-fnirt",
+    "execution": "optimized",
+    "bending_normal": "coefficient-space Gram",
+    "device": "cpu",
+    "tf32": {
+      "matmul": false,
+      "cudnn": true,
+      "reduced_precision_tensor_dtype": false
+    },
+    "fsl_fnirt_numerically_equivalent": false,
+    "equivalence_status": "external FSL 6.0.7.4 numerical gate not passed",
+    "fsl_source_versions": {
+      "fnirt": "2203.0 (27f514a182b5972094e30d8ea79f4fad89cbf03d)",
+      "basisfield": "2203.1 (9588bbe8eb8aa0939ddefd00df756aeb80d2305b)",
+      "miscmaths": "2203.2 (7824d74cdfa9fb65de178f642c3c05e57c8c8868)",
+      "newimage": "2203.11 (19e3ddd10138d8ea1394fd522fb0770435c61ddd)",
+      "warpfns": "2203.0 (50ea45cb0b9661adba7844444cb38649ae44892b)"
+    },
+    "optimizer": [
+      "lm",
+      "lm",
+      "lm",
+      "lm"
+    ],
+    "hessian": "analytic matrix-free B-spline JtJ plus bending Hessian",
+    "global_intensity_model": "global_linear",
+    "t1_intensity_fitting": null,
+    "ssd_weighted_lambda": true,
+    "mask_schedule_matches_gm_config": true,
+    "implicit_reference_mask": false,
+    "implicit_input_mask": false,
+    "masked_input_smoothing": false,
+    "process_stages": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "process_full_resolution_knot_spacing_voxels": [
+      [
+        5,
+        5,
+        5
+      ],
+      [
+        5,
+        5,
+        5
+      ],
+      [
+        5,
+        5,
+        5
+      ],
+      [
+        5,
+        5,
+        5
+      ]
+    ],
+    "process_handoff_float32_coefficients": true,
+    "process_handoff_float32_affine_header": true,
+    "process_handoff_intensity_precision": 10,
+    "final_output_upsampled_to_reference_grid": false,
+    "intensity_schedule_matches_gm_config": true,
+    "topology_projection_matches_fsl": false,
+    "topology_projection": "FSL 2203.0 algorithm ported; external numerical gate pending",
+    "strict_topology": false,
+    "topology_projection_required": true,
+    "accepts_fsl_coefficient_file": false,
+    "exports_fsl_coefficient_file": true,
+    "reference_mask_available": true,
+    "knot_spacing_voxels": [
+      5,
+      5,
+      5
+    ],
+    "control_grid_shape": [
+      21,
+      24,
+      21
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "stride": 4,
+        "matrix_size": [
+          24,
+          28,
+          24
+        ],
+        "control_grid_shape": [
+          7,
+          8,
+          7
+        ],
+        "warp_resolution_mm": [
+          10.0,
+          10.0,
+          10.0
+        ],
+        "knot_spacing_voxels": [
+          5,
+          5,
+          5
+        ],
+        "maximum_iterations": 5,
+        "accepted_iterations": 5,
+        "attempts": 5,
+        "converged": false,
+        "input_fwhm_mm": 6.0,
+        "reference_fwhm_mm": 4.0,
+        "base_lambda": 150.0,
+        "effective_lambda": 8579.18480068903,
+        "ssd": 57.194565337926875,
+        "bending_energy": 4.485120996567915,
+        "cost": 59.92451793693409,
+        "intensity_scale": 0.6308647722468379,
+        "estimate_intensity": true,
+        "t1_polynomial": null,
+        "t1_bias_range": null,
+        "t1_bias_bending_energy": null,
+        "apply_reference_mask": false,
+        "explicit_reference_mask_available": true,
+        "implicit_reference_mask": false,
+        "implicit_input_mask": false,
+        "mask_voxels": 14095,
+        "minimization_method": "lm",
+        "process_stage": 1,
+        "process_boundary_handoff": false,
+        "lm_or_scg_lambda_final": 1.0000000000000002e-06,
+        "pcg": [
+          {
+            "iterations": 5,
+            "converged": true,
+            "relative_residual": 0.00034550135926716583
+          },
+          {
+            "iterations": 24,
+            "converged": true,
+            "relative_residual": 0.000215889836917277
+          },
+          {
+            "iterations": 69,
+            "converged": true,
+            "relative_residual": 0.00042876537349671387
+          },
+          {
+            "iterations": 67,
+            "converged": true,
+            "relative_residual": 0.0009179725571665548
+          },
+          {
+            "iterations": 139,
+            "converged": true,
+            "relative_residual": 0.0006575114178019931
+          }
+        ],
+        "scg": [],
+        "full_jacobian_min_before_projection": 0.4365876468623345,
+        "full_jacobian_max_before_projection": 1.3869187196425157,
+        "topology_projection_required": false,
+        "topology_projection": {
+          "required": false,
+          "calls": [],
+          "range": [
+            0.4365876468623345,
+            1.3869187196425157
+          ],
+          "succeeded": true
+        }
+      },
+      {
+        "level": 2,
+        "stride": 2,
+        "matrix_size": [
+          46,
+          55,
+          46
+        ],
+        "control_grid_shape": [
+          12,
+          14,
+          12
+        ],
+        "warp_resolution_mm": [
+          10.0,
+          10.0,
+          10.0
+        ],
+        "knot_spacing_voxels": [
+          5,
+          5,
+          5
+        ],
+        "maximum_iterations": 5,
+        "accepted_iterations": 5,
+        "attempts": 5,
+        "converged": false,
+        "input_fwhm_mm": 4.0,
+        "reference_fwhm_mm": 2.0,
+        "base_lambda": 75.0,
+        "effective_lambda": 6481.622056580639,
+        "ssd": 86.42162742107519,
+        "bending_energy": 100.92451814754837,
+        "cost": 92.44909089051582,
+        "intensity_scale": 0.6238534502415976,
+        "estimate_intensity": true,
+        "t1_polynomial": null,
+        "t1_bias_range": null,
+        "t1_bias_bending_energy": null,
+        "apply_reference_mask": false,
+        "explicit_reference_mask_available": true,
+        "implicit_reference_mask": false,
+        "implicit_input_mask": false,
+        "mask_voxels": 108529,
+        "minimization_method": "lm",
+        "process_stage": 1,
+        "process_boundary_handoff": false,
+        "lm_or_scg_lambda_final": 1.0000000000000002e-06,
+        "pcg": [
+          {
+            "iterations": 20,
+            "converged": true,
+            "relative_residual": 0.00034084724994094123
+          },
+          {
+            "iterations": 36,
+            "converged": true,
+            "relative_residual": 0.000573303394781546
+          },
+          {
+            "iterations": 91,
+            "converged": true,
+            "relative_residual": 0.0005465813016276224
+          },
+          {
+            "iterations": 111,
+            "converged": true,
+            "relative_residual": 0.0005358339988141777
+          },
+          {
+            "iterations": 102,
+            "converged": true,
+            "relative_residual": 0.000977211974989384
+          }
+        ],
+        "scg": [],
+        "full_jacobian_min_before_projection": 0.3150565922255247,
+        "full_jacobian_max_before_projection": 1.6385927886313187,
+        "topology_projection_required": false,
+        "topology_projection": {
+          "required": false,
+          "calls": [],
+          "range": [
+            0.3150565922255247,
+            1.6385927886313187
+          ],
+          "succeeded": true
+        }
+      },
+      {
+        "level": 3,
+        "stride": 1,
+        "matrix_size": [
+          91,
+          109,
+          91
+        ],
+        "control_grid_shape": [
+          21,
+          24,
+          21
+        ],
+        "warp_resolution_mm": [
+          10.0,
+          10.0,
+          10.0
+        ],
+        "knot_spacing_voxels": [
+          5,
+          5,
+          5
+        ],
+        "maximum_iterations": 10,
+        "accepted_iterations": 10,
+        "attempts": 10,
+        "converged": false,
+        "input_fwhm_mm": 2.0,
+        "reference_fwhm_mm": 0.0,
+        "base_lambda": 50.0,
+        "effective_lambda": 6082.38300172913,
+        "ssd": 121.6476600345826,
+        "bending_energy": 2453.6815043468036,
+        "cost": 139.03015839081368,
+        "intensity_scale": 0.6691304702105916,
+        "estimate_intensity": true,
+        "t1_polynomial": null,
+        "t1_bias_range": null,
+        "t1_bias_bending_energy": null,
+        "apply_reference_mask": false,
+        "explicit_reference_mask_available": true,
+        "implicit_reference_mask": false,
+        "implicit_input_mask": false,
+        "mask_voxels": 858578,
+        "minimization_method": "lm",
+        "process_stage": 1,
+        "process_boundary_handoff": false,
+        "lm_or_scg_lambda_final": 1.0000000000000003e-11,
+        "pcg": [
+          {
+            "iterations": 22,
+            "converged": true,
+            "relative_residual": 0.0005982821455453816
+          },
+          {
+            "iterations": 45,
+            "converged": true,
+            "relative_residual": 0.0002830094513389419
+          },
+          {
+            "iterations": 59,
+            "converged": true,
+            "relative_residual": 0.000748473902890733
+          },
+          {
+            "iterations": 64,
+            "converged": true,
+            "relative_residual": 0.0009128924476706556
+          },
+          {
+            "iterations": 89,
+            "converged": true,
+            "relative_residual": 0.0007395750762993295
+          },
+          {
+            "iterations": 87,
+            "converged": true,
+            "relative_residual": 0.0008267953701193478
+          },
+          {
+            "iterations": 90,
+            "converged": true,
+            "relative_residual": 0.000670427524563178
+          },
+          {
+            "iterations": 100,
+            "converged": true,
+            "relative_residual": 0.0007775286020704932
+          },
+          {
+            "iterations": 110,
+            "converged": true,
+            "relative_residual": 0.0004529808368126804
+          },
+          {
+            "iterations": 95,
+            "converged": true,
+            "relative_residual": 0.0007992723169456688
+          }
+        ],
+        "scg": [],
+        "full_jacobian_min_before_projection": 0.11162549695951487,
+        "full_jacobian_max_before_projection": 2.424310042416102,
+        "topology_projection_required": true,
+        "topology_projection": {
+          "required": true,
+          "calls": [
+            {
+              "wide_shape": [
+                98,
+                112,
+                98
+              ],
+              "offsets": [
+                3,
+                1,
+                3
+              ],
+              "range_before": [
+                0.11162549695951487,
+                2.424310042416102
+              ],
+              "range_after": [
+                0.18828890618494673,
+                2.425243211900752
+              ],
+              "constrain_topology": {
+                "iterations": 5,
+                "history": [
+                  {
+                    "minimum": 0.0919877141714096,
+                    "maximum": 2.48271107673645,
+                    "below": 3050,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.08850385248661041,
+                    "maximum": 2.4820642471313477,
+                    "below": 730,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.19323180615901947,
+                    "maximum": 2.4818506240844727,
+                    "below": 6,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.19458025693893433,
+                    "maximum": 2.481858253479004,
+                    "below": 1,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.20100772380828857,
+                    "maximum": 2.481867790222168,
+                    "below": 0,
+                    "above": 0
+                  }
+                ],
+                "final": {
+                  "minimum": 0.20100772380828857,
+                  "maximum": 2.481867790222168,
+                  "below": 0,
+                  "above": 0
+                },
+                "limit_gradient_backend": "numpy-cpu-serial-order",
+                "elapsed_seconds": 73.27070561051369
+              }
+            },
+            {
+              "wide_shape": [
+                98,
+                112,
+                98
+              ],
+              "offsets": [
+                3,
+                1,
+                3
+              ],
+              "range_before": [
+                0.18828890618494673,
+                2.425243211900752
+              ],
+              "range_after": [
+                0.19319160230110416,
+                2.4256749738213346
+              ],
+              "constrain_topology": {
+                "iterations": 5,
+                "history": [
+                  {
+                    "minimum": 0.16689781844615936,
+                    "maximum": 2.4875481128692627,
+                    "below": 183,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.15268149971961975,
+                    "maximum": 2.487483263015747,
+                    "below": 78,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.18264010548591614,
+                    "maximum": 2.4874422550201416,
+                    "below": 26,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.19928592443466187,
+                    "maximum": 2.487401008605957,
+                    "below": 1,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.2003612220287323,
+                    "maximum": 2.4874093532562256,
+                    "below": 0,
+                    "above": 0
+                  }
+                ],
+                "final": {
+                  "minimum": 0.2003612220287323,
+                  "maximum": 2.4874093532562256,
+                  "below": 0,
+                  "above": 0
+                },
+                "limit_gradient_backend": "numpy-cpu-serial-order",
+                "elapsed_seconds": 73.59766185097396
+              }
+            },
+            {
+              "wide_shape": [
+                98,
+                112,
+                98
+              ],
+              "offsets": [
+                3,
+                1,
+                3
+              ],
+              "range_before": [
+                0.19319160230110416,
+                2.4256749738213346
+              ],
+              "range_after": [
+                0.19688908365348187,
+                2.4258260575249437
+              ],
+              "constrain_topology": {
+                "iterations": 4,
+                "history": [
+                  {
+                    "minimum": 0.1743832528591156,
+                    "maximum": 2.4892287254333496,
+                    "below": 99,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.1636020839214325,
+                    "maximum": 2.4892098903656006,
+                    "below": 26,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.19582979381084442,
+                    "maximum": 2.4892139434814453,
+                    "below": 6,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.20119798183441162,
+                    "maximum": 2.4892232418060303,
+                    "below": 0,
+                    "above": 0
+                  }
+                ],
+                "final": {
+                  "minimum": 0.20119798183441162,
+                  "maximum": 2.4892232418060303,
+                  "below": 0,
+                  "above": 0
+                },
+                "limit_gradient_backend": "numpy-cpu-serial-order",
+                "elapsed_seconds": 55.533477193675935
+              }
+            },
+            {
+              "wide_shape": [
+                98,
+                112,
+                98
+              ],
+              "offsets": [
+                3,
+                1,
+                3
+              ],
+              "range_before": [
+                0.19688908365348187,
+                2.4258260575249437
+              ],
+              "range_after": [
+                0.20078126775505012,
+                2.4258760264979173
+              ],
+              "constrain_topology": {
+                "iterations": 4,
+                "history": [
+                  {
+                    "minimum": 0.17844486236572266,
+                    "maximum": 2.4897639751434326,
+                    "below": 59,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.17277413606643677,
+                    "maximum": 2.4897689819335938,
+                    "below": 23,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.1969408392906189,
+                    "maximum": 2.48976731300354,
+                    "below": 3,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.20035143196582794,
+                    "maximum": 2.4897704124450684,
+                    "below": 0,
+                    "above": 0
+                  }
+                ],
+                "final": {
+                  "minimum": 0.20035143196582794,
+                  "maximum": 2.4897704124450684,
+                  "below": 0,
+                  "above": 0
+                },
+                "limit_gradient_backend": "numpy-cpu-serial-order",
+                "elapsed_seconds": 55.128548100590706
+              }
+            }
+          ],
+          "range": [
+            0.20078126775505012,
+            2.4258760264979173
+          ],
+          "succeeded": true
+        }
+      },
+      {
+        "level": 4,
+        "stride": 1,
+        "matrix_size": [
+          91,
+          109,
+          91
+        ],
+        "control_grid_shape": [
+          21,
+          24,
+          21
+        ],
+        "warp_resolution_mm": [
+          10.0,
+          10.0,
+          10.0
+        ],
+        "knot_spacing_voxels": [
+          5,
+          5,
+          5
+        ],
+        "maximum_iterations": 5,
+        "accepted_iterations": 5,
+        "attempts": 5,
+        "converged": false,
+        "input_fwhm_mm": 2.0,
+        "reference_fwhm_mm": 0.0,
+        "base_lambda": 30.0,
+        "effective_lambda": 11244.20148258339,
+        "ssd": 374.806716086113,
+        "bending_energy": 1711.9595957475558,
+        "cost": 440.7257782862696,
+        "intensity_scale": 0.6691304702105916,
+        "estimate_intensity": false,
+        "t1_polynomial": null,
+        "t1_bias_range": null,
+        "t1_bias_bending_energy": null,
+        "apply_reference_mask": true,
+        "explicit_reference_mask_available": true,
+        "implicit_reference_mask": false,
+        "implicit_input_mask": false,
+        "mask_voxels": 292019,
+        "minimization_method": "lm",
+        "process_stage": 1,
+        "process_boundary_handoff": false,
+        "lm_or_scg_lambda_final": 1.0000000000000002e-06,
+        "pcg": [
+          {
+            "iterations": 34,
+            "converged": true,
+            "relative_residual": 0.0008572585533961242
+          },
+          {
+            "iterations": 74,
+            "converged": true,
+            "relative_residual": 0.0009614246350686345
+          },
+          {
+            "iterations": 89,
+            "converged": true,
+            "relative_residual": 0.0009301002944033845
+          },
+          {
+            "iterations": 76,
+            "converged": true,
+            "relative_residual": 0.0009038747500523179
+          },
+          {
+            "iterations": 78,
+            "converged": true,
+            "relative_residual": 0.000984026213758645
+          }
+        ],
+        "scg": [],
+        "full_jacobian_min_before_projection": 0.16778835424587638,
+        "full_jacobian_max_before_projection": 2.0096057961826252,
+        "topology_projection_required": true,
+        "topology_projection": {
+          "required": true,
+          "calls": [
+            {
+              "wide_shape": [
+                98,
+                112,
+                98
+              ],
+              "offsets": [
+                3,
+                1,
+                3
+              ],
+              "range_before": [
+                0.16778835424587638,
+                2.0096057961826252
+              ],
+              "range_after": [
+                0.20249747003554847,
+                2.0095683112952707
+              ],
+              "constrain_topology": {
+                "iterations": 4,
+                "history": [
+                  {
+                    "minimum": 0.1612144410610199,
+                    "maximum": 2.0794589519500732,
+                    "below": 504,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.14416570961475372,
+                    "maximum": 2.079448699951172,
+                    "below": 101,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.19079247117042542,
+                    "maximum": 2.079446315765381,
+                    "below": 4,
+                    "above": 0
+                  },
+                  {
+                    "minimum": 0.20190516114234924,
+                    "maximum": 2.0794451236724854,
+                    "below": 0,
+                    "above": 0
+                  }
+                ],
+                "final": {
+                  "minimum": 0.20190516114234924,
+                  "maximum": 2.0794451236724854,
+                  "below": 0,
+                  "above": 0
+                },
+                "limit_gradient_backend": "numpy-cpu-serial-order",
+                "elapsed_seconds": 55.29037127736956
+              }
+            }
+          ],
+          "range": [
+            0.20249747003554847,
+            2.0095683112952707
+          ],
+          "succeeded": true
+        }
+      }
+    ],
+    "final_intensity_scale": 0.6691304702105916,
+    "nonlinear_jacobian_min": 0.341810128363754,
+    "nonlinear_jacobian_max": 2.637835976989797,
+    "full_pull_jacobian_min": 0.20939874649047852,
+    "full_pull_jacobian_max": 1.977856993675232
+  },
+  "outputs": {
+    "old_dense_jacobian.nii.gz": "53d1c93cd45c6cc75bfd60bdfbfc24e601aa3cea1909eb3e52177a625087f20a",
+    "coefficients.nii.gz": "8417d6886ddce8445b0dd90a1f283372653893cbbeb130bacab7b1ec60f2d221",
+    "old_warped.nii.gz": "51dfa853eb167843f34c54076bdbec19e9c4d77b8f778233df4a53f0dd0d1954",
+    "full_pull_jacobian.nii.gz": "33582b63d14661634f13dd2d1633cd35005824161ed17529c6842c93c021e96a",
+    "analytic.nii.gz": "0bbe937c87a83087067a1532113723917c9074e0574d863e5ebe07781c75cc15",
+    "pull.nii.gz": "282f3867762745c3ed779631021f453b3a2df20d1f6808aecb06bb3377fd42f1",
+    "old_modulated.nii.gz": "02ab4502ef79ec043829de075ee79d6c00e05fda295bfd323e4f37b2b284ad70",
+    "estimator_warped.nii.gz": "1843b518d10a62ecdb13b06477319c27643e9c529a30037097c929f35be93a2b"
+  }
+}
