@@ -238,5 +238,49 @@
       "reference_sha256": "2dcefbfcbe87d2a2fe63c6b62082d3dfb808abbbad021a5bc9f7994f24d9061b",
       "candidate_sha256": "c3db616c04d7cd815dfb956b2ca9a123cc4214430632331b0fba15d5d6565eb5"
     }
+  },
+  "hybrid_middle_followup": {
+    "schema": "fnit_cpu_hybrid_slabs_diagnostic/v1",
+    "classification": "diagnostic_only_not_production",
+    "policy": "middle layers oneDNN slabs; first two and final two convolutions and likelihood original backend; unchanged tie rule",
+    "script_sha256": "6cb9dbad334522f358af8ed0cee3725b164cd734475024d3d84dcc949849b56e",
+    "cpu_affinity": "1,5,9,13,17,21,25,29",
+    "threads": 8,
+    "gate": "saved hard labels must equal corrected baseline exactly; no threshold relaxation",
+    "cases": {
+      "case01": {
+        "status": "complete",
+        "observed_command_wall_seconds": 114.41389121860266,
+        "sampled_tree_rss_bytes": 14896979968,
+        "baseline": {
+          "different_voxels": 0,
+          "foreground_minimum_dice": 1.0,
+          "maximum_csv_absolute_difference_mm3": 0.10000000009313226
+        },
+        "official": {
+          "different_voxels": 1,
+          "foreground_minimum_dice": 0.9999979512353027,
+          "maximum_csv_absolute_difference_mm3": 0.3099999999976717
+        },
+        "hard_exact_gate": "passed"
+      },
+      "case02": {
+        "status": "complete",
+        "observed_command_wall_seconds": 113.15927286446095,
+        "sampled_tree_rss_bytes": 15113011200,
+        "baseline": {
+          "different_voxels": 2,
+          "foreground_minimum_dice": 0.9999971371559935,
+          "maximum_csv_absolute_difference_mm3": 0.0400000000372529
+        },
+        "official": {
+          "different_voxels": 3,
+          "foreground_minimum_dice": 0.9999957057401372,
+          "maximum_csv_absolute_difference_mm3": 0.5
+        },
+        "hard_exact_gate": "failed"
+      }
+    },
+    "decision": "not adopted; case02 hard-label exact gate failed; no CUDA or production source changes"
   }
 }
