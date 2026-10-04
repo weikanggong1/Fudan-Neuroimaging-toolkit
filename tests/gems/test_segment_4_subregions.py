@@ -1,6 +1,7 @@
 import inspect
 
 import nibabel as nib
+import numba
 import numpy as np
 import pytest
 import torch
@@ -44,13 +45,21 @@ def test_thread_configuration_reaches_shared_context(tmp_path, monkeypatch, thre
     directory.mkdir()
     (directory / "AtlasMesh.gz").touch()
     configured = []
-    monkeypatch.setattr(torch, "set_num_threads", configured.append)
+    before_torch = torch.get_num_threads()
+    before_numba = numba.get_num_threads()
+    original_set_threads = torch.set_num_threads
+    def set_threads(value):
+        configured.append(value)
+        original_set_threads(value)
+    monkeypatch.setattr(torch, "set_num_threads", set_threads)
 
     class PreparedEnough(Exception):
         pass
 
     def prepare(*args, **kwargs):
-        assert configured == [threads]
+        assert configured[-1] == threads
+        assert torch.get_num_threads() == threads
+        assert numba.get_num_threads() == threads
         assert kwargs["need_coarse"] and not kwargs["need_parc"]
         assert kwargs["device"] == torch.device("cpu")
         raise PreparedEnough
@@ -59,3 +68,45 @@ def test_thread_configuration_reaches_shared_context(tmp_path, monkeypatch, thre
     with pytest.raises(PreparedEnough):
         pipeline.segment_4_subregions(image, tmp_path, structures="brainstem", threads=threads,
                                      device="cpu")
+    assert torch.get_num_threads() == before_torch
+    assert numba.get_num_threads() == before_numba
+
+
+def test_cpu_scope_restores_threads_on_success():
+    before_torch = torch.get_num_threads()
+    before_numba = numba.get_num_threads()
+    requested = 1 if before_torch != 1 or before_numba != 1 else 2
+    @pipeline._cpu_thread_scoped
+    def finished(*, device="cpu", threads=4):
+        assert torch.get_num_threads() == threads
+        assert numba.get_num_threads() == threads
+        return "finished"
+    assert finished(device="cpu", threads=requested) == "finished"
+    assert torch.get_num_threads() == before_torch
+    assert numba.get_num_threads() == before_numba
+
+
+def test_cpu_scope_preserves_torch_budget_above_numba_capacity(monkeypatch):
+    before_torch = torch.get_num_threads()
+    before_numba = numba.get_num_threads()
+    monkeypatch.setattr(numba.config, "NUMBA_NUM_THREADS", 1)
+    @pipeline._cpu_thread_scoped
+    def finished(*, device="cpu", threads=4):
+        assert torch.get_num_threads() == threads
+        assert numba.get_num_threads() == 1
+        raise RuntimeError("after preparation")
+    with pytest.raises(RuntimeError, match="after preparation"):
+        finished(device="cpu", threads=8)
+    assert torch.get_num_threads() == before_torch
+    assert numba.get_num_threads() == before_numba
+
+
+def test_cuda_scope_does_not_enter_cpu_budget(monkeypatch):
+    import fnit.recon_all.thread_budget as budget
+    def forbidden(**kwargs):
+        raise AssertionError("CUDA path must preserve its original thread policy")
+    monkeypatch.setattr(budget, "thread_budget", forbidden)
+    @pipeline._cpu_thread_scoped
+    def finished(*, device="cuda:0", threads=4):
+        return device, threads
+    assert finished(device="cuda:0", threads=8) == ("cuda:0", 8)

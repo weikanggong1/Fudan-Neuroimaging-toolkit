@@ -1,0 +1,1217 @@
+{
+  "schema": "fnit.smri.cpu.strip_sr.cli_summary.v1",
+  "source_revision": "1d31e7baaebbb644ab199471f7fe6282721455fd",
+  "feature": "synthsr",
+  "scope": "Cold complete CLI including imports, loading, inference and specified output writes; lock wait excluded",
+  "startup_variation": "GPFS imports and file cache vary; internal network profiles are reported separately",
+  "cases": [
+    {
+      "case": "case01_synthsr_default",
+      "data_description": "public raw ds003138 v1.0.1 T1w",
+      "candidate_options": [],
+      "executions": [
+        {
+          "id": "case01_synthsr_default_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 94.82146199792624,
+          "maximum_sampled_tree_rss_bytes": 8735821824,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "case01_synthsr_default_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 41.29080098122358,
+          "maximum_sampled_tree_rss_bytes": 10204655616,
+          "maximum_sampled_tree_threads": 16,
+          "returncode": 0
+        },
+        {
+          "id": "case01_synthsr_default_3_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 44.30888904631138,
+          "maximum_sampled_tree_rss_bytes": 10219507712,
+          "maximum_sampled_tree_threads": 16,
+          "returncode": 0
+        },
+        {
+          "id": "case01_synthsr_default_4_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 30.7983096241951,
+          "maximum_sampled_tree_rss_bytes": 8754667520,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "case01_synthsr_default_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_synthsr_default_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "dff4ef9d658243a500704c141290c636414e7e871e3d6fccf5b2f211a7328922",
+                "candidate_sha256": "fbccec5cad5503d3c1f2589d79888571bf15e19607ced94502ae124624d821f6",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 527,
+                  "exact_fraction": 0.9999419091710758,
+                  "mae": 5.8090828924162256e-05,
+                  "rmse": 0.007621733984085397,
+                  "nrmse_reference_rms": 7.787066303123203e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -8.04673721340388e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7334228,
+                  "different_voxels": 527,
+                  "exact_fraction": 0.9999281451299306,
+                  "mae": 7.185487006948789e-05,
+                  "rmse": 0.008476725197237899,
+                  "nrmse_reference_rms": 7.787066303123205e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -9.953331148145381e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        },
+        {
+          "candidate": "case01_synthsr_default_3_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_synthsr_default_3_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "dff4ef9d658243a500704c141290c636414e7e871e3d6fccf5b2f211a7328922",
+                "candidate_sha256": "fbccec5cad5503d3c1f2589d79888571bf15e19607ced94502ae124624d821f6",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 527,
+                  "exact_fraction": 0.9999419091710758,
+                  "mae": 5.8090828924162256e-05,
+                  "rmse": 0.007621733984085397,
+                  "nrmse_reference_rms": 7.787066303123203e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -8.04673721340388e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7334228,
+                  "different_voxels": 527,
+                  "exact_fraction": 0.9999281451299306,
+                  "mae": 7.185487006948789e-05,
+                  "rmse": 0.008476725197237899,
+                  "nrmse_reference_rms": 7.787066303123205e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -9.953331148145381e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        },
+        {
+          "candidate": "case01_synthsr_default_4_reference",
+          "role": "official_repeat",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_synthsr_default_4_reference",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "dff4ef9d658243a500704c141290c636414e7e871e3d6fccf5b2f211a7328922",
+                "candidate_sha256": "dff4ef9d658243a500704c141290c636414e7e871e3d6fccf5b2f211a7328922",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7334224,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 62.80988581106067,
+      "fnit_median_seconds": 42.79984501376748,
+      "observed_complete_process_ratio": 1.46752601068664
+    },
+    {
+      "case": "case02_synthsr_default",
+      "data_description": "public raw ds003138 v1.0.1 T1w",
+      "candidate_options": [],
+      "executions": [
+        {
+          "id": "case02_synthsr_default_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 63.09047216176987,
+          "maximum_sampled_tree_rss_bytes": 8744001536,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "case02_synthsr_default_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 48.575587786734104,
+          "maximum_sampled_tree_rss_bytes": 10219372544,
+          "maximum_sampled_tree_threads": 16,
+          "returncode": 0
+        },
+        {
+          "id": "case02_synthsr_default_3_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 43.31901065260172,
+          "maximum_sampled_tree_rss_bytes": 10211692544,
+          "maximum_sampled_tree_threads": 64,
+          "returncode": 0
+        },
+        {
+          "id": "case02_synthsr_default_4_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 98.64739868044853,
+          "maximum_sampled_tree_rss_bytes": 8715857920,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "case02_synthsr_default_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case02_synthsr_default_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "51b06d813ca79d5188f923ef8721ca09f85e654ed4da09ed3282764652185112",
+                "candidate_sha256": "3b526cca7bafbedd012e66dd809087179a540e6154fdb1db9a08ba7f1660297d",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 563,
+                  "exact_fraction": 0.9999379409171076,
+                  "mae": 6.205908289241622e-05,
+                  "rmse": 0.00787775874804606,
+                  "nrmse_reference_rms": 7.039590239066948e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -1.3999118165784833e-05
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 8240187,
+                  "different_voxels": 563,
+                  "exact_fraction": 0.9999316763078314,
+                  "mae": 6.832369216863647e-05,
+                  "rmse": 0.008265814670595784,
+                  "nrmse_reference_rms": 7.039590239066949e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -1.541227159043842e-05
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        },
+        {
+          "candidate": "case02_synthsr_default_3_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case02_synthsr_default_3_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "51b06d813ca79d5188f923ef8721ca09f85e654ed4da09ed3282764652185112",
+                "candidate_sha256": "3b526cca7bafbedd012e66dd809087179a540e6154fdb1db9a08ba7f1660297d",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 563,
+                  "exact_fraction": 0.9999379409171076,
+                  "mae": 6.205908289241622e-05,
+                  "rmse": 0.00787775874804606,
+                  "nrmse_reference_rms": 7.039590239066948e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -1.3999118165784833e-05
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 8240187,
+                  "different_voxels": 563,
+                  "exact_fraction": 0.9999316763078314,
+                  "mae": 6.832369216863647e-05,
+                  "rmse": 0.008265814670595784,
+                  "nrmse_reference_rms": 7.039590239066949e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -1.541227159043842e-05
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        },
+        {
+          "candidate": "case02_synthsr_default_4_reference",
+          "role": "official_repeat",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case02_synthsr_default_4_reference",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "51b06d813ca79d5188f923ef8721ca09f85e654ed4da09ed3282764652185112",
+                "candidate_sha256": "51b06d813ca79d5188f923ef8721ca09f85e654ed4da09ed3282764652185112",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 8240186,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 80.8689354211092,
+      "fnit_median_seconds": 45.94729921966791,
+      "observed_complete_process_ratio": 1.7600367550328824
+    },
+    {
+      "case": "flair_sr_default",
+      "data_description": "existing public derived FLAIR, not raw scanner data",
+      "candidate_options": [],
+      "executions": [
+        {
+          "id": "flair_sr_default_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 123.89759847521782,
+          "maximum_sampled_tree_rss_bytes": 6428094464,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "flair_sr_default_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 21.036957323551178,
+          "maximum_sampled_tree_rss_bytes": 6089957376,
+          "maximum_sampled_tree_threads": 64,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "flair_sr_default_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "flair_sr_default_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "2a9d9bfb1fce724ee0059463c6a2c2315f0857f396431e716802effc4819e310",
+                "candidate_sha256": "9bdae674bd6c0dc7af1132acff106b1dc7986dd202085aa353c691ff3498bbad",
+                "reference_shape": [
+                  217,
+                  218,
+                  127
+                ],
+                "candidate_shape": [
+                  217,
+                  218,
+                  127
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 6007862,
+                  "different_voxels": 399,
+                  "exact_fraction": 0.9999335870231374,
+                  "mae": 6.641297686265098e-05,
+                  "rmse": 0.008149415737502351,
+                  "nrmse_reference_rms": 8.49976818974822e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": 3.828316962007449e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 4027965,
+                  "different_voxels": 399,
+                  "exact_fraction": 0.9999009425354987,
+                  "mae": 9.905746450130526e-05,
+                  "rmse": 0.009952761651989123,
+                  "nrmse_reference_rms": 8.49976818974822e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": 5.71007940734341e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 123.89759847521782,
+      "fnit_median_seconds": 21.036957323551178,
+      "observed_complete_process_ratio": 5.889520835625438
+    },
+    {
+      "case": "case01_sr_v1",
+      "data_description": "public raw ds003138 v1.0.1 T1w",
+      "candidate_options": [
+        "--v1"
+      ],
+      "executions": [
+        {
+          "id": "case01_sr_v1_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 131.18472950905561,
+          "maximum_sampled_tree_rss_bytes": 8732639232,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "case01_sr_v1_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 40.814085468649864,
+          "maximum_sampled_tree_rss_bytes": 10215084032,
+          "maximum_sampled_tree_threads": 16,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "case01_sr_v1_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_sr_v1_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "2608906ef657e2cc61c03f9c3c19698164a17aa0d49d31cd0b0d2aee798bebf5",
+                "candidate_sha256": "8e0835e66d672cfa0170449fd207e5666d1920b23772d7723788137a11a9da2d",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 520,
+                  "exact_fraction": 0.9999426807760141,
+                  "mae": 5.731922398589065e-05,
+                  "rmse": 0.007570946042991632,
+                  "nrmse_reference_rms": 7.158411677612844e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -7.054673721340388e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7074412,
+                  "different_voxels": 520,
+                  "exact_fraction": 0.9999264956578724,
+                  "mae": 7.350434212765668e-05,
+                  "rmse": 0.00857346733402867,
+                  "nrmse_reference_rms": 7.158411677612844e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -9.046688261865438e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 131.18472950905561,
+      "fnit_median_seconds": 40.814085468649864,
+      "observed_complete_process_ratio": 3.2142023520243104
+    },
+    {
+      "case": "case01_sr_lowfield_model",
+      "data_description": "lowfield checkpoint functionality on raw T1; actual lowfield acquisition not yet available",
+      "candidate_options": [
+        "--lowfield"
+      ],
+      "executions": [
+        {
+          "id": "case01_sr_lowfield_model_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 39.05288525670767,
+          "maximum_sampled_tree_rss_bytes": 8743182336,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "case01_sr_lowfield_model_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 40.55906294286251,
+          "maximum_sampled_tree_rss_bytes": 10112901120,
+          "maximum_sampled_tree_threads": 71,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "case01_sr_lowfield_model_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_sr_lowfield_model_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "79214d18ed9a3d25e9da7bb5424b967a04e5e067e14dba92b65f61713a8d0fde",
+                "candidate_sha256": "5b56efaafb83faf1563ee437e8bf3710c9eac175ff0c1e384417071dbd12373a",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 628,
+                  "exact_fraction": 0.9999307760141094,
+                  "mae": 6.922398589065256e-05,
+                  "rmse": 0.00832009530538278,
+                  "nrmse_reference_rms": 8.215594503180895e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": 5.5114638447971785e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 9050870,
+                  "different_voxels": 628,
+                  "exact_fraction": 0.9999306144050241,
+                  "mae": 6.93855949759526e-05,
+                  "rmse": 0.00832980161684254,
+                  "nrmse_reference_rms": 8.215594503180895e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": 5.524330810187308e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 39.05288525670767,
+      "fnit_median_seconds": 40.55906294286251,
+      "observed_complete_process_ratio": 0.9628645837238236
+    },
+    {
+      "case": "case01_sr_v1_precedence",
+      "data_description": "public raw ds003138 v1.0.1 T1w",
+      "candidate_options": [
+        "--v1",
+        "--lowfield"
+      ],
+      "executions": [
+        {
+          "id": "case01_sr_v1_precedence_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 87.62165273725986,
+          "maximum_sampled_tree_rss_bytes": 8751636480,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "case01_sr_v1_precedence_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 39.55797579884529,
+          "maximum_sampled_tree_rss_bytes": 10215366656,
+          "maximum_sampled_tree_threads": 16,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "case01_sr_v1_precedence_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_sr_v1_precedence_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "2608906ef657e2cc61c03f9c3c19698164a17aa0d49d31cd0b0d2aee798bebf5",
+                "candidate_sha256": "8e0835e66d672cfa0170449fd207e5666d1920b23772d7723788137a11a9da2d",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 520,
+                  "exact_fraction": 0.9999426807760141,
+                  "mae": 5.731922398589065e-05,
+                  "rmse": 0.007570946042991632,
+                  "nrmse_reference_rms": 7.158411677612844e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -7.054673721340388e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7074412,
+                  "different_voxels": 520,
+                  "exact_fraction": 0.9999264956578724,
+                  "mae": 7.350434212765668e-05,
+                  "rmse": 0.00857346733402867,
+                  "nrmse_reference_rms": 7.158411677612844e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -9.046688261865438e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 87.62165273725986,
+      "fnit_median_seconds": 39.55797579884529,
+      "observed_complete_process_ratio": 2.2150186142693773
+    },
+    {
+      "case": "case01_sr_no_flip",
+      "data_description": "public raw ds003138 v1.0.1 T1w",
+      "candidate_options": [
+        "--disable_flipping"
+      ],
+      "executions": [
+        {
+          "id": "case01_sr_no_flip_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 107.1384544596076,
+          "maximum_sampled_tree_rss_bytes": 8614227968,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "case01_sr_no_flip_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 22.280203260481358,
+          "maximum_sampled_tree_rss_bytes": 10132852736,
+          "maximum_sampled_tree_threads": 71,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "case01_sr_no_flip_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_sr_no_flip_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "26883d6f1652ba8da9033843a4cd5c272b8ec36d3ec05d7112a854f8993411f4",
+                "candidate_sha256": "18f9fcea7d6926bee9fe2c5fa091c4d95d7e8aaecd2a57d77629c3abca4af568",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 668,
+                  "exact_fraction": 0.9999263668430335,
+                  "mae": 7.363315696649029e-05,
+                  "rmse": 0.008580976457635243,
+                  "nrmse_reference_rms": 8.76804350562585e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -9.700176366843034e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7139295,
+                  "different_voxels": 668,
+                  "exact_fraction": 0.9999064333383059,
+                  "mae": 9.356666169418689e-05,
+                  "rmse": 0.009672986182879975,
+                  "nrmse_reference_rms": 8.768043505625852e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -1.2326147049533603e-05
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 107.1384544596076,
+      "fnit_median_seconds": 22.280203260481358,
+      "observed_complete_process_ratio": 4.808683888878171
+    },
+    {
+      "case": "case01_sr_no_sharpen",
+      "data_description": "public raw ds003138 v1.0.1 T1w",
+      "candidate_options": [
+        "--disable_sharpening"
+      ],
+      "executions": [
+        {
+          "id": "case01_sr_no_sharpen_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 78.6038508489728,
+          "maximum_sampled_tree_rss_bytes": 8715702272,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "case01_sr_no_sharpen_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 36.80351731926203,
+          "maximum_sampled_tree_rss_bytes": 10189840384,
+          "maximum_sampled_tree_threads": 16,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "case01_sr_no_sharpen_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_sr_no_sharpen_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "6935da5440a7874083901e04a0d2c636a87217b8246b9cd893eea15e7759eb7e",
+                "candidate_sha256": "bb3f0bea709c486e5c642891b5665a92fcd8f2e44499d1fe90d6a536592cdd08",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 397,
+                  "exact_fraction": 0.9999562389770723,
+                  "mae": 4.3761022927689596e-05,
+                  "rmse": 0.0066152114801939325,
+                  "nrmse_reference_rms": 6.832156470490913e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -1.0030864197530864e-05
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7496428,
+                  "different_voxels": 397,
+                  "exact_fraction": 0.9999470414442718,
+                  "mae": 5.295855572814145e-05,
+                  "rmse": 0.00727726292833655,
+                  "nrmse_reference_rms": 6.832156470490912e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -1.2139114789070209e-05
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 78.6038508489728,
+      "fnit_median_seconds": 36.80351731926203,
+      "observed_complete_process_ratio": 2.1357700723847266
+    },
+    {
+      "case": "case01_sr_no_flip_no_sharpen",
+      "data_description": "public raw ds003138 v1.0.1 T1w",
+      "candidate_options": [
+        "--disable_flipping",
+        "--disable_sharpening"
+      ],
+      "executions": [
+        {
+          "id": "case01_sr_no_flip_no_sharpen_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 79.63328591734171,
+          "maximum_sampled_tree_rss_bytes": 8520777728,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "case01_sr_no_flip_no_sharpen_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 21.033956475555897,
+          "maximum_sampled_tree_rss_bytes": 10113568768,
+          "maximum_sampled_tree_threads": 64,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "case01_sr_no_flip_no_sharpen_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_sr_no_flip_no_sharpen_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "401c87b0162dca58524a6472f44494f4385782197dfdbdbbb4d1e7ab0a62b298",
+                "candidate_sha256": "9b91a34463d6f9d64f30358db96bd1b9e65ca77102d83db3ec4b5367de1b6500",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 498,
+                  "exact_fraction": 0.9999451058201059,
+                  "mae": 5.4894179894179895e-05,
+                  "rmse": 0.007409060662066406,
+                  "nrmse_reference_rms": 7.645767944418205e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -5.731922398589065e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7328088,
+                  "different_voxels": 498,
+                  "exact_fraction": 0.999932042300802,
+                  "mae": 6.795769919793539e-05,
+                  "rmse": 0.00824364598936268,
+                  "nrmse_reference_rms": 7.645767944418203e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -7.095984655206105e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 79.63328591734171,
+      "fnit_median_seconds": 21.033956475555897,
+      "observed_complete_process_ratio": 3.7859394645931497
+    }
+  ],
+  "pending_cases": [],
+  "all_planned_cases_complete": true,
+  "all_completed_cases_pass": true
+}

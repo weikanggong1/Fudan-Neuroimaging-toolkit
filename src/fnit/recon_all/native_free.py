@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import json
 import os
 from pathlib import Path
@@ -52,6 +53,19 @@ def _native_surface_metrics_binary(native_bin_dir: str | Path) -> tuple[Path, st
 
 def _native_inflate_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
     return _native_binary(native_bin_dir, "mris_inflate")
+
+
+def _validate_standard_python_dependencies() -> None:
+    """在输入目录检查后、输出创建前导入标准球面配准的完整模块。
+
+    tifffile 已属于标准 recon-all 安装依赖。这里提前检查导入，避免完成
+    体积和表面阶段后才因缺包退出；缺失或导入失败仍传播原始异常。
+    不执行配准、Numba JIT 或读取影像、模板，不修改环境或调用外部软件。
+    """
+    importlib.import_module("tifffile")
+    registration = importlib.import_module("fnit.recon_all.mris_register_run")
+    if not callable(registration.run_register_sphere):
+        raise TypeError("standard sphere registration entry point is not callable")
 
 
 def _run_native_wm_segment(binary: Path, mri: Path, assets: Path) -> None:
@@ -723,6 +737,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         raise FileNotFoundError("T1, weights, and assets must exist")
     if subject.exists() and any(subject.iterdir()):
         raise ValueError("subject_dir must be empty")
+    _validate_standard_python_dependencies()
     from .mni_aux_chain import validate_mni_aux_assets
     from .assets import validate_core_assets
 
@@ -753,8 +768,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     wm_edit_binary = _native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
     registration_atlases = {hemi: _folding_atlas(assets, hemi)
                             for hemi in ("lh", "rh")}
-    torch.backends.cuda.matmul.allow_tf32 = True
-    torch.backends.cudnn.allow_tf32 = True
+    if torch.device(device).type == "cuda":
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
     validation_seconds = time.perf_counter() - started
     pipeline_started = time.perf_counter()
     profile = "single-t1-standard"
@@ -765,6 +781,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                                   "sha256": n4_binary[1]}, "threads": threads,
                     "precision": {"matmul_tf32_default": True,
                                   "cudnn_tf32_default": True,
+                                  "cuda_policy_applied": torch.device(device).type == "cuda",
                                   "fp16_or_bf16_requested_by_fnit": False,
                                   "caller_autocast": caller_autocast,
                                   "fp16_or_bf16_enabled": any(
@@ -1168,6 +1185,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     失败报告读取/写入错误不遮盖原异常，也不改写先前运行的未变报告。
     thread_setup_and_restore_seconds 是公开/内部计时差，包含线程设置/恢复
     及内部末尾报告写出/返回开销，不能视为纯线程操作时间。
+    阶段间异常可能没有完成内部 total_seconds；此时仍记录完整公开耗时，
+    差值为 None，并在 scope 中注明内部计时尚未完成，不推算缺失时间。
     """
     tick = time.perf_counter()
     from .thread_budget import thread_budget
@@ -1193,10 +1212,17 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         timing["total_scope"] = (
             "API entry through validation, thread restoration, loading, transfers "
             "and output writes; excludes final public metadata write")
-        timing["thread_setup_and_restore_seconds"] = wall - value["total_seconds"]
-        timing["thread_setup_and_restore_scope"] = (
-            "public-wrapper residual including thread setup/restoration and "
-            "internal final report write/return overhead")
+        internal_seconds = value.get("total_seconds")
+        if internal_seconds is None:
+            timing["thread_setup_and_restore_seconds"] = None
+            timing["thread_setup_and_restore_scope"] = (
+                "unavailable: internal total_seconds was not finalized; "
+                "public API wall includes thread setup/restoration")
+        else:
+            timing["thread_setup_and_restore_seconds"] = wall - internal_seconds
+            timing["thread_setup_and_restore_scope"] = (
+                "public-wrapper residual including thread setup/restoration and "
+                "internal final report write/return overhead")
         value["total_seconds"] = wall
 
     try:

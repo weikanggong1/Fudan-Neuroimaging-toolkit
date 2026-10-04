@@ -1,0 +1,65 @@
+{
+  "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+  "feature": "synthsr",
+  "case": "case01_float_default",
+  "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+  "outputs": {
+    "image": {
+      "reference_sha256": "c0c2488455db3005c0c54f56994e90e76657db83c263cd06b2ad3431f5e24199",
+      "candidate_sha256": "f937f1370ab9639bc0fa286e981dfee9a53d23ba54e5ea4468e53b6dc9bbecb2",
+      "reference_shape": [
+        180,
+        224,
+        225
+      ],
+      "candidate_shape": [
+        180,
+        224,
+        225
+      ],
+      "reference_dtype": "float32",
+      "candidate_dtype": "float32",
+      "shape_matches": true,
+      "geometry_matches": true,
+      "dtype_matches": true,
+      "affine_max_abs_mm": null,
+      "reference_finite": true,
+      "candidate_finite": true,
+      "valid_direct_comparison": true,
+      "whole_grid": {
+        "status": "measured",
+        "voxel_count": 9072000,
+        "different_voxels": 8669078,
+        "exact_fraction": 0.044413800705467375,
+        "mae": 3.247302098268205e-05,
+        "rmse": 9.820702681143627e-05,
+        "nrmse_reference_rms": 1.948172218426513e-06,
+        "max_abs_difference": 0.019134521484375,
+        "mean_signed_difference": -4.242790832486947e-06
+      },
+      "fixed_allclose": {
+        "rtol": 1e-05,
+        "atol": 0.001,
+        "passes": false
+      },
+      "nonzero_union_secondary": {
+        "status": "measured",
+        "voxel_count": 9005409,
+        "different_voxels": 8669078,
+        "exact_fraction": 0.037347665164347336,
+        "mae": 3.271314455066855e-05,
+        "rmse": 9.856945671680977e-05,
+        "nrmse_reference_rms": 1.948172218426513e-06,
+        "max_abs_difference": 0.019134521484375,
+        "mean_signed_difference": -4.274164386350645e-06
+      }
+    }
+  },
+  "all_direct_comparisons_valid": true,
+  "numerical_equivalence": "fixed_gate_failed",
+  "fixed_gate": {
+    "name": "sr_official",
+    "passes": false,
+    "criterion": "floating SynthSR rtol=1e-5, atol=0.001"
+  }
+}

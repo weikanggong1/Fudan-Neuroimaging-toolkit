@@ -41,7 +41,7 @@ print(result.precision)  # 每次真实前向的 TF32、张量 dtype 与 autocas
 
 `SynthSeg(weights=None, device="cpu", threads=None, cudnn_tf32=True)` 在构造时加载一次模型；每次调用接收一幅图像。`weights` 可传包含四个文件的目录，或直接传 `synthseg_2.0.h5` 路径；三个 `.npy` 必须与这份 `.h5` 位于同一目录。省略 `weights` 时先查 `FNIT_WEIGHTS`、配置脚本记录的目录，再查默认缓存。输入是单幅 3D `.nii`、`.nii.gz`、`.mgz` T1 路径或 `nibabel.spatialimages.SpatialImage`。`threads=None` 保留调用方 PyTorch 线程数，负数使用 CPU 核数；非法设备、精度参数、缺失权重或推理失败时抛异常。
 
-`result.segmentation` 是 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），默认位于 SynthSeg 预处理后的 RAS 方向、约 1 mm 网格。标签编号和存储类型均为 `int32`；NIfTI qform code 为 0，sform code 为 2。`model(image, keep_geometry=True)` 会将标签以最近邻法重采样到输入网格，并保持相同 dtype 与 form-code 契约。`color_lut="/path/to/FreeSurferColorLUT.txt"` 可选地在返回图像的 `extra["color_lut"]` 中记录色表路径；默认不读取 FreeSurfer 文件。
+`result.segmentation` 是 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），默认位于 SynthSeg 预处理后的 RAS 方向、约 1 mm 网格。标签编号和存储类型均为 `int32`；NIfTI qform code 为 0，sform code 为 2。`model(image, keep_geometry=True)` 会将标签以最近邻法重采样到输入网格，并保持相同 dtype 与 form-code 契约。`color_lut="/path/to/FreeSurferColorLUT.txt"` 读取用户提供的 `编号 名称 R G B T` 文本色表，写入 NIfTI 的 FreeSurfer 颜色表扩展（代码 14），同时保留 `extra["color_lut"]`。编号、重复行或颜色范围不合法时抛出异常；默认不读取外部色表。
 
 `result.volumes_mm3` 是 `{前景标签编号: 软体积}`，`result.total_intracranial_mm3` 是所有前景软体积之和，后验概率先恢复到输入方向，再按原版 NumPy float32 顺序求和并保留三位小数；`result.label_names` 对应 32 个前景结构名。CSV 列顺序、总量和近似并列标签规则与本仓库 GPU recon-all 的 `mri_synthseg` 入口相同。`result.near_tie_voxels` 记录近似并列规则相对于普通 `argmax` 更改的体素数。
 
@@ -95,6 +95,20 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 可选参数为 `--weights /path/to/weights`、`--keep-geometry` 和 `--color-lut /path/to/FreeSurferColorLUT.txt`。命令行和 Python 每次均处理一幅图像。独立入口不依赖 recon-all 的原生运行包或个人 license。
 
 ## 与 FreeSurfer 8.2 的既有独立对照
+
+### 2026-10-04 CPU 优化与回归
+
+本次真实数据测试使用 nodecw10 的 8 个物理核、8 个计算线程；同组原版与 FNIT 使用相同亲和性，完整命令包含启动、权重读取、预处理、双向推理、后处理、CSV 和影像保存。逐标签 Dice、硬/软体积、几何和 GPU 回归见[本次验证记录](../../validation/smri_cpu_20261004/t2_seg/README.md)。早期共用 CPU 核组和随后独立 NUMA 核组保留各自身份，不合并计算速度比。
+
+CPU 连通域改用 SciPy 的 6 邻接标记，保持原版的等大连通域顺序。普通入口既有的完整体积 oneDNN 保护作用域内，CPU U-Net 按深度切片计算，内部边界读取完整卷积邻域，仅在真实影像边缘补零；分块保留原非 oneDNN 后端并恢复调用者开关。输入/输出切片的目标大小为 256 MiB，这不是整例 RSS 上限。模型仍为 float32，训练、梯度计算及调用者已开启的 CPU autocast 沿用原卷积路径；CUDA 卷积与连通域仍使用既有实现。
+
+本轮还修复预处理的浮点 endpoint 网格问题：3 幅原始 T1 的 CPU 网络输入 float32 数组 SHA 与官方相同。case01 旧代码少一层，使网络 padding 较小，旧较小输入的时间不能算等价加速。早期 oneDNN 分块在 case01 从约 154 秒降至 54–59 秒，但 case02 改变了两个原本与官方相同的标签体素，未通过严格门，不能作为默认无损优化。当前保留原 CPU 后端的分块在两例实际保存输出中与修正 baseline 硬标签逐值相同；CSV 最大差分别为 0.04/0.30 mm³，通过事先固定的 `rtol=1e-5, atol=0.01 mm³`。对官方两例仍各有一个标签体素差异，CSV 最大差为 0.28/0.80 mm³；不能称官方逐值一致。
+
+原后端分块的 case01 两次完整 wall 为 133.71/171.51 秒，同输入 baseline 为 145.22/143.45 秒，官方为 127.19/56.34 秒，时间波动明显。确定的收益是该例 CPU RSS 从约 94 GB 降至约 15 GB；当前普通入口没有达到全面超越官方 CPU 的速度目标。详细逐区数值、当前第二例完整重复时间与未通过候选见[本次记录](../../validation/smri_cpu_20261004/t2_seg/README.md)。
+
+修复的写出问题是：旧 `color_lut` 只存在于 Python `extra`，保存后丢失色表。新实现直接用 nibabel 写 NIfTI 扩展，生产推理不导入 Surfa。CPU 构造和推理保留调用方 CUDA TF32、cuDNN benchmark/deterministic 设置；这一合同包含异常路径测试。
+
+同日另修复 `keep_geometry=True` 保存头信息：将 qform 标记为未启用时不再重新编码矩阵，避免斜位 T1 的 `pixdim` 被 affine 列范数覆盖。实际原始 T1 的 GPU 公共 CLI 输出 shape、affine、pixdim 与输入逐值相同，dtype 为 int32，qform/sform code 为 0/2；硬标签与原 GPU 输出恢复到同一原图网格后相同，CSV 数值相同。指定色表的该输出经原软件读写核对了全部 1811 个条目。独立原软件保存函数的同标签控制和实际 GPU 结果见[保存几何记录](../../validation/smri_cpu_20261004/t2_seg/keep_geometry.public.json)。
 
 2026-09-27 在三幅仓库公开、去面容 T1w 上重跑当前源码和 FreeSurfer 8.2.0-1 `mri_synthseg --noaddctab`。候选推理没有调用 FreeSurfer。该次 33 类推理所用源码树 SHA-256 为 `39fa204aea7674ad7c6e09652d0f8750dd2872b1b78799812ab0d71b5b6c8972`。
 

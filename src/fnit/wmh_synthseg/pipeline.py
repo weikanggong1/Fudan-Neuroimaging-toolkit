@@ -10,10 +10,11 @@ import os
 from pathlib import Path
 
 import numpy as np
+import nibabel as nib
 import torch
 
 from .._dmri import configure_device
-from .._nib import FNITNifti1Image, load_image, new_image
+from .._nib import FNITNifti1Image, load_image
 from ..weights import resolve_weights
 from .model import UNet3D
 from .spatial import align_volume_to_ref, myzoom_torch
@@ -33,6 +34,17 @@ LABEL_NAMES = ('background', '3rd-ventricle', '4th-ventricle', 'brainstem',
                'right-thalamus', 'right-caudate', 'right-putamen',
                'right-pallidum', 'right-hippocampus', 'right-amygdala',
                'right-accumbens', 'right-ventral-DC')
+
+
+def _output_image(data, affine):
+    """Match original MRIwrite's fresh float32 NIfTI header on the new grid.
+
+    The output is RAS-aligned/upscaled and possibly cropped. Input scanner
+    extensions and qform/sform codes do not describe that grid and must not
+    be copied into the segmentation or lesion-probability image.
+    """
+    return FNITNifti1Image(np.asarray(data, dtype=np.float32), affine,
+                          nib.Nifti1Header())
 
 
 @dataclass
@@ -99,12 +111,11 @@ class WMHSynthSeg:
         segmentation = self.labels[torch.argmax(probabilities, dim=0)].cpu().numpy()
         volumes = probabilities.sum(dim=(1, 2, 3)).cpu().numpy()
         # FreeSurfer MRIwrite uses a default NIfTI header, yielding float32 labels.
-        seg_volume = new_image(segmentation.astype(np.float32), volume,
-                               affine=aff_upscaled)
+        seg_volume = _output_image(segmentation, aff_upscaled)
         lesion_volume = None
         if save_lesion_probabilities:
             lesion = probabilities[LABEL_IDS.index(77)].cpu().numpy()
-            lesion_volume = new_image(lesion, volume, affine=aff_upscaled)
+            lesion_volume = _output_image(lesion, aff_upscaled)
         return WMHResult(seg_volume, lesion_volume,
                          {label: float(value) for label, value in zip(LABEL_IDS, volumes)})
 

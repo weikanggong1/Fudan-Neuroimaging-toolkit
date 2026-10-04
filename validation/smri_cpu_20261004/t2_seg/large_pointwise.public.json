@@ -1,0 +1,3260 @@
+{
+  "schema": "fnit_synthseg_large_pointwise_repair/v1",
+  "analysis_only": true,
+  "input": {
+    "dataset": "OpenNeuro ds000114 1.0.2",
+    "license": "CC0",
+    "doi": "10.18112/openneuro.ds000114.v1.0.2",
+    "shape": [
+      156,
+      256,
+      256
+    ],
+    "input_sha256": "eb2bc2ff1f30441b0aff54685cfdd7f196bd02dccad4698100a8bad40421de22",
+    "network_shape": [
+      1,
+      1,
+      224,
+      288,
+      288
+    ]
+  },
+  "precision": {
+    "dtype": "float32",
+    "new_low_precision": false,
+    "cpu_threads": 8,
+    "cpu_affinity": "32,36,40,44,48,52,56,60",
+    "gpu_memory_budget_bytes": 20000000000
+  },
+  "failure": {
+    "scope": "large CPU 1x1x1 segmentation likelihood on nodecw10",
+    "oneDNN_version": "3.5.3",
+    "torch_version": "2.5.1",
+    "input_channels": 24,
+    "output_channels": 33,
+    "output_logical_bytes": 2452488192,
+    "observed_padded_channels": 48,
+    "output_padded_bytes": 3567255552,
+    "native_stack": "SIGSEGV in unresolved JIT region after channel reorder",
+    "addressing_root_cause": "not established",
+    "public_raw_all_v4_status": "failed before saving outputs",
+    "public_raw_all_v4_wall_seconds": 44.0615017414093
+  },
+  "repair": {
+    "cpu_only": true,
+    "kernel": [
+      1,
+      1,
+      1
+    ],
+    "minimum_estimated_blocked_bytes": 2147483648,
+    "maximum_slab_depth": 32,
+    "target_slab_bytes": 268435456,
+    "global_backend_or_cuda_state_writes": false,
+    "unchanged": [
+      "other oneDNN layers",
+      "original guarded CPU backend",
+      "GPU convolutions",
+      "flipping",
+      "postprocessing"
+    ],
+    "v1_to_final_v3": "only outer 5D eligibility check for valid unbatched Conv3d inputs"
+  },
+  "source": {
+    "task5_candidate_cpu_v4": {
+      "head_commit": "6f1e2b38925a481df3fa622f925af076df5436a9",
+      "manifest_sha256": "989a395e10ac1212d28b09b754a394fa379fa995fc2608d50ce9b18e11e110c9",
+      "file_count": 1257,
+      "cpu_conv_sha256": "d2b93630f65c1bf126f71c61a5622699f664a4a982ed7fc232e82b22c2288e0a"
+    },
+    "candidate_large_pointwise_v1": {
+      "head_commit": "6f1e2b38925a481df3fa622f925af076df5436a9",
+      "manifest_sha256": "c94b3c04633ccb37b1f9980f7f1c68308cdd00128d601329e198f0514645afb6",
+      "file_count": 1257,
+      "cpu_conv_sha256": "975c1318ad13ff59c2841baa8d451ad4aa5c380b6f015b45b36fb9f835f53e88"
+    },
+    "candidate_large_pointwise_v2": {
+      "head_commit": "6f1e2b38925a481df3fa622f925af076df5436a9",
+      "manifest_sha256": "5c054843e55e3a23b7c243e3c5455129bc475e576ba27e2b3120c7fd0fcb3bc8",
+      "file_count": 1257,
+      "cpu_conv_sha256": "df23a59ed8732d302e0ed13a2c3de5921891fd04cc42203b40bfaf52bae1e972"
+    },
+    "candidate_large_pointwise_v3": {
+      "head_commit": "6f1e2b38925a481df3fa622f925af076df5436a9",
+      "manifest_sha256": "df44a927f99571d8db8f23e4aeb8860cf47f2deca8ed8ed1dfc82c6a15469103",
+      "file_count": 1257,
+      "cpu_conv_sha256": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47"
+    },
+    "acceptance_v1_sha256": "d164dc810f3452957d5a4752d44b356542755b4815aec1a84a130e08958203f9",
+    "acceptance_v2_sha256": "5e9de4f8a0fb4dd0b7e3249d1e809ec7fc03749f5854aa250b5b61bafdc5c028",
+    "acceptance_v3_sha256": "c6bc1bf49bd75e545bd2b8d95032a55c5bbd5b419ce80a75664bcf41027f2c70",
+    "acceptance_v4_sha256": "cd31511d80da15ccc7c2de7a5ecde9a6de869fab24e75a500e4c07493258222f",
+    "exporter_sha256": "fa23044e07a9c0e932fa8dd17d5506a4ee9b605336df60461d60371b64f7100e",
+    "comparator_sha256": "61eaa50d008e1958f48c5f718d6ad6805fccf7142a91de83c266a91733b7bbf8",
+    "cpu_v1_plan_sha256": "95e8a1a7e46a4cf70ef9cd9b3a763d3b631df3401404903b9be4befe9f295141",
+    "cpu_v2_plan_sha256": "baf0f46ead1367c64c42f312365adb222ecb3b06e92ae89f5c473b431664c00d",
+    "cpu_v3_plan_sha256": "009f26a29835d908bc4e2a73ae81f6b0a6abd4a38bdc4a84b070e04250d24280",
+    "gpu_v4_plan_sha256": "17c833163e3f18cb886c12d3494ae37e35810572b98e62ffa4520e533ae09422"
+  },
+  "records": [
+    {
+      "status": "complete",
+      "wall_seconds": 325.9029356390238,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 40958029824,
+      "maximum_sampled_tree_threads": 39,
+      "load_before": [
+        55.27,
+        74.18,
+        87.53
+      ],
+      "load_after": [
+        60.3,
+        63.27,
+        78.56
+      ],
+      "started_utc": "2026-10-04T03:43:08.394324+00:00",
+      "finished_utc": "2026-10-04T03:48:34.299170+00:00",
+      "job_id": "t2_pointwise_cpu_largeT1_full_official_abba1",
+      "device": "cpu",
+      "version": "v1",
+      "receipt_sha256": "c9e5c6c5a6e8834ba7cab347bdea452bc51516a9d0f52dce3c61b0ae1a2727f3"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 102.13311835378408,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 24225619968,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        60.3,
+        63.27,
+        78.56
+      ],
+      "load_after": [
+        59.8,
+        62.25,
+        76.63
+      ],
+      "started_utc": "2026-10-04T03:48:34.307204+00:00",
+      "finished_utc": "2026-10-04T03:50:16.442167+00:00",
+      "job_id": "t2_pointwise_cpu_largeT1_full_candidate_abba2",
+      "device": "cpu",
+      "version": "v1",
+      "receipt_sha256": "c7e8428ebf8ef940c8384cf2015d0b5245b0b4c26cb5c459879de8aac171c4e8"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 106.1639471873641,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 24009281536,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        59.8,
+        62.25,
+        76.63
+      ],
+      "load_after": [
+        64.41,
+        63.41,
+        75.52
+      ],
+      "started_utc": "2026-10-04T03:50:16.449377+00:00",
+      "finished_utc": "2026-10-04T03:52:02.615077+00:00",
+      "job_id": "t2_pointwise_cpu_largeT1_full_candidate_abba3",
+      "device": "cpu",
+      "version": "v1",
+      "receipt_sha256": "ed84b881aca9a9a746678ce69be413ab36b1e7dbc535dce04adb0f2e1b4b39dc"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 118.17152439057827,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 45734297600,
+      "maximum_sampled_tree_threads": 39,
+      "load_before": [
+        64.41,
+        63.41,
+        75.52
+      ],
+      "load_after": [
+        50.59,
+        59.24,
+        72.58
+      ],
+      "started_utc": "2026-10-04T03:52:02.623771+00:00",
+      "finished_utc": "2026-10-04T03:54:00.797001+00:00",
+      "job_id": "t2_pointwise_cpu_largeT1_full_official_abba4",
+      "device": "cpu",
+      "version": "v1",
+      "receipt_sha256": "a62b2af9cf155b015acf732d50c99adcf27f7c430c94b2434d76f553326fd655"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 63.09088832885027,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 14435045376,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        50.59,
+        59.24,
+        72.58
+      ],
+      "load_after": [
+        53.47,
+        58.48,
+        71.42
+      ],
+      "started_utc": "2026-10-04T03:54:02.292369+00:00",
+      "finished_utc": "2026-10-04T03:55:05.384921+00:00",
+      "job_id": "t2_pointwise_v2_cpu_case01_full_baseline_pair1",
+      "device": "cpu",
+      "version": "v2",
+      "receipt_sha256": "2d1d61c06bdd2761aca573da0689aad58b0174f89fab92670347e043fa98fb65"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 68.09069792181253,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 14194212864,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        48.53,
+        55.73,
+        69.33
+      ],
+      "load_after": [
+        53.18,
+        55.61,
+        68.36
+      ],
+      "started_utc": "2026-10-04T03:56:28.371329+00:00",
+      "finished_utc": "2026-10-04T03:57:36.463850+00:00",
+      "job_id": "t2_pointwise_v3_cpu_case01_full_candidate_pair2",
+      "device": "cpu",
+      "version": "v3",
+      "receipt_sha256": "f3fd5d39f83bfa80a88350d8c903b8ea616e946ab7f8ef68b45986d31196c03a"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 49.07021772861481,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 14228860928,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        53.18,
+        55.61,
+        68.36
+      ],
+      "load_after": [
+        56.47,
+        56.23,
+        67.91
+      ],
+      "started_utc": "2026-10-04T03:57:36.470934+00:00",
+      "finished_utc": "2026-10-04T03:58:25.542859+00:00",
+      "job_id": "t2_pointwise_v3_cpu_case01_fast_baseline_pair1",
+      "device": "cpu",
+      "version": "v3",
+      "receipt_sha256": "7737aa78eb5471dfcc8b4204a24ed7211e90db770b3b6919983c649ba2a170f5"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 49.31849844008684,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 14319083520,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        56.47,
+        56.23,
+        67.91
+      ],
+      "load_after": [
+        56.69,
+        56.28,
+        67.31
+      ],
+      "started_utc": "2026-10-04T03:58:25.551088+00:00",
+      "finished_utc": "2026-10-04T03:59:14.871235+00:00",
+      "job_id": "t2_pointwise_v3_cpu_case01_fast_candidate_pair2",
+      "device": "cpu",
+      "version": "v3",
+      "receipt_sha256": "4176ba834a84df3d007ec0a8a7ad829da4ead6b48808cc8cc897b76cda1c8602"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 66.84761285036802,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 14521303040,
+      "maximum_sampled_tree_threads": 16,
+      "load_before": [
+        56.69,
+        56.28,
+        67.31
+      ],
+      "load_after": [
+        53.49,
+        55.03,
+        66.11
+      ],
+      "started_utc": "2026-10-04T03:59:14.878513+00:00",
+      "finished_utc": "2026-10-04T04:00:21.727899+00:00",
+      "job_id": "t2_pointwise_v3_cpu_case02_full_baseline_pair1",
+      "device": "cpu",
+      "version": "v3",
+      "receipt_sha256": "12eaffe726624bcf378ab5e5e720196579881204d67ae708bf8378bd44e5e5fd"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 70.59858229756355,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 14445858816,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        53.49,
+        55.03,
+        66.11
+      ],
+      "load_after": [
+        52.74,
+        54.41,
+        65.08
+      ],
+      "started_utc": "2026-10-04T04:00:21.735343+00:00",
+      "finished_utc": "2026-10-04T04:01:32.335711+00:00",
+      "job_id": "t2_pointwise_v3_cpu_case02_full_candidate_pair2",
+      "device": "cpu",
+      "version": "v3",
+      "receipt_sha256": "8831688baad37c72705492b7b95d82bc12d9b3bf6b58ead7352403627d106710"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 53.0719890743494,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 14457843712,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        52.74,
+        54.41,
+        65.08
+      ],
+      "load_after": [
+        48.48,
+        53.26,
+        64.09
+      ],
+      "started_utc": "2026-10-04T04:01:32.343944+00:00",
+      "finished_utc": "2026-10-04T04:02:25.417820+00:00",
+      "job_id": "t2_pointwise_v3_cpu_case02_fast_baseline_pair1",
+      "device": "cpu",
+      "version": "v3",
+      "receipt_sha256": "f46bdffff6f07ce9ea7481f059c90fa9b26eebca39e93d4267359e4bbb24d057"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 53.32517345249653,
+      "returncode": 0,
+      "cpu_affinity": "32,36,40,44,48,52,56,60",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 14515974144,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        48.48,
+        53.26,
+        64.09
+      ],
+      "load_after": [
+        46.6,
+        51.97,
+        63.03
+      ],
+      "started_utc": "2026-10-04T04:02:25.425003+00:00",
+      "finished_utc": "2026-10-04T04:03:18.751930+00:00",
+      "job_id": "t2_pointwise_v3_cpu_case02_fast_candidate_pair2",
+      "device": "cpu",
+      "version": "v3",
+      "receipt_sha256": "4883197e7700ed924ecbc377abfc7c45528d5e919408f234a8bf3476657fec93"
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 15.03378068562597,
+      "returncode": 0,
+      "cpu_affinity": "0,4,8,12,16,20,24,28",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 3512360960,
+      "maximum_sampled_tree_threads": 66,
+      "load_before": [
+        9.91,
+        9.55,
+        9.17
+      ],
+      "load_after": [
+        9.71,
+        9.53,
+        9.17
+      ],
+      "started_utc": "2026-10-04T04:26:05.084049+00:00",
+      "finished_utc": "2026-10-04T04:26:20.120553+00:00",
+      "job_id": "t2_pointwise_v4_gpu_case01_full_baseline_pair1",
+      "device": "gpu",
+      "version": "v4",
+      "receipt_sha256": "2f7b7e9683555bbaa045fa729c2cc8a1b0e67b6b3322670aae7c3141a419876c",
+      "gpu": {
+        "cli_api_seconds": 9.991041840985417,
+        "max_allocated_bytes": 12568181760,
+        "max_reserved_bytes": 18205376512,
+        "memory_budget_bytes": 20000000000
+      }
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 12.532595213036984,
+      "returncode": 0,
+      "cpu_affinity": "0,4,8,12,16,20,24,28",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 3497816064,
+      "maximum_sampled_tree_threads": 18,
+      "load_before": [
+        9.71,
+        9.53,
+        9.17
+      ],
+      "load_after": [
+        9.63,
+        9.52,
+        9.17
+      ],
+      "started_utc": "2026-10-04T04:26:20.129555+00:00",
+      "finished_utc": "2026-10-04T04:26:32.664576+00:00",
+      "job_id": "t2_pointwise_v4_gpu_case01_full_candidate_pair2",
+      "device": "gpu",
+      "version": "v4",
+      "receipt_sha256": "a5fc736ecfc69e83533b40c45d92d3f417d85dfcb998b3bfefbe89bd94f42620",
+      "gpu": {
+        "cli_api_seconds": 9.865197706967592,
+        "max_allocated_bytes": 12568181760,
+        "max_reserved_bytes": 18205376512,
+        "memory_budget_bytes": 20000000000
+      }
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 10.03506177989766,
+      "returncode": 0,
+      "cpu_affinity": "0,4,8,12,16,20,24,28",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 3500322816,
+      "maximum_sampled_tree_threads": 66,
+      "load_before": [
+        9.63,
+        9.52,
+        9.17
+      ],
+      "load_after": [
+        9.46,
+        9.48,
+        9.16
+      ],
+      "started_utc": "2026-10-04T04:26:32.672354+00:00",
+      "finished_utc": "2026-10-04T04:26:42.710003+00:00",
+      "job_id": "t2_pointwise_v4_gpu_case01_fast_baseline_pair1",
+      "device": "gpu",
+      "version": "v4",
+      "receipt_sha256": "9da5fc4c7f505c11910acf4d73a967084fc257a24e580bb8a31f7aac293894b6",
+      "gpu": {
+        "cli_api_seconds": 7.207035453990102,
+        "max_allocated_bytes": 12568181760,
+        "max_reserved_bytes": 18899533824,
+        "memory_budget_bytes": 20000000000
+      }
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 10.031881858129054,
+      "returncode": 0,
+      "cpu_affinity": "0,4,8,12,16,20,24,28",
+      "max_cpu_threads": 8,
+      "maximum_sampled_tree_rss_bytes": 3513278464,
+      "maximum_sampled_tree_threads": 66,
+      "load_before": [
+        9.46,
+        9.48,
+        9.16
+      ],
+      "load_after": [
+        9.39,
+        9.47,
+        9.16
+      ],
+      "started_utc": "2026-10-04T04:26:42.718196+00:00",
+      "finished_utc": "2026-10-04T04:26:52.752922+00:00",
+      "job_id": "t2_pointwise_v4_gpu_case01_fast_candidate_pair2",
+      "device": "gpu",
+      "version": "v4",
+      "receipt_sha256": "6d538eb0145bd925dd192df005e5809b8b91d19b8992c28bbe8651e5d7615425",
+      "gpu": {
+        "cli_api_seconds": 7.391403471119702,
+        "max_allocated_bytes": 12568181760,
+        "max_reserved_bytes": 18899533824,
+        "memory_budget_bytes": 20000000000
+      }
+    }
+  ],
+  "comparisons": {
+    "largeT1_official_candidate_first": {
+      "status": "reported",
+      "hard_exact": false,
+      "geometry_exact": true,
+      "csv_numeric_exact": false,
+      "csv_existing_tolerance": false,
+      "segmentation": {
+        "reference_sha256": "f72675bbe4be47e7c9f6aaa07e23fc7415dd4079410e66c2e423b2440b58ed5a",
+        "candidate_sha256": "fff1a58c8d3fd353f7cc2d119e61afab4270ac69d9c8c7ef293206195713c2d3",
+        "reference_geometry": {
+          "shape": [
+            203,
+            257,
+            257
+          ],
+          "affine": [
+            [
+              0.9997749328613281,
+              -0.009888110682368279,
+              -0.018768996000289917,
+              -99.75605010986328
+            ],
+            [
+              0.009889805689454079,
+              0.9999511241912842,
+              0.0,
+              -106.93299865722656
+            ],
+            [
+              0.018768079578876495,
+              -0.00018310801533516496,
+              0.9998238682746887,
+              -138.22817993164062
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "candidate_geometry": {
+          "shape": [
+            203,
+            257,
+            257
+          ],
+          "affine": [
+            [
+              0.9997749328613281,
+              -0.009888110682368279,
+              -0.018768996000289917,
+              -99.75605010986328
+            ],
+            [
+              0.009889805689454079,
+              0.9999511241912842,
+              0.0,
+              -106.93299865722656
+            ],
+            [
+              0.018768079578876495,
+              -0.00018310801533516496,
+              0.9998238682746887,
+              -138.22817993164062
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "shape_equal": true,
+        "affine_max_abs_mm": 0.0,
+        "comparison_status": "compared",
+        "different_voxels": 5,
+        "voxel_count": 13407947,
+        "voxel_agreement": 0.9999996270868314,
+        "per_label": [
+          {
+            "label": 0,
+            "reference_voxels": 11961376,
+            "candidate_voxels": 11961376,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 11961376.402229082,
+            "candidate_hard_volume_mm3": 11961376.402229082,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2,
+            "reference_voxels": 214701,
+            "candidate_voxels": 214700,
+            "dice": 0.9999976711744966,
+            "reference_hard_volume_mm3": 214701.00721982037,
+            "candidate_hard_volume_mm3": 214700.00721978676,
+            "hard_volume_signed_difference_mm3": -1.0000000336273254,
+            "hard_volume_relative_difference": -4.657640160036516e-06
+          },
+          {
+            "label": 4,
+            "reference_voxels": 8764,
+            "candidate_voxels": 8764,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 8764.00029470988,
+            "candidate_hard_volume_mm3": 8764.00029470988,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 5,
+            "reference_voxels": 555,
+            "candidate_voxels": 555,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 555.0000186631656,
+            "candidate_hard_volume_mm3": 555.0000186631656,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 7,
+            "reference_voxels": 15020,
+            "candidate_voxels": 15020,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 15020.000505082427,
+            "candidate_hard_volume_mm3": 15020.000505082427,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 8,
+            "reference_voxels": 52691,
+            "candidate_voxels": 52691,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 52691.0017718574,
+            "candidate_hard_volume_mm3": 52691.0017718574,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 10,
+            "reference_voxels": 6448,
+            "candidate_voxels": 6448,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 6448.000216828994,
+            "candidate_hard_volume_mm3": 6448.000216828994,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 11,
+            "reference_voxels": 3879,
+            "candidate_voxels": 3879,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 3879.000130440395,
+            "candidate_hard_volume_mm3": 3879.000130440395,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 12,
+            "reference_voxels": 5195,
+            "candidate_voxels": 5195,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 5195.000174693955,
+            "candidate_hard_volume_mm3": 5195.000174693955,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 13,
+            "reference_voxels": 1618,
+            "candidate_voxels": 1618,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1618.0000544090124,
+            "candidate_hard_volume_mm3": 1618.0000544090124,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 14,
+            "reference_voxels": 790,
+            "candidate_voxels": 790,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 790.0000265655871,
+            "candidate_hard_volume_mm3": 790.0000265655871,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 15,
+            "reference_voxels": 1993,
+            "candidate_voxels": 1993,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1993.0000670192594,
+            "candidate_hard_volume_mm3": 1993.0000670192594,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 16,
+            "reference_voxels": 20663,
+            "candidate_voxels": 20663,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 20663.000694841423,
+            "candidate_hard_volume_mm3": 20663.000694841423,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 17,
+            "reference_voxels": 4224,
+            "candidate_voxels": 4224,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 4224.000142041822,
+            "candidate_hard_volume_mm3": 4224.000142041822,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 18,
+            "reference_voxels": 1786,
+            "candidate_voxels": 1786,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1786.000060058403,
+            "candidate_hard_volume_mm3": 1786.000060058403,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 24,
+            "reference_voxels": 316573,
+            "candidate_voxels": 316573,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 316573.0106455033,
+            "candidate_hard_volume_mm3": 316573.0106455033,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 26,
+            "reference_voxels": 675,
+            "candidate_voxels": 675,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 675.0000226984446,
+            "candidate_hard_volume_mm3": 675.0000226984446,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 28,
+            "reference_voxels": 3790,
+            "candidate_voxels": 3790,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 3790.000127447563,
+            "candidate_hard_volume_mm3": 3790.000127447563,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 41,
+            "reference_voxels": 213245,
+            "candidate_voxels": 213245,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 213245.007170859,
+            "candidate_hard_volume_mm3": 213245.007170859,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 43,
+            "reference_voxels": 6842,
+            "candidate_voxels": 6842,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 6842.00023007816,
+            "candidate_hard_volume_mm3": 6842.00023007816,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 44,
+            "reference_voxels": 592,
+            "candidate_voxels": 592,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 592.0000199073767,
+            "candidate_hard_volume_mm3": 592.0000199073767,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 46,
+            "reference_voxels": 15452,
+            "candidate_voxels": 15452,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 15452.000519609432,
+            "candidate_hard_volume_mm3": 15452.000519609432,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 47,
+            "reference_voxels": 52268,
+            "candidate_voxels": 52268,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 52268.00175763304,
+            "candidate_hard_volume_mm3": 52268.00175763304,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 49,
+            "reference_voxels": 6449,
+            "candidate_voxels": 6449,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 6449.0002168626215,
+            "candidate_hard_volume_mm3": 6449.0002168626215,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 50,
+            "reference_voxels": 3906,
+            "candidate_voxels": 3906,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 3906.000131348333,
+            "candidate_hard_volume_mm3": 3906.000131348333,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 51,
+            "reference_voxels": 5112,
+            "candidate_voxels": 5112,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 5112.000171902887,
+            "candidate_hard_volume_mm3": 5112.000171902887,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 52,
+            "reference_voxels": 1539,
+            "candidate_voxels": 1539,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1539.0000517524538,
+            "candidate_hard_volume_mm3": 1539.0000517524538,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 53,
+            "reference_voxels": 4519,
+            "candidate_voxels": 4519,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 4519.000151961884,
+            "candidate_hard_volume_mm3": 4519.000151961884,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 54,
+            "reference_voxels": 1652,
+            "candidate_voxels": 1652,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1652.0000555523416,
+            "candidate_hard_volume_mm3": 1652.0000555523416,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 58,
+            "reference_voxels": 619,
+            "candidate_voxels": 619,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 619.0000208153144,
+            "candidate_hard_volume_mm3": 619.0000208153144,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 60,
+            "reference_voxels": 3824,
+            "candidate_voxels": 3824,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 3824.000128590892,
+            "candidate_hard_volume_mm3": 3824.000128590892,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1001,
+            "reference_voxels": 2545,
+            "candidate_voxels": 2544,
+            "dice": 0.999803497740224,
+            "reference_hard_volume_mm3": 2545.000085581543,
+            "candidate_hard_volume_mm3": 2544.0000855479157,
+            "hard_volume_signed_difference_mm3": -1.0000000336273254,
+            "hard_volume_relative_difference": -0.0003929273084479371
+          },
+          {
+            "label": 1002,
+            "reference_voxels": 1654,
+            "candidate_voxels": 1654,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1654.0000556195962,
+            "candidate_hard_volume_mm3": 1654.0000556195962,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1003,
+            "reference_voxels": 5003,
+            "candidate_voxels": 5003,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 5003.000168237509,
+            "candidate_hard_volume_mm3": 5003.000168237509,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1005,
+            "reference_voxels": 2564,
+            "candidate_voxels": 2564,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2564.0000862204624,
+            "candidate_hard_volume_mm3": 2564.0000862204624,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1006,
+            "reference_voxels": 2290,
+            "candidate_voxels": 2290,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2290.000077006575,
+            "candidate_hard_volume_mm3": 2290.000077006575,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1007,
+            "reference_voxels": 8436,
+            "candidate_voxels": 8436,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 8436.000283680118,
+            "candidate_hard_volume_mm3": 8436.000283680118,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1008,
+            "reference_voxels": 14495,
+            "candidate_voxels": 14497,
+            "dice": 0.9999310154525386,
+            "reference_hard_volume_mm3": 14495.000487428082,
+            "candidate_hard_volume_mm3": 14497.000487495336,
+            "hard_volume_signed_difference_mm3": 2.0000000672546507,
+            "hard_volume_relative_difference": 0.0001379786133149362
+          },
+          {
+            "label": 1009,
+            "reference_voxels": 10622,
+            "candidate_voxels": 10623,
+            "dice": 0.9999529301012002,
+            "reference_hard_volume_mm3": 10622.00035718945,
+            "candidate_hard_volume_mm3": 10623.000357223078,
+            "hard_volume_signed_difference_mm3": 1.0000000336273254,
+            "hard_volume_relative_difference": 9.414422895876483e-05
+          },
+          {
+            "label": 1010,
+            "reference_voxels": 2215,
+            "candidate_voxels": 2215,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2215.0000744845256,
+            "candidate_hard_volume_mm3": 2215.0000744845256,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1011,
+            "reference_voxels": 12326,
+            "candidate_voxels": 12326,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 12326.000414490412,
+            "candidate_hard_volume_mm3": 12326.000414490412,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1012,
+            "reference_voxels": 8736,
+            "candidate_voxels": 8736,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 8736.000293768315,
+            "candidate_hard_volume_mm3": 8736.000293768315,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1013,
+            "reference_voxels": 5879,
+            "candidate_voxels": 5880,
+            "dice": 0.9999149587549961,
+            "reference_hard_volume_mm3": 5879.000197695046,
+            "candidate_hard_volume_mm3": 5880.000197728673,
+            "hard_volume_signed_difference_mm3": 1.0000000336273254,
+            "hard_volume_relative_difference": 0.00017009695526450075
+          },
+          {
+            "label": 1014,
+            "reference_voxels": 5655,
+            "candidate_voxels": 5655,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 5655.000190162525,
+            "candidate_hard_volume_mm3": 5655.000190162525,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1015,
+            "reference_voxels": 12180,
+            "candidate_voxels": 12179,
+            "dice": 0.9999589474116343,
+            "reference_hard_volume_mm3": 12180.000409580824,
+            "candidate_hard_volume_mm3": 12179.000409547196,
+            "hard_volume_signed_difference_mm3": -1.0000000336273254,
+            "hard_volume_relative_difference": -8.210180623973728e-05
+          },
+          {
+            "label": 1016,
+            "reference_voxels": 2271,
+            "candidate_voxels": 2271,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2271.0000763676558,
+            "candidate_hard_volume_mm3": 2271.0000763676558,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1017,
+            "reference_voxels": 4376,
+            "candidate_voxels": 4376,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 4376.000147153176,
+            "candidate_hard_volume_mm3": 4376.000147153176,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1018,
+            "reference_voxels": 4266,
+            "candidate_voxels": 4266,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 4266.00014345417,
+            "candidate_hard_volume_mm3": 4266.00014345417,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1019,
+            "reference_voxels": 2759,
+            "candidate_voxels": 2759,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2759.0000927777905,
+            "candidate_hard_volume_mm3": 2759.0000927777905,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1020,
+            "reference_voxels": 4153,
+            "candidate_voxels": 4153,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 4153.000139654282,
+            "candidate_hard_volume_mm3": 4153.000139654282,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1021,
+            "reference_voxels": 1580,
+            "candidate_voxels": 1580,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1580.0000531311741,
+            "candidate_hard_volume_mm3": 1580.0000531311741,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1022,
+            "reference_voxels": 9883,
+            "candidate_voxels": 9882,
+            "dice": 0.9999494055147989,
+            "reference_hard_volume_mm3": 9883.000332338857,
+            "candidate_hard_volume_mm3": 9882.00033230523,
+            "hard_volume_signed_difference_mm3": -1.0000000336273254,
+            "hard_volume_relative_difference": -0.00010118385105737125
+          },
+          {
+            "label": 1023,
+            "reference_voxels": 2804,
+            "candidate_voxels": 2804,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2804.0000942910206,
+            "candidate_hard_volume_mm3": 2804.0000942910206,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1024,
+            "reference_voxels": 13673,
+            "candidate_voxels": 13673,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 13673.000459786419,
+            "candidate_hard_volume_mm3": 13673.000459786419,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1025,
+            "reference_voxels": 9460,
+            "candidate_voxels": 9459,
+            "dice": 0.9999471430836725,
+            "reference_hard_volume_mm3": 9460.000318114498,
+            "candidate_hard_volume_mm3": 9459.00031808087,
+            "hard_volume_signed_difference_mm3": -1.0000000336273254,
+            "hard_volume_relative_difference": -0.00010570824524312896
+          },
+          {
+            "label": 1026,
+            "reference_voxels": 2262,
+            "candidate_voxels": 2262,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2262.00007606501,
+            "candidate_hard_volume_mm3": 2262.00007606501,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1027,
+            "reference_voxels": 16234,
+            "candidate_voxels": 16234,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 16234.000545906,
+            "candidate_hard_volume_mm3": 16234.000545906,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1028,
+            "reference_voxels": 20076,
+            "candidate_voxels": 20076,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 20076.000675102183,
+            "candidate_hard_volume_mm3": 20076.000675102183,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1029,
+            "reference_voxels": 11454,
+            "candidate_voxels": 11454,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 11454.000385167385,
+            "candidate_hard_volume_mm3": 11454.000385167385,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1030,
+            "reference_voxels": 11715,
+            "candidate_voxels": 11715,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 11715.000393944116,
+            "candidate_hard_volume_mm3": 11715.000393944116,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1031,
+            "reference_voxels": 11086,
+            "candidate_voxels": 11087,
+            "dice": 0.9999549001037298,
+            "reference_hard_volume_mm3": 11086.000372792529,
+            "candidate_hard_volume_mm3": 11087.000372826156,
+            "hard_volume_signed_difference_mm3": 1.0000000336273254,
+            "hard_volume_relative_difference": 9.020386072523904e-05
+          },
+          {
+            "label": 1032,
+            "reference_voxels": 1934,
+            "candidate_voxels": 1934,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1934.0000650352472,
+            "candidate_hard_volume_mm3": 1934.0000650352472,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1033,
+            "reference_voxels": 3568,
+            "candidate_voxels": 3568,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 3568.000119982297,
+            "candidate_hard_volume_mm3": 3568.000119982297,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1034,
+            "reference_voxels": 918,
+            "candidate_voxels": 918,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 918.0000308698847,
+            "candidate_hard_volume_mm3": 918.0000308698847,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 1035,
+            "reference_voxels": 6698,
+            "candidate_voxels": 6698,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 6698.000225235825,
+            "candidate_hard_volume_mm3": 6698.000225235825,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2001,
+            "reference_voxels": 2367,
+            "candidate_voxels": 2367,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2367.000079595879,
+            "candidate_hard_volume_mm3": 2367.000079595879,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2002,
+            "reference_voxels": 2114,
+            "candidate_voxels": 2114,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2114.000071088166,
+            "candidate_hard_volume_mm3": 2114.000071088166,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2003,
+            "reference_voxels": 6524,
+            "candidate_voxels": 6524,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 6524.00021938467,
+            "candidate_hard_volume_mm3": 6524.00021938467,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2005,
+            "reference_voxels": 3216,
+            "candidate_voxels": 3216,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 3216.0001081454784,
+            "candidate_hard_volume_mm3": 3216.0001081454784,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2006,
+            "reference_voxels": 1868,
+            "candidate_voxels": 1868,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1868.0000628158439,
+            "candidate_hard_volume_mm3": 1868.0000628158439,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2007,
+            "reference_voxels": 10329,
+            "candidate_voxels": 10329,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 10329.000347336643,
+            "candidate_hard_volume_mm3": 10329.000347336643,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2008,
+            "reference_voxels": 17820,
+            "candidate_voxels": 17820,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 17820.000599238938,
+            "candidate_hard_volume_mm3": 17820.000599238938,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2009,
+            "reference_voxels": 10209,
+            "candidate_voxels": 10209,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 10209.000343301364,
+            "candidate_hard_volume_mm3": 10209.000343301364,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2010,
+            "reference_voxels": 2249,
+            "candidate_voxels": 2249,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2249.0000756278546,
+            "candidate_hard_volume_mm3": 2249.0000756278546,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2011,
+            "reference_voxels": 13001,
+            "candidate_voxels": 13001,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 13001.000437188857,
+            "candidate_hard_volume_mm3": 13001.000437188857,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2012,
+            "reference_voxels": 8140,
+            "candidate_voxels": 8140,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 8140.0002737264285,
+            "candidate_hard_volume_mm3": 8140.0002737264285,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2013,
+            "reference_voxels": 5006,
+            "candidate_voxels": 5006,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 5006.000168338391,
+            "candidate_hard_volume_mm3": 5006.000168338391,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2014,
+            "reference_voxels": 5228,
+            "candidate_voxels": 5228,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 5228.000175803657,
+            "candidate_hard_volume_mm3": 5228.000175803657,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2015,
+            "reference_voxels": 13196,
+            "candidate_voxels": 13196,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 13196.000443746185,
+            "candidate_hard_volume_mm3": 13196.000443746185,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2016,
+            "reference_voxels": 2251,
+            "candidate_voxels": 2251,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2251.0000756951094,
+            "candidate_hard_volume_mm3": 2251.0000756951094,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2017,
+            "reference_voxels": 4323,
+            "candidate_voxels": 4323,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 4323.000145370927,
+            "candidate_hard_volume_mm3": 4323.000145370927,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2018,
+            "reference_voxels": 4372,
+            "candidate_voxels": 4372,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 4372.000147018666,
+            "candidate_hard_volume_mm3": 4372.000147018666,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2019,
+            "reference_voxels": 2933,
+            "candidate_voxels": 2933,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2933.000098628945,
+            "candidate_hard_volume_mm3": 2933.000098628945,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2020,
+            "reference_voxels": 3931,
+            "candidate_voxels": 3931,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 3931.000132189016,
+            "candidate_hard_volume_mm3": 3931.000132189016,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2021,
+            "reference_voxels": 2174,
+            "candidate_voxels": 2174,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2174.0000731058053,
+            "candidate_hard_volume_mm3": 2174.0000731058053,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2022,
+            "reference_voxels": 8938,
+            "candidate_voxels": 8938,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 8938.000300561034,
+            "candidate_hard_volume_mm3": 8938.000300561034,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2023,
+            "reference_voxels": 3167,
+            "candidate_voxels": 3167,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 3167.0001064977396,
+            "candidate_hard_volume_mm3": 3167.0001064977396,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2024,
+            "reference_voxels": 12765,
+            "candidate_voxels": 12765,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 12765.000429252808,
+            "candidate_hard_volume_mm3": 12765.000429252808,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2025,
+            "reference_voxels": 9953,
+            "candidate_voxels": 9953,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 9953.00033469277,
+            "candidate_hard_volume_mm3": 9953.00033469277,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2026,
+            "reference_voxels": 2140,
+            "candidate_voxels": 2140,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 2140.0000719624763,
+            "candidate_hard_volume_mm3": 2140.0000719624763,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2027,
+            "reference_voxels": 14413,
+            "candidate_voxels": 14413,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 14413.00048467064,
+            "candidate_hard_volume_mm3": 14413.00048467064,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2028,
+            "reference_voxels": 19256,
+            "candidate_voxels": 19256,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 19256.000647527777,
+            "candidate_hard_volume_mm3": 19256.000647527777,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2029,
+            "reference_voxels": 12169,
+            "candidate_voxels": 12169,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 12169.000409210923,
+            "candidate_hard_volume_mm3": 12169.000409210923,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2030,
+            "reference_voxels": 10664,
+            "candidate_voxels": 10664,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 10664.000358601797,
+            "candidate_hard_volume_mm3": 10664.000358601797,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2031,
+            "reference_voxels": 8256,
+            "candidate_voxels": 8256,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 8256.000277627198,
+            "candidate_hard_volume_mm3": 8256.000277627198,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2032,
+            "reference_voxels": 1475,
+            "candidate_voxels": 1475,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 1475.000049600305,
+            "candidate_hard_volume_mm3": 1475.000049600305,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2033,
+            "reference_voxels": 3293,
+            "candidate_voxels": 3293,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 3293.0001107347825,
+            "candidate_hard_volume_mm3": 3293.0001107347825,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2034,
+            "reference_voxels": 787,
+            "candidate_voxels": 787,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 787.0000264647051,
+            "candidate_hard_volume_mm3": 787.0000264647051,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          },
+          {
+            "label": 2035,
+            "reference_voxels": 6890,
+            "candidate_voxels": 6890,
+            "dice": 1.0,
+            "reference_hard_volume_mm3": 6890.000231692272,
+            "candidate_hard_volume_mm3": 6890.000231692272,
+            "hard_volume_signed_difference_mm3": 0.0,
+            "hard_volume_relative_difference": 0.0
+          }
+        ],
+        "foreground_minimum_dice": 0.999803497740224,
+        "foreground_median_dice": 1.0
+      },
+      "soft_volumes": {
+        "reference_sha256": "2089a3af13c58f49c76d78a5e31dc4445e1c5549bee747788b0679b0b17a753c",
+        "candidate_sha256": "a5bf6eaa0b6a7e0beec3239eac638014906f2684d41d9595d4f54c6da7aee223",
+        "column_names_and_order_equal": true,
+        "comparison_status": "compared",
+        "numeric_columns": 101,
+        "max_absolute_difference_mm3": 0.6830000000009022,
+        "mean_absolute_difference_mm3": 0.03981188118964698,
+        "columns": [
+          {
+            "name": "total intracranial",
+            "reference_mm3": 1440031.6,
+            "candidate_mm3": 1440031.2,
+            "signed_difference_mm3": -0.4000000001396984,
+            "relative_difference": -2.7777168232953943e-07
+          },
+          {
+            "name": "left cerebral white matter",
+            "reference_mm3": 216639.53,
+            "candidate_mm3": 216639.53,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "left cerebral cortex",
+            "reference_mm3": 220797.8,
+            "candidate_mm3": 220797.81,
+            "signed_difference_mm3": 0.010000000009313226,
+            "relative_difference": 4.529030637675387e-08
+          },
+          {
+            "name": "left lateral ventricle",
+            "reference_mm3": 8937.209,
+            "candidate_mm3": 8937.208,
+            "signed_difference_mm3": -0.0010000000002037268,
+            "relative_difference": -1.1189175504385393e-07
+          },
+          {
+            "name": "left inferior lateral ventricle",
+            "reference_mm3": 626.913,
+            "candidate_mm3": 626.913,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "left cerebellum white matter",
+            "reference_mm3": 16971.35,
+            "candidate_mm3": 16971.35,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "left cerebellum cortex",
+            "reference_mm3": 49125.01,
+            "candidate_mm3": 49125.0,
+            "signed_difference_mm3": -0.010000000002037268,
+            "relative_difference": -2.0356229957077398e-07
+          },
+          {
+            "name": "left thalamus",
+            "reference_mm3": 6356.942,
+            "candidate_mm3": 6356.944,
+            "signed_difference_mm3": 0.0020000000004074536,
+            "relative_difference": 3.1461668211027467e-07
+          },
+          {
+            "name": "left caudate",
+            "reference_mm3": 3901.108,
+            "candidate_mm3": 3901.108,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "left putamen",
+            "reference_mm3": 5190.499,
+            "candidate_mm3": 5190.499,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "left pallidum",
+            "reference_mm3": 1627.588,
+            "candidate_mm3": 1627.588,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "3rd ventricle",
+            "reference_mm3": 771.266,
+            "candidate_mm3": 771.266,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "4th ventricle",
+            "reference_mm3": 1957.066,
+            "candidate_mm3": 1957.066,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "brain-stem",
+            "reference_mm3": 20201.76,
+            "candidate_mm3": 20201.76,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "left hippocampus",
+            "reference_mm3": 4142.491,
+            "candidate_mm3": 4142.491,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "left amygdala",
+            "reference_mm3": 1741.454,
+            "candidate_mm3": 1741.454,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "csf",
+            "reference_mm3": 340246.34,
+            "candidate_mm3": 340246.03,
+            "signed_difference_mm3": -0.3099999999976717,
+            "relative_difference": -9.111045838073428e-07
+          },
+          {
+            "name": "left accumbens area",
+            "reference_mm3": 650.03,
+            "candidate_mm3": 650.03,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "left ventral DC",
+            "reference_mm3": 3709.306,
+            "candidate_mm3": 3709.306,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right cerebral white matter",
+            "reference_mm3": 215136.0,
+            "candidate_mm3": 215135.98,
+            "signed_difference_mm3": -0.01999999998952262,
+            "relative_difference": -9.296445034546808e-08
+          },
+          {
+            "name": "right cerebral cortex",
+            "reference_mm3": 220331.08,
+            "candidate_mm3": 220331.1,
+            "signed_difference_mm3": 0.02000000001862645,
+            "relative_difference": 9.07724866533875e-08
+          },
+          {
+            "name": "right lateral ventricle",
+            "reference_mm3": 7119.29,
+            "candidate_mm3": 7119.29,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right inferior lateral ventricle",
+            "reference_mm3": 666.62,
+            "candidate_mm3": 666.62,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right cerebellum white matter",
+            "reference_mm3": 17307.295,
+            "candidate_mm3": 17307.293,
+            "signed_difference_mm3": -0.001999999996769475,
+            "relative_difference": -1.1555820807176829e-07
+          },
+          {
+            "name": "right cerebellum cortex",
+            "reference_mm3": 48612.523,
+            "candidate_mm3": 48612.523,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right thalamus",
+            "reference_mm3": 6358.332,
+            "candidate_mm3": 6358.333,
+            "signed_difference_mm3": 0.0009999999992942321,
+            "relative_difference": 1.5727395161093068e-07
+          },
+          {
+            "name": "right caudate",
+            "reference_mm3": 3902.244,
+            "candidate_mm3": 3902.244,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right putamen",
+            "reference_mm3": 5069.676,
+            "candidate_mm3": 5069.676,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right pallidum",
+            "reference_mm3": 1554.831,
+            "candidate_mm3": 1554.831,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right hippocampus",
+            "reference_mm3": 4442.002,
+            "candidate_mm3": 4442.002,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right amygdala",
+            "reference_mm3": 1589.436,
+            "candidate_mm3": 1589.436,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right accumbens area",
+            "reference_mm3": 587.02,
+            "candidate_mm3": 587.02,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "right ventral DC",
+            "reference_mm3": 3761.628,
+            "candidate_mm3": 3761.628,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "ctx-lh-bankssts",
+            "reference_mm3": 2606.35,
+            "candidate_mm3": 2606.517,
+            "signed_difference_mm3": 0.16699999999991633,
+            "relative_difference": 6.407428012351231e-05
+          },
+          {
+            "name": "ctx-lh-caudalanteriorcingulate",
+            "reference_mm3": 2602.329,
+            "candidate_mm3": 2602.326,
+            "signed_difference_mm3": -0.003000000000156433,
+            "relative_difference": -1.1528134990450604e-06
+          },
+          {
+            "name": "ctx-lh-caudalmiddlefrontal",
+            "reference_mm3": 5691.44,
+            "candidate_mm3": 5691.4,
+            "signed_difference_mm3": -0.03999999999996362,
+            "relative_difference": -7.028098337145542e-06
+          },
+          {
+            "name": "ctx-lh-cuneus",
+            "reference_mm3": 4936.011,
+            "candidate_mm3": 4936.008,
+            "signed_difference_mm3": -0.0030000000006111804,
+            "relative_difference": -6.077782242809386e-07
+          },
+          {
+            "name": "ctx-lh-entorhinal",
+            "reference_mm3": 4483.233,
+            "candidate_mm3": 4483.214,
+            "signed_difference_mm3": -0.01900000000023283,
+            "relative_difference": -4.238013058931541e-06
+          },
+          {
+            "name": "ctx-lh-fusiform",
+            "reference_mm3": 10070.04,
+            "candidate_mm3": 10070.032,
+            "signed_difference_mm3": -0.008000000001629815,
+            "relative_difference": -7.944357720157828e-07
+          },
+          {
+            "name": "ctx-lh-inferiorparietal",
+            "reference_mm3": 11283.053,
+            "candidate_mm3": 11283.736,
+            "signed_difference_mm3": 0.6830000000009022,
+            "relative_difference": 6.0533261697955527e-05
+          },
+          {
+            "name": "ctx-lh-inferiortemporal",
+            "reference_mm3": 8472.192,
+            "candidate_mm3": 8472.046,
+            "signed_difference_mm3": -0.1459999999988213,
+            "relative_difference": -1.7232848358349445e-05
+          },
+          {
+            "name": "ctx-lh-isthmuscingulate",
+            "reference_mm3": 2609.865,
+            "candidate_mm3": 2609.89,
+            "signed_difference_mm3": 0.02500000000009095,
+            "relative_difference": 9.579039528899369e-06
+          },
+          {
+            "name": "ctx-lh-lateraloccipital",
+            "reference_mm3": 9738.645,
+            "candidate_mm3": 9738.819,
+            "signed_difference_mm3": 0.17399999999906868,
+            "relative_difference": 1.7866961984862233e-05
+          },
+          {
+            "name": "ctx-lh-lateralorbitofrontal",
+            "reference_mm3": 7050.818,
+            "candidate_mm3": 7050.853,
+            "signed_difference_mm3": 0.03499999999985448,
+            "relative_difference": 4.963963046536513e-06
+          },
+          {
+            "name": "ctx-lh-lingual",
+            "reference_mm3": 8829.041,
+            "candidate_mm3": 8829.189,
+            "signed_difference_mm3": 0.14800000000104774,
+            "relative_difference": 1.6762862467288095e-05
+          },
+          {
+            "name": "ctx-lh-medialorbitofrontal",
+            "reference_mm3": 5277.582,
+            "candidate_mm3": 5277.578,
+            "signed_difference_mm3": -0.0039999999999054126,
+            "relative_difference": -7.579228517729165e-07
+          },
+          {
+            "name": "ctx-lh-middletemporal",
+            "reference_mm3": 8862.205,
+            "candidate_mm3": 8861.845,
+            "signed_difference_mm3": -0.3600000000005821,
+            "relative_difference": -4.062194453869912e-05
+          },
+          {
+            "name": "ctx-lh-parahippocampal",
+            "reference_mm3": 2665.726,
+            "candidate_mm3": 2665.737,
+            "signed_difference_mm3": 0.010999999999967258,
+            "relative_difference": 4.126455607203162e-06
+          },
+          {
+            "name": "ctx-lh-paracentral",
+            "reference_mm3": 3920.626,
+            "candidate_mm3": 3920.648,
+            "signed_difference_mm3": 0.021999999999934516,
+            "relative_difference": 5.611348799894332e-06
+          },
+          {
+            "name": "ctx-lh-parsopercularis",
+            "reference_mm3": 3931.33,
+            "candidate_mm3": 3931.301,
+            "signed_difference_mm3": -0.028999999999996362,
+            "relative_difference": -7.376638440425088e-06
+          },
+          {
+            "name": "ctx-lh-parsorbitalis",
+            "reference_mm3": 2420.06,
+            "candidate_mm3": 2420.058,
+            "signed_difference_mm3": -0.0019999999999527063,
+            "relative_difference": -8.264257910765462e-07
+          },
+          {
+            "name": "ctx-lh-parstriangularis",
+            "reference_mm3": 3871.288,
+            "candidate_mm3": 3871.303,
+            "signed_difference_mm3": 0.01499999999987267,
+            "relative_difference": 3.874679434821866e-06
+          },
+          {
+            "name": "ctx-lh-pericalcarine",
+            "reference_mm3": 4068.316,
+            "candidate_mm3": 4068.324,
+            "signed_difference_mm3": 0.008000000000265572,
+            "relative_difference": 1.966415588234929e-06
+          },
+          {
+            "name": "ctx-lh-postcentral",
+            "reference_mm3": 8856.439,
+            "candidate_mm3": 8856.271,
+            "signed_difference_mm3": -0.1679999999996653,
+            "relative_difference": -1.896924937886043e-05
+          },
+          {
+            "name": "ctx-lh-posteriorcingulate",
+            "reference_mm3": 6533.314,
+            "candidate_mm3": 6533.268,
+            "signed_difference_mm3": -0.046000000000276486,
+            "relative_difference": -7.0408371617033076e-06
+          },
+          {
+            "name": "ctx-lh-precentral",
+            "reference_mm3": 10957.231,
+            "candidate_mm3": 10957.211,
+            "signed_difference_mm3": -0.020000000000436557,
+            "relative_difference": -1.825278667615619e-06
+          },
+          {
+            "name": "ctx-lh-precuneus",
+            "reference_mm3": 8109.759,
+            "candidate_mm3": 8109.676,
+            "signed_difference_mm3": -0.08299999999962893,
+            "relative_difference": -1.0234582803216339e-05
+          },
+          {
+            "name": "ctx-lh-rostralanteriorcingulate",
+            "reference_mm3": 2261.612,
+            "candidate_mm3": 2261.611,
+            "signed_difference_mm3": -0.0010000000002037268,
+            "relative_difference": -4.421624930375886e-07
+          },
+          {
+            "name": "ctx-lh-rostralmiddlefrontal",
+            "reference_mm3": 12383.111,
+            "candidate_mm3": 12383.142,
+            "signed_difference_mm3": 0.030999999999039574,
+            "relative_difference": 2.503409684290125e-06
+          },
+          {
+            "name": "ctx-lh-superiorfrontal",
+            "reference_mm3": 15294.658,
+            "candidate_mm3": 15294.622,
+            "signed_difference_mm3": -0.03600000000005821,
+            "relative_difference": -2.3537629935928093e-06
+          },
+          {
+            "name": "ctx-lh-superiorparietal",
+            "reference_mm3": 9866.619,
+            "candidate_mm3": 9866.828,
+            "signed_difference_mm3": 0.20899999999892316,
+            "relative_difference": 2.1182534766866255e-05
+          },
+          {
+            "name": "ctx-lh-superiortemporal",
+            "reference_mm3": 8470.562,
+            "candidate_mm3": 8470.134,
+            "signed_difference_mm3": -0.4279999999998836,
+            "relative_difference": -5.0527934274004914e-05
+          },
+          {
+            "name": "ctx-lh-supramarginal",
+            "reference_mm3": 8654.035,
+            "candidate_mm3": 8654.041,
+            "signed_difference_mm3": 0.0059999999994033715,
+            "relative_difference": 6.933182035204817e-07
+          },
+          {
+            "name": "ctx-lh-frontalpole",
+            "reference_mm3": 3762.261,
+            "candidate_mm3": 3762.235,
+            "signed_difference_mm3": -0.02599999999983993,
+            "relative_difference": -6.910737984376929e-06
+          },
+          {
+            "name": "ctx-lh-temporalpole",
+            "reference_mm3": 4936.011,
+            "candidate_mm3": 4936.008,
+            "signed_difference_mm3": -0.0030000000006111804,
+            "relative_difference": -6.077782242809386e-07
+          },
+          {
+            "name": "ctx-lh-transversetemporal",
+            "reference_mm3": 1476.105,
+            "candidate_mm3": 1476.087,
+            "signed_difference_mm3": -0.018000000000029104,
+            "relative_difference": -1.2194254473786827e-05
+          },
+          {
+            "name": "ctx-lh-insula",
+            "reference_mm3": 5845.917,
+            "candidate_mm3": 5845.865,
+            "signed_difference_mm3": -0.05200000000058935,
+            "relative_difference": -8.895097210683858e-06
+          },
+          {
+            "name": "ctx-rh-bankssts",
+            "reference_mm3": 2819.141,
+            "candidate_mm3": 2819.136,
+            "signed_difference_mm3": -0.005000000000109139,
+            "relative_difference": -1.773589898521975e-06
+          },
+          {
+            "name": "ctx-rh-caudalanteriorcingulate",
+            "reference_mm3": 3846.724,
+            "candidate_mm3": 3846.728,
+            "signed_difference_mm3": 0.0039999999999054126,
+            "relative_difference": 1.039845853226125e-06
+          },
+          {
+            "name": "ctx-rh-caudalmiddlefrontal",
+            "reference_mm3": 6238.842,
+            "candidate_mm3": 6238.852,
+            "signed_difference_mm3": 0.010000000000218279,
+            "relative_difference": 1.6028615567148967e-06
+          },
+          {
+            "name": "ctx-rh-cuneus",
+            "reference_mm3": 3134.736,
+            "candidate_mm3": 3134.736,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "ctx-rh-entorhinal",
+            "reference_mm3": 4345.866,
+            "candidate_mm3": 4345.866,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "ctx-rh-fusiform",
+            "reference_mm3": 11254.62,
+            "candidate_mm3": 11254.644,
+            "signed_difference_mm3": 0.023999999999432475,
+            "relative_difference": 2.132457604026833e-06
+          },
+          {
+            "name": "ctx-rh-inferiorparietal",
+            "reference_mm3": 13678.397,
+            "candidate_mm3": 13678.396,
+            "signed_difference_mm3": -0.0010000000002037268,
+            "relative_difference": -7.310798189317993e-08
+          },
+          {
+            "name": "ctx-rh-inferiortemporal",
+            "reference_mm3": 9822.888,
+            "candidate_mm3": 9822.898,
+            "signed_difference_mm3": 0.00999999999839929,
+            "relative_difference": 1.018030542382168e-06
+          },
+          {
+            "name": "ctx-rh-isthmuscingulate",
+            "reference_mm3": 4336.13,
+            "candidate_mm3": 4336.13,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "ctx-rh-lateraloccipital",
+            "reference_mm3": 9532.812,
+            "candidate_mm3": 9532.844,
+            "signed_difference_mm3": 0.0319999999992433,
+            "relative_difference": 3.3568269257007588e-06
+          },
+          {
+            "name": "ctx-rh-lateralorbitofrontal",
+            "reference_mm3": 6604.413,
+            "candidate_mm3": 6604.413,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "ctx-rh-lingual",
+            "reference_mm3": 8306.976,
+            "candidate_mm3": 8306.962,
+            "signed_difference_mm3": -0.014000000001033186,
+            "relative_difference": -1.6853304982502881e-06
+          },
+          {
+            "name": "ctx-rh-medialorbitofrontal",
+            "reference_mm3": 4723.42,
+            "candidate_mm3": 4723.418,
+            "signed_difference_mm3": -0.0020000000004074536,
+            "relative_difference": -4.234220121029791e-07
+          },
+          {
+            "name": "ctx-rh-middletemporal",
+            "reference_mm3": 9170.144,
+            "candidate_mm3": 9170.146,
+            "signed_difference_mm3": 0.0020000000004074536,
+            "relative_difference": 2.1809908333036576e-07
+          },
+          {
+            "name": "ctx-rh-parahippocampal",
+            "reference_mm3": 3872.328,
+            "candidate_mm3": 3872.328,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "ctx-rh-paracentral",
+            "reference_mm3": 3669.338,
+            "candidate_mm3": 3669.338,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "ctx-rh-parsopercularis",
+            "reference_mm3": 3705.633,
+            "candidate_mm3": 3705.63,
+            "signed_difference_mm3": -0.0029999999997016857,
+            "relative_difference": -8.095782824963201e-07
+          },
+          {
+            "name": "ctx-rh-parsorbitalis",
+            "reference_mm3": 4171.335,
+            "candidate_mm3": 4171.334,
+            "signed_difference_mm3": -0.0010000000002037268,
+            "relative_difference": -2.3973140498275177e-07
+          },
+          {
+            "name": "ctx-rh-parstriangularis",
+            "reference_mm3": 5031.75,
+            "candidate_mm3": 5031.754,
+            "signed_difference_mm3": 0.0039999999999054126,
+            "relative_difference": 7.949520544354177e-07
+          },
+          {
+            "name": "ctx-rh-pericalcarine",
+            "reference_mm3": 2380.172,
+            "candidate_mm3": 2380.18,
+            "signed_difference_mm3": 0.007999999999810825,
+            "relative_difference": 3.3611016345923006e-06
+          },
+          {
+            "name": "ctx-rh-postcentral",
+            "reference_mm3": 7785.332,
+            "candidate_mm3": 7785.328,
+            "signed_difference_mm3": -0.0039999999999054126,
+            "relative_difference": -5.137866952758613e-07
+          },
+          {
+            "name": "ctx-rh-posteriorcingulate",
+            "reference_mm3": 4400.816,
+            "candidate_mm3": 4400.814,
+            "signed_difference_mm3": -0.001999999999497959,
+            "relative_difference": -4.54461172541174e-07
+          },
+          {
+            "name": "ctx-rh-precentral",
+            "reference_mm3": 10243.783,
+            "candidate_mm3": 10243.784,
+            "signed_difference_mm3": 0.0010000000002037268,
+            "relative_difference": 9.762018584381637e-08
+          },
+          {
+            "name": "ctx-rh-precuneus",
+            "reference_mm3": 8948.762,
+            "candidate_mm3": 8948.757,
+            "signed_difference_mm3": -0.005000000001018634,
+            "relative_difference": -5.587365046716667e-07
+          },
+          {
+            "name": "ctx-rh-rostralanteriorcingulate",
+            "reference_mm3": 2242.758,
+            "candidate_mm3": 2242.756,
+            "signed_difference_mm3": -0.0019999999999527063,
+            "relative_difference": -8.917591643649054e-07
+          },
+          {
+            "name": "ctx-rh-rostralmiddlefrontal",
+            "reference_mm3": 10689.434,
+            "candidate_mm3": 10689.424,
+            "signed_difference_mm3": -0.00999999999839929,
+            "relative_difference": -9.355032266815333e-07
+          },
+          {
+            "name": "ctx-rh-superiorfrontal",
+            "reference_mm3": 14541.971,
+            "candidate_mm3": 14541.954,
+            "signed_difference_mm3": -0.016999999999825377,
+            "relative_difference": -1.1690299753606562e-06
+          },
+          {
+            "name": "ctx-rh-superiorparietal",
+            "reference_mm3": 10791.572,
+            "candidate_mm3": 10791.541,
+            "signed_difference_mm3": -0.031000000000858563,
+            "relative_difference": -2.872612071796265e-06
+          },
+          {
+            "name": "ctx-rh-superiortemporal",
+            "reference_mm3": 7737.832,
+            "candidate_mm3": 7737.828,
+            "signed_difference_mm3": -0.0039999999999054126,
+            "relative_difference": -5.169406624368961e-07
+          },
+          {
+            "name": "ctx-rh-supramarginal",
+            "reference_mm3": 7865.824,
+            "candidate_mm3": 7865.826,
+            "signed_difference_mm3": 0.0020000000004074536,
+            "relative_difference": 2.5426452465850417e-07
+          },
+          {
+            "name": "ctx-rh-frontalpole",
+            "reference_mm3": 3237.623,
+            "candidate_mm3": 3237.618,
+            "signed_difference_mm3": -0.005000000000109139,
+            "relative_difference": -1.5443428713315723e-06
+          },
+          {
+            "name": "ctx-rh-temporalpole",
+            "reference_mm3": 3193.543,
+            "candidate_mm3": 3193.544,
+            "signed_difference_mm3": 0.0009999999997489795,
+            "relative_difference": 3.131318412650086e-07
+          },
+          {
+            "name": "ctx-rh-transversetemporal",
+            "reference_mm3": 2202.348,
+            "candidate_mm3": 2202.348,
+            "signed_difference_mm3": 0.0,
+            "relative_difference": 0.0
+          },
+          {
+            "name": "ctx-rh-insula",
+            "reference_mm3": 5803.824,
+            "candidate_mm3": 5803.836,
+            "signed_difference_mm3": 0.012000000000625732,
+            "relative_difference": 2.06760232574691e-06
+          }
+        ]
+      }
+    },
+    "largeT1_official_candidate_second": {
+      "status": "reported",
+      "hard_exact": false,
+      "geometry_exact": true,
+      "csv_numeric_exact": false,
+      "csv_existing_tolerance": false,
+      "segmentation": {
+        "reference_sha256": "f72675bbe4be47e7c9f6aaa07e23fc7415dd4079410e66c2e423b2440b58ed5a",
+        "candidate_sha256": "fff1a58c8d3fd353f7cc2d119e61afab4270ac69d9c8c7ef293206195713c2d3",
+        "reference_geometry": {
+          "shape": [
+            203,
+            257,
+            257
+          ],
+          "affine": [
+            [
+              0.9997749328613281,
+              -0.009888110682368279,
+              -0.018768996000289917,
+              -99.75605010986328
+            ],
+            [
+              0.009889805689454079,
+              0.9999511241912842,
+              0.0,
+              -106.93299865722656
+            ],
+            [
+              0.018768079578876495,
+              -0.00018310801533516496,
+              0.9998238682746887,
+              -138.22817993164062
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "candidate_geometry": {
+          "shape": [
+            203,
+            257,
+            257
+          ],
+          "affine": [
+            [
+              0.9997749328613281,
+              -0.009888110682368279,
+              -0.018768996000289917,
+              -99.75605010986328
+            ],
+            [
+              0.009889805689454079,
+              0.9999511241912842,
+              0.0,
+              -106.93299865722656
+            ],
+            [
+              0.018768079578876495,
+              -0.00018310801533516496,
+              0.9998238682746887,
+              -138.22817993164062
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "shape_equal": true,
+        "affine_max_abs_mm": 0.0,
+        "comparison_status": "compared",
+        "different_voxels": 5,
+        "voxel_count": 13407947,
+        "voxel_agreement": 0.9999996270868314,
+        "foreground_minimum_dice": 0.999803497740224,
+        "foreground_median_dice": 1.0,
+        "all_labels_array_equal": false
+      },
+      "soft_volumes": {
+        "reference_sha256": "2089a3af13c58f49c76d78a5e31dc4445e1c5549bee747788b0679b0b17a753c",
+        "candidate_sha256": "a5bf6eaa0b6a7e0beec3239eac638014906f2684d41d9595d4f54c6da7aee223",
+        "column_names_and_order_equal": true,
+        "comparison_status": "compared",
+        "numeric_columns": 101,
+        "max_absolute_difference_mm3": 0.6830000000009022,
+        "mean_absolute_difference_mm3": 0.03981188118964698,
+        "all_numeric_columns_equal": false
+      }
+    },
+    "largeT1_candidate_repeat": {
+      "status": "passed",
+      "hard_exact": true,
+      "geometry_exact": true,
+      "csv_numeric_exact": true,
+      "csv_existing_tolerance": true,
+      "segmentation": {
+        "reference_sha256": "fff1a58c8d3fd353f7cc2d119e61afab4270ac69d9c8c7ef293206195713c2d3",
+        "candidate_sha256": "fff1a58c8d3fd353f7cc2d119e61afab4270ac69d9c8c7ef293206195713c2d3",
+        "reference_geometry": {
+          "shape": [
+            203,
+            257,
+            257
+          ],
+          "affine": [
+            [
+              0.9997749328613281,
+              -0.009888110682368279,
+              -0.018768996000289917,
+              -99.75605010986328
+            ],
+            [
+              0.009889805689454079,
+              0.9999511241912842,
+              0.0,
+              -106.93299865722656
+            ],
+            [
+              0.018768079578876495,
+              -0.00018310801533516496,
+              0.9998238682746887,
+              -138.22817993164062
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "candidate_geometry": {
+          "shape": [
+            203,
+            257,
+            257
+          ],
+          "affine": [
+            [
+              0.9997749328613281,
+              -0.009888110682368279,
+              -0.018768996000289917,
+              -99.75605010986328
+            ],
+            [
+              0.009889805689454079,
+              0.9999511241912842,
+              0.0,
+              -106.93299865722656
+            ],
+            [
+              0.018768079578876495,
+              -0.00018310801533516496,
+              0.9998238682746887,
+              -138.22817993164062
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "shape_equal": true,
+        "affine_max_abs_mm": 0.0,
+        "comparison_status": "compared",
+        "different_voxels": 0,
+        "voxel_count": 13407947,
+        "voxel_agreement": 1.0,
+        "foreground_minimum_dice": 1.0,
+        "foreground_median_dice": 1.0,
+        "all_labels_array_equal": true
+      },
+      "soft_volumes": {
+        "reference_sha256": "a5bf6eaa0b6a7e0beec3239eac638014906f2684d41d9595d4f54c6da7aee223",
+        "candidate_sha256": "a5bf6eaa0b6a7e0beec3239eac638014906f2684d41d9595d4f54c6da7aee223",
+        "column_names_and_order_equal": true,
+        "comparison_status": "compared",
+        "numeric_columns": 101,
+        "max_absolute_difference_mm3": 0.0,
+        "mean_absolute_difference_mm3": 0.0,
+        "all_numeric_columns_equal": true
+      }
+    },
+    "case01_full_cpu": {
+      "status": "passed",
+      "hard_exact": true,
+      "geometry_exact": true,
+      "csv_numeric_exact": true,
+      "csv_existing_tolerance": true,
+      "segmentation": {
+        "reference_sha256": "c82e2e61edfdfaacddfb14dda5b574b6d246aab8cc829dbf3c891336fa30c90a",
+        "candidate_sha256": "c82e2e61edfdfaacddfb14dda5b574b6d246aab8cc829dbf3c891336fa30c90a",
+        "reference_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9980780482292175,
+              0.05702203884720802,
+              -0.02426288090646267,
+              -95.83161163330078
+            ],
+            [
+              -0.05713183060288429,
+              0.998359203338623,
+              -0.0038557148072868586,
+              -120.63325500488281
+            ],
+            [
+              0.024003207683563232,
+              0.005234487354755402,
+              0.9996981620788574,
+              -128.42210388183594
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "candidate_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9980780482292175,
+              0.05702203884720802,
+              -0.02426288090646267,
+              -95.83161163330078
+            ],
+            [
+              -0.05713183060288429,
+              0.998359203338623,
+              -0.0038557148072868586,
+              -120.63325500488281
+            ],
+            [
+              0.024003207683563232,
+              0.005234487354755402,
+              0.9996981620788574,
+              -128.42210388183594
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "shape_equal": true,
+        "affine_max_abs_mm": 0.0,
+        "comparison_status": "compared",
+        "different_voxels": 0,
+        "voxel_count": 9072000,
+        "voxel_agreement": 1.0,
+        "foreground_minimum_dice": 1.0,
+        "foreground_median_dice": 1.0,
+        "all_labels_array_equal": true
+      },
+      "soft_volumes": {
+        "reference_sha256": "22ecb5395c22e7e91c2afaa0bd7d2d7c246d2f84aba6b820553a880e1786d3ba",
+        "candidate_sha256": "22ecb5395c22e7e91c2afaa0bd7d2d7c246d2f84aba6b820553a880e1786d3ba",
+        "column_names_and_order_equal": true,
+        "comparison_status": "compared",
+        "numeric_columns": 101,
+        "max_absolute_difference_mm3": 0.0,
+        "mean_absolute_difference_mm3": 0.0,
+        "all_numeric_columns_equal": true
+      }
+    },
+    "case01_fast_cpu": {
+      "status": "passed",
+      "hard_exact": true,
+      "geometry_exact": true,
+      "csv_numeric_exact": true,
+      "csv_existing_tolerance": true,
+      "segmentation": {
+        "reference_sha256": "16dfc6d3ee8940acbdf3a3dc26adf3515370857423d64208e72d56667764b414",
+        "candidate_sha256": "16dfc6d3ee8940acbdf3a3dc26adf3515370857423d64208e72d56667764b414",
+        "reference_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9980780482292175,
+              0.05702203884720802,
+              -0.02426288090646267,
+              -95.83161163330078
+            ],
+            [
+              -0.05713183060288429,
+              0.998359203338623,
+              -0.0038557148072868586,
+              -120.63325500488281
+            ],
+            [
+              0.024003207683563232,
+              0.005234487354755402,
+              0.9996981620788574,
+              -128.42210388183594
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "candidate_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9980780482292175,
+              0.05702203884720802,
+              -0.02426288090646267,
+              -95.83161163330078
+            ],
+            [
+              -0.05713183060288429,
+              0.998359203338623,
+              -0.0038557148072868586,
+              -120.63325500488281
+            ],
+            [
+              0.024003207683563232,
+              0.005234487354755402,
+              0.9996981620788574,
+              -128.42210388183594
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "shape_equal": true,
+        "affine_max_abs_mm": 0.0,
+        "comparison_status": "compared",
+        "different_voxels": 0,
+        "voxel_count": 9072000,
+        "voxel_agreement": 1.0,
+        "foreground_minimum_dice": 1.0,
+        "foreground_median_dice": 1.0,
+        "all_labels_array_equal": true
+      },
+      "soft_volumes": {
+        "reference_sha256": "85d69d9ccaf12ccc73ad7e140f1d3dff5d8fe1ec054595c878b29b322ff534e2",
+        "candidate_sha256": "85d69d9ccaf12ccc73ad7e140f1d3dff5d8fe1ec054595c878b29b322ff534e2",
+        "column_names_and_order_equal": true,
+        "comparison_status": "compared",
+        "numeric_columns": 101,
+        "max_absolute_difference_mm3": 0.0,
+        "mean_absolute_difference_mm3": 0.0,
+        "all_numeric_columns_equal": true
+      }
+    },
+    "case02_full_cpu": {
+      "status": "passed",
+      "hard_exact": true,
+      "geometry_exact": true,
+      "csv_numeric_exact": true,
+      "csv_existing_tolerance": true,
+      "segmentation": {
+        "reference_sha256": "ed7922e8a20432aa07b57ed145a56ba7a317775fb80bb659be582ce3c67a3b34",
+        "candidate_sha256": "ed7922e8a20432aa07b57ed145a56ba7a317775fb80bb659be582ce3c67a3b34",
+        "reference_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9989399909973145,
+              0.0026188006158918142,
+              0.04595666751265526,
+              -92.477294921875
+            ],
+            [
+              -0.007321357261389494,
+              0.9947103261947632,
+              0.10245843231678009,
+              -128.0350799560547
+            ],
+            [
+              -0.04544525593519211,
+              -0.10268628597259521,
+              0.9936751127243042,
+              -95.557861328125
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "candidate_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9989399909973145,
+              0.0026188006158918142,
+              0.04595666751265526,
+              -92.477294921875
+            ],
+            [
+              -0.007321357261389494,
+              0.9947103261947632,
+              0.10245843231678009,
+              -128.0350799560547
+            ],
+            [
+              -0.04544525593519211,
+              -0.10268628597259521,
+              0.9936751127243042,
+              -95.557861328125
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "shape_equal": true,
+        "affine_max_abs_mm": 0.0,
+        "comparison_status": "compared",
+        "different_voxels": 0,
+        "voxel_count": 9072000,
+        "voxel_agreement": 1.0,
+        "foreground_minimum_dice": 1.0,
+        "foreground_median_dice": 1.0,
+        "all_labels_array_equal": true
+      },
+      "soft_volumes": {
+        "reference_sha256": "cf2de6bf8344757a45db702e0a544b110a59e1c6f5ff3ce2c68865b8bc939a24",
+        "candidate_sha256": "cf2de6bf8344757a45db702e0a544b110a59e1c6f5ff3ce2c68865b8bc939a24",
+        "column_names_and_order_equal": true,
+        "comparison_status": "compared",
+        "numeric_columns": 101,
+        "max_absolute_difference_mm3": 0.0,
+        "mean_absolute_difference_mm3": 0.0,
+        "all_numeric_columns_equal": true
+      }
+    },
+    "case02_fast_cpu": {
+      "status": "passed",
+      "hard_exact": true,
+      "geometry_exact": true,
+      "csv_numeric_exact": true,
+      "csv_existing_tolerance": true,
+      "segmentation": {
+        "reference_sha256": "df146c8d1b8792f541249b7c7be389e2cf20f05aa2a3ab1f443c341fa865dced",
+        "candidate_sha256": "df146c8d1b8792f541249b7c7be389e2cf20f05aa2a3ab1f443c341fa865dced",
+        "reference_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9989399909973145,
+              0.0026188006158918142,
+              0.04595666751265526,
+              -92.477294921875
+            ],
+            [
+              -0.007321357261389494,
+              0.9947103261947632,
+              0.10245843231678009,
+              -128.0350799560547
+            ],
+            [
+              -0.04544525593519211,
+              -0.10268628597259521,
+              0.9936751127243042,
+              -95.557861328125
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "candidate_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9989399909973145,
+              0.0026188006158918142,
+              0.04595666751265526,
+              -92.477294921875
+            ],
+            [
+              -0.007321357261389494,
+              0.9947103261947632,
+              0.10245843231678009,
+              -128.0350799560547
+            ],
+            [
+              -0.04544525593519211,
+              -0.10268628597259521,
+              0.9936751127243042,
+              -95.557861328125
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "shape_equal": true,
+        "affine_max_abs_mm": 0.0,
+        "comparison_status": "compared",
+        "different_voxels": 0,
+        "voxel_count": 9072000,
+        "voxel_agreement": 1.0,
+        "foreground_minimum_dice": 1.0,
+        "foreground_median_dice": 1.0,
+        "all_labels_array_equal": true
+      },
+      "soft_volumes": {
+        "reference_sha256": "6cf8f400646158d3e849f15b0ed608e1e140fc7190236d00943532b6d2eb73bd",
+        "candidate_sha256": "6cf8f400646158d3e849f15b0ed608e1e140fc7190236d00943532b6d2eb73bd",
+        "column_names_and_order_equal": true,
+        "comparison_status": "compared",
+        "numeric_columns": 101,
+        "max_absolute_difference_mm3": 0.0,
+        "mean_absolute_difference_mm3": 0.0,
+        "all_numeric_columns_equal": true
+      }
+    },
+    "case01_full_gpu_pair": {
+      "status": "passed",
+      "hard_exact": true,
+      "geometry_exact": true,
+      "csv_numeric_exact": true,
+      "csv_existing_tolerance": true,
+      "segmentation": {
+        "reference_sha256": "a4d79bc68f722d11c2c538606a7a38ecf37002aceea30f3bf2f3243d12d10280",
+        "candidate_sha256": "a4d79bc68f722d11c2c538606a7a38ecf37002aceea30f3bf2f3243d12d10280",
+        "reference_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9980780482292175,
+              0.05702203884720802,
+              -0.02426288090646267,
+              -95.83161163330078
+            ],
+            [
+              -0.05713183060288429,
+              0.998359203338623,
+              -0.0038557148072868586,
+              -120.63325500488281
+            ],
+            [
+              0.024003207683563232,
+              0.005234487354755402,
+              0.9996981620788574,
+              -128.42210388183594
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "candidate_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9980780482292175,
+              0.05702203884720802,
+              -0.02426288090646267,
+              -95.83161163330078
+            ],
+            [
+              -0.05713183060288429,
+              0.998359203338623,
+              -0.0038557148072868586,
+              -120.63325500488281
+            ],
+            [
+              0.024003207683563232,
+              0.005234487354755402,
+              0.9996981620788574,
+              -128.42210388183594
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "shape_equal": true,
+        "affine_max_abs_mm": 0.0,
+        "comparison_status": "compared",
+        "different_voxels": 0,
+        "voxel_count": 9072000,
+        "voxel_agreement": 1.0,
+        "foreground_minimum_dice": 1.0,
+        "foreground_median_dice": 1.0,
+        "all_labels_array_equal": true
+      },
+      "soft_volumes": {
+        "reference_sha256": "72771ad692620cd07a3696cc0e7f2d38cb8fd0d55756a1ee9d8980aedafc736e",
+        "candidate_sha256": "72771ad692620cd07a3696cc0e7f2d38cb8fd0d55756a1ee9d8980aedafc736e",
+        "column_names_and_order_equal": true,
+        "comparison_status": "compared",
+        "numeric_columns": 101,
+        "max_absolute_difference_mm3": 0.0,
+        "mean_absolute_difference_mm3": 0.0,
+        "all_numeric_columns_equal": true
+      }
+    },
+    "case01_fast_gpu_pair": {
+      "status": "passed",
+      "hard_exact": true,
+      "geometry_exact": true,
+      "csv_numeric_exact": true,
+      "csv_existing_tolerance": true,
+      "segmentation": {
+        "reference_sha256": "946d89cf254d577e7882fb42c8a92ff70f619965985eb7aa57d2d5d39adf31df",
+        "candidate_sha256": "946d89cf254d577e7882fb42c8a92ff70f619965985eb7aa57d2d5d39adf31df",
+        "reference_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9980780482292175,
+              0.05702203884720802,
+              -0.02426288090646267,
+              -95.83161163330078
+            ],
+            [
+              -0.05713183060288429,
+              0.998359203338623,
+              -0.0038557148072868586,
+              -120.63325500488281
+            ],
+            [
+              0.024003207683563232,
+              0.005234487354755402,
+              0.9996981620788574,
+              -128.42210388183594
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "candidate_geometry": {
+          "shape": [
+            180,
+            224,
+            225
+          ],
+          "affine": [
+            [
+              0.9980780482292175,
+              0.05702203884720802,
+              -0.02426288090646267,
+              -95.83161163330078
+            ],
+            [
+              -0.05713183060288429,
+              0.998359203338623,
+              -0.0038557148072868586,
+              -120.63325500488281
+            ],
+            [
+              0.024003207683563232,
+              0.005234487354755402,
+              0.9996981620788574,
+              -128.42210388183594
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "dtype": "int32",
+          "zooms": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "extensions": []
+        },
+        "shape_equal": true,
+        "affine_max_abs_mm": 0.0,
+        "comparison_status": "compared",
+        "different_voxels": 0,
+        "voxel_count": 9072000,
+        "voxel_agreement": 1.0,
+        "foreground_minimum_dice": 1.0,
+        "foreground_median_dice": 1.0,
+        "all_labels_array_equal": true
+      },
+      "soft_volumes": {
+        "reference_sha256": "40e944c1165c4cf48f88ae2fbdca02bdde5ea10642b63bc018467c7314ad1f6d",
+        "candidate_sha256": "40e944c1165c4cf48f88ae2fbdca02bdde5ea10642b63bc018467c7314ad1f6d",
+        "column_names_and_order_equal": true,
+        "comparison_status": "compared",
+        "numeric_columns": 101,
+        "max_absolute_difference_mm3": 0.0,
+        "mean_absolute_difference_mm3": 0.0,
+        "all_numeric_columns_equal": true
+      }
+    }
+  },
+  "official_equivalence": "per-label errors reported; no new bitwise acceptance threshold",
+  "gpu_status": "passed",
+  "gpu_external_load_at_dispatch": {
+    "memory_used_mib": 32154,
+    "utilization_percent": 74,
+    "speed_interpretation": "shared-load wall observations, not stable speedup"
+  },
+  "gpu_allocator_gate_passed": true
+}

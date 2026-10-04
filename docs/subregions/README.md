@@ -1,10 +1,10 @@
 # 四类脑亚区分割：`segment_4_subregions`
 
-[返回首页](../../README.md) · [真实数据验证](../../validation/subregions/README.md) · [十例完整 benchmark](../../validation/subregions/ten_public_t1_20261002/README.md) · [当前 main 配对](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)
+[返回首页](../../README.md) · [真实数据验证](../../validation/subregions/README.md) · [十例完整 benchmark](../../validation/subregions/ten_public_t1_20261002/README.md) · [2026-10-02 GPU 配对](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)
 
 输入一张三维 T1，一次完成脑干、双侧丘脑、双侧海马和杏仁核分割。返回与输入 T1 **形状和 affine 相同**的 `int32` 标签图，以及标签表、硬体积、软体积和各结构的高分辨率结果；设置 `output_dir` 后自动保存。默认全部结构共有 **110 项亚区统计**，其中某些小亚区在原始 T1 网格上可能没有硬标签体素。
 
-支持 CPU 和 GPU。CUDA 默认使用 FP32/TF32；脑干的小矩阵运算局部使用准确 FP32，梯度归约、标量累计和优化器状态使用 FP64，不使用 FP16。计算与读写分别使用项目的 PyTorch 实现和 Nibabel，运行时不调用 FreeSurfer 或 FSL。
+支持 CPU 和 GPU。CUDA 默认使用 FP32/TF32；脑干的小矩阵运算局部使用准确 FP32，部分梯度归约、标量累计和优化器状态使用 FP64，不使用 FP16。脑干 Adam 状态仍为 FP32；具体 recipe 的实际策略以报告为准。`precise_mesh_matrices` 字段目前仅记录请求，不能作为实际 FP64 矩阵计算的证据。计算与读写分别使用项目的 PyTorch 实现和 Nibabel，运行时不调用 FreeSurfer 或 FSL。
 
 ## 从一张 T1 到完整结果
 
@@ -85,7 +85,7 @@ print(native_label_path)
 | `synthseg_weights` | `None` | SynthSeg 模型权重文件或目录。省略时解析 FNIT 权重配置，并在需要时下载和校验。 |
 | `synthseg_parc_weights` | `None` | SynthSeg+ 皮层分区权重文件或目录；仅在需要自动皮层分区时读取。 |
 | `device` | `"cuda:0"` | PyTorch 计算设备，例如 `"cuda:1"` 或 `"cpu"`。CUDA 默认启用 TF32。 |
-| `threads` | `4` | PyTorch CPU 线程数，必须至少为 1；GPU 运行中的 CPU 准备步骤也使用此设置。 |
+| `threads` | `4` | PyTorch CPU 线程数，必须至少为 1。CPU 调用还临时设置当前调用线程的 Numba 掩码，正常返回或失败均恢复调用者的两项设置；GPU 保留原有线程设置方式。BLAS、外部库线程和 CPU 亲和性由启动环境控制。 |
 | `optimization` | `"fast"` | `"fast"` 速度优先；`"balanced"` 使用更多网格更新和更严格的停止阈值。两者均保留工作网格和最终输出分辨率；更多迭代不保证每个区域的精度提高，详见下文。 |
 | `output_dir` | `None` | 自动保存目录。省略时返回内存结果，也可稍后调用 `subregion_result.save(output_dir)`。 |
 | `save_highres` | `True` | 保存每项结构的工作网格标签；仅在保存结果时生效。 |
@@ -127,6 +127,8 @@ sub-01_subregions/
 | 停止条件 | 速度优先 | 更严格 |
 
 图谱先验平滑、部分容积模拟、Gaussian EM 和网格拟合支持 GPU，默认环境已包含所需依赖。图谱加载、裁剪、三次插值、部分形态学、白质标签传播和最终 Nibabel 重采样仍在 CPU；阶段控制和线搜索也包含 CPU 判断及 GPU 同步。整例时间包含这些步骤。实现与逐组件耗时见 [TorchGEMS](../../src/fnit/gems/core.py)及 [GPU 组件验证](../../validation/subregions/speed_v16/layout_components/README.md)。
+
+CPU 入口使用临时线程作用域，修复以前只设置 Torch、未约束 Numba且调用后不恢复线程设置的问题。它保持拟合规则、精度、标签和返回结构；Torch 使用请求的线程数；Numba 使用请求数与导入时线程池容量中的较小值。要让两者都达到请求数，请在新进程启动前设置 `NUMBA_NUM_THREADS`。CPU/GPU 不应在同一进程的多个调用线程中并发修改全局 Torch 设置。`timings["compute_seconds"]` 为内部计算范围；公开 API 和进程墙钟另包含 CPU 线程设置及恢复。当前 CPU 同节点实测状态见[CPU 对照协议](../../validation/smri_cpu/task5/README.md)，GPU 历史时间不改标为 CPU 结果。
 
 合成标签拟合按各结构的阶段预算运行，脑干采用其独立配置；上表的 20/30 上限对应丘脑和海马/杏仁核的强度拟合。
 
@@ -179,13 +181,23 @@ segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects 
 官方参考在 CPU 上独立运行；本轮每例均从同一公开 T1 新建 subject，没有复用旧预处理。相同阶段对照向 FNIT 传入本例 fresh `norm/aseg/wmparc`；raw 则从公开 T1 自动预处理。[实际官方协议](../../validation/subregions/ten_public_t1_20261002/official_protocol.md)记录版本、环境、准备阶段与输出身份。原实现见 [FreeSurfer 源码](https://github.com/freesurfer/samseg/tree/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/samseg/subregions)和 [官方使用说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SubregionSegmentation)。
 
 
-## 最新精度、运行时间与脑图
+<a id="最新精度运行时间与脑图"></a>
+
+## 精度、运行时间与脑图
+
+### 2026-10-04：同节点 CPU 与受影响 GPU 回归
+
+nodecw10 的相同八核预算下，脑干逐区门通过；丘脑及海马/杏仁核仍未全部通过，CPU 拟合明显较慢。脑干联合优化在另一固定核组完整旧新配对中将 API 时间从 733.021 降至 668.801 秒，全部后验和拟合状态相同，GPU 脑干回归也通过。原始 T1 的 CPU 全结构流程及完整 recon-all 已执行并评分；下列十例 GPU 结果绑定 2026-10-02 的源码，不能作为本轮最终整合源码的全结构 GPU 验收。详见[本轮完整记录](../../validation/smri_cpu/task5/README.md)。
+
+原始 T1 的 CPU v5 整例为 **6241.435 秒（104.024 分钟）**，API 6238.458 秒；共享预处理、脑干、丘脑及左右海马/杏仁核约为 162.214 / 643.776 / 2245.035 / 1583.290 / 1563.757 秒。这些为父阶段，内部计时不再累加。原网格 4/105、HR 5/107 非空区通过既定逐区门，另外 5/3 区双方为空记 NA，输出仍不等价。13 项约定输出齐全，全部后验和脑图见[完整 raw CPU 报告](../../validation/smri_cpu/task5/raw_all_cpu_v5/README.md)。本例未传入官方拟合检查点，官方 norm/aseg/wmparc 的保存参考已与本轮同 T1 官方 CPU recon 核验数组及几何恒等；无单次官方 raw 整链时钟或速度比。
+
+### 2026-10-02：十例 GPU 与官方对照
 
 2026-10-02，使用 OpenNeuro ds000114 **snapshot 1.0.2、ses-test 的 sub-01–sub-10 十例公开 T1**。选择在测试前固定，同时单列排除开发用 sub-01 的新九例。公开快照已做去脸，本次未追加处理；这批公开 T1 与此前单例开发派生 T1 分别记录。[数据与许可记录](../../validation/subregions/ten_public_t1_20261002/data_selection.md)保留选择、文件大小和 SHA-256。
 
 **raw** 从公开 T1 自动完成共享预处理和全部四项分割，原网格为公开 T1 网格。**stage** 从同一病例本轮全新官方 `norm/aseg/wmparc` 开始，原网格为其 norm 网格；用于比较亚区拟合，官方预处理耗时不计入 FNIT stage。两个输入分组报告。
 
-当前 main `f436de5` 已对十例分别完成一次独立 `structures="all", optimization="fast"` raw 运行。与原计量版本 `ac692bb` 比较，50 张原网格/高分辨率标签图的体素、shape、affine、dtype 完全相同，1,100 条硬/软体积字典及 160 条上下文记录相同；raw Dice 与脑图因此继承原计量结果。[main 实际审计](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/audit/summary.json)保留逐例证据。stage 结果及耗时来自 `ac692bb` 的实际运行，两版 24 个 GEMS 代码与查找表文件逐字节相同。
+`f436de5` 于 2026-10-02 对十例分别完成一次独立 `structures="all", optimization="fast"` raw 运行。与原计量版本 `ac692bb` 比较，50 张原网格/高分辨率标签图的体素、shape、affine、dtype 完全相同，1,100 条硬/软体积字典及 160 条上下文记录相同；raw Dice 与脑图因此继承原计量结果。[历史版本实际审计](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/audit/summary.json)保留逐例证据。stage 结果及耗时来自 `ac692bb` 的实际运行，两版 24 个 GEMS 代码与查找表文件逐字节相同。
 
 ### 六区域原网格精度
 
@@ -217,7 +229,7 @@ segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects 
 
 高分辨率统计在固定官方轴向、间距和整数网格相位的共同评价网格上进行。独立 [v2 HR 体素计数守恒审计](../../validation/subregions/ten_public_t1_20261002/official_hr_grid_conservation_v2.json)完成十例 40 张官方 HR 图、1,100 条标签记录：raw_hr 与 stage_hr 计数均保持原值，独立最近邻复查无分歧，原分析元数据未改。首轮报告写入遇到 NumPy 标量 JSON 兼容问题；v2 仅修复报告序列化，计数、网格和指标规则保留。
 
-### 当前完整流程 benchmark
+### 2026-10-02 GPU 完整流程 benchmark
 
 FNIT 使用共享 **NVIDIA H100 PCIe，4 线程，FP32/默认 TF32**，自身进程显存限制 19,073 MiB；当前 raw 采样自身峰值为 **14,748–18,428 MiB**。官方使用 FreeSurfer 8.2.0-1，CPU 每例 4 线程，从同一公开 T1 全新执行 `recon-all -all` 及三个细分割命令。时间均来自本例本轮实际进程，不拼接旧 recon-all 记录。
 
@@ -225,10 +237,10 @@ FNIT 使用共享 **NVIDIA H100 PCIe，4 线程，FP32/默认 TF32**，自身进
 
 | 实际计时 | 全部十例 | 新九例 |
 |---|---|---|
-| 当前 main raw：API compute（秒） | 253.66 ± 6.31 [245.68, 261.89]；10/10，NA 0 | 254.46 ± 6.13 [245.68, 261.89]；9/9，NA 0 |
-| 当前 main raw：API total（秒） | 254.26 ± 6.34 [246.25, 262.55]；10/10，NA 0 | 255.06 ± 6.17 [246.25, 262.55]；9/9，NA 0 |
-| 当前 main raw：进程 wall（秒） | 259.37 ± 6.45 [251.26, 267.76]；10/10，NA 0 | 260.21 ± 6.22 [251.26, 267.76]；9/9，NA 0 |
-| 当前 main raw：保存（秒） | 0.55 ± 0.05 [0.48, 0.64]；10/10，NA 0 | 0.55 ± 0.05 [0.48, 0.64]；9/9，NA 0 |
+| f436de5 raw：API compute（秒） | 253.66 ± 6.31 [245.68, 261.89]；10/10，NA 0 | 254.46 ± 6.13 [245.68, 261.89]；9/9，NA 0 |
+| f436de5 raw：API total（秒） | 254.26 ± 6.34 [246.25, 262.55]；10/10，NA 0 | 255.06 ± 6.17 [246.25, 262.55]；9/9，NA 0 |
+| f436de5 raw：进程 wall（秒） | 259.37 ± 6.45 [251.26, 267.76]；10/10，NA 0 | 260.21 ± 6.22 [251.26, 267.76]；9/9，NA 0 |
+| f436de5 raw：保存（秒） | 0.55 ± 0.05 [0.48, 0.64]；10/10，NA 0 | 0.55 ± 0.05 [0.48, 0.64]；9/9，NA 0 |
 | ac692bb stage：API compute（秒） | 289.63 ± 11.14 [272.47, 311.13]；10/10，NA 0 | 290.06 ± 11.73 [272.47, 311.13]；9/9，NA 0 |
 | ac692bb stage：API total（秒） | 290.26 ± 11.15 [273.11, 311.85]；10/10，NA 0 | 290.70 ± 11.73 [273.11, 311.85]；9/9，NA 0 |
 | ac692bb stage：进程 wall（秒） | 296.52 ± 11.00 [278.21, 317.26]；10/10，NA 0 | 296.44 ± 11.66 [278.21, 317.26]；9/9，NA 0 |
@@ -240,14 +252,14 @@ API compute 含共享预处理、拟合和合并；API total 与保存单独记�
 
 | 同病例 wall 比值 | 全部十例 | 新九例 |
 |---|---|---|
-| 官方 fresh 完整流程 / 当前 main raw | 29.010 ± 2.643；中位 29.702；[24.106, 32.966]；10/10，NA 0 | 29.231 ± 2.704；中位 30.331；[24.106, 32.966]；9/9，NA 0 |
+| 官方 fresh 完整流程 / f436de5 raw | 29.010 ± 2.643；中位 29.702；[24.106, 32.966]；10/10，NA 0 | 29.231 ± 2.704；中位 30.331；[24.106, 32.966]；9/9，NA 0 |
 | 官方三项细分割 / ac692bb stage | 5.212 ± 0.457；中位 5.282；[4.476, 5.786]；10/10，NA 0 | 5.293 ± 0.399；中位 5.306；[4.757, 5.786]；9/9，NA 0 |
 
 #### 实际分步骤时间
 
-当前 main raw 的共享预处理及四项 recipe 总计如下，单位为秒；字段分别为 `shared_preprocessing/seconds`、`brainstem/timing_seconds/total` 和其余三项的 `seconds`。
+f436de5 raw 的共享预处理及四项 recipe 总计如下，单位为秒；字段分别为 `shared_preprocessing/seconds`、`brainstem/timing_seconds/total` 和其余三项的 `seconds`。
 
-| 当前 main raw 步骤 | 全部十例 | 新九例 |
+| f436de5 raw 步骤 | 全部十例 | 新九例 |
 |---|---|---|
 | 共享预处理 | 13.11 ± 0.85 [11.95, 14.74]；10/10，NA 0 | 13.01 ± 0.85 [11.95, 14.74]；9/9，NA 0 |
 | 脑干 recipe | 17.78 ± 0.71 [16.88, 19.24]；10/10，NA 0 | 17.75 ± 0.74 [16.88, 19.24]；9/9，NA 0 |
@@ -294,7 +306,8 @@ main raw 的全部实际 timer 路径与值见[机器可读对照](../../validat
 
 | 版本与范围 | 官方参考 | 主要记录 |
 |---|---|---|
-| [当前 main 十例 raw 回归](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md) | 同病例本轮 fresh recon-all＋细分割 | f436de5 独立 raw 实测；与 ac692bb 的标签/几何逐值相同，另列新九例 |
+| [2026-10-04 同节点 CPU](../../validation/smri_cpu/task5/README.md) | 相同 norm/aseg/wmparc，8 线程配置与 8 物理核预算 | 脑干两个网格均 4/4 区通过，764.691 对 205.553 秒；丘脑原网格 29/45 非空区通过，2464.294 对 275.893 秒；左右海马/杏仁核原网格 3/28、1/28 区通过，3455.410 对 442.305 秒。速度均未通过，全部逐区及脑图保留。[CPU raw v5 整例](../../validation/smri_cpu/task5/raw_all_cpu_v5/README.md)完成，6241.435 秒；原网格 4/105、HR 5/107 非空区通过，仍不等价。全部结构 GPU 旧新标签、后验和表格一致，绑定对应冻结源码。 |
+| [2026-10-02 f436de5 十例 raw 回归](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md) | 同病例本轮 fresh recon-all＋细分割 | f436de5 独立 raw 实测；与 ac692bb 的标签/几何逐值相同，另列新九例 |
 | [十例公开 T1 benchmark](../../validation/subregions/ten_public_t1_20261002/README.md) | 每例完整官方流程，输入/源码/资产哈希已核验 | 固定十例与新九例；110 分区、两类输入、两种评价网格；ac692bb stage 为实际条件测试 |
 | [单例开发重复性与精度修复](../../validation/subregions/reproducibility_20261002/README.md) | 开发病例三次全新官方细分割 | 同参数 all 流程重复性、丘脑完整积分、脑干固定梯度归约、稳定连通域选择；原单例指标、步骤与脑图保留在记录中 |
 | [4178a48](../../validation/subregions/segment_4_subregions/raw_precision_analysis/README.md) | 历史存档；后续重新核对参考来源 | 双侧海马稳定拟合、TorchFAST、白质代理、标准类别图导出 |

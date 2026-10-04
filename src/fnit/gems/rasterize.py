@@ -8,10 +8,23 @@ import math
 import numpy as np
 import torch
 
-from ._raster_triton import (fused_data_cost, lookup_candidates,
+from ._raster_triton import (fused_data_cost, lookup_candidates as _lookup_candidates_cuda,
                             supports_fused_data_cost)
 from .deformation import (CurrentGeometry, ordered_row_gather,
                           prepare_vertex_reduction)
+
+
+def lookup_candidates(points, *args, **kwargs):
+    """Use the CPU ordered scan or the existing CUDA lookup.
+
+    Only the discrete owner search is compiled on CPU. Selected interpolation,
+    prior values and their gradients retain the existing PyTorch operations.
+    Unsupported CPU formats request the original dense Torch fallback.
+    """
+    if points.device.type == "cpu":
+        from ._raster_cpu import lookup_candidates_cpu
+        return lookup_candidates_cpu(points, *args, **kwargs)
+    return _lookup_candidates_cuda(points, *args, **kwargs)
 
 
 def _packed_device_buffer(parts, dtype, device):
@@ -352,6 +365,15 @@ def _compact_lookup(vertices, tetrahedra, valid_mask, block_index,
     else:
         all_v0, all_inv = current_geometry.origins, current_geometry.inverse_edges
         all_singular = current_geometry.singular
+    if (vertices.device.type == "cpu" and vertices.dtype == torch.float32
+            and not cache_owner_hints and not owner_hints and hint_stats is None):
+        from ._raster_cpu_compact import lookup_compact_cpu
+        with torch.no_grad():
+            packed = lookup_compact_cpu(batches, all_v0, all_inv, all_singular,
+                                        block_index._device_cache, tolerance=tolerance)
+        if packed is not None:
+            selected_ids, selected_points, covered = packed
+            return all_v0, all_inv, selected_ids, selected_points, covered, reorder
     selected_parts, point_parts, covered_parts, hint_parts = [], [], [], []
     for points, ids, candidate_mask, batch_ids, point_rows in batches:
         hint_key = ("owner_hints", id(valid_mask), id(tetrahedra),

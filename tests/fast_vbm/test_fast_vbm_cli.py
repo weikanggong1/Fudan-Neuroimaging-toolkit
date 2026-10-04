@@ -37,13 +37,14 @@ def _fake_pipeline(captured):
     return Pipeline
 
 
+@pytest.mark.parametrize("execution", [None, "fsl"])
 def test_fast_vbm_cli_runs_one_subject_and_prints_all_outputs(
-        tmp_path, monkeypatch, capsys):
+        tmp_path, monkeypatch, capsys, execution):
     captured = {}
     monkeypatch.setattr(fast_vbm_module, "FastVBM", _fake_pipeline(captured))
     output = tmp_path / "subject"
 
-    cli.main([
+    arguments = [
         "fast-vbm", "-i", "T1w.nii.gz", "--template", "template.nii.gz",
         "-o", str(output), "--brain-mask", "mask.nii.gz",
         "--reference-mask", "reference-mask.nii.gz",
@@ -51,7 +52,10 @@ def test_fast_vbm_cli_runs_one_subject_and_prints_all_outputs(
         "--device", "cuda:2", "--threads", "3",
         "--synthmorph-extent", "192", "--synthmorph-hyper", "0.4",
         "--synthmorph-steps", "6", "--no-bias", "--overwrite",
-    ])
+    ]
+    if execution is not None:
+        arguments.extend(["--fast-execution", execution])
+    cli.main(arguments)
 
     assert captured == {
         "options": {
@@ -59,6 +63,7 @@ def test_fast_vbm_cli_runs_one_subject_and_prints_all_outputs(
             "synthstrip_weights": "strip.pt",
             "synthmorph_weights": "morph.h5", "bias_correction": False,
             "registration_backend": "synthmorph",
+            "fast_execution": execution or "tensor",
             "synthmorph_extent": 192, "synthmorph_hyper": 0.4,
             "synthmorph_steps": 6,
             "fnirt_strides": (4, 2, 1, 1),

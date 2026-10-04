@@ -4,7 +4,7 @@
 
 FNIT 提供人脑磁共振（MRI）处理和群体分析的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel。Python 包名为 `fnit`，统一命令行入口为 `fnit`。各功能的运行依赖与安装要求见对应功能页。Connectome 支持读取已完成 subject、FNIT recon-all 或显式选择的官方 FreeSurfer；默认 auto 有 subject 时读取，没有时选 FNIT，后者须提供已校验的权重与结构像资源。
 
-CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹配原版统计结果，使用普通 float32 连接计算和 QR 正交化回归。模型、影像张量与 NIfTI 输出保持 float32，不自动使用 float16 或 bfloat16。
+CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹配原版统计结果，使用普通 float32 连接计算和 QR 正交化回归。主要网络与影像计算默认使用 float32，不自动使用 float16 或 bfloat16；输出按各接口保存，标签为整数，部分脑图保留输入 dtype。
 
 影像处理以单被试 Python API 和命令行接口为主；多被试任务可在包外通过任务调度器、进程池或作业系统分配 CPU/GPU。recon-all、Connectome、BigFLICA 和 BWAS 的处理范围与调用方式见对应功能页。
 
@@ -29,6 +29,8 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 
 ### sMRI
 
+CPU 的功能覆盖、同节点精度与耗时，以及受影响组件的 GPU 回归见[2026-10-04 对照报告](validation/smri_cpu/README.md)。各函数的验收状态分别列出。
+
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
 | [SynthStrip](docs/synthstrip/README.md) | FreeSurfer `mri_synthstrip` | 脑图、脑掩膜和有符号距离场。 |
@@ -39,8 +41,8 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
-| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[十张公开 T1 benchmark](validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)：H100 完整流程 4.32 ± 0.11 分钟/例，官方 CPU 125.45 ± 12.28 分钟/例；[110 分区 Dice 与脑图](docs/subregions/README.md#最新精度运行时间与脑图)。 |
-| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计；[两例当前性能与精度](validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)。 |
+| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[十张公开 T1 benchmark](validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)：H100 完整流程 4.32 ± 0.11 分钟/例，官方 CPU 125.45 ± 12.28 分钟/例；[110 分区 Dice 与脑图](docs/subregions/README.md#最新精度运行时间与脑图)。[同节点 CPU raw 整例](validation/smri_cpu/task5/raw_all_cpu_v5/README.md)为 104.02 分钟，逐区验收尚未通过。 |
+| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计；[2026-10-02 GPU 两例性能与精度](validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)及[同节点完整 CPU 官方对照](validation/smri_cpu/task5/recon_complete_cpu_v3/README.md)：CPU 本例官方 4600.04 / FNIT 4829.70 秒，整体数值等价未判定。 |
 
 ### fMRI
 

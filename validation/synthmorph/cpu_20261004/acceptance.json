@@ -1,0 +1,11 @@
+{
+  "schema": "fnit.synthmorph.cpu.acceptance.v1",
+  "fixed_before_official_accuracy_inspection": "2026-10-04",
+  "warp": {"world_displacement_absmax_mm": 0.001, "component_rmse_mm": 0.0001},
+  "affine": {"full_source_grid_world_displacement_max_mm": 0.001, "evaluation": "affine difference is affine; convex norm attains maximum on the eight full-grid corners"},
+  "continuous_image": {"nrmse_p99_minus_p1": 0.001, "regions": ["full FOV", "independent official brain mask", "upper coordinate boundary band"], "reported": ["MAE", "RMSE", "P99 absolute error", "maximum absolute error", "NRMSE"]},
+  "label_or_nearest": {"unequal_voxels": 0},
+  "cpu_layout": {"field_rtol": 0.00001, "field_atol_mm": 0.0001, "requires_stable_runtime_benefit": true},
+  "gpu_regression": {"all_returned_array_sha256_equal": true, "same_geometry_and_dtype": true, "maximum_process_reserved_bytes": 20000000000},
+  "timing": {"threads": 8, "physical_cpu_affinity": [2, 6, 10, 14, 18, 22, 26, 30], "reference_candidate_order": ["reference", "candidate", "candidate", "reference"], "cold_process_and_loaded_model_times_separate": true, "shared_node_not_exclusive": true}
+}

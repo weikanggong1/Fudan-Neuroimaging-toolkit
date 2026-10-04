@@ -111,8 +111,6 @@ def test_cuda_synthsr_enables_tf32(monkeypatch):
     ("constructor", "arguments"),
     (
         (WMHSynthSeg, ("missing-weights",)),
-        (SynthSeg, ("missing-weights",)),
-        (SynthSegSegmenter, ("missing-weights", "missing-labels")),
         (SynthSegParc, ("missing-weights", "missing-labels")),
     ),
 )
@@ -128,3 +126,21 @@ def test_cuda_segmentation_components_enable_tf32(
 
     assert torch.backends.cuda.matmul.allow_tf32 is True
     assert torch.backends.cudnn.allow_tf32 is True
+
+
+@pytest.mark.parametrize("initial", [False, True])
+@pytest.mark.parametrize("constructor,arguments", [
+    (SynthSeg, ("missing-weights",)),
+    (SynthSegSegmenter, ("missing-weights", "missing-labels")),
+])
+def test_scoped_segmentation_construction_preserves_cuda_policy(
+        monkeypatch, initial, constructor, arguments):
+    # These two APIs apply CUDA precision only while running posterior(),
+    # and retain the caller's policy even when resource resolution fails.
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
+    monkeypatch.setattr(torch.backends.cuda.matmul, "allow_tf32", initial)
+    monkeypatch.setattr(torch.backends.cudnn, "allow_tf32", initial)
+    with pytest.raises(FileNotFoundError):
+        constructor(*arguments, device="cuda:0")
+    assert torch.backends.cuda.matmul.allow_tf32 is initial
+    assert torch.backends.cudnn.allow_tf32 is initial

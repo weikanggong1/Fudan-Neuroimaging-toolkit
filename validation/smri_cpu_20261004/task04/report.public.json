@@ -1,0 +1,4153 @@
+{
+  "date": "2026-10-04",
+  "baseline_commit": "1d31e7baaebbb644ab199471f7fe6282721455fd",
+  "status": "fast_cpu8_cpu1_nondefault_gpu_and_frozen_vbm_official_comparisons_complete",
+  "data": {
+    "source": "OpenNeuro ds003138, anonymized case01 T1w",
+    "full_grid": [
+      224,
+      288,
+      288
+    ],
+    "commonbrain_source": "Frozen initial FNIT SynthStrip checkpoint for controlled FAST stage only; old input-grid bug is documented in task1. Corrected brain is used in the new CLI/pipeline round.",
+    "input_brain_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+    "input_mask_sha256": "df64e243b0b93c7389a167b954bbbaaa0c64c24a67842a425324ad7fc75ef7ce",
+    "corrected_brain_sha256": "fd8c3253a6960777715c85844a38e760959b6bf80849bd28b7e5b906dee0dea4"
+  },
+  "cpu_protocol": {
+    "host_alias": "nodecw10",
+    "hardware": "Intel Xeon Gold 6418H",
+    "threads_budget": 8,
+    "physical_cpu_affinity": [
+      0,
+      4,
+      8,
+      12,
+      16,
+      20,
+      24,
+      28
+    ],
+    "serial_common_lock": true,
+    "cold_process_scope": "Process startup, input reading, inference and gzip writing; worker report overhead included.",
+    "api_scope": "Loaded API separately timed; excludes save.",
+    "numba_version": "0.61.2",
+    "software": {
+      "torch": "2.5.1",
+      "numpy": "1.26.4",
+      "nibabel": "5.4.2"
+    },
+    "node_is_shared": true,
+    "physical_cores_are_not_exclusive": true,
+    "unrelated_worker_load_observed": true,
+    "load_observed_approximately": 32,
+    "thread_counts_mean": "Sampled resident threads, including idle library pools; affinity limits execution to selected cores."
+  },
+  "patch_runs": {
+    "v2_patch_baseline": {
+      "status": "complete",
+      "cold_process_seconds": 13.016762055456638,
+      "loaded_api_seconds": 10.492932505905628,
+      "save_seconds": 0.021942012012004852,
+      "peak_sampled_tree_rss_bytes": 339558400,
+      "stages": {
+        "fnit.fast.algorithm._fsl_moments": {
+          "calls": 28,
+          "seconds": 0.01567540317773819
+        },
+        "fnit.fast.algorithm._fsl_initial_probabilities": {
+          "calls": 19,
+          "seconds": 0.02097763866186142
+        },
+        "fnit.fast._fsl_scan.schedule": {
+          "calls": 1,
+          "seconds": 0.0010225176811218262
+        },
+        "fnit.fast._fsl_scan.blur": {
+          "calls": 10,
+          "seconds": 0.07092279195785522
+        },
+        "fnit.fast.algorithm._fsl_bias": {
+          "calls": 5,
+          "seconds": 0.08620528131723404
+        },
+        "GlibcRandom.raw": {
+          "calls": 8,
+          "seconds": 0.059786856174468994
+        },
+        "fnit.fast._fsl_scan.tanaka": {
+          "calls": 8,
+          "seconds": 9.949152298271656
+        },
+        "fnit.fast.algorithm._fsl_mixel_probabilities": {
+          "calls": 1,
+          "seconds": 0.05778646469116211
+        },
+        "fnit.fast._fsl_scan.icm": {
+          "calls": 1,
+          "seconds": 0.23876158148050308
+        },
+        "fnit.fast.algorithm._fsl_partial_volumes": {
+          "calls": 1,
+          "seconds": 0.00779019296169281
+        }
+      },
+      "source_sha256": {
+        "algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "mask_sha256": "df64e243b0b93c7389a167b954bbbaaa0c64c24a67842a425324ad7fc75ef7ce",
+      "diagnostic_crop": {
+        "start": [
+          100,
+          131,
+          130
+        ],
+        "stop": [
+          124,
+          157,
+          158
+        ],
+        "shape": [
+          24,
+          26,
+          28
+        ],
+        "is_full_image_benchmark": false
+      },
+      "cuda_initialized": false
+    },
+    "v2_patch_candidate_cold": {
+      "status": "complete",
+      "cold_process_seconds": 6.764539614319801,
+      "loaded_api_seconds": 4.365987941622734,
+      "save_seconds": 0.06542091071605682,
+      "peak_sampled_tree_rss_bytes": 434311168,
+      "stages": {
+        "fnit.fast.algorithm._fsl_moments": {
+          "calls": 28,
+          "seconds": 0.052380867302417755
+        },
+        "fnit.fast.algorithm._fsl_initial_probabilities": {
+          "calls": 19,
+          "seconds": 0.10079656541347504
+        },
+        "fnit.fast._fsl_scan.schedule": {
+          "calls": 1,
+          "seconds": 0.0010459274053573608
+        },
+        "fnit.fast._fsl_scan.blur": {
+          "calls": 10,
+          "seconds": 1.0092869848012924
+        },
+        "fnit.fast.algorithm._fsl_bias": {
+          "calls": 5,
+          "seconds": 1.0260648727416992
+        },
+        "GlibcRandom.raw": {
+          "calls": 8,
+          "seconds": 0.21837706863880157
+        },
+        "fnit.fast._fsl_scan.tanaka": {
+          "calls": 8,
+          "seconds": 0.3505726009607315
+        },
+        "fnit.fast.algorithm._fsl_mixel_probabilities": {
+          "calls": 1,
+          "seconds": 0.9830658286809921
+        },
+        "fnit.fast._fsl_scan.icm": {
+          "calls": 1,
+          "seconds": 0.2665492966771126
+        },
+        "fnit.fast.algorithm._fsl_partial_volumes": {
+          "calls": 1,
+          "seconds": 0.7441392838954926
+        }
+      },
+      "source_sha256": {
+        "algorithm.py": "02e6508b015ac2baa8f1b765dd19b9cd7947dd204050898b3cbcaec03142bad4",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "2648c4093fad19cc18014a542dcaa30f7e2fb6d6819b08f179aba119f5b72982",
+        "_fsl_cpu.py": "5b521ce1cc4efbe94ee12877cd95c8b2d0535ebcf8e66762868493a3fc6dce90"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "mask_sha256": "df64e243b0b93c7389a167b954bbbaaa0c64c24a67842a425324ad7fc75ef7ce",
+      "diagnostic_crop": {
+        "start": [
+          100,
+          131,
+          130
+        ],
+        "stop": [
+          124,
+          157,
+          158
+        ],
+        "shape": [
+          24,
+          26,
+          28
+        ],
+        "is_full_image_benchmark": false
+      },
+      "cuda_initialized": false
+    },
+    "v2_patch_candidate_warm_cache": {
+      "status": "complete",
+      "cold_process_seconds": 4.257842600345612,
+      "loaded_api_seconds": 1.5532408729195595,
+      "save_seconds": 0.08238257467746735,
+      "peak_sampled_tree_rss_bytes": 406941696,
+      "stages": {
+        "fnit.fast.algorithm._fsl_moments": {
+          "calls": 28,
+          "seconds": 0.054108865559101105
+        },
+        "fnit.fast.algorithm._fsl_initial_probabilities": {
+          "calls": 19,
+          "seconds": 0.07913810014724731
+        },
+        "fnit.fast._fsl_scan.schedule": {
+          "calls": 1,
+          "seconds": 0.0010329633951187134
+        },
+        "fnit.fast._fsl_scan.blur": {
+          "calls": 10,
+          "seconds": 0.47149869054555893
+        },
+        "fnit.fast.algorithm._fsl_bias": {
+          "calls": 5,
+          "seconds": 0.48240555077791214
+        },
+        "GlibcRandom.raw": {
+          "calls": 8,
+          "seconds": 0.00726453959941864
+        },
+        "fnit.fast._fsl_scan.tanaka": {
+          "calls": 8,
+          "seconds": 0.0667681023478508
+        },
+        "fnit.fast.algorithm._fsl_mixel_probabilities": {
+          "calls": 1,
+          "seconds": 0.21018614619970322
+        },
+        "fnit.fast._fsl_scan.icm": {
+          "calls": 1,
+          "seconds": 0.017929822206497192
+        },
+        "fnit.fast.algorithm._fsl_partial_volumes": {
+          "calls": 1,
+          "seconds": 0.015504695475101471
+        }
+      },
+      "source_sha256": {
+        "algorithm.py": "02e6508b015ac2baa8f1b765dd19b9cd7947dd204050898b3cbcaec03142bad4",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "2648c4093fad19cc18014a542dcaa30f7e2fb6d6819b08f179aba119f5b72982",
+        "_fsl_cpu.py": "5b521ce1cc4efbe94ee12877cd95c8b2d0535ebcf8e66762868493a3fc6dce90"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "mask_sha256": "df64e243b0b93c7389a167b954bbbaaa0c64c24a67842a425324ad7fc75ef7ce",
+      "diagnostic_crop": {
+        "start": [
+          100,
+          131,
+          130
+        ],
+        "stop": [
+          124,
+          157,
+          158
+        ],
+        "shape": [
+          24,
+          26,
+          28
+        ],
+        "is_full_image_benchmark": false
+      },
+      "cuda_initialized": false
+    },
+    "v2_patch_baseline_repeat": {
+      "status": "complete",
+      "cold_process_seconds": 10.767902635037899,
+      "loaded_api_seconds": 8.478719912469387,
+      "save_seconds": 0.023571133613586426,
+      "peak_sampled_tree_rss_bytes": 339374080,
+      "stages": {
+        "fnit.fast.algorithm._fsl_moments": {
+          "calls": 28,
+          "seconds": 0.012213803827762604
+        },
+        "fnit.fast.algorithm._fsl_initial_probabilities": {
+          "calls": 19,
+          "seconds": 0.011325493454933167
+        },
+        "fnit.fast._fsl_scan.schedule": {
+          "calls": 1,
+          "seconds": 0.0010227710008621216
+        },
+        "fnit.fast._fsl_scan.blur": {
+          "calls": 10,
+          "seconds": 0.0547405406832695
+        },
+        "fnit.fast.algorithm._fsl_bias": {
+          "calls": 5,
+          "seconds": 0.05794639140367508
+        },
+        "GlibcRandom.raw": {
+          "calls": 8,
+          "seconds": 0.0602698028087616
+        },
+        "fnit.fast._fsl_scan.tanaka": {
+          "calls": 8,
+          "seconds": 8.004337228834629
+        },
+        "fnit.fast.algorithm._fsl_mixel_probabilities": {
+          "calls": 1,
+          "seconds": 0.05703163892030716
+        },
+        "fnit.fast._fsl_scan.icm": {
+          "calls": 1,
+          "seconds": 0.23201961815357208
+        },
+        "fnit.fast.algorithm._fsl_partial_volumes": {
+          "calls": 1,
+          "seconds": 0.0075029656291007996
+        }
+      },
+      "source_sha256": {
+        "algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "mask_sha256": "df64e243b0b93c7389a167b954bbbaaa0c64c24a67842a425324ad7fc75ef7ce",
+      "diagnostic_crop": {
+        "start": [
+          100,
+          131,
+          130
+        ],
+        "stop": [
+          124,
+          157,
+          158
+        ],
+        "shape": [
+          24,
+          26,
+          28
+        ],
+        "is_full_image_benchmark": false
+      },
+      "cuda_initialized": false
+    }
+  },
+  "patch_comparison": {
+    "scope": "Every voxel of all eight maps; brain and whole-grid metrics are separate.",
+    "brain_voxels": 14453,
+    "outputs": {
+      "pve_0": {
+        "first_sha256": "7032890d6aa566ef2aaabc33b256679cf7da0b06d52ead5544996c660112eff5",
+        "second_sha256": "7032890d6aa566ef2aaabc33b256679cf7da0b06d52ead5544996c660112eff5",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 14453,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "whole_grid": {
+          "values": 17472,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0,
+        "soft_volume_mm3": {
+          "first": 2818.8956045679543,
+          "second": 2818.8956045679543,
+          "difference_percent": 0.0
+        },
+        "dice_0.5": 1.0
+      },
+      "pve_1": {
+        "first_sha256": "720a3dd37ac8ff9fcf28cbddfb2ceddd1f8d0526f75d68eabf0ec76d46c94665",
+        "second_sha256": "720a3dd37ac8ff9fcf28cbddfb2ceddd1f8d0526f75d68eabf0ec76d46c94665",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 14453,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "whole_grid": {
+          "values": 17472,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 0.9999999999999999
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0,
+        "soft_volume_mm3": {
+          "first": 1830.263824136509,
+          "second": 1830.263824136509,
+          "difference_percent": 0.0
+        },
+        "dice_0.5": 1.0
+      },
+      "pve_2": {
+        "first_sha256": "04257f6d95a1e6e89b735615efef25b6881f44d985e66cd8a0d2b159b1fbf24f",
+        "second_sha256": "04257f6d95a1e6e89b735615efef25b6881f44d985e66cd8a0d2b159b1fbf24f",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 14453,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "whole_grid": {
+          "values": 17472,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 0.9999999999999999
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0,
+        "soft_volume_mm3": {
+          "first": 2345.438252054677,
+          "second": 2345.438252054677,
+          "difference_percent": 0.0
+        },
+        "dice_0.5": 1.0
+      },
+      "seg": {
+        "first_sha256": "d523171e1f9f4a75c75356af0e8642481c0e3663fa319d580abfd5547350afd1",
+        "second_sha256": "d523171e1f9f4a75c75356af0e8642481c0e3663fa319d580abfd5547350afd1",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "int32",
+        "second_dtype": "int32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 14453,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "whole_grid": {
+          "values": 17472,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0,
+        "labels": {
+          "1": {
+            "dice": 1.0,
+            "first_voxels": 5228,
+            "second_voxels": 5228,
+            "volume_difference_percent": 0.0
+          },
+          "2": {
+            "dice": 1.0,
+            "first_voxels": 4468,
+            "second_voxels": 4468,
+            "volume_difference_percent": 0.0
+          },
+          "3": {
+            "dice": 1.0,
+            "first_voxels": 4757,
+            "second_voxels": 4757,
+            "volume_difference_percent": 0.0
+          }
+        }
+      },
+      "pveseg": {
+        "first_sha256": "eb70f6c184cbda39ffe2ccc31a561fb2a0ee5ebf91210f96de06590c1644aeef",
+        "second_sha256": "eb70f6c184cbda39ffe2ccc31a561fb2a0ee5ebf91210f96de06590c1644aeef",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "int32",
+        "second_dtype": "int32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 14453,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "whole_grid": {
+          "values": 17472,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0,
+        "labels": {
+          "1": {
+            "dice": 1.0,
+            "first_voxels": 5843,
+            "second_voxels": 5843,
+            "volume_difference_percent": 0.0
+          },
+          "2": {
+            "dice": 1.0,
+            "first_voxels": 3728,
+            "second_voxels": 3728,
+            "volume_difference_percent": 0.0
+          },
+          "3": {
+            "dice": 1.0,
+            "first_voxels": 4882,
+            "second_voxels": 4882,
+            "volume_difference_percent": 0.0
+          }
+        }
+      },
+      "mixeltype": {
+        "first_sha256": "a15feb30349ef3f1264f7d80f9dd282f4aa50409df03d00268de356d2cf9ae29",
+        "second_sha256": "a15feb30349ef3f1264f7d80f9dd282f4aa50409df03d00268de356d2cf9ae29",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "int32",
+        "second_dtype": "int32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 14453,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "whole_grid": {
+          "values": 17472,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 0.9999999999999999
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0,
+        "labels": {
+          "0": {
+            "dice": 1.0,
+            "first_voxels": 4239,
+            "second_voxels": 4239,
+            "volume_difference_percent": 0.0
+          },
+          "1": {
+            "dice": 1.0,
+            "first_voxels": 2144,
+            "second_voxels": 2144,
+            "volume_difference_percent": 0.0
+          },
+          "2": {
+            "dice": 1.0,
+            "first_voxels": 4378,
+            "second_voxels": 4378,
+            "volume_difference_percent": 0.0
+          },
+          "3": {
+            "dice": 1.0,
+            "first_voxels": 2873,
+            "second_voxels": 2873,
+            "volume_difference_percent": 0.0
+          },
+          "4": {
+            "dice": 1.0,
+            "first_voxels": 209,
+            "second_voxels": 209,
+            "volume_difference_percent": 0.0
+          },
+          "5": {
+            "dice": 1.0,
+            "first_voxels": 610,
+            "second_voxels": 610,
+            "volume_difference_percent": 0.0
+          }
+        }
+      },
+      "bias": {
+        "first_sha256": "31d7055862b06d7dea200db7d4e357ac26c322ee969a9c5ed0276a6bacc51c26",
+        "second_sha256": "31d7055862b06d7dea200db7d4e357ac26c322ee969a9c5ed0276a6bacc51c26",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 14453,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 0.9999999999999998
+        },
+        "whole_grid": {
+          "values": 17472,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 0.9999999999999999
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0
+      },
+      "restore": {
+        "first_sha256": "0edefc29ca2966d44833ca862736fb9106251228ddc76d111ab37d03030cbf9a",
+        "second_sha256": "0edefc29ca2966d44833ca862736fb9106251228ddc76d111ab37d03030cbf9a",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 14453,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 0.9999999999999999
+        },
+        "whole_grid": {
+          "values": 17472,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0
+      }
+    },
+    "all_value_bits_equal": true
+  },
+  "official_whole_cpu": {
+    "status": "complete",
+    "software": "FSL 6.0.7.4 FAST",
+    "cold_process_seconds": 357.19668366760015,
+    "returncode": 0,
+    "maximum_sampled_tree_rss_bytes": 2311577600,
+    "observed_fast_threads": 1,
+    "eight_expected_outputs_exist": true
+  },
+  "gpu_pairs": {
+    "fsl_1": {
+      "all_eight_saved_bytes_equal": true,
+      "outputs": {
+        "pve_0": true,
+        "pve_1": true,
+        "pve_2": true,
+        "seg": true,
+        "pveseg": true,
+        "mixeltype": true,
+        "bias": true,
+        "restore": true
+      }
+    },
+    "fsl_2": {
+      "all_eight_saved_bytes_equal": true,
+      "outputs": {
+        "pve_0": true,
+        "pve_1": true,
+        "pve_2": true,
+        "seg": true,
+        "pveseg": true,
+        "mixeltype": true,
+        "bias": true,
+        "restore": true
+      }
+    },
+    "tensor_1": {
+      "all_eight_saved_bytes_equal": true,
+      "outputs": {
+        "pve_0": true,
+        "pve_1": true,
+        "pve_2": true,
+        "seg": true,
+        "pveseg": true,
+        "mixeltype": true,
+        "bias": true,
+        "restore": true
+      }
+    },
+    "tensor_2": {
+      "all_eight_saved_bytes_equal": true,
+      "outputs": {
+        "pve_0": true,
+        "pve_1": true,
+        "pve_2": true,
+        "seg": true,
+        "pveseg": true,
+        "mixeltype": true,
+        "bias": true,
+        "restore": true
+      }
+    }
+  },
+  "gpu_runs": {
+    "fsl_baseline_1": {
+      "status": "complete",
+      "cold_process_seconds": 39.61585264792666,
+      "loaded_api_seconds": 32.25747918570414,
+      "save_seconds": 3.8301968299783766,
+      "source_sha256": {
+        "algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "gpu_memory": {
+        "name": "NVIDIA H100 PCIe",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000,
+        "allocated_peak_bytes": 2643126272,
+        "reserved_peak_bytes": 3378511872,
+        "context_initialization_in_cold_process_clock": true
+      }
+    },
+    "fsl_candidate_1": {
+      "status": "complete",
+      "cold_process_seconds": 39.129051725845784,
+      "loaded_api_seconds": 32.29566736984998,
+      "save_seconds": 3.786044669803232,
+      "source_sha256": {
+        "algorithm.py": "02e6508b015ac2baa8f1b765dd19b9cd7947dd204050898b3cbcaec03142bad4",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "2648c4093fad19cc18014a542dcaa30f7e2fb6d6819b08f179aba119f5b72982",
+        "_fsl_cpu.py": "5b521ce1cc4efbe94ee12877cd95c8b2d0535ebcf8e66762868493a3fc6dce90"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "gpu_memory": {
+        "name": "NVIDIA H100 PCIe",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000,
+        "allocated_peak_bytes": 2643126272,
+        "reserved_peak_bytes": 3378511872,
+        "context_initialization_in_cold_process_clock": true
+      }
+    },
+    "fsl_baseline_2": {
+      "status": "complete",
+      "cold_process_seconds": 24.069009729195386,
+      "loaded_api_seconds": 17.721188123803586,
+      "save_seconds": 3.5183689687401056,
+      "source_sha256": {
+        "algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "gpu_memory": {
+        "name": "NVIDIA H100 PCIe",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000,
+        "allocated_peak_bytes": 2643126272,
+        "reserved_peak_bytes": 3378511872,
+        "context_initialization_in_cold_process_clock": true
+      }
+    },
+    "fsl_candidate_2": {
+      "status": "complete",
+      "cold_process_seconds": 25.830648270901293,
+      "loaded_api_seconds": 18.065738168079406,
+      "save_seconds": 3.600158817600459,
+      "source_sha256": {
+        "algorithm.py": "02e6508b015ac2baa8f1b765dd19b9cd7947dd204050898b3cbcaec03142bad4",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "2648c4093fad19cc18014a542dcaa30f7e2fb6d6819b08f179aba119f5b72982",
+        "_fsl_cpu.py": "5b521ce1cc4efbe94ee12877cd95c8b2d0535ebcf8e66762868493a3fc6dce90"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "gpu_memory": {
+        "name": "NVIDIA H100 PCIe",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000,
+        "allocated_peak_bytes": 2643126272,
+        "reserved_peak_bytes": 3378511872,
+        "context_initialization_in_cold_process_clock": true
+      }
+    },
+    "tensor_baseline_1": {
+      "status": "complete",
+      "cold_process_seconds": 9.531920453067869,
+      "loaded_api_seconds": 2.6136081661097705,
+      "save_seconds": 3.676801700145006,
+      "source_sha256": {
+        "algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "gpu_memory": {
+        "name": "NVIDIA H100 PCIe",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000,
+        "allocated_peak_bytes": 3874571264,
+        "reserved_peak_bytes": 5523898368,
+        "context_initialization_in_cold_process_clock": true
+      }
+    },
+    "tensor_candidate_1": {
+      "status": "complete",
+      "cold_process_seconds": 9.028118243906647,
+      "loaded_api_seconds": 2.5216528489254415,
+      "save_seconds": 3.654837377835065,
+      "source_sha256": {
+        "algorithm.py": "02e6508b015ac2baa8f1b765dd19b9cd7947dd204050898b3cbcaec03142bad4",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "2648c4093fad19cc18014a542dcaa30f7e2fb6d6819b08f179aba119f5b72982",
+        "_fsl_cpu.py": "5b521ce1cc4efbe94ee12877cd95c8b2d0535ebcf8e66762868493a3fc6dce90"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "gpu_memory": {
+        "name": "NVIDIA H100 PCIe",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000,
+        "allocated_peak_bytes": 3874571264,
+        "reserved_peak_bytes": 5523898368,
+        "context_initialization_in_cold_process_clock": true
+      }
+    },
+    "tensor_baseline_2": {
+      "status": "complete",
+      "cold_process_seconds": 9.028648321982473,
+      "loaded_api_seconds": 2.6098256846889853,
+      "save_seconds": 3.583296768832952,
+      "source_sha256": {
+        "algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "gpu_memory": {
+        "name": "NVIDIA H100 PCIe",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000,
+        "allocated_peak_bytes": 3874571264,
+        "reserved_peak_bytes": 5523898368,
+        "context_initialization_in_cold_process_clock": true
+      }
+    },
+    "tensor_candidate_2": {
+      "status": "complete",
+      "cold_process_seconds": 9.534001140389591,
+      "loaded_api_seconds": 2.5306798848323524,
+      "save_seconds": 3.5845939498394728,
+      "source_sha256": {
+        "algorithm.py": "02e6508b015ac2baa8f1b765dd19b9cd7947dd204050898b3cbcaec03142bad4",
+        "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "_fsl_scan.py": "2648c4093fad19cc18014a542dcaa30f7e2fb6d6819b08f179aba119f5b72982",
+        "_fsl_cpu.py": "5b521ce1cc4efbe94ee12877cd95c8b2d0535ebcf8e66762868493a3fc6dce90"
+      },
+      "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+      "gpu_memory": {
+        "name": "NVIDIA H100 PCIe",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000,
+        "allocated_peak_bytes": 3874571264,
+        "reserved_peak_bytes": 5523898368,
+        "context_initialization_in_cold_process_clock": true
+      }
+    }
+  },
+  "remaining": [
+    "Actual paired public CLI with corrected SynthStrip brain, including default repeated CPU8, strict CPU1, no bias/MRF parameters",
+    "FastVBM both backends raw-T1 CPU end-to-end reference and figures"
+  ],
+  "whole_cpu_runs": {
+    "v2_whole_official_default": {
+      "status": "complete",
+      "wall_seconds": 357.19668366760015,
+      "returncode": 0,
+      "started_utc": "2026-10-03T23:24:51.137818+00:00",
+      "finished_utc": "2026-10-03T23:30:48.337362+00:00",
+      "maximum_sampled_tree_rss_bytes": 2311577600,
+      "maximum_sampled_tree_threads": 3,
+      "load_before": [
+        33.14,
+        34.32,
+        32.67
+      ],
+      "load_after": [
+        30.27,
+        31.03,
+        31.67
+      ]
+    },
+    "v2_whole_candidate_fsl": {
+      "status": "complete",
+      "wall_seconds": 97.34944555908442,
+      "returncode": 0,
+      "started_utc": "2026-10-03T23:32:26.721666+00:00",
+      "finished_utc": "2026-10-03T23:34:04.073747+00:00",
+      "maximum_sampled_tree_rss_bytes": 2920812544,
+      "maximum_sampled_tree_threads": 72,
+      "load_before": [
+        30.89,
+        31.15,
+        31.65
+      ],
+      "load_after": [
+        34.77,
+        32.65,
+        32.16
+      ],
+      "api": {
+        "loaded_api_seconds": 91.94713661819696,
+        "save_seconds": 3.0873780325055122,
+        "tissue_means": [
+          431.9330749511719,
+          773.6554565429688,
+          1068.1278076171875
+        ],
+        "tissue_variances": [
+          46163.4921875,
+          7162.7880859375,
+          5192.302734375
+        ],
+        "source_sha256": {
+          "algorithm.py": "02e6508b015ac2baa8f1b765dd19b9cd7947dd204050898b3cbcaec03142bad4",
+          "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+          "_fsl_scan.py": "2648c4093fad19cc18014a542dcaa30f7e2fb6d6819b08f179aba119f5b72982",
+          "_fsl_cpu.py": "5b521ce1cc4efbe94ee12877cd95c8b2d0535ebcf8e66762868493a3fc6dce90"
+        },
+        "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+        "mask_sha256": "df64e243b0b93c7389a167b954bbbaaa0c64c24a67842a425324ad7fc75ef7ce",
+        "outputs": {
+          "pve_0": {
+            "sha256": "f74dc6983299331ff859d02b74afed7574a7a173c55ea9e3dbce7c6d87e31453",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          },
+          "pve_1": {
+            "sha256": "7cd5fe05bfbd6ce6617101b33bf4e960d7eb36a4e02325044fff929573fc7a71",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          },
+          "pve_2": {
+            "sha256": "80b704c8d10a8bf34f21874d907066663fc894d8aba136491f8cb4603626ba5b",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          },
+          "seg": {
+            "sha256": "f4a5435229938b706a574a033515b2c170232d50a911f9d59ef6ea946fd55330",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "int32",
+            "finite": true
+          },
+          "pveseg": {
+            "sha256": "fb0e54ea5d38609a68fc9f9f7dc8ec3ae967a39a0404bb04342f0f1e9f569ba8",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "int32",
+            "finite": true
+          },
+          "mixeltype": {
+            "sha256": "017a4787d21dbcffb696965b398db20a672431c22169920d5adc4f7eda4a657d",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "int32",
+            "finite": true
+          },
+          "bias": {
+            "sha256": "009a8bbcacccf531a84395bb197025eb9b1df5748c7af45db07a5a5ee2658afc",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          },
+          "restore": {
+            "sha256": "9c7bac9c7984afd2998b5c6b86aa0b4307a67a2bd1375fe67d7b6fc772dc194b",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          }
+        },
+        "threads": 8,
+        "interop_threads": 1,
+        "cpu_affinity": [
+          0,
+          4,
+          8,
+          12,
+          16,
+          20,
+          24,
+          28
+        ],
+        "cuda_initialized": false
+      }
+    },
+    "v2_whole_baseline_tensor": {
+      "status": "complete",
+      "wall_seconds": 70.81403401494026,
+      "returncode": 0,
+      "started_utc": "2026-10-03T23:37:19.046544+00:00",
+      "finished_utc": "2026-10-03T23:38:29.863723+00:00",
+      "maximum_sampled_tree_rss_bytes": 4356583424,
+      "maximum_sampled_tree_threads": 64,
+      "load_before": [
+        28.84,
+        30.49,
+        31.39
+      ],
+      "load_after": [
+        30.97,
+        30.99,
+        31.5
+      ],
+      "api": {
+        "loaded_api_seconds": 65.41160190850496,
+        "save_seconds": 3.104902595281601,
+        "tissue_means": [
+          431.9871826171875,
+          773.664306640625,
+          1068.115966796875
+        ],
+        "tissue_variances": [
+          46166.75390625,
+          7159.0791015625,
+          5192.6943359375
+        ],
+        "source_sha256": {
+          "algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+          "pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+          "_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
+        },
+        "input_sha256": "175ce4690d14bd34f61d5befc865deab659842851e62d79fa65c74fe4f6bb60c",
+        "mask_sha256": "df64e243b0b93c7389a167b954bbbaaa0c64c24a67842a425324ad7fc75ef7ce",
+        "outputs": {
+          "pve_0": {
+            "sha256": "35194f6e97783ffeb52974df57b4c8744642d95f2a461799dea8114f8faa4808",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          },
+          "pve_1": {
+            "sha256": "9a1d7c53c4b2f3ad3fd8023b2fc7c65225d0b2878e3c126e8d6c82b0e230fe22",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          },
+          "pve_2": {
+            "sha256": "3c1cdbc6ae63dd37f3751b62e8c20ef852cf4c4c4b140e0d6973507701263971",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          },
+          "seg": {
+            "sha256": "77dc6915ae5a447625d6b2df0d966cc593147a9b5ed85ef548563d20b736eb23",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "int32",
+            "finite": true
+          },
+          "pveseg": {
+            "sha256": "02615d0a7fcc40acf253e0ebe9cc369ddf0e7ec4dadc89ec1ece5bd84939077e",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "int32",
+            "finite": true
+          },
+          "mixeltype": {
+            "sha256": "a114f75ccc2ff38baec5e92f57e0c5a8e5c72d1d6f125d27657a20f416421974",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "int32",
+            "finite": true
+          },
+          "bias": {
+            "sha256": "a890b24884e56562c1badd0a843257aca5932342eb81692986784994fe2390a3",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          },
+          "restore": {
+            "sha256": "837b161b451bd2dce285241dd82f73efedf8328b59d5eaac0a626ed78b205ea9",
+            "shape": [
+              224,
+              288,
+              288
+            ],
+            "dtype": "float32",
+            "finite": true
+          }
+        },
+        "threads": 8,
+        "interop_threads": 1,
+        "cpu_affinity": [
+          0,
+          4,
+          8,
+          12,
+          16,
+          20,
+          24,
+          28
+        ],
+        "cuda_initialized": false
+      }
+    },
+    "v2_whole_candidate_tensor": {
+      "status": "waiting_for_cpu_lock"
+    }
+  },
+  "whole_cpu_fsl_vs_official": {
+    "scope": "Every voxel of all eight maps; brain and whole-grid metrics are separate.",
+    "brain_voxels": 2843723,
+    "outputs": {
+      "pve_0": {
+        "first_sha256": "584e24ed7876058af83ca474217ed54364e6d16d4eb69ebf48c8ffcf494d9533",
+        "second_sha256": "f74dc6983299331ff859d02b74afed7574a7a173c55ea9e3dbce7c6d87e31453",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 3.51651486046536e-08,
+          "rmse": 1.875236736217748e-05,
+          "maximum_absolute_error": 0.01000000536441803,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 10,
+          "pearson_r": 0.9999999986131297
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 5.382285783042913e-09,
+          "rmse": 7.336404197667166e-06,
+          "maximum_absolute_error": 0.01000000536441803,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 10,
+          "pearson_r": 0.9999999988900726
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 10,
+        "soft_volume_mm3": {
+          "first": 265980.7965313387,
+          "second": 265980.8062104132,
+          "difference_percent": 3.6390125357499414e-06
+        },
+        "dice_0.5": 1.0
+      },
+      "pve_1": {
+        "first_sha256": "26f9189f962750066164a39df912557f5184821b583299170d7cb7c3e2e10417",
+        "second_sha256": "7cd5fe05bfbd6ce6617101b33bf4e960d7eb36a4e02325044fff929573fc7a71",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 1.6527616634675845e-07,
+          "rmse": 4.065415577800599e-05,
+          "maximum_absolute_error": 0.01000000536441803,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 47,
+          "pearson_r": 0.9999999955364381
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 2.5296738267907466e-08,
+          "rmse": 1.59049422050009e-05,
+          "maximum_absolute_error": 0.01000000536441803,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 47,
+          "pearson_r": 0.9999999977319239
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 47,
+        "soft_volume_mm3": {
+          "first": 633065.1276655444,
+          "second": 633065.1615423692,
+          "difference_percent": 5.351238496764665e-06
+        },
+        "dice_0.5": 0.9999996278159907
+      },
+      "pve_2": {
+        "first_sha256": "ef97fe04d98509a780ba812b38becd190dd68ed5543d115760aaec09f0b3d245",
+        "second_sha256": "80b704c8d10a8bf34f21874d907066663fc894d8aba136491f8cb4603626ba5b",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 1.3011102232712107e-07,
+          "rmse": 3.607089120104462e-05,
+          "maximum_absolute_error": 0.010000050067901611,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 37,
+          "pearson_r": 0.9999999966067813
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 1.9914453186635158e-08,
+          "rmse": 1.4111852253635197e-05,
+          "maximum_absolute_error": 0.010000050067901611,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 37,
+          "pearson_r": 0.9999999977838095
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 37,
+        "soft_volume_mm3": {
+          "first": 477187.2661771614,
+          "second": 477187.22262124857,
+          "difference_percent": -9.127635192118788e-06
+        },
+        "dice_0.5": 0.9999994991578339
+      },
+      "seg": {
+        "first_sha256": "09226cebd26aff52e4f016665296a98a9e1422a1556f076757852b377032dc1f",
+        "second_sha256": "f4a5435229938b706a574a033515b2c170232d50a911f9d59ef6ea946fd55330",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "int32",
+        "second_dtype": "int32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0,
+        "labels": {
+          "1": {
+            "dice": 1.0,
+            "first_voxels": 594932,
+            "second_voxels": 594932,
+            "volume_difference_percent": 0.0
+          },
+          "2": {
+            "dice": 1.0,
+            "first_voxels": 1290710,
+            "second_voxels": 1290710,
+            "volume_difference_percent": 0.0
+          },
+          "3": {
+            "dice": 1.0,
+            "first_voxels": 958081,
+            "second_voxels": 958081,
+            "volume_difference_percent": 0.0
+          }
+        }
+      },
+      "pveseg": {
+        "first_sha256": "099c0ad0bef09d4ce2e74b6e0c4ff097f8f44f1f6d3c05042ff9d5fedb87daa0",
+        "second_sha256": "fb0e54ea5d38609a68fc9f9f7dc8ec3ae967a39a0404bb04342f0f1e9f569ba8",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "int32",
+        "second_dtype": "int32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 3.5165169040725836e-07,
+          "rmse": 0.0005930022684672112,
+          "maximum_absolute_error": 1.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 1,
+          "pearson_r": 0.9999996463114572
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 5.382288910934744e-08,
+          "rmse": 0.00023199760582675726,
+          "maximum_absolute_error": 1.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 1,
+          "pearson_r": 0.9999999609448269
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 1,
+        "labels": {
+          "1": {
+            "dice": 1.0,
+            "first_voxels": 501983,
+            "second_voxels": 501983,
+            "volume_difference_percent": 0.0
+          },
+          "2": {
+            "dice": 0.9999996278159907,
+            "first_voxels": 1343422,
+            "second_voxels": 1343421,
+            "volume_difference_percent": -7.443677414453731e-05
+          },
+          "3": {
+            "dice": 0.9999994991578339,
+            "first_voxels": 998318,
+            "second_voxels": 998319,
+            "volume_difference_percent": 0.00010016848339677864
+          }
+        }
+      },
+      "mixeltype": {
+        "first_sha256": "1b6878eedc4e4c67a28236dbe8c121a39c88435ce02afda739782603cbb9fcf2",
+        "second_sha256": "017a4787d21dbcffb696965b398db20a672431c22169920d5adc4f7eda4a657d",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "int32",
+        "second_dtype": "int32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 0,
+          "pearson_r": 1.0
+        },
+        "values_exact_equal": true,
+        "dtype_equal": true,
+        "changed_bit_patterns": 0,
+        "labels": {
+          "0": {
+            "dice": 1.0,
+            "first_voxels": 377072,
+            "second_voxels": 377072,
+            "volume_difference_percent": 0.0
+          },
+          "1": {
+            "dice": 1.0,
+            "first_voxels": 842332,
+            "second_voxels": 842332,
+            "volume_difference_percent": 0.0
+          },
+          "2": {
+            "dice": 1.0,
+            "first_voxels": 739044,
+            "second_voxels": 739044,
+            "volume_difference_percent": 0.0
+          },
+          "3": {
+            "dice": 1.0,
+            "first_voxels": 411368,
+            "second_voxels": 411368,
+            "volume_difference_percent": 0.0
+          },
+          "4": {
+            "dice": 1.0,
+            "first_voxels": 4713,
+            "second_voxels": 4713,
+            "volume_difference_percent": 0.0
+          },
+          "5": {
+            "dice": 1.0,
+            "first_voxels": 469194,
+            "second_voxels": 469194,
+            "volume_difference_percent": 0.0
+          }
+        }
+      },
+      "bias": {
+        "first_sha256": "3eb41bea70daefd43e9aeea9eb543781842e11fc1a2f271a1472367206b63063",
+        "second_sha256": "009a8bbcacccf531a84395bb197025eb9b1df5748c7af45db07a5a5ee2658afc",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 9.006334236329487e-10,
+          "rmse": 1.0204380768506869e-08,
+          "maximum_absolute_error": 1.1920928955078125e-07,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 22779,
+          "pearson_r": 0.9999999999999899
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 1.378485990845889e-10,
+          "rmse": 3.992213914050313e-09,
+          "maximum_absolute_error": 1.1920928955078125e-07,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 22779,
+          "pearson_r": 1.0
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 22779
+      },
+      "restore": {
+        "first_sha256": "51468114b7e692e57a2c163bd7df3741c368b81c00aa26d2b3493f342b8cc103",
+        "second_sha256": "9c7bac9c7984afd2998b5c6b86aa0b4307a67a2bd1375fe67d7b6fc772dc194b",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 7.160174263971687e-07,
+          "rmse": 8.07937709985863e-06,
+          "maximum_absolute_error": 0.000244140625,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 26789,
+          "pearson_r": 1.0
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 1.0959175682250522e-07,
+          "rmse": 3.1608583025890613e-06,
+          "maximum_absolute_error": 0.000244140625,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 26789,
+          "pearson_r": 0.9999999999990974
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 26789
+      }
+    },
+    "all_value_bits_equal": false
+  },
+  "observed_full_cpu_budget_speed_ratio": 3.669221551455127,
+  "speed_ratio_limitations": [
+    "Both restricted to identical eight physical CPUs; official FAST actually single-threaded.",
+    "Candidate new process used existing Numba disk cache; first-JIT cost measured separately on real patch.",
+    "One whole-image timing per side on a shared node; no stable speed distribution inferred.",
+    "Worker cold process is distinct from the public CLI benchmark."
+  ],
+  "tests": {
+    "affected_suite_passed": 277,
+    "command": "PYTHONPATH=src python -m pytest -q tests/fast tests/fast_vbm",
+    "seconds": 29.05,
+    "warnings": 2,
+    "warning_scope": "Existing torch profiler tests run without warmup."
+  },
+  "single_thread_sensitivity": {
+    "wall_seconds": 325.27495635300875,
+    "cpu_affinity": "0",
+    "threads": 1,
+    "hostname": "nodecw10",
+    "load_before": [
+      52.94,
+      37.23,
+      32.57
+    ],
+    "load_after": [
+      47.57,
+      41.46,
+      35.85
+    ],
+    "all8_same_compressed_output_sha_as_cpu8": true,
+    "all8_value_bits_equal": true,
+    "timing_scope": "unpaired sensitivity; fresh strict single-core original pair measured separately"
+  },
+  "tensor_vs_official": {
+    "scope": "Every voxel of all eight maps; brain and whole-grid metrics are separate.",
+    "brain_voxels": 2843723,
+    "outputs": {
+      "pve_0": {
+        "first_sha256": "584e24ed7876058af83ca474217ed54364e6d16d4eb69ebf48c8ffcf494d9533",
+        "second_sha256": "35194f6e97783ffeb52974df57b4c8744642d95f2a461799dea8114f8faa4808",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 0.008270404003406735,
+          "rmse": 0.05697327220704036,
+          "maximum_absolute_error": 1.0,
+          "p99_absolute_error": 0.3199999928474426,
+          "changed_numerical_values": 415659,
+          "pearson_r": 0.9872020803899997
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 0.0012658464318750673,
+          "rmse": 0.0222893966026714,
+          "maximum_absolute_error": 1.0,
+          "p99_absolute_error": 1.7881393432617188e-07,
+          "changed_numerical_values": 415659,
+          "pearson_r": 0.9897663763230261
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 415659,
+        "soft_volume_mm3": {
+          "first": 265980.7965313387,
+          "second": 267372.5002571081,
+          "difference_percent": 0.5232346635240859
+        },
+        "dice_0.5": 0.9903069078795911
+      },
+      "pve_1": {
+        "first_sha256": "26f9189f962750066164a39df912557f5184821b583299170d7cb7c3e2e10417",
+        "second_sha256": "9a1d7c53c4b2f3ad3fd8023b2fc7c65225d0b2878e3c126e8d6c82b0e230fe22",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 0.014872108308880853,
+          "rmse": 0.07593875631014756,
+          "maximum_absolute_error": 1.0,
+          "p99_absolute_error": 0.4099999666213989,
+          "changed_numerical_values": 849588,
+          "pearson_r": 0.984385268014659
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 0.0022762860471509817,
+          "rmse": 0.029709177502733164,
+          "maximum_absolute_error": 1.0,
+          "p99_absolute_error": 4.76837158203125e-07,
+          "changed_numerical_values": 849588,
+          "pearson_r": 0.9920625689743476
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 849588,
+        "soft_volume_mm3": {
+          "first": 633065.1276655444,
+          "second": 630123.3035031434,
+          "difference_percent": -0.46469534236535104
+        },
+        "dice_0.5": 0.9920012758015399
+      },
+      "pve_2": {
+        "first_sha256": "ef97fe04d98509a780ba812b38becd190dd68ed5543d115760aaec09f0b3d245",
+        "second_sha256": "3c1cdbc6ae63dd37f3751b62e8c20ef852cf4c4c4b140e0d6973507701263971",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 0.006942574571210752,
+          "rmse": 0.05016888781300493,
+          "maximum_absolute_error": 1.0,
+          "p99_absolute_error": 0.30000001192092896,
+          "changed_numerical_values": 453896,
+          "pearson_r": 0.9934412477446224
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 0.0010626123276896349,
+          "rmse": 0.019627347952129937,
+          "maximum_absolute_error": 1.0,
+          "p99_absolute_error": 2.980232238769531e-07,
+          "changed_numerical_values": 453896,
+          "pearson_r": 0.9957197223863014
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 453896,
+        "soft_volume_mm3": {
+          "first": 477187.2661771614,
+          "second": 478737.3862110351,
+          "difference_percent": 0.32484522193811927
+        },
+        "dice_0.5": 0.9923290808721693
+      },
+      "seg": {
+        "first_sha256": "09226cebd26aff52e4f016665296a98a9e1422a1556f076757852b377032dc1f",
+        "second_sha256": "77dc6915ae5a447625d6b2df0d966cc593147a9b5ed85ef548563d20b736eb23",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "int32",
+        "second_dtype": "int32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 9.635256317158879e-05,
+          "rmse": 0.009851693588028574,
+          "maximum_absolute_error": 2.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 273,
+          "pearson_r": 0.9999084150533274
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 1.4747471615961198e-05,
+          "rmse": 0.0038542336974008067,
+          "maximum_absolute_error": 2.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 273,
+          "pearson_r": 0.9999888800311925
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 273,
+        "labels": {
+          "1": {
+            "dice": 0.9998529400642526,
+            "first_voxels": 594932,
+            "second_voxels": 595059,
+            "volume_difference_percent": 0.02134697746969394
+          },
+          "2": {
+            "dice": 0.9998946229827275,
+            "first_voxels": 1290710,
+            "second_voxels": 1290498,
+            "volume_difference_percent": -0.01642506837321589
+          },
+          "3": {
+            "dice": 0.9999483365140298,
+            "first_voxels": 958081,
+            "second_voxels": 958166,
+            "volume_difference_percent": 0.008871901227558432
+          }
+        }
+      },
+      "pveseg": {
+        "first_sha256": "099c0ad0bef09d4ce2e74b6e0c4ff097f8f44f1f6d3c05042ff9d5fedb87daa0",
+        "second_sha256": "02615d0a7fcc40acf253e0ebe9cc369ddf0e7ec4dadc89ec1ece5bd84939077e",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "int32",
+        "second_dtype": "int32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 0.010826300592568264,
+          "rmse": 0.10554940645874022,
+          "maximum_absolute_error": 2.0,
+          "p99_absolute_error": 1.0,
+          "changed_numerical_values": 30340,
+          "pearson_r": 0.988793110994182
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 0.0016570452870094798,
+          "rmse": 0.041293618754878296,
+          "maximum_absolute_error": 2.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 30340,
+          "pearson_r": 0.9987621002597187
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 30340,
+        "labels": {
+          "1": {
+            "dice": 0.9845546019885651,
+            "first_voxels": 501983,
+            "second_voxels": 503365,
+            "volume_difference_percent": 0.275308127964502
+          },
+          "2": {
+            "dice": 0.9888993154955426,
+            "first_voxels": 1343422,
+            "second_voxels": 1349475,
+            "volume_difference_percent": 0.45056579392031004
+          },
+          "3": {
+            "dice": 0.9923290808721693,
+            "first_voxels": 998318,
+            "second_voxels": 990883,
+            "volume_difference_percent": -0.7447526739976618
+          }
+        }
+      },
+      "mixeltype": {
+        "first_sha256": "1b6878eedc4e4c67a28236dbe8c121a39c88435ce02afda739782603cbb9fcf2",
+        "second_sha256": "a114f75ccc2ff38baec5e92f57e0c5a8e5c72d1d6f125d27657a20f416421974",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "int32",
+        "second_dtype": "int32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 0.16496262118356816,
+          "rmse": 0.7212087640544811,
+          "maximum_absolute_error": 5.0,
+          "p99_absolute_error": 4.0,
+          "changed_numerical_values": 159626,
+          "pearson_r": 0.8939176247607143
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 0.02524874786430776,
+          "rmse": 0.2821552554839271,
+          "maximum_absolute_error": 5.0,
+          "p99_absolute_error": 0.0,
+          "changed_numerical_values": 159626,
+          "pearson_r": 0.9573739700784315
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 159626,
+        "labels": {
+          "0": {
+            "dice": 0.9487060261798842,
+            "first_voxels": 377072,
+            "second_voxels": 388554,
+            "volume_difference_percent": 3.045041795731329
+          },
+          "1": {
+            "dice": 0.9476380993749502,
+            "first_voxels": 842332,
+            "second_voxels": 829055,
+            "volume_difference_percent": -1.5762193529392232
+          },
+          "2": {
+            "dice": 0.9802235042996326,
+            "first_voxels": 739044,
+            "second_voxels": 749339,
+            "volume_difference_percent": 1.3930158420878858
+          },
+          "3": {
+            "dice": 0.8956510544444066,
+            "first_voxels": 411368,
+            "second_voxels": 412004,
+            "volume_difference_percent": 0.15460609478616938
+          },
+          "4": {
+            "dice": 0.4396823018132774,
+            "first_voxels": 4713,
+            "second_voxels": 1960,
+            "volume_difference_percent": -58.412900488011886
+          },
+          "5": {
+            "dice": 0.9212761734110868,
+            "first_voxels": 469194,
+            "second_voxels": 462811,
+            "volume_difference_percent": -1.360418078662562
+          }
+        }
+      },
+      "bias": {
+        "first_sha256": "3eb41bea70daefd43e9aeea9eb543781842e11fc1a2f271a1472367206b63063",
+        "second_sha256": "a890b24884e56562c1badd0a843257aca5932342eb81692986784994fe2390a3",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 4.603765559688372e-06,
+          "rmse": 5.7294775088361826e-06,
+          "maximum_absolute_error": 1.633167266845703e-05,
+          "p99_absolute_error": 1.4424324035644531e-05,
+          "changed_numerical_values": 2826742,
+          "pearson_r": 0.9999999982662096
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 7.046403300879043e-07,
+          "rmse": 2.241517672645707e-06,
+          "maximum_absolute_error": 1.633167266845703e-05,
+          "p99_absolute_error": 1.0728836059570312e-05,
+          "changed_numerical_values": 2826742,
+          "pearson_r": 0.9999999982666101
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 2826742
+      },
+      "restore": {
+        "first_sha256": "51468114b7e692e57a2c163bd7df3741c368b81c00aa26d2b3493f342b8cc103",
+        "second_sha256": "837b161b451bd2dce285241dd82f73efedf8328b59d5eaac0a626ed78b205ea9",
+        "shape_equal": true,
+        "affine_equal": true,
+        "affine_maximum_absolute_error": 0.0,
+        "first_dtype": "float32",
+        "second_dtype": "float32",
+        "finite": true,
+        "header_fields_equal": {
+          "dim": true,
+          "pixdim": true,
+          "datatype": true,
+          "xyzt_units": true,
+          "qform_code": true,
+          "sform_code": true,
+          "intent_code": true
+        },
+        "brain": {
+          "values": 2843723,
+          "mae": 0.0036650786710476315,
+          "rmse": 0.004844315458002651,
+          "maximum_absolute_error": 0.0184326171875,
+          "p99_absolute_error": 0.013916015625,
+          "changed_numerical_values": 2827026,
+          "pearson_r": 0.9999999998558633
+        },
+        "whole_grid": {
+          "values": 18579456,
+          "mae": 0.0005609673670567957,
+          "rmse": 0.0018952197114374247,
+          "maximum_absolute_error": 0.0184326171875,
+          "p99_absolute_error": 0.0096435546875,
+          "changed_numerical_values": 2827026,
+          "pearson_r": 0.9999999999805811
+        },
+        "values_exact_equal": false,
+        "dtype_equal": true,
+        "changed_bit_patterns": 2827026
+      }
+    },
+    "all_value_bits_equal": false
+  },
+  "tensor_numa3_runs": [
+    {
+      "status": "complete",
+      "wall_seconds": 92.89016325771809,
+      "maximum_sampled_tree_rss_bytes": 4390817792,
+      "hostname": "nodecw10",
+      "cpu_affinity": "3,7,11,15,19,23,27,31",
+      "max_cpu_threads": 8,
+      "load_before": [
+        90.86,
+        78.3,
+        58.74
+      ],
+      "load_after": [
+        86.35,
+        80.84,
+        61.58
+      ],
+      "id": "0_baseline_tensor",
+      "loaded_api_seconds": 86.55212335288525,
+      "save_seconds": 3.3183033913373947,
+      "all_8_compressed_outputs_same_sha256": true
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 91.38273085653782,
+      "maximum_sampled_tree_rss_bytes": 4378177536,
+      "hostname": "nodecw10",
+      "cpu_affinity": "3,7,11,15,19,23,27,31",
+      "max_cpu_threads": 8,
+      "load_before": [
+        86.35,
+        80.84,
+        61.58
+      ],
+      "load_after": [
+        89.49,
+        83.15,
+        64.17
+      ],
+      "id": "1_candidate_tensor",
+      "loaded_api_seconds": 85.43201652914286,
+      "save_seconds": 3.3092559054493904,
+      "all_8_compressed_outputs_same_sha256": true
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 85.36222763359547,
+      "maximum_sampled_tree_rss_bytes": 4353933312,
+      "hostname": "nodecw10",
+      "cpu_affinity": "3,7,11,15,19,23,27,31",
+      "max_cpu_threads": 8,
+      "load_before": [
+        89.49,
+        83.15,
+        64.17
+      ],
+      "load_after": [
+        90.16,
+        84.72,
+        66.37
+      ],
+      "id": "2_candidate_tensor",
+      "loaded_api_seconds": 79.56942374259233,
+      "save_seconds": 3.217146687209606,
+      "all_8_compressed_outputs_same_sha256": true
+    },
+    {
+      "status": "complete",
+      "wall_seconds": 88.37589126825333,
+      "maximum_sampled_tree_rss_bytes": 4356452352,
+      "hostname": "nodecw10",
+      "cpu_affinity": "3,7,11,15,19,23,27,31",
+      "max_cpu_threads": 8,
+      "load_before": [
+        90.16,
+        84.72,
+        66.37
+      ],
+      "load_after": [
+        94.13,
+        87.0,
+        68.84
+      ],
+      "id": "3_baseline_tensor",
+      "loaded_api_seconds": 82.6774254962802,
+      "save_seconds": 3.277648590505123,
+      "all_8_compressed_outputs_same_sha256": true
+    }
+  ],
+  "corrected_public_cli": {
+    "corrected_cpu1_vs_cpu8": {
+      "scope": "Every voxel of all eight maps; brain and whole-grid metrics are separate.",
+      "brain_voxels": 2843038,
+      "outputs": {
+        "pve_0": {
+          "first_sha256": "80457934ad3709af140d929bb408e1046db0a8f7300d76dbd0d26fc98800e15e",
+          "second_sha256": "80457934ad3709af140d929bb408e1046db0a8f7300d76dbd0d26fc98800e15e",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "soft_volume_mm3": {
+            "first": 265499.5422086273,
+            "second": 265499.5422086273,
+            "difference_percent": 0.0
+          },
+          "dice_0.5": 1.0
+        },
+        "pve_1": {
+          "first_sha256": "e2da16dd71adddc0d46eef2c7354e21581b442bac3cade728d45536fedddb71d",
+          "second_sha256": "e2da16dd71adddc0d46eef2c7354e21581b442bac3cade728d45536fedddb71d",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "soft_volume_mm3": {
+            "first": 633099.1836035606,
+            "second": 633099.1836035606,
+            "difference_percent": 0.0
+          },
+          "dice_0.5": 1.0
+        },
+        "pve_2": {
+          "first_sha256": "382244b27f44eaa180584593a26cfa120cc1e7b840213bc0e7378639bc610f16",
+          "second_sha256": "382244b27f44eaa180584593a26cfa120cc1e7b840213bc0e7378639bc610f16",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "soft_volume_mm3": {
+            "first": 477302.9555741678,
+            "second": 477302.9555741678,
+            "difference_percent": 0.0
+          },
+          "dice_0.5": 1.0
+        },
+        "seg": {
+          "first_sha256": "5eed0cbaab5166b6459d8c3056d49735599504f0c39173bbcba16f8f007556ab",
+          "second_sha256": "5eed0cbaab5166b6459d8c3056d49735599504f0c39173bbcba16f8f007556ab",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "int32",
+          "second_dtype": "int32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "labels": {
+            "1": {
+              "dice": 1.0,
+              "first_voxels": 593922,
+              "second_voxels": 593922,
+              "volume_difference_percent": 0.0
+            },
+            "2": {
+              "dice": 1.0,
+              "first_voxels": 1290646,
+              "second_voxels": 1290646,
+              "volume_difference_percent": 0.0
+            },
+            "3": {
+              "dice": 1.0,
+              "first_voxels": 958470,
+              "second_voxels": 958470,
+              "volume_difference_percent": 0.0
+            }
+          }
+        },
+        "pveseg": {
+          "first_sha256": "d1de13e0c940f692ce1af720a8651f220bd6e2373a4f4f175d731d51b68f40a0",
+          "second_sha256": "d1de13e0c940f692ce1af720a8651f220bd6e2373a4f4f175d731d51b68f40a0",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "int32",
+          "second_dtype": "int32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "labels": {
+            "1": {
+              "dice": 1.0,
+              "first_voxels": 500956,
+              "second_voxels": 500956,
+              "volume_difference_percent": 0.0
+            },
+            "2": {
+              "dice": 1.0,
+              "first_voxels": 1343566,
+              "second_voxels": 1343566,
+              "volume_difference_percent": 0.0
+            },
+            "3": {
+              "dice": 1.0,
+              "first_voxels": 998516,
+              "second_voxels": 998516,
+              "volume_difference_percent": 0.0
+            }
+          }
+        },
+        "mixeltype": {
+          "first_sha256": "2c6f0769be960592ba856d06dff78a3f61388216bbf99be4af96875f471063a5",
+          "second_sha256": "2c6f0769be960592ba856d06dff78a3f61388216bbf99be4af96875f471063a5",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "int32",
+          "second_dtype": "int32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 0.9999999999999999
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "labels": {
+            "0": {
+              "dice": 1.0,
+              "first_voxels": 375860,
+              "second_voxels": 375860,
+              "volume_difference_percent": 0.0
+            },
+            "1": {
+              "dice": 1.0,
+              "first_voxels": 842168,
+              "second_voxels": 842168,
+              "volume_difference_percent": 0.0
+            },
+            "2": {
+              "dice": 1.0,
+              "first_voxels": 739226,
+              "second_voxels": 739226,
+              "volume_difference_percent": 0.0
+            },
+            "3": {
+              "dice": 1.0,
+              "first_voxels": 411738,
+              "second_voxels": 411738,
+              "volume_difference_percent": 0.0
+            },
+            "4": {
+              "dice": 1.0,
+              "first_voxels": 4739,
+              "second_voxels": 4739,
+              "volume_difference_percent": 0.0
+            },
+            "5": {
+              "dice": 1.0,
+              "first_voxels": 469307,
+              "second_voxels": 469307,
+              "volume_difference_percent": 0.0
+            }
+          }
+        },
+        "bias": {
+          "first_sha256": "2f9c553ae94250126eddc585cd076ea1a422e9bda73203cc3ae53d0b212da0d4",
+          "second_sha256": "2f9c553ae94250126eddc585cd076ea1a422e9bda73203cc3ae53d0b212da0d4",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 0.9999999999999998
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0
+        },
+        "restore": {
+          "first_sha256": "47a43be9b9fbb2eed34cc1752a62779f1d71974445236f2207b587410749c5c8",
+          "second_sha256": "47a43be9b9fbb2eed34cc1752a62779f1d71974445236f2207b587410749c5c8",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 0.9999999999999998
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 0.9999999999999998
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0
+        }
+      },
+      "all_value_bits_equal": true
+    },
+    "strict_one_thread_reference": {
+      "scope": "Every voxel of all eight maps; brain and whole-grid metrics are separate.",
+      "brain_voxels": 2843038,
+      "outputs": {
+        "pve_0": {
+          "first_sha256": "ce01e997b7d1719b87a0a21afd76d72145f17fe86e805e0060633f4010e06942",
+          "second_sha256": "80457934ad3709af140d929bb408e1046db0a8f7300d76dbd0d26fc98800e15e",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 1.7586814568995055e-08,
+            "rmse": 1.3261526412698282e-05,
+            "maximum_absolute_error": 0.01000000536441803,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 5,
+            "pearson_r": 0.9999999993053068
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 2.6911434930391165e-09,
+            "rmse": 5.187622317220712e-06,
+            "maximum_absolute_error": 0.01000000536441803,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 5,
+            "pearson_r": 0.9999999994430848
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 5,
+          "soft_volume_mm3": {
+            "first": 265499.5470481844,
+            "second": 265499.5422086273,
+            "difference_percent": -1.822811812601799e-06
+          },
+          "dice_0.5": 1.0
+        },
+        "pve_1": {
+          "first_sha256": "f27565c649053ebe5dd783709492ae989436b84fc0541cd06c194451217b8246",
+          "second_sha256": "e2da16dd71adddc0d46eef2c7354e21581b442bac3cade728d45536fedddb71d",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 9.496876565250269e-08,
+            "rmse": 3.0816991850115004e-05,
+            "maximum_absolute_error": 0.01000000536441803,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 27,
+            "pearson_r": 0.999999997434977
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.4532169809662884e-08,
+            "rmse": 1.2054940713173737e-05,
+            "maximum_absolute_error": 0.01000000536441803,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 27,
+            "pearson_r": 0.9999999986971174
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 27,
+          "soft_volume_mm3": {
+            "first": 633099.1497267584,
+            "second": 633099.1836035606,
+            "difference_percent": 5.350947351878688e-06
+          },
+          "dice_0.5": 0.999999255711484
+        },
+        "pve_2": {
+          "first_sha256": "e86cc83bbdb018243763e51bd14c82f34bd2d73011216dd43016544b88fb0dff",
+          "second_sha256": "382244b27f44eaa180584593a26cfa120cc1e7b840213bc0e7378639bc610f16",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 7.738193798030501e-08,
+            "rmse": 2.7817595903157807e-05,
+            "maximum_absolute_error": 0.009999990463256836,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 22,
+            "pearson_r": 0.9999999979822666
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.1841024311564903e-08,
+            "rmse": 1.0881641888558976e-05,
+            "maximum_absolute_error": 0.009999990463256836,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 22,
+            "pearson_r": 0.9999999986834434
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 22,
+          "soft_volume_mm3": {
+            "first": 477302.98461142374,
+            "second": 477302.9555741678,
+            "difference_percent": -6.083610815110774e-06
+          },
+          "dice_0.5": 0.9999989985147975
+        },
+        "seg": {
+          "first_sha256": "8a643ea1a78e328045af3331d15c811357a65fea738a1909dfec4041a7aeb2c1",
+          "second_sha256": "5eed0cbaab5166b6459d8c3056d49735599504f0c39173bbcba16f8f007556ab",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "int32",
+          "second_dtype": "int32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "labels": {
+            "1": {
+              "dice": 1.0,
+              "first_voxels": 593922,
+              "second_voxels": 593922,
+              "volume_difference_percent": 0.0
+            },
+            "2": {
+              "dice": 1.0,
+              "first_voxels": 1290646,
+              "second_voxels": 1290646,
+              "volume_difference_percent": 0.0
+            },
+            "3": {
+              "dice": 1.0,
+              "first_voxels": 958470,
+              "second_voxels": 958470,
+              "volume_difference_percent": 0.0
+            }
+          }
+        },
+        "pveseg": {
+          "first_sha256": "cf07607daa03e2ebbb6c56bbf6d831fa71d80b9092b0eb7077671b2239ed0d91",
+          "second_sha256": "d1de13e0c940f692ce1af720a8651f220bd6e2373a4f4f175d731d51b68f40a0",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "int32",
+          "second_dtype": "int32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 7.034728343412927e-07,
+            "rmse": 0.0008387328742462004,
+            "maximum_absolute_error": 1.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 2,
+            "pearson_r": 0.9999992919832246
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.0764577821869488e-07,
+            "rmse": 0.0003280941605982875,
+            "maximum_absolute_error": 1.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 2,
+            "pearson_r": 0.999999921898387
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 2,
+          "labels": {
+            "1": {
+              "dice": 1.0,
+              "first_voxels": 500956,
+              "second_voxels": 500956,
+              "volume_difference_percent": 0.0
+            },
+            "2": {
+              "dice": 0.999999255711484,
+              "first_voxels": 1343564,
+              "second_voxels": 1343566,
+              "volume_difference_percent": 0.00014885781398632503
+            },
+            "3": {
+              "dice": 0.9999989985147975,
+              "first_voxels": 998518,
+              "second_voxels": 998516,
+              "volume_difference_percent": -0.0002002968399139604
+            }
+          }
+        },
+        "mixeltype": {
+          "first_sha256": "3888506702998578296920781cdc97d8eec57e55c7ead106282fa5c9e4ed3c58",
+          "second_sha256": "2c6f0769be960592ba856d06dff78a3f61388216bbf99be4af96875f471063a5",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "int32",
+          "second_dtype": "int32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 0.9999999999999999
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "labels": {
+            "0": {
+              "dice": 1.0,
+              "first_voxels": 375860,
+              "second_voxels": 375860,
+              "volume_difference_percent": 0.0
+            },
+            "1": {
+              "dice": 1.0,
+              "first_voxels": 842168,
+              "second_voxels": 842168,
+              "volume_difference_percent": 0.0
+            },
+            "2": {
+              "dice": 1.0,
+              "first_voxels": 739226,
+              "second_voxels": 739226,
+              "volume_difference_percent": 0.0
+            },
+            "3": {
+              "dice": 1.0,
+              "first_voxels": 411738,
+              "second_voxels": 411738,
+              "volume_difference_percent": 0.0
+            },
+            "4": {
+              "dice": 1.0,
+              "first_voxels": 4739,
+              "second_voxels": 4739,
+              "volume_difference_percent": 0.0
+            },
+            "5": {
+              "dice": 1.0,
+              "first_voxels": 469307,
+              "second_voxels": 469307,
+              "volume_difference_percent": 0.0
+            }
+          }
+        },
+        "bias": {
+          "first_sha256": "c9d8f076312203d21444e41c7dfcbfabf70195e737469f9fcc21943c24a8c5e5",
+          "second_sha256": "2f9c553ae94250126eddc585cd076ea1a422e9bda73203cc3ae53d0b212da0d4",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 8.951898382168667e-10,
+            "rmse": 1.017286485295978e-08,
+            "maximum_absolute_error": 1.1920928955078125e-07,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 22641,
+            "pearson_r": 0.9999999999999938
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.3698241365432896e-10,
+            "rmse": 3.979404715489821e-09,
+            "maximum_absolute_error": 1.1920928955078125e-07,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 22641,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 22641
+        },
+        "restore": {
+          "first_sha256": "5ab4e3f27d10cf71a1f1e5c3af3e2f7dba3a82de88c537c6349d158d21ff1a73",
+          "second_sha256": "47a43be9b9fbb2eed34cc1752a62779f1d71974445236f2207b587410749c5c8",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 7.105972028469451e-07,
+            "rmse": 8.054575540390868e-06,
+            "maximum_absolute_error": 0.000244140625,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 26568,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.0873595278503166e-07,
+            "rmse": 3.150775749996796e-06,
+            "maximum_absolute_error": 0.000244140625,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 26568,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 26568
+        }
+      },
+      "all_value_bits_equal": false
+    },
+    "corrected_cpu8_reference": {
+      "scope": "Every voxel of all eight maps; brain and whole-grid metrics are separate.",
+      "brain_voxels": 2843038,
+      "outputs": {
+        "pve_0": {
+          "first_sha256": "ce01e997b7d1719b87a0a21afd76d72145f17fe86e805e0060633f4010e06942",
+          "second_sha256": "80457934ad3709af140d929bb408e1046db0a8f7300d76dbd0d26fc98800e15e",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 1.7586814568995055e-08,
+            "rmse": 1.3261526412698282e-05,
+            "maximum_absolute_error": 0.01000000536441803,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 5,
+            "pearson_r": 0.9999999993053068
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 2.6911434930391165e-09,
+            "rmse": 5.187622317220712e-06,
+            "maximum_absolute_error": 0.01000000536441803,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 5,
+            "pearson_r": 0.9999999994430848
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 5,
+          "soft_volume_mm3": {
+            "first": 265499.5470481844,
+            "second": 265499.5422086273,
+            "difference_percent": -1.822811812601799e-06
+          },
+          "dice_0.5": 1.0
+        },
+        "pve_1": {
+          "first_sha256": "f27565c649053ebe5dd783709492ae989436b84fc0541cd06c194451217b8246",
+          "second_sha256": "e2da16dd71adddc0d46eef2c7354e21581b442bac3cade728d45536fedddb71d",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 9.496876565250269e-08,
+            "rmse": 3.0816991850115004e-05,
+            "maximum_absolute_error": 0.01000000536441803,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 27,
+            "pearson_r": 0.999999997434977
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.4532169809662884e-08,
+            "rmse": 1.2054940713173737e-05,
+            "maximum_absolute_error": 0.01000000536441803,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 27,
+            "pearson_r": 0.9999999986971174
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 27,
+          "soft_volume_mm3": {
+            "first": 633099.1497267584,
+            "second": 633099.1836035606,
+            "difference_percent": 5.350947351878688e-06
+          },
+          "dice_0.5": 0.999999255711484
+        },
+        "pve_2": {
+          "first_sha256": "e86cc83bbdb018243763e51bd14c82f34bd2d73011216dd43016544b88fb0dff",
+          "second_sha256": "382244b27f44eaa180584593a26cfa120cc1e7b840213bc0e7378639bc610f16",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 7.738193798030501e-08,
+            "rmse": 2.7817595903157807e-05,
+            "maximum_absolute_error": 0.009999990463256836,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 22,
+            "pearson_r": 0.9999999979822666
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.1841024311564903e-08,
+            "rmse": 1.0881641888558976e-05,
+            "maximum_absolute_error": 0.009999990463256836,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 22,
+            "pearson_r": 0.9999999986834434
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 22,
+          "soft_volume_mm3": {
+            "first": 477302.98461142374,
+            "second": 477302.9555741678,
+            "difference_percent": -6.083610815110774e-06
+          },
+          "dice_0.5": 0.9999989985147975
+        },
+        "seg": {
+          "first_sha256": "8a643ea1a78e328045af3331d15c811357a65fea738a1909dfec4041a7aeb2c1",
+          "second_sha256": "5eed0cbaab5166b6459d8c3056d49735599504f0c39173bbcba16f8f007556ab",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "int32",
+          "second_dtype": "int32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "labels": {
+            "1": {
+              "dice": 1.0,
+              "first_voxels": 593922,
+              "second_voxels": 593922,
+              "volume_difference_percent": 0.0
+            },
+            "2": {
+              "dice": 1.0,
+              "first_voxels": 1290646,
+              "second_voxels": 1290646,
+              "volume_difference_percent": 0.0
+            },
+            "3": {
+              "dice": 1.0,
+              "first_voxels": 958470,
+              "second_voxels": 958470,
+              "volume_difference_percent": 0.0
+            }
+          }
+        },
+        "pveseg": {
+          "first_sha256": "cf07607daa03e2ebbb6c56bbf6d831fa71d80b9092b0eb7077671b2239ed0d91",
+          "second_sha256": "d1de13e0c940f692ce1af720a8651f220bd6e2373a4f4f175d731d51b68f40a0",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "int32",
+          "second_dtype": "int32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 7.034728343412927e-07,
+            "rmse": 0.0008387328742462004,
+            "maximum_absolute_error": 1.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 2,
+            "pearson_r": 0.9999992919832246
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.0764577821869488e-07,
+            "rmse": 0.0003280941605982875,
+            "maximum_absolute_error": 1.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 2,
+            "pearson_r": 0.999999921898387
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 2,
+          "labels": {
+            "1": {
+              "dice": 1.0,
+              "first_voxels": 500956,
+              "second_voxels": 500956,
+              "volume_difference_percent": 0.0
+            },
+            "2": {
+              "dice": 0.999999255711484,
+              "first_voxels": 1343564,
+              "second_voxels": 1343566,
+              "volume_difference_percent": 0.00014885781398632503
+            },
+            "3": {
+              "dice": 0.9999989985147975,
+              "first_voxels": 998518,
+              "second_voxels": 998516,
+              "volume_difference_percent": -0.0002002968399139604
+            }
+          }
+        },
+        "mixeltype": {
+          "first_sha256": "3888506702998578296920781cdc97d8eec57e55c7ead106282fa5c9e4ed3c58",
+          "second_sha256": "2c6f0769be960592ba856d06dff78a3f61388216bbf99be4af96875f471063a5",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "int32",
+          "second_dtype": "int32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 0,
+            "pearson_r": 0.9999999999999999
+          },
+          "values_exact_equal": true,
+          "dtype_equal": true,
+          "changed_bit_patterns": 0,
+          "labels": {
+            "0": {
+              "dice": 1.0,
+              "first_voxels": 375860,
+              "second_voxels": 375860,
+              "volume_difference_percent": 0.0
+            },
+            "1": {
+              "dice": 1.0,
+              "first_voxels": 842168,
+              "second_voxels": 842168,
+              "volume_difference_percent": 0.0
+            },
+            "2": {
+              "dice": 1.0,
+              "first_voxels": 739226,
+              "second_voxels": 739226,
+              "volume_difference_percent": 0.0
+            },
+            "3": {
+              "dice": 1.0,
+              "first_voxels": 411738,
+              "second_voxels": 411738,
+              "volume_difference_percent": 0.0
+            },
+            "4": {
+              "dice": 1.0,
+              "first_voxels": 4739,
+              "second_voxels": 4739,
+              "volume_difference_percent": 0.0
+            },
+            "5": {
+              "dice": 1.0,
+              "first_voxels": 469307,
+              "second_voxels": 469307,
+              "volume_difference_percent": 0.0
+            }
+          }
+        },
+        "bias": {
+          "first_sha256": "c9d8f076312203d21444e41c7dfcbfabf70195e737469f9fcc21943c24a8c5e5",
+          "second_sha256": "2f9c553ae94250126eddc585cd076ea1a422e9bda73203cc3ae53d0b212da0d4",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 8.951898382168667e-10,
+            "rmse": 1.017286485295978e-08,
+            "maximum_absolute_error": 1.1920928955078125e-07,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 22641,
+            "pearson_r": 0.9999999999999938
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.3698241365432896e-10,
+            "rmse": 3.979404715489821e-09,
+            "maximum_absolute_error": 1.1920928955078125e-07,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 22641,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 22641
+        },
+        "restore": {
+          "first_sha256": "5ab4e3f27d10cf71a1f1e5c3af3e2f7dba3a82de88c537c6349d158d21ff1a73",
+          "second_sha256": "47a43be9b9fbb2eed34cc1752a62779f1d71974445236f2207b587410749c5c8",
+          "shape_equal": true,
+          "affine_equal": true,
+          "affine_maximum_absolute_error": 0.0,
+          "first_dtype": "float32",
+          "second_dtype": "float32",
+          "finite": true,
+          "header_fields_equal": {
+            "dim": true,
+            "pixdim": true,
+            "datatype": true,
+            "xyzt_units": true,
+            "qform_code": true,
+            "sform_code": true,
+            "intent_code": true
+          },
+          "brain": {
+            "values": 2843038,
+            "mae": 7.105972028469451e-07,
+            "rmse": 8.054575540390868e-06,
+            "maximum_absolute_error": 0.000244140625,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 26568,
+            "pearson_r": 1.0
+          },
+          "whole_grid": {
+            "values": 18579456,
+            "mae": 1.0873595278503166e-07,
+            "rmse": 3.150775749996796e-06,
+            "maximum_absolute_error": 0.000244140625,
+            "p99_absolute_error": 0.0,
+            "changed_numerical_values": 26568,
+            "pearson_r": 1.0
+          },
+          "values_exact_equal": false,
+          "dtype_equal": true,
+          "changed_bit_patterns": 26568
+        }
+      },
+      "all_value_bits_equal": false
+    },
+    "run_records": {
+      "one_thread_0_official": {
+        "hostname": "nodecw10",
+        "max_cpu_threads": 1,
+        "cpu_affinity": "3",
+        "status": "complete",
+        "wall_seconds": 391.3895299360156,
+        "maximum_sampled_tree_rss_bytes": 2240475136,
+        "maximum_sampled_tree_threads": 3,
+        "started_utc": "2026-10-04T00:57:03.889128+00:00",
+        "load_before": [
+          85.42,
+          89.3,
+          92.07
+        ],
+        "load_after": [
+          113.21,
+          106.16,
+          98.63
+        ]
+      },
+      "one_thread_1_candidate_entrypoint_v2": {
+        "hostname": "nodecw10",
+        "max_cpu_threads": 1,
+        "cpu_affinity": "3",
+        "status": "complete",
+        "wall_seconds": 349.98917607218027,
+        "maximum_sampled_tree_rss_bytes": 3189719040,
+        "maximum_sampled_tree_threads": 64,
+        "started_utc": "2026-10-04T01:28:51.700724+00:00",
+        "load_before": [
+          114.69,
+          114.82,
+          111.24
+        ],
+        "load_after": [
+          105.47,
+          104.65,
+          107.41
+        ]
+      },
+      "default_0_official": {
+        "hostname": "nodecw10",
+        "max_cpu_threads": 8,
+        "cpu_affinity": "3,7,11,15,19,23,27,31",
+        "status": "complete",
+        "wall_seconds": 388.2162674739957,
+        "maximum_sampled_tree_rss_bytes": 2280468480,
+        "maximum_sampled_tree_threads": 3,
+        "started_utc": "2026-10-04T01:03:35.285719+00:00",
+        "load_before": [
+          113.21,
+          106.16,
+          98.63
+        ],
+        "load_after": [
+          121.06,
+          115.91,
+          105.9
+        ]
+      },
+      "default_3_official": {
+        "hostname": "nodecw10",
+        "max_cpu_threads": 8,
+        "cpu_affinity": "3,7,11,15,19,23,27,31",
+        "status": "complete",
+        "wall_seconds": 394.7898807153106,
+        "maximum_sampled_tree_rss_bytes": 2271543296,
+        "maximum_sampled_tree_threads": 5,
+        "started_utc": "2026-10-04T01:10:04.302475+00:00",
+        "load_before": [
+          121.06,
+          115.91,
+          105.9
+        ],
+        "load_after": [
+          104.08,
+          109.51,
+          106.87
+        ]
+      },
+      "default_1_candidate_entrypoint_v2": {
+        "hostname": "nodecw10",
+        "max_cpu_threads": 8,
+        "cpu_affinity": "3,7,11,15,19,23,27,31",
+        "status": "complete",
+        "wall_seconds": 121.68277706205845,
+        "maximum_sampled_tree_rss_bytes": 3209789440,
+        "maximum_sampled_tree_threads": 72,
+        "started_utc": "2026-10-04T01:26:50.009597+00:00",
+        "load_before": [
+          116.75,
+          115.01,
+          110.74
+        ],
+        "load_after": [
+          114.69,
+          114.82,
+          111.24
+        ]
+      },
+      "default_2_candidate_entrypoint_v2": {
+        "hostname": "nodecw10",
+        "max_cpu_threads": 8,
+        "cpu_affinity": "3,7,11,15,19,23,27,31",
+        "status": "complete",
+        "wall_seconds": 132.93889851123095,
+        "maximum_sampled_tree_rss_bytes": 3245391872,
+        "maximum_sampled_tree_threads": 72,
+        "started_utc": "2026-10-04T01:34:41.961305+00:00",
+        "load_before": [
+          105.47,
+          104.65,
+          107.41
+        ],
+        "load_after": [
+          104.8,
+          105.1,
+          107.24
+        ]
+      }
+    },
+    "no_bias_mrf_reference": {
+      "comparison": {
+        "scope": "Every voxel of all eight maps; brain and whole-grid metrics are separate.",
+        "brain_voxels": 2843038,
+        "outputs": {
+          "pve_0": {
+            "first_sha256": "fcd98d83729e066ec025547554619af6b9409f1913314e4c835de5b0203255ee",
+            "second_sha256": "34ffeca3e34c87a055eb8207a1de1e8ee43598d9eb7c642d46c7542235e31e6d",
+            "shape_equal": true,
+            "affine_equal": true,
+            "affine_maximum_absolute_error": 0.0,
+            "first_dtype": "float32",
+            "second_dtype": "float32",
+            "finite": true,
+            "header_fields_equal": {
+              "dim": true,
+              "pixdim": true,
+              "datatype": true,
+              "xyzt_units": true,
+              "qform_code": true,
+              "sform_code": true,
+              "intent_code": true
+            },
+            "brain": {
+              "values": 2843038,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "whole_grid": {
+              "values": 18579456,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "values_exact_equal": true,
+            "dtype_equal": true,
+            "changed_bit_patterns": 0,
+            "soft_volume_mm3": {
+              "first": 289765.6908436527,
+              "second": 289765.6908436527,
+              "difference_percent": 0.0
+            },
+            "dice_0.5": 1.0
+          },
+          "pve_1": {
+            "first_sha256": "17e46cc90eb1e02ddd9722d79406b0ec94b022613429b31d893a4d5aa62d5c7b",
+            "second_sha256": "d8ffe374832fafc93014362f38272a43a088ffc8c68ba0817ca919dce1236af6",
+            "shape_equal": true,
+            "affine_equal": true,
+            "affine_maximum_absolute_error": 0.0,
+            "first_dtype": "float32",
+            "second_dtype": "float32",
+            "finite": true,
+            "header_fields_equal": {
+              "dim": true,
+              "pixdim": true,
+              "datatype": true,
+              "xyzt_units": true,
+              "qform_code": true,
+              "sform_code": true,
+              "intent_code": true
+            },
+            "brain": {
+              "values": 2843038,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "whole_grid": {
+              "values": 18579456,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 0.9999999999999999
+            },
+            "values_exact_equal": true,
+            "dtype_equal": true,
+            "changed_bit_patterns": 0,
+            "soft_volume_mm3": {
+              "first": 594573.5904588604,
+              "second": 594573.5904588604,
+              "difference_percent": 0.0
+            },
+            "dice_0.5": 1.0
+          },
+          "pve_2": {
+            "first_sha256": "ed5c87883dbf36a4866bd6f69b9fc897ab877d740d6b334e011c32d418a669bf",
+            "second_sha256": "3ab33b94df4822063911b77cbbcebf7972abecf9aea22a07db17d129d7849d9c",
+            "shape_equal": true,
+            "affine_equal": true,
+            "affine_maximum_absolute_error": 0.0,
+            "first_dtype": "float32",
+            "second_dtype": "float32",
+            "finite": true,
+            "header_fields_equal": {
+              "dim": true,
+              "pixdim": true,
+              "datatype": true,
+              "xyzt_units": true,
+              "qform_code": true,
+              "sform_code": true,
+              "intent_code": true
+            },
+            "brain": {
+              "values": 2843038,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "whole_grid": {
+              "values": 18579456,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "values_exact_equal": true,
+            "dtype_equal": true,
+            "changed_bit_patterns": 0,
+            "soft_volume_mm3": {
+              "first": 491562.40000717354,
+              "second": 491562.40000717354,
+              "difference_percent": 0.0
+            },
+            "dice_0.5": 1.0
+          },
+          "seg": {
+            "first_sha256": "27db00fbbe0f6d3b3179cd26cd6997e17685d23b78ee001c431e602d0040fd5f",
+            "second_sha256": "54106792669a5e8c9a833c48b1910d11e6f0bc92b28abb487272ba03ae18c41e",
+            "shape_equal": true,
+            "affine_equal": true,
+            "affine_maximum_absolute_error": 0.0,
+            "first_dtype": "int32",
+            "second_dtype": "int32",
+            "finite": true,
+            "header_fields_equal": {
+              "dim": true,
+              "pixdim": true,
+              "datatype": true,
+              "xyzt_units": true,
+              "qform_code": true,
+              "sform_code": true,
+              "intent_code": true
+            },
+            "brain": {
+              "values": 2843038,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "whole_grid": {
+              "values": 18579456,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "values_exact_equal": true,
+            "dtype_equal": true,
+            "changed_bit_patterns": 0,
+            "labels": {
+              "1": {
+                "dice": 1.0,
+                "first_voxels": 582300,
+                "second_voxels": 582300,
+                "volume_difference_percent": 0.0
+              },
+              "2": {
+                "dice": 1.0,
+                "first_voxels": 1231599,
+                "second_voxels": 1231599,
+                "volume_difference_percent": 0.0
+              },
+              "3": {
+                "dice": 1.0,
+                "first_voxels": 1029139,
+                "second_voxels": 1029139,
+                "volume_difference_percent": 0.0
+              }
+            }
+          },
+          "pveseg": {
+            "first_sha256": "e0c42fecbad3a6c2408e664831e95b6d0d94389c8f59a7445166850ce3426368",
+            "second_sha256": "fc6f99d058b529ef01b9bb9561c2fba99520a4e4a727bb037dbb4de3c691cbdd",
+            "shape_equal": true,
+            "affine_equal": true,
+            "affine_maximum_absolute_error": 0.0,
+            "first_dtype": "int32",
+            "second_dtype": "int32",
+            "finite": true,
+            "header_fields_equal": {
+              "dim": true,
+              "pixdim": true,
+              "datatype": true,
+              "xyzt_units": true,
+              "qform_code": true,
+              "sform_code": true,
+              "intent_code": true
+            },
+            "brain": {
+              "values": 2843038,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "whole_grid": {
+              "values": 18579456,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "values_exact_equal": true,
+            "dtype_equal": true,
+            "changed_bit_patterns": 0,
+            "labels": {
+              "1": {
+                "dice": 1.0,
+                "first_voxels": 508359,
+                "second_voxels": 508359,
+                "volume_difference_percent": 0.0
+              },
+              "2": {
+                "dice": 1.0,
+                "first_voxels": 1333545,
+                "second_voxels": 1333545,
+                "volume_difference_percent": 0.0
+              },
+              "3": {
+                "dice": 1.0,
+                "first_voxels": 1001134,
+                "second_voxels": 1001134,
+                "volume_difference_percent": 0.0
+              }
+            }
+          },
+          "mixeltype": {
+            "first_sha256": "c0bde3e0e7155fa2938ce64becd241bb68dcffc7bc7179d75dfee58da2b9bc1a",
+            "second_sha256": "9a35c511e798d2965bc3516ad0cddc9ca03e76f61d2e30a27bc6312ab7fd78ca",
+            "shape_equal": true,
+            "affine_equal": true,
+            "affine_maximum_absolute_error": 0.0,
+            "first_dtype": "int32",
+            "second_dtype": "int32",
+            "finite": true,
+            "header_fields_equal": {
+              "dim": true,
+              "pixdim": true,
+              "datatype": true,
+              "xyzt_units": true,
+              "qform_code": true,
+              "sform_code": true,
+              "intent_code": true
+            },
+            "brain": {
+              "values": 2843038,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "whole_grid": {
+              "values": 18579456,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "values_exact_equal": true,
+            "dtype_equal": true,
+            "changed_bit_patterns": 0,
+            "labels": {
+              "0": {
+                "dice": 1.0,
+                "first_voxels": 469817,
+                "second_voxels": 469817,
+                "volume_difference_percent": 0.0
+              },
+              "1": {
+                "dice": 1.0,
+                "first_voxels": 774087,
+                "second_voxels": 774087,
+                "volume_difference_percent": 0.0
+              },
+              "2": {
+                "dice": 1.0,
+                "first_voxels": 793147,
+                "second_voxels": 793147,
+                "volume_difference_percent": 0.0
+              },
+              "3": {
+                "dice": 1.0,
+                "first_voxels": 342752,
+                "second_voxels": 342752,
+                "volume_difference_percent": 0.0
+              },
+              "4": {
+                "dice": 1.0,
+                "first_voxels": 0,
+                "second_voxels": 0,
+                "volume_difference_percent": null
+              },
+              "5": {
+                "dice": 1.0,
+                "first_voxels": 463235,
+                "second_voxels": 463235,
+                "volume_difference_percent": 0.0
+              }
+            }
+          },
+          "bias": {
+            "first_sha256": "491d576069aae39f7853fe15f6f0c796c1b6c0b700626ec5f50406f18430ded7",
+            "second_sha256": "bf8355d03043af9b328780e4e6da6b1e709fdb653e7851e2ffa996a114814f56",
+            "shape_equal": true,
+            "affine_equal": true,
+            "affine_maximum_absolute_error": 0.0,
+            "first_dtype": "float32",
+            "second_dtype": "float32",
+            "finite": true,
+            "header_fields_equal": {
+              "dim": true,
+              "pixdim": true,
+              "datatype": true,
+              "xyzt_units": true,
+              "qform_code": true,
+              "sform_code": true,
+              "intent_code": true
+            },
+            "brain": {
+              "values": 2843038,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": null
+            },
+            "whole_grid": {
+              "values": 18579456,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": null
+            },
+            "values_exact_equal": true,
+            "dtype_equal": true,
+            "changed_bit_patterns": 0
+          },
+          "restore": {
+            "first_sha256": "0b0caeba90333b28e6b17facad540cbac28b6d4d0a15504cc1772e5041a162c8",
+            "second_sha256": "193d40946a4701a48f512b3e6fade47a05fe69a6be1c67072225aeacab06af2f",
+            "shape_equal": true,
+            "affine_equal": true,
+            "affine_maximum_absolute_error": 0.0,
+            "first_dtype": "float32",
+            "second_dtype": "float32",
+            "finite": true,
+            "header_fields_equal": {
+              "dim": true,
+              "pixdim": true,
+              "datatype": true,
+              "xyzt_units": true,
+              "qform_code": true,
+              "sform_code": true,
+              "intent_code": true
+            },
+            "brain": {
+              "values": 2843038,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "whole_grid": {
+              "values": 18579456,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_error": 0.0,
+              "p99_absolute_error": 0.0,
+              "changed_numerical_values": 0,
+              "pearson_r": 1.0
+            },
+            "values_exact_equal": true,
+            "dtype_equal": true,
+            "changed_bit_patterns": 0
+          }
+        },
+        "all_value_bits_equal": true
+      },
+      "runs": {
+        "no_bias_mrf_0_official_entrypoint_v2": {
+          "hostname": "nodecw10",
+          "status": "complete",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "3,7,11,15,19,23,27,31",
+          "wall_seconds": 130.21324767172337,
+          "maximum_sampled_tree_rss_bytes": 2237480960,
+          "maximum_sampled_tree_threads": 5,
+          "started_utc": "2026-10-04T01:42:50.719251+00:00",
+          "load_before": [
+            83.01,
+            93.86,
+            102.16
+          ],
+          "load_after": [
+            95.98,
+            93.08,
+            100.63
+          ]
+        },
+        "no_bias_mrf_1_candidate_entrypoint_v2": {
+          "hostname": "nodecw10",
+          "status": "complete",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "3,7,11,15,19,23,27,31",
+          "wall_seconds": 53.3268803358078,
+          "maximum_sampled_tree_rss_bytes": 3134799872,
+          "maximum_sampled_tree_threads": 73,
+          "started_utc": "2026-10-04T01:45:00.945213+00:00",
+          "load_before": [
+            95.98,
+            93.08,
+            100.63
+          ],
+          "load_after": [
+            99.46,
+            94.64,
+            100.73
+          ]
+        }
+      }
+    },
+    "chronological_order_note": "The actual public default CPU8 order was reference-reference-candidate-candidate with other task4 jobs between arms; it was not a consecutive R-C-C-R run. All arms retained the same CPU8 affinity and lock.",
+    "strict_cpu1_speed_ratio": 1.1182903835154523,
+    "nondefault_parameters": {
+      "bias_correction": false,
+      "bias_iterations": 5,
+      "init_kmeans_iters": 2,
+      "em_iters": 2,
+      "pve_smoothing": 0.0,
+      "hyperparam": 0.0,
+      "mixel_hyperparam": 0.0
+    }
+  },
+  "vbm_cpu_summary": {
+    "source": "task5_candidate_cpu_v2/src",
+    "current_integrated_source_full_vbm_retested": false,
+    "report": "fast_vbm_cpu_20261004/report.public.json",
+    "fnirt_official_complete_wall_seconds": 769.3654369562864,
+    "fnirt_candidate_complete_wall_seconds": 610.8994775116444,
+    "synthmorph_candidate_complete_wall_seconds": 355.80188135802746,
+    "synthmorph_reference_reused_upstream_stage_sum_seconds": 580.1409437581897,
+    "synthmorph_reference_stage_sum_is_cold_process_wall": false,
+    "fnirt_numerical_equivalence": false,
+    "synthmorph_bitwise_equal": false
+  }
+}

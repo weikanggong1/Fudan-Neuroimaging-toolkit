@@ -1,0 +1,412 @@
+{
+  "strip_reference": {
+    "schema": "fnit.smri.cpu.strip.original_control.v1",
+    "worker_sha256": "8a5abfd963983fddb763f726d32876f27ab848baf46b8258846ea4d352a0ef69",
+    "original_script_sha256": "bbc2ff8f8779862039401b05d5cd6039fb4f3583e0032a793ac9adb3f4521590",
+    "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+    "weight_sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+    "torch_version": "2.1.2+cpu",
+    "stages": [
+      {
+        "name": "load_weights",
+        "seconds": 0.020084984600543976
+      },
+      {
+        "name": "load_input",
+        "seconds": 2.9041085988283157
+      },
+      {
+        "name": "conform",
+        "seconds": 0.4347710683941841
+      },
+      {
+        "name": "crop_to_bbox",
+        "seconds": 0.4030762389302254
+      },
+      {
+        "name": "reshape",
+        "seconds": 0.03956204652786255
+      },
+      {
+        "name": "network_forward",
+        "seconds": 8.209109604358673
+      },
+      {
+        "name": "resample_like",
+        "seconds": 0.5846521854400635
+      },
+      {
+        "name": "connected_component_mask",
+        "seconds": 1.1089957728981972
+      },
+      {
+        "name": "save",
+        "seconds": 0.6456465572118759
+      },
+      {
+        "name": "save",
+        "seconds": 0.14567473530769348
+      },
+      {
+        "name": "save",
+        "seconds": 1.9735531359910965
+      }
+    ],
+    "timing_scope": "Observed function bodies exclude array hashing; use independent complete CLI for speed.",
+    "input_unchanged": true,
+    "source_unchanged": true,
+    "weight_unchanged": true
+  },
+  "strip_contiguous": {
+    "schema": "fnit.smri.cpu.strip_sr.profile.v1",
+    "source_revision": "1d31e7baa+header_policy_v2",
+    "source_import_sha256": "85aa43b41d3dbf12bfe3842167970d0364f6af9784a055ca758e8102aa36ed2d",
+    "shared_nib_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+    "worker_sha256": "761f597b886d63ef3591b0421d848b207675e8db7c64dd5635b769ba556d4c19",
+    "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+    "weight_sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+    "torch_version": "2.5.1",
+    "stages": [
+      {
+        "name": "model_constructor",
+        "parent": null,
+        "status": "complete",
+        "seconds": 0.06645001471042633
+      },
+      {
+        "name": "_resample_affine",
+        "parent": "_conform_lia_1mm",
+        "status": "complete",
+        "seconds": 1.1115652173757553
+      },
+      {
+        "name": "_conform_lia_1mm",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 1.1138028278946877
+      },
+      {
+        "name": "_crop_nonzero",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.28159894049167633
+      },
+      {
+        "name": "_reshape_center",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.019298821687698364
+      },
+      {
+        "name": "network_forward",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 11.150539137423038
+      },
+      {
+        "name": "extend_sdt",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.0031615570187568665
+      },
+      {
+        "name": "_resample_affine",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.7225807085633278
+      },
+      {
+        "name": "_largest_filled_component",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.8544840216636658
+      },
+      {
+        "name": "api_call_observed",
+        "parent": null,
+        "status": "complete",
+        "seconds": 15.34814914315939
+      },
+      {
+        "name": "write_primary_outputs",
+        "parent": null,
+        "status": "complete",
+        "seconds": 3.056009367108345
+      }
+    ],
+    "timing_scope": "Observed API includes wrapper and tensor hash overhead; nested stages must not be added. Use separate uninstrumented CLI jobs for speed.",
+    "actual_precision": {
+      "cuda_matmul_tf32": false,
+      "cudnn_tf32": true,
+      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "autocast_enabled": false,
+      "parameter_dtypes": [
+        "torch.float32"
+      ]
+    },
+    "input_unchanged": true,
+    "weight_unchanged": true
+  },
+  "strip_channels_last": {
+    "schema": "fnit.smri.cpu.strip_sr.profile.v1",
+    "source_revision": "1d31e7baa+header_policy_v2",
+    "source_import_sha256": "85aa43b41d3dbf12bfe3842167970d0364f6af9784a055ca758e8102aa36ed2d",
+    "shared_nib_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+    "worker_sha256": "761f597b886d63ef3591b0421d848b207675e8db7c64dd5635b769ba556d4c19",
+    "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+    "weight_sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+    "torch_version": "2.5.1",
+    "stages": [
+      {
+        "name": "model_constructor",
+        "parent": null,
+        "status": "complete",
+        "seconds": 0.06167474389076233
+      },
+      {
+        "name": "cpu_layout_conversion",
+        "parent": null,
+        "status": "complete",
+        "seconds": 0.004130028188228607
+      },
+      {
+        "name": "_resample_affine",
+        "parent": "_conform_lia_1mm",
+        "status": "complete",
+        "seconds": 0.5652364566922188
+      },
+      {
+        "name": "_conform_lia_1mm",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.5672718062996864
+      },
+      {
+        "name": "_crop_nonzero",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.2126728892326355
+      },
+      {
+        "name": "_reshape_center",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.018887415528297424
+      },
+      {
+        "name": "cpu_input_layout_conversion",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 2.094358205795288e-05
+      },
+      {
+        "name": "network_forward",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 6.029448948800564
+      },
+      {
+        "name": "extend_sdt",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.003096282482147217
+      },
+      {
+        "name": "_resample_affine",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.7873737439513206
+      },
+      {
+        "name": "_largest_filled_component",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.8605958595871925
+      },
+      {
+        "name": "api_call_observed",
+        "parent": null,
+        "status": "complete",
+        "seconds": 9.509937055408955
+      },
+      {
+        "name": "write_primary_outputs",
+        "parent": null,
+        "status": "complete",
+        "seconds": 3.1026483103632927
+      }
+    ],
+    "timing_scope": "Observed API includes wrapper and tensor hash overhead; nested stages must not be added. Use separate uninstrumented CLI jobs for speed.",
+    "actual_precision": {
+      "cuda_matmul_tf32": false,
+      "cudnn_tf32": true,
+      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "autocast_enabled": false,
+      "parameter_dtypes": [
+        "torch.float32"
+      ]
+    },
+    "input_unchanged": true,
+    "weight_unchanged": true
+  },
+  "sr_reference": {
+    "schema": "fnit.smri.cpu.sr.original_control.v1",
+    "worker_sha256": "41b9cfdfb17e853ea391f67189b7b019de1ce7ddfd9eb7f41f0e47fb24d8d305",
+    "original_script_sha256": "917b20e90b00c1b2807ffcc1e8e2db123d3a63d52c8d395b8ba5a7f078c8b098",
+    "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+    "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+    "tensorflow_version": "2.13.1",
+    "stages": [
+      {
+        "name": "model_constructor",
+        "seconds": 0.6735495701432228
+      },
+      {
+        "name": "preprocess",
+        "seconds": 5.291380561888218
+      },
+      {
+        "name": "network_forward",
+        "seconds": 7.634294301271439
+      },
+      {
+        "name": "network_forward",
+        "seconds": 6.154296100139618
+      },
+      {
+        "name": "postprocess",
+        "seconds": 0.26631781458854675
+      },
+      {
+        "name": "write_extra_floating_npz",
+        "seconds": 1.9180770367383957
+      },
+      {
+        "name": "write_primary_output",
+        "seconds": 0.23392866551876068
+      }
+    ],
+    "timing_scope": "Original function bodies; array capture and extra NPZ write excluded. Use separate complete CLI timing.",
+    "input_unchanged": true,
+    "source_unchanged": true,
+    "weight_unchanged": true
+  },
+  "sr_contiguous": {
+    "schema": "fnit.smri.cpu.strip_sr.profile.v1",
+    "source_revision": "synthsr_unchanged_1d31e7baa_with_shared_dc2fc052",
+    "source_import_sha256": "c896d8e2e4a1a214546e6674ce3aacdcf84906d1b2010b5397ec1b076f502943",
+    "shared_nib_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+    "worker_sha256": "0389a726cc28e3ebc045f52f8496a1cc2ea80b549584d722ad78ab7a8267041f",
+    "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+    "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+    "torch_version": "2.5.1",
+    "stages": [
+      {
+        "name": "model_constructor",
+        "parent": null,
+        "status": "complete",
+        "seconds": 0.6060367450118065
+      },
+      {
+        "name": "_load_image",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.5261390581727028
+      },
+      {
+        "name": "resample_volume",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 5.036225654184818
+      },
+      {
+        "name": "align_volume_to_ref",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.047671519219875336
+      },
+      {
+        "name": "pad_volume",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.05014587938785553
+      },
+      {
+        "name": "network_forward",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 13.827176250517368
+      },
+      {
+        "name": "write_private_network_arrays",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.3656149283051491
+      },
+      {
+        "name": "network_forward",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 14.092025384306908
+      },
+      {
+        "name": "write_private_network_arrays",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.3768444135785103
+      },
+      {
+        "name": "crop_volume_with_idx",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.026689015328884125
+      },
+      {
+        "name": "gaussian_filter",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.16970735788345337
+      },
+      {
+        "name": "align_volume_to_ref",
+        "parent": "api_call_observed",
+        "status": "complete",
+        "seconds": 0.02737535536289215
+      },
+      {
+        "name": "api_call_observed",
+        "parent": null,
+        "status": "complete",
+        "seconds": 35.34394993633032
+      },
+      {
+        "name": "write_primary_outputs",
+        "parent": null,
+        "status": "complete",
+        "seconds": 0.1956317201256752
+      },
+      {
+        "name": "write_format_check_outputs",
+        "parent": null,
+        "status": "complete",
+        "seconds": 2.433787189424038
+      }
+    ],
+    "timing_scope": "Observed API includes wrapper and tensor hash overhead; nested stages must not be added. Use separate uninstrumented CLI jobs for speed.",
+    "actual_precision": {
+      "cuda_matmul_tf32": false,
+      "cudnn_tf32": true,
+      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "autocast_enabled": false,
+      "parameter_dtypes": [
+        "torch.float32"
+      ]
+    },
+    "input_unchanged": true,
+    "weight_unchanged": true,
+    "production_cpu_channels_last": false
+  }
+}

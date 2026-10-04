@@ -3,7 +3,7 @@
 The original z/y/x sweep has only 18 effective neighbours. Ordering updates by
 ``x + 2*y + 3*z`` preserves every directed neighbour dependency, while allowing
 independent voxels at the same level to run together. CUDA uses one Triton
-kernel per level; CPU tensor updates provide a small-volume reference.
+kernel per level; CPU uses compiled source-ordered scans on contiguous rows.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ except ImportError:  # CPU-only installations do not need the CUDA compiler.
 class GlibcRandom:
     """Local glibc additive-generator stream, without changing process RNGs."""
 
-    def __init__(self, seed=-1):
+    def __init__(self, seed=-1, *, compiled=False):
         seed = (int(seed) & 0xFFFFFFFF) or 1
         state = [seed]
         previous = seed if seed < 0x80000000 else seed - 0x100000000
@@ -37,8 +37,16 @@ class GlibcRandom:
             state.append((state[index - 31] + state[index - 3]) & 0xFFFFFFFF)
         self._state = state[-31:]
         self._position = 0
+        self._compiled = compiled
+        if compiled:
+            self._state = np.asarray(self._state, dtype=np.uint32)
 
     def raw(self, count):
+        if self._compiled:
+            from ._fsl_cpu import random_raw
+
+            output, self._position = random_raw(self._state, self._position, int(count))
+            return output
         output = np.empty(int(count), dtype=np.uint32)
         state, position = self._state, self._position
         for index in range(len(output)):
@@ -246,18 +254,12 @@ def tanaka(probabilities, energy, scan, beta, iterations=5):
                         *scan.shape, beta, 128, enable_fp_fusion=False,
                     )
     else:
-        flat = probabilities.reshape(3, -1)
-        flat_energy = energy.reshape(3, -1)
-        for _ in range(iterations):
-            for start, count in scan.spans:
-                ids = scan.indices[start:start + count]
-                support = torch.zeros((3, count), dtype=torch.float64, device=probabilities.device)
-                for neighbour in scan.neighbours:
-                    neighbour_ids, valid = _neighbour_indices(ids, scan.shape, neighbour)
-                    support += torch.where(valid[None], flat[:, neighbour_ids].double(), 0) * neighbour[3]
-                unnormalized = torch.exp(beta * support - flat_energy[:, ids].double()).float()
-                total = (unnormalized[0].double() + unnormalized[1].double()) + unnormalized[2].double()
-                flat[:, ids] = torch.where(total[None] > 0, unnormalized.double() / total[None], 0).float()
+        from ._fsl_cpu import included_zyx, neighbours_array, tanaka_zyx
+
+        ordered = np.ascontiguousarray(probabilities.numpy().transpose(0, 3, 2, 1))
+        ordered_energy = np.ascontiguousarray(energy.numpy().transpose(0, 3, 2, 1))
+        tanaka_zyx(ordered, ordered_energy, included_zyx(scan), neighbours_array(scan), beta, iterations)
+        probabilities.copy_(torch.from_numpy(ordered.transpose(0, 3, 2, 1)))
     return probabilities
 
 
@@ -287,23 +289,26 @@ def icm(probabilities, mask, scan, beta):
                     *scan.shape, beta, 128, enable_fp_fusion=False,
                 )
     else:
-        flat, included = labels.flatten(), mask.flatten()
-        flat_probability = probabilities.reshape(6, -1)
-        pairwise = compatibility()
-        for start, count in scan.spans:
-            ids = scan.indices[start:start + count]
-            clique = torch.zeros((6, count), dtype=torch.float32)
-            for neighbour in scan.neighbours:
-                neighbour_ids, valid = _neighbour_indices(ids, scan.shape, neighbour)
-                valid &= included[neighbour_ids]
-                clique += torch.where(valid[None], pairwise[:, flat[neighbour_ids].long()] * neighbour[3], 0)
-            score = flat_probability[:, ids] * torch.exp((beta * clique).float())
-            flat[ids] = score.argmax(dim=0).to(torch.int32)
+        from ._fsl_cpu import icm_zyx, neighbours_array
+
+        ordered = np.ascontiguousarray(labels.numpy().transpose(2, 1, 0))
+        ordered_probability = np.ascontiguousarray(probabilities.numpy().transpose(0, 3, 2, 1))
+        included = np.ascontiguousarray(mask.numpy().transpose(2, 1, 0))
+        icm_zyx(ordered, ordered_probability, included, neighbours_array(scan),
+                compatibility().numpy(), np.float32(beta))
+        labels = torch.from_numpy(ordered.transpose(2, 1, 0).copy())
     return labels.long()
 
 
 def blur(volume, kernels):
     result = volume.contiguous()
+    if not result.is_cuda:
+        from ._fsl_cpu import blur_axis
+
+        array = result.numpy()
+        for axis, kernel in enumerate(kernels):
+            array = blur_axis(array, kernel.numpy(), axis)
+        return torch.from_numpy(array)
     for axis, kernel in enumerate(kernels):
         if result.is_cuda:
             if triton is None:
@@ -314,20 +319,5 @@ def blur(volume, kernels):
                     result, output, kernel.contiguous(), result.numel(), *result.shape,
                     axis, kernel.numel() // 2, 256, enable_fp_fusion=False,
                 )
-        else:
-            radius = kernel.numel() // 2
-            output = torch.zeros_like(result)
-            for tap, weight in enumerate(kernel):
-                offset = tap - radius
-                target = [slice(None)] * 3
-                source = [slice(None)] * 3
-                if offset >= 0:
-                    target[axis] = slice(0, result.shape[axis] - offset)
-                    source[axis] = slice(offset, result.shape[axis])
-                else:
-                    target[axis] = slice(-offset, result.shape[axis])
-                    source[axis] = slice(0, result.shape[axis] + offset)
-                if abs(offset) < result.shape[axis]:
-                    output[tuple(target)] = (output[tuple(target)].double() + result[tuple(source)].double() * weight).float()
         result = output
     return result

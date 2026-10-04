@@ -1,0 +1,714 @@
+{
+  "schema": "fnit.smri.cpu.strip_sr.cli_summary.v1",
+  "source_revision": "1d31e7baaebbb644ab199471f7fe6282721455fd",
+  "feature": "synthsr",
+  "scope": "Cold complete CLI including imports, loading, inference and specified output writes; lock wait excluded",
+  "startup_variation": "GPFS imports and file cache vary; internal network profiles are reported separately",
+  "cases": [
+    {
+      "case": "true_ct_sr",
+      "data_description": "real SynthRAD2023 CT in HU, public registered/defaced/cropped derivative",
+      "candidate_options": [
+        "--ct"
+      ],
+      "executions": [
+        {
+          "id": "true_ct_sr_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 54.805724024772644,
+          "maximum_sampled_tree_rss_bytes": 13046743040,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "true_ct_sr_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 51.54151104390621,
+          "maximum_sampled_tree_rss_bytes": 13430345728,
+          "maximum_sampled_tree_threads": 64,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "true_ct_sr_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "true_ct_sr_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "f269642fa9529a1fb3b5e82552365047603fcfc53dc27550b05e6928c0d4e564",
+                "candidate_sha256": "63586ef0fd4ff5eb26f6452fc59398b98768e14adb59a3a6bbba25293aca5dbb",
+                "reference_shape": [
+                  231,
+                  244,
+                  204
+                ],
+                "candidate_shape": [
+                  231,
+                  244,
+                  204
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 11498256,
+                  "different_voxels": 747,
+                  "exact_fraction": 0.999935033625969,
+                  "mae": 6.496637403098349e-05,
+                  "rmse": 0.00806017208445226,
+                  "nrmse_reference_rms": 9.425576949714348e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -2.0263942636170217e-05
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 6873480,
+                  "different_voxels": 747,
+                  "exact_fraction": 0.9998913214267009,
+                  "mae": 0.00010867857329911487,
+                  "rmse": 0.010424901596615426,
+                  "nrmse_reference_rms": 9.425576949714347e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -3.389840371980423e-05
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 54.805724024772644,
+      "fnit_median_seconds": 51.54151104390621,
+      "observed_complete_process_ratio": 1.0633317284409023
+    },
+    {
+      "case": "true_lowfield_sr",
+      "data_description": "real64mT MRI, Zenodo15862148 original NIfTI",
+      "candidate_options": [
+        "--lowfield"
+      ],
+      "executions": [
+        {
+          "id": "true_lowfield_sr_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 33.803043842315674,
+          "maximum_sampled_tree_rss_bytes": 8057147392,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "true_lowfield_sr_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 40.31142222136259,
+          "maximum_sampled_tree_rss_bytes": 8940969984,
+          "maximum_sampled_tree_threads": 64,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "true_lowfield_sr_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "true_lowfield_sr_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "3a1bf5abde7d7c7bbab38fefdb19be0a1d5886c074ce25a9509683a62bca868a",
+                "candidate_sha256": "de15ada81f43cb630d0a2442e5c11fb68b1eac76070ca38ec963308b81d228ea",
+                "reference_shape": [
+                  180,
+                  218,
+                  200
+                ],
+                "candidate_shape": [
+                  180,
+                  218,
+                  200
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 7848000,
+                  "different_voxels": 610,
+                  "exact_fraction": 0.9999222731906218,
+                  "mae": 7.772680937818552e-05,
+                  "rmse": 0.008816280926682494,
+                  "nrmse_reference_rms": 7.426266865988122e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": 5.096839959225281e-07
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7812411,
+                  "different_voxels": 610,
+                  "exact_fraction": 0.9999219191105025,
+                  "mae": 7.808088949749316e-05,
+                  "rmse": 0.008836339145680928,
+                  "nrmse_reference_rms": 7.426266865988121e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": 5.120058327704469e-07
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 33.803043842315674,
+      "fnit_median_seconds": 40.31142222136259,
+      "observed_complete_process_ratio": 0.838547537635676
+    },
+    {
+      "case": "real_epi_first_channel_sr",
+      "data_description": "two actual raw DWI frames; single input SynthSR takes first channel",
+      "candidate_options": [],
+      "executions": [
+        {
+          "id": "real_epi_first_channel_sr_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 25.554258063435555,
+          "maximum_sampled_tree_rss_bytes": 8414277632,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "real_epi_first_channel_sr_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 47.828552201390266,
+          "maximum_sampled_tree_rss_bytes": 9749024768,
+          "maximum_sampled_tree_threads": 64,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "real_epi_first_channel_sr_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "real_epi_first_channel_sr_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "affd98f355cf2b2d92709da2cfcb39ec137c699cdff7e59d9a37a117f5b63f5a",
+                "candidate_sha256": "5e477d6e025103fc3c9cf59694d9729949bc478a2de19c2a9edd9f8dc3666142",
+                "reference_shape": [
+                  240,
+                  241,
+                  136
+                ],
+                "candidate_shape": [
+                  240,
+                  241,
+                  136
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 7866240,
+                  "different_voxels": 358,
+                  "exact_fraction": 0.9999544890570335,
+                  "mae": 4.551094296639818e-05,
+                  "rmse": 0.006746179879487218,
+                  "nrmse_reference_rms": 7.975149975306245e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -3.05101293629485e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 4458102,
+                  "different_voxels": 358,
+                  "exact_fraction": 0.9999196967678173,
+                  "mae": 8.030323218266428e-05,
+                  "rmse": 0.00896120707174342,
+                  "nrmse_reference_rms": 7.975149975306246e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -5.383456906100399e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 25.554258063435555,
+      "fnit_median_seconds": 47.828552201390266,
+      "observed_complete_process_ratio": 0.5342887644985572
+    },
+    {
+      "case": "real_epi_mgz_sr",
+      "data_description": "actual b0 converted to MGH float32; same converted input to both arms",
+      "candidate_options": [],
+      "executions": [
+        {
+          "id": "real_epi_mgz_sr_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 108.65016880631447,
+          "maximum_sampled_tree_rss_bytes": 8417882112,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "real_epi_mgz_sr_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 42.06220942735672,
+          "maximum_sampled_tree_rss_bytes": 9738575872,
+          "maximum_sampled_tree_threads": 64,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "real_epi_mgz_sr_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "real_epi_mgz_sr_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "59e5f843c6ecd84c6e08742915c87f7f97f1cb29a93cc6ff228240220a4fd980",
+                "candidate_sha256": "c28963b9ec24c2c1aedb2a781feab140d901445818882b3f03fa4d98e66cc2e4",
+                "reference_shape": [
+                  240,
+                  241,
+                  136
+                ],
+                "candidate_shape": [
+                  240,
+                  241,
+                  136
+                ],
+                "reference_dtype": ">f4",
+                "candidate_dtype": ">f4",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 7866240,
+                  "different_voxels": 373,
+                  "exact_fraction": 0.9999525821739484,
+                  "mae": 4.741782605158246e-05,
+                  "rmse": 0.006886060270690524,
+                  "nrmse_reference_rms": 8.140513017249467e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -3.8137661703685626e-07
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 4458102,
+                  "different_voxels": 373,
+                  "exact_fraction": 0.9999163321072511,
+                  "mae": 8.366789274897704e-05,
+                  "rmse": 0.009147015510480838,
+                  "nrmse_reference_rms": 8.140513017249467e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -6.729321132625499e-07
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 108.65016880631447,
+      "fnit_median_seconds": 42.06220942735672,
+      "observed_complete_process_ratio": 2.5830827787103785
+    },
+    {
+      "case": "real_epi_npz_sr",
+      "data_description": "actual b0 array in original NPZ identity-affine convention",
+      "candidate_options": [],
+      "executions": [
+        {
+          "id": "real_epi_npz_sr_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 8.264992348849773,
+          "maximum_sampled_tree_rss_bytes": 1975971840,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "real_epi_npz_sr_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 8.764991134405136,
+          "maximum_sampled_tree_rss_bytes": 1842565120,
+          "maximum_sampled_tree_threads": 71,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "real_epi_npz_sr_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "real_epi_npz_sr_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "e038a2a20a4e802e9ce767e978cf0163676c382c8fd617c3f563f4cb35df89e4",
+                "candidate_sha256": "4e676c14322e0b357c0cac1cb33c8ba756f24c23d507597278756e43c4956f60",
+                "reference_shape": [
+                  120,
+                  120,
+                  68
+                ],
+                "candidate_shape": [
+                  120,
+                  120,
+                  68
+                ],
+                "reference_dtype": "float32",
+                "candidate_dtype": "float32",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": null,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 979200,
+                  "different_voxels": 962849,
+                  "exact_fraction": 0.016698325163398694,
+                  "mae": 3.387190306329028e-05,
+                  "rmse": 6.87054584406037e-05,
+                  "nrmse_reference_rms": 2.397502379938239e-06,
+                  "max_abs_difference": 0.0015716552734375,
+                  "mean_signed_difference": -1.7398582961098623e-05
+                },
+                "fixed_allclose": {
+                  "rtol": 1e-05,
+                  "atol": 0.001,
+                  "passes": true
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 979200,
+                  "different_voxels": 962849,
+                  "exact_fraction": 0.016698325163398694,
+                  "mae": 3.387190306329028e-05,
+                  "rmse": 6.87054584406037e-05,
+                  "nrmse_reference_rms": 2.397502379938239e-06,
+                  "max_abs_difference": 0.0015716552734375,
+                  "mean_signed_difference": -1.7398582961098623e-05
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "floating SynthSR rtol=1e-5, atol=0.001"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 8.264992348849773,
+      "fnit_median_seconds": 8.764991134405136,
+      "observed_complete_process_ratio": 0.9429550152546393
+    },
+    {
+      "case": "real_epi_output_dir_sr",
+      "data_description": "real b0, output directory automatic filename",
+      "candidate_options": [],
+      "executions": [
+        {
+          "id": "real_epi_output_dir_sr_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 43.5680665820837,
+          "maximum_sampled_tree_rss_bytes": 8416083968,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "real_epi_output_dir_sr_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 43.057008527219296,
+          "maximum_sampled_tree_rss_bytes": 9722789888,
+          "maximum_sampled_tree_threads": 71,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "real_epi_output_dir_sr_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "real_epi_output_dir_sr_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "affd98f355cf2b2d92709da2cfcb39ec137c699cdff7e59d9a37a117f5b63f5a",
+                "candidate_sha256": "5e477d6e025103fc3c9cf59694d9729949bc478a2de19c2a9edd9f8dc3666142",
+                "reference_shape": [
+                  240,
+                  241,
+                  136
+                ],
+                "candidate_shape": [
+                  240,
+                  241,
+                  136
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 7866240,
+                  "different_voxels": 358,
+                  "exact_fraction": 0.9999544890570335,
+                  "mae": 4.551094296639818e-05,
+                  "rmse": 0.006746179879487218,
+                  "nrmse_reference_rms": 7.975149975306245e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -3.05101293629485e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 4458102,
+                  "different_voxels": 358,
+                  "exact_fraction": 0.9999196967678173,
+                  "mae": 8.030323218266428e-05,
+                  "rmse": 0.00896120707174342,
+                  "nrmse_reference_rms": 7.975149975306246e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -5.383456906100399e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 43.5680665820837,
+      "fnit_median_seconds": 43.057008527219296,
+      "observed_complete_process_ratio": 1.0118693349200358
+    },
+    {
+      "case": "real_epi_uncompressed_sr",
+      "data_description": "real b0, uncompressed NIfTI output",
+      "candidate_options": [],
+      "executions": [
+        {
+          "id": "real_epi_uncompressed_sr_1_reference",
+          "arm": "reference",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 65.84142655879259,
+          "maximum_sampled_tree_rss_bytes": 8410615808,
+          "maximum_sampled_tree_threads": 46,
+          "returncode": 0
+        },
+        {
+          "id": "real_epi_uncompressed_sr_2_baseline",
+          "arm": "fnit",
+          "hostname": "nodecw10",
+          "max_cpu_threads": 8,
+          "cpu_affinity": "0,4,8,12,16,20,24,28",
+          "wall_seconds": 49.81705939769745,
+          "maximum_sampled_tree_rss_bytes": 9717809152,
+          "maximum_sampled_tree_threads": 71,
+          "returncode": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "candidate": "real_epi_uncompressed_sr_2_baseline",
+          "role": "fnit_vs_official",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "real_epi_uncompressed_sr_2_baseline",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "f233785799c17a46b2019ecb0a2c3218918ba5f3fafef83c142c7b0957527d9b",
+                "candidate_sha256": "51280043e6c26809675bb248feaa66b8b7bbbb5605f5c579e82fc3ce8332215f",
+                "reference_shape": [
+                  240,
+                  241,
+                  136
+                ],
+                "candidate_shape": [
+                  240,
+                  241,
+                  136
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 7866240,
+                  "different_voxels": 358,
+                  "exact_fraction": 0.9999544890570335,
+                  "mae": 4.551094296639818e-05,
+                  "rmse": 0.006746179879487218,
+                  "nrmse_reference_rms": 7.975149975306245e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -3.05101293629485e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 4458102,
+                  "different_voxels": 358,
+                  "exact_fraction": 0.9999196967678173,
+                  "mae": 8.030323218266428e-05,
+                  "rmse": 0.00896120707174342,
+                  "nrmse_reference_rms": 7.975149975306246e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -5.383456906100399e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          }
+        }
+      ],
+      "all_fixed_gates_pass": true,
+      "reference_median_seconds": 65.84142655879259,
+      "fnit_median_seconds": 49.81705939769745,
+      "observed_complete_process_ratio": 1.3216642522628663
+    }
+  ],
+  "pending_cases": [],
+  "all_planned_cases_complete": true,
+  "all_completed_cases_pass": true
+}

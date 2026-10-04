@@ -63,7 +63,8 @@ def test_plus_reuses_both_weighted_models(tmp_path, monkeypatch):
     assert len(created) == 2
 
 
-def test_cli_parc_volume_option_requests_soft_volumes(tmp_path, monkeypatch):
+@pytest.mark.parametrize("fast", [False, True])
+def test_cli_parc_volume_option_requests_soft_volumes(tmp_path, monkeypatch, fast):
     source = tmp_path / "t1.nii.gz"
     source.touch()
     calls = []
@@ -84,8 +85,9 @@ def test_cli_parc_volume_option_requests_soft_volumes(tmp_path, monkeypatch):
         def __init__(self, **kwargs):
             pass
 
-        def __call__(self, source, *, keep_geometry, volumes):
+        def __call__(self, source, *, keep_geometry, volumes, fast):
             assert volumes is True
+            assert fast is args.fast
             return DummyResult()
 
     import fnit.synthseg_parc
@@ -95,7 +97,7 @@ def test_cli_parc_volume_option_requests_soft_volumes(tmp_path, monkeypatch):
                      parc=True, csv_vols=str(tmp_path / "vol.csv"),
                      color_lut=None, threads=2, weights=None,
                      parc_weights=None, device="cpu", keep_geometry=False,
-                     parc_out=None)
+                     parc_out=None, fast=fast)
     _run_synthseg(args)
     assert calls == [(source, args.csv_vols)]
     assert (tmp_path / "plus.nii.gz").is_file()

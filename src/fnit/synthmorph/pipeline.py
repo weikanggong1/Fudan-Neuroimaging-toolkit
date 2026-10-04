@@ -124,6 +124,21 @@ def _header_transform(image, transformation, data=None):
     )
 
 
+def _network_input_images(inputs, moving, fixed, net_to_moving, net_to_fixed,
+                          device, *, has_init=False):
+    """Return the documented debug inputs in their preview geometries."""
+    moving_affine = moving.affine @ net_to_moving
+    if torch.device(device).type == "cpu" and has_init:
+        # Initial alignment moves voxel data into the fixed network grid.
+        # The original debug preview labels both inputs with that geometry.
+        moving_affine = fixed.affine @ net_to_fixed
+    return (
+        new_image(_numpy(inputs[0])[..., 0], moving, affine=moving_affine),
+        new_image(_numpy(inputs[1])[..., 0], fixed,
+                  affine=fixed.affine @ net_to_fixed),
+    )
+
+
 def _resampled_image(
     image,
     pull,
@@ -142,6 +157,16 @@ def _resampled_image(
             shape=image_geometry(target).shape,
             fill_value=fill,
         )
+    elif torch.device(device).type == 'cpu' and method == 'linear':
+        # Surfa's final image sampler accepts the last-center band [n-1,n).
+        # Network preprocessing/integration keep their Neurite rules; this
+        # CPU-only image boundary correction leaves CUDA outputs unchanged.
+        plan = _prepare_transform(
+            pull, tensor.shape[2:], device=tensor.device, dtype=tensor.dtype,
+            shape=image_geometry(target).shape, method=method, fill_value=fill,
+            surfa_linear_rule=True,
+        )
+        moved = _sample_prepared(tensor, plan, fill)
     else:
         moved = transform(
             tensor,
@@ -174,7 +199,8 @@ def _resampled_frames(image, data, pull, target, device, *, method, fill, frame_
     plan = _prepare_transform(
         pull, data.shape[:3], device="cpu", dtype=torch.float32,
         shape=geometry.shape, method=method, fill_value=fill,
-        surfa_nearest_rule=True,
+        surfa_nearest_rule=True, surfa_linear_rule=device.type == 'cpu',
+        surfa_nearest_half_up=device.type == 'cpu',
     )
     # Independent apply keeps the original CPU float32 coordinate arithmetic.
     # Transferring a prepared plan avoids TF32 affine-coordinate drift while
@@ -281,7 +307,7 @@ class SynthMorph:
         self.device = torch.device(device)
         self.model = model
         self.extent = extent
-        if configure_precision:
+        if configure_precision and self.device.type == "cuda":
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
         self.network = SynthMorphNetwork(
@@ -420,11 +446,9 @@ class SynthMorph:
         if output_dir:
             root = Path(output_dir)
             root.mkdir(parents=True, exist_ok=True)
-            net_mov = new_image(
-                _numpy(inputs[0])[..., 0], mov, affine=mov.affine @ net_to_mov
-            )
-            net_fix = new_image(
-                _numpy(inputs[1])[..., 0], fix, affine=fix.affine @ net_to_fix
+            net_mov, net_fix = _network_input_images(
+                inputs, mov, fix, net_to_mov, net_to_fix, self.device,
+                has_init=init is not None,
             )
             nib.save(net_mov, str(root / "inp_1.nii.gz"))
             nib.save(net_fix, str(root / "inp_2.nii.gz"))

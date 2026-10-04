@@ -10,6 +10,7 @@ from torch.nn import functional as F
 
 from .._dmri import configure_device
 from .model import ParcUNet
+from .cpu_conv import convolution_slabs, cpu_autocast_enabled
 
 
 class SynthSegParc:
@@ -50,8 +51,13 @@ class SynthSegParc:
         grid = torch.stack(torch.meshgrid(axis, axis, axis, indexing="ij"))
         kernel = torch.exp(-grid.square().sum(0) / (2 * 0.5 ** 2))
         kernel = (kernel / kernel.sum()).view(1, 1, 3, 3, 3)
-        posterior = F.conv3d(posterior, kernel.expand(69, 1, 3, 3, 3),
-                             padding=1, groups=69)[0]
+        if (posterior.device.type == "cpu" and not cpu_autocast_enabled()
+                and not torch.backends.mkldnn.enabled):
+            posterior = convolution_slabs(posterior, kernel.expand(69, 1, 3, 3, 3),
+                                         padding=1, groups=69)[0]
+        else:
+            posterior = F.conv3d(posterior, kernel.expand(69, 1, 3, 3, 3),
+                                 padding=1, groups=69)[0]
 
         # FreeSurfer forces the background channel to zero inside cortex and
         # one outside before argmax; the resulting hard labels match this mask.

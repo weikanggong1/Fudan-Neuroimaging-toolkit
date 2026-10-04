@@ -234,6 +234,7 @@ class FastVBM:
         synthstrip_weights=None,
         synthmorph_weights=None,
         bias_correction=True,
+        fast_execution="tensor",
         synthmorph_extent=256,
         synthmorph_hyper=0.5,
         synthmorph_steps=7,
@@ -259,6 +260,9 @@ class FastVBM:
                 "registration_backend must be 'synthmorph' or 'fnirt'"
             )
         self.registration_backend = registration_backend
+        if fast_execution not in ("tensor", "fsl"):
+            raise ValueError("fast_execution must be 'tensor' or 'fsl'")
+        self.fast_execution = fast_execution
         self.threads = threads
         self.extractor = None
         self.deform_model = None
@@ -266,6 +270,7 @@ class FastVBM:
             device=self.device,
             threads=threads,
             bias_fwhm_mm=20.0 if bias_correction else 0.0,
+            execution=fast_execution,
         )
         self.bias_correction = bias_correction
         self.synthmorph_extent = synthmorph_extent

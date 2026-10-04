@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from functools import wraps
 import logging
 from pathlib import Path
 from time import monotonic
@@ -109,6 +110,39 @@ def _expand_structures(structures) -> list[str]:
     return expanded
 
 
+def _cpu_thread_scoped(function):
+    """CPU calls restore Torch threads and constrain the caller's Numba mask.
+
+    CUDA retains the existing pipeline path, including its thread policy.
+    Native BLAS threads and process affinity remain the caller's responsibility.
+    """
+    @wraps(function)
+    def scoped(*args, **kwargs):
+        device = torch.device(kwargs.get("device", "cuda:0"))
+        if device.type != "cpu":
+            return function(*args, **kwargs)
+        threads = kwargs.get("threads", 4)
+        if isinstance(threads, bool) or not isinstance(threads, int) or threads < 1:
+            raise ValueError("threads must be a positive integer")
+        import numba
+        before_torch = torch.get_num_threads()
+        before_numba = numba.get_num_threads()
+        # A previously imported Numba pool cannot grow beyond its capacity.
+        # Preserve the existing API's Torch budget while capping that pool.
+        numba_threads = min(threads, int(numba.config.NUMBA_NUM_THREADS))
+        try:
+            torch.set_num_threads(threads)
+            numba.set_num_threads(numba_threads)
+            return function(*args, **kwargs)
+        finally:
+            try:
+                numba.set_num_threads(before_numba)
+            finally:
+                torch.set_num_threads(before_torch)
+    return scoped
+
+
+@_cpu_thread_scoped
 def segment_4_subregions(
     t1: str | Path | nib.spatialimages.SpatialImage,
     atlas_root: str | Path | None = None,
@@ -126,7 +160,11 @@ def segment_4_subregions(
     save_highres: bool = True,
     save_posteriors: bool = False,
 ) -> SubregionResult:
-    """Segment one raw T1 end to end; optionally save all outputs in one call."""
+    """Segment one raw T1 end to end; optionally save all outputs in one call.
+
+    CPU calls temporarily constrain Torch intraop and the current Numba mask,
+    restoring both on success or failure. CUDA keeps its existing thread path.
+    """
     started = monotonic()
     if isinstance(threads, bool) or not isinstance(threads, int) or threads < 1:
         raise ValueError("threads must be a positive integer")

@@ -310,6 +310,17 @@ def _fsl_mixel_probabilities(values, means, variances, mask):
     pure = torch.exp(-_fsl_energy(values, means, variances).double()).float()
     fractions = _fsl_fractions(100, device=values.device)
     evidence = [pure[0], pure[1], pure[2]]
+    if not values.is_cuda:
+        from ._fsl_cpu import mixel_evidence
+
+        pair_means, pair_variances = _fsl_pair_parameters(fractions, means, variances)
+        scales = torch.log(torch.sqrt(
+            2.0 * float(np.float32(math.pi)) * pair_variances.double())).float()
+        mixed = mixel_evidence(values.contiguous().numpy().reshape(-1),
+                               mask.contiguous().numpy().reshape(-1),
+                               pair_means.numpy(), pair_variances.numpy(), scales.numpy())
+        evidence.extend(torch.from_numpy(mixed.reshape(3, *values.shape)))
+        return torch.stack(evidence) * mask[None]
     for a, b in ((0, 1), (0, 2), (1, 2)):
         probability = torch.zeros_like(values)
         for fraction in fractions:
@@ -321,7 +332,26 @@ def _fsl_mixel_probabilities(values, means, variances, mask):
     return torch.stack(evidence) * mask[None]
 
 
+def _fsl_pair_parameters(fractions, means, variances):
+    pair_means, pair_variances = [], []
+    for a, b in ((0, 1), (0, 2), (1, 2)):
+        pair_means.append(fractions * means[a] + (1 - fractions) * means[b])
+        pair_variances.append(fractions * fractions * variances[a]
+                              + (1 - fractions) * (1 - fractions) * variances[b])
+    return torch.stack(pair_means), torch.stack(pair_variances)
+
+
 def _fsl_partial_volumes(values, means, variances, mask, mixel, fractions, chunk_size):
+    if not values.is_cuda:
+        from ._fsl_cpu import partial_volumes
+
+        pair_means, pair_variances = _fsl_pair_parameters(fractions, means, variances)
+        output = partial_volumes(values.contiguous().numpy().reshape(-1),
+                                 mask.contiguous().numpy().reshape(-1),
+                                 mixel.contiguous().numpy().reshape(-1), fractions.numpy(),
+                                 pair_means.numpy(), pair_variances.numpy(),
+                                 torch.log(pair_variances).numpy())
+        return torch.from_numpy(output.reshape(3, *values.shape))
     result = torch.zeros((3, *values.shape), dtype=torch.float32, device=values.device)
     for tissue in range(3):
         result[tissue][mask & (mixel == tissue)] = 1
@@ -367,7 +397,7 @@ def _segment_t1_fsl(original, mask, voxel_size, config):
     if config.init_iterations + config.fixed_iterations == 0:
         means, variances = _fsl_moments(log_input, probabilities, mask)
     scan = schedule(mask, voxel_size)
-    random = GlibcRandom(-1)
+    random = GlibcRandom(-1, compiled=not original.is_cuda)
     kernels = _fsl_bias_kernels(config, voxel_size, original.device)
     bias_enabled = config.bias_fwhm_mm > 0
     bias_log = _fsl_bias(log_input, probabilities, means, variances, mask, kernels) if bias_enabled else torch.zeros_like(original)
@@ -443,6 +473,11 @@ def segment_t1(image, mask=None, voxel_size=(1.0, 1.0, 1.0), config=None):
 
     original = torch.where(mask, image, torch.zeros_like(image))
     if config.execution == "fsl":
+        if not original.is_cuda:
+            from ._fsl_cpu import thread_budget
+
+            with thread_budget(torch.get_num_threads()):
+                return _segment_t1_fsl(original, mask, voxel_size, config)
         return _segment_t1_fsl(original, mask, voxel_size, config)
     log_input = torch.where(mask, torch.log1p(original), torch.zeros_like(original))
     samples = log_input[mask]

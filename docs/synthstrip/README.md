@@ -12,23 +12,23 @@ SynthStrip 从脑影像预测有符号距离场，生成脑掩膜和去除背景
 from pathlib import Path
 from fnit import SynthStrip
 
-out = Path("results")
-out.mkdir(exist_ok=True)
-extract = SynthStrip(
+output_directory = Path("results")
+output_directory.mkdir(exist_ok=True)
+brain_extraction_model = SynthStrip(
     weights="/path/to/weights",  # 权重：官方 PT 文件或权重目录
     device="cuda:0",  # 设备：第一张可见 CUDA GPU
     no_csf=False,  # 模型：保留 CSF 的默认模型
     threads=4,  # CPU 线程：预处理与后处理使用 4 线程
 )
-result = extract(
+brain_extraction_result = brain_extraction_model(
     image="subject_T1w.nii.gz",  # 输入：单幅 3D T1w，也可传 nibabel 空间影像
     border=1,  # 掩膜阈值：距离场小于 1 mm 视为脑内
     fill=0,  # 输出背景：脑掩膜外填 0
 )
-result.image.save(path=out / "subject_brain.nii.gz")  # 输出路径：脑提取后的 T1w
-result.mask.save(path=out / "subject_mask.nii.gz")  # 输出路径：二值脑掩膜
-result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符号距离场
-# 可继续 extract(image="another_T1w.nii.gz")，复用已加载模型。
+brain_extraction_result.image.save(path=output_directory / "subject_brain.nii.gz")  # 脑提取后的 T1w
+brain_extraction_result.mask.save(path=output_directory / "subject_mask.nii.gz")  # 二值脑掩膜
+brain_extraction_result.distance.save(path=output_directory / "subject_sdt.nii.gz")  # 有符号距离场
+# 可继续 brain_extraction_model(image="another_T1w.nii.gz")，复用已加载模型。
 ```
 
 `from fnit.synthstrip import SynthStrip, StripResult` 是等价的功能模块入口。
@@ -41,11 +41,13 @@ result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符�
 |---|---|
 | `weights` | 官方 PT 文件或所在目录；省略时使用[统一查找顺序](../ARCHITECTURE.md#公开-python-api) |
 | `device` | `"cpu"` 或 `"cuda:N"`；CUDA 编号遵循 `CUDA_VISIBLE_DEVICES` |
-| `no_csf` | 为 `True` 时使用排除 CSF 的官方权重 |
+| `no_csf` | 为 `True` 时自动选择排除 CSF 的权重；若 `weights` 明确指定 PT 文件，则该文件优先，与官方 `--model` 一致 |
 | `threads` | 当前进程的 Torch 线程数；`None` 保留当前值 |
-| `configure_precision` | 默认 `True` 延续TF32配置；`False` 保留调用方TF32设置，不改变模型和float32输入。recon-all在构造后施加其cuDNN FP32例外。 |
+| `configure_precision` | CUDA 默认 `True` 配置 TF32；`False` 保留调用方的 TF32 设置。CPU 构造保持调用方的全部 CUDA 后端设置。模型和输入始终为 float32。recon-all 在构造后施加其 cuDNN FP32 例外。 |
 
-模型进入 eval 模式并使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。卷积使用 `cudnn.benchmark=False` 和 `cudnn.deterministic=True`，固定算法选择；这两项设置以及 TF32 是当前进程的 PyTorch 后端策略。重复使用实例可避免重复加载权重。
+模型进入 eval 模式并使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。CUDA 卷积使用 `cudnn.benchmark=False` 和 `cudnn.deterministic=True`，固定算法选择；这些是当前进程的 PyTorch 后端策略。CPU 构造不会修改它们，避免影响同一进程中其他 GPU 模型。重复使用实例可避免重复加载权重。
+
+CPU 的 oneDNN 可用且启用时，卷积权重和输入使用 PyTorch `channels_last_3d` 布局；仅改变内存布局，参数、数据类型和网络结构保持原样。调用方禁用 oneDNN 时保留原有布局。CUDA 路径保留原有布局与后端策略。
 
 [`DMRIPipeline`](../dmri_pipeline/README.md#b0-脑掩膜与权重) 使用此原生 API 对 TOPUP 校正 b0 均值或 AP-only 原 b0 均值提取 EDDY mask，固定标准模型、`border=1 mm`，复用实例处理 MMORF T1。输入均值保留原灰度和几何，标准权重在 pipeline 首次加载时校验大小/SHA-256；算法、网络和本模块预处理没有因此修改。该接入的真实新整链比较由 dMRI 验证页单独记录，下方既有 EPI/T1 基准保留原计时范围。
 
@@ -64,6 +66,8 @@ result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符�
 | `result.distance` | 有符号距离场，单位 mm |
 
 三个返回字段均为 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），可用 `.save(path)` 保存；也可直接传给 `nibabel.save`。调用不会修改输入对象。直接使用 Python 保存时，由调用者准备输出父目录。
+
+`SpatialImage` 可以含惰性 ArrayProxy，也可以持有已经完全解码的 ndarray。[默认完全物化 CPU API 验证](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md)覆盖后一种输入：保留原解码值、K-layout 和 NIfTI 几何，调用后输入未被修改；其余参数场景的既有 CLI 验收范围仍单独记录。
 
 2026-10-02的[recon-all串行接入](../recon_all/SERIAL_OPTIMIZATION.md)使用此精度接口，
 记录实际前向并在Talairach子进程启动前释放Strip模型。默认独立调用保持兼容，
@@ -155,11 +159,61 @@ U-Net、1 mm 最近邻重采样和 SDT 回采样在所选 PyTorch 设备执行�
 
 官方脚本集成参数解析和执行流程；本包将同一网络和影像处理拆成可导入接口。生产运行使用 nibabel、PyTorch 和 SciPy，不调用 FreeSurfer，也不依赖 Surfa。统一 CLI 为 `fnit synthstrip`。
 
-### 最新完整三维对照
+### 2026-10-04：CPU 对照与原始 NIfTI 几何问题
+
+新的 CPU 对照使用 nodecw10、相同 8 个物理核及 8 线程，默认 T1 按原版/FNIT/FNIT/原版交替运行，完整命令包含启动、模型加载、推理及三种结果写盘。参数矩阵和预先固定的精度门槛见[本轮验证说明](../../validation/smri_cpu/strip_sr_20261004/README.md)。
+
+冻结基线 `1d31e7baa` 在一例公开原始 T1 上的 mask Dice 为 0.99642849，相差 20,312 个体素。官方与 FNIT 解码出的原始数组、dtype 和 affine 完全相同；差异来自共享 `new_image()` 重写 qform 时重算 `pixdim`，将一个轴的间距由 0.777777791 变为 0.777777731 mm。`ceil(288 × pixdim)` 因而从 225 变成 224，改变了 1 mm 网格和归一化输入。
+
+共享修复 `dc2fc052` 保留原始头文件几何：1 mm 数组与归一化网络输入均与官方逐元素相同。CPU 模块 `6b7aeafd` 在 oneDNN 启用时使用 `channels_last_3d`，并使 CPU 构造保持调用方 CUDA 后端设置。两例原始 T1 和无 CSF 模型的修复后 contiguous 控制，脑图、mask、SDT 均与官方逐值相同；CPU 布局改变后的脑图与 mask 仍逐值相同，SDT 按预先固定的 `rtol=1e-5, atol=1e-4 mm` 验收。
+
+正式公开 CLI 共完成 **26 次运行、11 个场景**，所有场景通过上述门槛，mask Dice 均为 1。完整网格 SDT 的最大全场景绝对差为 `4.3392e-5 mm`，不能将距离场描述为逐位相同。[逐项匿名结果](../../validation/smri_cpu/strip_sr_20261004/reports/synthstrip_cpu_cli.public.json)记录网格、dtype、三份输出哈希、全部重复、RSS 与相同核亲和性。
+
+| 真实输入与功能 | 官方 / FNIT 完整 CLI（s） | 精度 |
+|---|---:|---|
+| 原始 T1 case01，默认 ABBA 中位数 | 45.561 / 14.901 | brain、mask 逐值同；SDT 通过 |
+| 原始 T1 case02，默认 ABBA 中位数 | 49.199 / 14.027 | 同上 |
+| 公开衍生 FLAIR | 49.585 / 6.264 | 同上 |
+| case01 `no_csf=True`，自动选权重 | 17.281 / 12.772 | 同上 |
+| case01 `border=2` | 73.600 / 12.269 | 同上 |
+| case01 `border=100`，距离扩展功能 | 24.783 / 18.279 | 同上；不是推荐临床阈值 |
+| case01 `fill=-1` | 23.034 / 12.270 | 同上 |
+| 作者去面、配准的真实 HU CT | 20.531 / 8.014 | 同上 |
+| 实际 64 mT T1 | 25.038 / 7.015 | 同上 |
+| 真实 EPI 两帧，逐帧提取 | 16.526 / 13.523 | 两帧完整网格均通过 |
+| 同一 EPI b0 的 MGZ 输入 | 11.017 / 8.265 | brain、mask 逐值同；SDT 通过 |
+
+本轮所有场景的 FNIT 完整进程均较快；两个默认 T1 的观测完整进程比为 3.06 和 3.51。GPFS 冷导入和文件缓存会使官方启动时间波动，不能把该比例当作卷积本身的提速。另行剖析的 case01 修复后 CPU 网络由 contiguous 的 11.151 s 降至 6.029 s；相应观察 API 时间为 15.348 / 9.510 s。官方独立观察的网络为 8.209 s。这些剖析包含包装与哈希的额外开销，完整进程不用于 CLI 表中的比例。
+
+GPU 回归在同一几何修复、同一 H100、默认 TF32 下按旧模块/新模块/新模块/旧模块运行。CPU 布局优化没有启用 CUDA layout，四次 brain、mask、SDT 逐值相同。网络配对时间为旧模块 0.188/0.190 s、新模块 0.192/0.198 s，观察 API 为 3.109/3.134 s 与 3.146/3.158 s；组件峰值 allocated `6,503,141,376 B`、reserved `10,800,332,800 B` 完全相同。共享卡上还有保留的 CUDA context，记录的是配对观测值；[回归报告](../../validation/smri_cpu/strip_sr_20261004/reports/synthstrip_gpu_regression.public.json)不据此宣称稳定 GPU 加速。
+
+同一原始 case01 的 GPU 对官方 CPU mask 差异由几何修复前 20,315 个降至 59 个，Dice 从 0.99642796 提高至 0.99998962；修复后 SDT RMSE 为 `0.00071054 mm`、最大差为 `0.00614119 mm`。[修复前](../../validation/smri_cpu/strip_sr_20261004/reports/synthstrip_gpu_official_before.public.json)与[修复后](../../validation/smri_cpu/strip_sr_20261004/reports/synthstrip_gpu_official_after.public.json)保留实际失败门槛。GPU TF32 结果没有通过本轮 CPU 逐值门槛；CPU 优化相对同修复 GPU 基线的输出没有变化。`nvidia-smi` 包含同卡其他保留 context，整卡峰值为 26,949 MiB，不等于本组件的 Torch 显存；[设备观察](../../validation/smri_cpu/strip_sr_20261004/reports/synthstrip_gpu_device_load.public.json)与[CPU 阶段](../../validation/smri_cpu/strip_sr_20261004/reports/cpu_stage_profiles.public.json)单独保存。
+
+下图只离散调整显示方向，不重采样结果。切片选择为旧版本差异最多的位置；右列 CPU 优化后的 mask 在完整网格无差异。原始 T1 来自 CC0 的 ds003138。
+
+![原始 T1、旧几何差异和修复后 CPU 掩膜](figures/synthstrip_cpu_header_alignment.png)
+
+### 默认完全物化 SpatialImage API（v5 冻结）
+
+2026-10-04 另用 `task5_candidate_cpu_v5`（提交 `00fedf3544291b9c3e1db9b6c2d6fcef3917d958`）在 nodecw10 相同 8 核/8 线程执行 **一次默认 CPU API**。同源 case01 T1 先按原缩放规则解码为 float64/F-layout，再用 `order="K"` 复制为自有 ndarray 构造 SpatialImage；没有提前请求 proxy 的 float32 数据，affine、zooms 和 qform/sform 保持原值。Strip 两种输入分支均使用 `asanyarray(dataobj)`，网络仍为 CPU float32、生产 channels-last，一次前向。官方及既有 FNIT 路径默认输出均复用保存参考。[匿名结果](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/report.public.json)保留源码、输入、权重和输出哈希。
+
+完整 `18,579,456` 体素的 brain、mask 逐值等于官方，Dice 1、体积差 0；SDT 最大差 `2.62260437e-5 mm`，通过原固定门槛。三份数组和文件 SHA 均与保存的 FNIT 路径默认输出相同。对官方输出，affine 与 sform 逐值同，但整份 header、`pixdim` 并非逐字节相同，qform 最大差 `1.4998256352150019e-9 mm`；数组通过和 header 字节一致分别报告。
+
+| 本次单例范围 | 时间（s） |
+|---|---:|
+| metadata＋解码＋K-layout 复制＋对象构造 | 0.504 |
+| 默认 API | 6.606 |
+| 同次三份输出保存 | 2.898 |
+| 保存参考比较与几何核对 | 12.041 |
+| 完整进程，含全部 provenance、哈希与比较 | 25.530 |
+
+完整进程包含 posthoc，且本次没有重跑官方，不能与上述 CLI 中位数计算新加速比。完整非重叠阶段、模型加载、GNU time 和 RSS 见[物化 API 报告](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md)。本次补测只覆盖默认单例 CPU 对象入口，没有追加参数矩阵或 GPU 运行。
+
+### 既有 GPU 完整三维对照（`cfb7beee`）
 
 受测源码 `cfb7beee` 已在同一例真实 SBRef 和 T1 的完整原始网格上核对已保存输出。实际 `pipeline.py` SHA-256 为 `0ae5d3e3…`，与运行捕获的源码一致；官方 checkpoint SHA-256 为 `37417f80…`，30,851,709 字节，与原程序相同。输入文件的 SHA-256 也逐项一致。完整哈希、三维统计和计时来源见[最新版原程序对照](../../validation/synthstrip/latest_native_comparison.public.json)。
 
-| 最新完整三维对照 | SBRef / EPI | T1 |
+| `cfb7beee` 历史完整三维对照 | SBRef / EPI | T1 |
 |---|---:|---:|
 | mask Dice | 0.999994968 | 0.999998569 |
 | mask 不同体素数 | 1 | 4 |
@@ -172,7 +226,7 @@ U-Net、1 mm 最近邻重采样和 SDT 回采样在所选 PyTorch 设备执行�
 
 FNIT 阶段计时包括影像处理、网络推理和该阶段结果保存，模型构造在两阶段计时之外；原进程包括 Python 启动、模型加载及影像读写。两种计时边界分别保留，未将它们相除为完整命令加速比。EPI 的流水线捕获保存了二值掩膜，没有单独保存 SynthStrip 脑图；T1 脑图比较覆盖全部 6,269,400 个体素，其强度差异只出现在上述 4 个 mask 边界体素。
 
-当前 T1 脑图和掩膜与 `1eb9c417` 的固定脑图示例输入逐值相同，文件 SHA-256 也相同。因此下方使用同一原 FNIRT 场的脑提取示例仍适用于当前输出；此核对范围是 SynthStrip 输出。
+该历史版本的 T1 脑图和掩膜与 `1eb9c417` 的固定脑图示例输入逐值相同，文件 SHA-256 也相同。下方使用同一原 FNIRT 场的脑提取图对应这次历史输入；本轮原始 T1 的示意见上图。
 
 ### 跨进程卷积选择修复
 
@@ -276,6 +330,8 @@ python validation/fmri/compare_synthstrip_geometry.py \
 
 | 版本与范围 | 更新及真实数据核对 | 耗时边界 |
 |---|---|---|
+| 2026-10-04，`task5_candidate_cpu_v5` 默认完全物化 API | 同源 case01，真实解码值/K-layout 自有 ndarray，默认 API 一次；对保存的 FNIT 三份输出逐值且文件 SHA 同；官方 brain/mask 逐值同，SDT 原门通过，header/qform 微差单列。[报告](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md) | API 6.606 s，三份保存 2.898 s；25.530 s 完整进程含 posthoc，官方参考复用，不计算新加速比。 |
+| 2026-10-04 `6b7aeafd` + 共享几何 `dc2fc052` | 11 场景、26 次 CPU CLI；脑图和 mask 逐值等于官方，SDT 固定容差通过。CPU oneDNN 使用 channels-last；CPU 构造不修改 CUDA 状态；同修复 GPU ABBA 三份输出均逐值同。 | nodecw10 同 8 线程/8 物理核；两例默认完整 CLI 中位数官方/FNIT为 45.561/14.901、49.199/14.027 s。阶段剖析和冷启动分别记录。 |
 | 2026-10-02 dMRI 固定 b0 输入 | 同一真实官方 TOPUP b0 均值，标准权重同哈希；FNIT H100 GPU/官方 CPU mask 为 271,077/271,080 voxel，差 5 voxel、Dice=0.9999907776，shape/affine 一致，SDT MAE=0.00056229 mm。[匿名报告](../../validation/dmri_pipeline/synthstrip_fixed_input_20261002.public.json)；不是新 dMRI pipeline 整链。 | FNIT 加载＋推理 1.5973 s；完整 FNIT/官方进程另测 6.825/122.275 s，官方包含冷 NFS 读取和 8 线程 CPU 推理，不与 FNIT 子函数时间直接计算速度比。 |
 | `cfb7beee` 合并版本验收 | SynthStrip 源码与 `44364a8` 一致；相对原 FreeSurfer，完整 EPI/T1 mask Dice 为 0.999994968/0.999998569，差异为 1/4 体素；当前 T1 脑图及 mask 与冻结图示输入逐值相同。见[最新版报告](../../validation/synthstrip/latest_native_comparison.public.json)。 | FNIT 复用模型子函数为 1.1654/1.4442 秒；原独立进程为 8.5569/9.3769 秒，分别保留模型构造与进程启动/读写边界。 |
 | `44364a8` 固定卷积算法选择 | 默认关闭 `cudnn.benchmark`，保留 deterministic、TF32 和原 API。旧策略真实 T1 两个新进程的 19 个边界差异及关闭 benchmark 后的逐值一致控制，保存在[跨进程报告](../../validation/synthstrip/cudnn_repeatability.public.json)的 `original_diagnostic`；报告顶层记录当前源码的新驱动验收及实际输入、模型状态、网络预测哈希。 | 新驱动的调用计时包含记录张量哈希的开销，新进程计时另含启动、模型加载和写盘；各次秒数读取该报告。此项测量限于 SynthStrip，不作为完整 fMRI 流程耗时或等价性结论。 |

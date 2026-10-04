@@ -67,7 +67,9 @@ class _SamplingPlan:
 
 def _prepare_transform(
     trans, source_shape, *, device, dtype, shape=None, method='linear',
-    fill_value=0, surfa_nearest_rule=False,
+    fill_value=0, surfa_nearest_rule=False, surfa_linear_rule=False,
+    surfa_nearest_half_up=False,
+    base_grid=None,
 ):
     """Prepare the existing sampler's coordinates without sampling frames.
 
@@ -77,12 +79,16 @@ def _prepare_transform(
     if method not in ('linear', 'nearest'):
         raise ValueError('method must be linear or nearest')
     use_surfa = method == 'nearest' and surfa_nearest_rule
+    use_surfa_domain = use_surfa or (method == 'linear' and surfa_linear_rule)
     trans = torch.as_tensor(
-        trans, dtype=torch.float32 if use_surfa else dtype, device=device
+        trans, dtype=torch.float32 if use_surfa_domain else dtype, device=device
     )
     if trans.ndim == 2:
         shape = source_shape if shape is None else tuple(shape)
-        if use_surfa:
+        if use_surfa_domain:
+            # The original final image sampler evaluates the affine directly.
+            # Its float32 coordinates can change at the fill boundary if an
+            # intermediate displacement is subtracted and added again.
             coords = grid(shape, device, torch.float32)
             loc = torch.stack([
                 trans[row, 0] * coords[:, 0]
@@ -102,9 +108,10 @@ def _prepare_transform(
             )
             loc = coords + shift
     else:
-        loc = grid(
+        coords = (base_grid if base_grid is not None else grid(
             trans.shape[2:], device, torch.float32 if use_surfa else dtype
-        ) + trans
+        ))
+        loc = coords + trans
     valid = None
     if fill_value is not None:
         valid = torch.ones_like(loc[:, :1], dtype=torch.bool)
@@ -112,14 +119,22 @@ def _prepare_transform(
             valid &= loc[:, dimension:dimension + 1] >= 0
             valid &= (
                 loc[:, dimension:dimension + 1] < size
-                if use_surfa else loc[:, dimension:dimension + 1] <= size - 1
+                if use_surfa_domain else loc[:, dimension:dimension + 1] <= size - 1
             )
     if method == 'nearest':
-        idx = [
-            (torch.floor(loc[:, d] + 0.5) if use_surfa else loc[:, d].round())
-            .long().clamp(0, n - 1)
-            for d, n in enumerate(source_shape)
-        ]
+        idx = []
+        for dimension, size in enumerate(source_shape):
+            coordinate = loc[:, dimension]
+            if use_surfa and surfa_nearest_half_up:
+                # libc round promotes the float coordinate before rounding.
+                # Adding .5 in float32 can round a value just below a tie up
+                # to the next integer. Compare its fractional part directly.
+                lower = coordinate.floor()
+                rounded = lower + ((coordinate - lower) >= 0.5)
+            else:
+                rounded = (torch.floor(coordinate + 0.5)
+                           if use_surfa else coordinate.round())
+            idx.append(rounded.long().clamp(0, size - 1))
         flat = (idx[0] * source_shape[1] + idx[1]) * source_shape[2] + idx[2]
         return _SamplingPlan(tuple(loc.shape[2:]), None, flat, valid)
     norm = [loc[:, d] * (2 / (n - 1)) - 1 if n > 1 else torch.zeros_like(loc[:, d])
@@ -158,6 +173,7 @@ def surfa_nearest(volume, trans, shape=None, fill_value=0):
         trans, volume.shape[2:], device=volume.device, dtype=volume.dtype,
         shape=shape, method='nearest', fill_value=fill_value,
         surfa_nearest_rule=True,
+        surfa_nearest_half_up=volume.device.type == 'cpu',
     )
     return _sample_prepared(volume, plan, fill_value)
 
@@ -195,6 +211,18 @@ def compose(transforms, shape=None):
 
 def integrate(vec, steps=7):
     out = vec / (2 ** steps)
+    if vec.device.type == 'cpu':
+        # Scaling-and-squaring repeatedly queries the same voxel grid. Reuse
+        # its values on CPU; keep the Neurite border-extension rule and every
+        # arithmetic operation. CUDA continues through its original path.
+        coords = grid(vec.shape[2:], vec.device, vec.dtype)
+        for _ in range(steps):
+            plan = _prepare_transform(
+                out, out.shape[2:], device=out.device, dtype=out.dtype,
+                fill_value=None, base_grid=coords,
+            )
+            out = out + _sample_prepared(out, plan, None)
+        return out
     for _ in range(steps):
         out = out + transform(out, out, fill_value=None)
     return out

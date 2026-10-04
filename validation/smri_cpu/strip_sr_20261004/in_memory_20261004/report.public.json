@@ -1,0 +1,1640 @@
+{
+  "schema": "fnit.smri.memory_api.public.v1",
+  "date": "2026-10-04",
+  "scope": "one real fully materialized case01 default CPU API per feature; archived references reused",
+  "case_alias": "case01",
+  "source_dataset": "OpenNeuro ds003138 v1.0.1",
+  "privacy": "allowlisted scalars, public resource names and hashes only; no images, arrays, private paths, subject IDs, argv, process IDs or raw logs",
+  "code_sha256": {
+    "worker.py": "fc807c795b7a5b785ba9037f6948b45f755ad06a7436bc040310b01f153e3d1e",
+    "prepare_jobs.py": "1193d0a52997a406a82ba881e65d94d4f36bd06d2715072011e36e5e5e77e15f",
+    "compare_outputs.py": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f"
+  },
+  "collector_sha256": "37a0d80a811fc08c9ceacbd8dd8dd6812a8c262ec3b9c3438756bdff24d08d63",
+  "runner_sha256": "7f5215188a07a0ed91470527f898c344760dd95f82dc9ef004ad0f0c216d1bb5",
+  "private_plan_sha256": "a57112bd9c1759eb2f01cf089e3c0640df505b36016dd4994a5a63272675b5cc",
+  "features": {
+    "synthstrip": {
+      "schema": "fnit.smri.memory_api.v1",
+      "status": "complete",
+      "feature": "synthstrip",
+      "case": "case01",
+      "worker_sha256": "fc807c795b7a5b785ba9037f6948b45f755ad06a7436bc040310b01f153e3d1e",
+      "config_sha256": "596b52a429de3a3f5997680f223a1c6eadd57653caefdf4aa5c11f47072609f3",
+      "source": {
+        "source_label": "task5_candidate_cpu_v5",
+        "head_commit": "00fedf3544291b9c3e1db9b6c2d6fcef3917d958",
+        "archive_sha256": "ab9a2d587d0fb9599fc2b6200011907b86e12b60f2630db131b62641ee755a72",
+        "manifest_sha256": "42ae32baba858d64f44ea095bc163d92d8ff142f5a7e78081c192356af99e8ef",
+        "includes_reviewed_uncommitted_changes": false,
+        "files_verified": 7,
+        "files_sha256": {
+          "src/fnit/_nib.py": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+          "src/fnit/synthstrip/pipeline.py": "af4978d445f3438a82c06de2548918b0dcc049e746eba8190fc50b889f0a5a48",
+          "src/fnit/synthstrip/model.py": "6afcff10848a8a2a57b9c00d4b637eda90e4c0e21f301d8a8031107d783a5f44",
+          "src/fnit/synthstrip/geometry.py": "c31febaf93404d1b4b7e39f36bfbacd7adb659ddcf923ae6a0924bc4e0a00dc1",
+          "src/fnit/synthsr/pipeline.py": "c896d8e2e4a1a214546e6674ce3aacdcf84906d1b2010b5397ec1b076f502943",
+          "src/fnit/synthsr/model.py": "290d0ae911d8c99f4f87c22936ca497ea45bb57b8f50066b822d9cd10c4661b2",
+          "src/fnit/synthsr/spatial.py": "962a2f0bd5b97db1f039efb67fa87d2f61aa5d8fc23512689f255b168b42dabe"
+        }
+      },
+      "resources": {
+        "input": {
+          "filename": "case01_T1w.nii.gz",
+          "bytes": 20077109,
+          "sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19"
+        },
+        "weight": {
+          "filename": "synthstrip.1.pt",
+          "bytes": 30851709,
+          "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+        }
+      },
+      "comparator_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+      "saved_reference_sha256": {
+        "official": {
+          "image": "3ae8a207799bb1f45a19cc9ae20bec0ba5ec41da5ec5c8161d37a182d7172d9f",
+          "mask": "b35980a9aba4f8a85da8557bea7221c504a4a5ac98587f5134f6980f9329af6d",
+          "distance": "d50931140ceb91299e6c7ffbceca5309ccb5c7f6e03b386af5916c0d8ead7ae4"
+        },
+        "saved_fnit_path": {
+          "image": "fd8c3253a6960777715c85844a38e760959b6bf80849bd28b7e5b906dee0dea4",
+          "mask": "f6c99210d9617b2450c9d90da2f34a85d9b885adf911a57f03a7e402d3f27ad3",
+          "distance": "639b2f0e6b6bf6d2656440db6f3a5f94b8f0904bc4e91644c84d6ba6b949dde5"
+        }
+      },
+      "canonical_index_sha256_before": "487ad823556519fe424d3c2dbf3b6cf097a820cf80283907fccc5ce6373e080c",
+      "runtime": {
+        "hostname": "nodecw10",
+        "device": "cpu",
+        "threads": 8,
+        "interop_threads": 1,
+        "affinity": [
+          0,
+          4,
+          8,
+          12,
+          16,
+          20,
+          24,
+          28
+        ],
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "nibabel": "5.4.2",
+        "cuda_initialized_before": false,
+        "cuda_visible_devices": "",
+        "cuda_initialized_after": false
+      },
+      "materialized_input": {
+        "input_alias": "case01",
+        "data_source": "OpenNeuro ds003138 v1.0.1 raw T1w",
+        "construction": "new_image(np.array(np.asanyarray(original.dataobj), copy=True, order='K'), original)",
+        "spatial_image_class": "FNITNifti1Image",
+        "dataobj_is_ndarray": true,
+        "dataobj_is_proxy": false,
+        "original_storage_dtype": "int16",
+        "proxy_slope": 0.059418629854917526,
+        "proxy_intercept": 1947.0296630859375,
+        "original_decoded": {
+          "shape": [
+            224,
+            288,
+            288
+          ],
+          "dtype": "float64",
+          "strides_bytes": [
+            8,
+            1792,
+            516096
+          ],
+          "c_contiguous": false,
+          "f_contiguous": true,
+          "owns_data": false
+        },
+        "materialized": {
+          "shape": [
+            224,
+            288,
+            288
+          ],
+          "dtype": "float64",
+          "strides_bytes": [
+            8,
+            1792,
+            516096
+          ],
+          "c_contiguous": false,
+          "f_contiguous": true,
+          "owns_data": true
+        },
+        "values_exact": true,
+        "affine_exact": true,
+        "zooms_exact": true,
+        "zooms_mm": [
+          0.800000011920929,
+          0.7777777910232544,
+          0.7777777910232544
+        ],
+        "forms": {
+          "qform": {
+            "original_code": 1,
+            "materialized_code": 1,
+            "exact": true
+          },
+          "sform": {
+            "original_code": 1,
+            "materialized_code": 1,
+            "exact": true
+          }
+        },
+        "decoded_array_sha256_C_order": "0e4084f775d0c71caf923957248e2e2a792ec056b3afd7910b8eca7e297500d5",
+        "loader_policy": "path and SpatialImage: load_image then asanyarray(dataobj); float32 conform/network after decoding; no proxy float32 request",
+        "unchanged_after_api": true
+      },
+      "model": {
+        "parameter_devices": [
+          "cpu"
+        ],
+        "parameter_dtypes": [
+          "torch.float32"
+        ],
+        "production_cpu_channels_last": true,
+        "network_forwards": 1,
+        "default_options_only": true,
+        "autocast_cpu_enabled": false
+      },
+      "network_bindings": [
+        {
+          "input": {
+            "shape": [
+              1,
+              1,
+              192,
+              256,
+              256
+            ],
+            "dtype": "float32",
+            "device": "cpu",
+            "tensor_stride": [
+              0,
+              0,
+              65536,
+              256,
+              1
+            ],
+            "array_sha256_C_order": "7beb01575c89f51e734f14f53c3572f305a614dc4230f7d213f7cbc55a02eb24"
+          },
+          "output": {
+            "shape": [
+              1,
+              1,
+              192,
+              256,
+              256
+            ],
+            "dtype": "float32",
+            "device": "cpu",
+            "tensor_stride": [
+              12582912,
+              1,
+              65536,
+              256,
+              1
+            ],
+            "array_sha256_C_order": "3efea0ac8d2e9c2f3569c2eb8b4da4c34322b5b0b5cc91a6ab41ce0909fb0e4c"
+          }
+        }
+      ],
+      "output_sha256": {
+        "image": "fd8c3253a6960777715c85844a38e760959b6bf80849bd28b7e5b906dee0dea4",
+        "mask": "f6c99210d9617b2450c9d90da2f34a85d9b885adf911a57f03a7e402d3f27ad3",
+        "distance": "639b2f0e6b6bf6d2656440db6f3a5f94b8f0904bc4e91644c84d6ba6b949dde5"
+      },
+      "stages": [
+        {
+          "name": "verify_frozen_source_and_resources",
+          "status": "complete",
+          "seconds": 0.19064106047153473
+        },
+        {
+          "name": "import_runtime",
+          "status": "complete",
+          "seconds": 1.560243271291256
+        },
+        {
+          "name": "load_image_metadata",
+          "status": "complete",
+          "seconds": 0.0015988275408744812
+        },
+        {
+          "name": "decode_original_values",
+          "status": "complete",
+          "seconds": 0.41563723236322403
+        },
+        {
+          "name": "copy_decoded_array_K_order",
+          "status": "complete",
+          "seconds": 0.08622561395168304
+        },
+        {
+          "name": "construct_materialized_spatial_image",
+          "status": "complete",
+          "seconds": 0.0005099177360534668
+        },
+        {
+          "name": "verify_materialized_input",
+          "status": "complete",
+          "seconds": 0.38222187757492065
+        },
+        {
+          "name": "model_constructor",
+          "status": "complete",
+          "seconds": 0.052968695759773254
+        },
+        {
+          "name": "default_api_call",
+          "status": "complete",
+          "seconds": 6.606296293437481
+        },
+        {
+          "name": "bind_actual_network_tensors_after_api",
+          "status": "complete",
+          "seconds": 0.5375814139842987
+        },
+        {
+          "name": "save_same_call_outputs",
+          "status": "complete",
+          "seconds": 2.898261420428753
+        },
+        {
+          "name": "compare_saved_reference_outputs",
+          "status": "complete",
+          "seconds": 12.041491478681564
+        },
+        {
+          "name": "verify_source_resources_unchanged",
+          "status": "complete",
+          "seconds": 0.1660601794719696
+        }
+      ],
+      "unchanged_after": {
+        "input": true,
+        "weight": true,
+        "source_manifest": true,
+        "source_files": true,
+        "saved_references": true
+      },
+      "comparisons_complete": true,
+      "all_fixed_gates_passed": true,
+      "overall_numerical_equivalence": "not_assessed",
+      "worker_seconds_including_posthoc": 25.034802220761776,
+      "timing_scope": "one new CPU process; preparation, loading, API, saving and posthoc work separate; reference clocks are archived",
+      "private_report_sha256": "09262d2ed11f7f6081a42422b5cef5a6247da2523e35faa514e537fd8ef5746e",
+      "comparisons": {
+        "official": {
+          "returncode": 0,
+          "seconds": 5.868671089410782,
+          "report_sha256": "e37b807cf88f68a3203564f10cf6cac6a6abe7e7e879ea82edf3b34fb66adb4b",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthstrip",
+            "case": "case01_memory_official",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "mask": {
+                "reference_sha256": "b35980a9aba4f8a85da8557bea7221c504a4a5ac98587f5134f6980f9329af6d",
+                "candidate_sha256": "f6c99210d9617b2450c9d90da2f34a85d9b885adf911a57f03a7e402d3f27ad3",
+                "reference_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "candidate_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 18579456,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 2843275,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "reference_binary": true,
+                "candidate_binary": true,
+                "reference_voxels": 2843275,
+                "candidate_voxels": 2843275,
+                "dice": 1.0,
+                "both_nonempty": true,
+                "voxel_mm3": 0.4839547277716253,
+                "reference_volume_mm3": 1376016.378604868,
+                "candidate_volume_mm3": 1376016.378604868,
+                "relative_volume_difference": 0.0
+              },
+              "distance": {
+                "reference_sha256": "d50931140ceb91299e6c7ffbceca5309ccb5c7f6e03b386af5916c0d8ead7ae4",
+                "candidate_sha256": "639b2f0e6b6bf6d2656440db6f3a5f94b8f0904bc4e91644c84d6ba6b949dde5",
+                "reference_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "candidate_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "reference_dtype": "float32",
+                "candidate_dtype": "float32",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 18579456,
+                  "different_voxels": 13793918,
+                  "exact_fraction": 0.25757148110256833,
+                  "mae": 6.483364456530019e-07,
+                  "rmse": 9.061000774465545e-07,
+                  "nrmse_reference_rms": 1.8553268893095684e-07,
+                  "max_abs_difference": 2.6226043701171875e-05,
+                  "mean_signed_difference": -1.1702885208836245e-07
+                },
+                "fixed_allclose": {
+                  "rtol": 1e-05,
+                  "atol": 0.0001,
+                  "passes": true
+                },
+                "mask_union_region": {
+                  "status": "measured",
+                  "voxel_count": 2843275,
+                  "different_voxels": 2304191,
+                  "exact_fraction": 0.18959966939532757,
+                  "mae": 8.774283795380454e-07,
+                  "rmse": 1.2615576428007293e-06,
+                  "nrmse_reference_rms": 2.786780176626559e-07,
+                  "max_abs_difference": 2.6226043701171875e-05,
+                  "mean_signed_difference": -2.803022874803164e-09
+                }
+              },
+              "image": {
+                "reference_sha256": "3ae8a207799bb1f45a19cc9ae20bec0ba5ec41da5ec5c8161d37a182d7172d9f",
+                "candidate_sha256": "fd8c3253a6960777715c85844a38e760959b6bf80849bd28b7e5b906dee0dea4",
+                "reference_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "candidate_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "reference_dtype": "float64",
+                "candidate_dtype": "float64",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 18579456,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "mask_union_region": {
+                  "status": "measured",
+                  "voxel_count": 2843275,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "strip_official",
+              "passes": true,
+              "criterion": "mask and brain exactly equal; SDT rtol=1e-5, atol=1e-4 mm"
+            }
+          },
+          "scientific_geometry": {
+            "image": {
+              "shape_exact": true,
+              "affine_exact": true,
+              "header_binaryblock_exact": false,
+              "header_fields_exact": {
+                "dim": true,
+                "pixdim": false,
+                "datatype": true,
+                "bitpix": true,
+                "scl_slope": true,
+                "scl_inter": true,
+                "qform_code": true,
+                "sform_code": true,
+                "xyzt_units": true,
+                "intent_code": true,
+                "cal_min": true,
+                "cal_max": true
+              },
+              "qform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": false,
+                "max_abs_mm": 1.4998256352150019e-09
+              },
+              "sform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": true,
+                "max_abs_mm": 0.0
+              }
+            },
+            "mask": {
+              "shape_exact": true,
+              "affine_exact": true,
+              "header_binaryblock_exact": false,
+              "header_fields_exact": {
+                "dim": true,
+                "pixdim": false,
+                "datatype": true,
+                "bitpix": true,
+                "scl_slope": true,
+                "scl_inter": true,
+                "qform_code": true,
+                "sform_code": true,
+                "xyzt_units": true,
+                "intent_code": true,
+                "cal_min": true,
+                "cal_max": true
+              },
+              "qform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": false,
+                "max_abs_mm": 1.4998256352150019e-09
+              },
+              "sform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": true,
+                "max_abs_mm": 0.0
+              }
+            },
+            "distance": {
+              "shape_exact": true,
+              "affine_exact": true,
+              "header_binaryblock_exact": false,
+              "header_fields_exact": {
+                "dim": true,
+                "pixdim": false,
+                "datatype": true,
+                "bitpix": true,
+                "scl_slope": true,
+                "scl_inter": true,
+                "qform_code": true,
+                "sform_code": true,
+                "xyzt_units": true,
+                "intent_code": true,
+                "cal_min": true,
+                "cal_max": true
+              },
+              "qform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": false,
+                "max_abs_mm": 1.4998256352150019e-09
+              },
+              "sform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": true,
+                "max_abs_mm": 0.0
+              }
+            }
+          }
+        },
+        "saved_fnit_path": {
+          "returncode": 0,
+          "seconds": 6.1534768268466,
+          "report_sha256": "4a88903a2cc1c5c43bed3b13af454121fe17066bde3047f99021e6cee3b9d55a",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthstrip",
+            "case": "case01_memory_saved_fnit_path",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "mask": {
+                "reference_sha256": "f6c99210d9617b2450c9d90da2f34a85d9b885adf911a57f03a7e402d3f27ad3",
+                "candidate_sha256": "f6c99210d9617b2450c9d90da2f34a85d9b885adf911a57f03a7e402d3f27ad3",
+                "reference_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "candidate_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 18579456,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 2843275,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "reference_binary": true,
+                "candidate_binary": true,
+                "reference_voxels": 2843275,
+                "candidate_voxels": 2843275,
+                "dice": 1.0,
+                "both_nonempty": true,
+                "voxel_mm3": 0.4839547277716253,
+                "reference_volume_mm3": 1376016.378604868,
+                "candidate_volume_mm3": 1376016.378604868,
+                "relative_volume_difference": 0.0
+              },
+              "distance": {
+                "reference_sha256": "639b2f0e6b6bf6d2656440db6f3a5f94b8f0904bc4e91644c84d6ba6b949dde5",
+                "candidate_sha256": "639b2f0e6b6bf6d2656440db6f3a5f94b8f0904bc4e91644c84d6ba6b949dde5",
+                "reference_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "candidate_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "reference_dtype": "float32",
+                "candidate_dtype": "float32",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 18579456,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "fixed_allclose": {
+                  "rtol": 1e-05,
+                  "atol": 0.0001,
+                  "passes": true
+                },
+                "mask_union_region": {
+                  "status": "measured",
+                  "voxel_count": 2843275,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                }
+              },
+              "image": {
+                "reference_sha256": "fd8c3253a6960777715c85844a38e760959b6bf80849bd28b7e5b906dee0dea4",
+                "candidate_sha256": "fd8c3253a6960777715c85844a38e760959b6bf80849bd28b7e5b906dee0dea4",
+                "reference_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "candidate_shape": [
+                  224,
+                  288,
+                  288
+                ],
+                "reference_dtype": "float64",
+                "candidate_dtype": "float64",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 18579456,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "mask_union_region": {
+                  "status": "measured",
+                  "voxel_count": 2843275,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "strip_candidate",
+              "passes": true,
+              "criterion": "mask and brain exactly equal; SDT rtol=1e-5, atol=1e-4 mm"
+            }
+          },
+          "scientific_geometry": {
+            "image": {
+              "shape_exact": true,
+              "affine_exact": true,
+              "header_binaryblock_exact": true,
+              "header_fields_exact": {
+                "dim": true,
+                "pixdim": true,
+                "datatype": true,
+                "bitpix": true,
+                "scl_slope": true,
+                "scl_inter": true,
+                "qform_code": true,
+                "sform_code": true,
+                "xyzt_units": true,
+                "intent_code": true,
+                "cal_min": true,
+                "cal_max": true
+              },
+              "qform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": true,
+                "max_abs_mm": 0.0
+              },
+              "sform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": true,
+                "max_abs_mm": 0.0
+              }
+            },
+            "mask": {
+              "shape_exact": true,
+              "affine_exact": true,
+              "header_binaryblock_exact": true,
+              "header_fields_exact": {
+                "dim": true,
+                "pixdim": true,
+                "datatype": true,
+                "bitpix": true,
+                "scl_slope": true,
+                "scl_inter": true,
+                "qform_code": true,
+                "sform_code": true,
+                "xyzt_units": true,
+                "intent_code": true,
+                "cal_min": true,
+                "cal_max": true
+              },
+              "qform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": true,
+                "max_abs_mm": 0.0
+              },
+              "sform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": true,
+                "max_abs_mm": 0.0
+              }
+            },
+            "distance": {
+              "shape_exact": true,
+              "affine_exact": true,
+              "header_binaryblock_exact": true,
+              "header_fields_exact": {
+                "dim": true,
+                "pixdim": true,
+                "datatype": true,
+                "bitpix": true,
+                "scl_slope": true,
+                "scl_inter": true,
+                "qform_code": true,
+                "sform_code": true,
+                "xyzt_units": true,
+                "intent_code": true,
+                "cal_min": true,
+                "cal_max": true
+              },
+              "qform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": true,
+                "max_abs_mm": 0.0
+              },
+              "sform": {
+                "reference_code": 1,
+                "candidate_code": 1,
+                "exact": true,
+                "max_abs_mm": 0.0
+              }
+            }
+          }
+        }
+      },
+      "runner": {
+        "job_sha256": "840931f3c3b88035a6eeaba8a64bbf453939edf34967df0cd9bbae0d672105d2",
+        "hostname": "nodecw10",
+        "max_cpu_threads": 8,
+        "cpu_affinity": "0,4,8,12,16,20,24,28",
+        "status": "complete",
+        "started_utc": "2026-10-04T05:04:24.669821+00:00",
+        "finished_utc": "2026-10-04T05:04:50.201846+00:00",
+        "wall_seconds": 25.530155189335346,
+        "returncode": 0,
+        "maximum_sampled_tree_rss_bytes": 4528693248,
+        "maximum_sampled_tree_threads": 17,
+        "resource_samples": 102,
+        "load_before": [
+          71.69,
+          73.4,
+          72.96
+        ],
+        "load_after": [
+          69.09,
+          72.84,
+          72.8
+        ],
+        "receipt_sha256": "4eaaa0344a11e1985a3506bf150ad801b6071df121981d9632ae8d591ad45b4b",
+        "thread_environment": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "OMP_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "NUMBA_NUM_THREADS": "8",
+          "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "8",
+          "TF_NUM_INTRAOP_THREADS": "8",
+          "TF_NUM_INTEROP_THREADS": "8"
+        },
+        "expected_outputs": [
+          {
+            "name": "report.private.json",
+            "exists": true,
+            "bytes": 26057
+          },
+          {
+            "name": "image.nii.gz",
+            "exists": true,
+            "bytes": 9350329
+          },
+          {
+            "name": "mask.nii.gz",
+            "exists": true,
+            "bytes": 263608
+          },
+          {
+            "name": "distance.nii.gz",
+            "exists": true,
+            "bytes": 51085881
+          }
+        ],
+        "gnu_time_sha256": "eeb5b0c84b69e0d22aa41ce6fe1920eaa88d2e674a54806b11d95a365f13f3f4",
+        "gnu_time": {
+          "User time (seconds)": "48.61",
+          "System time (seconds)": "13.29",
+          "Percent of CPU this job got": "243%",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:25.38",
+          "Maximum resident set size (kbytes)": "5364880",
+          "Exit status": "0"
+        }
+      },
+      "timing_derived": {
+        "metadata_decode_copy_construct_seconds": 0.503971591591835,
+        "api_seconds": 6.606296293437481,
+        "save_same_call_outputs_seconds": 2.898261420428753,
+        "api_and_save_seconds": 9.504557713866234,
+        "archived_reference_comparison_seconds": 12.041491478681564,
+        "basis": "nonoverlapping named phases; observed process wall includes posthoc work and is not a new paired speed comparison"
+      }
+    },
+    "synthsr": {
+      "schema": "fnit.smri.memory_api.v1",
+      "status": "complete",
+      "feature": "synthsr",
+      "case": "case01",
+      "worker_sha256": "fc807c795b7a5b785ba9037f6948b45f755ad06a7436bc040310b01f153e3d1e",
+      "config_sha256": "7aef2fe6f24002ef3cce2b8dbee10c81ba93753904642a343b55b85e162ff290",
+      "source": {
+        "source_label": "task5_candidate_cpu_v5",
+        "head_commit": "00fedf3544291b9c3e1db9b6c2d6fcef3917d958",
+        "archive_sha256": "ab9a2d587d0fb9599fc2b6200011907b86e12b60f2630db131b62641ee755a72",
+        "manifest_sha256": "42ae32baba858d64f44ea095bc163d92d8ff142f5a7e78081c192356af99e8ef",
+        "includes_reviewed_uncommitted_changes": false,
+        "files_verified": 7,
+        "files_sha256": {
+          "src/fnit/_nib.py": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+          "src/fnit/synthstrip/pipeline.py": "af4978d445f3438a82c06de2548918b0dcc049e746eba8190fc50b889f0a5a48",
+          "src/fnit/synthstrip/model.py": "6afcff10848a8a2a57b9c00d4b637eda90e4c0e21f301d8a8031107d783a5f44",
+          "src/fnit/synthstrip/geometry.py": "c31febaf93404d1b4b7e39f36bfbacd7adb659ddcf923ae6a0924bc4e0a00dc1",
+          "src/fnit/synthsr/pipeline.py": "c896d8e2e4a1a214546e6674ce3aacdcf84906d1b2010b5397ec1b076f502943",
+          "src/fnit/synthsr/model.py": "290d0ae911d8c99f4f87c22936ca497ea45bb57b8f50066b822d9cd10c4661b2",
+          "src/fnit/synthsr/spatial.py": "962a2f0bd5b97db1f039efb67fa87d2f61aa5d8fc23512689f255b168b42dabe"
+        }
+      },
+      "resources": {
+        "input": {
+          "filename": "case01_T1w.nii.gz",
+          "bytes": 20077109,
+          "sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19"
+        },
+        "weight": {
+          "filename": "synthsr_v20_230130.h5",
+          "bytes": 106163752,
+          "sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b"
+        }
+      },
+      "comparator_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+      "saved_reference_sha256": {
+        "official": {
+          "image": "dff4ef9d658243a500704c141290c636414e7e871e3d6fccf5b2f211a7328922"
+        },
+        "saved_fnit_path": {
+          "image": "fbccec5cad5503d3c1f2589d79888571bf15e19607ced94502ae124624d821f6"
+        },
+        "official_float": {
+          "float_image": "c0c2488455db3005c0c54f56994e90e76657db83c263cd06b2ad3431f5e24199"
+        },
+        "saved_fnit_float": {
+          "float_image": "f937f1370ab9639bc0fa286e981dfee9a53d23ba54e5ea4468e53b6dc9bbecb2"
+        }
+      },
+      "canonical_index_sha256_before": "487ad823556519fe424d3c2dbf3b6cf097a820cf80283907fccc5ce6373e080c",
+      "runtime": {
+        "hostname": "nodecw10",
+        "device": "cpu",
+        "threads": 8,
+        "interop_threads": 1,
+        "affinity": [
+          0,
+          4,
+          8,
+          12,
+          16,
+          20,
+          24,
+          28
+        ],
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "nibabel": "5.4.2",
+        "cuda_initialized_before": false,
+        "cuda_visible_devices": "",
+        "cuda_initialized_after": false
+      },
+      "materialized_input": {
+        "input_alias": "case01",
+        "data_source": "OpenNeuro ds003138 v1.0.1 raw T1w",
+        "construction": "new_image(np.array(np.asanyarray(original.dataobj), copy=True, order='K'), original)",
+        "spatial_image_class": "FNITNifti1Image",
+        "dataobj_is_ndarray": true,
+        "dataobj_is_proxy": false,
+        "original_storage_dtype": "int16",
+        "proxy_slope": 0.059418629854917526,
+        "proxy_intercept": 1947.0296630859375,
+        "original_decoded": {
+          "shape": [
+            224,
+            288,
+            288
+          ],
+          "dtype": "float64",
+          "strides_bytes": [
+            8,
+            1792,
+            516096
+          ],
+          "c_contiguous": false,
+          "f_contiguous": true,
+          "owns_data": false
+        },
+        "materialized": {
+          "shape": [
+            224,
+            288,
+            288
+          ],
+          "dtype": "float64",
+          "strides_bytes": [
+            8,
+            1792,
+            516096
+          ],
+          "c_contiguous": false,
+          "f_contiguous": true,
+          "owns_data": true
+        },
+        "values_exact": true,
+        "affine_exact": true,
+        "zooms_exact": true,
+        "zooms_mm": [
+          0.800000011920929,
+          0.7777777910232544,
+          0.7777777910232544
+        ],
+        "forms": {
+          "qform": {
+            "original_code": 1,
+            "materialized_code": 1,
+            "exact": true
+          },
+          "sform": {
+            "original_code": 1,
+            "materialized_code": 1,
+            "exact": true
+          }
+        },
+        "decoded_array_sha256_C_order": "0e4084f775d0c71caf923957248e2e2a792ec056b3afd7910b8eca7e297500d5",
+        "loader_policy": "path: get_fdata default float64; SpatialImage: asanyarray(dataobj), then float64; final network tensor float32",
+        "unchanged_after_api": true
+      },
+      "model": {
+        "parameter_devices": [
+          "cpu"
+        ],
+        "parameter_dtypes": [
+          "torch.float32"
+        ],
+        "production_cpu_channels_last": false,
+        "network_forwards": 2,
+        "default_options_only": true,
+        "autocast_cpu_enabled": false
+      },
+      "network_bindings": [
+        {
+          "input": {
+            "shape": [
+              1,
+              1,
+              192,
+              224,
+              256
+            ],
+            "dtype": "float32",
+            "device": "cpu",
+            "tensor_stride": [
+              11010048,
+              11010048,
+              57344,
+              256,
+              1
+            ],
+            "array_sha256_C_order": "c1c2d1ae0ba4adae0a433ec07a9fa61088f448e19166175be3742464ff30b677"
+          },
+          "output": {
+            "shape": [
+              1,
+              1,
+              192,
+              224,
+              256
+            ],
+            "dtype": "float32",
+            "device": "cpu",
+            "tensor_stride": [
+              11010048,
+              11010048,
+              57344,
+              256,
+              1
+            ],
+            "array_sha256_C_order": "4515398a2834679684b1cacc499685d573b85a30bfe9f0fd0e8e480f29f31b6d"
+          }
+        },
+        {
+          "input": {
+            "shape": [
+              1,
+              1,
+              192,
+              224,
+              256
+            ],
+            "dtype": "float32",
+            "device": "cpu",
+            "tensor_stride": [
+              11010048,
+              11010048,
+              57344,
+              256,
+              1
+            ],
+            "array_sha256_C_order": "326bcb07f12eae3f6268e0dd2ad069138f98299f512782afd92a901eda28a125"
+          },
+          "output": {
+            "shape": [
+              1,
+              1,
+              192,
+              224,
+              256
+            ],
+            "dtype": "float32",
+            "device": "cpu",
+            "tensor_stride": [
+              11010048,
+              11010048,
+              57344,
+              256,
+              1
+            ],
+            "array_sha256_C_order": "65e4d8d3d0288fe9961dfae9b25ba3c83a0f5feabba5f4159520f24fce3d912e"
+          }
+        }
+      ],
+      "output_sha256": {
+        "image": "fbccec5cad5503d3c1f2589d79888571bf15e19607ced94502ae124624d821f6",
+        "float_image": "f937f1370ab9639bc0fa286e981dfee9a53d23ba54e5ea4468e53b6dc9bbecb2"
+      },
+      "stages": [
+        {
+          "name": "verify_frozen_source_and_resources",
+          "status": "complete",
+          "seconds": 0.264773964881897
+        },
+        {
+          "name": "import_runtime",
+          "status": "complete",
+          "seconds": 2.209412232041359
+        },
+        {
+          "name": "load_image_metadata",
+          "status": "complete",
+          "seconds": 0.0031302496790885925
+        },
+        {
+          "name": "decode_original_values",
+          "status": "complete",
+          "seconds": 0.5268919616937637
+        },
+        {
+          "name": "copy_decoded_array_K_order",
+          "status": "complete",
+          "seconds": 0.13741589337587357
+        },
+        {
+          "name": "construct_materialized_spatial_image",
+          "status": "complete",
+          "seconds": 0.0011614412069320679
+        },
+        {
+          "name": "verify_materialized_input",
+          "status": "complete",
+          "seconds": 0.5260277092456818
+        },
+        {
+          "name": "model_constructor",
+          "status": "complete",
+          "seconds": 0.6748767718672752
+        },
+        {
+          "name": "default_api_call",
+          "status": "complete",
+          "seconds": 29.987039126455784
+        },
+        {
+          "name": "bind_actual_network_tensors_after_api",
+          "status": "complete",
+          "seconds": 0.6132608652114868
+        },
+        {
+          "name": "save_same_call_outputs",
+          "status": "complete",
+          "seconds": 1.9491617679595947
+        },
+        {
+          "name": "compare_saved_reference_outputs",
+          "status": "complete",
+          "seconds": 3.8008518666028976
+        },
+        {
+          "name": "verify_source_resources_unchanged",
+          "status": "complete",
+          "seconds": 0.28270741552114487
+        }
+      ],
+      "unchanged_after": {
+        "input": true,
+        "weight": true,
+        "source_manifest": true,
+        "source_files": true,
+        "saved_references": true
+      },
+      "comparisons_complete": true,
+      "all_fixed_gates_passed": false,
+      "overall_numerical_equivalence": "not_assessed",
+      "worker_seconds_including_posthoc": 41.0383543074131,
+      "timing_scope": "one new CPU process; preparation, loading, API, saving and posthoc work separate; reference clocks are archived",
+      "private_report_sha256": "32a8dd58d770a43fbe1e5fe68bbebedd2cefaff62c5bf965760a274add212878",
+      "comparisons": {
+        "official": {
+          "returncode": 0,
+          "seconds": 0.7101530954241753,
+          "report_sha256": "4105d910899bd17ddfd0f860ee693866a3f07c45fd6f1b5aeabb3497bf05ae3c",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_memory_official",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "dff4ef9d658243a500704c141290c636414e7e871e3d6fccf5b2f211a7328922",
+                "candidate_sha256": "fbccec5cad5503d3c1f2589d79888571bf15e19607ced94502ae124624d821f6",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 527,
+                  "exact_fraction": 0.9999419091710758,
+                  "mae": 5.8090828924162256e-05,
+                  "rmse": 0.007621733984085397,
+                  "nrmse_reference_rms": 7.787066303123203e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -8.04673721340388e-06
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7334228,
+                  "different_voxels": 527,
+                  "exact_fraction": 0.9999281451299306,
+                  "mae": 7.185487006948789e-05,
+                  "rmse": 0.008476725197237899,
+                  "nrmse_reference_rms": 7.787066303123205e-05,
+                  "max_abs_difference": 1.0,
+                  "mean_signed_difference": -9.953331148145381e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": true,
+              "criterion": "quantization tolerance: exact fraction >=99.99%, max <=1, MAE <=1e-4"
+            }
+          },
+          "scientific_geometry": {
+            "image": {
+              "shape_exact": true,
+              "affine_exact": true,
+              "header_binaryblock_exact": true,
+              "header_fields_exact": {
+                "dim": true,
+                "pixdim": true,
+                "datatype": true,
+                "bitpix": true,
+                "scl_slope": true,
+                "scl_inter": true,
+                "qform_code": true,
+                "sform_code": true,
+                "xyzt_units": true,
+                "intent_code": true,
+                "cal_min": true,
+                "cal_max": true
+              },
+              "qform": {
+                "reference_code": 0,
+                "candidate_code": 0,
+                "exact": true,
+                "max_abs_mm": null
+              },
+              "sform": {
+                "reference_code": 2,
+                "candidate_code": 2,
+                "exact": true,
+                "max_abs_mm": 0.0
+              }
+            }
+          }
+        },
+        "saved_fnit_path": {
+          "returncode": 0,
+          "seconds": 0.719637081027031,
+          "report_sha256": "ad00c7967fcf6327146591c47af4f8fa6433ffdc464bd194af97e79792eaab04",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_memory_saved_fnit_path",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "fbccec5cad5503d3c1f2589d79888571bf15e19607ced94502ae124624d821f6",
+                "candidate_sha256": "fbccec5cad5503d3c1f2589d79888571bf15e19607ced94502ae124624d821f6",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "uint8",
+                "candidate_dtype": "uint8",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": 0.0,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 7334226,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_candidate",
+              "passes": true,
+              "criterion": "quantized SynthSR exactly equal"
+            }
+          },
+          "scientific_geometry": {
+            "image": {
+              "shape_exact": true,
+              "affine_exact": true,
+              "header_binaryblock_exact": true,
+              "header_fields_exact": {
+                "dim": true,
+                "pixdim": true,
+                "datatype": true,
+                "bitpix": true,
+                "scl_slope": true,
+                "scl_inter": true,
+                "qform_code": true,
+                "sform_code": true,
+                "xyzt_units": true,
+                "intent_code": true,
+                "cal_min": true,
+                "cal_max": true
+              },
+              "qform": {
+                "reference_code": 0,
+                "candidate_code": 0,
+                "exact": true,
+                "max_abs_mm": null
+              },
+              "sform": {
+                "reference_code": 2,
+                "candidate_code": 2,
+                "exact": true,
+                "max_abs_mm": 0.0
+              }
+            }
+          }
+        },
+        "official_float": {
+          "returncode": 0,
+          "seconds": 1.201842948794365,
+          "report_sha256": "914747c2ad3e055a7777f59f307335288fe33838576fe80adef4f046a9c21884",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_memory_official_float",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "c0c2488455db3005c0c54f56994e90e76657db83c263cd06b2ad3431f5e24199",
+                "candidate_sha256": "f937f1370ab9639bc0fa286e981dfee9a53d23ba54e5ea4468e53b6dc9bbecb2",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "float32",
+                "candidate_dtype": "float32",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": null,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 8669078,
+                  "exact_fraction": 0.044413800705467375,
+                  "mae": 3.247302098268205e-05,
+                  "rmse": 9.820702681143627e-05,
+                  "nrmse_reference_rms": 1.948172218426513e-06,
+                  "max_abs_difference": 0.019134521484375,
+                  "mean_signed_difference": -4.242790832486947e-06
+                },
+                "fixed_allclose": {
+                  "rtol": 1e-05,
+                  "atol": 0.001,
+                  "passes": false
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 9005409,
+                  "different_voxels": 8669078,
+                  "exact_fraction": 0.037347665164347336,
+                  "mae": 3.271314455066855e-05,
+                  "rmse": 9.856945671680977e-05,
+                  "nrmse_reference_rms": 1.948172218426513e-06,
+                  "max_abs_difference": 0.019134521484375,
+                  "mean_signed_difference": -4.274164386350645e-06
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_failed",
+            "fixed_gate": {
+              "name": "sr_official",
+              "passes": false,
+              "criterion": "floating SynthSR rtol=1e-5, atol=0.001"
+            }
+          },
+          "scientific_geometry": {
+            "float_image": {
+              "status": "array_container_without_affine",
+              "basis": "spatial geometry is separately checked on the quantized NIfTI from the same API call"
+            }
+          }
+        },
+        "saved_fnit_float": {
+          "returncode": 0,
+          "seconds": 1.1616649478673935,
+          "report_sha256": "b9def1346154cc60d2b2e22c7021ae971f4b6555507d9308d93020ce2b22ff78",
+          "result": {
+            "schema": "fnit.smri.cpu.strip_sr.comparison.v1",
+            "feature": "synthsr",
+            "case": "case01_memory_saved_fnit_float",
+            "worker_sha256": "51239330ea955c3b26c99246cfba65b59f1d608e6ffadf36f3ae4d13e385148f",
+            "outputs": {
+              "image": {
+                "reference_sha256": "f937f1370ab9639bc0fa286e981dfee9a53d23ba54e5ea4468e53b6dc9bbecb2",
+                "candidate_sha256": "f937f1370ab9639bc0fa286e981dfee9a53d23ba54e5ea4468e53b6dc9bbecb2",
+                "reference_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "candidate_shape": [
+                  180,
+                  224,
+                  225
+                ],
+                "reference_dtype": "float32",
+                "candidate_dtype": "float32",
+                "shape_matches": true,
+                "geometry_matches": true,
+                "dtype_matches": true,
+                "affine_max_abs_mm": null,
+                "reference_finite": true,
+                "candidate_finite": true,
+                "valid_direct_comparison": true,
+                "whole_grid": {
+                  "status": "measured",
+                  "voxel_count": 9072000,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                },
+                "fixed_allclose": {
+                  "rtol": 1e-05,
+                  "atol": 0.0001,
+                  "passes": true
+                },
+                "nonzero_union_secondary": {
+                  "status": "measured",
+                  "voxel_count": 9005398,
+                  "different_voxels": 0,
+                  "exact_fraction": 1.0,
+                  "mae": 0.0,
+                  "rmse": 0.0,
+                  "nrmse_reference_rms": 0.0,
+                  "max_abs_difference": 0.0,
+                  "mean_signed_difference": 0.0
+                }
+              }
+            },
+            "all_direct_comparisons_valid": true,
+            "numerical_equivalence": "fixed_gate_passed",
+            "fixed_gate": {
+              "name": "sr_candidate",
+              "passes": true,
+              "criterion": "floating SynthSR rtol=1e-5, atol=0.0001"
+            }
+          },
+          "scientific_geometry": {
+            "float_image": {
+              "status": "array_container_without_affine",
+              "basis": "spatial geometry is separately checked on the quantized NIfTI from the same API call"
+            }
+          }
+        }
+      },
+      "runner": {
+        "job_sha256": "e99426d1f9bb3159bcda3b227237d3ff3ca9cd8c366870ac567a01ef13a54dbf",
+        "hostname": "nodecw10",
+        "max_cpu_threads": 8,
+        "cpu_affinity": "0,4,8,12,16,20,24,28",
+        "status": "complete",
+        "started_utc": "2026-10-04T05:04:50.208486+00:00",
+        "finished_utc": "2026-10-04T05:05:31.754717+00:00",
+        "wall_seconds": 41.54450210928917,
+        "returncode": 0,
+        "maximum_sampled_tree_rss_bytes": 10253303808,
+        "maximum_sampled_tree_threads": 51,
+        "resource_samples": 166,
+        "load_before": [
+          69.09,
+          72.84,
+          72.8
+        ],
+        "load_after": [
+          64.55,
+          71.17,
+          72.24
+        ],
+        "receipt_sha256": "96989e67fd2b94b40865cdcf191cb55c9abe9ebe8c552e1da22bfad156e985e7",
+        "thread_environment": {
+          "CUDA_VISIBLE_DEVICES": "",
+          "OMP_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "NUMBA_NUM_THREADS": "8",
+          "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "8",
+          "TF_NUM_INTRAOP_THREADS": "8",
+          "TF_NUM_INTEROP_THREADS": "8"
+        },
+        "expected_outputs": [
+          {
+            "name": "report.private.json",
+            "exists": true,
+            "bytes": 21353
+          },
+          {
+            "name": "image.nii.gz",
+            "exists": true,
+            "bytes": 4166735
+          },
+          {
+            "name": "image.npz",
+            "exists": true,
+            "bytes": 32064921
+          }
+        ],
+        "gnu_time_sha256": "154cfbe3cd641c03ef15167543f9714cffce119937084c4124e24ce546694040",
+        "gnu_time": {
+          "User time (seconds)": "157.95",
+          "System time (seconds)": "50.04",
+          "Percent of CPU this job got": "502%",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:41.38",
+          "Maximum resident set size (kbytes)": "10125016",
+          "Exit status": "0"
+        }
+      },
+      "timing_derived": {
+        "metadata_decode_copy_construct_seconds": 0.668599545955658,
+        "api_seconds": 29.987039126455784,
+        "save_same_call_outputs_seconds": 1.9491617679595947,
+        "api_and_save_seconds": 31.93620089441538,
+        "archived_reference_comparison_seconds": 3.8008518666028976,
+        "basis": "nonoverlapping named phases; observed process wall includes posthoc work and is not a new paired speed comparison"
+      }
+    }
+  }
+}

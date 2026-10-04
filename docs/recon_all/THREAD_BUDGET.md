@@ -12,6 +12,8 @@
 调用方状态。它不改变算法、影像、精度、CUDA allocator 或坐标空间；没有对应的
 FreeSurfer 独立命令，属于 FNIT 调度的线程管理。依赖的 Torch 和 Numba
 已包含在主页 `environment.yml`，不增加依赖或调用外部脑影像软件。
+
+公开 `run_recon_all_python` 的失败报告覆盖线程设置、已执行阶段和线程恢复的墙钟。阶段间异常可能发生在内部总计完成前，此时 `thread_setup_and_restore_seconds=None`，表示不能单独估算计时残差；完整公开 `total_seconds` 仍写出，状态为 `failed`，原异常继续传播。2026-10-04 的缺包中断发现并修复了此前部分报告访问不存在的内部总计、留下 `running` 状态的问题。
 原生子进程的环境副本助手尚未接入各生产 wrapper，不能将 Python 预算
 当作所有原生程序的实际线程数。本次已完成双例 CA normalize 和 sub-01
 LH 标准球面的真实同输入 128/4 掩码回归，范围及时间见后文。
