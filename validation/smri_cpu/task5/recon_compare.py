@@ -30,7 +30,9 @@ def load(path):
 
 def candidate_state(candidate, runner_record=None):
     """The process receipt takes precedence over an unfinished pipeline report."""
-    if runner_record is not None and runner_record.exists():
+    if runner_record is not None:
+        if not runner_record.exists():
+            return None, None
         receipt = json.loads(runner_record.read_text())
         if receipt.get("status") in {"failed", "timeout", "cancelled"}:
             return None, {"status": "candidate_failed", "runner_status": receipt["status"],

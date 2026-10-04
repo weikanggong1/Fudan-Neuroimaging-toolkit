@@ -30,6 +30,7 @@ class ComparisonReadinessTests(unittest.TestCase):
             root = Path(name)
             receipt = root / "receipt.json"
             (root / "fnit-native-free-run.json").write_text(json.dumps({"status": "complete"}))
+            self.assertEqual(DRIVER.candidate_state(root, receipt), (None, None))
             receipt.write_text(json.dumps({"status": "running"}))
             self.assertEqual(DRIVER.candidate_state(root, receipt), (None, None))
             receipt.write_text(json.dumps({"status": "complete", "returncode": 0}))
