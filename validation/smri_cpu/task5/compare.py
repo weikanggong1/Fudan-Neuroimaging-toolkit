@@ -22,6 +22,12 @@ def main():
     parser.add_argument("--official-dir", type=Path, required=True)
     parser.add_argument("--like", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--scope",
+        choices=("same_stage_inputs_cpu8",
+                 "fnit_raw_end_to_end_vs_official_saved_stage_outputs"),
+        default="same_stage_inputs_cpu8",
+        help="Record the comparison scope; raw-input scoring reuses saved official stages.")
     parser.add_argument("--audit-helper", type=Path,
                         default=Path(__file__).resolve().parents[2] / "subregions/reproducibility_20261002/analyze_repeatability.py")
     args = parser.parse_args()
@@ -45,10 +51,10 @@ def main():
                           "official": [{"id": "official_cpu8", "labels": str(official),
                                         "label_offset": 10000 if family.endswith("-right") else 0,
                                         "soft_volumes_files": [str(args.official_dir / name) for name in volumes],
-                                        "provenance": {"scope": "same_stage_inputs_cpu8"}}],
+                                        "provenance": {"scope": args.scope}}],
                           "fnit": [{"id": "candidate_cpu8", "labels": str(candidate),
                                     "soft_volumes_file": str(args.candidate_dir / "volumes.tsv"),
-                                    "provenance": {"scope": "same_stage_inputs_cpu8"}}]}
+                                    "provenance": {"scope": args.scope}}]}
             result = audit.audit_group(definition, Path("/"))
             pair = next(row for row in result["pairs"] if row["kind"] == "cross_method")
             for region in pair["regions"]:
@@ -60,6 +66,7 @@ def main():
                                                        if region["dice"] is not None and relative is not None else False)
             groups.append(result)
     output = {"status": "scored", "both_empty_dice": None,
+              "comparison_scope": args.scope,
               "threshold": {"per_label_dice_minimum": .95, "hard_volume_relative_to_official_maximum": .05},
               "audit_helper_sha256": hashlib.sha256(args.audit_helper.read_bytes()).hexdigest(),
               "candidate_report_sha256": hashlib.sha256((args.candidate_dir / "report.json").read_bytes()).hexdigest(),
