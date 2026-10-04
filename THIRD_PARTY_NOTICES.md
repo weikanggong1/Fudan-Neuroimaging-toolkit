@@ -84,6 +84,14 @@ developers; the unmodified Nilearn BSD 3-Clause license is preserved in
 [`licenses/Nilearn-BSD-3-Clause.txt`](licenses/Nilearn-BSD-3-Clause.txt).
 Neither Nilearn nor NiWorkflows is added as an FNIT runtime dependency.
 
+`src/fnit/fmri/reference.py` adapts the reference-frame selection, float32
+clipping, global drift normalization and temporal median definitions from
+[NiWorkflows 1.14.4 `NonsteadyStatesDetector` and `RobustAverage`](https://github.com/nipreps/niworkflows/tree/1.14.4/niworkflows/interfaces).
+The NiPreps attribution and Apache 2.0 license above apply. FNIT uses its own
+PyTorch MCFLIRT motion implementation instead of the upstream AFNI Fourier
+operator; equality of those motion implementations has not been established.
+NiWorkflows, Nipype and AFNI are isolated benchmark dependencies only.
+
 `src/fnit/msm/msmall.py` and `config_msmall.py` independently implement the
 same pinned newMSM multivariate Pearson triangle objective and HCP MSMAll
 discrete schedules. The newMSM MIT notice applies to these source-derived parts.

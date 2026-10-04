@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "scope": "focused contracts and static validation; no MRI benchmark or external program run",
+  "base_revision": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+  "created_utc": "2026-10-04T13:42:21.192452+00:00",
+  "tests": [
+    {
+      "command": "PYTHONPATH=src /tmp/fnit_bwas_final311/bin/python -m pytest -q tests/test_fmri_bold_reference.py",
+      "passed": 20,
+      "elapsed_seconds": 5.56,
+      "scope": "reference algorithm/control tests; includes mature CPU TorchMCFLIRT/spline small fixture, not benchmark"
+    },
+    {
+      "command": "/tmp/fnit_bwas_final311/bin/python -m pytest -q validation/fmri/reference_alignment_20261004/bold_reference/test_reference_benchmark.py",
+      "passed": 5,
+      "elapsed_seconds": 2.97,
+      "scope": "driver input/source protection, real schema mapping, metric domain/grid guards, delayed Torch import, generated child syntax/JSON newline; mocked execution only"
+    }
+  ],
+  "static_checks": {
+    "python_AST_files": 4,
+    "documentation_code_blocks": 3,
+    "Python_AST_and_bash_n": "passed"
+  },
+  "files_sha256": {
+    "src/fnit/fmri/reference.py": "ac885355a286ff6799aaeafc9735de1d0c0264b8afba55041ea4e94b1ddc3484",
+    "tests/test_fmri_bold_reference.py": "d2a1df9937dff24f5fab45cd16e6cf56cd892b3e827fb2136c978d752881b3ae",
+    "docs/fmri/bold_reference.md": "e494feea5f669b5bc57fcbb543a2e347df607fd790476068bfcb3ce7f0ddb2fa",
+    "validation/fmri/reference_alignment_20261004/bold_reference/run_reference_benchmark.py": "a4a794fbfb26d20cd393521aa19bc510ff1bcbff2f4e5db6e39cbaec8a06b4aa",
+    "validation/fmri/reference_alignment_20261004/bold_reference/test_reference_benchmark.py": "34d2044c21452f248993adfeb8b3076979ca7fefe42683d50f4d841efd27d1c7"
+  },
+  "reference_manifest_sha256": "40ecbdf2cce9ef4e5fabcce71231347ea5bcdde85ad2d668ef02efecb143c9d1",
+  "real_benchmark_status": "pending; parent launches official and FNIT reference-only phases on CON01/CON06"
+}

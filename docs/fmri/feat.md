@@ -2,7 +2,7 @@
 
 ## 功能简介与流程图
 
-`run_feat_core` 从一个原始 BIDS run 生成 PICA 前的 `filtered_func_data.nii.gz`。它调用本包 `TorchMCFLIRT` 估计每帧到 SBRef 的刚体运动，使用三次 B 样条重采样 BOLD，求 EPI 均值和脑掩膜，按整段掩膜内第 50 百分位缩放到 10000，再做高斯加权局部直线高通。缺少 SBRef 时以 BOLD 中间帧为参考。没有场图/GDC warp 时直接使用 TorchMCFLIRT 的 Constant 样条和原输出类型转换；提供共享形变时，将运动矩阵与形变组合后只采样一次。场图估计不包含在本函数内。
+`run_feat_core` 从一个原始 BIDS run 生成 PICA 前的 `filtered_func_data.nii.gz`。它调用本包 `TorchMCFLIRT` 估计每帧到 SBRef 的刚体运动，使用三次 B 样条重采样 BOLD，求 EPI 均值和脑掩膜，按整段掩膜内第 50 百分位缩放到 10000，再做高斯加权局部直线高通。独立调用缺少 SBRef 时仍以 BOLD 中间帧为参考；提供 `reference_image` 时以其作为 HMC 目标，并保存为 `example_func`。完整 volume 会显式传入其生成的稳健参考，避免掩膜、HMC 和 BBR 独立选择不同目标。没有场图/GDC warp 时直接使用 TorchMCFLIRT 的 Constant 样条和原输出类型转换；提供共享形变时，将运动矩阵与形变组合后只采样一次。场图估计不包含在本函数内。
 
 脑提取默认使用 PyTorch SynthStrip 对重采样后的 EPI 均值求掩膜。若有同网格现成掩膜，传 `brain_mask`；`brain_extraction="otsu"` 保留无需权重的独立 EPI 掩膜算法。默认与官方 FEAT 的 BET/强度阈值掩膜定义不同，因此整链对照须分别记录掩膜差异和后续数值差异。完整 `fMRIVolume_pipeline` 会先对 SBRef（缺失时 BOLD 中间帧）运行 SynthStrip，再把该掩膜通过 `brain_mask` 显式交给本函数；本页独立调用的 `brain_mask=None` 则对运动校正后的 EPI 均值运行 SynthStrip。
 
@@ -33,6 +33,7 @@ feat = run_feat_core(
     direction=None,                              # dir 标签；多个候选时指定
     reconstruction=None,                         # rec 标签；多个候选时指定
     echo=None,                                   # echo 标签；多个候选时指定
+    reference_image=None,                          # 可选有限3D目标，必须与原BOLD同网格
     brain_mask=None,                             # 已对齐 EPI 参考的 3D 掩膜；None 则运行默认脑提取
     brain_extraction="synthstrip",               # 默认 PyTorch SynthStrip；otsu 为无权重备选算法
     synthstrip_weights="/absolute/path/synthstrip.1.pt",  # 脑提取权重；已部署缓存时填 None
@@ -184,3 +185,5 @@ filtered_path = highpass_nifti(
 
 - Jenkinson et al., *Improved Optimization for the Robust and Accurate Linear Registration and Motion Correction of Brain Images*, NeuroImage 2002，[doi:10.1006/nimg.2002.1132](https://doi.org/10.1006/nimg.2002.1132)。
 - [FSL MCFLIRT 使用与算法说明](https://pages.fmrib.ox.ac.uk/docs-881397/registration/mcflirt.html)；[原实现代码库](https://git.fmrib.ox.ac.uk/fsl/mcflirt)。
+
+2026-10-04 参考图接入：新增 `reference_image=None`，显式目标的全部有限值和原 BOLD 网格经过检查；既有无显式目标的 standalone FEAT 行为保留。完整 volume 对同一参考的 HMC/BBR 传递控制通过，新真实 benchmark 见 [参考图专项](bold_reference.md)。旧 490 帧和十例时间继续绑定其原版本。
