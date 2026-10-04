@@ -1,6 +1,7 @@
 """双侧 exec 进程、私有文件和阶段屏障；父进程确定性发布输出。"""
 from __future__ import annotations
 import json
+import math
 from numbers import Integral
 import os
 from pathlib import Path
@@ -136,12 +137,14 @@ def _cancel(processes):
 
 def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
                          profile_stages=False, callable_path='fnit.recon_all.native_free:_hemisphere_operation',
-                         kwargs=None):
+                         kwargs=None, startup_wait_seconds=30):
     """在私有完整拷贝中执行双侧任务，成功屏障后逐文件原子发布。
 
     subject 是自产被试目录；operation 标识阶段；kwargs 为 JSON 可序列化
     公共参数。threads 是总预算，workers=1/2 时分别分配全部/一半预算
     （奇数向下取整）。device 是显式 CPU/CUDA 设备；不 fork CUDA 状态。
+    startup_wait_seconds 默认30秒，为每批算法进入前的固定启动预算；
+    0禁资源重启但单次启动仍有90秒期限。仅可信的pre-GO CUDA OOM可重启。
     返回 values[lh/rh]、独立 workers 报告、组墙钟、重叠及同期显存记录。
     启动 worker 前同步 CUDA 并释放父进程空闲缓存，不改变 live tensor 或缓存策略。
     发布失败不会生成成功状态；失败子树终止，保留 worker 日志和失败报告。
@@ -151,6 +154,9 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
     from .thread_budget import native_thread_environment
     import torch
     validate_hemisphere_workers(workers, threads)
+    if (isinstance(startup_wait_seconds, bool) or not isinstance(startup_wait_seconds, (int, float))
+            or not math.isfinite(startup_wait_seconds) or startup_wait_seconds < 0):
+        raise ValueError('startup_wait_seconds must be finite and >= 0')
     caller_device = str(device)
     device = resolve_worker_device(device)
     subject = Path(subject).resolve()
@@ -159,6 +165,11 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
     report = {'operation': operation, 'workers_requested': workers,
               'total_thread_budget': threads, 'worker_threads': threads // workers,
               'status': 'running', 'workers': {}, 'values': {}, 'published': [],
+              'startup_attempts': {hemi: [] for hemi in HEMISPHERES},
+              'startup_wait_seconds': startup_wait_seconds,
+              'mitigation_scope': 'pre-callable startup resource admission; not a driver root-cause fix',
+              'requests': {}, 'request_path_scope':
+                  'historical parameters; private subject paths are cleaned after this group',
               'caller_device': caller_device, 'worker_device': device,
               'worker_allocator_selection': {'basis': 'environment at fresh exec',
                   'selected_policy': inherited_allocator_policy(os.environ),
@@ -166,8 +177,10 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
     precision = {'matmul_tf32': bool(torch.backends.cuda.matmul.allow_tf32),
                  'cudnn_tf32': bool(torch.backends.cudnn.allow_tf32)}
     processes, streams, private_roots, snapshots, pending = [], [], {}, {}, []
+    worker_records = {}
     sampler = ProcessTreeDeviceSampler(device=device, parent_pid=os.getpid())
     failure = None
+    startup_tick = group_tick
     try:
         preparation_tick = time.monotonic()
         for hemi in HEMISPHERES:
@@ -187,47 +200,144 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
         # Previously used volume/network buffers should not overlap the fresh
         # hemisphere CUDA contexts when they are only held as idle cache.
         report['parent_idle_cuda_cache'] = release_idle_parent_cuda_cache(device)
+        startup_tick = time.monotonic()
+        deadline = startup_tick + startup_wait_seconds if startup_wait_seconds else None
+        ready = {}
+        retry_at = {}
+
+        def spawn(hemi):
+            attempt = len(report['startup_attempts'][hemi]) + 1
+            private = private_roots[hemi]
+            prefix = subject / 'scripts' / f'{operation}.{hemi}.startup-{attempt:02d}'
+            request_path = prefix.with_suffix(prefix.suffix + '.request.json')
+            report_path = prefix.with_suffix(prefix.suffix + '.report.json')
+            ready_path = root / f'{hemi}.{attempt}.ready.json'
+            go_path = root / f'{hemi}.{attempt}.go.json'
+            child_kwargs = dict(kwargs or {}, subject=str(private), hemi=hemi,
+                                device=device, threads=threads // workers, operation=operation)
+            request = {'callable': callable_path, 'operation': operation,
+                       'kwargs': child_kwargs, 'device': device, 'threads': threads // workers,
+                       'precision': precision, 'profile_stages': profile_stages,
+                       'allocator_policy': inherited_allocator_policy(os.environ),
+                       'ready_path': str(ready_path), 'go_path': str(go_path),
+                       'parent_pid': os.getpid(), 'startup_deadline_monotonic': deadline}
+            request_path.write_text(json.dumps(request, indent=2))
+            retained_request = subject / 'scripts' / f'{operation}.{hemi}.request.json'
+            temporary = retained_request.with_suffix('.json.tmp')
+            temporary.write_text(json.dumps(request, indent=2))
+            temporary.replace(retained_request)
+            report['requests'][hemi] = {'path': str(retained_request),
+                'private_subject': str(private), 'private_path_scope': 'historical path; cleaned after group'}
+            env, environment_report = native_thread_environment(threads=threads // workers)
+            source_root = str(Path(__file__).resolve().parents[2])
+            env.setdefault('TORCH_SHOW_CPP_STACKTRACES', '1')
+            environment_report['TORCH_SHOW_CPP_STACKTRACES'] = env['TORCH_SHOW_CPP_STACKTRACES']
+            env['PYTHONPATH'] = source_root + os.pathsep + env.get('PYTHONPATH', '')
+            log_path = prefix.with_suffix(prefix.suffix + '.worker.log')
+            stream = log_path.open('w')
+            streams.append(stream)
+            process = subprocess.Popen([sys.executable, '-m', 'fnit.recon_all.hemisphere_worker',
+                str(request_path), str(report_path)], env=env, stdout=stream,
+                stderr=subprocess.STDOUT, start_new_session=True)
+            processes.append(process)
+            sampler.add_worker(process.pid)
+            row = {'attempt': attempt, 'pid': process.pid, 'request_path': str(request_path),
+                   'report_path': str(report_path), 'log_path': str(log_path),
+                   'started_monotonic': time.monotonic(), 'operation_entered': False}
+            report['startup_attempts'][hemi].append(row)
+            worker_records[hemi] = (process, report_path, environment_report, ready_path, go_path, row)
+
+        def collect(hemi):
+            process, path, env, _, _, row = worker_records[hemi]
+            if path.is_file():
+                try:
+                    child = json.loads(path.read_text())
+                    if not isinstance(child, dict):
+                        raise ValueError('worker report must be an object')
+                    child['environment'] = env
+                except (OSError, ValueError) as error:
+                    child = {'status': 'report_unavailable', 'pid': process.pid,
+                             'exit_code': process.returncode,
+                             'reason': 'invalid worker report: ' + repr(error), 'environment': env}
+            else:
+                child = {'status': 'report_unavailable', 'pid': process.pid,
+                         'exit_code': process.returncode, 'reason': 'worker report missing after process reaping',
+                         'environment': env}
+            row['worker_report'] = child
+            row['operation_entered'] = child.get('operation_entered')
+            row['exit_code'] = process.returncode
+            report['workers'][hemi] = child
+            return child
+
         for offset in range(0, 2, workers):
-            active = []
-            for hemi in HEMISPHERES[offset:offset + workers]:
-                private = private_roots[hemi]
-                request_path, report_path = root / f'{hemi}.request.json', root / f'{hemi}.report.json'
-                child_kwargs = dict(kwargs or {}, subject=str(private), hemi=hemi,
-                                    device=device, threads=threads // workers,
-                                    operation=operation)
-                request = {'callable': callable_path, 'operation': operation,
-                           'kwargs': child_kwargs, 'device': device,
-                           'threads': threads // workers, 'precision': precision,
-                           'profile_stages': profile_stages,
-                           'allocator_policy': inherited_allocator_policy(os.environ)}
-                request_path.write_text(json.dumps(request))
-                env, environment_report = native_thread_environment(threads=threads // workers)
-                # API 调用者可从 sys.path 导入候选源码；worker 必须导入同一包。
-                source_root = str(Path(__file__).resolve().parents[2])
-                env['PYTHONPATH'] = source_root + os.pathsep + env.get('PYTHONPATH', '')
-                log_path = subject / 'scripts' / f'{operation}.{hemi}.worker.log'
-                stream = log_path.open('w')
-                streams.append(stream)
-                process = subprocess.Popen([sys.executable, '-m',
-                    'fnit.recon_all.hemisphere_worker', str(request_path), str(report_path)],
-                    env=env, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
-                processes.append(process)
-                sampler.add_worker(process.pid)
-                active.append((hemi, process, report_path, environment_report))
-            while any(p.poll() is None for _, p, _, _ in active):
+            active = HEMISPHERES[offset:offset + workers]
+            startup_tick = time.monotonic()
+            deadline = startup_tick + (startup_wait_seconds or 90)
+            ready, retry_at = {}, {}
+            for hemi in active:
+                spawn(hemi)
+            while len(ready) != len(active):
+                now = time.monotonic()
+                if deadline is not None and now >= deadline:
+                    raise TimeoutError('hemisphere worker startup resource deadline exceeded')
+                for hemi in active:
+                    process, path, env, ready_path, go_path, row = worker_records[hemi]
+                    if hemi in retry_at:
+                        if now >= retry_at[hemi]:
+                            del retry_at[hemi]
+                            spawn(hemi)
+                        continue
+                    if process.poll() is not None:
+                        _cancel([process])  # Reap descendants before any new attempt.
+                        child = collect(hemi)
+                        ready.pop(hemi, None)
+                        eligible = (device.startswith('cuda') and startup_wait_seconds > 0
+                            and child.get('status') == 'failed' and child.get('pid') == process.pid
+                            and child.get('operation_entered') is False and child.get('cuda_oom') is True
+                            and child.get('failure_phase') in ('first_allocation', 'sync', 'device_properties'))
+                        row['startup_retry_eligible'] = eligible
+                        if not eligible:
+                            raise RuntimeError(f'{hemi} worker failed before GO; no startup retry permitted')
+                        retry_at[hemi] = now + min(2., max(0., deadline - now))
+                    elif ready_path.is_file() and hemi not in ready:
+                        marker = json.loads(ready_path.read_text())
+                        if marker.get('pid') != process.pid or marker.get('operation_entered') is not False:
+                            raise RuntimeError('invalid worker READY marker')
+                        ready[hemi] = marker
+                        row['ready_monotonic'] = marker['ready_monotonic']
                 sampler.sample_if_due()
-                if any(p.poll() not in (None, 0) for _, p, _, _ in active):
+                time.sleep(.02)
+            if time.monotonic() >= deadline:
+                raise TimeoutError('hemisphere worker startup resource deadline exceeded before GO')
+            elapsed = time.monotonic() - startup_tick
+            report.setdefault('startup_batches', []).append({'hemispheres': list(active), 'seconds': elapsed,
+                'deadline_seconds': startup_wait_seconds or 90})
+            report['startup_wait_seconds_actual'] = sum(b['seconds'] for b in report['startup_batches'])
+            for hemi in active:
+                process, _, _, _, go_path, row = worker_records[hemi]
+                if process.poll() is not None:
+                    collect(hemi)
+                    raise RuntimeError(f'{hemi} worker exited before GO')
+                row['go_monotonic'] = time.monotonic()
+                temporary = go_path.with_suffix('.tmp')
+                temporary.write_text(json.dumps({'go_monotonic': row['go_monotonic']}))
+                temporary.replace(go_path)
+            while any(worker_records[h][0].poll() is None for h in active):
+                sampler.sample_if_due()
+                if any(worker_records[h][0].poll() not in (None, 0) for h in active):
                     raise RuntimeError('hemisphere worker failed; sibling cancelled')
                 time.sleep(.05)
-            for hemi, process, report_path, environment_report in active:
-                if report_path.is_file():
-                    child_report = json.loads(report_path.read_text())
-                    child_report['environment'] = environment_report
-                    report['workers'][hemi] = child_report
-                if process.returncode or not report_path.is_file() or child_report['status'] != 'complete':
+            for hemi in active:
+                child = collect(hemi)
+                if worker_records[hemi][0].returncode or child.get('status') != 'complete':
                     raise RuntimeError(f'{hemi} worker failed or produced no complete report')
-                report['values'][hemi] = child_report['value']
+                report['values'][hemi] = child['value']
+        # READY residency is not algorithm overlap.
+        intervals = {h: {'started_monotonic': c['operation_started_monotonic'],
+                         'finished_monotonic': c['operation_finished_monotonic']}
+                     for h, c in report['workers'].items()}
         report.update(parallel_intervals(report['workers']))
+        report.update({'operation_' + k: v for k, v in parallel_intervals(intervals).items()})
         # 先审计两侧全部改动，再发布任何文件。
         for hemi in HEMISPHERES:
             private = private_roots[hemi]
@@ -264,16 +374,18 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
         report['status'] = 'complete'
     except BaseException as error:
         _cancel(processes)
-        # 失败 worker 报告也可诊断，不能丢失失败阶段。
-        for hemi in HEMISPHERES:
-            path = root / f'{hemi}.report.json'
-            if path.is_file():
-                report['workers'][hemi] = json.loads(path.read_text())
+        # Preserve all attempts; collect the last worker even when no report exists.
+        for hemi in worker_records:
+            collect(hemi)
+        if len(ready if 'ready' in locals() else {}) != len(active if 'active' in locals() else ()):
+            report['startup_wait_seconds_actual'] = (sum(b['seconds'] for b in report.get('startup_batches', []))
+                + time.monotonic() - startup_tick)
         report.update(status='failed', error=repr(error))
         failure = HemisphereGroupError(f'{operation} hemisphere group failed: {error}', report)
         raise failure from error
     finally:
         final_errors = []
+        report['operation_entered'] = {h: c.get('operation_entered') for h, c in report['workers'].items()}
         try:
             _cancel(processes)
         except BaseException as error:
@@ -283,6 +395,11 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
                 stream.close()
             except BaseException as error:
                 final_errors.append(('worker_log_close', error))
+        for hemi, record in worker_records.items():
+            try:
+                shutil.copyfile(record[5]['log_path'], subject / 'scripts' / f'{operation}.{hemi}.worker.log')
+            except OSError as error:
+                final_errors.append(('worker_log_retention', error))
         try:
             sampler.sample_if_due(force=True)
             report['device_process_tree'] = sampler.report()
