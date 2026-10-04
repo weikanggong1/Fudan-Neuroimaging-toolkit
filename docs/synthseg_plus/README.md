@@ -84,7 +84,9 @@ mri_synthseg --i sub-01_T1w.nii.gz --o sub-01_official_parc.nii.gz \
 
 本次矩阵分别安排普通 `--parc`、`--parc --fast`、输入网格输出和软体积 CSV，完成状态及数值见[8 线程验证记录](../../validation/smri_cpu_20261004/t2_seg/README.md)。计时配对只保存原版也输出的合并标签图与 CSV；Python 返回的主分割、单独皮层图和 `mask()` 功能另作输出检查，不向计时流程添加额外写盘。
 
-共享预处理修复真实影像少一层问题，3 幅 CPU 网络输入 float32 数组 SHA 与官方相同；CPU 连通域使用 6 邻接 SciPy。最初将所有 CPU 卷积切片的候选使 fast 从旧 FNIT 56.33/52.57 秒变成 63.59/58.33 秒，因此最终选择在 Plus 保留既有完整 oneDNN 卷积，仅普通 SynthSeg 的既有保护上下文启用切片。fast 全层切片候选与同输入旧 FNIT 硬标签和 CSV 相同，与官方只差 1 个体素、最小 Dice 0.99990777、CSV 最大差 0.10 mm³；不能称官方逐值一致。最终选择策略另作公共 CLI 配对，未结束项目不会列为通过。CUDA 前向仍走原卷积；CPU 调用保留同进程的 CUDA 精度与性能开关。新版本和下列历史验证按源码和核组分别记录。
+共享预处理修复真实影像少一层问题，3 幅 CPU 网络输入 float32 数组 SHA 与官方相同；CPU 连通域使用 6 邻接 SciPy。最初将所有 CPU 卷积切片的候选使 fast 从旧 FNIT 56.33/52.57 秒变成 63.59/58.33 秒，因此选择在 Plus 保留既有完整 oneDNN 卷积，仅普通 SynthSeg 的既有保护上下文启用保留原后端的切片。case01 最终策略公共 CLI 的 fast baseline 为 54.33/58.35 秒，候选为 51.83/50.07 秒；非 fast baseline 为 73.87/71.11 秒，候选为 71.86/70.36 秒。两种模式的硬标签和数值 CSV 均与同输入 baseline 逐值相同。
+
+对官方 fast 仍差 1 个体素、最小 Dice 0.99990777、CSV 最大差 0.10 mm³；非 fast 差 6 个体素、最小 Dice 0.99961215、CSV 最大差 0.90 mm³。第二例的原版剩余误差和更早全层分块变慢的结果均保留，不能称官方逐值一致。`--parc` 与 `--color-lut` 的组合尚不支持，最终共享 CLI 明确拒绝该组合。CUDA 前向仍走原卷积；CPU 调用保留同进程的 CUDA 精度与性能开关。新版本和下列历史验证按源码和核组分别记录。
 
 公开 T1w 单例的详细命令、逐标签结果及计时范围见[验证记录](../../validation/synthseg_plus/README.md)。GPU 使用 TF32；未使用 float16 或 bfloat16。
 

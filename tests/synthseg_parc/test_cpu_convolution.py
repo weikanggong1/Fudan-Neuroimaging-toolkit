@@ -19,7 +19,7 @@ def test_slab_halos_match_full_convolution_at_every_boundary(kernel, groups,
     weight = torch.randn(output_channels, input_channels // groups, kernel, kernel, kernel)
     bias = torch.randn(output_channels)
     padding = kernel // 2
-    with torch.inference_mode(), torch.backends.mkldnn.flags(enabled=True):
+    with torch.inference_mode(), torch.backends.mkldnn.flags(enabled=False):
         expected = F.conv3d(image, weight, bias, padding=padding, groups=groups)
         actual = convolution_slabs(image, weight, bias, padding=padding, groups=groups,
                                    maximum_slab_bytes=4096)
@@ -30,6 +30,22 @@ def test_local_backend_context_restores_disabled_setting():
     with torch.backends.mkldnn.flags(enabled=False), torch.inference_mode():
         convolution_slabs(torch.ones(1, 1, 5, 4, 3), torch.ones(1, 1, 3, 3, 3), padding=1)
         assert not torch.backends.mkldnn.enabled
+
+
+def test_slab_preserves_original_backend_even_when_caller_enabled_onednn():
+    original = F.conv3d
+    seen = []
+
+    def record_backend(*args, **kwargs):
+        seen.append(torch.backends.mkldnn.enabled)
+        return original(*args, **kwargs)
+
+    with torch.inference_mode(), torch.backends.mkldnn.flags(enabled=True):
+        with patch("fnit.synthseg_parc.cpu_conv.F.conv3d", side_effect=record_backend):
+            convolution_slabs(torch.ones(1, 1, 5, 4, 3),
+                              torch.ones(1, 1, 3, 3, 3), padding=1)
+        assert torch.backends.mkldnn.enabled
+    assert seen and not any(seen)
 
 
 @pytest.mark.parametrize("full_volume_backend", [False, True])

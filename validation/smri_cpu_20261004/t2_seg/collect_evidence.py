@@ -13,7 +13,9 @@ def collect(run_root, workspace, tables_dir=None):
     groups = ["corrected_numa1_records_v1", "corrected_case02_records_v1",
               "selective_numa1_v1_records", "gpu_corrected_records_v1",
               "gpu_selective_v1_records", "gpu_header_v1_records", "wmh_numa1_v2_records",
-              "original_backend_numa1_v1_records", "gpu_original_backend_v1_records"]
+              "original_backend_numa1_v1_records", "gpu_original_backend_v1_records",
+              "wmh_header_cpu_v1_records", "wmh_header_gpu_v1_records",
+              "wmh_header_gpu_full_v2_records"]
     for group in groups:
         for path in sorted((run_root / group).glob("*/record.json")):
             record = json.loads(path.read_text())
@@ -86,11 +88,13 @@ def collect(run_root, workspace, tables_dir=None):
                 item[prefix] = json.loads(path.read_text())
         report["preprocessing"][f"case{index:02d}"] = item
     for freeze in ("baseline_corrected", "candidate_corrected", "candidate_selective",
-                   "baseline_final_frontend", "candidate_header", "candidate_original_backend"):
+                   "baseline_final_frontend", "candidate_header", "candidate_original_backend",
+                   "candidate_wmh_header"):
         source = workspace / freeze / "src/fnit"
         if not source.exists():
             continue
         paths = list((source / "synthseg_parc").glob("*.py"))
+        paths += list((source / "wmh_synthseg").glob("*.py"))
         paths += [source / "_nib.py", source / "cli.py"]
         report["source_files"][freeze] = {
             str(path.relative_to(source.parent)): hashlib.sha256(path.read_bytes()).hexdigest()

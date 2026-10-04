@@ -2,7 +2,7 @@
 
 Large NCDHW convolutions have previously crashed in oneDNN on nodecw10;
 disabling it for the entire U-Net uses a very large im2col workspace. Slabs
-retain each kernel's complete depth halo while limiting oneDNN call sizes.
+retain each kernel's complete depth halo and the guarded original backend.
 CUDA and gradient-enabled/training forwards retain nn.Conv3d unchanged.
 """
 
@@ -27,8 +27,10 @@ def convolution_slabs(image, weight, bias=None, *, padding=0, groups=1,
     RSS; at least one output plane and its full halo are always retained.
     Zero padding on depth boundaries is applied only at the true image
     edges; internal chunk edges use the neighboring original input planes.
-    All arithmetic stays in the input dtype, with local restoring oneDNN
-    contexts. No model, precision, thread or CUDA setting is changed.
+    All arithmetic stays in the input dtype. The original non-oneDNN CPU
+    backend remains selected in a restoring context: switching to oneDNN
+    inside a slab changed near-tie labels on a real validation T1. No model,
+    precision, thread or CUDA setting is changed.
     """
     if image.device.type != "cpu" or weight.device.type != "cpu":
         raise ValueError("convolution_slabs accepts CPU tensors only")
@@ -44,7 +46,7 @@ def convolution_slabs(image, weight, bias=None, *, padding=0, groups=1,
     slab_depth = max(1, min(32, maximum_slab_bytes // bytes_per_plane - 2 * padding[0]))
     output = image.new_empty((batch, weight.shape[0], depth, height, width))
     halo = padding[0]
-    with torch.backends.mkldnn.flags(enabled=True):
+    with torch.backends.mkldnn.flags(enabled=False):
         for start in range(0, depth, slab_depth):
             stop = min(start + slab_depth, depth)
             lower, upper = max(0, start - halo), min(depth, stop + halo)

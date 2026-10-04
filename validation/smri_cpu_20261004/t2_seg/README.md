@@ -10,7 +10,7 @@ FNIT 生产推理不调用 FreeSurfer、TensorFlow、Surfa 或其他神经影像
 |---|---|---|---|
 | `SynthSeg` | 33 类、原图/约 1 mm 输出、翻转集成、拓扑类别后处理、软体积 CSV、显式色表 | 修正预处理网格与浮点顺序；安全卷积分块；6 邻接连通域；真正保存 CTAB | 原卷积、连通域和精度作用域；修正同一预处理网格计数 |
 | `SynthSegPlus` | 普通 SynthSeg 2.0 + `--parc`、fast/非 fast、3 份返回影像、101 列数值 CSV、mask | 同一预处理和连通域修复；保留原有完整 oneDNN 卷积 | 原卷积、翻转与后处理 |
-| `WMHSynthSeg` | T1/FLAIR、crop/完整体积、label 77 概率图、33 列软体积 | 本提交未修改网络或算法；新原始数据矩阵继续验证 | 本提交未修改网络或算法 |
+| `WMHSynthSeg` | T1/FLAIR、crop/完整体积、label 77 概率图、33 列软体积 | 网络与空间处理保留；修复新网格保存头信息 | 网络与空间处理保留；20 GB 完整回归未通过 |
 
 `SynthSegPlus` 是本仓库普通 SynthSeg 2.0 皮层分区入口，对应 `mri_synthseg --parc`。
 它不代表论文中的 robust SynthSeg+，不对应 `--robust`。普通 33 类入口也没有
@@ -18,8 +18,9 @@ FNIT 生产推理不调用 FreeSurfer、TensorFlow、Surfa 或其他神经影像
 
 CPU 分块只在普通 SynthSeg 既有的“禁用完整体积 oneDNN”作用域内启用。
 每块保留深度方向完整卷积邻域，内部边界不补零；只有真实体积边缘补零。
-单次输入/输出块目标 256 MiB，不是整例 RSS 上限。每次局部 oneDNN 调用恢复
-调用者设置。默认 Plus 已能使用完整 oneDNN 卷积，因此保留该路径；最初对所有
+单次输入/输出块目标 256 MiB，不是整例 RSS 上限。分块保留普通入口原有
+禁用 oneDNN 的计算后端，退出时恢复调用者设置。默认 Plus 已能使用完整 oneDNN
+卷积，因此保留该路径；最初对所有
 CPU 层分块使 fast 变慢，其结果仍保留在下表。
 
 ## 2. 数据、资源与计时边界
@@ -189,20 +190,56 @@ baseline 完全相同，CSV 最大差 0.30 mm³、最大相对差 `6.0e-7`，通
 对官方仍差 1 个体素、CSV 最大差 0.80 mm³。
 
 诊断包含 hook，不作为正式完整命令 benchmark，也不修改既有平局阈值。
-原后端分块的新冻结源码正进行两例正式 ABCCBA，预先固定验收 SHA
+随后保留原后端的正式两例 ABCCBA 已完成 12/12，新候选没有 diagnostic hook。
+结果读取前固定 [验收文件](acceptance_original_backend.json)，SHA 为
 `a128a0c4fe1b24cbac85982a64130aa14124acfc577801d7f1493fb724687234`。
-正式候选完成前，oneDNN slab 不列为普遍无损的默认优化。见
+两例的两次 baseline/候选配对均满足：硬标签逐值相同、保存几何相同、CSV
+列名与顺序相同，数值满足 `rtol=1e-5, atol=0.01 mm³`。不同框架的官方输出
+仍有下表误差。oneDNN slab 的失败结果保留，但不作为默认路径。见
 [数值差异定位](reduction_diagnostic.public.json)。
+
+| 原后端分块正式普通 33 类 | 官方两次 wall（秒） | 修正 baseline 两次（秒） | 最终候选两次（秒） | baseline/候选硬标签差 | 官方/候选硬标签差 | 官方最小 Dice | 官方 CSV 最大差（mm³） |
+|---|---|---|---|---:|---:|---:|---:|
+| case01 | 127.192 / 56.339 | 145.217 / 143.453 | 133.706 / 171.511 | 0 | 1 | 0.9999979512 | 0.28 |
+| case02 | 46.052 / 97.340 | 135.113 / 129.138 | 124.613 / 124.866 | 0 | 1 | 0.9999985686 | 0.80 |
+
+候选/baseline CSV 最大绝对差分别为 0.04 和 0.30 mm³；各臂自重复硬标签和
+数值 CSV 均相同。候选进程树采样 RSS 峰值约 15.06–15.35 GB，baseline
+约 94.00 GB，完整命令显著降低内存需求。case01 第二次候选比 baseline 慢，
+官方时间仍明显波动，因此普通 CPU 速度尚未达到稳定一致或超越官方的目标。
+
+最终原后端修改的 GPU raw ABBA 为 baseline 7.772/7.520 秒、候选
+8.277/7.272 秒。配对与自重复硬标签和数值 CSV 均逐值相同，保存几何相同；
+allocated 10,712,466,944 B、reserved 14,615,052,288 B。短 wall 波动不证明
+性能改善，结果支持本次仅 CPU 后端选择未改变 CUDA 数学与保存输出。
 
 WMH 新测试使用真实原始 ds003592 FLAIR（CC0），没有拿既有 6 mm、脑外置零
 派生例子当原始影像。原 FS 安装缺少 WMH checkpoint 的失败保留；仅在私密
 reference overlay 链接同 SHA 权重补齐安装，不修改公共 FS 模块。
 另一次 CSV 父目录未预建属于本次 benchmark 准备错误，已记录并修正后重排；
-不计为原软件算法时间。原始 FLAIR crop/完整体积各 4 次已完成，全部保存的
-硬标签、33 列数值 CSV、label 77 概率图均与官方逐值相同，网格 shape/affine
-相同。crop 官方 121.909/114.893 秒、FNIT 83.364/83.861 秒；完整体积官方
-65.588/103.131 秒、FNIT 59.331/61.589 秒。新 T1 两种模式仍进行，旧日期
-结果不重标为当前版本。
+不计为原软件算法时间。原始 T1/FLAIR 的 crop/完整体积矩阵已完成 16/16，
+全部保存的硬标签、33 列数值 CSV、label 77 概率图与官方及自重复均逐值相同。
+网格 shape/affine/dtype/zoom 相同；该矩阵旧 FNIT 输出 header 的 form code
+和扫描扩展不同，后续单独修复与核验，不重标旧计时的源码身份。
+
+| WMH CPU 输入与模式 | 官方两次 wall（秒） | FNIT 两次 wall（秒） | 硬标签/数值 CSV/WMH 概率 |
+|---|---|---|---|
+| 原始 FLAIR crop | 121.909 / 114.893 | 83.364 / 83.861 | 逐值差异均为 0 |
+| 原始 FLAIR full | 65.588 / 103.131 | 59.331 / 61.589 | 逐值差异均为 0 |
+| 原始 T1 crop | 180.240 / 137.197 | 107.158 / 94.373 | 逐值差异均为 0 |
+| 原始 T1 full | 107.648 / 91.330 | 76.350 / 79.598 | 逐值差异均为 0 |
+
+新 WMH header 使用与原版相同的空 float32 NIfTI header，qform/sform 为 0/2，
+不继承输入扫描扩展。实际 FLAIR full 和 T1 crop 补验均保持硬标签、CSV 和
+概率逐值相同，全部保存几何字段也与官方相同；完整命令分别为 53.329 和
+94.368 秒。只改变保存函数，网络/空间处理文件 SHA 保持相同，详见
+[WMH 保存头信息核验](wmh_output_header.public.json)。WMH CPU 的采样内存
+峰值约 24–36 GB，当前没有引入降低内存的网络算法。
+
+WMH GPU crop 同输入 ABBA 四次均在原有 GroupNorm 超过 20,000,000,000 B
+allocator 限额；较小 full 的 baseline 同样 OOM，candidate 在 CUDA 初始化时
+OOM。它们均发生在新保存代码执行前，不列为完整 GPU 回归通过，没有提高
+预算或降低精度。旧 GPU 模型实际需求约 29.7 GiB，显存适配仍待完成。
 
 ## 7. 复现与文件
 
@@ -220,17 +257,20 @@ reference overlay 链接同 SHA 权重补齐安装，不修改公共 FS 模块�
 - 公开 JSON 保留每次真实计时、hash、状态和关键误差；不同几何只保存一份，
   各比较引用其标识。逐标签/逐列表各保存一份；完整逐层 profiling 和运行日志
   留在私密运行目录，不重复发布数组或多份冻结计划。
-- [冻结源码清单](source_freeze.public.json)：提交的 12 个 task2 生产文件与实际
-  `25e876f1`/`candidate_header` 冻结源码逐文件 SHA 完全相同；共享 CLI/header
-  由主任务整合。原后端分块候选另有冻结身份，尚未替换这些已完成结果。
-- 本提交针对性测试：32 passed，涵盖完整 halo、边缘/分组/bias、autograd、
+- [冻结源码清单](source_freeze.public.json)：最终 16 个 task2 生产文件与
+  `candidate_wmh_header` 冻结源码逐文件 SHA 相同；普通原后端分块完整矩阵
+  来自 `candidate_original_backend`，WMH 网络矩阵来自 `candidate_header`。
+  三者仅有明确列出的 CPU 后端和 WMH 保存函数差别，共享 CLI/header 由主任务
+  整合。当前 CLI 明确拒绝 `--parc --color-lut`，该组合不列为支持。
+- 最终针对性测试：35 passed，涵盖完整 halo、边缘/分组/bias、autograd、
   调用者 autocast、CPU/CUDA 全局状态保留、色表写出和真实几何的 endpoint 回归。
 
 ## 8. 更新记录与原实现
 
 - 2026-10-04：修复少一层的真实网格问题、3 例 float32 输入与官方 SHA 相同；
   CPU 连通域和安全卷积分块；CTAB 实际保存/原版回读；修复原图 pixdim 写出；
-  保留 fast 全分块变慢及 case02 oneDNN 标签门失败证据，继续原后端分块验证。
+  保留 fast 全分块变慢及 case02 oneDNN 标签门失败证据；原后端两例严格标签门
+  与 GPU 保存输出回归完成；WMH 四模式 CPU 逐值一致，保存头信息单独修复。
 - 2026-10-01：既有 recon-all 集成精度作用域和后验缓冲回归，见各子功能文档。
 - 2026-09-27：既有独立验证属于原源码/原输入版本，不作为本轮原始图像的结果。
 
