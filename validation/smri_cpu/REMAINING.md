@@ -4,9 +4,9 @@
 
 | 工作包 | 已测试、尚未通过 | 尚缺的完整真实输入覆盖 |
 |---|---|---|
-| SynthStrip / SynthSR | SR 默认浮点输出有 3,522 点超过原定容差；Strip GPU TF32 对官方 CPU 有 59 个 mask 差异。未采用改变 SR 量化输出的布局、BN 原型 | 内存影像入口的独立完整原版对照；SR 本轮 GPU 完整对照 |
+| SynthStrip / SynthSR | SR 默认浮点输出有 3,522 点超过原定容差；Strip GPU TF32 对官方 CPU 有 59 个 mask 差异。未采用改变 SR 量化输出的布局、BN 原型。[各一次默认真实物化对象 API](strip_sr_20261004/in_memory_20261004/README.md)已完成，与已有 FNIT 保存数组及文件 SHA 相同；复用官方参考的 Strip 数据门、SR 量化门通过，SR 浮点原门仍失败，Strip 官方完整 header/qform 微差另列 | 其他模型、参数、域/格式的完全物化对象入口；SR 本轮 GPU 完整对照。默认对象补测的完整进程含事后比较，不代替冷 CLI 速度对照 |
 | SynthSeg / Plus / WMH | 普通 Seg 尚无稳定官方 CPU 速度优势；仍有少数官方标签/体积差。大图 Plus CPU 崩溃已修复，真实 CPU 与最新 GPU fast/非 fast 旧新回归通过。WMH GPU 在 20 GB allocator 预算内失败 | 非默认 `min_pad`；CPU keep-geometry/色表独立计时。WMH 四模式网络已测，新 header 对两个模式重新核验，其余计时仍绑定此前源码 |
-| SynthMorph | affine 逆向上边界、joint 逆向场与上边界未全部过门；rigid 零动态范围边界有三点非零；官方 init+mid-space 分支自身异常另列 | World 链越界周期采样；当前 CPU 边界实现的完整 490 帧对照。真实两帧 DWI 和 14 项同场 apply 已测 |
+| SynthMorph | affine 逆向上边界、joint 逆向场与上边界未全部过门；rigid 零动态范围边界有三点非零；官方 init+mid-space 分支自身异常另列。[一次 affine256 双向真实物化对象 API](../synthmorph/cpu_20261004/in_memory_affine_20261004/README.md)已完成，float64 先解码再转 float32 与路径直接 float32 解码产生首次输入微差，保存输出不逐值同 | rigid/deform/joint 及其他对象参数分支；直接 float32 物化路线的完整网络输出（仅无 CNN 前处理逐值同）。World 链越界周期采样；当前 CPU 边界实现的完整 490 帧对照。真实两帧 DWI 和 14 项同场 apply 已测 |
 | TorchFAST / FastVBM | 默认 FAST 少量 PVE 差仍保留；默认 `tensor` 与官方差异更大。FNIRT VBM 尚未等价；Morph 三张标准图误差较小，但与官方 13 图没有逐位相同。最终 v4 两链完整补测已完成，输出与 v2 相同 | 官方 Morph 冷完整链；pipeline AB-BA、其他 FAST 组合、默认 tensor VBM、显式 brain/mask 和本轮完整 VBM GPU |
 | 亚区 / recon-all | 丘脑与双侧海马/杏仁核逐区门未全过；CPU stage 仍慢于官方。脑干联合优化降低时间 8.76%，完整后验和拟合状态相同。recon v3 已完整执行并[完成评分](task5/recon_complete_cpu_v3/README.md)，墙钟慢 4.99%，皮层分区和几何仍有差异。44 顶点图、12 注释因顶点对应不成立记 NA；raw v4 CPU 卷积崩溃已修复，v5 新空目录运行中 | 原始 T1 的 CPU 全亚区整例、`balanced`；有效顶点对应、DKT/a2009s/BA 具名逐区摘要、三图谱同公式 no-TH3 体积；其他半球策略、批量入口及当前整合版完整 CPU/GPU 回归 |
 

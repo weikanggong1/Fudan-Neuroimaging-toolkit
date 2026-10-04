@@ -10,6 +10,8 @@
 
 `profile_inference.py` 另行记录模型构造、预处理、网络前向、重采样、连通域及写盘。它会增加函数包装和张量哈希的开销，其整个进程时间不用于计算 CLI 加速比。嵌套阶段已经包含在父阶段中，不能累加。`--cpu-channels-last` 是验证布局原型；SynthStrip 的生产 CPU 模块 `6b7aeafd` 已通过门槛并在 oneDNN 启用时使用此布局，SynthSR 原型没有通过候选门槛，生产网络保持 contiguous。CUDA 布局均未更改。
 
+另以 `task5_candidate_cpu_v5`（提交 `00fedf3544291b9c3e1db9b6c2d6fcef3917d958`）补测[完全物化的 SpatialImage 默认 API](in_memory_20261004/README.md)：Strip、SR 各一次真实 case01 默认 CPU 调用，官方和 FNIT 路径结果均复用保存参考，未重跑其他模式或 GPU。保留原解码值和 K-layout，自有 ndarray 无 ArrayProxy，输入几何与数据前后保持。该补测有准备、加载、API、保存、比较的分时；完整进程包含 posthoc，不能与历史 CLI 时钟计算新加速比。
+
 ## 已确认的问题与控制
 
 原始冻结版本在第一例 T1 上的脑掩膜 Dice 为 `0.9964284923`，有 `20,312` 个差异体素。原始数据解码、官方权重和归一化公式一致；问题来自共享 `new_image` 重写 qform 时重新计算了 `pixdim`。原有 `0.7777777910 mm` 被改成 `0.7777777314 mm`，使 `ceil(288 * voxel_size)` 从 225 变为 224，继而改变 1 mm 网格的中心。
@@ -26,14 +28,18 @@ SynthSR 的 CPU channels-last 原型在第一例真实 T1 上缩短了网络耗�
 |---|---|
 | SynthStrip 生产 CPU，11 场景/26 CLI | 全部通过 mask/brain 逐值门槛和 SDT 固定容差；[逐项结果](reports/synthstrip_cpu_cli.public.json) |
 | SynthStrip 默认两个原始 T1 | 官方/FNIT 完整 CLI 中位数 `45.561/14.901`、`49.199/14.027 s`；官方冷启动波动与卷积另列 |
+| SynthStrip 默认完全物化 CPU API，v5 单例 | brain/mask 逐值等于官方，SDT max `2.62260437e-5 mm` 原门通过；官方 header/`pixdim` 微差、qform max `1.49982564e-9 mm` 单列；三份结果与保存 FNIT 路径逐值且文件 SHA 同。[报告](in_memory_20261004/report.public.json) |
 | SynthStrip CPU layout 的 GPU 回归 | 同修复输入 ABBA 全部三份输出逐值同；组件 allocated/reserved峰值一致，[配对结果](reports/synthstrip_gpu_regression.public.json) |
 | SynthStrip GPU TF32 对官方 CPU | 几何修复将 mask 差从 20,315 降至 59；仍未通过 CPU 的逐值 gate，[修复前](reports/synthstrip_gpu_official_before.public.json)/[修复后](reports/synthstrip_gpu_official_after.public.json) |
 | SynthSR 当前 CPU 功能 | 9 个模型/参数场景 + 7 个域/格式场景全部通过官方量化容差或相应 NPZ 门槛；[参数](reports/synthsr_cpu_functions.public.json)/[域和格式](reports/synthsr_cpu_domains.public.json) |
 | SynthSR 默认 case01 浮点 NPZ | `rtol=1e-5, atol=1e-3` 未通过；3,522/9,072,000 点超门槛、max `0.0191345`，[尾部报告](reports/synthsr_float_tail.public.json) |
+| SynthSR 默认完全物化 CPU API，v5 单例 | uint8 对官方 527 点差 1、量化门槛通过；官方浮点原门仍失败。NIfTI/NPZ 均与保存 FNIT 默认输出逐值且文件 SHA 同。[报告](in_memory_20261004/report.public.json) |
 | SynthSR 误差隔离 | 两次 CNN 实际输入逐值同，原始预测 RMSE `3.76e-7/4.01e-7`；同一官方预测回放经过 FNIT 后处理，9,072,000 个输出逐值等于官方，[回放控制](reports/synthsr_network_replay.public.json) |
 | SynthSR BN 算式原型 | 两种 FP32 算式仍有 3,533/3,702 点超浮点门槛，未接入生产，[结果](reports/synthsr_bn_formula.public.json) |
 
 [阶段观察](reports/cpu_stage_profiles.public.json)与完整 CLI 使用不同计时范围。GPU 设备记录中，整卡 `nvidia-smi` 显存包含其他保留 context，不能代替组件的 Torch 峰值；[设备采样](reports/synthstrip_gpu_device_load.public.json)已按实际目标卡 UUID 过滤。所有公开 JSON 只发布匿名参数标识、资源设置、标量与哈希；完整命令、私有输入、数组和模型留在服务器。
+
+物化默认 API 的准备（metadata＋解码＋K-layout 复制＋对象构造）为 Strip/SR `0.504/0.669 s`；API `6.606/29.987 s`，同次全部输出保存 `2.898/1.949 s`，保存参考比较 `12.041/3.801 s`。完整进程为 `25.530/41.545 s`，还包含 provenance、运行时导入、模型构造和张量哈希。这些阶段及完整进程的范围见[单例报告](in_memory_20261004/README.md)，不能将 API、汇总项和完整进程重复相加，也不作为新官方配对速度比较。
 
 ## 功能覆盖
 
@@ -46,6 +52,7 @@ SynthSR 的 CPU channels-last 原型在第一例真实 T1 上缩短了网络耗�
 | SynthSR 模型 | 通用 v2、v1、低场权重及 v1/lowfield 同时指定时的优先级 |
 | SynthSR 翻转与锐化 | 默认、关闭翻转、关闭锐化、同时关闭 |
 | 输出格式 | 同次真实推理结果保存 NIfTI/MGZ；SynthSR另保存 NPZ浮点值 |
+| 完全物化 SpatialImage 默认 CPU API | 同源真实 case01，Strip/SR 各一次默认调用；自有 ndarray 保留解码值、K-layout、几何，复用官方/路径保存参考。对象覆盖限于默认单例，结果见[补测](in_memory_20261004/README.md) |
 | 额外输入契约 | 真实多帧、内存影像、NPZ输入及真实 HU CT与低场采集按实际资源补测 |
 
 本轮计划、执行记录和结果分别保存。表中列出需要覆盖的功能，不能把计划当作已经通过的实测。
@@ -105,7 +112,7 @@ PYTHONPATH=src python validation/smri_cpu/strip_sr_20261004/profile_inference.py
 | `--cpu-channels-last` | CPU 专用验证布局原型；禁止用于 CUDA；生产 Strip 是否自动启用另记录 |
 | `--save-network-arrays` | 保存本次真实前向的输入/输出 NPY 到私有目录；不额外推理，写盘阶段另列 |
 | `--cpu-bn-formula` | 仅 CPU SynthSR 诊断，默认 `pytorch`；`subtract_first` 与 `scale_bias` 改变验证实例的 BN 算式，不修改生产源码 |
-| `--input-object` | 用 `nibabel.load` 后的内存影像调用公开 Python API；默认传路径 |
+| `--input-object` | 用 `nibabel.load` 后仍可含 ArrayProxy 的影像调用公开 Python API；默认传路径。完全物化自有 ndarray 的默认单例由[独立 worker](in_memory_20261004/README.md)覆盖 |
 
 API完整输入输出和原软件命令见 [SynthStrip](../../../docs/synthstrip/README.md) 与 [SynthSR](../../../docs/synthsr/README.md)。
 

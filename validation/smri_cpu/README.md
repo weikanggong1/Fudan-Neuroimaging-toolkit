@@ -43,12 +43,19 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 
 | 功能 | 同组 CPU 原软件 / FNIT 时间 | 当前精度与性能结论 |
 |---|---|---|
-| [SynthStrip / SynthSR](strip_sr_20261004/README.md) | Strip 默认两例的中位数 45.56 / 14.90 秒、49.20 / 14.03 秒 | Strip 11 场景、26 CLI：mask/brain 相同，SDT 最大差 4.34e−5 mm。SR 16 场景的量化/格式门通过，默认浮点严格门仍有 3,522 点超限；未采用改变其量化输出的布局原型。 |
+| [SynthStrip / SynthSR](strip_sr_20261004/README.md) | Strip 默认两例的中位数 45.56 / 14.90 秒、49.20 / 14.03 秒 | Strip 11 场景、26 CLI：mask/brain 相同，SDT 最大差 4.34e−5 mm。SR 16 场景的量化/格式门通过，默认浮点严格门仍有 3,522 点超限；未采用改变其量化输出的布局原型。另已完成[默认真实物化对象 API](strip_sr_20261004/in_memory_20261004/README.md)，各一次，与已有 FNIT 保存输出逐值相同。 |
 | [SynthSeg / Plus / WMH](../smri_cpu_20261004/t2_seg/README.md) | 普通 SynthSeg 官方 46.05–127.19 秒、候选 124.61–171.51 秒；WMH 四组原软件 65.59–180.24 秒、候选 59.33–107.16 秒 | 普通 SynthSeg 保持原 CPU 卷积后端：12/12 旧新标签/几何检查通过，内存降至约 15.1 GB，尚无稳定官方速度优势。WMH 16/16 CPU 检查通过；20 GB 预算内的 GPU WMH 对照失败，未宣称 GPU 验收完成。Plus 为普通 `--parc`，并非 robust SynthSeg+。大尺寸 CPU 1×1 投影崩溃已修复：正式大图四进程完成，最小 Dice 0.999803；两例 fast/非 fast 旧新八进程标签和 CSV 相同。最新 GPU fast/非 fast 四进程回归完成，旧新标签/101 列 CSV/几何相同；reserved 最大 18.900 GB，共享负载下不宣称稳定 GPU 提速。 |
-| [SynthMorph](../synthmorph/cpu_20261004/README.md) | 四模式原软件 35.81–261.35 秒、候选 20.53–169.25 秒，各模式分别配对 | 本例各模式完整时间较短。deform 两向通过；affine/joint 逆向场或上边界尚未全过门。GPU 四模式旧新数组和 header 相同。 |
+| [SynthMorph](../synthmorph/cpu_20261004/README.md) | 四模式原软件 35.81–261.35 秒、候选 20.53–169.25 秒，各模式分别配对 | 本例各模式完整时间较短。deform 两向通过；affine/joint 逆向场或上边界尚未全过门。GPU 四模式旧新数组和 header 相同。另已完成[affine256 真实物化对象 API](../synthmorph/cpu_20261004/in_memory_affine_20261004/README.md)；对象先解码 float64 与路径直接解码 float32 的首次输入差异已定位，其他对象模式未测。 |
 | [TorchFAST](../smri_cpu_20261004/task04/README.md) | 默认 8 核预算原软件 388.22–394.79 秒、候选 121.68–132.94 秒；严格单核 391.39 / 349.99 秒 | 8 核预算相同，官方 FAST 主要单线程。默认仍有少量 PVE 差；真实非默认配置八图相同。CUDA 两后端共 32 对 gzip 文件 SHA 相同。 |
 | [FastVBM](../smri_cpu_20261004/task04/fast_vbm_cpu_20261004/final_v4/README.md) | FNIRT 完整链官方 769.37 秒 / 最终 v4 536.79 秒；v4 SynthMorph 完整链 317.74 秒 | 最终 v4 两条原始 T1 链均返回 0，各 13 图数据与科学几何/header 与 v2 相同。FNIRT 灰质/Jacobian/调制图脑内 NRMSE 约 0.0190/0.0101/0.0160；SynthMorph 对应约 0.000562/0.000352/0.000451。沿用既有官方输出与计时，非邻接配对；官方 SynthMorph 仅分支实测，无冷整链速度比。 |
 | [亚区分割 / recon-all](task5/README.md) | 脑干 205.55 / 764.69 秒；丘脑 275.89 / 2464.29 秒；双侧海马/杏仁核 442.30 / 3455.41 秒；完整 recon-all 官方 4600.04 / v3 4829.70 秒 | 脑干逐区门通过，丘脑与海马/杏仁核未全过，CPU 仍明显慢于官方。后续联合优化在另一核组的旧新配对降低脑干 API 时间 8.76%，全部后验/拟合状态相同。v2 因部署缺少 tifffile 失败；v3 重跑及[完整评分](task5/recon_complete_cpu_v3/README.md)完成，138 输出齐全。68 区厚度/面积/灰质体积 MAE 为 0.017 mm / 30.559 mm² / 75.529 mm³；顶点拓扑不同，44 顶点图与 12 注释的同索引误差为 NA。本例墙钟慢 4.99%，整体数值等价未判定。 |
+
+### 内存影像入口的新增覆盖
+
+这组补测复用已经保存的官方和 FNIT 文件入口输出，没有重复官方推理。完整进程还包含来源校验、物化及事后比较，不能与上表的冷 CLI 墙钟直接相除为新的加速比。 本次对象补测仅在 CPU 执行，没有新增 GPU 回归。
+
+- **SynthStrip / SynthSR**：冻结 `task5_candidate_cpu_v5`（head `00fedf35`、归档 `ab9a2d58…`），各运行一次 case01 默认 CPU API。输入是默认解码为 float64、保留 K-layout 的真实自有 ndarray SpatialImage，沿各自成熟 loader 的精度政策处理。Strip 三图、SR uint8 与浮点输出均与既有 FNIT 保存结果逐值且文件 SHA 相同。Strip 对官方的数组门通过，完整 header/pixdim 不逐字节相同，qform 最大差 `1.49983e−9 mm`；SR uint8 对官方门通过，浮点原门仍失败。API 分别为 **6.606 / 29.987 秒**，全部保存为 2.898 / 1.949 秒；含物化、检查和事后比较的完整进程为 25.530 / 41.545 秒。[完整对象报告](strip_sr_20261004/in_memory_20261004/README.md)保留各阶段与几何差异。
+- **SynthMorph**：冻结 `task5_candidate_cpu_v4`（head `6f1e2b38`、归档 `ffda47a7…`），仅运行一次 affine256 双向真实对象 API；API 为 **12.765 秒**，保存为 5.401 秒，新进程完整墙钟为 27.289 秒。先默认解码 float64 再转 float32 的对象输出与既有路径候选有微差，官方逆向上边界原门仍未过。两个无 CNN 控制证明首次输入分歧来自 NIfTI slope/intercept 的解码精度顺序；直接 `np.array(ArrayProxy, dtype=np.float32, copy=True)` 物化与路径的张量、规范化网络输入逐值相同，但这第三路线没有重新运行网络，完整输出未验收。其他配准模式和对象参数分支仍未覆盖。[对象与缩放精度报告](../synthmorph/cpu_20261004/in_memory_affine_20261004/README.md)保留实际微差和未测范围。
 
 已完成的相应 GPU 回归证明其对应 CPU 修改保留已有结果；这与 GPU 对官方精度验收是两项检查。WMH 在显存预算内失败，剩余问题保留在对应报告中。重建和亚区分割的已有算法差异分别报告，时间比较不自动等于等价重建加速。
 

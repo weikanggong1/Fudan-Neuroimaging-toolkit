@@ -59,6 +59,8 @@ print(super_resolution_result.image.data.shape, super_resolution_result.image.af
 
 `.npz` 是原版的特例：`save()` 将锐化后的浮点数组写在 `vol_data` 字段，**不执行 NIfTI/MGZ 的末端乘 2 和 `uint8` 转换**。因此 `result.image.data` 对应 NIfTI/MGZ 的量化数值；读 `.npz` 应使用 `numpy.load(path)["vol_data"]`，两者的数值尺度不同。原版及本包均通过 `nibabel.save(Nifti1Image(...))` 写 `.mgz`；用 nibabel 重新读入时，该格式报告的存储 dtype 为 `float32`，体素数值仍为量化后的 0–255。原版对常规输入使用单幅 3D 数据；当文件带多个通道时只取第一个通道。
 
+`SpatialImage` 输入也支持自有、完全解码的 ndarray；仅 `nib.load()` 返回的对象仍可含 ArrayProxy。[默认完全物化 CPU API 验证](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md)按原解码值和 K-layout 覆盖了真实默认单例；参数、域和格式矩阵的既有 CLI 验收分别记录。
+
 ## 单例命令行
 
 ```bash
@@ -109,6 +111,22 @@ CPU SynthSR 构造保持调用方 CUDA 后端设置；本轮加入对应合同�
 
 ![本轮官方与 FNIT CPU SynthSR 量化输出](figures/synthsr_cpu_comparison.png)
 
+### 默认完全物化 SpatialImage API（v5 冻结）
+
+2026-10-04 在 `task5_candidate_cpu_v5`（提交 `00fedf3544291b9c3e1db9b6c2d6fcef3917d958`）上，使用同源 case01 原始 T1 和 nodecw10 的相同 8 核/8 线程，执行 **一次默认 CPU API**，包含默认翻转的两次网络前向。输入完全解码为 float64/F-layout，自有 ndarray 保留 K-layout 和原几何；路径分支的 `get_fdata()` 默认 float64 与对象分支的 `asanyarray(dataobj)` 后统一 float64 分别记录。模型和真实网络张量仍为 CPU float32、contiguous。官方及旧 FNIT 默认结果均复用保存参考，没有重跑官方或其他模式。
+
+同次结果保存为 uint8 NIfTI 与浮点 NPZ，二者都与旧 FNIT 默认保存结果逐值且文件 SHA 相同。对官方，uint8 图仍为 `527 / 9,072,000` 点差 1，99.9941909171% 逐值同，通过原量化门槛；浮点 max `0.019134521484375`、RMSE `9.82070268e-5`，仍未通过原 `rtol=1e-5, atol=1e-3`。与旧浮点数组逐值同，故既有 3,522 点超门槛的尾部结论仍适用。NIfTI 的完整 header、affine 和 sform 与两种保存参考逐值同；NPZ 不含 affine，几何由同次 NIfTI 核对。[匿名结果](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/report.public.json)保留通过与失败。
+
+| 本次单例范围 | 时间（s） |
+|---|---:|
+| metadata＋解码＋K-layout 复制＋对象构造 | 0.669 |
+| 默认 API | 29.987 |
+| 同次 NIfTI＋浮点 NPZ 保存 | 1.949 |
+| 保存参考比较与几何核对 | 3.801 |
+| 完整进程，含全部 provenance、哈希与比较 | 41.545 |
+
+完整进程含 posthoc，本次只补测默认 CPU 对象入口，不能与原软件历史 CLI 时钟计算新加速比，也不能把上述 16 个 CLI 场景改记为对象模式全部通过。非重叠阶段、加载、GNU time、RSS 及 SHA 见[物化 API 报告](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md)。
+
 ## 2026-09-27：既有 GPU 与 CPU 对照
 
 2026-09-27 用当时默认 TF32 和 Nibabel I/O 重跑 12 幅真实临床 T1w。候选推理没有调用 FreeSurfer；同一病例的 FreeSurfer 8.2.0-1 CPU/CUDA 输出作为固定参考。该历史版本 SynthSR 源码树 SHA-256 为 `7b5bc19e1afa806fe8698ea70b6358bacaab23b19877d20d21d2e7c5f3560543`。
@@ -134,6 +152,7 @@ CPU SynthSR 构造保持调用方 CUDA 后端设置；本轮加入对应合同�
 
 | 版本 | 修改与验收 | 当前结果 |
 |---|---|---|
+| 2026-10-04，`task5_candidate_cpu_v5` 默认完全物化 API | 同源 case01 原解码值/K-layout 自有 ndarray；默认 API 一次、两次网络前向；复用官方和 FNIT 保存参考。[报告](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md) | NIfTI/NPZ 与保存 FNIT 逐值且文件 SHA 同；官方量化通过、浮点原门仍失败。API 29.987 s、两份保存 1.949 s；含 posthoc 完整进程 41.545 s，不计算新加速比。 |
 | 2026-10-04，SynthSR 模块仍为 `1d31e7baa` | 16 个真实参数/域/格式场景；CPU CUDA策略合同；同网络输入与输出回放诊断 | 量化容差通过；默认 T1 浮点门槛未通过，误差定位网络 FP32 计算。CPU layout/BN 原型不接入，GPU 生产路径不变。 |
 | 2026-09-27，源码树 `7b5bc19e…` | 12 例临床 T1 的既有 TF32 GPU 对照，独立 CPU 单例 | 历史 GPU 平均 MAE 0.02314；完整命令中位数 14.45 s。时间来自不同运行时段，不作为本轮 CPU 提速。 |
 

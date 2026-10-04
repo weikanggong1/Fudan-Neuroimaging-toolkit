@@ -67,6 +67,8 @@ CPU 的 oneDNN 可用且启用时，卷积权重和输入使用 PyTorch `channel
 
 三个返回字段均为 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），可用 `.save(path)` 保存；也可直接传给 `nibabel.save`。调用不会修改输入对象。直接使用 Python 保存时，由调用者准备输出父目录。
 
+`SpatialImage` 可以含惰性 ArrayProxy，也可以持有已经完全解码的 ndarray。[默认完全物化 CPU API 验证](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md)覆盖后一种输入：保留原解码值、K-layout 和 NIfTI 几何，调用后输入未被修改；其余参数场景的既有 CLI 验收范围仍单独记录。
+
 2026-10-02的[recon-all串行接入](../recon_all/SERIAL_OPTIMIZATION.md)使用此精度接口，
 记录实际前向并在Talairach子进程启动前释放Strip模型。默认独立调用保持兼容，
 没有开启半精度。输入链当前整例仍在验证，旧功能benchmark不改标为本轮结果。
@@ -191,6 +193,22 @@ GPU 回归在同一几何修复、同一 H100、默认 TF32 下按旧模块/新�
 
 ![原始 T1、旧几何差异和修复后 CPU 掩膜](figures/synthstrip_cpu_header_alignment.png)
 
+### 默认完全物化 SpatialImage API（v5 冻结）
+
+2026-10-04 另用 `task5_candidate_cpu_v5`（提交 `00fedf3544291b9c3e1db9b6c2d6fcef3917d958`）在 nodecw10 相同 8 核/8 线程执行 **一次默认 CPU API**。同源 case01 T1 先按原缩放规则解码为 float64/F-layout，再用 `order="K"` 复制为自有 ndarray 构造 SpatialImage；没有提前请求 proxy 的 float32 数据，affine、zooms 和 qform/sform 保持原值。Strip 两种输入分支均使用 `asanyarray(dataobj)`，网络仍为 CPU float32、生产 channels-last，一次前向。官方及既有 FNIT 路径默认输出均复用保存参考。[匿名结果](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/report.public.json)保留源码、输入、权重和输出哈希。
+
+完整 `18,579,456` 体素的 brain、mask 逐值等于官方，Dice 1、体积差 0；SDT 最大差 `2.62260437e-5 mm`，通过原固定门槛。三份数组和文件 SHA 均与保存的 FNIT 路径默认输出相同。对官方输出，affine 与 sform 逐值同，但整份 header、`pixdim` 并非逐字节相同，qform 最大差 `1.4998256352150019e-9 mm`；数组通过和 header 字节一致分别报告。
+
+| 本次单例范围 | 时间（s） |
+|---|---:|
+| metadata＋解码＋K-layout 复制＋对象构造 | 0.504 |
+| 默认 API | 6.606 |
+| 同次三份输出保存 | 2.898 |
+| 保存参考比较与几何核对 | 12.041 |
+| 完整进程，含全部 provenance、哈希与比较 | 25.530 |
+
+完整进程包含 posthoc，且本次没有重跑官方，不能与上述 CLI 中位数计算新加速比。完整非重叠阶段、模型加载、GNU time 和 RSS 见[物化 API 报告](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md)。本次补测只覆盖默认单例 CPU 对象入口，没有追加参数矩阵或 GPU 运行。
+
 ### 既有 GPU 完整三维对照（`cfb7beee`）
 
 受测源码 `cfb7beee` 已在同一例真实 SBRef 和 T1 的完整原始网格上核对已保存输出。实际 `pipeline.py` SHA-256 为 `0ae5d3e3…`，与运行捕获的源码一致；官方 checkpoint SHA-256 为 `37417f80…`，30,851,709 字节，与原程序相同。输入文件的 SHA-256 也逐项一致。完整哈希、三维统计和计时来源见[最新版原程序对照](../../validation/synthstrip/latest_native_comparison.public.json)。
@@ -312,6 +330,7 @@ python validation/fmri/compare_synthstrip_geometry.py \
 
 | 版本与范围 | 更新及真实数据核对 | 耗时边界 |
 |---|---|---|
+| 2026-10-04，`task5_candidate_cpu_v5` 默认完全物化 API | 同源 case01，真实解码值/K-layout 自有 ndarray，默认 API 一次；对保存的 FNIT 三份输出逐值且文件 SHA 同；官方 brain/mask 逐值同，SDT 原门通过，header/qform 微差单列。[报告](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md) | API 6.606 s，三份保存 2.898 s；25.530 s 完整进程含 posthoc，官方参考复用，不计算新加速比。 |
 | 2026-10-04 `6b7aeafd` + 共享几何 `dc2fc052` | 11 场景、26 次 CPU CLI；脑图和 mask 逐值等于官方，SDT 固定容差通过。CPU oneDNN 使用 channels-last；CPU 构造不修改 CUDA 状态；同修复 GPU ABBA 三份输出均逐值同。 | nodecw10 同 8 线程/8 物理核；两例默认完整 CLI 中位数官方/FNIT为 45.561/14.901、49.199/14.027 s。阶段剖析和冷启动分别记录。 |
 | 2026-10-02 dMRI 固定 b0 输入 | 同一真实官方 TOPUP b0 均值，标准权重同哈希；FNIT H100 GPU/官方 CPU mask 为 271,077/271,080 voxel，差 5 voxel、Dice=0.9999907776，shape/affine 一致，SDT MAE=0.00056229 mm。[匿名报告](../../validation/dmri_pipeline/synthstrip_fixed_input_20261002.public.json)；不是新 dMRI pipeline 整链。 | FNIT 加载＋推理 1.5973 s；完整 FNIT/官方进程另测 6.825/122.275 s，官方包含冷 NFS 读取和 8 线程 CPU 推理，不与 FNIT 子函数时间直接计算速度比。 |
 | `cfb7beee` 合并版本验收 | SynthStrip 源码与 `44364a8` 一致；相对原 FreeSurfer，完整 EPI/T1 mask Dice 为 0.999994968/0.999998569，差异为 1/4 体素；当前 T1 脑图及 mask 与冻结图示输入逐值相同。见[最新版报告](../../validation/synthstrip/latest_native_comparison.public.json)。 | FNIT 复用模型子函数为 1.1654/1.4442 秒；原独立进程为 8.5569/9.3769 秒，分别保留模型构造与进程启动/读写边界。 |
