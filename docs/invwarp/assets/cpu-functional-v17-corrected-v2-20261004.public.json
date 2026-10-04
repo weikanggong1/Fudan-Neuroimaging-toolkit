@@ -1,0 +1,3570 @@
+{
+  "schema_version": 1,
+  "status": "executed_with_numeric_comparisons",
+  "timing_policy": "Complete single observations; native oracle reuse has no new native clock and no paired speed ratio",
+  "candidate_source_tree_sha256": "887448f659db9956c3189fdfb5206d117054d285040b69eaf7108c0b3626a21c",
+  "benchmark_script_sha256": "96c342a229bb8b48fbebcbfec08c9173c4786a7fc70e9bec9469f474f80461ba",
+  "adapter_source_files_sha256": {
+    "tools/benchmark_multimodal_cpu_invwarp.py": "88dd60f3797e0b212f93b4d73ace5412688f3a170f91495b4cc543749ee2a7bc"
+  },
+  "native_output_contract": "FSL 6.0.7.4 inverse is relative; absolute outputs include a complete invwarp + convertwarp --rel --absout chain",
+  "expected_complete_observations": 28,
+  "records": [
+    {
+      "case_id": "invwarp_t1_coefficient_auto_absolute",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "e5d81228aafc0bec5cda0f0102a182798a53c8c499b8a4c23099f839efce77ce",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 78.0269502773881,
+        "candidate": 55.90319272875786
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 40.591715,
+              "system_seconds": 0.424008,
+              "effective_cpu_cores": 0.9962807249811279
+            },
+            {
+              "user_seconds": 35.424458,
+              "system_seconds": 1.1619819999999998,
+              "effective_cpu_cores": 0.9926293279358727
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 28.676974,
+            "system_seconds": 26.776916,
+            "effective_cpu_cores": 0.9919628431431836
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.1095411498407368,
+            "rmse": 0.3213501970958714,
+            "relative_l2_error": 0.002816895885434633,
+            "exact_fraction": 0.0038888357205899555
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.017226811879700547,
+            "median_vector_difference_mm": 0.010075046626851696,
+            "p95_vector_difference_mm": 0.033606932653964805,
+            "max_vector_difference_mm": 7.314282449052975
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818989623770304,
+            "p95_residual_mm_valid_region": 0.027750906720628403
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.394839110444643e-06,
+            "p95_residual_mm_valid_region": 7.271718858306718e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "3f6281fb31212262a700543da3ec83b70b77430ed85a78f0a12aec29bc0699f0",
+          "bytes": 63358064
+        }
+      },
+      "candidate_api_single_seconds": 54.006752386689186,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "5cebec9645a78f571664144f2ef722408a5ff369318b7b8378e0c5f693810699",
+          "bytes": 63661341
+        }
+      },
+      "candidate_maximum_rss_kib": 1682688,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_tbss_coefficient_auto_absolute",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "996e8a4bd3357b460ab3324447d45922eac3a4d0ed0f8e5cbb4124950346779a",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 25.195816732943058,
+        "candidate": 8.513032548129559
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 6.478592000000006,
+              "system_seconds": 0.19098800000000082,
+              "effective_cpu_cores": 0.9904389980763744
+            },
+            {
+              "user_seconds": 4.847227999999987,
+              "system_seconds": 0.05298099999999906,
+              "effective_cpu_cores": 0.2654234610984172
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 4.969933000000012,
+            "system_seconds": 3.135065000000001,
+            "effective_cpu_cores": 0.9520694246353865
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              104,
+              104,
+              72,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 2336256,
+            "finite_pair_count": 2336256,
+            "candidate_finite_count": 2336256,
+            "reference_finite_count": 2336256,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 0.5071258544921875,
+            "mean_absolute_error": 0.011985431996022304,
+            "rmse": 0.051750873687686404,
+            "relative_l2_error": 0.0004727707178106698,
+            "exact_fraction": 0.015257745726495726
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 242261,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.0024726599805827442,
+            "median_vector_difference_mm": 0.0018884870622188938,
+            "p95_vector_difference_mm": 0.006592445871405699,
+            "max_vector_difference_mm": 0.05833146180172736
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 1.0,
+            "median_residual_mm_valid_region": 0.002111322839785349,
+            "p95_residual_mm_valid_region": 0.007094877991828903
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 1.0,
+            "median_residual_mm_valid_region": 4.641922848722563e-06,
+            "p95_residual_mm_valid_region": 1.023053171717558e-05
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "d1a62f8224dd544f264ee024c64b8ee35a8262eff84c6d6a7106cd5cc2e4c561",
+          "bytes": 7946428
+        }
+      },
+      "candidate_api_single_seconds": 6.476998291909695,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "1b7e2e8f705711e779a58a5d736c4731bb98200ea4c5e1bfd38d2ef44c04d8df",
+          "bytes": 7993311
+        }
+      },
+      "candidate_maximum_rss_kib": 1794808,
+      "input_sha256": [
+        "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
+        "9814d1c0a378f5f3f6750f7d91b6be54dab68322dc1944b2c332a398194e6dbc",
+        "bb19cb12057edd513e1b3d1d283bad4619443b993015d0cd279bd12c960a081b"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_explicit_absolute",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "e5d81228aafc0bec5cda0f0102a182798a53c8c499b8a4c23099f839efce77ce",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 52.5994514003396
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 27.493459,
+            "system_seconds": 24.899566,
+            "effective_cpu_cores": 0.9960755027886419
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.1095411498407368,
+            "rmse": 0.3213501970958714,
+            "relative_l2_error": 0.002816895885434633,
+            "exact_fraction": 0.0038888357205899555
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.017226811879700547,
+            "median_vector_difference_mm": 0.010075046626851696,
+            "p95_vector_difference_mm": 0.033606932653964805,
+            "max_vector_difference_mm": 7.314282449052975
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818989623770304,
+            "p95_residual_mm_valid_region": 0.027750906720628403
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.394839110444643e-06,
+            "p95_residual_mm_valid_region": 7.271718858306718e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "3f6281fb31212262a700543da3ec83b70b77430ed85a78f0a12aec29bc0699f0",
+          "bytes": 63358064
+        }
+      },
+      "candidate_api_single_seconds": 50.98440279066563,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "5cebec9645a78f571664144f2ef722408a5ff369318b7b8378e0c5f693810699",
+          "bytes": 63661341
+        }
+      },
+      "candidate_maximum_rss_kib": 1794808,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_auto_to_absolute",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "868b6f1c14ad4f090932709e44281def374281328b919870d439b3755243eb10",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 583.6243212893605,
+        "candidate": 46.57519781589508
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 542.0696,
+              "system_seconds": 4.348989000000003,
+              "effective_cpu_cores": 0.999772515996027
+            },
+            {
+              "user_seconds": 36.03760699999998,
+              "system_seconds": 0.6109250000000017,
+              "effective_cpu_cores": 0.9883264793545286
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 27.126758999999993,
+            "system_seconds": 19.036322000000006,
+            "effective_cpu_cores": 0.9911515820603893
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 1541.1997301578522,
+            "mean_absolute_error": 32.322396684727565,
+            "rmse": 140.9047998879479,
+            "relative_l2_error": 1.2426214333267516,
+            "exact_fraction": 4.838315202943397e-06
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 1.050071802257043,
+            "median_vector_difference_mm": 0.8159284070592294,
+            "p95_vector_difference_mm": 1.7831446065175558,
+            "max_vector_difference_mm": 311.4398397933622
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503459890262792,
+            "p95_residual_mm_valid_region": 1.6116684629588436
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 1.1294097215964327e-05,
+            "p95_residual_mm_valid_region": 3.013143020244518e-05
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "29dee2a478f5985e3f33bf218ed17af845af1be797c912e0e326eb74e854ad15",
+          "bytes": 62033356
+        }
+      },
+      "candidate_api_single_seconds": 44.888607211411,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db0dba1800281b4f55be711fd5116aae9d7cfff67a91e53e72b71e5e941e3790",
+          "bytes": 63914088
+        }
+      },
+      "candidate_maximum_rss_kib": 1833468,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "f8502f7b9bd3fbc01a687879143ccfac104f7aff118723234ffc036528702289"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_absolute_to_absolute",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "868b6f1c14ad4f090932709e44281def374281328b919870d439b3755243eb10",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 44.349932722747326
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 26.606776999999965,
+            "system_seconds": 17.133144,
+            "effective_cpu_cores": 0.986245487077492
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 1541.1997301578522,
+            "mean_absolute_error": 32.322396684727565,
+            "rmse": 140.9047998879479,
+            "relative_l2_error": 1.2426214333267516,
+            "exact_fraction": 4.838315202943397e-06
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 1.050071802257043,
+            "median_vector_difference_mm": 0.8159284070592294,
+            "p95_vector_difference_mm": 1.7831446065175558,
+            "max_vector_difference_mm": 311.4398397933622
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503459890262792,
+            "p95_residual_mm_valid_region": 1.6116684629588436
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 1.1294097215964327e-05,
+            "p95_residual_mm_valid_region": 3.013143020244518e-05
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "29dee2a478f5985e3f33bf218ed17af845af1be797c912e0e326eb74e854ad15",
+          "bytes": 62033356
+        }
+      },
+      "candidate_api_single_seconds": 42.492154225707054,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db0dba1800281b4f55be711fd5116aae9d7cfff67a91e53e72b71e5e941e3790",
+          "bytes": 63914088
+        }
+      },
+      "candidate_maximum_rss_kib": 1833468,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "f8502f7b9bd3fbc01a687879143ccfac104f7aff118723234ffc036528702289"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_relative_to_absolute",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "99bdba5ec9afee7edc2519e6b1ce219a7fbf81abc94dc035d30fc634fee3c266",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 608.2288256362081,
+        "candidate": 51.73056888580322
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 565.2444170000001,
+              "system_seconds": 4.024981999999994,
+              "effective_cpu_cores": 0.9998221014749343
+            },
+            {
+              "user_seconds": 37.54309599999988,
+              "system_seconds": 0.7149830000000037,
+              "effective_cpu_cores": 0.9845577403986441
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 28.834865000000036,
+            "system_seconds": 22.418336999999994,
+            "effective_cpu_cores": 0.9907720542015118
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 40.408202171325684,
+            "mean_absolute_error": 2.1948230928312773,
+            "rmse": 5.0410603236096385,
+            "relative_l2_error": 0.04445646713092282,
+            "exact_fraction": 4.7851469040099535e-06
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.8837201397267526,
+            "median_vector_difference_mm": 0.8159272941523692,
+            "p95_vector_difference_mm": 1.7811427166722522,
+            "max_vector_difference_mm": 10.310814238762894
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503447353692942,
+            "p95_residual_mm_valid_region": 1.611669234195796
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.8517700246342445e-06,
+            "p95_residual_mm_valid_region": 8.509906910693525e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "29dee2a478f5985e3f33bf218ed17af845af1be797c912e0e326eb74e854ad15",
+          "bytes": 62033356
+        }
+      },
+      "candidate_api_single_seconds": 49.82493603974581,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "5e5742b374cdd0d57d40fe40ca25eae8f9bd6171dc068e2cc7ee583593111ca4",
+          "bytes": 60221705
+        }
+      },
+      "candidate_maximum_rss_kib": 1833468,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "8eb7aba09d271a5c1b97760296ed221e3aaae4e6a3f89f486cebca86113cd7dc"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_auto_relative",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "9a748f0de76f152555690b103e82bc8d68f39759c9acadb1bb104ec36cf410d4",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 44.71210039407015,
+        "candidate": 59.036502845585346
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 44.095494000000144,
+              "system_seconds": 0.42198600000000397,
+              "effective_cpu_cores": 0.9956472544936462
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 29.491199999999935,
+            "system_seconds": 28.378268000000006,
+            "effective_cpu_cores": 0.9802319787024331
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561402243,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "0b7aac1b14c27a77bf06103df775465e592c085a599cb208b5d9b43c20833866",
+          "bytes": 61788459
+        }
+      },
+      "candidate_api_single_seconds": 57.05370034277439,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "a06710a36669a074755c847eac3539df876c87209e01eabc0d46bb344fd7ebcf",
+          "bytes": 66105338
+        }
+      },
+      "candidate_maximum_rss_kib": 1833468,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_tbss_coefficient_auto_relative",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "6f189d632c23cd8d4447a0cc5433058508241aa49fa949a18bb414eaf50a3ac6",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 6.7223136350512505,
+        "candidate": 8.143447518348694
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 6.489192000000003,
+              "system_seconds": 0.19297599999998738,
+              "effective_cpu_cores": 0.9940280032693051
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 5.308254999999917,
+            "system_seconds": 2.6026349999999923,
+            "effective_cpu_cores": 0.9714423752563286
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              104,
+              104,
+              72,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 2336256,
+            "finite_pair_count": 2336256,
+            "candidate_finite_count": 2336256,
+            "reference_finite_count": 2336256,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 0.5071182250976562,
+            "mean_absolute_error": 0.011985432164490353,
+            "rmse": 0.05175082983444411,
+            "relative_l2_error": 0.00289524077475046,
+            "exact_fraction": 0.0022223591935130395
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 242261,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.002472649472185368,
+            "median_vector_difference_mm": 0.0018885136102128092,
+            "p95_vector_difference_mm": 0.00659313411857732,
+            "max_vector_difference_mm": 0.05833057821337256
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 1.0,
+            "median_residual_mm_valid_region": 0.0021112285405763083,
+            "p95_residual_mm_valid_region": 0.007095277881450434
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 1.0,
+            "median_residual_mm_valid_region": 7.919910206210361e-07,
+            "p95_residual_mm_valid_region": 2.0145246560394637e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "744deceb2e9a6ab0a833b3b32de98ee71dbe379d2d934fddaacb03937e53a74b",
+          "bytes": 7721587
+        }
+      },
+      "candidate_api_single_seconds": 6.206891596317291,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "83182326f08ffedf11f5f264fd7f8ca640cb27169c9b7aba5804bf0a41e027f8",
+          "bytes": 8161142
+        }
+      },
+      "candidate_maximum_rss_kib": 1833764,
+      "input_sha256": [
+        "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
+        "9814d1c0a378f5f3f6750f7d91b6be54dab68322dc1944b2c332a398194e6dbc",
+        "bb19cb12057edd513e1b3d1d283bad4619443b993015d0cd279bd12c960a081b"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_explicit_relative",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "9a748f0de76f152555690b103e82bc8d68f39759c9acadb1bb104ec36cf410d4",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 50.71310867369175
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 27.5950949999999,
+            "system_seconds": 22.769127999999995,
+            "effective_cpu_cores": 0.9931204045104634
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561402243,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "0b7aac1b14c27a77bf06103df775465e592c085a599cb208b5d9b43c20833866",
+          "bytes": 61788459
+        }
+      },
+      "candidate_api_single_seconds": 48.86306270211935,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "a06710a36669a074755c847eac3539df876c87209e01eabc0d46bb344fd7ebcf",
+          "bytes": 66105338
+        }
+      },
+      "candidate_maximum_rss_kib": 1833764,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_60_iterations",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "9a748f0de76f152555690b103e82bc8d68f39759c9acadb1bb104ec36cf410d4",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 98.32905727624893
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 51.22559299999989,
+            "system_seconds": 46.43737899999999,
+            "effective_cpu_cores": 0.9932259568565006
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954101736298937,
+            "rmse": 0.32135020996962693,
+            "relative_l2_error": 0.020147399390166267,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 60,
+          "fnit_tolerance_mm": 0.001,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.017225419972975598,
+            "median_vector_difference_mm": 0.01007445280476502,
+            "p95_vector_difference_mm": 0.03360411398347168,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.788179420896169e-07,
+            "p95_residual_mm_valid_region": 8.595477158366112e-07
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "0b7aac1b14c27a77bf06103df775465e592c085a599cb208b5d9b43c20833866",
+          "bytes": 61788459
+        }
+      },
+      "candidate_api_single_seconds": 96.27236291766167,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "7b0a218f031ddf61c9e94f82c46b19e321500128644071597c6a3b889c9dba72",
+          "bytes": 66105189
+        }
+      },
+      "candidate_maximum_rss_kib": 1833844,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_uncompressed_output",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "b3fcbd16b71b48c5b0ff412ab886ab55c78eda2619aae281b2a99e40d9541457",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 37.294425778090954,
+        "candidate": 50.41771572828293
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 36.515903999999864,
+              "system_seconds": 0.38399899999998865,
+              "effective_cpu_cores": 0.9894214009235953
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 25.437278000000106,
+            "system_seconds": 24.20949200000001,
+            "effective_cpu_cores": 0.9847088326564105
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561402243,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "ff079f2d0acff8e64fc066257fff3fcdbfaa71ce89b78071fdf8b13e4ea6d319",
+          "bytes": 75233152
+        }
+      },
+      "candidate_api_single_seconds": 48.4700531065464,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "0bfb4eef883f8f9fdb943a1165c6b9e2f8935677873bf6b15833feaae27330c3",
+          "bytes": 75233152
+        }
+      },
+      "candidate_maximum_rss_kib": 1833892,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_relative_to_relative",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "3a5819b9b41ee2303ff2b6b32d665bf00c44e4f43a05b31b9682198ae5e93091",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 558.5264013782144,
+        "candidate": 48.515701808035374
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 553.6851819999999,
+              "system_seconds": 4.747984000000002,
+              "effective_cpu_cores": 0.9998330689865609
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 27.3334990000003,
+            "system_seconds": 20.216462999999976,
+            "effective_cpu_cores": 0.9800942834578344
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 40.408203125,
+            "mean_absolute_error": 2.194823191914283,
+            "rmse": 5.0410604203987255,
+            "relative_l2_error": 0.3798935072514416,
+            "exact_fraction": 2.6584149466721963e-07
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.8837201331262124,
+            "median_vector_difference_mm": 0.8159249445793246,
+            "p95_vector_difference_mm": 1.7811460877737164,
+            "max_vector_difference_mm": 10.310815542272673
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503445749008502,
+            "p95_residual_mm_valid_region": 1.6116695802141943
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.0,
+            "p95_residual_mm_valid_region": 3.844384073399806e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db5ef8703a00c5af26327d15447d8f1a63037afd7790949d2ee66f06304287f8",
+          "bytes": 60289459
+        }
+      },
+      "candidate_api_single_seconds": 46.559373416006565,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "d86b1bed01779f5b23ae6689f6903a2ace48cf64afdf8f523a4ec1d4120ab627",
+          "bytes": 61597878
+        }
+      },
+      "candidate_maximum_rss_kib": 1833924,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "8eb7aba09d271a5c1b97760296ed221e3aaae4e6a3f89f486cebca86113cd7dc"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_auto_to_relative",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "3a5819b9b41ee2303ff2b6b32d665bf00c44e4f43a05b31b9682198ae5e93091",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 48.258681915700436
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 27.226912000000084,
+            "system_seconds": 20.813576999999952,
+            "effective_cpu_cores": 0.9954786805805927
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 40.408203125,
+            "mean_absolute_error": 2.194823191914283,
+            "rmse": 5.0410604203987255,
+            "relative_l2_error": 0.3798935072514416,
+            "exact_fraction": 2.6584149466721963e-07
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.8837201331262124,
+            "median_vector_difference_mm": 0.8159249445793246,
+            "p95_vector_difference_mm": 1.7811460877737164,
+            "max_vector_difference_mm": 10.310815542272673
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503445749008502,
+            "p95_residual_mm_valid_region": 1.6116695802141943
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.0,
+            "p95_residual_mm_valid_region": 3.844384073399806e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db5ef8703a00c5af26327d15447d8f1a63037afd7790949d2ee66f06304287f8",
+          "bytes": 60289459
+        }
+      },
+      "candidate_api_single_seconds": 46.61394967883825,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "d86b1bed01779f5b23ae6689f6903a2ace48cf64afdf8f523a4ec1d4120ab627",
+          "bytes": 61597878
+        }
+      },
+      "candidate_maximum_rss_kib": 1833924,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "8eb7aba09d271a5c1b97760296ed221e3aaae4e6a3f89f486cebca86113cd7dc"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_absolute_to_relative",
+      "threads": 1,
+      "affinity": [
+        65
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "90a40dccccf348b06ddebb8bcb209a36ddcc91751fd65567ebde367b7cd829a1",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 546.5176488980651,
+        "candidate": 47.8866657987237
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 542.1334059999999,
+              "system_seconds": 4.285002999999961,
+              "effective_cpu_cores": 0.9998184141019684
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 27.525222000000213,
+            "system_seconds": 19.765596000000016,
+            "effective_cpu_cores": 0.9875571249577519
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 1541.1997299194336,
+            "mean_absolute_error": 32.322396783954865,
+            "rmse": 140.90479988938847,
+            "relative_l2_error": 10.618563189984037,
+            "exact_fraction": 4.253463914675514e-07
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 1.0500717985239523,
+            "median_vector_difference_mm": 0.8159267000968202,
+            "p95_vector_difference_mm": 1.7831459558766938,
+            "max_vector_difference_mm": 311.43983991246137
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503451103434003,
+            "p95_residual_mm_valid_region": 1.6116684629588436
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 1.0855247915107927e-05,
+            "p95_residual_mm_valid_region": 2.909976650712952e-05
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db5ef8703a00c5af26327d15447d8f1a63037afd7790949d2ee66f06304287f8",
+          "bytes": 60289459
+        }
+      },
+      "candidate_api_single_seconds": 45.93758652359247,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "74305972d0f70f9cdc4552f5bf56be7e228fc1834829359c3737e265a7420298",
+          "bytes": 66416972
+        }
+      },
+      "candidate_maximum_rss_kib": 1833924,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "f8502f7b9bd3fbc01a687879143ccfac104f7aff118723234ffc036528702289"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_auto_absolute",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "403b9951d4567b8c989db07b38a920b2b500abffb0a1ee1bfefe11b8c25dc354",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 76.5209627225995,
+        "candidate": 19.550135247409344
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 39.437676999999894,
+              "system_seconds": 0.3559970000000021,
+              "effective_cpu_cores": 0.9967400096209338
+            },
+            {
+              "user_seconds": 35.628879999999754,
+              "system_seconds": 0.6279799999999796,
+              "effective_cpu_cores": 0.9907020750772281
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 61.34015800000043,
+            "system_seconds": 28.039473000000044,
+            "effective_cpu_cores": 4.571816505046655
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.1095411498407368,
+            "rmse": 0.3213501970958714,
+            "relative_l2_error": 0.0028168958854361127,
+            "exact_fraction": 0.0038888357205899555
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.017226811879700547,
+            "median_vector_difference_mm": 0.010075046626851696,
+            "p95_vector_difference_mm": 0.033606932653964805,
+            "max_vector_difference_mm": 7.314282449052975
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818989623770304,
+            "p95_residual_mm_valid_region": 0.027750906720628403
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.394839110444643e-06,
+            "p95_residual_mm_valid_region": 7.271718858306718e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "3f6281fb31212262a700543da3ec83b70b77430ed85a78f0a12aec29bc0699f0",
+          "bytes": 63358064
+        }
+      },
+      "candidate_api_single_seconds": 17.899567507207394,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "5cebec9645a78f571664144f2ef722408a5ff369318b7b8378e0c5f693810699",
+          "bytes": 63661341
+        }
+      },
+      "candidate_maximum_rss_kib": 1833924,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_tbss_coefficient_auto_absolute",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "42dace71c4abd5ebfd35b6c232ab5d329cc0200c69c1df273714b80d1b012ea5",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 11.781507633626461,
+        "candidate": 3.9303587675094604
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 6.559893000000102,
+              "system_seconds": 0.20502800000002708,
+              "effective_cpu_cores": 0.9958517515023186
+            },
+            {
+              "user_seconds": 4.897728999999799,
+              "system_seconds": 0.04398799999995617,
+              "effective_cpu_cores": 0.9906402658664568
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 7.697263999999905,
+            "system_seconds": 3.408774000000051,
+            "effective_cpu_cores": 2.8257059105668514
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              104,
+              104,
+              72,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 2336256,
+            "finite_pair_count": 2336256,
+            "candidate_finite_count": 2336256,
+            "reference_finite_count": 2336256,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 0.5071258544921875,
+            "mean_absolute_error": 0.011985431996022304,
+            "rmse": 0.051750873687686404,
+            "relative_l2_error": 0.0004727707178106808,
+            "exact_fraction": 0.015257745726495726
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 242261,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.0024726599805827442,
+            "median_vector_difference_mm": 0.0018884870622188938,
+            "p95_vector_difference_mm": 0.006592445871405699,
+            "max_vector_difference_mm": 0.05833146180172736
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 1.0,
+            "median_residual_mm_valid_region": 0.002111322839785349,
+            "p95_residual_mm_valid_region": 0.007094877991828903
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 1.0,
+            "median_residual_mm_valid_region": 4.641922848722563e-06,
+            "p95_residual_mm_valid_region": 1.023053171717558e-05
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "d1a62f8224dd544f264ee024c64b8ee35a8262eff84c6d6a7106cd5cc2e4c561",
+          "bytes": 7946428
+        }
+      },
+      "candidate_api_single_seconds": 2.0263566002249718,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "1b7e2e8f705711e779a58a5d736c4731bb98200ea4c5e1bfd38d2ef44c04d8df",
+          "bytes": 7993311
+        }
+      },
+      "candidate_maximum_rss_kib": 1834044,
+      "input_sha256": [
+        "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
+        "9814d1c0a378f5f3f6750f7d91b6be54dab68322dc1944b2c332a398194e6dbc",
+        "bb19cb12057edd513e1b3d1d283bad4619443b993015d0cd279bd12c960a081b"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_explicit_absolute",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "403b9951d4567b8c989db07b38a920b2b500abffb0a1ee1bfefe11b8c25dc354",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 16.356433637440205
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 48.90324899999996,
+            "system_seconds": 28.321202000000028,
+            "effective_cpu_cores": 4.72135018621857
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.1095411498407368,
+            "rmse": 0.3213501970958714,
+            "relative_l2_error": 0.0028168958854361127,
+            "exact_fraction": 0.0038888357205899555
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.017226811879700547,
+            "median_vector_difference_mm": 0.010075046626851696,
+            "p95_vector_difference_mm": 0.033606932653964805,
+            "max_vector_difference_mm": 7.314282449052975
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818989623770304,
+            "p95_residual_mm_valid_region": 0.027750906720628403
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.394839110444643e-06,
+            "p95_residual_mm_valid_region": 7.271718858306718e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "3f6281fb31212262a700543da3ec83b70b77430ed85a78f0a12aec29bc0699f0",
+          "bytes": 63358064
+        }
+      },
+      "candidate_api_single_seconds": 14.721998080611229,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "5cebec9645a78f571664144f2ef722408a5ff369318b7b8378e0c5f693810699",
+          "bytes": 63661341
+        }
+      },
+      "candidate_maximum_rss_kib": 1834044,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_auto_to_absolute",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "edee8b6cce39280d4d695bc11ba0a64dfeeb8a6bee2290eab88e09bf646574dc",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 574.9496795162559,
+        "candidate": 18.97537838667631
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 532.9311379999999,
+              "system_seconds": 4.337984000000006,
+              "effective_cpu_cores": 0.9998402291464416
+            },
+            {
+              "user_seconds": 36.04517699999997,
+              "system_seconds": 0.9480310000000145,
+              "effective_cpu_cores": 0.9840005162567496
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 55.54993299999978,
+            "system_seconds": 36.459491999999955,
+            "effective_cpu_cores": 4.848884861479477
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 1541.1997301578522,
+            "mean_absolute_error": 32.322396684727565,
+            "rmse": 140.9047998879479,
+            "relative_l2_error": 1.242621433326827,
+            "exact_fraction": 4.838315202943397e-06
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 1.050071802257043,
+            "median_vector_difference_mm": 0.8159284070592294,
+            "p95_vector_difference_mm": 1.7831446065175558,
+            "max_vector_difference_mm": 311.4398397933622
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503459890262792,
+            "p95_residual_mm_valid_region": 1.6116684629588436
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 1.1294097215964327e-05,
+            "p95_residual_mm_valid_region": 3.013143020244518e-05
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "29dee2a478f5985e3f33bf218ed17af845af1be797c912e0e326eb74e854ad15",
+          "bytes": 62033356
+        }
+      },
+      "candidate_api_single_seconds": 17.24179871380329,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db0dba1800281b4f55be711fd5116aae9d7cfff67a91e53e72b71e5e941e3790",
+          "bytes": 63914088
+        }
+      },
+      "candidate_maximum_rss_kib": 1834084,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "f8502f7b9bd3fbc01a687879143ccfac104f7aff118723234ffc036528702289"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_absolute_to_absolute",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "edee8b6cce39280d4d695bc11ba0a64dfeeb8a6bee2290eab88e09bf646574dc",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 19.331307776272297
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 57.63458500000024,
+            "system_seconds": 37.571597,
+            "effective_cpu_cores": 4.924973680097232
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 1541.1997301578522,
+            "mean_absolute_error": 32.322396684727565,
+            "rmse": 140.9047998879479,
+            "relative_l2_error": 1.242621433326827,
+            "exact_fraction": 4.838315202943397e-06
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 1.050071802257043,
+            "median_vector_difference_mm": 0.8159284070592294,
+            "p95_vector_difference_mm": 1.7831446065175558,
+            "max_vector_difference_mm": 311.4398397933622
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503459890262792,
+            "p95_residual_mm_valid_region": 1.6116684629588436
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 1.1294097215964327e-05,
+            "p95_residual_mm_valid_region": 3.013143020244518e-05
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "29dee2a478f5985e3f33bf218ed17af845af1be797c912e0e326eb74e854ad15",
+          "bytes": 62033356
+        }
+      },
+      "candidate_api_single_seconds": 17.420728102326393,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db0dba1800281b4f55be711fd5116aae9d7cfff67a91e53e72b71e5e941e3790",
+          "bytes": 63914088
+        }
+      },
+      "candidate_maximum_rss_kib": 1834084,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "f8502f7b9bd3fbc01a687879143ccfac104f7aff118723234ffc036528702289"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_relative_to_absolute",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "b8e59aa24504a6584d52fc25e7fe7026454e6a0a5ff2a605e21eae93b1a89e23",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 572.8129206523299,
+        "candidate": 14.585054688155651
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 531.1799639999999,
+              "system_seconds": 4.5609830000000215,
+              "effective_cpu_cores": 0.9998367270478967
+            },
+            {
+              "user_seconds": 36.01594800000021,
+              "system_seconds": 0.6460710000000063,
+              "effective_cpu_cores": 0.9912809833201757
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 45.959272999999484,
+            "system_seconds": 23.076937999999984,
+            "effective_cpu_cores": 4.733352906524448
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 40.408202171325684,
+            "mean_absolute_error": 2.1948230928312773,
+            "rmse": 5.0410603236096385,
+            "relative_l2_error": 0.04445646713093808,
+            "exact_fraction": 4.7851469040099535e-06
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.8837201397267526,
+            "median_vector_difference_mm": 0.8159272941523692,
+            "p95_vector_difference_mm": 1.7811427166722522,
+            "max_vector_difference_mm": 10.310814238762894
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503447353692942,
+            "p95_residual_mm_valid_region": 1.611669234195796
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.8517700246342445e-06,
+            "p95_residual_mm_valid_region": 8.509906910693525e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "29dee2a478f5985e3f33bf218ed17af845af1be797c912e0e326eb74e854ad15",
+          "bytes": 62033356
+        }
+      },
+      "candidate_api_single_seconds": 12.713725231587887,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "5e5742b374cdd0d57d40fe40ca25eae8f9bd6171dc068e2cc7ee583593111ca4",
+          "bytes": 60221705
+        }
+      },
+      "candidate_maximum_rss_kib": 1834084,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "8eb7aba09d271a5c1b97760296ed221e3aaae4e6a3f89f486cebca86113cd7dc"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        },
+        {
+          "name": "convertwarp",
+          "sha256": "aacba44907265dc39316d54c3838e3f41c871d0474e93d5bda1fe7ba728f8c6e",
+          "bytes": 110920
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_auto_relative",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "38ad87c8fe31e47d8c4bb07ecd74f1c9e19d17b0f4460cd29b7fcd839e6bb74c",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 40.16227436065674,
+        "candidate": 18.412307672202587
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 39.59075699999994,
+              "system_seconds": 0.450019999999995,
+              "effective_cpu_cores": 0.9969748386367241
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 54.23736800000006,
+            "system_seconds": 30.128979999999956,
+            "effective_cpu_cores": 4.582062688826866
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561425347,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "0b7aac1b14c27a77bf06103df775465e592c085a599cb208b5d9b43c20833866",
+          "bytes": 61788459
+        }
+      },
+      "candidate_api_single_seconds": 16.517952732741833,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "a06710a36669a074755c847eac3539df876c87209e01eabc0d46bb344fd7ebcf",
+          "bytes": 66105338
+        }
+      },
+      "candidate_maximum_rss_kib": 1834084,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_tbss_coefficient_auto_relative",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "1cc13b7616cf1be6f71e1ea11d480c43123ba25f59a036665bf787316fd556e0",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 6.715515807271004,
+        "candidate": 3.9412509128451347
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 6.497855000000527,
+              "system_seconds": 0.20002599999997983,
+              "effective_cpu_cores": 0.9973740204361831
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 10.085562999999638,
+            "system_seconds": 3.233669999999961,
+            "effective_cpu_cores": 3.3794430485483606
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              104,
+              104,
+              72,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 2336256,
+            "finite_pair_count": 2336256,
+            "candidate_finite_count": 2336256,
+            "reference_finite_count": 2336256,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 0.5071182250976562,
+            "mean_absolute_error": 0.011985432164490353,
+            "rmse": 0.05175082983444411,
+            "relative_l2_error": 0.0028952407747506186,
+            "exact_fraction": 0.0022223591935130395
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 242261,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.002472649472185368,
+            "median_vector_difference_mm": 0.0018885136102128092,
+            "p95_vector_difference_mm": 0.00659313411857732,
+            "max_vector_difference_mm": 0.05833057821337256
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 1.0,
+            "median_residual_mm_valid_region": 0.0021112285405763083,
+            "p95_residual_mm_valid_region": 0.007095277881450434
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 1.0,
+            "median_residual_mm_valid_region": 7.919910206210361e-07,
+            "p95_residual_mm_valid_region": 2.0145246560394637e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "744deceb2e9a6ab0a833b3b32de98ee71dbe379d2d934fddaacb03937e53a74b",
+          "bytes": 7721587
+        }
+      },
+      "candidate_api_single_seconds": 2.2790613770484924,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "83182326f08ffedf11f5f264fd7f8ca640cb27169c9b7aba5804bf0a41e027f8",
+          "bytes": 8161142
+        }
+      },
+      "candidate_maximum_rss_kib": 1834620,
+      "input_sha256": [
+        "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
+        "9814d1c0a378f5f3f6750f7d91b6be54dab68322dc1944b2c332a398194e6dbc",
+        "bb19cb12057edd513e1b3d1d283bad4619443b993015d0cd279bd12c960a081b"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_explicit_relative",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "38ad87c8fe31e47d8c4bb07ecd74f1c9e19d17b0f4460cd29b7fcd839e6bb74c",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 17.319914281368256
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 52.150642999999945,
+            "system_seconds": 28.537821000000008,
+            "effective_cpu_cores": 4.658710354403984
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561425347,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "0b7aac1b14c27a77bf06103df775465e592c085a599cb208b5d9b43c20833866",
+          "bytes": 61788459
+        }
+      },
+      "candidate_api_single_seconds": 15.660616129636765,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "a06710a36669a074755c847eac3539df876c87209e01eabc0d46bb344fd7ebcf",
+          "bytes": 66105338
+        }
+      },
+      "candidate_maximum_rss_kib": 1834620,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_60_iterations",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "38ad87c8fe31e47d8c4bb07ecd74f1c9e19d17b0f4460cd29b7fcd839e6bb74c",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 31.597653917968273
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 106.34303999999975,
+            "system_seconds": 54.322631,
+            "effective_cpu_cores": 5.084734183655198
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954101736298937,
+            "rmse": 0.32135020996962693,
+            "relative_l2_error": 0.02014739939018937,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 60,
+          "fnit_tolerance_mm": 0.001,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.017225419972975598,
+            "median_vector_difference_mm": 0.01007445280476502,
+            "p95_vector_difference_mm": 0.03360411398347168,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.788179420896169e-07,
+            "p95_residual_mm_valid_region": 8.595477158366112e-07
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "0b7aac1b14c27a77bf06103df775465e592c085a599cb208b5d9b43c20833866",
+          "bytes": 61788459
+        }
+      },
+      "candidate_api_single_seconds": 29.65997189283371,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "7b0a218f031ddf61c9e94f82c46b19e321500128644071597c6a3b889c9dba72",
+          "bytes": 66105189
+        }
+      },
+      "candidate_maximum_rss_kib": 1834812,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_uncompressed_output",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "16dcc27638325c8569501014ee4dd53942ba74c11e8de5e76a196702ee2cb29a",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 35.88936688750982,
+        "candidate": 15.296363919973373
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 35.00728900000013,
+              "system_seconds": 0.36802399999999125,
+              "effective_cpu_cores": 0.9856767078360367
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 52.08984200000032,
+            "system_seconds": 28.090176999999926,
+            "effective_cpu_cores": 5.24176983624878
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561425347,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "ff079f2d0acff8e64fc066257fff3fcdbfaa71ce89b78071fdf8b13e4ea6d319",
+          "bytes": 75233152
+        }
+      },
+      "candidate_api_single_seconds": 13.402268171310425,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "0bfb4eef883f8f9fdb943a1165c6b9e2f8935677873bf6b15833feaae27330c3",
+          "bytes": 75233152
+        }
+      },
+      "candidate_maximum_rss_kib": 1834812,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "47ea34688e765afd8d6f07a400b7b6d6d38f3b77fa982eeaca6501720cbe7625"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_relative_to_relative",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "c3dc639668ad3e8b6cb909cbbf0102e155399b477fe1473bb0f9d3a634cbc896",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 535.0004542469978,
+        "candidate": 15.751047737896442
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 530.5639249999995,
+              "system_seconds": 4.349023999999986,
+              "effective_cpu_cores": 0.99983643892953
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 48.36800100000073,
+            "system_seconds": 26.249764000000027,
+            "effective_cpu_cores": 4.737320732034418
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 40.408203125,
+            "mean_absolute_error": 2.194823191914283,
+            "rmse": 5.0410604203987255,
+            "relative_l2_error": 0.37989350725156457,
+            "exact_fraction": 2.6584149466721963e-07
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.8837201331262124,
+            "median_vector_difference_mm": 0.8159249445793246,
+            "p95_vector_difference_mm": 1.7811460877737164,
+            "max_vector_difference_mm": 10.310815542272673
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503445749008502,
+            "p95_residual_mm_valid_region": 1.6116695802141943
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.0,
+            "p95_residual_mm_valid_region": 3.844384073399806e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db5ef8703a00c5af26327d15447d8f1a63037afd7790949d2ee66f06304287f8",
+          "bytes": 60289459
+        }
+      },
+      "candidate_api_single_seconds": 13.796592198312283,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "d86b1bed01779f5b23ae6689f6903a2ace48cf64afdf8f523a4ec1d4120ab627",
+          "bytes": 61597878
+        }
+      },
+      "candidate_maximum_rss_kib": 1834812,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "8eb7aba09d271a5c1b97760296ed221e3aaae4e6a3f89f486cebca86113cd7dc"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_auto_to_relative",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": true,
+      "reference_contract_sha256": "c3dc639668ad3e8b6cb909cbbf0102e155399b477fe1473bb0f9d3a634cbc896",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "reused precision oracle; native clock omitted",
+      "single_full_process_seconds": {
+        "candidate": 18.077066831290722
+      },
+      "process_cpu_usage": {
+        "official": [],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 56.73125100000016,
+            "system_seconds": 28.290613000000008,
+            "effective_cpu_cores": 4.703299755070378
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 40.408203125,
+            "mean_absolute_error": 2.194823191914283,
+            "rmse": 5.0410604203987255,
+            "relative_l2_error": 0.37989350725156457,
+            "exact_fraction": 2.6584149466721963e-07
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.8837201331262124,
+            "median_vector_difference_mm": 0.8159249445793246,
+            "p95_vector_difference_mm": 1.7811460877737164,
+            "max_vector_difference_mm": 10.310815542272673
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503445749008502,
+            "p95_residual_mm_valid_region": 1.6116695802141943
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.0,
+            "p95_residual_mm_valid_region": 3.844384073399806e-06
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db5ef8703a00c5af26327d15447d8f1a63037afd7790949d2ee66f06304287f8",
+          "bytes": 60289459
+        }
+      },
+      "candidate_api_single_seconds": 16.40545956045389,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "d86b1bed01779f5b23ae6689f6903a2ace48cf64afdf8f523a4ec1d4120ab627",
+          "bytes": 61597878
+        }
+      },
+      "candidate_maximum_rss_kib": 1834812,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "8eb7aba09d271a5c1b97760296ed221e3aaae4e6a3f89f486cebca86113cd7dc"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    },
+    {
+      "case_id": "invwarp_t1_dense_absolute_to_relative",
+      "threads": 8,
+      "affinity": [
+        65,
+        69,
+        73,
+        77,
+        81,
+        85,
+        89,
+        93
+      ],
+      "reference_reused": false,
+      "reference_contract_sha256": "2a1dd3d01fcca6e0083b5024c9cdb6791e3a7e45d23d9beebd355a32b4171dfa",
+      "timing_protocol": "single_observation",
+      "native_timing_scope": "one fresh complete native process chain",
+      "single_full_process_seconds": {
+        "official": 548.2146722227335,
+        "candidate": 18.226736202836037
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 543.9435880000001,
+              "system_seconds": 4.125981000000024,
+              "effective_cpu_cores": 0.9997353167835793
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 58.168453999999656,
+            "system_seconds": 27.72678700000006,
+            "effective_cpu_cores": 4.712595828683504
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 1541.1997299194336,
+            "mean_absolute_error": 32.322396783954865,
+            "rmse": 140.90479988938847,
+            "relative_l2_error": 10.61856318998916,
+            "exact_fraction": 4.253463914675514e-07
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 1.0500717985239523,
+            "median_vector_difference_mm": 0.8159267000968202,
+            "p95_vector_difference_mm": 1.7831459558766938,
+            "max_vector_difference_mm": 311.43983991246137
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983794093132019,
+            "median_residual_mm_valid_region": 0.7503451103434003,
+            "p95_residual_mm_valid_region": 1.6116684629588436
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 1.0855247915107927e-05,
+            "p95_residual_mm_valid_region": 2.909976650712952e-05
+          }
+        }
+      },
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "db5ef8703a00c5af26327d15447d8f1a63037afd7790949d2ee66f06304287f8",
+          "bytes": 60289459
+        }
+      },
+      "candidate_api_single_seconds": 16.58582153171301,
+      "candidate_output_metadata": {
+        "inverse_warp": {
+          "sha256": "74305972d0f70f9cdc4552f5bf56be7e228fc1834829359c3737e265a7420298",
+          "bytes": 66416972
+        }
+      },
+      "candidate_maximum_rss_kib": 1834812,
+      "input_sha256": [
+        "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "f8502f7b9bd3fbc01a687879143ccfac104f7aff118723234ffc036528702289"
+      ],
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ]
+    }
+  ]
+}

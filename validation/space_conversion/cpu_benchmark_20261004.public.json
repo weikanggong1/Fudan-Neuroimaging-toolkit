@@ -1,0 +1,3679 @@
+{
+  "schema_version": 2,
+  "status": "validated_on_real_public_templates",
+  "date": "2026-10-04",
+  "host": "nodecw10",
+  "cpu": {
+    "Architecture": "x86_64",
+    "CPU(s)": "192",
+    "Model name": "Intel(R) Xeon(R) Gold 6418H",
+    "Socket(s)": "4",
+    "Core(s) per socket": "24",
+    "Thread(s) per core": "2"
+  },
+  "versions": {
+    "CBIG": "v0.18.1-Update_stable_project_unit_test",
+    "FreeSurfer_reference": "7.1.1",
+    "MATLAB": "R2018b",
+    "Workbench": "2.0.0",
+    "FSL_template_distribution": "6.0.7.22",
+    "Python": "3.11",
+    "PyTorch": "2.5.1",
+    "NumPy": "1.26.4",
+    "Numba": "0.61.2",
+    "Nibabel": "5.4.2"
+  },
+  "privacy": "Only public group templates, HCP average-area maps and original public atlas are used. No participant-derived image is published.",
+  "source": {
+    "base_commit": "1d31e7baaebbb644ab199471f7fe6282721455fd",
+    "formal_worker_core_sha256": "270a0615d70c3dfb8438171bfe435efe293469bdd371b37fdd2fa5f3fdb2ed44",
+    "current_core_and_dependencies_sha256": {
+      "src/fnit/space_conversion.py": "91e3942b487cb91ee58e1310a7ab29aa670d31720e7abe6edb194e1a679a4afd",
+      "src/fnit/_space_conversion_cpu.py": "45911a090eff848c90db77eb547436eeba3a694a915652869181569a72881b6b",
+      "src/fnit/_hemisphere_parallel.py": "2bca5a145a335dbcfd81f5af13f2cb1db7c5f639f250caf456a143023c64a6d7",
+      "tools/benchmark_multimodal_cpu_space.py": "d95092796e1642380dc63c948e3b50c4390ad9e68ce122da62073bab3a28c200"
+    },
+    "formal_worker_freeze": "candidate_all_v8",
+    "actual_cli_freeze": "space_cli_v15",
+    "latest_source_real_input_exact_gate": {
+      "status": "complete",
+      "scope": "Correctness gate only; no new speed claims; latest source versus immutable v8 outputs on identical public inputs",
+      "records": [
+        {
+          "case_id": "space_mni2mm_to_fsaverage164k_linear",
+          "threads": 1,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                163842
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                163842
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fsaverage164k_to_mni_default_linear",
+          "threads": 1,
+          "accuracy_vs_v8": {
+            "volume": {
+              "shape": [
+                256,
+                256,
+                256
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": true
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fsaverage41k_to_fslr32k_linear",
+          "threads": 1,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_mni_ho_labels_to_fslr32k",
+          "threads": 1,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fslr32k_two_real_template_channels_to_mni2mm",
+          "threads": 1,
+          "accuracy_vs_v8": {
+            "volume": {
+              "shape": [
+                91,
+                109,
+                91,
+                2
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": true
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_mni2mm_to_fsaverage164k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                163842
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                163842
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fsaverage164k_to_mni_default_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "volume": {
+              "shape": [
+                256,
+                256,
+                256
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": true
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fsaverage41k_to_fslr32k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_mni_ho_labels_to_fslr32k",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fslr32k_two_real_template_channels_to_mni2mm",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "volume": {
+              "shape": [
+                91,
+                109,
+                91,
+                2
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": true
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fsaverage3k_to_fsaverage10k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                10242
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                10242
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fsaverage10k_to_fsaverage41k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                40962
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                40962
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fsaverage41k_to_fsaverage164k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                163842
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                163842
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fslr32k_to_fslr59k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                59292
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                59292
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fslr59k_to_fslr164k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                163842
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                163842
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fslr164k_to_fslr32k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fslr59k_to_fsaverage10k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                10242
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                10242
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fslr164k_to_fsaverage3k_linear",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                2562
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                2562
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fsaverage41k_labels_to_fslr59k",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                59292
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                59292
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fslr32k_same_density_copy",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        },
+        {
+          "case_id": "space_fsaverage41k_labels_same_density_copy",
+          "threads": 8,
+          "accuracy_vs_v8": {
+            "left": {
+              "shape": [
+                1,
+                40962
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            },
+            "right": {
+              "shape": [
+                1,
+                40962
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_affine": null
+            }
+          },
+          "numba_mask_before": 8,
+          "numba_mask_after": 8,
+          "numba_mask_restored": true
+        }
+      ],
+      "source_sha256": "91e3942b487cb91ee58e1310a7ab29aa670d31720e7abe6edb194e1a679a4afd"
+    },
+    "formal_tools_sha256": {
+      "tools/benchmark_multimodal_cpu.py": "96a148e438fbdfc5a5dc34ebb17ff42764888e16bc9f1cf9bb2bde0ae5fb648c",
+      "tools/benchmark_multimodal_cpu_space.py": "d95092796e1642380dc63c948e3b50c4390ad9e68ce122da62073bab3a28c200"
+    }
+  },
+  "protocol": {
+    "thread_budgets": [
+      1,
+      8
+    ],
+    "isolated_physical_core_affinity": [
+      66,
+      70,
+      74,
+      78,
+      82,
+      86,
+      90,
+      94
+    ],
+    "warmup_pairs": 1,
+    "measured_pairs": 3,
+    "paired_order": "Alternating official/candidate and candidate/official; actual CLI old/new additionally recorded",
+    "scope": "Full Python worker or official process chain includes startup, complete input load, computation and save; worker eagerly imports Torch. Actual module CLI is a separate protocol.",
+    "worker_inner_scope": "Timed adapter.run_case: excludes process startup and common Torch preconfiguration; includes function-specific first imports, complete input load, computation and save. No separate loaded-API repetitions were run.",
+    "cbig_internal_scope": "Original CBIG function plus MATLAB MAT serialization; MATLAB startup and Python IO bridges excluded. Different output serialization from FNIT API.",
+    "observations_scope": "20 functional variants: one same-thread observation per variant; no stable speed claim",
+    "cpu_8_is_budget_not_usage": "Original MEX k-d tree and other serial steps can use fewer than eight cores; actual per-step effective CPU cores are recorded.",
+    "physical_core_mapping": [
+      {
+        "cpu": 66,
+        "core": 66,
+        "socket": 2
+      },
+      {
+        "cpu": 70,
+        "core": 70,
+        "socket": 2
+      },
+      {
+        "cpu": 74,
+        "core": 74,
+        "socket": 2
+      },
+      {
+        "cpu": 78,
+        "core": 78,
+        "socket": 2
+      },
+      {
+        "cpu": 82,
+        "core": 82,
+        "socket": 2
+      },
+      {
+        "cpu": 86,
+        "core": 86,
+        "socket": 2
+      },
+      {
+        "cpu": 90,
+        "core": 90,
+        "socket": 2
+      },
+      {
+        "cpu": 94,
+        "core": 94,
+        "socket": 2
+      }
+    ]
+  },
+  "inputs_and_assets": {
+    "MNI152_T1-and-brain_2mm_two-real-template-channels.nii.gz": {
+      "bytes": 2483137,
+      "sha256": "9492c9af901d959745400974549312d5d24b9d5130b562f608574c58f7176915"
+    },
+    "MNI152_T1_0p5mm_from_official1mm.nii.gz": {
+      "bytes": 196951537,
+      "sha256": "2ac8c752f1ccbe7a43f2cd92016a725b74b44a0a95d8640ffa9e6d0f1010c185"
+    },
+    "L.fsaverage.41k.label.gii": {
+      "bytes": 17306,
+      "sha256": "1894cd2407e23825edf5ad39054c719cfed506fd688b972414d9f6deb1d76ca4"
+    },
+    "R.fsaverage.41k.label.gii": {
+      "bytes": 17122,
+      "sha256": "a61fa5f55a901dc0949c38fb78fbd4423bfb4d55b6b601b50c3198bd7ef18a30"
+    },
+    "L.fsLR.32k.func.gii": {
+      "bytes": 297823,
+      "sha256": "7d4bb6c9117f59b3d25b4de0389814b92e5eaae73ccf619603b6591ca6a9d2f3"
+    },
+    "R.fsLR.32k.func.gii": {
+      "bytes": 297843,
+      "sha256": "c5c8914301c1eb83f82d4218a4e30935a403134c1678ae163987989269fd0bc9"
+    },
+    "fs_LR.L.midthickness_va_avg.164k_fs_LR.shape.gii": {
+      "bytes": 761760,
+      "sha256": "5334b611efd10601ccaa5a3469610723387f0caa9cc040f9ec4928870d2968f0"
+    },
+    "fs_LR.L.midthickness_va_avg.32k_fs_LR.shape.gii": {
+      "bytes": 150803,
+      "sha256": "e06c0f3e6069f9244e4dd74a4265323be3324a96c0f2bf9edd5ad9734d170f6d"
+    },
+    "fs_LR.L.midthickness_va_avg.59k_fs_LR.shape.gii": {
+      "bytes": 274239,
+      "sha256": "72f2c95a137d57010da03414d70208b327ac8a573a315d6ceab38ce2e950312e"
+    },
+    "fs_LR.R.midthickness_va_avg.164k_fs_LR.shape.gii": {
+      "bytes": 761361,
+      "sha256": "97006956e0a29913c3507fc89bb4cfcb4558b8f94be8c8f54b889d103290024b"
+    },
+    "fs_LR.R.midthickness_va_avg.32k_fs_LR.shape.gii": {
+      "bytes": 151292,
+      "sha256": "cb4b7680b8637c81398a99d4a034ee1680510ad6528d6948b4aa9c67b3e81867"
+    },
+    "fs_LR.R.midthickness_va_avg.59k_fs_LR.shape.gii": {
+      "bytes": 274688,
+      "sha256": "1b7395b8fd83f5b6e14f4209ed1aaf72a7351b360845ac73cee4e31a0dfd3ebc"
+    },
+    "fsaverage.L.midthickness_va_avg.164k_fsavg_L.shape.gii": {
+      "bytes": 771660,
+      "sha256": "fbbccfe4bbcec0619fa6549cfe3f3460c761b0becc7097092379d98a684a52e0"
+    },
+    "fsaverage.R.midthickness_va_avg.164k_fsavg_R.shape.gii": {
+      "bytes": 772033,
+      "sha256": "2cda969b6295e96f510aad9d1df329afc36859aba7ee95564b1217b43f30ee03"
+    },
+    "fsaverage4.L.midthickness_va_avg.3k_fsavg_L.shape.gii": {
+      "bytes": 13078,
+      "sha256": "7c8f29373e1ad8a30f4159b743cf724cc01e4e601b7af0dfd7ff22bb560a23be"
+    },
+    "fsaverage4.R.midthickness_va_avg.3k_fsavg_R.shape.gii": {
+      "bytes": 13103,
+      "sha256": "fe6da9656d50de88b3177db6864b9b88478859471c4966fa7a58ae45b1ab9e52"
+    },
+    "fsaverage5.L.midthickness_va_avg.10k_fsavg_L.shape.gii": {
+      "bytes": 49219,
+      "sha256": "d3c03ce6efe36e0bc85d85a6f24bdfcc51da7427b19e28b79783ae8062e88e02"
+    },
+    "fsaverage5.R.midthickness_va_avg.10k_fsavg_R.shape.gii": {
+      "bytes": 49228,
+      "sha256": "c039f3035e0730feb49774f8956c80ecd85288ad0a9fbc2706c538dc73ddde8a"
+    },
+    "fsaverage6.L.midthickness_va_avg.41k_fsavg_L.shape.gii": {
+      "bytes": 193823,
+      "sha256": "0b757ddcb61fa9570220a655977a3c3eaab53eee323331c832bec979ad35add4"
+    },
+    "fsaverage6.R.midthickness_va_avg.41k_fsavg_R.shape.gii": {
+      "bytes": 193800,
+      "sha256": "56495d5114d9b31c0a58bddfd5a961ed51c974c96ca745afeb119406aca18384"
+    },
+    "HarvardOxford-cort-maxprob-thr25-2mm.nii.gz": {
+      "bytes": 27867,
+      "sha256": "7397ffdbae7559e0f0aa6237f998dc0f6aca3f9db9009f6ffa637c0c62b686ca"
+    },
+    "MNI152_T1_1mm.nii.gz": {
+      "bytes": 10963667,
+      "sha256": "d1f03e160c2548592a01d98d44d7e0ffa8a8ef58bc9b07d26369e214ba170edb"
+    },
+    "MNI152_T1_2mm.nii.gz": {
+      "bytes": 1406977,
+      "sha256": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92"
+    },
+    "MNI152_T1_2mm_brain.nii.gz": {
+      "bytes": 414185,
+      "sha256": "09c925ad165dfbe6b41b572876d67e9bbf8c5e26517e7817f9b43a8256227f53"
+    },
+    "CBIG_RF_find_nearestVertex_fsaverage2MNI_mapping.m": {
+      "bytes": 2088,
+      "sha256": "028f92982ed30d51e512aa3df948a069b268708d866c9b707df3e59d914d798f"
+    },
+    "CBIG_RF_projectMNI2fsaverage.m": {
+      "bytes": 6019,
+      "sha256": "d8c1ebf3e636683189d01761eead67ccda08f88a73597db17e9c31ef9c9d7709"
+    },
+    "CBIG_RF_projectVol2fsaverage_single.m": {
+      "bytes": 5334,
+      "sha256": "0704def25a5a56c455a7351766cbd76a7ef7fc5a43941d01c5a7ec627c8c3d99"
+    },
+    "CBIG_RF_projectfsaverage2Vol_single.m": {
+      "bytes": 7953,
+      "sha256": "4f8d7e67f608c5144f4c89a0f527559b10e94d57c7958f1c3e1862037543d54d"
+    },
+    "CBIG_ReadNCAvgMesh.m": {
+      "bytes": 1652,
+      "sha256": "ef64172f84842973f14e0eb39c63e7eec106886d976cc4ab30a7f5b09088f489"
+    },
+    "MARS2_readSbjMesh.m": {
+      "bytes": 14509,
+      "sha256": "2d31465814386122a1442a7a79fc8c433e121db3c09365457f8e2b252c8987ce"
+    },
+    "MARS_calculateSurfaceArea.mexa64": {
+      "bytes": 14120,
+      "sha256": "e629a2cad5983b29b83a01bea5b3c73de41d92ce3a379b75df1089861ae6d947"
+    },
+    "MARS_computeFoldingEnergy.m": {
+      "bytes": 2272,
+      "sha256": "34b3ad32d2ba893271b9dfe6ff8aa9d50a5cbdec21b797bc5378d9cac7fb60bd"
+    },
+    "MARS_computeFoldingEnergyAux.mexa64": {
+      "bytes": 14216,
+      "sha256": "d44fe00573508acd29e07cc599fa63057bbb747d2dfc0796da0b628cb3f6f0d6"
+    },
+    "MARS_computeFoldingEnergyFast.m": {
+      "bytes": 2431,
+      "sha256": "643926140d75a3ff9ecfe9b173eaad82cb8e73fd8b86ae72a464d4ddbb9adba2"
+    },
+    "MARS_computeFoldingEnergyFastAux.mexa64": {
+      "bytes": 14224,
+      "sha256": "3b801711578830987d4c2031e915217c2f02cffb6832639f543c5bfaf13b67fa"
+    },
+    "MARS_computeFoldingGradFast.m": {
+      "bytes": 2680,
+      "sha256": "769d1aa9c26aafe3b1cb7448d25c5ca34352337289ddde55a3609d1252ab769b"
+    },
+    "MARS_computeFoldingGradFastAux.mexa64": {
+      "bytes": 14296,
+      "sha256": "bda7c7d7cfff6360cdd05631d28730acef6e223078a36464c1b32e47d593d55c"
+    },
+    "MARS_computeFoldingGradFastAux2.mexa64": {
+      "bytes": 14216,
+      "sha256": "c75d68002d2213a0ff8e886dda4bf6dbf54ceaa268b23781634a3a5dc31608e6"
+    },
+    "MARS_computeMeshFaceAreas.mexa64": {
+      "bytes": 9944,
+      "sha256": "ba4da8d5573050a98be7b99c1d9656dc7f5f555c755d3ffc6e1d70cc65867d8e"
+    },
+    "MARS_computeVertexDistSq2Nbors.mexa64": {
+      "bytes": 9896,
+      "sha256": "280da491d3ce3f7ce4e2bc08d7d4db0499c4aaffd67d6dd81be1247aac4b49ac"
+    },
+    "MARS_convertFaces2FacesOfVert.mexa64": {
+      "bytes": 10056,
+      "sha256": "0e229dc14b0dc125ab21ac6bd1f44168e8315c65cd8056a4fb4de5d3731d586b"
+    },
+    "MARS_convertFaces2VertNbors.mexa64": {
+      "bytes": 14184,
+      "sha256": "82926bc0f29247137dfd993c89f03fc3ade5d41108cc437def714eb61c280f3b"
+    },
+    "MARS_findNV_kdTree.m": {
+      "bytes": 2130,
+      "sha256": "2ebae0f310df216b2ed7f93f42fced5bd004ff181ea7ef26c97de1b252be5e50"
+    },
+    "MARS_readUniformMesh.m": {
+      "bytes": 4624,
+      "sha256": "e3abbf53bf9f216b21f69c6fb439409dd1647bb1075c5780bcbac68282bf3fb5"
+    },
+    "MARS_reorganizeCT.m": {
+      "bytes": 3064,
+      "sha256": "9d2cd9ae10ef076491ec6f94163e27925f7f31158cbaf608a05ee37e3e30d30c"
+    },
+    "MARS_reorganizeLabels.m": {
+      "bytes": 3589,
+      "sha256": "138351c87bb891a173e790556ff2c94e1c749fbaa2edd2d390ee4986a7685da9"
+    },
+    "MARS_simpleUnfoldMesh.m": {
+      "bytes": 3150,
+      "sha256": "a71c30b1e12a13160c00bfb8418a04248908638e685ec909a428b89196b1d121"
+    },
+    "MARS_unfoldMesh.m": {
+      "bytes": 6180,
+      "sha256": "b55f17b8bf7dc8536312984011a9b3104724d99299edc2435bdfd6bb023d294a"
+    },
+    "MARS_warpPointbyTangentVec.m": {
+      "bytes": 3401,
+      "sha256": "35aec751cec3c9d0d5b7e45e2b3a92bae3564f3c687c1757d31d80066cc1fc7c"
+    },
+    "allSub_fsaverage_to_FSL_MNI152_FS4.5.0_RF_ANTs_avgMapping.prop.mat": {
+      "bytes": 73572230,
+      "sha256": "a1df5fffedbc74a651ba3e2f6d3290d329918c8033918013118c0ccef4ba6992"
+    },
+    "fread3.m": {
+      "bytes": 867,
+      "sha256": "16943ec97bbb3718b641747e7451ad6e8cda121275d8e2894f81aa38dc5a58d2"
+    },
+    "kdtree.mexa64": {
+      "bytes": 13658,
+      "sha256": "5c57492ba877ffcb285180024fbed6ebc47f4c5f7f22b7fd13a2931e2a6dd278"
+    },
+    "kdtreeidx.mexa64": {
+      "bytes": 13664,
+      "sha256": "5451786028af01195b6c282a84b06db0e696fd4eb581f88e14e6aa087cd87bd1"
+    },
+    "read_annotation.m": {
+      "bytes": 4800,
+      "sha256": "bfbfb48edd68d3c0401119bc80568144b7c0bca20e1fe2a6b9c0cb1b841d823c"
+    },
+    "read_curv.m": {
+      "bytes": 1540,
+      "sha256": "7a42c516994cfec27995c50db258c68fb08569edb233b61bf596f59f71046f7b"
+    },
+    "read_surf.m": {
+      "bytes": 2127,
+      "sha256": "51caec223cc21af240c27bbbeddcc051e78a9926518fb1c57c709ef4d0edf117"
+    },
+    "FSL_MNI152_FS4.5.0_cortex_estimate.nii.gz": {
+      "bytes": 207362,
+      "sha256": "e4d788be332be76d7429855aba8f20c02693625f400905573e9063b4001f0e2b"
+    },
+    "allSub_fsaverage_to_FSL_MNI152_FS4.5.0_RF_ANTs_avgMapping.vertex.mat": {
+      "bytes": 7002380,
+      "sha256": "91da461449b2d85e82b8e7f945bdb3d57121a48a2e3a8610e4c742e3bb26a89e"
+    },
+    "lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat": {
+      "bytes": 3584268,
+      "sha256": "3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd"
+    },
+    "rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat": {
+      "bytes": 3573633,
+      "sha256": "c44a8a824ade7c7c2203f2cd91cc6dced7c064d4371a45270cc50bb02d182319"
+    },
+    "L.sphere.32k_fs_LR.surf.gii": {
+      "bytes": 562891,
+      "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8"
+    },
+    "L.sphere.59k_fs_LR.surf.gii": {
+      "bytes": 1208350,
+      "sha256": "65d38a5f938c2667f94f8978af4750ed66f76ce9060884bafccc3e9cdc52d178"
+    },
+    "R.sphere.32k_fs_LR.surf.gii": {
+      "bytes": 553052,
+      "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c"
+    },
+    "R.sphere.59k_fs_LR.surf.gii": {
+      "bytes": 1099211,
+      "sha256": "6df50dfa10d872f0aca5b4e9c96b6dbf0546131fec469f918445433cab805d60"
+    },
+    "fsaverage.L_LR.spherical_std.164k_fs_LR.surf.gii": {
+      "bytes": 3614784,
+      "sha256": "6968ef7d9638de54ade78cdbb7f0c6f25025c60477f72456ab2fb77c53a85cfa"
+    },
+    "fsaverage.R_LR.spherical_std.164k_fs_LR.surf.gii": {
+      "bytes": 3492005,
+      "sha256": "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1"
+    },
+    "fs_LR-deformed_to-fsaverage.L.sphere.164k_fs_LR.surf.gii": {
+      "bytes": 3616474,
+      "sha256": "1f3b09b813fe32c934a565264dccc357629834259fa34f39de5c8c00dc0fec92"
+    },
+    "fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii": {
+      "bytes": 720487,
+      "sha256": "31987d139b6cdf1040188d1795bf23c213c57f8e84fb45f2c04823d996b0defc"
+    },
+    "fs_LR-deformed_to-fsaverage.L.sphere.59k_fs_LR.surf.gii": {
+      "bytes": 1395631,
+      "sha256": "6d25494ddb49de4b782fa3fb91b05075fd64325cb329020fc166adc330c23122"
+    },
+    "fs_LR-deformed_to-fsaverage.R.sphere.164k_fs_LR.surf.gii": {
+      "bytes": 3495547,
+      "sha256": "f024337147073263dc11e56603afcb9dae2c48cf8869809388d5985eb95a585a"
+    },
+    "fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii": {
+      "bytes": 707932,
+      "sha256": "8c1f67fa8fb3024ad3b292be995d5c9bae07dc4dbdd53fbac48e511e1366553d"
+    },
+    "fs_LR-deformed_to-fsaverage.R.sphere.59k_fs_LR.surf.gii": {
+      "bytes": 1277400,
+      "sha256": "41a471a8fc5bff1330289646c61d95b7fe3e6c57297092e6af513c8c822ad6b6"
+    },
+    "fsaverage4_std_sphere.L.3k_fsavg_L.surf.gii": {
+      "bytes": 46973,
+      "sha256": "5c3281b8d0afef386ee3e79aa51fa075d345986a0846846a11a4f3ded8d434d9"
+    },
+    "fsaverage4_std_sphere.R.3k_fsavg_R.surf.gii": {
+      "bytes": 46974,
+      "sha256": "b12139d0bb2e606596ab4ed27b52e8cc3e090fb61577915bccd5b430bbb8eb8d"
+    },
+    "fsaverage5_std_sphere.L.10k_fsavg_L.surf.gii": {
+      "bytes": 204479,
+      "sha256": "38b13855694098fde897ef3984f0420bd6bce4eac1562ce0c285bcaf565d56b8"
+    },
+    "fsaverage5_std_sphere.R.10k_fsavg_R.surf.gii": {
+      "bytes": 204480,
+      "sha256": "a2b9f152da32bf387e33e58f0a6a8931ebca69be66e198178298d66d68d98808"
+    },
+    "fsaverage6_std_sphere.L.41k_fsavg_L.surf.gii": {
+      "bytes": 839203,
+      "sha256": "7fd8185a51bdae23f565b07d28150ce0100aec60c6e72fc70e740462633a3f2a"
+    },
+    "fsaverage6_std_sphere.R.41k_fsavg_R.surf.gii": {
+      "bytes": 839204,
+      "sha256": "f0a093489fc2248905148c904b883302c3b806105845328fd49b96fe4e7ce658"
+    },
+    "fsaverage_std_sphere.L.164k_fsavg_L.surf.gii": {
+      "bytes": 4093613,
+      "sha256": "9bf5b673cc1c4738b1137ac53ff724ff0ef45e12f5550448efa2da50bb521c32"
+    },
+    "fsaverage_std_sphere.R.164k_fsavg_R.surf.gii": {
+      "bytes": 4093614,
+      "sha256": "a2fada23394286212f38cd44303bce0b3252759e09fe693f92d463286ca28b45"
+    },
+    "build-stamp.txt": {
+      "bytes": 55,
+      "sha256": "47f15a28d51de3e1514d997c4b892289ac55da2053067023d1526d9596455f46"
+    },
+    "MRIread.m": {
+      "bytes": 8832,
+      "sha256": "2a82dcbeb7beebc9eaadd2b776bf9548bd5eb6af6e80d014939127d6ac8a9c66"
+    },
+    "MRIwrite.m": {
+      "bytes": 6659,
+      "sha256": "bdb237bf22332a5546937c646419142df998baec9d8acb15d69c97fc198a0296"
+    },
+    "lh.sphere": {
+      "bytes": 5898546,
+      "sha256": "fddcf0eeecc6e0f62142164f7c0ac24fda1f0be8cb653d3f037970184c5ba98f"
+    },
+    "rh.sphere": {
+      "bytes": 5898546,
+      "sha256": "fddcf0eeecc6e0f62142164f7c0ac24fda1f0be8cb653d3f037970184c5ba98f"
+    },
+    "wb_command": {
+      "bytes": 668,
+      "sha256": "39f66b70bd89f2adc71c1a04948b4747ce0f42243eb51e019e9b80789dc089eb"
+    },
+    "matlab": {
+      "bytes": 58216,
+      "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2"
+    },
+    "MATLAB": {
+      "bytes": 60264,
+      "sha256": "c6973970abbcb72791a68f4c701aae6279222af03cb909d088c3324c525d5129"
+    },
+    "wb_command.private.sh": {
+      "bytes": 257,
+      "sha256": "93675fec64c55b84f5a0defc09268a87501c779f99100b8247b49894eb8bea0d"
+    }
+  },
+  "multiframe_scope": "Actual official T1 and brain-masked T1 channels from the same template, not independent scans",
+  "half_mm_scope": "Cubic resampling of original official 1mm template, not independent scan",
+  "paired_full_process": [
+    {
+      "case_id": "space_mni2mm_to_fsaverage164k_linear",
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 9.088661074638367,
+        "candidate": 2.2594267576932907
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          12.465114839375019,
+          6.653376504778862,
+          8.625217288732529
+        ],
+        "candidate": [
+          2.3117192313075066,
+          2.220408909022808,
+          2.1156535148620605
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 8.625217288732529,
+        "candidate": 2.220408909022808
+      },
+      "worker_run_case_seconds": [
+        0.39080604910850525,
+        0.4051670581102371,
+        0.41976141929626465
+      ],
+      "median_worker_run_case_seconds": 0.4051670581102371,
+      "cbig_function_and_mat_save_seconds": [
+        0.950898,
+        0.759704,
+        0.666248
+      ],
+      "median_cbig_function_and_mat_save_seconds": 0.759704,
+      "official_phases": [
+        {
+          "name": "MATLAB forward: startup + original CBIG + MAT save",
+          "wall_seconds": [
+            12.023075573146345,
+            6.179421976208687,
+            8.07510370761156
+          ],
+          "median_wall_seconds": 8.07510370761156,
+          "effective_cpu_cores": [
+            0.5412198368388975,
+            0.9406696973244049,
+            0.7587876542346379
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MAT to GIFTI IO bridge",
+          "wall_seconds": [
+            0.44203926622867634,
+            0.47395452857017356,
+            0.5501135811209699
+          ],
+          "median_wall_seconds": 0.47395452857017356,
+          "effective_cpu_cores": [
+            0.8545643540286325,
+            0.8276089294543468,
+            0.8730578856485037
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.01708984375,
+          "mean_absolute_error": 0.0012119115472146945,
+          "rmse": 0.001704072979620225,
+          "relative_l2_error": 2.847569723662847e-07,
+          "exact_fraction": 0.154777163364705
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.01611328125,
+          "mean_absolute_error": 0.0009866251313193504,
+          "rmse": 0.0013669115219745367,
+          "relative_l2_error": 2.275672693016132e-07,
+          "exact_fraction": 0.18182151096788368
+        }
+      }
+    },
+    {
+      "case_id": "space_fsaverage164k_to_mni_default_linear",
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 37.61028443276882,
+        "candidate": 6.396487928926945
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          36.909193985164165,
+          33.60911598801613,
+          53.533063352108
+        ],
+        "candidate": [
+          5.101061835885048,
+          4.909259602427483,
+          5.196343213319778
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 36.909193985164165,
+        "candidate": 5.101061835885048
+      },
+      "worker_run_case_seconds": [
+        3.2735681012272835,
+        3.0751421079039574,
+        3.2828411757946014
+      ],
+      "median_worker_run_case_seconds": 3.2735681012272835,
+      "cbig_function_and_mat_save_seconds": [
+        36.751703,
+        26.339636,
+        24.780727
+      ],
+      "median_cbig_function_and_mat_save_seconds": 26.339636,
+      "official_phases": [
+        {
+          "name": "GIFTI to MAT IO bridge",
+          "wall_seconds": [
+            0.43103405833244773,
+            0.43277367949486645,
+            0.42991038411855276
+          ],
+          "median_wall_seconds": 0.43103405833244773,
+          "effective_cpu_cores": [
+            0.7844786124515638,
+            0.817069098131688,
+            0.8530289417221216
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MATLAB reverse: startup + original CBIG + MAT save",
+          "wall_seconds": [
+            35.45983995497226,
+            32.20993823558091,
+            52.14234255999326
+          ],
+          "median_wall_seconds": 35.45983995497226,
+          "effective_cpu_cores": [
+            0.8913639497565724,
+            0.9324969138506732,
+            0.5773925474360943
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MAT to NIfTI IO bridge",
+          "wall_seconds": [
+            1.018319971859459,
+            0.966404072940338,
+            0.9608104079961816
+          ],
+          "median_wall_seconds": 0.966404072940338,
+          "effective_cpu_cores": [
+            0.9092996558922433,
+            0.9224392000829542,
+            0.9167521424304748
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "volume": {
+          "status": "compared",
+          "shape": [
+            256,
+            256,
+            256
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "space_fsaverage41k_to_fslr32k_linear",
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 2.513719826936722,
+        "candidate": 4.426556445658207
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          2.367077186703682,
+          2.4978273659944534,
+          2.431066945195198
+        ],
+        "candidate": [
+          4.250436097383499,
+          4.447302579879761,
+          4.270494155585766
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 2.431066945195198,
+        "candidate": 4.270494155585766
+      },
+      "worker_run_case_seconds": [
+        2.5449209809303284,
+        2.6751461923122406,
+        2.5344536006450653
+      ],
+      "median_worker_run_case_seconds": 2.5449209809303284,
+      "cbig_function_and_mat_save_seconds": [],
+      "median_cbig_function_and_mat_save_seconds": null,
+      "official_phases": [
+        {
+          "name": "Workbench left metric resample",
+          "wall_seconds": [
+            1.1677014827728165,
+            1.329312793910496,
+            1.2348254546523203
+          ],
+          "median_wall_seconds": 1.2348254546523203,
+          "effective_cpu_cores": [
+            0.9878783379299881,
+            0.9864171969206997,
+            0.9850056098353523
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench right metric resample",
+          "wall_seconds": [
+            1.199375703930844,
+            1.1685145720839392,
+            1.1962414905428778
+          ],
+          "median_wall_seconds": 1.1962414905428778,
+          "effective_cpu_cores": [
+            0.9880540318735059,
+            0.9876273925637363,
+            0.988029598825914
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "space_mni_ho_labels_to_fslr32k",
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 104.99394527822733,
+        "candidate": 8.326266020536423
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          46.538522094488144,
+          13.100206762552261,
+          14.912464901804924
+        ],
+        "candidate": [
+          8.670731969177723,
+          8.443779274821281,
+          8.532383225858212
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 14.912464901804924,
+        "candidate": 8.532383225858212
+      },
+      "worker_run_case_seconds": [
+        6.999965034425259,
+        6.69928202778101,
+        6.80075179040432
+      ],
+      "median_worker_run_case_seconds": 6.80075179040432,
+      "cbig_function_and_mat_save_seconds": [
+        0.666584,
+        2.490587,
+        0.533699
+      ],
+      "median_cbig_function_and_mat_save_seconds": 0.666584,
+      "official_phases": [
+        {
+          "name": "MATLAB nearest forward: startup + original CBIG + MAT save",
+          "wall_seconds": [
+            39.43634831160312,
+            6.013319812715069,
+            7.866732768714428
+          ],
+          "median_wall_seconds": 7.866732768714428,
+          "effective_cpu_cores": [
+            0.15692271888620132,
+            0.9291499827076913,
+            0.7814175440720574
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MAT to GIFTI IO bridge",
+          "wall_seconds": [
+            0.4544162750244097,
+            0.36802394688129425,
+            0.43592279404400913
+          ],
+          "median_wall_seconds": 0.43592279404400913,
+          "effective_cpu_cores": [
+            0.8095638739616358,
+            0.8425919091074762,
+            0.8238362501496822
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench left label resample",
+          "wall_seconds": [
+            3.3370314463973045,
+            3.254671424627297,
+            3.3259599879383828
+          ],
+          "median_wall_seconds": 3.3259599879383828,
+          "effective_cpu_cores": [
+            0.9945848738054871,
+            0.9955176966507617,
+            0.9960453559314978
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench right label resample",
+          "wall_seconds": [
+            3.310726061463349,
+            3.4641915783286166,
+            3.28384935110806
+          ],
+          "median_wall_seconds": 3.310726061463349,
+          "effective_cpu_cores": [
+            0.9958912150353677,
+            0.9959258666821627,
+            0.9959616444939525
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "space_fslr32k_two_real_template_channels_to_mni2mm",
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 70.7573726400733,
+        "candidate": 10.37615604698658
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          74.08280032128096,
+          91.48465082794428,
+          75.59360937029123
+        ],
+        "candidate": [
+          10.139062829315662,
+          10.190799981355667,
+          10.247378319501877
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 75.59360937029123,
+        "candidate": 10.190799981355667
+      },
+      "worker_run_case_seconds": [
+        8.315506249666214,
+        8.291454412043095,
+        8.305655732750893
+      ],
+      "median_worker_run_case_seconds": 8.305655732750893,
+      "cbig_function_and_mat_save_seconds": [
+        50.988313,
+        52.004987,
+        53.593118
+      ],
+      "median_cbig_function_and_mat_save_seconds": 52.004987,
+      "official_phases": [
+        {
+          "name": "Workbench left to fsaverage164k",
+          "wall_seconds": [
+            3.4182304218411304,
+            3.2312381863594197,
+            3.237403258681269
+          ],
+          "median_wall_seconds": 3.237403258681269,
+          "effective_cpu_cores": [
+            0.9932136167026921,
+            0.9948248363645791,
+            0.9940164208368848
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench right to fsaverage164k",
+          "wall_seconds": [
+            3.2419346421956803,
+            3.362930960953264,
+            3.3334368690848204
+          ],
+          "median_wall_seconds": 3.3334368690848204,
+          "effective_cpu_cores": [
+            0.9919691033073773,
+            0.9952146026367734,
+            0.9950201939509358
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "GIFTI to MAT IO bridge",
+          "wall_seconds": [
+            0.4162819758057858,
+            0.456810139119659,
+            0.38248296827074485
+          ],
+          "median_wall_seconds": 0.4162819758057858,
+          "effective_cpu_cores": [
+            0.8092951883105053,
+            0.8386000379461834,
+            0.840547231301654
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MATLAB reverse 2 frames: startup + original CBIG + MAT save",
+          "wall_seconds": [
+            64.78877725452183,
+            82.21879412978883,
+            66.65529175102712
+          ],
+          "median_wall_seconds": 66.65529175102712,
+          "effective_cpu_cores": [
+            0.8670865137538796,
+            0.7224621283818939,
+            0.823434412454646
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MAT to NIfTI IO bridge",
+          "wall_seconds": [
+            1.6225931420922126,
+            1.521128550171837,
+            1.3929291069507148
+          ],
+          "median_wall_seconds": 1.521128550171837,
+          "effective_cpu_cores": [
+            0.9318503577861704,
+            0.9377399430435223,
+            0.9464508950394317
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench custom 2mm grid resample",
+          "wall_seconds": [
+            0.5949828848242465,
+            0.6937488615513141,
+            0.5920654162764988
+          ],
+          "median_wall_seconds": 0.5949828848242465,
+          "effective_cpu_cores": [
+            0.9654008790012363,
+            0.9710214132728786,
+            0.9722591189672897
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "volume": {
+          "status": "compared",
+          "shape": [
+            91,
+            109,
+            91,
+            2
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "space_mni2mm_to_fsaverage164k_linear",
+      "threads": 8,
+      "affinity": [
+        66,
+        70,
+        74,
+        78,
+        82,
+        86,
+        90,
+        94
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 24.132177606225014,
+        "candidate": 2.07763759046793
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          5.515752948820591,
+          4.9342773631215096,
+          4.999569326639175
+        ],
+        "candidate": [
+          2.1578011214733124,
+          2.1781087145209312,
+          2.034115046262741
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 4.999569326639175,
+        "candidate": 2.1578011214733124
+      },
+      "worker_run_case_seconds": [
+        0.5260026305913925,
+        0.44931964576244354,
+        0.45520318299531937
+      ],
+      "median_worker_run_case_seconds": 0.45520318299531937,
+      "cbig_function_and_mat_save_seconds": [
+        0.488337,
+        0.471976,
+        0.480979
+      ],
+      "median_cbig_function_and_mat_save_seconds": 0.480979,
+      "official_phases": [
+        {
+          "name": "MATLAB forward: startup + original CBIG + MAT save",
+          "wall_seconds": [
+            5.064501501619849,
+            4.492711655795554,
+            4.5574390217662275
+          ],
+          "median_wall_seconds": 4.5574390217662275,
+          "effective_cpu_cores": [
+            1.2980689210768912,
+            1.4024354293630326,
+            1.3831535583677401
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MAT to GIFTI IO bridge",
+          "wall_seconds": [
+            0.45125144720084104,
+            0.4415657073259683,
+            0.4421303048730226
+          ],
+          "median_wall_seconds": 0.4421303048730226,
+          "effective_cpu_cores": [
+            0.8632083119429816,
+            0.8625284837141498,
+            0.864215811014706
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.01708984375,
+          "mean_absolute_error": 0.0012119115472146945,
+          "rmse": 0.001704072979620225,
+          "relative_l2_error": 2.847569723662847e-07,
+          "exact_fraction": 0.154777163364705
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.01611328125,
+          "mean_absolute_error": 0.0009866251313193504,
+          "rmse": 0.0013669115219745367,
+          "relative_l2_error": 2.275672693016132e-07,
+          "exact_fraction": 0.18182151096788368
+        }
+      }
+    },
+    {
+      "case_id": "space_fsaverage164k_to_mni_default_linear",
+      "threads": 8,
+      "affinity": [
+        66,
+        70,
+        74,
+        78,
+        82,
+        86,
+        90,
+        94
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 27.201107278466225,
+        "candidate": 4.350981831550598
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          34.83204934746027,
+          27.831273913383484,
+          34.41376280039549
+        ],
+        "candidate": [
+          4.398183450102806,
+          5.6260851547122,
+          4.58023975789547
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 34.41376280039549,
+        "candidate": 4.58023975789547
+      },
+      "worker_run_case_seconds": [
+        2.620259292423725,
+        3.542257383465767,
+        2.6662152111530304
+      ],
+      "median_worker_run_case_seconds": 2.6662152111530304,
+      "cbig_function_and_mat_save_seconds": [
+        21.698351,
+        21.15304,
+        22.372832
+      ],
+      "median_cbig_function_and_mat_save_seconds": 21.698351,
+      "official_phases": [
+        {
+          "name": "GIFTI to MAT IO bridge",
+          "wall_seconds": [
+            0.3762076646090261,
+            0.3546105995774269,
+            0.3638625517487187
+          ],
+          "median_wall_seconds": 0.3638625517487187,
+          "effective_cpu_cores": [
+            0.8034684788099212,
+            0.8513451102696,
+            0.8379895060226281
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MATLAB reverse: startup + original CBIG + MAT save",
+          "wall_seconds": [
+            33.6217339038849,
+            26.580265253782233,
+            33.197556816041406
+          ],
+          "median_wall_seconds": 33.197556816041406,
+          "effective_cpu_cores": [
+            0.8601847270184414,
+            1.1209992344135884,
+            0.8844467730773564
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MAT to NIfTI IO bridge",
+          "wall_seconds": [
+            0.8341077789664738,
+            0.8963980600237691,
+            0.8523434326052971
+          ],
+          "median_wall_seconds": 0.8523434326052971,
+          "effective_cpu_cores": [
+            0.9067377371029112,
+            0.9160082296231619,
+            0.9318110160974845
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "volume": {
+          "status": "compared",
+          "shape": [
+            256,
+            256,
+            256
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "space_fsaverage41k_to_fslr32k_linear",
+      "threads": 8,
+      "affinity": [
+        66,
+        70,
+        74,
+        78,
+        82,
+        86,
+        90,
+        94
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 0.9485468566417694,
+        "candidate": 2.8000171408057213
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          1.0855546593666077,
+          1.010007083415985,
+          1.095229521393776
+        ],
+        "candidate": [
+          2.64480347186327,
+          2.6418977975845337,
+          3.0786660090088844
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 1.0855546593666077,
+        "candidate": 2.64480347186327
+      },
+      "worker_run_case_seconds": [
+        1.0225728303194046,
+        0.9795741885900497,
+        1.2952794656157494
+      ],
+      "median_worker_run_case_seconds": 1.0225728303194046,
+      "cbig_function_and_mat_save_seconds": [],
+      "median_cbig_function_and_mat_save_seconds": null,
+      "official_phases": [
+        {
+          "name": "Workbench left metric resample",
+          "wall_seconds": [
+            0.6473853141069412,
+            0.5545567721128545,
+            0.5265284329652711
+          ],
+          "median_wall_seconds": 0.5545567721128545,
+          "effective_cpu_cores": [
+            2.970024123349895,
+            3.4719547155907686,
+            3.7656408958463587
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench right metric resample",
+          "wall_seconds": [
+            0.43816934525966283,
+            0.4554503113031281,
+            0.5687010884284933
+          ],
+          "median_wall_seconds": 0.4554503113031281,
+          "effective_cpu_cores": [
+            3.9516251393027337,
+            3.9850647918253395,
+            3.542518277162272
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "space_mni_ho_labels_to_fslr32k",
+      "threads": 8,
+      "affinity": [
+        66,
+        70,
+        74,
+        78,
+        82,
+        86,
+        90,
+        94
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 9.158345304429531,
+        "candidate": 4.2459646835923195
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          12.531258672475815,
+          10.519459374248981,
+          9.96009275317192
+        ],
+        "candidate": [
+          4.504702508449554,
+          4.392228052020073,
+          5.162644602358341
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 10.519459374248981,
+        "candidate": 4.504702508449554
+      },
+      "worker_run_case_seconds": [
+        2.845185659825802,
+        2.6471953690052032,
+        3.356543891131878
+      ],
+      "median_worker_run_case_seconds": 2.845185659825802,
+      "cbig_function_and_mat_save_seconds": [
+        1.025647,
+        0.588561,
+        0.819709
+      ],
+      "median_cbig_function_and_mat_save_seconds": 0.819709,
+      "official_phases": [
+        {
+          "name": "MATLAB nearest forward: startup + original CBIG + MAT save",
+          "wall_seconds": [
+            9.814452044665773,
+            7.490256682038292,
+            6.6410985365509845
+          ],
+          "median_wall_seconds": 7.490256682038292,
+          "effective_cpu_cores": [
+            0.6888198107478025,
+            0.944008369827432,
+            0.9916796089913575
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MAT to GIFTI IO bridge",
+          "wall_seconds": [
+            0.3997214809059433,
+            0.42326109111304144,
+            0.44780211150651555
+          ],
+          "median_wall_seconds": 0.42326109111304144,
+          "effective_cpu_cores": [
+            0.8559660071919749,
+            0.8691467458834902,
+            0.7976916383851396
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench left label resample",
+          "wall_seconds": [
+            1.1161013469100078,
+            1.2885145992040465,
+            1.4016056433319857
+          ],
+          "median_wall_seconds": 1.2885145992040465,
+          "effective_cpu_cores": [
+            3.5089913750599973,
+            3.3614683160559435,
+            3.010686365366324
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench right label resample",
+          "wall_seconds": [
+            1.200983799993996,
+            1.3174270018935204,
+            1.4695864617824648
+          ],
+          "median_wall_seconds": 1.3174270018935204,
+          "effective_cpu_cores": [
+            3.4918222877119205,
+            3.1945762413788814,
+            3.0226877529969327
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      }
+    },
+    {
+      "case_id": "space_fslr32k_two_real_template_channels_to_mni2mm",
+      "threads": 8,
+      "affinity": [
+        66,
+        70,
+        74,
+        78,
+        82,
+        86,
+        90,
+        94
+      ],
+      "input_unchanged": true,
+      "warmup_full_process_seconds": {
+        "official": 55.736578196287155,
+        "candidate": 7.2308037504553795
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          57.235741034150124,
+          54.56174558401108,
+          83.77740362286568
+        ],
+        "candidate": [
+          6.027485437691212,
+          5.966937571763992,
+          6.285089984536171
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 57.235741034150124,
+        "candidate": 6.027485437691212
+      },
+      "worker_run_case_seconds": [
+        4.3479310274124146,
+        4.160500377416611,
+        4.444633707404137
+      ],
+      "median_worker_run_case_seconds": 4.3479310274124146,
+      "cbig_function_and_mat_save_seconds": [
+        44.28615,
+        42.919329,
+        44.141106
+      ],
+      "median_cbig_function_and_mat_save_seconds": 44.141106,
+      "official_phases": [
+        {
+          "name": "Workbench left to fsaverage164k",
+          "wall_seconds": [
+            1.222013607621201,
+            1.215061545372025,
+            1.2421315908431683
+          ],
+          "median_wall_seconds": 1.222013607621201,
+          "effective_cpu_cores": [
+            3.5325711375696955,
+            3.6048141073043034,
+            3.5196005256032743
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench right to fsaverage164k",
+          "wall_seconds": [
+            1.2397979274391955,
+            1.439979031682024,
+            1.367674916982623
+          ],
+          "median_wall_seconds": 1.367674916982623,
+          "effective_cpu_cores": [
+            3.280265202894919,
+            3.027261442069785,
+            3.07892610130642
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "GIFTI to MAT IO bridge",
+          "wall_seconds": [
+            0.38988331705341855,
+            0.4139175787567762,
+            0.3903952464460988
+          ],
+          "median_wall_seconds": 0.3903952464460988,
+          "effective_cpu_cores": [
+            0.848346121859485,
+            0.8610289059730568,
+            0.8403637159689866
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MATLAB reverse 2 frames: startup + original CBIG + MAT save",
+          "wall_seconds": [
+            52.45170287042857,
+            49.29692693054671,
+            78.50385498255487
+          ],
+          "median_wall_seconds": 52.45170287042857,
+          "effective_cpu_cores": [
+            1.010345824823112,
+            1.1252382542658603,
+            0.6920548298178861
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "MAT to NIfTI IO bridge",
+          "wall_seconds": [
+            1.3834355920552603,
+            1.605148434639041,
+            1.6297674551605579
+          ],
+          "median_wall_seconds": 1.605148434639041,
+          "effective_cpu_cores": [
+            0.93918792277838,
+            0.8882050838622967,
+            0.9478573124702798
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        },
+        {
+          "name": "Workbench custom 2mm grid resample",
+          "wall_seconds": [
+            0.5489077195525602,
+            0.5907120630145747,
+            0.6435794308781182
+          ],
+          "median_wall_seconds": 0.5907120630145747,
+          "effective_cpu_cores": [
+            1.3144796006659765,
+            1.2667339078556918,
+            1.2877975277568499
+          ],
+          "derivation": "Exact algebraic recovery from recorded child CPU seconds / effective CPU cores; original unrounded fields"
+        }
+      ],
+      "accuracy": {
+        "volume": {
+          "status": "compared",
+          "shape": [
+            91,
+            109,
+            91,
+            2
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      }
+    }
+  ],
+  "single_observations": [
+    {
+      "case_id": "space_mni1mm_to_fsaverage3k_linear",
+      "source_space": "MNI152",
+      "target_space": "fsaverage",
+      "source_density": null,
+      "target_density": "3k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 34.1152099147439,
+      "candidate_worker_full_process_seconds": 7.627477876842022,
+      "worker_run_case_seconds": 5.983850061893463,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            2562
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.00146484375,
+          "mean_absolute_error": 0.00012788318452380953,
+          "rmse": 0.00025740707631168345,
+          "relative_l2_error": 4.3142188191669915e-08,
+          "exact_fraction": 0.7455113192818111
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            2562
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0009765625,
+          "mean_absolute_error": 0.00010463169642857142,
+          "rmse": 0.0002289957621107603,
+          "relative_l2_error": 3.823814667666586e-08,
+          "exact_fraction": 0.788056206088993
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_mni1mm_to_fsaverage10k_linear",
+      "source_space": "MNI152",
+      "target_space": "fsaverage",
+      "source_density": null,
+      "target_density": "10k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 38.566910579800606,
+      "candidate_worker_full_process_seconds": 8.276740320026875,
+      "worker_run_case_seconds": 6.5374889597296715,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            10242
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.00390625,
+          "mean_absolute_error": 0.00024726329848906464,
+          "rmse": 0.00040018793422109895,
+          "relative_l2_error": 6.701412352378877e-08,
+          "exact_fraction": 0.5559461042765085
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            10242
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.00244140625,
+          "mean_absolute_error": 0.00020314063720464754,
+          "rmse": 0.00034681421736811177,
+          "relative_l2_error": 5.7862846968898374e-08,
+          "exact_fraction": 0.6196055457918376
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_mni1mm_to_fsaverage41k_linear",
+      "source_space": "MNI152",
+      "target_space": "fsaverage",
+      "source_density": null,
+      "target_density": "41k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 80.93634634464979,
+      "candidate_worker_full_process_seconds": 9.782005660235882,
+      "worker_run_case_seconds": 7.76316361874342,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            40962
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.009765625,
+          "mean_absolute_error": 0.0005264800016631268,
+          "rmse": 0.0007733614819579313,
+          "relative_l2_error": 1.294455733828081e-07,
+          "exact_fraction": 0.32578975635955276
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            40962
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0068359375,
+          "mean_absolute_error": 0.0004352059053970753,
+          "rmse": 0.0006473226992542053,
+          "relative_l2_error": 1.0795106425299459e-07,
+          "exact_fraction": 0.3783994922122943
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_mni2mm_to_fslr59k_linear",
+      "source_space": "MNI152",
+      "target_space": "fsLR",
+      "source_density": null,
+      "target_density": "59k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 17.792222753167152,
+      "candidate_worker_full_process_seconds": 9.031338199973106,
+      "worker_run_case_seconds": 7.229876585304737,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            59292
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0078125,
+          "mean_absolute_error": 0.0005326813100312858,
+          "rmse": 0.0007627269966588897,
+          "relative_l2_error": 1.2743019971510717e-07,
+          "exact_fraction": 0.3174121297982864
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            59292
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0068359375,
+          "mean_absolute_error": 0.0004349665901386359,
+          "rmse": 0.0006340431138001008,
+          "relative_l2_error": 1.0570931909962063e-07,
+          "exact_fraction": 0.3747217162517709
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_mni2mm_to_fslr164k_linear",
+      "source_space": "MNI152",
+      "target_space": "fsLR",
+      "source_density": null,
+      "target_density": "164k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 41.3829945102334,
+      "candidate_worker_full_process_seconds": 12.885947115719318,
+      "worker_run_case_seconds": 11.226163111627102,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.01513671875,
+          "mean_absolute_error": 0.0008442373335477168,
+          "rmse": 0.0012101431694117883,
+          "relative_l2_error": 2.0179870499279745e-07,
+          "exact_fraction": 0.22322115208554583
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0126953125,
+          "mean_absolute_error": 0.0006945942489563116,
+          "rmse": 0.0009911364314182096,
+          "relative_l2_error": 1.6511370288237144e-07,
+          "exact_fraction": 0.26100755606010667
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fsaverage3k_to_fsaverage10k_linear",
+      "source_space": "fsaverage",
+      "target_space": "fsaverage",
+      "source_density": "3k",
+      "target_density": "10k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 0.5827041193842888,
+      "candidate_worker_full_process_seconds": 2.3705001920461655,
+      "worker_run_case_seconds": 0.6404249519109726,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            10242
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            10242
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fsaverage10k_to_fsaverage41k_linear",
+      "source_space": "fsaverage",
+      "target_space": "fsaverage",
+      "source_density": "10k",
+      "target_density": "41k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 1.684510849416256,
+      "candidate_worker_full_process_seconds": 3.5216070488095284,
+      "worker_run_case_seconds": 1.785616897046566,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            40962
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            40962
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fsaverage41k_to_fsaverage164k_linear",
+      "source_space": "fsaverage",
+      "target_space": "fsaverage",
+      "source_density": "41k",
+      "target_density": "164k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 7.0940049439668655,
+      "candidate_worker_full_process_seconds": 9.0813550055027,
+      "worker_run_case_seconds": 7.199736326932907,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fslr32k_to_fslr59k_linear",
+      "source_space": "fsLR",
+      "target_space": "fsLR",
+      "source_density": "32k",
+      "target_density": "59k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 2.7893809378147125,
+      "candidate_worker_full_process_seconds": 4.573747478425503,
+      "worker_run_case_seconds": 2.80422779917717,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            59292
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            59292
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fslr59k_to_fslr164k_linear",
+      "source_space": "fsLR",
+      "target_space": "fsLR",
+      "source_density": "59k",
+      "target_density": "164k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 6.593107469379902,
+      "candidate_worker_full_process_seconds": 8.330571793019772,
+      "worker_run_case_seconds": 6.645841561257839,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            163842
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fslr164k_to_fslr32k_linear",
+      "source_space": "fsLR",
+      "target_space": "fsLR",
+      "source_density": "164k",
+      "target_density": "32k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 6.694896623492241,
+      "candidate_worker_full_process_seconds": 8.531681135296822,
+      "worker_run_case_seconds": 6.597465358674526,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fslr59k_to_fsaverage10k_linear",
+      "source_space": "fsLR",
+      "target_space": "fsaverage",
+      "source_density": "59k",
+      "target_density": "10k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 2.235444687306881,
+      "candidate_worker_full_process_seconds": 4.223512090742588,
+      "worker_run_case_seconds": 2.4246344715356827,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            10242
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            10242
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fslr164k_to_fsaverage3k_linear",
+      "source_space": "fsLR",
+      "target_space": "fsaverage",
+      "source_density": "164k",
+      "target_density": "3k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 5.391788460314274,
+      "candidate_worker_full_process_seconds": 7.278541348874569,
+      "worker_run_case_seconds": 5.517353020608425,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            2562
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            2562
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fsaverage3k_to_mni2mm_linear",
+      "source_space": "fsaverage",
+      "target_space": "MNI152",
+      "source_density": "3k",
+      "target_density": null,
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 50.68613417446613,
+      "candidate_worker_full_process_seconds": 9.082184672355652,
+      "worker_run_case_seconds": 7.146975629031658,
+      "accuracy": {
+        "volume": {
+          "status": "compared",
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG native grid followed by Workbench ENCLOSING_VOXEL extension; not native CBIG custom-grid support"
+    },
+    {
+      "case_id": "space_fsaverage164k_to_mni0p5mm_linear",
+      "source_space": "fsaverage",
+      "target_space": "MNI152",
+      "source_density": "164k",
+      "target_density": null,
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 61.02135219424963,
+      "candidate_worker_full_process_seconds": 7.178739532828331,
+      "worker_run_case_seconds": 5.248399183154106,
+      "accuracy": {
+        "volume": {
+          "status": "compared",
+          "shape": [
+            363,
+            435,
+            363
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "max_absolute_error": 1.3110557794570923,
+          "mean_absolute_error": 0.006322822768510057,
+          "rmse": 0.059870453899477746,
+          "relative_l2_error": 0.22466097631505907,
+          "exact_fraction": 0.9267345684973085
+        }
+      },
+      "reference_scope": "Official CBIG native grid followed by Workbench ENCLOSING_VOXEL extension; not native CBIG custom-grid support"
+    },
+    {
+      "case_id": "space_fsaverage41k_labels_to_fslr59k",
+      "source_space": "fsaverage",
+      "target_space": "fsLR",
+      "source_density": "41k",
+      "target_density": "59k",
+      "label": true,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 3.13695902377367,
+      "candidate_worker_full_process_seconds": 4.87433049082756,
+      "worker_run_case_seconds": 3.101525194942951,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            59292
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            59292
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fsaverage41k_labels_to_mni_default",
+      "source_space": "fsaverage",
+      "target_space": "MNI152",
+      "source_density": "41k",
+      "target_density": null,
+      "label": true,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 66.89929519593716,
+      "candidate_worker_full_process_seconds": 12.089647218585014,
+      "worker_run_case_seconds": 10.17530121654272,
+      "accuracy": {
+        "volume": {
+          "status": "compared",
+          "shape": [
+            256,
+            256,
+            256
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_mni_two_real_template_channels_to_fsaverage10k",
+      "source_space": "MNI152",
+      "target_space": "fsaverage",
+      "source_density": null,
+      "target_density": "10k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration",
+      "official_full_process_seconds": 27.855809062719345,
+      "candidate_worker_full_process_seconds": 7.8298600018024445,
+      "worker_run_case_seconds": 6.144007071852684,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            2,
+            10242
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.00390625,
+          "mean_absolute_error": 0.00023256170402814391,
+          "rmse": 0.0003760245263924821,
+          "relative_l2_error": 6.287360010159233e-08,
+          "exact_fraction": 0.5689806678383128
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            2,
+            10242
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.00244140625,
+          "mean_absolute_error": 0.00018904987105027095,
+          "rmse": 0.00032363343318087716,
+          "relative_l2_error": 5.391281738249496e-08,
+          "exact_fraction": 0.6342023042374536
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fslr32k_same_density_copy",
+      "source_space": "fsLR",
+      "target_space": "fsLR",
+      "source_density": "32k",
+      "target_density": "32k",
+      "label": false,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration; identical-space/density is correctness-only copy",
+      "official_full_process_seconds": 0.026349365711212158,
+      "candidate_worker_full_process_seconds": 2.0192915722727776,
+      "worker_run_case_seconds": 0.15565994381904602,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            32492
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    },
+    {
+      "case_id": "space_fsaverage41k_labels_same_density_copy",
+      "source_space": "fsaverage",
+      "target_space": "fsaverage",
+      "source_density": "41k",
+      "target_density": "41k",
+      "label": true,
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "One observation; not evidence of stable acceleration; identical-space/density is correctness-only copy",
+      "official_full_process_seconds": 0.018619559705257416,
+      "candidate_worker_full_process_seconds": 1.9693269953131676,
+      "worker_run_case_seconds": 0.16262727975845337,
+      "accuracy": {
+        "left": {
+          "status": "compared",
+          "shape": [
+            40962
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "right": {
+          "status": "compared",
+          "shape": [
+            40962
+          ],
+          "all_finite": true,
+          "affine_max_absolute_difference": null,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "reference_scope": "Official CBIG and/or official Workbench; file copy for identity route"
+    }
+  ],
+  "actual_surface_cli": [
+    {
+      "case_id": "space_fsaverage41k_to_fslr32k_linear",
+      "threads": 1,
+      "affinity": [
+        66
+      ],
+      "scope": "Actual python -m fnit.space_conversion CLI full process, versus two official Workbench commands; IO included, no API worker",
+      "warmup_full_process_seconds": {
+        "official": 2.436299793422222,
+        "old_cli": 4.535375624895096,
+        "new_cli": 2.5948798656463623
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          2.328103758394718,
+          2.384940654039383,
+          2.481098733842373
+        ],
+        "old_cli": [
+          4.3222552463412285,
+          3.9730460792779922,
+          4.018912091851234
+        ],
+        "new_cli": [
+          2.7312131449580193,
+          2.9029502272605896,
+          2.6215750575065613
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 2.384940654039383,
+        "old_cli": 4.018912091851234,
+        "new_cli": 2.7312131449580193
+      },
+      "accuracy_every_pair": [
+        {
+          "old_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          },
+          "new_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          }
+        },
+        {
+          "old_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          },
+          "new_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          }
+        },
+        {
+          "old_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          },
+          "new_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          }
+        },
+        {
+          "old_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          },
+          "new_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          }
+        }
+      ],
+      "candidate_hemisphere_budget": [
+        1,
+        1
+      ],
+      "candidate_hemispheres_parallel": false,
+      "official_each_sequential_command_thread_budget": 1
+    },
+    {
+      "case_id": "space_fsaverage41k_to_fslr32k_linear",
+      "threads": 8,
+      "affinity": [
+        66,
+        70,
+        74,
+        78,
+        82,
+        86,
+        90,
+        94
+      ],
+      "scope": "Actual python -m fnit.space_conversion CLI full process, versus two official Workbench commands; IO included, no API worker",
+      "warmup_full_process_seconds": {
+        "official": 1.1927168890833855,
+        "old_cli": 2.623825214803219,
+        "new_cli": 0.818805992603302
+      },
+      "measured_full_process_seconds": {
+        "official": [
+          1.0602277368307114,
+          0.9517983198165894,
+          0.9718907549977303
+        ],
+        "old_cli": [
+          2.604358524084091,
+          2.813775457441807,
+          2.5875586047768593
+        ],
+        "new_cli": [
+          0.8618465885519981,
+          0.891490064561367,
+          0.9492365941405296
+        ]
+      },
+      "median_full_process_seconds": {
+        "official": 0.9718907549977303,
+        "old_cli": 2.604358524084091,
+        "new_cli": 0.891490064561367
+      },
+      "accuracy_every_pair": [
+        {
+          "old_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          },
+          "new_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          }
+        },
+        {
+          "old_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          },
+          "new_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          }
+        },
+        {
+          "old_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          },
+          "new_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          }
+        },
+        {
+          "old_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          },
+          "new_cli": {
+            "l": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            },
+            "r": {
+              "shape": [
+                1,
+                32492
+              ],
+              "all_finite": true,
+              "max_absolute_error": 0.0,
+              "mean_absolute_error": 0.0,
+              "exact_fraction": 1.0,
+              "matching_intents": true
+            }
+          }
+        }
+      ],
+      "candidate_hemisphere_budget": [
+        4,
+        4
+      ],
+      "candidate_hemispheres_parallel": true,
+      "official_each_sequential_command_thread_budget": 8
+    }
+  ],
+  "custom_grid_rounding": {
+    "status": "diagnosed",
+    "scope": "Single public HCP average-area input projected to custom 0.5 mm grid; native CBIG supports its own grid only",
+    "shape": [
+      363,
+      435,
+      363
+    ],
+    "counts": {
+      "mismatch_voxels": 4199539,
+      "mismatch_without_half_voxel_coordinate": 0,
+      "mismatch_without_index_disagreement": 0,
+      "index_disagreement_voxels": 29932155,
+      "mask_boundary_mismatch_voxels": 429826,
+      "both_nonzero_value_mismatch_voxels": 3769713
+    },
+    "torch_nearest_even_prediction_max_absolute_error": 0.0,
+    "workbench_floor_plus_half_prediction_max_absolute_error": 0.0,
+    "all_finite": true,
+    "input_sha256": {
+      "canonical.cortex.nii.gz": "04ba045ed4208fb669fc332ba1917a36f25b2a7889f8034148a1f209abf852e3",
+      "MNI152_T1_0p5mm_from_official1mm.nii.gz": "2ac8c752f1ccbe7a43f2cd92016a725b74b44a0a95d8640ffa9e6d0f1010c185"
+    },
+    "interpretation": "All observed differences occur at half-voxel coordinates with different nearest-index choices; mask-boundary and nonzero vertex-value differences are included",
+    "runtime_float32_unchanged": true
+  },
+  "public_template_lineage": {
+    "status": "verified",
+    "source": "FSL original MNI152 T1 and brain-masked T1 templates 2 mm",
+    "channels": 2,
+    "channels_equal_original_files": true,
+    "all_finite": true,
+    "public_input_metadata": {
+      "MNI152_T1_2mm.nii.gz": {
+        "sha256": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+        "bytes": 1406977
+      },
+      "MNI152_T1_2mm_brain.nii.gz": {
+        "sha256": "09c925ad165dfbe6b41b572876d67e9bbf8c5e26517e7817f9b43a8256227f53",
+        "bytes": 414185
+      },
+      "MNI152_T1-and-brain_2mm_two-real-template-channels.nii.gz": {
+        "sha256": "9492c9af901d959745400974549312d5d24b9d5130b562f608574c58f7176915",
+        "bytes": 2483137
+      },
+      "L.prepared.fsLR32k.func.gii": {
+        "sha256": "7d4bb6c9117f59b3d25b4de0389814b92e5eaae73ccf619603b6591ca6a9d2f3",
+        "bytes": 297823
+      },
+      "R.prepared.fsLR32k.func.gii": {
+        "sha256": "c5c8914301c1eb83f82d4218a4e30935a403134c1678ae163987989269fd0bc9",
+        "bytes": 297843
+      }
+    },
+    "official_cbig_tag": "v0.18.1-Update_stable_project_unit_test",
+    "figure_script_sha256": "72c57f9d6462fe4a13bc19e99e1b632850a796c03354ea26c400084f361d9f9f",
+    "stack_affine_equals_original_templates": true
+  },
+  "conclusion": {
+    "default_grid_and_2mm_inverse": "Exact agreement on these tested public inputs",
+    "trilinear_forward": "Float32 interpolation differences; main template left/right relative L2 2.848e-7/2.276e-7",
+    "custom_half_mm": "Half-voxel rounding differs between Torch nearest-even and Workbench floor(voxel + 0.5); never claim strict equivalence for this extension",
+    "pure_surface_cpu1": "New actual CLI remains slower than direct Workbench due to Python/GIFTI validation overhead",
+    "pure_surface_cpu8": "New actual CLI is slightly faster on the tested HCP41k to fsLR32k route with total budget split 4+4"
+  }
+}

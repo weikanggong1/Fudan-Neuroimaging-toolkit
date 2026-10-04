@@ -1,5 +1,9 @@
 # 验证索引
 
+## 多模态 CPU 与最新 GPU 对照（2026-10-04）
+
+本轮在 nodecw10/nodecw8 完成同 1/8 线程预算的官方功能与速度检查，并汇总与生产源码匹配的最新 H100 完整调用。输入、输出精度、完整进程及分步骤耗时、GPU allocation 和尚未达速度目标的配置见[本轮汇总](multimodal_cpu_20261004/README.md)。CPU 进程、GPU API 和共享负载观察分别记录；下方既有报告保留各自的测量源码和历史范围。
+
 本页只索引当前发布代码采用的证据。机器可读报告记录候选源码或调用链的 SHA-256、输入边界、参考软件版本、计时范围和限制。真实数据报告保留实际测量源码 hash。FLIRT 的最新证据见 [GPU 批量优化](flirt/gpu_batch.current.public.json)；[早期 12-DOF 源码范围核对](runtime_dependencies/flirt_profile_source_equivalence.public.json)仅覆盖旧串行分支。其他保留的继承链有 [SynthMorph registration linear 路径](runtime_dependencies/synthmorph_linear_source_equivalence.public.json)和 [FNIRT/SynthMorph/dMRI 报告的公共包入口](runtime_dependencies/package_entry_source_equivalence.public.json)。这些记录不能写成当前 hash 的完整多例重跑，也不能外推到未列出的配置。
 
 当前 MCFLIRT 的源码来源、许可、元数据、文档与公开报告共 74 项已通过[源码分发包内容核对](mcflirt/source_distribution.public.json)。该记录只验证列出的文件在 sdist 中与工作树逐字节相同，不代表完整仓库 release 验收或运行时数值等价。

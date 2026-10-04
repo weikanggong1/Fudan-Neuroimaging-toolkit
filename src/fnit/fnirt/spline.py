@@ -446,6 +446,25 @@ class BendingOperator:
         return self.adjoint(self.forward(coefficients))
 
     def energy(self, coefficients: torch.Tensor):
+        if (self.execution == "optimized" and coefficients.device.type == "cpu"
+                and not coefficients.requires_grad
+                and all(not basis.requires_grad for bases, _ in self.operators for basis in bases)):
+            # Retain every dense expansion, elementwise multiplication,
+            # square, reduction and six-term sum in their original order.
+            # Only one derivative field is live, and its storage is reused
+            # for the multiplier and square. Gram-dot energy would change
+            # reduction roundings and can alter LM acceptance decisions.
+            result = coefficients.new_zeros(())
+            for bases, multiplier in self.operators:
+                field = expand_coefficients(coefficients, bases)
+                if field.dtype in (torch.float32, torch.float64):
+                    from ._bending_cpu import multiply_square_
+                    multiply_square_(field, multiplier)
+                else:
+                    field.mul_(multiplier)
+                    field.square_()
+                result = result + field.sum()
+            return result
         return sum(
             (field.square().sum() for field in self.forward(coefficients)),
             coefficients.new_zeros(()),

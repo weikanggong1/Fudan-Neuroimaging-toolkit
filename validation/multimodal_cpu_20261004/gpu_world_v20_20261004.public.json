@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-04",
+  "case_id": "world_complete490_spline",
+  "status": "complete_with_full_saved_file_byte_equality",
+  "candidate_snapshot": "all_v20",
+  "candidate_archive_sha256": "c0b5145549efb6c58dd4ae3b7bd060c7cc40b73cd556fe9ab01ca8432d30d617",
+  "baseline_commit": "1d31e7baaebbb644ab199471f7fe6282721455fd",
+  "device": "NVIDIA H100 PCIe",
+  "shared_device": true,
+  "tf32_enabled": true,
+  "memory_budget_bytes": 20000000000,
+  "protocol": "one complete GPU API per source, no warmup; all 490 frames",
+  "timing_scope": "fresh first complete API; entry imports/CUDA setup excluded; internal lazy imports, all input/matrix/field loading, all 490 frames and output save included",
+  "source_hashes": {
+    "baseline": {
+      "src/fnit/_world_resampling.py": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5",
+      "src/fnit/applywarp/core.py": "0022b5a6386409f29bd9e513ab4f2192e9722eb5dd9bd8735eac0241a5d0928d",
+      "src/fnit/eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8"
+    },
+    "candidate": {
+      "src/fnit/_world_resampling.py": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83",
+      "src/fnit/applywarp/core.py": "21dc364be908ff985e73c0fc78f09a405b1465624a0cc8b913a0f0a4f6d054a2",
+      "src/fnit/eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8"
+    }
+  },
+  "measurements": {
+    "baseline": {
+      "api_load_compute_save_seconds": 34.10345269413665,
+      "full_process_seconds": 37.24034328106791,
+      "cuda_peak_allocation_bytes": 2002300416,
+      "gpu_before_target": {
+        "used_memory_mib": 73370,
+        "utilization_percent": 100
+      }
+    },
+    "candidate": {
+      "api_load_compute_save_seconds": 36.942976389080286,
+      "full_process_seconds": 40.182505692820996,
+      "cuda_peak_allocation_bytes": 2002300416,
+      "gpu_before_target": {
+        "used_memory_mib": 73370,
+        "utilization_percent": 97
+      }
+    }
+  },
+  "full_output_proof": {
+    "all_saved_bytes_equal": true,
+    "voxel_bits_equal": true,
+    "header_binary_equal": true,
+    "extensions_equal": true,
+    "affine_equal": true,
+    "saved_dtype": "float32",
+    "element_count": 442288210,
+    "shape": [
+      91,
+      109,
+      91,
+      490
+    ]
+  },
+  "limitation": "one full observation per source on a shared GPU; no stable speed ratio",
+  "peak_allocation_unchanged": true
+}

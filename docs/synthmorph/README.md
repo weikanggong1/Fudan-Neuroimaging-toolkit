@@ -191,6 +191,8 @@ nearest 按半体素舍入，有效域为 `[0,n)`；CPU 先取 floor 再比较�
 
 公共底层直接复用已实现的volume采样器。采样顺序为reference world → 固定RAS pull → world affine → 每帧motion pull → source voxel → 一次影像插值；时间轴不做空间样条滤波。输出保留全部frame和TR，源为4D单帧时保留 `(X,Y,Z,1)`。
 
+2026-10-04 的 CPU 优化修复了该成熟公共采样器的两处行为：显式 `fmriprep`、`grid-constant` 的 nearest/linear 查询直接保留 FP64 体素坐标，避免归一化到 float32 后改变半体素取整；三维 `fmriprep` 输出保留 reference 的完整时间单位标志。CPU 的匹配协议使用环境已有的 SciPy，三次样条每帧滤波一次再分块查询，帧池以调用方的 Torch 线程数为上限。完整 3D 的三种插值和掩膜样条与官方逐位一致；完整 490 帧的 CPU 对照及官方多线程参照异常见 [World 专项](../applywarp/WORLD_CPU_BENCHMARK_20261004.md)。H100 上完整 490 帧的保存字节与优化前相同，见 [GPU 报告](../../validation/multimodal_cpu_20261004/gpu_world_v20_20261004.public.json)。这些是固定变换的采样检查，不是 SynthMorph 模型配准计时。
+
 ```python
 import numpy as np
 from fnit.synthmorph import WorldTransformChain, apply_transform

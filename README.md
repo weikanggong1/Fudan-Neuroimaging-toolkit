@@ -215,4 +215,6 @@ API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、�
 
 [验证索引](validation/README.md)汇总当前源码对应的真实数据精度、运行时间、峰值显存和示意图，并链接机器可读报告。公开样例见 [T1w](examples/README.md)与 [FLAIR](examples/WMH.md)。各功能的验证范围和运行依赖以对应功能页为准。
 
+[多模态 CPU / GPU 对照](validation/multimodal_cpu_20261004/README.md)汇总同 1/8 CPU 线程预算的官方精度、完整进程与分步骤耗时，以及最新 H100 完整 API、显存和公开脑图；未达速度目标及数值差异按配置列出。
+
 FSL 派生代码及随包保存的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束；其他第三方来源、许可与引用见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 [来源记录](docs/provenance.json)。

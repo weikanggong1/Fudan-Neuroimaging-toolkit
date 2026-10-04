@@ -1,0 +1,61 @@
+{
+  "description": "Schema examples only. Replace placeholders with verified real files; never crop a benchmark series.",
+  "resources": {"fsl_applywarp": "/verified/FSL/bin/applywarp"},
+  "cases": [
+    {
+      "id": "applywarp_real_3d_coefficient",
+      "adapter": "tools/benchmark_multimodal_cpu_applywarp.py",
+      "mode": "fsl",
+      "input": "/private/verified/native_FA.nii.gz",
+      "reference": "/private/verified/reference.nii.gz",
+      "warp": "/private/verified/coefficient.nii.gz",
+      "interpolation": "trilinear",
+      "warp_convention": "auto",
+      "output_dtype": "float",
+      "output_suffix": ".nii.gz"
+    },
+    {
+      "id": "applywarp_real_complete_4d",
+      "adapter": "tools/benchmark_multimodal_cpu_applywarp.py",
+      "mode": "fsl",
+      "input": "/private/verified/complete_DWI.nii.gz",
+      "reference": "/private/verified/reference.nii.gz",
+      "warp": "/private/verified/coefficient.nii.gz",
+      "premat": "/private/verified/premat.txt",
+      "postmat": "/private/verified/postmat.txt",
+      "interpolation": "trilinear",
+      "output_dtype": "float",
+      "output_suffix": ".nii.gz"
+    },
+    {
+      "id": "applywarp_real_multimap_plan",
+      "adapter": "tools/benchmark_multimodal_cpu_applywarp.py",
+      "mode": "plan",
+      "input": "/private/verified/native_FA.nii.gz",
+      "reference": "/private/verified/reference.nii.gz",
+      "warp": "/private/verified/coefficient.nii.gz",
+      "maps": {
+        "FA": "/private/verified/native_FA.nii.gz",
+        "MD": "/private/verified/native_MD.nii.gz",
+        "DWI": "/private/verified/complete_DWI.nii.gz"
+      },
+      "interpolation": "trilinear",
+      "output_dtype": "float",
+      "output_suffix": ".nii"
+    }
+  ],
+  "variant_fields": {
+    "mode": ["fsl", "plan", "world"],
+    "warp_convention": ["auto", "relative", "absolute"],
+    "interpolation": ["trilinear", "nearest", "nn"],
+    "output_dtype": [null, "char", "short", "int", "float", "double"],
+    "frame_chunk_size": [null, 1, 8],
+    "output_suffix": [".nii", ".nii.gz"]
+  },
+  "unsupported": ["intent 2008 DCT", "intent 2009 quadratic", "FSL sinc/spline image interpolation", "FSL supersampling/padding"],
+  "world_oracle": {
+    "status": "no_universal_FSL_match",
+    "required_semantics": ["reference_to_source_world", "pre_affine_pull_ras", "motion_pull_world", "coordinate_precision", "boundary", "interpolation", "output_mask"],
+    "do_not_compute_official_speed_ratio": true
+  }
+}

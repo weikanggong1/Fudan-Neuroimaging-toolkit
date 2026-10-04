@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "status": "all_checked_headers_equal",
+  "date": "2026-10-04",
+  "scope": "Read-only header construction and existing saved-output audit; no new registration, numerical-array benchmark, or performance measurement. Full original scalar reference grid and float32 output dtype used in construction. No image arrays exported.",
+  "origin_main_commit": "f1cbdab10fbfd573c3aa1b3461aa086dab220cfb",
+  "old_shared_helper_source": "candidate_all_v28",
+  "old_nib_sha256": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+  "new_nib_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+  "host": "nodecw8",
+  "nibabel_version": "5.4.2",
+  "changed_behavior": "Same-grid NIfTI new_image now retains original stored forms instead of re-encoding affine. FNIRT output_image then restores stored pixdim, as in the frozen solver.",
+  "actual_reference_grid_constructor_count": 4,
+  "actual_configuration_reference_checks": [
+    {
+      "preset": "default",
+      "reference_shape": [
+        91,
+        109,
+        91
+      ],
+      "reference_qform_code": 0,
+      "reference_sform_code": 2,
+      "reference_voxel_sizes_mm": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "old_new_constructor_comparisons": 1,
+      "old_new_header_bytes_equal": true,
+      "old_new_changed_header_fields": [],
+      "old_new_qform_bits_equal": true,
+      "old_new_sform_bits_equal": true,
+      "old_new_affine_bits_equal": true,
+      "matching_existing_cpu_output_headers_checked": 12,
+      "old_construct_matches_all_saved_header_fields": true,
+      "new_construct_matches_all_saved_header_fields": true,
+      "old_new_affines_match_all_saved_bits": true
+    },
+    {
+      "preset": "t1",
+      "reference_shape": [
+        91,
+        109,
+        91
+      ],
+      "reference_qform_code": 0,
+      "reference_sform_code": 2,
+      "reference_voxel_sizes_mm": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "old_new_constructor_comparisons": 1,
+      "old_new_header_bytes_equal": true,
+      "old_new_changed_header_fields": [],
+      "old_new_qform_bits_equal": true,
+      "old_new_sform_bits_equal": true,
+      "old_new_affine_bits_equal": true,
+      "matching_existing_cpu_output_headers_checked": 6,
+      "old_construct_matches_all_saved_header_fields": true,
+      "new_construct_matches_all_saved_header_fields": true,
+      "old_new_affines_match_all_saved_bits": true
+    },
+    {
+      "preset": "gm",
+      "reference_shape": [
+        91,
+        109,
+        91
+      ],
+      "reference_qform_code": 2,
+      "reference_sform_code": 2,
+      "reference_voxel_sizes_mm": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "old_new_constructor_comparisons": 1,
+      "old_new_header_bytes_equal": true,
+      "old_new_changed_header_fields": [],
+      "old_new_qform_bits_equal": true,
+      "old_new_sform_bits_equal": true,
+      "old_new_affine_bits_equal": true,
+      "matching_existing_cpu_output_headers_checked": 3,
+      "old_construct_matches_all_saved_header_fields": true,
+      "new_construct_matches_all_saved_header_fields": true,
+      "old_new_affines_match_all_saved_bits": true
+    },
+    {
+      "preset": "tbss",
+      "reference_shape": [
+        182,
+        218,
+        182
+      ],
+      "reference_qform_code": 4,
+      "reference_sform_code": 4,
+      "reference_voxel_sizes_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "old_new_constructor_comparisons": 1,
+      "old_new_header_bytes_equal": true,
+      "old_new_changed_header_fields": [],
+      "old_new_qform_bits_equal": true,
+      "old_new_sform_bits_equal": true,
+      "old_new_affine_bits_equal": true,
+      "matching_existing_cpu_output_headers_checked": 3,
+      "old_construct_matches_all_saved_header_fields": true,
+      "new_construct_matches_all_saved_header_fields": true,
+      "old_new_affines_match_all_saved_bits": true
+    }
+  ],
+  "existing_gpu_candidate_headers": [
+    {
+      "preset": "default",
+      "existing_candidate_complete_saved_calls_checked": 8,
+      "saved_output_header_count": 16,
+      "saved_header_counts_by_output": {
+        "iout": 8,
+        "jout": 8
+      },
+      "old_new_constructor_header_bytes_equal": true,
+      "old_new_changed_header_fields": [],
+      "old_construct_matches_all_saved_header_fields": true,
+      "new_construct_matches_all_saved_header_fields": true,
+      "old_new_affines_match_all_saved_bits": true
+    },
+    {
+      "preset": "tbss",
+      "existing_candidate_complete_saved_calls_checked": 8,
+      "saved_output_header_count": 24,
+      "saved_header_counts_by_output": {
+        "full_pull_jacobian": 8,
+        "iout": 8,
+        "jout": 8
+      },
+      "old_new_constructor_header_bytes_equal": true,
+      "old_new_changed_header_fields": [],
+      "old_construct_matches_all_saved_header_fields": true,
+      "new_construct_matches_all_saved_header_fields": true,
+      "old_new_affines_match_all_saved_bits": true
+    }
+  ],
+  "existing_gpu_candidate_header_total": 40,
+  "coefficient_header_scope": "cout uses make_fsl_coefficient_image rather than new_image; this shared-helper change cannot enter its constructor. DenseWarp also constructs and sets its own forms.",
+  "flirt_scope": "FLIRT _output_image overwrites both qform/sform and restores reference zooms after new_image, so this early return does not change those fields. No new FLIRT registration performed.",
+  "conclusion": "For these four real FNIRT reference grids and the existing default/TBSS GPU candidate outputs, the merge changes no checked header field, qform, sform or affine. Existing frozen-source reports retain their original source binding; this audit establishes header compatibility only. Different untested references with distinct stored forms are outside this conclusion.",
+  "private_paths_subject_ids_or_individual_image_hashes_exported": false
+}

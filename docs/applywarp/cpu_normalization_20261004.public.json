@@ -1,0 +1,201 @@
+{
+  "scope": "single instrumented full API diagnosis; not a native official speed benchmark",
+  "host": "nodecw10",
+  "entry_imports_excluded": true,
+  "inside_call_lazy_numba_import_and_JIT_included": true,
+  "invwarp": [
+    {
+      "threads": 1,
+      "affinity": [
+        34
+      ],
+      "baseline_api_seconds": 51.41185171157122,
+      "candidate_api_seconds": 39.32334168255329,
+      "baseline_normalization_seconds": 12.868118330836296,
+      "candidate_normalization_seconds": 3.505534529685974,
+      "normalization_calls": 32,
+      "baseline_rss_kib": 1674496,
+      "candidate_rss_kib": 1745304,
+      "whole_saved_file_sha256_equal": true,
+      "input_hashes_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "iterations_used": 30,
+      "converged": false,
+      "timed_candidate_core_sha256": "e6674ec7aebe065cef4a7fe1a24a1cb5e87eae118f0e997f36608ba6a1a7231e"
+    },
+    {
+      "threads": 8,
+      "affinity": [
+        34,
+        38,
+        42,
+        46,
+        50,
+        54,
+        58,
+        62
+      ],
+      "baseline_api_seconds": 18.408660739660263,
+      "candidate_api_seconds": 13.028697296977043,
+      "baseline_normalization_seconds": 4.275357685983181,
+      "candidate_normalization_seconds": 1.3803946673870087,
+      "normalization_calls": 32,
+      "baseline_rss_kib": 1674264,
+      "candidate_rss_kib": 1747340,
+      "whole_saved_file_sha256_equal": true,
+      "input_hashes_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "iterations_used": 30,
+      "converged": false,
+      "timed_candidate_core_sha256": "39a73346f15d8c91199da91fe621b6c33adc4a67b6427e99a4f5b75e6e69ec95"
+    }
+  ],
+  "real_coordinate_gate": [
+    {
+      "threads": 1,
+      "coordinate_gate": {
+        "shape": [
+          3,
+          162,
+          215,
+          180
+        ],
+        "source_shape": [
+          91,
+          109,
+          91
+        ],
+        "dtype": "torch.float64",
+        "contiguous": true,
+        "stored_dtype": "torch.float64",
+        "entry": "_to_float64_grid_cpu",
+        "stored_values": 18808200,
+        "different_stored_bits": 0
+      },
+      "warmed_kernel_seconds": {
+        "legacy": [
+          0.43458861112594604,
+          0.421265684068203,
+          0.3625268042087555
+        ],
+        "fused": [
+          0.2169218808412552,
+          0.07778690755367279,
+          0.08238222450017929
+        ]
+      }
+    },
+    {
+      "threads": 8,
+      "coordinate_gate": {
+        "shape": [
+          3,
+          162,
+          215,
+          180
+        ],
+        "source_shape": [
+          91,
+          109,
+          91
+        ],
+        "dtype": "torch.float64",
+        "contiguous": true,
+        "stored_dtype": "torch.float64",
+        "entry": "_to_float64_grid_cpu",
+        "stored_values": 18808200,
+        "different_stored_bits": 0
+      },
+      "warmed_kernel_seconds": {
+        "legacy": [
+          0.09523990005254745,
+          0.14535963535308838,
+          0.150919608771801
+        ],
+        "fused": [
+          0.085371233522892,
+          0.07990606874227524,
+          0.08054807037115097
+        ]
+      }
+    }
+  ],
+  "rejected_f32_apply_prototype": [
+    {
+      "case": "t1",
+      "threads": 1,
+      "whole_saved_file_sha256_equal": true,
+      "input_hashes_equal": true,
+      "baseline_api_seconds": 2.7859616726636887,
+      "rejected_f32_candidate_api_seconds": 2.663812853395939,
+      "qc_mask_capture": "not_captured; Plan.apply alias was not invoked"
+    },
+    {
+      "case": "t1",
+      "threads": 8,
+      "whole_saved_file_sha256_equal": true,
+      "input_hashes_equal": true,
+      "baseline_api_seconds": 1.1151911541819572,
+      "rejected_f32_candidate_api_seconds": 1.641783632338047,
+      "qc_mask_capture": "not_captured; Plan.apply alias was not invoked"
+    },
+    {
+      "case": "dwi",
+      "threads": 1,
+      "whole_saved_file_sha256_equal": true,
+      "input_hashes_equal": true,
+      "baseline_api_seconds": 7.628242343664169,
+      "rejected_f32_candidate_api_seconds": 5.9210218116641045,
+      "qc_mask_capture": "not_captured; Plan.apply alias was not invoked"
+    },
+    {
+      "case": "dwi",
+      "threads": 8,
+      "whole_saved_file_sha256_equal": true,
+      "input_hashes_equal": true,
+      "baseline_api_seconds": 3.93674386292696,
+      "rejected_f32_candidate_api_seconds": 4.247824147343636,
+      "qc_mask_capture": "not_captured; Plan.apply alias was not invoked"
+    }
+  ],
+  "final_policy": "FP64 fusion only for repeated prepared-source CPU queries; one-shot CPU FP64 and FP32 preserve validated all22 tensor normalization; CUDA and gradients keep tensor operations",
+  "final_source_sha256": {
+    "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+    "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe"
+  },
+  "final_local_tests": {
+    "passed": 160,
+    "seconds": 20.02,
+    "numba_threads": 8,
+    "torch_threads": 8,
+    "actual_cuda_tests_executed": true,
+    "final_changes_after_test": "documentation only; guarded production source unchanged",
+    "new_cases": "one-shot versus prepared-source FP64 sampling at budgets1/8"
+  },
+  "eligibility": {
+    "device": "cpu",
+    "coordinate_dtype": "float64",
+    "grid_dtype": "float64",
+    "requires_grad": false,
+    "layout": "C contiguous strided; no negative-bit view",
+    "coordinate_formula": "2 * coordinates / (size - 1) - 1 with each FP64 rounding and reversed axes",
+    "fastmath": false,
+    "singleton_axis": "positive zero",
+    "threads": "no greater than current torch/Numba budget; no mask/global device mutations",
+    "prepared_source_required_for_sampling_dispatch": true
+  },
+  "history": [
+    "initial F32-only helper did not intercept FP64 coefficient Inv queries; failed_capture preserved",
+    "v3 CPU1 and v4 CPU8 complete Inv gates passed all files/QC/stops",
+    "v4 ordinary Apply full file gates passed; F32 cold JIT prototype rejected for observed overhead",
+    "final F32 compute body and one-shot FP64 expression equal validated all22; repeated FP64 helper entry/kernel equal v4; dispatch narrowed to prepared-source after measured cold cost"
+  ],
+  "final_contract_proof": {
+    "one_shot_default_assignment_ast_equal_all22": true,
+    "float32_computation_ast_equal_all22": true,
+    "only_dispatch_guard_changed_after_all23": true,
+    "prepared_fp64_helper_unchanged": true
+  }
+}

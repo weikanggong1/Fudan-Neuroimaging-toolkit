@@ -169,7 +169,22 @@ class BatchedAffineCost:
         temp6 = (temp4 - temp2) * dy + temp2
         return (temp6 - temp5) * dz + temp5
 
+    def _sample_cpu(self, coefficients):
+        # Reuse strict float32 voxel sampling while retaining the existing
+        # batched reductions below. Candidate ordering/chunking is unchanged.
+        values, weights = [], []
+        for coefficient in coefficients:
+            sampled, contribution, _valid = self.cost._sample_cpu(
+                coefficient, nmi=self.nmi,
+            )
+            values.append(sampled)
+            weights.append(contribution)
+        return torch.stack(values), torch.stack(weights)
+
     def _sample(self, coefficients):
+        # Keep the established tensor exception for one-voxel input axes.
+        if self.device.type == "cpu" and min(self.moving.shape) >= 2:
+            return self._sample_cpu(coefficients)
         if self.device.type == "cuda" and not self.cost.weighted:
             if not self._cuda_sample_imported:
                 self._cuda_sample_imported = True
@@ -266,6 +281,36 @@ class BatchedAffineCost:
         cost = numerator / safe_total / total_variance
         cost = 1.0 - (1.0 - cost)
         return torch.where((total_n > 1) & (total_variance > 0), cost, 1.0)
+
+    def _cpu_corratio_statistics(self, coefficients):
+        statistics = [self.cost._corratio_cpu(coefficient)[:3]
+                      for coefficient in coefficients]
+        return tuple(torch.stack([row[column] for row in statistics])
+                     for column in range(3))
+
+    def _corratio_cpu(self, coefficients):
+        counts, sums, sums2 = self._cpu_corratio_statistics(coefficients)
+        keep = counts > 2
+        n = torch.where(keep, counts, 0)
+        y = torch.where(keep, sums, 0)
+        y2 = torch.where(keep, sums2, 0)
+        safe_n = torch.where(keep, n, 3)
+        within = (y2 - y.square() / safe_n) / (safe_n - 1)
+        # Match the reference's kept-bin order without nonzero()/boolean
+        # indexing, which would synchronize to size a CUDA output tensor.
+        positions = keep.long().cumsum(dim=1).sub_(1).clamp_min_(0)
+        packed = torch.zeros((counts.shape[0], 4, self.cost.bins),
+                             dtype=torch.float32, device=self.device)
+        packed.scatter_add_(2, positions[:, None].expand(-1, 4, -1),
+                            torch.stack((n, y, y2, within * n), dim=1))
+        totals = self._compact_sum(packed, keep.sum(dim=1))
+        total_n, total_sum, total_sum2, numerator = totals.unbind(dim=1)
+        safe_total = total_n.clamp_min(2)
+        total_variance = (total_sum2 - total_sum.square() / safe_total) / (safe_total - 1)
+        cost = numerator / safe_total / total_variance
+        cost = 1.0 - (1.0 - cost)
+        return torch.where((total_n > 1) & (total_variance > 0), cost, 1.0)
+
 
     def _compact_sum(self, packed, lengths):
         """Preserve CUDA's one-dimensional sum grouping for kept bins.
@@ -378,6 +423,52 @@ class BatchedAffineCost:
         result = torch.where(nonzero_entropy, result, 0)
         return torch.where(total > 0, result, -1.0)
 
+    def _joint_histogram_cpu(self, values, weights):
+        from fnit.flirt._cpu import histogram_nmi
+        joints = []
+        try:
+            for value, weight in zip(values, weights):
+                array = histogram_nmi(
+                    value.numpy(), weight.numpy(), self.cost.bin_index.numpy(),
+                    self.cost.bins, np.float32(self.cost.test_factor),
+                    np.float32(self.cost.test_offset),
+                )
+                if not np.isfinite(array).all():
+                    return None
+                joints.append(torch.from_numpy(array))
+        except ValueError:
+            return None
+        return torch.stack(joints)
+
+    def _normmi_cpu(self, values, weights):
+        joint = self._joint_histogram_cpu(values, weights)
+        if joint is None:
+            return self._normmi(values, weights)
+        stride = self.cost.bins + 1
+        joint = joint.float()
+        first, second = joint.sum(dim=2), joint.sum(dim=1)
+        total_lengths = torch.full((values.shape[0],), stride,
+                                   dtype=torch.long, device=self.device)
+        total = self._compact_sum(second[:, None], total_lengths)[:, 0]
+        safe_total = torch.where(total > 0, total, 1)
+
+        def entropy(histogram):
+            probabilities = histogram.reshape(values.shape[0], -1) / safe_total[:, None]
+            terms = probabilities * probabilities.clamp_min(torch.finfo(torch.float32).tiny).log()
+            positive = probabilities > 0
+            positions = positive.long().cumsum(dim=1).sub_(1).clamp_min_(0)
+            packed = torch.zeros_like(terms)
+            packed.scatter_add_(1, positions, torch.where(positive, terms, 0))
+            return -self._compact_sum(packed[:, None], positive.sum(dim=1))[:, 0]
+
+        joint_entropy = entropy(joint)
+        nonzero_entropy = joint_entropy.abs() >= 1e-9
+        safe_entropy = torch.where(nonzero_entropy, joint_entropy, 1)
+        result = -(entropy(first) + entropy(second)) / safe_entropy
+        result = torch.where(nonzero_entropy, result, 0)
+        return torch.where(total > 0, result, -1.0)
+
+
     @torch.no_grad()
     def evaluate(self, matrices, *, chunk_size=None):
         """Return device costs, preserving the input order and all candidates."""
@@ -398,8 +489,14 @@ class BatchedAffineCost:
         output = []
         for start in range(0, count, size):
             coefficients, invertible = self._coefficients(matrices[start:start + size])
-            values, weights = self._sample(coefficients)
-            result = self._normmi(values, weights) if self.nmi else self._corratio(values, weights)
+            if self.device.type == "cpu" and not self.nmi and min(self.moving.shape) >= 2:
+                result = self._corratio_cpu(coefficients)
+            else:
+                values, weights = self._sample(coefficients)
+                if self.device.type == "cpu" and self.nmi and min(self.moving.shape) >= 2:
+                    result = self._normmi_cpu(values, weights)
+                else:
+                    result = self._normmi(values, weights) if self.nmi else self._corratio(values, weights)
             if invertible is not None:
                 result = torch.where(invertible, result, -1.0 if self.nmi else 1.0)
             output.append(result)

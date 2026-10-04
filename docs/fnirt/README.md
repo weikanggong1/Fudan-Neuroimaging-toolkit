@@ -2,6 +2,8 @@
 
 [返回首页](../../README.md) · [dMRI/TBSS pipeline](../dmri_pipeline/README.md)
 
+[CPU 同线程官方 benchmark：功能覆盖与复现](CPU_BENCHMARK.md)
+
 ## 1. 功能简介
 
 `TorchFNIRT` 是 FNIT 的 PyTorch FNIRT 非线性配准核心。直接调用且不传配置时，
@@ -190,6 +192,12 @@ x_input = inverse(A) · x_reference + d(x_reference)
 
 图像与插值为 float32；系数、法方程、Gram、PCG、强度模型及关键归约保留 float64。不使用 FP16/BF16。GPU 默认允许 TF32，不降低 FP64 算子的精度。上述优化使用主页环境已有的 PyTorch/Triton，无新增编译依赖，也不启动 FSL。对应原软件没有 `--execution` 或 `--device` 选项。
 
+### CPU 执行方式
+
+`device="cpu", execution="optimized"` 使用设备对应的保序平滑、弯曲能量、角点筛选和法方程缓冲。空间法方程在每次线性化时固定权重布局，PCG 中按原 FP64 运算顺序处理八个体素；尾部、非连续布局和非有限值块使用原标量算式。函数遵循调用方的 CPU 线程预算，不自行修改全局线程数。没有新增运行依赖，CPU helper 使用主页环境已有的 Numba；CUDA、需要梯度的 CPU 张量和 `execution="reference"` 保留各自路径。布局内存、逐位门槛、真实精度及速度见 [CPU 专页](CPU_BENCHMARK.md)。
+
+最新 v27 的 CPU 采样合并图像值、FOV 判定与所需梯度，SCG 梯度跳过未使用的代价计算；原插值舍入、真实 cost、有效 lambda 和 CUDA 路径保持原方式。当前组合源 v28 保留该注册器和采样 helper 的相同 SHA。[完整真实 SCG 阶段检查](CPU_BENCHMARK.md#v27-的完整-scg-阶段检查)记录了输出与迭代轨迹的逐位一致性；[完整功能报告](assets/cpu-functional-v27-node8-20261004.public.json)包含 13 项预设/参数分支在 1/8 线程预算的 26 项完整输出检查及八项新官方配对。
+
 ## 3. 命令行调用
 
 ### 命令行：无配置默认值
@@ -233,7 +241,7 @@ python -m fnit.fnirt \
 | `--iout` | 输出，可省略 | 原始 input 经 affine 和 nonlinear warp 后的 reference-grid 图像。 |
 | `--jout` | 输出，可省略 | nonlinear-only Jacobian determinant，不含 FLIRT affine determinant。 |
 | `--device` | 运行选项 | `cpu`、`cuda` 或 `cuda:N`；省略时优先 CUDA。 |
-| `--execution` | 运行选项 | `optimized`（默认）启用 GPU 执行优化；`reference` 使用原 dense 算子与逐标量 PCG 执行方式，见下文。 |
+| `--execution` | 运行选项 | `optimized`（默认）启用设备对应的缓冲复用和算子优化；`reference` 使用原 dense 算子与逐标量 PCG 执行方式，见下文。 |
 | `--overwrite` | 运行选项 | 允许替换已有输出；默认保护已有文件。 |
 
 `cout` 总会写出。省略 `--cout` 时，输入 `subject_GM.nii.gz` 生成
@@ -309,6 +317,48 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
 
 ## 5. 最新真实数据精度、耗时与脑图
 
+### 2026-10-04：最新 v27 的同 CPU 预算官方对照
+
+本轮补充 CPU 执行缓冲优化，完整 default/T1/GM/TBSS schedule 和受支持参数分支按同输入官方配对验收；
+精度与端到端时间见 [CPU benchmark 的范围和复现](CPU_BENCHMARK.md)。官方与 FNIT 的优化轨迹仍有差异，
+不能把配对参数相同写成逐体素等价。CPU 修改不替换既有 CUDA 分支；GPU 回归独立核对。
+公开脑图补充使用已核验 CC0 许可、逐文件 SHA 的 [ds000114 T1 示例](../../examples/README.md)，
+共享官方 FLIRT 初始矩阵、完整 FNIRT 默认四级及三个相同输出。最新 v27 在已验收的严格 FP64 法方程 SIMD 上增加 CPU 三线性采样融合与 SCG 未使用代价的跳过，组合源 v28 保留其相同文件 SHA。八项主要功能分别完成新的官方配对，包含导入、读取、完整求解和全部声明输出保存；[主要配对报告](assets/cpu-primary-v27-node8-20261004.public.json)记录完整数值与源码 SHA。[全部 26 项完整输出检查](assets/cpu-functional-v27-node8-20261004.public.json)也已完成，覆盖 13 项预设/参数分支的 1/8 线程预算，原网格、全部层数和迭代预算保持不变；非主要分支沿用已核验的官方精度参照，不复制旧时钟为新配对。T1 单线程的[同节点旧/新诊断](CPU_BENCHMARK.md#t1-单线程的同节点旧新诊断)也已完成。私有病例只公开聚合指标和文件 SHA。
+
+| 完整预设 | 线程上限 | 原版完整进程 | FNIT 完整进程 | FNIT 已导入 API（含读写） | 脑掩膜内 iout Pearson r | Jacobian MAE |
+|---|---:|---:|---:|---:|---:|---:|
+| default | 1 | 181.04 s | 149.12 s | 146.56 s | 0.956660 | 0.050896 |
+| default | 8 | 172.21 s | 57.68 s | 55.67 s | 0.955977 | 0.051218 |
+| T1 六级 | 1 | 224.02 s | 293.71 s | 291.49 s | 0.999078 | 0.008707 |
+| T1 六级 | 8 | 221.80 s | 169.21 s | 166.93 s | 0.999243 | 0.008490 |
+| TBSS 六级/三阶段 | 1 | 836.24 s | 795.22 s | 793.07 s | 0.999704 | 0.011844 |
+| TBSS 六级/三阶段 | 8 | 831.94 s | 400.19 s | 398.29 s | 0.999032 | 0.019836 |
+| GM 四级/末级 SCG | 1 | 548.11 s | 143.57 s | 141.42 s | 0.970540 | 0.029834 |
+| GM 四级/末级 SCG | 8 | 556.22 s | 63.28 s | 60.73 s | 0.973537 | 0.028395 |
+
+这些是共享 nodecw8 上各一次完整观察，七项快于原版，T1 单线程未达到速度目标；8 是相同线程上限，原版的实际 CPU 使用量另行记录。每个预算的完整三图/四图文件、数值、header 和 affine 与该预算旧 normal SIMD v2 输出一致；旧完整输出 adapter 未保存 QC/停止记录，不宣称这两项逐位核对完成。原有 FSL 求解轨迹差异仍存在。旧 nodecw10 的[normal SIMD v2 配对](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)保留历史来源，不与本节点时间构成优化比。
+
+新算子保留九次乘法与加法的顺序、每步 FP64 舍入和原标量尾部，不使用 FMA、fastmath 或低精度。完整 default/T1 的[独立热点门槛](assets/cpu-normal-simd-v2-gate-20261004.public.json)核对了全部输出文件 SHA、停止条件和调用次数；热点钟与官方完整进程时间分别报告。
+
+完整六层 T1 的独立 CPU95 [热点报告](assets/cpu-profile-t1-v20-20261004.public.json)包含四图 SHA 与正式 CPU 输出核对。其 7,247 次空间法方程乘积累计 158.905 s，完整 instrumented API 为 362.182 s，峰值 RSS 1,371,236 KiB；函数钟互相包含，不用于相加或替代官方配对时间。具体范围见[六层 T1 诊断](CPU_BENCHMARK.md#六层-t1-的独立热点诊断)。
+
+![公开 T1 的完整 FNIRT warped 图与原版差异](assets/cpu-public-v27-node8/fnirt_warped.png)
+
+![同一公开 T1 的非线性 Jacobian 与原版差异](assets/cpu-public-v27-node8/fnirt_jacobian.png)
+
+图读取同一公开 CC0 输入在 nodecw8 的 v27 CPU8 和新原版配对保存输出，三个完整文件与该预算旧输出逐位相同。显示 MNI 脑掩膜内真实结果；双方共用标尺，差异显示有分位裁剪，完整误差见数值报告。[绘图位置、范围和来源 SHA](assets/cpu-public-v27-node8/figures.public.json) · [warped PDF](assets/cpu-public-v27-node8/fnirt_warped.pdf) · [Jacobian PDF](assets/cpu-public-v27-node8/fnirt_jacobian.pdf)。旧 v17 公开图保留为历史产物，私有病例没有新增脑图。
+
+[最新组合源 v28 的 H100 完整回归](../../validation/multimodal_cpu_20261004/gpu_cpu_final_v28_ready_retry_20261004.public.json)使用相同的 v27 注册器与采样 helper，完整运行六级 TBSS 和三阶段交接，没有降低网格或迭代预算。四个进程各一次完整 warmup 与三次完整 API 调用，共 16 次保存；系数、重采样、非线性及完整 pull Jacobian 的全部 float32 位模式、header/extensions 和 affine 与基线相同。
+
+| H100 完整 API，含读写 | 测试冻结源 | 优化前 FNIT，两组中位数 | 当前 FNIT，两组中位数 | 两版对应位置的峰值 allocation |
+|---|---|---:|---:|---|
+| default 四级，三输出，16 次保存 | v27；注册器/helper 与 v28 相同 | 16.945 / 16.702 s | 16.737 / 16.868 s | warmup 1,181,705,216 B；每个 measured repeat 1,181,704,704 B |
+| TBSS 六级/三阶段，四输出，16 次保存 | v28 | 14.866 / 13.365 s | 14.854 / 14.102 s | warmup 3,564,715,520 B；每个 measured repeat 3,565,562,368 B |
+
+GPU 表对照本轮优化前 FNIT，CPU 表对照原版 FSL，两者的参照和计时范围分别保留。对应调用位置的 allocation 两版完全相同；各例的 warmup 与 measured repeat 分列。GPU 为共享 H100 观测，默认 TF32、进程上限 20 GB；短时波动不用于推断稳定加速比。
+
+上表 default 的[完整 v27 报告](assets/cuda-final-v27-20261004.public.json)保存 16 次三输出的逐位和 metadata 校验。较早 [v27 TBSS 的 12 次有效调用](assets/cuda-tbss-partial-v27-20261004.public.json)也逐位相同，但最后基线进程在 CUDA setup 失败，原 16 次协议未完成；其失败和 partial 范围保留，不计作算法耗时。新 v28 完整运行另有独立目录与协议，不覆盖该失败事实。历史 v23 见[原报告](../../validation/multimodal_cpu_20261004/gpu_final_v23_20261004.public.json)。
+
 本轮以 `7473452` 的现有 optimized 实现为固定基线，实际运行 FastVBM、
 fMRI volume 和 dMRI/TBSS 三条完整流程。所有 FNIRT 层级、优化精度、
 PCG 停止判断和输出公式保持一致。最新逐位验收、分步骤耗时、显存、
@@ -380,6 +430,9 @@ r/强度误差在 MNI 脑掩膜内；支持区使用正值第 99 百分位的 5%
 
 | 日期 | 更新与验收 |
 |---|---|
+| 2026-10-04，最新 v27/v28 | CPU float32 采样的值、FOV 和梯度融合；SCG 梯度跳过未使用的能量/cost。83 项采样专项、33 项 SCG 专项和[完整真实末阶段轨迹](assets/cpu-scg-cost-skip-stage3-node8-20261004.public.json)通过；nodecw8 [26 项完整功能输出检查](assets/cpu-functional-v27-node8-20261004.public.json)及[八项新官方单次配对](assets/cpu-primary-v27-node8-20261004.public.json)完成，T1 单线程未达速度目标。H100 default 和完整 TBSS 各 16 次保存逐位相同、对应位置 allocation 不增加。 |
+| 2026-10-04，normal SIMD v2 | FP64 空间法方程按原运算顺序执行八点 SIMD；105 项局部回归通过，完整 default/T1 的输出 SHA、停止条件和 PCG 计数保持一致。nodecw10 的四项完整官方单次配对见[历史报告](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)。 |
+| 2026-10-04 | CPU Gaussian 合并 offset 循环，bending 保留 dense 展开/原 sum 并融合逐元素乘方，FP64 法方程缓冲/固定 weight 布局复用，Jacobian limiter 保序筛选角点。216 项函数专项通过；v17/v19/v20 在完整公开 default 的 1/8 预算三输出 SHA 一致。最新 CPU 官方观测与 GPU 门槛见[专页](CPU_BENCHMARK.md)。 |
 | 2026-10-02 | 跳过无用插值梯度、T1 强度映射复用、联合 PCG 增量场复用；三种预设在完整 pipeline 中实际执行，固定输入逐位比较，见[最新报告](../../validation/registration_lossless_20261002/README.md) |
 | 2026-10-01 | T1 六级 joint intensity/bias、GPU smoothing/PCG/Gram 优化与同输入 FSL 对照，见[历史报告](../../validation/fmri/registration_gpu.current.public.json) |
 | 2026-09-28/29 | 无配置、GM、TBSS 预设与 FSL 独立验证，见[FNIRT 验证索引](../../validation/fnirt/README.md) |

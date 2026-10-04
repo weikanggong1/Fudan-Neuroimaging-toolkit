@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "benchmark": false,
+  "scope": "local focused precision tests; not real-data speed benchmark",
+  "tests_passed": 83,
+  "wall_seconds": 8.96,
+  "threads_exercised": [
+    1,
+    8
+  ],
+  "reference_scope": "unchanged registration tensor arithmetic; requires_grad metadata forces original route without changing data",
+  "source_sha256": {
+    "src/fnit/fnirt/_sampling_cpu.py": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368",
+    "tests/fnirt/test_cpu_sampling.py": "970459cbaca3b76964647427741b8e071e8706a43e56f31130aab327cee7614a",
+    "registration_tensor_reference.py": "74fc259e2096e64153a591488303b8ccdfdf19d4ba0b2b91891222b905740e89"
+  },
+  "numerical_ast_equivalence": {
+    "experimental_source_sha256": "c8e62eca397463ed185e845250288c3bb6437c112fa10c6bbfa388c397f9a96e",
+    "production_source_sha256": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368",
+    "same_ast_excluding_docstrings": true,
+    "numerical_ast_sha256": "29d8045a03185242bd5ed411bb3b6c52f3c79d3291535a766affa316c2ef0fd6"
+  },
+  "gates": [
+    "value/valid/three analytic voxel gradients all FP32 bits",
+    "random finite/subnormal/signed-zero inputs",
+    "axes 1,4096,4097 and all boundaries",
+    "new-output alias exclusion",
+    "NaN/Inf and intermediate overflow tensor fallback",
+    "float64/stride/negative-view/extreme-floor tensor fallback",
+    "reverse/forward autograd and vmap wrapper tensor fallback",
+    "in-place input mutation without value cache",
+    "Numba thread mask restored after exception",
+    "CPU default-meta-device and CUDA helper guard"
+  ]
+}

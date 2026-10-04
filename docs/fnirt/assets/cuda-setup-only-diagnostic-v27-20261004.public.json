@@ -1,0 +1,74 @@
+{
+  "status": "stopped_at_first_setup_error",
+  "host": "gpucw1",
+  "scope": "setup-only diagnostic; no FNIT computation or function timing",
+  "gpu_uuid_requested": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "memory_cap_bytes": 20000000000,
+  "environment_before_torch_import": {
+    "CUDA_MODULE_LOADING": null,
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "PYTORCH_ALLOC_CONF": null
+  },
+  "phases": [
+    {
+      "phase": "get_properties",
+      "result": {
+        "name": "NVIDIA H100 PCIe",
+        "total_memory_bytes": 84942979072,
+        "device_uuid_property": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+      },
+      "returncode": 0,
+      "status": "passed",
+      "elapsed_seconds_setup_only": 0.07379346806555986,
+      "torch_allocated_bytes": 0,
+      "torch_reserved_bytes": 0,
+      "peak_allocation_bytes": 0,
+      "environment_after_phase": {
+        "CUDA_MODULE_LOADING": "LAZY",
+        "PYTORCH_CUDA_ALLOC_CONF": null,
+        "PYTORCH_ALLOC_CONF": null
+      }
+    },
+    {
+      "phase": "synchronize",
+      "returncode": 1,
+      "status": "first_error_stopped",
+      "elapsed_seconds_setup_only": 4.14390412485227,
+      "exception_class": "RuntimeError",
+      "short_error": "CUDA error: out of memory",
+      "is_out_of_memory": true,
+      "environment_after_phase": {
+        "CUDA_MODULE_LOADING": "LAZY",
+        "PYTORCH_CUDA_ALLOC_CONF": null,
+        "PYTORCH_ALLOC_CONF": null
+      },
+      "torch_allocated_bytes": 0,
+      "torch_reserved_bytes": 0,
+      "peak_allocation_bytes": 0
+    }
+  ],
+  "torch_version": "2.5.1",
+  "environment_after_torch_import": {
+    "CUDA_MODULE_LOADING": null,
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "PYTORCH_ALLOC_CONF": null
+  },
+  "threads": {
+    "torch": 8,
+    "interop": 1
+  },
+  "tf32": {
+    "matmul": true,
+    "cudnn": true
+  },
+  "affinity": [
+    33,
+    37,
+    41,
+    45,
+    49,
+    53,
+    57,
+    61
+  ]
+}

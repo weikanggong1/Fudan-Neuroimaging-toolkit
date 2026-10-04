@@ -1,0 +1,4734 @@
+{
+  "schema_version": 1,
+  "host": "nodecw10",
+  "status": "executed_with_full_precision_comparisons",
+  "timing_protocol": "single complete observation, no warmup/repeated stable speed estimate",
+  "tool_sha256": "6b0ccab743beb7556318de6120bfd6d6b6ef5c59e02d72bbe5c1e8078c05f65e",
+  "source_hashes": {
+    "candidate": {
+      "src/fnit/applywarp/core.py": "21dc364be908ff985e73c0fc78f09a405b1465624a0cc8b913a0f0a4f6d054a2",
+      "src/fnit/_world_resampling.py": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5",
+      "src/fnit/eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+      "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    },
+    "baseline": {
+      "src/fnit/applywarp/core.py": "0022b5a6386409f29bd9e513ab4f2192e9722eb5dd9bd8735eac0241a5d0928d",
+      "src/fnit/_world_resampling.py": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5",
+      "src/fnit/eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+      "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    }
+  },
+  "official_program": {
+    "container_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+    "singularity_sha256": "327cb3ec715228f3487edb6ec41974ef38e2d51184c5d1d2f3e406ee3734d90b"
+  },
+  "privacy": "Private real fMRI chain: aggregate results only; no participant identifiers, paths or images",
+  "records": [
+    {
+      "case_id": "world_full490_spline_fmriprep",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": true
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 442288210,
+            "nonfinite": 0,
+            "different_values": 26023474,
+            "different_fraction": 0.05883827199463445,
+            "bit_different_values": 41088921,
+            "max_absolute_error": 0.0009765625,
+            "mae": 3.177670347458327e-07,
+            "rmse": 7.090259205525998e-06,
+            "relative_l2": 1.7269404436024383e-09
+          },
+          "brain": {
+            "values": 111956670,
+            "nonfinite": 0,
+            "different_values": 210835,
+            "different_fraction": 0.0018831839139195547,
+            "bit_different_values": 210835,
+            "max_absolute_error": 0.0009765625,
+            "mae": 3.977597679514382e-11,
+            "rmse": 1.4928989602635877e-07,
+            "relative_l2": 2.3794012012655665e-11
+          },
+          "outside_brain": {
+            "values": 330331540,
+            "nonfinite": 0,
+            "different_values": 25812639,
+            "different_fraction": 0.07814161190905355,
+            "bit_different_values": 40878086,
+            "max_absolute_error": 0.0008501801639795303,
+            "mae": 4.254518348712154e-07,
+            "rmse": 8.20380638970912e-06,
+            "relative_l2": 2.70067969144735e-09
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0,
+            0.7350000143051147
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0,
+            0.7350000143051147
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "official": {
+          "api_load_compute_save_seconds": 295.432030595839,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "output_shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 3193328,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 308.4185894727707,
+          "user_cpu_seconds": 293.529306,
+          "system_cpu_seconds": 9.273772
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 675.9707279801369,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "output_shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 5523800,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 678.6574811115861,
+          "user_cpu_seconds": 520.4846249999999,
+          "system_cpu_seconds": 149.595229
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_grid-constant_linear",
+      "case_semantics": {
+        "interpolation": "linear",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 582365,
+            "different_fraction": 0.6451875576787363,
+            "bit_different_values": 582365,
+            "max_absolute_error": 0.1171875,
+            "mae": 0.0009150371568267024,
+            "rmse": 0.00302126867222062,
+            "relative_l2": 7.471679955840077e-07
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 192288,
+            "different_fraction": 0.8415855884245217,
+            "bit_different_values": 192288,
+            "max_absolute_error": 0.0693359375,
+            "mae": 0.001646193065816563,
+            "rmse": 0.003715195333922895,
+            "relative_l2": 5.992242139663828e-07
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 390077,
+            "different_fraction": 0.5786239182610295,
+            "bit_different_values": 390077,
+            "max_absolute_error": 0.1171875,
+            "mae": 0.0006672322368928449,
+            "rmse": 0.0027465860497372903,
+            "relative_l2": 9.225043676109447e-07
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": false,
+        "extensions_identical": true
+      },
+      "observations": {
+        "official": {
+          "api_load_compute_save_seconds": 0.7109463885426521,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 391292,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 13.35332278162241,
+          "user_cpu_seconds": 7.815420000000017,
+          "system_cpu_seconds": 1.845234000000005
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 0.47297533601522446,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 538948,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.1129295229911804,
+          "user_cpu_seconds": 2.4726470000000518,
+          "system_cpu_seconds": 0.44247400000000425
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_grid-constant_nearest",
+      "case_semantics": {
+        "interpolation": "nearest",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 1,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 3,
+            "different_fraction": 3.323624656420301e-06,
+            "bit_different_values": 3,
+            "max_absolute_error": 1822.9501953125,
+            "mae": 0.004249535909831041,
+            "rmse": 2.7148351487576075,
+            "relative_l2": 0.0006601769665656346
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 3,
+            "different_fraction": 4.450074612917677e-06,
+            "bit_different_values": 3,
+            "max_absolute_error": 1822.9501953125,
+            "mae": 0.00568979768292756,
+            "rmse": 3.1413846958713187,
+            "relative_l2": 0.0010342626485093096
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": false,
+        "extensions_identical": true
+      },
+      "observations": {
+        "official": {
+          "api_load_compute_save_seconds": 0.6550899893045425,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 391308,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 9.923694357275963,
+          "user_cpu_seconds": 7.733199000000013,
+          "system_cpu_seconds": 1.814483999999993
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 0.46286965906620026,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 538940,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.982433497905731,
+          "user_cpu_seconds": 2.430691999999908,
+          "system_cpu_seconds": 0.41296700000000897
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_grid-constant_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 51260,
+            "different_fraction": 0.05678966662936821,
+            "bit_different_values": 82298,
+            "max_absolute_error": 0.0007541222148574889,
+            "mae": 3.1258940915695907e-07,
+            "rmse": 6.981340107340108e-06,
+            "relative_l2": 1.7019211065199852e-09
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 449,
+            "different_fraction": 0.001965135261704372,
+            "bit_different_values": 449,
+            "max_absolute_error": 5.960464477539063e-08,
+            "mae": 4.854797244079579e-13,
+            "rmse": 1.2603003664819325e-10,
+            "relative_l2": 2.0077369314696736e-14
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 50811,
+            "different_fraction": 0.07537091371898669,
+            "bit_different_values": 81849,
+            "max_absolute_error": 0.0007541222148574889,
+            "mae": 4.1853271379504294e-07,
+            "rmse": 8.078234503116186e-06,
+            "relative_l2": 2.6669525691922063e-09
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": false,
+        "extensions_identical": true
+      },
+      "observations": {
+        "official": {
+          "api_load_compute_save_seconds": 1.1667162850499153,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 391792,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 10.07695172727108,
+          "user_cpu_seconds": 8.133596000000011,
+          "system_cpu_seconds": 1.8435289999999895
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 1.6801537051796913,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 553184,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 4.113203436136246,
+          "user_cpu_seconds": 3.3138280000000577,
+          "system_cpu_seconds": 0.5186689999999885
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_periodic_linear",
+      "case_semantics": {
+        "interpolation": "linear",
+        "boundary": "periodic",
+        "coordinate_precision": "fmriprep",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "baseline": {
+          "api_load_compute_save_seconds": 0.4835653007030487,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 517752,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.0267630964517593,
+          "user_cpu_seconds": 2.5004699999999502,
+          "system_cpu_seconds": 0.38314500000001317
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 0.4827076122164726,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 538816,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.9151383116841316,
+          "user_cpu_seconds": 2.3750029999999924,
+          "system_cpu_seconds": 0.4165790000000129
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_periodic_nearest",
+      "case_semantics": {
+        "interpolation": "nearest",
+        "boundary": "periodic",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 1,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "baseline": {
+          "api_load_compute_save_seconds": 0.49451060593128204,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 538904,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.039841838181019,
+          "user_cpu_seconds": 2.331860000000006,
+          "system_cpu_seconds": 0.4109749999999792
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 0.4749617204070091,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 538932,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.8366263285279274,
+          "user_cpu_seconds": 2.266518000000019,
+          "system_cpu_seconds": 0.43858500000001754
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_periodic_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "periodic",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "baseline": {
+          "api_load_compute_save_seconds": 1.4784200116991997,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 517776,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 4.035825051367283,
+          "user_cpu_seconds": 3.2665680000000066,
+          "system_cpu_seconds": 0.4469880000000046
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 1.293245606124401,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 517728,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.664539024233818,
+          "user_cpu_seconds": 2.991168000000016,
+          "system_cpu_seconds": 0.49432399999997756
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_grid-constant_linear",
+      "case_semantics": {
+        "interpolation": "linear",
+        "boundary": "grid-constant",
+        "coordinate_precision": "float64",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "baseline": {
+          "api_load_compute_save_seconds": 0.30351270735263824,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 477816,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.68069264292717,
+          "user_cpu_seconds": 2.248505000000023,
+          "system_cpu_seconds": 0.2863190000000202
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 0.35822416096925735,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 477800,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.7055619806051254,
+          "user_cpu_seconds": 2.2050279999999702,
+          "system_cpu_seconds": 0.3147159999999758
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_grid-constant_nearest",
+      "case_semantics": {
+        "interpolation": "nearest",
+        "boundary": "grid-constant",
+        "coordinate_precision": "float64",
+        "entry": "run_world",
+        "batch_size": 1,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "baseline": {
+          "api_load_compute_save_seconds": 0.2793211117386818,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 477748,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.7226016968488693,
+          "user_cpu_seconds": 2.296167999999966,
+          "system_cpu_seconds": 0.31484600000001706
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 0.2771649584174156,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 477824,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.816779352724552,
+          "user_cpu_seconds": 2.391537000000085,
+          "system_cpu_seconds": 0.3059649999999863
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_grid-constant_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "float64",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "baseline": {
+          "api_load_compute_save_seconds": 1.4484828561544418,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 552532,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 4.055151596665382,
+          "user_cpu_seconds": 3.359034999999949,
+          "system_cpu_seconds": 0.4459810000000175
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 1.54491026699543,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 552624,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 4.260654494166374,
+          "user_cpu_seconds": 3.6553350000000364,
+          "system_cpu_seconds": 0.4316919999999982
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_periodic_linear",
+      "case_semantics": {
+        "interpolation": "linear",
+        "boundary": "periodic",
+        "coordinate_precision": "float64",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "baseline": {
+          "api_load_compute_save_seconds": 0.31970373541116714,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 478124,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.898106098175049,
+          "user_cpu_seconds": 2.4281069999999545,
+          "system_cpu_seconds": 0.3394339999999829
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 0.3312099948525429,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 478340,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.878751404583454,
+          "user_cpu_seconds": 2.4310120000000097,
+          "system_cpu_seconds": 0.32447000000001935
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_periodic_nearest",
+      "case_semantics": {
+        "interpolation": "nearest",
+        "boundary": "periodic",
+        "coordinate_precision": "float64",
+        "entry": "run_world",
+        "batch_size": 1,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "baseline": {
+          "api_load_compute_save_seconds": 0.3239927664399147,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 478128,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.706975184381008,
+          "user_cpu_seconds": 2.2653999999999996,
+          "system_cpu_seconds": 0.3224869999999953
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 0.32420311868190765,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 478212,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.852770298719406,
+          "user_cpu_seconds": 2.4301719999999705,
+          "system_cpu_seconds": 0.3036469999999838
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_periodic_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "periodic",
+        "coordinate_precision": "float64",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "baseline": {
+          "api_load_compute_save_seconds": 1.154870793223381,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 478552,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.6332399919629097,
+          "user_cpu_seconds": 3.1048490000000584,
+          "system_cpu_seconds": 0.3596600000000194
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 1.1502828896045685,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 474968,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.540123850107193,
+          "user_cpu_seconds": 2.986167000000023,
+          "system_cpu_seconds": 0.37303499999998735
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_masked_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": true,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 449,
+            "different_fraction": 0.0004974358235775718,
+            "bit_different_values": 43709,
+            "max_absolute_error": 5.960464477539063e-08,
+            "mae": 1.2288976298335579e-13,
+            "rmse": 6.340833763004249e-11,
+            "relative_l2": 2.0077369314696736e-14
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 449,
+            "different_fraction": 0.001965135261704372,
+            "bit_different_values": 449,
+            "max_absolute_error": 5.960464477539063e-08,
+            "mae": 4.854797244079579e-13,
+            "rmse": 1.2603003664819325e-10,
+            "relative_l2": 2.0077369314696736e-14
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 43260,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": false,
+        "extensions_identical": true
+      },
+      "observations": {
+        "official": {
+          "api_load_compute_save_seconds": 1.3025455176830292,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 391884,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 10.928642265498638,
+          "user_cpu_seconds": 8.54563799999994,
+          "system_cpu_seconds": 1.8844840000000147
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 1.610644742846489,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 553388,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 4.312770858407021,
+          "user_cpu_seconds": 3.429169999999999,
+          "system_cpu_seconds": 0.5212929999999858
+        }
+      }
+    },
+    {
+      "case_id": "world_full490_spline_fmriprep",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": true
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 442288210,
+            "nonfinite": 0,
+            "different_values": 27108275,
+            "different_fraction": 0.061290973593892545,
+            "bit_different_values": 42145324,
+            "max_absolute_error": 28920.338005065918,
+            "mae": 7.7323794997927235,
+            "rmse": 250.45840219555325,
+            "relative_l2": 0.06099947535215962
+          },
+          "brain": {
+            "values": 111956670,
+            "nonfinite": 0,
+            "different_values": 429016,
+            "different_fraction": 0.003831982498229002,
+            "bit_different_values": 429016,
+            "max_absolute_error": 27548.1640625,
+            "mae": 8.548688600960338,
+            "rmse": 259.187975846372,
+            "relative_l2": 0.04132906936125912
+          },
+          "outside_brain": {
+            "values": 330331540,
+            "nonfinite": 0,
+            "different_values": 26679259,
+            "different_fraction": 0.0807650973927588,
+            "bit_different_values": 41716308,
+            "max_absolute_error": 28920.338005065918,
+            "mae": 7.455714278368758,
+            "rmse": 247.4298853333408,
+            "relative_l2": 0.08138707558920476
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0,
+            0.7350000143051147
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0,
+            0.7350000143051147
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 164.90656462311745,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "output_shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 5554912,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 166.80541267991066,
+          "user_cpu_seconds": 778.6342450000001,
+          "system_cpu_seconds": 191.640397
+        },
+        "official": {
+          "api_load_compute_save_seconds": 71.07061927765608,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "output_shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 4266212,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 81.59489458054304,
+          "user_cpu_seconds": 490.6258549999998,
+          "system_cpu_seconds": 7.945467000000008
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_grid-constant_linear",
+      "case_semantics": {
+        "interpolation": "linear",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 582365,
+            "different_fraction": 0.6451875576787363,
+            "bit_different_values": 582365,
+            "max_absolute_error": 0.1171875,
+            "mae": 0.0009150371568267024,
+            "rmse": 0.00302126867222062,
+            "relative_l2": 7.471679955840077e-07
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 192288,
+            "different_fraction": 0.8415855884245217,
+            "bit_different_values": 192288,
+            "max_absolute_error": 0.0693359375,
+            "mae": 0.001646193065816563,
+            "rmse": 0.003715195333922895,
+            "relative_l2": 5.992242139663828e-07
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 390077,
+            "different_fraction": 0.5786239182610295,
+            "bit_different_values": 390077,
+            "max_absolute_error": 0.1171875,
+            "mae": 0.0006672322368928449,
+            "rmse": 0.0027465860497372903,
+            "relative_l2": 9.225043676109447e-07
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": false,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 0.23795893788337708,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 538688,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 1.982966162264347,
+          "user_cpu_seconds": 2.6951530000001185,
+          "system_cpu_seconds": 0.41371599999996533
+        },
+        "official": {
+          "api_load_compute_save_seconds": 0.8077095821499825,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 391420,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 10.332882270216942,
+          "user_cpu_seconds": 11.321228000000247,
+          "system_cpu_seconds": 1.9124429999999961
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_grid-constant_nearest",
+      "case_semantics": {
+        "interpolation": "nearest",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 1,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 3,
+            "different_fraction": 3.323624656420301e-06,
+            "bit_different_values": 3,
+            "max_absolute_error": 1822.9501953125,
+            "mae": 0.004249535909831041,
+            "rmse": 2.7148351487576075,
+            "relative_l2": 0.0006601769665656346
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 3,
+            "different_fraction": 4.450074612917677e-06,
+            "bit_different_values": 3,
+            "max_absolute_error": 1822.9501953125,
+            "mae": 0.00568979768292756,
+            "rmse": 3.1413846958713187,
+            "relative_l2": 0.0010342626485093096
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": false,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 0.26212990283966064,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 538688,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.0685307905077934,
+          "user_cpu_seconds": 3.053074999999808,
+          "system_cpu_seconds": 0.47240400000004
+        },
+        "official": {
+          "api_load_compute_save_seconds": 0.6164993047714233,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 390232,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 10.306090146303177,
+          "user_cpu_seconds": 11.106448,
+          "system_cpu_seconds": 1.8936709999999835
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_grid-constant_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 51260,
+            "different_fraction": 0.05678966662936821,
+            "bit_different_values": 82298,
+            "max_absolute_error": 0.0007541222148574889,
+            "mae": 3.1258940915695907e-07,
+            "rmse": 6.981340107340108e-06,
+            "relative_l2": 1.7019211065199852e-09
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 449,
+            "different_fraction": 0.001965135261704372,
+            "bit_different_values": 449,
+            "max_absolute_error": 5.960464477539063e-08,
+            "mae": 4.854797244079579e-13,
+            "rmse": 1.2603003664819325e-10,
+            "relative_l2": 2.0077369314696736e-14
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 50811,
+            "different_fraction": 0.07537091371898669,
+            "bit_different_values": 81849,
+            "max_absolute_error": 0.0007541222148574889,
+            "mae": 4.1853271379504294e-07,
+            "rmse": 8.078234503116186e-06,
+            "relative_l2": 2.6669525691922063e-09
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": false,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 2.188366413116455,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 552868,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 4.155507408082485,
+          "user_cpu_seconds": 12.780018999999811,
+          "system_cpu_seconds": 0.7142519999999877
+        },
+        "official": {
+          "api_load_compute_save_seconds": 1.3083677887916565,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 391976,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 10.65570554882288,
+          "user_cpu_seconds": 12.451866000000336,
+          "system_cpu_seconds": 2.0177610000000072
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_periodic_linear",
+      "case_semantics": {
+        "interpolation": "linear",
+        "boundary": "periodic",
+        "coordinate_precision": "fmriprep",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 0.8453754112124443,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 538272,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.784916378557682,
+          "user_cpu_seconds": 6.652330999999776,
+          "system_cpu_seconds": 0.559346000000005
+        },
+        "baseline": {
+          "api_load_compute_save_seconds": 0.6006542518734932,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 517080,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.39945712685585,
+          "user_cpu_seconds": 4.937296999999944,
+          "system_cpu_seconds": 0.4443069999999807
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_periodic_nearest",
+      "case_semantics": {
+        "interpolation": "nearest",
+        "boundary": "periodic",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 1,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 0.7846746295690536,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 538488,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.5512880235910416,
+          "user_cpu_seconds": 6.014987999999903,
+          "system_cpu_seconds": 0.5829630000000066
+        },
+        "baseline": {
+          "api_load_compute_save_seconds": 0.826660580933094,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 538288,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.6567456126213074,
+          "user_cpu_seconds": 6.6122700000000805,
+          "system_cpu_seconds": 0.4681700000000433
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_periodic_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "periodic",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 1.9354212880134583,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 539164,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.74669486284256,
+          "user_cpu_seconds": 11.378097000000253,
+          "system_cpu_seconds": 0.6286309999999844
+        },
+        "baseline": {
+          "api_load_compute_save_seconds": 1.0200087800621986,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 538972,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.8145314678549767,
+          "user_cpu_seconds": 5.387103999999908,
+          "system_cpu_seconds": 0.5996789999999805
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_grid-constant_linear",
+      "case_semantics": {
+        "interpolation": "linear",
+        "boundary": "grid-constant",
+        "coordinate_precision": "float64",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 0.5681043490767479,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 476468,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.4055524691939354,
+          "user_cpu_seconds": 4.60110799999984,
+          "system_cpu_seconds": 0.3790089999999964
+        },
+        "baseline": {
+          "api_load_compute_save_seconds": 0.4843641221523285,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 476504,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.610580161213875,
+          "user_cpu_seconds": 4.2191139999999905,
+          "system_cpu_seconds": 0.4220109999999977
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_grid-constant_nearest",
+      "case_semantics": {
+        "interpolation": "nearest",
+        "boundary": "grid-constant",
+        "coordinate_precision": "float64",
+        "entry": "run_world",
+        "batch_size": 1,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 0.4876650646328926,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 477100,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.318276271224022,
+          "user_cpu_seconds": 4.097364000000198,
+          "system_cpu_seconds": 0.39374700000001894
+        },
+        "baseline": {
+          "api_load_compute_save_seconds": 0.2672094255685806,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 477068,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.2298470214009285,
+          "user_cpu_seconds": 3.011120000000119,
+          "system_cpu_seconds": 0.4097859999999969
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_grid-constant_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "float64",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 1.3765264302492142,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 556372,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.2643823474645615,
+          "user_cpu_seconds": 8.079973999999766,
+          "system_cpu_seconds": 0.5865089999999782
+        },
+        "baseline": {
+          "api_load_compute_save_seconds": 1.616487592458725,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 556624,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.6113498508930206,
+          "user_cpu_seconds": 9.391219000000092,
+          "system_cpu_seconds": 0.6296720000000278
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_periodic_linear",
+      "case_semantics": {
+        "interpolation": "linear",
+        "boundary": "periodic",
+        "coordinate_precision": "float64",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 0.28011100739240646,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 476492,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.1417123824357986,
+          "user_cpu_seconds": 3.0774179999998523,
+          "system_cpu_seconds": 0.39479699999998275
+        },
+        "baseline": {
+          "api_load_compute_save_seconds": 0.3361346423625946,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 477300,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.1907342448830605,
+          "user_cpu_seconds": 3.5255369999999857,
+          "system_cpu_seconds": 0.40899100000001454
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_periodic_nearest",
+      "case_semantics": {
+        "interpolation": "nearest",
+        "boundary": "periodic",
+        "coordinate_precision": "float64",
+        "entry": "run_world",
+        "batch_size": 1,
+        "spatial_chunk_size": 262144,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 0.2718407064676285,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 477684,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.1797607988119125,
+          "user_cpu_seconds": 3.206767000000127,
+          "system_cpu_seconds": 0.36631599999998343
+        },
+        "baseline": {
+          "api_load_compute_save_seconds": 0.2383112609386444,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 478368,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 2.144911102950573,
+          "user_cpu_seconds": 2.7898199999999633,
+          "system_cpu_seconds": 0.424886000000015
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_float64_periodic_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "periodic",
+        "coordinate_precision": "float64",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "baseline",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 0,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 1.519880585372448,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 474264,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 3.4362927824258804,
+          "user_cpu_seconds": 8.622491000000082,
+          "system_cpu_seconds": 0.5476939999999786
+        },
+        "baseline": {
+          "api_load_compute_save_seconds": 2.082195110619068,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 479000,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 4.010170675814152,
+          "user_cpu_seconds": 12.149883000000045,
+          "system_cpu_seconds": 0.616753000000017
+        }
+      }
+    },
+    {
+      "case_id": "world_3d_fmriprep_masked_spline",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "apply_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 65536,
+        "complete_490": false
+      },
+      "masked": true,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 902629,
+            "nonfinite": 0,
+            "different_values": 449,
+            "different_fraction": 0.0004974358235775718,
+            "bit_different_values": 43709,
+            "max_absolute_error": 5.960464477539063e-08,
+            "mae": 1.2288976298335579e-13,
+            "rmse": 6.340833763004249e-11,
+            "relative_l2": 2.0077369314696736e-14
+          },
+          "brain": {
+            "values": 228483,
+            "nonfinite": 0,
+            "different_values": 449,
+            "different_fraction": 0.001965135261704372,
+            "bit_different_values": 449,
+            "max_absolute_error": 5.960464477539063e-08,
+            "mae": 4.854797244079579e-13,
+            "rmse": 1.2603003664819325e-10,
+            "relative_l2": 2.0077369314696736e-14
+          },
+          "outside_brain": {
+            "values": 674146,
+            "nonfinite": 0,
+            "different_values": 0,
+            "different_fraction": 0.0,
+            "bit_different_values": 43260,
+            "max_absolute_error": 0.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "relative_l2": 0.0
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "unknown"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": false,
+        "extensions_identical": true
+      },
+      "observations": {
+        "candidate": {
+          "api_load_compute_save_seconds": 2.4243489801883698,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 553112,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 4.422276467084885,
+          "user_cpu_seconds": 14.499763999999686,
+          "system_cpu_seconds": 0.8333000000000084
+        },
+        "official": {
+          "api_load_compute_save_seconds": 1.360784612596035,
+          "scope": "imports excluded; complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64
+          ],
+          "output_shape": [
+            91,
+            109,
+            91
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 392016,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 11.390972316265106,
+          "user_cpu_seconds": 12.39830800000027,
+          "system_cpu_seconds": 2.1200109999999768
+        }
+      }
+    }
+  ]
+}

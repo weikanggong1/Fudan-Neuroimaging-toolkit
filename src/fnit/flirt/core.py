@@ -470,7 +470,8 @@ class FSLCorrelationRatio:
         moving_weight=None,
     ):
         self.reference = reference.contiguous().to(dtype=torch.float32)
-        self.moving = moving.contiguous().to(dtype=torch.float32)
+        self.moving = (moving.to(dtype=torch.float32) if moving.device.type == "cpu"
+                       else moving.contiguous().to(dtype=torch.float32))
         self.device = self.reference.device
         self.reference_voxel_sizes = tuple(float(v) for v in reference_voxel_sizes)
         self.moving_voxel_sizes = tuple(float(v) for v in moving_voxel_sizes)
@@ -486,7 +487,9 @@ class FSLCorrelationRatio:
             self.moving_weight = (
                 torch.ones_like(self.moving)
                 if moving_weight is None
-                else moving_weight.contiguous().to(dtype=torch.float32)
+                else (moving_weight.to(dtype=torch.float32)
+                      if moving_weight.device.type == "cpu"
+                      else moving_weight.contiguous().to(dtype=torch.float32))
             )
             if self.reference_weight.shape != self.reference.shape:
                 raise ValueError("reference weight must match the reference grid")
@@ -496,13 +499,16 @@ class FSLCorrelationRatio:
             raise ValueError("bins must be at least two")
         # NEWIMAGE traverses x fastest, then y, then z.  Keeping that order
         # also reduces the float32 accumulation difference on CPU.
-        z, y, x = torch.meshgrid(
-            torch.arange(self.reference.shape[2], dtype=torch.float32, device=self.device),
-            torch.arange(self.reference.shape[1], dtype=torch.float32, device=self.device),
-            torch.arange(self.reference.shape[0], dtype=torch.float32, device=self.device),
-            indexing="ij",
-        )
-        self.grid = torch.stack((x, y, z)).reshape(3, -1)
+        if self.device.type == "cpu":
+            self._cpu_grid_shape = tuple(self.reference.shape)
+        else:
+            z, y, x = torch.meshgrid(
+                torch.arange(self.reference.shape[2], dtype=torch.float32, device=self.device),
+                torch.arange(self.reference.shape[1], dtype=torch.float32, device=self.device),
+                torch.arange(self.reference.shape[0], dtype=torch.float32, device=self.device),
+                indexing="ij",
+            )
+            self.grid = torch.stack((x, y, z)).reshape(3, -1)
         self.reference_values = self.reference.permute(2, 1, 0).reshape(-1)
         if self.weighted:
             self.reference_weight_values = (
@@ -519,10 +525,66 @@ class FSLCorrelationRatio:
             self.reference_values * bin_factor + bin_offset
         ).to(torch.long)
         self.bin_index = bin_index.clamp(0, self.bins - 1)
-        self.bin_sort_order = torch.argsort(self.bin_index, stable=True)
-        self.bin_lengths = torch.bincount(
-            self.bin_index, minlength=self.bins
+        if self.device.type != "cpu":
+            self.bin_sort_order = torch.argsort(self.bin_index, stable=True)
+            self.bin_lengths = torch.bincount(
+                self.bin_index, minlength=self.bins
+            )
+
+    def __getattr__(self, name):
+        # CPU scalar fusion consumes neither the full coordinate grid nor the
+        # sorted voxel permutation. Materialize them only for explicit tensor
+        # execution or diagnostics. CUDA constructs the original fields eagerly.
+        device = self.__dict__.get("device")
+        if device is not None and device.type == "cpu":
+            if name == "grid":
+                nx, ny, nz = self._cpu_grid_shape
+                z, y, x = torch.meshgrid(
+                    torch.arange(nz, dtype=torch.float32),
+                    torch.arange(ny, dtype=torch.float32),
+                    torch.arange(nx, dtype=torch.float32), indexing="ij",
+                )
+                self.grid = torch.stack((x, y, z)).reshape(3, -1)
+                return self.grid
+            if name == "bin_sort_order":
+                self.bin_sort_order = torch.argsort(self.bin_index, stable=True)
+                return self.bin_sort_order
+            if name == "bin_lengths":
+                self.bin_lengths = torch.bincount(self.bin_index, minlength=self.bins)
+                return self.bin_lengths
+        raise AttributeError(name)
+
+    def _cpu_sample_arguments(self, coefficients, *, nmi=False):
+        """Read the current input tensors; do not cache an image copy."""
+        moving = self.moving.detach().numpy()
+        upper = np.asarray([size - 1.0001 for size in moving.shape], dtype=np.float32)
+        smooth = np.asarray([self.smooth_size / value
+                             for value in self.moving_voxel_sizes], dtype=np.float32)
+        # NMI intentionally uses only the existing geometric taper.  Its
+        # weighted profile is not part of the supported public interface.
+        weighted = self.weighted and not nmi
+        moving_weight = (self.moving_weight.detach().numpy() if weighted
+                         else np.empty((0, 0, 0), dtype=np.float32))
+        reference_weight = (self.reference_weight_values.detach().numpy() if weighted
+                            else np.empty(0, dtype=np.float32))
+        return (moving, coefficients.detach().numpy(), tuple(self.reference.shape),
+                upper, smooth, self.smooth_size > 0 or nmi,
+                moving_weight, reference_weight, weighted)
+
+    def _sample_cpu(self, coefficients, *, nmi=False):
+        from ._cpu import sample_cost
+        values, weights, valid = sample_cost(
+            *self._cpu_sample_arguments(coefficients, nmi=nmi)
         )
+        return torch.from_numpy(values), torch.from_numpy(weights), valid
+
+    def _corratio_cpu(self, coefficients):
+        from ._cpu import sample_corratio
+        counts, sums, sums2, valid = sample_corratio(
+            *self._cpu_sample_arguments(coefficients), self.bin_index.numpy(), self.bins,
+        )
+        return (torch.from_numpy(counts), torch.from_numpy(sums),
+                torch.from_numpy(sums2), valid)
 
     def __call__(self, moving_to_reference):
         coefficients = _fsl_pull_coefficients(
@@ -531,70 +593,76 @@ class FSLCorrelationRatio:
             self.reference_voxel_sizes,
             device=self.device,
         )
-        coordinates = _coordinates_from_fsl_coefficients(
-            coefficients, self.grid
-        )
-        upper = torch.tensor(
-            [size - 1.0001 for size in self.moving.shape],
-            dtype=torch.float32,
-            device=self.device,
-        )[:, None]
-        valid = ((coordinates >= 0) & (coordinates <= upper)).all(dim=0)
-        if not bool(valid.any()):
-            return 1.0
-        # Keep every reference voxel so that the precomputed stable bin order
-        # can be reduced without CUDA atomics.  Invalid voxels receive zero
-        # weight after interpolation at clamped coordinates.
-        interpolation_coordinates = coordinates.clone()
-        interpolation_coordinates.clamp_min_(0)
-        interpolation_coordinates = torch.minimum(
-            interpolation_coordinates, upper
-        )
-        values = _manual_trilinear(self.moving, interpolation_coordinates)
-        if self.smooth_size > 0:
-            smooth = torch.tensor(
-                [
-                    self.smooth_size / self.moving_voxel_sizes[0],
-                    self.smooth_size / self.moving_voxel_sizes[1],
-                    self.smooth_size / self.moving_voxel_sizes[2],
-                ],
+        if self.device.type == "cpu" and getattr(self, "_cpu_sampling", True):
+            counts, sums, sums2, any_valid = self._corratio_cpu(coefficients)
+            if not any_valid:
+                return 1.0
+        else:
+            coordinates = _coordinates_from_fsl_coefficients(
+                coefficients, self.grid
+            )
+            upper = torch.tensor(
+                [size - 1.0001 for size in self.moving.shape],
                 dtype=torch.float32,
                 device=self.device,
             )[:, None]
-            selected = coordinates
-            far_distance = upper - selected
-            weight_per_axis = torch.where(
-                selected < smooth,
-                selected / smooth,
-                torch.where(far_distance < smooth, far_distance / smooth, 1.0),
+            valid = ((coordinates >= 0) & (coordinates <= upper)).all(dim=0)
+            if not bool(valid.any()):
+                return 1.0
+            # Keep every reference voxel so that the precomputed stable bin order
+            # can be reduced without CUDA atomics.  Invalid voxels receive zero
+            # weight after interpolation at clamped coordinates.
+            interpolation_coordinates = coordinates.clone()
+            interpolation_coordinates.clamp_min_(0)
+            interpolation_coordinates = torch.minimum(
+                interpolation_coordinates, upper
             )
-            weights = weight_per_axis.prod(dim=0).clamp_min_(0)
-        else:
-            weights = torch.ones_like(values)
-        if self.weighted:
-            moving_weights = _manual_trilinear(
-                self.moving_weight, interpolation_coordinates
+            values = _manual_trilinear(self.moving, interpolation_coordinates)
+            if self.smooth_size > 0:
+                smooth = torch.tensor(
+                    [
+                        self.smooth_size / self.moving_voxel_sizes[0],
+                        self.smooth_size / self.moving_voxel_sizes[1],
+                        self.smooth_size / self.moving_voxel_sizes[2],
+                    ],
+                    dtype=torch.float32,
+                    device=self.device,
+                )[:, None]
+                selected = coordinates
+                far_distance = upper - selected
+                weight_per_axis = torch.where(
+                    selected < smooth,
+                    selected / smooth,
+                    torch.where(far_distance < smooth, far_distance / smooth, 1.0),
+                )
+                weights = weight_per_axis.prod(dim=0).clamp_min_(0)
+            else:
+                weights = torch.ones_like(values)
+            if self.weighted:
+                moving_weights = _manual_trilinear(
+                    self.moving_weight, interpolation_coordinates
+                )
+                weights = (
+                    weights * moving_weights * self.reference_weight_values
+                ).clamp_min_(0)
+            weights = weights * valid
+        if not (self.device.type == "cpu" and getattr(self, "_cpu_sampling", True)):
+            order = self.bin_sort_order
+            lengths = self.bin_lengths
+            sorted_weights = weights[order]
+            sorted_values = values[order]
+            counts = torch.segment_reduce(
+                sorted_weights, "sum", lengths=lengths, initial=0
             )
-            weights = (
-                weights * moving_weights * self.reference_weight_values
-            ).clamp_min_(0)
-        weights = weights * valid
-        order = self.bin_sort_order
-        lengths = self.bin_lengths
-        sorted_weights = weights[order]
-        sorted_values = values[order]
-        counts = torch.segment_reduce(
-            sorted_weights, "sum", lengths=lengths, initial=0
-        )
-        sums = torch.segment_reduce(
-            sorted_weights * sorted_values, "sum", lengths=lengths, initial=0
-        )
-        sums2 = torch.segment_reduce(
-            (sorted_weights * sorted_values) * sorted_values,
-            "sum",
-            lengths=lengths,
-            initial=0,
-        )
+            sums = torch.segment_reduce(
+                sorted_weights * sorted_values, "sum", lengths=lengths, initial=0
+            )
+            sums2 = torch.segment_reduce(
+                (sorted_weights * sorted_values) * sorted_values,
+                "sum",
+                lengths=lengths,
+                initial=0,
+            )
         keep = counts > 2
         if not bool(keep.any()):
             return 1.0
@@ -636,49 +704,61 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
             moving_to_reference, self.moving_voxel_sizes,
             self.reference_voxel_sizes, device=self.device,
         )
-        coordinates = _coordinates_from_fsl_coefficients(coefficients, self.grid)
-        upper = torch.tensor(
-            [size - 1.0001 for size in self.moving.shape],
-            dtype=torch.float32, device=self.device,
-        )[:, None]
-        valid = ((coordinates >= 0) & (coordinates <= upper)).all(dim=0)
-        if not bool(valid.any()):
-            return -1.0
-        values = _manual_trilinear(
-            self.moving, torch.minimum(coordinates.clamp_min(0), upper)
-        )
-        smooth = torch.tensor(
-            [self.smooth_size / value for value in self.moving_voxel_sizes],
-            dtype=torch.float32, device=self.device,
-        )[:, None]
-        edge_weight = torch.where(
-            coordinates < smooth, coordinates / smooth,
-            torch.where(upper - coordinates < smooth,
-                        (upper - coordinates) / smooth, 1.0),
-        ).prod(dim=0).clamp_min_(0)
-        weight = edge_weight * valid
-        bin_float = values * self.test_factor + self.test_offset
-        truncated = torch.trunc(bin_float)
-        raw_centre = truncated.long()
-        minus = (raw_centre - 1).clamp_min(0)
-        plus = (raw_centre + 1).clamp_max(self.bins - 1)
-        centre = raw_centre.clamp(0, self.bins - 1)
-        fractional = (bin_float - truncated).abs()
-        centre_weight = torch.where(
-            fractional < 0.5, 0.5 + fractional,
-            torch.where(fractional > 0.5, 1.5 - fractional, 1.0),
-        ).clamp(0, 1)
-        minus_weight = torch.where(fractional < 0.5, 1 - centre_weight, 0)
-        plus_weight = torch.where(fractional > 0.5, 1 - centre_weight, 0)
-        stride = self.bins + 1
-        # Accumulate atomics in float64, then keep FSL's float32 entropy path.
-        joint = torch.zeros(stride * stride, dtype=torch.float64, device=self.device)
-        for bin_id, bin_weight in (
-            (centre, centre_weight), (minus, minus_weight), (plus, plus_weight)
-        ):
-            joint.scatter_add_(0, self.bin_index * stride + bin_id,
-                               (weight * bin_weight).double())
-        joint = joint.reshape(stride, stride).float()
+        if self.device.type == "cpu" and getattr(self, "_cpu_sampling", True):
+            values, weight, any_valid = self._sample_cpu(coefficients, nmi=True)
+            if not any_valid:
+                return -1.0
+        else:
+            coordinates = _coordinates_from_fsl_coefficients(coefficients, self.grid)
+            upper = torch.tensor(
+                [size - 1.0001 for size in self.moving.shape],
+                dtype=torch.float32, device=self.device,
+            )[:, None]
+            valid = ((coordinates >= 0) & (coordinates <= upper)).all(dim=0)
+            if not bool(valid.any()):
+                return -1.0
+            values = _manual_trilinear(
+                self.moving, torch.minimum(coordinates.clamp_min(0), upper)
+            )
+            smooth = torch.tensor(
+                [self.smooth_size / value for value in self.moving_voxel_sizes],
+                dtype=torch.float32, device=self.device,
+            )[:, None]
+            edge_weight = torch.where(
+                coordinates < smooth, coordinates / smooth,
+                torch.where(upper - coordinates < smooth,
+                            (upper - coordinates) / smooth, 1.0),
+            ).prod(dim=0).clamp_min_(0)
+            weight = edge_weight * valid
+        if self.device.type == "cpu" and getattr(self, "_cpu_sampling", True):
+            from ._cpu import histogram_nmi
+            joint = torch.from_numpy(histogram_nmi(
+                values.numpy(), weight.numpy(), self.bin_index.numpy(), self.bins,
+                np.float32(self.test_factor), np.float32(self.test_offset),
+            )).float()
+        else:
+            bin_float = values * self.test_factor + self.test_offset
+            truncated = torch.trunc(bin_float)
+            raw_centre = truncated.long()
+            minus = (raw_centre - 1).clamp_min(0)
+            plus = (raw_centre + 1).clamp_max(self.bins - 1)
+            centre = raw_centre.clamp(0, self.bins - 1)
+            fractional = (bin_float - truncated).abs()
+            centre_weight = torch.where(
+                fractional < 0.5, 0.5 + fractional,
+                torch.where(fractional > 0.5, 1.5 - fractional, 1.0),
+            ).clamp(0, 1)
+            minus_weight = torch.where(fractional < 0.5, 1 - centre_weight, 0)
+            plus_weight = torch.where(fractional > 0.5, 1 - centre_weight, 0)
+            stride = self.bins + 1
+            # Accumulate atomics in float64, then keep FSL's float32 entropy path.
+            joint = torch.zeros(stride * stride, dtype=torch.float64, device=self.device)
+            for bin_id, bin_weight in (
+                (centre, centre_weight), (minus, minus_weight), (plus, plus_weight)
+            ):
+                joint.scatter_add_(0, self.bin_index * stride + bin_id,
+                                   (weight * bin_weight).double())
+            joint = joint.reshape(stride, stride).float()
         first = joint.sum(1)
         second = joint.sum(0)
         total = second.sum()
@@ -994,6 +1074,20 @@ def _flip_to_radiological(data, vox2world):
 def _isotropic_resample(data, voxel_sizes, scale):
     step = np.asarray([scale / value for value in voxel_sizes], dtype=np.float64)
     shape = tuple(max(1, int(data.shape[i] / step[i])) for i in range(3))
+    if data.device.type == "cpu" and data.dtype == torch.float32 and min(data.shape) >= 2 and not data.requires_grad:
+        with np.errstate(over="ignore", invalid="ignore"):
+            step_float32 = np.asarray(step, dtype=np.float32)
+        if np.isfinite(step_float32).all() and (step_float32 > 0).all():
+            array = data.detach().numpy()
+            # This preparation call happens once, rather than for each cost.
+            # Preserve the tensor path's exceptional-input behaviour.
+            if np.isfinite(array).all():
+                from ._cpu import sample_output
+                coefficients = np.zeros((3, 4), dtype=np.float32)
+                coefficients[:3, :3] = np.diag(step_float32)
+                return torch.from_numpy(sample_output(
+                    array, coefficients, shape, np.float32(0),
+                )), (float(scale),) * 3
     grid = _voxel_grid(shape, device=data.device)
     coordinates = grid * torch.as_tensor(
         step, dtype=torch.float32, device=data.device
@@ -1042,7 +1136,8 @@ class _DefaultFLIRTEngine:
             _clamp_like_fsl(reference), reference_vox2world
         )
         self.moving_original = torch.as_tensor(
-            moving.copy(), dtype=torch.float32, device=self.device
+            np.array(moving, dtype=np.float32, order="F") if self.device.type == "cpu"
+            else moving.copy(), dtype=torch.float32, device=self.device
         )
         self.reference_original = torch.as_tensor(
             reference.copy(), dtype=torch.float32, device=self.device
@@ -1062,7 +1157,9 @@ class _DefaultFLIRTEngine:
                     reference_weight, reference_vox2world
                 )
             self.moving_weight_original = torch.as_tensor(
-                np.asarray(moving_weight, dtype=np.float32).copy(),
+                np.array(moving_weight, dtype=np.float32, order="F")
+                if self.device.type == "cpu"
+                else np.asarray(moving_weight, dtype=np.float32).copy(),
                 device=self.device,
             )
             self.reference_weight_original = torch.as_tensor(
@@ -1659,6 +1756,16 @@ def _resample_output(
     # a sub-millimetre input is written on a 2 mm template grid.
     moving = _blur(moving, min(fixed_voxel_sizes), moving_voxel_sizes,
                    boundary=blur_boundary)
+    if moving.device.type == "cpu":
+        from ._cpu import sample_output
+        cpu_pull = np.asarray(
+            np.linalg.inv(moving_fsl) @ np.linalg.inv(matrix) @ fixed_fsl,
+            dtype=np.float32,
+        )
+        return torch.from_numpy(sample_output(
+            moving.detach().numpy(), cpu_pull[:3, :], tuple(fixed_shape),
+            np.float32(_edge_background(moving)),
+        ))
     grid = _voxel_grid(fixed_shape, device=device)
     # NEWMAT inverts/composes in double, then NEWIMAGE narrows its twelve
     # sampling coefficients to float. These small matrices are already on CPU.

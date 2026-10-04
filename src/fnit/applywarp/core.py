@@ -120,6 +120,23 @@ def _fsl_voxel_matrix(image):
 
 def _spatial_grid(shape, matrix, device):
     # FSL coordinate matrices are double precision. Keep geometry out of TF32.
+    matrix_array = (np.asarray(matrix, dtype=np.float64)
+                    if torch.device(device).type == "cpu" and not isinstance(matrix, torch.Tensor)
+                    else None)
+    if (torch.device(device).type == "cpu"
+            and matrix_array is not None
+            and np.count_nonzero(matrix_array[:3, :3] - np.diag(np.diag(matrix_array[:3, :3]))) == 0):
+        # FSL scaled-mm grids are diagonal. Broadcast the already transformed
+        # one-dimensional axes instead of allocating a full voxel mesh and
+        # multiplying its mostly-zero matrix. Retain each FP64 multiply/add.
+        result = torch.empty((3, *shape), dtype=torch.float64, device=device)
+        for axis, size in enumerate(shape):
+            positions = (torch.arange(size, dtype=torch.float64, device=device)
+                         * matrix_array[axis, axis] + matrix_array[axis, 3])
+            layout = [1, 1, 1]
+            layout[axis] = size
+            result[axis].copy_(positions.reshape(layout).expand(shape))
+        return result.reshape(3, -1)
     axes = torch.meshgrid(
         *(torch.arange(size, dtype=torch.float64, device=device) for size in shape),
         indexing="ij",
@@ -140,6 +157,39 @@ def _to_grid(coordinates, shape):
     return torch.stack(normalized[::-1], dim=-1).reshape(1, *output_shape, 3)
 
 
+def _to_float32_grid_cpu(coordinates, shape):
+    """Cast each FP64-normalized coordinate directly into its final CPU grid.
+
+    The arithmetic is identical to ``_to_grid(...).to(torch.float32)``. Only
+    the three retained FP64 normalized arrays and their stacked copy disappear.
+    CPU FP64 coefficient fields use the separate FP64 grid helper below.
+    """
+    grid = torch.empty((*coordinates.shape[1:], 3), dtype=torch.float32,
+                       device=coordinates.device)
+    for axis, size in enumerate(shape):
+        if size == 1:
+            grid[..., 2 - axis].zero_()
+        else:
+            grid[..., 2 - axis].copy_(2 * coordinates[axis] / (size - 1) - 1)
+    return grid[None]
+
+
+def _to_float64_grid_cpu(coordinates, shape):
+    """Fuse the FP64 CPU coefficient-field grid without narrowing precision."""
+    if (coordinates.device.type == "cpu" and not coordinates.requires_grad
+            and coordinates.dtype == torch.float64 and coordinates.ndim >= 2
+            and coordinates.shape[0] == 3 and coordinates.layout == torch.strided
+            and coordinates.is_contiguous() and not coordinates.is_neg()
+            and len(shape) == 3 and all(size > 0 for size in shape)):
+        from ._normalization_cpu import normalize_into
+        grid = torch.empty((*coordinates.shape[1:], 3), dtype=torch.float64,
+                           device=coordinates.device)
+        normalize_into(coordinates.numpy().reshape(3, -1), shape,
+                       grid.numpy().reshape(-1, 3))
+        return grid[None]
+    return _to_grid(coordinates, shape).to(dtype=torch.float64)
+
+
 def _inside(coordinates, shape):
     valid = torch.ones(
         coordinates.shape[1:], dtype=torch.bool, device=coordinates.device
@@ -150,16 +200,72 @@ def _inside(coordinates, shape):
     return valid
 
 
-def _sample_linear(data, coordinates):
+def _sample_linear(data, coordinates, *, prepared_source=None, calculate_valid=True):
     shape = tuple(int(size) for size in data.shape[1:])
+    if data.device.type == "cpu" and data.dtype == torch.float32:
+        grid = _to_float32_grid_cpu(coordinates, shape)
+    elif (data.device.type == "cpu" and data.dtype == torch.float64
+            and prepared_source is not None):
+        # Repeated field queries amortise the fused helper's first import/JIT.
+        # One-shot FP64 callers retain the original tensor grid preparation.
+        grid = _to_float64_grid_cpu(coordinates, shape)
+    else:
+        grid = _to_grid(coordinates, shape).to(dtype=data.dtype)
+    if data.device.type == "cpu":
+        sampled = (_sample_linear_cpu(data, grid) if prepared_source is None
+                   else _sample_linear_cpu(data, grid, prepared_source=prepared_source))
+    else:
+        sampled = F.grid_sample(
+            data[None], grid, mode="bilinear", padding_mode="border",
+            align_corners=True,
+        )[0]
+    # Iterative CPU callers may discard this flag. CUDA and default callers
+    # retain the original bounds check and complete sampling arithmetic.
+    valid = _inside(coordinates, shape) if calculate_valid or data.device.type != "cpu" else None
+    return sampled, valid
+
+
+def _sample_linear_cpu(data, grid, *, prepared_source=None):
+    """Retain PyTorch interpolation arithmetic with cache-friendly CPU work.
+
+    The CPU 3D grid sampler parallelises batches, not output voxels. Expand
+    one read-only source over disjoint query batches (zero batch stride),
+    without copying the image or changing any coordinate/weight arithmetic.
+    Channel-last source storage makes the per-query channel loop contiguous.
+    The CUDA call site retains its original single-batch implementation.
+    """
+    if prepared_source is None:
+        source = data[None].contiguous(memory_format=torch.channels_last_3d)
+    else:
+        if (prepared_source.device != data.device or prepared_source.dtype != data.dtype
+                or tuple(prepared_source.shape) != (1, *data.shape)
+                or not prepared_source.is_contiguous(memory_format=torch.channels_last_3d)):
+            raise ValueError("prepared_source must match the CPU image and channels-last layout")
+        source = prepared_source
+    output_shape = tuple(grid.shape[1:4])
+    query_count = int(np.prod(output_shape))
+    # Small queries do not repay partition/reassembly. Respect the caller's
+    # existing intra-op budget rather than modifying global thread settings.
+    batches = min(torch.get_num_threads(), max(1, query_count // 32768))
+    if batches == 1:
+        return F.grid_sample(
+            source, grid, mode="bilinear", padding_mode="border",
+            align_corners=True,
+        )[0]
+    queries_per_batch = (query_count + batches - 1) // batches
+    flat_grid = grid.reshape(-1, 3)
+    padding = batches * queries_per_batch - query_count
+    if padding:
+        # At most batches-1 dummy queries; discard them after sampling.
+        flat_grid = torch.cat((flat_grid, flat_grid.new_zeros((padding, 3))))
+    queries = flat_grid.reshape(batches, queries_per_batch, 1, 1, 3)
     sampled = F.grid_sample(
-        data[None],
-        _to_grid(coordinates, shape).to(dtype=data.dtype),
-        mode="bilinear",
-        padding_mode="border",
-        align_corners=True,
-    )[0]
-    return sampled, _inside(coordinates, shape)
+        source.expand(batches, -1, -1, -1, -1), queries,
+        mode="bilinear", padding_mode="border", align_corners=True,
+    )
+    return sampled.permute(1, 0, 2, 3, 4).reshape(data.shape[0], -1)[
+        :, :query_count
+    ].reshape(data.shape[0], *output_shape)
 
 
 def _sample_nearest(data, coordinates):
@@ -340,9 +446,9 @@ def _resolve_dtype(input_image, result, output_dtype):
 
 
 def _cast_output(data, dtype):
-    if np.issubdtype(dtype, np.integer):
-        limits = np.iinfo(dtype)
-        data = np.clip(np.trunc(data), limits.min, limits.max)
+    # NEWIMAGE convertbuffer uses a direct C cast, with no saturation.  In
+    # particular uint8 wraps finite MRI intensities above 255; clipping them
+    # changed more than a million values in the complete public T1 test.
     return data.astype(dtype, copy=False)
 
 
@@ -460,10 +566,13 @@ class ApplyWarpPlan:
 
     def _sample_frames(self, frames, valid_weights):
         if self.interpolation == "trilinear":
-            sampled = F.grid_sample(
-                frames[None], self._grid, mode="bilinear",
-                padding_mode="border", align_corners=True,
-            )[0]
+            if frames.device.type == "cpu":
+                sampled = _sample_linear_cpu(frames, self._grid)
+            else:
+                sampled = F.grid_sample(
+                    frames[None], self._grid, mode="bilinear",
+                    padding_mode="border", align_corners=True,
+                )[0]
         else:
             sampled = frames.reshape(frames.shape[0], -1)[:, self._nearest_flat]
             sampled = sampled.reshape(frames.shape[0], *self.reference_geometry.shape)
@@ -480,8 +589,12 @@ class ApplyWarpPlan:
         chunk_size = self._frame_chunk(frame_count, input_data.shape[:3], frame_chunk_size)
         valid_weights = self._valid.to(torch.float32)
         if chunk_size == frame_count:
+            host_frames = np.moveaxis(input_data, -1, 0)
+            if (self.device.type != "cpu" or self.interpolation != "trilinear"
+                    or any(stride < 0 for stride in host_frames.strides)):
+                host_frames = np.ascontiguousarray(host_frames)
             frames = torch.as_tensor(
-                np.ascontiguousarray(np.moveaxis(input_data, -1, 0)),
+                host_frames,
                 dtype=torch.float32, device=self.device,
             )
             result_frames = self._sample_frames(frames, valid_weights).detach().cpu().numpy()
@@ -695,10 +808,11 @@ class TorchApplyWarp:
 
         input_valid = _inside(input_voxels, input_image.shape[:3])
         valid = warp_valid & input_valid
-        grid = (
-            _to_grid(input_voxels, input_image.shape[:3]).to(torch.float32)
-            if interpolation == "trilinear" else None
-        )
+        grid = None
+        if interpolation == "trilinear":
+            grid = (_to_float32_grid_cpu(input_voxels, input_image.shape[:3])
+                    if self.device.type == "cpu"
+                    else _to_grid(input_voxels, input_image.shape[:3]).to(torch.float32))
         return ApplyWarpPlan(
             device=self.device,
             input_geometry=SamplingGeometry.capture(input_image),

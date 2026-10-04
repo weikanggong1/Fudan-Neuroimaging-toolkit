@@ -1,0 +1,251 @@
+{
+  "status": "executed_with_numeric_comparisons",
+  "source_snapshot": "all_v26",
+  "targeted_changed_routes": "inv_mni",
+  "candidate_archive_sha256": "36b71b55bac45ffcf22fea5b933ee3b97c4130f616817a95a2e09428ee33e05e",
+  "baseline_commit": "1d31e7baaebbb644ab199471f7fe6282721455fd",
+  "source_hashes": {
+    "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef",
+    "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+    "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+    "src/fnit/fnirt/registration.py": "74fc259e2096e64153a591488303b8ccdfdf19d4ba0b2b91891222b905740e89",
+    "src/fnit/invwarp/core.py": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391",
+    "src/fnit/convertwarp/core.py": "d5268055b8d3b858fd80e96158d0fc167daf722e0b25fd7a3cbe04da3b8e3264",
+    "src/fnit/space_conversion.py": "91e3942b487cb91ee58e1310a7ab29aa670d31720e7abe6edb194e1a679a4afd",
+    "src/fnit/_space_conversion_cpu.py": "45911a090eff848c90db77eb547436eeba3a694a915652869181569a72881b6b",
+    "src/fnit/fnirt/_normal_cpu.py": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f",
+    "src/fnit/fnirt/spline.py": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+    "src/fnit/fnirt/_smoothing_cpu.py": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be",
+    "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+    "src/fnit/fnirt/topology.py": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3",
+    "src/fnit/fnirt/_topology_cpu.py": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6",
+    "src/fnit/_world_resampling.py": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83",
+    "src/fnit/fnirt/_bending_cpu.py": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47",
+    "src/fnit/flirt/batched.py": "06bcaeba1b58090d5b40b57160a159075af48ab0c42c2b61a6d7e3f803ee85f4",
+    "src/fnit/fnirt/_normal_simd_cpu.py": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9",
+    "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe"
+  },
+  "memory_budget_bytes": 20000000000,
+  "protocol": "two AB/BA process pairs; one complete warmup and three measured complete API calls per process",
+  "timing_scope": "complete API input reads, computation and output saves; process startup and torch imports excluded",
+  "declared_source_files_unchanged_before_after": true,
+  "output_gate_scope": "all sixteen saved complete calls per case; full values and NIfTI header/extensions/affine",
+  "records": [
+    {
+      "case_id": "invwarp_real_coeff",
+      "precision": {
+        "inverse_warp": {
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "element_count": 18808200,
+          "finite_pair_count": 18808200,
+          "candidate_finite_count": 18808200,
+          "reference_finite_count": 18808200,
+          "nonfinite_pattern_equal": true,
+          "nonfinite_pattern_mismatch_count": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "measurements": {
+        "baseline": [
+          {
+            "seconds": [
+              3.9700013981200755,
+              3.9618467651307583,
+              3.9458097582682967
+            ],
+            "median_seconds": 3.9618467651307583,
+            "cuda_peak_allocation_bytes_per_call": [
+              1275725824,
+              1275725824,
+              1275725824,
+              1275725824
+            ],
+            "maximum_all_calls_allocation_bytes": 1275725824,
+            "gpu_before_target": {
+              "used_memory_mib": 61606,
+              "utilization_percent": 100
+            }
+          },
+          {
+            "seconds": [
+              3.8736075940541923,
+              3.9023401332087815,
+              4.017867831978947
+            ],
+            "median_seconds": 3.9023401332087815,
+            "cuda_peak_allocation_bytes_per_call": [
+              1275725824,
+              1275725824,
+              1275725824,
+              1275725824
+            ],
+            "maximum_all_calls_allocation_bytes": 1275725824,
+            "gpu_before_target": {
+              "used_memory_mib": 66014,
+              "utilization_percent": 100
+            }
+          }
+        ],
+        "candidate": [
+          {
+            "seconds": [
+              4.100916416849941,
+              3.911404751241207,
+              3.935057827271521
+            ],
+            "median_seconds": 3.935057827271521,
+            "cuda_peak_allocation_bytes_per_call": [
+              1275725824,
+              1275725824,
+              1275725824,
+              1275725824
+            ],
+            "maximum_all_calls_allocation_bytes": 1275725824,
+            "gpu_before_target": {
+              "used_memory_mib": 61608,
+              "utilization_percent": 100
+            }
+          },
+          {
+            "seconds": [
+              3.9217741722241044,
+              3.915659338235855,
+              3.909293749835342
+            ],
+            "median_seconds": 3.915659338235855,
+            "cuda_peak_allocation_bytes_per_call": [
+              1275725824,
+              1275725824,
+              1275725824,
+              1275725824
+            ],
+            "maximum_all_calls_allocation_bytes": 1275725824,
+            "gpu_before_target": {
+              "used_memory_mib": 63874,
+              "utilization_percent": 100
+            }
+          }
+        ]
+      },
+      "all_sixteen_saved_calls_bit_and_metadata_equal": true,
+      "input_files_unchanged_before_after": true,
+      "full_output_element_counts": {
+        "inverse_warp": 18808200
+      },
+      "allocation_maxima_equal_across_processes_and_sources": true
+    },
+    {
+      "case_id": "applywarp_full_dwi_mni_coefficient",
+      "precision": {
+        "warped": {
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "element_count": 94776045,
+          "finite_pair_count": 94776045,
+          "candidate_finite_count": 94776045,
+          "reference_finite_count": 94776045,
+          "nonfinite_pattern_equal": true,
+          "nonfinite_pattern_mismatch_count": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "measurements": {
+        "baseline": [
+          {
+            "seconds": [
+              6.394230951089412,
+              5.835793389007449,
+              5.817037026863545
+            ],
+            "median_seconds": 5.835793389007449,
+            "cuda_peak_allocation_bytes_per_call": [
+              777303040,
+              777303040,
+              777303040,
+              777303040
+            ],
+            "maximum_all_calls_allocation_bytes": 777303040,
+            "gpu_before_target": {
+              "used_memory_mib": 66014,
+              "utilization_percent": 100
+            }
+          },
+          {
+            "seconds": [
+              6.1069047609344125,
+              6.669271109160036,
+              5.286325277760625
+            ],
+            "median_seconds": 6.1069047609344125,
+            "cuda_peak_allocation_bytes_per_call": [
+              777303040,
+              777303040,
+              777303040,
+              777303040
+            ],
+            "maximum_all_calls_allocation_bytes": 777303040,
+            "gpu_before_target": {
+              "used_memory_mib": 66014,
+              "utilization_percent": 100
+            }
+          }
+        ],
+        "candidate": [
+          {
+            "seconds": [
+              5.58314174413681,
+              5.423245412763208,
+              5.498352269642055
+            ],
+            "median_seconds": 5.498352269642055,
+            "cuda_peak_allocation_bytes_per_call": [
+              777303040,
+              777303040,
+              777303040,
+              777303040
+            ],
+            "maximum_all_calls_allocation_bytes": 777303040,
+            "gpu_before_target": {
+              "used_memory_mib": 66014,
+              "utilization_percent": 97
+            }
+          },
+          {
+            "seconds": [
+              5.84296771325171,
+              5.2605477049946785,
+              5.394956197123975
+            ],
+            "median_seconds": 5.394956197123975,
+            "cuda_peak_allocation_bytes_per_call": [
+              777303040,
+              777303040,
+              777303040,
+              777303040
+            ],
+            "maximum_all_calls_allocation_bytes": 777303040,
+            "gpu_before_target": {
+              "used_memory_mib": 66014,
+              "utilization_percent": 100
+            }
+          }
+        ]
+      },
+      "all_sixteen_saved_calls_bit_and_metadata_equal": true,
+      "input_files_unchanged_before_after": true,
+      "full_output_element_counts": {
+        "warped": 94776045
+      },
+      "allocation_maxima_equal_across_processes_and_sources": true
+    }
+  ]
+}

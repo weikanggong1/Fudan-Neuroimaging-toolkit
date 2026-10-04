@@ -1,0 +1,115 @@
+{
+  "status": "completed",
+  "scope": "one instrumented full API load + compute + save; imports and lock wait excluded",
+  "benchmark": false,
+  "inclusive_scopes_overlap": true,
+  "threads": 1,
+  "affinity": [
+    95
+  ],
+  "case_id": "public_cc0_t1_default",
+  "source_hashes": {
+    "src/fnit/fnirt/registration.py": "74fc259e2096e64153a591488303b8ccdfdf19d4ba0b2b91891222b905740e89",
+    "src/fnit/fnirt/spline.py": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+    "src/fnit/fnirt/topology.py": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3",
+    "src/fnit/fnirt/_normal_cpu.py": "7d9d182c6a3925bbd495e983c4e5c723ed752629fd451b5d1a351370ba1d6898",
+    "src/fnit/fnirt/_smoothing_cpu.py": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be",
+    "src/fnit/fnirt/_topology_cpu.py": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6",
+    "src/fnit/fnirt/_bending_cpu.py": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+  },
+  "instrumented_api_seconds": 165.2377983108163,
+  "counters": {
+    "registration._fsl_masked_gaussian_blur": {
+      "calls": 4,
+      "inclusive_seconds": 10.856778115034103
+    },
+    "registration.expand_coefficients": {
+      "calls": 3684,
+      "inclusive_seconds": 5.775312751531601
+    },
+    "registration._trilinear_sample": {
+      "calls": 211,
+      "inclusive_seconds": 29.752704061567783
+    },
+    "spline.expand_coefficients": {
+      "calls": 22398,
+      "inclusive_seconds": 25.980029962956905
+    },
+    "bending_cpu.multiply_square_": {
+      "calls": 1260,
+      "inclusive_seconds": 4.654850527644157
+    },
+    "BendingOperator.energy": {
+      "calls": 210,
+      "inclusive_seconds": 35.16497106850147
+    },
+    "LevelSystem.evaluate": {
+      "calls": 105,
+      "inclusive_seconds": 44.245772041380405
+    },
+    "registration.adjoint_field": {
+      "calls": 5206,
+      "inclusive_seconds": 11.492439448833466
+    },
+    "BendingOperator.normal": {
+      "calls": 3523,
+      "inclusive_seconds": 2.774176873266697
+    },
+    "registration.design_diagonal": {
+      "calls": 185,
+      "inclusive_seconds": 0.14461251348257065
+    },
+    "BendingOperator.diagonal": {
+      "calls": 85,
+      "inclusive_seconds": 0.1320357322692871
+    },
+    "LevelSystem.linearize": {
+      "calls": 50,
+      "inclusive_seconds": 22.914308845996857
+    },
+    "SpatialNormalCPU.__call__": {
+      "calls": 1755,
+      "inclusive_seconds": 40.854419611394405
+    },
+    "registration._spline_jacobian": {
+      "calls": 10,
+      "inclusive_seconds": 1.4173280745744705
+    },
+    "registration._force_jacobian_range": {
+      "calls": 4,
+      "inclusive_seconds": 7.273479461669922
+    },
+    "topology.gradient_field": {
+      "calls": 10,
+      "inclusive_seconds": 0.3316517621278763
+    },
+    "topology.jacobian_check": {
+      "calls": 6,
+      "inclusive_seconds": 2.759084038436413
+    },
+    "topology.limit_gradient": {
+      "calls": 4,
+      "inclusive_seconds": 1.6858818158507347
+    },
+    "topology._rounded_fft": {
+      "calls": 48,
+      "inclusive_seconds": 1.0762856602668762
+    },
+    "topology.integrate_gradient_field": {
+      "calls": 4,
+      "inclusive_seconds": 1.2986750230193138
+    },
+    "registration.constrain_topology": {
+      "calls": 1,
+      "inclusive_seconds": 6.461457297205925
+    }
+  },
+  "output_sha256": {
+    "cout": "42380fd6386eb180a2d786efc17fd5fb0d2e5759e4909e9b219769eb6e678141",
+    "iout": "df8c1627a2ce0217f7f7848dd8d06f2dcab39a804c42ac76655ffd646312da55",
+    "jout": "a06818e20571e681043dc5545e30e7e22feaff39d1abd576f903e1202883cb26"
+  },
+  "input_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+  "dataset": "OpenNeuro ds000114 v1.0.2",
+  "license": "CC0"
+}

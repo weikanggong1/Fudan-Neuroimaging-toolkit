@@ -325,6 +325,8 @@ def _fsl_gaussian_blur(volume, fwhm_mm, voxel_sizes):
             pass
         else:
             return gaussian_blur_cuda(volume, _fsl_gaussian_kernels(fwhm_mm, voxel_sizes))
+    if volume.device.type == "cpu" and not volume.requires_grad:
+        return _fsl_gaussian_blur_cpu(volume, fwhm_mm, voxel_sizes)
     return _fsl_gaussian_blur_reference(volume, fwhm_mm, voxel_sizes)
 
 
@@ -375,6 +377,43 @@ def _fsl_gaussian_blur_reference(volume, fwhm_mm, voxel_sizes):
             convolved[target] = (
                 convolved[target].to(torch.float64) + product
             ).to(result.dtype)
+        result = convolved
+    return result
+
+
+def _fsl_gaussian_blur_cpu(volume, fwhm_mm, voxel_sizes):
+    """Reuse CPU scratch while retaining every offset's float assignment.
+
+    FSL multiplies a float sample by a double kernel entry, adds in double,
+    then stores back to the image dtype after *each* offset.  A conventional
+    convolution changes that rounding order.  ``add(..., out=target)`` uses
+    the double scratch's promoted dtype and casts only its result, exactly
+    as the reference expression does.  No thread settings are changed.
+    """
+    if fwhm_mm <= 0:
+        return volume
+    if volume.ndim == 5 and volume.dtype in (torch.float32, torch.float64) and not volume.requires_grad:
+        from ._smoothing_cpu import gaussian_blur_cpu
+        return gaussian_blur_cpu(volume, _fsl_gaussian_kernels(fwhm_mm, voxel_sizes))
+    scratch = torch.empty_like(volume, dtype=torch.float64)
+    result = volume
+    for axis, kernel in enumerate(_fsl_gaussian_kernels(fwhm_mm, voxel_sizes)):
+        radius = len(kernel) // 2
+        convolved = torch.zeros_like(result)
+        dimension = axis + 2
+        length = result.shape[dimension]
+        for offset, weight in zip(range(-radius, radius + 1), kernel):
+            source_start = max(0, offset)
+            source_stop = min(length, length + offset)
+            count = source_stop - source_start
+            if count <= 0:
+                continue
+            source = result.narrow(dimension, source_start, count)
+            target = convolved.narrow(dimension, source_start - offset, count)
+            product = scratch.narrow(dimension, 0, count)
+            product.copy_(source)
+            product.mul_(weight)
+            torch.add(product, target, out=target)
         result = convolved
     return result
 
@@ -480,6 +519,15 @@ def _trilinear_sample(volume, coordinates, *, derivatives=True):
     """
     if volume.ndim != 3 or coordinates.shape[0] != 3:
         raise ValueError("invalid trilinear input shapes")
+    if (volume.device.type == "cpu" and coordinates.device.type == "cpu"
+            and volume.dtype == torch.float32 and coordinates.dtype == torch.float32
+            and not volume.requires_grad and not coordinates.requires_grad):
+        # CUDA retains its tensor operations and never imports this CPU module.
+        # The helper returns None for unsupported/exceptional tensor semantics.
+        from ._sampling_cpu import try_sample_cpu
+        result = try_sample_cpu(volume, coordinates, derivatives=derivatives)
+        if result is not None:
+            return result
     spatial_shape = coordinates.shape[1:]
     flat = coordinates.reshape(3, -1)
     valid = torch.ones(flat.shape[1], dtype=torch.bool, device=volume.device)
@@ -821,7 +869,7 @@ class _LevelSystem:
             else _fsl_affine_grid(coordinate_affine, fixed.shape)
         )
 
-    def evaluate(self, coefficients, scale, *, derivatives=False):
+    def evaluate(self, coefficients, scale, *, derivatives=False, _compute_cost=True):
         # basisfield coefficients and spline arithmetic are double precision;
         # AsVolume then rounds the dense displacement to float before warping.
         field = expand_coefficients(coefficients, self.bases).to(
@@ -872,8 +920,13 @@ class _LevelSystem:
         effective_lambda = self.regularization
         if self.ssd_weighted_lambda:
             effective_lambda *= float(ssd.detach())
-        bend = self.bending.energy(coefficients)
-        cost = ssd + effective_lambda * bend / count
+        if _compute_cost:
+            bend = self.bending.energy(coefficients)
+            cost = ssd + effective_lambda * bend / count
+        else:
+            if not derivatives or coefficients.device.type != "cpu":
+                raise ValueError("discarded SCG cost is CPU derivative-only")
+            bend, cost = None, None
         state = {
             "field": field,
             "warped": warped,
@@ -893,13 +946,27 @@ class _LevelSystem:
             )
         return state
 
-    def gradient(self, coefficients, scale, *, effective_lambda=None):
+    def gradient(self, coefficients, scale, *, effective_lambda=None, _skip_cost=False):
         """Return the FSL SSD gradient and its evaluated state.
 
         The override reproduces stateful latest_ssd behavior in SCG because a
         finite-difference gradient does not itself update that value.
         """
-        state = self.evaluate(coefficients, scale, derivatives=True)
+        skip_cost = bool(_skip_cost and coefficients.device.type == "cpu")
+        if skip_cost:
+            values = (coefficients, scale, self.moving, self.fixed, self.moving_mask,
+                self.reference_mask, self.moving_fsl2vox, self.target_fsl,
+                self.affine_pull, self.coordinate_affine, *self.bases,
+                *(basis for bases, _ in self.bending.operators for basis in bases))
+            for value in values:
+                if value is None:
+                    continue
+                if (value.requires_grad
+                        or torch._C._functorch.is_functorch_wrapped_tensor(value)
+                        or torch.autograd.forward_ad.unpack_dual(value).tangent is not None):
+                    skip_cost = False
+                    break
+        state = self.evaluate(coefficients, scale, derivatives=True, _compute_cost=not skip_cost)
         mask = state["mask"].to(state["residual"].dtype)
         count = state["count"]
         weighted = state["residual"] * mask / count
@@ -976,19 +1043,33 @@ class _LevelSystem:
                 dtype=coefficients.dtype
             ) / count
 
+        cpu_normal = None
+        if (coefficients.device.type == "cpu" and coefficients.dtype == torch.float64
+                and self.bending.execution == "optimized" and not coefficients.requires_grad
+                and all(not value.requires_grad for row in spatial_weights for value in row)
+                and (cross_weights is None or all(not value.requires_grad for value in cross_weights))):
+            from ._normal_cpu import SpatialNormalCPU
+            cpu_normal = SpatialNormalCPU(spatial_weights, cross_weights, count)
+
         def data_normal(vector, *, delta_field=None):
             delta_coefficients, delta_scale = _unpack(
                 vector, coefficient_shape, self.estimate_scale
             )
             if delta_field is None:
                 delta_field = expand_coefficients(delta_coefficients, self.bases)
-            dense = torch.zeros_like(delta_field)
-            for row in range(3):
-                for column in range(3):
-                    dense[row] = dense[row] + spatial_weights[row][column] * delta_field[column]
-                if delta_scale is not None:
-                    dense[row] = dense[row] + cross_weights[row] * delta_scale
-            coefficient_result = adjoint_field(dense / count, self.bases)
+            if cpu_normal is not None and not delta_field.requires_grad and (delta_scale is None or not delta_scale.requires_grad):
+                # Final division follows the original FP64 additions. CUDA and
+                # differentiable/reference CPU calls keep the existing path.
+                dense = cpu_normal(delta_field, delta_scale)
+                coefficient_result = adjoint_field(dense, self.bases)
+            else:
+                dense = torch.zeros_like(delta_field)
+                for row in range(3):
+                    for column in range(3):
+                        dense[row] = dense[row] + spatial_weights[row][column] * delta_field[column]
+                    if delta_scale is not None:
+                        dense[row] = dense[row] + cross_weights[row] * delta_scale
+                coefficient_result = adjoint_field(dense / count, self.bases)
             scale_result = None
             if delta_scale is not None:
                 scale_result = scale_weight * delta_scale
@@ -1587,6 +1668,7 @@ class TorchFNIRT:
                         current_coefficients,
                         current_scale,
                         effective_lambda=effective_lambda,
+                        _skip_cost=self.device.type == "cpu",
                     )
                     return value
 

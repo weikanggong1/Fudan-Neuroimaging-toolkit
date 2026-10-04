@@ -1,0 +1,101 @@
+{
+  "status": "completed",
+  "scope": "single full instrumented API old/new gate, no official clocks",
+  "source_hashes": {
+    "baseline": {
+      "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+      "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+      "src/fnit/convertwarp/core.py": "4c564a082b893a2b45a8d1ecab0fdd347ee4cedd022d108c90aff1b0269cc70f",
+      "src/fnit/invwarp/core.py": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391"
+    },
+    "candidate": {
+      "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+      "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+      "src/fnit/convertwarp/core.py": "d5268055b8d3b858fd80e96158d0fc167daf722e0b25fd7a3cbe04da3b8e3264",
+      "src/fnit/invwarp/core.py": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391"
+    }
+  },
+  "checks": [
+    {
+      "threads": 1,
+      "status_a": "completed",
+      "status_b": "completed",
+      "same_all_output_files": true,
+      "same_solver_qc": true,
+      "same_valid_fraction": true,
+      "same_input_sha256": true,
+      "baseline_api_seconds": 57.28058271110058,
+      "candidate_api_seconds": 54.79254027456045,
+      "baseline_rss_kib": 1745268,
+      "candidate_rss_kib": 1745412,
+      "baseline_normalization": {
+        "calls": 32,
+        "inclusive_seconds": 4.000033125281334
+      },
+      "candidate_normalization": {
+        "calls": 32,
+        "inclusive_seconds": 4.2054547145962715
+      },
+      "solver_qc": {
+        "device": "cpu",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 30,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.760824978351593
+    },
+    {
+      "threads": 8,
+      "status_a": "completed",
+      "status_b": "completed",
+      "same_all_output_files": true,
+      "same_solver_qc": true,
+      "same_valid_fraction": true,
+      "same_input_sha256": true,
+      "baseline_api_seconds": 15.345010980963707,
+      "candidate_api_seconds": 15.332220546901226,
+      "baseline_rss_kib": 1736980,
+      "candidate_rss_kib": 1736876,
+      "baseline_normalization": {
+        "calls": 32,
+        "inclusive_seconds": 3.644722767174244
+      },
+      "candidate_normalization": {
+        "calls": 32,
+        "inclusive_seconds": 3.9388929530978203
+      },
+      "solver_qc": {
+        "device": "cpu",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 30,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.760824978351593
+    }
+  ],
+  "focused_tests": {
+    "passed": 187,
+    "seconds": 20.85,
+    "cuda_executed": true,
+    "scope": [
+      "Apply CPU normalization",
+      "Apply CPU sampling",
+      "InvWarp",
+      "ConvertWarp static coordinates and exceptional routing"
+    ]
+  },
+  "timing_contract": "One complete instrumented API old/new observation for each budget, no warmup or official comparison; all input voxels, full 30-iteration solver and all saved outputs retained.",
+  "coordinate_precision": "FP64, no lower precision introduced",
+  "cpu_scope": "Prepared repeated sampling only; finite contiguous FP64 query, strict diagonal scaled inverse and positive-zero translation. CUDA/autograd/one-shot/other layouts/matrices use the original product.",
+  "correctness_checks": "All saved file SHA-256, input hashes, solver QC, actual stopping count and valid fraction equal for each old/new pair."
+}

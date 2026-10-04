@@ -1,0 +1,480 @@
+{
+  "status": "completed",
+  "source_label": "candidate_all_v26",
+  "node": "nodecw10",
+  "scope": "fresh all_v26 complete InvWarp official/candidate process pairs; separate warmed complete load+compute+save API",
+  "protocol_inv": "one full pair warmup plus three alternating process pairs, and one full API warmup plus three full API repetitions",
+  "cpuset": [
+    35,
+    39,
+    43,
+    47,
+    51,
+    55,
+    59,
+    63
+  ],
+  "source_sha256": {
+    "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+    "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+    "src/fnit/convertwarp/core.py": "d5268055b8d3b858fd80e96158d0fc167daf722e0b25fd7a3cbe04da3b8e3264",
+    "src/fnit/invwarp/core.py": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391"
+  },
+  "reference_environment_preserved": true,
+  "private_image_hashes_exported": false,
+  "records": [
+    {
+      "case_id": "invwarp_t1_coefficient_uncompressed_output",
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "timing_protocol": "warmup_and_paired_repeats",
+      "full_process": {
+        "official": [
+          36.36398629844189,
+          35.77902988344431,
+          35.58284479379654,
+          35.577017307281494
+        ],
+        "baseline": [],
+        "candidate": [
+          56.129276156425476,
+          55.58417983353138,
+          55.634680680930614,
+          55.46978472173214
+        ]
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 35.129772,
+              "system_seconds": 0.5480269999999999,
+              "effective_cpu_cores": 0.9811300308824699
+            }
+          ],
+          [
+            {
+              "user_seconds": 35.11884599999999,
+              "system_seconds": 0.5470129999999997,
+              "effective_cpu_cores": 0.9968369493579624
+            }
+          ],
+          [
+            {
+              "user_seconds": 34.937504000000004,
+              "system_seconds": 0.5299770000000024,
+              "effective_cpu_cores": 0.996757881657156
+            }
+          ],
+          [
+            {
+              "user_seconds": 34.97247200000001,
+              "system_seconds": 0.49002000000000123,
+              "effective_cpu_cores": 0.9967809188079952
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 25.396231999999998,
+            "system_seconds": 30.227898,
+            "effective_cpu_cores": 0.9910003087334015
+          },
+          {
+            "user_seconds": 25.070530000000005,
+            "system_seconds": 30.174329,
+            "effective_cpu_cores": 0.9938953703275353
+          },
+          {
+            "user_seconds": 25.281463000000002,
+            "system_seconds": 29.781123,
+            "effective_cpu_cores": 0.9897169414126479
+          },
+          {
+            "user_seconds": 25.014684999999986,
+            "system_seconds": 30.168038999999993,
+            "effective_cpu_cores": 0.9948249173280153
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561402243,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "median_full_process_seconds": {
+        "official": 35.58284479379654,
+        "candidate": 55.58417983353138
+      },
+      "warmup_full_process": {
+        "official": 36.36398629844189,
+        "candidate": 56.129276156425476
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "complete_process_speed_goal_met": false,
+      "input_metadata_unchanged": true,
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "bytes": 265960,
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c"
+        }
+      ],
+      "candidate_first_api_seconds": [
+        54.002732925117016,
+        53.742019556462765,
+        53.533415488898754,
+        53.61473363637924
+      ],
+      "candidate_first_api_peak_rss_kib": [
+        1746564,
+        1738316,
+        1738420,
+        1738436
+      ],
+      "candidate_first_api_threads": [
+        {
+          "torch": 1,
+          "torch_interop": 1,
+          "numba": 1
+        },
+        {
+          "torch": 1,
+          "torch_interop": 1,
+          "numba": 1
+        },
+        {
+          "torch": 1,
+          "torch_interop": 1,
+          "numba": 1
+        },
+        {
+          "torch": 1,
+          "torch_interop": 1,
+          "numba": 1
+        }
+      ],
+      "candidate_versions": {
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "numba": "0.61.2",
+        "nibabel": "5.4.2"
+      },
+      "candidate_loaded_api": {
+        "candidate": {
+          "scope": "Warmed adapter API: load + complete computation + transfer + save; one complete warmup call excluded",
+          "warmup_seconds": 53.827368661761284,
+          "seconds": [
+            54.15453353524208,
+            53.733048141002655,
+            53.3993288949132
+          ],
+          "median_seconds": 53.733048141002655,
+          "maximum_rss_kib": 1795448,
+          "threads": {
+            "torch": 1,
+            "torch_interop": 1,
+            "numba": 1
+          },
+          "versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          }
+        }
+      }
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_uncompressed_output",
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "timing_protocol": "warmup_and_paired_repeats",
+      "full_process": {
+        "official": [
+          35.784846760332584,
+          35.78602074831724,
+          35.61363949626684,
+          35.732444152235985
+        ],
+        "baseline": [],
+        "candidate": [
+          16.742270305752754,
+          16.596421778202057,
+          16.542403616011143,
+          16.126686342060566
+        ]
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 35.126547000000016,
+              "system_seconds": 0.5470080000000053,
+              "effective_cpu_cores": 0.9968899752155457
+            }
+          ],
+          [
+            {
+              "user_seconds": 35.08157399999999,
+              "system_seconds": 0.5780090000000087,
+              "effective_cpu_cores": 0.9964668396856281
+            }
+          ],
+          [
+            {
+              "user_seconds": 34.96939600000002,
+              "system_seconds": 0.5360519999999838,
+              "effective_cpu_cores": 0.9969620769514954
+            }
+          ],
+          [
+            {
+              "user_seconds": 35.04583500000001,
+              "system_seconds": 0.5719980000000078,
+              "effective_cpu_cores": 0.9967925185372802
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 39.67905000000002,
+            "system_seconds": 29.364491000000015,
+            "effective_cpu_cores": 4.1239055241078155
+          },
+          {
+            "user_seconds": 41.18190499999997,
+            "system_seconds": 29.123356,
+            "effective_cpu_cores": 4.236169816576954
+          },
+          {
+            "user_seconds": 40.74385199999995,
+            "system_seconds": 27.363872000000015,
+            "effective_cpu_cores": 4.117160092387029
+          },
+          {
+            "user_seconds": 40.4617310000001,
+            "system_seconds": 27.431259999999952,
+            "effective_cpu_cores": 4.2099777697620375
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561425347,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "median_full_process_seconds": {
+        "official": 35.732444152235985,
+        "candidate": 16.542403616011143
+      },
+      "warmup_full_process": {
+        "official": 35.784846760332584,
+        "candidate": 16.742270305752754
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "complete_process_speed_goal_met": true,
+      "input_metadata_unchanged": true,
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "bytes": 265960,
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c"
+        }
+      ],
+      "candidate_first_api_seconds": [
+        14.67041302472353,
+        14.74918482452631,
+        14.421892240643501,
+        14.276036471128464
+      ],
+      "candidate_first_api_peak_rss_kib": [
+        1795448,
+        1795448,
+        1795448,
+        1795448
+      ],
+      "candidate_first_api_threads": [
+        {
+          "torch": 8,
+          "torch_interop": 1,
+          "numba": 8
+        },
+        {
+          "torch": 8,
+          "torch_interop": 1,
+          "numba": 8
+        },
+        {
+          "torch": 8,
+          "torch_interop": 1,
+          "numba": 8
+        },
+        {
+          "torch": 8,
+          "torch_interop": 1,
+          "numba": 8
+        }
+      ],
+      "candidate_versions": {
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "numba": "0.61.2",
+        "nibabel": "5.4.2"
+      },
+      "candidate_loaded_api": {
+        "candidate": {
+          "scope": "Warmed adapter API: load + complete computation + transfer + save; one complete warmup call excluded",
+          "warmup_seconds": 14.517401672899723,
+          "seconds": [
+            14.14466917514801,
+            14.262019112706184,
+            14.25915002077818
+          ],
+          "median_seconds": 14.25915002077818,
+          "maximum_rss_kib": 1810116,
+          "threads": {
+            "torch": 8,
+            "torch_interop": 1,
+            "numba": 8
+          },
+          "versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          }
+        }
+      }
+    }
+  ]
+}

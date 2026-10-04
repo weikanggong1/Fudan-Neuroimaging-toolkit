@@ -560,3 +560,189 @@ def test_cpu_batched_affine_empty_shape_and_invalid_inputs():
         fsl_affine_from_parameters_batch(np.zeros((1, 12)), [0, 0])
     with pytest.raises(ValueError, match="dof"):
         fsl_affine_from_parameters_batch(np.zeros((1, 12)), [0, 0, 0], dof=8)
+
+
+@pytest.mark.parametrize("cost_class", _COST_CLASSES)
+@pytest.mark.parametrize("weighted", (False, True))
+@pytest.mark.parametrize("smooth", (0.0, 1.3))
+@pytest.mark.parametrize("chunk_size", (1, 3, 32))
+def test_cpu_fused_batch_sampling_keeps_original_samples_and_batch_cost_bits(
+    cost_class, weighted, smooth, chunk_size,
+):
+    cost = _cost(cost_class, "cpu", smooth_size=smooth, weighted=weighted)
+    evaluator = BatchedAffineCost(cost, max_batch_size=32)
+    candidates = _candidates()
+    coefficients, _ = evaluator._coefficients(candidates)
+    values, weights = evaluator._sample(coefficients)
+    expected_values, expected_weights = evaluator._sample_tensor(coefficients)
+    np.testing.assert_array_equal(values.numpy().view(np.uint32), expected_values.numpy().view(np.uint32))
+    np.testing.assert_array_equal(weights.numpy().view(np.uint32), expected_weights.numpy().view(np.uint32))
+
+    actual = evaluator.evaluate(candidates, chunk_size=chunk_size)
+    # Call the original Tensor sampler and batch reducers directly: CPU
+    # evaluate() now routes through fused statistics rather than _sample().
+    # Preserve the same partial chunks and duplicate candidate ordering.
+    expected_parts = []
+    size = evaluator._chunk_size(chunk_size)
+    for start in range(0, len(candidates), size):
+        chunk_coefficients, _ = evaluator._coefficients(candidates[start:start + size])
+        chunk_values, chunk_weights = evaluator._sample_tensor(chunk_coefficients)
+        reducer = evaluator._normmi if evaluator.nmi else evaluator._corratio
+        expected_parts.append(reducer(chunk_values, chunk_weights))
+    expected = torch.cat(expected_parts)
+    np.testing.assert_array_equal(actual.numpy().view(np.uint32), expected.numpy().view(np.uint32))
+
+
+def test_cpu_batch_fusion_preserves_empty_and_failed_inverse_contracts():
+    evaluator = BatchedAffineCost(_cost(FSLCorrelationRatio, "cpu"))
+    assert evaluator(np.empty((0, 4, 4))).shape == (0,)
+    singular = np.zeros((1, 4, 4), dtype=np.float64)
+    with pytest.raises(np.linalg.LinAlgError):
+        evaluator(singular)
+    nonfinite = np.eye(4)[None]
+    nonfinite[0, 0, 0] = np.nan
+    with pytest.raises(ValueError, match="only finite"):
+        evaluator(nonfinite)
+
+
+@pytest.mark.parametrize("shape", ((1, 4, 5), (3, 1, 5), (3, 4, 1)))
+def test_cpu_batch_thin_axis_keeps_original_tensor_exception(shape):
+    image = torch.arange(np.prod(shape), dtype=torch.float32).reshape(shape)
+    cost = FSLCorrelationRatio(image, image, (1, 1, 1), (1, 1, 1), bins=32, smooth_size=1)
+    evaluator = BatchedAffineCost(cost)
+    with pytest.raises(IndexError):
+        evaluator(np.eye(4))
+
+
+def _tensor_joint_histogram(evaluator, values, weights):
+    """Original Tensor scatter before its float32 entropy conversion."""
+    bins = values * evaluator.cost.test_factor + evaluator.cost.test_offset
+    bins = torch.where(torch.isfinite(bins), bins, 0)
+    truncated = bins.trunc()
+    raw = truncated.long()
+    fraction = (bins - truncated).abs()
+    centre_weight = torch.where(
+        fraction < .5, .5 + fraction,
+        torch.where(fraction > .5, 1.5 - fraction, 1.),
+    ).clamp(0, 1)
+    stride = evaluator.cost.bins + 1
+    joint = torch.zeros((len(values), stride * stride), dtype=torch.float64)
+    contributions = (
+        (raw.clamp(0, evaluator.cost.bins - 1), centre_weight),
+        ((raw - 1).clamp_min(0), torch.where(fraction < .5, 1 - centre_weight, 0)),
+        ((raw + 1).clamp_max(evaluator.cost.bins - 1),
+         torch.where(fraction > .5, 1 - centre_weight, 0)),
+    )
+    for index, contribution in contributions:
+        joint.scatter_add_(1, evaluator.bin_offsets[None] + index,
+                           (weights * contribution).double())
+    return joint.reshape(-1, stride, stride)
+
+
+@pytest.mark.parametrize("cost_class", _COST_CLASSES)
+@pytest.mark.parametrize("batch_size", (1, 128))
+@pytest.mark.parametrize("threads", (1, 8))
+@pytest.mark.parametrize("layout", ("fortran", "strided"))
+@pytest.mark.parametrize("weight_kind", ("none", "input", "reference", "both"))
+def test_cpu_batch_statistics_preserve_bins_packed_sums_and_cost_bits(
+    cost_class, batch_size, threads, layout, weight_kind,
+):
+    rng = np.random.default_rng(104023)
+    shape = (3, 4, 5)
+    reference = torch.from_numpy(rng.uniform(-30, 900, shape).astype(np.float32))
+    moving_array = rng.uniform(-40, 700, shape).astype(np.float32)
+    if layout == "fortran":
+        moving = torch.from_numpy(np.asfortranarray(moving_array))
+    else:
+        storage = torch.empty((shape[0] * 2, shape[1], shape[2]))
+        moving = storage[::2]
+        moving.copy_(torch.from_numpy(moving_array))
+    kwargs = {}
+    if weight_kind in ("input", "both"):
+        kwargs["moving_weight"] = torch.from_numpy(rng.uniform(0, 1, shape).astype(np.float32))
+    if weight_kind in ("reference", "both"):
+        kwargs["reference_weight"] = torch.from_numpy(rng.uniform(0, 1, shape).astype(np.float32))
+    previous_threads = torch.get_num_threads()
+    torch.set_num_threads(threads)
+    try:
+        cost = cost_class(reference, moving, (1.1, 1.9, 2.7), (1.7, 1.3, 2.2),
+                          bins=32, smooth_size=1.3, **kwargs)
+        original = BatchedAffineCost(cost)
+        fused = BatchedAffineCost(cost)
+        matrices = np.repeat(np.eye(4)[None], batch_size, axis=0)
+        matrices[:, :3, 3] = rng.uniform(-.8, .8, (batch_size, 3))
+        if batch_size > 1:
+            matrices[-1, :3, 3] = (1000, -1000, 1000)
+        coefficients, _ = original._coefficients(matrices)
+        values, weights = original._sample_tensor(coefficients)
+        if fused.nmi:
+            expected_joint = _tensor_joint_histogram(original, values, weights)
+            joint = fused._joint_histogram_cpu(values, weights)
+            np.testing.assert_array_equal(joint.numpy().view(np.uint64),
+                                          expected_joint.numpy().view(np.uint64))
+        else:
+            order = original.bin_sort_order
+            sorted_values, sorted_weights = values[:, order], weights[:, order]
+            lengths = original._segment_bin_lengths.repeat(batch_size)
+            expected_statistics = []
+            for data in (sorted_weights, sorted_weights * sorted_values,
+                         (sorted_weights * sorted_values) * sorted_values):
+                expected_statistics.append(torch.segment_reduce(
+                    data.reshape(-1), "sum", lengths=lengths, unsafe=True, initial=0,
+                ).reshape(batch_size, cost.bins))
+            for actual, expected in zip(fused._cpu_corratio_statistics(coefficients),
+                                        expected_statistics):
+                np.testing.assert_array_equal(actual.numpy().view(np.uint32),
+                                              expected.numpy().view(np.uint32))
+        captured = {"old": [], "new": []}
+
+        def capture(label, function):
+            def compact(packed, lengths):
+                result = function(packed, lengths)
+                captured[label].append((packed.clone(), lengths.clone(), result.clone()))
+                return result
+            return compact
+
+        original._compact_sum = capture("old", original._compact_sum)
+        fused._compact_sum = capture("new", fused._compact_sum)
+        expected = original._normmi(values, weights) if fused.nmi else original._corratio(values, weights)
+        actual = fused._normmi_cpu(values, weights) if fused.nmi else fused._corratio_cpu(coefficients)
+        assert len(captured["old"]) == len(captured["new"])
+        for old_call, new_call in zip(captured["old"], captured["new"]):
+            for expected_tensor, actual_tensor in zip(old_call, new_call):
+                np.testing.assert_array_equal(actual_tensor.numpy().view(np.uint32),
+                                              expected_tensor.numpy().view(np.uint32))
+        np.testing.assert_array_equal(actual.numpy().view(np.uint32), expected.numpy().view(np.uint32))
+    finally:
+        torch.set_num_threads(previous_threads)
+
+
+@pytest.mark.parametrize("bad_value", (np.nan, np.inf, -100.0, 100.0))
+def test_cpu_batch_nmi_unsafe_bin_retains_tensor_fallback(bad_value):
+    evaluator = BatchedAffineCost(_cost(FSLNormalizedMutualInformation, "cpu"))
+    coefficients, _ = evaluator._coefficients(np.eye(4)[None])
+    values, weights = evaluator._sample_tensor(coefficients)
+    values = values.clone()
+    values[0, 0] = float((bad_value - evaluator.cost.test_offset) / evaluator.cost.test_factor)
+    assert evaluator._joint_histogram_cpu(values, weights) is None
+    try:
+        expected = evaluator._normmi(values, weights)
+    except RuntimeError:
+        with pytest.raises(RuntimeError):
+            evaluator._normmi_cpu(values, weights)
+    else:
+        actual = evaluator._normmi_cpu(values, weights)
+        np.testing.assert_array_equal(actual.numpy().view(np.uint32), expected.numpy().view(np.uint32))
+
+
+@pytest.mark.parametrize("bad_weight", (np.nan, np.inf, -np.inf))
+def test_cpu_batch_nmi_nonfinite_joint_retains_tensor_bits(bad_weight):
+    evaluator = BatchedAffineCost(_cost(FSLNormalizedMutualInformation, "cpu"))
+    coefficients, _ = evaluator._coefficients(np.eye(4)[None])
+    values, weights = evaluator._sample_tensor(coefficients)
+    weights = weights.clone()
+    weights[0, 0] = bad_weight
+    assert evaluator._joint_histogram_cpu(values, weights) is None
+    actual = evaluator._normmi_cpu(values, weights)
+    expected = evaluator._normmi(values, weights)
+    np.testing.assert_array_equal(actual.numpy().view(np.uint32), expected.numpy().view(np.uint32))

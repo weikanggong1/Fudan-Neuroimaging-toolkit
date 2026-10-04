@@ -1,0 +1,64 @@
+{
+  "status": "failed_attempt_preserved",
+  "source_snapshot": "all_v27",
+  "candidate_archive_sha256": "71469f311d1eff54a9c3f60855e7270dc0b833f28abdb7f3ce6498674f5b58e4",
+  "baseline_commit": "1d31e7baaebbb644ab199471f7fe6282721455fd",
+  "targeted_changed_routes": "FNIRT default and complete six-level TBSS CUDA; CPU sampler and SCG cost-skip integration",
+  "source_hashes": {
+    "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef",
+    "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+    "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+    "src/fnit/fnirt/registration.py": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da",
+    "src/fnit/invwarp/core.py": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391",
+    "src/fnit/convertwarp/core.py": "d5268055b8d3b858fd80e96158d0fc167daf722e0b25fd7a3cbe04da3b8e3264",
+    "src/fnit/space_conversion.py": "91e3942b487cb91ee58e1310a7ab29aa670d31720e7abe6edb194e1a679a4afd",
+    "src/fnit/_space_conversion_cpu.py": "45911a090eff848c90db77eb547436eeba3a694a915652869181569a72881b6b",
+    "src/fnit/fnirt/_normal_cpu.py": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f",
+    "src/fnit/fnirt/spline.py": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+    "src/fnit/fnirt/_smoothing_cpu.py": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be",
+    "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+    "src/fnit/fnirt/topology.py": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3",
+    "src/fnit/fnirt/_topology_cpu.py": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6",
+    "src/fnit/_world_resampling.py": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83",
+    "src/fnit/fnirt/_bending_cpu.py": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47",
+    "src/fnit/flirt/batched.py": "06bcaeba1b58090d5b40b57160a159075af48ab0c42c2b61a6d7e3f803ee85f4",
+    "src/fnit/fnirt/_normal_simd_cpu.py": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9",
+    "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+    "src/fnit/fnirt/_sampling_cpu.py": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368"
+  },
+  "source_python_file_counts": {
+    "baseline": 467,
+    "candidate": 477
+  },
+  "source_tree_hashes": {
+    "baseline": "1bb040766e667a34ca2322299e74fed2eaa3ceacfb2021ef0e3a34c0245c7782",
+    "candidate": "c974fdf5a1a7aa8f5945bd9f1b8ebeced8ea5d1e4f32baf7c28098d72864a6c5"
+  },
+  "memory_budget_bytes": 20000000000,
+  "protocol": "two AB/BA process pairs; one complete warmup and three measured complete API calls per process",
+  "timing_scope": "complete API input reads, computation and all requested output saves; process startup and imports excluded",
+  "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "declared_source_files_unchanged_before_after": true,
+  "all_python_source_files_unchanged_before_after": true,
+  "output_gate_scope": "all sixteen saved complete calls per successful case; full values and NIfTI header/extensions/affine",
+  "timing_limitation": "shared H100 observed load; timings are observations, not an exclusive-GPU speed claim",
+  "records": [],
+  "failed_attempts": [
+    {
+      "case_id": "fnirt_real_default",
+      "pair": 0,
+      "backend": "baseline",
+      "status": "failed_attempt_not_normal_timing",
+      "returncode": 1,
+      "exception_class": "RuntimeError",
+      "is_cuda_out_of_memory": true,
+      "failure_phase": "cuda_setup",
+      "peak_allocation_before_failure_bytes": null,
+      "completed_peak_capture_count": null,
+      "gpu_before_target": {
+        "used_memory_mib": 66038,
+        "utilization_percent": 100
+      }
+    }
+  ]
+}

@@ -1,0 +1,2789 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-04",
+  "status": "complete",
+  "measurements_complete": true,
+  "previous_source_checks_complete": true,
+  "generated_at_utc": "2026-10-04T05:58:11.439557+00:00",
+  "dataset": "OpenNeuro ds000114 v1.0.2; FNIT defaced public T1w examples",
+  "dataset_license": "CC0",
+  "official_version": "FSL 6.0.7.4",
+  "hardware": {
+    "host": "nodecw10",
+    "processor_models": [
+      "Intel(R) Xeon(R) Gold 6418H"
+    ],
+    "logical_cpu_count": 192,
+    "physical_core_count": 96,
+    "memory_total_kib": 1056126768,
+    "shared_node": true,
+    "formal_affinity_1": [
+      33
+    ],
+    "formal_affinity_8": [
+      33,
+      37,
+      41,
+      45,
+      49,
+      53,
+      57,
+      61
+    ],
+    "smt_siblings_per_formal_cpu": {
+      "33": "33,129",
+      "37": "37,133",
+      "41": "41,137",
+      "45": "45,141",
+      "49": "49,145",
+      "53": "53,149",
+      "57": "57,153",
+      "61": "61,157"
+    }
+  },
+  "timing_scope": "One fresh complete official CLI and FNIT API worker per case/thread ceiling; includes startup, imports, read, full computation and save; no warmup or stable speed ratio",
+  "previous_report": "cpu_20261004.public.json",
+  "previous_comparison": "Same thread budget, complete outputs and search counts compared against v16; previous and current timing runs use different reserved physical-core groups",
+  "weighted_exact_gate_report": "cpu_weighted_exact_20261004.public.json",
+  "batched_exact_gate_report": "cpu_batched_exact_20261004.public.json",
+  "batched_statistics_exact_gate_report": "cpu_batched_statistics_exact_20261004.public.json",
+  "groups": {
+    "weighted": {
+      "status": "executed_with_numeric_comparisons",
+      "expected_records": 6,
+      "run_id": "flirt_weighted_latest_v21_20261004a",
+      "candidate_snapshot": "candidate_all_v21",
+      "source_sha256": {
+        "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef",
+        "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+        "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719"
+      },
+      "candidate_archive_sha256": "6fe4ae95447729e68b94b8d7796f1d056237e679f95b44fcaf66f70a40957a72",
+      "benchmark_sha256": {
+        "tools/benchmark_multimodal_cpu.py": "6bf87cb40b9b2c37d306dd5e2083b4fd3a6711e5ca481cb154f53a782c294710",
+        "tools/benchmark_multimodal_cpu_flirt.py": "7f1dd4a1d2babdfe29dd13c16377ee8b2611a7902ed1e829b046fa749c968ceb"
+      },
+      "records": [
+        {
+          "case_id": "flirt_12_corratio_input_weight",
+          "threads_ceiling": 1,
+          "affinity": [
+            34
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              131.02456083893776
+            ],
+            "candidate": [
+              177.86127614974976
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "public_weight_0.nii.gz",
+              "sha256": "0ba81f3a696bdc81ecdb607bd8615c4ae11d1d92c947229f542bf20f46398172",
+              "bytes": 494949
+            },
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 124.197,
+                  "system_seconds": 6.719945,
+                  "effective_cpu_cores": 0.9991786590372926
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 164.65653300000002,
+                "system_seconds": 12.589231000000002,
+                "effective_cpu_cores": 0.9965393695408352
+              }
+            ]
+          },
+          "load_before": [
+            60.34,
+            62.72,
+            77.41
+          ],
+          "load_after": [
+            52.33,
+            58.55,
+            71.72
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.0926909473227927,
+                "median": 0.09043151836204244,
+                "p95": 0.1637981235694377,
+                "minimum": 0.005223335709110919,
+                "maximum": 0.20173247543315223,
+                "rms": 0.10078279147391409
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1727100,
+                "pearson_r": 0.9998194416838132,
+                "mae": 4.072408850061056,
+                "rmse": 7.394249181434389,
+                "support_dice": 0.9990503208387279
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.6198152303695679,
+              "cost_evaluations": 10766
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "1cf5c8737cb37ed747a7b119f0a47a733369841bedb02bf75210a6229ea0913f",
+              "bytes": 6343223
+            },
+            "matrix": {
+              "sha256": "69ea5bfb1795ddab515fbfda779e8a7274f3403f24a11d3d817c345f2b107fb0",
+              "bytes": 185
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "3de02fa83d8660a7a73ea831473d41d3a0131e24361df8701a1a24786eba7c19",
+                "bytes": 6533429
+              },
+              "matrix": {
+                "sha256": "5da1d1c2fcd04122eb338540d5b9240d89279cfc1edcffbedfe32d513b88f9bf",
+                "bytes": 188
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1330128
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 1,
+            "torch_interop": 1,
+            "numba": 1
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.6198152303695679,
+              "cost_evaluations": 10766,
+              "phase_cost_evaluations": {
+                "angular_coarse": 3831,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 276,
+                "angular_candidate_refinement": 1043,
+                "measure_4mm": 26,
+                "local_4mm_initial": 505,
+                "local_4mm_perturbations": 3351,
+                "measure_2mm": 44,
+                "local_2mm": 187,
+                "local_1mm": 172
+              },
+              "phase_timings_seconds": {
+                "preparation": 16.24687397480011,
+                "level_8mm": 8.599009171128273,
+                "angular_coarse": 9.136406153440475,
+                "angular_fine_measure": 3.057691439986229,
+                "angular_fine_refinement": 0.4777456820011139,
+                "angular_candidate_refinement": 2.0710269659757614,
+                "level_4mm": 5.581621252000332,
+                "measure_4mm": 0.2922227308154106,
+                "local_4mm_initial": 6.038689769804478,
+                "local_4mm_perturbations": 40.07109393924475,
+                "level_2mm": 4.114857971668243,
+                "measure_2mm": 2.7803466469049454,
+                "local_2mm": 10.227895081043243,
+                "level_1mm": 1.0446282178163528,
+                "local_1mm": 63.3234234303236,
+                "output_resampling": 0.2206786349415779
+              },
+              "execution": "reference",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": true,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 131.02456083893776,
+            "candidate": 177.86127614974976
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_12_corratio_reference_weight",
+          "threads_ceiling": 1,
+          "affinity": [
+            34
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              117.45550394803286
+            ],
+            "candidate": [
+              181.66553503274918
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "public_weight_1.nii.gz",
+              "sha256": "bd272a9154de45ff3e3901230b38ea98d7d7c9cc37b96a401f87a5bdfa0ae2ee",
+              "bytes": 469430
+            },
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 110.81915499999997,
+                  "system_seconds": 6.592009000000001,
+                  "effective_cpu_cores": 0.9996224957831477
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 169.287154,
+                "system_seconds": 12.106100999999999,
+                "effective_cpu_cores": 0.9985012014926217
+              }
+            ]
+          },
+          "load_before": [
+            54.79,
+            58.96,
+            71.78
+          ],
+          "load_after": [
+            51.14,
+            54.87,
+            66.42
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.14797524093661374,
+                "median": 0.14582456007229416,
+                "p95": 0.26477508488501494,
+                "minimum": 0.007070221533495204,
+                "maximum": 0.3786272370645739,
+                "rms": 0.16232317063899707
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1776014,
+                "pearson_r": 0.9996488939669489,
+                "mae": 5.8584946370398985,
+                "rmse": 10.308593679582982,
+                "support_dice": 0.9985492421662173
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.6249905228614807,
+              "cost_evaluations": 12520
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "046a5fa1d5ebefc48c6420bcc076e1c086742cfac127d1a06e281b6f4114bf90",
+              "bytes": 6520316
+            },
+            "matrix": {
+              "sha256": "e578527e774415ef2b2dc718b3e4069863dfcb9e173326071fd46250ff2bc9b0",
+              "bytes": 187
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "259d51efc278dd835612237797ef09d6de8a700e7b87dab0dccdda3c830e7547",
+                "bytes": 6710953
+              },
+              "matrix": {
+                "sha256": "659d790a6c0485a317f45237fd5a8a3afe543ced4fc3caa6ab73efe177d2c065",
+                "bytes": 188
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1306876
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 1,
+            "torch_interop": 1,
+            "numba": 1
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.6249905228614807,
+              "cost_evaluations": 12520,
+              "phase_cost_evaluations": {
+                "angular_coarse": 4890,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 1067,
+                "angular_candidate_refinement": 791,
+                "measure_4mm": 20,
+                "local_4mm_initial": 731,
+                "local_4mm_perturbations": 3260,
+                "measure_2mm": 44,
+                "local_2mm": 182,
+                "local_1mm": 204
+              },
+              "phase_timings_seconds": {
+                "preparation": 14.882320620119572,
+                "level_8mm": 8.156497567892075,
+                "angular_coarse": 9.234179601073265,
+                "angular_fine_measure": 2.6629334539175034,
+                "angular_fine_refinement": 1.8754087686538696,
+                "angular_candidate_refinement": 1.5977643802762032,
+                "level_4mm": 5.612533241510391,
+                "measure_4mm": 0.22862959653139114,
+                "local_4mm_initial": 7.1375389993190765,
+                "local_4mm_perturbations": 30.781165719032288,
+                "level_2mm": 4.273059219121933,
+                "measure_2mm": 2.3662497997283936,
+                "local_2mm": 9.884087339043617,
+                "level_1mm": 0.9557068347930908,
+                "local_1mm": 77.60774989426136,
+                "output_resampling": 0.22592242807149887
+              },
+              "execution": "reference",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": true,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 117.45550394803286,
+            "candidate": 181.66553503274918
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_12_corratio_both_weights",
+          "threads_ceiling": 1,
+          "affinity": [
+            34
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              117.55369094014168
+            ],
+            "candidate": [
+              173.17472615092993
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "public_weight_0.nii.gz",
+              "sha256": "0ba81f3a696bdc81ecdb607bd8615c4ae11d1d92c947229f542bf20f46398172",
+              "bytes": 494949
+            },
+            {
+              "filename": "public_weight_1.nii.gz",
+              "sha256": "bd272a9154de45ff3e3901230b38ea98d7d7c9cc37b96a401f87a5bdfa0ae2ee",
+              "bytes": 469430
+            },
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 109.972485,
+                  "system_seconds": 7.513213,
+                  "effective_cpu_cores": 0.9994216009757081
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 154.75677900000005,
+                "system_seconds": 18.148078999999996,
+                "effective_cpu_cores": 0.9984416423982408
+              }
+            ]
+          },
+          "load_before": [
+            51.14,
+            54.87,
+            66.42
+          ],
+          "load_after": [
+            45.33,
+            50.73,
+            61.71
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.050939464259738505,
+                "median": 0.0470928989228212,
+                "p95": 0.10207801559471308,
+                "minimum": 0.00416182420888844,
+                "maximum": 0.13269920605091298,
+                "rms": 0.05740242617374157
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1752414,
+                "pearson_r": 0.9999092215425157,
+                "mae": 2.738482266861768,
+                "rmse": 5.243002414798323,
+                "support_dice": 0.9993873459982736
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.595370352268219,
+              "cost_evaluations": 11085
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "5c12e1199c7ea5c058176d71d38b2b3907464683c46227681ec0676bf74c61c5",
+              "bytes": 6434415
+            },
+            "matrix": {
+              "sha256": "9cc1d7eebce084d3cec03c41f61735a4e5a5260ec8e116b8cd5c42fa094d7feb",
+              "bytes": 185
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "848d60d65eb5b7bc8f3783b79c345aa3b62deb97cd74f660c516bdc38aae23e7",
+                "bytes": 6620433
+              },
+              "matrix": {
+                "sha256": "15a4d293a20d0129aa7e69843b84870bceee1bde0cac381a8aa478aa44324395",
+                "bytes": 189
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1346696
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 1,
+            "torch_interop": 1,
+            "numba": 1
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.595370352268219,
+              "cost_evaluations": 11085,
+              "phase_cost_evaluations": {
+                "angular_coarse": 4410,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 182,
+                "angular_candidate_refinement": 1074,
+                "measure_4mm": 24,
+                "local_4mm_initial": 642,
+                "local_4mm_perturbations": 3039,
+                "measure_2mm": 44,
+                "local_2mm": 180,
+                "local_1mm": 159
+              },
+              "phase_timings_seconds": {
+                "preparation": 21.20221136510372,
+                "level_8mm": 8.865873008966446,
+                "angular_coarse": 8.532400377094746,
+                "angular_fine_measure": 2.6176840141415596,
+                "angular_fine_refinement": 0.3038373216986656,
+                "angular_candidate_refinement": 2.1936360970139503,
+                "level_4mm": 7.581194333732128,
+                "measure_4mm": 0.2595965713262558,
+                "local_4mm_initial": 7.203113101422787,
+                "local_4mm_perturbations": 34.503846138715744,
+                "level_2mm": 4.198380410671234,
+                "measure_2mm": 2.5909899696707726,
+                "local_2mm": 9.875501848757267,
+                "level_1mm": 1.060284435749054,
+                "local_1mm": 56.893312714993954,
+                "output_resampling": 0.21950894594192505
+              },
+              "execution": "reference",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": true,
+              "reference_weight_used": true,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 117.55369094014168,
+            "candidate": 173.17472615092993
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_12_corratio_input_weight",
+          "threads_ceiling": 8,
+          "affinity": [
+            34,
+            38,
+            42,
+            46,
+            50,
+            54,
+            58,
+            62
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              130.49471347033978
+            ],
+            "candidate": [
+              71.48097268491983
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "public_weight_0.nii.gz",
+              "sha256": "0ba81f3a696bdc81ecdb607bd8615c4ae11d1d92c947229f542bf20f46398172",
+              "bytes": 494949
+            },
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 120.76632499999994,
+                  "system_seconds": 9.709026000000009,
+                  "effective_cpu_cores": 0.9998516225690297
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 352.8635640000001,
+                "system_seconds": 37.503399,
+                "effective_cpu_cores": 5.461131100169749
+              }
+            ]
+          },
+          "load_before": [
+            44.9,
+            50.56,
+            61.59
+          ],
+          "load_after": [
+            40.46,
+            45.56,
+            57.46
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.0926909473227927,
+                "median": 0.09043151836204244,
+                "p95": 0.1637981235694377,
+                "minimum": 0.005223335709110919,
+                "maximum": 0.20173247543315223,
+                "rms": 0.10078279147391409
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1727100,
+                "pearson_r": 0.9998194416838132,
+                "mae": 4.072408850061056,
+                "rmse": 7.394249181434389,
+                "support_dice": 0.9990503208387279
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.6198152303695679,
+              "cost_evaluations": 10766
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "1cf5c8737cb37ed747a7b119f0a47a733369841bedb02bf75210a6229ea0913f",
+              "bytes": 6343223
+            },
+            "matrix": {
+              "sha256": "69ea5bfb1795ddab515fbfda779e8a7274f3403f24a11d3d817c345f2b107fb0",
+              "bytes": 185
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "3de02fa83d8660a7a73ea831473d41d3a0131e24361df8701a1a24786eba7c19",
+                "bytes": 6533429
+              },
+              "matrix": {
+                "sha256": "5da1d1c2fcd04122eb338540d5b9240d89279cfc1edcffbedfe32d513b88f9bf",
+                "bytes": 188
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1330632
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 8,
+            "torch_interop": 1,
+            "numba": 8
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.6198152303695679,
+              "cost_evaluations": 10766,
+              "phase_cost_evaluations": {
+                "angular_coarse": 3831,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 276,
+                "angular_candidate_refinement": 1043,
+                "measure_4mm": 26,
+                "local_4mm_initial": 505,
+                "local_4mm_perturbations": 3351,
+                "measure_2mm": 44,
+                "local_2mm": 187,
+                "local_1mm": 172
+              },
+              "phase_timings_seconds": {
+                "preparation": 8.516134679317474,
+                "level_8mm": 2.9098250940442085,
+                "angular_coarse": 6.98681778460741,
+                "angular_fine_measure": 1.4854838848114014,
+                "angular_fine_refinement": 0.29400911182165146,
+                "angular_candidate_refinement": 1.3067320510745049,
+                "level_4mm": 1.8324472159147263,
+                "measure_4mm": 0.08461657166481018,
+                "local_4mm_initial": 1.7504835724830627,
+                "local_4mm_perturbations": 11.740748815238476,
+                "level_2mm": 1.0616226196289062,
+                "measure_2mm": 1.381494827568531,
+                "local_2mm": 2.7623151242733,
+                "level_1mm": 0.6656859070062637,
+                "local_1mm": 23.654153406620026,
+                "output_resampling": 0.22334453463554382
+              },
+              "execution": "reference",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": true,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 130.49471347033978,
+            "candidate": 71.48097268491983
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_12_corratio_reference_weight",
+          "threads_ceiling": 8,
+          "affinity": [
+            34,
+            38,
+            42,
+            46,
+            50,
+            54,
+            58,
+            62
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              123.07344085723162
+            ],
+            "candidate": [
+              69.26884990930557
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "public_weight_1.nii.gz",
+              "sha256": "bd272a9154de45ff3e3901230b38ea98d7d7c9cc37b96a401f87a5bdfa0ae2ee",
+              "bytes": 469430
+            },
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 114.73141699999996,
+                  "system_seconds": 8.32095799999999,
+                  "effective_cpu_cores": 0.9998288350672172
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 359.82653099999993,
+                "system_seconds": 31.596147000000016,
+                "effective_cpu_cores": 5.650774893945744
+              }
+            ]
+          },
+          "load_before": [
+            40.46,
+            45.56,
+            57.46
+          ],
+          "load_after": [
+            47.55,
+            46.42,
+            55.53
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.14797524093661374,
+                "median": 0.14582456007229416,
+                "p95": 0.26477508488501494,
+                "minimum": 0.007070221533495204,
+                "maximum": 0.3786272370645739,
+                "rms": 0.16232317063899707
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1776014,
+                "pearson_r": 0.9996488939669489,
+                "mae": 5.8584946370398985,
+                "rmse": 10.308593679582982,
+                "support_dice": 0.9985492421662173
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.6249905228614807,
+              "cost_evaluations": 12520
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "046a5fa1d5ebefc48c6420bcc076e1c086742cfac127d1a06e281b6f4114bf90",
+              "bytes": 6520316
+            },
+            "matrix": {
+              "sha256": "e578527e774415ef2b2dc718b3e4069863dfcb9e173326071fd46250ff2bc9b0",
+              "bytes": 187
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "259d51efc278dd835612237797ef09d6de8a700e7b87dab0dccdda3c830e7547",
+                "bytes": 6710953
+              },
+              "matrix": {
+                "sha256": "659d790a6c0485a317f45237fd5a8a3afe543ced4fc3caa6ab73efe177d2c065",
+                "bytes": 188
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1313120
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 8,
+            "torch_interop": 1,
+            "numba": 8
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.6249905228614807,
+              "cost_evaluations": 12520,
+              "phase_cost_evaluations": {
+                "angular_coarse": 4890,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 1067,
+                "angular_candidate_refinement": 791,
+                "measure_4mm": 20,
+                "local_4mm_initial": 731,
+                "local_4mm_perturbations": 3260,
+                "measure_2mm": 44,
+                "local_2mm": 182,
+                "local_1mm": 204
+              },
+              "phase_timings_seconds": {
+                "preparation": 6.099271021783352,
+                "level_8mm": 2.7458932772278786,
+                "angular_coarse": 5.9158714935183525,
+                "angular_fine_measure": 1.2355253249406815,
+                "angular_fine_refinement": 1.0929279401898384,
+                "angular_candidate_refinement": 0.8818238899111748,
+                "level_4mm": 1.456118568778038,
+                "measure_4mm": 0.0681268572807312,
+                "local_4mm_initial": 2.0727430060505867,
+                "local_4mm_perturbations": 9.760333701968193,
+                "level_2mm": 1.0859836637973785,
+                "measure_2mm": 0.6501393914222717,
+                "local_2mm": 2.7101939916610718,
+                "level_1mm": 0.6310586035251617,
+                "local_1mm": 27.81965859979391,
+                "output_resampling": 0.245311439037323
+              },
+              "execution": "reference",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": true,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 123.07344085723162,
+            "candidate": 69.26884990930557
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_12_corratio_both_weights",
+          "threads_ceiling": 8,
+          "affinity": [
+            34,
+            38,
+            42,
+            46,
+            50,
+            54,
+            58,
+            62
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              114.90046114474535
+            ],
+            "candidate": [
+              56.78241812437773
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "public_weight_0.nii.gz",
+              "sha256": "0ba81f3a696bdc81ecdb607bd8615c4ae11d1d92c947229f542bf20f46398172",
+              "bytes": 494949
+            },
+            {
+              "filename": "public_weight_1.nii.gz",
+              "sha256": "bd272a9154de45ff3e3901230b38ea98d7d7c9cc37b96a401f87a5bdfa0ae2ee",
+              "bytes": 469430
+            },
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 107.20208000000002,
+                  "system_seconds": 7.5700049999999806,
+                  "effective_cpu_cores": 0.9988827186290956
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 304.8412740000001,
+                "system_seconds": 27.340993999999995,
+                "effective_cpu_cores": 5.850090203491851
+              }
+            ]
+          },
+          "load_before": [
+            47.55,
+            46.42,
+            55.53
+          ],
+          "load_after": [
+            49.42,
+            47.31,
+            54.27
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.050939464259738505,
+                "median": 0.0470928989228212,
+                "p95": 0.10207801559471308,
+                "minimum": 0.00416182420888844,
+                "maximum": 0.13269920605091298,
+                "rms": 0.05740242617374157
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1752414,
+                "pearson_r": 0.9999092215425157,
+                "mae": 2.738482266861768,
+                "rmse": 5.243002414798323,
+                "support_dice": 0.9993873459982736
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.595370352268219,
+              "cost_evaluations": 11085
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "5c12e1199c7ea5c058176d71d38b2b3907464683c46227681ec0676bf74c61c5",
+              "bytes": 6434415
+            },
+            "matrix": {
+              "sha256": "9cc1d7eebce084d3cec03c41f61735a4e5a5260ec8e116b8cd5c42fa094d7feb",
+              "bytes": 185
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "848d60d65eb5b7bc8f3783b79c345aa3b62deb97cd74f660c516bdc38aae23e7",
+                "bytes": 6620433
+              },
+              "matrix": {
+                "sha256": "15a4d293a20d0129aa7e69843b84870bceee1bde0cac381a8aa478aa44324395",
+                "bytes": 189
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1346168
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 8,
+            "torch_interop": 1,
+            "numba": 8
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.595370352268219,
+              "cost_evaluations": 11085,
+              "phase_cost_evaluations": {
+                "angular_coarse": 4410,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 182,
+                "angular_candidate_refinement": 1074,
+                "measure_4mm": 24,
+                "local_4mm_initial": 642,
+                "local_4mm_perturbations": 3039,
+                "measure_2mm": 44,
+                "local_2mm": 180,
+                "local_1mm": 159
+              },
+              "phase_timings_seconds": {
+                "preparation": 6.361413300037384,
+                "level_8mm": 2.035109281539917,
+                "angular_coarse": 5.243165582418442,
+                "angular_fine_measure": 1.2362594157457352,
+                "angular_fine_refinement": 0.16595640778541565,
+                "angular_candidate_refinement": 1.1979956030845642,
+                "level_4mm": 1.4500172957777977,
+                "measure_4mm": 0.07129650563001633,
+                "local_4mm_initial": 1.9273188337683678,
+                "local_4mm_perturbations": 9.220220997929573,
+                "level_2mm": 1.0807125866413116,
+                "measure_2mm": 0.6274090856313705,
+                "local_2mm": 2.693795807659626,
+                "level_1mm": 0.563900850713253,
+                "local_1mm": 18.303263187408447,
+                "output_resampling": 0.22013477236032486
+              },
+              "execution": "reference",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": true,
+              "reference_weight_used": true,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 114.90046114474535,
+            "candidate": 56.78241812437773
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        }
+      ]
+    },
+    "batched": {
+      "status": "executed_with_numeric_comparisons",
+      "expected_records": 4,
+      "run_id": "flirt_batched_latest_candidate_all_v22_20261004a",
+      "candidate_snapshot": "candidate_all_v22",
+      "source_sha256": {
+        "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef",
+        "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+        "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+        "src/fnit/flirt/batched.py": "63a6336f0d33219b36f8d7184f75093e4215403f0a435ca48203b2bbe5266436"
+      },
+      "candidate_archive_sha256": "0a4259e6fa216318712474452c75bc737742948c8565b73978f6447f45564c4a",
+      "benchmark_sha256": {
+        "tools/benchmark_multimodal_cpu.py": "6bf87cb40b9b2c37d306dd5e2083b4fd3a6711e5ca481cb154f53a782c294710",
+        "tools/benchmark_multimodal_cpu_flirt.py": "7f1dd4a1d2babdfe29dd13c16377ee8b2611a7902ed1e829b046fa749c968ceb"
+      },
+      "records": [
+        {
+          "case_id": "flirt_12_corratio_explicit_batched",
+          "threads_ceiling": 1,
+          "affinity": [
+            35
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              57.76207557320595
+            ],
+            "candidate": [
+              264.5664126574993
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 54.272308,
+                  "system_seconds": 2.336056,
+                  "effective_cpu_cores": 0.9800264868989382
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 191.02721,
+                "system_seconds": 73.214977,
+                "effective_cpu_cores": 0.9987745018188721
+              }
+            ]
+          },
+          "load_before": [
+            71.57,
+            73.59,
+            69.23
+          ],
+          "load_after": [
+            82.62,
+            76.1,
+            71.66
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.013679297512715042,
+                "median": 0.012999332481225956,
+                "p95": 0.027589191450260356,
+                "minimum": 0.0005483677858403197,
+                "maximum": 0.02875542532404241,
+                "rms": 0.015691730490243475
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1737594,
+                "pearson_r": 0.9999959580270273,
+                "mae": 0.5505153965359726,
+                "rmse": 1.1058680744040987,
+                "support_dice": 0.9999122352922896
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.21309858560562134,
+              "cost_evaluations": 8981
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "3d76d501590fdbdc9fd427dbe0bc1d570c003db16c8b34faa32b5483e1f82783",
+              "bytes": 6380100
+            },
+            "matrix": {
+              "sha256": "137c261f4500d50af99f93b128805e8233b93392d212b3804e802974af8d03dc",
+              "bytes": 184
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "3264e0bdc25788f4986d4395400bb207a3cbe204a8b179a03c417ed0161f696b",
+                "bytes": 6567731
+              },
+              "matrix": {
+                "sha256": "251caf17e12f317a2a1d2c6a08c27a340d73a0d3bd9babff41637c2623516348",
+                "bytes": 192
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            2504252
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 1,
+            "torch_interop": 1,
+            "numba": 1
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.21309858560562134,
+              "cost_evaluations": 8981,
+              "phase_cost_evaluations": {
+                "angular_coarse": 2677,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 209,
+                "angular_candidate_refinement": 270,
+                "measure_4mm": 6,
+                "local_4mm_initial": 499,
+                "local_4mm_perturbations": 3589,
+                "measure_2mm": 44,
+                "local_2mm": 180,
+                "local_1mm": 176
+              },
+              "phase_timings_seconds": {
+                "preparation": 5.637014634907246,
+                "level_8mm": 2.761084705591202,
+                "angular_coarse": 7.012275084853172,
+                "angular_fine_measure": 2.3782148510217667,
+                "angular_fine_refinement": 0.4447986036539078,
+                "angular_candidate_refinement": 0.6824237927794456,
+                "level_4mm": 2.1763559207320213,
+                "measure_4mm": 0.16138622164726257,
+                "local_4mm_initial": 6.100912012159824,
+                "local_4mm_perturbations": 54.13503159582615,
+                "level_2mm": 1.5016654208302498,
+                "measure_2mm": 5.697074867784977,
+                "local_2mm": 14.330006837844849,
+                "level_1mm": 0.8022033497691154,
+                "local_1mm": 155.37405502796173,
+                "output_resampling": 0.22418605536222458
+              },
+              "execution": "batched",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 57.76207557320595,
+            "candidate": 264.5664126574993
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_6_normmi_explicit_batched",
+          "threads_ceiling": 1,
+          "affinity": [
+            35
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              119.36849346756935
+            ],
+            "candidate": [
+              304.1166122481227
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 116.79507800000002,
+                  "system_seconds": 2.078054999999992,
+                  "effective_cpu_cores": 0.9958501573306369
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 153.53722399999992,
+                "system_seconds": 150.133269,
+                "effective_cpu_cores": 0.9985330651790937
+              }
+            ]
+          },
+          "load_before": [
+            79.04,
+            75.46,
+            71.48
+          ],
+          "load_after": [
+            72.39,
+            71.94,
+            70.91
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.5289637135829602,
+                "median": 0.5254111957892744,
+                "p95": 0.9370537731992443,
+                "minimum": 0.026598876711865102,
+                "maximum": 1.193909368830128,
+                "rms": 0.5772646328061538
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1930365,
+                "pearson_r": 0.9963764668887397,
+                "mae": 19.408039951923172,
+                "rmse": 33.12685339167238,
+                "support_dice": 0.9956795399797964
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": -1.151161789894104,
+              "cost_evaluations": 6403
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "458db29d798448aa181ee5668ce4a2099f1cb21306ca7ad95484bbc5744b1bc6",
+              "bytes": 7077387
+            },
+            "matrix": {
+              "sha256": "7de2b686a4715a3acb46b6ce690b3aef241ae5b40bb946269924341c8096597e",
+              "bytes": 187
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "7a1839bfc79dd3c75d441a569519b7cd849acce08bade2c77219e91e7ae52d29",
+                "bytes": 7267350
+              },
+              "matrix": {
+                "sha256": "bf7a70dfa3353459bc4d14477c3c06e38cabd2496722b8da474be01224095a0a",
+                "bytes": 191
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            6507780
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 1,
+            "torch_interop": 1,
+            "numba": 1
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": -1.151161789894104,
+              "cost_evaluations": 6403,
+              "phase_cost_evaluations": {
+                "angular_coarse": 2677,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 209,
+                "angular_candidate_refinement": 237,
+                "measure_4mm": 6,
+                "local_4mm_initial": 423,
+                "local_4mm_perturbations": 1347,
+                "measure_2mm": 42,
+                "local_2mm": 37,
+                "local_1mm": 94
+              },
+              "phase_timings_seconds": {
+                "preparation": 5.063643604516983,
+                "level_8mm": 2.578056998550892,
+                "angular_coarse": 4.574343144893646,
+                "angular_fine_measure": 2.0656716972589493,
+                "angular_fine_refinement": 0.40579114109277725,
+                "angular_candidate_refinement": 0.47605927288532257,
+                "level_4mm": 2.0363986268639565,
+                "measure_4mm": 0.20379695296287537,
+                "local_4mm_initial": 10.910420507192612,
+                "local_4mm_perturbations": 45.19254818558693,
+                "level_2mm": 1.441400207579136,
+                "measure_2mm": 14.392690815031528,
+                "local_2mm": 6.585142761468887,
+                "level_1mm": 1.2421239987015724,
+                "local_1mm": 202.56695640087128,
+                "output_resampling": 0.19869793951511383
+              },
+              "execution": "batched",
+              "degrees_of_freedom": 6,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 119.36849346756935,
+            "candidate": 304.1166122481227
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_12_corratio_explicit_batched",
+          "threads_ceiling": 8,
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              53.15197987854481
+            ],
+            "candidate": [
+              92.89621898531914
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 50.68742700000007,
+                  "system_seconds": 2.164145999999988,
+                  "effective_cpu_cores": 0.99434815261386
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 341.356994,
+                "system_seconds": 66.901894,
+                "effective_cpu_cores": 4.3947847658312025
+              }
+            ]
+          },
+          "load_before": [
+            72.39,
+            71.94,
+            70.91
+          ],
+          "load_after": [
+            67.37,
+            70.9,
+            70.74
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.013679297512715042,
+                "median": 0.012999332481225956,
+                "p95": 0.027589191450260356,
+                "minimum": 0.0005483677858403197,
+                "maximum": 0.02875542532404241,
+                "rms": 0.015691730490243475
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1737594,
+                "pearson_r": 0.9999959580270273,
+                "mae": 0.5505153965359726,
+                "rmse": 1.1058680744040987,
+                "support_dice": 0.9999122352922896
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.21309858560562134,
+              "cost_evaluations": 8981
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "3d76d501590fdbdc9fd427dbe0bc1d570c003db16c8b34faa32b5483e1f82783",
+              "bytes": 6380100
+            },
+            "matrix": {
+              "sha256": "137c261f4500d50af99f93b128805e8233b93392d212b3804e802974af8d03dc",
+              "bytes": 184
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "3264e0bdc25788f4986d4395400bb207a3cbe204a8b179a03c417ed0161f696b",
+                "bytes": 6567731
+              },
+              "matrix": {
+                "sha256": "251caf17e12f317a2a1d2c6a08c27a340d73a0d3bd9babff41637c2623516348",
+                "bytes": 192
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            2504236
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 8,
+            "torch_interop": 1,
+            "numba": 8
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.21309858560562134,
+              "cost_evaluations": 8981,
+              "phase_cost_evaluations": {
+                "angular_coarse": 2677,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 209,
+                "angular_candidate_refinement": 270,
+                "measure_4mm": 6,
+                "local_4mm_initial": 499,
+                "local_4mm_perturbations": 3589,
+                "measure_2mm": 44,
+                "local_2mm": 180,
+                "local_1mm": 176
+              },
+              "phase_timings_seconds": {
+                "preparation": 2.207940511405468,
+                "level_8mm": 0.7564010247588158,
+                "angular_coarse": 4.931504912674427,
+                "angular_fine_measure": 0.8969870433211327,
+                "angular_fine_refinement": 0.15512915700674057,
+                "angular_candidate_refinement": 0.2886461541056633,
+                "level_4mm": 0.734451062977314,
+                "measure_4mm": 0.04056791216135025,
+                "local_4mm_initial": 2.3611370623111725,
+                "local_4mm_perturbations": 20.205373495817184,
+                "level_2mm": 0.525058276951313,
+                "measure_2mm": 1.344648815691471,
+                "local_2mm": 5.679902978241444,
+                "level_1mm": 0.5103285908699036,
+                "local_1mm": 47.55309733003378,
+                "output_resampling": 0.22437024861574173
+              },
+              "execution": "batched",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 53.15197987854481,
+            "candidate": 92.89621898531914
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_6_normmi_explicit_batched",
+          "threads_ceiling": 8,
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              117.81045288592577
+            ],
+            "candidate": [
+              102.96933401376009
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 115.73483899999997,
+                  "system_seconds": 2.008944999999983,
+                  "effective_cpu_cores": 0.9994341004189974
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 345.63263399999994,
+                "system_seconds": 183.95365500000003,
+                "effective_cpu_cores": 5.143145714909935
+              }
+            ]
+          },
+          "load_before": [
+            73.35,
+            72.08,
+            71.12
+          ],
+          "load_after": [
+            81.24,
+            75.1,
+            72.4
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.5289637135829602,
+                "median": 0.5254111957892744,
+                "p95": 0.9370537731992443,
+                "minimum": 0.026598876711865102,
+                "maximum": 1.193909368830128,
+                "rms": 0.5772646328061538
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1930365,
+                "pearson_r": 0.9963764668887397,
+                "mae": 19.408039951923172,
+                "rmse": 33.12685339167238,
+                "support_dice": 0.9956795399797964
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": -1.151161789894104,
+              "cost_evaluations": 6406
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "458db29d798448aa181ee5668ce4a2099f1cb21306ca7ad95484bbc5744b1bc6",
+              "bytes": 7077387
+            },
+            "matrix": {
+              "sha256": "7de2b686a4715a3acb46b6ce690b3aef241ae5b40bb946269924341c8096597e",
+              "bytes": 187
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "7a1839bfc79dd3c75d441a569519b7cd849acce08bade2c77219e91e7ae52d29",
+                "bytes": 7267350
+              },
+              "matrix": {
+                "sha256": "bf7a70dfa3353459bc4d14477c3c06e38cabd2496722b8da474be01224095a0a",
+                "bytes": 191
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            6482564
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 8,
+            "torch_interop": 1,
+            "numba": 8
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": -1.151161789894104,
+              "cost_evaluations": 6406,
+              "phase_cost_evaluations": {
+                "angular_coarse": 2677,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 209,
+                "angular_candidate_refinement": 237,
+                "measure_4mm": 6,
+                "local_4mm_initial": 423,
+                "local_4mm_perturbations": 1347,
+                "measure_2mm": 42,
+                "local_2mm": 37,
+                "local_1mm": 97
+              },
+              "phase_timings_seconds": {
+                "preparation": 1.8434583470225334,
+                "level_8mm": 0.8406481295824051,
+                "angular_coarse": 1.7162888124585152,
+                "angular_fine_measure": 0.6610591784119606,
+                "angular_fine_refinement": 0.16194047778844833,
+                "angular_candidate_refinement": 0.24065815657377243,
+                "level_4mm": 1.1415497958660126,
+                "measure_4mm": 0.09195330739021301,
+                "local_4mm_initial": 7.185814432799816,
+                "local_4mm_perturbations": 13.284264162182808,
+                "level_2mm": 0.6400558277964592,
+                "measure_2mm": 3.7084161192178726,
+                "local_2mm": 4.680351726710796,
+                "level_1mm": 0.6896283999085426,
+                "local_1mm": 61.907755233347416,
+                "output_resampling": 0.19597584009170532
+              },
+              "execution": "batched",
+              "degrees_of_freedom": 6,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 117.81045288592577,
+            "candidate": 102.96933401376009
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        }
+      ]
+    },
+    "batched_statistics": {
+      "status": "executed_with_numeric_comparisons",
+      "expected_records": 4,
+      "run_id": "flirt_batched_latest_candidate_all_v24_20261004a",
+      "candidate_snapshot": "candidate_all_v24",
+      "source_sha256": {
+        "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef",
+        "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+        "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+        "src/fnit/flirt/batched.py": "06bcaeba1b58090d5b40b57160a159075af48ab0c42c2b61a6d7e3f803ee85f4"
+      },
+      "candidate_archive_sha256": "940b484a9414d14c2d51954df986a8f0da1d8f37e410af9636b7a9b61447e660",
+      "benchmark_sha256": {
+        "tools/benchmark_multimodal_cpu.py": "6bf87cb40b9b2c37d306dd5e2083b4fd3a6711e5ca481cb154f53a782c294710",
+        "tools/benchmark_multimodal_cpu_flirt.py": "7f1dd4a1d2babdfe29dd13c16377ee8b2611a7902ed1e829b046fa749c968ceb"
+      },
+      "records": [
+        {
+          "case_id": "flirt_12_corratio_explicit_batched",
+          "threads_ceiling": 1,
+          "affinity": [
+            35
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              56.2198788523674
+            ],
+            "candidate": [
+              96.29803670197725
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 53.076186,
+                  "system_seconds": 2.96201,
+                  "effective_cpu_cores": 0.9967683521189276
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 87.56699899999998,
+                "system_seconds": 8.098853,
+                "effective_cpu_cores": 0.9934351236678506
+              }
+            ]
+          },
+          "load_before": [
+            77.86,
+            87.78,
+            86.52
+          ],
+          "load_after": [
+            66.56,
+            79.63,
+            83.69
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.013679297512715042,
+                "median": 0.012999332481225956,
+                "p95": 0.027589191450260356,
+                "minimum": 0.0005483677858403197,
+                "maximum": 0.02875542532404241,
+                "rms": 0.015691730490243475
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1737594,
+                "pearson_r": 0.9999959580270273,
+                "mae": 0.5505153965359726,
+                "rmse": 1.1058680744040987,
+                "support_dice": 0.9999122352922896
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.21309858560562134,
+              "cost_evaluations": 8981
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "3d76d501590fdbdc9fd427dbe0bc1d570c003db16c8b34faa32b5483e1f82783",
+              "bytes": 6380100
+            },
+            "matrix": {
+              "sha256": "137c261f4500d50af99f93b128805e8233b93392d212b3804e802974af8d03dc",
+              "bytes": 184
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "3264e0bdc25788f4986d4395400bb207a3cbe204a8b179a03c417ed0161f696b",
+                "bytes": 6567731
+              },
+              "matrix": {
+                "sha256": "251caf17e12f317a2a1d2c6a08c27a340d73a0d3bd9babff41637c2623516348",
+                "bytes": 192
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1500224
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 1,
+            "torch_interop": 1,
+            "numba": 1
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.21309858560562134,
+              "cost_evaluations": 8981,
+              "phase_cost_evaluations": {
+                "angular_coarse": 2677,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 209,
+                "angular_candidate_refinement": 270,
+                "measure_4mm": 6,
+                "local_4mm_initial": 499,
+                "local_4mm_perturbations": 3589,
+                "measure_2mm": 44,
+                "local_2mm": 180,
+                "local_1mm": 176
+              },
+              "phase_timings_seconds": {
+                "preparation": 7.095920376479626,
+                "level_8mm": 3.230297803878784,
+                "angular_coarse": 4.912483811378479,
+                "angular_fine_measure": 1.0951823443174362,
+                "angular_fine_refinement": 0.21508591622114182,
+                "angular_candidate_refinement": 0.36580198258161545,
+                "level_4mm": 2.213773176074028,
+                "measure_4mm": 0.15121304243803024,
+                "local_4mm_initial": 2.816709630191326,
+                "local_4mm_perturbations": 16.09110253304243,
+                "level_2mm": 1.5053632631897926,
+                "measure_2mm": 1.6785822063684464,
+                "local_2mm": 6.2372501865029335,
+                "level_1mm": 0.7802151814103127,
+                "local_1mm": 42.35724683851004,
+                "output_resampling": 0.25067995488643646
+              },
+              "execution": "batched",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 56.2198788523674,
+            "candidate": 96.29803670197725
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_6_normmi_explicit_batched",
+          "threads_ceiling": 1,
+          "affinity": [
+            35
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              119.95020566135645
+            ],
+            "candidate": [
+              117.37828420847654
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 117.12097600000001,
+                  "system_seconds": 2.1910560000000014,
+                  "effective_cpu_cores": 0.9946796784729312
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 96.509862,
+                "system_seconds": 20.595864,
+                "effective_cpu_cores": 0.9976779503098506
+              }
+            ]
+          },
+          "load_before": [
+            69.72,
+            80.07,
+            83.81
+          ],
+          "load_after": [
+            76.32,
+            77.14,
+            81.64
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.5289637135829602,
+                "median": 0.5254111957892744,
+                "p95": 0.9370537731992443,
+                "minimum": 0.026598876711865102,
+                "maximum": 1.193909368830128,
+                "rms": 0.5772646328061538
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1930365,
+                "pearson_r": 0.9963764668887397,
+                "mae": 19.408039951923172,
+                "rmse": 33.12685339167238,
+                "support_dice": 0.9956795399797964
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": -1.151161789894104,
+              "cost_evaluations": 6403
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "458db29d798448aa181ee5668ce4a2099f1cb21306ca7ad95484bbc5744b1bc6",
+              "bytes": 7077387
+            },
+            "matrix": {
+              "sha256": "7de2b686a4715a3acb46b6ce690b3aef241ae5b40bb946269924341c8096597e",
+              "bytes": 187
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "7a1839bfc79dd3c75d441a569519b7cd849acce08bade2c77219e91e7ae52d29",
+                "bytes": 7267350
+              },
+              "matrix": {
+                "sha256": "bf7a70dfa3353459bc4d14477c3c06e38cabd2496722b8da474be01224095a0a",
+                "bytes": 191
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1855920
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 1,
+            "torch_interop": 1,
+            "numba": 1
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": -1.151161789894104,
+              "cost_evaluations": 6403,
+              "phase_cost_evaluations": {
+                "angular_coarse": 2677,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 209,
+                "angular_candidate_refinement": 237,
+                "measure_4mm": 6,
+                "local_4mm_initial": 423,
+                "local_4mm_perturbations": 1347,
+                "measure_2mm": 42,
+                "local_2mm": 37,
+                "local_1mm": 94
+              },
+              "phase_timings_seconds": {
+                "preparation": 5.306868329644203,
+                "level_8mm": 3.112820327281952,
+                "angular_coarse": 2.4793859645724297,
+                "angular_fine_measure": 0.9857806116342545,
+                "angular_fine_refinement": 0.20293711125850677,
+                "angular_candidate_refinement": 0.30059920251369476,
+                "level_4mm": 1.8734511882066727,
+                "measure_4mm": 1.2865602597594261,
+                "local_4mm_initial": 5.07841320335865,
+                "local_4mm_perturbations": 16.499467246234417,
+                "level_2mm": 1.5723178759217262,
+                "measure_2mm": 4.162302449345589,
+                "local_2mm": 2.8659960851073265,
+                "level_1mm": 1.222089134156704,
+                "local_1mm": 65.56379336863756,
+                "output_resampling": 0.2502516731619835
+              },
+              "execution": "batched",
+              "degrees_of_freedom": 6,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 119.95020566135645,
+            "candidate": 117.37828420847654
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_12_corratio_explicit_batched",
+          "threads_ceiling": 8,
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              53.40998346358538
+            ],
+            "candidate": [
+              46.16859911382198
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 51.14315399999998,
+                  "system_seconds": 2.2490510000000015,
+                  "effective_cpu_cores": 0.9996671322020252
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 194.303296,
+                "system_seconds": 16.156253999999997,
+                "effective_cpu_cores": 4.558499803754984
+              }
+            ]
+          },
+          "load_before": [
+            76.32,
+            77.14,
+            81.64
+          ],
+          "load_after": [
+            72.16,
+            75.65,
+            80.66
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.013679297512715042,
+                "median": 0.012999332481225956,
+                "p95": 0.027589191450260356,
+                "minimum": 0.0005483677858403197,
+                "maximum": 0.02875542532404241,
+                "rms": 0.015691730490243475
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1737594,
+                "pearson_r": 0.9999959580270273,
+                "mae": 0.5505153965359726,
+                "rmse": 1.1058680744040987,
+                "support_dice": 0.9999122352922896
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": 0.21309858560562134,
+              "cost_evaluations": 8981
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "3d76d501590fdbdc9fd427dbe0bc1d570c003db16c8b34faa32b5483e1f82783",
+              "bytes": 6380100
+            },
+            "matrix": {
+              "sha256": "137c261f4500d50af99f93b128805e8233b93392d212b3804e802974af8d03dc",
+              "bytes": 184
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "3264e0bdc25788f4986d4395400bb207a3cbe204a8b179a03c417ed0161f696b",
+                "bytes": 6567731
+              },
+              "matrix": {
+                "sha256": "251caf17e12f317a2a1d2c6a08c27a340d73a0d3bd9babff41637c2623516348",
+                "bytes": 192
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1509508
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 8,
+            "torch_interop": 1,
+            "numba": 8
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": 0.21309858560562134,
+              "cost_evaluations": 8981,
+              "phase_cost_evaluations": {
+                "angular_coarse": 2677,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 209,
+                "angular_candidate_refinement": 270,
+                "measure_4mm": 6,
+                "local_4mm_initial": 499,
+                "local_4mm_perturbations": 3589,
+                "measure_2mm": 44,
+                "local_2mm": 180,
+                "local_1mm": 176
+              },
+              "phase_timings_seconds": {
+                "preparation": 2.810450553894043,
+                "level_8mm": 1.3247819542884827,
+                "angular_coarse": 3.5719941183924675,
+                "angular_fine_measure": 0.46782155334949493,
+                "angular_fine_refinement": 0.11601068079471588,
+                "angular_candidate_refinement": 0.22714661806821823,
+                "level_4mm": 0.6355876997113228,
+                "measure_4mm": 0.34233423322439194,
+                "local_4mm_initial": 1.0079005882143974,
+                "local_4mm_perturbations": 5.541784539818764,
+                "level_2mm": 0.5656940340995789,
+                "measure_2mm": 0.821549616754055,
+                "local_2mm": 3.19021475315094,
+                "level_1mm": 0.5035856515169144,
+                "local_1mm": 20.41283568739891,
+                "output_resampling": 0.2331719994544983
+              },
+              "execution": "batched",
+              "degrees_of_freedom": 12,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 53.40998346358538,
+            "candidate": 46.16859911382198
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        },
+        {
+          "case_id": "flirt_6_normmi_explicit_batched",
+          "threads_ceiling": 8,
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "timing_protocol": "single_observation",
+          "full_process_seconds": {
+            "official": [
+              117.13587544113398
+            ],
+            "candidate": [
+              68.23577865958214
+            ]
+          },
+          "input_files": [
+            {
+              "filename": "sub-01_T1w.nii.gz",
+              "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+              "bytes": 3847853
+            },
+            {
+              "filename": "sub-02_T1w.nii.gz",
+              "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+              "bytes": 4238223
+            }
+          ],
+          "official_programs": [
+            {
+              "name": "flirt",
+              "bytes": 551408,
+              "sha256": "89d987bd774e32a7405997b44878655e0784029e2f8e9b11fedfe894fbbb6ac0"
+            }
+          ],
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 114.72064899999998,
+                  "system_seconds": 1.9489599999999996,
+                  "effective_cpu_cores": 0.9960194394810468
+                }
+              ]
+            ],
+            "candidate": [
+              {
+                "user_seconds": 205.893955,
+                "system_seconds": 23.911882,
+                "effective_cpu_cores": 3.3678202478858807
+              }
+            ]
+          },
+          "load_before": [
+            72.16,
+            75.65,
+            80.66
+          ],
+          "load_after": [
+            79.14,
+            77.11,
+            80.31
+          ],
+          "accuracy": {
+            "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+            "candidate_vs_official": {
+              "world_grid_displacement_mm": {
+                "mean": 0.5289637135829602,
+                "median": 0.5254111957892744,
+                "p95": 0.9370537731992443,
+                "minimum": 0.026598876711865102,
+                "maximum": 1.193909368830128,
+                "rms": 0.5772646328061538
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1930365,
+                "pearson_r": 0.9963764668887397,
+                "mae": 19.408039951923172,
+                "rmse": 33.12685339167238,
+                "support_dice": 0.9956795399797964
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true,
+                "qform_matrix_max_abs": 0.0,
+                "sform_matrix_max_abs": 0.0,
+                "candidate_dtype": "float32",
+                "official_dtype": "float32"
+              },
+              "cost": -1.151161789894104,
+              "cost_evaluations": 6406
+            }
+          },
+          "official_output_metadata": {
+            "moved": {
+              "sha256": "458db29d798448aa181ee5668ce4a2099f1cb21306ca7ad95484bbc5744b1bc6",
+              "bytes": 7077387
+            },
+            "matrix": {
+              "sha256": "7de2b686a4715a3acb46b6ce690b3aef241ae5b40bb946269924341c8096597e",
+              "bytes": 187
+            }
+          },
+          "candidate_output_metadata": [
+            {
+              "moved": {
+                "sha256": "7a1839bfc79dd3c75d441a569519b7cd849acce08bade2c77219e91e7ae52d29",
+                "bytes": 7267350
+              },
+              "matrix": {
+                "sha256": "bf7a70dfa3353459bc4d14477c3c06e38cabd2496722b8da474be01224095a0a",
+                "bytes": 191
+              }
+            }
+          ],
+          "candidate_rss_kib": [
+            1841280
+          ],
+          "runtime_versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          },
+          "actual_thread_settings": {
+            "torch": 8,
+            "torch_interop": 1,
+            "numba": 8
+          },
+          "fnit_diagnostics": [
+            {
+              "cost_value": -1.151161789894104,
+              "cost_evaluations": 6406,
+              "phase_cost_evaluations": {
+                "angular_coarse": 2677,
+                "angular_fine_measure": 1331,
+                "angular_fine_refinement": 209,
+                "angular_candidate_refinement": 237,
+                "measure_4mm": 6,
+                "local_4mm_initial": 423,
+                "local_4mm_perturbations": 1347,
+                "measure_2mm": 42,
+                "local_2mm": 37,
+                "local_1mm": 97
+              },
+              "phase_timings_seconds": {
+                "preparation": 2.0404172837734222,
+                "level_8mm": 0.7632258236408234,
+                "angular_coarse": 1.1012501120567322,
+                "angular_fine_measure": 0.3372877314686775,
+                "angular_fine_refinement": 0.11098232120275497,
+                "angular_candidate_refinement": 0.18034958839416504,
+                "level_4mm": 0.9020056873559952,
+                "measure_4mm": 0.30256999284029007,
+                "local_4mm_initial": 3.7283152416348457,
+                "local_4mm_perturbations": 11.631613902747631,
+                "level_2mm": 0.5859959349036217,
+                "measure_2mm": 1.9148662239313126,
+                "local_2mm": 2.5399310514330864,
+                "level_1mm": 0.5886558294296265,
+                "local_1mm": 37.144210547208786,
+                "output_resampling": 0.22291970998048782
+              },
+              "execution": "batched",
+              "degrees_of_freedom": 6,
+              "angular_search": true,
+              "input_weight_used": false,
+              "reference_weight_used": false,
+              "initial_matrix_used": false
+            }
+          ],
+          "single_full_process_seconds": {
+            "official": 117.13587544113398,
+            "candidate": 68.23577865958214
+          },
+          "vs_v16_same_budget": {
+            "saved_output_files_sha256_identical": true,
+            "final_cost_identical": true,
+            "cost_evaluations_identical": true,
+            "phase_counts_identical": true
+          }
+        }
+      ]
+    }
+  },
+  "summary_script_sha256": "a0f98f8939130613ed94cf4e290053205b80993a8ef567d890e6a77b08dd6f47"
+}
