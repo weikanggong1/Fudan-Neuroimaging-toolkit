@@ -106,6 +106,8 @@ CPU 连通域改用 SciPy 的 6 邻接标记，保持原版的等大连通域顺
 
 修复的写出问题是：旧 `color_lut` 只存在于 Python `extra`，保存后丢失色表。新实现直接用 nibabel 写 NIfTI 扩展，生产推理不导入 Surfa。CPU 构造和推理保留调用方 CUDA TF32、cuDNN benchmark/deterministic 设置；这一合同包含异常路径测试。
 
+同日另修复 `keep_geometry=True` 保存头信息：将 qform 标记为未启用时不再重新编码矩阵，避免斜位 T1 的 `pixdim` 被 affine 列范数覆盖。实际原始 T1 的 GPU 公共 CLI 输出 shape、affine、pixdim 与输入逐值相同，dtype 为 int32，qform/sform code 为 0/2；硬标签与原 GPU 输出恢复到同一原图网格后相同，CSV 数值相同。指定色表的该输出经原软件读写核对了全部 1811 个条目。独立原软件保存函数的同标签控制和实际 GPU 结果见[保存几何记录](../../validation/smri_cpu_20261004/t2_seg/keep_geometry.public.json)。
+
 2026-09-27 在三幅仓库公开、去面容 T1w 上重跑当前源码和 FreeSurfer 8.2.0-1 `mri_synthseg --noaddctab`。候选推理没有调用 FreeSurfer。该次 33 类推理所用源码树 SHA-256 为 `39fa204aea7674ad7c6e09652d0f8750dd2872b1b78799812ab0d71b5b6c8972`。
 
 本轮同时核对文件头：默认输出和 `keep_geometry=True` 均写 `int32`，qform code 为 0，sform code 为 2，与原版相同。一幅真实 T1w 的 `keep_geometry=True` 输出与输入 shape、affine 完全一致。 针对性测试为 `2 passed`；WMH-SynthSeg、SynthSR 和 TorchFAST 的最小跨模块回归为 `28 passed, 4 skipped`。

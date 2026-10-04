@@ -68,7 +68,10 @@ def _official_soft_volumes(posterior: torch.Tensor, reference_affine: np.ndarray
 def _segmentation_image(data: np.ndarray, reference, affine: np.ndarray):
     """Create the int32 NIfTI header written by FreeSurfer mri_synthseg."""
     image = new_image(np.asarray(data, dtype=np.int32), reference, affine=affine)
-    image.set_qform(image.affine, code=0)
+    # Setting the inactive qform code must not re-encode its matrix: that
+    # replaces original pixdim values with affine-column norms on oblique
+    # keep-geometry outputs. new_image already establishes world geometry.
+    image.header["qform_code"] = 0
     image.set_sform(image.affine, code=2)
     return image
 

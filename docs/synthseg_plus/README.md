@@ -80,6 +80,8 @@ mri_synthseg --i sub-01_T1w.nii.gz --o sub-01_official_parc.nii.gz \
 
 ### 2026-10-04 CPU 功能与 GPU 回归
 
+共享的分割写出函数修复了斜位 T1 在 `keep_geometry=True` 时重编码未启用 qform、改变 `pixdim` 的问题。实际 GPU 公共 CLI `--parc --fast --keep-geometry` 已保存并回读，shape、affine、pixdim 与原始输入逐值相同，int32 标签和 qform/sform code 为 0/2。此项验证输出几何；CPU/GPU 网络精度与耗时仍分别按各冻结源码记录，见[保存几何记录](../../validation/smri_cpu_20261004/t2_seg/keep_geometry.public.json)。
+
 本次矩阵分别安排普通 `--parc`、`--parc --fast`、输入网格输出和软体积 CSV，完成状态及数值见[8 线程验证记录](../../validation/smri_cpu_20261004/t2_seg/README.md)。计时配对只保存原版也输出的合并标签图与 CSV；Python 返回的主分割、单独皮层图和 `mask()` 功能另作输出检查，不向计时流程添加额外写盘。
 
 共享预处理修复真实影像少一层问题，3 幅 CPU 网络输入 float32 数组 SHA 与官方相同；CPU 连通域使用 6 邻接 SciPy。最初将所有 CPU 卷积切片的候选使 fast 从旧 FNIT 56.33/52.57 秒变成 63.59/58.33 秒，因此最终选择在 Plus 保留既有完整 oneDNN 卷积，仅普通 SynthSeg 的既有保护上下文启用切片。fast 全层切片候选与同输入旧 FNIT 硬标签和 CSV 相同，与官方只差 1 个体素、最小 Dice 0.99990777、CSV 最大差 0.10 mm³；不能称官方逐值一致。最终选择策略另作公共 CLI 配对，未结束项目不会列为通过。CUDA 前向仍走原卷积；CPU 调用保留同进程的 CUDA 精度与性能开关。新版本和下列历史验证按源码和核组分别记录。
