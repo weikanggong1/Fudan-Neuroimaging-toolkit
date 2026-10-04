@@ -48,6 +48,6 @@ python -m pytest \
 
 ## 打包交接
 
-coordinator 维护共享 `pyproject.toml` / `MANIFEST.in`。需要在 setuptools `fnit` package-data 添加 `recon_all/*.cpp`，并在 sdist manifest 添加 `recursive-include src/fnit/recon_all _average_cpu_persistent.cpp`（或等效 `*.cpp`）。`.py` 已由包发现规则覆盖，`.md` 已由既有 `recon_all/*.md` 覆盖。只发布自有 `.cpp`，不发布缓存 `.so` 或私密运行状态。
+coordinator 已在 `pyproject.toml` / `MANIFEST.in` 纳入自有 `.cpp`。实际 wheel 与 sdist 中的 CPP 字节 SHA 均为 `a6dcc287830b60379b75545943ec5e019f2f7274c9266610177c849f05a3cc89`；安装该 wheel 到独立目录后，从该目录导入 helper、调用现有编译器生成内核，确认实际 CPP 八线程与原 NumBa 的 24,576 个 FP32 位模式相同。完整绑定见 [packaging.public.json](packaging.public.json)。这里只用合成数据检查打包、安装与编译合同，不作为 benchmark。复用现有依赖，不等于全新 Conda 环境或全部 FNIT 功能安装验证；后续 SynthMorph 修改不由该 wheel 记录覆盖。只发布自有 `.cpp`，不发布缓存 `.so` 或私密运行状态。
 
 功能文档与本目录随后单独提交，生产源码在 `fc2abc94` 保持冻结。
