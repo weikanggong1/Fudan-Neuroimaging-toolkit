@@ -59,7 +59,7 @@ def output_audit(comparison, report, candidate_dir):
             offset = int(run.get("label_offset", 0))
             values = np.where(values != 0, values + offset, values) if offset else values
             observed[role] = sorted(int(label) for label in np.unique(values) if label != 0)
-            sources[role] = {"shape": list(image.shape), "affine": affine.tolist(),
+            sources[role] = {"shape": [int(size) for size in image.shape], "affine": affine.tolist(),
                              "zooms": list(map(float, image.header.get_zooms()[:3])),
                              "dtype": str(image.get_data_dtype()),
                              "voxel_volume_mm3": float(abs(np.linalg.det(affine[:3, :3])))}
@@ -148,6 +148,14 @@ def build_raw(comparison, metadata, source_manifest, upstream):
         if key in intensity:
             result["shared_preprocessing"]["intensity_preprocessing"][key] = {
                 name: intensity[key][name] for name in ("shape", "affine", "voxel_sizes_mm")}
+    # Brainstem's established recipe uses plain stage names rather than the
+    # other recipes' *_seconds keys. Preserve its measured fields explicitly.
+    brainstem = report["initialization"]["brainstem"]["timing_seconds"]
+    result["recipe_timings"]["brainstem"]["recipe_total_seconds"] = brainstem["total"]
+    result["recipe_timings"]["brainstem"]["timing_seconds"] = {
+        name + "_seconds": brainstem[name]
+        for name in ("alignment", "segmentation_fit", "image_preparation",
+                     "intensity_mesh_fit", "postprocess", "total")}
     return result
 
 
