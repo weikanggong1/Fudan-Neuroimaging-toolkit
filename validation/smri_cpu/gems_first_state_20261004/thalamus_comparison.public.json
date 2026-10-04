@@ -1,0 +1,285 @@
+{
+  "structure": "thalamus",
+  "scope": "first synthetic-label objective only; no optimizer update, no intensity EM or regional segmentation gate",
+  "run": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/remaining_20261004/gems/first-state-v2",
+  "native": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/remaining_20261004/gems/first-state-v2/native_boundary_f32",
+  "source_binding": {
+    "status": "first_objective_captured",
+    "structure": "thalamus",
+    "scope": "real same-input synthetic-label recipe, first objective only; no optimizer update or complete fit",
+    "host": "nodecw7",
+    "affinity": [32, 36, 40, 44, 48, 52, 56, 60],
+    "torch_threads": 8,
+    "numba_threads": 8,
+    "first_cost": -32005.427897074707,
+    "image_shape": [119, 113, 117],
+    "valid_voxels": 97843,
+    "vertices": 23027,
+    "tetrahedra": 135299,
+    "classes": 14,
+    "background_class": 0,
+    "source": {"$ref": "binding.public.json#/fnit_gems_source_files"},
+    "inputs": {"norm": "001021a47f102bb9772f7f736b65f74740334e86dfd1afd0386ca250cb25b698", "aseg": "ea02b3cd278c8eb229a4cd6a5bec982a0a6175f7d34ab3f651696902e1a259f8", "wmparc": "bd45c6371c7d389cfc5d9ce5cabe321e362d32cce6feb35fdaea81e7606a469c", "mesh": "7bb5954c43885ddace887fe5fa8e0c0cdcd3bea41beb6185f48a1784e451bd08", "lut": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff", "atlas_dump": "c6bb408e519ebd5fc520dd98da044493f34cb14747f7229fbed224598d129758"},
+    "outputs": {"fnit_gradient.npy": "17b10efb912e6848fc26051fdc036b00f9b5b28d8a8b2be0e71e223442181eff", "fnit_vertices.npy": "526d6ff9f582cec7ee724c2ec166d75c104f85fe9694acf707e5c523407fd7c3", "shared_input.npz": "c1c49bd36ffde0307aef2b245e516ac0c85bb5ed03b452c73ddff66a8dd3d1cf", "fnit_priors.npy": "fbd305ebd9f3dc1387fb2e346dd8719edf79d308bdb2d643473dbdb78cd3064e", "fnit_coverage.npy": "f79360106156fa289c8eac2702f13d71932ba5296e8d66bc35debafed7e5d71c"}
+  },
+  "native_binding": {
+    "status": "first_objective_evaluated",
+    "scope": "isolated official cost/prior oracle; no fit",
+    "host": "nodecw7",
+    "affinity": [32, 36, 40, 44, 48, 52, 56, 60],
+    "python": "3.8.13 (default, Apr 21 2022, 14:55:37) \n[GCC 8.3.1 20190311 (Red Hat 8.3.1-3)]",
+    "python_executable": "/public/software/apps/Freesurfer/8.2.0-1/python/bin/python3.8",
+    "SOABI": "cpython-38-x86_64-linux-gnu",
+    "numpy": "1.24.3",
+    "native_binding": {"path": "/public/software/apps/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/gems/gemsbindings.cpython-38-x86_64-linux-gnu.so", "sha256": "8125a39cd9885ada66ac2945dc5d7e38737e3bb707bce26ad6d796340fadbf82"},
+    "shared_input_sha256": "c1c49bd36ffde0307aef2b245e516ac0c85bb5ed03b452c73ddff66a8dd3d1cf",
+    "mesh_sha256": "7bb5954c43885ddace887fe5fa8e0c0cdcd3bea41beb6185f48a1784e451bd08",
+    "raw_reference_original_exact": true,
+    "raw_reference_after_float32_exact": false,
+    "node_flags_exact": true,
+    "image_roundtrip_exact": true,
+    "common_points": "captured FNIT FP32 coordinates promoted to the official FP64 API; setter/getter exact",
+    "common_reference": "captured FNIT FP32 reference promoted to the official FP64 API",
+    "common_alphas": "captured first smoothed reduced FP32 alpha; setter/getter exact",
+    "common_gaussians": "actual fixed Gaussian FP32 means/covariances promoted to official FP64 API",
+    "common_boundary": "actual FNIT FP32 boundary matrix promoted to official FP64 API",
+    "mask": "same finite, nonzero FP32 image; native image buffer roundtrip exact",
+    "cost": {
+      "total": -32159.086967381172,
+      "data": -32159.086967381172,
+      "continuous_dtype": "float64",
+      "continuous_shape": [119, 113, 117, 14],
+      "uint16_dtype": "uint16"
+    },
+    "outputs": {"native_priors.npy": "cc3ea2517e74ef1e1569a4cedfb0701891ac24b42f35af485e6f0f45bb2de17b", "native_data_gradient.npy": "f0bc82d934b0ebe2479f357f48c97d16c08e25db635f9e2b3d0a6dad4280c178", "native_total_gradient.npy": "dc4ff8989fea50d2206c53f236f0fb09a67c3638bdc8712e945455a2c77c6593", "native_priors_uint16.npy": "a6c4022e2a48ed2c9c3ef74b976ebf744367f8df2e52e9d47cb8d71a1acd3cf3"}
+  },
+  "autograd": {
+    "scope": "same saved real state; three independent objectives and their complete autograd gradients; no mesh update",
+    "affinity": [32, 36, 40, 44, 48, 52, 56, 60],
+    "threads": 8,
+    "official_cost": -32159.086967381172,
+    "variants": {
+      "baseline": {
+        "data_cost": -32005.427210211754,
+        "prior_cost": -0.0006868629518208547,
+        "total_cost": -32005.427897074707,
+        "cost_minus_official": 153.65907030646486,
+        "coverage": 97843,
+        "min_jacobian": 0.9999988079071045,
+        "single_evaluation_observation_seconds": 1.6236560568213463,
+        "vertex_storage_dtype": "torch.float32",
+        "gradient_storage_dtype": "torch.float32",
+        "geometry_dtype": "torch.float32",
+        "gradient_vs_saved_fnit": {"different": 0, "max_abs": 0.0, "rms": 0.0, "relative_l2": 0.0, "p99_abs": 0.0},
+        "gradient_vs_official": {"different": 69057, "max_abs": 4.1105530233893575, "rms": 0.0419890357764859, "relative_l2": 0.001808298145585478, "p99_abs": 1.6573506321115727e-06}
+      },
+      "epsilon": {
+        "data_cost": -32159.092274069786,
+        "prior_cost": -0.0006868629518208547,
+        "total_cost": -32159.09296093274,
+        "cost_minus_official": -0.005993551567371469,
+        "coverage": 97843,
+        "min_jacobian": 0.9999988079071045,
+        "single_evaluation_observation_seconds": 1.3223617933690548,
+        "vertex_storage_dtype": "torch.float32",
+        "gradient_storage_dtype": "torch.float32",
+        "geometry_dtype": "torch.float32",
+        "gradient_vs_saved_fnit": {"different": 363, "max_abs": 4.110603332519531, "rms": 0.04133756449665881, "relative_l2": 0.0017796332090422513, "p99_abs": 0.0},
+        "gradient_vs_official": {"different": 69057, "max_abs": 1.6698414514585238, "rms": 0.007351153122885796, "relative_l2": 0.0003165844681642699, "p99_abs": 1.2677341998390497e-06}
+      },
+      "epsilon_native_mixture": {
+        "data_cost": -32159.087422000346,
+        "prior_cost": -0.0006868629518208547,
+        "total_cost": -32159.0881088633,
+        "cost_minus_official": -0.0011414821274229325,
+        "coverage": 97843,
+        "min_jacobian": 0.9999988079071045,
+        "single_evaluation_observation_seconds": 1.1932708472013474,
+        "vertex_storage_dtype": "torch.float32",
+        "gradient_storage_dtype": "torch.float32",
+        "geometry_dtype": "torch.float32",
+        "gradient_vs_saved_fnit": {"different": 401, "max_abs": 4.110603332519531, "rms": 0.04133756519117839, "relative_l2": 0.0017796332389421769, "p99_abs": 0.0},
+        "gradient_vs_official": {"different": 69057, "max_abs": 1.6688648889585238, "rms": 0.007347407461342835, "relative_l2": 0.00031642315765315965, "p99_abs": 1.2904898544774306e-06}
+      },
+      "epsilon_native_mixture_fp64_geometry": {
+        "data_cost": -32159.086797473617,
+        "prior_cost": -1.2359062310401425e-12,
+        "total_cost": -32159.086797473617,
+        "cost_minus_official": 0.00016990755466395058,
+        "coverage": 97843,
+        "min_jacobian": 0.999999999999998,
+        "single_evaluation_observation_seconds": 21.00605367589742,
+        "vertex_storage_dtype": "torch.float64",
+        "gradient_storage_dtype": "torch.float64",
+        "geometry_dtype": "torch.float64",
+        "gradient_vs_saved_fnit": {"different": 69057, "max_abs": 4.110552843843465, "rms": 0.041989036130775564, "relative_l2": 0.0018076798675462102, "p99_abs": 1.6726460128956994e-06},
+        "gradient_vs_official": {"different": 69057, "max_abs": 1.1415396839742353e-06, "rms": 8.681616935675944e-08, "relative_l2": 3.738821698367697e-09, "p99_abs": 3.204032871018114e-07}
+      },
+      "epsilon_cpu64_internal": {
+        "data_cost": -32159.09159840321,
+        "prior_cost": -1.2359062310401425e-12,
+        "total_cost": -32159.09159840321,
+        "cost_minus_official": -0.004631022038665833,
+        "coverage": 97843,
+        "min_jacobian": 0.999999999999998,
+        "single_evaluation_observation_seconds": 20.08955855574459,
+        "vertex_storage_dtype": "torch.float32",
+        "gradient_storage_dtype": "torch.float32",
+        "geometry_dtype": "torch.float64",
+        "gradient_vs_saved_fnit": {"different": 63287, "max_abs": 4.110553741455078, "rms": 0.041989055848201354, "relative_l2": 0.0018076807164057438, "p99_abs": 1.7344951629637805e-06},
+        "gradient_vs_official": {"different": 69057, "max_abs": 0.00011418271242291667, "rms": 5.849026445198191e-07, "relative_l2": 2.5189394037610587e-08, "p99_abs": 3.514944639460003e-07}
+      }
+    },
+    "outputs": {"epsilon_native_mixture_fp64_geometry_gradient.npy": "953a4ff6edfe45d5aef94d7b56ee4d13490461e1d0f01d494de884abef7aa10f", "epsilon_native_mixture_gradient.npy": "366ece698bb8eb41d0a22fcab01f71c5f00c280398f76c7f680226d1321e36c0", "baseline_gradient.npy": "17b10efb912e6848fc26051fdc036b00f9b5b28d8a8b2be0e71e223442181eff", "epsilon_gradient.npy": "5155d63c165690e77bcab616c98253f7fae18f5b7d96a844b20810f2aa4d4e7a", "epsilon_cpu64_internal_gradient.npy": "c5d917e72eb397a8c21f6614a85acf35c79b76ca1cde48b5b3f0dc2474f9f7a6"}
+  },
+  "arrays": {
+    "image": {
+      "dtype": "float32",
+      "shape": [119, 113, 117],
+      "sha256_c_order": "f7001d5a82e65fd18afd150555216425678f45589571a1b8049a34abd21e9e0f"
+    },
+    "vertices": {
+      "dtype": "float32",
+      "shape": [23027, 3],
+      "sha256_c_order": "e89d314f5655d23d1056461e8ee1c8010d952c6e3aa9faee991cdb3bd58d2888"
+    },
+    "reference": {
+      "dtype": "float32",
+      "shape": [23027, 3],
+      "sha256_c_order": "e89d314f5655d23d1056461e8ee1c8010d952c6e3aa9faee991cdb3bd58d2888"
+    },
+    "tetrahedra": {
+      "dtype": "int64",
+      "shape": [135299, 4],
+      "sha256_c_order": "09d2fe1b0375a800007cfc05904e6d9654f31d49dca25e9e0cdd4a1fb17010ac"
+    },
+    "alphas": {
+      "dtype": "float32",
+      "shape": [23027, 14],
+      "sha256_c_order": "2c0fd5f2f0e935e51d8bef762998119f44d2b80f2aa0e4e9ba922f17145e0f25"
+    },
+    "can_move": {
+      "dtype": "bool",
+      "shape": [23027, 3],
+      "sha256_c_order": "e65d0cec4cf128e0e5dc04394ec4b352e9678ae31984440e45b74777e07a2212"
+    },
+    "means": {
+      "dtype": "float64",
+      "shape": [14, 1],
+      "sha256_c_order": "c66b22d83e50c9ac177453a9d0f69f597545fa060b1effc0e8c985023ee96b1f"
+    },
+    "variances": {
+      "dtype": "float64",
+      "shape": [14, 1, 1],
+      "sha256_c_order": "b75f7b6fd02bb5981cd4973a7bd57fe84f39dfd627970df351aeb449610fdbd4"
+    },
+    "stiffness": {
+      "dtype": "float64",
+      "shape": [],
+      "sha256_c_order": "7f925b2036e92fe2f1f0697c3aedfff74d719c1ee2cb6b739d7c30484e75972c"
+    },
+    "boundary_transform": {
+      "dtype": "float64",
+      "shape": [3, 3],
+      "sha256_c_order": "494cceef93117b7e592b5ea5d2127944336749e5f436a7a7386d7f64652e5b16"
+    },
+    "original_reference": {
+      "dtype": "float64",
+      "shape": [23027, 3],
+      "sha256_c_order": "52248db52b609939aad55464bd7330fd195982470b5773776ca125f6126799aa"
+    },
+    "classes": {
+      "dtype": "int64",
+      "shape": [66],
+      "sha256_c_order": "2a9d0c2e5906118b5dd17c6bde5b20feba87ecce897b5b4085de41680d81eefb"
+    },
+    "raw_alphas": {
+      "dtype": "float32",
+      "shape": [23027, 66],
+      "sha256_c_order": "1496b55825d1ef878ed0aa18d28a88c7ebb854eed6144d27c9a6fa639a626cfa"
+    },
+    "label_ids": {
+      "dtype": "int32",
+      "shape": [66],
+      "sha256_c_order": "d831ea94de3fd04a4b373844abd9ff9e8ae8884c73dedeb12356d323be9f3fa3"
+    }
+  },
+  "finite_image": true,
+  "prior_comparison": {"different_elements": 991258, "max_abs": 3.11975519418084e-07, "rms": 1.2515296234250611e-08, "p99_abs": 6.120153225985801e-08},
+  "prior_vs_uint16_div65535": {"different_elements": 990951, "max_abs": 7.767879945608236e-06, "rms": 3.0938825133290707e-06, "p99_abs": 7.469788505795271e-06},
+  "coverage": {"valid_voxels": 97843, "fnit_covered": 97843, "official_nonzero_mass": 97843, "official_mass_min": 0.9999998344997729, "official_mass_max": 1.000000227564027},
+  "classes": [
+    {
+      "class_index": 0,
+      "fixed_mean": 1.0,
+      "prior": {"different_elements": 96594, "max_abs": 1.8283702285515346e-07, "rms": 1.3584870061817606e-08, "p99_abs": 6.549056476901075e-08}
+    },
+    {
+      "class_index": 1,
+      "fixed_mean": 2.0,
+      "prior": {"different_elements": 97834, "max_abs": 2.1041886744121996e-07, "rms": 2.7627786192506686e-08, "p99_abs": 9.4853827876662e-08}
+    },
+    {
+      "class_index": 2,
+      "fixed_mean": 3.0,
+      "prior": {"different_elements": 93314, "max_abs": 1.43938475027916e-07, "rms": 1.2748378677954677e-08, "p99_abs": 5.865782836012028e-08}
+    },
+    {
+      "class_index": 3,
+      "fixed_mean": 8.0,
+      "prior": {"different_elements": 35529, "max_abs": 7.686262659678533e-08, "rms": 1.7261196906820178e-09, "p99_abs": 3.4412396191646505e-09}
+    },
+    {
+      "class_index": 4,
+      "fixed_mean": 7.0,
+      "prior": {"different_elements": 38271, "max_abs": 1.2173074395716021e-08, "rms": 1.5965988936885206e-10, "p99_abs": 1.377684766463473e-10}
+    },
+    {
+      "class_index": 5,
+      "fixed_mean": 16.0,
+      "prior": {"different_elements": 51527, "max_abs": 1.5960581689622444e-07, "rms": 7.418470649763169e-09, "p99_abs": 3.8199497819357846e-08}
+    },
+    {
+      "class_index": 6,
+      "fixed_mean": 4.0,
+      "prior": {"different_elements": 95377, "max_abs": 1.466914199554914e-07, "rms": 1.5535038912861776e-08, "p99_abs": 6.455989661091632e-08}
+    },
+    {
+      "class_index": 7,
+      "fixed_mean": 31.0,
+      "prior": {"different_elements": 83907, "max_abs": 5.189067769917344e-08, "rms": 2.8149392158336472e-09, "p99_abs": 1.3303480231249832e-08}
+    },
+    {
+      "class_index": 8,
+      "fixed_mean": 12.0,
+      "prior": {"different_elements": 76433, "max_abs": 1.5938817132798988e-07, "rms": 1.0789442536808525e-08, "p99_abs": 5.604424523686374e-08}
+    },
+    {
+      "class_index": 9,
+      "fixed_mean": 13.0,
+      "prior": {"different_elements": 67782, "max_abs": 1.9031225317878153e-07, "rms": 7.096485977988558e-09, "p99_abs": 3.663742132620223e-08}
+    },
+    {
+      "class_index": 10,
+      "fixed_mean": 26.0,
+      "prior": {"different_elements": 30897, "max_abs": 1.915697833698715e-08, "rms": 3.4594589267609743e-10, "p99_abs": 7.08742250461053e-10}
+    },
+    {
+      "class_index": 11,
+      "fixed_mean": 11.0,
+      "prior": {"different_elements": 64666, "max_abs": 1.607226406408202e-07, "rms": 6.3649709432964945e-09, "p99_abs": 3.1888132714930076e-08}
+    },
+    {
+      "class_index": 12,
+      "fixed_mean": 10.0,
+      "prior": {"different_elements": 81004, "max_abs": 3.11975519418084e-07, "rms": 1.704887570844668e-08, "p99_abs": 8.248447171288477e-08}
+    },
+    {
+      "class_index": 13,
+      "fixed_mean": 49.0,
+      "prior": {"different_elements": 78123, "max_abs": 2.3353715250529206e-07, "rms": 1.6647031269238164e-08, "p99_abs": 8.090244948188998e-08}
+    }
+  ],
+  "epsilon_effect": {"voxels_density_below_1e_minus15": 22, "max_point_cost_reduction": 15.257156372070312, "total_data_cost_reduction": 153.66506385803223, "voxels_reduced_cost_over_1e_minus3": 79, "changed_fnit_vertex_gradient_components": 363},
+  "figure": {"plane_axis": 2, "plane_index": 35, "data_sha256": "5f33a3e53dfe39f92dfc15fca6b92d54c6f6ef3afc1e24eca2fe0c35416493b8"}
+}
