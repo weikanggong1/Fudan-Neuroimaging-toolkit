@@ -71,15 +71,36 @@ class WMHSynthSeg:
         if threads is not None:
             torch.set_num_threads(os.cpu_count() if threads < 0 else threads)
         checkpoint_path = resolve_weights('WMH-SynthSeg_v10_231110.pth', explicit=weights)
-        self.model = UNet3D().to(self.device)
+        self.model = UNet3D()
         # The official checkpoint contains NumPy scalars outside its state_dict.
-        checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
+        # Load on CPU before the single device transfer: otherwise CUDA holds
+        # both the model and every checkpoint tensor during construction.
+        checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
         self.model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        del checkpoint
+        self.model.to(self.device)
         self.model.eval()
         self.labels = torch.tensor(LABEL_IDS, device=self.device)
 
+    def _release_cuda_cache(self):
+        """Release unreferenced stage buffers on the explicitly chosen device."""
+        if self.device.type == 'cuda':
+            with torch.cuda.device(self.device):
+                torch.cuda.empty_cache()
+
     @torch.no_grad()
     def __call__(self, image, crop=False, save_lesion_probabilities=False):
+        # The larger CUDA full-view convolution needs its original workspace
+        # to reproduce the existing result. Crop inference uses the verified
+        # bounded schedule; restore the dispatch mode even when inference fails.
+        previous = self.model._memory_efficient_inference
+        self.model._memory_efficient_inference = self.device.type != 'cuda' or crop
+        try:
+            return self._predict(image, crop, save_lesion_probabilities)
+        finally:
+            self.model._memory_efficient_inference = previous
+
+    def _predict(self, image, crop, save_lesion_probabilities):
         volume = load_image(image)
         data, affine = volume.get_fdata(), volume.affine
         data = np.squeeze(data)
@@ -98,16 +119,39 @@ class WMHSynthSeg:
         aff_upscaled[:-1, -1] -= aff_upscaled[:-1, :-1] @ (0.5 * (voxsize - 1))
         if crop:
             upscaled, aff_upscaled = self._crop(upscaled, aff_upscaled)
+            # Preliminary crop inference creates large cached blocks which
+            # subsequent softmax/crop temporaries can fragment. All of those
+            # local tensors are gone when _crop returns.
+            self._release_cuda_cache()
         shape = upscaled.shape
         padded_shape = tuple((np.ceil(np.array(shape) / 32) * 32).astype(int))
         padded = torch.zeros(padded_shape, device=self.device)
         padded[:shape[0], :shape[1], :shape[2]] = upscaled
+        legacy_cuda = self.device.type == 'cuda' and not crop
+        probabilities = None
+        if self.device.type == 'cuda' and not legacy_cuda:
+            # Allocate the retained probability buffer before the large CNN
+            # blocks exist. Otherwise a small probability tensor can split
+            # a multi-GB cached GroupNorm block and prevent its release.
+            probabilities = torch.empty((33, *shape), dtype=padded.dtype, device=self.device)
         pred1 = self.model(padded[None, None])[0, :33, :shape[0], :shape[1], :shape[2]]
-        pred2 = torch.flip(self.model(torch.flip(padded, [0])[None, None]), [2])
-        pred2 = pred2[0, :33, :shape[0], :shape[1], :shape[2]]
         flip_channels = list(range(7)) + list(range(20, 33)) + list(range(7, 20))
-        probabilities = 0.5 * torch.softmax(pred1, dim=0)
-        probabilities += 0.5 * torch.softmax(pred2[flip_channels], dim=0)
+        if legacy_cuda:
+            pred2 = torch.flip(self.model(torch.flip(padded, [0])[None, None]), [2])
+            pred2 = pred2[0, :33, :shape[0], :shape[1], :shape[2]]
+            probabilities = 0.5 * torch.softmax(pred1, dim=0)
+            probabilities += 0.5 * torch.softmax(pred2[flip_channels], dim=0)
+        else:
+            if probabilities is None:
+                probabilities = 0.5 * torch.softmax(pred1, dim=0)
+            else:
+                torch.softmax(pred1, dim=0, out=probabilities)
+                probabilities.mul_(0.5)
+            del pred1
+            self._release_cuda_cache()
+            pred2 = torch.flip(self.model(torch.flip(padded, [0])[None, None]), [2])
+            pred2 = pred2[0, :33, :shape[0], :shape[1], :shape[2]]
+            probabilities += 0.5 * torch.softmax(pred2[flip_channels], dim=0)
         segmentation = self.labels[torch.argmax(probabilities, dim=0)].cpu().numpy()
         volumes = probabilities.sum(dim=(1, 2, 3)).cpu().numpy()
         # FreeSurfer MRIwrite uses a default NIfTI header, yielding float32 labels.
@@ -118,7 +162,6 @@ class WMHSynthSeg:
             lesion_volume = _output_image(lesion, aff_upscaled)
         return WMHResult(seg_volume, lesion_volume,
                          {label: float(value) for label, value in zip(LABEL_IDS, volumes)})
-
 
     def _crop(self, upscaled, affine):
         target = (192, 224, 192)

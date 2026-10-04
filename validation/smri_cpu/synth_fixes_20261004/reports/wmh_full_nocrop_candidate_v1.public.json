@@ -1,0 +1,156 @@
+{
+  "schema": "fnit.wmh.real.gpu.memory_fix.v1",
+  "source_revision": "f1cbdab10fbfd573c3aa1b3461aa086dab220cfb+source_v6",
+  "crop": false,
+  "budget_bytes": 20000000000,
+  "purpose": "20GB candidate/baseline acceptance",
+  "device_total_bytes": 84942979072,
+  "initial_free_bytes": 61487513600,
+  "visible_gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+  "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+  "weight_sha256": "0ece39dd651357aa95222fc4d45fa32d00f11e763d2583cae3f869989ce35988",
+  "driver_sha256": "74dd7981a7afd9ecfd3f3b1861381a905e205b35ae03a37cc91633edc8e46f77",
+  "torch_version": "2.5.1",
+  "timing_scope": "constructor/API/save separately; synchronized network forwards nested in API",
+  "diagnostic_hooks": false,
+  "network_calls": [
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        224
+      ],
+      "input_dtype": "torch.float32",
+      "output_dtype": "torch.float32",
+      "seconds": 1.7803692040033638,
+      "allocated_bytes": 3179200000,
+      "peak_allocated_bytes": 16473836032,
+      "peak_reserved_bytes": 16565403648
+    },
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        224
+      ],
+      "input_dtype": "torch.float32",
+      "output_dtype": "torch.float32",
+      "seconds": 1.4807135029695928,
+      "allocated_bytes": 3217735168,
+      "peak_allocated_bytes": 16512371200,
+      "peak_reserved_bytes": 16565403648
+    }
+  ],
+  "layer_memory": [],
+  "model_sha256": "8dc9ef14cda42454d1c156429d14d1760d702d9b508493417ec510e6872361a0",
+  "pipeline_sha256": "e52ae70208f69b96d5006c86f2d9b18bf04a493261364b823fc9f81caaf4f082",
+  "spatial_sha256": "d81416104064110511ee0f073998b3e19959748c74ad88675d90488a261db8a6",
+  "constructor_seconds": 1.9198853089474142,
+  "constructor_peak_allocated_bytes": 267410944,
+  "constructor_peak_reserved_bytes": 283115520,
+  "parameters_dtype": "torch.float32",
+  "parameters_device": "cuda:0",
+  "api_seconds": 5.176942460238934,
+  "peak_allocated_bytes": 16512371200,
+  "peak_reserved_bytes": 16565403648,
+  "policy": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "benchmark": false,
+    "deterministic": false,
+    "autocast_enabled": false
+  },
+  "save_seconds": 2.1041327249258757,
+  "shape": [
+    179,
+    224,
+    224
+  ],
+  "affine": [
+    [
+      0.9980780529675662,
+      0.057022039529938034,
+      -0.024262880157097155,
+      -95.83161428355358
+    ],
+    [
+      -0.05713183184127595,
+      0.9983591974594734,
+      -0.003855714766585038,
+      -120.6332573392888
+    ],
+    [
+      0.024003207596737405,
+      0.005234487169006013,
+      0.9996981775066518,
+      -128.4221038968429
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "volume_values": {
+    "0": 7690955.0,
+    "14": 560.861083984375,
+    "15": 2081.7578125,
+    "16": 19611.6484375,
+    "24": 237621.921875,
+    "77": 543.3935546875,
+    "85": 5.600510120391846,
+    "2": 183672.015625,
+    "3": 230416.46875,
+    "4": 5534.837890625,
+    "7": 16793.6484375,
+    "8": 48788.1953125,
+    "10": 6939.98095703125,
+    "11": 4165.5595703125,
+    "12": 5947.9306640625,
+    "13": 1786.634765625,
+    "17": 4035.14697265625,
+    "18": 1669.7806396484375,
+    "26": 665.7655029296875,
+    "28": 3987.35498046875,
+    "41": 185194.09375,
+    "42": 230568.390625,
+    "43": 5436.8740234375,
+    "46": 15830.544921875,
+    "47": 49879.73828125,
+    "49": 6768.521484375,
+    "50": 4202.58984375,
+    "51": 5589.79541015625,
+    "52": 1675.467529296875,
+    "53": 4030.88623046875,
+    "54": 1738.576416015625,
+    "58": 575.3742065429688,
+    "60": 4231.111328125
+  },
+  "output_sha256": {
+    "seg.nii.gz": "ee01049a521f6ee955dbe971e9a3a620f346604e9e49c66a2822d3fce46d1268",
+    "lesion.nii.gz": "b0e7429f7943fa3df010bd4bc8ba1210cdf16f5d5ab75897e2c3f313833ec917",
+    "volumes.csv": "97cb5f1f71b40810ec41a0708a23c0ca09e96abd5f887b863943312806611e36"
+  },
+  "status": "complete",
+  "observed_device_load": {
+    "sample_count": 17,
+    "memory_used_MiB_minmax": [
+      22368,
+      38176
+    ],
+    "memory_free_MiB_minmax": [
+      42831,
+      58639
+    ],
+    "utilization_percent_minmax": [
+      43,
+      100
+    ],
+    "scope": "whole shared device, includes external processes; not isolated performance"
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "schema": "fnit.wmh.real.gpu.memory_fix.v1",
+  "source_revision": "f1cbdab10fbfd573c3aa1b3461aa086dab220cfb+source_v6",
+  "crop": true,
+  "budget_bytes": 20000000000,
+  "device_total_bytes": 84942979072,
+  "initial_free_bytes": 62158602240,
+  "visible_gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+  "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+  "weight_sha256": "0ece39dd651357aa95222fc4d45fa32d00f11e763d2583cae3f869989ce35988",
+  "driver_sha256": "9f36e5f041e0cda26cc9e6f7710cb6347ad2b0acc590048e3c604910830b795f",
+  "torch_version": "2.5.1",
+  "timing_scope": "constructor/API/save separately; synchronized network forwards nested in API",
+  "diagnostic_hooks": false,
+  "network_calls": [
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        192
+      ],
+      "input_dtype": "torch.float32",
+      "output_dtype": "torch.float32",
+      "seconds": 1.1766632171347737,
+      "allocated_bytes": 1773440512,
+      "peak_allocated_bytes": 15284866560,
+      "peak_reserved_bytes": 19608371200
+    },
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        192
+      ],
+      "input_dtype": "torch.float32",
+      "output_dtype": "torch.float32",
+      "seconds": 1.3330352930352092,
+      "allocated_bytes": 2715536384,
+      "peak_allocated_bytes": 15284866560,
+      "peak_reserved_bytes": 19608371200
+    },
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        192
+      ],
+      "input_dtype": "torch.float32",
+      "output_dtype": "torch.float32",
+      "seconds": 1.3085475410334766,
+      "allocated_bytes": 2748566528,
+      "peak_allocated_bytes": 15284866560,
+      "peak_reserved_bytes": 19608371200
+    }
+  ],
+  "layer_memory": [],
+  "model_sha256": "8dc9ef14cda42454d1c156429d14d1760d702d9b508493417ec510e6872361a0",
+  "pipeline_sha256": "e52ae70208f69b96d5006c86f2d9b18bf04a493261364b823fc9f81caaf4f082",
+  "spatial_sha256": "d81416104064110511ee0f073998b3e19959748c74ad88675d90488a261db8a6",
+  "constructor_seconds": 1.435353193897754,
+  "constructor_peak_allocated_bytes": 267410944,
+  "constructor_peak_reserved_bytes": 283115520,
+  "parameters_dtype": "torch.float32",
+  "parameters_device": "cuda:0",
+  "api_seconds": 5.531108092982322,
+  "peak_allocated_bytes": 15284866560,
+  "peak_reserved_bytes": 19608371200,
+  "policy": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "benchmark": false,
+    "deterministic": false,
+    "autocast_enabled": false
+  },
+  "save_seconds": 1.586435026023537,
+  "shape": [
+    179,
+    224,
+    178
+  ],
+  "affine": [
+    [
+      0.9980780529675662,
+      0.057022039529938034,
+      -0.024262880157097155,
+      -96.94770677078004
+    ],
+    [
+      -0.05713183184127595,
+      0.9983591974594734,
+      -0.003855714766585038,
+      -120.81062021855172
+    ],
+    [
+      0.024003207596737405,
+      0.005234487169006013,
+      0.9996981775066518,
+      -82.43598773153693
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "volume_values": {
+    "0": 5849284.5,
+    "14": 563.1546630859375,
+    "15": 2101.089599609375,
+    "16": 19610.28125,
+    "24": 233862.125,
+    "77": 518.146728515625,
+    "85": 2.628666400909424,
+    "2": 183631.875,
+    "3": 231224.859375,
+    "4": 5562.54052734375,
+    "7": 16758.740234375,
+    "8": 48718.2734375,
+    "10": 6909.24072265625,
+    "11": 4179.19677734375,
+    "12": 5953.3408203125,
+    "13": 1797.890869140625,
+    "17": 4008.4033203125,
+    "18": 1658.210205078125,
+    "26": 689.3396606445312,
+    "28": 4043.35888671875,
+    "41": 184991.75,
+    "42": 230996.375,
+    "43": 5421.34619140625,
+    "46": 15737.6640625,
+    "47": 49980.171875,
+    "49": 6748.7626953125,
+    "50": 4214.748046875,
+    "51": 5605.10107421875,
+    "52": 1685.569580078125,
+    "53": 4035.51708984375,
+    "54": 1736.1246337890625,
+    "58": 587.8551025390625,
+    "60": 4270.564453125
+  },
+  "output_sha256": {
+    "seg.nii.gz": "727e26ceca127e6a7cef6c4c58accf9e271bab38aa930a1d1638baad6316c37c",
+    "lesion.nii.gz": "62d7a4ccefe364e641f7addff7f66bef341d629e9aa3576a6eb76d8b3ee4ef36",
+    "volumes.csv": "caba2641ab69d510800b4e166953344011b3cdb70818fa895426f2aa58686c57"
+  },
+  "status": "complete",
+  "observed_device_load": {
+    "sample_count": 16,
+    "memory_used_MiB_minmax": [
+      21728,
+      40438
+    ],
+    "memory_free_MiB_minmax": [
+      40569,
+      59279
+    ],
+    "utilization_percent_minmax": [
+      50,
+      100
+    ],
+    "scope": "whole shared device, includes external processes; not isolated performance"
+  }
+}

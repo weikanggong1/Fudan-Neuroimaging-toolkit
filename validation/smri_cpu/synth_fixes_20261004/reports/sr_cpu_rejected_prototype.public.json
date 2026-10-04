@@ -1,0 +1,62 @@
+{
+  "schema": "fnit.synthsr.real.cpu.elu_fix.v1",
+  "source_revision": "f1cbdab10fbfd573c3aa1b3461aa086dab220cfb+source_v7",
+  "driver_sha256": "ca2d85e6ea46d247e4ed4e5309bf0c921519455cd1de110ac8d5537ab1a23df9",
+  "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+  "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+  "torch_version": "2.5.1",
+  "model_sha256": "995edc69c440c9548c488c533cfacc706e5876388d6c2ea22c63015d916ba930",
+  "network_calls": [
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        256
+      ],
+      "dtype": "torch.float32",
+      "seconds": 32.2037407932803
+    },
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        256
+      ],
+      "dtype": "torch.float32",
+      "seconds": 30.146473408676684
+    }
+  ],
+  "fixed_float_gate": {
+    "rtol": 1e-05,
+    "atol": 0.001,
+    "passes": false,
+    "failed_values": 1935
+  },
+  "timing_scope": "constructor/API/save separately; networks nested in API; excludes comparison",
+  "constructor_seconds": 0.502778179012239,
+  "api_seconds": 66.81531604658812,
+  "save_seconds": 2.0265733702108264,
+  "float": {
+    "count": 9072000,
+    "different": 8665132,
+    "mae": 2.9201180334709446e-05,
+    "rmse": 8.68783525571638e-05,
+    "max_abs": 0.01938629150390625
+  },
+  "quantized": {
+    "count": 9072000,
+    "different": 457,
+    "max_abs": 1,
+    "mae": 5.037477954144621e-05,
+    "affine_exact": true
+  },
+  "output_sha256": {
+    "image.nii.gz": "a3068cf64354b25a59ce56885b196591d76dbdaa8fba6bb90f01f85885001d7c",
+    "image.npz": "0e289de4206af6c145cd4012e814955f03e4a3c42edec337d136bae0e30f08f3"
+  },
+  "status": "complete"
+}
