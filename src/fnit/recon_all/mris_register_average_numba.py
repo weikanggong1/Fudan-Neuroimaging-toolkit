@@ -2,7 +2,7 @@
 
 import numpy as np
 import torch
-from numba import njit
+from numba import config, get_num_threads, njit, prange, set_num_threads
 
 
 @njit(cache=True, fastmath=False)
@@ -38,12 +38,12 @@ def three_hop_neighbor_total(neighbors, degrees):
     return total
 
 
-@njit
+@njit(cache=True, parallel=True, fastmath=False)
 def _average_numpy(gradient, neighbors, degrees, reciprocals, iterations):
     current = gradient.copy()
     following = np.empty_like(current)
     for _ in range(iterations):
-        for vertex in range(len(current)):
+        for vertex in prange(len(current)):
             degree = degrees[vertex]
             for axis in range(3):
                 value = current[vertex, axis]
@@ -62,8 +62,18 @@ def average_gradients_exact_cpu(gradient: torch.Tensor,
     if gradient.device.type != "cpu":
         raise ValueError("source-order averaging requires CPU tensors")
     reciprocals = (1.0 / (degrees + 1).float()).numpy()
-    result = _average_numpy(gradient.numpy(), neighbors.numpy(), degrees.numpy(),
-                            reciprocals, iterations)
+    previous_threads = get_num_threads()
+    # Every vertex reads the previous buffer. Neighbours within a vertex are
+    # still accumulated in their original order with float32 rounding.
+    thread_budget = min(torch.get_num_threads(), config.NUMBA_NUM_THREADS)
+    if len(gradient) < 8192:
+        thread_budget = 1
+    try:
+        set_num_threads(thread_budget)
+        result = _average_numpy(gradient.numpy(), neighbors.numpy(), degrees.numpy(),
+                                reciprocals, iterations)
+    finally:
+        set_num_threads(previous_threads)
     return torch.from_numpy(result)
 
 
