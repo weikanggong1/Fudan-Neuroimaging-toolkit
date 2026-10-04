@@ -113,8 +113,8 @@ gpucw1 的 H100 PCIe 上，CUDA 设备和共同锁固定，CPU budget 为 8 核�
 | bias 开关、迭代/MRF/PVE 参数 | 新 RNG 不同种子/分段流逐位核验；真实完整 `-N -W5 -I2 -O2 -f0 -H0 -R0` 官方八图逐位相同 | 其他非默认组合 |
 | 3D/单帧 4D、显式 mask、内部 X 翻转及几何 | 现有输入/几何测试和本轮八图 header 检查 | 非默认真实影像功能病例 |
 | CLI 保存八图、覆盖保护 | 原有测试和真实公共 CLI 完整冷进程、八图评分 | 更多病例 |
-| FastVBM `fast_execution` | 默认 tensor 不变测试；冻结 v2 在同 raw T1 上以 `fsl` 跑通两条 CPU 流程 | 最终源码全链重测、其他 FAST 配置 |
-| FastVBM SynthMorph/FNIRT 后端 | 冻结 v2 已完成独立官方输出、13 图精度、阶段时间与脑图，见[独立报告](fast_vbm_cpu_20261004/README.md) | FNIRT 数值差异、SynthMorph 反向场差异和更多病例；官方 SynthMorph 只有分支实测，不作冷完整链时间比 |
+| FastVBM `fast_execution` | 默认 tensor 不变测试；最终 v4 在同 raw T1 上以 `fsl` 完整补测两条 CPU 流程，各 13 图与 v2 相同 | 其他 FAST 配置 |
+| FastVBM SynthMorph/FNIRT 后端 | 最终 v4 已完成 13 图精度、阶段时间与脑图，536.788 / 317.736 秒，见[最新报告](fast_vbm_cpu_20261004/final_v4/README.md)；沿用已测的独立官方输出 | FNIRT 数值差异、SynthMorph 反向场差异和更多病例；官方 SynthMorph 只有分支实测，不作冷完整链时间比 |
 
 任务 1 负责 SynthStrip，任务 3 负责 SynthMorph；FLIRT、FNIRT、ApplyWarp 与 CLI 由主任务协调。若上游成熟组件发现 bug，记录到相应组件，修复后再冻结完整 VBM。FAST commonbrain 的受控对照不借用官方 brain 作为生产输入。
 

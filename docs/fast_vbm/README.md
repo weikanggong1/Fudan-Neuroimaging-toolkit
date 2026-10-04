@@ -367,14 +367,14 @@ FastVBM 在 modulated GM 结束，不包含 UKB gradient distortion correction�
 
 ### 2026-10-04：CPU 官方完整链对照
 
-本次以公开 ds003138 v1.0.1 的真实原始 T1（224×288×288）为输入，固定同一 GM 模板、参考 mask 和权重。nodecw10 两端使用同一组 8 个物理核、8 线程配置，串行运行；节点同时有其他任务。本次候选冻结于 `task5_candidate_cpu_v2/src`，基线为 `1d31e7baaebbb644ab199471f7fe6282721455fd`，显式选择 `fast_execution="fsl"`。该配置使用 FNIT 内部 CPU 顺序分割实现，运行时不调用原版 FAST。后续整合版未在此报告重新测量完整链；源码 hash、实际负载和线程记录见[独立 CPU 报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/README.md)及[机器报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/report.public.json)。
+本次以公开 ds003138 v1.0.1 的真实原始 T1（224×288×288）为输入，固定同一 GM 模板、参考 mask 和权重。nodecw10 两端使用同一组 8 个物理核、8 线程配置，串行运行；节点同时有其他任务。基线为 `1d31e7baaebbb644ab199471f7fe6282721455fd`，显式选择 `fast_execution="fsl"`。该配置使用 FNIT 内部 CPU 顺序分割实现，运行时不调用原版 FAST。先测冻结 v2，再以最终整合 v4（源码 head `6f1e2b38`）从原始 T1、新目录补测两条完整链。v4 各 13 图的数据、几何、17 个科学 header 字段及扩展与 v2 相同；两条链均返回 0。旧参考没有重跑，两版时间不属于紧邻配对。初次独立对照的源码 hash、负载和线程见[CPU 报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/README.md)及[机器报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/report.public.json)。
 
 | 分支与处理范围 | FNIT 实际完整 CLI 墙钟 | 官方参考时间与范围 |
 |---|---:|---|
-| 原始 T1→SynthStrip/FAST/FLIRT/FNIRT→13 图 | **610.899 s** | **769.365 s**，独立完整链墙钟 |
-| 原始 T1→SynthStrip/FAST/FLIRT/SynthMorph→13 图 | **355.802 s** | **580.141 s**，复用官方自身上游和原版场后的实测阶段和；不是完整冷进程墙钟 |
+| 原始 T1→SynthStrip/FAST/FLIRT/FNIRT→13 图 | **v4 536.788 s**；v2 610.899 s | **769.365 s**，独立完整链墙钟 |
+| 原始 T1→SynthStrip/FAST/FLIRT/SynthMorph→13 图 | **v4 317.736 s**；v2 355.802 s | 完整冷链未测；官方 Morph 子链 152.992 s、复用同场后处理 19.534 s |
 
-FNIT Morph API 总计 **347.725 s**，其中脑提取 **11.338 s**、FAST **135.719 s**、配准/Jacobian/调制合计 **200.106 s**；API 不含最终 `save()`。原版 Morph 实际网络阶段 **138.976 s**；最终参考后处理使用独立 NumPy 坐标适配器与原版 FSL。官方完整 FNIRT 链没有使用候选 GM 或仿射初始化。两条参考均采用 SynthStrip 前处理，因此不是 standard FSL-VBM 的 BET 流程。本轮各一次完整测量，没有 pipeline AB-BA 重复，不据复用阶段和计算正式 Morph 端到端加速比。
+最终 v4 Morph API 总计 **310.025 s**，其中脑提取 **10.243 s**、FAST **109.200 s**、配准/Jacobian/调制合计 **190.122 s**；API 不含最终 `save()`。v4 FNIRT 对应为 **529.225 s**，三个步骤为 **9.383 / 97.443 / 421.900 s**。此前 v2 Morph API 为 347.725 秒。原版 Morph 实际网络阶段 **138.976 s**；最终参考后处理使用独立 NumPy 坐标适配器与原版 FSL。官方完整 FNIRT 链没有使用候选 GM 或仿射初始化。两条参考均采用 SynthStrip 前处理，因此不是 standard FSL-VBM 的 BET 流程。本轮各一次完整测量，没有 pipeline AB-BA 重复，不据复用阶段和计算正式 Morph 端到端加速比。新进程、源码和全部输出的逐值评分见[最终 v4 报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/final_v4/README.md)。
 
 三幅模板图的同估计方法脑内 NRMSE 为 `RMSE/(参考 P99−P1)`：
 
@@ -384,11 +384,11 @@ FNIT Morph API 总计 **347.725 s**，其中脑提取 **11.338 s**、FAST **135.
 | nonlinear-only Jacobian | **0.0100674** | **0.000352361** |
 | modulated GM | **0.0160380** | **0.000450764** |
 
-FNIRT 完整链尚未数值等价，不能将 769.365/610.899 的时间比称为等价重建加速。Morph 同算法三图脑内 NRMSE 均小于 10⁻³，但完整 13 图并非逐位同。原空间脑图、mask、seg、mixeltype 的数据完全相同；CSF/GM/WM PVE 分别有 **5/27/22** 个不同体素，pveseg 有 **2** 个。全 FOV、局部 max、软/硬体积、空间变换误差和 Jacobian 定义诊断分别见独立报告，不能只以整体积分体积判断匹配。
+FNIRT 完整链尚未数值等价，测得的时间差不能称为等价重建加速。Morph 同算法三图脑内 NRMSE 均小于 10⁻³，但完整 13 图并非逐位同。原空间脑图、mask、seg、mixeltype 的数据完全相同；CSF/GM/WM PVE 分别有 **5/27/22** 个不同体素，pveseg 有 **2** 个。全 FOV、局部 max、软/硬体积、空间变换误差和 Jacobian 定义诊断分别见独立报告，不能只以整体积分体积判断匹配。
 
 13 图 shape、dtype、affine、sform 和空间 pixdim 相同，native qform 最大差 **2.98×10⁻⁹ mm**。非空间 header 仍有差：原空间候选 pixdim[5:8] 为 0、官方为 1；warped/mod 图候选 pixdim[4] 为 1、官方为 2.4（均为 3D 图）。本轮未重跑完整 FastVBM GPU pipeline；下列历史 GPU 结果保留各自冻结源码、输入与计时范围。
 
-![本次 CPU 两分支的官方/FNIT 标准空间脑图与差值](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/figures/standard_vbm.png)
+![最终 v4 CPU 两分支的官方/FNIT 标准空间脑图与差值](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/final_v4/figures/standard_vbm.png)
 
 
 ### 本轮 FNIRT 完整端到端验证
@@ -424,7 +424,7 @@ FSL 完整命令计时 3195.14 s 来自 2026-09-30，本轮没有重测原软件
 
 | 版本或日期 | 更新与验证范围 |
 |---|---|
-| 2026-10-04 CPU 审计 | 新增显式 `fast_execution` 选项，默认不变；FAST 的 CPU 原序热点改为 Numba。真实 FAST 小区域八图逐位相同，完整 CUDA `fsl` / `tensor` 两轮对照共 32 对文件 SHA-256 相同。原始 T1 的冻结 v2 两条 CPU 链与各自官方对照已完成，输出尚非逐值相同；后续整合源未重新测量完整 VBM。见[FAST 结果](../../validation/smri_cpu_20261004/task04/README.md)和[VBM 独立报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/README.md)。 |
+| 2026-10-04 CPU 审计 | 新增显式 `fast_execution` 选项，默认不变；FAST 的 CPU 原序热点改为 Numba。完整 CUDA 两后端 32 对文件 SHA 相同。原始 T1 冻结 v2 两条 CPU 链完成官方对照；最终 v4 两链补测为 536.788 / 317.736 秒，各 13 图、科学 header、扩展与 v2 相同，官方误差复现。见[FAST 结果](../../validation/smri_cpu_20261004/task04/README.md)和[VBM 独立报告](../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/README.md)。 |
 | 本轮 FNIRT 优化 | 跳过未使用的采样梯度，复用 T1 intensity mapping 与原始 float64 deformation field；真实 FastVBM 完整端到端 18 幅影像及科学 QC 逐位通过，含保存 API 212.67→204.58 s，见[统一验证页](../../validation/registration_lossless_20261002/README.md)。 |
 | 2026-09-30，`f958121` | 两个后端从 raw T1w 到全部 13 幅输出；FNIRT / SynthMorph 进程内含保存为 901.93 / 607.16 s。对 FSL 调制 GM 的 r 为 0.865489 / 0.616679，未达到数值等价；见[当次报告](../../validation/fast_vbm/e2e.public.json)。 |
 

@@ -4,7 +4,7 @@
 
 本轮使用此前同一张 OpenNeuro **ds003138 v1.0.1、CC0 原始 T1**，完整网格 `224×288×288`；GM 模板网格为 `91×109×91`。T1、模板、显式参考 mask、SynthStrip/SynthMorph 权重的大小和 SHA-256 均重新核对，与[原独立官方对照](../README.md)相同。本轮没有下载或发布原始影像、模板及权重。
 
-候选为 **`task5_candidate_cpu_v4`**，基于 `6f1e2b38925a481df3fa622f925af076df5436a9`，包含已审查、尚未提交的修改，实际身份由归档确定：
+候选为 **`task5_candidate_cpu_v4`**，源码 head 为 `6f1e2b38925a481df3fa622f925af076df5436a9`，实际身份由逐文件 manifest 和归档确定。归档工具的元数据保留了 `includes_reviewed_uncommitted_changes=true` 标记；此标记不作为工作树是否有未提交改动的核验：
 
 ```text
 ffda47a74376fbaec07c3e8aedaacdc30f2a60398b919c0d5feae38e3beba0d9
