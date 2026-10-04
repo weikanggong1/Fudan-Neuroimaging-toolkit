@@ -79,3 +79,68 @@ def test_caller_autocast_keeps_original_output_dtype_and_values():
         actual = layer(image)
     assert actual.dtype == expected.dtype == torch.bfloat16
     torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
+
+def test_large_pointwise_guard_keeps_every_voxel_and_enabled_backend(monkeypatch):
+    import fnit.synthseg_parc.cpu_conv as convolution
+    monkeypatch.setattr(convolution, "_ONEDNN_POINTWISE_BYTES", 0)
+    torch.manual_seed(318)
+    layer = CPUInferenceConv3d(24, 33, 1).eval()
+    image = torch.randn(1, 24, 33, 23, 21)
+    native = F.conv3d
+    calls = []
+    before = (torch.backends.cuda.matmul.allow_tf32, torch.backends.cudnn.allow_tf32)
+
+    def observed(value, *args, **kwargs):
+        calls.append((value.shape[2], torch.backends.mkldnn.enabled))
+        return native(value, *args, **kwargs)
+
+    with torch.inference_mode(), torch.backends.mkldnn.flags(enabled=True):
+        expected = native(image, layer.weight, layer.bias)
+        with patch("fnit.synthseg_parc.cpu_conv.F.conv3d", side_effect=observed):
+            actual = layer(image)
+        assert torch.backends.mkldnn.enabled
+    assert calls == [(32, True), (1, True)]
+    assert before == (torch.backends.cuda.matmul.allow_tf32, torch.backends.cudnn.allow_tf32)
+    torch.testing.assert_close(actual, expected, rtol=2e-6, atol=3e-5)
+
+
+def test_small_pointwise_retains_whole_original_path():
+    import fnit.synthseg_parc.cpu_conv as convolution
+    layer = CPUInferenceConv3d(24, 33, 1).eval()
+    image = torch.randn(1, 24, 5, 7, 9)
+    with torch.inference_mode(), torch.backends.mkldnn.flags(enabled=True):
+        expected = F.conv3d(image, layer.weight, layer.bias)
+        with patch.object(convolution, "_pointwise_onednn_slabs", wraps=convolution._pointwise_onednn_slabs) as slabs:
+            actual = layer(image)
+        assert slabs.call_count == 0
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
+
+@pytest.mark.parametrize("enabled_backend", [True, False])
+def test_unbatched_pointwise_retains_nn_conv3d_contract(enabled_backend):
+    import fnit.synthseg_parc.cpu_conv as convolution
+    layer = CPUInferenceConv3d(24, 33, 1).eval()
+    image = torch.randn(24, 5, 7, 9)
+    with torch.inference_mode(), torch.backends.mkldnn.flags(enabled=enabled_backend):
+        expected = F.conv3d(image, layer.weight, layer.bias)
+        with patch.object(convolution, "_pointwise_onednn_slabs") as slabs, \
+                patch.object(convolution, "convolution_slabs") as original_slabs:
+            actual = layer(image)
+        assert slabs.call_count == 0 and original_slabs.call_count == 0
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
+
+def test_pointwise_kernel_failure_preserves_caller_flags(monkeypatch):
+    import fnit.synthseg_parc.cpu_conv as convolution
+    monkeypatch.setattr(convolution, "_ONEDNN_POINTWISE_BYTES", 0)
+    layer = CPUInferenceConv3d(24, 33, 1).eval()
+    image = torch.randn(1, 24, 5, 7, 9)
+    error = RuntimeError("pointwise kernel failed")
+    before = (torch.backends.cuda.matmul.allow_tf32, torch.backends.cudnn.allow_tf32)
+    with torch.inference_mode(), torch.backends.mkldnn.flags(enabled=True):
+        with patch("fnit.synthseg_parc.cpu_conv.F.conv3d", side_effect=error):
+            with pytest.raises(RuntimeError) as caught:
+                layer(image)
+        assert caught.value is error and torch.backends.mkldnn.enabled
+    assert before == (torch.backends.cuda.matmul.allow_tf32, torch.backends.cudnn.allow_tf32)

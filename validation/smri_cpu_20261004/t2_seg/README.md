@@ -9,18 +9,19 @@ FNIT 生产推理不调用 FreeSurfer、TensorFlow、Surfa 或其他神经影像
 | 入口 | 本轮保留的功能 | CPU 修改 | GPU 路径 |
 |---|---|---|---|
 | `SynthSeg` | 33 类、原图/约 1 mm 输出、翻转集成、拓扑类别后处理、软体积 CSV、显式色表 | 修正预处理网格与浮点顺序；安全卷积分块；6 邻接连通域；真正保存 CTAB | 原卷积、连通域和精度作用域；修正同一预处理网格计数 |
-| `SynthSegPlus` | 普通 SynthSeg 2.0 + `--parc`、fast/非 fast、3 份返回影像、101 列数值 CSV、mask | 同一预处理和连通域修复；保留原有完整 oneDNN 卷积 | 原卷积、翻转与后处理 |
+| `SynthSegPlus` | 普通 SynthSeg 2.0 + `--parc`、fast/非 fast、3 份返回影像、101 列数值 CSV、mask | 同一预处理和连通域修复；保留 oneDNN，仅大 1×1×1 投影分块 | 原卷积、翻转与后处理 |
 | `WMHSynthSeg` | T1/FLAIR、crop/完整体积、label 77 概率图、33 列软体积 | 网络与空间处理保留；修复新网格保存头信息 | 网络与空间处理保留；20 GB 完整回归未通过 |
 
 `SynthSegPlus` 是本仓库普通 SynthSeg 2.0 皮层分区入口，对应 `mri_synthseg --parc`。
 它不代表论文中的 robust SynthSeg+，不对应 `--robust`。普通 33 类入口也没有
 目录批处理、原版 QC/posterior/CT/Photo/v1 模式；未实现的模式不列为通过。
 
-CPU 分块只在普通 SynthSeg 既有的“禁用完整体积 oneDNN”作用域内启用。
+普通 SynthSeg 的 CPU 分块只在其既有的“禁用完整体积 oneDNN”作用域内启用。
 每块保留深度方向完整卷积邻域，内部边界不补零；只有真实体积边缘补零。
 单次输入/输出块目标 256 MiB，不是整例 RSS 上限。分块保留普通入口原有
-禁用 oneDNN 的计算后端，退出时恢复调用者设置。默认 Plus 已能使用完整 oneDNN
-卷积，因此保留该路径；最初对所有
+禁用 oneDNN 的计算后端，退出时恢复调用者设置。下述早期 Plus 病例可使用完整
+oneDNN 卷积，因此当时保留该路径；后来发现的大投影崩溃与局部修复见第 9 节。
+最初对所有
 CPU 层分块使 fast 变慢，其结果仍保留在下表。
 
 ## 2. 数据、资源与计时边界
@@ -291,3 +292,76 @@ WMH：`mri_WMHsynthseg --i INPUT --o OUTPUT --csv_vols CSV --threads 8
 [WMH-SynthSeg](https://github.com/rosanna-tri/WMH-SynthSeg)。
 参考文献：Billot et al., NeuroImage 2023, SynthSeg；Billot et al., PNAS 2023,
 robust SynthSeg；WMH-SynthSeg 参考及对应原始资源 DOI 见子功能文档。
+
+## 9. 大体积 Plus CPU 崩溃定位与修复
+
+原始 T1 自动分割的全亚区调用在 44.062 秒触发 SIGSEGV，未产生输出；失败
+源码及 receipt 保留。公开输入来自 OpenNeuro ds000114 1.0.2（CC0），原图为
+`156×256×256`，约 `1.299296×1×1 mm`，网络张量为 `224×288×288`。原始
+输入 SHA 为 `eb2bc2ff1f30441b0aff54685cfdd7f196bd02dccad4698100a8bad40421de22`。
+
+逐层观察与 gdb 控制均在分割网络末尾 24→33 通道的 `1×1×1` oneDNN 投影
+发生原生错误；3×3 层已完成。输出逻辑大小 2,452,488,192 B，观察到的填充
+48 通道布局 3,567,255,552 B。gdb 栈指向未解析的 JIT 地址，不能据此确认
+2 GiB 地址溢出或笼统归因环境。诊断显式禁用 oneDNN 后完整推理可运行。
+
+最终生产修复仅对 CPU、FP32、5D、eval/no-grad、stride/dilation 1、零 padding、
+groups 1 的大 `1×1×1` 层分块。估算按通道向 16 对齐，超过 `2**31-1` B 时
+使用至多 32 层深度、目标每块 256 MiB。1×1 没有空间 halo。oneDNN 保持启用，
+其余完整卷积、普通入口原 non-oneDNN 分块、翻转、后处理与 GPU 原路径保留；
+不写 backend、CUDA、精度或线程全局设置。4D 无 batch 原生卷积在两种 backend
+下均恢复 PyTorch 原合同。目标 slab 字节数不是整例 RSS 限额。
+
+### 正式大 T1 对照
+
+官方和候选按 ABBA，使用同一 8 物理核 `32,36,40,44,48,52,56,60`、8 线程及
+同一串行锁。该组不与前文 NUMA1 计时混合。官方仍是独立 FreeSurfer 8.2
+`mri_synthseg --cpu --threads 8 --parc --vol CSV --noaddctab`；FNIT 为公共 CLI
+`synthseg --device cpu --threads 8 --parc --csv-vols CSV`。两端使用原版默认
+RAS/约 1 mm 输出，均保存合并图及 101 列软体积 CSV。
+
+| 臂与执行顺序 | 完整 wall（秒） |
+|---|---:|
+| 官方 A1 | 325.90294 |
+| 候选 B1 | 102.13312 |
+| 候选 B2 | 106.16395 |
+| 官方 A2 | 118.17152 |
+
+官方 A1 在原 fspython 导入期间处于 NFS 读取等待，时长包含该等待。RSS 峰值
+与原完整 wall 都保留在[公开证据](large_pointwise.public.json)，不截短计时或
+更换参考环境。两轮官方/候选保存几何精确相同；标签差 5 个体素、前景最小
+Dice 0.9998034977、101 列软体积最大差 0.683 mm³。候选自重复的硬标签、
+数值 CSV、几何逐值相同。官方逐标签和逐列误差原样报告，不称逐值一致。
+
+正式大 T1 使用 `candidate_large_pointwise_v1`；最终 v3 仅在共同资格判断增加
+`image.ndim == 5`，真实网络输入均为 5D，计算路径相同。复制时已断言这项
+单一源码差异，文件 SHA 与所有冻结文件数均在公开证据；v3 生产卷积文件 SHA
+为 `78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47`。
+
+### 原有病例和 GPU 回归
+
+两个已有病例的 69 通道 head 也超过估算大小门，因此需要普通/fast 模式真实
+旧新配对。沿用已固定的硬标签与几何逐值相同、CSV 同列名顺序且
+`rtol=1e-5, atol=0.01 mm³` 门。两个病例各两模式共 8 次 CPU 推理，第一例
+普通 baseline 已在前一未改动计划中开始，按相同 v4 源码/相同核组复用；其余
+7 次使用独立最终 v3 计划。旧 20-job 计划的后续作业经 stopmarker 保留未执行，
+没有修改在跑源码、作业参数或发送中止信号。
+
+全部 8 次 CPU 推理完成。四对保存的硬标签、101 列数值 CSV 与几何均逐值相同，
+通过原有精度门。完整 wall 保留如下；分块没有带来所有病例的 CPU 提速。
+
+| 病例/模式 | 原 FNIT v4（秒） | 最终 v3 候选（秒） | 硬标签/数值 CSV/几何 |
+|---|---:|---:|---|
+| case01 普通 | 63.091 | 68.091 | 逐值相同 |
+| case01 fast | 49.070 | 49.318 | 逐值相同 |
+| case02 普通 | 66.848 | 70.599 | 逐值相同 |
+| case02 fast | 53.072 | 53.325 | 逐值相同 |
+
+最终状态与全部实测时间由 `large_pointwise_evidence.py` 从 receipt 和成熟
+`compare_outputs.py` 导出。该分析不重采样、不计入推理速度。
+GPU0 当前外部负载占满，最终 v3 的实际 fast/普通各一对旧新回归尚未运行；旧 GPU 完整
+回归属于旧冻结源码，本次不将其重标为已通过。没有改变 20 GB allocator 预算。
+本地针对性测试为 33 passed、3 subtests，涵盖 halo/bias/groups、CPU autocast、
+调用者 CUDA flags、异常恢复及两种 backend 的 4D 合同；它们不是速度 benchmark。
+
+![官方、FNIT 标签和 5 个差异体素位置](large_pointwise_labels.png)

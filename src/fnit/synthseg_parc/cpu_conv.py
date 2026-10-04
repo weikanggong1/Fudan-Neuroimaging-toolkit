@@ -11,6 +11,37 @@ from torch import nn
 from torch.nn import functional as F
 
 
+_ONEDNN_POINTWISE_BYTES = 2**31 - 1
+
+
+def _pointwise_blocked_bytes(image, output_channels):
+    """Conservatively include the AVX-512 channel padding observed on nodecw10."""
+    channels = ((max(image.shape[1], output_channels) + 15) // 16) * 16
+    return image.shape[0] * channels * image.shape[2] * image.shape[3] * image.shape[4] * image.element_size()
+
+
+def _pointwise_onednn_slabs(image, weight, bias=None,
+                          maximum_slab_bytes=256 * 1024 * 1024):
+    """Bound a large CPU 1x1x1 call while retaining the enabled oneDNN backend.
+
+    This projection has no spatial halo. Every voxel and every input channel
+    remains in its original order. Only the depth extent of each independent
+    call changes. No backend, precision, thread or CUDA flag is written.
+    The byte limit is a conservative guard for the observed large-volume
+    failure, rather than a claim about the exact native addressing defect.
+    """
+    batch, _, depth, height, width = image.shape
+    channels = ((max(image.shape[1], weight.shape[0]) + 15) // 16) * 16
+    plane_bytes = batch * channels * height * width * image.element_size()
+    slab_depth = max(1, min(32, maximum_slab_bytes // plane_bytes))
+    output = image.new_empty((batch, weight.shape[0], depth, height, width))
+    for start in range(0, depth, slab_depth):
+        stop = min(depth, start + slab_depth)
+        chunk = image[:, :, start:stop].contiguous()
+        output[:, :, start:stop] = F.conv3d(chunk, weight, bias)
+    return output
+
+
 def cpu_autocast_enabled():
     """Query caller CPU autocast without changing it; compatible with Torch 2.1."""
     try:
@@ -66,15 +97,22 @@ class CPUInferenceConv3d(nn.Conv3d):
 
     SynthSeg's ordinary entry point disables full-volume oneDNN after large
     convolutions crashed on nodecw10. Only that guarded path needs slabs.
-    SynthSegPlus retains its established full-volume oneDNN path: chunking
-    every layer added overhead in the real-data ``fast`` comparison.
+    SynthSegPlus retains its established oneDNN backend. Large 1x1x1 output
+    projections use bounded depth calls after that native path crashed on
+    a real T1; smaller projections and all other oneDNN layers stay whole.
     """
 
     def forward(self, image):
-        if (image.device.type == "cpu" and not self.training and not torch.is_grad_enabled()
+        if (image.ndim == 5 and image.device.type == "cpu"
+                and not self.training and not torch.is_grad_enabled()
                 and self.padding_mode == "zeros" and self.stride == (1, 1, 1)
                 and self.dilation == (1, 1, 1) and image.dtype == torch.float32
-                and not cpu_autocast_enabled() and not torch.backends.mkldnn.enabled):
-            return convolution_slabs(image, self.weight, self.bias,
-                                     padding=self.padding, groups=self.groups)
+                and not cpu_autocast_enabled()):
+            if not torch.backends.mkldnn.enabled:
+                return convolution_slabs(image, self.weight, self.bias,
+                                         padding=self.padding, groups=self.groups)
+            if (self.kernel_size == (1, 1, 1) and self.padding == (0, 0, 0)
+                    and self.groups == 1
+                    and _pointwise_blocked_bytes(image, self.out_channels) > _ONEDNN_POINTWISE_BYTES):
+                return _pointwise_onednn_slabs(image, self.weight, self.bias)
         return super().forward(image)

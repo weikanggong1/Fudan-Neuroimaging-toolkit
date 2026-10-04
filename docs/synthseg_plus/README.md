@@ -104,6 +104,37 @@ mri_synthseg --i sub-01_T1w.nii.gz --o sub-01_official_parc.nii.gz \
 
 ![公开 T1w 的原版与 FNIT SynthSeg+ 分区](figures/synthseg_plus_comparison.png)
 
+### 大体积 T1 的 CPU 原生崩溃修复
+
+原始影像驱动的亚区 pipeline 暴露了成熟 `SynthSegPlus` 子函数的问题：公开
+ds000114 T1 的网络张量为 `224×288×288`，CPU 分割网络最后的 24→33 通道
+`1×1×1` 卷积在 oneDNN 3.5.3 中触发 SIGSEGV，尚未保存分割。逐层控制与
+原生栈定位到该投影，不代表整个 CPU 环境不可用。33 通道输出逻辑大小为
+2,452,488,192 B，日志中的 48 通道填充布局为 3,567,255,552 B；现有栈不能
+确定具体地址或溢出原因。
+
+修复只将 CPU FP32 推理中估算填充大小超过 `2**31-1` B 的 `1×1×1` 投影按
+深度分块，保留 oneDNN、所有通道与体素顺序；其他 oneDNN 层沿用完整卷积。
+没有更改模型、翻转集成、后处理、GPU 精度或调用者全局设置。未带 batch 的
+4D `Conv3d` 继续走 PyTorch 原路径。该修复不需要新增依赖或调用原软件。
+
+同一真实 T1、nodecw10 相同 8 物理核/8 线程，冷进程 ABBA 的完整命令包含
+权重载入、计算、CSV 和标签图保存：
+
+| 普通 `--parc` | 第一次 wall | 第二次 wall |
+|---|---:|---:|
+| 官方 CPU | 325.90 s | 118.17 s |
+| FNIT 大投影分块 | 102.13 s | 106.16 s |
+
+官方首轮有网络文件读取等待，两次原值均保留，不以首轮计算稳定加速倍数。
+两轮同网格对照均差 5 个标签体素，前景最小 Dice 为 0.99980350，101 列软体积
+最大绝对差 0.683 mm³；候选两次保存的硬标签、数值 CSV 与几何逐值相同。
+修复前后的两个已有病例普通/fast 模式精度门，以及本次 GPU 实际回归状态，
+见[专项记录](../../validation/smri_cpu_20261004/t2_seg/README.md#9-大体积-plus-cpu-崩溃定位与修复)
+和[逐区证据](../../validation/smri_cpu_20261004/t2_seg/large_pointwise.public.json)。
+
+![大体积真实 T1 的官方与 FNIT CPU 标签及差异位置](../../validation/smri_cpu_20261004/t2_seg/large_pointwise_labels.png)
+
 ## Reference
 
 - 参考文献：Billot et al., *Robust machine learning segmentation for large-scale analysis of heterogeneous clinical brain MRI datasets*, PNAS (2023), [doi:10.1073/pnas.2216399120](https://doi.org/10.1073/pnas.2216399120)。
