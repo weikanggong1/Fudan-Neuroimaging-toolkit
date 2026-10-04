@@ -1,0 +1,4744 @@
+{
+  "status": "completed",
+  "source_label": "candidate_all_v23",
+  "scope": "bounded independent diagnostic; no native timing or stable speed claim",
+  "coefficient_cold_observations": [
+    {
+      "status": "completed",
+      "threads": 1,
+      "mode": "fused",
+      "scope": "single instrumented full API; entry torch/core/adapter imported before timer; lazy helper and cache load included",
+      "api_seconds": 1.0380729585886002,
+      "normalization_seconds": [
+        0.5561443418264389
+      ],
+      "query_calls": [
+        {
+          "data_dtype": "torch.float64",
+          "coordinates_dtype": "torch.float64",
+          "coordinates_shape": [
+            3,
+            91,
+            109,
+            91
+          ],
+          "prepared_source": false
+        }
+      ],
+      "peak_rss_kib": 689240,
+      "full_output_file_bytes_equal_to_other_mode": true
+    },
+    {
+      "status": "completed",
+      "threads": 1,
+      "mode": "tensor",
+      "scope": "single instrumented full API; entry torch/core/adapter imported before timer; lazy helper and cache load included",
+      "api_seconds": 0.6218142881989479,
+      "normalization_seconds": [
+        0.03663840889930725
+      ],
+      "query_calls": [
+        {
+          "data_dtype": "torch.float64",
+          "coordinates_dtype": "torch.float64",
+          "coordinates_shape": [
+            3,
+            91,
+            109,
+            91
+          ],
+          "prepared_source": false
+        }
+      ],
+      "peak_rss_kib": 636396,
+      "full_output_file_bytes_equal_to_other_mode": true
+    },
+    {
+      "status": "completed",
+      "threads": 8,
+      "mode": "fused",
+      "scope": "single instrumented full API; entry torch/core/adapter imported before timer; lazy helper and cache load included",
+      "api_seconds": 0.7978585883975029,
+      "normalization_seconds": [
+        0.4185827597975731
+      ],
+      "query_calls": [
+        {
+          "data_dtype": "torch.float64",
+          "coordinates_dtype": "torch.float64",
+          "coordinates_shape": [
+            3,
+            91,
+            109,
+            91
+          ],
+          "prepared_source": false
+        }
+      ],
+      "peak_rss_kib": 667964,
+      "full_output_file_bytes_equal_to_other_mode": true
+    },
+    {
+      "status": "completed",
+      "threads": 8,
+      "mode": "tensor",
+      "scope": "single instrumented full API; entry torch/core/adapter imported before timer; lazy helper and cache load included",
+      "api_seconds": 0.7062902078032494,
+      "normalization_seconds": [
+        0.11800220608711243
+      ],
+      "query_calls": [
+        {
+          "data_dtype": "torch.float64",
+          "coordinates_dtype": "torch.float64",
+          "coordinates_shape": [
+            3,
+            91,
+            109,
+            91
+          ],
+          "prepared_source": false
+        }
+      ],
+      "peak_rss_kib": 614792,
+      "full_output_file_bytes_equal_to_other_mode": true
+    }
+  ],
+  "warmed_full_inverse_profile": {
+    "status": "completed",
+    "threads": 1,
+    "affinity": [
+      35
+    ],
+    "scope": "one complete warmed instrumented read+compute+save; profiler and wrapper overhead included; entry imports and full warmup excluded",
+    "benchmark": false,
+    "inclusive_scopes_overlap": true,
+    "warmup_seconds": 45.04520074278116,
+    "solver_qc": {
+      "device": "cpu",
+      "output_convention": "relative",
+      "input_convention": "relative",
+      "iterations": 30,
+      "tolerance_mm": 0.01,
+      "iterations_used": 30,
+      "converged": false,
+      "median_residual_mm_in_field": 0.0,
+      "matrix_coordinates": "FSL scaled-mm"
+    },
+    "valid_fraction": 0.760824978351593,
+    "instrumented_api_seconds": 41.70714382827282,
+    "torch_operator_totals": [
+      {
+        "key": "aten::lift_fresh",
+        "calls": 1,
+        "self_cpu_seconds": 2.9659999999985305e-06,
+        "inclusive_cpu_seconds": 2.9659999999985305e-06,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 1,
+        "self_cpu_seconds": 1.1697000000000117e-05,
+        "inclusive_cpu_seconds": 0.00011319700000000012,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3
+          ],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::_to_copy",
+        "calls": 1,
+        "self_cpu_seconds": 4.84890000000014e-05,
+        "inclusive_cpu_seconds": 0.0001015,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::empty_strided",
+        "calls": 24,
+        "self_cpu_seconds": 7.554499998911343e-05,
+        "inclusive_cpu_seconds": 7.554499998911343e-05,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 1,
+        "self_cpu_seconds": 4.275299999999697e-05,
+        "inclusive_cpu_seconds": 4.275299999999697e-05,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3
+          ],
+          [
+            21,
+            24,
+            21,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::arange",
+        "calls": 9,
+        "self_cpu_seconds": 7.250800000000163e-05,
+        "inclusive_cpu_seconds": 0.00021689900000000854,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::empty",
+        "calls": 150,
+        "self_cpu_seconds": 0.0012437069999827399,
+        "inclusive_cpu_seconds": 0.0012437069999827399,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::arange",
+        "calls": 9,
+        "self_cpu_seconds": 0.00011862200000001758,
+        "inclusive_cpu_seconds": 0.0001337030000000086,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [
+            0
+          ]
+        ]
+      },
+      {
+        "key": "aten::resize_",
+        "calls": 9,
+        "self_cpu_seconds": 1.5080999999991037e-05,
+        "inclusive_cpu_seconds": 1.5080999999991037e-05,
+        "input_shapes": [
+          [
+            0
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::slice",
+        "calls": 2,
+        "self_cpu_seconds": 0.0023264940000000023,
+        "inclusive_cpu_seconds": 0.0023302590000000016,
+        "input_shapes": [
+          [
+            91
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 4,
+        "self_cpu_seconds": 4.93300000000454e-06,
+        "inclusive_cpu_seconds": 4.93300000000454e-06,
+        "input_shapes": [
+          [
+            91
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 2,
+        "self_cpu_seconds": 6.431999999993422e-06,
+        "inclusive_cpu_seconds": 7.599999999998545e-06,
+        "input_shapes": [
+          [
+            91
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 2,
+        "self_cpu_seconds": 4.076000000000931e-06,
+        "inclusive_cpu_seconds": 5.031999999999243e-06,
+        "input_shapes": [
+          [
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 2,
+        "self_cpu_seconds": 9.55999999998312e-07,
+        "inclusive_cpu_seconds": 9.55999999998312e-07,
+        "input_shapes": [
+          [
+            21
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 2,
+        "self_cpu_seconds": 2.681499999999869e-05,
+        "inclusive_cpu_seconds": 4.331199999999808e-05,
+        "input_shapes": [
+          [
+            1,
+            21
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 16,
+        "self_cpu_seconds": 4.585400000320442e-05,
+        "inclusive_cpu_seconds": 0.000142020999999575,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::_to_copy",
+        "calls": 16,
+        "self_cpu_seconds": 6.418199999501303e-05,
+        "inclusive_cpu_seconds": 9.616699999637058e-05,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 16,
+        "self_cpu_seconds": 1.7737000005243317e-05,
+        "inclusive_cpu_seconds": 1.7737000005243317e-05,
+        "input_shapes": [
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::mul",
+        "calls": 2,
+        "self_cpu_seconds": 1.1287000000000261e-05,
+        "inclusive_cpu_seconds": 2.2021000000000642e-05,
+        "input_shapes": [
+          [
+            1,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 2,
+        "self_cpu_seconds": 1.2384000000001833e-05,
+        "inclusive_cpu_seconds": 1.2384000000001833e-05,
+        "input_shapes": [
+          [
+            91,
+            1
+          ],
+          [
+            1,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::div",
+        "calls": 2,
+        "self_cpu_seconds": 3.392599999999948e-05,
+        "inclusive_cpu_seconds": 5.183199999999852e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::abs",
+        "calls": 2,
+        "self_cpu_seconds": 1.633599999999933e-05,
+        "inclusive_cpu_seconds": 2.9341999999996915e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ]
+        ]
+      },
+      {
+        "key": "aten::abs",
+        "calls": 2,
+        "self_cpu_seconds": 1.1440999999998895e-05,
+        "inclusive_cpu_seconds": 1.1440999999998895e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [
+            0
+          ]
+        ]
+      },
+      {
+        "key": "aten::square",
+        "calls": 2,
+        "self_cpu_seconds": 8.412000000000263e-06,
+        "inclusive_cpu_seconds": 3.281199999999808e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ]
+        ]
+      },
+      {
+        "key": "aten::pow",
+        "calls": 4,
+        "self_cpu_seconds": 3.7192999999995664e-05,
+        "inclusive_cpu_seconds": 3.9344999999997524e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::result_type",
+        "calls": 4,
+        "self_cpu_seconds": 1.5510000000031142e-06,
+        "inclusive_cpu_seconds": 1.5510000000031142e-06,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 6,
+        "self_cpu_seconds": 6.7659999999996215e-06,
+        "inclusive_cpu_seconds": 2.822099999999773e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::mul",
+        "calls": 4,
+        "self_cpu_seconds": 1.1459999999999126e-05,
+        "inclusive_cpu_seconds": 1.1459999999999126e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 2,
+        "self_cpu_seconds": 5.316999999999098e-06,
+        "inclusive_cpu_seconds": 5.316999999999098e-06,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::mul",
+        "calls": 4,
+        "self_cpu_seconds": 1.3718000000004394e-05,
+        "inclusive_cpu_seconds": 4.133800000000338e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [
+            91,
+            21
+          ]
+        ]
+      },
+      {
+        "key": "aten::add",
+        "calls": 2,
+        "self_cpu_seconds": 7.510999999998603e-06,
+        "inclusive_cpu_seconds": 7.510999999998603e-06,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::rsub",
+        "calls": 2,
+        "self_cpu_seconds": 1.1675999999999476e-05,
+        "inclusive_cpu_seconds": 1.716700000000128e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 2,
+        "self_cpu_seconds": 5.491000000001805e-06,
+        "inclusive_cpu_seconds": 5.491000000001805e-06,
+        "input_shapes": [
+          [],
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::clamp_min",
+        "calls": 2,
+        "self_cpu_seconds": 1.577700000000186e-05,
+        "inclusive_cpu_seconds": 1.577700000000186e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::le",
+        "calls": 2,
+        "self_cpu_seconds": 2.6836999999999533e-05,
+        "inclusive_cpu_seconds": 4.427400000000125e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::where",
+        "calls": 2,
+        "self_cpu_seconds": 1.821700000000419e-05,
+        "inclusive_cpu_seconds": 1.942000000000189e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [
+            91,
+            21
+          ],
+          [
+            91,
+            21
+          ]
+        ]
+      },
+      {
+        "key": "aten::lt",
+        "calls": 2,
+        "self_cpu_seconds": 3.67980000000025e-05,
+        "inclusive_cpu_seconds": 6.181199999999807e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::_to_copy",
+        "calls": 2,
+        "self_cpu_seconds": 1.0703000000001339e-05,
+        "inclusive_cpu_seconds": 2.145499999999811e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 2,
+        "self_cpu_seconds": 8.194999999999709e-06,
+        "inclusive_cpu_seconds": 8.194999999999709e-06,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::slice",
+        "calls": 1,
+        "self_cpu_seconds": 3.5469999999986614e-06,
+        "inclusive_cpu_seconds": 4.049999999999273e-06,
+        "input_shapes": [
+          [
+            109
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 2,
+        "self_cpu_seconds": 1.1090000000003783e-06,
+        "inclusive_cpu_seconds": 1.1090000000003783e-06,
+        "input_shapes": [
+          [
+            109
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 1.6140000000013969e-06,
+        "inclusive_cpu_seconds": 2.220000000001164e-06,
+        "input_shapes": [
+          [
+            109
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 1.5599999999976716e-06,
+        "inclusive_cpu_seconds": 2.1199999999989815e-06,
+        "input_shapes": [
+          [
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 5.600000000013097e-07,
+        "inclusive_cpu_seconds": 5.600000000013097e-07,
+        "input_shapes": [
+          [
+            24
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 1,
+        "self_cpu_seconds": 3.5599999999976717e-06,
+        "inclusive_cpu_seconds": 8.735999999997148e-06,
+        "input_shapes": [
+          [
+            1,
+            24
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::mul",
+        "calls": 1,
+        "self_cpu_seconds": 2.9990000000034343e-06,
+        "inclusive_cpu_seconds": 7.851000000002387e-06,
+        "input_shapes": [
+          [
+            1,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 1,
+        "self_cpu_seconds": 4.228000000002794e-06,
+        "inclusive_cpu_seconds": 4.228000000002794e-06,
+        "input_shapes": [
+          [
+            109,
+            1
+          ],
+          [
+            1,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::div",
+        "calls": 1,
+        "self_cpu_seconds": 1.0444000000003143e-05,
+        "inclusive_cpu_seconds": 2.4793000000001485e-05,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::abs",
+        "calls": 1,
+        "self_cpu_seconds": 2.7070000000021537e-06,
+        "inclusive_cpu_seconds": 6.5149999999994175e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ]
+        ]
+      },
+      {
+        "key": "aten::abs",
+        "calls": 1,
+        "self_cpu_seconds": 3.261999999998807e-06,
+        "inclusive_cpu_seconds": 3.261999999998807e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [
+            0
+          ]
+        ]
+      },
+      {
+        "key": "aten::square",
+        "calls": 1,
+        "self_cpu_seconds": 1.144000000000233e-06,
+        "inclusive_cpu_seconds": 6.715000000000146e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ]
+        ]
+      },
+      {
+        "key": "aten::pow",
+        "calls": 2,
+        "self_cpu_seconds": 9.997999999995954e-06,
+        "inclusive_cpu_seconds": 1.0443999999999506e-05,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::result_type",
+        "calls": 2,
+        "self_cpu_seconds": 2.319999999999709e-07,
+        "inclusive_cpu_seconds": 2.319999999999709e-07,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 3,
+        "self_cpu_seconds": 1.2620000000024447e-06,
+        "inclusive_cpu_seconds": 1.1813000000001921e-05,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::mul",
+        "calls": 2,
+        "self_cpu_seconds": 5.312999999998283e-06,
+        "inclusive_cpu_seconds": 5.312999999998283e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 1,
+        "self_cpu_seconds": 2.6330000000016297e-06,
+        "inclusive_cpu_seconds": 2.6330000000016297e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::mul",
+        "calls": 2,
+        "self_cpu_seconds": 1.1434000000001106e-05,
+        "inclusive_cpu_seconds": 2.3032999999999446e-05,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [
+            109,
+            24
+          ]
+        ]
+      },
+      {
+        "key": "aten::add",
+        "calls": 1,
+        "self_cpu_seconds": 2.7740000000012515e-06,
+        "inclusive_cpu_seconds": 2.7740000000012515e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::rsub",
+        "calls": 1,
+        "self_cpu_seconds": 3.1419999999998252e-06,
+        "inclusive_cpu_seconds": 5.748999999999796e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 1,
+        "self_cpu_seconds": 2.606999999999971e-06,
+        "inclusive_cpu_seconds": 2.606999999999971e-06,
+        "input_shapes": [
+          [],
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::clamp_min",
+        "calls": 1,
+        "self_cpu_seconds": 2.7530000000006113e-06,
+        "inclusive_cpu_seconds": 2.7530000000006113e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::le",
+        "calls": 1,
+        "self_cpu_seconds": 8.391999999996187e-06,
+        "inclusive_cpu_seconds": 1.5760999999998604e-05,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::where",
+        "calls": 1,
+        "self_cpu_seconds": 7.75500000000102e-06,
+        "inclusive_cpu_seconds": 8.21099999999933e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [
+            109,
+            24
+          ],
+          [
+            109,
+            24
+          ]
+        ]
+      },
+      {
+        "key": "aten::lt",
+        "calls": 1,
+        "self_cpu_seconds": 9.948000000003958e-06,
+        "inclusive_cpu_seconds": 1.66830000000009e-05,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::_to_copy",
+        "calls": 1,
+        "self_cpu_seconds": 3.6649999999972353e-06,
+        "inclusive_cpu_seconds": 1.0550999999999476e-05,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 1,
+        "self_cpu_seconds": 5.5360000000000585e-06,
+        "inclusive_cpu_seconds": 5.5360000000000585e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::einsum",
+        "calls": 3,
+        "self_cpu_seconds": 0.0001579139999999934,
+        "inclusive_cpu_seconds": 0.010397088,
+        "input_shapes": [
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 2,
+        "self_cpu_seconds": 1.0440000000002328e-05,
+        "inclusive_cpu_seconds": 1.1338000000003377e-05,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 2,
+        "self_cpu_seconds": 8.980000000010477e-07,
+        "inclusive_cpu_seconds": 8.980000000010477e-07,
+        "input_shapes": [
+          [
+            91,
+            21
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 2,
+        "self_cpu_seconds": 2.824000000004162e-06,
+        "inclusive_cpu_seconds": 3.992000000002008e-06,
+        "input_shapes": [
+          [
+            91,
+            21,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 2,
+        "self_cpu_seconds": 1.1679999999978463e-06,
+        "inclusive_cpu_seconds": 1.1679999999978463e-06,
+        "input_shapes": [
+          [
+            91,
+            21,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 2,
+        "self_cpu_seconds": 2.3230000000039582e-06,
+        "inclusive_cpu_seconds": 4.214000000003579e-06,
+        "input_shapes": [
+          [
+            91,
+            21,
+            1,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 2,
+        "self_cpu_seconds": 1.8909999999996216e-06,
+        "inclusive_cpu_seconds": 1.8909999999996216e-06,
+        "input_shapes": [
+          [
+            91,
+            21,
+            1,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 2,
+        "self_cpu_seconds": 4.756999999997788e-06,
+        "inclusive_cpu_seconds": 5.665999999997439e-06,
+        "input_shapes": [
+          [
+            91,
+            21,
+            1,
+            1,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 2,
+        "self_cpu_seconds": 9.089999999996507e-07,
+        "inclusive_cpu_seconds": 9.089999999996507e-07,
+        "input_shapes": [
+          [
+            91,
+            21,
+            1,
+            1,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 1.6890000000021246e-06,
+        "inclusive_cpu_seconds": 2.3330000000023572e-06,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 6.440000000002328e-07,
+        "inclusive_cpu_seconds": 6.440000000002328e-07,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 1.8580000000001745e-06,
+        "inclusive_cpu_seconds": 4.744999999998981e-06,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 2.8869999999988066e-06,
+        "inclusive_cpu_seconds": 2.8869999999988066e-06,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 1.66899999999805e-06,
+        "inclusive_cpu_seconds": 2.084999999999127e-06,
+        "input_shapes": [
+          [
+            91,
+            1,
+            1,
+            1,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 4.1600000000107686e-07,
+        "inclusive_cpu_seconds": 4.1600000000107686e-07,
+        "input_shapes": [
+          [
+            91,
+            1,
+            1,
+            1,
+            21
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 2,
+        "self_cpu_seconds": 4.505000000001019e-06,
+        "inclusive_cpu_seconds": 7.325000000000728e-06,
+        "input_shapes": [
+          [
+            91,
+            21,
+            1,
+            1,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 2,
+        "self_cpu_seconds": 2.819999999999709e-06,
+        "inclusive_cpu_seconds": 2.819999999999709e-06,
+        "input_shapes": [
+          [
+            91,
+            21,
+            1,
+            1,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 1.5659999999988941e-06,
+        "inclusive_cpu_seconds": 1.9360000000015134e-06,
+        "input_shapes": [
+          [
+            1,
+            24,
+            21,
+            3,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 3.7000000000261935e-07,
+        "inclusive_cpu_seconds": 3.7000000000261935e-07,
+        "input_shapes": [
+          [
+            1,
+            24,
+            21,
+            3,
+            21
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 1,
+        "self_cpu_seconds": 9.95999999999185e-07,
+        "inclusive_cpu_seconds": 1.495999999999185e-06,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 5e-07,
+        "inclusive_cpu_seconds": 5e-07,
+        "input_shapes": [
+          [
+            21,
+            24,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::bmm",
+        "calls": 1,
+        "self_cpu_seconds": 0.00039507299999999666,
+        "inclusive_cpu_seconds": 0.0003957350000000006,
+        "input_shapes": [
+          [
+            1,
+            91,
+            21
+          ],
+          [
+            1,
+            21,
+            1512
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 1,
+        "self_cpu_seconds": 5.8100000000195e-07,
+        "inclusive_cpu_seconds": 5.8100000000195e-07,
+        "input_shapes": [
+          [
+            1,
+            21,
+            1512
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 2,
+        "self_cpu_seconds": 1.13999999997759e-07,
+        "inclusive_cpu_seconds": 1.13999999997759e-07,
+        "input_shapes": [
+          [
+            1,
+            91,
+            21
+          ]
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 1.003000000000611e-06,
+        "inclusive_cpu_seconds": 1.003000000000611e-06,
+        "input_shapes": [
+          [
+            1,
+            91,
+            1512
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 2.101999999998952e-06,
+        "inclusive_cpu_seconds": 2.6939999999995053e-06,
+        "input_shapes": [
+          [
+            91,
+            1,
+            24,
+            21,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 5.92000000000553e-07,
+        "inclusive_cpu_seconds": 5.92000000000553e-07,
+        "input_shapes": [
+          [
+            91,
+            1,
+            24,
+            21,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 8.060000000004948e-07,
+        "inclusive_cpu_seconds": 8.060000000004948e-07,
+        "input_shapes": [
+          [
+            91,
+            24,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 2.0080000000016298e-06,
+        "inclusive_cpu_seconds": 2.6330000000016297e-06,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 6.25e-07,
+        "inclusive_cpu_seconds": 6.25e-07,
+        "input_shapes": [
+          [
+            109,
+            24
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 1.5630000000019208e-06,
+        "inclusive_cpu_seconds": 2.0169999999998254e-06,
+        "input_shapes": [
+          [
+            109,
+            24,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 4.539999999979045e-07,
+        "inclusive_cpu_seconds": 4.539999999979045e-07,
+        "input_shapes": [
+          [
+            109,
+            24,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 1.932999999997264e-06,
+        "inclusive_cpu_seconds": 2.381999999997788e-06,
+        "input_shapes": [
+          [
+            109,
+            24,
+            1,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 4.4900000000052385e-07,
+        "inclusive_cpu_seconds": 4.4900000000052385e-07,
+        "input_shapes": [
+          [
+            109,
+            24,
+            1,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 1.8100000000049476e-06,
+        "inclusive_cpu_seconds": 2.2470000000030267e-06,
+        "input_shapes": [
+          [
+            109,
+            24,
+            1,
+            1,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 4.3699999999807915e-07,
+        "inclusive_cpu_seconds": 4.3699999999807915e-07,
+        "input_shapes": [
+          [
+            109,
+            24,
+            1,
+            1,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 1.5010000000002038e-06,
+        "inclusive_cpu_seconds": 1.9219999999986612e-06,
+        "input_shapes": [
+          [
+            91,
+            24,
+            21,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 4.2099999999845747e-07,
+        "inclusive_cpu_seconds": 4.2099999999845747e-07,
+        "input_shapes": [
+          [
+            91,
+            24,
+            21,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 1.6739999999990687e-06,
+        "inclusive_cpu_seconds": 2.4539999999979046e-06,
+        "input_shapes": [
+          [
+            91,
+            24,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 7.799999999988358e-07,
+        "inclusive_cpu_seconds": 7.799999999988358e-07,
+        "input_shapes": [
+          [
+            91,
+            24,
+            21,
+            3,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 1.6850000000013097e-06,
+        "inclusive_cpu_seconds": 2.0669999999990978e-06,
+        "input_shapes": [
+          [
+            1,
+            109,
+            1,
+            1,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 3.819999999977881e-07,
+        "inclusive_cpu_seconds": 3.819999999977881e-07,
+        "input_shapes": [
+          [
+            1,
+            109,
+            1,
+            1,
+            24
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 1,
+        "self_cpu_seconds": 1.13300000000163e-06,
+        "inclusive_cpu_seconds": 1.5910000000003493e-06,
+        "input_shapes": [
+          [
+            109,
+            24,
+            1,
+            1,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 4.5799999999871944e-07,
+        "inclusive_cpu_seconds": 4.5799999999871944e-07,
+        "input_shapes": [
+          [
+            109,
+            24,
+            1,
+            1,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 1.6570000000028814e-06,
+        "inclusive_cpu_seconds": 2.311000000001513e-06,
+        "input_shapes": [
+          [
+            91,
+            1,
+            21,
+            3,
+            24
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 6.539999999986322e-07,
+        "inclusive_cpu_seconds": 6.539999999986322e-07,
+        "input_shapes": [
+          [
+            91,
+            1,
+            21,
+            3,
+            24
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 1,
+        "self_cpu_seconds": 1.740899999999965e-05,
+        "inclusive_cpu_seconds": 0.00046961699999999835,
+        "input_shapes": [
+          [
+            24,
+            91,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::clone",
+        "calls": 1,
+        "self_cpu_seconds": 9.318999999999505e-06,
+        "inclusive_cpu_seconds": 0.0004498159999999989,
+        "input_shapes": [
+          [
+            24,
+            91,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::empty_like",
+        "calls": 1,
+        "self_cpu_seconds": 1.4892999999996391e-05,
+        "inclusive_cpu_seconds": 1.8719999999997527e-05,
+        "input_shapes": [
+          [
+            24,
+            91,
+            21,
+            3,
+            1
+          ],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 1,
+        "self_cpu_seconds": 0.00042177700000000187,
+        "inclusive_cpu_seconds": 0.00042177700000000187,
+        "input_shapes": [
+          [
+            24,
+            91,
+            21,
+            3,
+            1
+          ],
+          [
+            24,
+            91,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::_unsafe_view",
+        "calls": 1,
+        "self_cpu_seconds": 2.3919999999998252e-06,
+        "inclusive_cpu_seconds": 2.3919999999998252e-06,
+        "input_shapes": [
+          [
+            24,
+            91,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::bmm",
+        "calls": 1,
+        "self_cpu_seconds": 0.001755690999999999,
+        "inclusive_cpu_seconds": 0.0017558909999999997,
+        "input_shapes": [
+          [
+            1,
+            109,
+            24
+          ],
+          [
+            1,
+            24,
+            5733
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 1,
+        "self_cpu_seconds": 1.290000000008149e-07,
+        "inclusive_cpu_seconds": 1.290000000008149e-07,
+        "input_shapes": [
+          [
+            1,
+            24,
+            5733
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 1,
+        "self_cpu_seconds": 7.099999999991269e-08,
+        "inclusive_cpu_seconds": 7.099999999991269e-08,
+        "input_shapes": [
+          [
+            1,
+            109,
+            24
+          ]
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 1.010999999998603e-06,
+        "inclusive_cpu_seconds": 1.010999999998603e-06,
+        "input_shapes": [
+          [
+            1,
+            109,
+            5733
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 5.256999999997788e-06,
+        "inclusive_cpu_seconds": 6.09100000000035e-06,
+        "input_shapes": [
+          [
+            109,
+            1,
+            91,
+            21,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 8.340000000025611e-07,
+        "inclusive_cpu_seconds": 8.340000000025611e-07,
+        "input_shapes": [
+          [
+            109,
+            1,
+            91,
+            21,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 7.700000000004366e-07,
+        "inclusive_cpu_seconds": 7.700000000004366e-07,
+        "input_shapes": [
+          [
+            91,
+            109,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 9.240000000027067e-07,
+        "inclusive_cpu_seconds": 1.2290000000029977e-06,
+        "input_shapes": [
+          [
+            91,
+            109,
+            21,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 3.0500000000029105e-07,
+        "inclusive_cpu_seconds": 3.0500000000029105e-07,
+        "input_shapes": [
+          [
+            91,
+            109,
+            21,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 9.450000000033469e-07,
+        "inclusive_cpu_seconds": 1.3250000000007276e-06,
+        "input_shapes": [
+          [
+            91,
+            109,
+            21,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 3.7999999999738067e-07,
+        "inclusive_cpu_seconds": 3.7999999999738067e-07,
+        "input_shapes": [
+          [
+            91,
+            109,
+            21,
+            3,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 8.869999999988068e-07,
+        "inclusive_cpu_seconds": 1.2160000000003493e-06,
+        "input_shapes": [
+          [
+            1,
+            1,
+            91,
+            1,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 3.290000000015425e-07,
+        "inclusive_cpu_seconds": 3.290000000015425e-07,
+        "input_shapes": [
+          [
+            1,
+            1,
+            91,
+            1,
+            21
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 9.710000000013679e-07,
+        "inclusive_cpu_seconds": 1.3699999999989815e-06,
+        "input_shapes": [
+          [
+            91,
+            109,
+            1,
+            3,
+            21
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 3.989999999976135e-07,
+        "inclusive_cpu_seconds": 3.989999999976135e-07,
+        "input_shapes": [
+          [
+            91,
+            109,
+            1,
+            3,
+            21
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 1,
+        "self_cpu_seconds": 5.932000000000698e-06,
+        "inclusive_cpu_seconds": 0.0025996189999999988,
+        "input_shapes": [
+          [
+            21,
+            91,
+            109,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::clone",
+        "calls": 1,
+        "self_cpu_seconds": 8.673999999995431e-06,
+        "inclusive_cpu_seconds": 0.0025929029999999984,
+        "input_shapes": [
+          [
+            21,
+            91,
+            109,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::empty_like",
+        "calls": 1,
+        "self_cpu_seconds": 6.525000000001455e-06,
+        "inclusive_cpu_seconds": 9.654999999998836e-06,
+        "input_shapes": [
+          [
+            21,
+            91,
+            109,
+            3,
+            1
+          ],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 1,
+        "self_cpu_seconds": 0.002574574000000004,
+        "inclusive_cpu_seconds": 0.002574574000000004,
+        "input_shapes": [
+          [
+            21,
+            91,
+            109,
+            3,
+            1
+          ],
+          [
+            21,
+            91,
+            109,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::_unsafe_view",
+        "calls": 1,
+        "self_cpu_seconds": 7.839999999996507e-07,
+        "inclusive_cpu_seconds": 7.839999999996507e-07,
+        "input_shapes": [
+          [
+            21,
+            91,
+            109,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::bmm",
+        "calls": 1,
+        "self_cpu_seconds": 0.004931339000000007,
+        "inclusive_cpu_seconds": 0.004931432,
+        "input_shapes": [
+          [
+            1,
+            91,
+            21
+          ],
+          [
+            1,
+            21,
+            29757
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 1,
+        "self_cpu_seconds": 5.99999999976717e-08,
+        "inclusive_cpu_seconds": 5.99999999976717e-08,
+        "input_shapes": [
+          [
+            1,
+            21,
+            29757
+          ]
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 8.759999999965658e-07,
+        "inclusive_cpu_seconds": 8.759999999965658e-07,
+        "input_shapes": [
+          [
+            1,
+            91,
+            29757
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 2.169000000001688e-06,
+        "inclusive_cpu_seconds": 3.1449999999967986e-06,
+        "input_shapes": [
+          [
+            91,
+            1,
+            91,
+            109,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 9.759999999951106e-07,
+        "inclusive_cpu_seconds": 9.759999999951106e-07,
+        "input_shapes": [
+          [
+            91,
+            1,
+            91,
+            109,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 5.900000000037834e-07,
+        "inclusive_cpu_seconds": 5.900000000037834e-07,
+        "input_shapes": [
+          [
+            91,
+            109,
+            91,
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 1,
+        "self_cpu_seconds": 6.193000000006578e-06,
+        "inclusive_cpu_seconds": 6.706000000005588e-06,
+        "input_shapes": [
+          [
+            91,
+            109,
+            91,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 5.129999999990105e-07,
+        "inclusive_cpu_seconds": 5.129999999990105e-07,
+        "input_shapes": [
+          [
+            91,
+            109,
+            91,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::contiguous",
+        "calls": 1,
+        "self_cpu_seconds": 2.822999999996682e-06,
+        "inclusive_cpu_seconds": 0.010458362999999998,
+        "input_shapes": [
+          [
+            3,
+            91,
+            109,
+            91
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::clone",
+        "calls": 1,
+        "self_cpu_seconds": 1.965700000000652e-05,
+        "inclusive_cpu_seconds": 0.010455540000000001,
+        "input_shapes": [
+          [
+            3,
+            91,
+            109,
+            91
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::empty_like",
+        "calls": 1,
+        "self_cpu_seconds": 6.6379999999990105e-06,
+        "inclusive_cpu_seconds": 2.0237999999997555e-05,
+        "input_shapes": [
+          [
+            3,
+            91,
+            109,
+            91
+          ],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 1,
+        "self_cpu_seconds": 0.010415644999999996,
+        "inclusive_cpu_seconds": 0.010415644999999996,
+        "input_shapes": [
+          [
+            3,
+            91,
+            109,
+            91
+          ],
+          [
+            3,
+            91,
+            109,
+            91
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::lift_fresh",
+        "calls": 4,
+        "self_cpu_seconds": 1.6850000000049477e-06,
+        "inclusive_cpu_seconds": 1.6850000000049477e-06,
+        "input_shapes": [
+          [
+            4,
+            4
+          ]
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 4,
+        "self_cpu_seconds": 1.761000000005879e-06,
+        "inclusive_cpu_seconds": 1.761000000005879e-06,
+        "input_shapes": [
+          [
+            4,
+            4
+          ],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 3.7220000000015718e-06,
+        "inclusive_cpu_seconds": 5.3780000000042496e-06,
+        "input_shapes": [
+          [
+            3,
+            91,
+            109,
+            91
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 1.6560000000026776e-06,
+        "inclusive_cpu_seconds": 1.6560000000026776e-06,
+        "input_shapes": [
+          [
+            3,
+            91,
+            109,
+            91
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::contiguous",
+        "calls": 1,
+        "self_cpu_seconds": 2.8870000000024446e-06,
+        "inclusive_cpu_seconds": 0.010742306000000004,
+        "input_shapes": [
+          [
+            1,
+            3,
+            91,
+            109,
+            91
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::clone",
+        "calls": 1,
+        "self_cpu_seconds": 4.138000000006287e-06,
+        "inclusive_cpu_seconds": 0.010739419000000002,
+        "input_shapes": [
+          [
+            1,
+            3,
+            91,
+            109,
+            91
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::empty_like",
+        "calls": 1,
+        "self_cpu_seconds": 4.413999999997032e-06,
+        "inclusive_cpu_seconds": 1.4773000000001048e-05,
+        "input_shapes": [
+          [
+            1,
+            3,
+            91,
+            109,
+            91
+          ],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 1,
+        "self_cpu_seconds": 0.010720507999999995,
+        "inclusive_cpu_seconds": 0.010720507999999995,
+        "input_shapes": [
+          [
+            1,
+            3,
+            91,
+            109,
+            91
+          ],
+          [
+            1,
+            3,
+            91,
+            109,
+            91
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::linspace",
+        "calls": 3,
+        "self_cpu_seconds": 1.913300000000163e-05,
+        "inclusive_cpu_seconds": 3.321799999999348e-05,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::linspace",
+        "calls": 3,
+        "self_cpu_seconds": 1.0881999999997788e-05,
+        "inclusive_cpu_seconds": 1.0881999999997788e-05,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [
+            5
+          ]
+        ]
+      },
+      {
+        "key": "aten::meshgrid",
+        "calls": 1,
+        "self_cpu_seconds": 3.5773000000008326e-05,
+        "inclusive_cpu_seconds": 4.8896999999997204e-05,
+        "input_shapes": [
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 3,
+        "self_cpu_seconds": 3.5609999999942375e-06,
+        "inclusive_cpu_seconds": 3.5609999999942375e-06,
+        "input_shapes": [
+          [
+            5
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::expand",
+        "calls": 1,
+        "self_cpu_seconds": 5.4619999999995345e-06,
+        "inclusive_cpu_seconds": 7.061999999998079e-06,
+        "input_shapes": [
+          [
+            5,
+            1,
+            1
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 1.5999999999985447e-06,
+        "inclusive_cpu_seconds": 1.5999999999985447e-06,
+        "input_shapes": [
+          [
+            5,
+            1,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::expand",
+        "calls": 1,
+        "self_cpu_seconds": 1.0469999999986612e-06,
+        "inclusive_cpu_seconds": 1.330999999998312e-06,
+        "input_shapes": [
+          [
+            1,
+            5,
+            1
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 2.8399999999965076e-07,
+        "inclusive_cpu_seconds": 2.8399999999965076e-07,
+        "input_shapes": [
+          [
+            1,
+            5,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::expand",
+        "calls": 1,
+        "self_cpu_seconds": 8.470000000015716e-07,
+        "inclusive_cpu_seconds": 1.1699999999982539e-06,
+        "input_shapes": [
+          [
+            1,
+            1,
+            5
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 3.2299999999668214e-07,
+        "inclusive_cpu_seconds": 3.2299999999668214e-07,
+        "input_shapes": [
+          [
+            1,
+            1,
+            5
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::stack",
+        "calls": 1,
+        "self_cpu_seconds": 1.0360999999989872e-05,
+        "inclusive_cpu_seconds": 6.437199999999574e-05,
+        "input_shapes": [
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::cat",
+        "calls": 1,
+        "self_cpu_seconds": 2.880600000001141e-05,
+        "inclusive_cpu_seconds": 5.3312000000005354e-05,
+        "input_shapes": [
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::narrow",
+        "calls": 3,
+        "self_cpu_seconds": 1.681099999999424e-05,
+        "inclusive_cpu_seconds": 2.4505999999993948e-05,
+        "input_shapes": [
+          [
+            15,
+            5,
+            5
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::slice",
+        "calls": 3,
+        "self_cpu_seconds": 6.923999999999068e-06,
+        "inclusive_cpu_seconds": 7.694999999999709e-06,
+        "input_shapes": [
+          [
+            15,
+            5,
+            5
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 3,
+        "self_cpu_seconds": 7.710000000006403e-07,
+        "inclusive_cpu_seconds": 7.710000000006403e-07,
+        "input_shapes": [
+          [
+            15,
+            5,
+            5
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 6.990000000005239e-07,
+        "inclusive_cpu_seconds": 6.990000000005239e-07,
+        "input_shapes": [
+          [
+            15,
+            5,
+            5
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 4,
+        "self_cpu_seconds": 9.281000000009954e-06,
+        "inclusive_cpu_seconds": 1.0890000000006694e-05,
+        "input_shapes": [
+          [
+            3,
+            5,
+            5,
+            5
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 4,
+        "self_cpu_seconds": 1.6089999999967404e-06,
+        "inclusive_cpu_seconds": 1.6089999999967404e-06,
+        "input_shapes": [
+          [
+            3,
+            5,
+            5,
+            5
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::slice",
+        "calls": 162,
+        "self_cpu_seconds": 0.0012896509999798435,
+        "inclusive_cpu_seconds": 0.0015908419999834586,
+        "input_shapes": [
+          [
+            4,
+            4
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 162,
+        "self_cpu_seconds": 0.000301191000003615,
+        "inclusive_cpu_seconds": 0.000301191000003615,
+        "input_shapes": [
+          [
+            4,
+            4
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::slice",
+        "calls": 162,
+        "self_cpu_seconds": 0.00023467300000157412,
+        "inclusive_cpu_seconds": 0.00044967800000418357,
+        "input_shapes": [
+          [
+            3,
+            4
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 162,
+        "self_cpu_seconds": 0.00021500500000260945,
+        "inclusive_cpu_seconds": 0.00021500500000260945,
+        "input_shapes": [
+          [
+            3,
+            4
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::matmul",
+        "calls": 3,
+        "self_cpu_seconds": 7.879999999990104e-06,
+        "inclusive_cpu_seconds": 4.985699999998906e-05,
+        "input_shapes": [
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            125
+          ]
+        ]
+      },
+      {
+        "key": "aten::mm",
+        "calls": 3,
+        "self_cpu_seconds": 4.129899999999179e-05,
+        "inclusive_cpu_seconds": 4.197699999999895e-05,
+        "input_shapes": [
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            125
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 6,
+        "self_cpu_seconds": 5.780000000086148e-07,
+        "inclusive_cpu_seconds": 5.780000000086148e-07,
+        "input_shapes": [
+          [
+            3,
+            125
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 96,
+        "self_cpu_seconds": 4.53000001890905e-06,
+        "inclusive_cpu_seconds": 4.53000001890905e-06,
+        "input_shapes": [
+          [
+            3,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::add",
+        "calls": 3,
+        "self_cpu_seconds": 2.0644999999996798e-05,
+        "inclusive_cpu_seconds": 2.0644999999996798e-05,
+        "input_shapes": [
+          [
+            3,
+            125
+          ],
+          [
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 3,
+        "self_cpu_seconds": 8.906000000002677e-06,
+        "inclusive_cpu_seconds": 1.0169000000001688e-05,
+        "input_shapes": [
+          [
+            3,
+            125
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 3,
+        "self_cpu_seconds": 1.2629999999990105e-06,
+        "inclusive_cpu_seconds": 1.2629999999990105e-06,
+        "input_shapes": [
+          [
+            3,
+            125
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::detach",
+        "calls": 1,
+        "self_cpu_seconds": 8.93300000000454e-06,
+        "inclusive_cpu_seconds": 8.93300000000454e-06,
+        "input_shapes": [
+          [
+            3,
+            5,
+            5,
+            5
+          ]
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 1,
+        "self_cpu_seconds": 1.8389999999999419e-06,
+        "inclusive_cpu_seconds": 1.8389999999999419e-06,
+        "input_shapes": [
+          [
+            3,
+            5,
+            5,
+            5
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 1,
+        "self_cpu_seconds": 6.300000000192085e-08,
+        "inclusive_cpu_seconds": 6.300000000192085e-08,
+        "input_shapes": [
+          [
+            3,
+            5,
+            5,
+            5
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_neg",
+        "calls": 1,
+        "self_cpu_seconds": 4.029999999984284e-07,
+        "inclusive_cpu_seconds": 4.029999999984284e-07,
+        "input_shapes": [
+          [
+            3,
+            5,
+            5,
+            5
+          ]
+        ]
+      },
+      {
+        "key": "aten::detach",
+        "calls": 1,
+        "self_cpu_seconds": 4.930000000022119e-07,
+        "inclusive_cpu_seconds": 4.930000000022119e-07,
+        "input_shapes": [
+          [
+            5,
+            5,
+            5,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 1,
+        "self_cpu_seconds": 1.1100000000442378e-07,
+        "inclusive_cpu_seconds": 1.1100000000442378e-07,
+        "input_shapes": [
+          [
+            5,
+            5,
+            5,
+            3
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 1,
+        "self_cpu_seconds": 5.700000000069849e-08,
+        "inclusive_cpu_seconds": 5.700000000069849e-08,
+        "input_shapes": [
+          [
+            5,
+            5,
+            5,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_neg",
+        "calls": 1,
+        "self_cpu_seconds": 3.299999999580905e-08,
+        "inclusive_cpu_seconds": 3.299999999580905e-08,
+        "input_shapes": [
+          [
+            5,
+            5,
+            5,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 1,
+        "self_cpu_seconds": 2.3550000000032013e-06,
+        "inclusive_cpu_seconds": 3.0420000000012806e-06,
+        "input_shapes": [
+          [
+            5,
+            5,
+            5,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 6.869999999980792e-07,
+        "inclusive_cpu_seconds": 6.869999999980792e-07,
+        "input_shapes": [
+          [
+            5,
+            5,
+            5,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::grid_sampler",
+        "calls": 1,
+        "self_cpu_seconds": 5.584999999991851e-06,
+        "inclusive_cpu_seconds": 4.05199999999968e-05,
+        "input_shapes": [
+          [
+            1,
+            3,
+            91,
+            109,
+            91
+          ],
+          [
+            1,
+            5,
+            5,
+            5,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::grid_sampler_3d",
+        "calls": 1,
+        "self_cpu_seconds": 3.3326000000000934e-05,
+        "inclusive_cpu_seconds": 3.493500000000495e-05,
+        "input_shapes": [
+          [
+            1,
+            3,
+            91,
+            109,
+            91
+          ],
+          [
+            1,
+            5,
+            5,
+            5,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::select",
+        "calls": 1,
+        "self_cpu_seconds": 6.12000000000262e-06,
+        "inclusive_cpu_seconds": 6.590000000003783e-06,
+        "input_shapes": [
+          [
+            1,
+            3,
+            5,
+            5,
+            5
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 4.7000000000116414e-07,
+        "inclusive_cpu_seconds": 4.7000000000116414e-07,
+        "input_shapes": [
+          [
+            1,
+            3,
+            5,
+            5,
+            5
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 1,
+        "self_cpu_seconds": 3.0700000000069847e-07,
+        "inclusive_cpu_seconds": 3.0700000000069847e-07,
+        "input_shapes": [
+          [
+            3,
+            5,
+            5,
+            5
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::add",
+        "calls": 1,
+        "self_cpu_seconds": 2.5489999999990688e-06,
+        "inclusive_cpu_seconds": 2.5489999999990688e-06,
+        "input_shapes": [
+          [
+            3,
+            5,
+            5,
+            5
+          ],
+          [
+            3,
+            5,
+            5,
+            5
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::numpy_T",
+        "calls": 2,
+        "self_cpu_seconds": 3.1009999999878345e-06,
+        "inclusive_cpu_seconds": 1.0251999999993132e-05,
+        "input_shapes": [
+          [
+            3,
+            125
+          ]
+        ]
+      },
+      {
+        "key": "aten::permute",
+        "calls": 2,
+        "self_cpu_seconds": 6.283000000010361e-06,
+        "inclusive_cpu_seconds": 7.151000000005297e-06,
+        "input_shapes": [
+          [
+            3,
+            125
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 2,
+        "self_cpu_seconds": 8.679999999949359e-07,
+        "inclusive_cpu_seconds": 8.679999999949359e-07,
+        "input_shapes": [
+          [
+            3,
+            125
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 4,
+        "self_cpu_seconds": 5.920000000114669e-07,
+        "inclusive_cpu_seconds": 5.920000000114669e-07,
+        "input_shapes": [
+          [
+            125,
+            3
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::detach",
+        "calls": 2,
+        "self_cpu_seconds": 8.330000000059954e-07,
+        "inclusive_cpu_seconds": 8.330000000059954e-07,
+        "input_shapes": [
+          [
+            125,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 2,
+        "self_cpu_seconds": 9.100000000034925e-08,
+        "inclusive_cpu_seconds": 9.100000000034925e-08,
+        "input_shapes": [
+          [
+            125,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_neg",
+        "calls": 2,
+        "self_cpu_seconds": 1.279999999969732e-07,
+        "inclusive_cpu_seconds": 1.279999999969732e-07,
+        "input_shapes": [
+          [
+            125,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::mul",
+        "calls": 1,
+        "self_cpu_seconds": 6.97099999999773e-06,
+        "inclusive_cpu_seconds": 6.97099999999773e-06,
+        "input_shapes": [
+          [
+            162
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::add",
+        "calls": 1,
+        "self_cpu_seconds": 2.474999999998545e-06,
+        "inclusive_cpu_seconds": 2.474999999998545e-06,
+        "input_shapes": [
+          [
+            162
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::select",
+        "calls": 9,
+        "self_cpu_seconds": 5.7301999993564096e-05,
+        "inclusive_cpu_seconds": 6.9045999990165e-05,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 9,
+        "self_cpu_seconds": 1.1743999996600906e-05,
+        "inclusive_cpu_seconds": 1.1743999996600906e-05,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 1,
+        "self_cpu_seconds": 7.850000000034924e-07,
+        "inclusive_cpu_seconds": 1.5160000000032596e-06,
+        "input_shapes": [
+          [
+            162
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 7.309999999997671e-07,
+        "inclusive_cpu_seconds": 7.309999999997671e-07,
+        "input_shapes": [
+          [
+            162
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::expand",
+        "calls": 1,
+        "self_cpu_seconds": 1.735000000000582e-06,
+        "inclusive_cpu_seconds": 2.2989999999990686e-06,
+        "input_shapes": [
+          [
+            162,
+            1,
+            1
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 5.639999999984866e-07,
+        "inclusive_cpu_seconds": 5.639999999984866e-07,
+        "input_shapes": [
+          [
+            162,
+            1,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 4,
+        "self_cpu_seconds": 0.07247100100000191,
+        "inclusive_cpu_seconds": 0.07247100100000191,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          [
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::mul",
+        "calls": 1,
+        "self_cpu_seconds": 6.384999999994761e-06,
+        "inclusive_cpu_seconds": 6.384999999994761e-06,
+        "input_shapes": [
+          [
+            215
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::add",
+        "calls": 1,
+        "self_cpu_seconds": 3.2939999999944123e-06,
+        "inclusive_cpu_seconds": 3.2939999999944123e-06,
+        "input_shapes": [
+          [
+            215
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 1,
+        "self_cpu_seconds": 3.0680000000138533e-06,
+        "inclusive_cpu_seconds": 4.044000000008964e-06,
+        "input_shapes": [
+          [
+            215
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 9.759999999951106e-07,
+        "inclusive_cpu_seconds": 9.759999999951106e-07,
+        "input_shapes": [
+          [
+            215
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::expand",
+        "calls": 1,
+        "self_cpu_seconds": 1.6849999999831199e-06,
+        "inclusive_cpu_seconds": 2.080999999991036e-06,
+        "input_shapes": [
+          [
+            1,
+            215,
+            1
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 3.9600000000791626e-07,
+        "inclusive_cpu_seconds": 3.9600000000791626e-07,
+        "input_shapes": [
+          [
+            1,
+            215,
+            1
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::mul",
+        "calls": 1,
+        "self_cpu_seconds": 8.361999999993714e-06,
+        "inclusive_cpu_seconds": 8.361999999993714e-06,
+        "input_shapes": [
+          [
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::add",
+        "calls": 1,
+        "self_cpu_seconds": 3.150000000008731e-06,
+        "inclusive_cpu_seconds": 3.150000000008731e-06,
+        "input_shapes": [
+          [
+            180
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 1,
+        "self_cpu_seconds": 6.1059999999852155e-06,
+        "inclusive_cpu_seconds": 7.410999999992782e-06,
+        "input_shapes": [
+          [
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 1,
+        "self_cpu_seconds": 1.305000000007567e-06,
+        "inclusive_cpu_seconds": 1.305000000007567e-06,
+        "input_shapes": [
+          [
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::expand",
+        "calls": 1,
+        "self_cpu_seconds": 1.9070000000065193e-06,
+        "inclusive_cpu_seconds": 2.297000000005937e-06,
+        "input_shapes": [
+          [
+            1,
+            1,
+            180
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 1,
+        "self_cpu_seconds": 3.899999999994179e-07,
+        "inclusive_cpu_seconds": 3.899999999994179e-07,
+        "input_shapes": [
+          [
+            1,
+            1,
+            180
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 63,
+        "self_cpu_seconds": 0.00023659599999875354,
+        "inclusive_cpu_seconds": 0.00045648800000581833,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 63,
+        "self_cpu_seconds": 0.00021989200000706478,
+        "inclusive_cpu_seconds": 0.00021989200000706478,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 94,
+        "self_cpu_seconds": 0.0004815070000131527,
+        "inclusive_cpu_seconds": 0.0008987470000210888,
+        "input_shapes": [
+          [
+            3,
+            6269400
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 94,
+        "self_cpu_seconds": 0.000417240000007936,
+        "inclusive_cpu_seconds": 0.000417240000007936,
+        "input_shapes": [
+          [
+            3,
+            6269400
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::matmul",
+        "calls": 63,
+        "self_cpu_seconds": 0.0005682169999845937,
+        "inclusive_cpu_seconds": 5.173761751999996,
+        "input_shapes": [
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            6269400
+          ]
+        ]
+      },
+      {
+        "key": "aten::mm",
+        "calls": 63,
+        "self_cpu_seconds": 5.173155214000013,
+        "inclusive_cpu_seconds": 5.173193535000011,
+        "input_shapes": [
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            6269400
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 186,
+        "self_cpu_seconds": 5.412500000024738e-05,
+        "inclusive_cpu_seconds": 5.412500000024738e-05,
+        "input_shapes": [
+          [
+            3,
+            6269400
+          ]
+        ]
+      },
+      {
+        "key": "aten::add",
+        "calls": 63,
+        "self_cpu_seconds": 4.87012682599999,
+        "inclusive_cpu_seconds": 4.87012682599999,
+        "input_shapes": [
+          [
+            3,
+            6269400
+          ],
+          [
+            3,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::empty_like",
+        "calls": 2,
+        "self_cpu_seconds": 1.0880999999993947e-05,
+        "inclusive_cpu_seconds": 3.272599999996601e-05,
+        "input_shapes": [
+          [
+            3,
+            6269400
+          ],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::detach",
+        "calls": 33,
+        "self_cpu_seconds": 0.00018314499999809778,
+        "inclusive_cpu_seconds": 0.00018314499999809778,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ]
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 33,
+        "self_cpu_seconds": 7.365099998837104e-05,
+        "inclusive_cpu_seconds": 7.365099998837104e-05,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 32,
+        "self_cpu_seconds": 9.9329999856418e-06,
+        "inclusive_cpu_seconds": 9.9329999856418e-06,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_neg",
+        "calls": 32,
+        "self_cpu_seconds": 1.4990000000456348e-05,
+        "inclusive_cpu_seconds": 1.4990000000456348e-05,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ]
+        ]
+      },
+      {
+        "key": "aten::detach",
+        "calls": 31,
+        "self_cpu_seconds": 1.4819999999308493e-05,
+        "inclusive_cpu_seconds": 1.4819999999308493e-05,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 31,
+        "self_cpu_seconds": 7.582000004360452e-06,
+        "inclusive_cpu_seconds": 7.582000004360452e-06,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180,
+            3
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::resolve_conj",
+        "calls": 31,
+        "self_cpu_seconds": 1.914999988221098e-06,
+        "inclusive_cpu_seconds": 1.914999988221098e-06,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::resolve_neg",
+        "calls": 31,
+        "self_cpu_seconds": 1.862999992328696e-06,
+        "inclusive_cpu_seconds": 1.862999992328696e-06,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180,
+            3
+          ]
+        ]
+      },
+      {
+        "key": "aten::unsqueeze",
+        "calls": 31,
+        "self_cpu_seconds": 0.00031339200001640713,
+        "inclusive_cpu_seconds": 0.0004579370000038762,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180,
+            3
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 31,
+        "self_cpu_seconds": 0.00014454499998746905,
+        "inclusive_cpu_seconds": 0.00014454499998746905,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::grid_sampler",
+        "calls": 31,
+        "self_cpu_seconds": 0.0003264299999996438,
+        "inclusive_cpu_seconds": 14.933967460999995,
+        "input_shapes": [
+          [
+            1,
+            3,
+            91,
+            109,
+            91
+          ],
+          [
+            1,
+            162,
+            215,
+            180,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::grid_sampler_3d",
+        "calls": 31,
+        "self_cpu_seconds": 14.933137439,
+        "inclusive_cpu_seconds": 14.933641030999995,
+        "input_shapes": [
+          [
+            1,
+            3,
+            91,
+            109,
+            91
+          ],
+          [
+            1,
+            162,
+            215,
+            180,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::select",
+        "calls": 31,
+        "self_cpu_seconds": 0.0005398689999956404,
+        "inclusive_cpu_seconds": 0.0006752459999962012,
+        "input_shapes": [
+          [
+            1,
+            3,
+            162,
+            215,
+            180
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 31,
+        "self_cpu_seconds": 0.00013537700000056067,
+        "inclusive_cpu_seconds": 0.00013537700000056067,
+        "input_shapes": [
+          [
+            1,
+            3,
+            162,
+            215,
+            180
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 32,
+        "self_cpu_seconds": 3.087899999786168e-05,
+        "inclusive_cpu_seconds": 3.087899999786168e-05,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::add",
+        "calls": 31,
+        "self_cpu_seconds": 2.9363252299999987,
+        "inclusive_cpu_seconds": 2.9363252299999987,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 30,
+        "self_cpu_seconds": 1.0536500150000165,
+        "inclusive_cpu_seconds": 1.0536500150000165,
+        "input_shapes": [
+          [
+            3,
+            6269400
+          ],
+          [
+            3,
+            6269400
+          ],
+          [],
+          [
+            3,
+            6269400
+          ]
+        ]
+      },
+      {
+        "key": "aten::mm",
+        "calls": 30,
+        "self_cpu_seconds": 0.7677861949999826,
+        "inclusive_cpu_seconds": 0.7678064290000033,
+        "input_shapes": [
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            6269400
+          ],
+          [
+            3,
+            6269400
+          ]
+        ]
+      },
+      {
+        "key": "aten::add_",
+        "calls": 30,
+        "self_cpu_seconds": 0.8088301680000033,
+        "inclusive_cpu_seconds": 0.8088301680000033,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::abs",
+        "calls": 30,
+        "self_cpu_seconds": 0.0004955020000210498,
+        "inclusive_cpu_seconds": 2.2381427760000103,
+        "input_shapes": [
+          [
+            3,
+            6269400
+          ]
+        ]
+      },
+      {
+        "key": "aten::abs",
+        "calls": 30,
+        "self_cpu_seconds": 2.237465993,
+        "inclusive_cpu_seconds": 2.237465993,
+        "input_shapes": [
+          [
+            3,
+            6269400
+          ],
+          [
+            0
+          ]
+        ]
+      },
+      {
+        "key": "aten::max",
+        "calls": 30,
+        "self_cpu_seconds": 0.6840463630000099,
+        "inclusive_cpu_seconds": 0.6842310190000106,
+        "input_shapes": [
+          [
+            3,
+            6269400
+          ]
+        ]
+      },
+      {
+        "key": "aten::fill_",
+        "calls": 30,
+        "self_cpu_seconds": 7.229099999531172e-05,
+        "inclusive_cpu_seconds": 7.229099999531172e-05,
+        "input_shapes": [
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::item",
+        "calls": 33,
+        "self_cpu_seconds": 0.00014607399999559857,
+        "inclusive_cpu_seconds": 0.00021466800000425427,
+        "input_shapes": [
+          []
+        ]
+      },
+      {
+        "key": "aten::_local_scalar_dense",
+        "calls": 33,
+        "self_cpu_seconds": 6.859400000865572e-05,
+        "inclusive_cpu_seconds": 6.859400000865572e-05,
+        "input_shapes": [
+          []
+        ]
+      },
+      {
+        "key": "aten::ones",
+        "calls": 1,
+        "self_cpu_seconds": 1.2609000012278556e-05,
+        "inclusive_cpu_seconds": 0.003540907000005245,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::fill_",
+        "calls": 1,
+        "self_cpu_seconds": 0.003520219999998808,
+        "inclusive_cpu_seconds": 0.003520219999998808,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::ge",
+        "calls": 3,
+        "self_cpu_seconds": 0.0520689280000031,
+        "inclusive_cpu_seconds": 0.0520689280000031,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::__iand__",
+        "calls": 6,
+        "self_cpu_seconds": 3.681499999761581e-05,
+        "inclusive_cpu_seconds": 0.055217692999996244,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          [
+            162,
+            215,
+            180
+          ]
+        ]
+      },
+      {
+        "key": "aten::bitwise_and_",
+        "calls": 6,
+        "self_cpu_seconds": 0.05518087799999863,
+        "inclusive_cpu_seconds": 0.05518087799999863,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          [
+            162,
+            215,
+            180
+          ]
+        ]
+      },
+      {
+        "key": "aten::le",
+        "calls": 3,
+        "self_cpu_seconds": 0.05317031300000846,
+        "inclusive_cpu_seconds": 0.05317031300000846,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::sub",
+        "calls": 2,
+        "self_cpu_seconds": 0.16701840100000054,
+        "inclusive_cpu_seconds": 0.16701840100000054,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::square",
+        "calls": 1,
+        "self_cpu_seconds": 1.179500000923872e-05,
+        "inclusive_cpu_seconds": 0.06522020800000429,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ]
+        ]
+      },
+      {
+        "key": "aten::pow",
+        "calls": 1,
+        "self_cpu_seconds": 0.06520481700000166,
+        "inclusive_cpu_seconds": 0.06520841299999505,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::result_type",
+        "calls": 1,
+        "self_cpu_seconds": 2.456999994814396e-06,
+        "inclusive_cpu_seconds": 2.456999994814396e-06,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::sum",
+        "calls": 1,
+        "self_cpu_seconds": 0.0182413919999972,
+        "inclusive_cpu_seconds": 0.03737440199999511,
+        "input_shapes": [
+          [
+            3,
+            162,
+            215,
+            180
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 2,
+        "self_cpu_seconds": 7.2490000054240225e-06,
+        "inclusive_cpu_seconds": 7.2490000054240225e-06,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::fill_",
+        "calls": 1,
+        "self_cpu_seconds": 0.019127020999997853,
+        "inclusive_cpu_seconds": 0.019127020999997853,
+        "input_shapes": [
+          [
+            1,
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::sqrt",
+        "calls": 1,
+        "self_cpu_seconds": 0.06155775100000203,
+        "inclusive_cpu_seconds": 0.06155775100000203,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ]
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 1,
+        "self_cpu_seconds": 6.6670000031590465e-06,
+        "inclusive_cpu_seconds": 0.013550516000002623,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::_to_copy",
+        "calls": 1,
+        "self_cpu_seconds": 2.60080000013113e-05,
+        "inclusive_cpu_seconds": 0.013543848999999464,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::mean",
+        "calls": 1,
+        "self_cpu_seconds": 2.7969999998807908e-05,
+        "inclusive_cpu_seconds": 0.0016954780000001193,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::sum",
+        "calls": 1,
+        "self_cpu_seconds": 0.0016248940000087022,
+        "inclusive_cpu_seconds": 0.0016305950000062585,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 2,
+        "self_cpu_seconds": 4.490000002086163e-06,
+        "inclusive_cpu_seconds": 4.490000002086163e-06,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::fill_",
+        "calls": 2,
+        "self_cpu_seconds": 3.1609999984502794e-06,
+        "inclusive_cpu_seconds": 3.1609999984502794e-06,
+        "input_shapes": [
+          [
+            1,
+            1,
+            1
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::div_",
+        "calls": 1,
+        "self_cpu_seconds": 2.0960999995470045e-05,
+        "inclusive_cpu_seconds": 3.6912999995052816e-05,
+        "input_shapes": [
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::to",
+        "calls": 2,
+        "self_cpu_seconds": 3.18299999833107e-06,
+        "inclusive_cpu_seconds": 3.18299999833107e-06,
+        "input_shapes": [
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::any",
+        "calls": 1,
+        "self_cpu_seconds": 0.005774914999999106,
+        "inclusive_cpu_seconds": 0.005776865000002086,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ]
+        ]
+      },
+      {
+        "key": "aten::is_nonzero",
+        "calls": 1,
+        "self_cpu_seconds": 2.2990000024437904e-06,
+        "inclusive_cpu_seconds": 5.093000002205372e-06,
+        "input_shapes": [
+          []
+        ]
+      },
+      {
+        "key": "aten::index",
+        "calls": 1,
+        "self_cpu_seconds": 0.050779818000003696,
+        "inclusive_cpu_seconds": 0.12130918400000036,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::nonzero",
+        "calls": 1,
+        "self_cpu_seconds": 0.07047214699999987,
+        "inclusive_cpu_seconds": 0.07048762900000066,
+        "input_shapes": [
+          [
+            162,
+            215,
+            180
+          ]
+        ]
+      },
+      {
+        "key": "aten::as_strided_",
+        "calls": 1,
+        "self_cpu_seconds": 1.345499999821186e-05,
+        "inclusive_cpu_seconds": 1.345499999821186e-05,
+        "input_shapes": [
+          [
+            4769916,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::select",
+        "calls": 3,
+        "self_cpu_seconds": 2.4328999996185303e-05,
+        "inclusive_cpu_seconds": 2.7815999999642372e-05,
+        "input_shapes": [
+          [
+            4769916,
+            3
+          ],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::as_strided",
+        "calls": 3,
+        "self_cpu_seconds": 3.4870000034570695e-06,
+        "inclusive_cpu_seconds": 3.4870000034570695e-06,
+        "input_shapes": [
+          [
+            4769916,
+            3
+          ],
+          [],
+          [],
+          []
+        ]
+      },
+      {
+        "key": "aten::reshape",
+        "calls": 3,
+        "self_cpu_seconds": 7.71399998664856e-06,
+        "inclusive_cpu_seconds": 1.2660999990999699e-05,
+        "input_shapes": [
+          [
+            4769916
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::view",
+        "calls": 3,
+        "self_cpu_seconds": 4.947000004351139e-06,
+        "inclusive_cpu_seconds": 4.947000004351139e-06,
+        "input_shapes": [
+          [
+            4769916
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::median",
+        "calls": 1,
+        "self_cpu_seconds": 0.042357489999994634,
+        "inclusive_cpu_seconds": 0.058041887999996544,
+        "input_shapes": [
+          [
+            4769916
+          ]
+        ]
+      },
+      {
+        "key": "aten::clone",
+        "calls": 1,
+        "self_cpu_seconds": 1.186599999666214e-05,
+        "inclusive_cpu_seconds": 0.01568031099999696,
+        "input_shapes": [
+          [
+            4769916
+          ],
+          []
+        ]
+      },
+      {
+        "key": "aten::copy_",
+        "calls": 1,
+        "self_cpu_seconds": 0.015658476000003516,
+        "inclusive_cpu_seconds": 0.015658476000003516,
+        "input_shapes": [
+          [
+            4769916
+          ],
+          [
+            4769916
+          ],
+          []
+        ]
+      }
+    ],
+    "counters": {
+      "coefficient_expand": {
+        "calls": 1,
+        "inclusive_seconds": 0.04405330866575241
+      },
+      "PullField.__init__": {
+        "calls": 1,
+        "inclusive_seconds": 0.04562684893608093
+      },
+      "normalization_fp64": {
+        "calls": 32,
+        "inclusive_seconds": 2.8742768317461014
+      },
+      "sample_linear_cpu": {
+        "calls": 32,
+        "inclusive_seconds": 14.938774213194847
+      },
+      "sample_linear": {
+        "calls": 32,
+        "inclusive_seconds": 18.48410102725029
+      },
+      "PullField.sample": {
+        "calls": 32,
+        "inclusive_seconds": 33.738640025258064
+      },
+      "reference_grid": {
+        "calls": 1,
+        "inclusive_seconds": 0.05936810374259949
+      },
+      "correction_mm": {
+        "calls": 30,
+        "inclusive_seconds": 0.7683119997382164
+      },
+      "bounds_mask": {
+        "calls": 1,
+        "inclusive_seconds": 0.16439054906368256
+      },
+      "output_image": {
+        "calls": 1,
+        "inclusive_seconds": 0.04848010092973709
+      }
+    },
+    "maximum_rss_kib": 1768004,
+    "warmup_output_same_files": true,
+    "source_sha256": {
+      "src/fnit/applywarp/core.py": "b4ea958df93805f0aa9ed08f4e9f93bc293d23699dc316264d37be5a637792b6",
+      "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+      "src/fnit/invwarp/core.py": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391",
+      "src/fnit/convertwarp/core.py": "4c564a082b893a2b45a8d1ecab0fdd347ee4cedd022d108c90aff1b0269cc70f"
+    }
+  },
+  "private_image_hashes_exported": false
+}

@@ -1,0 +1,409 @@
+{
+  "status": "executed_with_numeric_comparisons",
+  "timing_policy": "One complete official/candidate observation; no warmup or stable speed estimate",
+  "source_tree_sha256": "5ca209d856eee64c178fbbffb7b2971c76bcd9261365d44385a76b4f9f536be4",
+  "backend_source_tree_sha256": {
+    "baseline": "3f0df20f5fb85e3854dea946e4831fc1e78e811b1ccf93f0e4cf075d9a1013ce",
+    "candidate": "5ca209d856eee64c178fbbffb7b2971c76bcd9261365d44385a76b4f9f536be4"
+  },
+  "records": [
+    {
+      "case_id": "public_cc0_t1_default",
+      "threads": 1,
+      "affinity": [
+        34
+      ],
+      "timing_protocol": "single_observation",
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 182.585455,
+              "system_seconds": 3.418989,
+              "effective_cpu_cores": 0.9975961534987763
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 139.910875,
+            "system_seconds": 22.382168,
+            "effective_cpu_cores": 0.9973445356276566
+          }
+        ]
+      },
+      "candidate_api_seconds": [
+        160.77243561297655
+      ],
+      "accuracy": {
+        "candidate_vs_official": {
+          "cout": {
+            "status": "compared",
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 31752,
+            "finite_pair_count": 31752,
+            "candidate_finite_count": 31752,
+            "reference_finite_count": 31752,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 33.24078035354614,
+            "mean_absolute_error": 0.5649201266352197,
+            "rmse": 1.062182586392451,
+            "relative_l2_error": 0.4172134387636438,
+            "exact_fraction": 0.0
+          },
+          "iout": {
+            "status": "compared",
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 902629,
+            "finite_pair_count": 902629,
+            "candidate_finite_count": 902629,
+            "reference_finite_count": 902629,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 1992.5032958984375,
+            "mean_absolute_error": 41.29547522108083,
+            "rmse": 117.70970379873602,
+            "relative_l2_error": 0.2797496945916848,
+            "exact_fraction": 0.45715570849152865
+          },
+          "jout": {
+            "status": "compared",
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 902629,
+            "finite_pair_count": 902629,
+            "candidate_finite_count": 902629,
+            "reference_finite_count": 902629,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 0.8153494149446487,
+            "mean_absolute_error": 0.05440454789998832,
+            "rmse": 0.08280337031354723,
+            "relative_l2_error": 0.08372901115576879,
+            "exact_fraction": 0.0
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 228483,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "pairs": {
+          "candidate_vs_official": {
+            "iout": {
+              "all_finite": true,
+              "mean_absolute_error": 36.28452330040952,
+              "p95_absolute_error": 123.61091003417967,
+              "pearson_r": 0.9566601332178607,
+              "nonzero_support_dice": 1.0
+            },
+            "jout": {
+              "all_finite": true,
+              "mean_absolute_error": 0.05089630134735697,
+              "p95_absolute_error": 0.14311693906784057,
+              "pearson_r": 0.9492775686971252,
+              "candidate_nonpositive_fraction": 0.0,
+              "reference_nonpositive_fraction": 0.0,
+              "candidate_range": [
+                0.146414116024971,
+                2.5294971466064453
+              ],
+              "reference_range": [
+                0.36055731773376465,
+                2.0456044673919678
+              ]
+            }
+          }
+        }
+      },
+      "official_programs": [
+        {
+          "name": "fnirt",
+          "sha256": "af1aa4003680ac99db36d854bdd0b910d8ca6e7a7ec42de1d934c11910161f13",
+          "bytes": 980088
+        }
+      ],
+      "maximum_rss_kib": [
+        1400708
+      ],
+      "official_output_metadata": {
+        "cout": {
+          "sha256": "8d4459c312cb8b5bd3fccba0d3e7031223028b03828444dc129bc6139b65cc3d",
+          "bytes": 118486
+        },
+        "iout": {
+          "sha256": "6e51135622ef6dbe1c8c31caf990ba5024de0247450db622447334dcb3405c0f",
+          "bytes": 1742440
+        },
+        "jout": {
+          "sha256": "cd5ffed5a338a0dbacba078416c82595b7e950bc7f8661cd97e189c8cef5375a",
+          "bytes": 3044551
+        }
+      },
+      "worker_output_metadata": {
+        "candidate": [
+          {
+            "cout": {
+              "sha256": "42380fd6386eb180a2d786efc17fd5fb0d2e5759e4909e9b219769eb6e678141",
+              "bytes": 119054
+            },
+            "iout": {
+              "sha256": "df8c1627a2ce0217f7f7848dd8d06f2dcab39a804c42ac76655ffd646312da55",
+              "bytes": 1798843
+            },
+            "jout": {
+              "sha256": "a06818e20571e681043dc5545e30e7e22feaff39d1abd576f903e1202883cb26",
+              "bytes": 3106263
+            }
+          }
+        ]
+      },
+      "single_full_process_seconds": {
+        "official": 186.4526475444436,
+        "candidate": 162.72515384852886
+      }
+    },
+    {
+      "case_id": "public_cc0_t1_default",
+      "threads": 8,
+      "affinity": [
+        34,
+        38,
+        42,
+        46,
+        50,
+        54,
+        58,
+        62
+      ],
+      "timing_protocol": "single_observation",
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 176.93789299999997,
+              "system_seconds": 3.7529339999999998,
+              "effective_cpu_cores": 0.9989811042701325
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 502.416686,
+            "system_seconds": 58.468258000000006,
+            "effective_cpu_cores": 4.574392594629063
+          }
+        ]
+      },
+      "candidate_api_seconds": [
+        120.2034277766943
+      ],
+      "accuracy": {
+        "candidate_vs_official": {
+          "cout": {
+            "status": "compared",
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 31752,
+            "finite_pair_count": 31752,
+            "candidate_finite_count": 31752,
+            "reference_finite_count": 31752,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 32.183781147003174,
+            "mean_absolute_error": 0.568957515015131,
+            "rmse": 1.0694787012095839,
+            "relative_l2_error": 0.4200792710522426,
+            "exact_fraction": 0.0
+          },
+          "iout": {
+            "status": "compared",
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 902629,
+            "finite_pair_count": 902629,
+            "candidate_finite_count": 902629,
+            "reference_finite_count": 902629,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 1983.8912353515625,
+            "mean_absolute_error": 41.83397320398031,
+            "rmse": 119.25729025104525,
+            "relative_l2_error": 0.283427699237149,
+            "exact_fraction": 0.4569285941400066
+          },
+          "jout": {
+            "status": "compared",
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 902629,
+            "finite_pair_count": 902629,
+            "candidate_finite_count": 902629,
+            "reference_finite_count": 902629,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 0.8183173537254333,
+            "mean_absolute_error": 0.05470126962790913,
+            "rmse": 0.08322011364139924,
+            "relative_l2_error": 0.0841504131665272,
+            "exact_fraction": 0.0
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 228483,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "pairs": {
+          "candidate_vs_official": {
+            "iout": {
+              "all_finite": true,
+              "mean_absolute_error": 36.604768712873415,
+              "p95_absolute_error": 124.56109924316405,
+              "pearson_r": 0.9559765887895829,
+              "nonzero_support_dice": 1.0
+            },
+            "jout": {
+              "all_finite": true,
+              "mean_absolute_error": 0.05121781926827763,
+              "p95_absolute_error": 0.1435368537902832,
+              "pearson_r": 0.9485550182924111,
+              "candidate_nonpositive_fraction": 0.0,
+              "reference_nonpositive_fraction": 0.0,
+              "candidate_range": [
+                0.14346587657928467,
+                2.5281217098236084
+              ],
+              "reference_range": [
+                0.36055731773376465,
+                2.0456044673919678
+              ]
+            }
+          }
+        }
+      },
+      "official_programs": [
+        {
+          "name": "fnirt",
+          "sha256": "af1aa4003680ac99db36d854bdd0b910d8ca6e7a7ec42de1d934c11910161f13",
+          "bytes": 980088
+        }
+      ],
+      "maximum_rss_kib": [
+        1466364
+      ],
+      "official_output_metadata": {
+        "cout": {
+          "sha256": "8d4459c312cb8b5bd3fccba0d3e7031223028b03828444dc129bc6139b65cc3d",
+          "bytes": 118486
+        },
+        "iout": {
+          "sha256": "6e51135622ef6dbe1c8c31caf990ba5024de0247450db622447334dcb3405c0f",
+          "bytes": 1742440
+        },
+        "jout": {
+          "sha256": "cd5ffed5a338a0dbacba078416c82595b7e950bc7f8661cd97e189c8cef5375a",
+          "bytes": 3044551
+        }
+      },
+      "worker_output_metadata": {
+        "candidate": [
+          {
+            "cout": {
+              "sha256": "4b3b10608f6e15af58b87e2213971196a7334e1e7a1511b6f8b238f4e6242c3b",
+              "bytes": 119038
+            },
+            "iout": {
+              "sha256": "02c711827cbc47fc76cb7930ca0eb7958a57260f6eb2e8ffbd3d226d3bdce7b7",
+              "bytes": 1800029
+            },
+            "jout": {
+              "sha256": "745da3b0972d522ba71a933b356c4e525fd58ab34413dcc942b1272a6dc6d4c7",
+              "bytes": 3106377
+            }
+          }
+        ]
+      },
+      "single_full_process_seconds": {
+        "official": 180.87511988729239,
+        "candidate": 122.61408097296953
+      }
+    }
+  ],
+  "schema_version": 1,
+  "dataset": "OpenNeuro ds000114 v1.0.2",
+  "license": "CC0",
+  "source_url": "https://openneuro.org/datasets/ds000114/versions/1.0.2",
+  "input_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+  "source_snapshot": "candidate_all_v20",
+  "source_archive_sha256": "c0b5145549efb6c58dd4ae3b7bd060c7cc40b73cd556fe9ab01ca8432d30d617",
+  "complete_output_sha256_equal_to_previous": {
+    "fnirt_public_cpu_fusion_v19_gate_numa2": {
+      "1": {
+        "cout": true,
+        "iout": true,
+        "jout": true
+      },
+      "8": {
+        "cout": true,
+        "iout": true,
+        "jout": true
+      }
+    },
+    "fnirt_public_cpu_fusion_v17_gate_numa2b": {
+      "1": {
+        "cout": true,
+        "iout": true,
+        "jout": true
+      },
+      "8": {
+        "cout": true,
+        "iout": true,
+        "jout": true
+      }
+    }
+  }
+}

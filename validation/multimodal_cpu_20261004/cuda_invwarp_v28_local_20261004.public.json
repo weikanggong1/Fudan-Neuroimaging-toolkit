@@ -1,0 +1,1395 @@
+{
+  "status": "complete_local_cuda_full_api_correctness_gate_passed",
+  "date": "2026-10-04",
+  "scope": "Synthetic small-grid full CUDA inverse-field API correctness gate only; no real-data benchmark or performance claim.",
+  "reference_fixture": "tests/invwarp/test_cpu_execution.py: same (17,13,11) field, smooth dense maps and seeded cubic coefficients; forms and a header extension added to test full save.",
+  "source_binding": {
+    "old_convertwarp": {
+      "module_name": "fnit.convertwarp._old_v26_cuda_gate",
+      "sha256": "d5268055b8d3b858fd80e96158d0fc167daf722e0b25fd7a3cbe04da3b8e3264"
+    },
+    "old_invwarp": {
+      "module_name": "fnit.invwarp._old_v26_cuda_gate",
+      "sha256": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391"
+    },
+    "new_convertwarp": {
+      "module_name": "fnit.convertwarp.core",
+      "sha256": "730c0d8c82b7d35c5f77e9a7d0ffad65e375f13f37c379591c399ef0b26627d8"
+    },
+    "new_invwarp": {
+      "module_name": "fnit.invwarp.core",
+      "sha256": "b3f48e5a7fd4156b9f8cd9d0094b5299ed95c77b59b5636faeda0f522df34adc"
+    }
+  },
+  "old_new_pullfield_classes_independently_loaded_and_bound": true,
+  "baseline_freeze": "all_v26",
+  "candidate_freeze": "all_v28",
+  "baseline_archive_sha256": "36b71b55bac45ffcf22fea5b933ee3b97c4130f616817a95a2e09428ee33e05e",
+  "candidate_declared_archive_sha256": "d21dd94bbf081f6e02685582090f840d82fec4d4c3f51baffe564ba889f070a4",
+  "shared_applywarp_sha256": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+  "actual_fnit_imports_all_from_frozen_candidate_source": {
+    "fnit": {
+      "source_relative": "fnit/__init__.py",
+      "sha256": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4"
+    },
+    "fnit._nib": {
+      "source_relative": "fnit/_nib.py",
+      "sha256": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+    },
+    "fnit._world_resampling": {
+      "source_relative": "fnit/_world_resampling.py",
+      "sha256": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83"
+    },
+    "fnit._sampling_plan": {
+      "source_relative": "fnit/_sampling_plan.py",
+      "sha256": "a44a7fedd476be3f41cd3d9426790eadfabef08eb72f45dba14db1ebd2a8d3c3"
+    },
+    "fnit.applywarp.core": {
+      "source_relative": "fnit/applywarp/core.py",
+      "sha256": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985"
+    },
+    "fnit.applywarp": {
+      "source_relative": "fnit/applywarp/__init__.py",
+      "sha256": "959341360b1a6057cecfa3c98989a425d8a4c192ab7cb1cf2e221429f73452b5"
+    },
+    "fnit.convertwarp.core": {
+      "source_relative": "fnit/convertwarp/core.py",
+      "sha256": "730c0d8c82b7d35c5f77e9a7d0ffad65e375f13f37c379591c399ef0b26627d8"
+    },
+    "fnit.convertwarp": {
+      "source_relative": "fnit/convertwarp/__init__.py",
+      "sha256": "ffb6ba321829f59323fef484076ea4fa8cb1d558d544ec00f2da0a4d0bffa425"
+    },
+    "fnit.invwarp.core": {
+      "source_relative": "fnit/invwarp/core.py",
+      "sha256": "b3f48e5a7fd4156b9f8cd9d0094b5299ed95c77b59b5636faeda0f522df34adc"
+    },
+    "fnit.invwarp": {
+      "source_relative": "fnit/invwarp/__init__.py",
+      "sha256": "079e99cfdf2f38ae30f00de5a5e9c955c92577a238fcfd2353975a884824117f"
+    },
+    "fnit.fnirt.spline": {
+      "source_relative": "fnit/fnirt/spline.py",
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7"
+    },
+    "fnit.fnirt.io": {
+      "source_relative": "fnit/fnirt/io.py",
+      "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+    },
+    "fnit.fnirt": {
+      "source_relative": "fnit/fnirt/__init__.py",
+      "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+    }
+  },
+  "actual_device": {
+    "name": "NVIDIA GeForce RTX 3060",
+    "index": 0,
+    "total_memory_bytes": 12884246528,
+    "memory_fraction": 1.0,
+    "budget_bytes": 12884246528,
+    "server_h100_used": false
+  },
+  "versions": {
+    "torch": "2.5.1",
+    "torch_cuda": "11.8",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2"
+  },
+  "precision": {
+    "cuda_matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast_enabled": false,
+    "output_dtype": "float32",
+    "geometry_and_inverse_solver_dtype": "float64"
+  },
+  "torch_threads": 8,
+  "torch_interop_threads": 1,
+  "fixtures_input_file_sha256": {
+    "relative": {
+      "reference": "9d7d5c313a1c99c396c9e823e30e3fc638fdd3e67a62e4de6a89da6932e4f5e4",
+      "warp": "70e12adf5849170867a421159438d379cdae74ad275201b38774def137108b10"
+    },
+    "absolute": {
+      "reference": "9d7d5c313a1c99c396c9e823e30e3fc638fdd3e67a62e4de6a89da6932e4f5e4",
+      "warp": "662483d60ed549ea8b9aebec512f267145013b44d09c88bbf5a6d2597ba50a77"
+    },
+    "coefficient": {
+      "reference": "9d7d5c313a1c99c396c9e823e30e3fc638fdd3e67a62e4de6a89da6932e4f5e4",
+      "warp": "d2ca0541d895170d80aa3d6cf9324ea447a54ba80b10696f35eb8fa5e67ea9b1"
+    }
+  },
+  "cases_completed": 12,
+  "records": [
+    {
+      "case_id": "relative_to_relative_iterations_1",
+      "input_kind": "relative",
+      "input_convention": "relative",
+      "output_convention": "relative",
+      "iterations_budget": 1,
+      "tolerance_mm": 1e-12,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 1,
+        "tolerance_mm": 1e-12,
+        "iterations_used": 1,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0005844841347770908,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7897984385490417,
+      "output_data_sha256": "ab192bca48865736842614135beb06d043fb50d9ccf1479b95c1882be607b15e",
+      "saved_file_sha256": "53e2fb24b4048ce79763e175a7e6f47ddedfaba63f834f131f8553da08109236",
+      "header_sha256": "226e65d09adfd41228fcfff3d7e26f10657f9d7f3b54dd752a7cd38a96efa41d",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        9000960,
+        9000960
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "5fe06cec21d8bd94e17bfdc4cc71562085774d2ac155d875bb65bb3d5ed8240d",
+      "cuda_operator_count": 197,
+      "sample_calls": 3,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float32"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "relative_to_relative_iterations_30",
+      "input_kind": "relative",
+      "input_convention": "relative",
+      "output_convention": "relative",
+      "iterations_budget": 30,
+      "tolerance_mm": 0.01,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 2,
+        "converged": true,
+        "median_residual_mm_in_field": 4.2076120693553555e-06,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7902098298072815,
+      "output_data_sha256": "caa8c89b14c3b57882ca7597433841319baf137b5fe34bb11d893383c2ffc163",
+      "saved_file_sha256": "035c44849370c4a163545010d2ac3b4d495848c8ef00f20c582066a25c0cd21c",
+      "header_sha256": "226e65d09adfd41228fcfff3d7e26f10657f9d7f3b54dd752a7cd38a96efa41d",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        9000960,
+        9000960
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "327144cb346e6e3491d79e513783d3f4d374f10273a01eac19409084db05adb9",
+      "cuda_operator_count": 253,
+      "sample_calls": 4,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float32"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "relative_to_absolute_iterations_1",
+      "input_kind": "relative",
+      "input_convention": "relative",
+      "output_convention": "absolute",
+      "iterations_budget": 1,
+      "tolerance_mm": 1e-12,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "absolute",
+        "input_convention": "relative",
+        "iterations": 1,
+        "tolerance_mm": 1e-12,
+        "iterations_used": 1,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0005844841347770908,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7897984385490417,
+      "output_data_sha256": "76936097c2a5c9c9c7c0717c96323bd95ceabe0819266587324eeea4036e5090",
+      "saved_file_sha256": "4588dfc82f0cedaa48bdb33b646e98ed5d44a7f71d31c2cbe36672d2db3fea8d",
+      "header_sha256": "1177e220d9e285835e89194e9e3c52a0e83fe044a6517f99b40a86ba9ce12460",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        9000960,
+        9000960
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "ebbe5410566437d2963d4ee313c5cb28eb0e6068f88c77288660d65b394f7e52",
+      "cuda_operator_count": 196,
+      "sample_calls": 3,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float32"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "relative_to_absolute_iterations_30",
+      "input_kind": "relative",
+      "input_convention": "relative",
+      "output_convention": "absolute",
+      "iterations_budget": 30,
+      "tolerance_mm": 0.01,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "absolute",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 2,
+        "converged": true,
+        "median_residual_mm_in_field": 4.2076120693553555e-06,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7902098298072815,
+      "output_data_sha256": "9bf059fdfcfee86263fb1dbbc88ca7cec7a44eff5527f2f42b8e5cf81f2a2f13",
+      "saved_file_sha256": "c24fafa7e5645d3d29971274361c19efc48efbc88f5fbad26231fdaa6990bc91",
+      "header_sha256": "1177e220d9e285835e89194e9e3c52a0e83fe044a6517f99b40a86ba9ce12460",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        9000960,
+        9000960
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "e53dac568c779d8b8e89f9f88a6174c850aa978deb0c5a45f84ad103cbc95f58",
+      "cuda_operator_count": 252,
+      "sample_calls": 4,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float32"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "absolute_to_relative_iterations_1",
+      "input_kind": "absolute",
+      "input_convention": "absolute",
+      "output_convention": "relative",
+      "iterations_budget": 1,
+      "tolerance_mm": 1e-12,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "relative",
+        "input_convention": "absolute",
+        "iterations": 1,
+        "tolerance_mm": 1e-12,
+        "iterations_used": 1,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0005839699907917538,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7897984385490417,
+      "output_data_sha256": "ea1c8200d0bb06d76d26a62cf11c9ec9b2dd62bab2ad957ba4587f32c896558a",
+      "saved_file_sha256": "da4673d4f6f962d0f2e7e52c2875530ee724246234a9001ab580067dbcfd9f76",
+      "header_sha256": "226e65d09adfd41228fcfff3d7e26f10657f9d7f3b54dd752a7cd38a96efa41d",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        8969216,
+        8969216
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "92ee771657b944c4a4a69bedbcc09e4fddfccd209ba9c1475fab684befe535d5",
+      "cuda_operator_count": 194,
+      "sample_calls": 3,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float32"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "absolute_to_relative_iterations_30",
+      "input_kind": "absolute",
+      "input_convention": "absolute",
+      "output_convention": "relative",
+      "iterations_budget": 30,
+      "tolerance_mm": 0.01,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "relative",
+        "input_convention": "absolute",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 30,
+        "converged": false,
+        "median_residual_mm_in_field": 1.0925711858167266e-06,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7897984385490417,
+      "output_data_sha256": "29756caefed4789c18bb4dbd478db60d89eb2bffa479e8721a48dad7bf3f19c4",
+      "saved_file_sha256": "5520c0599b1fd809e5e667ec5645097ff32785bbe7fc3f2ddbd34ebeb9c0e0dd",
+      "header_sha256": "226e65d09adfd41228fcfff3d7e26f10657f9d7f3b54dd752a7cd38a96efa41d",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        8969216,
+        8969216
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "e7c298034fc9632f1cce41ab3b40f54949549ff70fba693c3037d6d947fc40d0",
+      "cuda_operator_count": 1789,
+      "sample_calls": 32,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float32"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "absolute_to_absolute_iterations_1",
+      "input_kind": "absolute",
+      "input_convention": "absolute",
+      "output_convention": "absolute",
+      "iterations_budget": 1,
+      "tolerance_mm": 1e-12,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "absolute",
+        "input_convention": "absolute",
+        "iterations": 1,
+        "tolerance_mm": 1e-12,
+        "iterations_used": 1,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0005839699907917538,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7897984385490417,
+      "output_data_sha256": "6a90f4958608340bbad13f5ef4644378d656077f47e459f95bb9d19e6fa60317",
+      "saved_file_sha256": "2ef21b72c8d660f4d60b9ef9bcbc2b6cb6d00c658ce091ac44d381bbde39a814",
+      "header_sha256": "1177e220d9e285835e89194e9e3c52a0e83fe044a6517f99b40a86ba9ce12460",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        8969216,
+        8969216
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "290586021e4b73a8c2e5345e239737a3bfb1b94384da8321903dd86db9d1b2e6",
+      "cuda_operator_count": 193,
+      "sample_calls": 3,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float32"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "absolute_to_absolute_iterations_30",
+      "input_kind": "absolute",
+      "input_convention": "absolute",
+      "output_convention": "absolute",
+      "iterations_budget": 30,
+      "tolerance_mm": 0.01,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "absolute",
+        "input_convention": "absolute",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 30,
+        "converged": false,
+        "median_residual_mm_in_field": 1.0925711858167266e-06,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7897984385490417,
+      "output_data_sha256": "99917f088d255711f593a140b65f0fdfd5fc4f5af0a352a6cf7f33d60ee21b97",
+      "saved_file_sha256": "0eb85852ac37c720e0a221de0429bb69bb50e04fd6dcf7aa285858fb28daca0e",
+      "header_sha256": "1177e220d9e285835e89194e9e3c52a0e83fe044a6517f99b40a86ba9ce12460",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        8969216,
+        8969216
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "8fc9160552f5432a5219d36e23aea7870fc70ea2d00f66fa4303a5825ba04b6f",
+      "cuda_operator_count": 1788,
+      "sample_calls": 32,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float32"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "coefficient_to_relative_iterations_1",
+      "input_kind": "coefficient",
+      "input_convention": "auto",
+      "output_convention": "relative",
+      "iterations_budget": 1,
+      "tolerance_mm": 1e-12,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 1,
+        "tolerance_mm": 1e-12,
+        "iterations_used": 1,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0008356099099199976,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7782805562019348,
+      "output_data_sha256": "9c510fbce7b3128df4986aa9accd981daef2e5b37d37872442e80667a4921932",
+      "saved_file_sha256": "596a83a2cc9b834bc4622cac1b8d8010e12290e971ecf8093d4edff0a7c5478b",
+      "header_sha256": "226e65d09adfd41228fcfff3d7e26f10657f9d7f3b54dd752a7cd38a96efa41d",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        9059840,
+        9059840
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "361a3e81fbe448ad344984b5ec7c6cd34641b4939178e83d42c5f1e9d03674d9",
+      "cuda_operator_count": 286,
+      "sample_calls": 3,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float64"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "coefficient_to_relative_iterations_30",
+      "input_kind": "coefficient",
+      "input_convention": "auto",
+      "output_convention": "relative",
+      "iterations_budget": 30,
+      "tolerance_mm": 0.01,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 2,
+        "converged": true,
+        "median_residual_mm_in_field": 9.319760554702357e-06,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7782805562019348,
+      "output_data_sha256": "412e5d8263283f8cc3b6a6fb1143943ca04315395390c84ccf92c25a1d9c8509",
+      "saved_file_sha256": "606f860d39a109d22e6ef4e306045e88e1119333818390de384702902a119b0e",
+      "header_sha256": "226e65d09adfd41228fcfff3d7e26f10657f9d7f3b54dd752a7cd38a96efa41d",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        9059840,
+        9059840
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "bcf846abebffdae15ccfdaeefe725b02a56727c8549fb9a5ab8c4a1f6470c971",
+      "cuda_operator_count": 349,
+      "sample_calls": 4,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float64"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "coefficient_to_absolute_iterations_1",
+      "input_kind": "coefficient",
+      "input_convention": "auto",
+      "output_convention": "absolute",
+      "iterations_budget": 1,
+      "tolerance_mm": 1e-12,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "absolute",
+        "input_convention": "relative",
+        "iterations": 1,
+        "tolerance_mm": 1e-12,
+        "iterations_used": 1,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0008356099099199976,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7782805562019348,
+      "output_data_sha256": "82f9339dbd094f4be0c6e943f995dccd8edfe5122f0a6fe0485ebb2ac6519073",
+      "saved_file_sha256": "8302100ac692671d5ed6662f65ba20b68b17f4f9b1ede02ecda9d11f6fc52af1",
+      "header_sha256": "1177e220d9e285835e89194e9e3c52a0e83fe044a6517f99b40a86ba9ce12460",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        9059840,
+        9059840
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "f030f849a626a4cf9bc49f93c6e554820f11f70e55d1946d628fa474a8383be0",
+      "cuda_operator_count": 285,
+      "sample_calls": 3,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float64"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    },
+    {
+      "case_id": "coefficient_to_absolute_iterations_30",
+      "input_kind": "coefficient",
+      "input_convention": "auto",
+      "output_convention": "absolute",
+      "iterations_budget": 30,
+      "tolerance_mm": 0.01,
+      "output_shape": [
+        17,
+        13,
+        11,
+        3
+      ],
+      "output_dtype": "float32",
+      "output_elements": 7293,
+      "full_array_bits_equal": true,
+      "saved_file_bytes_equal": true,
+      "header_affine_forms_extensions_equal": true,
+      "qc_equal": true,
+      "valid_fraction_equal": true,
+      "qc": {
+        "device": "cuda:0",
+        "output_convention": "absolute",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 2,
+        "converged": true,
+        "median_residual_mm_in_field": 9.319760554702357e-06,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.7782805562019348,
+      "output_data_sha256": "3e21069431c331424df4a0868cd34853af945485b67fb79152b98478cd170a49",
+      "saved_file_sha256": "9920c755d711538e44b99999327bbb17795c13e892ff0f84fda19828e07a1408",
+      "header_sha256": "1177e220d9e285835e89194e9e3c52a0e83fe044a6517f99b40a86ba9ce12460",
+      "affine_sha256": "35c08ae1767a28bb4142636caa738bcc04f0da6632e0e797a69cf3e929b71cc0",
+      "qform_code": 2,
+      "sform_code": 1,
+      "extensions": [
+        [
+          6,
+          "c15a41905965edd5bd067a4fe6fcacb3fed8a9d6ffeeeb051f3e9e650306ab84"
+        ]
+      ],
+      "peak_allocation_bytes_old_new": [
+        9059840,
+        9059840
+      ],
+      "allocator_baseline_bytes_old_new": [
+        8519680,
+        8519680
+      ],
+      "peak_reserved_bytes_old_new": [
+        23068672,
+        23068672
+      ],
+      "cuda_operator_sequence_equal": true,
+      "cuda_operator_sequence_sha256": "b4a0cb7801e9f9f7d2fca86959b43ed03a3858929e33840f538bcc7f52275a1d",
+      "cuda_operator_count": 348,
+      "sample_calls": 4,
+      "sample_tensor_contracts": [
+        [
+          [
+            "field_device",
+            "cuda:0"
+          ],
+          [
+            "field_dtype",
+            "torch.float64"
+          ],
+          [
+            "mapped_device",
+            "cuda:0"
+          ],
+          [
+            "mapped_dtype",
+            "torch.float64"
+          ],
+          [
+            "prepared_source",
+            "False"
+          ],
+          [
+            "query_device",
+            "cuda:0"
+          ],
+          [
+            "query_dtype",
+            "torch.float64"
+          ],
+          [
+            "valid_device",
+            "cuda:0"
+          ],
+          [
+            "valid_dtype",
+            "torch.bool"
+          ]
+        ]
+      ],
+      "original_abs_max_cuda_reductions_retained": true,
+      "cpu_optimized_helpers_forbidden_and_not_called": true,
+      "in_place_add_cuda_not_called": true,
+      "inputs_unchanged": true
+    }
+  ],
+  "cuda_allocator_peak_scope": "Absolute per-API peak allocated/reserved bytes after one full warm call of each module for that fixture and budget; equal allocator baselines verified, not cold-startup memory.",
+  "production_and_frozen_sources_not_modified": true,
+  "performance_not_assessed": true,
+  "archive_hashes_verified": {
+    "26": "36b71b55bac45ffcf22fea5b933ee3b97c4130f616817a95a2e09428ee33e05e",
+    "28": "d21dd94bbf081f6e02685582090f840d82fec4d4c3f51baffe564ba889f070a4"
+  },
+  "gate_script_sha256": "7b28a182e228dce1f43ddaf74b4ec1c80fae404b6976906552eda074965d3515",
+  "saved_full_api_calls_checked": 24,
+  "additional_allocator_warm_full_api_calls": 24,
+  "timing_scope": "not_measured; correctness and per-call allocator peaks only"
+}

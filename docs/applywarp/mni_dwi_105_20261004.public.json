@@ -1,0 +1,439 @@
+{
+  "status": "completed",
+  "case_id": "applywarp_full_dwi_mni_coefficient",
+  "source": "candidate_all_v25",
+  "scope": "Single full native FSL / FNIT process observation per CPU budget, plus first complete candidate API in that process. No warmup or repeated stability estimate. Complete105frames and grids retained.",
+  "input_output_contract": {
+    "input_shape": [
+      104,
+      104,
+      72,
+      105
+    ],
+    "input_dtype": "float32",
+    "output_shape": [
+      91,
+      109,
+      91,
+      105
+    ],
+    "output_values": 94776045,
+    "output_dtype": "float32",
+    "warp_kind": "intent-2007 complete native three-stage TBSS FNIRT coefficient with embedded affine",
+    "premat": false,
+    "postmat": false,
+    "interpolation": "trilinear",
+    "convention": "auto coefficient metadata",
+    "output_suffix": ".nii"
+  },
+  "provenance_checks": {
+    "raw_AP_SHA_matches_pipeline_input": true,
+    "actual_pipeline_QC_file_SHA_matches_record": true,
+    "corrected_105_frame_DWI_file_SHA_verified": true,
+    "DWI_and_actual_registered_FA_same_grid_and_affine": true,
+    "latest_native_TBSS_three_stage_coefficient_SHA_verified": true,
+    "existing_2mm_MNI_reference_voxel_matrix_to_1mm_target_is_exact_diagonal2": true,
+    "clinical_paths_IDs_images_and_hashes_exported": false
+  },
+  "source_sha256": {
+    "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+    "src/fnit/convertwarp/core.py": "4c564a082b893a2b45a8d1ecab0fdd347ee4cedd022d108c90aff1b0269cc70f",
+    "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+    "tools/benchmark_multimodal_cpu_applywarp.py": "2764ed2a2ddc40af7baa730a73fc4e5e24b147171c69ede592db483772cf5fb6"
+  },
+  "cross_budget_saved_file_proof": {
+    "candidate_files_identical": true,
+    "official_files_identical": true
+  },
+  "records": [
+    {
+      "case_id": "applywarp_full_dwi_mni_coefficient",
+      "threads": 1,
+      "affinity": [
+        95
+      ],
+      "timing_protocol": "single_observation",
+      "single_full_process_seconds": {
+        "official": 457.84280340373516,
+        "candidate": 11.243297807872295
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 404.750124,
+              "system_seconds": 52.192016,
+              "effective_cpu_cores": 0.9980328108314921
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 7.026196999999968,
+            "system_seconds": 2.747076,
+            "effective_cpu_cores": 0.8692532357505431
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "warped": {
+            "status": "compared",
+            "shape": [
+              91,
+              109,
+              91,
+              105
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 94776045,
+            "finite_pair_count": 94776045,
+            "candidate_finite_count": 94776045,
+            "reference_finite_count": 94776045,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 0.3935546875,
+            "mean_absolute_error": 0.0006471061245037162,
+            "rmse": 0.002594995905248115,
+            "relative_l2_error": 2.088457871296323e-06,
+            "exact_fraction": 0.44821246761246475
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "support": "reference_nonzero_support",
+        "support_spatial_voxels": 857785,
+        "comparisons": {
+          "candidate_vs_official": {
+            "warped": {
+              "status": "compared",
+              "candidate_contract": {
+                "shape": [
+                  91,
+                  109,
+                  91,
+                  105
+                ],
+                "dtype": "float32",
+                "zooms": [
+                  2.0,
+                  2.0,
+                  2.0,
+                  3.5999999046325684
+                ],
+                "xyzt_units": [
+                  "mm",
+                  "sec"
+                ],
+                "qform_code": 4,
+                "sform_code": 4,
+                "storage_slope": 1.0,
+                "storage_intercept": 0.0
+              },
+              "reference_contract": {
+                "shape": [
+                  91,
+                  109,
+                  91,
+                  105
+                ],
+                "dtype": "float32",
+                "zooms": [
+                  2.0,
+                  2.0,
+                  2.0,
+                  3.5999999046325684
+                ],
+                "xyzt_units": [
+                  "mm",
+                  "sec"
+                ],
+                "qform_code": 4,
+                "sform_code": 4,
+                "storage_slope": 1.0,
+                "storage_intercept": 0.0
+              },
+              "same_dtype": true,
+              "affine_max_error": 0.0,
+              "whole_grid": {
+                "values": 94776045,
+                "different_values": 52296240,
+                "different_fraction": 0.5517875323875353,
+                "max_absolute_error": 0.3935546875,
+                "mae": 0.0006471061245037165,
+                "rmse": 0.002594995905248113,
+                "relative_l2": 2.0884578712965303e-06
+              },
+              "reference_nonzero_support": {
+                "values": 90067425,
+                "different_values": 51702457,
+                "different_fraction": 0.5740416915438629,
+                "max_absolute_error": 0.3935546875,
+                "mae": 0.0006801455352017588,
+                "rmse": 0.0026619271266008445,
+                "relative_l2": 2.0884474265116364e-06
+              },
+              "outside_support": {
+                "values": 4708620,
+                "different_values": 593783,
+                "different_fraction": 0.1261055256104761,
+                "max_absolute_error": 0.0023193359375,
+                "mae": 1.5121669378836073e-05,
+                "rmse": 6.085219678339765e-05,
+                "relative_l2": 2.6231399915408177e-06
+              }
+            }
+          }
+        }
+      },
+      "candidate_first_complete_api_seconds": 9.721498161554337,
+      "candidate_peak_rss_kib": 1533264,
+      "candidate_threads": {
+        "torch": 1,
+        "torch_interop": 1,
+        "numba": null
+      },
+      "candidate_versions": {
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "numba": "0.61.2",
+        "nibabel": "5.4.2"
+      },
+      "inputs_unchanged": true,
+      "official_program": [
+        {
+          "name": "applywarp",
+          "bytes": 331296,
+          "sha256": "40721907ce0c2f0d05636e88cbe4ac7729bd09e0ff58c4407614653c8e853fdd"
+        }
+      ]
+    },
+    {
+      "case_id": "applywarp_full_dwi_mni_coefficient",
+      "threads": 8,
+      "affinity": [
+        33,
+        37,
+        41,
+        45,
+        49,
+        53,
+        57,
+        61
+      ],
+      "timing_protocol": "single_observation",
+      "single_full_process_seconds": {
+        "official": 431.2784084379673,
+        "candidate": 7.570621512830257
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 399.80197,
+              "system_seconds": 30.390073,
+              "effective_cpu_cores": 0.9974810576724628
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 7.474894000000006,
+            "system_seconds": 2.323439999999998,
+            "effective_cpu_cores": 1.2942575432405814
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "warped": {
+            "status": "compared",
+            "shape": [
+              91,
+              109,
+              91,
+              105
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 94776045,
+            "finite_pair_count": 94776045,
+            "candidate_finite_count": 94776045,
+            "reference_finite_count": 94776045,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 0.3935546875,
+            "mean_absolute_error": 0.0006471061245037162,
+            "rmse": 0.002594995905248115,
+            "relative_l2_error": 2.0884578712964532e-06,
+            "exact_fraction": 0.44821246761246475
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "support": "reference_nonzero_support",
+        "support_spatial_voxels": 857785,
+        "comparisons": {
+          "candidate_vs_official": {
+            "warped": {
+              "status": "compared",
+              "candidate_contract": {
+                "shape": [
+                  91,
+                  109,
+                  91,
+                  105
+                ],
+                "dtype": "float32",
+                "zooms": [
+                  2.0,
+                  2.0,
+                  2.0,
+                  3.5999999046325684
+                ],
+                "xyzt_units": [
+                  "mm",
+                  "sec"
+                ],
+                "qform_code": 4,
+                "sform_code": 4,
+                "storage_slope": 1.0,
+                "storage_intercept": 0.0
+              },
+              "reference_contract": {
+                "shape": [
+                  91,
+                  109,
+                  91,
+                  105
+                ],
+                "dtype": "float32",
+                "zooms": [
+                  2.0,
+                  2.0,
+                  2.0,
+                  3.5999999046325684
+                ],
+                "xyzt_units": [
+                  "mm",
+                  "sec"
+                ],
+                "qform_code": 4,
+                "sform_code": 4,
+                "storage_slope": 1.0,
+                "storage_intercept": 0.0
+              },
+              "same_dtype": true,
+              "affine_max_error": 0.0,
+              "whole_grid": {
+                "values": 94776045,
+                "different_values": 52296240,
+                "different_fraction": 0.5517875323875353,
+                "max_absolute_error": 0.3935546875,
+                "mae": 0.0006471061245037165,
+                "rmse": 0.002594995905248113,
+                "relative_l2": 2.0884578712965303e-06
+              },
+              "reference_nonzero_support": {
+                "values": 90067425,
+                "different_values": 51702457,
+                "different_fraction": 0.5740416915438629,
+                "max_absolute_error": 0.3935546875,
+                "mae": 0.0006801455352017588,
+                "rmse": 0.0026619271266008445,
+                "relative_l2": 2.0884474265116364e-06
+              },
+              "outside_support": {
+                "values": 4708620,
+                "different_values": 593783,
+                "different_fraction": 0.1261055256104761,
+                "max_absolute_error": 0.0023193359375,
+                "mae": 1.5121669378836073e-05,
+                "rmse": 6.085219678339765e-05,
+                "relative_l2": 2.6231399915408177e-06
+              }
+            }
+          }
+        }
+      },
+      "candidate_first_complete_api_seconds": 5.808609403669834,
+      "candidate_peak_rss_kib": 1909316,
+      "candidate_threads": {
+        "torch": 8,
+        "torch_interop": 1,
+        "numba": null
+      },
+      "candidate_versions": {
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "numba": "0.61.2",
+        "nibabel": "5.4.2"
+      },
+      "inputs_unchanged": true,
+      "official_program": [
+        {
+          "name": "applywarp",
+          "bytes": 331296,
+          "sha256": "40721907ce0c2f0d05636e88cbe4ac7729bd09e0ff58c4407614653c8e853fdd"
+        }
+      ]
+    }
+  ],
+  "isolated_stage_diagnostics": {
+    "status": "completed",
+    "scope": "one isolated full actual run-chain observation per budget",
+    "records": [
+      {
+        "status": "completed",
+        "threads": 1,
+        "affinity": [
+          95
+        ],
+        "scope": "One full actual run chain with isolated timings; entry feature imports excluded, inside-call lazy imports/JIT included; no warmup or official substep clock",
+        "full_instrumented_api_seconds": 8.316599920392036,
+        "stage_seconds": {
+          "input_decode_cast_validate": 3.0419963523745537,
+          "coefficient_expand_inclusive_within_prepare": 0.7780893370509148,
+          "warp_and_query_prepare": 1.2306037098169327,
+          "full_image_sample_and_output": 2.503296285867691,
+          "nifti_save": 1.4441783353686333
+        },
+        "same_all_formal_candidate_output_files": true,
+        "maximum_rss_kib": 1532004,
+        "complete105frames": true,
+        "source": "candidate_all_v25"
+      },
+      {
+        "status": "completed",
+        "threads": 8,
+        "affinity": [
+          33,
+          37,
+          41,
+          45,
+          49,
+          53,
+          57,
+          61
+        ],
+        "scope": "One full actual run chain with isolated timings; entry feature imports excluded, inside-call lazy imports/JIT included; no warmup or official substep clock",
+        "full_instrumented_api_seconds": 5.380530029535294,
+        "stage_seconds": {
+          "input_decode_cast_validate": 3.05617443472147,
+          "coefficient_expand_inclusive_within_prepare": 0.2482629343867302,
+          "warp_and_query_prepare": 0.3606509119272232,
+          "full_image_sample_and_output": 0.4588662385940552,
+          "nifti_save": 1.422966554760933
+        },
+        "same_all_formal_candidate_output_files": true,
+        "maximum_rss_kib": 1886700,
+        "complete105frames": true,
+        "source": "candidate_all_v25"
+      }
+    ]
+  },
+  "header_comparison_scope": "Saved shape/dtype/zooms/xyzt_units/qform_code/sform_code/storage_slope/storage_intercept and affine were checked. Cross-budget file proof concerns whole bytes within each backend; it is not an official-vs-FNIT whole-header byte equality claim."
+}

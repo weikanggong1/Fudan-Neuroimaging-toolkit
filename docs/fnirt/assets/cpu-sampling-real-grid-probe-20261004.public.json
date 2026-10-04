@@ -1,0 +1,181 @@
+{
+  "status": "passed_single_grid_only",
+  "benchmark": false,
+  "scope": "single loaded complete real-grid sampler probe; no solver/native clock",
+  "jit_preparation_scope": "small query with real volume; excluded from clock",
+  "clock_includes": [
+    "finite input scans",
+    "output allocation",
+    "sampling",
+    "voxel-gradient if requested",
+    "finite output scan"
+  ],
+  "dataset_crop": false,
+  "query_count": 7221032,
+  "volume_shape": [
+    104,
+    104,
+    72
+  ],
+  "query_shape": [
+    3,
+    182,
+    218,
+    182
+  ],
+  "volume_dtype": "torch.float32",
+  "query_dtype": "torch.float32",
+  "storage_source": "original saved Torch tensors; no layout conversion",
+  "affinity": [
+    33,
+    37,
+    41,
+    45,
+    49,
+    53,
+    57,
+    61
+  ],
+  "source_sha256": {
+    "registration.py": "74fc259e2096e64153a591488303b8ccdfdf19d4ba0b2b91891222b905740e89",
+    "sampler_cpu.py": "c8e62eca397463ed185e845250288c3bb6437c112fa10c6bbfa388c397f9a96e",
+    "probe_full_query.py": "f9c867e625d7476a96740bfab868f8a725691b3088b979b573a830dcf2034cc0"
+  },
+  "records": [
+    {
+      "torch_threads": 1,
+      "numba_threads_after": 8,
+      "calling_thread_affinity": [
+        33
+      ],
+      "numba_kernel_budget": 1,
+      "kernel_execution": "serial",
+      "small_query_preparation_seconds": 14.074424959719181,
+      "derivatives": false,
+      "old_tensor_seconds": 60.333173386752605,
+      "fused_seconds": 4.29100738465786,
+      "clock_kind": "single_function_observation",
+      "comparisons": {
+        "values": {
+          "value_count": 7221032,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        },
+        "valid": {
+          "value_count": 7221032,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        },
+        "voxel_gradients": {
+          "both_none": true
+        }
+      }
+    },
+    {
+      "torch_threads": 1,
+      "numba_threads_after": 8,
+      "calling_thread_affinity": [
+        33
+      ],
+      "numba_kernel_budget": 1,
+      "kernel_execution": "serial",
+      "small_query_preparation_seconds": 0.0031825825572013855,
+      "derivatives": true,
+      "old_tensor_seconds": 60.59256500005722,
+      "fused_seconds": 5.2714128121733665,
+      "clock_kind": "single_function_observation",
+      "comparisons": {
+        "values": {
+          "value_count": 7221032,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        },
+        "valid": {
+          "value_count": 7221032,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        },
+        "voxel_gradients": {
+          "value_count": 21663096,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        }
+      }
+    },
+    {
+      "torch_threads": 8,
+      "numba_threads_after": 8,
+      "calling_thread_affinity": [
+        33,
+        37,
+        41,
+        45,
+        49,
+        53,
+        57,
+        61
+      ],
+      "numba_kernel_budget": 8,
+      "kernel_execution": "independent_query_prange",
+      "small_query_preparation_seconds": 0.1201978474855423,
+      "derivatives": false,
+      "old_tensor_seconds": 13.434644728899002,
+      "fused_seconds": 3.959716148674488,
+      "clock_kind": "single_function_observation",
+      "comparisons": {
+        "values": {
+          "value_count": 7221032,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        },
+        "valid": {
+          "value_count": 7221032,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        },
+        "voxel_gradients": {
+          "both_none": true
+        }
+      }
+    },
+    {
+      "torch_threads": 8,
+      "numba_threads_after": 8,
+      "calling_thread_affinity": [
+        33,
+        37,
+        41,
+        45,
+        49,
+        53,
+        57,
+        61
+      ],
+      "numba_kernel_budget": 8,
+      "kernel_execution": "independent_query_prange",
+      "small_query_preparation_seconds": 0.0021552518010139465,
+      "derivatives": true,
+      "old_tensor_seconds": 10.167797736823559,
+      "fused_seconds": 4.285731002688408,
+      "clock_kind": "single_function_observation",
+      "comparisons": {
+        "values": {
+          "value_count": 7221032,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        },
+        "valid": {
+          "value_count": 7221032,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        },
+        "voxel_gradients": {
+          "value_count": 21663096,
+          "bit_mismatch_count": 0,
+          "bit_exact": true
+        }
+      }
+    }
+  ],
+  "capture_scope": "complete real TBSS stage3 initial query after official stage2 checkpoint; sampler probe only"
+}

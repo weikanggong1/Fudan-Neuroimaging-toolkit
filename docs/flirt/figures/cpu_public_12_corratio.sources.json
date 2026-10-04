@@ -1,0 +1,80 @@
+{
+  "dataset": "OpenNeuro ds000114 v1.0.2",
+  "license": "CC0",
+  "license_metadata": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds000114/master/dataset_description.json",
+  "input_note": "FNIT defaced public examples; complete-volume registered outputs",
+  "files": {
+    "reference": {
+      "filename": "sub-01_T1w.nii.gz",
+      "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a"
+    },
+    "official": {
+      "filename": "official.nii.gz",
+      "sha256": "3d76d501590fdbdc9fd427dbe0bc1d570c003db16c8b34faa32b5483e1f82783"
+    },
+    "candidate": {
+      "filename": "candidate.nii.gz",
+      "sha256": "3264e0bdc25788f4986d4395400bb207a3cbe204a8b179a03c417ed0161f696b"
+    },
+    "moving": {
+      "filename": "sub-02_T1w.nii.gz",
+      "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d"
+    },
+    "official_matrix": {
+      "filename": "official.mat",
+      "sha256": "137c261f4500d50af99f93b128805e8233b93392d212b3804e802974af8d03dc"
+    },
+    "candidate_matrix": {
+      "filename": "candidate.mat",
+      "sha256": "251caf17e12f317a2a1d2c6a08c27a340d73a0d3bd9babff41637c2623516348"
+    }
+  },
+  "slice_world_mm": [
+    -1.5202551539987326,
+    16.265094943344593,
+    -27.59595036879182
+  ],
+  "display_grayscale_max": 1872.1632897949232,
+  "display_difference_max": 5.8592529296875,
+  "case_id": "flirt_12_corratio_default",
+  "candidate_source_sha256": {
+    "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef",
+    "src/fnit/flirt/_cpu.py": "0867dc5ce59a773aec47d4d5d0249f6435b4e2cfca2778949397b4858d75591d",
+    "src/fnit/flirt/_cpu_simd.py": "03c70f8c6c9239b5d66eff2f992c60f4e1aca2bb471067be2baeec6d9a3ac04f"
+  },
+  "official_flirt_version": "6.0.7.4",
+  "cpu_threads": 1,
+  "scope": "Complete-volume saved outputs from the final CPU source; this picture does not imply a repeated performance result",
+  "accuracy": {
+    "method": "benchmark_flirt_gpu.paired_metrics: 13^3 moving world grid; official nonzero output foreground",
+    "candidate_vs_official": {
+      "world_grid_displacement_mm": {
+        "mean": 0.013679297512715042,
+        "median": 0.012999332481225956,
+        "p95": 0.027589191450260356,
+        "minimum": 0.0005483677858403197,
+        "maximum": 0.02875542532404241,
+        "rms": 0.015691730490243475
+      },
+      "warped": {
+        "comparison_mask": "official output foreground; unchanged across paths",
+        "voxels": 1737594,
+        "pearson_r": 0.9999959580270273,
+        "mae": 0.5505153965359726,
+        "rmse": 1.1058680744040987,
+        "support_dice": 0.9999122352922896
+      },
+      "grid_header": {
+        "shape_equal": true,
+        "affine_max_abs": 0.0,
+        "dtype_equal": true,
+        "qform_code_equal": true,
+        "sform_code_equal": true,
+        "qform_matrix_max_abs": 0.0,
+        "sform_matrix_max_abs": 0.0,
+        "candidate_dtype": "float32",
+        "official_dtype": "float32"
+      }
+    }
+  }
+}

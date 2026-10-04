@@ -218,6 +218,25 @@ def test_explicit_integer_dtype_uses_fsl_truncation():
     )
 
 
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_explicit_char_keeps_fsl_direct_cast_without_saturation(device):
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA is unavailable")
+    # Includes the public T1's observed maximum (2779), as well as the uint8
+    # boundary. NEWIMAGE's direct cast truncates, then retains the low byte.
+    shape = (2, 2, 2)
+    values = np.array([0, 1.9, 254.9, 255.9, 256.1, 257.9, 512.3, 2779],
+                      dtype=np.float32).reshape(shape)
+    affine = np.diag([-1., 1., 1., 1.])
+    result = TorchApplyWarp(device)(
+        _image(values, affine), _image(np.zeros(shape, np.float32), affine),
+        interpolation="nearest", output_dtype="char",
+    )
+    expected = np.array([0, 1, 254, 255, 0, 1, 0, 219], dtype=np.uint8).reshape(shape)
+    assert result.image.get_data_dtype() == np.dtype("uint8")
+    np.testing.assert_array_equal(np.asarray(result.image.dataobj), expected)
+
+
 def test_many_frame_integer_default_matches_fsl_range_rule():
     shape = (2, 2, 2, 11)
     affine = np.diag([-1.0, 1.0, 1.0, 1.0])

@@ -121,42 +121,42 @@ def limit_gradient(
     checks = jacobians.detach().contiguous().numpy()
     nx, ny, nz = values.shape[1:]
     identity = np.eye(3, dtype=np.float64)
-    for z in range(nz - 1):
-        for y in range(ny - 1):
-            for x in range(nx - 1):
-                for index, offsets in enumerate(_JACOBIAN_OFFSETS):
-                    if minimum <= checks[index, x, y, z] <= maximum:
-                        continue
-                    matrix = np.empty((3, 3), dtype=np.float64)
-                    for row in range(3):
-                        for column, offset in enumerate(offsets):
-                            dx, dy, dz = offset
-                            matrix[row, column] = values[
-                                3 * row + column, x + dx, y + dy, z + dz
-                            ]
-                    alpha = np.float32(0.0)
-                    candidate = matrix
-                    determinant = np.linalg.det(candidate)
-                    while determinant < minimum or determinant > maximum:
-                        alpha = np.float32(alpha + np.float32(0.1))
-                        alpha = min(alpha, np.float32(1.0))
-                        candidate = (1.0 - float(alpha)) * matrix + float(
-                            alpha
-                        ) * identity
-                        determinant = np.linalg.det(candidate)
-                    alpha = min(
-                        np.float32(alpha + np.float32(0.1)), np.float32(1.0)
-                    )
-                    for row in range(3):
-                        for column, offset in enumerate(offsets):
-                            dx, dy, dz = offset
-                            values[
-                                3 * row + column, x + dx, y + dy, z + dz
-                            ] = np.float32(
-                                (1.0 - float(alpha)) * matrix[row, column]
-                                + float(alpha) * identity[row, column]
-                            )
-    backend = "numpy-cpu-serial-order"
+    # Checks remain fixed throughout the original limiter loop. Filter only
+    # its no-op corners, in the same z/y/x/corner order. Matrix extraction,
+    # NumPy determinant, alpha rounding and overlapping updates stay serial.
+    from ._topology_cpu import out_of_range_corners
+    for flat in out_of_range_corners(checks, float(minimum), float(maximum)):
+        index = int(flat % 8)
+        voxel = int(flat // 8)
+        x = voxel % (nx - 1)
+        voxel //= nx - 1
+        y = voxel % (ny - 1)
+        z = voxel // (ny - 1)
+        offsets = _JACOBIAN_OFFSETS[index]
+        matrix = np.empty((3, 3), dtype=np.float64)
+        for row in range(3):
+            for column, offset in enumerate(offsets):
+                dx, dy, dz = offset
+                matrix[row, column] = values[
+                    3 * row + column, x + dx, y + dy, z + dz
+                ]
+        alpha = np.float32(0.0)
+        candidate = matrix
+        determinant = np.linalg.det(candidate)
+        while determinant < minimum or determinant > maximum:
+            alpha = np.float32(alpha + np.float32(0.1))
+            alpha = min(alpha, np.float32(1.0))
+            candidate = (1.0 - float(alpha)) * matrix + float(alpha) * identity
+            determinant = np.linalg.det(candidate)
+        alpha = min(np.float32(alpha + np.float32(0.1)), np.float32(1.0))
+        for row in range(3):
+            for column, offset in enumerate(offsets):
+                dx, dy, dz = offset
+                values[3 * row + column, x + dx, y + dy, z + dz] = np.float32(
+                    (1.0 - float(alpha)) * matrix[row, column]
+                    + float(alpha) * identity[row, column]
+                )
+    backend = "numpy-cpu-serial-order-numba-filter"
     return (gradient, backend) if return_backend else gradient
 
 

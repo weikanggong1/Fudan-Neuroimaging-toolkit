@@ -1,0 +1,334 @@
+{
+  "status": "default_full_case_validated_tbss_pending_after_setup_failure",
+  "source_snapshot": "all_v27",
+  "candidate_archive_sha256": "71469f311d1eff54a9c3f60855e7270dc0b833f28abdb7f3ce6498674f5b58e4",
+  "baseline_commit": "1d31e7baaebbb644ab199471f7fe6282721455fd",
+  "targeted_changed_routes": "FNIRT default and complete six-level TBSS CUDA; CPU sampler and SCG cost-skip integration",
+  "source_hashes": {
+    "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef",
+    "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+    "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+    "src/fnit/fnirt/registration.py": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da",
+    "src/fnit/invwarp/core.py": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391",
+    "src/fnit/convertwarp/core.py": "d5268055b8d3b858fd80e96158d0fc167daf722e0b25fd7a3cbe04da3b8e3264",
+    "src/fnit/space_conversion.py": "91e3942b487cb91ee58e1310a7ab29aa670d31720e7abe6edb194e1a679a4afd",
+    "src/fnit/_space_conversion_cpu.py": "45911a090eff848c90db77eb547436eeba3a694a915652869181569a72881b6b",
+    "src/fnit/fnirt/_normal_cpu.py": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f",
+    "src/fnit/fnirt/spline.py": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+    "src/fnit/fnirt/_smoothing_cpu.py": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be",
+    "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+    "src/fnit/fnirt/topology.py": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3",
+    "src/fnit/fnirt/_topology_cpu.py": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6",
+    "src/fnit/_world_resampling.py": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83",
+    "src/fnit/fnirt/_bending_cpu.py": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47",
+    "src/fnit/flirt/batched.py": "06bcaeba1b58090d5b40b57160a159075af48ab0c42c2b61a6d7e3f803ee85f4",
+    "src/fnit/fnirt/_normal_simd_cpu.py": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9",
+    "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+    "src/fnit/fnirt/_sampling_cpu.py": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368"
+  },
+  "source_python_file_counts": {
+    "baseline": 467,
+    "candidate": 477
+  },
+  "source_tree_hashes": {
+    "baseline": "1bb040766e667a34ca2322299e74fed2eaa3ceacfb2021ef0e3a34c0245c7782",
+    "candidate": "c974fdf5a1a7aa8f5945bd9f1b8ebeced8ea5d1e4f32baf7c28098d72864a6c5"
+  },
+  "memory_budget_bytes": 20000000000,
+  "protocol": "two AB/BA process pairs; one complete warmup and three measured complete API calls per process",
+  "timing_scope": "complete API input reads, computation and all requested output saves; process startup and imports excluded",
+  "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "declared_source_files_unchanged_before_after": true,
+  "all_python_source_files_unchanged_before_after": true,
+  "output_gate_scope": "all sixteen saved complete calls per successful case; full values and NIfTI header/extensions/affine",
+  "timing_limitation": "shared H100 observed load; timings are observations, not an exclusive-GPU speed claim",
+  "records": [
+    {
+      "case_id": "fnirt_real_default",
+      "precision": {
+        "cout": {
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "element_count": 31752,
+          "finite_pair_count": 31752,
+          "candidate_finite_count": 31752,
+          "reference_finite_count": 31752,
+          "nonfinite_pattern_equal": true,
+          "nonfinite_pattern_mismatch_count": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "iout": {
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "element_count": 902629,
+          "finite_pair_count": 902629,
+          "candidate_finite_count": 902629,
+          "reference_finite_count": 902629,
+          "nonfinite_pattern_equal": true,
+          "nonfinite_pattern_mismatch_count": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        },
+        "jout": {
+          "all_finite": true,
+          "affine_max_absolute_difference": 0.0,
+          "element_count": 902629,
+          "finite_pair_count": 902629,
+          "candidate_finite_count": 902629,
+          "reference_finite_count": 902629,
+          "nonfinite_pattern_equal": true,
+          "nonfinite_pattern_mismatch_count": 0,
+          "max_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_l2_error": 0.0,
+          "exact_fraction": 1.0
+        }
+      },
+      "measurements": {
+        "baseline": [
+          {
+            "warmup_seconds": 18.79398067900911,
+            "seconds": [
+              16.986892296932638,
+              16.945098338183016,
+              16.90160483494401
+            ],
+            "median_seconds": 16.945098338183016,
+            "cuda_peak_allocation_bytes_per_call": [
+              1181705216,
+              1181704704,
+              1181704704,
+              1181704704
+            ],
+            "maximum_all_calls_allocation_bytes": 1181705216,
+            "gpu_before_target": {
+              "used_memory_mib": 66158,
+              "utilization_percent": 100
+            },
+            "source_binding_verified": true,
+            "gpu_binding_verified": true,
+            "torch_threads": 8,
+            "torch_interop_threads": 1,
+            "tf32_matmul": true,
+            "tf32_cudnn": true
+          },
+          {
+            "warmup_seconds": 18.085952919907868,
+            "seconds": [
+              16.702491697855294,
+              16.705177173018456,
+              16.665431411005557
+            ],
+            "median_seconds": 16.702491697855294,
+            "cuda_peak_allocation_bytes_per_call": [
+              1181705216,
+              1181704704,
+              1181704704,
+              1181704704
+            ],
+            "maximum_all_calls_allocation_bytes": 1181705216,
+            "gpu_before_target": {
+              "used_memory_mib": 66158,
+              "utilization_percent": 100
+            },
+            "source_binding_verified": true,
+            "gpu_binding_verified": true,
+            "torch_threads": 8,
+            "torch_interop_threads": 1,
+            "tf32_matmul": true,
+            "tf32_cudnn": true
+          }
+        ],
+        "candidate": [
+          {
+            "warmup_seconds": 18.137779981363565,
+            "seconds": [
+              16.736749676056206,
+              16.756995144765824,
+              16.690700728446245
+            ],
+            "median_seconds": 16.736749676056206,
+            "cuda_peak_allocation_bytes_per_call": [
+              1181705216,
+              1181704704,
+              1181704704,
+              1181704704
+            ],
+            "maximum_all_calls_allocation_bytes": 1181705216,
+            "gpu_before_target": {
+              "used_memory_mib": 66158,
+              "utilization_percent": 77
+            },
+            "source_binding_verified": true,
+            "gpu_binding_verified": true,
+            "torch_threads": 8,
+            "torch_interop_threads": 1,
+            "tf32_matmul": true,
+            "tf32_cudnn": true
+          },
+          {
+            "warmup_seconds": 18.18117642775178,
+            "seconds": [
+              16.868242718745023,
+              16.94124772073701,
+              16.85144134517759
+            ],
+            "median_seconds": 16.868242718745023,
+            "cuda_peak_allocation_bytes_per_call": [
+              1181705216,
+              1181704704,
+              1181704704,
+              1181704704
+            ],
+            "maximum_all_calls_allocation_bytes": 1181705216,
+            "gpu_before_target": {
+              "used_memory_mib": 66158,
+              "utilization_percent": 100
+            },
+            "source_binding_verified": true,
+            "gpu_binding_verified": true,
+            "torch_threads": 8,
+            "torch_interop_threads": 1,
+            "tf32_matmul": true,
+            "tf32_cudnn": true
+          }
+        ]
+      },
+      "all_sixteen_saved_calls_bit_and_metadata_equal": true,
+      "input_files_unchanged_before_after": true,
+      "input_file_hashes_by_role": {
+        "input": {
+          "sha256": "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+          "bytes": 5048560
+        },
+        "reference": {
+          "sha256": "91729207be92d54c8a9e3d790070ad26f68f2d049861c6162d6a35db713c5e56",
+          "bytes": 572444
+        },
+        "affine": {
+          "sha256": "ee2029b61ea2f9e556e5c92c4fbc9fd81da00e20a300d53e0b8f2aab3bfbab5d",
+          "bytes": 186
+        },
+        "refmask": {
+          "sha256": "b71a9f2015bd10262c37e51b4d17a655d0eb0a0dec4ba48322fb5af55c86b97c",
+          "bytes": 12480
+        }
+      },
+      "full_outputs": {
+        "cout": {
+          "value_bits_equal": true,
+          "metadata_equal": true,
+          "element_count": 31752,
+          "shape": [
+            21,
+            24,
+            21,
+            3
+          ],
+          "dtype": "float32"
+        },
+        "iout": {
+          "value_bits_equal": true,
+          "metadata_equal": true,
+          "element_count": 902629,
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32"
+        },
+        "jout": {
+          "value_bits_equal": true,
+          "metadata_equal": true,
+          "element_count": 902629,
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32"
+        }
+      },
+      "allocation_maxima_equal_across_processes_and_sources": true,
+      "resolved_full_budget": {
+        "subsampling": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "maximum_iterations": [
+          5,
+          5,
+          5,
+          5
+        ],
+        "input_fwhm_mm": [
+          6.0,
+          4.0,
+          2.0,
+          2.0
+        ],
+        "reference_fwhm_mm": [
+          4.0,
+          2.0,
+          0.0,
+          0.0
+        ],
+        "regularization": [
+          120.0,
+          60.0,
+          30.0,
+          30.0
+        ],
+        "estimate_intensity": [
+          true,
+          true,
+          true,
+          false
+        ],
+        "process_stages": null,
+        "warp_resolution_mm": [
+          10.0,
+          10.0,
+          10.0
+        ],
+        "warp_resolution_schedule_mm": null,
+        "minimization_methods": null
+      }
+    }
+  ],
+  "failed_attempts": [
+    {
+      "case_id": "fnirt_tbss_real_full_s1_s2_s3",
+      "pair": 1,
+      "backend": "baseline",
+      "status": "failed_attempt_not_normal_timing",
+      "returncode": 1,
+      "exception_class": "RuntimeError",
+      "is_cuda_out_of_memory": true,
+      "failure_phase": "cuda_setup",
+      "peak_allocation_before_failure_bytes": 0,
+      "completed_peak_capture_count": 0,
+      "gpu_before_target": {
+        "used_memory_mib": 66158,
+        "utilization_percent": 98
+      },
+      "cuda_setup_failed_python_api": "torch.cuda.set_per_process_memory_fraction",
+      "cuda_setup_failed_c_extension": "torch._C._cuda_setMemoryFraction",
+      "failure_before_first_fnirt_api_call": true
+    }
+  ],
+  "attempt_controller_status": "failed_attempt_preserved",
+  "full_tbss_sixteen_call_gate_complete": false,
+  "tbss_partial_report": "cuda-tbss-partial-v27-20261004.public.json"
+}

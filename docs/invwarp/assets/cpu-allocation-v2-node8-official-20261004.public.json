@@ -1,0 +1,499 @@
+{
+  "status": "completed",
+  "node": "nodecw8",
+  "cpu_model": "Intel(R) Xeon(R) Gold 6418H",
+  "source_label": "frozen26_strict_inv_allocation_v2_overlay",
+  "shared_inv_runtime_hashes_match_candidate_all_v28": true,
+  "scope": "same-node fresh complete FSL/candidate InvWarp process pairs; separately warmed full read+compute+save API",
+  "protocol": "one complete pair warmup plus three alternating process pairs; one complete API warmup plus three complete API repetitions",
+  "cpuset": [
+    35,
+    39,
+    43,
+    47,
+    51,
+    55,
+    59,
+    63
+  ],
+  "source_sha256": {
+    "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+    "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+    "src/fnit/convertwarp/core.py": "730c0d8c82b7d35c5f77e9a7d0ffad65e375f13f37c379591c399ef0b26627d8",
+    "src/fnit/invwarp/core.py": "b3f48e5a7fd4156b9f8cd9d0094b5299ed95c77b59b5636faeda0f522df34adc"
+  },
+  "runner_sha256": "6bf87cb40b9b2c37d306dd5e2083b4fd3a6711e5ca481cb154f53a782c294710",
+  "source_all_python_checked": 658,
+  "source_all_python_before_after_equal": true,
+  "input_before_after_equal": true,
+  "manifest_before_after_equal": true,
+  "runner_before_after_equal": true,
+  "same_verified_native_binary_as_formal26": true,
+  "same_input_hashes_as_all_v2_gate_records": true,
+  "reference_environment_preserved": true,
+  "output_shape": [
+    162,
+    215,
+    180,
+    3
+  ],
+  "output_element_count": 18808200,
+  "private_image_hashes_exported": false,
+  "records": [
+    {
+      "case_id": "invwarp_t1_coefficient_uncompressed_output",
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "timing_protocol": "warmup_and_paired_repeats",
+      "full_process": {
+        "official": [
+          37.996797036379576,
+          35.878038375638425,
+          36.052086307667196,
+          35.20978767238557
+        ],
+        "baseline": [],
+        "candidate": [
+          46.74849099479616,
+          51.65063347388059,
+          50.898511704057455,
+          50.58123488817364
+        ]
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 36.570231,
+              "system_seconds": 0.719043,
+              "effective_cpu_cores": 0.9813794032243779
+            }
+          ],
+          [
+            {
+              "user_seconds": 34.41472700000001,
+              "system_seconds": 0.7740609999999961,
+              "effective_cpu_cores": 0.9807890730139134
+            }
+          ],
+          [
+            {
+              "user_seconds": 35.143737999999985,
+              "system_seconds": 0.6759570000000039,
+              "effective_cpu_cores": 0.993554012223204
+            }
+          ],
+          [
+            {
+              "user_seconds": 34.20846,
+              "system_seconds": 0.6960100000000011,
+              "effective_cpu_cores": 0.9913286136449765
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 25.940744000000002,
+            "system_seconds": 20.55889,
+            "effective_cpu_cores": 0.9946766838992974
+          },
+          {
+            "user_seconds": 25.90240899999999,
+            "system_seconds": 25.438286,
+            "effective_cpu_cores": 0.9939993287006378
+          },
+          {
+            "user_seconds": 25.64379500000001,
+            "system_seconds": 25.00507199999999,
+            "effective_cpu_cores": 0.9950952455052322
+          },
+          {
+            "user_seconds": 26.233265999999986,
+            "system_seconds": 23.69910800000001,
+            "effective_cpu_cores": 0.9871719049641999
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561402243,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "median_full_process_seconds": {
+        "official": 35.878038375638425,
+        "candidate": 50.898511704057455
+      },
+      "warmup_full_process": {
+        "official": 37.996797036379576,
+        "candidate": 46.74849099479616
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "complete_process_speed_goal_met": false,
+      "input_metadata_unchanged": true,
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "bytes": 265960,
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c"
+        }
+      ],
+      "candidate_first_api_seconds": [
+        44.03592489566654,
+        48.707035755738616,
+        48.003918232396245,
+        47.45471027866006
+      ],
+      "candidate_first_api_peak_rss_kib": [
+        1591492,
+        1591604,
+        1591480,
+        1591604
+      ],
+      "candidate_first_api_threads": [
+        {
+          "torch": 1,
+          "torch_interop": 1,
+          "numba": 1
+        },
+        {
+          "torch": 1,
+          "torch_interop": 1,
+          "numba": 1
+        },
+        {
+          "torch": 1,
+          "torch_interop": 1,
+          "numba": 1
+        },
+        {
+          "torch": 1,
+          "torch_interop": 1,
+          "numba": 1
+        }
+      ],
+      "candidate_versions": {
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "numba": "0.61.2",
+        "nibabel": "5.4.2"
+      },
+      "candidate_loaded_api": {
+        "candidate": {
+          "scope": "Warmed adapter API: load + complete computation + transfer + save; one complete warmup call excluded",
+          "warmup_seconds": 46.47667764313519,
+          "seconds": [
+            51.2477285368368,
+            48.570890131406486,
+            47.18286682944745
+          ],
+          "median_seconds": 48.570890131406486,
+          "maximum_rss_kib": 1795104,
+          "threads": {
+            "torch": 1,
+            "torch_interop": 1,
+            "numba": 1
+          },
+          "versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          }
+        }
+      },
+      "candidate_saved_files_equal_across_all_process_calls": true
+    },
+    {
+      "case_id": "invwarp_t1_coefficient_uncompressed_output",
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "timing_protocol": "warmup_and_paired_repeats",
+      "full_process": {
+        "official": [
+          35.53613333590329,
+          35.384481825865805,
+          36.96823072806001,
+          36.678692759014666
+        ],
+        "baseline": [],
+        "candidate": [
+          25.088256456889212,
+          24.52204497810453,
+          21.66106254979968,
+          19.092797775752842
+        ]
+      },
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 34.52875799999998,
+              "system_seconds": 0.6600909999999942,
+              "effective_cpu_cores": 0.9902272897104293
+            }
+          ],
+          [
+            {
+              "user_seconds": 34.08462499999996,
+              "system_seconds": 0.7480139999999835,
+              "effective_cpu_cores": 0.9844043830122581
+            }
+          ],
+          [
+            {
+              "user_seconds": 35.945246,
+              "system_seconds": 0.7139450000000238,
+              "effective_cpu_cores": 0.991640397120076
+            }
+          ],
+          [
+            {
+              "user_seconds": 35.17090900000005,
+              "system_seconds": 0.6469979999999964,
+              "effective_cpu_cores": 0.9765317219817475
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 55.779426,
+            "system_seconds": 28.043285999999995,
+            "effective_cpu_cores": 3.3411134864647942
+          },
+          {
+            "user_seconds": 50.03417400000001,
+            "system_seconds": 26.617333000000002,
+            "effective_cpu_cores": 3.125820341184487
+          },
+          {
+            "user_seconds": 51.77108600000008,
+            "system_seconds": 24.730101999999988,
+            "effective_cpu_cores": 3.531737550922106
+          },
+          {
+            "user_seconds": 43.649479999999926,
+            "system_seconds": 26.81463500000001,
+            "effective_cpu_cores": 3.690612336002786
+          }
+        ]
+      },
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              162,
+              215,
+              180,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 18808200,
+            "finite_pair_count": 18808200,
+            "candidate_finite_count": 18808200,
+            "reference_finite_count": 18808200,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 7.026096343994141,
+            "mean_absolute_error": 0.10954117451245865,
+            "rmse": 0.32135022865079366,
+            "relative_l2_error": 0.020147400561425347,
+            "exact_fraction": 0.000646154336938144
+          }
+        }
+      },
+      "median_full_process_seconds": {
+        "official": 36.678692759014666,
+        "candidate": 21.66106254979968
+      },
+      "warmup_full_process": {
+        "official": 35.53613333590329,
+        "candidate": 25.088256456889212
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1397640,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.01722681863787303,
+            "median_vector_difference_mm": 0.010075206222264483,
+            "p95_vector_difference_mm": 0.0336059224877545,
+            "max_vector_difference_mm": 7.314282086525388
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 0.008818903880941921,
+            "p95_residual_mm_valid_region": 0.027750792471793444
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9983343482017517,
+            "median_residual_mm_valid_region": 3.797962352368618e-07,
+            "p95_residual_mm_valid_region": 8.712454274501209e-07
+          }
+        }
+      },
+      "complete_process_speed_goal_met": true,
+      "input_metadata_unchanged": true,
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "bytes": 265960,
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c"
+        }
+      ],
+      "candidate_first_api_seconds": [
+        22.165444782935083,
+        21.976134912110865,
+        18.949017672799528,
+        16.548220268450677
+      ],
+      "candidate_first_api_peak_rss_kib": [
+        1795104,
+        1795104,
+        1795104,
+        1795104
+      ],
+      "candidate_first_api_threads": [
+        {
+          "torch": 8,
+          "torch_interop": 1,
+          "numba": 8
+        },
+        {
+          "torch": 8,
+          "torch_interop": 1,
+          "numba": 8
+        },
+        {
+          "torch": 8,
+          "torch_interop": 1,
+          "numba": 8
+        },
+        {
+          "torch": 8,
+          "torch_interop": 1,
+          "numba": 8
+        }
+      ],
+      "candidate_versions": {
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "numba": "0.61.2",
+        "nibabel": "5.4.2"
+      },
+      "candidate_loaded_api": {
+        "candidate": {
+          "scope": "Warmed adapter API: load + complete computation + transfer + save; one complete warmup call excluded",
+          "warmup_seconds": 19.493793450295925,
+          "seconds": [
+            17.285875816829503,
+            19.40804493613541,
+            18.440739329904318
+          ],
+          "median_seconds": 18.440739329904318,
+          "maximum_rss_kib": 1809976,
+          "threads": {
+            "torch": 8,
+            "torch_interop": 1,
+            "numba": 8
+          },
+          "versions": {
+            "torch": "2.5.1",
+            "numpy": "1.26.4",
+            "numba": "0.61.2",
+            "nibabel": "5.4.2"
+          }
+        }
+      },
+      "candidate_saved_files_equal_across_all_process_calls": true
+    }
+  ]
+}

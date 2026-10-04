@@ -1,0 +1,181 @@
+{
+  "status": "completed",
+  "node": "nodecw8",
+  "scope": "single full instrumented API old26/new allocation gate on matched physical group; no official clocks or stable speed claim",
+  "source_hashes": {
+    "baseline": {
+      "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+      "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+      "src/fnit/convertwarp/core.py": "d5268055b8d3b858fd80e96158d0fc167daf722e0b25fd7a3cbe04da3b8e3264",
+      "src/fnit/invwarp/core.py": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391"
+    },
+    "candidate": {
+      "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+      "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+      "src/fnit/convertwarp/core.py": "730c0d8c82b7d35c5f77e9a7d0ffad65e375f13f37c379591c399ef0b26627d8",
+      "src/fnit/invwarp/core.py": "b3f48e5a7fd4156b9f8cd9d0094b5299ed95c77b59b5636faeda0f522df34adc"
+    }
+  },
+  "checks": [
+    {
+      "threads": 1,
+      "runtime_source_origins_verified": true,
+      "same_all_output_files": true,
+      "same_solver_qc": true,
+      "same_valid_fraction": true,
+      "same_input_sha256": true,
+      "baseline_api_seconds": 47.165119961835444,
+      "candidate_api_seconds": 38.815482144244015,
+      "baseline_rss_kib": 1745664,
+      "candidate_rss_kib": 1598748,
+      "baseline_api_resource_usage": {
+        "ru_utime": 21.681675000000002,
+        "ru_stime": 24.978697999999998,
+        "ru_minflt": 12345166,
+        "ru_majflt": 0,
+        "ru_inblock": 4080,
+        "ru_oublock": 147040
+      },
+      "candidate_api_resource_usage": {
+        "ru_utime": 21.316996,
+        "ru_stime": 16.952712000000002,
+        "ru_minflt": 8272070,
+        "ru_majflt": 0,
+        "ru_inblock": 0,
+        "ru_oublock": 147040
+      },
+      "baseline_solver_call": {
+        "calls": 1,
+        "inclusive_seconds": 46.474112121388316
+      },
+      "candidate_solver_call": {
+        "calls": 1,
+        "inclusive_seconds": 38.06262075062841
+      },
+      "baseline_api_main_thread_scheduler_usage": {
+        "runtime_ns": 46660373074,
+        "runqueue_wait_ns": 39495412,
+        "schedule_count": 2781
+      },
+      "candidate_api_main_thread_scheduler_usage": {
+        "runtime_ns": 38269708170,
+        "runqueue_wait_ns": 300948,
+        "schedule_count": 1758
+      },
+      "baseline_nifti_save": {
+        "calls": 1,
+        "inclusive_seconds": 0.663742202334106
+      },
+      "candidate_nifti_save": {
+        "calls": 1,
+        "inclusive_seconds": 0.7423115503042936
+      },
+      "baseline_normalization": {
+        "calls": 32,
+        "inclusive_seconds": 3.8909282283857465
+      },
+      "candidate_normalization": {
+        "calls": 32,
+        "inclusive_seconds": 3.97994870506227
+      },
+      "solver_qc": {
+        "device": "cpu",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 30,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.760824978351593
+    },
+    {
+      "threads": 8,
+      "runtime_source_origins_verified": true,
+      "same_all_output_files": true,
+      "same_solver_qc": true,
+      "same_valid_fraction": true,
+      "same_input_sha256": true,
+      "baseline_api_seconds": 22.625720004551113,
+      "candidate_api_seconds": 19.642293494194746,
+      "baseline_rss_kib": 1737640,
+      "candidate_rss_kib": 1725188,
+      "baseline_api_resource_usage": {
+        "ru_utime": 49.505106,
+        "ru_stime": 38.734093,
+        "ru_minflt": 11846859,
+        "ru_majflt": 0,
+        "ru_inblock": 88,
+        "ru_oublock": 146952
+      },
+      "candidate_api_resource_usage": {
+        "ru_utime": 50.676702,
+        "ru_stime": 24.117414999999998,
+        "ru_minflt": 8295091,
+        "ru_majflt": 0,
+        "ru_inblock": 88,
+        "ru_oublock": 146952
+      },
+      "baseline_solver_call": {
+        "calls": 1,
+        "inclusive_seconds": 22.13530818372965
+      },
+      "candidate_solver_call": {
+        "calls": 1,
+        "inclusive_seconds": 19.146864055655897
+      },
+      "baseline_api_main_thread_scheduler_usage": {
+        "runtime_ns": 20353991523,
+        "runqueue_wait_ns": 165685740,
+        "schedule_count": 1793
+      },
+      "candidate_api_main_thread_scheduler_usage": {
+        "runtime_ns": 16540104920,
+        "runqueue_wait_ns": 1111893869,
+        "schedule_count": 1367
+      },
+      "baseline_nifti_save": {
+        "calls": 1,
+        "inclusive_seconds": 0.47360963746905327
+      },
+      "candidate_nifti_save": {
+        "calls": 1,
+        "inclusive_seconds": 0.48271965235471725
+      },
+      "baseline_normalization": {
+        "calls": 32,
+        "inclusive_seconds": 4.271600847132504
+      },
+      "candidate_normalization": {
+        "calls": 32,
+        "inclusive_seconds": 3.9355733031407
+      },
+      "solver_qc": {
+        "device": "cpu",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 30,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.760824978351593
+    }
+  ],
+  "all_gates_passed": true,
+  "source_all_python_hashes_before_after_equal": true,
+  "baseline_1_8_output_files_equal": true,
+  "candidate_1_8_output_files_equal": true,
+  "input_1_8_all_equal": true,
+  "output_shape": [
+    162,
+    215,
+    180,
+    3
+  ],
+  "output_element_count": 18808200
+}

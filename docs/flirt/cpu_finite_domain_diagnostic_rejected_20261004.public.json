@@ -1,0 +1,546 @@
+{
+  "status": "rejected_experiment_no_visible_cpu1_kernel_gain",
+  "date": "2026-10-04",
+  "experiment": "conservative finite-coordinate domain proof and lazy row_inside",
+  "decision": {
+    "adopted": false,
+    "reason": "All four CPU1 loaded-kernel medians are slower by 2.49% to 8.95%; no visible gain in the targeted path.",
+    "cpu8_route": "The existing parallel route is unchanged; small observed timing differences are not attributed to this experiment.",
+    "full_registration_trajectory_gate_run": false,
+    "new_official_benchmark_run": false,
+    "production_changes": false
+  },
+  "numeric_design": {
+    "coordinate_proof": "Recomputed conservative float64 absolute bound accepts only float32 intermediate coordinate operations proved finite; otherwise original per-block endpoint checks remain.",
+    "row_inside": "Original float32 row endpoint calculation is deferred until the first scalar fallback in that row.",
+    "sampling_and_bin_reduction_order": "unchanged float32 operations and per-bin accumulation order",
+    "unchanged_components": [
+      "SIMD intrinsic arithmetic",
+      "CPU8 parallel route",
+      "CUDA route",
+      "optimizer",
+      "scientific search budget"
+    ],
+    "not_implemented": [
+      "int32 address rewrite",
+      "implicit-one weight caching"
+    ]
+  },
+  "unit_exactness_only": {
+    "status": "unit_gate_passed",
+    "scope": "synthetic exactness and exceptional fallback units only; no performance benchmark",
+    "counts": {
+      "comparisons": 344,
+      "mutation_comparisons": 4,
+      "domain_guard_true": 304,
+      "domain_guard_false": 32,
+      "exception_fallbacks": 48
+    },
+    "versions": {
+      "numpy": "1.26.4",
+      "numba": "0.67.0",
+      "torch": "2.5.1"
+    },
+    "tested_contracts": [
+      "C/F/strided/negative-stride storage",
+      "weighted and unweighted stats",
+      "SIMD full blocks and tails",
+      "NaN/Inf and extreme coordinates",
+      "overflow fallback",
+      "4096/4097-axis neighbor safety",
+      "signed zero",
+      "in-place image/coefficient/bin/weight modification",
+      "CPU1/8 statistics and valid flags",
+      "Numba thread mask restoration"
+    ]
+  },
+  "real_loaded_kernel_diagnostic": {
+    "status": "complete_real_query_kernel_diagnostic_passed",
+    "host": "nodecw8",
+    "scope": "complete real T1 query loaded sampling+histogram diagnosis only; no registration/native/official benchmark",
+    "cold_imports_preprocessing_and_jit_excluded": true,
+    "arrays_all_original_full_reference_grid": true,
+    "no_production_edits": true,
+    "scientific_FP32_sampling_and_histogram_order_unchanged": true,
+    "CPU8_existing_parallel_route_unchanged": true,
+    "source_snapshot": "candidate_all_v27",
+    "source_manifest": {
+      "production_cpu_sha256": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+      "experimental_cpu_sha256": "85e120eb7760dec3c4e19d92517fbb76cc646ee255440a41967e72f3417cb9ab",
+      "intrinsic_sha256": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+      "scope": "private outer-loop finite-domain proof and lazy row_inside; same SIMD intrinsic, FP32 sampling/reduction/search unchanged",
+      "no_production_edits": true
+    },
+    "inputs": {
+      "moving": {
+        "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+        "bytes": 4238223
+      },
+      "reference": {
+        "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+        "bytes": 3847853
+      },
+      "actual_coefficients_by_resolution": {
+        "sha256": "c97f7feaa3c3cca407d0a42a9546e4f91c202bf96b572b21a79575c1f018bfc8"
+      }
+    },
+    "input_geometry": {
+      "moving": [
+        156,
+        256,
+        256
+      ],
+      "reference": [
+        256,
+        156,
+        256
+      ]
+    },
+    "versions": {
+      "torch": "2.5.1",
+      "numpy": "1.26.4",
+      "numba": "0.61.2",
+      "nibabel": "5.4.2"
+    },
+    "records": [
+      {
+        "threads": 1,
+        "affinity": [
+          32
+        ],
+        "scale_mm": 8,
+        "complete_reference_shape": [
+          32,
+          26,
+          32
+        ],
+        "reference_points": 26624,
+        "moving_shape": [
+          156,
+          256,
+          256
+        ],
+        "moving_strides_bytes": [
+          4,
+          624,
+          159744
+        ],
+        "actual_optimizer_coefficient_sha256": "1118f27674dcaf7793cbd9a47d4abf77ba5eaeb37ff2cb949133bff51c2fa980",
+        "coordinate_domain_proof": true,
+        "all_warm_and_measured_stats_bits_equal": true,
+        "valid_flag_equal": true,
+        "warm_call_seconds_not_loaded_clock": {
+          "old": 2.5646087136119604,
+          "new": 2.6433224929496646
+        },
+        "loaded_kernel_seconds_diagnostic": {
+          "old": [
+            0.0011228090152144432,
+            0.0004730960354208946,
+            0.00047910120338201523
+          ],
+          "new": [
+            0.0005212817341089249,
+            0.0004910193383693695,
+            0.00047460291534662247
+          ]
+        },
+        "loaded_kernel_medians_diagnostic": {
+          "old": 0.00047910120338201523,
+          "new": 0.0004910193383693695
+        },
+        "loaded_kernel_fraction_reduced": -0.02487602807762368,
+        "numba_mask_before_after_unchanged": true
+      },
+      {
+        "threads": 1,
+        "affinity": [
+          32
+        ],
+        "scale_mm": 4,
+        "complete_reference_shape": [
+          64,
+          51,
+          64
+        ],
+        "reference_points": 208896,
+        "moving_shape": [
+          156,
+          256,
+          256
+        ],
+        "moving_strides_bytes": [
+          4,
+          624,
+          159744
+        ],
+        "actual_optimizer_coefficient_sha256": "ff77f723a2172dff443cee30cb993a4ae63e7e7998c37ac536e4294ea9124da1",
+        "coordinate_domain_proof": true,
+        "all_warm_and_measured_stats_bits_equal": true,
+        "valid_flag_equal": true,
+        "warm_call_seconds_not_loaded_clock": {
+          "old": 0.024318747222423553,
+          "new": 0.026396394707262516
+        },
+        "loaded_kernel_seconds_diagnostic": {
+          "old": [
+            0.005018898285925388,
+            0.0037108445540070534,
+            0.00362345390021801
+          ],
+          "new": [
+            0.004329834133386612,
+            0.003862787038087845,
+            0.003543606959283352
+          ]
+        },
+        "loaded_kernel_medians_diagnostic": {
+          "old": 0.0037108445540070534,
+          "new": 0.003862787038087845
+        },
+        "loaded_kernel_fraction_reduced": -0.04094552651544525,
+        "numba_mask_before_after_unchanged": true
+      },
+      {
+        "threads": 1,
+        "affinity": [
+          32
+        ],
+        "scale_mm": 2,
+        "complete_reference_shape": [
+          128,
+          101,
+          128
+        ],
+        "reference_points": 1654784,
+        "moving_shape": [
+          156,
+          256,
+          256
+        ],
+        "moving_strides_bytes": [
+          4,
+          624,
+          159744
+        ],
+        "actual_optimizer_coefficient_sha256": "217222120241ddf36dd437647f763c30db8adb39ebc8aa06995520c632cc0dae",
+        "coordinate_domain_proof": true,
+        "all_warm_and_measured_stats_bits_equal": true,
+        "valid_flag_equal": true,
+        "warm_call_seconds_not_loaded_clock": {
+          "old": 0.05434262100607157,
+          "new": 0.038137394934892654
+        },
+        "loaded_kernel_seconds_diagnostic": {
+          "old": [
+            0.036041779443621635,
+            0.03193965461105108,
+            0.03045802190899849
+          ],
+          "new": [
+            0.03434507176280022,
+            0.03479800373315811,
+            0.05539568979293108
+          ]
+        },
+        "loaded_kernel_medians_diagnostic": {
+          "old": 0.03193965461105108,
+          "new": 0.03479800373315811
+        },
+        "loaded_kernel_fraction_reduced": -0.08949217381699692,
+        "numba_mask_before_after_unchanged": true
+      },
+      {
+        "threads": 1,
+        "affinity": [
+          32
+        ],
+        "scale_mm": 1,
+        "complete_reference_shape": [
+          256,
+          202,
+          256
+        ],
+        "reference_points": 13238272,
+        "moving_shape": [
+          156,
+          256,
+          256
+        ],
+        "moving_strides_bytes": [
+          4,
+          624,
+          159744
+        ],
+        "actual_optimizer_coefficient_sha256": "60f47f900b3891e676619d1ccbe5adfac22ba1e6aae8fdf8282a583150fc7793",
+        "coordinate_domain_proof": true,
+        "all_warm_and_measured_stats_bits_equal": true,
+        "valid_flag_equal": true,
+        "warm_call_seconds_not_loaded_clock": {
+          "old": 0.23582295421510935,
+          "new": 0.2488614283502102
+        },
+        "loaded_kernel_seconds_diagnostic": {
+          "old": [
+            0.22694324143230915,
+            0.22736184298992157,
+            0.2161067547276616
+          ],
+          "new": [
+            0.21189478412270546,
+            0.24098774790763855,
+            0.24003431294113398
+          ]
+        },
+        "loaded_kernel_medians_diagnostic": {
+          "old": 0.22694324143230915,
+          "new": 0.24003431294113398
+        },
+        "loaded_kernel_fraction_reduced": -0.057684341803717176,
+        "numba_mask_before_after_unchanged": true
+      },
+      {
+        "threads": 8,
+        "affinity": [
+          32,
+          36,
+          40,
+          44,
+          48,
+          52,
+          56,
+          60
+        ],
+        "scale_mm": 8,
+        "complete_reference_shape": [
+          32,
+          26,
+          32
+        ],
+        "reference_points": 26624,
+        "moving_shape": [
+          156,
+          256,
+          256
+        ],
+        "moving_strides_bytes": [
+          4,
+          624,
+          159744
+        ],
+        "actual_optimizer_coefficient_sha256": "1118f27674dcaf7793cbd9a47d4abf77ba5eaeb37ff2cb949133bff51c2fa980",
+        "coordinate_domain_proof": true,
+        "all_warm_and_measured_stats_bits_equal": true,
+        "valid_flag_equal": true,
+        "warm_call_seconds_not_loaded_clock": {
+          "old": 2.5773507663980126,
+          "new": 2.1468889182433486
+        },
+        "loaded_kernel_seconds_diagnostic": {
+          "old": [
+            0.0005380995571613312,
+            0.00027576833963394165,
+            0.0002809511497616768
+          ],
+          "new": [
+            0.00032529328018426895,
+            0.0002801883965730667,
+            0.00027371570467948914
+          ]
+        },
+        "loaded_kernel_medians_diagnostic": {
+          "old": 0.0002809511497616768,
+          "new": 0.0002801883965730667
+        },
+        "loaded_kernel_fraction_reduced": 0.0027148961278752326,
+        "numba_mask_before_after_unchanged": true
+      },
+      {
+        "threads": 8,
+        "affinity": [
+          32,
+          36,
+          40,
+          44,
+          48,
+          52,
+          56,
+          60
+        ],
+        "scale_mm": 4,
+        "complete_reference_shape": [
+          64,
+          51,
+          64
+        ],
+        "reference_points": 208896,
+        "moving_shape": [
+          156,
+          256,
+          256
+        ],
+        "moving_strides_bytes": [
+          4,
+          624,
+          159744
+        ],
+        "actual_optimizer_coefficient_sha256": "ff77f723a2172dff443cee30cb993a4ae63e7e7998c37ac536e4294ea9124da1",
+        "coordinate_domain_proof": true,
+        "all_warm_and_measured_stats_bits_equal": true,
+        "valid_flag_equal": true,
+        "warm_call_seconds_not_loaded_clock": {
+          "old": 0.0036189472302794456,
+          "new": 0.0028573404997587204
+        },
+        "loaded_kernel_seconds_diagnostic": {
+          "old": [
+            0.001976553350687027,
+            0.001878662034869194,
+            0.0018436433747410774
+          ],
+          "new": [
+            0.0018573272973299026,
+            0.0018415702506899834,
+            0.0018363967537879944
+          ]
+        },
+        "loaded_kernel_medians_diagnostic": {
+          "old": 0.001878662034869194,
+          "new": 0.0018415702506899834
+        },
+        "loaded_kernel_fraction_reduced": 0.019743723719733985,
+        "numba_mask_before_after_unchanged": true
+      },
+      {
+        "threads": 8,
+        "affinity": [
+          32,
+          36,
+          40,
+          44,
+          48,
+          52,
+          56,
+          60
+        ],
+        "scale_mm": 2,
+        "complete_reference_shape": [
+          128,
+          101,
+          128
+        ],
+        "reference_points": 1654784,
+        "moving_shape": [
+          156,
+          256,
+          256
+        ],
+        "moving_strides_bytes": [
+          4,
+          624,
+          159744
+        ],
+        "actual_optimizer_coefficient_sha256": "217222120241ddf36dd437647f763c30db8adb39ebc8aa06995520c632cc0dae",
+        "coordinate_domain_proof": true,
+        "all_warm_and_measured_stats_bits_equal": true,
+        "valid_flag_equal": true,
+        "warm_call_seconds_not_loaded_clock": {
+          "old": 0.015762620605528355,
+          "new": 0.013964013196527958
+        },
+        "loaded_kernel_seconds_diagnostic": {
+          "old": [
+            0.013802856206893921,
+            0.013791888020932674,
+            0.013831758871674538
+          ],
+          "new": [
+            0.013717788271605968,
+            0.013703374192118645,
+            0.013763134367763996
+          ]
+        },
+        "loaded_kernel_medians_diagnostic": {
+          "old": 0.013802856206893921,
+          "new": 0.013717788271605968
+        },
+        "loaded_kernel_fraction_reduced": 0.006163067557384605,
+        "numba_mask_before_after_unchanged": true
+      },
+      {
+        "threads": 8,
+        "affinity": [
+          32,
+          36,
+          40,
+          44,
+          48,
+          52,
+          56,
+          60
+        ],
+        "scale_mm": 1,
+        "complete_reference_shape": [
+          256,
+          202,
+          256
+        ],
+        "reference_points": 13238272,
+        "moving_shape": [
+          156,
+          256,
+          256
+        ],
+        "moving_strides_bytes": [
+          4,
+          624,
+          159744
+        ],
+        "actual_optimizer_coefficient_sha256": "60f47f900b3891e676619d1ccbe5adfac22ba1e6aae8fdf8282a583150fc7793",
+        "coordinate_domain_proof": true,
+        "all_warm_and_measured_stats_bits_equal": true,
+        "valid_flag_equal": true,
+        "warm_call_seconds_not_loaded_clock": {
+          "old": 0.1438899813219905,
+          "new": 0.12241524830460548
+        },
+        "loaded_kernel_seconds_diagnostic": {
+          "old": [
+            0.12414393573999405,
+            0.12423472385853529,
+            0.12448874209076166
+          ],
+          "new": [
+            0.12449857220053673,
+            0.1240965723991394,
+            0.12382736150175333
+          ]
+        },
+        "loaded_kernel_medians_diagnostic": {
+          "old": 0.12423472385853529,
+          "new": 0.1240965723991394
+        },
+        "loaded_kernel_fraction_reduced": 0.001112019692281807,
+        "numba_mask_before_after_unchanged": true
+      }
+    ],
+    "inputs_after": {
+      "moving": {
+        "sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+        "bytes": 4238223
+      },
+      "reference": {
+        "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+        "bytes": 3847853
+      },
+      "actual_coefficients_by_resolution": {
+        "sha256": "c97f7feaa3c3cca407d0a42a9546e4f91c202bf96b572b21a79575c1f018bfc8"
+      }
+    },
+    "input_files_unchanged_before_after": true,
+    "production_and_intrinsic_unchanged_before_after": true
+  },
+  "actual_optimizer_coefficient_origin": "Saved actual affine coefficients for all four full levels from an earlier complete v10 public T1 registration, reused for this bounded query diagnostic; no new registration trajectory was executed.",
+  "timing_contract": "One loaded warm call per implementation and budget/level, then three alternating paired calls. Loaded kernel includes finite guards, allocations, sampling and histogram. Imports, image preparation and first JIT compilation are excluded. This is neither a full FNIT registration nor an official FSL comparison.",
+  "public_data_policy": "Only aggregate timings, array geometry, software versions and SHA-256 values are retained; no image data, subject identifiers or private server paths are included."
+}

@@ -1,0 +1,502 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-04",
+  "status": "rejected_not_merged",
+  "experiment": "CPU1 prepared FP64 three-channel normalize and native trilinear sampling fusion",
+  "decision": {
+    "adopted": false,
+    "reason": "The complete CPU1 API did not improve despite faster loaded first-query sampling.",
+    "minimum_required_warm_API_time_reduction_percent": 5.0,
+    "observed_new_warm_API_time_increase_percent": 4.1748452037223105,
+    "official_benchmark_started": false,
+    "production_source_modified": false,
+    "permanent_test_or_third_party_license_added_to_production": false,
+    "further_prototypes_or_full_solver_tests_planned": false
+  },
+  "baseline_source": "candidate_all_v28",
+  "experimental_source": "experimental_inv_fused1_v29_ready",
+  "source_sha256": {
+    "old": {
+      "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+      "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+      "src/fnit/convertwarp/core.py": "730c0d8c82b7d35c5f77e9a7d0ffad65e375f13f37c379591c399ef0b26627d8",
+      "src/fnit/invwarp/core.py": "b3f48e5a7fd4156b9f8cd9d0094b5299ed95c77b59b5636faeda0f522df34adc"
+    },
+    "new": {
+      "src/fnit/applywarp/core.py": "ad9e98215f2c3decb05dd8bffb5f1784571575ed8219b66e7d52ce1c4c852fef",
+      "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+      "src/fnit/convertwarp/core.py": "730c0d8c82b7d35c5f77e9a7d0ffad65e375f13f37c379591c399ef0b26627d8",
+      "src/fnit/invwarp/core.py": "b3f48e5a7fd4156b9f8cd9d0094b5299ed95c77b59b5636faeda0f522df34adc",
+      "src/fnit/applywarp/_sampling_fused_cpu.py": "22f6b7626f3f811afc1ffcb17354c2ef6b67ed1bc9444a57f5524f3cf19e8ad6"
+    }
+  },
+  "text_AST_equivalence": {
+    "schema_version": 1,
+    "status": "private_production_candidate_text_only",
+    "base": "candidate_all_v28",
+    "prior_private_math_gate": "experimental_inv_fused1_v28",
+    "text_only_changes": true,
+    "normalized_AST_identical": true,
+    "removed_only_docstrings_and_comments_for_AST_comparison": true,
+    "old_new": {
+      "src/fnit/applywarp/core.py": {
+        "old_sha256": "d6420899d33894bfa08ab56b44dfbc17853bf759af768df3be7ba213e3b26f92",
+        "ready_sha256": "ad9e98215f2c3decb05dd8bffb5f1784571575ed8219b66e7d52ce1c4c852fef",
+        "normalized_ast_sha256": "92e52f7ed8b05f8bec087c76000d37001a89124ee6df89f57da2030737014898"
+      },
+      "src/fnit/applywarp/_sampling_fused_cpu.py": {
+        "old_sha256": "fc17d09101d560ffacf52054043bbb49de47369486c2e615e0ab920e36f39d98",
+        "ready_sha256": "22f6b7626f3f811afc1ffcb17354c2ef6b67ed1bc9444a57f5524f3cf19e8ad6",
+        "normalized_ast_sha256": "ae032f59b847b92d93dcd088492e103c09c6a43833726b2b74cbf3e90f0418b7"
+      }
+    },
+    "license_reference": "licenses/PyTorch-BSD-3-Clause.txt",
+    "source_urls": [
+      "https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/GridSampler.cpp",
+      "https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/GridSampler.h",
+      "https://github.com/pytorch/pytorch/blob/v2.5.1/LICENSE"
+    ],
+    "old_frozen_source_unchanged": true
+  },
+  "implementation_scope": {
+    "cpu_budget": 1,
+    "prepared_dtype": "float64",
+    "channels": 3,
+    "guards": "CPU, strided ordinary storage, supported layout, no reverse gradient/forward dual/functional transform; otherwise original route",
+    "finite_arithmetic": "fastmath and FMA disabled; native normalization, unnormalization, border and eight-corner FP64 order retained",
+    "no_persistent_input_or_finite_cache": true,
+    "source_and_query_mutations_read_at_each_call": true,
+    "cpu8_and_cuda_original_routes": true,
+    "runtime_dependencies_added": false
+  },
+  "runtime": {
+    "old": {
+      "hostname": "nodecw8",
+      "cpus": [
+        35
+      ],
+      "python": "3.11.16",
+      "torch": "2.5.1",
+      "numpy": "1.26.4",
+      "numba": "0.61.2",
+      "torch_threads": 1,
+      "interop_threads": 1,
+      "numba_mask": 8,
+      "flush_denormal": false
+    },
+    "new": {
+      "hostname": "nodecw8",
+      "cpus": [
+        35
+      ],
+      "python": "3.11.16",
+      "torch": "2.5.1",
+      "numpy": "1.26.4",
+      "numba": "0.61.2",
+      "torch_threads": 1,
+      "interop_threads": 1,
+      "numba_mask": 8,
+      "flush_denormal": false
+    }
+  },
+  "unit_gate": {
+    "cases": 198,
+    "fused_cases": 117,
+    "fallback_cases": 81,
+    "oracle": "actual native Torch 2.5.1 3D grid_sample; synthetic correctness cases, no benchmark",
+    "flush_denormal_sequence": [
+      false,
+      true,
+      false
+    ],
+    "coverage": [
+      "ULP and half ties",
+      "border and size-one axes",
+      "signed zero and subnormal",
+      "NaN/Inf and extreme-coordinate fallback",
+      "prepared/source/query mutation",
+      "fresh output and input alias",
+      "unsupported layout and prepared error contract",
+      "reverse AD, forward dual and functional guards",
+      "CPU8 and actual local CUDA original routes"
+    ],
+    "all_value_bits_and_required_valid_masks_equal": true,
+    "LLVM_and_assembly_FMA_absent": true
+  },
+  "loaded_first_query_diagnostic": {
+    "scope": "loaded complete first real InvWarp sampling query; no complete inverse solver and no official benchmark",
+    "full_query_shape": [
+      3,
+      162,
+      215,
+      180
+    ],
+    "full_query_points": 6269400,
+    "source_shape": [
+      3,
+      91,
+      109,
+      91
+    ],
+    "prepared_strides": [
+      2707887,
+      1,
+      29757,
+      273,
+      3
+    ],
+    "capture_from_original_coarse_fit": true,
+    "warmup": 1,
+    "repetitions": 3,
+    "orders": [
+      [
+        "old",
+        "new"
+      ],
+      [
+        "new",
+        "old"
+      ],
+      [
+        "old",
+        "new"
+      ]
+    ],
+    "rows": [
+      {
+        "calculate_valid": false,
+        "old_median_seconds": 0.5950340377166867,
+        "new_median_seconds": 0.4361837822943926,
+        "old_over_new_median_ratio": 1.364181938601013,
+        "full_sample_bits_equal": true,
+        "full_valid_mask_equal": true,
+        "output_fresh_and_no_input_alias": true
+      },
+      {
+        "calculate_valid": true,
+        "old_median_seconds": 0.7654571468010545,
+        "new_median_seconds": 0.5750282173976302,
+        "old_over_new_median_ratio": 1.3311644953098767,
+        "full_sample_bits_equal": true,
+        "full_valid_mask_equal": true,
+        "output_fresh_and_no_input_alias": true
+      }
+    ],
+    "full_API_or_official_performance_claim": false
+  },
+  "complete_trajectory_gate": {
+    "scope": "four independent complete saved InvWarp API calls; original 30 iterations; no official program",
+    "timing_scope": "first fresh-process instrumented full API with per-sample hashes; diagnostic overhead included; warm clean timing still separate",
+    "rows": [
+      {
+        "threads": 1,
+        "sample_calls": 32,
+        "full_query_calls": 31,
+        "per_sample_query_values_valid_hashes_equal": true,
+        "complete_saved_files_equal": true,
+        "array_bits_header_affine_extensions_equal": true,
+        "qc_valid_fraction_stopping_equal": true,
+        "all_iterations_retained": 30,
+        "helper_counts": {
+          "calls": 32,
+          "fused": 32,
+          "fallback": 0
+        },
+        "old_instrumented_api_seconds": 63.23966868594289,
+        "new_instrumented_api_seconds": 73.06855945847929,
+        "old_hash_diagnostic_seconds": 17.90767435450107,
+        "new_hash_diagnostic_seconds": 21.83507345803082,
+        "old_process_wall_seconds": 67.92545666825026,
+        "new_process_wall_seconds": 78.73058013617992
+      },
+      {
+        "threads": 8,
+        "sample_calls": 32,
+        "full_query_calls": 31,
+        "per_sample_query_values_valid_hashes_equal": true,
+        "complete_saved_files_equal": true,
+        "array_bits_header_affine_extensions_equal": true,
+        "qc_valid_fraction_stopping_equal": true,
+        "all_iterations_retained": 30,
+        "helper_counts": {
+          "calls": 0,
+          "fused": 0,
+          "fallback": 0
+        },
+        "old_instrumented_api_seconds": 41.493418728001416,
+        "new_instrumented_api_seconds": 47.48325879685581,
+        "old_hash_diagnostic_seconds": 20.904963843524456,
+        "new_hash_diagnostic_seconds": 23.160460115410388,
+        "old_process_wall_seconds": 45.659220611676574,
+        "new_process_wall_seconds": 53.14741820003837
+      }
+    ],
+    "sample_hash_diagnostic_clock_not_subtracted_to_create_API_times": true,
+    "verification": {
+      "actual_source_binding_checked": true,
+      "source_prepost_sha_unchanged": true,
+      "input_prepost_sha_unchanged": true,
+      "full_values_and_saved_bytes_compared": true,
+      "per_query_f64_values_hashed_and_compared": true,
+      "cpu8_helper_calls_zero": true,
+      "input_paths_and_individual_image_hashes_private": true
+    }
+  },
+  "complete_clean_CPU1_API": {
+    "scope": "same-source28/private fused complete saved CPU1 InvWarp API; no official binary",
+    "timing_scope": "full API image reads + all original computation/QC + complete save; imports and file checking outside clock; no per-sample hashing in timed API",
+    "protocol": {
+      "physical_core": 35,
+      "independent_persistent_process_per_implementation": true,
+      "first_API_per_process_includes_lazy_import_and_JIT": true,
+      "first_process_API_is_also_warmup": true,
+      "filesystem_cache_eviction": false,
+      "warm_repetitions": 3,
+      "warm_orders": [
+        [
+          "old",
+          "new"
+        ],
+        [
+          "new",
+          "old"
+        ],
+        [
+          "old",
+          "new"
+        ]
+      ],
+      "source_input_options_equal": true
+    },
+    "first_process_API_seconds": {
+      "old": 38.21308142505586,
+      "new": 38.99067160952836
+    },
+    "initialization_seconds": {
+      "old": 3.056978950276971,
+      "new": 2.600668686442077
+    },
+    "warm_API_median_seconds": {
+      "old": 37.692398792132735,
+      "new": 39.26599809527397
+    },
+    "warm_old_over_new_ratio": 0.9599246325198942,
+    "calls": [
+      {
+        "status": "call_complete",
+        "call_index": 0,
+        "implementation": "old",
+        "full_api_seconds": 38.21308142505586,
+        "qc": {
+          "valid_fraction": 0.760824978351593,
+          "device": "cpu",
+          "output_convention": "relative",
+          "input_convention": "relative",
+          "iterations": 30,
+          "tolerance_mm": 0.01,
+          "iterations_used": 30,
+          "converged": false,
+          "median_residual_mm_in_field": 0.0,
+          "matrix_coordinates": "FSL scaled-mm"
+        }
+      },
+      {
+        "status": "call_complete",
+        "call_index": 0,
+        "implementation": "new",
+        "full_api_seconds": 38.99067160952836,
+        "qc": {
+          "valid_fraction": 0.760824978351593,
+          "device": "cpu",
+          "output_convention": "relative",
+          "input_convention": "relative",
+          "iterations": 30,
+          "tolerance_mm": 0.01,
+          "iterations_used": 30,
+          "converged": false,
+          "median_residual_mm_in_field": 0.0,
+          "matrix_coordinates": "FSL scaled-mm"
+        }
+      },
+      {
+        "status": "call_complete",
+        "call_index": 1,
+        "implementation": "old",
+        "full_api_seconds": 36.40952583309263,
+        "qc": {
+          "valid_fraction": 0.760824978351593,
+          "device": "cpu",
+          "output_convention": "relative",
+          "input_convention": "relative",
+          "iterations": 30,
+          "tolerance_mm": 0.01,
+          "iterations_used": 30,
+          "converged": false,
+          "median_residual_mm_in_field": 0.0,
+          "matrix_coordinates": "FSL scaled-mm"
+        }
+      },
+      {
+        "status": "call_complete",
+        "call_index": 1,
+        "implementation": "new",
+        "full_api_seconds": 39.18649041838944,
+        "qc": {
+          "valid_fraction": 0.760824978351593,
+          "device": "cpu",
+          "output_convention": "relative",
+          "input_convention": "relative",
+          "iterations": 30,
+          "tolerance_mm": 0.01,
+          "iterations_used": 30,
+          "converged": false,
+          "median_residual_mm_in_field": 0.0,
+          "matrix_coordinates": "FSL scaled-mm"
+        }
+      },
+      {
+        "status": "call_complete",
+        "call_index": 2,
+        "implementation": "new",
+        "full_api_seconds": 39.951777630485594,
+        "qc": {
+          "valid_fraction": 0.760824978351593,
+          "device": "cpu",
+          "output_convention": "relative",
+          "input_convention": "relative",
+          "iterations": 30,
+          "tolerance_mm": 0.01,
+          "iterations_used": 30,
+          "converged": false,
+          "median_residual_mm_in_field": 0.0,
+          "matrix_coordinates": "FSL scaled-mm"
+        }
+      },
+      {
+        "status": "call_complete",
+        "call_index": 2,
+        "implementation": "old",
+        "full_api_seconds": 37.692398792132735,
+        "qc": {
+          "valid_fraction": 0.760824978351593,
+          "device": "cpu",
+          "output_convention": "relative",
+          "input_convention": "relative",
+          "iterations": 30,
+          "tolerance_mm": 0.01,
+          "iterations_used": 30,
+          "converged": false,
+          "median_residual_mm_in_field": 0.0,
+          "matrix_coordinates": "FSL scaled-mm"
+        }
+      },
+      {
+        "status": "call_complete",
+        "call_index": 3,
+        "implementation": "old",
+        "full_api_seconds": 39.81006428319961,
+        "qc": {
+          "valid_fraction": 0.760824978351593,
+          "device": "cpu",
+          "output_convention": "relative",
+          "input_convention": "relative",
+          "iterations": 30,
+          "tolerance_mm": 0.01,
+          "iterations_used": 30,
+          "converged": false,
+          "median_residual_mm_in_field": 0.0,
+          "matrix_coordinates": "FSL scaled-mm"
+        }
+      },
+      {
+        "status": "call_complete",
+        "call_index": 3,
+        "implementation": "new",
+        "full_api_seconds": 39.26599809527397,
+        "qc": {
+          "valid_fraction": 0.760824978351593,
+          "device": "cpu",
+          "output_convention": "relative",
+          "input_convention": "relative",
+          "iterations": 30,
+          "tolerance_mm": 0.01,
+          "iterations_used": 30,
+          "converged": false,
+          "median_residual_mm_in_field": 0.0,
+          "matrix_coordinates": "FSL scaled-mm"
+        }
+      }
+    ],
+    "verification": {
+      "all_saved_files_array_bits_headers_affines_extensions_equal": true,
+      "qc_valid_fraction_iterations_and_stops_equal": true,
+      "all_outputs_equal_to_independent_trace_gate": true,
+      "source_input_manifest_prepost_sha_unchanged": true,
+      "actual_source_imports_verified": true,
+      "individual_image_paths_and_hashes_private": true
+    },
+    "numba_cache_observation": {
+      "per_worker_fresh_custom_NUMBA_CACHE_DIR": true,
+      "directories_initially_absent_in_new_run": true,
+      "first_API_includes_lazy_import_and_JIT": true,
+      "CPU_filesystem_cache_eviction": false,
+      "observed_cache_files": {
+        "old": {
+          "custom_directory_created": true,
+          "nbi_index_files": 1,
+          "nbc_compiled_files": 1,
+          "all_cache_files_created_after_controller_launch": true,
+          "cache_filenames": [
+            "_normalization_cpu._normalize_float64_grid64-14.py311.1.nbc",
+            "_normalization_cpu._normalize_float64_grid64-14.py311.nbi"
+          ]
+        },
+        "new": {
+          "custom_directory_created": true,
+          "nbi_index_files": 1,
+          "nbc_compiled_files": 1,
+          "all_cache_files_created_after_controller_launch": true,
+          "cache_filenames": [
+            "_sampling_fused_cpu._sample-43.py311.1.nbc",
+            "_sampling_fused_cpu._sample-43.py311.nbi"
+          ]
+        }
+      }
+    },
+    "compared_to_current_official_invwarp": false
+  },
+  "independent_local_CUDA_gate": {
+    "scope": "complete small-grid CUDA API correctness; synthetic unit fixtures, no real-data benchmark or speed assessment",
+    "cases_completed": 12,
+    "saved_calls": 24,
+    "device": "NVIDIA GeForce RTX 3060",
+    "torch": "2.5.1",
+    "old_new_classes_independently_loaded_and_bound": true,
+    "new_sampler_module_never_imported": true,
+    "arrays_headers_affines_forms_extensions_QC_stops_operator_sequence_and_peaks_equal": true,
+    "included_in_production_regression_count": false
+  },
+  "provenance": {
+    "actual_source_modules_and_prepost_SHA_checked": true,
+    "input_source_manifest_prepost_SHA_unchanged": true,
+    "per_sample_full_FP64_query_values_and_validity_hashed_in_trajectory_gate": true,
+    "all_complete_saved_NIfTI_bytes_arrays_headers_affines_extensions_equal": true,
+    "all_30_iterations_and_original_QC_stops_retained": true,
+    "individual_image_paths_image_hashes_and_raw_arrays_remain_private": true,
+    "detailed_reports_retained_outside_repository": true,
+    "detailed_public_report_sha256": {
+      "unit": "3a84f2cac7b346c946e8eef894e3f440307e6553eaba5a17ab3c52644afa68fa",
+      "loaded_first_query": "9c66e32ea78c75e89284603d712aac80a1b4cfb9a6f705c6d6d54da5e4ea7c5f",
+      "complete_instrumented_trace": "446e94452b406d161b6b06e81aa662894d5661242f48c41072faf61cb50fa6c1",
+      "complete_clean_API": "2d48ce6766c81047d3435112b20a454376ec7603d192bb3281234bcb12a3b41b",
+      "text_AST_equivalence": "b119ffdda129da972623300a4cac89b5982429ca9cc0e0327e655341b35d4ed0",
+      "independent_local_CUDA": "8de0839c4fc54c621e4ed9812e9455116767df559c023292d3a63c03b9dc6f2d"
+    }
+  },
+  "arithmetic_reference_urls": [
+    "https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/GridSampler.cpp",
+    "https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/GridSampler.h",
+    "https://github.com/pytorch/pytorch/blob/v2.5.1/LICENSE"
+  ],
+  "license_reference_scope": "Upstream license was checked for the experiment; no rejected helper or license file was added to production."
+}

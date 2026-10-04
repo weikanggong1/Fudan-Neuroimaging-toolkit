@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "host": "nodecw10",
+  "timing_protocol": "single complete observation, no warmup/repeated stable speed estimate",
+  "tool_sha256": "6f1907f15893c1a4f7ad7b1437dc92b4f2ae78ad6eb8e777833ee907af9719f8",
+  "source_hashes": {
+    "candidate": {
+      "src/fnit/applywarp/core.py": "21dc364be908ff985e73c0fc78f09a405b1465624a0cc8b913a0f0a4f6d054a2",
+      "src/fnit/_world_resampling.py": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83",
+      "src/fnit/eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+      "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    },
+    "baseline": {
+      "src/fnit/applywarp/core.py": "0022b5a6386409f29bd9e513ab4f2192e9722eb5dd9bd8735eac0241a5d0928d",
+      "src/fnit/_world_resampling.py": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5",
+      "src/fnit/eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+      "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    }
+  },
+  "official_program": {
+    "container_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+    "singularity_sha256": "327cb3ec715228f3487edb6ec41974ef38e2d51184c5d1d2f3e406ee3734d90b"
+  },
+  "privacy": "Private real fMRI chain: aggregate results only; no participant identifiers, paths or images",
+  "status": "complete_with_matching_correct_official_and_full_file_thread_equality",
+  "candidate_world_sha256": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83",
+  "cpu1_snapshot": "all_v20",
+  "cpu8_snapshot": "all_v18_execution_sources_plus_exact_latest_World0b24714e",
+  "candidate_all_v20_archive_sha256": "c0b5145549efb6c58dd4ae3b7bd060c7cc40b73cd556fe9ab01ca8432d30d617",
+  "execution_source_hashes_identical_between_budgets": true,
+  "full_file_bit_gate": {
+    "latest_candidate1_file_identical_candidate8": true,
+    "latest_candidate1_file_identical_frozen18": true,
+    "latest_official1_file_identical_correct_oracle1and8": true,
+    "all_inputs_identical": true
+  },
+  "records": [
+    {
+      "case_id": "world_full490_spline_fmriprep_pool_layout_cpu1",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": true
+      },
+      "masked": false,
+      "threads": 1,
+      "affinity": [
+        35
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 442288210,
+            "nonfinite": 0,
+            "different_values": 113,
+            "different_fraction": 2.5548951440509796e-07,
+            "bit_different_values": 113,
+            "max_absolute_error": 0.00048828125,
+            "mae": 1.2597391716055094e-12,
+            "rmse": 2.3252531833470033e-08,
+            "relative_l2": 5.663507704778413e-12
+          },
+          "brain": {
+            "values": 111956670,
+            "nonfinite": 0,
+            "different_values": 10,
+            "different_fraction": 8.932027006519576e-08,
+            "bit_different_values": 10,
+            "max_absolute_error": 1.52587890625e-05,
+            "mae": 1.762546091293989e-13,
+            "rmse": 1.4872180046378523e-09,
+            "relative_l2": 2.370346822503172e-13
+          },
+          "outside_brain": {
+            "values": 330331540,
+            "nonfinite": 0,
+            "different_values": 103,
+            "different_fraction": 3.118079490683814e-07,
+            "bit_different_values": 103,
+            "max_absolute_error": 0.00048828125,
+            "mae": 1.6269560701530483e-12,
+            "rmse": 2.689198954449753e-08,
+            "relative_l2": 8.852799124628544e-12
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0,
+            0.7350000143051147
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0,
+            0.7350000143051147
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "official": {
+          "api_load_compute_save_seconds": 291.45950193703175,
+          "scope": "entry framework imports/setup excluded; function-internal lazy imports and complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "output_shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 3193488,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "scipy": "1.15.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 301.47503188997507,
+          "user_cpu_seconds": 292.885674,
+          "system_cpu_seconds": 6.196623,
+          "official_frame_concurrency": 1,
+          "openblas_thread_limit": "1",
+          "effective_cpu_cores": 0.9920632402790546
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 239.19265092164278,
+          "scope": "entry framework imports/setup excluded; function-internal lazy imports and complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "output_shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "affinity": [
+            35
+          ],
+          "thread_budget": 1,
+          "maximum_rss_kib": 3621288,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "scipy": "1.17.1",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 241.77778355032206,
+          "user_cpu_seconds": 219.80188999999996,
+          "system_cpu_seconds": 19.953337,
+          "official_frame_concurrency": null,
+          "openblas_thread_limit": "1",
+          "effective_cpu_cores": 0.9916346468206367
+        }
+      }
+    },
+    {
+      "case_id": "world_full490_spline_fmriprep_pool_layout_blas1",
+      "case_semantics": {
+        "interpolation": "spline",
+        "boundary": "grid-constant",
+        "coordinate_precision": "fmriprep",
+        "entry": "run_world",
+        "batch_size": 8,
+        "spatial_chunk_size": 262144,
+        "complete_490": true
+      },
+      "masked": false,
+      "threads": 8,
+      "affinity": [
+        35,
+        39,
+        43,
+        47,
+        51,
+        55,
+        59,
+        63
+      ],
+      "reference_backend": "official",
+      "precision": {
+        "status": "compared",
+        "regions": {
+          "whole": {
+            "values": 442288210,
+            "nonfinite": 0,
+            "different_values": 113,
+            "different_fraction": 2.5548951440509796e-07,
+            "bit_different_values": 113,
+            "max_absolute_error": 0.00048828125,
+            "mae": 1.2597391716055094e-12,
+            "rmse": 2.3252531833470033e-08,
+            "relative_l2": 5.663507704778413e-12
+          },
+          "brain": {
+            "values": 111956670,
+            "nonfinite": 0,
+            "different_values": 10,
+            "different_fraction": 8.932027006519576e-08,
+            "bit_different_values": 10,
+            "max_absolute_error": 1.52587890625e-05,
+            "mae": 1.762546091293989e-13,
+            "rmse": 1.4872180046378523e-09,
+            "relative_l2": 2.370346822503172e-13
+          },
+          "outside_brain": {
+            "values": 330331540,
+            "nonfinite": 0,
+            "different_values": 103,
+            "different_fraction": 3.118079490683814e-07,
+            "bit_different_values": 103,
+            "max_absolute_error": 0.00048828125,
+            "mae": 1.6269560701530483e-12,
+            "rmse": 2.689198954449753e-08,
+            "relative_l2": 8.852799124628544e-12
+          }
+        },
+        "left_metadata": {
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0,
+            0.7350000143051147
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "right_metadata": {
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "zooms": [
+            2.0,
+            2.0,
+            2.0,
+            0.7350000143051147
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ],
+          "qform_code": 4,
+          "sform_code": 4,
+          "slope": 1.0,
+          "intercept": 0.0
+        },
+        "affine_max_error": 0.0,
+        "header_binary_identical": true,
+        "extensions_identical": true
+      },
+      "observations": {
+        "official": {
+          "api_load_compute_save_seconds": 46.60970050096512,
+          "scope": "entry framework imports/setup excluded; function-internal lazy imports and complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "output_shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 4397944,
+          "versions": {
+            "numpy": "2.2.6",
+            "nibabel": "5.3.2",
+            "scipy": "1.15.2",
+            "nitransforms": "25.1.0"
+          },
+          "full_process_seconds": 56.297035448253155,
+          "user_cpu_seconds": 298.083346,
+          "system_cpu_seconds": 9.385206,
+          "official_frame_concurrency": 8,
+          "openblas_thread_limit": "1",
+          "effective_cpu_cores": 5.4615407285987105
+        },
+        "candidate": {
+          "api_load_compute_save_seconds": 45.03958511352539,
+          "scope": "entry framework imports/setup excluded; function-internal lazy imports and complete source/target/field/matrices/mask loading, computation and NIfTI save included",
+          "source_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "output_shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "affinity": [
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "thread_budget": 8,
+          "maximum_rss_kib": 3818064,
+          "versions": {
+            "numpy": "1.26.4",
+            "nibabel": "5.4.2",
+            "scipy": "1.17.1",
+            "torch": "2.5.1"
+          },
+          "full_process_seconds": 46.831402994692326,
+          "user_cpu_seconds": 231.38015299999995,
+          "system_cpu_seconds": 16.084211,
+          "official_frame_concurrency": null,
+          "openblas_thread_limit": "1",
+          "effective_cpu_cores": 5.284154395887874
+        }
+      }
+    }
+  ],
+  "roundoff_accuracy": "Both CPU budgets save identical complete NIfTI. Against correct official1and8, whole442288210 values RMSE2.3252531833470033e-8/113 different values; brain111956670 RMSE1.4872180046378523e-9/10 differences; all finite; entire header/affine/extensions equal",
+  "observation_only": "One complete no-warmup pair per CPU budget; no stable speed-ratio estimate; complete490 frames, batch8/query262144, same cpuset budgets1and8; official native frame concurrency matches budget; both OpenBLAS1"
+}

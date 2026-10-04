@@ -1,0 +1,140 @@
+{
+  "status": "executed_with_numeric_comparisons",
+  "timing_policy": "One complete original first-pair observation; repeated protocol deliberately reduced after expensive native solve. No medians.",
+  "source_tree_sha256": "3f0df20f5fb85e3854dea946e4831fc1e78e811b1ccf93f0e4cf075d9a1013ce",
+  "backend_source_tree_sha256": {
+    "baseline": "1bb040766e667a34ca2322299e74fed2eaa3ceacfb2021ef0e3a34c0245c7782",
+    "candidate": "3f0df20f5fb85e3854dea946e4831fc1e78e811b1ccf93f0e4cf075d9a1013ce"
+  },
+  "records": [
+    {
+      "case_id": "public_cc0_t1_fixed_official_coefficients",
+      "threads": 1,
+      "affinity": [
+        34
+      ],
+      "timing_protocol": "single_observation",
+      "process_cpu_usage": {
+        "official": [
+          [
+            {
+              "user_seconds": 884.963725,
+              "system_seconds": 7.099074,
+              "effective_cpu_cores": 0.9553843009771404
+            }
+          ]
+        ],
+        "baseline": [],
+        "candidate": [
+          {
+            "user_seconds": 42.86817300000007,
+            "system_seconds": 37.906996,
+            "effective_cpu_cores": 0.9880270367124786
+          }
+        ]
+      },
+      "candidate_api_seconds": [
+        79.37213584780693
+      ],
+      "accuracy": {
+        "candidate_vs_official": {
+          "inverse_warp": {
+            "status": "compared",
+            "shape": [
+              256,
+              156,
+              256,
+              3
+            ],
+            "all_finite": true,
+            "affine_max_absolute_difference": 0.0,
+            "element_count": 30670848,
+            "finite_pair_count": 30670848,
+            "candidate_finite_count": 30670848,
+            "reference_finite_count": 30670848,
+            "nonfinite_pattern_equal": true,
+            "nonfinite_pattern_mismatch_count": 0,
+            "max_absolute_error": 16.74109649658203,
+            "mean_absolute_error": 0.9749341937249224,
+            "rmse": 1.7014445375446647,
+            "relative_l2_error": 0.031527021216396126,
+            "exact_fraction": 4.368969517895299e-05
+          }
+        }
+      },
+      "adapter_accuracy": {
+        "region": "explicit_accuracy_mask",
+        "region_voxels": 1681332,
+        "available_backends": [
+          "candidate",
+          "official"
+        ],
+        "solver_contract": {
+          "fnit_solver": "global-affine-initialised fixed-point",
+          "fnit_maximum_iterations": 30,
+          "fnit_tolerance_mm": 0.01,
+          "official_niter_option_available": false,
+          "official_maximum_iterations": null,
+          "official_solver_stopping": "native FSL program defaults unless supported niter is explicitly requested",
+          "same_stopping_rule": false
+        },
+        "pairs": {
+          "candidate_vs_official": {
+            "all_finite": true,
+            "mean_vector_difference_mm": 0.10691259068999447,
+            "median_vector_difference_mm": 0.021164797137796693,
+            "p95_vector_difference_mm": 0.11475530193780253,
+            "max_vector_difference_mm": 10.886521432096602
+          }
+        },
+        "composition": {
+          "official": {
+            "valid_field_fraction_in_region": 0.9612396359443665,
+            "median_residual_mm_valid_region": 0.01826767284285778,
+            "p95_residual_mm_valid_region": 0.04845982157489635
+          },
+          "candidate": {
+            "valid_field_fraction_in_region": 0.9618136286735535,
+            "median_residual_mm_valid_region": 1.5004259550608312e-06,
+            "p95_residual_mm_valid_region": 2.956431624836687e-06
+          }
+        }
+      },
+      "official_programs": [
+        {
+          "name": "invwarp",
+          "sha256": "1285637c4de3ff754bf6d3b6b2f103bf2e14f8a9a8fc640289bdc8c3c9b3ef4c",
+          "bytes": 265960
+        }
+      ],
+      "maximum_rss_kib": [
+        2526636
+      ],
+      "official_output_metadata": {
+        "inverse_warp": {
+          "sha256": "3995d25e46784b9b41926aa407320719c84d7521bf4026db102461c5425fc712",
+          "bytes": 103072335
+        }
+      },
+      "worker_output_metadata": {
+        "candidate": [
+          {
+            "inverse_warp": {
+              "sha256": "0a83b83f4560b78791f55a67f1ba26737793c079e736c632da595ae616cf0de3",
+              "bytes": 106302345
+            }
+          }
+        ]
+      },
+      "single_full_process_seconds": {
+        "official": 933.7214334458113,
+        "candidate": 81.75400672107935
+      }
+    }
+  ],
+  "input_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+  "dataset": "OpenNeuro ds000114 v1.0.2",
+  "license": "CC0",
+  "source_url": "https://openneuro.org/datasets/ds000114/versions/1.0.2",
+  "original_protocol_note": "first complete warmup pair from the cancelled repeated protocol"
+}

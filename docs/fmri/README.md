@@ -218,6 +218,8 @@ print(volume_result.mni_pull)     # MNI→T1w RAS pull 位移场
 
 pipeline 内部 `_resample_final_volume` 建立 `WorldTransformChain` 并按后端调用公共组件。它们共用 `fnit._world_resampling.resample_world_image`，源影像只在组合完全部变换后插值一次。原 `fnit.fmri.normalization.resample_world` 保留为其他既有调用的兼容 wrapper。
 
+2026-10-04 的 CPU 优化修复该成熟公共采样器的半体素查询舍入和三维时间单位标志：显式 `fmriprep`、`grid-constant` 的 CPU nearest/linear 保留 FP64 查询坐标，三次样条使用环境已有的 SciPy 每帧滤波一次再分块查询；三维输出保留 reference 的时间单位。帧池不超过调用方 Torch 线程预算，四维仍保留 source TR 和全部帧。完整 3D 与官方逐位一致，完整 490 帧的最新 1/8 线程 CPU 对照及官方多线程参照异常见 [World 专项](../applywarp/WORLD_CPU_BENCHMARK_20261004.md)；共享 H100 的完整序列保存字节与优化前相同，见 [GPU 报告](../../validation/multimodal_cpu_20261004/gpu_world_v20_20261004.public.json)。这里的时间只对应已保存变换的采样节点，不替换本页完整 volume pipeline 时间。
+
 | 最终节点 | 源影像与目标 | 采样规则 | 逐帧运动 |
 |---|---|---|---|
 | `mask_mni` | EPI mask→MNI 2 mm | nearest、grid-constant；再阈值并交模板 mask | 不重复应用 |

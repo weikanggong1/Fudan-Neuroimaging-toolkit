@@ -3,16 +3,20 @@
 from __future__ import annotations
 
 import argparse
+import os
+import sys
 import shutil
 import subprocess
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
 import nibabel as nib
 import numpy as np
-from scipy.io import loadmat
-import torch
-import torch.nn.functional as F
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import torch
 
 
 _FSAVG = {"3k": ("fsaverage4", 2562), "10k": ("fsaverage5", 10242),
@@ -22,6 +26,8 @@ _RF = "rf_ants"
 
 
 def _device(name: str) -> torch.device:
+    import torch
+
     device = torch.device(name)
     if device.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA device requested but unavailable")
@@ -83,7 +89,8 @@ def _sphere_area(root: Path, space: str, density: str, hemi: str,
 def _surface_resample(source: Path, destination: Path, root: Path,
                       source_space: str, source_density: str,
                       target_space: str, target_density: str,
-                      hemi: str, label: bool, wb_command: str) -> Path:
+                      hemi: str, label: bool, wb_command: str,
+                      cpu_threads: int | None = None) -> Path:
     if source_space == target_space and source_density == target_density:
         if source.resolve() != destination.resolve():
             shutil.copyfile(source, destination)
@@ -94,14 +101,22 @@ def _surface_resample(source: Path, destination: Path, root: Path,
     src_sphere, src_area = _sphere_area(root, source_space, source_density, hemi, target_space)
     dst_sphere, dst_area = _sphere_area(root, target_space, target_density, hemi, source_space)
     command = "-label-resample" if label else "-metric-resample"
+    environment = None
+    if cpu_threads is not None:
+        from ._hemisphere_parallel import workbench_environment
+        environment = workbench_environment(cpu_threads)
     subprocess.run([wb, command, str(source), str(src_sphere), str(dst_sphere),
                     "ADAP_BARY_AREA", str(destination), "-area-metrics", str(src_area),
-                    str(dst_area)], check=True, capture_output=True, text=True)
+                    str(dst_area)], check=True, capture_output=True, text=True,
+                   env=environment)
     return destination
 
 
 def _sample_volume(image: nib.spatialimages.SpatialImage, ras: np.ndarray,
                    device: torch.device, nearest: bool) -> np.ndarray:
+    import torch
+    import torch.nn.functional as F
+
     values = np.asarray(image.dataobj, dtype=np.float32)
     if values.ndim == 3:
         values = values[..., None]
@@ -123,6 +138,8 @@ def _sample_volume(image: nib.spatialimages.SpatialImage, ras: np.ndarray,
 
 def _volume_to_fsaverage(source: Path, output: Path, root: Path,
                          density: str, device: torch.device, label: bool) -> tuple[Path, Path]:
+    from scipy.io import loadmat
+
     count = _density("fsaverage", density)
     image = nib.load(str(source))
     result = []
@@ -138,6 +155,10 @@ def _volume_to_fsaverage(source: Path, output: Path, root: Path,
 
 def _surface_to_volume(sources: tuple[Path, Path], output: Path, root: Path,
                        reference: Path, device: torch.device, label: bool) -> Path:
+    from scipy.io import loadmat
+    import torch
+    import torch.nn.functional as F
+
     ref = nib.load(str(reference))
     if len(ref.shape) < 3 or len(ref.shape) > 4:
         raise ValueError("MNI reference must be a NIfTI image with a 3D grid")
@@ -150,6 +171,8 @@ def _surface_to_volume(sources: tuple[Path, Path], output: Path, root: Path,
     if reference_mask.shape[:3] != (256, 256, 256):
         raise ValueError("RF-ANTs cortex mask must have a 256-cubed grid")
     maps = loadmat(mapping)
+    if device.type == "cpu":
+        return _surface_to_volume_cpu(sources, output, ref, reference_mask, maps, label)
     vertex_maps = []
     values = []
     nframes = None
@@ -187,8 +210,79 @@ def _surface_to_volume(sources: tuple[Path, Path], output: Path, root: Path,
         result = np.rint(result).astype(np.int32)
     if nframes == 1:
         result = result[..., 0]
-    nib.save(nib.Nifti1Image(result, ref.affine, ref.header), str(output))
+    _save_volume(result, ref, output, label)
     return output
+
+
+def _save_volume(result: np.ndarray, reference: nib.spatialimages.SpatialImage,
+                 output: Path, label: bool) -> None:
+    # A cortex mask or atlas reference often has an integer storage dtype.
+    # Preserve its geometry, while avoiding quantization of continuous maps.
+    header = reference.header.copy()
+    header.set_data_dtype(np.int32 if label else np.float32)
+    nib.save(nib.Nifti1Image(result, reference.affine, header), str(output))
+
+
+def _surface_to_volume_cpu(sources: tuple[Path, Path], output: Path,
+                           reference: nib.spatialimages.SpatialImage,
+                           reference_mask: nib.spatialimages.SpatialImage,
+                           maps: dict, label: bool) -> Path:
+    from ._space_conversion_cpu import project_surface_layer
+
+    values = [_gifti_values(path, 163842)[0] for path in sources]
+    if values[0].shape[1] != values[1].shape[1]:
+        raise ValueError("Left and right GIFTI files have different frame counts")
+    values = [np.ascontiguousarray(data, dtype=np.float32) for data in values]
+    vertices = [np.ascontiguousarray(maps[f"{hemi}_vertex"], dtype=np.float32)
+                for hemi in ("lh", "rh")]
+    for vertex_map in vertices:
+        if vertex_map.shape != (256, 256, 256):
+            raise ValueError("RF-ANTs vertex maps must have a 256-cubed grid")
+        if (not np.isfinite(vertex_map).all() or vertex_map.min() < 0
+                or vertex_map.max() > 163842):
+            raise ValueError("RF-ANTs vertex map contains invalid vertex indices")
+    mask = np.asarray(reference_mask.dataobj, dtype=np.float32)
+    if mask.ndim == 4:
+        mask = mask[..., 0]
+    mask = np.ascontiguousarray(mask)
+    shape = reference.shape[:3]
+    nframes = values[0].shape[1]
+    result = np.zeros((*shape, nframes), np.float32)
+    transform = np.linalg.inv(reference_mask.affine) @ reference.affine
+    # The x/y plane and affine multiplication order match the Torch path.
+    x, y = np.meshgrid(np.arange(shape[0]), np.arange(shape[1]), indexing="ij")
+    ijk = np.column_stack((x.ravel(), y.ravel(), np.zeros(x.size)))
+    with _cpu_thread_budget():
+        for z in range(shape[2]):
+            ijk[:, 2] = z
+            mapped = nib.affines.apply_affine(transform, ijk).astype(np.float32)
+            grid = np.ascontiguousarray(2 * mapped / 255 - 1, dtype=np.float32)
+            layer = project_surface_layer(grid, mask, vertices[0], vertices[1],
+                                          values[0], values[1])
+            result[:, :, z, :] = layer.reshape(shape[0], shape[1], nframes)
+    if label:
+        result = np.rint(result).astype(np.int32)
+    if nframes == 1:
+        result = result[..., 0]
+    _save_volume(result, reference, output, label)
+    return output
+
+
+@contextmanager
+def _cpu_thread_budget():
+    """Respect an existing Numba mask and restore it even on failed calls."""
+    from numba import get_num_threads, set_num_threads
+    import torch
+
+    previous = get_num_threads()
+    budget = min(previous, torch.get_num_threads())
+    try:
+        if budget != previous:
+            set_num_threads(budget)
+        yield
+    finally:
+        if budget != previous:
+            set_num_threads(previous)
 
 
 def convert_space(
@@ -218,7 +312,12 @@ def convert_space(
         _density(source_space, source_density)
     if target_space != "MNI152":
         _density(target_space, target_density)
-    work_device = _device(device)
+    # A CPU-only surface route delegates its computation to Workbench.
+    # Leave its CLI independent of volume/GPU library startup. Other device
+    # values still follow the existing Torch validation and TF32 setup.
+    surface_only_cpu = (device == "cpu" and source_space != "MNI152"
+                        and target_space != "MNI152")
+    work_device = None if surface_only_cpu else _device(device)
     root = Path(assets_dir).expanduser().resolve()
     output = Path(output_dir).expanduser().resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -249,6 +348,23 @@ def convert_space(
                     for hemi, path in zip(("L", "R"), source_pair))
             return _surface_to_volume(source_pair, output / "space-MNI152_cortex.nii.gz", root,
                                       Path(reference), work_device, label)
+        configured_threads = os.environ.get("OMP_NUM_THREADS") if surface_only_cpu else None
+        if configured_threads is not None:
+            from ._hemisphere_parallel import map_hemispheres, resolve_cpu_threads
+            budget = resolve_cpu_threads(int(configured_threads))
+            loaded_torch = sys.modules.get("torch")
+            if loaded_torch is not None:
+                budget = min(budget, loaded_torch.get_num_threads())
+            sources_by_hemi = dict(zip(("L", "R"), source_pair))
+
+            def resample_hemisphere(hemi, threads):
+                destination = output / f"{hemi}.{target_space}.{target_density}.{'label' if label else 'func'}.gii"
+                return _surface_resample(sources_by_hemi[hemi], destination, root,
+                                         source_space, source_density, target_space,
+                                         target_density, hemi, label, wb_command,
+                                         cpu_threads=threads)
+
+            return map_hemispheres(resample_hemisphere, cpu_threads=budget)
         result = []
         for hemi, path in zip(("L", "R"), source_pair):
             destination = output / f"{hemi}.{target_space}.{target_density}.{'label' if label else 'func'}.gii"

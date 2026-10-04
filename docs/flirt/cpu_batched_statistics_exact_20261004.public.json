@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-04",
+  "status": "complete",
+  "generated_at_utc": "2026-10-04T05:46:42.661059+00:00",
+  "dataset": "OpenNeuro ds000114 v1.0.2; FNIT defaced public T1w examples",
+  "dataset_license": "CC0",
+  "host": "nodecw10",
+  "scope": "Complete fixed-input CPU candidate-batch trajectories: ordered counts/sums/sums2 and float64 joint histogram replace Tensor volume sorting/scatter; original batch packing, compact_sum, float32 cost/entropy, chunks and search retained",
+  "reference": "Source22 Tensor batch statistics plus frozen v16 fixed-input same-budget complete saved outputs",
+  "production_source_sha256": {
+    "src/fnit/flirt/batched.py": "06bcaeba1b58090d5b40b57160a159075af48ab0c42c2b61a6d7e3f803ee85f4",
+    "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef",
+    "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+    "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630"
+  },
+  "input_contract": "Fixed image data during one complete registration; arbitrary in-place mutations of noncontiguous cached tensors are outside this gate",
+  "timing_scope": "Shadow validation calculates both statistics implementations and compares every candidate. Its elapsed times are excluded from performance benchmark tables",
+  "preserved": [
+    "candidate order",
+    "chunk planning",
+    "batch bin packing",
+    "compact_sum grouping",
+    "float32 cost and entropy formulas",
+    "search levels",
+    "search stopping conditions",
+    "CUDA original sampling and reductions"
+  ],
+  "local_fixture_checks": {
+    "corratio_candidate_statistics_and_costs": 12672,
+    "normmi_candidate_costs": 4128,
+    "normmi_finite_float64_joints": 2064,
+    "normmi_tensor_fallback_cases": 256,
+    "threads": [
+      1,
+      8
+    ],
+    "representative_batch_sizes": [
+      1,
+      3,
+      128
+    ],
+    "scope": "Fixture parity only, not a real-data speed benchmark",
+    "production_flirt_regression_tests_passed": 506
+  },
+  "records": [
+    {
+      "case_id": "flirt_12_corratio_explicit_batched",
+      "run_id": "flirt_batched_statistics_full_gate_20261004a",
+      "affinity": [
+        95
+      ],
+      "threads_ceiling": 1,
+      "reference_source_sha256": {
+        "src/fnit/flirt/batched.py": "63a6336f0d33219b36f8d7184f75093e4215403f0a435ca48203b2bbe5266436",
+        "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+        "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+        "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef"
+      },
+      "prototype_sha256": "14ba1f19309815dc92ed8ab8b09a9b0b6b8168ad308cc9ccc74de36662334040",
+      "worker_sha256": "dc30cf87f44b9a701a2942163df8b365b219a9a1c4c6ec48510dd44b72c87572",
+      "gates": {
+        "all_candidate_statistics_bits_exact": true,
+        "all_packed_intermediates_bits_exact": true,
+        "all_compact_sums_bits_exact": true,
+        "all_batch_cost_bits_exact": true,
+        "checked_evaluations": 8981,
+        "checked_chunks": 790,
+        "saved_matrix_values_exact": true,
+        "moved_bits_exact": true,
+        "header_exact": true,
+        "affine_exact": true,
+        "final_cost_bits_exact": true,
+        "cost_evaluations_exact": true,
+        "phase_counts_exact": true
+      },
+      "statistics_and_cost_trace_sha256": "eb9e45bf7a7c630665a828d39dff431a49491fb63f616b04210bb51c42c1b554",
+      "final_cost": 0.21309858560562134,
+      "phase_cost_evaluations": {
+        "angular_coarse": 2677,
+        "angular_fine_measure": 1331,
+        "angular_fine_refinement": 209,
+        "angular_candidate_refinement": 270,
+        "measure_4mm": 6,
+        "local_4mm_initial": 499,
+        "local_4mm_perturbations": 3589,
+        "measure_2mm": 44,
+        "local_2mm": 180,
+        "local_1mm": 176
+      }
+    },
+    {
+      "case_id": "flirt_6_normmi_explicit_batched",
+      "run_id": "flirt_batched_nmi_statistics_full_gate_20261004b",
+      "affinity": [
+        95
+      ],
+      "threads_ceiling": 1,
+      "reference_source_sha256": {
+        "src/fnit/flirt/batched.py": "63a6336f0d33219b36f8d7184f75093e4215403f0a435ca48203b2bbe5266436",
+        "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+        "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+        "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef"
+      },
+      "prototype_sha256": "06bcaeba1b58090d5b40b57160a159075af48ab0c42c2b61a6d7e3f803ee85f4",
+      "worker_sha256": "d0dbd393b15269f8ceae3a706a12a178e312366b0df833ac1ad450afe869ede3",
+      "gates": {
+        "all_joint_statistics_bits_exact": true,
+        "all_entropy_packed_bits_exact": true,
+        "all_compact_sums_bits_exact": true,
+        "all_batch_cost_bits_exact": true,
+        "checked_evaluations": 6403,
+        "checked_chunks": 421,
+        "checked_cost_families": {
+          "corratio": 4454,
+          "normmi": 1949
+        },
+        "all_corr_initialization_statistics_bits_exact": true,
+        "saved_matrix_values_exact": true,
+        "moved_bits_exact": true,
+        "header_exact": true,
+        "affine_exact": true,
+        "final_cost_bits_exact": true,
+        "cost_evaluations_exact": true,
+        "phase_counts_exact": true
+      },
+      "statistics_and_cost_trace_sha256": "4465597a9c08a87ca4b6a0382487aeb4cc278b61faa7702bc28c12649ecb1f39",
+      "final_cost": -1.151161789894104,
+      "phase_cost_evaluations": {
+        "angular_coarse": 2677,
+        "angular_fine_measure": 1331,
+        "angular_fine_refinement": 209,
+        "angular_candidate_refinement": 237,
+        "measure_4mm": 6,
+        "local_4mm_initial": 423,
+        "local_4mm_perturbations": 1347,
+        "measure_2mm": 42,
+        "local_2mm": 37,
+        "local_1mm": 94
+      }
+    }
+  ],
+  "summary_script_sha256": "4d3e01683721c896a613e0abc174ccf1f9c9fc7f39c3299788cc2cf603427e11"
+}

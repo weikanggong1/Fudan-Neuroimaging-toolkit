@@ -1,0 +1,670 @@
+{
+  "schema_version": 1,
+  "status": "full_gate_passed",
+  "benchmark": false,
+  "host": "nodecw8",
+  "scope": "Complete real T1 loaded CPU1 old26/new27 diagnostic on one fixed CPU32; original six-level budget and all four output writes. No native run, no new official speed ratio.",
+  "checks": {
+    "all_outputs_equal": true,
+    "all_numeric_qc_and_stops_equal": true,
+    "input_sha_equal": true,
+    "same_cpu_masks": true,
+    "same_torch_numba_budget": true
+  },
+  "output_checks": {
+    "cout": {
+      "file_sha_equal": true,
+      "shape_equal": true,
+      "dtype_equal": true,
+      "array_bits_equal": true,
+      "header_bytes_equal": true,
+      "affine_bits_equal": true,
+      "all_finite": true
+    },
+    "iout": {
+      "file_sha_equal": true,
+      "shape_equal": true,
+      "dtype_equal": true,
+      "array_bits_equal": true,
+      "header_bytes_equal": true,
+      "affine_bits_equal": true,
+      "all_finite": true
+    },
+    "jout": {
+      "file_sha_equal": true,
+      "shape_equal": true,
+      "dtype_equal": true,
+      "array_bits_equal": true,
+      "header_bytes_equal": true,
+      "affine_bits_equal": true,
+      "all_finite": true
+    },
+    "full_pull_jacobian": {
+      "file_sha_equal": true,
+      "shape_equal": true,
+      "dtype_equal": true,
+      "array_bits_equal": true,
+      "header_bytes_equal": true,
+      "affine_bits_equal": true,
+      "all_finite": true
+    }
+  },
+  "numeric_qc_sha256": {
+    "old": "7eda49c40930a78ec1e90a9412bb3a1339fabb9c7ad9172c2f914e3e9ec5472e",
+    "new": "7eda49c40930a78ec1e90a9412bb3a1339fabb9c7ad9172c2f914e3e9ec5472e"
+  },
+  "records": {
+    "old": {
+      "schema_version": 1,
+      "status": "complete",
+      "benchmark": false,
+      "case_id": "fnirt_t1_real_t1",
+      "backend": "old",
+      "scope": "One loaded complete real T1 API and all four output writes, instrumentation included; no native clock; no warmup call.",
+      "setup_excluded": "Torch, adapter, Numba, selected instrumentation imports and wrapping. Sampling disk cache loads/compile events inside API are recorded.",
+      "threads": {
+        "torch": 1,
+        "torch_interop": 1,
+        "numba": 1
+      },
+      "affinity": [
+        32
+      ],
+      "api_seconds": 333.438963518478,
+      "inclusive_scopes_overlap": true,
+      "counters": {
+        "registration.expand_coefficients": {
+          "calls": 14107,
+          "inclusive_seconds": 63.846949056722224
+        },
+        "registration._trilinear_sample": {
+          "calls": 201,
+          "inclusive_seconds": 23.110999665223062
+        },
+        "LevelSystem.evaluate": {
+          "calls": 100,
+          "inclusive_seconds": 37.482690253295004
+        },
+        "JointT1System.evaluate": {
+          "calls": 53,
+          "inclusive_seconds": 30.700222810730338
+        },
+        "registration.adjoint_field": {
+          "calls": 20559,
+          "inclusive_seconds": 63.347894984297454
+        },
+        "JointT1System.linearize": {
+          "calls": 47,
+          "inclusive_seconds": 30.074902611784637
+        },
+        "SpatialNormalCPU.__call__": {
+          "calls": 7247,
+          "inclusive_seconds": 32.83543888758868
+        }
+      },
+      "query_signatures": [
+        {
+          "derivatives": false,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 48384,
+          "query_shape": [
+            3,
+            24,
+            28,
+            24
+          ],
+          "query_stride": [
+            16128,
+            672,
+            24,
+            1
+          ],
+          "calls": 52
+        },
+        {
+          "derivatives": true,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 48384,
+          "query_shape": [
+            3,
+            24,
+            28,
+            24
+          ],
+          "query_stride": [
+            16128,
+            672,
+            24,
+            1
+          ],
+          "calls": 16
+        },
+        {
+          "derivatives": false,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 349140,
+          "query_shape": [
+            3,
+            46,
+            55,
+            46
+          ],
+          "query_stride": [
+            116380,
+            2530,
+            46,
+            1
+          ],
+          "calls": 46
+        },
+        {
+          "derivatives": true,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 349140,
+          "query_shape": [
+            3,
+            46,
+            55,
+            46
+          ],
+          "query_stride": [
+            116380,
+            2530,
+            46,
+            1
+          ],
+          "calls": 14
+        },
+        {
+          "derivatives": false,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 2707887,
+          "query_shape": [
+            3,
+            91,
+            109,
+            91
+          ],
+          "query_stride": [
+            902629,
+            9919,
+            91,
+            1
+          ],
+          "calls": 55
+        },
+        {
+          "derivatives": true,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 2707887,
+          "query_shape": [
+            3,
+            91,
+            109,
+            91
+          ],
+          "query_stride": [
+            902629,
+            9919,
+            91,
+            1
+          ],
+          "calls": 18
+        }
+      ],
+      "sampling_dispatcher_before": null,
+      "sampling_dispatcher_after": null,
+      "sampling_compile_cache_events": [],
+      "maximum_rss_kib": 1397384,
+      "source_registration_sha256": "74fc259e2096e64153a591488303b8ccdfdf19d4ba0b2b91891222b905740e89",
+      "sampling_source_sha256": null,
+      "input_sha256": {
+        "input": "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "reference": "91729207be92d54c8a9e3d790070ad26f68f2d049861c6162d6a35db713c5e56",
+        "affine": "ee2029b61ea2f9e556e5c92c4fbc9fd81da00e20a300d53e0b8f2aab3bfbab5d",
+        "refmask": "b71a9f2015bd10262c37e51b4d17a655d0eb0a0dec4ba48322fb5af55c86b97c"
+      },
+      "output_sha256": {
+        "cout": "e94e95a886bc9b126a13c0be1c0aae04c60b9d81e6b7c490b72f7590c9ab2538",
+        "iout": "68cca1d1083e93184ca3e2380b569a5d289bb5b551b1869cd1cbb2cf7c4fe55b",
+        "jout": "487a1b84652a3f0376da035c22a6e3c7bc9ec9a019f4c8aa5e5f007cd496c34c",
+        "full_pull_jacobian": "4319509fa6a729698f8ed29b6928306c4c847c2d673e37d7b2c13613e26d5838"
+      }
+    },
+    "new": {
+      "schema_version": 1,
+      "status": "complete",
+      "benchmark": false,
+      "case_id": "fnirt_t1_real_t1",
+      "backend": "new",
+      "scope": "One loaded complete real T1 API and all four output writes, instrumentation included; no native clock; no warmup call.",
+      "setup_excluded": "Torch, adapter, Numba, selected instrumentation imports and wrapping. Sampling disk cache loads/compile events inside API are recorded.",
+      "threads": {
+        "torch": 1,
+        "torch_interop": 1,
+        "numba": 1
+      },
+      "affinity": [
+        32
+      ],
+      "api_seconds": 283.0666485959664,
+      "inclusive_scopes_overlap": true,
+      "counters": {
+        "registration.expand_coefficients": {
+          "calls": 14107,
+          "inclusive_seconds": 45.68766996264458
+        },
+        "sampling.try_sample_cpu": {
+          "calls": 201,
+          "hits": 201,
+          "fallbacks": 0,
+          "inclusive_seconds": 4.539763446897268,
+          "image_elements_total": 1260149400,
+          "query_elements_total": 221914263
+        },
+        "registration._trilinear_sample": {
+          "calls": 201,
+          "inclusive_seconds": 4.559484077617526
+        },
+        "LevelSystem.evaluate": {
+          "calls": 100,
+          "inclusive_seconds": 17.78458588384092
+        },
+        "JointT1System.evaluate": {
+          "calls": 53,
+          "inclusive_seconds": 18.402369115501642
+        },
+        "registration.adjoint_field": {
+          "calls": 20559,
+          "inclusive_seconds": 65.74796220846474
+        },
+        "JointT1System.linearize": {
+          "calls": 47,
+          "inclusive_seconds": 18.431106455624104
+        },
+        "SpatialNormalCPU.__call__": {
+          "calls": 7247,
+          "inclusive_seconds": 22.989796084351838
+        }
+      },
+      "query_signatures": [
+        {
+          "derivatives": false,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 48384,
+          "query_shape": [
+            3,
+            24,
+            28,
+            24
+          ],
+          "query_stride": [
+            16128,
+            672,
+            24,
+            1
+          ],
+          "calls": 52
+        },
+        {
+          "derivatives": true,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 48384,
+          "query_shape": [
+            3,
+            24,
+            28,
+            24
+          ],
+          "query_stride": [
+            16128,
+            672,
+            24,
+            1
+          ],
+          "calls": 16
+        },
+        {
+          "derivatives": false,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 349140,
+          "query_shape": [
+            3,
+            46,
+            55,
+            46
+          ],
+          "query_stride": [
+            116380,
+            2530,
+            46,
+            1
+          ],
+          "calls": 46
+        },
+        {
+          "derivatives": true,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 349140,
+          "query_shape": [
+            3,
+            46,
+            55,
+            46
+          ],
+          "query_stride": [
+            116380,
+            2530,
+            46,
+            1
+          ],
+          "calls": 14
+        },
+        {
+          "derivatives": false,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 2707887,
+          "query_shape": [
+            3,
+            91,
+            109,
+            91
+          ],
+          "query_stride": [
+            902629,
+            9919,
+            91,
+            1
+          ],
+          "calls": 55
+        },
+        {
+          "derivatives": true,
+          "image_contiguous": true,
+          "image_dtype": "torch.float32",
+          "image_elements": 6269400,
+          "image_shape": [
+            162,
+            215,
+            180
+          ],
+          "image_stride": [
+            38700,
+            180,
+            1
+          ],
+          "query_contiguous": true,
+          "query_dtype": "torch.float32",
+          "query_elements": 2707887,
+          "query_shape": [
+            3,
+            91,
+            109,
+            91
+          ],
+          "query_stride": [
+            902629,
+            9919,
+            91,
+            1
+          ],
+          "calls": 18
+        }
+      ],
+      "sampling_dispatcher_before": {
+        "_point": {
+          "signatures": [],
+          "cache_hits": {},
+          "cache_misses": {}
+        },
+        "_serial": {
+          "signatures": [],
+          "cache_hits": {},
+          "cache_misses": {}
+        },
+        "_parallel": {
+          "signatures": [],
+          "cache_hits": {},
+          "cache_misses": {}
+        }
+      },
+      "sampling_dispatcher_after": {
+        "_point": {
+          "signatures": [],
+          "cache_hits": {},
+          "cache_misses": {}
+        },
+        "_serial": {
+          "signatures": [
+            "(Array(float32, 1, 'C', False, aligned=True), Array(float32, 2, 'C', False, aligned=True), UniTuple(int64, 3), Array(float32, 1, 'C', False, aligned=True), bool, Array(float32, 1, 'C', False, aligned=True), Array(bool, 1, 'C', False, aligned=True), Array(float32, 2, 'C', False, aligned=True))"
+          ],
+          "cache_hits": {
+            "(Array(float32, 1, 'C', False, aligned=True), Array(float32, 2, 'C', False, aligned=True), UniTuple(int64, 3), Array(float32, 1, 'C', False, aligned=True), bool, Array(float32, 1, 'C', False, aligned=True), Array(bool, 1, 'C', False, aligned=True), Array(float32, 2, 'C', False, aligned=True))": 1
+          },
+          "cache_misses": {}
+        },
+        "_parallel": {
+          "signatures": [],
+          "cache_hits": {},
+          "cache_misses": {}
+        }
+      },
+      "sampling_compile_cache_events": [
+        {
+          "helper_call": 1,
+          "derivatives": false,
+          "numba_threads": 1,
+          "before": {
+            "_point": {
+              "signatures": [],
+              "cache_hits": {},
+              "cache_misses": {}
+            },
+            "_serial": {
+              "signatures": [],
+              "cache_hits": {},
+              "cache_misses": {}
+            },
+            "_parallel": {
+              "signatures": [],
+              "cache_hits": {},
+              "cache_misses": {}
+            }
+          },
+          "after": {
+            "_point": {
+              "signatures": [],
+              "cache_hits": {},
+              "cache_misses": {}
+            },
+            "_serial": {
+              "signatures": [
+                "(Array(float32, 1, 'C', False, aligned=True), Array(float32, 2, 'C', False, aligned=True), UniTuple(int64, 3), Array(float32, 1, 'C', False, aligned=True), bool, Array(float32, 1, 'C', False, aligned=True), Array(bool, 1, 'C', False, aligned=True), Array(float32, 2, 'C', False, aligned=True))"
+              ],
+              "cache_hits": {
+                "(Array(float32, 1, 'C', False, aligned=True), Array(float32, 2, 'C', False, aligned=True), UniTuple(int64, 3), Array(float32, 1, 'C', False, aligned=True), bool, Array(float32, 1, 'C', False, aligned=True), Array(bool, 1, 'C', False, aligned=True), Array(float32, 2, 'C', False, aligned=True))": 1
+              },
+              "cache_misses": {}
+            },
+            "_parallel": {
+              "signatures": [],
+              "cache_hits": {},
+              "cache_misses": {}
+            }
+          }
+        }
+      ],
+      "maximum_rss_kib": 1255276,
+      "source_registration_sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da",
+      "sampling_source_sha256": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368",
+      "input_sha256": {
+        "input": "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+        "reference": "91729207be92d54c8a9e3d790070ad26f68f2d049861c6162d6a35db713c5e56",
+        "affine": "ee2029b61ea2f9e556e5c92c4fbc9fd81da00e20a300d53e0b8f2aab3bfbab5d",
+        "refmask": "b71a9f2015bd10262c37e51b4d17a655d0eb0a0dec4ba48322fb5af55c86b97c"
+      },
+      "output_sha256": {
+        "cout": "e94e95a886bc9b126a13c0be1c0aae04c60b9d81e6b7c490b72f7590c9ab2538",
+        "iout": "68cca1d1083e93184ca3e2380b569a5d289bb5b551b1869cd1cbb2cf7c4fe55b",
+        "jout": "487a1b84652a3f0376da035c22a6e3c7bc9ec9a019f4c8aa5e5f007cd496c34c",
+        "full_pull_jacobian": "4319509fa6a729698f8ed29b6928306c4c847c2d673e37d7b2c13613e26d5838"
+      }
+    }
+  },
+  "inclusive_scopes_overlap": true,
+  "no_warmup_full_call": true
+}

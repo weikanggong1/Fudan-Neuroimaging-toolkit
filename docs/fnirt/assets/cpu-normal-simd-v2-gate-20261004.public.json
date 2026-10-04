@@ -1,0 +1,2264 @@
+{
+  "schema_version": 1,
+  "status": "full_gate_passed",
+  "benchmark": false,
+  "scope": "CPU95 complete instrumented old/new diagnostics, no native speed ratio",
+  "same_complete_input_and_output_budget": true,
+  "excluded_non_numeric_qc_keys": [
+    "elapsed_seconds"
+  ],
+  "baseline_profiles_reused_for_precision_and_existing_diagnostic_clock": true,
+  "case_count_expected": 2,
+  "records": [
+    {
+      "case_id": "public_cc0_t1_default",
+      "checks": {
+        "all_output_file_sha_equal": true,
+        "solver_numeric_qc_and_stops_equal": true,
+        "operation_counts_equal": true
+      },
+      "profiles": {
+        "baseline": {
+          "status": "completed",
+          "benchmark": false,
+          "inclusive_scopes_overlap": true,
+          "scope": "one instrumented full API load + compute + save; imports and lock wait excluded",
+          "case_id": "public_cc0_t1_default",
+          "threads": 1,
+          "affinity": [
+            95
+          ],
+          "profile_tool_sha256": "97ddafe790e7be56eda1eef90c66557b81f5898d50ac9d8cc67dd55602f6bd2e",
+          "source_hashes": {
+            "src/fnit/fnirt/registration.py": "74fc259e2096e64153a591488303b8ccdfdf19d4ba0b2b91891222b905740e89",
+            "src/fnit/fnirt/spline.py": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+            "src/fnit/fnirt/topology.py": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3",
+            "src/fnit/fnirt/_normal_cpu.py": "4bcb0f4490c0fcd613e6d8f3e533c9929fc14bc123ebfbfe4cd70afa6519794f",
+            "src/fnit/fnirt/_smoothing_cpu.py": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be",
+            "src/fnit/fnirt/_topology_cpu.py": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6",
+            "src/fnit/fnirt/_bending_cpu.py": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+          },
+          "instrumented_api_seconds": 156.3584510460496,
+          "counters": {
+            "registration._fsl_masked_gaussian_blur": {
+              "calls": 4,
+              "inclusive_seconds": 10.281023509800434
+            },
+            "registration.expand_coefficients": {
+              "calls": 3684,
+              "inclusive_seconds": 5.7155444622039795
+            },
+            "registration._trilinear_sample": {
+              "calls": 211,
+              "inclusive_seconds": 29.87786854058504
+            },
+            "spline.expand_coefficients": {
+              "calls": 22398,
+              "inclusive_seconds": 24.02339255064726
+            },
+            "bending_cpu.multiply_square_": {
+              "calls": 1260,
+              "inclusive_seconds": 4.539241932332516
+            },
+            "BendingOperator.energy": {
+              "calls": 210,
+              "inclusive_seconds": 32.7050256729126
+            },
+            "LevelSystem.evaluate": {
+              "calls": 105,
+              "inclusive_seconds": 43.025943107903004
+            },
+            "JointT1System.evaluate": {
+              "calls": 55,
+              "inclusive_seconds": 33.10591755062342
+            },
+            "registration.adjoint_field": {
+              "calls": 5206,
+              "inclusive_seconds": 11.536875315010548
+            },
+            "BendingOperator.normal": {
+              "calls": 3523,
+              "inclusive_seconds": 2.7194392383098602
+            },
+            "registration.design_diagonal": {
+              "calls": 185,
+              "inclusive_seconds": 0.14761409908533096
+            },
+            "BendingOperator.diagonal": {
+              "calls": 85,
+              "inclusive_seconds": 0.13472343981266022
+            },
+            "LevelSystem.linearize": {
+              "calls": 50,
+              "inclusive_seconds": 22.744367517530918
+            },
+            "JointT1System.linearize": {
+              "calls": 50,
+              "inclusive_seconds": 33.947240605950356
+            },
+            "SpatialNormalCPU.__call__": {
+              "calls": 1755,
+              "inclusive_seconds": 35.212769232690334
+            },
+            "JointT1System.matvec": {
+              "calls": 1755,
+              "inclusive_seconds": 69.12153868377209
+            },
+            "registration._spline_jacobian": {
+              "calls": 10,
+              "inclusive_seconds": 1.4357190802693367
+            },
+            "registration._force_jacobian_range": {
+              "calls": 4,
+              "inclusive_seconds": 7.023082010447979
+            },
+            "topology.gradient_field": {
+              "calls": 10,
+              "inclusive_seconds": 0.265236496925354
+            },
+            "topology.jacobian_check": {
+              "calls": 6,
+              "inclusive_seconds": 3.01995337754488
+            },
+            "topology.limit_gradient": {
+              "calls": 4,
+              "inclusive_seconds": 1.279674768447876
+            },
+            "topology._rounded_fft": {
+              "calls": 48,
+              "inclusive_seconds": 1.0218500941991806
+            },
+            "topology.integrate_gradient_field": {
+              "calls": 4,
+              "inclusive_seconds": 1.2380904257297516
+            },
+            "registration.constrain_topology": {
+              "calls": 1,
+              "inclusive_seconds": 6.268174484372139
+            }
+          },
+          "maximum_rss_kib": 1490612,
+          "solver_numeric_qc_sha256": "9e183372119f915fbe93c312ecb668181fff1e272fba0383fb912b1ecd4aaeb1",
+          "output_sha256": {
+            "cout": "42380fd6386eb180a2d786efc17fd5fb0d2e5759e4909e9b219769eb6e678141",
+            "iout": "df8c1627a2ce0217f7f7848dd8d06f2dcab39a804c42ac76655ffd646312da55",
+            "jout": "a06818e20571e681043dc5545e30e7e22feaff39d1abd576f903e1202883cb26"
+          },
+          "layout_copies": [
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00027420371770858765
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003720000386238098
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00025532394647598267
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003211870789527893
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00027948617935180664
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002616792917251587
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00026451051235198975
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00027674436569213867
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00027298927307128906
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001971691846847534
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0017539337277412415
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018726512789726257
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.002302214503288269
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018633455038070679
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001920551061630249
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.002133682370185852
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018477141857147217
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001969650387763977
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018613263964653015
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001959584653377533
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.004826471209526062
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0024189576506614685
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01697702705860138
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.017622731626033783
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.018344514071941376
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.018769070506095886
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.016944482922554016
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015422113239765167
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015185810625553131
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01539001613855362
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015815146267414093
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.018105819821357727
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.018385134637355804
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015301480889320374
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015522800385951996
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.019950591027736664
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.018289051949977875
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.016156837344169617
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01646946370601654
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01699087768793106
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01822546124458313
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.014928646385669708
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015793919563293457
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015832580626010895
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015396036207675934
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01960526406764984
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015480145812034607
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01840014010667801
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.020587429404258728
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01618800312280655
+            }
+          ],
+          "maximum_layout_copy_bytes_per_operator": 64989288
+        },
+        "candidate": {
+          "status": "completed",
+          "benchmark": false,
+          "inclusive_scopes_overlap": true,
+          "scope": "one instrumented full API load + compute + save; imports and lock wait excluded",
+          "case_id": "public_cc0_t1_default",
+          "threads": 1,
+          "affinity": [
+            95
+          ],
+          "profile_tool_sha256": "f57ddc4505832e00c1f165176abeec558905109a9dbbf529f21bdeab365a2dc1",
+          "source_hashes": {
+            "src/fnit/fnirt/registration.py": "74fc259e2096e64153a591488303b8ccdfdf19d4ba0b2b91891222b905740e89",
+            "src/fnit/fnirt/spline.py": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+            "src/fnit/fnirt/topology.py": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3",
+            "src/fnit/fnirt/_normal_cpu.py": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f",
+            "src/fnit/fnirt/_normal_simd_cpu.py": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9",
+            "src/fnit/fnirt/_smoothing_cpu.py": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be",
+            "src/fnit/fnirt/_topology_cpu.py": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6",
+            "src/fnit/fnirt/_bending_cpu.py": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+          },
+          "instrumented_api_seconds": 150.12929325550795,
+          "counters": {
+            "registration._fsl_masked_gaussian_blur": {
+              "calls": 4,
+              "inclusive_seconds": 10.538978770375252
+            },
+            "registration.expand_coefficients": {
+              "calls": 3684,
+              "inclusive_seconds": 6.1719390749931335
+            },
+            "registration._trilinear_sample": {
+              "calls": 211,
+              "inclusive_seconds": 34.756280303001404
+            },
+            "spline.expand_coefficients": {
+              "calls": 22398,
+              "inclusive_seconds": 32.72758229076862
+            },
+            "bending_cpu.multiply_square_": {
+              "calls": 1260,
+              "inclusive_seconds": 6.172954171895981
+            },
+            "BendingOperator.energy": {
+              "calls": 210,
+              "inclusive_seconds": 45.818148627877235
+            },
+            "LevelSystem.evaluate": {
+              "calls": 105,
+              "inclusive_seconds": 52.42696191370487
+            },
+            "JointT1System.evaluate": {
+              "calls": 55,
+              "inclusive_seconds": 42.7660067230463
+            },
+            "registration.adjoint_field": {
+              "calls": 5206,
+              "inclusive_seconds": 11.909208834171295
+            },
+            "BendingOperator.normal": {
+              "calls": 3523,
+              "inclusive_seconds": 2.769760936498642
+            },
+            "registration.design_diagonal": {
+              "calls": 185,
+              "inclusive_seconds": 0.15211322158575058
+            },
+            "BendingOperator.diagonal": {
+              "calls": 85,
+              "inclusive_seconds": 0.174700528383255
+            },
+            "LevelSystem.linearize": {
+              "calls": 50,
+              "inclusive_seconds": 27.718582026660442
+            },
+            "JointT1System.linearize": {
+              "calls": 50,
+              "inclusive_seconds": 42.900191619992256
+            },
+            "normal_kernel._flat_serial": {
+              "calls": 1755,
+              "inclusive_seconds": 4.601101264357567
+            },
+            "SpatialNormalCPU.__call__": {
+              "calls": 1755,
+              "inclusive_seconds": 5.30669654160738
+            },
+            "JointT1System.matvec": {
+              "calls": 1755,
+              "inclusive_seconds": 41.53837791830301
+            },
+            "registration._spline_jacobian": {
+              "calls": 10,
+              "inclusive_seconds": 1.5850380957126617
+            },
+            "registration._force_jacobian_range": {
+              "calls": 4,
+              "inclusive_seconds": 8.990363977849483
+            },
+            "topology.gradient_field": {
+              "calls": 10,
+              "inclusive_seconds": 0.4874637797474861
+            },
+            "topology.jacobian_check": {
+              "calls": 6,
+              "inclusive_seconds": 4.107670605182648
+            },
+            "topology.limit_gradient": {
+              "calls": 4,
+              "inclusive_seconds": 1.3157843127846718
+            },
+            "topology._rounded_fft": {
+              "calls": 48,
+              "inclusive_seconds": 1.3635364323854446
+            },
+            "topology.integrate_gradient_field": {
+              "calls": 4,
+              "inclusive_seconds": 1.6186926513910294
+            },
+            "registration.constrain_topology": {
+              "calls": 1,
+              "inclusive_seconds": 8.03735338896513
+            }
+          },
+          "maximum_rss_kib": 1478492,
+          "solver_numeric_qc_sha256": "9e183372119f915fbe93c312ecb668181fff1e272fba0383fb912b1ecd4aaeb1",
+          "output_sha256": {
+            "cout": "42380fd6386eb180a2d786efc17fd5fb0d2e5759e4909e9b219769eb6e678141",
+            "iout": "df8c1627a2ce0217f7f7848dd8d06f2dcab39a804c42ac76655ffd646312da55",
+            "jout": "a06818e20571e681043dc5545e30e7e22feaff39d1abd576f903e1202883cb26"
+          },
+          "layout_copies": [
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003307238221168518
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00070914626121521
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003937333822250366
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00039051473140716553
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00044392049312591553
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0004010125994682312
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00039897114038467407
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00044511258602142334
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00043141841888427734
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.00176982581615448
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0020123273134231567
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001909211277961731
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0028693079948425293
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001978732645511627
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0020688623189926147
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001853160560131073
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0019255205988883972
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.00192975252866745
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001937583088874817
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018431618809700012
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.002046823501586914
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.002071872353553772
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.019677944481372833
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.022080279886722565
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.026783213019371033
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.027334697544574738
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.017863750457763672
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01869571954011917
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01770363748073578
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015595108270645142
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.016753338277339935
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.018687397241592407
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01850709319114685
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.021682359278202057
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.0178217813372612
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.03270053118467331
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.018297187983989716
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.016086377203464508
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.018075741827487946
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015971951186656952
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.016951769590377808
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.020151972770690918
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01872311532497406
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.017285257577896118
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.0169684961438179
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.022291772067546844
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.019008107483386993
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.016415737569332123
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01632552593946457
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.020423397421836853
+            }
+          ],
+          "maximum_layout_copy_bytes_per_operator": 64989288
+        }
+      }
+    },
+    {
+      "case_id": "fnirt_t1_real_t1",
+      "checks": {
+        "all_output_file_sha_equal": true,
+        "solver_numeric_qc_and_stops_equal": true,
+        "operation_counts_equal": true
+      },
+      "profiles": {
+        "baseline": {
+          "status": "completed",
+          "benchmark": false,
+          "inclusive_scopes_overlap": true,
+          "scope": "one instrumented full API load + compute + save; imports and lock wait excluded",
+          "case_id": "fnirt_t1_real_t1",
+          "threads": 1,
+          "affinity": [
+            95
+          ],
+          "profile_tool_sha256": "97ddafe790e7be56eda1eef90c66557b81f5898d50ac9d8cc67dd55602f6bd2e",
+          "source_hashes": {
+            "src/fnit/fnirt/registration.py": "74fc259e2096e64153a591488303b8ccdfdf19d4ba0b2b91891222b905740e89",
+            "src/fnit/fnirt/spline.py": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+            "src/fnit/fnirt/topology.py": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3",
+            "src/fnit/fnirt/_normal_cpu.py": "4bcb0f4490c0fcd613e6d8f3e533c9929fc14bc123ebfbfe4cd70afa6519794f",
+            "src/fnit/fnirt/_smoothing_cpu.py": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be",
+            "src/fnit/fnirt/_topology_cpu.py": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6",
+            "src/fnit/fnirt/_bending_cpu.py": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+          },
+          "instrumented_api_seconds": 359.1733184456825,
+          "counters": {
+            "registration._fsl_masked_gaussian_blur": {
+              "calls": 6,
+              "inclusive_seconds": 12.239819057285786
+            },
+            "registration.expand_coefficients": {
+              "calls": 14107,
+              "inclusive_seconds": 22.595446951687336
+            },
+            "registration._trilinear_sample": {
+              "calls": 201,
+              "inclusive_seconds": 18.905097231268883
+            },
+            "spline.expand_coefficients": {
+              "calls": 84870,
+              "inclusive_seconds": 23.06089459359646
+            },
+            "bending_cpu.multiply_square_": {
+              "calls": 1200,
+              "inclusive_seconds": 3.0525657013058662
+            },
+            "BendingOperator.energy": {
+              "calls": 200,
+              "inclusive_seconds": 20.2867192029953
+            },
+            "LevelSystem.evaluate": {
+              "calls": 100,
+              "inclusive_seconds": 26.932374067604542
+            },
+            "JointT1System.evaluate": {
+              "calls": 53,
+              "inclusive_seconds": 20.921494610607624
+            },
+            "registration.adjoint_field": {
+              "calls": 20559,
+              "inclusive_seconds": 45.38420608639717
+            },
+            "BendingOperator.normal": {
+              "calls": 13945,
+              "inclusive_seconds": 11.033117696642876
+            },
+            "registration.design_diagonal": {
+              "calls": 178,
+              "inclusive_seconds": 0.09790176898241043
+            },
+            "BendingOperator.diagonal": {
+              "calls": 84,
+              "inclusive_seconds": 0.1643022671341896
+            },
+            "LevelSystem.linearize": {
+              "calls": 47,
+              "inclusive_seconds": 13.99280048161745
+            },
+            "JointT1System.linearize": {
+              "calls": 47,
+              "inclusive_seconds": 21.188966408371925
+            },
+            "SpatialNormalCPU.__call__": {
+              "calls": 7247,
+              "inclusive_seconds": 160.30582416057587
+            },
+            "JointT1System.matvec": {
+              "calls": 7247,
+              "inclusive_seconds": 300.09385377168655
+            },
+            "registration._spline_jacobian": {
+              "calls": 13,
+              "inclusive_seconds": 1.3476815521717072
+            },
+            "registration._force_jacobian_range": {
+              "calls": 6,
+              "inclusive_seconds": 0.5435825064778328
+            }
+          },
+          "maximum_rss_kib": 1363176,
+          "solver_numeric_qc_sha256": "80c8ce9b6833ebc39257e66980ed5a7db43ef58889b3150c19655e338e253141",
+          "output_sha256": {
+            "cout": "e94e95a886bc9b126a13c0be1c0aae04c60b9d81e6b7c490b72f7590c9ab2538",
+            "iout": "68cca1d1083e93184ca3e2380b569a5d289bb5b551b1869cd1cbb2cf7c4fe55b",
+            "jout": "487a1b84652a3f0376da035c22a6e3c7bc9ec9a019f4c8aa5e5f007cd496c34c",
+            "full_pull_jacobian": "4319509fa6a729698f8ed29b6928306c4c847c2d673e37d7b2c13613e26d5838"
+          },
+          "layout_copies": [
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002507343888282776
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.000283561646938324
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002713501453399658
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003116801381111145
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002593919634819031
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00031804293394088745
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002495869994163513
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00026500970125198364
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00038701295852661133
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002804994583129883
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00027070939540863037
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00029025226831436157
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002726241946220398
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002894476056098938
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002805441617965698
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00023198872804641724
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0016835257411003113
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0020416676998138428
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.002553112804889679
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0019446983933448792
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0019289255142211914
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.00275314599275589
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018654316663742065
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0020511001348495483
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0023905783891677856
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0015947744250297546
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018074065446853638
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018742382526397705
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018675923347473145
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.002000652253627777
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.017446063458919525
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015449218451976776
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.017665140330791473
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.02003312110900879
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.017609648406505585
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.017950862646102905
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.016599558293819427
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.016421250998973846
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015529721975326538
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01632382720708847
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01983899623155594
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015427552163600922
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01839681714773178
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015070967376232147
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01857588440179825
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015099719166755676
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015772901475429535
+            }
+          ],
+          "maximum_layout_copy_bytes_per_operator": 64989288
+        },
+        "candidate": {
+          "status": "completed",
+          "benchmark": false,
+          "inclusive_scopes_overlap": true,
+          "scope": "one instrumented full API load + compute + save; imports and lock wait excluded",
+          "case_id": "fnirt_t1_real_t1",
+          "threads": 1,
+          "affinity": [
+            95
+          ],
+          "profile_tool_sha256": "f57ddc4505832e00c1f165176abeec558905109a9dbbf529f21bdeab365a2dc1",
+          "source_hashes": {
+            "src/fnit/fnirt/registration.py": "74fc259e2096e64153a591488303b8ccdfdf19d4ba0b2b91891222b905740e89",
+            "src/fnit/fnirt/spline.py": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+            "src/fnit/fnirt/topology.py": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3",
+            "src/fnit/fnirt/_normal_cpu.py": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f",
+            "src/fnit/fnirt/_normal_simd_cpu.py": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9",
+            "src/fnit/fnirt/_smoothing_cpu.py": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be",
+            "src/fnit/fnirt/_topology_cpu.py": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6",
+            "src/fnit/fnirt/_bending_cpu.py": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+          },
+          "instrumented_api_seconds": 222.0508264824748,
+          "counters": {
+            "registration._fsl_masked_gaussian_blur": {
+              "calls": 6,
+              "inclusive_seconds": 12.500046603381634
+            },
+            "registration.expand_coefficients": {
+              "calls": 14107,
+              "inclusive_seconds": 24.83754688501358
+            },
+            "registration._trilinear_sample": {
+              "calls": 201,
+              "inclusive_seconds": 19.839177131652832
+            },
+            "spline.expand_coefficients": {
+              "calls": 84870,
+              "inclusive_seconds": 22.343092650175095
+            },
+            "bending_cpu.multiply_square_": {
+              "calls": 1200,
+              "inclusive_seconds": 2.985953003168106
+            },
+            "BendingOperator.energy": {
+              "calls": 200,
+              "inclusive_seconds": 19.29701939225197
+            },
+            "LevelSystem.evaluate": {
+              "calls": 100,
+              "inclusive_seconds": 27.054589428007603
+            },
+            "JointT1System.evaluate": {
+              "calls": 53,
+              "inclusive_seconds": 21.212998002767563
+            },
+            "registration.adjoint_field": {
+              "calls": 20559,
+              "inclusive_seconds": 46.72705326229334
+            },
+            "BendingOperator.normal": {
+              "calls": 13945,
+              "inclusive_seconds": 11.05001549422741
+            },
+            "registration.design_diagonal": {
+              "calls": 178,
+              "inclusive_seconds": 0.09865600615739822
+            },
+            "BendingOperator.diagonal": {
+              "calls": 84,
+              "inclusive_seconds": 0.1917683258652687
+            },
+            "LevelSystem.linearize": {
+              "calls": 47,
+              "inclusive_seconds": 13.87830913811922
+            },
+            "JointT1System.linearize": {
+              "calls": 47,
+              "inclusive_seconds": 21.060897931456566
+            },
+            "normal_kernel._flat_serial": {
+              "calls": 7247,
+              "inclusive_seconds": 17.17444521188736
+            },
+            "SpatialNormalCPU.__call__": {
+              "calls": 7247,
+              "inclusive_seconds": 18.017828948795795
+            },
+            "JointT1System.matvec": {
+              "calls": 7247,
+              "inclusive_seconds": 162.6850457713008
+            },
+            "registration._spline_jacobian": {
+              "calls": 13,
+              "inclusive_seconds": 1.0924913063645363
+            },
+            "registration._force_jacobian_range": {
+              "calls": 6,
+              "inclusive_seconds": 0.46121659874916077
+            }
+          },
+          "maximum_rss_kib": 1367020,
+          "solver_numeric_qc_sha256": "80c8ce9b6833ebc39257e66980ed5a7db43ef58889b3150c19655e338e253141",
+          "output_sha256": {
+            "cout": "e94e95a886bc9b126a13c0be1c0aae04c60b9d81e6b7c490b72f7590c9ab2538",
+            "iout": "68cca1d1083e93184ca3e2380b569a5d289bb5b551b1869cd1cbb2cf7c4fe55b",
+            "jout": "487a1b84652a3f0376da035c22a6e3c7bc9ec9a019f4c8aa5e5f007cd496c34c",
+            "full_pull_jacobian": "4319509fa6a729698f8ed29b6928306c4c847c2d673e37d7b2c13613e26d5838"
+          },
+          "layout_copies": [
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003120005130767822
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00042092055082321167
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003789141774177551
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003887563943862915
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00033818185329437256
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00045996159315109253
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.000292755663394928
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003459230065345764
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0004613623023033142
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003878772258758545
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00035721808671951294
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0003425180912017822
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00034146010875701904
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00043486058712005615
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.0002902671694755554
+            },
+            {
+              "geometry": [
+                24,
+                28,
+                24
+              ],
+              "copied_bytes": 1161216,
+              "copy_seconds": 0.00037644803524017334
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0020383745431900024
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001954123377799988
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.002335868775844574
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.002606600522994995
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0017450377345085144
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018374323844909668
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0016818419098854065
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.001862548291683197
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0017579421401023865
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018759667873382568
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0017544850707054138
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0019975826144218445
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.002231128513813019
+            },
+            {
+              "geometry": [
+                46,
+                55,
+                46
+              ],
+              "copied_bytes": 8379360,
+              "copy_seconds": 0.0018335282802581787
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.02337884157896042
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.04012160748243332
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.034685999155044556
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.021719813346862793
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.030300967395305634
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01659494638442993
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01686473935842514
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.018572084605693817
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01651020348072052
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.019200004637241364
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015636444091796875
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.016241393983364105
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015150263905525208
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.015820443630218506
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.0152021124958992
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.01691291481256485
+            },
+            {
+              "geometry": [
+                91,
+                109,
+                91
+              ],
+              "copied_bytes": 64989288,
+              "copy_seconds": 0.017191745340824127
+            }
+          ],
+          "maximum_layout_copy_bytes_per_operator": 64989288
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "status": "full_gate_passed",
+  "benchmark": false,
+  "same_complete_input_and_output_budget": true,
+  "scope": "CPU95 diagnosis; no official native clock or speed ratio",
+  "checks": {
+    "all_output_file_sha_equal": true,
+    "solver_qc_equal": true,
+    "final_valid_fraction_equal": true,
+    "output_file_sha_equal_to_runtime17": true
+  },
+  "profiles": {
+    "baseline20": {
+      "status": "completed",
+      "benchmark": false,
+      "inclusive_scopes_overlap": true,
+      "scope": "One full instrumented API read + compute + save; imports and lock wait excluded",
+      "case_id": "invwarp_t1_coefficient_uncompressed_output",
+      "threads": 1,
+      "affinity": [
+        95
+      ],
+      "profile_tool_sha256": "ef42e0878b1b19499c97638baf18c78f84248f44dc810cacacc0cc9a2f6fe016",
+      "source_hashes": {
+        "src/fnit/applywarp/core.py": "21dc364be908ff985e73c0fc78f09a405b1465624a0cc8b913a0f0a4f6d054a2",
+        "src/fnit/convertwarp/core.py": "5c25a942d6f545a41b1e6d07aa66c1012d8cff0349a2e5049358903d4e00518c",
+        "src/fnit/invwarp/core.py": "63e73fface1e76d6916e1d916ec30804ca3649fed85ad74a4ee3444abbe4bfe5"
+      },
+      "instrumented_api_seconds": 58.32984457165003,
+      "counters": {
+        "PullField.__init__": {
+          "calls": 1,
+          "inclusive_seconds": 0.03373309224843979
+        },
+        "sample_linear_cpu": {
+          "calls": 32,
+          "inclusive_seconds": 13.106787130236626
+        },
+        "bounds_mask": {
+          "calls": 32,
+          "inclusive_seconds": 4.19212981313467
+        },
+        "sample_linear": {
+          "calls": 32,
+          "inclusive_seconds": 32.13861811906099
+        },
+        "PullField.sample": {
+          "calls": 32,
+          "inclusive_seconds": 49.42361193150282
+        },
+        "reference_grid": {
+          "calls": 1,
+          "inclusive_seconds": 0.054122187197208405
+        },
+        "correction_mm": {
+          "calls": 30,
+          "inclusive_seconds": 0.7808060273528099
+        },
+        "output_image": {
+          "calls": 1,
+          "inclusive_seconds": 0.0647183507680893
+        }
+      },
+      "maximum_rss_kib": 1679424,
+      "solver_qc": {
+        "device": "cpu",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 30,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.760824978351593,
+      "output_sha256": {
+        "inverse_warp": "0bfb4eef883f8f9fdb943a1165c6b9e2f8935677873bf6b15833feaae27330c3"
+      }
+    },
+    "candidate_skipvalid_v1": {
+      "status": "completed",
+      "benchmark": false,
+      "inclusive_scopes_overlap": true,
+      "scope": "One full instrumented API read + compute + save; imports and lock wait excluded",
+      "case_id": "invwarp_t1_coefficient_uncompressed_output",
+      "threads": 1,
+      "affinity": [
+        95
+      ],
+      "profile_tool_sha256": "ef42e0878b1b19499c97638baf18c78f84248f44dc810cacacc0cc9a2f6fe016",
+      "source_hashes": {
+        "src/fnit/applywarp/core.py": "851c2bad7eba52e981a6fa92f474eea9a74df686a0fc9baa7531e23a2e58e246",
+        "src/fnit/convertwarp/core.py": "4c564a082b893a2b45a8d1ecab0fdd347ee4cedd022d108c90aff1b0269cc70f",
+        "src/fnit/invwarp/core.py": "147347e5b4a49bdab6e505949feb19b76759c9fc2b81c385bed5b335c2866391"
+      },
+      "instrumented_api_seconds": 56.896215833723545,
+      "counters": {
+        "PullField.__init__": {
+          "calls": 1,
+          "inclusive_seconds": 0.05816897004842758
+        },
+        "sample_linear_cpu": {
+          "calls": 32,
+          "inclusive_seconds": 13.101191326975822
+        },
+        "sample_linear": {
+          "calls": 32,
+          "inclusive_seconds": 28.70964679121971
+        },
+        "PullField.sample": {
+          "calls": 32,
+          "inclusive_seconds": 47.3282024115324
+        },
+        "reference_grid": {
+          "calls": 1,
+          "inclusive_seconds": 0.08636146783828735
+        },
+        "correction_mm": {
+          "calls": 30,
+          "inclusive_seconds": 0.7478688135743141
+        },
+        "bounds_mask": {
+          "calls": 1,
+          "inclusive_seconds": 0.20366773754358292
+        },
+        "output_image": {
+          "calls": 1,
+          "inclusive_seconds": 0.07088997215032578
+        }
+      },
+      "maximum_rss_kib": 1674268,
+      "solver_qc": {
+        "device": "cpu",
+        "output_convention": "relative",
+        "input_convention": "relative",
+        "iterations": 30,
+        "tolerance_mm": 0.01,
+        "iterations_used": 30,
+        "converged": false,
+        "median_residual_mm_in_field": 0.0,
+        "matrix_coordinates": "FSL scaled-mm"
+      },
+      "valid_fraction": 0.760824978351593,
+      "output_sha256": {
+        "inverse_warp": "0bfb4eef883f8f9fdb943a1165c6b9e2f8935677873bf6b15833feaae27330c3"
+      }
+    }
+  }
+}

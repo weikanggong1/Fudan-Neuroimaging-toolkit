@@ -65,6 +65,15 @@ Copyright The NiPreps Developers. These are modified adaptations distributed
 under [Apache License 2.0](licenses/Apache-2.0.txt), with direct nibabel/NumPy
 handling, explicit input checks and no NiPreps workflow runtime.
 
+`src/fnit/_world_resampling.py` follows the RAS pull-chain, coordinate-rounding
+and output-header conventions of
+[fMRIPrep 25.2.4 `resample_image`](https://github.com/nipreps/fmriprep/blob/25.2.4/fmriprep/interfaces/resampling.py).
+The modified header handling retains the NiPreps attribution and Apache 2.0
+license above. FNIT evaluates its own transform chain with PyTorch; the
+explicit matching CPU protocol uses the existing SciPy `ndimage` dependency
+for grid-constant interpolation. fMRIPrep and NiTransforms are used only by
+the isolated official benchmark and are not FNIT runtime dependencies.
+
 `src/fnit/fmri/sampling_reference.py` is a modified nibabel/NumPy adaptation
 informed by NiWorkflows 1.14.4 `GenerateSamplingReference` / `_gen_reference`
 and [Nilearn 0.11.1 `resample_img`](https://github.com/nilearn/nilearn/blob/0.11.1/nilearn/image/resampling.py).

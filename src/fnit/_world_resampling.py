@@ -7,6 +7,7 @@ sampled independently after composing the declared transform stages.
 from dataclasses import dataclass
 
 import math
+from contextlib import nullcontext
 
 import nibabel as nib
 import numpy as np
@@ -188,6 +189,56 @@ def _fmriprep_dense_world(world, pull_image, pull, voxels, spatial_chunk_size):
     return mapped
 
 
+def _sample_fmriprep_image_cpu(source_batch, coordinates, spatial_chunk_size, interpolation, executor=None):
+    """CPU queries with the fixed SciPy grid-constant convention.
+
+    Filter cubic frames once, then query every spatial block. Coordinate
+    preparation finishes before the bounded frame pool starts; SciPy's
+    separable filter/query do not start a second Torch worker pool. The
+    twelve-voxel cubic zero prepad matches SciPy ``map_coordinates`` with
+    ``order=3, mode='grid-constant', prefilter=True``. Only the explicitly
+    matching CPU protocol calls this helper; CUDA and other protocols retain
+    the mature Torch sampler.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+    from scipy.ndimage import map_coordinates, spline_filter
+
+    query = coordinates.detach().numpy().reshape(coordinates.shape[0], 3, -1)
+    batch_size = query.shape[0]
+    target_shape = tuple(coordinates.shape[2:])
+    order = {"nearest": 0, "linear": 1, "spline": 3}[interpolation]
+
+    def sample_frame(index):
+        frame = source_batch[..., index]
+        if order == 3:
+            samples = spline_filter(
+                np.pad(frame, 12, mode="constant", constant_values=0),
+                order=3, output=np.float64, mode="grid-constant",
+            )
+        else:
+            samples = frame
+        values = np.empty(query.shape[2], dtype=np.float32)
+        for start in range(0, values.size, spatial_chunk_size):
+            stop = min(start + spatial_chunk_size, values.size)
+            block = query[index, :, start:stop]
+            map_coordinates(
+                samples, block + 12 if order == 3 else block,
+                output=values[start:stop], order=order, mode="grid-constant",
+                cval=0, prefilter=False,
+            )
+        return values.reshape(target_shape)
+
+    workers = min(batch_size, torch.get_num_threads())
+    if workers == 1:
+        images = [sample_frame(index) for index in range(batch_size)]
+    elif executor is not None:
+        images = list(executor.map(sample_frame, range(batch_size)))
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            images = list(pool.map(sample_frame, range(batch_size)))
+    return torch.from_numpy(np.stack(images))
+
+
 def resample_world_image(
     source,
     reference,
@@ -299,7 +350,15 @@ def resample_world_image(
     if motion.shape != (frames, 4, 4) or not np.isfinite(motion).all() \
             or not np.allclose(motion[:, 3], (0, 0, 0, 1), rtol=0, atol=1e-8):
         raise ValueError("motion_pull_world must have one finite affine per frame")
-    result = np.empty((*shape, frames), dtype=np.float32)
+    cpu_fmriprep = (
+        selected.type == "cpu" and boundary == "grid-constant"
+        and coordinate_precision == "fmriprep"
+    )
+    # CPU frame writes and NIfTI saves follow contiguous per-volume storage.
+    # Other protocols retain their established C allocation; no arithmetic
+    # or saved NIfTI byte order changes with the CPU allocation's layout.
+    result = np.empty((*shape, frames), dtype=np.float32,
+                      order="F" if cpu_fmriprep else "C")
     voxel_motion = None
     if coordinate_precision == "fmriprep":
         # Tiny matrix products follow the installed CPU reference's order;
@@ -307,78 +366,91 @@ def resample_world_image(
         inverse_source = np.linalg.inv(image.affine)
         voxel_motion = np.asarray([inverse_source @ frame @ image.affine
                                    for frame in motion], dtype=np.float64)
-    for start in range(0, frames, batch_size):
-        stop = min(start + batch_size, frames)
-        if coordinate_precision == "fmriprep":
-            pull = torch.as_tensor(voxel_motion[start:stop].copy(), dtype=torch.float64, device=selected)
-            coords = (pull[:, :3, :3] @ reference_voxels
-                       + pull[:, :3, 3:4]).reshape(stop - start, 3, *shape)
-        else:
-            pull = torch.as_tensor(motion[start:stop].copy(), dtype=torch.float64, device=selected)
-            frame_world = pull[:, :3, :3] @ reference_world + pull[:, :3, 3:4]
-            coords = (world_to_source[:3, :3] @ frame_world
-                      + world_to_source[:3, 3:4]).reshape(stop - start, 3, *shape)
-        if boundary == "periodic":
-            # Preserve the clean-volume edge correction. Grid-constant uses
-            # unmodified coordinates, including its outside-grid support.
-            for axis in range(3):
-                upper = image.shape[axis] - 1
-                within = (coords[:, axis] >= -1e-6) & (coords[:, axis] <= upper + 1e-6)
-                coords[:, axis] = torch.where(
-                    within, coords[:, axis].clamp(0, upper), coords[:, axis]
+    pool_context = nullcontext(None)
+    if cpu_fmriprep and min(batch_size, frames, torch.get_num_threads()) > 1:
+        from concurrent.futures import ThreadPoolExecutor
+        pool_context = ThreadPoolExecutor(
+            max_workers=min(batch_size, frames, torch.get_num_threads()),
+        )
+    # The bounded CPU frame pool survives across batches; each map finishes
+    # before preparing the next batch's Torch coordinates. Other protocols
+    # enter a null context and keep their original operations.
+    with pool_context as frame_pool:
+        for start in range(0, frames, batch_size):
+            stop = min(start + batch_size, frames)
+            if coordinate_precision == "fmriprep":
+                pull = torch.as_tensor(voxel_motion[start:stop].copy(), dtype=torch.float64, device=selected)
+                coords = (pull[:, :3, :3] @ reference_voxels
+                           + pull[:, :3, 3:4]).reshape(stop - start, 3, *shape)
+            else:
+                pull = torch.as_tensor(motion[start:stop].copy(), dtype=torch.float64, device=selected)
+                frame_world = pull[:, :3, :3] @ reference_world + pull[:, :3, 3:4]
+                coords = (world_to_source[:3, :3] @ frame_world
+                          + world_to_source[:3, 3:4]).reshape(stop - start, 3, *shape)
+            if boundary == "periodic":
+                # Preserve the clean-volume edge correction. Grid-constant uses
+                # unmodified coordinates, including its outside-grid support.
+                for axis in range(3):
+                    upper = image.shape[axis] - 1
+                    within = (coords[:, axis] >= -1e-6) & (coords[:, axis] <= upper + 1e-6)
+                    coords[:, axis] = torch.where(
+                        within, coords[:, axis].clamp(0, upper), coords[:, axis]
+                    )
+            source_batch = data if image.ndim == 3 else data[..., start:stop]
+            if source_batch.ndim == 3:
+                source_batch = source_batch[..., None]
+            if cpu_fmriprep:
+                sampled = _sample_fmriprep_image_cpu(source_batch, coords, spatial_chunk_size, interpolation, executor=frame_pool)
+            else:
+                source_tensor = torch.as_tensor(
+                    np.moveaxis(source_batch, -1, 0).copy(),
+                    dtype=torch.float32, device=selected,
+                )[:, None]
+            if interpolation == "spline" and not cpu_fmriprep:
+                from .eddy.fsl2111_strict.spline import _pad_cubic_coefficients, sample_cubic_periodic_fast
+                coefficients = (_grid_constant_cubic_coefficients(source_tensor[:, 0])
+                                if boundary == "grid-constant" else
+                                _periodic_cubic_coefficients(source_tensor[:, 0]))
+                padded_coeff = _pad_cubic_coefficients(
+                    coefficients, "mirror" if boundary == "grid-constant" else "periodic",
                 )
-        source_batch = data if image.ndim == 3 else data[..., start:stop]
-        if source_batch.ndim == 3:
-            source_batch = source_batch[..., None]
-        source_tensor = torch.as_tensor(
-            np.moveaxis(source_batch, -1, 0).copy(),
-            dtype=torch.float32, device=selected,
-        )[:, None]
-        if interpolation == "spline":
-            from .eddy.fsl2111_strict.spline import _pad_cubic_coefficients, sample_cubic_periodic_fast
-            coefficients = (_grid_constant_cubic_coefficients(source_tensor[:, 0])
-                            if boundary == "grid-constant" else
-                            _periodic_cubic_coefficients(source_tensor[:, 0]))
-            padded_coeff = _pad_cubic_coefficients(
-                coefficients, "mirror" if boundary == "grid-constant" else "periodic",
-            )
-            flat_coords = coords.reshape(stop - start, 3, -1)
-            sampled = torch.empty((stop - start, flat_coords.shape[2]),
-                                  dtype=coefficients.dtype, device=selected)
-            for query_start in range(0, flat_coords.shape[2], spatial_chunk_size):
-                query_stop = min(query_start + spatial_chunk_size, flat_coords.shape[2])
-                query = flat_coords[:, :, query_start:query_stop].reshape(stop - start, 3, -1, 1, 1)
-                sample_coords = query + 12 if boundary == "grid-constant" else query.float()
-                sampled[:, query_start:query_stop] = sample_cubic_periodic_fast(
-                    coefficients, sample_coords,
-                    boundary="mirror" if boundary == "grid-constant" else "periodic",
-                    padded_coeff=padded_coeff,
-                ).reshape(stop - start, -1)
-            sampled = sampled.reshape(stop - start, *shape)
-            if boundary == "grid-constant":
-                # Beyond the prepad there is only zero extension. Prevent the
-                # interpolation helper's mirrored coefficients re-entering FOV.
+                flat_coords = coords.reshape(stop - start, 3, -1)
+                sampled = torch.empty((stop - start, flat_coords.shape[2]),
+                                      dtype=coefficients.dtype, device=selected)
+                for query_start in range(0, flat_coords.shape[2], spatial_chunk_size):
+                    query_stop = min(query_start + spatial_chunk_size, flat_coords.shape[2])
+                    query = flat_coords[:, :, query_start:query_stop].reshape(stop - start, 3, -1, 1, 1)
+                    sample_coords = query + 12 if boundary == "grid-constant" else query.float()
+                    sampled[:, query_start:query_stop] = sample_cubic_periodic_fast(
+                        coefficients, sample_coords,
+                        boundary="mirror" if boundary == "grid-constant" else "periodic",
+                        padded_coeff=padded_coeff,
+                    ).reshape(stop - start, -1)
+                sampled = sampled.reshape(stop - start, *shape)
+                if boundary == "grid-constant":
+                    # Beyond the prepad there is only zero extension. Prevent the
+                    # interpolation helper's mirrored coefficients re-entering FOV.
+                    inside = torch.ones_like(valid).expand(stop - start, *shape).clone()
+                    for axis in range(3):
+                        inside &= ((coords[:, axis] >= -12)
+                                   & (coords[:, axis] <= image.shape[axis] + 11))
+                    sampled *= inside
+            elif interpolation != "spline" and not cpu_fmriprep:
+                grid = torch.stack([2 * coords[:, axis] / max(image.shape[axis] - 1, 1) - 1
+                                    for axis in (2, 1, 0)], dim=-1).float()
+                sampled = F.grid_sample(
+                    source_tensor, grid,
+                    mode="bilinear" if interpolation == "linear" else "nearest",
+                    padding_mode="zeros", align_corners=True,
+                )[:, 0]
+            if boundary == "periodic":
                 inside = torch.ones_like(valid).expand(stop - start, *shape).clone()
                 for axis in range(3):
-                    inside &= ((coords[:, axis] >= -12)
-                               & (coords[:, axis] <= image.shape[axis] + 11))
+                    inside &= ((coords[:, axis] >= 0)
+                               & (coords[:, axis] <= image.shape[axis] - 1))
                 sampled *= inside
-        else:
-            grid = torch.stack([2 * coords[:, axis] / max(image.shape[axis] - 1, 1) - 1
-                                for axis in (2, 1, 0)], dim=-1).float()
-            sampled = F.grid_sample(
-                source_tensor, grid,
-                mode="bilinear" if interpolation == "linear" else "nearest",
-                padding_mode="zeros", align_corners=True,
-            )[:, 0]
-        if boundary == "periodic":
-            inside = torch.ones_like(valid).expand(stop - start, *shape).clone()
-            for axis in range(3):
-                inside &= ((coords[:, axis] >= 0)
-                           & (coords[:, axis] <= image.shape[axis] - 1))
-            sampled *= inside
-        sampled *= valid
-        result[..., start:stop] = np.moveaxis(sampled.cpu().numpy(), 0, -1)
+            sampled *= valid
+            result[..., start:stop] = np.moveaxis(sampled.cpu().numpy(), 0, -1)
     if image.ndim == 3:
         result = result[..., 0]
     header = target.header.copy()
@@ -389,7 +461,13 @@ def resample_world_image(
     # instead of losing that declaration in the output header.
     if spatial_unit == "unknown" and image.header.get_xyzt_units()[0] == "mm":
         spatial_unit = "mm"
-    header.set_xyzt_units(xyz=spatial_unit)
+    if image.ndim == 3 and coordinate_precision == "fmriprep":
+        # resample_image copies the complete target header, including its
+        # otherwise unused 3D time-unit flag. Retain the default float64
+        # protocol's established clearing of that flag.
+        header.set_xyzt_units(xyz=spatial_unit, t=target.header.get_xyzt_units()[1])
+    else:
+        header.set_xyzt_units(xyz=spatial_unit)
     output_image = nib.Nifti1Image(result, target.affine, header)
     if image.ndim == 4:
         output_image.header.set_zooms((*target.header.get_zooms()[:3], image.header.get_zooms()[3]))
