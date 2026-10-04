@@ -46,10 +46,12 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 | [TorchFAST](fast_fixes_20261004/README.md) | CPU 标量 C 指数/对数修复；默认和一组非默认八图与官方逐值相同 | nodecw7 默认完整 CLI 官方 368.198–411.291 s、FNIT 100.174–110.173 s，中位数比 3.706；完整脑 GPU 两后端各八图/headers 相同、显存相同，共享 GPU 时间另列 |
 | [SynthMorph](../synthmorph/cpu_fixes_20261004/README.md) | CPU slope/intercept 解码顺序、affine/rigid 返回变换与采样契约、joint 归约顺序 | affine/rigid/deform/joint 默认已测门通过，joint 物化 API 与路径输出相同；extent192 场与逆向门通过，正向零边界门未过。最终源码 GPU affine 数组/header 相同 |
 | [WMH-SynthSeg](synth_fixes_20261004/README.md) | 推理激活生命周期、CPU 权重搬运、GPU crop 工作区管理 | 完整 CPU 同官方标签/概率/CSV 相同；GPU crop allocated/reserved 为 18.374/18.438 GB，旧输出 SHA 和 57 次卷积 kernel 全同。默认 no-crop 保留原 GPU 路径、同实例模式恢复通过，但仍约 38 GB allocated |
-| [球面梯度平均](recon_fixes_20261004/README.md) | CPU 顶点间保序并行，不改变顶点内 FP32 累加 | 完整真实表面 256 轮 1.317464→0.314495 s，输出逐值相同；GPU 三轮数输出、内存相同。范围仅为该算子 |
+| [球面配准](recon_fixes_20261004/FULL_REGISTRATION.md) | CPU 平均保序并行；完整左半球同输入与官方逐点比较 | 119,451 点坐标/有序面/解码几何全同官方，旧新轨迹相同。新进程旧 764.907 / 新 348.038 / 官方 261.199 s，新仍慢 33.25%；GPU 平均三轮数输出/内存相同，原始 T1 整链未新跑 |
 | [GEMS](gems_fixes_20261004/README.md) | 修复无超参数 Gaussian 类别质量广播；缓存和裁剪候选均未进入默认 | 缓存 CPU 完整状态相同但无提速；裁剪候选存在逐区退步。丘脑/HA 未验收，不把预处理更接近官方写成最终分割通过 |
 | [FastVBM/FNIRT 定位](gems_fixes_20261004/FNIRT_READONLY.md) | 大量误差进入非线性估计段；最终乘法不是额外误差来源 | 固定官方场的实际转换/重采样 RMSE 4.39e−6，旧完整链 0.0189811。解析/稠密 Jacobian 定义差异另列 |
 | [FastVBM CPU Jacobian 修复](fnirt_jacobian_20261004/README.md) | CPU FNIRT 采用已有解析 Jacobian；GPU/SynthMorph 保留原路径 | 同官方系数对 `jout` RMSE 7.37e−8；固定真实 GM stage 的 Jacobian RMSE 0.01404→0.01259。调制图 RMSE 略降、最大误差略增；完整 GPU 后处理三图/header/QC 相同，未重测整 pipeline |
+| [FNIRT 首轮实测](fnirt_first_diff_20261004/README.md) | 首次分歧为正方向 moving GM 的平滑累计顺序；翻转控制整图逐值相同 | 初始 mask、fixed 平滑相同；首轮梯度/accepted coefficient 差很小。共享真实 FP64 系数 `4→2` 转换最大差 1.35e−12 mm；[完整平滑候选](fnirt_cpu_orientation_20261004/README.md)最终退化，未接入 |
+| [FNIRT 非零状态](fnirt_nonzero_state_20261004/README.md) | 同官方 accepted 参数的 bending、梯度、Hessian 与正则权重状态对照 | regularizer action 相对差约 3.2e−15，未发现量级错误；baseline/flip 完整对照最早在 PCG 80/49 轮分叉，非线性估计仍未等价 |
 | SynthSR | 第一层 ELU 可匹配，但完整候选仍失败且变慢，未替换正式实现 | 第二层卷积和 BatchNorm 首差已定位；默认浮点原门尚未通过，不影响既有 GPU 源码 |
 
 这版没有宣称全部 sMRI 功能已等价：SynthSR、丘脑/HA、FNIRT 非线性估计和 recon-all 的有效顶点对应仍见[剩余清单](REMAINING.md)。以下保留前一轮源码绑定结果，不改标为本版新测试。
