@@ -52,11 +52,13 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 | [FastVBM CPU Jacobian 修复](fnirt_jacobian_20261004/README.md) | CPU FNIRT 采用已有解析 Jacobian；GPU/SynthMorph 保留原路径 | 同官方系数对 `jout` RMSE 7.37e−8；固定真实 GM stage 的 Jacobian RMSE 0.01404→0.01259。调制图 RMSE 略降、最大误差略增；完整 GPU 后处理三图/header/QC 相同，未重测整 pipeline |
 | [FNIRT 首轮实测](fnirt_first_diff_20261004/README.md) | 首次分歧为正方向 moving GM 的平滑累计顺序；翻转控制整图逐值相同 | 初始 mask、fixed 平滑相同；首轮梯度/accepted coefficient 差很小。共享真实 FP64 系数 `4→2` 转换最大差 1.35e−12 mm；[完整平滑候选](fnirt_cpu_orientation_20261004/README.md)最终退化，未接入 |
 | [FNIRT 非零状态](fnirt_nonzero_state_20261004/README.md) | 同官方 accepted 参数的 bending、梯度、Hessian 与正则权重状态对照 | regularizer action 相对差约 3.2e−15，未发现量级错误；baseline/flip 完整对照最早在 PCG 80/49 轮分叉，非线性估计仍未等价 |
-| SynthSR | 第一层 ELU 可匹配，但完整候选仍失败且变慢，未替换正式实现 | 第二层卷积和 BatchNorm 首差已定位；默认浮点原门尚未通过，不影响既有 GPU 源码 |
+| [SynthSR](synth_fixes_20261004/sr_cpu_followup/README.md) | CPU 推理使用已核验的 FP32 ELU/BN 顺序及临时 channels-last 权重；保留训练、hooks、autocast 和 CUDA 路径 | 默认两分支 22,020,096 CNN 值、9,072,000 浮点/量化值全同官方，3,522 个旧超限值降为 0。四参数分支和六真实域原门均通过；正常 CPU CLI 中位数 28.660→28.340 s，RSS 10.222→7.496 GB。GPU 新旧完整输出/header/文件 SHA 与 allocated/reserved 相同；共享时间另列 |
 
-这版没有宣称全部 sMRI 功能已等价：SynthSR、丘脑/HA、FNIRT 非线性估计和 recon-all 的有效顶点对应仍见[剩余清单](REMAINING.md)。以下保留前一轮源码绑定结果，不改标为本版新测试。
+这版没有宣称全部 sMRI 功能已等价：SynthMorph 非默认零边界、丘脑/HA、FNIRT 非线性估计和 recon-all 的有效顶点对应仍见[剩余清单](REMAINING.md)。SynthSR 的 EPI NPZ 浮点仍有微差但通过原门；GPU 与旧 GPU 一致，未因此宣称 GPU 同官方 CPU 逐值相同。以下保留前一轮源码绑定结果，不改标为本版新测试。
 
-整合后的本地组件回归为 **931 passed、3 skipped，69.70 秒**，覆盖 FAST、GEMS、SynthMorph、world ApplyWarp、WMH、SynthSR、FastVBM 和受影响的球面算子。两项 warning 来自既有 FastVBM 模拟 profiler 测试未设 warmup；不使用这些测试的时间作 benchmark。完整命令、已测生产提交及修改源码/测试 SHA-256 见[整合记录](integration_20261004.json)。这组回归不代替真实影像与原软件的对照，也没有重新运行原始 T1 的完整 recon-all。
+SynthSR 修复并普通合并最新 main 后，本地组件回归为 **2,092 passed、5 skipped，138.79 秒**。覆盖前述组件及最新 FLIRT/FNIRT、ApplyWarp、ConvertWarp、InvWarp 和空间转换接口；测试和实际源码 SHA 见[最新整合记录](integration_sr_final_20261004.json)。首次整合的两项 NMI 测试固定统计 scatter 调用次数，未覆盖 CPU Numba 后端；已改为逐值检查送入熵计算的完整直方图，数值门未改变，生产数学也未改。两项 warning 来自既有 FastVBM profiler 测试未设 warmup，不能使用测试时间作 benchmark。
+
+前一轮 **931 passed、3 skipped，69.70 秒**及其源码仍见[原整合记录](integration_20261004.json)。两组组件回归均不代替真实影像与原软件的对照，也没有重新运行原始 T1 的完整 recon-all。
 
 ## 前一轮 nodecw10 验收记录（已发布）
 

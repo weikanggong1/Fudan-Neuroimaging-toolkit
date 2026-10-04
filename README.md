@@ -31,7 +31,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 
 CPU 的功能覆盖、同节点精度与耗时，以及受影响组件的 GPU 回归见[2026-10-04 对照报告](validation/smri_cpu/README.md)。各函数的验收状态分别列出。
 
-最新修复包含 FAST 的 CPU 标量数学、SynthMorph 的 CPU 解码与双向变换、WMH 的推理内存生命周期、球面梯度平均和 FastVBM CPU FNIRT 的解析 Jacobian 输出。WMH 的 GPU 裁剪模式已在 20 GB 内保持旧实现完整输出；未裁剪模式保留原 GPU 路径，仍需要更多显存。SynthSR 浮点输出、部分亚区分割及完整重建的一致性仍见[剩余清单](validation/smri_cpu/REMAINING.md)。
+最新修复包含 FAST 的 CPU 标量数学、SynthMorph 的 CPU 解码与双向变换、WMH 的推理内存生命周期、球面梯度平均和 FastVBM CPU FNIRT 的解析 Jacobian 输出。SynthSR 的 CPU 默认完整浮点门已通过，GPU 新旧完整输出和显存相同；[完整左半球同输入配准](validation/smri_cpu/recon_fixes_20261004/FULL_REGISTRATION.md)也与官方逐点一致，新版仍比官方慢 33.25%。WMH 的 GPU 裁剪模式已在 20 GB 内保持旧实现完整输出；未裁剪模式保留原 GPU 路径，仍需要更多显存。部分亚区、非线性估计和完整重建的一致性见[剩余清单](validation/smri_cpu/REMAINING.md)。
 
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
