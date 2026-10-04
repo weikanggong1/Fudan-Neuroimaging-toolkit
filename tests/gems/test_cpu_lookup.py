@@ -127,6 +127,9 @@ def test_original_lookup_and_fused_cpu_preserve_priors_and_gradients(monkeypatch
         return priors, covered, gradients
 
     actual = run()
+    if compact:
+        from fnit.gems import _raster_cpu_compact
+        monkeypatch.setattr(_raster_cpu_compact, "lookup_compact_cpu", lambda *a, **k: None)
     monkeypatch.setattr(rasterize, "lookup_candidates", lambda *a, **k: None)
     original = run()
     assert torch.equal(actual[0], original[0])

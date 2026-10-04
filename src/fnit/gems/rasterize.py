@@ -365,6 +365,15 @@ def _compact_lookup(vertices, tetrahedra, valid_mask, block_index,
     else:
         all_v0, all_inv = current_geometry.origins, current_geometry.inverse_edges
         all_singular = current_geometry.singular
+    if (vertices.device.type == "cpu" and vertices.dtype == torch.float32
+            and not cache_owner_hints and not owner_hints and hint_stats is None):
+        from ._raster_cpu_compact import lookup_compact_cpu
+        with torch.no_grad():
+            packed = lookup_compact_cpu(batches, all_v0, all_inv, all_singular,
+                                        block_index._device_cache, tolerance=tolerance)
+        if packed is not None:
+            selected_ids, selected_points, covered = packed
+            return all_v0, all_inv, selected_ids, selected_points, covered, reorder
     selected_parts, point_parts, covered_parts, hint_parts = [], [], [], []
     for points, ids, candidate_mask, batch_ids, point_rows in batches:
         hint_key = ("owner_hints", id(valid_mask), id(tetrahedra),
