@@ -142,6 +142,16 @@ def _resampled_image(
             shape=image_geometry(target).shape,
             fill_value=fill,
         )
+    elif torch.device(device).type == 'cpu' and method == 'linear':
+        # Surfa's final image sampler accepts the last-center band [n-1,n).
+        # Network preprocessing/integration keep their Neurite rules; this
+        # CPU-only image boundary correction leaves CUDA outputs unchanged.
+        plan = _prepare_transform(
+            pull, tensor.shape[2:], device=tensor.device, dtype=tensor.dtype,
+            shape=image_geometry(target).shape, method=method, fill_value=fill,
+            surfa_linear_rule=True,
+        )
+        moved = _sample_prepared(tensor, plan, fill)
     else:
         moved = transform(
             tensor,
@@ -174,7 +184,7 @@ def _resampled_frames(image, data, pull, target, device, *, method, fill, frame_
     plan = _prepare_transform(
         pull, data.shape[:3], device="cpu", dtype=torch.float32,
         shape=geometry.shape, method=method, fill_value=fill,
-        surfa_nearest_rule=True,
+        surfa_nearest_rule=True, surfa_linear_rule=device.type == 'cpu',
     )
     # Independent apply keeps the original CPU float32 coordinate arithmetic.
     # Transferring a prepared plan avoids TF32 affine-coordinate drift while
@@ -281,7 +291,7 @@ class SynthMorph:
         self.device = torch.device(device)
         self.model = model
         self.extent = extent
-        if configure_precision:
+        if configure_precision and self.device.type == "cuda":
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
         self.network = SynthMorphNetwork(

@@ -67,7 +67,8 @@ class _SamplingPlan:
 
 def _prepare_transform(
     trans, source_shape, *, device, dtype, shape=None, method='linear',
-    fill_value=0, surfa_nearest_rule=False,
+    fill_value=0, surfa_nearest_rule=False, surfa_linear_rule=False,
+    base_grid=None,
 ):
     """Prepare the existing sampler's coordinates without sampling frames.
 
@@ -77,6 +78,7 @@ def _prepare_transform(
     if method not in ('linear', 'nearest'):
         raise ValueError('method must be linear or nearest')
     use_surfa = method == 'nearest' and surfa_nearest_rule
+    use_surfa_domain = use_surfa or (method == 'linear' and surfa_linear_rule)
     trans = torch.as_tensor(
         trans, dtype=torch.float32 if use_surfa else dtype, device=device
     )
@@ -102,9 +104,10 @@ def _prepare_transform(
             )
             loc = coords + shift
     else:
-        loc = grid(
+        coords = (base_grid if base_grid is not None else grid(
             trans.shape[2:], device, torch.float32 if use_surfa else dtype
-        ) + trans
+        ))
+        loc = coords + trans
     valid = None
     if fill_value is not None:
         valid = torch.ones_like(loc[:, :1], dtype=torch.bool)
@@ -112,7 +115,7 @@ def _prepare_transform(
             valid &= loc[:, dimension:dimension + 1] >= 0
             valid &= (
                 loc[:, dimension:dimension + 1] < size
-                if use_surfa else loc[:, dimension:dimension + 1] <= size - 1
+                if use_surfa_domain else loc[:, dimension:dimension + 1] <= size - 1
             )
     if method == 'nearest':
         idx = [
@@ -195,6 +198,18 @@ def compose(transforms, shape=None):
 
 def integrate(vec, steps=7):
     out = vec / (2 ** steps)
+    if vec.device.type == 'cpu':
+        # Scaling-and-squaring repeatedly queries the same voxel grid. Reuse
+        # its values on CPU; keep the Neurite border-extension rule and every
+        # arithmetic operation. CUDA continues through its original path.
+        coords = grid(vec.shape[2:], vec.device, vec.dtype)
+        for _ in range(steps):
+            plan = _prepare_transform(
+                out, out.shape[2:], device=out.device, dtype=out.dtype,
+                fill_value=None, base_grid=coords,
+            )
+            out = out + _sample_prepared(out, plan, None)
+        return out
     for _ in range(steps):
         out = out + transform(out, out, fill_value=None)
     return out
