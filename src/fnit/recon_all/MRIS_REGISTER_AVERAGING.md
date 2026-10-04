@@ -4,7 +4,7 @@
 
 `RegistrationGradientAverager` 按固定邻接顺序，反复计算每个顶点及其邻点的梯度平均。每轮读取上一轮完整结果，再写入另一缓冲区；各顶点可并行，顶点内逐次 FP32 加法和最后的 FP32 乘法保持原规则。它是球面配准内部步骤，输入梯度的坐标系和单位由调用者保留。
 
-2026-10-04 候选 `fc2abc94966150906f4f3421f23aab235b64dd8d` 为大网格的多轮 CPU 调用增加自有 C++ 内核：一支 OpenMP 线程组完成全部轮次，减少逐轮调度。原 NumBa 内核继续承担小调用和不支持的环境。CUDA 使用既有 Triton 实现。本页新增内核的完整真实数据验收由协调任务执行；此前原型结果见第 5 节。
+2026-10-04 候选 `fc2abc94966150906f4f3421f23aab235b64dd8d` 为大网格的多轮 CPU 调用增加自有 C++ 内核：一支 OpenMP 线程组完成全部轮次，减少逐轮调度。原 NumBa 内核继续承担小调用和不支持的环境。CUDA 使用既有 Triton 实现。2026-10-05 正式源码的实际 H100 回归已通过；完整 CPU ABBA 仍在执行，此前原型结果见第 5 节。
 
 ## 2. Python 调用、输入与输出
 
@@ -99,9 +99,12 @@ mris_register -curv -threads 8 \
 | 同输入完整 LH 连续配准原型 | 与既有 accepted/native 参考的坐标、面顺序、解码 geometry 相同；sulc seed 与完整接受步长/轮数/清理轨迹相同；负面积面 0。 |
 | 原型完整调用的平均累计时间，包含首调用 | 既有参考 48.069 s，原型 20.127 s。两次不是相邻完整配对。 |
 | 原型完整 API 时间，含读写 | 既有参考 345.714 s，原型 448.403 s；未改刚体搜索从 49.294 s 波动至 196.200 s。不能据此宣称完整配准提速。 |
-| 正式 `fc2abc94` 候选完整 CPU ABBA / GPU 实际回归 | 协调任务正在对冻结正式源码验收；本页局部测试不替代该门。 |
+| 正式 `fc2abc94` GPU 实际回归 | H100，完整真实梯度 1/16/256 轮 ABBA，旧/新输出 SHA、逐调用 allocated/reserved 完全相同；CPU helper 未导入。 |
+| 正式 `fc2abc94` 完整 CPU ABBA | 相同八核、独立冷缓存，旧→新→新→旧正在执行；不以原型时钟代替正式结果。 |
 
 原型[算子报告](../../../validation/smri_cpu/recon_fixes_20261004/results/persistent_average_prototype.public.json)和[完整阶段报告](../../../validation/smri_cpu/recon_fixes_20261004/results/persistent_registration_pilot.public.json)保留输入、程序、原型和时钟。它们不证明右半球、原始 T1 全部 recon-all 或此次正式源码已通过。
+
+正式 [GPU 报告](../../../validation/smri_cpu/average_cpu_persistent_20261004/gpu.public.json)绑定新 wrapper SHA `956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b`，每次调用 allocated 25,273,344 B、reserved 46,137,344 B，均与旧版相同。该报告中的首次调用共用同一进程和 Triton 缓存，不能用于声称 CUDA 冷启动加速；短时钟受共享 GPU 负载影响。
 
 ![此前同输入官方与 FNIT 球面配准示例](../../../validation/smri_cpu/recon_fixes_20261004/results/full_cpu_registration.png)
 
