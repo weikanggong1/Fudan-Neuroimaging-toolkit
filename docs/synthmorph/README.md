@@ -20,7 +20,7 @@ flowchart TD
     H --> I[目标网格 NIfTI；保留 frame 轴和顺序]
 ```
 
-2026-10-02 的独立 apply 优化复用解码后的 float32 数据、坐标与采样索引，并按 frame 限制 CUDA 缓冲。变换方向、插值方法和输出 dtype 规则保留。配准模型仍只接受单帧 3D 输入。
+2026-10-02 的独立 apply 优化复用解码后的 float32 数据、坐标与采样索引，并按 frame 限制 CUDA 缓冲。2026-10-04 修复 CPU 最终 linear 的有效域和 nearest 半体素舍入；网络预处理与积分、CUDA 的既有采样路径保留。配准模型仍只接受单帧 3D 输入。
 
 ## 2. Python 调用、输入与输出
 
@@ -99,7 +99,7 @@ labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采
 | `extent` | 192 或 256，每轴网络网格大小，分辨率 1 mm，默认 256 |
 | `hyper` | 非线性正则化参数，`0 < hyper < 1`，默认 0.5；实例构造时固定 |
 | `steps` | scaling-and-squaring 次数，至少 5，默认 7 |
-| `configure_precision` | 默认 `True` 延续独立TF32配置；`False`保留调用方策略。recon-all构造后应用已验证的阶段FP32例外，不开启半精度。 |
+| `configure_precision` | 默认 `True`：CUDA 构造允许 TF32 matmul/cuDNN；CPU 构造不改变 CUDA 的进程全局配置。`False` 保留调用方策略。recon-all 构造后应用其阶段 FP32 配置；不启用半精度。 |
 
 模型使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。不同 `hyper` 需构造另一实例；底层 `DeformNetwork.set_hyper()` 是显式重新计算特化权重的入口。改变实例的普通属性不会自动更新这些权重。Python 的 CPU 线程数可用 `torch.set_num_threads()` 设置；统一 CLI 提供 `-j` 参数。
 
@@ -113,7 +113,7 @@ labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采
 | `init` | 可选初始仿射：`.lta` 路径、带源/目标几何的 `AffineTransform`，或 4×4 world-RAS 矩阵 |
 | `mid_space` | 使用初始仿射的中间空间；为 `True` 时必须提供 `init` |
 | `header_only` | 仅改变影像头信息，限 affine / rigid |
-| `output_dir` | 调试输出目录：`inp_1.nii.gz`、`inp_2.nii.gz` 和 `network_transforms.npz` |
+| `output_dir` | 调试输出目录：`inp_1.nii.gz`、`inp_2.nii.gz` 和 `network_transforms.npz`。CPU 指定 `init` 时两幅预处理输入采用 fixed 网络网格；CUDA 保留此前 preview 几何。官方另写中间场/输出图，本接口文件列表如上。 |
 | `transform_only` | 默认 `False`；`True`不重采样两幅影像，`moved`/`fixed_moved`为`None`，与`header_only`不能同时开启。 |
 | `compute_inverse` | 默认 `True`；`False`仅允许非线性模型、`transform_only=True`且无调试目录，`inverse=None`。两次反对称velocity前向保留，只省去未消费的反向积分/合成；不代替recon-all的原生数值求逆。非法组合抛`ValueError`。 |
 | `precision_report` | 默认 `None`；列表收集真实前向设备、输入/模型dtype、TF32和autocast，不插入额外同步。 |
@@ -319,11 +319,36 @@ FNIT 的 NIfTI RAS场为 `(X,Y,Z,3)`、intent vector 1007，不包含 FreeSurfer
 
 ## 5. 精度、运行时间与脑图
 
+### 5.1 当前 CPU 官方对照：2026-10-04
+
+真实输入为公开 CC0 的 OpenNeuro `ds003138` v1.0.1 两幅原始 T1w，moving/fixed 固定，完整网格 `224×288×288`。nodecw10 双方配置 8 线程并绑定同一组 8 个物理核；节点有其他任务。每次完整 CLI 都启动新进程，包含模型加载、解压、双向网络计算、双向场与双向影像保存；操作系统缓存未清空。formal v1 执行 `官方、FNIT、FNIT、官方`，实际 OS helper/idle 线程池数量也保留在报告，不能写成进程只有 8 条 OS 线程。
+
+CPU 构造不更改 CUDA 全局 TF32；CPU 最终 linear 接受官方 `[0,n)` 有效域，nearest 对半体素附近的 float32 坐标按原版舍入。预处理和积分的 Neurite 边界规则保留。CPU 积分只复用不变网格，采样与加法的次序不变；CUDA 使用此前路径。本轮没有启用通道布局候选：joint 约快 8%，但场输出没有通过提前固定的 `allclose` 门槛。
+
+完整参数、分步骤时间、全 FOV/官方脑 mask/坐标上边界的 MAE、RMSE、P99、max，及 CPU/GPU 各测量源码哈希见[验收说明](../../validation/synthmorph/cpu_20261004/README.md)与[逐项报告](../../validation/synthmorph/cpu_20261004/report.public.json)。连续图像使用参考区域 `P99−P1` 归一化；零动态范围区域单列误差。仿射以完整输入网格上的世界位移验收，dense 场以毫米分量最大误差与 RMSE 验收；不能只比较矩阵系数或相关性。
+
+| 默认模式（extent 256） | 原版完整 CLI 两次（秒） | FNIT v1 完整 CLI 两次（秒） | 最新 v3 完整 CLI 单次（秒） | 当前精度验收 |
+|---|---:|---:|---:|---|
+| rigid | 89.14 / 44.57 | 22.29 / 21.54 | 22.54 | 世界位移、全 FOV、脑内通过；正向零动态范围上边界有 3 个非零误差点，NRMSE 无定义 |
+| affine | 35.81 / 104.90 | 23.79 / 20.53 | 23.54 | 世界位移、全 FOV、脑内通过；逆向上边界 NRMSE 0.002444，超过 0.001 |
+| deform | 213.11 / 163.73 | 156.21 / 155.69 | 核心 dense 路径与 v1 相同 | 两向场和全部定义的影像区域通过；零动态范围正向边界逐值相同 |
+| joint | 220.79 / 261.35 | 164.24 / 169.25 | 核心 dense 路径与 v1 相同 | 全 FOV、脑内通过；逆向场 RMSE 0.000112653 mm、逆向边界 NRMSE 0.001528 未过门槛 |
+
+以上是同核预算下实际观测，节点负载和页面缓存会影响范围；v3 单次观测与 v1 R-C-C-R 分开。v3 改善最终 affine 坐标求值，v4 只修复有初始变换时的 CPU debug 图几何。四模式脑内 NRMSE 为 `1.60e−6–9.18e−6`；少量全 FOV 边界点的最大误差仍可达 715.07 个原始强度单位，因此不能称四模式已经全面匹配。官方 `affine -i -M` 在本输入上因 TensorFlow 混合 dtype 失败，修补参考仅列作诊断。
+
+同一真实物理变换下，8 项 affine apply 与 6 项 dense apply 通过本轮影像门槛，官方脑 mask 的 nearest 输出逐体素相同；真实两帧 DWI 的 chunk 1/2/auto 结果和 TR 相同。FSL intent-2006 warp 消费验证用同场对比原版 `applywarp` 与 `TorchApplyWarp`，完整 T1 NRMSE `1.21e−6`，完整命令 48.84 / 14.27 秒；它与配准模型精度是两个验收项。World 链的 5 项验证使用独立 NumPy/SciPy oracle，范围和元数据差异在报告单列。
+
+四种 GPU 模式的新旧输出数组 SHA-256 与完整 NIfTI 元数据一致，v3 已加载 API 单次时间为 3.41 / 3.39 / 5.94 / 5.55 秒，reserved 峰值为 5.91 / 5.91 / 17.74 / 17.84 GB，均低于 20 GB。该组证明本轮 CPU 修改没有改变现有 GPU 输出；旧版 GPU 与原软件的精度仍按历史对照单列。
+
+![真实 T1 官方 CPU、FNIT CPU 与脑内差图](../../validation/synthmorph/cpu_20261004/figures/cpu_official_brains.png)
+
+显示前应用官方脑 mask，图像只裁出脑部显示框；输入和数值比较仍使用完整 FOV。rigid/affine 来自 v3，deform/joint 来自核心计算相同的 v1；每行差图色标为脑内绝对误差 P99，最低为 0.01，色标外数值截断，完整最大误差见报告。
+
 ### 公共world变换链的验证范围
 
 新World链入口复用原volume算法，不添加另一套样条实现。专项测试核对完整参数转发、默认float32图像/header原样返回、frame轴与TR、dtype转换及不支持的参数；真实完整 volume 的逐位对照与计时见[公共入口验证](../../validation/fmri/public_resamplers_20261002/README.md)。完整新旧 SynthMorph volume API 为 499.55→461.54 s；7 幅影像逐位相同，包括全部 490 帧、正负零、完整 header/扩展，实际四个节点均通过 `apply_transform()`。allocated / reserved 峰值 13.31 / 15.06 GB，包含非线性配准。单次共享服务器观测没有稳定提速证据。下面的 490 帧 linear 计时属于此前普通 DenseWarp 入口，不作为新 World 链 spline 的性能测量。
 
-### 5.1 本轮4D数据流优化的验收
+### 5.2 已归档 4D 数据流优化：2026-10-02
 
 完整真实 BOLD 为 `88×88×64×490`，固定实际配准生成的非零 RAS pull，输出 `91×109×91×490`。最终 CPU 默认32帧，与冻结 `7473452` 的 CPU 输出逐位相同；CUDA 默认490帧，与同设备全通道 oracle 逐位相同。门禁覆盖全部 442,288,210 个值、正负零、完整 header、affine、dtype、TR 和 gzip 保存重读。
 
@@ -343,11 +368,11 @@ CPU 默认约1.86倍；CUDA是显式设备选项，CPU/GPU间最大差值为0.00
 | 新CPU → 新CUDA | nearest检查标签逐值一致；linear报告最大误差、MAE、RMSE、相关性，不声称跨设备逐位一致 |
 | 同一RAS场 → 官方FreeSurfer apply | 使用核查后的官方warp metadata，对照完整4D输出与时间，区分旧→新变化和既有sampler差异 |
 
-第一帧诊断确认，旧 FNIT linear 的 `[0,n−1]` 有效域与 Surfa 的 `[0,n)` 不同：14,467 个末层中心外体素覆盖本帧全部绝对误差 >1 的位置，模板脑 mask 与该带无交集，见[匿名边界诊断](../../validation/registration_lossless_20261002/synthmorph_boundary.public.json)。本轮为保持既有输出而保留这项边界行为；第一帧的误差贡献不推广到 490 帧，完整输出对照与计时见[统一报告](../../validation/registration_lossless_20261002/README.md)。
+第一帧诊断确认，旧 FNIT linear 的 `[0,n−1]` 有效域与 Surfa 的 `[0,n)` 不同：14,467 个末层中心外体素覆盖本帧全部绝对误差 >1 的位置，模板脑 mask 与该带无交集，见[匿名边界诊断](../../validation/registration_lossless_20261002/synthmorph_boundary.public.json)。2026-10-02 的测量版保留这项边界行为；2026-10-04 CPU 最终 linear 已接受 `[0,n)`，因此旧版逐位一致结论和该组 CPU 时间不用于当前边界修复版。CUDA 的既有路径保留。第一帧的误差贡献不推广到 490 帧，旧版完整输出对照与计时见[统一报告](../../validation/registration_lossless_20261002/README.md)。
 
 `tests/synthmorph` 提供边界、半体素tie、混合网格、一次解码、frame切块、单例frame及CPU/CUDA定向回归；单元测试验证接口和数值边界，真实benchmark使用真实影像。
 
-### 5.2 已归档 joint 配准：2026-09-27
+### 5.3 已归档 joint 配准：2026-09-27
 
 [GPU报告](../../validation/synthmorph/report.real.current.gpu.json)和[CPU报告](../../validation/synthmorph/report.real.current.cpu.json)将12例真实临床T1w配准到MNI152 T1 2 mm，并与FreeSurfer 8.2.0 joint逐例比较。结果覆盖各报告记录的测量源码；历史[源码关系说明](../../validation/runtime_dependencies/synthmorph_linear_source_equivalence.public.json)不能替代本轮新源码实测。病例按固定排序选取，未按输出质量筛选；报告保存去标识别名和SHA-256。每例完整CLI包含启动、HDF5加载、权重特化、读图、推理、重采样和两份NIfTI写出。GPU候选使用float32/TF32；CPU双方固定8线程。
 
@@ -376,7 +401,7 @@ CPU 默认约1.86倍；CUDA是显式设备选项，CPU/GPU间最大差值为0.00
 
 <a id="fsl-warp-转换真实-t1w"></a>
 
-### 5.3 已归档 FSL warp 转换：真实 T1w
+### 5.4 已归档 FSL warp 转换：真实 T1w
 
 原报告未记录测量日期；以下单例结果不是本轮4D优化结果。
 
@@ -414,6 +439,7 @@ python validation/synthmorph/validate_fsl_warp.py --help
 
 | 日期 | 更新 | 验证记录 |
 |---|---|---|
+| 2026-10-04 | CPU 构造精度隔离、最终 linear 有效域/affine 坐标、nearest 半体素舍入、积分 grid 复用与 init debug 几何；GPU 原路径保留 | [四模式、参数、独立 apply、GPU 回归与明确未过项](../../validation/synthmorph/cpu_20261004/README.md)；历史 4D 的 CPU 逐位结论不作为本次边界修复版结论 |
 | 2026-10-02 | `WorldTransformChain` 接入公共volume采样器，支持同一次插值中的固定场、BBR与逐帧HMC，新增spline/边界/mask参数 | `tests/synthmorph/test_world_transform.py` 契约测试；[完整 490 帧 API、矩阵/调用门与脑图](../../validation/fmri/public_resamplers_20261002/README.md)通过 |
 | 2026-10-02 | 独立apply一次解码、float32输入复用、坐标复用、可选CUDA与frame chunk，仿射准备复用voxel grid | [本轮真实影像报告](../../validation/registration_lossless_20261002/README.md)；完整490帧同设备位模式、header与保存重读均通过 |
 | 2026-10-02 | 修复既有 `(X,Y,Z,1)` 输入重采样后折叠为3D的bug；现在保留单例frame轴，registration的3D返回不变 | `test_apply_preserves_singleton_frame_dimension` |
