@@ -169,6 +169,12 @@ x_input = inverse(A) · x_reference + d(x_reference)
 `150,75,50,30`、10 mm warp resolution，四层使用 LM。dMRI/TBSS schedule 见
 [dMRI 页面](../dmri_pipeline/README.md#ukb-tbss-对应关系)。
 
+### CPU 平滑方向候选与验证（2026-10-04）
+
+成熟子函数的首差定位发现：NEWIMAGE 读取 affine 行列式为正的 NIfTI 时先在内部翻转 X，再按该方向累计 FP32 Gaussian 卷积；FNIT CPU 在 nibabel 数组原方向累计，产生末位差。隔离候选分别检查 moving 和 template 的实际 affine，必要时翻转 X、调用原平滑函数、再翻回；隐式 moving mask 同步翻转。候选保留影像网格、header、thread budget 和原 CUDA 分支，FP64 coefficients、gradient、solver 和 objective 未降低精度。
+
+同一真实官方 GM 的完整 `224×288×288` 平滑图中，原 CPU 最大差 `3.8147e-5`（归一化强度）；按内部方向累计后与官方逐值相同。但固定官方 GM/FLIRT/template/mask 的完整 CPU 配对中，warped GM 脑区 RMSE 从 `0.020061` 增至 `0.031622`，非线性 Jacobian 从 `0.013270` 增至 `0.020135`，用时从 `365.786` 增至 `422.257 s`。因此未采纳候选，默认源码保持原路径；独立 patch、完整 QC 和脑图见[阶段报告](../../validation/smri_cpu/fnirt_cpu_orientation_20261004/README.md)。首次接受更新及共享系数网格转换的证据另见[首差诊断](../../validation/smri_cpu/fnirt_first_diff_20261004/README.md)。完整 nonlinear estimation 仍未通过官方等价门。
+
 ### GPU 执行方式
 
 `TorchFNIRT(..., execution="optimized")`、`run_fnirt(..., execution="optimized")` 与 CLI `--execution optimized` 默认启用：
