@@ -68,6 +68,7 @@ class _SamplingPlan:
 def _prepare_transform(
     trans, source_shape, *, device, dtype, shape=None, method='linear',
     fill_value=0, surfa_nearest_rule=False, surfa_linear_rule=False,
+    surfa_nearest_half_up=False,
     base_grid=None,
 ):
     """Prepare the existing sampler's coordinates without sampling frames.
@@ -118,11 +119,19 @@ def _prepare_transform(
                 if use_surfa_domain else loc[:, dimension:dimension + 1] <= size - 1
             )
     if method == 'nearest':
-        idx = [
-            (torch.floor(loc[:, d] + 0.5) if use_surfa else loc[:, d].round())
-            .long().clamp(0, n - 1)
-            for d, n in enumerate(source_shape)
-        ]
+        idx = []
+        for dimension, size in enumerate(source_shape):
+            coordinate = loc[:, dimension]
+            if use_surfa and surfa_nearest_half_up:
+                # libc round promotes the float coordinate before rounding.
+                # Adding .5 in float32 can round a value just below a tie up
+                # to the next integer. Compare its fractional part directly.
+                lower = coordinate.floor()
+                rounded = lower + ((coordinate - lower) >= 0.5)
+            else:
+                rounded = (torch.floor(coordinate + 0.5)
+                           if use_surfa else coordinate.round())
+            idx.append(rounded.long().clamp(0, size - 1))
         flat = (idx[0] * source_shape[1] + idx[1]) * source_shape[2] + idx[2]
         return _SamplingPlan(tuple(loc.shape[2:]), None, flat, valid)
     norm = [loc[:, d] * (2 / (n - 1)) - 1 if n > 1 else torch.zeros_like(loc[:, d])
@@ -161,6 +170,7 @@ def surfa_nearest(volume, trans, shape=None, fill_value=0):
         trans, volume.shape[2:], device=volume.device, dtype=volume.dtype,
         shape=shape, method='nearest', fill_value=fill_value,
         surfa_nearest_rule=True,
+        surfa_nearest_half_up=volume.device.type == 'cpu',
     )
     return _sample_prepared(volume, plan, fill_value)
 

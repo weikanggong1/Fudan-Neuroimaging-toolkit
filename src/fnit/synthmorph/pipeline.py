@@ -185,6 +185,7 @@ def _resampled_frames(image, data, pull, target, device, *, method, fill, frame_
         pull, data.shape[:3], device="cpu", dtype=torch.float32,
         shape=geometry.shape, method=method, fill_value=fill,
         surfa_nearest_rule=True, surfa_linear_rule=device.type == 'cpu',
+        surfa_nearest_half_up=device.type == 'cpu',
     )
     # Independent apply keeps the original CPU float32 coordinate arithmetic.
     # Transferring a prepared plan avoids TF32 affine-coordinate drift while

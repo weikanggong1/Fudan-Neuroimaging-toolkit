@@ -64,3 +64,33 @@ def test_cpu_integration_reuses_grid_and_is_bitwise_unchanged(monkeypatch, steps
     actual = spatial.integrate(velocity, steps)
     assert len(calls) == 1
     assert torch.equal(actual.view(torch.int32), previous.view(torch.int32))
+
+
+@pytest.mark.parametrize('center', [0.5, 127.5])
+@pytest.mark.parametrize('direction', [-1, 0, 1])
+def test_cpu_surfa_nearest_rounds_float_coordinate_before_half_tie(center, direction):
+    from fnit.synthmorph.spatial import surfa_nearest
+    coordinate = torch.tensor(center, dtype=torch.float32)
+    if direction:
+        coordinate = torch.nextafter(coordinate, torch.tensor(float('inf')*direction))
+    matrix = torch.eye(4, dtype=torch.float32)
+    matrix[0, 3] = coordinate
+    image = torch.arange(260, dtype=torch.float32).reshape(1, 1, 260, 1, 1)
+    result = surfa_nearest(image, matrix, shape=(1, 1, 1))
+    # C libc round receives the exact float32 value promoted to double.
+    expected = np.floor(np.float64(coordinate.item()) + .5)
+    assert result.item() == expected
+
+
+def test_legacy_prepared_nearest_policy_remains_explicit_for_cuda_plans():
+    from fnit.synthmorph.spatial import _prepare_transform, _sample_prepared
+    coordinate = torch.nextafter(torch.tensor(.5), torch.tensor(-float('inf')))
+    matrix = torch.eye(4);matrix[0, 3] = coordinate
+    image = torch.arange(2, dtype=torch.float32).reshape(1, 1, 2, 1, 1)
+    options = dict(device='cpu', dtype=torch.float32, shape=(1, 1, 1),
+                   method='nearest', surfa_nearest_rule=True)
+    legacy = _prepare_transform(matrix, image.shape[2:], **options)
+    strict = _prepare_transform(matrix, image.shape[2:], **options,
+                                surfa_nearest_half_up=True)
+    assert _sample_prepared(image, legacy).item() == 1
+    assert _sample_prepared(image, strict).item() == 0
