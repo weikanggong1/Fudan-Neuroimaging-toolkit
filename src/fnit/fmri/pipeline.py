@@ -49,6 +49,7 @@ def run_feat_core(
     direction=None,
     reconstruction=None,
     echo=None,
+    reference_image=None,
     brain_mask=None,
     brain_extraction="synthstrip",
     synthstrip_weights=None,
@@ -68,6 +69,9 @@ def run_feat_core(
     performs motion-only resampling. It never manufactures a missing B0
     fieldmap or GDC warp. ``motion_iterations`` counts coordinate-optimizer
     sweeps at 8/4/4 mm, one per stage as in MCFLIRT. The optional
+    ``reference_image`` is an optional finite 3D HMC target. When supplied,
+    it is also saved as ``example_func``; the caller's mask and subsequent
+    BBR therefore use the same target instead of selecting another frame.
     ``brain_mask`` must already be in the reference grid. Without one,
     SynthStrip extracts the corrected EPI mean by default;
     ``brain_extraction='otsu'`` selects an independent Otsu mask.
@@ -95,7 +99,15 @@ def run_feat_core(
     matrices_dir = mc_dir / "prefiltered_func_data_mcf.mat"
     matrices_dir.mkdir(parents=True, exist_ok=True)
     raw = nib.load(str(inputs.bold))
-    if inputs.sbref is not None:
+    if reference_image is not None:
+        reference = nib.load(str(reference_image))
+        if reference.ndim != 3 or not np.isfinite(np.asarray(reference.dataobj)).all():
+            raise ValueError("reference_image must be a finite 3D NIfTI image")
+        if reference.shape != raw.shape[:3] or not np.allclose(
+            reference.affine, raw.affine, rtol=0, atol=1e-4
+        ):
+            raise ValueError("reference_image must match the raw BOLD voxel grid")
+    elif inputs.sbref is not None:
         reference = nib.load(str(inputs.sbref))
     else:
         midpoint = np.asarray(raw.dataobj[..., raw.shape[3] // 2], dtype=np.float32)

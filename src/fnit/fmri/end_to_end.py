@@ -28,6 +28,7 @@ from ..flirt.coordinates import flirt_to_world_affine
 from .pipeline import run_feat_core
 from .sampling_reference import native_bold_sampling_reference
 from .timing import prepare_timing_parameters
+from .reference import prepare_bold_reference
 
 
 @dataclass(frozen=True)
@@ -45,6 +46,7 @@ class FMRIVolumeResult:
     preproc_mni: Path | None = None
     motion_pull: Path | None = None
     mni_pull: Path | None = None
+    bold_reference: Path | None = None
 
 
 def _resample_final_volume(
@@ -258,6 +260,7 @@ def fMRIVolume_pipeline(
     device=None,
     batch_size=8,
     motion_iterations=(1, 1, 1),
+    bold_reference_strategy="robust",
     ica_max_iter=500,
     n_splits=1000,
     random_state=0,
@@ -273,12 +276,21 @@ def fMRIVolume_pipeline(
     Clean adds FEAT scaling/highpass, PICA/AROMA and optional confound
     regression, and is saved on the native EPI and MNI grids.
 
+    ``bold_reference_strategy='robust'`` aligns raw-BOLD frame selection,
+    clipping, drift normalization and median with NiWorkflows 1.14.4, using
+    TorchMCFLIRT in place of AFNI Fourier motion correction. ``'middle'``
+    retains the previous single-frame target for paired validation. An SBRef
+    retains the existing compatibility path; separate SBRef coregistration
+    and raw-BOLD HMC targets are not implemented in this entry.
+
     Motion and anatomical estimation reuse TorchMCFLIRT, SynthStrip,
     source-ordered TorchFAST, BBR and the selected SynthMorph/FNIRT backend.
     Associated fieldmaps require a supplied B0 warp in the FEAT subfunction;
     this full entry does not estimate or accept B0/GDC warps.
     """
     pipeline_started = time.perf_counter()
+    if bold_reference_strategy not in ("robust", "middle"):
+        raise ValueError("bold_reference_strategy must be 'robust' or 'middle'")
     if registration_backend not in ("synthmorph", "fnirt"):
         raise ValueError("registration_backend must be 'synthmorph' or 'fnirt'")
     if bbr_execution not in ("reference", "batched"):
@@ -301,7 +313,8 @@ def fMRIVolume_pipeline(
     paths = fmri_derivative_paths(inputs, t1w, derivatives_root)
     destinations = (paths.clean_native, paths.clean_mni, paths.mask_mni,
                     paths.t1_brain, paths.bbr_matrix, paths.preproc_t1w,
-                    paths.preproc_mni, paths.motion_pull, paths.mni_pull)
+                    paths.preproc_mni, paths.motion_pull, paths.mni_pull,
+                    paths.bold_reference)
     for destination in destinations:
         if destination == paths.t1_brain:
             # Anatomical derivatives are shared by runs. Validate identity
@@ -337,9 +350,25 @@ def fMRIVolume_pipeline(
         template, classification_masks, output / "classification_masks")
     mask_dir = output / "masks"
     mask_dir.mkdir(exist_ok=True)
-    reference = _reference_image(inputs, output / "reference_epi.nii.gz")
+    started = time.perf_counter()
+    if inputs.sbref is None and bold_reference_strategy == "robust":
+        reference_result = prepare_bold_reference(
+            inputs.bold, output / "bold_reference", device=selected,
+            stage_iterations=motion_iterations,
+        )
+        reference = reference_result.reference
+        reference_description = json.loads(reference_result.metadata.read_text())
+    else:
+        reference = _reference_image(inputs, output / "reference_epi.nii.gz")
+        reference_description = {
+            "strategy": "sbref_compatibility" if inputs.sbref is not None else "middle",
+            "selected_indices": ([] if inputs.sbref is not None else
+                                 [nib.load(str(inputs.bold)).shape[3] // 2]),
+            "fmriprep_afni_motion_equivalent": False,
+        }
+    reference_elapsed = time.perf_counter() - started
     strip = SynthStrip(weights=synthstrip_weights, device=selected)
-    timing = {}
+    timing = {"bold_reference": reference_elapsed}
 
     started = time.perf_counter()
     epi_mask = _save_mask(
@@ -367,6 +396,7 @@ def fMRIVolume_pipeline(
         bids_root=bids_root, output_dir=output / "feat", subject=subject,
         session=session, task=task, run=run, acquisition=acquisition,
         direction=direction, reconstruction=reconstruction, echo=echo,
+        reference_image=reference,
         brain_mask=epi_mask, highpass_cutoff_seconds=highpass_cutoff_seconds,
         device=selected, batch_size=batch_size,
         motion_iterations=motion_iterations, overwrite=overwrite,
@@ -478,6 +508,8 @@ def fMRIVolume_pipeline(
         "slice_time_reference": slice_time_reference,
         "device": str(selected), "batch_size": batch_size,
         "motion_iterations": list(motion_iterations),
+        "bold_reference_strategy": bold_reference_strategy,
+        "bold_reference": reference_description,
         "motion_algorithm": "MCFLIRT-2111.0-8/4/4mm-coordinate-Brent",
         "motion_output": "NEWIMAGE-float32-Constant-spline-source-dtype-cast",
         "n_splits": n_splits, "random_state": random_state,
@@ -618,6 +650,7 @@ def fMRIVolume_pipeline(
         (bbr_matrix, paths.bbr_matrix),
         (preproc_t1w, paths.preproc_t1w), (preproc_mni, paths.preproc_mni),
         (motion_pull_file, paths.motion_pull), (t1_to_mni.pull_ras, paths.mni_pull),
+        (reference, paths.bold_reference),
     ):
         if destination == paths.t1_brain and reuse_t1:
             continue
@@ -652,9 +685,9 @@ def fMRIVolume_pipeline(
         if destination == paths.clean_mni:
             details["Resolution"] = "2 mm isotropic"
         else:
-            reference = inputs.sbref or inputs.bold
+            spatial_reference_source = inputs.sbref or inputs.bold
             details["SpatialReference"] = (
-                f"bids:raw:{reference.relative_to(inputs.bids_root).as_posix()}"
+                f"bids:raw:{spatial_reference_source.relative_to(inputs.bids_root).as_posix()}"
             )
         write_details(sidecar(destination), details)
     for destination in (paths.preproc_t1w, paths.preproc_mni):
@@ -691,6 +724,11 @@ def fMRIVolume_pipeline(
         "Sources": [f"bids:raw:{raw_bold}", f"bids:raw:{raw_t1w}"],
         "Description": "EPI reference to T1w affine in FSL FLIRT matrix convention",
     })
+    write_details(sidecar(paths.bold_reference), {
+        "Sources": [f"bids:raw:{raw_bold}"],
+        "Description": "HMC target used for EPI extraction and BOLD-to-T1w registration",
+        "FNIT": {"Reference": reference_description, "SHA256": _sha256(reference)},
+    })
     write_details(paths.motion_pull.with_suffix(".json"), {
         "Sources": [f"bids:raw:{raw_bold}"],
         "Description": "Per-frame boldref-world-RAS to original-frame-world-RAS pull matrices",
@@ -706,4 +744,5 @@ def fMRIVolume_pipeline(
         timing_seconds=timing,
         preproc_t1w=paths.preproc_t1w, preproc_mni=paths.preproc_mni,
         motion_pull=paths.motion_pull, mni_pull=paths.mni_pull,
+        bold_reference=paths.bold_reference,
     )
