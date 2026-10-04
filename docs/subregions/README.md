@@ -189,6 +189,8 @@ segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects 
 
 GEMS Gaussian 子函数修正了未提供超参数时 `[C,M] / [C]` 的错误广播：现在每类、每模态除以自己的样本质量，返回 `[C,M]` 均值。现有四类亚区的强度拟合均提供超参数，合成拟合使用固定 Gaussian，因此这一修复不改变成熟 recipe 的该分支。另行实测的 CPU 固定 EM 数据缓存没有速度或内存收益，裁剪插值候选虽改善工作图强度，却使部分 GPU 亚区退化，均未作为默认行为合入。实际二值掩膜已进一步定位到坐标精度与最近邻舍入；组合候选仍在隔离验证。输入 hash、完整状态、逐区门与被撤回的补丁见[本轮 GEMS 记录](../../validation/smri_cpu/gems_fixes_20261004/README.md)。
 
+新增[首次目标函数同状态诊断](../../validation/smri_cpu/gems_first_state_20261004/README.md)：官方在 `Σ prior × likelihood` 后加 `1e-15`，生产 compact objective 原来缺少该项。相同 FP32 输入上，左/右 HA 原完整梯度相对差为 0.377/0.252；加入 epsilon 后约为 6.27e−6/1.37e−4。剩余小 prior 的误差会放大，CPU 混合内部几何探针将梯度差降到约 4e−8。该报告仅含隔离诊断；CPU 完整分割候选尚未验收，原 GPU fallback/Triton 的同项差异也尚未修复。
+
 nodecw10 的相同八核预算下，脑干逐区门通过；丘脑及海马/杏仁核仍未全部通过，CPU 拟合明显较慢。脑干联合优化在另一固定核组完整旧新配对中将 API 时间从 733.021 降至 668.801 秒，全部后验和拟合状态相同，GPU 脑干回归也通过。原始 T1 的 CPU 全结构流程及完整 recon-all 已执行并评分；下列十例 GPU 结果绑定 2026-10-02 的源码，不能作为本轮最终整合源码的全结构 GPU 验收。详见[本轮完整记录](../../validation/smri_cpu/task5/README.md)。
 
 原始 T1 的 CPU v5 整例为 **6241.435 秒（104.024 分钟）**，API 6238.458 秒；共享预处理、脑干、丘脑及左右海马/杏仁核约为 162.214 / 643.776 / 2245.035 / 1583.290 / 1563.757 秒。这些为父阶段，内部计时不再累加。原网格 4/105、HR 5/107 非空区通过既定逐区门，另外 5/3 区双方为空记 NA，输出仍不等价。13 项约定输出齐全，全部后验和脑图见[完整 raw CPU 报告](../../validation/smri_cpu/task5/raw_all_cpu_v5/README.md)。本例未传入官方拟合检查点，官方 norm/aseg/wmparc 的保存参考已与本轮同 T1 官方 CPU recon 核验数组及几何恒等；无单次官方 raw 整链时钟或速度比。
