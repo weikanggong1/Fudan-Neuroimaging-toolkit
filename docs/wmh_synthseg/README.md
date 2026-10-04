@@ -52,8 +52,8 @@ print(result.volumes_mm3)
 |---|---|---|
 | `WMHSynthSeg(weights=None, device="cpu", threads=None)` | 模型构造时加载一次官方 `.pth`；`weights` 可为文件或目录；`device` 选 CPU/GPU | `--device`、`--threads`；原版从 `$FREESURFER_HOME/models` 加载固定文件 |
 | `model(image, crop=False, save_lesion_probabilities=False)` | 单幅 3D 影像；`crop=True` 两遍定位并限制推理区域 | `--i`、`--crop`、`--save_lesion_probabilities` |
-| `result.segmentation` | `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），33 类整数标签；WMH 为 77 | `--o` 指定的图像 |
-| `result.lesion_probability` | 请求时为 `FNITNifti1Image`，否则为 `None`；体素值为 WMH 后验概率 | `--save_lesion_probabilities` 额外写出的 `.lesion_probs` 图 |
+| `result.segmentation` | `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），float32 存储的 33 类整数标签；WMH 为 77 | `--o` 指定的图像 |
+| `result.lesion_probability` | 请求时为 float32 `FNITNifti1Image`，否则为 `None`；体素值为 WMH 后验概率 | `--save_lesion_probabilities` 额外写出的 `.lesion_probs` 图 |
 | `result.volumes_mm3` | `{标签编号: 软体积}` 字典，单位 mm³，包括背景 0 | `--csv_vols` 的各标签体积列；CSV 不输出背景列 |
 
 两幅图像结果都使用原版同样的处理后网格，原图的坐标变换保留在输出仿射矩阵中；不保证与输入数组同形状。调用者通过 `.save(path)` 写出影像；Python 字典若需 CSV，可用下面的 CLI 直接生成与原版列名相同的表。原版 `Intracranial-volume` 列是非背景软体积之和，`Input-file` 列实际记录**输出分割路径**。
@@ -72,7 +72,22 @@ fnit wmh-synthseg --i case_FLAIR.nii.gz --o case_seg.nii.gz \
 
 ### 2026-10-04 CPU 对照
 
-本次 CPU 对照矩阵使用原始公开 T1 和 FLAIR，安排 `crop=True/False`、33 类标签、CSV 和 WMH 概率输出；同组两端固定 8 个物理核、8 个线程。[逐模式记录](../../validation/smri_cpu_20261004/t2_seg/README.md)列出完整命令耗时、各标签 Dice、硬/软体积和 WMH 概率差的完成状态，目前矩阵尚未全部结束。本轮没有修改 WMH 网络或算法。以下 2026-09-27 的 FLAIR 输入是经过预处理的公开样例，不能代替本次原始影像验证。
+本次 CPU 对照矩阵使用原始公开 T1 和 FLAIR，安排 `crop=True/False`、33 类标签、CSV 和 WMH 概率输出；同组两端固定 8 个物理核、8 个计算线程。完整命令包括冷进程、权重读取、全部计算和保存。[逐模式记录](../../validation/smri_cpu_20261004/t2_seg/README.md)保留实际核组、时间、逐标签数值及源码/输入 hash。
+
+| 原始 FLAIR CPU 模式 | 官方两次 wall（秒） | FNIT 两次 wall（秒） | 硬标签/33 列 CSV/WMH 概率 |
+|---|---|---|---|
+| `crop=True` | 121.909 / 114.893 | 83.364 / 83.861 | 逐值差异均为 0 |
+| `crop=False` | 65.588 / 103.131 | 59.331 / 61.589 | 逐值差异均为 0 |
+
+T1 crop 已有同样的逐值输出结果，完整重复矩阵仍按实际状态更新。共享节点上的原版时间存在波动，以上是这组输入的实测值，不推广为全部扫描的固定加速比。本轮没有修改 WMH 网络、重采样或概率/体积归约。以下 2026-09-27 的 FLAIR 输入是经过预处理的公开样例，不能代替本次原始影像验证。
+
+这轮发现并修复了成熟子函数的保存头信息问题：输出为新 RAS/1 mm 网格时，旧代码继承输入 qform/sform code 和 FLAIR 扫描 XML 扩展。现在按原版 `MRIwrite` 用全新 float32 NIfTI header，qform/sform code 为 0/2，不继承扫描扩展。新保存代码的实际 CPU 原始 FLAIR full 与 T1 crop 输出，对官方硬标签、数值 CSV、WMH 概率的差异均为 0，保存几何字段也相同；[独立记录](../../validation/smri_cpu_20261004/t2_seg/wmh_output_header.public.json)列出冻结源文件和权重 SHA。它与已完成矩阵的网络源文件逐个 SHA 相同，旧计时仍保留原冻结身份。
+
+同输入 GPU crop 的 baseline/candidate 4 次均在模型原有 GroupNorm 阶段超过 20,000,000,000 B allocator 限额；较小 full 模式的 baseline 也超过限额，candidate 在 CUDA 初始化时报 OOM。失败发生在新保存代码执行前，不将它们列为 GPU 回归通过，也没有提高预算或降低精度。模型及空间处理 CUDA 代码保持原样，本项保存修复的 CPU/CUDA 状态检查通过；完整 GPU 性能回归仍受现有显存需求限制。
+
+下图为本次原始 FLAIR full 的实际保存标签；量化比较直接在同一保存网格上进行。
+
+![原始 FLAIR 的官方与 FNIT CPU 标签，差异为 0](../../validation/smri_cpu_20261004/t2_seg/wmh_raw_flair_labels.png)
 
 测试发现 FreeSurfer 模块安装缺少 WMH checkpoint，原始参考调用因此在推理前失败。参考端通过私密运行目录链接同一经大小和 SHA-256 校验的权重恢复测试，保留原脚本和原 Python 环境；不改公共 FreeSurfer 安装，也不将参考程序作为 FNIT 运行依赖。FNIT CPU 构造与推理保留调用方 CUDA TF32、cuDNN benchmark/deterministic 设置；CUDA 默认行为保持原策略。
 

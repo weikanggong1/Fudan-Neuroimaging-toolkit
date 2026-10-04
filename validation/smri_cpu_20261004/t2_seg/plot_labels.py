@@ -10,7 +10,7 @@ import nibabel as nib
 import numpy as np
 
 
-def plot(reference, candidate, output):
+def plot(reference, candidate, output, *, title="Real T1 case01", maximum_label=60):
     first, second = nib.load(reference), nib.load(candidate)
     if first.shape != second.shape or not np.array_equal(first.affine, second.affine):
         raise ValueError("The figure requires exactly the same saved output grid")
@@ -26,7 +26,7 @@ def plot(reference, candidate, output):
         planes = [np.take(volume, middle[axis], axis=axis).T for volume in (x, y)]
         for row, plane in enumerate(planes):
             axes[row, axis].imshow(plane, origin="lower", interpolation="nearest",
-                                   cmap=cmap, vmin=1, vmax=60)
+                                   cmap=cmap, vmin=1, vmax=maximum_label)
             axes[row, axis].axis("off")
         plane_index = int(changed[0, axis]) if len(changed) else int(middle[axis])
         axes[2, axis].imshow(np.take(x > 0, plane_index, axis=axis).T,
@@ -41,10 +41,10 @@ def plot(reference, candidate, output):
                                   s=120, facecolors="none", edgecolors="red", linewidths=1)
         axes[2, axis].axis("off")
         axes[0, axis].set_title(["Sagittal", "Coronal", "Axial"][axis])
-    for axis, title in zip(axes[:, 0], ["Official", "FNIT CPU", "Changed voxel location"]):
-        axis.text(-0.04, 0.5, title, rotation=90, transform=axis.transAxes,
+    for axis, row_title in zip(axes[:, 0], ["Official", "FNIT CPU", "Changed voxel location"]):
+        axis.text(-0.04, 0.5, row_title, rotation=90, transform=axis.transAxes,
                   va="center", ha="right")
-    figure.suptitle(f"Real T1 case01: {len(changed)} differing label voxel(s); identical saved grid")
+    figure.suptitle(f"{title}: {len(changed)} differing label voxel(s); identical saved grid")
     Path(output).parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output, dpi=160)
     plt.close(figure)
@@ -55,5 +55,8 @@ if __name__ == "__main__":
     parser.add_argument("--reference", required=True)
     parser.add_argument("--candidate", required=True)
     parser.add_argument("--output", required=True)
+    parser.add_argument("--title", default="Real T1 case01")
+    parser.add_argument("--maximum-label", type=int, default=60)
     args = parser.parse_args()
-    plot(args.reference, args.candidate, args.output)
+    plot(args.reference, args.candidate, args.output,
+         title=args.title, maximum_label=args.maximum_label)
