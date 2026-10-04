@@ -1,8 +1,10 @@
 # 单幅 T1w 的 recon-all 重建
 
+2026-10-04，[同节点完整 CPU 官方对照](../../validation/smri_cpu/task5/recon_complete_cpu_v3/README.md)已完成：同一原始 T1、同一八物理核预算，官方 **4600.035 秒**、FNIT 冻结 v3 **4829.697 秒**，本例慢 **4.99%**。138 项输出齐全；68 区厚度/面积/灰质体积 MAE 分别为 **0.017 mm / 30.559 mm² / 75.529 mm³**。顶点拓扑不同，44 份顶点图和 12 份注释的逐点误差为 NA；分区边界与表面距离仍有差异，整体数值等价未判定。报告包含逐标签数据、完整阶段计时和脑图，本次测量不重标为后续 main。
+
 2026-10-02 两例原始 T1 整例从 **3440.4→2248.7 秒、3669.0→2322.5 秒**，墙钟分别减少 **34.64% 和36.70%**；候选父子进程同期显存采样峰值 **8.75 GB、10.90 GB**。两例各输出138/138项，生产网格检查通过；严格复现与整体指标等效单独报告，不由输出数量推断。
 
-五任务已完成接入，实际测试源码固定为 `8d750e25d4d067a43edb788a96b2086a1c031ba0`，配对基线为 `6f67cc0`。两例使用同一H100、线程预算4和相同权重/资产，显式启用2个半球worker。[本轮结果与复现](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)汇总端到端与分阶段时间、实现归属、显存、误差及验证范围；[生产接入](PERFORMANCE_INTEGRATION.md)说明参数、设备和原生程序选择。138项诊断及脑区/表面/扩展质量的三方比较另存版本绑定报告。
+上述 2026-10-02 GPU 五任务已完成接入，实际测试源码固定为 `8d750e25d4d067a43edb788a96b2086a1c031ba0`，配对基线为 `6f67cc0`。两例使用同一H100、线程预算4和相同权重/资产，显式启用2个半球worker。[本轮结果与复现](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)汇总端到端与分阶段时间、实现归属、显存、误差及验证范围；[生产接入](PERFORMANCE_INTEGRATION.md)说明参数、设备和原生程序选择。138项诊断及脑区/表面/扩展质量的三方比较另存版本绑定报告。
 
 两例三方比较已经完成：相对优化前基线，最终white/pial、7类分割和脑区统计一致，部分顶点图浮点差通过既有门槛；严格135/138，3项仅为MNI输出头字节差。相对官方的严格结果为6/138、2/138，厚度MAE为0.04184、0.02169 mm。已有局部低Dice、非零white/pial穿越及双向距离极值均保留，整体指标等效尚未判定，详见本轮结果及脑图。
 
@@ -47,7 +49,7 @@ flowchart TD
 
 在仓库根目录创建[主页 Conda 环境](../../environment.yml)，然后运行[原生程序安装脚本](../../tools/setup_recon_all_native_conda.sh)。脚本从固定 FreeSurfer 源码提交编译所需程序并安装至当前 Conda 环境；不会调用系统安装的 FreeSurfer。模型、模板及个人许可证单独提供。
 
-球面配准读取 TIFF 图谱，`tifffile` 已列入标准 Python 安装依赖和主页 Conda 环境。旧环境升级后应执行 `python -c "import tifffile; print(tifffile.__version__)"` 核查实际环境。2026-10-04 CPU 验证发现部署前缀缺少该包，首轮在进入球面配准前失败；新空目录重测 v3 已返回 0、生成全部 138 项输出，完整墙钟 4829.697 秒，独立官方为 4600.035 秒，指标评分另列。阶段间异常的报告记录问题也已修复，失败不会记为完整耗时结果。
+球面配准读取 TIFF 图谱，`tifffile` 已列入标准 Python 安装依赖和主页 Conda 环境。旧环境升级后应执行 `python -c "import tifffile; print(tifffile.__version__)"` 核查实际环境。2026-10-04 CPU 验证发现部署前缀缺少该包，首轮在进入球面配准前失败；新空目录重测 v3 已返回 0、生成全部 138 项输出，完整墙钟 4829.697 秒，独立官方为 4600.035 秒，[完整指标与几何评分](../../validation/smri_cpu/task5/recon_complete_cpu_v3/README.md)已完成。阶段间异常的报告记录问题也已修复，失败不会记为完整耗时结果。
 
 ```bash
 conda env create -f environment.yml
@@ -115,7 +117,8 @@ report = run_recon_all_python(
 
 | 版本 | 记录与用途 |
 | --- | --- |
-| `8d750e2`，2026-10-02 五任务整合 | [当前完整结果](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)：两例原始T1空目录、CLI与已初始化CUDA API；保留成功重跑、首次CUDA失败和正式三方比较。 |
+| `e91dd25`，2026-10-04 CPU 冻结 v3 | [完整 CPU 官方对照](../../validation/smri_cpu/task5/recon_complete_cpu_v3/README.md)：同一八核组、一例原始 T1；138 输出、68 区、七图合计 601 条非背景标签记录、完整表面距离和网格质量，保留顶点不可评估项与先前失败。 |
+| `8d750e2`，2026-10-02 GPU 五任务整合 | [该版完整结果](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)：两例原始T1空目录、CLI与已初始化CUDA API；保留成功重跑、首次CUDA失败和正式三方比较。 |
 | `ff372d7`，2026-10-01 串行整合版本 | [前轮完整结果](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)：两例原始 T1、完整耗时及最终指标；报告保留实际计算提交。 |
 | `3faa938`，辅助网络卷积精度修复 | [中间版原始报告](../../validation/recon_all/optimizations/20261001_serial/whole/precision_policy/whole_reports/)：两例完成，各 138 项齐全，相对优化前严格诊断均为 135/138；MNI 仿射矩阵乘法误差随后另行定位。 |
 | `61926c7`，五阶段首次整合 | [历史整例与原因定位](../../validation/recon_all/optimizations/20261001_serial/WHOLE_RESULTS.md)：保留 MRI/WM 输入变化导致表面变化的四组控制，不能代替当前版结果。 |

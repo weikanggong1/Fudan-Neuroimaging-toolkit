@@ -42,7 +42,7 @@ CPU 的功能覆盖、同节点精度与耗时，以及受影响组件的 GPU �
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
 | [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[十张公开 T1 benchmark](validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)：H100 完整流程 4.32 ± 0.11 分钟/例，官方 CPU 125.45 ± 12.28 分钟/例；[110 分区 Dice 与脑图](docs/subregions/README.md#最新精度运行时间与脑图)。 |
-| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计；[两例当前性能与精度](validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)。 |
+| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计；[2026-10-02 GPU 两例性能与精度](validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)及[同节点完整 CPU 官方对照](validation/smri_cpu/task5/recon_complete_cpu_v3/README.md)：CPU 本例官方 4600.04 / FNIT 4829.70 秒，整体数值等价未判定。 |
 
 ### fMRI
 
