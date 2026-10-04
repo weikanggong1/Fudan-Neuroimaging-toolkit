@@ -86,6 +86,21 @@ def test_cpu_scope_restores_threads_on_success():
     assert numba.get_num_threads() == before_numba
 
 
+def test_cpu_scope_preserves_torch_budget_above_numba_capacity(monkeypatch):
+    before_torch = torch.get_num_threads()
+    before_numba = numba.get_num_threads()
+    monkeypatch.setattr(numba.config, "NUMBA_NUM_THREADS", 1)
+    @pipeline._cpu_thread_scoped
+    def finished(*, device="cpu", threads=4):
+        assert torch.get_num_threads() == threads
+        assert numba.get_num_threads() == 1
+        raise RuntimeError("after preparation")
+    with pytest.raises(RuntimeError, match="after preparation"):
+        finished(device="cpu", threads=8)
+    assert torch.get_num_threads() == before_torch
+    assert numba.get_num_threads() == before_numba
+
+
 def test_cuda_scope_does_not_enter_cpu_budget(monkeypatch):
     import fnit.recon_all.thread_budget as budget
     def forbidden(**kwargs):

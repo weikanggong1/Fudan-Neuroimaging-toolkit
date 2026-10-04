@@ -8,10 +8,23 @@ import math
 import numpy as np
 import torch
 
-from ._raster_triton import (fused_data_cost, lookup_candidates,
+from ._raster_triton import (fused_data_cost, lookup_candidates as _lookup_candidates_cuda,
                             supports_fused_data_cost)
 from .deformation import (CurrentGeometry, ordered_row_gather,
                           prepare_vertex_reduction)
+
+
+def lookup_candidates(points, *args, **kwargs):
+    """Use the CPU ordered scan or the existing CUDA lookup.
+
+    Only the discrete owner search is compiled on CPU. Selected interpolation,
+    prior values and their gradients retain the existing PyTorch operations.
+    Unsupported CPU formats request the original dense Torch fallback.
+    """
+    if points.device.type == "cpu":
+        from ._raster_cpu import lookup_candidates_cpu
+        return lookup_candidates_cpu(points, *args, **kwargs)
+    return _lookup_candidates_cuda(points, *args, **kwargs)
 
 
 def _packed_device_buffer(parts, dtype, device):

@@ -128,7 +128,7 @@ sub-01_subregions/
 
 图谱先验平滑、部分容积模拟、Gaussian EM 和网格拟合支持 GPU，默认环境已包含所需依赖。图谱加载、裁剪、三次插值、部分形态学、白质标签传播和最终 Nibabel 重采样仍在 CPU；阶段控制和线搜索也包含 CPU 判断及 GPU 同步。整例时间包含这些步骤。实现与逐组件耗时见 [TorchGEMS](../../src/fnit/gems/core.py)及 [GPU 组件验证](../../validation/subregions/speed_v16/layout_components/README.md)。
 
-CPU 入口复用现有线程预算助手，修复以前只设置 Torch、未约束 Numba且调用后不恢复线程设置的问题。它保持拟合规则、精度、标签和返回结构；Numba 请求超过导入时容量会明确报错，应在新进程启动前设置 `NUMBA_NUM_THREADS`。CPU/GPU 不应在同一进程的多个调用线程中并发修改全局 Torch 设置。`timings["compute_seconds"]` 为内部计算范围；公开 API 和进程墙钟另包含 CPU 线程设置及恢复。当前 CPU 同节点实测状态见[CPU 对照协议](../../validation/smri_cpu/task5/README.md)，GPU 历史时间不改标为 CPU 结果。
+CPU 入口使用临时线程作用域，修复以前只设置 Torch、未约束 Numba且调用后不恢复线程设置的问题。它保持拟合规则、精度、标签和返回结构；Torch 使用请求的线程数；Numba 使用请求数与导入时线程池容量中的较小值。要让两者都达到请求数，请在新进程启动前设置 `NUMBA_NUM_THREADS`。CPU/GPU 不应在同一进程的多个调用线程中并发修改全局 Torch 设置。`timings["compute_seconds"]` 为内部计算范围；公开 API 和进程墙钟另包含 CPU 线程设置及恢复。当前 CPU 同节点实测状态见[CPU 对照协议](../../validation/smri_cpu/task5/README.md)，GPU 历史时间不改标为 CPU 结果。
 
 合成标签拟合按各结构的阶段预算运行，脑干采用其独立配置；上表的 20/30 上限对应丘脑和海马/杏仁核的强度拟合。
 

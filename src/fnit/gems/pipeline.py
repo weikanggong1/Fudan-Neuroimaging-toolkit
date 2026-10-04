@@ -121,9 +121,24 @@ def _cpu_thread_scoped(function):
         device = torch.device(kwargs.get("device", "cuda:0"))
         if device.type != "cpu":
             return function(*args, **kwargs)
-        from ..recon_all.thread_budget import thread_budget
-        with thread_budget(threads=kwargs.get("threads", 4)):
+        threads = kwargs.get("threads", 4)
+        if isinstance(threads, bool) or not isinstance(threads, int) or threads < 1:
+            raise ValueError("threads must be a positive integer")
+        import numba
+        before_torch = torch.get_num_threads()
+        before_numba = numba.get_num_threads()
+        # A previously imported Numba pool cannot grow beyond its capacity.
+        # Preserve the existing API's Torch budget while capping that pool.
+        numba_threads = min(threads, int(numba.config.NUMBA_NUM_THREADS))
+        try:
+            torch.set_num_threads(threads)
+            numba.set_num_threads(numba_threads)
             return function(*args, **kwargs)
+        finally:
+            try:
+                numba.set_num_threads(before_numba)
+            finally:
+                torch.set_num_threads(before_torch)
     return scoped
 
 
