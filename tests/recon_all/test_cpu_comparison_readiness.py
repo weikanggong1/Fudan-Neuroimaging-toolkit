@@ -37,3 +37,30 @@ class ComparisonReadinessTests(unittest.TestCase):
             run, failure = DRIVER.candidate_state(root, receipt)
             self.assertEqual(run["status"], "complete")
             self.assertIsNone(failure)
+
+    def test_ordered_topology_keeps_indexed_and_triangle_distances_separate(self):
+        import nibabel.freesurfer.io as fsio
+        import numpy as np
+
+        source = SCRIPT.parents[2] / "recon_all/python_gpu_port/compare_surface_chain.py"
+        spec = importlib.util.spec_from_file_location("surface_distance_test", source)
+        surface = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(surface)
+        vertices = np.array([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], np.float32)
+        faces = np.array([[0, 1, 2], [0, 2, 3]], np.int32)
+        with tempfile.TemporaryDirectory() as name:
+            reference, candidate = Path(name) / "reference", Path(name) / "candidate"
+            for root, shift in ((reference, 0.0), (candidate, 0.5)):
+                (root / "surf").mkdir(parents=True)
+                shifted = vertices + np.array([shift, 0, 0])
+                for hemi in ("lh", "rh"):
+                    for label in ("white", "pial"):
+                        fsio.write_geometry(str(root / "surf" / f"{hemi}.{label}"), shifted, faces)
+            result = DRIVER.final_surface_distances(surface, reference, candidate)
+        for hemi in ("lh", "rh"):
+            for label in ("white", "pial"):
+                row = result["stages"][hemi][label]
+                self.assertTrue(row["ordered_faces_equal"])
+                self.assertEqual(row["indexed_vertex_distance"]["mean_mm"], 0.5)
+                for direction in ("candidate_to_reference_triangle", "reference_to_candidate_triangle"):
+                    self.assertEqual(row[direction]["mean_mm"], 0.25)

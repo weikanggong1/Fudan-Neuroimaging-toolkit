@@ -49,6 +49,34 @@ def candidate_state(candidate, runner_record=None):
     return (run, None) if run.get("status") == "complete" else (None, None)
 
 
+def final_surface_distances(surface, reference, candidate):
+    """Score both mesh directions after the caller has checked surface RAS.
+
+    The shared chain comparator uses indexed coordinate distances when the
+    ordered topology matches. Those distances are retained, and the full
+    triangle distances are added separately rather than relabeled.
+    """
+    import nibabel.freesurfer.io as fsio
+
+    surface.STAGES = ("white", "pial")
+    result = surface.compare(reference, candidate)
+    for hemi in ("lh", "rh"):
+        for name in surface.STAGES:
+            row = result["stages"][hemi][name]
+            if "candidate_to_reference_triangle" not in row:
+                ref_vertices, ref_faces = fsio.read_geometry(
+                    str(reference / "surf" / f"{hemi}.{name}"))
+                got_vertices, got_faces = fsio.read_geometry(
+                    str(candidate / "surf" / f"{hemi}.{name}"))
+                row["candidate_to_reference_triangle"] = surface._summary(
+                    surface._point_to_mesh(got_vertices, ref_vertices, ref_faces))
+                row["reference_to_candidate_triangle"] = surface._summary(
+                    surface._point_to_mesh(ref_vertices, got_vertices, got_faces))
+            row["triangle_distance_scope"] = "all source vertices to full target triangle mesh"
+    result["scope"] = "bidirectional all-vertex to full-triangle distance; not continuous Hausdorff; indexed distances retained when ordered topology matches"
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reference", type=Path, required=True)
@@ -130,9 +158,7 @@ def main():
     finals = [gate["surfaces"][f"{hemi}.{name}"] for hemi in ("lh", "rh")
               for name in ("white", "pial")]
     if all(row.get("surface_ras_mm_comparable") and row["status"] == "available" for row in finals):
-        surface.STAGES = ("white", "pial")
-        distances = surface.compare(args.reference, args.candidate)
-        distances["scope"] = "all vertices to final full triangle meshes; not continuous Hausdorff"
+        distances = final_surface_distances(surface, args.reference, args.candidate)
         write(args.output / "surfaces.private.json", distances)
     else:
         write(args.output / "surfaces.private.json", {"status": "not_assessed_space_or_invalid_mesh"})
