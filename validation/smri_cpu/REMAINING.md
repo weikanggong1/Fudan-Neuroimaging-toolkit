@@ -8,11 +8,11 @@
 | SynthSeg / Plus / WMH | 普通 Seg 尚无稳定官方 CPU 速度优势；仍有少数官方标签/体积差。大图 Plus CPU 崩溃已修复，真实 CPU 与最新 GPU fast/非 fast 旧新回归通过。WMH GPU 在 20 GB allocator 预算内失败 | 非默认 `min_pad`；CPU keep-geometry/色表独立计时。WMH 四模式网络已测，新 header 对两个模式重新核验，其余计时仍绑定此前源码 |
 | SynthMorph | affine 逆向上边界、joint 逆向场与上边界未全部过门；rigid 零动态范围边界有三点非零；官方 init+mid-space 分支自身异常另列。[一次 affine256 双向真实物化对象 API](../synthmorph/cpu_20261004/in_memory_affine_20261004/README.md)已完成，float64 先解码再转 float32 与路径直接 float32 解码产生首次输入微差，保存输出不逐值同 | rigid/deform/joint 及其他对象参数分支；直接 float32 物化路线的完整网络输出（仅无 CNN 前处理逐值同）。World 链越界周期采样；当前 CPU 边界实现的完整 490 帧对照。真实两帧 DWI 和 14 项同场 apply 已测 |
 | TorchFAST / FastVBM | FAST `fsl` 默认参数仍有少量 PVE 差；接口默认 `tensor` 与官方差异更大。FNIRT VBM 尚未等价；Morph 三张标准图误差较小，但与官方 13 图没有逐位相同。最终 v4 两链完整补测已完成，输出与 v2 相同 | 官方 Morph 冷完整链；pipeline AB-BA、其他 FAST 组合、默认 tensor VBM、显式 brain/mask 和本轮完整 VBM GPU |
-| 亚区 / recon-all | 丘脑与双侧海马/杏仁核逐区门未全过；CPU stage 仍慢于官方。脑干联合优化降低时间 8.76%，完整后验和拟合状态相同。recon v3 已完整执行并[完成评分](task5/recon_complete_cpu_v3/README.md)，墙钟慢 4.99%，皮层分区和几何仍有差异。44 顶点图、12 注释因顶点对应不成立记 NA；raw v4 CPU 卷积崩溃已修复，v5 新空目录运行中 | 原始 T1 的 CPU 全亚区整例、`balanced`；有效顶点对应、DKT/a2009s/BA 具名逐区摘要、三图谱同公式 no-TH3 体积；其他半球策略、批量入口及当前整合版完整 CPU/GPU 回归 |
+| 亚区 / recon-all | 丘脑与双侧海马/杏仁核逐区门未全过；CPU stage 仍慢于官方。脑干联合优化降低时间 8.76%，完整后验和拟合状态相同。recon v3 已完整执行并[完成评分](task5/recon_complete_cpu_v3/README.md)，墙钟慢 4.99%，皮层分区和几何仍有差异。44 顶点图、12 注释因顶点对应不成立记 NA；raw v4 CPU 卷积崩溃已修复，[v5 原始 T1 整例](task5/raw_all_cpu_v5/README.md)执行和逐区评分完成：原网格 4/105、HR 5/107 非空区通过，分别 5/3 区 NA；自动预处理与拟合整链仍不等价 | 原始 T1 的 CPU `balanced` 全亚区；有效顶点对应、DKT/a2009s/BA 具名逐区摘要、三图谱同公式 no-TH3 体积；其他半球策略、批量入口及当前整合版完整 CPU/GPU 回归 |
 
 ## 后续定位顺序
 
-1. 完成正在测量的最终整合流程，先报告执行状态、输出完整性、逐区和几何精度，再解释耗时。
+1. 本轮最终 CPU 整例与评分已完成。下一轮针对已记录的逐区、边界和几何失败定位首次分歧；改动通过阶段回归后再测受影响整链。
 2. 对丘脑、海马/杏仁核定位每次 mesh evaluation、Gaussian 更新和后处理输出首次分歧。现有标签命名空间及固定物理评价网格已核验，不通过调整评价网格提高 Dice。
 3. GEMS CPU 的强度网格拟合仍占主要时间。稳定整数排序和梯度归约可继续评估，但需保留原排序及累计顺序，并通过完整后验/拟合状态核验后才替换。
 4. SynthMorph 逆向场按网络预测、仿射分解和场合成逐阶段隔离；边界和脑内误差分别验收。
