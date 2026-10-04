@@ -1,0 +1,43 @@
+{
+  "scope": "independent readonly SynthSR CPU/CUDA and packaging review; no scientific inference or 2092-suite rerun",
+  "reviewed_root_head": "a713f87571db2b9f7a8c3c344f3479bd72dc57be",
+  "reviewed_source_sha256": {
+    "model.py": "aa8c577eb728b68b90aa7703153c7156c3bad61e78e5803d0f295b94d60452b5",
+    "pipeline.py": "c896d8e2e4a1a214546e6674ce3aacdcf84906d1b2010b5397ec1b076f502943",
+    "spatial.py": "962a2f0bd5b97db1f039efb67fa87d2f61aa5d8fc23512689f255b168b42dabe",
+    "_cpu_inference.py": "2cbcbbf65b87c827bf7fa3665a508a4be5b1844d1de8474b1da1d1a1e430a148",
+    "_cpu_math.py": "b643d821b1c84d746656deb6809799dbd18a279dc82a000e710dfae9d9add18e",
+    "__init__.py": "6519a5e1986dab5333aff90c8fa6a1e5603d38b8442a84528aabb2742bb80c51"
+  },
+  "source_equal_frozen_source_sr_v2": true,
+  "original_cuda_forward_body_ast_equal": true,
+  "integration_record_sha256": "5cc8290bb8911443e0e03c625bc9e5078a2f617ffc578a915834d49e85d0567b",
+  "integration_reported_passed": 2092,
+  "integration_bindings_checked": 278,
+  "integration_binding_mismatches": [],
+  "whole_real_summary_sha256": "089292d1c9d14993ff963531b69b763603cf3251defb86c28f0661d8d68bd4d7",
+  "package_builder_discovered_synthsr_modules": [
+    "model",
+    "pipeline",
+    "spatial",
+    "_cpu_inference",
+    "_cpu_math",
+    "__init__"
+  ],
+  "package_scope": "setuptools module discovery and metadata/manifest review; fresh whole wheel/sdist not built",
+  "existing_dependencies": {
+    "numba": "0.67.0",
+    "llvmlite": "0.49.0",
+    "numba_llvmlite_requirements": [
+      "llvmlite<0.50,>=0.49.0dev0"
+    ]
+  },
+  "license_file_sha256": {
+    "Apache-2.0.txt": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+    "MPL-2.0.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+    "THIRD_PARTY_NOTICES.md": "2272da520d31e6801abae957ba9a8931282c3a5961df806973041d587a16f095"
+  },
+  "notice_correction": "parent corrected false whole-path oneDNN exclusion; custom ELU/BN NumBa/LLVM, unchanged Torch convolution existing oneDNN",
+  "new_production_risks_found": [],
+  "new_tests": "none: no new runtime risk identified; existing contract tests bound to current source and real gates reused"
+}
