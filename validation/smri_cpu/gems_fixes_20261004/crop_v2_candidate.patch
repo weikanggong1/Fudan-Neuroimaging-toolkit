@@ -1,0 +1,50 @@
+diff --git a/src/fnit/gems/recipes/base.py b/src/fnit/gems/recipes/base.py
+index df64afa1..26f0a02c 100644
+--- a/src/fnit/gems/recipes/base.py
++++ b/src/fnit/gems/recipes/base.py
+@@ -59,8 +59,10 @@ def working_image(context: SubregionContext, ids: tuple[int, ...],
+     shape = tuple(np.ceil((high - low) / step - 1e-5).astype(int))
+     origin = low + ((high - low) - np.asarray(shape) * step) / 2
+     scale = np.diag(step)
+-    data = ndimage.affine_transform(context.data, scale, offset=origin,
+-                                    output_shape=shape, order=3, mode="nearest").astype(np.float32)
++    # The original recipe crops before constructing cubic coefficients. Using
++    # the full T1 changes the boundary coefficients inside the working ROI.
++    crop = tuple(slice(int(a), int(b)) for a, b in zip(low, high))
++    data = _cropped_cubic_image(context.data[crop], step, origin - low, shape)
+     labels = ndimage.affine_transform(coarse, scale, offset=origin,
+                                       output_shape=shape, order=0, mode="nearest")
+     transform = np.eye(4)
+@@ -72,6 +74,32 @@ def working_image(context: SubregionContext, ids: tuple[int, ...],
+                            "working_shape": [int(v) for v in shape]}
+ 
+ 
++def _cropped_cubic_image(data: np.ndarray, step: np.ndarray,
++                         origin: np.ndarray, shape: tuple[int, ...]) -> np.ndarray:
++    """Cubic B-splines in the cropped image's domain, preserving source sign.
++
++    Each coefficient axis is stored as FP32, with whole-sample mirror edges.
++    Outside queries use the rounded-voxel support rule. Positive source images
++    cannot acquire negative intensity from spline ringing.
++    """
++    coefficients = np.asarray(data, dtype=np.float32)
++    for axis in range(3):
++        coefficients = ndimage.spline_filter1d(
++            coefficients, order=3, axis=axis, output=np.float32, mode="mirror")
++    sampled = ndimage.affine_transform(
++        coefficients, np.diag(step), offset=origin, output_shape=shape,
++        order=3, mode="mirror", prefilter=False).astype(np.float32)
++    if not np.any(data < 0):
++        np.maximum(sampled, 0, out=sampled)
++    for axis in range(3):
++        rounded = np.rint(origin[axis] + np.arange(shape[axis]) * step[axis])
++        outside = (rounded < 0) | (rounded >= data.shape[axis])
++        selector = [slice(None)] * 3
++        selector[axis] = outside
++        sampled[tuple(selector)] = 0
++    return sampled
++
++
+ def _native(volume: np.ndarray, affine: np.ndarray, target, order: int) -> np.ndarray:
+     source = nib.Nifti1Image(volume, affine)
+     return np.asarray(resample_from_to(source, (target.shape, target.affine), order=order).dataobj)

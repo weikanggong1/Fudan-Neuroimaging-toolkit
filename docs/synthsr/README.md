@@ -127,6 +127,12 @@ CPU SynthSR 构造保持调用方 CUDA 后端设置；本轮加入对应合同�
 
 完整进程含 posthoc，本次只补测默认 CPU 对象入口，不能与原软件历史 CLI 时钟计算新加速比，也不能把上述 16 个 CLI 场景改记为对象模式全部通过。非重叠阶段、加载、GNU time、RSS 及 SHA 见[物化 API 报告](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md)。
 
+## 2026-10-04：CPU网络首差定位
+
+同一真实首层CNN输入和权重下，第一Conv+bias全264,241,152值相同；原Torch ELU有32,371,573点1 ULP差。按实际TensorFlow2.13.1随安装Eigen的packet `exp(x)-1`，逐步FP32且非融合乘加，验证原型可使整个首ELU逐值同。随后第二Conv输入和权重同时channels-last可逐值恢复官方，而首BN仍有max1.90735e-6差；首层匹配不足以验收完整网络。
+
+完整ELU原型默认CPU API66.815 s，固定rtol1e-5/atol1e-3仍有1,935点失败、max0.0193863，量化457点差1；它仍未通过且更慢，故没有接入默认。成熟默认浮点3,522点失败和量化527点差1的结论保持，GPU网络保持原文件。实际模块/header SHA、完整中间张量统计、拒绝记录与复现见[首差定位报告](../../validation/smri_cpu/synth_fixes_20261004/README.md)。
+
 ## 2026-09-27：既有 GPU 与 CPU 对照
 
 2026-09-27 用当时默认 TF32 和 Nibabel I/O 重跑 12 幅真实临床 T1w。候选推理没有调用 FreeSurfer；同一病例的 FreeSurfer 8.2.0-1 CPU/CUDA 输出作为固定参考。该历史版本 SynthSR 源码树 SHA-256 为 `7b5bc19e1afa806fe8698ea70b6358bacaab23b19877d20d21d2e7c5f3560543`。

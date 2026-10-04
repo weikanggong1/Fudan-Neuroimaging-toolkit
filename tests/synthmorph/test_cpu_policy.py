@@ -1,5 +1,6 @@
 """CPU image semantics and device isolation regressions."""
 import numpy as np
+import nibabel as nib
 import pytest
 import torch
 
@@ -7,6 +8,109 @@ from fnit._nib import FNITNifti1Image
 from fnit._transforms import AffineTransform, DenseWarp
 from fnit.synthmorph import SynthMorph, apply_transform
 from fnit.synthmorph import models, pipeline, spatial
+
+
+def test_joint_cpu_barycenter_known_point_and_empty_feature():
+    features = torch.zeros(1, 2, 5, 7, 9)
+    features[0, 0, 1, 5, 7] = 11
+    before = features.clone()
+    centers, mass = models._cpu_joint_barycenter(features, (192, 256, 192))
+    expected = torch.tensor([[[-192 / 5, 512 / 7, 64], [0, 0, 0]]])
+    torch.testing.assert_close(centers, expected, rtol=1e-6, atol=1e-5)
+    torch.testing.assert_close(mass, torch.tensor([[11., 0.]]), rtol=0, atol=0)
+    assert torch.equal(features, before)
+    assert torch.isfinite(centers).all()
+    alternate = features.contiguous(memory_format=torch.channels_last_3d)
+    second_centers, second_mass = models._cpu_joint_barycenter(alternate, (192, 256, 192))
+    assert torch.equal(centers, second_centers)
+    assert torch.equal(mass, second_mass)
+
+
+@pytest.mark.parametrize('device,mid_space,expected', [
+    ('cpu', True, 'joint_cpu'), ('cpu', False, 'established'),
+    ('cuda:0', True, 'established'),
+])
+def test_joint_reduction_dispatch_leaves_cuda_and_linear_routes(monkeypatch, device, mid_space, expected):
+    class Input:
+        shape = (1, 1, 16, 16, 16)
+        def __init__(self):
+            self.device = torch.device(device)
+        def __getitem__(self, key):
+            return self
+    class StopBeforeDeviceAllocation(Exception):
+        pass
+    calls = []
+    def centers(role):
+        def compute(*args):
+            calls.append(role)
+            return torch.zeros(1, 1, 3), torch.ones(1, 1)
+        return compute
+    monkeypatch.setattr(models, 'FeatureDetector', lambda weights: torch.nn.Identity())
+    monkeypatch.setattr(models, 'barycenter', centers('established'))
+    monkeypatch.setattr(models, '_cpu_joint_barycenter', centers('joint_cpu'))
+    def stop(*args):
+        raise StopBeforeDeviceAllocation
+    monkeypatch.setattr(models, 'fit_affine', stop)
+    network = models.AffineNetwork('/unused.h5')
+    with pytest.raises(StopBeforeDeviceAllocation):
+        network(Input(), Input(), mid_space=mid_space)
+    assert calls == [expected, expected]
+
+
+def test_cpu_scaled_nifti_decode_matches_materialized_image(tmp_path):
+    raw = (np.arange(4096, dtype=np.int16) - 1000).reshape(16, 16, 16)
+    stored = nib.Nifti1Image(raw, np.eye(4))
+    stored.header.set_slope_inter(np.float32(0.037421), np.float32(3.19237))
+    filename = tmp_path / 'scaled.nii.gz'
+    nib.save(stored, filename)
+    proxy = nib.load(filename)
+    decoded = np.asanyarray(proxy.dataobj)
+    materialized = nib.Nifti1Image(decoded.copy(), proxy.affine, proxy.header.copy())
+    direct32 = np.array(proxy.dataobj, dtype=np.float32, copy=True)
+    # Exercise actual ArrayProxy scaling, including values where requesting
+    # float32 rounds the slope/intercept arithmetic before the final cast.
+    assert np.count_nonzero(direct32 != decoded.astype(np.float32)) > 0
+    assert torch.equal(pipeline._tensor(proxy, 'cpu'),
+                       pipeline._tensor(materialized, 'cpu'))
+    assert torch.equal(pipeline._tensor_frames(proxy, 'cpu'),
+                       pipeline._tensor_frames(materialized, 'cpu'))
+    # Decoding needs no CUDA allocation, so the unchanged GPU route is
+    # checked even on a CPU runner.
+    assert np.array_equal(pipeline._image_data(proxy, 'cuda:0'), direct32)
+
+
+@pytest.mark.parametrize('model', ['affine', 'rigid'])
+def test_cpu_registration_images_apply_the_returned_affines(monkeypatch, model):
+    class RoundedPair:
+        def __call__(self, moving, fixed):
+            # FP32 estimation and composition need not make paired matrices
+            # exact inverses. A visible offset exercises which affine the
+            # public image output actually consumes.
+            forward = torch.eye(4)
+            backward = torch.eye(4)
+            forward[0, 3] = 0.21
+            backward[0, 3] = -0.2
+            return forward, backward
+
+    monkeypatch.setattr(pipeline, 'resolve_weights', lambda *args: '/unused.h5')
+    monkeypatch.setattr(models, 'SynthMorphNetwork', lambda **kwargs: RoundedPair())
+    values = np.arange(125, dtype=np.float32).reshape(5, 5, 5)
+    moving = FNITNifti1Image(values, np.eye(4))
+    fixed = FNITNifti1Image(values[::-1].copy(), np.eye(4))
+    result = SynthMorph(device='cpu', model=model, extent=192)(moving, fixed)
+    if model == 'rigid':
+        # LIA reverses the first native axis. The declared forward affine
+        # must invert its own +0.21 network pull, preserving that direction
+        # even though the independently rounded reciprocal predicts -0.20.
+        np.testing.assert_allclose(result.transform.matrix[0, 3], .21, atol=5e-6)
+        np.testing.assert_allclose(result.inverse.matrix[0, 3], -.2, atol=5e-6)
+    for source, transformation, image in (
+        (moving, result.transform, result.moved),
+        (fixed, result.inverse, result.fixed_moved),
+    ):
+        reapplied = apply_transform(source, transformation, device='cpu')
+        np.testing.assert_array_equal(np.asarray(image.dataobj), np.asarray(reapplied.dataobj))
+        assert image.header.binaryblock == reapplied.header.binaryblock
 
 
 @pytest.mark.parametrize('device,configure,expected', [

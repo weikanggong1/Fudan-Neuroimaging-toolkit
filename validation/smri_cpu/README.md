@@ -37,7 +37,26 @@
 
 CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同一 H100 上进行冻结基线与候选的真实输入回归，记录目标 UUID、精度策略、实际输出、内存和配对时间。不能只凭设备参数或代码检查宣布 GPU 性能不受影响。
 
-## 当前验收状态
+## 继续修复：nodecw7 与 H100
+
+本版从已发布的 `f1cbdab1` 继续，CPU 对照迁至现场确认的 nodecw7；不把 nodecw10 时间混入新配对。各组仍限制相同八个物理核心和线程预算，同组串行。GPU 用既有 H100 共用锁；数值、完整 header、显存和实测时钟分别记录。
+
+| 功能 | 本版已完成的修复或定位 | 完整真实输入证据 |
+|---|---|---|
+| [TorchFAST](fast_fixes_20261004/README.md) | CPU 标量 C 指数/对数修复；默认和一组非默认八图与官方逐值相同 | nodecw7 默认完整 CLI 官方 368.198–411.291 s、FNIT 100.174–110.173 s，中位数比 3.706；完整脑 GPU 两后端各八图/headers 相同、显存相同，共享 GPU 时间另列 |
+| [SynthMorph](../synthmorph/cpu_fixes_20261004/README.md) | CPU slope/intercept 解码顺序、affine/rigid 返回变换与采样契约、joint 归约顺序 | affine/rigid/deform/joint 默认已测门通过，joint 物化 API 与路径输出相同；extent192 场与逆向门通过，正向零边界门未过。最终源码 GPU affine 数组/header 相同 |
+| [WMH-SynthSeg](synth_fixes_20261004/README.md) | 推理激活生命周期、CPU 权重搬运、GPU crop 工作区管理 | 完整 CPU 同官方标签/概率/CSV 相同；GPU crop allocated/reserved 为 18.374/18.438 GB，旧输出 SHA 和 57 次卷积 kernel 全同。默认 no-crop 保留原 GPU 路径、同实例模式恢复通过，但仍约 38 GB allocated |
+| [球面梯度平均](recon_fixes_20261004/README.md) | CPU 顶点间保序并行，不改变顶点内 FP32 累加 | 完整真实表面 256 轮 1.317464→0.314495 s，输出逐值相同；GPU 三轮数输出、内存相同。范围仅为该算子 |
+| [GEMS](gems_fixes_20261004/README.md) | 修复无超参数 Gaussian 类别质量广播；缓存和裁剪候选均未进入默认 | 缓存 CPU 完整状态相同但无提速；裁剪候选存在逐区退步。丘脑/HA 未验收，不把预处理更接近官方写成最终分割通过 |
+| [FastVBM/FNIRT 定位](gems_fixes_20261004/FNIRT_READONLY.md) | 大量误差进入非线性估计段；最终乘法不是额外误差来源 | 固定官方场的实际转换/重采样 RMSE 4.39e−6，旧完整链 0.0189811。解析/稠密 Jacobian 定义差异另列 |
+| [FastVBM CPU Jacobian 修复](fnirt_jacobian_20261004/README.md) | CPU FNIRT 采用已有解析 Jacobian；GPU/SynthMorph 保留原路径 | 同官方系数对 `jout` RMSE 7.37e−8；固定真实 GM stage 的 Jacobian RMSE 0.01404→0.01259。调制图 RMSE 略降、最大误差略增；完整 GPU 后处理三图/header/QC 相同，未重测整 pipeline |
+| SynthSR | 第一层 ELU 可匹配，但完整候选仍失败且变慢，未替换正式实现 | 第二层卷积和 BatchNorm 首差已定位；默认浮点原门尚未通过，不影响既有 GPU 源码 |
+
+这版没有宣称全部 sMRI 功能已等价：SynthSR、丘脑/HA、FNIRT 非线性估计和 recon-all 的有效顶点对应仍见[剩余清单](REMAINING.md)。以下保留前一轮源码绑定结果，不改标为本版新测试。
+
+整合后的本地组件回归为 **931 passed、3 skipped，69.70 秒**，覆盖 FAST、GEMS、SynthMorph、world ApplyWarp、WMH、SynthSR、FastVBM 和受影响的球面算子。两项 warning 来自既有 FastVBM 模拟 profiler 测试未设 warmup；不使用这些测试的时间作 benchmark。完整命令、已测生产提交及修改源码/测试 SHA-256 见[整合记录](integration_20261004.json)。这组回归不代替真实影像与原软件的对照，也没有重新运行原始 T1 的完整 recon-all。
+
+## 前一轮 nodecw10 验收记录（已发布）
 
 以下为 2026-10-04 已完成的真实输入对照；每行绑定各自的冻结源码和计时范围。完整函数精度和性能以链接中的逐图、逐区报告为准。
 

@@ -88,6 +88,29 @@ def barycenter(features, full_shape):
     return torch.stack(centers, dim=-1), mass
 
 
+def _cpu_joint_barycenter(features, full_shape):
+    """Preserve the reference's distinct confidence and XYZ reduction shapes.
+
+    Confidence masses reduce NHWDC features. Barycenter moments reduce an
+    NCDHW tensor with a final XYZ dimension and their own denominator. Their
+    mathematically equivalent FP32 reductions can round differently, which
+    matters before joint registration's affine square roots. Convolutions
+    and CUDA's established reduction path remain unchanged.
+    """
+    mass = features.permute(0, 2, 3, 4, 1).contiguous().sum((1, 2, 3))
+    coordinates = [
+        (torch.arange(size, dtype=features.dtype, device=features.device)
+         - (size - 1) / 2) / size for size in features.shape[2:]
+    ]
+    grid = torch.stack(torch.meshgrid(*coordinates, indexing='ij'), -1)
+    values = features.contiguous().unsqueeze(-1)
+    denominator = values.sum((2, 3, 4))
+    moment = (values * grid).sum((2, 3, 4))
+    centers = torch.where(denominator != 0, moment / denominator, 0)
+    centers *= torch.as_tensor(full_shape, dtype=features.dtype, device=features.device)
+    return centers, mass
+
+
 def fit_affine(source, target, weights):
     """Match the original weighted normal equations (target -> source)."""
     x = torch.cat((target, torch.ones_like(target[..., :1])), dim=-1)
@@ -157,8 +180,10 @@ class AffineNetwork(nn.Module):
             moving = moving[..., ::2, ::2, ::2]
             fixed = fixed[..., ::2, ::2, ::2]
         feat1, feat2 = self.detector(moving), self.detector(fixed)
-        cen1, mass1 = barycenter(feat1, full_shape)
-        cen2, mass2 = barycenter(feat2, full_shape)
+        center_function = (_cpu_joint_barycenter
+                           if mid_space and moving.device.type == 'cpu' else barycenter)
+        cen1, mass1 = center_function(feat1, full_shape)
+        cen2, mass2 = center_function(feat2, full_shape)
         weights = (mass1 / mass1.sum(-1, keepdim=True)) * (mass2 / mass2.sum(-1, keepdim=True))
         affine1 = fit_affine(cen1, cen2, weights)
         affine2 = fit_affine(cen2, cen1, weights)

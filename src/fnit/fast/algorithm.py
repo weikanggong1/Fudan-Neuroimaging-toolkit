@@ -12,6 +12,8 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+from ._fsl_math import exp as _fsl_exp, log as _fsl_log
+
 
 @dataclass(frozen=True)
 class FASTConfig:
@@ -265,13 +267,13 @@ def _fsl_moments(values, probabilities, mask):
 def _fsl_energy(values, means, variances):
     delta = (values.unsqueeze(0) - means[:, None, None, None]).float()
     variance = variances[:, None, None, None]
-    scale = torch.log(torch.sqrt(2.0 * float(np.float32(math.pi)) * variance.double())).float()
+    scale = _fsl_log(torch.sqrt(2.0 * float(np.float32(math.pi)) * variance.double())).float()
     quadratic = (0.5 * delta.double() * delta.double() / variance.double()).float()
     return scale + quadratic
 
 
 def _fsl_initial_probabilities(values, means, variances, mask):
-    probability = torch.exp(-_fsl_energy(values, means, variances).double()).float()
+    probability = _fsl_exp(-_fsl_energy(values, means, variances).double()).float()
     total = (probability[0] + probability[1]) + probability[2]
     return torch.where((mask & (total > 0))[None], probability / total[None], 0)
 
@@ -307,14 +309,14 @@ def _fsl_bias(log_input, probabilities, means, variances, mask, kernels):
 
 
 def _fsl_mixel_probabilities(values, means, variances, mask):
-    pure = torch.exp(-_fsl_energy(values, means, variances).double()).float()
+    pure = _fsl_exp(-_fsl_energy(values, means, variances).double()).float()
     fractions = _fsl_fractions(100, device=values.device)
     evidence = [pure[0], pure[1], pure[2]]
     if not values.is_cuda:
         from ._fsl_cpu import mixel_evidence
 
         pair_means, pair_variances = _fsl_pair_parameters(fractions, means, variances)
-        scales = torch.log(torch.sqrt(
+        scales = _fsl_log(torch.sqrt(
             2.0 * float(np.float32(math.pi)) * pair_variances.double())).float()
         mixed = mixel_evidence(values.contiguous().numpy().reshape(-1),
                                mask.contiguous().numpy().reshape(-1),
@@ -327,7 +329,7 @@ def _fsl_mixel_probabilities(values, means, variances, mask):
             mean = fraction * means[a] + (1 - fraction) * means[b]
             variance = fraction * fraction * variances[a] + (1 - fraction) * (1 - fraction) * variances[b]
             energy = _fsl_energy(values, mean[None], variance[None])[0]
-            probability = (probability.double() + torch.exp(-energy.double()) * 0.01).float()
+            probability = (probability.double() + _fsl_exp(-energy.double()) * 0.01).float()
         evidence.append(probability)
     return torch.stack(evidence) * mask[None]
 
@@ -350,7 +352,7 @@ def _fsl_partial_volumes(values, means, variances, mask, mixel, fractions, chunk
                                  mask.contiguous().numpy().reshape(-1),
                                  mixel.contiguous().numpy().reshape(-1), fractions.numpy(),
                                  pair_means.numpy(), pair_variances.numpy(),
-                                 torch.log(pair_variances).numpy())
+                                 _fsl_log(pair_variances).numpy())
         return torch.from_numpy(output.reshape(3, *values.shape))
     result = torch.zeros((3, *values.shape), dtype=torch.float32, device=values.device)
     for tissue in range(3):
@@ -368,7 +370,7 @@ def _fsl_partial_volumes(values, means, variances, mask, mixel, fractions, chunk
             mean = fraction * means[a] + (1 - fraction) * means[b]
             variance = fraction * fraction * variances[a] + (1 - fraction) * (1 - fraction) * variances[b]
             delta = selected_values[None] - mean
-            energy = (delta * delta / variance + torch.log(variance)) / 2
+            energy = (delta * delta / variance + _fsl_log(variance)) / 2
             chunk_energy, chunk_index = energy.min(dim=0)
             improved = chunk_energy < minimum
             minimum[improved] = chunk_energy[improved]
@@ -383,7 +385,7 @@ def _segment_t1_fsl(original, mask, voxel_size, config):
     """Ordered single-channel three-tissue FAST defaults, without FSL calls."""
     from ._fsl_scan import GlibcRandom, icm, random_posteriors, schedule, tanaka
 
-    log_input = torch.where(mask, torch.log(original.double() + 1).float(), 0)
+    log_input = torch.where(mask, _fsl_log(original.double() + 1).float(), 0)
     samples = torch.sort(log_input[mask]).values
     means = torch.stack([samples[min(int(math.floor(samples.numel() * fraction)), samples.numel() - 1)]
                          for fraction in (0.25, 0.5, 0.75)])
@@ -420,14 +422,14 @@ def _segment_t1_fsl(original, mask, voxel_size, config):
     order = torch.argsort(means, stable=True)
     probabilities, means, variances = probabilities[order], means[order], variances[order]
     hard = torch.where(mask, probabilities.argmax(dim=0) + 1, 0)
-    corrected_linear = torch.where(mask, torch.exp(corrected_log), 0)
+    corrected_linear = torch.where(mask, _fsl_exp(corrected_log), 0)
     linear_means, linear_variances = _fsl_moments(corrected_linear, probabilities, mask)
     mixel = icm(_fsl_mixel_probabilities(corrected_linear, linear_means, linear_variances, mask),
                 mask, scan, config.mixel_mrf)
     fractions = _fsl_fractions(config.pve_steps, device=original.device)
     pve = _fsl_partial_volumes(corrected_linear, linear_means, linear_variances, mask,
                               mixel, fractions, config.pve_chunk_size)
-    correction = torch.exp(-bias_log)
+    correction = _fsl_exp(-bias_log)
     bias_field = 1 / correction
     restored = torch.where(mask, original * correction, 0)
     if not all(torch.isfinite(value).all() for value in (pve, bias_field, restored)):

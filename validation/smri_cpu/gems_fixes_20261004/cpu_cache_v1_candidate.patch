@@ -1,0 +1,132 @@
+diff --git a/src/fnit/gems/core.py b/src/fnit/gems/core.py
+index f67533ff..84047f67 100644
+--- a/src/fnit/gems/core.py
++++ b/src/fnit/gems/core.py
+@@ -17,7 +17,7 @@ from .deformation import (ashburner_prior, prepare_current_geometry, prepare_def
+                           prepare_vertex_reduction, sliding_boundary_projectors)
+ from .gaussian import (GaussianParameters, gaussian_log_likelihood,
+                        initialise_gaussians, label_posterior, update_gaussians,
+-                       _class_posterior_from_log_prior)
++                       _class_posterior_from_log_prior, _CPUEMImageCache)
+ from .optim import CachedLBFGS, PrecisionLBFGS
+ from .rasterize import (BlockIndex, build_block_index, compact_data_cost, rasterize_priors,
+                        rasterize_priors_compact)
+@@ -208,6 +208,7 @@ class TorchGEMS:
+         vertex_reduction = (prepare_vertex_reduction(tetra.reshape(-1), len(vertices))
+                             if stable_mesh_fitting else None)
+         em_image = image[valid].reshape(-1, 1, 1) if compact_em else image
++        em_image_cache = _CPUEMImageCache() if self.device.type == "cpu" else None
+         mesh_valid = valid
+         mesh_selection = None
+         sampling_scale = 1.0
+@@ -251,7 +252,8 @@ class TorchGEMS:
+                 params = fixed_gaussians
+             elif params is None:
+                 params = initialise_gaussians(em_image, em_priors, class_ids,
+-                                               mean_hyper=mean_hyper, n_hyper=n_hyper)
++                                               mean_hyper=mean_hyper, n_hyper=n_hyper,
++                                               _image_cache=em_image_cache)
+             cpu_log_prior = _cpu_em_log_prior(em_priors, em_image, params)
+ 
+             def em_posterior(likelihood):
+@@ -282,7 +284,7 @@ class TorchGEMS:
+                 previous_em_cost = em_cost.detach()
+                 if fixed_gaussians is None:
+                     params = update_gaussians(em_image, posterior, mean_hyper=mean_hyper,
+-                                              n_hyper=n_hyper)
++                                              n_hyper=n_hyper, _image_cache=em_image_cache)
+             ll = gaussian_log_likelihood(em_image, params)
+             posterior, nll = em_posterior(ll)
+             return priors, posterior, params, nll
+diff --git a/src/fnit/gems/gaussian.py b/src/fnit/gems/gaussian.py
+index d127779b..71a38e82 100644
+--- a/src/fnit/gems/gaussian.py
++++ b/src/fnit/gems/gaussian.py
+@@ -22,32 +22,76 @@ def _as_modalities(image: torch.Tensor) -> torch.Tensor:
+     raise ValueError("image must be [X,Y,Z] or [M,X,Y,Z]")
+ 
+ 
++class _CPUEMImageCache:
++    """One fit's fixed EM data; arithmetic and responsibility ordering stay intact.
++
++    Tensor version counters invalidate changes made through aliases. Calls with
++    gradients, CPU autocast, inference tensors or CUDA retain the uncached path.
++    No image or geometry is cached across public TorchGEMS calls.
++    """
++
++    def __init__(self):
++        self._image = None
++        self._key = None
++        self._prepared = None
++
++    def prepare(self, image: torch.Tensor, dtype: torch.dtype):
++        if (image.device.type != "cpu" or image.requires_grad
++                or torch.is_autocast_enabled("cpu")):
++            return None
++        try:
++            version = image._version
++        except RuntimeError:
++            return None
++        key = (version, tuple(image.shape), tuple(image.stride()),
++               image.storage_offset(), image.dtype, dtype)
++        if image is not self._image or key != self._key:
++            data = _as_modalities(image).to(dtype=dtype)
++            modalities = data.shape[0]
++            flat_x = data.reshape(modalities, -1).T
++            finite = torch.isfinite(flat_x).all(1)
++            nonzero = flat_x.abs().sum(1) > 0
++            keep = finite & nonzero
++            self._prepared = (flat_x[keep], keep, modalities)
++            self._image, self._key = image, key
++        return self._prepared
++
++
+ def initialise_gaussians(image: torch.Tensor, priors: torch.Tensor,
+                          label_classes: torch.Tensor,
+                          mean_hyper: torch.Tensor | None = None,
+                          n_hyper: torch.Tensor | None = None,
+-                         variance_floor: float = 1e-4) -> GaussianParameters:
++                         variance_floor: float = 1e-4,
++                         _image_cache: _CPUEMImageCache | None = None) -> GaussianParameters:
++    image_for_update = image
+     image = _as_modalities(image)
+     label_classes = label_classes.long()
+     n_classes = int(label_classes.max().item()) + 1
+     class_resp = torch.zeros((n_classes, *priors.shape[1:]), device=priors.device, dtype=priors.dtype)
+     class_resp.index_add_(0, label_classes, priors)
+-    return update_gaussians(image, class_resp, mean_hyper=mean_hyper,
+-                            n_hyper=n_hyper, variance_floor=variance_floor)
++    return update_gaussians(image_for_update, class_resp, mean_hyper=mean_hyper,
++                            n_hyper=n_hyper, variance_floor=variance_floor,
++                            _image_cache=_image_cache)
+ 
+ 
+ def update_gaussians(image: torch.Tensor, responsibilities: torch.Tensor, *,
+                      mean_hyper: torch.Tensor | None = None,
+                      n_hyper: torch.Tensor | None = None,
+-                     variance_floor: float = 1e-4) -> GaussianParameters:
+-    image = _as_modalities(image).to(dtype=responsibilities.dtype)
+-    m = image.shape[0]
+-    flat_x = image.reshape(m, -1).T  # N,M
++                     variance_floor: float = 1e-4,
++                     _image_cache: _CPUEMImageCache | None = None) -> GaussianParameters:
++    prepared = (None if _image_cache is None or responsibilities.requires_grad else
++                _image_cache.prepare(image, responsibilities.dtype))
++    if prepared is None:
++        image = _as_modalities(image).to(dtype=responsibilities.dtype)
++        m = image.shape[0]
++        flat_x = image.reshape(m, -1).T  # N,M
++        finite = torch.isfinite(flat_x).all(1)
++        nonzero = flat_x.abs().sum(1) > 0
++        keep = finite & nonzero
++        flat_x = flat_x[keep]
++    else:
++        flat_x, keep, m = prepared
+     r = responsibilities.reshape(responsibilities.shape[0], -1)
+-    finite = torch.isfinite(flat_x).all(1)
+-    nonzero = flat_x.abs().sum(1) > 0
+-    keep = finite & nonzero
+-    flat_x = flat_x[keep]
+     r = r[:, keep]
+     mass = r.sum(1)
+     weighted = r @ flat_x

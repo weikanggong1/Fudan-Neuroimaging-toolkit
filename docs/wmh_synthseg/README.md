@@ -10,6 +10,19 @@ WMH-SynthSeg 同时分割脑结构和白质高信号（WMH，FreeSurfer 标签 *
 
 `crop=False` 时在完整重采样视野上推理，网络输入各轴填充到 32 的倍数。`crop=True` 时先在 192×224×192 的区域进行定位，再围绕估计的脑中心裁出不超过该大小的区域用于正式预测。原版官网指出 GPU 运行需要 `--crop`；裁剪可能移除视野边缘。**输出是模型处理后的 RAS/1 mm 网格，通常不等于输入网格**。分割体素值来自 33 个 FreeSurfer 标签；另可保存标签 77 的浮点概率图。CSV 体积来自各标签后验概率在 1 mm 网格上的求和，单位 mm³，因此通常不等于硬分割中各标签的体素计数。
 
+
+```mermaid
+flowchart LR
+    A[单幅3D T1w或FLAIR] --> B[RAS重排和1 mm重采样]
+    B --> C{crop}
+    C -->|True| D[初步定位与有限视野]
+    C -->|False| E[完整重采样视野]
+    D --> F[原图及左右翻转CNN]
+    E --> F
+    F --> G[33类概率平均]
+    G --> H[标签图 WMH概率 软体积CSV]
+```
+
 原版 CLI 的单例指令：
 
 ```bash
@@ -69,6 +82,17 @@ fnit wmh-synthseg --i case_FLAIR.nii.gz --o case_seg.nii.gz \
 这条命令的 `--i` 读取单幅 FLAIR，`--o` 写标签图；`--crop` 将正式预测限制在脑周围的区域；`--save_lesion_probabilities` 额外写 `case_seg.lesion_probs.nii.gz`；`--csv_vols` 写软体积 CSV；`--device` 指定 GPU，`--threads` 指定 Torch 的 CPU 线程。本包 CLI 每次处理单幅影像并创建输出父目录。
 
 ## 真实数据验证与更新记录
+
+### 2026-10-04：生命周期修复与完整 GPU 裁剪回归
+
+本轮修复成熟 WMH 子函数的内存峰值：checkpoint 在 CPU 严格加载后一次转 GPU；无梯度 eval 推理及时释放已经消费的 skip、cat 和第一次预测；CUDA 分块填充原 nearest 拼接，大 GroupNorm 后释放 inactive cache，使原 Conv 获得原 workspace。网络参数、FP32/TF32、GN/Conv 算子和标签累加不变。训练、有梯度、容器或 global hooks 保留原 Module 调用。
+
+原始公开 T1 的 `crop=True` 完整网络为192×224×192，输出179×224×178；新代码在 **20,000,000,000 B** allocator 限额下 allocated/reserved 峰值 **18,373,921,792 / 18,438,160,384 B**。分割、WMH概率、匿名CSV三个文件 SHA 与旧成熟GPU完全相同，57次实际 cuDNN卷积kernel和三次CNN输入SHA也相同。旧不限额隔离参考峰值32,633,949,696 /45,267,025,920 B，不能作为同20 GB预算速度比较。[最终完整门](../../validation/smri_cpu/synth_fixes_20261004/reports/wmh_final_gpu_acceptance.public.json)保留证据。
+
+GPU默认 `crop=False` 保留原decoder、forward和概率缓冲调度：20 GB优化原型产生1个硬标签及概率尾差，故未接入该默认模式。同实例full→crop→full完整输出均与旧GPU各自SHA相同，调用后状态恢复。原full峰值allocated37,997,219,328 B，**full仍未达到20 GB**；在20 GB环境显式使用 `crop=True`，裁剪可能移除边缘。直接使用观察hooks的原容器路径不承诺优化峰值。
+
+nodecw7同8核/8线程完整CPU官方/候选/候选/官方为172.064/77.134/83.876/107.942 s，标签、WMH概率、33列数值及完整header/affine逐值同；采样RSS官方约29.992 GB、候选约16.778 GB。无profiler完整GPUcrop ABBA的API旧4.842/5.364 s、新5.199/5.375 s，完整worker wall旧12.85/13.32 s、新13.21/13.18 s，构造/API/保存分别记录。CPUload99–136、共享GPU利用率43–100%，这些是观察时间，不能断言稳定性能保证。以下上一轮GroupNorm/初始化OOM为历史失败，新完整crop门已补足。[完整报告与复现](../../validation/smri_cpu/synth_fixes_20261004/README.md)含失败原型、小视野及最终模式切换记录。
+
 
 ### 2026-10-04 CPU 对照
 

@@ -1,5 +1,7 @@
 # SynthSR 源码目录
 
+本轮CPU首差定位：第一Conv+bias全值同，原ELU是第一处分歧；按实际TF/Eigen packet逐步FP32公式可恢复首ELU，第二Conv需同时转换输入/权重channels-last，随后BN仍有尾差。一次完整ELU原型更慢且固定浮点门失败，未进入默认；生产CPU/GPU网络保持原文件。[完整定位与拒绝记录](../../../validation/smri_cpu/synth_fixes_20261004/README.md)保留统计、实际源码SHA和复现。
+
 2026-10-04 的[相同 CPU 资源对照](../../../validation/smri_cpu/strip_sr_20261004/README.md)完成 9 个参数和 7 个域/格式场景，NIfTI 量化容差通过：最差 exact99.992227%、max1。默认 T1 浮点 NPZ 在固定 rtol1e−5/atol1e−3 下仍有3,522个超门槛点、max0.0191345。相同官方预测经过 FNIT 后处理可逐值恢复官方输出，误差已定位网络 FP32 计算。CPU channels-last/BN 原型未通过、不接入生产；CPU 构造保持调用方 CUDA 后端设置，GPU 路径不变。默认两例完整 CLI 中位数官方/FNIT62.810/42.800、80.869/45.947 s，但实际低场和 EPI 有慢于官方的场景。详细表格、阶段时间和脑图见[完整说明](../../../docs/synthsr/README.md)。下面的2026-09-27数据为历史对照。
 
 这里实现单幅 3D MRI/CT 到 1 mm 合成 T1w 的推理。`model.py` 定义与官方 HDF5 权重对应的 PyTorch U-Net，`spatial.py` 处理重采样、方向和填充，`pipeline.py` 连接读图、推理、后处理和写盘；`__init__.py` 导出公开接口。推理不调用 FreeSurfer 或 TensorFlow。

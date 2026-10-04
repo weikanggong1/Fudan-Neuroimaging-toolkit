@@ -501,9 +501,10 @@ def _register_gm(
 
     Both public backends use the same GM arrays, FSL-correlation-ratio FLIRT
     stage, reference grid, RAS-to-FSL warp conversion, GPU ``applywarp``
-    resampling, dense nonlinear-only Jacobian, and modulation.  The only
-    branch-specific operation is estimation of the nonlinear pull field:
-    SynthMorph deform or :class:`~fnit.fnirt.TorchFNIRT`.
+    resampling and modulation. CPU FNIRT uses the estimator's analytic
+    coefficient Jacobian, matching FSL ``fnirt --jout``. CUDA FNIRT and
+    SynthMorph retain the dense nonlinear-only Jacobian. Nonlinear pull
+    estimation uses SynthMorph deform or :class:`~fnit.fnirt.TorchFNIRT`.
 
     The affine preparation stage always runs the package TorchFLIRT
     implementation.
@@ -628,6 +629,14 @@ def _register_gm(
                 jacobian, native_jacobian
             ),
         }
+    use_analytic_jacobian = package_fnirt and device.type == "cpu"
+    if use_analytic_jacobian:
+        if native_jacobian is None or not np.isfinite(native_jacobian).all():
+            raise ValueError("CPU FNIRT requires a finite analytic nonlinear Jacobian")
+        # TorchFNIRT already evaluated the final spline coefficients with
+        # their physical voxel sizes. Avoid replacing that FSL --jout
+        # definition with finite differences of the sampled pull field.
+        jacobian = native_jacobian.copy()
     warped_gm = new_image(moved_data, fixed)
     jacobian_volume = new_image(jacobian, fixed)
     modulated_gm = new_image(moved_data * jacobian, fixed)
@@ -713,7 +722,9 @@ def _register_gm(
             "det(I + d residual_fsl / d fixed_fsl), affine excluded"
         ),
         "jacobian_method": (
-            "FSL dense-field centred finite differences with one-sided edges"
+            "FSL coefficient analytic spline derivatives"
+            if use_analytic_jacobian
+            else "FSL dense-field centred finite differences with one-sided edges"
         ),
         "native_jacobian_comparison": native_jacobian_comparison,
         "maximum_fsl_nonlinear_residual_mm": maximum_fsl_residual,

@@ -1,0 +1,1977 @@
+{
+  "schema": "fnit.wmh.real.gpu.memory_fix.v1",
+  "source_revision": "f1cbdab10fbfd573c3aa1b3461aa086dab220cfb+source_v6",
+  "crop": true,
+  "budget_bytes": null,
+  "purpose": "uncapped candidate numerical control",
+  "device_total_bytes": 84942979072,
+  "initial_free_bytes": 61902749696,
+  "visible_gpu": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+  "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+  "weight_sha256": "0ece39dd651357aa95222fc4d45fa32d00f11e763d2583cae3f869989ce35988",
+  "driver_sha256": "459753ab2b80e1a32d67f223569767a123f9f66611e074f770e24079ac2723b0",
+  "torch_version": "2.5.1",
+  "timing_scope": "constructor/API/save separately; synchronized network forwards nested in API",
+  "diagnostic_hooks": false,
+  "network_calls": [
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        192
+      ],
+      "input_dtype": "torch.float32",
+      "input_sha256": "8acb4d670b5209c3fe1eb7a16c584cf9a38ec3a015276c4183997ae7e9563a06",
+      "output_dtype": "torch.float32",
+      "seconds": 1.328662573825568,
+      "allocated_bytes": 1773440512,
+      "peak_allocated_bytes": 17398795776,
+      "peak_reserved_bytes": 31245467648
+    },
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        192
+      ],
+      "input_dtype": "torch.float32",
+      "input_sha256": "fe0e81a46c71b478fe47ed0108f287f40fe03e8ab16a023f870adf3deae3e9de",
+      "output_dtype": "torch.float32",
+      "seconds": 1.0626439931802452,
+      "allocated_bytes": 2715536384,
+      "peak_allocated_bytes": 18340891648,
+      "peak_reserved_bytes": 32187088896
+    },
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        192
+      ],
+      "input_dtype": "torch.float32",
+      "input_sha256": "88fe592d176c0b4122ae9a767595f81c6ab74355f93ca703a29195d11a77c121",
+      "output_dtype": "torch.float32",
+      "seconds": 1.0923296296969056,
+      "allocated_bytes": 2748566528,
+      "peak_allocated_bytes": 18373921792,
+      "peak_reserved_bytes": 32187088896
+    }
+  ],
+  "layer_memory": [],
+  "model_sha256": "8dc9ef14cda42454d1c156429d14d1760d702d9b508493417ec510e6872361a0",
+  "pipeline_sha256": "e52ae70208f69b96d5006c86f2d9b18bf04a493261364b823fc9f81caaf4f082",
+  "spatial_sha256": "d81416104064110511ee0f073998b3e19959748c74ad88675d90488a261db8a6",
+  "constructor_seconds": 1.6497577051632106,
+  "constructor_peak_allocated_bytes": 267410944,
+  "constructor_peak_reserved_bytes": 283115520,
+  "parameters_dtype": "torch.float32",
+  "parameters_device": "cuda:0",
+  "actual_cudnn_convolutions": [
+    {
+      "input_shapes": [
+        [
+          1,
+          1,
+          192,
+          224,
+          192
+        ],
+        [
+          32,
+          1,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "Memset (Device)",
+        "sm80_xmma_fprop_implicit_gemm_f32f32_f32f32_f32_nchwkcrs_nchw_tilesize128x32x8_stage3_warpsize2x2x1_g1_ffma_aligna4_alignc4_execute_kernel__5x_cudnn"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          32,
+          192,
+          224,
+          192
+        ],
+        [
+          64,
+          32,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          96,
+          112,
+          96
+        ],
+        [
+          64,
+          64,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          96,
+          112,
+          96
+        ],
+        [
+          128,
+          64,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          128,
+          48,
+          56,
+          48
+        ],
+        [
+          128,
+          128,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          128,
+          48,
+          56,
+          48
+        ],
+        [
+          256,
+          128,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          256,
+          24,
+          28,
+          24
+        ],
+        [
+          256,
+          256,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cask_plugin__5x_cudnn::xmma__5x_cudnn::init_device_workspace_kernel<xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params> >(xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params>, bool)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_on_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          256,
+          24,
+          28,
+          24
+        ],
+        [
+          512,
+          256,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          512,
+          12,
+          14,
+          12
+        ],
+        [
+          512,
+          512,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          512,
+          12,
+          14,
+          12
+        ],
+        [
+          1024,
+          512,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cask_plugin__5x_cudnn::xmma__5x_cudnn::init_device_workspace_kernel<xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params> >(xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params>, bool)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_on_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          1536,
+          24,
+          28,
+          24
+        ],
+        [
+          512,
+          1536,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          512,
+          24,
+          28,
+          24
+        ],
+        [
+          512,
+          512,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          768,
+          48,
+          56,
+          48
+        ],
+        [
+          256,
+          768,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          256,
+          48,
+          56,
+          48
+        ],
+        [
+          256,
+          256,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          384,
+          96,
+          112,
+          96
+        ],
+        [
+          128,
+          384,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          128,
+          96,
+          112,
+          96
+        ],
+        [
+          128,
+          128,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          192,
+          192,
+          224,
+          192
+        ],
+        [
+          64,
+          192,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          192,
+          224,
+          192
+        ],
+        [
+          64,
+          64,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          192,
+          224,
+          192
+        ],
+        [
+          39,
+          64,
+          1,
+          1,
+          1
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "Memset (Device)",
+        "sm90_xmma_gemm_f32f32_tf32f32_f32_nn_n_tilesize128x128x32_warpgroupsize1x1x1_execute_segment_k_off_kernel__51_cublas"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          1,
+          192,
+          224,
+          192
+        ],
+        [
+          32,
+          1,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "sm80_xmma_fprop_implicit_gemm_f32f32_f32f32_f32_nchwkcrs_nchw_tilesize128x32x8_stage3_warpsize2x2x1_g1_ffma_aligna4_alignc4_execute_kernel__5x_cudnn"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          32,
+          192,
+          224,
+          192
+        ],
+        [
+          64,
+          32,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          96,
+          112,
+          96
+        ],
+        [
+          64,
+          64,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          96,
+          112,
+          96
+        ],
+        [
+          128,
+          64,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          128,
+          48,
+          56,
+          48
+        ],
+        [
+          128,
+          128,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          128,
+          48,
+          56,
+          48
+        ],
+        [
+          256,
+          128,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          256,
+          24,
+          28,
+          24
+        ],
+        [
+          256,
+          256,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cask_plugin__5x_cudnn::xmma__5x_cudnn::init_device_workspace_kernel<xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params> >(xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params>, bool)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_on_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          256,
+          24,
+          28,
+          24
+        ],
+        [
+          512,
+          256,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          512,
+          12,
+          14,
+          12
+        ],
+        [
+          512,
+          512,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          512,
+          12,
+          14,
+          12
+        ],
+        [
+          1024,
+          512,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cask_plugin__5x_cudnn::xmma__5x_cudnn::init_device_workspace_kernel<xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params> >(xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params>, bool)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_on_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          1536,
+          24,
+          28,
+          24
+        ],
+        [
+          512,
+          1536,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          512,
+          24,
+          28,
+          24
+        ],
+        [
+          512,
+          512,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          768,
+          48,
+          56,
+          48
+        ],
+        [
+          256,
+          768,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          256,
+          48,
+          56,
+          48
+        ],
+        [
+          256,
+          256,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          384,
+          96,
+          112,
+          96
+        ],
+        [
+          128,
+          384,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          128,
+          96,
+          112,
+          96
+        ],
+        [
+          128,
+          128,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          192,
+          192,
+          224,
+          192
+        ],
+        [
+          64,
+          192,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          192,
+          224,
+          192
+        ],
+        [
+          64,
+          64,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          192,
+          224,
+          192
+        ],
+        [
+          39,
+          64,
+          1,
+          1,
+          1
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "Memset (Device)",
+        "sm90_xmma_gemm_f32f32_tf32f32_f32_nn_n_tilesize128x128x32_warpgroupsize1x1x1_execute_segment_k_off_kernel__51_cublas"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          1,
+          192,
+          224,
+          192
+        ],
+        [
+          32,
+          1,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "sm80_xmma_fprop_implicit_gemm_f32f32_f32f32_f32_nchwkcrs_nchw_tilesize128x32x8_stage3_warpsize2x2x1_g1_ffma_aligna4_alignc4_execute_kernel__5x_cudnn"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          32,
+          192,
+          224,
+          192
+        ],
+        [
+          64,
+          32,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          96,
+          112,
+          96
+        ],
+        [
+          64,
+          64,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          96,
+          112,
+          96
+        ],
+        [
+          128,
+          64,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          128,
+          48,
+          56,
+          48
+        ],
+        [
+          128,
+          128,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          128,
+          48,
+          56,
+          48
+        ],
+        [
+          256,
+          128,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          256,
+          24,
+          28,
+          24
+        ],
+        [
+          256,
+          256,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cask_plugin__5x_cudnn::xmma__5x_cudnn::init_device_workspace_kernel<xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params> >(xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params>, bool)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_on_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          256,
+          24,
+          28,
+          24
+        ],
+        [
+          512,
+          256,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          512,
+          12,
+          14,
+          12
+        ],
+        [
+          512,
+          512,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          512,
+          12,
+          14,
+          12
+        ],
+        [
+          1024,
+          512,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cask_plugin__5x_cudnn::xmma__5x_cudnn::init_device_workspace_kernel<xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params> >(xmma__5x_cudnn::implicit_gemm::fprop::Warp_specialized_params_non_template<xmma__5x_cudnn::Grid_constant_params>, bool)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_on_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          1536,
+          24,
+          28,
+          24
+        ],
+        [
+          512,
+          1536,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          512,
+          24,
+          28,
+          24
+        ],
+        [
+          512,
+          512,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          768,
+          48,
+          56,
+          48
+        ],
+        [
+          256,
+          768,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          256,
+          48,
+          56,
+          48
+        ],
+        [
+          256,
+          256,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x256x32_warpgroupsize2x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          384,
+          96,
+          112,
+          96
+        ],
+        [
+          128,
+          384,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          128,
+          96,
+          112,
+          96
+        ],
+        [
+          128,
+          128,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize128x128x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          192,
+          192,
+          224,
+          192
+        ],
+        [
+          64,
+          192,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          192,
+          224,
+          192
+        ],
+        [
+          64,
+          64,
+          3,
+          3,
+          3
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "void cudnn::engines_precompiled::nchwToNhwcKernel<float, float, float, false, true, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nchw2nhwc_params_t<float>, float const*, float*)",
+        "Memset (Device)",
+        "sm90_xmma_fprop_implicit_gemm_f32f32_tf32f32_f32_nhwckrsc_nhwc_tilesize64x64x32_warpgroupsize1x1x1_g1_execute_segment_k_off_kernel__5x_cudnn",
+        "void cudnn::engines_precompiled::nhwcToNchwKernel<float, float, float, true, false, (cudnnKernelDataType_t)0>(cudnn::engines_precompiled::nhwc2nchw_params_t<float>, float const*, float*)"
+      ]
+    },
+    {
+      "input_shapes": [
+        [
+          1,
+          64,
+          192,
+          224,
+          192
+        ],
+        [
+          39,
+          64,
+          1,
+          1,
+          1
+        ],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "kernels": [
+        "Memset (Device)",
+        "sm90_xmma_gemm_f32f32_tf32f32_f32_nn_n_tilesize128x128x32_warpgroupsize1x1x1_execute_segment_k_off_kernel__51_cublas"
+      ]
+    }
+  ],
+  "api_seconds": 9.018196280114353,
+  "peak_allocated_bytes": 18373921792,
+  "peak_reserved_bytes": 32187088896,
+  "policy": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "benchmark": false,
+    "deterministic": false,
+    "autocast_enabled": false
+  },
+  "save_seconds": 1.5304477289319038,
+  "shape": [
+    179,
+    224,
+    178
+  ],
+  "affine": [
+    [
+      0.9980780529675662,
+      0.057022039529938034,
+      -0.024262880157097155,
+      -96.94770677078004
+    ],
+    [
+      -0.05713183184127595,
+      0.9983591974594734,
+      -0.003855714766585038,
+      -120.81062021855172
+    ],
+    [
+      0.024003207596737405,
+      0.005234487169006013,
+      0.9996981775066518,
+      -82.43598773153693
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "volume_values": {
+    "0": 5849287.0,
+    "14": 563.1560668945312,
+    "15": 2101.09228515625,
+    "16": 19610.28515625,
+    "24": 233860.5625,
+    "77": 518.1195068359375,
+    "85": 2.627497673034668,
+    "2": 183632.375,
+    "3": 231223.90625,
+    "4": 5562.53369140625,
+    "7": 16758.69921875,
+    "8": 48718.48828125,
+    "10": 6909.21875,
+    "11": 4179.173828125,
+    "12": 5953.3544921875,
+    "13": 1797.87109375,
+    "17": 4008.39990234375,
+    "18": 1658.20068359375,
+    "26": 689.342041015625,
+    "28": 4043.33544921875,
+    "41": 184992.28125,
+    "42": 230995.578125,
+    "43": 5421.3486328125,
+    "46": 15737.59765625,
+    "47": 49980.40625,
+    "49": 6748.7353515625,
+    "50": 4214.728515625,
+    "51": 5605.09765625,
+    "52": 1685.554931640625,
+    "53": 4035.501220703125,
+    "54": 1736.114990234375,
+    "58": 587.8558349609375,
+    "60": 4270.55078125
+  },
+  "output_sha256": {
+    "seg.nii.gz": "ca94a9caf118205a426a1dc7ad468b013716bd9b452b8a441f1258a053d1672f",
+    "lesion.nii.gz": "cc4cc54d9bcd0d20162f154b7e6b4c7216c723d8eed5d1537c654d75137cc893",
+    "volumes.csv": "c26284e2fe67368f58e1d771e8a8f83fd21db9c18552b8835fc4efaecfbd6cf7"
+  },
+  "status": "complete",
+  "observed_device_load": {
+    "sample_count": 21,
+    "memory_used_MiB_minmax": [
+      21972,
+      52680
+    ],
+    "memory_free_MiB_minmax": [
+      28327,
+      59035
+    ],
+    "utilization_percent_minmax": [
+      45,
+      100
+    ],
+    "scope": "whole shared device, includes external processes; not isolated performance"
+  }
+}
