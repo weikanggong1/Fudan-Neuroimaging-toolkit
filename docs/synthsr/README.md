@@ -27,21 +27,21 @@ mri_synthsr --i case_FLAIR.nii.gz --o case_synthsr.nii.gz --threads 4
 ```python
 from fnit import SynthSR
 
-sr = SynthSR(
+super_resolution_model = SynthSR(
     weights=None,  # 权重：按 FNIT 配置顺序查找官方 HDF5
     device="cuda:0",  # 设备：第一张可见 CUDA GPU
     lowfield=False,  # 模型：不使用低场专用模型
     v1=False,  # 模型：使用默认 v2，而非 2021 年 v1
     threads=4,  # CPU 线程：用于预处理和后处理
 )
-result = sr(
+super_resolution_result = super_resolution_model(
     image="case_FLAIR.nii.gz",  # 输入：单幅 3D MRI 或 CT
     ct=False,  # 输入类型：按 MRI 强度处理
     disable_flipping=False,  # 推理：保留左右翻转测试增强
     disable_sharpening=False,  # 后处理：保留末端锐化
 )
-result.image.save(path="case_synthsr.nii.gz")  # 输出路径：1 mm 合成 T1w
-print(result.image.data.shape, result.image.affine)
+super_resolution_result.image.save(path="case_synthsr.nii.gz")  # 输出路径：1 mm 合成 T1w
+print(super_resolution_result.image.data.shape, super_resolution_result.image.affine)
 ```
 
 构造 `SynthSR` 时加载一次权重；每次调用接收一幅影像。`device="cpu"` 是 Python 默认值；要用 GPU，显式指定 `"cuda:0"` 等设备。`weights` 可以是 `.h5` 文件或包含所选官方文件的目录；省略时按[权重配置](../WEIGHTS.md)自动查找。`threads` 控制 PyTorch CPU 线程，省略时保留当前设置。
@@ -49,8 +49,9 @@ print(result.image.data.shape, result.image.affine)
 | 本包接口 | 输入或返回值 | 原版对应 |
 |---|---|---|
 | `SynthSR(weights=None, device="cpu", lowfield=False, v1=False, threads=None)` | 选择设备、权重和单输入模型；`v1=True` 优先于 `lowfield=True` | `--model`、`--cpu`、`--lowfield`、`--v1`、`--threads` |
-| `sr(image, ct=False, disable_flipping=False, disable_sharpening=False)` | `image` 是单幅 `.nii`、`.nii.gz`、`.mgz`、`.npz` 路径或 `nibabel.spatialimages.SpatialImage` | `--i`、`--ct`、`--disable_flipping`、`--disable_sharpening` |
+| `model(image, ct=False, disable_flipping=False, disable_sharpening=False)` | `image` 是单幅 `.nii`、`.nii.gz`、`.mgz`、`.npz` 路径或 `nibabel.spatialimages.SpatialImage` | `--i`、`--ct`、`--disable_flipping`、`--disable_sharpening` |
 | `result.image.data` | 3D `numpy.ndarray`，`uint8`，是 NIfTI/MGZ 写盘前的量化数值 | `--o` 输出的体素数组 |
+| `result.image.float_data` | 3D 浮点数组，锐化后、末端乘 2 前的原始输出强度；NPZ 写盘保存此字段 | 原版 NPZ 的 `vol_data` |
 | `result.image.affine` | 4×4 RAS 仿射矩阵，描述 1 mm 输出网格 | `--o` 输出的几何信息 |
 | `result.image.save(path)` | 写 `.nii`、`.nii.gz`、`.mgz` 或 `.npz` | `--o` 指定输出路径 |
 
@@ -67,26 +68,74 @@ fnit synthsr --i case_FLAIR.nii.gz --o case_synthsr.nii.gz \
 
 这条命令读取 `case_FLAIR.nii.gz`，在 `cuda:0` 上用通用 v2 模型合成图像，并把 1 mm `uint8` T1w 写到 `case_synthsr.nii.gz`。本包的 `--device` 可选具体 GPU，原版没有对应的 GPU 编号参数；原版自动选择可用的 TensorFlow GPU。`--cpu` 可覆盖 `--device` 强制 CPU；`--weights` 或同义的 `--model` 指定本地权重。其余模型和处理开关与上表同名。单幅输入的 `--o` 也可指定目录，输出文件名自动加 `_synthsr`。
 
-## 当前源码对照验证
+## 2026-10-04：相同 CPU 资源对照
 
-2026-09-27 用当前默认 TF32 和 Nibabel I/O 重跑 12 幅真实临床 T1w。候选推理没有调用 FreeSurfer；同一病例的 FreeSurfer 8.2.0-1 CPU/CUDA 输出作为固定参考。当前 SynthSR 源码树 SHA-256 为 `7b5bc19e1afa806fe8698ea70b6358bacaab23b19877d20d21d2e7c5f3560543`。
+nodecw10 对照统一使用 8 线程和 8 个物理核。默认两例公开原始 T1 按原版/FNIT/FNIT/原版运行；模型版本、翻转、锐化、真实 HU CT、64 mT 采集及输入/输出格式分别覆盖。完整命令时间和内部阶段时间分别记录，协议见[CPU 验证目录](../../validation/smri_cpu/strip_sr_20261004/README.md)。
 
-12/12 例的 shape、`uint8` dtype 和数值 affine 均一致，affine 最大差为 0。当前 GPU 对原版 CPU 的平均 MAE 为 0.02314 灰度级、平均 NRMSE 为 0.001580，最低完全相同体素比例为 96.3994%，最大差为 9。当前 CPU 单例对原版 CPU 的完全相同体素比例为 99.99497%，最大差为 1。默认 TF32 会改变更多靠近量化边界的体素，因此当前 GPU 结果不能写成逐体素等价。
+运行源码保留 `1d31e7baa` 的 SynthSR 网络与流程；共享几何修复 `dc2fc052` 不改变这次 SR 网络。模型文件大小与 SHA-256 均同官方实际加载文件，原软件是 FreeSurfer 8.2.0-1、TensorFlow 2.13.1。本轮 **9 个模型/参数场景、7 个域/格式场景**均通过对应量化容差或 EPI NPZ 门槛。[模型与参数结果](../../validation/smri_cpu/strip_sr_20261004/reports/synthsr_cpu_functions.public.json)和[域/格式结果](../../validation/smri_cpu/strip_sr_20261004/reports/synthsr_cpu_domains.public.json)保留完整网格、dtype、affine、哈希、资源设置和重复。
+
+| 真实输入与功能 | 官方 / FNIT 完整 CLI（s） | 量化差异体素 |
+|---|---:|---:|
+| 原始 T1 case01，默认 ABBA 中位数 | 62.810 / 42.800 | 527 / 9,072,000 |
+| 原始 T1 case02，默认 ABBA 中位数 | 80.869 / 45.947 | 563 / 9,072,000 |
+| 衍生 FLAIR | 123.898 / 21.037 | 399 |
+| case01 v1 | 131.185 / 40.814 | 520 |
+| case01 低场权重 | 39.053 / 40.559 | 628 |
+| case01 同时 v1 + lowfield，v1 优先 | 87.622 / 39.558 | 520 |
+| case01 关闭翻转 | 107.138 / 22.280 | 668 |
+| case01 关闭锐化 | 78.604 / 36.804 | 397 |
+| case01 同时关闭翻转和锐化 | 79.633 / 21.034 | 498 |
+| 实际 HU CT，`ct=True` | 54.806 / 51.542 | 747 |
+| 实际 64 mT T1，低场模型 | 33.803 / 40.311 | 610 |
+| 真实 EPI 两帧，仅取第一通道 | 25.554 / 47.829 | 358 |
+| 同一 EPI b0 的 MGZ 输入 | 108.650 / 42.062 | 373 |
+| 同一 EPI b0 的 NPZ 输入/输出 | 8.265 / 8.765 | 浮点 allclose 通过；max 0.001572 |
+| 同一 EPI b0，输出到目录 | 43.568 / 43.057 | 358 |
+| 同一 EPI b0，输出未压缩 NIfTI | 65.841 / 49.817 | 358 |
+
+量化结果的最差完全相同比例为实际 64 mT 的 **99.992227%**；所有 NIfTI 场景最大差为 1、完整网格 MAE≤`7.773e-5`。这通过预先固定的 exact≥99.99%、max≤1、MAE≤`1e-4` 量化容差，不是逐点相同。
+
+**默认 case01 的浮点 NPZ 仍未通过。** 与官方 TensorFlow CPU 固定 `rtol=1e-5, atol=1e-3`，有 3,522 / 9,072,000 个体素超门槛，RMSE `9.821e-5`、最大差 `0.0191345`。[固定 gate](../../validation/smri_cpu/strip_sr_20261004/reports/synthsr_default_float_gate.public.json)与[尾部报告](../../validation/smri_cpu/strip_sr_20261004/reports/synthsr_float_tail.public.json)保留失败值；EPI NPZ 的通过不能代替默认 T1 的浮点验收。
+
+实际两次 CNN 输入均逐元素等于官方 float32 输入，权重也一致。未乘 255 的原始网络预测 RMSE 为 `3.76e-7/4.01e-7`，最大差为 `6.00e-5/8.29e-5`。将同一官方 CNN 预测注入 FNIT 公开 API，预处理输入仍逐值同，最终 9,072,000 个浮点输出也全部逐值等于官方。将 FNIT 预测回放亦逐值恢复自身输出。因此差异已经定位到 **TensorFlow 与 PyTorch 网络的 FP32 计算**，不是读图、归一化、翻转平均、裁剪、Gaussian 锐化或方向恢复。[回放诊断](../../validation/smri_cpu/strip_sr_20261004/reports/synthsr_network_replay.public.json)不执行额外 CNN，不能用作耗时 benchmark。两种 BN 算式的 CPU 原型仍有 3,533/3,702 个超门槛点，未接入生产。
+
+完整 CLI 的优势并非所有输入都有：实际低场、第一通道 EPI 和 NPZ 输入本轮慢于官方。官方 case01 两个默认完整进程为 94.821/30.798 s，GPFS 导入和缓存变化较大。另行观察实际两次网络，官方为 7.634+6.154 s、FNIT contiguous 为 13.827+14.092 s；预处理约 5.3/5.7 s。当前 CPU 网络还没有超过官方，完整进程速度不得写成稳定的网络加速。[阶段报告](../../validation/smri_cpu/strip_sr_20261004/reports/cpu_stage_profiles.public.json)与 CLI 时钟分开。
+
+CPU channels-last 使观察进程由 47.805 降至 34.781 s，但相对当前 CPU 产生 465 个量化差异体素、NPZ 最大差 `0.0188980`，未通过量化逐值同及浮点 `rtol=1e-5, atol=1e-4` 的候选门槛。生产 SynthSR 保持原 CPU 布局，CUDA 路径也没有修改。
+
+CPU SynthSR 构造保持调用方 CUDA 后端设置；本轮加入对应合同回归。GPU 构造沿用原有 TF32 默认。
+
+下图为本轮 CC0 原始 T1 的两个 CPU 量化输出。显示只离散调整轴方向，不重采样；切片选择为差异最多的位置，红点表示强度相差 1 的体素。浮点 gate 仍以完整三维数值判断。
+
+![本轮官方与 FNIT CPU SynthSR 量化输出](figures/synthsr_cpu_comparison.png)
+
+## 2026-09-27：既有 GPU 与 CPU 对照
+
+2026-09-27 用当时默认 TF32 和 Nibabel I/O 重跑 12 幅真实临床 T1w。候选推理没有调用 FreeSurfer；同一病例的 FreeSurfer 8.2.0-1 CPU/CUDA 输出作为固定参考。该历史版本 SynthSR 源码树 SHA-256 为 `7b5bc19e1afa806fe8698ea70b6358bacaab23b19877d20d21d2e7c5f3560543`。
+
+12/12 例的 shape、`uint8` dtype 和数值 affine 均一致，affine 最大差为 0。该历史版本 GPU 对原版 CPU 的平均 MAE 为 0.02314 灰度级、平均 NRMSE 为 0.001580，最低完全相同体素比例为 96.3994%，最大差为 9。该历史版本 CPU 单例对原版 CPU 的完全相同体素比例为 99.99497%，最大差为 1。默认 TF32 会改变更多靠近量化边界的体素，因此该历史版本 GPU 结果不能写成逐体素等价。
 
 | 运行 | 完整单例命令时间 |
 |---|---:|
 | FreeSurfer 原版 CPU，固定同批 12 例参考 | 中位数 103.60 s |
 | FreeSurfer 原版 CUDA，固定同批 12 例参考 | 中位数 53.27 s |
-| FNIT 当前源码 H100 GPU，12 例重跑 | 中位数 14.45 s [13.05–16.88] |
-| FNIT 当前源码 CPU，1 例 | 31.36 s |
+| FNIT 该历史源码 H100 GPU，12 例重跑 | 中位数 14.45 s [13.05–16.88] |
+| FNIT 该历史源码 CPU，1 例 | 31.36 s |
 
-原版和当前候选来自不同运行时段，表中不计算稳定加速倍数。独占 GPU 单例的 Torch 峰值 allocated 13,780 MiB、reserved 19,074 MiB。逐例数值、命令、输出契约与源码哈希见[验证页](../../validation/synthsr/README.md)和[机器报告](../../validation/synthsr/report.public.json)。
+原版和该次候选来自不同运行时段，表中不计算稳定加速倍数。独占 GPU 单例的 Torch 峰值 allocated 13,780 MiB、reserved 19,074 MiB。逐例数值、命令、输出契约与源码哈希见[验证页](../../validation/synthsr/README.md)和[机器报告](../../validation/synthsr/report.public.json)。
 
-### 当前公开 FLAIR 示意图
+### 该次公开 FLAIR 示意图
 
-下图使用仓库公开 `sub-04` FLAIR，并用当前默认 TF32 重新生成 FNIT 一列。临床 12 例统计与这幅公开示意图不是同一数据集。公开图两幅输出的 shape、`uint8` 和 affine 一致，完全相同体素比例为 97.8558%，MAE 为 0.02145 灰度级，最大差为 2。
+下图使用仓库公开 `sub-04` FLAIR，并用当时默认 TF32 重新生成 FNIT 一列。临床 12 例统计与这幅公开示意图不是同一数据集。公开图两幅输出的 shape、`uint8` 和 affine 一致，完全相同体素比例为 97.8558%，MAE 为 0.02145 灰度级，最大差为 2。
 
-![公开 FLAIR、FreeSurfer SynthSR 与当前 FNIT SynthSR](figures/synthsr_flair_comparison.png)
+![公开 FLAIR、FreeSurfer SynthSR 与该次 FNIT SynthSR](figures/synthsr_flair_comparison.png)
+
+## 最近版本更新与 benchmark
+
+| 版本 | 修改与验收 | 当前结果 |
+|---|---|---|
+| 2026-10-04，SynthSR 模块仍为 `1d31e7baa` | 16 个真实参数/域/格式场景；CPU CUDA策略合同；同网络输入与输出回放诊断 | 量化容差通过；默认 T1 浮点门槛未通过，误差定位网络 FP32 计算。CPU layout/BN 原型不接入，GPU 生产路径不变。 |
+| 2026-09-27，源码树 `7b5bc19e…` | 12 例临床 T1 的既有 TF32 GPU 对照，独立 CPU 单例 | 历史 GPU 平均 MAE 0.02314；完整命令中位数 14.45 s。时间来自不同运行时段，不作为本轮 CPU 提速。 |
 
 ## Reference
 
