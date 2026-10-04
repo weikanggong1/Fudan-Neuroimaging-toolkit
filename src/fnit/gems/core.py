@@ -16,13 +16,23 @@ from .atlas import GEMSAtlas
 from .deformation import (ashburner_prior, prepare_current_geometry, prepare_deformation_reference,
                           prepare_vertex_reduction, sliding_boundary_projectors)
 from .gaussian import (GaussianParameters, gaussian_log_likelihood,
-                       initialise_gaussians, label_posterior, update_gaussians)
+                       initialise_gaussians, label_posterior, update_gaussians,
+                       _class_posterior_from_log_prior)
 from .optim import CachedLBFGS, PrecisionLBFGS
 from .rasterize import (BlockIndex, build_block_index, compact_data_cost, rasterize_priors,
                        rasterize_priors_compact)
 
 
 logger = logging.getLogger(__name__)
+
+
+def _cpu_em_log_prior(priors, image, params):
+    # EM iterations share these priors until the next mesh rasterization.
+    # Leave differentiable calls and every CUDA call on their original path.
+    if (priors.device.type != "cpu" or priors.requires_grad or image.requires_grad
+            or params.means.requires_grad or params.covariances.requires_grad):
+        return None
+    return torch.log(priors.clamp_min(torch.finfo(priors.dtype).tiny))
 
 
 @dataclass
@@ -242,12 +252,20 @@ class TorchGEMS:
             elif params is None:
                 params = initialise_gaussians(em_image, em_priors, class_ids,
                                                mean_hyper=mean_hyper, n_hyper=n_hyper)
+            cpu_log_prior = _cpu_em_log_prior(em_priors, em_image, params)
+
+            def em_posterior(likelihood):
+                if cpu_log_prior is not None:
+                    return _class_posterior_from_log_prior(
+                        cpu_log_prior, likelihood, None if compact_em else valid)
+                return label_posterior(em_priors, likelihood, class_ids,
+                                       None if compact_em else valid)
+
             posterior = priors
             nll = torch.tensor(float("inf"), device=self.device, dtype=self.dtype)
             for _ in range(max(0, int(n_em))):
                 ll = gaussian_log_likelihood(em_image, params)
-                posterior, nll = label_posterior(em_priors, ll, class_ids,
-                                               None if compact_em else valid)
+                posterior, nll = em_posterior(ll)
                 em_cost = nll
                 if em_relative_cost_stop is not None and mean_hyper is not None and n_hyper is not None:
                     variance = params.covariances[:, 0, 0]
@@ -266,8 +284,7 @@ class TorchGEMS:
                     params = update_gaussians(em_image, posterior, mean_hyper=mean_hyper,
                                               n_hyper=n_hyper)
             ll = gaussian_log_likelihood(em_image, params)
-            posterior, nll = label_posterior(em_priors, ll, class_ids,
-                                            None if compact_em else valid)
+            posterior, nll = em_posterior(ll)
             return priors, posterior, params, nll
 
         history_tensors: list[torch.Tensor] = []

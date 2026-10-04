@@ -162,7 +162,7 @@ python validation/smri_cpu_20261004/task04/vbm_compare.py \
 
 机器为 nodecw10 的 Intel Xeon Gold 6418H。每条受测链均设定 **8 线程环境、相同 8 物理核 affinity `3,7,11,15,19,23,27,31`**，共同锁保证本组链相互串行。节点同时有其他任务，运行前后 load 范围约 75–117；不是独占节点。采样驻留 OS 线程峰值 FNIT 72、官方 FNIRT 链 31、官方 Morph 子链 27，库线程池驻留数不等于同时执行线程数。
 
-下表为新进程完整墙钟，包含启动、读写和 13 图输出；没有清空文件系统缓存。候选的 CPU Numba 编译缓存已由前序 FAST 验证建立。顺序实际为候选 FNIRT→候选 Morph→官方 FNIRT→官方 Morph 子链，仅各一次，没有完整 pipeline 的 AB-BA 重复。
+下表前三行为从原始 T1 到 13 图的新进程完整墙钟，包含启动和读写；后两行分别为复用上游的 Morph 子链和复用形变场的后处理。没有清空文件系统缓存。候选的 CPU Numba 编译缓存已由前序 FAST 验证建立。顺序实际为候选 FNIRT→候选 Morph→官方 FNIRT→官方 Morph 子链，仅各一次，没有完整 pipeline 的 AB-BA 重复。
 
 | 实现与范围 | 完整进程墙钟 | 采样树 RSS 峰值 | 结果 |
 |---|---:|---:|---|

@@ -90,6 +90,15 @@ def test_autocast_and_non_fp32_geometry_request_original_path():
         assert packed.lookup_compact_cpu(batches, origins, inverses, singular, {}) is None
 
 
+def test_unversioned_inference_tensors_keep_original_lookup():
+    batches, origins, inverses, singular = fixture()
+    with torch.inference_mode():
+        assert packed.lookup_compact_cpu(batches, origins, inverses, singular, {}) is None
+        inference_batches = tuple(tuple(value.clone() for value in batch) for batch in batches)
+    # These tensors remain unversioned after leaving inference_mode.
+    assert packed.lookup_compact_cpu(inference_batches, origins, inverses, singular, {}) is None
+
+
 def test_numba_thread_budget_restores_on_kernel_failure(monkeypatch):
     batches, origins, inverses, singular = fixture()
     before_numba = numba.get_num_threads()

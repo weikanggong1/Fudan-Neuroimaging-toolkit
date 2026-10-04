@@ -102,3 +102,17 @@ def label_posterior(priors: torch.Tensor, class_log_likelihood: torch.Tensor,
     log_norm = torch.logsumexp(log_joint, dim=0)
     posterior = torch.exp(log_joint - log_norm[None])
     return posterior, -(log_norm[valid_mask].sum() if valid_mask is not None else log_norm.sum())
+
+
+def _class_posterior_from_log_prior(log_prior: torch.Tensor,
+                                    class_log_likelihood: torch.Tensor,
+                                    valid_mask: torch.Tensor | None = None):
+    """CPU EM only: the caller has one prior per Gaussian class in order.
+
+    Keep the original elementwise and reduction order. The prior belongs to
+    one fixed mesh evaluation and is never reused after geometry changes.
+    """
+    log_joint = log_prior + class_log_likelihood
+    log_norm = torch.logsumexp(log_joint, dim=0)
+    posterior = torch.exp(log_joint - log_norm[None])
+    return posterior, -(log_norm[valid_mask].sum() if valid_mask is not None else log_norm.sum())

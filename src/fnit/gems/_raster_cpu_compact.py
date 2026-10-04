@@ -135,6 +135,13 @@ def lookup_compact_cpu(batches, origins, inverses, singular, cache, *, tolerance
     handling, singular-cell exclusion and FP32 scalar tolerance. No gradients,
     model precision or GPU backend settings are changed.
     """
+    # Inference tensors have no version counter. A reused index cannot safely
+    # detect changes to their static coordinates or to returned packed points.
+    if (torch.is_inference_mode_enabled()
+            or any(torch.is_inference(value)
+                   for points, ids, mask, _, rows in batches
+                   for value in (points, ids, mask, rows))):
+        return None
     geometry = (origins, inverses, singular)
     if (any(value.device.type != "cpu" for value in geometry)
             or origins.dtype != torch.float32 or inverses.dtype != torch.float32
