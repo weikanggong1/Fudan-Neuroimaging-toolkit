@@ -1,7 +1,7 @@
 """Complete real spherical-registration comparison, not a synthetic benchmark.
 
 Run each arm in a separate process with the same frozen FNIT tree. Only the
-ordered averaging module changes. Native FreeSurfer is run separately by the
+ordered averaging module changes; actual CPU backend provenance is recorded. Native FreeSurfer is run separately by the
 isolated reference launcher; it is never imported by this diagnostic.
 """
 
@@ -44,8 +44,11 @@ def main():
     def measured_call(self, gradient, iterations):
         started = time.perf_counter()
         result = original_call(self, gradient, iterations)
-        averaging.append({"iterations": int(iterations),
-                          "seconds": time.perf_counter() - started})
+        row = {"iterations": int(iterations), "seconds": time.perf_counter() - started}
+        helper = sys.modules.get("fnit.recon_all._average_cpu_cpp")
+        if helper is not None and iterations > 0:
+            row["CPU_backend"] = helper.backend_info()
+        averaging.append(row)
         return result
 
     module.RegistrationGradientAverager.__call__ = measured_call
