@@ -12,12 +12,15 @@
 | 11项结构像/重建模块 | [anatomy.audit.json](anatomy.audit.json) |
 | 11项扩散/统计模块 | [diffusion_statistics.audit.json](diffusion_statistics.audit.json) |
 | fMRI volume/surface、connectome与主页 | [root.audit.json](root.audit.json) |
+| 主页37项公开函数/类与原软件对应表 | [homepage_api_mapping.public.json](homepage_api_mapping.public.json) |
 | 20权重、30HCP固定资源 | [resources.audit.json](resources.audit.json) |
 | 统一结构、长度、链接、fence与图片 | [summary.public.json](summary.public.json) |
 | 最终文档大小与SHA | [manual_files.sha256.public.json](manual_files.sha256.public.json) |
 | 既有验证文档的反向链接兼容 | [backlinks.audit.json](backlinks.audit.json) |
 
 API核对包含真实模块导入、`inspect.signature`、公开参数/default和示例语法；CLI核对实际parser的 `--help`，不通过删除导入或伪造模块来运行parser。依赖和资源要求与主页Conda环境相连。
+
+主页五组表格以公开函数、类或方法作为链接名称，增加对应原软件包函数/命令列，并保留每项一句话用途。37项逐一实际导入并核对当前源码；UKB VBM与通用VBM共同使用 `FastVBM.run`，pipeline对应组合参考流程，不编造单一原软件函数。
 
 这些检查证明示例调用形状与当前接口相符；它们不替代真实MRI运行。影像shape、dtype、affine、空间与变换方向依据源码和对应原报告的真实输出检查。精度与耗时按报告的冻结source SHA、输入、程序版本和计时范围保留；缺少同范围参考、分阶段计时或硬件元数据的地方明示缺项。
 
