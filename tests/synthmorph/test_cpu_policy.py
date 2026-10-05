@@ -287,7 +287,7 @@ def test_cpu_eigen_missing_dependency_reports_the_conda_requirement(monkeypatch,
         _cpu_eigen._build_inputs()
 
 
-@pytest.mark.parametrize('code,failures,expected_calls', [(errno.ENOLCK, 1, 2), (errno.ENOLCK, 9, 3), (errno.EACCES, 1, 1)])
+@pytest.mark.parametrize('code,failures,expected_calls', [(errno.ENOLCK, 1, 2), (errno.ENOLCK, 9, 3), (errno.EPERM, 1, 1)])
 def test_cpu_build_lock_retries_only_bounded_enolck(monkeypatch, tmp_path, code, failures, expected_calls):
     import fcntl
     import time

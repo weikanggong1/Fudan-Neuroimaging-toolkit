@@ -4,6 +4,14 @@
 
 ## 最新 CPU joint 修复：192 和 256 固定门均通过
 
+### 2026-10-05：实际 Conda 缓存能力问题已修复
+
+新的 v33 缓存保护在 nodecw7 的 Python 中遇到 `NotImplementedError: chmod: follow_symlinks unavailable on this platform`，验证在构建前退出，原失败记录保留。v34 使用 `O_DIRECTORY | O_NOFOLLOW` 打开目录；在同一文件描述符上检查类型和当前用户所有权、执行 `fchmod` 并确认权限确为 `0700`，退出时关闭描述符。继续拒绝链接、错误所有者及不落实权限的文件系统，没有退回跟随路径修改权限。
+
+最终源码 SHA `ff7936cf2d89c740e09ba164a7c6a76fcebd22e889fd33f8c1a419a25c71a426`，与新冻结的全部 1,231 个文件逐一核对。实际独立 Conda Eigen `3.4.0` / GCC `11.4.0` 构建完成，529 份头文件、compiler、argv/flags 和 binary 指纹见 [eigen_loader_v34.public.json](eigen_loader_v34.public.json)。两种 extent 保存的 fit₀、fit₁、average、inverse 共 **8 个真实矩阵**全部旧/新输出字节相同，重复 cached 调用也相同；目录 `0700`、文件 `0600`。CPU 数值正文和 CUDA 路线没有改变。
+
+首次构建与调用 `19.581485 s`、重复调用 `0.000058 s`，整个新进程验证 `22.288850 s`、sampled process-tree RSS `1.517 GB`；同 nodecw7 八物理核与任务锁，load 51–56。不是完整配准速度比较。最终缓存合同 9 项通过，包括不支持 no-follow chmod 的 Python，以及权限未落实时的明确拒绝。这次独立构建验证没有替代全仓全新 Conda 环境安装验收。
+
 最新 v29 在相同原始 T1、既定参数和原误差门下通过完整配准：extent256 `hyper=0.5, steps=7` 与 extent192 `hyper=0.75, steps=5` 的两向影像、场及严格零边界均通过。完整记录见[最新公共 JSON](joint_precision_v29.public.json)。最终源码另加 inference policy 保护，标准 CLI 的 eval/float32 分支与 v29 数学相同；保存的两种 extent 真实网络输入再次验证 features 和仿射矩阵逐值相同。完整 CNN/CLI、物化 API、GPU pair 的实际 v29 SHA 与最终保护源码 SHA 分别记录。
 
 ### 首差与最小修复

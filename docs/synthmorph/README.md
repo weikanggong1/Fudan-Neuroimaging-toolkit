@@ -253,7 +253,11 @@ mri_synthmorph apply -m nearest -t int16 reference/moving_to_fixed.mgz \
 
 当前 H100 GPU1（实际 UUID 及公共锁记录见 JSON）完整 joint v7/v29 pair 的两图两场 SHA 和完整图像元数据相同，reserved 均 `17,836,277,760 bytes`，19 GB quota。旧/新 API `6.90588 / 6.83554 s`，完整 worker `45.1056 / 40.1046 s`；两入口均未加载 CPU helper。存在外部 GPU 任务，只列同场观测。最终 inference policy 的新增 guard 对这条 CUDA 路线直接返回，数学正文另经 AST 审计；同保存真实 CPU 输入的最终 guard 源码与 v29 features/矩阵逐值相同。
 
-CPU joint 的 Eigen 适配器是 FNIT 自有小段 C++，不调用原软件。主页 Conda 环境固定 `eigen=3.4.0`、GCC/GXX `11`；wheel/sdist 包含 `.cpp`。首次 CPU joint 推理懒编译，默认缓存 `~/.cache/fnit/synthmorph/cpu_eigen`；`FNIT_SYNTHMORPH_BUILD_CACHE` 可指定缓存，`CXX`/`FNIT_EIGEN_INCLUDE` 可指定独立 Conda compiler/headers。缺少依赖会报清晰错误。cache identity 绑定源码、Eigen headers、compiler/flags 和 binary SHA；编译无 native/fast-math/FMA contraction。首次含构建的阶段 `18.191 s`、完整 stage worker `20.526 s`，已有缓存阶段进程 `2.255 s`；上面 CLI 已有编译缓存。其他模式、CUDA、训练不加载该适配器。
+CPU joint 的 Eigen 适配器是 FNIT 自有小段 C++，不调用原软件。主页 Conda 环境固定 `eigen=3.4.0`、GCC/GXX `11`；wheel/sdist 包含 `.cpp`。首次 CPU joint 推理懒编译，默认缓存 `~/.cache/fnit/synthmorph/cpu_eigen`；`FNIT_SYNTHMORPH_BUILD_CACHE` 可指定缓存，`CXX`/`FNIT_EIGEN_INCLUDE` 可指定独立 Conda compiler/headers。缺少依赖或 headers 版本不是 `3.4.0` 时会报清晰错误。cache identity 绑定源码、Eigen headers、compiler/flags 和 binary SHA；编译末尾显式关闭 fast-math/FMA contraction。缓存目录和文件限定为当前用户拥有的普通目录/文件，权限分别为 `0700`/`0600`，拒绝符号链接和文件硬链接。锁等待上限 20 秒，共享文件系统 ENOLCK 最多尝试 3 次；compiler 版本查询上限 5 秒，编译上限 60 秒，超时只结束本次编译子进程组。首次含构建的阶段 `18.191 s`、完整 stage worker `20.526 s`，已有缓存阶段进程 `2.255 s`；上面 CLI 已有编译缓存。其他模式、CUDA、训练不加载该适配器。
+
+**2026-10-05 缓存兼容修复（v34）**：nodecw7 的 Conda Python 不支持 `chmod(..., follow_symlinks=False)`，v33 在编译前抛出 `NotImplementedError`。现通过 `O_DIRECTORY | O_NOFOLLOW` 打开目录，对同一文件描述符检查用户所有权、设置并再次确认 `0700`；无法执行权限策略的文件系统明确报错。源码、Eigen 版本和数值计算保持原定义，失败记录保留。
+
+新冻结 v34 在独立 Conda Eigen `3.4.0` / GCC `11.4.0` 下重新编译，两种 extent 保存的 **8 个真实 4×4 矩阵**与旧适配器结果逐位相同，重复调用也相同。实际目录为 `0700`、三份缓存文件为 `0600`。首次构建及调用 `19.581485 s`，同进程缓存调用 `0.000058 s`，包含导入和读写的整个验证 `22.288850 s`；这些是矩阵阶段，完整配准不在本次时钟中。[完整源码、529 份头文件、compiler、binary 绑定及失败记录](../../validation/synthmorph/cpu_fixes_20261004/eigen_loader_v34.public.json)。最终缓存能力合同 9 项通过，包含上述平台能力缺失及文件系统不落实权限时的拒绝行为。
 
 ![最新真实 joint 两种 extent 的原版、FNIT 及脑内差图](../../validation/synthmorph/cpu_fixes_20261004/figures/cpu_joint_v29_brains.png)
 
