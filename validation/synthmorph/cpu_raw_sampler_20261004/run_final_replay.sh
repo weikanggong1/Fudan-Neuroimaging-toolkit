@@ -20,6 +20,8 @@ else
 fi
 mkdir -p "$TASK_RUNS"
 mkdir -m 700 "$TASK_WORKSPACE/cache-final-v31-$PHASE"
+exec 8>"$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+flock -x 8
 exec 9>"$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/nodecw7.synth.cpu8.lock"
 flock -x 9
 export PYTHONPATH="$MORPH_WORKSPACE/final_joint_v31_numba/src"

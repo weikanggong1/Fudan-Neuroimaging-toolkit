@@ -1,4 +1,4 @@
-# SynthMorph CPUjoint raw 八角采样：独立 NumBa 原型
+# SynthMorph CPU joint 原始坐标采样：NumBa 实现与验收
 
 ## 范围与源码
 
@@ -53,6 +53,21 @@ root 已批准推进 CPU 限定安全 wrapper。Morph 任务负责复制新 help
 
 随后追加一项默认浮点政策下的 subnormal/signed-zero 合同，本地 **1 passed，21 deselected，4.46 s**：FP32 最小/最大 subnormal 的正负值与正负零组成输入，半整数坐标采样和原 Torch 八角结果逐位相同，输入及坐标位模式未改。该次核对使用已接入 helper 的 Morph 源码，并在 oracle 调用期间显式禁用 NumBa 路径，避免把候选自身当成对照。测试没有调用 `torch.set_flush_denormal` 或修改 worker 浮点政策；它只证明该运行环境的默认政策，不承诺调用者自行切换 FTZ/DAZ 后的跨线程行为。
 
-最终生产接入门由 [final_helper_probe.py](final_helper_probe.py) 执行。脚本要求显式给出 Morph 冻结的 preprocessing/helper SHA，仍从独立 v29 文件加载 Torch oracle；四幅真实输入的 raw/normalized 全数组、实际后端、NumBa 版本、请求 8 线程和 mask 恢复分别记录。输入与原 einsum locations 的 SHA 在未计时调用中核对，默认浮点合同在实际服务器 helper 上另行复核。单独 `cold256` 模式计入真正的懒模块导入和空 cache JIT；它与暖 ABBA 时钟分开。目前该最终门待新服务器连接和生产 freeze 完成，本页前述原型记录不代表其验收。
+最终生产接入门由 [final_helper_probe.py](final_helper_probe.py) 执行。脚本要求显式给出 Morph 冻结的 preprocessing/helper SHA，仍从独立 v29 文件加载 Torch oracle；四幅真实输入的 raw/normalized 全数组、实际后端、NumBa 版本、请求 8 线程和 mask 恢复分别记录。输入与原 einsum locations 的 SHA 在未计时调用中核对，默认浮点合同在实际服务器 helper 上另行复核。单独 `cold256` 模式计入真正的懒模块导入和空 cache JIT；它与暖 ABBA 时钟分开。最终生产 helper 的服务器门已完成，结果见下节；前述原型时钟仍按其原测量源码保留。
 
 已独立只读核对待上传的 Morph v31 源码：preprocessing SHA `1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b`，helper SHA `f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd`。helper 增加首次 `numba.get_num_threads()` 初始化异常的缓存回退；`_sample_impl` 与 ready041 的 AST 逐节点全等，canonical AST SHA `1b93ed9279559e0493658349a38fdd24717205004efacef0794ac31d7bf01cbe`。最终 driver 同时断言这一 kernel AST 绑定。Morph 任务报告生产副本 27 项合同通过；该项为其测试结果，本记录未将旧 ready 测试改标为 v31 测试。
+
+## 2026-10-05：最终 helper 的真实门已通过
+
+新 frozen 版本使用 preprocessing `1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b`、实际 helper `f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd`，kernel AST 与先前 ready 版本相同。最终 driver 在 nodecw7 固定八核、GEMS 共用锁与 Synth 自己的锁下完成；NumBa `0.61.2`、Torch `2.5.1`，CUDA 隐藏。
+
+四幅真实 192/256 raw 采样和全部 normalized 输入各 **47,710,208 值**，旧 Torch / 官方对照的数值与位模式差异全部为 0；192 另有 14,155,776 个官方 raw 值逐位一致。256 的独立官方 raw 未保存，范围保持原说明。实际后端为 NumBa、请求 8 线程；四组输入与原 einsum locations 的 SHA 未改变，线程 mask 全部恢复。服务器默认浮点政策下的 subnormal / signed-zero 合同也逐位通过，没有切换 FTZ/DAZ。
+
+| 最终 helper 每图暖 ABBA 中位数 | 原 Torch | 最终 helper | 观测比值 |
+| --- | ---: | ---: | ---: |
+| 192 | 0.593804 s | 0.110970 s | 5.35 |
+| 256 | 1.958145 s | 0.322657 s | 6.07 |
+
+独立空 cache 的 256 首次真实调用包含 helper 的懒导入和 JIT：最终 helper **2.331800 s**、原 Torch **2.076089 s**，该冷调用慢约 12.3%。暖函数结果不能代表冷启动或整段 SynthMorph 提速。完整有限验收 GNU wall **36.05 s**、RSS峰 **3.845 GB**；单独冷 probe GNU wall **7.24 s**。当前节点共享 load 45–55。
+
+完整记录：[final_helper.public.json](final_helper.public.json)、[final_cold256.public.json](final_cold256.public.json)，其中 `production_adopted=false` 表示本有限门本身没有改写生产默认。Morph v35 的完整 192/256、相邻 CLI ABBA 与物化 API 均已通过，[完整报告](../cpu_fixes_20261004/full_sampler_v35.public.json)将当前提交源码绑定到冻结文件。两图两场数组及完整影像元数据与已验收 v29 相同，原官方误差门未改。默认256完整 CLI 中位数163.094→155.086 s，该单共享节点观测下降4.91%；192为87.383 s，带observer的物化API worker为166.986 s。原版CNN与完整GPU joint没有重复运行；新增GPU隔离审计另见[14项AST/源hash/实际小CUDA合同](../cpu_fixes_20261004/gpu_route_v35.public.json)。
