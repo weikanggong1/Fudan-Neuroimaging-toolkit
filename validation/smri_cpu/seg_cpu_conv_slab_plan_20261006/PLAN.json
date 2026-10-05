@@ -1,0 +1,452 @@
+{
+  "schema": "fnit_seg_single_CPU_slab_static_plan/v1",
+  "status": "static_plan_only_no_computation",
+  "production_modified": false,
+  "scientific_worker_implemented": false,
+  "contracts_executed": false,
+  "real_layer_executed": false,
+  "full_CNN_executed": false,
+  "new_native_or_GPU_execution": false,
+  "builder_sha256": "130efffa5d61389142b970f1ee399626bc1eee2f4cbf04b08345fb40a159ab01",
+  "evidence_sha256": "7631b641cae7e5dc1d3a68d903ee0f4fe8001fe90dcd6111de39c95eaf0b288b",
+  "evidence_pending_trial_commit": "08d6f8826e56af0844786643e655fb30a0a34496",
+  "evidence_report_commit": "84fbd765e436f1d0727ec5b4f2a0af015292f7f5",
+  "source_commit": "46eead65807265395982e6968b0ce48c750c1672",
+  "source_files": {
+    "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+    "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+    "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+    "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+    "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+    "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+    "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+    "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+    "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+    "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+    "segment.py": "9329348c6174785df4de2624344e63b141ad7c795238c8b7dd62f47f34495061",
+    "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+    "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+    "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0"
+  },
+  "input_sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21",
+  "checkpoint_files": {
+    "skip.npy": {
+      "sha256": "931be584c81fdee64cfc2da65f231ff777c799ec0accc55b43db2d15800967e2",
+      "bytes": 1056964736
+    },
+    "value.npy": {
+      "sha256": "52cdbe984194f0c165ac98f1eb2e67159157362e3ded976d5a7db1712f702d14",
+      "bytes": 264241280
+    }
+  },
+  "weights": {
+    "synthseg_2.0.h5": {
+      "bytes": 53079152,
+      "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+    },
+    "synthseg_parc_2.0.h5": {
+      "bytes": 53090840,
+      "sha256": "83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684"
+    },
+    "synthseg_segmentation_labels_2.0.npy": {
+      "bytes": 348,
+      "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+    },
+    "synthseg_segmentation_names_2.0.npy": {
+      "bytes": 7168,
+      "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+    },
+    "synthseg_topological_classes_2.0.npy": {
+      "bytes": 348,
+      "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+    }
+  },
+  "layer": "SegmentUNet.up[3].conv0",
+  "input_shape": [
+    1,
+    72,
+    192,
+    224,
+    256
+  ],
+  "weight_shape": [
+    24,
+    72,
+    3,
+    3,
+    3
+  ],
+  "bias_shape": [
+    24
+  ],
+  "dtype": "float32",
+  "layout": "contiguous NCDHW before original CPU slab slicing",
+  "groups": 1,
+  "stride": [
+    1,
+    1,
+    1
+  ],
+  "dilation": [
+    1,
+    1,
+    1
+  ],
+  "padding": [
+    1,
+    1,
+    1
+  ],
+  "bytes_per_input_plane": 16515072,
+  "retained_full_input_bytes": 3170893824,
+  "retained_full_output_bytes": 1056964608,
+  "variants": {
+    "existing_256MiB": {
+      "maximum_slab_bytes": 268435456,
+      "slab_depth": 14,
+      "calls": 14,
+      "last_output_depth": 10,
+      "max_padded_chunk_depth": 16,
+      "max_GEMM_M_N_K": [
+        802816,
+        24,
+        1944
+      ],
+      "max_column_bytes": 6242697216,
+      "max_contiguous_chunk_bytes": 264241152,
+      "max_temporary_output_bytes": 77070336,
+      "total_column_elements_written": 21403533312,
+      "total_padded_chunk_depth_planes": 220,
+      "original_source_depth_planes_consumed_with_halo": 218,
+      "output_depths": [
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        10
+      ]
+    },
+    "proposed_64MiB_only": {
+      "maximum_slab_bytes": 67108864,
+      "slab_depth": 2,
+      "calls": 96,
+      "last_output_depth": 2,
+      "max_padded_chunk_depth": 4,
+      "max_GEMM_M_N_K": [
+        114688,
+        24,
+        1944
+      ],
+      "max_column_bytes": 891813888,
+      "max_contiguous_chunk_bytes": 66060288,
+      "max_temporary_output_bytes": 11010048,
+      "total_column_elements_written": 21403533312,
+      "total_padded_chunk_depth_planes": 384,
+      "original_source_depth_planes_consumed_with_halo": 382,
+      "output_depths": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    }
+  },
+  "workspace_limit": "Derived column/input/output geometry; excludes BLAS workspace, allocator/page behavior and overlapping lifetimes; not measured RSS.",
+  "existing_observation": {
+    "wall_seconds": 16.27879886701703,
+    "process_user_seconds": 55.20152300000001,
+    "process_system_seconds": 41.681274,
+    "observed_process_CPU_seconds_per_wall_second": 5.951470854296087,
+    "record_shapes": false,
+    "with_stack": false,
+    "profile_memory": false,
+    "module_hooks": false,
+    "operators": [
+      {
+        "name": "aten::new_empty",
+        "calls": 1,
+        "cpu_inclusive_us": 28.611999999999966,
+        "cpu_exclusive_us": 9.812999999999988
+      },
+      {
+        "name": "aten::empty",
+        "calls": 43,
+        "cpu_inclusive_us": 2579.902999999631,
+        "cpu_exclusive_us": 2579.902999999631
+      },
+      {
+        "name": "aten::slice",
+        "calls": 86,
+        "cpu_inclusive_us": 304.11199999928687,
+        "cpu_exclusive_us": 177.7099999960148
+      },
+      {
+        "name": "aten::as_strided",
+        "calls": 86,
+        "cpu_inclusive_us": 126.40200000327206,
+        "cpu_exclusive_us": 126.40200000327206
+      },
+      {
+        "name": "aten::pad",
+        "calls": 2,
+        "cpu_inclusive_us": 40479.876000000746,
+        "cpu_exclusive_us": 25.241000000070926
+      },
+      {
+        "name": "aten::constant_pad_nd",
+        "calls": 2,
+        "cpu_inclusive_us": 40454.63500000067,
+        "cpu_exclusive_us": 84.2430000027125
+      },
+      {
+        "name": "aten::fill_",
+        "calls": 2,
+        "cpu_inclusive_us": 21822.866999999613,
+        "cpu_exclusive_us": 21822.866999999613
+      },
+      {
+        "name": "aten::narrow",
+        "calls": 2,
+        "cpu_inclusive_us": 45.834999999895444,
+        "cpu_exclusive_us": 30.52599999861559
+      },
+      {
+        "name": "aten::copy_",
+        "calls": 42,
+        "cpu_inclusive_us": 433221.49100000295,
+        "cpu_exclusive_us": 433221.49100000295
+      },
+      {
+        "name": "aten::conv3d",
+        "calls": 14,
+        "cpu_inclusive_us": 16054480.125,
+        "cpu_exclusive_us": 87.37600000132807
+      },
+      {
+        "name": "aten::convolution",
+        "calls": 14,
+        "cpu_inclusive_us": 16054392.748999998,
+        "cpu_exclusive_us": 86.00099999690428
+      },
+      {
+        "name": "aten::_convolution",
+        "calls": 14,
+        "cpu_inclusive_us": 16054306.748000002,
+        "cpu_exclusive_us": 189.57899999781512
+      },
+      {
+        "name": "aten::slow_conv3d",
+        "calls": 14,
+        "cpu_inclusive_us": 16054117.169000003,
+        "cpu_exclusive_us": 117.61500000348315
+      },
+      {
+        "name": "aten::slow_conv3d_forward",
+        "calls": 14,
+        "cpu_inclusive_us": 16053999.554000001,
+        "cpu_exclusive_us": 15701269.975
+      },
+      {
+        "name": "aten::view",
+        "calls": 28,
+        "cpu_inclusive_us": 196.12599999760278,
+        "cpu_exclusive_us": 196.12599999760278
+      },
+      {
+        "name": "aten::resize_",
+        "calls": 14,
+        "cpu_inclusive_us": 179.45800000074087,
+        "cpu_exclusive_us": 179.45800000074087
+      },
+      {
+        "name": "aten::reshape",
+        "calls": 14,
+        "cpu_inclusive_us": 131.07099999819184,
+        "cpu_exclusive_us": 42.041999999957625
+      },
+      {
+        "name": "aten::contiguous",
+        "calls": 12,
+        "cpu_inclusive_us": 285409.8620000016,
+        "cpu_exclusive_us": 57.18600000324659
+      },
+      {
+        "name": "aten::clone",
+        "calls": 12,
+        "cpu_inclusive_us": 285352.67599999835,
+        "cpu_exclusive_us": 86.11500000278465
+      },
+      {
+        "name": "aten::empty_like",
+        "calls": 12,
+        "cpu_inclusive_us": 1889.9369999968912,
+        "cpu_exclusive_us": 31.698999996529892
+      }
+    ],
+    "limitations": "Instrumented sole decoder-tail resume; CPU ratio is this process total, not per-kernel occupancy; native GEMM/unfold may lack distinct ATen events."
+  },
+  "single_candidate": "Use existing convolution_slabs with maximum_slab_bytes=64MiB only for this saved layer; same kernel, FP32, NCDHW, backend and halo algorithm.",
+  "risk": "M/leading dimension changes from802816 to114688; BLAS packing/reduction may change FP32 bits even with the same1944 neighbors and bias. More calls and repeated halos can erase memory gains in speed.",
+  "proposed_contracts_not_executed": {
+    "in_out_channels": [
+      72,
+      24
+    ],
+    "kernel": [
+      3,
+      3,
+      3
+    ],
+    "bias": true,
+    "shapes": [
+      [
+        1,
+        72,
+        1,
+        13,
+        17
+      ],
+      [
+        1,
+        72,
+        2,
+        13,
+        17
+      ],
+      [
+        1,
+        72,
+        7,
+        13,
+        17
+      ],
+      [
+        1,
+        72,
+        31,
+        13,
+        17
+      ],
+      [
+        1,
+        72,
+        33,
+        13,
+        17
+      ]
+    ],
+    "caps": "16 versus4 logical input planes to reproduce depth14 versus2 on bounded shapes",
+    "values": "Fixed FP32 seed, finite cancellation-rich mixed signs, zeros and signed zeros; no dtype change.",
+    "gates": [
+      "All pre-ELU output uint32 bits equal",
+      "Shape/stride/dtype/finite equal",
+      "Input/weight/bias unchanged, output independent",
+      "True-boundary padding and internal halos",
+      "Contiguous and strided CPU inputs",
+      "Flags/no-grad/training/autocast/GPU fallback unchanged"
+    ]
+  },
+  "future_real_gate_needs_root_authorization": "Same saved skip/value and weight SHA, rejoin once, old/new single convolution only, common eight-core lock; compare all pre-ELU uint32 values first. Stop on any difference, do not use final labels as a substitute.",
+  "upstream": "https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/ConvolutionMM3d.cpp#L27"
+}
