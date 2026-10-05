@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "status": "rejected_first_actual_returned_cost_mismatch",
+  "diagnostic_only": true,
+  "case": "public_complete_180_frame_input",
+  "complete_real_API_calls": 0,
+  "first_mismatch_cost_index_zero_based": 588,
+  "returned_cost_pairs_equal_before_mismatch": 588,
+  "old_returned_cost": 0.0034199953079223633,
+  "candidate_returned_cost": 0.003420114517211914,
+  "absolute_returned_cost_difference": 1.1920928955078125e-07,
+  "float32_returned_cost_ULP_distance": 512,
+  "stopped_on_first_mismatch": true,
+  "full_output_gate_completed": false,
+  "normal_benchmark_API_calls": 0,
+  "GPU_API_calls": 0,
+  "candidate_promoted": false,
+  "production_v5_retained": true,
+  "actual_controller_exit_code": 1,
+  "source_sha256": {
+    "v5": {
+      "src/fnit/mcflirt/_cost_cpu.py": "7c29f67f62ffb168f0b38d85e158db37966d75c81e516c2167fa987645221314",
+      "src/fnit/mcflirt/_sampling_cpu.py": "8fe4cca243a18b1ceff406c9a377cdf9a769ccf650c46af615ca11b98fdd4457",
+      "src/fnit/mcflirt/sampling.py": "bb620094b8768292aa457cc6ff9704180ea5db709fad1e138a98e1fe860a8617",
+      "src/fnit/mcflirt/core.py": "cd06848a835771434638985a590fae45ae678c46d8c822ba3bed50f2f231ca30",
+      "src/fnit/fmri/_bbr_cpu.py": "0a60a6a03e84e285aab22cab4b54f791172fcbb51d056520a6523ff0690c11eb",
+      "src/fnit/fmri/bbr.py": "cd596c2f306e5f237cc52be3a8819dd776212eab7278a70de33ce2dd99fd545e"
+    },
+    "candidate": {
+      "src/fnit/mcflirt/_cost_cpu.py": "7c29f67f62ffb168f0b38d85e158db37966d75c81e516c2167fa987645221314",
+      "src/fnit/mcflirt/_sampling_cpu.py": "8fe4cca243a18b1ceff406c9a377cdf9a769ccf650c46af615ca11b98fdd4457",
+      "src/fnit/mcflirt/sampling.py": "bb620094b8768292aa457cc6ff9704180ea5db709fad1e138a98e1fe860a8617",
+      "src/fnit/mcflirt/core.py": "1386739044eff7941d7ead6dc0fabdf7965326d51c6e8f15856778241610493b",
+      "src/fnit/fmri/_bbr_cpu.py": "0a60a6a03e84e285aab22cab4b54f791172fcbb51d056520a6523ff0690c11eb",
+      "src/fnit/fmri/bbr.py": "cd596c2f306e5f237cc52be3a8819dd776212eab7278a70de33ce2dd99fd545e",
+      "src/fnit/mcflirt/_ncc_scalar_cpu.py": "83750db8c49c214c177959dc528d1f3058deade8b21ea4ec35d3bc8e6eba884b"
+    }
+  },
+  "raw_evidence_sha256": "334d594c41a0f3ab2c4611479b4bb29eef433d88a54a870d07f06715f15e4ba2",
+  "precision_requirement": "Raw returned-cost equality; no tolerance relaxation.",
+  "timing_scope": "Partial instrumented diagnosis; no valid complete API performance result.",
+  "causal_localization": "Failure record did not store intermediate moments. No specific arithmetic operation is proved responsible.",
+  "source_review": {
+    "float32_reciprocal_multiply_division_hypothesis_supported_by_v2_5_1_source": false,
+    "CPU_sqrt_backend_difference_is_a_candidate_explanation_not_proved_cause": true,
+    "installed_Torch_build_and_actual_LLVM_metadata_pending": false
+  },
+  "primary_source_links": [
+    "https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/cpu/BinaryOpsKernel.cpp#L153-L185",
+    "https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/cpu/UnaryOpsKernel.cpp#L665-L768",
+    "https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/cpu/vml.h#L96-L140",
+    "https://github.com/pytorch/pytorch/releases/tag/v2.5.1"
+  ],
+  "actual_installed_Torch": {
+    "version": "2.5.1",
+    "git_version": "a8d6afb511a69687bbb2b7e88a3cf67917e1697e",
+    "official_v2_5_1_release_commit_matches": true,
+    "GCC_version": "9.3",
+    "MKL_available": true,
+    "MKL_version": "2022.1",
+    "CPU_capability": "AVX512",
+    "build_uses_fast_math_flag": false
+  },
+  "actual_native_helper_compilation": {
+    "LLVM_bytes": 15515,
+    "LLVM_sha256": "cc0302388f638ce2936640f1ce3259f0563fb3e78ba638b2e1536ccaddc34a78",
+    "float32_direct_divisions": 8,
+    "sqrt_calls": 2,
+    "sqrt_symbol": "sqrtf(float)",
+    "native_math_float32_without_fast_flags": true,
+    "native_float_to_double_promotions": false,
+    "scope": "Root returned actual native operation lines, while first actual signature had passed the immutable full-IR checker before failure."
+  },
+  "metadata_evidence_sha256": "737eb620bc5b85d07b663fcc4158f13650a93f402a3141fc75f14ae39398112a"
+}

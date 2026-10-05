@@ -280,6 +280,76 @@ apptainer run --cleanenv \
 
 ## 5. 最新精度和运行时间
 
+### 2026-10-06：fMRIPrep 25.2.4 完整体积预处理（CPU1/CPU8）
+
+同一真实公开病例的原始 T1w 和完整 180 帧 BOLD，在固定 fMRIPrep 25.2.4 容器中分别使用 1、8 线程；nthreads 与 omp-nthreads 均按该预算设置。STC、fieldmap、recon-all 与 surface 关闭，dummy scans 为 0。两个预算各完成 first 和新进程 workflow-cache 调用，四次实际 fMRIPrep 进程及容器启动器均退出 0。原始输入大小及 SHA-256 与 FNIT 冻结测试相符。
+
+| CPU 线程 | first 完整 wall | first payload wall | 缓存新进程完整 wall | 缓存 payload wall |
+|---:|---:|---:|---:|---:|
+| 1 | 19400.443 s | 19399.265 s | 1107.668 s | 1106.255 s |
+| 8 | 2957.476 s | 2956.069 s | 453.581 s | 452.485 s |
+
+完整 wall 含正常读写及外层启动，payload wall 仅记录容器内实际 fMRIPrep 进程。原版生成 T1w/MNI preproc 和混杂变量，执行其完整解剖模板注册流程（包括额外 MNI2009 注册），没有 PICA、ICA-AROMA 或 FNIT clean 后处理。FNIT 与原版采用相同 1/8 线程预算，但完整计算范围不同、实际物理核组不同；上述原版总时钟按自身范围列示，不计算同范围整链速度比。
+
+原版缓存调用启动新进程并复用 workflow cache；FNIT warm 则在同一进程复用解剖缓存。每格为一次完整运行观察。
+
+#### 原版保存 leaf 节点时钟
+
+| 原版工作流分组 | leaf 数（各预算） | CPU1 leaf duration 合计 | CPU8 leaf duration 合计 | CPU8 活动区间并集 |
+|---|---:|---:|---:|---:|
+| BOLD reference 相关工作流 | 6 | 14.693 s | 14.764 s | 14.739 s |
+| 运动校正工作流 | 2 | 22.516 s | 23.375 s | 23.375 s |
+| 解剖脑提取相关工作流 | 53 | 2206.239 s | 435.447 s | 420.752 s |
+| 解剖标准化工作流（含原版模板注册） | 13 | 15924.751 s | 2022.059 s | 2018.837 s |
+| BOLD→T1w 配准工作流 | 13 | 78.085 s | 78.133 s | 78.133 s |
+| native preproc 工作流 | 3 | 26.558 s | 9.494 s | 9.494 s |
+| T1w preproc 工作流 | 4 | 22.002 s | 8.262 s | 8.262 s |
+| MNI preproc 工作流 | 11 | 167.916 s | 78.034 s | 76.376 s |
+| 混杂变量生成工作流 | 44 | 22.286 s | 24.277 s | 20.588 s |
+| 其他原版节点 | 110 | 515.603 s | 197.173 s | 178.192 s |
+
+每个预算的 259 个 leaf 来自 first/cache 共享 work 目录中的当前保存结果；按真实 runtime 去重，并排除 MapNode 父节点。缓存节点可能保留 first 的 runtime，因此不拆成两套调用阶段表。leaf duration 合计计入同时运行的节点；活动区间并集仅计算这些节点实际运行区间的覆盖时间，两者都不能替代完整调用 wall。起止跨度还含组内等待及跨调用间隔。
+
+未记录 GNU time 的整体 user/system/RSS，不从 leaf 推导进程资源统计。匹配空间与输出层的科学比较单独记录。新个体影像、路径和原始命令不公开。
+
+完整执行与保存节点见 [CPU1 原版报告](../../validation/fmri_cpu_20261004/task05_volume/official_saved_nodes_cpu1_v2.public.json)及 [CPU8 原版报告](../../validation/fmri_cpu_20261004/task05_volume/official_saved_nodes_cpu8_v2.public.json)。
+
+### 2026-10-06：完整 volume CPU 优化前后对照
+
+同一真实公开病例的原始 T1w 和完整 180 帧 BOLD，使用冻结基线 `6f624040` 和候选 `98019133`，分别运行 FNIRT/SynthMorph、CPU1/CPU8。每个预算的旧、新实现绑定同一组物理核心；PyTorch interop=1，STC 关闭。每份源码在同一进程运行一次 first（重新准备解剖结果）及一次 warm（复用已生成的解剖缓存），合计 16 次完整正常 API。
+
+| 后端 | CPU 线程 | 基线 first | 候选 first | 基线 warm | 候选 warm |
+|---|---:|---:|---:|---:|---:|
+| FNIRT | 1 | 1351.524 s | 851.694 s | 832.104 s | 405.339 s |
+| FNIRT | 8 | 748.712 s | 581.172 s | 611.512 s | 432.309 s |
+| SynthMorph | 1 | 1710.378 s | 1243.552 s | 804.598 s | 411.036 s |
+| SynthMorph | 8 | 793.044 s | 617.190 s | 595.666 s | 405.428 s |
+
+本次观测中，first 的基线/候选时间比为 1.28–1.59，warm 为 1.41–2.05；每格各一次完整调用。API 时钟包含原始输入、完整计算和正常输出读写；导入、来源校验、锁等待及额外保存对照副本在 API 时钟外。进程时钟同时覆盖 first/warm 及这些外围工作，不能替代单次 API。
+
+8 组旧、新配对及 8 组 first/warm 配对均完整比较十个科学输出，每组 **395,140,404 个值**：不同值数、最大绝对误差、RMSE 均为 0，dtype、网格、affine、qform/sform、加载后及原始存储头一致。所有四张 BOLD 输出均为完整 180 帧、float32、有限值，mm/sec 单位及 TR 经校验。真实核预算、完整源码和原始输入前后校验通过；科学配置只对基线缺失的 `confound_projection` 按既有 `orthogonal` 补齐。
+
+本表记录 FNIT 优化前后的完整 API。官方 fMRIPrep 整链时钟见上表；preproc 与 FNIT clean 的后处理范围不同，精度在匹配输出层比较。
+
+#### 候选 CPU8 的分步骤时钟
+
+| 已记录的阶段 host wall | FNIRT first | FNIRT warm | SynthMorph first | SynthMorph warm |
+|---|---:|---:|---:|---:|
+| 解剖准备／缓存读入 | 140.100 s | 0.064 s | 192.509 s | 3.208 s |
+| 其中 T1w→MNI 配准 | 84.861 s | —（缓存命中） | 123.652 s | —（缓存命中） |
+| FEAT core | 37.817 s | 36.161 s | 37.177 s | 36.537 s |
+| 其中强度缩放 | 0.105 s | 0.103 s | 0.115 s | 0.110 s |
+| 其中 Gaussian 高通 | 0.157 s | 0.125 s | 0.131 s | 0.126 s |
+| BBR | 46.986 s | 44.104 s | 43.917 s | 41.088 s |
+| PICA＋ICA-AROMA＋混杂处理 | 151.339 s | 155.960 s | 143.470 s | 127.473 s |
+| MNI mask 重采样 | 0.149 s | 0.146 s | 0.163 s | 0.146 s |
+| clean MNI 重采样 | 105.797 s | 103.072 s | 102.618 s | 104.661 s |
+| T1w preproc 单次插值 | 8.867 s | 8.454 s | 8.573 s | 8.869 s |
+| MNI preproc 单次插值 | 40.594 s | 38.661 s | 38.734 s | 38.740 s |
+
+解剖准备包含 T1w→MNI，FEAT core 包含强度缩放和高通；这些已有 observer 时钟存在嵌套，不相加代替完整 API。warm 未重新调用 T1w→MNI，表中按实际缺省事件标为缓存命中。重采样四项按生产调用顺序分别对应 MNI mask、clean MNI、T1w preproc、MNI preproc。未保存独立时钟的步骤不补造计时。
+完整 first/warm 阶段、全量误差与来源 SHA 见 [CPU 机器可读报告](../../validation/fmri_cpu_20261004/task05_volume/final_merged_cpu_v1.public.json)。本轮仅公开聚合报告。
+
 ### 2026-10-06：完整 volume 默认 GPU 保持性回归
 
 本轮用同一真实公开病例的原始 T1w 和完整 180 帧 BOLD（64×64×42×180），在 NVIDIA H100 PCIe 上串行运行四次 cold API。两份冻结源码为 FNIT main 基线 `6f624040` 与 CPU 优化候选 `98019133`；两种后端分别配对。调用包括原始输入、robust reference、完整运动校正、T1w 配准、PICA/ICA-AROMA，以及 preproc 和 clean 的正常读写；STC 关闭，CUDA 使用 TF32，四张 BOLD 输出保持 float32。不包含 recon-all 或 surface。
@@ -376,6 +446,7 @@ NRMSE=RMSE/参考RMS，使用全部帧和固定脑mask，不筛零值、不拟�
 
 | 日期 | commit/version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-06 | `6f624040`→`98019133` | 两后端 CPU1/CPU8 的完整 first/warm 优化比较。 | [16 次正常 API；旧、新及缓存十科学输出逐值精确](../../validation/fmri_cpu_20261004/task05_volume/final_merged_cpu_v1.public.json)。 |
 | 2026-10-06 | `6f624040`→`98019133` | CPU 优化候选的默认完整 GPU 路径保持性回归。 | [两后端×两源码、完整180帧及十科学输出逐值精确](../../validation/fmri_cpu_20261004/task05_volume/final_merged_gpu_v1.public.json)。 |
 | 2026-10-04 | `140c3739` | 修复参考sidecar来源SHA与输入覆盖保护。 | 77项合同检查；原MRI冻结记录保留。 |
 | 2026-10-04 | `cc940273`＋source_v1 | 接入稳健参考，保留middle对照。 | [两例×两策略连续链](../../validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md)。 |

@@ -18,7 +18,31 @@ nodecw8 的原 MATLAB R2018b 因许可证主机绑定失败，未进入 CBIG/HCP
 
 GPU 对照使用已验证 H100 的显式 UUID，先记录设备负载。同一设备中的本轮计时顺序执行。默认 TF32；保留既有功能的精度策略和 float32 输出，不启用 float16/bfloat16。PyTorch 显存目标为 20,000,000,000 字节。
 
-共享 H100 的完整 GPU 回归分别保留冻结版本：MCFLIRT／BBR v4 的 12 个进程、36 次调用和 18 组完整比较见[任务 1 报告](task01_motion_bbr/gpu_v4.public.json)；混杂回归最终可选 AFNI 模式的十次调用、六组完整比较见[任务 2 报告](task02_ica_aroma/gpu_projection_20261005.public.json)；MS-HBM 的四次完整 490 帧旧新对照见[任务 3 说明](task03_mshbm/README.md)；三种 MSM 配准的 12 次完整旧新对照见[任务 4 报告](task04_msm_surface/gpu_registration_abba_final_recovery_v1.public.json)。各项旧新输出已通过其完整数值门槛；源码版本、进程／API 时钟、初始化失败重试和显存由各报告单列。共享设备时钟只作为观测值。最终合并源码的完整 volume GPU 回归另行验收。
+共享 H100 的完整 GPU 回归分别保留冻结版本：MCFLIRT／BBR v4 的 12 个进程、36 次调用和 18 组完整比较见[任务 1 报告](task01_motion_bbr/gpu_v4.public.json)；混杂回归最终可选 AFNI 模式的十次调用、六组完整比较见[任务 2 报告](task02_ica_aroma/gpu_projection_20261005.public.json)；MS-HBM 的四次完整 490 帧旧新对照见[任务 3 说明](task03_mshbm/README.md)；三种 MSM 配准的 12 次完整旧新对照见[任务 4 报告](task04_msm_surface/gpu_registration_abba_final_recovery_v1.public.json)。各项旧新输出已通过其完整数值门槛；源码版本、进程／API 时钟、初始化失败重试和显存由各报告单列。共享设备时钟只作为观测值。完整 volume 的 CPU16 与 GPU4 保持性对照已验收，见下方冻结源码结果。
+
+## 2026-10-06 完整链保持性结果
+
+最终 volume 测量绑定同一完整真实 180 帧 BOLD、原始 T1w 和固定资产，源码为 `6f624040 → 98019133`；默认 STC 关闭。两种配准后端分别完成 CPU1/8 的 first/warm 调用，共 16 次；八组新旧及八组首跑/缓存比较，每组十个科学输出共 395,140,404 个值逐值一致，完整头、网格、dtype、有限值与来源/输入/物理核心门槛通过。
+
+| 后端 | CPU 线程 | 基线 first / warm | 候选 first / warm |
+|---|---:|---:|---:|
+| FNIRT | 1 | 1351.524 / 832.104 s | 851.694 / 405.339 s |
+| FNIRT | 8 | 748.712 / 611.512 s | 581.172 / 432.309 s |
+| SynthMorph | 1 | 1710.378 / 804.598 s | 1243.552 / 411.036 s |
+| SynthMorph | 8 | 793.044 / 595.666 s | 617.190 / 405.428 s |
+
+四次完整 cold GPU 调用也比较同一十科学输出的全部值，两个后端均精确相同。FNIRT 旧/新 API 为 597.814/599.190 s，SynthMorph 为 421.071/415.174 s；最高 Torch allocation/reservation 为 13.323/16.182 GB，采样本任务进程树峰值为 15.804 GB，均低于 20e9 bytes。共享 GPU 487 次采样均为 100%，时间保留为单次观察。
+
+完整记录见 [CPU16](task05_volume/final_merged_cpu_v1.public.json)、[GPU4](task05_volume/final_merged_gpu_v1.public.json)与[功能页阶段表](../../docs/fmri/README.md)。合并上游 `d2237221` 的源码为 `2530650b`，两条已测 GPU 候选执行链的 103/101 个实际导入模块均与合并代码逐文件相同；[来源核查](task05_volume/final_source_bridge_20261006.public.json)将实际冻结树与 Git tracked 树的范围分开。本轮计时保留冻结提交标签。
+
+原版 fMRIPrep 25.2.4 的 CPU1/CPU8 first 与新进程 workflow-cache 四次完整调用已完成，STC OFF、180 帧、launcher/payload 均退出 0。CPU1 first/cache 为 19400.443/1107.668 s，CPU8 为 2957.476/453.581 s；[保存节点 CPU1](task05_volume/official_saved_nodes_cpu1_v2.public.json)及[CPU8](task05_volume/official_saved_nodes_cpu8_v2.public.json)保留完整时钟和分组。其范围包含 confounds 和额外解剖模板配准，FNIT 的完整调用另含 PICA、ICA-AROMA 与 clean；本表是 FNIT 新旧保持性结果，不计算原版整链加速比。
+
+### 尚未达到的范围
+
+- MCFLIRT 某些可选阶段仍慢于同线程原版；默认 180 帧 CPU8 warm 为 36.542 s，原版 app 为 35.233 s。三轴展开候选实测内核收益约 0.135%，未采用；[完整说明](../../docs/mcflirt/CPU_BENCHMARK_20261004.md)保留结果。
+- MS-HBM CPU8 原版标签逐值一致，CPU1 有一个顶点差异；更改权重的已测参数有 79 个顶点差异，旧、新 FNIT 一致，属于既有官方差异。两个独立 run 的真实输入仍待提供。
+- MSMAll CA/CAT 所需的个体髓鞘图和偏置图仍待提供，未用代理图替代。
+- 180 帧 fresh surface 的球面和时序仍有差异；准备、刚性和前两轮离散更新已核对。后续阶段继续定位，[任务 4](task04_msm_surface/README.md)保留实际误差；固定 490 帧几何投影与 CIFTI 则逐值一致。
 
 ## 验证规则
 
