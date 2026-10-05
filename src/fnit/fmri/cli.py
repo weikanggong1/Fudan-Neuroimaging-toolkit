@@ -56,6 +56,7 @@ def main(argv=None):
     volume.add_argument("--regress-motion", action="store_true")
     volume.add_argument("--motion-model", type=int, choices=(6, 12, 24), default=24)
     volume.add_argument("--bandpass", nargs=2, type=float)
+    volume.add_argument("--confound-projection", choices=("orthogonal", "afni"), default="orthogonal")
     volume.add_argument("--global-signal", action="store_true")
     volume.add_argument("--batch-size", type=int, default=8)
     volume.add_argument("--motion-iterations", nargs=3, type=int, default=(1, 1, 1))
@@ -128,6 +129,7 @@ def main(argv=None):
             regress_wm=args.regress_wm, regress_csf=args.regress_csf,
             regress_motion=args.regress_motion, motion_model=args.motion_model,
             bandpass=tuple(args.bandpass) if args.bandpass else None,
+            confound_projection=args.confound_projection,
             global_signal=args.global_signal, batch_size=args.batch_size,
             motion_iterations=tuple(args.motion_iterations),
             bold_reference_strategy=args.bold_reference_strategy,

@@ -1,0 +1,1754 @@
+{
+  "schema_version": 1,
+  "status": "finished_readout_with_grid_or_mapping_gaps",
+  "required_preproc_comparisons_available": false,
+  "required_preproc_pairs": 8,
+  "same_physical_grid_preproc_pairs_compared": 4,
+  "new_API_calls": 0,
+  "complete_frames": 180,
+  "results": [
+    {
+      "backend": "fnirt",
+      "cpu_threads": 1,
+      "same_node": true,
+      "same_thread_budget": true,
+      "same_physical_cores": false,
+      "original_process_seconds_including_separate_hashes": 20518.529179811478,
+      "original_calls": [
+        {
+          "repeat": 0,
+          "call_type": "first_call",
+          "complete_frames": 180,
+          "official_wall_seconds_including_IO": 19400.44276893977,
+          "payload_wall_seconds": 19399.265271668322,
+          "receipt_sha256": "2c7e00e4a274dfd5c2404e115257ff463b781f94dd7d1eedcfd7a6e38647deec",
+          "native_log_sha256": "5cc938638796166d1a54bc7a6c0cccb3901a4ef826b4ba58c0f7dcd2fd64a490",
+          "cached_node_log_messages": 28,
+          "native_launcher_exit": 0,
+          "native_payload_exit": 0,
+          "native_entrypoint_sha256": "9932a19098387cf763e117539f972264377818245f836b9bf33f7e2038b1939a",
+          "original_argv_sha256": "601f42e9fec27ce7c5de11e0773cf99b5fa30f78cfc6c5a4cdbca22302a20c04"
+        },
+        {
+          "repeat": 1,
+          "call_type": "fresh_official_process_with_workflow_cache",
+          "complete_frames": 180,
+          "official_wall_seconds_including_IO": 1107.6676066815853,
+          "payload_wall_seconds": 1106.2548759607598,
+          "receipt_sha256": "7420bdf56861118293a7b106b2883a5d89354639a174ad3f97b8a52d9b54a8cb",
+          "native_log_sha256": "ff271bea34c9c90fe445a39285fccd9ca382c42cf67f0e4414ed3c3890565b8d",
+          "cached_node_log_messages": 28,
+          "native_launcher_exit": 0,
+          "native_payload_exit": 0,
+          "native_entrypoint_sha256": "9932a19098387cf763e117539f972264377818245f836b9bf33f7e2038b1939a",
+          "original_argv_sha256": "601f42e9fec27ce7c5de11e0773cf99b5fa30f78cfc6c5a4cdbca22302a20c04"
+        }
+      ],
+      "original_stage_groups": {
+        "MNI_preproc": {
+          "leaf_executions": 11,
+          "leaf_duration_sum_seconds": 167.915713,
+          "observed_active_interval_union_seconds": 167.915713,
+          "elapsed_span_seconds": 654.469224
+        },
+        "T1w_preproc": {
+          "leaf_executions": 4,
+          "leaf_duration_sum_seconds": 22.002325,
+          "observed_active_interval_union_seconds": 22.002325,
+          "elapsed_span_seconds": 254.222277
+        },
+        "anatomical_brain_extraction": {
+          "leaf_executions": 53,
+          "leaf_duration_sum_seconds": 2206.2386030000002,
+          "observed_active_interval_union_seconds": 2206.2386030000002,
+          "elapsed_span_seconds": 2811.268007
+        },
+        "anatomical_standard_normalization": {
+          "leaf_executions": 13,
+          "leaf_duration_sum_seconds": 15924.751026,
+          "observed_active_interval_union_seconds": 15924.751026,
+          "elapsed_span_seconds": 18822.81583
+        },
+        "bbr": {
+          "leaf_executions": 13,
+          "leaf_duration_sum_seconds": 78.084601,
+          "observed_active_interval_union_seconds": 78.084601,
+          "elapsed_span_seconds": 20072.76794
+        },
+        "confounds": {
+          "leaf_executions": 44,
+          "leaf_duration_sum_seconds": 22.285788,
+          "observed_active_interval_union_seconds": 22.285788,
+          "elapsed_span_seconds": 1107.755055
+        },
+        "motion": {
+          "leaf_executions": 2,
+          "leaf_duration_sum_seconds": 22.515544000000002,
+          "observed_active_interval_union_seconds": 22.515544000000002,
+          "elapsed_span_seconds": 125.979552
+        },
+        "native_preproc": {
+          "leaf_executions": 3,
+          "leaf_duration_sum_seconds": 26.557678,
+          "observed_active_interval_union_seconds": 26.557678,
+          "elapsed_span_seconds": 19664.339519
+        },
+        "other_original_nodes": {
+          "leaf_executions": 110,
+          "leaf_duration_sum_seconds": 515.6026469999999,
+          "observed_active_interval_union_seconds": 515.6026469999999,
+          "elapsed_span_seconds": 20425.623204
+        },
+        "reference": {
+          "leaf_executions": 6,
+          "leaf_duration_sum_seconds": 14.693035,
+          "observed_active_interval_union_seconds": 14.693035,
+          "elapsed_span_seconds": 19454.038746
+        }
+      },
+      "original_node_runtime_scope": "Deduplicated completed leaf runtimes. MapNode parents excluded; stage duration sums and unions overlap and do not replace whole process time.",
+      "official_cache_scope": "Both original invocations share one work root. Second process may reuse first-call workflow nodes; saved node runtimes can retain first-call intervals. Original first/cache process clocks remain distinct.",
+      "GNU_time_scope": "Not present in the declared v4 command. No global GNU user/system/RSS inferred from Nipype nodes.",
+      "original_scope": "Complete original raw-BIDS volume preproc,including confounds and required anatomical template registrations; no PICA/AROMA/FNITclean/recon-all/surface.",
+      "FNIT_scope": "Complete cold raw-BIDS API also performs highpass,scaling,PICA/AROMA and saves clean outputs; whole time is a different mathematical/output scope.",
+      "FNIT_cold_complete_API_seconds": 851.693966540508,
+      "comparisons": {
+        "preproc_t1w": {
+          "candidate_sha256": "1268408075f58e28c48907552c681dd2b75291e5d403f1ef575cb93e4bb0b624",
+          "official_sha256": "ed722b3c546c665b9d030071d5cf255f263c557b72f96d292984a14858ea8f17",
+          "candidate_shape": [
+            50,
+            59,
+            47,
+            180
+          ],
+          "official_shape": [
+            50,
+            59,
+            44,
+            180
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "sec"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 6.599998474121094,
+          "status": "not_comparable_distinct_physical_lattices"
+        },
+        "preproc_mni": {
+          "candidate_sha256": "d03c6a950fdfc5335a2566e2961c84a9a17968be15c1502c644539f47e050aaf",
+          "official_sha256": "94107b422a6bebd6dbf0dd093dd68b5c687cf7a1221f284ed39322c4af894694",
+          "candidate_shape": [
+            91,
+            109,
+            91,
+            180
+          ],
+          "official_shape": [
+            91,
+            109,
+            91,
+            180
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "sec"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 0.0,
+          "TR_seconds": [
+            2.0999999046325684,
+            2.0999999046325684
+          ],
+          "status": "compared_same_physical_lattice",
+          "values": 162473220,
+          "different_values": 162473190,
+          "all_finite": true,
+          "rmse": 67.16952108889437,
+          "max_abs": 1377.0108795166016,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9698989648679692,
+          "temporal_correlation": {
+            "mean_varying_voxels": 0.5253823235943763,
+            "varying_voxels": 902629,
+            "constant_series_excluded": 0,
+            "rmse_scope": "RMSE retains every voxel including constant/zero series."
+          }
+        },
+        "bold_reference": {
+          "candidate_sha256": "31860ccd8934f8c9b848103dcdf372c158065ebdd6b60da41dbd96d14330b195",
+          "official_sha256": "860e08e82b87cb610773c9367c2dbbe05a00b783e87d1049f1e049018228c9b3",
+          "candidate_shape": [
+            64,
+            64,
+            42
+          ],
+          "official_shape": [
+            64,
+            64,
+            42
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "L",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "L",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 0.0,
+          "status": "compared_same_physical_lattice",
+          "values": 172032,
+          "different_values": 171241,
+          "all_finite": true,
+          "rmse": 4.144168848210343,
+          "max_abs": 230.10491943359375,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9998845314856871
+        },
+        "mask_mni": {
+          "candidate_sha256": "60dd7295864f6595f5a9e76a819e0a9b75d841b49e50e457319220fccf24f1b8",
+          "official_sha256": "69e228fe0963d8e045edfcfd7316731a5c09c64ce8bb4249a6453b07a4e7472f",
+          "candidate_shape": [
+            91,
+            109,
+            91
+          ],
+          "official_shape": [
+            91,
+            109,
+            91
+          ],
+          "candidate_dtype": "uint8",
+          "official_dtype": "uint8",
+          "units": [
+            [
+              "unknown",
+              "unknown"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "status": "not_comparable_spatial_units_unproved"
+        },
+        "t1_brain": {
+          "candidate_sha256": "3f9541227f869cd7876289e0bc07b8b98a3fe50fb26b170a413c2eaa8e26f152",
+          "official_sha256": "b612adb9d5809a90893c1bfcf1092f77e3045d52dfd69c452e448f7fcfc09ae9",
+          "candidate_shape": [
+            160,
+            256,
+            256
+          ],
+          "official_shape": [
+            160,
+            256,
+            256
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 1.504174562683147e-11,
+          "status": "compared_same_physical_lattice",
+          "values": 10485760,
+          "different_values": 1404113,
+          "all_finite": true,
+          "rmse": 66.76165934621639,
+          "max_abs": 595.5167846679688,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9795459830059204
+        },
+        "native_preproc": {
+          "status": "official_working_native_complete_frames_finite_time_axis_not_proven",
+          "official_sha256": "382ec9c5908f39c0e837fe302ddb85e5309d49f4b374f08d24dfb9f0caf7b091",
+          "official_checks": {
+            "shape": [
+              64,
+              64,
+              42,
+              180
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "spatial_axis_codes": [
+              "L",
+              "A",
+              "S"
+            ],
+            "time_unit": "unknown",
+            "binary_header_sha256": "21c7f36c5bb95c93c946ed5e270489eade8cec692fa64e5de08c0cf2d5770884",
+            "stored_units": [
+              "mm",
+              "unknown"
+            ],
+            "stored_time_zoom": 2.0999999046325684,
+            "source_TR_seconds": 2.1,
+            "physical_time_axis_checked": false
+          },
+          "FNITclean_not_compared": true
+        },
+        "bbr_world_ras": {
+          "status": "coordinate_convention_or_native_affine_not_proven"
+        },
+        "motion_world_ras_pull": {
+          "status": "full_frame_transform_direction_or_coordinate_convention_not_proven"
+        },
+        "nonlinear_warp": {
+          "status": "not_compared_different_representations_and_independent_estimation",
+          "FNIT_pull_sha256": "7b00c6c033ed099cf338a1bd6cb1999ed6d6793085fd5a8c1b578f8ecf5c32f7",
+          "scope": "No ANTs/FNIRT/SynthMorph warp-equivalence claim; no transform evaluation or resampling added."
+        }
+      },
+      "source_image_execution_evidence": {
+        "actual_image_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+        "adapter_sha256": "df1c2bc03bb78509bb80b3c12e1ee3aaa1fab320e326c3b1b618230c46156823",
+        "reference_wrapper_source_sha256": "aac5d542ad4a089131ffb69dab029c0160fd62afb8e147f6d3d96080b559608d",
+        "wrapper_payload_code_sha256": "9743f296f2c6da581aa541441b3da8972336285b73eb4d5eb6efbbaa15245d51",
+        "execution_report_sha256": "8cb1e18099bd2bbbfcdb68c9aedcd9b3af517908fe1dc6e21e89a42ad804233d",
+        "manifest_sha256": "32955ca133a97badb5482a3f83591a0e80b4bd3d630d9094d1a7c53262bb0a85",
+        "inputs_configuration_sha256": "ea1736335c8cf326a06e05b5e9ad3bd35e4846b4dc67687496fa8fac364ff445"
+      },
+      "reference_export_sha256": "6fe223689cd6b747431f78e273b5edd93dbf275fdf7317c633871a2366c8a6f3",
+      "reference_inventory_sha256": "d009efe101a3cb3cc947bbac091f27f6cbd28e84216533553d88846cdc796b6a"
+    },
+    {
+      "backend": "synthmorph",
+      "cpu_threads": 1,
+      "same_node": true,
+      "same_thread_budget": true,
+      "same_physical_cores": false,
+      "original_process_seconds_including_separate_hashes": 20518.529179811478,
+      "original_calls": [
+        {
+          "repeat": 0,
+          "call_type": "first_call",
+          "complete_frames": 180,
+          "official_wall_seconds_including_IO": 19400.44276893977,
+          "payload_wall_seconds": 19399.265271668322,
+          "receipt_sha256": "2c7e00e4a274dfd5c2404e115257ff463b781f94dd7d1eedcfd7a6e38647deec",
+          "native_log_sha256": "5cc938638796166d1a54bc7a6c0cccb3901a4ef826b4ba58c0f7dcd2fd64a490",
+          "cached_node_log_messages": 28,
+          "native_launcher_exit": 0,
+          "native_payload_exit": 0,
+          "native_entrypoint_sha256": "9932a19098387cf763e117539f972264377818245f836b9bf33f7e2038b1939a",
+          "original_argv_sha256": "601f42e9fec27ce7c5de11e0773cf99b5fa30f78cfc6c5a4cdbca22302a20c04"
+        },
+        {
+          "repeat": 1,
+          "call_type": "fresh_official_process_with_workflow_cache",
+          "complete_frames": 180,
+          "official_wall_seconds_including_IO": 1107.6676066815853,
+          "payload_wall_seconds": 1106.2548759607598,
+          "receipt_sha256": "7420bdf56861118293a7b106b2883a5d89354639a174ad3f97b8a52d9b54a8cb",
+          "native_log_sha256": "ff271bea34c9c90fe445a39285fccd9ca382c42cf67f0e4414ed3c3890565b8d",
+          "cached_node_log_messages": 28,
+          "native_launcher_exit": 0,
+          "native_payload_exit": 0,
+          "native_entrypoint_sha256": "9932a19098387cf763e117539f972264377818245f836b9bf33f7e2038b1939a",
+          "original_argv_sha256": "601f42e9fec27ce7c5de11e0773cf99b5fa30f78cfc6c5a4cdbca22302a20c04"
+        }
+      ],
+      "original_stage_groups": {
+        "MNI_preproc": {
+          "leaf_executions": 11,
+          "leaf_duration_sum_seconds": 167.915713,
+          "observed_active_interval_union_seconds": 167.915713,
+          "elapsed_span_seconds": 654.469224
+        },
+        "T1w_preproc": {
+          "leaf_executions": 4,
+          "leaf_duration_sum_seconds": 22.002325,
+          "observed_active_interval_union_seconds": 22.002325,
+          "elapsed_span_seconds": 254.222277
+        },
+        "anatomical_brain_extraction": {
+          "leaf_executions": 53,
+          "leaf_duration_sum_seconds": 2206.2386030000002,
+          "observed_active_interval_union_seconds": 2206.2386030000002,
+          "elapsed_span_seconds": 2811.268007
+        },
+        "anatomical_standard_normalization": {
+          "leaf_executions": 13,
+          "leaf_duration_sum_seconds": 15924.751026,
+          "observed_active_interval_union_seconds": 15924.751026,
+          "elapsed_span_seconds": 18822.81583
+        },
+        "bbr": {
+          "leaf_executions": 13,
+          "leaf_duration_sum_seconds": 78.084601,
+          "observed_active_interval_union_seconds": 78.084601,
+          "elapsed_span_seconds": 20072.76794
+        },
+        "confounds": {
+          "leaf_executions": 44,
+          "leaf_duration_sum_seconds": 22.285788,
+          "observed_active_interval_union_seconds": 22.285788,
+          "elapsed_span_seconds": 1107.755055
+        },
+        "motion": {
+          "leaf_executions": 2,
+          "leaf_duration_sum_seconds": 22.515544000000002,
+          "observed_active_interval_union_seconds": 22.515544000000002,
+          "elapsed_span_seconds": 125.979552
+        },
+        "native_preproc": {
+          "leaf_executions": 3,
+          "leaf_duration_sum_seconds": 26.557678,
+          "observed_active_interval_union_seconds": 26.557678,
+          "elapsed_span_seconds": 19664.339519
+        },
+        "other_original_nodes": {
+          "leaf_executions": 110,
+          "leaf_duration_sum_seconds": 515.6026469999999,
+          "observed_active_interval_union_seconds": 515.6026469999999,
+          "elapsed_span_seconds": 20425.623204
+        },
+        "reference": {
+          "leaf_executions": 6,
+          "leaf_duration_sum_seconds": 14.693035,
+          "observed_active_interval_union_seconds": 14.693035,
+          "elapsed_span_seconds": 19454.038746
+        }
+      },
+      "original_node_runtime_scope": "Deduplicated completed leaf runtimes. MapNode parents excluded; stage duration sums and unions overlap and do not replace whole process time.",
+      "official_cache_scope": "Both original invocations share one work root. Second process may reuse first-call workflow nodes; saved node runtimes can retain first-call intervals. Original first/cache process clocks remain distinct.",
+      "GNU_time_scope": "Not present in the declared v4 command. No global GNU user/system/RSS inferred from Nipype nodes.",
+      "original_scope": "Complete original raw-BIDS volume preproc,including confounds and required anatomical template registrations; no PICA/AROMA/FNITclean/recon-all/surface.",
+      "FNIT_scope": "Complete cold raw-BIDS API also performs highpass,scaling,PICA/AROMA and saves clean outputs; whole time is a different mathematical/output scope.",
+      "FNIT_cold_complete_API_seconds": 1243.5521642379463,
+      "comparisons": {
+        "preproc_t1w": {
+          "candidate_sha256": "1268408075f58e28c48907552c681dd2b75291e5d403f1ef575cb93e4bb0b624",
+          "official_sha256": "ed722b3c546c665b9d030071d5cf255f263c557b72f96d292984a14858ea8f17",
+          "candidate_shape": [
+            50,
+            59,
+            47,
+            180
+          ],
+          "official_shape": [
+            50,
+            59,
+            44,
+            180
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "sec"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 6.599998474121094,
+          "status": "not_comparable_distinct_physical_lattices"
+        },
+        "preproc_mni": {
+          "candidate_sha256": "99c23349915247e93ce0c8a3b653101c96d7d6d915ac65d073c6d89e96565906",
+          "official_sha256": "94107b422a6bebd6dbf0dd093dd68b5c687cf7a1221f284ed39322c4af894694",
+          "candidate_shape": [
+            91,
+            109,
+            91,
+            180
+          ],
+          "official_shape": [
+            91,
+            109,
+            91,
+            180
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "sec"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 0.0,
+          "TR_seconds": [
+            2.0999999046325684,
+            2.0999999046325684
+          ],
+          "status": "compared_same_physical_lattice",
+          "values": 162473220,
+          "different_values": 162473187,
+          "all_finite": true,
+          "rmse": 39.852095938694724,
+          "max_abs": 926.5619506835938,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9895656577953186,
+          "temporal_correlation": {
+            "mean_varying_voxels": 0.742279678928116,
+            "varying_voxels": 902629,
+            "constant_series_excluded": 0,
+            "rmse_scope": "RMSE retains every voxel including constant/zero series."
+          }
+        },
+        "bold_reference": {
+          "candidate_sha256": "31860ccd8934f8c9b848103dcdf372c158065ebdd6b60da41dbd96d14330b195",
+          "official_sha256": "860e08e82b87cb610773c9367c2dbbe05a00b783e87d1049f1e049018228c9b3",
+          "candidate_shape": [
+            64,
+            64,
+            42
+          ],
+          "official_shape": [
+            64,
+            64,
+            42
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "L",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "L",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 0.0,
+          "status": "compared_same_physical_lattice",
+          "values": 172032,
+          "different_values": 171241,
+          "all_finite": true,
+          "rmse": 4.144168848210343,
+          "max_abs": 230.10491943359375,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9998845314856871
+        },
+        "mask_mni": {
+          "candidate_sha256": "27e99b9e0efd89f43aebe59e02e80293827b353b853885b0b37f45c7a1d9d2f2",
+          "official_sha256": "69e228fe0963d8e045edfcfd7316731a5c09c64ce8bb4249a6453b07a4e7472f",
+          "candidate_shape": [
+            91,
+            109,
+            91
+          ],
+          "official_shape": [
+            91,
+            109,
+            91
+          ],
+          "candidate_dtype": "uint8",
+          "official_dtype": "uint8",
+          "units": [
+            [
+              "unknown",
+              "unknown"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "status": "not_comparable_spatial_units_unproved"
+        },
+        "t1_brain": {
+          "candidate_sha256": "3f9541227f869cd7876289e0bc07b8b98a3fe50fb26b170a413c2eaa8e26f152",
+          "official_sha256": "b612adb9d5809a90893c1bfcf1092f77e3045d52dfd69c452e448f7fcfc09ae9",
+          "candidate_shape": [
+            160,
+            256,
+            256
+          ],
+          "official_shape": [
+            160,
+            256,
+            256
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 1.504174562683147e-11,
+          "status": "compared_same_physical_lattice",
+          "values": 10485760,
+          "different_values": 1404113,
+          "all_finite": true,
+          "rmse": 66.76165934621639,
+          "max_abs": 595.5167846679688,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9795459830059204
+        },
+        "native_preproc": {
+          "status": "official_working_native_complete_frames_finite_time_axis_not_proven",
+          "official_sha256": "382ec9c5908f39c0e837fe302ddb85e5309d49f4b374f08d24dfb9f0caf7b091",
+          "official_checks": {
+            "shape": [
+              64,
+              64,
+              42,
+              180
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "spatial_axis_codes": [
+              "L",
+              "A",
+              "S"
+            ],
+            "time_unit": "unknown",
+            "binary_header_sha256": "21c7f36c5bb95c93c946ed5e270489eade8cec692fa64e5de08c0cf2d5770884",
+            "stored_units": [
+              "mm",
+              "unknown"
+            ],
+            "stored_time_zoom": 2.0999999046325684,
+            "source_TR_seconds": 2.1,
+            "physical_time_axis_checked": false
+          },
+          "FNITclean_not_compared": true
+        },
+        "bbr_world_ras": {
+          "status": "coordinate_convention_or_native_affine_not_proven"
+        },
+        "motion_world_ras_pull": {
+          "status": "full_frame_transform_direction_or_coordinate_convention_not_proven"
+        },
+        "nonlinear_warp": {
+          "status": "not_compared_different_representations_and_independent_estimation",
+          "FNIT_pull_sha256": "346c23e7ca49e7c1963d95bf0093e49358451fc58884f79fd68beb787419add5",
+          "scope": "No ANTs/FNIRT/SynthMorph warp-equivalence claim; no transform evaluation or resampling added."
+        }
+      },
+      "source_image_execution_evidence": {
+        "actual_image_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+        "adapter_sha256": "df1c2bc03bb78509bb80b3c12e1ee3aaa1fab320e326c3b1b618230c46156823",
+        "reference_wrapper_source_sha256": "aac5d542ad4a089131ffb69dab029c0160fd62afb8e147f6d3d96080b559608d",
+        "wrapper_payload_code_sha256": "9743f296f2c6da581aa541441b3da8972336285b73eb4d5eb6efbbaa15245d51",
+        "execution_report_sha256": "8cb1e18099bd2bbbfcdb68c9aedcd9b3af517908fe1dc6e21e89a42ad804233d",
+        "manifest_sha256": "32955ca133a97badb5482a3f83591a0e80b4bd3d630d9094d1a7c53262bb0a85",
+        "inputs_configuration_sha256": "ea1736335c8cf326a06e05b5e9ad3bd35e4846b4dc67687496fa8fac364ff445"
+      },
+      "reference_export_sha256": "6fe223689cd6b747431f78e273b5edd93dbf275fdf7317c633871a2366c8a6f3",
+      "reference_inventory_sha256": "d009efe101a3cb3cc947bbac091f27f6cbd28e84216533553d88846cdc796b6a"
+    },
+    {
+      "backend": "fnirt",
+      "cpu_threads": 8,
+      "same_node": true,
+      "same_thread_budget": true,
+      "same_physical_cores": false,
+      "original_process_seconds_including_separate_hashes": 3423.4595606327057,
+      "original_calls": [
+        {
+          "repeat": 0,
+          "call_type": "first_call",
+          "complete_frames": 180,
+          "official_wall_seconds_including_IO": 2957.4759035091847,
+          "payload_wall_seconds": 2956.0688890041783,
+          "receipt_sha256": "edc389d39f04966a337049fc634502a09ffc6e3978fc92d638f17c7540dac7a9",
+          "native_log_sha256": "9e5f5e5f002ece0dedc9fee991b891dd62d9d0ca124ba3fbc1da410934dc0889",
+          "cached_node_log_messages": 28,
+          "native_launcher_exit": 0,
+          "native_payload_exit": 0,
+          "native_entrypoint_sha256": "9932a19098387cf763e117539f972264377818245f836b9bf33f7e2038b1939a",
+          "original_argv_sha256": "9b4fa9b9975483f34cfa0cf2b3d8fcd2438600639f2a92669379fdf83162cdf6"
+        },
+        {
+          "repeat": 1,
+          "call_type": "fresh_official_process_with_workflow_cache",
+          "complete_frames": 180,
+          "official_wall_seconds_including_IO": 453.58124697208405,
+          "payload_wall_seconds": 452.4852566085756,
+          "receipt_sha256": "f454d0ea0d65769c39f1c7a1c189b0bbc008c38b5310a3e4bb318ce61e62430a",
+          "native_log_sha256": "d271976012aa14f96dc7707475801324c98639ffd2c37bd12556e64eaa2b3016",
+          "cached_node_log_messages": 28,
+          "native_launcher_exit": 0,
+          "native_payload_exit": 0,
+          "native_entrypoint_sha256": "9932a19098387cf763e117539f972264377818245f836b9bf33f7e2038b1939a",
+          "original_argv_sha256": "9b4fa9b9975483f34cfa0cf2b3d8fcd2438600639f2a92669379fdf83162cdf6"
+        }
+      ],
+      "original_stage_groups": {
+        "MNI_preproc": {
+          "leaf_executions": 11,
+          "leaf_duration_sum_seconds": 78.03408900000001,
+          "observed_active_interval_union_seconds": 76.376439,
+          "elapsed_span_seconds": 298.331182
+        },
+        "T1w_preproc": {
+          "leaf_executions": 4,
+          "leaf_duration_sum_seconds": 8.261916,
+          "observed_active_interval_union_seconds": 8.261916,
+          "elapsed_span_seconds": 132.026646
+        },
+        "anatomical_brain_extraction": {
+          "leaf_executions": 53,
+          "leaf_duration_sum_seconds": 435.44730799999996,
+          "observed_active_interval_union_seconds": 420.751675,
+          "elapsed_span_seconds": 579.143137
+        },
+        "anatomical_standard_normalization": {
+          "leaf_executions": 13,
+          "leaf_duration_sum_seconds": 2022.059031,
+          "observed_active_interval_union_seconds": 2018.8368819999998,
+          "elapsed_span_seconds": 2666.108287
+        },
+        "bbr": {
+          "leaf_executions": 13,
+          "leaf_duration_sum_seconds": 78.13305,
+          "observed_active_interval_union_seconds": 78.13305,
+          "elapsed_span_seconds": 3222.961708
+        },
+        "confounds": {
+          "leaf_executions": 44,
+          "leaf_duration_sum_seconds": 24.277121,
+          "observed_active_interval_union_seconds": 20.587964,
+          "elapsed_span_seconds": 292.352783
+        },
+        "motion": {
+          "leaf_executions": 2,
+          "leaf_duration_sum_seconds": 23.375035,
+          "observed_active_interval_union_seconds": 23.375035,
+          "elapsed_span_seconds": 47.144035
+        },
+        "native_preproc": {
+          "leaf_executions": 3,
+          "leaf_duration_sum_seconds": 9.493742000000001,
+          "observed_active_interval_union_seconds": 9.493742000000001,
+          "elapsed_span_seconds": 3041.579302
+        },
+        "other_original_nodes": {
+          "leaf_executions": 110,
+          "leaf_duration_sum_seconds": 197.172842,
+          "observed_active_interval_union_seconds": 178.192066,
+          "elapsed_span_seconds": 3326.074634
+        },
+        "reference": {
+          "leaf_executions": 6,
+          "leaf_duration_sum_seconds": 14.76372,
+          "observed_active_interval_union_seconds": 14.739204,
+          "elapsed_span_seconds": 2956.115699
+        }
+      },
+      "original_node_runtime_scope": "Deduplicated completed leaf runtimes. MapNode parents excluded; stage duration sums and unions overlap and do not replace whole process time.",
+      "official_cache_scope": "Both original invocations share one work root. Second process may reuse first-call workflow nodes; saved node runtimes can retain first-call intervals. Original first/cache process clocks remain distinct.",
+      "GNU_time_scope": "Not present in the declared v4 command. No global GNU user/system/RSS inferred from Nipype nodes.",
+      "original_scope": "Complete original raw-BIDS volume preproc,including confounds and required anatomical template registrations; no PICA/AROMA/FNITclean/recon-all/surface.",
+      "FNIT_scope": "Complete cold raw-BIDS API also performs highpass,scaling,PICA/AROMA and saves clean outputs; whole time is a different mathematical/output scope.",
+      "FNIT_cold_complete_API_seconds": 581.172028853558,
+      "comparisons": {
+        "preproc_t1w": {
+          "candidate_sha256": "1268408075f58e28c48907552c681dd2b75291e5d403f1ef575cb93e4bb0b624",
+          "official_sha256": "e38cd895542ab3869320c37cec97669c8eac797d01046f5b7cf79cfdfe5c9587",
+          "candidate_shape": [
+            50,
+            59,
+            47,
+            180
+          ],
+          "official_shape": [
+            50,
+            59,
+            44,
+            180
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "sec"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 6.599998474121094,
+          "status": "not_comparable_distinct_physical_lattices"
+        },
+        "preproc_mni": {
+          "candidate_sha256": "0e103ee56b6d7f598b89d41ca161354836302927f2e82ce5be5d28b573c2400b",
+          "official_sha256": "b879a7457c9558b2dc24f7d43744328969d05e0f77dc93fdfaf20cfb1c695a3e",
+          "candidate_shape": [
+            91,
+            109,
+            91,
+            180
+          ],
+          "official_shape": [
+            91,
+            109,
+            91,
+            180
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "sec"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 0.0,
+          "TR_seconds": [
+            2.0999999046325684,
+            2.0999999046325684
+          ],
+          "status": "compared_same_physical_lattice",
+          "values": 162473220,
+          "different_values": 162473179,
+          "all_finite": true,
+          "rmse": 68.03484110094121,
+          "max_abs": 1380.0439147949219,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9691404402350965,
+          "temporal_correlation": {
+            "mean_varying_voxels": 0.500815962299996,
+            "varying_voxels": 902629,
+            "constant_series_excluded": 0,
+            "rmse_scope": "RMSE retains every voxel including constant/zero series."
+          }
+        },
+        "bold_reference": {
+          "candidate_sha256": "31860ccd8934f8c9b848103dcdf372c158065ebdd6b60da41dbd96d14330b195",
+          "official_sha256": "860e08e82b87cb610773c9367c2dbbe05a00b783e87d1049f1e049018228c9b3",
+          "candidate_shape": [
+            64,
+            64,
+            42
+          ],
+          "official_shape": [
+            64,
+            64,
+            42
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "L",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "L",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 0.0,
+          "status": "compared_same_physical_lattice",
+          "values": 172032,
+          "different_values": 171241,
+          "all_finite": true,
+          "rmse": 4.144168848210343,
+          "max_abs": 230.10491943359375,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9998845314856871
+        },
+        "mask_mni": {
+          "candidate_sha256": "36671d2562bbcea651ed99ff079747aa09f1e4290888deb9197c1e45e204a8b2",
+          "official_sha256": "95c223926e1e59da8ca022ac47226c3a75a95038c79ce97b98c78a6c82050e3b",
+          "candidate_shape": [
+            91,
+            109,
+            91
+          ],
+          "official_shape": [
+            91,
+            109,
+            91
+          ],
+          "candidate_dtype": "uint8",
+          "official_dtype": "uint8",
+          "units": [
+            [
+              "unknown",
+              "unknown"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "status": "not_comparable_spatial_units_unproved"
+        },
+        "t1_brain": {
+          "candidate_sha256": "3f9541227f869cd7876289e0bc07b8b98a3fe50fb26b170a413c2eaa8e26f152",
+          "official_sha256": "450bd044c2346ac52b988b113d3a8c3fbdfa6354670db52015f90ac057b59cc1",
+          "candidate_shape": [
+            160,
+            256,
+            256
+          ],
+          "official_shape": [
+            160,
+            256,
+            256
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 1.504174562683147e-11,
+          "status": "compared_same_physical_lattice",
+          "values": 10485760,
+          "different_values": 1404246,
+          "all_finite": true,
+          "rmse": 43.81232041758872,
+          "max_abs": 468.9782409667969,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9792577414422938
+        },
+        "native_preproc": {
+          "status": "official_working_native_complete_frames_finite_time_axis_not_proven",
+          "official_sha256": "382ec9c5908f39c0e837fe302ddb85e5309d49f4b374f08d24dfb9f0caf7b091",
+          "official_checks": {
+            "shape": [
+              64,
+              64,
+              42,
+              180
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "spatial_axis_codes": [
+              "L",
+              "A",
+              "S"
+            ],
+            "time_unit": "unknown",
+            "binary_header_sha256": "21c7f36c5bb95c93c946ed5e270489eade8cec692fa64e5de08c0cf2d5770884",
+            "stored_units": [
+              "mm",
+              "unknown"
+            ],
+            "stored_time_zoom": 2.0999999046325684,
+            "source_TR_seconds": 2.1,
+            "physical_time_axis_checked": false
+          },
+          "FNITclean_not_compared": true
+        },
+        "bbr_world_ras": {
+          "status": "coordinate_convention_or_native_affine_not_proven"
+        },
+        "motion_world_ras_pull": {
+          "status": "full_frame_transform_direction_or_coordinate_convention_not_proven"
+        },
+        "nonlinear_warp": {
+          "status": "not_compared_different_representations_and_independent_estimation",
+          "FNIT_pull_sha256": "4db8dc97af4f0d015dd65a4d0c1aa09434ec46a0bc8341157452ca4e45ff4360",
+          "scope": "No ANTs/FNIRT/SynthMorph warp-equivalence claim; no transform evaluation or resampling added."
+        }
+      },
+      "source_image_execution_evidence": {
+        "actual_image_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+        "adapter_sha256": "df1c2bc03bb78509bb80b3c12e1ee3aaa1fab320e326c3b1b618230c46156823",
+        "reference_wrapper_source_sha256": "aac5d542ad4a089131ffb69dab029c0160fd62afb8e147f6d3d96080b559608d",
+        "wrapper_payload_code_sha256": "9743f296f2c6da581aa541441b3da8972336285b73eb4d5eb6efbbaa15245d51",
+        "execution_report_sha256": "66a7fd2f1b667ad88f88cbc8267518446a3cb2132910a1385ed16e643bb2d989",
+        "manifest_sha256": "32955ca133a97badb5482a3f83591a0e80b4bd3d630d9094d1a7c53262bb0a85",
+        "inputs_configuration_sha256": "ea1736335c8cf326a06e05b5e9ad3bd35e4846b4dc67687496fa8fac364ff445"
+      },
+      "reference_export_sha256": "299d291d84fd90d6b9e31ea204d53a89295c59c041a03d3aaebd1a95731ac8a8",
+      "reference_inventory_sha256": "42a5c54b4117da5b51b1861adce0ef83e2ac95df44d4ab9016388c2530ba9b06"
+    },
+    {
+      "backend": "synthmorph",
+      "cpu_threads": 8,
+      "same_node": true,
+      "same_thread_budget": true,
+      "same_physical_cores": false,
+      "original_process_seconds_including_separate_hashes": 3423.4595606327057,
+      "original_calls": [
+        {
+          "repeat": 0,
+          "call_type": "first_call",
+          "complete_frames": 180,
+          "official_wall_seconds_including_IO": 2957.4759035091847,
+          "payload_wall_seconds": 2956.0688890041783,
+          "receipt_sha256": "edc389d39f04966a337049fc634502a09ffc6e3978fc92d638f17c7540dac7a9",
+          "native_log_sha256": "9e5f5e5f002ece0dedc9fee991b891dd62d9d0ca124ba3fbc1da410934dc0889",
+          "cached_node_log_messages": 28,
+          "native_launcher_exit": 0,
+          "native_payload_exit": 0,
+          "native_entrypoint_sha256": "9932a19098387cf763e117539f972264377818245f836b9bf33f7e2038b1939a",
+          "original_argv_sha256": "9b4fa9b9975483f34cfa0cf2b3d8fcd2438600639f2a92669379fdf83162cdf6"
+        },
+        {
+          "repeat": 1,
+          "call_type": "fresh_official_process_with_workflow_cache",
+          "complete_frames": 180,
+          "official_wall_seconds_including_IO": 453.58124697208405,
+          "payload_wall_seconds": 452.4852566085756,
+          "receipt_sha256": "f454d0ea0d65769c39f1c7a1c189b0bbc008c38b5310a3e4bb318ce61e62430a",
+          "native_log_sha256": "d271976012aa14f96dc7707475801324c98639ffd2c37bd12556e64eaa2b3016",
+          "cached_node_log_messages": 28,
+          "native_launcher_exit": 0,
+          "native_payload_exit": 0,
+          "native_entrypoint_sha256": "9932a19098387cf763e117539f972264377818245f836b9bf33f7e2038b1939a",
+          "original_argv_sha256": "9b4fa9b9975483f34cfa0cf2b3d8fcd2438600639f2a92669379fdf83162cdf6"
+        }
+      ],
+      "original_stage_groups": {
+        "MNI_preproc": {
+          "leaf_executions": 11,
+          "leaf_duration_sum_seconds": 78.03408900000001,
+          "observed_active_interval_union_seconds": 76.376439,
+          "elapsed_span_seconds": 298.331182
+        },
+        "T1w_preproc": {
+          "leaf_executions": 4,
+          "leaf_duration_sum_seconds": 8.261916,
+          "observed_active_interval_union_seconds": 8.261916,
+          "elapsed_span_seconds": 132.026646
+        },
+        "anatomical_brain_extraction": {
+          "leaf_executions": 53,
+          "leaf_duration_sum_seconds": 435.44730799999996,
+          "observed_active_interval_union_seconds": 420.751675,
+          "elapsed_span_seconds": 579.143137
+        },
+        "anatomical_standard_normalization": {
+          "leaf_executions": 13,
+          "leaf_duration_sum_seconds": 2022.059031,
+          "observed_active_interval_union_seconds": 2018.8368819999998,
+          "elapsed_span_seconds": 2666.108287
+        },
+        "bbr": {
+          "leaf_executions": 13,
+          "leaf_duration_sum_seconds": 78.13305,
+          "observed_active_interval_union_seconds": 78.13305,
+          "elapsed_span_seconds": 3222.961708
+        },
+        "confounds": {
+          "leaf_executions": 44,
+          "leaf_duration_sum_seconds": 24.277121,
+          "observed_active_interval_union_seconds": 20.587964,
+          "elapsed_span_seconds": 292.352783
+        },
+        "motion": {
+          "leaf_executions": 2,
+          "leaf_duration_sum_seconds": 23.375035,
+          "observed_active_interval_union_seconds": 23.375035,
+          "elapsed_span_seconds": 47.144035
+        },
+        "native_preproc": {
+          "leaf_executions": 3,
+          "leaf_duration_sum_seconds": 9.493742000000001,
+          "observed_active_interval_union_seconds": 9.493742000000001,
+          "elapsed_span_seconds": 3041.579302
+        },
+        "other_original_nodes": {
+          "leaf_executions": 110,
+          "leaf_duration_sum_seconds": 197.172842,
+          "observed_active_interval_union_seconds": 178.192066,
+          "elapsed_span_seconds": 3326.074634
+        },
+        "reference": {
+          "leaf_executions": 6,
+          "leaf_duration_sum_seconds": 14.76372,
+          "observed_active_interval_union_seconds": 14.739204,
+          "elapsed_span_seconds": 2956.115699
+        }
+      },
+      "original_node_runtime_scope": "Deduplicated completed leaf runtimes. MapNode parents excluded; stage duration sums and unions overlap and do not replace whole process time.",
+      "official_cache_scope": "Both original invocations share one work root. Second process may reuse first-call workflow nodes; saved node runtimes can retain first-call intervals. Original first/cache process clocks remain distinct.",
+      "GNU_time_scope": "Not present in the declared v4 command. No global GNU user/system/RSS inferred from Nipype nodes.",
+      "original_scope": "Complete original raw-BIDS volume preproc,including confounds and required anatomical template registrations; no PICA/AROMA/FNITclean/recon-all/surface.",
+      "FNIT_scope": "Complete cold raw-BIDS API also performs highpass,scaling,PICA/AROMA and saves clean outputs; whole time is a different mathematical/output scope.",
+      "FNIT_cold_complete_API_seconds": 617.189880663529,
+      "comparisons": {
+        "preproc_t1w": {
+          "candidate_sha256": "1268408075f58e28c48907552c681dd2b75291e5d403f1ef575cb93e4bb0b624",
+          "official_sha256": "e38cd895542ab3869320c37cec97669c8eac797d01046f5b7cf79cfdfe5c9587",
+          "candidate_shape": [
+            50,
+            59,
+            47,
+            180
+          ],
+          "official_shape": [
+            50,
+            59,
+            44,
+            180
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "sec"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 6.599998474121094,
+          "status": "not_comparable_distinct_physical_lattices"
+        },
+        "preproc_mni": {
+          "candidate_sha256": "07c1a551e9f41d9b29e0996da07ce104af1f789dd02e03a5efefef19aad9d4ee",
+          "official_sha256": "b879a7457c9558b2dc24f7d43744328969d05e0f77dc93fdfaf20cfb1c695a3e",
+          "candidate_shape": [
+            91,
+            109,
+            91,
+            180
+          ],
+          "official_shape": [
+            91,
+            109,
+            91,
+            180
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "sec"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 0.0,
+          "TR_seconds": [
+            2.0999999046325684,
+            2.0999999046325684
+          ],
+          "status": "compared_same_physical_lattice",
+          "values": 162473220,
+          "different_values": 162473177,
+          "all_finite": true,
+          "rmse": 40.927701330101065,
+          "max_abs": 971.6247863769531,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9889974959869314,
+          "temporal_correlation": {
+            "mean_varying_voxels": 0.732728761838627,
+            "varying_voxels": 902629,
+            "constant_series_excluded": 0,
+            "rmse_scope": "RMSE retains every voxel including constant/zero series."
+          }
+        },
+        "bold_reference": {
+          "candidate_sha256": "31860ccd8934f8c9b848103dcdf372c158065ebdd6b60da41dbd96d14330b195",
+          "official_sha256": "860e08e82b87cb610773c9367c2dbbe05a00b783e87d1049f1e049018228c9b3",
+          "candidate_shape": [
+            64,
+            64,
+            42
+          ],
+          "official_shape": [
+            64,
+            64,
+            42
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "L",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "L",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 0.0,
+          "status": "compared_same_physical_lattice",
+          "values": 172032,
+          "different_values": 171241,
+          "all_finite": true,
+          "rmse": 4.144168848210343,
+          "max_abs": 230.10491943359375,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9998845314856871
+        },
+        "mask_mni": {
+          "candidate_sha256": "27e99b9e0efd89f43aebe59e02e80293827b353b853885b0b37f45c7a1d9d2f2",
+          "official_sha256": "95c223926e1e59da8ca022ac47226c3a75a95038c79ce97b98c78a6c82050e3b",
+          "candidate_shape": [
+            91,
+            109,
+            91
+          ],
+          "official_shape": [
+            91,
+            109,
+            91
+          ],
+          "candidate_dtype": "uint8",
+          "official_dtype": "uint8",
+          "units": [
+            [
+              "unknown",
+              "unknown"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "status": "not_comparable_spatial_units_unproved"
+        },
+        "t1_brain": {
+          "candidate_sha256": "3f9541227f869cd7876289e0bc07b8b98a3fe50fb26b170a413c2eaa8e26f152",
+          "official_sha256": "450bd044c2346ac52b988b113d3a8c3fbdfa6354670db52015f90ac057b59cc1",
+          "candidate_shape": [
+            160,
+            256,
+            256
+          ],
+          "official_shape": [
+            160,
+            256,
+            256
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "units": [
+            [
+              "mm",
+              "sec"
+            ],
+            [
+              "mm",
+              "unknown"
+            ]
+          ],
+          "comparison_scope": "All values/frames; lossless spatial axis-index alignment only. No interpolation,registration,intensity fitting or FNITclean comparison.",
+          "axis_permutation_flip": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "candidate_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "official_axis_codes": [
+            "R",
+            "A",
+            "S"
+          ],
+          "affine_max_abs_mm": 1.504174562683147e-11,
+          "status": "compared_same_physical_lattice",
+          "values": 10485760,
+          "different_values": 1404246,
+          "all_finite": true,
+          "rmse": 43.81232041758872,
+          "max_abs": 468.9782409667969,
+          "decoded_values_exact": false,
+          "full_lattice_pearson": 0.9792577414422938
+        },
+        "native_preproc": {
+          "status": "official_working_native_complete_frames_finite_time_axis_not_proven",
+          "official_sha256": "382ec9c5908f39c0e837fe302ddb85e5309d49f4b374f08d24dfb9f0caf7b091",
+          "official_checks": {
+            "shape": [
+              64,
+              64,
+              42,
+              180
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "spatial_axis_codes": [
+              "L",
+              "A",
+              "S"
+            ],
+            "time_unit": "unknown",
+            "binary_header_sha256": "21c7f36c5bb95c93c946ed5e270489eade8cec692fa64e5de08c0cf2d5770884",
+            "stored_units": [
+              "mm",
+              "unknown"
+            ],
+            "stored_time_zoom": 2.0999999046325684,
+            "source_TR_seconds": 2.1,
+            "physical_time_axis_checked": false
+          },
+          "FNITclean_not_compared": true
+        },
+        "bbr_world_ras": {
+          "status": "coordinate_convention_or_native_affine_not_proven"
+        },
+        "motion_world_ras_pull": {
+          "status": "full_frame_transform_direction_or_coordinate_convention_not_proven"
+        },
+        "nonlinear_warp": {
+          "status": "not_compared_different_representations_and_independent_estimation",
+          "FNIT_pull_sha256": "061225a727c941e1e86e0cb9d738c5d65b519fbc8eba9f00d1f9afbc9619b5b0",
+          "scope": "No ANTs/FNIRT/SynthMorph warp-equivalence claim; no transform evaluation or resampling added."
+        }
+      },
+      "source_image_execution_evidence": {
+        "actual_image_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+        "adapter_sha256": "df1c2bc03bb78509bb80b3c12e1ee3aaa1fab320e326c3b1b618230c46156823",
+        "reference_wrapper_source_sha256": "aac5d542ad4a089131ffb69dab029c0160fd62afb8e147f6d3d96080b559608d",
+        "wrapper_payload_code_sha256": "9743f296f2c6da581aa541441b3da8972336285b73eb4d5eb6efbbaa15245d51",
+        "execution_report_sha256": "66a7fd2f1b667ad88f88cbc8267518446a3cb2132910a1385ed16e643bb2d989",
+        "manifest_sha256": "32955ca133a97badb5482a3f83591a0e80b4bd3d630d9094d1a7c53262bb0a85",
+        "inputs_configuration_sha256": "ea1736335c8cf326a06e05b5e9ad3bd35e4846b4dc67687496fa8fac364ff445"
+      },
+      "reference_export_sha256": "299d291d84fd90d6b9e31ea204d53a89295c59c041a03d3aaebd1a95731ac8a8",
+      "reference_inventory_sha256": "42a5c54b4117da5b51b1861adce0ef83e2ac95df44d4ab9016388c2530ba9b06"
+    }
+  ],
+  "collector_sha256": "d4425507571c15d0ba5cee2a569c03d0d18ab6d74c99f4250a53a733682dc2b1",
+  "cpu_binding_sha256": "7daa4061e580449f2a60c8709b5a7034f17dce5ca739d2522e502dcd8950a053",
+  "cpu_inventory_sha256": "0d6be76d189bfee3419a679a749b050ce6593c3f76a7be83674aebb5a99cf49a",
+  "manifest_sha256": "7564f25c917eaad565c4005a5b7a68dd8fe7119aad788a44da49ca7adc04c545",
+  "comparison_seconds_outside_all_API_clocks": 99.73077891487628,
+  "scope": "Independent end-to-end protocols. Full preproc compared only on the same proven physical lattice,using lossless spatial-axis permutation/flip; no clean-vs-preproc comparison and no added registration/interpolation.",
+  "privacy": "Only anonymous roles,hashes and aggregate metrics; no paths,subject IDs,license contents,raw images or new individual figures."
+}

@@ -159,6 +159,8 @@ melodic -i /data/preproc/bold.nii.gz -m /data/preproc/mask.nii.gz    -o /data/re
 
 ## 5. 最新精度和运行时间
 
+完整 490 帧、1/8 线程的原版 MELODIC CPU 精度与耗时见 [本轮 CPU 对照](../fmri/CPU_ICA_BENCHMARK_20261004.md)。
+
 最新独立内核对照见[固定真实输入报告](../../validation/fmri/ica_fixed_input.public.json)，绑定ica.py SHA `66b8cfeb…`。同一例490帧、TR0.735 s、99,372脑体素；两边使用相同原FEAT BOLD/mask，参考MELODIC2601.1。本轮没有按140c3739重跑影像或原命令。
 
 | 同输入精度 | 配对结果 |

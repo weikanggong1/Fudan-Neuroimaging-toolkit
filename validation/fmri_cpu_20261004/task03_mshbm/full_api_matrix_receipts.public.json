@@ -1,0 +1,1576 @@
+{
+  "baseline_volume_api_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume-api",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.02836007159203291,
+      "complete_volume_api": 116.61298326402903
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "function_chain_seconds": 116.64442924037576,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3822,
+      "4": 2387,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4422,
+      "11": 5272,
+      "12": 4368,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.11945995622085,
+        "cost": 549349726.9171238
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.4174358937255,
+        "cost": 549386783.2223572
+      }
+    ],
+    "maximum_rss_kib": 3805276,
+    "adapter_entry_seconds": 118.95721791125834,
+    "outputs_sha256": {
+      "rh_labels.npy": "cfbe2f785edd14fb23ec9f35082eae1e44e481d67c5ae7c3c38c946684922616",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "37896a809fb50823110b27ea26f96fa19896b6b3a96d7f35daf98fc43d7498fb",
+      "network_timeseries.tsv": "cb2ff1979cb646c33ec00fe0468cbc9e44c5dbc2fa8a9f4303ba645788c5bba0",
+      "labels_fslr32k_64984.npy": "26ae2b9795b53eb11545647e2d78e95ee8298bf4bf16dc4866fe3bd2737c9bf7",
+      "network_correlation.tsv": "5b9f879344d1e84670fe488bddbd92d36f101ba44a978e2cc20bd9ec1dba448e",
+      "labels_mni.nii.gz": "33c9a717bed97626c4c6f3a07959883a4029df73ec710dbd49ff97edac84d7ae"
+    }
+  },
+  "candidate_volume_api_cpu1": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume-api",
+    "device": "cpu",
+    "threads": 1,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.060846335254609585,
+      "complete_volume_api": 200.59010243974626
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 1,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "function_chain_seconds": 200.66740796063095,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3822,
+      "4": 2387,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4422,
+      "11": 5272,
+      "12": 4368,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.11945995622085,
+        "cost": 549349726.9171238
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.4174358937255,
+        "cost": 549386783.2223572
+      }
+    ],
+    "maximum_rss_kib": 3805020,
+    "adapter_entry_seconds": 206.51336998213083,
+    "outputs_sha256": {
+      "rh_labels.npy": "cfbe2f785edd14fb23ec9f35082eae1e44e481d67c5ae7c3c38c946684922616",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "37896a809fb50823110b27ea26f96fa19896b6b3a96d7f35daf98fc43d7498fb",
+      "network_timeseries.tsv": "cb2ff1979cb646c33ec00fe0468cbc9e44c5dbc2fa8a9f4303ba645788c5bba0",
+      "labels_fslr32k_64984.npy": "26ae2b9795b53eb11545647e2d78e95ee8298bf4bf16dc4866fe3bd2737c9bf7",
+      "network_correlation.tsv": "5b9f879344d1e84670fe488bddbd92d36f101ba44a978e2cc20bd9ec1dba448e",
+      "labels_mni.nii.gz": "33c9a717bed97626c4c6f3a07959883a4029df73ec710dbd49ff97edac84d7ae"
+    }
+  },
+  "candidate_weights_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "surface",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 179548160,
+        "sha256": "ebf2f4ac854e5e521819b5182233442a6b18271c81e62c4609f03cc0cbb4dcdd"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.029052164405584335,
+      "read_cortex": 0.6809919439256191,
+      "build_profiles": 3.4499870035797358,
+      "parcellate": 16.7076570475474,
+      "save_results": 0.5136923044919968
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 100.0,
+    "c": 25.0,
+    "input_shape": [
+      490,
+      59412
+    ],
+    "sessions": 2,
+    "function_chain_seconds": 21.451888688839972,
+    "profiles_sha256": [
+      "1481edb8fc3d53b4e98c11168251861c5382c40825dc80b3d1bddd6d4df9ffa4",
+      "5cc0d3917a23d9b88577ac088b987656aa47b50cd250c4b8477514ed562a950f"
+    ],
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5591,
+      "1": 3937,
+      "2": 3422,
+      "3": 3582,
+      "4": 2774,
+      "5": 3424,
+      "6": 2653,
+      "7": 4918,
+      "8": 4530,
+      "9": 4628,
+      "10": 4702,
+      "11": 4568,
+      "12": 4023,
+      "13": 2289,
+      "14": 2692,
+      "15": 3121,
+      "16": 2667,
+      "17": 1463
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 917.8403177018891,
+        "cost": 569026560.7691584
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 920.4566756570531,
+        "cost": 569102093.5259663
+      },
+      {
+        "outer": 3,
+        "em": 2,
+        "kappa": 921.0868918131225,
+        "cost": 569121421.4092331
+      }
+    ],
+    "maximum_rss_kib": 3012140,
+    "adapter_entry_seconds": 24.322104325518012,
+    "outputs_sha256": {
+      "rh_labels.npy": "f96fc1298f89a4097462833bc164c0922828a76c23befb284ce1579683788fab",
+      "lh_labels.npy": "bf519722777b983e9d788cf8b051b5c9a080ccce4d18be6e18f9a2d7c1e0a31d",
+      "labels_fslr32k.dlabel.nii": "ded0f55917de5a8740a7bfa68a73bf46571cf7fa916944599e77d1a0e2e32dfc",
+      "network_timeseries.tsv": "8396cce76b50fe26e194b0a62eb9377839da7e9a3bdab7e5698a660e2b515b5a",
+      "labels_fslr32k_64984.npy": "6bf0a33c33fb94d3f4e89c863924e565fa3b0c35aa7648810aa294ad0f2bb2d2",
+      "network_correlation.tsv": "cd665c4e878eddb02352b79904ec6c0ff0c66930d343dfa3d5cf1c413f6f2cba"
+    }
+  },
+  "baseline_volume_api_cpu1": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume-api",
+    "device": "cpu",
+    "threads": 1,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.029480203986167908,
+      "complete_volume_api": 259.8151706047356
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 1,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "function_chain_seconds": 259.8480317154899,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3822,
+      "4": 2387,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4422,
+      "11": 5272,
+      "12": 4368,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.11945995622085,
+        "cost": 549349726.9171238
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.4174358937255,
+        "cost": 549386783.2223572
+      }
+    ],
+    "maximum_rss_kib": 3805016,
+    "adapter_entry_seconds": 263.95120483543724,
+    "outputs_sha256": {
+      "rh_labels.npy": "cfbe2f785edd14fb23ec9f35082eae1e44e481d67c5ae7c3c38c946684922616",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "37896a809fb50823110b27ea26f96fa19896b6b3a96d7f35daf98fc43d7498fb",
+      "network_timeseries.tsv": "cb2ff1979cb646c33ec00fe0468cbc9e44c5dbc2fa8a9f4303ba645788c5bba0",
+      "labels_fslr32k_64984.npy": "26ae2b9795b53eb11545647e2d78e95ee8298bf4bf16dc4866fe3bd2737c9bf7",
+      "network_correlation.tsv": "5b9f879344d1e84670fe488bddbd92d36f101ba44a978e2cc20bd9ec1dba448e",
+      "labels_mni.nii.gz": "33c9a717bed97626c4c6f3a07959883a4029df73ec710dbd49ff97edac84d7ae"
+    }
+  },
+  "baseline_volume_staged_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.02913574129343033,
+      "read_project_volume": 9.111556155607104,
+      "build_profiles": 3.748993861488998,
+      "parcellate": 67.94512958265841,
+      "save_results": 0.4397302307188511,
+      "labels_to_volume": 28.15213384758681
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      490,
+      59412
+    ],
+    "sessions": 2,
+    "function_chain_seconds": 109.42894056253135,
+    "profiles_sha256": [
+      "3f362fdf73c8beeb00a4f145c73427f3e3d4d62e9b15747a86a2a64023ae65dc",
+      "a3c38b7060af6ff469cb166247c735c205249f860de5afef111c97c452c1cad5"
+    ],
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3822,
+      "4": 2387,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4422,
+      "11": 5272,
+      "12": 4368,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.11945995622085,
+        "cost": 549349726.9171238
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.4174358937255,
+        "cost": 549386783.2223572
+      }
+    ],
+    "maximum_rss_kib": 3805256,
+    "adapter_entry_seconds": 113.46844358928502,
+    "outputs_sha256": {
+      "rh_labels.npy": "cfbe2f785edd14fb23ec9f35082eae1e44e481d67c5ae7c3c38c946684922616",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "37896a809fb50823110b27ea26f96fa19896b6b3a96d7f35daf98fc43d7498fb",
+      "network_timeseries.tsv": "cb2ff1979cb646c33ec00fe0468cbc9e44c5dbc2fa8a9f4303ba645788c5bba0",
+      "labels_fslr32k_64984.npy": "26ae2b9795b53eb11545647e2d78e95ee8298bf4bf16dc4866fe3bd2737c9bf7",
+      "projected_series.npy": "eeed59000d30e4739c96e4f5107fb39bc8706da9d55b39ab54961e27202653f3",
+      "network_correlation.tsv": "5b9f879344d1e84670fe488bddbd92d36f101ba44a978e2cc20bd9ec1dba448e",
+      "labels_mni.nii.gz": "33c9a717bed97626c4c6f3a07959883a4029df73ec710dbd49ff97edac84d7ae"
+    }
+  },
+  "candidate_split_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "surface",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 58223888,
+        "sha256": "55973cd269edde7958634f0d4db67349a8b883ffe29873ab8ff1af2beccf3a8f"
+      },
+      {
+        "size": 58223888,
+        "sha256": "3b2dc801ff6f6259401bed82104c44e96c80eb206e35f2bb321ee889fe7ae58b"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.04490519408136606,
+      "read_cortex": 0.001434391364455223,
+      "build_profiles": 7.264397041872144,
+      "parcellate": 24.73279861919582,
+      "save_results": 1.5731132347136736
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      490,
+      59412
+    ],
+    "sessions": 2,
+    "function_chain_seconds": 33.81273543834686,
+    "profiles_sha256": [
+      "1481edb8fc3d53b4e98c11168251861c5382c40825dc80b3d1bddd6d4df9ffa4",
+      "5cc0d3917a23d9b88577ac088b987656aa47b50cd250c4b8477514ed562a950f"
+    ],
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5591,
+      "1": 4164,
+      "2": 3544,
+      "3": 3843,
+      "4": 2742,
+      "5": 3451,
+      "6": 2365,
+      "7": 5448,
+      "8": 4416,
+      "9": 4364,
+      "10": 4633,
+      "11": 4040,
+      "12": 4223,
+      "13": 2273,
+      "14": 2842,
+      "15": 3047,
+      "16": 2811,
+      "17": 1187
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 849.3348524188851,
+        "cost": 562059339.399487
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 849.5887651499593,
+        "cost": 562087885.6723946
+      }
+    ],
+    "maximum_rss_kib": 3000412,
+    "adapter_entry_seconds": 40.996872077696025,
+    "outputs_sha256": {
+      "rh_labels.npy": "11e518374b443b92e73a8054224528be88022eb28e4db6f4a080b719e1cd4a6e",
+      "lh_labels.npy": "7d495c2719968d6d4dfdf15d041a5c71d8a2ab3dec748301fe2df90aa3160c25",
+      "labels_fslr32k.dlabel.nii": "f3c448e1c4d4086f33ed9428f0046275e5c00a165eda30998fa64854f5144c0e",
+      "network_timeseries.tsv": "8c1b2b9a5ce23ff8b2e1d05500ce7d12f734358bc9df58885fdae8a025f1d3dc",
+      "labels_fslr32k_64984.npy": "78b75d7bda4aaf46f69f06aa210677485a0a7e5bb5c503db3653e31d11d868cf",
+      "network_correlation.tsv": "bb6594675aa51d876aec3d53430aca9cb12ff5d3b7a2ff346a364a77e7c16364"
+    }
+  },
+  "candidate_volume_staged_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.030200942419469357,
+      "read_project_volume": 9.587881114333868,
+      "build_profiles": 3.897858686745167,
+      "parcellate": 10.732147241942585,
+      "save_results": 0.44467492029070854,
+      "labels_to_volume": 28.36245681811124
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      490,
+      59412
+    ],
+    "sessions": 2,
+    "function_chain_seconds": 53.05749276466668,
+    "profiles_sha256": [
+      "3f362fdf73c8beeb00a4f145c73427f3e3d4d62e9b15747a86a2a64023ae65dc",
+      "a3c38b7060af6ff469cb166247c735c205249f860de5afef111c97c452c1cad5"
+    ],
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3822,
+      "4": 2387,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4422,
+      "11": 5272,
+      "12": 4368,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.1194599561011,
+        "cost": 549349726.9171237
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.41743589377194,
+        "cost": 549386783.2223572
+      }
+    ],
+    "maximum_rss_kib": 3805280,
+    "adapter_entry_seconds": 56.78112349845469,
+    "outputs_sha256": {
+      "rh_labels.npy": "cfbe2f785edd14fb23ec9f35082eae1e44e481d67c5ae7c3c38c946684922616",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "37896a809fb50823110b27ea26f96fa19896b6b3a96d7f35daf98fc43d7498fb",
+      "network_timeseries.tsv": "cb2ff1979cb646c33ec00fe0468cbc9e44c5dbc2fa8a9f4303ba645788c5bba0",
+      "labels_fslr32k_64984.npy": "26ae2b9795b53eb11545647e2d78e95ee8298bf4bf16dc4866fe3bd2737c9bf7",
+      "projected_series.npy": "eeed59000d30e4739c96e4f5107fb39bc8706da9d55b39ab54961e27202653f3",
+      "network_correlation.tsv": "5b9f879344d1e84670fe488bddbd92d36f101ba44a978e2cc20bd9ec1dba448e",
+      "labels_mni.nii.gz": "33c9a717bed97626c4c6f3a07959883a4029df73ec710dbd49ff97edac84d7ae"
+    }
+  },
+  "candidate_volume_cli_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume-cli",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.02802677545696497,
+      "complete_cli": 77.29025741945952
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "sessions": 2,
+    "complete_frames_from_binding": 490,
+    "observed_input_frames": [
+      490
+    ],
+    "function_chain_seconds": 77.32251830399036,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3822,
+      "4": 2387,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4422,
+      "11": 5272,
+      "12": 4368,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.1194599561011,
+        "cost": 549349726.9171237
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.41743589377194,
+        "cost": 549386783.2223572
+      }
+    ],
+    "maximum_rss_kib": 3811948,
+    "adapter_entry_seconds": 79.68095907382667,
+    "outputs_sha256": {
+      "provenance.json": "7e0474f4b2a3819c2c5c4157668c2f2a3d21433b52408c9a30f32f678d02c5e4",
+      "rh_labels.npy": "cfbe2f785edd14fb23ec9f35082eae1e44e481d67c5ae7c3c38c946684922616",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "37896a809fb50823110b27ea26f96fa19896b6b3a96d7f35daf98fc43d7498fb",
+      "network_timeseries.tsv": "cb2ff1979cb646c33ec00fe0468cbc9e44c5dbc2fa8a9f4303ba645788c5bba0",
+      "labels_fslr32k_64984.npy": "26ae2b9795b53eb11545647e2d78e95ee8298bf4bf16dc4866fe3bd2737c9bf7",
+      "network_correlation.tsv": "5b9f879344d1e84670fe488bddbd92d36f101ba44a978e2cc20bd9ec1dba448e",
+      "labels_mni.nii.gz": "33c9a717bed97626c4c6f3a07959883a4029df73ec710dbd49ff97edac84d7ae"
+    }
+  },
+  "baseline_weights_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "surface",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 179548160,
+        "sha256": "ebf2f4ac854e5e521819b5182233442a6b18271c81e62c4609f03cc0cbb4dcdd"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.08356700465083122,
+      "read_cortex": 2.529790014028549,
+      "build_profiles": 4.991093754768372,
+      "parcellate": 81.84659846965224,
+      "save_results": 0.4199502728879452
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 100.0,
+    "c": 25.0,
+    "input_shape": [
+      490,
+      59412
+    ],
+    "sessions": 2,
+    "function_chain_seconds": 90.00032703857869,
+    "profiles_sha256": [
+      "1481edb8fc3d53b4e98c11168251861c5382c40825dc80b3d1bddd6d4df9ffa4",
+      "5cc0d3917a23d9b88577ac088b987656aa47b50cd250c4b8477514ed562a950f"
+    ],
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5591,
+      "1": 3937,
+      "2": 3422,
+      "3": 3582,
+      "4": 2774,
+      "5": 3424,
+      "6": 2653,
+      "7": 4918,
+      "8": 4530,
+      "9": 4628,
+      "10": 4702,
+      "11": 4568,
+      "12": 4023,
+      "13": 2289,
+      "14": 2692,
+      "15": 3121,
+      "16": 2667,
+      "17": 1463
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 917.8403177017792,
+        "cost": 569026560.7691585
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 920.4566756571852,
+        "cost": 569102093.5259663
+      },
+      {
+        "outer": 3,
+        "em": 2,
+        "kappa": 921.0868918130618,
+        "cost": 569121421.4092332
+      }
+    ],
+    "maximum_rss_kib": 2748536,
+    "adapter_entry_seconds": 96.14717014227062,
+    "outputs_sha256": {
+      "rh_labels.npy": "f96fc1298f89a4097462833bc164c0922828a76c23befb284ce1579683788fab",
+      "lh_labels.npy": "bf519722777b983e9d788cf8b051b5c9a080ccce4d18be6e18f9a2d7c1e0a31d",
+      "labels_fslr32k.dlabel.nii": "ded0f55917de5a8740a7bfa68a73bf46571cf7fa916944599e77d1a0e2e32dfc",
+      "network_timeseries.tsv": "8396cce76b50fe26e194b0a62eb9377839da7e9a3bdab7e5698a660e2b515b5a",
+      "labels_fslr32k_64984.npy": "6bf0a33c33fb94d3f4e89c863924e565fa3b0c35aa7648810aa294ad0f2bb2d2",
+      "network_correlation.tsv": "cd665c4e878eddb02352b79904ec6c0ff0c66930d343dfa3d5cf1c413f6f2cba"
+    }
+  },
+  "candidate_volume_api_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume-api",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.03245878592133522,
+      "complete_volume_api": 51.411254913546145
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "function_chain_seconds": 51.44687630049884,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3822,
+      "4": 2387,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4422,
+      "11": 5272,
+      "12": 4368,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.1194599561011,
+        "cost": 549349726.9171237
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.41743589377194,
+        "cost": 549386783.2223572
+      }
+    ],
+    "maximum_rss_kib": 3805308,
+    "adapter_entry_seconds": 54.14612903725356,
+    "outputs_sha256": {
+      "rh_labels.npy": "cfbe2f785edd14fb23ec9f35082eae1e44e481d67c5ae7c3c38c946684922616",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "37896a809fb50823110b27ea26f96fa19896b6b3a96d7f35daf98fc43d7498fb",
+      "network_timeseries.tsv": "cb2ff1979cb646c33ec00fe0468cbc9e44c5dbc2fa8a9f4303ba645788c5bba0",
+      "labels_fslr32k_64984.npy": "26ae2b9795b53eb11545647e2d78e95ee8298bf4bf16dc4866fe3bd2737c9bf7",
+      "network_correlation.tsv": "5b9f879344d1e84670fe488bddbd92d36f101ba44a978e2cc20bd9ec1dba448e",
+      "labels_mni.nii.gz": "33c9a717bed97626c4c6f3a07959883a4029df73ec710dbd49ff97edac84d7ae"
+    }
+  },
+  "baseline_split_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "surface",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 58223888,
+        "sha256": "55973cd269edde7958634f0d4db67349a8b883ffe29873ab8ff1af2beccf3a8f"
+      },
+      {
+        "size": 58223888,
+        "sha256": "3b2dc801ff6f6259401bed82104c44e96c80eb206e35f2bb321ee889fe7ae58b"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.02926679141819477,
+      "read_cortex": 0.0014148177579045296,
+      "build_profiles": 2.9734112564474344,
+      "parcellate": 58.310198684222996,
+      "save_results": 0.7327793929725885
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      490,
+      59412
+    ],
+    "sessions": 2,
+    "function_chain_seconds": 62.155755849555135,
+    "profiles_sha256": [
+      "1481edb8fc3d53b4e98c11168251861c5382c40825dc80b3d1bddd6d4df9ffa4",
+      "5cc0d3917a23d9b88577ac088b987656aa47b50cd250c4b8477514ed562a950f"
+    ],
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5591,
+      "1": 4164,
+      "2": 3544,
+      "3": 3843,
+      "4": 2742,
+      "5": 3451,
+      "6": 2365,
+      "7": 5448,
+      "8": 4416,
+      "9": 4364,
+      "10": 4633,
+      "11": 4040,
+      "12": 4223,
+      "13": 2273,
+      "14": 2842,
+      "15": 3047,
+      "16": 2811,
+      "17": 1187
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 849.3348524188851,
+        "cost": 562059339.399487
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 849.5887651498133,
+        "cost": 562087885.6723946
+      }
+    ],
+    "maximum_rss_kib": 2737208,
+    "adapter_entry_seconds": 65.39363506808877,
+    "outputs_sha256": {
+      "rh_labels.npy": "11e518374b443b92e73a8054224528be88022eb28e4db6f4a080b719e1cd4a6e",
+      "lh_labels.npy": "7d495c2719968d6d4dfdf15d041a5c71d8a2ab3dec748301fe2df90aa3160c25",
+      "labels_fslr32k.dlabel.nii": "f3c448e1c4d4086f33ed9428f0046275e5c00a165eda30998fa64854f5144c0e",
+      "network_timeseries.tsv": "8c1b2b9a5ce23ff8b2e1d05500ce7d12f734358bc9df58885fdae8a025f1d3dc",
+      "labels_fslr32k_64984.npy": "78b75d7bda4aaf46f69f06aa210677485a0a7e5bb5c503db3653e31d11d868cf",
+      "network_correlation.tsv": "bb6594675aa51d876aec3d53430aca9cb12ff5d3b7a2ff346a364a77e7c16364"
+    }
+  },
+  "baseline_cli_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "surface-cli",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 127368768,
+        "sha256": "ecb188ff86f443c5b05f93c3cd16262d1ff4f7caadced4fd8116bd7685c15162"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.028170992620289326,
+      "complete_cli": 62.90176330227405
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "sessions": 2,
+    "complete_frames_from_binding": 490,
+    "observed_input_frames": [
+      490
+    ],
+    "function_chain_seconds": 62.933261236175895,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5591,
+      "1": 4164,
+      "2": 3544,
+      "3": 3843,
+      "4": 2742,
+      "5": 3451,
+      "6": 2365,
+      "7": 5448,
+      "8": 4416,
+      "9": 4364,
+      "10": 4633,
+      "11": 4040,
+      "12": 4223,
+      "13": 2273,
+      "14": 2842,
+      "15": 3047,
+      "16": 2811,
+      "17": 1187
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 849.3348524188851,
+        "cost": 562059339.399487
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 849.5887651498133,
+        "cost": 562087885.6723946
+      }
+    ],
+    "maximum_rss_kib": 2630116,
+    "adapter_entry_seconds": 65.20463960710913,
+    "outputs_sha256": {
+      "provenance.json": "57d8dcb187485ee0163373f5a6e277a56b66615fc7b7e75ba72cc3c78f158ccf",
+      "rh_labels.npy": "11e518374b443b92e73a8054224528be88022eb28e4db6f4a080b719e1cd4a6e",
+      "lh_labels.npy": "7d495c2719968d6d4dfdf15d041a5c71d8a2ab3dec748301fe2df90aa3160c25",
+      "labels_fslr32k.dlabel.nii": "f3c448e1c4d4086f33ed9428f0046275e5c00a165eda30998fa64854f5144c0e",
+      "network_timeseries.tsv": "8c1b2b9a5ce23ff8b2e1d05500ce7d12f734358bc9df58885fdae8a025f1d3dc",
+      "labels_fslr32k_64984.npy": "78b75d7bda4aaf46f69f06aa210677485a0a7e5bb5c503db3653e31d11d868cf",
+      "network_correlation.tsv": "bb6594675aa51d876aec3d53430aca9cb12ff5d3b7a2ff346a364a77e7c16364"
+    }
+  },
+  "candidate_cli_cpu8": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "surface-cli",
+    "device": "cpu",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 127368768,
+        "sha256": "ecb188ff86f443c5b05f93c3cd16262d1ff4f7caadced4fd8116bd7685c15162"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.02841140329837799,
+      "complete_cli": 13.102845484390855
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "nodecw8",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "sessions": 2,
+    "complete_frames_from_binding": 490,
+    "observed_input_frames": [
+      490
+    ],
+    "function_chain_seconds": 13.134770561940968,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5591,
+      "1": 4164,
+      "2": 3544,
+      "3": 3843,
+      "4": 2742,
+      "5": 3451,
+      "6": 2365,
+      "7": 5448,
+      "8": 4416,
+      "9": 4364,
+      "10": 4633,
+      "11": 4040,
+      "12": 4223,
+      "13": 2273,
+      "14": 2842,
+      "15": 3047,
+      "16": 2811,
+      "17": 1187
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 849.3348524188851,
+        "cost": 562059339.399487
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 849.5887651499593,
+        "cost": 562087885.6723946
+      }
+    ],
+    "maximum_rss_kib": 2893544,
+    "adapter_entry_seconds": 15.560023419559002,
+    "outputs_sha256": {
+      "provenance.json": "46b5c6cd538268fc3eba5ca8f4703cf26b977900559d915da37b67e2a841345e",
+      "rh_labels.npy": "11e518374b443b92e73a8054224528be88022eb28e4db6f4a080b719e1cd4a6e",
+      "lh_labels.npy": "7d495c2719968d6d4dfdf15d041a5c71d8a2ab3dec748301fe2df90aa3160c25",
+      "labels_fslr32k.dlabel.nii": "f3c448e1c4d4086f33ed9428f0046275e5c00a165eda30998fa64854f5144c0e",
+      "network_timeseries.tsv": "8c1b2b9a5ce23ff8b2e1d05500ce7d12f734358bc9df58885fdae8a025f1d3dc",
+      "labels_fslr32k_64984.npy": "78b75d7bda4aaf46f69f06aa210677485a0a7e5bb5c503db3653e31d11d868cf",
+      "network_correlation.tsv": "bb6594675aa51d876aec3d53430aca9cb12ff5d3b7a2ff346a364a77e7c16364"
+    }
+  }
+}

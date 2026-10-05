@@ -42,6 +42,7 @@ def run_aroma_pipeline(
     regress_motion=False,
     motion_model=24,
     bandpass=None,
+    confound_projection="orthogonal",
     global_signal=False,
     mni_template=None,
     mni_pull_ras=None,
@@ -58,6 +59,8 @@ def run_aroma_pipeline(
     ``regression_csf_mask`` supplies a native EPI tissue mask when MNI-space
     classification and CSF regression are both requested.
     """
+    if confound_projection not in ("orthogonal", "afni"):
+        raise ValueError("confound_projection must be orthogonal or afni")
     transforms = (mni_template, mni_pull_ras, epi_to_t1_world)
     if any(value is not None for value in transforms) and not all(
         value is not None for value in transforms
@@ -127,6 +130,7 @@ def run_aroma_pipeline(
             csf_mask=(regression_csf_mask or csf_mask) if regress_csf else None,
             brain_mask=brain_mask, motion=motion_parameters if regress_motion else None,
             motion_model=motion_model, bandpass=bandpass, tr=seconds,
+            projection=confound_projection,
             global_signal=global_signal, device=device,
         )
     return AromaResult(ica, feature_path, noise_path, denoised, clean_path)

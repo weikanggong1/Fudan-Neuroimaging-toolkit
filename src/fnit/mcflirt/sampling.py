@@ -92,6 +92,20 @@ def sample_motion_frame(values, input_image, reference_image, fsl_matrix, *, dev
     target_sizes = tuple(float(v) for v in reference_image.header.get_zooms()[:3])
     pull = np.diag([*(1 / np.asarray(source_sizes)), 1]) @ np.linalg.inv(fsl_matrix)
     pull = pull @ np.diag([*target_sizes, 1])
+    if (data.device.type == "cpu" and data.dtype == torch.float32
+            and not data.requires_grad
+            and (interpolation == "spline" or
+                 (interpolation == "linear" and min(data.shape) >= 2))
+            and np.isfinite(pull).all()
+            and np.max(np.abs(pull[:3])) < (2.0**60) / (4 * sum(reference_image.shape[:3]))
+            and bool(torch.isfinite(data).all())
+            and float(data.abs().max()) < np.finfo(np.float32).max / 256):
+        from ._sampling_cpu import sample
+        sampled = torch.from_numpy(sample(data.numpy(), pull[:3], reference_image.shape[:3],
+                                          float(_edge_background(data)), interpolation))
+        if np.linalg.det(reference_image.affine[:3, :3]) > 0:
+            sampled = sampled.flip(0)
+        return sampled
     coordinates = _coordinates(pull[:3], reference_image.shape[:3], data.device)
     lower = torch.floor(coordinates)
     valid = torch.ones(reference_image.shape[:3], dtype=torch.bool, device=data.device)

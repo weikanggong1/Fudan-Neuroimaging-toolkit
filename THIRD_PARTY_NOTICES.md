@@ -12,6 +12,14 @@ The complete source license and copyright notice are preserved in
 FNIT does not ship or invoke AFNI binaries. The container's AFNI_25.2.09
 `3dTshift` is used only for numerical reference validation.
 
+`src/fnit/fmri/confounds.py` provides an independent NumPy/PyTorch formulation
+of the optional single-run `3dTproject` passband-edge and normalized SVD
+regularization conventions described in
+[AFNI's original source](https://github.com/afni/afni/blob/master/src/3dTproject.c),
+by Robert W. Cox (NIH). It uses FNIT's own image I/O and matrix operations;
+AFNI_24.2.02 is used only in isolated official reference validation. The
+existing AFNI license and copyright files linked above cover the source notice.
+
 `assets/connectome/` includes the Schaefer 2018 fsaverage annotations for 200,
 500 and 1000 parcels from Thomas Yeo Lab / CBIG under the MIT license in
 [`licenses/CBIG-MIT.txt`](licenses/CBIG-MIT.txt), and the Tian S1/S4 3T

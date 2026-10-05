@@ -1,4 +1,4 @@
-"""MCFLIRT 2111.0 的三阶段刚体估计；运行时只使用 NumPy 和 PyTorch。"""
+"""MCFLIRT 2111.0 的三阶段刚体估计；使用 NumPy、PyTorch 和 CPU Numba。"""
 
 from dataclasses import dataclass
 import os
@@ -121,6 +121,18 @@ class FSLMotionNormCorr:
         self.cost_evaluations = 0
         self.reducer = _normcorr_reduce
         self.sampler = None
+        self.cpu_rows = None
+        if (self.device.type == "cpu" and min(moving.shape) >= 2
+                and reference.dtype == moving.dtype == torch.float32
+                and not reference.requires_grad and not moving.requires_grad
+                and bool(torch.isfinite(self.reference).all())
+                and bool(torch.isfinite(self.moving).all())
+                # Keep overflow/nonfinite inputs on the original tensor path.
+                # This bound also protects the squared intensity moments.
+                and max(float(self.reference.abs().max()), float(self.moving.abs().max()))
+                    < np.sqrt(np.finfo(np.float32).max) / (4 * self.reference.numel())):
+            from ._cost_cpu import motion_cost_rows
+            self.cpu_rows = motion_cost_rows
         if self.device.type == "cuda":
             if workspace is not None:
                 workspace.set_moving(self.moving)
@@ -138,6 +150,34 @@ class FSLMotionNormCorr:
                     self.sampler = FusedMotionSampler(self.reference, self.moving, moving_sizes)
 
     def __call__(self, matrix):
+        cpu_coefficients = None
+        if (self.cpu_rows is not None and not self.reference.requires_grad
+                and not self.moving.requires_grad
+                and self.reference.dtype == self.moving.dtype == torch.float32):
+            candidate_coefficients = self.pull_coefficients(matrix)
+            if (np.isfinite(candidate_coefficients).all()
+                    and np.max(np.abs(candidate_coefficients))
+                        < (2.0**60) / (4 * sum(self.reference.shape))):
+                cpu_coefficients = candidate_coefficients
+        if cpu_coefficients is not None:
+            row_counts, sums = self.cpu_rows(
+                self.reference.numpy(), self.moving.numpy(),
+                cpu_coefficients, self.upper.numpy(), self.smooth.numpy())
+            sums = torch.from_numpy(sums)
+            row_counts = torch.from_numpy(row_counts).reshape(-1)
+            cumulative_count = torch.cumsum(row_counts, 0)
+            cumulative_count_a = torch.cumsum(cumulative_count, 0)
+            count = cumulative_count_a[self.reference.shape[1] - 1::self.reference.shape[1]].sum()
+            _, sx, sx2, sy, sy2, sxy = sums.unbind()
+            denominator = count - 1.0
+            count_square = count * count
+            covariance = sxy / denominator - (sx * sy) / count_square
+            vx = sx2 / denominator - (sx * sx) / count_square
+            vy = sy2 / denominator - (sy * sy) / count_square
+            corr = covariance / torch.sqrt(vx) / torch.sqrt(vy)
+            valid = (count > 2) & (vx > 0) & (vy > 0)
+            self.cost_evaluations += 1
+            return float(torch.where(valid, 1.0 - corr.abs(), torch.ones_like(corr)))
         if self.sampler is not None:
             coefficients = self.pull_coefficients(matrix)
             reference, values, weights = self.sampler.prepare(coefficients)

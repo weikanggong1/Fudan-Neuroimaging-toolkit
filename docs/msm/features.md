@@ -6,7 +6,7 @@
 
 ## 2. Python 调用、输入和输出
 
-## 方差归一化图
+### 方差归一化图
 
 `compute_msmall_variance_normalization(clean_dtseries, ica_timecourses, noise_components, output_file, *, device="cuda:0")`
 
@@ -18,7 +18,7 @@
 
 算法为 HCP `ComputeVN.m`：暂时从已清理数据中回归被分类为信号的 ICA mixing 列，以剩余非结构噪声的逐灰质点 sample SD（ddof=1，最小0.001）作为 VN。返回 VN Path；输出 CIFTI 为 1×灰质点，保留原 BrainModel 顺序。例如 `VN.dscalar.nii` 旁保存 `VN.dscalar.json` 方法与耗时记录。无需 ICA 空间图。使用已有 FNIT clean BOLD 和原始 UKB ICA 分类时，可验证这一算子，不能把输入清理协议写成 FIX 等价。
 
-## 个体 RSN / topographic 回归
+### 个体 RSN / topographic 回归
 
 `run_msmall_regression(clean_dtseries, reference_maps, output_dir, *, variance_normalization, vertex_area=None, component_indices=None, low_dimensional_maps=None, left_midthickness=None, right_midthickness=None, method="WRN", device="cuda:0", wb_command="wb_command")`
 
@@ -47,7 +47,7 @@ WRN 包含官方15维低阶图各两轮双回归、逐灰质点跨组件相关�
 
 WRN 要求每个输入灰质点的 BOLD 随时间变化。恒定时序的相关未定义，函数会报告数量并停止。应明确选择有效覆盖，并对 BOLD、VN、所有参考地图和皮层面积使用同一个 BrainModel 轴；恢复到完整表面时，缺失顶点的 ROI 与特征权重设为 0。函数不自动删除这些点或将 NaN 填成 0。
 
-## 单侧配准输入
+### 单侧配准输入
 
 `prepare_msmall_inputs(source_sphere, reference_sphere, output_dir, *, source_rsn, reference_rsn, source_rsn_weights, reference_rsn_weights, subject_myelin=None, reference_myelin=None, subject_myelin_bias=None, source_roi, reference_roi, modalities="CA", initial_sphere=None, source_topography=None, reference_topography=None, source_topography_weights=None, reference_topography_weights=None)`
 
@@ -159,11 +159,42 @@ ComputeVN('/absolute/path/work/clean.dtseries.nii', 'NONE', ...
 
 ## 5. 真实数据精度与耗时
 
+### 本轮原 MATLAB CPU 对照
+
+[CPU 官方报告](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)使用合法 MATLAB R2018b 和固定 HCP v4.7 原函数，完整读取同一 490×90,568 输入，候选 VN/DR/DR+VN/WRN CPU1/8 八项全部完成且输入不变。全部 maps 有限、形状与保存 float32 正确，所有 40 列 weights 逐位相同；VN 的 BrainModelAxis 相同，但 ScalarAxis 名称不同。原 nodes/spectra 六项完整输出已逐值核对，旧／新 FNIT 的 12 项完整 nodes 输出保存 SHA 相同；实际误差见下方全矩阵结果。
+
+| 完整功能 | CPU 预算 | 原版 fresh / s | FNIT fresh / s | FNIT 完整 API / s | maps 最大误差 / RMSE |
+| --- | ---: | ---: | ---: | ---: | --- |
+| VN | 1 / 8 | 107.621 / 131.837 | 63.373 / 55.529 | 39.671 / 31.964 | 2.44e-4 / 1.84e-5 |
+| DR | 1 / 8 | 112.120 / 95.747 | 86.136 / 74.894 | 60.982 / 52.172 | 5.05e-5 / 8.05e-7；2.10e-5 / 6.81e-7 |
+| DR+VN | 1 / 8 | 381.639 / 184.906 | 103.930 / 99.782 | 78.871 / 74.660 | 6.91e-6 / 5.09e-7；8.26e-6 / 4.88e-7 |
+| WRN d7–d21 | 1 / 8 | 1943.838 / 1373.877 | 723.399 / 533.785 | 699.610 / 509.053 | 3.28e-6 / 2.35e-7；2.28e-6 / 2.00e-7 |
+
+每项是 nodecw10 的一次完整观测，源码、输入 SHA、实际核绑定和 CPU 使用见[最新回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。fresh process 包括 MATLAB 或 Python 的启动、读写和退出；原函数与 Workbench 分项另列在报告中。此前原 VN/DR 函数仍快于 FNIT 完整 API，本轮尚不能据 fresh 优势宣布计算已达到速度目标。
+
+CPU1 WRN 原函数 1781.215 s，FNIT 冻结基线 API 954.113 s；保存 maps 最大差 `3.28e-6`、RMSE `2.35e-7`，40 列 weights 逐位相同，全部 CIFTI 轴相同。该节点负载约 2,500，这些是单次观测。原 nodes 的 spectra/绘图输出支路另行完整运行；不将没有写出的原节点时序标为通过。
+
+候选 CPU WRN 复用 d7–d21 各轮共用的完整 BOLD demean，中间仍为 float64、输出 float32，pinv 容差与回归顺序不变。同一完整真实 CPU1 输入的缓存前后 maps、weights 和 nodes 三份保存文件 SHA 完全相同。增加约 710 MB CPU 内存；CUDA 或任一回归输入需要梯度时保留原运算序列。
+
+### 完整 nodes 与振幅谱
+
+[最新全矩阵报告](../../validation/fmri_cpu_20261004/task04_msm_surface/full_nodes_spectra_v3.public.json)核对原 DR、DR+VN、WRN 的 CPU1/8 全部 490×40 nodes 与 245×40 spectra，固定组件身份。旧／新 FNIT 每项 nodes 文件 SHA 相同。
+
+| 功能 | CPU | nodes 最大差 / RMSE | 谱最大差 / RMSE |
+| --- | ---: | --- | --- |
+| DR | 1 / 8 | 5.288e-3 / 7.998e-4；5.087e-3 / 7.981e-4 | 4.949e-1 / 1.455e-2；4.949e-1 / 1.450e-2 |
+| DR+VN | 1 / 8 | 5.424e-5 / 1.056e-5；5.169e-5 / 1.055e-5 | 4.830e-3 / 1.932e-4；4.830e-3 / 1.928e-4 |
+| WRN | 1 / 8 | 9.570e-5 / 1.611e-5；5.746e-5 / 1.431e-5 | 6.511e-3 / 3.504e-4；4.998e-3 / 3.125e-4 |
+
+原 `MSMregression` 文本只有 5 位有效数字，FNIT nodes 为 17 位。报告用原保存 nodes 重建谱，单列量化与 FFT 舍入控制；上表保留原样实际误差，全部组件平均相关大于 0.9999999998，不称为逐位一致。谱按 float64 时间去均值、振幅 FFT、前 245 点计算，没有 Welch、符号调整或组件重排。它用于验证已保存节点，生产 API 仍只提供文档列出的 nodes/maps/weights；原谱与绘图支路的额外时间不计入上方 maps/weights 主计时。
+
+### 历史独立源码公式专项
+
 安装器已补齐固定 HCP 的 d7–d21 低维模板。无个体 myelin 时可明确运行 `C`；本次真实数据 C 验证不等于完整默认 CA_CAT、髓鞘重建或 UKB 专用 DeDrift。
 
 本次用一例 490 帧真实已清理 CIFTI 验证 `C` 特征。原文件有 91,282 个灰质点，其中 714 个时序恒定；明确选取其余 90,568 点，并同步调整 BOLD、VN 和参考图的 BrainModel 轴。有效皮层点为 59,380 个；拆回完整 32k 表面时，缺失点的 ROI 和权重为 0。d40 参考保留 32 个组件，附加 medial-wall 列后，左右两侧进入配准的特征均为 33 列。没有个体髓鞘图，也没有重新进行 FIX 分类或清理。[匿名特征报告](../../validation/msm/msmall.features.current.public.json)保存覆盖、精度、耗时与源码哈希。
 
-对照为独立 NumPy 实现的固定 HCP 源码公式：相同真实数据、VN 和参考图，均用 float64 回归，地图保存为 float32。现有节点的 MATLAB 因许可未启动，安装的 Runtime 与该版本编译程序不匹配，因此下表不称为 MATLAB 二进制对照。
+下方历史专项的对照为独立 NumPy 实现的固定 HCP 源码公式：相同真实数据、VN 和参考图，均用 float64 回归，地图保存为 float32。当时节点的 MATLAB 因许可未启动，安装的 Runtime 与该版本编译程序不匹配，因此下表不称为 MATLAB 二进制对照。
 
 | 输出 / 计算 | FNIT CPU 8 线程 | 独立源码公式 CPU 8 线程 | MAE / 最大绝对差 |
 |---|---:|---:|---:|
@@ -178,6 +209,7 @@ VN 和 WRN 地图为保存后的 float32 逐值一致；节点时序在 float64 
 
 ## 6. 更新记录
 
+- 2026-10-04 起：完整 490 帧真实原 MATLAB CPU1/8 对照；CPU WRN 缓存固定 BOLD demean，GPU 与梯度分支保留原计算路径。maps/weights、完整 nodes 与谱的聚合结果见本轮报告；CA/CAT 仍缺同被试髓鞘输入。
 - 2026-10：新增三种独立特征准备接口；固定参考列顺序和 BrainModel 轴，补齐全部 15 份 WRN 低维模板。CA/CAT 缺少个体髓鞘图时明确报错。
 - VN 保留 HCP ICA mixing 标准差下限 `1e-5`，残差 VN 下限 `0.001`；WRN 保留原 MATLAB 前三列零值参与 Fisher 平均的行为。
 - 真实数据定位到恒定时序会产生未定义的 Fisher 权重，新增进入回归前的覆盖检查与具体报错；本次显式有效覆盖为 90,568 点。完整准备为 47.498 s，VN 与 WRN 保存地图对独立源码公式逐值一致。

@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "candidate": "CPU static-axis expansion v6; not promoted",
+  "scope": "One complete public 180-frame CPU1 MCFLIRT diagnosis with every actual cost evaluated in both versions; alternating execution order. API times include dual evaluation and byte/SHA checking and are not normal benchmark observations.",
+  "input": {
+    "public_reference_case": "180-frame case",
+    "shape": [
+      64,
+      64,
+      42,
+      180
+    ]
+  },
+  "budget": {
+    "CPU_threads": 1,
+    "OS_threads_before_and_after": 1,
+    "same_single_core": true,
+    "shared_CPU_lease_held": true,
+    "GPU_API_calls": 0
+  },
+  "calls": {
+    "preparation_scientific_API_calls": 0,
+    "complete_diagnostic_API_calls": 1,
+    "actual_cost_calls": 17456,
+    "paired_kernel_invocations": 34912,
+    "normal_API_calls": 0,
+    "kernel_output_values_checked": 21455784
+  },
+  "precision": {
+    "all_cost_outputs_raw_byte_equal": true,
+    "historic_cost_output_stream_sha256": "288a1e3f55360e3e6d5221e86075cf2e4485cbb857f7d6f1cd037d13aa95a099",
+    "whole_grid": {
+      "all_values_bit_equal": true,
+      "different_values": 0,
+      "finite_complete_arrays": true,
+      "max_absolute": 0.0,
+      "mean_absolute": 0.0,
+      "normalized_rmse_by_reference_rms": 0.0,
+      "rmse": 0.0,
+      "values": 30965760
+    },
+    "header_binary_equal": true,
+    "normal_image_file_bytes_equal": true,
+    "stored_dtype": "int16",
+    "matrix_values": {
+      "all_values_bit_equal": true,
+      "different_values": 0,
+      "finite_complete_arrays": true,
+      "max_absolute": 0.0,
+      "mean_absolute": 0.0,
+      "normalized_rmse_by_reference_rms": 0.0,
+      "rmse": 0.0,
+      "values": 2880
+    },
+    "parameter_values": {
+      "all_values_bit_equal": true,
+      "different_values": 0,
+      "finite_complete_arrays": true,
+      "max_absolute": 0.0,
+      "mean_absolute": 0.0,
+      "normalized_rmse_by_reference_rms": 0.0,
+      "rmse": 0.0,
+      "values": 1080
+    },
+    "normal_file_completeness": {
+      "images": 1,
+      "matrices": 180,
+      "parameter_files": 1,
+      "standard_text_bytes_equal": true
+    }
+  },
+  "sources": {
+    "changed_file": "src/fnit/mcflirt/_cost_cpu.py",
+    "v5_sha256": "7c29f67f62ffb168f0b38d85e158db37966d75c81e516c2167fa987645221314",
+    "candidate_v6_sha256": "b9051bf32e31ea9467d33d1110fe49897e96dddc30d910fd295709235b999de2",
+    "frozen_files_per_version": 1240,
+    "other_source_files_unchanged": true
+  },
+  "timing": {
+    "paired_kernel_totals": {
+      "v5": {
+        "calls": 17456,
+        "execution_process_seconds": 20.967675980999985,
+        "execution_wall_seconds": 21.357767990790308,
+        "compile_or_cache_load_process_seconds": 1.2333501430000005,
+        "compile_or_cache_load_wall_seconds": 1.272525760345161
+      },
+      "v6": {
+        "calls": 17456,
+        "execution_process_seconds": 20.939347529000276,
+        "execution_wall_seconds": 21.340998423285782,
+        "compile_or_cache_load_process_seconds": 0.6700737999999999,
+        "compile_or_cache_load_wall_seconds": 0.6767072733491659
+      }
+    },
+    "execution_order_strata": {
+      "first": {
+        "calls_per_version": 8728,
+        "v5_execution_process_seconds": 10.53706841200002,
+        "v6_execution_process_seconds": 10.524403045000103,
+        "v6_over_v5_process_ratio": 0.9987980179586294,
+        "CPU_reduction_percent": 0.1201982041370564
+      },
+      "second": {
+        "calls_per_version": 8728,
+        "v5_execution_process_seconds": 10.430607568999967,
+        "v6_execution_process_seconds": 10.414944484000173,
+        "v6_over_v5_process_ratio": 0.9984983535334658,
+        "CPU_reduction_percent": 0.15016464665341678
+      }
+    },
+    "v6_over_v5_process_ratio_excluding_compile_load": 0.9986489465010152,
+    "kernel_CPU_reduction_percent": 0.1351053498984789,
+    "top_level_dispatcher_compile_or_cache_load": {
+      "v5": {
+        "dispatcher_entries": 29,
+        "top_level_entries": 1,
+        "top_level_process_seconds": 1.2333501430000005,
+        "top_level_wall_seconds": 1.272525760345161,
+        "top_level_cache_hits": 0,
+        "top_level_cache_misses": 1
+      },
+      "v6": {
+        "dispatcher_entries": 7,
+        "top_level_entries": 1,
+        "top_level_process_seconds": 0.6700737999999999,
+        "top_level_wall_seconds": 0.6767072733491659,
+        "top_level_cache_hits": 0,
+        "top_level_cache_misses": 1
+      },
+      "API": {
+        "dispatcher_entries": 18,
+        "top_level_entries": 2,
+        "top_level_process_seconds": 1.2494239720000024,
+        "top_level_wall_seconds": 1.2752174250781536,
+        "top_level_cache_hits": 0,
+        "top_level_cache_misses": 2
+      }
+    },
+    "compiler_scope": "Dispatcher-entry timings include cache loading and compilation; cache hit/miss counts describe the paths. Only depth-zero timings are summed, so nested events are not counted twice.",
+    "diagnostic_API": {
+      "process_seconds": 62.872587735,
+      "runnable_wait_seconds": 0.967523637,
+      "scheduled_runtime_seconds": 62.872587735,
+      "system_seconds": 0.5834429999999999,
+      "timeslices": 1946,
+      "user_seconds": 62.289089,
+      "wall_seconds": 64.85769507475197,
+      "adapter_API_wall_seconds": 64.85795820597559,
+      "adapter_import_seconds": 1.2961253989487886,
+      "adapter_application_seconds": 66.15409549232572,
+      "runnable_wait_fraction_of_wall": 0.014917638313925233,
+      "not_a_normal_benchmark": true
+    }
+  },
+  "runtime_versions": {
+    "llvmlite": "0.44.0",
+    "numba": "0.61.2",
+    "torch": "2.5.1"
+  },
+  "decision": {
+    "precision_accepted": true,
+    "required_kernel_reduction_percent": 7.0,
+    "kernel_speed_gate_accepted": false,
+    "continue_to_normal": false,
+    "normal_launch_controller_and_workers_absent_in_completed_probe": true,
+    "candidate_promoted": false,
+    "retained_production": "v5",
+    "normal_wall_or_official_speed_claim": false,
+    "tuple_heap_allocation_claim": false
+  },
+  "provenance": {
+    "private_aggregate_raw_bytes": 369939,
+    "private_aggregate_raw_sha256": "19cd67209f0c385db4ed9e82e0dc6517dd74eae9dadbc331ba91abe26baff108",
+    "original_result_bytes": 39804,
+    "original_result_sha256": "5c1352146ff62f2d099dfbe9144ba25579046be97ed04db22d4d2c65e109f7e8",
+    "completed_read_only_probe_sha256": "65fc6ab0cb5920683364b0d2ca07b8ef1c4d9306cde42b18968648ad3e55cf05",
+    "config_sha256": "54cc08ee3801019622a0e6a8c1bd60cc6aed9440da743336a91dd07bbdeb5e41",
+    "binding_sha256": "aff39440fb41c69b50a2555385ad650e27b404b2229a3ce14d00336d1cd33c60"
+  },
+  "privacy": {
+    "no_subject_IDs": true,
+    "no_private_paths_or_hostnames": true,
+    "no_PIDs": true,
+    "no_cache_locations_or_filenames": true,
+    "no_individual_cost_or_image_arrays": true,
+    "aggregate_metrics_only": true
+  }
+}

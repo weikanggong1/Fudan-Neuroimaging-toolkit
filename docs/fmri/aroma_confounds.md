@@ -106,6 +106,7 @@ cleaned_path = clean_confounds(
     global_signal=False,                                                  # 是否回归全脑均值
     device="cuda:0",                                                       # 计算设备
     chunk_size=4096,                                                       # 每批投影的空间体素数
+    projection="orthogonal",                                            # 默认严格投影；afni 使用原版正则化及带通边界
 )
 ```
 
@@ -113,9 +114,11 @@ cleaned_path = clean_confounds(
 
 `clean_confounds` 先构造截距、一次/二次趋势及选择的信号列。截距保留，其余列去掉常数列后中心化，并按 L2 范数归一化，避免组织信号的大基线或运动参数单位影响数值秩。启用 `bandpass` 时，BOLD 和设计矩阵使用同一个频段；带通后删除只剩 FFT 舍入误差的列，重新归一化有效列，再以 float64 求投影。带通与混杂回归仍是同一个联合投影。`bandpass=None` 时只做混杂和趋势回归，FEAT 阶段的高通另行完成。
 
+以上为默认 `projection="orthogonal"` 的计算。`projection="afni"` 使用原版 `3dTproject` 的单 run 频率边界、float32 设计列，以及按最大奇异值平方乘 `1e-6` 的 SVD 正则化；主投影仍为 PyTorch float64，输出为 float32。它与无正则化投影的数值定义不同，不能把两者的差值当成纯浮点误差。较大的 stopband 设计预先生成残差算子，较小的设计保留两次矩阵乘法，按 `chunk_size` 分块处理。两种选项都不调用 AFNI。
+
 ## 命令行调用
 
-本页函数的独立入口为上面的 Python 调用。完整 BIDS→preproc/clean 使用 [`fnit-fmri volume`](README.md#命令行调用)，用 `--aroma-mode`、`--ica-n-components`、`--regress-wm`、`--regress-csf`、`--regress-motion`、`--motion-model`、`--bandpass` 与 `--global-signal` 选择相应参数；函数本身没有独立 AROMA CLI。
+本页函数的独立入口为上面的 Python 调用。完整 BIDS→preproc/clean 使用 [`fnit-fmri volume`](README.md#命令行调用)，用 `--aroma-mode`、`--ica-n-components`、`--regress-wm`、`--regress-csf`、`--regress-motion`、`--motion-model`、`--bandpass`、`--confound-projection orthogonal/afni` 与 `--global-signal` 选择相应参数；函数本身没有独立 AROMA CLI。
 
 ## 原软件调用
 
@@ -130,9 +133,11 @@ fsl_regfilt -i filtered_func_data.nii.gz -d melodic_mix \
   -f 2,5,9 -o filtered_func_data_aroma_ref.nii.gz
 ```
 
-`fsl_regfilt -f` 用从 1 开始的 IC 编号。可选 WM/CSF/motion 与带通的参考脚本为用户指定的 [MATLAB 实现](https://github.com/weikanggong/Resting-state-fMRI-preprocessing/blob/master/g_regressWmCsf_and_filter.m)；本包联合投影还可与 AFNI `3dTproject -ort confounds.1D -polort 2 -passband 0.01 0.1` 作独立方法比较，但当前服务器没有 AFNI 实测输出。
+`fsl_regfilt -f` 用从 1 开始的 IC 编号。可选 WM/CSF/motion 与带通的参考脚本为用户指定的 [MATLAB 实现](https://github.com/weikanggong/Resting-state-fMRI-preprocessing/blob/master/g_regressWmCsf_and_filter.m)。本轮已在服务器执行原版 AFNI_24.2.02 `3dTproject -ort confounds.1D -polort 2 -passband 0.01 0.1`，按相同原始设计比较 `projection="afni"`；默认严格投影的独立 NumPy 参考单独报告。
 
 ## 最新真实数据精度、耗时与脑图
+
+完整 490 帧、1／8 线程的最新原版 CPU 对照见 [PICA、ICA-AROMA 与混杂回归 CPU 报告](CPU_ICA_BENCHMARK_20261004.md)。下表保留此前固定输入及裁剪控制的历史范围。
 
 | 真实数据同输入项目 | FNIT | 原软件或独立参考 | 差异 |
 |---|---:|---:|---|

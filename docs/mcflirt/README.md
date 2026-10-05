@@ -14,6 +14,8 @@
 
 计算使用FP32，变换组合和运动参数解析用FP64，CUDA默认TF32。2026-10-03修复pipeline无allocator缓存时CUDA graph空闲流调度失败；计算、接口和正常缓存结果保留，真实回归见第5节。
 
+CPU 使用独立的有序 Numba 采样与 cost 内核，保持 float32 坐标、插值和行/平面归约顺序；CPU 样条保留 double 累加和每轴前滤波舍入。CUDA 沿用成熟采样、归约及 graph 路径。完整 180/490 帧的默认输出逐值回归见 [CPU 专页](CPU_BENCHMARK_20261004.md)。
+
 ## 2. Python 调用
 
 ```python
@@ -147,6 +149,11 @@ mcflirt -in sub-01_task-rest_bold.nii.gz \
 省略 `-reffile` 使用中间帧；省略 `-spline_final` 使用三线性最终采样。`-mats`、`-plots` 和 RMS 开关只控制文件输出，不改变估计流程。
 
 ## 5. 最新精度和运行时间
+
+### 2026-10-04 完整 CPU 官方 benchmark
+
+[CPU 专页](CPU_BENCHMARK_20261004.md)记录完整 180/490 帧、默认三阶段、最终样条及正常文件。最新 CPU v5 的 17,456 次真实成本原始字节、六项默认/10 组完整输出、标准文件和 31 项功能组合门槛已通过；最终额外一次完整 CUDA 180 帧的影像、header、矩阵、参数和成本计数与已接受 v4 精确相同，CPU 成本模块未导入。CUDA/BBR 源码保持原实现，v4 的 36 次完整 CUDA ABBA 和历史 CPU/FSL 时钟保留在专页。180 帧 CPU8 热 API 为 36.542 s，此前官方完整进程为 35.233 s，速度目标仍有差距；共享 CPU 调度诊断与正常原始时钟分开记录，不宣布稳定加速比。
+
 
 最新2026-10-03公开CON03回归为ds001226 v5.0.1的一例完整64×64×42×180 BOLD，H100 GPU0、PyTorch2.5.1、8CPU线程、TF32，FP32计算/FP64矩阵；各配置独立进程各一次。源码与输入SHA见[正式组件报告](../../validation/mcflirt/nocache_public_con03_20261003.public.json)。
 

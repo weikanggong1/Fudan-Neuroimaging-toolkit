@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "assessment": "complete_real_resampling_helper_differential_gate",
+  "baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+  "scope": "Every frame and complete spatial grid for both linear and spline helpers, 180/490 frames, CPU1/8. The full final MCFLIRT API and native performance gates remain pending. Diagnostic helper times exclude conversion/hashes and are not end-to-end speed claims.",
+  "records": [
+    {
+      "status": "complete",
+      "diagnostic_only": true,
+      "case": "mc180",
+      "input_shape": [
+        64,
+        64,
+        42,
+        180
+      ],
+      "threads": 1,
+      "cpu_affinity": [
+        8
+      ],
+      "actual_torch_threads": 1,
+      "actual_numba_threads": 1,
+      "input_sha256": "b8a3dea34c3d138d84fb0f9d47ea505c44461e4098c869fde2e3145ac9930599",
+      "matrix_sha256": "dcc17a9e6c8eb3b703e09e3be41717f779717cae858a87791e6325c4f93ba0c0",
+      "prototype_sha256": "8d63cda1509cae50d4b9d9439c98804afd63556c9b112ba9cb109791aa9b8190",
+      "full_real_frames_required": true,
+      "default_algorithm_matrices_reused": true,
+      "upstream_voxel_transform_uses_float64": true,
+      "records": [
+        {
+          "interpolation": "spline",
+          "frames": 180,
+          "whole_grid_values": 30965760,
+          "all_float32_values_bit_equal": true,
+          "different_values": 0,
+          "maximum_absolute": 0.0,
+          "different_frames": [],
+          "coefficient_checks": [
+            {
+              "frame": 0,
+              "all_values_bit_equal": true,
+              "different": 0
+            },
+            {
+              "frame": 90,
+              "all_values_bit_equal": true,
+              "different": 0
+            },
+            {
+              "frame": 179,
+              "all_values_bit_equal": true,
+              "different": 0
+            }
+          ],
+          "old_helper_seconds": 35.622136825695634,
+          "new_prototype_seconds": 4.582753519527614,
+          "timing_scope": "Diagnostic paired full-frame helper calls, source/target conversion and hashes excluded; not complete MCFLIRT API/native speed claim"
+        },
+        {
+          "interpolation": "linear",
+          "frames": 180,
+          "whole_grid_values": 30965760,
+          "all_float32_values_bit_equal": true,
+          "different_values": 0,
+          "maximum_absolute": 0.0,
+          "different_frames": [],
+          "coefficient_checks": [],
+          "old_helper_seconds": 3.6351656317710876,
+          "new_prototype_seconds": 0.5747811775654554,
+          "timing_scope": "Diagnostic paired full-frame helper calls, source/target conversion and hashes excluded; not complete MCFLIRT API/native speed claim"
+        }
+      ],
+      "actual_numba_threads_after": 1,
+      "numba_threading_layer": "omp"
+    },
+    {
+      "status": "complete",
+      "diagnostic_only": true,
+      "case": "mc180",
+      "input_shape": [
+        64,
+        64,
+        42,
+        180
+      ],
+      "threads": 8,
+      "cpu_affinity": [
+        8,
+        12,
+        16,
+        20,
+        24,
+        28,
+        32,
+        40
+      ],
+      "actual_torch_threads": 8,
+      "actual_numba_threads": 8,
+      "input_sha256": "b8a3dea34c3d138d84fb0f9d47ea505c44461e4098c869fde2e3145ac9930599",
+      "matrix_sha256": "dcc17a9e6c8eb3b703e09e3be41717f779717cae858a87791e6325c4f93ba0c0",
+      "prototype_sha256": "8d63cda1509cae50d4b9d9439c98804afd63556c9b112ba9cb109791aa9b8190",
+      "full_real_frames_required": true,
+      "default_algorithm_matrices_reused": true,
+      "upstream_voxel_transform_uses_float64": true,
+      "records": [
+        {
+          "interpolation": "spline",
+          "frames": 180,
+          "whole_grid_values": 30965760,
+          "all_float32_values_bit_equal": true,
+          "different_values": 0,
+          "maximum_absolute": 0.0,
+          "different_frames": [],
+          "coefficient_checks": [
+            {
+              "frame": 0,
+              "all_values_bit_equal": true,
+              "different": 0
+            },
+            {
+              "frame": 90,
+              "all_values_bit_equal": true,
+              "different": 0
+            },
+            {
+              "frame": 179,
+              "all_values_bit_equal": true,
+              "different": 0
+            }
+          ],
+          "old_helper_seconds": 84.96483781002462,
+          "new_prototype_seconds": 4.909477245993912,
+          "timing_scope": "Diagnostic paired full-frame helper calls, source/target conversion and hashes excluded; not complete MCFLIRT API/native speed claim"
+        },
+        {
+          "interpolation": "linear",
+          "frames": 180,
+          "whole_grid_values": 30965760,
+          "all_float32_values_bit_equal": true,
+          "different_values": 0,
+          "maximum_absolute": 0.0,
+          "different_frames": [],
+          "coefficient_checks": [],
+          "old_helper_seconds": 1.1063275896012783,
+          "new_prototype_seconds": 0.5482846815139055,
+          "timing_scope": "Diagnostic paired full-frame helper calls, source/target conversion and hashes excluded; not complete MCFLIRT API/native speed claim"
+        }
+      ],
+      "actual_numba_threads_after": 8,
+      "numba_threading_layer": "omp"
+    },
+    {
+      "status": "complete",
+      "diagnostic_only": true,
+      "case": "mc490",
+      "input_shape": [
+        88,
+        88,
+        64,
+        490
+      ],
+      "threads": 1,
+      "cpu_affinity": [
+        8
+      ],
+      "actual_torch_threads": 1,
+      "actual_numba_threads": 1,
+      "input_sha256": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+      "matrix_sha256": "4e6f5c12ee3fc2ccc6770662da0eea390560e3746a66d83060754435ae24e0a9",
+      "prototype_sha256": "8d63cda1509cae50d4b9d9439c98804afd63556c9b112ba9cb109791aa9b8190",
+      "full_real_frames_required": true,
+      "default_algorithm_matrices_reused": true,
+      "upstream_voxel_transform_uses_float64": true,
+      "records": [
+        {
+          "interpolation": "spline",
+          "frames": 490,
+          "whole_grid_values": 242851840,
+          "all_float32_values_bit_equal": true,
+          "different_values": 0,
+          "maximum_absolute": 0.0,
+          "different_frames": [],
+          "coefficient_checks": [
+            {
+              "frame": 0,
+              "all_values_bit_equal": true,
+              "different": 0
+            },
+            {
+              "frame": 245,
+              "all_values_bit_equal": true,
+              "different": 0
+            },
+            {
+              "frame": 489,
+              "all_values_bit_equal": true,
+              "different": 0
+            }
+          ],
+          "old_helper_seconds": 352.59320103004575,
+          "new_prototype_seconds": 34.084080901928246,
+          "timing_scope": "Diagnostic paired full-frame helper calls, source/target conversion and hashes excluded; not complete MCFLIRT API/native speed claim"
+        },
+        {
+          "interpolation": "linear",
+          "frames": 490,
+          "whole_grid_values": 242851840,
+          "all_float32_values_bit_equal": true,
+          "different_values": 0,
+          "maximum_absolute": 0.0,
+          "different_frames": [],
+          "coefficient_checks": [],
+          "old_helper_seconds": 27.05659445654601,
+          "new_prototype_seconds": 4.048142661340535,
+          "timing_scope": "Diagnostic paired full-frame helper calls, source/target conversion and hashes excluded; not complete MCFLIRT API/native speed claim"
+        }
+      ],
+      "actual_numba_threads_after": 1,
+      "numba_threading_layer": "omp"
+    },
+    {
+      "status": "complete",
+      "diagnostic_only": true,
+      "case": "mc490",
+      "input_shape": [
+        88,
+        88,
+        64,
+        490
+      ],
+      "threads": 8,
+      "cpu_affinity": [
+        8,
+        12,
+        16,
+        20,
+        24,
+        28,
+        32,
+        40
+      ],
+      "actual_torch_threads": 8,
+      "actual_numba_threads": 8,
+      "input_sha256": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+      "matrix_sha256": "4e6f5c12ee3fc2ccc6770662da0eea390560e3746a66d83060754435ae24e0a9",
+      "prototype_sha256": "8d63cda1509cae50d4b9d9439c98804afd63556c9b112ba9cb109791aa9b8190",
+      "full_real_frames_required": true,
+      "default_algorithm_matrices_reused": true,
+      "upstream_voxel_transform_uses_float64": true,
+      "records": [
+        {
+          "interpolation": "spline",
+          "frames": 490,
+          "whole_grid_values": 242851840,
+          "all_float32_values_bit_equal": true,
+          "different_values": 0,
+          "maximum_absolute": 0.0,
+          "different_frames": [],
+          "coefficient_checks": [
+            {
+              "frame": 0,
+              "all_values_bit_equal": true,
+              "different": 0
+            },
+            {
+              "frame": 245,
+              "all_values_bit_equal": true,
+              "different": 0
+            },
+            {
+              "frame": 489,
+              "all_values_bit_equal": true,
+              "different": 0
+            }
+          ],
+          "old_helper_seconds": 295.76029779203236,
+          "new_prototype_seconds": 35.381140913814306,
+          "timing_scope": "Diagnostic paired full-frame helper calls, source/target conversion and hashes excluded; not complete MCFLIRT API/native speed claim"
+        },
+        {
+          "interpolation": "linear",
+          "frames": 490,
+          "whole_grid_values": 242851840,
+          "all_float32_values_bit_equal": true,
+          "different_values": 0,
+          "maximum_absolute": 0.0,
+          "different_frames": [],
+          "coefficient_checks": [],
+          "old_helper_seconds": 6.13589025568217,
+          "new_prototype_seconds": 4.035312784835696,
+          "timing_scope": "Diagnostic paired full-frame helper calls, source/target conversion and hashes excluded; not complete MCFLIRT API/native speed claim"
+        }
+      ],
+      "actual_numba_threads_after": 8,
+      "numba_threading_layer": "omp"
+    }
+  ],
+  "candidate_v4_sampler_sha256": "8fe4cca243a18b1ceff406c9a377cdf9a769ccf650c46af615ca11b98fdd4457",
+  "final_production_dispatch_gate": "pending_final_focused_and_complete_api"
+}

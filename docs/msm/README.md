@@ -14,6 +14,17 @@ MSMSulc依据脑沟特征把个体原生球面注册到HCP参考球面，保留�
 
 准备阶段使用Connectome Workbench，配准复用包内HOCR/FastPD算子，几何与代价FP64、GIFTI坐标FP32。MSMAll和特征准备分别见[MSMAll](msmall.md)、[特征页](features.md)。pipeline曾暴露首次CUDA峰值重置、双侧统计和空标签shape问题；修复及真实回归见版本表和完整档案。
 
+```mermaid
+flowchart LR
+    I[同源 recon-all 与 HCP 模板] --> P[双侧 FS→fsLR 初始球面与脑沟]
+    P --> A[刚性初始化]
+    A --> D[三阶段离散配准]
+    D --> N[原生顶点插值与几何检查]
+    N --> O[双侧 GIFTI 球面与报告]
+    classDef mono fill:#fff,stroke:#000,color:#000;
+    class I,P,A,D,N,O mono;
+```
+
 ## 2. Python 调用
 
 ```python
@@ -154,6 +165,22 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 ## 5. 最新精度和运行时间
 
+### CPU 官方配对与本轮修复
+
+[2026-10-04 起的 CPU 官方对照](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)使用相同物理核预算和完整双侧顶点，分别运行实际 newMSM、冻结 `cc940273` 与优化候选；原版 1/8 线程和 GPU 旧/新结果分别记录。CPU1 基线完整 MSMSulc 为原版 1550.168 s、FNIT 2185.466 s，角差 L/R mean 0.587 / 0.554°，没有达到严格原版参照。
+
+这次核对发现成熟球面子函数的 CPU 向量除法舍入会改变共享边面归属。已将 CPU float64 无梯度的 Point normalize、tangent、投影除法和 unsigned area 改为 literal double 顺序，并对 containing-face 查询复用静态几何。完整四级候选 CPU1/8 的全部双侧球面坐标与有序 faces 都和原版严格单线程逐位相同，角差为 0；CPU1/8 球面文件 SHA 相同。原版与候选左侧都存在 1 个取向改变面，右侧为 0，几何检查单独保留。
+
+本次 CPU 移植另发现单点几何路径的标量除法缺陷：NumPy 返回零维标量，直接交给 `torch.from_numpy` 会报错。已用 `np.asarray` 保持标量 Tensor 返回；数组结果不新增运算或复制，原数组及 CUDA 分支保持相同。标量、单三角形距离与旧 Tensor 差分、既有 Point/SphereMap 定向检查共 29 项通过，见[标量修复回执](../../validation/fmri_cpu_20261004/task04_msm_surface/point_scalar_regression_20261006.public.json)。完整批量 benchmark 未触发此缺陷，其源码范围与最终修复的关系单列在[源码语义核对](../../validation/fmri_cpu_20261004/task04_msm_surface/surface_final_source_semantics_20261005.public.json)。
+
+| 完整双侧 MSMSulc | 原版 fresh / s | FNIT fresh / s | FNIT 完整 API / s |
+| --- | ---: | ---: | ---: |
+| CPU1 | 1537.903 | 455.084 | 452.696 |
+| CPU8 | 466.986 | 173.393 | 171.057 |
+
+每项是在 nodecw8 同一 CPU 预算的一次完整运行，fresh 包括程序启动和读写。实际锁内候选源码树 SHA、输入不变检查、负载和 CPU 使用见[最新聚合回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。CUDA、float32 和梯度运算保留已有 Tensor 路径；最终快照的完整 GPU 回归见下一节；下方历史 GPU 专项保留其实际源码范围。
+
+
 同一例已有 volume 和 recon-all/graymid、490 帧、TR 0.735 s、STC 关闭，三次均重新准备输入并估计双侧 MSMSulc。表中 MSM 时间**包含准备与配准**，完整 API 另含投影、CIFTI、QC 和最终保存；不包含前序 volume、recon-all、编译、包导入或 CUDA 初始化。
 
 | 同一真实输入 | 旧版 `954ad19` 串行 | 新版 `9f9f63e` 串行 | 新版 `9f9f63e` 并行 |
@@ -164,6 +191,22 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 | 完整 API 峰值 allocated，十进制 GB | 0.344 | 0.644 | 1.049 |
 
 局部 CPU 总预算为 8，并行时左右各 4；CUDA 上限 20 GB、TF32 开启。注册球面、左右 GIFTI 与 CIFTI 的全部数值，及有效科学配置和 21 结构轴/metadata，旧→新版串行、串行→并行均严格相同。卡号和共享负载不同，耗时是各一次完整观测。新版初次在 GPU 1 初始化失败，未进入 API；表中并行为 GPU 0 新目录的成功运行。实际报告、严格 native 编译 SHA、逐侧执行计数及官方差异见[完整验证页](../../validation/fmri/surface_gpu_parallel/README.md)，实测/发布的全部 116 个 runtime 文件另由[源码回溯](../../validation/fmri/surface_gpu_parallel/publication_runtime.public.json)逐项核验。
+
+完整 180 帧 surface 另有几何和时序差异，不能由上面的独立配准零差推断整链通过。对其保存细级几何的[左右各四组完整重放](../../validation/fmri_cpu_20261004/task04_msm_surface/surface_saved_geometry_mapping_aggregate_v1.public.json)，三种 FNIT 选面与官方 Octree 固定同一几何时逐值一致；右侧 2 个源顶点受上游 double 几何舍入影响。未更改选面规则，完整链差异见 [surface 说明](../fmri/surface.md#本轮-cpu-官方测试范围)。
+
+### 本轮 CPU 优化后的完整 GPU 回归（2026-10-05）
+
+同一 H100、CPU 总预算 8、TF32 开启，四级 MSMSulc、一级 MSMAll coarse 和三级 refine 各按旧／新／新／旧运行四个新进程，每个只调用一次完整双侧 API。保留全部顶点和原配置迭代，12 次均完成；所有重复和新旧配对的坐标、有序 faces 逐位相同。严格原生扩展 SHA 为 `69fda883c5022d412172eba2de164b79726d18c068b7c421a200b331b6502ad8`。
+
+| 完整双侧功能 | 旧版 A1 / A2 | 优化版 B1 / B2 | 最大 Torch allocated / reserved | 最大本任务进程树显存 |
+|---|---:|---:|---:|---:|
+| MSMSulc 四级 | 122.910 / 94.794 s | 112.039 / 105.074 s | 1.098 / 1.449 GB | 2.074 GB |
+| MSMAll coarse 一级 | 17.887 / 27.212 s | 29.399 / 28.669 s | 0.235 / 0.440 GB | 1.065 GB |
+| MSMAll refine 三级 | 142.121 / 140.804 s | 138.971 / 141.350 s | 1.866 / 3.536 GB | 4.161 GB |
+
+![完整 GPU API 观测与显存](images/cpu_optimization_gpu_abba_20261005.svg)
+
+图中每点是一次完整 API；显存柱为该功能四次调用的最大值，GB 为十进制。本次 coarse 的优化版观测较慢；该组 A1 在恢复前，后续调用在共享 H100 利用率接近 100% 的时段执行，不能据此确定稳定速度变化。MSMSulc/refine 的新旧时间接近。CPU 专用修复保留 CUDA 分支，输出一致性已完整验证。第六个进程曾在设置显存上限时 CUDA 初始化失败，尚未进入 API；保留前五个成功结果，独立重试剩七个。所有实际调用的本任务进程树显存低于 20 GB。[完整 GPU 回执](../../validation/fmri_cpu_20261004/task04_msm_surface/gpu_registration_abba_final_recovery_v1.public.json)记录两份冻结绑定、输入和源码不变检查、采样负载与全部几何误差。
 
 ### 共享 MSMAll 真实回归
 
@@ -176,6 +219,8 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 最新质量诊断发现一例保存球面出现1个新增反向面，不能当几何质量通过；[CON10保存质量](../../validation/fmri/public_ten_20261003/reconstruction_completed/CON10.saved-MSM-absolute.public.json)。完整MSM独立函数本轮未新增公开脑图；[历史专项球面可视化与证据](../../validation/msm/README.md)。
 
 ## 6. 最近版本和 benchmark
+
+2026-10-04 起：新增 CPU1/8 完整官方对照、Point 舍入修复和 containing-face 缓存；最新 CPU 实测与最终 GPU 配对分别记录。
 
 | 实测或更新 | 范围与记录 |
 |---|---|

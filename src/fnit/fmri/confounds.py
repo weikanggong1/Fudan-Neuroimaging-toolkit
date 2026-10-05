@@ -83,6 +83,71 @@ def _bandpass(matrix: torch.Tensor, keep: torch.Tensor | None) -> torch.Tensor:
     return torch.fft.irfft(spectrum, n=matrix.shape[0], dim=0)
 
 
+def _passband_bins(nt: int, tr_seconds: float, low: float, high: float) -> np.ndarray:
+    """Select uncensored single-run bins using 3dTproject's edge convention.
+
+    AFNI converts passband endpoints to two stopbands, rounds their endpoints
+    to the nearest bin after a one-sixth-bin adjustment, and calculates these
+    bounds in float32. Testing bin centers against the requested Hz endpoints
+    can retain an extra edge bin. DC is removed by the intercept in either
+    formulation; removing it here avoids amplifying FFT roundoff in the fit.
+    """
+    frequency_step = np.float32(1) / np.float32(nt * np.float32(tr_seconds))
+    edge_adjustment = np.float32(0.1666666) * frequency_step
+    maximum_bin = nt // 2
+    frequency_limit = np.float32(maximum_bin + np.float32(0.1)) * frequency_step
+    keep = np.ones(maximum_bin + 1, dtype=bool)
+    stopbands = (
+        (np.float32(0), np.float32(low) - np.float32(0.0001)),
+        (np.float32(high) + np.float32(0.0001), np.float32(999999.9)),
+    )
+    for start_hz, stop_hz in stopbands:
+        start_hz = np.clip(start_hz, np.float32(0), frequency_limit)
+        stop_hz = np.clip(stop_hz, np.float32(0), frequency_limit)
+        first = max(0, int(np.rint((start_hz + edge_adjustment) / frequency_step)))
+        last = min(maximum_bin, int(np.rint((stop_hz - edge_adjustment) / frequency_step)))
+        keep[first:last + 1] = False
+    keep[0] = False
+    return keep
+
+
+def _afni_model(design: np.ndarray, keep: np.ndarray | None) -> tuple[np.ndarray, np.ndarray]:
+    """Build 3dTproject's normalized, regularized single-run nuisance model.
+
+    This is a NumPy formulation of the documented SVD regularization, not an
+    invocation or a distribution of AFNI code. The constant/drift and supplied
+    nuisance columns are stored in float32 before the float64 SVD, as in AFNI.
+    """
+    nt = len(design)
+    raw = design.astype(np.float32)
+    nuisance = raw[:, 3:]
+    if nuisance.shape[1]:
+        means = np.cumsum(nuisance, axis=0, dtype=np.float32)[-1] / np.float32(nt)
+        nuisance = nuisance - means
+    columns = [raw[:, :3]]
+    if keep is not None:
+        sample = np.arange(nt, dtype=np.float32)
+        stop_columns = []
+        for index in np.flatnonzero(~keep)[1:]:  # DC is represented by the intercept.
+            angle = np.float32(2 * np.pi * index / nt) * sample
+            stop_columns.append(np.cos(angle))
+            if index < nt // 2 or nt % 2:
+                stop_columns.append(np.sin(angle))
+        if stop_columns:
+            columns.append(np.column_stack(stop_columns))
+    columns.append(nuisance)
+    matrix = np.column_stack(columns).astype(np.float64)
+    norms = np.linalg.norm(matrix, axis=0)
+    inverse_norm = np.divide(1, norms, out=np.zeros_like(norms), where=norms > 0)
+    scaled = matrix * inverse_norm
+    left, singular, right = np.linalg.svd(scaled, full_matrices=False)
+    regularizer = 1e-6 * singular[0] ** 2
+    reciprocal = singular / (singular**2 + regularizer)
+    inverse = ((right.T * reciprocal) @ left.T).astype(np.float32)
+    inverse = (inverse * inverse_norm[:, None]).astype(np.float32)
+    return matrix, inverse.astype(np.float64)
+
+
 def clean_confounds(
     input_bold: str | Path,
     output_bold: str | Path,
@@ -97,6 +162,7 @@ def clean_confounds(
     global_signal: bool = False,
     device: str | torch.device | None = None,
     chunk_size: int = 4096,
+    projection: str = "orthogonal",
 ) -> Path:
     """Regress selected confounds, quadratic drift, and optional stopband.
 
@@ -104,9 +170,14 @@ def clean_confounds(
     their mean time series are used. `global_signal=True` additionally uses
     the mean within `brain_mask`. The returned file has the input shape and
     affine and contains mean-zero float32 residuals. It mirrors an uncensored
-    single-run 3dTproject call with default ``-polort 2`` and ``-ort``: drift,
-    tissue signals, motion, and frequencies are projected out together.
-    ``bandpass=(low, high)`` uses Hz and a discrete Fourier-bin projector.
+    single-run nuisance model with quadratic drift, tissue signals, motion,
+    and optional frequencies removed together. The ``afni`` option additionally
+    follows 3dTproject's numerical conventions.
+    ``projection="orthogonal"`` uses the existing exact joint projection and
+    retains Fourier bins whose centers are within the requested Hz endpoints.
+    ``projection="afni"`` uses 3dTproject's single-run passband-edge convention
+    and normalized SVD regularization (1e-6 times the largest squared singular
+    value). Its residuals can retain a small regularized stopband contribution.
     Projection arithmetic is float64 to avoid TF32 residual drift on long BOLD
     runs; NIfTI input and output remain float32. Nuisance columns are centered
     and normalized before solving, so motion units and tissue baselines do not
@@ -116,6 +187,8 @@ def clean_confounds(
     nt = data.shape[3]
     if chunk_size < 1:
         raise ValueError("chunk_size must be positive")
+    if projection not in ("orthogonal", "afni"):
+        raise ValueError("projection must be orthogonal or afni")
 
     regressors: list[np.ndarray] = []
     for tissue in (wm_mask, csf_mask):
@@ -137,6 +210,7 @@ def clean_confounds(
     design = np.column_stack((np.ones(nt), t, (3 * t**2 - 1) / 2, *regressors))
     if not np.isfinite(design).all():
         raise ValueError("confound design must contain only finite values")
+    afni_design = design.copy() if projection == "afni" else None
     # Keep the intercept separately. Constant nuisance columns add no new
     # direction; centering other columns preserves the span with the intercept.
     varying = np.r_[True, np.ptp(design[:, 1:], axis=0) > 0]
@@ -156,14 +230,38 @@ def clean_confounds(
         else:
             tr_seconds = tr
         low, high = bandpass
-        if tr_seconds <= 0 or not (0 < low < high < 0.5 / tr_seconds):
+        if not np.isfinite(tr_seconds) or tr_seconds <= 0 or not (0 < low < high < 0.5 / tr_seconds):
             raise ValueError("bandpass must satisfy 0 < low < high < Nyquist")
-        frequencies = np.fft.rfftfreq(nt, tr_seconds)
-        keep_np = (frequencies >= low) & (frequencies <= high)
+        if projection == "afni":
+            keep_np = _passband_bins(nt, tr_seconds, low, high)
+        else:
+            frequencies = np.fft.rfftfreq(nt, tr_seconds)
+            keep_np = (frequencies >= low) & (frequencies <= high)
         if not keep_np.any():
             raise ValueError("bandpass contains no Fourier bin for this time series")
 
     selected = _device(device)
+    if projection == "afni":
+        matrix, inverse = _afni_model(afni_design, keep_np if bandpass is not None else None)
+        # A dense residual operator is cheaper than two large products when
+        # stopbands fill most of the model. Small nuisance models keep their
+        # low-rank factorization. Both calculations stay in float64 on device.
+        dense = matrix.shape[1] > nt // 2
+        if dense:
+            operator = torch.as_tensor(np.eye(nt) - matrix @ inverse,
+                                       dtype=torch.float64, device=selected)
+        else:
+            matrix_tensor = torch.as_tensor(matrix, dtype=torch.float64, device=selected)
+            inverse_tensor = torch.as_tensor(inverse, dtype=torch.float64, device=selected)
+        flat = data.reshape((-1, nt))
+        output = np.empty_like(flat)
+        for start in range(0, flat.shape[0], chunk_size):
+            stop = min(start + chunk_size, flat.shape[0])
+            series = torch.as_tensor(flat[start:stop].T.copy(), dtype=torch.float64, device=selected)
+            residual = operator @ series if dense else series - matrix_tensor @ (inverse_tensor @ series)
+            residual -= residual.mean(dim=0, keepdim=True)
+            output[start:stop] = residual.T.cpu().numpy()
+        return _save_bold(output_bold, output.reshape(data.shape), image)
     if bandpass is not None:
         keep = torch.as_tensor(keep_np, device=selected)
     design_tensor = torch.as_tensor(design, dtype=torch.float64, device=selected)
