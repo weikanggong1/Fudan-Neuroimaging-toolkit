@@ -1,0 +1,263 @@
+{
+  "schema": "fnit_synthseg_cpu_profile_independent_saved_review/v1",
+  "scope": "saved public records, current source and tool bindings only; no new MRI/GPU/native inference",
+  "review_worktree_commit": "ba7c2b906eda7e3875ca3a6a78f5b3a4e114088c",
+  "reviewer_sha256": "a42ef5275c6b9edcdcd5770c4d9f84eaa89b55044109c18dd120378de6186e7f",
+  "profile_sha256": "0d4d28557ed7954328a67f4aade3bfac142dd7b3abd07557124e6cc1b16b1dbf",
+  "plan_sha256": "e5f07c6cdc5c96479736c129d5ac902ff2f4f0eb6ed8d533a090b3b93f26468d",
+  "summary_sha256": "d0abf4fcdca925851b6f6cbb90aaaf6e88b338435afc170bfd72ed025442da20",
+  "previous_full_report_sha256": "9348f42249ec48a99f365b224efde3d8217d9e7f8e7e8b9a8e502dd2fac4da61",
+  "current_source_files_sha256": {
+    "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+    "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+    "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+    "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+    "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+    "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+    "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+    "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+    "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+    "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+    "segment.py": "9329348c6174785df4de2624344e63b141ad7c795238c8b7dd62f47f34495061",
+    "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+    "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+    "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0"
+  },
+  "passed": true,
+  "recomputed_stage_totals": {
+    "nifti_header_load": {
+      "calls": 2,
+      "inclusive_seconds": 0.005150537006556988,
+      "exclusive_seconds": 0.005150537006556988
+    },
+    "nifti_data_decode": {
+      "calls": 1,
+      "inclusive_seconds": 0.41370538994669914,
+      "exclusive_seconds": 0.41370538994669914
+    },
+    "resample_1mm": {
+      "calls": 1,
+      "inclusive_seconds": 3.7559515414759517,
+      "exclusive_seconds": 3.7559515414759517
+    },
+    "align_ras": {
+      "calls": 1,
+      "inclusive_seconds": 0.00033173803240060806,
+      "exclusive_seconds": 0.00033173803240060806
+    },
+    "percentile": {
+      "calls": 1,
+      "inclusive_seconds": 0.10585476085543633,
+      "exclusive_seconds": 0.10585476085543633
+    },
+    "pad": {
+      "calls": 65,
+      "inclusive_seconds": 0.44771925266832113,
+      "exclusive_seconds": 0.44771925266832113
+    },
+    "preprocess": {
+      "calls": 1,
+      "inclusive_seconds": 4.361878182739019,
+      "exclusive_seconds": 0.08084930293262005
+    },
+    "functional_conv": {
+      "calls": 142,
+      "inclusive_seconds": 86.5194198852405,
+      "exclusive_seconds": 86.5194198852405
+    },
+    "slab_output_copy": {
+      "calls": 142,
+      "inclusive_seconds": 0.9274806771427393,
+      "exclusive_seconds": 0.9274806771427393
+    },
+    "slabs": {
+      "calls": 40,
+      "inclusive_seconds": 89.5305744362995,
+      "exclusive_seconds": 1.639091493561864
+    },
+    "layer_conv": {
+      "calls": 38,
+      "inclusive_seconds": 76.39947822131217,
+      "exclusive_seconds": 0.004039512015879154
+    },
+    "elu": {
+      "calls": 36,
+      "inclusive_seconds": 0.851935756392777,
+      "exclusive_seconds": 0.851935756392777
+    },
+    "batchnorm": {
+      "calls": 18,
+      "inclusive_seconds": 0.30933590419590473,
+      "exclusive_seconds": 0.30933590419590473
+    },
+    "max_pool3d": {
+      "calls": 8,
+      "inclusive_seconds": 0.5171672273427248,
+      "exclusive_seconds": 0.5171672273427248
+    },
+    "decoder_join": {
+      "calls": 8,
+      "inclusive_seconds": 0.632348757237196,
+      "exclusive_seconds": 0.632348757237196
+    },
+    "CNN": {
+      "calls": 2,
+      "inclusive_seconds": 81.71587014570832,
+      "exclusive_seconds": 3.005604279227555
+    },
+    "gaussian33": {
+      "calls": 2,
+      "inclusive_seconds": 13.136424171738327,
+      "exclusive_seconds": 0.001288444735109806
+    },
+    "posterior": {
+      "calls": 1,
+      "inclusive_seconds": 95.6540197301656,
+      "exclusive_seconds": 0.8017254127189517
+    },
+    "posterior_clone": {
+      "calls": 1,
+      "inclusive_seconds": 0.07374978065490723,
+      "exclusive_seconds": 0.07374978065490723
+    },
+    "posterior_sum": {
+      "calls": 2,
+      "inclusive_seconds": 0.038526626303792,
+      "exclusive_seconds": 0.038526626303792
+    },
+    "LCC": {
+      "calls": 24,
+      "inclusive_seconds": 3.150258240289986,
+      "exclusive_seconds": 3.150258240289986
+    },
+    "posterior_normalize_divide": {
+      "calls": 1,
+      "inclusive_seconds": 0.027378194965422153,
+      "exclusive_seconds": 0.027378194965422153
+    },
+    "posterior_argmax": {
+      "calls": 1,
+      "inclusive_seconds": 0.9421185282990336,
+      "exclusive_seconds": 0.9421185282990336
+    },
+    "postprocess": {
+      "calls": 1,
+      "inclusive_seconds": 4.7098496444523335,
+      "exclusive_seconds": 0.4778182739391923
+    },
+    "tie_argmax": {
+      "calls": 1,
+      "inclusive_seconds": 1.074127433821559,
+      "exclusive_seconds": 1.074127433821559
+    },
+    "segmentation_header": {
+      "calls": 1,
+      "inclusive_seconds": 0.001246059313416481,
+      "exclusive_seconds": 0.001246059313416481
+    },
+    "soft_volumes": {
+      "calls": 1,
+      "inclusive_seconds": 0.3422915665432811,
+      "exclusive_seconds": 0.3422915665432811
+    },
+    "API": {
+      "calls": 1,
+      "inclusive_seconds": 106.37706702481955,
+      "exclusive_seconds": 0.2305524479597807
+    }
+  },
+  "recomputed_layer_convolution_totals": {
+    "down.0.conv0": {
+      "calls": 2,
+      "inclusive_seconds": 0.830498993396759
+    },
+    "down.0.conv1": {
+      "calls": 2,
+      "inclusive_seconds": 12.661322166211903
+    },
+    "down.1.conv0": {
+      "calls": 2,
+      "inclusive_seconds": 1.393274050205946
+    },
+    "down.1.conv1": {
+      "calls": 2,
+      "inclusive_seconds": 2.9026101725175977
+    },
+    "down.2.conv0": {
+      "calls": 2,
+      "inclusive_seconds": 0.37559809163212776
+    },
+    "down.2.conv1": {
+      "calls": 2,
+      "inclusive_seconds": 0.7349176099523902
+    },
+    "down.3.conv0": {
+      "calls": 2,
+      "inclusive_seconds": 0.10514036007225513
+    },
+    "down.3.conv1": {
+      "calls": 2,
+      "inclusive_seconds": 0.21491132490336895
+    },
+    "down.4.conv0": {
+      "calls": 2,
+      "inclusive_seconds": 0.03577721118927002
+    },
+    "down.4.conv1": {
+      "calls": 2,
+      "inclusive_seconds": 0.07120767328888178
+    },
+    "up.0.conv0": {
+      "calls": 2,
+      "inclusive_seconds": 0.6536773117259145
+    },
+    "up.0.conv1": {
+      "calls": 2,
+      "inclusive_seconds": 0.21714838314801455
+    },
+    "up.1.conv0": {
+      "calls": 2,
+      "inclusive_seconds": 2.186384528875351
+    },
+    "up.1.conv1": {
+      "calls": 2,
+      "inclusive_seconds": 0.7342135664075613
+    },
+    "up.2.conv0": {
+      "calls": 2,
+      "inclusive_seconds": 8.044326920993626
+    },
+    "up.2.conv1": {
+      "calls": 2,
+      "inclusive_seconds": 2.9211411168798804
+    },
+    "up.3.conv0": {
+      "calls": 2,
+      "inclusive_seconds": 30.585816046223044
+    },
+    "up.3.conv1": {
+      "calls": 2,
+      "inclusive_seconds": 10.88219975028187
+    },
+    "likelihood": {
+      "calls": 2,
+      "inclusive_seconds": 0.8493129434064031
+    }
+  },
+  "recomputed_functional_convolution_by_group": {
+    "1": {
+      "calls": 130,
+      "seconds": 73.89513062499464
+    },
+    "33": {
+      "calls": 12,
+      "seconds": 12.62428926024586
+    }
+  },
+  "exclusive_clock_sum_seconds": 106.37706702481955,
+  "previous_uninstrumented_cold_seconds_preserved": 112.95203952863812,
+  "official_speed_gate": "not_passed; profiling is not a new performance comparison",
+  "saved_output_header_voxel_label_csv_file_hash_gates": "passed by original completed comparison; hashes bound to prior full record",
+  "MRI_arrays_reread_in_this_review": false,
+  "new_native_runs": 0
+}
