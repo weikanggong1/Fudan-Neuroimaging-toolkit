@@ -60,6 +60,8 @@ def main(argv=None):
     volume.add_argument("--global-signal", action="store_true")
     volume.add_argument("--batch-size", type=int, default=8)
     volume.add_argument("--motion-iterations", nargs=3, type=int, default=(1, 1, 1))
+    volume.add_argument("--bold-reference-strategy", choices=("robust", "middle"), default="robust",
+                        help="BOLD参考策略；robust 使用选帧、漂移归一和运动校正后中位数；middle保留旧对照")
     volume.add_argument("--highpass-cutoff-seconds", type=float, default=100)
     timing = volume.add_mutually_exclusive_group()
     timing.add_argument("--slice-timing", dest="slice_timing", action="store_true",
@@ -130,6 +132,7 @@ def main(argv=None):
             confound_projection=args.confound_projection,
             global_signal=args.global_signal, batch_size=args.batch_size,
             motion_iterations=tuple(args.motion_iterations),
+            bold_reference_strategy=args.bold_reference_strategy,
             highpass_cutoff_seconds=args.highpass_cutoff_seconds,
             slice_timing=args.slice_timing,
             slice_time_reference=args.slice_time_reference,

@@ -27,6 +27,7 @@ class FMRIDerivativePaths:
     preproc_mni: Path
     motion_pull: Path
     mni_pull: Path
+    bold_reference: Path
 
 
 def fmri_derivative_paths(inputs: BIDSInputs, t1w: Path, root: str | Path,
@@ -61,6 +62,7 @@ def fmri_derivative_paths(inputs: BIDSInputs, t1w: Path, root: str | Path,
         preproc_mni=func / f"{stem}_space-MNI152NLin6Asym_res-2_desc-preproc_bold.nii.gz",
         motion_pull=func / f"{stem}_from-boldref_to-orig_mode-image_desc-pull_xfm.npy",
         mni_pull=func / f"{stem}_from-MNI152NLin6Asym_to-T1w_mode-image_desc-pull_xfm.nii.gz",
+        bold_reference=func / f"{stem}_desc-hmc_boldref.nii.gz",
     )
 
 

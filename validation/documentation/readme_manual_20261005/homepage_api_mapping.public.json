@@ -1,0 +1,604 @@
+{
+  "schema": "fnit.homepage_public_api_mapping.v1",
+  "date": "2026-10-05",
+  "scientific_source_baseline": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+  "documentation_commit_before_table_change": "4fa6843fc0b062d1a52d99c5b49aa9cef1619f44",
+  "homepage_sha256": "99556f738391d23eb8aaf8e4a748f6b5bdf3a9c90029ceeced922a42646bf6b0",
+  "feature_tables": 5,
+  "feature_rows": 37,
+  "actual_public_api_checks": 41,
+  "reference_evidence": "Each linked current manual section 4 and its official source references; independently cross-reviewed against current source exports.",
+  "scope": "Actual imports, callable/signature/source checks and three-column table structure. No MRI execution or new numerical equivalence claim.",
+  "ukb_vbm_uses_existing_fast_vbm_api": true,
+  "new_scientific_benchmark_run": false,
+  "passed": true,
+  "rows": [
+    {
+      "label": "run_fslmaths",
+      "manual": "docs/fslmaths/README.md",
+      "reference_function_or_command": "FSL `fslmaths`",
+      "public_apis": [
+        {
+          "public_import": "fnit.run_fslmaths",
+          "kind": "function_or_method",
+          "signature": "(input_path, operations, output_path, *, device='cpu', input_dtype=None, output_dtype=None)",
+          "source": "src/fnit/fslmaths/core.py",
+          "source_sha256": "8fea8d3fe7d6cd0385b3678f927aaef6704781f5bedb6564418e4b638a601472",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "fnit.flirt.run_flirt",
+      "manual": "docs/flirt/README.md",
+      "reference_function_or_command": "FSL `flirt`",
+      "public_apis": [
+        {
+          "public_import": "fnit.flirt.run_flirt",
+          "kind": "function_or_method",
+          "signature": "(input, reference, *, output=None, omat=None, init=None, inweight=None, refweight=None, dof=12, cost='corratio', applyxfm=False, usesqform=False, device=None, execution='auto', candidate_batch_size=128, memory_budget_gb=20.0, overwrite=False)",
+          "source": "src/fnit/flirt/standalone.py",
+          "source_sha256": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchFNIRT",
+      "manual": "docs/fnirt/README.md",
+      "reference_function_or_command": "FSL `fnirt`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchFNIRT",
+          "kind": "class",
+          "signature": "(*, device='cpu', config: 'FNIRTConfig | None' = None, reference_mask=None, pcg_tolerance=0.001, pcg_max_iterations=500, cost_tolerance=1e-08, initial_lm_lambda=0.1, strict_topology=False, execution='optimized')",
+          "source": "src/fnit/fnirt/registration.py",
+          "source_sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchApplyWarp",
+      "manual": "docs/applywarp/README.md",
+      "reference_function_or_command": "FSL `applywarp`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchApplyWarp",
+          "kind": "class",
+          "signature": "(device=None, *, frame_chunk_size=None)",
+          "source": "src/fnit/applywarp/core.py",
+          "source_sha256": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchConvertWarp",
+      "manual": "docs/convertwarp/README.md",
+      "reference_function_or_command": "FSL `convertwarp`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchConvertWarp",
+          "kind": "class",
+          "signature": "(device='cpu')",
+          "source": "src/fnit/convertwarp/core.py",
+          "source_sha256": "730c0d8c82b7d35c5f77e9a7d0ffad65e375f13f37c379591c399ef0b26627d8",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchInvWarp",
+      "manual": "docs/invwarp/README.md",
+      "reference_function_or_command": "FSL `invwarp`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchInvWarp",
+          "kind": "class",
+          "signature": "(device='cpu')",
+          "source": "src/fnit/invwarp/core.py",
+          "source_sha256": "b3f48e5a7fd4156b9f8cd9d0094b5299ed95c77b59b5636faeda0f522df34adc",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "convert_space",
+      "manual": "docs/space_conversion/README.md",
+      "reference_function_or_command": "CBIG `CBIG_RF_projectMNI2fsaverage` / `CBIG_RF_projectfsaverage2Vol_single`；Workbench `-metric-resample`",
+      "public_apis": [
+        {
+          "public_import": "fnit.convert_space",
+          "kind": "function_or_method",
+          "signature": "(source: 'str | Path | tuple[str | Path, str | Path]', source_space: 'str', target_space: 'str', output_dir: 'str | Path', assets_dir: 'str | Path', *, source_density: 'str | None' = None, target_density: 'str | None' = None, reference: 'str | Path | None' = None, device: 'str' = 'cpu', label: 'bool' = False, wb_command: 'str' = 'wb_command') -> 'Path | tuple[Path, Path]'",
+          "source": "src/fnit/space_conversion.py",
+          "source_sha256": "91e3942b487cb91ee58e1310a7ab29aa670d31720e7abe6edb194e1a679a4afd",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "run_mmorf",
+      "manual": "docs/mmorf/README.md",
+      "reference_function_or_command": "FSL MMORF `mmorf`",
+      "public_apis": [
+        {
+          "public_import": "fnit.run_mmorf",
+          "kind": "function_or_method",
+          "signature": "(moving_scalar, reference_scalar, moving_tensor, reference_tensor, *, output_dir, moving_scalar_affine=None, reference_scalar_affine=None, moving_tensor_affine=None, reference_tensor_affine=None, scalar_weights=None, auto_linear=True, device=None, config=None, overwrite=False) -> 'MMORFResult'",
+          "source": "src/fnit/mmorf/standalone.py",
+          "source_sha256": "cfad1efe8703a620af4b196a98cad2b6b490b7a7d57daf2293e1bd7f0b816326",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "SynthStrip",
+      "manual": "docs/synthstrip/README.md",
+      "reference_function_or_command": "FreeSurfer `mri_synthstrip`",
+      "public_apis": [
+        {
+          "public_import": "fnit.SynthStrip",
+          "kind": "class",
+          "signature": "(weights=None, device='cpu', no_csf=False, threads=None, *, configure_precision=True)",
+          "source": "src/fnit/synthstrip/pipeline.py",
+          "source_sha256": "af4978d445f3438a82c06de2548918b0dcc049e746eba8190fc50b889f0a5a48",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "SynthMorph",
+      "manual": "docs/synthmorph/README.md",
+      "reference_function_or_command": "FreeSurfer `mri_synthmorph register`",
+      "public_apis": [
+        {
+          "public_import": "fnit.SynthMorph",
+          "kind": "class",
+          "signature": "(weights=None, device='cpu', model='joint', extent=256, hyper=0.5, steps=7, configure_precision=True)",
+          "source": "src/fnit/synthmorph/pipeline.py",
+          "source_sha256": "75044d4484b0c5a73efe31949ae609e5920b514583d1ee067ee440ff4cbc1bfc",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "SynthSeg",
+      "manual": "docs/synthseg/README.md",
+      "reference_function_or_command": "FreeSurfer `mri_synthseg`",
+      "public_apis": [
+        {
+          "public_import": "fnit.SynthSeg",
+          "kind": "class",
+          "signature": "(weights: 'str | Path | None' = None, device: 'str' = 'cpu', threads: 'int | None' = None, *, cudnn_tf32: 'bool | None' = True)",
+          "source": "src/fnit/synthseg_parc/synthseg.py",
+          "source_sha256": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "SynthSegPlus",
+      "manual": "docs/synthseg_plus/README.md",
+      "reference_function_or_command": "FreeSurfer `mri_synthseg --parc`",
+      "public_apis": [
+        {
+          "public_import": "fnit.SynthSegPlus",
+          "kind": "class",
+          "signature": "(weights: 'str | Path | None' = None, parc_weights: 'str | Path | None' = None, device: 'str | torch.device' = 'cpu')",
+          "source": "src/fnit/synthseg_parc/synthseg_plus.py",
+          "source_sha256": "b49cfbc26f4733e7b6c8ceffaceb102f0f5a6a57044dfb1a5f4a048b3f14786b",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "SynthSR",
+      "manual": "docs/synthsr/README.md",
+      "reference_function_or_command": "FreeSurfer `mri_synthsr`",
+      "public_apis": [
+        {
+          "public_import": "fnit.SynthSR",
+          "kind": "class",
+          "signature": "(weights=None, device='cpu', lowfield=False, v1=False, threads=None)",
+          "source": "src/fnit/synthsr/pipeline.py",
+          "source_sha256": "c896d8e2e4a1a214546e6674ce3aacdcf84906d1b2010b5397ec1b076f502943",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "WMHSynthSeg",
+      "manual": "docs/wmh_synthseg/README.md",
+      "reference_function_or_command": "FreeSurfer `mri_WMHsynthseg`",
+      "public_apis": [
+        {
+          "public_import": "fnit.WMHSynthSeg",
+          "kind": "class",
+          "signature": "(weights=None, device='cpu', threads=None)",
+          "source": "src/fnit/wmh_synthseg/pipeline.py",
+          "source_sha256": "b0cfe39ee0c1fc2a070cdba90265e9b6fbc4f652b484ed7b9db307c5a9fc3643",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchFAST",
+      "manual": "docs/fast/README.md",
+      "reference_function_or_command": "FSL `fast`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchFAST",
+          "kind": "class",
+          "signature": "(device='cpu', threads=None, *, init_iterations=15, bias_iterations=4, fixed_iterations=4, bias_fwhm_mm=20.0, init_mrf=0.02, mrf=0.1, mixel_mrf=0.3, pve_steps=100, mean_field_iterations=5, pve_chunk_size=8, execution='tensor')",
+          "source": "src/fnit/fast/pipeline.py",
+          "source_sha256": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "segment_4_subregions",
+      "manual": "docs/subregions/README.md",
+      "reference_function_or_command": "FreeSurfer `segment_subregions`",
+      "public_apis": [
+        {
+          "public_import": "fnit.segment_4_subregions",
+          "kind": "function_or_method",
+          "signature": "(t1: 'str | Path | nib.spatialimages.SpatialImage', atlas_root: 'str | Path | None' = None, *, structures: 'str | list[str] | tuple[str, ...]' = 'all', coarse_segmentation: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, cortical_parcellation: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, wmparc: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, synthseg_weights: 'str | Path | None' = None, synthseg_parc_weights: 'str | Path | None' = None, device: 'str | torch.device' = 'cuda:0', threads: 'int' = 4, optimization: 'str' = 'fast', output_dir: 'str | Path | None' = None, save_highres: 'bool' = True, save_posteriors: 'bool' = False) -> 'SubregionResult'",
+          "source": "src/fnit/gems/pipeline.py",
+          "source_sha256": "20a0df50ce6c3fd0e3eb67b0eb8cbcd588565615cc8c15ed4449ca1644ea3543",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "fnit.recon_all.native_free.run_recon_all_python",
+      "manual": "docs/recon_all/README.md",
+      "reference_function_or_command": "FreeSurfer `recon-all`",
+      "public_apis": [
+        {
+          "public_import": "fnit.recon_all.native_free.run_recon_all_python",
+          "kind": "function_or_method",
+          "signature": "(t1: 'str | Path', subject_dir: 'str | Path', weights_dir: 'str | Path', assets_dir: 'str | Path', *, device: 'str' = 'cuda:0', threads: 'int' = 4, native_bin_dir: 'str | Path | None' = None, profile_stages: 'bool' = False, cuda_allocator_cache: 'str' = 'auto', hemisphere_workers: 'int' = 1, native_optimizations: 'str' = 'auto') -> 'dict'",
+          "source": "src/fnit/recon_all/native_free.py",
+          "source_sha256": "fd02095d1fee2eca566090117e51f770e5fcc7deef68e47330a121a019bfd301",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "FastVBM.run",
+      "manual": "docs/fast_vbm/README.md",
+      "reference_function_or_command": "FSL `fast` + `fsl_reg` + `fslmaths`（组合流程）",
+      "public_apis": [
+        {
+          "public_import": "fnit.FastVBM.run",
+          "kind": "function_or_method",
+          "signature": "(self, image, template, output_dir, *, brain_mask=None, reference_mask=None, overwrite=False)",
+          "source": "src/fnit/fast_vbm/pipeline.py",
+          "source_sha256": "6fbef2de2698c3c61d56034d8a2cb91f6c29a91e8048dcde292f23171979ad2a",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "FastVBM.run",
+      "manual": "docs/ukb_vbm/README.md",
+      "reference_function_or_command": "UKB `bb_struct_init` / `bb_vbm`（组合流程）",
+      "public_apis": [
+        {
+          "public_import": "fnit.FastVBM.run",
+          "kind": "function_or_method",
+          "signature": "(self, image, template, output_dir, *, brain_mask=None, reference_mask=None, overwrite=False)",
+          "source": "src/fnit/fast_vbm/pipeline.py",
+          "source_sha256": "6fbef2de2698c3c61d56034d8a2cb91f6c29a91e8048dcde292f23171979ad2a",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchMCFLIRT",
+      "manual": "docs/mcflirt/README.md",
+      "reference_function_or_command": "FSL `mcflirt`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchMCFLIRT",
+          "kind": "class",
+          "signature": "(device=None)",
+          "source": "src/fnit/mcflirt/core.py",
+          "source_sha256": "2b344c34ecbc96d14a07132f6c5731a87ebe13178ab5fa1452222ed2299bae78",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "fMRIVolume_pipeline",
+      "manual": "docs/fmri/README.md",
+      "reference_function_or_command": "fMRIPrep volume；FSL `feat` / `melodic`、ICA-AROMA（组合流程）",
+      "public_apis": [
+        {
+          "public_import": "fnit.fMRIVolume_pipeline",
+          "kind": "function_or_method",
+          "signature": "(bids_root, derivatives_root, *, subject, mni_template, session=None, task='rest', run=None, acquisition=None, direction=None, reconstruction=None, echo=None, t1w_image=None, mni_brain_mask=None, registration_backend='synthmorph', fnirt_config=None, synthstrip_weights=None, synthmorph_weights=None, ica_n_components=None, aroma_mode='nonaggr', regress_wm=False, regress_csf=False, regress_motion=False, motion_model=24, bandpass=None, global_signal=False, highpass_cutoff_seconds=100.0, slice_timing=False, slice_time_reference=0.5, device=None, batch_size=8, motion_iterations=(1, 1, 1), bold_reference_strategy='robust', ica_max_iter=500, n_splits=1000, random_state=0, overwrite=False, reuse_anatomical=True, bbr_execution='batched', fnirt_execution='optimized')",
+          "source": "src/fnit/fmri/end_to_end.py",
+          "source_sha256": "5ea01d782b91aca830f6941512f27be4daf654ad781dc2f17b7f668c0f2eb8bc",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "fMRISurface_pipeline",
+      "manual": "docs/fmri/surface.md",
+      "reference_function_or_command": "fMRIPrep surface；Workbench `wb_command`（组合流程）",
+      "public_apis": [
+        {
+          "public_import": "fnit.fMRISurface_pipeline",
+          "kind": "function_or_method",
+          "signature": "(bids_root: str | pathlib.Path, derivatives_root: str | pathlib.Path, *, subject: str, hcp_assets_dir: str | pathlib.Path, recon_all: str | pathlib.Path | None = None, session: str | None = None, task: str = 'rest', run: str | None = None, acquisition: str | None = None, direction: str | None = None, reconstruction: str | None = None, echo: str | None = None, wb_command: str | pathlib.Path = 'wb_command', device: str = 'cuda:0', overwrite: bool = False, registered_spheres: tuple[str | pathlib.Path, str | pathlib.Path] | None = None, msm_config: fnit.msm.config.MSMSulcConfig | str | pathlib.Path | None = None, msm_execution: str = 'optimized', msmall_inputs: dict[str, fnit.msm.msmall.MSMAllInputs] | str | pathlib.Path | None = None, msmall_config: fnit.msm.config_msmall.MSMAllConfig | str | pathlib.Path | None = None, goodvoxels: str | pathlib.Path | None = None, signal: str = 'preproc', fsnative_to_t1w: str | pathlib.Path | numpy.ndarray | None = None, parallel: bool = True, cpu_threads: int | None = None, recon_all_backend: str | None = None, recon_all_output_dir: str | pathlib.Path | None = None, recon_all_options: dict | None = None, t1w_image: str | pathlib.Path | None = None, auto_volume: bool = True, volume_options: dict | None = None) -> fnit.fmri.surface_pipeline.FMRISurfaceResult",
+          "source": "src/fnit/fmri/surface_pipeline.py",
+          "source_sha256": "cce599a853b25b82a1951861d1659874815918be904aa6fae5dab54b050eeb68",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "run_msmsulc / run_msmall",
+      "manual": "docs/msm/README.md",
+      "reference_function_or_command": "newMSM `newmsm`（MSMSulc / MSMAll 配置）",
+      "public_apis": [
+        {
+          "public_import": "fnit.msm.run_msmsulc",
+          "kind": "function_or_method",
+          "signature": "(inputs: dict[str, fnit.msm.prepare.MSMSulcInputs], output_dir: str | pathlib.Path, *, device: str = 'cuda:0', config: fnit.msm.config.MSMSulcConfig | str | pathlib.Path | None = None, execution: str = 'optimized', parallel: bool = True, cpu_threads: int | None = None) -> dict[str, pathlib.Path]",
+          "source": "src/fnit/msm/msmsulc.py",
+          "source_sha256": "a4ff7112888d645497ddbcc003059a810231d60a60dd9f06602fa7a94601f924",
+          "actual_import_and_callable_check": "passed"
+        },
+        {
+          "public_import": "fnit.msm.run_msmall",
+          "kind": "function_or_method",
+          "signature": "(inputs, output_dir, *, device='cuda:0', config=None, execution='optimized', parallel=True, cpu_threads=None)",
+          "source": "src/fnit/msm/msmall.py",
+          "source_sha256": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "fnit.melodic.run_melodic_bids / decompose_spatial_ica",
+      "manual": "docs/melodic/README.md",
+      "reference_function_or_command": "FSL `melodic`",
+      "public_apis": [
+        {
+          "public_import": "fnit.melodic.run_melodic_bids",
+          "kind": "function_or_method",
+          "signature": "(source_derivatives_root, derivatives_root, *, input_bold, brain_mask, n_components=None, device=None, voxel_batch_size=8192, max_iter=500, tolerance=0.001, random_state=0, mm_threshold=0.5, overwrite=False) -> fnit.melodic.bids.MelodicBIDSResult",
+          "source": "src/fnit/melodic/bids.py",
+          "source_sha256": "a272ad75955a6c1c19b5ce0e486f9609b32768d6df28e48760704cf641388aa3",
+          "actual_import_and_callable_check": "passed"
+        },
+        {
+          "public_import": "fnit.melodic.decompose_spatial_ica",
+          "kind": "function_or_method",
+          "signature": "(input_bold: 'str | Path', brain_mask: 'str | Path', output_dir: 'str | Path', *, n_components: 'int | None' = None, device: 'str | torch.device | None' = None, voxel_batch_size: 'int' = 8192, max_iter: 'int' = 500, tolerance: 'float' = 0.001, random_state: 'int' = 0, mm_threshold: 'float' = 0.5) -> 'ICAResult'",
+          "source": "src/fnit/melodic/ica.py",
+          "source_sha256": "66b8cfeb887fbebb64cc37565141bf2009a8bbb089228774b8093086195fb228",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "fnit.mshbm.parcellate_volume / parcellate",
+      "manual": "docs/mshbm/README.md",
+      "reference_function_or_command": "CBIG `CBIG_MSHBM_parcellation_single_subject`",
+      "public_apis": [
+        {
+          "public_import": "fnit.mshbm.parcellate_volume",
+          "kind": "function_or_method",
+          "signature": "(volume, left_surface, right_surface, cortical_mask, output_dir, *, assets=None, censor=None, w=200.0, c=50.0, device='cuda:0', frame_chunk=8, max_distance_mm=3.0)",
+          "source": "src/fnit/mshbm/volume.py",
+          "source_sha256": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+          "actual_import_and_callable_check": "passed"
+        },
+        {
+          "public_import": "fnit.mshbm.parcellate",
+          "kind": "function_or_method",
+          "signature": "(profiles, assets, w=200.0, c=50.0, *, max_outer=50, max_em=101, max_m=300, max_lambda=101)",
+          "source": "src/fnit/mshbm/core.py",
+          "source_sha256": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchTOPUP",
+      "manual": "docs/topup/README.md",
+      "reference_function_or_command": "FSL `topup`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchTOPUP",
+          "kind": "class",
+          "signature": "(device=None, *, config=None)",
+          "source": "src/fnit/topup/core.py",
+          "source_sha256": "d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchEDDY",
+      "manual": "docs/eddy/README.md",
+      "reference_function_or_command": "FSL `eddy_cuda`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchEDDY",
+          "kind": "class",
+          "signature": "(device='cuda:0', config: 'FSL2111Config | None' = None)",
+          "source": "src/fnit/eddy/fsl2111_strict/pipeline.py",
+          "source_sha256": "148335d9b4d314bcb216bbf95501e7574e3a8f30e50df60a965fbe9eca6bf0d4",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchDTIFIT",
+      "manual": "docs/dtifit/README.md",
+      "reference_function_or_command": "FSL `dtifit`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchDTIFIT",
+          "kind": "class",
+          "signature": "(device=None, *, weighted=False, chunk_size=131072)",
+          "source": "src/fnit/dtifit/core.py",
+          "source_sha256": "23e0fb554be1e0b309af154f34f5b6f7139db6e06ca8f10b1bd08be09789dc39",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchAMICONODDI",
+      "manual": "docs/amico_noddi/README.md",
+      "reference_function_or_command": "AMICO `Evaluation.fit`（NODDI）；NODDI Toolbox `batch_fitting_single`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchAMICONODDI",
+          "kind": "class",
+          "signature": "(device=None, *, config=None, fit_method='amico')",
+          "source": "src/fnit/amico_noddi/core.py",
+          "source_sha256": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchBEDPOSTX",
+      "manual": "docs/bedpostx/README.md",
+      "reference_function_or_command": "FSL `bedpostx` / `bedpostx_gpu`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchBEDPOSTX",
+          "kind": "class",
+          "signature": "(device='cpu', threads=None, *, nfibres=3, model=2, burnin=1000, njumps=1250, sample_every=25, ard_weight=1.0, chunk_size=16384, seed=8665904)",
+          "source": "src/fnit/bedpostx/core.py",
+          "source_sha256": "a1b2f8fd430168149c00788292ae5226bda01854df8065929feb2fd4ab52cc51",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "TorchProbtrackX",
+      "manual": "docs/probtrackx/README.md",
+      "reference_function_or_command": "FSL `probtrackx2` / `probtrackx2_gpu`",
+      "public_apis": [
+        {
+          "public_import": "fnit.TorchProbtrackX",
+          "kind": "class",
+          "signature": "(device='cpu', *, nsamples=5000, nsteps=2000, steplength=0.5, cthr=0.2, fibthresh=0.01, batch_size=16384, seed=12345, distthresh=0.0, sampvox=0.0, fibst=None, usef=False, randfib=0, pathdist=False, mean_path_length=False)",
+          "source": "src/fnit/probtrackx/pipeline.py",
+          "source_sha256": "75dd078ec3f627b975b39a7ae9e201c022df12dd131f95fda1bd11459d5b7edd",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "DMRIPipeline.run_bids",
+      "manual": "docs/dmri_pipeline/README.md",
+      "reference_function_or_command": "FSL TOPUP / EDDY / DTIFIT / TBSS + AMICO 或 MMORF（组合流程）",
+      "public_apis": [
+        {
+          "public_import": "fnit.DMRIPipeline.run_bids",
+          "kind": "function_or_method",
+          "signature": "(self, bids_root, output_dir, *, subject, session=None, run=None, acquisition=None, direction=None, fa_template, fa_skeleton=None, t1=None, t1_template=None, tensor_template=None, overwrite=False)",
+          "source": "src/fnit/dmri_pipeline/pipeline.py",
+          "source_sha256": "c95465d06f7af97849762c87cbbb19c6a9bc459f76c8ea98fd796e31ac702cb4",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "UKBConnectome_pipeline.run_bids",
+      "manual": "docs/connectome/README.md",
+      "reference_function_or_command": "MRtrix3 `dwi2response` / `dwi2fod` / `mtnormalise` / `tckgen` / `tcksift2` / `tck2connectome`（组合流程）",
+      "public_apis": [
+        {
+          "public_import": "fnit.UKBConnectome_pipeline.run_bids",
+          "kind": "function_or_method",
+          "signature": "(self, bids_root: 'str | Path', output_dir: 'str | Path', *, subject: 'str', n_seeds: 'int', atlas: 'str | Sequence[str]' = 'fs-aparc', session: 'str | None' = None, run: 'str | None' = None, acquisition: 'str | None' = None, direction: 'str | None' = None, t1: 'str | Path | None' = None, freesurfer_subject_dir: 'str | Path | None' = None, corrected_dwi: 'str | Path | None' = None, rotated_bvecs: 'str | Path | None' = None, eddy_gp_seed: 'int | None' = None, recon_backend: 'str' = 'auto', recon_options: 'Mapping | None' = None, checkpoint_dir: 'str | Path | None' = None, overwrite: 'bool' = False, **connectome_options) -> 'ConnectomeResult'",
+          "source": "src/fnit/connectome/pipeline.py",
+          "source_sha256": "8709c6d337b737bce1c8626bf6f1667155aa7f1c0fa395a1c457655e5a8f923e",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "fit_dictionary_learning / fit_dictionary_learning_streaming",
+      "manual": "docs/dictionary_learning/README.md",
+      "reference_function_or_command": "scikit-learn `MiniBatchDictionaryLearning.fit`",
+      "public_apis": [
+        {
+          "public_import": "fnit.fit_dictionary_learning",
+          "kind": "function_or_method",
+          "signature": "(projected: 'Mapping[str, np.ndarray]', dicl_dim: 'int', max_iter: 'int' = 1000, random_state: 'int' = 0) -> 'dict[str, np.ndarray]'",
+          "source": "src/fnit/dictionary_learning/cpu.py",
+          "source_sha256": "b6a4cde5d0b51dbb51bc8253cbdf816a3076103eb7c88cf68db53795eff09f97",
+          "actual_import_and_callable_check": "passed"
+        },
+        {
+          "public_import": "fnit.fit_dictionary_learning_streaming",
+          "kind": "function_or_method",
+          "signature": "(projected_dir: 'str | Path', modality_names: 'Sequence[str]', dicl_dim: 'int', *, device: 'str' = 'cuda:0', max_iter: 'int' = 1000, batch_size: 'int' = 32, sparse_iterations: 'int' = 1000, alpha: 'float' = 1.0, random_state: 'int' = 0, feature_block: 'int' = 4096) -> 'dict[str, np.ndarray]'",
+          "source": "src/fnit/dictionary_learning/torch_backend.py",
+          "source_sha256": "6f225f0ac9727934fe6fd2f298d586e7aea178a5e8db756c63e7acc8a8e72a99",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "fnit.bigflica.run_bigflica",
+      "manual": "docs/bigflica/README.md",
+      "reference_function_or_command": "BigFLICA `BigFLICA.BigFLICA_cpu.BigFLICA`",
+      "public_apis": [
+        {
+          "public_import": "fnit.bigflica.run_bigflica",
+          "kind": "function_or_method",
+          "signature": "(subjects_root: 'str | Path', modalities: 'Mapping[str, Mapping[str, str]]', output_dir: 'str | Path', n_components: 'int', migp_dim: 'int | None' = None, dicl_dim: 'int | None' = None, *, subjects: 'Sequence[str] | None' = None, device: 'str' = 'auto', dicl_max_iter: 'int' = 1000, flica_max_iter: 'int' = 1000, top_voxels: 'int' = 1000, random_state: 'int' = 0, max_gpu_gb: 'float' = 19.0, feature_block: 'int' = 2048, dicl_batch_size: 'int' = 32, dicl_sparse_iterations: 'int' = 1000, use_mmigp_dicl: 'bool' = True, flica_lambda_dims: 'str' = 'o') -> 'Path'",
+          "source": "src/fnit/bigflica/pipeline.py",
+          "source_sha256": "779d37dc32a74b23728db9ca9de39b246148449518a21938d28bd52666b67b48",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "run_superbigflica",
+      "manual": "docs/superbigflica/README.md",
+      "reference_function_or_command": "SuperBigFLICA `SupBigFLICA_cpu.SupervisedFLICA`",
+      "public_apis": [
+        {
+          "public_import": "fnit.run_superbigflica",
+          "kind": "function_or_method",
+          "signature": "(subjects_root: 'str | Path', modalities: 'Mapping[str, Mapping[str, str]]', phenotypes_csv: 'str | Path', targets: 'Mapping[str, str]', output_dir: 'str | Path', n_components: 'int', *, id_column: 'str' = 'subject_id', split_column: 'str | None' = None, subjects: 'Sequence[str] | None' = None, validation_fraction: 'float' = 0.2, test_fraction: 'float' = 0.2, max_epochs: 'int' = 50, batch_size: 'int' = 64, learning_rate: 'float' = 0.001, dropout: 'float' = 0.2, relative_weight: 'float' = 0.5, class_weight: 'str' = 'balanced', random_state: 'int' = 0, device: 'str' = 'auto', max_gpu_gb: 'float' = 19.0, feature_block: 'int' = 2048, top_voxels: 'int' = 1000, make_plots: 'bool' = True) -> 'Path'",
+          "source": "src/fnit/superbigflica/pipeline.py",
+          "source_sha256": "a7fc4934ff4103dbfd11e793e367e162c88f4f854cb094a390461bca4870a13b",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    },
+    {
+      "label": "run_bwas",
+      "manual": "docs/bwas/README.md",
+      "reference_function_or_command": "BWAS `BWAS_main.py`",
+      "public_apis": [
+        {
+          "public_import": "fnit.run_bwas",
+          "kind": "function_or_method",
+          "signature": "(bids_root: 'str | Path', participants_tsv: 'str | Path', mask_file: 'str | Path', output_root: 'str | Path', *, phenotype: 'str', covariates: 'tuple[str, ...]' = ('age', 'sex'), cdt: 'float' = 5.0, block_size: 'int | None' = None, subject_block_size: 'int | None' = None, num_workers: 'int' = 1, device: 'str' = 'cuda:0', fwhm: 'float | None' = None, validate_direct_ols: 'bool' = False, cache_root: 'str | Path | None' = None, column_tiles: 'int | None' = None, gpu_row_cache: 'bool | None' = None, _prepared_cache_dir: 'str | Path | None' = None, _prepared_packed_cache_dir: 'str | Path | None' = None) -> 'BWASResult'",
+          "source": "src/fnit/bwas/core.py",
+          "source_sha256": "b059dbfe84dd916beb1e19fbe81c081daaac7efbd2ddc611c178488dfb45a6b2",
+          "actual_import_and_callable_check": "passed"
+        }
+      ]
+    }
+  ]
+}

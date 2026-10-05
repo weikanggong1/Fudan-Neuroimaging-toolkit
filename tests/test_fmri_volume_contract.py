@@ -82,8 +82,10 @@ def volume_dependencies(tmp_path, monkeypatch):
         )
 
     def feat(**kwargs):
+        state.feat_kwargs = kwargs
         output = kwargs["output_dir"]
-        epi = _save(output / "example_func.nii.gz", np.ones((4, 5, 6)))
+        reference = nib.load(str(kwargs["reference_image"]))
+        epi = _save(output / "example_func.nii.gz", np.asarray(reference.dataobj), reference.affine)
         mask = _save(output / "mask.nii.gz", np.ones((4, 5, 6)))
         filtered = _save(output / "filtered_func_data.nii.gz", np.ones((4, 5, 6, 3)), tr=.8)
         motion = output / "motion.par"
@@ -164,6 +166,46 @@ def test_aroma_only_does_not_require_unused_csf_or_wm_masks(volume_dependencies)
     assert state.aroma_kwargs["wm_mask"] is None
     assert state.aroma_kwargs["regression_csf_mask"] is None
     assert not any(name.startswith("T1_pve_") for name in state.resampled_sources)
+
+
+def test_robust_reference_is_shared_by_hmc_bbr_and_published_output(volume_dependencies, monkeypatch):
+    """A supplied robust target must survive the full orchestration handoff."""
+    state = volume_dependencies
+    state.inputs.sbref = None
+    calls = []
+
+    def reference_builder(bold, output_dir, **options):
+        calls.append((bold, options))
+        target = _save(output_dir / "bold_reference.nii.gz", np.full((4, 5, 6), 42.))
+        metadata = output_dir / "bold_reference.json"
+        metadata.write_text(json.dumps({"strategy": "robust", "selected_indices": [0, 1]}))
+        return SimpleNamespace(reference=target, metadata=metadata)
+
+    monkeypatch.setattr(end_to_end, "prepare_bold_reference", reference_builder)
+    result = end_to_end.fMRIVolume_pipeline(**state.call)
+    assert len(calls) == 1 and calls[0][0] == state.inputs.bold
+    assert state.feat_kwargs["reference_image"].name == "bold_reference.nii.gz"
+    assert state.bbr_kwargs["epi"].name == "example_func.nii.gz"
+    np.testing.assert_array_equal(np.asarray(nib.load(result.bold_reference).dataobj), 42.)
+    metadata = json.loads(result.metadata.read_text())
+    assert metadata["FNIT"]["Configuration"]["bold_reference"]["selected_indices"] == [0, 1]
+    assert json.loads(sidecar(result.bold_reference).read_text())["FNIT"]["Reference"]["strategy"] == "robust"
+    actual_reference_sha = hashlib.sha256(result.bold_reference.read_bytes()).hexdigest()
+    assert json.loads(sidecar(result.bold_reference).read_text())["FNIT"]["SHA256"] == actual_reference_sha
+    assert actual_reference_sha != hashlib.sha256(state.inputs.bold.read_bytes()).hexdigest()
+
+
+def test_middle_reference_retains_the_legacy_comparison_without_calling_builder(volume_dependencies, monkeypatch):
+    state = volume_dependencies
+    state.inputs.sbref = None
+
+    def unexpected_builder(*args, **kwargs):
+        raise AssertionError("legacy comparison must retain the original middle frame")
+
+    monkeypatch.setattr(end_to_end, "prepare_bold_reference", unexpected_builder)
+    result = end_to_end.fMRIVolume_pipeline(**state.call, bold_reference_strategy="middle")
+    assert json.loads(result.metadata.read_text())["FNIT"]["Configuration"]["bold_reference"]["selected_indices"] == [1]
+    assert json.loads(sidecar(result.bold_reference).read_text())["FNIT"]["SHA256"] == hashlib.sha256(result.bold_reference.read_bytes()).hexdigest()
 
 
 def test_default_volume_keeps_slice_timing_disabled_with_bids_onsets(volume_dependencies):
