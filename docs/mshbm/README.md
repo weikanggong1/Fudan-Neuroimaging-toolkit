@@ -4,6 +4,8 @@
 
 随包资产包含 HCP_40 17-network prior、fsLR32k medial-wall mask、fs_LR_900 seed 和 mesh adjacency，来源为 CBIG commit `b69b822a15e2a94f1e439606552fc44b6858cf3c`，许可证为 CBIG MIT。
 
+最新完整 CPU 精度、1/8 物理核速度、分步骤时间与官方/GPU 验证状态见[2026-10-04 CPU benchmark](cpu_benchmark_20261004.md)。本轮提前提升推断内 profile 的 dtype；完整 profile、标签与科学输出已完成冻结版本对照。
+
 ## 输入
 
 CLI 支持以下单被试输入：
@@ -206,11 +208,11 @@ FNIT 的 `--timeseries` 对应 `params.lh_fMRI_list`，`--censor` 对应 `params
 
 真实前八帧的 GPU 三线性采样与 SciPy 独立插值比较为 `r=0.9999999999928`，MAE 0.000313；最大绝对差 0.01514（原始 BOLD 强度单位）。该结果验证采样坐标与插值，不验证整条 fMRI 预处理。单被试 Python/CLI 接口与 CPU/CUDA 坐标测试见[完整验证说明](../../validation/mshbm/processed_release.md)，其中记录每个网络 Dice、资源和输入 SHA-256、代码版本与计时。
 
-## CBIG 算法数值对照
+## 历史 CBIG 算法数值对照（2026-09-27）
 
 2026-09-27 在 headcw 的 Intel Xeon Gold 6418H 上固定 8 个 BLAS/MATLAB 线程，用 MSC02 的 100-frame、`100×59412` 真实五分钟 fsLR32k 静息态时序运行当时的发布源码。输入按前后各 50 frame 构成两节 pseudo-session。CBIG 参考为 commit `b69b822a15e2a94f1e439606552fc44b6858cf3c` 与 MATLAB R2018b。
 
-| 比较项 | CBIG MATLAB | FNIT 当前源码 | 结果 |
+| 比较项 | CBIG MATLAB | FNIT 当时源码 | 结果 |
 |---|---:|---:|---:|
 | session 1 二值 profile | 88,107,996 值 | 88,107,996 值 | 0 个不同 |
 | session 2 二值 profile | 88,107,996 值 | 88,107,996 值 | 0 个不同 |
@@ -221,7 +223,7 @@ FNIT 的 `--timeseries` 对应 `params.lh_fMRI_list`，`--censor` 对应 `params
 | 最大 RSS | 2,680,168 KiB | 2,257,836 KiB | FNIT 少 15.8% |
 | 原始 `.npy` 时序到标签 | — | 186.29 s | 含 profile 生成、推断与保存 |
 
-Matched 计时从相同的两份冻结二值 profile 开始，到标签写出结束，均包含解释器启动和文件 I/O。原始时序到标签的 186.29 秒多了相关矩阵与 profile 构建，因此不与 CBIG 的 matched 计时作加速比较。该推断部分使用 CPU，不使用 CUDA 或半精度。新增体积投影使用 CUDA；没有改变 `core.py` 的 MS-HBM 算法和固定 prior。
+Matched 计时从相同的两份冻结二值 profile 开始，到标签写出结束，均包含解释器启动和文件 I/O。原始时序到标签的 186.29 秒多了相关矩阵与 profile 构建，因此不与 CBIG 的 matched 计时作加速比较。该推断部分使用 CPU，不使用 CUDA 或半精度。当时新增的体积投影使用 CUDA；该历史测量绑定当时的 `core.py` 和固定 prior，不作为最新 CPU 优化结果。
 
 ![CBIG MATLAB 与 FNIT 的 MSC02 17 网络表面对照](figures/mshbm_cbig_comparison.png)
 

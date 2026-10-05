@@ -1,0 +1,44 @@
+{
+  "status": "static_review_complete_full_gpu_timing_pending",
+  "GPU_source_files": {
+    "src/fnit/mcflirt/_cost_cuda.py": {
+      "baseline_sha256": "e005d1553e36c2bdbcc94fd399e697ef3cd445beb78c0dcb87c07100ca0f98fa",
+      "candidate_sha256": "e005d1553e36c2bdbcc94fd399e697ef3cd445beb78c0dcb87c07100ca0f98fa",
+      "bit_equal": true
+    },
+    "src/fnit/mcflirt/_cuda_executor.py": {
+      "baseline_sha256": "ddb2172bf290023f41bc6e39ce0b47f3633a6c1be8303077b89d2682487d428c",
+      "candidate_sha256": "ddb2172bf290023f41bc6e39ce0b47f3633a6c1be8303077b89d2682487d428c",
+      "bit_equal": true
+    },
+    "src/fnit/mcflirt/_cuda_graph.py": {
+      "baseline_sha256": "1b0bda7f1e521f5c3e82f54d52e19e0db6282043bc1a23e0805a0ad640a28a26",
+      "candidate_sha256": "1b0bda7f1e521f5c3e82f54d52e19e0db6282043bc1a23e0805a0ad640a28a26",
+      "bit_equal": true
+    },
+    "src/fnit/mcflirt/_sampling_cuda.py": {
+      "baseline_sha256": "8f1b8b3ab03d819e3263319eaa0f9024a1a81c3f6d9a05304766ad463d885a42",
+      "candidate_sha256": "8f1b8b3ab03d819e3263319eaa0f9024a1a81c3f6d9a05304766ad463d885a42",
+      "bit_equal": true
+    },
+    "src/fnit/mcflirt/_rigid.py": {
+      "baseline_sha256": "ea6ca9d4aa6f87d8b353cecdfdd1650a99f4e3dcd558290815a4004935c2158e",
+      "candidate_sha256": "ea6ca9d4aa6f87d8b353cecdfdd1650a99f4e3dcd558290815a4004935c2158e",
+      "bit_equal": true
+    },
+    "src/fnit/fmri/_bbr_cuda.py": {
+      "baseline_sha256": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090",
+      "candidate_sha256": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090",
+      "bit_equal": true
+    }
+  },
+  "unchanged_mature_functions_ast": {
+    "src/fnit/mcflirt/core.py:_normcorr_reduce": true,
+    "src/fnit/mcflirt/core.py:TorchMCFLIRT": true,
+    "src/fnit/fmri/bbr.py:_resample": true,
+    "src/fnit/fmri/bbr.py:_BBRSchedule": true,
+    "src/fnit/fmri/bbr.py:BBRResult": true
+  },
+  "CPU_guard_dispatch": "All new Numba imports, finite/range scans and CPU NumPy work remain behind device.type == cpu. BBR reference schedule enables ordered CPU cost while CUDA reference retains Torch. dtype/gradient fallback preserved. No global Torch/Numba/OMP flags changed by new dispatch.",
+  "claim_boundary": "Static call tree review is not full GPU precision/performance evidence. Root will run frozen final source ABBA with shared GPU lock and independent memory monitoring."
+}

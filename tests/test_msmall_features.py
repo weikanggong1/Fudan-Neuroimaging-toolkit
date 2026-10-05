@@ -125,6 +125,38 @@ def test_wrn_preserves_source_weighting_and_leading_zero_columns():
     np.testing.assert_allclose(actual, expected, rtol=2e-11, atol=2e-11)
 
 
+def test_wrn_cpu_cached_bold_preserves_uncached_values_and_reductions(monkeypatch):
+    generator = torch.Generator().manual_seed(742)
+    data = torch.randn((64, 49), dtype=torch.float64, generator=generator)
+    reference = torch.randn((64, 8), dtype=torch.float64, generator=generator)
+    low_maps = [torch.randn((64, count), dtype=torch.float64, generator=generator)
+                for count in range(7, 22)]
+    area = torch.linspace(0.8, 1.2, 53, dtype=torch.float64)
+    arguments = dict(method="WRN", cortical_area=area, low_maps=low_maps,
+                     smooth=lambda value: value * 0.8)
+    # Differentiable data retains the pre-existing unshared reduction path.
+    differentiable_data = data.clone().requires_grad_()
+    expected = features._regression(differentiable_data, reference, **arguments)
+    original = features._demean
+    counts = {"spatial_bold": 0, "temporal_bold": 0}
+
+    def count_bold_reduction(value, axis):
+        if value.data_ptr() == data.data_ptr() and axis == 0:
+            counts["spatial_bold" if value.shape == data.shape else "temporal_bold"] += 1
+        return original(value, axis)
+
+    monkeypatch.setattr(features, "_demean", count_bold_reduction)
+    actual = features._regression(data, reference, **arguments)
+    assert counts == {"spatial_bold": 2, "temporal_bold": 1}
+    for before, after in zip(expected, actual):
+        assert torch.equal(before.detach(), after)
+    # Caching is excluded for an autograd caller; its original gradients
+    # remain usable after all 15 dimensions and the final weighted passes.
+    (expected[0].square().mean() + expected[1].square().mean()).backward()
+    assert torch.isfinite(differentiable_data.grad).all()
+    assert torch.count_nonzero(differentiable_data.grad) > 0
+
+
 def test_vn_regresses_retained_signal_instead_of_temporal_sd(tmp_path):
     rng = np.random.default_rng(840)
     mixing = rng.normal(size=(32, 3))

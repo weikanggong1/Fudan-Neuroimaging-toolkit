@@ -181,6 +181,15 @@ def compare_outputs(candidate, reference):
         reference_path = reference[name]
         if str(candidate_path).endswith((".nii", ".nii.gz", ".mgz", ".gii")):
             a, b = nib.load(candidate_path), nib.load(reference_path)
+            if (isinstance(a, nib.Cifti2Image) or isinstance(b, nib.Cifti2Image)
+                    or (isinstance(a, nib.gifti.GiftiImage) and len(a.darrays) != 1)
+                    or (isinstance(b, nib.gifti.GiftiImage) and len(b.darrays) != 1)):
+                # Geometry, ordered faces and CIFTI axes require the feature's
+                # adapter. A tuple of points/faces is not a rectangular array;
+                # CIFTI data also has no NIfTI-style spatial affine.
+                comparisons[name] = {"status": "format_needs_adapter_comparison",
+                                     "same_bytes": sha256(candidate_path) == sha256(reference_path)}
+                continue
             if hasattr(a, "dataobj"):
                 left, right = np.asanyarray(a.dataobj), np.asanyarray(b.dataobj)
                 affine_difference = float(np.max(np.abs(a.affine - b.affine)))
@@ -256,8 +265,8 @@ def run(args):
     backends = args.backends.split(",")
     if len(set(backends)) != len(backends) or not set(backends).issubset({"official", "baseline", "candidate"}):
         raise ValueError("Backends must be a distinct subset of official,baseline,candidate")
-    if not {"official", "candidate"}.issubset(backends):
-        raise ValueError("Official and candidate are required for official comparisons")
+    if "official" not in backends or not ({"candidate", "baseline"} & set(backends)):
+        raise ValueError("Official and at least one FNIT source are required for official comparisons")
     cpus = [int(value) for value in args.cpuset.split(",")]
     if not budgets or min(budgets) < 1 or max(budgets) > len(cpus):
         raise ValueError("Provide at least one distinct allowed CPU per requested thread")
@@ -359,13 +368,12 @@ def run(args):
                     save_json(work / "timing.private.json", scope)
                 scope["load_after"] = os.getloadavg()
                 scope["official_output_metadata"] = output_metadata(output_sets["official"])
-                scope["accuracy"] = {
-                    "candidate_vs_official": compare_outputs(output_sets["candidate"], output_sets["official"]),
-                }
-                if "baseline" in backends:
-                    scope["accuracy"].update({
-                        "baseline_vs_official": compare_outputs(output_sets["baseline"], output_sets["official"]),
-                        "candidate_vs_baseline": compare_outputs(output_sets["candidate"], output_sets["baseline"])})
+                scope["accuracy"] = {}
+                for left, right in (("candidate", "official"), ("baseline", "official"),
+                                    ("candidate", "baseline")):
+                    if left in output_sets and right in output_sets:
+                        scope["accuracy"][left + "_vs_" + right] = compare_outputs(
+                            output_sets[left], output_sets[right])
                 if hasattr(plugin, "compare_case"):
                     scope["adapter_accuracy"] = plugin.compare_case(case, output_sets, resources)
                 scope["input_metadata_after"] = input_metadata(case)

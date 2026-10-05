@@ -12,6 +12,7 @@ import torch
 
 from ._execution import cpu_workers, record_statistics
 from ._spatial import ExactCellNearest
+from . import _point_cpu
 
 
 def _dot(first, second):
@@ -31,6 +32,8 @@ def _norm(vector):
 
 
 def _normalize(vector):
+    if _point_cpu.enabled(vector):
+        return _point_cpu.normalize(vector)
     length = _norm(vector)
     return vector/torch.where(length > 1e-8, length, torch.ones_like(length))[..., None]
 
@@ -52,7 +55,9 @@ def _edge_distance(points, triangles):
         edge = second-first
         first_delta, second_delta = points-first, points-second
         valid = (_dot(first_delta, edge) > 0) & (_dot(second_delta, edge) < 0)
-        distance = _norm(_cross(first_delta, second_delta))/_norm(edge)
+        numerator, denominator = _norm(_cross(first_delta, second_delta)), _norm(edge)
+        distance = (_point_cpu.divide(numerator, denominator) if _point_cpu.enabled(numerator, denominator)
+                    else numerator/denominator)
         best = torch.where(valid & (distance < best), distance, best)
     for corner in (a, b, c):
         distance = _norm(points-corner)
@@ -62,6 +67,8 @@ def _edge_distance(points, triangles):
 
 def _area_weights(triangles, points):
     """Unsigned area weights with the source's three-term arithmetic order."""
+    if _point_cpu.enabled(triangles, points):
+        return _point_cpu.area_weights(triangles, points)
     a, b, c = triangles.unbind(-2)
     first = _norm(_cross(b-points, c-points))*0.5
     second = _norm(_cross(a-points, c-points))*0.5
@@ -101,6 +108,20 @@ class RadialSphereMap:
             self.normal, self.normal_dot_a, self.edge_normals = _projection_geometry(self.triangles)
 
     def _select(self, points, nearest):
+        if (self.device.type == 'cpu' and self.execution == 'optimized'
+                and _point_cpu.enabled(
+                    points, self.triangles, self.normal, self.normal_dot_a, *self.edge_normals)):
+            # Independent CPU query rows avoid materializing point-by-face
+            # triangle/cross-product tensors. Cached PyTorch geometry and
+            # scalar operation order are retained. CUDA stays on its batched
+            # tensor path; differentiable callers retain that path as well.
+            from ._sphere_cpu import select_faces
+            values = select_faces(
+                points.numpy(), nearest.numpy(), self.incident.numpy(),
+                self.triangles.numpy(), self.normal.numpy(), self.normal_dot_a.numpy(),
+                *(edge.numpy() for edge in self.edge_normals), cpu_threads=self.cpu_threads)
+            face, projected, exists, ambiguous = (torch.from_numpy(value) for value in values)
+            return face, projected, exists, ambiguous if self.source_precision else None
         candidates = self.incident[nearest].reshape(len(points), -1)
         if self.execution == 'optimized':
             triangles = self.triangles[candidates]
@@ -112,7 +133,9 @@ class RadialSphereMap:
             normal, top, (ab, bc, ca) = _projection_geometry(triangles)
         a, b, c = triangles.unbind(-2)
         denominator = _dot(normal, points[:, None, :])
-        projected = points[:, None, :]*(top/denominator)[:, :, None]
+        ratio = (_point_cpu.divide(top, denominator) if _point_cpu.enabled(top, denominator)
+                 else top/denominator)
+        projected = points[:, None, :]*ratio[:, :, None]
         inside_ab = _dot(_cross(b-a, projected-a), ab) > -1e-8
         inside_bc = _dot(_cross(c-b, projected-b), bc) > -1e-8
         inside_ca = _dot(_cross(a-c, projected-c), ca) > -1e-8

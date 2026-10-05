@@ -29,12 +29,12 @@ CUDA 路径将行范围计算、坐标生成、三线性采样、1 mm 边界降�
 
 - **CPU 变换缓存。** 每个固定重心的搜索保存最近一次各轴角度及旋转矩阵；只改变平移时直接复制三轴旋转的组合再加平移，只改变一个角度时复用另外两轴。角度按 float64 原始字节比较，正负零不会共用缓存。仍用共享 FLIRT 的逐轴旋转和 `I @ Rx @ Ry @ Rz` 运算顺序，不改三角函数和矩阵乘法。pull 系数复用固定 voxel size 的两份对角矩阵，每次仍按原顺序求逆、乘积，再缩窄到 float32。
 - **NCC 的 CUDA graph。** 每次 `run` 为 8 mm、4 mm 参考分别保存采样缓冲区和 graph；两个 4 mm 阶段复用同一 workspace。graph 捕获并重放既有的编译 NCC 归约，继续使用原行、层累加顺序和连续计数。帧切换时复制完整 float32 moving 到固定地址。变换系数、融合采样和返回标量所需的同步仍按实际 cost 执行。
-- **最终 motion-only 样条采样 graph。** 复用逐帧最终样条采样的固定缓冲区和 CUDA graph，保持原 Constant 样条、extraslice 边界和输出类型转换。三线性最终采样和 CPU 沿用原路径；组合 nonlinear warp 的采样流程由原接口处理。
+- **最终 motion-only 样条采样 graph。** CUDA 复用逐帧最终样条采样的固定缓冲区和 graph，保持原 Constant 样条、extraslice 边界和输出类型转换；CUDA 三线性与组合 nonlinear warp 仍由既有接口处理。CPU v4 的线性/样条路径使用有序 Numba 内核，逐步 float32 坐标、double 样条累加和每轴前滤波舍入保持不变；完整 180/490 帧 helper 已逐值核对，最终完整 API 验收范围见 [CPU 专页](CPU_BENCHMARK_20261004.md)。
 - **按输出要求计算 RMS。** 仅请求 `rmsrel` 或 `rmsabs` 时计算对应 RMS 和均值，保留原 80 mm 球体定义及文本格式。
 
 这些改动复用相同计算及固定数据，没有减少 cost 求值、放宽 Brent 容差、改变三阶段顺序或使用 float16。完整时序的精度及计时以本轮配对验证为准。
 
-Python、命令行参数及输出结构均无需调整。融合采样需要 Triton；项目 [Conda 环境](../../environment.yml)已包含与 PyTorch 2.5.1 对应的 `triton==3.1.0`。CPU 路径，以及无法导入 Triton 时的 CUDA cost 采样，使用既有 PyTorch 张量实现。2026-10-02 正常缓存配置的 H100 双卡 focused 检查 **74 项通过、0 跳过**，覆盖精确缓存、融合采样、原归约 graph 重放、最终采样及非默认 device/stream；实际源码、Git 及运行前后哈希核对见[测试报告](../../validation/mcflirt/review_tests_exact_latest.public.json)。该历史检查未覆盖本轮发现的无缓存配置。
+Python、命令行参数及输出结构均无需调整。融合采样需要 Triton；项目 [Conda 环境](../../environment.yml)已包含与 PyTorch 2.5.1 对应的 `triton==3.1.0`。CPU 成本采用专属有序行采样 helper，保持逐次 float32 坐标、插值和行/平面归约；计数的累计求和沿用 PyTorch CPU 的双精度累加及 float32 输出。无法导入 Triton 时的 CUDA cost 采样使用既有 PyTorch 张量实现。CPU 完整精度和当前性能状态见 [2026-10-04 CPU 专页](CPU_BENCHMARK_20261004.md)。2026-10-02 正常缓存配置的 H100 双卡 focused 检查 **74 项通过、0 跳过**，覆盖精确缓存、融合采样、原归约 graph 重放、最终采样及非默认 device/stream；实际源码、Git 及运行前后哈希核对见[测试报告](../../validation/mcflirt/review_tests_exact_latest.public.json)。该历史检查未覆盖本轮发现的无缓存配置。
 
 ### 2026-10-03 pipeline 接入暴露的成熟子函数 bug
 
@@ -136,6 +136,10 @@ mcflirt -in sub-01_task-rest_bold.nii.gz \
 省略 `-reffile` 使用中间帧；省略 `-spline_final` 使用三线性最终采样。`-mats`、`-plots` 和 RMS 开关只控制文件输出，不改变估计流程。
 
 ## 5. 真实数据精度、耗时与脑图
+
+### 2026-10-04 完整 CPU 官方 benchmark
+
+[CPU 专页](CPU_BENCHMARK_20261004.md)记录完整 180/490 帧、默认三阶段、最终样条及正常文件的原 MCFLIRT、冻结主仓库和 CPU 候选 v2。1/8 线程的完整矩阵、参数、影像及 header 与冻结版本逐位相同；速度尚未达标，8 线程 v2 正式计时出现回退。页面列出全体素官方误差、内部 profile、已执行及待执行功能，完整 GPU ABBA 由协调任务验收。
 
 ### 2026-10-03 公开 CON03 的无缓存修复回归
 

@@ -1,16 +1,27 @@
 # FNIT MSM：MSMSulc 与 MSMAll
 
-2026-10-02 的 `9f9f63e` 完整 surface 复测中，新版串行与旧版 `954ad19`、新版并行与新版串行的球面和全部 490 帧时序逐值相同。对独立官方单线程完整链，球面角差均值仍为左 **0.221050°**、右 **0.319595°**，CIFTI 时间 r 均值 **0.977911**。执行优化保持 FNIT 已有结果；这次独立完整链仍未逐值匹配官方。见[最新完整复测](../../validation/fmri/surface_gpu_parallel/README.md)；本页 `4f7bd9f2` 的固定输入专项结果保留其原实测范围。
+## 1. 功能简介
 
 `fnit.msm` 提供独立的 MSMSulc、[MSMAll 多特征配准](msmall.md)和 [VN、DR/WRN 与特征准备](features.md)。本页介绍 MSMSulc：先按 newMSM 的有限差分规则估计刚性初始化，再用 162→642→2,562 个控制点优化脑沟相似度和三角形应变；HOCR 降阶与 FastPD 选择联合位移。输出球面保持原生顶点顺序。运行时不调用官方 MSM 或 FreeSurfer；准备阶段使用 Connectome Workbench。MSMAll 使用独立的 `MSMAllConfig` 与 `run_msmall`，默认 MSMSulc 调用保持原接口。
-
-新增 MSMAll 以一例真实 WRN `C` 特征独立验证：完整一级和三级配置的双侧球面及固定 490 帧投影均与官方逐值相同。H100 冷/热配准分别为 **20.31/20.39 s** 与 **167.72/166.63 s**，对应官方单线程为 **105.02 s** 与 **2,155.63 s**。这是准备好的连接特征到球面及固定 BOLD 的专项对照，结果与上方默认 MSMSulc 完整 surface 的测量分别记录；输入、配置、范围及修复原因见 [MSMAll 功能页](msmall.md)和[匿名汇总](../../validation/msm/msmall.current.public.json)。
 
 MSMAll 集成测试还定位了共享 MSMSulc 入口的 CUDA 启动问题：独立 Python 进程中，第一次分配 CUDA 张量前重置显存统计可能报 `invalid-device`。现在先初始化 CUDA，再进入阶段计时和显存统计；配准计算未变。MSMSulc 与 MSMAll 两种新进程 GPU 调用测试均已通过。
 
 默认使用 HCP/sMRIPrep 的四级配置：`simval=3,2,2,2`，最大迭代数 `50,10,15,15`。官方 newMSM 将历史仿射相似度值 3 转为 Pearson 2；FNIT 保持该行为。几何、相似度和优化标量使用 float64，写出的 GIFTI 顶点为 float32；没有使用 FP16/BF16。刚性坐标与离散成本在 PyTorch 上计算，刚性加权相似度、每轮 Rodrigues 矩阵及 HOCR/FastPD 使用包内独立 C++ 算子；矩阵缓存后，所有位移标签在 GPU 应用。默认优化路径缓存固定几何并合并传输，`execution="reference"` 保留逐块检查供回归对照；二者使用相同的算法和停止条件。
 
-## 输入与调用
+```mermaid
+flowchart LR
+    I[同源 recon-all 与 HCP 模板] --> P[双侧 FS→fsLR 初始球面与脑沟]
+    P --> A[刚性初始化]
+    A --> D[三阶段离散配准]
+    D --> N[原生顶点插值与几何检查]
+    N --> O[双侧 GIFTI 球面与报告]
+    classDef mono fill:#fff,stroke:#000,color:#000;
+    class I,P,A,D,N,O mono;
+```
+
+<a id="输入与调用"></a>
+
+## 2. Python 调用、输入与输出
 
 先用同一 recon-all 结果和 `fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep` 准备 HCP 参考文件。需要 `surf/lh|rh.{white,pial,sphere,sphere.reg,sulc,thickness}` 和 `mri/orig/001.mgz`；T2w、FLAIR 不参与此配准。`prepare_fmriprep_surface_inputs` 产生的 `initial_spheres` 分别是左、右 FS→fsLR 初始球面，顶点顺序与原生 mesh 相同。
 
@@ -102,7 +113,9 @@ CON10 的[原生产 QC](../../validation/fmri/public_ten_20261003/reconstruction
 
 官方配置的 `--numthreads=N` 是 CPU 执行参数，FNIT 识别该字段并使用所选 PyTorch 设备；旧 `--threads=N` 写法仍可读取。配置文件支持本页的 MSMSulc 选项，不覆盖 newMSM 的其他注册算法。
 
-## 命令行调用
+<a id="命令行调用"></a>
+
+## 3. 命令行调用
 
 ```bash
 fnit-msm msmsulc \
@@ -114,7 +127,9 @@ fnit-msm msmsulc \
 
 JSON 顶层含 `L`、`R`；每侧填 `MSMSulcInputs` 的六个文件路径，可用绝对路径或相对清单目录的路径。`--config` 与 `--execution` 对应上述 Python 参数；`--cpu-threads` 为总 CPU 预算，`--no-parallel` 对应 `parallel=False`。MSMAll 命令使用 `fnit-msm msmall`，支持相同执行参数；完整输入和例子见[功能页](msmall.md)。
 
-## 原版对照命令
+<a id="原版对照命令"></a>
+
+## 4. 原版对照命令
 
 以下命令只在独立基准环境中运行。安装器提供的 HCP 配置 SHA-256 为 `46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203`，未指定线程数。对照时复制配置并在末尾追加 `--numthreads=1`；线程数是配置选项。FNIT 不调用官方命令。
 
@@ -132,9 +147,26 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
   --out=/absolute/path/reference/L.
 ```
 
-## 真实数据基准
+<a id="真实数据基准"></a>
 
-### 本轮完整 surface 内调用
+## 5. 真实数据精度与耗时
+
+### CPU 官方配对与本轮修复
+
+[2026-10-04 起的 CPU 官方对照](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)使用相同物理核预算和完整双侧顶点，分别运行实际 newMSM、冻结 `cc940273` 与优化候选；原版 1/8 线程和 GPU 旧/新结果分别记录。CPU1 基线完整 MSMSulc 为原版 1550.168 s、FNIT 2185.466 s，角差 L/R mean 0.587 / 0.554°，没有达到严格原版参照。
+
+这次核对发现成熟球面子函数的 CPU 向量除法舍入会改变共享边面归属。已将 CPU float64 无梯度的 Point normalize、tangent、投影除法和 unsigned area 改为 literal double 顺序，并对 containing-face 查询复用静态几何。完整四级候选 CPU1/8 的全部双侧球面坐标与有序 faces 都和原版严格单线程逐位相同，角差为 0；CPU1/8 球面文件 SHA 相同。原版与候选左侧都存在 1 个取向改变面，右侧为 0，几何检查单独保留。
+
+| 完整双侧 MSMSulc | 原版 fresh / s | FNIT fresh / s | FNIT 完整 API / s |
+| --- | ---: | ---: | ---: |
+| CPU1 | 1537.903 | 455.084 | 452.696 |
+| CPU8 | 466.986 | 173.393 | 171.057 |
+
+每项是在 nodecw8 同一 CPU 预算的一次完整运行，fresh 包括程序启动和读写。实际锁内候选源码树 SHA、输入不变检查、负载和 CPU 使用见[最新聚合回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。CUDA、float32 和梯度运算保留已有 Tensor 路径；最终快照的完整 GPU 回归另列，下方历史 GPU 专项保留其实际源码范围。
+
+### 历史完整 surface 内调用
+
+2026-10-02 的 `9f9f63e` 完整 surface 复测中，新版串行与旧版 `954ad19`、新版并行与新版串行的球面和全部 490 帧时序逐值相同。对独立官方单线程完整链，球面角差均值仍为左 **0.221050°**、右 **0.319595°**，CIFTI 时间 r 均值 **0.977911**。执行优化保持 FNIT 已有结果；这次独立完整链仍未逐值匹配官方。见[最新完整复测](../../validation/fmri/surface_gpu_parallel/README.md)；本页 `4f7bd9f2` 的固定输入专项结果保留其原实测范围。
 
 同一例已有 volume 和 recon-all/graymid、490 帧、TR 0.735 s、STC 关闭，三次均重新准备输入并估计双侧 MSMSulc。表中 MSM 时间**包含准备与配准**，完整 API 另含投影、CIFTI、QC 和最终保存；不包含前序 volume、recon-all、编译、包导入或 CUDA 初始化。
 
@@ -147,7 +179,9 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 局部 CPU 总预算为 8，并行时左右各 4；CUDA 上限 20 GB、TF32 开启。注册球面、左右 GIFTI 与 CIFTI 的全部数值，及有效科学配置和 21 结构轴/metadata，旧→新版串行、串行→并行均严格相同。卡号和共享负载不同，耗时是各一次完整观测。新版初次在 GPU 1 初始化失败，未进入 API；表中并行为 GPU 0 新目录的成功运行。实际报告、严格 native 编译 SHA、逐侧执行计数及官方差异见[完整验证页](../../validation/fmri/surface_gpu_parallel/README.md)，实测/发布的全部 116 个 runtime 文件另由[源码回溯](../../validation/fmri/surface_gpu_parallel/publication_runtime.public.json)逐项核验。
 
-### 共享 MSMAll 真实回归
+### 共享 MSMAll 历史真实回归
+
+新增 MSMAll 以一例真实 WRN `C` 特征独立验证：完整一级和三级配置的双侧球面及固定 490 帧投影均与官方逐值相同。H100 冷/热配准分别为 **20.31/20.39 s** 与 **167.72/166.63 s**，对应官方单线程为 **105.02 s** 与 **2,155.63 s**。这是准备好的连接特征到球面及固定 BOLD 的专项对照，结果与上方默认 MSMSulc 完整 surface 的测量分别记录；输入、配置、范围及修复原因见 [MSMAll 功能页](msmall.md)和[匿名汇总](../../validation/msm/msmall.current.public.json)。
 
 共享 MSMAll 另用同一真实 C 特征复测：旧版串行→新版并行，coarse 一级 **23.237→11.430 s**，refine 三级 **181.790→90.796 s**，两侧注册坐标/拓扑/GIFTI metadata 严格相同。四次均为 GPU 0、CPU 总预算 8，新版 allocated 峰值 **0.2194 / 1.4662 GB**；计时包含既有特征读取、配准和写盘，不含特征估计或 BOLD 投影。历史保存的单线程官方球面坐标/拓扑也相同，metadata 不同，且缺历史逐输入 SHA，仅作为保存结果回归。详细边界见[真实 MSMAll 配对](../../validation/fmri/surface_gpu_parallel/msmall_paired.public.json)。
 
@@ -174,8 +208,11 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 本例最终原生输出翻折数为左侧 **1**、右侧 **0**，与官方相同；报告按实际 float32 保存坐标计算，保留迭代中的展开处理。
 
-## 最近版本与 benchmark 记录
+<a id="最近版本与-benchmark-记录"></a>
 
+## 6. 最近版本与 benchmark 记录
+
+- 2026-10-04 起：新增 CPU 1/8 官方整例对照、CPU Point 舍入修复和 fused containing-face 查询；完整候选的执行/验收状态与 GPU 配对见新报告。
 | 实测或更新 | 范围与记录 |
 |---|---|
 | `9f9f63e` GPU 重采样与双侧并行 | 严格最近邻证明、有序 GPU CSR、独立 stream 与原生 GIL 释放；完整 surface 的球面/490 帧时序保持旧版数值。MSM 准备＋配准串行/并行为 **116.361 / 94.773 s**，完整 API 为 **343.056 / 243.695 s**；两次物理 GPU 不同。修复调用方峰值统计和空标签形状，见[最新完整复测](../../validation/fmri/surface_gpu_parallel/README.md)。 |
@@ -183,7 +220,9 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 | `7102c187` 完整 surface 历史 | 重新准备几何、估计球面并投影 preproc；CIFTI 时间 r 均值 0.977911，范围包含完整 surface，见[历史完整报告](../../validation/fmri/surface_e2e/README.md)。 |
 | 2026-10 MSMAll 扩展 | 新增独立 MSMAll、VN/DR/WRN 与 C/CA/CAT 特征准备；共享应变成本保留既有 MSMSulc 运算顺序。MSMAll 的真实 C 模式结果单独记录，以上测量保留原源码快照。 |
 
-## 参考文献与原实现
+<a id="参考文献与原实现"></a>
+
+## 7. 参考文献与原实现
 
 - Robinson 等，*Multimodal surface matching with higher-order smoothness constraints*，NeuroImage，2018，[DOI](https://doi.org/10.1016/j.neuroimage.2017.10.037)。
 - Ishikawa，*Transformation of General Binary MRF Minimization to the First-Order Case*，IEEE TPAMI，2011，[DOI](https://doi.org/10.1109/TPAMI.2010.91)。

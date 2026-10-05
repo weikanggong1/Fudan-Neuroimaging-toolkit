@@ -1,0 +1,498 @@
+{
+  "baseline_1": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume-api",
+    "device": "cuda:0",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.0322898686863482,
+      "complete_volume_api": 95.00175834586844
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "gpucw1",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "function_chain_seconds": 95.68836209410802,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3823,
+      "4": 2386,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4421,
+      "11": 5272,
+      "12": 4369,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.12355487636995,
+        "cost": 549349990.559671
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.4143955767856,
+        "cost": 549386849.2796539
+      }
+    ],
+    "maximum_rss_kib": 3931440,
+    "gpu": {
+      "peak_allocated_bytes": 183072768,
+      "peak_reserved_bytes": 320864256,
+      "tf32_matmul": true,
+      "tf32_cudnn": true
+    },
+    "adapter_entry_seconds": 99.00350683508441,
+    "outputs_sha256": {
+      "rh_labels.npy": "11ae129326bcec15a6423dddb0deaba97c5930b60966192aadf52c2295221a6e",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "63c8f4b89a587d432ddbfd8e1e2effac3e45a4583dd3f5ae15ec07573a28be93",
+      "network_timeseries.tsv": "fda56f79077d3c1f32f42a61bf6917c3e08372c5a8def7053df6ba35e2a15172",
+      "labels_fslr32k_64984.npy": "c908390bbeb2aa8ca84310ae8e2ee3e01a282314c9a089ad22de60b9911f83a7",
+      "network_correlation.tsv": "d397cd6d45aaf08ce7e067abe1b660a0e3518ba2b23eec476788a01a75aed9d3",
+      "labels_mni.nii.gz": "70172f7d8422646ce5b94b1ea309d2b7f511344845f447e3d25a8065b961c916"
+    }
+  },
+  "candidate_1": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume-api",
+    "device": "cuda:0",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.03141883295029402,
+      "complete_volume_api": 28.104938028845936
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "gpucw1",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "function_chain_seconds": 28.80046028085053,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3823,
+      "4": 2386,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4421,
+      "11": 5272,
+      "12": 4369,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.12355487641884,
+        "cost": 549349990.5596709
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.41439557689944,
+        "cost": 549386849.2796539
+      }
+    ],
+    "maximum_rss_kib": 3931508,
+    "gpu": {
+      "peak_allocated_bytes": 183072768,
+      "peak_reserved_bytes": 320864256,
+      "tf32_matmul": true,
+      "tf32_cudnn": true
+    },
+    "adapter_entry_seconds": 31.981368797831237,
+    "outputs_sha256": {
+      "rh_labels.npy": "11ae129326bcec15a6423dddb0deaba97c5930b60966192aadf52c2295221a6e",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "63c8f4b89a587d432ddbfd8e1e2effac3e45a4583dd3f5ae15ec07573a28be93",
+      "network_timeseries.tsv": "fda56f79077d3c1f32f42a61bf6917c3e08372c5a8def7053df6ba35e2a15172",
+      "labels_fslr32k_64984.npy": "c908390bbeb2aa8ca84310ae8e2ee3e01a282314c9a089ad22de60b9911f83a7",
+      "network_correlation.tsv": "d397cd6d45aaf08ce7e067abe1b660a0e3518ba2b23eec476788a01a75aed9d3",
+      "labels_mni.nii.gz": "70172f7d8422646ce5b94b1ea309d2b7f511344845f447e3d25a8065b961c916"
+    }
+  },
+  "candidate_2": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume-api",
+    "device": "cuda:0",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.031157339923083782,
+      "complete_volume_api": 27.824127957690507
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "gpucw1",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "function_chain_seconds": 28.46829752996564,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3823,
+      "4": 2386,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4421,
+      "11": 5272,
+      "12": 4369,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.12355487641884,
+        "cost": 549349990.5596709
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.41439557689944,
+        "cost": 549386849.2796539
+      }
+    ],
+    "maximum_rss_kib": 3931500,
+    "gpu": {
+      "peak_allocated_bytes": 183072768,
+      "peak_reserved_bytes": 320864256,
+      "tf32_matmul": true,
+      "tf32_cudnn": true
+    },
+    "adapter_entry_seconds": 31.127986205741763,
+    "outputs_sha256": {
+      "rh_labels.npy": "11ae129326bcec15a6423dddb0deaba97c5930b60966192aadf52c2295221a6e",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "63c8f4b89a587d432ddbfd8e1e2effac3e45a4583dd3f5ae15ec07573a28be93",
+      "network_timeseries.tsv": "fda56f79077d3c1f32f42a61bf6917c3e08372c5a8def7053df6ba35e2a15172",
+      "labels_fslr32k_64984.npy": "c908390bbeb2aa8ca84310ae8e2ee3e01a282314c9a089ad22de60b9911f83a7",
+      "network_correlation.tsv": "d397cd6d45aaf08ce7e067abe1b660a0e3518ba2b23eec476788a01a75aed9d3",
+      "labels_mni.nii.gz": "70172f7d8422646ce5b94b1ea309d2b7f511344845f447e3d25a8065b961c916"
+    }
+  },
+  "baseline_2": {
+    "schema_version": 1,
+    "case": "CASE01",
+    "kind": "volume-api",
+    "device": "cuda:0",
+    "threads": 8,
+    "inputs": [
+      {
+        "size": 495020019,
+        "sha256": "a2668d4394417d201f55464be240987161af995e8983603299db75f984b152d9"
+      }
+    ],
+    "stages_seconds": {
+      "load_assets": 0.031073066405951977,
+      "complete_volume_api": 94.29451176943257
+    },
+    "source_sha256": {
+      "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+      "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+      "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+      "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+      "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    "profiling_run": false,
+    "numerics": {
+      "profiles": "float32",
+      "inference_state": "float64",
+      "float16": false,
+      "budgets": {
+        "max_outer": 50,
+        "max_em": 101,
+        "max_m": 300,
+        "max_lambda": 101
+      }
+    },
+    "environment": {
+      "hostname": "gpucw1",
+      "affinity": [
+        2,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "torch": "2.5.1",
+      "nibabel": "5.4.2",
+      "torch_threads": 8,
+      "torch_interop_threads": 1,
+      "threadpools": "unavailable"
+    },
+    "actual_import_matches_frozen_source": true,
+    "frozen_baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "git_commit": null,
+    "assets_sha256": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "w": 200.0,
+    "c": 50.0,
+    "input_shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "function_chain_seconds": 94.93623194703832,
+    "labels_shape": [
+      64984
+    ],
+    "label_counts": {
+      "0": 5574,
+      "1": 4056,
+      "2": 3326,
+      "3": 3823,
+      "4": 2386,
+      "5": 3420,
+      "6": 2834,
+      "7": 6065,
+      "8": 3691,
+      "9": 4875,
+      "10": 4421,
+      "11": 5272,
+      "12": 4369,
+      "13": 2276,
+      "14": 2387,
+      "15": 2446,
+      "16": 2664,
+      "17": 1099
+    },
+    "history": [
+      {
+        "outer": 1,
+        "em": 5,
+        "kappa": 389.12355487636995,
+        "cost": 549349990.559671
+      },
+      {
+        "outer": 2,
+        "em": 2,
+        "kappa": 388.4143955767856,
+        "cost": 549386849.2796539
+      }
+    ],
+    "maximum_rss_kib": 3931500,
+    "gpu": {
+      "peak_allocated_bytes": 183072768,
+      "peak_reserved_bytes": 320864256,
+      "tf32_matmul": true,
+      "tf32_cudnn": true
+    },
+    "adapter_entry_seconds": 98.03089248295873,
+    "outputs_sha256": {
+      "rh_labels.npy": "11ae129326bcec15a6423dddb0deaba97c5930b60966192aadf52c2295221a6e",
+      "lh_labels.npy": "4045a343838593bfa115a5fb57de73c920296ec31c2fc1d5e48fcb77aafa2cad",
+      "labels_fslr32k.dlabel.nii": "63c8f4b89a587d432ddbfd8e1e2effac3e45a4583dd3f5ae15ec07573a28be93",
+      "network_timeseries.tsv": "fda56f79077d3c1f32f42a61bf6917c3e08372c5a8def7053df6ba35e2a15172",
+      "labels_fslr32k_64984.npy": "c908390bbeb2aa8ca84310ae8e2ee3e01a282314c9a089ad22de60b9911f83a7",
+      "network_correlation.tsv": "d397cd6d45aaf08ce7e067abe1b660a0e3518ba2b23eec476788a01a75aed9d3",
+      "labels_mni.nii.gz": "70172f7d8422646ce5b94b1ea309d2b7f511344845f447e3d25a8065b961c916"
+    }
+  }
+}

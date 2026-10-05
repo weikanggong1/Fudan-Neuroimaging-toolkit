@@ -66,6 +66,9 @@ def _local_normals(vertices,faces,incident=None):
 
 def _tangent_basis(normals):
     """Source calculate_tangs branch order and Point normalization."""
+    from . import _point_cpu
+    if _point_cpu.enabled(normals):
+        return _point_cpu.tangent_basis(normals)
     x,y,z=normals.unbind(-1)
     first=(x.abs()>=y.abs())&(x.abs()>=z.abs())
     second=(~first)&(y.abs()>=x.abs())&(y.abs()>=z.abs())

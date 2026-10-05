@@ -1,0 +1,348 @@
+{
+  "schema_version": 1,
+  "status": "complete_CPU_defaults_and_exact_oldnew_gate",
+  "baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+  "candidate": "Frozen task01 candidate_v4 CPU-only optimizations",
+  "cpu_node": "nodecw8",
+  "complete_real_inputs": {
+    "mc180": [
+      64,
+      64,
+      42,
+      180
+    ],
+    "mc490": [
+      88,
+      88,
+      64,
+      490
+    ],
+    "bbr_fixed_init": [
+      88,
+      88,
+      64
+    ]
+  },
+  "accepted_oldnew_full_output_gate": {
+    "full_comparisons": 10,
+    "all_full_images_bit_equal": true,
+    "all_headers_binary_equal": true,
+    "all_matrices_bit_equal": true,
+    "all_algorithm_counts_equal": true
+  },
+  "candidate_source_sha256": {
+    "fnit/mcflirt/_cost_cpu.py": "3a484a2263414ceb3d908f35dc7227ee6c367b8bce82f17f387cb19b85f5851a",
+    "fnit/mcflirt/_sampling_cpu.py": "8fe4cca243a18b1ceff406c9a377cdf9a769ccf650c46af615ca11b98fdd4457",
+    "fnit/mcflirt/sampling.py": "bb620094b8768292aa457cc6ff9704180ea5db709fad1e138a98e1fe860a8617",
+    "fnit/mcflirt/core.py": "cd06848a835771434638985a590fae45ae678c46d8c822ba3bed50f2f231ca30",
+    "fnit/fmri/_bbr_cpu.py": "0a60a6a03e84e285aab22cab4b54f791172fcbb51d056520a6523ff0690c11eb",
+    "fnit/fmri/bbr.py": "cd596c2f306e5f237cc52be3a8819dd776212eab7278a70de33ce2dd99fd545e"
+  },
+  "clock_scope": {
+    "api_seconds": "Input loading plus complete API computation and ordinary MCFLIRT output save; BBR image/matrix save is recorded separately. Python feature import excluded.",
+    "measured_application_seconds": "Feature import plus input-object setup plus complete API plus ordinary outputs; evidence/hash comparisons excluded.",
+    "native": "Same-batch fresh official CPU1/8 six defaults not yet executed; historical native timings retain their original scope."
+  },
+  "records": [
+    {
+      "job": "mc180_fnit_cpu1",
+      "status": "complete",
+      "cpu_threads": 1,
+      "cpu_affinity": [
+        8
+      ],
+      "input_shape": [
+        64,
+        64,
+        42,
+        180
+      ],
+      "source6_verified_in_report": true,
+      "adapter_sha256": "f3a540bae91770a8433b338e5cad815a1fff18275d39e32c3aa2ece88df95188",
+      "records": [
+        {
+          "import_seconds": 2.50649456679821,
+          "cost_evaluations": 17456,
+          "api_seconds": 40.61527497600764,
+          "save_seconds": 9.501352906227112e-06,
+          "input_object_load_seconds": 2.5192275643348694e-06,
+          "measured_application_seconds": 43.12178156338632,
+          "source_unchanged": true,
+          "repeat": 0,
+          "call_type": "first_fnit_call"
+        },
+        {
+          "import_seconds": 0.00014406908303499222,
+          "cost_evaluations": 17456,
+          "api_seconds": 39.783634264953434,
+          "save_seconds": 1.0058283805847168e-05,
+          "input_object_load_seconds": 2.4707987904548645e-06,
+          "measured_application_seconds": 39.783790863119066,
+          "source_unchanged": true,
+          "repeat": 1,
+          "call_type": "warm_fnit_api_call"
+        }
+      ]
+    },
+    {
+      "job": "bbr_fnit_cpu1",
+      "status": "complete",
+      "cpu_threads": 1,
+      "cpu_affinity": [
+        8
+      ],
+      "input_shape": [
+        88,
+        88,
+        64
+      ],
+      "source6_verified_in_report": true,
+      "adapter_sha256": "f3a540bae91770a8433b338e5cad815a1fff18275d39e32c3aa2ece88df95188",
+      "records": [
+        {
+          "import_seconds": 2.3871474377810955,
+          "cost_evaluations": 2604,
+          "phase_timings": {
+            "initial_flirt": 0.0005649710074067116,
+            "boundary_preparation": 1.9176189582794905,
+            "coarse_bbr": 0.5662067737430334,
+            "local_bbr": 15.24706409405917,
+            "final_resampling": 0.1443146402016282
+          },
+          "phase_cost_evaluations": {
+            "coarse_bbr": 1674,
+            "local_bbr": 928
+          },
+          "boundary_points": 287094,
+          "initial_cost": 0.4562232792377472,
+          "final_cost": 0.3413587808609009,
+          "api_seconds": 17.87893573474139,
+          "save_seconds": 0.9488624315708876,
+          "input_object_load_seconds": 4.116445779800415e-06,
+          "measured_application_seconds": 21.214949720539153,
+          "source_unchanged": true,
+          "repeat": 0,
+          "call_type": "first_fnit_call"
+        },
+        {
+          "import_seconds": 0.00010664109140634537,
+          "cost_evaluations": 2604,
+          "phase_timings": {
+            "initial_flirt": 0.0004077646881341934,
+            "boundary_preparation": 1.3854771265760064,
+            "coarse_bbr": 0.5645827557891607,
+            "local_bbr": 15.071471025235951,
+            "final_resampling": 0.12391119915992022
+          },
+          "phase_cost_evaluations": {
+            "coarse_bbr": 1674,
+            "local_bbr": 928
+          },
+          "boundary_points": 287094,
+          "initial_cost": 0.4562232792377472,
+          "final_cost": 0.3413587808609009,
+          "api_seconds": 17.148774977773428,
+          "save_seconds": 0.8678059410303831,
+          "input_object_load_seconds": 4.569068551063538e-06,
+          "measured_application_seconds": 18.01669212896377,
+          "source_unchanged": true,
+          "repeat": 1,
+          "call_type": "warm_fnit_api_call"
+        }
+      ]
+    },
+    {
+      "job": "mc180_fnit_cpu8",
+      "status": "complete",
+      "cpu_threads": 8,
+      "cpu_affinity": [
+        8,
+        12,
+        16,
+        20,
+        24,
+        28,
+        32,
+        40
+      ],
+      "input_shape": [
+        64,
+        64,
+        42,
+        180
+      ],
+      "source6_verified_in_report": true,
+      "adapter_sha256": "f3a540bae91770a8433b338e5cad815a1fff18275d39e32c3aa2ece88df95188",
+      "records": [
+        {
+          "import_seconds": 1.8851434485986829,
+          "cost_evaluations": 17456,
+          "api_seconds": 41.91197619587183,
+          "save_seconds": 1.1715106666088104e-05,
+          "input_object_load_seconds": 2.117827534675598e-06,
+          "measured_application_seconds": 43.797133477404714,
+          "source_unchanged": true,
+          "repeat": 0,
+          "call_type": "first_fnit_call"
+        },
+        {
+          "import_seconds": 0.00013242103159427643,
+          "cost_evaluations": 17456,
+          "api_seconds": 39.32376389671117,
+          "save_seconds": 1.026596873998642e-05,
+          "input_object_load_seconds": 2.4139881134033203e-06,
+          "measured_application_seconds": 39.32390899769962,
+          "source_unchanged": true,
+          "repeat": 1,
+          "call_type": "warm_fnit_api_call"
+        }
+      ]
+    },
+    {
+      "job": "bbr_fnit_cpu8",
+      "status": "complete",
+      "cpu_threads": 8,
+      "cpu_affinity": [
+        8,
+        12,
+        16,
+        20,
+        24,
+        28,
+        32,
+        40
+      ],
+      "input_shape": [
+        88,
+        88,
+        64
+      ],
+      "source6_verified_in_report": true,
+      "adapter_sha256": "f3a540bae91770a8433b338e5cad815a1fff18275d39e32c3aa2ece88df95188",
+      "records": [
+        {
+          "import_seconds": 1.8476122664287686,
+          "cost_evaluations": 2604,
+          "phase_timings": {
+            "initial_flirt": 0.0005402704700827599,
+            "boundary_preparation": 1.7672077883034945,
+            "coarse_bbr": 0.5629896400496364,
+            "local_bbr": 15.187357139773667,
+            "final_resampling": 0.12997541204094887
+          },
+          "phase_cost_evaluations": {
+            "coarse_bbr": 1674,
+            "local_bbr": 928
+          },
+          "boundary_points": 287094,
+          "initial_cost": 0.4562232792377472,
+          "final_cost": 0.3413587808609009,
+          "api_seconds": 17.651162015274167,
+          "save_seconds": 0.8128202082589269,
+          "input_object_load_seconds": 3.5492703318595886e-06,
+          "measured_application_seconds": 20.311598039232194,
+          "source_unchanged": true,
+          "repeat": 0,
+          "call_type": "first_fnit_call"
+        },
+        {
+          "import_seconds": 0.00011185556650161743,
+          "cost_evaluations": 2604,
+          "phase_timings": {
+            "initial_flirt": 0.0004314891993999481,
+            "boundary_preparation": 1.2908993503078818,
+            "coarse_bbr": 0.5652439277619123,
+            "local_bbr": 15.083100765943527,
+            "final_resampling": 0.11950293462723494
+          },
+          "phase_cost_evaluations": {
+            "coarse_bbr": 1674,
+            "local_bbr": 928
+          },
+          "boundary_points": 287094,
+          "initial_cost": 0.4562232792377472,
+          "final_cost": 0.3413587808609009,
+          "api_seconds": 17.062105659395456,
+          "save_seconds": 0.8071437897160649,
+          "input_object_load_seconds": 4.563480615615845e-06,
+          "measured_application_seconds": 17.86936586815864,
+          "source_unchanged": true,
+          "repeat": 1,
+          "call_type": "warm_fnit_api_call"
+        }
+      ]
+    },
+    {
+      "job": "mc490_fnit_cpu1",
+      "status": "complete",
+      "cpu_threads": 1,
+      "cpu_affinity": [
+        8
+      ],
+      "input_shape": [
+        88,
+        88,
+        64,
+        490
+      ],
+      "source6_verified_in_report": true,
+      "adapter_sha256": "f3a540bae91770a8433b338e5cad815a1fff18275d39e32c3aa2ece88df95188",
+      "records": [
+        {
+          "import_seconds": 2.429788263514638,
+          "cost_evaluations": 45908,
+          "api_seconds": 195.58975329529494,
+          "save_seconds": 1.3793818652629852e-05,
+          "input_object_load_seconds": 2.1280720829963684e-06,
+          "measured_application_seconds": 198.0195574807003,
+          "source_unchanged": true,
+          "repeat": 0,
+          "call_type": "first_fnit_call"
+        }
+      ]
+    },
+    {
+      "job": "mc490_fnit_cpu8",
+      "status": "complete",
+      "cpu_threads": 8,
+      "cpu_affinity": [
+        8,
+        12,
+        16,
+        20,
+        24,
+        28,
+        32,
+        40
+      ],
+      "input_shape": [
+        88,
+        88,
+        64,
+        490
+      ],
+      "source6_verified_in_report": true,
+      "adapter_sha256": "f3a540bae91770a8433b338e5cad815a1fff18275d39e32c3aa2ece88df95188",
+      "records": [
+        {
+          "import_seconds": 1.6741319624707103,
+          "cost_evaluations": 45908,
+          "api_seconds": 190.2622510464862,
+          "save_seconds": 1.3626180589199066e-05,
+          "input_object_load_seconds": 3.010965883731842e-06,
+          "measured_application_seconds": 191.93639964610338,
+          "source_unchanged": true,
+          "repeat": 0,
+          "call_type": "first_fnit_call"
+        }
+      ]
+    }
+  ],
+  "completion_gaps": [
+    "31 full CPU feature jobs and strict gates",
+    "Same-batch fresh native defaults and full trace/output comparisons",
+    "Full GPU ABBA regression still running"
+  ],
+  "timing_conclusion": "Current observations show a remaining MC180 performance gap against the earlier official36\u201337s observations, including warm API39.3\u201339.8s; compare the fresh native batch before a final efficiency conclusion.",
+  "privacy": "Aggregate clocks, shapes, algorithm counts and source hashes only; no new individual brain maps or identifiers"
+}

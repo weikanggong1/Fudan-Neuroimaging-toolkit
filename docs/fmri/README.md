@@ -197,6 +197,7 @@ print(volume_result.mni_pull)     # MNI→T1w RAS pull 位移场
 | `regress_motion` | 默认 `False`；设为 `True` 在 clean 中联合回归所选运动项。 |
 | `motion_model` | 默认 `24`；选择 6、12 或 24 项运动回归模型，仅开启运动回归时使用。 |
 | `bandpass` | 默认 `None`；可传 `(低频 Hz, 高频 Hz)`，用于 clean 的额外时间滤波。 |
+| `confound_projection` | 默认 `orthogonal`：严格联合投影；`afni`：采用 `3dTproject` 的正则化及单 run 频率边界。详见 [AROMA 与混杂回归](aroma_confounds.md)。 |
 | `global_signal` | 默认 `False`；设为 `True` 在 clean 中回归脑内平均信号。 |
 | `highpass_cutoff_seconds` | 默认 `100.0` 秒；clean FEAT 高通截止周期，体积单位 sigma 为该值除以 `2×TR`。 |
 | `slice_timing` | 默认 `False`；设为 `True` 根据有效 BIDS 切片时刻校正 preproc。 |
@@ -302,6 +303,7 @@ CLI 默认关闭 STC；`--slice-timing` 显式开启，`--ignore-slice-timing` �
 | `reuse_anatomical=True` | 默认开启；`--no-anatomical-cache` 对应 `False`。 |
 | `device=None` | Python 自动选择 CUDA/CPU；CLI 默认 `--device cuda:0`。 |
 | `bandpass=(low, high)` | `--bandpass LOW_HZ HIGH_HZ`。 |
+| `confound_projection` | `--confound-projection orthogonal/afni`。 |
 | `motion_iterations=(1,1,1)` | `--motion-iterations 1 1 1`，依次指定三个阶段的轮数。 |
 
 其余选项将 Python 参数中的下划线改为连字符；布尔选项如 `--regress-wm`、`--overwrite` 传入即为 True。CLI 每次同时生成 preproc 和 clean，不以 `--signal` 选择 volume 分支；`--signal` 仅用于 surface。

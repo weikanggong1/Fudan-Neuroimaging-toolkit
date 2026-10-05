@@ -156,7 +156,10 @@ def parcellate(profiles, assets, w=200.0, c=50.0, *, max_outer=50,
     if any(p.shape != (n, 1483) or not np.isfinite(p).all() for p in x):
         raise ValueError("Each profile must be finite [59412, 1483]")
     valid = np.any(np.stack([np.any(p != 0, axis=1) for p in x]), axis=0)
-    x = [p[valid] for p in x]
+    # The inference directions/posteriors are float64. Promoting each validated
+    # float32 profile once preserves its values and avoids an implicit full
+    # matrix conversion at every mixed-dtype BLAS multiplication below.
+    x = [p[valid].astype(np.float64) for p in x]
     theta = theta[valid]
     graph = graph[valid][:, valid].tocsr()
     degree = np.asarray(graph.sum(axis=1))

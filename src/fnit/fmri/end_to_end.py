@@ -251,6 +251,7 @@ def fMRIVolume_pipeline(
     regress_motion=False,
     motion_model=24,
     bandpass=None,
+    confound_projection="orthogonal",
     global_signal=False,
     highpass_cutoff_seconds=100.0,
     slice_timing=False,
@@ -437,6 +438,7 @@ def fMRIVolume_pipeline(
         regress_motion=regress_motion,
         motion_model=motion_model,
         bandpass=bandpass,
+        confound_projection=confound_projection,
         global_signal=global_signal,
     )
     timing["pica_aroma_confounds"] = time.perf_counter() - started
@@ -472,6 +474,7 @@ def fMRIVolume_pipeline(
         "regress_wm": regress_wm, "regress_csf": regress_csf,
         "regress_motion": regress_motion, "motion_model": motion_model,
         "bandpass": list(bandpass) if bandpass is not None else None,
+        "confound_projection": confound_projection,
         "global_signal": global_signal,
         "highpass_cutoff_seconds": highpass_cutoff_seconds,
         "slice_timing": slice_timing,

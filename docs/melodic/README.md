@@ -2,6 +2,8 @@
 
 [返回首页](../../README.md) · [源码目录](../../src/fnit/melodic/) · [固定输入验证](../../validation/fmri/ica_fixed_input.public.json)
 
+完整 490 帧、1／8 线程的原版 MELODIC CPU 精度与耗时见 [本轮 CPU 对照](../fmri/CPU_ICA_BENCHMARK_20261004.md)。
+
 `run_melodic_bids` 对一张已预处理的 4D BOLD 做单被试空间 PICA，从 BIDS Derivatives 读取 BOLD 和同网格脑掩膜，将成分图与时间序列写回 BIDS Derivatives。算法内核是 `decompose_spatial_ica`，volume 流程调用同一个内核。数据读写用 nibabel，PCA、ICA 和混合模型用 PyTorch；FNIT 运行时不调用 FSL。
 
 计算顺序对应 FSL MELODIC 2601.1 的单被试 `symm`、`pow3`、`dimest=lap` 分支：

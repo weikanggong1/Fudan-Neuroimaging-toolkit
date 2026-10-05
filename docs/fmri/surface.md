@@ -545,6 +545,12 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 ## 最新真实数据精度、耗时与脑图
 
+### 本轮 CPU 官方测试范围
+
+[2026-10-04 起的 CPU 官方对照](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)包含完整 490 帧固定几何投影/CIFTI，以及公开 180 帧 fresh surface 输出整链。后者以同一已完成 volume 和 recon-all 为起点，完整计入几何、ROI、MSMSulc、投影、CIFTI、QC 与保存；前序 volume/recon-all 计算分别由其独立测试记录。原 fMRIPrep 25.2.4、冻结基线和候选使用相同 1/8 物理核预算。当前完整测试排队或执行中，最终表将同时核对全帧、全部顶点、有序 faces、CIFTI 轴和保存 dtype。仅发布聚合指标与既有公开图。
+
+本轮成熟 MSMSulc 子函数已修 CPU float64 Point 除法舍入，并优化 CPU containing-face 查询；CPU 与 CUDA 的执行边界见 [MSMSulc](../msm/README.md#cpu-官方配对与本轮修复)。既有 GPU 专项和下方三 backend 报告保留各自实测版本，完整 GPU 旧/新配对完成后另行更新。
+
 最终[发布验证汇总](../../validation/fmri/public_ten_20261003/final_publication_validation.public.json)绑定 10 例候选、10 例原流程完整输出、210 个结构比较、主队列 80 个完整自交扫描及额外 CON08 的已测量范围与未完成预算；执行完成和数值差异分别记录。
 
 <a id="新的三-backend-完整整链验收进行中"></a>
@@ -760,6 +766,7 @@ provided 的[官方 ITK 正向变换实证](../../validation/fmri/public_ten_202
 
 ## 最近版本与 benchmark 记录
 
+- 2026-10-04 起：新增实际原程序的同预算 CPU1/8 配对，分别保留 fixed projection 与 whole surface 边界；MSMSulc CPU Point 修复由子功能完整候选验证，执行状态见新报告。
 | 源码 / 报告快照 | 变化与实际测量 |
 |---|---|
 | 2026-10-03，最新 main 集成 `b77d5315`（上游 `9a1069b9`） | 合入最新 main 后 15 个定向模块重新验证：222 passed、12 skipped，pytest 82.05 s、外层 85.170 s。246 个相关生产文件与 15 个测试文件相对此前定向验收字节不变，见[实际集成记录](../../validation/fmri/public_ten_20261003/local_latest_main_focused_validation.public.json)。资源/CUDA skipped 不代替 MRI 验收；正式十例和 backend 实测仍绑定冻结 `1128bc52`，未重标为新 main。 |

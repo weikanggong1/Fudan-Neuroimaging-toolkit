@@ -224,7 +224,7 @@ def test_volume_metadata_preserves_task_and_execution_settings(volume_dependenci
     state = volume_dependencies
     result = end_to_end.fMRIVolume_pipeline(
         **state.call, ica_n_components=2, ica_max_iter=123, aroma_mode="aggr",
-        motion_model=12, bandpass=(.01, .1), global_signal=True,
+        motion_model=12, bandpass=(.01, .1), global_signal=True, confound_projection="afni",
         highpass_cutoff_seconds=80., batch_size=3, motion_iterations=(4, 3, 2),
         n_splits=17, random_state=29,
     )
@@ -234,12 +234,13 @@ def test_volume_metadata_preserves_task_and_execution_settings(volume_dependenci
     configuration = metadata["FNIT"]["Configuration"]
     expected = {
         "ica_n_components": 2, "ica_max_iter": 123, "aroma_mode": "aggr",
-        "motion_model": 12, "bandpass": [.01, .1], "global_signal": True,
+        "motion_model": 12, "bandpass": [.01, .1], "global_signal": True, "confound_projection": "afni",
         "highpass_cutoff_seconds": 80., "batch_size": 3,
         "motion_iterations": [4, 3, 2], "n_splits": 17, "random_state": 29,
     }
     for key, value in expected.items():
         assert configuration[key] == value
+    assert state.aroma_kwargs["confound_projection"] == "afni"
     assert configuration["fast_config"] == json.loads(json.dumps(asdict(FASTConfig(execution="fsl"))))
     assert configuration["weights"]["synthstrip"]["SizeBytes"] == len(b"model-double")
     source = metadata["FNIT"]["Source"]
