@@ -41,7 +41,8 @@ def test_plus_reuses_both_weighted_models(tmp_path, monkeypatch):
     model._segmenter = model._parcellator = None
     created = []
 
-    def constructor(*args):
+    def constructor(*args, **kwargs):
+        assert kwargs == {"cudnn_tf32": True}
         instance = object()
         created.append(instance)
         return instance

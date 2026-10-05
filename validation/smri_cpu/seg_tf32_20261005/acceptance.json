@@ -1,0 +1,44 @@
+{
+  "schema": "fnit_parc_tf32_predeclared_gates/v1",
+  "baseline_commit": "0215f0c480a4ff566d1ebf853a59a481b4e4d5e7",
+  "status": "finite_contracts_passed_real_stage_and_complete_gates_pending",
+  "finite_tests": {
+    "passed": 116,
+    "skipped": 5,
+    "subtests_passed": 3,
+    "elapsed_seconds": 5.57
+  },
+  "constructor_none_fix": "Scope device=None reuses existing no-precision device selection, preserves legacy preprocessing device argument.",
+  "ordinary_33_segmenter_class_ast_unchanged": true,
+  "ordinary_33_public_file_unchanged": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+  "default_policy": "cudnn_tf32=True; CUDA matmul=True inside scope; CPU flags unchanged; caller autocast untouched",
+  "None_policy": "inherit caller cuDNN on each call, while preserving existing scoped CUDA matmul=True",
+  "cache_gate": "Declared True/False/None identity must match both supplied child caches; reject mismatches before T1 loading.",
+  "real_stage": {
+    "input": "CC0 OpenNeuro ds003138 case02 verified prepared FP32 feature cube; diagnostic only, not whole-image benchmark",
+    "hard_gate": "Default baseline/candidate real-prefix arrays and soft volumes exact; candidate actual seg/parc/fast-blur precision and normal/exception restore pass; False equals None with inherited False, True equals None with inherited True"
+  },
+  "complete_CPU_gate": "Two default modes parc/parc-fast from original raw T1: all three maps, dtype, complete headers, world affine, CSV numeric values old/new exact. Same node eight physical cores and per-arm common lock.",
+  "complete_GPU_gate": "Same default two modes: all three maps, headers and numeric CSV exact; model/input/output FP32 and unchanged autocast; old/new allocated/reserved peaks paired; physical own-process sampled memory separately. No speed claim from shared GPU timings.",
+  "declared_new_GPU_policy_gate": "New public False/None modes scored against same input official saved reference, separate from default True lossless gate. None with caller cuDNN=False must match declared False and restore caller.",
+  "memory_budget_bytes": 20000000000,
+  "low_precision_changes": false,
+  "new_dependencies": false,
+  "CLI_defaults_unchanged": true,
+  "production_source_files": {
+    "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+    "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+    "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+    "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+    "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+    "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+    "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+    "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+    "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+    "segment.py": "9329348c6174785df4de2624344e63b141ad7c795238c8b7dd62f47f34495061",
+    "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+    "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+    "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0",
+    "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a"
+  }
+}
