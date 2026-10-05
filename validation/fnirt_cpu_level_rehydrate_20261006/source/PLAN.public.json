@@ -1,0 +1,91 @@
+{
+  "status": "root authorized one stage1 after reviewed private-output correction; not yet enqueued or executed",
+  "canonical_workspace": "workspaces/smri_cpu_20261004/remaining_20261006/fnirt-level-rehydrate-v1",
+  "canonical_run": "runs/smri_cpu_20261004/remaining_20261006/fnirt-level-rehydrate-v1",
+  "latest_observed_main_head": "7eb2a7f2335022b3eaeb97a30d317dbfc591c4db",
+  "source_rule": "17 production FNIRT hashes plus existing coordinates hash, before and after; Git HEAD is recorded, not a cache identity proof",
+  "point": "solve3_parameters.f64 (21d339a4d3c4310cc4e264a23bb446c55ceba0a716e08ecdef6d695ceac66f45), second accepted coefficient/intensity point",
+  "input_provenance": {
+    "legacy_registration_sha256": "e67c71a6d01b1e8b7b0de842680e9f3012cb5cb492e13e927b32b976f3320d6d",
+    "legacy_first_accepted_equals_solve2": true,
+    "legacy_first_accepted_equals_solve3": false,
+    "reused_arrays": "Only coefficient-independent smoothed_moving.npy and initial_fixed.npy; reference/optimized frozen files have equal bytes",
+    "raw_four_assets": "Identical real GM, template, affine and reference-mask hashes as existing current assembly; use GM/template NIfTI headers and affine only; first-level reference mask inactive by GM config",
+    "resource_license_scope": "Existing public real ds003138-derived GM and declared reference resources are read in place; no arrays/templates/native source redistribution",
+    "blur_limitation": "Current optimized CPU blur dispatch changed after the saved preprocessing. No equality to current preprocessed cache is assumed."
+  },
+  "one_stage": [
+    "Bind code/resources/harness without NumPy/Torch imports before scientific child",
+    "Load two saved F32 preprocessed arrays; reconstruct actual current geometry/bases/bending from headers and full four-level GM config, with no new image normalization/smoothing/preprocessing",
+    "Construct current _LevelSystem on CPU; override only this instance evaluate lambda from bound current/native state",
+    "Call system.linearize once; its guarded evaluate wrapper must be called exactly once",
+    "Check count and SSD/bending/effective-lambda-before-override/cost-before-override against saved current scalar bits; first mismatch raises and stops",
+    "Check full 2g then full 2diag bytes, including signed zero, against saved current files; first mismatch records finite scalar diagnostic and stops",
+    "Only if all exact, save a private array checkpoint: actual evaluated state, bases, unpacked linearization weights, bending cached Gram/diagonal arrays and geometry; moving array kept by reference/hash",
+    "Restore instance method; require precision/grad/CUDA flags and source/input bytes unchanged before accepting checkpoint"
+  ],
+  "checkpoint_schema": {
+    "private_npz": "points/scale, F32 field/warped/residual/derivative, bool mask, fixed image, basis and derivative-basis matrices, F64 spatial/cross weights, bending Gram/diagonal matrices, geometry transforms, half-gradient/half-diagonal",
+    "metadata": "source/input/value identities, shapes/dtypes/strides, state scalars, GM config, multipliers, private NPZ SHA/size",
+    "original_python_cache_identity_preserved": false,
+    "actual_callback_executed": false,
+    "packed_cpu_normal_layout": "not initialized at linearize-only stage",
+    "cpu_normal_scratch": "None; no callback performed",
+    "future_restore": "Requires separate reviewed loader/layout bridge. An array checkpoint alone does not prove same Python cache or matrix-free numerical equality."
+  },
+  "gates": {
+    "gradient_full_sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73",
+    "independent_diagonal_full_sha256": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f",
+    "count": 14341,
+    "ssd": 60.329756040354546,
+    "bending_energy": 2.3604429240341207,
+    "lambda_before_override": 9049.463406053183,
+    "fixed_effective_lambda": 9049.463427795125,
+    "all_exact_required": true,
+    "mismatch_acceptance": "false; no retry/alternative blur/callback/solver in same run"
+  },
+  "forbidden_in_this_stage": [
+    "full H materialization",
+    "matrix-free action",
+    "PCG or any linear solve",
+    "direct_gradient second evaluate",
+    "stock native executable",
+    "MRI/CNN fitting",
+    "normalization or smoothing of raw input",
+    "production/default/GPU changes",
+    "reference trajectory used by production optimizer"
+  ],
+  "scheduling": {
+    "host": "nodecw7",
+    "cores": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "threads": 8,
+    "outer_lock": "runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock",
+    "inner_lock": "own run/module.cpu8.lock",
+    "queue_order": "after already queued GEMS full and Seg contracts; no current launch",
+    "outer_wait_seconds": 19000,
+    "controller_timeout_seconds_when_authorized": 19600,
+    "scientific_child_timeout_seconds": 180,
+    "address_space_cap_bytes": 20000000000,
+    "GPU_visible_devices": "empty",
+    "new_dependencies": false
+  },
+  "clocks": "Queue wait, external preflights, imports/binding, input/geometry restore, evaluate, linearize including evaluate, scalar/vector bridge, checkpoint write and worker-through-post-bind are separate; evaluate is a subset of linearize, not added twice",
+  "publication": "A future public report contains own source/schema/hashes/scalars only; checkpoint/images/arrays stay private canonical runs",
+  "next_stage_not_authorized": "No callback probe or runtime integration is included in this prepared stage1.",
+  "H_scope": "H file is bound as prior context only; no H values, columns or matrix-free action are evaluated by stage1.",
+  "privacy_guard": {
+    "worker_umask": "077",
+    "new_output_directory_mode": "0700",
+    "uploaded_code_mode": "0600",
+    "checkpoint_mode": "0600 via worker umask"
+  }
+}

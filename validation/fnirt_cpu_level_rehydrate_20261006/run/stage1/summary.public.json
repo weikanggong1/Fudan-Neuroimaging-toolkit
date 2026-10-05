@@ -1,0 +1,1398 @@
+{
+  "scope": "prepared stage1 only; one current linearize/internal evaluate, no callback/H materialization/solver/native process",
+  "host": "nodecw7",
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "torch_threads": 8,
+  "interop_threads": 1,
+  "address_space_cap_bytes": 20000000000,
+  "flags_before": {
+    "cuda_initialized": false,
+    "cudnn_tf32": true,
+    "matmul_tf32": false,
+    "grad_enabled": true,
+    "default_dtype": "torch.float32"
+  },
+  "bindings_before": {
+    "input/gm": {
+      "bytes": 2241083,
+      "sha256": "e29419b101603fc83f0d0a99771b9d7bf0e0f3d5228b8d9dc90b4e37e141816a"
+    },
+    "input/template": {
+      "bytes": 707776,
+      "sha256": "ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77"
+    },
+    "input/mask": {
+      "bytes": 11132,
+      "sha256": "342d41e1c445d87a812ca288786a116306e96a5595a198e46ba7e7515d4f221c"
+    },
+    "input/affine": {
+      "bytes": 189,
+      "sha256": "069fdf2dcecaaa3c9a02cc3661e09d41727dc32e0d0aa1f50e46a91e09b57af8"
+    },
+    "input/parameters": {
+      "bytes": 9416,
+      "sha256": "21d339a4d3c4310cc4e264a23bb446c55ceba0a716e08ecdef6d695ceac66f45"
+    },
+    "input/gradient": {
+      "bytes": 9416,
+      "sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73"
+    },
+    "input/diagonal": {
+      "bytes": 9416,
+      "sha256": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f"
+    },
+    "input/moving_level": {
+      "bytes": 74317952,
+      "sha256": "407836cfe470e483151da01993a4e51987b00c9ae4ab5276dcf4e7076e9a601d"
+    },
+    "input/fixed_level": {
+      "bytes": 64640,
+      "sha256": "43a20463d53f464448f403347cddddec2a1b24119e3bd1d121d7b9f862538be4"
+    },
+    "input/assembly_summary": {
+      "bytes": 8286,
+      "sha256": "cf196b3f9d302fdb85aeb975b68bef1da65c13c677895d4f5c7e2ad8220cc1a2"
+    },
+    "input/H_reference_identity_only": {
+      "bytes": 11082632,
+      "sha256": "426e0d4add9dd6f46a972ecde0b4e06e6f1350301c06be4c6391af4148c4fa8d"
+    },
+    "production_source/src/fnit/fnirt/cli.py": {
+      "bytes": 6245,
+      "sha256": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c"
+    },
+    "production_source/src/fnit/fnirt/io.py": {
+      "bytes": 6080,
+      "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+    },
+    "production_source/src/fnit/fnirt/optimizer.py": {
+      "bytes": 8506,
+      "sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd"
+    },
+    "production_source/src/fnit/fnirt/registration.py": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "production_source/src/fnit/fnirt/spline.py": {
+      "bytes": 18840,
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7"
+    },
+    "production_source/src/fnit/fnirt/standalone.py": {
+      "bytes": 10838,
+      "sha256": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6"
+    },
+    "production_source/src/fnit/fnirt/topology.py": {
+      "bytes": 9213,
+      "sha256": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3"
+    },
+    "production_source/src/fnit/fnirt/_bending_cpu.py": {
+      "bytes": 3312,
+      "sha256": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+    },
+    "production_source/src/fnit/fnirt/_normal_cpu.py": {
+      "bytes": 10560,
+      "sha256": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f"
+    },
+    "production_source/src/fnit/fnirt/_normal_simd_cpu.py": {
+      "bytes": 6810,
+      "sha256": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9"
+    },
+    "production_source/src/fnit/fnirt/_sampling_cpu.py": {
+      "bytes": 7782,
+      "sha256": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_cpu.py": {
+      "bytes": 3635,
+      "sha256": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_triton.py": {
+      "bytes": 1969,
+      "sha256": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b"
+    },
+    "production_source/src/fnit/fnirt/_topology_cpu.py": {
+      "bytes": 1091,
+      "sha256": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6"
+    },
+    "production_source/src/fnit/fnirt/_topology_triton.py": {
+      "bytes": 7134,
+      "sha256": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1"
+    },
+    "production_source/src/fnit/fnirt/__init__.py": {
+      "bytes": 1040,
+      "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+    },
+    "production_source/src/fnit/fnirt/__main__.py": {
+      "bytes": 80,
+      "sha256": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a"
+    },
+    "source_extra/src/fnit/flirt/coordinates.py": {
+      "bytes": 5019,
+      "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    }
+  },
+  "harness_bindings": {
+    "stage1_io.py": {
+      "bytes": 3168,
+      "sha256": "ff08c1d4073d1310f081808d1db4fd8aba594307f124c55e824039090853e1e7"
+    },
+    "preflight_stage1.py": {
+      "bytes": 1763,
+      "sha256": "75b2c66824df11faf6665392069a25d10f93bc127085c6ab85fa08ecfa526856"
+    },
+    "stage1_linearize.py": {
+      "bytes": 20419,
+      "sha256": "f78d691ecc4bcb7440b87a0dcfcb71864bdd3d355605333ec1f2f9fc6d24d09b"
+    },
+    "run_stage1.sh": {
+      "bytes": 1797,
+      "sha256": "8e0a1c925ef7488591d373b6c4245c73cdfb99d23eebfaffac352d40a2f6bfd5"
+    },
+    "register_index.py": {
+      "bytes": 5902,
+      "sha256": "0685ab810467e5cad456a106d073788bc5be3ef7f30835e622d8ee25d8a48d17"
+    },
+    "expected.public.json": {
+      "bytes": 6632,
+      "sha256": "ba669ecb001c3aca9a419615dc9c626e5b7e51882a1b28c0b99c0de3de83a6ec"
+    },
+    "PLAN.public.json": {
+      "bytes": 5878,
+      "sha256": "1ae60b342b0f3d4d1e4f8d8e8e465dec8146f75807e2fce452f926313389388d"
+    },
+    "PREPARATION_HISTORY.public.json": {
+      "bytes": 1915,
+      "sha256": "41304aa10fd8e80953e11fca997103f6d017055ac72b0aa01ac0bd16d7f490b6"
+    }
+  },
+  "evaluate_calls": 1,
+  "linearize_calls": 1,
+  "callback_calls": 0,
+  "solver_calls": 0,
+  "native_process_calls": 0,
+  "full_H_materialized": false,
+  "checkpoint_written": true,
+  "accepted_checkpoint": true,
+  "source_point": "solve3 second accepted parameters; solve2 is solely legacy preprocessed-input provenance",
+  "stage1_passed": true,
+  "clock": {
+    "imports_and_binding_seconds": 1.4936687583103776,
+    "input_restore_geometry_seconds": 0.0765814995393157,
+    "linearize_including_evaluate_seconds": 2.103898350149393,
+    "evaluate_seconds": 2.0882555190473795,
+    "scalar_vector_bridge_seconds": 0.0007277615368366241,
+    "private_checkpoint_write_seconds": 0.08688899595290422,
+    "numerical_and_private_checkpoint_before_post_bind_seconds": 2.2706049662083387,
+    "worker_through_post_bind_before_public_summary_seconds": 3.8508322266861796
+  },
+  "limitations": [
+    "Saved old preprocessing is a candidate input, not a restored current cache.",
+    "No matrix-free action or PCG is evaluated.",
+    "A saved checkpoint contains arrays and metadata, not original Python object identities.",
+    "A later callback would initialize its own packed layout and scratch."
+  ],
+  "fsl_dso_snapshot_before": [],
+  "config": {
+    "subsampling": [
+      4,
+      2,
+      1,
+      1
+    ],
+    "maximum_iterations": [
+      5,
+      5,
+      10,
+      5
+    ],
+    "input_fwhm_mm": [
+      6.0,
+      4.0,
+      2.0,
+      2.0
+    ],
+    "reference_fwhm_mm": [
+      4.0,
+      2.0,
+      0.0,
+      0.0
+    ],
+    "regularization": [
+      150.0,
+      75.0,
+      50.0,
+      30.0
+    ],
+    "estimate_intensity": [
+      true,
+      true,
+      true,
+      false
+    ],
+    "apply_reference_mask": [
+      false,
+      false,
+      false,
+      true
+    ],
+    "minimization_methods": null,
+    "process_stages": null,
+    "implicit_reference_mask": false,
+    "implicit_input_mask": false,
+    "warp_resolution_mm": [
+      10.0,
+      10.0,
+      10.0
+    ],
+    "warp_resolution_schedule_mm": null,
+    "jacobian_range": [
+      0.2,
+      5.0
+    ],
+    "ssd_weighted_lambda": true,
+    "intensity_model": "global_linear",
+    "intensity_order": 5,
+    "bias_resolution_mm": [
+      50.0,
+      50.0,
+      50.0
+    ],
+    "bias_regularization": 10000.0
+  },
+  "geometry": {
+    "moving_shape": [
+      224,
+      288,
+      288
+    ],
+    "fixed_shape": [
+      91,
+      109,
+      91
+    ],
+    "level_shape": [
+      24,
+      28,
+      24
+    ],
+    "moving_voxel_sizes": [
+      0.800000011920929,
+      0.7777777910232544,
+      0.7777777910232544
+    ],
+    "fixed_voxel_sizes": [
+      2.0,
+      2.0,
+      2.0
+    ],
+    "level_voxel_sizes": [
+      8.0,
+      8.0,
+      8.0
+    ],
+    "knot_spacing": [
+      5,
+      5,
+      5
+    ],
+    "coefficient_shape": [
+      7,
+      8,
+      7
+    ],
+    "reference_mask_active": false,
+    "moving_mask_active": false,
+    "declared_mask_resource_used_for_geometry_only_at_level1": true
+  },
+  "input_tensor_metadata": {
+    "moving": {
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "dtype": "torch.float32",
+      "stride": [
+        82944,
+        288,
+        1
+      ],
+      "device": "cpu",
+      "requires_grad": false
+    },
+    "fixed": {
+      "shape": [
+        24,
+        28,
+        24
+      ],
+      "dtype": "torch.float32",
+      "stride": [
+        672,
+        24,
+        1
+      ],
+      "device": "cpu",
+      "requires_grad": false
+    },
+    "coefficients": {
+      "shape": [
+        3,
+        7,
+        8,
+        7
+      ],
+      "dtype": "torch.float64",
+      "stride": [
+        392,
+        1,
+        7,
+        56
+      ],
+      "device": "cpu",
+      "requires_grad": false
+    },
+    "scale": {
+      "shape": [],
+      "dtype": "torch.float64",
+      "stride": [],
+      "device": "cpu",
+      "requires_grad": false
+    }
+  },
+  "state_before_lambda_override": {
+    "count": 14341,
+    "ssd": 60.329756040354546,
+    "cost": 61.81924365370954,
+    "effective_lambda": 9049.463406053183,
+    "bending_energy": 2.3604429240341207
+  },
+  "scalar_gates": {
+    "count": {
+      "actual": 14341,
+      "reference": 14341,
+      "bitexact": true
+    },
+    "ssd": {
+      "actual": 60.329756040354546,
+      "reference": 60.329756040354546,
+      "bitexact": true
+    },
+    "bending_energy": {
+      "actual": 2.3604429240341207,
+      "reference": 2.3604429240341207,
+      "bitexact": true
+    },
+    "effective_lambda": {
+      "actual": 9049.463406053183,
+      "reference": 9049.463406053183,
+      "bitexact": true
+    },
+    "cost": {
+      "actual": 61.81924365370954,
+      "reference": 61.81924365370954,
+      "bitexact": true
+    }
+  },
+  "vector_gates": {
+    "gradient": {
+      "tensor": {
+        "shape": [
+          1177
+        ],
+        "dtype": "torch.float64",
+        "stride": [
+          1
+        ],
+        "device": "cpu",
+        "requires_grad": false
+      },
+      "different_bits": 0,
+      "max_abs": 0.0,
+      "reference_l2": 10.45408646467309,
+      "relative_l2": 0.0,
+      "actual_value_sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73",
+      "reference_file_sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73",
+      "bitexact": true
+    },
+    "diagonal": {
+      "tensor": {
+        "shape": [
+          1177
+        ],
+        "dtype": "torch.float64",
+        "stride": [
+          1
+        ],
+        "device": "cpu",
+        "requires_grad": false
+      },
+      "different_bits": 0,
+      "max_abs": 0.0,
+      "reference_l2": 5132.688093374895,
+      "relative_l2": 0.0,
+      "actual_value_sha256": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f",
+      "reference_file_sha256": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f",
+      "bitexact": true
+    }
+  },
+  "checkpoint": {
+    "bytes": 2647508,
+    "sha256": "78abee8589e6e026fede946136c9e78589817b01a1d55d2085aee19758ceae0e",
+    "array_count": 68,
+    "arrays": {
+      "coefficients": {
+        "shape": [
+          3,
+          7,
+          8,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          3136,
+          8,
+          56,
+          448
+        ]
+      },
+      "scale": {
+        "shape": [],
+        "dtype": "float64",
+        "strides": []
+      },
+      "fixed": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "strides": [
+          2688,
+          96,
+          4
+        ]
+      },
+      "moving_fsl2vox": {
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float32",
+        "strides": [
+          4,
+          16
+        ]
+      },
+      "target_fsl": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "strides": [
+          64512,
+          2688,
+          96,
+          4
+        ]
+      },
+      "affine_pull": {
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float32",
+        "strides": [
+          4,
+          16
+        ]
+      },
+      "coordinate_affine": {
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float64",
+        "strides": [
+          32,
+          8
+        ]
+      },
+      "affine_grid": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "strides": [
+          64512,
+          2688,
+          96,
+          4
+        ]
+      },
+      "gradient_half": {
+        "shape": [
+          1177
+        ],
+        "dtype": "float64",
+        "strides": [
+          8
+        ]
+      },
+      "diagonal_half": {
+        "shape": [
+          1177
+        ],
+        "dtype": "float64",
+        "strides": [
+          8
+        ]
+      },
+      "bending_diagonal": {
+        "shape": [
+          7,
+          8,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8,
+          448
+        ]
+      },
+      "scale_weight": {
+        "shape": [],
+        "dtype": "float64",
+        "strides": []
+      },
+      "state_field": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "strides": [
+          2688,
+          112,
+          4,
+          8064
+        ]
+      },
+      "state_warped": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "strides": [
+          2688,
+          96,
+          4
+        ]
+      },
+      "state_mask": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "bool",
+        "strides": [
+          672,
+          24,
+          1
+        ]
+      },
+      "state_residual": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "strides": [
+          2688,
+          96,
+          4
+        ]
+      },
+      "state_gradient_fsl": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "strides": [
+          4,
+          8064,
+          288,
+          12
+        ]
+      },
+      "basis_0": {
+        "shape": [
+          24,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "basis_1": {
+        "shape": [
+          28,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "basis_2": {
+        "shape": [
+          24,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "spatial_weight_0_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "spatial_weight_0_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "spatial_weight_0_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "spatial_weight_1_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "spatial_weight_1_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "spatial_weight_1_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "spatial_weight_2_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "spatial_weight_2_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "spatial_weight_2_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "cross_weight_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "cross_weight_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "cross_weight_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "strides": [
+          5376,
+          192,
+          8
+        ]
+      },
+      "bending_basis_0_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_0_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_basis_0_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_1_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_1_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_basis_1_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_2_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_2_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_basis_2_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_3_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_3_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_basis_3_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_4_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_4_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_basis_4_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_5_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_basis_5_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_basis_5_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_0_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_0_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_gram_0_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_1_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_1_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_gram_1_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_2_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_2_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_gram_2_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_3_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_3_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_gram_3_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_4_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_4_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_gram_4_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_5_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      },
+      "bending_gram_5_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "strides": [
+          64,
+          8
+        ]
+      },
+      "bending_gram_5_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "strides": [
+          56,
+          8
+        ]
+      }
+    },
+    "moving_array_reference": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261004/gems/fnirt-first-diff-v2/fnit-reference/smoothed_moving.npy",
+      "bytes": 74317952,
+      "sha256": "407836cfe470e483151da01993a4e51987b00c9ae4ab5276dcf4e7076e9a601d"
+    },
+    "state_scalars": {
+      "count": 14341,
+      "ssd": 60.329756040354546,
+      "cost": 61.81924365728813,
+      "effective_lambda": 9049.463427795125,
+      "bending_energy": 2.3604429240341207
+    },
+    "bending_multipliers": [
+      1.0,
+      1.0,
+      1.0,
+      1.4142135623730951,
+      1.4142135623730951,
+      1.4142135623730951
+    ],
+    "normal_cache": {
+      "packed_layout": null,
+      "scratch": null,
+      "layout_copy_bytes": 0
+    },
+    "closure_identity_preserved": false,
+    "meaning": "Newly reconstructed state and unpacked weights after an exact stage1 bridge; no original Python cache objects."
+  },
+  "status": "stage1_passed_no_callback",
+  "flags_after": {
+    "cuda_initialized": false,
+    "cudnn_tf32": true,
+    "matmul_tf32": false,
+    "grad_enabled": true,
+    "default_dtype": "torch.float32"
+  },
+  "flags_unchanged": true,
+  "process_maxrss_KiB": 526548,
+  "bindings_after": {
+    "input/gm": {
+      "bytes": 2241083,
+      "sha256": "e29419b101603fc83f0d0a99771b9d7bf0e0f3d5228b8d9dc90b4e37e141816a"
+    },
+    "input/template": {
+      "bytes": 707776,
+      "sha256": "ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77"
+    },
+    "input/mask": {
+      "bytes": 11132,
+      "sha256": "342d41e1c445d87a812ca288786a116306e96a5595a198e46ba7e7515d4f221c"
+    },
+    "input/affine": {
+      "bytes": 189,
+      "sha256": "069fdf2dcecaaa3c9a02cc3661e09d41727dc32e0d0aa1f50e46a91e09b57af8"
+    },
+    "input/parameters": {
+      "bytes": 9416,
+      "sha256": "21d339a4d3c4310cc4e264a23bb446c55ceba0a716e08ecdef6d695ceac66f45"
+    },
+    "input/gradient": {
+      "bytes": 9416,
+      "sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73"
+    },
+    "input/diagonal": {
+      "bytes": 9416,
+      "sha256": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f"
+    },
+    "input/moving_level": {
+      "bytes": 74317952,
+      "sha256": "407836cfe470e483151da01993a4e51987b00c9ae4ab5276dcf4e7076e9a601d"
+    },
+    "input/fixed_level": {
+      "bytes": 64640,
+      "sha256": "43a20463d53f464448f403347cddddec2a1b24119e3bd1d121d7b9f862538be4"
+    },
+    "input/assembly_summary": {
+      "bytes": 8286,
+      "sha256": "cf196b3f9d302fdb85aeb975b68bef1da65c13c677895d4f5c7e2ad8220cc1a2"
+    },
+    "input/H_reference_identity_only": {
+      "bytes": 11082632,
+      "sha256": "426e0d4add9dd6f46a972ecde0b4e06e6f1350301c06be4c6391af4148c4fa8d"
+    },
+    "production_source/src/fnit/fnirt/cli.py": {
+      "bytes": 6245,
+      "sha256": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c"
+    },
+    "production_source/src/fnit/fnirt/io.py": {
+      "bytes": 6080,
+      "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+    },
+    "production_source/src/fnit/fnirt/optimizer.py": {
+      "bytes": 8506,
+      "sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd"
+    },
+    "production_source/src/fnit/fnirt/registration.py": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "production_source/src/fnit/fnirt/spline.py": {
+      "bytes": 18840,
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7"
+    },
+    "production_source/src/fnit/fnirt/standalone.py": {
+      "bytes": 10838,
+      "sha256": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6"
+    },
+    "production_source/src/fnit/fnirt/topology.py": {
+      "bytes": 9213,
+      "sha256": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3"
+    },
+    "production_source/src/fnit/fnirt/_bending_cpu.py": {
+      "bytes": 3312,
+      "sha256": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+    },
+    "production_source/src/fnit/fnirt/_normal_cpu.py": {
+      "bytes": 10560,
+      "sha256": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f"
+    },
+    "production_source/src/fnit/fnirt/_normal_simd_cpu.py": {
+      "bytes": 6810,
+      "sha256": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9"
+    },
+    "production_source/src/fnit/fnirt/_sampling_cpu.py": {
+      "bytes": 7782,
+      "sha256": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_cpu.py": {
+      "bytes": 3635,
+      "sha256": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_triton.py": {
+      "bytes": 1969,
+      "sha256": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b"
+    },
+    "production_source/src/fnit/fnirt/_topology_cpu.py": {
+      "bytes": 1091,
+      "sha256": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6"
+    },
+    "production_source/src/fnit/fnirt/_topology_triton.py": {
+      "bytes": 7134,
+      "sha256": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1"
+    },
+    "production_source/src/fnit/fnirt/__init__.py": {
+      "bytes": 1040,
+      "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+    },
+    "production_source/src/fnit/fnirt/__main__.py": {
+      "bytes": 80,
+      "sha256": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a"
+    },
+    "source_extra/src/fnit/flirt/coordinates.py": {
+      "bytes": 5019,
+      "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    }
+  },
+  "all_source_and_inputs_unchanged": true,
+  "binding_failures_after": [],
+  "fsl_dso_snapshot_after": []
+}

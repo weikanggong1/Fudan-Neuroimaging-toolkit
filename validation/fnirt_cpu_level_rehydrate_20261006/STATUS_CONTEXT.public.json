@@ -1,0 +1,23 @@
+{
+  "raw_files_preserved": true,
+  "historical_preparation_documents": [
+    "source/PLAN.public.json",
+    "PLAN_REVIEWED_BEFORE_RUN.md"
+  ],
+  "state": "Their not-yet-run wording describes the frozen pre-run plan, not the final exit state.",
+  "scheduler_snapshots": [
+    "run/controller_phase.public.json",
+    "run/index_scheduler_prerequisite.public.json"
+  ],
+  "scheduler_correction": "scientific_worker_started=false is a historical scheduler handoff/metadata snapshot; it does not assert the final runtime state. summary, exitcode and index_completed establish one worker completed.",
+  "read_only_collector_failure": {
+    "phase": "queue status read after enqueue",
+    "error": "AssertionError while assuming the controller was still queued",
+    "scientific_state_changed": false,
+    "scientific_worker_restarted": false,
+    "resolution": "The one worker had already naturally finished; subsequent full summary and final INDEX collection confirm exit0."
+  },
+  "plan_schema_precision_note": "F32 field/warped/residual/gradient_fsl, bool mask, F64 coefficients/bases/weights/gradients. All actual array shapes/dtypes/strides are in raw summary; points are mixed coefficient and intensity units.",
+  "index_update_order_note": "Other FNIT tasks updated INDEX between registration and completion. The final updater reread under all six locks and preserved other fields; intermediate INDEX hashes are historical snapshots.",
+  "serialization_layout_scope": "Array strides in the raw summary describe views before np.savez. Stage1 verified file identity, not np.load layout reconstruction. Nonstandard layouts require a separate explicit restore and validation gate in stage2."
+}
