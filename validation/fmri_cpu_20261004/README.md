@@ -18,7 +18,7 @@ nodecw8 的原 MATLAB R2018b 因许可证主机绑定失败，未进入 CBIG/HCP
 
 GPU 对照使用已验证 H100 的显式 UUID，先记录设备负载。同一设备中的本轮计时顺序执行。默认 TF32；保留既有功能的精度策略和 float32 输出，不启用 float16/bfloat16。PyTorch 显存目标为 20,000,000,000 字节。
 
-用户已明确授权在共享 H100 上串行运行完整 GPU 回归。MS-HBM 的完整 490 帧旧、新、新、旧对照四次均已完成：完整标签、CIFTI、MNI 回投和网络输出一致；API 耗时分别为旧版 95.002/94.295 s、新版 28.105/27.824 s，同期 GPU 利用率接近 100%。这些是共享 GPU 的观察值。首次尝试在 CUDA 峰值统计初始化处失败，未进入影像计算；失败记录保留，成功回执见 task03 的 GPU JSON。混杂回归较早的边界诊断版本也完成八次 GPU 运行，但该版本不代表最终的可选 AFNI 模式。其余受影响功能按同一设备锁顺序验证；局部 CUDA 测试和未修改 CUDA 路径均不能替代完整 GPU 回归。
+共享 H100 的完整 GPU 回归分别保留冻结版本：MCFLIRT／BBR v4 的 12 个进程、36 次调用和 18 组完整比较见[任务 1 报告](task01_motion_bbr/gpu_v4.public.json)；混杂回归最终可选 AFNI 模式的十次调用、六组完整比较见[任务 2 报告](task02_ica_aroma/gpu_projection_20261005.public.json)；MS-HBM 的四次完整 490 帧旧新对照见[任务 3 说明](task03_mshbm/README.md)；三种 MSM 配准的 12 次完整旧新对照见[任务 4 报告](task04_msm_surface/gpu_registration_abba_final_recovery_v1.public.json)。各项旧新输出已通过其完整数值门槛；源码版本、进程／API 时钟、初始化失败重试和显存由各报告单列。共享设备时钟只作为观测值。最终合并源码的完整 volume GPU 回归另行验收。
 
 ## 验证规则
 
@@ -43,5 +43,5 @@ GPU 对照使用已验证 H100 的显式 UUID，先记录设备负载。同一�
 - volume 初次两条队列的前置导入、校验和准备没有共同队列锁，发生同组 CPU 竞争，相关计时全部作废。另加独立队列锁覆盖整个子进程，计算适配器保留原 CPU 资源锁；避免控制器与 worker 重复获取同一锁。无效尝试保留，正式数据从修复后的新目录运行。
 - benchmark 统一框架将多数组 GIFTI 和 CIFTI 交给表面适配器核对面、顶点与轴。普通 metric GIFTI 仍使用数值比较；官方与冻结 FNIT 双版本测量无需伪造 candidate。
 
-- 官方容器阶段的首轮 `strace` 使 Singularity setuid 启动器失败，未进入原版影像计算；这些尝试没有有效耗时。新隔离参考工具在容器内记录实际 payload 退出码，并要求 payload 与启动器均为零，保留 FSL 原有严格 trace 规则。原版 volume 的 session/task 选择也与单 run API 对齐；新的参考尝试尚未执行。
-- 体积基线四组完整 API 已返回成功，单次 180 帧的 first call/cache call 耗时见 [执行回执](task05_volume/baseline_execution_20261005.public.json)。该记录只报告运行状态；最终优化链、原版完整链和逐图精度仍待验收。
+- 官方容器阶段的首轮 `strace` 使 Singularity setuid 启动器失败，未进入原版影像计算；这些尝试没有有效耗时。新隔离参考工具在容器内记录实际 payload 退出码，并要求 payload 与启动器均为零，保留 FSL 原有严格 trace 规则。原版 volume 的许可、session/task 选择与实际修复后的独立运行保持一致；原版与 FNIT 的预处理／clean 输出范围和不同核组分列，不预先宣称整链通过。
+- 体积基线四组完整 API 已返回成功，单次 180 帧的 first call/cache call 耗时见 [执行回执](task05_volume/baseline_execution_20261005.public.json)。该冻结基线早于最新 robust BOLD reference 默认，仅报告执行状态；最终合并优化链、原版完整链和逐图精度仍待验收。[13 项完整 helper 官方比较](task05_volume/helper_float32_protocol_20261005.public.json)已完成，固定 helper 输入的精度独立于整链验收。

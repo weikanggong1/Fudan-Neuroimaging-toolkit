@@ -251,6 +251,15 @@ def fnit_call(args, config, out, repeat):
 
 
 def original(command, out, environment=None):
+    if Path(command[0]).name == 'singularity':
+        # setuid 容器启动器不使用 host strace；与实际 v4 原版运行相同，
+        # 同时要求容器启动器与容器内真实 payload 正常退出。
+        sys.path.insert(0, str(Path(__file__).parent))
+        from container_reference import run_container_reference
+        image = next(value for value in command if str(value).endswith('.simg'))
+        return run_container_reference(
+            command, out, image_path=image,
+            container_python='/app/.pixi/envs/fmriprep/bin/python')
     # 独立参考工具不依赖生产源码快照包含 validation/。
     sys.path.insert(0,os.environ['FNIT_BENCHMARK_REFERENCE_TOOLS'])
     from native_exec import run_traced
@@ -288,16 +297,22 @@ def official_call(args, config, out, repeat):
         if result.returncode:raise RuntimeError('Original NiWorkflows sampling reference failed')
         return {'native_exit_code':result.returncode,'scope':'Original NiWorkflows grid generation; identical full T1/WM mask and complete real BOLD geometry.'}
     if args.function == 'volume':
+        license_path = config.get('official_fs_license')
+        if not license_path or not Path(license_path).is_file():
+            raise ValueError('Declare an existing authorized official_fs_license in the private input manifest')
         cache=Path(config['official_templateflow_cache'])
         work=args.output/'work';work.mkdir(exist_ok=True)
         home=args.output/'runtime_home';home.mkdir(exist_ok=True)
         command=[config['singularity'],'exec','--cleanenv','--bind',f'/cwStorage,/home1,/public,{cache}:/reference-templateflow','--home',f'{home}:/home/reference','--env',f'TEMPLATEFLOW_HOME=/reference-templateflow,OMP_NUM_THREADS={args.threads},MKL_NUM_THREADS={args.threads},OPENBLAS_NUM_THREADS=1,NUMEXPR_NUM_THREADS={args.threads},ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={args.threads}',config['fmriprep_image'],
             '/app/.pixi/envs/fmriprep/bin/fmriprep',p['pipeline']['bids_root'],str(args.output/'derivatives'),
             'participant','--participant-label',p['pipeline']['subject'],'--fs-no-reconall',
+            '--fs-license-file',license_path,
             '--output-spaces','T1w','MNI152NLin6Asym:res-2','--nthreads',str(args.threads),
             '--omp-nthreads',str(args.threads),'--work-dir',str(args.output/'work'),
             '--skip-bids-validation','--notrack','--no-msm','--random-seed','0','--dummy-scans','0','--slice-time-ref',str(args.slice_time_reference),'--resource-monitor','--stop-on-first-crash','--ignore','fieldmaps']
         if not args.pipeline_stc:command+=['slicetiming']
+        if p['pipeline'].get('session'):command+=['--session-label',str(p['pipeline']['session'])]
+        if p['pipeline'].get('task'):command+=['--task-id',str(p['pipeline']['task'])]
         return dict(original(command,out),complete_frames=p['bold_shape'][3],
                     scope='Independent official raw-BIDS volume-only preproc; no AROMA/highpass/scaling/clean, no recon-all/surface. Output scope differs from FNIT complete API.')
     if args.function == 'temporal':

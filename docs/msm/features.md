@@ -161,7 +161,7 @@ ComputeVN('/absolute/path/work/clean.dtseries.nii', 'NONE', ...
 
 ### 本轮原 MATLAB CPU 对照
 
-[CPU 官方报告](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)使用合法 MATLAB R2018b 和固定 HCP v4.7 原函数，完整读取同一 490×90,568 输入，候选 VN/DR/DR+VN/WRN CPU1/8 八项全部完成且输入不变。全部 maps 有限、形状与保存 float32 正确，所有 40 列 weights 逐位相同；VN 的 BrainModelAxis 相同，但 ScalarAxis 名称不同。原 nodes/spectra 六项完整输出已写出，nodes 全矩阵数值核对待导出。
+[CPU 官方报告](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)使用合法 MATLAB R2018b 和固定 HCP v4.7 原函数，完整读取同一 490×90,568 输入，候选 VN/DR/DR+VN/WRN CPU1/8 八项全部完成且输入不变。全部 maps 有限、形状与保存 float32 正确，所有 40 列 weights 逐位相同；VN 的 BrainModelAxis 相同，但 ScalarAxis 名称不同。原 nodes/spectra 六项完整输出已逐值核对，旧／新 FNIT 的 12 项完整 nodes 输出保存 SHA 相同；实际误差见下方全矩阵结果。
 
 | 完整功能 | CPU 预算 | 原版 fresh / s | FNIT fresh / s | FNIT 完整 API / s | maps 最大误差 / RMSE |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -175,6 +175,18 @@ ComputeVN('/absolute/path/work/clean.dtseries.nii', 'NONE', ...
 CPU1 WRN 原函数 1781.215 s，FNIT 冻结基线 API 954.113 s；保存 maps 最大差 `3.28e-6`、RMSE `2.35e-7`，40 列 weights 逐位相同，全部 CIFTI 轴相同。该节点负载约 2,500，这些是单次观测。原 nodes 的 spectra/绘图输出支路另行完整运行；不将没有写出的原节点时序标为通过。
 
 候选 CPU WRN 复用 d7–d21 各轮共用的完整 BOLD demean，中间仍为 float64、输出 float32，pinv 容差与回归顺序不变。同一完整真实 CPU1 输入的缓存前后 maps、weights 和 nodes 三份保存文件 SHA 完全相同。增加约 710 MB CPU 内存；CUDA 或任一回归输入需要梯度时保留原运算序列。
+
+### 完整 nodes 与振幅谱
+
+[最新全矩阵报告](../../validation/fmri_cpu_20261004/task04_msm_surface/full_nodes_spectra_v3.public.json)核对原 DR、DR+VN、WRN 的 CPU1/8 全部 490×40 nodes 与 245×40 spectra，固定组件身份。旧／新 FNIT 每项 nodes 文件 SHA 相同。
+
+| 功能 | CPU | nodes 最大差 / RMSE | 谱最大差 / RMSE |
+| --- | ---: | --- | --- |
+| DR | 1 / 8 | 5.288e-3 / 7.998e-4；5.087e-3 / 7.981e-4 | 4.949e-1 / 1.455e-2；4.949e-1 / 1.450e-2 |
+| DR+VN | 1 / 8 | 5.424e-5 / 1.056e-5；5.169e-5 / 1.055e-5 | 4.830e-3 / 1.932e-4；4.830e-3 / 1.928e-4 |
+| WRN | 1 / 8 | 9.570e-5 / 1.611e-5；5.746e-5 / 1.431e-5 | 6.511e-3 / 3.504e-4；4.998e-3 / 3.125e-4 |
+
+原 `MSMregression` 文本只有 5 位有效数字，FNIT nodes 为 17 位。报告用原保存 nodes 重建谱，单列量化与 FFT 舍入控制；上表保留原样实际误差，全部组件平均相关大于 0.9999999998，不称为逐位一致。谱按 float64 时间去均值、振幅 FFT、前 245 点计算，没有 Welch、符号调整或组件重排。它用于验证已保存节点，生产 API 仍只提供文档列出的 nodes/maps/weights；原谱与绘图支路的额外时间不计入上方 maps/weights 主计时。
 
 ### 历史独立源码公式专项
 
@@ -197,7 +209,7 @@ VN 和 WRN 地图为保存后的 float32 逐值一致；节点时序在 float64 
 
 ## 6. 更新记录
 
-- 2026-10-04 起：完整 490 帧真实原 MATLAB CPU1/8 对照；CPU WRN 缓存固定 BOLD demean，GPU 与梯度分支保留原计算路径。结果及未完成支路见本轮报告。
+- 2026-10-04 起：完整 490 帧真实原 MATLAB CPU1/8 对照；CPU WRN 缓存固定 BOLD demean，GPU 与梯度分支保留原计算路径。maps/weights、完整 nodes 与谱的聚合结果见本轮报告；CA/CAT 仍缺同被试髓鞘输入。
 - 2026-10：新增三种独立特征准备接口；固定参考列顺序和 BrainModel 轴，补齐全部 15 份 WRN 低维模板。CA/CAT 缺少个体髓鞘图时明确报错。
 - VN 保留 HCP ICA mixing 标准差下限 `1e-5`，残差 VN 下限 `0.001`；WRN 保留原 MATLAB 前三列零值参与 Fisher 平均的行为。
 - 真实数据定位到恒定时序会产生未定义的 Fisher 权重，新增进入回归前的覆盖检查与具体报错；本次显式有效覆盖为 90,568 点。完整准备为 47.498 s，VN 与 WRN 保存地图对独立源码公式逐值一致。

@@ -4,7 +4,7 @@
 
 本轮基线为 `cc9402734faeba93b3a13c29932fa1392eaccf62`。完整功能清单见 [功能矩阵](FEATURE_MATRIX.md)：MSMSulc、MSMAll、VN、DR、WRN、配准准备、表面几何、体积到表面投影、CIFTI 和 surface pipeline。
 
-此前的 10 项完整基线回执见 [聚合检查点](report.checkpoint.public.json)。2026-10-05 已取回候选配准 CPU1/8 六项、HCP 特征 CPU1/8 八项的完整数值、实际源码与输入 SHA，见 [最新精度与耗时报告](completion_status_20261005.public.json)。全部 14 项输入在配对前后不变；保留完整帧数、顶点、d7–d21 组数和原配准停止条件。原 nodes/spectra 六项已经完成，全部 nodes 的数值核对待导出。固定投影与完整 surface 的原版 command_0 在候选启动前失败，失败原因和重新验证单列，不作为通过项。
+此前的 10 项完整基线回执见 [聚合检查点](report.checkpoint.public.json)。2026-10-05 已取回候选配准 CPU1/8 六项、HCP 特征 CPU1/8 八项的完整数值、实际源码与输入 SHA，见 [最新精度与耗时报告](completion_status_20261005.public.json)。全部 14 项输入在配对前后不变；保留完整帧数、顶点、d7–d21 组数和原配准停止条件。原 nodes/spectra 六项已经完成，全部 nodes 的数值核对待导出。固定投影与完整 surface 的历史初次尝试在原版 command_0、候选启动前因参考源码元数据部署缺失而失败，原失败目录保留；隔离修复元数据部署后的 CPU1/8 官方与候选完整重试均已执行成功，科学聚合待取回。
 
 ```mermaid
 flowchart LR
@@ -87,6 +87,8 @@ surface 参照使用用户指定 fMRIPrep 25.2.4 镜像内的原工作流与 NiW
 
 MSMSulc 的 CPU 不一致已定位到 Point 运算中向量除法的末位舍入，进而改变共享边三角面归属。CPU literal double 修复先通过完整 affine 与首轮成本检查，随后完整四级配准达到双侧坐标和有序 faces 逐位相同。原 FastPD/WLS 固定源码构建与原完整 WLS 包逐位通过。
 
+本次 CPU 移植另发现单点几何路径的标量除法缺陷：NumPy 返回零维标量，直接交给 `torch.from_numpy` 会报错。已用 `np.asarray` 保持标量 Tensor 返回；数组结果不新增运算或复制，原数组及 CUDA 分支保持相同。标量、单三角形距离与旧 Tensor 差分、既有 Point/SphereMap 定向检查共 29 项通过，见[标量修复回执](point_scalar_regression_20261006.public.json)。完整批量 benchmark 未触发此缺陷，其源码范围与最终修复的关系单列在[源码语义核对](surface_final_source_semantics_20261005.public.json)。
+
 ### 最新完整 CPU1/8 配准
 
 以下在 nodecw8 完成，每项各一次。fresh process 包含程序启动、读入、计算和全部保存；API 是 FNIT 函数的完整读写调用。所有 CPU1 候选双侧坐标与有序 faces 都和原版严格单线程逐位相同；候选 CPU8 与 CPU1 的全部球面文件 SHA 也相同。
@@ -104,7 +106,7 @@ MSMSulc 的 CPU 不一致已定位到 Point 运算中向量除法的末位舍入
 
 四级 MSMSulc 左侧参照和候选都存在 1 个相对取向改变面，右侧为 0；MSMAll coarse/refine 双侧为 0。数值逐位匹配和几何零翻面是两项独立检查。
 
-实际锁内候选全部 FNIT Python 源码树 SHA 为 `72059515e650f7db02084fd41816ab78abf61bfbc1286e8f398a2ebdfd5b294f`，逐模块与输入 SHA 见报告。本地追加的 float32 selector guard 未覆盖该冻结目录；最终交付快照和完整 GPU 回归另核对源码。
+实际锁内候选全部 FNIT Python 源码树 SHA 为 `72059515e650f7db02084fd41816ab78abf61bfbc1286e8f398a2ebdfd5b294f`，逐模块与输入 SHA 见报告。最终快照将 selector 的 CPU 分支增加 float64 条件。实际读回旧源码后核对，公开入口先转换 points 与缓存几何为 float64，CPU 完整调用保持同一分支；CUDA 保持原 Tensor 分支。四个变更文件的 SHA 与 ready-path 语义见 [最终表面源码核对](surface_final_source_semantics_20261005.public.json)。
 
 ### 完整 490 帧 HCP CPU1 基线
 
@@ -119,7 +121,7 @@ MSMSulc 的 CPU 不一致已定位到 Point 运算中向量除法的末位舍入
 
 原 DR+VN 还包含 31.704 s 的 Workbench 归一化准备，原 wrapper 合计 69.928 s。所有表项均核对完整数组、有限性、保存 float32 与 BrainModelAxis；DR/WRN maps 的全部轴一致，40 组件 weights 逐位相同。VN 的 ScalarAxis 标签名称不同，类型、形状、BrainModelAxis 和全部数值均单独记录。此表未将主参照没有写出的 nodes 标为通过。
 
-已保存的 CPU8 基线使用 nodecw10 同一组八个物理核。旧基线 WRN CPU8 在输入不变检查处失败，其结果不验收；最新候选另用完整且稳定的输入完成全部八项。
+已保存的 CPU8 基线使用 nodecw10 同一组八个物理核。旧基线 WRN CPU8 的完整 API 已保存，原队列在后续候选阶段没有追加第八条记录。现已独立核对实际输入、全源码、原输出 SHA 与 CPU 预算，恢复该已完成结果；只变化的参考 launcher 在 FNIT 调用之外，默认原命令不变。原队列和旧尝试保留原字节，详见下方完整节点报告。最新候选完成全部八项。
 
 | CPU8 功能 | 原函数 / s | 原 fresh process / s | FNIT 完整 API / s | FNIT fresh process / s | maps 最大误差 / RMSE |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -146,7 +148,35 @@ CPU8 原 DR+VN 的 Workbench 准备为 33.662 s，原 wrapper 合计 64.867 s。
 
 全部 maps 有限、形状与保存 float32 正确；DR/WRN 轴一致，所有 40 列 weights 逐位相同。VN 的 BrainModelAxis 一致，ScalarAxis 名称仍不同，报告明确 `axes_equal=false`。本轮保留节点负载、实际 user/system CPU 和 affinity，数字是共享节点的一次观测。WRN 缓存保持数学结果；VN/DR 的完整 CPU profile 用于判断仍慢于原函数的热点。
 
-固定投影、完整 surface 和最终 GPU 配对仍待完整回执，当前不填入通过结论。
+### 完整节点与振幅谱核对
+
+[全矩阵报告](full_nodes_spectra_v3.public.json)逐项核对 DR、DR+VN、WRN 的 6 个原版输出和 12 个旧／新 FNIT 输出。每项 nodes 为 490×40，振幅谱为 245×40；组件顺序固定，不调整符号或重新排列。全部数组有限，旧／新 FNIT nodes 文件 SHA 在每种配置和线程预算下相同。
+
+| 功能 | CPU | nodes 最大差 / RMSE | 振幅谱最大差 / RMSE |
+| --- | ---: | --- | --- |
+| DR | 1 | 5.288e-3 / 7.998e-4 | 4.949e-1 / 1.455e-2 |
+| DR | 8 | 5.087e-3 / 7.981e-4 | 4.949e-1 / 1.450e-2 |
+| DR+VN | 1 | 5.424e-5 / 1.056e-5 | 4.830e-3 / 1.932e-4 |
+| DR+VN | 8 | 5.169e-5 / 1.055e-5 | 4.830e-3 / 1.928e-4 |
+| WRN | 1 | 9.570e-5 / 1.611e-5 | 6.511e-3 / 3.504e-4 |
+| WRN | 8 | 5.746e-5 / 1.431e-5 | 4.998e-3 / 3.125e-4 |
+
+原脚本以 5 位有效数字保存 nodes 和 spectra，FNIT nodes 保留 17 位。报告另外用原已保存 nodes 重建振幅谱，记录相同文本量化造成的误差量级；上表仍为实际误差，不称为逐位一致。nodes 和 spectra 的组件平均相关均大于 0.9999999998。谱核对按原 `nets_demean` → `abs(FFT)` → 前 245 点执行；这是保存节点的离线核对，生产 API 没有新增谱输出，也没有将这次 FFT 的耗时当作生产速度结果。
+
+### 固定投影与完整 surface 实际门槛
+
+[完整原版／候选报告](projection_surface_metadata_v1.public.json)已核对 CPU1/8 保存输出。固定 490 帧几何投影的左右 GIFTI 全帧与 91k CIFTI 逐值相同，轴和 float32 保存类型相同。
+
+| 完整范围 | CPU | 原版 fresh / s | FNIT fresh / s | FNIT 完整 API / s | 实际精度 |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 固定几何投影，490 帧 | 1 | 466.650 | 414.180 | 412.364 | 全部值及 CIFTI 轴相同 |
+| 固定几何投影，490 帧 | 8 | 268.903 | 130.268 | 128.419 | 全部值及 CIFTI 轴相同 |
+| fresh surface，180 帧 | 1 | 1855.025 | 783.233 | 781.290 | 球面与时序仍有差异，未通过严格匹配 |
+| fresh surface，180 帧 | 8 | 521.294 | 251.735 | 249.809 | 同上；FNIT CPU1/8 输出一致 |
+
+180 帧的严格单线程原版对照中，球面左／右平均角差为 0.302742/0.345475°；CIFTI 最大差 388.922、RMSE 13.8695，逐 grayordinate 时间相关均值 0.977986、p01 0.732025。完整调用和元数据修复已完成；这些误差仍需定位和修复，不能由固定几何零差或其他病例的 MSM 零差推断本例整链一致。当前正核对保存的 MSM 输入与重新生成的准备数组，原版和候选使用同一已完成 volume、recon-all 和配置。
+
+最终三种配准的 12 次 GPU 旧／新配对完成，全部坐标和有序 faces 相同；详细时间、显存和共享负载见 [完整 GPU 聚合](gpu_registration_abba_final_recovery_v1.public.json)及[图表](../../../docs/msm/README.md#本轮-cpu-优化后的完整-gpu-回归2026-10-05)。coarse 优化版在本次繁忙共享环境观测较慢，不报告稳定加速或性能回退。
 
 ### 公开脑图例子
 

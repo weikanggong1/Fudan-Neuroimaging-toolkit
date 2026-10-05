@@ -1,8 +1,10 @@
 # MS-HBM CPU 官方对照与优化验证（2026-10-04）
 
-本轮基线为 `cc9402734faeba93b3a13c29932fa1392eaccf62`。完整真实 490 帧的冻结/优化 FNIT CPU1/CPU8、13 项体积/参数/CLI 矩阵和 4 次完整 GPU ABBA 已完成。独立全帧几何与网络核查完成，既有单元门槛 7 项通过、1 项因 CPU 节点无 CUDA 跳过。固定原 vendor 的实际 reader 已读入完整 490 帧，独立比较的全部 29,111,880 个皮层值差异为 0；原版／冻结／优化 FNIT 的完整 CPU1、CPU8 六项配对已启动，尚无新的官方分区精度/时间结果。先读取服务器固定入口 `FNIT/README.md`、`FNIT/INDEX.md`，再使用本任务私有绑定；旧源码、旧输出与 Conda prefix 保留原位置。
+本轮基线为 `cc9402734faeba93b3a13c29932fa1392eaccf62`。完整真实 490 帧的冻结/优化 FNIT CPU1/CPU8、13 项体积/参数/CLI 矩阵和 4 次完整 GPU ABBA 已完成。独立全帧几何与网络核查完成，既有单元门槛 7 项通过、1 项因 CPU 节点无 CUDA 跳过。固定原 vendor 的实际 reader 已读入完整 490 帧，独立比较的全部 29,111,880 个皮层值差异为 0；原版／冻结／优化 FNIT 的完整 CPU1、CPU8 六项配对均返回 0。完整固定身份标签与 CBIG 比较：CPU1 的新旧 FNIT 各差 1 个顶点，CPU8 均为 0 差；新旧 FNIT 完全一致。官方完整函数链 CPU1/CPU8 为 1741.111/1199.323 s，优化 FNIT 为 603.380/181.457 s；共享节点负载约 2,415–2,539，时间为各一次运行观测。先读取服务器固定入口 `FNIT/README.md`、`FNIT/INDEX.md`，再使用本任务私有绑定；旧源码、旧输出与 Conda prefix 保留原位置。
 
 最新七节功能与结果说明见[CPU benchmark](../../../docs/mshbm/cpu_benchmark_20261004.md)，机器可读完整旧新证据见 [cpu_hoist_control.public.json](cpu_hoist_control.public.json) 与 [cpu_hoist_receipts.public.json](cpu_hoist_receipts.public.json)。
+
+官方完整原版对照与六项实际进程记录见 [official_cbig_matched_cpu_v5.public.json](official_cbig_matched_cpu_v5.public.json)。
 
 其他已完成证据：[完整 CPU 功能矩阵](full_api_matrix.public.json)、[跨 API/CLI 的科学文件核查](cross_api_controls.public.json)、[独立全部帧核查](independent_oracles.public.json)、[GPU ABBA](gpu_abba_control.public.json)、[既有测试门槛](focused_tests.public.json)。[21 条完整新进程观测 CSV](fnit_complete_observations.csv)分开记录函数链、过程墙钟、user/system CPU time、非函数链开销、分步骤与源码 SHA；非函数链开销包含导入、校验和报告 I/O，不等于纯解释器启动。
 
@@ -13,7 +15,7 @@
 | 单 run CIFTI | 完整 490 帧、两侧各 32,492 顶点，取 59,412 皮层顶点；前后各 245 帧 | 干净 CBIG 单被试 wrapper，全局 top 10% profile、原版完整迭代 | 完整 profile 值、64,984 标签、逐网络 Dice；CPU1/CPU8 启动到写出与 API 分步 |
 | NPY 布局 | 同一完整时序的 `T×59412`、转置、`T×64984` 和转置 | 与 CIFTI 入口逐值比较；保留所有帧和顶点 | 读取及标签／输出一致性；不将格式转换时间混入推断速度 |
 | 多文件 session | 真实多 run 资源待协调者选择；单 run 的两个 pseudo-session 可用于接口控制 | CBIG `num_sess` 与一文件一 session；完整 run，不复制 run 冒充独立采集 | session 数、每 run 全部帧、profile／标签；独立采集与接口控制分列 |
-| censor | 无 censor 主样例完整 490 帧；可选控制预定义为同 run 的 DVARS P95，完整执行尚待完成 | 同一 490 行 0/1 向量，先保留帧后拆半 | 保留帧数、profile、网络 TSV 时间轴；该控制不作为运动质控建议，不降低主速度样例的工作量 |
+| censor | 无 censor 主样例完整 490 帧；可选控制预定义为同 run 的 DVARS P95，原版／FNIT 已完整执行，保留465帧且标签0差 | 同一 490 行 0/1 向量，先保留帧后拆半 | 保留帧数、profile、网络 TSV 时间轴；该控制不作为运动质控建议，不降低主速度样例的工作量 |
 | HCP_40 prior／mask | 官方固定先验、fsLR32k mask／seed／graph；`--assets` 使用相同 NPZ 控制 | `mu/sigma/epsil/theta` 与原始 MAT 逐值相同，medial mask 0 差 | 资产 SHA、shape、标签 0 与网络 1–17、缺失网络行为 |
 | `w`／`c` | 默认 200／50；改变 prior／MRF 权重的真实输入控制 | 官方同值参数 | 各配置原版标签对照、收敛记录、耗时；不改变配置换速度 |
 | 迭代上限 | Python `50/101/300/101` 原有预算 | 官方 outer 50、EM/lambda 101、M-step 按原收敛结束 | 原预算主 benchmark、未收敛报错；原版 M-step 无 300 次上限，应记录此接口差别 |
@@ -100,7 +102,7 @@ python compare_official.py \
 
 可选 censor 控制按完整皮层计算 `DVARS[t] = sqrt(mean((x[t]-x[t-1])**2))`，保持第 0 帧，剔除超过同 run DVARS 第 95 百分位数的帧。`prepare_censor_control.py` 先核对完整输入 SHA，再写出全部 490 行向量及私有逐帧 DVARS；公开报告只保存阈值、保留/剔除帧数和 SHA。原 CBIG 与 FNIT 必须使用相同向量，完整时间轴读取和原有迭代上限仍保留；该额外样例的耗时单独记录。
 
-`reference_feature_controls.py` 提供独立的 CPU8 附加队列：原版／优化 FNIT 的相同 censor 控制，以及 `w=100/c=25` 的无 censor 控制。它要求六项主队列已经成功完成，重新核对完整输入、667 个原版文件和冻结 core，随后沿用相同八个物理核与 CPU 锁。每个配置写入新目录和各自私有绑定；公开回执保存参数、censor SHA、实际退出码与耗时，不保存逐帧向量。此附加队列目前只完成准备，没有可报告的官方结果。
+`reference_feature_controls.py` 提供独立的 CPU8 附加队列：原版／优化 FNIT 的相同 censor 控制，以及 `w=100/c=25` 的无 censor 控制。它要求六项主队列已经成功完成，重新核对完整输入、667 个原版文件和冻结 core，随后沿用相同八个物理核与 CPU 锁。每个配置写入新目录和各自私有绑定；公开回执保存参数、censor SHA、实际退出码与耗时，不保存逐帧向量。此附加队列四项均完成：删帧保留465帧，原版／FNIT标签0差；`w=100/c=25` 保留490帧，固定身份下左42、右37顶点有差异，背景0，最小双半球网络 Dice 0.995934。完整参数、source/input SHA 与实际时钟见[可选控制报告](optional4_matched_cpu_v1.public.json)。原版和旧／新实现的标签身份不重排；旧核心同配置单次完整控制仍在准备／运行，79差不会写为通过。
 
 ```bash
 python reference_feature_controls.py \
@@ -120,7 +122,7 @@ python reference_feature_controls.py \
 
 ## 更新记录与参考
 
-- 2026-10-04/05：完成资源与接口核对、完整 CPU1/CPU8、体积/参数/CLI 矩阵、GPU ABBA 和独立全帧核查；四种 NPY 布局读取与完整 CIFTI 逐值相同。用户直接确认共享 GPU 串行运行后由协调者启动；各失败 attempt 保留。固定原 vendor 的实际全值读取通过，完整原版 CPU1/CPU8 配对已启动，结果待完成。
+- 2026-10-04/05：完成资源与接口核对、完整 CPU1/CPU8、体积/参数/CLI 矩阵、GPU ABBA 和独立全帧核查；四种 NPY 布局读取与完整 CIFTI 逐值相同。用户直接确认共享 GPU 串行运行后由协调者启动；各失败 attempt 保留。固定原 vendor 的实际全值读取通过，完整原版 CPU1/CPU8 配对全部成功，CPU1 一个边界标签差、CPU8 全标签相同；额外参数控制已启动。
 - 2026-10-01：490 帧官方发布数据与 FNIT 上游输出的下游 MS-HBM 对照；两边推断均为 FNIT，保留原版本和报告。
 - 2026-09-27：100 帧真实样例的旧 profile／标签对照；绑定当时脚本与源码，不能代替本轮完整数据对照。
 

@@ -41,7 +41,7 @@
   "clock_scope": {
     "api_seconds": "Input loading plus complete API computation and ordinary MCFLIRT output save; BBR image/matrix save is recorded separately. Python feature import excluded.",
     "measured_application_seconds": "Feature import plus input-object setup plus complete API plus ordinary outputs; evidence/hash comparisons excluded.",
-    "native": "Same-batch fresh official CPU1/8 six defaults not yet executed; historical native timings retain their original scope."
+    "native": "One fresh official subprocess per case/budget; complete frozen candidate first/warm clocks retain their original process boundaries. Single observations do not establish a stable speed ratio."
   },
   "records": [
     {
@@ -82,7 +82,8 @@
           "repeat": 1,
           "call_type": "warm_fnit_api_call"
         }
-      ]
+      ],
+      "fresh_native_complete_process_seconds": 35.39762426447123
     },
     {
       "job": "bbr_fnit_cpu1",
@@ -149,7 +150,8 @@
           "repeat": 1,
           "call_type": "warm_fnit_api_call"
         }
-      ]
+      ],
+      "fresh_native_complete_process_seconds": 40.81688482500613
     },
     {
       "job": "mc180_fnit_cpu8",
@@ -196,7 +198,8 @@
           "repeat": 1,
           "call_type": "warm_fnit_api_call"
         }
-      ]
+      ],
+      "fresh_native_complete_process_seconds": 35.23275456111878
     },
     {
       "job": "bbr_fnit_cpu8",
@@ -270,7 +273,8 @@
           "repeat": 1,
           "call_type": "warm_fnit_api_call"
         }
-      ]
+      ],
+      "fresh_native_complete_process_seconds": 40.589191124774516
     },
     {
       "job": "mc490_fnit_cpu1",
@@ -299,7 +303,8 @@
           "repeat": 0,
           "call_type": "first_fnit_call"
         }
-      ]
+      ],
+      "fresh_native_complete_process_seconds": 296.35452311486006
     },
     {
       "job": "mc490_fnit_cpu8",
@@ -335,14 +340,57 @@
           "repeat": 0,
           "call_type": "first_fnit_call"
         }
-      ]
+      ],
+      "fresh_native_complete_process_seconds": 296.2893558098003
     }
   ],
   "completion_gaps": [
-    "31 full CPU feature jobs and strict gates",
-    "Same-batch fresh native defaults and full trace/output comparisons",
-    "Full GPU ABBA regression still running"
+    "CPU v5 scalar-row candidate full cost/output/CPU1/8 feature gates before promotion",
+    "One final full GPU180 v5 vs acceptedv4 call after CPU acceptance"
   ],
-  "timing_conclusion": "Current observations show a remaining MC180 performance gap against the earlier official36\u201337s observations, including warm API39.3\u201339.8s; compare the fresh native batch before a final efficiency conclusion.",
-  "privacy": "Aggregate clocks, shapes, algorithm counts and source hashes only; no new individual brain maps or identifiers"
+  "timing_conclusion": "Fresh official MC180 observations35.233–35.398s remain faster than v4 warm39.324–39.784s; completeCPU1 diagnostic has been submitted. MC490 and BBR are faster in these whole-function observations; process-clock boundaries and single-run shared-server observations remain explicit.",
+  "privacy": "Aggregate clocks, shapes, algorithm counts and source hashes only; no new individual brain maps or identifiers",
+  "feature_queue": {
+    "status": "completed",
+    "jobs": 31,
+    "exit_codes": "all0",
+    "numerical_gate": {
+      "status": "completed",
+      "accepted": true,
+      "jobs": 31,
+      "full_oldnew_comparisons": 11,
+      "full_official_comparisons": 6,
+      "native_exec_chains": 6,
+      "full_real_frames": true,
+      "scope": "Official precision metrics are reported without declaring bitwise equality; all frozen baseline comparisons must be exact."
+    }
+  },
+  "feature_full_report": "features_v4.public.json",
+  "GPU_execution_status": {
+    "status": "complete_full_numerical_gate",
+    "complete_API_calls": 36,
+    "full_comparisons": 18,
+    "timing_groups": 9,
+    "output_precision_gate": "allcompleteoutputsexact",
+    "report": "gpu_v4.public.json"
+  },
+  "fresh_native_full_report": "fresh_native_v4.public.json",
+  "fresh_native_gate": {
+    "accepted_official_exec_output_gate": true,
+    "candidate_manifest_sha256": "bd283223a88af2b839b03af6746e669eca8a3a5b2dc12e76221d6d3dab1107d7",
+    "candidate_source_sha256": {
+      "src/fnit/fmri/_bbr_cpu.py": "0a60a6a03e84e285aab22cab4b54f791172fcbb51d056520a6523ff0690c11eb",
+      "src/fnit/fmri/bbr.py": "cd596c2f306e5f237cc52be3a8819dd776212eab7278a70de33ce2dd99fd545e",
+      "src/fnit/mcflirt/_cost_cpu.py": "3a484a2263414ceb3d908f35dc7227ee6c367b8bce82f17f387cb19b85f5851a",
+      "src/fnit/mcflirt/_sampling_cpu.py": "8fe4cca243a18b1ceff406c9a377cdf9a769ccf650c46af615ca11b98fdd4457",
+      "src/fnit/mcflirt/core.py": "cd06848a835771434638985a590fae45ae678c46d8c822ba3bed50f2f231ca30",
+      "src/fnit/mcflirt/sampling.py": "bb620094b8768292aa457cc6ff9704180ea5db709fad1e138a98e1fe860a8617"
+    },
+    "full_output_comparisons": 10,
+    "native_jobs": 6,
+    "native_manifest_sha256": "c3dd46a9c508ec02c1c9eaadc6622f358684e06529933040f4b22ba008f79796",
+    "scope": "Native success proven from full payload/launcher chain, including retained original launcher exit255; precision metrics cover full outputs and are not assumed bitwise equal to official",
+    "status": "completed"
+  },
+  "profile_report": "profile180_cpu1_v4.public.json"
 }

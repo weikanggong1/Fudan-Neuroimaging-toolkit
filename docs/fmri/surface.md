@@ -299,9 +299,9 @@ wb_command -metric-mask atlas.func.gii atlas_roi.shape.gii final.func.gii
 
 ### 本轮 CPU 官方测试范围
 
-[2026-10-04 起的 CPU 官方对照](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)包含完整 490 帧固定几何投影/CIFTI，以及公开 180 帧 fresh surface 输出整链。后者以同一已完成 volume 和 recon-all 为起点，完整计入几何、ROI、MSMSulc、投影、CIFTI、QC 与保存；前序 volume/recon-all 计算分别由其独立测试记录。原 fMRIPrep 25.2.4、冻结基线和候选使用相同 1/8 物理核预算。当前完整测试排队或执行中，最终表将同时核对全帧、全部顶点、有序 faces、CIFTI 轴和保存 dtype。仅发布聚合指标与既有公开图。
+[2026-10-04 起的 CPU 官方对照](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)包含完整 490 帧固定几何投影/CIFTI，以及公开 180 帧 fresh surface 输出整链。后者以同一已完成 volume 和 recon-all 为起点，完整计入几何、ROI、MSMSulc、投影、CIFTI、QC 与保存；前序 volume/recon-all 计算分别由其独立测试记录。原 fMRIPrep 25.2.4、冻结基线和候选使用相同 1/8 物理核预算。固定 490 帧投影的 CPU1/8 左右全帧时序与 91k CIFTI 逐值及轴相同；原版 fresh 为 466.650/268.903 s，FNIT 完整 API 为 412.364/128.419 s。完整 180 帧 surface 已运行完成，但尚未达到严格匹配：球面左／右平均角差 0.302742/0.345475°，CIFTI RMSE 13.8695、平均时间相关 0.977986，CPU1/8 的 FNIT 输出相同。原版 fresh 为 1855.025/521.294 s，FNIT 完整 API 为 781.290/249.809 s；精度差异正在按保存 MSM 输入定位，未作为通过结果。全部指标和测量范围见[完整报告](../../validation/fmri_cpu_20261004/task04_msm_surface/projection_surface_metadata_v1.public.json)。仅发布聚合指标与既有公开图。
 
-本轮成熟 MSMSulc 子函数已修 CPU float64 Point 除法舍入，并优化 CPU containing-face 查询；CPU 与 CUDA 的执行边界见 [MSMSulc](../msm/README.md#cpu-官方配对与本轮修复)。既有 GPU 专项和下方三 backend 报告保留各自实测版本，完整 GPU 旧/新配对完成后另行更新。
+本轮成熟 MSMSulc 子函数已修 CPU float64 Point 除法舍入，并优化 CPU containing-face 查询；CPU 与 CUDA 的执行边界见 [MSMSulc](../msm/README.md#cpu-官方配对与本轮修复)。最终三种配准的 12 次完整 GPU 旧/新调用已完成，全部球面坐标和有序 faces 相同，最大本任务进程树显存 4.161 GB；各项实测时间及繁忙共享 H100 的边界见 [完整 GPU 回归](../../validation/fmri_cpu_20261004/task04_msm_surface/gpu_registration_abba_final_recovery_v1.public.json)与 [计时/资源图表](../msm/README.md#本轮-cpu-优化后的完整-gpu-回归2026-10-05)。既有 GPU 专项和下方三 backend 报告保留各自实测版本。
 
 
 最新正式采样控制为 [2026-10-04两例全180帧报告](../../validation/fmri/reference_alignment_20261004/surface/SURFACE_ALIGNMENT.md)。

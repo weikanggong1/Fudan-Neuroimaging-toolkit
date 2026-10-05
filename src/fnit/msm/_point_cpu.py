@@ -24,7 +24,7 @@ def normalize(values):
 
 
 def divide(first, second):
-    return torch.from_numpy(first.numpy() / second.numpy())
+    return torch.from_numpy(np.asarray(first.numpy() / second.numpy()))
 
 
 def _cross(first, second):

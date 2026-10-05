@@ -2,7 +2,7 @@
 
 本轮冻结基线为 `cc9402734faeba93b3a13c29932fa1392eaccf62`。2026-10-04 已完成完整 180/490 帧、固定初始化 BBR 的原软件与冻结 FNIT 对照，以及 CPU v2 的完整输出比较和 profile。最新结果见 [MCFLIRT CPU 报告](../../../docs/mcflirt/CPU_BENCHMARK_20261004.md)与 [BBR CPU 报告](../../../docs/fmri/bbr_CPU_BENCHMARK_20261004.md)。
 
-截至 2026-10-05，CPU v4 已在服务器完成六份源码、七份测试及控制文件的哈希核验；[focused suite](focused_suite_v4.public.json) 实测 66 项通过、12 项跳过。完整默认 API 和功能变体另行验证，GPU 完整 ABBA 已按固定设备提交。完整 180/490 的线性及样条重采样 helper 已在 1/8 线程下检查所有帧，逐值相同；该结果只验收 helper，不能替代 MCFLIRT 优化与正常输出整链。本页的历史核与排期数字保留其原版本，不改标为 v4 实测。GPU 回归由协调任务统一串行启动和验收。
+截至 2026-10-05，CPU v4 已在服务器完成六份源码、七份测试及控制文件的哈希核验；[focused suite](focused_suite_v4.public.json) 实测 66 项通过、12 项跳过。v4 六项默认完整 API 已完成，10 组完整影像、矩阵、参数、RMS、binary header 和算法计数与冻结基线精确相同；见[默认报告](defaults_v4.public.json)。31 项真实功能 job 全部 exit 0；11 组旧新完整输出与计数精确相同，6 组官方完整精度比较和成功退出链均已通过独立门槛。本轮六项官方默认重测已完成；10 组完整首次/热输出精度与 6 个真实原生退出链均已核对，详见[重测报告](fresh_native_v4.public.json)。 [完整功能报告](features_v4.public.json)保存 17 行逐项完整指标、观测时钟及 6 个官方成功退出链摘要。GPU 完整 ABBA 已按固定设备完成 12 个进程、36 次完整 API，全部退出 0；18 组完整输出精度与六份源码哈希门槛均已通过，9 组首次/热调用的实际时钟和显存见[GPU 聚合报告](gpu_v4.public.json)。共享 GPU 的大幅时钟波动另列，未宣布稳定性能比。完整 180/490 的线性及样条重采样 helper 已在 1/8 线程下检查所有帧，逐值相同；该结果只验收 helper，不能替代 MCFLIRT 优化与正常输出整链。本页的历史核与排期数字保留其原版本，不改标为 v4 实测。GPU 回归由协调任务统一串行启动和验收。完整 180 帧 CPU1 profile 已完成，行内核占诊断总 self 的 56%，见[profile 报告](profile180_cpu1_v4.public.json)。2026-10-06 的独立 CPU v5 标量候选已完成 frozen SHA 核验和 focused 66 项通过；完整逐成本、默认和功能门槛尚在验收，未替换生产。
 
 ## 功能与覆盖计划
 

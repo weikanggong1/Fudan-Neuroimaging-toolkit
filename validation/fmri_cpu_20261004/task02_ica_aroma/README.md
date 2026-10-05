@@ -44,3 +44,5 @@ taskset -c "$CPU_SET" "$FNIT_ENV_PREFIX/bin/python" \
 预计首轮全功能约 20–60 分钟，实际取决于核组、文件系统和自动定阶；这是调度估计。静态热点是 PICA 多遍 float64 voxel block、每成分 EM、AROMA 1000 次抽样的矩阵计算、IC/混杂回归反复转换与转置。优化候选先按同线程 CPU profile 决定；CUDA 分支需要原/候选相同输入和配置的独立回归。
 
 参考：[FSL MELODIC 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/resting_state/melodic.html)、[MELODIC 原代码](https://git.fmrib.ox.ac.uk/fsl/melodic)、[ICA-AROMA 原代码](https://github.com/maartenmennes/ICA-AROMA)、[Pruim 等 2015](https://doi.org/10.1016/j.neuroimage.2015.02.064)、[Beckmann 与 Smith 2004](https://doi.org/10.1109/TMI.2003.822821)。
+
+最新 GPU 混杂回归：十个完整调用、六组全图核对完成；默认数据与影像头一致。见 [聚合报告](gpu_projection_20261005.public.json)。PICA 非默认阈值与完整 BIDS 输出的五项调用及数值核对已完成，见 [聚合报告](pica_features_20261005.public.json)。

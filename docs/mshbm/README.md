@@ -230,7 +230,7 @@ CBIG_MSHBM_parcellation_single_subject(params);
 
 ## 5. 最新精度和运行时间
 
-最新完整 CPU 精度、1/8 物理核速度、分步骤时间与官方/GPU 验证状态见 [2026-10-04 CPU benchmark](cpu_benchmark_20261004.md)。本轮将固定有效顶点 profile 一次转换为 float64；完整 profile、标签与科学输出已完成冻结版本对照。
+最新完整 CPU 精度、1/8 物理核速度、分步骤时间与官方/GPU 验证状态见 [2026-10-04 CPU benchmark](cpu_benchmark_20261004.md)。本轮将固定有效顶点 profile 一次转换为 float64；完整 profile、标签与科学输出已完成冻结版本对照。 完整 490 帧官方 CBIG 对照已完成：固定 64,984 顶点的 CPU1 差 1 个标签、CPU8 全部相同；优化 FNIT 完整函数链为 603.380/181.457 s，官方为 1741.111/1199.323 s。节点负载约 2,415–2,539，各为一次完整运行观测。 同 run 额外 DVARS P95 控制保留465帧并与原版标签一致；无删帧 `w=100/c=25` 控制有79顶点差异（左42、右37），完整结果与正在核对的旧实现来源见[可选参数控制](cpu_benchmark_20261004.md#相同真实输入的可选参数控制)。
 
 最新正式[2026-10-01已处理真实volume/surface对照](../../validation/mshbm/processed_release.md)绑定MS-HBM `09a0313c53e5d9f6e4a3c49a35022462718c9f15`，上游BOLD为 `3f8b756`；1例同扫描490帧，TR0.735 s。参考为原官方MSMAll CIFTI以及官方FIX+BOLD warp经FSL6.0.7.22生成的MNI BOLD；官方完整pipeline commit未记录。本轮未重跑MRI，源码SHA匹配结果见审核JSON。
 

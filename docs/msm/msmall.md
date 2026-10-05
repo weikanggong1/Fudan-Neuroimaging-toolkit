@@ -138,7 +138,7 @@ newmsm --inmesh=/absolute/path/features/L.sphere.surf.gii \
 | WRN C refine | 1 | 2020.025 | 1512.800 | 1510.518 |
 | WRN C refine | 8 | 600.420 | 360.841 | 358.670 |
 
-原版多线程会改变结果：coarse 右侧相对单线程平均角差 0.706°、p99 4.266°；refine 左/右平均角差 0.251/0.277°。FNIT CPU1/8 保持严格单线程参照。上述是同预算各一次 fresh-process 观测，包含读写和程序启动；实际源码、输入不变检查和全部角差见[最新回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。最终 GPU 旧/新配对另列。
+原版多线程会改变结果：coarse 右侧相对单线程平均角差 0.706°、p99 4.266°；refine 左/右平均角差 0.251/0.277°。FNIT CPU1/8 保持严格单线程参照。上述是同预算各一次 fresh-process 观测，包含读写和程序启动；实际源码、输入不变检查和全部角差见[最新回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。最终 GPU 旧/新配对已完成：coarse 旧版 17.887/27.212 s、优化版 29.399/28.669 s；refine 旧版 142.121/140.804 s、优化版 138.971/141.350 s。全部双侧坐标与 faces 相同，最大本任务进程树显存为 1.065/4.161 GB。共享 H100 接近满载，coarse 观测较慢；完整回执和聚合图见 [GPU 回归](README.md#本轮-cpu-优化后的完整-gpu-回归2026-10-05)。
 
 最新匿名汇总、精度与耗时的测量范围见 [MSM 验证页](../../validation/msm/README.md)。对照固定同一真实 BOLD、参考图、特征和权重，分别执行完整官方配置。球面误差按对应顶点计算；490 帧时间序列先逐灰质点计算 Pearson，再取均值。单次成本检查、完整球面和最终时间序列是不同检查项。
 

@@ -7,7 +7,44 @@ import torch
 
 from fnit.msm import _point_cpu
 from fnit.msm._affine import _tangent_basis
-from fnit.msm._sphere_map import _area_weights, _normalize
+from fnit.msm._sphere_map import _area_weights, _edge_distance, _normalize
+
+
+def test_literal_division_accepts_zero_dimensional_cpu_tensors():
+    first = torch.tensor(3.0, dtype=torch.float64)
+    second = torch.tensor(2.0, dtype=torch.float64)
+    result = _point_cpu.divide(first, second)
+    assert result.shape == ()
+    assert result.dtype == torch.float64
+    assert result.device.type == "cpu"
+    assert result.item() == 1.5
+
+
+def test_array_division_preserves_existing_literal_double_results():
+    generator = np.random.default_rng(154)
+    first = generator.normal(size=(7, 5))
+    second = generator.uniform(0.25, 3.0, size=(7, 5))
+    expected = first / second
+    # np.asarray leaves the existing array result and arithmetic untouched.
+    assert np.asarray(expected) is expected
+    np.testing.assert_array_equal(
+        _point_cpu.divide(torch.from_numpy(first), torch.from_numpy(second)).numpy(),
+        expected,
+    )
+
+
+@pytest.mark.parametrize("point", [[0.5, 0.5, 1.0], [3.0, -2.0, 0.25]])
+def test_single_triangle_distance_matches_tensor_path(point, monkeypatch):
+    triangle = torch.tensor([[0.0, 0.0, 0.0], [2.0, 0.0, 0.0],
+                             [0.0, 2.0, 0.0]], dtype=torch.float64)
+    query = torch.tensor(point, dtype=torch.float64)
+    actual = _edge_distance(query, triangle)
+    with monkeypatch.context() as context:
+        context.setattr(_point_cpu, "enabled", lambda *values: False)
+        expected = _edge_distance(query, triangle)
+    assert actual.shape == ()
+    assert torch.isfinite(actual)
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
 
 
 def _scalar_normalize(row):
