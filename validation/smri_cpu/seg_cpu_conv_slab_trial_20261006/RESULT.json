@@ -1,0 +1,176 @@
+{
+  "schema": "fnit_seg_CPU_conv64Mi_rejection/v1",
+  "status": "rejected_at_first_nonexact_contract",
+  "production_integration": false,
+  "source_commit": "46eead65807265395982e6968b0ce48c750c1672",
+  "source14_unchanged": true,
+  "scientific_prototype5_unchanged": true,
+  "actual_weight_sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+  "plan_sha256": "7c914bed8d61d9fe7b514069424df234c3d4b7e4bfc8bb1fe3cf36f8abaf6a92",
+  "scope": "Target Torch 2.5.1, actual model weights and synthetic FP32 inputs; old CPU versus private candidate only",
+  "official_comparison_executed": false,
+  "official_accuracy_direction": "unknown",
+  "real_MRI_layer_arms": 0,
+  "ABBA_arms": 0,
+  "full_CNN_native_GPU_arms": 0,
+  "whole_T1_map_CSV_status": "not_assessed",
+  "speed_conclusion": "none; no real-layer timer or benchmark was run",
+  "executed_contracts": [
+    {
+      "name": "single_depth",
+      "shape": [
+        1,
+        72,
+        1,
+        13,
+        17
+      ],
+      "strided": false,
+      "actual_weight_and_bias": true,
+      "old_slab_depth": 14,
+      "new_slab_depth": 2,
+      "bit_different_values": 0,
+      "max_absolute": 0.0,
+      "finite": true,
+      "shape_stride_dtype_equal": true,
+      "input_unchanged": true,
+      "weight_bias_unchanged": true,
+      "output_independent": true,
+      "output_value_count": 5304,
+      "bit_difference_fraction": 0.0,
+      "bitexact": true
+    },
+    {
+      "name": "two_depth",
+      "shape": [
+        1,
+        72,
+        2,
+        13,
+        17
+      ],
+      "strided": false,
+      "actual_weight_and_bias": true,
+      "old_slab_depth": 14,
+      "new_slab_depth": 2,
+      "bit_different_values": 0,
+      "max_absolute": 0.0,
+      "finite": true,
+      "shape_stride_dtype_equal": true,
+      "input_unchanged": true,
+      "weight_bias_unchanged": true,
+      "output_independent": true,
+      "output_value_count": 10608,
+      "bit_difference_fraction": 0.0,
+      "bitexact": true
+    },
+    {
+      "name": "boundary_internal",
+      "shape": [
+        1,
+        72,
+        7,
+        13,
+        17
+      ],
+      "strided": false,
+      "actual_weight_and_bias": true,
+      "old_slab_depth": 14,
+      "new_slab_depth": 2,
+      "bit_different_values": 33144,
+      "max_absolute": 4.291534423828125e-06,
+      "finite": true,
+      "shape_stride_dtype_equal": true,
+      "input_unchanged": true,
+      "weight_bias_unchanged": true,
+      "output_independent": true,
+      "output_value_count": 37128,
+      "bit_difference_fraction": 0.8926955397543633,
+      "bitexact": false
+    }
+  ],
+  "skipped_numeric_contracts": [
+    "many_slabs",
+    "strided_odd_depth",
+    "cancellation"
+  ],
+  "skipped_fallback_contracts": [
+    "grad_enabled",
+    "oneDNN_enabled",
+    "training",
+    "float64_guard",
+    "non_CPU_meta",
+    "CPU_autocast",
+    "forward_hook"
+  ],
+  "skipped_exception_propagation_contract": true,
+  "guard_status": "not_executed_after_first_nonexact_arithmetic_contract",
+  "torch_version": "2.5.1",
+  "threads": 8,
+  "interop_threads": 8,
+  "cpu_affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "initial_flags": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "mkldnn": true,
+    "cpu_autocast": false,
+    "grad": true,
+    "cuda_initialized": false
+  },
+  "final_flags": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "mkldnn": true,
+    "cpu_autocast": false,
+    "grad": true,
+    "cuda_initialized": false
+  },
+  "flags_unchanged": true,
+  "synthetic_worker_maximum_RSS_bytes": 412340224,
+  "controller_PID": 126298,
+  "worker_receipt": {
+    "name": "contracts",
+    "status": "failed",
+    "start_epoch": 1791233194.8958333,
+    "hard_timeout_seconds": 120,
+    "PID": 141454,
+    "exit_code": 2,
+    "end_epoch": 1791233197.7171001,
+    "worker_wall_seconds": 2.8212671279907227
+  },
+  "timing_boundary": "worker wall includes import, model weight loading, contracts and reporting; not isolated convolution timing",
+  "initial_enqueue_epoch": 1791230591.8181322,
+  "outer_deadline_epoch": 1791253591.8181326,
+  "deadline_not_reset": true,
+  "receipts": {
+    "CONTRACTS.json": {
+      "bytes": 5697,
+      "sha256": "d13a564a4fe4c9c5d247bdef346c9d841fefaa97ab609d2c08b1b7a3a14e0544"
+    },
+    "QUEUE.json": {
+      "bytes": 2117,
+      "sha256": "fea25a99d3ed7a365c965de9741471a32c87ca6d2e0eb893a1fb5d12617162cd"
+    },
+    "WATCHDOG.json": {
+      "bytes": 430,
+      "sha256": "ae1d15285d98823a9b72b04ad9e4838fba8a0d3c991758fa91f42246719c5a38"
+    },
+    "TASK_BOUND.json": {
+      "bytes": 179,
+      "sha256": "fbcc07d1396640aed3c58da253ba22b6dd97578b7c0cbc4e455168f251e6328d"
+    },
+    "contracts.log": {
+      "bytes": 76,
+      "sha256": "80e3aa74f5f1aad65cb77016b695a88a6decf9fffe3ea9710914230b4ecacaf3"
+    }
+  }
+}
