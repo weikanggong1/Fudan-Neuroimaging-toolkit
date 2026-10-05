@@ -59,7 +59,7 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 
 SynthSR 修复并普通合并最新 main 后，本地组件回归为 **2,092 passed、5 skipped，138.79 秒**。覆盖前述组件及最新 FLIRT/FNIRT、ApplyWarp、ConvertWarp、InvWarp 和空间转换接口；测试和实际源码 SHA 见[最新整合记录](integration_sr_final_20261004.json)。首次整合的两项 NMI 测试固定统计 scatter 调用次数，未覆盖 CPU Numba 后端；已改为逐值检查送入熵计算的完整直方图，数值门未改变，生产数学也未改。两项 warning 来自既有 FastVBM profiler 测试未设 warmup，不能使用测试时间作 benchmark。
 
-该 2,092 项记录早于本次 joint 原始插值与正式 CPP 平均器合并，只覆盖其注明的源码；最终整合回归将另存。前一轮 **931 passed、3 skipped，69.70 秒**及其源码仍见[原整合记录](integration_20261004.json)。组件回归不代替真实影像与原软件的对照，也没有重新运行原始 T1 的完整 recon-all。
+该 2,092 项记录早于本次 joint 原始插值与正式 CPP 平均器合并，只覆盖其注明的源码。2026-10-05 当前整合版 `55d7a88f` 的组件回归为 **2,148 passed、5 skipped，158.32 秒**；加入正式 CPP 平均器的合同与安全测试，完整文件哈希及测试期间不变性见[本次整合记录](integration_20261005.json)。两个 warning 仍来自既有 profiler 测试。此次没有包含尚未验收的 Eigen loader、精确 NumBa 采样候选或未采纳的 GEMS mixed 补丁。前一轮 **931 passed、3 skipped，69.70 秒**及其源码仍见[原整合记录](integration_20261004.json)。组件回归不代替真实影像与原软件的对照，也没有重新运行原始 T1 的完整 recon-all。
 
 ## 前一轮 nodecw10 验收记录（已发布）
 
