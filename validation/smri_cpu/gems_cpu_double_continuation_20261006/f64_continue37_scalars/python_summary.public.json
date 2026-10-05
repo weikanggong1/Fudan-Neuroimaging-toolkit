@@ -1,0 +1,2206 @@
+{
+  "status": "completed_bounded_private_CPU_raw_prior_likelihood",
+  "scope": "fixed synthetic state only; no EM/full recipe, public rasterizer/probabilities/GPU unchanged",
+  "actual_private_CPU_precision_policy": {
+    "points": "torch.float64",
+    "gradient_leaf": "torch.float64",
+    "owner_geometry_and_scan": "torch.float32",
+    "projection_matrix_storage": "torch.float64",
+    "projection_computed_in": "torch.float64",
+    "Gaussian_likelihood": "torch.float64",
+    "optimizer_state": "torch.float64",
+    "raw_mass": true,
+    "mixture_epsilon": 1e-15,
+    "GPU_source_or_default_changed": false
+  },
+  "actual_static_signature": {
+    "image": {
+      "shape": [
+        101,
+        117,
+        118
+      ],
+      "dtype": "torch.float32",
+      "sha256": "3bf1b3f9ba59d0ce5238994bd8314ca569832926f0fa3a301ee7e9a5aa3f533d"
+    },
+    "start": {
+      "shape": [
+        20100,
+        3
+      ],
+      "dtype": "torch.float64",
+      "sha256": "7c995e927fc5b5745820c9b1eb816f04a257b42596334a1a6fbfd97a2f2cd053"
+    },
+    "reference": {
+      "shape": [
+        20100,
+        3
+      ],
+      "dtype": "torch.float32",
+      "sha256": "6304490923db1880b2c48c16332429cd86580acf4ea35a5397d70511463c1054"
+    },
+    "tetra": {
+      "shape": [
+        122333,
+        4
+      ],
+      "dtype": "torch.int64",
+      "sha256": "d2d508217ea831fff55c4bf77aea7d0f56929bcb53442045ca3d525ea83c184a"
+    },
+    "alphas": {
+      "shape": [
+        20100,
+        11
+      ],
+      "dtype": "torch.float32",
+      "sha256": "55ac7259f386c4c08f557ca7706b59be4af75baf5e2f36cdd98ca7691690c561"
+    },
+    "can_move": {
+      "shape": [
+        20100,
+        3
+      ],
+      "dtype": "torch.bool",
+      "sha256": "72a96b192a58bdaf50f04447dd0dd70a0d906b6c1e03c9a15391c4b3a33d0dea"
+    },
+    "boundary": {
+      "shape": [
+        3,
+        3
+      ],
+      "dtype": "torch.float32",
+      "sha256": "4742e6de75774efe763779dcf6ba421b75adf1b186666a755070ecf7a9948c14"
+    },
+    "valid": {
+      "shape": [
+        101,
+        117,
+        118
+      ],
+      "dtype": "torch.bool",
+      "sha256": "8bcfb371b7b74f0cc4eeef5956474f965681266d959030d0c1195a77bb880a1c"
+    },
+    "likelihood": {
+      "shape": [
+        11,
+        44255
+      ],
+      "dtype": "torch.float64",
+      "sha256": "1338bf2e8bcad614c8a02569e5249acf80e37043ca77549b881bdce80f3dfa7f"
+    },
+    "projection": {
+      "shape": [
+        20100,
+        3,
+        3
+      ],
+      "dtype": "torch.float64",
+      "sha256": "7705f7ee9abf5a2df743262b41a07bd7b1e49ef2ff58fa52457ba52b901edd11"
+    },
+    "means": {
+      "shape": [
+        11,
+        1
+      ],
+      "dtype": "torch.float64",
+      "sha256": "67bfe165db0c2e7cb33506747de984e9341e8e0c148870b866aa7475422c76e6"
+    },
+    "variances": {
+      "shape": [
+        11,
+        1,
+        1
+      ],
+      "dtype": "torch.float64",
+      "sha256": "3b822a098003f05aa6d227af2a3da65b0da5a71911b85d608fd0d37175d01c93"
+    },
+    "reference_inverse": {
+      "shape": [
+        122333,
+        3,
+        3
+      ],
+      "dtype": "torch.float64",
+      "sha256": "f38f5ebf1d70b6f6416a1cbaa922faf791d6f72c43a20857ccbaf437d293ac2e"
+    },
+    "reference_volumes": {
+      "shape": [
+        122333
+      ],
+      "dtype": "torch.float64",
+      "sha256": "b16839599b6ede789a34b8cf6865295229af4422b572727a9be88ace8fc9540b"
+    },
+    "reduction_order": {
+      "shape": [
+        489332
+      ],
+      "dtype": "torch.int64",
+      "sha256": "8f416d7e9b3d5554a0169028d302da34f662e4941878ecdd4447e15015f661bb"
+    },
+    "reduction_offsets": {
+      "shape": [
+        20101
+      ],
+      "dtype": "torch.int64",
+      "sha256": "c8cbf01710cbb1bc542316458000b3a6d417a851dadb3a8d967acab6a9c4bc8d"
+    }
+  },
+  "initial_gate": {
+    "original_normalized_five_gates_reused_without_recompute": true,
+    "same_image_alphas_reference_canmove_epsilon_projection_source": true,
+    "points_exact_to_original": true,
+    "coverage_exact_to_original": true,
+    "cost_and_gradient_finite": true,
+    "raw_priors_are_finite_nonnegative": true
+  },
+  "raw_initial": {
+    "cost": 38208.85810314611,
+    "cost_minus_original_normalized": 0.0015982044424163178,
+    "gradient_exact_to_original_normalized": false,
+    "priors_exact_to_original_normalized": false,
+    "intentional_change": "retain raw atlas mass in private CPU mesh data likelihood only",
+    "priors_sum_min": 0.9999997921276617,
+    "priors_sum_max": 1.0000002052448718,
+    "private_initial_sha256": "10485c84955a6c6dcf4a2b199e85d98cc107abe7138d33069688c454065a8fce"
+  },
+  "modes": {
+    "native_definition_cpu": {
+      "steps": 37,
+      "rows": [
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 0,
+          "initial_cost": 38208.85810314611,
+          "accepted_cost": 37717.39416052708,
+          "alpha": 1.0,
+          "hessian_initial_scale": 0.0007518461234415332,
+          "new_curvature_sy": null,
+          "history_pairs": 0,
+          "theoretical_maximal_deformation": 1.0,
+          "actual_maximal_deformation": 1.0000000000000027,
+          "returned_maximal_deformation": 1.0,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 37717.39416052708,
+              "gradient_finite": true,
+              "directional_derivative": -197.8450979969573
+            }
+          ],
+          "total_evaluations": 2,
+          "selected_closure_checkpoint_restored": true,
+          "step": 1,
+          "separate_priors_observation_caller_state_restored": true,
+          "private_state_sha256": "f70c3c5653069a6deb85be5448fafb061a92fa32f3ece7a207601e7981b681ae"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 1,
+          "initial_cost": 37717.39416052708,
+          "accepted_cost": 37400.07992962874,
+          "alpha": 1.0,
+          "hessian_initial_scale": 0.0006832977527481477,
+          "new_curvature_sy": 3601.7974666728296,
+          "history_pairs": 1,
+          "theoretical_maximal_deformation": 0.3426788370243044,
+          "actual_maximal_deformation": 0.34267883702430657,
+          "returned_maximal_deformation": 0.3426788370243044,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 37400.07992962874,
+              "gradient_finite": true,
+              "directional_derivative": -230.9387540439488
+            }
+          ],
+          "total_evaluations": 3,
+          "selected_closure_checkpoint_restored": true,
+          "step": 2,
+          "private_state_sha256": "b69fd7193fd4936be0533169e72ef361626d47d60694d07afd7399528c572c7d"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 2,
+          "initial_cost": 37400.07992962874,
+          "accepted_cost": 36998.90534870967,
+          "alpha": 0.5,
+          "hessian_initial_scale": 4.997417754063718e-05,
+          "new_curvature_sy": 335.0677748937135,
+          "history_pairs": 2,
+          "theoretical_maximal_deformation": 0.39675235426357924,
+          "actual_maximal_deformation": 0.3967523542635832,
+          "returned_maximal_deformation": 0.39675235426357924,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": 36998.90534870967,
+              "gradient_finite": true,
+              "directional_derivative": -1008.2446489763967
+            }
+          ],
+          "total_evaluations": 5,
+          "selected_closure_checkpoint_restored": true,
+          "step": 3,
+          "separate_priors_observation_caller_state_restored": true,
+          "private_state_sha256": "a986a966d676bebcb7b4486a6f6ffdfc0e353adb922f9b20065ebdc4d66cf0c0"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 3,
+          "initial_cost": 36998.90534870967,
+          "accepted_cost": 36940.07702282045,
+          "alpha": 0.0078125,
+          "hessian_initial_scale": 3.071399014641911e-07,
+          "new_curvature_sy": 58.68961067268941,
+          "history_pairs": 3,
+          "theoretical_maximal_deformation": 0.12322351000324644,
+          "actual_maximal_deformation": 0.12322351000324695,
+          "returned_maximal_deformation": 0.12322351000324644,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.25,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.125,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.0625,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.03125,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.015625,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.0078125,
+              "phase": "zoom",
+              "cost": 36940.07702282045,
+              "gradient_finite": true,
+              "directional_derivative": 6647.7106893712225
+            }
+          ],
+          "total_evaluations": 13,
+          "selected_closure_checkpoint_restored": true,
+          "step": 4,
+          "separate_priors_observation_caller_state_restored": true,
+          "private_state_sha256": "ef3a7a2985c641cce5b3836365b54e55663e1cd6ee68cac7da38744c7ad6d846"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 4,
+          "initial_cost": 36940.07702282045,
+          "accepted_cost": 36936.19144955573,
+          "alpha": 0.3434410536734174,
+          "hessian_initial_scale": 6.457844117107716e-07,
+          "new_curvature_sy": 213.90404075254972,
+          "history_pairs": 4,
+          "theoretical_maximal_deformation": 0.009198393320171687,
+          "actual_maximal_deformation": 0.009198393320165749,
+          "returned_maximal_deformation": 0.009198393320171687,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 36945.473569289104,
+              "gradient_finite": true,
+              "directional_derivative": 26.731981051772348
+            },
+            {
+              "alpha": 0.3434410536734174,
+              "phase": "zoom",
+              "cost": 36936.19144955573,
+              "gradient_finite": true,
+              "directional_derivative": 1.6392476117185488
+            }
+          ],
+          "total_evaluations": 15,
+          "selected_closure_checkpoint_restored": true,
+          "step": 5,
+          "private_state_sha256": "1e20772e6a5cb4a78290427146da9209a7012dc51e41077b7c56b65a37a6b25f"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 5,
+          "initial_cost": 36936.19144955573,
+          "accepted_cost": 36923.334109458745,
+          "alpha": 0.23828431328695235,
+          "hessian_initial_scale": 2.2658280093564466e-07,
+          "new_curvature_sy": 28.18612136205001,
+          "history_pairs": 5,
+          "theoretical_maximal_deformation": 0.023676275522309286,
+          "actual_maximal_deformation": 0.023676275522308304,
+          "returned_maximal_deformation": 0.023676275522309286,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 36953.02042054612,
+              "gradient_finite": true,
+              "directional_derivative": 69.09325497934225
+            },
+            {
+              "alpha": 0.3357476677113326,
+              "phase": "zoom",
+              "cost": 36924.20080147087,
+              "gradient_finite": true,
+              "directional_derivative": 102.14572162214691
+            },
+            {
+              "alpha": 0.23828431328695235,
+              "phase": "zoom",
+              "cost": 36923.334109458745,
+              "gradient_finite": true,
+              "directional_derivative": -14.683927994930979
+            }
+          ],
+          "total_evaluations": 18,
+          "selected_closure_checkpoint_restored": true,
+          "step": 6,
+          "private_state_sha256": "7688a8f2153f581e0cac5cdce45710fe8f0455fe7857558fec81bc89e1f14fb3"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 6,
+          "initial_cost": 36923.334109458745,
+          "accepted_cost": 36921.61064800132,
+          "alpha": 0.04259152531017496,
+          "hessian_initial_scale": 6.566517328944397e-06,
+          "new_curvature_sy": 21.788436201924792,
+          "history_pairs": 6,
+          "theoretical_maximal_deformation": 0.005139530904757384,
+          "actual_maximal_deformation": 0.005139530904759644,
+          "returned_maximal_deformation": 0.005139530904757384,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": 36954.926214287174,
+              "gradient_finite": true,
+              "directional_derivative": 308.3280048388643
+            },
+            {
+              "alpha": 0.20333442557230863,
+              "phase": "zoom",
+              "cost": 36926.11308447422,
+              "gradient_finite": true,
+              "directional_derivative": -2.299141111974386
+            },
+            {
+              "alpha": 0.04259152531017496,
+              "phase": "zoom",
+              "cost": 36921.61064800132,
+              "gradient_finite": true,
+              "directional_derivative": -31.55105839576892
+            }
+          ],
+          "total_evaluations": 22,
+          "selected_closure_checkpoint_restored": true,
+          "step": 7,
+          "private_state_sha256": "56411c3331f45ec15a882bb71498c8f899d5ff78fbf1211e6fcab7462378ff47"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 7,
+          "initial_cost": 36921.61064800132,
+          "accepted_cost": 36819.612370019764,
+          "alpha": 1.9808775027129584,
+          "hessian_initial_scale": 1.155151793739442e-05,
+          "new_curvature_sy": 0.7206654859537482,
+          "history_pairs": 7,
+          "theoretical_maximal_deformation": 0.1252584838841041,
+          "actual_maximal_deformation": 0.12525848388410038,
+          "returned_maximal_deformation": 0.1252584838841041,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 36867.629508707294,
+              "gradient_finite": true,
+              "directional_derivative": -48.64612268334294
+            },
+            {
+              "alpha": 1.9808775027129584,
+              "phase": "bracket",
+              "cost": 36819.612370019764,
+              "gradient_finite": true,
+              "directional_derivative": -32.88195167251802
+            }
+          ],
+          "total_evaluations": 24,
+          "selected_closure_checkpoint_restored": true,
+          "step": 8,
+          "private_state_sha256": "314f37ed03b232fe6665f8f828d67730d5d5b9391e7bc5e87ad990239f1d4887"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 8,
+          "initial_cost": 36819.612370019764,
+          "accepted_cost": 36675.20497572931,
+          "alpha": 0.5,
+          "hessian_initial_scale": 4.790070911698695e-06,
+          "new_curvature_sy": 36.76301757163311,
+          "history_pairs": 8,
+          "theoretical_maximal_deformation": 0.27456396913862186,
+          "actual_maximal_deformation": 0.2745639691386196,
+          "returned_maximal_deformation": 0.27456396913862186,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": 36675.20497572931,
+              "gradient_finite": true,
+              "directional_derivative": -133.2067887323962
+            }
+          ],
+          "total_evaluations": 26,
+          "selected_closure_checkpoint_restored": true,
+          "step": 9,
+          "private_state_sha256": "342c5f214896b19a841115bf24dd202b0050e114feaea47446be399f7135ca19"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 9,
+          "initial_cost": 36675.20497572931,
+          "accepted_cost": 36570.721891321955,
+          "alpha": 0.5,
+          "hessian_initial_scale": 1.470509421564161e-05,
+          "new_curvature_sy": 138.1043906192596,
+          "history_pairs": 9,
+          "theoretical_maximal_deformation": 0.17838491601034495,
+          "actual_maximal_deformation": 0.17838491601035136,
+          "returned_maximal_deformation": 0.17838491601034495,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": 36570.721891321955,
+              "gradient_finite": true,
+              "directional_derivative": 64.58119424800665
+            }
+          ],
+          "total_evaluations": 28,
+          "selected_closure_checkpoint_restored": true,
+          "step": 10,
+          "private_state_sha256": "a260d6ff4ad9a1f9159e39d1c3a491e44f61627c0eaefc4ba2f74a47508a4835"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 10,
+          "initial_cost": 36570.721891321955,
+          "accepted_cost": 36546.89269921039,
+          "alpha": 1.0,
+          "hessian_initial_scale": 7.032234991029235e-06,
+          "new_curvature_sy": 157.90057151284492,
+          "history_pairs": 10,
+          "theoretical_maximal_deformation": 0.04068711153582535,
+          "actual_maximal_deformation": 0.040687111535821656,
+          "returned_maximal_deformation": 0.04068711153582535,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 36546.89269921039,
+              "gradient_finite": true,
+              "directional_derivative": -4.396807218730954
+            }
+          ],
+          "total_evaluations": 29,
+          "selected_closure_checkpoint_restored": true,
+          "step": 11,
+          "private_state_sha256": "e360a920c76687de3df2dcd88d008657e1babf098984046864013e5491c9ad43"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 11,
+          "initial_cost": 36546.89269921039,
+          "accepted_cost": 36523.630366371726,
+          "alpha": 0.6069848855539686,
+          "hessian_initial_scale": 9.543181827920882e-06,
+          "new_curvature_sy": 75.28066592001133,
+          "history_pairs": 11,
+          "theoretical_maximal_deformation": 0.06642518178221446,
+          "actual_maximal_deformation": 0.06642518178221495,
+          "returned_maximal_deformation": 0.06642518178221446,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 36599.955296278094,
+              "gradient_finite": true,
+              "directional_derivative": 851.4109240025036
+            },
+            {
+              "alpha": 0.6069848855539686,
+              "phase": "zoom",
+              "cost": 36523.630366371726,
+              "gradient_finite": true,
+              "directional_derivative": 30.516008732176765
+            }
+          ],
+          "total_evaluations": 31,
+          "selected_closure_checkpoint_restored": true,
+          "step": 12,
+          "private_state_sha256": "cc38c0085cd8a628fc07c2a4ed992a7e37bb29e7ff8673e6c11c1bf7fe57b66d"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 12,
+          "initial_cost": 36523.630366371726,
+          "accepted_cost": 36459.594970409744,
+          "alpha": 1.0,
+          "hessian_initial_scale": 2.6309984625719664e-05,
+          "new_curvature_sy": 49.71341035207057,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.0425409888350323,
+          "actual_maximal_deformation": 0.042540988835033856,
+          "returned_maximal_deformation": 0.0425409888350323,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 36459.594970409744,
+              "gradient_finite": true,
+              "directional_derivative": -35.48546531130947
+            }
+          ],
+          "total_evaluations": 32,
+          "selected_closure_checkpoint_restored": true,
+          "step": 13,
+          "private_state_sha256": "2eb4b3ad020b82d6621e9dd9a2e4b56750f713de9ddfe085ef2c90f0fae087e7"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 13,
+          "initial_cost": 36459.594970409744,
+          "accepted_cost": 36056.83242196153,
+          "alpha": 1.8886336280870413,
+          "hessian_initial_scale": 1.4924618805872008e-05,
+          "new_curvature_sy": 25.521689946302097,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.41925120200124,
+          "actual_maximal_deformation": 0.41925120200123794,
+          "returned_maximal_deformation": 0.41925120200124,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 36217.14335455117,
+              "gradient_finite": true,
+              "directional_derivative": -245.9857521420379
+            },
+            {
+              "alpha": 1.8886336280870413,
+              "phase": "bracket",
+              "cost": 36056.83242196153,
+              "gradient_finite": true,
+              "directional_derivative": -42.181519650101265
+            }
+          ],
+          "total_evaluations": 34,
+          "selected_closure_checkpoint_restored": true,
+          "step": 14,
+          "private_state_sha256": "f66da0a19c47fcce522130762dd8ad121b43374cf5bdfe231e3d5306abd1a7be"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 14,
+          "initial_cost": 36056.83242196153,
+          "accepted_cost": 35972.41171597237,
+          "alpha": 0.21810590248288658,
+          "hessian_initial_scale": 0.00019325432628402266,
+          "new_curvature_sy": 256.6543096870094,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.07423198983766219,
+          "actual_maximal_deformation": 0.07423198983766265,
+          "returned_maximal_deformation": 0.07423198983766219,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.25,
+              "phase": "zoom",
+              "cost": 35990.440519666095,
+              "gradient_finite": true,
+              "directional_derivative": 1895.0294056164669
+            },
+            {
+              "alpha": 0.1783179803552286,
+              "phase": "zoom",
+              "cost": 35979.80791138345,
+              "gradient_finite": true,
+              "directional_derivative": -447.28591183873164
+            },
+            {
+              "alpha": 0.21810590248288658,
+              "phase": "zoom",
+              "cost": 35972.41171597237,
+              "gradient_finite": true,
+              "directional_derivative": 28.723049508090895
+            }
+          ],
+          "total_evaluations": 39,
+          "selected_closure_checkpoint_restored": true,
+          "step": 15,
+          "private_state_sha256": "bd9c2a65b5839ff2de90e94ff27824e5ea6167c25cb16a40b4bff5749d3d9f48"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 15,
+          "initial_cost": 35972.41171597237,
+          "accepted_cost": 35889.86900930367,
+          "alpha": 0.125,
+          "hessian_initial_scale": 4.039503732460395e-06,
+          "new_curvature_sy": 97.62043843888496,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.04261345146516039,
+          "actual_maximal_deformation": 0.04261345146516718,
+          "returned_maximal_deformation": 0.04261345146516039,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.25,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.125,
+              "phase": "zoom",
+              "cost": 35889.86900930367,
+              "gradient_finite": true,
+              "directional_derivative": 8.610050260804371
+            }
+          ],
+          "total_evaluations": 43,
+          "selected_closure_checkpoint_restored": true,
+          "step": 16,
+          "private_state_sha256": "175acd956a3b193cdd3678a4c0f39dffa3428d32dda3635f32a51a41b0d9cb44"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 16,
+          "initial_cost": 35889.86900930367,
+          "accepted_cost": 35441.54760709711,
+          "alpha": 0.5,
+          "hessian_initial_scale": 6.703550295648034e-08,
+          "new_curvature_sy": 92.3663558910022,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.28090888417402227,
+          "actual_maximal_deformation": 0.2809088841740245,
+          "returned_maximal_deformation": 0.28090888417402227,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": 35441.54760709711,
+              "gradient_finite": true,
+              "directional_derivative": 624.2966169016289
+            }
+          ],
+          "total_evaluations": 45,
+          "selected_closure_checkpoint_restored": true,
+          "step": 17,
+          "private_state_sha256": "c2eef1ed78c32ac2079521746fdc797dd4615433e08a2a9627d1af94fbf9356d"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 17,
+          "initial_cost": 35441.54760709711,
+          "accepted_cost": 35381.224463416766,
+          "alpha": 1.0,
+          "hessian_initial_scale": 3.475381914807979e-07,
+          "new_curvature_sy": 1136.7659212946453,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.14881727029546526,
+          "actual_maximal_deformation": 0.14881727029546513,
+          "returned_maximal_deformation": 0.14881727029546526,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 35381.224463416766,
+              "gradient_finite": true,
+              "directional_derivative": -33.07867859207058
+            }
+          ],
+          "total_evaluations": 46,
+          "selected_closure_checkpoint_restored": true,
+          "step": 18,
+          "private_state_sha256": "b23aa35b8855ef06e64c1851f2a7c16036e3a743ccfeaaed2838d23525be66d9"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 18,
+          "initial_cost": 35381.224463416766,
+          "accepted_cost": 35268.72757868265,
+          "alpha": 0.25,
+          "hessian_initial_scale": 4.051148825738018e-07,
+          "new_curvature_sy": 619.6839456633645,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.08845063003063273,
+          "actual_maximal_deformation": 0.08845063003062827,
+          "returned_maximal_deformation": 0.08845063003063273,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.25,
+              "phase": "zoom",
+              "cost": 35268.72757868265,
+              "gradient_finite": true,
+              "directional_derivative": -98.62547963964568
+            }
+          ],
+          "total_evaluations": 49,
+          "selected_closure_checkpoint_restored": true,
+          "step": 19,
+          "private_state_sha256": "6f160f6fa3d0fb2cd1e86180703200eca07bc8dee23aed2f755c81fc2345a2db"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 19,
+          "initial_cost": 35268.72757868265,
+          "accepted_cost": 35190.76543365441,
+          "alpha": 1.0,
+          "hessian_initial_scale": 1.6210349763424572e-05,
+          "new_curvature_sy": 137.6542682248051,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.2966827180574979,
+          "actual_maximal_deformation": 0.29668271805749985,
+          "returned_maximal_deformation": 0.2966827180574979,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 35190.76543365441,
+              "gradient_finite": true,
+              "directional_derivative": -39.71015950297075
+            }
+          ],
+          "total_evaluations": 50,
+          "selected_closure_checkpoint_restored": true,
+          "step": 20,
+          "private_state_sha256": "663ef1e1c1a2c60a58d7bbea3af46e18acd5a338cc157d8e3bc43d7369ee3a70"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 20,
+          "initial_cost": 35190.76543365441,
+          "accepted_cost": 35079.87178714468,
+          "alpha": 1.0,
+          "hessian_initial_scale": 2.4299848388288938e-05,
+          "new_curvature_sy": 153.07022085142802,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.07263348153522417,
+          "actual_maximal_deformation": 0.07263348153522424,
+          "returned_maximal_deformation": 0.07263348153522417,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 35079.87178714468,
+              "gradient_finite": true,
+              "directional_derivative": -54.44036195029787
+            }
+          ],
+          "total_evaluations": 51,
+          "selected_closure_checkpoint_restored": true,
+          "step": 21,
+          "private_state_sha256": "385196a7a7c69b8401843f2955efcb3fe31f09a187068f0feffc711c7f0d4989"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 21,
+          "initial_cost": 35079.87178714468,
+          "accepted_cost": 35017.740162647795,
+          "alpha": 0.04123974468046309,
+          "hessian_initial_scale": 3.2878179762540525e-05,
+          "new_curvature_sy": 7.400498477794575,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.05321506300046212,
+          "actual_maximal_deformation": 0.05321506300046457,
+          "returned_maximal_deformation": 0.05321506300046212,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.25,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.125,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.0625,
+              "phase": "zoom",
+              "cost": 35102.631061001746,
+              "gradient_finite": true,
+              "directional_derivative": 60670.869865023815
+            },
+            {
+              "alpha": 0.04123974468046309,
+              "phase": "zoom",
+              "cost": 35017.740162647795,
+              "gradient_finite": true,
+              "directional_derivative": -682.1801565789377
+            }
+          ],
+          "total_evaluations": 57,
+          "selected_closure_checkpoint_restored": true,
+          "step": 22,
+          "private_state_sha256": "793284cfbd50d2ccf8c3bde5a7ff38e19d68985faa1da85fc2b3ad8869bb8cdf"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 22,
+          "initial_cost": 35017.740162647795,
+          "accepted_cost": 34927.23165448714,
+          "alpha": 0.25,
+          "hessian_initial_scale": 2.2360007815815445e-06,
+          "new_curvature_sy": 12.706452233500173,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.07551066044591948,
+          "actual_maximal_deformation": 0.07551066044591288,
+          "returned_maximal_deformation": 0.07551066044591948,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.25,
+              "phase": "zoom",
+              "cost": 34927.23165448714,
+              "gradient_finite": true,
+              "directional_derivative": -13.552003507018355
+            }
+          ],
+          "total_evaluations": 60,
+          "selected_closure_checkpoint_restored": true,
+          "step": 23,
+          "private_state_sha256": "3068ef377ebfcaf9fef29ebe27ae31a7a1074add1ca3efd2b5e187d7eef22073"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 23,
+          "initial_cost": 34927.23165448714,
+          "accepted_cost": 34790.322204428965,
+          "alpha": 0.08017268571047029,
+          "hessian_initial_scale": 8.200634701659144e-08,
+          "new_curvature_sy": 48.793963579865796,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.09878753274203582,
+          "actual_maximal_deformation": 0.09878753274203102,
+          "returned_maximal_deformation": 0.09878753274203582,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.25,
+              "phase": "zoom",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.125,
+              "phase": "zoom",
+              "cost": 35506.728471128496,
+              "gradient_finite": true,
+              "directional_derivative": 137745.2825533244
+            },
+            {
+              "alpha": 0.08017268571047029,
+              "phase": "zoom",
+              "cost": 34790.322204428965,
+              "gradient_finite": true,
+              "directional_derivative": 505.4536079699915
+            }
+          ],
+          "total_evaluations": 65,
+          "selected_closure_checkpoint_restored": true,
+          "step": 24,
+          "private_state_sha256": "f0491039452b85fc5041159aa4606226f1f59f5af47bb8b0d83d4a323dff5dda"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 24,
+          "initial_cost": 34790.322204428965,
+          "accepted_cost": 34789.39221485789,
+          "alpha": 0.025081450019745627,
+          "hessian_initial_scale": 3.7086274569048874e-07,
+          "new_curvature_sy": 113.98485954155665,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.0011924057251557325,
+          "actual_maximal_deformation": 0.0011924057251561676,
+          "returned_maximal_deformation": 0.0011924057251557325,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34811.90278421344,
+              "gradient_finite": true,
+              "directional_derivative": 23.084500476676375
+            },
+            {
+              "alpha": 0.1930167722237346,
+              "phase": "zoom",
+              "cost": 34795.246062316364,
+              "gradient_finite": true,
+              "directional_derivative": -20.646220314195183
+            },
+            {
+              "alpha": 0.025081450019745627,
+              "phase": "zoom",
+              "cost": 34789.39221485789,
+              "gradient_finite": true,
+              "directional_derivative": -33.16809954950133
+            }
+          ],
+          "total_evaluations": 68,
+          "selected_closure_checkpoint_restored": true,
+          "step": 25,
+          "private_state_sha256": "ebc2a7c6a3d5461399f0ffc1a00368ffdd79b53c3b49c0041f5cef1ffb474a24"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 25,
+          "initial_cost": 34789.39221485789,
+          "accepted_cost": 34782.54246568613,
+          "alpha": 0.41259898403826867,
+          "hessian_initial_scale": 8.851229781346358e-07,
+          "new_curvature_sy": 0.1897550801544592,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.08486312124247032,
+          "actual_maximal_deformation": 0.08486312124247138,
+          "returned_maximal_deformation": 0.08486312124247032,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34809.19688916954,
+              "gradient_finite": true,
+              "directional_derivative": 127.92622892772397
+            },
+            {
+              "alpha": 0.41259898403826867,
+              "phase": "zoom",
+              "cost": 34782.54246568613,
+              "gradient_finite": true,
+              "directional_derivative": 12.07172136536919
+            }
+          ],
+          "total_evaluations": 70,
+          "selected_closure_checkpoint_restored": true,
+          "step": 26,
+          "private_state_sha256": "bc8de8d94b671a3d9cf9e083ac46812f72d748b23adc6faece13fc61077e705a"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 26,
+          "initial_cost": 34782.54246568613,
+          "accepted_cost": 34776.03384031335,
+          "alpha": 1.0,
+          "hessian_initial_scale": 8.017949956624605e-07,
+          "new_curvature_sy": 38.74757904220007,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.018443925805161902,
+          "actual_maximal_deformation": 0.018443925805164112,
+          "returned_maximal_deformation": 0.018443925805161902,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34776.03384031335,
+              "gradient_finite": true,
+              "directional_derivative": -5.45652605351626
+            }
+          ],
+          "total_evaluations": 71,
+          "selected_closure_checkpoint_restored": true,
+          "step": 27,
+          "private_state_sha256": "9e817d998b9328a2d366fbbeb123b34d6746f6a7899075775cb1a246c89ab612"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 27,
+          "initial_cost": 34776.03384031335,
+          "accepted_cost": 34630.19700895042,
+          "alpha": 4.1326815515513,
+          "hessian_initial_scale": 7.12737402046586e-06,
+          "new_curvature_sy": 2.240356962540325,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.17141240102867977,
+          "actual_maximal_deformation": 0.17141240102867836,
+          "returned_maximal_deformation": 0.17141240102867977,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34733.240957342685,
+              "gradient_finite": true,
+              "directional_derivative": -27.53322019909691
+            },
+            {
+              "alpha": 2.0328997888610494,
+              "phase": "bracket",
+              "cost": 34704.216892763434,
+              "gradient_finite": true,
+              "directional_derivative": -43.23708720770569
+            },
+            {
+              "alpha": 4.1326815515513,
+              "phase": "bracket",
+              "cost": 34630.19700895042,
+              "gradient_finite": true,
+              "directional_derivative": -16.053726063609666
+            }
+          ],
+          "total_evaluations": 74,
+          "selected_closure_checkpoint_restored": true,
+          "step": 28,
+          "private_state_sha256": "dd9d8d65b220b447fd563f73ee3a8b178070fc55281b5d436d35f8159fb93661"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 28,
+          "initial_cost": 34630.19700895042,
+          "accepted_cost": 34584.845323558875,
+          "alpha": 0.31327072861385274,
+          "hessian_initial_scale": 1.1958983369675807e-05,
+          "new_curvature_sy": 46.88903597894336,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.10660017599113239,
+          "actual_maximal_deformation": 0.10660017599113097,
+          "returned_maximal_deformation": 0.10660017599113239,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": 34636.06984573647,
+              "gradient_finite": true,
+              "directional_derivative": 1149.6049388112804
+            },
+            {
+              "alpha": 0.31327072861385274,
+              "phase": "zoom",
+              "cost": 34584.845323558875,
+              "gradient_finite": true,
+              "directional_derivative": 11.102301412439587
+            }
+          ],
+          "total_evaluations": 77,
+          "selected_closure_checkpoint_restored": true,
+          "step": 29,
+          "private_state_sha256": "aad0eaba422bfd6364f9d7697340cfc17c8a6fb73d7c2c29fe6fc71612aec7f6"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 29,
+          "initial_cost": 34584.845323558875,
+          "accepted_cost": 34515.35019526766,
+          "alpha": 0.7533215150496146,
+          "hessian_initial_scale": 1.556811412908073e-05,
+          "new_curvature_sy": 70.43581036046758,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.05822227855360966,
+          "actual_maximal_deformation": 0.058222278553608106,
+          "returned_maximal_deformation": 0.05822227855360966,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34518.62322780215,
+              "gradient_finite": true,
+              "directional_derivative": 172.83570938800625
+            },
+            {
+              "alpha": 0.7533215150496146,
+              "phase": "zoom",
+              "cost": 34515.35019526766,
+              "gradient_finite": true,
+              "directional_derivative": -31.33728163168749
+            }
+          ],
+          "total_evaluations": 79,
+          "selected_closure_checkpoint_restored": true,
+          "step": 30,
+          "private_state_sha256": "4abd164e745803a375e76d34db574c4f1c1104469ccd897d6819a0417d74e66a"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 30,
+          "initial_cost": 34515.35019526766,
+          "accepted_cost": 34436.79558950338,
+          "alpha": 1.0,
+          "hessian_initial_scale": 7.786727364539933e-06,
+          "new_curvature_sy": 73.31451122118347,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.047982275416322336,
+          "actual_maximal_deformation": 0.04798227541632482,
+          "returned_maximal_deformation": 0.047982275416322336,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34436.79558950338,
+              "gradient_finite": true,
+              "directional_derivative": -39.84190237483766
+            }
+          ],
+          "total_evaluations": 80,
+          "selected_closure_checkpoint_restored": true,
+          "step": 31,
+          "private_state_sha256": "26502c8164b41807024442fe7f00cf4cb3f40cb1079e2f8f83e11e7c5aeda7c4"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 31,
+          "initial_cost": 34436.79558950338,
+          "accepted_cost": 34391.288752869135,
+          "alpha": 0.5,
+          "hessian_initial_scale": 9.78413029782538e-06,
+          "new_curvature_sy": 61.42194015690017,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.041843401837096415,
+          "actual_maximal_deformation": 0.041843401837097755,
+          "returned_maximal_deformation": 0.041843401837096415,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": 34391.288752869135,
+              "gradient_finite": true,
+              "directional_derivative": 15.738000740060333
+            }
+          ],
+          "total_evaluations": 82,
+          "selected_closure_checkpoint_restored": true,
+          "step": 32,
+          "private_state_sha256": "545e1d4af572634ffbe95a913a317d0ce0e50ded74dfd77a532fcf0c3a1635dd"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 32,
+          "initial_cost": 34391.288752869135,
+          "accepted_cost": 34324.6723241032,
+          "alpha": 1.0,
+          "hessian_initial_scale": 3.335809374232337e-06,
+          "new_curvature_sy": 42.77285030496843,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.03875133110852245,
+          "actual_maximal_deformation": 0.03875133110851977,
+          "returned_maximal_deformation": 0.03875133110852245,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34324.6723241032,
+              "gradient_finite": true,
+              "directional_derivative": -38.11134356137372
+            }
+          ],
+          "total_evaluations": 83,
+          "selected_closure_checkpoint_restored": true,
+          "step": 33,
+          "private_state_sha256": "892087e5e7d2181b6079bc8f69881c4a10d256b1ecbb3449cae94cff45e23605"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 33,
+          "initial_cost": 34324.6723241032,
+          "accepted_cost": 34225.75370608721,
+          "alpha": 1.0,
+          "hessian_initial_scale": 4.559715045480779e-06,
+          "new_curvature_sy": 50.9726521603697,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.08690512054848701,
+          "actual_maximal_deformation": 0.0869051205484892,
+          "returned_maximal_deformation": 0.08690512054848701,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34225.75370608721,
+              "gradient_finite": true,
+              "directional_derivative": -12.647634695094984
+            }
+          ],
+          "total_evaluations": 84,
+          "selected_closure_checkpoint_restored": true,
+          "step": 34,
+          "private_state_sha256": "d9cfdbc0795026d382f98329b1b904db3b70df891c071127573655cf3fa2c1ee"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 34,
+          "initial_cost": 34225.75370608721,
+          "accepted_cost": 34046.825065810306,
+          "alpha": 0.642992428549823,
+          "hessian_initial_scale": 7.858567917691702e-07,
+          "new_curvature_sy": 52.77179746000007,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.14038825935340388,
+          "actual_maximal_deformation": 0.14038825935339705,
+          "returned_maximal_deformation": 0.14038825935340388,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34503.12658562285,
+              "gradient_finite": true,
+              "directional_derivative": 9611.139303727952
+            },
+            {
+              "alpha": 0.642992428549823,
+              "phase": "zoom",
+              "cost": 34046.825065810306,
+              "gradient_finite": true,
+              "directional_derivative": 14.95801995706141
+            }
+          ],
+          "total_evaluations": 86,
+          "selected_closure_checkpoint_restored": true,
+          "step": 35,
+          "private_state_sha256": "ccd5839b56dd12b54244eaa648c3d623b69ed5afc17068fb1d57b883e2093727"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 35,
+          "initial_cost": 34046.825065810306,
+          "accepted_cost": 34023.75160496817,
+          "alpha": 1.0,
+          "hessian_initial_scale": 1.56576484298511e-06,
+          "new_curvature_sy": 119.897508717203,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.009415739634791554,
+          "actual_maximal_deformation": 0.009415739634791323,
+          "returned_maximal_deformation": 0.009415739634791554,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34023.75160496817,
+              "gradient_finite": true,
+              "directional_derivative": -17.928529933276824
+            }
+          ],
+          "total_evaluations": 87,
+          "selected_closure_checkpoint_restored": true,
+          "step": 36,
+          "private_state_sha256": "1844bb1cdacb8ec0e8ea7016e028793a3d5ac6931d62a86a7700f27b1125566a"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 36,
+          "initial_cost": 34023.75160496817,
+          "accepted_cost": 33961.14062719573,
+          "alpha": 0.650429055502236,
+          "hessian_initial_scale": 3.074377513226507e-06,
+          "new_curvature_sy": 14.229578799229426,
+          "history_pairs": 12,
+          "theoretical_maximal_deformation": 0.057234106902573405,
+          "actual_maximal_deformation": 0.057234106902571254,
+          "returned_maximal_deformation": 0.057234106902573405,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 34116.98407645481,
+              "gradient_finite": true,
+              "directional_derivative": 2043.614775210378
+            },
+            {
+              "alpha": 0.6246166910950823,
+              "phase": "zoom",
+              "cost": 33962.23755163879,
+              "gradient_finite": true,
+              "directional_derivative": -140.08215851258512
+            },
+            {
+              "alpha": 0.7848369020026311,
+              "phase": "zoom",
+              "cost": 33964.008202849676,
+              "gradient_finite": true,
+              "directional_derivative": 156.18012373567913
+            },
+            {
+              "alpha": 0.6979557114530751,
+              "phase": "zoom",
+              "cost": 33963.44991469915,
+              "gradient_finite": true,
+              "directional_derivative": 83.34598388926135
+            },
+            {
+              "alpha": 0.650429055502236,
+              "phase": "zoom",
+              "cost": 33961.14062719573,
+              "gradient_finite": true,
+              "directional_derivative": 6.981559981851902
+            }
+          ],
+          "total_evaluations": 92,
+          "selected_closure_checkpoint_restored": true,
+          "step": 37,
+          "separate_priors_observation_caller_state_restored": true,
+          "private_state_sha256": "5baf1aa07726c52c5549f13b69f2df08ea8c071c11ddc0562cd461be6218a3d1"
+        }
+      ],
+      "stop_reason": "diagnostic_step_limit"
+    }
+  },
+  "limited_replay_observation_seconds": 99.18923038616776,
+  "added_steps": 33,
+  "previous_segment_observation_seconds": 27.917272814549506,
+  "all_prior_segment_observation_seconds": 36.05778637621552,
+  "sum_segment_observation_seconds_excluding_resume_import_gate_pause": 135.24703495856375,
+  "not_a_fresh_uninterrupted_process_benchmark": true,
+  "resume_state_provenance": {
+    "method": "restore hashed portable anchor/index/counters/last; rebuild immutable plans at accepted-point gate",
+    "original_mutable_Python_cache_object_saved": false,
+    "dynamic_cache_initially_empty": true,
+    "saved_dynamic_cache_keys": [
+      "('compact', 'cpu', torch.float32, 140535640546320)",
+      "('cpu_compact_plan', 94486345946480)"
+    ],
+    "cache_rebuilt_and_resume_objective_rechecked": true,
+    "portable_checkpoint_sha256": "ffdfb0eb630f92cad7788e756082be70d0136b71c1b216aca664309e3c1dc4b2",
+    "accepted_point_sha256": "ef3a7a2985c641cce5b3836365b54e55663e1cd6ee68cac7da38744c7ad6d846",
+    "original_optimizer_evaluations": 13,
+    "before_resume_cost_gate": {
+      "anchor_sha256": "95b42977b8e0e74477ffaaab527bb86ab1d2de282f43352c7fe33fdfb5714720",
+      "candidate_offsets_sha256": "daf974c1b16126f294dd07e34563e0081e2d12e5ef5ff16d2df0e129a41d0117",
+      "candidate_ids_sha256": "8b265f14858a6cbd5aea6093d791e38c6d38fb5490fb16858af37b05e41400ec",
+      "shape": [
+        101,
+        117,
+        118
+      ],
+      "block_size": 8,
+      "index_rebuilds": 5,
+      "closure_evaluations": 13,
+      "cache_keys": [],
+      "static_signature": {
+        "image": {
+          "shape": [
+            101,
+            117,
+            118
+          ],
+          "dtype": "torch.float32",
+          "sha256": "3bf1b3f9ba59d0ce5238994bd8314ca569832926f0fa3a301ee7e9a5aa3f533d"
+        },
+        "start": {
+          "shape": [
+            20100,
+            3
+          ],
+          "dtype": "torch.float64",
+          "sha256": "7c995e927fc5b5745820c9b1eb816f04a257b42596334a1a6fbfd97a2f2cd053"
+        },
+        "reference": {
+          "shape": [
+            20100,
+            3
+          ],
+          "dtype": "torch.float32",
+          "sha256": "6304490923db1880b2c48c16332429cd86580acf4ea35a5397d70511463c1054"
+        },
+        "tetra": {
+          "shape": [
+            122333,
+            4
+          ],
+          "dtype": "torch.int64",
+          "sha256": "d2d508217ea831fff55c4bf77aea7d0f56929bcb53442045ca3d525ea83c184a"
+        },
+        "alphas": {
+          "shape": [
+            20100,
+            11
+          ],
+          "dtype": "torch.float32",
+          "sha256": "55ac7259f386c4c08f557ca7706b59be4af75baf5e2f36cdd98ca7691690c561"
+        },
+        "can_move": {
+          "shape": [
+            20100,
+            3
+          ],
+          "dtype": "torch.bool",
+          "sha256": "72a96b192a58bdaf50f04447dd0dd70a0d906b6c1e03c9a15391c4b3a33d0dea"
+        },
+        "boundary": {
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "torch.float32",
+          "sha256": "4742e6de75774efe763779dcf6ba421b75adf1b186666a755070ecf7a9948c14"
+        },
+        "valid": {
+          "shape": [
+            101,
+            117,
+            118
+          ],
+          "dtype": "torch.bool",
+          "sha256": "8bcfb371b7b74f0cc4eeef5956474f965681266d959030d0c1195a77bb880a1c"
+        },
+        "likelihood": {
+          "shape": [
+            11,
+            44255
+          ],
+          "dtype": "torch.float64",
+          "sha256": "1338bf2e8bcad614c8a02569e5249acf80e37043ca77549b881bdce80f3dfa7f"
+        },
+        "projection": {
+          "shape": [
+            20100,
+            3,
+            3
+          ],
+          "dtype": "torch.float64",
+          "sha256": "7705f7ee9abf5a2df743262b41a07bd7b1e49ef2ff58fa52457ba52b901edd11"
+        },
+        "means": {
+          "shape": [
+            11,
+            1
+          ],
+          "dtype": "torch.float64",
+          "sha256": "67bfe165db0c2e7cb33506747de984e9341e8e0c148870b866aa7475422c76e6"
+        },
+        "variances": {
+          "shape": [
+            11,
+            1,
+            1
+          ],
+          "dtype": "torch.float64",
+          "sha256": "3b822a098003f05aa6d227af2a3da65b0da5a71911b85d608fd0d37175d01c93"
+        },
+        "reference_inverse": {
+          "shape": [
+            122333,
+            3,
+            3
+          ],
+          "dtype": "torch.float64",
+          "sha256": "f38f5ebf1d70b6f6416a1cbaa922faf791d6f72c43a20857ccbaf437d293ac2e"
+        },
+        "reference_volumes": {
+          "shape": [
+            122333
+          ],
+          "dtype": "torch.float64",
+          "sha256": "b16839599b6ede789a34b8cf6865295229af4422b572727a9be88ace8fc9540b"
+        },
+        "reduction_order": {
+          "shape": [
+            489332
+          ],
+          "dtype": "torch.int64",
+          "sha256": "8f416d7e9b3d5554a0169028d302da34f662e4941878ecdd4447e15015f661bb"
+        },
+        "reduction_offsets": {
+          "shape": [
+            20101
+          ],
+          "dtype": "torch.int64",
+          "sha256": "c8cbf01710cbb1bc542316458000b3a6d417a851dadb3a8d967acab6a9c4bc8d"
+        }
+      },
+      "last": {
+        "data_cost": 36816.70850102864,
+        "prior_cost": 123.36852179181219,
+        "min_jacobian": 0.03819765666836861,
+        "covered_voxels": 44255,
+        "index_rebuilds": 5
+      }
+    },
+    "resume_cost_gradient_gate": {
+      "cost_exact": true,
+      "gradient_exact": true,
+      "observation_seconds": 2.333237949758768,
+      "original_optimizer_state_sha256": "2401f037dd4bcba637f48818a9b584dbfeb33a6690d87a636376f5a6f2ffd48f",
+      "after_resume_cost_gate": {
+        "anchor_sha256": "95b42977b8e0e74477ffaaab527bb86ab1d2de282f43352c7fe33fdfb5714720",
+        "candidate_offsets_sha256": "daf974c1b16126f294dd07e34563e0081e2d12e5ef5ff16d2df0e129a41d0117",
+        "candidate_ids_sha256": "8b265f14858a6cbd5aea6093d791e38c6d38fb5490fb16858af37b05e41400ec",
+        "shape": [
+          101,
+          117,
+          118
+        ],
+        "block_size": 8,
+        "index_rebuilds": 5,
+        "closure_evaluations": 13,
+        "cache_keys": [
+          "('compact', 'cpu', torch.float32, 140139559902896)",
+          "('cpu_compact_plan', 93896680650800)"
+        ],
+        "static_signature": {
+          "image": {
+            "shape": [
+              101,
+              117,
+              118
+            ],
+            "dtype": "torch.float32",
+            "sha256": "3bf1b3f9ba59d0ce5238994bd8314ca569832926f0fa3a301ee7e9a5aa3f533d"
+          },
+          "start": {
+            "shape": [
+              20100,
+              3
+            ],
+            "dtype": "torch.float64",
+            "sha256": "7c995e927fc5b5745820c9b1eb816f04a257b42596334a1a6fbfd97a2f2cd053"
+          },
+          "reference": {
+            "shape": [
+              20100,
+              3
+            ],
+            "dtype": "torch.float32",
+            "sha256": "6304490923db1880b2c48c16332429cd86580acf4ea35a5397d70511463c1054"
+          },
+          "tetra": {
+            "shape": [
+              122333,
+              4
+            ],
+            "dtype": "torch.int64",
+            "sha256": "d2d508217ea831fff55c4bf77aea7d0f56929bcb53442045ca3d525ea83c184a"
+          },
+          "alphas": {
+            "shape": [
+              20100,
+              11
+            ],
+            "dtype": "torch.float32",
+            "sha256": "55ac7259f386c4c08f557ca7706b59be4af75baf5e2f36cdd98ca7691690c561"
+          },
+          "can_move": {
+            "shape": [
+              20100,
+              3
+            ],
+            "dtype": "torch.bool",
+            "sha256": "72a96b192a58bdaf50f04447dd0dd70a0d906b6c1e03c9a15391c4b3a33d0dea"
+          },
+          "boundary": {
+            "shape": [
+              3,
+              3
+            ],
+            "dtype": "torch.float32",
+            "sha256": "4742e6de75774efe763779dcf6ba421b75adf1b186666a755070ecf7a9948c14"
+          },
+          "valid": {
+            "shape": [
+              101,
+              117,
+              118
+            ],
+            "dtype": "torch.bool",
+            "sha256": "8bcfb371b7b74f0cc4eeef5956474f965681266d959030d0c1195a77bb880a1c"
+          },
+          "likelihood": {
+            "shape": [
+              11,
+              44255
+            ],
+            "dtype": "torch.float64",
+            "sha256": "1338bf2e8bcad614c8a02569e5249acf80e37043ca77549b881bdce80f3dfa7f"
+          },
+          "projection": {
+            "shape": [
+              20100,
+              3,
+              3
+            ],
+            "dtype": "torch.float64",
+            "sha256": "7705f7ee9abf5a2df743262b41a07bd7b1e49ef2ff58fa52457ba52b901edd11"
+          },
+          "means": {
+            "shape": [
+              11,
+              1
+            ],
+            "dtype": "torch.float64",
+            "sha256": "67bfe165db0c2e7cb33506747de984e9341e8e0c148870b866aa7475422c76e6"
+          },
+          "variances": {
+            "shape": [
+              11,
+              1,
+              1
+            ],
+            "dtype": "torch.float64",
+            "sha256": "3b822a098003f05aa6d227af2a3da65b0da5a71911b85d608fd0d37175d01c93"
+          },
+          "reference_inverse": {
+            "shape": [
+              122333,
+              3,
+              3
+            ],
+            "dtype": "torch.float64",
+            "sha256": "f38f5ebf1d70b6f6416a1cbaa922faf791d6f72c43a20857ccbaf437d293ac2e"
+          },
+          "reference_volumes": {
+            "shape": [
+              122333
+            ],
+            "dtype": "torch.float64",
+            "sha256": "b16839599b6ede789a34b8cf6865295229af4422b572727a9be88ace8fc9540b"
+          },
+          "reduction_order": {
+            "shape": [
+              489332
+            ],
+            "dtype": "torch.int64",
+            "sha256": "8f416d7e9b3d5554a0169028d302da34f662e4941878ecdd4447e15015f661bb"
+          },
+          "reduction_offsets": {
+            "shape": [
+              20101
+            ],
+            "dtype": "torch.int64",
+            "sha256": "c8cbf01710cbb1bc542316458000b3a6d417a851dadb3a8d967acab6a9c4bc8d"
+          }
+        },
+        "last": {
+          "data_cost": 36816.70850102864,
+          "prior_cost": 123.36852179181219,
+          "min_jacobian": 0.03819765666836861,
+          "covered_voxels": 44255,
+          "index_rebuilds": 5
+        }
+      }
+    },
+    "restored_optimizer_state": {
+      "points": {
+        "dtype": "torch.float64",
+        "shape": [
+          20100,
+          3
+        ],
+        "sha256": "eb1cb54436bb61f91764725d36291154eb945b42595979bfef8caaed2c6cca23"
+      },
+      "current_gradient": {
+        "dtype": "torch.float64",
+        "shape": [
+          20100,
+          3
+        ],
+        "sha256": "52808f042c980045e48ee60ff082b81050a26de01ef92405acfffec66457c3b0"
+      },
+      "old_gradient": {
+        "dtype": "torch.float64",
+        "shape": [
+          20100,
+          3
+        ],
+        "sha256": "664536ea97e52cb0b609f5f85a882c1e656464c2a19af6611b51fbb7a70b45b2"
+      },
+      "old_direction": {
+        "dtype": "torch.float64",
+        "shape": [
+          20100,
+          3
+        ],
+        "sha256": "3dc3491215c2009f40261f9a64eb1358e3fe9c3e4cc9326c99802d2260ab3eed"
+      },
+      "history_s": [
+        {
+          "dtype": "torch.float64",
+          "shape": [
+            20100,
+            3
+          ],
+          "sha256": "2b651cf606fd26a9196e3b440c7c5e6b03693e00d2d638c7b7a801ed69858f39"
+        },
+        {
+          "dtype": "torch.float64",
+          "shape": [
+            20100,
+            3
+          ],
+          "sha256": "7665d46ed28a3eaec10fe27a0702021f97703e75ff1fabccde19cefa3928dba3"
+        },
+        {
+          "dtype": "torch.float64",
+          "shape": [
+            20100,
+            3
+          ],
+          "sha256": "eb966c2773532bb3d6485812e261a4259fb0bda883f8d901e21d44e2a99a0588"
+        }
+      ],
+      "history_y": [
+        {
+          "dtype": "torch.float64",
+          "shape": [
+            20100,
+            3
+          ],
+          "sha256": "53f57fe2faf58943c8354cee3024b427351c82846771559977c90eb91373899e"
+        },
+        {
+          "dtype": "torch.float64",
+          "shape": [
+            20100,
+            3
+          ],
+          "sha256": "d19b7d60770d50a41c9de37cdf56bd4ecbb9b4fbe95bd18f697daf8df82a95f9"
+        },
+        {
+          "dtype": "torch.float64",
+          "shape": [
+            20100,
+            3
+          ],
+          "sha256": "b360ec7ccedfca19758e0ea7f18356b018a3fd3fb465c696b609846420ca8a21"
+        }
+      ],
+      "history_sy": [
+        58.68961067268941,
+        335.0677748937135,
+        3601.7974666728296
+      ],
+      "current_alpha": 0.0078125,
+      "old_alpha": 0.0078125,
+      "iteration": 4,
+      "evaluations": 13,
+      "finished": false,
+      "derivative_resets_from_current_gradient_and_direction_in_each_source_defined_search": true
+    }
+  },
+  "closure_checkpoint": {
+    "private_checkpoint_sha256": "a766e36ab496a6e7ab6a499adaa031b2865d21b8c2880f92d0f89c65d50be8e0",
+    "state_fingerprint": {
+      "anchor_sha256": "ac237ca9bd995deac5dbd4859c9a7c1c70051237a005f8a0cfde15190b70917b",
+      "candidate_offsets_sha256": "77236aad3a4d0aefb15cad2846d654dd274170b0af0c28e06b91cb5fedd31f6a",
+      "candidate_ids_sha256": "edac673033394ea0a1ada6619c192d1e3c32de77e321b0e21b09f02f7a929b16",
+      "shape": [
+        101,
+        117,
+        118
+      ],
+      "block_size": 8,
+      "index_rebuilds": 6,
+      "closure_evaluations": 92,
+      "cache_keys": [
+        "('compact', 'cpu', torch.float32, 140139559902896)",
+        "('cpu_compact_plan', 93896564424688)",
+        "('cpu_compact_plan', 93896564442080)",
+        "('cpu_compact_plan', 93896569750896)",
+        "('cpu_compact_plan', 93896589152400)",
+        "('cpu_compact_plan', 93896609563840)",
+        "('cpu_compact_plan', 93896610654240)",
+        "('cpu_compact_plan', 93896630280048)",
+        "('cpu_compact_plan', 93896636958400)",
+        "('cpu_compact_plan', 93896636996656)",
+        "('cpu_compact_plan', 93896637014944)",
+        "('cpu_compact_plan', 93896672745984)",
+        "('cpu_compact_plan', 93896676971008)",
+        "('cpu_compact_plan', 93896677386432)",
+        "('cpu_compact_plan', 93896678555776)",
+        "('cpu_compact_plan', 93896681211424)",
+        "('cpu_compact_plan', 93896833899664)"
+      ],
+      "static_signature": {
+        "image": {
+          "shape": [
+            101,
+            117,
+            118
+          ],
+          "dtype": "torch.float32",
+          "sha256": "3bf1b3f9ba59d0ce5238994bd8314ca569832926f0fa3a301ee7e9a5aa3f533d"
+        },
+        "start": {
+          "shape": [
+            20100,
+            3
+          ],
+          "dtype": "torch.float64",
+          "sha256": "7c995e927fc5b5745820c9b1eb816f04a257b42596334a1a6fbfd97a2f2cd053"
+        },
+        "reference": {
+          "shape": [
+            20100,
+            3
+          ],
+          "dtype": "torch.float32",
+          "sha256": "6304490923db1880b2c48c16332429cd86580acf4ea35a5397d70511463c1054"
+        },
+        "tetra": {
+          "shape": [
+            122333,
+            4
+          ],
+          "dtype": "torch.int64",
+          "sha256": "d2d508217ea831fff55c4bf77aea7d0f56929bcb53442045ca3d525ea83c184a"
+        },
+        "alphas": {
+          "shape": [
+            20100,
+            11
+          ],
+          "dtype": "torch.float32",
+          "sha256": "55ac7259f386c4c08f557ca7706b59be4af75baf5e2f36cdd98ca7691690c561"
+        },
+        "can_move": {
+          "shape": [
+            20100,
+            3
+          ],
+          "dtype": "torch.bool",
+          "sha256": "72a96b192a58bdaf50f04447dd0dd70a0d906b6c1e03c9a15391c4b3a33d0dea"
+        },
+        "boundary": {
+          "shape": [
+            3,
+            3
+          ],
+          "dtype": "torch.float32",
+          "sha256": "4742e6de75774efe763779dcf6ba421b75adf1b186666a755070ecf7a9948c14"
+        },
+        "valid": {
+          "shape": [
+            101,
+            117,
+            118
+          ],
+          "dtype": "torch.bool",
+          "sha256": "8bcfb371b7b74f0cc4eeef5956474f965681266d959030d0c1195a77bb880a1c"
+        },
+        "likelihood": {
+          "shape": [
+            11,
+            44255
+          ],
+          "dtype": "torch.float64",
+          "sha256": "1338bf2e8bcad614c8a02569e5249acf80e37043ca77549b881bdce80f3dfa7f"
+        },
+        "projection": {
+          "shape": [
+            20100,
+            3,
+            3
+          ],
+          "dtype": "torch.float64",
+          "sha256": "7705f7ee9abf5a2df743262b41a07bd7b1e49ef2ff58fa52457ba52b901edd11"
+        },
+        "means": {
+          "shape": [
+            11,
+            1
+          ],
+          "dtype": "torch.float64",
+          "sha256": "67bfe165db0c2e7cb33506747de984e9341e8e0c148870b866aa7475422c76e6"
+        },
+        "variances": {
+          "shape": [
+            11,
+            1,
+            1
+          ],
+          "dtype": "torch.float64",
+          "sha256": "3b822a098003f05aa6d227af2a3da65b0da5a71911b85d608fd0d37175d01c93"
+        },
+        "reference_inverse": {
+          "shape": [
+            122333,
+            3,
+            3
+          ],
+          "dtype": "torch.float64",
+          "sha256": "f38f5ebf1d70b6f6416a1cbaa922faf791d6f72c43a20857ccbaf437d293ac2e"
+        },
+        "reference_volumes": {
+          "shape": [
+            122333
+          ],
+          "dtype": "torch.float64",
+          "sha256": "b16839599b6ede789a34b8cf6865295229af4422b572727a9be88ace8fc9540b"
+        },
+        "reduction_order": {
+          "shape": [
+            489332
+          ],
+          "dtype": "torch.int64",
+          "sha256": "8f416d7e9b3d5554a0169028d302da34f662e4941878ecdd4447e15015f661bb"
+        },
+        "reduction_offsets": {
+          "shape": [
+            20101
+          ],
+          "dtype": "torch.int64",
+          "sha256": "c8cbf01710cbb1bc542316458000b3a6d417a851dadb3a8d967acab6a9c4bc8d"
+        }
+      },
+      "last": {
+        "data_cost": 33200.99545541052,
+        "prior_cost": 760.1451717852088,
+        "min_jacobian": 0.03200002553567518,
+        "covered_voxels": 44255,
+        "index_rebuilds": 6
+      }
+    },
+    "cache_storage": "derived immutable compact plans; explicitly rebuildable, no byte-object claim"
+  },
+  "resume_helper_sha256": "2a0204659e93d9bb5677c89a649ef778d456e6ced0fec5a6a440e6523c279451",
+  "capture_sha256": "30269d8aa4d9db4e6ba1c9ffcaaaa3784d4b7c941781eb0bfd8556ee122f6712",
+  "base_adapter_sha256": "a996995feed38f49b53498a8a6e10e49cfba0ee86ceec176cb9267a67ff841f4",
+  "raw_adapter_sha256": "5246ee699c528f8c296925d9e76b287fd6f9122bedc707cf8bfb10581b90295c",
+  "candidate_sha256": "d6ab8eeefcfc7ef33e33246318d6adeafb4ad4cb31ca09490d0cca4515fe995e",
+  "program_sha256": "cb5b7b35498067fbd8d38a71dddf5736e73a08ef3501d7436dd73053f3b4276c",
+  "source_sha256": {
+    "__init__.py": "028efcf28fa9ef09e74913df677e556aa7d3f358e8ee35ad92636cb485fe68e7",
+    "_raster_cpu.py": "e5548621fe29d40e140b97ed9e5c81c038ceb8947d04e57730037935debed9b9",
+    "_raster_cpu_compact.py": "be03336c29131a39e75312af2923a5c75b7007c0992b9ba8bd726bbb5d652382",
+    "_raster_triton.py": "22ce1ca61efa42b5b6d06cacc4f4d859ef2c10ffca26ecf154f3d73361bee5ac",
+    "atlas.py": "f6415958b02956f50f6efa6043428513610c3d3a00b734ff2aeff353930cf975",
+    "brainstem.py": "23fa1286c627e16c974ec17f96b2481d434c81b253e379111e2b6390a4574b3e",
+    "context.py": "2739c5a4f7e147b78fcb14ac2e203786c100fdfd6c13488924d291151e5f11f3",
+    "core.py": "7f7c5eaa5bd56e32af52afd86bb0b35edb469b70aba2a50d30215554b89b5d77",
+    "deformation.py": "d0a69c20047cc669f9460a886c9755477f099f095abd59ab7ed7e10a49e662fd",
+    "gaussian.py": "67856df056e408572d243b5ebf35824573291f29276292cd75b31fc1d0f140c3",
+    "initialize.py": "ab5bc936c751a5b1fa897957d9382343544127eba7afac93d5b761a334dac187",
+    "optim.py": "f25b7251a6b850dc30716308e2a686399c9339cc39d9324c10f19e3046716c89",
+    "output.py": "a67e5aeb863ba4a6370ced77110d519b7e6185c34aa2eb72f8659e95866e873c",
+    "pipeline.py": "20a0df50ce6c3fd0e3eb67b0eb8cbcd588565615cc8c15ed4449ca1644ea3543",
+    "preprocessing.py": "4f7926afaa175015c40c2790363f503979c3b495fc2d9f8af022f994173d0135",
+    "rasterize.py": "f665e25582b2d4d63da6c2351d9d09a76a23b81354b60a1fa8c2187d580b55eb",
+    "recipes/__init__.py": "2109d5d096c7bfbf3533e75009956bfcaf8b4b66326929b47acc9ee91f6f63b9",
+    "recipes/base.py": "5e8b4af9410fd5fe447cc674450332288085b0098fae3c119b20134b904187b9",
+    "recipes/brainstem.py": "3054bc95ba0700a19256ca0419ecd1d62093817e9e4cbf97e00b703281bd86bb",
+    "recipes/hippo_amygdala.py": "385e3cf19cbe3ba6e7985b36a525664d46a037e4b80ee298b82916bbd99e710e",
+    "recipes/thalamus.py": "76dcdc24afc90765d766ca228f64a937d437fdbd1f96a466e244161e11c63941",
+    "setup.py": "ccd6c6c9952df395c972e3dbc32842c20fb7b666bcc10f8c1afe274753ab561d",
+    "smoothing.py": "853078d34c9c798395db16b9af503065d88cc68b656615a52826c066bbf45fb5"
+  },
+  "reused_normalized_summary_sha256": "2acf5cffe9fc57b3c74995a6ec613ece71a9c1801186e31737cfaf112181919c",
+  "optimizer_state_sha256": "3d80752384b9e6fdfdb0cf11fd23c35eeb72c92cc7b80abced8d12b21c4a87c5",
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "output_directory_mode": "0o700",
+  "resume_summary_sha256": "5cdb8ef696b68ffd372822ceac11ac038145d622b8aa3017c83781b1b5a6c6d0"
+}
