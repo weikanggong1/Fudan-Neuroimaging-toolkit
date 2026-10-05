@@ -2,7 +2,7 @@
 
 ## 1. 功能与阶段
 
-**目前仅准备、静态冻结；0上传、0INDEX登记、0worker、0数值。** [v2短合同](../seg_columns_reuse_v2_20261006/README.md)已通过：六个真实权重小输入的完整 FP32 pre-ELU 输出逐位相同，13复制门、23回退守卫和异常恢复通过。小尺寸 M 不代表真实层 M 的结果，本计划等待协调者另行审查授权。
+**本阶段已授权派发一次；A1在参数哈希检查中停止，尚未调用原卷积或候选卷积。** [v2短合同](../seg_columns_reuse_v2_20261006/README.md)已通过：六个真实权重小输入的完整 FP32 pre-ELU 输出逐位相同，13复制门、23回退守卫和异常恢复通过。小尺寸 M 不代表真实层 M 的结果，本次失败属于私有检查程序的维度错误，不是候选数值失败。
 
 候选只复用原14-plane slab的列缓冲，保留K1944、N24、原M/leading dimensions、C/kD/kH/kW排列、bias预填及同一已加载LP64 SGEMM。最大列缓冲仍为6,242,697,216B，不减少总展开量。它是自有copy加公开SGEMM胶水，不是原隐藏ATen wrapper。生产、GPU、原dtype、后端和旧冻结目录不修改；不重编译v1 `.so`。
 
@@ -37,7 +37,7 @@ joined输入占3,170,893,824B，仅在内存使用，不另存。新私有磁盘
 
 ## 3. 私有命令行与参数
 
-以下入口已准备，**尚未执行，必须另获本阶段授权**：
+以下入口保留首次冻结时的调用方式。v1已经运行并失败，**不可重跑或覆盖**：
 
 ```bash
 # deadline从首次排队开始，不因等待或arm切换重置。
@@ -74,14 +74,28 @@ worker地址空间cap及RSS门均32,000,000,000B。清除loader/PYTHONPATH/core 
 
 源/输入hash、加载、重join、保存和比较位于层操作时钟之外。报告前后系统loadavg三个标量，不收集进程名或地址；它们只是共享负载背景，不能证明本层实际使用八个核。
 
-本次计划尚无实际结果、脑图、完整map/CSV/官方误差或GPU输出。即使单层三bit门通过，也不能宣称完整SynthSeg等价或把旧stage 1.836倍拼接比当CNN提升。
+本次没有实际卷积结果、脑图、完整map/CSV/官方误差或GPU输出。即使单层三bit门通过，也不能宣称完整SynthSeg等价或把旧stage 1.836倍拼接比当CNN提升。
+
+### 本次实际停止记录
+
+原 [QUEUE.json](QUEUE.json)、[A1报告](A1_baseline/report.json) 和日志按远端原始字节收回。[SUMMARY.json](SUMMARY.json) 由 [build_failure_summary.py](build_failure_summary.py) 机械汇总，INDEX已使用六把共享锁闭合。
+
+| 项目 | 实际结果 |
+| --- | --- |
+| 唯一尝试 | A1 baseline，新进程退出1；B1/B2/A2未派发。 |
+| 原因 | `weight.view(1, *weight.shape)`得到6维 `[1,24,72,3,3,3]`，私有 `value_sha`错误要求5维。 |
+| 原卷积/候选copy/候选SGEMM | 全部0；A1参考数组不存在，实际旧新位比较0。 |
+| 源/参数输入文件/运行库/flags | 已执行的前后门通过，CUDA未初始化；joinedSHA检查先于错误，但其报告字段尚未赋值，不将该顺序推断冒充保存的检查结果。 |
+| RSS | 4,898,291,712B；仅加载/重join/哈希检查，不能当卷积峰值。 |
+| 时钟 | worker含IO/hash观察8.056秒、外层8.629秒、controller9.829秒；0卷积计时，不作速度结论。 |
+| 下一边界 | 保留v1冻结和失败receipt。另建v2只修哈希守卫并先验证2D/5D/6D字节哈希，再另行审查；模型、矩阵、精度与严格停止门保持。 |
 
 ## 6. 记录与下一边界
 
 - v1编译/metadata加载通过，未数值；v2独立strict Tensor/forward-AD守卫和短合同通过；两阶段原freeze/receipt/binary保留。
 - 此计划复用旧真实skip/value，无新CNN capture；六个producer/current终端证明由本地实际 `git show 4ec078cb` 和当前14源机械重算，未依据Git头替代源SHA。
 - [PLAN.json](PLAN.json)声明0上传/0INDEX/0worker/0数学，之后若获授权，实际状态另写receipt，不改冻结PLAN历史。
-- 协调者读源码与计划后才能上传并运行这一组；本计划不授权whole CNN、官方、GPU、新cap/layout/provider/dtype或参数搜索。
+- 协调者审查后曾授权一次v1；本次metadata错误停止，未重试。该授权不包含新的v2、whole CNN、官方、GPU、新cap/layout/provider/dtype或参数搜索。
 
 ## 7. 来源与依赖
 
