@@ -14,6 +14,7 @@ from ..msm.config import MSMSulcConfig
 from .surface_pipeline import FMRISurfaceResult, fMRISurface_pipeline
 from .surface_volume import SurfaceVolumeStatus, inspect_surface_volume
 from .surface_reconstruction import ReconstructionResult, prepare_surface_reconstruction
+from .reference import BoldReferenceResult, prepare_bold_reference, select_reference_volumes
 from .surface_prepare import (T1SurfacePair, T1SurfaceGeometry, T1SurfacePreparation,
                               prepare_fmriprep_surface_inputs, prepare_t1w_surface_geometry)
 
@@ -40,6 +41,7 @@ __all__ = [
     "FMRISurfaceResult", "fMRISurface_pipeline",
     "SurfaceVolumeStatus", "inspect_surface_volume",
     "ReconstructionResult", "prepare_surface_reconstruction",
+    "BoldReferenceResult", "prepare_bold_reference", "select_reference_volumes",
     "T1SurfacePair", "T1SurfaceGeometry", "T1SurfacePreparation",
     "prepare_fmriprep_surface_inputs", "prepare_t1w_surface_geometry",
 ]

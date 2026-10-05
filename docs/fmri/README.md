@@ -4,6 +4,10 @@
 
 `fMRIVolume_pipeline` 每次处理一个原始 BIDS BOLD run，同时输出 **preproc** 和 **clean** 两组 BIDS Derivatives。preproc 保留原始强度基线和时间均值，不做 AROMA、混杂回归、高通滤波或 grand-mean scaling；clean 沿用 FEAT 高通、PICA/ICA-AROMA 及可选 WM/CSF/运动等回归。计算使用本包已有 [SynthStrip](../synthstrip/README.md)、[TorchFAST](../fast/README.md)、[TorchMCFLIRT](../mcflirt/README.md)、BBR、SynthMorph/TorchFNIRT 和 [FNIT MELODIC/PICA](../melodic/README.md)，运行时不调用 FSL、FreeSurfer 或 fMRIPrep。
 
+参考图的算法与独立调用见 [BOLD 稳健参考](bold_reference.md)。同一生成目标显式传入 FEAT，用于脑掩膜、HMC 和 BBR，保存到 `FMRIVolumeResult.bold_reference` 及其 JSON。官方参考图默认用 AFNI Fourier 校正；这里使用 TorchMCFLIRT/spline，数值一致性须以本轮实测为准。
+
+**配准方向：**BOLD→T1w 使用初始仿射和 TorchBBR；T1w→MNI 在 `registration_backend="fnirt"` 时使用 TorchFLIRT 仿射接 TorchFNIRT。完整 BOLD→MNI 链才同时包含 BBR 和 FNIRT。接口默认 `synthmorph` 保持原配准选择。
+
 需要同时完成 surface 时，可直接调用 [`fMRISurface_pipeline`](surface.md)，由其只读判断同 run 的 volume 是否完整；完全缺失时自动调用这里的成熟 volume API，随后核验再继续。无需先手动跑 volume。surface 提供 FNIT 完整 recon-all、显式官方 FreeSurfer recon-all 和用户已有目录/ZIP 三个选项；默认 FNIT 重建复用 PyTorch/Numba 与 Conda 独立源码构建节点，只有显式 `freesurfer` backend 执行官方重建命令。完整参数、三种 Python/CLI 示例、复用与许可说明见 [surface 页](surface.md#python-调用输入输出与参数)。
 
 preproc 从原始 BOLD 或其切片时间校正结果出发，将逐帧运动、EPI→T1w BBR 与 T1w→MNI 形变组合后，分别**一次空间插值**得到 T1w 和 MNI 输出。三次 B 样条采用固定 fMRIPrep 25.2.4 的 `grid-constant` 零边界策略；固定变换控制与官方实际产物的验收范围见下文。clean 的最终 MNI 插值保持三次 B 样条 `periodic` 边界和脑掩膜。两类输出使用原始 BIDS TR 并保持全部输入帧。
@@ -17,7 +21,7 @@ CUDA 默认允许 TF32。主要影像计算与输出为 float32；原始整数 B
 ```mermaid
 flowchart TD
     BIDS["原始 BIDS：BOLD、JSON、同被试 T1w"] --> SEL["选择 subject、session、run 与源 T1w"]
-    SEL --> EPI["BOLD 或 SBRef 参考图"]
+    SEL --> EPI["无 SBRef：稳健 BOLD 参考；SBRef：兼容路径"]
     SEL --> T1["同被试 T1w"]
     EPI --> MASK["SynthStrip：EPI 脑掩膜"] --> FEAT["TorchMCFLIRT → 强度缩放与高通滤波"]
     T1 --> BRAIN["SynthStrip：T1 脑图与掩膜"] --> FAST["TorchFAST execution=fsl：WM、CSF 部分体积分数"]
@@ -26,7 +30,7 @@ flowchart TD
     BRAIN --> REG{"T1w 到 MNI 后端"}
     TEMPLATE["内容身份核验的 TemplateFlow MNI6 2 mm 模板"] --> REG
     REG -- synthmorph --> SM["FNIT SynthMorph"] --> XFM["MNI 到 T1w 的 RAS pull 场"]
-    REG -- fnirt --> FN["TorchFNIRT"] --> XFM
+    REG -- fnirt --> FN["TorchFLIRT 仿射 → TorchFNIRT"] --> XFM
     FEAT --> ICA["MELODIC/PICA 与 ICA-AROMA"]
     BBR --> ICA
     XFM --> ICA
@@ -95,7 +99,7 @@ fnit-setup-fmri-surface-assets \
 | `*_bold.nii.gz` | 一个 run 的 4D NIfTI，结构为 X×Y×Z×T；全部帧参与运动估计及两个信号分支。 |
 | BOLD JSON | `TaskName` 与有限正数 `RepetitionTime`（秒）；开启 STC 时使用继承的 `SliceTiming`，规则见下文。 |
 | 同被试 `*_T1w.nii.gz` | 3D 解剖 NIfTI，用于脑提取、组织分割、BBR 和标准空间配准。 |
-| 可选 `*_sbref.nii.gz` | 与 BOLD 同网格的 3D EPI 参考；未提供时采用 BOLD 中间帧。 |
+| 可选 `*_sbref.nii.gz` | 与 BOLD 同网格的 3D EPI 参考；未提供时默认采用稳健 BOLD 参考；`bold_reference_strategy="middle"` 保留中间帧对照。 |
 | `mni_template` / 可选 `mni_brain_mask` | 经身份核验的 3D MNI2mm 模板及同网格掩膜，定义标准输出网格。 |
 
 关联的原始 fieldmap 当前会因缺少 fieldmap 估计而明确报错；输出记录无 susceptibility correction，不处理 GDC。
@@ -155,6 +159,7 @@ volume_result = fMRIVolume_pipeline(
     device="cuda:0",                                       # 默认 None 自动选择 CUDA 或 CPU
     batch_size=8,                                          # 组合变换重采样每批帧数；不改变逐帧运动估计
     motion_iterations=(1, 1, 1),                           # 8/4/4 mm 各一次 Brent 坐标优化
+    bold_reference_strategy="robust",                     # 稳健参考；middle 保留旧单帧对照
     ica_max_iter=500,                                       # ICA 迭代上限
     n_splits=1000,                                         # AROMA 随机抽样次数
     random_state=0,                                        # ICA/AROMA 随机种子
@@ -203,7 +208,8 @@ print(volume_result.mni_pull)     # MNI→T1w RAS pull 位移场
 | `slice_time_reference` | 默认 `0.5`；STC 目标在最早与最晚切片时刻之间的比例，范围 0–1。 |
 | `device` | 默认 `None` 自动选择 CUDA 或 CPU；可传 `"cuda:0"` 或 `"cpu"`。 |
 | `batch_size` | 默认 `8`；组合变换和标准空间 BOLD 重采样每批帧数。motion-only MCFLIRT 仍逐帧执行，不受此参数影响。 |
-| `motion_iterations` | 默认 `(1, 1, 1)`；依次指定 8/4/4 mm 阶段的 Brent 坐标优化轮数。 |
+| `motion_iterations` | 默认 `(1, 1, 1)`；依次指定 8/4/4 mm 阶段的 Brent 坐标优化轮数，也用于稳健参考的选中帧运动校正。 |
+| `bold_reference_strategy` | 默认 `"robust"`；无 SBRef 时按 NiWorkflows1.14.4 选帧、截断、漂移归一和时间中位数，运动后端复用 TorchMCFLIRT。`"middle"` 是原单帧对照。有 SBRef 时保留既有兼容路径；不宣称与官方独立 raw-HMC/SBRef-coreg 两参考策略等价。 |
 | `ica_max_iter` | 默认 `500`；PICA/ICA 最大迭代数。 |
 | `n_splits` | 默认 `1000`；ICA-AROMA 运动相关特征的随机子采样次数。 |
 | `random_state` | 默认 `0`；PICA 和 ICA-AROMA 的随机种子。 |
@@ -357,6 +363,12 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 ## 最新真实数据精度、耗时与脑图
 
+2026-10-04 的[参考策略连续实测](../../validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md)使用同一公开 ds001226 v5.0.1 的 CON01、CON06，各完整180帧，分别运行 middle/robust，共4次 fresh raw→自动volume→surface。冻结 source_v1 来自 cc940 基线及本次参考接入，复用自身已有重建/MSM，不计冷重建或新MSM求解。MNI 时序r均值的病例中位数为 **0.511970→0.520368**，全域NRMSE为 **24.044193%→23.845726%**；CIFTI为 **0.717636→0.737295**、**9.248912%→9.170536%**。这项 n=2 策略对照不重标下述1128十例结果；4次API/进程/步骤时钟与4张实际MNI脑图均在该页具名绑定。
+
+参考子函数的输入、全部参数和原实现见 [BOLD稳健参考七节页](bold_reference.md)；隔离[官方CON01节点](../../validation/fmri/reference_alignment_20261004/bold_reference/CON01.official.public.json)和[官方CON06节点](../../validation/fmri/reference_alignment_20261004/bold_reference/CON06.official.public.json)重跑均与其原保存参考图逐值相同。官方 AFNI 和 FNIT TorchMCFLIRT 后端仍分列。另有[同输入皮层采样实测](../../validation/fmri/reference_alignment_20261004/surface/SURFACE_ALIGNMENT.md)，两例各11项完整输出逐元素零差；这是同输入采样算子对照，不能用它替代连续链精度。
+
+原冻结 `1128bc52` 的[FNIT／fMRIPrep／DeepPrep 十例三方比较](../../validation/fmri/threeway_20261004/final10/REPORT.md)也已全部完成，n=10；该报告单列三方实际时钟、完整180帧 MNI/CIFTI 精度及真实脑图，仍属于原参考策略，未重标为上述 robust 连续重测。
+
 最终[发布验证汇总](../../validation/fmri/public_ten_20261003/final_publication_validation.public.json)绑定 10 例候选、10 例原流程完整输出、210 个结构比较、主队列 80 个完整自交扫描及额外 CON08 的已测量范围与未完成预算；执行完成和数值差异分别记录。
 
 ### 新完整流程：正式十例全部执行完成
@@ -484,6 +496,8 @@ CON10 的[实际保存球面追加读数](../../validation/fmri/public_ten_20261
 
 | 版本/记录 | 变化与可复核范围 |
 |---|---|
+| 2026-10-04，发布前保护修复 | 共享参考 JSON 的 SHA 改为实际发布的 3D 参考图；文件路径、file-backed nibabel image 与硬链接输入均在覆盖前保护。六个合同检查先复现旧问题，修复后参考、volume 与 surface 状态三套共77项通过；修复不改变数值算法，冻结source_v1的4次MRI和原报告保持原字节。原1128[十例三方结果](../../validation/fmri/threeway_20261004/final10/REPORT.md)单列版本与范围。 |
+| 2026-10-04，cc940基线 + 冻结source_v1 | 接入共享 HMC/BBR 稳健BOLD参考，保留 middle 对照；[2例×2策略的连续实测](../../validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md)完成全帧MNI/CIFTI比较、实际步骤时钟与4张MNI图。原runner before/after只覆盖输入子集，独立16重建/11资源晚复核不补造原全程守卫；原MRI源、失败分析v1和1128十例保留版本身份。[参考子功能](bold_reference.md)和[采样七节页](../../validation/fmri/reference_alignment_20261004/surface/SURFACE_ALIGNMENT.md)分别保留独立算子结果与全部参数。 |
 | 2026-10-03，最新 main 集成 `b77d5315`（上游 `9a1069b9`） | 合入最新 main 后 15 个定向模块重新验证：222 passed、12 skipped，pytest 82.05 s、外层 85.170 s。246 个相关生产文件与 15 个测试文件相对此前定向验收字节不变，见[实际集成记录](../../validation/fmri/public_ten_20261003/local_latest_main_focused_validation.public.json)。资源/CUDA skipped 不代替 MRI 验收；正式十例和 backend 实测仍绑定冻结 `1128bc52`，未重标为新 main。 |
 | 2026-10-03，成熟统计单体素警告修复（发布代码） | 仅在 count>1 时计算原方差，单体素仍保存 std=0；真实 CON04 完整 aseg/wmparc 旧/新重算与原生产文本逐字节相同，旧警告消除，见[统计专属页](../recon_all/SEGMENTATION_STATS.md)。正式十例及后续 GPU backend 示例仍执行冻结1128，不能重标为该修复的执行结果。 |
 | `1128bc52` / 2026-10-03，正式 v4 | 纳入成熟 MCFLIRT 无缓存兼容、父进程空闲缓存释放和官方 adapter 内部 pial 链接校验。新正式队列启用缓存；源码/10份配置/程序 SHA、实际 flag 缺席及各计时边界见[当前来源快照](../../validation/fmri/public_ten_20261003/paired_batches/v12_batch_007/runtime_snapshot.public.json)，十例整链及全帧比较全部完成，差异按原指标报告。 |

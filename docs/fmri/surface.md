@@ -68,7 +68,7 @@ flowchart TD
 
 流程先读取 volume JSON 的 `FNIT.SourceT1w` 再选择对应 T1 产物；`t1w_image` 如显式提供必须一致。尚无 volume 时使用明确指定的 T1w，或唯一的 BIDS T1w 候选；多个候选会要求指定，避免挑选第一张。原始 BOLD 来源、TR/完整帧数、实际 native BOLD 分辨率、MNI/dseg 网格、模板身份与有限值都参与判断。显式传 `volume_options["mni_template"]` 时，进一步校验固定模板内容及与 volume 记录相同的文件 SHA-256；未传时优先使用 surface assets 内固定 T1w 模板。若该文件未安装，仅核验声明和固定 dseg 网格，不称为模板文件哈希匹配。
 
-只有该 run 全部 volume 影像、变换及 sidecar 均不存在才为 `missing`；共享 T1w 脑图不妨碍新 run 自动处理。所需分支不完整为 `partial`，数据或来源不符为 `invalid`，这两种状态均停止并保留文件。已有 clean 而缺 preproc 属于 `partial`。旧结果需单独运行 volume 到新目录，或明确授权其 `overwrite`；surface 的 `overwrite=True` 只控制 surface 发布，不能重写 volume。设置 `auto_volume=False` 要求已完成的 volume。clean 分支核对 ICA-AROMA 已完成，使用 BBR 将原生 EPI clean BOLD 重采样到 T1w 后投影；WM、CSF 和运动回归可选。
+只有该 run 全部 volume 影像、变换及 sidecar 均不存在才为 `missing`；共享 T1w 脑图不妨碍新 run 自动处理。新保存的 HMC 参考图及其 sidecar 也参与这项判断：中断只留下参考图时属于 `partial`，保留文件并停止自动重跑。所需分支不完整为 `partial`，数据或来源不符为 `invalid`，这两种状态均停止并保留文件。已有 clean 而缺 preproc 属于 `partial`。旧结果需单独运行 volume 到新目录，或明确授权其 `overwrite`；surface 的 `overwrite=True` 只控制 surface 发布，不能重写 volume。设置 `auto_volume=False` 要求已完成的 volume。clean 分支核对 ICA-AROMA 已完成，使用 BBR 将原生 EPI clean BOLD 重采样到 T1w 后投影；WM、CSF 和运动回归可选。
 
 T1w 可以通过 BIDS 内的文件符号链接指向外部存储。表面入口保留其 BIDS 逻辑路径用于解剖产物命名与 `Sources`；此前解析真实目标后再取 BIDS 相对路径会失败。多个 BIDS 文件链接到同一目标时，按 `SourceT1w` 的明确逻辑路径选择；无法唯一选择时拒绝处理。该字段必须是相对 BIDS 路径，不能包含绝对路径或 `..`。
 
@@ -314,7 +314,7 @@ freesurfer_surface_result = fMRISurface_pipeline(
 | `mris_expand_command` | 三种 backend 共用；默认定位上述 native 目录；仅显式 freesurfer 模式可回退到官方程序目录。补 graymid 时使用原厚度展开算法。 |
 | `fsnative_to_t1w` | 仅 provided 的 adapter 世界仿射参数。完整 pipeline 请使用顶层同名参数，使重建身份检查与后续坐标转换一致。 |
 
-`volume_options` 支持 `mni_template`、`mni_brain_mask`、`registration_backend`、`fnirt_config`、`synthstrip_weights`、`synthmorph_weights`、`ica_n_components`、`aroma_mode`、`regress_wm`、`regress_csf`、`regress_motion`、`motion_model`、`bandpass`、`global_signal`、`highpass_cutoff_seconds`、`slice_timing`、`slice_time_reference`、`batch_size`、`motion_iterations`、`ica_max_iter`、`n_splits`、`random_state`、`overwrite`、`reuse_anatomical`、`bbr_execution` 和 `fnirt_execution`，默认值沿用 volume。未提供 `mni_template` 时自动查找 `hcp_assets_dir/fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz`；文件不存在时须显式提供。`mni_brain_mask=None` 沿用 volume 的模板脑提取，不自动把安装目录中的 mask 当作参数。只在缺失 volume 时执行这些计算参数；对已有 volume 不因此静默重算。
+`volume_options` 支持 `mni_template`、`mni_brain_mask`、`registration_backend`、`fnirt_config`、`synthstrip_weights`、`synthmorph_weights`、`ica_n_components`、`aroma_mode`、`regress_wm`、`regress_csf`、`regress_motion`、`motion_model`、`bandpass`、`global_signal`、`highpass_cutoff_seconds`、`slice_timing`、`slice_time_reference`、`batch_size`、`motion_iterations`、`bold_reference_strategy`、`ica_max_iter`、`n_splits`、`random_state`、`overwrite`、`reuse_anatomical`、`bbr_execution` 和 `fnirt_execution`，默认值沿用 volume。无 SBRef 时参考默认 `robust`；选帧和强度规则及 AFNI/TorchMCFLIRT 差异见 [BOLD 参考图](bold_reference.md)。未提供 `mni_template` 时自动查找 `hcp_assets_dir/fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz`；文件不存在时须显式提供。`mni_brain_mask=None` 沿用 volume 的模板脑提取，不自动把安装目录中的 mask 当作参数。只在缺失 volume 时执行这些计算参数；对已有 volume 不因此静默重算。
 
 自产重建仅在其专属 manifest、原始 T1w SHA、参数/程序及必要文件校验和均吻合时复用；不完整或无归属的现存目录明确拒绝。更改输入或配置不会借 `overwrite=True` 覆盖陌生目录。
 
@@ -545,6 +545,10 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 ## 最新真实数据精度、耗时与脑图
 
+2026-10-04 的[同输入皮层采样实测](../../validation/fmri/reference_alignment_20261004/surface/SURFACE_ALIGNMENT.md)直接调用成熟 `surface_fmriprep.run_fmriprep_surface_projection`，与固定 fMRIPrep25.2.4 原 Workbench/NiWorkflows 顺序对照。CON01、CON06 各完整180帧，两侧 ribbon/dilate/nativeROI/ADAP_BARY_AREA/atlasROI 的10份GIFTI及91k CIFTI共11项数组逐元素相同，CIFTI轴一致；API时钟包含检查、Workbench、CIFTI、生产QC和发布，个体几何准备成本单列。原CON01 driver文件读取失败和独立不重采样复核、CON06原输出receipt及两张实际皮层图都保留原身份。这是固定同输入算子对照，不把它写作冷重建或整条pipeline等价。
+
+另有[参考图策略的连续对照](../../validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md)：同两例分别 middle/robust，共4次新的 raw→volume→surface 保存成品，复用自身已有重建和MSM。四次完整终点均通过，MNI/CIFTI r均值在两病例间的中位数分别为0.511970→0.520368和0.717636→0.737295，NRMSE为24.044193%→23.845726%和9.248912%→9.170536%；实际API、进程和各步骤时钟及4张MNI脑图单列。该n=2对照未重测下述冻结1128十例。
+
 最终[发布验证汇总](../../validation/fmri/public_ten_20261003/final_publication_validation.public.json)绑定 10 例候选、10 例原流程完整输出、210 个结构比较、主队列 80 个完整自交扫描及额外 CON08 的已测量范围与未完成预算；执行完成和数值差异分别记录。
 
 <a id="新的三-backend-完整整链验收进行中"></a>
@@ -762,6 +766,7 @@ provided 的[官方 ITK 正向变换实证](../../validation/fmri/public_ten_202
 
 | 源码 / 报告快照 | 变化与实际测量 |
 |---|---|
+| 2026-10-04，cc940基线 + 冻结source_v1 | [同输入采样七节页](../../validation/fmri/reference_alignment_20261004/surface/SURFACE_ALIGNMENT.md)记录两例各11份完整输出逐元素零差、原API/原命令时间、后验失败修复与两张皮层脑图；原采样API和算子顺序未因指标改写。[连续策略实测](../../validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md)另记2例×2策略4次fresh volume/surface，排除冷重建/MSM；原runner before/after只有输入子集，16重建+11资源闭包是独立晚检查。原1128十例及原failed记录未重标。 |
 | 2026-10-03，最新 main 集成 `b77d5315`（上游 `9a1069b9`） | 合入最新 main 后 15 个定向模块重新验证：222 passed、12 skipped，pytest 82.05 s、外层 85.170 s。246 个相关生产文件与 15 个测试文件相对此前定向验收字节不变，见[实际集成记录](../../validation/fmri/public_ten_20261003/local_latest_main_focused_validation.public.json)。资源/CUDA skipped 不代替 MRI 验收；正式十例和 backend 实测仍绑定冻结 `1128bc52`，未重标为新 main。 |
 | 2026-10-03，成熟统计单体素警告修复（发布代码） | 仅在 count>1 时计算原方差，单体素仍保存 std=0；真实 CON04 完整 aseg/wmparc 旧/新重算与原生产文本逐字节相同，旧警告消除，见[统计专属页](../recon_all/SEGMENTATION_STATS.md)。正式十例及后续 GPU backend 示例仍执行冻结1128，不能重标为该修复的执行结果。 |
 | 2026-10-03 三 backend 与自动 volume（本次工作版） | 新增 missing/partial/invalid/ready 判断、三种重建、真实 graymid 补齐及持久复用。十例数据已校验；v2 CON01 在 ribbon odd-ray 检查失败，CON03 完成但超显存预算，两例仅保留诊断。正式 v3 绑定 `19c8e0a3` fresh raw 重跑，CON03 CUDA graph capture 失败 1,352.027 s；成熟 MCFLIRT 子功能已完成兼容回归；新冻结 `1128bc52` 的正式 v4 已完成十例执行与全帧统计；失败和超显存诊断仍独立保留。graymid 同输入坐标/面一致但自编耗时更长，见[子功能记录](../../validation/fmri/public_ten_20261003/middle_same_input.md)。 |

@@ -41,7 +41,8 @@ def _present(path):
 
 def _run_paths(paths):
     images = (paths.preproc_mni, paths.preproc_t1w, paths.clean_mni,
-              paths.clean_native, paths.mask_mni, paths.mni_pull)
+              paths.clean_native, paths.mask_mni, paths.mni_pull,
+              paths.bold_reference)
     return (*images, *(sidecar(path) for path in images), paths.bbr_matrix,
             paths.bbr_matrix.with_suffix(".json"), paths.motion_pull,
             paths.motion_pull.with_suffix(".json"))

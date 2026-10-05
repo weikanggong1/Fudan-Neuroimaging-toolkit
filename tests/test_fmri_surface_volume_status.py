@@ -109,6 +109,25 @@ def test_dangling_output_is_partial_and_keeps_the_link(public_case):
     assert any(str(path) in reason for reason in result.reasons)
 
 
+@pytest.mark.parametrize("remaining", ["image", "sidecar", "dangling"])
+def test_only_hmc_reference_is_partial_and_never_triggers_volume_overwrite(public_case, remaining):
+    _remove_run_outputs(public_case)
+    reference = public_case.paths.bold_reference
+    if remaining == "sidecar":
+        reference = sidecar(reference)
+        reference.write_text('{"Description": "unfinished volume reference"}')
+    elif remaining == "dangling":
+        reference.symlink_to(reference.parent / "missing-reference.nii.gz")
+    else:
+        reference.write_bytes(b"unfinished reference")
+    before = reference.read_bytes() if remaining != "dangling" else reference.readlink()
+    result = _inspect(public_case)
+    assert result.state == "partial"
+    assert result.source_t1w is None
+    assert (reference.read_bytes() if remaining != "dangling" else reference.readlink()) == before
+    assert not public_case.paths.preproc_mni.exists()
+
+
 @pytest.mark.parametrize("source", ["/outside/T1w.nii.gz", "../T1w.nii.gz",
                                    "sub-other/anat/sub-other_T1w.nii.gz"])
 def test_untrusted_source_path_is_invalid(public_case, source):
