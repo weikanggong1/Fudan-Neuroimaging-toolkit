@@ -39,6 +39,7 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 
 ## 2026-10-06：有限诊断与候选接入
 
+- **普通33类平滑候选**：一份真实末端概率的[ABBA回放](seg_cpu_blur_trial_20261006/README.md)三次实际逐位比较全部通过；局部最大RSS10.295→5.592GB，降低45.68%，操作中位数6.963→6.978秒，无速度收益。生产未接入、未补跑完整T1。下一步只验证高分辨率卷积的更小slab候选，F32逐位门通过前不替换。
 - **普通33类 SynthSeg CPU**：一次当前源码的[完整分步观察](seg_cpu_profile_20261006/README.md)通过输出逐值、header、CSV、压缩 SHA、两次前向、8次原 CPU join 和精度恢复门。观察API106.377秒中，两次CNN81.716秒、两次blur13.136秒；显式slab复制仅0.927秒。优先处理高分辨率卷积和group33平滑；单纯减少Python循环不足以解决差距。未采用改变标签的oneDNN候选，正式速度门仍未通过。
 - **SynthSegPlus**：真实原始 T1 的 CPU 4 臂、GPU 8 臂完成；默认两模式旧新三图、完整 header、体积 CSV 及压缩文件 SHA 相同，Torch allocated/reserved 峰值相同。新 `cudnn_tf32=False` 普通模式对该病例官方分割差 0 voxel，fast 差 2 voxel；CSV 最大差分别 0.20 / 0.346 mm³。`None` 继承调用方 cuDNN=False 的输出与 False 相同；不推广为全部输入逐位相同，也不把共享 GPU 时钟作为加速验收。[精度报告](seg_tf32_20261005/README.md)。
 - **GEMS CPU Double**：真实 T1 派生标签阶段的第37个候选点同点评分通过；不同末点的 cost 差从前一 FP32 控制的 +242.54 降至 +35.49，最大坐标差却从 0.508 增至 0.660 voxel，尚无新的完整 ROI 验收。保存状态审计显示第5步起线搜索 alpha 分叉，微小几何差后的梯度变化进入历史；目前不能确认唯一原因。[Double 续段与计划](gems_cpu_double_continuation_20261006/README.md)。下一阶段在独立工作树实现 opt-in CPU 候选，先固定真实状态接线与 GPU 保护，再只做一个完整右侧 HA recipe；最终每区 Dice≥0.95、硬体积差≤5%，不以内部37步坐标差单独判断最终核团失败。
