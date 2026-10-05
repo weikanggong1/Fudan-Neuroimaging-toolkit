@@ -221,7 +221,7 @@ segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --thread
 
 2026-10-05 的[CPU 网格数据项诊断](../../validation/smri_cpu/gems_cpu_objective_20261005/README.md)确认，平滑阶段的零质量 alpha 会使额外 prior 归一化改变梯度。验证性 raw 闭包在真实阶段 initial/1/3/37 的同点评分通过，但 37 步轨迹仍与官方不同，未进入默认实现或完整亚区分割。它还依赖 CPU epsilon、FP64 几何和私有线搜索等共同前提；当前主版本不能通过单改归一化获得该结果。下面的最终分割指标仍属于其注明的历史源码，没有以同点梯度门替代逐区 Dice/体积验收。
 
-2026-10-06 的[Double 状态有限续段](../../validation/smri_cpu/gems_cpu_double_continuation_20261006/README.md)进一步保留真实 Double point、QR、Gaussian 和优化历史。第37候选点同点评分的梯度相对差为5.92e−11、cost差约0.000555，coverage无差；各自末点最大差仍0.660 voxel、cost高35.49，没有新的完整分割结果。它仅属于真实T1派生标签的网格阶段，未更改默认CPU或GPU实现。新的显式CPU候选正按[最小接入计划](../../validation/smri_cpu/gems_cpu_double_continuation_20261006/CPU_INTEGRATION_PLAN.md)开发，先固定状态接线，再做完整右侧HA逐核团Dice≥0.95、硬体积差≤5%的验收。
+2026-10-06 的[Double 状态有限续段](../../validation/smri_cpu/gems_cpu_double_continuation_20261006/README.md)保留真实 Double point、QR、Gaussian 和优化历史。同点评分门通过后，显式 CPU 候选已经完成一次[右侧海马/杏仁核完整 recipe](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/README.md)：API 3110.729 秒、峰值 RSS 11.838 GB；28 区中 native 9 区、HR 6 区同时满足 Dice≥0.95、硬体积差≤5%，未通过完整精度。候选源码 `7e9d511a` 没有接入 main 默认 CPU/GPU；报告中的 `cpu_mesh_profile` 示例仅用于复现该冻结候选。官方同节点新墙钟缺失，不能形成速度比。逐区 CSV、五阶段时钟和脑图均已保存并[独立核验](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/ROOT_REVIEW.json)。
 
 最新2026-10-04 raw CPU全结构正式测量使用公开CC0 ds000114 snapshot1.0.2一例原始T1，冻结00fedf3544/v5，参考FreeSurfer8.2.0-1保存亚区输出；其norm/aseg/wmparc已与本轮同T1官方CPU recon核验数组/几何同。CPU评测节点 Xeon Gold6418H同8物理核、Torch/Numba8线程、CPUfloat32并保留既有FP64累加；源码1257文件和图谱权重SHA见[身份及结果](../../validation/smri_cpu/task5/raw_all_cpu_v5/README.md)。
 
@@ -260,6 +260,7 @@ segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --thread
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-06 | 7e9d511a 未采纳 CPU 候选 | 四个固定真实点、EM 与默认 GPU 保护门后完成唯一右侧 HA recipe；初始对齐、工作图、mask 和后处理仍与官方定义不同 | [完整未过门报告与脑图](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/README.md)：native 9/28、HR 6/28；51.85 分钟，不替换默认 |
 | 2026-10-06 | Double 37步冻结诊断 | 同点评分、状态恢复和有限轨迹定位；未替换默认 | [报告](../../validation/smri_cpu/gems_cpu_double_continuation_20261006/README.md)，没有新的ROI通过率 |
 | 2026-10-04 | 00fedf3544/v5 | 大T1投影修复后raw完整CPU执行及评分 | 上节13产物、110区门与脑图 |
 | 2026-10-04 | task5 v2/compact冻结 | CPU线程恢复及离散owner lookup/log-prior缓存 | [stage及GPU实测](../../validation/smri_cpu/task5/README.md) |

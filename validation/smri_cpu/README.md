@@ -55,6 +55,8 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 
 [单层64MiB卷积分块候选](seg_cpu_conv_slab_trial_20261006/README.md)已在目标Torch2.5.1的第三个短合同停止：实际权重、depth7输入的37,128个FP32值中33,144个不同，maxabs4.292e−6。未运行真实MRI层或ABBA，不形成速度或官方精度结论；14个生产文件和GPU保持原样。记录与Git源码已[独立复核](seg_cpu_conv_slab_trial_20261006/ROOT_REVIEW.json)，下一步只研究保留原GEMM矩阵布局的列缓冲复用。
 
+[列缓冲复用接口](seg_columns_reuse_20261006/README.md)已用既有 Conda C++ 编译器加载成功；原3源与14生产源的[独立检查](seg_columns_reuse_20261006/ROOT_REVIEW.json)通过。copy/SGEMM/真实MRI调用均为0，尚无数值或速度验收；不能将接口可编译等同于完整安装或性能通过。
+
 | 功能 | 本版已完成的修复或定位 | 完整真实输入证据 |
 |---|---|---|
 | [TorchFAST](fast_fixes_20261004/README.md) | CPU 标量 C 指数/对数修复；默认和一组非默认八图与官方逐值相同 | nodecw7 默认完整 CLI 官方 368.198–411.291 s、FNIT 100.174–110.173 s，中位数比 3.706；完整脑 GPU 两后端各八图/headers 相同、显存相同，共享 GPU 时间另列 |
@@ -72,6 +74,8 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 | [FNIRT 非零状态](fnirt_nonzero_state_20261004/README.md) | 同官方 accepted 参数的 bending、梯度、Hessian 与正则权重状态对照 | regularizer action 相对差约 3.2e−15，未发现量级错误；baseline/flip 完整对照最早在 PCG 80/49 轮分叉，非线性估计仍未等价 |
 | [SynthSegPlus CUDA 精度作用域](seg_tf32_20261005/README.md) | 默认 CPU/GPU 完整三图、CSV、header 与上一版严格相同；构造及异常退出恢复调用方策略，新增 Python True/False/None 选项 | 同病例 False 普通分割对官方 0 voxel 差，fast 2 voxel 差；CSV 尾差 0.20/0.346 mm³。默认 Torch 显存相同；共享 GPU 时间仅作观察 |
 | [GEMS CPU Double 续段](gems_cpu_double_continuation_20261006/README.md) | actual Double point、QR、Gaussian 与保存状态恢复；37步同点 objective/gradient/prior/coverage 原门通过 | 不同末点最大差 0.660 voxel、RMSE 0.009264，cost 高35.49；与前一控制相比 cost 差降低但坐标差增大。仅诊断，未接入默认生产或完成新的 ROI 验收 |
+| [FNIRT 恢复状态的矩阵作用](../fnirt_cpu_matrixfree_restore_20261006/README.md) | 68数组/臂的原stride与逻辑值恢复，3unit列和7个优化CPU/原Torch action逐位通过 | 14callback/7CSC，0solver/native/new assembly；真实方向对CSC最大差3.55e−15。3.515秒含冷JIT，不是速度对照；未接生产，完整非线性差异仍待解决。[独立复核](../fnirt_cpu_matrixfree_restore_20261006/root_review.public.json) |
+| [GEMS CPU 完整右侧 HA 未过门](gems_native_cpu_rha_failure_20261006/README.md) | 未采纳的显式 CPU 候选四真实点/EM/GPU 保护门后，完整 recipe 只执行一次，exit0 | API3110.729秒/RSS11.838GB；native9/28、HR6/28通过原Dice≥0.95/硬体积差≤5%门。逐区CSV、固定网格、五阶段耗时和真实脑图已[独立核验](gems_native_cpu_rha_failure_20261006/ROOT_REVIEW.json)。初始对齐等定义差异已定位，未接入生产；官方同节点新墙钟缺失 |
 | [FNIRT 新共享探针](../fnirt_shared_followup_20261006/README.md) | 固定真实系统的严格CSC/除法/独立官方reductions组合自然69轮，全部向量/scalar与1177解bits相同 | 仍是隔离诊断，不是自有生产修复。当前第二接受点H rel1.03e−9、RHS rel8.36e−7；只换Jte后7.37e−7，完整非线性估计尚未等价 |
 | [FNIRT 共享 PCG](../fnirt_pcg_shared_state_20261004/README.md) | 同 H/RHS/初值/对角/容差重放实际官方与 FNIT solver | 第二次均 24 轮；第三次官方 69、dense 80、严格列序 49、除法控制 79。所有停止门正确；实际 FP64 尾差可放大为不同参数，未改生产求解器或重跑整链 |
 | [SynthSR](synth_fixes_20261004/sr_cpu_followup/README.md) | CPU 推理使用已核验的 FP32 ELU/BN 顺序及临时 channels-last 权重；保留训练、hooks、autocast 和 CUDA 路径 | 默认两分支 22,020,096 CNN 值、9,072,000 浮点/量化值全同官方，3,522 个旧超限值降为 0。四参数分支和六真实域原门均通过；正常 CPU CLI 中位数 28.660→28.340 s，RSS 10.222→7.496 GB。GPU 新旧完整输出/header/文件 SHA 与 allocated/reserved 相同；共享时间另列 |
