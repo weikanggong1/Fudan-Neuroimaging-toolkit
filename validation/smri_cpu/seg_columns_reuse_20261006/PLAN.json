@@ -1,0 +1,297 @@
+{
+  "schema": "fnit_seg_columns_reuse_interface_plan/v1",
+  "status": "frozen_before_interface_compile_no_numerical_authorization",
+  "scope": "Thin own copy plus already-loaded Torch public SGEMM proposal; compile/load interface only; no numerical contracts, tensor allocation, MRI, native or GPU",
+  "production_source_commit": "46eead65807265395982e6968b0ce48c750c1672",
+  "canonical_main_read": "7eb2a7f2335022b3eaeb97a30d317dbfc591c4db",
+  "source14": {
+    "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+    "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+    "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+    "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+    "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+    "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+    "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+    "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+    "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+    "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+    "segment.py": "9329348c6174785df4de2624344e63b141ad7c795238c8b7dd62f47f34495061",
+    "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+    "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+    "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0"
+  },
+  "headers": {
+    "ATen/Config.h": "317951cca3faf477f49632e48427436b9b9461c1a12943d1e1f8ba402e5082bd",
+    "ATen/Parallel-inl.h": "3f5f0b88547cf2a3a5296b3712ae9ba7f2b7b22e9598dbf2d36918b084f7b473",
+    "ATen/Parallel.h": "d45ea50942d5e51f5b90f236e13c57fa6e980c1b4134eeba11f812e934b80513",
+    "ATen/ParallelOpenMP.h": "547137c59ba1f88da28c1953069b155080147cca4edd741e6a3309eedd08f9aa",
+    "ATen/native/CPUBlas.h": "65d41851492e355c08af2c73be4b2ad7d09f1d0af0ca3706a8a91dce78513899",
+    "ATen/native/Unfold3d.h": "bbee13e24d17450d3dace10e38774a1463e74cc59bdf34afaf1e6c6bd4fa9500",
+    "c10/core/CPUAllocator.h": "714c17e13a79842d52eb6172a4b8551a48ac7db8d0f969b6ece8f335dda3d9c7",
+    "c10/core/impl/alloc_cpu.h": "afbdba37984811ece9442f9c746b92249ec50f5c2d2ef84abd54bc268427b350"
+  },
+  "libtorch_cpu_sha256": "529f5ab9d2397b671c4768e8ad2865c626352909fd6d76b4b6b57622b39a874c",
+  "provider_sha256": "bd259733d7a3044c0656f32325df145e63ca52aba71560db0db2e991a138ee16",
+  "provider_basename": "libmkl_intel_lp64.so.2",
+  "libgomp_sha256": "34324e0835be6e103844d7c416bec42834cf803d3ba8d9519df15ced19914dfe",
+  "compiler_path": "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-c++",
+  "compiler_resolved_path": "/cwStorage/home/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-c++",
+  "compiler_sha256": "719a27612668e4f3be10b5cb8123845e66265c9f4b56fddbaf75ac367f659519",
+  "compiler": "Existing independent Conda GCC11.2 toolchain; no environment installation/mutation. Torch runtime has no compiler in its own bin.",
+  "prototype_sources": {
+    "compile_probe.py": "5db6b2be0ed8cc2ff869fd5cebbf6a834d86b0e07d978b39bc72ee4822730ddc",
+    "prototype.py": "2a946aa100d2c7d4aa5aff0e95ac0740b04446e53768a1e29048ec6222c8b5a4",
+    "columns_reuse.cpp": "2440abe802f1da2c14bd192f8b0f84c46b6f1f518de1dc9f0dca8429b05a2527"
+  },
+  "workspace": "workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-reuse-v1",
+  "runs": "runs/smri_cpu_20261004/remaining_20261006/seg-columns-reuse-v1",
+  "interface_only_limits": {
+    "compiler_timeout_seconds": 120,
+    "process_address_space_bytes": 4000000000,
+    "total_controller_timeout_seconds": 300,
+    "compiler_jobs": 1,
+    "OMP_MKL_threads": 1,
+    "GPU_visible": false
+  },
+  "scope_unchanged": {
+    "slab_depth": 14,
+    "real_last_slab_depth": 10,
+    "calls": 14,
+    "input_shape": [
+      1,
+      72,
+      192,
+      224,
+      256
+    ],
+    "weight_shape": [
+      24,
+      72,
+      3,
+      3,
+      3
+    ],
+    "FP32": true,
+    "K": 1944,
+    "N": 24,
+    "M_full_slab": 802816,
+    "M_last_slab": 573440,
+    "transpose": "NN",
+    "alpha": 1.0,
+    "beta": 1.0,
+    "bias": "same Torch copy_ before SGEMM",
+    "lda": "actual M",
+    "ldb": 1944,
+    "ldc": "actual M",
+    "columns_last_slab": "flattened compact prefix rewritten with actual M; not max-M row-stride slice",
+    "K_order": [
+      "input_channel",
+      "kernel_depth",
+      "kernel_height",
+      "kernel_width"
+    ],
+    "columns_workspace_maximum_bytes": 6242697216,
+    "workspace_lifetime": "only one layer call; released on normal/error return; no model or cross-call cache"
+  },
+  "interface_evidence": {
+    "hidden_ATen_Unfold3d_and_float_CPUBlas_symbols_exported": false,
+    "direct_ATen_wrapper_reuse": "unavailable",
+    "public_provider": "already-loaded Torch libtorch_cpu handle SGEMM via RTLD_NOLOAD and dladdr/SHA gate; different NumPy mkl_rt route forbidden",
+    "SGEMM_path_inference": "Torch2.5.1 source: groups1->single gemm; oneDNN off rejects bf32; M/N/K>1 no normalize changes; LP64 valid dimensions satisfy BLAS condition. No numerical call trace in this stage.",
+    "custom_copy_and_BLAS": "not claimed to be the hidden ATen wrapper; output ordering remains subject to exact contracts"
+  },
+  "future_contract_plan_not_authorized": {
+    "same_actual_weight_and_bias": {
+      "bytes": 53079152,
+      "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+    },
+    "fixed_seed": 20261006,
+    "cases": [
+      {
+        "name": "single_depth",
+        "shape": [
+          1,
+          72,
+          1,
+          13,
+          17
+        ],
+        "strided": false,
+        "cancellation": false
+      },
+      {
+        "name": "two_depth",
+        "shape": [
+          1,
+          72,
+          2,
+          13,
+          17
+        ],
+        "strided": false,
+        "cancellation": false
+      },
+      {
+        "name": "boundary_internal",
+        "shape": [
+          1,
+          72,
+          7,
+          13,
+          17
+        ],
+        "strided": false,
+        "cancellation": false
+      },
+      {
+        "name": "many_slabs",
+        "shape": [
+          1,
+          72,
+          31,
+          13,
+          17
+        ],
+        "strided": false,
+        "cancellation": false
+      },
+      {
+        "name": "strided_odd_depth",
+        "shape": [
+          1,
+          72,
+          33,
+          13,
+          17
+        ],
+        "strided": true,
+        "cancellation": false
+      },
+      {
+        "name": "cancellation",
+        "shape": [
+          1,
+          72,
+          31,
+          13,
+          17
+        ],
+        "strided": false,
+        "cancellation": true
+      }
+    ],
+    "old_geometry": "current convolution_slabs with 16 logical-plane cap gives depth14; same M on each small slab",
+    "copy_oracle": "small padded Tensor.unfold/permute materialized K-major bytes, including signed zero/boundary/strided cases; no arithmetic",
+    "strict_numeric_gate": "every full preELU FP32 uint32 bit equal; first failure stops all remaining cases and MRI",
+    "other_gates": [
+      "shape/stride/dtype/finite",
+      "input/weight/bias unchanged",
+      "output no alias",
+      "reused-buffer poison fully overwritten",
+      "provider address/path/SHA unchanged",
+      "GPU/training/grad/oneDNN/autocast/hooks/subclass fallback",
+      "normal and exception flags restore",
+      "columns/output workspace released across calls",
+      "no global allocator or thread changes"
+    ]
+  },
+  "future_single_layer_plan_not_authorized": {
+    "source_checkpoint_files": {
+      "skip.npy": {
+        "sha256": "931be584c81fdee64cfc2da65f231ff777c799ec0accc55b43db2d15800967e2",
+        "bytes": 1056964736
+      },
+      "value.npy": {
+        "sha256": "52cdbe984194f0c165ac98f1eb2e67159157362e3ded976d5a7db1712f702d14",
+        "bytes": 264241280
+      }
+    },
+    "join_values_sha256": "38457e8127bddb7d39d3e36435f4b632046eee46bec64abc10e69e79f7e61288",
+    "checkpoint_prefix": "runs/smri_cpu_20261004/remaining_20261004/seg_memory_v2/checkpoint",
+    "ABBA_arms": [
+      "old A1 reference only",
+      "candidate B1 compare all values",
+      "candidate B2 compare all values",
+      "old A2 compare all values"
+    ],
+    "layer_only": "up[3].conv0 preELU, no tail/fullCNN/native/GPU",
+    "eight_core_affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "each_arm_timeout_seconds": 180,
+    "outer_total_seconds": 23000,
+    "RSS_limit_bytes": 32000000000,
+    "timer_boundary": "operation and worker clocks separate; old/new provider/source/input checks same; RSS/faults/processCPU recorded; no whole pipeline claim"
+  },
+  "prohibited": [
+    "numerical work before root review",
+    "hidden symbol offsets",
+    "gemm_stub substitution",
+    "Eigen or oneDNN",
+    "dlopen a new BLAS",
+    "global allocator or thread setter",
+    "production edits",
+    "old frozen directory mutations"
+  ],
+  "dependencies_and_licenses": {
+    "existing_runtime_packages": [
+      {
+        "build": "16_linux64_mkl",
+        "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+        "license": "BSD-3-Clause",
+        "license_family": null,
+        "name": "libblas",
+        "version": "3.9.0"
+      },
+      {
+        "build": "hc2b9512_224",
+        "channel": "https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/linux-64",
+        "license": "LicenseRef-ProprietaryIntel",
+        "license_family": null,
+        "name": "mkl",
+        "version": "2022.1.0"
+      },
+      {
+        "build": "he0feb66_7",
+        "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+        "license": "GPL-3.0-only WITH GCC-exception-3.1",
+        "license_family": null,
+        "name": "libgomp",
+        "version": "16.2.0"
+      },
+      {
+        "build": "16_linux64_mkl",
+        "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+        "license": "BSD-3-Clause",
+        "license_family": null,
+        "name": "libcblas",
+        "version": "3.9.0"
+      },
+      {
+        "build": "py311h64a7726_0",
+        "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+        "license": "BSD-3-Clause",
+        "license_family": null,
+        "name": "numpy",
+        "version": "1.26.4"
+      },
+      {
+        "build": "py3.11_cuda11.8_cudnn9.1.0_0",
+        "channel": "https://conda.anaconda.org/pytorch/linux-64",
+        "license": "BSD 3-Clause",
+        "license_family": null,
+        "name": "pytorch",
+        "version": "2.5.1"
+      }
+    ],
+    "implementation": "FNIT-owned glue; no upstream source or native binaries vendored; installed headers/libraries and compiler are not committed",
+    "future_install": "If adopted, root must add the Conda C++ build tool and validate the documented environment before production release."
+  }
+}
