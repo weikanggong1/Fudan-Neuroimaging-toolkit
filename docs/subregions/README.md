@@ -18,7 +18,7 @@
 
 支持 CPU 和 GPU。CUDA 默认使用 FP32/TF32；脑干的小矩阵运算局部使用准确 FP32，部分梯度归约、标量累计和优化器状态使用 FP64，不使用 FP16。脑干 Adam 状态仍为 FP32；具体 recipe 的实际策略以报告为准。`precise_mesh_matrices` 字段目前仅记录请求，不能作为实际 FP64 矩阵计算的证据。计算与读写分别使用项目的 PyTorch 实现和 Nibabel，运行时不调用 FreeSurfer 或 FSL。
 
-原始T1默认共享一次SynthSeg+，生成粗标签、DK68和白质代理，再用TorchFAST校正/归一化及图谱拟合。已有粗标签时按已准备T1直接拟合，跳过自动强度与1mm网格准备；同阶段对照用独立官方norm/aseg/wmparc。两种输入范围不可混为同一个benchmark。
+原始T1默认共享一次 `SynthSegPlus`（普通 SynthSeg 2.0 `--parc`），生成粗标签、DK68和白质代理，再用TorchFAST校正/归一化及图谱拟合。已有粗标签时按已准备T1直接拟合，跳过自动强度与1mm网格准备；同阶段对照用独立官方norm/aseg/wmparc。两种输入范围不可混为同一个benchmark。
 
 ```mermaid
 flowchart LR
@@ -221,9 +221,11 @@ segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --thread
 
 2026-10-05 的[CPU 网格数据项诊断](../../validation/smri_cpu/gems_cpu_objective_20261005/README.md)确认，平滑阶段的零质量 alpha 会使额外 prior 归一化改变梯度。验证性 raw 闭包在真实阶段 initial/1/3/37 的同点评分通过，但 37 步轨迹仍与官方不同，未进入默认实现或完整亚区分割。它还依赖 CPU epsilon、FP64 几何和私有线搜索等共同前提；当前主版本不能通过单改归一化获得该结果。下面的最终分割指标仍属于其注明的历史源码，没有以同点梯度门替代逐区 Dice/体积验收。
 
+2026-10-06 的[Double 状态有限续段](../../validation/smri_cpu/gems_cpu_double_continuation_20261006/README.md)进一步保留真实 Double point、QR、Gaussian 和优化历史。第37候选点同点评分的梯度相对差为5.92e−11、cost差约0.000555，coverage无差；各自末点最大差仍0.660 voxel、cost高35.49，没有新的完整分割结果。它仅属于真实T1派生标签的网格阶段，未更改默认CPU或GPU实现。新的显式CPU候选正按[最小接入计划](../../validation/smri_cpu/gems_cpu_double_continuation_20261006/CPU_INTEGRATION_PLAN.md)开发，先固定状态接线，再做完整右侧HA逐核团Dice≥0.95、硬体积差≤5%的验收。
+
 最新2026-10-04 raw CPU全结构正式测量使用公开CC0 ds000114 snapshot1.0.2一例原始T1，冻结00fedf3544/v5，参考FreeSurfer8.2.0-1保存亚区输出；其norm/aseg/wmparc已与本轮同T1官方CPU recon核验数组/几何同。CPU评测节点 Xeon Gold6418H同8物理核、Torch/Numba8线程、CPUfloat32并保留既有FP64累加；源码1257文件和图谱权重SHA见[身份及结果](../../validation/smri_cpu/task5/raw_all_cpu_v5/README.md)。
 
-新增[首次目标函数同状态诊断](../../validation/smri_cpu/gems_first_state_20261004/README.md)：官方在 `Σ prior × likelihood` 后加 `1e-15`，生产 compact objective 原来缺少该项。相同 FP32 输入上，左/右 HA 原完整梯度相对差为 0.377/0.252；加入 epsilon 后约为 6.27e−6/1.37e−4。剩余小 prior 的误差会放大，CPU 混合内部几何探针将梯度差降到约 4e−8。该报告仅含隔离诊断；CPU 混合内部精度完整候选已跑完但未通过逐区验收，未接入默认，详见[全部 recipe 报告](../../validation/smri_cpu/gems_cpu_epsilon_20261004/README.md)，原 GPU fallback/Triton 的同项差异也尚未修复。
+新增[首次目标函数同状态诊断](../../validation/smri_cpu/gems_first_state_20261004/README.md)：官方在 `Σ prior × likelihood` 后加 `1e-15`，生产 compact objective 原来缺少该项。相同 FP32 输入上，左/右 HA 原完整梯度相对差为 0.377/0.252；加入 epsilon 后约为 6.27e−6/1.37e−4。剩余小 prior 的误差会放大，CPU 混合内部几何探针将梯度差降到约 4e−8。该报告仅含隔离诊断；CPU 混合内部精度完整候选已跑完但未通过逐区验收，未接入默认，详见[全部 recipe 报告](../../validation/smri_cpu/gems_cpu_epsilon_20261004/README.md)，原 GPU fallback/Triton 的同项差异也尚未修复。 早期首状态的部分梯度差还包含参考适配器的负行列式 tet 换序遗漏，后续[同点核验](../../validation/smri_cpu/gems_first_trial_20261005/README.md)已经更正；该项不能归因为生产 prior 符号错误。
 
 ### 端到端 benchmark
 
@@ -258,6 +260,7 @@ segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --thread
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-06 | Double 37步冻结诊断 | 同点评分、状态恢复和有限轨迹定位；未替换默认 | [报告](../../validation/smri_cpu/gems_cpu_double_continuation_20261006/README.md)，没有新的ROI通过率 |
 | 2026-10-04 | 00fedf3544/v5 | 大T1投影修复后raw完整CPU执行及评分 | 上节13产物、110区门与脑图 |
 | 2026-10-04 | task5 v2/compact冻结 | CPU线程恢复及离散owner lookup/log-prior缓存 | [stage及GPU实测](../../validation/smri_cpu/task5/README.md) |
 | 2026-10-02 | f436de5 raw /ac692bb stage | 固定十例独立raw回归与官方fresh对照 | [十例全区与新九例](../../validation/subregions/ten_public_t1_20261002/README.md) |

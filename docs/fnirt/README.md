@@ -254,6 +254,10 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
 
 ## 5. 最新精度和运行时间
 
+2026-10-06 新增[共享真实系统的有限诊断](../../validation/fnirt_shared_followup_20261006/README.md)：严格 CSC 乘法、直接除法与独立官方算术上下文配套后，固定 Hessian 的 PCG 自然停止于69轮，每轮向量／标量及最终1177个Double解逐位同官方。该算术进程只用于隔离benchmark，生产不得依赖它或安装FSL。当前FNIT第二个接受点的完整H相对差1.03e−9、RHS相对差8.36e−7；只改变Jte顺序降至7.37e−7，未解决完整组装差异。本轮未改生产、重跑完整配准或测GPU；以下完整精度／时间仍绑定原版本。
+
+随后[自有 Numba/llvmlite 求和候选](../../validation/fnirt_cpu_reductions_20261006/README.md)复现了这一保存系统：93行的465项标量和186项相对范数逐位相同，动态求解自然停止于69轮，逐轮向量与最终解不同bit数均为0。自有计算不调用FSL算术桥；运行前后503项输入/源码绑定通过。范数按原 `sqrt(SumSquare)` 两链平方累加实现，点积按现场观察的COOPERLAKE FMA顺序实现。这里只通过一个保存线性系统的核验，尚未接入生产矩阵自由回调，其他CPU/BLAS分支及完整组装、配准仍待验证；原CUDA分支未修改。
+
 2026-10-04正式CPU对照绑定v27，组合源v28保留其注册器/采样SHA；官方FSL6.0.7.4，Intel Xeon Gold6418H、1/8线程预算，四种预设各1例完整观察（不是队列）。float32图像/输出，float64系数/法方程。
 
 | 完整预设 | 线程上限 | 原版完整进程 | FNIT 完整进程 | FNIT 已导入 API（含读写） | 脑掩膜内 iout Pearson r | Jacobian MAE |
@@ -288,6 +292,8 @@ GPU为共享H100、TF32、20GB上限，完整TBSS保存16次，与FNIT基线1d31
 
 | 日期 | 更新与验收 |
 |---|---|
+| 2026-10-06，有限共享系统 | 固定真实H/RHS的69轮算术恢复、第二接受点组装定位；生产与GPU未改，[报告](../../validation/fnirt_shared_followup_20261006/README.md)。这不是新的完整FNIRT benchmark。 |
+| 2026-10-06，自有CPU归约 | Numba/llvmlite的465项标量、186项相对范数及69轮保存系统轨迹逐位通过；生产未接入，[报告](../../validation/fnirt_cpu_reductions_20261006/README.md)。完整组装和非线性配准仍待验收。 |
 | 2026-10-04，最新 v27/v28 | CPU float32 采样的值、FOV 和梯度融合；SCG 梯度跳过未使用的能量/cost。83 项采样专项、33 项 SCG 专项和[完整真实末阶段轨迹](assets/cpu-scg-cost-skip-stage3-node8-20261004.public.json)通过；CPU评测节点 [26 项完整功能输出检查](assets/cpu-functional-v27-node8-20261004.public.json)及[八项新官方单次配对](assets/cpu-primary-v27-node8-20261004.public.json)完成，T1 单线程未达速度目标。H100 default 和完整 TBSS 各 16 次保存逐位相同、对应位置 allocation 不增加。 |
 | 2026-10-04，normal SIMD v2 | FP64 空间法方程按原运算顺序执行八点 SIMD；105 项局部回归通过，完整 default/T1 的输出 SHA、停止条件和 PCG 计数保持一致。CPU评测节点 的四项完整官方单次配对见[历史报告](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)。 |
 | 2026-10-04 | CPU Gaussian 合并 offset 循环，bending 保留 dense 展开/原 sum 并融合逐元素乘方，FP64 法方程缓冲/固定 weight 布局复用，Jacobian limiter 保序筛选角点。216 项函数专项通过；v17/v19/v20 在完整公开 default 的 1/8 预算三输出 SHA 一致。最新 CPU 官方观测与 GPU 门槛见[专页](CPU_BENCHMARK.md)。 |

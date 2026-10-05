@@ -1,0 +1,36 @@
+{
+  "schema": "fnit_seg_tf32_preserved_validation_tool_failures/v1",
+  "production_source_commit_unchanged": "46eead65807265395982e6968b0ce48c750c1672",
+  "full_v1": {
+    "worker_sha256": "a8af11d59fdc4f95015c9fe60a89e2bf6da42ee5124101061bfa01a589b6e6d2",
+    "failure": "Test harness required two parcel forwards in ordinary mode; actual existing pipeline performs two segmentation forwards and one parcel forward.",
+    "failed_arms": [
+      {"device": "cuda:0", "arm": "parc_baseline_true", "returncode": 1, "observed_failure_wall_seconds_not_benchmark": 17.610356146935374},
+      {"device": "cpu", "arm": "parc_baseline_true", "returncode": 1, "observed_failure_wall_seconds_not_benchmark": 53.07673282548785}
+    ],
+    "saved_complete_scientific_outputs": false,
+    "recovery": "Verified counts in 20 already saved real-stage cases; fixed only harness; preserved failed logs and dispatched independent v2 twelve necessary arms."
+  },
+  "full_v2": {
+    "worker_sha256": "383ed337e4693583780e3110b3c146f85aab5fd74cea73e241d41873250810fd",
+    "CPU_complete_saved_arms": 4,
+    "GPU_complete_saved_arms": 8,
+    "all_returncodes": 0,
+    "all_scientific_gates": "passed"
+  },
+  "collector_first_attempt": {
+    "collector_sha256": "4b946ad6b6dc84a54d045b4e10982582a6e28b807691b51561c34d453e78f780",
+    "failure": "Local relay dispatched read-only GPU collector with an insufficient 18-second child timeout; child was killed before writing a report.",
+    "report_written": false,
+    "network_or_native_inference": false,
+    "recovery": "Unique detached sequential collector with 600-second child bounds; GPU comparison 68.55709838215262 s and CPU comparison 27.439047675114125 s; both exit0. These are saved-result comparison times, not inference."
+  },
+  "finite_mock_failure": {
+    "failure": "Test used mock.patch on a torch.backends.mkldnn descriptor whose deletion is unsupported.",
+    "recovery": "Test-only correction to mkldnn.flags context; final affected contracts 116 passed, 5 skipped, 3 subtests, 5.57 s; no production backend edit."
+  },
+  "local_document_check": {
+    "failure": "One temporary validation command overescaped its Markdown section regex.",
+    "recovery": "Used literal dot character class; all three documents have seven sections. No file or scientific result was changed by the failed check."
+  }
+}

@@ -1,0 +1,2955 @@
+{
+  "schema": "fnit_parc_tf32_real_prefix_pairs/v1",
+  "collector_sha256": "48347e68cd1412352632eada8778773c633e0804f9b44d7c69f19df6dbe77682",
+  "queue": {
+    "schema": "fnit_parc_tf32_real_prefix_queue/v1",
+    "status": "complete",
+    "hostname": "gpucw1",
+    "device": "cuda:0",
+    "affinity": "0,1,2,3,4,5,6,7",
+    "controller_sha256": "7796e251f667cd540fb705e93f4b1b1e49cfc41e4c9de326ea772a167ef6c252",
+    "worker_sha256": "cfc8efd843f67199860b2aea287aaf5dd9fd3b491a8d0e6dc664685913d39ab2",
+    "binding_sha256": "4aa50bcc51f8037fae6784cf4efa83f2dca8b47597abd739e2946417d27788b5",
+    "lock_scope": "one arm",
+    "jobs": [
+      {
+        "arm": "baseline",
+        "returncode": 0,
+        "wall_seconds": 7.739638669416308,
+        "load_after": [
+          3.94,
+          3.9,
+          3.88
+        ]
+      },
+      {
+        "arm": "candidate",
+        "returncode": 0,
+        "wall_seconds": 17.828857569023967,
+        "load_after": [
+          4.32,
+          3.98,
+          3.91
+        ]
+      }
+    ],
+    "next_arm": "candidate"
+  },
+  "stage_reports": {
+    "baseline": {
+      "schema": "fnit_parc_tf32_real_prefix/v1",
+      "worker_sha256": "cfc8efd843f67199860b2aea287aaf5dd9fd3b491a8d0e6dc664685913d39ab2",
+      "arm": "baseline",
+      "device": "cuda:0",
+      "hostname": "gpucw1",
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "torch_version": "2.5.1",
+      "torch_threads": 8,
+      "torch_interop_threads": 8,
+      "source_files": {
+        "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+        "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+        "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+        "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+        "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+        "pipeline.py": "030095b124a3556f0508359317ee15108fbb2a3d45a803d80c28350d18776633",
+        "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+        "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+        "segment.py": "1bc2c3d90a42e4cf664991ec6dd8b0499df4b1c5e788c7adb35d02ce4b2d000e",
+        "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+        "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+        "synthseg_plus.py": "b49cfbc26f4733e7b6c8ceffaceb102f0f5a6a57044dfb1a5f4a048b3f14786b",
+        "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a"
+      },
+      "binding_sha256": "4aa50bcc51f8037fae6784cf4efa83f2dca8b47597abd739e2946417d27788b5",
+      "index_sha256": "fd6992cd80bf62731c0829398d52f1ae53d578be11c1d9626f53d23ba88ad4d4",
+      "input_sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21",
+      "feature_file_sha256": "3132a18a1524165eb3ecfa6785ef9dc209c07b68c1a601dfa83b0a29bb45ee43",
+      "feature_shape": [
+        192,
+        224,
+        256
+      ],
+      "crop_slices": [
+        [
+          32,
+          64
+        ],
+        [
+          96,
+          128
+        ],
+        [
+          96,
+          128
+        ]
+      ],
+      "crop_value_sha256": "deff26835c3b87d166ecb54d070cf1c08616a3f6dbdc855c33e6bc427ada5642",
+      "weights": {
+        "synthseg_2.0.h5": {
+          "bytes": 53079152,
+          "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+        },
+        "synthseg_parc_2.0.h5": {
+          "bytes": 53090840,
+          "sha256": "83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684"
+        },
+        "synthseg_segmentation_labels_2.0.npy": {
+          "bytes": 348,
+          "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+        },
+        "synthseg_segmentation_names_2.0.npy": {
+          "bytes": 7168,
+          "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+        },
+        "synthseg_topological_classes_2.0.npy": {
+          "bytes": 348,
+          "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+        }
+      },
+      "cases": [
+        {
+          "id": 0,
+          "policy": true,
+          "caller_cudnn": false,
+          "fast": false,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after_construction": {
+            "matmul_tf32": true,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": true,
+            "cudnn_tf32": true
+          },
+          "api_seconds_diagnostic_only": 1.0970057314261794,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": null,
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "95cda4c1b7db003ff055466869f0616bb307b4848d2185916448589247e23c20",
+              "saved_file_sha256": "f686121ab492b524b49fbfa8279393b2638816c02685abcd6c679a7da598ead6"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "add081346000dcd3077d05fd3bee52f5f028b6d7badc56a442a9a7d20685ce88",
+              "saved_file_sha256": "2bd60e0bc086d695555c64ed5b628fb50e67ed2598278423d9762e9063d8d04e"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "b76c656867852ba38442a3615621525684863f510a16f244ce630c3a2ca89cca",
+              "saved_file_sha256": "9271629d0299c1aea13ccfc1b4a44d29a5ee5cbb904b41e713e3239020c17a48"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "7a0a292fff8e13ad0c30a690bc0ad3fe9266dc681ac01788fc2beba82924eb29",
+              "saved_file_sha256": "a306e55c5482f7f86d51528c984413ce476e36ddd35dcf230cf3a9d103d42776"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "119c5847b4c6bdd65712b308c92927720a0a8dd2649f3715d0fc88a026e3890d",
+              "saved_file_sha256": "92c0139ac51dfacedbde3b85dd14a3fa57fce2c61cac2a2b78e61aaf76e14c6c"
+            }
+          }
+        },
+        {
+          "id": 1,
+          "policy": true,
+          "caller_cudnn": false,
+          "fast": true,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after_construction": {
+            "matmul_tf32": true,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": true,
+            "cudnn_tf32": true
+          },
+          "api_seconds_diagnostic_only": 0.06128204520791769,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": null,
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "57279a11640e030eb2c3ebda8cf53e212421811668c329df5f4788ac3341b561",
+              "saved_file_sha256": "01000e77082e6a32f88c5c99a6bd74017c5cb7f39ce487ce6c4d1277a72508f4"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "d32a321d7a907a485dc104c72945120de344b5305375105ad2ab5c50e0c155ea",
+              "saved_file_sha256": "1aa61dff6cb49a6bfaab3875f28bf7a949efb11de5483c4a2aec3219fd96779f"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "3877d0d98f036c6f6e9fef412f6c1abcef4143af666b7e73c9a765d7d69bb95f",
+              "saved_file_sha256": "1f46c92dfef7b102f1a6f7298f72159b9cdd9207c4d537be5f6e556243788462"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "3fa1c1b1ed17ffed455f59cc6261eade4cdf8ae1c924b294134acb9403770c0d",
+              "saved_file_sha256": "43899cbae8a3c443e4a0529405c3e426bbc31c07925e163bea9a606c1599da06"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "f88aaf416f689095c3a34b5083b50f7ef6db6bae620a604440893c3f4eda3a7e",
+              "saved_file_sha256": "2012b3dce5d6ab1dbd8590326c6d8aaa427379e1aef837ec2193f62e49ec15e3"
+            }
+          }
+        }
+      ],
+      "failures": [],
+      "scope": "Actual saved real FP32 T1 feature prefix and official weights; actual complete small CNNs and filters; no whole-image benchmark or geometry assertion.",
+      "gpu": {
+        "name": "NVIDIA H100 PCIe",
+        "uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000
+      },
+      "maximum_allocated_bytes": 147345408,
+      "maximum_reserved_bytes": 167772160,
+      "status": "complete"
+    },
+    "candidate": {
+      "schema": "fnit_parc_tf32_real_prefix/v1",
+      "worker_sha256": "cfc8efd843f67199860b2aea287aaf5dd9fd3b491a8d0e6dc664685913d39ab2",
+      "arm": "candidate",
+      "device": "cuda:0",
+      "hostname": "gpucw1",
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "torch_version": "2.5.1",
+      "torch_threads": 8,
+      "torch_interop_threads": 8,
+      "source_files": {
+        "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+        "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+        "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+        "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+        "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+        "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+        "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+        "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+        "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+        "segment.py": "9329348c6174785df4de2624344e63b141ad7c795238c8b7dd62f47f34495061",
+        "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+        "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+        "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0",
+        "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a"
+      },
+      "binding_sha256": "4aa50bcc51f8037fae6784cf4efa83f2dca8b47597abd739e2946417d27788b5",
+      "index_sha256": "fd6992cd80bf62731c0829398d52f1ae53d578be11c1d9626f53d23ba88ad4d4",
+      "input_sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21",
+      "feature_file_sha256": "3132a18a1524165eb3ecfa6785ef9dc209c07b68c1a601dfa83b0a29bb45ee43",
+      "feature_shape": [
+        192,
+        224,
+        256
+      ],
+      "crop_slices": [
+        [
+          32,
+          64
+        ],
+        [
+          96,
+          128
+        ],
+        [
+          96,
+          128
+        ]
+      ],
+      "crop_value_sha256": "deff26835c3b87d166ecb54d070cf1c08616a3f6dbdc855c33e6bc427ada5642",
+      "weights": {
+        "synthseg_2.0.h5": {
+          "bytes": 53079152,
+          "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+        },
+        "synthseg_parc_2.0.h5": {
+          "bytes": 53090840,
+          "sha256": "83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684"
+        },
+        "synthseg_segmentation_labels_2.0.npy": {
+          "bytes": 348,
+          "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+        },
+        "synthseg_segmentation_names_2.0.npy": {
+          "bytes": 7168,
+          "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+        },
+        "synthseg_topological_classes_2.0.npy": {
+          "bytes": 348,
+          "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+        }
+      },
+      "cases": [
+        {
+          "id": 0,
+          "policy": true,
+          "caller_cudnn": false,
+          "fast": false,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after_construction": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "api_seconds_diagnostic_only": 0.8521474418230355,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": {
+            "requested_cudnn_tf32": true,
+            "fast": false,
+            "cache_precision_matches": true,
+            "operations": [],
+            "cuda_precision_before": {
+              "matmul_tf32": false,
+              "cudnn_tf32": false
+            },
+            "cuda_precision_active": {
+              "matmul_tf32": true,
+              "cudnn_tf32": true
+            },
+            "segmentation": {
+              "requested_cudnn_tf32": true,
+              "forwards": [
+                {
+                  "pass": "original",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                },
+                {
+                  "pass": "flipped",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "posterior_buffer_reused": true,
+              "posterior_ensemble_dtype": "torch.float32"
+            },
+            "parcellation": {
+              "requested_cudnn_tf32": true,
+              "forwards": [
+                {
+                  "operation": "parcellation_network",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "operations": [
+                {
+                  "operation": "parcellation_gaussian_blur",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "cuda_precision_before": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_active": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_after": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_restored": true
+            },
+            "cuda_precision_after": {
+              "matmul_tf32": false,
+              "cudnn_tf32": false
+            },
+            "cuda_precision_restored": true
+          },
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "95cda4c1b7db003ff055466869f0616bb307b4848d2185916448589247e23c20",
+              "saved_file_sha256": "f686121ab492b524b49fbfa8279393b2638816c02685abcd6c679a7da598ead6"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "add081346000dcd3077d05fd3bee52f5f028b6d7badc56a442a9a7d20685ce88",
+              "saved_file_sha256": "2bd60e0bc086d695555c64ed5b628fb50e67ed2598278423d9762e9063d8d04e"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "b76c656867852ba38442a3615621525684863f510a16f244ce630c3a2ca89cca",
+              "saved_file_sha256": "9271629d0299c1aea13ccfc1b4a44d29a5ee5cbb904b41e713e3239020c17a48"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "7a0a292fff8e13ad0c30a690bc0ad3fe9266dc681ac01788fc2beba82924eb29",
+              "saved_file_sha256": "a306e55c5482f7f86d51528c984413ce476e36ddd35dcf230cf3a9d103d42776"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "119c5847b4c6bdd65712b308c92927720a0a8dd2649f3715d0fc88a026e3890d",
+              "saved_file_sha256": "92c0139ac51dfacedbde3b85dd14a3fa57fce2c61cac2a2b78e61aaf76e14c6c"
+            }
+          }
+        },
+        {
+          "id": 1,
+          "policy": true,
+          "caller_cudnn": false,
+          "fast": true,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after_construction": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "api_seconds_diagnostic_only": 0.06149195274338126,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": {
+            "requested_cudnn_tf32": true,
+            "fast": true,
+            "cache_precision_matches": true,
+            "operations": [
+              {
+                "operation": "fast_segmentation_gaussian_blur",
+                "device": "cuda:0",
+                "input_dtype": "torch.float32",
+                "matmul_tf32": true,
+                "cudnn_tf32": true,
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              }
+            ],
+            "cuda_precision_before": {
+              "matmul_tf32": false,
+              "cudnn_tf32": false
+            },
+            "cuda_precision_active": {
+              "matmul_tf32": true,
+              "cudnn_tf32": true
+            },
+            "segmentation": {
+              "requested_cudnn_tf32": true,
+              "forwards": [
+                {
+                  "pass": "original",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "posterior_buffer_reused": false
+            },
+            "parcellation": {
+              "requested_cudnn_tf32": true,
+              "forwards": [
+                {
+                  "operation": "parcellation_network",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "operations": [
+                {
+                  "operation": "parcellation_gaussian_blur",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "cuda_precision_before": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_active": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_after": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_restored": true
+            },
+            "cuda_precision_after": {
+              "matmul_tf32": false,
+              "cudnn_tf32": false
+            },
+            "cuda_precision_restored": true
+          },
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "57279a11640e030eb2c3ebda8cf53e212421811668c329df5f4788ac3341b561",
+              "saved_file_sha256": "01000e77082e6a32f88c5c99a6bd74017c5cb7f39ce487ce6c4d1277a72508f4"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "d32a321d7a907a485dc104c72945120de344b5305375105ad2ab5c50e0c155ea",
+              "saved_file_sha256": "1aa61dff6cb49a6bfaab3875f28bf7a949efb11de5483c4a2aec3219fd96779f"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "3877d0d98f036c6f6e9fef412f6c1abcef4143af666b7e73c9a765d7d69bb95f",
+              "saved_file_sha256": "1f46c92dfef7b102f1a6f7298f72159b9cdd9207c4d537be5f6e556243788462"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "3fa1c1b1ed17ffed455f59cc6261eade4cdf8ae1c924b294134acb9403770c0d",
+              "saved_file_sha256": "43899cbae8a3c443e4a0529405c3e426bbc31c07925e163bea9a606c1599da06"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "f88aaf416f689095c3a34b5083b50f7ef6db6bae620a604440893c3f4eda3a7e",
+              "saved_file_sha256": "2012b3dce5d6ab1dbd8590326c6d8aaa427379e1aef837ec2193f62e49ec15e3"
+            }
+          }
+        },
+        {
+          "id": 2,
+          "policy": false,
+          "caller_cudnn": true,
+          "fast": false,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after_construction": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "api_seconds_diagnostic_only": 0.4182487530633807,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": {
+            "requested_cudnn_tf32": false,
+            "fast": false,
+            "cache_precision_matches": true,
+            "operations": [],
+            "cuda_precision_before": {
+              "matmul_tf32": false,
+              "cudnn_tf32": true
+            },
+            "cuda_precision_active": {
+              "matmul_tf32": true,
+              "cudnn_tf32": false
+            },
+            "segmentation": {
+              "requested_cudnn_tf32": false,
+              "forwards": [
+                {
+                  "pass": "original",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                },
+                {
+                  "pass": "flipped",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "posterior_buffer_reused": true,
+              "posterior_ensemble_dtype": "torch.float32"
+            },
+            "parcellation": {
+              "requested_cudnn_tf32": false,
+              "forwards": [
+                {
+                  "operation": "parcellation_network",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "operations": [
+                {
+                  "operation": "parcellation_gaussian_blur",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "cuda_precision_before": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_active": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_after": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_restored": true
+            },
+            "cuda_precision_after": {
+              "matmul_tf32": false,
+              "cudnn_tf32": true
+            },
+            "cuda_precision_restored": true
+          },
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "459c71ff18fcb32d75462087e6a2a03252c2e1eed62d222a8565145a5fa124fb",
+              "saved_file_sha256": "f036c77a9f86e9a502117b3b0bcd4f9bf3292e4f671c4f13ada969fd5ef8f910"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "904188916e659fd575fefc088ad5129c8df87742187980fe9eb95c0963b9ba2c",
+              "saved_file_sha256": "86342085e4c6e4d7f1cd469d7df0b8c0869c1eceaddd79dfc0c897a3e03f621c"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "49960bd510222c6f2bdcf9b5559f62107fe7a15fbcd99ef08c3a5269ddff9da9",
+              "saved_file_sha256": "a5c65ee240bce1dc3a1c6942387f2e9a6bd8b12a243ef6e227ce053c08805070"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "adaeb0e93666ad6c13d59c5491dad50fb9f6adf53fdd7c1ce6cd736dcafe4b51",
+              "saved_file_sha256": "b8bff14281e691d70e70fa7938f369693c6b532b6cedc47fb92ad7df072b8d42"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "437af761e1b6c57d1045aa6ff49d6a637d1b8e8392817b8218e0b0c70e8664b8",
+              "saved_file_sha256": "278ab291631f0268fd94ca53ff24fe923ab28e22a886836bddbee075c2e47f60"
+            }
+          }
+        },
+        {
+          "id": 3,
+          "policy": false,
+          "caller_cudnn": true,
+          "fast": true,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after_construction": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "api_seconds_diagnostic_only": 0.06868882523849607,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": {
+            "requested_cudnn_tf32": false,
+            "fast": true,
+            "cache_precision_matches": true,
+            "operations": [
+              {
+                "operation": "fast_segmentation_gaussian_blur",
+                "device": "cuda:0",
+                "input_dtype": "torch.float32",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              }
+            ],
+            "cuda_precision_before": {
+              "matmul_tf32": false,
+              "cudnn_tf32": true
+            },
+            "cuda_precision_active": {
+              "matmul_tf32": true,
+              "cudnn_tf32": false
+            },
+            "segmentation": {
+              "requested_cudnn_tf32": false,
+              "forwards": [
+                {
+                  "pass": "original",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "posterior_buffer_reused": false
+            },
+            "parcellation": {
+              "requested_cudnn_tf32": false,
+              "forwards": [
+                {
+                  "operation": "parcellation_network",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "operations": [
+                {
+                  "operation": "parcellation_gaussian_blur",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "cuda_precision_before": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_active": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_after": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_restored": true
+            },
+            "cuda_precision_after": {
+              "matmul_tf32": false,
+              "cudnn_tf32": true
+            },
+            "cuda_precision_restored": true
+          },
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "5b348bf67d14eb9d8cc47a0c559f0f6f4e3ff4eea89df479fa8e8a6038c10324",
+              "saved_file_sha256": "081790b1eea4e6918d55bb0fb03b3fc2aa235f22d4678ea2ff907481de7cfa45"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "7aad93ef3ac06f243a92349f7dc1ad976fdf852328e8f495f47fcb7a1a64b53d",
+              "saved_file_sha256": "cadf56100ef3a4f457adeeb5432ca54f08e58d104306571748ab04ee68ac9065"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "dafcbfce0c211a537740e2dd4a2e95cbba19a9b54b4ad2e540b3fb33e9848bb7",
+              "saved_file_sha256": "b15aeb7c85a620e9957511766702c0514e259920b1f66c2215a0c491e4b2450f"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "f5867705e35b379ca2149c9754df37b4bc65f2053bd38434a54c081a64a20e49",
+              "saved_file_sha256": "0f6fdf06db67a42d11a8198840e3c95af227a2cf7dae44408cd46edbcf69b7d7"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "7fdb50ed60d86f42db50484127700c5bd4472649879c069534fd92169793de99",
+              "saved_file_sha256": "18b49ca73fcb727d4939befc83782cbdf8a18526873a2afad750b8edb54060fa"
+            }
+          }
+        },
+        {
+          "id": 4,
+          "policy": null,
+          "caller_cudnn": false,
+          "fast": false,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after_construction": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "api_seconds_diagnostic_only": 0.4003865928389132,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": {
+            "requested_cudnn_tf32": null,
+            "fast": false,
+            "cache_precision_matches": true,
+            "operations": [],
+            "cuda_precision_before": {
+              "matmul_tf32": false,
+              "cudnn_tf32": false
+            },
+            "cuda_precision_active": {
+              "matmul_tf32": true,
+              "cudnn_tf32": false
+            },
+            "segmentation": {
+              "requested_cudnn_tf32": null,
+              "forwards": [
+                {
+                  "pass": "original",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                },
+                {
+                  "pass": "flipped",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "posterior_buffer_reused": true,
+              "posterior_ensemble_dtype": "torch.float32"
+            },
+            "parcellation": {
+              "requested_cudnn_tf32": null,
+              "forwards": [
+                {
+                  "operation": "parcellation_network",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "operations": [
+                {
+                  "operation": "parcellation_gaussian_blur",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "cuda_precision_before": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_active": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_after": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_restored": true
+            },
+            "cuda_precision_after": {
+              "matmul_tf32": false,
+              "cudnn_tf32": false
+            },
+            "cuda_precision_restored": true
+          },
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "459c71ff18fcb32d75462087e6a2a03252c2e1eed62d222a8565145a5fa124fb",
+              "saved_file_sha256": "f036c77a9f86e9a502117b3b0bcd4f9bf3292e4f671c4f13ada969fd5ef8f910"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "904188916e659fd575fefc088ad5129c8df87742187980fe9eb95c0963b9ba2c",
+              "saved_file_sha256": "86342085e4c6e4d7f1cd469d7df0b8c0869c1eceaddd79dfc0c897a3e03f621c"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "49960bd510222c6f2bdcf9b5559f62107fe7a15fbcd99ef08c3a5269ddff9da9",
+              "saved_file_sha256": "a5c65ee240bce1dc3a1c6942387f2e9a6bd8b12a243ef6e227ce053c08805070"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "adaeb0e93666ad6c13d59c5491dad50fb9f6adf53fdd7c1ce6cd736dcafe4b51",
+              "saved_file_sha256": "b8bff14281e691d70e70fa7938f369693c6b532b6cedc47fb92ad7df072b8d42"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "437af761e1b6c57d1045aa6ff49d6a637d1b8e8392817b8218e0b0c70e8664b8",
+              "saved_file_sha256": "278ab291631f0268fd94ca53ff24fe923ab28e22a886836bddbee075c2e47f60"
+            }
+          }
+        },
+        {
+          "id": 5,
+          "policy": null,
+          "caller_cudnn": false,
+          "fast": true,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after_construction": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": false
+          },
+          "api_seconds_diagnostic_only": 0.06790310982614756,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": {
+            "requested_cudnn_tf32": null,
+            "fast": true,
+            "cache_precision_matches": true,
+            "operations": [
+              {
+                "operation": "fast_segmentation_gaussian_blur",
+                "device": "cuda:0",
+                "input_dtype": "torch.float32",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              }
+            ],
+            "cuda_precision_before": {
+              "matmul_tf32": false,
+              "cudnn_tf32": false
+            },
+            "cuda_precision_active": {
+              "matmul_tf32": true,
+              "cudnn_tf32": false
+            },
+            "segmentation": {
+              "requested_cudnn_tf32": null,
+              "forwards": [
+                {
+                  "pass": "original",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "posterior_buffer_reused": false
+            },
+            "parcellation": {
+              "requested_cudnn_tf32": null,
+              "forwards": [
+                {
+                  "operation": "parcellation_network",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "operations": [
+                {
+                  "operation": "parcellation_gaussian_blur",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": false,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "cuda_precision_before": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_active": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_after": {
+                "matmul_tf32": true,
+                "cudnn_tf32": false
+              },
+              "cuda_precision_restored": true
+            },
+            "cuda_precision_after": {
+              "matmul_tf32": false,
+              "cudnn_tf32": false
+            },
+            "cuda_precision_restored": true
+          },
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "5b348bf67d14eb9d8cc47a0c559f0f6f4e3ff4eea89df479fa8e8a6038c10324",
+              "saved_file_sha256": "081790b1eea4e6918d55bb0fb03b3fc2aa235f22d4678ea2ff907481de7cfa45"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "7aad93ef3ac06f243a92349f7dc1ad976fdf852328e8f495f47fcb7a1a64b53d",
+              "saved_file_sha256": "cadf56100ef3a4f457adeeb5432ca54f08e58d104306571748ab04ee68ac9065"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "dafcbfce0c211a537740e2dd4a2e95cbba19a9b54b4ad2e540b3fb33e9848bb7",
+              "saved_file_sha256": "b15aeb7c85a620e9957511766702c0514e259920b1f66c2215a0c491e4b2450f"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "f5867705e35b379ca2149c9754df37b4bc65f2053bd38434a54c081a64a20e49",
+              "saved_file_sha256": "0f6fdf06db67a42d11a8198840e3c95af227a2cf7dae44408cd46edbcf69b7d7"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "7fdb50ed60d86f42db50484127700c5bd4472649879c069534fd92169793de99",
+              "saved_file_sha256": "18b49ca73fcb727d4939befc83782cbdf8a18526873a2afad750b8edb54060fa"
+            }
+          }
+        },
+        {
+          "id": 6,
+          "policy": null,
+          "caller_cudnn": true,
+          "fast": false,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after_construction": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "api_seconds_diagnostic_only": 0.023974630050361156,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": {
+            "requested_cudnn_tf32": null,
+            "fast": false,
+            "cache_precision_matches": true,
+            "operations": [],
+            "cuda_precision_before": {
+              "matmul_tf32": false,
+              "cudnn_tf32": true
+            },
+            "cuda_precision_active": {
+              "matmul_tf32": true,
+              "cudnn_tf32": true
+            },
+            "segmentation": {
+              "requested_cudnn_tf32": null,
+              "forwards": [
+                {
+                  "pass": "original",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                },
+                {
+                  "pass": "flipped",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "posterior_buffer_reused": true,
+              "posterior_ensemble_dtype": "torch.float32"
+            },
+            "parcellation": {
+              "requested_cudnn_tf32": null,
+              "forwards": [
+                {
+                  "operation": "parcellation_network",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "operations": [
+                {
+                  "operation": "parcellation_gaussian_blur",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "cuda_precision_before": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_active": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_after": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_restored": true
+            },
+            "cuda_precision_after": {
+              "matmul_tf32": false,
+              "cudnn_tf32": true
+            },
+            "cuda_precision_restored": true
+          },
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "95cda4c1b7db003ff055466869f0616bb307b4848d2185916448589247e23c20",
+              "saved_file_sha256": "f686121ab492b524b49fbfa8279393b2638816c02685abcd6c679a7da598ead6"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "add081346000dcd3077d05fd3bee52f5f028b6d7badc56a442a9a7d20685ce88",
+              "saved_file_sha256": "2bd60e0bc086d695555c64ed5b628fb50e67ed2598278423d9762e9063d8d04e"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "b76c656867852ba38442a3615621525684863f510a16f244ce630c3a2ca89cca",
+              "saved_file_sha256": "9271629d0299c1aea13ccfc1b4a44d29a5ee5cbb904b41e713e3239020c17a48"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "7a0a292fff8e13ad0c30a690bc0ad3fe9266dc681ac01788fc2beba82924eb29",
+              "saved_file_sha256": "a306e55c5482f7f86d51528c984413ce476e36ddd35dcf230cf3a9d103d42776"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "119c5847b4c6bdd65712b308c92927720a0a8dd2649f3715d0fc88a026e3890d",
+              "saved_file_sha256": "92c0139ac51dfacedbde3b85dd14a3fa57fce2c61cac2a2b78e61aaf76e14c6c"
+            }
+          }
+        },
+        {
+          "id": 7,
+          "policy": null,
+          "caller_cudnn": true,
+          "fast": true,
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after_construction": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "api_seconds_diagnostic_only": 0.06414514081552625,
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": true,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "precision": {
+            "requested_cudnn_tf32": null,
+            "fast": true,
+            "cache_precision_matches": true,
+            "operations": [
+              {
+                "operation": "fast_segmentation_gaussian_blur",
+                "device": "cuda:0",
+                "input_dtype": "torch.float32",
+                "matmul_tf32": true,
+                "cudnn_tf32": true,
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              }
+            ],
+            "cuda_precision_before": {
+              "matmul_tf32": false,
+              "cudnn_tf32": true
+            },
+            "cuda_precision_active": {
+              "matmul_tf32": true,
+              "cudnn_tf32": true
+            },
+            "segmentation": {
+              "requested_cudnn_tf32": null,
+              "forwards": [
+                {
+                  "pass": "original",
+                  "device": "cuda:0",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "input_dtype": "torch.float32",
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "posterior_buffer_reused": false
+            },
+            "parcellation": {
+              "requested_cudnn_tf32": null,
+              "forwards": [
+                {
+                  "operation": "parcellation_network",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "model_dtypes": [
+                    "torch.float32"
+                  ],
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "operations": [
+                {
+                  "operation": "parcellation_gaussian_blur",
+                  "device": "cuda:0",
+                  "input_dtype": "torch.float32",
+                  "matmul_tf32": true,
+                  "cudnn_tf32": true,
+                  "autocast": {
+                    "cpu": {
+                      "enabled": false,
+                      "dtype": "torch.bfloat16"
+                    },
+                    "cuda": {
+                      "enabled": false,
+                      "dtype": "torch.float16"
+                    }
+                  },
+                  "output_dtype": "torch.float32"
+                }
+              ],
+              "cuda_precision_before": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_active": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_after": {
+                "matmul_tf32": true,
+                "cudnn_tf32": true
+              },
+              "cuda_precision_restored": true
+            },
+            "cuda_precision_after": {
+              "matmul_tf32": false,
+              "cudnn_tf32": true
+            },
+            "cuda_precision_restored": true
+          },
+          "outputs": {
+            "segmentation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "57279a11640e030eb2c3ebda8cf53e212421811668c329df5f4788ac3341b561",
+              "saved_file_sha256": "01000e77082e6a32f88c5c99a6bd74017c5cb7f39ce487ce6c4d1277a72508f4"
+            },
+            "parcellation": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "d32a321d7a907a485dc104c72945120de344b5305375105ad2ab5c50e0c155ea",
+              "saved_file_sha256": "1aa61dff6cb49a6bfaab3875f28bf7a949efb11de5483c4a2aec3219fd96779f"
+            },
+            "combined": {
+              "shape": [
+                32,
+                32,
+                32
+              ],
+              "dtype": "int64",
+              "value_sha256": "3877d0d98f036c6f6e9fef412f6c1abcef4143af666b7e73c9a765d7d69bb95f",
+              "saved_file_sha256": "1f46c92dfef7b102f1a6f7298f72159b9cdd9207c4d537be5f6e556243788462"
+            },
+            "segmentation_posterior": {
+              "shape": [
+                33,
+                32,
+                32,
+                32
+              ],
+              "dtype": "float32",
+              "value_sha256": "3fa1c1b1ed17ffed455f59cc6261eade4cdf8ae1c924b294134acb9403770c0d",
+              "saved_file_sha256": "43899cbae8a3c443e4a0529405c3e426bbc31c07925e163bea9a606c1599da06"
+            },
+            "parcellation_soft_voxels": {
+              "shape": [
+                68
+              ],
+              "dtype": "float32",
+              "value_sha256": "f88aaf416f689095c3a34b5083b50f7ef6db6bae620a604440893c3f4eda3a7e",
+              "saved_file_sha256": "2012b3dce5d6ab1dbd8590326c6d8aaa427379e1aef837ec2193f62e49ec15e3"
+            }
+          }
+        }
+      ],
+      "failures": [
+        {
+          "phase": "preprocess",
+          "exception": "declared preprocessing failure",
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "operations": []
+        },
+        {
+          "phase": "segmentation_network",
+          "exception": "declared segmentation_network failure",
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ]
+            }
+          ]
+        },
+        {
+          "phase": "fast_blur",
+          "exception": "declared fast blur failure",
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false
+            }
+          ]
+        },
+        {
+          "phase": "parcellation_network",
+          "exception": "declared parcellation_network failure",
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ]
+            }
+          ]
+        },
+        {
+          "phase": "parcel_blur",
+          "exception": "declared parcel blur failure",
+          "before": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "after": {
+            "matmul_tf32": false,
+            "cudnn_tf32": true
+          },
+          "operations": [
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "segmentation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_network",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false,
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "output_dtype": "torch.float32"
+            },
+            {
+              "operation": "parcellation_gaussian_blur",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cpu_autocast": false,
+              "cuda_autocast": false
+            }
+          ]
+        }
+      ],
+      "scope": "Actual saved real FP32 T1 feature prefix and official weights; actual complete small CNNs and filters; no whole-image benchmark or geometry assertion.",
+      "gpu": {
+        "name": "NVIDIA H100 PCIe",
+        "uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "total_bytes": 84942979072,
+        "allocator_budget_bytes": 20000000000
+      },
+      "cache_rejected_before_preprocess": true,
+      "maximum_allocated_bytes": 147345408,
+      "maximum_reserved_bytes": 167772160,
+      "status": "complete"
+    }
+  },
+  "default_pairs": [
+    {
+      "fast": false,
+      "outputs": {
+        "segmentation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "combined": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "segmentation_posterior": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation_soft_voxels": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        }
+      }
+    },
+    {
+      "fast": true,
+      "outputs": {
+        "segmentation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "combined": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "segmentation_posterior": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation_soft_voxels": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        }
+      }
+    }
+  ],
+  "inheritance_pairs": [
+    {
+      "fast": false,
+      "declared_policy": false,
+      "inherited_cudnn": false,
+      "outputs": {
+        "segmentation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "combined": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "segmentation_posterior": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation_soft_voxels": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        }
+      }
+    },
+    {
+      "fast": false,
+      "declared_policy": true,
+      "inherited_cudnn": true,
+      "outputs": {
+        "segmentation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "combined": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "segmentation_posterior": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation_soft_voxels": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        }
+      }
+    },
+    {
+      "fast": true,
+      "declared_policy": false,
+      "inherited_cudnn": false,
+      "outputs": {
+        "segmentation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "combined": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "segmentation_posterior": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation_soft_voxels": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        }
+      }
+    },
+    {
+      "fast": true,
+      "declared_policy": true,
+      "inherited_cudnn": true,
+      "outputs": {
+        "segmentation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "combined": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "segmentation_posterior": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        },
+        "parcellation_soft_voxels": {
+          "value_bits_exact": true,
+          "saved_npy_files_exact": true,
+          "shape_and_dtype_exact": true
+        }
+      }
+    }
+  ],
+  "scope": "Real saved 32-cubed feature-prefix/weight diagnostic; neither original T1 end-to-end nor image geometry benchmark.",
+  "passed": true
+}

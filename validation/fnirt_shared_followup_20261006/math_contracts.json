@@ -1,0 +1,37 @@
+{
+  "scope": "Two bounded diagnostic probes, no production patch and no nonlinear optimizer",
+  "arithmetic": {
+    "inputs": "Archived solve3 native FP64 A/RHS/diagonal/x0 and all24+69 native trace vectors",
+    "native_bridge": "Installed NEWMAT DotProduct and ColumnVector NormFrobenius, independently compiled O0; actual saved scalars must all be exact first",
+    "arm": "Self strict CSC fastmath=False, r/diagonal, installed native dot/norm, separate FP64 vector multiply/add",
+    "unchanged": [
+      "Zero initial value",
+      "Unpreconditioned norm(r)/norm(b)",
+      "Stop<=1e-3",
+      "Maximum500",
+      "Native matrix and RHS bytes"
+    ],
+    "acceptance": [
+      "All93 same-vector rho/den/alpha/relative_norm exact",
+      "Every dynamic recorded native vector and scalar compared",
+      "Natural stopping count and final solution compared without forcing agreement"
+    ]
+  },
+  "assembly": {
+    "point": "Saved native second accepted point solve3_parameters.f64",
+    "effective_lambda": 9049.463427795125,
+    "lm_damping": 0.001,
+    "convention": "Native full g/H = 2*production linearize g/H, compare +g before step sign",
+    "arms": [
+      "Current CPU normal assembly with saved effective lambda",
+      "Only Jte ordering changed: F32 derivative*residual*mask, F64 adjoint/sum, divide bycount"
+    ],
+    "acceptance": [
+      "Exact current source/input bindings",
+      "CPU FP64 coefficients and no CUDA initialization",
+      "All finite and full1177x1177 H/diagonal/RHS metrics",
+      "Same-point private lambda adapter only; no optimizer"
+    ]
+  },
+  "timing": "Finite diagnostic wall includes preprocessing/building/metrics, not performance benchmark"
+}

@@ -1,0 +1,68 @@
+{
+  "scope": "isolated original arithmetic bridge; same headers and four bound objects as archived observer",
+  "compile": [
+    "g++",
+    "-std=c++17",
+    "-O0",
+    "-fPIC",
+    "-I/public/software/apps/FSL/6.0.7.4/include",
+    "-I/public/software/apps/FSL/6.0.7.4/include/newmat",
+    "-I/public/software/apps/FSL/6.0.7.4/src/fsl-fnirt",
+    "-c",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1/native_cli_build/arithmetic_cli.cpp",
+    "-o",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1/native_cli_build/arithmetic_cli.o"
+  ],
+  "link": [
+    "g++",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1/native_cli_build/arithmetic_cli.o",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261004/gems/fnirt-first-diff-v2/fnirt_costfunctions.o",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261004/gems/fnirt-first-diff-v2/fnirtfns.o",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261004/gems/fnirt-first-diff-v2/intensity_mappers.o",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261004/gems/fnirt-first-diff-v2/matching_points.o",
+    "-L/public/software/apps/FSL/6.0.7.4/lib",
+    "-Wl,-rpath,/public/software/apps/FSL/6.0.7.4/lib",
+    "-lfsl-warpfns",
+    "-lfsl-meshclass",
+    "-lfsl-basisfield",
+    "-lfsl-newimage",
+    "-lfsl-miscmaths",
+    "-lfsl-utils",
+    "-lfsl-znz",
+    "-lfsl-NewNifti",
+    "-lfsl-cprob",
+    "-lz",
+    "-llapack",
+    "-lblas",
+    "-lpthread",
+    "-o",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1/native_cli_build/arithmetic_cli"
+  ],
+  "cpp": {
+    "bytes": 2902,
+    "sha256": "7b45469ff339955deb440fd9b9d8a279cbcf3dc2a274cb29517b2139269e8c3c"
+  },
+  "executable": {
+    "bytes": 2119224,
+    "sha256": "89aecc478a8212fad9590174dcec960f77d86b57cd448fad9fff5880d3f077a2"
+  },
+  "objects": {
+    "fnirt_costfunctions.o": {
+      "bytes": 2755792,
+      "sha256": "f206c68a0864348c55fb14bdf7260a7c1a7392409c61501340445b2348a2db7f"
+    },
+    "fnirtfns.o": {
+      "bytes": 1274160,
+      "sha256": "3211718d279827116c73f516f5f2b61f772b1c133c62c34d3708d579a1d2ce8f"
+    },
+    "intensity_mappers.o": {
+      "bytes": 930264,
+      "sha256": "1c2764a87207120b51f6da0e4d6539608ce25c9ccefc2a0d90d1e486dcc3de1c"
+    },
+    "matching_points.o": {
+      "bytes": 1742360,
+      "sha256": "ec1dfd4468e7b01a65804e768c9490a8691a52f157576efe500d2e807adf70d4"
+    }
+  },
+  "ldd": "\tlinux-vdso.so.1 (0x00007fffe25fc000)\n\tlibfsl-warpfns.so => /public/software/apps/FSL/6.0.7.4/lib/libfsl-warpfns.so (0x00007f943f40c000)\n\tlibfsl-meshclass.so => /public/software/apps/FSL/6.0.7.4/lib/libfsl-meshclass.so (0x00007f943f3f1000)\n\tlibfsl-basisfield.so => /public/software/apps/FSL/6.0.7.4/lib/libfsl-basisfield.so (0x00007f943f359000)\n\tlibfsl-newimage.so => /public/software/apps/FSL/6.0.7.4/lib/libfsl-newimage.so (0x00007f943f0c2000)\n\tlibfsl-miscmaths.so => /public/software/apps/FSL/6.0.7.4/lib/libfsl-miscmaths.so (0x00007f943ef0f000)\n\tlibfsl-utils.so => /public/software/apps/FSL/6.0.7.4/lib/libfsl-utils.so (0x00007f943f33f000)\n\tlibfsl-znz.so => /public/software/apps/FSL/6.0.7.4/lib/libfsl-znz.so (0x00007f943f339000)\n\tlibfsl-NewNifti.so => /public/software/apps/FSL/6.0.7.4/lib/libfsl-NewNifti.so (0x00007f943f31c000)\n\tlibfsl-cprob.so => /public/software/apps/FSL/6.0.7.4/lib/libfsl-cprob.so (0x00007f943f312000)\n\tlibz.so.1 => /public/software/apps/FSL/6.0.7.4/lib/libz.so.1 (0x00007f943f2f7000)\n\tlibopenblas.so.0 => /public/software/apps/FSL/6.0.7.4/lib/libopenblas.so.0 (0x00007f943ce3a000)\n\tlibpthread.so.0 => /lib64/libpthread.so.0 (0x00007f943cc1a000)\n\tlibstdc++.so.6 => /public/software/apps/FSL/6.0.7.4/lib/libstdc++.so.6 (0x00007f943ca37000)\n\tlibm.so.6 => /lib64/libm.so.6 (0x00007f943c6b5000)\n\tlibgcc_s.so.1 => /public/software/apps/FSL/6.0.7.4/lib/libgcc_s.so.1 (0x00007f943f2cf000)\n\tlibc.so.6 => /lib64/libc.so.6 (0x00007f943c2df000)\n\tlibdl.so.2 => /lib64/libdl.so.2 (0x00007f943c0db000)\n\tlibgfortran.so.5 => /public/software/apps/FSL/6.0.7.4/lib/./libgfortran.so.5 (0x00007f943bf30000)\n\tlibgomp.so.1 => /public/software/apps/FSL/6.0.7.4/lib/./libgomp.so.1 (0x00007f943be2e000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f943f238000)\n\tlibquadmath.so.0 => /public/software/apps/FSL/6.0.7.4/lib/././libquadmath.so.0 (0x00007f943f294000)\n\tlibrt.so.1 => /lib64/librt.so.1 (0x00007f943bc26000)\n"
+}

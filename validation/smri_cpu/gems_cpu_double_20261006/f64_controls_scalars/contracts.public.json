@@ -1,0 +1,74 @@
+{
+  "scope": "Meaningful CPU precision/gradient contracts only; synthetic unit data is not the real benchmark",
+  "test_count": 5,
+  "passed": [
+    "Double CPU raw gradient/finite difference and checkpoint restoration 00",
+    "Double CPU raw gradient/finite difference and checkpoint restoration 10",
+    "Double CPU raw gradient/finite difference and checkpoint restoration 11",
+    "Double QR projectors agree with native Gram projection for all8 mobility patterns",
+    "FP32 point input rejected in bounded Double control; no silent dtype conversion"
+  ],
+  "observations": [
+    {
+      "projection": "0",
+      "gaussian": "0",
+      "cost": 2.1252796702614574,
+      "raw_mass": 0.6000000089406967,
+      "gradient_vs_central_difference_abs": 1.2885345568314222e-11,
+      "actual_precision_policy": {
+        "points": "torch.float64",
+        "gradient_leaf": "torch.float64",
+        "owner_geometry_and_scan": "torch.float32",
+        "projection_matrix_storage": "torch.float64",
+        "projection_computed_in": "torch.float32_then_promoted",
+        "Gaussian_likelihood": "torch.float32",
+        "optimizer_state": "torch.float64",
+        "raw_mass": true,
+        "mixture_epsilon": 1e-15,
+        "GPU_source_or_default_changed": false
+      }
+    },
+    {
+      "projection": "1",
+      "gaussian": "0",
+      "cost": 2.1252796702614574,
+      "raw_mass": 0.6000000089406967,
+      "gradient_vs_central_difference_abs": 1.2885345568314222e-11,
+      "actual_precision_policy": {
+        "points": "torch.float64",
+        "gradient_leaf": "torch.float64",
+        "owner_geometry_and_scan": "torch.float32",
+        "projection_matrix_storage": "torch.float64",
+        "projection_computed_in": "torch.float64",
+        "Gaussian_likelihood": "torch.float32",
+        "optimizer_state": "torch.float64",
+        "raw_mass": true,
+        "mixture_epsilon": 1e-15,
+        "GPU_source_or_default_changed": false
+      }
+    },
+    {
+      "projection": "1",
+      "gaussian": "1",
+      "cost": 2.125279685280275,
+      "raw_mass": 0.6000000089406967,
+      "gradient_vs_central_difference_abs": 9.31911492418891e-12,
+      "actual_precision_policy": {
+        "points": "torch.float64",
+        "gradient_leaf": "torch.float64",
+        "owner_geometry_and_scan": "torch.float32",
+        "projection_matrix_storage": "torch.float64",
+        "projection_computed_in": "torch.float64",
+        "Gaussian_likelihood": "torch.float64",
+        "optimizer_state": "torch.float64",
+        "raw_mass": true,
+        "mixture_epsilon": 1e-15,
+        "GPU_source_or_default_changed": false
+      }
+    }
+  ],
+  "adapter_sha256": "5246ee699c528f8c296925d9e76b287fd6f9122bedc707cf8bfb10581b90295c",
+  "program_sha256": "9c3e859c37f44e45e2903c8cbb44ca6e97c112d54010b5157b375e8474f0326f",
+  "torch_threads": 8,
+  "GPU_or_production_source_changed": false
+}
