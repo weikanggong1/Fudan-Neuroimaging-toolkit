@@ -1,0 +1,46 @@
+{
+  "scope": "same saved real state; independent objectives and their complete autograd gradients; no mesh update",
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "threads": 8,
+  "official_cost": 38208.85865753007,
+  "variants": {
+    "epsilon_cpu64_interp_fp32_owner": {
+      "data_cost": 38208.856504941665,
+      "prior_cost": -6.38428355716207e-13,
+      "total_cost": 38208.856504941665,
+      "cost_minus_official": -0.0021525884076254442,
+      "coverage": 44255,
+      "min_jacobian": 0.9999999999999972,
+      "single_evaluation_observation_seconds": 1.4332832852378488,
+      "vertex_storage_dtype": "torch.float32",
+      "gradient_storage_dtype": "torch.float32",
+      "geometry_dtype": "torch.float64",
+      "gradient_vs_saved_fnit": {
+        "different": 56634,
+        "max_abs": 288.70178413391113,
+        "rms": 2.3094410620544643,
+        "relative_l2": 0.24203846011284907,
+        "p99_abs": 0.015212262920422891
+      },
+      "gradient_vs_official": {
+        "different": 60276,
+        "max_abs": 3.358646665674314e-05,
+        "rms": 2.8751725509511795e-07,
+        "relative_l2": 3.140622083018592e-08,
+        "p99_abs": 3.436956787183754e-07
+      }
+    }
+  },
+  "outputs": {
+    "epsilon_cpu64_interp_fp32_owner_gradient.npy": "aae3b8c40de56b1ff2360edcd614cc6c01f69a9e4da4841f0cae14b33434a06c"
+  }
+}

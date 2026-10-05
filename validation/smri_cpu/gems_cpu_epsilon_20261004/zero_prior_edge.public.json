@@ -1,0 +1,50 @@
+{
+  "scope": "local mathematical boundary diagnostic only; not a real-data/native-binary benchmark; no production/freeze change",
+  "source_sha256": "fb8c6030517bec5fd77abe85c318b1ae0df7fa5b4c4accff261ad371e6d3ffdd",
+  "dtype": "float64",
+  "prior": [
+    [
+      0.0,
+      0.3
+    ],
+    [
+      0.5,
+      0.7
+    ]
+  ],
+  "log_likelihood": [
+    [
+      -2.0,
+      -3.0
+    ],
+    [
+      -4.0,
+      -6.0
+    ]
+  ],
+  "candidate_cost": 8.787216958496998,
+  "linear_formula_cost": 8.787216958496998,
+  "candidate_prior_gradient": [
+    [
+      0.0,
+      -2.9864033725999435
+    ],
+    [
+      -1.9999999999997815,
+      -0.1486842688856528
+    ]
+  ],
+  "linear_formula_prior_gradient": [
+    [
+      -14.778112197859691,
+      -2.9864033725999435
+    ],
+    [
+      -1.999999999999782,
+      -0.14868426888565286
+    ]
+  ],
+  "cost_absolute_difference": 0.0,
+  "conclusion": "Retained clamp_min(tiny) before log masks derivatives at an exactly zero class prior. A native tetrahedron with any nonzero vertex alpha can still have a nonzero spatial derivative at a zero interpolated prior. Actual impact in the three captured states or full recipes has not been measured; their saved full-gradient errors remain as reported.",
+  "reference_source": "kvlAtlasMeshToIntensityImageCostAndGradientCalculator.cxx lines124-151 (nonzero vertex alpha test, linear mixture and spatial derivative accumulation, epsilon denominator)"
+}

@@ -1,0 +1,313 @@
+{
+  "scope": "candidate-only complete real API on six unique inputs; original saved reference, no original rerun",
+  "host": "nodecw7",
+  "cpu_affinity": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    28
+  ],
+  "torch_threads": 8,
+  "torch_version": "2.5.1",
+  "source_sha256": {
+    "model.py": "aa8c577eb728b68b90aa7703153c7156c3bad61e78e5803d0f295b94d60452b5",
+    "_cpu_inference.py": "2cbcbbf65b87c827bf7fa3665a508a4be5b1844d1de8474b1da1d1a1e430a148",
+    "_cpu_math.py": "b643d821b1c84d746656deb6809799dbd18a279dc82a000e710dfae9d9add18e"
+  },
+  "driver_sha256": "7caf18040a2836ae4a25459d29fd3b795513f662acb56bf80e91633e0f3287bf",
+  "cases": [
+    {
+      "case": "case02_synthsr_default",
+      "description": "public raw ds003138 v1.0.1 T1w",
+      "input_sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21",
+      "options": [],
+      "weight_size_bytes": 106163752,
+      "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+      "reference_sha256": "51b06d813ca79d5188f923ef8721ca09f85e654ed4da09ed3282764652185112",
+      "output_sha256": "51b06d813ca79d5188f923ef8721ca09f85e654ed4da09ed3282764652185112",
+      "shape": [
+        180,
+        224,
+        225
+      ],
+      "dtype": "uint8",
+      "count": 9072000,
+      "different": 0,
+      "max_abs": 0.0,
+      "rmse": 0.0,
+      "mae": 0.0,
+      "affine_exact": true,
+      "header_exact": true,
+      "fixed_original_gate": {
+        "exact_fraction_min": 0.9999,
+        "max_abs_max": 1,
+        "mae_max": 0.0001,
+        "passes": true
+      },
+      "old_metrics": {
+        "status": "measured",
+        "voxel_count": 9072000,
+        "different_voxels": 563,
+        "exact_fraction": 0.9999379409171076,
+        "mae": 6.205908289241622e-05,
+        "rmse": 0.00787775874804606,
+        "nrmse_reference_rms": 7.039590239066948e-05,
+        "max_abs_difference": 1.0,
+        "mean_signed_difference": -1.3999118165784833e-05
+      },
+      "constructor_seconds": 0.6330162882804871,
+      "api_seconds": 20.835714421235025,
+      "load_after": [
+        25.73,
+        23.03,
+        24.16
+      ]
+    },
+    {
+      "case": "flair_sr_default",
+      "description": "existing public derived FLAIR, not raw scanner data",
+      "input_sha256": "5d89375e39443cea96b42176b0fc07491a9a2d2c545ea397a8d460c25c0e929e",
+      "options": [],
+      "weight_size_bytes": 106163752,
+      "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+      "reference_sha256": "2a9d9bfb1fce724ee0059463c6a2c2315f0857f396431e716802effc4819e310",
+      "output_sha256": "2a9d9bfb1fce724ee0059463c6a2c2315f0857f396431e716802effc4819e310",
+      "shape": [
+        217,
+        218,
+        127
+      ],
+      "dtype": "uint8",
+      "count": 6007862,
+      "different": 0,
+      "max_abs": 0.0,
+      "rmse": 0.0,
+      "mae": 0.0,
+      "affine_exact": true,
+      "header_exact": true,
+      "fixed_original_gate": {
+        "exact_fraction_min": 0.9999,
+        "max_abs_max": 1,
+        "mae_max": 0.0001,
+        "passes": true
+      },
+      "old_metrics": {
+        "status": "measured",
+        "voxel_count": 6007862,
+        "different_voxels": 399,
+        "exact_fraction": 0.9999335870231374,
+        "mae": 6.641297686265098e-05,
+        "rmse": 0.008149415737502351,
+        "nrmse_reference_rms": 8.49976818974822e-05,
+        "max_abs_difference": 1.0,
+        "mean_signed_difference": 3.828316962007449e-06
+      },
+      "constructor_seconds": 0.5063428217545152,
+      "api_seconds": 11.946624846197665,
+      "load_after": [
+        25.86,
+        23.14,
+        24.19
+      ]
+    },
+    {
+      "case": "true_ct_sr",
+      "description": "real SynthRAD2023 CT in HU, public registered/defaced/cropped derivative",
+      "input_sha256": "ee3e37675aed9853ada2945f671e624e2666da4ab3216841d63e33c50b62a1c1",
+      "options": [
+        "--ct"
+      ],
+      "weight_size_bytes": 106163752,
+      "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+      "reference_sha256": "f269642fa9529a1fb3b5e82552365047603fcfc53dc27550b05e6928c0d4e564",
+      "output_sha256": "f269642fa9529a1fb3b5e82552365047603fcfc53dc27550b05e6928c0d4e564",
+      "shape": [
+        231,
+        244,
+        204
+      ],
+      "dtype": "uint8",
+      "count": 11498256,
+      "different": 0,
+      "max_abs": 0.0,
+      "rmse": 0.0,
+      "mae": 0.0,
+      "affine_exact": true,
+      "header_exact": true,
+      "fixed_original_gate": {
+        "exact_fraction_min": 0.9999,
+        "max_abs_max": 1,
+        "mae_max": 0.0001,
+        "passes": true
+      },
+      "old_metrics": {
+        "status": "measured",
+        "voxel_count": 11498256,
+        "different_voxels": 747,
+        "exact_fraction": 0.999935033625969,
+        "mae": 6.496637403098349e-05,
+        "rmse": 0.00806017208445226,
+        "nrmse_reference_rms": 9.425576949714348e-05,
+        "max_abs_difference": 1.0,
+        "mean_signed_difference": -2.0263942636170217e-05
+      },
+      "constructor_seconds": 0.30693744122982025,
+      "api_seconds": 25.875008922070265,
+      "load_after": [
+        28.03,
+        23.89,
+        24.4
+      ]
+    },
+    {
+      "case": "true_lowfield_sr",
+      "description": "real64mT MRI, Zenodo15862148 original NIfTI",
+      "input_sha256": "3fc8ee5c5166f412adec04fd963c1cefb6e9632466e80d473c6a9b1f0298fff5",
+      "options": [
+        "--lowfield"
+      ],
+      "weight_size_bytes": 106163752,
+      "weight_sha256": "a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84",
+      "reference_sha256": "3a1bf5abde7d7c7bbab38fefdb19be0a1d5886c074ce25a9509683a62bca868a",
+      "output_sha256": "3a1bf5abde7d7c7bbab38fefdb19be0a1d5886c074ce25a9509683a62bca868a",
+      "shape": [
+        180,
+        218,
+        200
+      ],
+      "dtype": "uint8",
+      "count": 7848000,
+      "different": 0,
+      "max_abs": 0.0,
+      "rmse": 0.0,
+      "mae": 0.0,
+      "affine_exact": true,
+      "header_exact": true,
+      "fixed_original_gate": {
+        "exact_fraction_min": 0.9999,
+        "max_abs_max": 1,
+        "mae_max": 0.0001,
+        "passes": true
+      },
+      "old_metrics": {
+        "status": "measured",
+        "voxel_count": 7848000,
+        "different_voxels": 610,
+        "exact_fraction": 0.9999222731906218,
+        "mae": 7.772680937818552e-05,
+        "rmse": 0.008816280926682494,
+        "nrmse_reference_rms": 7.426266865988122e-05,
+        "max_abs_difference": 1.0,
+        "mean_signed_difference": 5.096839959225281e-07
+      },
+      "constructor_seconds": 0.6984481886029243,
+      "api_seconds": 16.64258797559887,
+      "load_after": [
+        29.45,
+        24.4,
+        24.56
+      ]
+    },
+    {
+      "case": "real_epi_first_channel_sr",
+      "description": "two actual raw DWI frames; single input SynthSR takes first channel",
+      "input_sha256": "0ed6336f9c3672e39a0dd19e77cf36a9d3301185fbcc24b4bcf76c2ab1773130",
+      "options": [],
+      "weight_size_bytes": 106163752,
+      "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+      "reference_sha256": "affd98f355cf2b2d92709da2cfcb39ec137c699cdff7e59d9a37a117f5b63f5a",
+      "output_sha256": "affd98f355cf2b2d92709da2cfcb39ec137c699cdff7e59d9a37a117f5b63f5a",
+      "shape": [
+        240,
+        241,
+        136
+      ],
+      "dtype": "uint8",
+      "count": 7866240,
+      "different": 0,
+      "max_abs": 0.0,
+      "rmse": 0.0,
+      "mae": 0.0,
+      "affine_exact": true,
+      "header_exact": true,
+      "fixed_original_gate": {
+        "exact_fraction_min": 0.9999,
+        "max_abs_max": 1,
+        "mae_max": 0.0001,
+        "passes": true
+      },
+      "old_metrics": {
+        "status": "measured",
+        "voxel_count": 7866240,
+        "different_voxels": 358,
+        "exact_fraction": 0.9999544890570335,
+        "mae": 4.551094296639818e-05,
+        "rmse": 0.006746179879487218,
+        "nrmse_reference_rms": 7.975149975306245e-05,
+        "max_abs_difference": 1.0,
+        "mean_signed_difference": -3.05101293629485e-06
+      },
+      "constructor_seconds": 0.3823902178555727,
+      "api_seconds": 17.467525754123926,
+      "load_after": [
+        29.12,
+        24.65,
+        24.64
+      ]
+    },
+    {
+      "case": "real_epi_npz_sr",
+      "description": "actual b0 array in original NPZ identity-affine convention",
+      "input_sha256": "652bcd9e9fa1442c668542a558dd16d55f7dc9856965cac8fce8c7cec09d14d4",
+      "options": [],
+      "weight_size_bytes": 106163752,
+      "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+      "reference_sha256": "e038a2a20a4e802e9ce767e978cf0163676c382c8fd617c3f563f4cb35df89e4",
+      "output_sha256": "53ca78d989f4282986ae8110ecbaedff01df49a4641619f223dd937e132cea19",
+      "shape": [
+        120,
+        120,
+        68
+      ],
+      "dtype": "float32",
+      "count": 979200,
+      "different": 922432,
+      "max_abs": 0.000339508056640625,
+      "rmse": 1.7675640381613313e-05,
+      "mae": 1.0339544030111649e-05,
+      "affine_exact": null,
+      "header_exact": null,
+      "fixed_original_gate": {
+        "rtol": 1e-05,
+        "atol": 0.001,
+        "failed_values": 0,
+        "passes": true
+      },
+      "old_metrics": {
+        "status": "measured",
+        "voxel_count": 979200,
+        "different_voxels": 962849,
+        "exact_fraction": 0.016698325163398694,
+        "mae": 3.387190306329028e-05,
+        "rmse": 6.87054584406037e-05,
+        "nrmse_reference_rms": 2.397502379938239e-06,
+        "max_abs_difference": 0.0015716552734375,
+        "mean_signed_difference": -1.7398582961098623e-05
+      },
+      "constructor_seconds": 0.31090801022946835,
+      "api_seconds": 2.4874428641051054,
+      "load_after": [
+        29.59,
+        24.82,
+        24.69
+      ]
+    }
+  ],
+  "all_passed": true,
+  "maximum_rss_bytes": 9899642880,
+  "status": "complete"
+}

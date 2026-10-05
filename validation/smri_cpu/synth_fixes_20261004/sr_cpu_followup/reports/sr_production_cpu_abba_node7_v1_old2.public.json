@@ -1,0 +1,110 @@
+{
+  "report": {
+    "scope": "Complete real CPU diagnostic with fixed whole-output gates and RSS sampling.\n\nNo production imports this script. The frozen original full-graph oracle stays\nunchanged. API memory includes retained input/output tensor views for hashing.\n",
+    "source_revision": "source_sr_v2_abba_old2",
+    "driver_sha256": "3ca5a7ca1b9d154d1fcdd5a219f96b702e14035c003a154e12cd91a3971e9382",
+    "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+    "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+    "torch_version": "2.5.1",
+    "model_sha256": "290d0ae911d8c99f4f87c22936ca497ea45bb57b8f50066b822d9cd10c4661b2",
+    "implementation": "original",
+    "helpers_sha256": {},
+    "network_calls": [
+      {
+        "seconds": 15.070262311026454,
+        "shape": [
+          1,
+          1,
+          192,
+          224,
+          256
+        ],
+        "dtype": "torch.float32",
+        "input_array_sha256": "c1c2d1ae0ba4adae0a433ec07a9fa61088f448e19166175be3742464ff30b677",
+        "input_exact": true,
+        "output_array_sha256": "4515398a2834679684b1cacc499685d573b85a30bfe9f0fd0e8e480f29f31b6d",
+        "frozen_output_file_sha256": "8a789b66686deb69ba06aa6551608568eb28680dc2c56005f2b074d3d76f2bf6",
+        "output_exact": false,
+        "metrics": {
+          "count": 11010048,
+          "different": 10731900,
+          "mae": 1.1718086842689574e-07,
+          "rmse": 3.760038181447616e-07,
+          "max_abs": 5.9992074966430664e-05
+        }
+      },
+      {
+        "seconds": 14.427549688145518,
+        "shape": [
+          1,
+          1,
+          192,
+          224,
+          256
+        ],
+        "dtype": "torch.float32",
+        "input_array_sha256": "326bcb07f12eae3f6268e0dd2ad069138f98299f512782afd92a901eda28a125",
+        "input_exact": true,
+        "output_array_sha256": "65e4d8d3d0288fe9961dfae9b25ba3c83a0f5feabba5f4159520f24fce3d912e",
+        "frozen_output_file_sha256": "5c9b6552623a3a01a7008e4c4ef252b44f105495263e35145f7c99376733e8ef",
+        "output_exact": false,
+        "metrics": {
+          "count": 11010048,
+          "different": 10729952,
+          "mae": 1.2044329681296153e-07,
+          "rmse": 4.010438737450602e-07,
+          "max_abs": 8.288025856018066e-05
+        }
+      }
+    ],
+    "rss_sample_interval_seconds": 0.05,
+    "rss_phase_peak_bytes": {
+      "constructor": 425152512,
+      "api": 10218831872,
+      "save": 681779200,
+      "compare": 832786432
+    },
+    "fixed_float_gate": {
+      "rtol": 1e-05,
+      "atol": 0.001,
+      "passes": false,
+      "failed_values": 3522
+    },
+    "cpu_elu_explicit_fma": false,
+    "timing_scope": "constructor/JIT/API/save/compare separately; CNN timers nested in API",
+    "constructor_seconds": 0.3267569439485669,
+    "jit_warmup_seconds": 9.98377799987793e-07,
+    "api_seconds": 33.79165344592184,
+    "retained_network_view_bytes": 176160768,
+    "save_seconds": 1.9214215241372585,
+    "float": {
+      "count": 9072000,
+      "different": 8669078,
+      "mae": 3.2473020982682055e-05,
+      "rmse": 9.82070268114363e-05,
+      "max_abs": 0.019134521484375
+    },
+    "quantized": {
+      "count": 9072000,
+      "different": 527,
+      "max_abs": 1,
+      "mae": 5.8090828924162256e-05,
+      "affine_exact": true
+    },
+    "output_sha256": {
+      "image.nii.gz": "fbccec5cad5503d3c1f2589d79888571bf15e19607ced94502ae124624d821f6",
+      "image.npz": "f937f1370ab9639bc0fa286e981dfee9a53d23ba54e5ea4468e53b6dc9bbecb2"
+    },
+    "compare_seconds": 1.0697447350248694,
+    "worker_peak_rss_bytes": 10219913216,
+    "status": "complete"
+  },
+  "time_lines": [
+    "\tUser time (seconds): 147.11",
+    "\tSystem time (seconds): 35.70",
+    "\tPercent of CPU this job got: 459%",
+    "\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:39.74",
+    "\tMaximum resident set size (kbytes): 9980384",
+    "\tExit status: 0"
+  ]
+}

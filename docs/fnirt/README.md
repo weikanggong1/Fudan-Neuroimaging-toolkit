@@ -126,9 +126,59 @@ size；pixdim 保存 knot spacing；intent parameters 保存 dense field voxel s
 x_input = inverse(A) · x_reference + d(x_reference)
 ```
 
-因此 coefficient array 不能当作 `[X,Y,Z,3]` dense warp 使用。`jout` 定义为
+因此 coefficient array 不能当作 `[X,Y,Z,3]` dense warp 使用。`jout` 定义为 `det(I + ∂d_nonlinear/∂x_reference)`。
 
 NIfTI结果以float32写出，moved和两类Jacobian的shape为reference.shape，affine来自reference；Jacobian无量纲。系数为(Cx,Cy,Cz,3)，不是dense场；pull_transform为reference→input的world-RAS毫米位移。
+
+### 算法对应与数值边界
+
+| FSL 行为 | 当前实现 |
+|---|---|
+| SPM-like mean normalization、float32 image scaling | 相同顺序实现 |
+| implicit input/reference zero mask | 使用 `1e-16` 判零；reference mask 在归一化前建立，input mask 在 float32 归一化后建立 |
+| warped input mask | 按 FSL `volume<char>` 语义，三线性插值后先截断为 char，再执行 `>0.5` |
+| 有效 FOV 边界 | 使用 newimage 的 `1e-8` tolerance、原始 floor index 和 zero-padded neighbor |
+| input masked smoothing 与 reference zero-padded Gaussian smoothing | 已实现 |
+| cubic B-spline field、bending regularization、SSD-weighted lambda | 已实现 |
+| LM stages | matrix-free analytic `JᵀJ` + FP64 PCG |
+| T1 强度映射 | 5 系数全局多项式、B 样条乘性偏置场与形变联合进入 LM 法方程；强度关闭的末级固定上一层参数 |
+| `minmet=scg` stages | 按 MISCMATHS `sccngr` 更新顺序实现 |
+| `inwarp`/`intin` process handoff | 在内存中执行 float32 coefficient/header、10 位 intensity 交接 |
+| `FullResKsp` 与 `ZoomField` | 按每个进程最后 subsampling 计算 full-grid spacing |
+| coefficient NIfTI | 输出 FSL intent 2007，shape、spacing、sform 契约已验证 |
+| `ForceJacobianRange` | 已移植；外部逐步 topology oracle 仍未通过 |
+
+独立 GM schedule 为 `subsampling=4,2,1,1`、`maxiter=5,5,10,5`、input FWHM
+`6,4,2,2 mm`、reference FWHM `4,2,0,0 mm`、bending lambda
+`150,75,50,30`、10 mm warp resolution，四层使用 LM。dMRI/TBSS schedule 见
+[dMRI 页面](../dmri_pipeline/README.md#ukb-tbss-对应关系)。
+
+### CPU 平滑方向候选与验证（2026-10-04）
+
+成熟子函数的首差定位发现：NEWIMAGE 读取 affine 行列式为正的 NIfTI 时先在内部翻转 X，再按该方向累计 FP32 Gaussian 卷积；FNIT CPU 在 nibabel 数组原方向累计，产生末位差。隔离候选分别检查 moving 和 template 的实际 affine，必要时翻转 X、调用原平滑函数、再翻回；隐式 moving mask 同步翻转。候选保留影像网格、header、thread budget 和原 CUDA 分支，FP64 coefficients、gradient、solver 和 objective 未降低精度。
+
+同一真实官方 GM 的完整 `224×288×288` 平滑图中，原 CPU 最大差 `3.8147e-5`（归一化强度）；按内部方向累计后与官方逐值相同。但固定官方 GM/FLIRT/template/mask 的完整 CPU 配对中，warped GM 脑区 RMSE 从 `0.020061` 增至 `0.031622`，非线性 Jacobian 从 `0.013270` 增至 `0.020135`，用时从 `365.786` 增至 `422.257 s`。因此未采纳候选，默认源码保持原路径；独立 patch、完整 QC 和脑图见[阶段报告](../../validation/smri_cpu/fnirt_cpu_orientation_20261004/README.md)。首次接受更新及共享系数网格转换的证据另见[首差诊断](../../validation/smri_cpu/fnirt_first_diff_20261004/README.md)。完整 nonlinear estimation 仍未通过官方等价门。
+
+### GPU 执行方式
+
+`TorchFNIRT(..., execution="optimized")`、`run_fnirt(..., execution="optimized")` 与 CLI `--execution optimized` 默认启用：
+
+- 每个方向一个 Gaussian kernel，保留官方零填充、核生成和每个偏移赋值回 float32 的舍入顺序。未安装 Triton 时自动使用原张量平滑。
+- PCG 每轮合并分母与残差标量的 GPU→CPU 传输；每轮仍检查相同停止条件，无效分母不接受试算更新，不跳过迭代检查。
+- 缓存分辨率层内的 affine 网格、固定张量类型转换和 bending diagonal。
+- bending Hessian 在系数空间计算 `BᵀB` 的三个方向 Gram 乘积，避免每轮展开六张全网格导数场；energy 保留原 dense 算法及求和顺序。
+
+本轮继续减少重复计算：只在需要导数时计算 trilinear 梯度；T1 联合 linearization 复用已算好的强度多项式和 bias；每次联合 PCG matvec 只展开一次 FP64 形变增量，图像线性项仍按原路径转换为 FP32。上述三个改动保留原浮点运算和求和顺序，按冻结 optimized 基线逐位验证。
+
+`execution="reference"` 保留逐偏移平滑、逐标量 PCG 主机判断和 dense bending Hessian，用于检查执行改动。两条路径都采用修正后的 header `pixdim`、相同 cubic spline、SSD、强度模型、LM/SCG、PCG 容差、Jacobian 约束和配置。Gram 改变 FP64 求和顺序，不能称为逐 bit 相同；固定 FSL basisfield oracle 和真实 T1 配对用于验收。
+
+图像与插值为 float32；系数、法方程、Gram、PCG、强度模型及关键归约保留 float64。不使用 FP16/BF16。GPU 默认允许 TF32，不降低 FP64 算子的精度。上述优化使用主页环境已有的 PyTorch/Triton，无新增编译依赖，也不启动 FSL。对应原软件没有 `--execution` 或 `--device` 选项。
+
+### CPU 执行方式
+
+`device="cpu", execution="optimized"` 使用设备对应的保序平滑、弯曲能量、角点筛选和法方程缓冲。空间法方程在每次线性化时固定权重布局，PCG 中按原 FP64 运算顺序处理八个体素；尾部、非连续布局和非有限值块使用原标量算式。函数遵循调用方的 CPU 线程预算，不自行修改全局线程数。没有新增运行依赖，CPU helper 使用主页环境已有的 Numba；CUDA、需要梯度的 CPU 张量和 `execution="reference"` 保留各自路径。布局内存、逐位门槛、真实精度及速度见 [CPU 专页](CPU_BENCHMARK.md)。
+
+最新 v27 的 CPU 采样合并图像值、FOV 判定与所需梯度，SCG 梯度跳过未使用的代价计算；原插值舍入、真实 cost、有效 lambda 和 CUDA 路径保持原方式。当前组合源 v28 保留该注册器和采样 helper 的相同 SHA。[完整真实 SCG 阶段检查](CPU_BENCHMARK.md#v27-的完整-scg-阶段检查)记录了输出与迭代轨迹的逐位一致性；[完整功能报告](assets/cpu-functional-v27-node8-20261004.public.json)包含 13 项预设/参数分支在 1/8 线程预算的 26 项完整输出检查及八项新官方配对。
 
 ## 3. 命令行调用
 

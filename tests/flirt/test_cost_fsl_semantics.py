@@ -42,22 +42,26 @@ def test_nmi_bin_assignment_uses_source_multiply_then_offset(device, monkeypatch
     cost = FSLNormalizedMutualInformation(
         reference, moving, (1, 1, 1), (1, 1, 1), bins=32, smooth_size=0,
     )
-    scatter = torch.Tensor.scatter_add_
+    to_float = torch.Tensor.float
     histograms = []
 
-    def observe_histogram(tensor, *args, **kwargs):
-        result = scatter(tensor, *args, **kwargs)
+    def observe_completed_histogram(tensor, *args, **kwargs):
+        # Inspect the complete FP64 histogram at the FP32 entropy boundary.
+        # CPU now accumulates with Numba, so counting scatter_add_ calls would
+        # skip that backend. Kernel/observer replay may also change call counts.
         if tensor.dtype == torch.float64 and tensor.numel() == 33 * 33:
-            histograms.append(result.clone())
-        return result
+            histograms.append(tensor.detach().cpu().numpy().copy().reshape(-1))
+        return to_float(tensor, *args, **kwargs)
 
-    monkeypatch.setattr(torch.Tensor, "scatter_add_", observe_histogram)
-    _evaluate_both(cost, np.eye(4))
+    monkeypatch.setattr(torch.Tensor, "float", observe_completed_histogram)
     expected = np.zeros(33 * 33, dtype=np.float64)
     expected[:2] = 32
-    assert len(histograms) == 6
-    for histogram in (histograms[2], histograms[5]):
-        np.testing.assert_array_equal(histogram.cpu().numpy().reshape(-1), expected)
+    for evaluator in (cost, BatchedAffineCost(cost)):
+        histograms.clear()
+        evaluator(np.eye(4))
+        assert histograms, "each evaluator must expose its completed histogram"
+        for histogram in histograms:
+            np.testing.assert_array_equal(histogram, expected)
 
 
 @pytest.mark.parametrize("device", _DEVICES)

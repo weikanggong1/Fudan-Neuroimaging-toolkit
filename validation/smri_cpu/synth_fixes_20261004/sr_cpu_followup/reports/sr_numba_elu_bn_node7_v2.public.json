@@ -1,0 +1,90 @@
+{
+  "driver_sha256": "d12af5bfd96e6fff2f873a4dfb166c8f5146dd58c6f797fc095d24781364a475",
+  "elu_driver_sha256": "e2d15127f7846aaf5b908949867be7b3a4454166ab2afeea270f4de099bed0bb",
+  "first_raw_sha256": "5fd3726179d9d5105a1493c3bd6c0a6f5989732f97ec110c5368a50b0e003ed7",
+  "first_elu_sha256": "0b42081d6940cf1e6c26cf7ff87b22724bfdf5ed2f99ade6926b6520946c425b",
+  "bn_reference_sha256": "1bdc063c109dbaa9438b5aac8728941f611464876ce8e5163cda738e5768e417",
+  "factor_sha256": "da4ca5c0c61e7fa8533547a154e2e808234b20049af0e36b63d4e061e75361f8",
+  "fastmath": false,
+  "threads": 8,
+  "scope": "full real first ELU and first BN stage only; no complete CNN speed claim",
+  "first_elu_seconds": 0.5098690763115883,
+  "first_elu": {
+    "count": 264241152,
+    "different": 0,
+    "mae": 0.0,
+    "rmse": 0.0,
+    "max_abs": 0.0
+  },
+  "inverse_factors": {
+    "torch_rsqrt": {
+      "count": 24,
+      "different": 13,
+      "mae": 1.44044558207194e-07,
+      "rmse": 2.0790546672002822e-07,
+      "max_abs": 4.76837158203125e-07
+    },
+    "one_over_sqrt": {
+      "count": 24,
+      "different": 13,
+      "mae": 1.44044558207194e-07,
+      "rmse": 2.0790546672002822e-07,
+      "max_abs": 4.76837158203125e-07
+    }
+  },
+  "bn_plane": {
+    "subtract_inv_gamma": {
+      "count": 1376256,
+      "different": 771573,
+      "mae": 2.56211279916908e-08,
+      "rmse": 5.7567058201174375e-08,
+      "max_abs": 9.5367431640625e-07
+    },
+    "subtract_scale": {
+      "count": 1376256,
+      "different": 738048,
+      "mae": 2.0335177859059124e-08,
+      "rmse": 4.399488558644375e-08,
+      "max_abs": 9.5367431640625e-07
+    },
+    "linear_separate": {
+      "count": 1376256,
+      "different": 0,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0
+    },
+    "linear_output_fma": {
+      "count": 1376256,
+      "different": 538832,
+      "mae": 1.1604523548296527e-08,
+      "rmse": 2.801339771857915e-08,
+      "max_abs": 4.76837158203125e-07
+    },
+    "linear_offset_output_fma": {
+      "count": 1376256,
+      "different": 643915,
+      "mae": 1.6633846169358976e-08,
+      "rmse": 3.2436575791884665e-08,
+      "max_abs": 4.76837158203125e-07
+    },
+    "subtract_scale_fma": {
+      "count": 1376256,
+      "different": 726919,
+      "mae": 2.2186245424232868e-08,
+      "rmse": 5.0792149657824495e-08,
+      "max_abs": 9.5367431640625e-07
+    }
+  },
+  "bn_full": {
+    "linear_separate": {
+      "count": 264241152,
+      "different": 0,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "arithmetic_seconds": 3.218064551241696
+    }
+  },
+  "status": "complete"
+}

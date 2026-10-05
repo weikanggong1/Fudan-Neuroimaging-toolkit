@@ -1,0 +1,25 @@
+{
+  "schema": "fnit_cpu_seg_nearest_join_acceptance/v1",
+  "recorded_before_candidate_results_read": true,
+  "baseline_commit": "6763958572d577e33258f5a2e83bb796e451cae3",
+  "stage": {
+    "input": "ds003138 case02; current qualified CPU CNN's final decoder skip and nearest source",
+    "values": "all FP32 bits equal to baseline including signed zero and nonfinite unit contracts",
+    "layout": "shape, dtype, contiguous NCDHW strides and skip-first channel order exact",
+    "alias": "new allocation; input bits unchanged",
+    "performance": "report both ABBA process arms and all per-process operation times; candidate median operation <= baseline median is the stage speed target",
+    "memory": "report actual per-process maximum RSS and GNU time; no inferred whole-model budget pass"
+  },
+  "full_cpu": {
+    "scope": "ordinary 33-class, non-fast parc and fast parc; current original-T1 preprocessing",
+    "hard_labels": "saved arrays exact to current qualified FNIT",
+    "geometry": "shape affine zoom dtype qform sform exact",
+    "csv": "same columns; rtol=1e-5 and atol=0.01 mm3",
+    "official": "report all per-label errors and soft-volume differences; count errors introduced, removed and retained"
+  },
+  "gpu": {
+    "implementation": "retain original interpolate and cat CUDA route, convolution/backend/precision unchanged",
+    "acceptance": "actual same-input old/new outputs and target GPU time/memory remain necessary before adopting production"
+  },
+  "remaining": "stage is not a complete neural network or a general CPU speedup benchmark; robust SynthSeg+ is not implemented"
+}

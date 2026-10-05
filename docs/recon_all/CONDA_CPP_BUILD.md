@@ -43,7 +43,7 @@ fnit-recon-all /data/sub01_T1w.nii.gz /data/subjects/sub01 \
 
 运行入口默认查找当前 Conda 环境的 `bin/`，检查必要程序可执行和资产哈希，并在报告中记录程序哈希。`FREESURFER_HOME` 在子进程中指向经过校验的 FNIT 数据资产目录；变量名不能用来推断是否调用了预装软件。严格隔离验收还须在没有系统 FreeSurfer/FSL 等软件的环境中核查进程、动态库和文件访问。
 
-已有[2026-09-27 环境安装记录](../../validation/recon_all/python_gpu_port/conda_yaml_install_20260927/README.md)只对应当时的独立 `environment-recon-all-cpp.yml`。现版主页环境已完成安装、程序发现和[两例真实 T1 连续运行](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)；138 项均存在且当时的标准mesh_validation通过（未覆盖后续发现的white/pial穿越），但严格数值比较仅通过 5/138 和 2/138 项。无预装 FreeSurfer/FSL 环境中的整例隔离验收仍待完成。各程序输入输出、官方命令和阶段数据见[阶段索引](CONDA_CPP_STAGES.md)。
+已有[2026-09-27 环境安装记录](../../validation/recon_all/python_gpu_port/conda_yaml_install_20260927/README.md)只对应当时的独立 `environment-recon-all-cpp.yml`。2026-09-30 冻结的主页环境完成了安装、程序发现和[两例真实 T1 连续运行](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)；138 项均存在且当时的标准mesh_validation通过（未覆盖后续发现的white/pial穿越），但严格数值比较仅通过 5/138 和 2/138 项。2026-10-05 主页配置增加 Eigen 3.4.0 固定版本并调整绘图 wheel 来源，本批[安装检查](../../validation/smri_cpu/conda_install_20261005/README.md)仅完成 277 包 Conda dry-run 和 pip wheel 解析，尚未创建全新环境。无预装 FreeSurfer/FSL 环境中的整例隔离验收仍待完成。各程序输入输出、官方命令和阶段数据见[阶段索引](CONDA_CPP_STAGES.md)。
 
 ## N4构建与各轮安装范围
 

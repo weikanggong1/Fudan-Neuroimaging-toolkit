@@ -145,7 +145,13 @@ mri_synthseg --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg.nii.gz \
 
 ## 5. 最新精度和运行时间
 
-最新2026-10-04测试使用公开原始T1两例，nodecw10同8物理核/8线程。原版FreeSurfer8.2.0-1，FNIT冻结源码和每次文件SHA见[正式矩阵](../../validation/smri_cpu_20261004/t2_seg/README.md)；CPUfloat32、原后端分块，完整命令含权重加载、预后处理、标签/CSV保存。
+2026-10-05 的 CPU decoder 拼接仅减少临时缓冲，卷积与后处理保持原数值。公开原始 T1 的 nodecw7 八核对照中，旧/新完整 worker 为 **115.886/112.952 s**，最大 RSS 为 **15.34/13.51 GB**；标签、体积 CSV 和几何旧新相同。与同节点官方仍有 **1 个不同体素**、最小 Dice **0.99999857**、CSV 最大差 **0.800 mm³**，均为已有误差。官方正常冷 CLI 为 **55.046 s**，首次异常的 373.087 s 单独保留；worker 还包含资源校验和报告写出，不把两种时钟混作精确加速比，CPU 速度目标仍未通过。
+
+同一真实 decoder 中间输入的拼接操作中位数 **0.9723→0.5294 s**，逐位一致；这是局部时间。H100 默认 TF32 与显式 `cudnn_tf32=False` 两组完整旧新输出、CSV、几何、allocated/reserved 相同。默认 reserved 为 **14.615 GB**，False 为 **9.326 GB**；共享 GPU 的背景负载不支持稳定速度或进程树物理峰值结论。显式 False 单例标签与官方完全相同，CSV 仍有最大 0.20 mm³ 尾差，不能推广为所有输入等价。[最新完整协议、逐区指标和运行边界](../../validation/smri_cpu/seg_memory_20261005/README.md)。
+
+![本次公开真实T1的官方和FNIT CPU标签](../../validation/smri_cpu/seg_memory_20261005/case02_cpu_labels.png)
+
+前版2026-10-04测试使用公开原始T1两例，nodecw10同8物理核/8线程。原版FreeSurfer8.2.0-1，FNIT冻结源码和每次文件SHA见[正式矩阵](../../validation/smri_cpu_20261004/t2_seg/README.md)；CPUfloat32、原后端分块，完整命令含权重加载、预后处理、标签/CSV保存。
 
 ### 端到端 benchmark
 
@@ -170,6 +176,7 @@ mri_synthseg --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg.nii.gz \
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-05 | `585bf181` 源码；`b1d46705` 完整报告 | CPU 单缓冲 nearest/skip 拼接，GPU 保留原路径 | 同节点 CPU 与 H100 完整旧新输出相同；官方 CPU 速度目标未通过，见[完整记录](../../validation/smri_cpu/seg_memory_20261005/README.md) |
 | 2026-10-04 | 报告冻结v2及最终保存修复 | 原后端分块、endpoint及色表/几何 | [真实CPU与GPU回归](../../validation/smri_cpu_20261004/t2_seg/README.md) |
 | 2026-10-01 | recon-all集成修复 | 前向作用域应用cuDNN精度，恢复调用方设置 | [同输入FP32报告](../recon_all/SYNTHSEG_PRECISION.md) |
 | 2026-09-30 | 报告冻结CPU后端 | 避免oneDNN完整体积崩溃 | [阶段对照](../../validation/recon_all/python_gpu_port/synthseg_cpu_backend_20260930.json) |

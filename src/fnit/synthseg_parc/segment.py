@@ -14,6 +14,7 @@ from torch.nn import functional as F
 from .._dmri import configure_device
 from .model import _Block
 from .cpu_conv import CPUInferenceConv3d, convolution_slabs, cpu_autocast_enabled
+from .cpu_join import cpu_join_allowed, join_nearest_cpu
 from .pipeline import SynthSegParc
 from .postprocess import postprocess_segmentation
 from .preprocess import preprocess_t1
@@ -43,8 +44,11 @@ class SegmentUNet(nn.Module):
         skips.pop()
         del skip
         for level, block in enumerate(self.up):
-            x = F.interpolate(x, scale_factor=2, mode="nearest")
-            x = block(torch.cat((skips.pop(), x), dim=1))[0]
+            if cpu_join_allowed(self, skips[-1], x):
+                x = block(join_nearest_cpu(skips.pop(), x))[0]
+            else:
+                x = F.interpolate(x, scale_factor=2, mode="nearest")
+                x = block(torch.cat((skips.pop(), x), dim=1))[0]
         logits = self.likelihood(x)
         del x
         return torch.softmax(logits, dim=1)

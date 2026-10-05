@@ -388,9 +388,14 @@ class SynthMorph:
             mov_to_net = np.linalg.inv(net_to_mov)
 
         native = [_tensor(image, self.device) for image in (mov, fix)]
+        if self.device.type == 'cpu' and self.model == 'joint':
+            from ._cpu_preprocessing import network_transform
+            input_sampler = network_transform
+        else:
+            input_sampler = transform
         inputs = []
         for image, matrix in zip(native, (net_to_mov, net_to_fix)):
-            normalized = transform(image, matrix, shape=shape)
+            normalized = input_sampler(image, matrix, shape=shape)
             normalized -= normalized.min()
             maximum = normalized.max()
             if maximum <= 0:

@@ -1,0 +1,24 @@
+{
+  "scope": "explicit fused op harness binding failures before numerical execution, not model/precision/benchmark failures",
+  "attempts": [
+    {
+      "attempt": "reference_node7_v1",
+      "frozen_source": "sr_cpu_followup_v3/onednn_fused_layer.py",
+      "error": "ValueError: _MklNativeFusedConv3D is not a valid root scope name",
+      "repair": "explicit legal node name"
+    },
+    {
+      "attempt": "reference_node7_v2",
+      "frozen_source": "sr_cpu_followup_v4/onednn_fused_layer.py",
+      "error": "TypeError: No argument found for attr padding_list for _MklNativeFusedConv3D",
+      "repair": "pass all actual registered default attrs explicitly"
+    },
+    {
+      "attempt": "reference_node7_v3",
+      "frozen_source": "sr_cpu_followup_v5/onednn_fused_layer.py",
+      "error": "InvalidArgumentError: registered internal kernel requires label='MklNameChangeOp'",
+      "repair": "set actual registered _kernel label normally supplied by graph rewrite"
+    }
+  ],
+  "status": "binding failures retained; corrected v4 full real isolated op complete"
+}

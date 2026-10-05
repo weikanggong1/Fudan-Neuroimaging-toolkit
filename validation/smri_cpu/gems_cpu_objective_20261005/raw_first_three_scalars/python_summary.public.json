@@ -1,0 +1,166 @@
+{
+  "status": "completed_bounded_private_CPU_raw_prior_likelihood",
+  "scope": "fixed synthetic state only; no EM/full recipe, public rasterizer/probabilities/GPU unchanged",
+  "initial_gate": {
+    "original_normalized_five_gates_reused_without_recompute": true,
+    "same_image_alphas_reference_canmove_epsilon_projection_source": true,
+    "points_exact_to_original": true,
+    "coverage_exact_to_original": true,
+    "cost_and_gradient_finite": true,
+    "raw_priors_are_finite_nonnegative": true
+  },
+  "raw_initial": {
+    "cost": 38208.85650570512,
+    "cost_minus_original_normalized": 7.634516805410385e-07,
+    "gradient_exact_to_original_normalized": false,
+    "priors_exact_to_original_normalized": false,
+    "intentional_change": "retain raw atlas mass in private CPU mesh data likelihood only",
+    "priors_sum_min": 0.9999997921276617,
+    "priors_sum_max": 1.0000002052448718,
+    "private_initial_sha256": "54abe793f3ca4514e6964b317bd0ced2a12415521ef0c7e8bce73dc2929ebb72"
+  },
+  "modes": {
+    "native_definition_cpu": {
+      "steps": 3,
+      "rows": [
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 0,
+          "initial_cost": 38208.85650570512,
+          "accepted_cost": 37717.38959203442,
+          "alpha": 1.0,
+          "hessian_initial_scale": 0.0007518461184260746,
+          "new_curvature_sy": null,
+          "history_pairs": 0,
+          "theoretical_maximal_deformation": 0.9999999999999999,
+          "actual_maximal_deformation": 1.000000676983971,
+          "returned_maximal_deformation": 0.9999999999999999,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 37717.38959203442,
+              "gradient_finite": true,
+              "directional_derivative": -197.83238503776144
+            }
+          ],
+          "total_evaluations": 2,
+          "selected_closure_checkpoint_restored": true,
+          "step": 1,
+          "separate_priors_observation_caller_state_restored": true,
+          "private_state_sha256": "19ac2827092fcd945fa7f595f7169a58bc40495a9fedad98e3f302886f8d7afc"
+        },
+        {
+          "reason": "strong_wolfe_bracket",
+          "iteration": 1,
+          "initial_cost": 37717.38959203442,
+          "accepted_cost": 37400.124551721885,
+          "alpha": 1.0,
+          "hessian_initial_scale": 0.0006834671862755817,
+          "new_curvature_sy": 3601.8100735784265,
+          "history_pairs": 1,
+          "theoretical_maximal_deformation": 0.3421643146477149,
+          "actual_maximal_deformation": 0.34216334096362855,
+          "returned_maximal_deformation": 0.3421643146477149,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": 37400.124551721885,
+              "gradient_finite": true,
+              "directional_derivative": -231.74354282854102
+            }
+          ],
+          "total_evaluations": 3,
+          "selected_closure_checkpoint_restored": true,
+          "step": 2,
+          "private_state_sha256": "266a62ce66368c9b854e736ead7fbcd67b09940f66e82ddffa42257c4a509ca9"
+        },
+        {
+          "reason": "strong_wolfe_zoom",
+          "iteration": 2,
+          "initial_cost": 37400.124551721885,
+          "accepted_cost": 36996.50974917296,
+          "alpha": 0.5,
+          "hessian_initial_scale": 4.971558906095464e-05,
+          "new_curvature_sy": 333.3910964794665,
+          "history_pairs": 2,
+          "theoretical_maximal_deformation": 0.3987003995491074,
+          "actual_maximal_deformation": 0.39869923225761866,
+          "returned_maximal_deformation": 0.3987003995491074,
+          "algorithmic_convergence": false,
+          "records": [
+            {
+              "alpha": 1.0,
+              "phase": "bracket",
+              "cost": null,
+              "gradient_finite": true,
+              "directional_derivative": 0.0
+            },
+            {
+              "alpha": 0.5,
+              "phase": "zoom",
+              "cost": 36996.50974917296,
+              "gradient_finite": true,
+              "directional_derivative": -582.2299124738365
+            }
+          ],
+          "total_evaluations": 5,
+          "selected_closure_checkpoint_restored": true,
+          "step": 3,
+          "separate_priors_observation_caller_state_restored": true,
+          "private_state_sha256": "9e53b95ddd7f342d3e26cd7af47e4570fb77af633375d23be31fa95774d43805"
+        }
+      ],
+      "stop_reason": "diagnostic_step_limit"
+    }
+  },
+  "limited_replay_observation_seconds": 10.006917494349182,
+  "added_steps": 3,
+  "capture_sha256": "30269d8aa4d9db4e6ba1c9ffcaaaa3784d4b7c941781eb0bfd8556ee122f6712",
+  "base_adapter_sha256": "a996995feed38f49b53498a8a6e10e49cfba0ee86ceec176cb9267a67ff841f4",
+  "raw_adapter_sha256": "fd6a6cd80c0cfe81df9c77c3694f328d75b0e75c5978280fb1efd106d846f675",
+  "candidate_sha256": "d6ab8eeefcfc7ef33e33246318d6adeafb4ad4cb31ca09490d0cca4515fe995e",
+  "program_sha256": "b805593419894e8cd1633cdec023430ae6d53d2a9d5664ac9f999fde858dc40e",
+  "source_sha256": {
+    "__init__.py": "028efcf28fa9ef09e74913df677e556aa7d3f358e8ee35ad92636cb485fe68e7",
+    "_raster_cpu.py": "e5548621fe29d40e140b97ed9e5c81c038ceb8947d04e57730037935debed9b9",
+    "_raster_cpu_compact.py": "be03336c29131a39e75312af2923a5c75b7007c0992b9ba8bd726bbb5d652382",
+    "_raster_triton.py": "22ce1ca61efa42b5b6d06cacc4f4d859ef2c10ffca26ecf154f3d73361bee5ac",
+    "atlas.py": "f6415958b02956f50f6efa6043428513610c3d3a00b734ff2aeff353930cf975",
+    "brainstem.py": "23fa1286c627e16c974ec17f96b2481d434c81b253e379111e2b6390a4574b3e",
+    "context.py": "2739c5a4f7e147b78fcb14ac2e203786c100fdfd6c13488924d291151e5f11f3",
+    "core.py": "7f7c5eaa5bd56e32af52afd86bb0b35edb469b70aba2a50d30215554b89b5d77",
+    "deformation.py": "d0a69c20047cc669f9460a886c9755477f099f095abd59ab7ed7e10a49e662fd",
+    "gaussian.py": "67856df056e408572d243b5ebf35824573291f29276292cd75b31fc1d0f140c3",
+    "initialize.py": "ab5bc936c751a5b1fa897957d9382343544127eba7afac93d5b761a334dac187",
+    "optim.py": "f25b7251a6b850dc30716308e2a686399c9339cc39d9324c10f19e3046716c89",
+    "output.py": "a67e5aeb863ba4a6370ced77110d519b7e6185c34aa2eb72f8659e95866e873c",
+    "pipeline.py": "20a0df50ce6c3fd0e3eb67b0eb8cbcd588565615cc8c15ed4449ca1644ea3543",
+    "preprocessing.py": "4f7926afaa175015c40c2790363f503979c3b495fc2d9f8af022f994173d0135",
+    "rasterize.py": "f665e25582b2d4d63da6c2351d9d09a76a23b81354b60a1fa8c2187d580b55eb",
+    "recipes/__init__.py": "2109d5d096c7bfbf3533e75009956bfcaf8b4b66326929b47acc9ee91f6f63b9",
+    "recipes/base.py": "5e8b4af9410fd5fe447cc674450332288085b0098fae3c119b20134b904187b9",
+    "recipes/brainstem.py": "3054bc95ba0700a19256ca0419ecd1d62093817e9e4cbf97e00b703281bd86bb",
+    "recipes/hippo_amygdala.py": "385e3cf19cbe3ba6e7985b36a525664d46a037e4b80ee298b82916bbd99e710e",
+    "recipes/thalamus.py": "76dcdc24afc90765d766ca228f64a937d437fdbd1f96a466e244161e11c63941",
+    "setup.py": "ccd6c6c9952df395c972e3dbc32842c20fb7b666bcc10f8c1afe274753ab561d",
+    "smoothing.py": "853078d34c9c798395db16b9af503065d88cc68b656615a52826c066bbf45fb5"
+  },
+  "reused_normalized_summary_sha256": "2acf5cffe9fc57b3c74995a6ec613ece71a9c1801186e31737cfaf112181919c",
+  "optimizer_state_sha256": "0d6d94c1c255c1f701e4e14cc6d88c23dbf27935c6f34e0e08033ec9a5b5c39d",
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "output_directory_mode": "0o700",
+  "resume_summary_sha256": null
+}

@@ -1,0 +1,190 @@
+{
+  "schema": "fnit_synthseg_decoder_join_stage_public/v1",
+  "analysis_only": true,
+  "scope": "real final decoder nearest+cat operation, not complete network or CLI",
+  "input": {
+    "dataset": "OpenNeuro ds003138 v1.0.1",
+    "license": "CC0",
+    "alias": "case02",
+    "sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21",
+    "prepared_values_sha256": "d34b6799879799e9156a0a0a2c7a977dd084adb82c8847b883adfeaf6d3769ce",
+    "network_shape": [
+      192,
+      224,
+      256
+    ],
+    "checkpoint_files": {
+      "skip.npy": {
+        "sha256": "931be584c81fdee64cfc2da65f231ff777c799ec0accc55b43db2d15800967e2",
+        "bytes": 1056964736
+      },
+      "value.npy": {
+        "sha256": "52cdbe984194f0c165ac98f1eb2e67159157362e3ded976d5a7db1712f702d14",
+        "bytes": 264241280
+      }
+    }
+  },
+  "source": {
+    "producer_files": {
+      "model.py": "292428207da96cea837919e73b3fa455dc533b5b9e7fb1bca02e3729a92cde52",
+      "segment.py": "ca51439f15ea9b792f2eb4bfb7bdd6cd7f298522e03a5917dda7ed8c9438c441",
+      "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+      "pipeline.py": "030095b124a3556f0508359317ee15108fbb2a3d45a803d80c28350d18776633",
+      "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+      "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f"
+    },
+    "worker_sha256": "80a4acfb26e2a7e3588155fb9e45c709c2b90397a5e8abad6969056917eb30a3",
+    "helper_sha256": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+    "queue_sha256": "4ce5328654c59b9b307cd3fca3483937bcc3aa170ed223956acfbf4cba59836f",
+    "collector_sha256": "533239e71ade29c78b062f602920c778b8dcc75851dc273e98091d96b70fbf4d",
+    "capture_worker_sha256": "a3fe5ea0964a08e839948ba2604d16341099fee63691b170f029534e25189690",
+    "weight_sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+  },
+  "resources": {
+    "hostname": "nodecw7",
+    "cpu_affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "torch_threads": 8,
+    "torch_interop_threads": 8,
+    "torch_version": "2.5.1",
+    "thread_environment": {
+      "OMP_NUM_THREADS": "8",
+      "MKL_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "8",
+      "NUMBA_NUM_THREADS": "8"
+    },
+    "cuda_visible_devices": ""
+  },
+  "capture": {
+    "status": "partial_capture_complete",
+    "diagnostic_seconds": 30.396625764667988,
+    "scope": "first original CNN stopped before final decoder conv0; no final prediction",
+    "maximum_rss_kib": 10483084
+  },
+  "identity": {
+    "values_sha256": "38457e8127bddb7d39d3e36435f4b632046eee46bec64abc10e69e79f7e61288",
+    "shape": [
+      1,
+      72,
+      192,
+      224,
+      256
+    ],
+    "stride": [
+      792723456,
+      11010048,
+      57344,
+      256,
+      1
+    ],
+    "contiguous": true,
+    "independent": true
+  },
+  "values_per_call": 792723456,
+  "calls_compared": 16,
+  "records": [
+    {
+      "name": "A1",
+      "mode": "baseline",
+      "operation_seconds_including_guard_for_candidate": [
+        0.8719145059585571,
+        1.0015369690954685,
+        0.7081822650507092,
+        0.9510759795084596
+      ],
+      "process_wall_seconds_including_import_io_hash": 35.91645812802017,
+      "load_after": [
+        40.54,
+        39.47,
+        40.93
+      ],
+      "maximum_rss_kib": 6773888,
+      "gnu_time_maximum_rss_kib": 6773888,
+      "report_sha256": "b05431066d3108f2f2e082f2ded500a0646a452a00d97bc7e28d6917d64831ce"
+    },
+    {
+      "name": "B1",
+      "mode": "candidate",
+      "operation_seconds_including_guard_for_candidate": [
+        0.5370531789958477,
+        0.5218333676457405,
+        0.5840941397473216,
+        0.4528927505016327
+      ],
+      "process_wall_seconds_including_import_io_hash": 35.662280707620084,
+      "load_after": [
+        36.48,
+        38.54,
+        40.57
+      ],
+      "maximum_rss_kib": 4804300,
+      "gnu_time_maximum_rss_kib": 4804300,
+      "report_sha256": "4b0c8140311a45a15250aab086b4f9ca6eed062650fcfb1721922383999280b3"
+    },
+    {
+      "name": "B2",
+      "mode": "candidate",
+      "operation_seconds_including_guard_for_candidate": [
+        0.5997392935678363,
+        0.6715332781895995,
+        0.45066412538290024,
+        0.43236740306019783
+      ],
+      "process_wall_seconds_including_import_io_hash": 31.762074075639248,
+      "load_after": [
+        37.41,
+        38.57,
+        40.51
+      ],
+      "maximum_rss_kib": 4804240,
+      "gnu_time_maximum_rss_kib": 4804240,
+      "report_sha256": "9b2b12315e55865b9180c25b95eabcc43578ca531c88a140d5c1272c8e994357"
+    },
+    {
+      "name": "A2",
+      "mode": "baseline",
+      "operation_seconds_including_guard_for_candidate": [
+        0.9934795862063766,
+        0.8813931802287698,
+        1.0069742612540722,
+        1.1628288896754384
+      ],
+      "process_wall_seconds_including_import_io_hash": 33.61227382905781,
+      "load_after": [
+        34.54,
+        37.71,
+        40.15
+      ],
+      "maximum_rss_kib": 6773828,
+      "gnu_time_maximum_rss_kib": 6773828,
+      "report_sha256": "c4fb73653db0b10c6a510a6fa2d3dc5e2ae8e8e0896fe9d8469b675cb526f3cc"
+    }
+  ],
+  "summary": {
+    "baseline_median_operation_seconds": 0.9722777828574181,
+    "candidate_median_operation_seconds": 0.5294432733207941,
+    "operation_ratio_baseline_over_candidate": 1.836415404353068
+  },
+  "gates": {
+    "same_input_bits_layout_alias_and_repeats": true,
+    "source_identity": true,
+    "same_cpu_resource_budget": true,
+    "qualification_guard_timed": true,
+    "median_operation_speed_target": true,
+    "complete_cpu_network": "pending",
+    "complete_gpu_regression": "pending"
+  },
+  "history": {
+    "v1": "controller named queue.py shadowed stdlib; failed before Torch import; receipt retained",
+    "v2": "qualified partial capture and 16 copy-identity controls passed; helper-only timing excludes guard",
+    "v3": "same checkpoint reused, operation clock includes actual network qualification guard; no repeated CNN capture"
+  }
+}

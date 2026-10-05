@@ -1,0 +1,185 @@
+diff --git a/src/fnit/gems/core.py b/src/fnit/gems/core.py
+index f67533ff..0997fdd3 100644
+--- a/src/fnit/gems/core.py
++++ b/src/fnit/gems/core.py
+@@ -4,6 +4,7 @@ from __future__ import annotations
+ 
+ from dataclasses import dataclass
+ import logging
++import math
+ from time import monotonic
+ from typing import Sequence
+ 
+@@ -26,6 +27,19 @@ from .rasterize import (BlockIndex, build_block_index, compact_data_cost, raster
+ logger = logging.getLogger(__name__)
+ 
+ 
++def _compact_mesh_data_cost(priors, likelihood, *, double_accumulation=False):
++    """Mesh likelihood; CPU follows KVL's epsilon after the class sum.
++
++    EM posterior normalization has its own definition and is unchanged. CUDA
++    retains the established logsumexp expression until an official regression.
++    """
++    joint = priors.clamp_min(torch.finfo(priors.dtype).tiny).log() + likelihood
++    log_density = joint.logsumexp(dim=0)
++    if priors.device.type == "cpu":
++        log_density = torch.logaddexp(log_density, log_density.new_tensor(math.log(1e-15)))
++    return -log_density.sum(dtype=torch.float64 if double_accumulation else joint.dtype)
++
++
+ def _cpu_em_log_prior(priors, image, params):
+     # EM iterations share these priors until the next mesh rasterization.
+     # Leave differentiable calls and every CUDA call on their original path.
+@@ -131,6 +145,10 @@ class TorchGEMS:
+         shape = tuple(image.shape[-3:])
+         vertices, reference, tetra, alphas, movable, label_ids = self._tensors()
+         reference_geometry = prepare_deformation_reference(reference, tetra)
++        cpu_precise_mesh = (vertices.device.type == "cpu" and vertices.dtype == torch.float32
++                            and precise_mesh_matrices and reuse_geometry and image.ndim == 3)
++        mesh_reference_geometry = (prepare_deformation_reference(reference.double(), tetra)
++                                   if cpu_precise_mesh else reference_geometry)
+         projection = (None if boundary_transform is None else sliding_boundary_projectors(
+             movable.bool(), torch.as_tensor(boundary_transform, device=self.device, dtype=self.dtype)))
+         if label_classes is None:
+@@ -349,10 +367,16 @@ class TorchGEMS:
+                             evaluations += 1
+                             refresh_index(vertices)
+                             optimizer.zero_grad(set_to_none=True)
++                            geometry_vertices = vertices.double() if cpu_precise_mesh else vertices
+                             geometry = (prepare_current_geometry(
+-                                        vertices, tetra, deterministic_gradient=stable_mesh_fitting,
++                                        geometry_vertices, tetra, deterministic_gradient=stable_mesh_fitting,
+                                         vertex_reduction=vertex_reduction)
+                                         if reuse_geometry else None)
++                            # Preserve the original FP32 owner decisions, point
++                            # layout and candidate order. Only differentiable
++                            # interpolation/prior matrices use CPU FP64.
++                            owner_geometry = (prepare_current_geometry(vertices.detach(), tetra)
++                                              if cpu_precise_mesh else None)
+                             if compact_em:
+                                 hint_stats = {} if owner_hint_enabled else None
+                                 use_owner_hints = (owner_hint_enabled and
+@@ -372,10 +396,9 @@ class TorchGEMS:
+                                     priors, _ = rasterize_priors_compact(
+                                         vertices, tetra, class_alphas, shape, valid_mask=mesh_valid,
+                                         block_index=index, background_channel=class_background,
+-                                        current_geometry=geometry)
+-                                    joint = priors.clamp_min(torch.finfo(priors.dtype).tiny).log() + mesh_likelihood
+-                                    data_cost = -joint.logsumexp(dim=0).sum(
+-                                        dtype=torch.float64 if double_data_cost_accumulation else joint.dtype)
++                                        current_geometry=geometry, owner_geometry=owner_geometry)
++                                    data_cost = _compact_mesh_data_cost(priors, mesh_likelihood,
++                                        double_accumulation=double_data_cost_accumulation)
+                                 else:
+                                     fused_evaluations += 1
+                                     if owner_hint_enabled:
+@@ -392,7 +415,7 @@ class TorchGEMS:
+                                 _, data_cost = label_posterior(
+                                     priors, likelihood, class_ids, valid)
+                             prior_cost, jacobian = ashburner_prior(vertices, reference, tetra,
+-                                self.atlas.stiffness, reference_geometry=reference_geometry,
++                                self.atlas.stiffness, reference_geometry=mesh_reference_geometry,
+                                 current_geometry=geometry, analytic_gradient=analytic_prior,
+                                 double_accumulation=stable_mesh_fitting)
+                             objective = data_cost + float(deformation_weight) * prior_cost
+@@ -560,4 +583,8 @@ class TorchGEMS:
+                                    "prior_cost_accumulation": "float64" if stable_mesh_fitting
+                                        else str(self.dtype),
+                                    "optimizer_state_precision": "float64" if stable_mesh_fitting
+-                                       and deform_optimizer == "lbfgs" else str(self.dtype)})
++                                       and deform_optimizer == "lbfgs" else str(self.dtype),
++                                   **({"mesh_data_epsilon": 1e-15,
++                                       "mesh_interpolation_precision": "float64" if cpu_precise_mesh else str(self.dtype),
++                                       "mesh_owner_precision": str(self.dtype)}
++                                      if vertices.device.type == "cpu" and compact_em else {})})
+diff --git a/src/fnit/gems/rasterize.py b/src/fnit/gems/rasterize.py
+index b52d84d7..b799c728 100644
+--- a/src/fnit/gems/rasterize.py
++++ b/src/fnit/gems/rasterize.py
+@@ -353,7 +353,7 @@ def rasterize_priors(
+ def _compact_lookup(vertices, tetrahedra, valid_mask, block_index,
+                     current_geometry=None, tolerance=2e-5, *,
+                     cache_owner_hints=False, owner_hints=False,
+-                    hint_tolerance=2e-4, hint_stats=None):
++                    hint_tolerance=2e-4, hint_stats=None, owner_geometry=None):
+     batches, reorder = block_index.device_compact_batches(valid_mask, vertices.device, vertices.dtype)
+     if current_geometry is None:
+         all_tet = vertices[tetrahedra]
+@@ -365,11 +365,14 @@ def _compact_lookup(vertices, tetrahedra, valid_mask, block_index,
+     else:
+         all_v0, all_inv = current_geometry.origins, current_geometry.inverse_edges
+         all_singular = current_geometry.singular
++    lookup_v0, lookup_inv, lookup_singular = ((all_v0, all_inv, all_singular)
++        if owner_geometry is None else (owner_geometry.origins, owner_geometry.inverse_edges,
++                                       owner_geometry.singular))
+     if (vertices.device.type == "cpu" and vertices.dtype == torch.float32
+             and not cache_owner_hints and not owner_hints and hint_stats is None):
+         from ._raster_cpu_compact import lookup_compact_cpu
+         with torch.no_grad():
+-            packed = lookup_compact_cpu(batches, all_v0, all_inv, all_singular,
++            packed = lookup_compact_cpu(batches, lookup_v0, lookup_inv, lookup_singular,
+                                         block_index._device_cache, tolerance=tolerance)
+         if packed is not None:
+             selected_ids, selected_points, covered = packed
+@@ -381,15 +384,15 @@ def _compact_lookup(vertices, tetrahedra, valid_mask, block_index,
+                     id(points), id(ids), id(point_rows))
+         previous = block_index._device_cache.get(hint_key) if owner_hints else None
+         with torch.no_grad():
+-            lookup = lookup_candidates(points, ids, candidate_mask, all_v0, all_inv,
+-                                       all_singular, point_rows, tolerance=tolerance,
++            lookup = lookup_candidates(points, ids, candidate_mask, lookup_v0, lookup_inv,
++                                       lookup_singular, point_rows, tolerance=tolerance,
+                                        previous_selected=previous, hint_tolerance=hint_tolerance,
+                                        return_hint_hits=hint_stats is not None)
+             if lookup is None:
+-                rel = points[:, :, None, :] - all_v0[ids][:, None]
+-                w123 = torch.einsum("bcij,bpcj->bpci", all_inv[ids], rel)
++                rel = points[:, :, None, :] - lookup_v0[ids][:, None]
++                w123 = torch.einsum("bcij,bpcj->bpci", lookup_inv[ids], rel)
+                 weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
+-                singular = all_singular[ids] | ~candidate_mask
++                singular = lookup_singular[ids] | ~candidate_mask
+                 score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
+                 best_score, best = score.max(dim=2)
+                 selected_ids = ids[batch_ids, best].flatten()[point_rows]
+@@ -470,6 +473,7 @@ def rasterize_priors_compact(
+     tolerance: float = 2e-5,
+     background_channel: int | None = 0,
+     current_geometry: CurrentGeometry | None = None,
++    owner_geometry: CurrentGeometry | None = None,
+ ) -> tuple[torch.Tensor, torch.Tensor]:
+     """Rasterize only masked voxels, in the order of ``dense[:, valid_mask]``.
+ 
+@@ -477,6 +481,9 @@ def rasterize_priors_compact(
+     caches fixed mask coordinates without retaining a mesh's autograd graph;
+     replacing the index naturally rebuilds that mapping after mesh movement.
+     ``current_geometry`` may share this evaluation's solves with the mesh prior.
++    ``owner_geometry`` optionally retains CPU FP32 ownership while the shared
++    differentiable matrices use FP64; it must describe the same current mesh.
++    CUDA callers leave it unset.
+     """
+     if vertices.ndim != 2 or vertices.shape[1] != 3:
+         raise ValueError("vertices must be [V,3]")
+@@ -492,8 +499,21 @@ def rasterize_priors_compact(
+     k = int(alphas.shape[1])
+     if background_channel is not None and not 0 <= int(background_channel) < k:
+         raise ValueError("background_channel is out of range")
++    if owner_geometry is not None:
++        if (vertices.device.type != "cpu" or vertices.dtype != torch.float32
++                or current_geometry is None or owner_geometry.origins.device != vertices.device
++                or owner_geometry.inverse_edges.device != vertices.device
++                or owner_geometry.singular.device != vertices.device
++                or owner_geometry.origins.dtype != torch.float32
++                or owner_geometry.inverse_edges.dtype != torch.float32
++                or owner_geometry.singular.dtype != torch.bool
++                or owner_geometry.origins.shape != (len(tetrahedra), 3)
++                or owner_geometry.inverse_edges.shape != (len(tetrahedra), 3, 3)
++                or owner_geometry.singular.shape != (len(tetrahedra),)):
++            raise ValueError("owner_geometry requires matching CPU FP32 geometry and shared interpolation geometry")
+     all_v0, all_inv, selected_ids, selected_points, covered, reorder = _compact_lookup(
+-        vertices, tetrahedra, valid_mask, block_index, current_geometry, tolerance)
++        vertices, tetrahedra, valid_mask, block_index, current_geometry, tolerance,
++        owner_geometry=owner_geometry)
+     if selected_ids.numel():
+         selected_cells = tetrahedra[selected_ids]
+         if (current_geometry is not None and current_geometry.deterministic_gradient

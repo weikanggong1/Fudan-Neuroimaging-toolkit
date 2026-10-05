@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "scope": "guarded persistent CPU average source and targeted local contract tests",
+  "production_source_commit": "fc2abc94966150906f4f3421f23aab235b64dd8d",
+  "base_commit": "a713f87571db2b9f7a8c3c344f3479bd72dc57be",
+  "source_sha256": {
+    "src/fnit/recon_all/_average_cpu_cpp.py": "03ba0229b6d8052d933a8e56d6558db35f030d5e3251c026e504486d3ca214bd",
+    "src/fnit/recon_all/_average_cpu_persistent.cpp": "a6dcc287830b60379b75545943ec5e019f2f7274c9266610177c849f05a3cc89",
+    "src/fnit/recon_all/mris_register_average_numba.py": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+    "src/fnit/recon_all/mris_register_average_gpu.py": "d0e2afb1e37fdfaff7ac80913ada47fed1805ae52ff296fa34050ac0cd7d7b42",
+    "tests/recon_all/test_average_cpu_cpp.py": "98f5e3426f3db924fd07f4b4589b47394ca9dc57aae0fb6f47553b63f0c5a24c",
+    "tests/recon_all/test_average_cpu_parallel.py": "f95c0a824d851c1f4abb198ab82469639296821f167cd874047ebbb99352a551",
+    "environment.yml": "baec456abc05df832c7e958943ab7eeac092a012952ab52fa0d4cc80071224a2",
+    "pyproject.toml": "de9f80c67ed9cf455fe5018fcbcce7a91e3396507daee4b213e0562b0378e10b",
+    "MANIFEST.in": "9535aa25f8c94dd50af76646dd523b9914f5c2a15a5c43a186ac266331427526"
+  },
+  "source_guards": {
+    "RegistrationGradientAverager_AST_unchanged": true,
+    "ordered_NumBa_AST_unchanged": true,
+    "three_hop_AST_unchanged": true,
+    "CUDA_source_unchanged": true,
+    "SynthSR_and_FNIRT_production_unchanged": true
+  },
+  "versions": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "numba": "0.67.0",
+    "llvmlite": "0.49.0",
+    "setuptools": "84.0.0"
+  },
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "processor_baseline": "x86_64 SSE2, no march=native"
+  },
+  "compiler": {
+    "command": "/usr/bin/c++",
+    "resolved_path": "/usr/bin/x86_64-linux-gnu-g++-11",
+    "binary_sha256": "2360901d864cf10bfd6296e261cb2c14053552a80377761ab07146ec9ec9a2c0",
+    "version": "c++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0\nCopyright (C) 2021 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+  },
+  "compiler_flags": [
+    "-O3",
+    "-std=c++17",
+    "-ffp-contract=off",
+    "-fno-fast-math",
+    "-fopenmp",
+    "-fPIC",
+    "-shared"
+  ],
+  "tests": {
+    "new_tests": 29,
+    "existing_tests": 3,
+    "passed": 32,
+    "skipped": 0,
+    "failed": 0,
+    "seconds": 23.92,
+    "threads": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "rounds": [
+      16,
+      17,
+      256
+    ],
+    "configured_pool_threads": 8,
+    "OMP_NUM_THREADS": 8,
+    "MKL_NUM_THREADS": 8,
+    "OPENBLAS_NUM_THREADS": 8,
+    "NUMBA_NUM_THREADS": 8,
+    "test_log_sha256": "82f3c1c596d18d7d92ecba53c3c599c7ba21255d52e56bb3def222007d17c145",
+    "scope_note": "Synthetic fixtures test bit patterns and error paths, not a benchmark"
+  },
+  "verified_error_paths": [
+    "compiler missing",
+    "unsupported platform",
+    "short or small call",
+    "non-FP32 input",
+    "failed build once per identity",
+    "compiler or flags invalidate failure",
+    "private cache ownership/mode/link guards",
+    "bad manifest rebuild",
+    "build timeout own-group cleanup",
+    "concurrent processes single publisher",
+    "bounded ENOLCK retry and deadline",
+    "subnormal and signed zero bit exact with default FP policy",
+    "NaN/Inf retains NumBa bit-pattern policy",
+    "explicit flush uses NumBa and restores caller policy"
+  ],
+  "formal_real_data_gates": "pending coordinator immutable source CPU ABBA and H100 GPU operator regression",
+  "prototype_evidence": {
+    "cpp_source_sha256": "8fb858ea0caee073b3af01d6787a883a50b32c3b0d6678cdcd5c18b629e5e9d6",
+    "operator_report_sha256": "cc7abc0bac96c34cd8464fd307f129be58956d49bc50ec60bb0358e8d6a9a50a",
+    "full_report_sha256": "d46c5abf533e6c1fe8da9adc260d43b7776a46efbcdf76fc2cc04ecf52ac1d1c",
+    "scope": "Distinct validation-only prototype. Do not relabel as formal fc2 source.",
+    "vertices": 119451,
+    "faces": 238898,
+    "coordinate_sha256": "70dcd5a9b819abe783558da573df2fe70712ca319a18fb5590a2acda43871e82"
+  },
+  "packaging": {
+    "shared_edits_owner": "coordinator",
+    "required_package_data": "recon_all/*.cpp",
+    "required_sdist_include": "recursive-include src/fnit/recon_all _average_cpu_persistent.cpp",
+    "new_runtime_dependency": false,
+    "clean_wheel_sdist_reinstall": "not measured here"
+  },
+  "not_repeated": [
+    "whole 2k test suite",
+    "original registration",
+    "complete reconstruction",
+    "minimum dependency reinstall"
+  ],
+  "production_adopted": false
+}
