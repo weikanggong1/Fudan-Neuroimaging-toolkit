@@ -1,6 +1,7 @@
 """Geometry, discrete sampling and boundary contracts; not an MRI benchmark."""
 
 import sys
+import json
 
 import nibabel as nib
 from nibabel.freesurfer.mghformat import MGHHeader, MGHImage
@@ -46,6 +47,17 @@ def test_crop_keeps_ras_origin_and_mgh_storage(tmp_path):
     for key in ("delta", "Mdc", "Pxyz_c", "dims", "type", "dof", "tr", "fov"):
         np.testing.assert_array_equal(loaded.header[key], prepared.image.header[key])
     np.testing.assert_array_equal(loaded.dataobj, prepared.image.dataobj)
+
+
+def test_report_json_roundtrip_on_cropped_target():
+    labels = np.zeros((13, 14, 15), np.int32)
+    labels[4:7, 5:8, 6:9] = 53
+    prepared = prepare_subregion_alignment_target(mgh(labels), (53, 54),
+                                                  bbox_margin_voxels=2, smoothing=None)
+    decoded = json.loads(json.dumps(prepared.report, allow_nan=False))
+    assert decoded["bbox_lower"] == [2, 3, 4]
+    assert decoded["bbox_upper_exclusive"] == [9, 10, 11]
+    assert decoded["output_selected_voxels"] == 27
 
 
 @pytest.mark.parametrize("mode", [None, "forward", "backward"])
@@ -183,3 +195,30 @@ def test_nifti_mm_input_and_invalid_spatial_units():
     source.header.set_xyzt_units("meter")
     with pytest.raises(ValueError, match="coordinates in mm"):
         prepare_subregion_alignment_target(source, (53,))
+
+
+def test_saved_mgh_score_and_atomic_metadata_are_json_serializable(tmp_path):
+    import importlib.util
+    from pathlib import Path
+    source = Path(__file__).resolve().parents[2] / "validation/robust_register/target_preparation_20261006/prep_benchmark.py"
+    spec = importlib.util.spec_from_file_location("prepared_mask_score", source)
+    worker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(worker)
+    labels = np.ones((3, 4, 5), np.float32)
+    for arm in ("official", "fnit"):
+        output = tmp_path / arm
+        output.mkdir()
+        for filename in ("targetMask.mgz", "flippedAtlasDump.mgz"):
+            nib.save(mgh(labels), output / filename)
+    result = worker.score({}, tmp_path)
+    assert result["all_gates_pass"]
+    path = tmp_path / "score.json"
+    worker.write_json(path, result)
+    assert json.loads(path.read_text()) == result
+    with pytest.raises(FileExistsError):
+        worker.write_json(path, {"overwrite": True})
+    invalid = tmp_path / "invalid.json"
+    with pytest.raises(TypeError):
+        worker.write_json(invalid, {"numpy_integer": np.int64(3)})
+    assert not invalid.exists()
+    assert not list(tmp_path.glob(".report-*"))

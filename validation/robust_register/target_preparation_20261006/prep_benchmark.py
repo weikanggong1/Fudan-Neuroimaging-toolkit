@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import resource
 import sys
+import tempfile
 import time
 import traceback
 from types import SimpleNamespace
@@ -26,9 +27,19 @@ def sha(path):
 
 
 def write_json(path, value):
-    with Path(path).open("x") as file:
-        json.dump(value, file, indent=2, allow_nan=False)
-        file.write("\n")
+    # Validate all metadata before touching the final report. Publishing by
+    # hard link is atomic and refuses to overwrite an existing artifact.
+    payload = json.dumps(value, indent=2, allow_nan=False) + "\n"
+    path = Path(path)
+    descriptor, temporary = tempfile.mkstemp(prefix=".report-", dir=str(path.parent))
+    try:
+        with os.fdopen(descriptor, "w") as file:
+            file.write(payload)
+            file.flush()
+            os.fsync(file.fileno())
+        os.link(temporary, path)
+    finally:
+        os.unlink(temporary)
 
 
 def method(path, class_name, function_name):
@@ -203,7 +214,9 @@ def score(plan, root):
             "version", "dims", "type", "dof", "goodRASFlag", "delta", "Mdc", "Pxyz_c",
             "tr", "flip_angle", "te", "ti", "fov")}
         rows[filename] = {
-            "shape_equal": equal_shape, "shape_official": list(a.shape), "shape_fnit": list(b.shape),
+            "shape_equal": equal_shape,
+            "shape_official": [int(v) for v in a.shape],
+            "shape_fnit": [int(v) for v in b.shape],
             "dtype_equal": a.header.get_data_dtype() == b.header.get_data_dtype(),
             "different_voxels": data_differences, "header_fields_exact": header_fields,
             "stored_affine_exact": bool(np.array_equal(a.affine, b.affine)),

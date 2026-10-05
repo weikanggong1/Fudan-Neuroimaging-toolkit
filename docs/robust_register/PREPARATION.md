@@ -39,7 +39,7 @@ prepared_target = prepare_subregion_alignment_target(
     target_voxel_mm=1.0,            # 高分辨率输入降至1mm
     bbox_margin_voxels=6,           # 以重采样后的体素为单位
     smoothing="backward",          # 先腐蚀，再膨胀
-    device="cpu",                  # 独立阶段的设备；当前真实CPU门待执行
+    device="cpu",                  # 本例CPU前处理门已过；CUDA尚未验收
     spatial_chunk_size=262144,      # 最近邻查询分块，限制坐标缓冲
     memory_budget_gb=20.0,          # 读入/工作缓冲的预检预算，单位十进制GB
 )
@@ -91,23 +91,41 @@ mri_robust_register --mov alignedAtlasImage.mgz --dst targetMask.mgz \
 
 ## 5. 精度、耗时与可视化
 
-当前34项局部合同通过，覆盖离散边界、半体素舍入、分块不变性、中心相位、MGH存储、形态学和反射。它们是接口/算法合同，不是模拟 MRI benchmark。
+同一公开真实 T1 派生的 ASEG（1 mm，256³）上，原安装版 SAMSEG 前处理前缀与 FNIT 使用相同8物理核、输入和 atlas。目标标签53/54、6体素边距、先腐蚀后膨胀。**保存后的正式数据/几何门全部通过**：
 
-同一公开真实影像派生的 `aseg` 和原 atlas 已有固定 SHA。一次官方前处理与 FNIT 的独立 CPU 对照 worker 已准备，但**尚未运行**。目标门固定为0个不同掩膜体素、相同 shape、dtype、MGH 几何/扫描字段和反射后的 atlas 体素顺序；未通过前不进行 affine benchmark。此次不跑整例 GEMS。
+| 输出 | shape | 前景体素（官方/FNIT） | 不同体素 | dtype、13个MGH字段、存储affine |
+| --- | --- | ---: | ---: | --- |
+| 目标掩膜 | 39×45×56 | 5835 / 5835 | 0 | 全部一致，affine最大差0 |
+| 右侧atlas头信息反射 | 131×241×99 | 512815 / 512815 | 0 | 全部一致，affine最大差0 |
 
-| 范围 | 官方对照 | 状态 |
-| --- | --- | --- |
-| 同例目标掩膜、裁剪、头信息 | 原安装版 SAMSEG 准备前缀 + Surfa/SciPy | 待执行；没有精度/耗时数字 |
-| 高分辨率 resize 的安装版编译实现 | 固定 Surfa 0.6.3 `.so` | 当前真实case不触发resize；仅源定义合同已测，不能称编译实现已验收 |
-| GPU 真数据精度和速度 | 共享GPU同设备配对 | 未执行；默认GPU链没有接线 |
-| robust rigid/affine、最终ROI | 同例官方注册/核团结果 | 未实现/未重跑 |
+MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作为数值门。该例没有触发高分辨率resize。它证明这一个前处理定义，不能代替rigid/affine或最终ROI验收。
 
-此前一次 GEMS CPU 候选完整右侧 recipe 已完成但最终核团门未过，见[负结果与脑图](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/README.md)。该记录不能代替本模块的真实验收，模块也不读取其细分结果提高匹配。
+| 持久化的时间记录 | 秒 | 范围 |
+| --- | ---: | --- |
+| 官方准备、保存、两次保存后重读 | 0.868449 | 含AST前缀编译；完整原报告 |
+| FNIT两个API、不含保存 | 0.638673 | 原不完整报告中已完整写出的标量 |
+| FNIT两个API加保存 | 0.662887 | 原不完整报告中已完整写出的标量 |
+| FNIT内部各步骤时钟/RSS | NA | 序列化失败时尚未完整写出，未重做计时 |
+
+双方计时范围不同且只有一对观察，不据此宣称稳定加速。原FNIT图像生成成功后，报告的NumPy裁剪整数不能JSON序列化，原进程exit1；首次只读评分随后也因MGH尺寸的NumPy整数exit1。这两次记录和原partial字节均保留。固定四个保存图像的SHA后，只读恢复标量得到完整正式评分：恢复exit0，等锁54.038秒、标量/头信息评分0.202秒、总54.505秒。**恢复时钟不属于前处理时间。** 没有重算官方或FNIT影像，也没有运行注册或GEMS。
+
+后续修复只把report裁剪坐标/评分尺寸转为Python整数，并在报告原子发布前验证JSON。影像、几何计算的AST保持。35项不同模块合同来自原34项批次加1项新JSON合同；另有1项评分/原子发布合同和5项仅stub的进程边界合同，没有声称一次重跑35项或把小合同当MRI benchmark。完整来源和时间证据见[验证记录](../../validation/robust_register/target_preparation_20261006/README.md)。
+
+![同一保存网格上的官方与FNIT目标掩膜](../../validation/robust_register/target_preparation_20261006/preparation_targets.png)
+
+| 尚未验收范围 | 状态 |
+| --- | --- |
+| 高分辨率resize安装版编译实现 | 仅源定义合同；本例不触发，尚未对真实高分辨率数据验收 |
+| GPU真数据精度/速度 | 未执行；默认GPU链没有接线 |
+| robust rigid/affine、最终ROI | 未实现/未重跑 |
+
+此前一次GEMS CPU候选完整右侧recipe已完成但最终核团门未过，见[负结果与脑图](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/README.md)。本模块不读取其细分结果或原配准矩阵来提高匹配。
 
 ## 6. 更新与 benchmark 记录
 
 - 2026-10-06：独立目标准备/右侧头信息模块；没有修改生产 GEMS、默认 CPU/GPU 数学或通用重采样。34项合同通过。首批合同的一个预期值误写为标签值乘255，已更正为布尔选择乘255；代码结果未因该测试修订而改变。
-- 下一阶段：一次受锁保护、相同8物理核的真实 target-prep 对照。未启动注册或第二次整体拟合。
+- 2026-10-06真实对照：目标与反射atlas的数据/几何exact门通过；保留两次报告写出exit1，metadata-only修复及只读补录后得到完整评分，未重算前处理。源版本与SHA见验证记录。
+- 下一阶段：核对并计划独立robust rigid→affine移植与组件benchmark；未启动注册或第二次整体拟合。
 
 ## 7. 来源、许可与参考文献
 
