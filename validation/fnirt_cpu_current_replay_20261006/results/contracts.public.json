@@ -1,0 +1,189 @@
+{
+  "scope": "small mathematical contracts derived from saved vector prefixes and explicit guard fixtures; not MRI benchmark or new native oracle",
+  "independent_oracle": "exact Fraction multiply+add with one FP64 rounding for FMA; separate FP64 products/adds for norm/tails",
+  "rows": [
+    {
+      "length": 0,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "length": 1,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "87491f3a6f906171f949d75702056e133b853d5aae59469527d29baee6bbc3a5"
+    },
+    {
+      "length": 3,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "41598a28777edaf8fe3fa3e0a88e0e1804a2c04bc4396aceb120b64d96d28247"
+    },
+    {
+      "length": 4,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "25374240b2ae5a2b7a204a77de5fae2ec2557eb6fd2a779590c8a3d814819b60"
+    },
+    {
+      "length": 7,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "93686281560ba62223b2dd2b027f6fcc0b2cb1ba40322f63b03fbe0de9430c29"
+    },
+    {
+      "length": 8,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "5143fa0cf17fe31e05c8ee49ee50a09fc60c060e1b64630a6c8363ce8372a70c"
+    },
+    {
+      "length": 15,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "d2ae83b73060a0cb884f63d2861671c55fe65f345e54d9900b6db48e4b718bed"
+    },
+    {
+      "length": 16,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "df27491e6d7b632097d1f945aad17447735ad1ba633dd216a450e611a060bc67"
+    },
+    {
+      "length": 17,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "2ba92c6f5f76335a4a9de1d09e0542e7a698f6b652e4ff2232839a873f207230"
+    },
+    {
+      "length": 31,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "f255a332aefd6deb572070580bae0a006bdfd309fbbe9825f480ebf32676071e"
+    },
+    {
+      "length": 32,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "9d915d8fd4a5c2aac15c49688e0ba31fe32e91826d4b4cb9c03f1e3356d64e96"
+    },
+    {
+      "length": 33,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "4e4b4285aebf6dc64241da49e98157fc82004bfdb30eea3556d69f4c98ff62fb"
+    },
+    {
+      "length": 47,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "53b93bcc7f4fcde2f2b6a8975589c0866d8d3acdcb9f820fe5ea000ddd53546a"
+    },
+    {
+      "length": 48,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "9baaf974aea0d6a354cf1ba99fa07bc5630a0c917c6d26a8249ff9b2a274dfb5"
+    },
+    {
+      "length": 63,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "5cb692007d20529063a3702c915ba19638b74998ac6c6ad5a22120b7f95a4586"
+    },
+    {
+      "length": 64,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "1b2a8a310d2b67fcdf6e79faf977e8354a6e8fb42de58e9842f0c2bcb5b57c01"
+    },
+    {
+      "length": 65,
+      "dot_exact_bits": true,
+      "norm_exact_bits": true,
+      "input_sha256": "67fd9bc0633e3992b3171dbef7945cb3f77b706bf4b0d09b582677c8055f7fe5"
+    }
+  ],
+  "guards": [
+    {
+      "case": "fma_cancellation",
+      "passed": true
+    },
+    {
+      "case": "zero_rhs",
+      "passed": true
+    },
+    {
+      "case": "strided_identity_and_input_unchanged",
+      "passed": true
+    },
+    {
+      "case": "zero_denominator",
+      "passed": true
+    },
+    {
+      "case": "negative_denominator",
+      "passed": true
+    },
+    {
+      "case": "nan_denominator",
+      "passed": true
+    },
+    {
+      "case": "inf_denominator",
+      "passed": true
+    },
+    {
+      "case": "device_meta",
+      "passed": true
+    },
+    {
+      "case": "dtype_fp32",
+      "passed": true
+    },
+    {
+      "case": "rhs_requires_grad",
+      "passed": true
+    },
+    {
+      "case": "diagonal_requires_grad",
+      "passed": true
+    },
+    {
+      "case": "diagonal_nonpositive",
+      "passed": true
+    },
+    {
+      "case": "diagonal_mismatch",
+      "passed": true
+    },
+    {
+      "case": "output_dtype",
+      "passed": true
+    },
+    {
+      "case": "output_requires_grad",
+      "passed": true
+    },
+    {
+      "case": "output_shape",
+      "passed": true
+    },
+    {
+      "case": "tolerance_zero",
+      "passed": true
+    },
+    {
+      "case": "iterations_zero",
+      "passed": true
+    }
+  ],
+  "all_passed": true,
+  "limitations": [
+    "Only the declared arithmetic definition is checked; no native BLAS selector/large threaded reduction equivalence is established.",
+    "Meta device rejects the non-CPU contract without allocating CUDA memory. No CUDA tensor or GPU execution is tested."
+  ],
+  "source_sha256": "538afc2ab817964514ca6e030ba945bfdc75450f4a79f1a5d0d2b7a459455671",
+  "candidate_sha256": "845a8244d0617e7d22bb9626ec08f9dde1130aa8227aefe1fc3d9a3625c23c8a"
+}

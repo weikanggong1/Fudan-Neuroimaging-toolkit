@@ -1,0 +1,485 @@
+{
+  "status": "bounded_current_system_pair_completed",
+  "scope": "one saved current system; numerical isolation only, not full FNIRT registration or performance benchmark",
+  "old_new_pair_executed": true,
+  "contracts_passed": true,
+  "system": {
+    "dimension_from_saved_gradient": 1177,
+    "dtype": "float64",
+    "formula": "A = saved full H + .001 * diag(saved independent full diagonal); preconditioner = 1.001 * same diagonal; RHS = saved full current gradient",
+    "saved_current_inputs": {
+      "H.private.f64": "426e0d4add9dd6f46a972ecde0b4e06e6f1350301c06be4c6391af4148c4fa8d",
+      "gradient.private.f64": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73",
+      "diagonal.private.f64": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f"
+    },
+    "CSC_data_sha256": "5f7766aee46f97b95aa64efd777d5bdf117c06b67f1c5a29dadf5d4669c531ac",
+    "CSC_indices_sha256": "0d641373b01ee00cf7981b586c24d125fea5ae746dfdf8676b43c81be9493160",
+    "CSC_indptr_sha256": "4fd6623804280e4e34bba83ac1e17e8799cad3fab16b792de90aa03179a817fa",
+    "preconditioner_sha256": "7c13899dbb82fde928cfe24612e10f4e5e5a500ff520253aa62871ae4fb01b17",
+    "full_A_sha256": "dad18e485e04287cd7772a895474f21ce6f9d73862699cabdb95717b2db5cf71",
+    "Hdiagonal_vs_independent_diagonal": {
+      "different_bits": 840,
+      "different_values": 840,
+      "all_finite": true,
+      "max_abs": 2.0816681711721685e-17,
+      "rmse": 1.8691824375849378e-18,
+      "relative_l2": 1.2493814389492012e-20
+    }
+  },
+  "arms": {
+    "old": {
+      "report": {
+        "iterations": 53,
+        "converged": true,
+        "relative_residual": 0.0007816909115502338
+      },
+      "strict_CSC_matvec_calls": 53,
+      "true_relative_residual_own_definition": 0.0007816909115493257,
+      "wall_seconds_observation": 0.2581393187865615,
+      "all_finite": true,
+      "rhs_unchanged": true,
+      "diagonal_unchanged": true,
+      "vs_saved_native_solution": {
+        "different_bits": 1177,
+        "different_values": 1177,
+        "all_finite": true,
+        "max_abs": 1.487993443694992,
+        "rmse": 0.3040706990531981,
+        "relative_l2": 0.11529942222584459
+      }
+    },
+    "new": {
+      "report": {
+        "iterations": 49,
+        "converged": true,
+        "relative_residual": 0.00041659632038126105
+      },
+      "strict_CSC_matvec_calls": 49,
+      "true_relative_residual_own_definition": 0.0004165963203812138,
+      "wall_seconds_observation": 0.0407829349860549,
+      "all_finite": true,
+      "rhs_unchanged": true,
+      "diagonal_unchanged": true,
+      "vs_saved_native_solution": {
+        "different_bits": 1177,
+        "different_values": 1177,
+        "all_finite": true,
+        "max_abs": 2.1182363826433015,
+        "rmse": 0.38681070868022416,
+        "relative_l2": 0.14667329460046588
+      }
+    }
+  },
+  "new_vs_old": {
+    "different_bits": 1177,
+    "different_values": 1177,
+    "all_finite": true,
+    "max_abs": 0.6926206766287937,
+    "rmse": 0.17502217077442106,
+    "relative_l2": 0.06786199083086962
+  },
+  "native_solution_loaded_only_after_both_solvers": true,
+  "native_solution_sha256": "42346d870cee4db77ea726ad4c119b9390d18133b71a99952ba1d100df9b2166",
+  "other_gradient_inputs_used_for_solving": false,
+  "production_changed": false,
+  "source_sha256": "f000d386ea781d495c3c1dedd8d1230431a8536f933d6d9584b796624452c579",
+  "candidate_sha256": "845a8244d0617e7d22bb9626ec08f9dde1130aa8227aefe1fc3d9a3625c23c8a",
+  "arithmetic_sha256": "3faffbd27e7de5bec55982a8502573e910ad0668b4fbef2cf003b6267f4d36a6",
+  "frozen_optimizer_sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+  "wall_seconds_with_contracts_JIT_and_diagnostics": 38.448953073471785,
+  "precision_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "grad_enabled": true,
+    "cuda_initialized": false
+  },
+  "precision_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "grad_enabled": true,
+    "cuda_initialized": false
+  },
+  "caller_precision_and_grad_unchanged": true,
+  "loaded_DSO_basename_sha256": {
+    "cython_blas.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d2c8d68e269f8ae27a6ca1f8da3f7588d986429015bcb5630b8ae94f5f1cc8d6"
+    },
+    "_decomp_update.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "b3744ff016118201731b8c9efdb034a685b9fff3de6ebc88fa8e0b92454b2495"
+    },
+    "_linalg_pythran.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "4eb72c0f9bf1524c502a1e5fe7c35255de6ee890941799d87bf92db873d6c85c"
+    },
+    "_matfuncs_expm.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "29fb8f26ee32ff7933f3c4455f522931e08e9a5f31bc8491c5f940dafa4330c2"
+    },
+    "_matfuncs_schur_sqrtm.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "f39ef53207859cad0e84023572988d07045c6477a224b60ed684c5615ffcb639"
+    },
+    "_decomp_lu_cython.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "5b71f1b08d03c6fe88bedfbc68c6042694a16bf5602f722dbf41ae5bfb03c282"
+    },
+    "_batched_linalg.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "1e0114969d4e661c276c9858c1bf9df5023954c7e6e3668f85e2bf50cd0be7de"
+    },
+    "_solve_toeplitz.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "90f0dca430d9849659306b0a2b2f83daf6ce4ce2e9d2a64e81ad8a62351749fd"
+    },
+    "cython_lapack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d10749a0f786988ac19d1719b0d3224ce7e583f5dc4aa79b96d08c88aab90d9f"
+    },
+    "_flapack.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "bfb4021517a622ad6ef62e5b43b36ecbe784d18c25a7b3946ac380b37cf4f93d"
+    },
+    "_fblas.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e3fe96ad973d2e1973b7dce03368acd56372824f7b83f097c00155d5115f9de7"
+    },
+    "unicodedata.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "1f9bd84525aecf2ade8412218ea7d6894b12e9e0ba78da9d88e8a2fa4d56d086"
+    },
+    "libssl.so.3": {
+      "sha256": "0246a392f07abf2c65cf701b2e0fa5f8c673d4606e13dff940defac1c6017659"
+    },
+    "cmath.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "f45e52498cfd2a22143ad443a669cf92edd0305854c719a7bb8c2187e57557eb"
+    },
+    "_queue.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ad2eb3851cb6c61d99dee1d11fe95bb0c2199817c587f573b335675427ddf64b"
+    },
+    "mmap.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "20924ef30b4b58f100cf38e0ba718ed135f1b0a907d153c22344816368975ca9"
+    },
+    "grp.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d94a239e4b0988cebfe6508366c1cb6ca78f1fcc0b2e3aa6b576f93143e061cc"
+    },
+    "libcublasLt.so.11.11.3.6": {
+      "sha256": "386d327232c56d6e37e0600ea1c258d1873b519c2abe6524a9b47f4a3d18762c"
+    },
+    "libcublas.so.11.11.3.6": {
+      "sha256": "e2cf07ca67614bb87e819859685287e2bc71c6c047f4466a5e896e0655b9b833"
+    },
+    "libcurand.so.10.3.5.147": {
+      "sha256": "f51685e407cdbcb764f52aa76110b7e73a21af321030685303c43afc056ee0ae"
+    },
+    "libcusparseLt-f8b4a9fb.so.0": {
+      "sha256": "161c80b2e24e5ef3c6fe778825e3b6e83e1b3e8ac866e2d4c80f14a6300f7fce"
+    },
+    "libcufft.so.10.9.0.58": {
+      "sha256": "334a5f3ee7c6a3cc830b86bd882177c49f92b5dbf801bde53537456155cd2fb2"
+    },
+    "libcusparse.so.11.7.5.86": {
+      "sha256": "3ee85a7bbf0b11caf7c9371ef704a708a43574803be5903b90820413070e12de"
+    },
+    "libcupti-ae79a72e.so.11.8": {
+      "sha256": "4230369b8cd61eb3615069e40388100e1c2bfc539b636df9fac5ce652c57721e"
+    },
+    "libcudnn.so.9": {
+      "sha256": "23ec7bc9b065f5e055d9a5f16752c27cf2fd3e8690bfebd7fa3fcde95ec25c9d"
+    },
+    "libc10.so": {
+      "sha256": "6f21ef6adac07a6f79899ee93f466aa63cb58e7d6198bc37c7bc46f3d26bb26b"
+    },
+    "libc10_cuda.so": {
+      "sha256": "3b523a45ddac6241f0c6b4d538008db9d7c344ced316acc14bfc1bfe78c7dc07"
+    },
+    "libtorch_cuda.so": {
+      "sha256": "5541685d2b67c415155a50f8c553b1cec0dc0e9f61d4e91205337c2565813dbc"
+    },
+    "libtorch_cpu.so": {
+      "sha256": "529f5ab9d2397b671c4768e8ad2865c626352909fd6d76b4b6b57622b39a874c"
+    },
+    "libshm.so": {
+      "sha256": "57f95330b40eaabc2c71411538596de8451f7033569f40df3361d5cc120c32bc"
+    },
+    "libtorch.so": {
+      "sha256": "712261a4bacce343f4e7a858b2034a08d5caabd9132ca289bcdf2a5d8f38b107"
+    },
+    "libtorch_python.so": {
+      "sha256": "95a1aa1821c2f96a4727d04a375cfe911892f2902bbe81c96222d46eb3fb5d9e"
+    },
+    "_C.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "1c1799d71bf46f6a60e3305f13a9fd0b7128326a1d9d4da5c16e9e838d7371a4"
+    },
+    "libgomp.so.1.0.0": {
+      "sha256": "34324e0835be6e103844d7c416bec42834cf803d3ba8d9519df15ced19914dfe"
+    },
+    "libcudart.so.11.8.89": {
+      "sha256": "8db0547bf0ca365e06778575987e4ccf8ec35fa314867fd84e7d43fed00ecd2e"
+    },
+    "libmkl_gnu_thread.so.2": {
+      "sha256": "44c26166da452ab302c931c2de17681cf01e92c5b1c2d856011825f4ababc5a0"
+    },
+    "libtorch_global_deps.so": {
+      "sha256": "67855b5b40fd0157590fb567c13c1b0ae4b59ab4d33b068d8a9c2accb4ccd561"
+    },
+    "_csparsetools.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "3a071ff22e1a9965f0400df3eff0af8b2331fff0e80dad05a25b6064e97f9d61"
+    },
+    "_sparsetools.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "b7c325a875d82050f298f424dddea7819051c66ea261a51e7dc158f5dc765c76"
+    },
+    "_box.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "511336a93293b2425e88238a0d3d3517788d8d59d0a34bde7bcc6efae519f33d"
+    },
+    "_internal.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "0e313d326478c11d93a4cdacde002b2e656c3d5685cfaff0ea7a880f43f2c504"
+    },
+    "_csv.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d37a58c00e1714c7e6687bf926b0c49cafa27ab710999f6c5e21b4a36c28d978"
+    },
+    "_heapq.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "f9592ad83a563c036a984fdc25c6a3a909436bd445a23966586cf1c2b6f4dbfc"
+    },
+    "_nrt_python.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "b4a472d35f026355132418e2e991a44d4230d26b96675d55dead4642b5278860"
+    },
+    "_devicearray.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "6754d6e8b6b7b96cc605f7e0c2cd5f5bc4b6b63f74a84813198b1d987a14c80c"
+    },
+    "_dispatcher.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "5b0222fa88115c8115a1383abb0c97b5b3b25889b478f06343538cfc9ae90fa4"
+    },
+    "_dynfunc.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "64f7fdf9458ab5d0ee84354e7769cf92973a77a8d0e715e8649c0aa8dd71262e"
+    },
+    "_helperlib.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "4fd889d54be2d94b9c4c4d2c01b2be327b86c4c363df74bfb49c2a322a054f40"
+    },
+    "_cythonized_array_utils.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "a3e333aec005441ad9850c4569bfd93d400213ece69a970459db96de20a3ec30"
+    },
+    "_decimal.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "5e901a75799662272d4a1c238e347c7c2f288c73e22fb99f3c02ba4969adeb37"
+    },
+    "_asyncio.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "22c3689cb663e03ce5c3a9dde28ac32fb4102cb2aaa4f59d64e8e4725e97529b"
+    },
+    "_multiprocessing.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "5254f171abb0d07d42de633a87d36d2dafdbefb720e61c439a5f3c299b3efd67"
+    },
+    "_ssl.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "7cdd325eff4070de5edbea42600c0c694814c69cffede00d9f028f2fb760b824"
+    },
+    "libuuid.so.1.3.0": {
+      "sha256": "096aba5908e5f3332eb9bdd5f229dd4f4f39552ef7bd157ca389c78e78f0b33e"
+    },
+    "_uuid.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ed8a590ba06134f9b9ba509ad9b648defec91b2170e64f07f9e7dfe750514233"
+    },
+    "_typeconv.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "92bbb1355ff1cacfc8684715fe1e53435480b50f28f39d77e3824763c8414b77"
+    },
+    "libstdc++.so.6.0.36": {
+      "sha256": "10f0d3c46c070acd4abea2ccf2500ff0ec77e9b90154b82ea2720dba05510cb9"
+    },
+    "libllvmlite.so": {
+      "sha256": "8d5be916c2e4b8d9f7bc6489ab512eaef998f4642feff04c8b85ad207193ce76"
+    },
+    "libyaml-0.so.2.0.9": {
+      "sha256": "7ee9ab43b39cc0ad7811fa5ad3af8c1a093f519e08fd17f9442efa8a7d07aad0"
+    },
+    "_yaml.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "731a79d4e6fb9092acd98ca26582ab8c888c83348f8d4dcbcd47201a12cdc8eb"
+    },
+    "_cyutility.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "bf7a6723bc5d35a49df4120ed9ae918bc06b6903140acc7132e54181045cce8b"
+    },
+    "_ccallback_c.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "7a97fc83384873b790c056160355b0a2c990e7e7164cc46cc8eb8a1cce34df6b"
+    },
+    "_posixsubprocess.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "cf5bd5c52fe10c92072d7a49dfe5297438ce8fbe098c79f1ecbc58254f420b91"
+    },
+    "fcntl.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "4081c53fc1b8ae863af847147e9bb5cfa6f6fac67803ca5be2d60b7124314f47"
+    },
+    "liblzma.so.5": {
+      "sha256": "491c01c02da5a22f5825a7c05a561e175aa70c203d5e462dfe90b5040dbdaf50"
+    },
+    "_lzma.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "b2669069e06f0cad5c3079c9b2b52c02cb2539c8051cba06038a736ce5519b20"
+    },
+    "libbz2.so.1.0.8": {
+      "sha256": "89167cfb36a81306dcf8f439436f46dda12f0bbf4877b9f87abfd079bf765c46"
+    },
+    "libmkl_vml_avx512.so.2": {
+      "sha256": "a91658c37ca33fae183a22cd99a980d6f24158d1bbb55a5e31c09b676ebc0b50"
+    },
+    "libmkl_avx512.so.2": {
+      "sha256": "5dbc11d0fac83ce35e5a7d9e66c99de4ea5b88a4ca0b32e8f490fa791d3d815a"
+    },
+    "libmkl_intel_lp64.so.2": {
+      "sha256": "bd259733d7a3044c0656f32325df145e63ca52aba71560db0db2e991a138ee16"
+    },
+    "libmkl_intel_thread.so.2": {
+      "sha256": "2a568b1acf5d528539bbff53be43384bba822ea1c78669240c06a6bf76fed3ce"
+    },
+    "librt-2.17.so": {
+      "sha256": "5a76b3619ccd14f300d4df3cf45574106ba4f049e74cdf8f97dae1ea6a38e9e8"
+    },
+    "_bz2.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "7772fee3e37d63dd0ef1dc007364401f7961e77bdbdcc271933c64451ff80f8c"
+    },
+    "zlib.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "44809a44e06157482f18840189c79cbb36cb07a21b728d5f925c89b99b908aad"
+    },
+    "libiomp5.so": {
+      "sha256": "53169dc0f49fe54bb09d7a5e671c875dad0a049a4078d5e43a6f07c9926d5d33"
+    },
+    "libmkl_core.so.2": {
+      "sha256": "3d6f3d5e6ace46852e1d22f47ce32c5baebca80b99c721a56ec9e3351c1d21ae"
+    },
+    "_generator.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "9c4a5eaf77c2b110a873a4c00a5a163decceea6a944e37a405983471e84e19fc"
+    },
+    "_sfc64.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "85a891ea54a4c7830f4689daceedc1522b77484c6d374a905620bb20c45b2740"
+    },
+    "_pcg64.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "eecc4887af96027c27f64cfd6b318a99b89f0ff7a4d160248d92c7a145550e74"
+    },
+    "_philox.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "cc266ee485a75f98db4d4ffe0440154145015b19edce524aab7914bee5f4fede"
+    },
+    "_mt19937.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "9db8e9fa32de7e2d4533b31fc901da7191d61f05ce59995e65fe2fd20fe5ab88"
+    },
+    "_bounded_integers.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "1d78a532d2fd11804454580f96fef2345ee747cb4f163c910cdaac9ac6560475"
+    },
+    "_sha512.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "23ba1a72adc5f4b49c03ddccc0a8cfe4159bd4f6a65de69de961adb4fe972436"
+    },
+    "_random.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "b21af70283d0b8656952a12ec8c2c1eff944e79853292f5f574418133c4b2daa"
+    },
+    "_bisect.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d3d407d9f1be5cb6ebdd68c20031cca45f82b4f4a89abf7ebac194474d60d93b"
+    },
+    "libz.so.1.3.2": {
+      "sha256": "3c6fd78e248a60e45081bcc77031204a7cb64a88ff2e27fc786ef12ae7e91fca"
+    },
+    "binascii.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "9a11af554b4d85afa7e84ce250aa174c9cfcd9ac5062b8fe8a145012435c804f"
+    },
+    "_common.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "1e46ad62bee1dacce34547e9648faad297c7186ee6c74bc7182a0f449db9d0bd"
+    },
+    "bit_generator.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "3a5ad3eba25927dc848809da7251a4dc32f6c91cafb9b0f7a7f0f2a85ac0c33a"
+    },
+    "mtrand.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "712d2bf7d607f56da3e82e6acdc71439927c7bfd981108d2804304defce9b651"
+    },
+    "_pocketfft_internal.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "28875bfafe2d4ffd866354897a8e6327e2176fd4e22d4ef056d84baff58dd823"
+    },
+    "_umath_linalg.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "d65538c8b25331800f88a0549aa91386b23cce50f0c3c3e3ad3f673879295c1c"
+    },
+    "_typing.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "c6715f80fa4486ad2e129b18dc74a750cbf334ece3aa5b3dd11a5bf50029931c"
+    },
+    "libffi.so.8.4.0": {
+      "sha256": "4d28902e78d7ed5e1d825e0e038286a5e4dc7ef14d789ff4992336bbfc315ca4"
+    },
+    "_ctypes.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "57d3daa06bf511d25351fd5452832504a7e05159b98be0607adc8e88032c928d"
+    },
+    "_multiarray_tests.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "6fb0e9c4af7512fbe90dbe2d20098517a8acfffd6a144a341038478f8b59fbce"
+    },
+    "_contextvars.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ca8ca7388e0906624edd6e3cb68486f414d1aebf0da2a25f515f6674fc342acc"
+    },
+    "_pickle.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "a6d5c9d6a3d2b10f50ad5250037c91cb2c9e77e522dcc905bdc2e3bfffc19ac6"
+    },
+    "_struct.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "1224cf1dda9b495c9608bf9bf206b1a130522be7ebbe9e61f3b55112be576f0e"
+    },
+    "libgcc_s.so.1": {
+      "sha256": "5444fbe71e8cfe3bd05cdf2b44bd8c2e553e6e7e276977089b5e4e1a1ceed531"
+    },
+    "libmkl_rt.so.2": {
+      "sha256": "eba5c737cbd0653fd887cb7f8cdac1c728280e9a95324536ed3a515f002cf07c"
+    },
+    "_multiarray_umath.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "9226d24891a947d115b245e1b97832b22dd352e22dff26e452bc55b717cc3721"
+    },
+    "libcrypto.so.3": {
+      "sha256": "a3168a2b6c3acce82c3b01cbb1f3c8c3f96db082e11c484fc3dfd8fd013a0cc6"
+    },
+    "libc-2.17.so": {
+      "sha256": "18c9eb148ec8bf8f6018d3021e7395bd9de847f280dde5d65e73522195fa35f9"
+    },
+    "libm-2.17.so": {
+      "sha256": "2ff6a53615516bf6c6e9ae1df288221ecb73bbc5a61e4cbb38a777da3afb0b59"
+    },
+    "libutil-2.17.so": {
+      "sha256": "85de5b1e64d56eab48a5537ade8ddcf77adbca544a28489baad9e848c8c816f6"
+    },
+    "libdl-2.17.so": {
+      "sha256": "bc46c72626d57207bbeac8cdf27e9a7707fb72db57ebe1948aefd788f0fdda1c"
+    },
+    "libpthread-2.17.so": {
+      "sha256": "878b0b9d65c7154837e674de16b913959a72824dbfeebb047407c7880a07d3c4"
+    },
+    "ld-2.17.so": {
+      "sha256": "5dd05366a881b2c3c525beb5f6811f3584ff8b1de3c08ea79ae9bb54ffacf835"
+    },
+    "_datetime.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "a4d07c41f42d08148c4591937e32d6b1ef7db3fb32032cf95f8c9b22c19297a5"
+    },
+    "array.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "a9fceacd72d93044325dd4920a8765bf4745c6bbbcfa0afff268813b7cd2ce91"
+    },
+    "select.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "525c3fe14d09eee1358ffde05cd00bf6c00f41a9d806e2d9015f162141f6a8e1"
+    },
+    "math.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "122d6eb4ef43980be3f4ae2bab03a9132194849823196dde223ac1e3370e5659"
+    },
+    "_socket.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "ee02eeea63270a447ab21e456668117829c2cb7e85d99996452de24a604774bd"
+    },
+    "_json.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "5ac473245836a1c080dd12f5689879dd0dba56b3202aa4b464784394aadba7bc"
+    },
+    "_hashlib.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "2ee2ce84c41036f3cbc3287b0d57dd3cb23f1f3b133e16feed6c3587e1393e6c"
+    },
+    "_blake2.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "e440f18649da21e3ad0da41c7ac15ac5e29ef3449795b4f6193bb575bc9bdd29"
+    },
+    "_opcode.cpython-311-x86_64-linux-gnu.so": {
+      "sha256": "2aad5141f776bc3023966d72a0cc92d723b8cc3f22cf5c0e391e083370971f0d"
+    }
+  },
+  "reference_DSO_absent_at_final_snapshot": true,
+  "own_dot_JIT_assembly_sha256": "d60ad1834a817c6a1f75e3d05dde3b9b16b36fb063427febcd13a2cd6f56e6e7",
+  "own_dot_JIT_contains_vfmadd": true,
+  "snapshot_scope": "one process maps read after both arms; source + snapshot is not a complete system-call audit",
+  "host": "nodecw7",
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "torch_threads": 8,
+  "torch_interop_threads": 1,
+  "environment": {
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "8",
+    "MKL_NUM_THREADS": "8",
+    "NUMBA_NUM_THREADS": "8",
+    "CUDA_VISIBLE_DEVICES": "",
+    "LD_PRELOAD": null,
+    "LD_LIBRARY_PATH": null
+  }
+}
