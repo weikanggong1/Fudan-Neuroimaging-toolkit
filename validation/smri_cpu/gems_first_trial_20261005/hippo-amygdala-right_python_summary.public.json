@@ -1,0 +1,88 @@
+{
+  "status": "completed_bounded_same_state_python_first_steps",
+  "scope": "Real synthetic stage1 only; reference search is source-informed Python, not actual native optimizer; no complete fit or default adoption",
+  "structure": "hippo-amygdala-right",
+  "gate": {
+    "cost_exact": true,
+    "gradient_exact": true,
+    "priors_exact": true,
+    "coverage_exact": true,
+    "points_exact": true
+  },
+  "searches": {
+    "armijo": {
+      "method": "existing-fnit-armijo",
+      "reason": "existing_optimizer_returned",
+      "evaluations": 2,
+      "initial_cost": 38208.856504941665,
+      "selected_cost": 37930.37491417464,
+      "selected_alpha": 0.00037592278354625934,
+      "selected_max_node_displacement": 0.49999947572332326,
+      "selected_source_armijo_satisfied": true,
+      "selected_strong_wolfe_satisfied": true,
+      "caller_static_state_restored": true,
+      "bounded_search_observation_seconds": 5.2165650287643075
+    },
+    "reference": {
+      "method": "reference-first-step",
+      "reason": "strong_wolfe_bracket",
+      "evaluations": 2,
+      "initial_cost": 38208.856504941665,
+      "selected_cost": 37717.38959156219,
+      "selected_alpha": 1.0,
+      "selected_max_node_displacement": 1.000000676983971,
+      "selected_source_armijo_satisfied": true,
+      "selected_strong_wolfe_satisfied": true,
+      "caller_static_state_restored": true,
+      "bounded_search_observation_seconds": 2.365907651372254
+    }
+  },
+  "host": "nodecw7",
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "torch_threads": 8,
+  "numba_threads": 8,
+  "capture_inputs_sha256": {
+    "report.public.json": "788bda7238107490849fcd34d2d617f9ad85e62bc1cd2a3f55dce7cade8e164c",
+    "shared_input.npz": "30269d8aa4d9db4e6ba1c9ffcaaaa3784d4b7c941781eb0bfd8556ee122f6712"
+  },
+  "program_sha256": "a996995feed38f49b53498a8a6e10e49cfba0ee86ceec176cb9267a67ff841f4",
+  "prototype_sha256": "99b034bee88954c736d5178644f8419abbba3b6674f0e76f20d8b812049fd0fa",
+  "source_sha256": {
+    "_raster_triton.py": "22ce1ca61efa42b5b6d06cacc4f4d859ef2c10ffca26ecf154f3d73361bee5ac",
+    "smoothing.py": "853078d34c9c798395db16b9af503065d88cc68b656615a52826c066bbf45fb5",
+    "_raster_cpu.py": "e5548621fe29d40e140b97ed9e5c81c038ceb8947d04e57730037935debed9b9",
+    "pipeline.py": "20a0df50ce6c3fd0e3eb67b0eb8cbcd588565615cc8c15ed4449ca1644ea3543",
+    "rasterize.py": "f665e25582b2d4d63da6c2351d9d09a76a23b81354b60a1fa8c2187d580b55eb",
+    "preprocessing.py": "4f7926afaa175015c40c2790363f503979c3b495fc2d9f8af022f994173d0135",
+    "atlas.py": "f6415958b02956f50f6efa6043428513610c3d3a00b734ff2aeff353930cf975",
+    "initialize.py": "ab5bc936c751a5b1fa897957d9382343544127eba7afac93d5b761a334dac187",
+    "deformation.py": "d0a69c20047cc669f9460a886c9755477f099f095abd59ab7ed7e10a49e662fd",
+    "gaussian.py": "67856df056e408572d243b5ebf35824573291f29276292cd75b31fc1d0f140c3",
+    "optim.py": "f25b7251a6b850dc30716308e2a686399c9339cc39d9324c10f19e3046716c89",
+    "brainstem.py": "23fa1286c627e16c974ec17f96b2481d434c81b253e379111e2b6390a4574b3e",
+    "_raster_cpu_compact.py": "be03336c29131a39e75312af2923a5c75b7007c0992b9ba8bd726bbb5d652382",
+    "__init__.py": "028efcf28fa9ef09e74913df677e556aa7d3f358e8ee35ad92636cb485fe68e7",
+    "output.py": "a67e5aeb863ba4a6370ced77110d519b7e6185c34aa2eb72f8659e95866e873c",
+    "context.py": "2739c5a4f7e147b78fcb14ac2e203786c100fdfd6c13488924d291151e5f11f3",
+    "setup.py": "ccd6c6c9952df395c972e3dbc32842c20fb7b666bcc10f8c1afe274753ab561d",
+    "core.py": "7f7c5eaa5bd56e32af52afd86bb0b35edb469b70aba2a50d30215554b89b5d77",
+    "recipes/base.py": "5e8b4af9410fd5fe447cc674450332288085b0098fae3c119b20134b904187b9",
+    "recipes/brainstem.py": "3054bc95ba0700a19256ca0419ecd1d62093817e9e4cbf97e00b703281bd86bb",
+    "recipes/thalamus.py": "76dcdc24afc90765d766ca228f64a937d437fdbd1f96a466e244161e11c63941",
+    "recipes/__init__.py": "2109d5d096c7bfbf3533e75009956bfcaf8b4b66326929b47acc9ee91f6f63b9",
+    "recipes/hippo_amygdala.py": "385e3cf19cbe3ba6e7985b36a525664d46a037e4b80ee298b82916bbd99e710e"
+  },
+  "native_options_for_source_informed_search": {
+    "LineSearchMaximalDeformationIntervalStopCriterion": 1e-10
+  },
+  "output_directory_mode": "0o700"
+}
