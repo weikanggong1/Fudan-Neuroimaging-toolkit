@@ -102,7 +102,7 @@ python compare_official.py \
 
 可选 censor 控制按完整皮层计算 `DVARS[t] = sqrt(mean((x[t]-x[t-1])**2))`，保持第 0 帧，剔除超过同 run DVARS 第 95 百分位数的帧。`prepare_censor_control.py` 先核对完整输入 SHA，再写出全部 490 行向量及私有逐帧 DVARS；公开报告只保存阈值、保留/剔除帧数和 SHA。原 CBIG 与 FNIT 必须使用相同向量，完整时间轴读取和原有迭代上限仍保留；该额外样例的耗时单独记录。
 
-`reference_feature_controls.py` 提供独立的 CPU8 附加队列：原版／优化 FNIT 的相同 censor 控制，以及 `w=100/c=25` 的无 censor 控制。它要求六项主队列已经成功完成，重新核对完整输入、667 个原版文件和冻结 core，随后沿用相同八个物理核与 CPU 锁。每个配置写入新目录和各自私有绑定；公开回执保存参数、censor SHA、实际退出码与耗时，不保存逐帧向量。此附加队列四项均完成：删帧保留465帧，原版／FNIT标签0差；`w=100/c=25` 保留490帧，固定身份下左42、右37顶点有差异，背景0，最小双半球网络 Dice 0.995934。完整参数、source/input SHA 与实际时钟见[可选控制报告](optional4_matched_cpu_v1.public.json)。原版和旧／新实现的标签身份不重排；旧核心同配置单次完整控制仍在准备／运行，79差不会写为通过。
+`reference_feature_controls.py` 提供独立的 CPU8 附加队列：原版／优化 FNIT 的相同 censor 控制，以及 `w=100/c=25` 的无 censor 控制。它要求六项主队列已经成功完成，重新核对完整输入、667 个原版文件和冻结 core，随后沿用相同八个物理核与 CPU 锁。每个配置写入新目录和各自私有绑定；公开回执保存参数、censor SHA、实际退出码与耗时，不保存逐帧向量。此附加队列四项均完成：删帧保留465帧，原版／FNIT标签0差；`w=100/c=25` 保留490帧，固定身份下左42、右37顶点有差异，背景0，最小双半球网络 Dice 0.995934。完整参数、source/input SHA 与实际时钟见[可选控制报告](optional4_matched_cpu_v1.public.json)。原版和旧／新实现的标签身份不重排；[旧核心同配置单次完整控制](baseline_weight_control_v1.public.json)也已完成：旧／新全部标签、profile SHA 与六份科学输出 SHA 相同，旧核心相对原版同样79差；该差异已有于旧实现，未由本轮优化引入，仍不写为逐标签匹配通过。
 
 ```bash
 python reference_feature_controls.py \

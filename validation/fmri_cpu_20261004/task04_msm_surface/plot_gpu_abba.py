@@ -57,6 +57,8 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
     prefix = args.output_dir / 'cpu_optimization_gpu_abba_20261005'
     figure.savefig(prefix.with_suffix('.svg'), bbox_inches='tight')
+    svg_path = prefix.with_suffix('.svg')
+    svg_path.write_text('\n'.join(line.rstrip() for line in svg_path.read_text().splitlines()) + '\n')
     figure.savefig(prefix.with_suffix('.png'), dpi=170, bbox_inches='tight')
     plt.close(figure)
     receipt = {'source_report_sha256': hashlib.sha256(report_bytes).hexdigest(),

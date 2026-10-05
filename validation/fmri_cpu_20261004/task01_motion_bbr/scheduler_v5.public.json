@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "status": "observed_shared_node_midrun",
+  "normal_benchmark": false,
+  "MC490_CPU1_midrun": {
+    "worker_elapsed_wall_seconds": 516.9191565513611,
+    "single_OS_thread_CPU_seconds": 177.05,
+    "OS_threads_observed": 1,
+    "effective_affinity": [
+      8
+    ],
+    "thread_state": "R (running)",
+    "scope": "Single midrun observation of cumulative workerwall versus OS-thread CPU; these boundaries include workerpreparation and are not API-specific or finalbenchmarktiming."
+  },
+  "MC490_CPU8_midrun": {
+    "name": "mc490_fnit_cpu8",
+    "state": "running",
+    "cpu_seconds": 22.2,
+    "elapsed_seconds": 10.693406343460083,
+    "scheduler_runtime_seconds": 10.015165864,
+    "scheduler_wait_seconds": 0.141474748,
+    "timeslices": 5977
+  },
+  "authorized_core_1second_observation": {
+    "scope": "one-second per-core observation, shared node; no benchmark conclusion",
+    "rows": [
+      {
+        "authorized_cpu": 8,
+        "busy_percent": 100.0,
+        "iowait_percent": 0.0
+      },
+      {
+        "authorized_cpu": 12,
+        "busy_percent": 100.0,
+        "iowait_percent": 0.0
+      },
+      {
+        "authorized_cpu": 16,
+        "busy_percent": 100.0,
+        "iowait_percent": 0.0
+      },
+      {
+        "authorized_cpu": 20,
+        "busy_percent": 100.0,
+        "iowait_percent": 0.0
+      },
+      {
+        "authorized_cpu": 24,
+        "busy_percent": 100.0,
+        "iowait_percent": 0.0
+      },
+      {
+        "authorized_cpu": 28,
+        "busy_percent": 100.0,
+        "iowait_percent": 0.0
+      },
+      {
+        "authorized_cpu": 32,
+        "busy_percent": 100.0,
+        "iowait_percent": 0.0
+      },
+      {
+        "authorized_cpu": 40,
+        "busy_percent": 100.0,
+        "iowait_percent": 0.0
+      }
+    ]
+  },
+  "receipts_sha256": {
+    "actual_thread_state_20261006.live.private.json": "3a3ebba942feba283630b9df5bd79675d547cf54227f4d27bb2ca6ac9b208f35",
+    "authorized_core_busy_20261006.live.private.json": "030846992a7a8db7c79b989ca71bdfed261f0b69e7ff8d9bb7f7a95e218ce392",
+    "scheduler_contention_20261006.live.private.json": "53b2153eca8e7545489e1159f8d62d7d8185e511bdab0784a7ca3bdba0fd26f9"
+  },
+  "conclusion": "Preserve full normalwall clocks. Shared CPU scheduling can affect timing; exact per-API scheduler evidence is in profile_v4v5_cpu1.public.json. One-second busypercent is a snapshot, not a stable-load assertion."
+}

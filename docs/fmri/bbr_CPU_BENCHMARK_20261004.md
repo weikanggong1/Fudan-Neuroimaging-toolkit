@@ -41,7 +41,7 @@ python benchmark_baseline.py --case-json /private/inputs.json --case bbr \
   --cpu-lock /private/task01_motion_bbr.lock
 ```
 
-两个预算的 CPU 亲和性分别是 `[8]`、`[8,12,16,20,24,28,32,40]`；OMP、OpenBLAS、MKL、NumExpr、Numba 与 PyTorch 均设置 1/8 线程。源码/输入核验和 API 使用同一任务锁。原软件实际线程数未单独采样；8 指允许的环境线程与亲和性预算。
+CPU 实测在共享节点 nodecw8，Python 3.11.16、PyTorch 2.5.1、NumPy 1.26.4、Nibabel 5.4.2。两个预算的 CPU 亲和性分别是 `[8]`、`[8,12,16,20,24,28,32,40]`；OMP、OpenBLAS、MKL、NumExpr、Numba 与 PyTorch 均设置 1/8 线程。源码/输入核验和 API 使用同一任务锁。原软件实际线程数未单独采样；8 指允许的环境线程与亲和性预算。
 
 ## 完整精度与耗时
 
@@ -53,6 +53,19 @@ python benchmark_baseline.py --case-json /private/inputs.json --case bbr \
 | 8 | 18.464 / 17.869 s | 20.312 / 17.869 s | 40.589 s |
 
 官方重测列已完成，固定同一 WM/init、算法和 CPU 组；六个完整官方默认案例的实际退出链及 10 组全输出精度均已核对，见[本轮重测报告](../../validation/fmri_cpu_20261004/task01_motion_bbr/fresh_native_v4.public.json)。下面保留较早 v2 时钟，不替换其版本标签。
+
+### v5 冻结源复测（2026-10-06，BBR 模块未改）
+
+v5 只修改 MCFLIRT 的 CPU 成本内核，BBR 的两份模块 SHA 与 v4 相同。这一批默认 CPU1/8 首次和热调用的全部矩阵、影像、header、边界点、成本及阶段求值计数仍与 v4 精确相同，成本调用均为 2,604 次。正常文件检查另核对标准影像与矩阵齐全；见[默认 v5 报告](../../validation/fmri_cpu_20261004/task01_motion_bbr/defaults_v5.public.json)。
+
+| CPU 预算 | v5 API＋正常保存 首次 / 热（s） | v5 导入＋header＋API＋保存 首次 / 热（s） |
+|---|---:|---:|
+| 1 | 23.558 / 18.673 | 28.538 / 18.673 |
+| 8 | 19.762 / 18.484 | 21.888 / 18.484 |
+
+该批共享 CPU 调度状态与此前官方参照不同，时钟作为实际观察保留，未计算稳定速度比。MCFLIRT 的同核 CPU 时钟、调度等待及缓存加载诊断见[诊断报告](../../validation/fmri_cpu_20261004/task01_motion_bbr/profile_v4v5_cpu1.public.json)，其记录不能替代 BBR 的正常时钟。
+
+### 较早 CPU v2 记录
 
 | CPU 预算 | 原 FLIRT 完整进程 | 旧版 API＋正常保存 首次 / 热 | v2 API＋正常保存 首次 / 热 | v2 导入＋header＋API＋保存 首次 / 热 |
 |---|---:|---:|---:|---:|
@@ -104,16 +117,16 @@ v4 阶段钟是完整 API 的内部 wall；阶段含依赖，不与整体钟重�
 
 本轮 BBR 数据只发布聚合统计。公开脑图需另使用许可允许的同输入 BBR 配对；MCFLIRT 的公开 180 帧图不能作为这个私有 BBR 案例的精度图。
 
-## BBR 真实功能变体
+## 最新 BBR 真实功能变体（v5 冻结源）
 
-下面四组均为完整真实 EPI/T1 网格、CPU 8 的独立调用；v4 与冻结 FNIT 的完整影像、矩阵、binary header、边界点、成本和阶段求值次数精确相同。影像对象与数组 init 已覆盖前三组，自动初始化由成熟 FNIT FLIRT 执行。每组观测不能代替默认完整 grid 的速度。详见[完整功能报告](../../validation/fmri_cpu_20261004/task01_motion_bbr/features_v4.public.json)。
+下面四组均为本轮完整真实 EPI/T1 网格、CPU 8 的独立调用；v5 冻结源中的 BBR 模块保持 v4 SHA，与冻结 FNIT 的完整影像、矩阵、binary header、边界点、成本和阶段求值次数精确相同。影像对象与数组 init 已覆盖前三组，自动初始化由成熟 FNIT FLIRT 执行。每组观测不能代替默认完整 grid 的速度。详见[最新功能报告](../../validation/fmri_cpu_20261004/task01_motion_bbr/features_v5.public.json)；14 项候选新运行与 17 项此前实际参照逐文件绑定，31 项组合门槛通过。[v4 报告](../../validation/fmri_cpu_20261004/task01_motion_bbr/features_v4.public.json)保留历史时钟。
 
-| 模式 | v4 应用（s） | 冻结 FNIT 应用（s） | 完整比较 |
+| 模式 | v5 冻结源应用（s） | 冻结 FNIT 应用（s） | 完整比较 |
 |---|---:|---:|---|
-| `execution="reference"`、影像对象、数组 init | 20.278 | 20.288 | 全部相同 |
-| `execution="batched"`、`candidate_batch_size=1` | 19.658 | 19.609 | 全部相同 |
-| `grid_search=False`、影像对象、数组 init | 8.394 | 7.840 | 全部相同 |
-| 自动 FNIT FLIRT 初始化 | 45.985 | 104.215 | 全部相同 |
+| `execution="reference"`、影像对象、数组 init | 24.051 | 20.288 | 全部相同 |
+| `execution="batched"`、`candidate_batch_size=1` | 24.974 | 19.609 | 全部相同 |
+| `grid_search=False`、影像对象、数组 init | 8.494 | 7.840 | 全部相同 |
+| 自动 FNIT FLIRT 初始化 | 56.524 | 104.215 | 全部相同 |
 
 这些参数功能与原 FLIRT CLI 的映射见覆盖表；FNIT reference/batch 的执行选择没有单独对应的原软件选项。本轮六个功能官方参照为完整 MCFLIRT 变体，BBR 的默认官方对照与同批重测分别记录。
 
@@ -141,12 +154,13 @@ API 与正常保存计入表内，导入、interpreter、证据与 SHA 比较另
 | MCFLIRT 490 | 1.154 | 1.292 | 2.397 |
 | BBR | 0.810 | 1.103 | 1.655 |
 
-显存采用十进制 GB。allocator 是每次完整 API 的精确峰值；NVIDIA owned 进程树以 0.5 s 间隔采样，后者含 CUDA context，并分别保存监控 SHA。全部低于 20 GB。该 v4 回归保留其六份源码 SHA；后续 CPU v5 只改尚未发布的 CPU 行内核，需要单独的最终 GPU 完整调用门槛。
+显存采用十进制 GB。allocator 是每次完整 API 的精确峰值；NVIDIA owned 进程树以 0.5 s 间隔采样，后者含 CUDA context，并分别保存监控 SHA。全部低于 20 GB。该 v4 回归保留其六份源码 SHA；CPU v5 只改变 MCFLIRT CPU 行内核，BBR 两份模块 SHA 保持 v4。最终 v5 已额外完成一次 CUDA MCFLIRT 180 帧的精确完整输出门槛，CPU 成本模块未导入，详见[GPU v5 报告](../../validation/fmri_cpu_20261004/task01_motion_bbr/gpu_v5.public.json)；本节 BBR GPU 时钟仍属于原 36-call ABBA。
 
 ## 版本与原实现
 
 | 日期/版本 | 内容 |
 |---|---|
+| 2026-10-06 v5 冻结源复测 | BBR 模块保持 v4 SHA；默认 1/8 首次/热、标准输出和四组功能变体完整精确回归通过，最新共享 CPU 原始时钟另列。最终改变仅在 MCFLIRT CPU 内核。 |
 | 2026-10-05 CPU v4 | 去掉逐边界点数组和小调用线程池切换，CPU reference 使用同一有序成本。默认 1/8 首次/热完整输出及计数与基线精确一致，实际 API＋保存 18.828/18.464 s；31 项功能和六项官方重测门槛通过；GPU 完整数值回归及聚合已完成。 |
 | 2026-10-04 CPU v2 | CPU 有序融合平滑/成本；完整输出保持冻结版本，速度接近官方，尚未通过最终性能目标。 |
 | `cc940273` | 本轮冻结主仓库基线，默认 BBR 原完整搜索。 |

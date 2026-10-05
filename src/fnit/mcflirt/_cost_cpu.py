@@ -17,12 +17,19 @@ def _sample_rows_impl(reference, moving, coefficients, upper, smooth):
     rows = np.zeros((6, nz, ny), dtype=np.float32)
     for row in prange(nz * ny):
         z, y = row // ny, row % ny
-        origin = np.empty(3, dtype=np.float32)
+        # Every intermediate keeps the original float32 operation order.
+        o0 = np.float32(np.float32(np.float32(y) * coefficients[0, 1])
+                        + np.float32(np.float32(z) * coefficients[0, 2]))
+        o1 = np.float32(np.float32(np.float32(y) * coefficients[1, 1])
+                        + np.float32(np.float32(z) * coefficients[1, 2]))
+        o2 = np.float32(np.float32(np.float32(y) * coefficients[2, 1])
+                        + np.float32(np.float32(z) * coefficients[2, 2]))
+        o0 = np.float32(o0 + coefficients[0, 3])
+        o1 = np.float32(o1 + coefficients[1, 3])
+        o2 = np.float32(o2 + coefficients[2, 3])
+        origin = (o0, o1, o2)
         xmin, xmax = np.float32(0), np.float32(nx - 1)
         for axis in range(3):
-            origin[axis] = np.float32(np.float32(np.float32(y) * coefficients[axis, 1])
-                                    + np.float32(np.float32(z) * coefficients[axis, 2]))
-            origin[axis] = np.float32(origin[axis] + coefficients[axis, 3])
             direction = coefficients[axis, 0]
             if abs(direction) < 1e-8:
                 if origin[axis] < 0 or origin[axis] > upper[axis]:
@@ -33,18 +40,19 @@ def _sample_rows_impl(reference, moving, coefficients, upper, smooth):
                 xmin = max(xmin, np.float32(np.ceil(min(bound0, bound1))))
                 xmax = min(xmax, np.float32(np.floor(max(bound0, bound1))))
         xmin = min(max(xmin, np.float32(0)), np.float32(nx))
-        coordinate = np.empty(3, dtype=np.float32)
-        for axis in range(3):
-            coordinate[axis] = np.float32(origin[axis] + np.float32(xmin * coefficients[axis, 0]))
-        total = np.zeros(6, dtype=np.float32)
+        c0 = np.float32(o0 + np.float32(xmin * coefficients[0, 0]))
+        c1 = np.float32(o1 + np.float32(xmin * coefficients[1, 0]))
+        c2 = np.float32(o2 + np.float32(xmin * coefficients[2, 0]))
+        t0, t1, t2 = np.float32(0), np.float32(0), np.float32(0)
+        t3, t4, t5 = np.float32(0), np.float32(0), np.float32(0)
         for offset in range(nx):
             actual_x = np.float32(xmin + np.float32(offset))
             valid = actual_x <= xmax
             weight = np.float32(1)
-            px, py, pz = coordinate[0], coordinate[1], coordinate[2]
-            sx = min(max(px, np.float32(0)), upper[0])
-            sy = min(max(py, np.float32(0)), upper[1])
-            sz = min(max(pz, np.float32(0)), upper[2])
+            sx = min(max(c0, np.float32(0)), upper[0])
+            sy = min(max(c1, np.float32(0)), upper[1])
+            sz = min(max(c2, np.float32(0)), upper[2])
+            coordinate = (c0, c1, c2)
             for axis in range(3):
                 position = coordinate[axis]
                 valid = valid and position >= 0 and position <= upper[axis]
@@ -57,14 +65,21 @@ def _sample_rows_impl(reference, moving, coefficients, upper, smooth):
             value = _trilinear(moving, sx, sy, sz)
             ref = reference[z, y, min(int(actual_x), nx - 1)]
             wr, wv = np.float32(weight * ref), np.float32(weight * value)
-            terms = (weight, wr, np.float32(wr * ref), wv,
-                     np.float32(wv * value), np.float32(wr * value))
-            for term in range(6):
-                total[term] = np.float32(total[term] + terms[term])
-            for axis in range(3):
-                coordinate[axis] = np.float32(coordinate[axis] + coefficients[axis, 0])
-        for term in range(6):
-            rows[term, z, y] = total[term]
+            t0 = np.float32(t0 + weight)
+            t1 = np.float32(t1 + wr)
+            t2 = np.float32(t2 + np.float32(wr * ref))
+            t3 = np.float32(t3 + wv)
+            t4 = np.float32(t4 + np.float32(wv * value))
+            t5 = np.float32(t5 + np.float32(wr * value))
+            c0 = np.float32(c0 + coefficients[0, 0])
+            c1 = np.float32(c1 + coefficients[1, 0])
+            c2 = np.float32(c2 + coefficients[2, 0])
+        rows[0, z, y] = t0
+        rows[1, z, y] = t1
+        rows[2, z, y] = t2
+        rows[3, z, y] = t3
+        rows[4, z, y] = t4
+        rows[5, z, y] = t5
     sums = np.zeros(6, dtype=np.float32)
     for term in range(6):
         for z in range(nz):
