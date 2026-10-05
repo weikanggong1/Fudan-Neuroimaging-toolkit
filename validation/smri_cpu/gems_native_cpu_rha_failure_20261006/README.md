@@ -6,6 +6,8 @@
 
 本目录是独立验证报告，基于 main `7eb2a7f2`，不改生产源码、默认 CPU 或 GPU 路径。实际运行源码为候选 `7e9d511ac524`（未合入 main 的候选提交） 的冻结 v2；该提交尚未作为公开已验收功能采用。完整源码/输入/输出 SHA 见 [BINDINGS_V2](BINDINGS_V2.public.json)，快速结果见 [SUMMARY](SUMMARY.public.json)，逐区表见 [REGIONS.csv](REGIONS.csv)。
 
+`BINDINGS_V2` 保留启动前冻结时的原 `running_not_scored` 状态和 SHA，没有事后改写为成功。最终完成由完整 score 的 `full_run_scalar_receipt` 和本目录 `SUMMARY` 证明；完成与 ROI 验收未通过分别记录。
+
 ```mermaid
 flowchart LR
     A[同一真实 norm / aseg / wmparc] --> B[FNIT 自行计算初始仿射和工作图]
