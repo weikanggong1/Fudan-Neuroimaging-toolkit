@@ -24,6 +24,10 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 
 ## GEMS CPU：保留拟合轨迹的候选优化
 
+最新[数据目标与有限轨迹诊断](gems_cpu_objective_20261005/README.md)证实，平滑阶段的零质量 alpha 使额外通道归一化改变 CPU mesh 数据项梯度。保留 raw mass 后，真实阶段 initial/1/3/37 同点评分通过，但还依赖冻结 CPU epsilon、FP64 reference/插值、独立 FP32 ownership 与私有 L-BFGS；当前生产未接入这套前提，不能单改归一化就宣布通过。37 步对官方轨迹仍有最大 0.508 voxel、RMSE 0.008893 voxel、目标值高 242.54，未收敛；下一步按已保存状态定位 direction/history/alpha 最早分叉，再决定 CPU 精度候选。新完整 recipe、逐区 Dice/体积与速度仍未验收，CUDA 保留当前实现。
+
+[已保存优化状态的只读审计](gems_optimizer_state_20261005/README.md)按官方 Double 梯度重建方向，并从点增量推断步长，37 步增量最大残差为 1.85e−13 voxel；这不是原生内部 trace。首步官方 Double 点舍入后虽与 Python FP32 点相同，原几何上的梯度已差 0.1233%，到第四步出现明显步长分叉。接下来限定前三步比较 CPU Double 点、投影与历史状态；不改变 GPU，不以同点门代替完整分割验收。
+
 本轮[完整脑干同输入 stage](task5/README.md)中，强度网格拟合为 689.308 秒，约占该 recipe 的 91%。owner、EM 和 Gaussian 的细项优先级来自冻结 v2 的五次 core evaluation 限额诊断，主动停止退出码为 75；它们不是最新联合候选或 raw v5 的完整热点占比，也不与 recipe/API 重复累加。[联合候选](task5/cpu_compact_20261004/README.md)已有完整后验与拟合状态恒等核验，API 从 733.021 降至 668.801 秒。
 
 固定 EM 数据缓存已完成 nodecw7 实测，完整状态相同但墙钟/RSS均无收益，因此未采纳。其余候选仍待验证：

@@ -219,6 +219,8 @@ segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --thread
 
 ## 5. 最新精度和运行时间
 
+2026-10-05 的[CPU 网格数据项诊断](../../validation/smri_cpu/gems_cpu_objective_20261005/README.md)确认，平滑阶段的零质量 alpha 会使额外 prior 归一化改变梯度。验证性 raw 闭包在真实阶段 initial/1/3/37 的同点评分通过，但 37 步轨迹仍与官方不同，未进入默认实现或完整亚区分割。它还依赖 CPU epsilon、FP64 几何和私有线搜索等共同前提；当前主版本不能通过单改归一化获得该结果。下面的最终分割指标仍属于其注明的历史源码，没有以同点梯度门替代逐区 Dice/体积验收。
+
 最新2026-10-04 raw CPU全结构正式测量使用公开CC0 ds000114 snapshot1.0.2一例原始T1，冻结00fedf3544/v5，参考FreeSurfer8.2.0-1保存亚区输出；其norm/aseg/wmparc已与本轮同T1官方CPU recon核验数组/几何同。CPU评测节点 Xeon Gold6418H同8物理核、Torch/Numba8线程、CPUfloat32并保留既有FP64累加；源码1257文件和图谱权重SHA见[身份及结果](../../validation/smri_cpu/task5/raw_all_cpu_v5/README.md)。
 
 新增[首次目标函数同状态诊断](../../validation/smri_cpu/gems_first_state_20261004/README.md)：官方在 `Σ prior × likelihood` 后加 `1e-15`，生产 compact objective 原来缺少该项。相同 FP32 输入上，左/右 HA 原完整梯度相对差为 0.377/0.252；加入 epsilon 后约为 6.27e−6/1.37e−4。剩余小 prior 的误差会放大，CPU 混合内部几何探针将梯度差降到约 4e−8。该报告仅含隔离诊断；CPU 混合内部精度完整候选已跑完但未通过逐区验收，未接入默认，详见[全部 recipe 报告](../../validation/smri_cpu/gems_cpu_epsilon_20261004/README.md)，原 GPU fallback/Triton 的同项差异也尚未修复。

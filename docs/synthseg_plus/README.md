@@ -149,7 +149,13 @@ mri_synthseg --parc --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg_plus.nii
 
 ## 5. 最新精度和运行时间
 
-最新大T1崩溃修复用公开ds000114完整真实T1，网络张量224×288×288，nodecw10同8物理核/8线程，CPUfloat32；原版FreeSurfer8.2.0-1。普通--parc的冷进程ABBA含加载、计算、CSV和合并图保存。源码SHA与逐区结果绑定[正式记录](../../validation/smri_cpu_20261004/t2_seg/large_pointwise.public.json)。
+2026-10-05 的 CPU decoder 拼接减少临时缓冲，保留原卷积与全部标签/体积计算。同一公开原始 T1、nodecw7 八核下，普通 parc 旧/新完整 worker 为 **61.648/55.684 s**；fast 两组 API 中位数为 **38.887/38.980 s**，差约 0.24%、两组方向相反，完整时间近似不变。三张图、101 项数值 CSV 和几何旧新均相同。对同节点官方的标签差仍为 **5/1 个体素**，最小 Dice **0.99982140/0.99997630**，CSV 最大差 **0.657/0.220 mm³**，没有新增误差。
+
+同节点官方普通 parc/fast 冷 CLI 为 **48.296/33.784 s**；FNIT worker 包含资源校验、三图保存和报告写出，API 时间另列，CPU 总速度目标仍未通过。真实中间输入的拼接局部时间快 1.836 倍，不作为完整函数倍率。H100 默认普通/fast 旧新完整输出、CSV、几何与 allocated/reserved 相同，reserved 为 **18.207/18.900 GB**；共享 GPU 的整体显存和墙钟不作为本进程树物理峰值或稳定加速结论。[最新版完整协议与逐区指标](../../validation/smri_cpu/seg_memory_20261005/README.md)。
+
+此次也确认已有精度上下文问题：首次调用的 lazy `SynthSegParc` 构造会开启全局 TF32，覆盖调用方设置。当前 CPU 拼接优化未改变这一已有政策；Plus 还没有单独的 False/None 参数，不能用外部关闭开关替代已验证的模型精度声明。后续修复与本次数值不变的优化分开验收。
+
+前版大T1崩溃修复用公开ds000114完整真实T1，网络张量224×288×288，nodecw10同8物理核/8线程，CPUfloat32；原版FreeSurfer8.2.0-1。普通--parc的冷进程ABBA含加载、计算、CSV和合并图保存。源码SHA与逐区结果绑定[正式记录](../../validation/smri_cpu_20261004/t2_seg/large_pointwise.public.json)。
 
 ### 端到端 benchmark
 
@@ -176,6 +182,7 @@ mri_synthseg --parc --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg_plus.nii
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-05 | `585bf181` 源码；`b1d46705` 完整报告 | CPU 单缓冲拼接；原卷积、GPU 数学与精度政策不变 | 普通/fast 完整旧新输出相同，fast ABBA 近似持平；同节点官方仍较快，见[最新记录](../../validation/smri_cpu/seg_memory_20261005/README.md) |
 | 2026-10-04 | large_pointwise冻结源码 | 最小末层CPU投影分块，修复SIGSEGV | 上节ABBA及CPU/GPU配对 |
 | 2026-10-04 | t2_seg v2 | 共享endpoint、CPU连通域与保存几何 | [矩阵与保存合同](../../validation/smri_cpu_20261004/t2_seg/README.md) |
 | 较早单例 | synthseg_plus报告源码SHA | 普通parc及101列软体积 | [历史完整CPU/GPU对照](../../validation/synthseg_plus/README.md) |
