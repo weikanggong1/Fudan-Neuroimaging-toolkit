@@ -1,6 +1,6 @@
 # SynthSeg+ 体积分区
 
-[返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/synthseg_plus/readme_archive_20261005.md)
+[返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/synthseg_plus/readme_archive_20261005.md) · [CUDA精度声明](precision.md)
 
 | 项目 | 内容 |
 |---|---|
@@ -30,6 +30,7 @@ parcellation_model = SynthSegPlus(
     weights="/absolute/path/weights",       # 主网络及三个主分割 npy 所在目录
     parc_weights="/absolute/path/weights",  # 皮层分区 H5 所在目录
     device="cuda:0",                         # 计算设备；CPU 可写 "cpu"
+    cudnn_tf32=True,                         # 默认cuDNN TF32；False关闭，None逐次继承
 )
 parcellation_result = parcellation_model(
     t1="sub-01_T1w.nii.gz",  # 输入：一幅 3D T1 NIfTI/MGZ 路径
@@ -61,6 +62,7 @@ left_precentral_mask = parcellation_result.mask("ctx-lh-precentral")         # �
 | `weights` | 否 | `str 或 Path 或 None` | `None` | 官方 checkpoint 文件或目录；省略时按显式配置、FNIT_WEIGHTS 和缓存查找 |
 | `parc_weights` | 否 | `str 或 Path 或 None` | `None` | 官方皮层分区 H5 文件或目录 |
 | `device` | 否 | `str 或 torch.device` | `'cpu'` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
+| `cudnn_tf32` | 否 | `bool 或 None`，关键字参数 | `True` | 两个CUDA网络及全部平滑的cuDNN TF32；False关闭，None继承每次调用前cuDNN；作用域内matmul TF32仍True，退出恢复两开关 |
 
 ### 单次调用
 
@@ -93,6 +95,8 @@ sub-01_volumes.csv         # volumes=True时101个数值列，mm³
 
 `volumes_mm3`在`volumes=False`时为None，在True时按主分割32项及皮层68项保存软体积。CSV另有total intracranial，共101个数值列；皮层体积在各半球皮层概率内分配，不是硬标签体素数。
 
+`precision`是结果末尾默认None的可选字段，记录本次实际网络/平滑的dtype、device、autocast和CUDA开关；模型实例`.precision`在缓存拒绝或内部分区调用失败时为None。CPU不写CUDA状态，CUDA调用正常/异常退出均恢复原开关。缓存按声明True/False/None匹配，不匹配在读T1前报错；None缓存可逐次继承。完整语义及串行/独立进程要求见[精度说明](precision.md)。
+
 `volumes=True`才计算101列软体积，定义与原--vol相同；`write_volumes_csv(source,path)`两参必需，不可在volumes=False后调用。Python需显式保存；CLI默认只保存combined，--parc-out另存仅皮层图。
 
 <a id="命令行与原版"></a>
@@ -121,7 +125,7 @@ fnit synthseg --parc --i sub-01_T1w.nii.gz --o sub-01_synthseg_plus.nii.gz \
 | `--parc-weights` | `parc_weights` | 官方皮层分区 H5 文件或目录 |
 | `--parc-out` | `cortical_parcellation.save` | 另存仅皮层标签图 |
 
-CLI与Python默认差异：Python keep_geometry=True，CLI默认False；CLI threads=4，Python构造不含threads；只有--csv-vols才计算volumes。
+CLI与Python默认差异：Python keep_geometry=True，CLI默认False；CLI threads=4，Python构造不含threads；只有--csv-vols才计算volumes。CLI仍使用默认cudnn_tf32=True，没有新增精度参数；False/None用Python声明。
 
 ## 4. 原软件调用
 
@@ -149,11 +153,13 @@ mri_synthseg --parc --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg_plus.nii
 
 ## 5. 最新精度和运行时间
 
-2026-10-05 的 CPU decoder 拼接减少临时缓冲，保留原卷积与全部标签/体积计算。同一公开原始 T1、nodecw7 八核下，普通 parc 旧/新完整 worker 为 **61.648/55.684 s**；fast 两组 API 中位数为 **38.887/38.980 s**，差约 0.24%、两组方向相反，完整时间近似不变。三张图、101 项数值 CSV 和几何旧新均相同。对同节点官方的标签差仍为 **5/1 个体素**，最小 Dice **0.99982140/0.99997630**，CSV 最大差 **0.657/0.220 mm³**，没有新增误差。
+2026-10-06 修复首次调用的lazy皮层模型构造覆盖全局TF32的问题。构造不写开关，普通/fast的两个网络及全部高斯平滑统一使用声明True/False/None，并在正常和异常退出时恢复调用者状态。默认True的原始T1 **CPU4arm、H1004arm**三张图、完整影像头及101列软体积均与旧版逐值相同，连压缩NIfTI和CSV文件SHA也相同；GPU allocated/reserved旧新相同。新增False/None另有四个完整GPUarm，并单独核验继承和恢复。[七节报告及逐区/逐列数值](../../validation/smri_cpu/seg_tf32_20261005/README.md)。
 
-同节点官方普通 parc/fast 冷 CLI 为 **48.296/33.784 s**；FNIT worker 包含资源校验、三图保存和报告写出，API 时间另列，CPU 总速度目标仍未通过。真实中间输入的拼接局部时间快 1.836 倍，不作为完整函数倍率。H100 默认普通/fast 旧新完整输出、CSV、几何与 allocated/reserved 相同，reserved 为 **18.207/18.900 GB**；共享 GPU 的整体显存和墙钟不作为本进程树物理峰值或稳定加速结论。[最新版完整协议与逐区指标](../../validation/smri_cpu/seg_memory_20261005/README.md)。
+对同输入官方，CPU默认普通/fast仍差 **5/1体素**、CSV最大 **0.657/0.220mm³**；GPU默认仍差 **328/498体素**、CSV最大 **118.280/121.600mm³**，没有改变默认数学。GPU新增False普通硬标签0差、Dice1、CSV最大0.20mm³；fast差2体素、最小Dice0.99997630、CSV最大0.346mm³。None继承关闭状态逐值同False。这是单例可选政策效果，不代表所有输入或全部官方数值完全等价。
 
-此次也确认已有精度上下文问题：首次调用的 lazy `SynthSegParc` 构造会开启全局 TF32，覆盖调用方设置。当前 CPU 拼接优化未改变这一已有政策；Plus 还没有单独的 False/None 参数，不能用外部关闭开关替代已验证的模型精度声明。后续修复与本次数值不变的优化分开验收。
+同节点八核默认CPU旧/新API普通 **49.898/51.018s**、fast **35.474/35.347s**，冷worker外层 **52.680/53.577s**及 **38.009/38.160s**。本次每功能一组，普通新API约慢2.2%、fast约快0.36%，不作提速声明。既有同节点官方冷CLI **48.296/33.784s**；双方保存输出/校验边界不同且已分别列出，CPU总速度目标仍未通过。
+
+H100默认普通/fast旧/新API **10.068/9.732s**及 **7.097/6.937s**，allocated均12.568GB、reserved18.207/18.900GB旧新相同。本进程树driver采样最大18.772/19.464GB，小于20GB；最大采样间隔0.786s，不能称未采样绝对物理峰值。整GPU同时约66–67GB共享背景，墙钟不作稳定加速倍率。False/None普通/fast reserved15.162/15.590GB。此前CPU单缓冲拼接及大体积CPU末层投影防崩保留，[上一阶段验收](../../validation/smri_cpu/seg_memory_20261005/README.md)。
 
 前版大T1崩溃修复用公开ds000114完整真实T1，网络张量224×288×288，nodecw10同8物理核/8线程，CPUfloat32；原版FreeSurfer8.2.0-1。普通--parc的冷进程ABBA含加载、计算、CSV和合并图保存。源码SHA与逐区结果绑定[正式记录](../../validation/smri_cpu_20261004/t2_seg/large_pointwise.public.json)。
 
@@ -182,6 +188,7 @@ mri_synthseg --parc --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg_plus.nii
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-06 | `46eead65` 源码 | 普通/fast统一cuDNN策略，修复lazy构造覆盖开关；True默认不变，False/None新增 | 12完整arm及真实特征/异常门；见[本次报告](../../validation/smri_cpu/seg_tf32_20261005/README.md) |
 | 2026-10-05 | `585bf181` 源码；`b1d46705` 完整报告 | CPU 单缓冲拼接；原卷积、GPU 数学与精度政策不变 | 普通/fast 完整旧新输出相同，fast ABBA 近似持平；同节点官方仍较快，见[最新记录](../../validation/smri_cpu/seg_memory_20261005/README.md) |
 | 2026-10-04 | large_pointwise冻结源码 | 最小末层CPU投影分块，修复SIGSEGV | 上节ABBA及CPU/GPU配对 |
 | 2026-10-04 | t2_seg v2 | 共享endpoint、CPU连通域与保存几何 | [矩阵与保存合同](../../validation/smri_cpu_20261004/t2_seg/README.md) |
