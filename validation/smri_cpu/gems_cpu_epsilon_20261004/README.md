@@ -8,22 +8,22 @@ CUDA 的计算路径保持原样，仍缺少这个 epsilon。保持旧 CUDA 行�
 
 本记录提交仅保存诊断、完成的阶段指标和未采纳的[冻结候选补丁](candidate_v1.patch)，不修改生产源文件。补丁 SHA 与 `source.public.json` 的实际 v1 绑定一致；完整结果及所有改善、退步均已保存；生产修改保持未提交候选。后续本地 dense guard 的差异单独记录，不能将 v1 结果改标为另一份源码。
 
-## 子函数输入、输出与公式
+## 冻结候选的输入、输出与公式
 
-`_compact_mesh_data_cost` 输入 `priors[C,N]` 和 Gaussian `likelihood[C,N]`（log 密度），输出一个可微标量：
+`_compact_mesh_data_cost` 仅存在于未采纳的冻结候选补丁中，当前安装版本不能直接导入。该候选输入 `priors[C,N]` 和 Gaussian `likelihood[C,N]`（log 密度），输出一个可微标量。下面用 PyTorch 直接展示其公式，可独立运行；不是生产拟合入口：
 
 ```python
 import torch
-from fnit.gems.core import _compact_mesh_data_cost
 
-# 两类、三个有效体素，演示内部调用；正式拟合由 recipe 生成这些数组。
+# 两类、三个有效体素，演示公式；正式拟合由 recipe 生成这些数组。
 class_priors = torch.tensor([[1e-20, .3, .6], [1e-22, .7, .4]], dtype=torch.float64)
 gaussian_log_density = torch.tensor([[-2., -3., -4.], [-4., -6., -3.]], dtype=torch.float64)
-mesh_data_cost = _compact_mesh_data_cost(
-    class_priors,
-    gaussian_log_density,
-    double_accumulation=True,  # 标量求和使用 FP64；完整梯度经过相同 epsilon 分母
+per_voxel_log_density = torch.logsumexp(
+    class_priors.log() + gaussian_log_density, dim=0,
 )
+epsilon_log_value = torch.tensor(1e-15, dtype=torch.float64).log()
+# epsilon 位于类别求和之后；此例的标量求和使用 FP64。
+mesh_data_cost = -torch.logaddexp(per_voxel_log_density, epsilon_log_value).sum()
 ```
 
 CPU 用 `logaddexp(logsumexp(log(prior) + log_density), log(1e-15))` 实现 `-sum(log(sum(prior * density) + 1e-15))`。epsilon 位于类别求和之后；EM 责任权重及 Gaussian 更新继续沿用原公式。
