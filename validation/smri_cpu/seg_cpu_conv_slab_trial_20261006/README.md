@@ -31,6 +31,8 @@ python run_trial.py --root "$fnit_root" --workspace "$frozen_trial_workspace" \
 
 两阶段共用首个enqueue时间+23000秒的总界限，外层watchdog只可终止PID identity匹配的专属process group。合同worker≤120秒，各单层worker≤180秒；同8物理核、8线程、共同CPU锁内串行，CUDA不可见。run只创建一次，旧文件不覆盖。
 
+合同only phase已派发controller **126298**、watchdog **126299**，最新receipt为`waiting_for_common_CPU_lock/jobs=[]`，科学worker为0；排在GEMS v2完整作业后。总deadline为`1791253591.8181326`，来自首enqueue+23000秒，后续ABBA不会重置。此处是派发记录，合同/真层仍待执行。本地转移生成器的语法失败已记录在[HARNESS_FAILURES.json](HARNESS_FAILURES.json)，发生在任何远端调用之前，未创建远端目录或运行科学worker；恢复后完整AST/manifest检查通过。
+
 `candidate.forward`的默认cap为64MiB；合同用4逻辑输入平面的cap复现小shape下的depth2，旧合同cap为16平面/depth14，不是搜索更多真实budget。只有CPU、FP32、72→24指定kernel、eval、no-grad、无autocast、非oneDNN且无hooks的调用进入候选；GPU、训练、梯度、dtype及观察器条件调用原layer。
 
 ## 4. 原步骤与数值风险
