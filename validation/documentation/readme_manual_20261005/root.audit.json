@@ -1,0 +1,157 @@
+{
+  "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+  "pages": [
+    {
+      "page": "docs/fmri/README.md",
+      "python_compile_import_signatures": [
+        {
+          "call": "fMRIVolume_pipeline",
+          "keyword_names": [
+            "bids_root",
+            "derivatives_root",
+            "subject",
+            "mni_template",
+            "mni_brain_mask",
+            "registration_backend",
+            "device"
+          ],
+          "signature_bind": "passed"
+        }
+      ],
+      "line_count": 357
+    },
+    {
+      "page": "docs/fmri/surface.md",
+      "python_compile_import_signatures": [
+        {
+          "call": "fMRISurface_pipeline",
+          "keyword_names": [
+            "bids_root",
+            "derivatives_root",
+            "subject",
+            "hcp_assets_dir",
+            "recon_all",
+            "recon_all_backend",
+            "volume_options",
+            "device",
+            "cpu_threads"
+          ],
+          "signature_bind": "passed"
+        },
+        {
+          "call": "fMRISurface_pipeline",
+          "keyword_names": [
+            "bids_root",
+            "derivatives_root",
+            "subject",
+            "hcp_assets_dir",
+            "recon_all_backend",
+            "recon_all_output_dir",
+            "recon_all_options",
+            "volume_options",
+            "device"
+          ],
+          "signature_bind": "passed"
+        }
+      ],
+      "line_count": 371
+    },
+    {
+      "page": "docs/connectome/README.md",
+      "python_compile_import_signatures": [
+        {
+          "call": "UKBConnectome_pipeline",
+          "keyword_names": [
+            "device"
+          ],
+          "signature_bind": "passed"
+        },
+        {
+          "call": "TemplateSpec",
+          "keyword_names": [
+            "name",
+            "kind",
+            "space",
+            "left_path",
+            "right_path",
+            "nodes_tsv"
+          ],
+          "signature_bind": "passed"
+        },
+        {
+          "call": "TemplateSpec",
+          "keyword_names": [
+            "name",
+            "kind",
+            "space",
+            "volume_path",
+            "nodes_tsv"
+          ],
+          "signature_bind": "passed"
+        },
+        {
+          "call": "TemplatePair",
+          "keyword_names": [
+            "name",
+            "first",
+            "second"
+          ],
+          "signature_bind": "passed"
+        },
+        {
+          "call": "UKBConnectome_pipeline.run_bids",
+          "keyword_names": [
+            "bids_root",
+            "output_dir",
+            "subject",
+            "freesurfer_subject_dir",
+            "recon_backend",
+            "n_seeds",
+            "seed"
+          ],
+          "signature_bind": "passed"
+        }
+      ],
+      "line_count": 393
+    }
+  ],
+  "actual_cli_help": [
+    {
+      "command": "fnit-fmri volume --help",
+      "exit_code": 0,
+      "help_sha256": "5bfe28aef5f410325637f95a3e5941f55fa9e6db975e51652972e5267e70c6c4"
+    },
+    {
+      "command": "fnit-fmri surface --help",
+      "exit_code": 0,
+      "help_sha256": "5597fb59a356083f2d9f4f7b2c2473c3b4424f0f89ee473c60e312dc63fc9467"
+    },
+    {
+      "command": "fnit connectome --help",
+      "exit_code": 0,
+      "help_sha256": "038be477e9ed780155202e8908e823a541be8051399ef4808e973f5cd158359f"
+    }
+  ],
+  "verification_scope": "Compiled examples, real public imports/signature binding and actual CLI parser help. No MRI benchmark rerun. Input files in examples require user paths.",
+  "noted_existing_runtime_compatibility": "Explicit FreeSurfer backend still calls official recon-all; production examples use FNIT/provided and docs disclose native/Workbench stages.",
+  "homepage_example": "compiled and real SynthStrip public constructor signature checked; data paths are user inputs",
+  "reference_commands_verified": [
+    {
+      "official_source": "https://raw.githubusercontent.com/nipreps/fmriprep/25.2.4/fmriprep/cli/parser.py",
+      "correction": "Removed invalid --use-syn-sdc false; omitted option uses default False."
+    },
+    {
+      "official_source": "https://mrtrix.readthedocs.io/en/latest/reference/commands/tckgen.html",
+      "mapping": "Explicit -seeds 100000 -select 0 for attempted seed budget."
+    }
+  ],
+  "surface_workbench_versions": {
+    "FNIT": "2.1.0",
+    "reference": "2.0.1",
+    "same_binary": false,
+    "reports_checked": [
+      "CON01.same_input.posthoc-v2.public.json",
+      "CON06.same_input.completion-receipt-v3.public.json"
+    ]
+  }
+}

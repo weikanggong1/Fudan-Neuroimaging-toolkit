@@ -1,0 +1,4016 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-05",
+  "scope": [
+    "applywarp",
+    "convertwarp",
+    "flirt",
+    "fnirt",
+    "invwarp",
+    "mcflirt",
+    "mmorf",
+    "msm",
+    "space_conversion",
+    "topup",
+    "eddy",
+    "fslmaths"
+  ],
+  "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+  "server_index_status": {
+    "record": "/mnt/c/users/admin/documents/codex/2026-09-30/new-chat/work/readme_manual_20261005/SERVER_ENTRY.md",
+    "sha256": "addd2be0f3a2a310de6d5907b67a2161a6beed1c254c309ce56f329c36042059",
+    "kind": "root-provided live entry README/INDEX verification summary, not full index",
+    "server_repo_head": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+    "local_main": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+    "remote_docs_deployed": false,
+    "subtask_read_summary": true
+  },
+  "official_pages_verified": [
+    "https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/flirt/user_guide.html",
+    "https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/fnirt/user_guide.html",
+    "https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/topup/users_guide/index.html",
+    "https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/eddy/users_guide/index.html"
+  ],
+  "release_manifest_sha256": "24a292cc79b0e9530559b7edb3fc09c7b157d0023b06335798ca4a902d5c1a3f",
+  "modules": [
+    {
+      "module": "applywarp",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/applywarp/README.md",
+      "readme_sha256": "c7413b4d9eb1a05fd76033b23852954a51cc6bb0cc0a0d3c1f88ad6292f83fcd",
+      "readme_lines": 230,
+      "sources_sha256": {
+        "src/fnit/applywarp/__init__.py": "959341360b1a6057cecfa3c98989a425d8a4c192ab7cb1cf2e221429f73452b5",
+        "src/fnit/applywarp/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+        "src/fnit/applywarp/_normalization_cpu.py": "c28302fb3aa01af7d45de22a327e77a05e0ae03084959532e1c0e2bde6b65dbe",
+        "src/fnit/applywarp/cli.py": "024de40d9121d2352071cf37f2c47558d97f0630faa1bfc47abcfb4e6e38270e",
+        "src/fnit/applywarp/core.py": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "TorchApplyWarp",
+              "signature": "(device=None, *, frame_chunk_size=None)",
+              "status": "bound"
+            },
+            {
+              "call": "resampler.run",
+              "signature": "(self, input, reference, output, **kwargs)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/applywarp/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "docs/applywarp/cpu_normalization_all23_official_20261004.public.json",
+          "sha256": "8aba0bfb8ebd93cf25bdb7b29bd7be78d825d4ec009d3e09de8a6558433d2fcb",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/applywarp/_normalization_cpu.py",
+              "json_key": ".source_sha256.src/fnit/applywarp/_normalization_cpu.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/applywarp/benchmark_20261004.public.json",
+          "sha256": "5f3f14b6b4747e63d9c4c3dc11378062a9a48818263348355d5684ca7826c2aa",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/applywarp/mni_dwi_105_20261004.public.json",
+          "sha256": "307682805fe239d0218c9b2eec5b1135b00fb4fbb80e2b90ad1f79edd8907358",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/applywarp/_normalization_cpu.py",
+              "json_key": ".source_sha256.src/fnit/applywarp/_normalization_cpu.py"
+            },
+            {
+              "source": "src/fnit/applywarp/core.py",
+              "json_key": ".source_sha256.src/fnit/applywarp/core.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/applywarp/world_cpu_latest_20261004.public.json",
+          "sha256": "bb56af45d90f14349857663001ec97de1bc8c5aaafccf5347bdd1fe03f0be3e3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/multimodal_cpu_20261004/gpu_final_v23_20261004.public.json",
+          "sha256": "7eec9bb946ba8d570c3e96fc1178299494714b5bdbb18fdf6b1862a8341fb7ad",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/applywarp/_normalization_cpu.py",
+              "json_key": ".source_hashes.src/fnit/applywarp/_normalization_cpu.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/multimodal_cpu_20261004/gpu_inv_mni_v26_20261004.public.json",
+          "sha256": "f8b37a0d6449eafa173bde72136c4d4e82651314a922b8a2b16a69507b2d2c6b",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/applywarp/_normalization_cpu.py",
+              "json_key": ".source_hashes.src/fnit/applywarp/_normalization_cpu.py"
+            },
+            {
+              "source": "src/fnit/applywarp/core.py",
+              "json_key": ".source_hashes.src/fnit/applywarp/core.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/multimodal_cpu_20261004/gpu_world_v20_20261004.public.json",
+          "sha256": "42889c15037ce06996844dd01b2db89c7e522c4270f6122872b4c4cf01ebe90a",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/registration_lossless_20261002/component_tuning.public.json",
+          "sha256": "3e630d0883361f128b8f5ee6e63c63e638915c2dd418e40ecbbc626413f8ca4d",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [],
+      "images": [
+        {
+          "path": "validation/registration_lossless_20261002/figures/official_warp_001.png",
+          "sha256": "dfbc5e8ea9395e9bedde8f2072fb1a054cbddc987669b64ef30245c829ad430a",
+          "exists": true
+        }
+      ],
+      "archive": {
+        "path": "validation/applywarp/readme_archive_20261005.md",
+        "original_readme_sha256": "f72afaa493116114c77d13f633196842992b3fddc2da1497b6a48b3ee9859b39",
+        "archive_sha256": "392e583cbedad2a2d99849783f2feeb2ff726e280b36d79cf47ec470453a47ee",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [
+          {
+            "url": "../fmri/README.md#命令行调用",
+            "target_exists": true
+          }
+        ],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [
+          {
+            "url": "../fmri/README.md#命令行调用",
+            "fragment_exists": true
+          }
+        ],
+        "benchmark_section_fraction": 0.14782608695652175,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "forwarded_api_example_checks": [
+        {
+          "call": "resampler.run",
+          "underlying": "fnit.applywarp.core.TorchApplyWarp.__call__",
+          "signature": "(self, input, reference, *, warp=None, premat=None, postmat=None, interpolation='trilinear', warp_convention='auto', output_dtype=None)",
+          "status": "bound_without_executing_mri"
+        }
+      ]
+    },
+    {
+      "module": "convertwarp",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/convertwarp/README.md",
+      "readme_sha256": "6122cb5338378a1cf4e640341ffbf873540f91c8da9d54119eec43189d7a054d",
+      "readme_lines": 206,
+      "sources_sha256": {
+        "src/fnit/convertwarp/__init__.py": "ffb6ba321829f59323fef484076ea4fa8cb1d558d544ec00f2da0a4d0bffa425",
+        "src/fnit/convertwarp/cli.py": "4e2d78717ccb19fe1c05a4f2011fd4f0178ef86c5368cda3c438e66cd6c1ff32",
+        "src/fnit/convertwarp/core.py": "730c0d8c82b7d35c5f77e9a7d0ffad65e375f13f37c379591c399ef0b26627d8"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "TorchConvertWarp(device='cuda:0').run",
+              "signature": "(self, reference, warp1, output, **kwargs)",
+              "status": "bound"
+            },
+            {
+              "call": "TorchConvertWarp",
+              "signature": "(device='cpu')",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        },
+        {
+          "block": 1,
+          "bindings": [
+            {
+              "call": "TorchConvertWarp(device='cuda:0').run_mmorf",
+              "signature": "(self, reference, source, mmorf_warp, output, *, affine, output_convention='relative')",
+              "status": "bound"
+            },
+            {
+              "call": "TorchConvertWarp",
+              "signature": "(device='cpu')",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/convertwarp/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "docs/convertwarp/benchmark_20261004.public.json",
+          "sha256": "1012a0e782deac43bf3dfd070ce7fa489ae7e0c06257a4ea5b2072738177a2da",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/convertwarp/assets/public_figure_report.public.json",
+          "sha256": "b906f67147c5585feb21db9fc51e7b1ce38f4f15e04d13ee5cb09378329dac7d",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/convertwarp/assets/public_figure_report.public.json",
+          "sha256": "b906f67147c5585feb21db9fc51e7b1ce38f4f15e04d13ee5cb09378329dac7d",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [],
+      "images": [
+        {
+          "path": "docs/convertwarp/assets/public_convertwarp_comparison.png",
+          "sha256": "54a0a24bb948784e85577a327d3e06f455909600a0e6eefaebda51f305ba81c7",
+          "exists": true
+        }
+      ],
+      "archive": {
+        "path": "validation/convertwarp/readme_archive_20261005.md",
+        "original_readme_sha256": "9e2eb3781675395b25b17ff14590667c5048e212cdb7747836c54bca85877573",
+        "archive_sha256": "415a73a53b7c9b9bf5e74c86eb6b81728a117f7b366d9ca57db71f38e141c73f",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [],
+        "benchmark_section_fraction": 0.0825242718446602,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "forwarded_api_example_checks": [
+        {
+          "call": "TorchConvertWarp(device='cuda:0').run",
+          "underlying": "fnit.convertwarp.core.TorchConvertWarp.__call__",
+          "signature": "(self, reference, warp1, *, premat=None, postmat=None, warp_convention='auto', output_convention='relative')",
+          "status": "bound_without_executing_mri"
+        }
+      ]
+    },
+    {
+      "module": "flirt",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/flirt/README.md",
+      "readme_sha256": "3ae68587ba08bcf5bd084610ecf40331e063266c05f802733ff9522d2070f9d9",
+      "readme_lines": 208,
+      "sources_sha256": {
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/flirt/_cpu.py": "737c05d72c8b6c6cb5e3d02a6072b818c7e0a84d7ce2f16b924f35b46b05cb20",
+        "src/fnit/flirt/_cpu_simd.py": "cb95ca5724c67d6230f3e5daba9a1b19b0c1364f67df3bcdc1d8cb199f8f2630",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/batched.py": "06bcaeba1b58090d5b40b57160a159075af48ab0c42c2b61a6d7e3f803ee85f4",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/core.py": "21efb96d6f48797f7dc90542fad6dfa75cd7580fa77fed346c90615f0280f4ef",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "run_flirt",
+              "signature": "(input, reference, *, output=None, omat=None, init=None, inweight=None, refweight=None, dof=12, cost='corratio', applyxfm=False, usesqform=False, device=None, execution='auto', candidate_batch_size=128, memory_budget_gb=20.0, overwrite=False)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/flirt/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "docs/flirt/cpu_20261004.public.json",
+          "sha256": "154e9feffcd1293517fa5de862b42d7b48d0c6bfaeb5af6d8eb54423cab3d556",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/flirt/core.py",
+              "json_key": ".source_sha256.src/fnit/flirt/core.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/flirt/cpu_followup_20261004.public.json",
+          "sha256": "99b791fd7b6847deab52e25e09195b16f47802ae87d4e4d0b0419a4a12a632fb",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/flirt/_cpu.py",
+              "json_key": ".groups.weighted.source_sha256.src/fnit/flirt/_cpu.py"
+            },
+            {
+              "source": "src/fnit/flirt/_cpu.py",
+              "json_key": ".groups.batched.source_sha256.src/fnit/flirt/_cpu.py"
+            },
+            {
+              "source": "src/fnit/flirt/_cpu.py",
+              "json_key": ".groups.batched_statistics.source_sha256.src/fnit/flirt/_cpu.py"
+            },
+            {
+              "source": "src/fnit/flirt/_cpu_simd.py",
+              "json_key": ".groups.weighted.source_sha256.src/fnit/flirt/_cpu_simd.py"
+            },
+            {
+              "source": "src/fnit/flirt/_cpu_simd.py",
+              "json_key": ".groups.batched.source_sha256.src/fnit/flirt/_cpu_simd.py"
+            },
+            {
+              "source": "src/fnit/flirt/_cpu_simd.py",
+              "json_key": ".groups.batched_statistics.source_sha256.src/fnit/flirt/_cpu_simd.py"
+            },
+            {
+              "source": "src/fnit/flirt/batched.py",
+              "json_key": ".groups.batched_statistics.source_sha256.src/fnit/flirt/batched.py"
+            },
+            {
+              "source": "src/fnit/flirt/core.py",
+              "json_key": ".groups.weighted.source_sha256.src/fnit/flirt/core.py"
+            },
+            {
+              "source": "src/fnit/flirt/core.py",
+              "json_key": ".groups.batched.source_sha256.src/fnit/flirt/core.py"
+            },
+            {
+              "source": "src/fnit/flirt/core.py",
+              "json_key": ".groups.batched_statistics.source_sha256.src/fnit/flirt/core.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/flirt/figures/cpu_public_12_corratio.sources.json",
+          "sha256": "7af186f9d593947b9585ed4cc7ba86a805a6eaa17975ea4ea273f3668605bf5c",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/flirt/core.py",
+              "json_key": ".candidate_source_sha256.src/fnit/flirt/core.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [],
+      "images": [
+        {
+          "path": "docs/flirt/figures/cpu_public_12_corratio.png",
+          "sha256": "92b67fcf23d21f6d9b5dd6e5cdc8ae9d654f1f369b2fd8eb50ac8d1829be36e2",
+          "exists": true
+        }
+      ],
+      "archive": {
+        "path": "validation/flirt/readme_archive_20261005.md",
+        "original_readme_sha256": "6c5e19bc6b787c7fdffbba30491d7c5aecd4c5dc0bde64dfbcbfe170295a5fe1",
+        "archive_sha256": "912b406e31b8cae9c73a77707451ac0b1d92fb3db7221a2866faf88e33580b02",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [],
+        "benchmark_section_fraction": 0.20673076923076922,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "forwarded_api_example_checks": []
+    },
+    {
+      "module": "fnirt",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/fnirt/README.md",
+      "readme_sha256": "7074048356cb78862ffbfb9cc66faa42114199723d76ecb2adb5474ebd9b5333",
+      "readme_lines": 279,
+      "sources_sha256": {
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/_bending_cpu.py": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47",
+        "src/fnit/fnirt/_normal_cpu.py": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f",
+        "src/fnit/fnirt/_normal_simd_cpu.py": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9",
+        "src/fnit/fnirt/_sampling_cpu.py": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368",
+        "src/fnit/fnirt/_smoothing_cpu.py": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be",
+        "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+        "src/fnit/fnirt/_topology_cpu.py": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+        "src/fnit/fnirt/registration.py": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da",
+        "src/fnit/fnirt/spline.py": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+        "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+        "src/fnit/fnirt/topology.py": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "run_fnirt",
+              "signature": "(input, reference, affine=None, *, cout=None, iout=None, jout=None, refmask=None, config=None, device=None, execution='optimized', overwrite=False)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/fnirt/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "docs/fnirt/assets/cpu-primary-v27-node8-20261004.public.json",
+          "sha256": "648c826b6f2e633a435c0b0c141eff2fe0629542dfe2c7cd52cb0d6b32ef1c12",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[0].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[1].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[2].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[3].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[4].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[5].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[6].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[7].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[0].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[1].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[2].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[3].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[4].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[5].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[6].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[7].source_registration_sha256"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/multimodal_cpu_20261004/gpu_cpu_final_v28_ready_retry_20261004.public.json",
+          "sha256": "7944989c3a7f39a61d09972d54d29e86b86e5cbe9bb5c09f6a5292c5408964da",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/fnirt/_bending_cpu.py",
+              "json_key": ".source_hashes.src/fnit/fnirt/_bending_cpu.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_normal_cpu.py",
+              "json_key": ".source_hashes.src/fnit/fnirt/_normal_cpu.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_normal_simd_cpu.py",
+              "json_key": ".source_hashes.src/fnit/fnirt/_normal_simd_cpu.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".source_hashes.src/fnit/fnirt/_sampling_cpu.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_smoothing_cpu.py",
+              "json_key": ".source_hashes.src/fnit/fnirt/_smoothing_cpu.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_cpu.py",
+              "json_key": ".source_hashes.src/fnit/fnirt/_topology_cpu.py"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".source_hashes.src/fnit/fnirt/registration.py"
+            },
+            {
+              "source": "src/fnit/fnirt/spline.py",
+              "json_key": ".source_hashes.src/fnit/fnirt/spline.py"
+            },
+            {
+              "source": "src/fnit/fnirt/topology.py",
+              "json_key": ".source_hashes.src/fnit/fnirt/topology.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/fnirt/assets/cpu-public-v27-node8/figures.public.json",
+          "sha256": "94a56c07a66dd48bd852db2429aa85a461ecfb000264ec3abd8b7fcd3bb2ef57",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/fnirt/assets/cpu-scg-cost-skip-stage3-node8-20261004.public.json",
+          "sha256": "b547ad41b34b7e77dcc0a74f828bd88b8ca9d1ad4e273fe8cb7023b9c451e2da",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".records.new.source_registration_sha256"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/fnirt/assets/cpu-functional-v27-node8-20261004.public.json",
+          "sha256": "f77ff659462b931e342a318ff888b4527bb85a4c4d9db14aa18f4d112df5d43c",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[0].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[1].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[2].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[3].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[4].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[5].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[6].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[7].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[8].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[9].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[10].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[11].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[12].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[13].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[14].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[15].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[16].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[17].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[18].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[19].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[20].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[21].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[22].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[23].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[24].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[25].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[0].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[1].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[2].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[3].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[4].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[5].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[6].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[7].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[8].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[9].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[10].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[11].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[12].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[13].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[14].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[15].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[16].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[17].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[18].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[19].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[20].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[21].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[22].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[23].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[24].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[25].source_registration_sha256"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/fnirt/assets/cpu-primary-v27-node8-20261004.public.json",
+          "sha256": "648c826b6f2e633a435c0b0c141eff2fe0629542dfe2c7cd52cb0d6b32ef1c12",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[0].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[1].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[2].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[3].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[4].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[5].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[6].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/_sampling_cpu.py",
+              "json_key": ".candidate_gates[7].source_sampling_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[0].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[1].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[2].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[3].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[4].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[5].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[6].source_registration_sha256"
+            },
+            {
+              "source": "src/fnit/fnirt/registration.py",
+              "json_key": ".candidate_gates[7].source_registration_sha256"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/fnirt/assets/cpu-default-t1-normal-simd-v2-20261004.public.json",
+          "sha256": "bd833bfc532028af8bfb77b80e492b155cf4e1d9e59d1baf0849f55b8bd17a06",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/fnirt/_normal_cpu.py",
+              "json_key": ".measured_normal_source_sha256.src/fnit/fnirt/_normal_cpu.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_normal_simd_cpu.py",
+              "json_key": ".measured_normal_source_sha256.src/fnit/fnirt/_normal_simd_cpu.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/fmri/registration_gpu.current.public.json",
+          "sha256": "8d7f864f5673ed44252d40f3aac01a843cb82c0d16426e75dd3c5fb7069dfc2d",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/fnirt/__init__.py",
+              "json_key": ".conditions.before_bbr.source_sha256.src/fnit/fnirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__init__.py",
+              "json_key": ".conditions.before_bbr_chain.source_sha256.src/fnit/fnirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__init__.py",
+              "json_key": ".conditions.before_fnirt.source_sha256.src/fnit/fnirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__init__.py",
+              "json_key": ".conditions.bbr_v1_math.source_sha256.src/fnit/fnirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__init__.py",
+              "json_key": ".conditions.final_bbr.source_sha256.src/fnit/fnirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__init__.py",
+              "json_key": ".conditions.final_bbr_chain.source_sha256.src/fnit/fnirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__init__.py",
+              "json_key": ".conditions.after_fnirt_reference.source_sha256.src/fnit/fnirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__init__.py",
+              "json_key": ".conditions.after_fnirt.source_sha256.src/fnit/fnirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__init__.py",
+              "json_key": ".conditions.diagnostic_fnirt_dense.source_sha256.src/fnit/fnirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__main__.py",
+              "json_key": ".conditions.before_bbr.source_sha256.src/fnit/fnirt/__main__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__main__.py",
+              "json_key": ".conditions.before_bbr_chain.source_sha256.src/fnit/fnirt/__main__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__main__.py",
+              "json_key": ".conditions.before_fnirt.source_sha256.src/fnit/fnirt/__main__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__main__.py",
+              "json_key": ".conditions.bbr_v1_math.source_sha256.src/fnit/fnirt/__main__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__main__.py",
+              "json_key": ".conditions.final_bbr.source_sha256.src/fnit/fnirt/__main__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__main__.py",
+              "json_key": ".conditions.final_bbr_chain.source_sha256.src/fnit/fnirt/__main__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__main__.py",
+              "json_key": ".conditions.after_fnirt_reference.source_sha256.src/fnit/fnirt/__main__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__main__.py",
+              "json_key": ".conditions.after_fnirt.source_sha256.src/fnit/fnirt/__main__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/__main__.py",
+              "json_key": ".conditions.diagnostic_fnirt_dense.source_sha256.src/fnit/fnirt/__main__.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_smoothing_triton.py",
+              "json_key": ".conditions.final_bbr.source_sha256.src/fnit/fnirt/_smoothing_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_smoothing_triton.py",
+              "json_key": ".conditions.final_bbr_chain.source_sha256.src/fnit/fnirt/_smoothing_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_smoothing_triton.py",
+              "json_key": ".conditions.after_fnirt_reference.source_sha256.src/fnit/fnirt/_smoothing_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_smoothing_triton.py",
+              "json_key": ".conditions.after_fnirt.source_sha256.src/fnit/fnirt/_smoothing_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_smoothing_triton.py",
+              "json_key": ".conditions.diagnostic_fnirt_dense.source_sha256.src/fnit/fnirt/_smoothing_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_triton.py",
+              "json_key": ".conditions.before_bbr.source_sha256.src/fnit/fnirt/_topology_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_triton.py",
+              "json_key": ".conditions.before_bbr_chain.source_sha256.src/fnit/fnirt/_topology_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_triton.py",
+              "json_key": ".conditions.before_fnirt.source_sha256.src/fnit/fnirt/_topology_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_triton.py",
+              "json_key": ".conditions.bbr_v1_math.source_sha256.src/fnit/fnirt/_topology_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_triton.py",
+              "json_key": ".conditions.final_bbr.source_sha256.src/fnit/fnirt/_topology_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_triton.py",
+              "json_key": ".conditions.final_bbr_chain.source_sha256.src/fnit/fnirt/_topology_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_triton.py",
+              "json_key": ".conditions.after_fnirt_reference.source_sha256.src/fnit/fnirt/_topology_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_triton.py",
+              "json_key": ".conditions.after_fnirt.source_sha256.src/fnit/fnirt/_topology_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/_topology_triton.py",
+              "json_key": ".conditions.diagnostic_fnirt_dense.source_sha256.src/fnit/fnirt/_topology_triton.py"
+            },
+            {
+              "source": "src/fnit/fnirt/cli.py",
+              "json_key": ".conditions.final_bbr.source_sha256.src/fnit/fnirt/cli.py"
+            },
+            {
+              "source": "src/fnit/fnirt/cli.py",
+              "json_key": ".conditions.final_bbr_chain.source_sha256.src/fnit/fnirt/cli.py"
+            },
+            {
+              "source": "src/fnit/fnirt/cli.py",
+              "json_key": ".conditions.after_fnirt_reference.source_sha256.src/fnit/fnirt/cli.py"
+            },
+            {
+              "source": "src/fnit/fnirt/cli.py",
+              "json_key": ".conditions.after_fnirt.source_sha256.src/fnit/fnirt/cli.py"
+            },
+            {
+              "source": "src/fnit/fnirt/cli.py",
+              "json_key": ".conditions.diagnostic_fnirt_dense.source_sha256.src/fnit/fnirt/cli.py"
+            },
+            {
+              "source": "src/fnit/fnirt/io.py",
+              "json_key": ".conditions.before_bbr.source_sha256.src/fnit/fnirt/io.py"
+            },
+            {
+              "source": "src/fnit/fnirt/io.py",
+              "json_key": ".conditions.before_bbr_chain.source_sha256.src/fnit/fnirt/io.py"
+            },
+            {
+              "source": "src/fnit/fnirt/io.py",
+              "json_key": ".conditions.before_fnirt.source_sha256.src/fnit/fnirt/io.py"
+            },
+            {
+              "source": "src/fnit/fnirt/io.py",
+              "json_key": ".conditions.bbr_v1_math.source_sha256.src/fnit/fnirt/io.py"
+            },
+            {
+              "source": "src/fnit/fnirt/io.py",
+              "json_key": ".conditions.final_bbr.source_sha256.src/fnit/fnirt/io.py"
+            },
+            {
+              "source": "src/fnit/fnirt/io.py",
+              "json_key": ".conditions.final_bbr_chain.source_sha256.src/fnit/fnirt/io.py"
+            },
+            {
+              "source": "src/fnit/fnirt/io.py",
+              "json_key": ".conditions.after_fnirt_reference.source_sha256.src/fnit/fnirt/io.py"
+            },
+            {
+              "source": "src/fnit/fnirt/io.py",
+              "json_key": ".conditions.after_fnirt.source_sha256.src/fnit/fnirt/io.py"
+            },
+            {
+              "source": "src/fnit/fnirt/io.py",
+              "json_key": ".conditions.diagnostic_fnirt_dense.source_sha256.src/fnit/fnirt/io.py"
+            },
+            {
+              "source": "src/fnit/fnirt/optimizer.py",
+              "json_key": ".conditions.final_bbr.source_sha256.src/fnit/fnirt/optimizer.py"
+            },
+            {
+              "source": "src/fnit/fnirt/optimizer.py",
+              "json_key": ".conditions.final_bbr_chain.source_sha256.src/fnit/fnirt/optimizer.py"
+            },
+            {
+              "source": "src/fnit/fnirt/optimizer.py",
+              "json_key": ".conditions.after_fnirt_reference.source_sha256.src/fnit/fnirt/optimizer.py"
+            },
+            {
+              "source": "src/fnit/fnirt/optimizer.py",
+              "json_key": ".conditions.after_fnirt.source_sha256.src/fnit/fnirt/optimizer.py"
+            },
+            {
+              "source": "src/fnit/fnirt/optimizer.py",
+              "json_key": ".conditions.diagnostic_fnirt_dense.source_sha256.src/fnit/fnirt/optimizer.py"
+            },
+            {
+              "source": "src/fnit/fnirt/standalone.py",
+              "json_key": ".conditions.final_bbr.source_sha256.src/fnit/fnirt/standalone.py"
+            },
+            {
+              "source": "src/fnit/fnirt/standalone.py",
+              "json_key": ".conditions.final_bbr_chain.source_sha256.src/fnit/fnirt/standalone.py"
+            },
+            {
+              "source": "src/fnit/fnirt/standalone.py",
+              "json_key": ".conditions.after_fnirt_reference.source_sha256.src/fnit/fnirt/standalone.py"
+            },
+            {
+              "source": "src/fnit/fnirt/standalone.py",
+              "json_key": ".conditions.after_fnirt.source_sha256.src/fnit/fnirt/standalone.py"
+            },
+            {
+              "source": "src/fnit/fnirt/standalone.py",
+              "json_key": ".conditions.diagnostic_fnirt_dense.source_sha256.src/fnit/fnirt/standalone.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [],
+      "images": [
+        {
+          "path": "docs/fnirt/assets/cpu-public-v27-node8/fnirt_warped.png",
+          "sha256": "027a1768c77c8ebf903bab73311394325178d81a15458dc3e8650bbfda312e8e",
+          "exists": true
+        },
+        {
+          "path": "docs/fnirt/assets/cpu-public-v27-node8/fnirt_jacobian.png",
+          "sha256": "fe71cf2bde1eb250bf47224e1c4acf003a22b5e8dfceab153d5d87a450fa572f",
+          "exists": true
+        }
+      ],
+      "archive": {
+        "path": "validation/fnirt/readme_archive_20261005.md",
+        "original_readme_sha256": "673485e0a29e1df461ac0a96dea134ccf480b97fa19a42a6e20a821d8d4df2fc",
+        "archive_sha256": "71fba008a214c3e9dca24c343ca8c637218ac27f6f3f87f84a86b3cce1f56e7b",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [
+          {
+            "url": "../../validation/fnirt/readme_archive_20261005.md#选择预设",
+            "target_exists": true
+          }
+        ],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [
+          {
+            "url": "../../validation/fnirt/readme_archive_20261005.md#选择预设",
+            "fragment_exists": true
+          }
+        ],
+        "benchmark_section_fraction": 0.11469534050179211,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "forwarded_api_example_checks": []
+    },
+    {
+      "module": "invwarp",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/invwarp/README.md",
+      "readme_sha256": "63aa3484689f81d5be08397546e3957e62239ee325279c8447c944118f3bf215",
+      "readme_lines": 205,
+      "sources_sha256": {
+        "src/fnit/invwarp/__init__.py": "079e99cfdf2f38ae30f00de5a5e9c955c92577a238fcfd2353975a884824117f",
+        "src/fnit/invwarp/cli.py": "97e75c1eeaf59be79d36b1141d6cf469734c1358ab82524b124b30a02e55426b",
+        "src/fnit/invwarp/core.py": "b3f48e5a7fd4156b9f8cd9d0094b5299ed95c77b59b5636faeda0f522df34adc"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "TorchInvWarp(device='cuda:0').run",
+              "signature": "(self, reference, warp, output, **kwargs)",
+              "status": "bound"
+            },
+            {
+              "call": "TorchInvWarp",
+              "signature": "(device='cpu')",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        },
+        {
+          "block": 1,
+          "bindings": [
+            {
+              "call": "invwarp",
+              "signature": "(reference, warp, **kwargs)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/invwarp/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "docs/invwarp/assets/cpu-allocation-v2-node8-official-20261004.public.json",
+          "sha256": "c5d5316ee70231b935ae22b610fd86e2f171c99221ea358df7ff5e251dc518fb",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/invwarp/core.py",
+              "json_key": ".source_sha256.src/fnit/invwarp/core.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/multimodal_cpu_20261004/gpu_cpu_final_v28_ready_retry_20261004.public.json",
+          "sha256": "7944989c3a7f39a61d09972d54d29e86b86e5cbe9bb5c09f6a5292c5408964da",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/invwarp/core.py",
+              "json_key": ".source_hashes.src/fnit/invwarp/core.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/invwarp/assets/cpu-functional-v17-corrected-v2-20261004.public.json",
+          "sha256": "0a02fe7639c60ba2b812878ddf44c0840c88568275b1ca8db2800ea5eb4aa924",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/fnirt/assets/figures-v17-20261004.public.json",
+          "sha256": "d95b91f54579eb6daa6421a75c899713fbc96c20cfdb7c2f1ac433baa0af5b2a",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "examples/data/SOURCES.json",
+          "sha256": "15397ee88ece3bcbcfe657b2ff113b8eccba3613fea109b8ff68e6af8b5e5902",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [],
+      "images": [
+        {
+          "path": "docs/invwarp/assets/invwarp_displacement.png",
+          "sha256": "8f6df8f0c99156a51ece4c62d0274574bec809bd6a48b6ba9efad75ec2b34d33",
+          "exists": true
+        }
+      ],
+      "archive": {
+        "path": "validation/invwarp/readme_archive_20261005.md",
+        "original_readme_sha256": "eb18ae654145b381acd8e33b76dd8444cfb6bb335df9467385652b906b243908",
+        "archive_sha256": "243d393ef3e1b14fb23c5be9d2874d05405b7ad95d6029df0049bb426e42061a",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [
+          {
+            "url": "CPU_BENCHMARK.md#14-项真实功能的完整-18-线程结果",
+            "target_exists": true
+          }
+        ],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [
+          {
+            "url": "CPU_BENCHMARK.md#14-项真实功能的完整-18-线程结果",
+            "fragment_exists": true
+          }
+        ],
+        "benchmark_section_fraction": 0.16585365853658537,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "forwarded_api_example_checks": []
+    },
+    {
+      "module": "mcflirt",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/mcflirt/README.md",
+      "readme_sha256": "f67aa22fff384c6d84d1df62281e0cced2660747b93547c5984cd9b36caca132",
+      "readme_lines": 204,
+      "sources_sha256": {
+        "src/fnit/mcflirt/__init__.py": "793c2b2e08ae85bedf341df682225f7bc9eadd44069dbe6fd73356ccb985a1ec",
+        "src/fnit/mcflirt/_cost_cuda.py": "e005d1553e36c2bdbcc94fd399e697ef3cd445beb78c0dcb87c07100ca0f98fa",
+        "src/fnit/mcflirt/_cuda_executor.py": "ddb2172bf290023f41bc6e39ce0b47f3633a6c1be8303077b89d2682487d428c",
+        "src/fnit/mcflirt/_cuda_graph.py": "1b0bda7f1e521f5c3e82f54d52e19e0db6282043bc1a23e0805a0ad640a28a26",
+        "src/fnit/mcflirt/_rigid.py": "ea6ca9d4aa6f87d8b353cecdfdd1650a99f4e3dcd558290815a4004935c2158e",
+        "src/fnit/mcflirt/_sampling_cuda.py": "8f1b8b3ab03d819e3263319eaa0f9024a1a81c3f6d9a05304766ad463d885a42",
+        "src/fnit/mcflirt/cli.py": "855e192b26ced79517250bb7f406468e614c5da30922772c737f0b70062e08a9",
+        "src/fnit/mcflirt/core.py": "2b344c34ecbc96d14a07132f6c5731a87ebe13178ab5fa1452222ed2299bae78",
+        "src/fnit/mcflirt/sampling.py": "af10cfd4f42f94adff2bb910eafe40834786a3b7646756a3967d5c9fc3aa0b8f"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "TorchMCFLIRT(device='cuda:0').run",
+              "signature": "(self, input_bold, reference=None, *, stages=3, stage_iterations=(1, 1, 1), resample=False, interpolation='linear', output=None, mats=False, plots=False, overwrite=False, rmsrel=False, rmsabs=False)",
+              "status": "bound"
+            },
+            {
+              "call": "TorchMCFLIRT",
+              "signature": "(device=None)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        },
+        {
+          "block": 1,
+          "bindings": [
+            {
+              "call": "TorchMCFLIRT(device='cuda:0').run",
+              "signature": "(self, input_bold, reference=None, *, stages=3, stage_iterations=(1, 1, 1), resample=False, interpolation='linear', output=None, mats=False, plots=False, overwrite=False, rmsrel=False, rmsabs=False)",
+              "status": "bound"
+            },
+            {
+              "call": "TorchMCFLIRT",
+              "signature": "(device=None)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/mcflirt/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "validation/mcflirt/nocache_public_con03_20261003.public.json",
+          "sha256": "e4370ecc8d2e403cb1aeb8cdea5cac9be3d22f738642775d7492918fb3e37424",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/mcflirt/__init__.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/__init__.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cost_cuda.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_cost_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cost_cuda.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_cost_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cuda_executor.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_cuda_executor.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cuda_executor.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_cuda_executor.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cuda_graph.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_cuda_graph.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cuda_graph.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_cuda_graph.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_rigid.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_rigid.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_rigid.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_rigid.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_sampling_cuda.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_sampling_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_sampling_cuda.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_sampling_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/cli.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/cli.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/cli.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/cli.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/core.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/core.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/core.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/core.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/sampling.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/sampling.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/sampling.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/sampling.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/mcflirt/nocache_public_con03_20261003.public.json",
+          "sha256": "e4370ecc8d2e403cb1aeb8cdea5cac9be3d22f738642775d7492918fb3e37424",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/mcflirt/__init__.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/__init__.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cost_cuda.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_cost_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cost_cuda.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_cost_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cuda_executor.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_cuda_executor.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cuda_executor.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_cuda_executor.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cuda_graph.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_cuda_graph.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cuda_graph.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_cuda_graph.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_rigid.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_rigid.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_rigid.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_rigid.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_sampling_cuda.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/_sampling_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_sampling_cuda.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/_sampling_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/cli.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/cli.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/cli.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/cli.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/core.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/core.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/core.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/core.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/sampling.py",
+              "json_key": ".cached.mcflirt_sources_sha256.src/fnit/mcflirt/sampling.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/sampling.py",
+              "json_key": ".nocache.mcflirt_sources_sha256.src/fnit/mcflirt/sampling.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/mcflirt/paired_exact_latest.public.json",
+          "sha256": "4ce0fbea9b24cbb81ebfe104bcee51b2d3978bf64ea831eedaa8a7c8fe23aa71",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/mcflirt/__init__.py",
+              "json_key": ".trials[0].sources_sha256.mcflirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/__init__.py",
+              "json_key": ".trials[1].sources_sha256.mcflirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/__init__.py",
+              "json_key": ".trials[2].sources_sha256.mcflirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/__init__.py",
+              "json_key": ".trials[3].sources_sha256.mcflirt/__init__.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cost_cuda.py",
+              "json_key": ".trials[0].sources_sha256.mcflirt/_cost_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cost_cuda.py",
+              "json_key": ".trials[1].sources_sha256.mcflirt/_cost_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cost_cuda.py",
+              "json_key": ".trials[2].sources_sha256.mcflirt/_cost_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cost_cuda.py",
+              "json_key": ".trials[3].sources_sha256.mcflirt/_cost_cuda.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_rigid.py",
+              "json_key": ".trials[1].sources_sha256.mcflirt/_rigid.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/_rigid.py",
+              "json_key": ".trials[2].sources_sha256.mcflirt/_rigid.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/cli.py",
+              "json_key": ".trials[0].sources_sha256.mcflirt/cli.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/cli.py",
+              "json_key": ".trials[1].sources_sha256.mcflirt/cli.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/cli.py",
+              "json_key": ".trials[2].sources_sha256.mcflirt/cli.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/cli.py",
+              "json_key": ".trials[3].sources_sha256.mcflirt/cli.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/core.py",
+              "json_key": ".trials[1].sources_sha256.mcflirt/core.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/core.py",
+              "json_key": ".trials[2].sources_sha256.mcflirt/core.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/sampling.py",
+              "json_key": ".trials[0].sources_sha256.mcflirt/sampling.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/sampling.py",
+              "json_key": ".trials[1].sources_sha256.mcflirt/sampling.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/sampling.py",
+              "json_key": ".trials[2].sources_sha256.mcflirt/sampling.py"
+            },
+            {
+              "source": "src/fnit/mcflirt/sampling.py",
+              "json_key": ".trials[3].sources_sha256.mcflirt/sampling.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/mcflirt/gpu_optimization_latest.public.json",
+          "sha256": "fbd2353b558eb45068b61e14bc4f6e4bade9831982b22077aa5670893dd6139e",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/mcflirt/__init__.py",
+              "json_key": ".sources_sha256.fnit.mcflirt.__init__"
+            },
+            {
+              "source": "src/fnit/mcflirt/_cost_cuda.py",
+              "json_key": ".sources_sha256.fnit.mcflirt._cost_cuda"
+            },
+            {
+              "source": "src/fnit/mcflirt/cli.py",
+              "json_key": ".sources_sha256.fnit.mcflirt.cli"
+            },
+            {
+              "source": "src/fnit/mcflirt/sampling.py",
+              "json_key": ".sources_sha256.fnit.mcflirt.sampling"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/mcflirt/full490_gpu.public.json",
+          "sha256": "becb5a818a918d597e89ce05c7eac43c13792eecb9f64b13cdb61d2ee2498cfb",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [],
+      "images": [
+        {
+          "path": "docs/mcflirt/figures/motion_correction_mni.png",
+          "sha256": "5d5718ef56a8452c73e532dd83410b7e9a35c3515db2e741660d63d2e58bf466",
+          "exists": true
+        }
+      ],
+      "archive": {
+        "path": "validation/mcflirt/readme_archive_20261005.md",
+        "original_readme_sha256": "10c6c9c1711aea2efeceb16f9d46d6086f149ede44e350d9ff786e801488614f",
+        "archive_sha256": "309368b298a2a3aa4654d5296412e82b136ffe94b7acc35de79dad5a451a0e3f",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [
+          {
+            "url": "../../validation/mcflirt/readme_archive_20261005.md#前次正常缓存的完整-490-帧核对",
+            "target_exists": true
+          }
+        ],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [
+          {
+            "url": "../../validation/mcflirt/readme_archive_20261005.md#前次正常缓存的完整-490-帧核对",
+            "fragment_exists": true
+          }
+        ],
+        "benchmark_section_fraction": 0.1323529411764706,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "forwarded_api_example_checks": []
+    },
+    {
+      "module": "mmorf",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/mmorf/README.md",
+      "readme_sha256": "b227ac8402c2398f9e404a176edba1b91880c1dda4554831b4f692ace75ef595",
+      "readme_lines": 203,
+      "sources_sha256": {
+        "src/fnit/mmorf/__init__.py": "6b44520b11f72192c1f78a5ba309b6f49e7cd767e4cff24e2b135748ae65c4ef",
+        "src/fnit/mmorf/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+        "src/fnit/mmorf/cli.py": "3e9d2d8c2cbeed1121e986545cc0d6d26f4f248937c9ff7423a4ea81e0b61101",
+        "src/fnit/mmorf/core.py": "1692d754c41139fbc61ce2d1fd1071790168e30ed2039dbb8d2e7bc256105338",
+        "src/fnit/mmorf/standalone.py": "cfad1efe8703a620af4b196a98cad2b6b490b7a7d57daf2293e1bd7f0b816326"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "run_mmorf",
+              "signature": "(moving_scalar, reference_scalar, moving_tensor, reference_tensor, *, output_dir, moving_scalar_affine=None, reference_scalar_affine=None, moving_tensor_affine=None, reference_tensor_affine=None, scalar_weights=None, auto_linear=True, device=None, config=None, overwrite=False) -> 'MMORFResult'",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        },
+        {
+          "block": 1,
+          "bindings": [
+            {
+              "call": "apply_mmorf_warp",
+              "signature": "(image, reference, warp, *, affine=None, device=None, interpolation='linear')",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/mmorf/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "validation/mmorf/report.public.json",
+          "sha256": "1493b8ed68bfa19bdd19f0510771cc9a2129da7fd9b35b47b641eaba5b6bf0cd",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/mmorf/cli.py",
+              "json_key": ".source_sha256.src/fnit/mmorf/cli.py"
+            },
+            {
+              "source": "src/fnit/mmorf/standalone.py",
+              "json_key": ".source_sha256.src/fnit/mmorf/standalone.py"
+            }
+          ],
+          "recorded_identities": [
+            {
+              "json_key": ".created_utc",
+              "value": "2026-09-29T06:29:56+00:00"
+            },
+            {
+              "json_key": ".reference.commit",
+              "value": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6"
+            },
+            {
+              "json_key": ".fnit.version",
+              "value": "0.16.0"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/mmorf/report.public.json",
+          "sha256": "1493b8ed68bfa19bdd19f0510771cc9a2129da7fd9b35b47b641eaba5b6bf0cd",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/mmorf/cli.py",
+              "json_key": ".source_sha256.src/fnit/mmorf/cli.py"
+            },
+            {
+              "source": "src/fnit/mmorf/standalone.py",
+              "json_key": ".source_sha256.src/fnit/mmorf/standalone.py"
+            }
+          ],
+          "recorded_identities": [
+            {
+              "json_key": ".created_utc",
+              "value": "2026-09-29T06:29:56+00:00"
+            },
+            {
+              "json_key": ".reference.commit",
+              "value": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6"
+            },
+            {
+              "json_key": ".fnit.version",
+              "value": "0.16.0"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [],
+      "images": [
+        {
+          "path": "docs/mmorf/figures/mmorf_fsl_comparison.png",
+          "sha256": "2c49df2c97d69634a8892f70210abff13612db8f93e1da38c01c0b83274ca508",
+          "exists": true
+        }
+      ],
+      "archive": {
+        "path": "validation/mmorf/readme_archive_20261005.md",
+        "original_readme_sha256": "4e90df0a69165b3c2f3680cd4e745be9e0c687f4795ad41825def8bb1d0ba03b",
+        "archive_sha256": "e59e3c0e302e27ed93275e3bb5a4aae7868f8659c0dc4e275620be485499cf34",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [
+          {
+            "url": "../../validation/mmorf/readme_archive_20261005.md#对应的官方-mmorf-032-调用",
+            "target_exists": true
+          }
+        ],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [
+          {
+            "url": "../../validation/mmorf/readme_archive_20261005.md#对应的官方-mmorf-032-调用",
+            "fragment_exists": true
+          }
+        ],
+        "benchmark_section_fraction": 0.13793103448275862,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [],
+      "forwarded_api_example_checks": []
+    },
+    {
+      "module": "msm",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/msm/README.md",
+      "readme_sha256": "d3f62ae04f8e76b083540d21cc53eb20f4a2206d52d98feab276e533dc1a2dec",
+      "readme_lines": 203,
+      "sources_sha256": {
+        "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+        "src/fnit/msm/_affine.py": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e",
+        "src/fnit/msm/_execution.py": "e67d43b972dd690c9ec86081c6d3e4fb783935def4bec8f264ab7d232916beae",
+        "src/fnit/msm/_ordered_sparse.py": "440ffd8f634fa42736aa0ea5b5f41de114e685a033146492d1e1f9e7a5364f11",
+        "src/fnit/msm/_spatial.py": "c7319ae9a616dbc2d741a8e8ecb0543cec6ffb7f54914f672f7b6947e6359204",
+        "src/fnit/msm/_sphere_map.py": "51bd19d1c12ef8be3427d4f9ef642dae5591ae8b0e0638b426d89e12173751be",
+        "src/fnit/msm/cli.py": "7f9b9d2df7619818eaff9e4bfac29f239c17cbddc3575968dbacada7f387fe8d",
+        "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+        "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+        "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+        "src/fnit/msm/features.py": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2",
+        "src/fnit/msm/msmall.py": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+        "src/fnit/msm/msmsulc.py": "a4ff7112888d645497ddbcc003059a810231d60a60dd9f06602fa7a94601f924",
+        "src/fnit/msm/prepare.py": "a8f6ca261378768e38a13c53d85d58702a2f4e7f30928e6e2b6b6e1665fd9b11"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "prepare_fmriprep_surface_inputs",
+              "signature": "(subject_dir: str | pathlib.Path, hcp_assets_dir: str | pathlib.Path, output_dir: str | pathlib.Path, *, wb_command: str | pathlib.Path = 'wb_command', fsnative_to_t1w=None, overwrite: bool = False, parallel: bool = True, cpu_threads: int | None = None) -> fnit.fmri.surface_prepare.T1SurfacePreparation",
+              "status": "bound"
+            },
+            {
+              "call": "prepare_msmsulc_inputs",
+              "signature": "(subject_dir: str | pathlib.Path, initial_spheres: tuple[str | pathlib.Path, str | pathlib.Path], hcp_assets_dir: str | pathlib.Path, output_dir: str | pathlib.Path, *, wb_command: str | pathlib.Path = 'wb_command', parallel: bool = True, cpu_threads: int | None = None) -> dict[str, fnit.msm.prepare.MSMSulcInputs]",
+              "status": "bound"
+            },
+            {
+              "call": "run_msmsulc",
+              "signature": "(inputs: dict[str, fnit.msm.prepare.MSMSulcInputs], output_dir: str | pathlib.Path, *, device: str = 'cuda:0', config: fnit.msm.config.MSMSulcConfig | str | pathlib.Path | None = None, execution: str = 'optimized', parallel: bool = True, cpu_threads: int | None = None) -> dict[str, pathlib.Path]",
+              "status": "bound"
+            },
+            {
+              "call": "MSMSulcConfig",
+              "signature": "(simval: tuple[int, ...] = (3, 2, 2, 2), iterations: tuple[int, ...] = (50, 10, 15, 15), control_grid: tuple[int, ...] = (6, 2, 3, 4), sampling_grid: tuple[int, ...] = (6, 4, 5, 6), data_grid: tuple[int, ...] = (6, 4, 5, 6), regularization: tuple[float, ...] = (0.0, 10.0, 7.5, 7.5), affine_step_size: float = 0.01, affine_gradient_spacing: float = 0.5, shear_modulus: float = 0.4, bulk_modulus: float = 1.6, strain_exponent: float = 2.0, regularization_exponent: float = 2.0) -> None",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/msm/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "validation/fmri/surface_gpu_parallel/publication_runtime.public.json",
+          "sha256": "bafb7fcb66f69ecf81a58fdde02246349ac8c207ab851422d9daf78e09b5f29f",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/msm/__init__.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/__init__.py"
+            },
+            {
+              "source": "src/fnit/msm/_affine.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_affine.py"
+            },
+            {
+              "source": "src/fnit/msm/_execution.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_execution.py"
+            },
+            {
+              "source": "src/fnit/msm/_ordered_sparse.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_ordered_sparse.py"
+            },
+            {
+              "source": "src/fnit/msm/_spatial.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_spatial.py"
+            },
+            {
+              "source": "src/fnit/msm/_sphere_map.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_sphere_map.py"
+            },
+            {
+              "source": "src/fnit/msm/cli.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/cli.py"
+            },
+            {
+              "source": "src/fnit/msm/config.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/config.py"
+            },
+            {
+              "source": "src/fnit/msm/config_msmall.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/config_msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/feature_cli.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/feature_cli.py"
+            },
+            {
+              "source": "src/fnit/msm/features.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/features.py"
+            },
+            {
+              "source": "src/fnit/msm/msmall.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/msmsulc.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/msmsulc.py"
+            },
+            {
+              "source": "src/fnit/msm/prepare.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/prepare.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/fmri/surface_gpu_parallel/msmall_paired.public.json",
+          "sha256": "32e0464be7538d97bbea49d158476eb8bfcc71fc274878607bfded732151eb63",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/msm/__init__.py",
+              "json_key": ".configurations.coarse.runs.baseline.source_sha256.src/fnit/msm/__init__.py"
+            },
+            {
+              "source": "src/fnit/msm/__init__.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/__init__.py"
+            },
+            {
+              "source": "src/fnit/msm/__init__.py",
+              "json_key": ".configurations.refine.runs.baseline.source_sha256.src/fnit/msm/__init__.py"
+            },
+            {
+              "source": "src/fnit/msm/__init__.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/__init__.py"
+            },
+            {
+              "source": "src/fnit/msm/_affine.py",
+              "json_key": ".configurations.coarse.runs.baseline.source_sha256.src/fnit/msm/_affine.py"
+            },
+            {
+              "source": "src/fnit/msm/_affine.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/_affine.py"
+            },
+            {
+              "source": "src/fnit/msm/_affine.py",
+              "json_key": ".configurations.refine.runs.baseline.source_sha256.src/fnit/msm/_affine.py"
+            },
+            {
+              "source": "src/fnit/msm/_affine.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/_affine.py"
+            },
+            {
+              "source": "src/fnit/msm/_execution.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/_execution.py"
+            },
+            {
+              "source": "src/fnit/msm/_execution.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/_execution.py"
+            },
+            {
+              "source": "src/fnit/msm/_ordered_sparse.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/_ordered_sparse.py"
+            },
+            {
+              "source": "src/fnit/msm/_ordered_sparse.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/_ordered_sparse.py"
+            },
+            {
+              "source": "src/fnit/msm/_spatial.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/_spatial.py"
+            },
+            {
+              "source": "src/fnit/msm/_spatial.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/_spatial.py"
+            },
+            {
+              "source": "src/fnit/msm/_sphere_map.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/_sphere_map.py"
+            },
+            {
+              "source": "src/fnit/msm/_sphere_map.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/_sphere_map.py"
+            },
+            {
+              "source": "src/fnit/msm/cli.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/cli.py"
+            },
+            {
+              "source": "src/fnit/msm/cli.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/cli.py"
+            },
+            {
+              "source": "src/fnit/msm/config.py",
+              "json_key": ".configurations.coarse.runs.baseline.source_sha256.src/fnit/msm/config.py"
+            },
+            {
+              "source": "src/fnit/msm/config.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/config.py"
+            },
+            {
+              "source": "src/fnit/msm/config.py",
+              "json_key": ".configurations.refine.runs.baseline.source_sha256.src/fnit/msm/config.py"
+            },
+            {
+              "source": "src/fnit/msm/config.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/config.py"
+            },
+            {
+              "source": "src/fnit/msm/config_msmall.py",
+              "json_key": ".configurations.coarse.runs.baseline.source_sha256.src/fnit/msm/config_msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/config_msmall.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/config_msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/config_msmall.py",
+              "json_key": ".configurations.refine.runs.baseline.source_sha256.src/fnit/msm/config_msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/config_msmall.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/config_msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/feature_cli.py",
+              "json_key": ".configurations.coarse.runs.baseline.source_sha256.src/fnit/msm/feature_cli.py"
+            },
+            {
+              "source": "src/fnit/msm/feature_cli.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/feature_cli.py"
+            },
+            {
+              "source": "src/fnit/msm/feature_cli.py",
+              "json_key": ".configurations.refine.runs.baseline.source_sha256.src/fnit/msm/feature_cli.py"
+            },
+            {
+              "source": "src/fnit/msm/feature_cli.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/feature_cli.py"
+            },
+            {
+              "source": "src/fnit/msm/features.py",
+              "json_key": ".configurations.coarse.runs.baseline.source_sha256.src/fnit/msm/features.py"
+            },
+            {
+              "source": "src/fnit/msm/features.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/features.py"
+            },
+            {
+              "source": "src/fnit/msm/features.py",
+              "json_key": ".configurations.refine.runs.baseline.source_sha256.src/fnit/msm/features.py"
+            },
+            {
+              "source": "src/fnit/msm/features.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/features.py"
+            },
+            {
+              "source": "src/fnit/msm/msmall.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/msmall.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/msmsulc.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/msmsulc.py"
+            },
+            {
+              "source": "src/fnit/msm/msmsulc.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/msmsulc.py"
+            },
+            {
+              "source": "src/fnit/msm/prepare.py",
+              "json_key": ".configurations.coarse.runs.candidate.source_sha256.src/fnit/msm/prepare.py"
+            },
+            {
+              "source": "src/fnit/msm/prepare.py",
+              "json_key": ".configurations.refine.runs.candidate.source_sha256.src/fnit/msm/prepare.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/fmri/surface_gpu_parallel/publication_runtime.public.json",
+          "sha256": "bafb7fcb66f69ecf81a58fdde02246349ac8c207ab851422d9daf78e09b5f29f",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/msm/__init__.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/__init__.py"
+            },
+            {
+              "source": "src/fnit/msm/_affine.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_affine.py"
+            },
+            {
+              "source": "src/fnit/msm/_execution.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_execution.py"
+            },
+            {
+              "source": "src/fnit/msm/_ordered_sparse.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_ordered_sparse.py"
+            },
+            {
+              "source": "src/fnit/msm/_spatial.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_spatial.py"
+            },
+            {
+              "source": "src/fnit/msm/_sphere_map.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/_sphere_map.py"
+            },
+            {
+              "source": "src/fnit/msm/cli.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/cli.py"
+            },
+            {
+              "source": "src/fnit/msm/config.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/config.py"
+            },
+            {
+              "source": "src/fnit/msm/config_msmall.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/config_msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/feature_cli.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/feature_cli.py"
+            },
+            {
+              "source": "src/fnit/msm/features.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/features.py"
+            },
+            {
+              "source": "src/fnit/msm/msmall.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/msmall.py"
+            },
+            {
+              "source": "src/fnit/msm/msmsulc.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/msmsulc.py"
+            },
+            {
+              "source": "src/fnit/msm/prepare.py",
+              "json_key": ".runtime_sha256.src/fnit/msm/prepare.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/fmri/public_ten_20261003/reconstruction_completed/CON10.saved-MSM-absolute.public.json",
+          "sha256": "06258f3a9779839ad9a063d3072b89fecf269f089b92de461dd9b35f45b99017",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".created_utc",
+              "value": "2026-10-03T16:58:42.774861+00:00"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/msm/current.public.json",
+          "sha256": "7d97fc56c8e5a6a47eb9ef3a60a16cf1aa3d97f213f6a27736ce83d55e20ab93",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/msm/config.py",
+              "json_key": ".after.bindings.source_sha256.src/fnit/msm/config.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [
+        {
+          "path": "global/templates/standard_mesh_atlases/L.sphere.32k_fs_LR.surf.gii",
+          "asset": "hcp--global--templates--standard_mesh_atlases--L.sphere.32k_fs_LR.surf.gii",
+          "size": 562891,
+          "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/L.sphere.32k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "global/templates/standard_mesh_atlases/R.sphere.32k_fs_LR.surf.gii",
+          "asset": "hcp--global--templates--standard_mesh_atlases--R.sphere.32k_fs_LR.surf.gii",
+          "size": 553052,
+          "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/R.sphere.32k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "global/templates/standard_mesh_atlases/L.refsulc.164k_fs_LR.shape.gii",
+          "asset": "hcp--global--templates--standard_mesh_atlases--L.refsulc.164k_fs_LR.shape.gii",
+          "size": 846142,
+          "sha256": "10f5e3fd775bb2f77278b0b69126f6f67abefb3c76de6f1233128d9914ddcb5c",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/L.refsulc.164k_fs_LR.shape.gii",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "global/templates/standard_mesh_atlases/R.refsulc.164k_fs_LR.shape.gii",
+          "asset": "hcp--global--templates--standard_mesh_atlases--R.refsulc.164k_fs_LR.shape.gii",
+          "size": 847311,
+          "sha256": "4eefc7807cdd9076cfc9ffc933da3d0c100a4770d5359c3e5f4fb37d71097520",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/R.refsulc.164k_fs_LR.shape.gii",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "global/templates/standard_mesh_atlases/fs_L/fsaverage.L.sphere.164k_fs_L.surf.gii",
+          "asset": "hcp--global--templates--standard_mesh_atlases--fs_L--fsaverage.L.sphere.164k_fs_L.surf.gii",
+          "size": 4093613,
+          "sha256": "9bf5b673cc1c4738b1137ac53ff724ff0ef45e12f5550448efa2da50bb521c32",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/fs_L/fsaverage.L.sphere.164k_fs_L.surf.gii",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "global/templates/standard_mesh_atlases/fs_R/fsaverage.R.sphere.164k_fs_R.surf.gii",
+          "asset": "hcp--global--templates--standard_mesh_atlases--fs_R--fsaverage.R.sphere.164k_fs_R.surf.gii",
+          "size": 4093614,
+          "sha256": "a2fada23394286212f38cd44303bce0b3252759e09fe693f92d463286ca28b45",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/fs_R/fsaverage.R.sphere.164k_fs_R.surf.gii",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "MSMConfig/MSMSulcStrainFinalconf",
+          "asset": "hcp--MSMConfig--MSMSulcStrainFinalconf",
+          "size": 298,
+          "sha256": "46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/MSMConfig/MSMSulcStrainFinalconf",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "MSMConfig/MSMAllStrainFinalconf1to1_1to3_1",
+          "asset": "hcp--MSMConfig--MSMAllStrainFinalconf1to1_1to3_1",
+          "size": 223,
+          "sha256": "ec9348a2bd2aea5ce2bf1a7387997dabb3443784c15a017faa4871e4ea38cc2e",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/MSMConfig/MSMAllStrainFinalconf1to1_1to3_1",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "MSMConfig/MSMAllStrainFinalconf1to1_1to3_2",
+          "asset": "hcp--MSMConfig--MSMAllStrainFinalconf1to1_1to3_2",
+          "size": 283,
+          "sha256": "646f100e7826d0c285f379f2a9121f0c0c8cd61a3d2d200cc241c416617b8555",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/MSMConfig/MSMAllStrainFinalconf1to1_1to3_2",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "global/templates/MSMAll/DeDriftingGroup.L.sphere.DeDriftMSMAll.164k_fs_LR.surf.gii",
+          "asset": "hcp--global--templates--MSMAll--DeDriftingGroup.L.sphere.DeDriftMSMAll.164k_fs_LR.surf.gii",
+          "size": 3702511,
+          "sha256": "e07fe3f9d7e508f60a85a0230c1680610f23521c89d204f79000093abd51149e",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/MSMAll/DeDriftingGroup.L.sphere.DeDriftMSMAll.164k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md"
+        },
+        {
+          "path": "global/templates/MSMAll/DeDriftingGroup.R.sphere.DeDriftMSMAll.164k_fs_LR.surf.gii",
+          "asset": "hcp--global--templates--MSMAll--DeDriftingGroup.R.sphere.DeDriftMSMAll.164k_fs_LR.surf.gii",
+          "size": 3579919,
+          "sha256": "27c4ab1d7773fbaf90e917f6ae992fc37c6400f81603b239f8faa357ae276fb3",
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/MSMAll/DeDriftingGroup.R.sphere.DeDriftMSMAll.164k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md"
+        }
+      ],
+      "images": [],
+      "archive": {
+        "path": "validation/msm/readme_archive_20261005.md",
+        "original_readme_sha256": "7f818a5785b23dff7619b3cad78e9d32eea3229eb93cf4705523dc87bf1f978a",
+        "archive_sha256": "7252688eaa19e509ccc99821ae17c74ed29d0855e632e392ecbb3a239bc7ad42",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [],
+        "benchmark_section_fraction": 0.11330049261083744,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [],
+      "forwarded_api_example_checks": []
+    },
+    {
+      "module": "space_conversion",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/space_conversion/README.md",
+      "readme_sha256": "a8e8d7a3e9e85ad0282191119a66176738a66572289eeda0a9223379759f876f",
+      "readme_lines": 207,
+      "sources_sha256": {
+        "src/fnit/space_conversion.py": "91e3942b487cb91ee58e1310a7ab29aa670d31720e7abe6edb194e1a679a4afd",
+        "src/fnit/_space_conversion_cpu.py": "45911a090eff848c90db77eb547436eeba3a694a915652869181569a72881b6b"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "convert_space",
+              "signature": "(source: 'str | Path | tuple[str | Path, str | Path]', source_space: 'str', target_space: 'str', output_dir: 'str | Path', assets_dir: 'str | Path', *, source_density: 'str | None' = None, target_density: 'str | None' = None, reference: 'str | Path | None' = None, device: 'str' = 'cpu', label: 'bool' = False, wb_command: 'str' = 'wb_command') -> 'Path | tuple[Path, Path]'",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/space_conversion.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "validation/space_conversion/cpu_benchmark_20261004.public.json",
+          "sha256": "747fe607c5beaafa3011af255106c0b84b50a72e7c71026ccde6a1af87d51ba5",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/space_conversion.py",
+              "json_key": ".source.current_core_and_dependencies_sha256.src/fnit/space_conversion.py"
+            },
+            {
+              "source": "src/fnit/space_conversion.py",
+              "json_key": ".source.latest_source_real_input_exact_gate.source_sha256"
+            },
+            {
+              "source": "src/fnit/_space_conversion_cpu.py",
+              "json_key": ".source.current_core_and_dependencies_sha256.src/fnit/_space_conversion_cpu.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/multimodal_cpu_20261004/source_v28_20261004.public.json",
+          "sha256": "c8ca11ee074c7f4e39a764953bab0d7ebc2abf13400b92acf719c5aae2773175",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/space_conversion.py",
+              "json_key": ".source_sha256.src/fnit/space_conversion.py"
+            },
+            {
+              "source": "src/fnit/_space_conversion_cpu.py",
+              "json_key": ".source_sha256.src/fnit/_space_conversion_cpu.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/space_conversion/cpu_benchmark_20261004.public.json",
+          "sha256": "747fe607c5beaafa3011af255106c0b84b50a72e7c71026ccde6a1af87d51ba5",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/space_conversion.py",
+              "json_key": ".source.current_core_and_dependencies_sha256.src/fnit/space_conversion.py"
+            },
+            {
+              "source": "src/fnit/space_conversion.py",
+              "json_key": ".source.latest_source_real_input_exact_gate.source_sha256"
+            },
+            {
+              "source": "src/fnit/_space_conversion_cpu.py",
+              "json_key": ".source.current_core_and_dependencies_sha256.src/fnit/_space_conversion_cpu.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "docs/space_conversion/assets/public_space_comparison.json",
+          "sha256": "aa92bff114f0902e6e1797ee5e357577412b67e418c52c042a03bd92fd1e8c64",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [
+        {
+          "path": "resample_fsaverage/fsaverage4_std_sphere.L.3k_fsavg_L.surf.gii",
+          "sha256": "5c3281b8d0afef386ee3e79aa51fa075d345986a0846846a11a4f3ded8d434d9",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage4_std_sphere.L.3k_fsavg_L.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage4.L.midthickness_va_avg.3k_fsavg_L.shape.gii",
+          "sha256": "7c8f29373e1ad8a30f4159b743cf724cc01e4e601b7af0dfd7ff22bb560a23be",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage4.L.midthickness_va_avg.3k_fsavg_L.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage5_std_sphere.L.10k_fsavg_L.surf.gii",
+          "sha256": "38b13855694098fde897ef3984f0420bd6bce4eac1562ce0c285bcaf565d56b8",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage5_std_sphere.L.10k_fsavg_L.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage5.L.midthickness_va_avg.10k_fsavg_L.shape.gii",
+          "sha256": "d3c03ce6efe36e0bc85d85a6f24bdfcc51da7427b19e28b79783ae8062e88e02",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage5.L.midthickness_va_avg.10k_fsavg_L.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage6_std_sphere.L.41k_fsavg_L.surf.gii",
+          "sha256": "7fd8185a51bdae23f565b07d28150ce0100aec60c6e72fc70e740462633a3f2a",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage6_std_sphere.L.41k_fsavg_L.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage6.L.midthickness_va_avg.41k_fsavg_L.shape.gii",
+          "sha256": "0b757ddcb61fa9570220a655977a3c3eaab53eee323331c832bec979ad35add4",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage6.L.midthickness_va_avg.41k_fsavg_L.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage_std_sphere.L.164k_fsavg_L.surf.gii",
+          "sha256": "9bf5b673cc1c4738b1137ac53ff724ff0ef45e12f5550448efa2da50bb521c32",
+          "size": 4093613,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage_std_sphere.L.164k_fsavg_L.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage.L.midthickness_va_avg.164k_fsavg_L.shape.gii",
+          "sha256": "fbbccfe4bbcec0619fa6549cfe3f3460c761b0becc7097092379d98a684a52e0",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage.L.midthickness_va_avg.164k_fsavg_L.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii",
+          "sha256": "31987d139b6cdf1040188d1795bf23c213c57f8e84fb45f2c04823d996b0defc",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.L.sphere.32k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR.L.midthickness_va_avg.32k_fs_LR.shape.gii",
+          "sha256": "e06c0f3e6069f9244e4dd74a4265323be3324a96c0f2bf9edd5ad9734d170f6d",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR.L.midthickness_va_avg.32k_fs_LR.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "L.sphere.32k_fs_LR.surf.gii",
+          "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+          "size": 562891,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/L.sphere.32k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR-deformed_to-fsaverage.L.sphere.59k_fs_LR.surf.gii",
+          "sha256": "6d25494ddb49de4b782fa3fb91b05075fd64325cb329020fc166adc330c23122",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.L.sphere.59k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR.L.midthickness_va_avg.59k_fs_LR.shape.gii",
+          "sha256": "72f2c95a137d57010da03414d70208b327ac8a573a315d6ceab38ce2e950312e",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR.L.midthickness_va_avg.59k_fs_LR.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "L.sphere.59k_fs_LR.surf.gii",
+          "sha256": "65d38a5f938c2667f94f8978af4750ed66f76ce9060884bafccc3e9cdc52d178",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/L.sphere.59k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR-deformed_to-fsaverage.L.sphere.164k_fs_LR.surf.gii",
+          "sha256": "1f3b09b813fe32c934a565264dccc357629834259fa34f39de5c8c00dc0fec92",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.L.sphere.164k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR.L.midthickness_va_avg.164k_fs_LR.shape.gii",
+          "sha256": "5334b611efd10601ccaa5a3469610723387f0caa9cc040f9ec4928870d2968f0",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR.L.midthickness_va_avg.164k_fs_LR.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "fsaverage.L_LR.spherical_std.164k_fs_LR.surf.gii",
+          "sha256": "6968ef7d9638de54ade78cdbb7f0c6f25025c60477f72456ab2fb77c53a85cfa",
+          "size": 3614784,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/fsaverage.L_LR.spherical_std.164k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage4_std_sphere.R.3k_fsavg_R.surf.gii",
+          "sha256": "b12139d0bb2e606596ab4ed27b52e8cc3e090fb61577915bccd5b430bbb8eb8d",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage4_std_sphere.R.3k_fsavg_R.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage4.R.midthickness_va_avg.3k_fsavg_R.shape.gii",
+          "sha256": "fe6da9656d50de88b3177db6864b9b88478859471c4966fa7a58ae45b1ab9e52",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage4.R.midthickness_va_avg.3k_fsavg_R.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage5_std_sphere.R.10k_fsavg_R.surf.gii",
+          "sha256": "a2b9f152da32bf387e33e58f0a6a8931ebca69be66e198178298d66d68d98808",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage5_std_sphere.R.10k_fsavg_R.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage5.R.midthickness_va_avg.10k_fsavg_R.shape.gii",
+          "sha256": "c039f3035e0730feb49774f8956c80ecd85288ad0a9fbc2706c538dc73ddde8a",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage5.R.midthickness_va_avg.10k_fsavg_R.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage6_std_sphere.R.41k_fsavg_R.surf.gii",
+          "sha256": "f0a093489fc2248905148c904b883302c3b806105845328fd49b96fe4e7ce658",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage6_std_sphere.R.41k_fsavg_R.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage6.R.midthickness_va_avg.41k_fsavg_R.shape.gii",
+          "sha256": "56495d5114d9b31c0a58bddfd5a961ed51c974c96ca745afeb119406aca18384",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage6.R.midthickness_va_avg.41k_fsavg_R.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage_std_sphere.R.164k_fsavg_R.surf.gii",
+          "sha256": "a2fada23394286212f38cd44303bce0b3252759e09fe693f92d463286ca28b45",
+          "size": 4093614,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage_std_sphere.R.164k_fsavg_R.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fsaverage.R.midthickness_va_avg.164k_fsavg_R.shape.gii",
+          "sha256": "2cda969b6295e96f510aad9d1df329afc36859aba7ee95564b1217b43f30ee03",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fsaverage.R.midthickness_va_avg.164k_fsavg_R.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii",
+          "sha256": "8c1f67fa8fb3024ad3b292be995d5c9bae07dc4dbdd53fbac48e511e1366553d",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.R.sphere.32k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR.R.midthickness_va_avg.32k_fs_LR.shape.gii",
+          "sha256": "cb4b7680b8637c81398a99d4a034ee1680510ad6528d6948b4aa9c67b3e81867",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR.R.midthickness_va_avg.32k_fs_LR.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "R.sphere.32k_fs_LR.surf.gii",
+          "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+          "size": 553052,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/R.sphere.32k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR-deformed_to-fsaverage.R.sphere.59k_fs_LR.surf.gii",
+          "sha256": "41a471a8fc5bff1330289646c61d95b7fe3e6c57297092e6af513c8c822ad6b6",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.R.sphere.59k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR.R.midthickness_va_avg.59k_fs_LR.shape.gii",
+          "sha256": "1b7395b8fd83f5b6e14f4209ed1aaf72a7351b360845ac73cee4e31a0dfd3ebc",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR.R.midthickness_va_avg.59k_fs_LR.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "R.sphere.59k_fs_LR.surf.gii",
+          "sha256": "6df50dfa10d872f0aca5b4e9c96b6dbf0546131fec469f918445433cab805d60",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/R.sphere.59k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR-deformed_to-fsaverage.R.sphere.164k_fs_LR.surf.gii",
+          "sha256": "f024337147073263dc11e56603afcb9dae2c48cf8869809388d5985eb95a585a",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR-deformed_to-fsaverage.R.sphere.164k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "resample_fsaverage/fs_LR.R.midthickness_va_avg.164k_fs_LR.shape.gii",
+          "sha256": "97006956e0a29913c3507fc89bb4cfcb4558b8f94be8c8f54b889d103290024b",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/resample_fsaverage/fs_LR.R.midthickness_va_avg.164k_fs_LR.shape.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "fsaverage.R_LR.spherical_std.164k_fs_LR.surf.gii",
+          "sha256": "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1",
+          "size": 3492005,
+          "upstream": "https://raw.githubusercontent.com/Washington-University/HCPpipelines/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases/fsaverage.R_LR.spherical_std.164k_fs_LR.surf.gii",
+          "license": "HCPpipelines LICENSE.md; installation currently uses upstream; size validation absent"
+        },
+        {
+          "path": "final_warps_FS5.3/lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "sha256": "3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/v0.18.1-Update_stable_project_unit_test/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/lh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "license": "Mapping-specific redistribution unresolved; retain upstream"
+        },
+        {
+          "path": "final_warps_FS5.3/rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "sha256": "c44a8a824ade7c7c2203f2cd91cc6dced7c064d4371a45270cc50bb02d182319",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/v0.18.1-Update_stable_project_unit_test/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/rh.avgMapping_allSub_RF_ANTs_MNI152_orig_to_fsaverage.mat",
+          "license": "Mapping-specific redistribution unresolved; retain upstream"
+        },
+        {
+          "path": "final_warps_FS5.3/allSub_fsaverage_to_FSL_MNI152_FS4.5.0_RF_ANTs_avgMapping.vertex.mat",
+          "sha256": "91da461449b2d85e82b8e7f945bdb3d57121a48a2e3a8610e4c742e3bb26a89e",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/v0.18.1-Update_stable_project_unit_test/stable_projects/registration/Wu2017_RegistrationFusion/bin/final_warps_FS5.3/allSub_fsaverage_to_FSL_MNI152_FS4.5.0_RF_ANTs_avgMapping.vertex.mat",
+          "license": "Mapping-specific redistribution unresolved; retain upstream"
+        },
+        {
+          "path": "liberal_cortex_masks_FS5.3/FSL_MNI152_FS4.5.0_cortex_estimate.nii.gz",
+          "sha256": "e4d788be332be76d7429855aba8f20c02693625f400905573e9063b4001f0e2b",
+          "size": null,
+          "upstream": "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/v0.18.1-Update_stable_project_unit_test/stable_projects/registration/Wu2017_RegistrationFusion/bin/liberal_cortex_masks_FS5.3/FSL_MNI152_FS4.5.0_cortex_estimate.nii.gz",
+          "license": "Mapping-specific redistribution unresolved; retain upstream"
+        }
+      ],
+      "images": [
+        {
+          "path": "docs/space_conversion/assets/public_space_comparison.png",
+          "sha256": "ccc1d6c5841c697c46a0fa68aeede3bd3c71451f4144ca148e2a4ddf7cf54488",
+          "exists": true
+        }
+      ],
+      "archive": {
+        "path": "validation/space_conversion/readme_archive_20261005.md",
+        "original_readme_sha256": "9dbca2e982cd81fa8bc7541d922e107fa4e974f71771bfd898c9f804b9eee870",
+        "archive_sha256": "8d3a083ecd5e7a6cea50b93d204986d15203025230eb594c5b6dce7af9a6f8e2",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [],
+        "benchmark_section_fraction": 0.1932367149758454,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [],
+      "forwarded_api_example_checks": []
+    },
+    {
+      "module": "topup",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/topup/README.md",
+      "readme_sha256": "f40fffc84b70a753e12b07c9d90a023c38284d43e49c5c22ad48b9e7a72c409c",
+      "readme_lines": 211,
+      "sources_sha256": {
+        "src/fnit/topup/__init__.py": "e15e503ddf68a59a8e36274ddfd6dc1609c38437885071049b8c9c37d813876d",
+        "src/fnit/topup/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+        "src/fnit/topup/_sampling_cuda.py": "ee19a764849bda80137312ed3ab8f1bf0aaef5e13f852f49f435e511b40d2427",
+        "src/fnit/topup/cli.py": "fc5220c7c9de36577f5e116262bb5789733397beff00796059fe07313fba3388",
+        "src/fnit/topup/core.py": "d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8",
+        "src/fnit/topup/io.py": "c87edab5c5369204d1a7ccfd2cb079dfd1a64e68279d8899f51755609038176a",
+        "src/fnit/topup/ukb.py": "1b610bcf0fe1bd2cfa7d6ae1917701d4b106205afc1d36ecd2c57c20561712b9"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "TorchTOPUP(device='cuda:0').run",
+              "signature": "(self, imain, datain, *, out, fout=None, iout=None, jacout=None, overwrite=False)",
+              "status": "bound"
+            },
+            {
+              "call": "TorchTOPUP",
+              "signature": "(device=None, *, config=None)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/topup/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "validation/topup/report.matched_20261002.public.json",
+          "sha256": "5b4d70fa5691e2b4a0f7485cee7060778321fd0063b7e764d40b9ec5209af99d",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/topup/__init__.py",
+              "json_key": ".source_sha256.topup/__init__.py"
+            },
+            {
+              "source": "src/fnit/topup/__main__.py",
+              "json_key": ".source_sha256.topup/__main__.py"
+            },
+            {
+              "source": "src/fnit/topup/_sampling_cuda.py",
+              "json_key": ".source_sha256.topup/_sampling_cuda.py"
+            },
+            {
+              "source": "src/fnit/topup/cli.py",
+              "json_key": ".source_sha256.topup/cli.py"
+            },
+            {
+              "source": "src/fnit/topup/core.py",
+              "json_key": ".source_sha256.topup/core.py"
+            },
+            {
+              "source": "src/fnit/topup/io.py",
+              "json_key": ".source_sha256.topup/io.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/topup/repeats_20261002.public.json",
+          "sha256": "99cb56208bf5d41f9ce4753a4c610758e6a9426b01cfb0f2ff981ff990d045ec",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/topup/__init__.py",
+              "json_key": ".runs.topup_final_1.source_sha256.topup/__init__.py"
+            },
+            {
+              "source": "src/fnit/topup/__init__.py",
+              "json_key": ".runs.topup_final_2.source_sha256.topup/__init__.py"
+            },
+            {
+              "source": "src/fnit/topup/__init__.py",
+              "json_key": ".runs.topup_final_3.source_sha256.topup/__init__.py"
+            },
+            {
+              "source": "src/fnit/topup/__main__.py",
+              "json_key": ".runs.topup_final_1.source_sha256.topup/__main__.py"
+            },
+            {
+              "source": "src/fnit/topup/__main__.py",
+              "json_key": ".runs.topup_final_2.source_sha256.topup/__main__.py"
+            },
+            {
+              "source": "src/fnit/topup/__main__.py",
+              "json_key": ".runs.topup_final_3.source_sha256.topup/__main__.py"
+            },
+            {
+              "source": "src/fnit/topup/_sampling_cuda.py",
+              "json_key": ".runs.topup_final_1.source_sha256.topup/_sampling_cuda.py"
+            },
+            {
+              "source": "src/fnit/topup/_sampling_cuda.py",
+              "json_key": ".runs.topup_final_2.source_sha256.topup/_sampling_cuda.py"
+            },
+            {
+              "source": "src/fnit/topup/_sampling_cuda.py",
+              "json_key": ".runs.topup_final_3.source_sha256.topup/_sampling_cuda.py"
+            },
+            {
+              "source": "src/fnit/topup/cli.py",
+              "json_key": ".runs.topup_final_1.source_sha256.topup/cli.py"
+            },
+            {
+              "source": "src/fnit/topup/cli.py",
+              "json_key": ".runs.topup_final_2.source_sha256.topup/cli.py"
+            },
+            {
+              "source": "src/fnit/topup/cli.py",
+              "json_key": ".runs.topup_final_3.source_sha256.topup/cli.py"
+            },
+            {
+              "source": "src/fnit/topup/core.py",
+              "json_key": ".runs.topup_final_1.source_sha256.topup/core.py"
+            },
+            {
+              "source": "src/fnit/topup/core.py",
+              "json_key": ".runs.topup_final_2.source_sha256.topup/core.py"
+            },
+            {
+              "source": "src/fnit/topup/core.py",
+              "json_key": ".runs.topup_final_3.source_sha256.topup/core.py"
+            },
+            {
+              "source": "src/fnit/topup/io.py",
+              "json_key": ".runs.topup_final_1.source_sha256.topup/io.py"
+            },
+            {
+              "source": "src/fnit/topup/io.py",
+              "json_key": ".runs.topup_final_2.source_sha256.topup/io.py"
+            },
+            {
+              "source": "src/fnit/topup/io.py",
+              "json_key": ".runs.topup_final_3.source_sha256.topup/io.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/topup/reference_repeats_20261002.public.json",
+          "sha256": "e8d6054df2ea6d624d6e53edaa2cec6e7bba3cfca687174900bd6f2086988644",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/dmri_pipeline/public10_20261002/matched_topup_pair_20261003.public.json",
+          "sha256": "3778d53798434ba3e71726ed721e0c517ec70e796765988d497c028c47d9937d",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [],
+      "images": [],
+      "archive": {
+        "path": "validation/topup/readme_archive_20261005.md",
+        "original_readme_sha256": "b9f2c39eb5762a6e1bfa59bdc3cdf58bab8d59f33eed7537828392eaed5b9e8e",
+        "archive_sha256": "1c6f6c5c961f44e693580e5a70e8aa954485285f5461a2af737eb88b4c6c6ad7",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [
+          {
+            "url": "../../validation/topup/readme_archive_20261005.md#历史-l-bfgs-版与-fsl-6074-的真实数据对照",
+            "target_exists": true
+          }
+        ],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [
+          {
+            "url": "../../validation/topup/readme_archive_20261005.md#历史-l-bfgs-版与-fsl-6074-的真实数据对照",
+            "fragment_exists": true
+          }
+        ],
+        "benchmark_section_fraction": 0.10900473933649289,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "forwarded_api_example_checks": []
+    },
+    {
+      "module": "eddy",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/eddy/README.md",
+      "readme_sha256": "eb0383fb01e3d8bc784cb006e9fbf6114a988c84fb38af6bcc94bcb7686c0657",
+      "readme_lines": 230,
+      "sources_sha256": {
+        "src/fnit/eddy/__init__.py": "e1239c07080954468a0d3060a0385275df55addfa243ac039f4bbcd65cea1908",
+        "src/fnit/eddy/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+        "src/fnit/eddy/cli.py": "e8ab099b16b55a93eed871e5c0a52fbf32c0f29f0b4556e2a5f6845160d10a1d",
+        "src/fnit/eddy/fsl2111_strict/__init__.py": "82de3ea49caa7ac9460c0172621eef9c76b52074f54f5e9c71fa362178a06b46",
+        "src/fnit/eddy/fsl2111_strict/config.py": "2440c28354d70fd40317584c2a1ff9d43dcc25d0ec83c173033a2f1f7653600d",
+        "src/fnit/eddy/fsl2111_strict/geometry.py": "4933be355012c36aa281c5cbb309444f3d0e66a3dd493eaa737c1671384981ae",
+        "src/fnit/eddy/fsl2111_strict/gp.py": "1b0cd8303eded816bf986703962f4644f8fb7435ddf25c72f22658c3e9fc8f2a",
+        "src/fnit/eddy/fsl2111_strict/outlier.py": "5b125641eaa882e02fe682a769a66b6ce171139e301f8d301b50834b51fb8d7d",
+        "src/fnit/eddy/fsl2111_strict/pipeline.py": "148335d9b4d314bcb216bbf95501e7574e3a8f30e50df60a965fbe9eca6bf0d4",
+        "src/fnit/eddy/fsl2111_strict/registration.py": "064e0b4e92c6bee67149eb03f413be57f6ae0ebcf25c307629bee0077cff19b7",
+        "src/fnit/eddy/fsl2111_strict/shell_alignment.py": "477028cecfebf0ba4ff1938f2b2228c0bca690450a5742a89b560ab7cbef1030",
+        "src/fnit/eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+        "src/fnit/eddy/fsl2111_strict/warp.py": "d9e03b07016bad2bda750ffec3141352e9b17f327b5eb0ba2a66fd80ee14e8ee",
+        "src/fnit/eddy/topup_field.py": "54d076b5187d70596db7778264326dbd797d9972c28f954aa32e43f6db2c6b74",
+        "src/fnit/eddy/ukb.py": "1138693b6edab00ad02a83b9b7c66a3db66a9863641e619576ee2f18fafe3d85"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "TorchEDDY(device='cuda:0').run",
+              "signature": "(self, *args, out, overwrite=False, **kwargs)",
+              "status": "bound"
+            },
+            {
+              "call": "TorchEDDY",
+              "signature": "(device='cuda:0', config: 'FSL2111Config | None' = None)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/eddy/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "validation/eddy/report.public.json",
+          "sha256": "ca0370d3db8cf03ff27660161395b3f55e67a93a1a946881869854da0deeebaa",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/dmri_pipeline/upstream.synthstrip_topup_20261002.public.json",
+          "sha256": "ce0487607ffb0f5f9fcb605ed61c237f78b5a45b72991ac7630bfeb20d4df89a",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/dmri_pipeline/upstream.synthstrip_topup_20261002.public.json",
+          "sha256": "ce0487607ffb0f5f9fcb605ed61c237f78b5a45b72991ac7630bfeb20d4df89a",
+          "current_source_hash_matches": [],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthstrip.1.pt",
+          "size": 30851709,
+          "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt",
+          "license": "CC BY 4.0",
+          "release_assets": [
+            {
+              "name": "synthstrip.1.pt",
+              "size": 30851709,
+              "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+            }
+          ]
+        }
+      ],
+      "images": [],
+      "archive": {
+        "path": "validation/eddy/readme_archive_20261005.md",
+        "original_readme_sha256": "f60a79e901e994b1021236b4a3c17f8306cdc6e163267664317f0dc56c1fc68a",
+        "archive_sha256": "239860305edcc102407a5781a03029a58ef639a610e6374cf4272cb7d20663e7",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [],
+        "benchmark_section_fraction": 0.10869565217391304,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "forwarded_api_example_checks": [
+        {
+          "call": "TorchEDDY(device='cuda:0').run",
+          "underlying": "fnit.eddy.fsl2111_strict.pipeline.TorchEDDYFSL2111.__call__",
+          "signature": "(self, imain, mask, acqp, index, bvecs, bvals, *, topup=None, ref_scan_no=None, gp_seed=None)",
+          "status": "bound_without_executing_mri"
+        }
+      ]
+    },
+    {
+      "module": "fslmaths",
+      "baseline_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "readme": "docs/fslmaths/README.md",
+      "readme_sha256": "934277ee81e7bfd003fe572c604d2d476cf223ac0b24a48a2ea74f5df51f5ddd",
+      "readme_lines": 204,
+      "sources_sha256": {
+        "src/fnit/fslmaths/__init__.py": "75f4bb11e916e07c0713511b0a1acaa7ea7ab45334e73f782fd6c8fb6d6ed062",
+        "src/fnit/fslmaths/cli.py": "3987df199e2530ab3df02353282bdee157fc3cff32694a039251d86a674bf5b0",
+        "src/fnit/fslmaths/core.py": "8fea8d3fe7d6cd0385b3678f927aaef6704781f5bedb6564418e4b638a601472"
+      },
+      "python_example_checks": [
+        {
+          "block": 0,
+          "bindings": [
+            {
+              "call": "run_fslmaths",
+              "signature": "(input_path, operations, output_path, *, device='cpu', input_dtype=None, output_dtype=None)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        },
+        {
+          "block": 1,
+          "bindings": [
+            {
+              "call": "run_fslmaths",
+              "signature": "(input_path, operations, output_path, *, device='cpu', input_dtype=None, output_dtype=None)",
+              "status": "bound"
+            }
+          ],
+          "errors": [],
+          "ast": "passed"
+        }
+      ],
+      "cli": {
+        "actual_help_exit_code": 0,
+        "actual_help_output_nonempty": true,
+        "source": "src/fnit/fslmaths/cli.py",
+        "documented_fnit_flags_missing_from_parser": [],
+        "record": "validation/documentation/readme_manual_20261005/registration.cli_help.json"
+      },
+      "benchmark_records": [
+        {
+          "path": "validation/fslmaths/real_data_20260929.json",
+          "sha256": "aad602add16e0d880a3b10bb833e764a21cd3f4340ab84b1355f91362d1ae84c",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/fslmaths/cli.py",
+              "json_key": ".source_sha256.src/fnit/fslmaths/cli.py"
+            },
+            {
+              "source": "src/fnit/fslmaths/core.py",
+              "json_key": ".source_sha256.src/fnit/fslmaths/core.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        },
+        {
+          "path": "validation/fslmaths/real_data_20260929.json",
+          "sha256": "aad602add16e0d880a3b10bb833e764a21cd3f4340ab84b1355f91362d1ae84c",
+          "current_source_hash_matches": [
+            {
+              "source": "src/fnit/fslmaths/cli.py",
+              "json_key": ".source_sha256.src/fnit/fslmaths/cli.py"
+            },
+            {
+              "source": "src/fnit/fslmaths/core.py",
+              "json_key": ".source_sha256.src/fnit/fslmaths/core.py"
+            }
+          ],
+          "recorded_identities": [],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "resources": [],
+      "images": [],
+      "archive": {
+        "path": "validation/fslmaths/readme_archive_20261005.md",
+        "original_readme_sha256": "56921fb5129ebd43c27b681e9630740e10715f1a2d13f69d1b134a1a948fa4a7",
+        "archive_sha256": "f036fc64b8099f6c8dace8ce23f1fc98256791a1414ee6c3b62589b3fdd5cccc",
+        "preservation": "complete original content retained; relative Markdown paths repaired; old heading anchors preserved",
+        "complete_original_text_verified_excluding_updated_markdown_targets": true,
+        "link_preservation_note": "all labels and full prose/code retained; relative targets and links to superseded sections repaired to new archive targets"
+      },
+      "checks": {
+        "seven_sections": true,
+        "fence_errors": [],
+        "local_link_missing": [],
+        "linked_fragment_targets": [],
+        "mri_execution": "not_run; documentation/API/parser audit only",
+        "report_content_modified": false,
+        "markdown_table_errors": [],
+        "fragment_checks": [],
+        "benchmark_section_fraction": 0.13725490196078433,
+        "git_diff_check": "passed: owned 12 README paths"
+      },
+      "unmeasured": [
+        "No new current-main MRI benchmark was run. Missing stage times, hardware/thread values and resource sizes are recorded as unmeasured/unrecorded."
+      ],
+      "upstream_source_provenance": [
+        {
+          "path": "src/fnit/_vendor_fsl/manifest.json",
+          "sha256": "0213624afaa8244585eaa8b5dad3099155364f09c7e9c1762e9e165d21178db3",
+          "current_source_hash_matches": [],
+          "recorded_identities": [
+            {
+              "json_key": ".components[0].commit",
+              "value": "5036b4620ea97db0050f2dc132fbb331dbba060c"
+            },
+            {
+              "json_key": ".components[1].commit",
+              "value": "27f514a182b5972094e30d8ea79f4fad89cbf03d"
+            },
+            {
+              "json_key": ".components[2].commit",
+              "value": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+            },
+            {
+              "json_key": ".components[3].commit",
+              "value": "9588bbe8eb8aa0939ddefd00df756aeb80d2305b"
+            },
+            {
+              "json_key": ".components[4].commit",
+              "value": "7824d74cdfa9fb65de178f642c3c05e57c8c8868"
+            },
+            {
+              "json_key": ".components[5].commit",
+              "value": "19e3ddd10138d8ea1394fd522fb0770435c61ddd"
+            },
+            {
+              "json_key": ".components[6].commit",
+              "value": "50ea45cb0b9661adba7844444cb38649ae44892b"
+            },
+            {
+              "json_key": ".components[7].commit",
+              "value": "9d815181a19c4fe1aebac74e9fa6601cde4e1ded"
+            },
+            {
+              "json_key": ".components[8].commit",
+              "value": "03e2b6bd88423e77386356a4c75b14cca5d90c6c"
+            },
+            {
+              "json_key": ".components[9].commit",
+              "value": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc"
+            },
+            {
+              "json_key": ".components[10].commit",
+              "value": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c"
+            },
+            {
+              "json_key": ".components[11].commit",
+              "value": "f0287f09f09dc34e24b95c471127239be69b4022"
+            },
+            {
+              "json_key": ".components[12].commit",
+              "value": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3"
+            },
+            {
+              "json_key": ".components[13].commit",
+              "value": "228ca8e73b86b4466e4323be10da36bd5bfdfb07"
+            },
+            {
+              "json_key": ".components[14].commit",
+              "value": "fcc335218284a2b04d5d7eb17dd4cfba264d0295"
+            },
+            {
+              "json_key": ".components[15].commit",
+              "value": "fa24cb88fba970fb9adc959713fee57bf3706d3e"
+            }
+          ],
+          "version_status": "source-level matches are explicit; all timings remain attributed to original report date/frozen source; no MRI rerun"
+        }
+      ],
+      "forwarded_api_example_checks": []
+    }
+  ],
+  "shared_resource_catalog": {
+    "path": "docs/RESOURCE_MANIFEST.md",
+    "sha256": "fb943aa2d5d2524aa5506d0c06dbf5757ddca7048f9ec8e2f54d60d934930d2a",
+    "release": "assets-v1",
+    "runtime_installer_size_validation": "not inferred from catalog; source-specific current behavior stated per module"
+  },
+  "cross_review": {
+    "scope": [
+      "docs/fmri/README.md",
+      "docs/fmri/surface.md"
+    ],
+    "read_only": true,
+    "source_signatures_defaults_paths_shapes_directions": "checked against end_to_end.py, surface_pipeline.py, derivatives.py, cli.py and original reports",
+    "matched_benchmark_values": "two-case timing medians, 32k/91k shapes and continuous volume/CIFTI metrics matched original reports",
+    "findings_sent_to_root": [
+      "surface table incorrectly claimed same Workbench binary; original reports use FNIT 2.1.0 versus official 2.0.1",
+      "CLI table serial-hemispheres and require-volume needed explicit False mapping",
+      "BIDS input description needed required nonempty TaskName",
+      "reconstruction options native_bin_dir also applies to freesurfer; provided fsnative_to_t1w option omitted",
+      "BOLD-reference timings FNIT API and official RobustAverage core have different boundaries"
+    ],
+    "files_sha256": {
+      "docs/fmri/README.md": "6715a8b1704b633639001253c07ac18a10d9cc8555ca703e30108985c22dde5f",
+      "docs/fmri/surface.md": "41ab45cf120cef15fff3f896593b2cd2a09b06b7fdd784f6745bbdcb0f95e393",
+      "src/fnit/fmri/end_to_end.py": "5ea01d782b91aca830f6941512f27be4daf654ad781dc2f17b7f668c0f2eb8bc",
+      "src/fnit/fmri/surface_pipeline.py": "cce599a853b25b82a1951861d1659874815918be904aa6fae5dab54b050eeb68",
+      "src/fnit/fmri/derivatives.py": "59d15b7b297fef6ba95d8db064d66363dd9be19f7dc785ecd3a4d78134ca10d2",
+      "src/fnit/fmri/cli.py": "e5d70239d1f3a601c311ef46f6faaf6ecc7dc4c7221ba40a8129b2003748dce1",
+      "src/fnit/fmri/surface_reconstruction.py": "26da1681679190a0bdb4b86ba99ec7b42260301ec10a159da3020b88edeb538b",
+      "src/fnit/fmri/bids.py": "7fce819c071fbf1ac7c67f32356129d9eda233484f701b5dc6fb113330ab166c",
+      "validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md": "ecc681b4af58491f258b5390a4c31fce4f8e7d86b721d59e1571ade314fc81f2",
+      "validation/fmri/reference_alignment_20261004/surface/SURFACE_ALIGNMENT.md": "87dd54def10544b13ae7874aa925ad6fcce96da51e0434958f80345d4d0b0105"
+    }
+  }
+}

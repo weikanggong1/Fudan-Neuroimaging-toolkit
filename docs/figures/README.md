@@ -1,27 +1,85 @@
-# 当前实现与原软件的影像对照
+# 真实脑图索引
 
-本页汇总当前源码对应的单被试示意图。数值结论以各功能页和机器可读报告为准。公开样例的来源和 SHA-256 见 [T1w 清单](../../examples/data/SOURCES.json)与 [FLAIR 清单](../../examples/wmh_data/SOURCES.json)；临床回归图只发布去标识化衍生切面，不发布原始影像或病例标识。
+| 摘要 | 内容 |
+|---|---|
+| 输入 | 各模块已经保存的真实病例结果与对应来源记录。 |
+| 输出 | 对照、差分或overlay图的导航。 |
+| 对应原软件 | 按各图所属模块记录。 |
+| Python / CLI | 本页没有独立处理入口。 |
+| CPU / GPU | 绘图环境及处理设备见对应验证报告。 |
 
-## SynthStrip
+## 1. 功能简介
 
-![当前 SynthStrip 与 FreeSurfer 8.2 的真实 T1w 脑提取对照](../synthstrip/figures/synthstrip_current_real_case01.png)
+本页是可视化索引，帮助查看真实影像的处理结果。
+每张图保留原始来源链接；数值结论以对应模块最新手册和版本绑定报告为准。
+它不是独立影像功能，也不以图片替代完整数据验证。
 
-当前 12 例回归的最低 mask Dice 为 `0.993925`，最低 brain-image Pearson r 为 `0.994261`。完整方法、计时和限制见 [SynthStrip 功能页](../synthstrip/README.md)。
+## 2. Python 调用
 
-## SynthMorph
+本页没有独立Python API。
+处理输入、保存结果和公开绘图接口见对应功能页：
 
-![当前 SynthMorph 与 FreeSurfer 8.2 的公开 T1w 配准对照](../synthmorph/figures/synthmorph_public_current.png)
+| 功能 | 输入与输出说明 |
+|---|---|
+| [SynthStrip](../synthstrip/README.md) | 三维结构像→脑图、mask和距离场。 |
+| [SynthMorph](../synthmorph/README.md) | moving/fixed影像→配准影像与变换。 |
+| [fMRI](../fmri/README.md) | 原始T1w＋BOLD→volume与surface衍生时序。 |
+| [Connectome](../connectome/README.md) | DWI、解剖和模板→四类矩阵。 |
 
-当前 12 例回归的最低 moved-image Pearson r 为 `0.994337`，平均位移向量误差均值为 `0.079139 mm`。公开 OpenNeuro 示例和完整真实数据统计见 [SynthMorph 功能页](../synthmorph/README.md)。
+图片为PNG展示文件，没有可用于科学计算的NIfTI affine或标签编码。
+显示色阶、切面和数据空间由原报告解释；不要把图片像素当成原始强度。
 
-## WMH-SynthSeg
+## 3. 命令行调用
 
-![当前 WMH-SynthSeg 与 FreeSurfer 8.2 的公开 FLAIR 对照](wmh_synthseg_comparison.png)
+本页没有独立CLI。
+用户按对应模块CLI生成影像，正式绘图复现命令位于各验证报告。
 
-三幅公开 FLAIR 的最低全标签一致率为 `0.99997810`，最低 WMH Dice 为 `0.99981002`。完整方法、计时和显存见 [WMH-SynthSeg 功能页](../wmh_synthseg/README.md)。
+| 图类型 | 入口 |
+|---|---|
+| 结构像脑提取 | [SynthStrip调用](../synthstrip/README.md#3-命令行调用)。 |
+| fMRI标准空间/皮层时序 | [fMRI调用](../fmri/README.md#3-命令行调用)。 |
+| 连接矩阵与两端标签 | [Connectome调用](../connectome/README.md#3-命令行调用)。 |
 
-## TorchFLIRT
+## 4. 原软件调用
 
-![当前 TorchFLIRT GPU 批量实现与 FSL FLIRT 6.0.7.4 的公开 T1w 配准对照](../flirt/figures/flirt_public_current.png)
+原软件处理命令分别见上述功能页第4节。
+图中的reference只对应原报告记录的版本、数据和处理范围。
 
-图中使用同一组 CC0 公开 OpenNeuro ds000114 v1.0.2 去面部 T1w，比较 FSL 与当前 FNIT GPU 批量结果。修复 header 采样距离与搜索层级后，官方输出非零区域的 moved Pearson 为 `0.9999965`，moving 视野 13³ 个世界坐标点的位移 RMS 为 `0.01355 mm`。源码绑定、CPU/FSL 对照、性能与精度范围见 [TorchFLIRT 功能页](../flirt/README.md)。
+| 对照 | 参考 |
+|---|---|
+| SynthStrip | FreeSurfer的mri_synthstrip。 |
+| fMRI | 独立fMRIPrep参考或固定输入Workbench算子。 |
+| Connectome | 当前图为FNIT真实输出QC；不是原软件整链对照图。 |
+
+## 5. 最新精度和运行时间
+
+本页不产生新benchmark，设备、时间边界和精度见每幅图的原报告。
+不汇总不同版本、数据或处理范围的指标。
+
+![真实T1w脑提取对照](../synthstrip/figures/synthstrip_current_real_case01.png)
+
+[SynthStrip完整来源与指标](../synthstrip/README.md#5-最新精度和运行时间)。
+
+![真实完整180帧MNI时序比较](../../validation/fmri/reference_alignment_20261004/continuous_figures/CON01_robust/volume_consistency.png)
+
+[fMRI两例最新冻结运行记录](../../validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md)。
+
+![真实两模板连接矩阵输出QC](../../validation/connectome/paired_pipeline_20261003/CON01_pair_outputs.png)
+
+[Connectome十例实际输出与缓存验证](../../validation/connectome/paired_pipeline_20261003/README.md)。
+
+## 6. 最近版本和 benchmark
+
+| 日期 | commit/version | 变化 | benchmark |
+|---|---|---|---|
+| 2026-10-05 | 文档迁移，基线140c3739 | 以版本绑定链接替换本页旧“当前”数值。 | 未重新执行MRI。 |
+| 2026-10-04 | fMRI source_v1 | 稳健参考连续链图。 | 原始报告保留。 |
+| 2026-10-03～04 | Connectome8bc337c4 | 已保存SS/VV/SV输出QC。 | 原始报告保留。 |
+
+更早索引文本见 [归档](../../validation/figures/readme_archive_20261005.md)。
+
+## 7. 参考文献、原软件和资源
+
+论文、原软件源码、模型许可和外部资源大小/SHA均链接各模块第7节。
+公开样例影像来源见 [T1w清单](../../examples/data/SOURCES.json) 和 [FLAIR清单](../../examples/wmh_data/SOURCES.json)。
+只展示有来源的真实处理图；本页不新增模型、模板或原始MRI的再分发。

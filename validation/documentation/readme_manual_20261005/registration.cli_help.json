@@ -1,0 +1,361 @@
+[
+  {
+    "module": "applywarp",
+    "command": [
+      "python",
+      "-m",
+      "fnit.applywarp.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit applywarp [-h] -i INPUT -r REFERENCE [-w WARP] -o OUTPUT\n                      [--premat PREMAT] [--postmat POSTMAT] [--abs | --rel]\n                      [--interp {trilinear,nearest,nn}]\n                      [--datatype {char,short,int,float,double}]\n                      [--device DEVICE] [--frame-chunk-size FRAME_CHUNK_SIZE]\n                      [--overwrite]\n\noptions:\n  -h, --help            show this help message and exit\n  -i INPUT, --in INPUT  input image to resample\n  -r REFERENCE, --ref REFERENCE\n                        reference image defining the output grid\n  -w WARP, --warp WARP  FSL dense displacement field or FNIRT cubic\n                        coefficient file\n  -o OUTPUT, --out OUTPUT\n  --premat PREMAT       input-to-warp-source FLIRT matrix\n  --postmat POSTMAT     warp-reference-to-output FLIRT matrix\n  --abs                 treat an untyped dense field as absolute coordinates\n  --rel                 treat an untyped dense field as relative displacements\n  --interp {trilinear,nearest,nn}\n  --datatype {char,short,int,float,double}\n  --device DEVICE\n  --frame-chunk-size FRAME_CHUNK_SIZE\n                        positive frame-buffer limit; CUDA auto policy if\n                        omitted\n  --overwrite\n",
+    "stderr": "",
+    "flags": [
+      "--abs",
+      "--datatype",
+      "--device",
+      "--frame-chunk-size",
+      "--help",
+      "--in",
+      "--interp",
+      "--out",
+      "--overwrite",
+      "--postmat",
+      "--premat",
+      "--ref",
+      "--rel",
+      "--warp",
+      "-h",
+      "-i",
+      "-o",
+      "-r",
+      "-w"
+    ]
+  },
+  {
+    "module": "convertwarp",
+    "command": [
+      "python",
+      "-m",
+      "fnit.convertwarp.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit-convertwarp [-h] --ref REF\n                        (--warp1 WARP1 | --mmorf-warp MMORF_WARP)\n                        [--source SOURCE] [--premat PREMAT]\n                        [--postmat POSTMAT] --out OUT [--relout | --absout]\n                        [--rel | --abs] [--device DEVICE] [--overwrite]\n\noptions:\n  -h, --help            show this help message and exit\n  --ref REF             MNI output reference image\n  --warp1 WARP1         FSL dense or FNIRT nonlinear warp\n  --mmorf-warp MMORF_WARP\n                        FNIT MMORF reference-axis millimetre field\n  --source SOURCE       native FA or diffusion image; required with --mmorf-\n                        warp\n  --premat PREMAT       diffusion-to-structural FLIRT matrix\n  --postmat POSTMAT     warp-reference-to-output FLIRT matrix\n  --out OUT             composite dense warp output\n  --relout              relative output (default)\n  --absout              absolute output\n  --rel                 relative input dense warp\n  --abs                 absolute input dense warp\n  --device DEVICE\n  --overwrite\n",
+    "stderr": "",
+    "flags": [
+      "--abs",
+      "--absout",
+      "--device",
+      "--help",
+      "--mmorf-",
+      "--mmorf-warp",
+      "--out",
+      "--overwrite",
+      "--postmat",
+      "--premat",
+      "--ref",
+      "--rel",
+      "--relout",
+      "--source",
+      "--warp1",
+      "-h"
+    ]
+  },
+  {
+    "module": "flirt",
+    "command": [
+      "python",
+      "-m",
+      "fnit.flirt.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit-flirt [-h] -in INPUT -ref REFERENCE [-out OUTPUT] [-omat OMAT]\n                  [-init INIT] [-applyxfm] [-usesqform] [-inweight INWEIGHT]\n                  [-refweight REFWEIGHT] [-dof {6,12}]\n                  [-cost {corratio,normmi}] [--device DEVICE]\n                  [--execution {auto,reference,batched}]\n                  [--candidate-batch-size CANDIDATE_BATCH_SIZE]\n                  [--memory-budget-gb MEMORY_BUDGET_GB] [--overwrite]\n\nRun the source-derived PyTorch implementation of FLIRT's supported 12-DOF\ncorrelation-ratio or 6-DOF normalized-mutual-information registration path, or\napply a known transform with -applyxfm. Other profiles are rejected.\n\noptions:\n  -h, --help            show this help message and exit\n  -in INPUT, --in INPUT\n                        input/moving 3D image\n  -ref REFERENCE, --ref REFERENCE\n                        reference/fixed image defining the output grid\n  -out OUTPUT, --out OUTPUT\n                        warped input on the reference grid\n  -omat OMAT, --omat OMAT\n                        input-to-reference 4x4 matrix in FSL scaled-mm\n                        coordinates\n  -init INIT, --init INIT\n                        initial registration matrix, or the matrix applied by\n                        -applyxfm\n  -applyxfm             resample without estimating a new registration\n  -usesqform            with -applyxfm, align input and reference qform/sform\n                        world coordinates\n  -inweight INWEIGHT, --inweight INWEIGHT\n                        input-space voxelwise registration weight\n  -refweight REFWEIGHT, --refweight REFWEIGHT\n                        reference-space voxelwise registration weight\n  -dof {6,12}           degrees of freedom; choose 6 with -cost normmi\n  -cost {corratio,normmi}\n                        cost function; choose normmi with -dof 6\n  --device DEVICE       PyTorch device, for example cpu, cuda, or cuda:1;\n                        default: CUDA when available\n  --execution {auto,reference,batched}\n                        candidate execution; auto batches CUDA and preserves\n                        scalar CPU execution\n  --candidate-batch-size CANDIDATE_BATCH_SIZE\n                        maximum independent affine candidates per GPU chunk\n  --memory-budget-gb MEMORY_BUDGET_GB\n                        GPU memory budget; chunks also adapt to available\n                        memory\n  --overwrite           replace existing output files; outputs are otherwise\n                        protected\n",
+    "stderr": "",
+    "flags": [
+      "--candidate-batch-size",
+      "--device",
+      "--execution",
+      "--help",
+      "--in",
+      "--init",
+      "--inweight",
+      "--memory-budget-gb",
+      "--omat",
+      "--out",
+      "--overwrite",
+      "--ref",
+      "--refweight",
+      "-applyxfm",
+      "-cost",
+      "-dof",
+      "-h",
+      "-in",
+      "-init",
+      "-inweight",
+      "-omat",
+      "-out",
+      "-ref",
+      "-refweight",
+      "-usesqform"
+    ]
+  },
+  {
+    "module": "fnirt",
+    "command": [
+      "python",
+      "-m",
+      "fnit.fnirt.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: python -m fnit.fnirt [-h] --in INPUT --ref REF [--aff AFF]\n                            [--cout COUT] [--iout IOUT] [--jout JOUT]\n                            [--refmask REFMASK] [--config CONFIG]\n                            [--subsamp SUBSAMP] [--miter MITER]\n                            [--infwhm INFWHM] [--reffwhm REFFWHM]\n                            [--lambda LAMBDA_VALUES] [--estint ESTINT]\n                            [--applyrefmask APPLYREFMASK] [--warpres WARPRES]\n                            [--biasres BIASRES] [--jacrange JACRANGE]\n                            [--intmod {global_linear,global_non_linear_with_bias}]\n                            [--intorder INTORDER] [--biaslambda BIASLAMBDA]\n                            [--ssqlambda SSQLAMBDA] [--imprefm IMPREFM]\n                            [--impinm IMPINM] [--minmet MINMET]\n                            [--device DEVICE]\n                            [--execution {reference,optimized}] [--overwrite]\n\nRun PyTorch FNIRT with the FSL no-config defaults or the GM, T1, and UKB TBSS\npresets. Only implemented FSL options can be overridden.\n\noptions:\n  -h, --help            show this help message and exit\n  --in INPUT            input/moving 3D NIfTI\n  --ref REF             reference/fixed 3D NIfTI\n  --aff AFF             input-to-reference FLIRT matrix in FSL scaled-mm\n                        coordinates; default: identity\n  --cout COUT           output cubic coefficient NIfTI (intent 2007); default:\n                        <input>_warpcoef with FSLOUTPUTTYPE extension\n  --iout IOUT           output warped input on the reference grid\n  --jout JOUT           output nonlinear-only Jacobian determinant\n  --refmask REFMASK     reference-grid binary mask; required by GM and T1\n                        presets\n  --config CONFIG       default, gm, t1, tbss, or unmodified FSL GM/T1 config\n                        (default: default)\n  --subsamp SUBSAMP\n  --miter MITER\n  --infwhm INFWHM\n  --reffwhm REFFWHM\n  --lambda LAMBDA_VALUES\n  --estint ESTINT\n  --applyrefmask APPLYREFMASK\n  --warpres WARPRES\n  --biasres BIASRES\n  --jacrange JACRANGE\n  --intmod {global_linear,global_non_linear_with_bias}\n  --intorder INTORDER\n  --biaslambda BIASLAMBDA\n  --ssqlambda SSQLAMBDA\n  --imprefm IMPREFM\n  --impinm IMPINM\n  --minmet MINMET\n  --device DEVICE       PyTorch device, for example cpu, cuda, or cuda:1;\n                        default: CUDA when available\n  --execution {reference,optimized}\n                        dense reference or coefficient-space/fused GPU\n                        execution; same schedule and precision\n  --overwrite           replace existing output files; outputs are otherwise\n                        protected\n",
+    "stderr": "",
+    "flags": [
+      "--aff",
+      "--applyrefmask",
+      "--biaslambda",
+      "--biasres",
+      "--config",
+      "--cout",
+      "--device",
+      "--estint",
+      "--execution",
+      "--help",
+      "--impinm",
+      "--imprefm",
+      "--in",
+      "--infwhm",
+      "--intmod",
+      "--intorder",
+      "--iout",
+      "--jacrange",
+      "--jout",
+      "--lambda",
+      "--minmet",
+      "--miter",
+      "--overwrite",
+      "--ref",
+      "--reffwhm",
+      "--refmask",
+      "--ssqlambda",
+      "--subsamp",
+      "--warpres",
+      "-h",
+      "-m"
+    ]
+  },
+  {
+    "module": "invwarp",
+    "command": [
+      "python",
+      "-m",
+      "fnit.invwarp.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit-invwarp [-h] --ref REF --warp WARP --out OUT [--rel | --abs]\n                    [--niter NITER] [--device DEVICE] [--overwrite]\n\noptions:\n  -h, --help       show this help message and exit\n  --ref REF        diffusion output reference image\n  --warp WARP      forward composite warp\n  --out OUT        inverse dense warp output\n  --rel            relative input and output (default)\n  --abs            absolute input and output\n  --niter NITER    maximum fixed-point iterations\n  --device DEVICE\n  --overwrite\n",
+    "stderr": "",
+    "flags": [
+      "--abs",
+      "--device",
+      "--help",
+      "--niter",
+      "--out",
+      "--overwrite",
+      "--ref",
+      "--rel",
+      "--warp",
+      "-h"
+    ]
+  },
+  {
+    "module": "mcflirt",
+    "command": [
+      "python",
+      "-m",
+      "fnit.mcflirt.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit mcflirt [-h] -in INPUT -out OUTPUT [-reffile REFERENCE] [-mats]\n                    [-plots] [-rmsrel] [-rmsabs] [-stages {1,2,3}]\n                    [-spline_final | -trilinear_final] [--device DEVICE]\n                    [--overwrite]\n\noptions:\n  -h, --help            show this help message and exit\n  -in INPUT, --in INPUT\n                        原始四维 BOLD NIfTI\n  -out OUTPUT, --out OUTPUT\n                        校正图输出路径或前缀\n  -reffile REFERENCE    同网格的三维参考图；默认中间帧\n  -mats                 输出每帧 input→reference 的 MAT_####\n  -plots                输出六列弧度/mm 的 .par\n  -rmsrel               输出相邻帧80mm球体RMS位移\n  -rmsabs               输出各帧相对identity的80mm球体RMS位移\n  -stages {1,2,3}       8/4/4 mm 阶段数\n  -spline_final         最终使用三阶 B-spline\n  -trilinear_final      最终使用三线性（原 MCFLIRT 默认）\n  --device DEVICE       cpu、cuda 或 cuda:1\n  --overwrite           覆盖已有输出\n",
+    "stderr": "",
+    "flags": [
+      "--device",
+      "--help",
+      "--in",
+      "--out",
+      "--overwrite",
+      "-h",
+      "-in",
+      "-mats",
+      "-out",
+      "-plots",
+      "-reffile",
+      "-rmsabs",
+      "-rmsrel",
+      "-spline_final",
+      "-stages",
+      "-trilinear_final"
+    ]
+  },
+  {
+    "module": "mmorf",
+    "command": [
+      "python",
+      "-m",
+      "fnit.mmorf.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit-mmorf [-h] --mov-scalar MOV_SCALAR --ref-scalar REF_SCALAR\n                  --mov-tensor MOV_TENSOR --ref-tensor REF_TENSOR\n                  [--aff-mov-scalar AFF_MOV_SCALAR]\n                  [--aff-ref-scalar AFF_REF_SCALAR]\n                  [--aff-mov-tensor AFF_MOV_TENSOR]\n                  [--aff-ref-tensor AFF_REF_TENSOR]\n                  [--scalar-weight SCALAR_WEIGHT] [--no-auto-linear] -o\n                  OUTPUT_DIR [--device DEVICE] [--overwrite]\n\noptions:\n  -h, --help            show this help message and exit\n  --mov-scalar MOV_SCALAR\n                        moving scalar; repeat in pair order\n  --ref-scalar REF_SCALAR\n                        reference scalar; repeat in pair order\n  --mov-tensor MOV_TENSOR\n                        moving FSL six-frame tensor\n  --ref-tensor REF_TENSOR\n                        reference FSL six-frame tensor\n  --aff-mov-scalar AFF_MOV_SCALAR\n                        moving scalar to common FLIRT matrix; repeat per pair,\n                        use AUTO for missing\n  --aff-ref-scalar AFF_REF_SCALAR\n                        reference scalar to common FLIRT matrix; repeat per\n                        pair, use AUTO for missing\n  --aff-mov-tensor AFF_MOV_TENSOR\n                        moving tensor to common FLIRT matrix\n  --aff-ref-tensor AFF_REF_TENSOR\n                        reference tensor to common FLIRT matrix\n  --scalar-weight SCALAR_WEIGHT\n                        scalar pair weight; repeat per pair\n  --no-auto-linear      use identity for unspecified linear matrices\n  -o OUTPUT_DIR, --output-dir OUTPUT_DIR\n  --device DEVICE\n  --overwrite\n",
+    "stderr": "",
+    "flags": [
+      "--aff-mov-scalar",
+      "--aff-mov-tensor",
+      "--aff-ref-scalar",
+      "--aff-ref-tensor",
+      "--device",
+      "--help",
+      "--mov-scalar",
+      "--mov-tensor",
+      "--no-auto-linear",
+      "--output-dir",
+      "--overwrite",
+      "--ref-scalar",
+      "--ref-tensor",
+      "--scalar-weight",
+      "-h",
+      "-o"
+    ]
+  },
+  {
+    "module": "msm",
+    "command": [
+      "python",
+      "-m",
+      "fnit.msm.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit-msm [-h] --inputs-json INPUTS_JSON --output-dir OUTPUT_DIR\n                [--device DEVICE] [--config CONFIG]\n                [--execution {optimized,reference}] [--no-parallel]\n                [--cpu-threads CPU_THREADS]\n                {msmsulc,msmall}\n\nSingle-subject FNIT spherical registration commands.\n\npositional arguments:\n  {msmsulc,msmall}\n\noptions:\n  -h, --help            show this help message and exit\n  --inputs-json INPUTS_JSON\n                        Private L/R input-file manifest\n  --output-dir OUTPUT_DIR\n  --device DEVICE\n  --config CONFIG       Official configuration file; defaults to the canonical\n                        schedule\n  --execution {optimized,reference}\n  --no-parallel         Run L/R hemispheres sequentially\n  --cpu-threads CPU_THREADS\n                        Total host thread budget, split between L/R\n",
+    "stderr": "",
+    "flags": [
+      "--config",
+      "--cpu-threads",
+      "--device",
+      "--execution",
+      "--help",
+      "--inputs-json",
+      "--no-parallel",
+      "--output-dir",
+      "-h"
+    ]
+  },
+  {
+    "module": "space_conversion",
+    "command": [
+      "python",
+      "-m",
+      "fnit.space_conversion",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: space_conversion.py [-h] --source-space {MNI152,fsaverage,fsLR}\n                           --target-space {MNI152,fsaverage,fsLR}\n                           [--volume VOLUME] [--left LEFT] [--right RIGHT]\n                           [--source-density {3k,10k,32k,41k,59k,164k}]\n                           [--target-density {3k,10k,32k,41k,59k,164k}]\n                           [--reference REFERENCE] --output-dir OUTPUT_DIR\n                           --assets-dir ASSETS_DIR [--device DEVICE] [--label]\n\nMNI152, fsaverage and fsLR map conversion using RF-ANTs and HCP 2017 assets.\n\noptions:\n  -h, --help            show this help message and exit\n  --source-space {MNI152,fsaverage,fsLR}\n  --target-space {MNI152,fsaverage,fsLR}\n  --volume VOLUME       MNI152 NIfTI input\n  --left LEFT           Left GIFTI input\n  --right RIGHT         Right GIFTI input\n  --source-density {3k,10k,32k,41k,59k,164k}\n  --target-density {3k,10k,32k,41k,59k,164k}\n  --reference REFERENCE\n                        MNI152 output reference NIfTI\n  --output-dir OUTPUT_DIR\n  --assets-dir ASSETS_DIR\n  --device DEVICE\n  --label\n",
+    "stderr": "",
+    "flags": [
+      "--assets-dir",
+      "--device",
+      "--help",
+      "--label",
+      "--left",
+      "--output-dir",
+      "--reference",
+      "--right",
+      "--source-density",
+      "--source-space",
+      "--target-density",
+      "--target-space",
+      "--volume",
+      "-h"
+    ]
+  },
+  {
+    "module": "topup",
+    "command": [
+      "python",
+      "-c",
+      "from fnit.topup.cli import main; main([\"--help\"])"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit-topup [-h] (--raw-dir RAW_DIR | --imain IMAIN) [--datain DATAIN]\n                  [--output-dir OUTPUT_DIR] [--out OUT] [--fout FOUT]\n                  [--iout IOUT] [--jacout JACOUT] [--config {b02b0.cnf}]\n                  [--device DEVICE] [--overwrite]\n\noptions:\n  -h, --help            show this help message and exit\n  --raw-dir RAW_DIR     UKB-format directory containing AP/PA .nii.gz, .bval,\n                        and .json\n  --imain IMAIN         FSL-style merged b0 image\n  --datain DATAIN       FSL-style acquisition parameters\n  --output-dir OUTPUT_DIR\n                        output directory for --raw-dir\n  --out OUT             FSL-style TOPUP output basename\n  --fout FOUT           field in Hz\n  --iout IOUT           corrected b0 series\n  --jacout JACOUT       Jacobian output basename\n  --config {b02b0.cnf}\n  --device DEVICE\n  --overwrite\n",
+    "stderr": "",
+    "flags": [
+      "--config",
+      "--datain",
+      "--device",
+      "--fout",
+      "--help",
+      "--imain",
+      "--iout",
+      "--jacout",
+      "--out",
+      "--output-dir",
+      "--overwrite",
+      "--raw-dir",
+      "-h"
+    ]
+  },
+  {
+    "module": "eddy",
+    "command": [
+      "python",
+      "-m",
+      "fnit.eddy.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit-eddy [-h] [--raw-dir RAW_DIR] [--topup-dir TOPUP_DIR]\n                 [--output-dir OUTPUT_DIR]\n                 [--synthstrip-weights SYNTHSTRIP_WEIGHTS] [--imain IMAIN]\n                 [--mask MASK] [--acqp ACQP] [--index INDEX] [--bvecs BVECS]\n                 [--bvals BVALS] [--topup TOPUP] [--out OUT]\n                 [--ref-scan-no REF_SCAN_NO] [--gp-seed GP_SEED]\n                 [--device DEVICE] [--overwrite]\n\noptions:\n  -h, --help            show this help message and exit\n  --raw-dir RAW_DIR\n  --topup-dir TOPUP_DIR\n  --output-dir OUTPUT_DIR\n  --synthstrip-weights SYNTHSTRIP_WEIGHTS\n                        UKB mode: standard synthstrip.1.pt file/directory;\n                        default FNIT local resolver\n  --imain IMAIN\n  --mask MASK\n  --acqp ACQP\n  --index INDEX\n  --bvecs BVECS\n  --bvals BVALS\n  --topup TOPUP\n  --out OUT\n  --ref-scan-no REF_SCAN_NO\n                        0-based reference volume; default direct mode 0, UKB\n                        mode automatic b0 selection\n  --gp-seed GP_SEED\n  --device DEVICE\n  --overwrite\n",
+    "stderr": "",
+    "flags": [
+      "--acqp",
+      "--bvals",
+      "--bvecs",
+      "--device",
+      "--gp-seed",
+      "--help",
+      "--imain",
+      "--index",
+      "--mask",
+      "--out",
+      "--output-dir",
+      "--overwrite",
+      "--raw-dir",
+      "--ref-scan-no",
+      "--synthstrip-weights",
+      "--topup",
+      "--topup-dir",
+      "-h"
+    ]
+  },
+  {
+    "module": "fslmaths",
+    "command": [
+      "python",
+      "-m",
+      "fnit.fslmaths.cli",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "usage: fnit-fslmaths [--device cpu|cuda:0] [-dt dtype] input [operations] output [-odt dtype]\n\nPyTorch fslmaths common operations\n\noptions:\n  -h, --help  show this help message and exit\n",
+    "stderr": "",
+    "flags": [
+      "--device",
+      "--help",
+      "-dt",
+      "-h",
+      "-odt"
+    ]
+  }
+]

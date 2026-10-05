@@ -1,246 +1,304 @@
 # BigFLICA：多模态标准空间成分
 
-`run_bigflica` 读取“每名被试一个目录”的 3D NIfTI。每个模态指定相对于被试目录的影像路径和自己的 3D 掩膜。输出被试成分 course、每模态每成分的原网格 z-stat NIfTI、绝对 z 值最高的若干体素的阈值图与 PNG，以及可投影新被试的固定模型。模态间可有不同网格；同一模态的影像必须与其掩膜形状和仿射一致。输入必须已经在所需标准空间；函数不做配准。
+| 项目 | 内容 |
+|---|---|
+| 输入 | 每名被试的多模态3D标准空间影像与各模态mask |
+| 输出 | 共享course、成分z图、固定模型及新被试course |
+| 对应原软件 | 原BigFLICA/FLICA；字典CPU对照sklearn变体 |
+| Python / CLI | run_bigflica / fnit-bigflica fit、apply |
+| CPU / GPU | CPU/CUDA；直接体素模式要求CUDA |
 
-**字典学习已独立：**压缩流程调用 `fnit.dictionary_learning`，CPU/GPU 共用独立模块中的对应入口。单独拟合字典的输入、参数、求解方式和真实数据报告见[字典学习功能页](../dictionary_learning/README.md)；此页保留完整 BigFLICA 流程的接口和验收范围。
+## 1. 功能简介
 
-**验收范围：**字典阶段已有保存的同一 float64 R500 投影对照；公开入口的 float32 投影、默认逐体素标准化和从原始 NIfTI 开始的冷启动全链尚未验收。压缩流程的有效 C20、最终成分脑图和新被试模型也尚未通过。原始体素试验曾保留20个有效成分，旧版30,000人压缩对照仅保留 CPU17/GPU13个；这些不同设置的历史结果与剩余工作见[验证索引](../../validation/bigflica/README.md)。
+`run_bigflica` 从已在标准空间的多模态影像提取共享成分，输出被试course、模态贡献、原模态网格z-stat脑图及可投影新被试的模型。默认压缩流程为逐体素标准化→联合mMIGP→每模态字典学习→FLICA；`use_mmigp_dicl=False`直接拟合体素。
 
-默认 `use_mmigp_dicl=True`：逐体素跨被试标准化 → 联合 mMIGP → 每模态 Lasso-LARS 字典学习 → FLICA。CUDA 路径用 PyTorch 执行协方差、特征分解、稀疏编码、字典更新、FLICA、空间回归和 t→z 转换；nibabel/HDF5 负责 CPU 文件读写和分块传输。为复现原 FLICA 的自由度拟合，GPU 特征分解后每模态将少量特征值送给 SciPy 做一次标量优化；这一步属于 CPU 计算。`use_mmigp_dicl=False` 时，标准化后直接把体素送入 FLICA，不建立 mMIGP 或 DicL 模型。此模式保留体素信息，但每轮须读取全部模态矩阵，适合较小训练集；大样本建议开启预处理。`device="cpu"` 保留原 notebook 的 sklearn DicL 对照路径。
-
-**FLICA 已修复项：**已修正自由能、精度和迭代记录、PCA 的 MATLAB SVD 尺度、逐模态 W 先验、零影像判定及归一化统计保存精度，并在脑图回归前检查含截距的设计矩阵。主要修复与真实数据控制见[初始化和先验报告](../../validation/bigflica/flica_initialization_prior_fix_real1000_20261001.md)。
-
-CUDA 压缩路径先逐被试读取，把 float32 标准化矩阵作为 HDF5 分块存盘；后续阶段不在内存中装入完整的“被试 × 体素”模态矩阵。默认 `max_gpu_gb=19`，按 20 GiB 显存目标预留空间。float32 协方差本身需 `N × N × 4` 字节，计算还要为临时数组留空间；超过配置预算时报错。磁盘需求不受内存预算限制，例如 37,182 人 × 100 万掩膜体素的 float32 标准化缓存约 138.5 GiB/**每模态**。大于 2,048 人时，mMIGP 根据目标秩和显存预算选择完整 GPU 特征分解或随机子空间；随机路径与直接体素 FLICA 的自由度近似仍需单独核验，不能当作逐点一致。
-
-## 流程策略
+CUDA采用项目PyTorch，CPU保留SciPy/sklearn对照；nibabel/HDF5承担读取、缓存和传输。字典学习复用[独立模块](../dictionary_learning/README.md)，运行时不调用外部神经影像软件。压缩完整默认C20尚未通过真实数据有效秩与脑图验收；遇到有效秩不足会保留诊断并停止输出成功模型。
 
 ```mermaid
-flowchart TD
-    IN["每名被试的多模态标准空间 NIfTI"] --> CHECK["核对被试、模态掩膜与各模态网格"]
-    MASK["每模态独立的 3D 掩膜"] --> CHECK
-    CHECK --> CACHE["逐被试读取与逐体素标准化；分块写 HDF5"]
-    CACHE --> MODE{"启用 mMIGP 与 DicL？"}
-    MODE -- 是 --> MIGP["联合 mMIGP：低维被试子空间"] --> DICL["每模态 DicL 稀疏字典"] --> FLICA["多模态 FLICA 成分拟合"]
-    MODE -- 否 --> RAW["直接使用标准化体素矩阵"] --> FLICA
-    FLICA --> COURSE["被试成分 course 与模态贡献"]
-    FLICA --> MAP["空间回归与 t→z 转换"]
-    MAP --> OUT["各模态 z-stat NIfTI、top-voxel 图与 PNG"]
-    FLICA --> MODEL["保存固定模型及标准化参数"]
-    MODEL --> APPLY["可选 apply_model：投影新的单名被试"]
-    NEW["未参与训练的新被试同模态影像"] --> APPLY
-    APPLY --> NEWCOURSE["新被试成分 course"]
-    classDef default fill:#ffffff,stroke:#000000,color:#000000;
+flowchart LR
+    A[标准空间多模态影像与mask] --> B[按被试核对并标准化]
+    B --> C{启用压缩}
+    C -->|是| D[mMIGP与每模态字典学习]
+    C -->|否| E[原始体素矩阵]
+    D --> F[FLICA及有效秩检查]
+    E --> F
+    F --> G[course、z脑图与固定模型]
+    G --> H[可选新被试冻结投影]
 ```
 
-## 调用独立字典学习模块
-
-开启 `use_mmigp_dicl` 时，mMIGP 输出每模态 `[掩膜体素, migp_dim]` 矩阵。CPU 流程调用 `fnit.dictionary_learning.fit_dicl`，CUDA 流程调用 `fnit.dictionary_learning.fit_dicl_gpu_streaming`；两者返回 `[dicl_dim, migp_dim]` 字典，再交给 FLICA。这里保留 `dicl_dim`、`dicl_max_iter`、`dicl_batch_size`、`dicl_sparse_iterations` 等完整流程参数，内部使用同一份成熟字典实现。
-
-GPU 字典缓存版本仍为 `rsvd5rowgraph`。本次提取模块未改变拟合数学和参数，已有通过输入签名检查的标准化、mMIGP 和字典缓存可复用。CLI 和 Python 的 `dicl_sparse_iterations` 默认 1000；显式设置 120 的调用仍按 120 运行。
-
-独立字典阶段的精度、内存、CPU/GPU 运算分工和历史耗时见[功能页](../dictionary_learning/README.md)与[独立验证索引](../../validation/dictionary_learning/README.md)。BigFLICA 的验收继续包括 mMIGP 输入、FLICA 有效成分、最终脑图和新被试投影；字典阶段通过某项指标不能替代这些检查。
-
-## 安装与输入
-
-在仓库根目录运行 `conda env create -f environment.yml`，再运行 `conda activate fnit`。环境包含 PyTorch、nibabel、h5py、scikit-learn、SciPy、matplotlib；运行时不调用 FSL、FreeSurfer、SPM、MRtrix3 或 AFNI。
-
-```text
-ukb_multimodal_new/
-  SUBJECT_A/
-    VBM_2mm.nii.gz
-    dti_FA_2mm_mmorf.nii.gz
-    dti_MD_2mm_mmorf.nii.gz
-    zstat1s.nii.gz
-  SUBJECT_B/
-    ...
-```
-
-此目录中的任务图为 `zstat1s.nii.gz`，不是 tstat。`modalities.json` 的四个掩膜均由使用者准备；路径须为绝对路径：
-
-```json
-{
-  "modalities": {
-    "vbm": {"image": "VBM_2mm.nii.gz", "mask": "/absolute/masks/vbm.nii.gz"},
-    "fa": {"image": "dti_FA_2mm_mmorf.nii.gz", "mask": "/absolute/masks/fa.nii.gz"},
-    "md": {"image": "dti_MD_2mm_mmorf.nii.gz", "mask": "/absolute/masks/md.nii.gz"},
-    "zstat1": {"image": "zstat1s.nii.gz", "mask": "/absolute/masks/zstat1.nii.gz"}
-  }
-}
-```
-
-CUDA 压缩模式和新被试投影。以下 `C=3/R=10/D=40` 参数来自 [18 名真实被试的小掩膜核验](../../validation/bigflica/README.md)；示例 `subjects.txt` 应列出该规模的训练被试。更换被试或掩膜后须检查 `flica_reconstruction.json`，重新选择能保留所需成分的维度。
-
-```bash
-# subjects.txt 每行一个训练被试目录名；本示例使用 18 名训练被试。
-fnit-bigflica fit \
-  --subjects-root /absolute/path/ukb_multimodal_new \
-  --config /absolute/path/modalities.json \
-  --subjects-file /absolute/path/subjects.txt \
-  --output-dir /absolute/path/bigflica_output \
-  --n-components 3 --migp-dim 10 --dicl-dim 40 \
-  --dicl-max-iter 20 --dicl-batch-size 32 \
-  --dicl-sparse-iterations 1000 --flica-max-iter 100 \
-  --top-voxels 300 --random-state 0 \
-  --device cuda:0 --max-gpu-gb 19 --feature-block 2048
-
-# 使用训练时冻结的均值、标准差和空间载荷，不重新拟合。
-fnit-bigflica apply \
-  --model-dir /absolute/path/bigflica_output/components_3 \
-  --subject-dir /absolute/path/ukb_multimodal_new/NEW_SUBJECT \
-  --output-file /absolute/path/new_subject_course.tsv \
-  --ridge 1e-6 --device cuda:0 --feature-block 32768
-```
-
-直接体素模式省略 mMIGP/DicL 维度，另设输出目录以保留两套模型。支持标量 `o` 和逐被试 `R` 噪声精度，输出前执行与压缩流程相同的有效秩和模态重建检查。默认预处理为逐体素标准化，初始化已采用修正后的 MATLAB SVD 尺度；历史整体 RMS 数据控制使用另一种预处理，须与公开默认设置分别验收：
-
-```bash
-fnit-bigflica fit \
-  --subjects-root /absolute/path/ukb_multimodal_new \
-  --config /absolute/path/modalities.json \
-  --subjects-file /absolute/path/subjects.txt \
-  --output-dir /absolute/path/bigflica_raw_output \
-  --n-components 3 --no-mmigp-dicl \
-  --flica-max-iter 1000 --device cuda:0 --max-gpu-gb 19
-```
-
-Python API 的变量名与文件用途对应：
+## 2. Python 调用
 
 ```python
 from pathlib import Path
-from fnit.bigflica import apply_model, run_bigflica
+from fnit.bigflica import run_bigflica, apply_model
 
-subjects_root = Path("/absolute/path/ukb_multimodal_new")
-mask_root = Path("/absolute/masks")  # 四个事先准备好的标准空间掩膜
-modalities = {
-    "vbm": {"image": "VBM_2mm.nii.gz", "mask": str(mask_root / "vbm.nii.gz")},
-    "fa": {"image": "dti_FA_2mm_mmorf.nii.gz", "mask": str(mask_root / "fa.nii.gz")},
-    "md": {"image": "dti_MD_2mm_mmorf.nii.gz", "mask": str(mask_root / "md.nii.gz")},
-    "zstat1": {"image": "zstat1s.nii.gz", "mask": str(mask_root / "zstat1.nii.gz")},
-}
-training_subject_ids = [
-    subject_id.strip()
-    for subject_id in Path("/absolute/path/subjects.txt").read_text().splitlines()
-    if subject_id.strip()
-]  # 与掩膜网格一致、模态齐全的训练被试；顺序会写入模型
-model_dir = run_bigflica(
-    subjects_root=subjects_root,
-    modalities=modalities,
-    output_dir=Path("/absolute/path/bigflica_output"),
-    n_components=3,
-    migp_dim=10,
-    dicl_dim=40,
-    subjects=training_subject_ids,
-    use_mmigp_dicl=True,  # 改为 False 时省略 migp_dim、dicl_dim
-    device="cuda:0",
-    max_gpu_gb=19,
-    feature_block=2048,
-    dicl_batch_size=32,
-    dicl_sparse_iterations=1000,
-    dicl_max_iter=20,
-    flica_max_iter=100,
-    top_voxels=300,
-    random_state=0,
+subjects_root = Path("/data/cohort_images")  # 用户的被试影像根目录
+mask_root = Path("/data/masks")  # 用户准备的标准空间mask
+modality_specifications = {
+    name: {"image": f"{name}.nii.gz", "mask": str(mask_root / f"{name}.nii.gz")}
+    for name in ("vbm", "fa", "md")
+}  # 每模态独立网格；同模态被试必须对齐mask
+training_subject_ids = Path("/data/training_subjects.txt").read_text().splitlines()  # 真实训练ID
+model_directory = run_bigflica(
+    subjects_root=subjects_root,  # 输入影像根
+    modalities=modality_specifications,  # 输入路径映射
+    output_dir="/data/results/bigflica",  # 新的模型/缓存目录
+    n_components=3,  # 示例C，用户须按真实规模与秩检查选择
+    migp_dim=10,  # 压缩维度R，不超过被试数
+    dicl_dim=40,  # 字典维度D，不超过体素样本数
+    subjects=training_subject_ids,  # 固定被试顺序
+    device="cuda:0",  # 计算设备
+    max_gpu_gb=18.0,  # 保守18GiB预算，非实测峰值
 )
-new_subject_dir = subjects_root / "NEW_SUBJECT"  # 不得在训练列表中
 new_subject_course = apply_model(
-    model_dir, new_subject_dir, ridge=1e-6, device="cuda:0", feature_block=32768
+    model_dir=model_directory,  # 已通过有效秩检查的固定模型
+    subject_dir=subjects_root / "NEW_SUBJECT",  # 未参与训练的完整同模态影像
+    output_file="/data/results/new_subject_course.tsv",  # 可选单被试course文件
+    device="cuda:0",  # 推理设备
 )
 ```
-
-只用结构模态时，应另设输出目录以免复用四模态模型。以下 `18` 人、三个小核验掩膜、`C=3/R=10/D=40` 示例用于说明 API 与 CLI；完整掩膜的性能和精度测试已扩展到30,000人。此前2,050人公开调用的C3输出已核对，C20/R100/D200在两个样本规模均未通过有效秩验收，见[三模态基准](../../validation/bigflica/README.md)。
-
-```python
-structural_modalities = {name: modalities[name] for name in ("vbm", "fa", "md")}
-structural_model_dir = run_bigflica(
-    subjects_root=subjects_root,
-    modalities=structural_modalities,
-    output_dir=Path("/absolute/path/bigflica_structural_output"),  # 与四模态输出分开
-    n_components=3,
-    migp_dim=10,
-    dicl_dim=40,
-    subjects=training_subject_ids,  # 此核验设置使用 18 名真实被试
-    device="cuda:0",
-    max_gpu_gb=19,
-    dicl_max_iter=20,
-    flica_max_iter=100,
-    flica_lambda_dims="R",  # 每个 mMIGP 维度单独估计噪声精度
-    top_voxels=100,
-    random_state=0,
-)
-```
-
-## 输出与参数
+### 输入数据格式
 
 ```text
-bigflica_output/
-  normalized_f32/vbm.h5, fa.h5, ...   # CUDA 压缩模式：[被试, 掩膜体素]；均值/标准差为 float64
-  mmigp_10/U.npy                      # [被试, mMIGP 维度]
-  mmigp_10/vbm_projected.h5, ...      # [掩膜体素, mMIGP 维度]
-  mmigp_10/eigen_diagnostics.json     # 阶段耗时、收敛次数、整体/逐特征对残差
-  dicl_10_40_20_0_32_1000_rsvd5rowgraph_cuda/ # 每模态 dictionary.npy 与 manifest.json
-  components_3/
-    model.json                         # 参数、被试顺序、输入签名、阶段耗时
-    flica_reconstruction.json          # 重建比、有效秩、H 奇异值比例及成分范数；失败时也保留
-    subj_course.npy, subj_course.tsv  # [被试, 成分]；TSV 首列 subject
-    modality_contribution.npy         # [模态, 成分]
-    vbm_zstat.npy, fa_zstat.npy, ...   # [掩膜体素, 成分]
-    vbm_loadings.npy, ...             # 新被试的固定空间载荷
-    vbm_mask.nii.gz, vbm_mean.npy, vbm_std.npy, ...
-    maps/vbm/component-001_zstat.nii.gz
-    maps/vbm/component-001_top-300.nii.gz
-    maps/vbm/component-001_top-300.png
+cohort_images/
+├── SUBJECT_A/{vbm,fa,md}.nii.gz
+└── SUBJECT_B/{vbm,fa,md}.nii.gz
+masks/{vbm,fa,md}.nii.gz
 ```
 
-直接体素模式只有 `normalized/` 和 `components_*/`，不生成 mMIGP/DicL 目录。CPU 压缩模式使用 `normalized/` float64 缓存；被试数不超过 2,048 时保留 SciPy 精确 mMIGP，超过 2,048 时逐被试写入 HDF5、分块计算协方差和投影。大样本随机子空间最多迭代 120 次，float64 的整体及每对特征残差须低于 `1e-8`；float32 须低于 `1e-6` 且至少迭代 90 次。失败时不写成功缓存清单。CPU DicL 用 sklearn `.fit`，每次只读取一个压缩后的 `P × migp_dim` 模态；单模态投影超过 4 GiB 时会报错。原始 `N × P` 模态始终保存在 HDF5。CPU 大样本 mMIGP 缓存版本为 `cpu-stream-v2-adaptive-float64`；GPU 随机子空间为 `cuda-stream-v6-adaptive-float32`，高目标秩完整特征分解为 `cuda-stream-v7-highrank-exact-float32`，旧版本缓存不会复用。
+- 每幅输入为有限实数 3D NIfTI `[X,Y,Z]`，已经配准到选定标准空间；输入不会在该功能中再配准。
+- 每个模态有自己的3D非零mask。同一模态所有被试与其mask须有相同shape、affine、orientation；不同模态可有不同网格。
+- `modalities` 的 `image` 是相对于每个被试目录的文件名；`mask` 是绝对路径。模态插入顺序写入模型，推理沿用该顺序。
+- `subjects` 是字符串ID序列，保留前导零；每个ID必须具有所有模态。省略时按源码规则搜索目录，实际名单写入模型。
+- VBM、FA、MD只是示例模态名。强度和单位由用户的前处理决定，标准化后course没有物理单位。
+- 原始影像、ID表、个体预测及用户目标列放在有授权的私有存储；公开报告只引用匿名标量。
+配置JSON可直接对应Python映射：
 
-压缩及直接体素模式的 `flica_reconstruction.json` 记录各模态与整体重建范数比、H 的奇异值相对最大奇异值的比例、逐成分范数、有效秩及请求成分数。有效秩以奇异值比例大于 `1e-6` 的个数定义。若出现非有限值、有效秩不足，或某模态重建范数比低于 `1e-6`，会保留诊断并停止输出该模型。该检查不替代收敛、逐模态残差、脑图及留出被试验收。逐被试噪声模式的输出目录为 `components_C_lambda_R/`，标量模式仍为 `components_C/`；已有模型的输入签名或模态不一致时会拒绝覆盖，应使用新输出目录。缓存以被试顺序、影像和掩膜的路径/大小/修改时间及阶段参数核验；若原地改写文件却保留这些属性，须删除相应缓存后重跑。
+```json
+{"modalities": {
+  "vbm": {"image": "vbm.nii.gz", "mask": "/data/masks/vbm.nii.gz"},
+  "fa": {"image": "fa.nii.gz", "mask": "/data/masks/fa.nii.gz"},
+  "md": {"image": "md.nii.gz", "mask": "/data/masks/md.nii.gz"}
+}}
+```
 
-`model.json` 新增 `flica_algorithm_version`、`normalization_version`、`course_coordinates`、`brainmap_space` 和 `brainmap_df`。当前版本为 `matlab-pca-per-modality-W-v2`、`voxel-zscore-v3-stats64-any-nonzero`；旧算法模型不会被新拟合覆盖，已有固定模型仍可用 `apply_model`。标准化均值和标准差保存为 float64，供训练输出和新被试投影共用。脑图回归要求成分与截距合并后满列秩，否则停止生成统计图。
+压缩模式要求C< D且C< R-1；直接体素模式要求C< N-1。示例C3/R10/D40是接口示意，不能自动保证用户数据或C20有效。
 
-压缩模式保留原 BigFLICA 的 `U@H` course 回映和 PC 空间回归：`course_coordinates=legacy_spectral_PC_zscore`，`brainmap_space=mMIGP_PC`，自由度为 `migp_dim-C-1`。直接体素模式使用原始被试坐标，自由度为 `N-C-1`。两种模型的坐标、噪声和统计自由度不同，不能把成分数相同视为脑图等价。
+CUDA标准化/mMIGP缓存为float32，字典学习为float64；mMIGP采用严格float32协方差分解，关闭该阶段TF32。其他阶段保留各自源码精度。CPU压缩缓存与mMIGP主要为float64。
 
-| 参数 | 含义 |
+`fit_mmigp`是内存矩阵辅助入口，返回联合被试基U和各模态投影；`fit_dicl`兼容名见独立字典学习页。完整影像模型必须通过 `run_bigflica` 创建。
+
+**`run_bigflica` 参数**
+
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `subjects_root` | 是 | `str / Path` | `—` | 每名被试一个目录的多模态影像根目录。 |
+| `modalities` | 是 | `Mapping[str, Mapping[str, str]]` | `—` | 有序模态名→{image:被试目录相对路径, mask:绝对掩膜路径}。 |
+| `output_dir` | 是 | `str / Path` | `—` | 本次结果目录；路径按当前工作目录解析。 |
+| `n_components` | 是 | `int` | `—` | 共享成分数C，必须与输入被试数、压缩维度及数据有效秩相容。 |
+| `migp_dim` | 否 | `int / None` | `None` | 联合mMIGP维度；压缩模式要求，不得超过被试数。 |
+| `dicl_dim` | 否 | `int / None` | `None` | 字典原子数≥2，不能超过各模态样本数。 |
+| `subjects` | 否 | `Sequence[str] / None` | `None` | 被试目录名序列；None自动识别；顺序会写入模型。 |
+| `device` | 否 | `str` | `'auto'` | PyTorch设备；auto自动选择CUDA，否则CPU，可显式指定cpu或cuda:N。 |
+| `dicl_max_iter` | 否 | `int` | `1000` | 字典训练最大epoch数；遵循独立字典学习的停止条件。 |
+| `flica_max_iter` | 否 | `int` | `1000` | FLICA变分更新次数，必须为正整数。 |
+| `top_voxels` | 否 | `int` | `1000` | 每张成分图保留绝对z值最大的体素数。 |
+| `random_state` | 否 | `int` | `0` | 初始化和数据划分随机种子。 |
+| `max_gpu_gb` | 否 | `float` | `19.0` | 预算单位GiB，默认19.0约20.40十进制GB；实际峰值另记。 与严格20 GB目标有差别；需要严格预算时应留出CUDA上下文余量。 |
+| `feature_block` | 否 | `int` | `2048` | 分块大小；DicL为样本行，影像流程为体素列。 |
+| `dicl_batch_size` | 否 | `int` | `32` | GPU字典编码每批体素数；改动可能改变在线轨迹。 |
+| `dicl_sparse_iterations` | 否 | `int` | `1000` | ADMM及兼容LARS稀疏求解预算。 |
+| `use_mmigp_dicl` | 否 | `bool` | `True` | True启用mMIGP+DicL；False直接拟合体素，要求CUDA。 |
+| `flica_lambda_dims` | 否 | `str` | `'o'` | o每模态一个噪声精度；R每个原始被试/压缩坐标一个。 |
+
+**`apply_model` 参数**
+
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `model_dir` | 是 | `str / Path` | `—` | 训练保存的模型目录。 |
+| `subject_dir` | 是 | `str / Path` | `—` | 一名被试的输入目录，须包含上述全部模态。 |
+| `ridge` | 否 | `float` | `1e-06` | 新被试冻结载荷岭投影的非负正则系数。 |
+| `output_file` | 否 | `str / Path / None` | `None` | 可选返回值保存路径；None只返回内存对象。 |
+| `device` | 否 | `str` | `'auto'` | PyTorch设备；auto自动选择CUDA，否则CPU，可显式指定cpu或cuda:N。 |
+| `feature_block` | 否 | `int` | `32768` | 分块大小；DicL为样本行，影像流程为体素列。 |
+
+**`fit_mmigp` 参数**
+
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `matrices` | 是 | `Mapping[str, np.ndarray]` | `—` | 模态名→二维被试×体素NumPy矩阵，模态共享同一被试顺序。 |
+| `migp_dim` | 是 | `int` | `—` | 联合mMIGP维度；压缩模式要求，不得超过被试数。 |
+| `device` | 否 | `str` | `'auto'` | PyTorch设备；auto自动选择CUDA，否则CPU，可显式指定cpu或cuda:N。 |
+
+### 输出
+
+```text
+bigflica/
+├── normalized_f32/{vbm,fa,md}.h5
+├── mmigp_R/U.npy
+├── mmigp_R/{vbm,fa,md}_projected.h5
+├── dicl_<参数和算法版本>/
+└── components_C/
+    ├── model.json
+    ├── flica_reconstruction.json
+    ├── subj_course.npy / subj_course.tsv
+    ├── modality_contribution.npy
+    ├── <模态>_{zstat,loadings,mean,std}.npy
+    ├── <模态>_mask.nii.gz
+    └── maps/<模态>/component-001_{zstat,top-1000}.nii.gz
+```
+
+`flica_lambda_dims="R"`的模型目录为 `components_C_lambda_R/`。CPU缓存为normalized/，直接体素模式没有mMIGP/DicL目录；GPU压缩使用normalized_f32/。
+
+| 输出 | shape、空间与单位 |
 |---|---|
-| `subjects_root` / `--subjects-root` | 每名被试一个目录的父路径。 |
-| `modalities` / `--config` | 有序模态映射；各项为相对影像路径 `image` 和绝对掩膜路径 `mask`。 |
-| `output_dir` / `--output-dir` | 模型、成分图和可复用 HDF5 缓存目录。 |
-| `subjects` / `--subjects-file` | 训练被试目录名及顺序；省略时自动搜索。 |
-| `n_components` / `--n-components` | 成分数；压缩模式须小于 `dicl_dim` 和 `migp_dim - 1`，直接模式须小于被试数减一。 |
-| `use_mmigp_dicl` / `--no-mmigp-dicl` | 默认开启两阶段压缩；CLI 标志将其关闭并直接拟合体素。 |
-| `migp_dim` / `--migp-dim` | 压缩模式的联合 mMIGP 维度，不得超过被试数；直接模式可省略。 |
-| `dicl_dim` / `--dicl-dim` | 压缩模式每模态的字典原子数；直接模式可省略。 |
-| `dicl_max_iter` / `--dicl-max-iter` | DicL 最大 epoch 数，默认 1000；沿用 sklearn 提前停止规则。 |
-| `dicl_batch_size` / `--dicl-batch-size` | GPU LARS 每批体素数，默认 32，与指定 notebook 一致。改动后结果可能变化。 |
-| `dicl_sparse_iterations` / `--dicl-sparse-iterations` | GPU 稀疏求解预算，默认1000；用于ADMM迭代和回退LARS的路径事件数。预算耗尽且回退仍未求解时会报错，不返回截断编码。 |
-| `flica_max_iter` / `--flica-max-iter` | FLICA 变分更新次数，默认 1000，必须为正整数。CPU/GPU 均执行指定次数；旧版多更新一次的问题已修复。 |
-| `flica_lambda_dims` / `--flica-lambda-dims` | 噪声精度维度：默认 `o` 为每模态一个值，与指定 notebook 一致。`R` 在直接体素模式中为每模态、每个原始被试一个值，在压缩模式中为每模态、每个 mMIGP 坐标一个值。更改此项会改变模型，须分别验收成分稳定性和重建。 |
-| `top_voxels` / `--top-voxels` | 各成分按绝对 z 值保留最高的体素数，默认 1000。 |
-| `random_state` / `--random-state` | DicL 随机种子，默认 0。 |
-| `device` / `--device` | `auto` 优先 CUDA；可显式指定 `cuda:0` 或 `cpu`。直接体素模式要求 CUDA。 |
-| `max_gpu_gb` / `--max-gpu-gb` | mMIGP/直接 FLICA 的显存预算，默认 19 GiB；被试数超过 2,048 的 CPU mMIGP 将同一数值用作协方差的内存预算。 |
-| `feature_block` / `--feature-block` | 逐批处理的体素列数，拟合默认 2048，投影默认 32768。 |
-| `model_dir` / `--model-dir` | 已拟合的 `components_*` 目录。 |
-| `subject_dir` / `--subject-dir` | 不在训练列表的新被试目录；各影像须与冻结掩膜同网格。 |
-| `ridge` / `--ridge` | 新被试多模态岭回归的非负正则化系数，默认 `1e-6`。 |
-| `output_file` / `--output-file` | 新被试 course TSV；Python 中可省略，此时只返回数组。 |
+| normalized HDF5 | `[Nsubjects,Nmasked_voxels]`；跨被试标准化，均值/标准差保存float64。 |
+| U与projected | U为`[Nsubjects,R]`；每模态projected为`[Nmasked_voxels,R]`。 |
+| dictionary | `[D,R]`；归一化原子，未代表最终脑图。 |
+| subj_course | `[Nsubjects,C]`；TSV附subject，course无物理单位。 |
+| modality_contribution | `[Nmodalities,C]`；各模态成分贡献。 |
+| zstat及top图 | `[X,Y,Z]` float32；各自mask原shape/affine/orientation/标准空间，mask外零；带符号正态z。 |
+| loadings/mean/std/mask | 固定模型所需载荷及训练标准化；新被试不得重新拟合。 |
+| flica_reconstruction.json | 请求C、有效秩、奇异值比例与逐模态重建范数比；失败也保存。 |
 
-原软件接受已展开的 NumPy `N × P` 矩阵。相应调用是：
+压缩course使用 `U@H` 回映，脑图在mMIGP PC空间回归，自由度R-C-1；直接体素course在原始被试坐标，自由度N-C-1。两者坐标与噪声模型不同。
+
+有效秩以H奇异值比>1e-6定义；不足C或模态重建范数比<1e-6时报错，不删失败成分。检查通过也不能替代脑图和留出预测验收。
+
+缓存按被试顺序、影像/mask路径、大小、mtime和阶段参数核对。原地改写却保留这些属性时应清理对应缓存；参数或输入不同用新目录。`apply_model`返回`[C]`数组，沿用冻结标准化/载荷，非原FLICA重推断。
+
+### 选择运行路径与分步接口
+
+压缩模式适合先查看低维结构；直接模式省去mMIGP和DicL，仍需全部真实影像输入及原mask。二者的优化输入不同，应分别验证有效秩、course和脑图，不能只看同名成分数。
+
+```python
+from fnit.bigflica import run_bigflica
+
+voxel_model_directory = run_bigflica(
+    subjects_root="/data/cohort_images",  # 用户真实影像根
+    modalities=modality_specifications,  # 上例完整模态映射
+    output_dir="/data/results/bigflica_voxel",  # 独立新目录
+    n_components=3,  # 按真实数据有效秩选择
+    subjects=training_subject_ids,  # 上例训练名单与顺序
+    device="cuda:0",  # 直接体素模式要求CUDA
+    use_mmigp_dicl=False,  # 不经过压缩和字典阶段
+    max_gpu_gb=18.0,  # 保守预算GiB，非实测峰值
+)
+```
+
+内存辅助 `fit_mmigp` 只产生U和投影，不保存全影像模型，也不携带mask几何：
+
+```python
+import numpy as np
+from fnit.bigflica import fit_mmigp
+
+masked_modality_matrices = {
+    name: np.load(f"/data/matrices/{name}.npy", allow_pickle=False)
+    for name in ("vbm", "fa", "md")
+}  # 每项被试×该模态mask体素，所有模态行ID及顺序一致
+subject_basis, projected_modality_matrices = fit_mmigp(
+    matrices=masked_modality_matrices,  # 已检查的有限矩阵
+    migp_dim=10,  # 不超过共同被试数
+    device="cuda:0",  # CUDA或cpu/auto
+)
+```
+
+返回U为 `[Nsubjects,R]`，每个投影为 `[Nmasked_voxels,R]`；它供字典训练使用，而不是原被试×体素方向。原始影像affine不能从该矩阵恢复，完整影像流程保留几何并写入各模态mask。
+
+## 3. 命令行调用
+
+```bash
+fnit-bigflica fit --subjects-root /data/cohort_images --config /data/modalities.json    --subjects-file /data/training_subjects.txt --output-dir /data/results/bigflica    --n-components 3 --migp-dim 10 --dicl-dim 40 --device cuda:0 --max-gpu-gb 18
+fnit-bigflica apply --model-dir /data/results/bigflica/components_3    --subject-dir /data/cohort_images/NEW_SUBJECT    --output-file /data/results/new_subject_course.tsv --device cuda:0
+```
+
+| CLI | Python | 含义 |
+|---|---|---|
+| --subjects-root / --output-dir | subjects_root / output_dir | 影像根与输出 |
+| --config | modalities | JSON的modalities映射 |
+| --subjects-file | subjects | 每行字符串ID |
+| --n-components / --migp-dim / --dicl-dim | n_components / migp_dim / dicl_dim | C/R/D |
+| --no-mmigp-dicl | use_mmigp_dicl=False | 直接体素模式，要求CUDA |
+| --dicl-max-iter / --dicl-batch-size / --dicl-sparse-iterations | 同名下划线参数 | 字典训练配置 |
+| --flica-max-iter / --flica-lambda-dims | flica_max_iter / flica_lambda_dims | FLICA配置 |
+| --top-voxels / --random-state | top_voxels / random_state | 图显示体素数和种子 |
+| --device / --max-gpu-gb / --feature-block | 同名下划线参数 | 设备与资源 |
+| apply --model-dir / --subject-dir / --output-file / --ridge | 同名下划线参数 | 新被试投影 |
+
+其余默认值与上表Python一致；apply CLI必需output-file，Python允许None。直接体素关闭压缩时省略migp/dicl维度，用新的结果目录。
+
+## 4. 原软件调用
+
+原BigFLICA没有等价单行神经影像CLI，接收已展开的被试×体素NumPy矩阵。在独立原作者环境运行：
 
 ```python
 from BigFLICA.BigFLICA_cpu import BigFLICA
 
-BigFLICA(
-    data_loc=["/absolute/path/vbm.npy", "/absolute/path/fa.npy", "/absolute/path/md.npy", "/absolute/path/zstat1.npy"],
-    nlat=20,
-    output_dir="/absolute/path/original_output",
-    migp_dim=1000,
-    dicl_dim=500,
-    ncore=4,
+reference_data_files = ["/data/matrices/vbm.npy", "/data/matrices/fa.npy", "/data/matrices/md.npy"]
+reference_model = BigFLICA(
+    data_loc=reference_data_files,  # 同一被试顺序的模态矩阵
+    nlat=3,  # 对应C
+    output_dir="/data/reference/bigflica",  # 参考结果目录
+    migp_dim=10,  # 对应R
+    dicl_dim=40,  # 对应D
+    ncore=4,  # 原CPU并行数
 )
 ```
 
-[上游 `BigFLICA_cpu.py`](https://github.com/weikanggong/BigFLICA/blob/master/BigFLICA_cpu.py) 用 SPAMS 字典学习；本功能的压缩模式对照用户 notebook 的 sklearn DicL 变体。原 `sKPCR_regression` 实际计算 t 值却命名为 Z；FNIT 按相同回归和自由度将双侧 t 转为带符号正态 z。mMIGP 特征向量本身有任意正负号；CUDA 实现固定最大绝对载荷为正以便复现，但它不保证与 SciPy 参考的符号一致。字典学习是非凸问题，符号改变会改变固定种子下的拟合轨迹，因此比较压缩模式时必须记录并处理这一差异。`apply_model` 是 FNIT 新增的冻结载荷投影，不等同于原 FLICA 对新被试重新推断后验。
+| FNIT | 原实现 |
+|---|---|
+| n_components / migp_dim / dicl_dim | nlat / migp_dim / dicl_dim |
+| modalities影像与mask | data_loc预先展开矩阵 |
+| CPU字典 | sklearn变体；原BigFLICA_cpu.py为SPAMS |
+| z-stat脑图 | 原sKPCR_regression输出t但命名Z；FNIT完成t→z |
+| apply_model | FNIT新增冻结载荷投影，不等同原FLICA后验推断 |
 
-完整流程的原软件数值核对、缓存输出与留出投影检查，见[必要对照证据](../../validation/bigflica/README.md#当前实现所需的补充证据)；字典的同投影控制已移至[独立验证目录](../../validation/dictionary_learning/README.md)。小样本及 C3 检查用于定位和接口核验；30,000 人 C20 结论、阶段时间与剩余工作见 BigFLICA 验证索引。
+mMIGP特征向量和成分符号可翻转，字典非凸训练会放大上游微小扰动；需先匹配坐标/原子再判断流程误差。不能用相同C或同名文件声称脑图等价。
 
-参考：Gong W, Beckmann CF, Smith SM. [Phenotype Discovery from Population Brain Imaging](https://www.sciencedirect.com/science/article/pii/S1361841521000967). *Medical Image Analysis*, 2021；[BigFLICA 原仓库](https://github.com/weikanggong/BigFLICA)。
+## 5. 最新精度和运行时间
+
+当前完整压缩C20的验收结论仍为未通过。[匿名30,000人CPU/GPU报告](../../validation/bigflica/bigflica_real30000_cpu_gpu_20260930.json)冻结源码 `6f8dcea1…`，完整三模态mask、C20/R100/D200；独立从原始NIfTI建库，最后有效秩CPU17、GPU13，未生成完整C20脑图或可验收模型。本轮未按140c3739重跑。
+
+| 至科学检查失败的阶段 | CPU | GPU |
+|---|---:|---:|
+| 读取/标准化 | 5478.73 s | 4358.81 s |
+| mMIGP | 3541.38 s | 2176.20 s |
+| DicL | 79.85 s | 145.19 s |
+| FLICA | 23.60 s | 46.58 s |
+| 至失败的总墙钟 | 9182.28 s | 6753.04 s |
+
+8CPU线程、共享H100顺序运行；CPUfloat64标准化/mMIGP，GPUfloat32且该阶段TF32关闭，DicLfloat64。GPU peak allocated/reserved3.66/3.85GiB，CPU峰RSS8.48GiB。它不是成功端到端模型的加速比。
+
+新初始化/逐模态先验与真实1000人控制另见[修复报告](../../validation/bigflica/flica_initialization_prior_fix_real1000_20261001.md)：原始体素保留20成分，压缩同字典仍未保留请求C20，不能据此改写上面的完整流程结果。独立DicL优化没有补测整条FLICA链。
+
+最近公开API的小mask18人C3及独立新被试检查见[接口报告](../../validation/bigflica/three_structural_public_R_smoke_real18.json)与[投影报告](../../validation/bigflica/three_structural_public_R_heldout_apply_real1.json)，属于接口核验。最新成功C20的reference/FNIT/difference脑图未提供；历史小样本图与诊断保留在验证目录。
+
+## 6. 最近版本和 benchmark
+
+| 日期 | commit/version | 变化 | benchmark |
+|---|---|---|---|
+| 2026-10-01 | fc76fb8f | 字典学习独立并复用成熟函数 | AST/缓存兼容，不代替FLICA全链 |
+| 2026-10-01 | 571fc9ea | 同投影字典优化 | 1000人阶段检查，OMP尚有差异 |
+| 2026-10-01 | 53ab978b | 修正PCA尺度、模态W先验及秩检查 | 原始体素20，压缩C20仍未通过 |
+| 2026-09-30 | 6f8dcea1冻结源码 | 30,000人独立CPU/GPU压缩控制 | CPU17/GPU13；科学验收未通过 |
+
+更早的debug、profiling和长表保留在[旧README归档](../../validation/bigflica/readme_archive_20261005.md)。归档已修复相对链接；旧科学报告与原始产物不修改。
+
+<a id="流程策略"></a>
+<a id="调用独立字典学习模块"></a>
+<a id="安装与输入"></a>
+<a id="输出与参数"></a>
+
+## 7. 参考文献、原软件和资源
+
+- Gong、Beckmann与Smith，2021，[Phenotype Discovery from Population Brain Imaging](https://www.sciencedirect.com/science/article/pii/S1361841521000967)，Medical Image Analysis。
+- 原代码：[BigFLICA](https://github.com/weikanggong/BigFLICA)，`BigFLICA_cpu.py`及FLICA模块；字典参考sklearn见[独立功能页](../dictionary_learning/README.md)。
+- FNIT：[pipeline.py](../../src/fnit/bigflica/pipeline.py)、[flica_torch.py](../../src/fnit/bigflica/flica_torch.py)、[完整验证索引](../../validation/bigflica/README.md)。
+
+### 外部资源
+
+本功能不需要预训练权重、图谱或模板，也不自动下载真实输入数据。用户输入与参考软件的许可由各自来源决定。
+
+| 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
+|---|---|---|---|---|---|
+| 无额外模型资源 | — | — | 不适用 | 不适用 | 不适用 |
