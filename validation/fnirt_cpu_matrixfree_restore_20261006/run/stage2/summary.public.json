@@ -1,0 +1,3947 @@
+{
+  "scope": "prepared only: restore accepted level arrays; current optimized/reference callback controls and existing strict CSC comparison; no evaluate/linearize/assembly/solver/native/full registration",
+  "status": "bounded_restored_callback_comparison_completed",
+  "host": "nodecw7",
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "torch_threads": 8,
+  "interop_threads": 1,
+  "address_space_cap_bytes": 20000000000,
+  "flags_before": {
+    "cuda_initialized": false,
+    "cudnn_tf32": true,
+    "matmul_tf32": false,
+    "grad_enabled": true,
+    "default_dtype": "torch.float32"
+  },
+  "bindings_before": {
+    "input/gradient": {
+      "bytes": 9416,
+      "sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73"
+    },
+    "input/diagonal": {
+      "bytes": 9416,
+      "sha256": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f"
+    },
+    "input/H": {
+      "bytes": 11082632,
+      "sha256": "426e0d4add9dd6f46a972ecde0b4e06e6f1350301c06be4c6391af4148c4fa8d"
+    },
+    "input/old_solution": {
+      "bytes": 9416,
+      "sha256": "58579e0f5cb34fa409d6d26de31a6e4687a011d9346539493b255f538ba316ab"
+    },
+    "input/new_solution": {
+      "bytes": 9416,
+      "sha256": "a798a3cc3ef392573137caba22de268804c2eb0e135e3ded8fd828ae41e10425"
+    },
+    "input/paired_summary": {
+      "bytes": 20372,
+      "sha256": "5651fb99e1d2eee0cf2ed79c686c862b04235f48b5f6669c68bd616c69cdbe21"
+    },
+    "input/stage1_summary": {
+      "bytes": 30714,
+      "sha256": "eb31cfd14bf4d8b5a0b82228a72b2f854a86a38d1a969d981cd0d215e09afbf6"
+    },
+    "input/checkpoint": {
+      "bytes": 2647508,
+      "sha256": "78abee8589e6e026fede946136c9e78589817b01a1d55d2085aee19758ceae0e"
+    },
+    "production_source/src/fnit/fnirt/cli.py": {
+      "bytes": 6245,
+      "sha256": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c"
+    },
+    "production_source/src/fnit/fnirt/io.py": {
+      "bytes": 6080,
+      "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+    },
+    "production_source/src/fnit/fnirt/optimizer.py": {
+      "bytes": 8506,
+      "sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd"
+    },
+    "production_source/src/fnit/fnirt/registration.py": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "production_source/src/fnit/fnirt/spline.py": {
+      "bytes": 18840,
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7"
+    },
+    "production_source/src/fnit/fnirt/standalone.py": {
+      "bytes": 10838,
+      "sha256": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6"
+    },
+    "production_source/src/fnit/fnirt/topology.py": {
+      "bytes": 9213,
+      "sha256": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3"
+    },
+    "production_source/src/fnit/fnirt/_bending_cpu.py": {
+      "bytes": 3312,
+      "sha256": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+    },
+    "production_source/src/fnit/fnirt/_normal_cpu.py": {
+      "bytes": 10560,
+      "sha256": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f"
+    },
+    "production_source/src/fnit/fnirt/_normal_simd_cpu.py": {
+      "bytes": 6810,
+      "sha256": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9"
+    },
+    "production_source/src/fnit/fnirt/_sampling_cpu.py": {
+      "bytes": 7782,
+      "sha256": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_cpu.py": {
+      "bytes": 3635,
+      "sha256": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_triton.py": {
+      "bytes": 1969,
+      "sha256": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b"
+    },
+    "production_source/src/fnit/fnirt/_topology_cpu.py": {
+      "bytes": 1091,
+      "sha256": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6"
+    },
+    "production_source/src/fnit/fnirt/_topology_triton.py": {
+      "bytes": 7134,
+      "sha256": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1"
+    },
+    "production_source/src/fnit/fnirt/__init__.py": {
+      "bytes": 1040,
+      "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+    },
+    "production_source/src/fnit/fnirt/__main__.py": {
+      "bytes": 80,
+      "sha256": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a"
+    },
+    "source_extra/src/fnit/flirt/coordinates.py": {
+      "bytes": 5019,
+      "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    },
+    "source_extra/validation/fnirt_cpu_current_replay_20261006/source/replay_current.py": {
+      "bytes": 9641,
+      "sha256": "f000d386ea781d495c3c1dedd8d1230431a8536f933d6d9584b796624452c579"
+    }
+  },
+  "harness_bindings": {
+    "PLAN.md": {
+      "bytes": 5496,
+      "sha256": "e3694091e70c1c49b6786977f684e750dbd63dc1c0084ddbf688160c5aabce35"
+    },
+    "PLAN.public.json": {
+      "bytes": 5463,
+      "sha256": "3adf31dca156cde563961db98568c1d8152b3a408dbd4dc1d004d65df4ab3fca"
+    },
+    "PREPARATION_HISTORY.public.json": {
+      "bytes": 1228,
+      "sha256": "44a4766cf195cae9958629a97ed14e6de48c40d442e8c11f463cf1c55f9a3eb5"
+    },
+    "expected.public.json": {
+      "bytes": 7442,
+      "sha256": "f08c4d2fbfb52c86dcdbbe039e5fa229efe31a86bcbc002422cc978265c54882"
+    },
+    "pre_bookkeeping/freeze.public.json": {
+      "bytes": 1212,
+      "sha256": "92fbbfdc1c8cf2da484d8a64903deb1db349d367ca2ba79b7bf611d46daa01bb"
+    },
+    "pre_bookkeeping/run_stage2.sh": {
+      "bytes": 1414,
+      "sha256": "84e4103f7f9216fc4d24261a343e2c1386f27db02d8c7e2be23e8fe08465108f"
+    },
+    "pre_bookkeeping/stage2_callback.py": {
+      "bytes": 16621,
+      "sha256": "a7ffb7a3b7eac5ecfeb58c0fd490f6918d9d90a026394a0ca20a913ca53d1101"
+    },
+    "preflight_stage2.py": {
+      "bytes": 1763,
+      "sha256": "55d03d0739b950ce991bf5fab7d77c7850f7f6c9e20ccfb676bc83d46ab76596"
+    },
+    "restore_callback.py": {
+      "bytes": 9304,
+      "sha256": "b2cdb6829fe3caafe52d4fe77031857bd3d4ac6fc3100e90fbf72a1573ec657c"
+    },
+    "run_stage2.sh": {
+      "bytes": 1899,
+      "sha256": "ede2ce464970a589f08813ea6a08aee23632152c5e17314e733910160afd7870"
+    },
+    "stage2_callback.py": {
+      "bytes": 18274,
+      "sha256": "1d306d0447551006c9c73083a6054e1b046994f554660941eef0aaba7f5be2ae"
+    },
+    "stage2_io.py": {
+      "bytes": 3168,
+      "sha256": "ff08c1d4073d1310f081808d1db4fd8aba594307f124c55e824039090853e1e7"
+    }
+  },
+  "callback_ast": {
+    "callback_order": [
+      "bend_normal",
+      "data_normal",
+      "matvec"
+    ],
+    "callbacks": {
+      "bend_normal": "45fd59ad2fe9610da6e49879fa70c827b4f093269d9dde760b03e500a19d86c1",
+      "data_normal": "eb29a74d84490bd4b5b8676a2085da8899c0878934ff96b120cfe22d18c34306",
+      "matvec": "d6cee3e8118928ec468a855f878bf6c03f0a64bf5709970d38c5cf7faed04262"
+    },
+    "strict_csc_body_without_decorator": "df4b6416ed16ba82c64e013d97db2d0cc0052ef856e810d58303ace59dbd7b0b",
+    "free_variables": {
+      "bend_normal": [
+        "bend_factor",
+        "coefficient_shape",
+        "coefficients",
+        "self"
+      ],
+      "data_normal": [
+        "coefficient_shape",
+        "count",
+        "cpu_normal",
+        "cross_weights",
+        "scale_weight",
+        "self",
+        "spatial_weights"
+      ],
+      "matvec": [
+        "bend_normal",
+        "data_normal"
+      ]
+    }
+  },
+  "stage1_checkpoint_identity": {
+    "bytes": 2647508,
+    "sha256": "78abee8589e6e026fede946136c9e78589817b01a1d55d2085aee19758ceae0e"
+  },
+  "evaluate_calls": 0,
+  "linearize_calls": 0,
+  "gradient_calls": 0,
+  "bending_constructor_calls": 0,
+  "solver_calls": 0,
+  "native_process_calls": 0,
+  "full_H_materialized": false,
+  "existing_H_loaded_for_third_comparison": true,
+  "callback_calls": {
+    "optimized": 7,
+    "reference": 7
+  },
+  "strict_csc_calls": 7,
+  "runtime_integration_accepted": false,
+  "probe_completed": true,
+  "limitations": [
+    "Restored values/layouts are new objects; the original Python alias graph is not persisted.",
+    "Three original unit columns do not prove arbitrary-direction floating-point equality.",
+    "CSC action and a composed spline callback use different rounding paths; a difference is not alone an algorithm bug.",
+    "This is no linear solve, convergence, full nonlinear registration or speed comparison."
+  ],
+  "clock": {
+    "imports_and_binding_seconds": 1.9132582610473037,
+    "checkpoint_restore_and_factory_seconds": 0.08996754698455334,
+    "worker_through_post_bind_before_summary_seconds": 3.51452140789479
+  },
+  "fsl_dso_snapshot_before": [],
+  "restored_layouts": {
+    "optimized": {
+      "coefficients": {
+        "shape": [
+          3,
+          7,
+          8,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          3136,
+          448,
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          3136,
+          8,
+          56,
+          448
+        ],
+        "restored_byte_strides": [
+          3136,
+          8,
+          56,
+          448
+        ],
+        "logical_value_sha256": "172a2bfe85c436dca759a0bf163312b93ce70461c9d3b567d2471e8b3c07519f",
+        "restored_values_bitexact": true
+      },
+      "scale": {
+        "shape": [],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [],
+        "recorded_byte_strides": [],
+        "restored_byte_strides": [],
+        "logical_value_sha256": "9126293ff649226ac410f8e9b4bf7556f24d05ddbe6ddde16530b66e13a79ce8",
+        "restored_values_bitexact": true
+      },
+      "fixed": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "2d111e634047ede2edce06db4c01a270b796209917a85704e6e179399eac14d5",
+        "restored_values_bitexact": true
+      },
+      "moving_fsl2vox": {
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          4,
+          16
+        ],
+        "recorded_byte_strides": [
+          4,
+          16
+        ],
+        "restored_byte_strides": [
+          4,
+          16
+        ],
+        "logical_value_sha256": "2d2b44518b518c130c4f8fd3a98744d9cc162591c228fcc5673f056547f292c5",
+        "restored_values_bitexact": true
+      },
+      "target_fsl": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "fd21770f96e66e7a455bc535c3b7ff649a1e5fee7e429e172e2cddb761b38dc6",
+        "restored_values_bitexact": true
+      },
+      "affine_pull": {
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          4,
+          16
+        ],
+        "recorded_byte_strides": [
+          4,
+          16
+        ],
+        "restored_byte_strides": [
+          4,
+          16
+        ],
+        "logical_value_sha256": "7f7303d2dc2a587a151d97a3002031feb42b306de8cb054d3112e661dfa102b2",
+        "restored_values_bitexact": true
+      },
+      "coordinate_affine": {
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          32,
+          8
+        ],
+        "recorded_byte_strides": [
+          32,
+          8
+        ],
+        "restored_byte_strides": [
+          32,
+          8
+        ],
+        "logical_value_sha256": "638fe69ee6388aa9ddfaed7897bfec80a3bcfb32fb9dcf2e1f0094d8404c113d",
+        "restored_values_bitexact": true
+      },
+      "affine_grid": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "824d07af7450ba358d8410b8ff219f04227f2ba932e20785b342667e61af3727",
+        "restored_values_bitexact": true
+      },
+      "gradient_half": {
+        "shape": [
+          1177
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          8
+        ],
+        "recorded_byte_strides": [
+          8
+        ],
+        "restored_byte_strides": [
+          8
+        ],
+        "logical_value_sha256": "d39f46dd76292a79acd16ffd64fa35331ffb605c92ca898b44174a715946181e",
+        "restored_values_bitexact": true
+      },
+      "diagonal_half": {
+        "shape": [
+          1177
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          8
+        ],
+        "recorded_byte_strides": [
+          8
+        ],
+        "restored_byte_strides": [
+          8
+        ],
+        "logical_value_sha256": "862c4ce0180dd4657f2da67b6c06fabbc31eec26d981f90d442ac6f0902f7cfc",
+        "restored_values_bitexact": true
+      },
+      "bending_diagonal": {
+        "shape": [
+          7,
+          8,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          448,
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8,
+          448
+        ],
+        "restored_byte_strides": [
+          64,
+          8,
+          448
+        ],
+        "logical_value_sha256": "ff611560156c3125ea1026769c957f16a6be8dd8537274bb982fd69b793dc973",
+        "restored_values_bitexact": true
+      },
+      "scale_weight": {
+        "shape": [],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [],
+        "recorded_byte_strides": [],
+        "restored_byte_strides": [],
+        "logical_value_sha256": "17ef33fab2a5418431f9eafa49b3ef708cc29fd91b5e9b127e0ff80ed89c4694",
+        "restored_values_bitexact": true
+      },
+      "state_field": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          2688,
+          112,
+          4,
+          8064
+        ],
+        "restored_byte_strides": [
+          2688,
+          112,
+          4,
+          8064
+        ],
+        "logical_value_sha256": "ec5480f79d78db43a52b52de6701fc5f76c8c38e50fb4a02c09c8a161837c506",
+        "restored_values_bitexact": true
+      },
+      "state_warped": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "298e8a11577304ada0dee4ff8f7f299fc08f8499b065030e497d4200aa5c40d4",
+        "restored_values_bitexact": true
+      },
+      "state_mask": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "bool",
+        "npz_loaded_byte_strides": [
+          672,
+          24,
+          1
+        ],
+        "recorded_byte_strides": [
+          672,
+          24,
+          1
+        ],
+        "restored_byte_strides": [
+          672,
+          24,
+          1
+        ],
+        "logical_value_sha256": "bfba711d7d6c1bbfe54f66188b4e64577a51a919e9460c9ebd1710022b6edd07",
+        "restored_values_bitexact": true
+      },
+      "state_residual": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "c38fe62344815661213020d20f99b5e0e26803214c2fc096ca9b4e57ac1a25a3",
+        "restored_values_bitexact": true
+      },
+      "state_gradient_fsl": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          4,
+          8064,
+          288,
+          12
+        ],
+        "restored_byte_strides": [
+          4,
+          8064,
+          288,
+          12
+        ],
+        "logical_value_sha256": "e5bbf0a45915a8054a7937ac620659a9d2bf919830968d00a745216cae9d64b2",
+        "restored_values_bitexact": true
+      },
+      "basis_0": {
+        "shape": [
+          24,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+        "restored_values_bitexact": true
+      },
+      "basis_1": {
+        "shape": [
+          28,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "5a855d1241a3a164411c6423d7792dafb72864333ba5c57b025e326367661d50",
+        "restored_values_bitexact": true
+      },
+      "basis_2": {
+        "shape": [
+          24,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_0_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "4796fbd22a20c5f205da6fd7dcee2566ed8caab96b3a60c44ef1ba31d0c54400",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_0_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_0_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_1_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_1_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "1d676fe6542d967ae304fe3a5d537f015662553483ec3b3c5cc552a541d27b03",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_1_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_2_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_2_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_2_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "8f74dc2d6f485806afe5fe62aaf1792b92aa78e4c752740a9e3b5ce6875d9ca4",
+        "restored_values_bitexact": true
+      },
+      "cross_weight_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "62f3104eb5b8ce085bc9b7f223f1263fcba142fd68e722852823b67a01342bdc",
+        "restored_values_bitexact": true
+      },
+      "cross_weight_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "7b4f9db16259c7132dda3c8eaebc605fa2e6393e075125e2e0ea8c386f6ef96f",
+        "restored_values_bitexact": true
+      },
+      "cross_weight_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "355f7473f95ec6c8b245b4fdda4b7c8a67f8b5a4b77b515853e99467e5e13268",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_0_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_0_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_0_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_1_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_1_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "d7ec6541aa8890275050bf9527d9609b0648794855474cf699c94c30f26bf2b6",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_1_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_2_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_2_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_2_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_3_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_3_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_3_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_4_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_4_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_4_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_5_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_5_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_5_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_0_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_0_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_0_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_1_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_1_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "87fa35ddaa2d4f38457f256a1afde68eb905eec81b1965d02e0af7491131b46a",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_1_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_2_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_2_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_2_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_3_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_3_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_3_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_4_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_4_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_4_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_5_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_5_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_5_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+        "restored_values_bitexact": true
+      }
+    },
+    "reference": {
+      "coefficients": {
+        "shape": [
+          3,
+          7,
+          8,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          3136,
+          448,
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          3136,
+          8,
+          56,
+          448
+        ],
+        "restored_byte_strides": [
+          3136,
+          8,
+          56,
+          448
+        ],
+        "logical_value_sha256": "172a2bfe85c436dca759a0bf163312b93ce70461c9d3b567d2471e8b3c07519f",
+        "restored_values_bitexact": true
+      },
+      "scale": {
+        "shape": [],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [],
+        "recorded_byte_strides": [],
+        "restored_byte_strides": [],
+        "logical_value_sha256": "9126293ff649226ac410f8e9b4bf7556f24d05ddbe6ddde16530b66e13a79ce8",
+        "restored_values_bitexact": true
+      },
+      "fixed": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "2d111e634047ede2edce06db4c01a270b796209917a85704e6e179399eac14d5",
+        "restored_values_bitexact": true
+      },
+      "moving_fsl2vox": {
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          4,
+          16
+        ],
+        "recorded_byte_strides": [
+          4,
+          16
+        ],
+        "restored_byte_strides": [
+          4,
+          16
+        ],
+        "logical_value_sha256": "2d2b44518b518c130c4f8fd3a98744d9cc162591c228fcc5673f056547f292c5",
+        "restored_values_bitexact": true
+      },
+      "target_fsl": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "fd21770f96e66e7a455bc535c3b7ff649a1e5fee7e429e172e2cddb761b38dc6",
+        "restored_values_bitexact": true
+      },
+      "affine_pull": {
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          4,
+          16
+        ],
+        "recorded_byte_strides": [
+          4,
+          16
+        ],
+        "restored_byte_strides": [
+          4,
+          16
+        ],
+        "logical_value_sha256": "7f7303d2dc2a587a151d97a3002031feb42b306de8cb054d3112e661dfa102b2",
+        "restored_values_bitexact": true
+      },
+      "coordinate_affine": {
+        "shape": [
+          4,
+          4
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          32,
+          8
+        ],
+        "recorded_byte_strides": [
+          32,
+          8
+        ],
+        "restored_byte_strides": [
+          32,
+          8
+        ],
+        "logical_value_sha256": "638fe69ee6388aa9ddfaed7897bfec80a3bcfb32fb9dcf2e1f0094d8404c113d",
+        "restored_values_bitexact": true
+      },
+      "affine_grid": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "824d07af7450ba358d8410b8ff219f04227f2ba932e20785b342667e61af3727",
+        "restored_values_bitexact": true
+      },
+      "gradient_half": {
+        "shape": [
+          1177
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          8
+        ],
+        "recorded_byte_strides": [
+          8
+        ],
+        "restored_byte_strides": [
+          8
+        ],
+        "logical_value_sha256": "d39f46dd76292a79acd16ffd64fa35331ffb605c92ca898b44174a715946181e",
+        "restored_values_bitexact": true
+      },
+      "diagonal_half": {
+        "shape": [
+          1177
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          8
+        ],
+        "recorded_byte_strides": [
+          8
+        ],
+        "restored_byte_strides": [
+          8
+        ],
+        "logical_value_sha256": "862c4ce0180dd4657f2da67b6c06fabbc31eec26d981f90d442ac6f0902f7cfc",
+        "restored_values_bitexact": true
+      },
+      "bending_diagonal": {
+        "shape": [
+          7,
+          8,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          448,
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8,
+          448
+        ],
+        "restored_byte_strides": [
+          64,
+          8,
+          448
+        ],
+        "logical_value_sha256": "ff611560156c3125ea1026769c957f16a6be8dd8537274bb982fd69b793dc973",
+        "restored_values_bitexact": true
+      },
+      "scale_weight": {
+        "shape": [],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [],
+        "recorded_byte_strides": [],
+        "restored_byte_strides": [],
+        "logical_value_sha256": "17ef33fab2a5418431f9eafa49b3ef708cc29fd91b5e9b127e0ff80ed89c4694",
+        "restored_values_bitexact": true
+      },
+      "state_field": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          2688,
+          112,
+          4,
+          8064
+        ],
+        "restored_byte_strides": [
+          2688,
+          112,
+          4,
+          8064
+        ],
+        "logical_value_sha256": "ec5480f79d78db43a52b52de6701fc5f76c8c38e50fb4a02c09c8a161837c506",
+        "restored_values_bitexact": true
+      },
+      "state_warped": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "298e8a11577304ada0dee4ff8f7f299fc08f8499b065030e497d4200aa5c40d4",
+        "restored_values_bitexact": true
+      },
+      "state_mask": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "bool",
+        "npz_loaded_byte_strides": [
+          672,
+          24,
+          1
+        ],
+        "recorded_byte_strides": [
+          672,
+          24,
+          1
+        ],
+        "restored_byte_strides": [
+          672,
+          24,
+          1
+        ],
+        "logical_value_sha256": "bfba711d7d6c1bbfe54f66188b4e64577a51a919e9460c9ebd1710022b6edd07",
+        "restored_values_bitexact": true
+      },
+      "state_residual": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "restored_byte_strides": [
+          2688,
+          96,
+          4
+        ],
+        "logical_value_sha256": "c38fe62344815661213020d20f99b5e0e26803214c2fc096ca9b4e57ac1a25a3",
+        "restored_values_bitexact": true
+      },
+      "state_gradient_fsl": {
+        "shape": [
+          3,
+          24,
+          28,
+          24
+        ],
+        "dtype": "float32",
+        "npz_loaded_byte_strides": [
+          64512,
+          2688,
+          96,
+          4
+        ],
+        "recorded_byte_strides": [
+          4,
+          8064,
+          288,
+          12
+        ],
+        "restored_byte_strides": [
+          4,
+          8064,
+          288,
+          12
+        ],
+        "logical_value_sha256": "e5bbf0a45915a8054a7937ac620659a9d2bf919830968d00a745216cae9d64b2",
+        "restored_values_bitexact": true
+      },
+      "basis_0": {
+        "shape": [
+          24,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+        "restored_values_bitexact": true
+      },
+      "basis_1": {
+        "shape": [
+          28,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "5a855d1241a3a164411c6423d7792dafb72864333ba5c57b025e326367661d50",
+        "restored_values_bitexact": true
+      },
+      "basis_2": {
+        "shape": [
+          24,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_0_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "4796fbd22a20c5f205da6fd7dcee2566ed8caab96b3a60c44ef1ba31d0c54400",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_0_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_0_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_1_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_1_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "1d676fe6542d967ae304fe3a5d537f015662553483ec3b3c5cc552a541d27b03",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_1_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_2_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_2_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+        "restored_values_bitexact": true
+      },
+      "spatial_weight_2_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "8f74dc2d6f485806afe5fe62aaf1792b92aa78e4c752740a9e3b5ce6875d9ca4",
+        "restored_values_bitexact": true
+      },
+      "cross_weight_0": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "62f3104eb5b8ce085bc9b7f223f1263fcba142fd68e722852823b67a01342bdc",
+        "restored_values_bitexact": true
+      },
+      "cross_weight_1": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "7b4f9db16259c7132dda3c8eaebc605fa2e6393e075125e2e0ea8c386f6ef96f",
+        "restored_values_bitexact": true
+      },
+      "cross_weight_2": {
+        "shape": [
+          24,
+          28,
+          24
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "recorded_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "restored_byte_strides": [
+          5376,
+          192,
+          8
+        ],
+        "logical_value_sha256": "355f7473f95ec6c8b245b4fdda4b7c8a67f8b5a4b77b515853e99467e5e13268",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_0_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_0_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_0_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_1_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_1_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "d7ec6541aa8890275050bf9527d9609b0648794855474cf699c94c30f26bf2b6",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_1_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_2_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_2_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_2_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_3_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_3_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_3_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_4_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_4_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_4_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_5_0": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_5_1": {
+        "shape": [
+          54,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+        "restored_values_bitexact": true
+      },
+      "bending_basis_5_2": {
+        "shape": [
+          49,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_0_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_0_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_0_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_1_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_1_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "87fa35ddaa2d4f38457f256a1afde68eb905eec81b1965d02e0af7491131b46a",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_1_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_2_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_2_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_2_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_3_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_3_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_3_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_4_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_4_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_4_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_5_0": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_5_1": {
+        "shape": [
+          8,
+          8
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          64,
+          8
+        ],
+        "recorded_byte_strides": [
+          64,
+          8
+        ],
+        "restored_byte_strides": [
+          64,
+          8
+        ],
+        "logical_value_sha256": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+        "restored_values_bitexact": true
+      },
+      "bending_gram_5_2": {
+        "shape": [
+          7,
+          7
+        ],
+        "dtype": "float64",
+        "npz_loaded_byte_strides": [
+          56,
+          8
+        ],
+        "recorded_byte_strides": [
+          56,
+          8
+        ],
+        "restored_byte_strides": [
+          56,
+          8
+        ],
+        "logical_value_sha256": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+        "restored_values_bitexact": true
+      }
+    }
+  },
+  "checkpoint_values_before": {
+    "optimized": {
+      "coefficients": "172a2bfe85c436dca759a0bf163312b93ce70461c9d3b567d2471e8b3c07519f",
+      "scale": "9126293ff649226ac410f8e9b4bf7556f24d05ddbe6ddde16530b66e13a79ce8",
+      "fixed": "2d111e634047ede2edce06db4c01a270b796209917a85704e6e179399eac14d5",
+      "moving_fsl2vox": "2d2b44518b518c130c4f8fd3a98744d9cc162591c228fcc5673f056547f292c5",
+      "target_fsl": "fd21770f96e66e7a455bc535c3b7ff649a1e5fee7e429e172e2cddb761b38dc6",
+      "affine_pull": "7f7303d2dc2a587a151d97a3002031feb42b306de8cb054d3112e661dfa102b2",
+      "coordinate_affine": "638fe69ee6388aa9ddfaed7897bfec80a3bcfb32fb9dcf2e1f0094d8404c113d",
+      "affine_grid": "824d07af7450ba358d8410b8ff219f04227f2ba932e20785b342667e61af3727",
+      "gradient_half": "d39f46dd76292a79acd16ffd64fa35331ffb605c92ca898b44174a715946181e",
+      "diagonal_half": "862c4ce0180dd4657f2da67b6c06fabbc31eec26d981f90d442ac6f0902f7cfc",
+      "bending_diagonal": "ff611560156c3125ea1026769c957f16a6be8dd8537274bb982fd69b793dc973",
+      "scale_weight": "17ef33fab2a5418431f9eafa49b3ef708cc29fd91b5e9b127e0ff80ed89c4694",
+      "state_field": "ec5480f79d78db43a52b52de6701fc5f76c8c38e50fb4a02c09c8a161837c506",
+      "state_warped": "298e8a11577304ada0dee4ff8f7f299fc08f8499b065030e497d4200aa5c40d4",
+      "state_mask": "bfba711d7d6c1bbfe54f66188b4e64577a51a919e9460c9ebd1710022b6edd07",
+      "state_residual": "c38fe62344815661213020d20f99b5e0e26803214c2fc096ca9b4e57ac1a25a3",
+      "state_gradient_fsl": "e5bbf0a45915a8054a7937ac620659a9d2bf919830968d00a745216cae9d64b2",
+      "basis_0": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+      "basis_1": "5a855d1241a3a164411c6423d7792dafb72864333ba5c57b025e326367661d50",
+      "basis_2": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+      "spatial_weight_0_0": "4796fbd22a20c5f205da6fd7dcee2566ed8caab96b3a60c44ef1ba31d0c54400",
+      "spatial_weight_0_1": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+      "spatial_weight_0_2": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+      "spatial_weight_1_0": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+      "spatial_weight_1_1": "1d676fe6542d967ae304fe3a5d537f015662553483ec3b3c5cc552a541d27b03",
+      "spatial_weight_1_2": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+      "spatial_weight_2_0": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+      "spatial_weight_2_1": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+      "spatial_weight_2_2": "8f74dc2d6f485806afe5fe62aaf1792b92aa78e4c752740a9e3b5ce6875d9ca4",
+      "cross_weight_0": "62f3104eb5b8ce085bc9b7f223f1263fcba142fd68e722852823b67a01342bdc",
+      "cross_weight_1": "7b4f9db16259c7132dda3c8eaebc605fa2e6393e075125e2e0ea8c386f6ef96f",
+      "cross_weight_2": "355f7473f95ec6c8b245b4fdda4b7c8a67f8b5a4b77b515853e99467e5e13268",
+      "bending_basis_0_0": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+      "bending_basis_0_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_0_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_1_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_1_1": "d7ec6541aa8890275050bf9527d9609b0648794855474cf699c94c30f26bf2b6",
+      "bending_basis_1_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_2_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_2_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_2_2": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+      "bending_basis_3_0": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_3_1": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+      "bending_basis_3_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_4_0": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_4_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_4_2": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_5_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_5_1": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+      "bending_basis_5_2": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_gram_0_0": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+      "bending_gram_0_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_0_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_1_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_1_1": "87fa35ddaa2d4f38457f256a1afde68eb905eec81b1965d02e0af7491131b46a",
+      "bending_gram_1_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_2_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_2_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_2_2": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+      "bending_gram_3_0": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_3_1": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+      "bending_gram_3_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_4_0": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_4_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_4_2": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_5_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_5_1": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+      "bending_gram_5_2": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e"
+    },
+    "reference": {
+      "coefficients": "172a2bfe85c436dca759a0bf163312b93ce70461c9d3b567d2471e8b3c07519f",
+      "scale": "9126293ff649226ac410f8e9b4bf7556f24d05ddbe6ddde16530b66e13a79ce8",
+      "fixed": "2d111e634047ede2edce06db4c01a270b796209917a85704e6e179399eac14d5",
+      "moving_fsl2vox": "2d2b44518b518c130c4f8fd3a98744d9cc162591c228fcc5673f056547f292c5",
+      "target_fsl": "fd21770f96e66e7a455bc535c3b7ff649a1e5fee7e429e172e2cddb761b38dc6",
+      "affine_pull": "7f7303d2dc2a587a151d97a3002031feb42b306de8cb054d3112e661dfa102b2",
+      "coordinate_affine": "638fe69ee6388aa9ddfaed7897bfec80a3bcfb32fb9dcf2e1f0094d8404c113d",
+      "affine_grid": "824d07af7450ba358d8410b8ff219f04227f2ba932e20785b342667e61af3727",
+      "gradient_half": "d39f46dd76292a79acd16ffd64fa35331ffb605c92ca898b44174a715946181e",
+      "diagonal_half": "862c4ce0180dd4657f2da67b6c06fabbc31eec26d981f90d442ac6f0902f7cfc",
+      "bending_diagonal": "ff611560156c3125ea1026769c957f16a6be8dd8537274bb982fd69b793dc973",
+      "scale_weight": "17ef33fab2a5418431f9eafa49b3ef708cc29fd91b5e9b127e0ff80ed89c4694",
+      "state_field": "ec5480f79d78db43a52b52de6701fc5f76c8c38e50fb4a02c09c8a161837c506",
+      "state_warped": "298e8a11577304ada0dee4ff8f7f299fc08f8499b065030e497d4200aa5c40d4",
+      "state_mask": "bfba711d7d6c1bbfe54f66188b4e64577a51a919e9460c9ebd1710022b6edd07",
+      "state_residual": "c38fe62344815661213020d20f99b5e0e26803214c2fc096ca9b4e57ac1a25a3",
+      "state_gradient_fsl": "e5bbf0a45915a8054a7937ac620659a9d2bf919830968d00a745216cae9d64b2",
+      "basis_0": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+      "basis_1": "5a855d1241a3a164411c6423d7792dafb72864333ba5c57b025e326367661d50",
+      "basis_2": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+      "spatial_weight_0_0": "4796fbd22a20c5f205da6fd7dcee2566ed8caab96b3a60c44ef1ba31d0c54400",
+      "spatial_weight_0_1": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+      "spatial_weight_0_2": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+      "spatial_weight_1_0": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+      "spatial_weight_1_1": "1d676fe6542d967ae304fe3a5d537f015662553483ec3b3c5cc552a541d27b03",
+      "spatial_weight_1_2": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+      "spatial_weight_2_0": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+      "spatial_weight_2_1": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+      "spatial_weight_2_2": "8f74dc2d6f485806afe5fe62aaf1792b92aa78e4c752740a9e3b5ce6875d9ca4",
+      "cross_weight_0": "62f3104eb5b8ce085bc9b7f223f1263fcba142fd68e722852823b67a01342bdc",
+      "cross_weight_1": "7b4f9db16259c7132dda3c8eaebc605fa2e6393e075125e2e0ea8c386f6ef96f",
+      "cross_weight_2": "355f7473f95ec6c8b245b4fdda4b7c8a67f8b5a4b77b515853e99467e5e13268",
+      "bending_basis_0_0": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+      "bending_basis_0_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_0_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_1_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_1_1": "d7ec6541aa8890275050bf9527d9609b0648794855474cf699c94c30f26bf2b6",
+      "bending_basis_1_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_2_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_2_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_2_2": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+      "bending_basis_3_0": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_3_1": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+      "bending_basis_3_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_4_0": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_4_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_4_2": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_5_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_5_1": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+      "bending_basis_5_2": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_gram_0_0": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+      "bending_gram_0_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_0_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_1_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_1_1": "87fa35ddaa2d4f38457f256a1afde68eb905eec81b1965d02e0af7491131b46a",
+      "bending_gram_1_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_2_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_2_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_2_2": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+      "bending_gram_3_0": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_3_1": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+      "bending_gram_3_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_4_0": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_4_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_4_2": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_5_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_5_1": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+      "bending_gram_5_2": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e"
+    }
+  },
+  "two_arm_storage_disjoint": true,
+  "restored_full_g_diag_bitexact": true,
+  "CSC": {
+    "shape": [
+      1177,
+      1177
+    ],
+    "nnz": 516445,
+    "compiled_fastmath": false,
+    "compiled_cache": false,
+    "data_sha256": "045f575367876c7e4e1397e0ba7809c17ff280de6a232951c5ea38a4e734eb89",
+    "indices_sha256": "0d641373b01ee00cf7981b586c24d125fea5ae746dfdf8676b43c81be9493160",
+    "indptr_sha256": "4fd6623804280e4e34bba83ac1e17e8799cad3fab16b792de90aa03179a817fa"
+  },
+  "directions": [
+    {
+      "label": "unit_first",
+      "coordinate_units": "mixed displacement-coefficient/intensity coordinates",
+      "direction_value_sha256": "e289a73ba45f109bf8ca92573a137102ab3efc1703579eaf90cad647b78f1591",
+      "optimized_seconds_including_cold_JIT_if_any": 1.2034490890800953,
+      "optimized_value_sha256": "2b8ad83f6bcc5d5a44da66bc0e45b44f50e1c6fb01239711ef7927356b1057f9",
+      "stored_H_unit_column": 0,
+      "optimized_vs_stored_dense_column": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "original_unit_bridge_bitexact": true,
+      "reference_seconds": 0.002270466648042202,
+      "reference_value_sha256": "2b8ad83f6bcc5d5a44da66bc0e45b44f50e1c6fb01239711ef7927356b1057f9",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "CSC_seconds_including_cold_JIT_if_any": 0.21972930803894997,
+      "CSC_value_sha256": "2b8ad83f6bcc5d5a44da66bc0e45b44f50e1c6fb01239711ef7927356b1057f9",
+      "optimized_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "third_comparison_is_not_a_new_native_or_universal_callback_oracle": true
+    },
+    {
+      "label": "unit_middle",
+      "coordinate_units": "mixed displacement-coefficient/intensity coordinates",
+      "direction_value_sha256": "b6b9bfdd25fac1d200b66560c046def1bfd2b4944da340720998b546c34ba5b3",
+      "optimized_seconds_including_cold_JIT_if_any": 0.00132658239454031,
+      "optimized_value_sha256": "d335af586896c4a09385ee4756e3c7c1452a9c8c5135ba9fefcc3fe91097838e",
+      "stored_H_unit_column": 588,
+      "optimized_vs_stored_dense_column": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "original_unit_bridge_bitexact": true,
+      "reference_seconds": 0.001740897074341774,
+      "reference_value_sha256": "d335af586896c4a09385ee4756e3c7c1452a9c8c5135ba9fefcc3fe91097838e",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "CSC_seconds_including_cold_JIT_if_any": 0.0008443174883723259,
+      "CSC_value_sha256": "d335af586896c4a09385ee4756e3c7c1452a9c8c5135ba9fefcc3fe91097838e",
+      "optimized_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "third_comparison_is_not_a_new_native_or_universal_callback_oracle": true
+    },
+    {
+      "label": "unit_intensity",
+      "coordinate_units": "mixed displacement-coefficient/intensity coordinates",
+      "direction_value_sha256": "501645d36d5a8e068f23253e3f7373da8621aa0f3c5da2571ab67495990b1ed4",
+      "optimized_seconds_including_cold_JIT_if_any": 0.0011037522926926613,
+      "optimized_value_sha256": "db681f23259811fb4ad8f1544d80c7d0079c08991f4670d0f39ed320b1bfab1c",
+      "stored_H_unit_column": 1176,
+      "optimized_vs_stored_dense_column": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "original_unit_bridge_bitexact": true,
+      "reference_seconds": 0.0015589045360684395,
+      "reference_value_sha256": "db681f23259811fb4ad8f1544d80c7d0079c08991f4670d0f39ed320b1bfab1c",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "CSC_seconds_including_cold_JIT_if_any": 0.0008108457550406456,
+      "CSC_value_sha256": "db681f23259811fb4ad8f1544d80c7d0079c08991f4670d0f39ed320b1bfab1c",
+      "optimized_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "third_comparison_is_not_a_new_native_or_universal_callback_oracle": true
+    },
+    {
+      "label": "saved_current_full_g",
+      "coordinate_units": "mixed displacement-coefficient/intensity coordinates",
+      "direction_value_sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73",
+      "optimized_seconds_including_cold_JIT_if_any": 0.0011815978214144707,
+      "optimized_value_sha256": "2f5b7073fa6b50c0b12a1135db428d5d4c7aee55d92a3583e686c393f5ba55d8",
+      "reference_seconds": 0.0015434827655553818,
+      "reference_value_sha256": "2f5b7073fa6b50c0b12a1135db428d5d4c7aee55d92a3583e686c393f5ba55d8",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "CSC_seconds_including_cold_JIT_if_any": 0.0007982067763805389,
+      "CSC_value_sha256": "e576e6fdbaeb8098ff58754acd40c1164589f22ebe8419d16c20e2b0abbd377a",
+      "optimized_vs_existing_CSC": {
+        "different_bits": 877,
+        "max_abs": 3.552713678800501e-15,
+        "relative_l2": 2.839669883872303e-19,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 877,
+        "max_abs": 3.552713678800501e-15,
+        "relative_l2": 2.839669883872303e-19,
+        "all_finite": true
+      },
+      "third_comparison_is_not_a_new_native_or_universal_callback_oracle": true
+    },
+    {
+      "label": "saved_old_solution",
+      "coordinate_units": "mixed displacement-coefficient/intensity coordinates",
+      "direction_value_sha256": "58579e0f5cb34fa409d6d26de31a6e4687a011d9346539493b255f538ba316ab",
+      "optimized_seconds_including_cold_JIT_if_any": 0.00111436378210783,
+      "optimized_value_sha256": "4343c710056c9cd5dbeaa1772a5d474cb5537b987a05302452f244a2c1e5b77b",
+      "reference_seconds": 0.0015121512115001678,
+      "reference_value_sha256": "4343c710056c9cd5dbeaa1772a5d474cb5537b987a05302452f244a2c1e5b77b",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "CSC_seconds_including_cold_JIT_if_any": 0.0008036959916353226,
+      "CSC_value_sha256": "2662e8c05adf8f91590b89f4d634f0e5c8603cbcc4403c0350a979475e9d1444",
+      "optimized_vs_existing_CSC": {
+        "different_bits": 1128,
+        "max_abs": 1.7763568394002505e-15,
+        "relative_l2": 1.8044984774236337e-16,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 1128,
+        "max_abs": 1.7763568394002505e-15,
+        "relative_l2": 1.8044984774236337e-16,
+        "all_finite": true
+      },
+      "third_comparison_is_not_a_new_native_or_universal_callback_oracle": true
+    },
+    {
+      "label": "saved_new_solution",
+      "coordinate_units": "mixed displacement-coefficient/intensity coordinates",
+      "direction_value_sha256": "a798a3cc3ef392573137caba22de268804c2eb0e135e3ded8fd828ae41e10425",
+      "optimized_seconds_including_cold_JIT_if_any": 0.0011274199932813644,
+      "optimized_value_sha256": "880fde47a9b92457ddac6fab448d3b0797400d0e3b2759d2a23889469062f047",
+      "reference_seconds": 0.0015193615108728409,
+      "reference_value_sha256": "880fde47a9b92457ddac6fab448d3b0797400d0e3b2759d2a23889469062f047",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "CSC_seconds_including_cold_JIT_if_any": 0.0007458757609128952,
+      "CSC_value_sha256": "4a6ce28234743433161e311d2bb059bfac2ad6b75df21eb03cec3f6f8a56c036",
+      "optimized_vs_existing_CSC": {
+        "different_bits": 1143,
+        "max_abs": 1.7763568394002505e-15,
+        "relative_l2": 1.7878525268259794e-16,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 1143,
+        "max_abs": 1.7763568394002505e-15,
+        "relative_l2": 1.7878525268259794e-16,
+        "all_finite": true
+      },
+      "third_comparison_is_not_a_new_native_or_universal_callback_oracle": true
+    },
+    {
+      "label": "saved_new_minus_old",
+      "coordinate_units": "mixed displacement-coefficient/intensity coordinates",
+      "direction_value_sha256": "2aef093fc61855c67f82d693c56e8b9d2db7df4bb15412e7b6dda75bf414dacf",
+      "optimized_seconds_including_cold_JIT_if_any": 0.0010631131008267403,
+      "optimized_value_sha256": "bf1ff2e90f5f0baeff811425db88798cbfc9af457e04a398e210ca655b701d3e",
+      "reference_seconds": 0.001510261557996273,
+      "reference_value_sha256": "bf1ff2e90f5f0baeff811425db88798cbfc9af457e04a398e210ca655b701d3e",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "CSC_seconds_including_cold_JIT_if_any": 0.0008044326677918434,
+      "CSC_value_sha256": "1a2746ba95cf0f5668ee938a8079a55e780fd764ee2c01bbcb6b6c2b69d14d22",
+      "optimized_vs_existing_CSC": {
+        "different_bits": 1107,
+        "max_abs": 1.0755285551056204e-16,
+        "relative_l2": 1.3545709522148033e-14,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 1107,
+        "max_abs": 1.0755285551056204e-16,
+        "relative_l2": 1.3545709522148033e-14,
+        "all_finite": true
+      },
+      "third_comparison_is_not_a_new_native_or_universal_callback_oracle": true
+    }
+  ],
+  "normal_cache_after": {
+    "optimized": {
+      "packed_layout": [
+        2,
+        0,
+        1
+      ],
+      "layout_copy_bytes": 1548288,
+      "scratch_shape": [
+        3,
+        24,
+        28,
+        24
+      ],
+      "scratch_stride": [
+        672,
+        28,
+        1,
+        2016
+      ]
+    },
+    "reference": null
+  },
+  "checkpoint_values_after": {
+    "optimized": {
+      "coefficients": "172a2bfe85c436dca759a0bf163312b93ce70461c9d3b567d2471e8b3c07519f",
+      "scale": "9126293ff649226ac410f8e9b4bf7556f24d05ddbe6ddde16530b66e13a79ce8",
+      "fixed": "2d111e634047ede2edce06db4c01a270b796209917a85704e6e179399eac14d5",
+      "moving_fsl2vox": "2d2b44518b518c130c4f8fd3a98744d9cc162591c228fcc5673f056547f292c5",
+      "target_fsl": "fd21770f96e66e7a455bc535c3b7ff649a1e5fee7e429e172e2cddb761b38dc6",
+      "affine_pull": "7f7303d2dc2a587a151d97a3002031feb42b306de8cb054d3112e661dfa102b2",
+      "coordinate_affine": "638fe69ee6388aa9ddfaed7897bfec80a3bcfb32fb9dcf2e1f0094d8404c113d",
+      "affine_grid": "824d07af7450ba358d8410b8ff219f04227f2ba932e20785b342667e61af3727",
+      "gradient_half": "d39f46dd76292a79acd16ffd64fa35331ffb605c92ca898b44174a715946181e",
+      "diagonal_half": "862c4ce0180dd4657f2da67b6c06fabbc31eec26d981f90d442ac6f0902f7cfc",
+      "bending_diagonal": "ff611560156c3125ea1026769c957f16a6be8dd8537274bb982fd69b793dc973",
+      "scale_weight": "17ef33fab2a5418431f9eafa49b3ef708cc29fd91b5e9b127e0ff80ed89c4694",
+      "state_field": "ec5480f79d78db43a52b52de6701fc5f76c8c38e50fb4a02c09c8a161837c506",
+      "state_warped": "298e8a11577304ada0dee4ff8f7f299fc08f8499b065030e497d4200aa5c40d4",
+      "state_mask": "bfba711d7d6c1bbfe54f66188b4e64577a51a919e9460c9ebd1710022b6edd07",
+      "state_residual": "c38fe62344815661213020d20f99b5e0e26803214c2fc096ca9b4e57ac1a25a3",
+      "state_gradient_fsl": "e5bbf0a45915a8054a7937ac620659a9d2bf919830968d00a745216cae9d64b2",
+      "basis_0": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+      "basis_1": "5a855d1241a3a164411c6423d7792dafb72864333ba5c57b025e326367661d50",
+      "basis_2": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+      "spatial_weight_0_0": "4796fbd22a20c5f205da6fd7dcee2566ed8caab96b3a60c44ef1ba31d0c54400",
+      "spatial_weight_0_1": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+      "spatial_weight_0_2": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+      "spatial_weight_1_0": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+      "spatial_weight_1_1": "1d676fe6542d967ae304fe3a5d537f015662553483ec3b3c5cc552a541d27b03",
+      "spatial_weight_1_2": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+      "spatial_weight_2_0": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+      "spatial_weight_2_1": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+      "spatial_weight_2_2": "8f74dc2d6f485806afe5fe62aaf1792b92aa78e4c752740a9e3b5ce6875d9ca4",
+      "cross_weight_0": "62f3104eb5b8ce085bc9b7f223f1263fcba142fd68e722852823b67a01342bdc",
+      "cross_weight_1": "7b4f9db16259c7132dda3c8eaebc605fa2e6393e075125e2e0ea8c386f6ef96f",
+      "cross_weight_2": "355f7473f95ec6c8b245b4fdda4b7c8a67f8b5a4b77b515853e99467e5e13268",
+      "bending_basis_0_0": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+      "bending_basis_0_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_0_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_1_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_1_1": "d7ec6541aa8890275050bf9527d9609b0648794855474cf699c94c30f26bf2b6",
+      "bending_basis_1_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_2_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_2_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_2_2": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+      "bending_basis_3_0": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_3_1": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+      "bending_basis_3_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_4_0": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_4_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_4_2": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_5_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_5_1": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+      "bending_basis_5_2": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_gram_0_0": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+      "bending_gram_0_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_0_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_1_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_1_1": "87fa35ddaa2d4f38457f256a1afde68eb905eec81b1965d02e0af7491131b46a",
+      "bending_gram_1_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_2_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_2_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_2_2": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+      "bending_gram_3_0": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_3_1": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+      "bending_gram_3_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_4_0": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_4_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_4_2": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_5_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_5_1": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+      "bending_gram_5_2": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e"
+    },
+    "reference": {
+      "coefficients": "172a2bfe85c436dca759a0bf163312b93ce70461c9d3b567d2471e8b3c07519f",
+      "scale": "9126293ff649226ac410f8e9b4bf7556f24d05ddbe6ddde16530b66e13a79ce8",
+      "fixed": "2d111e634047ede2edce06db4c01a270b796209917a85704e6e179399eac14d5",
+      "moving_fsl2vox": "2d2b44518b518c130c4f8fd3a98744d9cc162591c228fcc5673f056547f292c5",
+      "target_fsl": "fd21770f96e66e7a455bc535c3b7ff649a1e5fee7e429e172e2cddb761b38dc6",
+      "affine_pull": "7f7303d2dc2a587a151d97a3002031feb42b306de8cb054d3112e661dfa102b2",
+      "coordinate_affine": "638fe69ee6388aa9ddfaed7897bfec80a3bcfb32fb9dcf2e1f0094d8404c113d",
+      "affine_grid": "824d07af7450ba358d8410b8ff219f04227f2ba932e20785b342667e61af3727",
+      "gradient_half": "d39f46dd76292a79acd16ffd64fa35331ffb605c92ca898b44174a715946181e",
+      "diagonal_half": "862c4ce0180dd4657f2da67b6c06fabbc31eec26d981f90d442ac6f0902f7cfc",
+      "bending_diagonal": "ff611560156c3125ea1026769c957f16a6be8dd8537274bb982fd69b793dc973",
+      "scale_weight": "17ef33fab2a5418431f9eafa49b3ef708cc29fd91b5e9b127e0ff80ed89c4694",
+      "state_field": "ec5480f79d78db43a52b52de6701fc5f76c8c38e50fb4a02c09c8a161837c506",
+      "state_warped": "298e8a11577304ada0dee4ff8f7f299fc08f8499b065030e497d4200aa5c40d4",
+      "state_mask": "bfba711d7d6c1bbfe54f66188b4e64577a51a919e9460c9ebd1710022b6edd07",
+      "state_residual": "c38fe62344815661213020d20f99b5e0e26803214c2fc096ca9b4e57ac1a25a3",
+      "state_gradient_fsl": "e5bbf0a45915a8054a7937ac620659a9d2bf919830968d00a745216cae9d64b2",
+      "basis_0": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+      "basis_1": "5a855d1241a3a164411c6423d7792dafb72864333ba5c57b025e326367661d50",
+      "basis_2": "a10fd9f1162af8c8ec7a931a4f70ef7cdd515508fd1a05f5c971303268a4f16f",
+      "spatial_weight_0_0": "4796fbd22a20c5f205da6fd7dcee2566ed8caab96b3a60c44ef1ba31d0c54400",
+      "spatial_weight_0_1": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+      "spatial_weight_0_2": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+      "spatial_weight_1_0": "c1a24042294b7c33cf257c58aa496ee50a8fe116bff3c6d6a3d7508ed69c1b1c",
+      "spatial_weight_1_1": "1d676fe6542d967ae304fe3a5d537f015662553483ec3b3c5cc552a541d27b03",
+      "spatial_weight_1_2": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+      "spatial_weight_2_0": "5d5d249605e4d1abfb7bbbf6155f45acc2e3c1d580411ab3deaab85108efe787",
+      "spatial_weight_2_1": "78e393d944a6ae9d12e08b045c78f53b3f4af67019d0ed5c7f0b84e83ca218cc",
+      "spatial_weight_2_2": "8f74dc2d6f485806afe5fe62aaf1792b92aa78e4c752740a9e3b5ce6875d9ca4",
+      "cross_weight_0": "62f3104eb5b8ce085bc9b7f223f1263fcba142fd68e722852823b67a01342bdc",
+      "cross_weight_1": "7b4f9db16259c7132dda3c8eaebc605fa2e6393e075125e2e0ea8c386f6ef96f",
+      "cross_weight_2": "355f7473f95ec6c8b245b4fdda4b7c8a67f8b5a4b77b515853e99467e5e13268",
+      "bending_basis_0_0": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+      "bending_basis_0_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_0_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_1_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_1_1": "d7ec6541aa8890275050bf9527d9609b0648794855474cf699c94c30f26bf2b6",
+      "bending_basis_1_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_2_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_2_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_2_2": "7b443196069c532dc574d190d8184bc6205d85e8a00b4657d45de759dab58681",
+      "bending_basis_3_0": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_3_1": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+      "bending_basis_3_2": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_4_0": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_4_1": "1ce35b7ff1b64029cd24aab57bd545a2e8b3b5342f370a3446dee9cb6cb94993",
+      "bending_basis_4_2": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_basis_5_0": "34fd756c7fbe64798e4beb5f75af4972972e875fe816c0dd337837bb9df090af",
+      "bending_basis_5_1": "ff3e6737daa6464b94ccc240315e5d8dd7ea7da717e6cd59cf309bfe89f890f0",
+      "bending_basis_5_2": "e48844fa5487148a2dc4772045af760c94b17b443f375766d3b8c5936b6b561e",
+      "bending_gram_0_0": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+      "bending_gram_0_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_0_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_1_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_1_1": "87fa35ddaa2d4f38457f256a1afde68eb905eec81b1965d02e0af7491131b46a",
+      "bending_gram_1_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_2_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_2_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_2_2": "2a782c23f390e98f2f80f8c6e2df39fd7f5ebfe9827dd8ab09785765f7894e67",
+      "bending_gram_3_0": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_3_1": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+      "bending_gram_3_2": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_4_0": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_4_1": "0505cca662428992c5b8cdc8165ea0941d596c8f89fe3699773efab9cb92db15",
+      "bending_gram_4_2": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e",
+      "bending_gram_5_0": "fc9b25d320c0944dafd7cd42ccebef9c7784cf2ec2d5c74f232748822f2740be",
+      "bending_gram_5_1": "cbf8856bf21443b147bde91cf37543f10166d4804ad07d4d8d90961547057b41",
+      "bending_gram_5_2": "705a9b6376d2d6b24e8ffbf22b75d09952e23ba97dafccabec02831e0511166e"
+    }
+  },
+  "checkpoint_after_hash_failures": {},
+  "checkpoint_operand_values_unchanged": true,
+  "postcondition_bookkeeping_failures": {},
+  "flags_after": {
+    "cuda_initialized": false,
+    "cudnn_tf32": true,
+    "matmul_tf32": false,
+    "grad_enabled": true,
+    "default_dtype": "torch.float32"
+  },
+  "flags_unchanged": true,
+  "bindings_after": {
+    "input/gradient": {
+      "bytes": 9416,
+      "sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73"
+    },
+    "input/diagonal": {
+      "bytes": 9416,
+      "sha256": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f"
+    },
+    "input/H": {
+      "bytes": 11082632,
+      "sha256": "426e0d4add9dd6f46a972ecde0b4e06e6f1350301c06be4c6391af4148c4fa8d"
+    },
+    "input/old_solution": {
+      "bytes": 9416,
+      "sha256": "58579e0f5cb34fa409d6d26de31a6e4687a011d9346539493b255f538ba316ab"
+    },
+    "input/new_solution": {
+      "bytes": 9416,
+      "sha256": "a798a3cc3ef392573137caba22de268804c2eb0e135e3ded8fd828ae41e10425"
+    },
+    "input/paired_summary": {
+      "bytes": 20372,
+      "sha256": "5651fb99e1d2eee0cf2ed79c686c862b04235f48b5f6669c68bd616c69cdbe21"
+    },
+    "input/stage1_summary": {
+      "bytes": 30714,
+      "sha256": "eb31cfd14bf4d8b5a0b82228a72b2f854a86a38d1a969d981cd0d215e09afbf6"
+    },
+    "input/checkpoint": {
+      "bytes": 2647508,
+      "sha256": "78abee8589e6e026fede946136c9e78589817b01a1d55d2085aee19758ceae0e"
+    },
+    "production_source/src/fnit/fnirt/cli.py": {
+      "bytes": 6245,
+      "sha256": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c"
+    },
+    "production_source/src/fnit/fnirt/io.py": {
+      "bytes": 6080,
+      "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+    },
+    "production_source/src/fnit/fnirt/optimizer.py": {
+      "bytes": 8506,
+      "sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd"
+    },
+    "production_source/src/fnit/fnirt/registration.py": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "production_source/src/fnit/fnirt/spline.py": {
+      "bytes": 18840,
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7"
+    },
+    "production_source/src/fnit/fnirt/standalone.py": {
+      "bytes": 10838,
+      "sha256": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6"
+    },
+    "production_source/src/fnit/fnirt/topology.py": {
+      "bytes": 9213,
+      "sha256": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3"
+    },
+    "production_source/src/fnit/fnirt/_bending_cpu.py": {
+      "bytes": 3312,
+      "sha256": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+    },
+    "production_source/src/fnit/fnirt/_normal_cpu.py": {
+      "bytes": 10560,
+      "sha256": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f"
+    },
+    "production_source/src/fnit/fnirt/_normal_simd_cpu.py": {
+      "bytes": 6810,
+      "sha256": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9"
+    },
+    "production_source/src/fnit/fnirt/_sampling_cpu.py": {
+      "bytes": 7782,
+      "sha256": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_cpu.py": {
+      "bytes": 3635,
+      "sha256": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_triton.py": {
+      "bytes": 1969,
+      "sha256": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b"
+    },
+    "production_source/src/fnit/fnirt/_topology_cpu.py": {
+      "bytes": 1091,
+      "sha256": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6"
+    },
+    "production_source/src/fnit/fnirt/_topology_triton.py": {
+      "bytes": 7134,
+      "sha256": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1"
+    },
+    "production_source/src/fnit/fnirt/__init__.py": {
+      "bytes": 1040,
+      "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+    },
+    "production_source/src/fnit/fnirt/__main__.py": {
+      "bytes": 80,
+      "sha256": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a"
+    },
+    "source_extra/src/fnit/flirt/coordinates.py": {
+      "bytes": 5019,
+      "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    },
+    "source_extra/validation/fnirt_cpu_current_replay_20261006/source/replay_current.py": {
+      "bytes": 9641,
+      "sha256": "f000d386ea781d495c3c1dedd8d1230431a8536f933d6d9584b796624452c579"
+    }
+  },
+  "binding_failures_after": [],
+  "all_source_and_inputs_unchanged": true,
+  "fsl_dso_snapshot_after": [],
+  "process_maxrss_KiB": 439464,
+  "valid_bounded_diagnostic": true
+}
