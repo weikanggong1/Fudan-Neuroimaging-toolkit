@@ -100,7 +100,7 @@ mris_register -curv -threads 8 \
 | 原型完整调用的平均累计时间，包含首调用 | 既有参考 48.069 s，原型 20.127 s。两次不是相邻完整配对。 |
 | 原型完整 API 时间，含读写 | 既有参考 345.714 s，原型 448.403 s；未改刚体搜索从 49.294 s 波动至 196.200 s。不能据此宣称完整配准提速。 |
 | 正式 `fc2abc94` GPU 实际回归 | H100，完整真实梯度 1/16/256 轮 ABBA，旧/新输出 SHA、逐调用 allocated/reserved 完全相同；CPU helper 未导入。 |
-| 正式 `fc2abc94` 完整 CPU ABBA | 1,239 个冻结文件、四臂接受轨迹、坐标、有序面、几何及相同 CPU 资源门通过；两个候选臂各 67 次大循环实际 CPP8。同输入保存官方坐标逐点相同，负面积面 0。平均中位 55.151→26.447 s，完整冷进程 914.965→963.223 s，未达到完整阶段提速门。 |
+| 正式整合冻结 `7deb4de5` 完整 CPU ABBA（平均器源码来自 `fc2abc94`） | 1,239 个冻结文件、四臂接受轨迹、坐标、有序面、几何及相同 CPU 资源门通过；两个候选臂各 67 次大循环实际 CPP8。同输入保存官方坐标逐点相同，负面积面 0。平均中位 55.151→26.447 s，完整冷进程 914.965→963.223 s，未达到完整阶段提速门。 |
 
 原型[算子报告](../../../validation/smri_cpu/recon_fixes_20261004/results/persistent_average_prototype.public.json)和[完整阶段报告](../../../validation/smri_cpu/recon_fixes_20261004/results/persistent_registration_pilot.public.json)保留输入、程序、原型和时钟。正式 [CPU ABBA 报告](../../../validation/smri_cpu/average_cpu_persistent_20261004/CPU_ABBA.public.json)单独绑定实际候选，不证明右半球或原始 T1 全部 recon-all。NumBa 基线的八线程配置由执行源码、环境和亲和性验证，没有逐调用观察线程组人数；CPP 的实际八线程则在每次大循环直接记录。
 

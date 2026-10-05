@@ -252,6 +252,8 @@ segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --thread
 
 ## 6. 最近版本和 benchmark
 
+成熟 GEMS Gaussian 子函数曾在未提供超参数时错误广播 `[C,M] / [C]`；已改为各类、各模态除以对应样本质量，返回 `[C,M]` 均值。现有四个亚区 recipe 的强度拟合提供超参数，合成拟合使用固定 Gaussian，因此不进入该错误分支。CPU 固定 EM 数据缓存无速度或内存收益，裁剪插值候选使部分 GPU 亚区退步，两者未接入默认；实际状态和被撤回补丁见[本轮 GEMS 记录](../../validation/smri_cpu/gems_fixes_20261004/README.md)。
+
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
 | 2026-10-04 | 00fedf3544/v5 | 大T1投影修复后raw完整CPU执行及评分 | 上节13产物、110区门与脑图 |
