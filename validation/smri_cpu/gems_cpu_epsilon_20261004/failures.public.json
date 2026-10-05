@@ -40,6 +40,11 @@
       "timeout_seconds": 30,
       "exception": "subprocess.TimeoutExpired",
       "action": "parent notified; no upload/source/process/socket mutation; latest frozen queue status remains unverified"
+    },
+    {
+      "scope": "local IPC and process inspection only, after failed fresh-route server requests",
+      "observation": "IPC first confirmed PID159541; later process inspection did not find it",
+      "action": "no signals or socket changes; no retry through potentially stale socket; coordinator informed"
     }
   ]
 }

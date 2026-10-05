@@ -2,11 +2,11 @@
 
 ## 进度与范围
 
-本轮修正候选针对成熟 `TorchGEMS` compact 网格目标漏掉的 `1e-15`，同时保留原 FP32 owner 查找和外部顶点／梯度，将可微插值及形变矩阵算术改为 CPU FP64。三处真实首次状态的实际 frozen recipe 闭环已经通过；完整脑干、丘脑和双侧海马／杏仁核的旧版／候选逐区对照正在运行，尚未据此采纳默认行为。独立公式诊断和脑图在[首次状态记录](../gems_first_state_20261004/README.md)，对应提交 `0211dabcb5c566b6ec03f43e1c8cf312e417a45a`。
+本轮修正候选针对成熟 `TorchGEMS` compact 网格目标漏掉的 `1e-15`，同时保留原 FP32 owner 查找和外部顶点／梯度，将可微插值及形变矩阵算术改为 CPU FP64。三处真实首次状态的实际 frozen recipe 闭环已经通过；完整脑干、丘脑和双侧海马／杏仁核的旧版／候选逐区对照均已完成。丘脑有旧通过区跌出固定门，HA 仍有多数区域未过，因此不采纳 mixed 候选为默认。独立公式诊断和脑图在[首次状态记录](../gems_first_state_20261004/README.md)，对应提交 `0211dabcb5c566b6ec03f43e1c8cf312e417a45a`。
 
 CUDA 的计算路径保持原样，仍缺少这个 epsilon。保持旧 CUDA 行为只表示本次 CPU 分支隔离，不能证明 GPU 与官方等价。本轮也没有使用首次 closure 时长作提速结论。
 
-本记录提交仅保存诊断、完成的阶段指标和未采纳的[冻结候选补丁](candidate_v1.patch)，不修改生产源文件。补丁 SHA 与 `source.public.json` 的实际 v1 绑定一致；完整丘脑／HA 结果齐前保持候选状态。后续本地 dense guard 的差异单独记录，不能将 v1 结果改标为另一份源码。
+本记录提交仅保存诊断、完成的阶段指标和未采纳的[冻结候选补丁](candidate_v1.patch)，不修改生产源文件。补丁 SHA 与 `source.public.json` 的实际 v1 绑定一致；完整结果及所有改善、退步均已保存；生产修改保持未提交候选。后续本地 dense guard 的差异单独记录，不能将 v1 结果改标为另一份源码。
 
 ## 子函数输入、输出与公式
 
@@ -44,7 +44,7 @@ CPU 用 `logaddexp(logsumexp(log(prior) + log_density), log(1e-15))` 实现 `-su
 
 剩余 cost 小差与原 FP32 Gaussian log-density 算术有关，没有为它调整参数。该闭环没有 optimizer update，不能代替最终分割精度。[丘脑](first-thalamus.public.json)、[左侧](first-hippo-amygdala-left.public.json)、[右侧](first-hippo-amygdala-right.public.json)保存完整指标；共同源码与固定资源元数据采用[安全精简绑定](binding.public.json)，展开后 canonical SHA 已核验无损。
 
-## 完整 recipe 验证计划
+## 完整 recipe 验证与来源
 
 nodecw7、固定 8 个物理核 `32,36,40,44,48,52,56,60`，公共同组锁 `nodecw7.gems.cpu8.lock`。冷进程依次运行候选脑干、旧丘脑、候选丘脑、旧双侧 HA、候选双侧 HA。旧脑干复用同 node7、同实际 f1 源码的完整已保存结果；旧 thal/HA CPU v2 缺少 f1 owner 实现，其结果不作为本次旧臂。
 
@@ -78,7 +78,55 @@ nodecw7、固定 8 个物理核 `32,36,40,44,48,52,56,60`，公共同组锁 `nod
 
 ### 已完成丘脑旧臂
 
-实际 f1 冻结旧臂的冷进程 wall 为 2655.507 秒，API 为 2651.360 秒；native 为 29/45 个非空区通过，HR 为 32/47，分别有 5／3 个双方均空区域，仍不满足全部区域门。[完整旧臂评分](score-thalamus-baseline.public.json)中的 `candidate` 字段来自既有单臂评分器，在此文件专指 f1 旧臂。候选及双侧 HA 仍待完整运行和评分，此处不预判效果。
+实际 f1 冻结旧臂的冷进程 wall 为 2655.507 秒，API 为 2651.360 秒；native 为 29/45 个非空区通过，HR 为 32/47，分别有 5／3 个双方均空区域，仍不满足全部区域门。[完整旧臂评分](score-thalamus-baseline.public.json)中的 `candidate` 字段来自既有单臂评分器，在此文件专指 f1 旧臂。该旧臂评分与后续 paired report 的 baseline 逐值相同，现采用本地 JSON 引用保存，展开后的 canonical SHA 不变。
+
+### 四个完整 recipe：不采纳 mixed 默认
+
+2026-10-05 通过已认证的交互 TTY 重新读取统一 README／INDEX 和 canonical 产物，全部五个冷进程 job 及两家族后处理均为 complete、exit 0。现场逐文件核验旧／新各 472 个 Python 源、23 个 GEMS 文件及三个 worker／contract／queue helper，均与原冻结绑定相同；没有重新拟合。正式服务器仓库此时为 `cc9402734faeba93b3a13c29932fa1392eaccf62`，其 GEMS core 与旧 f1 一致。实际运行仍使用绑定的独立旧／新源码，不改标为随后 main。
+
+| 家族／评价网格 | 旧通过／非空 | mixed 通过／非空 | 双方均空 | 丢失旧通过区 |
+|---|---:|---:|---:|---|
+| 脑干 native | 4/4 | 4/4 | 0 | 无 |
+| 脑干 HR | 4/4 | 4/4 | 0 | 无 |
+| 丘脑 native | 29/45 | 31/45 | 5 | Right-CM |
+| 丘脑 HR | 32/47 | 33/47 | 3 | Left-MV(Re)、Right-Pc |
+| 左 HA native | 3/28 | 5/28 | 0 | 无 |
+| 左 HA HR | 4/28 | 5/28 | 0 | 无 |
+| 右 HA native | 1/28 | 3/28 | 0 | 无 |
+| 右 HA HR | 1/28 | 3/28 | 0 | 无 |
+
+native 合计为 37/105 → 43/105，HR 为 41/107 → 45/107。通过数增加不能替代逐区门：Right-CM 的 native Dice 为 0.95833 → 0.94301；Left-MV(Re) 的 HR Dice 为 0.96154 → 0.94737、硬体积误差为 0 → 5.128%；Right-Pc 的 HR Dice 为 1 → 0.88889、硬体积误差为 0 → 20%。所有区域均保留，没有仅筛选旧通过区或改善区。
+
+| 家族／网格 | 最小／最大 ΔDice | 最小／最大硬体积相对误差 Δ |
+|---|---:|---:|
+| 丘脑 native | −0.104348 / +0.059524 | −0.111111 / +0.153846 |
+| 丘脑 HR | −0.111111 / +0.333333 | −1.000000 / +0.200000 |
+| 左 HA native | −0.004342 / +0.068627 | −0.086957 / +0.058824 |
+| 左 HA HR | −0.001239 / +0.046099 | −0.022235 / +0.017360 |
+| 右 HA native | +0.011507 / +0.107790 | −0.156250 / +0.068966 |
+| 右 HA HR | +0.006903 / +0.132547 | −0.119431 / +0.022523 |
+
+软体积误差按实际工作网格积分，与官方软体积比较；native／HR 两套硬标签评价共享该软积分。丘脑绝对误差 Δ 的极值为 Left-VPL −2.516663、Right-VLa +2.445984 mm³；左 HA 为 Left-Lateral-nucleus −7.205750、Left-hippocampal-fissure +1.348679 mm³；右 HA 为 Right-Lateral-nucleus −32.158569、Right-presubiculum-head +0.808149 mm³。相对软误差、全部 hard／soft 数值及变化见 [220 行区域表](regional_changes_complete.csv)和[完整汇总](complete_recipe_summary.public.json)。
+
+| 完整冷进程阶段 | 旧 wall / API（秒） | mixed wall / API（秒） | 旧／mixed 采样峰值 RSS（GB） |
+|---|---:|---:|---:|
+| 脑干 | 636.617 / 632.479 | 954.319 / 949.813 | 3.711 / 4.688 |
+| 丘脑 | 2655.507 / 2651.360 | 3549.210 / 3545.832 | 4.456 / 4.473 |
+| 双侧 HA | 4018.157 / 4012.925 | 4000.569 / 3994.958 | 8.813 / 8.973 |
+
+均为 nodecw7 的同一 8 核组、独立冷进程；丘脑和 HA 分别顺序 old/new。运行期间共享负载变化：丘脑旧臂 103.60 → 79.74、新臂 79.74 → 117.39；HA 旧臂 117.39 → 94.12、新臂 94.12 → 115.82。此处直接报告时钟和负载，不给出因果提速比；没有重跑官方以形成同节点速度对照。RSS 未降低。
+
+完整输出的 shape／affine／zooms／dtype／finite 门全部通过，posterior／vertices／Gaussian 存储均为 FP32，objective 存储为 FP64。丘脑 native／HR 分别变动 93／818 个标签体素；66 通道后验 RMSE 为 0.00170329。双侧 HA native 合计变动 540 个体素，左右 HR 分别 3230／11814；后验 RMSE 分别 0.00230302／0.00876206。全部 posterior、参数和目标轨迹的实际 SHA、不同值数量、最大差与 RMSE 均保存。
+
+强度 solver 的步数丘脑为 400 → 400、左 HA 和右 HA 均为 300 → 300；objective／backtracking／evaluations／cache-hit／rebuild／分阶段时钟见完整状态。最小 Jacobian 丘脑 0.219089 → 0.203753、左 HA 0.252634 → 0.176472、右 HA 0.204451 → 0.164773，均为正，候选更低。参考输出与当前 recipe 的完整估计差异仍待定位，首次公式梯度改善并没有消除它。
+
+[丘脑完整评分](score-thalamus.public.json)、[双侧 HA 完整评分](score-hippo-amygdala.public.json)、[丘脑状态](state-thalamus.public.json)、[HA 状态](state-hippo-amygdala.public.json)保留全部科学值。重复的 metadata／metric 字典通过[共享文件](complete_recipe_shared.public.json)引用，评分原文件 SHA 与展开后的 canonical SHA 分别记录在[精简清单](complete_recipe_encoding.public.json)，无损展开核验通过。旧单臂丘脑报告也核验与 paired baseline 完全一致后引用复用。[现场状态和冻结源码核验](recovery_queue.public.json)保留完整队列记录及 collector 来源。
+
+![全部非空区域的完整旧／新 Dice](complete_regional_dice.png)
+
+图中每点为一个真实区域；红点是丢失旧通过门的区域，绿点是新增通过门的区域。Dice 图仍需结合硬体积门，不能仅看是否位于 0.95 上方。脑干影像切面见上图。
+
+下一项有限验证只统计已有首次 capture 的零 prior 边界，必须先逐值复现原 owner／priors／coverage。EPS-only FP32 已有首次梯度探针，但没有其完整 recipe 结果；本轮不启动另一组数小时拟合。CUDA 仍保留旧公式，本轮未为已拒绝 mixed 候选运行新的完整 GPU benchmark。
 
 ### 有限 alpha 平滑检查：丘脑首态未见量级差
 
