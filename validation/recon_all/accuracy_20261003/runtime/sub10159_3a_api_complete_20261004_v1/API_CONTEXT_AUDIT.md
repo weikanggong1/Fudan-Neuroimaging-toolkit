@@ -1,0 +1,7 @@
+# 初始化 API 实际策略
+
+冻结driver在exec前设置PYTORCH_NO_CUDA_MEMORY_CACHING=1；子进程import torch后、创建context前调用disabled配置，实际pre-context receipt effective=disabled。同api_child函数保留4B CUDA标量，synchronize后记录CUDA已初始化，再调用run_recon_all_python。生产API入场allocator实际报告preserved_preinitialized_unknown，必须保留其未知语义，不可改称已证实disabled。
+
+同PID关系由冻结源码无fork/exec的顺序调用证明；现有实际receipt/pipeline没有API子进程PID，monitor记录的是外层driver PID123917，因此没有另行记录的运行时same-PID凭据。所有parent_idle_cuda_cache报告见JSON，零计数不等于零设备显存。
+
+官方评估verify_binding失败仅是验证工具当前不接受该实际策略，算法已独立complete；未执行数值比较。

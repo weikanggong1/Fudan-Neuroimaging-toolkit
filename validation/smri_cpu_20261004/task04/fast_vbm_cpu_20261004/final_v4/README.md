@@ -123,3 +123,5 @@ python vbm_revision_compare.py \
 - **此前v2**：两条候选610.899/355.802秒；独立官方FNIRT完整链769.365秒、Morph阶段和580.141秒，保留其版本和范围。
 
 后续仍需更多病例及邻接完整链重复；FNIRT空间差异、少数FAST PVE/pveseg差及非空间header差未在此次复测修改。本轮没有重跑完整FastVBM GPU链，也不把其他组件的GPU回归扩大为本pipeline的GPU验收。
+
+公开报告的字符串隐私检查、输入输出和失败行为见 [隐私检查说明](PUBLIC_REPORT_PRIVACY.md)。该修改不重新计算影像或更改上述真实数值记录。

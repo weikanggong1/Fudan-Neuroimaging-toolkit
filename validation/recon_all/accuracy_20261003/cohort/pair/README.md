@@ -120,8 +120,11 @@ precision_comparison_configuration.update(
 )
 ```
 
-`verify_admitted_candidate_binding`复用原启动候选核验流程；`verify_startup_binding`保留为兼容入口，不复制另一套归档/资产核验。精度角色额外读取本次 `fnit-native-free-run.json`：完成状态、原始input/subject_dir/device/总线程4、138项输出及每个输出自身路径、完成回执及总时长、无FP16/BF16或autocast、缓存禁用须一致。报告SHA保留并确认核验期间稳定。官方程序/资源SHA、log/done与两侧host/GPU/原T1/cohort绑定仍通过同一个evaluate_pair核验。
+`verify_admitted_candidate_binding`复用原启动候选核验流程；`verify_startup_binding`保留为兼容入口，不复制另一套归档/资产核验。精度角色额外读取本次 `fnit-native-free-run.json`：完成状态、原始input/subject_dir/device/总线程4、138项输出及每个输出自身路径、完成回执及总时长、无FP16/BF16或autocast须一致；CLI 须保持缓存禁用，已初始化 CUDA 的 API 入口须保留实际 allocator unknown，并绑定冻结 driver 和本次初始化 receipt，见[API 入口绑定修正](INITIALIZED_API_ALLOCATOR_BINDING.md)。报告SHA保留并确认核验期间稳定。官方程序/资源SHA、log/done与两侧host/GPU/原T1/cohort绑定仍通过同一个evaluate_pair核验。
 
 输出前缀为 `precision_candidate_vs_official`，执行绑定键为 `precision_candidate` 和 `precision_resource_verification`，质量目录为 `quality_precision_candidate`。helper SHA与resume配置绑定沿用候选协议，核验阶段每次重做。`--verify-only`同样只标`binding_verified_only`；完成比对也不自动建立整体指标等效结论，阈值、138项诊断与所有既有数值算法不变。
 
 2026-10-04：新增精度候选角色支持，与此前输入SHA变量修复独立。8项新CPU回归覆盖外置benchmark工具精确键/绝对路径/冻结SHA与inventory准入、角色/3a提交绑定、源码输入及资产漂移、prepared/admitted或历史报告拒绝、138输出路径门控、旧角色兼容、比较器命名。原10项角色核验及4项SHA/只核验回归仍通过。临时fixture只验证工具，真实两例annotation另行准备；精度候选原始T1整例尚未开始，当前没有新的实际精度比较或等效声明。
+
+
+2026-10-05：恢复 API 入口验证修正。ds000030/sub-10159 的真实完成报告使用 `initialized_cuda_api`，其 `preserved_preinitialized_unknown` 曾被统一 disabled gate 误拒绝。修复仅修改验证 helper；精确核验已准入 driver、实际 child command、GPU UUID、4 字节 retained tensor 及初始化前策略，保留 unknown 和原失败 checkpoint。`evaluate_pair.py` 与 production 不变，完整 CPU pair 回归 40 项通过；不据此宣布真实影像精度通过。详情与复现示例见[API 入口绑定修正](INITIALIZED_API_ALLOCATOR_BINDING.md)。

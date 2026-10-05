@@ -1,0 +1,216 @@
+{
+  "scope": "real retained archive and metadata SHA chain plus executable allocator helper interface; full remote resource binding and numerical evaluation not executed",
+  "relocation": {
+    "field": "actual_config.output",
+    "original": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject",
+    "local": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat-2/work/fnit-recon-recovered-20261005/validation/recon_all/accuracy_20261003/runtime/sub10159_3a_api_complete_20261004_v1/case/attempt_01/subject"
+  },
+  "mock_used": false,
+  "archive_sha256": "d8823f58fef01e5cf75ee2dff7fba7c649c640e57e7962081e11ff3b790cbc54",
+  "archive_files_verified": 81,
+  "manifest_files_verified": 80,
+  "original_metadata_unchanged": true,
+  "helper_sha256": "fc6a29ca38f959b2662ff87dd212a9886c8faa5fdb82e82ad1ccad68609c33a2",
+  "driver_sha256": "6690d0e37682a024ef2daaa06d9e3c366ac2d41922905f1c0d39b3603ca93249",
+  "precision_sha256_carrier": {
+    "file": "case/attempt_01/subject/fnit-native-free-run.json",
+    "sha256": "697d15159356a2d584a22c36c35606a2b57d59f28a2a7e030462ec2190870bc2"
+  },
+  "precision": {
+    "matmul_tf32_default": true,
+    "cudnn_tf32_default": true,
+    "cuda_policy_applied": true,
+    "fp16_or_bf16_requested_by_fnit": false,
+    "caller_autocast": {
+      "cpu": {
+        "enabled": false,
+        "dtype": "torch.bfloat16"
+      },
+      "cuda": {
+        "enabled": false,
+        "dtype": "torch.float16"
+      }
+    },
+    "fp16_or_bf16_enabled": false,
+    "fp32_exceptions": [
+      "SynthStrip",
+      "SynthSeg",
+      "Talairach affine",
+      "MNI nonlinear CUDA",
+      "MNI152 affine matmul",
+      "EntoWM/MCA-dura/vsinus cuDNN"
+    ],
+    "auxiliary_convolution_policy": "scoped cuDNN FP32; same-input GPU/CPU label regression; matmul TF32 preserved",
+    "SynthSeg_actual_forward": {
+      "requested_cudnn_tf32": false,
+      "forwards": [
+        {
+          "pass": "original",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        },
+        {
+          "pass": "flipped",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        }
+      ],
+      "posterior_buffer_reused": true,
+      "posterior_ensemble_dtype": "torch.float32"
+    },
+    "EntoWM_actual_forwards": [
+      {
+        "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+        "device": "cuda:0",
+        "input_dtype": "torch.float32",
+        "model_devices": [
+          "cuda:0"
+        ],
+        "model_dtypes": [
+          "torch.float32"
+        ],
+        "matmul_tf32": true,
+        "cudnn_tf32": false,
+        "cudnn_enabled": true,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": false,
+        "autocast": {
+          "enabled": false,
+          "dtype": "torch.float16"
+        }
+      }
+    ]
+  },
+  "api_binding": {
+    "invocation": "initialized_cuda_api",
+    "gpu_memory_mode": "preserved_preinitialized_unknown",
+    "cuda_allocator": {
+      "requested": "auto",
+      "cuda_initialized_at_entry": true,
+      "environment_at_entry": "1",
+      "environment_after_selection": "1",
+      "effective": "preserved_preinitialized_unknown",
+      "torch_stats_known_valid": false,
+      "torch_stats_known_unavailable": false
+    },
+    "api_invocation_path": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat-2/work/fnit-recon-recovered-20261005/validation/recon_all/accuracy_20261003/runtime/sub10159_3a_api_complete_20261004_v1/case/attempt_01/subject/run-api-invocation.json",
+    "api_invocation_sha256": "08088791908fe1e80565e114bb526ee75a383b784177ff5c9c39168669561dc1",
+    "api_invocation": {
+      "cuda_initialized_before_api": true,
+      "device_uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+      "retained_tensor_bytes": 4,
+      "allocator_before_initialization": {
+        "requested": "disabled",
+        "cuda_initialized_at_entry": false,
+        "environment_at_entry": "1",
+        "environment_after_selection": "1",
+        "effective": "disabled",
+        "torch_stats_known_valid": false,
+        "torch_stats_known_unavailable": true
+      }
+    },
+    "scope": "frozen driver and run receipt bind initialization to API entry; allocator remains unknown"
+  },
+  "context_sha256": "aca96ff2422121eaf4d7eae0366c1705b983deff24f3244918866c90c44c68f3",
+  "evaluated_config_path": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/retry_config.json",
+  "original_failed_checkpoint": {
+    "schema": "fnit-recon-pair-evaluation-v1",
+    "case": "ds000030_sub-10159",
+    "pair": "precision_candidate_vs_official",
+    "reference_role": "official",
+    "evaluated_role": "precision_candidate",
+    "candidate_status": "precision_candidate_evaluated_separately; equivalence_not_assessed",
+    "overall_metric_equivalence": "not_assessed",
+    "config_sha256": "dc8b8af7aa651d1c8c29d7ac1a8421c833ba7bd16d3446a14ebcc1ebfaf648b8",
+    "script_sha256": "4e6a96e57009a5be4bc3c085809042aae093a7039c864a380b80c3574e114418",
+    "phases": {
+      "verify_binding": {
+        "status": "failed",
+        "lock_wait_seconds": 0.00010213209316134453,
+        "seconds": 16.921674334909767,
+        "error": "ValueError('precision candidate actual allocator differs')"
+      }
+    },
+    "comparison_time_scope": "comparison and figures only; excluded from whole execution timing",
+    "role_helper_sha256": "d746e03a31658f89c75189ee8be99cc0e3e88b6a9900c11c71fa469290711607",
+    "status": "failed",
+    "current_phase": "verify_binding",
+    "pid": 78162,
+    "host": "gpucw1"
+  },
+  "reuse_eval_spec": {
+    "case": "ds000030_sub-10159",
+    "evaluated_role": "precision_candidate",
+    "python": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+    "code_root": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/ten_case_candidate_frozen_3a0c9aba",
+    "evaluated_commit": "3a0c9aba6321b4981fd8174b4b191515459aa38b",
+    "evaluated_config": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/retry_config.json",
+    "evaluated_resources": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/admission.json",
+    "evaluated_resources_kind": "admission_inventory",
+    "official_config": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/configs_v1/official_ds000030_sub-10159.json",
+    "whole_driver": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/pair_tools_v1/compare_whole_cases.py",
+    "scripts_dir": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/pair_tools_v1",
+    "source_archive": "/cwStorage/home/gongwk/Notebook_code/FNIT/archive/transfers/ten_case_candidate_frozen_3a0c9aba_gitarchive_v3.tar.gz",
+    "cohort_manifest": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/cohort/cohort_verified.json",
+    "label_table": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/FreeSurferColorLUT.txt",
+    "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+    "lock": "/tmp/fnit-shared-benchmark.lock",
+    "output": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_ten_case_queue_v1/evaluations/ds000030_sub-10159",
+    "evaluator_tools_commit": "fe653dfb273d639b8077fa96b2d6e3296cd3fb29",
+    "evaluator_tools_archive_sha256": "db6abf0323ed05446d751d014a506c23fc993498b2d20edaeb9f04bdb6b2b5e4",
+    "evaluator_tool": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/precision_whole_tools_v1/evaluate_pair.py"
+  },
+  "new_output_required": true,
+  "full_binding_missing_locally": [
+    "raw T1 bytes",
+    "frozen production source and source archive",
+    "weights/assets/native program bytes",
+    "138 output artifact bodies",
+    "original official config/results/program resources"
+  ],
+  "real_reuse_files": [
+    "case/attempt_01/retry_config.json",
+    "case/admission.json",
+    "case/whole.config.json",
+    "case/nominal/diagnostics/launch.json",
+    "case/attempt_01/diagnostics/launch.json",
+    "case/attempt_01/diagnostics/completion.json",
+    "case/attempt_01/subject/fnit-native-free-run.json",
+    "case/attempt_01/subject/run-api-invocation.json",
+    "evaluation_partial/config.json",
+    "API_CONTEXT_AUDIT.json",
+    "metadata_manifest.json"
+  ]
+}

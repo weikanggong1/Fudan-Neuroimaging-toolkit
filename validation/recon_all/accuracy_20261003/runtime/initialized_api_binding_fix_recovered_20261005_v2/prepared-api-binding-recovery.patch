@@ -1,0 +1,247 @@
+--- a/validation/recon_all/accuracy_20261003/cohort/pair/evaluated_role_bindings.py
++++ b/validation/recon_all/accuracy_20261003/cohort/pair/evaluated_role_bindings.py
+@@ -39,6 +39,63 @@
+             'candidate_status': ('startup_only_evaluated_separately; merged_precision_candidate_not_evaluated'
+                                  if role == 'startup_only_candidate' else
+                                  'precision_candidate_evaluated_separately; equivalence_not_assessed')}
++
++
++# This driver initializes a retained float32 tensor, synchronizes, then calls the
++# Python API in api_child. Its exact bytes are admitted as an external tool.
++INITIALIZED_API_DRIVER_SHA256 = '6690d0e37682a024ef2daaa06d9e3c366ac2d41922905f1c0d39b3603ca93249'
++
++
++def verify_precision_allocator_binding(actual_config, launch, pipeline, tool_receipts, config_path):
++    """Bind CLI cache selection or the frozen, already initialized API entry."""
++    allocator = pipeline.get('cuda_allocator', {})
++    invocation = actual_config.get('invocation')
++    if invocation == 'cli':
++        if pipeline.get('gpu_memory_mode') != 'disabled' or allocator.get('effective') != 'disabled':
++            raise ValueError('precision candidate actual CLI allocator differs')
++        return {'invocation': invocation, 'gpu_memory_mode': 'disabled', 'cuda_allocator': allocator}
++    if invocation != 'initialized_cuda_api':
++        raise ValueError('precision candidate actual invocation differs')
++    expected = {'requested': 'auto', 'cuda_initialized_at_entry': True,
++                'environment_at_entry': '1', 'environment_after_selection': '1',
++                'effective': 'preserved_preinitialized_unknown',
++                'torch_stats_known_valid': False, 'torch_stats_known_unavailable': False}
++    if (pipeline.get('gpu_memory_mode') != 'preserved_preinitialized_unknown'
++            or any(type(allocator.get(key)) is not type(value) or allocator.get(key) != value
++                   for key, value in expected.items())):
++        raise ValueError('precision candidate actual initialized API allocator differs')
++    driver = (tool_receipts or {}).get('whole_case_driver', {})
++    if driver.get('sha256') != INITIALIZED_API_DRIVER_SHA256:
++        raise ValueError('precision candidate initialized API requires known frozen driver')
++    command = [actual_config['python'], driver['path'], '--api-child',
++               str(Path(config_path).resolve())]
++    if (launch.get('script_sha256') != INITIALIZED_API_DRIVER_SHA256
++            or launch.get('command') != command):
++        raise ValueError('precision candidate initialized API child command/driver differs')
++    receipt_path = Path(actual_config['output'])/'run-api-invocation.json'
++    receipt_sha = digest(receipt_path)
++    receipt = read(receipt_path)
++    uuid = receipt.get('device_uuid')
++    if isinstance(uuid, str) and not uuid.startswith('GPU-'):
++        uuid = 'GPU-' + uuid
++    before = receipt.get('allocator_before_initialization', {})
++    expected_before = {'requested': 'disabled', 'cuda_initialized_at_entry': False,
++                       'environment_at_entry': '1', 'environment_after_selection': '1',
++                       'effective': 'disabled', 'torch_stats_known_valid': False,
++                       'torch_stats_known_unavailable': True}
++    if (receipt.get('cuda_initialized_before_api') is not True
++            or uuid != actual_config['gpu_uuid']
++            or type(receipt.get('retained_tensor_bytes')) is not int
++            or receipt['retained_tensor_bytes'] != 4
++            or any(type(before.get(key)) is not type(value) or before.get(key) != value
++                   for key, value in expected_before.items())):
++        raise ValueError('precision candidate initialized API initialization receipt differs')
++    if digest(receipt_path) != receipt_sha:
++        raise ValueError('precision candidate initialized API receipt changed during binding')
++    return {'invocation': invocation, 'gpu_memory_mode': pipeline['gpu_memory_mode'],
++            'cuda_allocator': allocator, 'api_invocation_path': str(receipt_path),
++            'api_invocation_sha256': receipt_sha, 'api_invocation': receipt,
++            'scope': 'frozen driver and run receipt bind initialization to API entry; allocator remains unknown'}
+ 
+ 
+ def verify_admitted_candidate_binding(evaluation, actual_config):
+@@ -208,13 +265,13 @@
+                 or any(precision.get('caller_autocast', {}).get(kind, {}).get('enabled') is not False
+                        for kind in ('cpu', 'cuda'))):
+             raise ValueError('precision candidate actual pipeline low precision policy differs')
+-        if (pipeline.get('gpu_memory_mode') != 'disabled'
+-                or pipeline.get('cuda_allocator', {}).get('effective') != 'disabled'):
+-            raise ValueError('precision candidate actual allocator differs')
++        allocator_binding = verify_precision_allocator_binding(
++            actual_config, launch, pipeline, tool_receipts, config_path)
+         if digest(pipeline_path) != pipeline_sha:
+             raise ValueError('precision candidate pipeline changed during binding')
+         result.update(pipeline_path=str(pipeline_path), pipeline_sha256=pipeline_sha,
+                       pipeline_status='complete', output_validation=validation, precision=precision,
++                      allocator_binding=allocator_binding,
+                       scope='completed actual raw-T1 precision candidate; no historical whole report substituted')
+     return result
+ 
+--- a/validation/recon_all/accuracy_20261003/cohort/pair/test_precision_candidate_bindings.py
++++ b/validation/recon_all/accuracy_20261003/cohort/pair/test_precision_candidate_bindings.py
+@@ -134,6 +134,12 @@
+         self.admission_path.write_text(json.dumps(self.admission))
+         with self.assertRaisesRegex(ValueError, 'not bound to admitted inventory'): self.verify()
+ 
++    def test_cli_cannot_claim_preinitialized_unknown(self):
++        self.pipeline['gpu_memory_mode']='preserved_preinitialized_unknown'
++        self.pipeline['cuda_allocator']['effective']='preserved_preinitialized_unknown'
++        self.pipeline_path.write_text(json.dumps(self.pipeline))
++        with self.assertRaisesRegex(ValueError,'CLI allocator'): self.verify()
++
+     def test_evaluator_emits_precision_names_and_resource_key(self):
+         fixture = pair_fixtures.PairInputBindingTests()
+         fixture.setUp()
+@@ -151,4 +157,104 @@
+             fixture.doCleanups()
+ 
+ 
++class InitializedAPIBindings(unittest.TestCase):
++    candidate_commit = PRECISION_COMMIT
++    verify = PrecisionCandidateBindings.verify
++    add_benchmark_tools = PrecisionCandidateBindings.add_benchmark_tools
++    """Synthetic CPU provenance fixtures; these tests make no GPU accuracy claim."""
++
++    def setUp(self):
++        PrecisionCandidateBindings.setUp(self)
++        from evaluated_role_bindings import digest
++        from unittest.mock import patch
++        tools = self.add_benchmark_tools()
++        # Synthetic driver bytes exercise the binding chain; production only
++        # accepts INITIALIZED_API_DRIVER_SHA256 from the real frozen driver.
++        self.driver = tools['whole_case_driver']
++        self.driver_patch = patch('evaluated_role_bindings.INITIALIZED_API_DRIVER_SHA256', self.driver['sha256'])
++        self.driver_patch.start(); self.addCleanup(self.driver_patch.stop)
++        self.actual['invocation'] = 'initialized_cuda_api'
++        self.config_path.write_text(json.dumps(self.actual))
++        self.launch.update(self.actual, config_sha256=digest(self.config_path),
++                           script_sha256=self.driver['sha256'],
++                           command=[self.actual['python'],self.driver['path'],'--api-child',str(self.config_path.resolve())])
++        self.launch_path.write_text(json.dumps(self.launch))
++        original_path = Path(self.admission['original_config'])
++        original = json.loads(original_path.read_text()); original['invocation'] = 'initialized_cuda_api'
++        original_path.write_text(json.dumps(original))
++        prepared_path = Path(original['diagnostic_root'])/'launch.json'
++        prepared = json.loads(prepared_path.read_text())
++        prepared.update(original, config_sha256=digest(original_path)); prepared_path.write_text(json.dumps(prepared))
++        self.admission.update(config=self.actual, original_config_sha256=digest(original_path),
++                              original_launch_sha256=digest(prepared_path))
++        self.admission_path.write_text(json.dumps(self.admission))
++        self.pipeline.update(gpu_memory_mode='preserved_preinitialized_unknown',cuda_allocator={
++            'requested':'auto','cuda_initialized_at_entry':True,'environment_at_entry':'1',
++            'environment_after_selection':'1','effective':'preserved_preinitialized_unknown',
++            'torch_stats_known_valid':False,'torch_stats_known_unavailable':False})
++        self.pipeline_path.write_text(json.dumps(self.pipeline))
++        self.receipt = {'cuda_initialized_before_api':True,
++            'device_uuid':self.actual['gpu_uuid'].removeprefix('GPU-'),'retained_tensor_bytes':4,
++            'allocator_before_initialization':{'requested':'disabled','cuda_initialized_at_entry':False,
++                'environment_at_entry':'1','environment_after_selection':'1','effective':'disabled',
++                'torch_stats_known_valid':False,'torch_stats_known_unavailable':True}}
++        self.receipt_path = Path(self.actual['output'])/'run-api-invocation.json'
++        self.receipt_path.write_text(json.dumps(self.receipt))
++
++    def test_initialized_api_preserves_unknown(self):
++        result = self.verify()['allocator_binding']
++        self.assertEqual(result['gpu_memory_mode'],'preserved_preinitialized_unknown')
++        self.assertIs(result['cuda_allocator']['torch_stats_known_unavailable'],False)
++        self.assertEqual(result['api_invocation'],self.receipt)
++        self.assertNotIn('pid',result)
++
++    def test_missing_receipt_rejected(self):
++        self.receipt_path.unlink()
++        with self.assertRaises(FileNotFoundError): self.verify()
++
++    def test_initialization_uuid_and_retained_receipt_drift_rejected(self):
++        import copy
++        for key,value in [('cuda_initialized_before_api',False),('device_uuid','other'),
++                          ('retained_tensor_bytes',8),('retained_tensor_bytes',4.),('retained_tensor_bytes',True)]:
++            receipt = copy.deepcopy(self.receipt); receipt[key]=value
++            self.receipt_path.write_text(json.dumps(receipt))
++            with self.assertRaisesRegex(ValueError,'initialization receipt'): self.verify()
++        self.receipt_path.write_text(json.dumps(self.receipt))
++        self.receipt['allocator_before_initialization']['effective']='preserved_preinitialized_unknown'
++        self.receipt_path.write_text(json.dumps(self.receipt))
++        with self.assertRaisesRegex(ValueError,'initialization receipt'): self.verify()
++
++    def test_wrong_child_command_and_driver_rejected(self):
++        original = self.launch['command']
++        for command in [original[:-1], original[:-1]+['other-config'],
++                        [original[0],original[1],'--cli',original[3]]]:
++            self.launch['command']=command; self.launch_path.write_text(json.dumps(self.launch))
++            with self.assertRaisesRegex(ValueError,'child command/driver'): self.verify()
++        self.launch['command']=original; self.launch['script_sha256']='0'*64
++        self.launch_path.write_text(json.dumps(self.launch))
++        with self.assertRaisesRegex(ValueError,'child command/driver'): self.verify()
++
++    def test_unknown_frozen_driver_rejected(self):
++        self.driver_patch.stop()
++        with self.assertRaisesRegex(ValueError,'known frozen driver'): self.verify()
++
++    def test_api_disabled_claim_rejected_even_with_env_one(self):
++        self.pipeline['gpu_memory_mode']='disabled'; self.pipeline['cuda_allocator']['effective']='disabled'
++        self.pipeline_path.write_text(json.dumps(self.pipeline))
++        with self.assertRaisesRegex(ValueError,'initialized API allocator'): self.verify()
++
++    def test_receipt_changes_during_read_rejected(self):
++        from unittest.mock import patch
++        import evaluated_role_bindings as binding
++        read = binding.read
++        def mutate(path):
++            value = read(path)
++            if Path(path)==self.receipt_path: self.receipt_path.write_text(json.dumps({**value,'drift':True}))
++            return value
++        with patch.object(binding,'read',side_effect=mutate):
++            with self.assertRaisesRegex(ValueError,'receipt changed'): self.verify()
++
++    # Parent tests cover CLI and baseline/compatibility behavior separately.
++
++
+ if __name__ == '__main__': unittest.main()
+--- /dev/null
++++ b/validation/recon_all/accuracy_20261003/cohort/pair/INITIALIZED_API_ALLOCATOR_BINDING.md
+@@ -0,0 +1,41 @@
++# 已初始化 CUDA 的 API 入口绑定修正
++
++`evaluated_role_bindings.py` 校验完整真实 T1 执行的来源、资源和入口证据，输出 `allocator_binding`，供单对 precision candidate 评估保留实际 allocator 状态。输入为 evaluator 配置、实际 retry 配置、launch、完成 pipeline 报告及已准入工具清单。它不计算影像差异，也不调整数值容差。
++
++CLI 的 `gpu_memory_mode` 和 allocator `effective` 仍须是 `disabled`。`initialized_cuda_api` 则须保留报告中的 `preserved_preinitialized_unknown`；`requested=auto`、入口 CUDA 已初始化、环境选择前后均为 `1`、两项统计可信标记均为 false。环境变量 `1` 不能单独证明已初始化进程的 allocator 已禁用。
++
++API 校验同时要求已准入的 `whole_case_driver` SHA 为 `6690d0e37682a024ef2daaa06d9e3c366ac2d41922905f1c0d39b3603ca93249`，launch 的 `script_sha256` 相同，并且 `command` 精确等于 `[python, driver_path, '--api-child', actual_config.resolve()]`。准入流程已逐文件核验工具、输入、源码、资产和权重的 SHA。冻结 driver 的 `api_child` 在同一函数调用中选择 allocator、创建保留的 4 字节 float32 CUDA tensor、同步，然后调用 `run_recon_all_python` 并保存 receipt。
++
++本次执行的 `subject/run-api-invocation.json` 必须报告初始化成功、相同 GPU UUID（接受 receipt 缺少 `GPU-` 前缀）、严格整数 4 字节 retained tensor，以及初始化前 `requested/effective=disabled`、CUDA 未初始化、环境前后为 `1`、统计有效/不可用分别为 false/true。读取 receipt 前后 SHA 必须相同。输出保留 receipt 路径、SHA 和实际内容；现有 receipt 没有 child PID，校验结果不生成同 PID 的记录。
++
++真实例为 ds000030/sub-10159 的 `sub10159_3a_api_complete_20261004_v1`：原输入 SHA `0cb8a28928917b452b516e4e4694b3b79eb96b4c558f47ac63603035d0072e8b`，生产冻结版本 `3a0c9aba6321b4981fd8174b4b191515459aa38b`，138/138 输出完整。旧统一 disabled gate 误拒绝其 API 报告；旧失败 checkpoint 保留，新的绑定结果应单独记录。这项修正只恢复入口语义，不代表脑图精度通过、不改变 production，也不改变误差阈值。
++
++CPU 单元测试使用合成来源文件验证证据门控，包括合法 API、CLI unknown 拒绝、缺 receipt、UUID/初始化/retained 漂移、错误 child 命令、假 disabled、未知 driver 和读取中 receipt 改变。合成 fixture driver 的 SHA 仅在测试的局部 mock 中被接受；生产允许值保持真实冻结 driver SHA。CPU 测试结果不作真实 GPU benchmark。
++
++调用仍通过 `evaluate_pair.py` 原命令；其 SHA `4e6a96e57009a5be4bc3c085809042aae093a7039c864a380b80c3574e114418` 应保持不变。输出报告中的 `precision_resource_verification.allocator_binding` 说明本次实际入口证据。原 FreeSurfer 调用和数值比较、参考文献继续沿用单对与 cohort 说明。本修改是验证工具修正，不新增原软件算法。
++
++Python 调用示例（在 `cohort/pair` 目录执行；所有路径取实际冻结配置）：
++
++```python
++import json
++from pathlib import Path
++from evaluated_role_bindings import verify_admitted_candidate_binding
++
++# evaluator 配置指定本次 precision candidate、源码归档和准入清单。
++evaluation_config_path = Path('ds000030_sub-10159.json')
++evaluation_config = json.loads(evaluation_config_path.read_text())
++# 实际配置是通过准入并执行完成的 retry 配置，不能用 prepared 配置替代。
++actual_config_path = Path(evaluation_config['evaluated_config'])
++actual_config = json.loads(actual_config_path.read_text())
++binding_result = verify_admitted_candidate_binding(evaluation_config, actual_config)
++# allocator_binding 保留真实入口策略；API 已初始化时 effective 仍为 unknown。
++print(json.dumps(binding_result['allocator_binding'], indent=2))
++```
++
++参数 `evaluation_config` 包含 `evaluated_role=precision_candidate`、`evaluated_config`（实际 JSON）、`evaluated_commit`（冻结提交）、`evaluated_resources`（准入 JSON）、`evaluated_resources_kind=admission_inventory`、`code_root`（实际源码目录）、`source_archive`（冻结归档）和 `gpu_uuid`。`actual_config` 是 `evaluated_config` 的原样解析结果，路径、SHA、入口与执行参数逐字段绑定 launch 和准入清单。缺失文件或任一不一致会中止验证。
++
++CPU 回归命令（无独立原软件命令）：
++
++```bash
++python -m unittest discover -s validation/recon_all/accuracy_20261003/cohort/pair -p 'test_*.py' -v
++```

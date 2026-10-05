@@ -2,7 +2,7 @@
 
 ## 当前结果
 
-实际计算源码为 `3a0c9aba6321b4981fd8174b4b191515459aa38b`，基于本轮核对的主线 `cc940273`；源码归档 SHA-256 为 `03cc806fb449a8620c8caa78b1af86dfaff6b64ab9e9e7c5210cf12184aa7f31`。2026-10-04，公开 ds000114/sub-06、sub-07 均从原始 T1 和空目录完成，合并候选执行与完整官方比较均为 **2/10**；其余八例按计划串行执行。冻结基线和官方分别为 8/10、10/10 成功。先给出 sub-06 完整数值，再列 sub-07 结果。
+实际计算源码为 `3a0c9aba6321b4981fd8174b4b191515459aa38b`，基于本轮核对的主线 `cc940273`；源码归档 SHA-256 为 `03cc806fb449a8620c8caa78b1af86dfaff6b64ab9e9e7c5210cf12184aa7f31`。归档回执确认公开 ds000114/sub-06、sub-07 及 ds000030/sub-10159 均从原始 T1 和空目录完成，合并候选执行为 **3/10**、完整官方数值比较为 **2/10**；第三例旧helper入口绑定失败，数值评估未执行，其余七例完成状态须现场重新核对。冻结基线和官方分别为 8/10、10/10 成功。先给出 sub-06 完整数值，再列 sub-07 结果。
 
 | 检查 | 实测 |
 | --- | --- |
@@ -128,9 +128,17 @@
 
 球面负面积面按既有零阈值检测：候选左侧sphere/sphere.reg分别49/56、右侧0/0；官方左侧58/26、右侧27/35。这是待定位的质量现象，不能因官方也存在而视为全部质量验收通过，也不能仅凭异网格数量认定本轮引入退化。white/pial proper相互穿越面对应数候选左265/右227，官方左240/右213，接触与重合面单列。
 
-[完整第二例报告](../../validation/recon_all/accuracy_20261003/runtime/precision_sub07_official_evaluation_v1/RESULTS.md)绑定实际输入、双方程序/源版本、18阶段、逐脑区、标签、表面距离和质量数据；[真实整例元数据](../../validation/recon_all/accuracy_20261003/runtime/sub07_3a_status_20261004_v1/README.md)保留原始完成回执、精度设置、同步、GPU采样和全部worker启动结果。旧冻结队列在后续评估结束前没有将整例完成状态写盘，导致磁盘状态暂时滞后；本地已修正并通过12项CPU回归，服务器正在执行的冻结脚本保持原字节，实际完成以原始回执和评估checkpoint核对。
+[完整第二例报告](../../validation/recon_all/accuracy_20261003/runtime/precision_sub07_official_evaluation_v1/RESULTS.md)绑定实际输入、双方程序/源版本、18阶段、逐脑区、标签、表面距离和质量数据；[真实整例元数据](../../validation/recon_all/accuracy_20261003/runtime/sub07_3a_status_20261004_v1/README.md)保留原始完成回执、精度设置、同步、GPU采样和全部worker启动结果。旧冻结队列在后续评估结束前没有将整例完成状态写盘，导致磁盘状态暂时滞后；本地已修正并通过12项CPU回归，当时服务器执行的冻结脚本保持原字节；该历史快照中的实际完成以原始回执和评估checkpoint核对，不作为当前队列状态。
 
 ![第二例原始T1与官方和候选表面叠加](../../validation/recon_all/accuracy_20261003/runtime/precision_sub07_official_evaluation_v1/evaluation/figures/t1_surface_overlay.png)
+
+## 第三例 sub-10159：预初始化CUDA API
+
+第三例 ds000030/sub-10159 的[归档原始回执](../../validation/recon_all/accuracy_20261003/runtime/sub10159_3a_api_complete_20261004_v1/summary.json)绑定同一冻结生产源3a。原始T1和空目录整例完成，入口墙钟 **2769.71966387704秒**，内部API 2766.121300884988秒，pipeline 2760.63337273011秒；138/138输出存在，双侧生产网格检查通过。该例计入raw完成3/10，完整官方数值比较仍为2/10。
+
+自身父子进程同一时刻合计采样峰 **10,947,133,440字节**（10.947GB），共1321次采样，请求间隔2秒、最大实际间隔3.5076937531121075秒；连续峰未验证。预初始化API入场策略实际为 `preserved_preinitialized_unknown`：初始化前driver选择disabled，调用API前保留4字节CUDA标量，但生产入口保留已初始化上下文的未知allocator语义。PyTorch计数为0或不可用不表示设备显存为0，同PID调用顺序由冻结源码证明，原运行回执没有独立记录API子进程PID。细节见[归档API上下文审计](../../validation/recon_all/accuracy_20261003/runtime/sub10159_3a_api_complete_20261004_v1/API_CONTEXT_AUDIT.md)。
+
+旧冻结helper的 `verify_binding` 因不接受该API实际策略而失败，原失败checkpoint及日志保留；数值阶段未执行，因此本例没有官方Dice、表面距离、脑区偏差或严格138项数值结果。2026-10-05的helper修复与CPU回归说明见[API入口绑定修正](../../validation/recon_all/accuracy_20261003/cohort/pair/INITIALIZED_API_ALLOCATOR_BINDING.md)，工具修复不计作新的真实官方评估。本次耐久恢复逐字节核对81份archive原件（80份manifest条目及manifest），另保留4份派生审计文件；未改写原报告数值。这里仅更新已归档的第三例证据，不据旧queue快照声明第四例或当前服务器队列状态。
 
 ## 报告复现与输入输出
 
@@ -165,6 +173,8 @@ summary = summarize(
 九例队列使用[明确角色和失败协议](../../validation/recon_all/accuracy_20261003/PRECISION_CANDIDATE_QUEUE.md)，五例CLI及五例预初始化CUDA API覆盖仍需全部实际完成。本次没有新增生产依赖，主页 Conda 安装路径不变；未在物理没有预装脑影像软件的干净环境完成本次整例隔离验收。既有运行路径不移动，全部新源码/产物位于统一 FNIT workspaces/runs。工作分支保留，尚未推送 main。
 
 ## 更新与参考
+
+2026-10-05：耐久恢复第三例预初始化CUDA API的完成元数据，当前归档raw为3/10、完整官方数值比较为2/10；保留旧helper绑定失败，未执行第三例数值重评估。
 
 2026-10-04：完成合并候选前两例及各18阶段官方比较与脑图，首例实际启动恢复、第二例首次启动成功；完成同输入左侧冷暖指标/六图谱回归，记录第二例球面翻折。另纠正原两例参考绑定的元数据，未重算或覆盖原数值。
 

@@ -1,0 +1,171 @@
+{
+  "source_sha256": "6690d0e37682a024ef2daaa06d9e3c366ac2d41922905f1c0d39b3603ca93249",
+  "before_import_environment_evidence": {
+    "source_lines": [
+      68,
+      75,
+      82,
+      92,
+      97,
+      120
+    ],
+    "selected_environment": {
+      "PYTHONPATH": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/ten_case_candidate_frozen_3a0c9aba/src",
+      "CUDA_VISIBLE_DEVICES": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+      "OMP_NUM_THREADS": "4",
+      "PYTORCH_NO_CUDA_MEMORY_CACHING": "1"
+    },
+    "scope": "main builds child env with PYTORCH_NO_CUDA_MEMORY_CACHING=1 before subprocess exec; api_child imports torch after child launch"
+  },
+  "API_context_sequence": {
+    "source_lines": [
+      124,
+      125,
+      126,
+      132,
+      136,
+      137,
+      138
+    ],
+    "sequence": [
+      "configure_cuda_allocator disabled before context",
+      "create retained torch.ones float32 scalar on device",
+      "synchronize",
+      "record CUDA initialized true/deviceUUID/retained4B",
+      "invoke run_recon_all_python same api_child function without subprocess between",
+      "synchronize",
+      "write receipt after successful return"
+    ],
+    "runtime_receipt": {
+      "cuda_initialized_before_api": true,
+      "device_uuid": "26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+      "retained_tensor_bytes": 4,
+      "allocator_before_initialization": {
+        "requested": "disabled",
+        "cuda_initialized_at_entry": false,
+        "environment_at_entry": "1",
+        "environment_after_selection": "1",
+        "effective": "disabled",
+        "torch_stats_known_valid": false,
+        "torch_stats_known_unavailable": true
+      }
+    },
+    "same_PID_evidence_boundary": "frozen source executes initialization and API in same api_child function with no fork/exec between; actual receipt and pipeline contain no api_child PID, monitor PID123917 belongs outer driver. Do not claim separately recorded runtime same-PID evidence."
+  },
+  "actual_pipeline_allocator": {
+    "requested": "auto",
+    "cuda_initialized_at_entry": true,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "preserved_preinitialized_unknown",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": false
+  },
+  "thread_budget": {
+    "requested_threads": 4,
+    "scope": "Torch process intraop and current caller Numba thread mask",
+    "torch": {
+      "before": 4,
+      "effective": 4,
+      "interop_unchanged": 64,
+      "restored": 4
+    },
+    "numba": {
+      "before": 4,
+      "effective": 4,
+      "initial_capacity": 4,
+      "mask_only": true,
+      "threading_layer": "tbb",
+      "restored": 4
+    },
+    "environment_modified": false,
+    "restoration_complete": true
+  },
+  "parent_idle_cuda_cache": [
+    {
+      "file": "case/attempt_01/subject/scripts/finish_surface.hemisphere-group.json",
+      "operation": "finish_surface",
+      "parent_idle_cuda_cache": {
+        "status": "complete",
+        "device": "cuda:0",
+        "seconds": 0.0014827470295131207,
+        "before": {
+          "allocated_bytes": 0,
+          "reserved_bytes": 0
+        },
+        "after": {
+          "allocated_bytes": 0,
+          "reserved_bytes": 0
+        },
+        "cuda_context_created": null,
+        "cuda_context_measurement": "not measured; global initialization does not prove target-device context exists",
+        "scope": "parent PyTorch allocator counters; CUDA contexts, workers and external allocators excluded",
+        "method": "synchronize selected device then empty_cache on parent allocator; live tensors and allocator policy unchanged"
+      }
+    },
+    {
+      "file": "case/attempt_01/subject/scripts/annotation.hemisphere-group.json",
+      "operation": "annotation",
+      "parent_idle_cuda_cache": {
+        "status": "complete",
+        "device": "cuda:0",
+        "seconds": 0.001960969064384699,
+        "before": {
+          "allocated_bytes": 0,
+          "reserved_bytes": 0
+        },
+        "after": {
+          "allocated_bytes": 0,
+          "reserved_bytes": 0
+        },
+        "cuda_context_created": null,
+        "cuda_context_measurement": "not measured; global initialization does not prove target-device context exists",
+        "scope": "parent PyTorch allocator counters; CUDA contexts, workers and external allocators excluded",
+        "method": "synchronize selected device then empty_cache on parent allocator; live tensors and allocator policy unchanged"
+      }
+    },
+    {
+      "file": "case/attempt_01/subject/scripts/register.hemisphere-group.json",
+      "operation": "register",
+      "parent_idle_cuda_cache": {
+        "status": "complete",
+        "device": "cuda:0",
+        "seconds": 0.003532690927386284,
+        "before": {
+          "allocated_bytes": 0,
+          "reserved_bytes": 0
+        },
+        "after": {
+          "allocated_bytes": 0,
+          "reserved_bytes": 0
+        },
+        "cuda_context_created": null,
+        "cuda_context_measurement": "not measured; global initialization does not prove target-device context exists",
+        "scope": "parent PyTorch allocator counters; CUDA contexts, workers and external allocators excluded",
+        "method": "synchronize selected device then empty_cache on parent allocator; live tensors and allocator policy unchanged"
+      }
+    },
+    {
+      "file": "case/attempt_01/subject/scripts/surface.hemisphere-group.json",
+      "operation": "surface",
+      "parent_idle_cuda_cache": {
+        "status": "complete",
+        "device": "cuda:0",
+        "seconds": 0.0019995542243123055,
+        "before": {
+          "allocated_bytes": 0,
+          "reserved_bytes": 0
+        },
+        "after": {
+          "allocated_bytes": 0,
+          "reserved_bytes": 0
+        },
+        "cuda_context_created": null,
+        "cuda_context_measurement": "not measured; global initialization does not prove target-device context exists",
+        "scope": "parent PyTorch allocator counters; CUDA contexts, workers and external allocators excluded",
+        "method": "synchronize selected device then empty_cache on parent allocator; live tensors and allocator policy unchanged"
+      }
+    }
+  ],
+  "equivalence": "not_assessed"
+}

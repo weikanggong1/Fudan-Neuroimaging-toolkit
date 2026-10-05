@@ -41,6 +41,63 @@ def evaluation_spec(config):
                                  'precision_candidate_evaluated_separately; equivalence_not_assessed')}
 
 
+# This driver initializes a retained float32 tensor, synchronizes, then calls the
+# Python API in api_child. Its exact bytes are admitted as an external tool.
+INITIALIZED_API_DRIVER_SHA256 = '6690d0e37682a024ef2daaa06d9e3c366ac2d41922905f1c0d39b3603ca93249'
+
+
+def verify_precision_allocator_binding(actual_config, launch, pipeline, tool_receipts, config_path):
+    """Bind CLI cache selection or the frozen, already initialized API entry."""
+    allocator = pipeline.get('cuda_allocator', {})
+    invocation = actual_config.get('invocation')
+    if invocation == 'cli':
+        if pipeline.get('gpu_memory_mode') != 'disabled' or allocator.get('effective') != 'disabled':
+            raise ValueError('precision candidate actual CLI allocator differs')
+        return {'invocation': invocation, 'gpu_memory_mode': 'disabled', 'cuda_allocator': allocator}
+    if invocation != 'initialized_cuda_api':
+        raise ValueError('precision candidate actual invocation differs')
+    expected = {'requested': 'auto', 'cuda_initialized_at_entry': True,
+                'environment_at_entry': '1', 'environment_after_selection': '1',
+                'effective': 'preserved_preinitialized_unknown',
+                'torch_stats_known_valid': False, 'torch_stats_known_unavailable': False}
+    if (pipeline.get('gpu_memory_mode') != 'preserved_preinitialized_unknown'
+            or any(type(allocator.get(key)) is not type(value) or allocator.get(key) != value
+                   for key, value in expected.items())):
+        raise ValueError('precision candidate actual initialized API allocator differs')
+    driver = (tool_receipts or {}).get('whole_case_driver', {})
+    if driver.get('sha256') != INITIALIZED_API_DRIVER_SHA256:
+        raise ValueError('precision candidate initialized API requires known frozen driver')
+    command = [actual_config['python'], driver['path'], '--api-child',
+               str(Path(config_path).resolve())]
+    if (launch.get('script_sha256') != INITIALIZED_API_DRIVER_SHA256
+            or launch.get('command') != command):
+        raise ValueError('precision candidate initialized API child command/driver differs')
+    receipt_path = Path(actual_config['output'])/'run-api-invocation.json'
+    receipt_sha = digest(receipt_path)
+    receipt = read(receipt_path)
+    uuid = receipt.get('device_uuid')
+    if isinstance(uuid, str) and not uuid.startswith('GPU-'):
+        uuid = 'GPU-' + uuid
+    before = receipt.get('allocator_before_initialization', {})
+    expected_before = {'requested': 'disabled', 'cuda_initialized_at_entry': False,
+                       'environment_at_entry': '1', 'environment_after_selection': '1',
+                       'effective': 'disabled', 'torch_stats_known_valid': False,
+                       'torch_stats_known_unavailable': True}
+    if (receipt.get('cuda_initialized_before_api') is not True
+            or uuid != actual_config['gpu_uuid']
+            or type(receipt.get('retained_tensor_bytes')) is not int
+            or receipt['retained_tensor_bytes'] != 4
+            or any(type(before.get(key)) is not type(value) or before.get(key) != value
+                   for key, value in expected_before.items())):
+        raise ValueError('precision candidate initialized API initialization receipt differs')
+    if digest(receipt_path) != receipt_sha:
+        raise ValueError('precision candidate initialized API receipt changed during binding')
+    return {'invocation': invocation, 'gpu_memory_mode': pipeline['gpu_memory_mode'],
+            'cuda_allocator': allocator, 'api_invocation_path': str(receipt_path),
+            'api_invocation_sha256': receipt_sha, 'api_invocation': receipt,
+            'scope': 'frozen driver and run receipt bind initialization to API entry; allocator remains unknown'}
+
+
 def verify_admitted_candidate_binding(evaluation, actual_config):
     """Share completed execution, prepared origin, source archive and inventory checks."""
     label = 'precision candidate' if evaluation.get('evaluated_role') == 'precision_candidate' else 'startup'
@@ -208,13 +265,13 @@ def verify_admitted_candidate_binding(evaluation, actual_config):
                 or any(precision.get('caller_autocast', {}).get(kind, {}).get('enabled') is not False
                        for kind in ('cpu', 'cuda'))):
             raise ValueError('precision candidate actual pipeline low precision policy differs')
-        if (pipeline.get('gpu_memory_mode') != 'disabled'
-                or pipeline.get('cuda_allocator', {}).get('effective') != 'disabled'):
-            raise ValueError('precision candidate actual allocator differs')
+        allocator_binding = verify_precision_allocator_binding(
+            actual_config, launch, pipeline, tool_receipts, config_path)
         if digest(pipeline_path) != pipeline_sha:
             raise ValueError('precision candidate pipeline changed during binding')
         result.update(pipeline_path=str(pipeline_path), pipeline_sha256=pipeline_sha,
                       pipeline_status='complete', output_validation=validation, precision=precision,
+                      allocator_binding=allocator_binding,
                       scope='completed actual raw-T1 precision candidate; no historical whole report substituted')
     return result
 

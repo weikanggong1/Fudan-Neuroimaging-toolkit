@@ -378,6 +378,31 @@ def build_report(collected, prior, prior_sha256):
     return redact(report)
 
 
+def ensure_public_report(serialized: str) -> None:
+    """检查待发布的纯 JSON 字符串；通过返回 None，含私密信息抛 ValueError。
+
+    只检查文本，不改写数值或处理 MRI，也不执行原软件命令。
+    """
+    forbidden = ('/cwStorage/', '/public/', '/home/', '/mnt/', '/tmp/', 'FS_LICENSE',
+                 'gongwk@', 'BEGIN PRIVATE KEY', 'PYTHONPATH',
+                 'job_command_basenames_only')
+    if any(token in serialized for token in forbidden):
+        raise ValueError('private location, environment or command escaped redaction')
+    if re.search(r'gwk_[0-9]+', serialized, flags=re.IGNORECASE):
+        raise ValueError('private account pattern escaped redaction')
+    # 仅检测 RFC1918 三个范围；不把公开 IPv4 或版本号当作私网地址。
+    ipv4_pattern = r'(?<![\w.])(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?![\w.])'
+    for match in re.finditer(ipv4_pattern, serialized):
+        octets = tuple(int(part) for part in match.group().split('.'))
+        if any(part > 255 for part in octets):
+            continue
+        private = (octets[0] == 10 or
+                   (octets[0] == 172 and 16 <= octets[1] <= 31) or
+                   octets[:2] == (192, 168))
+        if private:
+            raise ValueError('private IPv4 address escaped redaction')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--collected', required=True, type=Path, help='private collected JSON records')
@@ -390,11 +415,7 @@ def main():
     prior_bytes = args.prior_public.read_bytes()
     report = build_report(collected, json.loads(prior_bytes), hashlib.sha256(prior_bytes).hexdigest())
     serialized = json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + '\n'
-    forbidden = ('/cwStorage/', '/public/', '/home/', '/mnt/', '/tmp/', 'FS_LICENSE',
-                 'gongwk@', 'gwk_44019', 'BEGIN PRIVATE KEY', 'PYTHONPATH',
-                 'job_command_basenames_only')
-    if any(token in serialized for token in forbidden):
-        raise ValueError('private location, environment or command escaped redaction')
+    ensure_public_report(serialized)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile('w', encoding='utf-8', dir=args.output.parent,
                                      prefix=args.output.name + '.', suffix='.tmp', delete=False) as stream:

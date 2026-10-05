@@ -1,0 +1,57 @@
+{
+  "checked_at_utc": "2026-10-04T17:15:40.577411+00:00",
+  "files": [
+    {
+      "path": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat-2/work/fnit-recon-recovered-20261005/validation/recon_all/accuracy_20261003/run_resource_replay_queue.py",
+      "sha256": "42f34188719a8e3fbe65d86f03ff7daf2e568b7a467de075c4b87958fc8c5ecf",
+      "bytes": 29975
+    },
+    {
+      "path": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat-2/work/fnit-recon-recovered-20261005/validation/recon_all/accuracy_20261003/test_precision_validation_queue.py",
+      "sha256": "f72fbc1af0c1814bc7490afbf2aa8a47f2063cb633c8026d40817b6c08c5b11d",
+      "bytes": 26563
+    },
+    {
+      "path": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat-2/work/fnit-recon-recovered-20261005/validation/recon_all/accuracy_20261003/PRECISION_CANDIDATE_QUEUE.md",
+      "sha256": "a8df3c7a261050ab1875bda8d257cb2ed45c4ba8eba566a152e8c15ed41af58b",
+      "bytes": 16984
+    }
+  ],
+  "tests": 23,
+  "test_seconds": 17.091,
+  "tests_passed": true,
+  "test_command": "python3 -m unittest test_precision_validation_queue -v",
+  "test_log_path": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat-2/work/fnit-recon-recovered-20261005/validation/recon_all/accuracy_20261003/runtime/evaluation_only_recovery_20261005/reviewed_tests.log",
+  "test_log_sha256": "a3f2e5d6ce58625062f544f82dbc8fe2eeb4e53b03b42ff8ac5ab8d648b37e97",
+  "prior_22_test_receipt_preserved": true,
+  "prior_receipt_sha256": "c32b5633a0e122bb289b34e8e0516835d65e8a82bc07ed8c08d7d200d50ea035",
+  "cli_dispatch": "Only execution_role precision_evaluation_only selects new branch; baseline and precision_candidate retain original path.",
+  "review_fix": "Remove duplicate owned-group cleanup on cancellation/timeout; reject not-yet-created actual config without raw start.; raw evidence SHA rechecks stream 1MB chunks and never reparse large pipeline JSON.",
+  "required_top_level": [
+    "execution_role",
+    "python",
+    "shared_lock",
+    "cases"
+  ],
+  "optional_top_level_defaults": {
+    "poll_seconds": 30,
+    "maximum_wait_seconds": 86400,
+    "evaluation_timeout_seconds": 86400
+  },
+  "required_case_fields": [
+    "id",
+    "actual_config",
+    "actual_config_sha256",
+    "admission_report",
+    "post_evaluation"
+  ],
+  "required_post_evaluation_fields": [
+    "script",
+    "script_sha256",
+    "config",
+    "config_sha256"
+  ],
+  "not_generated_actual_config": "Preflight fails; include only existing actual configs, then create a separate frozen plan for later generated configs.",
+  "template_server_verified": false,
+  "real_image_benchmark_executed": false
+}

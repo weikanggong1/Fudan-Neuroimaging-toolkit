@@ -134,6 +134,12 @@ class PrecisionCandidateBindings(unittest.TestCase):
         self.admission_path.write_text(json.dumps(self.admission))
         with self.assertRaisesRegex(ValueError, 'not bound to admitted inventory'): self.verify()
 
+    def test_cli_cannot_claim_preinitialized_unknown(self):
+        self.pipeline['gpu_memory_mode']='preserved_preinitialized_unknown'
+        self.pipeline['cuda_allocator']['effective']='preserved_preinitialized_unknown'
+        self.pipeline_path.write_text(json.dumps(self.pipeline))
+        with self.assertRaisesRegex(ValueError,'CLI allocator'): self.verify()
+
     def test_evaluator_emits_precision_names_and_resource_key(self):
         fixture = pair_fixtures.PairInputBindingTests()
         fixture.setUp()
@@ -149,6 +155,106 @@ class PrecisionCandidateBindings(unittest.TestCase):
             self.assertEqual(state['status'], 'binding_verified_only')
         finally:
             fixture.doCleanups()
+
+
+class InitializedAPIBindings(unittest.TestCase):
+    candidate_commit = PRECISION_COMMIT
+    verify = PrecisionCandidateBindings.verify
+    add_benchmark_tools = PrecisionCandidateBindings.add_benchmark_tools
+    """Synthetic CPU provenance fixtures; these tests make no GPU accuracy claim."""
+
+    def setUp(self):
+        PrecisionCandidateBindings.setUp(self)
+        from evaluated_role_bindings import digest
+        from unittest.mock import patch
+        tools = self.add_benchmark_tools()
+        # Synthetic driver bytes exercise the binding chain; production only
+        # accepts INITIALIZED_API_DRIVER_SHA256 from the real frozen driver.
+        self.driver = tools['whole_case_driver']
+        self.driver_patch = patch('evaluated_role_bindings.INITIALIZED_API_DRIVER_SHA256', self.driver['sha256'])
+        self.driver_patch.start(); self.addCleanup(self.driver_patch.stop)
+        self.actual['invocation'] = 'initialized_cuda_api'
+        self.config_path.write_text(json.dumps(self.actual))
+        self.launch.update(self.actual, config_sha256=digest(self.config_path),
+                           script_sha256=self.driver['sha256'],
+                           command=[self.actual['python'],self.driver['path'],'--api-child',str(self.config_path.resolve())])
+        self.launch_path.write_text(json.dumps(self.launch))
+        original_path = Path(self.admission['original_config'])
+        original = json.loads(original_path.read_text()); original['invocation'] = 'initialized_cuda_api'
+        original_path.write_text(json.dumps(original))
+        prepared_path = Path(original['diagnostic_root'])/'launch.json'
+        prepared = json.loads(prepared_path.read_text())
+        prepared.update(original, config_sha256=digest(original_path)); prepared_path.write_text(json.dumps(prepared))
+        self.admission.update(config=self.actual, original_config_sha256=digest(original_path),
+                              original_launch_sha256=digest(prepared_path))
+        self.admission_path.write_text(json.dumps(self.admission))
+        self.pipeline.update(gpu_memory_mode='preserved_preinitialized_unknown',cuda_allocator={
+            'requested':'auto','cuda_initialized_at_entry':True,'environment_at_entry':'1',
+            'environment_after_selection':'1','effective':'preserved_preinitialized_unknown',
+            'torch_stats_known_valid':False,'torch_stats_known_unavailable':False})
+        self.pipeline_path.write_text(json.dumps(self.pipeline))
+        self.receipt = {'cuda_initialized_before_api':True,
+            'device_uuid':self.actual['gpu_uuid'].removeprefix('GPU-'),'retained_tensor_bytes':4,
+            'allocator_before_initialization':{'requested':'disabled','cuda_initialized_at_entry':False,
+                'environment_at_entry':'1','environment_after_selection':'1','effective':'disabled',
+                'torch_stats_known_valid':False,'torch_stats_known_unavailable':True}}
+        self.receipt_path = Path(self.actual['output'])/'run-api-invocation.json'
+        self.receipt_path.write_text(json.dumps(self.receipt))
+
+    def test_initialized_api_preserves_unknown(self):
+        result = self.verify()['allocator_binding']
+        self.assertEqual(result['gpu_memory_mode'],'preserved_preinitialized_unknown')
+        self.assertIs(result['cuda_allocator']['torch_stats_known_unavailable'],False)
+        self.assertEqual(result['api_invocation'],self.receipt)
+        self.assertNotIn('pid',result)
+
+    def test_missing_receipt_rejected(self):
+        self.receipt_path.unlink()
+        with self.assertRaises(FileNotFoundError): self.verify()
+
+    def test_initialization_uuid_and_retained_receipt_drift_rejected(self):
+        import copy
+        for key,value in [('cuda_initialized_before_api',False),('device_uuid','other'),
+                          ('retained_tensor_bytes',8),('retained_tensor_bytes',4.),('retained_tensor_bytes',True)]:
+            receipt = copy.deepcopy(self.receipt); receipt[key]=value
+            self.receipt_path.write_text(json.dumps(receipt))
+            with self.assertRaisesRegex(ValueError,'initialization receipt'): self.verify()
+        self.receipt_path.write_text(json.dumps(self.receipt))
+        self.receipt['allocator_before_initialization']['effective']='preserved_preinitialized_unknown'
+        self.receipt_path.write_text(json.dumps(self.receipt))
+        with self.assertRaisesRegex(ValueError,'initialization receipt'): self.verify()
+
+    def test_wrong_child_command_and_driver_rejected(self):
+        original = self.launch['command']
+        for command in [original[:-1], original[:-1]+['other-config'],
+                        [original[0],original[1],'--cli',original[3]]]:
+            self.launch['command']=command; self.launch_path.write_text(json.dumps(self.launch))
+            with self.assertRaisesRegex(ValueError,'child command/driver'): self.verify()
+        self.launch['command']=original; self.launch['script_sha256']='0'*64
+        self.launch_path.write_text(json.dumps(self.launch))
+        with self.assertRaisesRegex(ValueError,'child command/driver'): self.verify()
+
+    def test_unknown_frozen_driver_rejected(self):
+        self.driver_patch.stop()
+        with self.assertRaisesRegex(ValueError,'known frozen driver'): self.verify()
+
+    def test_api_disabled_claim_rejected_even_with_env_one(self):
+        self.pipeline['gpu_memory_mode']='disabled'; self.pipeline['cuda_allocator']['effective']='disabled'
+        self.pipeline_path.write_text(json.dumps(self.pipeline))
+        with self.assertRaisesRegex(ValueError,'initialized API allocator'): self.verify()
+
+    def test_receipt_changes_during_read_rejected(self):
+        from unittest.mock import patch
+        import evaluated_role_bindings as binding
+        read = binding.read
+        def mutate(path):
+            value = read(path)
+            if Path(path)==self.receipt_path: self.receipt_path.write_text(json.dumps({**value,'drift':True}))
+            return value
+        with patch.object(binding,'read',side_effect=mutate):
+            with self.assertRaisesRegex(ValueError,'receipt changed'): self.verify()
+
+    # Parent tests cover CLI and baseline/compatibility behavior separately.
 
 
 if __name__ == '__main__': unittest.main()
