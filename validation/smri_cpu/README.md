@@ -44,11 +44,12 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 | 功能 | 本版已完成的修复或定位 | 完整真实输入证据 |
 |---|---|---|
 | [TorchFAST](fast_fixes_20261004/README.md) | CPU 标量 C 指数/对数修复；默认和一组非默认八图与官方逐值相同 | nodecw7 默认完整 CLI 官方 368.198–411.291 s、FNIT 100.174–110.173 s，中位数比 3.706；完整脑 GPU 两后端各八图/headers 相同、显存相同，共享 GPU 时间另列 |
-| [SynthMorph](../synthmorph/cpu_fixes_20261004/README.md) | CPU slope/intercept 解码顺序、affine/rigid 双向契约、joint 原始坐标插值、小网格 oneDNN、归约和矩阵组合顺序 | 四模式默认已测门通过，joint 192/256 的完整场与零边界门均通过，物化 API 与路径输出相同。完整 GPU joint 两图、两场和完整元数据新旧相同，reserved 17.836 GB；当前相邻 CPU 两对约慢 5%，新插值优化另行验收 |
+| [SynthMorph](../synthmorph/cpu_fixes_20261004/README.md) | CPU 解码、双向契约、有序插值、oneDNN 和矩阵顺序修复；精确 NumBa 采样与实际 Conda Eigen 缓存修复已接入 | joint 192/256 的完整场、脑内及零边界门通过。最新六次完整 CPU 两图两场及全部元数据与已验收 v29 逐位相同；256 同八核 ABBA 中位数 163.094→155.086 s，本组缩短 4.91%，RSS 11.718–11.799 GB。暖采样快 5.35/6.07 倍，局部冷 256 慢 12.3%，不混作完整时间。CUDA 路线及精度策略保持，14 项隔离门通过；完整 H100 两图两场和 reserved 17.836 GB 来自已绑定父版，未重复 GPU CNN 或宣称新的 GPU 提速 |
 | [WMH-SynthSeg](synth_fixes_20261004/README.md) | 推理激活生命周期、CPU 权重搬运、GPU crop 工作区管理 | 完整 CPU 同官方标签/概率/CSV 相同；GPU crop allocated/reserved 为 18.374/18.438 GB，旧输出 SHA 和 57 次卷积 kernel 全同。默认 no-crop 保留原 GPU 路径、同实例模式恢复通过，但仍约 38 GB allocated |
 | [球面配准](recon_fixes_20261004/FULL_REGISTRATION.md) | CPU 平均保序并行；完整左半球同输入与官方逐点比较 | 119,451 点坐标/有序面/解码几何全同官方，旧新轨迹相同。新进程旧 764.907 / 新 348.038 / 官方 261.199 s，新仍慢 33.25%；GPU 平均三轮数输出/内存相同，原始 T1 整链未新跑 |
 | [C++ 持续线程组平均器](average_cpu_persistent_20261004/README.md) | 四次冻结源码完整配准 ABBA；正式源、任务、运行库与相同 CPU 资源门通过 | 四次轨迹、119,451 点坐标、有序面和几何相同；对同输入保存的官方结果也相同，负面积面为 0。候选各 67 次 eligible 调用，实测 C++ team 均为 8。平均步骤中位数 55.151→26.447 s（2.085 倍）；完整进程 914.965→963.223 s，慢 5.27%。Numba 基线没有逐调用 team 采样，绑定的配置、环境和预算均为 8；官方是历史保存参考，未重跑。不能将算子收益称作完整配准加速 |
 | [GEMS](gems_cpu_epsilon_20261004/README.md) | Gaussian 广播修复已验收；定位到 mixture 缺少官方 `1e-15`，完成 CPU 混合内部精度候选的全部 recipe 对照 | 首次完整梯度相对差约 4e−8，但最终 native 通过数仅 37/105→43/105、HR 41/107→45/107；丘脑丢失三个旧通过区，HA 仍有多数区域未过。保存全部 220 行 hard/soft 指标，候选不替换默认；原 CUDA 仍缺 epsilon |
+| [GEMS 同点与首步定位](gems_first_trial_20261005/README.md) | 同一真实初态复现与已安装原版的目标、完整梯度、四面体方向及单次更新 | 三处同点梯度相对差约 5e−8、cost 绝差≤0.004632。旧丘脑/左 HA 对照漏掉负行列式时的 tet 换序，修正的是参考适配器，FNIT prior 不改。右 HA 首步旧 Armijo 最大位移 0.5 voxel、原版 1 voxel，按原搜索定义的探针舍入点相同。仅首步和同点评分，尚未通过完整优化、分割或速度门 |
 | [FastVBM/FNIRT 定位](gems_fixes_20261004/FNIRT_READONLY.md) | 大量误差进入非线性估计段；最终乘法不是额外误差来源 | 固定官方场的实际转换/重采样 RMSE 4.39e−6，旧完整链 0.0189811。解析/稠密 Jacobian 定义差异另列 |
 | [FastVBM CPU Jacobian 修复](fnirt_jacobian_20261004/README.md) | CPU FNIRT 采用已有解析 Jacobian；GPU/SynthMorph 保留原路径 | 同官方系数对 `jout` RMSE 7.37e−8；固定真实 GM stage 的 Jacobian RMSE 0.01404→0.01259。调制图 RMSE 略降、最大误差略增；完整 GPU 后处理三图/header/QC 相同，未重测整 pipeline |
 | [FNIRT 首轮实测](fnirt_first_diff_20261004/README.md) | 首次分歧为正方向 moving GM 的平滑累计顺序；翻转控制整图逐值相同 | 初始 mask、fixed 平滑相同；首轮梯度/accepted coefficient 差很小。共享真实 FP64 系数 `4→2` 转换最大差 1.35e−12 mm；[完整平滑候选](fnirt_cpu_orientation_20261004/README.md)最终退化，未接入 |
@@ -60,7 +61,9 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 
 SynthSR 修复并普通合并最新 main 后，本地组件回归为 **2,092 passed、5 skipped，138.79 秒**。覆盖前述组件及最新 FLIRT/FNIRT、ApplyWarp、ConvertWarp、InvWarp 和空间转换接口；测试和实际源码 SHA 见[最新整合记录](integration_sr_final_20261004.json)。首次整合的两项 NMI 测试固定统计 scatter 调用次数，未覆盖 CPU Numba 后端；已改为逐值检查送入熵计算的完整直方图，数值门未改变，生产数学也未改。两项 warning 来自既有 FastVBM profiler 测试未设 warmup，不能使用测试时间作 benchmark。
 
-该 2,092 项记录早于本次 joint 原始插值与正式 CPP 平均器合并，只覆盖其注明的源码。2026-10-05 当前整合版 `55d7a88f` 的组件回归为 **2,148 passed、5 skipped，158.32 秒**；加入正式 CPP 平均器的合同与安全测试，完整文件哈希及测试期间不变性见[本次整合记录](integration_20261005.json)。两个 warning 仍来自既有 profiler 测试。此次没有包含尚未验收的 Eigen loader、精确 NumBa 采样候选或未采纳的 GEMS mixed 补丁。前一轮 **931 passed、3 skipped，69.70 秒**及其源码仍见[原整合记录](integration_20261004.json)。组件回归不代替真实影像与原软件的对照，也没有重新运行原始 T1 的完整 recon-all。
+该 2,092 项记录早于本次 joint 原始插值与正式 CPP 平均器合并，只覆盖其注明的源码。中间版 `55d7a88f` 的 **2,148 passed、5 skipped，158.32 秒**见[当时整合记录](integration_20261005.json)，当时尚未包括安全 Eigen loader 和精确 NumBa 采样。
+
+2026-10-05 整合版 `c2ceb18e` 的组件回归为 **2,218 passed、5 skipped，158.37 秒**；包含上述两项已验收 CPU 修改、正式 CPP 平均器合同与最新 main 文档合并，实际文件哈希及测试期间不变性见[最新整合记录](integration_final_20261005.json)。未采纳 GEMS mixed 或尚在验证的 SynthSeg 内存候选。两个 warning 仍来自既有 profiler 测试。前一轮 **931 passed、3 skipped，69.70 秒**及其源码仍见[原整合记录](integration_20261004.json)。组件回归不代替真实影像与原软件对照，也没有重新运行原始 T1 的完整 recon-all。
 
 ## 前一轮 nodecw10 验收记录（已发布）
 

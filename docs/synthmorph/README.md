@@ -107,7 +107,7 @@ transformed_label_image.save(registration_output_directory / "labels_in_fixed.ni
 | `image` | 是 | `str 或 Path 或 nibabel SpatialImage` | `—` | 输入影像，格式、维数与预处理约束见输入数据格式 |
 | `transformation` | 是 | `str 或 Path 或 SpatialImage 或 AffineTransform 或 DenseWarp 或 WorldTransformChain` | `—` | 带 source/target 几何的 Affine、DenseWarp 或公共 WorldTransformChain |
 | `method` | 否 | `str` | `'linear'` | linear、nearest；World链另支持公共 volume 的 spline/边界合同 |
-| `fill` | 否 | `float` | `0` | 视野外或掩膜外填充值；SynthStrip None 为 min(input.min(),0) |
+| `fill` | 否 | `float 或 None` | `0` | 普通变换的视野外填充值；None 使用最近边界值。World链只接受0 |
 | `dtype` | 否 | `str` | `'float32'` | 输出体素dtype；标签应选整数型并用nearest |
 | `header_only` | 否 | `bool` | `False` | rigid/affine 仅改头信息；不适用于非线性模型 |
 | `device` | 否 | `str` | `'cpu'` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
@@ -185,7 +185,7 @@ fnit apply results/moving_to_fixed.mgz moving_labels.nii.gz results/labels_in_fi
 | `image` | `image` | 输入影像，格式、维数与预处理约束见输入数据格式 |
 | `output` | `结果保存路径` | 输出影像路径 |
 | `-m` / `--method` | `method` | linear、nearest；World链另支持公共 volume 的 spline/边界合同 |
-| `-f` / `--fill` | `fill` | 视野外或掩膜外填充值；SynthStrip None 为 min(input.min(),0) |
+| `-f` / `--fill` | `fill` | 普通变换的视野外填充值，CLI只接受数值，默认0；Python另支持None |
 | `-t` / `--dtype` | `dtype` | 输出体素dtype；标签应选整数型并用nearest |
 | `-H` / `--header-only` | `header_only` | rigid/affine 仅改头信息；不适用于非线性模型 |
 | `--device` | `device` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
@@ -250,7 +250,7 @@ CPU joint 的原始体素坐标八角采样现在可使用仓库自写的 NumBa 
 
 同源码的有限真实采样门验证 raw 和 normalized 各 **47,710,208 值**逐位相同。每图暖 ABBA：192 为 Torch **0.593804 s** / NumBa **0.110970 s**，256 为 **1.958145 s** / **0.322657 s**。独立空 cache 256 首次调用计入懒导入与 JIT，NumBa **2.331800 s**，Torch **2.076089 s**，冷调用慢 **12.3%**；局部暖速比不代表完整配准速比。[最终采样门与冷启动记录](../../validation/synthmorph/cpu_raw_sampler_20261004/README.md)。
 
-GPU 入口、六个核心文件和进程全局 TF32/cuDNN 精度设置与既有版本相同。新增检查包含 CPU guard/入口 AST、三种实际小 CUDA 采样逐位一致、CPU helper 未导入及精度策略未变，见 [GPU 隔离审计](../../validation/synthmorph/cpu_fixes_20261004/gpu_route_v35.public.json)。已有完整 H100 joint 的两图两场一致与 reserved **17,836,277,760 bytes** 证据保留；本次没有重跑 GPU CNN，也没有将小采样合同称作完整 GPU 性能重测。下节真实脑图来自 v29，同输入的 v35 输出位模式相同，沿用该图展示官方差异。
+在 Morph 冻结 v35 中，GPU 入口、六个核心文件和全局 TF32/cuDNN 策略与父版相同；[GPU 隔离审计](../../validation/synthmorph/cpu_fixes_20261004/gpu_route_v35.public.json)另含 CPU guard/入口 AST、三种实际小 CUDA 采样逐位一致及 helper 未导入。当前整合版的五个普通配准核心及 CPU helper 仍匹配该版；共享 World 已合入另一任务的 CPU 修订，详见[整合绑定与范围](../../validation/smri_cpu/synthmorph_integration_binding_20261005.json)。普通 joint 不调用 World 分支，既有完整 H100 两图两场和 reserved **17,836,277,760 bytes** 证据保留，本次未重跑 GPU CNN或性能。当前 World sampler 另有[完整 490 帧 H100 旧新逐字节相同记录](../../validation/multimodal_cpu_20261004/gpu_world_v20_20261004.public.json)，但不覆盖3D时间header修订或整合 wrapper 全参数。下节脑图来自 v29，v35 同输入位模式相同。
 
 ### 5.1.1 CPU joint 精度续修及其他模式回归：2026-10-04
 
@@ -269,7 +269,7 @@ GPU 入口、六个核心文件和进程全局 TF32/cuDNN 精度设置与既有�
 
 当前相邻 A-C-R-C-A 顺序中，已发布 v7 CLI `182.312 / 170.276 s`，v29 `194.054 / 176.282 s`，中位数 `176.294 / 185.168 s`；新 CPU 约慢 `5.0%`。同节点原版完整 CLI 为 `691.550 s`，共享负载与 I/O 干扰显著，不宣称稳定加速倍数。分步骤、GNU time user/sys、上下文切换、缺页和 I/O 及实际时序保存在[最新 JSON](../../validation/synthmorph/cpu_fixes_20261004/joint_precision_v29.public.json)。历史 v7 四模式 main/原版对照和 v10–v23 未过候选分别归档，不作为新计时。
 
-完整物化 joint API 与路径 CLI 的两图、两场、完整 header/extensions/affine 相同，输入未修改：输入读取/物化 `1.003 s`、模型加载 `4.039 s`、API `146.031 s`、保存 `23.837 s`，完整 observer worker `194.019 s`。rigid/affine 保存 LTA 后由最终源码双向回放，图像与完整头再次一致。共享 World 源码未改，既有真实两帧 DWI 三入口×三插值回归保留。
+当时冻结版的完整物化 joint API 与路径 CLI 两图、两场及全部元数据相同，输入未修改：读取/物化 `1.003 s`、模型加载 `4.039 s`、API `146.031 s`、保存 `23.837 s`，observer worker `194.019 s`。rigid/affine 保存 LTA 后双向回放，图像与完整头一致。该冻结版没有改共享 World，保留真实两帧 DWI 三入口×三插值回归；当前整合版已含上文单列的 World 修订，历史记录不改标为新实测。
 
 当前 H100 GPU1（实际 UUID 及公共锁记录见 JSON）完整 joint v7/v29 pair 的两图两场 SHA 和完整图像元数据相同，reserved 均 `17,836,277,760 bytes`，19 GB quota。旧/新 API `6.90588 / 6.83554 s`，完整 worker `45.1056 / 40.1046 s`；两入口均未加载 CPU helper。存在外部 GPU 任务，只列同场观测。最终 inference policy 的新增 guard 对这条 CUDA 路线直接返回，数学正文另经 AST 审计；同保存真实 CPU 输入的最终 guard 源码与 v29 features/矩阵逐值相同。
 

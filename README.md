@@ -55,7 +55,7 @@ Python 示例和参数说明见 [SynthStrip 手册](docs/synthstrip/README.md)�
 
 ### 结构 MRI
 
-CPU 的功能覆盖、同节点精度与耗时、GPU 保持检查见[本轮 sMRI 报告](validation/smri_cpu/README.md)。SynthSR 默认 CPU 完整浮点输出、FAST 已测 CPU 模式已与官方匹配；SynthMorph joint 的 192/256 固定门已通过，CPU 精确采样提速仍在验收。完整左半球 sphere.reg 的坐标、有序面和解码几何与同输入官方相同；正式 C++ 平均器 ABBA 同源码及八核资源门通过，平均步骤快 2.09 倍，完整配准墙钟仍慢 5.27%，不能视为整步提速。WMH 的 GPU crop 已在 20 GB 内保持旧输出，no-crop 仍需更多显存。丘脑/海马亚区、FNIRT 非线性估计、原始 T1 完整 recon-all 仍有差异，见[剩余清单](validation/smri_cpu/REMAINING.md)。
+CPU 的功能覆盖、同节点精度与耗时、GPU 保持检查见[本轮 sMRI 报告](validation/smri_cpu/README.md)。SynthSR 默认 CPU 完整浮点输出、FAST 已测 CPU 模式已与官方匹配；SynthMorph joint 的 192/256 固定门已通过，精确 NumBa 采样的六次完整 CPU 输出与验收版逐位相同。同八核默认 256 的 ABBA 中位数 163.094→155.086 秒，本组缩短 4.91%；局部首次 JIT 仍有成本，共享节点时间不代表稳定吞吐。完整左半球 sphere.reg 的坐标、有序面和解码几何与同输入官方相同；正式 C++ 平均器 ABBA 同源码及八核资源门通过，平均步骤快 2.09 倍，完整配准墙钟仍慢 5.27%，不能视为整步提速。WMH 的 GPU crop 已在 20 GB 内保持旧输出，no-crop 仍需更多显存。丘脑/海马亚区、FNIRT 非线性估计、原始 T1 完整 recon-all 仍有差异，见[剩余清单](validation/smri_cpu/REMAINING.md)。
 
 | FNIT 函数 / 类 | 对应原软件包函数 / 命令 | 用途 |
 |---|---|---|

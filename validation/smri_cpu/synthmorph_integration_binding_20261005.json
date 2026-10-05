@@ -1,0 +1,95 @@
+{
+  "schema": "fnit.smri.synthmorph_integration_binding.v1",
+  "audited_git_head": "c2ceb18e36e3a595bf365ec4342ed4ca8cbd41c8",
+  "scope": "Current source binding and static call graph only; no new CNN, MRI benchmark or GPU timing.",
+  "historical_reports_preserved_sha256": {
+    "validation/synthmorph/cpu_fixes_20261004/gpu_route_v35.public.json": "22e010564aa5a03405c8ed1208e691ac8da56a660e47f4e73c4e4ae151e0a426",
+    "validation/multimodal_cpu_20261004/gpu_world_v20_20261004.public.json": "42889c15037ce06996844dd01b2db89c7e522c4270f6122872b4c4cf01ebe90a"
+  },
+  "v35_historical_core_bindings": {
+    "src/fnit/synthmorph/models.py": {
+      "historical_v35_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+      "current_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+      "same_bytes": true
+    },
+    "src/fnit/synthmorph/pipeline.py": {
+      "historical_v35_sha256": "633ee2f94ebc6136c4219ea945a2c489a42fe6f1f154da80691fbb0c3794d37b",
+      "current_sha256": "633ee2f94ebc6136c4219ea945a2c489a42fe6f1f154da80691fbb0c3794d37b",
+      "same_bytes": true
+    },
+    "src/fnit/synthmorph/spatial.py": {
+      "historical_v35_sha256": "0dd342cf0a9c94cd09a0396097adc40afbb838cfbce2f0963a28f417249d93a5",
+      "current_sha256": "0dd342cf0a9c94cd09a0396097adc40afbb838cfbce2f0963a28f417249d93a5",
+      "same_bytes": true
+    },
+    "src/fnit/_nib.py": {
+      "historical_v35_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+      "current_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+      "same_bytes": true
+    },
+    "src/fnit/_transforms.py": {
+      "historical_v35_sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33",
+      "current_sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33",
+      "same_bytes": true
+    },
+    "src/fnit/_world_resampling.py": {
+      "historical_v35_sha256": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5",
+      "current_sha256": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83",
+      "same_bytes": false
+    }
+  },
+  "accepted_CPU_helper_bindings": {
+    "src/fnit/synthmorph/_cpu_raw_sampler.py": {
+      "benchmarked_sha256": "f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd",
+      "current_sha256": "f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd",
+      "same_bytes": true
+    },
+    "src/fnit/synthmorph/_cpu_preprocessing.py": {
+      "benchmarked_sha256": "1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b",
+      "current_sha256": "1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b",
+      "same_bytes": true
+    },
+    "src/fnit/synthmorph/_cpu_eigen.py": {
+      "benchmarked_sha256": "ff7936cf2d89c740e09ba164a7c6a76fcebd22e889fd33f8c1a419a25c71a426",
+      "current_sha256": "ff7936cf2d89c740e09ba164a7c6a76fcebd22e889fd33f8c1a419a25c71a426",
+      "same_bytes": true
+    }
+  },
+  "upstream_World_report_bindings": {
+    "src/fnit/_world_resampling.py": {
+      "benchmarked_sha256": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83",
+      "current_sha256": "0b24714e94085feb4d40762e9144789d9f8b835aa42d00614a612be8c3046d83",
+      "same_bytes": true
+    },
+    "src/fnit/applywarp/core.py": {
+      "benchmarked_sha256": "21dc364be908ff985e73c0fc78f09a405b1465624a0cc8b913a0f0a4f6d054a2",
+      "current_sha256": "48271f6ee41940b1c4e24eac4c8420069e1a1817a780f71c7a2033101fbbc985",
+      "same_bytes": false
+    },
+    "src/fnit/eddy/fsl2111_strict/spline.py": {
+      "benchmarked_sha256": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+      "current_sha256": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+      "same_bytes": true
+    }
+  },
+  "direct_world_callers_in_synthmorph_pipeline": [
+    "apply_transform"
+  ],
+  "gates": {
+    "ordinary_registration_five_core_files_unchanged": true,
+    "accepted_CPU_helpers_match_real_reports": true,
+    "world_call_is_only_public_apply_transform": true,
+    "current_world_sampler_matches_upstream_real_report": true,
+    "current_world_spline_matches_upstream_real_report": true,
+    "upstream_490_frame_saved_files_equal": true,
+    "upstream_490_frame_GPU_peak_unchanged": true
+  },
+  "passed": true,
+  "limitations": [
+    "Historical v35 six-core byte identity describes its frozen task source. Current World differs after the independent upstream d63c2580 CPU change; do not relabel the old report.",
+    "Ordinary SynthMorph registration uses the unchanged five core files and spatial sampler, not the WorldTransformChain branch. The World delta does not require repeating ordinary joint CNN fits.",
+    "The upstream World report binds the current direct sampler and spline. Its ApplyWarp wrapper file has a different SHA; this audit does not transfer a whole-wrapper benchmark to the integrated wrapper.",
+    "The saved upstream full 490-frame H100 proof is reused. Its single shared-GPU timing observation does not establish stable performance.",
+    "The upstream 3D fmriprep time-unit header fix applies on CPU and CUDA. A 490-frame proof does not establish unchanged headers for that 3D case."
+  ]
+}
