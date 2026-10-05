@@ -1,0 +1,77 @@
+{
+  "status": "completed_static_installed_recipe_and_frozen_FNIT_source_audit",
+  "scope": "Source semantics and existing saved-output statistics only; no new affine fitting, mask computation, Gaussian recalculation or image fitting. The causal contribution of each difference is not measured.",
+  "installed_recipe_source": {
+    "core.py": {
+      "sha256": "beb64fa1f2a9d6b6946388fc6641b92ffc5a100bef47b96b55877d4df9d0d700",
+      "binding": "actual installed FreeSurfer 8.2 samseg/subregions file"
+    },
+    "hippocampus.py": {
+      "sha256": "e935323cacc6c7a23a24ac19da0e4da01b48e1e05f7db3a3effcb3486aca95f6",
+      "binding": "actual installed FreeSurfer 8.2 samseg/subregions file"
+    }
+  },
+  "upstream_cpp_source": {
+    "commit": "2ce2b6be69f2954ea704e593a5be79c284a3a8c3",
+    "pyKvlMesh.cxx": {
+      "sha256": "1c51420676b47d0ee40c13be867bf6dfcbb888fed25fa13bca5de1104f544544",
+      "lines": "302-438",
+      "behavior": "All-prior rasterization returns clamped per-class probabilities rounded to uint16 by probability*65535+.5; a zero alpha sum remains zero. GetPointSet returns Double. This is pinned source evidence, not a new native run."
+    }
+  },
+  "FNIT_runtime_source": {
+    "initialize.py": "ab5bc936c751a5b1fa897957d9382343544127eba7afac93d5b761a334dac187",
+    "recipes/base.py": "d0e99426119c76ad7d6a23c56352c48a2567e7f1349e9d3e67ea9344e246d1fb",
+    "recipes/hippo_amygdala.py": "385e3cf19cbe3ba6e7985b36a525664d46a037e4b80ee298b82916bbd99e710e",
+    "atlas.py": "f6415958b02956f50f6efa6043428513610c3d3a00b734ff2aeff353930cf975",
+    "core.py": "90958374a622952f2efedbcfedfeed1377c296ffb5f921719d9a6307be2d9036"
+  },
+  "verified_algorithm_differences": [
+    {
+      "part": "initial atlas alignment",
+      "official": "core.py:224-272; target downsampled to 1 mm if necessary, crop margin6, spherical radius1 erosion then dilation for hippocampus, two mri_robust_register passes (rigid then affine), sat50",
+      "FNIT": "initialize.py:13-78; center initialization on raw selected coarse labels, margin15 mm, differentiable trilinear soft-Dice plus linear regularization, FP32 torch.optim.LBFGS",
+      "conclusion": "Different preparation and registration algorithms; no official saved corresponding affine was located in the bounded reference leaves, so the actual affine error and its causal share remain unknown."
+    },
+    {
+      "part": "working-image grid and sampling",
+      "official": "hippocampus.py:127-175 uses a hippocampus bounding-box crop with15 mm margin, mri_convert cubic resolution .33333, then nearest/linear mask resampling. core.py:205-222 additionally crops to aligned atlas corners.",
+      "FNIT": "recipes/base.py:47-73 explicitly constructs ceil-size and center-adjusted grid; scipy.ndimage.affine_transform order3 mode nearest; _fit:184-201 crops by mesh bounds plus schedule-derived margin.",
+      "conclusion": "Grid/crop/interpolation definitions differ at source level; output headers and posthoc fixed grids are recorded. Saved recipe-preparation images were not compared voxelwise in this run."
+    },
+    {
+      "part": "fixed mesh-stage mask",
+      "official": "core.py:305-308 and431-440 applies (sum(mesh.rasterize(uint16))/65535)>.99, then spherical erosion radius3 synthetic/radius5 intensity and positive-intensity guard for intensity.",
+      "FNIT": "recipes/base.py:207-223 casts vertices to FP32, rasterizes all-one occupancy, takes geometric covered, then the same erosion radii and positive-intensity guard.",
+      "conclusion": "Coverage of all-one occupancy is not the same declared primitive as original alpha-mass threshold and uint16 quantization. Actual preparation mask differences remain unmeasured. This FP32 preparation boundary is separate from preserved Double mesh/optimizer state."
+    },
+    {
+      "part": "Gaussian hyperparameters and partial volume",
+      "official": "hippocampus.py:376-505 computes medians and counts in wmparc; partial-volume imageShape=(points.max+1.5).astype(int), uint16 rasterized grouped prior, sum/65535>.97, then gaussian filtering and thin-label median/KDE.",
+      "FNIT": "recipes/hippo_amygdala.py:118-207 uses the corresponding wmparc labels/median/count concepts, with default values for missing samples, ceil(max)+2 grid, FP32 normalized raster priors and covered, followed by thin-label median/KDE.",
+      "conclusion": "Core concepts overlap, but support/grid/prior-mass and scalar initialization differ; Double EM wiring passed independently, which does not prove these hyperparameters equal."
+    },
+    {
+      "part": "final posterior, labels and soft volume",
+      "official": "core.py:690-749 normalizes with float32 epsilon, rounds posterior*65535 to uint16, uses quantized priors/posteriors in winner/volume, zeros labels outside workingMask. hippocampus.py:177-190 retains direct largest foreground connected component and nearest resamples native labels.",
+      "FNIT": "CPU native final posterior/priors are Double probability tensors; hippo_amygdala.py:211-259 uses a closing-assisted component selection intersected with original foreground, adds native coarse support dilation2, and sums unquantized posterior for soft volume.",
+      "conclusion": "Confirmed quantization, component and native-support semantics differ. Closing creates no new labeled voxels; retained/input counts are saved. Their separate causal share needs bounded saved-state comparison, not another full fit."
+    }
+  ],
+  "not_supported_causes": [
+    "Stage-to-stage FP32 vertex storage: atlas.vertices/reference and with_vertices preserve actual Double in this candidate.",
+    "A single global header mismatch: native header matches norm and both spaces were scored on explicitly identical grids.",
+    "Initial affine as proven sole cause: corresponding official affine was not found; saved-label centroid shifts are observations, not affine estimation."
+  ],
+  "saved_affine_inventory": {
+    "official_final_output_leaf": "22 final image/text files; no corresponding initial affine file",
+    "first_stage_capture_leaf": "six captured FNIT state/report files; not an official initial affine",
+    "inventory_scope": "Only the two previously indexed bounded reference leaves; no broad server search or final-label inverse fitting"
+  },
+  "priority_next_validation": [
+    "Port official mask preparation and robust rigid+affine definitions as an isolated component with fixed input/header gates.",
+    "Compare each saved/prepared working-image grid, stage mask and Gaussian hyperparameter before new complete fitting.",
+    "Use saved final state to isolate posterior quantization, component and native support changes; preserve exact IDs and probability semantics."
+  ],
+  "second_whole_recipe_or_native_optimizer_started": false
+}
