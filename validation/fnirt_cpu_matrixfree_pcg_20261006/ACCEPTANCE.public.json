@@ -1,0 +1,104 @@
+{
+  "scope": "bounded same restored half matrix-free controlled-LM system; no native same-system oracle",
+  "status": "bounded_comparison_completed_no_runtime_integration",
+  "summary": {
+    "bytes": 149216,
+    "sha256": "8730d37a2faace0d100b24c94230ca676f19a3c1aa019c6759e50f5a4ebf0cd3"
+  },
+  "valid_bounded_diagnostic": true,
+  "science_exit_code": 0,
+  "after_preflight_exit_code": 0,
+  "controller_exit_code": 0,
+  "unit_restore_gates": {
+    "current_torch": {
+      "column": 0,
+      "different_bits": 0,
+      "bitexact": true
+    },
+    "owned_cpu": {
+      "column": 0,
+      "different_bits": 0,
+      "bitexact": true
+    }
+  },
+  "solver_calls": {
+    "current_torch": 1,
+    "owned_cpu": 1
+  },
+  "callback_calls": {
+    "current_torch": 51,
+    "owned_cpu": 55
+  },
+  "arms": {
+    "current_torch": {
+      "PCG": {
+        "iterations": 49,
+        "converged": true,
+        "relative_residual": 0.0007101809160834593,
+        "solver_callback_count": 49,
+        "possible_denominator_stop_from_bound_source": false
+      },
+      "true_residual": {
+        "absolute_l2": 0.0037121463511494562,
+        "relative_l2": 0.0007101809160836206,
+        "rhs_l2": 5.227043232336545,
+        "common_norm": "torch.linalg.vector_norm",
+        "relative_le_declared_tolerance": true,
+        "residual_value_sha256": "086054c89e7a43eb0184be307180f9dc35d4648e8398a7e5158b6ab441f7ebff"
+      },
+      "private_solution": {
+        "bytes": 9416,
+        "sha256": "4d659ee6ec4fa1d4fc3dccbf2edbadfee1e19aced62f648db4cf88ca5c613575",
+        "mode": "0o600",
+        "dtype": "little-endian FP64",
+        "shape": [
+          1177
+        ]
+      },
+      "coordinate_units": "mixed displacement-coefficient/intensity step coordinates"
+    },
+    "owned_cpu": {
+      "PCG": {
+        "iterations": 53,
+        "converged": true,
+        "relative_residual": 0.0006769837850846045,
+        "solver_callback_count": 53,
+        "possible_denominator_stop_from_bound_source": false
+      },
+      "true_residual": {
+        "absolute_l2": 0.00353862351223074,
+        "relative_l2": 0.0006769837850851172,
+        "rhs_l2": 5.227043232336545,
+        "common_norm": "torch.linalg.vector_norm",
+        "relative_le_declared_tolerance": true,
+        "residual_value_sha256": "00ac0e5157fa761a9aca2fd268bc119aa0c519858418e6e2443ec88a8add95e7"
+      },
+      "private_solution": {
+        "bytes": 9416,
+        "sha256": "418e3d2a7a1aede4acd9a7a37deb99cdf7757e547017e66efe68f5b898d0e93c",
+        "mode": "0o600",
+        "dtype": "little-endian FP64",
+        "shape": [
+          1177
+        ]
+      },
+      "coordinate_units": "mixed displacement-coefficient/intensity step coordinates"
+    }
+  },
+  "two_step_comparison": {
+    "different_bits": 1177,
+    "max_abs": 0.7198678639661988,
+    "relative_l2_to_current_torch": 0.06966489368470974,
+    "reference_is_current_torch_not_native": true,
+    "no_numerical_improvement_claim": true
+  },
+  "input_source_before_after_exact": true,
+  "checkpoint_immutable": true,
+  "system_immutable": true,
+  "flags_unchanged": true,
+  "runtime_integration_accepted": false,
+  "numerical_improvement_established": false,
+  "native_same_system_oracle": false,
+  "whole_registration_assessed": false,
+  "speed_comparison_assessed": false
+}

@@ -1,0 +1,147 @@
+{
+  "status": "prepared_only_awaiting_root_review_no_upload_no_worker_no_math",
+  "canonical_workspace": "workspaces/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-pcg-v1",
+  "canonical_run": "runs/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-pcg-v1",
+  "stage1_commit": "0b691f32bdc47dc68f30516daf7d4e9f369e3235",
+  "stage2_commit": "e2c13cb75f103e372618cc51189312d2a73c5797",
+  "lm_tau": {
+    "value": 0.001,
+    "meaning": "declared controlled LM comparison, not established historical solve3 damping"
+  },
+  "PCG": {
+    "tolerance": 0.001,
+    "max_iterations": 500,
+    "initial_solution": "zero",
+    "rhs": "negative checkpoint gradient_half",
+    "damping_diagonal": "diagonal_half.clamp_min(eps * diagonal_half.abs().mean().clamp_min(1))",
+    "operator": "mature restored half_matvec(v) + tau * damping_diagonal * v",
+    "preconditioner": "(1 + tau) * damping_diagonal",
+    "recursive_stop": "relative unpreconditioned recursive residual <= tolerance; native comparison not performed",
+    "arms": [
+      "current_torch",
+      "owned_cpu"
+    ],
+    "callback_max_per_arm": 502,
+    "callback_max_total": 1004,
+    "solver_calls": 2
+  },
+  "inputs": {
+    "gradient": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v2/assembly/gradient.private.f64",
+      "bytes": 9416,
+      "sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73"
+    },
+    "diagonal": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v2/assembly/diagonal.private.f64",
+      "bytes": 9416,
+      "sha256": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f"
+    },
+    "H": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v2/assembly/H.private.f64",
+      "bytes": 11082632,
+      "sha256": "426e0d4add9dd6f46a972ecde0b4e06e6f1350301c06be4c6391af4148c4fa8d"
+    },
+    "stage1_summary": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-level-rehydrate-v1/stage1/summary.public.json",
+      "bytes": 30714,
+      "sha256": "eb31cfd14bf4d8b5a0b82228a72b2f854a86a38d1a969d981cd0d215e09afbf6"
+    },
+    "checkpoint": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-level-rehydrate-v1/stage1/level_state.private.npz",
+      "bytes": 2647508,
+      "sha256": "78abee8589e6e026fede946136c9e78589817b01a1d55d2085aee19758ceae0e"
+    },
+    "stage2_summary": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-restored-v1/stage2/summary.public.json",
+      "bytes": 117714,
+      "sha256": "5a9ae71f620bff8148c774431145947a0f2cd50f11d6fa7c21941480a0059f84"
+    }
+  },
+  "source_count": 21,
+  "input_count": 6,
+  "candidate_copy_bindings": {
+    "pcg_cpu_candidate.py": {
+      "bytes": 2727,
+      "sha256": "845a8244d0617e7d22bb9626ec08f9dde1130aa8227aefe1fc3d9a3625c23c8a"
+    },
+    "own_reductions.py": {
+      "bytes": 2923,
+      "sha256": "3faffbd27e7de5bec55982a8502573e910ad0668b4fbef2cf003b6267f4d36a6"
+    }
+  },
+  "restored_helper": {
+    "bytes": 9304,
+    "sha256": "b2cdb6829fe3caafe52d4fe77031857bd3d4ac6fc3100e90fbf72a1573ec657c"
+  },
+  "formula_source": {
+    "registration": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "location": "registration.py:1696-1718 LM branch; current optimizer.py unchanged CPU branch"
+  },
+  "floor_rhs_damped_precond": "checkpoint half quantities; exact current formula and negative RHS; tau is a declared control value",
+  "maximum_calls": {
+    "optimized_callback_per_arm": 502,
+    "optimized_callback_total": 1004,
+    "PCG": 2,
+    "evaluate": 0,
+    "linearize": 0,
+    "new_H": 0,
+    "CSC_action": 0,
+    "native": 0
+  },
+  "first_restore_mismatch_stops_before_any_solve": true,
+  "forbidden_inputs": [
+    "native A/RHS/solution/trajectory",
+    "previous paired old/new solutions",
+    "original MRI and preprocessed images",
+    "reference iteration count or direction"
+  ],
+  "scientific_execution_at_freeze": false,
+  "scheduling": {
+    "common_CPU_lock": true,
+    "host": "nodecw7",
+    "affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "threads": 8,
+    "outer_wait_seconds": 19000,
+    "controller_timeout_seconds": 19600,
+    "child_timeout_seconds": 180,
+    "address_space_cap_bytes": 20000000000
+  },
+  "latest_read_canonical_head": "f75e724653cac80e04d29b71df8eaf0f66f95bfb",
+  "latest_read_INDEX_sha256": "3493c9878ac575e2bc8274bc93b8f9670e8693450172435d41d7be1c5714daee",
+  "local_head_at_prepare": "b0c8a347d64e2760f877a979eaa8286ca06008a4",
+  "static_checks": {
+    "AST_compile_JSON": true,
+    "shell_bash_n": true,
+    "closure_freevar_compilation_without_callbacks": true,
+    "current_source_hashes_exact": 21,
+    "candidate_copies_exact": true,
+    "NumPy_Torch_NumBa_imported": false,
+    "scientific_worker_started": false,
+    "callbacks": 0,
+    "PCG_calls": 0
+  },
+  "preparation_read_failure": {
+    "operation": "readonly canonical metadata subprocess git query",
+    "exception": "FileNotFoundError: git not in remote PATH",
+    "corrective_action": "stdlib git_head reader reused; same INDEX and HEAD returned; no science or server mutation"
+  },
+  "publication": "future own source/scalars/schema/hash only; private checkpoint and output steps remain server-side",
+  "limits": [
+    "no native same-system oracle or full nonlinear result",
+    "no speed ratio from sequential old/new clock",
+    "no arbitrary-direction materialized H exactness claim",
+    "no runtime integration approved"
+  ]
+}
