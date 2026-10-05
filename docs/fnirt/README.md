@@ -294,6 +294,7 @@ GPU为共享H100、TF32、20GB上限，完整TBSS保存16次，与FNIT基线1d31
 |---|---|
 | 2026-10-06，有限共享系统 | 固定真实H/RHS的69轮算术恢复、第二接受点组装定位；生产与GPU未改，[报告](../../validation/fnirt_shared_followup_20261006/README.md)。这不是新的完整FNIRT benchmark。 |
 | 2026-10-06，自有CPU归约 | Numba/llvmlite的465项标量、186项相对范数及69轮保存系统轨迹逐位通过；生产未接入，[报告](../../validation/fnirt_cpu_reductions_20261006/README.md)。完整组装和非线性配准仍待验收。 |
+| 2026-10-06，当前系统两臂 | 复用当前H/g/独立diagonal，旧/新求解器自然53/49轮，真实相对残差7.82e−4/4.17e−4，均通过原1e−3门；对另一存档原生系统解的距离不是同系统精度验收。保存解差方向解释了停止门下的参数分叉，未计算全局条件数、改生产或重跑完整配准。[结果、绑定与计时范围](../../validation/fnirt_cpu_current_replay_20261006/README.md)。 |
 | 2026-10-04，最新 v27/v28 | CPU float32 采样的值、FOV 和梯度融合；SCG 梯度跳过未使用的能量/cost。83 项采样专项、33 项 SCG 专项和[完整真实末阶段轨迹](assets/cpu-scg-cost-skip-stage3-node8-20261004.public.json)通过；CPU评测节点 [26 项完整功能输出检查](assets/cpu-functional-v27-node8-20261004.public.json)及[八项新官方单次配对](assets/cpu-primary-v27-node8-20261004.public.json)完成，T1 单线程未达速度目标。H100 default 和完整 TBSS 各 16 次保存逐位相同、对应位置 allocation 不增加。 |
 | 2026-10-04，normal SIMD v2 | FP64 空间法方程按原运算顺序执行八点 SIMD；105 项局部回归通过，完整 default/T1 的输出 SHA、停止条件和 PCG 计数保持一致。CPU评测节点 的四项完整官方单次配对见[历史报告](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)。 |
 | 2026-10-04 | CPU Gaussian 合并 offset 循环，bending 保留 dense 展开/原 sum 并融合逐元素乘方，FP64 法方程缓冲/固定 weight 布局复用，Jacobian limiter 保序筛选角点。216 项函数专项通过；v17/v19/v20 在完整公开 default 的 1/8 预算三输出 SHA 一致。最新 CPU 官方观测与 GPU 门槛见[专页](CPU_BENCHMARK.md)。 |
