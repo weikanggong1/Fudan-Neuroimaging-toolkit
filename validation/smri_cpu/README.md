@@ -56,6 +56,9 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 | [FastVBM CPU Jacobian 修复](fnirt_jacobian_20261004/README.md) | CPU FNIRT 采用已有解析 Jacobian；GPU/SynthMorph 保留原路径 | 同官方系数对 `jout` RMSE 7.37e−8；固定真实 GM stage 的 Jacobian RMSE 0.01404→0.01259。调制图 RMSE 略降、最大误差略增；完整 GPU 后处理三图/header/QC 相同，未重测整 pipeline |
 | [FNIRT 首轮实测](fnirt_first_diff_20261004/README.md) | 首次分歧为正方向 moving GM 的平滑累计顺序；翻转控制整图逐值相同 | 初始 mask、fixed 平滑相同；首轮梯度/accepted coefficient 差很小。共享真实 FP64 系数 `4→2` 转换最大差 1.35e−12 mm；[完整平滑候选](fnirt_cpu_orientation_20261004/README.md)最终退化，未接入 |
 | [FNIRT 非零状态](fnirt_nonzero_state_20261004/README.md) | 同官方 accepted 参数的 bending、梯度、Hessian 与正则权重状态对照 | regularizer action 相对差约 3.2e−15，未发现量级错误；baseline/flip 完整对照最早在 PCG 80/49 轮分叉，非线性估计仍未等价 |
+| [SynthSegPlus CUDA 精度作用域](seg_tf32_20261005/README.md) | 默认 CPU/GPU 完整三图、CSV、header 与上一版严格相同；构造及异常退出恢复调用方策略，新增 Python True/False/None 选项 | 同病例 False 普通分割对官方 0 voxel 差，fast 2 voxel 差；CSV 尾差 0.20/0.346 mm³。默认 Torch 显存相同；共享 GPU 时间仅作观察 |
+| [GEMS CPU Double 续段](gems_cpu_double_continuation_20261006/README.md) | actual Double point、QR、Gaussian 与保存状态恢复；37步同点 objective/gradient/prior/coverage 原门通过 | 不同末点最大差 0.660 voxel、RMSE 0.009264，cost 高35.49；与前一控制相比 cost 差降低但坐标差增大。仅诊断，未接入默认生产或完成新的 ROI 验收 |
+| [FNIRT 新共享探针](../fnirt_shared_followup_20261006/README.md) | 固定真实系统的严格CSC/除法/独立官方reductions组合自然69轮，全部向量/scalar与1177解bits相同 | 仍是隔离诊断，不是自有生产修复。当前第二接受点H rel1.03e−9、RHS rel8.36e−7；只换Jte后7.37e−7，完整非线性估计尚未等价 |
 | [FNIRT 共享 PCG](../fnirt_pcg_shared_state_20261004/README.md) | 同 H/RHS/初值/对角/容差重放实际官方与 FNIT solver | 第二次均 24 轮；第三次官方 69、dense 80、严格列序 49、除法控制 79。所有停止门正确；实际 FP64 尾差可放大为不同参数，未改生产求解器或重跑整链 |
 | [SynthSR](synth_fixes_20261004/sr_cpu_followup/README.md) | CPU 推理使用已核验的 FP32 ELU/BN 顺序及临时 channels-last 权重；保留训练、hooks、autocast 和 CUDA 路径 | 默认两分支 22,020,096 CNN 值、9,072,000 浮点/量化值全同官方，3,522 个旧超限值降为 0。四参数分支和六真实域原门均通过；正常 CPU CLI 中位数 28.660→28.340 s，RSS 10.222→7.496 GB。GPU 新旧完整输出/header/文件 SHA 与 allocated/reserved 相同；共享时间另列 |
 
@@ -68,6 +71,10 @@ SynthSR 修复并普通合并最新 main 后，本地组件回归为 **2,092 pas
 2026-10-05 整合版 `c2ceb18e` 的组件回归为 **2,218 passed、5 skipped，158.37 秒**；包含上述两项已验收 CPU 修改、正式 CPP 平均器合同与最新 main 文档合并，实际文件哈希及测试期间不变性见[该版整合记录](integration_final_20261005.json)。该版尚未接入 SynthSeg CPU 拼接优化。
 
 随后 `7e0890a5` 接入保留原数值的 SynthSeg CPU 拼接，整合回归为 **2,288 passed、11 skipped、3 subtests passed，155.04 秒**；包含完整 `tests/synthseg_parc`，外层墙钟 158.44 秒，源码与测试文件在执行期间均未变化，见[接入后记录](integration_seg_20261005.json)。没有采纳 GEMS mixed 或新的 raw-prior 优化目标。两个 warning 仍来自既有 profiler 测试。前一轮 **931 passed、3 skipped，69.70 秒**及其源码仍见[原整合记录](integration_20261004.json)。组件回归不代替真实影像与原软件对照，也没有重新运行原始 T1 的完整 recon-all。
+
+
+2026-10-06 接入 SynthSegPlus 精度作用域的 `76bb9546` 整合回归为 **2,386 passed、11 skipped、3 subtests passed，165.89 秒**，外层墙钟169.99秒。绑定源码和测试在执行期间保持不变，详见[本次记录](integration_seg_tf32_20261006.json)；真实原始T1的CPU/GPU门见独立精度报告。组件测试不代替MRI速度benchmark。
+
 
 ## 前一轮 nodecw10 验收记录（已发布）
 
