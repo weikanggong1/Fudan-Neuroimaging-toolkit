@@ -280,7 +280,50 @@ apptainer run --cleanenv \
 
 ## 5. 最新精度和运行时间
 
-本节最新正式数据为 2026-10-04 的 [两例连续 volume→surface 对照](../../validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md)。
+### 2026-10-06：完整 volume 默认 GPU 保持性回归
+
+本轮用同一真实公开病例的原始 T1w 和完整 180 帧 BOLD（64×64×42×180），在 NVIDIA H100 PCIe 上串行运行四次 cold API。两份冻结源码为 FNIT main 基线 `6f624040` 与 CPU 优化候选 `98019133`；两种后端分别配对。调用包括原始输入、robust reference、完整运动校正、T1w 配准、PICA/ICA-AROMA，以及 preproc 和 clean 的正常读写；STC 关闭，CUDA 使用 TF32，四张 BOLD 输出保持 float32。不包含 recon-all 或 surface。
+
+| 后端 | 基线 GPU API | 候选 GPU API | Torch 峰值 allocation | Torch 峰值 reservation | 采样 owned 进程树峰值 |
+|---|---:|---:|---:|---:|---:|
+| FNIRT | 597.814 s | 599.190 s | 6.537 GB | 11.899 GB | 14.053 GB |
+| SynthMorph | 421.071 s | 415.174 s | 13.323 GB | 16.182 GB | 15.804 GB |
+
+显存以 1 GB = 10⁹ bytes 计；同一后端的旧、新三项峰值均相同，全部低于 20e9 bytes。每次使用相同的 8 个 GPU 主机物理核心、PyTorch 8 线程、interop=1，来源和完整输入前后校验通过，末次 owned GPU 存活采样绑定实际 guard SHA。
+
+两种后端各比较十个科学输出的全部 **395,140,404 个值**，不同值数、最大绝对误差和 RMSE 均为 0；dtype、affine、qform/sform、加载后的二进制头及原始存储头一致。四张 BOLD 均完整保留 180 帧并为有限值；11 份正常输出均绑定 SHA。元数据仅将基线未写出的 `confound_projection` 规范化为原有 `orthogonal`。
+
+四次调用共 487 次共享设备采样，利用率均为 100%。上表是每个后端各一次旧、新 cold 运行的观测时间；FNIRT 按基线→候选、SynthMorph 按候选→基线执行。稳定 GPU 速度结论需要独立重复和可控设备负载。
+API 时间包含正常读写和首尾 CUDA 同步；进程时钟另含导入、锁等待、来源/输出验证和最后采样握手。实际 owned 采样间隔最大为 0.972 s，采样峰值按该采样范围解释。
+
+#### 候选 GPU 的分步骤时钟
+
+| 生产阶段 host wall | FNIRT 候选 | SynthMorph 候选 |
+|---|---:|---:|
+| 稳健 BOLD 参考 | 23.017 s | 18.459 s |
+| EPI SynthStrip | 0.709 s | 0.631 s |
+| T1w SynthStrip | 2.227 s | 2.233 s |
+| 模板准备 | 0.061 s | 0.060 s |
+| FAST | 13.196 s | 12.007 s |
+| T1w→MNI 仿射 | 6.410 s | 4.994 s |
+| T1w→MNI 非线性 | 63.435 s | 7.613 s |
+| 形变转换 | 0.480 s | 0.529 s |
+| 解剖缓存查验 | 0.067 s | 3.993 s |
+| FEAT core：运动、高通与强度缩放 | 141.031 s | 96.532 s |
+| BBR 初始 FLIRT | 4.661 s | 3.748 s |
+| BBR 精化 | 2.563 s | 1.842 s |
+| BBR 最终重采样 | 0.065 s | 0.060 s |
+| AROMA 掩膜 | 0.001 s | 0.002 s |
+| PICA＋ICA-AROMA＋混杂处理 | 232.561 s | 158.283 s |
+| clean MNI 重采样 | 17.459 s | 16.951 s |
+| T1w/MNI preproc 单次插值及阶段保存 | 84.236 s | 81.605 s |
+
+这些是生产实现已有的 host wall 阶段时钟，部分边界嵌套，不相加替代完整 API，也不视为独立同步的 CUDA kernel 时间。
+完整误差、源码/输入 SHA、四次时钟及显存见 [GPU 机器可读报告](../../validation/fmri_cpu_20261004/task05_volume/final_merged_gpu_v1.public.json)。本轮仅公开聚合报告。
+
+### 2026-10-04：官方连续 volume→surface 对照
+
+本节的官方精度数据来自 2026-10-04 的 [两例连续 volume→surface 对照](../../validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md)。
 数值运行绑定 `cc940273` 基线的冻结 source_v1；随后 `140c3739` 保护修复不改变本轮算法。
 不是把原十例重标成当前 main；逐病例结果、源码清单及失败记录均在详细报告。
 
@@ -333,6 +376,7 @@ NRMSE=RMSE/参考RMS，使用全部帧和固定脑mask，不筛零值、不拟�
 
 | 日期 | commit/version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-06 | `6f624040`→`98019133` | CPU 优化候选的默认完整 GPU 路径保持性回归。 | [两后端×两源码、完整180帧及十科学输出逐值精确](../../validation/fmri_cpu_20261004/task05_volume/final_merged_gpu_v1.public.json)。 |
 | 2026-10-04 | `140c3739` | 修复参考sidecar来源SHA与输入覆盖保护。 | 77项合同检查；原MRI冻结记录保留。 |
 | 2026-10-04 | `cc940273`＋source_v1 | 接入稳健参考，保留middle对照。 | [两例×两策略连续链](../../validation/fmri/reference_alignment_20261004/CONTINUOUS_BENCHMARK.md)。 |
 | 2026-10-03 | `1128bc52` | 自动volume、重建来源选择与完整preproc输出。 | [十例三方独立记录](../../validation/fmri/threeway_20261004/final10/REPORT.md)。 |

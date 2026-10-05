@@ -47,8 +47,27 @@ python validation/fmri_cpu_20261004/task05_volume/compare_helpers_v2.py \
 
 [完整 volume 执行基线](baseline_execution_20261005.public.json)记录基线四组 first/cache-call 已完成。最新 main 已改变 robust BOLD reference，该旧记录不作为当前整链验收。本轮新个体影像与脑图不公开。
 
+### 2026-10-06：完整 volume 默认 GPU 保持性回归
+
+本轮用同一真实公开病例的原始 T1w 和完整 180 帧 BOLD（64×64×42×180），在 NVIDIA H100 PCIe 上串行运行四次 cold API。两份冻结源码为 FNIT main 基线 `6f624040` 与 CPU 优化候选 `98019133`；两种后端分别配对。调用包括原始输入、robust reference、完整运动校正、T1w 配准、PICA/ICA-AROMA，以及 preproc 和 clean 的正常读写；STC 关闭，CUDA 使用 TF32，四张 BOLD 输出保持 float32。不包含 recon-all 或 surface。
+
+| 后端 | 基线 GPU API | 候选 GPU API | Torch 峰值 allocation | Torch 峰值 reservation | 采样 owned 进程树峰值 |
+|---|---:|---:|---:|---:|---:|
+| FNIRT | 597.814 s | 599.190 s | 6.537 GB | 11.899 GB | 14.053 GB |
+| SynthMorph | 421.071 s | 415.174 s | 13.323 GB | 16.182 GB | 15.804 GB |
+
+显存以 1 GB = 10⁹ bytes 计；同一后端的旧、新三项峰值均相同，全部低于 20e9 bytes。每次使用相同的 8 个 GPU 主机物理核心、PyTorch 8 线程、interop=1，来源和完整输入前后校验通过，末次 owned GPU 存活采样绑定实际 guard SHA。
+
+两种后端各比较十个科学输出的全部 **395,140,404 个值**，不同值数、最大绝对误差和 RMSE 均为 0；dtype、affine、qform/sform、加载后的二进制头及原始存储头一致。四张 BOLD 均完整保留 180 帧并为有限值；11 份正常输出均绑定 SHA。元数据仅将基线未写出的 `confound_projection` 规范化为原有 `orthogonal`。
+
+四次调用共 487 次共享设备采样，利用率均为 100%。上表是每个后端各一次旧、新 cold 运行的观测时间；FNIRT 按基线→候选、SynthMorph 按候选→基线执行。稳定 GPU 速度结论需要独立重复和可控设备负载。
+API 时间包含正常读写和首尾 CUDA 同步；进程时钟另含导入、锁等待、来源/输出验证和最后采样握手。实际 owned 采样间隔最大为 0.972 s，采样峰值按该采样范围解释。
+
+分步骤时钟见 [功能文档 GPU 小节](../../../docs/fmri/README.md)；完整记录见 [聚合 JSON](final_merged_gpu_v1.public.json)。
+
 ## 6. 最近记录
 
+- 2026-10-06：FNIRT 与 SynthMorph 的四次完整默认 GPU cold 调用完成；冻结 `6f624040`→`98019133` 的两对十科学输出、全180帧、dtype 与头逐值精确。20 GB 显存门槛与来源/输入、TF32、末次采样检查通过；时间保留为共享 GPU 的单次观察。
 - 2026-10-04：固定完整真实输入、CPU 分组、冻结源码和原程序；修复队列锁覆盖导入与校验，保留竞争中的无效计时。
 - 2026-10-05：13 项最终完整 helper 比较完成，全部正常调用、来源、实际输入、同核预算、完整数值与头网格已核对；三项原始 int16 STC 协议保留。float32 原版控制和同核 FNIT first/warm 已通过，未改变生产默认。
 - `compare_helpers.py` 与旧 int16 报告保存首轮事实；`compare_helpers_v2.py` 增加实际输入重哈希、完整浮点转换证明、预算和时序元数据门槛，不覆盖旧报告。
