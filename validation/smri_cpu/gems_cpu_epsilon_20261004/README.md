@@ -126,7 +126,72 @@ native 合计为 37/105 → 43/105，HR 为 41/107 → 45/107。通过数增加�
 
 图中每点为一个真实区域；红点是丢失旧通过门的区域，绿点是新增通过门的区域。Dice 图仍需结合硬体积门，不能仅看是否位于 0.95 上方。脑干影像切面见上图。
 
-下一项有限验证只统计已有首次 capture 的零 prior 边界，必须先逐值复现原 owner／priors／coverage。EPS-only FP32 已有首次梯度探针，但没有其完整 recipe 结果；本轮不启动另一组数小时拟合。CUDA 仍保留旧公式，本轮未为已拒绝 mixed 候选运行新的完整 GPU benchmark。
+下一项有限验证转向已有 synthetic stage1 的共享初始状态与首个搜索更新；零 prior 统计仍需先逐值复现原 owner／priors／coverage。EPS-only FP32 已有首次梯度探针，但没有其完整 recipe 结果；本轮不启动另一组数小时拟合。CUDA 仍保留旧公式，本轮未为已拒绝 mixed 候选运行新的完整 GPU benchmark。
+
+### 首态接近官方后，完整轨迹在哪里分叉
+
+以下仅分析已取回的 score／state 和源码，没有使用 TTY、重评目标或新增拟合。[可复现分析](analyze_saved_trajectories.py)与[计算记录](saved_trajectory_analysis.public.json)保留原文件及程序 SHA。
+
+已保存的三个 first capture **都属于 synthetic stage1**：捕获器拦截 recipe 第一次 `TorchGEMS` 调用，读取 `fixed_gaussians`，再替换 `CachedArmijoLBFGS.step`，只执行首次 closure、保存 cost／完整 gradient 后退出。这确实覆盖首个合成状态，但没有执行方向构造、首个 trial、Armijo 判断或 accepted 更新。初始梯度接近官方与后续更新相同是两项不同的验证。
+
+完整流程的 alignment matrix 和 alignment Dice 在旧／新之间逐值相同。三家族 synthetic stage1 的 `history[0]` 也相同；**最早已保存的标量分叉是该阶段 `history[1]`**，此时尚未进入 intensity 和后处理：
+
+| 合成 stage1 | 初始 EM NLL（旧＝新） | 首次记录的 mesh 目标：旧 → mixed | Δ |
+|---|---:|---:|---:|
+| 丘脑 | 344029.21875 | −32028.572828 → −32182.140151 | −153.567323 |
+| 左 HA | 308917.68750 | 47760.972479 → 40852.867646 | −6908.104833 |
+| 右 HA | 309132.21875 | 42705.223330 → 37930.374914 | −4774.848416 |
+
+`history[0]` 是 infer 返回的 EM NLL，后续元素包含 mesh data cost 和形变 prior，定义不同。后续 Armijo history 保存的是该 step 后留存的目标；未保存首个 trial／accepted 顶点，不能由两个标量直接计算顶点首次变化，也不能把目标差全部归因于步长。旧／新 mesh 公式本身不同，之后 Gaussian、顶点和 alpha 阶段也不同，不能以候选目标更低表示更接近官方。
+
+#### 步数上限与停止
+
+丘脑全部 intensity stages 都达到 `outer×20`，总计 400 步；两侧 HA 都达到总计 300 步。每个固定 likelihood 的 outer block 内，保存的 accepted mesh 目标均严格下降，没有上升或相等值；这不证明达到收敛，也不证明增加步数会改善 Dice。合成阶段的差异如下：
+
+| 家族 | synthetic stage1：旧／新／上限 | stage2：旧／新／上限 |
+|---|---:|---:|
+| 丘脑 | 300 / 300 / 300 | 150 / 150 / 150 |
+| 左 HA | 300 / 300 / 300 | 149 / 150 / 150 |
+| 右 HA | 300 / 36 / 300 | 150 / 150 / 150 |
+
+右 HA 候选 stage1 最后三次相对目标变化为 `2.18561e-6、4.53435e-4、6.73714e-4`，均超过 fast 的 `1e-6`，排除这一次由相对 cost 连续三次不足阈值触发停止。结合一个 synthetic outer 和 `36<300`，源码流程指向位移停止分支；记录没有给出实际最大位移或停止原因，因此尚不能区分零位移与连续三次 ≤0.005 voxel，更不能称为已确认早停 bug。
+
+右侧合成拟合平均／P95 位移从 0.138462／0.555710 变为 0.043702／0.162717 voxel，合成拟合 wall 从 1020.841 变为 438.093 秒；其强度拟合仍用满 300 步。双侧总时间接近旧版包含这个轨迹变化，不能解释成单一算子提速。
+
+#### 几何与最终标签
+
+synthetic 结束的最小 Jacobian：丘脑 0.060129 → 0.078829，左 HA 0.035919 → 0.031822，右 HA 0.055860 → 0.055435；intensity 最终值见上节。保存的这些值均为正，没有证据把退步归因于最终网格倒置；缺少 Jacobian 分布及这些单元与失败标签的空间对应，不能定位局部压缩的作用。
+
+小区域的 hard 标签对少量体素很敏感，但仍按固定门完整计入：
+
+- Right-Pc HR：官方仅 5 个评价体素；旧 5 个全部重叠，新 4 个全部重叠。减少 1 voxel＝0.125 mm³，体积误差即 20%，Dice 为 0.888889。其软体积变化仅 −0.023565 mm³。
+- Left-MV(Re) HR：官方 78 voxel，旧 78 → 新 74；交集 75 → 72，减少 0.5 mm³，体积误差为 5.128%。
+- Right-CM native：官方 196 voxel，旧 188 → 新 190 更接近官方体积，但交集 184 → 182、对官方不同体素 16 → 22，Dice 跌到 0.943005。这个退步包含空间重叠变化，不能仅用体积量化解释。
+- 已失败的 Right-L-Sg native：官方 13 voxel，旧 12 → 新 10、交集 10 → 8；少 2 mm³ 使相对硬体积误差增加 15.385 个百分点。
+
+HA 的 LCC 后处理只把不保留的 foreground 置零，不创造标签或改变非零 label ID。左侧删除 21 → 20 个工作体素，右侧 145 → 314，其中右 fimbria 删除 61 → 253；原始 argmax 计数已变化，且完整目标最早分叉发生在后处理之前。左 Central-nucleus 的旧／新删除数均为零，原始计数 1323 → 1320，证明其 HR 小退步并非由这一步 LCC 删除造成。完整 state 没有 raw-label 空间阵列或 top-two posterior margin，其他 argmax 翻转、近邻采样和 support 裁剪的逐体素贡献尚不能分解。
+
+#### 参考 L-BFGS 与当前 Armijo 不是同一搜索定义
+
+只读核对了固定 samseg commit `2ce2b6…` 的[参考 L-BFGS](https://github.com/freesurfer/samseg/blob/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/gems/kvlAtlasMeshDeformationLBFGSOptimizer.cxx)和[公共 line search](https://github.com/freesurfer/samseg/blob/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/gems/kvlAtlasMeshDeformationOptimizer.cxx)。[源码审计](optimizer_source_audit.public.json)保存 URL、大小、SHA 和位置；原 C++ 仅留在私密 outputs，没有发布或引入生产。
+
+| 项目 | 固定参考源码 | 当前 FNIT |
+|---|---|---|
+| 初始尺度／trial | `H0=I/max_node_norm(g)`，alpha 从 1 开始 | `H0=I`，trial 最大实际位移 0.5 voxel |
+| 接受／搜索 | sufficient decrease + strong-Wolfe curvature，c1=1e-4、c2=0.9；可扩张、再 zoom | 严格下降 + Armijo，c1=1e-4；最多 20 次减半，没有 Wolfe curvature 门 |
+| 曲率历史 | 12 对，`s=alpha*p`，`s·y>1e-10` | 12 对，`s` 为写入 FP32 后实际位移，使用相对 curvature 门 |
+| 停止 | base 默认每步位移阈值 0.05 voxel，recipe 可改 option | fast 零位移或三次 ≤0.005 voxel；另有相对 cost 门 |
+
+这是固定源码的算法差异；该 samseg commit 没有被证明是本次 FreeSurfer 8.2 binary 的精确构建来源，base 默认也没有被当作实际 recipe 覆盖后的参数。两者使用相同 L-BFGS 名称不能证明更新等价；相同首态 cost／gradient 仍可能给出不同 trial 和接受点。尚没有官方同状态首步轨迹，不能由源码审计断言它解释了全部最终误差。
+
+#### 下一次有限验证顺序
+
+1. 优先复用现有 synthetic stage1 capture，核对实际官方 optimizer／options；在同 points、alphas、image、Gaussian、boundary 下分别记录参考与当前初始方向、max-deformation 缩放、实际存储 dtype 后 trial 点、directional product、Armijo／Wolfe 阈值和首个 accepted 点。先覆盖右 HA，再用丘脑／左 HA 复核；不进入完整 recipe。
+2. 同一次共享 state 检查零 prior：首先逐值复现 owner／priors／coverage，再统计活跃 alpha 的 exact-zero 边界。只有实际出现时才对该边界做原生完整 cost／gradient 检查；没有真实统计前保留未量化状态。
+3. 首步匹配后，最多在右 HA 原始 capture 上限定重放至 36 步附近，记录最大位移、停止分支和 rejected trials。根据该证据决定是否需要下一阶段检查，不先更改步数或重跑整例。
+4. 再用已有最终后验做 posthoc raw argmax、top-two margin、LCC 和 native sampling 的空间分解，特别核验三个丢失丘脑区域。此项只读已保存数组，不重新拟合。
+
+默认 CPU／CUDA 路径继续保持原样；mixed 补丁仍未采纳。EPS-only FP32 与 mixed 的因素尚未在完整首步搜索中拆分，本次不由标量差或名称直接选择新生产数学。
 
 ### 有限 alpha 平滑检查：丘脑首态未见量级差
 
