@@ -94,7 +94,7 @@ SIGINT/SIGTERM 对 admission 保持原清理协议；评估取消发送至自有
 
 本地新工具在post-evaluation之前先保存原始整例完成状态，并在评估子进程启动后保存独立evaluation.status=running及pid。完成/失败/继续下一例与严格比较数量规则保持原语义。真实CPU子进程测试将评估阻塞在显式文件屏障，核验此时磁盘row已complete且execution_succeeded=true、evaluation仍running，解除屏障后队列正常完成；不执行影像或GPU计算。
 
-服务器正在运行的冻结队列不修改；下次新冻结工具才使用本修正。当前实时状态以admission、diagnostics/completion和实际评估checkpoint分别判断，不能只看旧queue行。priority guard的父T态只是排序，guard completion确认恢复和/proc实际状态另核对，不等同诊断成功。
+2026-10-04运行中的冻结队列没有改写；2026-10-05现场确认该队列已结束。实时状态以admission、diagnostics/completion和实际评估checkpoint分别判断，不能只看旧queue行。priority guard的父T态只是排序，guard completion确认恢复和/proc实际状态另核对，不等同诊断成功。
 
 
 ## 2026-10-05：已有 API 整例的独立比较队列
@@ -196,5 +196,7 @@ raw 失败记 `skipped_algorithm_not_complete`；等待超时记 `skipped_raw_wa
 先只把现场已存在、读取完整并核验 SHA 的实际配置列入一份计划。剩余 API 整例由原有队列继续运行；待其 admission 生成实际 retry_config 后，重新现场读取、核验并为该子集创建另一份计划、全新队列 report、全新评估 config/output。不要修改正在运行的冻结计划，不要用 prepared `whole.config.json` 或预测配置的 SHA 替代 actual 配置，不预先创建 raw 的配置文件。
 
 `runtime/evaluation_only_recovery_20261005/existing_config_plan.template.json` 仅基于耐久归档中实际存在的 sub10159/sub07 配置提供结构模板，保留 canonical 服务器路径与归档 SHA；它并未证明服务器当前状态。独立评估工具和新配置路径是待填写项，模板不用于直接启动。协调者先现场核验每个 actual 路径与 SHA，删去尚未生成的 case，再填写新冻结工具/config 的路径及 SHA。已有部分比较 output 不复用。原 22 项测试证据保留为 `receipt.json`/`tests.log`；本轮审查后的源码与回归另存，避免旧证据改标。
+
+2026-10-05实际部署使用冻结ed16工具，queue脚本SHA为 `42f34188719a8e3fbe65d86f03ff7daf2e568b7a467de075c4b87958fc8c5ecf`。先为已核验的sub-10159安装全新单例plan并通过原gpucw1完整预检，再读取现场已存在的10171、10189、10193实际配置，为这三例另建独立plan、配置和输出。四例全部预检通过，两条队列已启动，每个比较阶段使用同一个共享锁及4线程预算；没有启动admission或raw进程，没有修改原始结果、旧失败checkpoint或正在运行的plan。启动记录与数值完成状态分别保存，数值结果仍须由完整18阶段checkpoint确认。
 
 取消对队列 PID 发送 `SIGTERM` 即可；不要向 raw PID 或 admission PID 发信号。等待阶段事件即时唤醒；评估阶段只处理队列创建的自有进程组，TERM 后最多等待 5 秒再 KILL。一次取消/超时只执行一次清理，避免重复等待后代退出。

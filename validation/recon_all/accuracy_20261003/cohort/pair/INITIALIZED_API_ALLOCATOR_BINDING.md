@@ -12,6 +12,8 @@ API 校验同时要求已准入的 `whole_case_driver` SHA 为 `6690d0e37682a024
 
 CPU 单元测试使用合成来源文件验证证据门控，包括合法 API、CLI unknown 拒绝、缺 receipt、UUID/初始化/retained 漂移、错误 child 命令、假 disabled、未知 driver 和读取中 receipt 改变。合成 fixture driver 的 SHA 仅在测试的局部 mock 中被接受；生产允许值保持真实冻结 driver SHA。CPU 测试结果不作真实 GPU benchmark。
 
+2026-10-05已在原gpucw1现场安装并预检冻结ed16工具，helper SHA为 `fc6a29ca38f959b2662ff87dd212a9886c8faa5fdb82e82ad1ccad68609c33a2`。sub-10159、10171、10189、10193的原始完成结果均通过完整来源、资源、138项输出、生产网格和API证据校验。sub-10159新的官方比较已越过旧失败阶段，`verify_binding`实测14.486秒，后续数值阶段已启动；另三例也启动独立比较。此次预检没有重跑影像算法，不能据此补填未完成的Dice、脑区偏差或整体等效结论。40项绑定回归、23项队列回归和6项公开报告隐私回归分别保留原证据。
+
 调用仍通过 `evaluate_pair.py` 原命令；其 SHA `4e6a96e57009a5be4bc3c085809042aae093a7039c864a380b80c3574e114418` 应保持不变。输出报告中的 `precision_resource_verification.allocator_binding` 说明本次实际入口证据。原 FreeSurfer 调用和数值比较、参考文献继续沿用单对与 cohort 说明。本修改是验证工具修正，不新增原软件算法。
 
 Python 调用示例（在 `cohort/pair` 目录执行；所有路径取实际冻结配置）：
