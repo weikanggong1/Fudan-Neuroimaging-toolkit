@@ -83,3 +83,11 @@ slab的显式结果copy合计只有 **0.927秒**；首末halo padding0.445秒；
 - 保留正式未插桩冷进程时钟；不要从一次profile推新的加速倍率。正式官方TensorFlow逐算子后端仍未记录，本次只证明FNIT自身实际参数与时间分布。
 - [profile_one.py](profile_one.py) 是冻结私有观察器；[run_one.py](run_one.py) 只派发有限合同和一个新CPU进程，在其退出后核验保存输出。执行参数从已现场核对的FNIT固定索引和 [PLAN.json](PLAN.json) 获取；不移动source/env，不创建Notebook_code根目录任务。
 - 原图和模型文件不发布；公开JSON不含影像体素/后验数组、凭据、许可证或外部地址。
+
+用标准库脚本从保存的events机械重算聚合，不执行模型：
+
+```bash
+python validation/smri_cpu/seg_cpu_profile_20261006/build_summary.py
+```
+
+[MANIFEST.json](MANIFEST.json) 只列该叶已跟踪的源码/报告文件及SHA，不含pycache或影像；manifest自身不递归计算自己的SHA。
