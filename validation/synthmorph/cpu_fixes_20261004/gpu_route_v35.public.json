@@ -1,0 +1,357 @@
+{
+  "schema": "fnit.synthmorph.cpu_raw_gpu_route_audit.v1",
+  "scope": "Independent read-only GPU-route audit and necessary input-contract tests; no GPU CNN rerun and no benchmark.",
+  "comparison_commit": "f837474d6cb3a6719ebaa8a5d7ca26623858e455",
+  "head_commit_at_audit": "6785395e0d288098764ea1564f112516b380e3dc",
+  "source_sha256": {
+    "src/fnit/synthmorph/_cpu_preprocessing.py": "1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b",
+    "src/fnit/synthmorph/_cpu_raw_sampler.py": "f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd"
+  },
+  "source_frozen_through_audit": true,
+  "ast": {
+    "nodes": {
+      "function_arguments": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "9fddd00d62e93aa234bc0af9d655cbc3d5e86e14a8aa23c62d99031567de62e3",
+        "candidate_ast_sha256": "9fddd00d62e93aa234bc0af9d655cbc3d5e86e14a8aa23c62d99031567de62e3",
+        "candidate_line": null,
+        "candidate_source": "volume, matrix, shape=None, fill_value=0"
+      },
+      "matrix_construction": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "92238d9e47ff7bf2782892a1b5022292c307593485f3152121788ab32fd0a6fc",
+        "candidate_ast_sha256": "92238d9e47ff7bf2782892a1b5022292c307593485f3152121788ab32fd0a6fc",
+        "candidate_line": 17,
+        "candidate_source": "matrix = torch.as_tensor(matrix, dtype=volume.dtype, device=volume.device)"
+      },
+      "early_return_guard": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "b40be4ae687881fe1bddfdccb7ebd7aa8da213438e9550d970b7d0b42546b3b2",
+        "candidate_ast_sha256": "b40be4ae687881fe1bddfdccb7ebd7aa8da213438e9550d970b7d0b42546b3b2",
+        "candidate_line": 18,
+        "candidate_source": "volume.device.type != 'cpu' or volume.dtype != torch.float32 or torch.is_grad_enabled() or volume.requires_grad or matrix.requires_grad or (matrix.ndim != 2)"
+      },
+      "return_transform": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "5d5b16882c717c89fad8e3133868105e6455b75909824977b249dd963561fd34",
+        "candidate_ast_sha256": "5d5b16882c717c89fad8e3133868105e6455b75909824977b249dd963561fd34",
+        "candidate_line": 21,
+        "candidate_source": "return transform(volume, matrix, shape=shape, fill_value=fill_value)"
+      },
+      "shape_assignment": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "539fdcd142cf426ff585a0a1f7712c412167d5732c4fad075e921f87ab4568ae",
+        "candidate_ast_sha256": "539fdcd142cf426ff585a0a1f7712c412167d5732c4fad075e921f87ab4568ae",
+        "candidate_line": 22,
+        "candidate_source": "shape = volume.shape[2:] if shape is None else tuple(shape)"
+      },
+      "grid_coordinates": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "98473178079f668c21800f761c3c3435712f00396e6d516ccf69546195628f8f",
+        "candidate_ast_sha256": "98473178079f668c21800f761c3c3435712f00396e6d516ccf69546195628f8f",
+        "candidate_line": 23,
+        "candidate_source": "coords = grid(shape, volume.device, volume.dtype)"
+      },
+      "raw_location_formula": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "2c900cda594123dac8a0d9f017b7ebe770e14084db306094c9c3c7da27d79b7e",
+        "candidate_ast_sha256": "2c900cda594123dac8a0d9f017b7ebe770e14084db306094c9c3c7da27d79b7e",
+        "candidate_line": 24,
+        "candidate_source": "locations = coords + _dense_from_grid(matrix, coords)"
+      }
+    },
+    "early_return_before_optional_cpu_import": true,
+    "optional_import_line": 27,
+    "only_inserted_three_cpu_statements": true,
+    "module_imports_unchanged": true,
+    "CPU_inserted_statements": [
+      "from ._cpu_raw_sampler import try_sample",
+      "compiled = try_sample(volume, locations, fill_value)",
+      "if compiled is not None:\n    return compiled"
+    ],
+    "matrix_dtype_device_rule": "torch.as_tensor(matrix, dtype=volume.dtype, device=volume.device), unchanged",
+    "coordinate_space": "Established raw voxel coords + _dense_from_grid(matrix, coords), unchanged",
+    "GPU_route": "Non-CPU volume returns existing spatial.transform before grid/locations creation and optional helper import.",
+    "pipeline_sampler_selection": {
+      "ast_equal": true,
+      "baseline_ast_sha256": "0a8e43aa5d7ae0639490fe3811172d398ce94ec16127b16c9f479712765c7662",
+      "candidate_ast_sha256": "0a8e43aa5d7ae0639490fe3811172d398ce94ec16127b16c9f479712765c7662",
+      "candidate_line": 391,
+      "candidate_source": "if self.device.type == 'cpu' and self.model == 'joint':\n    from ._cpu_preprocessing import network_transform\n    input_sampler = network_transform\nelse:\n    input_sampler = transform"
+    },
+    "models_CPU_helper_dispatch": {
+      "_cpu_joint_inference_enabled": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "77797bdbd320534327344da7da4bae5f6213c96f817d81c11ae9dfb7e8d67234",
+        "candidate_ast_sha256": "77797bdbd320534327344da7da4bae5f6213c96f817d81c11ae9dfb7e8d67234",
+        "candidate_line": 113,
+        "candidate_source": "def _cpu_joint_inference_enabled(module, moving, fixed, mid_space):\n    if not mid_space or module.training or moving.device.type != 'cpu' or (fixed.device.type != 'cpu') or (moving.dtype != torch.float32) or (fixed.dtype != torch.float32) or torch.is_grad_enabled():\n        return False\n    from ._cpu_features import supported_inference\n    return supported_inference(module.detector, moving) and supported_inference(module.detector, fixed)"
+      },
+      "FeatureDetector.forward": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "7e4746ee5cfe61cbf3c74218af0a872d0c322a33866cec13f8c8fe493384cba1",
+        "candidate_ast_sha256": "7e4746ee5cfe61cbf3c74218af0a872d0c322a33866cec13f8c8fe493384cba1",
+        "candidate_line": 69,
+        "candidate_source": "def forward(self, x, *, cpu_joint_inference=False):\n    if cpu_joint_inference and x.device.type == 'cpu' and (x.dtype == torch.float32) and (not torch.is_grad_enabled()) and torch.backends.mkldnn.is_available() and torch.backends.mkldnn.enabled:\n        from ._cpu_features import detector_features, supported_inference\n        if supported_inference(self, x):\n            return detector_features(self, x)\n    for layer in self.layers[:4]:\n        x = F.max_pool3d(F.leaky_relu(layer(x), 0.2), 2)\n    for layer in self.layers[4:8]:\n        x = F.leaky_relu(layer(x), 0.2)\n    return F.relu(self.layers[8](x))"
+      },
+      "AffineNetwork.forward": {
+        "ast_equal": true,
+        "baseline_ast_sha256": "6bd343afe28da63df36307366a69bfd5faabd6441ef9503f1d92a07fe07b7fb9",
+        "candidate_ast_sha256": "6bd343afe28da63df36307366a69bfd5faabd6441ef9503f1d92a07fe07b7fb9",
+        "candidate_line": 322,
+        "candidate_source": "def forward(self, moving, fixed, half_res=True, mid_space=False, return_features=False):\n    full_shape = moving.shape[2:]\n    if half_res:\n        moving = moving[..., ::2, ::2, ::2]\n        fixed = fixed[..., ::2, ::2, ::2]\n    cpu_inference = _cpu_joint_inference_enabled(self, moving, fixed, mid_space)\n    if cpu_inference:\n        feat1, feat2 = (self.detector(moving, cpu_joint_inference=True), self.detector(fixed, cpu_joint_inference=True))\n    else:\n        feat1, feat2 = (self.detector(moving), self.detector(fixed))\n    center_function = _cpu_joint_barycenter if cpu_inference else _cpu_joint_barycenter_legacy if mid_space and moving.device.type == 'cpu' else barycenter\n    cen1, mass1 = center_function(feat1, full_shape)\n    cen2, mass2 = center_function(feat2, full_shape)\n    if cpu_inference:\n        weights = mass1 / _cpu_inner_sum(mass1).unsqueeze(-1) * (mass2 / _cpu_inner_sum(mass2).unsqueeze(-1))\n    else:\n        weights = mass1 / mass1.sum(-1, keepdim=True) * (mass2 / mass2.sum(-1, keepdim=True))\n    fit_function = _cpu_joint_fit_affine if cpu_inference else fit_affine\n    inverse_function = _cpu_joint_inverse if cpu_inference else torch.linalg.inv\n    sqrt_function = _cpu_joint_matrix_sqrt if cpu_inference else matrix_sqrt\n    affine1 = fit_function(cen1, cen2, weights)\n    affine2 = fit_function(cen2, cen1, weights)\n    affine1 = (affine1 + inverse_function(affine2)) * 0.5\n    if self.rigid:\n        affine1 = _rigid(affine1)\n    affine2 = inverse_function(affine1)\n    if mid_space:\n        affine1, affine2 = (sqrt_function(affine1), sqrt_function(affine2))\n    center = torch.eye(4, device=moving.device, dtype=moving.dtype)\n    center[:3, 3] = -(torch.as_tensor(full_shape, device=moving.device) - 1) * 0.5\n    if cpu_inference:\n        affine1 = _cpu_joint_center_affine(affine1, full_shape)\n        affine2 = _cpu_joint_center_affine(affine2, full_shape)\n    else:\n        affine1 = torch.linalg.inv(center) @ affine1 @ center\n        affine2 = torch.linalg.inv(center) @ affine2 @ center\n    out = (affine1[0], affine2[0])\n    return (*out, feat1, feat2) if return_features else out"
+      }
+    },
+    "entrypoint_GPU_route": "pipeline selects transform directly whenever self.device.type != cpu; optional _cpu_preprocessing import occurs only for CPU joint, so GPU does not enter network_transform.",
+    "models_GPU_route": "_cpu_joint_inference_enabled returns False before _cpu_features import for moving/fixed on non-CPU. FeatureDetector CPU import remains conditional on CPU/FP32/no-grad/mkldnn. AffineNetwork receives cpu_inference=False and uses ordinary CUDA detector, barycenter, fit_affine, inverse and matrix_sqrt."
+  },
+  "six_core_files": {
+    "src/fnit/synthmorph/models.py": {
+      "baseline_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+      "candidate_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+      "exact_bytes_equal": true
+    },
+    "src/fnit/synthmorph/pipeline.py": {
+      "baseline_sha256": "633ee2f94ebc6136c4219ea945a2c489a42fe6f1f154da80691fbb0c3794d37b",
+      "candidate_sha256": "633ee2f94ebc6136c4219ea945a2c489a42fe6f1f154da80691fbb0c3794d37b",
+      "exact_bytes_equal": true
+    },
+    "src/fnit/synthmorph/spatial.py": {
+      "baseline_sha256": "0dd342cf0a9c94cd09a0396097adc40afbb838cfbce2f0963a28f417249d93a5",
+      "candidate_sha256": "0dd342cf0a9c94cd09a0396097adc40afbb838cfbce2f0963a28f417249d93a5",
+      "exact_bytes_equal": true
+    },
+    "src/fnit/_nib.py": {
+      "baseline_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+      "candidate_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+      "exact_bytes_equal": true
+    },
+    "src/fnit/_transforms.py": {
+      "baseline_sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33",
+      "candidate_sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33",
+      "exact_bytes_equal": true
+    },
+    "src/fnit/_world_resampling.py": {
+      "baseline_sha256": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5",
+      "candidate_sha256": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5",
+      "exact_bytes_equal": true
+    }
+  },
+  "precision_policy": {
+    "all_mutations_unchanged": true,
+    "helper_global_precision_or_environment_assignments": [],
+    "new_helper_policy": "Reads CPU autocast status; sets/restores NumBa thread mask locally in try/finally; fastmath=False FP32. No TF32/cuDNN/global float policy writes."
+  },
+  "existing_real_H100_jointproof": {
+    "file": "validation/synthmorph/cpu_fixes_20261004/joint_precision_v29.public.json",
+    "file_sha256": "f7dee95d89426643f03be69812d8d16ec6a5f61865ddd7ec01644be6a50c186d",
+    "reused_existing_run": true,
+    "CNN_rerun_this_audit": false,
+    "scope": "full real joint GPU old/new arrays and complete saved headers; shared GPU timing observations",
+    "array_checks": {
+      "forward": {
+        "baseline_sha256": "70d5f401aa4e5f08c38bcbee4de489da06636cab67a757408a71f761f5a8781f",
+        "candidate_sha256": "70d5f401aa4e5f08c38bcbee4de489da06636cab67a757408a71f761f5a8781f",
+        "exact_equal": true
+      },
+      "inverse": {
+        "baseline_sha256": "24eb2421daf0117988b0ae31fe0dd1075715b83fde1a2850cec4bdfd8e102e69",
+        "candidate_sha256": "24eb2421daf0117988b0ae31fe0dd1075715b83fde1a2850cec4bdfd8e102e69",
+        "exact_equal": true
+      },
+      "moved": {
+        "baseline_sha256": "3906757c133b1c21ce57c64110e1b84393addac9e37bdd91743e32236f264103",
+        "candidate_sha256": "3906757c133b1c21ce57c64110e1b84393addac9e37bdd91743e32236f264103",
+        "exact_equal": true
+      },
+      "fixed_moved": {
+        "baseline_sha256": "25b301ab36751d325f04bca64a8eac9ebfa075df497065c74617d5f7e9e22251",
+        "candidate_sha256": "25b301ab36751d325f04bca64a8eac9ebfa075df497065c74617d5f7e9e22251",
+        "exact_equal": true
+      }
+    },
+    "header_checks": {
+      "moved": {
+        "binary_header_equal": true,
+        "extensions_equal": true,
+        "affine_equal": true,
+        "shape_equal": true
+      },
+      "fixed_moved": {
+        "binary_header_equal": true,
+        "extensions_equal": true,
+        "affine_equal": true,
+        "shape_equal": true
+      }
+    },
+    "all_gates_passed": true,
+    "peak_cuda_reserved_bytes": [
+      17836277760,
+      17836277760
+    ],
+    "CPU_helpers_loaded": {
+      "baseline": [],
+      "candidate": []
+    },
+    "six_core_current_to_final_guard_source_binding": {
+      "src/fnit/synthmorph/models.py": {
+        "current_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+        "existing_final_guard_candidate_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+        "equal": true
+      },
+      "src/fnit/synthmorph/pipeline.py": {
+        "current_sha256": "633ee2f94ebc6136c4219ea945a2c489a42fe6f1f154da80691fbb0c3794d37b",
+        "existing_final_guard_candidate_sha256": "633ee2f94ebc6136c4219ea945a2c489a42fe6f1f154da80691fbb0c3794d37b",
+        "equal": true
+      },
+      "src/fnit/synthmorph/spatial.py": {
+        "current_sha256": "0dd342cf0a9c94cd09a0396097adc40afbb838cfbce2f0963a28f417249d93a5",
+        "existing_final_guard_candidate_sha256": "0dd342cf0a9c94cd09a0396097adc40afbb838cfbce2f0963a28f417249d93a5",
+        "equal": true
+      },
+      "src/fnit/_nib.py": {
+        "current_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+        "existing_final_guard_candidate_sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+        "equal": true
+      },
+      "src/fnit/_transforms.py": {
+        "current_sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33",
+        "existing_final_guard_candidate_sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33",
+        "equal": true
+      },
+      "src/fnit/_world_resampling.py": {
+        "current_sha256": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5",
+        "existing_final_guard_candidate_sha256": "810e28e5a70296762186116f2ac95e4209eb3ed3adfb5fc29ff89a784e7e08e5",
+        "equal": true
+      }
+    }
+  },
+  "tests": {
+    "existing_importtrap": {
+      "nodeid": "tests/synthmorph/test_cpu_raw_sampler.py::test_network_guard_returns_before_importing_optional_helper",
+      "returncode": 0,
+      "tests": 3,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "elapsed_seconds": 4.496,
+      "cases": [
+        "test_network_guard_returns_before_importing_optional_helper[gradient]",
+        "test_network_guard_returns_before_importing_optional_helper[double]",
+        "test_network_guard_returns_before_importing_optional_helper[other_device]"
+      ],
+      "scope": "Three existing contracts only; gradient/double/non-CPU(meta) reject CPU lazy import. No benchmark."
+    },
+    "local_cuda_contract": {
+      "scope": "Tiny sampling device/import contract only; artificial tensor is unit-test input, not benchmark; no CNN.",
+      "status": "passed",
+      "cuda_available": true,
+      "torch_version": "2.5.1",
+      "device_name": "NVIDIA GeForce RTX 3060",
+      "source_sha256": "1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b",
+      "cases": [
+        {
+          "shape_argument": null,
+          "fill_value": 0,
+          "output_device": "cuda:0",
+          "output_dtype": "torch.float32",
+          "output_shape": [
+            1,
+            1,
+            3,
+            4,
+            5
+          ],
+          "exact_bits_equal_to_spatial_transform": true
+        },
+        {
+          "shape_argument": [
+            4,
+            5,
+            6
+          ],
+          "fill_value": 3.25,
+          "output_device": "cuda:0",
+          "output_dtype": "torch.float32",
+          "output_shape": [
+            1,
+            1,
+            4,
+            5,
+            6
+          ],
+          "exact_bits_equal_to_spatial_transform": true
+        },
+        {
+          "shape_argument": [
+            4,
+            5,
+            6
+          ],
+          "fill_value": null,
+          "output_device": "cuda:0",
+          "output_dtype": "torch.float32",
+          "output_shape": [
+            1,
+            1,
+            4,
+            5,
+            6
+          ],
+          "exact_bits_equal_to_spatial_transform": true
+        }
+      ],
+      "optional_helper_import_attempts": [],
+      "CPU_helper_loaded_before": false,
+      "CPU_helper_loaded_after": false,
+      "policy_before": {
+        "matmul_tf32": false,
+        "cudnn_tf32": true,
+        "cudnn_enabled": true,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": false,
+        "float32_matmul_precision": "highest",
+        "default_dtype": "torch.float32",
+        "torch_threads": 18,
+        "grad_enabled": true,
+        "cuda_autocast": false,
+        "cpu_autocast": false
+      },
+      "policy_after": {
+        "matmul_tf32": false,
+        "cudnn_tf32": true,
+        "cudnn_enabled": true,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": false,
+        "float32_matmul_precision": "highest",
+        "default_dtype": "torch.float32",
+        "torch_threads": 18,
+        "grad_enabled": true,
+        "cuda_autocast": false,
+        "cpu_autocast": false
+      },
+      "policy_unchanged": true
+    },
+    "initial_environment_failure_corrected": true
+  },
+  "checks": {
+    "all_key_preprocessing_AST_equal": true,
+    "CPU_insert_only_preserves_original_AST": true,
+    "CPU_lazy_import_after_early_return": true,
+    "pipeline_sampler_selection_AST_equal": true,
+    "model_CPU_dispatch_AST_equal": true,
+    "six_core_bytes_equal_to_f837": true,
+    "global_precision_policy_mutations_unchanged": true,
+    "requested_source_hash_prefixes_match": true,
+    "source_frozen_through_audit": true,
+    "existing_importtrap_3_pass": true,
+    "actual_CUDA_device_contract_pass": true,
+    "existing_H100_GPU_arrays_headers_pass": true,
+    "six_core_bound_to_existing_H100_final_guard_source": true,
+    "module_imports_unchanged": true
+  },
+  "all_audited_gates_passed": true,
+  "findings": [],
+  "conclusion": "v35 optional CPU raw sampling preserves the established GPU route. pipeline CUDA selects original transform before importing CPU preprocessing; direct CUDA network_transform returns original transform before optional helper. Core GPU source and global precision-policy mutations unchanged. Existing complete H100 joint proof is reused; current audit adds AST/hash binding and finite device contracts, without new GPU CNN benchmark.",
+  "finished_utc": "2026-10-05T13:15:28.649610+00:00"
+}

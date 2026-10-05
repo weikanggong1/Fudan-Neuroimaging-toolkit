@@ -22,6 +22,12 @@ def network_transform(volume, matrix, shape=None, fill_value=0):
     shape = volume.shape[2:] if shape is None else tuple(shape)
     coords = grid(shape, volume.device, volume.dtype)
     locations = coords + _dense_from_grid(matrix, coords)
+    # Import only after the CPU inference guard. Keep this ordered Torch
+    # implementation for unsupported or failed optional compiled sampling.
+    from ._cpu_raw_sampler import try_sample
+    compiled = try_sample(volume, locations, fill_value)
+    if compiled is not None:
+        return compiled
     source_shape = volume.shape[2:]
     lower = [locations[:, axis].floor().clamp(0, size - 1)
              for axis, size in enumerate(source_shape)]

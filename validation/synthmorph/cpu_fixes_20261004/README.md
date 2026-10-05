@@ -4,6 +4,22 @@
 
 ## 最新 CPU joint 修复：192 和 256 固定门均通过
 
+### 2026-10-05：最终 v35 完整采样接入验收
+
+最终 NumBa helper SHA `f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd`，preprocessing SHA `1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b`；采用下节 v34 的安全 Eigen loader。baseline / candidate 冻结清单 SHA 为 `358b80ca61f5f5842ff72d0281c2bc86280fd996d07506dd206d2ea455a74111` / `27151ecb3e7edd14fe191ebbbee71abcf5f798b5273ef503f416db4ac48940f3`。两个清单的全部 1,231 / 1,232 文件现场重验，实际导入源文件和本次提交源文件逐一匹配。权重和公开 T1 的大小/SHA 在计时前核对。
+
+[full_sampler_v35.public.json](full_sampler_v35.public.json) 包含默认256 A1(v34)→C1(v35)→C2(v35)→A2(v34)、192 和完全物化 API。每次同八物理核、四个线程环境均8、CUDA隐藏；实际 candidate NumBa后端、请求8线程及 mask恢复均核对。**所有完整两图两场数组、header/extensions/affine、shape和dtype都与已验收v29相同**。仅借这些精确相同结果传递既有官方固定门，原软件完整CNN不重复。只读 scorer 首次因冻结包不包含验证脚本依赖而在 import 退出；原日志保留，补供已核对的三个既有评分脚本后继续评分，生产源码和完整拟合没有重跑。
+
+| 默认256，完整CLI秒 | A1(v34) | C1(v35，空NumBa cache) | C2(v35，新进程复用cache) | A2(v34) |
+| --- | ---: | ---: | ---: | ---: |
+| 运行时间 | 171.484 | 159.966 | 150.207 | 154.704 |
+
+中位数 **163.094→155.086 s**，该组下降 **4.91%**；load44–57，共享节点，页面缓存未清空，不声称稳定吞吐倍数。256 RSS峰11.718–11.799 GB；192 / hyper0.75 / steps5 **87.383 s**、RSS5.449 GB，单次单列。
+
+物化 API 读取1.016 / 模型加载3.619 / API121.043 / 保存21.466 s，带observer、诊断数组保存与启动的worker166.986 s，RSS12.081 GB；输入未改，两图两场与CLI全同。嵌套网络时钟见JSON，不能相加为完整时间。最终有限raw/normalized各47,710,208值位级门，以及暖采样5.35/6.07倍、冷256慢12.3%均在[采样报告](../cpu_raw_sampler_20261004/README.md)单列。成熟PyTorch子函数此次改变仅是安全CPU分支的有序采样入口；CPU训练/梯度/autocast、其他设备保留原Torch。
+
+[GPU隔离审计](gpu_route_v35.public.json) 14项全部通过，包括入口及CPUguard AST、六核心文件与既有完整H100父版本SHA绑定、全局精度策略不变、3个importtrap合同和实际小CUDA的3种采样位级一致。完整H10017.836GB及两图两场证明来自既有run，不重跑CNN或以小合同代替速度benchmark。生产helper与评分身份合同 **41 passed，6.12 s**；只列本次实际执行的合同。
+
 ### 2026-10-05：实际 Conda 缓存能力问题已修复
 
 新的 v33 缓存保护在 nodecw7 的 Python 中遇到 `NotImplementedError: chmod: follow_symlinks unavailable on this platform`，验证在构建前退出，原失败记录保留。v34 使用 `O_DIRECTORY | O_NOFOLLOW` 打开目录；在同一文件描述符上检查类型和当前用户所有权、执行 `fchmod` 并确认权限确为 `0700`，退出时关闭描述符。继续拒绝链接、错误所有者及不落实权限的文件系统，没有退回跟随路径修改权限。

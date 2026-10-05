@@ -33,7 +33,7 @@ flowchart LR
 <a id="固定场bbr与逐帧运动的一次采样"></a>
 <a id="公共world变换链的验证范围"></a>
 
-2026-10-02 的独立 apply 优化复用解码后的 float32 数据、坐标与采样索引，并按 frame 限制 CUDA 缓冲。2026-10-04 修复 CPU 最终 linear 的有效域和 nearest 半体素舍入；续修统一 CPU 的 NIfTI 缩放解码，让 rigid/affine 配准图像按返回的仿射重采样，并修正 CPU joint 的置信 mass 与 barycenter 两种归约形状。随后 CPU joint 续修原始坐标插值、显式 oneDNN 小网格卷积与仿射算术顺序，extent192/256 的完整固定门均通过。配准模型仍只接受单帧 3D 输入，CUDA 沿用已验收的解码与采样路径。
+2026-10-02 的独立 apply 优化复用解码后的 float32 数据、坐标与采样索引，并按 frame 限制 CUDA 缓冲。2026-10-04 修复 CPU 最终 linear 的有效域和 nearest 半体素舍入；续修统一 CPU 的 NIfTI 缩放解码，让 rigid/affine 配准图像按返回的仿射重采样，并修正 CPU joint 的置信 mass 与 barycenter 两种归约形状。随后 CPU joint 续修原始坐标插值、显式 oneDNN 小网格卷积与仿射算术顺序，extent192/256 的完整固定门均通过。2026-10-05 在保持输出位模式的前提下，以可回退的 NumBa 循环融合 CPU joint 初始采样，并修复 Conda Python 的缓存权限能力差异。配准模型仍只接受单帧 3D 输入，CUDA 沿用已验收的解码与采样路径。
 
 ## 2. Python 调用
 
@@ -232,7 +232,27 @@ mri_synthmorph apply -m nearest -t int16 reference/moving_to_fixed.mgz \
 
 ## 5. 最新精度和运行时间
 
-### 5.1 最新 CPU joint 续修及其他模式回归：2026-10-04
+### 5.1 最新 CPU joint 采样优化：2026-10-05
+
+CPU joint 的原始体素坐标八角采样现在可使用仓库自写的 NumBa FP32 循环，将索引、权重和八角累加合在一次遍历中；`fastmath=False`，保留逐角顺序。PyTorch 继续建立原坐标、运行网络及生成最终输出，Python/CLI 参数不变。新增路径只接受 Linux x86 CPU、float32、无梯度、无 autocast、有限数据及至少 32,768 个输出位置；不满足条件、NumBa 缺失/JIT 禁用或编译失败时调用原 Torch 路径。线程预算取当前 Torch 和 NumBa 的较小值，退出时恢复 NumBa mask。`FNIT_SYNTHMORPH_CPU_RAW_NUMBA=0` 可关闭这一优化；默认开启，不启用半精度。
+
+同一公开 OpenNeuro ds003138 v1.0.1 / CC0 双 T1 在固定八物理核、OMP/MKL/OpenBLAS/NumBa/Torch 各八线程下重新完整运行。实际输入及外置权重的大小/SHA 先验核对；两份冻结源码的全部 1,231 / 1,232 文件逐一校验。四次默认 extent256 CLI、extent192 CLI 和完全物化 API 均完成；两图两场的**全数组位模式、完整 header/extensions/affine、shape 和 dtype**与已验收 v29 相同，沿用其官方固定误差门。原版 CNN 没有重跑，没有调整容差。[完整输出、后端、源码及资源报告](../../validation/synthmorph/cpu_fixes_20261004/full_sampler_v35.public.json)。
+
+| 完整新进程，默认 extent256 | 原 Torch v34（秒） | NumBa v35（秒） |
+| --- | ---: | ---: |
+| 第一对 A1 → C1 | 171.484 | 159.966 |
+| 第二对 C2 → A2 | 154.704 | 150.207 |
+| 两次中位数 | 163.094 | 155.086 |
+
+顺序为 **A1 → C1 → C2 → A2**。C1 的 NumBa disk cache 初始为空，完整时间包括懒导入/JIT；C2 是复用该 cache 的新进程。两边都已有 Eigen 构建缓存。该组中位时间下降 **4.91%**，但仅一组共享节点观测，load 44–57、页面缓存未清空，不能推广为稳定倍数。256 sampled process-tree RSS 为 11.718–11.799 GB。extent192 / hyper0.75 / steps5 为 **87.383 s**、RSS **5.449 GB**；它单列，不与默认256的两对计时混合。
+
+完全物化 API 的输入读取/物化 **1.016 s**、模型加载 **3.619 s**、API **121.043 s**、保存 **21.466 s**；含 observer、诊断数组保存及启动的完整 worker **166.986 s**，RSS **12.081 GB**。两幅图像和两个场与完整 CLI 相同，输入不变。两个 detector 为 2.314 / 2.197 s、affine inclusive 4.740 s、两个 deform 50.241 / 50.498 s、顶层网络111.163 s；这些时钟有嵌套，不能相加。
+
+同源码的有限真实采样门验证 raw 和 normalized 各 **47,710,208 值**逐位相同。每图暖 ABBA：192 为 Torch **0.593804 s** / NumBa **0.110970 s**，256 为 **1.958145 s** / **0.322657 s**。独立空 cache 256 首次调用计入懒导入与 JIT，NumBa **2.331800 s**，Torch **2.076089 s**，冷调用慢 **12.3%**；局部暖速比不代表完整配准速比。[最终采样门与冷启动记录](../../validation/synthmorph/cpu_raw_sampler_20261004/README.md)。
+
+GPU 入口、六个核心文件和进程全局 TF32/cuDNN 精度设置与既有版本相同。新增检查包含 CPU guard/入口 AST、三种实际小 CUDA 采样逐位一致、CPU helper 未导入及精度策略未变，见 [GPU 隔离审计](../../validation/synthmorph/cpu_fixes_20261004/gpu_route_v35.public.json)。已有完整 H100 joint 的两图两场一致与 reserved **17,836,277,760 bytes** 证据保留；本次没有重跑 GPU CNN，也没有将小采样合同称作完整 GPU 性能重测。下节真实脑图来自 v29，同输入的 v35 输出位模式相同，沿用该图展示官方差异。
+
+### 5.1.1 CPU joint 精度续修及其他模式回归：2026-10-04
 
 最新实现修复 CPU joint 的首次分歧：NIfTI 默认缩放后转 float32；初始网络输入按原始体素坐标有序八角插值；仿射特征显式采用 oneDNN 卷积；置信、XYZ moments、4×4 LU/solve、平方根与中心组合保留明确的 FP32 次序。既有 rigid/affine 返回变换与最终图像的 pull 契约保留。最终采样、权重、deform 网络、速度积分、standalone affine/rigid 以及全部 CUDA 公式保持。各入口、局部 hook、训练和 autocast 的保护条件另有回归。
 
@@ -267,6 +287,7 @@ CPU joint 的 Eigen 适配器是 FNIT 自有小段 C++，不调用原软件。�
 
 | 日期 | 更新 | 验证记录 |
 |---|---|---|
+| 2026-10-05 | CPU有序NumBa采样、安全Eigen cache平台修复；GPU入口与数学源码保留 | [完整192/256/API全同，256单共享节点ABBA中位下降4.91%；暖/冷采样分别列出](../../validation/synthmorph/cpu_fixes_20261004/full_sampler_v35.public.json)；[GPU隔离审计](../../validation/synthmorph/cpu_fixes_20261004/gpu_route_v35.public.json) |
 | 2026-10-04 joint 续修 | 原始坐标输入、oneDNN 小网格卷积、有序仿射算术、Eigen3.4.0；保护训练/hooks/autocast，CUDA 保留 | [192/256 全门、物化 API、三模式输出保持、GPU joint pair、当前 CPU 约慢5%](../../validation/synthmorph/cpu_fixes_20261004/README.md) |
 | 2026-10-04 已归档 v7 | CPU NIfTI 解码、rigid/affine 返回仿射契约、joint 两种归约形状；GPU 原公式保留 | [nodecw7 四模式全部固定门、物化对象/192明确未过项、H100 affine 当前源码和 shared World](../../validation/synthmorph/cpu_fixes_20261004/README.md) |
 | 2026-10-04 | CPU 构造精度隔离、最终 linear 有效域/affine 坐标、nearest 半体素舍入、积分 grid 复用与 init debug 几何；GPU 原路径保留 | [四模式、参数、独立 apply、GPU 回归与明确未过项](../../validation/synthmorph/cpu_20261004/README.md)；历史 4D 的 CPU 逐位结论不作为本次边界修复版结论 |
@@ -294,6 +315,7 @@ CPU joint 的 Eigen 适配器是 FNIT 自有小段 C++，不调用原软件。�
 | [models.py](../../src/fnit/synthmorph/models.py) | affine/rigid 特征网络、HyperVxmJoint、HDF5 读取与权重特化 |
 | [pipeline.py](../../src/fnit/synthmorph/pipeline.py) | 图像几何、预后处理、双向结果与 apply |
 | [spatial.py](../../src/fnit/synthmorph/spatial.py) | 复用坐标的采样计划、仿射/位移组合和积分 |
+| [_cpu_raw_sampler.py](../../src/fnit/synthmorph/_cpu_raw_sampler.py) | 可回退的CPU joint有序FP32八角采样；不更改GPU入口 |
 | [fsl_warp.py](../../src/fnit/synthmorph/fsl_warp.py) | RAS 位移转换为 fixed 网格 FSL relative warp |
 | [_transforms.py](../../src/fnit/_transforms.py) | 带 source/target geometry 的 `AffineTransform`、`DenseWarp` 及 LTA 读写 |
 | [_world_resampling.py](../../src/fnit/_world_resampling.py) | 从成熟volume实现抽取的world坐标链及共享linear/nearest/cubic采样器 |
