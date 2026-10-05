@@ -26,6 +26,20 @@
       "timeout_seconds": 90,
       "exception": "subprocess.TimeoutExpired",
       "action": "parent notified; defer further reads to avoid shared-route contention; no signal/source/socket mutation"
+    },
+    {
+      "scope": "read-only fresh canonical README/INDEX/queue/collector request after root verified route",
+      "host_route": "headcw .228:39516 via fnit-smri-228-39516-direct-20261005.master",
+      "timeout_seconds": 90,
+      "exception": "subprocess.TimeoutExpired",
+      "action": "parent notified; no upload/source/process/socket mutation; latest frozen queue status remains unverified"
+    },
+    {
+      "scope": "read-only hostname only after fresh-route read timeout",
+      "host_route": "headcw .228:39516 via fnit-smri-228-39516-direct-20261005.master",
+      "timeout_seconds": 30,
+      "exception": "subprocess.TimeoutExpired",
+      "action": "parent notified; no upload/source/process/socket mutation; latest frozen queue status remains unverified"
     }
   ]
 }

@@ -86,6 +86,12 @@ nodecw7、固定 8 个物理核 `32,36,40,44,48,52,56,60`，公共同组锁 `nod
 
 参考 C++ 的统计分母使用 `sum(W) + 1e-15`，节点归一使用 `sum(stat) + 1e-12`，FNIT 当前使用相应下限截断；本次限定状态的影响小，未由此改动生产。FNIT atlas reader 没有保存 `m_CanChangeAlphas`，但实际 brainstem／thal／HA 的 4432／23027／20100 个节点均允许改变 alphas，本例排除该标志造成差异。源码参考与实际 binary 分别绑定，见[只读来源记录](alpha-first-source.public.json)。
 
+### 零 prior 的导数边界：真实影响尚待统计
+
+当前候选保留 `log(prior.clamp_min(tiny))`。当某类 prior 恰为零时，它屏蔽该类 prior 的导数；参考 C++ 在四面体任一顶点的该类 alpha 非零时仍累计空间导数。局部数学检查中，候选与线性 mixture+epsilon 的 cost 完全相同，但一项 prior 导数分别为 0 和 −14.7781，见[边界记录](zero_prior_edge.public.json)。这没有改变已保存的三处真实完整梯度结果，也没有证明实际 recipe 受到影响。
+
+[限定统计脚本](count_shared_zero_prior.py)先用原 FP32 owner 和 FP64 插值逐值重建已保存 capture 的 priors／coverage，再区分全零 alpha、负 raw prior 已被 raster 裁零、raw prior 恰零且四面体 alpha 有变化三类。最后一类才需进一步核验 loss clamp 的梯度影响。脚本只读已保存数组，不调用 optimizer；小型临时夹具已验证重建和分类，真实统计尚未执行，不将夹具作为 benchmark。
+
 ## 代码与参考
 
 - [官方网格目标源码](https://github.com/freesurfer/samseg/blob/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/gems/kvlAtlasMeshToIntensityImageCostAndGradientCalculator.cxx)：先累计类别密度，再加 `1e-15`，梯度使用同一分母。源码 Git 参考与实际安装二进制分别绑定。
