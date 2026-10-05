@@ -34,16 +34,19 @@ python validation/fmri_cpu_20261004/task05_volume/saved_output_tools/collect_cpu
 
 ## 5. 精度与读取边界
 
-`volume_numeric.py` 对全部值分八帧读取，保持原归约顺序、dtype、finite 与加载/存储头门槛。实际环境无 indexed_gzip，v3 仅将三个 `nib.load` 改为 `keep_file_open=True`，减少 gzip 前缀重复解压；计算方法未变。当前 CPU16 每组十科学输出 395,140,404 个值，新旧与缓存输出均精确相同，见 [完整报告](../final_merged_cpu_v1.public.json)。
+`volume_numeric.py` 对全部值分八帧读取，保持原归约顺序、dtype、finite 与加载/存储头门槛。实际环境无 indexed_gzip，CPU16 使用的 v3 仅将三个 `nib.load` 改为 `keep_file_open=True`，减少 gzip 前缀重复解压；计算方法未变。当前 CPU16 每组十科学输出 395,140,404 个值，新旧与缓存输出均精确相同，见 [完整报告](../final_merged_cpu_v1.public.json)。
 
 官方比较只允许同一物理网格的无损轴交换/翻转；不插值、不拟合强度。变换方向、单位与空间单独核查。FNIT 没有独立原生 pre-scale/pre-highpass preproc 输出，不能把 clean 当作 preproc。原版 preproc 与 FNIT PICA/AROMA/clean 的范围分别说明。
+
+本次官方保存输出比较采用 v2 comparator：working-native 没有声明时间单位时保留完整帧数、有限值和 SHA，明确记录 `physical_time_axis_checked=false`。v4 numeric 另给 `physical_pair` 两处加载启用持久 gzip 流，去掉这两个关键字后 AST 与 v3 完全相同；归约、数值门槛及空间/时间检查不改。[官方比较报告](../official_saved_comparison_v2.public.json)只完成四组同物理网格 MNI，四组 T1w 网格不同，未声明整链等价。
 
 ## 6. 记录
 
 - 本轮完整测量绑定 `6f624040 → 98019133`；CPU16 与 GPU4 保持性通过。
-- v2 保留原算法；v3 仅维持 gzip 打开流，当前收集器 SHA `756f72638d3ae566b8decdd256d12ebc8d45808504d80158aede124bd667d0ad`，数值工具 SHA `f4150e1d4c2b9f3dbcb7535d04772e7e69c1925cbc721033f8d2ad69b7013b77`。
+- CPU16 的冻结 v3 工具见提交 `23f75b32`；当前官方读取使用 comparator v2（`d4425507…`）及 numeric v4（`b26b2c45…`）。
+- v2 保留原算法；v3 仅维持 gzip 打开流，CPU16 使用的收集器 SHA `756f72638d3ae566b8decdd256d12ebc8d45808504d80158aede124bd667d0ad`，CPU16 v3 数值工具 SHA `f4150e1d4c2b9f3dbcb7535d04772e7e69c1925cbc721033f8d2ad69b7013b77`。
 - [合并源码核查](../final_source_bridge_20261006.public.json)区分实际冻结闭与 Git tracked 文件，不将旧计时改标为合并后的新实测。
 
 ## 7. 参照
 
-[fMRIPrep](https://github.com/nipreps/fmriprep)、[NiWorkflows](https://github.com/nipreps/niworkflows)、[Nibabel](https://github.com/nipy/nibabel)。功能接口和原软件调用见 [volume 文档](../../../../../docs/fmri/README.md)。
+[fMRIPrep](https://github.com/nipreps/fmriprep)、[NiWorkflows](https://github.com/nipreps/niworkflows)、[Nibabel](https://github.com/nipy/nibabel)。功能接口和原软件调用见 [volume 文档](../../../../docs/fmri/README.md)。

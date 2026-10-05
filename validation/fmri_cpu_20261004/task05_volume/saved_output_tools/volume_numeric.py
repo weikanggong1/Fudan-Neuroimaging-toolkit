@@ -80,7 +80,7 @@ def physical_pair(candidate, official, *, frames=None, mask=False):
     """Full values on the same physical lattice; only lossless axis flips/permutations."""
     import nibabel as nib
     import numpy as np
-    a,b=nib.load(str(candidate)),nib.load(str(official))
+    a,b=nib.load(str(candidate),keep_file_open=True),nib.load(str(official),keep_file_open=True)
     scales={'mm':1.,'meter':1000.,'micron':.001}
     units=[x.header.get_xyzt_units() for x in (a,b)]
     row={'candidate_sha256':sha(candidate),'official_sha256':sha(official),

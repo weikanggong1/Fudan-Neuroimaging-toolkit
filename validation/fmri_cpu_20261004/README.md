@@ -37,12 +37,16 @@ GPU 对照使用已验证 H100 的显式 UUID，先记录设备负载。同一�
 
 原版 fMRIPrep 25.2.4 的 CPU1/CPU8 first 与新进程 workflow-cache 四次完整调用已完成，STC OFF、180 帧、launcher/payload 均退出 0。CPU1 first/cache 为 19400.443/1107.668 s，CPU8 为 2957.476/453.581 s；[保存节点 CPU1](task05_volume/official_saved_nodes_cpu1_v2.public.json)及[CPU8](task05_volume/official_saved_nodes_cpu8_v2.public.json)保留完整时钟和分组。其范围包含 confounds 和额外解剖模板配准，FNIT 的完整调用另含 PICA、ICA-AROMA 与 clean；本表是 FNIT 新旧保持性结果，不计算原版整链加速比。
 
+官方 preproc 的[完整差异指标](task05_volume/official_saved_comparison_v2.public.json)已读取：四组 MNI 各 162,473,220 个值、全 180 帧有限；FNIRT 全网格相关 0.9691–0.9699，SynthMorph 0.9890–0.9896。逐体素时间相关均值分别为 0.5008–0.5254/0.7327–0.7423（全网格、不用 brain mask）。四组 T1w 物理网格不同，旧 mask 空间单位 unknown，原版 working-native 时间单位 unknown；报告保留这些缺口，不宣布官方整链等价。
+
+`_save_mask` 另修复保存时丢失 reference 空间单位的问题；四份已保存真实 mask 的 writer 验证通过，全部值/网格和其他头字节保持不变，仅 xyz 单位改为 mm。[独立报告](task05_volume/mask_units_writer_replay_v1.public.json)给出官方 Dice（FNIRT 0.94356–0.94392，SynthMorph 0.94868–0.94908）。这项验证只有四次 writer 调用，不改变上方 `98019133` 完整 CPU/GPU 测量标签。
+
 ### 尚未达到的范围
 
 - MCFLIRT 某些可选阶段仍慢于同线程原版；默认 180 帧 CPU8 warm 为 36.542 s，原版 app 为 35.233 s。三轴展开候选实测内核收益约 0.135%，未采用；[完整说明](../../docs/mcflirt/CPU_BENCHMARK_20261004.md)保留结果。
 - MS-HBM CPU8 原版标签逐值一致，CPU1 有一个顶点差异；更改权重的已测参数有 79 个顶点差异，旧、新 FNIT 一致，属于既有官方差异。两个独立 run 的真实输入仍待提供。
 - MSMAll CA/CAT 所需的个体髓鞘图和偏置图仍待提供，未用代理图替代。
-- 180 帧 fresh surface 的球面和时序仍有差异；准备、刚性和前两轮离散更新已核对；粗级右侧中间成本不同，细级源点→CP 面归属缓存与首 alpha 成本不同。具体边界运算继续定位，[任务 4](task04_msm_surface/README.md)保留实际误差；固定 490 帧几何投影与 CIFTI 则逐值一致。
+- 180 帧 fresh surface 的球面和时序仍有差异；准备、刚性和前两轮离散更新已核对。细级的完整几何交叉重放排除了选面实现差异，右侧 2 个源顶点受上游 double 舍入影响；粗级中间成本与细级首 alpha 成本仍不同。[任务 4](task04_msm_surface/README.md)保留实际误差与重放证据；固定 490 帧几何投影与 CIFTI 则逐值一致。
 
 ## 验证规则
 
@@ -68,4 +72,4 @@ GPU 对照使用已验证 H100 的显式 UUID，先记录设备负载。同一�
 - benchmark 统一框架将多数组 GIFTI 和 CIFTI 交给表面适配器核对面、顶点与轴。普通 metric GIFTI 仍使用数值比较；官方与冻结 FNIT 双版本测量无需伪造 candidate。
 
 - 官方容器阶段的首轮 `strace` 使 Singularity setuid 启动器失败，未进入原版影像计算；这些尝试没有有效耗时。新隔离参考工具在容器内记录实际 payload 退出码，并要求 payload 与启动器均为零，保留 FSL 原有严格 trace 规则。原版 volume 的许可、session/task 选择与实际修复后的独立运行保持一致；原版与 FNIT 的预处理／clean 输出范围和不同核组分列，不预先宣称整链通过。
-- 体积基线四组完整 API 已返回成功，单次 180 帧的 first call/cache call 耗时见 [执行回执](task05_volume/baseline_execution_20261005.public.json)。该冻结基线早于最新 robust BOLD reference 默认，仅报告执行状态；最终合并优化链、原版完整链和逐图精度仍待验收。[13 项完整 helper 官方比较](task05_volume/helper_float32_protocol_20261005.public.json)已完成，固定 helper 输入的精度独立于整链验收。
+- 早期体积四组 [执行基线](task05_volume/baseline_execution_20261005.public.json)早于最新 robust BOLD reference 默认，保留为历史记录。最终冻结源码的 CPU16/GPU4 保持性与原版四次完整调用均已完成，见上方结果；官方 T1w 网格和部分变换范围仍有缺口。[13 项完整 helper 官方比较](task05_volume/helper_float32_protocol_20261005.public.json)保留其独立输入与数值协议。

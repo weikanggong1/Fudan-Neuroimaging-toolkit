@@ -47,6 +47,62 @@ python validation/fmri_cpu_20261004/task05_volume/compare_helpers_v2.py \
 
 [完整 volume 执行基线](baseline_execution_20261005.public.json)记录基线四组 first/cache-call 已完成。最新 main 已改变 robust BOLD reference，该旧记录不作为当前整链验收。本轮新个体影像与脑图不公开。
 
+### 2026-10-06：完整 CPU volume 与 fMRIPrep 25.2.4 的差异指标
+
+同一真实公开病例的原始 T1w 与完整 180 帧 BOLD；FNIT 冻结候选为 `98019133`，原版固定为 fMRIPrep 25.2.4，分别使用 CPU1/CPU8。STC 关闭，两者采用相同线程预算，实际物理核组不同。本节从已完成调用的输出读取全量数值，新增影像 API 为 0。
+
+#### MNI152NLin6Asym 2 mm preproc
+
+四组 MNI preproc 的物理网格、方向、mm/sec 单位和 TR（2.1 s）相符，均为 float32 的 `91×109×91×180`。每组比较全部 **162,473,220 个值**，均为有限值；数值并不相同。
+
+| FNIT 后端 | CPU 线程 | RMSE（原始强度单位） | 最大绝对差 | 全网格 Pearson | 逐体素时间相关均值 |
+|---|---:|---:|---:|---:|---:|
+| FNIRT | 1 | 67.169521 | 1377.010880 | 0.969899 | 0.525382 |
+| FNIRT | 8 | 68.034841 | 1380.043915 | 0.969140 | 0.500816 |
+| SynthMorph | 1 | 39.852096 | 926.561951 | 0.989566 | 0.742280 |
+| SynthMorph | 8 | 40.927701 | 971.624786 | 0.988997 | 0.732729 |
+
+RMSE 和最大差包含整个空间网格及 180 帧。全网格 Pearson 将全部空间、时间值展平后计算；逐体素时间相关分别沿 180 帧计算，再对满足双方方差门槛的体素作普通算术平均，不使用 Fisher-z 或脑掩膜。本轮各组 902,629 个空间体素全部进入该时间相关均值，零个常量序列被排除。相关性高低仅描述本例两条独立估计管线的差异，不构成算法等价或整链精度通过。
+
+比较器先证明空间单位、物理网格、完整帧数和 TR，再按八帧前向块用 float64 累加平方差及 Pearson 统计量。只允许无损轴置换/翻转，本轮 MNI 对齐为恒等；没有新增配准、插值或强度拟合。
+
+#### 其他已证明或尚有缺口的输出
+
+| 输出 | 本轮实际结果 |
+|---|---|
+| T1w preproc | FNIT 为 50×59×47×180，原版为 50×59×44×180；仿射项最大差 6.600 mm，四组均为不同物理网格，未计算逐值误差。 |
+| HMC BOLD reference | 64×64×42 同网格，172,032 值完整有限；RMSE 4.144169，全网格 Pearson 0.999885；四组相同。 |
+| T1w brain | 160×256×256 同网格，10,485,760 值完整有限；CPU1 RMSE 66.761659／Pearson 0.979546，CPU8 RMSE 43.812320／Pearson 0.979258；两种 FNIT 后端共享该解剖结果。 |
+| MNI brain mask（冻结 `98019133`） | FNIT 输出空间单位为 unknown，原版为 mm；该原始报告未计算 Dice。保存单位已单独修复，四次真实 writer 验证及修复后 Dice 见下节。 |
+| 原版 working-native | 64×64×42×180、float32、全量有限；时间单位为 unknown。原始 BIDS TR=2.1 s 与无单位的 header zoom 2.0999999046 分别记录，时间轴未获证明。FNIT 未保存同范围的 motion-only native 输出，未与 FNIT clean 比较。 |
+| BBR 与 180 帧 HMC 变换 | 坐标约定、方向及对应原始 fixed/moving 网格尚未完全证明，未声称仿射数值一致。 |
+| 非线性形变 | ANTs、FNIRT、SynthMorph 的表示与独立估计不同，本轮未比较形变等价。 |
+
+预先要求的八组完整 preproc 比较中，四组 MNI 已比较、四组 T1w 仍有网格缺口；报告状态保持 `finished_readout_with_grid_or_mapping_gaps`，`required_preproc_comparisons_available=false`。
+
+原版完整时钟还包含其额外 MNI2009 解剖注册，并生成混杂变量；FNIT 完整 API 包含 PICA、ICA-AROMA 与 clean 后处理。总时钟按各自范围单列，不计算同范围整链速度比。该输出差异表不能代替 FNIT 优化前后逐值保持性验证。
+
+仅发布聚合指标、尺寸和 SHA，不发布本轮个体脑图。完整指标见 [官方保存输出报告](official_saved_comparison_v2.public.json)，SHA-256 为 `09d70ba88b7629d48041fe0f655ca704ca2beb5fef3d62a7bf0d7e37111ecae2`。
+
+#### MNI mask 空间单位修复与真实 writer 验证
+
+修复 `_save_mask` 新建 NIfTI 时丢失 reference 空间单位的问题：输出明确继承实际 reference 的 xyz 单位。本轮对 `98019133` 完整测试保存的四份真实 MNI mask，直接调用修后的生产 writer，分别对应 FNIRT/SynthMorph × 原完整运行 CPU1/CPU8；writer 验证统一使用 CPU1。
+
+每份完整 91×109×91 mask 的 902,629 个值、uint8 dtype、shape、affine、qform/sform 及其 code 均保持一致。空间单位由 unknown 改为 mm，3D 时间单位保持 unknown；加载后的完整头及原始 348-byte NIfTI-1 头，除 `xyzt_units`（原始 byte123）外逐字节相同。生产函数 AST、实际 reference 和旧输出 SHA 均绑定，旧文件前后 SHA 不变。
+
+单位修复后的 mask 与匹配预算的官方 MNI mask 处于同一物理网格，全量有限；Dice 以双方值大于 0 的前景集合计算。
+
+| FNIT 后端 | 原完整运行 CPU 线程 | writer CPU 线程 | 官方 mask Dice |
+|---|---:|---:|---:|
+| FNIRT | 1 | 1 | 0.943918 |
+| FNIRT | 8 | 1 | 0.943564 |
+| SynthMorph | 1 | 1 | 0.949085 |
+| SynthMorph | 8 | 1 | 0.948682 |
+
+新增验证仅 **4 次 mask writer 调用**，完整 volume API 与 GPU API 均为 0 次。原 16 次 CPU、4 次 GPU 的完整计时和保持性报告继续标注冻结 `98019133`；本轮没有重跑运动、配准、插值、ICA 或完整 pipeline。原官方差异报告保留旧 mask 的单位缺口，这里的 writer/Dice 报告单独记录修复后的范围。仅发布匿名聚合指标及 SHA，不发布新个体影像或脑图。
+
+[真实 writer 报告](mask_units_writer_replay_v1.public.json) SHA-256：`2b79d47120fea94181dc0cc956ee7225e5eb7879b81e70d184d2302a8cdfcd33`。
+
 ### 2026-10-06：fMRIPrep 25.2.4 完整体积预处理（CPU1/CPU8）
 
 同一真实公开病例的原始 T1w 和完整 180 帧 BOLD，在固定 fMRIPrep 25.2.4 容器中分别使用 1、8 线程；nthreads 与 omp-nthreads 均按该预算设置。STC、fieldmap、recon-all 与 surface 关闭，dummy scans 为 0。两个预算各完成 first 和新进程 workflow-cache 调用，四次实际 fMRIPrep 进程及容器启动器均退出 0。原始输入大小及 SHA-256 与 FNIT 冻结测试相符。

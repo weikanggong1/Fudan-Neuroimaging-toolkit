@@ -1,5 +1,13 @@
 # 第 4 项执行交接
 
+## 2026-10-06 当前状态
+
+固定 490 帧投影/CIFTI 的 CPU1/8 全值与轴对照已通过；完整 180 帧 surface 已结束，球面和时序仍有差异。nodes/spectra 六组原版与十二组旧新全矩阵核对已完成，最终三种配准的十二次 GPU 旧新回归坐标/faces 一致。右侧细网格的完整保存几何重放确认两源顶点受上游 double 舍入影响；固定相同几何时三种 FNIT 选面与官方 Octree 一致。CA/CAT 个体 myelin/bias 输入仍缺。最新数值和范围以 [README](README.md)、[功能矩阵](FEATURE_MATRIX.md)及其中报告为准。
+
+## 2026-10-05 历史交接与恢复协议
+
+以下保留当时的失败、排队及准备状态，供追溯；这些状态不代表上方最新结果。
+
 2026-10-05 已取回注册候选六项、features 候选八项的完整精度、实际源码与输入 SHA，全部输入稳定；原 nodes/spectra 六项输出已写出。配准 CPU1/8 都保持严格 native1 全坐标与有序 faces 逐位一致，原 MSMAll native8 波动另列。固定投影与完整 surface 的原版 command_0 在候选启动前失败；等待根任务集中取回实际 stderr。共享 tmux 路由由根任务统一执行，子任务不再发送远程命令。GPU 配对由协调者统一分配。完整数值见 [本轮报告](README.md)与[最新聚合回执](completion_status_20261005.public.json)，历史 GPU 保留实际源码范围。
 
 ## 可以启动的完整对照

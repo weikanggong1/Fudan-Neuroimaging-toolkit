@@ -163,7 +163,9 @@ def _save_mask(data, reference, path):
         raise ValueError("mask must be nonempty and match its reference")
     output = Path(path)
     output.parent.mkdir(parents=True, exist_ok=True)
-    nib.save(nib.Nifti1Image(array, image.affine), str(output))
+    result = nib.Nifti1Image(array, image.affine)
+    result.header.set_xyzt_units(xyz=image.header.get_xyzt_units()[0])
+    nib.save(result, str(output))
     return output
 
 

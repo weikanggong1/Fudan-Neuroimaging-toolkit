@@ -54,8 +54,12 @@ def compare_one(binding,data,reference,backend):
     if native:
         original=proved_file(native,observed);image=nib.load(str(original))
         if image.ndim!=4 or image.shape[3]!=180:raise ValueError('Original nativepreproc is not complete180')
-        checks=image_check(original,'official_native_preproc',call['configuration']['TR'])
-        comparisons['native_preproc']={'status':'official_complete_validated_FNIT_same_scope_output_not_retained',
+        units=image.header.get_xyzt_units();stored_zoom=float(image.header.get_zooms()[3]);expected_TR=call['configuration']['TR']
+        time_proven=units==('mm','sec') and np.isclose(stored_zoom,expected_TR,rtol=0,atol=1e-6)
+        checks=image_check(original,'official_native_preproc' if time_proven else 'official_native_working_diagnostic',expected_TR)
+        checks.update(stored_units=list(units),stored_time_zoom=stored_zoom,source_TR_seconds=expected_TR,
+                      physical_time_axis_checked=bool(time_proven))
+        comparisons['native_preproc']={'status':'official_complete_validated_FNIT_same_scope_output_not_retained' if time_proven else 'official_working_native_complete_frames_finite_time_axis_not_proven',
                                       'official_sha256':sha(original),'official_checks':checks,
                                       'FNITclean_not_compared':True}
     else:comparisons['native_preproc']={'status':'native_preproc_not_identified_in_original_inventory','FNITclean_not_compared':True}

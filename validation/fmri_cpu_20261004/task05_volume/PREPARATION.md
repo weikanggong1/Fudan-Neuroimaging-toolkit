@@ -1,6 +1,6 @@
 # 任务 05：完整 volume 与 helper 的 CPU 基线准备（2026-10-04）
 
-本页保存 2026-10-04 的初始准备记录：当时未启动正式计时、CPU profile 或 GPU 作业。初始 baseline 为 `cc9402734faeba93b3a13c29932fa1392eaccf62`，默认 STC 关闭。后续 13 项完整 helper 官方比较已完成，见[当前结果](README.md)；最新 main 的 volume 使用 robust BOLD reference，旧整链记录只作为执行基线，最终合并源码的完整 volume 另行验收。
+本页保存 2026-10-04 的初始准备记录：当时未启动正式计时、CPU profile 或 GPU 作业。初始 baseline 为 `cc9402734faeba93b3a13c29932fa1392eaccf62`，默认 STC 关闭。后续 13 项完整 helper 官方比较已完成，见[当前结果](README.md)；最新 main 的 volume 使用 robust BOLD reference，旧整链记录只作为执行基线，最终冻结优化链的 CPU16/GPU4 保持性已完成，见 [当前完整结果](README.md)。
 
 ## 1. 功能矩阵
 
