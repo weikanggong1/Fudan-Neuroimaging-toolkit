@@ -2,7 +2,7 @@
 
 ## 1. 功能与阶段
 
-**仅准备、冻结，尚无上传、INDEX登记、合同worker或真实层计算。** 本页不能作为完整SynthSeg或性能验收。v1唯一派发因参数哈希维度检查错误退出，原卷积/copy/SGEMM全部0，详见 [原失败报告](../seg_columns_real_layer_20261006/README.md)。v1源码、PLAN与原始receipt保留，不重跑旧冻结目录。
+**一次纯哈希前置合同和完整单层ABBA已自然完成，全部exit0；三实际完整FP32逐位门通过。生产尚未接入。** 本页不能作为完整SynthSeg或性能验收。v1唯一派发因参数哈希维度检查错误退出，原卷积/copy/SGEMM全部0，详见 [原失败报告](../seg_columns_real_layer_20261006/README.md)。v1源码、PLAN与原始receipt保留，不重跑旧冻结目录。
 
 v2仅把私有 `value_sha` 的 `ndim == 5` 改成 `ndim >= 2`，保留singleton batch、C-contiguous限制以及完全相同的逐通道字节哈希。真实权重加batch后是6维，bias和图像哈希也需各自处理；image/output的独立5维shape门保持。单层 `layer_trial.py` 与v1逐字节相同，候选胶水、C++、旧 `.so`、生产14源、原FP32/后端/14-plane几何不改。
 
@@ -46,7 +46,7 @@ K1944/N24/M802816（末次573440）、NN、lda/ldc实际紧凑M、ldb1944、C/kD
 
 ## 5. 验收与时间边界
 
-本次尚无实际结果。预声明门：4正例原始字节SHA exact、5D旧哈希exact、3负例拒绝和正常/异常收尾，全部source/runtime/权重/flags/RSS门。前置失败必须保证四个真实层arm0。2D NumPy scalar buffer语义目前只准备合同，尚未运行，不能称已通过。
+本次已通过下列原预声明门：4正例原始字节SHA exact、5D旧哈希exact、3负例拒绝和正常/异常收尾，全部source/runtime/权重/flags/RSS门。前置失败必须保证四个真实层arm0。2D NumPy scalar buffer语义已通过目标Torch2.5.1/NumPy实际合同，包含signed0与NaN payload，原始字节SHA相同。
 
 | 臂 | 角色 | 实际比较 |
 | --- | --- | --- |
@@ -58,12 +58,33 @@ K1944/N24/M802816（末次573440）、NN、lda/ldc实际紧凑M、ldb1944、C/kD
 
 操作时钟只包单次卷积，包含候选guards/provider保护/counter开销，不含load/join/hash/save/位比较；另报完整worker时钟、user/system/pagefaults/RSS与loadavg前后。仅一组配对观察，不作官方或完整CPU速度比，不把配置8线程称实际GEMM八核占用。没有新脑图或完整map/CSV。
 
+### 实际同层结果
+
+[HASH_CONTRACTS.json](HASH_CONTRACTS.json)、[QUEUE.json](QUEUE.json)及四arm报告均按远端原字节/SHA收回。[SUMMARY.json](SUMMARY.json)由 [build_summary.py](build_summary.py) 机械重算；公开不含原数组、权重、动态库或参考文件。[INDEX_CLOSED.json](INDEX_CLOSED.json)另记录六锁终态、实际原receipt SHA与参考文件当前身份。
+
+| arm | 操作秒 | user秒 | system秒 | minor faults | RSS GB | 实际比较 |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| A1原路径 | 15.383990 | 35.103042 | 40.044285 | 23,783,610 | 11.3949 | 唯一参考生成，不计位门。 |
+| B1候选 | 5.728821 | 33.030189 | 6.758967 | 3,894,691 | 11.3175 | 完整264,241,152个FP32值逐位差0。 |
+| B2候选 | 5.711896 | 33.123028 | 6.698394 | 3,707,043 | 11.3188 | 同一A1完整逐位差0。 |
+| A2原路径 | 15.387470 | 35.273149 | 40.093069 | 23,842,166 | 11.3970 | 同一A1完整逐位差0。 |
+
+四输出值SHA都是 `16d9251480386c56e8cbec6e20e406d2ef6560869799d008e007840077ffa69f`；shape、连续stride、dtype、finite和noalias相同。B1/B2各14copy/14SGEMM；A1/A2候选calls0。完整joined/权重/bias值和文件/source/runtime/header/provider/PLAN/flags前后门通过，CUDA未初始化，最大RSS11.397GB低于32GB。
+
+纯哈希4正例、3负例通过；前置卷积/copy/SGEMM均0。A1唯一私有参考1,056,964,736B，实际文件SHA `1bec5b85dd84bbcc464bc2a18a02260fb99042418ad7fadf27928e3674cf9a94`，三比较及结束再核文件不变。新编译/wholeCNN/tail/native/GPU全0，科学重试0。v1失败记录原样保留。
+
+这组ABBA的操作中位数15.385730→5.720358秒，描述比约2.69；只限当前同层/同机器/同8核/同输入。操作时钟含候选资格/provider/counter成本，不含load/join/hash/IO。对应worker含IO/hash观察31.352/19.629/19.764/29.724秒，外层31.754/20.041/20.192/30.153秒；不能混为单层耗时。loadavg前后记录在各arm，不能推出GEMM独占八核。
+
+system均值40.069→6.729秒、minor fault均值23,812,888→3,800,867，user均值35.188→33.077秒。这与一次columns工作区复用减少重复缺页成本相符；没有逐次allocator/syscall trace，不能声称查明唯一原因。峰值RSS基本相同；该候选主要改善本层耗时，并未把6.243GB workspace压缩。
+
+完整CPU官方速度门仍未通过：已保存普通33完整112.95秒与官方55.05秒的差距不是本层试验的验收范围。下一步需要CPU限定生产fallback、Conda安装编译、受影响原T1完整输出/header/CSV门和CUDA原路保护；不自动扩展layer/shape或把单层比推算整CNN。
+
 ## 6. 历史与下一步
 
 - [v1编译加载](../seg_columns_reuse_20261006/README.md) 与 [v2短数值合同](../seg_columns_reuse_v2_20261006/README.md) 保留，旧库不重编。
 - real-layer-v1准备提交a3ad5ed8，一次实际A1 metadata错误，原direct/copy/SGEMM全0，失败报告8f5d9a79。原freeze不修改、不重跑。
-- 本独立v2仅修私有哈希守卫并新增纯hash前置；[STATIC_CHECKS.json](STATIC_CHECKS.json)记录源码AST/字节检查，不能替代target worker结果。
-- 本计划仍等待root审查授权；无wholeCNN、官方、GPU、低精度、provider/矩阵/layout变更或生产集成授权。
+- 本独立v2仅修私有哈希守卫并新增纯hash前置，准备提交b7cc5f83。冻结时的 [STATIC_CHECKS.json](STATIC_CHECKS.json) 原档保持；实际结果另写原始receipts，不覆写准备历史。
+- 本v2获root独立审查后一次授权，timeout183231及controller/5worker已自然退出；六共享INDEX锁闭合为 `bounded_real_layer_exact_passed_pending_production_review`。无wholeCNN、官方、GPU、低精度、provider/矩阵/layout变更或生产集成验收。
 
 ## 7. 来源、依赖与许可
 
