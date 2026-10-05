@@ -1,8 +1,12 @@
 # TorchFNIRT：非线性配准
 
-[返回首页](../../README.md) · [dMRI/TBSS pipeline](../dmri_pipeline/README.md)
-
-[CPU 同线程官方 benchmark：功能覆盖与复现](CPU_BENCHMARK.md)
+| 项目 | 内容 |
+|---|---|
+| 输入 | 3D个体/参考影像、可选FLIRT初值及参考掩膜 |
+| 输出 | FSL样条系数、目标图像、Jacobian和QC |
+| 对应原软件 | FSL fnirt；default/gm/t1/tbss预设 |
+| Python / CLI | run_fnirt、TorchFNIRT / fnit fnirt、fnit-fnirt |
+| CPU / GPU | CPU或CUDA；样条和求解器保留FP64 |
 
 ## 1. 功能简介
 
@@ -14,9 +18,28 @@ CUDA 默认允许 TF32 matmul 和 cuDNN，但图像和写出的 coefficient NIfT
 主计算为 float64；不使用 float16 或 bfloat16。实际设置写入
 `result.qc["tf32"]`。
 
-## 2. Python 调用、输入输出与参数
+## 2. Python 调用
 
-### 选择预设
+```python
+from fnit.fnirt.standalone import run_fnirt
+
+moving_image_path = "/data/T1_brain.nii.gz"  # 个体3D去脑T1
+reference_image_path = "/data/MNI152_T1_2mm_brain.nii.gz"  # 目标模板
+reference_mask_path = "/data/MNI152_brain_mask.nii.gz"  # 模板同网格二值掩膜
+forward_matrix_path = "/data/T1_to_MNI.mat"  # input→reference的FLIRT scaled-mm初值
+coefficient_output_path = "/data/T1_to_MNI_coeff.nii.gz"  # FSL intent-2007系数
+registered_output_path = "/data/T1_in_MNI.nii.gz"  # 完整目标网格影像
+nonlinear_result = run_fnirt(
+    input=moving_image_path, reference=reference_image_path,
+    affine=forward_matrix_path, refmask=reference_mask_path,
+    cout=coefficient_output_path, iout=registered_output_path,
+    config="t1", device="cuda:0",  # 完整T1六级预设
+)
+```
+
+### 输入数据格式
+
+input/reference为单张有限3D NIfTI；reference决定输出shape、affine和空间。affine为input→reference的FLIRT scaled-mm矩阵，省略为identity；refmask必须同参考网格，GM/T1预设必需。GM输入是灰质概率图，TBSS输入是FA；不能以改预设替代输入预处理。
 
 | 名称 | Python 配置 | 独立命令 `--config` | 流程默认入口 |
 |---|---|---|---|
@@ -25,97 +48,55 @@ CUDA 默认允许 TF32 matmul 和 cuDNN，但图像和写出的 coefficient NIfT
 | `t1` | `T1FNIRTConfig()` | `t1` 或未修改的 `T1_2_MNI152_2mm.cnf` | fMRI volume 的 T1→MNI |
 | `tbss` | `TBSSFNIRTConfig()` | `tbss` | dMRI pipeline 的 UKB 三阶段 FA 配准 |
 
-`default` 的各级参数已与 FSL 帮助及无配置运行日志核对：`subsamp=4,2,1,1`，
-`miter=5,5,5,5`，`infwhm=6,4,2,2`，`reffwhm=4,2,0,0`，
-`lambda=120,60,30,30`，`estint=1,1,1,0`，`applyrefmask=1,1,1,1`。
-其余默认值为 `imprefm=1`、`impinm=1`、`warpres=10,10,10`、
-`ssqlambda=1`、`jacrange=0.01,100`、`intmod=global_non_linear_with_bias`、
-`intorder=5`、`biasres=50,50,50`、`biaslambda=10000`；固定使用三次 B 样条、
-bending energy 正则化和线性重采样。[FSL 官方 FNIRT 参数说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/fnirt/user_guide.html)
-解释各选项；参数匹配不代表形变和强度优化逐步数值等价。
+### 输入参数
 
-fMRI 的默认值仍是 `t1`，TBSS 的默认值仍是 `tbss`；两条流程不会因为直接
-`TorchFNIRT()` 改用 FSL 无配置默认值而换掉自己的配准 schedule。FastVBM 的默认
-GM 配置与 `GMFNIRTConfig()` 一致，包括关闭两个隐式零值掩膜，详见
-[FastVBM 掩膜说明](../fast_vbm/README.md#fnirt-gm-掩膜)。
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `input` | 是 | 路径 / NIfTI | 无 | 待处理影像，网格与空间由 NIfTI affine 定义。 |
+| `reference` | 是 | 路径 / NIfTI / None | 无 | 参考图；决定输出空间、shape、affine。 |
+| `affine` | 否 | 路径 / (4,4)数组 / None | `None` | source/input→reference的 FSL scaled-mm 矩阵。 |
+| `cout` | 否 | 路径 / None | `None` | FSL intent-2007 系数；未给时默认<input>_warpcoef。 |
+| `iout` | 否 | 路径 / None | `None` | reference网格上的重采样图。 |
+| `jout` | 否 | 路径 / None | `None` | 仅非线性形变的无量纲Jacobian。 |
+| `refmask` | 否 | 路径 / NIfTI / None | `None` | reference同网格二值掩膜；GM/T1预设必需。 |
+| `config` | 否 | 配置对象 / str / None | `None` | 本功能配置或预设；接受范围见本页。 |
+| `device` | 否 | str / torch.device / None | `None` | 计算设备；显式 CUDA 不可用时报错。 |
+| `execution` | 否 | str | `'optimized'` | 执行策略；本页说明实际支持值。 |
+| `overwrite` | 否 | bool | `False` | 是否覆盖已有结果，默认保护原文件。 |
 
-### 配置与覆盖规则
+### 配置参数
 
-Python 用 `dataclasses.replace` 更改单项参数，并把配置对象传给 `TorchFNIRT`、
-`run_fnirt`、fMRI 的 `fnirt_config` 或 dMRI 的 `fnirt_config`。函数也接受上述四个
-预设名称；fMRI 和 TBSS 未指定时分别选 `t1`、`tbss`。命令行覆盖选中的预设，
-只接受已实现的 FNIRT 选项：
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `subsampling` | 否 | tuple[int, ...] | `(4, 2, 1, 1)` | 每层降采样倍数。 |
+| `maximum_iterations` | 否 | tuple[int, ...] | `(5, 5, 5, 5)` | 每层最大迭代/接受步数。 |
+| `input_fwhm_mm` | 否 | tuple[float, ...] | `(6.0, 4.0, 2.0, 2.0)` | 输入每层Gaussian FWHM，mm。 |
+| `reference_fwhm_mm` | 否 | tuple[float, ...] | `(4.0, 2.0, 0.0, 0.0)` | 参考每层FWHM，mm。 |
+| `regularization` | 否 | tuple[float, ...] | `(120.0, 60.0, 30.0, 30.0)` | 各层形变正则化权重。 |
+| `estimate_intensity` | 否 | tuple[bool, ...] | `(True, True, True, False)` | 各层是否估计强度模型。 |
+| `apply_reference_mask` | 否 | tuple[bool, ...] | `(True,) * 4` | 各层是否使用参考掩膜。 |
+| `minimization_methods` | 否 | tuple[str, ...] / None | `None` | 各层lm/scg；None沿用预设。 |
+| `process_stages` | 否 | tuple[int, ...] / None | `None` | TBSS多阶段交接编号；None为普通流程。 |
+| `implicit_reference_mask` | 否 | bool | `True` | 参考零值是否隐式排除。 |
+| `implicit_input_mask` | 否 | bool | `True` | 输入零值是否隐式排除。 |
+| `warp_resolution_mm` | 否 | tuple[float, float, float] | `(10.0, 10.0, 10.0)` | 控制点分辨率，mm。 |
+| `warp_resolution_schedule_mm` | 否 | tuple[tuple[float, float, float], ...] / None | `None` | 逐层控制点分辨率，None沿用固定值。 |
+| `jacobian_range` | 否 | tuple[float, float] | `(0.01, 100.0)` | Jacobian允许范围。 |
+| `ssd_weighted_lambda` | 否 | bool | `True` | 正则化是否乘SSD。 |
+| `intensity_model` | 否 | str | `'global_non_linear_with_bias'` | global_linear或global_non_linear_with_bias。 |
+| `intensity_order` | 否 | int | `5` | 多项式系数个数，最高次数为本值减1。 |
+| `bias_resolution_mm` | 否 | tuple[float, float, float] | `(50.0, 50.0, 50.0)` | 偏置场控制点分辨率，mm。 |
+| `bias_regularization` | 否 | float | `10000.0` | 偏置场正则权重。 |
 
-| 命令行选项 | `FNIRTConfig` 字段 | 输入规则 |
-|---|---|---|
-| `--subsamp`、`--miter` | `subsampling`、`maximum_iterations` | 各级逗号分隔整数 |
-| `--infwhm`、`--reffwhm`、`--lambda` | `input_fwhm_mm`、`reference_fwhm_mm`、`regularization` | 各级逗号分隔数值；FWHM 单位 mm |
-| `--estint`、`--applyrefmask` | `estimate_intensity`、`apply_reference_mask` | 各级逗号分隔的 0/1 |
-| `--warpres`、`--biasres` | `warp_resolution_mm`、`bias_resolution_mm` | `x,y,z`，单位 mm；TBSS 的 `--warpres` 覆盖全部级别 |
-| `--jacrange` | `jacobian_range` | 最小值、最大值 |
-| `--intmod`、`--intorder` | `intensity_model`、`intensity_order` | 当前支持 `global_linear` 或 `global_non_linear_with_bias`；后者的 `intorder` 为系数个数 2–5，最高次数为 `intorder−1` |
-| `--biaslambda`、`--ssqlambda` | `bias_regularization`、`ssd_weighted_lambda` | 正则化数值、0/1 |
-| `--imprefm`、`--impinm`、`--minmet` | `implicit_reference_mask`、`implicit_input_mask`、`minimization_methods` | 0/1、`lm` 或 `scg`；优化器可写各级列表 |
+T1/GM/TBSS覆写对应层数、平滑、正则、强度及掩膜设置；[全部预设的具体数值与覆盖规则](../../validation/fnirt/readme_archive_20261005.md#选择预设)。逐层列表长度须与预设一致。intensity_order为系数个数；5对应常数至四次项。`TorchFNIRT`使用world-RAS初值，直接调用参数见[源码入口](../../src/fnit/fnirt/registration.py)；不要将其初值与run_fnirt的scaled-mm矩阵混用。
 
-各级列表必须与所选预设的级数相同；更改级数时，需要同时给出对应的全部列表。
-`--ssqlambda=0` 还须显式给出 `--lambda`，因为 FSL 的默认 λ 随该开关变化。
-Python 配置另可设置 `process_stages` 和逐级 `warp_resolution_schedule_mm`。
-未实现的 FSL 选项不会被默默忽略；独立命令不读取 `$FSLDIR` 中的 mask。
+### 输出
 
-### Python：GM 专用预设
-
-```python
-from fnit.fnirt.standalone import run_fnirt
-
-result = run_fnirt(
-    input="subject_GM.nii.gz",  # 输入：待配准的 3D 个体 GM 概率图
-    reference="template_GM.nii.gz",  # 输入：fixed GM 模板及输出网格
-    affine="subject_GM_to_template_GM.mat",  # 输入：input -> reference 的 FSL scaled-mm 4x4 矩阵
-    cout="subject_GM_to_template_GM_warp.nii.gz",  # 输出：intent-2007 B-spline coefficient NIfTI
-    iout="subject_GM_to_template_GM.nii.gz",  # 输出：reference-grid warped GM
-    jout="subject_GM_JAC_nl.nii.gz",  # 输出：仅 nonlinear warp 的 Jacobian determinant
-    refmask="MNI152_T1_2mm_brain_mask_dil.nii.gz",  # 输入：reference-grid 二值 mask
-    config="gm",  # 配置：官方 GM 预设；也可传 GMFNIRTConfig() 或原配置名称
-    execution="optimized",  # 保留同一 schedule、精度和停止准则的 GPU 执行优化
-    device="cuda:0",  # 运行设备：第一张 CUDA GPU
-    overwrite=False,  # 写盘策略：不覆盖已有文件
-)
+```text
+/data/
+├── T1_to_MNI_coeff.nii.gz
+└── T1_in_MNI.nii.gz
 ```
-
-### Python 与命令行：T1w 专用预设
-
-`T1FNIRTConfig` 采用官方 `T1_2_MNI152_2mm.cnf` 的六级采样、平滑、
-形变正则化、`intorder=5` 的全局强度映射和 50 mm 偏置场设置。这里的
-`intorder=5` 按 FSL 语义表示 5 个多项式系数，即常数项至四次项。
-以下是直接调用核心的例子；
-fMRI volume 的完整入口见[T1→MNI 用法](../fmri/normalization.md)。
-
-```python
-import nibabel as nib
-from fnit.flirt import TorchFLIRT
-from fnit.fnirt import T1FNIRTConfig, TorchFNIRT
-
-moving = nib.load("/absolute/path/T1_brain.nii.gz")  # 输入：同被试 3D 去脑 T1
-fixed = nib.load("/absolute/path/MNI152_T1_2mm_brain.nii.gz")  # 输入：3D MNI 脑模板，决定输出网格
-mask = nib.load("/absolute/path/MNI152_T1_2mm_brain_mask.nii.gz")  # 输入：模板同网格二值脑掩膜
-linear = TorchFLIRT(device="cuda:0")(moving=moving, fixed=fixed)  # 初始 12 自由度 T1→MNI 配准
-result = TorchFNIRT(device="cuda:0", config=T1FNIRTConfig(), execution="optimized")(
-    moving=moving,  # 待变形的 T1 NIfTI
-    fixed=fixed,  # 固定的 MNI NIfTI 与输出网格
-    moving_to_fixed=linear.moving_to_fixed_world,  # 输入：T1→MNI 的 4×4 RAS-world 初始矩阵
-    reference_mask=mask,  # 输入：只在模板网格的脑内估计配准
-)
-result.moved.save("/absolute/path/T1_in_MNI.nii.gz")  # 输出：MNI 网格重采样 T1
-nib.save(result.coefficient_image, "/absolute/path/T1_to_MNI_coeff.nii.gz")  # 输出：FSL intent-2007 系数图
-```
-
-`result` 与上表的 `TorchFNIRTResult` 结构相同；`pull_transform` 是 MNI→T1
-的 world-RAS 位移，可与 EPI→T1 BBR 合成，一次插值输出 BOLD。`qc["levels"]`
-记录各级强度多项式、偏置场范围和偏置场弯曲能。前五级把形变、强度多项式和
-三次 B 样条偏置场放进同一个 LM/PCG 法方程求解，末级固定强度参数，只优化形变。
-最终 `iout` 使用与系数文件重采样相同的坐标计算路径。当前实现仍与 FSL 的
-优化轨迹存在数值差异，见下文真实数据对照。
-### 输出结构与坐标
 
 `run_fnirt` 和 `TorchFNIRT` 返回 `TorchFNIRTResult`：
 
@@ -145,8 +126,9 @@ size；pixdim 保存 knot spacing；intent parameters 保存 dense field voxel s
 x_input = inverse(A) · x_reference + d(x_reference)
 ```
 
-因此 coefficient array 不能当作 `[X,Y,Z,3]` dense warp 使用。`jout` 定义为
-`det(I + ∂d_nonlinear/∂x_reference)`。
+因此 coefficient array 不能当作 `[X,Y,Z,3]` dense warp 使用。`jout` 定义为 `det(I + ∂d_nonlinear/∂x_reference)`。
+
+NIfTI结果以float32写出，moved和两类Jacobian的shape为reference.shape，affine来自reference；Jacobian无量纲。系数为(Cx,Cy,Cz,3)，不是dense场；pull_transform为reference→input的world-RAS毫米位移。
 
 ### 算法对应与数值边界
 
@@ -200,8 +182,6 @@ x_input = inverse(A) · x_reference + d(x_reference)
 
 ## 3. 命令行调用
 
-### 命令行：无配置默认值
-
 ```bash
 # --in：待变形的单张 3D 影像；--ref：目标 3D 影像和输出网格。
 # --aff：input→reference 的 FSL scaled-mm 初始矩阵；省略时使用单位矩阵。
@@ -215,65 +195,22 @@ python -m fnit.fnirt \
   --device cuda:0
 ```
 
-### 命令行：GM 专用预设
-
-```bash
-python -m fnit.fnirt \
-  --in subject_GM.nii.gz \
-  --ref template_GM.nii.gz \
-  --aff subject_GM_to_template_GM.mat \
-  --cout subject_GM_to_template_GM_warp.nii.gz \
-  --iout subject_GM_to_template_GM.nii.gz \
-  --jout subject_GM_JAC_nl.nii.gz \
-  --refmask MNI152_T1_2mm_brain_mask_dil.nii.gz \
-  --config GM_2_MNI152GM_2mm.cnf \
-  --device cuda:0
-```
-
-| 参数 | 输入或输出 | 作用 |
+| 命令行选项 | `FNIRTConfig` 字段 | 输入规则 |
 |---|---|---|
-| `--in` | 输入 | 单张 3D moving 灰质概率图或 T1 影像，与 `--config` 对应。 |
-| `--ref` | 输入 | 单张 3D fixed 灰质或 T1 模板；决定 `iout`/`jout` 的网格。 |
-| `--aff` | 输入，可省略 | 4×4 FSL scaled-mm 矩阵，方向为 input → reference；省略时使用 FSL scaled-mm identity。 |
-| `--refmask` | 输入，GM/T1 必需 | reference 网格上的非空二值 mask；default/TBSS 可省略。 |
-| `--config` | 输入 | `default`、`gm`、`t1`、`tbss`，或未修改的官方 GM/T1 `.cnf`；省略时使用 `default`。 |
-| `--cout` | 输出 | FSL intent-2007 cubic B-spline coefficient NIfTI；它不是 dense warp。 |
-| `--iout` | 输出，可省略 | 原始 input 经 affine 和 nonlinear warp 后的 reference-grid 图像。 |
-| `--jout` | 输出，可省略 | nonlinear-only Jacobian determinant，不含 FLIRT affine determinant。 |
-| `--device` | 运行选项 | `cpu`、`cuda` 或 `cuda:N`；省略时优先 CUDA。 |
-| `--execution` | 运行选项 | `optimized`（默认）启用设备对应的缓冲复用和算子优化；`reference` 使用原 dense 算子与逐标量 PCG 执行方式，见下文。 |
-| `--overwrite` | 运行选项 | 允许替换已有输出；默认保护已有文件。 |
+| `--subsamp`、`--miter` | `subsampling`、`maximum_iterations` | 各级逗号分隔整数 |
+| `--infwhm`、`--reffwhm`、`--lambda` | `input_fwhm_mm`、`reference_fwhm_mm`、`regularization` | 各级逗号分隔数值；FWHM 单位 mm |
+| `--estint`、`--applyrefmask` | `estimate_intensity`、`apply_reference_mask` | 各级逗号分隔的 0/1 |
+| `--warpres`、`--biasres` | `warp_resolution_mm`、`bias_resolution_mm` | `x,y,z`，单位 mm；TBSS 的 `--warpres` 覆盖全部级别 |
+| `--jacrange` | `jacobian_range` | 最小值、最大值 |
+| `--intmod`、`--intorder` | `intensity_model`、`intensity_order` | 当前支持 `global_linear` 或 `global_non_linear_with_bias`；后者的 `intorder` 为系数个数 2–5，最高次数为 `intorder−1` |
+| `--biaslambda`、`--ssqlambda` | `bias_regularization`、`ssd_weighted_lambda` | 正则化数值、0/1 |
+| `--imprefm`、`--impinm`、`--minmet` | `implicit_reference_mask`、`implicit_input_mask`、`minimization_methods` | 0/1、`lm` 或 `scg`；优化器可写各级列表 |
 
-`cout` 总会写出。省略 `--cout` 时，输入 `subject_GM.nii.gz` 生成
-`subject_GM_warpcoef.nii.gz`。不带扩展名的输出遵循 `FSLOUTPUTTYPE=NIFTI` 或
-`NIFTI_GZ`。三个输出路径必须不同，也不能覆盖 input、reference、affine 或 mask。
+各级列表必须与所选预设的级数相同；更改级数时，需要同时给出对应的全部列表。
+`--ssqlambda=0` 还须显式给出 `--lambda`，因为 FSL 的默认 λ 随该开关变化。
+Python 配置另可设置 `process_stages` 和逐级 `warp_resolution_schedule_mm`。
 
-### T1w 六级预设
-
-T1w 可用上述 Python API、fMRI volume 入口，或独立命令行：
-
-```bash
-# --in：待配准的单张去脑 T1。
-# --ref：MNI 脑模板，同时决定输出图像网格。
-# --aff：T1→MNI 的 FSL scaled-mm 初始矩阵。
-# --refmask：与模板同网格的二值脑掩膜。
-# --config：选择 T1w 六级配准和强度模型。
-# --cout：写出 FSL intent-2007 形变系数。
-# --iout：写出模板网格上的 T1 图像。
-# --device：指定 PyTorch 计算设备。
-python -m fnit.fnirt \
-  --in T1_brain.nii.gz \
-  --ref MNI152_T1_2mm_brain.nii.gz \
-  --aff T1_to_MNI_affine.mat \
-  --refmask MNI152_T1_2mm_brain_mask.nii.gz \
-  --config T1_2_MNI152_2mm.cnf \
-  --cout T1_to_MNI_coeff.nii.gz \
-  --iout T1_in_MNI.nii.gz \
-  --device cuda:0
-```
-
-`--aff` 是 FSL scaled-mm 的 T1→MNI 初始矩阵；`--refmask` 与 `--ref` 同网格；
-`--cout` 写 intent-2007 系数，`--iout` 写模板网格的变形 T1。其余选项见上表。
+基础参数`--in/--ref/--aff/--cout/--iout/--jout/--refmask/--config/--device/--execution/--overwrite`逐项对应`input/reference/affine/cout/iout/jout/refmask/config/device/execution/overwrite`。配置覆盖项只接受上表已实现参数；GM/T1掩膜必须显式给出。
 
 ## 4. 原软件调用
 
@@ -315,15 +252,9 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
   --iout=T1_in_MNI.nii.gz
 ```
 
-## 5. 最新真实数据精度、耗时与脑图
+## 5. 最新精度和运行时间
 
-### 2026-10-04：最新 v27 的同 CPU 预算官方对照
-
-本轮补充 CPU 执行缓冲优化，完整 default/T1/GM/TBSS schedule 和受支持参数分支按同输入官方配对验收；
-精度与端到端时间见 [CPU benchmark 的范围和复现](CPU_BENCHMARK.md)。官方与 FNIT 的优化轨迹仍有差异，
-不能把配对参数相同写成逐体素等价。CPU 修改不替换既有 CUDA 分支；GPU 回归独立核对。
-公开脑图补充使用已核验 CC0 许可、逐文件 SHA 的 [ds000114 T1 示例](../../examples/README.md)，
-共享官方 FLIRT 初始矩阵、完整 FNIRT 默认四级及三个相同输出。最新 v27 在已验收的严格 FP64 法方程 SIMD 上增加 CPU 三线性采样融合与 SCG 未使用代价的跳过，组合源 v28 保留其相同文件 SHA。八项主要功能分别完成新的官方配对，包含导入、读取、完整求解和全部声明输出保存；[主要配对报告](assets/cpu-primary-v27-node8-20261004.public.json)记录完整数值与源码 SHA。[全部 26 项完整输出检查](assets/cpu-functional-v27-node8-20261004.public.json)也已完成，覆盖 13 项预设/参数分支的 1/8 线程预算，原网格、全部层数和迭代预算保持不变；非主要分支沿用已核验的官方精度参照，不复制旧时钟为新配对。T1 单线程的[同节点旧/新诊断](CPU_BENCHMARK.md#t1-单线程的同节点旧新诊断)也已完成。私有病例只公开聚合指标和文件 SHA。
+2026-10-04正式CPU对照绑定v27，组合源v28保留其注册器/采样SHA；官方FSL6.0.7.4，Intel Xeon Gold6418H、1/8线程预算，四种预设各1例完整观察（不是队列）。float32图像/输出，float64系数/法方程。
 
 | 完整预设 | 线程上限 | 原版完整进程 | FNIT 完整进程 | FNIT 已导入 API（含读写） | 脑掩膜内 iout Pearson r | Jacobian MAE |
 |---|---:|---:|---:|---:|---:|---:|
@@ -336,108 +267,38 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
 | GM 四级/末级 SCG | 1 | 548.11 s | 143.57 s | 141.42 s | 0.970540 | 0.029834 |
 | GM 四级/末级 SCG | 8 | 556.22 s | 63.28 s | 60.73 s | 0.973537 | 0.028395 |
 
-这些是共享 nodecw8 上各一次完整观察，七项快于原版，T1 单线程未达到速度目标；8 是相同线程上限，原版的实际 CPU 使用量另行记录。每个预算的完整三图/四图文件、数值、header 和 affine 与该预算旧 normal SIMD v2 输出一致；旧完整输出 adapter 未保存 QC/停止记录，不宣称这两项逐位核对完成。原有 FSL 求解轨迹差异仍存在。旧 nodecw10 的[normal SIMD v2 配对](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)保留历史来源，不与本节点时间构成优化比。
+七项观察快于官方，T1单核仍较慢；原版与FNIT优化轨迹存在差异。完整进程含启动、导入、读写；已加载API另列。[正式来源和源码SHA](assets/cpu-primary-v27-node8-20261004.public.json)。
 
-新算子保留九次乘法与加法的顺序、每步 FP64 舍入和原标量尾部，不使用 FMA、fastmath 或低精度。完整 default/T1 的[独立热点门槛](assets/cpu-normal-simd-v2-gate-20261004.public.json)核对了全部输出文件 SHA、停止条件和调用次数；热点钟与官方完整进程时间分别报告。
+### 分步骤 benchmark
 
-完整六层 T1 的独立 CPU95 [热点报告](assets/cpu-profile-t1-v20-20261004.public.json)包含四图 SHA 与正式 CPU 输出核对。其 7,247 次空间法方程乘积累计 158.905 s，完整 instrumented API 为 362.182 s，峰值 RSS 1,371,236 KiB；函数钟互相包含，不用于相加或替代官方配对时间。具体范围见[六层 T1 诊断](CPU_BENCHMARK.md#六层-t1-的独立热点诊断)。
+| 阶段 | FNIT | FSL |
+|---|---|---|
+| T1六级法方程乘积 | 独立instrumented累计158.905s；API362.182s，不能与正式总时钟相加 | 未记录 |
+| TBSS完整六级/三阶段GPU API | v28两组14.854/14.102s；peak3,565,562,368B | 本轮未测GPU |
 
-![公开 T1 的完整 FNIRT warped 图与原版差异](assets/cpu-public-v27-node8/fnirt_warped.png)
+GPU为共享H100、TF32、20GB上限，完整TBSS保存16次，与FNIT基线1d31e7b逐位一致，不是本轮FSL等价对照。[GPU报告](../../validation/multimodal_cpu_20261004/gpu_cpu_final_v28_ready_retry_20261004.public.json)。
 
-![同一公开 T1 的非线性 Jacobian 与原版差异](assets/cpu-public-v27-node8/fnirt_jacobian.png)
+![公开T1的FNIRT配准及差异](assets/cpu-public-v27-node8/fnirt_warped.png)
 
-图读取同一公开 CC0 输入在 nodecw8 的 v27 CPU8 和新原版配对保存输出，三个完整文件与该预算旧输出逐位相同。显示 MNI 脑掩膜内真实结果；双方共用标尺，差异显示有分位裁剪，完整误差见数值报告。[绘图位置、范围和来源 SHA](assets/cpu-public-v27-node8/figures.public.json) · [warped PDF](assets/cpu-public-v27-node8/fnirt_warped.pdf) · [Jacobian PDF](assets/cpu-public-v27-node8/fnirt_jacobian.pdf)。旧 v17 公开图保留为历史产物，私有病例没有新增脑图。
+![同例非线性Jacobian及差异](assets/cpu-public-v27-node8/fnirt_jacobian.png)
 
-[最新组合源 v28 的 H100 完整回归](../../validation/multimodal_cpu_20261004/gpu_cpu_final_v28_ready_retry_20261004.public.json)使用相同的 v27 注册器与采样 helper，完整运行六级 TBSS 和三阶段交接，没有降低网格或迭代预算。四个进程各一次完整 warmup 与三次完整 API 调用，共 16 次保存；系数、重采样、非线性及完整 pull Jacobian 的全部 float32 位模式、header/extensions 和 affine 与基线相同。
+公开ds000114 CC0脑图绑定v27 CPU8，分别展示重采样T1和非线性Jacobian；[图示范围/SHA](assets/cpu-public-v27-node8/figures.public.json)。
 
-| H100 完整 API，含读写 | 测试冻结源 | 优化前 FNIT，两组中位数 | 当前 FNIT，两组中位数 | 两版对应位置的峰值 allocation |
-|---|---|---:|---:|---|
-| default 四级，三输出，16 次保存 | v27；注册器/helper 与 v28 相同 | 16.945 / 16.702 s | 16.737 / 16.868 s | warmup 1,181,705,216 B；每个 measured repeat 1,181,704,704 B |
-| TBSS 六级/三阶段，四输出，16 次保存 | v28 | 14.866 / 13.365 s | 14.854 / 14.102 s | warmup 3,564,715,520 B；每个 measured repeat 3,565,562,368 B |
-
-GPU 表对照本轮优化前 FNIT，CPU 表对照原版 FSL，两者的参照和计时范围分别保留。对应调用位置的 allocation 两版完全相同；各例的 warmup 与 measured repeat 分列。GPU 为共享 H100 观测，默认 TF32、进程上限 20 GB；短时波动不用于推断稳定加速比。
-
-上表 default 的[完整 v27 报告](assets/cuda-final-v27-20261004.public.json)保存 16 次三输出的逐位和 metadata 校验。较早 [v27 TBSS 的 12 次有效调用](assets/cuda-tbss-partial-v27-20261004.public.json)也逐位相同，但最后基线进程在 CUDA setup 失败，原 16 次协议未完成；其失败和 partial 范围保留，不计作算法耗时。新 v28 完整运行另有独立目录与协议，不覆盖该失败事实。历史 v23 见[原报告](../../validation/multimodal_cpu_20261004/gpu_final_v23_20261004.public.json)。
-
-本轮以 `7473452` 的现有 optimized 实现为固定基线，实际运行 FastVBM、
-fMRI volume 和 dMRI/TBSS 三条完整流程。所有 FNIRT 层级、优化精度、
-PCG 停止判断和输出公式保持一致。最新逐位验收、分步骤耗时、显存、
-原软件对照与模板空间脑图统一见[2026-10-02 验证](../../validation/registration_lossless_20261002/README.md)。
-
-### 2026-10-02：同输入无损复用
-
-固定同一真实已处理 T1、初始 FSL affine、MNI 模板和完整六级配置，基线/候选各运行 cold、两个 warm 和独立 profile。20 对已保存的系数、图像、pull、两种 Jacobian 的所有位模式、完整 header 和 SHA-256 均相同；四对完整 QC 文件也相同。
-
-| 指标 | 基线 | 本轮候选 |
-|---|---:|---:|
-| cold API | 27.101 s | 26.516 s |
-| 两个 warm 的中位数 | 24.813 s | 24.084 s |
-| 正式峰值 allocated / reserved | 1.178 / 1.491 GB | 1.183 / 1.458 GB |
-| profile：coefficient expand 次数 | 20,819 | 14,147 |
-| profile：PCG matvec 次数 | 7,266 | 7,266 |
-
-warm 观测降低 2.94%；图像相对独立 FSL 参照的脑内 r 仍为 0.9977178843。FSL 2026-10-01 命令为 217.558 s，与 FNIT 函数的读写边界不同。profile 会增加同步和事件开销，其总时间不用作速度表；数据、逐次时间、完整门禁与计数见[本轮固定输入报告](../../validation/registration_lossless_20261002/fixed_fnirt.public.json)。FastVBM、volume、dMRI 的最新端到端结果见[统一验证页](../../validation/registration_lossless_20261002/README.md)。
-
-### T1w 专用预设：当前 GPU 修复版
-
-以下为 **2026-10-01 历史记录**，对应优化前的发布，不作为本轮整链计时。
-
-2026-10-01 固定同一例真实已处理的去颅骨 T1、MNI152 2 mm 脑模板、脑掩膜及 FSL 初始仿射，重新运行 FSL 6.0.7.22 六级 T1 配置。T1 的更早预处理来源未知，不把它视为扫描仪原始 T1。官方实际 FNIRT 二进制子进程退出 0；包装器返回 255 单独保留。新官方输出与固定参照的系数、图像及 header 逐位一致。独立 `applywarp` 对三个 T1 RAS world 坐标图采样，构成完整 pull 的对照。
-
-| 同输入耗时 / 显存 | 修改前 `7952b33` | 当前 reference | 当前 optimized |
-|---|---:|---:|---:|
-| 首次 / 热调用 | 69.350 / 71.501 s | 79.003 / 74.543 s | 32.595 / 30.422 s |
-| 热调用峰值 allocated / reserved | 1.091 / 1.474 GB | 1.178 / 1.476 GB | 1.178 / 1.491 GB |
-
-FSL CPU FNIRT 为 217.558 s，包含命令输入读写、启动及 exec/exit 追踪。FNIT 函数计时包含 ArrayProxy 读入/解压与 CPU 结果转换，排除持久输出写盘、精度计算和 CUDA 上下文初始化。首次调用未清空 Triton 磁盘缓存。两侧负载均未隔离，仅报告观测时间。
-
-| 与 FSL 的精度 | 修改前 / 当前 reference | 当前 optimized |
-|---|---:|---:|
-| MNI 脑内 warped T1 Pearson r | 0.99784173 | 0.99771788 |
-| warped T1 MAE / RMSE，原强度单位 | 4.97974 / 16.37197 | 4.87159 / 16.83218 |
-| 支持区 Dice | 0.99924899 | 0.99922162 |
-| 完整 pull mean / median / p95 | 0.08663 / 0.05322 / 0.23351 mm | 0.08642 / 0.05176 / 0.23294 mm |
-| coefficient Pearson r | 0.99774652 | 0.99763395 |
-| coefficient MAE / RMSE | 0.04222 / 0.12553 | 0.04316 / 0.12872 |
-| nonlinear Jacobian Pearson r | 0.99800749 | 0.99812312 |
-| nonlinear Jacobian MAE / RMSE | 0.00746 / 0.01567 | 0.00715 / 0.01522 |
-| 完整 pull Jacobian min / max；非正占比 | 0.03564 / 1.80007；0 | 0.03243 / 1.78385；0 |
-
-r/强度误差在 MNI 脑掩膜内；支持区使用正值第 99 百分位的 5% 阈值。完整 pull 在模板掩膜及双方有效支持区的 228,458 个体素比较；coefficient 比较全系数数组，nonlinear Jacobian 比较脑内。两个路径的影像 shape/affine/pixdim、系数 intent-2007、knot pixdim、dense-grid intent 参数、qoffset、保存的 FSL 初始 affine 及 q/sform code 均通过合同核验。
-
-本例当前 reference 复现修改前已有图像、系数、pull 与完整 Jacobian。optimized 的图像 r 下降 0.000124、Dice 下降 0.000027，MAE 和 pull median/p95 改善，图像 RMSE 与 coefficient 误差略增。不能称为所有指标不退化或逐位等价。仅换回 dense bending normal、保留新平滑/PCG/缓存的消融中，五类输出及逐级 PCG 记录与 reference **逐位一致**，确认差异来自 Gram 的 FP64 求和顺序。optimized 与 reference 的最大 pull 分量差为 0.62815 mm；优化轨迹变化超过输出末位舍入。需要原数值轨迹时选择 `execution="reference"`。
-
-| 完整 CUDA profile | 修改前 | 当前 optimized |
-|---|---:|---:|
-| kernels | 2,126,760 | 1,553,433 |
-| `cudaStreamSynchronize` | 22,224 | 8,016 |
-| H2D / D2H 事件 | 21 / 22,203 | 72 / 7,944 |
-| CUDA 张量转 Python float / bool | 14,765 / 7,222 | 415 / 47 |
-| cost evaluations | 100 | 100 |
-| PCG matvec | 7,175 | 7,266 |
-
-同一热调用的嵌套 CPU wall：PCG 68.430→27.933 s，其中 matvec 32.477→21.345 s；联合 linearization 0.908→0.743 s，topology 检查 0.046→0.038 s。Gaussian dispatch wall 为 0.044→0.127 s，未表现为该局部时钟更快；新路径减少逐偏移 launch，全流程主要收益来自 PCG 同步与弯曲算子。以上阶段钟无额外 GPU fence，不能互相直接相加，也不是独立 kernel 时间。完整算子时钟与 CUDA 事件见报告。
-
-六级 LM 尝试/接受次数一致，PCG 每轮停止判断仍保留，没有减少 miter、搜索或采样级别。GPU 内仍有 PCG 主机分支和 spline expansion/adjoint kernels；本次未把整个优化器改成完全无同步 CUDA 算子。整张共享 GPU 的平均利用率为 98.4%→99.1%，含其他作业，不能归为本进程。所有冷/热/profile 重复产物各自逐位一致。
-
-源码哈希、FSL 退出/产物核验、profile、消融和坐标指标见 [当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。整条 490 帧 volume/surface 的既有运行见[全流程页](../../validation/fmri/README.md)；该历史测量不替代 2026-10-02 的三条完整流程验证。
-
-### 其他预设的独立验证
-
-无配置默认值与 Oxford TBSS/FA 使用不同的 schedule 和输入；各自最近一次真实对照、原始命令、图像及源码哈希保留在[FNIRT 验证页](../../validation/fnirt/README.md)。这些原软件对照绑定 2026-09-28/29 的候选；本轮 FNIT 前后比较另见最新验证。当前 T1 结果不能替代其数值验收，也没有建立跨预设的逐体素 FSL 等价。
-
-## 6. 最近版本与 benchmark 记录
+## 6. 最近版本和 benchmark
 
 | 日期 | 更新与验收 |
 |---|---|
-| 2026-10-04，最新 v27/v28 | CPU float32 采样的值、FOV 和梯度融合；SCG 梯度跳过未使用的能量/cost。83 项采样专项、33 项 SCG 专项和[完整真实末阶段轨迹](assets/cpu-scg-cost-skip-stage3-node8-20261004.public.json)通过；nodecw8 [26 项完整功能输出检查](assets/cpu-functional-v27-node8-20261004.public.json)及[八项新官方单次配对](assets/cpu-primary-v27-node8-20261004.public.json)完成，T1 单线程未达速度目标。H100 default 和完整 TBSS 各 16 次保存逐位相同、对应位置 allocation 不增加。 |
-| 2026-10-04，normal SIMD v2 | FP64 空间法方程按原运算顺序执行八点 SIMD；105 项局部回归通过，完整 default/T1 的输出 SHA、停止条件和 PCG 计数保持一致。nodecw10 的四项完整官方单次配对见[历史报告](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)。 |
+| 2026-10-04，最新 v27/v28 | CPU float32 采样的值、FOV 和梯度融合；SCG 梯度跳过未使用的能量/cost。83 项采样专项、33 项 SCG 专项和[完整真实末阶段轨迹](assets/cpu-scg-cost-skip-stage3-node8-20261004.public.json)通过；CPU评测节点 [26 项完整功能输出检查](assets/cpu-functional-v27-node8-20261004.public.json)及[八项新官方单次配对](assets/cpu-primary-v27-node8-20261004.public.json)完成，T1 单线程未达速度目标。H100 default 和完整 TBSS 各 16 次保存逐位相同、对应位置 allocation 不增加。 |
+| 2026-10-04，normal SIMD v2 | FP64 空间法方程按原运算顺序执行八点 SIMD；105 项局部回归通过，完整 default/T1 的输出 SHA、停止条件和 PCG 计数保持一致。CPU评测节点 的四项完整官方单次配对见[历史报告](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)。 |
 | 2026-10-04 | CPU Gaussian 合并 offset 循环，bending 保留 dense 展开/原 sum 并融合逐元素乘方，FP64 法方程缓冲/固定 weight 布局复用，Jacobian limiter 保序筛选角点。216 项函数专项通过；v17/v19/v20 在完整公开 default 的 1/8 预算三输出 SHA 一致。最新 CPU 官方观测与 GPU 门槛见[专页](CPU_BENCHMARK.md)。 |
 | 2026-10-02 | 跳过无用插值梯度、T1 强度映射复用、联合 PCG 增量场复用；三种预设在完整 pipeline 中实际执行，固定输入逐位比较，见[最新报告](../../validation/registration_lossless_20261002/README.md) |
 | 2026-10-01 | T1 六级 joint intensity/bias、GPU smoothing/PCG/Gram 优化与同输入 FSL 对照，见[历史报告](../../validation/fmri/registration_gpu.current.public.json) |
-| 2026-09-28/29 | 无配置、GM、TBSS 预设与 FSL 独立验证，见[FNIRT 验证索引](../../validation/fnirt/README.md) |
 
-## 7. 参考文献、原实现与许可
+## 7. 参考文献、原软件和资源
+
+源码位置：[原软件 `fnirt-2203.0/fnirt.cpp`](../../src/fnit/_vendor_fsl/sources/fnirt-2203.0/fnirt.cpp)；[FNIT `fnirt/registration.py`](../../src/fnit/fnirt/registration.py)。固定 tag/commit、Git tree 及每文件 SHA-256 见[来源清单](../../src/fnit/_vendor_fsl/manifest.json)。
+
+代码改写沿用 [FSL 6.0 非商业许可证](../../licenses/FSL-6.0.txt)，完整来源与再分发要求见[第三方声明](../../THIRD_PARTY_NOTICES.md)。
 
 ### 支持范围与许可
 
@@ -457,3 +318,12 @@ intensity model 或通用 `--inwarp`。TBSS 预设在直接配准时可选，dMR
 
 - 参考文献：Andersson, Jenkinson & Smith, *Non-linear registration, aka spatial normalisation*, FMRIB Technical Report TR07JA2 (2007), [原文](https://www.fmrib.ox.ac.uk/datasets/techrep/tr07ja2/tr07ja2.pdf)。
 - 原实现代码库：[FSL `fnirt`](https://git.fmrib.ox.ac.uk/fsl/fnirt)。
+
+| 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
+|---|---|---|---|---|---|
+| 本功能无模型权重；用户自备参考影像、掩膜或变换 | 定义目标网格/变换 | 各文件原作者 | 按实际文件 | 按实际文件 | 不随本功能发布用户数据 |
+
+[完整历史说明与调试证据](../../validation/fnirt/readme_archive_20261005.md) · [返回主页](../../README.md)
+
+<!-- 旧版文档锚点兼容 -->
+<a id="1-功能简介"></a> <a id="2-python-调用输入输出与参数"></a> <a id="选择预设"></a> <a id="配置与覆盖规则"></a> <a id="pythongm-专用预设"></a> <a id="python-与命令行t1w-专用预设"></a> <a id="输出结构与坐标"></a> <a id="算法对应与数值边界"></a> <a id="gpu-执行方式"></a> <a id="cpu-执行方式"></a> <a id="3-命令行调用"></a> <a id="命令行无配置默认值"></a> <a id="命令行gm-专用预设"></a> <a id="t1w-六级预设"></a> <a id="4-原软件调用"></a> <a id="5-最新真实数据精度耗时与脑图"></a> <a id="2026-10-04最新-v27-的同-cpu-预算官方对照"></a> <a id="2026-10-02同输入无损复用"></a> <a id="t1w-专用预设当前-gpu-修复版"></a> <a id="其他预设的独立验证"></a> <a id="6-最近版本与-benchmark-记录"></a> <a id="7-参考文献原实现与许可"></a> <a id="支持范围与许可"></a> <a id="参考文献"></a>

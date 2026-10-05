@@ -1,235 +1,303 @@
-# MS-HBM：fsLR32k 单被试 17 网络划分
+# MS-HBM：单被试 17 网络分区
 
-`fnit.mshbm` 将静息态 fMRI 皮层时序划分为单被试 17 网络。当前实现固定使用 CBIG Kong2019 MS-HBM 的 HCP_40 group prior，推断只在 fsLR32k cortex 进行。表面输入直接推断；MNI 体积输入先用 PyTorch 采样到 fsLR32k，再推断并映射回体积。MS-HBM 使用 NumPy/SciPy CPU，体积采样与标签映射使用 PyTorch CPU/CUDA，不调用 MATLAB、CBIG、FreeSurfer 或 Workbench。
+| 项目 | 内容 |
+|---|---|
+| 输入 | fsLR32k表面时序，或已处理MNI BOLD与解剖中层表面 |
+| 输出 | 左右/完整表面标签、CIFTI、网络时序/相关矩阵及可选MNI标签 |
+| 对应原软件 | CBIG Kong2019 MS-HBM，固定HCP_40 prior |
+| Python / CLI | fnit.mshbm公开函数 / fnit-mshbm |
+| CPU / GPU | MS-HBM推断CPU；体积采样与标签回写CPU/CUDA |
 
-随包资产包含 HCP_40 17-network prior、fsLR32k medial-wall mask、fs_LR_900 seed 和 mesh adjacency，来源为 CBIG commit `b69b822a15e2a94f1e439606552fc44b6858cf3c`，许可证为 CBIG MIT。
+## 1. 功能简介
 
-## 输入
+本功能从一名被试的静息态BOLD时序估计fsLR32k皮层17网络分区，采用CBIG Kong2019 MS-HBM的固定HCP_40群体先验。输入可以是表面时序，也可以是已经配准的MNI BOLD；体积模式先在解剖中层表面采样，再推断并回写皮层标签。
 
-CLI 支持以下单被试输入：
+读写使用nibabel，MS-HBM核心沿用经真实数据核对的NumPy/SciPy CPU实现，体积采样与最近顶点映射使用PyTorch。生产运行不调用MATLAB、Workbench、FSL或FreeSurfer。该功能不训练群体先验，也不覆盖其他网络数、fsaverage网格、皮层下或小脑分区。
 
-| 输入 | shape / 格式 | 含义 |
-|---|---|---|
-| `--timeseries` | 一个或多个 `.npy` 或 `.dtseries.nii` | 每个文件是一节 session；`.npy` 可为 `time×59412`、`59412×time`、`time×64984` 或 `64984×time` |
-| `--censor` | 每个时序对应一个 0/1 文本向量，可省略 | 一行对应一个 frame；1 保留，0 剔除 |
-| `--assets` | `.npz`，可省略 | 自定义资产；省略时使用随包 HCP_40 fsLR32k 资产 |
-| `--w` | 浮点数，默认 200 | group spatial prior 权重 |
-| `--c` | 浮点数，默认 50 | mesh MRF 平滑权重 |
+```mermaid
+flowchart LR
+  V[已处理MNI BOLD+同空间中层表面] --> S[三线性采样fsLR32k]
+  C[表面时序] --> P[两节profile]
+  S --> P
+  P --> H[固定HCP40 MS-HBM]
+  H --> L[表面标签与网络时序]
+  H --> M[皮层mask内最近顶点标签回写]
+```
 
-CIFTI 通过 nibabel 读取，只取两个 cortex structure，并检查每侧有 32,492 个顶点。64984 列输入包含 medial wall；59412 列输入已经去掉 medial wall。单个时序文件会按未 censor frame 的前后两半拆成两个 pseudo-session，与 CBIG 单 run wrapper 的 `split_flag` 作用一致。多个文件时每个文件作为一节 session，不再拆分。
+## 2. Python 调用
 
-Python 核心接口只接受已经整理成 `time×59412` 的 NumPy 数组；`.dtseries.nii` 与 64984 列转换由 CLI 的 `read_cortex()` 完成。
+```python
+from fnit.mshbm import parcellate_volume
 
-## Python 单被试调用
+surface_labels, inference_history = parcellate_volume(
+    volume="/data/bold/clean_mni_bold.nii.gz",  # 已配准到MNI的4D BOLD
+    left_surface="/data/assets/left_mni.surf.gii",  # fsLR32k左中层表面，MNI毫米坐标
+    right_surface="/data/assets/right_mni.surf.gii",  # fsLR32k右中层表面，相同坐标空间
+    cortical_mask="/data/assets/cortical_mask.nii.gz",  # 与BOLD同网格的皮层mask
+    output_dir="/data/results/mshbm",  # 表面、MNI标签及网络文件目录
+    device="cuda:0",  # 只控制投影/映射，MS-HBM推断仍在CPU
+    frame_chunk=8,  # 每批传入GPU的帧数，保留float32
+)
+```
+
+仅有表面时序时，以下公开接口不自动写文件；可用CLI写出完整结果。
 
 ```python
 import numpy as np
-from fnit.mshbm import load_assets, profiles_from_timeseries, parcellate
+from fnit.mshbm import load_assets, profiles_from_timeseries, parcellate, network_timeseries
 
-assets = load_assets(
-    path=None,  # 资产输入：None 使用随包 HCP_40 fsLR32k 17-network 资产
-)
-series = np.load(
-    file="cortical_5min_T_by_59412.npy",  # 输入：time×59412 的皮层时序
-    allow_pickle=False,  # 禁止从输入文件反序列化 Python 对象
-)
-censor = np.loadtxt(
-    fname="censor.txt",  # 输入：每个 frame 一个 0/1 值；1 表示保留
-)
-profiles = profiles_from_timeseries(
-    series=series,  # 输入：有限值的 time×59412 float 数组
-    assets=assets,  # 输入：load_assets() 返回的 prior、mask、seed 和 mesh
-    censor=censor,  # 可选输入：长度等于 frame 数的 0/1 向量
-)
-labels, history = parcellate(
-    profiles=profiles,  # 输入：至少两节 59412×1483、逐行归一化的 session profile
-    assets=assets,  # 输入：与 profile 空间匹配的 HCP_40 资产
-    w=200.0,  # group spatial prior 权重
-    c=50.0,  # mesh MRF 平滑权重
-    max_outer=50,  # subject-level outer iteration 上限
-    max_em=101,  # 每个 outer iteration 的 EM 上限
-    max_m=300,  # 每次 EM 的 M-step 上限
-    max_lambda=101,  # 每次 E-step 的 spatial posterior 更新上限
-)
-np.save(
-    file="labels_fslr32k_64984.npy",  # 输出：完整 fsLR32k 17-network 标签
-    arr=labels,  # 64984 个 uint8 标签；medial wall 为 0，网络为 1–17
+mshbm_assets = load_assets()  # 固定HCP_40先验、mesh邻接及cortex mask
+cortical_timeseries = np.load("/data/bold/cortex_timeseries.npy", allow_pickle=False)  # T×59412
+session_profiles = profiles_from_timeseries(cortical_timeseries, mshbm_assets)  # 前后半段profile
+surface_labels, inference_history = parcellate(session_profiles, mshbm_assets)  # 64984标签及收敛记录
+mean_network_timeseries = network_timeseries(
+    series=cortical_timeseries,  # 原始保留帧时序
+    labels=surface_labels,  # 左右完整顶点标签，包含medial wall
+    mask=mshbm_assets["cortex_mask"],  # 64984个布尔值，选择59412皮层顶点
 )
 ```
 
-`profiles_from_timeseries()` 至少需要 8 个未 censor frame，返回两个 `59412×1483` float32 profile。`parcellate()` 返回：
+### 输入数据格式
 
-- `labels`：shape `(64984,)` 的 `uint8` 数组；左右半球各 32,492 个顶点，medial wall 和无效顶点为 0，网络编号按 CBIG HCP_40 固定顺序为 1–17；
-- `history`：每个 outer iteration 的字典列表，字段为 `outer`、`em`、`kappa` 和 `cost`，用于检查收敛。
+- 直接Python表面输入：有限二维NumPy `[T,59412]`，读入float32，列次序为固定fsLR32k cortex mask选中的顶点。至少8个保留帧；单run按前后半段生成两节pseudo-session。
+- CLI另接受 `.npy` `[T,64984]` 的左右完整顶点或转置矩阵，自动提取59412个皮层顶点；fsLR32k `.dtseries.nii`须有每半球32492顶点的BrainModelAxis，皮层下结构不参与。
+- profiles：至少两节 `[59412,1483]` 有限矩阵；Pearson相关按整节全局top10%二值化并逐行单位归一化。需沿用同一prior和seed顺序。
+- censor：每原始帧一个0/1，1保留，长度须等于T，不能按秒给出。多session CLI每输入文件对应一个censor文件；不用censor则保留所有帧。
+- 体积BOLD：4D NIfTI `[X,Y,Z,T]`，T≥8，有限数值，读取float32，已经完成所需前处理并处于所选MNI空间。采样沿用强度单位，不做时间插值/平滑。
+- 左右表面：解剖中层GIFTI，各 `[32492,3]` scanner-RAS毫米坐标，fsLR32k固定顶点次序；所有皮层顶点须落在BOLD网格内。球面或inflated表面不能用作体积采样。
+- cortical_mask：3D NIfTI，与BOLD/reference完全相同shape、affine、orientation；有限非零值为待回写皮层。排除背景、medial wall、皮层下、小脑，不能把全脑mask当皮层mask。
+- 表面矩阵没有NIfTI affine；其空间由fsLR32k顶点编号与解剖表面定义。群体MNI中层表面投影不能代替个体ribbon投影；其他MNI模板要提供同空间表面和mask。
+- `load_assets`返回mu、sigma、epsil、theta、cortex_mask、seed_vertices及mesh邻接资产字典。替代NPZ必须保持该固定模型结构，不是任意标签图。
 
-直接 Python 接口不自动写 provenance；需要标准输出目录时使用 CLI。
+体积分步入口 `project_volume` 返回float32 `[T,59412]`；`labels_to_volume`接受完整64984标签并返回写出的Path。两者都不估计配准变换，坐标须由调用者准备。
 
-## 命令行
+**`load_assets` 参数**
 
-```bash
-fnit-mshbm \
-  --timeseries cortical_5min.npy \
-  --censor censor.txt \
-  --output-dir out/sub-01 \
-  --w 200 \
-  --c 50
-```
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `path` | 否 | `路径或None` | `None` | 替代资产.npz路径；None用随包HCP_40。 |
 
-参数含义：
+**`profiles_from_timeseries` 参数**
 
-- `--timeseries` 后可列一个或多个单被试 session 文件；
-- `--censor` 的文件数必须与 `--timeseries` 相同；不 censor 时省略整项；
-- `--output-dir` 是该被试的结果目录；
-- `--assets` 可替换随包资产；
-- `--w`、`--c` 分别控制 group spatial prior 和邻接顶点标签不一致的惩罚。
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `series` | 是 | `ndarray` | `—` | 有限值时间×59412皮层NumPy数组，按cortex mask顶点次序。 |
+| `assets` | 是 | `dict或None` | `—` | load_assets()返回的固定prior/mask/seed/mesh字典；None用默认资产。 |
+| `censor` | 否 | `ndarray或None` | `None` | 每帧0/1向量，1保留；None保留所有帧。 |
 
-MS-HBM 推断始终使用 CPU。`--device` 只控制体积采样和标签映射，默认 `cuda:0`；完整 fsLR32k profile 和 posterior 需要数 GB 内存。
+**`parcellate` 参数**
 
-## 输出结构
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `profiles` | 是 | `序列[ndarray]` | `—` | 至少两节59412×1483、逐行单位范数的profile。 |
+| `assets` | 是 | `dict或None` | `—` | load_assets()返回的固定prior/mask/seed/mesh字典；None用默认资产。 |
+| `w` | 否 | `float` | `200.0` | group spatial prior权重。 |
+| `c` | 否 | `float` | `50.0` | mesh MRF邻接平滑权重。 |
+| `max_outer` | 否 | `int` | `50` | subject outer迭代上限。 |
+| `max_em` | 否 | `int` | `101` | 每次outer内EM迭代上限。 |
+| `max_m` | 否 | `int` | `300` | 每次EM内M-step迭代上限。 |
+| `max_lambda` | 否 | `int` | `101` | 每次E-step spatial posterior更新上限。 |
+
+**`parcellate_volume` 参数**
+
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `volume` | 是 | `路径` | `—` | 4D已预处理MNI BOLD，保留时间顺序。 |
+| `left_surface` | 是 | `路径` | `—` | 左半球fsLR32k中层GIFTI，32492×3，scanner-RAS毫米坐标。 |
+| `right_surface` | 是 | `路径` | `—` | 右半球fsLR32k中层GIFTI，32492×3，scanner-RAS毫米坐标。 |
+| `cortical_mask` | 是 | `路径` | `—` | 与BOLD/reference同网格的3D皮层掩膜。 |
+| `output_dir` | 是 | `路径` | `—` | 本次结果目录；路径按当前工作目录解析。 |
+| `assets` | 否 | `dict或None` | `None` | load_assets()返回的固定prior/mask/seed/mesh字典；None用默认资产。 |
+| `censor` | 否 | `ndarray或None` | `None` | 每帧0/1向量，1保留；None保留所有帧。 |
+| `w` | 否 | `float` | `200.0` | group spatial prior权重。 |
+| `c` | 否 | `float` | `50.0` | mesh MRF邻接平滑权重。 |
+| `device` | 否 | `str/torch.device` | `'cuda:0'` | 指定PyTorch设备；默认cuda:0，CPU支持按该入口说明选择。 |
+| `frame_chunk` | 否 | `int` | `8` | GPU每批采样帧数，正整数。 |
+| `max_distance_mm` | 否 | `float` | `3.0` | 体素中心到中层最近顶点的距离上限，单位mm。 |
+
+**`project_volume` 参数**
+
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `volume` | 是 | `路径` | `—` | 4D已预处理MNI BOLD，保留时间顺序。 |
+| `left_surface` | 是 | `路径` | `—` | 左半球fsLR32k中层GIFTI，32492×3，scanner-RAS毫米坐标。 |
+| `right_surface` | 是 | `路径` | `—` | 右半球fsLR32k中层GIFTI，32492×3，scanner-RAS毫米坐标。 |
+| `assets` | 否 | `dict或None` | `None` | load_assets()返回的固定prior/mask/seed/mesh字典；None用默认资产。 |
+| `device` | 否 | `str/torch.device` | `'cuda:0'` | 指定PyTorch设备；默认cuda:0，CPU支持按该入口说明选择。 |
+| `frame_chunk` | 否 | `int` | `8` | GPU每批采样帧数，正整数。 |
+
+**`labels_to_volume` 参数**
+
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `labels` | 是 | `ndarray或映射` | `—` | 显示名映射或64984个0–17标签；具体依对应接口。 |
+| `reference` | 是 | `路径` | `—` | 定义标签回写shape/affine的3D或4D MNI NIfTI。 |
+| `left_surface` | 是 | `路径` | `—` | 左半球fsLR32k中层GIFTI，32492×3，scanner-RAS毫米坐标。 |
+| `right_surface` | 是 | `路径` | `—` | 右半球fsLR32k中层GIFTI，32492×3，scanner-RAS毫米坐标。 |
+| `cortical_mask` | 是 | `路径` | `—` | 与BOLD/reference同网格的3D皮层掩膜。 |
+| `output` | 是 | `路径` | `—` | 用户指定输出文件路径。 |
+| `device` | 否 | `str/torch.device` | `'cuda:0'` | 指定PyTorch设备；默认cuda:0，CPU支持按该入口说明选择。 |
+| `max_distance_mm` | 否 | `float` | `3.0` | 体素中心到中层最近顶点的距离上限，单位mm。 |
+
+**`network_timeseries` 参数**
+
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `series` | 是 | `ndarray` | `—` | 有限值时间×59412皮层NumPy数组，按cortex mask顶点次序。 |
+| `labels` | 是 | `ndarray或映射` | `—` | 显示名映射或64984个0–17标签；具体依对应接口。 |
+| `mask` | 是 | `路径` | `—` | 与 DWI 相同 shape、affine 和方向的 3D 脑掩膜。 |
+| `censor` | 否 | `ndarray或None` | `None` | 每帧0/1向量，1保留；None保留所有帧。 |
+
+### 输出
 
 ```text
-out/sub-01/
-├── labels_fslr32k_64984.npy   # (64984,) uint8；左半球后接右半球，0 为 medial wall
-├── lh_labels.npy              # (32492,) uint8；左半球标签
-├── rh_labels.npy              # (32492,) uint8；右半球标签
-├── labels_fslr32k.dlabel.nii  # 1×59412 cortex-only CIFTI label
-├── network_timeseries.tsv     # 保留帧×17；各网络的顶点平均时序
-├── network_correlation.tsv    # 17×17 Pearson r，行列为网络 1–17
-└── provenance.json            # CLI 输入、censor、w/c、session 数、收敛记录和来源 commit
+mshbm/
+├── labels_fslr32k_64984.npy
+├── lh_labels.npy
+├── rh_labels.npy
+├── labels_fslr32k.dlabel.nii
+├── network_timeseries.tsv
+├── network_correlation.tsv
+├── labels_mni.nii.gz        # 只在volume模式
+└── provenance.json          # CLI附加；直接Python不写此文件
 ```
 
-三个标签数组的顶点次序与标准 fsLR32k CIFTI cortex 次序一致。CIFTI label 只包含 59,412 个皮层顶点，不包含原 91k dtseries 的皮层下结构。CIFTI 名称为 `HCP40_Network01` 到 `HCP40_Network17`，保留 HCP_40 prior 的固定编号；不将这些编号直接命名为 Yeo2011 的网络。TSV 首行为 17 个网络名。未出现的网络时序及其连接值为 NaN。
+| 输出 | 格式与意义 |
+|---|---|
+| surface_labels | uint8 `[64984]`；前32492左、后32492右，0为medial wall/背景，1–17为HCP_40固定编号。 |
+| lh/rh_labels.npy | uint8 `[32492]`；各半球完整顶点次序。 |
+| CIFTI label | int32 `[1,59412]` cortex-only；LabelAxis名称HCP40_Network01–17，不包括91k dtseries中的皮层下结构。 |
+| labels_mni.nii.gz | uint8 `[X,Y,Z]`，原BOLD/reference affine、orientation，label intent；mask外、medial wall及距离>max_distance_mm为0。 |
+| network_timeseries.tsv | 有表头 `[T保留,17]`，float64平均BOLD，沿用输入强度单位。 |
+| network_correlation.tsv | 有表头 `[17,17]` Pearson相关，无量纲；未出现网络的时序/连接为NaN。 |
+| inference_history | 每次outer的收敛记录，由parcellate/parcellate_volume返回；不是空间变换。 |
+| provenance.json | CLI记录输入路径、prior版本、w/c、projection设备及历史，保留在用户结果目录。 |
 
-## MNI 2 mm 体积输入
+标签回写方向为fsLR32k中层顶点标签→reference体素中心的最近顶点，不是体积形变场。网络编号不直接重命名为Yeo2011编号；固定编号顺序用于下游FC比较。
 
-MS-HBM 原模型在表面推断。体积接口在解剖中层表面做三线性采样，不对时间做插值或平滑；沿用上述 profile 和推断，再将整数标签写回输入体积网格。标签回写取最近中层顶点，只处理皮层掩膜中的体素，并将距离大于 3 mm 的体素保留为 0。这是 FNIT 的投影接口，不是 CBIG 原生体积分割。
-
-投影需要双侧标准 fsLR32k **解剖表面**，坐标与 BOLD 位于相同 scanner-RAS mm 空间。球面与 inflated 表面不能用于体积采样。可提供该被试配准到 MNI 的 fsLR32k 中层表面；仅有 MNI BOLD 时，下面的安装脚本下载 CBIG 固定版本的群体平均 MNI 中层表面与 FSL MNI152 皮层估计掩膜。群体表面投影不代替个体 ribbon 投影。
+## 3. 命令行调用
 
 ```bash
-# 从 CBIG 原站下载固定资源并校验大小/SHA-256，将掩膜最近邻重采样到 BOLD 网格。
-python tools/setup_mshbm_projection_assets.py \
-  --reference sub-01_space-MNI152NLin6Asym_res-2_desc-clean_bold.nii.gz \
-  --output-dir assets/mshbm-mni
+fnit-mshbm --timeseries /data/bold/run1.dtseries.nii \
+  --output-dir /data/results/surface_mshbm --w 200 --c 50
 
-# 一名被试：MNI BOLD → fsLR32k 时序 → MS-HBM → MNI 皮层标签及网络连接。
-fnit-mshbm \
-  --volume sub-01_space-MNI152NLin6Asym_res-2_desc-clean_bold.nii.gz \
-  --left-surface assets/mshbm-mni/left_mni.surf.gii \
-  --right-surface assets/mshbm-mni/right_mni.surf.gii \
-  --cortical-mask assets/mshbm-mni/cortical_mask.nii.gz \
-  --output-dir out/sub-01-volume --device cuda:0 --frame-chunk 8 \
-  --max-distance-mm 3 --w 200 --c 50
+fnit-mshbm --volume /data/bold/clean_mni_bold.nii.gz \
+  --left-surface /data/assets/left_mni.surf.gii \
+  --right-surface /data/assets/right_mni.surf.gii \
+  --cortical-mask /data/assets/cortical_mask.nii.gz \
+  --output-dir /data/results/volume_mshbm --device cuda:0 --frame-chunk 8
 ```
 
-资源来自 CBIG commit `b69b822a15e2a94f1e439606552fc44b6858cf3c`。固定 FNIT `assets-v1` 中没有这两份解剖表面。CBIG 的 Readme 说明表面源自 Caret；这些文件仅从原站下载，不上传 FNIT Release。资源清单、大小和 SHA-256 固定在 [`assets_setup.py`](../../src/fnit/mshbm/assets_setup.py)。安装阶段使用 SciPy 做一次掩膜最近邻重采样，推断时不联网。默认资源对应 FSL MNI152 / MNI152NLin6Asym；其他 MNI 模板需提供该空间的表面及掩膜。
+| CLI参数 | Python对应 | 说明/默认 |
+|---|---|---|
+| --timeseries | profiles_from_timeseries→parcellate | 与volume二选一；一个或多个NPY/CIFTI；一个输入拆半，多输入各为一节。 |
+| --volume | parcellate_volume.volume | 与timeseries二选一；4D MNI BOLD。 |
+| --censor | censor | 每输入一个0/1文本；volume模式恰好一个。 |
+| --left-surface/--right-surface | 同名参数 | volume模式必需，解剖中层表面。 |
+| --cortical-mask | cortical_mask | volume模式必需，相同体积网格。 |
+| --output-dir | output_dir | 必需，保存上述完整文件。 |
+| --assets | load_assets.path | 可选替代NPZ；默认随包HCP_40。 |
+| --w / --c | w / c | 200.0 / 50.0。 |
+| --device | device | 默认cuda:0，只控制体积采样/映射。 |
+| --frame-chunk | frame_chunk | 默认8。 |
+| --max-distance-mm | max_distance_mm | 默认3.0 mm。 |
 
-```python
-from fnit.mshbm.assets_setup import prepare_projection_assets
-from fnit.mshbm import parcellate_volume
+公共Python可调四个推断迭代上限；CLI未暴露它们，使用默认值。输出目录不会通过overwrite开关保护已有结果，调用前为本次任务选择新目录。
 
-bold_volume = "sub-01_space-MNI152NLin6Asym_res-2_desc-clean_bold.nii.gz"
-projection_assets = prepare_projection_assets(
-    output_dir="assets/mshbm-mni",  # 安装资源并检查下载内容
-    reference=bold_volume,  # 将皮层掩膜放到该 BOLD 的空间网格
-)
-labels, history = parcellate_volume(
-    volume=bold_volume,  # 4D 已处理 BOLD；至少 8 帧，保留原始时间次序
-    left_surface=projection_assets["left_surface"],  # 32492×3，左半球 MNI mm
-    right_surface=projection_assets["right_surface"],  # 32492×3，右半球 MNI mm
-    cortical_mask=projection_assets["cortical_mask"],  # 3D，与 BOLD 同网格
-    output_dir="out/sub-01-volume",  # 写出表面标签、网络 TSV 和 labels_mni.nii.gz
-    assets=None,  # None 使用随包 HCP_40 MS-HBM prior
-    censor=None,  # 可选：每帧 0/1；1 保留
-    w=200.0,  # group prior 权重
-    c=50.0,  # 邻接标签不一致的惩罚
-    device="cuda:0",  # 体积采样和标签映射设备；MS-HBM 推断仍在 CPU
-    frame_chunk=8,  # 一次传入 GPU 的帧数，计算保持 float32
-    max_distance_mm=3.0,  # 体素中心到最近中层顶点的最大距离
-)
-```
+## 4. 原软件调用
 
-体积模式的 `--volume` 与 `--timeseries` 二选一；必须同时提供 `--left-surface`、`--right-surface`、`--cortical-mask`。其他新增参数与上面 Python 同名参数含义相同。`--censor` 只接受一个向量。输出增加 `labels_mni.nii.gz`：3D uint8、原 BOLD 的空间尺寸和 affine，背景为 0，网络为 1–17。它不包含时间轴，掩膜外与距离过远的体素为 0；不分割皮层下或小脑。
-
-分步 Python 入口为 `project_volume(volume, left_surface, right_surface, assets=None, device="cuda:0", frame_chunk=8)`，返回 `T×59412` float32；`labels_to_volume(labels, reference, left_surface, right_surface, cortical_mask, output, device="cuda:0", max_distance_mm=3.0)` 接受 `(64984,)` 标签并返回输出路径；`network_timeseries(series, labels, mask, censor=None)` 返回保留帧×17 的网络平均时序。这些接口不自动改变输入空间。
-
-## 与 CBIG 原实现对应
-
-对应的 CBIG 简化单被试入口为 `CBIG_MSHBM_parcellation_single_subject.m`。fsLR32k 两节 session 的 MATLAB 调用形式为：
+对应CBIG简化单被试入口 `CBIG_MSHBM_parcellation_single_subject.m`，在独立MATLAB/CBIG环境调用；路径指向同一被试的两节真实表面输入。
 
 ```matlab
-params.project_dir = '/myproject/sub1';  % 单被试工作目录
-params.censor_list = {'/mydata/sub1/censor1.txt', ...  % 每节 session 的 0/1 censor
-                      '/mydata/sub1/censor2.txt'};
-params.lh_fMRI_list = {'/mydata/sub1/fs_LR_32k_sess1_surf.dtseries.nii', ...  % session 1 时序
-                       '/mydata/sub1/fs_LR_32k_sess2_surf.dtseries.nii'};  % session 2 时序
-params.target_mesh = 'fs_LR_32k';  % 固定表面空间
-params.w = '200';  % group spatial prior 权重
-params.c = '50';  % mesh MRF 权重
+params.project_dir = '/data/reference/mshbm';  % CBIG工作目录
+params.censor_list = {'/data/bold/censor1.txt', '/data/bold/censor2.txt'};  % 每节0/1
+params.lh_fMRI_list = {'/data/bold/run1.dtseries.nii', '/data/bold/run2.dtseries.nii'};  % fsLR32k时序
+params.target_mesh = 'fs_LR_32k';  % 固定网格
+params.w = '200';  % 空间先验权重
+params.c = '50';  % mesh MRF权重
 CBIG_MSHBM_parcellation_single_subject(params);
 ```
 
-FNIT 的 `--timeseries` 对应 `params.lh_fMRI_list`，`--censor` 对应 `params.censor_list`，固定 mesh 为 `fs_LR_32k`，`--w/--c` 对应同名参数。官方 wrapper 还负责 CBIG 工程目录与 MATLAB 文件组织；FNIT 直接写上节列出的 NumPy 输出，因此文件布局不相同。算法来源和官方三步工作流见 [CBIG Kong2019 MS-HBM](https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Kong2019_MSHBM)。
+| FNIT | CBIG |
+|---|---|
+| timeseries / censor | params.lh_fMRI_list / params.censor_list |
+| output_dir | params.project_dir；文件组织不同 |
+| w / c | 同名权重 |
+| 固定prior/mesh | HCP_40、17网络、fs_LR_32k |
+| project_volume / labels_to_volume | FNIT新增投影/回写，CBIG此wrapper无原生体积入口 |
 
-## 算法范围
+原wrapper负责profile工程文件与subject-level inference。FNIT固定HCP_40模型，不覆盖group prior训练、fsaverage5/6、其他网络数、其他seed mesh或validation-set参数搜索。
 
-每节 session 以 1,483 个 fs_LR_900 seed 计算 Pearson correlation，按整节 profile 的全局 top 10% 二值化，再逐顶点做单位长度归一化。推断交替更新 session-specific vMF direction、共享 concentration、含 mesh MRF 的 spatial posterior 和 subject direction。
+## 5. 最新精度和运行时间
 
-本实现只覆盖 HCP_40 prior、17 网络和 fsLR32k cortex。它不训练新的 group prior，也不支持 fsaverage5/6、其他网络数、其他 seed mesh 或 CBIG 的 validation-set 参数搜索。
+最新正式[2026-10-01已处理真实volume/surface对照](../../validation/mshbm/processed_release.md)绑定MS-HBM `09a0313c53e5d9f6e4a3c49a35022462718c9f15`，上游BOLD为 `3f8b756`；1例同扫描490帧，TR0.735 s。参考为原官方MSMAll CIFTI以及官方FIX+BOLD warp经FSL6.0.7.22生成的MNI BOLD；官方完整pipeline commit未记录。本轮未重跑MRI，源码SHA匹配结果见审核JSON。
 
-## UKB 官方发布数据对照（2026-10-01）
+两边均运行相同FNIT MS-HBM，先验/w/c相同；比较衡量上游处理差异，不能读作MATLAB与Python速度比较或完整pipeline加速比。8个BLAS线程、共享H100；信号float32、推断float64、GPU投影TF32，不用半精度。
 
-本次使用同一例真实 UKB 扫描的完整 490 帧，TR 0.735 s。surface 参照为用户提供的官方 `surf_fMRI/CIFTIs/bb.rfMRI.MNI.MSMAll.dtseries.nii`；volume 参照为官方 ZIP 的 FIX 清理 BOLD，用 ZIP 中发布的 `example_func2standard_warp.nii.gz` 经原版 FSL `applywarp --interp=spline` 放到 MNI 2 mm。两组候选均取自 2026-09-30 的完整 FNIT volume/surface 运行，不用 FNIT 的投影结果充当官方 release。
-
-候选与参照分别运行相同的 HCP_40 MS-HBM，固定 `w=200`、`c=50`，各自按前后 245 帧拆成两节 pseudo-session。volume 两边共用固定 CBIG 群体中层表面和皮层掩膜。网络 FC 比较固定使用官方输入推断出的标签，先取各网络的平均时序，再比较 17×17 Pearson 矩阵的 136 条非对角边。
-
-| 输出/统计 | Volume 对官方 FIX + FSL warp | Surface 对官方 MSMAll release |
+| 结果 | Volume | Surface |
 |---|---:|---:|
-| 最终标签一致率 | 83.58%（MNI 非零并集） | 72.44%（59,412 皮层顶点） |
-| 17 网络平均 Dice | 0.8336（MNI 标签） | 0.7175 |
-| 最低网络 Dice | 0.7434 | 0.5978 |
-| 固定参照网络 FC 的 r | 0.8456 | 0.8189 |
-| FC 的平均绝对差 | 0.2764 | 0.2604 |
-| 逐顶点时间相关性均值 | 0.3255（体积采样后） | 0.2695 |
-| FNIT 输入到 MS-HBM 输出 | 83.03 s | 78.75 s |
-| 官方输入到相同 MS-HBM 输出 | 96.54 s | 73.60 s |
+| 最终标签一致率 | 83.58%（MNI非零并集） | 72.44%（59412皮层顶点） |
+| 平均/最低网络Dice | 0.8336 / 0.7434 | 0.7175 / 0.5978 |
+| 固定参考标签FC r / MAE | 0.8456 / 0.2764 | 0.8189 / 0.2604 |
+| FNIT已处理输入→文件输出 | 83.03 s | 78.75 s |
+| 官方已处理输入→相同FNIT输出 | 96.54 s | 73.60 s |
 
-计时只包含读取**已处理时序**、profile、MS-HBM、标签/网络文件写出；volume 还包含采样和标签回写。两边使用相同 FNIT MS-HBM，不是 MATLAB 与 Python 的速度比较，也不包含上游 UKB/FNIT 预处理。官方 volume 的 FSL 变换另耗时 558.38 s；完整官方预处理时间未知。CPU 固定 8 个 BLAS 线程，GPU 为共享 H100；本例计时不代表稳定加速比。
+计时含读取、profile、推断及文件输出；volume另含采样和回写。官方warp558.38 s另列，官方上游预处理时间未记录。官方用FIX、GDC/B0与MSMAll，候选用ICA-AROMA/混杂回归、无GDC/B0与MSMSulc；官方另有2mm表面平滑。本例未达到官方数值等价。
 
-![FNIT 与官方 MSMAll release 的个体表面 17 网络](figures/mshbm_surface_release.png)
+| 单阶段/完整API核查 | 已记录结果 |
+|---|---|
+| 八帧采样对独立SciPy，475296值 | r0.9999999999928，MAE0.0003133，max0.0151367原强度单位；GPU0.6678 s，allocated0.07553 GiB。 |
+| 完整体积Python API | 87.2879 s，allocated/reserved0.17050/0.29883 GiB；Xeon Gold6430+H100PCIe、8线程；CLI与Python标签差异0。 |
+| 其余profile/推断/回写阶段 | 未独立记录，不由总时间推算。 |
 
-![FNIT 与官方 FIX 参照的 MNI 皮层 17 网络](figures/mshbm_volume_release.png)
+真正的[CBIG算法对照](../../validation/mshbm/report.public.json)为2026-09-27 MSC02五分钟100帧、CBIG `b69b822a`/MATLABR2018b，XeonGold6418H、8线程CPU。相同两份profile到标签含启动/I/O：FNIT141.29 s、CBIG145.71 s；64984标签全同、各网络Dice1。原NPY到FNIT标签186.29 s的范围不同，不能混作matched时间。该单例不扩展为多队列等价。
 
-![固定参照网络划分下的连接矩阵](figures/mshbm_release_connectivity.png)
+![真实surface网络，FNIT与官方发布输入](figures/mshbm_surface_release.png)
 
-两份输出仍不等价。官方数据使用 FIX、GDC/B0 校正与 MSMAll；FNIT 本次运行采用 ICA-AROMA 和混杂回归、未启用 GDC/B0，表面配准为 MSMSulc。官方 CIFTI provenance 还记录了 2 mm FWHM 表面平滑。当前对照同时包含这些差异，不能将它们全部归因于 MS-HBM。两边共享空间先验，因此网络图相似度也不能代替时序和连接值的一致性。
+![真实MNI皮层标签，FNIT与官方FIX参照](figures/mshbm_volume_release.png)
 
-真实前八帧的 GPU 三线性采样与 SciPy 独立插值比较为 `r=0.9999999999928`，MAE 0.000313；最大绝对差 0.01514（原始 BOLD 强度单位）。该结果验证采样坐标与插值，不验证整条 fMRI 预处理。单被试 Python/CLI 接口与 CPU/CUDA 坐标测试见[完整验证说明](../../validation/mshbm/processed_release.md)，其中记录每个网络 Dice、资源和输入 SHA-256、代码版本与计时。
+## 6. 最近版本和 benchmark
 
-## CBIG 算法数值对照
+| 日期 | commit/version | 变化 | benchmark |
+|---|---|---|---|
+| 2026-10-01 | 22d2faf0 | 发布已处理volume/surface对官方release对照 | 冻结09a0313推断、3f8b756上游；非同算法speedup |
+| 2026-10-01 | 09a0313c | 公开体积API、CIFTI和网络TSV | 真实490帧、独立八帧插值、Python/CLI标签一致 |
+| 2026-09-28 | 2ad53c5b | 真实MSC02与CBIG算法审核 | profile/64984标签全同；核心SHA未变 |
+| 2026-09-26 | 2c651048 | 新增固定HCP40 17网络CPU模块 | 后续真实算法对照见2026-09-27报告 |
 
-2026-09-27 在 headcw 的 Intel Xeon Gold 6418H 上固定 8 个 BLAS/MATLAB 线程，用 MSC02 的 100-frame、`100×59412` 真实五分钟 fsLR32k 静息态时序运行当时的发布源码。输入按前后各 50 frame 构成两节 pseudo-session。CBIG 参考为 commit `b69b822a15e2a94f1e439606552fc44b6858cf3c` 与 MATLAB R2018b。
+更早的debug、profiling和长表保留在[旧README归档](../../validation/mshbm/readme_archive_20261005.md)。归档已修复相对链接；旧科学报告与原始产物不修改。
 
-| 比较项 | CBIG MATLAB | FNIT 当前源码 | 结果 |
-|---|---:|---:|---:|
-| session 1 二值 profile | 88,107,996 值 | 88,107,996 值 | 0 个不同 |
-| session 2 二值 profile | 88,107,996 值 | 88,107,996 值 | 0 个不同 |
-| 完整表面标签 | 64,984 顶点 | 64,984 顶点 | 0 个不同 |
-| 皮层标签 | 59,412 顶点 | 59,412 顶点 | 0 个不同 |
-| 17 个网络 Dice | 1.000 | 1.000 | 最小值 1.000 |
-| 相同冻结 profile 到标签 | 145.71 s | 141.29 s | FNIT 快 1.03 倍 |
-| 最大 RSS | 2,680,168 KiB | 2,257,836 KiB | FNIT 少 15.8% |
-| 原始 `.npy` 时序到标签 | — | 186.29 s | 含 profile 生成、推断与保存 |
+<a id="输入"></a>
+<a id="python-单被试调用"></a>
+<a id="命令行"></a>
+<a id="输出结构"></a>
+<a id="mni-2-mm-体积输入"></a>
+<a id="与-cbig-原实现对应"></a>
+<a id="算法范围"></a>
+<a id="ukb-官方发布数据对照2026-10-01"></a>
+<a id="cbig-算法数值对照"></a>
+<a id="reference"></a>
 
-Matched 计时从相同的两份冻结二值 profile 开始，到标签写出结束，均包含解释器启动和文件 I/O。原始时序到标签的 186.29 秒多了相关矩阵与 profile 构建，因此不与 CBIG 的 matched 计时作加速比较。该推断部分使用 CPU，不使用 CUDA 或半精度。新增体积投影使用 CUDA；没有改变 `core.py` 的 MS-HBM 算法和固定 prior。
+## 7. 参考文献、原软件和资源
 
-![CBIG MATLAB 与 FNIT 的 MSC02 17 网络表面对照](figures/mshbm_cbig_comparison.png)
+- 文献：Kong等，2019，[Spatial topography of individual-specific cortical networks predicts human cognition, personality, and emotion](https://doi.org/10.1093/cercor/bhy123)。
+- 原软件：[CBIG Kong2019 MS-HBM](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c/stable_projects/brain_parcellation/Kong2019_MSHBM)，公开[MIT许可](https://github.com/ThomasYeoLab/CBIG/blob/b69b822a15e2a94f1e439606552fc44b6858cf3c/LICENSE.md)；simple_wrapper中的单被试入口及step2 subject inference。
+- FNIT：[core.py](../../src/fnit/mshbm/core.py)、[volume.py](../../src/fnit/mshbm/volume.py)、[output.py](../../src/fnit/mshbm/output.py)、[资源安装器](../../src/fnit/mshbm/assets_setup.py)。
 
-上下两行分别为 CBIG MATLAB 和 FNIT，左右列为两个半球。标签逐顶点相同，因此两行视觉一致。机器可读指标、输入 SHA-256、峰值内存、计时和该次源码哈希见 [`validation/mshbm/report.public.json`](../../validation/mshbm/report.public.json)；复现步骤见 [`validation/mshbm/README.md`](../../validation/mshbm/README.md)。
+### 外部资源
 
-该 benchmark 只覆盖一名真实被试、一个五分钟 run 和 HCP_40 17-network 配置。结果证明本例的 profile 与最终标签数值等价，不代表其他队列、时长或采集协议已完成验证。
+| 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
+|---|---|---|---|---|---|
+| hcp40_fslr32k_17.npz | 固定prior/mesh/seed | [CBIG HCP_40](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c/stable_projects/brain_parcellation/Kong2019_MSHBM) | 1,497,800 bytes | `aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17` | CBIG MIT；FNIT转换资产随包附来源/许可。 |
+| left_mni.surf.gii | 左群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.L.midthickness_mni.32k_fs_LR.surf.gii) | 723,249 bytes | `ac51edc0f61ee988c6d941e073ae3275ef5da509233df9309bdf586b3b31838a` | Caret派生，未核明确独立再分发许可，仅原站下载。 |
+| right_mni.surf.gii | 右群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.R.midthickness_mni.32k_fs_LR.surf.gii) | 710,702 bytes | `6e1c9842efb303945abe0cd780422a9812d1eab59c08d3fa3c72276ec31e6a25` | 同上，仅原站下载。 |
+| cortex_estimate.nii.gz | 皮层估计mask，最近邻重采样 | [固定CBIG原站目录](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c/stable_projects/registration/Wu2017_RegistrationFusion/bin/liberal_cortex_masks_FS5.3) | 207,362 bytes | `e4d788be332be76d7429855aba8f20c02693625f400905573e9063b4001f0e2b` | 此功能仅原站下载，不放FNIT Release。 |
 
-## Reference
+群体投影资源不在FNIT固定assets-v1清单中，安装器从固定CBIG源核验大小/SHA。本轮未新下载/重打包。运行前在用户输入BOLD的网格准备资源：
 
-- 参考文献：Kong et al., *Spatial Topography of Individual-Specific Cortical Networks Predicts Human Cognition, Personality, and Emotion*, Cerebral Cortex (2019), [doi:10.1093/cercor/bhy123](https://doi.org/10.1093/cercor/bhy123)。
-- 原实现代码库：[CBIG Kong2019 MS-HBM](https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Kong2019_MSHBM)。
+```bash
+python tools/setup_mshbm_projection_assets.py \
+  --reference /data/bold/clean_mni_bold.nii.gz --output-dir /data/assets/mshbm_mni
+```
+
+安装阶段用nibabel/SciPy将cortex estimate最近邻映射为uint8 cortical_mask；生成文件SHA依reference网格，不套用源文件SHA。运行阶段只读本地资源，不联网。

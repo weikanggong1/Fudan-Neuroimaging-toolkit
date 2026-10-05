@@ -1,220 +1,122 @@
-# Fudan Neuroimaging Toolkit (FNIT)
+# Fudan Neuroimaging Toolkit（FNIT）
 
-**本工具包仍处于开发阶段，部分算法尚未完成严格验证，目前不宜作为常规数据处理与分析的默认工具。**
-
-FNIT 提供人脑磁共振（MRI）处理和群体分析的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel。Python 包名为 `fnit`，统一命令行入口为 `fnit`。各功能的运行依赖与安装要求见对应功能页。Connectome 支持读取已完成 subject、FNIT recon-all 或显式选择的官方 FreeSurfer；默认 auto 有 subject 时读取，没有时选 FNIT，后者须提供已校验的权重与结构像资源。
-
-CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹配原版统计结果，使用普通 float32 连接计算和 QR 正交化回归。主要网络与影像计算默认使用 float32，不自动使用 float16 或 bfloat16；输出按各接口保存，标签为整数，部分脑图保留输入 dtype。
-
-影像处理以单被试 Python API 和命令行接口为主；多被试任务可在包外通过任务调度器、进程池或作业系统分配 CPU/GPU。recon-all、Connectome、BigFLICA 和 BWAS 的处理范围与调用方式见对应功能页。
-
-## 功能
-
-### 一般功能
-
-| 函数名 | 原软件函数名 | 功能 |
-|---|---|---|
-| [run_fslmaths](docs/fslmaths/README.md) | FSL `fslmaths` | 3D/4D NIfTI 算术、阈值、滤波、形态学与时间统计。 |
-
-### 多模态
-
-| 函数名 | 原软件函数名 | 功能 |
-|---|---|---|
-| [TorchFLIRT](docs/flirt/README.md) | FSL `flirt` | 线性配准；`applyxfm` 应用已知矩阵或按 qform/sform 在 MNI152 不同分辨率间重采样。 |
-| [TorchFNIRT](docs/fnirt/README.md) | FSL `fnirt` | 非线性配准、Jacobian 与系数场。 |
-| [TorchApplyWarp](docs/applywarp/README.md) | FSL `applywarp` | 应用形变场及前后仿射矩阵。 |
-| [TorchConvertWarp](docs/convertwarp/README.md) | FSL `convertwarp` | 组合线性与非线性变换，转换 MMORF 场。 |
-| [TorchInvWarp](docs/invwarp/README.md) | FSL `invwarp` | 在指定网格上计算位移场的反场。 |
-| [convert_space](docs/space_conversion/README.md) | CBIG RF-ANTs；HCP Workbench `-metric-resample` | MNI152、fsaverage 与 fsLR 皮层标量或标签图互转，支持多种体素网格与表面密度。 |
-
-### sMRI
-
-CPU 的功能覆盖、同节点精度与耗时，以及受影响组件的 GPU 回归见[2026-10-04 对照报告](validation/smri_cpu/README.md)。各函数的验收状态分别列出。
-
-最新修复包含 FAST 的 CPU 标量数学、SynthMorph 的 CPU 解码与双向变换、WMH 的推理内存生命周期、球面梯度平均和 FastVBM CPU FNIRT 的解析 Jacobian 输出。SynthSR 的 CPU 默认完整浮点门已通过；SynthMorph joint 的 192/256 网格、完整场和严格零边界门已通过，两者 GPU 新旧完整输出和显存相同。SynthMorph 当前 CPU 相邻对照约慢 5%，精确插值优化正在验收。[完整左半球同输入配准](validation/smri_cpu/recon_fixes_20261004/FULL_REGISTRATION.md)也与官方逐点一致，新版仍比官方慢 33.25%；持续线程组候选的完整对照另行记录。WMH 的 GPU 裁剪模式已在 20 GB 内保持旧实现完整输出；未裁剪模式保留原 GPU 路径，仍需要更多显存。部分亚区、非线性估计和完整重建的一致性见[剩余清单](validation/smri_cpu/REMAINING.md)。
-
-| 函数名 | 原软件函数名 | 功能 |
-|---|---|---|
-| [SynthStrip](docs/synthstrip/README.md) | FreeSurfer `mri_synthstrip` | 脑图、脑掩膜和有符号距离场。 |
-| [SynthMorph](docs/synthmorph/README.md) | FreeSurfer `mri_synthmorph` | 刚性、仿射和非线性配准。 |
-| [WMHSynthSeg](docs/wmh_synthseg/README.md) | FreeSurfer `mri_WMHsynthseg` | 脑结构与白质高信号标签、软体积。 |
-| [SynthSeg](docs/synthseg/README.md) | FreeSurfer `mri_synthseg` | 33 类脑结构标签与软体积。 |
-| [SynthSegPlus](docs/synthseg_plus/README.md) | FreeSurfer `mri_synthseg --parc` | 33 类结构与 68 区皮层分区。 |
-| [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
-| [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
-| [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
-| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[十张公开 T1 benchmark](validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)：H100 完整流程 4.32 ± 0.11 分钟/例，官方 CPU 125.45 ± 12.28 分钟/例；[110 分区 Dice 与脑图](docs/subregions/README.md#最新精度运行时间与脑图)。[同节点 CPU raw 整例](validation/smri_cpu/task5/raw_all_cpu_v5/README.md)为 104.02 分钟，逐区验收尚未通过。 |
-| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计；[2026-10-02 GPU 两例性能与精度](validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)及[同节点完整 CPU 官方对照](validation/smri_cpu/task5/recon_complete_cpu_v3/README.md)：CPU 本例官方 4600.04 / FNIT 4829.70 秒，整体数值等价未判定。 |
-
-### fMRI
-
-| 函数名 | 原软件函数名 | 功能 |
-|---|---|---|
-| [TorchMCFLIRT](docs/mcflirt/README.md) | FSL `mcflirt` | BOLD 每帧刚体运动估计、FSL 矩阵与六列参数、图像重采样；[真实数据对照](validation/mcflirt/README.md)。 |
-| [parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject.m` | fsLR32k 或 MNI BOLD 到个体 17 网络标签与连接矩阵。 |
-| [fMRIVolume_pipeline](docs/fmri/README.md) | FSL FEAT、ICA-AROMA；fMRIPrep 单次重采样 | 原始 BIDS 单 run 同时生成 T1w 原生 BOLD 分辨率/MNI 2 mm preproc 与 FEAT/AROMA clean 体积 BOLD；默认关闭 slice timing；[验证记录](validation/fmri/README.md)。 |
-| [fMRISurface_pipeline](docs/fmri/surface.md) | recon-all、fMRIPrep fsLR 重采样、Workbench | 从原始配对 T1w＋BOLD 自动检查并运行 volume，选择 FNIT、FreeSurfer 或用户已有 recon-all，补齐中层面，输出 fsLR32k GIFTI、91k CIFTI、注册球面与 QC。 |
-| [fnit.msm.run_msmsulc](docs/msm/README.md) | newMSM MSMSulc | 独立的 HOCR/FastPD 脑沟球面配准。 |
-| [fnit.msm.run_msmall](docs/msm/msmall.md) | newMSM / HCP MSMAll | 独立的加权多特征球面配准；附 [VN、DR/WRN 与 C/CA/CAT 特征准备](docs/msm/features.md)，可接入 surface。真实 C 模式的完整一级/三级配置与固定 490 帧投影逐值匹配官方；[测量记录](validation/msm/README.md#独立-msmall-验证)。 |
-| [fnit.melodic.run_melodic_bids](docs/melodic/README.md) | FSL MELODIC | 独立的 PyTorch 单被试空间 PICA，输入和输出均为 BIDS Derivatives。 |
-
-### dMRI
-
-| 函数名 | 原软件函数名 | 功能 |
-|---|---|---|
-| [TorchTOPUP](docs/topup/README.md) | FSL `topup` | AP/PA b0 畸变场估计与校正。 |
-| [TorchEDDY](docs/eddy/README.md) | FSL `eddy` | DWI 运动及涡流校正、bvec 旋转。 |
-| [TorchDTIFIT](docs/dtifit/README.md) | FSL `dtifit` | FA、MD、特征值/向量、S0 与张量拟合。 |
-| [TorchAMICONODDI](docs/amico_noddi/README.md) | AMICO `NODDI`；NODDI Toolbox `WatsonSHStickTortIsoV_B0` | AMICO 或经典连续 Watson 拟合；输出 NDI、ODI、FWF、方向与拟合误差。 |
-| [TorchMMORF](docs/mmorf/README.md) | FSL `MMORF` | 多标量与扩散张量联合配准，自动估计线性初始化。 |
-| [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
-| [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
-| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、GPU `eddy`、`dtifit`、TBSS/MMORF） | 原始 AP/PA 或 BIDS DWI → 九张 native/标准参数图；可选 TBSS/FNIRT 或配对 T1/tensor MMORF。PyTorch SynthStrip 脑 mask＋TOPUP；[固定公开十人双分支 benchmark](validation/dmri_pipeline/public10_20261002/README.md)记录原软件对照、逐图误差、分步骤时间与脑图。FNIT 20/20 完成，原软件 19/20 完成；TBSS/配对 T1 MMORF 的完整命令中位耗时为 759.91/571.32 秒，对照 2606.87/2113.98 秒（n=10/9）。逐图误差与原 GPU EDDY 失败记录已公布，输出尚非数值等价。 |
-| [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 标准 BIDS DWI/T1 或已有校正 DWI；provided/FNIT/显式官方 recon 三路，一次全脑 ACT＋SIFT2 输出一或多对 SS/VV/SV 用户模板的四矩阵。换模板复用内容 checkpoint；[本轮评测范围](validation/connectome/paired_pipeline_20261003/README.md)。 |
-
-### Connectome 当前接口
-
-- 解剖先于 DWI GPU 阶段完成：已有 subject 用 provided；无 subject 的 auto 用 FNIT，须给权重与结构像资源；官方 FreeSurfer 须显式选择。见 [recon 三路选择](docs/connectome/recon_backends.md)。
-- 一对或多对用户 surface/volume 模板定义矩阵的行与列，支持 SS、VV、SV；跨模板输出为矩形，不强制对称。同模板复用原 square 统计。JSON、三路 CLI 与 Python 示例见 [主流程](docs/connectome/README.md)和[模板说明](docs/connectome/template_pairs.md)。
-- [共享 checkpoint](docs/connectome/checkpoints.md)绑定内容 SHA、数值源码与参数；换模板不重新追踪，换 assignment 半径只重算矩阵。默认半径仍为4 mm，不改变原精度或统计定义。
-- MNI volume 标签可与配准用 MNI intensity 不同体素网格，但须属于同一 MNI/RAS 坐标空间。DenseWarp 保持目标 T1 网格的 RAS-mm field，只更新 source metadata；标签一次 nearest 采样到 T1，再用既有 T1→DWI nearest。
-- 新增接入的真实评测范围见 [paired pipeline 记录](validation/connectome/paired_pipeline_20261003/README.md)；下面历史精度段保留原版本结论，不作为新版本的整链验收。
-
-### Connectome 两轮验证
-
-- **前轮数据流加速（2026-10-02 轮）**：十例两版的 320 张矩阵逐值一致，raw-DWI CLI 中位数 761.722→643.623 s；共享 GPU 下的实测时间见[前轮十例报告](docs/connectome/actual_cohort_comparison.md)。对独立官方 raw 链的通过率为 57.96%，整体未进入官方重复范围，见[前轮完整矩阵判定](docs/connectome/FINAL_RAW_MATRIX_RESULTS.md)。
-- **本轮精度优化（2026-10-03）**：复用相同十例原始 BIDS 与已完成的官方 FreeSurfer subject，正式候选保留梯度/张量解释、归一化四分位索引及 ACT 的 SGM 弦方向修正。十例候选及 CON01/03 两组基线配对已完成：矩阵 1388/2400、轨迹分布 85/250 项通过，整体仍未匹配；配对总耗时观测减少 2.80%。原 CON09/10 监测缺口保留，两例独立 NVML 补测及权重末位差另列，见[本轮总说明](docs/connectome/ACCURACY_OPTIMIZATION_20261003.md)。
-
-本轮组件记录：[1 TOPUP/EDDY](validation/connectome/accuracy_20261003/task_01/README.md)、[2 梯度/建模](validation/connectome/accuracy_20261003/task_02/README.md)、[3 iFOD2/ACT](validation/connectome/accuracy_20261003/task_03/README.md)、[4 解剖/atlas](validation/connectome/accuracy_20261003/task_04/README.md)、[5 固定轨迹矩阵](validation/connectome/accuracy_20261003/task_05/README.md)。各项保留实际采用或拒绝的候选、官方对照、耗时和脑图。
-
-### 后续分析（Post analysis）
-
-| 函数名 | 原软件函数名 | 功能 |
-|---|---|---|
-| [fit_dictionary_learning / fit_dictionary_learning_streaming](docs/dictionary_learning/README.md) | sklearn `MiniBatchDictionaryLearning` | 独立拟合稀疏字典：CPU 接受样本×特征数组，GPU 分块读取 HDF5；返回按特征中心化、整体 RMS 归一化的字典。真实1000人 R500/D200 的字典与 LASSO 指标通过原容差，FA/MD 的 OMP30 重建差仍待改进；[报告与复现](validation/dictionary_learning/README.md)。 |
-| [run_bigflica / apply_model](docs/bigflica/README.md) | [BigFLICA](https://github.com/weikanggong/BigFLICA) mMIGP、DicL、FLICA | 从每人一目录的多模态标准空间 NIfTI 提取成分，保存 course、各模态 z 图、阈值图及新被试模型。压缩流程调用独立字典学习模块，也支持直接体素 FLICA；压缩流程的有效 C20 和最终脑图仍待验收。 |
-| [run_superbigflica / apply_model / plot_superbigflica](docs/superbigflica/README.md) | [SuperBigFLICA](https://github.com/weikanggong/SuperBigFLICA) | 沿用 BigFLICA 的多模态影像目录，以被试 ID 匹配独立 CSV；随机初始化监督共享成分，预测连续表型、二分类或多分类；自动绘制成分权重、Top 3 脑图与测试集散点/ROC 图，并保存新被试模型。 |
-| [run_bwas / plot_bwas_connectivity](docs/bwas/README.md) | [weikanggong/BWAS](https://github.com/weikanggong/BWAS) | 对多被试 2 mm BIDS volume BOLD 的逐体素连接做表型 GLM、6D 连接簇校正、MA 图和多视角连接可视化。 |
-
-各功能页说明输入、输出、参数与调用示例，并汇总已有的真实数据验证结果、原软件命令、参考文献和原实现链接。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。 MS-HBM 的 HCP_40 prior 随包提供；MNI 体积投影的表面和掩膜按[专属说明](docs/mshbm/README.md#mni-2-mm-体积输入)从固定 CBIG 原站部署。
+FNIT 提供 MRI 处理、连接组构建和群体分析的 Python API 与命令行工具。先选择功能页，按输入要求运行，再查看该功能的真实数据验证结果。
 
 ## 安装
-
-推荐从仓库根目录创建独立 Conda 环境：
 
 ```bash
 git clone https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit.git
 cd Fudan-Neuroimaging-toolkit
 conda env create -f environment.yml
 conda activate fnit
-python -c "import fnit, torch; print(fnit.__version__, torch.__version__, torch.cuda.is_available())"
+python -c "import fnit, torch; print(fnit.__version__, torch.cuda.is_available())"
 fnit --help
 ```
 
-`environment.yml` 固定 Python 3.11、PyTorch 2.5.1、CUDA 11.8、Triton 3.1.0、Connectome Workbench 2.1.0、构建 MSM 原生扩展所需的 C++ 编译器，以及 AMICO 逐体素对照使用的 NumPy 1.26.4 x86_64 wheel。目标 GPU 节点为 glibc 2.17 时，可在共享文件系统上按该 ABI 求解：
+环境定义见 [environment.yml](environment.yml)，安装验证见 [Conda 环境报告](validation/environment/README.md)。需要独立编译程序的功能，按对应功能页完成安装。
+
+## 开始使用
+
+以脑提取为例，先配置外置权重：
 
 ```bash
-FNIT_ENV_PREFIX=/path/on/shared-storage/fnit-conda
-CONDA_OVERRIDE_GLIBC=2.17 conda env create -p "$FNIT_ENV_PREFIX" -f environment.yml
-conda activate "$FNIT_ENV_PREFIX"
-```
-
-[Conda 环境验证](validation/environment/README.md)和[机器可读报告](validation/environment/report.public.json)记录了依赖解析、目标 ABI、固定 wheel 的下载校验与实际导入结果。具体安装结果以目标机器上的环境创建和导入检查为准。
-
-也可使用 Python 虚拟环境安装；需预先安装支持 C++17 的编译器，以构建 MSMSulc/MSMAll 共用的原生扩展：
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install .
-```
-
-recon-all 的 Python 依赖和原生编译工具链已列入主页 Conda 环境；创建环境后按 [recon-all 安装说明](docs/recon_all/CONDA_CPP_BUILD.md)编译固定源码程序并获取外置权重、图谱。Connectome 的兼容依赖及其安装边界见功能页。
-
-## 下载和配置权重
-
-Git 仓库与 wheel 不包含模型权重。配置脚本优先从 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)下载；Release 不可用时回退到原作者地址。每个文件均检查大小和 SHA-256，再保存到默认权重目录。统一脑亚区接口在首次缺少所需资源时会自动准备；离线运行请先配置权重和图谱。
-
-下载全部模型：
-
-```bash
-python tools/setup_weights.py --all
-```
-
-只下载所需模型：
-
-```bash
-python tools/setup_weights.py --model synthstrip --model synthmorph-joint
-python tools/setup_weights.py --model wmh-synthseg
-python tools/setup_weights.py --model synthseg
-python tools/setup_weights.py --model synthseg-plus
-python tools/setup_weights.py --model synthsr
-python tools/setup_weights.py --model fast-vbm
-python tools/setup_weights.py --model fmri
-```
-
-安装包后可将 `python tools/setup_weights.py` 替换为 `fnit-setup-weights`。自定义存放位置与离线校验：
-
-```bash
-fnit-setup-weights --all --dest /path/to/weights
-fnit-setup-weights --all --dest /path/to/weights --verify-only
-```
-
-fsLR32k 表面投影的 HCP 公开模板不属于模型权重，同样优先从固定版本 Release 下载并逐文件校验；`--fmriprep` 的 TemplateFlow MNI152NLin6Asym 2 mm T1w、脑掩膜和 HCP dseg 仅从原站获取，核对固定大小和 SHA-256：
-
-```bash
-fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep
-```
-
-该命令包含 fsLR32k/MSMSulc 的球面、脑沟参考图、ROI 与配置，以及 `fmriprep/` 下的三个 TemplateFlow 文件。surface 入口自动检查对应 volume 的来源、模板、网格、完整帧数、TR 和有限值；缺少整条 volume 时先运行 FNIT volume，残缺或无效结果给出具体原因。重建可选择 FNIT、显式 FreeSurfer 或用户已有目录/ZIP；用户输入只读，缺中层面时在独立目录运行 `mris_expand -thickness` 补齐。FNIT 重建复用 PyTorch/Numba 和固定上游源码在 Conda 内独立编译的必要 native 程序；安装重建依赖时包含 `mris_expand`。完整参数与源 T1/世界仿射要求见 [fMRI 表面投影](docs/fmri/surface.md)，模板大小和 SHA-256 见[原站模板清单](docs/WEIGHTS.md#fmri-templateflow-原站模板)。
-
-使用可选 [MSMAll](docs/msm/msmall.md) 时，资源命令加 `--msmall`，下载多特征配准配置、d40 参考及 WRN 的 d7–d21 图，并校验固定大小和 SHA-256。无个体髓鞘图时须明确选择连接特征 `C`；默认 surface 仍使用 T1w-only MSMSulc。
-
-统一脑亚区分割使用经哈希校验的 BrainstemSS、ThalamicNuclei 和 HippoSF 图谱。可提前准备，以便离线运行；脑干沿用预计算先验，丘脑和海马先验在个体仿射变换后的参考网格上平滑：
-
-```bash
-# --output-root：生成四个结构目录的根路径；--device：先验计算设备
-fnit-setup-subregion-atlases --output-root /absolute/path/subregion_atlases --device cpu
-```
-
-```mermaid
-flowchart TD
-    T1[一张三维 T1] --> SS[一次共享 SynthSeg+]
-    SS --> LABELS[粗结构标签及 DK 68 区皮层分区]
-    LABELS --> WM[生成 wmparc 白质代理]
-    T1 --> FAST[TorchFAST 校正与白质强度归一]
-    LABELS --> FAST
-    FAST --> GRID[自身头信息建立工作网格]
-    LABELS --> GRID
-    WM --> GRID
-    GRID --> RECIPES[依次拟合脑干、丘脑及左右海马和杏仁核]
-    RECIPES --> MERGE[合并到输入 T1 网格]
-    MERGE --> SAVE[保存标签、110 项体积及报告]
-    RECIPES -. 可选 .-> HIGH[高分辨率标签和后验]
-    HIGH --> SAVE
+fnit-setup-weights --model synthstrip
+fnit synthstrip -i /data/sub-01_T1w.nii.gz \
+  -o /data/results/sub-01_brain.nii.gz \
+  -m /data/results/sub-01_mask.nii.gz --device cuda:0
 ```
 
 ```python
-from fnit import segment_4_subregions
+from fnit import SynthStrip
 
-subregion_result = segment_4_subregions(
-    t1="/absolute/path/sub-01_T1w.nii.gz",          # 输入：一张原始 T1
-    atlas_root="/absolute/path/subregion_atlases",  # 输入：已准备的统一图谱
-    output_dir="/absolute/path/sub-01_subregions", # 输出：标签、表格和报告目录
-    device="cuda:0",                             # 输入：CUDA 设备；也支持 cpu
-    threads=4,                                  # 输入：PyTorch CPU 线程数
-    optimization="fast",                         # 输入：默认速度配置
-)
+brain_extraction_model = SynthStrip(device="cuda:0")  # 加载已配置模型
+brain_extraction_result = brain_extraction_model("/data/sub-01_T1w.nii.gz")  # 原始结构像
+brain_extraction_result.image.save("/data/sub-01_brain.nii.gz")  # 保存脑图
 ```
 
-默认运行全部四项结构，设置输出目录后自动保存原 T1 网格的 `subregions_native.nii.gz`、`labels.tsv`、`volumes.tsv`、`report.json` 和四项 `highres/` 标签。`save_posteriors=False` 默认不写较大的后验图；需要时显式设为 `True`。完整参数、命令行和官方对照见[统一脑亚区说明](docs/subregions/README.md)。
+Python 示例和参数说明见 [SynthStrip 手册](docs/synthstrip/README.md)；其他功能的输入、输出、Python 和 CLI 示例均在下表链接中。
 
-API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchMCFLIRT、TorchFNIRT、TorchApplyWarp、TorchConvertWarp、TorchInvWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX 与 TorchProbtrackX 本身没有预训练权重。DMRIPipeline 从原始 DWI 启动时使用 PyTorch SynthStrip 提取 b0 脑掩膜，需要 `synthstrip.1.pt`；有 T1w 的流程也可复用该模型。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
+模型、图谱和模板的配置见 [资源手册](docs/WEIGHTS.md)。资源优先从固定 [assets-v1 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1) 获取；未获明确再分发许可的资源由安装器从原作者来源获取。
 
-## 验证、样例与许可
+## 功能
 
-[验证索引](validation/README.md)汇总当前源码对应的真实数据精度、运行时间、峰值显存和示意图，并链接机器可读报告。公开样例见 [T1w](examples/README.md)与 [FLAIR](examples/WMH.md)。各功能的验证范围和运行依赖以对应功能页为准。
+### 通用与配准
 
-[多模态 CPU / GPU 对照](validation/multimodal_cpu_20261004/README.md)汇总同 1/8 CPU 线程预算的官方精度、完整进程与分步骤耗时，以及最新 H100 完整 API、显存和公开脑图；未达速度目标及数值差异按配置列出。
+| FNIT 函数 / 类 | 对应原软件包函数 / 命令 | 用途 |
+|---|---|---|
+| [run_fslmaths](docs/fslmaths/README.md) | FSL `fslmaths` | 对 NIfTI 影像执行算术、滤波、形态学和时间统计。 |
+| [fnit.flirt.run_flirt](docs/flirt/README.md) | FSL `flirt` | 估计或应用影像间的刚性与仿射变换。 |
+| [TorchFNIRT](docs/fnirt/README.md) | FSL `fnirt` | 估计形变场并输出配准影像和 Jacobian。 |
+| [TorchApplyWarp](docs/applywarp/README.md) | FSL `applywarp` | 将已保存变换应用于影像。 |
+| [TorchConvertWarp](docs/convertwarp/README.md) | FSL `convertwarp` | 合并仿射与形变并转换场的表示。 |
+| [TorchInvWarp](docs/invwarp/README.md) | FSL `invwarp` | 在指定网格上计算位移场的反场。 |
+| [convert_space](docs/space_conversion/README.md) | CBIG `CBIG_RF_projectMNI2fsaverage` / `CBIG_RF_projectfsaverage2Vol_single`；Workbench `-metric-resample` | 在 MNI、fsaverage 和 fsLR 之间转换标量或标签脑图。 |
+| [run_mmorf](docs/mmorf/README.md) | FSL MMORF `mmorf` | 联合标量影像和扩散张量估计配准。 |
 
-FSL 派生代码及随包保存的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束；其他第三方来源、许可与引用见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 [来源记录](docs/provenance.json)。
+### 结构 MRI
+
+CPU 的功能覆盖、同节点精度与耗时、GPU 保持检查见[本轮 sMRI 报告](validation/smri_cpu/README.md)。SynthSR 默认 CPU 完整浮点输出、FAST 已测 CPU 模式已与官方匹配；SynthMorph joint 的 192/256 固定门已通过，CPU 精确采样提速仍在验收。完整左半球 sphere.reg 的坐标、有序面和解码几何与同输入官方相同；正式 C++ 平均器 ABBA 同源码及八核资源门通过，平均步骤快 2.09 倍，完整配准墙钟仍慢 5.27%，不能视为整步提速。WMH 的 GPU crop 已在 20 GB 内保持旧输出，no-crop 仍需更多显存。丘脑/海马亚区、FNIRT 非线性估计、原始 T1 完整 recon-all 仍有差异，见[剩余清单](validation/smri_cpu/REMAINING.md)。
+
+| FNIT 函数 / 类 | 对应原软件包函数 / 命令 | 用途 |
+|---|---|---|
+| [SynthStrip](docs/synthstrip/README.md) | FreeSurfer `mri_synthstrip` | 提取脑图、脑掩膜和脑边界距离场。 |
+| [SynthMorph](docs/synthmorph/README.md) | FreeSurfer `mri_synthmorph register` | 使用外置模型完成刚性、仿射或非线性配准。 |
+| [SynthSeg](docs/synthseg/README.md) | FreeSurfer `mri_synthseg` | 分割脑结构并统计体积。 |
+| [SynthSegPlus](docs/synthseg_plus/README.md) | FreeSurfer `mri_synthseg --parc` | 分割脑结构和皮层分区。 |
+| [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 从结构影像合成 1 mm T1w 影像。 |
+| [WMHSynthSeg](docs/wmh_synthseg/README.md) | FreeSurfer `mri_WMHsynthseg` | 分割脑结构和白质高信号。 |
+| [TorchFAST](docs/fast/README.md) | FSL `fast` | 估计脑组织标签、部分体积分数和偏置场。 |
+| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions` | 从 T1w 分割脑干、丘脑、海马和杏仁核亚区。 |
+| [fnit.recon_all.native_free.run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成皮层表面、脑区标签和形态统计。 |
+| [FastVBM.run](docs/fast_vbm/README.md) | FSL `fast` + `fsl_reg` + `fslmaths`（组合流程） | 生成标准空间组织图、Jacobian 和调制灰质图。 |
+| [FastVBM.run](docs/ukb_vbm/README.md) | UKB `bb_struct_init` / `bb_vbm`（组合流程） | 使用固定标准模板生成单被试灰质 VBM 衍生图。 |
+
+### 功能 MRI
+
+| FNIT 函数 / 类 | 对应原软件包函数 / 命令 | 用途 |
+|---|---|---|
+| [TorchMCFLIRT](docs/mcflirt/README.md) | FSL `mcflirt` | 估计 BOLD 逐帧运动并保存校正影像和运动参数。 |
+| [fMRIVolume_pipeline](docs/fmri/README.md) | fMRIPrep volume；FSL `feat` / `melodic`、ICA-AROMA（组合流程） | 从原始 BIDS BOLD 与 T1w 生成原生和 MNI 空间的预处理与去噪时序。 |
+| [fMRISurface_pipeline](docs/fmri/surface.md) | fMRIPrep surface；Workbench `wb_command`（组合流程） | 自动准备 volume 和重建，生成 fsLR32k 时序及 91k CIFTI。 |
+| [run_msmsulc / run_msmall](docs/msm/README.md) | newMSM `newmsm`（MSMSulc / MSMAll 配置） | 对皮层球面进行脑沟或多特征配准。 |
+| [fnit.melodic.run_melodic_bids / decompose_spatial_ica](docs/melodic/README.md) | FSL `melodic` | 对单被试 BOLD 进行空间 PICA 分解。 |
+| [fnit.mshbm.parcellate_volume / parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject` | 从 BOLD 估计个体网络分区和连接矩阵。 |
+
+### 扩散 MRI 与连接组
+
+| FNIT 函数 / 类 | 对应原软件包函数 / 命令 | 用途 |
+|---|---|---|
+| [TorchTOPUP](docs/topup/README.md) | FSL `topup` | 从反向相位编码影像估计和校正畸变。 |
+| [TorchEDDY](docs/eddy/README.md) | FSL `eddy_cuda` | 校正 DWI 运动与涡流并旋转梯度方向。 |
+| [TorchDTIFIT](docs/dtifit/README.md) | FSL `dtifit` | 拟合扩散张量并生成 FA、MD 等参数图。 |
+| [TorchAMICONODDI](docs/amico_noddi/README.md) | AMICO `Evaluation.fit`（NODDI）；NODDI Toolbox `batch_fitting_single` | 估计神经突密度、方向离散度和自由水比例。 |
+| [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` / `bedpostx_gpu` | 估计纤维方向及后验不确定性。 |
+| [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` / `probtrackx2_gpu` | 执行概率纤维追踪并生成路径密度与连接矩阵。 |
+| [DMRIPipeline.run_bids](docs/dmri_pipeline/README.md) | FSL TOPUP / EDDY / DTIFIT / TBSS + AMICO 或 MMORF（组合流程） | 从原始 DWI 生成校正影像和原生、标准空间扩散参数图。 |
+| [UKBConnectome_pipeline.run_bids](docs/connectome/README.md) | MRtrix3 `dwi2response` / `dwi2fod` / `mtnormalise` / `tckgen` / `tcksift2` / `tck2connectome`（组合流程） | 从 DWI 与 T1w 构建单模板或两模板结构连接矩阵。 |
+
+### 群体分析
+
+| FNIT 函数 / 类 | 对应原软件包函数 / 命令 | 用途 |
+|---|---|---|
+| [fit_dictionary_learning / fit_dictionary_learning_streaming](docs/dictionary_learning/README.md) | scikit-learn `MiniBatchDictionaryLearning.fit` | 从数组或分块数据拟合稀疏字典。 |
+| [fnit.bigflica.run_bigflica](docs/bigflica/README.md) | BigFLICA `BigFLICA.BigFLICA_cpu.BigFLICA` | 从多模态影像提取群体共享成分。 |
+| [run_superbigflica](docs/superbigflica/README.md) | SuperBigFLICA `SupBigFLICA_cpu.SupervisedFLICA` | 联合影像与表型学习共享成分并预测新被试。 |
+| [run_bwas](docs/bwas/README.md) | BWAS `BWAS_main.py` | 对逐体素功能连接开展表型关联和连接簇推断。 |
+
+## 运行与结果
+
+各功能页说明 CPU/GPU 支持、运行资源、输出格式与最新真实数据验证结果。
+
+原软件用于独立对照。生产示例采用 FNIT 实现或只读已有结果；现有兼容接口中显式调用官方 FreeSurfer 的选项仅用于独立参考实验。recon-all 的独立 native 程序及 surface 的 Workbench 依赖见相应手册。
+
+真实数据 benchmark 摘要见各功能页，详细记录见 [validation](validation)；图像示例见 [真实脑图索引](docs/figures/README.md)。具体算法仍在持续验证，是否适合某项分析应以对应功能的当前结果为依据。
+
+## 文档与许可
+
+- [统一用户手册模板](docs/README_TEMPLATE.md)
+- [资源下载、文件校验与许可](docs/WEIGHTS.md)
+- [本轮源码与文档核对记录](validation/documentation/readme_manual_20261005/README.md)
+- [代码与依赖归属](THIRD_PARTY_NOTICES.md)
+
+外部模型、模板和原始软件分别遵循原作者许可；Git 仓库和安装包不包含模型权重。
