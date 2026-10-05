@@ -4,7 +4,7 @@
 
 `RegistrationGradientAverager` 按固定邻接顺序，反复计算每个顶点及其邻点的梯度平均。每轮读取上一轮完整结果，再写入另一缓冲区；各顶点可并行，顶点内逐次 FP32 加法和最后的 FP32 乘法保持原规则。它是球面配准内部步骤，输入梯度的坐标系和单位由调用者保留。
 
-2026-10-04 候选 `fc2abc94966150906f4f3421f23aab235b64dd8d` 为大网格的多轮 CPU 调用增加自有 C++ 内核：一支 OpenMP 线程组完成全部轮次，减少逐轮调度。原 NumBa 内核继续承担小调用和不支持的环境。CUDA 使用既有 Triton 实现。2026-10-05 正式源码的实际 H100 回归已通过；完整 CPU ABBA 四臂已结束，全部正式评分仍待远端通道恢复。当前时钟和此前原型结果见第 5 节。
+2026-10-04 候选 `fc2abc94966150906f4f3421f23aab235b64dd8d` 为大网格的多轮 CPU 调用增加自有 C++ 内核：一支 OpenMP 线程组完成全部轮次，减少逐轮调度。原 NumBa 内核继续承担小调用和不支持的环境。CUDA 使用既有 Triton 实现。2026-10-05 正式源码的实际 H100 回归，以及完整 CPU ABBA 的数值、源码和相同资源门均已通过；完整阶段中位墙钟仍未提速。当前时钟和此前原型结果见第 5 节。
 
 ## 2. Python 调用、输入与输出
 
@@ -100,9 +100,9 @@ mris_register -curv -threads 8 \
 | 原型完整调用的平均累计时间，包含首调用 | 既有参考 48.069 s，原型 20.127 s。两次不是相邻完整配对。 |
 | 原型完整 API 时间，含读写 | 既有参考 345.714 s，原型 448.403 s；未改刚体搜索从 49.294 s 波动至 196.200 s。不能据此宣称完整配准提速。 |
 | 正式 `fc2abc94` GPU 实际回归 | H100，完整真实梯度 1/16/256 轮 ABBA，旧/新输出 SHA、逐调用 allocated/reserved 完全相同；CPU helper 未导入。 |
-| 正式 `fc2abc94` 完整 CPU ABBA | 四臂正常结束、坐标 SHA 相同；平均中位 55.151→26.447 s，完整冷进程 914.965→963.223 s。完整冻结源码、轨迹、几何及实际线程门尚待评分，不认定完整提速。 |
+| 正式 `fc2abc94` 完整 CPU ABBA | 1,239 个冻结文件、四臂接受轨迹、坐标、有序面、几何及相同 CPU 资源门通过；两个候选臂各 67 次大循环实际 CPP8。同输入保存官方坐标逐点相同，负面积面 0。平均中位 55.151→26.447 s，完整冷进程 914.965→963.223 s，未达到完整阶段提速门。 |
 
-原型[算子报告](../../../validation/smri_cpu/recon_fixes_20261004/results/persistent_average_prototype.public.json)和[完整阶段报告](../../../validation/smri_cpu/recon_fixes_20261004/results/persistent_registration_pilot.public.json)保留输入、程序、原型和时钟。它们不证明右半球、原始 T1 全部 recon-all 或此次正式源码已通过。
+原型[算子报告](../../../validation/smri_cpu/recon_fixes_20261004/results/persistent_average_prototype.public.json)和[完整阶段报告](../../../validation/smri_cpu/recon_fixes_20261004/results/persistent_registration_pilot.public.json)保留输入、程序、原型和时钟。正式 [CPU ABBA 报告](../../../validation/smri_cpu/average_cpu_persistent_20261004/CPU_ABBA.public.json)单独绑定实际候选，不证明右半球或原始 T1 全部 recon-all。NumBa 基线的八线程配置由执行源码、环境和亲和性验证，没有逐调用观察线程组人数；CPP 的实际八线程则在每次大循环直接记录。
 
 正式 [GPU 报告](../../../validation/smri_cpu/average_cpu_persistent_20261004/gpu.public.json)绑定新 wrapper SHA `956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b`，每次调用 allocated 25,273,344 B、reserved 46,137,344 B，均与旧版相同。该报告中的首次调用共用同一进程和 Triton 缓存，不能用于声称 CUDA 冷启动加速；短时钟受共享 GPU 负载影响。
 
@@ -117,7 +117,7 @@ mris_register -curv -threads 8 \
 | 2026-10-01 既有 Triton/有序 NumBa | 已有 GPU 逐顶点保序平均及完整阶段记录，见[原功能说明](../../../docs/recon_all/SPHERE_REGISTRATION_PERFORMANCE.md)。 |
 | 2026-10-04 已接受 NumBa 顶点并行 | 完整 LH 与官方坐标/轨迹相同；平均累计 227.280→48.069 s。既有完整时间受刚体搜索波动，原报告保留。 |
 | 2026-10-04 独立 persistent 原型 | 相同真实算子及完整 LH 结果相同，平均累计 20.127 s；原型不能直接替代正式源码绑定。 |
-| `fc2abc94966150906f4f3421f23aab235b64dd8d` | 自有 persistent 内核、CPU 懒加载、安全缓存/锁/超时、原 NumBa 回退、浮点政策保护；29 项新增测试与原 3 项线程测试通过。正式完整回归待协调门。 |
+| `fc2abc94966150906f4f3421f23aab235b64dd8d` | 自有 persistent 内核、CPU 懒加载、安全缓存/锁/超时、原 NumBa 回退、浮点政策保护；29 项新增测试与原 3 项线程测试通过。后续正式 CPU 数值/源码/资源门及 H100 算子回归通过；完整阶段速度门尚未达到。 |
 
 这次处理成熟 CPU 子函数的逐轮并行调度开销，没有识别或修改平均数学语义 bug。原内核保留为兼容回退和逐位参考，GPU 类、CUDA 源码及接口未改。
 
