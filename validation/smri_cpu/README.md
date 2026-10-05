@@ -47,9 +47,13 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 
 随后复用已存当前H/g/独立diagonal完成[旧新PCG两臂](../fnirt_cpu_current_replay_20261006/README.md)：自然53/49轮，同当前系统的真实残差7.82e−4/4.17e−4，均符合原1e−3停止门。与另一存档原生系统解的相对L2为11.53%/14.67%，这组跨系统距离不支持默认替换，也不能单独判定算术bug。只读保存解诊断发现，新旧差方向的逆增益为748.8；这是混合参数坐标中的单个方向，不是全局条件数或voxel误差。矩阵组装和任意方向的matrix-free回调仍待核对。
 
+[一次当前level重建](../fnirt_cpu_level_rehydrate_20261006/README.md)已在第二accepted参数点通过：count、SSD、bending、λ/cost和完整1177项gradient/独立diagonal逐位等于已保存当前系统，linearize含evaluate为2.104秒。只运行一次evaluate/linearize，没有callback、H物化或求解；私有状态可供后续诊断，尚未验证NPZ布局恢复和任意方向算术。30份Git产物、18个当前源码及原始summary已[独立复核](../fnirt_cpu_level_rehydrate_20261006/root_review.public.json)，不作为完整配准提速或官方等价结论。
+
 该回放的41份原报告/工具、17个当前生产源、509项前后绑定、追加10/17/5项绑定及残差标量已经[独立复核](../fnirt_cpu_current_replay_20261006/root_review.public.json)。没有重复计算模型或求解器。
 
 后续[普通33类平滑候选](seg_cpu_blur_trial_20261006/README.md)在同一真实概率张量的三次实际逐位门全部通过，局部 worker 峰值RSS最大值10.295→5.592 GB；操作中位数6.963→6.978秒，未证明加速，暂不接入默认。只恢复一次已保存 decoder 末端，不记作完整CNN或T1实测；原始12份产物、14个当前源文件、三次位比较与时钟已[独立核验](seg_cpu_blur_trial_20261006/ROOT_REVIEW.json)。
+
+[单层64MiB卷积分块候选](seg_cpu_conv_slab_trial_20261006/README.md)已在目标Torch2.5.1的第三个短合同停止：实际权重、depth7输入的37,128个FP32值中33,144个不同，maxabs4.292e−6。未运行真实MRI层或ABBA，不形成速度或官方精度结论；14个生产文件和GPU保持原样。记录与Git源码已[独立复核](seg_cpu_conv_slab_trial_20261006/ROOT_REVIEW.json)，下一步只研究保留原GEMM矩阵布局的列缓冲复用。
 
 | 功能 | 本版已完成的修复或定位 | 完整真实输入证据 |
 |---|---|---|
