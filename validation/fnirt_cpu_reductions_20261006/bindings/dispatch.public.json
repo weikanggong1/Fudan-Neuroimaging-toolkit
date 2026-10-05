@@ -1,0 +1,47 @@
+{
+  "scope": "one existing own arithmetic_cli stdio request; debugger stops at actual BLAS kernel entry; no FNIRT/observer/optimizer or new native scalar oracle",
+  "source_sha256": "584f2027d12bed2ad5017107d696d30da3e5bd95595c6302ca9147e5baccb530",
+  "executable_sha256": "89aecc478a8212fad9590174dcec960f77d86b57cd448fad9fff5880d3f077a2",
+  "inputs": {
+    "solve3_r_1.f64": {
+      "sha256": "c67ece0088b6942c3f3bad8b9b71b11daa254d35a5a9175f867c0816ad31e527",
+      "bytes": 9416
+    },
+    "solve3_z_1.f64": {
+      "sha256": "f69e6b22a4111df2a6bf3bd49857891cbcb493d80b7a1b742fc71804ed189f7e",
+      "bytes": 9416
+    }
+  },
+  "protocol_elements": 1177,
+  "returncode": 0,
+  "actual_kernel_symbol": "ddot_k_COOPERLAKE + 19 in section .text of /public/software/apps/FSL/6.0.7.4/lib/libopenblas.so.0",
+  "arguments": {
+    "n": 1177,
+    "incx": 1,
+    "incy": 1,
+    "xmod64": 0,
+    "ymod64": 32
+  },
+  "dispatch_observed": true,
+  "wall_seconds": 1.7740714708343148,
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "environment": {
+    "OPENBLAS_CORETYPE": null,
+    "OPENBLAS_NUM_THREADS": "8",
+    "OMP_NUM_THREADS": "8",
+    "MKL_NUM_THREADS": "8",
+    "NUMBA_NUM_THREADS": "8",
+    "CUDA_VISIBLE_DEVICES": ""
+  },
+  "log_sha256": "ea0b9ca67f835f0e6b636142f0a5649ddb2301e5ce04202c3b23f86b271aeede",
+  "limitation": "One pointer alignment and dispatch observation is not an input-specific production rule or a complete cause isolation."
+}
