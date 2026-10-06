@@ -33,6 +33,8 @@ class SegmentUNet(nn.Module):
         self.up = nn.ModuleList(_Block(widths[i + 1] + widths[i], widths[i])
                                 for i in (3, 2, 1, 0))
         self.likelihood = CPUInferenceConv3d(24, 33, 1)
+        # Metadata only: actual CPU shape/weight/provider qualification is lazy.
+        self.up[3].conv0._fnit_columns_reuse = True
 
     def forward(self, x):
         if x.ndim != 5 or x.shape[1] != 1 or any(size % 32 for size in x.shape[2:]):

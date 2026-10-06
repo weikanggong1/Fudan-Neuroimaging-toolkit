@@ -109,6 +109,12 @@ class CPUInferenceConv3d(nn.Conv3d):
                 and self.dilation == (1, 1, 1) and image.dtype == torch.float32
                 and not cpu_autocast_enabled()):
             if not torch.backends.mkldnn.enabled:
+                if getattr(self, "_fnit_columns_reuse", False):
+                    # Lazy CPU-only optional path; CUDA/training never imports it.
+                    from .cpu_columns import try_columns_reuse
+                    reused = try_columns_reuse(self, image)
+                    if reused is not None:
+                        return reused
                 return convolution_slabs(image, self.weight, self.bias,
                                          padding=self.padding, groups=self.groups)
             if (self.kernel_size == (1, 1, 1) and self.padding == (0, 0, 0)
