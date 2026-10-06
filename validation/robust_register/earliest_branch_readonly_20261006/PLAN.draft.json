@@ -1,0 +1,94 @@
+{
+  "schema": "fnit_robust_earliest_branch_draft/v1",
+  "status": "draft_not_frozen_not_authorized_not_dispatched",
+  "selected_single_boundary": "rigid_prepared_grid_initial_Double_M0_before_pyramid_halfway_QR_or_update",
+  "purpose": "separate preparation-input divergence from centroid/reduction/initial-state divergence; do not infer optimizer causality from final support counts",
+  "official_tap": {
+    "source": "FreeSurfer:Registration.cpp",
+    "entry_line": 712,
+    "capture_before_return_line": 3393,
+    "centroid_calls_lines": [
+      3192,
+      3193
+    ],
+    "source_target_same_state_required": true
+  },
+  "candidate_tap": {
+    "source": "B:registration.py",
+    "capture_after_line": 332,
+    "exit_before_line": 337
+  },
+  "private_payload": {
+    "prepared_images": "shape/dtype/geometry bits plus canonical x-fastest Float32 byte digests; optional raw prepared arrays remain mode700 server-only",
+    "centroids": "two actual returned3-vectors raw IEEE64 bits; no decimal truncation; no extra recomputation",
+    "initial_matrix": "actual M0 4x4 raw IEEE64 bits before translation downscale",
+    "input_order": "original common moving+fixed for rigid; never use own differing rigid MGH for an affine same-state solver claim"
+  },
+  "decision_table": [
+    {
+      "condition": "prepared array/shape/outside-value/geometry unequal",
+      "result": "earliest measured boundary differs in preparation; do not interpret centroid or QR yet"
+    },
+    {
+      "condition": "prepared state equal, returned centroids or M0 unequal",
+      "result": "localize to centroid/reduction or initialization assembly; needs separate same-array control to assign implementation cause"
+    },
+    {
+      "condition": "prepared state and centroids and M0 equal",
+      "result": "this boundary excluded for measured pair; separately approve first rigid A/b entry snapshot next"
+    }
+  ],
+  "future_scope_if_separately_approved": {
+    "fresh_isolated_workers": 2,
+    "rigid_initialization_prefix_per_side": 1,
+    "full_rigid_API": 0,
+    "affine_API": 0,
+    "IRLS_QR_or_SVD_solve": 0,
+    "optimizer_updates": 0,
+    "halfway_sampling": 0,
+    "final_MGH_LTA_writes": 0,
+    "GEMS": 0,
+    "GPU": 0,
+    "scientific_retries": 0,
+    "prepared_reslices": "only original initial grid preparation; exact conditional count frozen before dispatch"
+  },
+  "proposed_limits_not_an_approval": {
+    "same_original_CPU8_affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "same_common_lock": "existing FNIT CPU8 lock",
+    "intraop_threads": 8,
+    "address_space_and_RSS_bytes": 20000000000,
+    "lock_wait_seconds": 120,
+    "each_prefix_worker_seconds": 120,
+    "outer_controller_seconds": 420,
+    "terminate_wait_seconds": 2,
+    "kill_wait_seconds": 2,
+    "inherited_shared_lock_FD_all_descendants": true,
+    "external_supervisor_records_actual_remaining_tree_and_lock": true,
+    "failure": "save exact receipt/stdout/exit and stop; no retry or automatic later-stage progression"
+  },
+  "pre_dispatch_blockers": [
+    "Implement and SHA-freeze both early-exit taps and finite controller; no fictional CLI is supplied by this draft.",
+    "Validate exact official tap availability against installed binary metadata. If a rebuilt source-only reference is needed, require separate compilation approval and report that identity distinctly; never claim rebuilt reference is installed binary trace.",
+    "Bind actual compiler/runtime/provider library identities and inputs, licenses, loaded source namespaces and private paths; current metadata is not old as-run proof.",
+    "Verify canonical serialization and exit before pyramid/halfway/QR in both paths without altering numeric operations; observer-only source review required.",
+    "Root reviews final immutable PLAN and explicitly authorizes this new prefix group."
+  ],
+  "formal_acceptance_unchanged": {
+    "total": 20,
+    "passed": 17,
+    "failed": 3,
+    "warped_relative_L2_max": 1e-05,
+    "support_difference_max": 0,
+    "no_threshold_or_formula_change": true
+  },
+  "public_payload": "only source identities, equality booleans, category counts, resource/status receipts; no raw geometry or images"
+}
