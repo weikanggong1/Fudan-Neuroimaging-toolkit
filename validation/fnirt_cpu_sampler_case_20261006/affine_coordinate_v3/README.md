@@ -40,7 +40,7 @@ print(report["metrics"]["candidate_FSLorder_vs_native_positive_g"]["full"])
 | 保存变形场、affine grid及源矩阵 | 按原 dtype/shape/stride 恢复，复用成熟坐标构建函数，不重算 grid 或 spline |
 | 实际采样记录 | 两个自然阶段各16,128个唯一 XX；原 raw value/voxel derivative、floor、fraction、角点及 valid 分列 |
 | 已保存官方 moving | 仅隔离对照；按原始 word 恢复内部存储方向，先与实际 moving 身份相同；不用于生产读取 |
-| 固定及 scaled fixed | fixed 的原 rawRef 身份与保存参数末8字节相同后，一次保存状态乘法；不重算 scale reduction |
+| 固定及 scaled fixed | 分别核验 fixed 的原 rawRef 身份和保存 scale 参数末8字节后，再执行一次保存状态乘法；不重算 scale reduction |
 | gradient/RHS | 3×392个系数和1个全局 scale；正梯度 `g=2×FNIT half-gradient`，负 RHS 为 `-g` |
 | lambda | 复用原保存的 `9049.463427795125`，不从本轮新 residual/SSD 重算 |
 | 执行边界 | CPU8；AS8GB/RSS4GB；锁等待60s、子进程120s、工作180s、OS240s及清理10s；唯一attempt、retry0 |
