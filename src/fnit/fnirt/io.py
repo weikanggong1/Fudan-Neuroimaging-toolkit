@@ -90,6 +90,9 @@ def make_fsl_coefficient_image(
     image.header["intent_name"] = b""
     image.header.set_data_dtype(np.float32)
     image.header.set_slope_inter(1.0, 0.0)
+    # NEWIMAGE's NIfTI writer declares millimetres and seconds even for
+    # coefficient volumes; nibabel otherwise leaves both units unknown.
+    image.header.set_xyzt_units("mm", "sec")
     image.header["cal_min"] = 0
     image.header["cal_max"] = 0
     return image

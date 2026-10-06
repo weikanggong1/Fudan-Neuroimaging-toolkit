@@ -313,6 +313,7 @@ GPU为共享H100、TF32、20GB上限，完整TBSS保存16次，与FNIT基线1d31
 
 | 日期 | 更新与验收 |
 |---|---|
+| 2026-10-07，系数文件单位 | 修复 `make_fsl_coefficient_image` 未写空间／时间单位的问题，按 NEWIMAGE 写出 mm／sec（`xyzt_units=10`）；两项已有 I/O 测试通过。既有真实系数文件核对确认原候选为 0、官方为 10；没有重跑配准或新增速度结论。另明确完整 GM 对照的 moved／调制参考来自后续 `applywarp`／`fslmaths`，不是 FNIRT `--iout`。[保存合同与对照范围](../../validation/fnirt_output_header_20261007/README.md)。 |
 | 2026-10-06，有限共享系统 | 固定真实H/RHS的69轮算术恢复、第二接受点组装定位；生产与GPU未改，[报告](../../validation/fnirt_shared_followup_20261006/README.md)。这不是新的完整FNIRT benchmark。 |
 | 2026-10-06，自有CPU归约 | Numba/llvmlite的465项标量、186项相对范数及69轮保存系统轨迹逐位通过；生产未接入，[报告](../../validation/fnirt_cpu_reductions_20261006/README.md)。完整组装和非线性配准仍待验收。 |
 | 2026-10-07，保存状态X0单列 | 同状态固定投影/λ，成熟CPU normal与bending的组合列相对L2为2.94e−15，59个词不同；该方向候选数据项全零，只验证边界正则项与接口。未运行完整H、PCG或配准，没有速度验收。[范围与时钟](../../validation/fnirt_cpu_sampler_case_20261006/hcol_x0_v1/README.md)。 |

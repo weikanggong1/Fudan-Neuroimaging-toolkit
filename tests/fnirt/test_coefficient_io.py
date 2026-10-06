@@ -57,6 +57,7 @@ def test_coefficient_image_matches_fnirt_file_writer_2203_0():
         np.asarray(actual.dataobj), np.asarray(expected.dataobj)
     )
     assert int(actual.header["intent_code"]) == FSL_CUBIC_SPLINE_COEFFICIENTS
+    assert int(actual.header["xyzt_units"]) == int(expected.header["xyzt_units"]) == 10
     np.testing.assert_allclose(
         actual.header["pixdim"][1:4], expected.header["pixdim"][1:4]
     )
