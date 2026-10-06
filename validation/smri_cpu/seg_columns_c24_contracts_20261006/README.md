@@ -11,21 +11,46 @@
 本原型不是新增用户公共函数；完整 SynthSeg 调用保持 [功能说明](../../../docs/synthseg/README.md)。独立原型调用示例：
 
 ```python
+import json
+import os
+import sys
 from pathlib import Path
-from prototype import ColumnsC24
 
-columns_library_path = Path("/private/contract_run/compile/columns_c24.so")  # 本轮独立编译产物
-columns_provider_sha256 = plan["provider_sha256"]  # 已加载 Torch 的固定 LP64 SGEMM 文件哈希
+# 只展示独立短尺寸合同调用，不是MRI benchmark；不应重派本轮已完成队列。
+fnit_server_root = Path("/cwStorage/home/gongwk/Notebook_code/FNIT")
+columns_workspace_path = fnit_server_root / "workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1"
+columns_run_path = fnit_server_root / "runs/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1"
+columns_plan = json.loads((columns_workspace_path / "PLAN.json").read_text())
+for thread_environment_name in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMBA_NUM_THREADS"):
+    os.environ[thread_environment_name] = "8"  # 在首次导入Torch前固定CPU预算
+os.environ["CUDA_VISIBLE_DEVICES"] = ""  # 示例仅用CPU
+sys.path.insert(0, str(fnit_server_root / "repo/src"))
+sys.path.insert(0, str(columns_workspace_path))
+
+import torch
+from prototype import ColumnsC24
+from fnit.synthseg_parc.segment import SegmentUNet
+
+torch.set_num_threads(8)
+torch.set_num_interop_threads(8)  # 请在独立新进程、开始计算前设置
+segmentation_weight_path = fnit_server_root / columns_plan["weight"]["fnit_relative_path"]
+segmentation_model = SegmentUNet().load_h5(segmentation_weight_path).eval()
+layer_input_generator = torch.Generator(device="cpu").manual_seed(20261006)
+layer_input = torch.randn((1, 24, 7, 13, 17), generator=layer_input_generator, dtype=torch.float32)
+columns_library_path = columns_run_path / "compile/columns_c24.so"  # 已验收新DSO；不重新编译
+columns_provider_sha256 = columns_plan["provider_sha256"]
 columns_helper = ColumnsC24(
     library=columns_library_path,
     provider_sha256=columns_provider_sha256,
-    allow_compute=True,              # 仅打开本轮已批准的独立短合同
-    allow_bounded_contracts=True,    # 允许本轮六种短尺寸，真实层另行审查
+    allow_compute=True,              # 仅供已批准的独立短合同
+    allow_bounded_contracts=True,    # 短尺寸；真实层另行审查
 )
-layer_output = columns_helper.forward(
-    layer=segmentation_model.down[0].conv1,  # 同一 HDF5 的真实 C24 权重及偏置
-    image=layer_input,                       # CPU float32 NCDHW，无梯度
-)
+with torch.no_grad(), torch.backends.mkldnn.flags(enabled=False):
+    layer_output = columns_helper.forward(
+        layer=segmentation_model.down[0].conv1,  # 实际C24权重及偏置
+        image=layer_input,                       # CPU float32 NCDHW输入
+    )
+# layer_output为[1,24,7,13,17]、连续FP32的pre-ELU Tensor；无分割图或CSV。
 ```
 
 参数逐条见 [准备说明](../seg_columns_c24_prepare_20261006/README.md)：`library` 为新独立 DSO；`provider_sha256` 固定已有提供者；`allow_compute` 默认 False；`allow_bounded_contracts` 默认 False；`layer` 必须是 eval `CPUInferenceConv3d`、kernel `[24,24,3,3,3]`/bias `[24]` 且值 SHA 一致；`image` 为 CPU FP32 普通 Tensor，batch=1/channel=24。输出为同尺寸连续 FP32 pre-ELU，不别名输入或参数。本次输入为种子 20261006 的有限合成张量，权重为实际 `synthseg_2.0.h5`，没有读取 MRI。
