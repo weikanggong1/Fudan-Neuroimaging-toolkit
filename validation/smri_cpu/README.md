@@ -1,6 +1,14 @@
 # sMRI 同节点 CPU 对照
 
+## 最新FNIRT采样对照
+
+[真实体积CPU候选](../fnirt_cpu_sampler_case_20261006/README.md)在16,128个记录坐标上，通过plain值、partial值和三个导数逐位门；当前helper仍有2338/813/0/913/1520个word不同。129,024个角点同输入门先通过，四次实际API及冻结源码已独立核验。候选公开在验证目录，默认注册器未替换；完整目标坐标、RHS、配准输出和GPU保护仍待验收。首编译与第二模式复用分别记时，不报告加速倍率。
+
 [保存几何支持集诊断](../robust_register/support_points_results_20261006/README.md)已完成一次4全网格和4单点验证：原两阶段warp指标精确复现；两个差异点的round域、clamp、rint和FEQUAL整数捷径一致，插值角点记录不同。支持差异仍各1体素，原正式17/20保持；这是保存几何的观察，不证明优化器首差。[根复核](../robust_register/support_points_root_review_20261006.json)核对原回执和四个当前Git文件，没有新注册、GEMS、原软件或GPU调用。
+
+## 最新robust准备态对照
+
+[实际同例M0控制](../robust_register/prepared_m0_capture_20261006/README.md)已完成。两幅准备图像各39×45×61的完整Float32字节、几何字段和Rsrc/Rtrg矩阵同原生；质心与M0保留Double尾差，M0最大4.12e−13。原生捕获复用，修正的是验证入口字段宽度和惰性导入，原prepared数学未改。正式最终配准17/20仍未全过；下一步看质心归约与首个QR系统。
 
 ## 最新C24完整接入结果
 

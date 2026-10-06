@@ -56,7 +56,7 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 
 ## 初始刚体配准的首差观察计划
 
-[只读源码核对](../robust_register/earliest_branch_readonly_20261006/README.md)确认官方活动 robust 路径使用 LINPACK QR，候选使用 Torch reduced QR；停止语义相同，尚未捕获同状态求解轨迹。下一步先比较准备图像与 Double 初始化矩阵 M0，再决定是否观察首个 A/b；tap 与有限执行器尚待实现，未运行该控制，正式17/20及原阈值不变。
+[只读源码核对](../robust_register/earliest_branch_readonly_20261006/README.md)确认官方活动 robust 路径使用 LINPACK QR，候选使用 Torch reduced QR；停止语义相同，尚未捕获同状态求解轨迹。准备图像/M0观察器已独立构建并完成[真实同例对照](../robust_register/prepared_m0_capture_20261006/README.md)：准备图像/几何及Rsrc/Rtrg逐位同，质心/M0有最大4.12e−13的Double尾差。下一步核质心归约及首个A/b、LINPACK QR解，再验证最终影像；正式17/20及原阈值不变。
 
 ## 最新普通33类CPU优化
 
@@ -68,6 +68,10 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 
 ## Robust prepared/M0 的 SDK 现状
 
-[现场 SDK 审查](../robust_register/prepared_m0_sdk_review_20261006/README.md)已找到固定源码、Conda 编译器、原 libutils 与11个静态依赖；20个原源码/头文件/许可证身份相同。但原 robust 对象实存与 Ninja 声明均为0。还需独立构建局部对象、审核实际 ABI/provider 和新 binary，再运行准备态/M0 观察器。尚未捕获数值首差，17/20原门保持；不能把独立源码参考称为安装 binary trace。
+[现场 SDK 审查](../robust_register/prepared_m0_sdk_review_20261006/README.md)已找到固定源码、Conda 编译器、原 libutils 与11个静态依赖；20个原源码/头文件/许可证身份相同。但原 robust 对象实存与 Ninja 声明均为0。随后[局部Conda构建](../robust_register/prepared_m0_sdk_build_20261006/README.md)完成9个对象和M0前缀参考程序；尚不支持完整Schur，guard入口即停止，原链接失败记录保留。实际原生准备态/M0已exit0，23个加载ELF身份通过。outside字段宽度与懒加载模块名两处验证入口错误已修正，原数学不改；[双臂比较](../robust_register/prepared_m0_capture_20261006/README.md)完成，准备图像/几何逐位同，M0最大尾差4.12e−13，17/20原门保持。这是独立源码参考，不是安装版内部binary trace。
 
 [随后参考图/ScaledRef控制](../fnirt_saved_scaled_reference_20261006/README.md)已通过：参考图字节及scale参数相同，16128个按原dtype乘法派生的ScaledRef逐位同。当前首差范围进一步缩小到重采样/导数缓存与后续组装；完整非线性输出仍未验收。该控制0native/solver/GPU，不作速度结论。
+
+## 最新FNIRT采样修复候选
+
+[同真实体积四API对照](../fnirt_cpu_sampler_case_20261006/README.md)已通过：候选plain值及partial值/三个导数的逐位差异均为0，当前helper的2338/813/0/913/1520个word差异在实际API中复现。129,024个角点、坐标/floor/fraction/derivedvalid均先过门。默认生产未替换。随后成熟checkpoint坐标复现旧SHA，但与实际原记录XX的16128个唯一位键交集0，采样/RHS均未执行；先从源定义核对公共/内部体素方向，再比较RHS，最后检验完整真实配准和GPU。历史moving身份差异与旧2425word差异仍分列，不能把局部通过记作端到端等价。

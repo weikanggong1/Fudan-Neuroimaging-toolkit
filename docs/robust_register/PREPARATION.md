@@ -125,7 +125,7 @@ MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作�
 
 - 2026-10-06：独立目标准备/右侧头信息模块；没有修改生产 GEMS、默认 CPU/GPU 数学或通用重采样。34项合同通过。首批合同的一个预期值误写为标签值乘255，已更正为布尔选择乘255；代码结果未因该测试修订而改变。
 - 2026-10-06真实对照：目标与反射atlas的数据/几何exact门通过；保留两次报告写出exit1，metadata-only修复及只读补录后得到完整评分，未重算前处理。源版本与SHA见验证记录。
-- 后续独立候选已完成刚性/仿射对照，原门17/20通过；尚未接入GEMS。最新[SDK核查](../../validation/robust_register/prepared_m0_sdk_review_20261006/README.md)找到源与依赖，但准备态/M0观察器尚未编译；下一步先捕获首差，再核验最终ROI。
+- 后续独立候选已完成刚性/仿射对照，原门17/20通过；尚未接入GEMS。[局部Conda构建](../../validation/robust_register/prepared_m0_sdk_build_20261006/README.md)后，真实[准备态/M0对照](../../validation/robust_register/prepared_m0_capture_20261006/README.md)已完成：两幅准备图像与全部几何字段逐位同，Rsrc/Rtrg矩阵逐位同；质心最大差约2.20e−13，M0最大差4.12e−13。原生只捕获到初始化，完整Schur/QR求解尚未验收；下一步核质心求和与求解首差，再核最终ROI。
 
 ## 7. 来源、许可与参考文献
 

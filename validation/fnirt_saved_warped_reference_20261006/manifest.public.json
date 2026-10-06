@@ -1,0 +1,78 @@
+{
+  "schema": "fnit-saved-warped-reference-public/v1",
+  "title": "FNIRT saved-warped字节分类控制",
+  "date": "2026-10-06",
+  "status": "completed_byte_classification",
+  "input_layout": {
+    "dtype_descriptor": "<f4",
+    "semantic_axes": "XYZ",
+    "source_storage_order": "C",
+    "word_bytes": 4,
+    "destination_storage_order": "X-fast",
+    "operation": "copy each raw four-byte word; no Float decoding or floating-point arithmetic"
+  },
+  "comparison": {
+    "saved_xfast_bytes": 64512,
+    "saved_xfast_sha256": "c5f722324dd63a25fd9e434f4b535fe72092f2d414615884d10e9b0708074a27",
+    "original_pre_sha256": "939fe0e67b29ac11e1bef3e8fec88e742b0387b7c8e9441cb94fcdf2cea2d4ed",
+    "original_post_sha256": "7df95160f76a48bb2cff09c3da8b651b0d769d81cc641d658d2d6b6a35f198a4",
+    "saved_matches_original_pre": false,
+    "saved_matches_original_post": false,
+    "phase_classification": "neither"
+  },
+  "actions": {
+    "saved_member_read": 1,
+    "native_arrays_read": 0,
+    "Float_decodes": 0,
+    "floating_point_operations": 0,
+    "post_metrics_recomputed": 0,
+    "new_coordinates": 0,
+    "sampler_calls": 0,
+    "native_calls": 0,
+    "scale_residual_SSD_gradient_solver_evaluations": 0,
+    "compiles": 0,
+    "GPU_operations": 0,
+    "production_runtime_changes": 0,
+    "GPU_code_changes": 0,
+    "image_outputs": 0
+  },
+  "execution": {
+    "attempts": 1,
+    "automatic_retries": 0,
+    "worker_exit_code": 0,
+    "control_valid_complete": true,
+    "original_text_receipts_verified": 10,
+    "source_before_after_unchanged": true,
+    "local_worker_matches_frozen_and_executed_source": true,
+    "owned_tree_release_verified": true
+  },
+  "source_identity": {
+    "control_worker": {
+      "bytes": 10036,
+      "sha256": "e7be84e70869e100f2955cb4b263e14b3f29d101a3b483548f04df6dcad9569f"
+    }
+  },
+  "diagnostic_resources": {
+    "worker_wall_seconds": 0.017085092142224312,
+    "worker_max_RSS_bytes": 17293312,
+    "measurement_scope": "one byte rearrangement and SHA classification worker; not registration/sampling performance",
+    "speedup_claim_supported": false
+  },
+  "interpretation": {
+    "moving_and_coordinates_identity_proven": false,
+    "scientific_equivalence_proven": false,
+    "formula_bug_cause_proven": false,
+    "classification_scope": "hash inequality against two existing cache snapshots; no new native or sampler evaluation",
+    "brain_image_available": false
+  },
+  "references": [
+    {
+      "title": "FSL FNIRT original source repository",
+      "url": "https://git.fmrib.ox.ac.uk/fsl/fnirt"
+    },
+    {
+      "title": "Andersson, Jenkinson and Smith. Non-linear registration, aka spatial normalisation. FMRIB Technical Report TR07JA2 (2007).",
+      "url": "https://www.fmrib.ox.ac.uk/datasets/techrep/tr07ja2/tr07ja2.pdf"
+    }
+  ]
+}

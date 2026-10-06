@@ -269,6 +269,10 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
 
 随后[当前Numba CPU平滑桥接](../../validation/fnirt_cpu_smoothing_bridge_20261006/README.md)完成：当前plain与旧保存图、按声明头方向翻转后调用成熟blur的候选与官方保存图，各18,579,456个FP32值逐位相同。31项输入/源码、12项worker绑定和精度状态前后相同；仅2次blur、1次adapter，无归一化、梯度、求解或完整配准。早先完整orientation候选使最终系数/warp/Jacobian误差扩大的负结果仍保留；本次只补足当前编译器/运行时的预处理身份，不修改默认或据此声明整体精度改善。[独立核验](../../validation/fnirt_cpu_smoothing_bridge_root_review_20261006.json)。
 
+[真实体积上的CPU采样候选](../../validation/fnirt_cpu_sampler_case_20261006/README.md)已通过独立API对照：在同一18,579,456体素moving和16,128个实际记录坐标上，plain值、partial值及三个体素导数均逐位同原生，129,024个角点先通过同输入门。当前helper仍有2338/813/0/913/1520个值或导数word差；候选修正plain差值混合顺序与partial三个左项的标量Double提升，GPU代码未改。代码保存在验证目录，尚未替换默认注册器。四次顺序API调用包含首编译，不作为速度倍率；后续原checkpoint坐标门未过：两侧各16128个唯一XX位键，交集0，未执行采样/RHS；需先核公共NIfTI与NEWIMAGE内部体素方向。完整配准及fallback/GPU保护尚待验收。
+
+前置证据分别见[保存warped字节分类](../../validation/fnirt_saved_warped_reference_20261006/README.md)、[实际自然采样捕获](../../validation/fnirt_natural_sampler_capture_20261006/README.md)和[记录操作数控制](../../validation/fnirt_recorded_operand_reference_20261006/README.md)。保存Python warped既不等于原plain缓存也不等于partial缓存；实际moving与旧保存Python moving身份不同。因此，局部采样一致不能单独解释历史2425个差异或完整非线性误差。
+
 2026-10-04正式CPU对照绑定v27，组合源v28保留其注册器/采样SHA；官方FSL6.0.7.4，Intel Xeon Gold6418H、1/8线程预算，四种预设各1例完整观察（不是队列）。float32图像/输出，float64系数/法方程。
 
 | 完整预设 | 线程上限 | 原版完整进程 | FNIT 完整进程 | FNIT 已导入 API（含读写） | 脑掩膜内 iout Pearson r | Jacobian MAE |
