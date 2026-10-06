@@ -75,3 +75,5 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 ## 最新FNIRT采样修复候选
 
 [同真实体积四API对照](../fnirt_cpu_sampler_case_20261006/README.md)已通过：候选plain值及partial值/三个导数的逐位差异均为0，当前helper的2338/813/0/913/1520个word差异在实际API中复现。129,024个角点、坐标/floor/fraction/derivedvalid均先过门。默认生产未替换。第一组成熟checkpoint坐标复现旧SHA，但与实际原记录XX的16128个唯一位键交集0，失败保留。随后[同目标affine控制](../fnirt_cpu_sampler_case_20261006/affine_coordinate_v3/README.md)通过全部97门，16128个坐标/顺序输出、mask和129024个角点匹配；候选partial值/三导数逐位同。FSL序正梯度总相对L2由4.1597e−7降至8.7145e−10；三系数块仍有9.07e−8/3.21e−8/3.16e−8相对差，1177个Double words仍非逐位同。下一步核同状态H/diag和cf plain→grad partial的dynamic lambda/cost缓存，再验完整原始输入CPU、fallback和GPU。历史moving身份差异与旧2425word差异仍分列，默认不替换，不称端到端等价。
+
+[最新除法投影控制](../fnirt_cpu_sampler_case_20261006/projection_division_v1/README.md)已将固定点FSL累计序g相对L2缩小至5.26766e−15，XYZ系数块均约1e−15；投影48,384个Float32值逐位同，g仍有1,170个Double words尾差，LM序仍3.62e−8。下一步应把已匹配的投影用于同状态H/diag对照，核CPU代价/导数缓存时序和求解轨迹，再验完整输入及GPU保护。当前未做默认替换或完整配准提速结论。

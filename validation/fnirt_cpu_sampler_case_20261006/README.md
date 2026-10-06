@@ -105,6 +105,8 @@ python -m json.tool validation/fnirt_cpu_sampler_case_20261006/manifest.public.j
 
 随后[同目标affine v3控制](affine_coordinate_v3/README.md)已补足这一保存状态的对应关系：16128个坐标位键、顺序输出、mask和全部角点门通过；候选partial值及三导数逐位同。固定lambda的FSL累计序正梯度总相对L2降至8.7145e−10，1177个Double words仍非逐位同，逐块误差见该报告。第一组失败不改写为通过。完整FNIRT的H/PCG、动态缓存、最终配准、其他输入/线程、Tensor fallback语义及后续GPU保护仍需验收，默认实现未替换。本轮没有完整配准脑图；[原完整CPU benchmark及脑图](../../docs/fnirt/README.md#5-最新精度和运行时间)仍绑定原版本。
 
+[随后的除法投影控制](projection_division_v1/README.md)通过48,384个Float32值含符号零的逐位门。FSL累计序正g相对L2降至5.26766e−15，三系数块误差均约1e−15；仍有1,170个Double words尾差，LM序仍约3.62e−8。该结果仅是固定lambda保存状态的CPU投影与g前缀，完整H/求解、动态缓存、最终输出、fallback与GPU保护仍待验收。
+
 ## 6. 更新及 benchmark 记录
 
 - 既有raw moving不匹配与公式导入失败保留；随后同记录操作数控制定位plain顺序和partial提升差异。

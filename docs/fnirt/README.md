@@ -271,6 +271,8 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
 
 [真实体积上的CPU采样候选](../../validation/fnirt_cpu_sampler_case_20261006/README.md)已通过独立API对照：在同一18,579,456体素moving和16,128个实际记录坐标上，plain值、partial值及三个体素导数均逐位同原生，129,024个角点先通过同输入门。当前helper仍有2338/813/0/913/1520个值或导数word差；候选修正plain差值混合顺序与partial三个左项的标量Double提升，GPU代码未改。代码保存在验证目录，尚未替换默认注册器。四次顺序API调用包含首编译，不作为速度倍率；第一组原checkpoint坐标门未过：两侧各16128个唯一XX位键，交集0，未执行采样/RHS，失败记录保留。随后[按实际3×4消费者转换的同目标控制](../../validation/fnirt_cpu_sampler_case_20261006/affine_coordinate_v3/README.md)通过全部97门：实际消费的12个矩阵words、16128个坐标位键、顺序输出、mask及129024个角点均同；原第4行未消费且字节保留。候选partial值和三个导数逐位同，FSL累计序正梯度总相对L2由4.1597e−7降至8.7145e−10，但1177个Double words仍不同；三系数块相对差为9.07e−8/3.21e−8/3.16e−8，总误差主要受scale项范数影响。原始输入的完整H/diag/求解、动态lambda/cost缓存、完整配准及fallback/GPU保护尚待验收；当前生产仍未替换。
 
+[后续Float32除法投影控制](../../validation/fnirt_cpu_sampler_case_20261006/projection_division_v1/README.md)复用已匹配的采样状态，48,384个投影值连同符号零全部逐位同源定义参考。固定lambda下，FSL累计序正梯度相对L2进一步降至5.26766e−15；三系数块为3.14e−15/1.47e−15/2.16e−15，最大绝对差约1.3e−16，scale最大差5.51e−14。1,170/1,177个Double words仍不同，LM序仍为3.62e−8。候选的输入身份核对与资源收尾均完成，但未运行H/diag、求解、完整配准或GPU；默认实现未替换，不据固定状态时钟报告端到端加速。
+
 前置证据分别见[保存warped字节分类](../../validation/fnirt_saved_warped_reference_20261006/README.md)、[实际自然采样捕获](../../validation/fnirt_natural_sampler_capture_20261006/README.md)和[记录操作数控制](../../validation/fnirt_recorded_operand_reference_20261006/README.md)。保存Python warped既不等于原plain缓存也不等于partial缓存；实际moving与旧保存Python moving身份不同。因此，局部采样一致不能单独解释历史2425个差异或完整非线性误差。
 
 2026-10-04正式CPU对照绑定v27，组合源v28保留其注册器/采样SHA；官方FSL6.0.7.4，Intel Xeon Gold6418H、1/8线程预算，四种预设各1例完整观察（不是队列）。float32图像/输出，float64系数/法方程。
