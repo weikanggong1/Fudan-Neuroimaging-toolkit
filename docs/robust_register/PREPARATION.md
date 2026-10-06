@@ -130,6 +130,8 @@ MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作�
 - 2026-10-07：[连续首轮 A/b 对照](../../validation/robust_register/first_ab_cpu_prefix_20261007/README.md)进一步通过18个记录边界：准备态、两层金字塔、半空间变换与图像、9196×6的A及9196项b均逐位同固定SDK参考。原生一次四阶Schur成功；尚未执行注册QR、IRLS或更新，完整17/20门保持。下一步从相同A/b核对鲁棒尺度、权重和求解，随后接入核团验证。冷子进程含身份检查和导入，不作为完整配准速度。
 - 2026-10-07：[同A/b的完整IRLS对照](../../validation/robust_register/same_ab_irls_cpu_20261007/README.md)沿用已保存真实方程与原生输出：第一轮中心/MAD/尺度/归一化/权重/加权A/b逐位同，首差出现在QR的6个Float32参数，最大8.22544e−6。双方均4轮停止并回退到第3轮，但最终参数最大差3.29018e−5，2473项权重不同；相同权重输入的累计权重和另差0.027832。随后CPU Float LINPACK候选在相同保存加权A/b上使6个返回值全部逐位匹配，核函数0.595毫秒、首次类型编译0.919秒。候选尚未采用；残差、归约和完整配准仍待验证，正式17/20以及GEMS与GPU验收状态不变。
 
+- 随后同一真实A/b的CPU三处修正已组合完成自然IRLS：4轮、选第3轮并回退，与SDK参考的40个逐轮记录和4个最终记录全部逐位一致；最终6个参数与9196个权重均无差异。分别修正Float LINPACK QR、按行残差计算和Float保序误差累计，原MAD、Tukey权重及停止条件保持。仅覆盖这一6列方程，完整刚性/仿射、未知输入和GPU仍待验收，正式17/20门不变。
+
 ## 7. 来源、许可与参考文献
 
 - [FreeSurfer 源提交 d932c45](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)，安装版 8.2.0 build `freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45`。相关 SAMSEG `subregions/core.py` 和 `hippocampus.py` 的安装版源 SHA 单独绑定；不复制整个原程序。改编工作流适用[FreeSurfer许可](../../licenses/FreeSurfer.txt)。

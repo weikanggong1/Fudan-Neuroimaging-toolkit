@@ -54,9 +54,15 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 
 [一次保存状态控制](../fnirt_cpu_scale_accumulation_control_20261006/README.md)已排除该状态下的累计与最终factor分组作为主要差异：scale只变3.19744e−14，当前存档native差约7.66992e−6，同一串行和的最终两组FP64 bits完全相同。没有重建此前官方moving替换的输入，不把该结论扩展到其2.54688e−6残差。后续需绑定原oracle身份并核对实际Robj/ScaledRef/Mask中间缓存及系数梯度，完整非线性精度仍未过门。
 
+## FNIRT 完整 CPU 候选的实际未通过项
+
+2026-10-07，同一真实输入的四层GM候选已完整运行，25次PCG和全部输出写出及运行控制通过；moved、调制图、Jacobian、系数的相对L2分别为5.41%、6.54%、1.23%、7.07%，数值验收未通过，候选未采用。API27.745秒、worker39.845秒与已有官方CLI326.097秒的边界及CPU亲和设置不同，不作等价加速结论。moved/调制图TR和系数单位还有元信息差异，须另修复。
+
+当前可用参考中，第一级第三次求解的差异早于后续拓扑投影；同点PCG算术候选已运行：58轮达到相对残差4.0721e−4，但更新向量与原生69轮结果的相对L2为8.36%，高于先前候选的4.03%，未采用。下一步仍需核矩阵算子的计算顺序；残差通过不能代表更新向量一致。拒绝试步的梯度/Hessian复用规则已修成私密源码候选，但本例25次均接受，未覆盖拒绝路径；不能据此归因或宣布完整误差解决。剩余包括完整算子/停止轨迹、拓扑投影、最终输出数值和头信息，以及GPU保护验收。保持原验收阈值。
+
 ## 初始刚体配准的首差观察计划
 
-[只读源码核对](../robust_register/earliest_branch_readonly_20261006/README.md)确认官方活动 robust 路径使用 LINPACK QR，候选使用 Torch reduced QR；停止语义相同，当时尚未捕获同状态求解轨迹。准备图像/M0观察器已独立构建并完成[真实同例对照](../robust_register/prepared_m0_capture_20261006/README.md)：准备图像/几何及Rsrc/Rtrg逐位同，原质心/M0有最大4.12e−13的Double尾差。[保序CPU质心候选](../robust_register/centroid_serial_cpu_probe_20261006/README.md)先使保存两图的6个Double返回值逐位同，随后[完整初始化对照](../robust_register/centroid_m0_cpu_prefix_20261006/README.md)沿同一真实输入重算准备态、质心及M0，两幅图和54个Double初始化值全部逐位同SDK参考。[连续首轮 A/b 对照](../robust_register/first_ab_cpu_prefix_20261007/README.md)已进一步通过18个记录边界，9196×6的A与9196项b逐位同，四阶Schur成功。原完整17/20及阈值不变。[同A/b完整IRLS对照](../robust_register/same_ab_irls_cpu_20261007/README.md)已确认第一轮中心/MAD/尺度/归一化/权重/加权A/b逐位同，首差为QR的6个Float32返回值，最大8.22544e−6；双方4轮停止、选第3轮和回退语义相同。相同权重下的权重和另差0.027832。CPU Float LINPACK候选已在同一保存加权A/b上使6个返回值逐位匹配，仍需同输入验证残差和归约顺序，再接完整IRLS与更新，验最终warp、核团、fallback及GPU保护；不放宽原17/20门和阈值。
+[只读源码核对](../robust_register/earliest_branch_readonly_20261006/README.md)确认官方活动 robust 路径使用 LINPACK QR，候选使用 Torch reduced QR；停止语义相同，当时尚未捕获同状态求解轨迹。准备图像/M0观察器已独立构建并完成[真实同例对照](../robust_register/prepared_m0_capture_20261006/README.md)：准备图像/几何及Rsrc/Rtrg逐位同，原质心/M0有最大4.12e−13的Double尾差。[保序CPU质心候选](../robust_register/centroid_serial_cpu_probe_20261006/README.md)先使保存两图的6个Double返回值逐位同，随后[完整初始化对照](../robust_register/centroid_m0_cpu_prefix_20261006/README.md)沿同一真实输入重算准备态、质心及M0，两幅图和54个Double初始化值全部逐位同SDK参考。[连续首轮 A/b 对照](../robust_register/first_ab_cpu_prefix_20261007/README.md)已进一步通过18个记录边界，9196×6的A与9196项b逐位同，四阶Schur成功。原完整17/20及阈值不变。[同A/b完整IRLS对照](../robust_register/same_ab_irls_cpu_20261007/README.md)已确认第一轮中心/MAD/尺度/归一化/权重/加权A/b逐位同，首差为QR的6个Float32返回值，最大8.22544e−6；双方4轮停止、选第3轮和回退语义相同。相同权重下的权重和另差0.027832。CPU Float LINPACK候选已在同一保存加权A/b上使6个返回值逐位匹配，残差和最终误差的同输入原语对照已通过，随后三处CPU修正组成的自然IRLS也通过：40逐轮+4最终记录均逐位同，6参数和9196权重无差。仅此6列真实方程已验收；下一步验完整刚性/仿射的最终warp、核团、fallback及GPU保护，不放宽原17/20门和阈值。
 
 ## 最新普通33类CPU优化
 
