@@ -36,7 +36,7 @@ brain_extraction_result.image.save("/data/sub-01_brain.nii.gz")  # 保存脑图
 
 Python 示例和参数说明见 [SynthStrip 手册](docs/synthstrip/README.md)；其他功能的输入、输出、Python 和 CLI 示例均在下表链接中。
 
-权重、图谱和模板按[运行资源安装](docs/ASSETS.md)配置，已获许可并收录目录的文件优先从固定 [assets-v1 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1) 下载。个人 FreeSurfer 许可证由用户提供，许可尚待确认的少量资源继续从原作者来源获取。
+权重、图谱、模板和固定构建源码按[运行资源安装](docs/ASSETS.md)从 [assets-v1 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1) 获取。个人 FreeSurfer 许可证由用户自行申请。
 
 ## 功能
 

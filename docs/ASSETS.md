@@ -1,10 +1,10 @@
 # 运行资源安装
 
-模型权重、图谱、标准模板和固定native源码优先从FNIT的固定[assets-v1 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)取得。安装器只对许可已确认、已发布且大小/SHA-256匹配的文件使用Release；未收录或镜像下载失败时保留固定作者来源回退。
+模型权重、图谱、标准模板和固定native源码优先从FNIT的固定[assets-v1 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)取得。安装器只对已发布且大小/SHA-256匹配的文件使用Release；未收录或镜像下载失败时保留固定作者来源回退。
 
 Conda/PyPI依赖仍按[主页环境](../README.md#安装)安装，不制作离线依赖包。个人FreeSurfer运行许可证由用户提供，不进入Git仓库、安装包或Release。
 
-本轮新增165项获授权运行资源，另发布完整运行清单和许可汇编2项附件；Release目前共220项附件。20项再分发许可尚待确认的运行资源继续使用原作者来源，个人FreeSurfer运行许可证另行准备。
+本轮先发布165项运行资源，再按用户确认补齐VPNL 17项、Caret 2项及Oxford GM 1项，共185项新增运行文件；加上来源、许可及清单附件，Release共242项附件。个人FreeSurfer运行许可证另行准备。
 
 ## 按功能准备资源
 
@@ -76,21 +76,23 @@ HCP、空间转换、连接组和MS-HBM安装器会先校验已有文件；有�
 
 资源目录作为相应功能的公开参数传入；安装资源不会自动完成MRI预处理，也不会改变已有处理参数或精度设置。权重目录的配置规则见[权重手册](WEIGHTS.md)。
 
-## 仍需原作者来源的资源
+<a id="仍需原作者来源的资源"></a>
+
+## 个人许可证与资源条款
 
 | 资源 | 当前处理 | 原因 / 获取方式 |
 |---|---|---|
 | 个人FreeSurfer运行许可证 | 用户自行准备`FS_LICENSE` | 由[FreeSurfer官方](https://surfer.nmr.mgh.harvard.edu/)申请；不读取或公布许可证内容。 |
-| VPNL来源的17项重建资源 | 使用安装器记录的作者来源 | 独立再分发许可尚待确认；具体路径见[重建资源定义](../src/fnit/recon_all/assets.py)。 |
-| MS-HBM的两项Caret派生MNI中层表面 | 从固定CBIG作者来源下载 | 再分发许可尚待确认；来源、大小和SHA见[MS-HBM资源表](mshbm/README.md#外部资源)。 |
-| Oxford `template_GM.nii.gz` | 用户从官方公开包准备 | 文件级再分发许可尚待确认；获取步骤见[VBM手册](ukb_vbm/README.md)。 |
+| VPNL来源的17项重建资源 | 已补充Release；安装器自动获取 | 保留VPNL/Juelich作者归属和引用；上传确认与来源见[补充记录](../validation/assets_release_20261006/supplement_20/README.md)。 |
+| MS-HBM的两项Caret派生MNI中层表面 | 已补充Release；安装器自动获取 | 保留Caret/CBIG来源和引用；来源、大小和SHA见[MS-HBM资源表](mshbm/README.md#外部资源)。 |
+| Oxford `template_GM.nii.gz` | 从Release取得单文件，再交给`FastVBM` | 精确同字节官方文件按Apache-2.0发布；获取和校验见[VBM手册](ukb_vbm/README.md)。 |
 
 用户自己的影像、被试重建结果和自定义atlas不属于Release资源。HCP S1200 d25/d50等未纳入安装器的外部数据也不因本次资源发布获得额外访问或再分发许可。
 
 ## 文件目录、来源和许可
 
 - [固定Release附件](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)：下载文件。
-- [完整运行资源清单](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/runtime-assets-manifest-20261006.json)：本次新增文件、许可例外和来源记录。
+- [完整运行资源清单](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/runtime-assets-manifest-20261006-complete.json)：全部发布附件、固定来源和补充确认记录。
 - [公开许可汇编](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/runtime-assets-licenses-20261006.tar.gz)：完整公开条款与native来源notice，不包含个人许可证。
 - [安装器使用的发布目录](../src/fnit/_release_asset_catalog.json)：实际附件名称、大小、SHA-256和发布状态。
 - [资源来源清单](RESOURCE_MANIFEST.md)：原作者来源和逐资源许可记录。

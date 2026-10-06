@@ -302,7 +302,7 @@ fnit-setup-weights --model recon-all --dest /data/fnit-weights --verify-only
 
 本页列出的模型/数组共11个，3,653,913,443 B。原始文件许可及归属见[统一资源规则](../WEIGHTS.md#权重许可与归属)。模型推理从本地加载已准备资源。
 
-重建还需98项标准资产和本机源码构建程序。逐文件大小/SHA及原作者来源见[assets.py](../../src/fnit/recon_all/assets.py)；安装器仅对获许可并收录[发布目录](../../src/fnit/_release_asset_catalog.json)的资源优先使用固定Release，保留固定来源回退。VPNL第三方资源仍从原作者来源获取，例外见[统一安装说明](../ASSETS.md)。固定源码与图谱保留各自许可及归属，个人FreeSurfer运行许可证由用户提供，不上传Release。
+重建还需98项标准资产和本机源码构建程序。逐文件大小/SHA及原作者来源见[assets.py](../../src/fnit/recon_all/assets.py)；安装器对已发布并收录[发布目录](../../src/fnit/_release_asset_catalog.json)的资源优先使用固定Release，保留固定来源回退。17项VPNL资源也已补充Release，来源与适用条款见[统一安装说明](../ASSETS.md)。固定源码与图谱保留各自许可及归属，个人FreeSurfer运行许可证由用户提供，不上传Release。
 
 ```bash
 bash tools/setup_recon_all_native_conda.sh

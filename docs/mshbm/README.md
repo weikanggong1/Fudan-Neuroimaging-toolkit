@@ -292,11 +292,11 @@ CBIG_MSHBM_parcellation_single_subject(params);
 | 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
 |---|---|---|---|---|---|
 | hcp40_fslr32k_17.npz | 固定prior/mesh/seed | [CBIG HCP_40](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c/stable_projects/brain_parcellation/Kong2019_MSHBM) | 1,497,800 bytes | `aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17` | CBIG MIT；FNIT转换资产随包附来源/许可。 |
-| left_mni.surf.gii | 左群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.L.midthickness_mni.32k_fs_LR.surf.gii) | 723,249 bytes | `ac51edc0f61ee988c6d941e073ae3275ef5da509233df9309bdf586b3b31838a` | Caret派生，未核明确独立再分发许可，仅原站下载。 |
-| right_mni.surf.gii | 右群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.R.midthickness_mni.32k_fs_LR.surf.gii) | 710,702 bytes | `6e1c9842efb303945abe0cd780422a9812d1eab59c08d3fa3c72276ec31e6a25` | 同上，仅原站下载。 |
+| left_mni.surf.gii | 左群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.L.midthickness_mni.32k_fs_LR.surf.gii) | 723,249 bytes | `ac51edc0f61ee988c6d941e073ae3275ef5da509233df9309bdf586b3b31838a` | Caret派生；已按用户确认补充Release，保留来源和引用。 |
+| right_mni.surf.gii | 右群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.R.midthickness_mni.32k_fs_LR.surf.gii) | 710,702 bytes | `6e1c9842efb303945abe0cd780422a9812d1eab59c08d3fa3c72276ec31e6a25` | 同上，已补充Release。 |
 | cortex_estimate.nii.gz | 皮层估计mask，最近邻重采样 | [固定CBIG原站目录](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c/stable_projects/registration/Wu2017_RegistrationFusion/bin/liberal_cortex_masks_FS5.3) | 207,362 bytes | `e4d788be332be76d7429855aba8f20c02693625f400905573e9063b4001f0e2b` | 按逐资源许可；命中已发布目录时优先Release，保留固定CBIG来源回退。 |
 
-安装器优先使用已获许可并收录[发布目录](../../src/fnit/_release_asset_catalog.json)的文件，逐文件核验大小/SHA并原子保存；两项Caret派生中层表面仍从固定CBIG作者来源下载。完整下载例外见[统一安装说明](../ASSETS.md)。运行前在用户输入BOLD的网格准备资源：
+安装器优先使用已发布并收录[发布目录](../../src/fnit/_release_asset_catalog.json)的三项文件，逐文件核验大小/SHA并原子保存；固定CBIG作者来源作为回退。资源来源与条款见[统一安装说明](../ASSETS.md)。运行前在用户输入BOLD的网格准备资源：
 
 ```bash
 python tools/setup_mshbm_projection_assets.py \

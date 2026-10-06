@@ -91,10 +91,10 @@ fnit-setup-subregion-atlases --output-root /data/subregion_atlases --device cpu
 
 recon-all模型与默认98项核心图谱/模板是两组资源，安装、大小/SHA和native编译见 [重建手册](recon_all/README.md)。
 默认核心98项共264,773,919 B；`--all`完整111项共374,437,464 B，包含独立阶段验证额外资源。
-已明确获许可且已发布的重建图谱优先从固定Release获取，大小/SHA必须与源码清单匹配；VPNL第三方资源的再分发许可尚待确认，继续从原作者来源获取。
+已发布的重建图谱（含17项VPNL资源）优先从固定Release获取，大小/SHA必须与源码清单匹配；保留原作者来源和引用。
 亚区图谱由专用安装器配置，BrainstemSS、ThalamicNuclei及HippoSF来源和逐文件SHA见 [亚区手册](subregions/README.md)。
 空间转换与MS-HBM的CBIG资源分别按 [空间转换](space_conversion/README.md) 和 [MS-HBM](mshbm/README.md) 配置；
-未获明确再分发许可的外部atlas不上传FNIT，具体例外见[统一安装说明](ASSETS.md#仍需原作者来源的资源)。
+两项Caret中层表面及Oxford GM已补充Release；个人FreeSurfer运行许可证仍由用户提供，资源条款见[统一安装说明](ASSETS.md#个人许可证与资源条款)。
 
 ## 许可和归属
 

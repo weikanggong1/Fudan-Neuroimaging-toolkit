@@ -375,6 +375,6 @@ NRMSE使用全部91,282灰坐标，恒定时序仍保留；不筛零值或拟合
 |---|---|---|---|---|---|
 | HCP固定模板/配置 | fsLR球面、ROI、sulc、MSMAll低维参考和配准 | [HCP固定commit](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533) | 按选项逐文件见目录 | [发布目录](../../src/fnit/_release_asset_catalog.json) | 按固定HCP许可，已发布项优先Release。 |
 | TemplateFlow MNI6-2mm文件 | volume目标/皮层下dseg | [TemplateFlow](https://github.com/templateflow/tpl-MNI152NLin6Asym) | 3文件逐项见清单 | [发布目录](../../src/fnit/_release_asset_catalog.json) | 按逐资源许可；已发布项优先Release，保留官方来源回退。 |
-| recon-all模型/图谱 | 新重建与native节点 | [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) | 模型11文件；默认核心图谱98项（完整清单111项） | [重建资源说明](../recon_all/README.md) | 获许可已发布项优先Release；VPNL和个人许可证例外见统一安装说明。 |
+| recon-all模型/图谱 | 新重建与native节点 | [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) | 模型11文件；默认核心图谱98项（完整清单111项） | [重建资源说明](../recon_all/README.md) | 模型/图谱含VPNL均已发布，优先Release；个人许可证由用户提供。 |
 
 权重/模板分开安装，下载例外及完整大小/SHA见[统一安装说明](../ASSETS.md)与[资源手册](../WEIGHTS.md)。

@@ -1,5 +1,7 @@
 # FNIT 运行资源再分发许可审查（2026-10-06）
 
+**历史审查快照：当时尚未发布的20项文件已在用户确认后补充Release；Oxford GM另已找到精确同字节的官方Apache-2.0证据。当前状态见[补充发布记录](supplement_20/README.md)。**
+
 本审查对照当前 `origin/main=db61cebc9d3683720e6c0a288db3cdc7d6f30a7c` 中实际运行资源、文件大小和 SHA-256，使用原作者官方条款判断是否可镜像。Conda/PyPI 安装包和个人 FreeSurfer 运行 license 不在范围内。逐文件记录、冻结哈希和证据见 [license_audit.public.json](license_audit.public.json)。允许镜像仍须随资源发布完整许可、版权、引用及相应限制；FNIT 代码许可不会替换资源许可。
 
 | 资源组 | 当前判断 | 随资源保留的条款 |

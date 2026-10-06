@@ -2,7 +2,7 @@
 
 本清单记录运行资源的固定内容身份和原作者来源。实际已发布附件以[安装器发布目录](../src/fnit/_release_asset_catalog.json)为准；仅大小/SHA匹配且已收录的文件优先从FNIT固定Release下载，未收录或镜像失败时保留固定作者来源回退。
 
-[运行资源安装与例外](ASSETS.md) · [固定Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1) · [完整运行资源清单](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/runtime-assets-manifest-20261006.json) · [原始权重清单](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/asset-manifest.json) · [原始权重/HCP核对记录](../validation/documentation/readme_manual_20261005/resources.audit.json)
+[运行资源安装与例外](ASSETS.md) · [固定Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1) · [完整运行资源清单](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/runtime-assets-manifest-20261006-complete.json) · [原始权重清单](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/asset-manifest.json) · [原始权重/HCP核对记录](../validation/documentation/readme_manual_20261005/resources.audit.json)
 
 ## 模型权重
 
@@ -99,18 +99,18 @@ HCP来源固定为 `f8cac6892f88bdf889d644711ff038198eb81533`。资源许可随�
 
 | 资源组 | 固定内容和来源 | 逐文件大小/SHA | 下载与许可范围 |
 |---|---|---|---|
-| recon-all图谱/模板 | [FreeSurfer固定资源定义](../src/fnit/recon_all/assets.py)：默认核心98项，完整111条安装路径 | 源码逐文件记录 | 非VPNL的获许可已发布项优先Release；17条VPNL来源路径仍由原作者提供，原许可和归属继续适用。 |
+| recon-all图谱/模板 | [FreeSurfer固定资源定义](../src/fnit/recon_all/assets.py)：默认核心98项，完整111条安装路径 | 源码逐文件记录 | 完整111条路径已收录（含VPNL）；优先Release，原许可、来源和归属继续适用。 |
 | HCP2017空间转换 | 34条球面/面积路径；[固定HCP来源](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases) | [固定SHA定义](../src/fnit/space_assets.py)和发布目录大小 | 按固定HCP许可；已发布项优先Release，保留固定上游回退。 |
 | CBIG RF-ANTs | 4条正反向映射/皮层估计掩膜路径；[固定CBIG项目](https://github.com/ThomasYeoLab/CBIG/tree/v0.18.1-Update_stable_project_unit_test/stable_projects/registration/Wu2017_RegistrationFusion) | [固定SHA定义](../src/fnit/space_assets.py)和发布目录大小 | 按原资源许可；已发布项优先Release，保留固定CBIG来源回退。 |
 | Tian及Schaefer连接组atlas | Tian S1/S4及Schaefer 200/500/1000，共10文件；[Tian](https://github.com/yetianmed/subcortex)、[CBIG Schaefer](https://github.com/ThomasYeoLab/CBIG/tree/35b5664bec8822e2f77da5e090e96f91d0095be6/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal) | [atlas_manifest.json](../src/fnit/connectome/atlas_manifest.json) | 按原Tian/CBIG条款保留许可与科学引用；已发布项优先Release，保留清单中的固定来源回退。 |
-| MS-HBM投影 | 两项MNI中层表面和一个皮层估计掩膜；[固定CBIG来源](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c) | [大小/SHA定义](../src/fnit/mshbm/assets_setup.py) | 掩膜命中已发布目录时优先Release；两项Caret派生表面仍从固定原作者来源取得。 |
+| MS-HBM投影 | 两项MNI中层表面和一个皮层估计掩膜；[固定CBIG来源](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c) | [大小/SHA定义](../src/fnit/mshbm/assets_setup.py) | 三项资源均已收录Release；保留Caret/CBIG来源与引用，大小/SHA按原清单校验。 |
 | FSL标准模板 | dMRI profile 5文件、registration profile 7文件，去重联集11文件 | [标准安装器](../src/fnit/standard_assets.py)和发布目录 | 只分发核验后的标准数据；保留原非商业条件，不安装或执行FSL。 |
 | 固定native源码归档 | FreeSurfer源码`d932c45b7941662ea380a05efef580568b98d41a`，用于Conda内构建必要程序 | [构建安装器](../tools/setup_recon_all_native_conda.sh)中的固定SHA和发布目录大小 | 获许可且已发布的源码归档优先Release，保留固定上游回退；公共软件许可与个人运行许可证分别处理。 |
 
 表内文件数表示各功能的资源路径数量，跨功能可共享同一SHA，不等于Release附件总数。Tian的压缩NIfTI保留与原作者未压缩文件的来源关系，具体原始大小/SHA见atlas manifest。
 
-## 下载例外与许可记录
+## 补充资源与许可记录
 
-VPNL的17条资源路径、MS-HBM两项Caret派生表面及Oxford `template_GM.nii.gz`的文件级再分发许可尚待确认，继续从原作者来源获取；个人FreeSurfer运行许可证由用户准备。完整获取步骤和例外见[运行资源安装](ASSETS.md#仍需原作者来源的资源)。
+此前未镜像的20项文件已按用户确认补充Release，来源和确认见[补充发布记录](../validation/assets_release_20261006/supplement_20/README.md)。Oxford GM另已核实精确同字节官方仓库和Apache-2.0条款，使用独立Oxford组；它不加入FSL的11项standard profile。个人FreeSurfer运行许可证由用户准备，步骤见[运行资源安装](ASSETS.md#个人许可证与资源条款)。
 
 公开软件/数据许可随资源保留，完整条款见[Release公开许可汇编](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/runtime-assets-licenses-20261006.tar.gz)，原归属见[THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md)及[licenses目录](../licenses)。模型或数据的许可不能由其客户端代码的许可推断；Release中的文件仍按原作者条款使用和引用。
