@@ -87,7 +87,7 @@ mri_robust_register --mov rigid.header.mgz --dst target_mask.mgz \
 
 原score第一次因MGH大端Float32数组不能直接转Torch退出1，尚未获得数值结果。独立只读恢复显式转native Float32，局部值和正mask合同通过；只评分原保存输出，得到上述正式exit2。原controller/失败JSON和输出永久保留，不把恢复称作原controller成功。评分恢复2.452492s不计入注册API时间，不称metadata-only操作。
 
-本次未产生新脑图，先保留完整数值和来源。可查看 [A的真实目标准备脑图](../target_preparation_20261006/preparation_targets.png)，它只证明目标准备，不代表B的注册精度。详细字段见 [METRICS.csv](METRICS.csv) 和 [ONE_OFF_RESULTS.json](ONE_OFF_RESULTS.json)。
+本次未产生新脑图，先保留完整数值和来源。可查看 [A的真实目标准备脑图](../target_preparation_20261006/preparation_targets.png)，它只证明目标准备，不代表B的注册精度。详细字段见 [METRICS.csv](METRICS.csv) 和 [ONE_OFF_RESULTS.json](ONE_OFF_RESULTS.json)。CSV是由保存JSON的标量机械导出的本地LF表，不是原软件或scorer直接输出的science CSV；选择LF没有改变数值。
 
 ## 6. 更新记录、归因和待改进
 
