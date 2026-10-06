@@ -1,0 +1,99 @@
+{
+  "schema": "fnit.robust_centroid_serial.cpu_probe.public.v1",
+  "status": "saved_six_double_words_exact_and_metadata_seal_passed",
+  "formal_robust_register_gate": {
+    "passed": 17,
+    "total": 20,
+    "unchanged": true
+  },
+  "scope": {
+    "production_changed": false,
+    "default_backend_changed": false,
+    "full_registration_tested": false,
+    "M0_with_serial_dispatch_tested": false,
+    "GPU_executions": 0,
+    "installed_binary_trace": false,
+    "reference": "independent_FreeSurfer_source_SDK_saved_capture"
+  },
+  "reference_source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "tested_kernel_sha256": "7507ab2ab0a34a71feb95853bd06e2c12cf9b71f9cccd7b50a51d72903244b0d",
+  "public_kernel_ast_excluding_docstring_matches_tested": true,
+  "public_kernel_sha256": "0b2a8fba5084687f711c48cf075d2e763a7a19bda49be11b52712adb445a339b",
+  "input": {
+    "real_prepared_arrays": 2,
+    "shape_xyz": [
+      39,
+      45,
+      61
+    ],
+    "voxels_per_array": 107055,
+    "dtype": "float32",
+    "flat_order": "X_fastest_Y_then_Z",
+    "outside": 0.0,
+    "saved_centroid_outputs_finite": true,
+    "finite_values_positive_total_are_required_caller_conditions": true,
+    "independent_full_array_finite_or_total_receipt_recorded": false
+  },
+  "CPU": {
+    "thread_budget": 8,
+    "parallel_kernel": false,
+    "fastmath": false,
+    "cache": false,
+    "address_space_limit_bytes": 20000000000
+  },
+  "precision": {
+    "source": {
+      "double_words_compared": 3,
+      "bit_exact": true,
+      "max_absolute_difference": 0.0,
+      "prior_torch_max_absolute_difference": 1.9184653865522705e-13,
+      "native_reused_without_rerun": true
+    },
+    "target": {
+      "double_words_compared": 3,
+      "bit_exact": true,
+      "max_absolute_difference": 0.0,
+      "prior_torch_max_absolute_difference": 2.2026824808563106e-13,
+      "native_reused_without_rerun": true
+    }
+  },
+  "timing": {
+    "third_party_import_seconds": 0.2988782599568367,
+    "cold_signature_compile_seconds": 0.39159753639250994,
+    "isolated_native_centroid_seconds": null,
+    "full_registration_speedup": null,
+    "source_one_actual_kernel_call_nanoseconds": 283333,
+    "target_one_actual_kernel_call_nanoseconds": 227768
+  },
+  "stages": {
+    "centroid_v1": {
+      "group_passed": false,
+      "numerical_outputs_saved": false,
+      "reason": "observer_rejected_preexisting_transitive_MKL_after_kernel"
+    },
+    "centroid_v2": {
+      "original_v2_actual_DSO_exact": false,
+      "original_v2_group_passed": false,
+      "numerical_outputs_saved": true,
+      "reason": "observer_whitelist_missing_14_lazy_existing_environment_providers"
+    },
+    "metadata_v3": {
+      "metadata_seal_passed": true,
+      "saved_actual_DSO_files_audited": 91,
+      "original_resource_bindings_audited": 474,
+      "new_third_party_imports": 0,
+      "new_JIT_compilations": 0,
+      "new_kernel_calls": 0,
+      "new_native_calls": 0,
+      "new_preparation_calls": 0,
+      "new_M0_calls": 0,
+      "new_GPU_calls": 0
+    }
+  },
+  "prior_M0_capture": {
+    "serial_dispatch_used": false,
+    "M0_max_absolute_difference": 4.121147867408581e-13,
+    "prepared_voxel_bytes_geometry_Rsrc_Rtrg_exact": true
+  },
+  "acceptance_limits": "one_saved_real_case_only; full_CPU_initialization_and_20_feature_gates_remain_pending"
+}
