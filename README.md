@@ -57,6 +57,8 @@ Python 示例和参数说明见 [SynthStrip 手册](docs/synthstrip/README.md)�
 
 CPU 的功能覆盖、同节点精度与耗时、GPU 保持检查见[本轮 sMRI 报告](validation/smri_cpu/README.md)。SynthSR 默认 CPU 完整浮点输出、FAST 已测 CPU 模式已与官方匹配；SynthMorph joint 的 192/256 固定门已通过，精确 NumBa 采样的六次完整 CPU 输出与验收版逐位相同。同八核默认 256 的 ABBA 中位数 163.094→155.086 秒，本组缩短 4.91%；局部首次 JIT 仍有成本，共享节点时间不代表稳定吞吐。完整左半球 sphere.reg 的坐标、有序面和解码几何与同输入官方相同；正式 C++ 平均器 ABBA 同源码及八核资源门通过，平均步骤快 2.09 倍，完整配准墙钟仍慢 5.27%，不能视为整步提速。WMH 的 GPU crop 已在 20 GB 内保持旧输出，no-crop 仍需更多显存。丘脑/海马亚区、FNIRT 非线性估计、原始 T1 完整 recon-all 仍有差异，见[剩余清单](validation/smri_cpu/REMAINING.md)。
 
+普通33类 SynthSeg 新增[CPU列缓冲复用](docs/synthseg/CPU_COLUMNS.md)：同八核真实T1完整ABBA，冷worker中位数107.938→90.119秒，缩短16.51%，分割、体积表和完整几何保持旧输出；对应GPU输出及显存峰值相同。官方同例冷CLI55.046秒，CPU速度目标尚未达到。新增[独立robust配准前处理](docs/robust_register/PREPARATION.md)，同例目标掩膜与右侧atlas数据/几何匹配官方；两次初始配准的独立候选仍有边界及重采样误差，尚未接入GEMS。
+
 | FNIT 函数 / 类 | 对应原软件包函数 / 命令 | 用途 |
 |---|---|---|
 | [SynthStrip](docs/synthstrip/README.md) | FreeSurfer `mri_synthstrip` | 提取脑图、脑掩膜和脑边界距离场。 |
@@ -67,6 +69,7 @@ CPU 的功能覆盖、同节点精度与耗时、GPU 保持检查见[本轮 sMRI
 | [WMHSynthSeg](docs/wmh_synthseg/README.md) | FreeSurfer `mri_WMHsynthseg` | 分割脑结构和白质高信号。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 估计脑组织标签、部分体积分数和偏置场。 |
 | [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions` | 从 T1w 分割脑干、丘脑、海马和杏仁核亚区。 |
+| [prepare_subregion_alignment_target / reflect_atlas_header](docs/robust_register/PREPARATION.md) | FreeSurfer SAMSEG 的亚区初始对齐前处理 | 根据已有标签生成目标掩膜，并反射 atlas 头几何；独立接口。 |
 | [fnit.recon_all.native_free.run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成皮层表面、脑区标签和形态统计。 |
 | [FastVBM.run](docs/fast_vbm/README.md) | FSL `fast` + `fsl_reg` + `fslmaths`（组合流程） | 生成标准空间组织图、Jacobian 和调制灰质图。 |
 | [FastVBM.run](docs/ukb_vbm/README.md) | UKB `bb_struct_init` / `bb_vbm`（组合流程） | 使用固定标准模板生成单被试灰质 VBM 衍生图。 |

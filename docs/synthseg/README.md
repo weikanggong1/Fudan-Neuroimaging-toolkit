@@ -145,11 +145,15 @@ mri_synthseg --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg.nii.gz \
 
 ## 5. 最新精度和运行时间
 
-2026-10-05 的 CPU decoder 拼接仅减少临时缓冲，卷积与后处理保持原数值。公开原始 T1 的 nodecw7 八核对照中，旧/新完整 worker 为 **115.886/112.952 s**，最大 RSS 为 **15.34/13.51 GB**；标签、体积 CSV 和几何旧新相同。与同节点官方仍有 **1 个不同体素**、最小 Dice **0.99999857**、CSV 最大差 **0.800 mm³**，均为已有误差。官方正常冷 CLI 为 **55.046 s**，首次异常的 373.087 s 单独保留；worker 还包含资源校验和报告写出，不把两种时钟混作精确加速比，CPU 速度目标仍未通过。
+2026-10-06 最新[CPU列缓冲复用](CPU_COLUMNS.md)已完成同一公开T1、同八核的完整ABBA：冷worker中位数 **107.938→90.119 s**，缩短 **16.51%**；API中位数 **105.144→87.394 s**。旧新完整分割、体积CSV、全部header和压缩文件SHA相同，GPU旧新输出及allocated/reserved也相同。对官方仍为已有的 **1个体素**，前景最低Dice **0.999998569**、软体积CSV最大差 **0.8 mm³**；官方同例正常冷CLI **55.046 s**，CPU速度目标仍未通过。此次仅受测普通33类CPU层启用：每次符合资格的调用核对权重和运行库，缓存首次缺失时用既有Conda GCC11编译自有C++复制接口，数值继续使用已加载的原LP64 SGEMM；编译准备失败沿用原CPU路径，GPU在加载前直接绕过。实际已有Conda的冷编译通过，未测试新建完整环境安装。具体适用范围、每臂时间、安装及失败行为见[功能说明](CPU_COLUMNS.md)和[完整报告](../../validation/smri_cpu/seg_columns_integration_20261006/README.md)。
+
+![最新公开T1的旧版、新版和官方CPU分割](../../validation/smri_cpu/seg_columns_integration_20261006/case02_current_cpu_labels.png)
+
+此前2026-10-05 的 CPU decoder 拼接仅减少临时缓冲，卷积与后处理保持原数值。公开原始 T1 的 nodecw7 八核对照中，旧/新完整 worker 为 **115.886/112.952 s**，最大 RSS 为 **15.34/13.51 GB**；标签、体积 CSV 和几何旧新相同。与同节点官方仍有 **1 个不同体素**、最小 Dice **0.99999857**、CSV 最大差 **0.800 mm³**，均为已有误差。官方正常冷 CLI 为 **55.046 s**，首次异常的 373.087 s 单独保留；worker 还包含资源校验和报告写出，不把两种时钟混作精确加速比，CPU 速度目标仍未通过。
 
 同一真实 decoder 中间输入的拼接操作中位数 **0.9723→0.5294 s**，逐位一致；这是局部时间。H100 默认 TF32 与显式 `cudnn_tf32=False` 两组完整旧新输出、CSV、几何、allocated/reserved 相同。默认 reserved 为 **14.615 GB**，False 为 **9.326 GB**；共享 GPU 的背景负载不支持稳定速度或进程树物理峰值结论。显式 False 单例标签与官方完全相同，CSV 仍有最大 0.20 mm³ 尾差，不能推广为所有输入等价。[最新完整协议、逐区指标和运行边界](../../validation/smri_cpu/seg_memory_20261005/README.md)。
 
-2026-10-06 在同一公开 T1、八核预算上完成一次当前源码的分步骤观察：完整 API **106.377 s**，两次 CNN **81.716 s**，两次33通道平滑 **13.136 s**，预处理 **4.362 s**，后处理 **4.710 s**，并列判断 **1.074 s**，软体积 **0.342 s**。CNN 内卷积合计76.399 s，其中最后 decoder 的第一层占30.586 s；显式 slab 结果复制仅0.927 s。输出每个体素、完整 header、体积 CSV 和压缩文件 SHA 与已验收候选相同，保留对官方既有1个不同体素。带观察器的时间仅用于定位热点，未修改 CPU/GPU 算法，不替代上面的正式墙钟。下一步优先核查高分辨率卷积和分组平滑；增加错误标签的 oneDNN 路线不采用。[完整分步骤报告](../../validation/smri_cpu/seg_cpu_profile_20261006/README.md)及[独立来源与计时复核](../../validation/smri_cpu/seg_cpu_profile_20261006/ROOT_REVIEW.json)。
+2026-10-06 在同一公开 T1、八核预算上完成一次当前源码的分步骤观察：完整 API **106.377 s**，两次 CNN **81.716 s**，两次33通道平滑 **13.136 s**，预处理 **4.362 s**，后处理 **4.710 s**，并列判断 **1.074 s**，软体积 **0.342 s**。CNN 内卷积合计76.399 s，其中最后 decoder 的第一层占30.586 s；显式 slab 结果复制仅0.927 s。输出每个体素、完整 header、体积 CSV 和压缩文件 SHA 与已验收候选相同，保留对官方既有1个不同体素。带观察器的时间仅用于定位热点，未修改 CPU/GPU 算法，不替代对应版本的正式墙钟。该剖析据以定位高分辨率卷积和分组平滑；增加错误标签的 oneDNN 路线不采用。[完整分步骤报告](../../validation/smri_cpu/seg_cpu_profile_20261006/README.md)及[独立来源与计时复核](../../validation/smri_cpu/seg_cpu_profile_20261006/ROOT_REVIEW.json)。
 
 后续对同一真实末端概率张量完成一次旧/新 ABBA 平滑回放：按原 slab 和 kernel 将11个通道并为独立 batch，三次实际比较的363,331,584个 FP32值全部逐位相同。峰值RSS最大值10.295→5.592 GB，降低45.68%；操作中位数6.963→6.978 s，没有速度收益。因此只保留独立候选，不替换默认实现，也不把局部内存下降记作完整T1的峰值下降。本轮只恢复一次已保存的 decoder 末端，未重复完整CNN或官方软件。[真实候选报告](../../validation/smri_cpu/seg_cpu_blur_trial_20261006/README.md)及[独立复核](../../validation/smri_cpu/seg_cpu_blur_trial_20261006/ROOT_REVIEW.json)。
 
@@ -182,6 +186,7 @@ mri_synthseg --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg.nii.gz \
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-06 | 源码 `70ad6537`；调度 `41ede608`；文档 `f68ce251` | 普通33类受测CPU层复用原矩阵尺寸的列缓冲 | 完整ABBA冷worker缩短16.51%，CPU/GPU旧新分割、CSV和几何相同；官方仍1体素差异且CPU更慢，见[报告](../../validation/smri_cpu/seg_columns_integration_20261006/README.md) |
 | 2026-10-06 | 独立报告 `84fbd765`；生产未变 | 普通33类CPU概率平滑的batch11候选 | 一份真实posterior的三次逐位门通过，RSS最大值降低45.68%，速度未改善，未接入默认路径，见[报告](../../validation/smri_cpu/seg_cpu_blur_trial_20261006/README.md) |
 | 2026-10-06 | 独立报告 `10f3f913`；生产未变 | 单层64MiB slab候选的目标合同 | 首个跨slab合同出现FP32尾差，停止真实层；没有速度或官方精度结论，见[报告](../../validation/smri_cpu/seg_cpu_conv_slab_trial_20261006/README.md) |
 | 2026-10-06 | `46eead65` 对应生产文件；报告 `0b6c9dbf` | 一次无 Module hooks 的当前33类 CPU 分步观察；生产未变 | 完整输出、CSV、header 与文件 SHA 相同；卷积与平滑为主要热点，官方速度门仍未通过，见[实测报告](../../validation/smri_cpu/seg_cpu_profile_20261006/README.md) |

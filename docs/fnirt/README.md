@@ -258,6 +258,14 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
 
 随后[自有 Numba/llvmlite 求和候选](../../validation/fnirt_cpu_reductions_20261006/README.md)复现了这一保存系统：93行的465项标量和186项相对范数逐位相同，动态求解自然停止于69轮，逐轮向量与最终解不同bit数均为0。自有计算不调用FSL算术桥；运行前后503项输入/源码绑定通过。范数按原 `sqrt(SumSquare)` 两链平方累加实现，点积按现场观察的COOPERLAKE FMA顺序实现。这里只通过一个保存线性系统的核验，尚未接入生产矩阵自由回调，其他CPU/BLAS分支及完整组装、配准仍待验证；原CUDA分支未修改。
 
+恢复真实状态后的[矩阵自由 PCG 两臂](../../validation/fnirt_cpu_matrixfree_pcg_20261006/README.md)已完成：当前 Torch / 自有候选自然迭代49/53轮，同一 callback 的实际相对残差为7.102e−4 / 6.770e−4，均达到原1e−3门。两更新向量相对L2仍差6.9665%；这是位移系数和强度参数的混合坐标，不能解释为体素位移。首次方向已在预条件阶段分叉，后续归约和更新也不同。没有原生同系统解或新完整配准结果，候选未接入默认；源码、实际调用和原始报告已[独立复核](../../validation/fnirt_cpu_matrixfree_pcg_20261006/root_review.public.json)。
+
+[初始预条件诊断](../../validation/fnirt_cpu_initial_precondition_20261006/README.md)已复现上述两个首方向：内部下限没有改变数值，倒数再乘与直接除法使332/1177个元素相差1 ULP；同方向下的点积和同RHS范数也有末位差。只读取两个保存数组、执行4次点积和2次范数，没有再次求解。该结果解释首方向的局部分叉，不能单独解释最终6.97%更新差或完整非线性误差；[独立核验](../../validation/fnirt_cpu_initial_precondition_20261006/root_review.public.json)保留这一范围。
+
+[单moving输入控制](../../validation/fnirt_cpu_rhs_moving_control_20261006/README.md)先复现当前梯度、原始fixed、SSD和mask，再只换成官方保存的平滑moving图，参数、坐标、scale、basis和λ固定。总g相对误差由8.364e−7降至2.359e−7，FSL顺序控制由7.366e−7降至2.484e−7；三个位移系数分量仅改善约21%–30%，总变化主要受scale项影响。这证明平滑moving有贡献，尚未定位全部残差；官方SSD未单独保存，控制不重算λ。只调用一次采样，没有H/diag/PCG/native或完整配准，官方图只作诊断，不进入生产。[独立原结果核验](../../validation/fnirt_cpu_rhs_moving_control_20261006/root_review.public.json)。
+
+随后[当前Numba CPU平滑桥接](../../validation/fnirt_cpu_smoothing_bridge_20261006/README.md)完成：当前plain与旧保存图、按声明头方向翻转后调用成熟blur的候选与官方保存图，各18,579,456个FP32值逐位相同。31项输入/源码、12项worker绑定和精度状态前后相同；仅2次blur、1次adapter，无归一化、梯度、求解或完整配准。早先完整orientation候选使最终系数/warp/Jacobian误差扩大的负结果仍保留；本次只补足当前编译器/运行时的预处理身份，不修改默认或据此声明整体精度改善。[独立核验](../../validation/fnirt_cpu_smoothing_bridge_root_review_20261006.json)。
+
 2026-10-04正式CPU对照绑定v27，组合源v28保留其注册器/采样SHA；官方FSL6.0.7.4，Intel Xeon Gold6418H、1/8线程预算，四种预设各1例完整观察（不是队列）。float32图像/输出，float64系数/法方程。
 
 | 完整预设 | 线程上限 | 原版完整进程 | FNIT 完整进程 | FNIT 已导入 API（含读写） | 脑掩膜内 iout Pearson r | Jacobian MAE |
@@ -297,6 +305,10 @@ GPU为共享H100、TF32、20GB上限，完整TBSS保存16次，与FNIT基线1d31
 | 2026-10-06，当前系统两臂 | 复用当前H/g/独立diagonal，旧/新求解器自然53/49轮，真实相对残差7.82e−4/4.17e−4，均通过原1e−3门；对另一存档原生系统解的距离不是同系统精度验收。保存解差方向解释了停止门下的参数分叉，未计算全局条件数、改生产或重跑完整配准。[结果、绑定与计时范围](../../validation/fnirt_cpu_current_replay_20261006/README.md)。 |
 | 2026-10-06，当前状态重建 | 一次真实solve3 linearize/evaluate的count、SSD、bending、λ/cost及1177项gradient/独立diagonal与当前已存系统逐位相同；2.104秒为单点诊断时间，无callback/H/PCG或完整配准速度结论。私有checkpoint只保存于服务器；随后已完成下行的有限布局/callback验证，生产CPU/GPU未变。[报告](../../validation/fnirt_cpu_level_rehydrate_20261006/README.md)及[独立复核](../../validation/fnirt_cpu_level_rehydrate_20261006/root_review.public.json)。 |
 | 2026-10-06，恢复后的矩阵作用 | 两臂各68个数组恢复原byte strides和逻辑值，三个unit列与存档H逐位同；七个真实/单位方向的优化CPU与原Torch callback全部逐位同。与CSC的四真实方向仅有maxabs≤3.55e−15的舍入差。共14callback/7CSC，0新evaluate/linearize/assembly/solver/native；3.515秒包含冷JIT，不是ABBA速度。本轮未接生产。[原始状态与计数](../../validation/fnirt_cpu_matrixfree_restore_20261006/README.md)及[独立复核](../../validation/fnirt_cpu_matrixfree_restore_20261006/root_review.public.json)。 |
+| 2026-10-06，当前编译CPU平滑 | 一次保存图控制两幅18,579,456个FP32值均逐位相同，Numba实际parallel/OMP上下文及全部绑定保持。无新归一化/solver/完整配准，旧完整方向候选仍不采用。[报告](../../validation/fnirt_cpu_smoothing_bridge_20261006/README.md)。 |
+| 2026-10-06，真实 callback 上的 PCG | 同一恢复半量LM系统的旧/新PCG自然49/53轮，实际相对残差7.102e−4 / 6.770e−4；更新向量相对L2差6.9665%。控制tau=0.001，未证明为历史solve3阻尼。两个保存系统的轮数不能交叉比较；没有完整配准或速度结论，CPU/GPU默认未变。[完整范围与首差](../../validation/fnirt_cpu_matrixfree_pcg_20261006/README.md)。 |
+| 2026-10-06，首方向表达式 | 内部下限改值0；倒数再乘/直接除法产生332个1 ULP差异。两方向均匹配前轮保存值；同输入点积/范数末位差另列。0 callback/PCG/影像/官方运行，默认未接入。[原始标量和范围](../../validation/fnirt_cpu_initial_precondition_20261006/README.md)。 |
+| 2026-10-06，平滑moving输入 | 唯一有限控制的12项前置/替换门通过；同点总g相对误差8.364e−7→2.359e−7，三coef分量各仅改善21%–30%。固定λ、没有新的solver/官方/整链；CPU/GPU生产未变。[单输入结果](../../validation/fnirt_cpu_rhs_moving_control_20261006/README.md)。 |
 | 2026-10-04，最新 v27/v28 | CPU float32 采样的值、FOV 和梯度融合；SCG 梯度跳过未使用的能量/cost。83 项采样专项、33 项 SCG 专项和[完整真实末阶段轨迹](assets/cpu-scg-cost-skip-stage3-node8-20261004.public.json)通过；CPU评测节点 [26 项完整功能输出检查](assets/cpu-functional-v27-node8-20261004.public.json)及[八项新官方单次配对](assets/cpu-primary-v27-node8-20261004.public.json)完成，T1 单线程未达速度目标。H100 default 和完整 TBSS 各 16 次保存逐位相同、对应位置 allocation 不增加。 |
 | 2026-10-04，normal SIMD v2 | FP64 空间法方程按原运算顺序执行八点 SIMD；105 项局部回归通过，完整 default/T1 的输出 SHA、停止条件和 PCG 计数保持一致。CPU评测节点 的四项完整官方单次配对见[历史报告](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)。 |
 | 2026-10-04 | CPU Gaussian 合并 offset 循环，bending 保留 dense 展开/原 sum 并融合逐元素乘方，FP64 法方程缓冲/固定 weight 布局复用，Jacobian limiter 保序筛选角点。216 项函数专项通过；v17/v19/v20 在完整公开 default 的 1/8 预算三输出 SHA 一致。最新 CPU 官方观测与 GPU 门槛见[专页](CPU_BENCHMARK.md)。 |
