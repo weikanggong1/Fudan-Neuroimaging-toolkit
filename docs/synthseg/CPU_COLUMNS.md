@@ -72,7 +72,7 @@ fnit-setup-weights --model synthseg --dest /data/fnit-weights
 fnit-setup-weights --model synthseg --dest /data/fnit-weights --verify-only
 ```
 
-仅首次合资格CPU层调用才查已有Torch头文件/库、provider和GCC11，编译FNIT自有4,385B胶水。可用环境变量：`CXX`指定一个GCC11编译器可执行文件，不能附参数；`FNIT_SYNTHSEG_CPU_CACHE`指定本人拥有的0700缓存目录；未指定时使用`$XDG_CACHE_HOME/fnit/synthseg_columns`，或`~/.cache/fnit/synthseg_columns`。锁和产物为0600，按源码、运行库、头文件、provider、编译器、ABI和flags生成键，原子发布。无编译器或不匹配库时数学开始前回退原卷积；开始候选数值后异常传播，不暗中重复卷积。
+每次合资格CPU层调用校验已有Torch头文件/库、provider和GCC11；首次未命中私有cache时编译FNIT自有4,385B胶水。可用环境变量：`CXX`指定一个GCC11编译器可执行文件，不能附参数；`FNIT_SYNTHSEG_CPU_CACHE`指定本人拥有的0700缓存目录；未指定时使用`$XDG_CACHE_HOME/fnit/synthseg_columns`，或`~/.cache/fnit/synthseg_columns`。锁和产物为0600，按源码、运行库、头文件、provider、编译器、ABI和flags生成键，原子发布。无编译器或不匹配库时数学开始前回退原卷积；开始候选数值后异常传播，不暗中重复卷积。
 
 CPU目标是Linux x86_64、Torch2.5.1/ABI0、已验收运行库SHA及MKL LP64 provider；其他平台/版本先回退。动态库不打包，weight和MRI也不进入wheel。编译子进程最多120秒、退出收尾5秒，锁等待15秒；仅编译子进程CUDA不可见，不写调用方环境、线程、TF32或autocast。已有Conda/GCC11目标环境已经真实构建加载及短数值合同通过，**全新独立Conda安装尚未测试**。
 
