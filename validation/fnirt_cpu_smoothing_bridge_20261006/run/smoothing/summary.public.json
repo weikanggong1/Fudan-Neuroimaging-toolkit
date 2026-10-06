@@ -1,0 +1,877 @@
+{
+  "status": "saved_current_smoothing_bridge_passed_no_registration",
+  "accepted": true,
+  "scope": "current compiled CPU plain bridge, then private header adapter; saved moving only",
+  "host": "nodecw7",
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "calls": {
+    "mature_blur": 2,
+    "compiled_cpu_helper": 2,
+    "adapter": 1,
+    "normalization": 0,
+    "RHS": 0,
+    "H": 0,
+    "PCG": 0,
+    "evaluate": 0,
+    "linearize": 0,
+    "native": 0,
+    "GPU": 0
+  },
+  "gates": {
+    "declared_header_orientation_and_zoom": true,
+    "plain_current_matches_legacy_saved_bits": true,
+    "adapter_matches_saved_native_bits": true
+  },
+  "arms": {
+    "plain_current_vs_legacy_saved": {
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "values": 18579456,
+      "different_bits": 0,
+      "all_value_bits_exact": true,
+      "max_abs": 0.0,
+      "rmse": 0.0,
+      "relative_l2": 0.0,
+      "statistics_scope": "full logical C order; FP64 chunk statistics, not PCG reductions"
+    },
+    "adapter_current_vs_saved_native": {
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "values": 18579456,
+      "different_bits": 0,
+      "all_value_bits_exact": true,
+      "max_abs": 0.0,
+      "rmse": 0.0,
+      "relative_l2": 0.0,
+      "statistics_scope": "full logical C order; FP64 chunk statistics, not PCG reductions"
+    }
+  },
+  "production_changed": false,
+  "interpretation": "preprocessing identity only; old full orientation candidate was rejected; no full precision improvement",
+  "read_reference_policy": "native image values decoded only after adapter result is computed",
+  "bindings_before": {
+    "input/normalized_moving": {
+      "bytes": 74317952,
+      "sha256": "8531ea820d429664a50e9a015a34ed74c39e1343ee283654187a8a08c8f6d816"
+    },
+    "input/old_smoothed_moving": {
+      "bytes": 74317952,
+      "sha256": "407836cfe470e483151da01993a4e51987b00c9ae4ab5276dcf4e7076e9a601d"
+    },
+    "input/official_smoothed_moving": {
+      "bytes": 15775834,
+      "sha256": "c464b3587efe1885f882167733bbf7c6d7fc689377962a26c2badfe09b235d09"
+    },
+    "input/original_gm_header_only": {
+      "bytes": 2241083,
+      "sha256": "e29419b101603fc83f0d0a99771b9d7bf0e0f3d5228b8d9dc90b4e37e141816a"
+    },
+    "input/official_normalized_header_only": {
+      "bytes": 2246930,
+      "sha256": "7955410791b3216e5246632c2e85032e74cfb75f00b4f982b4613930fa36a5fd"
+    },
+    "input/old_reference_report": {
+      "bytes": 12555,
+      "sha256": "9995bb7d067f22d8af8288a90e8d3c23d0dc33b9f4396e8b60e5d22282d2daca"
+    },
+    "input/old_optimized_report": {
+      "bytes": 12560,
+      "sha256": "12a1f05bce842d74bb9ed32dbc8f95c3bc112036239136e77036d530721435b5"
+    },
+    "input/old_registration_source": {
+      "bytes": 82912,
+      "sha256": "e67c71a6d01b1e8b7b0de842680e9f3012cb5cb492e13e927b32b976f3320d6d"
+    },
+    "input/rejected_full_stage_comparison": {
+      "bytes": 37857,
+      "sha256": "38bc13f1072df8bd49b14360e26192dd146f1bc81e16b7d321f4ba770ac810d7"
+    },
+    "production_source/src/fnit/fnirt/cli.py": {
+      "bytes": 6245,
+      "sha256": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c"
+    },
+    "production_source/src/fnit/fnirt/io.py": {
+      "bytes": 6080,
+      "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+    },
+    "production_source/src/fnit/fnirt/optimizer.py": {
+      "bytes": 8506,
+      "sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd"
+    },
+    "production_source/src/fnit/fnirt/registration.py": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "production_source/src/fnit/fnirt/spline.py": {
+      "bytes": 18840,
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7"
+    },
+    "production_source/src/fnit/fnirt/standalone.py": {
+      "bytes": 10838,
+      "sha256": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6"
+    },
+    "production_source/src/fnit/fnirt/topology.py": {
+      "bytes": 9213,
+      "sha256": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3"
+    },
+    "production_source/src/fnit/fnirt/_bending_cpu.py": {
+      "bytes": 3312,
+      "sha256": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+    },
+    "production_source/src/fnit/fnirt/_normal_cpu.py": {
+      "bytes": 10560,
+      "sha256": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f"
+    },
+    "production_source/src/fnit/fnirt/_normal_simd_cpu.py": {
+      "bytes": 6810,
+      "sha256": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9"
+    },
+    "production_source/src/fnit/fnirt/_sampling_cpu.py": {
+      "bytes": 7782,
+      "sha256": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_cpu.py": {
+      "bytes": 3635,
+      "sha256": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_triton.py": {
+      "bytes": 1969,
+      "sha256": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b"
+    },
+    "production_source/src/fnit/fnirt/_topology_cpu.py": {
+      "bytes": 1091,
+      "sha256": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6"
+    },
+    "production_source/src/fnit/fnirt/_topology_triton.py": {
+      "bytes": 7134,
+      "sha256": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1"
+    },
+    "production_source/src/fnit/fnirt/__init__.py": {
+      "bytes": 1040,
+      "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+    },
+    "production_source/src/fnit/fnirt/__main__.py": {
+      "bytes": 80,
+      "sha256": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a"
+    },
+    "source_extra/src/fnit/__init__.py": {
+      "bytes": 6351,
+      "sha256": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4"
+    },
+    "source_extra/src/fnit/_nib.py": {
+      "bytes": 2448,
+      "sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6"
+    },
+    "source_extra/src/fnit/_transforms.py": {
+      "bytes": 13233,
+      "sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33"
+    },
+    "source_extra/src/fnit/flirt/__init__.py": {
+      "bytes": 1191,
+      "sha256": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af"
+    },
+    "source_extra/src/fnit/flirt/coordinates.py": {
+      "bytes": 5019,
+      "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    }
+  },
+  "harness_before": {
+    "PLAN.md": {
+      "bytes": 8240,
+      "sha256": "561b9e29535ae96181809540756b877557185ba453210e687039abcd834e4d4e"
+    },
+    "PLAN.public.json": {
+      "bytes": 1728,
+      "sha256": "16221d01fcfb2f48161ef9f9181646f9f93adb296adede94088ba62350281ceb"
+    },
+    "PREPARATION_CHECKS.public.json": {
+      "bytes": 916,
+      "sha256": "38141b3a5ec2d2ee0cb375d5c67f6dadaeaa1a98cd4a0a650a69bdebb2e6fd34"
+    },
+    "PREPARATION_HISTORY.public.json": {
+      "bytes": 503,
+      "sha256": "cdb359810be757fe65ccd781b0a96bae6137643585d12b8964d3036456965f80"
+    },
+    "SOURCE_RUNTIME_GAP.public.json": {
+      "bytes": 3798,
+      "sha256": "ee3cae72deec55c4dc56111bb8d847f8a8b3c7ca874ee2b7f977dd23115432d5"
+    },
+    "expected.public.json": {
+      "bytes": 10061,
+      "sha256": "27b84b4a822e17c01c09a6bc41a7b914d707ab4e92ae742857012e1abf4d39a4"
+    },
+    "lifecycle_smoothing.py": {
+      "bytes": 9616,
+      "sha256": "0b18dd95bab038027f16f121ac7dbd4de408b6328be418ada5434eb655492644"
+    },
+    "preflight_smoothing.py": {
+      "bytes": 1985,
+      "sha256": "44e289b2087552b848134aace3553e7666754f1075ce5f122ccca0266cfacf6e"
+    },
+    "run_smoothing.sh": {
+      "bytes": 1801,
+      "sha256": "76f841ae3e45f0709275391134f77c52df711822616b98103f0b7390d831f3fd"
+    },
+    "smoothing_adapter.py": {
+      "bytes": 3094,
+      "sha256": "e3e5955922dccb1b310cf10a901c517ed2aef78fde59eff7ee21058abdbc36f6"
+    },
+    "smoothing_bridge.py": {
+      "bytes": 19136,
+      "sha256": "953fc2daa366f479ef4579c434723c9d597b2828eaa92f097f66974dd8527fb0"
+    },
+    "smoothing_io.py": {
+      "bytes": 5385,
+      "sha256": "5cc06697f84a1db64a61c9ccb73aa477d7614eeb741d036e2e17a29bf99b0fa4"
+    }
+  },
+  "headers_before": {
+    "original_gm_header_only": {
+      "header348_sha256": "fd2f1bfa420691f35ce42e420df37e871ec33d2f459855d9828e757a1a1e390a",
+      "byte_order": "<",
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "datatype": 16,
+      "bitpix": 32,
+      "pixdim": [
+        0.800000011920929,
+        0.7777777910232544,
+        0.7777777910232544
+      ],
+      "qform_code": 1,
+      "sform_code": 1,
+      "xyzt_units": 10,
+      "header_only_bytes_decoded": 348
+    },
+    "official_smoothed_moving": {
+      "header348_sha256": "fd2f1bfa420691f35ce42e420df37e871ec33d2f459855d9828e757a1a1e390a",
+      "byte_order": "<",
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "datatype": 16,
+      "bitpix": 32,
+      "pixdim": [
+        0.800000011920929,
+        0.7777777910232544,
+        0.7777777910232544
+      ],
+      "qform_code": 1,
+      "sform_code": 1,
+      "xyzt_units": 10,
+      "header_only_bytes_decoded": 348
+    },
+    "official_normalized_header_only": {
+      "header348_sha256": "fd2f1bfa420691f35ce42e420df37e871ec33d2f459855d9828e757a1a1e390a",
+      "byte_order": "<",
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "datatype": 16,
+      "bitpix": 32,
+      "pixdim": [
+        0.800000011920929,
+        0.7777777910232544,
+        0.7777777910232544
+      ],
+      "qform_code": 1,
+      "sform_code": 1,
+      "xyzt_units": 10,
+      "header_only_bytes_decoded": 348
+    },
+    "normalized_moving": {
+      "version": [
+        1,
+        0
+      ],
+      "descr": "<f4",
+      "fortran_order": true,
+      "shape": [
+        224,
+        288,
+        288
+      ]
+    },
+    "old_smoothed_moving": {
+      "version": [
+        1,
+        0
+      ],
+      "descr": "<f4",
+      "fortran_order": false,
+      "shape": [
+        224,
+        288,
+        288
+      ]
+    }
+  },
+  "main_head_at_read": "db61cebc9d3683720e6c0a288db3cdc7d6f30a7c",
+  "numba_cache_empty_before_numerical_import": true,
+  "runtime": {
+    "versions": {
+      "python": "3.11.16",
+      "torch": "2.5.1",
+      "numpy": "1.26.4",
+      "numba": "0.61.2",
+      "nibabel": "5.4.2"
+    },
+    "llvmlite": "0.44.0",
+    "prefix_basename": "fnit_conda_env_956b1a9",
+    "prefix_path_sha256": "ab97d6f7021fb229f5de9f246cc3a0397e8caadedf2b97ec5cca0df323c88e97",
+    "canonical_default_resolves_to_actual_prefix": true,
+    "interpreter": {
+      "bytes": 25916456,
+      "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153"
+    },
+    "torch_threads": 8,
+    "torch_interop_threads": 1,
+    "numba_threads": 8,
+    "numba_config_threads": 8,
+    "environment": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "8",
+      "MKL_NUM_THREADS": "8",
+      "NUMBA_NUM_THREADS": "8",
+      "CUDA_VISIBLE_DEVICES": "",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "numba_cache_is_new_run_local": true
+  },
+  "flags_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": false,
+    "grad_enabled": true,
+    "cpu_autocast": false,
+    "cuda_autocast": false,
+    "cuda_initialized": false
+  },
+  "fsl_dso_snapshot_before": [],
+  "actually_imported_project_sources": {
+    "fnit": {
+      "bytes": 6351,
+      "sha256": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4"
+    },
+    "fnit.fnirt.spline": {
+      "bytes": 18840,
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7"
+    },
+    "fnit.fnirt.io": {
+      "bytes": 6080,
+      "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+    },
+    "fnit.fnirt": {
+      "bytes": 1040,
+      "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+    },
+    "fnit._nib": {
+      "bytes": 2448,
+      "sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6"
+    },
+    "fnit._transforms": {
+      "bytes": 13233,
+      "sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33"
+    },
+    "fnit.flirt.coordinates": {
+      "bytes": 5019,
+      "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    },
+    "fnit.flirt": {
+      "bytes": 1191,
+      "sha256": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af"
+    },
+    "fnit.fnirt.optimizer": {
+      "bytes": 8506,
+      "sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd"
+    },
+    "fnit.fnirt.topology": {
+      "bytes": 9213,
+      "sha256": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3"
+    },
+    "fnit.fnirt.registration": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "fnit.fnirt._smoothing_cpu": {
+      "bytes": 3635,
+      "sha256": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be"
+    }
+  },
+  "resolved_header": {
+    "qform_code": 1,
+    "sform_code": 1,
+    "determinants": {
+      "qform": {
+        "float64": 0.483950640978637,
+        "float32": 0.4839506447315216
+      },
+      "sform": {
+        "float64": 0.4839547277716253,
+        "float32": 0.4839547276496887
+      }
+    },
+    "orientation_sign": 1,
+    "orientation": "neurological",
+    "flip_x": true,
+    "pixdim": [
+      0.800000011920929,
+      0.7777777910232544,
+      0.7777777910232544
+    ],
+    "determinant_arithmetic": "NumPy FP64 and FP32 diagnostics; not NEWMAT bits",
+    "guard_scope": "both forms known, consistent, abs(det)>1e-6"
+  },
+  "operands_before": {
+    "normalized_moving": {
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "byte_strides": [
+        4,
+        896,
+        258048
+      ],
+      "logical_c_sha256": "b7d11c4860922ba77166505532473671d63b0fbca0419584f3ebf14acf9ea093"
+    },
+    "old_smoothed_moving": {
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "byte_strides": [
+        331776,
+        1152,
+        4
+      ],
+      "logical_c_sha256": "cc3d688ed3482fb2b19f4ca82579c949c32b36b3947e78c8b8e0457a13ac9aca"
+    },
+    "input_tensor": {
+      "shape": [
+        1,
+        1,
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "byte_strides": [
+        896,
+        896,
+        4,
+        896,
+        258048
+      ],
+      "logical_c_sha256": "b7d11c4860922ba77166505532473671d63b0fbca0419584f3ebf14acf9ea093"
+    },
+    "native_reference_decoded_after_adapter": {
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "byte_strides": [
+        4,
+        896,
+        258048
+      ],
+      "logical_c_sha256": "802170619f9d4f0170a84d001a12f1cf88bcf28a2bfa5ebbdae522491712cc6e"
+    }
+  },
+  "clock_seconds_import_bind_header_restore": 2.5252609523013234,
+  "clock_seconds_plain_cold": 2.9275706745684147,
+  "clock_seconds_adapter_warm": 0.7290190365165472,
+  "native_reference_decode": {
+    "actual_dtype": "float32",
+    "proxy_slope": 1.0,
+    "proxy_intercept": 0.0,
+    "reference_cast_performed": false
+  },
+  "numba_dispatcher_context": {
+    "selected_by_current_helper": "parallel",
+    "serial_signatures": [],
+    "parallel_signatures": [
+      "(Array(float32, 5, 'F', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), int64, bool, Array(float32, 5, 'F', False, aligned=True), int64)"
+    ],
+    "threading_layer": "omp",
+    "assembly_assessed": false,
+    "per_axis_native_runtime_arrays_available": false,
+    "compiled_helper_contains_three_source_bound_axes": true,
+    "axis_runtime_count_not_separately_instrumented": true
+  },
+  "bindings_after": {
+    "input/normalized_moving": {
+      "bytes": 74317952,
+      "sha256": "8531ea820d429664a50e9a015a34ed74c39e1343ee283654187a8a08c8f6d816"
+    },
+    "input/old_smoothed_moving": {
+      "bytes": 74317952,
+      "sha256": "407836cfe470e483151da01993a4e51987b00c9ae4ab5276dcf4e7076e9a601d"
+    },
+    "input/official_smoothed_moving": {
+      "bytes": 15775834,
+      "sha256": "c464b3587efe1885f882167733bbf7c6d7fc689377962a26c2badfe09b235d09"
+    },
+    "input/original_gm_header_only": {
+      "bytes": 2241083,
+      "sha256": "e29419b101603fc83f0d0a99771b9d7bf0e0f3d5228b8d9dc90b4e37e141816a"
+    },
+    "input/official_normalized_header_only": {
+      "bytes": 2246930,
+      "sha256": "7955410791b3216e5246632c2e85032e74cfb75f00b4f982b4613930fa36a5fd"
+    },
+    "input/old_reference_report": {
+      "bytes": 12555,
+      "sha256": "9995bb7d067f22d8af8288a90e8d3c23d0dc33b9f4396e8b60e5d22282d2daca"
+    },
+    "input/old_optimized_report": {
+      "bytes": 12560,
+      "sha256": "12a1f05bce842d74bb9ed32dbc8f95c3bc112036239136e77036d530721435b5"
+    },
+    "input/old_registration_source": {
+      "bytes": 82912,
+      "sha256": "e67c71a6d01b1e8b7b0de842680e9f3012cb5cb492e13e927b32b976f3320d6d"
+    },
+    "input/rejected_full_stage_comparison": {
+      "bytes": 37857,
+      "sha256": "38bc13f1072df8bd49b14360e26192dd146f1bc81e16b7d321f4ba770ac810d7"
+    },
+    "production_source/src/fnit/fnirt/cli.py": {
+      "bytes": 6245,
+      "sha256": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c"
+    },
+    "production_source/src/fnit/fnirt/io.py": {
+      "bytes": 6080,
+      "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+    },
+    "production_source/src/fnit/fnirt/optimizer.py": {
+      "bytes": 8506,
+      "sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd"
+    },
+    "production_source/src/fnit/fnirt/registration.py": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "production_source/src/fnit/fnirt/spline.py": {
+      "bytes": 18840,
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7"
+    },
+    "production_source/src/fnit/fnirt/standalone.py": {
+      "bytes": 10838,
+      "sha256": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6"
+    },
+    "production_source/src/fnit/fnirt/topology.py": {
+      "bytes": 9213,
+      "sha256": "4827c0e2acf5bc5e248e04c193f07902638fae623f93be73d07bf756d2d35ea3"
+    },
+    "production_source/src/fnit/fnirt/_bending_cpu.py": {
+      "bytes": 3312,
+      "sha256": "102f45b5c758800c61322402b4af38d464911ae665a212b1b8927949f35aad47"
+    },
+    "production_source/src/fnit/fnirt/_normal_cpu.py": {
+      "bytes": 10560,
+      "sha256": "74976a35f98b2959ad2580218e8f0f92e7f1d777abc07658b8912e346586817f"
+    },
+    "production_source/src/fnit/fnirt/_normal_simd_cpu.py": {
+      "bytes": 6810,
+      "sha256": "4cd621acde4e7dee591becbd1c8bbf5469dad7f860376f1f00d60b88a6266fb9"
+    },
+    "production_source/src/fnit/fnirt/_sampling_cpu.py": {
+      "bytes": 7782,
+      "sha256": "a7e10ff4cc33edecc17b6ca378a5cfabeeb8f1fd8c41213efa06a1d16ae62368"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_cpu.py": {
+      "bytes": 3635,
+      "sha256": "c31cef1b0c204101fa93af6511bd7a419d04458d6ee6d2b826b3e09b56e562be"
+    },
+    "production_source/src/fnit/fnirt/_smoothing_triton.py": {
+      "bytes": 1969,
+      "sha256": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b"
+    },
+    "production_source/src/fnit/fnirt/_topology_cpu.py": {
+      "bytes": 1091,
+      "sha256": "9a92f9b224bd32bbf85b49ef2d878a3e45a5a92facd5fb03b19441b1412278f6"
+    },
+    "production_source/src/fnit/fnirt/_topology_triton.py": {
+      "bytes": 7134,
+      "sha256": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1"
+    },
+    "production_source/src/fnit/fnirt/__init__.py": {
+      "bytes": 1040,
+      "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+    },
+    "production_source/src/fnit/fnirt/__main__.py": {
+      "bytes": 80,
+      "sha256": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a"
+    },
+    "source_extra/src/fnit/__init__.py": {
+      "bytes": 6351,
+      "sha256": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4"
+    },
+    "source_extra/src/fnit/_nib.py": {
+      "bytes": 2448,
+      "sha256": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6"
+    },
+    "source_extra/src/fnit/_transforms.py": {
+      "bytes": 13233,
+      "sha256": "cd9266c701827d85ac0d9b2c69bbeac2fdac3777d616b0a8c46ef0fda98bdf33"
+    },
+    "source_extra/src/fnit/flirt/__init__.py": {
+      "bytes": 1191,
+      "sha256": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af"
+    },
+    "source_extra/src/fnit/flirt/coordinates.py": {
+      "bytes": 5019,
+      "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    }
+  },
+  "harness_after": {
+    "PLAN.md": {
+      "bytes": 8240,
+      "sha256": "561b9e29535ae96181809540756b877557185ba453210e687039abcd834e4d4e"
+    },
+    "PLAN.public.json": {
+      "bytes": 1728,
+      "sha256": "16221d01fcfb2f48161ef9f9181646f9f93adb296adede94088ba62350281ceb"
+    },
+    "PREPARATION_CHECKS.public.json": {
+      "bytes": 916,
+      "sha256": "38141b3a5ec2d2ee0cb375d5c67f6dadaeaa1a98cd4a0a650a69bdebb2e6fd34"
+    },
+    "PREPARATION_HISTORY.public.json": {
+      "bytes": 503,
+      "sha256": "cdb359810be757fe65ccd781b0a96bae6137643585d12b8964d3036456965f80"
+    },
+    "SOURCE_RUNTIME_GAP.public.json": {
+      "bytes": 3798,
+      "sha256": "ee3cae72deec55c4dc56111bb8d847f8a8b3c7ca874ee2b7f977dd23115432d5"
+    },
+    "expected.public.json": {
+      "bytes": 10061,
+      "sha256": "27b84b4a822e17c01c09a6bc41a7b914d707ab4e92ae742857012e1abf4d39a4"
+    },
+    "lifecycle_smoothing.py": {
+      "bytes": 9616,
+      "sha256": "0b18dd95bab038027f16f121ac7dbd4de408b6328be418ada5434eb655492644"
+    },
+    "preflight_smoothing.py": {
+      "bytes": 1985,
+      "sha256": "44e289b2087552b848134aace3553e7666754f1075ce5f122ccca0266cfacf6e"
+    },
+    "run_smoothing.sh": {
+      "bytes": 1801,
+      "sha256": "76f841ae3e45f0709275391134f77c52df711822616b98103f0b7390d831f3fd"
+    },
+    "smoothing_adapter.py": {
+      "bytes": 3094,
+      "sha256": "e3e5955922dccb1b310cf10a901c517ed2aef78fde59eff7ee21058abdbc36f6"
+    },
+    "smoothing_bridge.py": {
+      "bytes": 19136,
+      "sha256": "953fc2daa366f479ef4579c434723c9d597b2828eaa92f097f66974dd8527fb0"
+    },
+    "smoothing_io.py": {
+      "bytes": 5385,
+      "sha256": "5cc06697f84a1db64a61c9ccb73aa477d7614eeb741d036e2e17a29bf99b0fa4"
+    }
+  },
+  "headers_after": {
+    "original_gm_header_only": {
+      "header348_sha256": "fd2f1bfa420691f35ce42e420df37e871ec33d2f459855d9828e757a1a1e390a",
+      "byte_order": "<",
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "datatype": 16,
+      "bitpix": 32,
+      "pixdim": [
+        0.800000011920929,
+        0.7777777910232544,
+        0.7777777910232544
+      ],
+      "qform_code": 1,
+      "sform_code": 1,
+      "xyzt_units": 10,
+      "header_only_bytes_decoded": 348
+    },
+    "official_smoothed_moving": {
+      "header348_sha256": "fd2f1bfa420691f35ce42e420df37e871ec33d2f459855d9828e757a1a1e390a",
+      "byte_order": "<",
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "datatype": 16,
+      "bitpix": 32,
+      "pixdim": [
+        0.800000011920929,
+        0.7777777910232544,
+        0.7777777910232544
+      ],
+      "qform_code": 1,
+      "sform_code": 1,
+      "xyzt_units": 10,
+      "header_only_bytes_decoded": 348
+    },
+    "official_normalized_header_only": {
+      "header348_sha256": "fd2f1bfa420691f35ce42e420df37e871ec33d2f459855d9828e757a1a1e390a",
+      "byte_order": "<",
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "datatype": 16,
+      "bitpix": 32,
+      "pixdim": [
+        0.800000011920929,
+        0.7777777910232544,
+        0.7777777910232544
+      ],
+      "qform_code": 1,
+      "sform_code": 1,
+      "xyzt_units": 10,
+      "header_only_bytes_decoded": 348
+    },
+    "normalized_moving": {
+      "version": [
+        1,
+        0
+      ],
+      "descr": "<f4",
+      "fortran_order": true,
+      "shape": [
+        224,
+        288,
+        288
+      ]
+    },
+    "old_smoothed_moving": {
+      "version": [
+        1,
+        0
+      ],
+      "descr": "<f4",
+      "fortran_order": false,
+      "shape": [
+        224,
+        288,
+        288
+      ]
+    }
+  },
+  "source_inputs_and_harness_unchanged": true,
+  "operands_after": {
+    "normalized_moving": {
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "byte_strides": [
+        4,
+        896,
+        258048
+      ],
+      "logical_c_sha256": "b7d11c4860922ba77166505532473671d63b0fbca0419584f3ebf14acf9ea093"
+    },
+    "old_smoothed_moving": {
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "byte_strides": [
+        331776,
+        1152,
+        4
+      ],
+      "logical_c_sha256": "cc3d688ed3482fb2b19f4ca82579c949c32b36b3947e78c8b8e0457a13ac9aca"
+    },
+    "input_tensor": {
+      "shape": [
+        1,
+        1,
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "byte_strides": [
+        896,
+        896,
+        4,
+        896,
+        258048
+      ],
+      "logical_c_sha256": "b7d11c4860922ba77166505532473671d63b0fbca0419584f3ebf14acf9ea093"
+    },
+    "native_reference_decoded_after_adapter": {
+      "shape": [
+        224,
+        288,
+        288
+      ],
+      "dtype": "float32",
+      "byte_strides": [
+        4,
+        896,
+        258048
+      ],
+      "logical_c_sha256": "802170619f9d4f0170a84d001a12f1cf88bcf28a2bfa5ebbdae522491712cc6e"
+    }
+  },
+  "all_available_operands_unchanged": true,
+  "flags_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": false,
+    "grad_enabled": true,
+    "cpu_autocast": false,
+    "cuda_autocast": false,
+    "cuda_initialized": false
+  },
+  "flags_unchanged": true,
+  "fsl_dso_snapshot_after": [],
+  "no_fsl_dso_in_recorded_snapshots": true,
+  "clock_seconds_worker_including_postchecks": 8.044316618703306,
+  "peak_rss_KiB_self": 943660,
+  "time_scope": "one cold plain then warm adapter; not a speed ratio or full registration"
+}
