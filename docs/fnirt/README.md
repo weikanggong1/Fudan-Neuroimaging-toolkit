@@ -262,6 +262,9 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
 
 [初始预条件诊断](../../validation/fnirt_cpu_initial_precondition_20261006/README.md)已复现上述两个首方向：内部下限没有改变数值，倒数再乘与直接除法使332/1177个元素相差1 ULP；同方向下的点积和同RHS范数也有末位差。只读取两个保存数组、执行4次点积和2次范数，没有再次求解。该结果解释首方向的局部分叉，不能单独解释最终6.97%更新差或完整非线性误差；[独立核验](../../validation/fnirt_cpu_initial_precondition_20261006/root_review.public.json)保留这一范围。
 
+
+[冷初始化缓存前缀对照](../../validation/fnirt_native_cache_prefix_result_20261006/README.md)已完成一次独立 Conda 编译与一次捕获。v3 修正了隔离观察器的动态库搜索标签；22 个实际加载库均符合原允许身份。与已保存 Python state 比较，重采样图 2425/16128 个 FP32 值不逐位同，最大绝对差 9.9182e−5、相对 L2 差 2.1212e−7；掩膜差异0。原生 Deriv 前后重采样缓存改变，掩膜保持。ScaledRef 目前没有直接保存的 Python 成员可对照，历史 solve3 缓存、完整梯度/H/PCG与最终非线性输出仍未验收。41.164秒仅为捕获外层时间，不能作为完整配准 benchmark；生产 CPU/GPU 实现未改，v2 原运行库门失败记录保留。 后续[保存参考图与缩放控制](../../validation/fnirt_saved_scaled_reference_20261006/README.md)通过参考图/scale身份门，原dtype乘法派生的16128个ScaledRef值逐位同；这排除了该固定状态下的参考图与缩放差异，但不恢复历史cache或证明完整梯度/配准一致。
+
 [单moving输入控制](../../validation/fnirt_cpu_rhs_moving_control_20261006/README.md)先复现当前梯度、原始fixed、SSD和mask，再只换成官方保存的平滑moving图，参数、坐标、scale、basis和λ固定。总g相对误差由8.364e−7降至2.359e−7，FSL顺序控制由7.366e−7降至2.484e−7；三个位移系数分量仅改善约21%–30%，总变化主要受scale项影响。这证明平滑moving有贡献，尚未定位全部残差；官方SSD未单独保存，控制不重算λ。只调用一次采样，没有H/diag/PCG/native或完整配准，官方图只作诊断，不进入生产。[独立原结果核验](../../validation/fnirt_cpu_rhs_moving_control_20261006/root_review.public.json)。
 
 随后[当前Numba CPU平滑桥接](../../validation/fnirt_cpu_smoothing_bridge_20261006/README.md)完成：当前plain与旧保存图、按声明头方向翻转后调用成熟blur的候选与官方保存图，各18,579,456个FP32值逐位相同。31项输入/源码、12项worker绑定和精度状态前后相同；仅2次blur、1次adapter，无归一化、梯度、求解或完整配准。早先完整orientation候选使最终系数/warp/Jacobian误差扩大的负结果仍保留；本次只补足当前编译器/运行时的预处理身份，不修改默认或据此声明整体精度改善。[独立核验](../../validation/fnirt_cpu_smoothing_bridge_root_review_20261006.json)。

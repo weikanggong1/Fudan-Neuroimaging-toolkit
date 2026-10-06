@@ -61,3 +61,13 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 ## 最新普通33类CPU优化
 
 [C24完整接入](seg_columns_c24_integration_20261006/README.md)在已接受C72基础上，CPU8 API中位85.499→80.621秒（5.71%改善）；完整CPU/GPU输出、几何、CSV及GPU精度/内存保持。冷进程首臂检查差异单列，未声称15.29%都是计算收益。仍需达到同线程官方CPU速度、更多真实shape/线程与输入覆盖，以及完整wheel/全新Conda安装；不扩大受测资格。
+
+## FNIRT 冷缓存的实际差异
+
+[固定参数点的冷初始化对照](../fnirt_native_cache_prefix_result_20261006/README.md)已通过实际运行库、输入/源码身份与资源回收门；这与数值等价分列。掩膜逐体素同，重采样图有2425/16128个FP32 word不同，maxabs9.9182e−5、relative L2 2.1212e−7。Deriv会改写原生重采样缓存，本轮仍未恢复历史solve3调用上下文；尚不能把这些尾差作为最终配准差异的唯一原因。下一步先核对参考图、scale参数与ScaledRef，再比较同输入采样，最后验证梯度和完整非线性输出。生产/GPU未修改，完整官方CPU速度目标仍未通过。
+
+## Robust prepared/M0 的 SDK 现状
+
+[现场 SDK 审查](../robust_register/prepared_m0_sdk_review_20261006/README.md)已找到固定源码、Conda 编译器、原 libutils 与11个静态依赖；20个原源码/头文件/许可证身份相同。但原 robust 对象实存与 Ninja 声明均为0。还需独立构建局部对象、审核实际 ABI/provider 和新 binary，再运行准备态/M0 观察器。尚未捕获数值首差，17/20原门保持；不能把独立源码参考称为安装 binary trace。
+
+[随后参考图/ScaledRef控制](../fnirt_saved_scaled_reference_20261006/README.md)已通过：参考图字节及scale参数相同，16128个按原dtype乘法派生的ScaledRef逐位同。当前首差范围进一步缩小到重采样/导数缓存与后续组装；完整非线性输出仍未验收。该控制0native/solver/GPU，不作速度结论。

@@ -117,7 +117,7 @@ MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作�
 | --- | --- |
 | 高分辨率resize安装版编译实现 | 仅源定义合同；本例不触发，尚未对真实高分辨率数据验收 |
 | GPU真数据精度/速度 | 未执行；默认GPU链没有接线 |
-| robust rigid/affine、最终ROI | 未实现/未重跑 |
+| robust rigid/affine、最终ROI | 独立候选17/20原门通过；尚未接入本模块或最终ROI验收 |
 
 此前一次GEMS CPU候选完整右侧recipe已完成但最终核团门未过，见[负结果与脑图](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/README.md)。本模块不读取其细分结果或原配准矩阵来提高匹配。
 
@@ -125,7 +125,7 @@ MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作�
 
 - 2026-10-06：独立目标准备/右侧头信息模块；没有修改生产 GEMS、默认 CPU/GPU 数学或通用重采样。34项合同通过。首批合同的一个预期值误写为标签值乘255，已更正为布尔选择乘255；代码结果未因该测试修订而改变。
 - 2026-10-06真实对照：目标与反射atlas的数据/几何exact门通过；保留两次报告写出exit1，metadata-only修复及只读补录后得到完整评分，未重算前处理。源版本与SHA见验证记录。
-- 下一阶段：核对并计划独立robust rigid→affine移植与组件benchmark；未启动注册或第二次整体拟合。
+- 后续独立候选已完成刚性/仿射对照，原门17/20通过；尚未接入GEMS。最新[SDK核查](../../validation/robust_register/prepared_m0_sdk_review_20261006/README.md)找到源与依赖，但准备态/M0观察器尚未编译；下一步先捕获首差，再核验最终ROI。
 
 ## 7. 来源、许可与参考文献
 
