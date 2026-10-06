@@ -55,12 +55,12 @@ segmentation_result.write_volumes_csv(input_t1_path, output_volumes_path)
 ## 3. CLI、Conda 与缓存
 
 ```bash
-fnit-synthseg --i /data/example/T1w.nii.gz \
-  --o /data/output/segmentation.nii.gz --vol /data/output/volumes.csv \
+fnit synthseg --i /data/example/T1w.nii.gz \
+  --o /data/output/segmentation.nii.gz --csv-vols /data/output/volumes.csv \
   --weights /data/fnit-weights --device cpu --threads 8
 ```
 
-`--i/--o/--vol` 分别是原 T1、整数分割和体积 CSV；`--weights` 是已核验外置资源目录，`--device` 指定设备，`--threads` 是线程预算。完整其他参数沿用[SynthSeg CLI](README.md)。
+`--i/--o/--csv-vols` 分别是原 T1、整数分割和体积 CSV；`--weights` 是已核验外置资源目录，`--device` 指定设备，`--threads` 是线程预算。完整其他参数沿用[SynthSeg CLI](README.md)。
 
 新增依赖 **0**。仍使用主页 Conda 环境已有 GCC/G++11、Torch 2.5.1 ABI0、Torch headers/库、已加载 MKL LP64 和 OpenMP。C24 自有 `_columns_c24.cpp` 为 4,396 B，与已验收短合同源码逐字节相同；独立导出 C24 符号，不重编或覆盖旧 C72 DSO。
 
