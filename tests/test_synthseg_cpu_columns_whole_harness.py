@@ -20,13 +20,14 @@ def test_first_mismatch_persisted_before_later_arm(tmp_path, monkeypatch, failur
     group = {'status':'prepared_requires_separate_approval',
              'arm_order':[['A1_baseline','baseline'],['B1_cold','candidate'],['B2_warm','candidate'],['A2_baseline','baseline']],
              'affinity':[0], 'common_lock':'common.lock', 'worker_timeout_seconds':1}
-    plan = {'whole_CPU':group, 'validation_sources':{'whole_queue.py':queue.sha(leaf / 'whole_queue.py'),
+    plan = {'Conda_CXX':'/mock/conda/compiler', 'whole_CPU':group, 'validation_sources':{'whole_queue.py':queue.sha(leaf / 'whole_queue.py'),
                                                     'whole_worker.py':queue.sha(leaf / 'whole_worker.py')}}
     plan_path = tmp_path / 'PLAN.json'
     plan_path.write_text(json.dumps(plan))
     calls = []
     def mock_child(command, **kwargs):
         # Only small receipt/byte fixtures: no invocation of the actual worker.
+        assert kwargs['env']['CXX'] == plan['Conda_CXX']
         output = Path(command[command.index('--output') + 1])
         calls.append(output.name)
         output.mkdir(mode=0o700)

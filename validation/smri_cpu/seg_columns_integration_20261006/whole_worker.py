@@ -34,6 +34,9 @@ def main():
     def sources():
         return {name: sha(args.source / 'fnit/synthseg_parc' / name) for name in expected}
     assert sources() == expected
+    def support_sources():
+        return {name: sha(args.source / name) for name in plan['common_support_sha256']}
+    assert support_sources() == plan['common_support_sha256']
     args.output.mkdir(mode=0o700)  # Never overwrite a prior arm.
     cpu = args.device == 'cpu'
     if cpu:
@@ -68,6 +71,7 @@ def main():
     weights = (args.root / plan['resources']['segmentation_weight']['fnit_relative']).parent
     report = {'schema': 'fnit_columns_complete33_worker/v1', 'status': 'running',
               'arm': args.arm, 'device': args.device, 'source_before': sources(),
+              'common_support_before': support_sources(),
               'worker_sha256': sha(__file__), 'PLAN_sha256': sha(args.plan), 'resources_before': resources,
               'affinity': sorted(os.sched_getaffinity(0)), 'flags_before': initial,
               'threads': torch.get_num_threads(), 'interop_threads': torch.get_num_interop_threads(),
@@ -183,6 +187,8 @@ def main():
             setattr(owner, name, original)
         report['flags_after'] = flags()
         report['source_after'] = sources()
+        report['common_support_after'] = support_sources()
+        report['common_support_unchanged'] = (report['common_support_before'] == report['common_support_after'] == plan['common_support_sha256'])
         report['resources_after'] = {name: {'bytes': (args.root / entry['fnit_relative']).stat().st_size,
                                           'sha256': sha(args.root / entry['fnit_relative'])}
                                      for name, entry in plan['resources'].items()}
@@ -193,7 +199,7 @@ def main():
         report['load_after'] = list(os.getloadavg())
         report['worker_seconds'] = time.perf_counter() - process_start
         report['valid_complete_arm'] = (error is None and report['source_unchanged']
-            and report['resources_unchanged'] and report['flags_restored']
+            and report['resources_unchanged'] and report['common_support_unchanged'] and report['flags_restored']
             and report['RSS_maximum_bytes'] <= 32_000_000_000)
         (args.output / 'WHOLE.json').write_text(json.dumps(report, indent=2) + '\n')
     if error is not None:

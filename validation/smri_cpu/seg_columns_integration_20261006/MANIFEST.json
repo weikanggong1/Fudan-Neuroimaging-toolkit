@@ -1,6 +1,7 @@
 {
-  "schema": "fnit_columns_integration_prepared_payload/v1",
-  "scope": "Owned narrow CPU source + mock-contract receipts + prepared whole plan; no actual new compile/scientific run",
+  "schema": "fnit_columns_integration_phase1_prepared_payload/v2",
+  "scope": "Source-identical narrow production candidate, phase1 loader and byte-identical accepted short body prepared only; no actual compile/math/whole",
+  "previous_prepare_commit": "70ad6537",
   "files": {
     "MANIFEST.in": {
       "bytes": 2684,
@@ -43,8 +44,12 @@
       "sha256": "f8688a735d9834e4e2aa04411c1a290a7d4a39ae727df47f919a83b0bb501352"
     },
     "tests/test_synthseg_cpu_columns_whole_harness.py": {
-      "bytes": 3627,
-      "sha256": "5032e1d7bec706083009e85cd045510722dfcb0faf1d7a1eee28ef9d84ec0c8f"
+      "bytes": 3720,
+      "sha256": "76ae225c8fe19ddf7df84cc92d822350973cb9c9183ef9d56d872ea40dae63a3"
+    },
+    "validation/smri_cpu/seg_columns_integration_20261006/COMMON_SUPPORT_CONTEXT.json": {
+      "bytes": 599,
+      "sha256": "aaf899f92e50b9c2011257e3a021059a0f18501814914df85afff12c6d5e663c"
     },
     "validation/smri_cpu/seg_columns_integration_20261006/HARNESS_HISTORY.json": {
       "bytes": 1371,
@@ -66,47 +71,79 @@
       "bytes": 99,
       "sha256": "807ed6fc2a936090ec1b96c4a24a28adb5d781d8971cc85e2ac8667b1000fe3f"
     },
+    "validation/smri_cpu/seg_columns_integration_20261006/PHASE1_PREPARE_STATIC.json": {
+      "bytes": 2165,
+      "sha256": "e1e5e664cba39346608c92c1d7babc7462ea1710f6cbdc745340b04d0a226e3a"
+    },
     "validation/smri_cpu/seg_columns_integration_20261006/PLAN.json": {
-      "bytes": 13490,
-      "sha256": "d68a19b7dec66247fa31d31f7283ae9b71600cfe44b15cc4bb464a8beca6235f"
+      "bytes": 18498,
+      "sha256": "6daa84b1b18e6c343c493ef9bbff7e6fc83836c8b8149845caaef1f87655e8ed"
+    },
+    "validation/smri_cpu/seg_columns_integration_20261006/PREPARE_HISTORY.json": {
+      "bytes": 716,
+      "sha256": "0dcd4cbfaba539afa4323a93d2860507f7a358b6bc70d18f56593a771630b7e4"
     },
     "validation/smri_cpu/seg_columns_integration_20261006/QUEUE_CONTRACTS.json": {
+      "bytes": 903,
+      "sha256": "ea1fd7847e110c49892d656a9c7c74787768c27316d0f522252efe900171bcaa"
+    },
+    "validation/smri_cpu/seg_columns_integration_20261006/QUEUE_CONTRACTS.log": {
+      "bytes": 98,
+      "sha256": "d9fc31ea12c56cf822cd578701c559539a1e381135467e86a203a20f5a69fd9b"
+    },
+    "validation/smri_cpu/seg_columns_integration_20261006/QUEUE_CONTRACTS_70ad.json": {
       "bytes": 821,
       "sha256": "eeea0caaef062921ea513572e233a361ec4f4a531a2c348e5a70d85ebf46b9f6"
     },
-    "validation/smri_cpu/seg_columns_integration_20261006/QUEUE_CONTRACTS.log": {
+    "validation/smri_cpu/seg_columns_integration_20261006/QUEUE_CONTRACTS_70ad.log": {
       "bytes": 98,
       "sha256": "7bca2a66619aaa2a9a62e5d17cb4b470f346aeea538543de55a77c35c9e4136d"
     },
     "validation/smri_cpu/seg_columns_integration_20261006/README.md": {
-      "bytes": 8215,
-      "sha256": "40f50b5cee5aed202b634189fd2458ba6356858bbee794252507397c5d7385e6"
+      "bytes": 9295,
+      "sha256": "6d3b385278e10d7815feebf78146abc6051d6eec47c07faf5af200c90d090d5a"
     },
     "validation/smri_cpu/seg_columns_integration_20261006/SOURCE_CONTEXT.json": {
       "bytes": 2971,
       "sha256": "6f3b97c97d3a50ec28ec1252994411dfb3747894635696f8ebc0d127cdf8c36f"
     },
     "validation/smri_cpu/seg_columns_integration_20261006/STATIC_CHECKS.json": {
-      "bytes": 2392,
-      "sha256": "39c16567d1b9f44166f10dc124e5cece4d9f75a427fcd41415f4a2f086d56e61"
+      "bytes": 2608,
+      "sha256": "38284405de2fbd122b48398dd2315968d0d575e4826d69f31ae76c4c9f274a60"
+    },
+    "validation/smri_cpu/seg_columns_integration_20261006/check_cached_contracts.py": {
+      "bytes": 22131,
+      "sha256": "81fe368438ad4bfdcbd90e020962677de4cab5d74153be7b9559c03771757f9f"
+    },
+    "validation/smri_cpu/seg_columns_integration_20261006/load_cache_interface.py": {
+      "bytes": 5404,
+      "sha256": "dde0bdd80c802475414942eda847cc0bff8c332fabacbc65412b42679861cc89"
+    },
+    "validation/smri_cpu/seg_columns_integration_20261006/phase1_bindings.py": {
+      "bytes": 4810,
+      "sha256": "b38e5df20b53efd1288db1962c496e417c0737878e31b8b8b6d9c040e176ab56"
     },
     "validation/smri_cpu/seg_columns_integration_20261006/prepare_plan.py": {
-      "bytes": 10243,
-      "sha256": "71db8267bc00db5dbc58057a5bf540905ebc36ff482072234e76a7f99c85ac6b"
+      "bytes": 13307,
+      "sha256": "8fc4820dbd15ad1cb2345285f0b8d6341e72ba1abca2324598c6cdde435b749c"
     },
     "validation/smri_cpu/seg_columns_integration_20261006/run_local_guards.py": {
       "bytes": 3076,
       "sha256": "973cc12b7e1a89b5e1fbead876ba99be7339b78ccd601a651b3e9128b18b2803"
     },
+    "validation/smri_cpu/seg_columns_integration_20261006/run_phase1.py": {
+      "bytes": 6413,
+      "sha256": "28427144542ef5d48f4cbd059c2d417df4a1ae4fe08560c48809418ab66b4373"
+    },
     "validation/smri_cpu/seg_columns_integration_20261006/whole_queue.py": {
-      "bytes": 10673,
-      "sha256": "abcdc96b9af67b1dc3e79e1d4fb3f467a699390dec8c06588cc878f6d10deed9"
+      "bytes": 10732,
+      "sha256": "a019125c22c3f21e5e6354262c4968d0fea3570bfd758537ad98e19e7d0bf6a7"
     },
     "validation/smri_cpu/seg_columns_integration_20261006/whole_worker.py": {
-      "bytes": 10900,
-      "sha256": "b93eedcd5968295be775c4a639b78f196b4b786d2164b88e3cf029eb590e77eb"
+      "bytes": 11380,
+      "sha256": "df0c95e8df1735ff55decb4a31e2e07a1630c6c5b48a8170044a899d8e71598e"
     }
   },
-  "PLAN_sha256": "d68a19b7dec66247fa31d31f7283ae9b71600cfe44b15cc4bb464a8beca6235f",
+  "PLAN_sha256": "6daa84b1b18e6c343c493ef9bbff7e6fc83836c8b8149845caaef1f87655e8ed",
   "real_new_compiles_model_copy_SGEMM_MRI_native_GPU_calls": 0
 }

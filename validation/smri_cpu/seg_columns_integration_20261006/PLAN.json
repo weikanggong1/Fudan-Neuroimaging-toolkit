@@ -1,6 +1,6 @@
 {
   "schema": "fnit_columns_narrow_production_candidate_plan/v1",
-  "status": "prepared_not_authorized_compile_numeric_or_whole",
+  "status": "phase1_workers_frozen_not_authorized_compile_numeric_or_whole",
   "canonical_main_observed": "db61cebc9d3683720e6c0a288db3cdc7d6f30a7c",
   "INDEX_observed_sha256": "76253bb419455532d9b1e1edf626dfdc8eff5c9dfe9017b5a9c1d8d443c8a313",
   "production_sources": {
@@ -41,10 +41,14 @@
     }
   },
   "validation_sources": {
-    "whole_worker.py": "b93eedcd5968295be775c4a639b78f196b4b786d2164b88e3cf029eb590e77eb",
-    "whole_queue.py": "abcdc96b9af67b1dc3e79e1d4fb3f467a699390dec8c06588cc878f6d10deed9",
-    "prepare_plan.py": "71db8267bc00db5dbc58057a5bf540905ebc36ff482072234e76a7f99c85ac6b",
-    "run_local_guards.py": "973cc12b7e1a89b5e1fbead876ba99be7339b78ccd601a651b3e9128b18b2803"
+    "whole_worker.py": "df0c95e8df1735ff55decb4a31e2e07a1630c6c5b48a8170044a899d8e71598e",
+    "whole_queue.py": "a019125c22c3f21e5e6354262c4968d0fea3570bfd758537ad98e19e7d0bf6a7",
+    "prepare_plan.py": "8fc4820dbd15ad1cb2345285f0b8d6341e72ba1abca2324598c6cdde435b749c",
+    "run_local_guards.py": "973cc12b7e1a89b5e1fbead876ba99be7339b78ccd601a651b3e9128b18b2803",
+    "phase1_bindings.py": "b38e5df20b53efd1288db1962c496e417c0737878e31b8b8b6d9c040e176ab56",
+    "load_cache_interface.py": "dde0bdd80c802475414942eda847cc0bff8c332fabacbc65412b42679861cc89",
+    "check_cached_contracts.py": "81fe368438ad4bfdcbd90e020962677de4cab5d74153be7b9559c03771757f9f",
+    "run_phase1.py": "28427144542ef5d48f4cbd059c2d417df4a1ae4fe08560c48809418ab66b4373"
   },
   "resources": {
     "raw_t1": {
@@ -81,11 +85,111 @@
   "workspace_fnit_relative": "workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-integration-v1",
   "runs_fnit_relative": "runs/smri_cpu_20261004/remaining_20261006/seg-columns-integration-v1",
   "source_bundle_rule": "Fresh baseline full src from the actual canonical repo, candidate has the same support files and only the frozen narrow17 module payload differences; assert source14 and common support file SHA before importing. Do not use snapshot as main.",
-  "support_files_to_freeze_at_upload": [
-    "fnit/__init__.py",
-    "fnit/_dmri.py",
-    "fnit/_nib.py",
-    "fnit/weights.py"
+  "common_support_sha256": {
+    "fnit/__init__.py": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4",
+    "fnit/_dmri.py": "0862c7cefbd2b2811e9a56e3b617a209968d70c4e5a5b76c557630b1cd2f0117",
+    "fnit/_nib.py": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+    "fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+  },
+  "common_support_context_sha256": "aaf899f92e50b9c2011257e3a021059a0f18501814914df85afff12c6d5e663c",
+  "common_support_INDEX_observed_sha256": "87145d881592437324b199793df9f7b2138027addeed94b887146e2dca6a315c",
+  "Conda_CXX": "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-c++",
+  "Conda_CXX_path_provenance": {
+    "existing_interface_report": "validation/smri_cpu/seg_columns_reuse_20261006/COMPILE.json",
+    "sha256": "74d1b96c3d56caeefb1f211271c7678586decc0277ec918b6b5707ba89d3ca11",
+    "new_compiler_probe_done": false
+  },
+  "headers": {
+    "ATen/Config.h": "317951cca3faf477f49632e48427436b9b9461c1a12943d1e1f8ba402e5082bd",
+    "ATen/Parallel-inl.h": "3f5f0b88547cf2a3a5296b3712ae9ba7f2b7b22e9598dbf2d36918b084f7b473",
+    "ATen/Parallel.h": "d45ea50942d5e51f5b90f236e13c57fa6e980c1b4134eeba11f812e934b80513",
+    "ATen/ParallelOpenMP.h": "547137c59ba1f88da28c1953069b155080147cca4edd741e6a3309eedd08f9aa",
+    "ATen/native/CPUBlas.h": "65d41851492e355c08af2c73be4b2ad7d09f1d0af0ca3706a8a91dce78513899",
+    "ATen/native/Unfold3d.h": "bbee13e24d17450d3dace10e38774a1463e74cc59bdf34afaf1e6c6bd4fa9500",
+    "c10/core/CPUAllocator.h": "714c17e13a79842d52eb6172a4b8551a48ac7db8d0f969b6ece8f335dda3d9c7",
+    "c10/core/impl/alloc_cpu.h": "afbdba37984811ece9442f9c746b92249ec50f5c2d2ef84abd54bc268427b350"
+  },
+  "libtorch_cpu_sha256": "529f5ab9d2397b671c4768e8ad2865c626352909fd6d76b4b6b57622b39a874c",
+  "provider_sha256": "bd259733d7a3044c0656f32325df145e63ca52aba71560db0db2e991a138ee16",
+  "weight": {
+    "fnit_relative_path": "workspaces/smri_cpu_20261004/assets/weights/synthseg_2.0.h5",
+    "bytes": 53079152,
+    "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+  },
+  "seed": 20261006,
+  "numeric_cases": [
+    {
+      "name": "single_depth",
+      "shape": [
+        1,
+        72,
+        1,
+        13,
+        17
+      ],
+      "strided": false,
+      "cancellation": false
+    },
+    {
+      "name": "two_depth",
+      "shape": [
+        1,
+        72,
+        2,
+        13,
+        17
+      ],
+      "strided": false,
+      "cancellation": false
+    },
+    {
+      "name": "boundary_internal",
+      "shape": [
+        1,
+        72,
+        7,
+        13,
+        17
+      ],
+      "strided": false,
+      "cancellation": false
+    },
+    {
+      "name": "many_slabs",
+      "shape": [
+        1,
+        72,
+        31,
+        13,
+        17
+      ],
+      "strided": false,
+      "cancellation": false
+    },
+    {
+      "name": "strided_odd_depth",
+      "shape": [
+        1,
+        72,
+        33,
+        13,
+        17
+      ],
+      "strided": true,
+      "cancellation": false
+    },
+    {
+      "name": "cancellation",
+      "shape": [
+        1,
+        72,
+        31,
+        13,
+        17
+      ],
+      "strided": false,
+      "cancellation": true
+    }
   ],
   "existing_official_reference": {
     "formal_public_report": "validation/smri_cpu/seg_memory_20261005/OFFICIAL_NODE7_FAST_BA_REPEAT.public.json",
@@ -168,7 +272,7 @@
     "workspace_lifetime": "one layer call; no persistent Tensor cache"
   },
   "phase1_interface_and_short_contracts": {
-    "status": "prepared_requires_separate_approval_and_worker_freeze",
+    "status": "frozen_requires_separate_phase1_approval",
     "interface_workers": 1,
     "interface_timeout_seconds": 180,
     "contract_workers": 1,
@@ -176,7 +280,33 @@
     "compile": "new private contract cache; original owned4385B Cpp; same Conda GCC11, installed Torch/header/provider gate; no provider replacement",
     "numeric_contracts": "Exactly original accepted six fixed actual-weight shapes and copy13/poison/compact-M/signed-zero oracle; original14-plane reference geometry. First nonexact stops. Guard23/exception/lifetime proof retained.",
     "new_MRI_or_native_or_GPU_calls": 0,
-    "real_short_worker_code_not_yet_prepared": true
+    "real_short_worker_code_not_yet_prepared": false,
+    "runner": "run_phase1.py",
+    "worker_order": [
+      "load_cache_interface.py",
+      "check_cached_contracts.py"
+    ],
+    "cache": "new retained private_contract_cache under canonical phase1 run; interface compile1, short fresh process0",
+    "sources": {
+      "phase1_bindings.py": "b38e5df20b53efd1288db1962c496e417c0737878e31b8b8b6d9c040e176ab56",
+      "load_cache_interface.py": "dde0bdd80c802475414942eda847cc0bff8c332fabacbc65412b42679861cc89",
+      "check_cached_contracts.py": "81fe368438ad4bfdcbd90e020962677de4cab5d74153be7b9559c03771757f9f",
+      "run_phase1.py": "28427144542ef5d48f4cbd059c2d417df4a1ae4fe08560c48809418ab66b4373"
+    },
+    "original_contract_worker": {
+      "fnit_relative": "workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-reuse-v2/check_contracts.py",
+      "bytes": 21342,
+      "sha256": "f37375bf338067af41d26d9b1ed0285cc9b46fefd8981b1deded7622ef675a8e"
+    },
+    "original_contract_body_sha256": "ae4aa4bf74342bf265115b3749557a79b05a812effcce17e277ee2e963123b0c",
+    "original_contract_body_byte_identical": true,
+    "diagnostic_fallback_adapter": "Only private ColumnsReuse shim maps production None to old layer call so exact original23 sentinel body remains unchanged; no production path changes.",
+    "source_candidate_relative": "source_candidate",
+    "address_space_limit_bytes": 8000000000,
+    "RSS_gate_bytes": 32000000000,
+    "lock_scope": "one bounded worker; release at interface/contract boundary",
+    "first_failure_stops": true,
+    "outer_total_seconds": 23000
   },
   "whole_CPU": {
     "status": "prepared_requires_separate_approval",
@@ -276,5 +406,5 @@
     "mock_queue_first_failure_contracts": 4,
     "real_copy_SGEMM_or_MRI_or_native_GPU_calls": 0
   },
-  "whole_controller_preflight_pending": "Phase1 actual code frozen and approved first; independent whole approval after phase1 PASS and common-support upload freeze. No dispatch from prepare_plan."
+  "whole_controller_preflight_pending": "Frozen phase1 workers require coordinator approval first; independent whole approval after phase1 PASS. No dispatch from prepare_plan."
 }

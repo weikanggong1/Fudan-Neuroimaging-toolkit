@@ -26,7 +26,7 @@ CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 \
 
 实际39 passed in3.05s见 [LOCAL_GUARDS.log](LOCAL_GUARDS.log)，source/flag前后门和过程时钟见 [原receipt](LOCAL_GUARDS.json)。positive参数SHA资格在local合同中mock；未知真实参数rawhash反例、实际Tensor负/共轭view及dual/subclass守卫另测。cache编译/dlopen是stub，不得把它标为真实.so/安装验证。38项旧receipt/log保留为v1；此前一次因旧editable安装路径在pytest collection退出2，零测试/科学调用，详见 [历史](HARNESS_HISTORY.json)。
 
-`prepare_plan.py`仅stdlib读取冻结源/已有标量报告和AST，生成 [PLAN](PLAN.json) / [STATIC_CHECKS](STATIC_CHECKS.json)，不import Torch、不派发。`whole_worker.py`、`whole_queue.py`是待审代码：显式approved参数只是程序门，不能代替root授权。短合同实际worker尚需单独冻结并审查，当前不能执行whole。
+`prepare_plan.py`仅stdlib读取冻结源/已有标量报告和AST，生成 [PLAN](PLAN.json) / [STATIC_CHECKS](STATIC_CHECKS.json)，不import Torch、不派发。`whole_worker.py`、`whole_queue.py`是待审代码：显式approved参数只是程序门，不能代替root授权。短合同四份实际worker已独立冻结，见 `phase1_bindings.py`、`load_cache_interface.py`、`check_cached_contracts.py`、`run_phase1.py`；当前尚未获实际编译/数学执行授权。metadata先在全新私有cache编译/ABI/provider-load（copy/SGEMM为0），短合同fresh进程复用该cache且禁止再编译。原六数值/13copy/23fallback合同的test body逐字节相同；只有loader/setup替换，私有兼容shim将生产None映射到旧fallback sentinel，生产不变。当前不能执行whole。
 
 另有4项纯队列控制mock合同通过，见 [QUEUE_CONTRACTS](QUEUE_CONTRACTS.json)。成功B1/B2/A2必须立即与A1的同名完整gzip/CSV SHA相同，门过后才能派下一臂；SHA、cold/warm compiler计数或worker后置门失败均先持久失败QUEUE及已完成worker的原exit0，再停止余臂。A1仅生成参考，comparison_executed=False。mock不派真实child，不import Torch，不做MRI/编译/数值。
 
@@ -44,7 +44,7 @@ CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 \
 
 后续两阶段分别审查/授权：
 
-1. 新私有contract cache一次metadata编译/加载，随后六个固定真实权重短合同、copy13/poison/紧凑末次M/signed0及fallback/异常守卫；无MRI，原14-plane reference，首差停止。其worker还待冻结。
+1. 新私有contract cache一次metadata编译/加载，随后六个固定真实权重短合同、copy13/poison/紧凑末次M/signed0及fallback/异常守卫；无MRI，原14-plane reference，首差停止。其worker已冻结待root授权。原test body SHA `ae4aa4bf74342bf265115b3749557a79b05a812effcce17e277ee2e963123b0c`，seed20261006/原六shape不变；失败保留receipt并停止后续，没有科学重试。每个worker释放共同锁；metadata180秒、contract240秒、AS8e9/RSS32e9、outer23000秒。
 2. CPU33 A1原/B1cold/B2warm/A2原共4新进程，每arm600秒、共同CPU8锁、同8物理核、32e9 AS/RSS，原T1+空输出。B1是新独立whole cache（保留short cache，不删除），B2同cache的新进程；每候选实际两pass/两层命中，28copy/28SGEMM。clock含hash/compiler/compile/构造/save/收尾，另列API/构造/save。GPU默认True普通33原/新AB共2个新进程、各300秒、同H100UUID与20e9预算，必须实际零optional-module import/compile/copy；GPU监测不能为了查状态先import helper。
 
 全标签、affine/完整header/extensions/dtype、数值CSV和CSV文件SHA严格相同；记录压缩图SHA。完整输出先保存再断言diagnostic计数。GPU全allocated/reserved exact≤20e9，另记录本人process-tree driver采样，最大gap/failure/zero明确，采样不是绝对峰值；共享GPU时间仅观察。全部源/资源/参数/精度/observer正常异常收尾门明确，首失败停余臂，不科学重试或放宽门。
@@ -55,6 +55,7 @@ CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 \
 
 - 已接受同层阶段提交7b69bc93；对应四原receipts与三位门保留，本candidate不重新跑层ABBA。
 - 接入local第1次收集错误0科学、第2次37合同、第3次38合同（新增GCC版本反例）、第4次39合同（实际懒view守卫）；旧38source-bound receipt/log保留，源码变动只在新freeze。
+- 新准备冻结保留70ad6537的原PLAN/manifest Git来源；生产17源未改变。common四source由当前canonical/INDEX只读逐SHA绑定，`Conda_CXX`路径来自旧真实interface argv，实际新编译器identity将在metadata cache-key中核对。whole每个成功arm立即做原gzip/CSV SHA严格门，失败QUEUE先持久再停余臂。
 - 下一候选可静态研究其他groups1/k3的同原slab workspace复用，但本freeze只72→24一层，不扩shape、layer或新BLAS/低精度。
 - 本地guard通过与prepared PLAN不能替代实际编译/完整CPU/GPU/Conda安装；当前这些状态保持not_assessed。
 

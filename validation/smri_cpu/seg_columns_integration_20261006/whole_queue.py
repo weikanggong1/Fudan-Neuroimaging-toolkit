@@ -67,6 +67,8 @@ def main():
     environment = {**os.environ, 'OMP_NUM_THREADS': '8', 'MKL_NUM_THREADS': '8',
         'OPENBLAS_NUM_THREADS': '8', 'NUMBA_NUM_THREADS': '8', 'PYTHONDONTWRITEBYTECODE': '1',
         'CUDA_VISIBLE_DEVICES': '' if cpu else '1', 'FNIT_SYNTHSEG_CPU_CACHE': str(cache)}
+    if cpu:
+        environment['CXX'] = plan['Conda_CXX']
     for name in ('PYTHONPATH', 'LD_PRELOAD', 'LD_LIBRARY_PATH', 'OPENBLAS_CORETYPE'):
         environment.pop(name, None)
     receipt = {'schema': 'fnit_columns_complete33_queue/v1', 'status': 'waiting_lock',
