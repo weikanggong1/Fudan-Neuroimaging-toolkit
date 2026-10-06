@@ -1,11 +1,11 @@
 {
-  "schema": "full_cpu_arithmetic_real_rigid_affine_benchmark/v1",
-  "status": "one_real_case_original20_checks_passed",
+  "schema": "full_cpu_arithmetic_normal_API_real_case_benchmark/v2",
+  "status": "reusable_CPU_adapter_cold_warm_and_fresh_reference_each_original20_passed",
   "date": "2026-10-07",
   "reference": {
-    "kind": "saved installed FreeSurfer original rigid and affine commands",
+    "kind": "fresh installed2CLI and earlier saved installed pair; SDK source probes separate",
     "command_count": 2,
-    "new_native_commands": 0,
+    "new_native_commands": 2,
     "SDK_reference_distinct_from_installed_reference": true
   },
   "input": {
@@ -54,31 +54,15 @@
     "intensity_scaling_13_parameters_not_tested": true,
     "rigid_input": "original moving and fixed",
     "affine_input": "own saved and reloaded rigid mapped-header image and same fixed",
-    "new_candidate_pairs": 1,
+    "new_candidate_pairs": 2,
     "registration_repeated_for_scoring": false,
-    "score_only_passes": 1,
-    "CPU_centroid_numeric": 4,
-    "CPU_centroid_typed_compile": 1,
-    "CPU_helper_numeric": {
-      "qr": 80,
-      "residual": 80,
-      "error": 80
-    },
-    "CPU_helper_typed_compile": {
-      "qr": 1,
-      "residual": 1,
-      "error": 1
-    },
-    "CPU_helper_fallback": {
-      "qr": 0,
-      "residual": 0,
-      "error": 0
-    },
-    "actual_IRLS_function_calls": {
-      "rigid": 10,
-      "affine": 10
-    },
-    "explicit_signature_compile_total": 4
+    "score_only_passes": 3,
+    "thread_scope": "same allocated8cores and OMP/MKL/OpenBLAS8 budget; Torchintraop8; installed native effective concurrency unobserved",
+    "adapter_loads_for_normal_API": 1,
+    "normal_API_same_instance_reused": true,
+    "score_recovery_new_registration": 0,
+    "score_recovery_new_native": 0,
+    "score_recovery_JIT": 0
   },
   "latest_original_gate_comparison": {
     "checks": 20,
@@ -142,65 +126,73 @@
     }
   },
   "timing": {
-    "official_saved_command_seconds": {
-      "rigid": 0.6756167951971292,
-      "affine": 0.5154428975656629
+    "cold_import_seconds": 1.713435952551663,
+    "one_factory_seconds": 0.08683884143829346,
+    "cold": {
+      "whole_normal_API_pair_seconds": 2.146999044343829,
+      "original_pair_inside_seconds": 2.1468866737559438,
+      "rigid_inside_API_seconds": 1.7374774320051074,
+      "affine_inside_API_seconds": 0.3638836033642292
     },
-    "full_candidate_pair_seconds_including_cold_JIT_and_checks": 14.851893172599375,
-    "candidate_rigid_API_seconds_including_cold_JIT_and_checks": 14.358867910690606,
-    "candidate_affine_API_seconds": 0.4467672277241945,
-    "full_candidate_cold_import_and_initial_check_seconds": 4.637339658103883,
-    "full_candidate_entry_seconds_until_score_IO_failure": 19.74747084453702,
-    "full_candidate_outer_seconds": 23.5939948996529,
-    "centroid_kernel_seconds_sum": 0.0013097720220685005,
-    "three_helper_kernel_seconds_sum": {
-      "qr": 0.07657251879572868,
-      "residual": 0.005007052794098854,
-      "error": 0.0008333530277013779
+    "warm": {
+      "whole_normal_API_pair_seconds": 0.7895335387438536,
+      "original_pair_inside_seconds": 0.7894432153552771,
+      "rigid_inside_API_seconds": 0.3666151389479637,
+      "affine_inside_API_seconds": 0.3809176702052355
     },
-    "centroid_typed_compile_seconds": 0.41862558107823133,
-    "three_helper_typed_compile_seconds": {
-      "qr": 0.5874045379459858,
-      "residual": 0.12933875527232885,
-      "error": 0.06389124877750874
+    "fresh_official_CLI_seconds": {
+      "rigid": 0.5155421253293753,
+      "affine": 0.515471875667572
     },
-    "full_candidate_five_runtime_identity_checkpoints_seconds_sum": 15.74585348367691,
-    "score_only_math_seconds": 0.19314039777964354,
-    "score_only_entry_seconds": 11.122744618915021,
-    "score_only_outer_seconds": 24.494294899515808,
-    "scopes_are_nested_and_not_additive": true,
-    "warm_production_speed_ratio_measured": false
+    "fresh_official_two_CLI_wall_sum_seconds": 1.0310140009969473,
+    "fresh_official_workflow_seconds": 1.0319315139204264,
+    "score_only_math_seconds": {
+      "cold": 0.19727732334285975,
+      "warm": 0.19070151075720787,
+      "fresh_official": 0.19364360813051462
+    },
+    "controls_identity_scoring_outside_normal_API_clock": true,
+    "four_kernel_objects_and_signatures_reused": true,
+    "warm_API_shorter_than_this_CLI_wall_sum_fraction": 0.23421647234624576,
+    "single_case_single_order_not_same_CLI_end_to_end_speedup": true,
+    "scopes_nested_not_additive": true,
+    "public_CLI_image_end_to_end_seconds": null
   },
   "controls": {
-    "original_full_pair_group_passed": false,
-    "original_full_pair_outputs_durable": true,
-    "original_full_pair_failure": "post-optimizer scorer passed big-endian F32 array to Torch.from_numpy; first failure preserved",
-    "score_IO_patch": "reuse public score_byteorder_recovery.py fixed-mask dtype=np.float32 conversion only",
-    "score_only_group_passed": true,
-    "saved_registration_output_file_count": 4,
-    "saved_full_pair_extra_report_count": 2,
-    "full_pair_runtime_actual_provider_counts": [
-      100,
-      123,
-      123,
-      123,
-      123
-    ],
-    "score_runtime_actual_provider_counts": [
-      100,
-      100
-    ],
-    "provider_checks": "literal measured union member identities; not dynamic arithmetic call traces",
-    "full_pair_source_resource_counts": [
+    "cold_warm_outputs_durable": true,
+    "fresh_installed_CLI_commands_returncode_zero": true,
+    "normal_API_original_group_passed": false,
+    "normal_API_original_failure": "benchmark explicit owned tree module import missing after coldwarm completed",
+    "fresh_command_recovery_group_passed": false,
+    "fresh_command_recovery_failure": "reader closed before scorer late relativeimports; official two commands already succeeded",
+    "intermediate_reader_factory_failure": "lazy centroid module None queried without guarded inventory; no native/registration/JIT",
+    "final_score_only_group_passed": true,
+    "final_score_original20_counts": [
       20,
-      150
+      20,
+      20
     ],
-    "score_source_resource_counts": [
-      14,
-      158
+    "new_final_score_reader_factory": 1,
+    "new_final_score_native": 0,
+    "new_final_score_registration": 0,
+    "new_final_score_JIT": 0,
+    "saved_pair_output_files_total": 12,
+    "saved_pair_files_per_pair": {
+      "mapped_header_images": 2,
+      "LTA_transforms": 2
+    },
+    "final_score_runtime_provider_counts": [
+      98,
+      98
     ],
-    "original_full_PID_instances_gone": 9,
-    "score_PID_instances_gone": 8,
+    "final_score_frozen_resource_count": 190,
+    "final_score_source_count": 13,
+    "final_score_PID_instances_gone": 10,
+    "reader_closed_and_own_namespace_removed": true,
+    "caller_CPU_precision_thread_flags_unchanged": true,
+    "old_namespace_objects_unchanged": true,
+    "provider_checks": "literal measured union file identity members, not dynamic mathcalltrace",
+    "all_oldFAIL_receipts_retained": true,
     "CPU8_lock_and_owned_trees_released": true,
     "INDEX_peers_preserved": true,
     "all_own_authorizations_closed": true
@@ -214,7 +206,7 @@
     "GPU_source_mathematical_branches_preserved_statically": true,
     "GPU_runtime_or_speed_regression_tested": false,
     "public_baseline_loader_automatically_enables_new_CPU_overlay": false,
-    "reusable_public_adapter_pending": true,
+    "reusable_public_adapter_pending": false,
     "untested": [
       "other real inputs",
       "rank deficient inputs and general fallback",
@@ -222,6 +214,217 @@
       "GPU execution and speed",
       "GEMS end-to-end segmentation",
       "whole brain recon-all"
-    ]
+    ],
+    "reusable_CPU_adapter_normal_API_tested": true,
+    "public_CLI_parser_help_tested": true,
+    "public_CLI_image_end_to_end_benchmarked": false,
+    "validation_checkout_API_not_production_wheel_API": true
+  },
+  "normal_API_comparisons": {
+    "cold": {
+      "checks": 20,
+      "passed": 20,
+      "all_passed": true,
+      "first_failed_original_gate": null,
+      "stages": {
+        "rigid": {
+          "point_count": 133,
+          "displacement_RMS_mm": 0.0,
+          "displacement_max_mm": 0.0,
+          "warp_relative_L2": 0.0,
+          "warp_max_absolute": 0.0,
+          "warp_P99_absolute": 0.0,
+          "warp_nonzero_support_difference_voxels": 0,
+          "world_LTA_matrix_max_absolute": 4.973799150320701e-14,
+          "combined_world_matrix_max_absolute": 0.0
+        },
+        "affine": {
+          "point_count": 133,
+          "displacement_RMS_mm": 0.0,
+          "displacement_max_mm": 0.0,
+          "warp_relative_L2": 0.0,
+          "warp_max_absolute": 0.0,
+          "warp_P99_absolute": 0.0,
+          "warp_nonzero_support_difference_voxels": 0,
+          "world_LTA_matrix_max_absolute": 3.9968028886505635e-15,
+          "combined_world_matrix_max_absolute": 0.0
+        }
+      }
+    },
+    "warm": {
+      "checks": 20,
+      "passed": 20,
+      "all_passed": true,
+      "first_failed_original_gate": null,
+      "stages": {
+        "rigid": {
+          "point_count": 133,
+          "displacement_RMS_mm": 0.0,
+          "displacement_max_mm": 0.0,
+          "warp_relative_L2": 0.0,
+          "warp_max_absolute": 0.0,
+          "warp_P99_absolute": 0.0,
+          "warp_nonzero_support_difference_voxels": 0,
+          "world_LTA_matrix_max_absolute": 4.973799150320701e-14,
+          "combined_world_matrix_max_absolute": 0.0
+        },
+        "affine": {
+          "point_count": 133,
+          "displacement_RMS_mm": 0.0,
+          "displacement_max_mm": 0.0,
+          "warp_relative_L2": 0.0,
+          "warp_max_absolute": 0.0,
+          "warp_P99_absolute": 0.0,
+          "warp_nonzero_support_difference_voxels": 0,
+          "world_LTA_matrix_max_absolute": 3.9968028886505635e-15,
+          "combined_world_matrix_max_absolute": 0.0
+        }
+      }
+    },
+    "fresh_official": {
+      "checks": 20,
+      "passed": 20,
+      "all_passed": true,
+      "first_failed_original_gate": null,
+      "stages": {
+        "rigid": {
+          "point_count": 133,
+          "displacement_RMS_mm": 0.0,
+          "displacement_max_mm": 0.0,
+          "warp_relative_L2": 0.0,
+          "warp_max_absolute": 0.0,
+          "warp_P99_absolute": 0.0,
+          "warp_nonzero_support_difference_voxels": 0,
+          "world_LTA_matrix_max_absolute": 0.0,
+          "combined_world_matrix_max_absolute": 0.0
+        },
+        "affine": {
+          "point_count": 133,
+          "displacement_RMS_mm": 0.0,
+          "displacement_max_mm": 0.0,
+          "warp_relative_L2": 0.0,
+          "warp_max_absolute": 0.0,
+          "warp_P99_absolute": 0.0,
+          "warp_nonzero_support_difference_voxels": 0,
+          "world_LTA_matrix_max_absolute": 0.0,
+          "combined_world_matrix_max_absolute": 0.0
+        }
+      }
+    }
+  },
+  "historical_instrumented_full_pair": {
+    "status": "one_real_case_original20_checks_passed",
+    "execution": {
+      "device": "cpu",
+      "threads": 8,
+      "memory_cap_GB_decimal": 20.0,
+      "parameters": {
+        "device": "cpu",
+        "highres_iterations": -1,
+        "initialize_translation": true,
+        "iterations_per_level": 5,
+        "memory_budget_gb": 20.0,
+        "pyramid_max_size": -1,
+        "pyramid_min_size": 16,
+        "saturation": 50.0,
+        "spatial_chunk_size": 131072,
+        "stop_distance": 0.01,
+        "tf32": true
+      },
+      "rigid_free_parameters": 6,
+      "affine_free_parameters": 12,
+      "intensity_scaling_13_parameters_not_tested": true,
+      "rigid_input": "original moving and fixed",
+      "affine_input": "own saved and reloaded rigid mapped-header image and same fixed",
+      "new_candidate_pairs": 1,
+      "registration_repeated_for_scoring": false,
+      "score_only_passes": 1,
+      "CPU_centroid_numeric": 4,
+      "CPU_centroid_typed_compile": 1,
+      "CPU_helper_numeric": {
+        "qr": 80,
+        "residual": 80,
+        "error": 80
+      },
+      "CPU_helper_typed_compile": {
+        "qr": 1,
+        "residual": 1,
+        "error": 1
+      },
+      "CPU_helper_fallback": {
+        "qr": 0,
+        "residual": 0,
+        "error": 0
+      },
+      "actual_IRLS_function_calls": {
+        "rigid": 10,
+        "affine": 10
+      },
+      "explicit_signature_compile_total": 4
+    },
+    "timing": {
+      "official_saved_command_seconds": {
+        "rigid": 0.6756167951971292,
+        "affine": 0.5154428975656629
+      },
+      "full_candidate_pair_seconds_including_cold_JIT_and_checks": 14.851893172599375,
+      "candidate_rigid_API_seconds_including_cold_JIT_and_checks": 14.358867910690606,
+      "candidate_affine_API_seconds": 0.4467672277241945,
+      "full_candidate_cold_import_and_initial_check_seconds": 4.637339658103883,
+      "full_candidate_entry_seconds_until_score_IO_failure": 19.74747084453702,
+      "full_candidate_outer_seconds": 23.5939948996529,
+      "centroid_kernel_seconds_sum": 0.0013097720220685005,
+      "three_helper_kernel_seconds_sum": {
+        "qr": 0.07657251879572868,
+        "residual": 0.005007052794098854,
+        "error": 0.0008333530277013779
+      },
+      "centroid_typed_compile_seconds": 0.41862558107823133,
+      "three_helper_typed_compile_seconds": {
+        "qr": 0.5874045379459858,
+        "residual": 0.12933875527232885,
+        "error": 0.06389124877750874
+      },
+      "full_candidate_five_runtime_identity_checkpoints_seconds_sum": 15.74585348367691,
+      "score_only_math_seconds": 0.19314039777964354,
+      "score_only_entry_seconds": 11.122744618915021,
+      "score_only_outer_seconds": 24.494294899515808,
+      "scopes_are_nested_and_not_additive": true,
+      "warm_production_speed_ratio_measured": false
+    },
+    "controls": {
+      "original_full_pair_group_passed": false,
+      "original_full_pair_outputs_durable": true,
+      "original_full_pair_failure": "post-optimizer scorer passed big-endian F32 array to Torch.from_numpy; first failure preserved",
+      "score_IO_patch": "reuse public score_byteorder_recovery.py fixed-mask dtype=np.float32 conversion only",
+      "score_only_group_passed": true,
+      "saved_registration_output_file_count": 4,
+      "saved_full_pair_extra_report_count": 2,
+      "full_pair_runtime_actual_provider_counts": [
+        100,
+        123,
+        123,
+        123,
+        123
+      ],
+      "score_runtime_actual_provider_counts": [
+        100,
+        100
+      ],
+      "provider_checks": "literal measured union member identities; not dynamic arithmetic call traces",
+      "full_pair_source_resource_counts": [
+        20,
+        150
+      ],
+      "score_source_resource_counts": [
+        14,
+        158
+      ],
+      "original_full_PID_instances_gone": 9,
+      "score_PID_instances_gone": 8,
+      "CPU8_lock_and_owned_trees_released": true,
+      "INDEX_peers_preserved": true,
+      "all_own_authorizations_closed": true
+    }
   }
 }
