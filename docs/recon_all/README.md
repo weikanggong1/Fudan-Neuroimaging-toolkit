@@ -302,7 +302,7 @@ fnit-setup-weights --model recon-all --dest /data/fnit-weights --verify-only
 
 本页列出的模型/数组共11个，3,653,913,443 B。原始文件许可及归属见[统一资源规则](../WEIGHTS.md#权重许可与归属)。模型推理从本地加载已准备资源。
 
-重建还需98项标准资产和本机源码构建程序。长资产清单逐文件大小/SHA/原站生成规则在[assets.py](../../src/fnit/recon_all/assets.py)；图谱含MNI/第三方来源，未逐一核准镜像，fnit-setup-recon-all-assets只从原站获取。固定源码与license适用[FreeSurfer条款](../../licenses/FreeSurfer.txt)，个人许可证另备，不读写其内容。
+重建还需98项标准资产和本机源码构建程序。逐文件大小/SHA及原作者来源见[assets.py](../../src/fnit/recon_all/assets.py)；安装器对已发布并收录[发布目录](../../src/fnit/_release_asset_catalog.json)的资源优先使用固定Release，保留固定来源回退。17项VPNL资源也已补充Release，来源与适用条款见[统一安装说明](../ASSETS.md)。固定源码与图谱保留各自许可及归属，个人FreeSurfer运行许可证由用户提供，不上传Release。
 
 ```bash
 bash tools/setup_recon_all_native_conda.sh
@@ -310,4 +310,4 @@ fnit-setup-recon-all-assets --dest /data/fnit-assets
 fnit-setup-recon-all-assets --dest /data/fnit-assets --verify-only
 ```
 
-源码固定d932c45b7941662ea380a05efef580568b98d41a；[构建说明](CONDA_CPP_BUILD.md)列程序、源码归档校验和安装哈希。主页Conda有C/C++/Fortran工具链与tifffile。现有部署前缀缺包不等于environment.yml缺依赖，先前失败与新空目录重跑均保留。
+源码固定d932c45b7941662ea380a05efef580568b98d41a；构建安装器优先使用核验过的Release源码归档，未命中或下载失败时回退固定上游源码。[构建说明](CONDA_CPP_BUILD.md)列程序、源码归档校验和安装哈希；所需C/C++/Fortran工具链与tifffile按主页Conda环境安装。

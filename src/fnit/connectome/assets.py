@@ -11,6 +11,8 @@ from pathlib import Path
 import tempfile
 from urllib.request import urlopen
 
+from fnit._release_assets import release_url_for
+
 
 def _required(atlas: str) -> tuple[str, ...]:
     if atlas in ("fs-aparc", "fs-aparc-a2009s"):
@@ -44,7 +46,7 @@ def _valid(path: Path, *, size: int, sha256: str) -> bool:
 
 def install_connectome_atlases(atlases: tuple[str, ...] | list[str],
                                output_dir: str | Path) -> Path:
-    """Download pinned, licensed Tian/Schaefer files; verify size/SHA."""
+    """Prefer verified FNIT Release Tian/Schaefer files, with source fallback."""
     manifest = json.loads(files("fnit.connectome").joinpath(
         "atlas_manifest.json").read_text())
     root = Path(output_dir).expanduser().resolve()
@@ -57,19 +59,28 @@ def install_connectome_atlases(atlases: tuple[str, ...] | list[str],
             continue
         if target.exists():
             raise ValueError(f"atlas file has unexpected size or SHA-256: {target}")
-        temporary = None
-        try:
-            with urlopen(entry["url"], timeout=120) as source:
-                with tempfile.NamedTemporaryFile(dir=root, delete=False) as stream:
-                    temporary = Path(stream.name)
-                    for chunk in iter(lambda: source.read(1024 * 1024), b""):
-                        stream.write(chunk)
-            if not _valid(temporary, **{key: entry[key] for key in ("size", "sha256")}):
-                raise ValueError(f"downloaded atlas failed verification: {name}")
-            os.replace(temporary, target)
-        finally:
-            if temporary is not None:
-                temporary.unlink(missing_ok=True)
+        release_url = release_url_for(entry["sha256"], size=entry["size"])
+        urls = ([release_url] if release_url else []) + [entry["url"]]
+        last_error = None
+        for url in dict.fromkeys(urls):
+            temporary = None
+            try:
+                with urlopen(url, timeout=120) as source:
+                    with tempfile.NamedTemporaryFile(dir=root, delete=False) as stream:
+                        temporary = Path(stream.name)
+                        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                            stream.write(chunk)
+                if not _valid(temporary, **{key: entry[key] for key in ("size", "sha256")}):
+                    raise ValueError(f"downloaded atlas failed verification: {name}")
+                os.replace(temporary, target)
+                break
+            except (OSError, ValueError) as error:
+                last_error = error
+            finally:
+                if temporary is not None:
+                    temporary.unlink(missing_ok=True)
+        else:
+            raise ValueError(f"Could not download verified atlas: {name}") from last_error
     return root
 
 

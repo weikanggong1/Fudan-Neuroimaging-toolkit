@@ -15,25 +15,46 @@ if [[ ! -d "$source_dir/.git" && ! -f "$source_dir/.fnit-source-commit" ]]; then
     exit 2
   fi
   mkdir -p "$source_dir"
-  git -C "$source_dir" init -q
-  if git -C "$source_dir" fetch -q --depth 1 https://github.com/freesurfer/freesurfer.git "$commit"; then
-    git -C "$source_dir" checkout -q --detach FETCH_HEAD
-  else
-    rm -rf "$source_dir/.git"
-    archive=$(mktemp "$CONDA_PREFIX/share/fnit/freesurfer.XXXXXX.tar.gz")
-    trap 'rm -f "$archive"' EXIT
-    curl -fL --retry 3 --connect-timeout 20 \
-      "https://codeload.github.com/freesurfer/freesurfer/tar.gz/$commit" -o "$archive"
-    expected_archive=2e76f40415f3e334b6fcd2ce548b451e9219bc9ffaecc46e752d4853e13aff0a
-    actual_archive=$(sha256sum "$archive" | cut -d' ' -f1)
-    [[ "$actual_archive" == "$expected_archive" ]] || {
-      echo "FreeSurfer source archive SHA-256 mismatch" >&2; exit 2;
-    }
+  expected_archive=2e76f40415f3e334b6fcd2ce548b451e9219bc9ffaecc46e752d4853e13aff0a
+  archive=$(mktemp "$CONDA_PREFIX/share/fnit/freesurfer.XXXXXX.tar.gz")
+  trap 'rm -f "$archive" "$archive.part"' EXIT
+  if "$CONDA_PREFIX/bin/python" - "$repo_root/src" "$archive" "$expected_archive" <<'PYTHON'
+import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from fnit._release_assets import release_asset_metadata, release_url_for
+from fnit.recon_all.assets import _download_verified
+archive, digest = Path(sys.argv[2]), sys.argv[3]
+metadata = release_asset_metadata(digest)
+release_url = release_url_for(digest)
+if metadata is None or release_url is None:
+    raise SystemExit(3)
+_download_verified(release_url, archive, metadata["size"], digest)
+print("Verified FNIT Release native source archive")
+PYTHON
+  then
     tar -xzf "$archive" --strip-components=1 -C "$source_dir"
     printf '%s\n' "$commit" > "$source_dir/.fnit-source-commit"
-    rm -f "$archive"
-    trap - EXIT
+  else
+    # A mirror failure keeps the pinned Git/codeload source paths available.
+    rm -f "$archive" "$archive.part"
+    git -C "$source_dir" init -q
+    if git -C "$source_dir" fetch -q --depth 1 https://github.com/freesurfer/freesurfer.git "$commit"; then
+      git -C "$source_dir" checkout -q --detach FETCH_HEAD
+    else
+      rm -rf "$source_dir/.git"
+      curl -fL --retry 3 --connect-timeout 20 \
+        "https://codeload.github.com/freesurfer/freesurfer/tar.gz/$commit" -o "$archive"
+      actual_archive=$(sha256sum "$archive" | cut -d' ' -f1)
+      [[ "$actual_archive" == "$expected_archive" ]] || {
+        echo "FreeSurfer source archive SHA-256 mismatch" >&2; exit 2;
+      }
+      tar -xzf "$archive" --strip-components=1 -C "$source_dir"
+      printf '%s\n' "$commit" > "$source_dir/.fnit-source-commit"
+    fi
   fi
+  rm -f "$archive" "$archive.part"
+  trap - EXIT
 fi
 bash "$repo_root/tools/build_recon_all_fs_cpp_conda.sh" "$source_dir" "$build_dir"
 for source in "$build_dir"/bin/*; do

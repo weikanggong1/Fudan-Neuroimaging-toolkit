@@ -291,18 +291,19 @@ fnit-setup-weights --model fast-vbm --dest /data/fnit-weights --verify-only
 
 本页列出的模型/数组共2个，3,539,482,133 B。原始文件许可及归属见[统一资源规则](../WEIGHTS.md#权重许可与归属)。模型推理从本地加载已准备资源。
 
-GM模板单独从官方公开archive获取，不纳入模型Release或Git/wheel：
+GM模板优先从FNIT Release取得单个文件，不纳入Git/wheel或模型权重安装器。它属于独立Oxford资源组，不加入`fnit-setup-standard-assets`的11文件profile。
 
 | 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
 |---|---|---|---|---|---|
-| DATA_public.tar.gz | 公开GM模板与参考图 | [原站](https://www.fmrib.ox.ac.uk/ukbiobank/fbp/templates/dckr_build/DATA_public.tar.gz) | 689,432,077 B | `52c2349270d4d19b8de6a0d136270e74f6a68379d02bda6635a92306c18e2319` | 未逐文件确认，仅原站 |
-| templates/template_GM.nii.gz | fixed GM模板 | [官方公开包](https://www.fmrib.ox.ac.uk/ukbiobank/fbp/templates/dckr_build/DATA_public.tar.gz) | 单文件大小未在公开记录单列 | `ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77` | 不镜像 |
+| `template_GM.nii.gz` | fixed GM模板；[FNIT Release下载](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/oxford--template_GM.nii.gz) | [Oxford官方冻结文件](https://git.fmrib.ox.ac.uk/falmagro/UK_biobank_pipeline_v_1/-/raw/9458b42e23c3476cc9bd4b6a0ae60e1df3807e55/templates/template_GM.nii.gz) | 707,776 B | `ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77` | Apache-2.0，保留Oxford版权和完整条款 |
 
-```bash
-curl --fail -L https://www.fmrib.ox.ac.uk/ukbiobank/fbp/templates/dckr_build/DATA_public.tar.gz -o DATA_public.tar.gz
-echo "52c2349270d4d19b8de6a0d136270e74f6a68379d02bda6635a92306c18e2319  DATA_public.tar.gz" | sha256sum -c -
-mkdir -p assets
-tar -xzf DATA_public.tar.gz -C assets --strip-components=1 templates/template_GM.nii.gz
-```
+官方下载冻结于commit `9458b42e23c3476cc9bd4b6a0ae60e1df3807e55`，与原公开包成员的大小/SHA完全相同。
+作者出处、许可和完整GET核验见[同字节许可证据](../../validation/assets_release_20261006/supplement_20/oxford_license.public.json)。
+
+下载及大小/SHA校验命令见[共享GM模板获取说明](../ukb_vbm/README.md#7-参考文献原软件和资源)，无须下载689MB完整公开包。
+完成后，既有Python调用将`assets/template_GM.nii.gz`作为`template`传入，CLI使用`--template assets/template_GM.nii.gz`；计算API和默认参数不变。
+
+[DATA_public.tar.gz作者原包](https://www.fmrib.ox.ac.uk/ukbiobank/fbp/templates/dckr_build/DATA_public.tar.gz)保留为科学出处，完整archive未上传。
+本次Apache-2.0证据对应精确GM模板，不扩展到原包其它文件；资源许可与获取规则见[统一安装说明](../ASSETS.md)。
 
 示例reference_mask须由用户提供同GM模板网格的实际掩膜。不同分辨率的掩膜必须正确空间重采样后使用，不能只修改header。

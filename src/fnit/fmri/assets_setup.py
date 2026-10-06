@@ -15,6 +15,8 @@ import tempfile
 from pathlib import Path
 from urllib.request import urlopen
 
+from fnit._release_assets import release_asset_metadata, release_url_for
+
 
 HCP_COMMIT = "f8cac6892f88bdf889d644711ff038198eb81533"  # v4.7.0
 RELEASE_BASE = ("https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/"
@@ -60,8 +62,7 @@ MSMALL_ASSETS = (
     ("global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d40_ROW_vn/melodic_oIC.dscalar.nii", "399f299bdde45720a37e650bf1306a771ffe179a8cdb914fdd297d28a16e9805"),
 )
 
-# WRN d7–d21 templates are not in the frozen FNIT assets-v1 release.
-# Install from the pinned HCP source, with both size and SHA-256 validation.
+# Prefer verified FNIT Release entries; retain the pinned HCP source fallback.
 MSMALL_LOW_DIM_ASSETS = (
     ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d7_ROW_vn/melodic_oIC.dscalar.nii', '88f0946d04f342949a266ce89fbb8fc7b7a207711cd9dc4ae7c1fe2e279845fc'),
     ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d8_ROW_vn/melodic_oIC.dscalar.nii', '7ef81675028dc5560417dafbdb3bb40981d2e51a114ce7652159c5ab2c5bef1e'),
@@ -111,7 +112,6 @@ FMRIPREP_SIZES = {
     "fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz": 1412252,
     "fmriprep/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz": 28557,
 }
-RELEASE_CHECKSUMS = dict(ASSETS + MSMALL_ASSETS)
 
 
 def _sha256(path: Path) -> str:
@@ -126,6 +126,9 @@ def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
                  opener=urlopen, base_urls=(RELEASE_BASE, BASE_URL, FALLBACK_URL)) -> Path:
     destination = output_dir / relative_path
     expected_size = {**FMRIPREP_SIZES, **ASSET_SIZES}.get(relative_path)
+    metadata = release_asset_metadata(expected_sha256, size=expected_size)
+    if expected_size is None and metadata is not None:
+        expected_size = metadata["size"]
     if destination.exists():
         if expected_size is not None and destination.stat().st_size != expected_size:
             raise ValueError(f"size mismatch in existing file: {destination}")
@@ -134,19 +137,19 @@ def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
         return destination
 
     destination.parent.mkdir(parents=True, exist_ok=True)
-    last_error = None
+    release_url = release_url_for(expected_sha256, size=expected_size)
+    urls = [release_url] if release_url else []
     for base_url in base_urls:
-        if base_url == RELEASE_BASE and RELEASE_CHECKSUMS.get(relative_path) != expected_sha256:
+        if base_url == RELEASE_BASE:
             continue
+        remote_name = (relative_path.split("/")[-1]
+                       if base_url == FMRIPREP_BASE else relative_path)
+        urls.append(base_url + remote_name)
+    last_error = None
+    for url in dict.fromkeys(urls):
         temporary = None
         try:
-            if base_url == RELEASE_BASE:
-                remote_name = "hcp--" + relative_path.replace("/", "--")
-            elif base_url == FMRIPREP_BASE:
-                remote_name = relative_path.split("/")[-1]
-            else:
-                remote_name = relative_path
-            with opener(base_url + remote_name, timeout=60) as source:
+            with opener(url, timeout=60) as source:
                 with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as target:
                     temporary = Path(target.name)
                     for chunk in iter(lambda: source.read(1024 * 1024), b""):

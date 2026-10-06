@@ -28,7 +28,7 @@ flowchart LR
 fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --msmall --fmriprep
 ```
 
-安装器校验固定 HCP v4.7.0 文件的 SHA-256；新增 WRN d7–d21 的 15 份模板另校验大小，共 86,180,368 字节。这 15 份文件从固定 HCP 上游下载，未列入 FNIT `assets-v1` Release。其他已镜像文件优先使用固定 Release。安装保留 HCP 许可文件，不包含个体特征或个体髓鞘图。
+安装器校验固定HCP v4.7.0文件的SHA-256；WRN d7–d21的15份模板另校验大小，共86,180,368字节。获许可且收录[发布目录](../../src/fnit/_release_asset_catalog.json)的精确文件优先从固定`assets-v1` Release下载，保留固定HCP上游回退；统一步骤见[资源安装说明](../ASSETS.md)。安装保留HCP许可文件，不包含个体特征或个体髓鞘图。
 
 ```python
 from fnit import MSMAllConfig, MSMAllInputs, run_msmall

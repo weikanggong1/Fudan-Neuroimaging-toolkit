@@ -284,18 +284,28 @@ fnit-setup-weights --model fast-vbm --dest /data/fnit-weights --verify-only
 
 本页列出的模型/数组共2个，3,539,482,133 B。原始文件许可及归属见[统一资源规则](../WEIGHTS.md#权重许可与归属)。模型推理从本地加载已准备资源。
 
-GM模板单独从官方公开archive获取，不纳入模型Release或Git/wheel：
+GM模板优先从FNIT Release下载单个文件，不纳入Git/wheel或模型权重安装器。模板在[发布目录](../../src/fnit/_release_asset_catalog.json)中属于独立Oxford资源组，不属于`fnit-setup-standard-assets`的11项FSL标准模板。原始公开包保留为作者出处，完整archive未上传。
 
 | 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
 |---|---|---|---|---|---|
-| DATA_public.tar.gz | 公开GM模板与参考图 | [原站](https://www.fmrib.ox.ac.uk/ukbiobank/fbp/templates/dckr_build/DATA_public.tar.gz) | 689,432,077 B | `52c2349270d4d19b8de6a0d136270e74f6a68379d02bda6635a92306c18e2319` | 未逐文件确认，仅原站 |
-| templates/template_GM.nii.gz | fixed GM模板 | [官方公开包](https://www.fmrib.ox.ac.uk/ukbiobank/fbp/templates/dckr_build/DATA_public.tar.gz) | 单文件大小未在公开记录单列 | `ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77` | 不镜像 |
+| DATA_public.tar.gz | 公开GM模板与参考图的作者原包 | [原站](https://www.fmrib.ox.ac.uk/ukbiobank/fbp/templates/dckr_build/DATA_public.tar.gz) | 689,432,077 B | `52c2349270d4d19b8de6a0d136270e74f6a68379d02bda6635a92306c18e2319` | 本次未镜像完整包；保留作者出处 |
+| templates/template_GM.nii.gz | fixed GM模板；[FNIT Release下载](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/oxford--template_GM.nii.gz) | [官方公开包](https://www.fmrib.ox.ac.uk/ukbiobank/fbp/templates/dckr_build/DATA_public.tar.gz) | 707,776 B | `ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77` | 官方仓库精确同字节文件；Apache-2.0，保留Oxford版权 |
+
+下载后先核验单文件大小和SHA，再将本地路径传给既有FastVBM入口：
 
 ```bash
-curl --fail -L https://www.fmrib.ox.ac.uk/ukbiobank/fbp/templates/dckr_build/DATA_public.tar.gz -o DATA_public.tar.gz
-echo "52c2349270d4d19b8de6a0d136270e74f6a68379d02bda6635a92306c18e2319  DATA_public.tar.gz" | sha256sum -c -
 mkdir -p assets
-tar -xzf DATA_public.tar.gz -C assets --strip-components=1 templates/template_GM.nii.gz
+curl --fail -L https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/download/assets-v1/oxford--template_GM.nii.gz \
+  -o assets/template_GM.nii.gz
+test "$(wc -c < assets/template_GM.nii.gz)" -eq 707776
+echo "ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77  assets/template_GM.nii.gz" | sha256sum -c -
 ```
+
+```bash
+fnit fast-vbm -i subject_T1w.nii.gz --template assets/template_GM.nii.gz \
+  -o results/sub-01 --registration-backend fnirt --device cuda:0
+```
+
+官方仓库冻结版本的GM模板与原包成员大小/SHA完全相同，根许可为Apache-2.0；[许可与同字节证据](../../validation/assets_release_20261006/supplement_20/oxford_license.public.json)记录来源，保留Oxford版权与完整条款。Python调用同样把`assets/template_GM.nii.gz`作为`template`传入，pipeline参数和默认值不变。
 
 示例reference_mask须由用户提供同GM模板网格的实际掩膜。不同分辨率的掩膜必须正确空间重采样后使用，不能只修改header。

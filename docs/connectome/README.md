@@ -385,9 +385,11 @@ host时钟存在异步与嵌套，不求和替代总墙钟。
 
 | 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
 |---|---|---|---|---|---|
-| FNIT重建权重/图谱 | 自动解剖 | [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) | 模型11文件/默认核心图谱98项（全部111项） | [recon-all手册](../recon_all/README.md) | 模型按固定Release许可；图谱原站下载。 |
+| FNIT重建权重/图谱 | 自动解剖 | [FreeSurfer](https://surfer.nmr.mgh.harvard.edu/) | 模型11文件/默认核心图谱98项（全部111项） | [recon-all手册](../recon_all/README.md) | 获许可已发布项优先Release；VPNL和个人许可证例外见统一安装说明。 |
 | SynthMorph joint（可选） | MNI atlas到T1 | [官网](https://synthmorph.io/) | 依组合 | [文件清单](../RESOURCE_MANIFEST.md) | 固定Release的相应许可。 |
 | 用户ROI模板 | 连接矩阵轴 | 用户提供；各atlas官方来源见[资源说明](atlas-assets.md) | 按实际文件 | 由模板checkpoint保存 | 未明确授权的不新增镜像。 |
+| Tian S1/S4和Schaefer 200/500/1000标准文件 | 自动配置标准连接矩阵轴 | [Tian](https://github.com/yetianmed/subcortex)、[CBIG Schaefer](https://github.com/ThomasYeoLab/CBIG/tree/35b5664bec8822e2f77da5e090e96f91d0095be6/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal) | 10文件逐项见[atlas清单](../../src/fnit/connectome/atlas_manifest.json) | [发布目录](../../src/fnit/_release_asset_catalog.json) | 按清单原许可；已发布项优先Release，保留固定来源回退。 |
 
 准备已有subject和用户native模板不需要下载标准atlas。
 外部atlas/template的版本、许可和空间必须分别核对，不由流程名称推断其再分发权。
+标准atlas的安装命令、离线准备和下载例外见[统一安装说明](../ASSETS.md)。

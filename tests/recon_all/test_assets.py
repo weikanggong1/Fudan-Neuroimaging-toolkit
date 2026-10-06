@@ -8,6 +8,13 @@ import pytest
 from fnit.recon_all import assets
 
 
+@pytest.fixture(autouse=True)
+def _test_pinned_upstream_without_release_catalog(monkeypatch):
+    # These tests validate preserved upstream URLs independently of which
+    # licensed files have since been published to the FNIT Release.
+    monkeypatch.setattr(assets, "release_url_for", lambda digest, size=None: None)
+
+
 def test_verified_official_annex_url():
     name = "average/RB_all_2020-01-02.gca"
     key = ("SHA256E-s71651552--"

@@ -65,7 +65,7 @@ mean_network_timeseries = network_timeseries(
 - censor：每原始帧一个0/1，1保留，长度须等于T，不能按秒给出。多session CLI每输入文件对应一个censor文件；不用censor则保留所有帧。
 - 体积BOLD：4D NIfTI `[X,Y,Z,T]`，T≥8，有限数值，读取float32，已经完成所需前处理并处于所选MNI空间。采样沿用强度单位，不做时间插值/平滑。
 - 左右表面：解剖中层GIFTI，各 `[32492,3]` scanner-RAS毫米坐标，fsLR32k固定顶点次序；所有皮层顶点须落在BOLD网格内。球面或inflated表面不能用作体积采样。
-- cortical_mask：3D NIfTI，与BOLD/reference完全相同shape、affine、orientation；有限非零值为待回写皮层。排除背景、medial wall、皮层下、小脑，不能把全脑mask当皮层mask。
+- cortical_mask：3D NIfTI，与BOLD/reference完全相同shape、affine、orientation和空间单位（通常mm）；有限非零值为待回写皮层。排除背景、medial wall、皮层下、小脑，不能把全脑mask当皮层mask。
 - 表面矩阵没有NIfTI affine；其空间由fsLR32k顶点编号与解剖表面定义。群体MNI中层表面投影不能代替个体ribbon投影；其他MNI模板要提供同空间表面和mask。
 - `load_assets`返回mu、sigma、epsil、theta、cortex_mask、seed_vertices及mesh邻接资产字典。替代NPZ必须保持该固定模型结构，不是任意标签图。
 
@@ -262,6 +262,7 @@ CBIG_MSHBM_parcellation_single_subject(params);
 
 | 日期 | commit/version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-06 | `assets_setup.py`空间单位修复 | 投影资源安装器继承reference空间单位，修复输出mask单位丢失；API/体素/affine/dtype不变。 | [真实模板缓存保存回放](../../validation/assets_release_20261006/mshbm_units_fix.public.json)；没有重测MRI benchmark。 |
 | 2026-10-01 | 22d2faf0 | 发布已处理volume/surface对官方release对照 | 冻结09a0313推断、3f8b756上游；非同算法speedup |
 | 2026-10-01 | 09a0313c | 公开体积API、CIFTI和网络TSV | 真实490帧、独立八帧插值、Python/CLI标签一致 |
 | 2026-09-28 | 2ad53c5b | 真实MSC02与CBIG算法审核 | profile/64984标签全同；核心SHA未变 |
@@ -291,15 +292,15 @@ CBIG_MSHBM_parcellation_single_subject(params);
 | 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
 |---|---|---|---|---|---|
 | hcp40_fslr32k_17.npz | 固定prior/mesh/seed | [CBIG HCP_40](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c/stable_projects/brain_parcellation/Kong2019_MSHBM) | 1,497,800 bytes | `aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17` | CBIG MIT；FNIT转换资产随包附来源/许可。 |
-| left_mni.surf.gii | 左群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.L.midthickness_mni.32k_fs_LR.surf.gii) | 723,249 bytes | `ac51edc0f61ee988c6d941e073ae3275ef5da509233df9309bdf586b3b31838a` | Caret派生，未核明确独立再分发许可，仅原站下载。 |
-| right_mni.surf.gii | 右群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.R.midthickness_mni.32k_fs_LR.surf.gii) | 710,702 bytes | `6e1c9842efb303945abe0cd780422a9812d1eab59c08d3fa3c72276ec31e6a25` | 同上，仅原站下载。 |
-| cortex_estimate.nii.gz | 皮层估计mask，最近邻重采样 | [固定CBIG原站目录](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c/stable_projects/registration/Wu2017_RegistrationFusion/bin/liberal_cortex_masks_FS5.3) | 207,362 bytes | `e4d788be332be76d7429855aba8f20c02693625f400905573e9063b4001f0e2b` | 此功能仅原站下载，不放FNIT Release。 |
+| left_mni.surf.gii | 左群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.L.midthickness_mni.32k_fs_LR.surf.gii) | 723,249 bytes | `ac51edc0f61ee988c6d941e073ae3275ef5da509233df9309bdf586b3b31838a` | Caret派生；已按用户确认补充Release，保留来源和引用。 |
+| right_mni.surf.gii | 右群体MNI中层表面 | [固定CBIG原站](https://raw.githubusercontent.com/ThomasYeoLab/CBIG/b69b822a15e2a94f1e439606552fc44b6858cf3c/data/templates/surface/fs_LR_32k/fsaverage.R.midthickness_mni.32k_fs_LR.surf.gii) | 710,702 bytes | `6e1c9842efb303945abe0cd780422a9812d1eab59c08d3fa3c72276ec31e6a25` | 同上，已补充Release。 |
+| cortex_estimate.nii.gz | 皮层估计mask，最近邻重采样 | [固定CBIG原站目录](https://github.com/ThomasYeoLab/CBIG/tree/b69b822a15e2a94f1e439606552fc44b6858cf3c/stable_projects/registration/Wu2017_RegistrationFusion/bin/liberal_cortex_masks_FS5.3) | 207,362 bytes | `e4d788be332be76d7429855aba8f20c02693625f400905573e9063b4001f0e2b` | 按逐资源许可；命中已发布目录时优先Release，保留固定CBIG来源回退。 |
 
-群体投影资源不在FNIT固定assets-v1清单中，安装器从固定CBIG源核验大小/SHA。本轮未新下载/重打包。运行前在用户输入BOLD的网格准备资源：
+安装器优先使用已发布并收录[发布目录](../../src/fnit/_release_asset_catalog.json)的三项文件，逐文件核验大小/SHA并原子保存；固定CBIG作者来源作为回退。资源来源与条款见[统一安装说明](../ASSETS.md)。运行前在用户输入BOLD的网格准备资源：
 
 ```bash
 python tools/setup_mshbm_projection_assets.py \
   --reference /data/bold/clean_mni_bold.nii.gz --output-dir /data/assets/mshbm_mni
 ```
 
-安装阶段用nibabel/SciPy将cortex estimate最近邻映射为uint8 cortical_mask；生成文件SHA依reference网格，不套用源文件SHA。运行阶段只读本地资源，不联网。
+安装阶段用nibabel/SciPy将cortex estimate最近邻映射为3D uint8 `cortical_mask.nii.gz`，shape/affine和空间单位继承reference；reference单位为mm时输出mm，未记录单位时保留unknown，3D掩膜不设时间单位。生成文件SHA依reference网格和头信息，不套用源文件SHA。运行阶段只读本地资源，不联网。
