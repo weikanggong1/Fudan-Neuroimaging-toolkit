@@ -1,0 +1,190 @@
+{
+  "scope": "Live read-only definitions; no official-source text, headers, objects, DSO or MRI payload republished.",
+  "live_canonical_repository": {
+    "commit": "7ff215ee86c49414b2fa6156fdf6769aa54d00f8",
+    "branch": "main",
+    "clean": true
+  },
+  "live_entry_metadata": {
+    "README.md": {
+      "bytes": 4448,
+      "sha256": "3cae7c1921af7638b9d48a13c1a0319a71496b10bec66e2379510ec11fd1a1a7"
+    },
+    "INDEX.json": {
+      "bytes": 320547,
+      "sha256": "3b0f2cd5a4dad35934d34aa42562ad19048e756d2ede3ce21b3d57377831ffb5"
+    }
+  },
+  "FNIT_sources": {
+    "src/fnit/fnirt/registration.py": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da",
+      "reviewed_lines": {
+        "scalar": "916-922",
+        "direct_gradient": "976-996",
+        "LM_adjoint": "1004-1012",
+        "LM_residual": "1023-1026"
+      }
+    },
+    "src/fnit/fnirt/spline.py": {
+      "bytes": 18840,
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7",
+      "reviewed_lines": {
+        "separable_adjoint": "167-174"
+      }
+    },
+    "validation/fnirt_shared_followup_20261006/source/assembly_shared_v2.py": {
+      "bytes": 8102,
+      "sha256": "9d1522ad584c80dc0001c35675dea70a3dcb14370c9ca8946d9c6f965f63f192",
+      "reviewed_lines": {
+        "FSL_order_control": "68-74"
+      }
+    }
+  },
+  "installed_reference_sources": [
+    {
+      "source": "FSL/src/fsl-fnirt/fnirt_costfunctions.cpp",
+      "bytes": 45537,
+      "sha256": "300bcf80839cb1591870845534f87778aa06d04785c22d76bf5100cd2474006a",
+      "reviewed_lines": {
+        "SQR_macro": "96-97",
+        "mean_SSD": "885-898",
+        "cost_regularization": "923-937",
+        "coefficient_gradient": "973-980",
+        "scale_gradient": "992-993"
+      }
+    },
+    {
+      "source": "FSL/src/fsl-fnirt/intensity_mappers.cpp",
+      "bytes": 38121,
+      "sha256": "ce17eed98f5dc1602e02dc6deeb7a59e7093893107e70d5142ba56ccb1aac438",
+      "reviewed_lines": {
+        "GLOBAL_LINEAR_scale": "234-241",
+        "GLOBAL_LINEAR_gradient": "424-427"
+      }
+    },
+    {
+      "source": "FSL/include/newimage/newimagefns.h",
+      "bytes": 94542,
+      "sha256": "8cb550a83acb09e274c7d7ab42e99ac9df5f11f543acadf767643658bb6a6d6a",
+      "reviewed_lines": {
+        "masked_dotproduct": "644-658"
+      }
+    },
+    {
+      "source": "FSL/include/newimage/newimage.h",
+      "bytes": 45586,
+      "sha256": "1db80579761f8d0bc8f5d9ee549645ce55ab576db7321effa9cadce9b7b62602",
+      "reviewed_lines": {
+        "voxel_address_x_fast": "221-225"
+      }
+    },
+    {
+      "source": "FSL/src/fsl-basisfield/splinefield.cpp",
+      "bytes": 133587,
+      "sha256": "0148687b342dfb17bfb273df771d7eb88d7eb80699ea528760221ab85915a9e9",
+      "reviewed_lines": {
+        "Jte_entry": "252-289",
+        "serial_get_jte": "766-800",
+        "parallel_coefficients": "813-877",
+        "masked_FP32_product": "1992-2002"
+      }
+    },
+    {
+      "source": "FSL/src/fsl-fnirt/intensity_mappers.h",
+      "bytes": 19104,
+      "sha256": "a4a1c26df1eb8eb495e7744ce74f29d985de6d961525efc3e15aed1ccb54e13b",
+      "reviewed_lines": {
+        "scale_container_double": "255"
+      }
+    }
+  ],
+  "formulas": {
+    "native_scaled_reference": "FP64 scale times FP64-promoted raw Ref voxel, stored back as FP32; residual subtraction occurs in FP32.",
+    "native_SSD": "Masked FP32 residual square is accumulated into one FP64 scalar in z-major/y-middle/x-fast order, then divided by count. latest_ssd is updated only by cost evaluation.",
+    "native_scale": "Masked FP32 raw Ref times FP32 residual product, serial FP64 accumulation; negate dot product then multiply by (2.0 / FP64 count).",
+    "production_direct_scale": "FP32 residual times mask divided by count before FP32 Ref product; FP64 reduction then negate and final factor2.",
+    "production_LM_scale": "FP32 residual normalized by sqrt(count), passed through another FP32 mask/sqrt(count) weighting before FP32 Ref product; FP64 reduction. This is a half-gradient until full2 conversion.",
+    "existing_FSL_order_control": "FP32 Ref*residual*mask product, PyTorch FP64 reduction, then count division and factor2. Early FP32 normalization has already been removed in this control.",
+    "native_coefficient": "Float mask*derivative*residual product; per-coefficient Double 3D spline weight times Float product; serial z/y/x support sum. Parallel implementation divides whole coefficients, preserving each coefficient scan order.",
+    "FNIT_coefficient": "Double separable adjoint performs Z then Y then X tensor reductions; final normalizer/regularizer grouping also differs from the native full-gradient expression."
+  },
+  "first_differences": [
+    {
+      "kind": "source_defined",
+      "between": "native scale vs production direct/LM",
+      "first_location": "FP32 division before Ref multiplication/reduction",
+      "numeric_effect_already_isolated_by_existing_control": true
+    },
+    {
+      "kind": "source_defined",
+      "between": "native scale vs existing late-division control",
+      "first_possible_location": "FP64 sum traversal/reduction layout; final (2/n)*(-sum) vs 2*(-sum/n) grouping",
+      "numeric_effect_measured": false,
+      "same_native_input_cache_established": false
+    },
+    {
+      "kind": "source_defined",
+      "between": "native coefficient vs FNIT adjoint",
+      "first_possible_location": "precombined Double 3D spline weight and one support dot product vs separable Double reductions",
+      "numeric_effect_measured": false
+    },
+    {
+      "kind": "observed_negative_control",
+      "between": "reciprocal vs division D projection",
+      "scale_changed_bits": 0,
+      "conclusion": "Derivative projection cannot explain the remaining scale error in this same-input control."
+    }
+  ],
+  "reference_scan_header": {
+    "file_record": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261004/gems/fnirt-first-diff-v2/oracle/initial_fixed.nii.gz",
+      "bytes": 23019,
+      "sha256": "a1d7dcd8b00fe238c7de8432daa176b3289a1edd6a0ad9c5aab1da3578feff5e"
+    },
+    "header348_bytes": 348,
+    "header348_sha256": "eef524a093288d933f90cb6cca3279863d41ae860303e01c009ce46cefd72f18",
+    "shape": [
+      24,
+      28,
+      24
+    ],
+    "qform_code": 2,
+    "sform_code": 2,
+    "pixdim": [
+      -1.0,
+      8.0,
+      8.0,
+      8.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "srow_x": [
+      -8.0,
+      0.0,
+      0.0,
+      90.0
+    ],
+    "srow_y": [
+      0.0,
+      8.0,
+      0.0,
+      -126.0
+    ],
+    "srow_z": [
+      0.0,
+      0.0,
+      8.0,
+      -72.0
+    ],
+    "interpretation": "Diagonal radiological reference; source-defined native X-fast scan is consistent with forward saved-storage X. Header only, no pixels loaded."
+  },
+  "limitations": [
+    "Definitions identify arithmetic differences; no numeric scalar trial has run.",
+    "The scalar-only proposal uses existing current-moving residual, not the prior substituted-moving residual which was not separately checkpointed.",
+    "Do not reconstruct native SSD from lambda/150 or native cost by subtracting unverified bending components.",
+    "Original implementation compilation and caching may affect instruction order; source inspection alone is not runtime trace."
+  ]
+}
