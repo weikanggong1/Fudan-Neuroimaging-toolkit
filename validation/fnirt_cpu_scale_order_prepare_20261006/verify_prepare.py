@@ -6,6 +6,7 @@ from pathlib import Path
 import hashlib
 import json
 import re
+import ast
 
 
 def identity(path):
@@ -20,12 +21,16 @@ def main():
     assert set(manifest["files"]) == {p.name for p in leaf.iterdir() if p.is_file() and p.name != "MANIFEST.public.json"}
     for name, wanted in manifest["files"].items():
         assert identity(leaf / name) == wanted, name
+    freeze = json.loads((leaf / "freeze.public.json").read_text())
+    assert set(freeze["files"]) == set(manifest["files"]) - {"freeze.public.json"}
+    for name, wanted in freeze["files"].items():
+        assert identity(leaf / name) == wanted, name
     context = json.loads((leaf / "CONTEXT.public.json").read_text())
     plan = json.loads((leaf / "PLAN.public.json").read_text())
     expected = json.loads((leaf / "EXPECTED.public.json").read_text())
     audit = json.loads((leaf / "SOURCE_AUDIT.public.json").read_text())
     assert plan["status"] == "prepared_only_zero_new_science_upload_enqueue"
-    assert plan["worker_definition_status"] == "not_created_not_frozen_not_reviewed"
+    assert plan["worker_definition_status"] == "implemented_frozen_not_executed_not_authorized"
     assert expected["schema_arrays"] == 68 and set(expected["arrays_to_restore"]) == {"fixed", "state_residual", "state_mask", "scale"}
     assert expected["baseline_count"] == 14341
     assert audit["live_canonical_repository"]["commit"] == plan["main_head_at_preparation"]
@@ -38,6 +43,8 @@ def main():
     assert audit["reference_scan_header"]["srow_x"] == [-8.0, 0.0, 0.0, 90.0]
     assert plan["resource_limits"]["science_seconds"] == 60
     assert plan["resource_limits"]["six_INDEX_locks_common_timeout_seconds"] == 25
+    for name in ["contracts.py", "scalar_control.py", "controller.py"]:
+        ast.parse((leaf / name).read_text())
     assert context["new_operations"]["checkpoint_array_read"] == 0
     assert context["new_operations"]["scientific_math_worker"] == 0
     assert context["new_operations"]["upload"] == context["new_operations"]["enqueue"] == 0

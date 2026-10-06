@@ -6,7 +6,7 @@
 
 ## 2. Python 调用、输入与输出
 
-本准备叶没有新增FNIT公共API。以下读取计划参数和保存状态schema，不读取NPZ像素：
+本准备叶没有新增FNIT公共API。自有有限worker已实现并冻结，尚未上传或执行。以下读取计划参数和保存状态schema，不读取NPZ像素：
 
 ```python
 import json
@@ -32,7 +32,7 @@ print(expected_checkpoint["baseline_count"])  # 同点有效体素数14341
 
 输出仅包含标量、FP64 hex/ULP、schema、哈希、旗标和退出码。数组、完整官方源码和动态库不进入GitHub。[输入和参考绑定](EXPECTED.public.json)列出每项schema/stride/SHA。
 
-`PLAN.public.json`参数：`canonical_leaf_proposed`指定未来独立源码/运行叶；`input_arrays`限定恢复成员；`input_shape`/`max_small_image_voxels`限定大小；`gate_order`固定前置门顺序；`maximum_calls`限定科学调用；`resource_limits`限定CPU8亲和性、锁等待120秒、worker60秒、controller210秒和8GB地址空间；`default_adoption_policy`规定失败即停、不放宽门槛、不变更GPU；`coefficient_Jte_trial`明确需另立计划。本文件尚未授权或派发科学worker。
+`PLAN.public.json`参数：`canonical_leaf_proposed`指定未来独立源码/运行叶；`input_arrays`限定恢复成员；`input_shape`/`max_small_image_voxels`限定大小；`gate_order`固定前置门顺序；`maximum_calls`限定科学调用；`resource_limits`限定CPU8亲和性、锁等待120秒、worker60秒、controller300秒和8GB地址空间；`default_adoption_policy`规定失败即停、不放宽门槛、不变更GPU；`coefficient_Jte_trial`明确需另立计划。参数 `--root`/`--workspace` 指向已有canonical根与独立冻结源码；`--output`指定新建scalar输出；`--canonical-main-commit`绑定派发时现场核实的main40位SHA；`--approved-scale-control`表示协调者已审定这一个有限范围；controller额外用 `--run` 与 `--mode enqueue|controller`，一次性标记拒绝重派。本文件尚未授权或派发科学worker。
 
 ## 3. 命令行调用
 
@@ -43,7 +43,7 @@ print(expected_checkpoint["baseline_count"])  # 同点有效体素数14341
 python validation/fnirt_cpu_scale_order_prepare_20261006/verify_prepare.py
 ```
 
-没有用于数值控制的现成CLI。本次未生成或上传controller，也未登记新的服务器运行叶。未来数值控制需先冻结自有worker和独立输出目录，再按PLAN由共同CPU8锁运行一次。
+[scalar_control.py](scalar_control.py) 与 [controller.py](controller.py) 已准备，但**未执行**。controller由协调者完成新叶登记、逐文件审核后用 `--mode enqueue --approved-scale-control` 唯一派发；等待共同CPU8锁最长120秒，child最长60秒、outer最长300秒。root登记INDEX时需六锁共同25秒deadline；本controller不修改INDEX。无上传、排队或新的服务器运行叶。
 
 ## 4. 原软件调用与源码定义
 
@@ -77,11 +77,12 @@ python validation/fnirt_cpu_scale_order_prepare_20261006/verify_prepare.py
 
 ## 6. 更新记录与后续边界
 
+- 准备修订：修正finally清理抛错可能丢失receipt的问题；自然退出、ESRCH竞态和等待失败转SIGKILL的三项标准库mock通过，真实信号/进程/科学worker均0。见 [准备核验](PREPARATION_CHECKS.public.json)。
 - 本轮：现场核对canonical main `7ff215ee`及registration/spline/assembly哈希，读取348字节Ref头，准备4成员标量计划；科学/上传/排队0。
 - 上轮：导数轴除法控制完成17前置门，总gradient未改善；原负结果不变。
 - 较早控制：仅替换保存moving输入，totalg残差下降，仍未逐位一致；原报告继续保留。
 
-若未来serial sum和最终分组与baseline逐位相同，或没有改善，保留这一排除结论，转到输入缓存或独立有限Jte控制，不重复此试验。新worker尚未实现/冻结/执行，所有生产和GPU路径保持现状。
+若未来serial sum和最终分组与baseline逐位相同，或没有改善，保留这一排除结论，转到输入缓存或独立有限Jte控制，不重复此试验。新worker/controller已实现并冻结，但没有数值运行。JSON shape/scalar显式转换为Python内置类型；数组/来源/精度旗标前后守卫保留。所有生产和GPU路径保持现状。
 
 ## 7. 原实现、许可与参考
 
