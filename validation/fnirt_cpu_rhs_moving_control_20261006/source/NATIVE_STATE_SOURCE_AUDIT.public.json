@@ -1,0 +1,61 @@
+{
+  "scope": "readonly source definitions and saved-state identities; no native run, array values or math",
+  "native_state": {
+    "relative_path": "runs/smri_cpu_20261004/remaining_20261004/synth/fnirt-pcg-shared-v2/oracle/state.json",
+    "bytes": 725,
+    "sha256": "c133c9accd2ffd7baba60da395b17e6ffddba42daf482482631e175ff88bb431"
+  },
+  "native_solve3": {
+    "solve": 3,
+    "lm_damping": 0.001,
+    "old_damping": 0,
+    "regularization_lambda": 9049.463427795125,
+    "cost_before": 61.819243802234425,
+    "trial_cost": 60.48043317967867,
+    "accepted": true,
+    "native_cg_status": 0,
+    "native_cg_iterations": 69,
+    "native_relative_residual": 0.0002717867671587692,
+    "observer_max_abs": 0
+  },
+  "native_lambda_equals_control": true,
+  "native_base_lambda": 150.0,
+  "native_mean_SSD_explicitly_saved": false,
+  "native_SSD_bit_identity_established": false,
+  "native_cost_before_is_saved": true,
+  "current_saved_SSD": 60.329756040354546,
+  "definitions": [
+    {
+      "source": "FSL/src/fsl-fnirt/fnirt_costfunctions.h",
+      "bytes": 28346,
+      "sha256": "4eee3e47b8f314f614789e14ea06fd1a797ceac6325df6216c3535bc41e2eb7e",
+      "lines": [
+        297,
+        338
+      ],
+      "meaning": "Lambda returns latest_ssd*lambda in SSD-weighted mode; latest_ssd setter"
+    },
+    {
+      "source": "FSL/src/fsl-fnirt/fnirt_costfunctions.cpp",
+      "bytes": 45537,
+      "sha256": "300bcf80839cb1591870845534f87778aa06d04785c22d76bf5100cd2474006a",
+      "lines": [
+        897,
+        898,
+        929,
+        973,
+        980
+      ],
+      "meaning": "cf computes mean SSD, updates latest_ssd, adds regularization; grad uses Lambda at saved state"
+    }
+  ],
+  "limitations": [
+    "Source definition identity is not a runtime call/kernel trace.",
+    "Lambda/150 is not an exact saved native SSD.",
+    "Native samepoint cached Ref/ScaledRef/Robj/Mask/Deriv/Jte/bending components unavailable.",
+    "Fixed lambda matching does not establish native SSD/cost/gradient equality."
+  ],
+  "readonly_index_sha256_at_read": "76253bb419455532d9b1e1edf626dfdc8eff5c9dfe9017b5a9c1d8d443c8a313",
+  "scientific_workers": 0,
+  "native_calls": 0
+}
