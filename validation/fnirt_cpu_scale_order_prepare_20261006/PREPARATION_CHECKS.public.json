@@ -1,5 +1,5 @@
 {
-  "scope": "Targeted stdlib mocks of corrected finite cleanup only; not scalar worker execution or MRI benchmark",
+  "scope": "Targeted stdlib cleanup mocks and controller lock-inheritance AST checks only; no scalar worker, subprocess execution or MRI benchmark",
   "syntax_files": [
     "contracts.py",
     "scalar_control.py",
@@ -63,7 +63,20 @@
   "numeric_worker_calls": 0,
   "unexecuted_prepare_freezes_superseded": [
     "a7a4a7800cd3b5cfb37c07bb29b54f2072b547fa7564b25c750a1c4acc9c3d30",
-    "25a1c0fc61deebcac679e55140d7a3d7a82e7905e8e4fb37f1475c5b9452f173"
+    "25a1c0fc61deebcac679e55140d7a3d7a82e7905e8e4fb37f1475c5b9452f173",
+    "d3ccb396f6ebc801dba00feb459092bf3159b322f2409465ae5ca4649189ab22"
   ],
-  "correction": "finally cleanup could raise before receipts; helper now returns typed failure metadata, handles ESRCH race, records every wait/signal failure and emits dedicated cleanup receipt before after-source checks."
+  "correction": "finally cleanup could raise before receipts; helper now returns typed failure metadata, handles ESRCH race, records every wait/signal failure and emits dedicated cleanup receipt before after-source checks. Scalar child now inherits the held CPU8 lock descriptor; finally records unreaped_child_retains_lock before the cleanup receipt and closes only the parent descriptor. README output list now states actual FP64 hex/absolute_difference only.",
+  "lock_inheritance_AST": {
+    "passed": true,
+    "scalar_Popen_pass_fds": "(lock_fd,)",
+    "parent_finally_closes_own_fd": true,
+    "unreaped_child_retains_lock_builtin_bool": true,
+    "retention_record_precedes_cleanup_receipt": true,
+    "explicit_LOCK_UN_absent": true,
+    "real_subprocesses_created": 0,
+    "real_OS_signals_sent": 0,
+    "scalar_worker_unchanged": true,
+    "source_products_unchanged": true
+  }
 }

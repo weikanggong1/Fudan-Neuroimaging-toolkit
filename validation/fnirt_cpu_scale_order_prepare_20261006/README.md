@@ -30,7 +30,7 @@ print(expected_checkpoint["baseline_count"])  # 同点有效体素数14341
 | 保存官方totalg | FP64 `[1177]`；仅未来自身两臂完成后读最后8字节作scale对照 |
 | 保存Ref影像头 | gzip首348字节；核对FP32图像schema与radiological X-fast扫描方向，不读像素 |
 
-输出仅包含标量、FP64 hex/ULP、schema、哈希、旗标和退出码。数组、完整官方源码和动态库不进入GitHub。[输入和参考绑定](EXPECTED.public.json)列出每项schema/stride/SHA。
+输出仅包含标量、FP64 hex、absolute_difference、schema、哈希、旗标和退出码。数组、完整官方源码和动态库不进入GitHub。[输入和参考绑定](EXPECTED.public.json)列出每项schema/stride/SHA。
 
 `PLAN.public.json`参数：`canonical_leaf_proposed`指定未来独立源码/运行叶；`input_arrays`限定恢复成员；`input_shape`/`max_small_image_voxels`限定大小；`gate_order`固定前置门顺序；`maximum_calls`限定科学调用；`resource_limits`限定CPU8亲和性、锁等待120秒、worker60秒、controller300秒和8GB地址空间；`default_adoption_policy`规定失败即停、不放宽门槛、不变更GPU；`coefficient_Jte_trial`明确需另立计划。参数 `--root`/`--workspace` 指向已有canonical根与独立冻结源码；`--output`指定新建scalar输出；`--canonical-main-commit`绑定派发时现场核实的main40位SHA；`--approved-scale-control`表示协调者已审定这一个有限范围；controller额外用 `--run` 与 `--mode enqueue|controller`，一次性标记拒绝重派。本文件尚未授权或派发科学worker。
 
@@ -77,7 +77,7 @@ python validation/fnirt_cpu_scale_order_prepare_20261006/verify_prepare.py
 
 ## 6. 更新记录与后续边界
 
-- 准备修订：修正finally清理抛错可能丢失receipt的问题；自然退出、ESRCH竞态和等待失败转SIGKILL的三项标准库mock通过，真实信号/进程/科学worker均0。见 [准备核验](PREPARATION_CHECKS.public.json)。
+- 准备修订：子进程继承共同CPU锁；若清理后仍未回收，记录`unreaped_child_retains_lock`并由子进程继续持锁，父进程仅关闭自身FD；仅标准库AST核验，无新增子进程。修正finally清理抛错可能丢失receipt的问题；自然退出、ESRCH竞态和等待失败转SIGKILL的三项标准库mock通过，真实信号/进程/科学worker均0。见 [准备核验](PREPARATION_CHECKS.public.json)。
 - 本轮：现场核对canonical main `7ff215ee`及registration/spline/assembly哈希，读取348字节Ref头，准备4成员标量计划；科学/上传/排队0。
 - 上轮：导数轴除法控制完成17前置门，总gradient未改善；原负结果不变。
 - 较早控制：仅替换保存moving输入，totalg残差下降，仍未逐位一致；原报告继续保留。

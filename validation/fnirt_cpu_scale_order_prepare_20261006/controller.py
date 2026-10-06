@@ -131,6 +131,7 @@ def main():
     started = invocation_started
     report = {'status':'started','controller':pid_record(os.getpid()),'freeze':freeze_record,
               'worker_started':False,'worker_returncode':None,'exit_code':1,'retry':False,
+              'unreaped_child_retains_lock':False,
               'bindings_before':before,'harness_before':frozen,'source_inputs_unchanged':False,'postcheck_errors':[]}
     deadline = started + 300
     lock_fd, child, code = None, None, 1
@@ -170,7 +171,7 @@ def main():
                    '--workspace',str(args.workspace),'--output',str(args.run/'scalar'),
                    '--canonical-main-commit',args.canonical_main_commit,'--approved-scale-control']
         with (args.run/'scalar.log').open('xb') as log:
-            child = subprocess.Popen(command,stdout=log,stderr=subprocess.STDOUT,env=env,preexec_fn=child_limits,start_new_session=True)
+            child = subprocess.Popen(command,stdout=log,stderr=subprocess.STDOUT,env=env,preexec_fn=child_limits,start_new_session=True,pass_fds=(lock_fd,))
             report['worker_started'] = True
             report['worker'],report['command'] = pid_record(child.pid),command
             write_json(args.run/'worker_launch.private.json',report)
@@ -189,6 +190,9 @@ def main():
         code = 124 if isinstance(error,TimeoutError) else 1
     finally:
         report['final_cleanup'] = terminate_owned(child, grace_seconds=0)
+        report['unreaped_child_retains_lock'] = bool(lock_fd is not None and child is not None
+                                                   and report['final_cleanup']['still_running'])
+        report['final_cleanup']['unreaped_child_retains_lock'] = report['unreaped_child_retains_lock']
         if report['final_cleanup']['still_running'] or report['final_cleanup']['errors']:
             code = code or 1
             report['status'] = 'failed_cleanup_stopped_no_retry'
