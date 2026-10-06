@@ -1,0 +1,190 @@
+{
+  "scope": "current_saved_moving_accumulation_contract",
+  "status": "unique_completed_scalar_control_not_integrated",
+  "source_commit": "3dc99bef147d40299e6510f026f62283819eef31",
+  "canonical_main_commit": "7ff215ee86c49414b2fa6156fdf6769aa54d00f8",
+  "freeze_sha256": "cb3b5827062ea652149ab15c65da4a2f532c38beca6cdfb1fd5ed5f681107f02",
+  "manifest_sha256": "599ef02dc15790421d434c062585915c4dedf19837744d614976be3bf443f751",
+  "unique_controller_and_worker": true,
+  "scientific_retries": 0,
+  "source_bindings": 23,
+  "input_bindings": 7,
+  "operand_bindings": 7,
+  "calls": {
+    "NPZ_member_restore": 4,
+    "baseline_scalar_pair": 1,
+    "scalar_FP32_product_pair": 1,
+    "serial_reduction_pair": 1,
+    "native_saved_g_tail8_read": 1
+  },
+  "prohibited_calls": {
+    "sampler": 0,
+    "coordinates": 0,
+    "Jte": 0,
+    "bending": 0,
+    "H": 0,
+    "diag": 0,
+    "PCG": 0,
+    "SCG": 0,
+    "native_program": 0,
+    "GPU": 0,
+    "raw_MRI": 0,
+    "full_FNIRT": 0
+  },
+  "baseline_gates_bitexact": true,
+  "serial_candidates": {
+    "dot_sum": {
+      "value": -74946.24645094977,
+      "FP64_little_endian_hex": "158d76f1234cf2c0"
+    },
+    "SSD_sum": {
+      "value": 865189.0313747242,
+      "FP64_little_endian_hex": "0d5910104a672a41"
+    },
+    "source_group_scale": {
+      "value": 10.452025165741547,
+      "FP64_little_endian_hex": "69a8afd76fe72440"
+    },
+    "existing_group_scale": {
+      "value": 10.452025165741547,
+      "FP64_little_endian_hex": "69a8afd76fe72440"
+    },
+    "serial_SSD": {
+      "value": 60.329756040354525,
+      "FP64_little_endian_hex": "967d2872352a4e40"
+    },
+    "scan": "z outer/y middle/x inner forward; masked FP32 terms promoted before each FP64 add"
+  },
+  "own_scalar_comparison": {
+    "serial_source_scale_vs_baseline": {
+      "bitexact": false,
+      "reference": {
+        "value": 10.452025165741516,
+        "FP64_little_endian_hex": "57a8afd76fe72440"
+      },
+      "actual": {
+        "value": 10.452025165741547,
+        "FP64_little_endian_hex": "69a8afd76fe72440"
+      },
+      "absolute_difference": 3.197442310920451e-14
+    },
+    "serial_existing_scale_vs_baseline": {
+      "bitexact": false,
+      "reference": {
+        "value": 10.452025165741516,
+        "FP64_little_endian_hex": "57a8afd76fe72440"
+      },
+      "actual": {
+        "value": 10.452025165741547,
+        "FP64_little_endian_hex": "69a8afd76fe72440"
+      },
+      "absolute_difference": 3.197442310920451e-14
+    },
+    "serial_SSD_vs_baseline": {
+      "bitexact": false,
+      "reference": {
+        "value": 60.329756040354546,
+        "FP64_little_endian_hex": "997d2872352a4e40"
+      },
+      "actual": {
+        "value": 60.329756040354525,
+        "FP64_little_endian_hex": "967d2872352a4e40"
+      },
+      "absolute_difference": 2.1316282072803006e-14
+    },
+    "final_grouping_at_same_serial_sum": {
+      "bitexact": true,
+      "reference": {
+        "value": 10.452025165741547,
+        "FP64_little_endian_hex": "69a8afd76fe72440"
+      },
+      "actual": {
+        "value": 10.452025165741547,
+        "FP64_little_endian_hex": "69a8afd76fe72440"
+      },
+      "absolute_difference": 0.0
+    }
+  },
+  "posthoc_native_scale_comparison": {
+    "native_scale": {
+      "value": 10.452032835660868,
+      "FP64_little_endian_hex": "5dc30bd970e72440"
+    },
+    "baseline": {
+      "bitexact": false,
+      "reference": {
+        "value": 10.452032835660868,
+        "FP64_little_endian_hex": "5dc30bd970e72440"
+      },
+      "actual": {
+        "value": 10.452025165741516,
+        "FP64_little_endian_hex": "57a8afd76fe72440"
+      },
+      "absolute_difference": 7.669919352082388e-06
+    },
+    "serial_source_group": {
+      "bitexact": false,
+      "reference": {
+        "value": 10.452032835660868,
+        "FP64_little_endian_hex": "5dc30bd970e72440"
+      },
+      "actual": {
+        "value": 10.452025165741547,
+        "FP64_little_endian_hex": "69a8afd76fe72440"
+      },
+      "absolute_difference": 7.669919320107965e-06
+    },
+    "serial_existing_group": {
+      "bitexact": false,
+      "reference": {
+        "value": 10.452032835660868,
+        "FP64_little_endian_hex": "5dc30bd970e72440"
+      },
+      "actual": {
+        "value": 10.452025165741547,
+        "FP64_little_endian_hex": "69a8afd76fe72440"
+      },
+      "absolute_difference": 7.669919320107965e-06
+    },
+    "input_cache_identity_unestablished": true,
+    "interpretation": "Current-moving scalar-order contract; this is not the substituted-moving projection residual context."
+  },
+  "same_input_context_as_prior_moving_substitution": false,
+  "does_not_explain_prior_projection_scale_error": true,
+  "native_samepoint_input_caches_established": false,
+  "source_inputs_unchanged": true,
+  "flags_unchanged": true,
+  "controller_exit_code": 0,
+  "worker_exit_code": 0,
+  "controller_seconds": 1.8499818844720721,
+  "worker_until_summary_seconds": 1.568003285676241,
+  "CPU8_lock_wait_seconds": 0.010545705445110798,
+  "process_maxrss_KiB": 319860,
+  "controller_reaped": true,
+  "worker_reaped": true,
+  "common_lock_inode": 5185616833,
+  "LOCK_NB_acquired_after_completion": true,
+  "production_integration_accepted": false,
+  "numeric_library_versions": {
+    "torch": "2.5.1",
+    "numpy": "1.26.4"
+  },
+  "CPU_threads": 8,
+  "CPU_affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "address_space_bytes": 8000000000,
+  "worker_limit_seconds": 60,
+  "controller_limit_seconds": 300,
+  "outer_lock_wait_limit_seconds": 120,
+  "source_transfer_payload_files": 11,
+  "source_transfer_total_files": 12,
+  "existing_preparation_leaf": "validation/fnirt_cpu_scale_order_prepare_20261006"
+}
