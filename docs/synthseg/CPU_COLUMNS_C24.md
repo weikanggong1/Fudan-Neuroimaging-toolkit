@@ -1,10 +1,10 @@
-# SynthSeg C24 列缓冲复用（生产接入草稿，2026-10-06）
+# SynthSeg C24 列缓冲复用（2026-10-06）
 
 ## 1. 功能与状态
 
-本草稿为普通 SynthSeg 33 类网络 `SegmentUNet.down[0].conv1` 增加可选 CPU 列缓冲复用。它保持原 32 平面分块、C/kD/kH/kW 列顺序、FP32、偏置预填和同一个已加载 LP64 SGEMM。columns、slab output 两个 scratch 只在当前层调用内存在，返回即释放。
+本版本为普通 SynthSeg 33 类网络 `SegmentUNet.down[0].conv1` 增加可选 CPU 列缓冲复用。它保持原 32 平面分块、C/kD/kH/kW 列顺序、FP32、偏置预填和同一个已加载 LP64 SGEMM。columns、slab output 两个 scratch 只在当前层调用内存在，返回即释放。
 
-[独立真实层](../../validation/smri_cpu/seg_columns_c24_real_results_20261006/README.md)已测两次前向 10.889→5.003 秒、六次完整位比较差 0。本草稿尚未执行生产缓存编译或完整 CPU/GPU 模型验证。完整性能、分割和 CSV 门待[有限计划](../../validation/smri_cpu/seg_columns_c24_integration_prepare_20261006/PLAN.json)审查执行。
+[独立真实层](../../validation/smri_cpu/seg_columns_c24_real_results_20261006/README.md)已测两次前向 10.889→5.003 秒、六次完整位比较差 0。[完整生产验收](../../validation/smri_cpu/seg_columns_c24_integration_20261006/README.md)的 metadata 冷/暖、CPU ABBA、GPU AB 及保存输出评分全部通过：CPU API 中位85.499→80.621秒，改善5.706%；完整分割/CSV/header保持。完整官方CPU速度目标仍未通过。原[有限计划](../../validation/smri_cpu/seg_columns_c24_integration_prepare_20261006/PLAN.json)作为冻结准备记录保留。
 
 ```mermaid
 flowchart LR
@@ -20,7 +20,7 @@ flowchart LR
 
 ## 2. Python、输入、输出与参数
 
-公共调用没有新算法参数；以下是草稿完成验收后沿用的调用方式：
+公共调用没有新算法参数；以下沿用成熟调用方式：
 
 ```python
 from pathlib import Path
@@ -46,11 +46,11 @@ segmentation_result.segmentation.save(output_segmentation_path)
 segmentation_result.write_volumes_csv(input_t1_path, output_volumes_path)
 ```
 
-输入可为原接口接受的 NIfTI 路径或 nibabel 三维影像。输出仍为整数分割图、各脑区 mm³ 软体积 CSV、总颅内容积、标签名称及真实 precision 记录；网格和字段详见[SynthSeg](README.md)。上述示例未在本草稿重跑。
+输入可为原接口接受的 NIfTI 路径或 nibabel 三维影像。输出仍为整数分割图、各脑区 mm³ 软体积 CSV、总颅内容积、标签名称及真实 precision 记录；网格和字段详见[SynthSeg](README.md)。本轮真实验收使用同参数的完整Python API；此示例路径为占位符，未追加推理。
 
 内部资格只覆盖原图与翻转图的 `[1,24,192,224,256]` CPU 普通 FP32 Tensor，以及 `down[0].conv1` 的实际 `[24,24,3,3,3]` kernel、`[24]` bias。参数逐位 SHA 必须匹配已验证模型。eval/no-grad、oneDNN=False、无 autocast/hooks/forward AD/懒负或共轭视图，stride/dilation=1、padding=1、groups=1，当前 intra 线程必须 8。输出同形状、连续、FP32，不别名输入/参数。helper 不设置线程、TF32、autocast、allocator 或调用方环境。
 
-`ParcUNet` 没有 C24 标记；默认 Plus/fast 的 oneDNN=True 路径不触发。本草稿没有扩大权重、层或 shape 范围。
+`ParcUNet` 没有 C24 标记；默认 Plus/fast 的 oneDNN=True 路径不触发。本优化保持已验证权重、层和shape范围。
 
 ## 3. CLI、Conda 与缓存
 
@@ -66,7 +66,7 @@ fnit synthseg --i /data/example/T1w.nii.gz \
 
 新私有 C24 cache 默认位于既有 CPU cache 根的 `c24` 子目录，或由 `FNIT_SYNTHSEG_C24_CPU_CACHE` 指定本人拥有的 0700 目录。C72 原 `FNIT_SYNTHSEG_CPU_CACHE` 含义不变。C24 按独立源码、原接受的运行库/headers/provider/GCC/flags 身份与导出符号生成新键；0600 lock/manifest/DSO，原子发布。构建失败在本进程对应键记录，不改 C72 的缓存或失败账本。
 
-编译复用成熟 builder 的 flags 与 linker/rpath：C++17、GCC11、ABI0、`-O2 -fno-fast-math -ffp-contract=off -fopenmp`，compiler 120 秒，锁 15 秒。目标外平台或版本在数值前回退。wheel 已有 `synthseg_parc/*.cpp` 配置；本草稿已在 `MANIFEST.in` 明确包含 `_columns_c24.cpp`，并用 setuptools FileList 核验 source inclusion。实际打包文件清单和新独立 Conda 安装仍待验证。
+编译复用成熟 builder 的 flags 与 linker/rpath：C++17、GCC11、ABI0、`-O2 -fno-fast-math -ffp-contract=off -fopenmp`，compiler 120 秒，锁 15 秒。目标外平台或版本在数值前回退。wheel 已有 `synthseg_parc/*.cpp` 配置；`MANIFEST.in` 已明确包含 `_columns_c24.cpp`，实际sdist的CPP和两个Python helper成员bytes/SHA与冻结源码相同。完整wheel和新独立Conda安装未测。
 
 ## 4. 原软件与原步骤
 
@@ -79,22 +79,24 @@ mri_synthseg --i /data/example/T1w.nii.gz \
 
 内部 conv1 没有独立官方 CLI。候选保持成熟 FP32 CPU 的 K=648、N=24、M=1,835,008、每 slab 32 平面；NN、lda/ldc=实际 M、ldb=648、alpha=beta=1。使用原加载的公共 SGEMM 指针，不寻找或加载第二套 BLAS。
 
-## 5. 已有精度、时间、资源与待测整例
+## 5. 最新精度、时间、资源与整例
 
 独立真实层 ABBA 中位两次前向 **10.889→5.003 秒，2.177 倍**。B1/B2/A2 的原图/翻转图六次完整 FP32 uint32 比较均不同位元素 0、最大绝对差 0；shape/stride/finite、输入/参数/flags/源码门通过。最大 RSS **9,769,492,480 B**。这是单层证据，不能作为新完整模型结果。
 
-计划先两个新 metadata worker 编译/复用独立 C24 contract cache（1/0 次编译、0 数学，AS 8 GB、worker/child RSS 各 4 GB，Torch 线程原值只读保持），再普通 33 类 CPU A1/B1cold/B2warm/A2、GPU A/B。CPU 每臂 600 秒、AS/RSS 各 32 GB；GPU 每臂 300 秒、allocated/reserved 和本人进程树采样各 20 GB。C72 复用已核验 warm cache，四臂始终编译 0 次；B1 在新 C24 cache 编译一次并单列实际 compiler 秒，B2 使用同 cache 的新进程。
+实际先两个新 metadata worker 编译/复用独立 C24 contract cache（1/0 次编译、0 数学，AS 8 GB、worker/child RSS 各 4 GB，Torch 线程原值只读保持），再普通 33 类 CPU A1/B1cold/B2warm/A2、GPU A/B。CPU 每臂 600 秒、AS/RSS 各 32 GB；GPU 每臂 300 秒、allocated/reserved 和本人进程树采样各 20 GB。C72 复用已核验 warm cache，四臂始终编译 0 次；B1 在新 C24 cache 编译一次并单列实际 compiler 秒，B2 使用同 cache 的新进程。
+
+实际CPU API中位85.499377→80.620943秒（5.705812%）；冷进程中位98.352197→83.310557秒（15.293649%的观察）。首baseline未细分检查/收尾20.286242秒，其余约0.125秒；检查时间差异原因尚未定位，单列为观察。新旧9,072,000体素、软CSV、全部NIfTI struct及13项控制一致；对官方保留1体素差、最大软CSV差0.8mm³，新增错误0。CPU峰值RSS13.419954GB，CPU cold实际编译0.653401秒。GPU完整图/CSV及allocated10.712467GB/reserved14.615052GB逐字相同，sampled本人树15.177089GB；单共享AB时钟只观察。
 
 每个完整臂先保存完整图/CSV/原回执，马上核同名 gzip 与 CSV 的全部 bytes/SHA，再派下一臂。完整文件 SHA 同时固定全部标签、CSV、header 和 extension 字节。GPU 必须保留 FP32、原 TF32/autocast 与恢复、相同 UUID 和 allocated/reserved，4 个 CPU optional 模块未 import、编译/复制/SGEMM/probe 为 0，记录 driver 有效样本、最大 gap 与失败，单对计时只作观察。首次失败停止，无重试或阈值更改。
 
-草稿无新的分割脑图。既有 C72 完整脑图和官方对照见[已验收报告](../../validation/smri_cpu/seg_columns_integration_20261006/README.md)；新完整结果和脑图须由本计划的实际输出生成。
+新完整CPU A1/B2输出整SHA与旧C72图的来源相同，故复用[既有CC0标签图](../../validation/smri_cpu/seg_columns_integration_20261006/case02_current_cpu_labels.png)，没有重新绘图；PNG整文件SHA及来源绑定见[最新完整报告](../../validation/smri_cpu/seg_columns_c24_integration_20261006/README.md)。
 
 ## 6. 更新与验收记录
 
-- 当前生产草稿：旧 C72 与新 C24 guard/cache 共 56 项软件合同通过；C24 队列的成功、图差、compiler 次数差和 worker 后置失败 4 项控制合同通过，另 4 项资源控制合同通过（同锁继承、未回收、中断清理、outer alarm）。完整 worker 逐 pass 核实际输入/输出及参数 device/dtype、全部精度 flags 与 PLAN 一致，才能通过 valid 门。它们不运行 compiler、SGEMM、MRI 或完整 CNN。
+- 冻结生产接入：旧 C72 与新 C24 guard/cache 共 56 项软件合同通过；C24 队列的成功、图差、compiler 次数差和 worker 后置失败 4 项控制合同通过，另 4 项资源控制合同通过（同锁继承、未回收、中断清理、outer alarm）。完整 worker 逐 pass 核实际输入/输出及参数 device/dtype、全部精度 flags 与 PLAN 一致，才能通过 valid 门。它们不运行 compiler、SGEMM、MRI 或完整 CNN。
 - [C24 真实层报告](../../validation/smri_cpu/seg_columns_c24_real_results_20261006/README.md)已提交 `05f36b86`，冻结采集/ABBA 源不修改。
 - [C24 短合同](../../validation/smri_cpu/seg_columns_c24_contracts_20261006/README.md)及真实层均验收；生产 CPP 字节和数学 AST 与该已验证原型相同，避免重复合成数值试验。
-- 新生产 cache 编译/加载、完整 CPU/GPU、打包源检查待根任务审查后一次执行。共享安装入口、根总表、main 发布由根任务维护。
+- `2e503082`实际metadata cold/warm、CPU4/GPU2各一次、保存输出评分一次均通过；实际编译2次、完整forward12次，0科学重试、0新官方/native/后验CNN/GPU/绘图。sdist源检查通过，完整wheel/全新Conda install未测；共享总表和main发布由根任务整合。
 
 ## 7. 来源、许可与参考
 
