@@ -82,7 +82,7 @@ FNIT_EXISTING_ENV_PREFIX="$(readlink -f "$FNIT_SERVER_ROOT/envs/default")"  # �
 
 ## 4. 原软件调用与源码定义
 
-这两项是FNIRT内部标量，没有独立原软件CLI；完整注册调用见[TorchFNIRT功能说明](../../docs/fnirt/README.md)。本次没有启动原软件。依据已安装FSL6.0.7.4源定义，SSD在FP32 residual平方后按Z/Y/X累入Double再除count；scale使用FP32 Ref×residual及masked Double扫描，factor在累加后应用。审计行号与SHA见[源码审计](../fnirt_cpu_scale_order_prepare_20261006/SOURCE_AUDIT.public.json)：`fnirt_costfunctions.cpp:885–898,992–993`、`intensity_mappers.cpp:424–427`、`newimagefns.h:644–658`。
+这两项是FNIRT内部标量，没有独立原软件CLI；完整注册调用见[TorchFNIRT功能说明](../../docs/fnirt/README.md)。本次没有启动原软件。依据原审计固定的FSL6.0.7.4源码定义，SSD在FP32 residual平方后按Z/Y/X累入Double再除count；scale使用FP32 Ref×residual及masked Double扫描，factor在累加后应用。审计行号与SHA见[源码审计](../fnirt_cpu_scale_order_prepare_20261006/SOURCE_AUDIT.public.json)：`fnirt_costfunctions.cpp:885–898,992–993`、`intensity_mappers.cpp:424–427`、`newimagefns.h:644–658`。
 
 自有worker从当前FNIT `evaluate`的SSD表达式和既有FSL-order控制的scale表达式提取AST，产品只执行一次，baseline和串行扫描共享这些不可变FP32产品。不复制原软件源、头、库或二进制。
 
