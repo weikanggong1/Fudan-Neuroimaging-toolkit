@@ -1,0 +1,365 @@
+{
+  "schema": "fnirt-saved-projection-diagonal-only-public-aggregate/v1",
+  "date": "2026-10-06",
+  "status": "accepted_isolated_saved_state_diagonal_control",
+  "production_adopted": false,
+  "GPU_changed": false,
+  "CPU_only": true,
+  "full_registration_or_end_to_end_speed_claimed": false,
+  "native_components_independently_saved": false,
+  "native_data_inferred_from_subtraction": false,
+  "projection_is_actual_CF_binary_trace": false,
+  "cache_latestSSD_equivalence_proven": false,
+  "fixed_lambda": 9049.463427795125,
+  "fixed_count": 14341,
+  "dtype_layout": {
+    "fixed": "CPU Float32 [24,28,24]",
+    "mask": "CPU Boolean [24,28,24], used as Float32 in diagonal suffix",
+    "accepted_projection": "CPU Float32 [3,24,28,24], source-reference division already accepted",
+    "basis_x_y_z": "CPU Float64 [24,7]/[28,8]/[24,7]",
+    "saved_bending_diagonal": "CPU Float64 [7,8,7], geometry cache, not recomputed",
+    "candidate_half_full_nudged": "CPU Float64 [1177]: coefficient X/Y/Z392 each plus scale1",
+    "candidate_data_half_xyz": "CPU Float64 [3,7,8,7]",
+    "candidate_regularizer_half_shared_xyz": "CPU Float64 [1,7,8,7], shared across axes",
+    "units": "mature diagonal=half-normal; full=2*half; native Hbefore is undamped full matrix; saved native post is nudged A diagonal"
+  },
+  "nudge": {
+    "lm_damping": 0.001,
+    "old_damping": 0.0,
+    "factor": 1.001,
+    "candidate_full_to_nudged_calls": 1,
+    "native_saved_nudged_compared_directly": true,
+    "native_Hbefore_obtained_by_inverse_nudge": false
+  },
+  "calls": {
+    "design_diagonal": 3,
+    "design_einsum": 9,
+    "saved_bending_diagonal_read": 1,
+    "scale_diagonal": 1,
+    "pack_half_diagonal": 1,
+    "half_to_full": 1,
+    "candidate_fixed_nudge": 1,
+    "native_pre_diagonal_decode": 1,
+    "native_post_diagonal_decode": 1,
+    "evaluate": 0,
+    "SSD": 0,
+    "g": 0,
+    "projection": 0,
+    "coordinate": 0,
+    "API": 0,
+    "normal": 0,
+    "adjoint": 0,
+    "bending_normal": 0,
+    "bending_diagonal_rebuild": 0,
+    "native": 0,
+    "JIT": 0,
+    "full_H": 0,
+    "PCG": 0,
+    "full": 0,
+    "GPU": 0
+  },
+  "input_closure": {
+    "checkpoint_members_restored": [
+      "fixed",
+      "state_mask",
+      "basis_0",
+      "basis_1",
+      "basis_2",
+      "bending_diagonal"
+    ],
+    "checkpoint_restored_count": 6,
+    "other_checkpoint_members_header_only": 62,
+    "logical_payload_bytes": 88256,
+    "binding_count_before_after": 54,
+    "deployment_and_close_byte_binding_count": 51,
+    "all_gate_count": 114,
+    "all_gates_passed": true,
+    "prior_division_projection_gates": 157,
+    "prior_source_reference_signedzero_words": 48384,
+    "source_input_before_after_exact": true,
+    "immutable_restored_derived_exact": true,
+    "runtime_before_after_exact": true,
+    "packet14_exact": true,
+    "output_files_exact": 6,
+    "owned_process_PID_start_tree_exited": true,
+    "owned_process_count": 4,
+    "common_CPU8_lock_released": true,
+    "six_INDEX_locks_used": true,
+    "peer_keys_preserved": true
+  },
+  "runtime": {
+    "torch_intra": 8,
+    "torch_interop": 96,
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cuda_initialized": false,
+    "default_dtype": "torch.float32",
+    "grad_enabled": true
+  },
+  "resources": {
+    "CPU_physical_cores": 8,
+    "AS_bytes": 8000000000,
+    "RSS_cap_bytes": 4000000000,
+    "peak_owned_tree_RSS_bytes": 353566720,
+    "worker_limit_seconds": 120,
+    "work_limit_seconds": 180,
+    "OS_limit_seconds": 240,
+    "cleanup_seconds": 10,
+    "attempts": 1,
+    "retry": 0
+  },
+  "clocks_seconds": {
+    "mature_diagonal_suffix": 0.004824773408472538,
+    "worker": 1.9882352743297815,
+    "supervisor": 2.3027869518846273,
+    "outer": 2.3689697068184614
+  },
+  "clock_scope": "one cold saved-state diagonal diagnostic; worker includes imports and checks; no separately measured import or warm costs, no JIT or end-to-end speed comparison",
+  "metrics": {
+    "full_vs_native_H_before_nudge_diagonal": {
+      "full": {
+        "count": 1177,
+        "bit_mismatches": 1166,
+        "maxabs": 3.637978807091713e-12,
+        "difference_L2": 3.637978881922238e-12,
+        "reference_L2": 5132.688093374891,
+        "relative_L2": 7.08786276457754e-16,
+        "signed_zero_bit_mismatches": 0,
+        "allfinite": true
+      },
+      "blocks": {
+        "coefficient_x": {
+          "count": 392,
+          "bit_mismatches": 390,
+          "maxabs": 2.498001805406602e-16,
+          "difference_L2": 5.161805130615103e-16,
+          "reference_L2": 0.24826196366777492,
+          "relative_L2": 2.079176791464781e-15,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "coefficient_y": {
+          "count": 392,
+          "bit_mismatches": 389,
+          "maxabs": 1.8041124150158794e-16,
+          "difference_L2": 3.832232141554388e-16,
+          "reference_L2": 0.163394679564634,
+          "relative_L2": 2.345383675750882e-15,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "coefficient_z": {
+          "count": 392,
+          "bit_mismatches": 386,
+          "maxabs": 1.457167719820518e-16,
+          "difference_L2": 3.6216209043763614e-16,
+          "reference_L2": 0.23391457608062333,
+          "relative_L2": 1.5482664505388059e-15,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "global_scale": {
+          "count": 1,
+          "bit_mismatches": 1,
+          "maxabs": 3.637978807091713e-12,
+          "difference_L2": 3.637978807091713e-12,
+          "reference_L2": 5132.688079439907,
+          "relative_L2": 7.087862638028647e-16,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        }
+      }
+    },
+    "nudged_vs_native_saved_nudged_diagonal": {
+      "full": {
+        "count": 1177,
+        "bit_mismatches": 1166,
+        "maxabs": 3.637978807091713e-12,
+        "difference_L2": 3.637978882127212e-12,
+        "reference_L2": 5137.8207814682655,
+        "relative_L2": 7.080781982993898e-16,
+        "signed_zero_bit_mismatches": 0,
+        "allfinite": true
+      },
+      "blocks": {
+        "coefficient_x": {
+          "count": 392,
+          "bit_mismatches": 390,
+          "maxabs": 2.498001805406602e-16,
+          "difference_L2": 5.168295399345505e-16,
+          "reference_L2": 0.24851022563144265,
+          "relative_L2": 2.079711362465396e-15,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "coefficient_y": {
+          "count": 392,
+          "bit_mismatches": 389,
+          "maxabs": 1.8041124150158794e-16,
+          "difference_L2": 3.8322603134939957e-16,
+          "reference_L2": 0.16355807424419863,
+          "relative_L2": 2.3430578595418535e-15,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "coefficient_z": {
+          "count": 392,
+          "bit_mismatches": 386,
+          "maxabs": 1.457167719820518e-16,
+          "difference_L2": 3.632907295502825e-16,
+          "reference_L2": 0.23414849065670393,
+          "relative_L2": 1.5515399161078516e-15,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "global_scale": {
+          "count": 1,
+          "bit_mismatches": 1,
+          "maxabs": 3.637978807091713e-12,
+          "difference_L2": 3.637978807091713e-12,
+          "reference_L2": 5137.820767519346,
+          "relative_L2": 7.080781856172476e-16,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        }
+      }
+    }
+  },
+  "first_difference_locations": {
+    "before_nudge": {
+      "vector_index": 0,
+      "block": "coefficient_x",
+      "index_in_block": 0,
+      "no_automatic_extra_block": true
+    },
+    "after_nudge": {
+      "vector_index": 0,
+      "block": "coefficient_x",
+      "index_in_block": 0,
+      "no_automatic_extra_block": true
+    }
+  },
+  "source_identity": {
+    "src/fnit/fnirt/registration.py": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "src/fnit/fnirt/spline.py": {
+      "bytes": 18840,
+      "sha256": "15ca88f8eb0aa2f1bc46c5a9b8e2486d9df0f45bac638e982907d17e086189b7"
+    },
+    "diagonal_source_control.py": {
+      "bytes": 4083,
+      "sha256": "144b57489f8361cb1d64bf1b77ae562d09e584bc46f000b0c5f1880699ae5dcb",
+      "only_module_docstring_changed": true,
+      "AST_without_docstrings_exact_to_frozen_own_helper": true
+    }
+  },
+  "mature_AST_identity": {
+    "diagonal_suffix": "2c708f6205fecaa984f910c78a92274493eb0b0fc44cf32c67b47a46c5732bec",
+    "design_diagonal": "5f5e1261e9e03aad720ab0b7738b44c042200e3fa800b897fe7b7938d291b23f",
+    "pack": "f05db1c98bdb3875ed872c608038093dc2083c1d5a1cd92225482f6a014b2831",
+    "normal_evaluate_gradient_bodies_excluded": true
+  },
+  "original_text_receipts": {
+    "DEPLOYMENT_PREFLIGHT.private.json": {
+      "bytes": 16405,
+      "sha256": "b9d557f1df9f8ee6aae6928ddd9dab713ffd7813d6e675a3bfc238141d19e452"
+    },
+    "REGISTER.private.json": {
+      "bytes": 3559,
+      "sha256": "6b58e9fe1ee440d895c080d763bbe68385f75b5a1c464b022e9e0e3670ccfeb6"
+    },
+    "PREPARED.private.json": {
+      "bytes": 1059,
+      "sha256": "94ccea63b58a45d8601af84cabcda6396bc52779ac1a7c44f52b9dbe49997538"
+    },
+    "AUTHORIZE.private.json": {
+      "bytes": 3093,
+      "sha256": "3358d36da84d8a7cfcac98fe85518d240320761ca967c3e4408a603808db15fb"
+    },
+    "DISPATCH.private.json": {
+      "bytes": 1328,
+      "sha256": "1aef14f1fbd170730edfa2e6d3dc550713690c373023f62e1c4e169b967377bd"
+    },
+    "CHILD.private.json": {
+      "bytes": 240,
+      "sha256": "ecb77b72d66ab04a8825a4b87715999ee42cb9d2b9cf346d7bdca5f61b339db1"
+    },
+    "worker.private.json": {
+      "bytes": 41904,
+      "sha256": "76cb8c854d31776d365c9f8b3ce27cda2c199b30a079c2ef274adf550e560c1f"
+    },
+    "supervisor.private.json": {
+      "bytes": 1498,
+      "sha256": "75f6352cdf282052b3a6b3dbfeea3c260a1886b5bb2890987d6dd06ac55ec280"
+    },
+    "outer.private.json": {
+      "bytes": 1550,
+      "sha256": "fce5ff51687e711529906d4d21f8492189b896a48f90d8ba4a46222c42f8e175"
+    },
+    "METRICS.private.json": {
+      "bytes": 9483,
+      "sha256": "0b9c281bdbc52fb16899ca1c1517d3fa539c9b735ad40de8c8fe1a2ca67429e3"
+    },
+    "FIRST_DIFFERENCE.private.json": {
+      "bytes": 617,
+      "sha256": "f914bbb43db88f760be21d3083c313275d2a60bf95a69974d2c76ef788bb95df"
+    },
+    "CLOSURE.private.json": {
+      "bytes": 4581,
+      "sha256": "0cefca9bcca32777a61b34b926e63fac4cdc7d370ee5eba963987a549ed1fa15"
+    },
+    "INDEX_CLOSED.private.json": {
+      "bytes": 4378,
+      "sha256": "1805385522b0d2f7251e054d80920a13e36c11e519f8f5d4ec05ebf534202f47"
+    },
+    "DISPATCH.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "supervisor.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ACTUAL_AUTH.private.json": {
+      "bytes": 2396,
+      "sha256": "db3e7a2abc6156788a488649bbaa3f56d8effebaa660c45658611e9391f6109c"
+    },
+    "INDEPENDENT_REVIEW.private.json": {
+      "bytes": 8892,
+      "sha256": "b34332a37542d71fe7862a53182b64440c6747eb3e10f769368a39ad99a44432"
+    },
+    "ROOT_SOURCE_REVIEW.private.json": {
+      "bytes": 364,
+      "sha256": "aecf4f85b18c7f3a6b8ddb634798ec8b48950dc4ad94ecc657ccc241fb5971b4"
+    },
+    "ROOT_DEPLOYMENT_AUTH.private.json": {
+      "bytes": 1013,
+      "sha256": "4767f930fd2730454e9690853edb20bcb994ca5b0e56c1e60c3a9d41e744a8d4"
+    }
+  },
+  "preparation_history": {
+    "v1_local_packet_executed": false,
+    "v2_completion_lock_free_and_own_FD_gates_added": true,
+    "peripheral_status_literal_prepare_block": {
+      "bytes": 553,
+      "sha256": "03d50d605402d1510ff06ed68600eafedff93a007f112008732e5112ccd8e9eb",
+      "before_INDEX_mutation_or_worker_Popen": true,
+      "scientific_attempts": 0
+    },
+    "actual_unique_scientific_attempts": 1,
+    "old_coordinate_and_frame_failures_retained": true
+  },
+  "privacy": "aggregate text, own FNIT source and receipt identities only; no image/coordinate/matrix array words or hashes, server/provider paths, SDK source or binary payload",
+  "independent_actual_review": {
+    "bytes": 16956,
+    "sha256": "2a2b67db1e3a831574ef12871cd59cb4b20bf63ff26bf1fa2bbf7849eff16758",
+    "actual_contract_PASS": true,
+    "numerical_bitexact": false
+  }
+}
