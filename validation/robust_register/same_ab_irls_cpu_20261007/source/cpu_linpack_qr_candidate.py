@@ -1,8 +1,10 @@
 """CPU Float LINPACK QR candidate, verified on one saved real weighted design.
 
 The first 9196-by-6 real system returned the same six Float32 words as the saved
-native SDK QR result. This candidate is confined to validation; full IRLS and
-registration acceptance remain pending. It does not replace the GPU solver.
+native SDK QR result. The natural four-iteration IRLS on the same real six-column
+system also matched all recorded boundaries. This candidate is confined to
+validation; broader registration inputs and GPU acceptance remain pending.
+It does not replace the GPU solver.
 Float work arrays and f2c Double scalar boundaries are explicit. Unsupported
 Tensor inputs return None so the caller can retain its previous implementation.
 """
