@@ -1,17 +1,21 @@
-"""从固定 CBIG 原站部署体积投影资源，校验大小与 SHA-256。"""
+"""优先从已核验 FNIT Release 部署投影资源，保留固定作者来源回退。"""
 
 import argparse
 import hashlib
+import os
 from pathlib import Path
+import tempfile
 from urllib.request import urlopen
 
 import nibabel as nib
 import numpy as np
 from nibabel.processing import resample_from_to
 
+from fnit._release_assets import release_url_for
+
 COMMIT = "b69b822a15e2a94f1e439606552fc44b6858cf3c"
 BASE = f"https://raw.githubusercontent.com/ThomasYeoLab/CBIG/{COMMIT}/"
-# Caret-derived meshes are downloaded upstream only; FNIT does not redistribute them.
+# Only assets in FNIT's license-reviewed publication catalogue use its Release.
 FILES = {
     "left_mni.surf.gii": (
         "data/templates/surface/fs_LR_32k/fsaverage.L.midthickness_mni.32k_fs_LR.surf.gii",
@@ -26,6 +30,38 @@ FILES = {
 }
 
 
+def _install_file(output: Path, name: str, relative: str, size: int, digest: str) -> Path:
+    destination = output / name
+    if destination.exists():
+        data = destination.read_bytes()
+        if len(data) != size or hashlib.sha256(data).hexdigest() != digest:
+            raise ValueError(f"resource size/SHA-256 mismatch: {name}")
+        return destination
+    release_url = release_url_for(digest, size=size)
+    urls = ([release_url] if release_url else []) + [BASE + relative]
+    last_error = None
+    for url in dict.fromkeys(urls):
+        temporary = None
+        try:
+            hasher = hashlib.sha256()
+            with urlopen(url, timeout=120) as source:
+                with tempfile.NamedTemporaryFile(dir=output, delete=False) as stream:
+                    temporary = Path(stream.name)
+                    for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                        stream.write(chunk)
+                        hasher.update(chunk)
+            if temporary.stat().st_size != size or hasher.hexdigest() != digest:
+                raise ValueError(f"resource size/SHA-256 mismatch: {name}")
+            os.replace(temporary, destination)
+            return destination
+        except (OSError, ValueError) as error:
+            last_error = error
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+    raise ValueError(f"Could not download verified resource: {name}") from last_error
+
+
 def prepare_projection_assets(output_dir, reference):
     """下载两个 fsLR32k MNI 中层表面，并将皮层掩膜放到 reference 网格。
 
@@ -36,18 +72,13 @@ def prepare_projection_assets(output_dir, reference):
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
     for name, (relative, size, digest) in FILES.items():
-        destination = output / name
-        data = destination.read_bytes() if destination.exists() else urlopen(
-            BASE + relative, timeout=120).read()
-        if len(data) != size or hashlib.sha256(data).hexdigest() != digest:
-            raise ValueError(f"resource size/SHA-256 mismatch: {name}")
-        if not destination.exists():
-            destination.write_bytes(data)
+        _install_file(output, name, relative, size, digest)
     original = nib.load(str(output / "cortex_estimate.nii.gz"))
     cortex = nib.Nifti1Image(np.asarray(original.dataobj)[..., 0], original.affine)
     target = nib.load(str(reference))
     remapped = resample_from_to(cortex, (target.shape[:3], target.affine), order=0)
     mask = nib.Nifti1Image((np.asarray(remapped.dataobj) > 0).astype(np.uint8), target.affine)
+    mask.header.set_xyzt_units(xyz=target.header.get_xyzt_units()[0])
     mask_path = output / "cortical_mask.nii.gz"
     nib.save(mask, str(mask_path))
     return {"left_surface": output / "left_mni.surf.gii",

@@ -77,7 +77,7 @@ NIfTI返回一个Path；GIFTI返回(L,R)路径元组。连续值float32、体积
 fnit-setup-space-assets --output-dir /data/fnit_space_assets
 ```
 
-目录含rf_ants/和hcp_2017/resample_fsaverage/。当前安装器从固定CBIG/HCP原站下载并校验SHA，未校验大小；许可与资源范围见第7节。体积输入须已在同一个FSL MNI模板坐标，函数不估计个体配准。
+目录含rf_ants/和hcp_2017/resample_fsaverage/。安装器按固定SHA优先选择已发布Release资源，保留固定CBIG/HCP来源回退，并用发布目录中的真实大小检查下载及缓存；资源范围见第7节。体积输入须已在同一个FSL MNI模板坐标，函数不估计个体配准。
 
 ## 3. 命令行调用
 
@@ -196,10 +196,10 @@ CPU数据绑定candidate_all_v8；本页当前源码SHA与candidate_all_v17/v28�
 
 | 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
 |---|---|---|---|---|---|
-| CBIG RF-ANTs正反向映射和皮层mask（4文件） | MNI152↔fsaverage | [CBIG固定tag](https://github.com/ThomasYeoLab/CBIG/tree/v0.18.1-Update_stable_project_unit_test/stable_projects/registration/Wu2017_RegistrationFusion) | 安装器未记录 | [逐文件固定SHA](../../src/fnit/space_assets.py)；左正向3961b1e1f04621f8c1961ac8e4e5385813e47579214e0ccd5e62d685265205fd | 未取得映射文件级许可结论；从原站获取 |
-| HCP2017球面和平均面积（34文件） | fsaverage↔fsLR/密度转换 | [固定HCP文件](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases) | 其中6文件见[资源清单](../RESOURCE_MANIFEST.md)；其余未记录 | [逐文件固定SHA](../../src/fnit/space_assets.py) | HCP许可按条款允许；本安装器当前走原站 |
+| CBIG RF-ANTs正反向映射和皮层mask（4文件） | MNI152↔fsaverage | [CBIG固定tag](https://github.com/ThomasYeoLab/CBIG/tree/v0.18.1-Update_stable_project_unit_test/stable_projects/registration/Wu2017_RegistrationFusion) | [发布目录](../../src/fnit/_release_asset_catalog.json) | [逐文件固定SHA](../../src/fnit/space_assets.py) | 按CBIG资源许可；已发布项优先Release，保留固定作者来源回退。 |
+| HCP2017球面和平均面积（34文件） | fsaverage↔fsLR/密度转换 | [固定HCP文件](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/standard_mesh_atlases) | [发布目录](../../src/fnit/_release_asset_catalog.json) | [逐文件固定SHA](../../src/fnit/space_assets.py) | 按固定HCP许可；已发布项优先Release，保留固定作者来源回退。 |
 
-本页安装器校验全部固定 SHA-256，目前不逐文件核验大小；上表有大小的 6 项与公开 Release 清单按内容 SHA 匹配。
+本页安装器校验全部固定SHA-256；命中发布目录的文件同时核验大小。完整安装步骤、许可和仍需原作者来源的例外见[统一安装说明](../ASSETS.md)。
 
 [完整历史说明与调试证据](../../validation/space_conversion/readme_archive_20261005.md) · [返回主页](../../README.md)
 

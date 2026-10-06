@@ -9,6 +9,8 @@ import tempfile
 from pathlib import Path
 from urllib.request import urlopen
 
+from fnit._release_assets import release_asset_metadata, release_url_for
+
 
 HCP_BASE = ("https://raw.githubusercontent.com/Washington-University/HCPpipelines/"
             "f8cac6892f88bdf889d644711ff038198eb81533/"
@@ -72,29 +74,42 @@ def _sha256(path: Path) -> str:
 
 
 def _install(base: str, remote: str, destination: Path, digest: str) -> Path:
+    metadata = release_asset_metadata(digest)
+    expected_size = metadata["size"] if metadata is not None else None
     if destination.exists():
+        if expected_size is not None and destination.stat().st_size != expected_size:
+            raise ValueError(f"Existing asset has a different size: {destination}")
         if _sha256(destination) != digest:
             raise ValueError(f"Existing asset has a different SHA-256: {destination}")
         return destination
     destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary = None
-    try:
-        with urlopen(base + remote, timeout=120) as source:
-            with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as stream:
-                temporary = Path(stream.name)
-                for chunk in iter(lambda: source.read(1024 * 1024), b""):
-                    stream.write(chunk)
-        if _sha256(temporary) != digest:
-            raise ValueError(f"Downloaded asset has a different SHA-256: {remote}")
-        os.replace(temporary, destination)
-        return destination
-    finally:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
+    release_url = release_url_for(digest, size=expected_size)
+    urls = ([release_url] if release_url else []) + [base + remote]
+    last_error = None
+    for url in dict.fromkeys(urls):
+        temporary = None
+        try:
+            with urlopen(url, timeout=120) as source:
+                with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as stream:
+                    temporary = Path(stream.name)
+                    for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                        stream.write(chunk)
+            if expected_size is not None and temporary.stat().st_size != expected_size:
+                raise ValueError(f"Downloaded asset has a different size: {remote}")
+            if _sha256(temporary) != digest:
+                raise ValueError(f"Downloaded asset has a different SHA-256: {remote}")
+            os.replace(temporary, destination)
+            return destination
+        except (OSError, ValueError) as error:
+            last_error = error
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+    raise ValueError(f"Could not download verified asset: {remote}") from last_error
 
 
 def install_space_assets(output_dir: str | Path) -> Path:
-    """Download and verify the official RF-ANTs and HCP conversion files."""
+    """Prefer verified FNIT Release assets, with pinned author-source fallback."""
     root = Path(output_dir).expanduser().resolve()
     for relative, digest in HCP_FILES.items():
         print(_install(HCP_BASE, relative, root / "hcp_2017" / relative, digest))
