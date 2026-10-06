@@ -16,6 +16,10 @@
 
 最新独立[robust配准前处理](../../docs/robust_register/PREPARATION.md)已完成同例CPU门：目标掩膜和右侧atlas的体素、13项MGH字段及存储affine均与官方相同；仅比较保存网格，gzip和可选tag另列。原报告序列化失败已修复，原两次exit1保留，未重算图像；[独立复核](../robust_register/target_preparation_20261006/ROOT_REVIEW.public.json)验证这一范围。该模块尚未接入GEMS。随后一次刚性→保存重读→仿射对照完成，133个点的最大世界坐标差为7.742e−6 / 4.487e−4 mm；刚性和仿射各有1个支持集体素不同，仿射同采样器warp相对L2为2.588e−5，超过预定1e−5。[独立候选](../robust_register/rigid_affine_20261006/README.md)17/20门通过，未采用；最终核团Dice/体积门仍未通过。
 
+随后独立[Float反矩阵源码顺序合同](../robust_register/inverse_order_20261006/README.md)对六个已保存矩阵的determinant、reciprocal、inverse共18门逐bit通过；[root复核](../robust_register/inverse_order_root_review_20261006.json)核对原receipt与22个Git文件。旧刚体不同word仅为带符号零，四个仿射矩阵有1.19e−7至7.63e−6的非零数值差。该合同不读取MRI、不证明安装binary指令一致，旧17/20影像门保持原结论。
+
+随后[真实求逆顺序候选](../robust_register/inverse_real_20261006/README.md)仍为17/20门通过：仿射同采样器warp相对L2为2.556643e−5，比旧候选降低约1.22%，仍超过原1e−5；两阶段各差1个支持集体素。刚性完整receipt记录26次局部求逆；仿射已保存两输出，但报告因NumPy int32不能JSON序列化而失败，其API时钟与内部flags记NA。随后只评分已保存输出，未重跑注册；[独立复核](../robust_register/inverse_real_root_review_20261006.json)核对518项绑定及原退出码。候选未采用，未形成等价提速结论。
+
 ## 线程和计时
 
 - 第一轮主对照限定相同的 8 个物理核：`0,4,8,12,16,20,24,28`，均在 NUMA node 0；排除这些核的超线程兄弟。
@@ -61,9 +65,13 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 
 [当前FNIRT编译CPU平滑](../fnirt_cpu_smoothing_bridge_20261006/README.md)补足旧保存图到当前Numba实现的桥接：plain→旧plain、header adapter→官方保存图两个整图各18,579,456个FP32值逐位同，三exit0。31项源/输入、12项harness与operands/flags前后相同；实际仅2次blur、1次adapter，不运行归一化/RHS/H/PCG/官方/GPU/完整配准。旧完整方向候选误差扩大仍保留，默认未采用；[独立复核](../fnirt_cpu_smoothing_bridge_root_review_20261006.json)只确认预处理身份。
 
+[单处除法顺序控制](../fnirt_cpu_rhs_projection_control_20261006/README.md)已完成：原完整RHS先逐位重现，再仅替换signed-axis FP32除法。17个前置门和所有后门通过，scale逐位不变，但对存档官方总梯度相对L2由2.4836018e−7变为2.4838650e−7，未改善；x轻微改善、y/z轻微变差，因此不接入默认。仅1次采样/2次梯度前缀，无H/PCG/官方/GPU/完整配准。v1的nibabel头信息表示守卫错误及原exit1/1/0完整保留，v2仅修守卫后exit0/0/0；[独立复核](../fnirt_cpu_projection_root_review_20261006.json)确认32项源/输入与15项harness前后身份，尚未证明最终非线性输出一致。
+
 [单层64MiB卷积分块候选](seg_cpu_conv_slab_trial_20261006/README.md)已在目标Torch2.5.1的第三个短合同停止：实际权重、depth7输入的37,128个FP32值中33,144个不同，maxabs4.292e−6。未运行真实MRI层或ABBA，不形成速度或官方精度结论；14个生产文件和GPU保持原样。记录与Git源码已[独立复核](seg_cpu_conv_slab_trial_20261006/ROOT_REVIEW.json)，下一步只研究保留原GEMM矩阵布局的列缓冲复用。
 
 [列缓冲复用接口](seg_columns_reuse_20261006/README.md)的编译后，[v2短合同](seg_columns_reuse_v2_20261006/README.md)通过6组完整FP32、13组复制及23组fallback门。真实层首次测试因6D权重哈希被误限为5D而在任何卷积前停止，[原失败](seg_columns_real_layer_20261006/README.md)保留。修正哈希守卫后，[真实MRI层ABBA](seg_columns_real_layer_v2_20261006/README.md)四臂完成：三次完整264,241,152个FP32值逐位相同，单层操作中位数15.385730→5.720358秒，本组快2.690倍，RSS最大11.397GB；14个slab的M/K/N、偏置及同一MKL provider保持。原始记录、源和时钟已[独立核验](seg_columns_real_layer_v2_20261006/ROOT_REVIEW.json)。该结果覆盖已保存输入的一层。随后[完整CPU/GPU接入对照](seg_columns_integration_20261006/README.md)完成真实T1的CPU四臂和GPU两臂：冷worker中位数107.937608→90.118916秒，缩短16.508%；API中位数105.144285→87.393578秒。两次CNN前向、分割、全部header、体积表及压缩文件SHA保持旧输出；GPU allocated/reserved为10.712/14.615GB，进程采样最大15.177GB，均与旧版相同。实际已有Conda缓存冷编译1次、暖编译0次，39个守卫/缓存合同及4个调度合同通过。对官方仍仅原1个体素差异，前景最低Dice0.999998569，软体积CSV最大差0.8mm³；对应官方同例CPU8冷CLI55.046秒，仍未达速度目标。缓存只在受测CPU层/权重/运行库下启用；共享GPU时钟不作提速结论，完整新Conda安装仍待测试。
+
+下一层[24通道列缓冲候选](seg_columns_c24_contracts_20261006/README.md)已完成现有Conda编译和短输入检查：实际`down[0].conv1`权重的六组FP32输出、13组复制均逐位相同，30个回退守卫通过；原32层slab、MKL矩阵布局和偏置累计保持。短数值worker峰值RSS0.468GB；[root复核](seg_columns_c24_contracts_root_review_20261006.json)实际重核28项source和12项冻结文件。测试没有MRI、完整CNN或GPU调用，尚无该层真实MRI计时，未接入生产。
 
 | 功能 | 本版已完成的修复或定位 | 完整真实输入证据 |
 |---|---|---|
