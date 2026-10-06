@@ -1,0 +1,172 @@
+{
+  "schema": "FNIT_robust_same_real_AB_IRLS_and_QR_primitive_20261007/v1",
+  "status": "baseline_first_difference_QR_then_one_CPU_QR_candidate_bitexact",
+  "scope": "one real source-defined analytic system, CPU8; independent source SDK reference, not installed binary trace",
+  "transport_scope": "server safe aggregates with original receipt size/SHA identities; no local raw matrix/image/A-b/log reconstruction",
+  "input": {
+    "design_shape": [
+      9196,
+      6
+    ],
+    "rhs_shape": [
+      9196
+    ],
+    "dtype": "Float32",
+    "layout": "C row major",
+    "saturation": 50.0,
+    "native_float_svd": true,
+    "upstream_MRI_prepare_in_these_groups": 0
+  },
+  "baseline": {
+    "native_iterations": 4,
+    "candidate_iterations": 4,
+    "selected_iteration": 3,
+    "rollback": true,
+    "selected_iteration_and_rollback_flags_exact": true,
+    "first_exact_boundaries": [
+      "median_center",
+      "raw_MAD",
+      "sigma",
+      "normalized_residual",
+      "sqrt_weights",
+      "weighted_A",
+      "weighted_b"
+    ],
+    "first_difference": {
+      "iteration": 1,
+      "phase": "QR_solution",
+      "words": 6,
+      "different_words": 6,
+      "max_abs": 8.225440979003906e-06
+    },
+    "first_residual": {
+      "words": 9196,
+      "different_words": 9088,
+      "max_abs": 0.000240325927734375
+    },
+    "first_sw": {
+      "different_words": 1,
+      "max_abs": 0.02783203125,
+      "same_sqrt_weights_input": true
+    },
+    "first_swr": {
+      "max_abs": 0.5078125,
+      "mixed_QR_residual_and_reduction_effects": true
+    },
+    "first_weighted_error": {
+      "max_abs": 0.000141143798828125,
+      "mixed_QR_residual_and_reduction_effects": true
+    },
+    "final_parameters": {
+      "words": 6,
+      "different_words": 6,
+      "max_abs": 3.2901763916015625e-05,
+      "p99_abs": 3.265142440795899e-05
+    },
+    "final_sqrt_weights": {
+      "words": 9196,
+      "different_words": 2473,
+      "max_abs": 0.00014184042811393738,
+      "p99_abs": 8.56056809425352e-05
+    },
+    "seconds": {
+      "native_function_including_observation_IO": 0.019434226,
+      "candidate_function_including_observation_IO": 0.027005182579159737,
+      "candidate_callbacks": 0.018958933651447296,
+      "candidate_cold_import_plus_first_runtime_checkpoint": 4.663720698095858,
+      "candidate_AB_read_and_tensor_view": 0.0003917301073670387,
+      "candidate_entry": 7.786051635630429,
+      "candidate_child": 8.086490632034838,
+      "worker": 8.863172066397965,
+      "supervisor": 8.994094209745526,
+      "outer": 9.07597535662353,
+      "owner": 9.175555929541588
+    },
+    "runtime_actual_count": [
+      99,
+      99
+    ],
+    "runtime_allowed_literal_union": 123,
+    "runtime_control_pass": true
+  },
+  "QR_primitive": {
+    "native_new_calls": 0,
+    "candidate_numeric_calls": 1,
+    "explicit_outer_typed_compile_calls": 1,
+    "dependent_lowering_included_in_outer_compile": true,
+    "dummy_numeric_calls": 0,
+    "upstream_calls": 0,
+    "IRLS_calls": 0,
+    "GPU_calls": 0,
+    "weighted_A_shape": [
+      9196,
+      6
+    ],
+    "weighted_b_shape": [
+      9196
+    ],
+    "solution_words": 6,
+    "different_words": 0,
+    "max_abs": 0.0,
+    "p99_abs": 0.0,
+    "bit_exact": true,
+    "observed_group_passed": true,
+    "seconds": {
+      "cold_import": 1.6748728100210428,
+      "typed_compile": 0.9188016345724463,
+      "kernel": 0.0005949158221483231,
+      "cold_helper_API_including_compile_and_runtime_checkpoint": 4.044624034315348,
+      "saved_input_read": 0.0003461278975009918,
+      "entry": 18.440733128227293,
+      "worker": 25.21593047399074,
+      "supervisor": 25.323404274880886,
+      "outer": 25.395626075565815,
+      "owner": 25.494489352218807
+    },
+    "runtime_actual_count": [
+      104,
+      116,
+      116
+    ],
+    "runtime_allowed_literal_union": 123,
+    "runtime_each_literal_member_exact": true,
+    "runtime_deleted_or_unbound_count": 0,
+    "resources_post_exact": 134,
+    "frozen_files_post_exact": 14,
+    "process_instances_gone": 9,
+    "same_inode_CPU8_free": true,
+    "peer_INDEX_preserved_and_own_stage_closed": true,
+    "actual_source_helper_bytes": 7195,
+    "actual_source_helper_SHA256": "93b1b42ed855ac89f2331ff61055585f615c3f3357d6667dcec19711a3283686",
+    "public_helper_math_AST_equals_actual": true,
+    "installed_binary_trace": false,
+    "kernel_speedup_vs_native_not_measured": true
+  },
+  "retained_failed_groups": [
+    {
+      "stage": "baseline candidate import identity gate",
+      "native_original_calls": 1,
+      "candidate_solver_calls": 0,
+      "reason": "observer compared a four-field identity to a six-field binding; fixed metadata projection only"
+    },
+    {
+      "stage": "QR primitive observer v1",
+      "native_calls": 0,
+      "candidate_numeric_calls": 0,
+      "explicit_typed_compile_calls": 0,
+      "reason": "global njit observer also rejected Numba internal decorators; v2 restricts interception to the exact helper solve_float source"
+    }
+  ],
+  "acceptance": {
+    "formal_CPU_gate": "17/20 unchanged",
+    "full_registration": false,
+    "three_CPU_primitives_integrated_in_full_IRLS": false,
+    "residual_candidate_same_input_tested": false,
+    "weighted_error_candidate_same_input_tested": false,
+    "production_default_changed": false,
+    "GPU_code_changed": false,
+    "GPU_performance_benchmark_in_this_stage": false,
+    "unknown_rank_deficient_or_nonfinite_domain_equivalence": false
+  },
+  "science_in_public_report_generation": 0
+}
