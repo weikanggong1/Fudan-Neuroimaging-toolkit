@@ -273,6 +273,8 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
 
 [后续Float32除法投影控制](../../validation/fnirt_cpu_sampler_case_20261006/projection_division_v1/README.md)复用已匹配的采样状态，48,384个投影值连同符号零全部逐位同源定义参考。固定lambda下，FSL累计序正梯度相对L2进一步降至5.26766e−15；三系数块为3.14e−15/1.47e−15/2.16e−15，最大绝对差约1.3e−16，scale最大差5.51e−14。1,170/1,177个Double words仍不同，LM序仍为3.62e−8。候选的输入身份核对与资源收尾均完成，但未运行H/diag、求解、完整配准或GPU；默认实现未替换，不据固定状态时钟报告端到端加速。
 
+[同投影Hessian对角线对照](../../validation/fnirt_cpu_sampler_case_20261006/diagonal_only_v2/README.md)已完成：未加扰及乘1.001后的1177项对角线相对L2分别为7.08786e−16、7.08078e−16；三个392项系数块约1.5e−15至2.4e−15，整体范数由scale项主导。两向量仍各有1166个Double words不同，不能称逐位同。仅执行一次对角线计算，未计算非对角项、完整H或求解；完整缓存、非线性配准及GPU保护仍待验收。
+
 前置证据分别见[保存warped字节分类](../../validation/fnirt_saved_warped_reference_20261006/README.md)、[实际自然采样捕获](../../validation/fnirt_natural_sampler_capture_20261006/README.md)和[记录操作数控制](../../validation/fnirt_recorded_operand_reference_20261006/README.md)。保存Python warped既不等于原plain缓存也不等于partial缓存；实际moving与旧保存Python moving身份不同。因此，局部采样一致不能单独解释历史2425个差异或完整非线性误差。
 
 2026-10-04正式CPU对照绑定v27，组合源v28保留其注册器/采样SHA；官方FSL6.0.7.4，Intel Xeon Gold6418H、1/8线程预算，四种预设各1例完整观察（不是队列）。float32图像/输出，float64系数/法方程。

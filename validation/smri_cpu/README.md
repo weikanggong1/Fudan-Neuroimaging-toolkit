@@ -61,6 +61,10 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 
 ## 继续修复：nodecw7 与 H100
 
+[同投影Hessian对角线对照](../fnirt_cpu_sampler_case_20261006/diagonal_only_v2/README.md)已完成：未加扰及乘1.001后的1177项对角线相对L2分别为7.08786e−16、7.08078e−16；三个392项系数块约1.5e−15至2.4e−15，整体范数由scale项主导。两向量仍各有1166个Double words不同，不能称逐位同。仅执行一次对角线计算，未计算非对角项、完整H或求解；完整缓存、非线性配准及GPU保护仍待验收。
+
+[Robust完整初始化对照](../robust_register/centroid_m0_cpu_prefix_20261006/README.md)在同一真实输入上使两幅准备图像和全部54个Double初始化值逐位匹配SDK参考。后续迭代及正式17/20完整配准门仍待解决。
+
 本版从已发布的 `f1cbdab1` 继续，CPU 对照迁至现场确认的 nodecw7；不把 nodecw10 时间混入新配对。各组仍限制相同八个物理核心和线程预算，同组串行。GPU 用既有 H100 共用锁；数值、完整 header、显存和实测时钟分别记录。
 
 最新[普通33类 CPU 分步骤观察](seg_cpu_profile_20261006/README.md)只运行一次当前源码的完整 API，未重复官方、parc/fast 或 GPU。当前标签、每区 Dice、完整 header、体积 CSV 和压缩 SHA 与已验收候选相同；106.377秒观察时钟中，CNN81.716秒、平滑13.136秒。正式112.952秒/官方55.046秒保留，分步骤诊断不能记作新的提速。源码、工具与543项事件聚合已[独立复核](seg_cpu_profile_20261006/ROOT_REVIEW.json)。

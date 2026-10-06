@@ -126,7 +126,7 @@ MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作�
 - 2026-10-06：独立目标准备/右侧头信息模块；没有修改生产 GEMS、默认 CPU/GPU 数学或通用重采样。34项合同通过。首批合同的一个预期值误写为标签值乘255，已更正为布尔选择乘255；代码结果未因该测试修订而改变。
 - 2026-10-06真实对照：目标与反射atlas的数据/几何exact门通过；保留两次报告写出exit1，metadata-only修复及只读补录后得到完整评分，未重算前处理。源版本与SHA见验证记录。
 - 后续独立候选已完成刚性/仿射对照，原门17/20通过；尚未接入GEMS。[局部Conda构建](../../validation/robust_register/prepared_m0_sdk_build_20261006/README.md)后，真实[准备态/M0对照](../../validation/robust_register/prepared_m0_capture_20261006/README.md)已完成：两幅准备图像与全部几何字段逐位同，Rsrc/Rtrg矩阵逐位同；质心最大差约2.20e−13，M0最大差4.12e−13。原生只捕获到初始化，完整Schur/QR求解尚未验收；下一步核质心求和与求解首差，再核最终ROI。
-- 随后[CPU保序质心候选](../../validation/robust_register/centroid_serial_cpu_probe_20261006/README.md)在这两幅保存准备图像上，6个Double返回值与SDK参考逐位相同。只测试了独立内核，尚未重算M0、接入GEMS或改变默认CPU/GPU路径；正式17/20不变。完整初始化、未知输入与最终ROI仍待验收。
+- 随后[CPU保序质心候选](../../validation/robust_register/centroid_serial_cpu_probe_20261006/README.md)先在保存的两幅准备图像上使6个Double返回值逐位相同。[完整初始化接入对照](../../validation/robust_register/centroid_m0_cpu_prefix_20261006/README.md)已沿同一真实输入重算准备态和M0：两幅图各107,055个Float32值、6个质心值、M0及Rsrc/Rtrg共54个Double值全部逐位同SDK参考。只覆盖该初始化边界，正式完整配准仍17/20；后续A/b、Schur/QR、最终ROI、未知输入和GPU仍待验收。
 
 ## 7. 来源、许可与参考文献
 

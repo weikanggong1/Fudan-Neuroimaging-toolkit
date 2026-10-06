@@ -56,7 +56,7 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 
 ## 初始刚体配准的首差观察计划
 
-[只读源码核对](../robust_register/earliest_branch_readonly_20261006/README.md)确认官方活动 robust 路径使用 LINPACK QR，候选使用 Torch reduced QR；停止语义相同，尚未捕获同状态求解轨迹。准备图像/M0观察器已独立构建并完成[真实同例对照](../robust_register/prepared_m0_capture_20261006/README.md)：准备图像/几何及Rsrc/Rtrg逐位同，原质心/M0有最大4.12e−13的Double尾差。[保序CPU质心候选](../robust_register/centroid_serial_cpu_probe_20261006/README.md)已使保存的两图6个Double返回值逐位同；尚未接入完整M0，原17/20及阈值不变。下一步验证完整初始化，核首个A/b和LINPACK QR解，再验证最终影像与核团；未知输入的有限性、正质量、fallback及GPU保护也待验收。
+[只读源码核对](../robust_register/earliest_branch_readonly_20261006/README.md)确认官方活动 robust 路径使用 LINPACK QR，候选使用 Torch reduced QR；停止语义相同，尚未捕获同状态求解轨迹。准备图像/M0观察器已独立构建并完成[真实同例对照](../robust_register/prepared_m0_capture_20261006/README.md)：准备图像/几何及Rsrc/Rtrg逐位同，原质心/M0有最大4.12e−13的Double尾差。[保序CPU质心候选](../robust_register/centroid_serial_cpu_probe_20261006/README.md)先使保存两图的6个Double返回值逐位同，随后[完整初始化对照](../robust_register/centroid_m0_cpu_prefix_20261006/README.md)沿同一真实输入重算准备态、质心及M0，两幅图和54个Double初始化值全部逐位同SDK参考。原完整17/20及阈值不变。下一步核同状态首个A/b、Schur和LINPACK QR解，再验证最终影像与核团；未知输入、fallback及GPU保护也待验收。
 
 ## 最新普通33类CPU优化
 
@@ -77,3 +77,5 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 [同真实体积四API对照](../fnirt_cpu_sampler_case_20261006/README.md)已通过：候选plain值及partial值/三个导数的逐位差异均为0，当前helper的2338/813/0/913/1520个word差异在实际API中复现。129,024个角点、坐标/floor/fraction/derivedvalid均先过门。默认生产未替换。第一组成熟checkpoint坐标复现旧SHA，但与实际原记录XX的16128个唯一位键交集0，失败保留。随后[同目标affine控制](../fnirt_cpu_sampler_case_20261006/affine_coordinate_v3/README.md)通过全部97门，16128个坐标/顺序输出、mask和129024个角点匹配；候选partial值/三导数逐位同。FSL序正梯度总相对L2由4.1597e−7降至8.7145e−10；三系数块仍有9.07e−8/3.21e−8/3.16e−8相对差，1177个Double words仍非逐位同。下一步核同状态H/diag和cf plain→grad partial的dynamic lambda/cost缓存，再验完整原始输入CPU、fallback和GPU。历史moving身份差异与旧2425word差异仍分列，默认不替换，不称端到端等价。
 
 [最新除法投影控制](../fnirt_cpu_sampler_case_20261006/projection_division_v1/README.md)已将固定点FSL累计序g相对L2缩小至5.26766e−15，XYZ系数块均约1e−15；投影48,384个Float32值逐位同，g仍有1,170个Double words尾差，LM序仍3.62e−8。下一步应把已匹配的投影用于同状态H/diag对照，核CPU代价/导数缓存时序和求解轨迹，再验完整输入及GPU保护。当前未做默认替换或完整配准提速结论。
+
+[同投影Hessian对角线对照](../fnirt_cpu_sampler_case_20261006/diagonal_only_v2/README.md)已完成：未加扰及乘1.001后的1177项对角线相对L2分别为7.08786e−16、7.08078e−16；三个392项系数块约1.5e−15至2.4e−15，整体范数由scale项主导。两向量仍各有1166个Double words不同，不能称逐位同。仅执行一次对角线计算，未计算非对角项、完整H或求解；完整缓存、非线性配准及GPU保护仍待验收。
