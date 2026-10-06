@@ -8,9 +8,11 @@
 
 [保存几何支持集诊断](../robust_register/support_points_results_20261006/README.md)已完成一次4全网格和4单点验证：原两阶段warp指标精确复现；两个差异点的round域、clamp、rint和FEQUAL整数捷径一致，插值角点记录不同。支持差异仍各1体素，原正式17/20保持；这是保存几何的观察，不证明优化器首差。[根复核](../robust_register/support_points_root_review_20261006.json)核对原回执和四个当前Git文件，没有新注册、GEMS、原软件或GPU调用。
 
+[保存状态的 X0 单列对照](../fnirt_cpu_sampler_case_20261006/hcol_x0_v1/README.md)已完成：196项合同门通过，组合列59/1177个Double词不同，相对L2为2.94287e−15。该边界方向的候选数据项全部为正零，结果主要验证bending及接口，不能代表非零数据项或完整H。data列含冷JIT为1.362秒，worker为88.437秒；其余导入和核验时间未细分，没有API或端到端加速结论。下一步用原始输入自产内部图像与坐标，核对cf/grad缓存、FSL顺序RHS和连续PCG，再验完整CPU配准及GPU保护。
+
 ## 最新robust准备态对照
 
-[实际同例M0控制](../robust_register/prepared_m0_capture_20261006/README.md)已完成。两幅准备图像各39×45×61的完整Float32字节、几何字段和Rsrc/Rtrg矩阵同原生；原PyTorch质心与M0保留Double尾差，M0最大4.12e−13。随后[CPU保序质心候选](../robust_register/centroid_serial_cpu_probe_20261006/README.md)在这两幅保存图像上，6个Double值与SDK参考逐位相同。两次单独内核调用为0.283/0.228毫秒，另有0.299秒导入和0.392秒冷编译；没有对应原生内核时钟，不计算加速比。原观察器的运行库门失败保留，追加元数据核验不重跑数学。候选尚未接入完整M0或默认配准，正式17/20不变；下一步验证完整初始化，再核首个A/b与QR系统。
+[完整CPU初始化对照](../robust_register/centroid_m0_cpu_prefix_20261006/README.md)已完成：从同一真实输入重算两幅39×45×61准备图像，其完整Float32字节、几何以及54个Double初始化值与固定SDK源码参考逐位一致。质心两次内核调用约0.55/0.23毫秒，另有0.471秒冷编译；worker29.120秒包含导入和身份检查。没有对应原生内核时钟，不计算加速比。正式刚性/仿射仍17/20通过；首个A/b、Schur/QR、最终warp及GPU保护仍待验收。
 
 ## 最新C24完整接入结果
 

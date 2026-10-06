@@ -275,6 +275,8 @@ fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
 
 [同投影Hessian对角线对照](../../validation/fnirt_cpu_sampler_case_20261006/diagonal_only_v2/README.md)已完成：未加扰及乘1.001后的1177项对角线相对L2分别为7.08786e−16、7.08078e−16；三个392项系数块约1.5e−15至2.4e−15，整体范数由scale项主导。两向量仍各有1166个Double words不同，不能称逐位同。仅执行一次对角线计算，未计算非对角项、完整H或求解；完整缓存、非线性配准及GPU保护仍待验收。
 
+[保存状态的 X0 单列对照](../../validation/fnirt_cpu_sampler_case_20261006/hcol_x0_v1/README.md)已完成：196项合同门通过，组合列59/1177个Double词不同，相对L2为2.94287e−15。该边界方向的候选数据项全部为正零，结果主要验证bending及接口，不能代表非零数据项或完整H。data列含冷JIT为1.362秒，worker为88.437秒；其余导入和核验时间未细分，没有API或端到端加速结论。下一步用原始输入自产内部图像与坐标，核对cf/grad缓存、FSL顺序RHS和连续PCG，再验完整CPU配准及GPU保护。
+
 前置证据分别见[保存warped字节分类](../../validation/fnirt_saved_warped_reference_20261006/README.md)、[实际自然采样捕获](../../validation/fnirt_natural_sampler_capture_20261006/README.md)和[记录操作数控制](../../validation/fnirt_recorded_operand_reference_20261006/README.md)。保存Python warped既不等于原plain缓存也不等于partial缓存；实际moving与旧保存Python moving身份不同。因此，局部采样一致不能单独解释历史2425个差异或完整非线性误差。
 
 2026-10-04正式CPU对照绑定v27，组合源v28保留其注册器/采样SHA；官方FSL6.0.7.4，Intel Xeon Gold6418H、1/8线程预算，四种预设各1例完整观察（不是队列）。float32图像/输出，float64系数/法方程。
@@ -313,6 +315,7 @@ GPU为共享H100、TF32、20GB上限，完整TBSS保存16次，与FNIT基线1d31
 |---|---|
 | 2026-10-06，有限共享系统 | 固定真实H/RHS的69轮算术恢复、第二接受点组装定位；生产与GPU未改，[报告](../../validation/fnirt_shared_followup_20261006/README.md)。这不是新的完整FNIRT benchmark。 |
 | 2026-10-06，自有CPU归约 | Numba/llvmlite的465项标量、186项相对范数及69轮保存系统轨迹逐位通过；生产未接入，[报告](../../validation/fnirt_cpu_reductions_20261006/README.md)。完整组装和非线性配准仍待验收。 |
+| 2026-10-07，保存状态X0单列 | 同状态固定投影/λ，成熟CPU normal与bending的组合列相对L2为2.94e−15，59个词不同；该方向候选数据项全零，只验证边界正则项与接口。未运行完整H、PCG或配准，没有速度验收。[范围与时钟](../../validation/fnirt_cpu_sampler_case_20261006/hcol_x0_v1/README.md)。 |
 | 2026-10-06，当前系统两臂 | 复用当前H/g/独立diagonal，旧/新求解器自然53/49轮，真实相对残差7.82e−4/4.17e−4，均通过原1e−3门；对另一存档原生系统解的距离不是同系统精度验收。保存解差方向解释了停止门下的参数分叉，未计算全局条件数、改生产或重跑完整配准。[结果、绑定与计时范围](../../validation/fnirt_cpu_current_replay_20261006/README.md)。 |
 | 2026-10-06，当前状态重建 | 一次真实solve3 linearize/evaluate的count、SSD、bending、λ/cost及1177项gradient/独立diagonal与当前已存系统逐位相同；2.104秒为单点诊断时间，无callback/H/PCG或完整配准速度结论。私有checkpoint只保存于服务器；随后已完成下行的有限布局/callback验证，生产CPU/GPU未变。[报告](../../validation/fnirt_cpu_level_rehydrate_20261006/README.md)及[独立复核](../../validation/fnirt_cpu_level_rehydrate_20261006/root_review.public.json)。 |
 | 2026-10-06，恢复后的矩阵作用 | 两臂各68个数组恢复原byte strides和逻辑值，三个unit列与存档H逐位同；七个真实/单位方向的优化CPU与原Torch callback全部逐位同。与CSC的四真实方向仅有maxabs≤3.55e−15的舍入差。共14callback/7CSC，0新evaluate/linearize/assembly/solver/native；3.515秒包含冷JIT，不是ABBA速度。本轮未接生产。[原始状态与计数](../../validation/fnirt_cpu_matrixfree_restore_20261006/README.md)及[独立复核](../../validation/fnirt_cpu_matrixfree_restore_20261006/root_review.public.json)。 |

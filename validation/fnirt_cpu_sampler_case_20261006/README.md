@@ -107,15 +107,17 @@ python -m json.tool validation/fnirt_cpu_sampler_case_20261006/manifest.public.j
 
 [随后的除法投影控制](projection_division_v1/README.md)通过48,384个Float32值含符号零的逐位门。FSL累计序正g相对L2降至5.26766e−15，三系数块误差均约1e−15；仍有1,170个Double words尾差，LM序仍约3.62e−8。该结果仅是固定lambda保存状态的CPU投影与g前缀，完整H/求解、动态缓存、最终输出、fallback与GPU保护仍待验收。
 
+[同投影Hessian对角线对照](diagonal_only_v2/README.md)已完成：未加扰及乘1.001后的1177项对角线相对L2分别为7.08786e−16、7.08078e−16；三个392项系数块约1.5e−15至2.4e−15，整体范数由scale项主导。两向量仍各有1166个Double words不同，不能称逐位同。仅执行一次对角线计算，未计算非对角项、完整H或求解；完整缓存、非线性配准及GPU保护仍待验收。
+
+[保存状态的 X0 单列对照](hcol_x0_v1/README.md)已完成：196项合同门通过，组合列59/1177个Double词不同，相对L2为2.94287e−15。该边界方向的候选数据项全部为正零，结果主要验证bending及接口，不能代表非零数据项或完整H。data列含冷JIT为1.362秒，worker为88.437秒；其余导入和核验时间未细分，没有API或端到端加速结论。下一步用原始输入自产内部图像与坐标，核对cf/grad缓存、FSL顺序RHS和连续PCG，再验完整CPU配准及GPU保护。
+
 ## 6. 更新及 benchmark 记录
 
 - 既有raw moving不匹配与公式导入失败保留；随后同记录操作数控制定位plain顺序和partial提升差异。
 - 2026-10-06：本轮真实体积四API一次通过，当前helper差异精确复现公式参考，候选值/导数逐位匹配；没有重复官方采样或完整配准。
-- 当前公开候选保持相同计算AST，未接入默认注册器；下一步先核坐标目标对应及RHS，再验证完整真实CPU配准和GPU。
+- 当前公开候选保持相同计算AST，未接入默认注册器。同目标坐标、投影、对角及X0单列控制已分阶段核验；原始输入的连续求解、完整真实CPU配准和GPU保护仍待验收。
 
 ## 7. 原实现、许可及参考文献
 
 - [FSL NEWIMAGE源码](https://git.fmrib.ox.ac.uk/fsl/newimage)、[FSL FNIRT源码](https://git.fmrib.ox.ac.uk/fsl/fnirt)。FNIT改写遵循[FSL 6.0许可](../../licenses/FSL-6.0.txt)。
 - Andersson, Jenkinson & Smith. *Non-linear registration, aka spatial normalisation*. FMRIB Technical Report TR07JA2 (2007), [原文](https://www.fmrib.ox.ac.uk/datasets/techrep/tr07ja2/tr07ja2.pdf)。
-
-[同投影Hessian对角线对照](diagonal_only_v2/README.md)已完成：未加扰及乘1.001后的1177项对角线相对L2分别为7.08786e−16、7.08078e−16；三个392项系数块约1.5e−15至2.4e−15，整体范数由scale项主导。两向量仍各有1166个Double words不同，不能称逐位同。仅执行一次对角线计算，未计算非对角项、完整H或求解；完整缓存、非线性配准及GPU保护仍待验收。

@@ -123,7 +123,7 @@ CPU8、Torch intra8/interop96，显式 OMP8 隔离约束；未改线程全局变
 
 ## 7. 参考文献和原实现
 
-- [FNIT](https://github.com/gongwk/Fudan-Neuroimaging-toolkit)：成熟 PyTorch 实现及项目环境。
+- [FNIT](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit)：成熟 PyTorch 实现及项目环境。
 - [FSL FNIRT 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/fnirt/index.html)：完整配准参数和方法。
 - [FSL fnirt 源码库](https://git.fmrib.ox.ac.uk/fsl/fnirt)与[basisfield 源码库](https://git.fmrib.ox.ac.uk/fsl/basisfield)：cost、spline 场和 Hessian 语义。
 - [Numba 文档](https://numba.readthedocs.io/en/stable/user/threading-layer.html)：线程池与 JIT 环境。

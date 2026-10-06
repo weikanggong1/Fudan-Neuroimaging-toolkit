@@ -79,3 +79,5 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 [最新除法投影控制](../fnirt_cpu_sampler_case_20261006/projection_division_v1/README.md)已将固定点FSL累计序g相对L2缩小至5.26766e−15，XYZ系数块均约1e−15；投影48,384个Float32值逐位同，g仍有1,170个Double words尾差，LM序仍3.62e−8。下一步应把已匹配的投影用于同状态H/diag对照，核CPU代价/导数缓存时序和求解轨迹，再验完整输入及GPU保护。当前未做默认替换或完整配准提速结论。
 
 [同投影Hessian对角线对照](../fnirt_cpu_sampler_case_20261006/diagonal_only_v2/README.md)已完成：未加扰及乘1.001后的1177项对角线相对L2分别为7.08786e−16、7.08078e−16；三个392项系数块约1.5e−15至2.4e−15，整体范数由scale项主导。两向量仍各有1166个Double words不同，不能称逐位同。仅执行一次对角线计算，未计算非对角项、完整H或求解；完整缓存、非线性配准及GPU保护仍待验收。
+
+[保存状态的 X0 单列对照](../fnirt_cpu_sampler_case_20261006/hcol_x0_v1/README.md)已完成：196项合同门通过，组合列59/1177个Double词不同，相对L2为2.94287e−15。该边界方向的候选数据项全部为正零，结果主要验证bending及接口，不能代表非零数据项或完整H。data列含冷JIT为1.362秒，worker为88.437秒；其余导入和核验时间未细分，没有API或端到端加速结论。下一步用原始输入自产内部图像与坐标，核对cf/grad缓存、FSL顺序RHS和连续PCG，再验完整CPU配准及GPU保护。
