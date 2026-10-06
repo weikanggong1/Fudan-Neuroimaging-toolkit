@@ -145,9 +145,13 @@ mri_synthseg --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg.nii.gz \
 
 ## 5. 最新精度和运行时间
 
-2026-10-06 最新[CPU列缓冲复用](CPU_COLUMNS.md)已完成同一公开T1、同八核的完整ABBA：冷worker中位数 **107.938→90.119 s**，缩短 **16.51%**；API中位数 **105.144→87.394 s**。旧新完整分割、体积CSV、全部header和压缩文件SHA相同，GPU旧新输出及allocated/reserved也相同。对官方仍为已有的 **1个体素**，前景最低Dice **0.999998569**、软体积CSV最大差 **0.8 mm³**；官方同例正常冷CLI **55.046 s**，CPU速度目标仍未通过。此次仅受测普通33类CPU层启用：每次符合资格的调用核对权重和运行库，缓存首次缺失时用既有Conda GCC11编译自有C++复制接口，数值继续使用已加载的原LP64 SGEMM；编译准备失败沿用原CPU路径，GPU在加载前直接绕过。实际已有Conda的冷编译通过，未测试新建完整环境安装。具体适用范围、每臂时间、安装及失败行为见[功能说明](CPU_COLUMNS.md)和[完整报告](../../validation/smri_cpu/seg_columns_integration_20261006/README.md)。
+2026-10-06 最新[C24 CPU列缓冲复用](CPU_COLUMNS_C24.md)在既有C72优化上完成同一公开T1、同八核的CPU ABBA与GPU AB：**API中位数85.499→80.621秒，缩短5.71%**。旧新完整分割、软体积CSV、全部header和gzip SHA相同；GPU实际设备、FP32/TF32作用域、输出和allocated/reserved相同，本人进程树采样最大15.177GB。新优化只覆盖已核验的权重和`[1,24,192,224,256]`层输入、CPU8及既有推理状态；其余模式沿用成熟路径，CUDA不导入该CPU模块。
 
-![最新公开T1的旧版、新版和官方CPU分割](../../validation/smri_cpu/seg_columns_integration_20261006/case02_current_cpu_labels.png)
+冷进程中位数98.352→83.311秒，首臂有20.286秒未细分检查，其他臂约0.125秒，因此该15.29%观察不能当纯计算加速。CPU/GPU所有原始时钟、编译次数、资源和保存输出评分见[最新完整报告](../../validation/smri_cpu/seg_columns_c24_integration_20261006/README.md)。CPU对官方保持既有1体素差异、前景最低Dice0.999998569、CSV最大差0.8mm³；官方同例冷CLI55.046秒仍是独立计时，CPU速度目标未过。已有Conda编译与实际sdist三源码成员验证通过，完整wheel和全新Conda安装未测。
+
+前一版[C72完整对照](../../validation/smri_cpu/seg_columns_integration_20261006/README.md)冷worker107.938→90.119秒（16.51%），API105.144→87.394秒；该组使用各自冻结版本与计时，不能与本组相乘推算累计加速。
+
+![复用的公开T1分割图：新版本与该图的三个来源分割SHA相同，行序与原报告一致](../../validation/smri_cpu/seg_columns_integration_20261006/case02_current_cpu_labels.png)
 
 此前2026-10-05 的 CPU decoder 拼接仅减少临时缓冲，卷积与后处理保持原数值。公开原始 T1 的 nodecw7 八核对照中，旧/新完整 worker 为 **115.886/112.952 s**，最大 RSS 为 **15.34/13.51 GB**；标签、体积 CSV 和几何旧新相同。与同节点官方仍有 **1 个不同体素**、最小 Dice **0.99999857**、CSV 最大差 **0.800 mm³**，均为已有误差。官方正常冷 CLI 为 **55.046 s**，首次异常的 373.087 s 单独保留；worker 还包含资源校验和报告写出，不把两种时钟混作精确加速比，CPU 速度目标仍未通过。
 
@@ -186,6 +190,7 @@ mri_synthseg --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg.nii.gz \
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-06 | C24冻结源码 `2e503082` | 同SGEMM provider与原矩阵顺序复用down0 conv1列缓冲 | 完整CPU API缩短5.71%；六完整臂输出及GPU精度/内存保持，见[报告](../../validation/smri_cpu/seg_columns_c24_integration_20261006/README.md) |
 | 2026-10-06 | 源码 `70ad6537`；调度 `41ede608`；文档 `f68ce251` | 普通33类受测CPU层复用原矩阵尺寸的列缓冲 | 完整ABBA冷worker缩短16.51%，CPU/GPU旧新分割、CSV和几何相同；官方仍1体素差异且CPU更慢，见[报告](../../validation/smri_cpu/seg_columns_integration_20261006/README.md) |
 | 2026-10-06 | 独立报告 `84fbd765`；生产未变 | 普通33类CPU概率平滑的batch11候选 | 一份真实posterior的三次逐位门通过，RSS最大值降低45.68%，速度未改善，未接入默认路径，见[报告](../../validation/smri_cpu/seg_cpu_blur_trial_20261006/README.md) |
 | 2026-10-06 | 独立报告 `10f3f913`；生产未变 | 单层64MiB slab候选的目标合同 | 首个跨slab合同出现FP32尾差，停止真实层；没有速度或官方精度结论，见[报告](../../validation/smri_cpu/seg_cpu_conv_slab_trial_20261006/README.md) |

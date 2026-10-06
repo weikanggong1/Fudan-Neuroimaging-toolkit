@@ -2,6 +2,10 @@
 
 [保存几何支持集诊断](../robust_register/support_points_results_20261006/README.md)已完成一次4全网格和4单点验证：原两阶段warp指标精确复现；两个差异点的round域、clamp、rint和FEQUAL整数捷径一致，插值角点记录不同。支持差异仍各1体素，原正式17/20保持；这是保存几何的观察，不证明优化器首差。[根复核](../robust_register/support_points_root_review_20261006.json)核对原回执和四个当前Git文件，没有新注册、GEMS、原软件或GPU调用。
 
+## 最新C24完整接入结果
+
+[完整CPU/GPU对照](seg_columns_c24_integration_20261006/README.md)已完成一次同公开T1的CPU8 ABBA和GPU AB：API中位85.499→80.621秒（缩短5.71%），分割、CSV、完整header和gzip SHA保持原输出；GPU实际设备/精度/allocated/reserved及采样内存保持。冷进程首臂20.286秒未细分检查使整体15.29%观察含检查时间差异，不能当计算加速。既有Conda冷/暖编译通过，sdist三个源文件逐字节包含；完整wheel/全新安装未测。GEMS与FNIRT严格验收仍未完成。
+
 ## 本轮范围
 
 冻结起点为 `1d31e7baaebbb644ab199471f7fe6282721455fd`。在 nodecw10 对照 FNIT 与独立安装的 FreeSurfer 8.2.0-1、FSL 6.0.7.4，检查已实现的公共功能、精度和完整运行时间。原软件只参与参考测试，FNIT 推理不调用这些安装。

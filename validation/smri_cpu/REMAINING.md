@@ -53,3 +53,11 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 ## FNIRT scale累计假设的后续结果
 
 [一次保存状态控制](../fnirt_cpu_scale_accumulation_control_20261006/README.md)已排除该状态下的累计与最终factor分组作为主要差异：scale只变3.19744e−14，当前存档native差约7.66992e−6，同一串行和的最终两组FP64 bits完全相同。没有重建此前官方moving替换的输入，不把该结论扩展到其2.54688e−6残差。后续需绑定原oracle身份并核对实际Robj/ScaledRef/Mask中间缓存及系数梯度，完整非线性精度仍未过门。
+
+## 初始刚体配准的首差观察计划
+
+[只读源码核对](../robust_register/earliest_branch_readonly_20261006/README.md)确认官方活动 robust 路径使用 LINPACK QR，候选使用 Torch reduced QR；停止语义相同，尚未捕获同状态求解轨迹。下一步先比较准备图像与 Double 初始化矩阵 M0，再决定是否观察首个 A/b；tap 与有限执行器尚待实现，未运行该控制，正式17/20及原阈值不变。
+
+## 最新普通33类CPU优化
+
+[C24完整接入](seg_columns_c24_integration_20261006/README.md)在已接受C72基础上，CPU8 API中位85.499→80.621秒（5.71%改善）；完整CPU/GPU输出、几何、CSV及GPU精度/内存保持。冷进程首臂检查差异单列，未声称15.29%都是计算收益。仍需达到同线程官方CPU速度、更多真实shape/线程与输入覆盖，以及完整wheel/全新Conda安装；不扩大受测资格。
