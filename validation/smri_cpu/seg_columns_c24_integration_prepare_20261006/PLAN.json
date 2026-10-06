@@ -1,0 +1,300 @@
+{
+  "schema": "fnit_C24_production_bounded_preparation/v1",
+  "status": "prepared_requires_root_review_not_run",
+  "baseline_commit": "7ff215ee86c49414b2fa6156fdf6769aa54d00f8",
+  "real_layer_report_commit": "05f36b86",
+  "scope": "only actual down[0].conv1 weight bits, full shape, CPU8, FP32, no-grad, oneDNNFalse; foreign devices bypass before import",
+  "private_bindings_required": true,
+  "private_binding_fields": [
+    "public_PLAN_sha256",
+    "resources six existing assets with path bytes SHA",
+    "compiler_identity",
+    "Conda_CXX",
+    "GPU_uuid",
+    "GPU_visible_devices",
+    "C72_cache_directory_fnit_relative",
+    "C72_cache_files",
+    "C72_cache_key"
+  ],
+  "compile_contract": {
+    "affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "common_lock": "runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock",
+    "lock_wait_seconds": 120,
+    "status": "prepared_requires_separate_approval",
+    "worker_timeout_seconds": 180,
+    "compiler_timeout_seconds": 120,
+    "outer_total_seconds": 720,
+    "arm_order": [
+      "cold",
+      "warm"
+    ],
+    "compile_calls_total": 1,
+    "tensor_math_calls": 0,
+    "copy_calls": 0,
+    "SGEMM_calls": 0,
+    "MRI_decodes": 0,
+    "model_forward_calls": 0,
+    "numerical_contract_evidence": "unchanged C24 CPP bytes and mathematical AST from accepted short and real contracts; no repeated synthetic runs",
+    "AS_limit_bytes": 8000000000,
+    "worker_RSS_limit_bytes": 4000000000,
+    "compiler_child_RSS_limit_bytes": 4000000000,
+    "Torch_threads": "record_and_preserve_actual_intra_inter; zero setters; original interop is not forced to8"
+  },
+  "whole_CPU": {
+    "affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "common_lock": "runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock",
+    "lock_wait_seconds": 120,
+    "status": "prepared_requires_separate_approval",
+    "worker_timeout_seconds": 600,
+    "outer_total_seconds": 3300,
+    "AS_and_RSS_bytes": 32000000000,
+    "arm_order": [
+      [
+        "A1_baseline",
+        "baseline"
+      ],
+      [
+        "B1_cold",
+        "candidate"
+      ],
+      [
+        "B2_warm",
+        "candidate"
+      ],
+      [
+        "A2_baseline",
+        "baseline"
+      ]
+    ],
+    "MRI_decodes": 4,
+    "model_forward_calls": 8,
+    "C72_layer_calls": 8,
+    "C72_copy_SGEMM_each": 112,
+    "C72_compile_calls": 0,
+    "C24_layer_calls": 4,
+    "C24_copy_SGEMM_each": 24,
+    "C24_compile_calls": 1,
+    "cache_policy": "existing warm C72 immutable file identities all arms; separate new private C24 cache B1cold B2warm; preserve compile-contract cache"
+  },
+  "whole_GPU": {
+    "status": "prepared_requires_separate_approval",
+    "affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "common_lock": "runs/smri_cpu_20261004/gpucw1.gpu.lock",
+    "lock_wait_seconds": 120,
+    "worker_timeout_seconds": 300,
+    "outer_total_seconds": 1020,
+    "allocator_budget_bytes": 20000000000,
+    "driver_sample_tree_budget_bytes": 20000000000,
+    "driver_sample_interval_seconds": 0.5,
+    "arm_order": [
+      [
+        "A_baseline",
+        "baseline"
+      ],
+      [
+        "B_candidate",
+        "candidate"
+      ]
+    ],
+    "MRI_decodes": 2,
+    "model_forward_calls": 4,
+    "CPU_optional_imports": 0,
+    "compile_copy_SGEMM_build_probe_calls": 0,
+    "dtype": "float32",
+    "cudnn_TF32": true,
+    "matmul_TF32_inside_forward": true,
+    "autocast": false,
+    "flags_restored": true,
+    "memory_gate": "same UUID/allocated/reserved by exact receipt; nonempty successful own-process-tree samples all <=20e9; retain max gap and failures",
+    "wall_time": "single-pair observation only"
+  },
+  "global_execution_counts": {
+    "new_compile_calls": 2,
+    "MRI_decodes": 6,
+    "full_model_forward_calls": 12,
+    "new_C24_fullshape_layer_calls": 4,
+    "new_C24_copy_calls": 24,
+    "new_C24_SGEMM_calls": 24,
+    "new_native_calls": 0,
+    "scientific_retries": 0
+  },
+  "first_failure": "save raw stdout/exit and report; stop later phases; no retry or tolerance change",
+  "output_gates": {
+    "CPU_and_GPU_same_version_pair": "full same-name segmentation.nii.gz and volumes.csv bytes/SHA equal; thereby preserves every saved header/extension byte and label/CSV",
+    "posthoc": "reuse existing saved-output scorer only after complete arms and separate root authorization; no new CNN",
+    "source_assets_runtime_and_old_C72": "all bound before/after unchanged",
+    "precision": "existing dtype/TF32/autocast flags and source settings restored"
+  },
+  "packaging": {
+    "new_dependencies": 0,
+    "CPP_source": "src/fnit/synthseg_parc/_columns_c24.cpp",
+    "wheel": "existing pyproject synthseg_parc/*.cpp wildcard covers it",
+    "gate_before_remote_compile": "verify frozen explicit MANIFEST and wheel glob source inclusion; root checks archive listing when building actual sdist/wheel artifact",
+    "compile_flags": "reuse unchanged mature GCC11 ABI0 F32/no-fast-math/ffp-contract-off/openmp flags and linker/rpath sequence",
+    "shared_install_files_changed_by_subtask": [
+      "MANIFEST.in"
+    ],
+    "explicit_MANIFEST_include": "recursive-include src/fnit/synthseg_parc _columns_c24.cpp",
+    "explicit_MANIFEST_include_applied": true,
+    "manifest_sha256": "c108c275de7668e5798044f9a59b71459a8a024e6694527a5c5968befd2edbf5",
+    "pyproject_sha256": "c088377fdf1a76be1581a5e24bd4d4fb23e2223d962d0409d5eed9ef50a4eaca",
+    "static_setuptools_FileList_source_inclusion": true
+  },
+  "production_sources": {
+    "baseline": {
+      "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+      "_columns_reuse.cpp": "2440abe802f1da2c14bd192f8b0f84c46b6f1f518de1dc9f0dca8429b05a2527",
+      "_cpu_columns_build.py": "31237d750678098a417390bf6a8ac1cc448f3293a90bf1fcd879b1f0a8fd293b",
+      "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+      "cpu_columns.py": "9cc29bc05600b0115d2ac559da362d03b72042156dd2747e6a0237f836ffedff",
+      "cpu_conv.py": "35ea804cc9d88e6bdb185f6d392f5d4398327f2faaf3d015a9fc7594fdf8f31b",
+      "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+      "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+      "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+      "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+      "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+      "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+      "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+      "segment.py": "b211f7246883ec0ab2b6963e7eaad63fdb974a398dbc06d20119f3755a3df152",
+      "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+      "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+      "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0"
+    },
+    "candidate": {
+      "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+      "_columns_reuse.cpp": "2440abe802f1da2c14bd192f8b0f84c46b6f1f518de1dc9f0dca8429b05a2527",
+      "_cpu_columns_build.py": "31237d750678098a417390bf6a8ac1cc448f3293a90bf1fcd879b1f0a8fd293b",
+      "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+      "cpu_columns.py": "9cc29bc05600b0115d2ac559da362d03b72042156dd2747e6a0237f836ffedff",
+      "cpu_conv.py": "234df7485ec44157c9e9d909d914dbb4d08f0d7f56d68f56400fd24891f786f4",
+      "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+      "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+      "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+      "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+      "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+      "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+      "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+      "segment.py": "e2c1b3e2ad4f90037054395385f2fb2d93925d236f11ec06dbb9613d52482484",
+      "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+      "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+      "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0",
+      "_columns_c24.cpp": "75c232fa2c83eb28fb4ce62dab2eecfdfd6f9cdd5ed25b22ee430ca305731bb1",
+      "cpu_columns_c24.py": "10d2a69d0638dcb2b7fffdb4e220a1cc77b794b305c5bad799ebe360d3f06dd6",
+      "_cpu_columns_c24_build.py": "37d8333a03de432149c9a1a0d25952f89fe9210603d1144ac520b3182a0b6d4a"
+    }
+  },
+  "common_support_sha256": {
+    "fnit/__init__.py": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4",
+    "fnit/_dmri.py": "0862c7cefbd2b2811e9a56e3b617a209968d70c4e5a5b76c557630b1cd2f0117",
+    "fnit/_nib.py": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+    "fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+  },
+  "validation_sources": {
+    "compile_contract.py": "800eb0e917155b1ab805ba4fcbb06a049f71d9535247bda56ff34390645dd782",
+    "compile_queue.py": "bab43da1c26fff6d9f2917b8ae666e8b6a28c5a6194144e1918a391470482ad9",
+    "controller_safety.py": "7b2880604c87285e801c477783da920e98b5664315c043f361fcaabf7fcd25cb",
+    "whole_queue.py": "353d1baf6ea1b786eb1b2c5d8f8f890cfc898533b40564b33241b7ff7aa01fe7",
+    "whole_worker.py": "c13ace778b8cce2deb9bf2fc464f4fac27b862b5982656270ed4ebe2744480c2"
+  },
+  "root_preflight_before_dispatch": [
+    "current FNIT root README/INDEX and source commits",
+    "all six asset bytes/SHA exact",
+    "same current GPU UUID and common lock; free memory",
+    "Conda compiler identity exact; read-only accepted C72 cache key/files exact",
+    "root MANIFEST C24 source include and package source listing verified",
+    "only declared new workspace/run paths existences checked; no existing dispatch",
+    "metadata first; all phases first failure stops without retry"
+  ],
+  "forward_expectations": {
+    "cpu": {
+      "input_shape": [
+        1,
+        1,
+        192,
+        224,
+        256
+      ],
+      "output_shape": [
+        1,
+        33,
+        192,
+        224,
+        256
+      ],
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "flags": {
+        "oneDNN": false,
+        "grad": false,
+        "matmul_TF32": false,
+        "cuDNN_TF32": true,
+        "CPU_autocast": false,
+        "CUDA_autocast": false,
+        "dtype": "torch.float32",
+        "threads": 8
+      }
+    },
+    "cuda:0": {
+      "input_shape": [
+        1,
+        1,
+        192,
+        224,
+        256
+      ],
+      "output_shape": [
+        1,
+        33,
+        192,
+        224,
+        256
+      ],
+      "device": "cuda:0",
+      "dtype": "torch.float32",
+      "flags": {
+        "oneDNN": true,
+        "grad": false,
+        "matmul_TF32": true,
+        "cuDNN_TF32": true,
+        "CPU_autocast": false,
+        "CUDA_autocast": false,
+        "dtype": "torch.float32",
+        "threads": 8
+      }
+    }
+  },
+  "controller_safety": {
+    "lock": "same resource FD inherited by worker/taskset/timeout and all compiler/version children",
+    "cleanup": "any BaseException or timeout triggers bounded process-group KILL and wait5; child_reaped gate required; surviving inherited child retains lock",
+    "outer_limit": "SIGALRM covers arms, hashes, samples, saves; root must also use finite external supervisor because uninterruptible kernel IO cannot be forcibly reaped",
+    "scientific_retries": 0,
+    "helper_binding": "controller_safety.py exact SHA in PLAN before and after each worker/arm plus worker valid and successful queue exit"
+  }
+}

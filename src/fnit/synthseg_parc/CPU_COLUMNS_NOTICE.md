@@ -30,3 +30,13 @@ source binding and publication records are in
 `validation/smri_cpu/seg_columns_integration_20261006/ROOT_REVIEW.json` and
 `validation/smri_cpu/README.md`. See `docs/synthseg/CPU_COLUMNS.md` and
 `validation/smri_cpu/seg_columns_integration_20261006/README.md`.
+
+The separate C24 production draft adds `_columns_c24.cpp`, byte-identical to
+the 4,396-byte real-validated C24 experimental glue, SHA-256
+`75c232fa2c83eb28fb4ce62dab2eecfdfd6f9cdd5ed25b22ee430ca305731bb1`.
+It has independent C24 exports and cache identity, while the accepted C72
+source, symbols, provider qualification and cache key remain unchanged.
+The same installed-library terms above apply. The C24 single-layer real
+ABBA passed exact output comparison; production-cache compile and complete
+CPU/GPU acceptance are prepared and have not run. See
+`docs/synthseg/CPU_COLUMNS_C24.md` for the current draft and bounded plan.
