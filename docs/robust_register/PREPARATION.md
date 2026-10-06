@@ -128,6 +128,7 @@ MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作�
 - 后续独立候选已完成刚性/仿射对照，原门17/20通过；尚未接入GEMS。[局部Conda构建](../../validation/robust_register/prepared_m0_sdk_build_20261006/README.md)后，真实[准备态/M0对照](../../validation/robust_register/prepared_m0_capture_20261006/README.md)已完成：两幅准备图像与全部几何字段逐位同，Rsrc/Rtrg矩阵逐位同；质心最大差约2.20e−13，M0最大差4.12e−13。原生只捕获到初始化，完整Schur/QR求解尚未验收；下一步核质心求和与求解首差，再核最终ROI。
 - 随后[CPU保序质心候选](../../validation/robust_register/centroid_serial_cpu_probe_20261006/README.md)先在保存的两幅准备图像上使6个Double返回值逐位相同。[完整初始化接入对照](../../validation/robust_register/centroid_m0_cpu_prefix_20261006/README.md)已沿同一真实输入重算准备态和M0：两幅图各107,055个Float32值、6个质心值、M0及Rsrc/Rtrg共54个Double值全部逐位同SDK参考。只覆盖该初始化边界，正式完整配准仍17/20；后续A/b、Schur/QR、最终ROI、未知输入和GPU仍待验收。
 - 2026-10-07：[连续首轮 A/b 对照](../../validation/robust_register/first_ab_cpu_prefix_20261007/README.md)进一步通过18个记录边界：准备态、两层金字塔、半空间变换与图像、9196×6的A及9196项b均逐位同固定SDK参考。原生一次四阶Schur成功；尚未执行注册QR、IRLS或更新，完整17/20门保持。下一步从相同A/b核对鲁棒尺度、权重和求解，随后接入核团验证。冷子进程含身份检查和导入，不作为完整配准速度。
+- 2026-10-07：[同A/b的完整IRLS对照](../../validation/robust_register/same_ab_irls_cpu_20261007/README.md)沿用已保存真实方程与原生输出：第一轮中心/MAD/尺度/归一化/权重/加权A/b逐位同，首差出现在QR的6个Float32参数，最大8.22544e−6。双方均4轮停止并回退到第3轮，但最终参数最大差3.29018e−5，2473项权重不同；相同权重输入的累计权重和另差0.027832。随后CPU Float LINPACK候选在相同保存加权A/b上使6个返回值全部逐位匹配，核函数0.595毫秒、首次类型编译0.919秒。候选尚未采用；残差、归约和完整配准仍待验证，正式17/20以及GEMS与GPU验收状态不变。
 
 ## 7. 来源、许可与参考文献
 
