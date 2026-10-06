@@ -1,0 +1,74 @@
+{
+  "schema": "fnit_columns_complete33_queue/v1",
+  "status": "complete",
+  "PLAN_sha256": "6daa84b1b18e6c343c493ef9bbff7e6fc83836c8b8149845caaef1f87655e8ed",
+  "queue_sha256": "a019125c22c3f21e5e6354262c4968d0fea3570bfd758537ad98e19e7d0bf6a7",
+  "worker_sha256": "df0c95e8df1735ff55decb4a31e2e07a1630c6c5b48a8170044a899d8e71598e",
+  "device": "cuda:0",
+  "started_monotonic": 3070122.601979732,
+  "jobs": [
+    {
+      "name": "A_baseline",
+      "arm": "baseline",
+      "returncode": 0,
+      "cold_process_seconds": 10.442042715847492,
+      "gpu_sampling": {
+        "sample_count": 16,
+        "nonzero_own_samples": 9,
+        "failed_samples": 0,
+        "requested_interval_seconds": 0.5,
+        "maximum_gap_seconds": 1.4232475641183555,
+        "sampled_own_process_tree_peak_bytes": 15177089024,
+        "status": "observed_within_20e9",
+        "limitation": "Driver sampling is not an absolute peak; zero/unavailable cannot prove budget compliance."
+      },
+      "WHOLE_sha256": "d52e7427fc8f6b6f5d16613a9747fcfb871f78779cf2aedc1b43db359f738603",
+      "saved_outputs": {
+        "segmentation.nii.gz": {
+          "bytes": 799801,
+          "sha256": "a879ab92b619219f9a13a94f44f4ede06fd1ba4701babaf19677afb7895a7d8c"
+        },
+        "volumes.csv": {
+          "bytes": 949,
+          "sha256": "00870e28281ac42fe0163d9d74855193aee3699210dc576715084451214ad23f"
+        }
+      },
+      "comparison_executed": false,
+      "immediate_full_file_SHA_gate_passed": true
+    },
+    {
+      "name": "B_candidate",
+      "arm": "candidate",
+      "returncode": 0,
+      "cold_process_seconds": 7.551733062136918,
+      "gpu_sampling": {
+        "sample_count": 14,
+        "nonzero_own_samples": 9,
+        "failed_samples": 0,
+        "requested_interval_seconds": 0.5,
+        "maximum_gap_seconds": 0.5466555668972433,
+        "sampled_own_process_tree_peak_bytes": 15177089024,
+        "status": "observed_within_20e9",
+        "limitation": "Driver sampling is not an absolute peak; zero/unavailable cannot prove budget compliance."
+      },
+      "WHOLE_sha256": "463264e9b751ee70c5cb7d7bc7a22ec9fd1977e438c0adbdf83a478af0e002f4",
+      "saved_outputs": {
+        "segmentation.nii.gz": {
+          "bytes": 799801,
+          "sha256": "a879ab92b619219f9a13a94f44f4ede06fd1ba4701babaf19677afb7895a7d8c"
+        },
+        "volumes.csv": {
+          "bytes": 949,
+          "sha256": "00870e28281ac42fe0163d9d74855193aee3699210dc576715084451214ad23f"
+        }
+      },
+      "comparison_executed": true,
+      "reference_arm": "A_baseline",
+      "immediate_full_file_SHA_gate_passed": true
+    }
+  ],
+  "deadline_seconds": 23000,
+  "lock_scope": "one fresh arm; release between arms",
+  "next_arm": "B_candidate",
+  "ended_monotonic": 3070140.623021894
+}

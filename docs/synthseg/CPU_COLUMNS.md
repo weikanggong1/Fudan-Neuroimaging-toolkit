@@ -1,4 +1,4 @@
-# SynthSeg 可选 CPU 列缓冲复用（候选，2026-10-06）
+# SynthSeg 可选 CPU 列缓冲复用（完整候选验收，2026-10-06）
 
 ## 1. 功能简介
 
@@ -6,7 +6,7 @@
 
 只有已验收权重、`[1,72,192,224,256]` 输入、72→24通道、3×3×3卷积、8个CPU线程、eval/no-grad、oneDNN关闭且无autocast/hooks/forward-AD时启用。未知shape、权重、运行库或编译环境继续使用成熟CPU分块卷积。Tensor子类、懒negative/conjugate视图也继续原路径。CUDA、训练和通用slab代码不使用这个候选。
 
-**当前仅完成私有同层实测及候选本地守卫/缓存合同。新生产编译缓存、完整CPU/GPU和安装门待审查后执行；尚未接入main。** 该候选不是新的分割模型，也不改变公共API。
+**真实已有Conda/GCC构建、固定短合同及完整CPU4/GPU2对照通过，等待root整合回归/发布；新独立Conda安装尚未测试。** 该候选不是新的分割模型，也不改变公共API。
 
 ## 2. Python调用、输入与输出
 
@@ -74,7 +74,7 @@ fnit-setup-weights --model synthseg --dest /data/fnit-weights --verify-only
 
 仅首次合资格CPU层调用才查已有Torch头文件/库、provider和GCC11，编译FNIT自有4,385B胶水。可用环境变量：`CXX`指定一个GCC11编译器可执行文件，不能附参数；`FNIT_SYNTHSEG_CPU_CACHE`指定本人拥有的0700缓存目录；未指定时使用`$XDG_CACHE_HOME/fnit/synthseg_columns`，或`~/.cache/fnit/synthseg_columns`。锁和产物为0600，按源码、运行库、头文件、provider、编译器、ABI和flags生成键，原子发布。无编译器或不匹配库时数学开始前回退原卷积；开始候选数值后异常传播，不暗中重复卷积。
 
-CPU目标是Linux x86_64、Torch2.5.1/ABI0、已验收运行库SHA及MKL LP64 provider；其他平台/版本先回退。动态库不打包，weight和MRI也不进入wheel。编译子进程最多120秒、退出收尾5秒，锁等待15秒；仅编译子进程CUDA不可见，不写调用方环境、线程、TF32或autocast。已运行合同只mock了新缓存的编译/加载，**全新同prefix Conda安装与此新构建实际编译尚未测试**。
+CPU目标是Linux x86_64、Torch2.5.1/ABI0、已验收运行库SHA及MKL LP64 provider；其他平台/版本先回退。动态库不打包，weight和MRI也不进入wheel。编译子进程最多120秒、退出收尾5秒，锁等待15秒；仅编译子进程CUDA不可见，不写调用方环境、线程、TF32或autocast。已有Conda/GCC11目标环境已经真实构建加载及短数值合同通过，**全新独立Conda安装尚未测试**。
 
 ## 4. 原软件调用与原步骤
 
@@ -87,29 +87,35 @@ mri_synthseg --i /data/example/T1w.nii.gz \
 
 原软件的这一个内部卷积层没有独立CLI。候选保持原成熟CPU路径的14-plane slab，K=1944、N=24、M=802816（最后10层M=573440），NN、lda/ldc=实际紧凑M、ldb=1944、alpha=beta=1。自己的copy胶水调用的是已经加载的公共SGEMM，不是隐藏的ATen CPUBlas/Unfold3d wrapper；不加载其他BLAS。
 
-## 5. 最新精度、时间及内存
+## 5. 最新完整精度、时间及内存
 
-真实输入为CC0 OpenNeuro ds003138 v1.0.1 case02已保存的自产decoder skip/value，仅恢复这一个层的输入；没有完整CNN或官方新运行。[单层ABBA报告](../../validation/smri_cpu/seg_columns_real_layer_v2_20261006/README.md) 保留原输入/权重/运行库SHA、四个新进程和原退出receipt。
+本轮同原始CC0 OpenNeuro ds003138 v1.0.1 case02 T1、同nodecw7/8物理核运行4个完整CPU新进程，既有正式官方输出和55.0464秒冷进程时钟复用，无新官方运行。原图SHA、H5、配置和17生产源/4支持源前后固定。[完整源绑定报告](../../validation/smri_cpu/seg_columns_integration_20261006/README.md) 与 [机械结果](../../validation/smri_cpu/seg_columns_integration_20261006/RESULTS.json) 保留全arm/raw receipt。
 
-| 单层臂 | 操作秒 | 实际完整pre-ELU比较 | RSS GB |
-|---|---:|---|---:|
-| A1原路径 | 15.383990 | 唯一参考生成；不算比较门 | 11.3949 |
-| B1候选 | 5.728821 | 264,241,152个FP32值逐位差0 | 11.3175 |
-| B2候选 | 5.711896 | 同A1逐位差0 | 11.3188 |
-| A2原路径 | 15.387470 | 同A1逐位差0 | 11.3970 |
+| CPU arm | 冷进程秒 | API秒 | 构造/保存秒 | 最大RSS GB | 编译 |
+|---|---:|---:|---:|---:|---:|
+| A1原 | 107.5875 | 104.7752 | 0.1595 / 0.1707 | 13.5211 | 0 |
+| B1候选cold | 90.7195 | 88.0436 | 0.1535 / 0.1505 | 13.3990 | 1 |
+| B2候选warm | 89.5184 | 86.7436 | 0.1588 / 0.1517 | 13.4457 | 0 |
+| A2原 | 108.2877 | 105.5134 | 0.1685 / 0.1543 | 13.4589 | 0 |
 
-该操作时钟含私有候选守卫/provider/counter，不含load/join/hash/IO；两臂中位数15.385730→5.720358秒只描述本层。新生产逐次参数SHA、缓存校验/首次编译成本尚未在整例计时。6.243GB列缓冲仍然存在，生命周期仅单次层调用；RSS基本相同。缺页和system时间下降与缓冲复用相符，没有allocator trace，不能归因于唯一机制。
+同例两arm中位数冷进程107.9376→90.1189秒，API105.1443→87.3936秒，观察耗时分别下降16.51%/16.88%。cold计入全新独立cache编译，warm是同cache的新进程；两个API都包含每个命中层的参数/runtime/header/provider哈希和compiler probe。cold进程还含source/input校验、imports、构造、保存和收尾。官方CLI含module/import/推理/主图/CSV；时钟与输出边界分别列明，**完整同线程官方速度门仍未通过**，不能把87秒API说成比55秒CLI快。
 
-候选本地39个守卫/缓存/异常合同通过，来源、精度状态、CUDA未初始化前后门通过；正例资格的实际权重SHA仅在该本地测试中mock，真实单层权重另有上述既存合同。新缓存没有真实编译/copy/SGEMM调用，不能标为完整验收。
+四个CPU完整gzip/CSV SHA相同，9,072,000体素新旧差0、各label Dice1、硬体积和软CSV差0，完整NIfTI所有struct字段/13个常规geometry及extension控制相同。与官方仍差1体素（CSF少1、背景多1）；最低前景Dice0.99999856858，软CSV最大绝对差0.8mm³（TIV），CSF0.53mm³，右皮层0.08、左白质0.06，其余非零≤0.004mm³；这1voxel和每区差均是旧版已存在误差，新候选未增减官方错误。官方header字段和13控制全部相同，gzip和CSV文件SHA不同，不能称官方位一致。逐label/数值列见 [保存结果评分](../../validation/smri_cpu/seg_columns_integration_20261006/whole_results/posthoc_v2/POSTHOC.json)。
 
-已完成旧完整版本CPU耗时普通33约112.95秒、parc55.68秒、fast约42–43秒；同节点/同8核官方正常冷进程55.05/48.30/33.78秒。API与官方CLI的输出/时钟边界分别见 [正式记录](../../validation/smri_cpu/seg_memory_20261005/README.md)。**完整官方CPU速度门仍未通过，不能以本层比推算整例加速。** 本轮不重新绘制单层脑图；既有完整脑图版本见 [逐标签图](../../validation/smri_cpu/seg_memory_20261005/case02_cpu_labels.png)，不能标为新候选完整结果。
+GPU default True完整原/新AB同图/CSV SHA、前向FP32/TF32和恢复相同，CPU可选模块没有import，copy/SGEMM/compile为0。Torch allocated10.7125 GB/reserved14.6151 GB逐字节不变；本人进程树driver采样最大15.1771GB是采样上限观察，不是绝对峰值。冷进程10.4420/7.5517秒、API3.7742/3.6127秒只报告共享GPU观察；单对且preflight不同，不给速度倍率。
 
-## 6. 版本与待验收
+![本轮CPU完整标签对照](../../validation/smri_cpu/seg_columns_integration_20261006/case02_current_cpu_labels.png)
 
-- 4385B自有胶水经 [编译加载v1](../../validation/smri_cpu/seg_columns_reuse_20261006/README.md)、[短合同v2](../../validation/smri_cpu/seg_columns_reuse_v2_20261006/README.md) 和私有真实同层ABBA验收。原库不发布。
-- v1真实层因纯哈希rank守卫错误在卷积前退出，记录 [原失败](../../validation/smri_cpu/seg_columns_real_layer_20261006/README.md)；独立v2仅修哈希并通过前置合同后运行，原失败不删除。
-- 本次新增lazy CPU构建/缓存及严格资格守卫，标记仅落在33类末级层。39本地合同通过；38合同旧receipt保留，随后只补懒negative/conjugate视图守卫。
-- [接入计划与状态](../../validation/smri_cpu/seg_columns_integration_20261006/README.md)：新库metadata/真实短合同→CPU33同原T1完整ABBA→parc/fast及GPU原路保护。每阶段先审查，首差停止；不自动扩大shape/layer、重跑官方或放宽逐位门。
+新图来自本轮A1原/B2候选/已有官方完整输出，上中下三行，矢状/冠状/轴位三列，RAS索引89/98/129；离散色，不插值，PNG SHA30ef9e7e…。单层历史15.39→5.72秒及三个264,241,152值完整pre-ELU位门见 [单层报告](../../validation/smri_cpu/seg_columns_real_layer_v2_20261006/README.md)，不能用本层2.69倍推算总体。新whole没有逐层CNN/blur细分计时，不把旧profile占比当成本轮值。
+
+## 6. 版本、实际验收和剩余项
+
+- 4385B自有胶水经编译加载、固定短合同与同层ABBA验收；原库不发布。旧真实层v1因哈希rank守卫在卷积前退出，独立v2仅修哈希后通过，失败记录保留。
+- 本次70ad6537窄CPU接入39个守卫/缓存合同；41ede608冻结实际worker/计划。已有Conda/GCC11真实compile/load1次，随后6numeric+13copy oracle+23fallback/异常守卫全部通过，12copy/12SGEMM、所有FP32位差0。short cache与wholecold cache分离，whole另compile1次，两candidate各实际2pass/2层命中/28copy/28SGEMM。
+- 完整CPU4/GPU2、strict map/CSV/header/源资源精度恢复门通过，原外层退出均rc0；每个成功candidate立即核科学文件SHA后才派下一arm。phase1两个child rc0且controller complete，原phase1外层OS RC未另外采样，报告明确此界限。
+- 后验v1仅因环境缺Matplotlib绘图退出，没有再跑模型；v2先原子保存数字，再用NumPy+stdlib画PNG，4正例/3负例PNG合同通过，63项原6臂/源/出口SHA前后相同。没有新增绘图依赖。
+- root整合回归/发布另执行；当前新独立Conda环境安装尚未测，已有目标Conda实际编译已通过。未知库/版本/shape/参数安全fallback。默认CPUparc/fast无影响路径没有重复跑，本轮不是robust SynthSeg+完整实现。
+- 普通33、parc及fast的整体官方CPU速度目标仍未过；上一版parc约55.68秒对官方48.30、fast约42–43对33.78记录保留。本次不改变oneDNN/BN/ELU/精度，不泛化其它层或shape；下一项工作区复用另独立验收。
 
 ## 7. 参考、源码与许可
 

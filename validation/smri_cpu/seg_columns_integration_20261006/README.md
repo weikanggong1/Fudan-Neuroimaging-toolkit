@@ -1,64 +1,79 @@
-# SynthSeg 单层复用 CPU 接入候选（2026-10-06）
+# SynthSeg 单层列缓冲复用：真实 CPU/GPU 接入验收（2026-10-06）
 
 ## 1. 功能与状态
 
-独立候选将既有同层逐位一致的FNIT自有copy/SGEMM胶水接入33类网络最后一级。**本地39项mock守卫/缓存合同已通过；新生产实际编译、短数值合同和whole尚未运行，不能接入main或称端到端通过。** 本次没有新MRI/native/GPU/列copy/SGEMM调用。
+该版本把 FNIT 自有 copy/SGEMM 胶水接入 33 类网络 `up[3].conv0`。输入仍按原14层 slab 展开，M/N/K、紧凑 leading dimensions、通道/核顺序、FP32、bias预填和已加载 Torch 的 LP64 SGEMM 保持。6.243 GB 列缓冲仅在本层调用内复用，返回后释放；不改变成熟通用slab、低内存防崩代码和GPU数学。
 
-新三文件是 `cpu_columns.py`、`_cpu_columns_build.py` 和4385B `_columns_reuse.cpp`；现有 `cpu_conv.py` 只在CPU/F32/eval/no-grad/oneDNNFalse的已标记层进行lazy资格检查，None继续原slab。`segment.py` 仅在33类网络up[3].conv0加metadata标记；CUDA/训练路径不导入helper。C++与已验收私有源逐字节相同，数值forward尾AST相同；不改原通用slab和低内存防崩路径。
+**真实新构建/加载、固定短合同、4个完整CPU进程、2个完整GPU进程及保存输出评分均通过。等待root整合回归与发布。** 新独立Conda环境安装尚未执行；不能把已有Conda/GCC编译通过写成全新环境安装通过。完整官方CPU速度目标仍未通过。
 
-## 2. 输入、输出、Python与参数
+实际源码是 `70ad6537`；准备worker是 `41ede608`。原预声明 [PLAN](PLAN.json) SHA `6daa84b1…` 和35项 [准备清单](MANIFEST.json) 保留为执行前记录，不用新结果覆盖旧声明。最新结果由 [build_summary.py](build_summary.py) 机械重算 [RESULTS.json](RESULTS.json)，不导入模型/影像软件，不运行新科学计算。最终新增文件另见 `RESULTS_MANIFEST.json`。
 
-用户调用及完整输入/输出/参数见 [七节功能说明](../../../docs/synthseg/CPU_COLUMNS.md)。公共函数、默认TF32/False/None、CSV/标签/几何不改，无新算法选项。普通SynthSeg CPU关闭oneDNN，因此本真实shape原图+flip两pass可激活；公开Plus/parc/fast CPU默认oneDNNTrue不激活；皮层ParcUNet不标记。调用方显式关闭oneDNN时，只有同已验权重和shape的共同33类末层可资格检查，未知条件均保持原路径。
+## 2. 输入、输出、调用与参数
 
-资格须是严格CPUInferenceConv3d、普通Tensor/Parameter、无forward-AD/懒negative/conjugate视图、CPU FP32输入 `[1,72,192,224,256]`、连续参数 `[24,72,3,3,3]` / `[24]` 且实际值SHA相同、8线程、无autocast/梯度/hooks、同stride/dilation/padding/groups。每个合资格CPU层重新核参数约0.187MB，捕获不递增_version的.data改值；GPU构造只加marker，不读HDF5做额外SHA。
+用户完整Python/CLI/参数见 [七节功能说明](../../../docs/synthseg/CPU_COLUMNS.md)。本次没有新算法参数。普通CPU SynthSeg关闭oneDNN，因此本例原图和翻转两pass均满足资格并激活。默认Plus/parc/fast CPU保持oneDNN=True，沿成熟路径；其完整重复测试未新增。调用者关闭oneDNN时，仅已验证权重、形状和CPU预算的共同33类末层可检查资格；ParcUNet没有标记。普通 `--parc` 不等于尚未实现的robust SynthSeg+。
 
-`CXX`、`FNIT_SYNTHSEG_CPU_CACHE`及XDG私有缓存规则在功能页列全。缓存只存小.so/manifest和锁，columns最大6,242,697,216B只在单次层调用内存在，不被engine/model缓存。provider只能来自已经加载的Torch handle/global同地址MKL LP64及SHA，禁止libblas/mkl_rt/provider替换或隐藏符号offset。
+窄条件是严格 `CPUInferenceConv3d`、普通Tensor/Parameter、CPU FP32输入 `[1,72,192,224,256]`、连续参数 `[24,72,3,3,3]`/`[24]` 且实际值SHA相同、8线程、eval/no-grad、无autocast/hooks/forward-AD/懒negative或conjugate视图、原groups/stride/dilation/padding。未知条件在数学前继续旧CPU路径；候选数学开始后的异常传播，不暗中重算。CUDA提前返回，不import CPU loader、不核模型SHA、不编译。
 
-## 3. 本地合同与待执行命令
+真实输入是CC0 OpenNeuro ds003138 v1.0.1 case02原T1，SHA `73e3866d…`；分割H5 `f190bfd7…` 和标签/名称/拓扑资源均在PLAN绑定。正式原/新17或14生产源、common4、输入/模型/配置 before/after SHA 恒定。完整结果shape `[180,224,225]`，int32、约1-mm网格，整数分割和按区软体积CSV。
 
-实际本地命令使用目标Torch2.5.1环境并在harness中显式绑定候选src，覆盖测试收集路径、源SHA和flags；没有Compiler/MRI性能意义。
+## 3. 实际运行、缓存与合同
+
+运行资源为nodecw7同8物理核，CPU affinity `32,36,40,44,48,52,56,60`、共同CPU锁、每完整arm 600s/32e9 AS与RSS上限。GPU默认True普通33类运行在同H100 UUID，两arm各300s/20e9，派发前可用显存84.09 GB；共同GPU锁。每arm完成即保存原输出/退出receipt并严格核同名gzip+CSV SHA，首差停止后续。无新官方运行或未影响模式重跑。
+
+1. [phase1原始receipt](phase1_results/phase1/QUEUE.json)：已有Conda Python3.11/Torch2.5.1/GCC11真实构建加载1次；全新短合同cache。metadata阶段copy/SGEMM为0。artifact17,640 B、SHA `74678cc0…`；源码4385 B保持已验收旧C++字节。随后一个新进程复用artifact，6个数值case、13个copy/poison/signed-zero oracle、23个fallback/异常case全部通过，12copy/12SGEMM，所有uint32位差0、shape/stride/参数/lifetime/flags门通过。短worker RSS0.506 GB。
+2. [CPU完整队列](whole_results/whole_cpu/QUEUE.json)：A1原、B1独立cold cache、B2相同cache的新warm进程、A2原。B1编译1次、B2编译0次；两candidate各2真实forward、2命中层、28copy/28SGEMM。short cache保留，没有删除以制造cold。实际 [CPU_EXIT](whole_results/CPU_EXIT.json) rc0。
+3. [GPU完整队列](whole_results/whole_gpu/QUEUE.json)：原/新AB均实际2forward、FP32/default TF32、autocast关闭；optional CPU模块import为空，compile/copy/SGEMM/构建输入/probe均0。实际 [GPU_EXIT](whole_results/GPU_EXIT.json) rc0。
+
+本地39项guard/cache合同以及4项队列控制mock是独立软件合同，不能当作真实GPU或MRI验收。phase1两个child原RC0/complete controller状态保存；未单独采样原phase1外层OS EXIT，这一点保留。whole CPU/GPU另有原外层退出receipt。
+
+## 4. 官方对照与时钟边界
 
 ```bash
-CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 \
-  OPENBLAS_NUM_THREADS=8 NUMBA_NUM_THREADS=8 \
-  python validation/smri_cpu/seg_columns_integration_20261006/run_local_guards.py
+# 独立官方验证环境；FNIT运行时不调用这个命令。
+mri_synthseg --i /data/example/T1w.nii.gz \
+  --o /data/reference/segmentation.nii.gz --vol /data/reference/volumes.csv \
+  --cpu --threads 8
 ```
 
-实际39 passed in3.05s见 [LOCAL_GUARDS.log](LOCAL_GUARDS.log)，source/flag前后门和过程时钟见 [原receipt](LOCAL_GUARDS.json)。positive参数SHA资格在local合同中mock；未知真实参数rawhash反例、实际Tensor负/共轭view及dual/subclass守卫另测。cache编译/dlopen是stub，不得把它标为真实.so/安装验证。38项旧receipt/log保留为v1；此前一次因旧editable安装路径在pytest collection退出2，零测试/科学调用，详见 [历史](HARNESS_HISTORY.json)。
+同例、同nodecw7、同8核官方输出/时钟复用 [正式记录](../seg_memory_20261005/OFFICIAL_NODE7_FAST_BA_REPEAT.public.json)，正常冷进程55.046403秒；原373秒异常保留且不用于加速分母。官方边界是module/CLI import、完整推理、主图和CSV；本轮FNIT冷进程包含资源/源码preflight、imports、构造、API、图/CSV保存和收尾。API包含合资格层每次runtime/header/provider/权重SHA、compiler probe及首次compile。两种边界并列，不把API单独与CLI当同一时间。
 
-`prepare_plan.py`仅stdlib读取冻结源/已有标量报告和AST，生成 [PLAN](PLAN.json) / [STATIC_CHECKS](STATIC_CHECKS.json)，不import Torch、不派发。`whole_worker.py`、`whole_queue.py`是待审代码：显式approved参数只是程序门，不能代替root授权。短合同四份实际worker已独立冻结，见 `phase1_bindings.py`、`load_cache_interface.py`、`check_cached_contracts.py`、`run_phase1.py`；当前尚未获实际编译/数学执行授权。metadata先在全新私有cache编译/ABI/provider-load（copy/SGEMM为0），短合同fresh进程复用该cache且禁止再编译。原六数值/13copy/23fallback合同的test body逐字节相同；只有loader/setup替换，私有兼容shim将生产None映射到旧fallback sentinel，生产不变。当前不能执行whole。
+唯一新posthoc只读取已保存的A1/B2/官方图与CSV，使用既有比较器。先原子保存全scalar/逐标签/CSV/完整header JSON，再用NumPy+stdlib生成新离散PNG。它是保存结果的数值评分与绘图，**不是模型benchmark，也不是metadata-only**；0新CNN/native/GPU。posthoc v1因目标环境无Matplotlib退出，原日志/EXIT保留；一次授权v2成功，无安装依赖或模型重跑。
 
-另有4项纯队列控制mock合同通过，见 [QUEUE_CONTRACTS](QUEUE_CONTRACTS.json)。成功B1/B2/A2必须立即与A1的同名完整gzip/CSV SHA相同，门过后才能派下一臂；SHA、cold/warm compiler计数或worker后置门失败均先持久失败QUEUE及已完成worker的原exit0，再停止余臂。A1仅生成参考，comparison_executed=False。mock不派真实child，不import Torch，不做MRI/编译/数值。
+## 5. 最新完整精度、时间与内存
 
-## 4. 对应原步骤与构建
+| CPU arm | 冷进程秒 | API秒 | 构造秒 | 保存秒 | 最大RSS GB | compile |
+|---|---:|---:|---:|---:|---:|---:|
+| A1原 | 107.5875 | 104.7752 | 0.1595 | 0.1707 | 13.5211 | 0 |
+| B1 cold | 90.7195 | 88.0436 | 0.1535 | 0.1505 | 13.3990 | 1 |
+| B2 warm | 89.5184 | 86.7436 | 0.1588 | 0.1517 | 13.4457 | 0 |
+| A2原 | 108.2877 | 105.5134 | 0.1685 | 0.1543 | 13.4589 | 0 |
 
-原软件这一个内部卷积没有独立CLI。矩阵和bias规则见 [已通过的单层ABBA](../seg_columns_real_layer_v2_20261006/README.md)。homepage Conda已有Torch2.5.1/GCC11，无新增依赖；package-data和MANIFEST声明自有cpp，wheel不带动态库、模型或数据。新build cache实际编译和安装还未评估。
+两原arm中位数冷进程107.9376秒、API105.1443秒；candidate cold/warm两arm中位数90.1189秒、API87.3936秒，本例观察耗时分别下降16.51%/16.88%。只有1个T1、2个候选arm，不扩大成总体或更多shape的性能结论。候选完整冷进程仍慢于官方55.0464秒，速度门false。分步骤新whole只量preflight/构造/API/保存；没有新计时把整个CNN/blur拆开。已测单层15.39→5.72秒是 [独立单层结果](../seg_columns_real_layer_v2_20261006/README.md)，不能替代整例计时。
 
-构建先核Linuxx86_64、Torch2.5.1/ABI0、TorchCPU314MB和8头文件SHA、公共LP64 provider及地址，再核GCC11编译器，创建本人0700cache/0600lock与artifact并atomic replace。编译120秒、锁15秒，失败同key不重复编译；未知准备条件在数值前None回退。数值engine调用后异常传播、没有旧卷积重试。源码/header/provider及compiler probe每个合资格调用仍做，cold/warm whole必须包含这些成本。
+四个CPU完整gzip和CSV SHA完全相同，新旧9,072,000体素差0、各label Dice1、硬体积差0、软CSV差0；完整NIfTI所有struct字段及13个常规geometry/header/extension控制逐值或字节相同。输出图SHA `1d679731…`、CSV `6276e3ea…`。
 
-## 5. 已有结果与新whole预声明门
+同官方：差1体素，CSF(label24)少1、背景多1；CSF Dice0.99999856858、其余前景Dice1，硬体积差约1mm³。soft CSV列名/顺序相同，最大绝对差0.8mm³（TIV），CSF0.53、右皮层0.08、左白质0.06，其余非零≤0.004mm³。所有header字段/13控制相同、affine差0；官方gzip/CSV SHA不同，不能称官方位一致。候选新增/移除官方错误均0，保留的1voxel原错误标签也未变。33数值列逐项见 [完整posthoc](whole_results/posthoc_v2/POSTHOC.json)，浮点双精度仅用于离线误差计量，没有改变推理dtype。
 
-[SOURCE_CONTEXT](SOURCE_CONTEXT.json)来自本轮实际canonical main/INDEX及14源/原T1/资产只读核验；不能拿历史snapshot当baseline。正式旧native结果来自 [同node7/8物理核记录](../seg_memory_20261005/OFFICIAL_NODE7_FAST_BA_REPEAT.public.json)，PLAN绑定原seg33重复结果map/CSV SHA，**只在新输出保存后独立评分，不进生产输入，不重跑native**。
+| GPU arm | 冷进程秒（观察） | API秒（观察） | Torch allocated/reserved GB |
+|---|---:|---:|---:|
+| 原 | 10.4420 | 3.7742 | 10.7125 / 14.6151 |
+| 新 | 7.5517 | 3.6127 | 10.7125 / 14.6151 |
 
-旧私有单层ABBA三个实际完整264,241,152值bits0；约15.39→5.72秒、RSS11.40GB，不能标为新生产whole性能。旧完整33约112.95秒/native55.05秒仍未速度门；native373秒异常原样保留且不用作分母。当前没有新完整脑图，既有图 [逐标签](../seg_memory_20261005/case02_cpu_labels.png) 只属于原版本。
+GPU旧新gzip `a879ab92…`、CSV `00870e28…` SHA相同；前向/参数FP32和TF32作用域/恢复不变。allocated/reserved逐字节相同。driver本人进程树采样最大15.1771GB，两arm一致；两arm各9个非零点、最大gap1.423/0.547秒，没有失败采样，**不能称绝对峰值**。共享GPU单对墙钟只列观察，不给速度倍率；两个进程preflight明显不同。
 
-后续两阶段分别审查/授权：
+![当前完整CPU标签对照](case02_current_cpu_labels.png)
 
-1. 新私有contract cache一次metadata编译/加载，随后六个固定真实权重短合同、copy13/poison/紧凑末次M/signed0及fallback/异常守卫；无MRI，原14-plane reference，首差停止。其worker已冻结待root授权。原test body SHA `ae4aa4bf74342bf265115b3749557a79b05a812effcce17e277ee2e963123b0c`，seed20261006/原六shape不变；失败保留receipt并停止后续，没有科学重试。每个worker释放共同锁；metadata180秒、contract240秒、AS8e9/RSS32e9、outer23000秒。
-2. CPU33 A1原/B1cold/B2warm/A2原共4新进程，每arm600秒、共同CPU8锁、同8物理核、32e9 AS/RSS，原T1+空输出。B1是新独立whole cache（保留short cache，不删除），B2同cache的新进程；每候选实际两pass/两层命中，28copy/28SGEMM。clock含hash/compiler/compile/构造/save/收尾，另列API/构造/save。GPU默认True普通33原/新AB共2个新进程、各300秒、同H100UUID与20e9预算，必须实际零optional-module import/compile/copy；GPU监测不能为了查状态先import helper。
+图为本轮实际A1原、B2candidate、已有官方，从上到下3行；从左到右矢状/冠状/轴位3列。RAS显示索引89/98/129，离散色和整数2倍显示，不做插值/重采样。新PNG52,305B，SHA `30ef9e7e…`；不是拷贝旧版本图。原MRI/数组/动态库留private。
 
-全标签、affine/完整header/extensions/dtype、数值CSV和CSV文件SHA严格相同；记录压缩图SHA。完整输出先保存再断言diagnostic计数。GPU全allocated/reserved exact≤20e9，另记录本人process-tree driver采样，最大gap/failure/zero明确，采样不是绝对峰值；共享GPU时间仅观察。全部源/资源/参数/精度/observer正常异常收尾门明确，首失败停余臂，不科学重试或放宽门。
+## 6. 版本记录、失败及剩余门
 
-默认CPUparc/fast不触发候选，不重跑上一版无影响whole；其oneDNN策略不为了提速更改。已有False/None和robust边界保留，当前普通--parc不是robust SynthSeg+。common锁每arm释放，outer总deadline23000秒不重置。
+- 4385B自有胶水先通过编译/短合同与真实同层三次完整preELU位门，见 [真实层v2](../seg_columns_real_layer_v2_20261006/README.md)。旧64Mi改变slab的非exact拒绝和group33无加速拒绝均保留，未采纳。
+- `70ad6537`仅窄CPU接入：39项local合同通过；`41ede608`冻结metadata/短worker/whole，source17和common4按实际SHA绑定，GPU未换后端。本次实际2次独立cache编译（short1、wholecold1）。无其它budget/布局/shape搜索。
+- 原posthoc v1无Matplotlib导致退出，完整模型先前已全部通过；v2新增atomic先保存数字及自有PNG，4正例/3负例PNG字节/CRC合同通过。原6臂/源/出口63项SHA在posthoc前后不变。构建summary首次只读schema断言按真实phase状态/资源字段修正，0新科学调用。
+- 完整CPU/GPU候选门通过，root整合回归、打包与main发布由root执行；新独立Conda install仍未测。当前已有Conda/GCC真实compile/load通过。未知运行库/编译器/权重/shape继续成熟fallback。
+- 33、parc、fast整体同线程官方速度门仍未通过。本轮未重跑默认parc/fast无影响路径，既有55.68/48.30秒与42–43/33.78秒对照不覆盖为新结果。robust SynthSeg+不在本验收。
+- 下一项可研究其它groups1/k3层保持原矩阵与SGEMM的工作区复用；本轮不泛化接入，不以单层结果推算其收益。
 
-## 6. 更新与后续
+## 7. 参考、源码和许可
 
-- 已接受同层阶段提交7b69bc93；对应四原receipts与三位门保留，本candidate不重新跑层ABBA。
-- 接入local第1次收集错误0科学、第2次37合同、第3次38合同（新增GCC版本反例）、第4次39合同（实际懒view守卫）；旧38source-bound receipt/log保留，源码变动只在新freeze。
-- 新准备冻结保留70ad6537的原PLAN/manifest Git来源；生产17源未改变。common四source由当前canonical/INDEX只读逐SHA绑定，`Conda_CXX`路径来自旧真实interface argv，实际新编译器identity将在metadata cache-key中核对。whole每个成功arm立即做原gzip/CSV SHA严格门，失败QUEUE先持久再停余臂。
-- 下一候选可静态研究其他groups1/k3的同原slab workspace复用，但本freeze只72→24一层，不扩shape、layer或新BLAS/低精度。
-- 本地guard通过与prepared PLAN不能替代实际编译/完整CPU/GPU/Conda安装；当前这些状态保持not_assessed。
-
-## 7. 来源及许可
-
-新C++、缓存与守卫是FNIT自有代码；仅复用用户已安装Torch头/库和公共SGEMM，不再分发Torch/MKL/libgomp或原软件源码。见 [own notice](../../../src/fnit/synthseg_parc/CPU_COLUMNS_NOTICE.md)、[PyTorch2.5.1 Slow3d](https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/ConvolutionMM3d.cpp)、[CPUBlas](https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/CPUBlas.cpp)、[SynthSeg](https://github.com/BBillot/SynthSeg)。权重继续外置原条款；原T1为CC0 OpenNeuro来源，私有影像/数组/动态库不进入本leaf。
+新copy/C++/cache是FNIT自有代码，未复制发布原软件实现体；只使用已有Torch头文件/库和公共SGEMM，不再分发Torch/MKL/GCC/libgomp。见 [归属说明](../../../src/fnit/synthseg_parc/CPU_COLUMNS_NOTICE.md)、[PyTorch2.5.1 Slow3d](https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/ConvolutionMM3d.cpp)、[CPUBlas](https://github.com/pytorch/pytorch/blob/v2.5.1/aten/src/ATen/native/CPUBlas.cpp)、[SynthSeg](https://github.com/BBillot/SynthSeg)。Billot et al., *Medical Image Analysis* (2023), [doi:10.1016/j.media.2023.102789](https://doi.org/10.1016/j.media.2023.102789)。模型继续按原资源条款外置；本例2D图来自CC0数据。
