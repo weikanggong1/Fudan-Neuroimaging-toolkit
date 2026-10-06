@@ -1,0 +1,86 @@
+"""Routing/IO contracts; no MRI registration is executed."""
+import json
+from pathlib import Path
+from types import SimpleNamespace
+
+import nibabel as nib
+import numpy as np
+import pytest
+
+from fnit._transforms import AffineTransform
+from fnit.robust_register import __main__ as cli
+
+
+def test_cli_defaults_and_every_declared_parameter():
+    options = cli.parser().parse_args(["--source", "a.mgz", "--target", "b.mgz", "--output-directory", "out"])
+    assert options.mode == "rigid" and options.device == "cuda:0"
+    assert options.saturation == 50 and options.iterations_per_level == 5
+    assert options.stop_distance == .01 and options.pyramid_min_size == 16
+    assert options.pyramid_max_size == -1 and options.highres_iterations == -1
+    assert options.spatial_chunk_size == 131072 and options.memory_budget_gb == 20
+    assert options.disable_tf32 is False and options.no_initialize_translation is False
+
+
+@pytest.mark.parametrize("mode", ("rigid", "affine"))
+def test_cli_single_routing_and_actual_saved_geometry(mode, tmp_path, monkeypatch):
+    image = nib.MGHImage(np.zeros((3, 4, 5), np.float32), np.eye(4))
+    calls = []
+
+    def controlled(source, target, **parameters):
+        calls.append((source, target, parameters))
+        return SimpleNamespace(transform=AffineTransform(np.eye(4), source=image, target=image),
+                               header_image=image, report={"mode": mode, "native_equivalence": "not_assessed"})
+
+    monkeypatch.setattr("fnit.robust_register.registration.robust_register", controlled)
+    path = tmp_path / "out"
+    cli.main(["--source", "a.mgz", "--target", "b.mgz", "--output-directory", str(path),
+              "--mode", mode, "--device", "cpu", "--saturation", "12", "--iterations-per-level", "3",
+              "--stop-distance", ".002", "--no-initialize-translation", "--pyramid-min-size", "12",
+              "--pyramid-max-size", "48", "--highres-iterations", "1", "--spatial-chunk-size", "1234",
+              "--memory-budget-gb", "8", "--disable-tf32"])
+    assert calls == [("a.mgz", "b.mgz", dict(mode=mode, device="cpu", saturation=12.,
+        iterations_per_level=3, stop_distance=.002, initialize_translation=False,
+        pyramid_min_size=12, pyramid_max_size=48, highres_iterations=1,
+        spatial_chunk_size=1234, memory_budget_gb=8., tf32=False))]
+    np.testing.assert_array_equal(nib.load(path/"mapped.header.mgz").dataobj, image.dataobj)
+    assert (path/"transform.lta").is_file()
+    assert json.loads((path/"report.json").read_text())["mode"] == mode
+
+
+def test_cli_two_stage_routes_without_single_stage_override(tmp_path, monkeypatch):
+    calls = []
+    result = SimpleNamespace(report={"native_equivalence": "not_assessed"})
+
+    def controlled(source, target, *, stage_directory, **parameters):
+        calls.append(parameters)
+        Path(stage_directory).mkdir()
+        return {"rigid": result, "affine": result, "combined_RAS_matrix": np.eye(4), "seconds": .01}
+
+    monkeypatch.setattr("fnit.robust_register.registration.robust_rigid_affine", controlled)
+    path = tmp_path/"out"
+    cli.main(["--source", "a.mgz", "--target", "b.mgz", "--output-directory", str(path),
+              "--mode", "rigid-affine", "--device", "cpu"])
+    assert len(calls) == 1 and "mode" not in calls[0]
+    report = json.loads((path/"report.json").read_text())
+    assert report["mode"] == "rigid-affine"
+    assert report["status"] == "completed_native_equivalence_not_assessed"
+
+
+def test_cli_existing_directory_rejected_before_any_registration(tmp_path, monkeypatch):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("registration must not be called")
+
+    monkeypatch.setattr("fnit.robust_register.registration.robust_register", forbidden)
+    with pytest.raises(FileExistsError):
+        cli.main(["--source", "a.mgz", "--target", "b.mgz", "--output-directory", str(tmp_path)])
+
+
+def test_cli_nonfinite_report_cannot_leave_partial_json(tmp_path, monkeypatch):
+    image = nib.MGHImage(np.zeros((3, 4, 5), np.float32), np.eye(4))
+    result = SimpleNamespace(transform=AffineTransform(np.eye(4), source=image, target=image),
+        header_image=image, report={"bad": float("nan")})
+    monkeypatch.setattr("fnit.robust_register.registration.robust_register", lambda *args, **kwargs: result)
+    path = tmp_path/"out"
+    with pytest.raises(ValueError, match="JSON"):
+        cli.main(["--source", "a.mgz", "--target", "b.mgz", "--output-directory", str(path), "--device", "cpu"])
+    assert not (path/"report.json").exists()

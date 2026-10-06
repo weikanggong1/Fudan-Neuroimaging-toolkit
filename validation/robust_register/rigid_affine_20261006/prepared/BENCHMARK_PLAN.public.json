@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "status": "prepared_not_dispatched",
+  "scope": "ONE CPU same-input rigid then affine registration comparison; no GEMS/reconstruction",
+  "authorizations": {
+    "local_implementation_and_contracts": true,
+    "real_FNIT_registration": false,
+    "official_two_commands": false,
+    "default_integration": false
+  },
+  "input_provenance": "one saved public CC0 ds000114 instance; A target/reflected header gate already passed; not synthetic MRI",
+  "inputs": {
+    "moving": {
+      "filename": "flippedAtlasDump.mgz",
+      "bytes": 406523,
+      "sha256": "9b8ffb8867b9c68c22a1178501970fbb125d37bc13d0def77fd530fc430b778b",
+      "shape": [
+        131,
+        241,
+        99
+      ],
+      "dtype": "uint8",
+      "voxel_mm": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    },
+    "fixed": {
+      "filename": "targetMask.mgz",
+      "bytes": 5047,
+      "sha256": "c71c187e8d0899d6127aca8e142714c87f95cd160d409659958f5f9ac5dd1e57",
+      "shape": [
+        39,
+        45,
+        56
+      ],
+      "dtype": "float32",
+      "voxel_mm": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "native_binary": {
+    "bytes": 27995368,
+    "sha256": "82b20927fdf9f650da81699a339577fbd24a6a2d9281fa9452cd1c6569c3334a",
+    "build_stamp": "freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45",
+    "version_commands_executed": false,
+    "registration_executed": false
+  },
+  "parameters": {
+    "mode_order": [
+      "rigid",
+      "affine"
+    ],
+    "saturation": 50.0,
+    "iterations_per_level": 5,
+    "stop_distance": 0.01,
+    "initialize_translation": true,
+    "pyramid_min_size": 16,
+    "pyramid_max_size": -1,
+    "highres_iterations": -1,
+    "device": "cpu",
+    "tf32": true,
+    "spatial_chunk_size": 131072,
+    "memory_budget_gb": 20.0
+  },
+  "resources": {
+    "same_node_physical_CPU_threads": 8,
+    "exclusive_outer_common_CPU_lock": true,
+    "shared_physical_cores_fixed": true,
+    "address_space_cap_bytes": 20000000000,
+    "CUDA_VISIBLE_DEVICES": "",
+    "GPU_allocation": 0,
+    "OMP_NUM_THREADS": 8,
+    "MKL_NUM_THREADS": 8,
+    "OPENBLAS_NUM_THREADS": 8,
+    "NUMEXPR_NUM_THREADS": 8,
+    "torch_threads": 8,
+    "torch_interop_threads": 1
+  },
+  "limits": {
+    "lock_wait_seconds": 600,
+    "each_arm_child_seconds": 1200,
+    "controller_after_lock_seconds": 3600,
+    "outer_controller_seconds": 4800,
+    "scientific_attempts": 1,
+    "automatic_retry": false,
+    "official_each_command_seconds": 550
+  },
+  "environment": {
+    "clean_env": true,
+    "unset": [
+      "LD_LIBRARY_PATH",
+      "LD_PRELOAD",
+      "PYTHONPATH",
+      "OPENBLAS_CORETYPE",
+      "FS_SetVoxToRasXform_Change_VoxSize"
+    ],
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "original_private_FS_license_used_only_official_arm": true,
+    "no_environment_install_or_prefix_change": true
+  },
+  "arms": [
+    "official_two_commands",
+    "FNIT_two_stages",
+    "read_only_score"
+  ],
+  "immutable_gates": {
+    "input_SHA_before_after_exact": true,
+    "source_tree_SHA_before_after_exact": true,
+    "original_moving_voxels_shape_dtype_exact": true,
+    "LTA_source_target_shape_exact": true,
+    "LTA_space": "world_RAS_mm",
+    "mapped_geometry_consistency_max_mm": 1e-05,
+    "physical_displacement_RMS_mm_max": 0.001,
+    "physical_displacement_max_mm_max": 0.01,
+    "warped_same_target_grid_relative_L2_max": 1e-05,
+    "warped_same_target_grid_nonzero_support_exact": true,
+    "header_field_errors_all_reported": true,
+    "same_input_shapes_data_hash_immutable": true
+  },
+  "score_point_set": "8 source bounding-box corners plus 5x5x5 regular source-voxel lattice, including source endpoints; transform in source scanner RAS mm, no fitted alignment",
+  "timings": [
+    "imports",
+    "input_load",
+    "axis_reorder_and_isotropic",
+    "pyramid",
+    "per_step_halfway_sampling",
+    "per_step_A_build",
+    "per_step_IRLS_QR",
+    "per_step_update",
+    "API",
+    "MGH_save_reload",
+    "LTA_save",
+    "two_stage_with_save",
+    "whole_arm_wall",
+    "official_rigid_command_wall",
+    "official_affine_command_wall",
+    "score_wall"
+  ],
+  "memory_reporting": [
+    "per_arm_ru_maxrss_bytes",
+    "Torch_allocated_reserved_zero_on_CPU",
+    "address_space_cap",
+    "sampling_peak_is_not_combined_peak"
+  ],
+  "future_not_authorized": [
+    "additional_native_same_state_internal_capture",
+    "CPU_ABBA",
+    "GPU_pair",
+    "GEMS_preparation_integration",
+    "GEMS_whole_recipe"
+  ],
+  "failure_policy": "preserve exception/nonzero receipts and partial outputs; no score with incomplete outputs; no change of thresholds or second registration",
+  "publication": "scalars/source/plan/code and legal derived overlay only; no MRI arrays/private paths/licenses/credentials; prepared candidate not a default",
+  "header_fields": [
+    "version",
+    "dims",
+    "type",
+    "dof",
+    "goodRASFlag",
+    "delta",
+    "Mdc",
+    "Pxyz_c",
+    "tr",
+    "flip_angle",
+    "te",
+    "ti",
+    "fov"
+  ],
+  "metrics": [
+    "rigid and affine LTA world RAS matrix maximum absolute difference",
+    "combined world RAS matrix maximum absolute difference",
+    "actual fixed-mask overlap before registration and after rigid/affine, diagnostic only",
+    "133 fixed source physical points: rigid/affine RMS and maximum displacement",
+    "same target grid warp maximum, P99, relative L2 and nonzero support",
+    "13 actual MGH fields, input/output voxel invariance"
+  ],
+  "sampler_oracle_scope": "Saved official and FNIT mapped headers are compared with one shared FNIT sampler; this evaluates geometry/warp discrepancy and is not an independent official MRI resampler test.",
+  "freeze_reference": "FROZEN_SOURCE.public.json; metadata additions here do not modify immutable private execution plan or worker."
+}
