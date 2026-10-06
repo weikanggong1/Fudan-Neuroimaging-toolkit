@@ -6,7 +6,7 @@
 
 只有已验收权重、`[1,72,192,224,256]` 输入、72→24通道、3×3×3卷积、8个CPU线程、eval/no-grad、oneDNN关闭且无autocast/hooks/forward-AD时启用。未知shape、权重、运行库或编译环境继续使用成熟CPU分块卷积。Tensor子类、懒negative/conjugate视图也继续原路径。CUDA、训练和通用slab代码不使用这个候选。
 
-**真实已有Conda/GCC构建、固定短合同及完整CPU4/GPU2对照通过，等待root整合回归/发布；新独立Conda安装尚未测试。** 该候选不是新的分割模型，也不改变公共API。
+**同输入阶段与CPU/GPU整例验收通过；整合源码绑定及发布记录见 [ROOT_REVIEW.json](../../validation/smri_cpu/seg_columns_integration_20261006/ROOT_REVIEW.json) 和 [总表](../../validation/smri_cpu/README.md)。新独立Conda安装尚未测试。** 该候选不是新的分割模型，也不改变公共API。
 
 ## 2. Python调用、输入与输出
 
@@ -114,7 +114,7 @@ GPU default True完整原/新AB同图/CSV SHA、前向FP32/TF32和恢复相同�
 - 本次70ad6537窄CPU接入39个守卫/缓存合同；41ede608冻结实际worker/计划。已有Conda/GCC11真实compile/load1次，随后6numeric+13copy oracle+23fallback/异常守卫全部通过，12copy/12SGEMM、所有FP32位差0。short cache与wholecold cache分离，whole另compile1次，两candidate各实际2pass/2层命中/28copy/28SGEMM。
 - 完整CPU4/GPU2、strict map/CSV/header/源资源精度恢复门通过，原外层退出均rc0；每个成功candidate立即核科学文件SHA后才派下一arm。phase1两个child rc0且controller complete，原phase1外层OS RC未另外采样，报告明确此界限。
 - 后验v1仅因环境缺Matplotlib绘图退出，没有再跑模型；v2先原子保存数字，再用NumPy+stdlib画PNG，4正例/3负例PNG合同通过，63项原6臂/源/出口SHA前后相同。没有新增绘图依赖。
-- root整合回归/发布另执行；当前新独立Conda环境安装尚未测，已有目标Conda实际编译已通过。未知库/版本/shape/参数安全fallback。默认CPUparc/fast无影响路径没有重复跑，本轮不是robust SynthSeg+完整实现。
+- 整合源码绑定及发布记录见本leaf的ROOT_REVIEW.json和CPU总表；当前新独立Conda环境安装尚未测，已有目标Conda实际编译已通过。未知库/版本/shape/参数安全fallback。默认CPUparc/fast无影响路径没有重复跑，本轮不是robust SynthSeg+完整实现。
 - 普通33、parc及fast的整体官方CPU速度目标仍未过；上一版parc约55.68秒对官方48.30、fast约42–43对33.78记录保留。本次不改变oneDNN/BN/ELU/精度，不泛化其它层或shape；下一项工作区复用另独立验收。
 
 ## 7. 参考、源码与许可

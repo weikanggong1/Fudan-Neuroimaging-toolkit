@@ -20,10 +20,13 @@ attribution and terms described in the repository's `THIRD_PARTY_NOTICES.md`
 and `licenses/FreeSurfer.txt`. This notice does not assign a new license to
 FNIT as a whole or grant additional rights to model files.
 
-The current narrow production candidate has passed real compile/load in the
+The current narrow production implementation has passed real compile/load in the
 existing Conda/GCC environment, six fixed numerical contracts, copy/fallback
 guards, four complete CPU processes and two complete GPU processes. A new
 independent Conda installation has not been tested. Full CPU timing remains
 slower than the frozen same-node official result;
-see `docs/synthseg/CPU_COLUMNS.md` and
+Same-input stage and complete CPU/GPU acceptance have passed. Integration
+source binding and publication records are in
+`validation/smri_cpu/seg_columns_integration_20261006/ROOT_REVIEW.json` and
+`validation/smri_cpu/README.md`. See `docs/synthseg/CPU_COLUMNS.md` and
 `validation/smri_cpu/seg_columns_integration_20261006/README.md`.

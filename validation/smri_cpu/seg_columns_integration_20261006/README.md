@@ -4,9 +4,9 @@
 
 该版本把 FNIT 自有 copy/SGEMM 胶水接入 33 类网络 `up[3].conv0`。输入仍按原14层 slab 展开，M/N/K、紧凑 leading dimensions、通道/核顺序、FP32、bias预填和已加载 Torch 的 LP64 SGEMM 保持。6.243 GB 列缓冲仅在本层调用内复用，返回后释放；不改变成熟通用slab、低内存防崩代码和GPU数学。
 
-**真实新构建/加载、固定短合同、4个完整CPU进程、2个完整GPU进程及保存输出评分均通过。等待root整合回归与发布。** 新独立Conda环境安装尚未执行；不能把已有Conda/GCC编译通过写成全新环境安装通过。完整官方CPU速度目标仍未通过。
+**同输入阶段与CPU/GPU整例验收通过；整合源码绑定及发布记录见 [ROOT_REVIEW.json](ROOT_REVIEW.json) 和 [总表](../README.md)。** 新独立Conda环境安装尚未执行；不能把已有Conda/GCC编译通过写成全新环境安装通过。完整官方CPU速度目标仍未通过。
 
-实际源码是 `70ad6537`；准备worker是 `41ede608`。原预声明 [PLAN](PLAN.json) SHA `6daa84b1…` 和35项 [准备清单](MANIFEST.json) 保留为执行前记录，不用新结果覆盖旧声明。最新结果由 [build_summary.py](build_summary.py) 机械重算 [RESULTS.json](RESULTS.json)，不导入模型/影像软件，不运行新科学计算。最终新增文件另见 `RESULTS_MANIFEST.json`。
+实际源码是 `70ad6537`；准备worker是 `41ede608`。原预声明 [PLAN](PLAN.json) SHA `6daa84b1…` 和35项 [准备清单](MANIFEST.json) 保留为执行前记录，不用新结果覆盖旧声明。最新结果由 [build_summary.py](build_summary.py) 机械重算 [RESULTS.json](RESULTS.json)，不导入模型/影像软件，不运行新科学计算。09facd3e的原88项清单保留为 `RESULTS_MANIFEST_09facd3e.json`；当前清单见 `RESULTS_MANIFEST.json`。本次收尾只更新三份说明文字，计算17源、PLAN与原科学报告保持原字节；范围见 `DOCUMENTATION_FINALIZATION.json`。
 
 ## 2. 输入、输出、调用与参数
 
@@ -70,7 +70,7 @@ GPU旧新gzip `a879ab92…`、CSV `00870e28…` SHA相同；前向/参数FP32和
 - 4385B自有胶水先通过编译/短合同与真实同层三次完整preELU位门，见 [真实层v2](../seg_columns_real_layer_v2_20261006/README.md)。旧64Mi改变slab的非exact拒绝和group33无加速拒绝均保留，未采纳。
 - `70ad6537`仅窄CPU接入：39项local合同通过；`41ede608`冻结metadata/短worker/whole，source17和common4按实际SHA绑定，GPU未换后端。本次实际2次独立cache编译（short1、wholecold1）。无其它budget/布局/shape搜索。
 - 原posthoc v1无Matplotlib导致退出，完整模型先前已全部通过；v2新增atomic先保存数字及自有PNG，4正例/3负例PNG字节/CRC合同通过。原6臂/源/出口63项SHA在posthoc前后不变。构建summary首次只读schema断言按真实phase状态/资源字段修正，0新科学调用。
-- 完整CPU/GPU候选门通过，root整合回归、打包与main发布由root执行；新独立Conda install仍未测。当前已有Conda/GCC真实compile/load通过。未知运行库/编译器/权重/shape继续成熟fallback。
+- 完整CPU/GPU门通过，整合源码绑定及发布记录见ROOT_REVIEW.json和CPU总表；新独立Conda install仍未测。当前已有Conda/GCC真实compile/load通过。未知运行库/编译器/权重/shape继续成熟fallback。
 - 33、parc、fast整体同线程官方速度门仍未通过。本轮未重跑默认parc/fast无影响路径，既有55.68/48.30秒与42–43/33.78秒对照不覆盖为新结果。robust SynthSeg+不在本验收。
 - 下一项可研究其它groups1/k3层保持原矩阵与SGEMM的工作区复用；本轮不泛化接入，不以单层结果推算其收益。
 
