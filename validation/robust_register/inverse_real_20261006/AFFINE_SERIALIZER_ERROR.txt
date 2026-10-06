@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "PRIVATE_FROZEN_WORKSPACE/run_real_worker.py", line 212, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "PRIVATE_FROZEN_WORKSPACE/run_real_worker.py", line 207, in main
+    atomic_report(directory/'report.private.json', report)
+  File "PRIVATE_FROZEN_WORKSPACE/run_real_worker.py", line 27, in atomic_report
+    payload = (json.dumps(report, indent=2, ensure_ascii=False,
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "PRIVATE_CONDA_PREFIX/lib/python3.11/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "PRIVATE_CONDA_PREFIX/lib/python3.11/json/encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "PRIVATE_CONDA_PREFIX/lib/python3.11/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "PRIVATE_CONDA_PREFIX/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "PRIVATE_CONDA_PREFIX/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "PRIVATE_CONDA_PREFIX/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "PRIVATE_CONDA_PREFIX/lib/python3.11/json/encoder.py", line 326, in _iterencode_list
+    yield from chunks
+  File "PRIVATE_CONDA_PREFIX/lib/python3.11/json/encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "PRIVATE_CONDA_PREFIX/lib/python3.11/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type int32 is not JSON serializable

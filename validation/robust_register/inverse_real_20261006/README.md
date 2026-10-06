@@ -1,10 +1,10 @@
-# Robust registration：局部 Float inverse 实图对照准备
+# Robust registration：局部 Float inverse 实图对照
 
 ## 1. 功能与验证范围
 
-本目录准备一次 CPU 刚性配准→MGH 保存重读→仿射配准的对照。它只在独立实验命名空间里替换 `native_inverse`，采用已经通过 18 项矩阵合同的固定 VNL Float 运算顺序。成熟 `ca_register_inverse`、原 B 六个源码文件、原参考输出与生产 CPU/GPU 流程保持原版本。
+本目录记录一次 CPU 刚性配准→MGH 保存重读→仿射配准的对照。它只在独立实验命名空间里替换 `native_inverse`，采用已经通过 18 项矩阵合同的固定 VNL Float 运算顺序。成熟 `ca_register_inverse`、原 B 六个源码文件、原参考输出与生产 CPU/GPU 流程保持原版本。
 
-**当前已冻结，尚未运行这两次 API 或新的评分。** 矩阵合同的 18/18 不代替影像验收；上一例 B 仍有仿射 warp 相对 L2 和两阶段各一体素支持集差，17/20 项通过。
+**两阶段影像已保存；仿射报告序列化失败，随后只评分已有输出。原 20 项条件仍为 17/20，三个失败未消失。** 矩阵合同的 18/18 不代替影像验收。原 controller RC1 和纯评分 RC2 均保留；不接生产，也不宣称完整 runtime 门通过。
 
 ```mermaid
 flowchart LR
@@ -59,7 +59,7 @@ rigid_result = experimental_package.robust_register(
 
 配准参数保持原 B 定义：`mode` 为 rigid/affine；`saturation=50` 为 Tukey SAT；`iterations_per_level=5` 为每层更新上限；`stop_distance=0.01` 为原变换停止距离；`initialize_translation=True` 使用原质心初始化；`pyramid_min_size=16`、`pyramid_max_size=-1` 和 `highres_iterations=-1` 保持原金字塔选择与最高层迭代策略；`device="cpu"` 固定本轮 CPU；`tf32=True` 在 CPU 上不参与数值计算；`spatial_chunk_size=131072` 控制采样分块；`memory_budget_gb=20` 控制预检。图像、A 和 QR 保持 Float32，小矩阵状态与原采样权重边界不变。
 
-每个 stage 输出自产 MGH、LTA、API/保存时钟、实际金字塔/更新数、停止原因和局部 inverse 的实际成功调用次数。JSON 另记录源码/输入/参考前后 SHA、真实模块路径、线程与 CUDA 未初始化状态、RSS、异常和退出码。数值数组不发布。
+两阶段均保存自产 MGH/LTA；成功写入的刚性报告保存 API/读写时钟、两层各5次更新、停止原因和局部 inverse 实际成功调用26次。仿射在写 JSON 时因 NumPy int32 shape 退出，内部 API 时钟/counter/flags/RSS 缺失为 NA，不重建。源码/输入/输出/参考前后 SHA、线程和 CUDA 未初始化由刚性与纯评分的实际报告核验；原失败记录保留。MRI/atlas 数组不发布。
 
 ## 3. 实验命令行与 Conda
 
@@ -92,19 +92,29 @@ mri_robust_register --mov rigid.header.mgz --dst targetMask.mgz \
 
 ## 5. 精度、时间与脑图
 
-本项实图尚无新精度或时钟。评分将保持原 20 项条件：两阶段两方的源体素/shape/dtype、LTA source/target shape 和内部 header 一致性，共 12 项；两阶段的 133 点 RMS≤0.001 mm、max≤0.01 mm、同目标网格 warp relL2≤1e-5、nonzero support 差 0，共 8 项。内部 header max≤1e-5 mm。13 项 MGH 字段误差与固定目标 mask overlap 单列，不代替正式条件。
+本项保持原 20 项条件：两阶段两方的源体素/shape/dtype、LTA source/target shape 和内部 header 一致性，共 12 项；两阶段的 133 点 RMS≤0.001 mm、max≤0.01 mm、同目标网格 warp relL2≤1e-5、nonzero support 差 0，共 8 项。内部 header max≤1e-5 mm。13 项 MGH 字段误差与固定目标 mask overlap 单列，不代替正式条件。
 
 `SCORER_SOURCE_BRIDGE.json` 记录原 scorer 数学 AST 相同；变化限于独立包选择、参考/新输出路径和显式包参数。保存官方/新 header 使用原共享 FNIT sampler，因此本轮评估几何/warp 差异，不冒称独立官方重采样器验证。
 
-完整时钟将单列阶段 API、MGH/LTA 保存、刚性重读、进程启动/导入、后验评分、controller 与锁等待。三个独立进程不是旧版单进程两阶段的同一计时协议；没有等价门通过前不发布加速结论。此准备阶段没有新的脑图。可复用 A 的 CC0 目标 mask 示意图；本次不发布许可尚未核清的 atlas 像素，也不为绘图新增采样。
+| 阶段/指标 | 旧 B | 本局部 inverse |
+|---|---:|---:|
+| 刚性133点 RMS / max，mm | 5.470951e-6 / 7.742393e-6 | 5.044064e-6 / 7.696581e-6 |
+| 仿射组合133点 RMS / max，mm | 2.691429e-4 / 4.487401e-4 | 2.681510e-4 / 4.470680e-4 |
+| 刚性 warp relL2 / support差 | 2.4091169e-6 / 1 | 2.5840940e-6 / 1 |
+| 仿射 warp relL2 / support差 | 2.5881265e-5 / 1 | 2.5566429e-5 / 1 |
+| 原正式条件 | 17/20 | 17/20 |
+
+新刚性 API 0.442906 s，MGH保存0.021029 s，LTA保存0.001726 s；刚性 worker RSS431,030,272 B。原失败 controller4.741112 s（刚性/仿射 child2.469602/2.269814 s）；其中仿射内部 API 时钟为NA。纯评分 worker2.189347 s、recovery controller2.687818 s，RSS410,267,648 B。两段不是连续成功 end-to-end benchmark，不能相加后与原官方1.191060 s的两命令时钟计算加速比；没有ABBA或新的官方计时。详细标量和原字节SHA见 [RESULTS.json](RESULTS.json)、[完整评分字段](FULL_SCORE_RESULTS.json) 与 [METRICS.csv](METRICS.csv)。
+
+本次没有新的脑图或最终ROI。可复用 A 已验收的 [CC0目标mask示意图](../target_preparation_20261006/preparation_targets.png)；不发布尚未核清许可的atlas像素，也没有为绘图增加采样。进一步原因与尚无证据的归因见 [SOURCE_RUNTIME_GAP.md](SOURCE_RUNTIME_GAP.md)。
 
 ## 6. 更新与 benchmark 记录
 
 - 原 B：一次真实两阶段实验完成，17/20；原结果与失败记录保持不变。
 - 矩阵合同：[inverse_order_20261006](../inverse_order_20261006/README.md)，六个保存状态共 18 项 bit0 通过；刚体旧 word 差只来自带符号零，仿射有真实非零差。
-- 本项：局部 inverse overlay、成功调用计数、独立 stage 进程、原评分数学 AST 和有界 controller 已冻结；实际配准与评分数量仍为 0。
-- v1 仅准备：保存原冻结记录，0 数值作业；v2 仅新增 flags 前后严格相同的后置门，没有修改数学或评分。
-- 不修改生产默认，也不以尚未运行的计划更新旧 B 的验收结论。
+- 本项：实际刚性/仿射 API各一次、自产保存输出；原 controller 因 affine JSON serializer失败RC1，未重跑任何API；唯一保存输出评分RC2，仍17/20。
+- v1 仅准备、0数值作业；v2追加 flags 后置门并作上述唯一实验。原 six runtime文件/PLAN/失败字节保持；独立score recovery使用原冻结worker的score分支，不修改数学或评分。
+- 后续一行shape元数据patch与JSON对象合同单列，没有作用于原已运行worker，也没有用重建时钟冒充affine报告；不修改生产默认或原门限。
 
 ## 7. 原实现、来源与许可
 
