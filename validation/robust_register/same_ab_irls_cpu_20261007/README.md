@@ -1,4 +1,4 @@
-# CPU robust regression：同一真实 A/b 的首差与 QR 修复候选
+# CPU robust regression：同一真实 A/b 的首差、保序原语与完整 IRLS 验证
 
 ## 1. 功能简介
 
@@ -6,13 +6,17 @@
 
 同一真实线性系统有 **9,196 行、6 列**。原 SDK 与当前 PyTorch 求解器的首轮中位数、MAD、sigma、归一化残差、平方根权重、加权 A 和加权 b 全部逐位相同，首差出现在 QR 返回的 6 个参数。使用保存的同一加权 A/b 单独检验新候选后，**6 个 Float32 参数全部逐位一致**。
 
-这是一个回归算子和首个 QR 算子的实测结果。完整配准原有 **17/20** CPU 门保持原状态；新 QR 尚未接入默认求解器，GPU 代码未改，本阶段没有 GPU 性能测试。
+随后，同原生参数生成的 **9,196 个残差**、同原生残差/权重生成的 **1 个加权误差**也逐位一致。三个 CPU 候选接入原 MAD/Tukey 和停止逻辑后，自然运行 **4 轮 IRLS**，逐轮 40 项记录与最终 4 项记录全部逐位一致；最终 6 个参数和 9,196 个平方根权重均零差。
+
+完整配准原有 **17/20** CPU 门保持原状态；这些候选尚未接入默认求解器，GPU 代码未改，本阶段没有 GPU 性能测试。
 
 文件用途：
 
 - [solver_boundary_probe.py](solver_boundary_probe.py)：在固定求解器的数学 AST 中插入观测点，保留原中位数、求和、QR 和 IRLS 调用。
 - [source/cpu_linpack_qr_candidate.py](source/cpu_linpack_qr_candidate.py)：自有 CPU Float QR 候选；实现无 pivot 的 SQRDC 与 JOB=100 的 SQRSL 所需步骤。
-- [benchmark_summary.json](benchmark_summary.json)：此次真实数据的差异、分层时钟、失败历史和验收范围。
+- [source/cpu_ordered_residual_candidate.py](source/cpu_ordered_residual_candidate.py)：CPU Float 按列累计残差。
+- [source/cpu_weighted_error_candidate.py](source/cpu_weighted_error_candidate.py)：CPU Float 按行累计加权误差。
+- [benchmark_summary.json](benchmark_summary.json)：真实同输入原语和完整 IRLS 的差异、分层时钟、失败历史与范围。
 
 NumPy、PyTorch、Numba 均已列入项目现有 Conda 环境，不新增运行依赖。候选计算使用 Float 工作数组，显式保留 f2c 标量返回、除法和平方根的 Double 边界。
 
@@ -108,9 +112,52 @@ if candidate_parameters is None:
 
 第一次调用包含 NumPy/Numba 导入和 JIT；本次实测将签名编译与唯一真实数值调用分开计时。观察器仅代理固定 helper 的 `solve_float`，其他 Numba 内部装饰器完整委托原 `njit`，退出时恢复全局装饰器。
 
+### 2.3 残差和加权误差候选
+
+`try_cpu_ordered_residual(design_matrix, rhs, parameters)` 按列顺序计算每一行的 Float32 `A*p`，再计算 Float32 `b-A*p`：
+
+| 参数或返回值 | 格式与意义 |
+|---|---|
+| `design_matrix` | 原始未加权 A，CPU Float32 连续二维 Tensor；形状 `(行数, 参数数)`，本例 `(9196, 6)`。 |
+| `rhs` | 原始 b，CPU Float32 连续一维 Tensor，长度等于行数。 |
+| `parameters` | 同一系统的 CPU Float32 连续一维参数；长度等于 A 列数，支持 1–12 列。 |
+| 返回值 | 新建 CPU Float32 残差 Tensor，形状与 b 相同；不支持的输入返回 `None`。 |
+
+`try_serial_weighted_error(current_residual, sqrt_weights)` 返回 Float32 舍入后的 Python `float`，即 `sum(w²*r²)/sum(w²)`。两个输入是形状相同、非空的 CPU Float32 连续一维 Tensor；这里 w 是**平方根权重**。平方、逐行累计和最后除法均为 Float32。接口只返回最终误差，没有另行返回 sw/swr；调用者保留全零权重与非有限误差检查。
+
+两个函数要求普通、无梯度、非 nested、非 lazy neg/conj、无 forward AD 或 functorch 包装的 strided Tensor。CUDA 与其他不支持输入在 NumPy/Numba 导入前返回 `None`，调用者继续原路径。未知、非有限及秩亏输入域尚未完成通用官方 API 验收。
+
+```python
+import numpy as np
+import torch
+from source.cpu_ordered_residual_candidate import try_cpu_ordered_residual
+from source.cpu_weighted_error_candidate import try_serial_weighted_error
+
+# 同一真实未加权系统；数组文件由调用者提供。
+design_matrix = torch.from_numpy(np.ascontiguousarray(np.load("design.npy"), dtype=np.float32))
+right_hand_side = torch.from_numpy(np.ascontiguousarray(np.load("rhs.npy"), dtype=np.float32))
+parameter_vector = torch.from_numpy(np.ascontiguousarray(np.load("parameters.npy"), dtype=np.float32))
+square_root_weights = torch.from_numpy(np.ascontiguousarray(np.load("sqrt_weights.npy"), dtype=np.float32))
+residual_vector = try_cpu_ordered_residual(
+    design_matrix=design_matrix,
+    rhs=right_hand_side,
+    parameters=parameter_vector,
+)
+if residual_vector is None:
+    raise ValueError("残差输入超出此 CPU 候选范围")
+weighted_error = try_serial_weighted_error(
+    current_residual=residual_vector,
+    sqrt_weights=square_root_weights,
+)
+if weighted_error is None:
+    raise ValueError("误差输入超出此 CPU 候选范围")
+```
+
+这段例子说明调用关系。本次单项验收分别用已保存的原生参数、原生残差和原生权重，避免把不同参数导致的残差差异混入误差归约对照。
+
 ## 3. 命令行调用
 
-这两个内部验证函数没有独立生产 CLI。将第 2 节调用写入自己的诊断脚本后使用 `python your_diagnostic.py`。无需安装或调用 FreeSurfer 来运行 Python 候选。
+本页内部验证函数没有独立生产 CLI。将第 2 节调用写入自己的诊断脚本后使用 `python your_diagnostic.py`。无需安装或调用 FreeSurfer 来运行 Python 候选。
 
 本阶段不增加生产 `recon-all` 或配准命令行选项。
 
@@ -160,7 +207,46 @@ if candidate_parameters is None:
 
 三次实际运行库检查点的映射数量为 104、116、116，均是已封印 123 个**字面文件身份**的子集，未发现未知或已删除映射。源码、输入、134 个资源、14 个冻结文件及进程树/锁/索引收尾检查通过。这是文件身份验证，不是动态 BLAS 调用轨迹。
 
-### 5.3 回归函数耗时与整体范围
+### 5.3 同输入残差与误差原语
+
+未重新执行原生程序，分别复用保存的同一真实输入。残差用原 A/b 和原生参数；误差用原生保存的残差与平方根权重，与新算残差隔离。
+
+| 原语 | 比较字数 / 不同字数 | 最大差 / P99 | 唯一 kernel | 显式签名编译 | 冷 helper API |
+|---|---:|---:|---:|---:|---:|
+| 按列残差 | 9196 / **0** | **0 / 0** | **0.205 ms** | 0.438 s | 3.597 s |
+| 按行加权误差 | 1 / **0** | **0 / 0** | **0.042 ms** | 0.104 s | 3.234 s |
+
+该组数值调用 2 次、显式签名编译 2 次、dummy 0；冷导入 1.837 秒，验证 entry 21.366 秒。四个运行库身份检查点映射数为 104、116、116、116，全部属于原 123 个字面身份。137 个资源、14 个源码冻结及进程/同 inode CPU8 锁/六索引收尾通过。最终误差逐位一致；内部 sw/swr 未单独导出，不写成两者分别实测一致。
+
+### 5.4 三个 CPU 原语接入自然完整 IRLS
+
+保持原 MAD、Tukey 权重、最大 20 轮、停止与回滚，只替换 CPU QR、残差和误差三个调用。候选自然完成 4 轮，选择第 3 轮并回滚，没有强制固定迭代数。
+
+| 比较范围 | 结果 |
+|---|---:|
+| 每轮 center、MAD、sigma、normalized、weights、weighted A/b、QR 解、残差、误差 | 4 × 10 = **40 项逐位一致** |
+| 最终 parameters、weights、selected iteration、rollback | **4 项逐位一致** |
+| 最终参数 / 平方根权重 | **6 / 9196 个字全零差** |
+| 已观测名称数 / 首差 | **14 / 无** |
+| QR、残差、误差真实调用 | **各 4 次** |
+| 显式签名编译 / fallback / dummy | **各 1 次 / 0 / 0** |
+| 新原生 / 上游 MRI / GPU 调用 | **0 / 0 / 0** |
+
+原参考保留 16 类边界；本候选实际比较 14 类，未单独观测 sw/swr。迭代选择与最终参数/权重都与已保存原参考比较，没有重新运行原生解。
+
+| 自然 IRLS 分层时钟 | QR | 残差 | 误差 |
+|---|---:|---:|---:|
+| 显式签名编译 | 0.858 s | 0.131 s | 0.067 s |
+| 第 1 轮 kernel | 0.879 ms | 0.197 ms | 0.062 ms |
+| 第 2–4 轮 kernel 范围 | 0.452–0.465 ms | 0.047–0.060 ms | 0.009–0.011 ms |
+
+整段冷求解 10.715 秒包含首次 JIT、三个约 3.2 秒的运行库身份检查点及观测 I/O；回调 0.017 秒包含在其中。冷导入与首身份检查 4.689 秒，entry 18.807 秒，outer 20.190 秒，均为嵌套时钟。这些检查用于验证，不据此推断生产热 IRLS 耗时或速度倍率。
+
+五个检查点映射数量为 99、122、122、122、122，均是已封印 123 身份的精确子集；378 个旧资源、19 个冻结文件、9 个 PID 实例、CPU8 锁和六索引全部闭合。数值结果在最终门前先写入，早期 durable 记录 `complete=false` 保留，最终 entry 与控制回执成功。这是文件身份验证，不是动态数学调用轨迹。
+
+本例只有 **6 个解析参数**。12 列仿射、13 列含强度缩放、秩亏和未知输入 fallback 未在此阶段完成实测；13 列仍返回 `None` 保留旧路径。完整刚体/仿射的原有 20 门是下一步验收，不因单一 A/b 全段相同而改写 17/20。
+
+### 5.5 原回归函数耗时与整体范围
 
 | 同 A/b 的整段回归函数 | 秒 |
 |---|---:|
@@ -169,7 +255,7 @@ if candidate_parameters is None:
 | PyTorch 回调时间，包含在上一项 | 0.018959 |
 | PyTorch 验证冷 entry | 7.786052 |
 
-两种观测 I/O 实现不同，此表不代表无观测生产求解器的速度倍率。新候选 0.595 ms 是一个 QR kernel，不能与整段原回归 19.434 ms 作倍率比较。本阶段没有新的完整配准或 recon-all 端到端耗时。
+两种观测 I/O 实现不同，此表不代表无观测生产求解器的速度倍率。新候选 0.595 ms 是一个 QR kernel，不能与整段原回归 19.434 ms 作倍率比较。自然 IRLS 冷观测运行见上节；本阶段没有新的完整配准或 recon-all 端到端耗时。
 
 精度结论来自服务器保存的原 COMPARISON 安全聚合，并绑定原件大小/SHA；矩阵、影像、A/b、日志和像素/参数 hex 没有传回本地，也未在本地重构原完整 JSON。此次对象是内部线性系统，不附缺少行到体素对应关系的脑图；上游准备图像和首 A/b 的真实对照见[首 A/b 报告](../first_ab_cpu_prefix_20261007/README.md)。
 
@@ -183,8 +269,11 @@ if candidate_parameters is None:
 | Float LINPACK 候选 v2 | 补齐原 SAXPY 零系数直接跳过的语义；未知输入域尚未验收。 |
 | QR 观察器首组 | 全局 `njit` 观察器误拦 Numba 内部装饰器，数值 0、显式 JIT 0；原失败保留。 |
 | QR 观察器 v2 | 仅代理固定 helper 的 `solve_float`；一次真实 kernel 返回 6 字逐位一致，控制和收尾通过。 |
+| 残差、误差单项 | 同原生参数产生 9196 个残差、同原生残差/权重产生 1 个误差均逐位一致；新原生调用 0。 |
+| 自然 IRLS 源观察器 v1 | 独审在执行前发现重复 exclusive HELPER_LATEST 写入会冲突；未部署、数值 0，保留源稿。 |
+| 自然 IRLS 源观察器 v2 | 仅改唯一递增事件文件名；三个 helper 各自然调用 4 次，44 项记录逐位一致，控制和收尾通过。 |
 
-下一步在同一保存数据上分别验证：原 A/b 与**原生参数**生成的残差，以及原生残差/权重生成的加权误差。三个 CPU 基元验收后再检查自然 IRLS 全段和原有 20 项配准门。当前默认 API、GPU 路径和正式 17/20 结果未替换。
+下一步将已验证的 CPU 保序初始化和三个 helper 接入独立完整刚体→自产结果保存重载→仿射候选，按原有 20 项配准门验收。当前默认 API、GPU 路径和正式 17/20 结果未替换。
 
 ## 7. 原实现与参考文献
 
