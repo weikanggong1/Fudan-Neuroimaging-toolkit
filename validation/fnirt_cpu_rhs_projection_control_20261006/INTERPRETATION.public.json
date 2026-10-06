@@ -1,0 +1,140 @@
+{
+  "conclusion": "Axis Float division changes derivative bits but did not improve total native RHS agreement; no runtime/default integration.",
+  "baseline_relative_l2": 2.483601764762327e-07,
+  "candidate_relative_l2": 2.483864966670823e-07,
+  "scale_reference_error_unchanged": {
+    "shape": [
+      1
+    ],
+    "dtype": "float64",
+    "different_bits": 1,
+    "max_abs": 2.546876526565711e-06,
+    "rmse": 2.546876526565711e-06,
+    "relative_l2": 2.4367284016522854e-07,
+    "reference_value_sha256": "aa70b04ebb94949837bab187c09e3ea916f47a12f9168cd7f2f8afdb8d08fa55",
+    "actual_value_sha256": "706a9d88816b9920a36fecdd3827d89055357f668f5718ab3a8a2e0de421dc5f",
+    "bitexact": false
+  },
+  "candidate_vs_current": {
+    "full": {
+      "shape": [
+        1177
+      ],
+      "dtype": "float64",
+      "different_bits": 1051,
+      "max_abs": 2.1484472863958493e-09,
+      "rmse": 2.6642209489240466e-10,
+      "relative_l2": 8.743230232585689e-10,
+      "reference_value_sha256": "b17ee0432b461fb57cb9d006e314c6dd24ec465af2156004cd531abb492dfef9",
+      "actual_value_sha256": "85480e640244d75d03c061cbce281c96ce7092eb1bdce9b0348723774a9819f9",
+      "bitexact": false
+    },
+    "blocks": {
+      "coefficient_x": {
+        "shape": [
+          392
+        ],
+        "dtype": "float64",
+        "different_bits": 367,
+        "max_abs": 2.1484472863958493e-09,
+        "rmse": 3.360126395254494e-10,
+        "relative_l2": 9.030837314876732e-08,
+        "reference_value_sha256": "644e8b9cfc7c12364bd5e7c0ab193e7b1788cecfbf2c69f237f0227b5e134321",
+        "actual_value_sha256": "179e47079c7f9f3c75dfa1ce191ff86a860989d23556b955f9ab527fbcbb994e",
+        "bitexact": false
+      },
+      "coefficient_y": {
+        "shape": [
+          392
+        ],
+        "dtype": "float64",
+        "different_bits": 339,
+        "max_abs": 1.968756116466075e-09,
+        "rmse": 2.5979727287957935e-10,
+        "relative_l2": 3.4383447842745754e-08,
+        "reference_value_sha256": "b29b9bd80f5ced3762833a9c2dfccfadeeeb28fbf4b658c49ca5cdab1b1da274",
+        "actual_value_sha256": "3c2d6df256ba0317f38762a8a315651c75dc0e36d1426e7b43cf28d3d3f7ec9f",
+        "bitexact": false
+      },
+      "coefficient_z": {
+        "shape": [
+          392
+        ],
+        "dtype": "float64",
+        "different_bits": 345,
+        "max_abs": 1.7378551878804993e-09,
+        "rmse": 1.8089818772341187e-10,
+        "relative_l2": 2.894697199509152e-08,
+        "reference_value_sha256": "683dde76e6825130c06fe393a6a07017d470ea603d5fa23918935f85b3fe97c7",
+        "actual_value_sha256": "35e00113eda0138245617249fed8d34513daba7a65883988db54f00431b2c284",
+        "bitexact": false
+      },
+      "global_scale": {
+        "shape": [
+          1
+        ],
+        "dtype": "float64",
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "rmse": 0.0,
+        "relative_l2": 0.0,
+        "reference_value_sha256": "706a9d88816b9920a36fecdd3827d89055357f668f5718ab3a8a2e0de421dc5f",
+        "actual_value_sha256": "706a9d88816b9920a36fecdd3827d89055357f668f5718ab3a8a2e0de421dc5f",
+        "bitexact": true
+      }
+    }
+  },
+  "units": "positive full g: three 392 coefficient blocks plus one dimensionless scale; mixed units, not voxel displacement",
+  "runtime": {
+    "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "numba": "0.61.2",
+    "canonical_environment_alias": "/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default",
+    "actual_prefix_basename": "fnit_conda_env_956b1a9",
+    "actual_prefix_path_sha256": "ab97d6f7021fb229f5de9f246cc3a0397e8caadedf2b97ec5cca0df323c88e97",
+    "actual_interpreter_basename": "python3.11",
+    "actual_interpreter_identity": {
+      "bytes": 25916456,
+      "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153"
+    },
+    "actual_prefix_matches_declared_alias": true
+  },
+  "clock": {
+    "imports_and_binding_seconds": 1.8394857784733176,
+    "worker_until_summary_seconds": 4.438787736929953
+  },
+  "process_maxrss_KiB": 576780,
+  "next_direction": "Read-only priority: source-defined scale/Jte accumulation and component cache provenance; do not rerun this same division or infer a unique remaining cause.",
+  "next_scientific_run_authorized": false,
+  "limitations": [
+    "Native samepoint effective lambda is stored and equal; native SSD was not separately saved. New SSD does not update the controlled lambda.",
+    "The baseline reuses archived official smoothed moving original-storage values with current mature sampler and current FNIT state. Native partial/warp/Jte caches were not saved.",
+    "Installed source and ELF establish axis division definition, not equality of this trial derivative with actual archived native derivatives.",
+    "Only derivative projection changes. Global-scale RHS must remain bitexact and its remaining discrepancy is not explained by projection.",
+    "FNIT separable adjoint and scale reduction still differ from official serial assembly; no unique total RHS cause is presumed.",
+    "Prior orientation candidate full registration worsened and remains rejected; smoothing whole-image equivalence is not a registration acceptance.",
+    "Native total g enters only after own gradients have been computed; no official trajectory selects trial mathematics.",
+    "Three coefficient blocks and global scale have mixed units; errors are not warp voxel displacement.",
+    "Before/after FSL DSO maps are snapshots, not a full-time loader audit.",
+    "Cold/warm wall observations are not a speed ratio. No production/default/GPU integration, solver, or full registration."
+  ],
+  "old_full_orientation_candidate": {
+    "rejected": true,
+    "coefficients_RMSE_old_candidate": [
+      0.084011,
+      0.127315
+    ],
+    "warped_RMSE_old_candidate": [
+      0.020061,
+      0.031622
+    ],
+    "jacobian_RMSE_old_candidate": [
+      0.01327,
+      0.020135
+    ]
+  },
+  "GPU_evidence": "production sources and flags unchanged; CUDA uninitialized; no GPU science performed",
+  "performance_claim": "none: v2 single worker cold/warm setup and two prefixes are not a speed comparison"
+}

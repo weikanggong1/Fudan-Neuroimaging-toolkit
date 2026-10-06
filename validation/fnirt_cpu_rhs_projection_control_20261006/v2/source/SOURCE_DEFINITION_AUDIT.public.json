@@ -1,0 +1,68 @@
+{
+  "scope": "read-only current/installed source and ELF definition audit; zero new arrays/official invocation",
+  "FNIT": {
+    "registration": {
+      "bytes": 87527,
+      "sha256": "caab8ffccfd47225018d15803e0acee70c05b0212a22a4b720b034454c75e4da"
+    },
+    "locations": {
+      "projection": "942-946",
+      "matrix_FP64_inverse_then_FP32": "1362-1369",
+      "raw_derivative_sampler": "875-943"
+    },
+    "coordinates": {
+      "bytes": 5019,
+      "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    },
+    "coordinates_sign_location": "42-46"
+  },
+  "installed_FSL": {
+    "src/fsl-fnirt/fnirt_costfunctions.cpp": {
+      "bytes": 45537,
+      "sha256": "300bcf80839cb1591870845534f87778aa06d04785c22d76bf5100cd2474006a",
+      "projection_location": "600-603",
+      "full_gradient_location": "973-993"
+    },
+    "src/fsl-fnirt/fnirt_costfunctions.h": {
+      "bytes": 28346,
+      "sha256": "4eee3e47b8f314f614789e14ea06fd1a797ceac6325df6216c3535bc41e2eb7e",
+      "ObjVxs_locations": "275-277"
+    },
+    "include/newimage/newimage.h": {
+      "bytes": 45586,
+      "sha256": "1db80579761f8d0bc8f5d9ee549645ce55ab576db7321effa9cadce9b7b62602",
+      "operator_T_argument_location": "617-618"
+    },
+    "src/fsl-newimage/newimage.cc": {
+      "bytes": 85611,
+      "sha256": "eb0219ffcde1de74e20bf6813922d83e141c558b84c6bc7c9b8c688a3376e845",
+      "operator_division_location": "2270-2275",
+      "sampling_matrix": "1231-1238",
+      "X_flip": "2195-2214"
+    },
+    "include/newimage/newimageio.h": {
+      "bytes": 17705,
+      "sha256": "2be7fd3ea92ffb9c9cfc74ebbd5ee8bb952c58bed4826253acbc9ccf6b6fdda3",
+      "read_volume_to_radiological": "311-321; read_volumeROI with swap=true",
+      "read_orig_original_storage": "466-472"
+    },
+    "lib/libfsl-newimage.so": {
+      "bytes": 1779344,
+      "sha256": "ea2f45b4bff49dea10f073ba6dff7710b3c9027c5c7b16d3d805fcb36a463e9f",
+      "symbol": "NEWIMAGE::volume<float>::operator/=(float)",
+      "symbol_address_hex": "0xa7a70",
+      "ELF_file_divps_divss_present": true,
+      "runtime_execution_observed": false
+    }
+  },
+  "formula_difference": "current original-storage D_fp32 times signed inverse_pixdim_fp32; counterfactual signed D_fp32 divided by positive pixdim_fp32",
+  "sign_derivation": "radiological NEWIMAGE positive sampling pixdim after possible X-storage flip; original-storage raw derivative chain rule contributes negative X if neurological original header",
+  "runtime_limits": "No native samepoint partial arrays are stored. ELF symbol read is not an actual executed kernel observation.",
+  "prior_full_orientation_candidate": "rejected: coefficient RMSE .084011 -> .127315, warped .020061 -> .031622, Jacobian .01327 -> .020135; not overwritten",
+  "read_only_preparation_failures": [
+    "initial guessed libnewimage.so filename absent; corrected actual libfsl-newimage.so",
+    "old binutils rejects --disassemble=symbol; address/size symbol disassembly read succeeded",
+    "one helper command had malformed --timeout25; exit2 before remote execution; corrected readonly request"
+  ],
+  "redistribution": "No installed official source, DSO, assembly text, image arrays or credentials copied into public report; locations/hashes/formulas only."
+}
