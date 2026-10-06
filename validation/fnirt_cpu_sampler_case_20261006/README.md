@@ -103,7 +103,7 @@ python -m json.tool validation/fnirt_cpu_sampler_case_20261006/manifest.public.j
 
 随后[原checkpoint坐标核对](coordinate_followup.public.json)只构建一次成熟坐标，先复现旧坐标SHA。两侧各16,128个唯一XX位键，却没有相同键；同输入门未过，因此没有运行新采样或RHS。首次差异报告还遇到NumPy整数JSON写出错误，原失败保留，补录只读取已保存整数位模式，没有重跑坐标。公共NIfTI与NEWIMAGE内部体素方向的source-defined对应仍需验证；没有自动反射或按输出寻找坐标匹配。
 
-完整FNIRT的RHS/H/PCG、最终配准、其他输入/线程、Tensor fallback语义及后续GPU保护仍需验收，默认实现未替换。本轮没有完整配准脑图；[原完整CPU benchmark及脑图](../../docs/fnirt/README.md#5-最新精度和运行时间)仍绑定原版本。
+随后[同目标affine v3控制](affine_coordinate_v3/README.md)已补足这一保存状态的对应关系：16128个坐标位键、顺序输出、mask和全部角点门通过；候选partial值及三导数逐位同。固定lambda的FSL累计序正梯度总相对L2降至8.7145e−10，1177个Double words仍非逐位同，逐块误差见该报告。第一组失败不改写为通过。完整FNIRT的H/PCG、动态缓存、最终配准、其他输入/线程、Tensor fallback语义及后续GPU保护仍需验收，默认实现未替换。本轮没有完整配准脑图；[原完整CPU benchmark及脑图](../../docs/fnirt/README.md#5-最新精度和运行时间)仍绑定原版本。
 
 ## 6. 更新及 benchmark 记录
 

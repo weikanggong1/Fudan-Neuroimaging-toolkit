@@ -2,13 +2,13 @@
 
 ## 最新FNIRT采样对照
 
-[真实体积CPU候选](../fnirt_cpu_sampler_case_20261006/README.md)在16,128个记录坐标上，通过plain值、partial值和三个导数逐位门；当前helper仍有2338/813/0/913/1520个word不同。129,024个角点同输入门先通过，四次实际API及冻结源码已独立核验。候选公开在验证目录，默认注册器未替换；完整目标坐标、RHS、配准输出和GPU保护仍待验收。首编译与第二模式复用分别记时，不报告加速倍率。
+[真实体积CPU候选](../fnirt_cpu_sampler_case_20261006/README.md)在16,128个记录坐标上，通过plain值、partial值和三个导数逐位门；当前helper仍有2338/813/0/913/1520个word不同。129,024个角点同输入门先通过，四次实际API及冻结源码已独立核验。候选公开在验证目录，默认注册器未替换。随后[同目标坐标/RHS控制](../fnirt_cpu_sampler_case_20261006/affine_coordinate_v3/README.md)通过12个实际消费矩阵word、16,128个坐标键、完整顺序输出、mask及129,024个角点门；候选partial值/三个导数逐位同。FSL序正梯度总相对L2由4.1597e−7降至8.7145e−10，三系数块仍有9.07e−8/3.21e−8/3.16e−8的相对差，1,177个Double word仍非逐位同。完整H/diag、求解与配准输出、fallback和GPU保护仍待验收。各API首编译与时钟分列，不报告加速倍率。
 
 [保存几何支持集诊断](../robust_register/support_points_results_20261006/README.md)已完成一次4全网格和4单点验证：原两阶段warp指标精确复现；两个差异点的round域、clamp、rint和FEQUAL整数捷径一致，插值角点记录不同。支持差异仍各1体素，原正式17/20保持；这是保存几何的观察，不证明优化器首差。[根复核](../robust_register/support_points_root_review_20261006.json)核对原回执和四个当前Git文件，没有新注册、GEMS、原软件或GPU调用。
 
 ## 最新robust准备态对照
 
-[实际同例M0控制](../robust_register/prepared_m0_capture_20261006/README.md)已完成。两幅准备图像各39×45×61的完整Float32字节、几何字段和Rsrc/Rtrg矩阵同原生；质心与M0保留Double尾差，M0最大4.12e−13。原生捕获复用，修正的是验证入口字段宽度和惰性导入，原prepared数学未改。正式最终配准17/20仍未全过；下一步看质心归约与首个QR系统。
+[实际同例M0控制](../robust_register/prepared_m0_capture_20261006/README.md)已完成。两幅准备图像各39×45×61的完整Float32字节、几何字段和Rsrc/Rtrg矩阵同原生；原PyTorch质心与M0保留Double尾差，M0最大4.12e−13。随后[CPU保序质心候选](../robust_register/centroid_serial_cpu_probe_20261006/README.md)在这两幅保存图像上，6个Double值与SDK参考逐位相同。两次单独内核调用为0.283/0.228毫秒，另有0.299秒导入和0.392秒冷编译；没有对应原生内核时钟，不计算加速比。原观察器的运行库门失败保留，追加元数据核验不重跑数学。候选尚未接入完整M0或默认配准，正式17/20不变；下一步验证完整初始化，再核首个A/b与QR系统。
 
 ## 最新C24完整接入结果
 

@@ -6,6 +6,8 @@
 
 本轮完成的是这个观察边界的控制。原安装二进制内部轨迹、完整 robust-register 等价性及端到端速度尚未验收，正式 CPU gate 保持 17/20。产品和 GPU 路径改动均为 0。
 
+后续[CPU保序质心控制](../centroid_serial_cpu_probe_20261006/README.md)复用本轮保存的准备图像和SDK返回值，6个Double质心已逐位匹配。这是独立内核结果，未重算本报告的M0；下表的v4原质心/M0差异保持。候选的完整初始化及默认配准接入仍待验证。
+
 ## 2. Python 调用、输入与输出
 
 输入为原固定moving/fixed MGZ对，使用 CPU、rigid 模式和平移初始化。输入身份、原数学源码、AST tap 和 protocol 全程保留；v4 的新增桥只显式导入原 registration 模块并核其身份。
@@ -95,6 +97,7 @@ Schur guard 的未进入结论来自绑定唯一退出守卫、原 native exit 0
 | v2 | 增加 SDK 环境入口；原 native exit 0、runtime 23 核验完成，outside 的 8B/4B 协议门失败，candidate 0 |
 | v3 | native 0；封存已保存 native 并做正/负零字段桥，candidate 1 在惰性模块尚未导入处 exit 1 |
 | v4 | 保持 v3 原 8 份代码，新增显式模块导入桥；native 0、candidate 1 exit 0，完成上述同输入观察比较 |
+| 后续独立质心控制 | 仅对保存准备图像计算串行质心，6个Double返回值逐位同；原运行库观察门失败保留，追加元数据核验不重跑数学；完整M0未执行 |
 
 v1/v2/v3 原失败和旧 native 原字节均保留。可恢复原文本核验数分别为 16、18、19、21；私密数组仅在原控制中核验，本独立审查没有打开数组或重跑数学。v4 控制结束后 capture/compile 权限关闭，正式全门仍为 17/20。
 
