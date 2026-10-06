@@ -56,7 +56,7 @@ python run_prepared.py \
 
 `root` 为 FNIT 固定入口；`workspace` 为冻结源码；`run` 必须不存在，保存 `QUEUE.json`、编译日志与 `COMPILE.json`、`CONTRACTS.json`；`approved-contracts` 是后来明确批准本阶段的执行开关，当前仅有准备授权。队列不上传、修改 INDEX 或重试。
 
-CPU 亲和性为 `[32,36,40,44,48,52,56,60]`，Torch intra/inter、OMP/MKL/OpenBLAS/Numba 都限定 8。共用锁最多等待 120 秒，外层 480 秒；编译 worker 180 秒、编译子进程 120 秒、短合同 worker 180 秒。编译地址空间上限 4 GB，短合同 8 GB，RSS 门 32 GB。源、旧 C72 文件、参数、精度 flags、hooks 和 CUDA 未初始化均核对前后；首次失败保存实际退出及日志并停止剩余项。
+CPU 亲和性为 `[32,36,40,44,48,52,56,60]`，数值 worker 的 Torch intra/inter 为 8，OMP/MKL/OpenBLAS/Numba 限定 8。编译 metadata worker 无张量运算，记录并保留 Torch 原线程状态；不把默认 interop 状态算作已用核数。共用锁最多等待 120 秒，外层 480 秒；编译 worker 180 秒、编译子进程 120 秒、短合同 worker 180 秒。编译地址空间上限 4 GB，短合同 8 GB，RSS 门 32 GB。源、旧 C72 文件、参数、精度 flags、hooks 和 CUDA 未初始化均核对前后；首次失败保存实际退出及日志并停止剩余项。
 
 Conda GCC 11.2.0、Torch 2.5.1 ABI0、现有 Torch headers/libtorch/MKL 的哈希全部固定。只动态使用既有已加载提供者，不 `dlopen` 另一套 BLAS，不改 allocator 或全局环境。不增加依赖，不发布编译产物或权重。新 C24 编译和新建 Conda 环境均尚未测。
 

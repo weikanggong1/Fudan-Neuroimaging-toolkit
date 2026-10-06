@@ -45,6 +45,8 @@ def main():
         from prototype import ColumnsC24
         check_runtime(torch, plan)
         report['flags_before'] = flags(torch)
+        report['Torch_threads_before'] = {'intra':torch.get_num_threads(),'interop':torch.get_num_interop_threads()}
+        report['Torch_thread_setters_called'] = 0
         if report['flags_before']['CUDA_initialized']:
             raise RuntimeError('unexpected CUDA initialization')
         cxx = Path(plan['compiler']['command'])
@@ -104,12 +106,14 @@ def main():
             report['postcondition_error'] = str(error)
         if torch is not None:
             report['flags_after'] = flags(torch)
+            report['Torch_threads_after'] = {'intra':torch.get_num_threads(),'interop':torch.get_num_interop_threads()}
+            report['Torch_threads_unchanged'] = report.get('Torch_threads_before') == report['Torch_threads_after']
             report['flags_unchanged'] = report.get('flags_before') == report['flags_after']
         report['worker_observation_seconds'] = time.monotonic()-started
         report['RSS_maximum_bytes'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024
         report['compiler_maxRSS_bytes'] = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss*1024
         report['binary_unchanged'] = report.get('binary') == identity(args.output/'columns_c24.so') if (args.output/'columns_c24.so').is_file() else False
-        report['valid_interface'] = bool(report['completed'] and report['binary_unchanged'] and report.get('sources_unchanged') and report.get('compiler_bytes_unchanged') and report.get('flags_unchanged') and not report.get('flags_after',{}).get('CUDA_initialized',True))
+        report['valid_interface'] = bool(report['completed'] and report['binary_unchanged'] and report.get('sources_unchanged') and report.get('compiler_bytes_unchanged') and report.get('flags_unchanged') and report.get('Torch_threads_unchanged') and not report.get('flags_after',{}).get('CUDA_initialized',True))
         (args.output/'COMPILE.json').write_text(json.dumps(report, indent=2, allow_nan=False)+'\n')
     if not report['valid_interface']:
         raise RuntimeError('interface final gate failed')
