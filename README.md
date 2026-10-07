@@ -70,14 +70,7 @@ Python 示例和参数说明见 [SynthStrip 手册](docs/synthstrip/README.md)�
 | [prepare_subregion_alignment_target / reflect_atlas_header](docs/robust_register/PREPARATION.md) | FreeSurfer SAMSEG 的亚区初始对齐前处理 | 根据已有标签生成目标掩膜，并反射 atlas 头几何；独立于默认分割流程。 |
 | [CPURegistration](docs/robust_register/README.md) | FreeSurfer `mri_robust_register` | 独立CPU刚性／仿射配准，正常安装包API与单被试CLI；已测单例算术匹配，完整GEMS仍待验收。 |
 | [fnit.recon_all.native_free.run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成皮层表面、脑区标签和形态统计。 |
-| [FastVBM.run（通用 VBM）](docs/fast_vbm/README.md) | FSL `fast` + `fsl_reg` + `fslmaths`（组合流程） | 生成标准空间组织图、Jacobian 和调制灰质图。 |
-| [FastVBM.run（UKB 单被试 GM-VBM 映射，共享入口）](docs/ukb_vbm/README.md) | UKB `bb_struct_init` / `bb_vbm`（参考配方） | 用同一个 FastVBM 入口按 UKB v1.5 语义生成单被试灰质 VBM 衍生图。 |
-
-上面两行不是两个实现：仓库只有一个 `fnit.fast_vbm.FastVBM.run()` 和一个 `fnit fast-vbm` 入口。两页文档分别说明通用 FSL 参考链和 UKB v1.5 单被试参考配方；实际后端由 `fast_execution` 与 `registration_backend` 选择，并在报告中记录。
-
-亚区分割与 SAMSEG 对齐前处理也保持分开。`segment_4_subregions` 从 T1w 生成脑干、丘脑、海马和杏仁核标签；`prepare_subregion_alignment_target` 根据已有标签生成 `0/255` 配准目标，`reflect_atlas_header` 只反射 atlas 的 RAS 头信息。右侧海马/杏仁核的 GEMS recipe 内部已有用于 soft-Dice 对齐的 affine 第一行反射，但不生成 SAMSEG 目标图，也不执行 robust rigid/affine。后两者不属于默认分割调用链，直接并入会改变输入、输出和空间语义。
-
-recon-all冻结3a已收集九例完整官方比较，原始执行及生产网格通过9/10；剩余一例自相交失败。厚度/面积/体积、Dice、表面局部误差与原始耗时分别见[九例benchmark](validation/recon_all/accuracy_20261003/runtime/server_refresh_20261007/README.md)，整体指标等效尚未判定。
+| [FastVBM.run](docs/fast_vbm/README.md)（含 [UKB v1.5 参考配方](docs/ukb_vbm/README.md)） | FSL `fast` + `fsl_reg` + `fslmaths`；UKB `bb_struct_init` / `bb_vbm` | 生成标准空间组织图、Jacobian 和调制灰质图。 |
 
 ### 功能 MRI
 
