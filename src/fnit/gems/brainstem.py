@@ -16,6 +16,7 @@ from .deformation import (ashburner_prior, prepare_current_geometry,
 from .optim import CachedLBFGS
 from .rasterize import (build_block_index, rasterize_priors,
                        rasterize_priors_compact)
+from .precision import parallel_precision_enabled
 
 
 def brainstem_gaussian_hyperparameters(
@@ -117,7 +118,8 @@ def fit_brainstem_segmentation(
         raise ValueError("stable_mesh_fitting must be a bool")
     arguments = dict(device=device, iterations=iterations, fit_alphas=fit_alphas,
                      optimizer_name=optimizer_name, stable_mesh_fitting=stable_mesh_fitting)
-    if not stable_mesh_fitting or torch.device(device).type != "cuda":
+    if (not stable_mesh_fitting or torch.device(device).type != "cuda"
+            or parallel_precision_enabled()):
         return _fit_brainstem_segmentation(atlas, coarse_labels, **arguments)
     previous_tf32 = torch.backends.cuda.matmul.allow_tf32
     try:

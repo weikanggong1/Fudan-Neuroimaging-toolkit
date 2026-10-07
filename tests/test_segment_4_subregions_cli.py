@@ -27,6 +27,7 @@ def test_cli_default_output_and_thread_routing(tmp_path, monkeypatch):
     options = calls[0][2]
     assert options["structures"] == "all"
     assert options["threads"] == 3 and options["optimization"] == "fast"
+    assert options["parallel_regions"] is False and options["max_parallel_regions"] == 2
     assert options["output_dir"] is None
     np.testing.assert_array_equal(np.asanyarray(nib.load(target).dataobj), 174)
 
@@ -48,9 +49,11 @@ def test_cli_saved_report_and_selected_recipes(tmp_path, monkeypatch):
     copied_report = tmp_path / "copied" / "report.json"
     cli.main(["segment-4-subregions", "--i", "T1.nii.gz", "--o", str(output / "subregions_native.nii.gz"),
               "--structure", "brainstem", "--structure", "thalamus", "--output-dir", str(output),
-              "--report-json", str(copied_report), "--save-highres", "--optimization", "balanced"])
+              "--report-json", str(copied_report), "--save-highres", "--optimization", "balanced",
+              "--parallel-regions", "--max-parallel-regions", "2"])
     assert calls[0]["structures"] == ["brainstem", "thalamus"]
     assert calls[0]["threads"] == 4 and calls[0]["optimization"] == "balanced"
+    assert calls[0]["parallel_regions"] is True and calls[0]["max_parallel_regions"] == 2
     assert copied_report.read_bytes() == (output / "report.json").read_bytes()
     assert (output / "labels.tsv").exists() and (output / "volumes.tsv").exists()
 

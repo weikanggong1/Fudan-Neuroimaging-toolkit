@@ -22,6 +22,8 @@ def test_public_entry_is_unique_and_uses_the_canonical_pipeline():
     assert parameters["structures"].default == "all"
     assert parameters["optimization"].default == "fast"
     assert parameters["threads"].default == 4
+    assert parameters["parallel_regions"].default is False
+    assert parameters["max_parallel_regions"].default == 2
     assert {"auto_initialize", "em_iterations", "deform_iterations"}.isdisjoint(parameters)
     assert not hasattr(pipeline, "_segment_atlas_packs")
 
@@ -36,6 +38,28 @@ def test_only_supported_structure_families_enter_the_pipeline(structures):
 def test_invalid_threads_are_rejected_before_resources_are_read(threads):
     with pytest.raises(ValueError, match="positive integer"):
         pipeline.segment_4_subregions("unused.nii.gz", threads=threads, device="cpu")
+
+
+@pytest.mark.parametrize("parallel_regions", (1, 0, "yes", None))
+def test_invalid_parallel_regions_are_rejected_before_resources_are_read(parallel_regions):
+    with pytest.raises(ValueError, match="parallel_regions"):
+        pipeline.segment_4_subregions("unused.nii.gz", parallel_regions=parallel_regions,
+                                      device="cpu")
+
+
+@pytest.mark.parametrize("max_parallel_regions", (0, -1, True, 1.5, "2", None))
+def test_invalid_parallel_worker_count_is_rejected_before_resources_are_read(max_parallel_regions):
+    with pytest.raises(ValueError, match="max_parallel_regions"):
+        pipeline.segment_4_subregions("unused.nii.gz",
+                                      max_parallel_regions=max_parallel_regions, device="cpu")
+
+
+def test_parallel_batches_keep_high_resolution_recipes_separate():
+    assert pipeline._parallel_batches(
+        ["brainstem", "thalamus", "hippo-amygdala-left", "hippo-amygdala-right"], 2
+    ) == [["thalamus", "brainstem"], ["hippo-amygdala-left"], ["hippo-amygdala-right"]]
+    assert pipeline._parallel_batches(["brainstem", "thalamus"], 2) == [
+        ["thalamus", "brainstem"]]
 
 
 @pytest.mark.parametrize("threads", (1, 4, 8))

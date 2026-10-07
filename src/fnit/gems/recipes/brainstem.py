@@ -29,7 +29,9 @@ def _fit_brainstem(context, directory: Path, device: torch.device, *,
     image, coarse = context.image, context.coarse_segmentation
     def tick():
         if device.type == "cuda":
-            torch.cuda.synchronize(device)
+            # Synchronize only this recipe's current stream so independent
+            # CUDA region workers can overlap safely.
+            torch.cuda.current_stream(device).synchronize()
         return monotonic()
 
     started = tick()

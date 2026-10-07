@@ -8,7 +8,7 @@
 | 输出 | 原生int32合并标签、110项软硬体积、可选HR/后验 |
 | 对应原软件 | FreeSurfer recon-all＋segment_subregions三命令 |
 | Python / CLI | fnit.segment_4_subregions；fnit segment-4-subregions |
-| CPU / GPU | CPU/CUDA；PyTorch、Numba、nibabel，recipe顺序执行 |
+| CPU / GPU | CPU/CUDA；PyTorch、Numba、nibabel；CUDA 可选区域并行，默认保持顺序执行 |
 
 <a id="2026-10-02-gpu-完整流程-benchmark"></a>
 
@@ -53,6 +53,8 @@ subregion_result = segment_4_subregions(
     device="cuda:0",                           # 输入：GPU 设备；也支持 "cpu"
     threads=4,                                 # 输入：PyTorch CPU 线程数
     optimization="fast",                       # 输入：速度优先配置；另一选项为 "balanced"
+    parallel_regions=False,                    # 输入：CUDA 上并行独立区域；默认 False 保持顺序
+    max_parallel_regions=2,                    # 输入：并行 worker 上限；显存不足时保持 2 或改为 1
     output_dir="/absolute/path/sub-01_subregions",  # 输出：标签、体积表和报告目录
     save_highres=True,                         # 输出：保存各结构工作网格的标签
     save_posteriors=False,                     # 输出：后验图较大，按需设为 True
@@ -86,6 +88,8 @@ print(native_label_path)
 | `device` | 否 | `str 或 torch.device` | `'cuda:0'` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
 | `threads` | 否 | `int 或 None` | `4` | 正整数CPU线程预算；具体每阶段并行度及恢复见输入说明 |
 | `optimization` | 否 | `str` | `'fast'` | fast 速度优先；balanced 增加拟合迭代预算 |
+| `parallel_regions` | 否 | `bool` | `False` | 仅 CUDA 生效；用独立 stream 重叠区域 recipe，最终仍按固定顺序合并；CPU 或单结构自动顺序执行 |
+| `max_parallel_regions` | 否 | `int` | `2` | 并行 worker 上限；必须为正整数，需结合整批显存峰值设置 |
 | `output_dir` | 否 | `str 或 Path 或 None` | `None` | 结果或调试文件的目录；具体自动保存范围见输出 |
 | `save_highres` | 否 | `bool` | `True` | 保存结构工作网格标签；Python 默认 True，CLI 需显式开启 |
 | `save_posteriors` | 否 | `bool` | `False` | 保存末维为标签通道的工作网格后验 |
@@ -173,6 +177,8 @@ fnit segment-4-subregions --i subject_T1w.nii.gz --o results/subregions_native.n
 | `--device` | `device` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
 | `--threads` | `threads` | 正整数CPU线程预算，默认4；CPU调用恢复Torch/Numba设置 |
 | `--optimization` | `optimization` | fast 速度优先；balanced 增加拟合迭代预算 |
+| `--parallel-regions` | `parallel_regions` | CUDA 上启用独立区域 stream 并行；默认关闭 |
+| `--max-parallel-regions` | `max_parallel_regions` | 并行 worker 上限，默认 2 |
 
 CLI与Python默认差异：Python save_highres=True，CLI默认False；两者device=cuda:0，threads=4。
 
@@ -268,6 +274,19 @@ segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --thread
 | 2026-10-04 | task5 v2/compact冻结 | CPU线程恢复及离散owner lookup/log-prior缓存 | [stage及GPU实测](../../validation/smri_cpu/task5/README.md) |
 | 2026-10-02 | f436de5 raw /ac692bb stage | 固定十例独立raw回归与官方fresh对照 | [十例全区与新九例](../../validation/subregions/ten_public_t1_20261002/README.md) |
 | 2026-10-02 | reproducibility冻结 | 丘脑完整积分、脑干归约与稳定连通域 | [单例重复性及精度修复](../../validation/subregions/reproducibility_20261002/README.md) |
+
+### 2026-10-08 CUDA 区域并行候选
+
+本轮在同一公开 ds000114 snapshot1.0.2 `sub-01`、同一 H100 节点和四线程预算上，将独立 recipe 放入 CUDA stream。为控制显存，脑干和丘脑可以同批运行；两个 0.333-mm 海马/杏仁核 recipe 分批顺序运行。最终标签仍按脑干、丘脑、左侧、右侧的固定顺序合并。默认 `parallel_regions=False`，需要显式启用并行，避免未测硬件直接改变既有生产行为。
+
+| 模式 | 端到端 wall | API compute | 保存 | 驱动显存峰值 | 标签 SHA-256 |
+|---|---:|---:|---:|---:|---|
+| 串行（候选同一源码） | 798.496 s | 797.912 s | 0.494 s | 18,936 MiB（19.856 GB） | `750d91a4…dd2701` |
+| CUDA 分批并行，`max_parallel_regions=2` | 625.168 s | 624.562 s | 0.519 s | 18,936 MiB（19.856 GB） | `30fcbe67…c7439` |
+
+该次共享 GPU 仍有其他进程，数值是同节点观察值，不作为无负载吞吐承诺；候选相对串行 wall 缩短 21.7%。两次输出 shape/affine 相同，721 个原生体素不同，整体标签 Dice 为 0.995692；脑干、丘脑、左/右海马杏仁核的结构 Dice 分别为 0.999186、0.996412、0.982290、0.990102。差异来自并发时统一的 FP32 几何策略和 GPU 并行归约，未改变标签空间或体积定义。完整机器报告和复现命令见[并行 benchmark 记录](../../validation/subregions/parallel_regions_20261008/README.md)。
+
+一次将丘脑与左海马/杏仁核同时运行的诊断达到 23,224 MiB，超过 20,000,000,000 字节预算，已废弃；因此默认调度不并行两个高分辨率 recipe。
 
 每条记录保留真实冻结源码、输入与时间边界；逐例、debug/profiling和更早脑图见[完整归档](../../validation/subregions/readme_archive_20261005.md)。文档整理不重跑MRI，不把执行成功或--help核验作为精度benchmark。
 

@@ -116,7 +116,9 @@ def _run_segment_4_subregions(args):
         cortical_parcellation=args.cortical_parcellation, wmparc=args.wmparc,
         synthseg_parc_weights=args.synthseg_parc_weights,
         device=args.device, threads=args.threads,
-        optimization=args.optimization, output_dir=output if save_outputs else None,
+        optimization=args.optimization, parallel_regions=args.parallel_regions,
+        max_parallel_regions=args.max_parallel_regions,
+        output_dir=output if save_outputs else None,
         save_highres=args.save_highres, save_posteriors=args.save_posteriors)
     target = Path(args.o)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -683,6 +685,10 @@ def main(argv=None):
     subregions.add_argument('--threads', type=int, default=4, help='positive CPU thread count')
     subregions.add_argument('--optimization', choices=('fast', 'balanced'), default='fast',
                            help='fast fine-grid fitting or balanced fitting with a longer mesh budget')
+    subregions.add_argument('--parallel-regions', action='store_true',
+                            help='CUDA only: overlap independent region recipes; default keeps canonical sequential execution')
+    subregions.add_argument('--max-parallel-regions', type=int, default=2,
+                            help='maximum concurrent CUDA region recipes when --parallel-regions is enabled (default: 2)')
     sr = commands.add_parser('synthsr', help='synthesize a 1 mm T1-weighted image')
     sr.add_argument('--i', '-i', required=True, help='single input image')
     sr.add_argument('--o', '-o', required=True, help='output image or directory for this image')

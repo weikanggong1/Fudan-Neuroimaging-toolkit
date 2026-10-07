@@ -166,7 +166,10 @@ class GEMSRecipe:
         """Return an atlas on the input grid and a fit on its cropped grid."""
         def tick():
             if device.type == "cuda":
-                torch.cuda.synchronize(device)
+                # Use the caller's stream. The public pipeline may run
+                # independent recipes on separate streams; synchronizing the
+                # whole device here would serialize those regions.
+                torch.cuda.current_stream(device).synchronize()
             return monotonic()
         fit_started = tick()
         self._preparation_device = device

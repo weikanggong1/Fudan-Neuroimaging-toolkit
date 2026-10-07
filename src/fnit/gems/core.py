@@ -21,6 +21,7 @@ from .gaussian import (GaussianParameters, gaussian_log_likelihood,
 from .optim import CachedLBFGS, PrecisionLBFGS
 from .rasterize import (BlockIndex, build_block_index, compact_data_cost, rasterize_priors,
                        rasterize_priors_compact)
+from .precision import parallel_precision_enabled
 
 
 logger = logging.getLogger(__name__)
@@ -66,7 +67,10 @@ class TorchGEMS:
     def __init__(self, atlas: GEMSAtlas, *, device: str | torch.device = "cpu",
                  dtype: torch.dtype = torch.float32, block_size: int = 8):
         self.atlas = atlas
-        self.device = configure_device(device)
+        # Parallel region workers keep the process-wide TF32 policy fixed while
+        # their independent CUDA streams overlap.
+        self.device = configure_device(
+            device, configure_precision=not parallel_precision_enabled())
         self.dtype = dtype
         self.block_size = int(block_size)
 
@@ -411,7 +415,9 @@ class TorchGEMS:
                             return objective
 
                         def closure():
-                            if not precise_mesh_matrices or vertices.device.type != "cuda":
+                            if (not precise_mesh_matrices
+                                    or vertices.device.type != "cuda"
+                                    or parallel_precision_enabled()):
                                 return mesh_objective()
                             # Tiny geometric products need consistent FP32 cost
                             # and derivatives. Restore the caller's TF32 policy

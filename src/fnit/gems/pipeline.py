@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import wraps
 import logging
 from pathlib import Path
@@ -18,6 +19,7 @@ from .._nib import FNITNifti1Image, new_image
 from .atlas import GEMSAtlas
 from .core import TorchGEMSResult
 from .gaussian import GaussianParameters
+from .precision import restore_parallel_precision, set_parallel_precision
 
 
 logger = logging.getLogger(__name__)
@@ -64,6 +66,38 @@ class SubregionLabel:
 
 
 _CANONICAL = ("brainstem", "thalamus", "hippo-amygdala-left", "hippo-amygdala-right")
+
+# Keep the final merge in ``_CANONICAL`` order, but submit the longest recipes
+# first.  With two workers this avoids filling both streams with the short
+# brainstem job before the two high-resolution hippocampal jobs are queued.
+# The values are only a scheduling hint; recipe output and numerical settings
+# are unchanged.
+_PARALLEL_PRIORITY = {
+    "thalamus": 0,
+    "hippo-amygdala-left": 1,
+    "hippo-amygdala-right": 2,
+    "brainstem": 3,
+}
+
+
+def _parallel_batches(selected: list[str], workers: int) -> list[list[str]]:
+    """Build conservative CUDA batches under the 20 GB process budget.
+
+    The hippocampus/amygdala recipes use substantially larger 0.333-mm
+    working grids than brainstem and thalamus.  Running both high-resolution
+    recipes together exceeded the measured driver budget on H100, so they are
+    deliberately kept in separate batches.  The two lighter recipes can
+    overlap and still preserve the canonical merge order.
+    """
+    ordered = sorted(selected, key=lambda name: _PARALLEL_PRIORITY.get(name, 99))
+    light = [name for name in ordered if not name.startswith("hippo-amygdala-")]
+    heavy = [name for name in ordered if name.startswith("hippo-amygdala-")]
+    batches: list[list[str]] = []
+    if light:
+        for index in range(0, len(light), max(1, workers)):
+            batches.append(light[index:index + max(1, workers)])
+    batches.extend([name_list] for name_list in heavy)
+    return batches
 
 
 def _merge_native(combined: np.ndarray, best_conf: np.ndarray,
@@ -156,6 +190,8 @@ def segment_4_subregions(
     device: str | torch.device = "cuda:0",
     threads: int = 4,
     optimization: str = "fast",
+    parallel_regions: bool = False,
+    max_parallel_regions: int = 2,
     output_dir: str | Path | None = None,
     save_highres: bool = True,
     save_posteriors: bool = False,
@@ -163,7 +199,9 @@ def segment_4_subregions(
     """Segment one raw T1 end to end; optionally save all outputs in one call.
 
     CPU calls temporarily constrain Torch intraop and the current Numba mask,
-    restoring both on success or failure. CUDA keeps its existing thread path.
+    restoring both on success or failure. CUDA keeps its existing thread path
+    unless ``parallel_regions=True``; then independent recipes use separate
+    CUDA streams and are merged in canonical structure order.
     """
     started = monotonic()
     if isinstance(threads, bool) or not isinstance(threads, int) or threads < 1:
@@ -171,6 +209,12 @@ def segment_4_subregions(
     torch.set_num_threads(threads)
     if optimization not in ("fast", "balanced"):
         raise ValueError("optimization must be 'fast' or 'balanced'")
+    if not isinstance(parallel_regions, bool):
+        raise ValueError("parallel_regions must be a bool")
+    if (isinstance(max_parallel_regions, bool)
+            or not isinstance(max_parallel_regions, int)
+            or max_parallel_regions < 1):
+        raise ValueError("max_parallel_regions must be a positive integer")
     selected = _expand_structures(structures)
     root = Path(atlas_root) if atlas_root is not None else None
     if root is None:
@@ -191,6 +235,10 @@ def segment_4_subregions(
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
         torch.cuda.reset_peak_memory_stats(device)
+    use_parallel_regions = (parallel_regions and device.type == "cuda"
+                            and len(selected) > 1 and max_parallel_regions > 1)
+    parallel_workers = (min(max_parallel_regions, len(selected))
+                        if use_parallel_regions else 1)
     preprocessing_started = monotonic()
     context = SubregionContext.prepare(
         t1, need_coarse=True, need_parc=any(name.startswith("hippo-amygdala") for name in selected),
@@ -220,16 +268,103 @@ def segment_4_subregions(
                           "proxy" if context.wmparc_proxy is not None else None,
         "peak_gpu_gib": torch.cuda.max_memory_allocated(device) / 2**30
                         if device.type == "cuda" else None,
+        "parallel_regions_requested": parallel_regions,
+        "parallel_regions": use_parallel_regions,
+        "max_parallel_regions_requested": max_parallel_regions,
+        "max_parallel_regions": parallel_workers,
     }}
     voxel_volume = abs(np.linalg.det(native_image.affine[:3, :3]))
-    for name in selected:
-        if device.type == "cuda":
-            torch.cuda.reset_peak_memory_stats(device)
+    if use_parallel_regions:
+        # Preprocessing runs on the default stream. Establish one dependency
+        # before workers start; recipe-local ticks then synchronize only their
+        # own streams.
+        torch.cuda.current_stream(device).synchronize()
+
+    def run_recipe(name):
         recipe = make_recipe(name, root)
         if hasattr(recipe, "set_optimization_profile"):
             recipe.set_optimization_profile(optimization)
         logger.info("Starting %s", name)
-        outcome = recipe.run(context, device)
+        recipe_started = monotonic()
+        if use_parallel_regions:
+            # A separate stream lets independent region solvers overlap while
+            # keeping all shared inputs read-only. The stream is synchronized
+            # before the future completes so CPU materialization below never
+            # races an outstanding device write.
+            stream = torch.cuda.Stream(device=device)
+            previous_precision = set_parallel_precision(True)
+            try:
+                with torch.cuda.stream(stream):
+                    outcome = recipe.run(context, device)
+            finally:
+                restore_parallel_precision(previous_precision)
+            stream.synchronize()
+        else:
+            if device.type == "cuda":
+                torch.cuda.reset_peak_memory_stats(device)
+            outcome = recipe.run(context, device)
+        if use_parallel_regions:
+            outcome.report["parallel_started_seconds"] = recipe_started - parallel_started
+            outcome.report["parallel_finished_seconds"] = monotonic() - parallel_started
+        return name, recipe, outcome
+
+    completed: dict[str, tuple[object, object]] = {}
+    region_schedule: list[dict[str, float | str]] = []
+    parallel_started = monotonic()
+    if use_parallel_regions:
+        previous_tf32 = torch.backends.cuda.matmul.allow_tf32
+        # Stable GEMS geometry has an existing FP32 exception. Keep it fixed
+        # for the whole overlap window; per-thread toggles would race across
+        # streams and make the numerical policy order-dependent.
+        torch.backends.cuda.matmul.allow_tf32 = False
+        parallel_batches = _parallel_batches(selected, parallel_workers)
+        reports["shared_preprocessing"]["parallel_batches"] = parallel_batches
+        try:
+            for parallel_order in parallel_batches:
+                with ThreadPoolExecutor(max_workers=min(parallel_workers, len(parallel_order)),
+                                        thread_name_prefix="fnit-gems") as executor:
+                    futures = {executor.submit(run_recipe, name): name for name in parallel_order}
+                    for future in as_completed(futures):
+                        name, recipe, outcome = future.result()
+                        completed[name] = (recipe, outcome)
+                        region_schedule.append({
+                            "name": name,
+                            "started_seconds": float(outcome.report["parallel_started_seconds"]),
+                            "finished_seconds": float(outcome.report["parallel_finished_seconds"]),
+                            "recipe_seconds": float(outcome.report.get("seconds", 0.0)),
+                        })
+                        # Release this region's device tensors before the next
+                        # batch. This keeps the measured peak bounded by one
+                        # light pair or one high-resolution recipe.
+                        outcome.fit.highres_labels = outcome.highres_labels
+                        fit = outcome.fit
+                        fit.labels = fit.labels.detach().cpu()
+                        fit.posterior = fit.posterior.detach().cpu()
+                        fit.priors = fit.priors.detach().cpu()
+                        fit.vertices = fit.vertices.detach().cpu()
+                        fit.gaussian_parameters = GaussianParameters(
+                            fit.gaussian_parameters.means.detach().cpu(),
+                            fit.gaussian_parameters.covariances.detach().cpu())
+                torch.cuda.empty_cache()
+        finally:
+            torch.backends.cuda.matmul.allow_tf32 = previous_tf32
+        torch.cuda.empty_cache()
+        batch_peak = torch.cuda.max_memory_allocated(device) / 2**30
+        for _, outcome in completed.values():
+            outcome.report["peak_gpu_gib"] = batch_peak
+            outcome.report["peak_gpu_scope"] = "all_parallel_regions"
+        reports["shared_preprocessing"]["region_schedule"] = sorted(
+            region_schedule, key=lambda row: row["finished_seconds"])
+        reports["shared_preprocessing"]["parallel_precision_policy"] = "fp32_global_overlap"
+    else:
+        for name in selected:
+            _, recipe, outcome = run_recipe(name)
+            completed[name] = (recipe, outcome)
+
+    # Merge in canonical order regardless of future completion order. This
+    # preserves overlap resolution, label-table ordering and volume semantics.
+    for name in selected:
+        recipe, outcome = completed[name]
         outcome.report["optimization"] = optimization
         outcome.report["mesh_solver"] = getattr(outcome.fit, "optimization_stats", None)
         outcome.fit.highres_labels = outcome.highres_labels
@@ -244,7 +379,8 @@ def segment_4_subregions(
             fit.gaussian_parameters = GaussianParameters(
                 fit.gaussian_parameters.means.detach().cpu(),
                 fit.gaussian_parameters.covariances.detach().cpu())
-            torch.cuda.empty_cache()
+            if not use_parallel_regions:
+                torch.cuda.empty_cache()
         detailed[name] = outcome.fit
         reports[name] = outcome.report
         logger.info("Finished %s: %s", name, outcome.report)
