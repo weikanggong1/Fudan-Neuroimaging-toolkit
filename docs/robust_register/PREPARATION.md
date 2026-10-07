@@ -2,7 +2,7 @@
 
 ## 1. 功能简介
 
-这是一个独立的前处理模块，用于匹配 FreeSurfer 8.2 SAMSEG 核团分割在 `mri_robust_register` 前准备的目标图像。生产模块提供目标准备和 atlas 头信息处理；完整刚体／仿射已有[独立 CPU 实验入口](../../validation/robust_register/full_cpu_arithmetic_20261007/README.md)，尚未接入 GEMS 默认 pipeline。当前默认 CPU/GPU 分割路径不变。
+这是一个独立的前处理模块，用于匹配 FreeSurfer 8.2 SAMSEG 核团分割在 `mri_robust_register` 前准备的目标图像。生产模块提供目标准备和 atlas 头信息处理；刚性／仿射另有[独立CPU正式接口](README.md)及[原实验验证记录](../../validation/robust_register/full_cpu_arithmetic_20261007/README.md)，尚未接入 GEMS 默认 pipeline。当前默认 CPU/GPU 分割路径不变。
 
 ```mermaid
 flowchart LR
@@ -74,7 +74,7 @@ nib.save(right_atlas_image, output_directory / "flippedAtlasDump.mgz")
 
 ## 3. 命令行调用
 
-本前处理阶段没有新增独立 CLI。使用上述 Python API。现有 `fnit subregions` 不调用该候选模块，完整 robust 注册入口尚未提供。
+本前处理阶段没有独立 CLI，使用上述 Python API。独立注册可使用 `fnit-robust-register`，见[注册手册](README.md)。现有 `fnit subregions` 的默认路径不改。
 
 ## 4. 原软件调用
 
@@ -87,7 +87,7 @@ mri_robust_register --mov alignedAtlasImage.mgz --dst targetMask.mgz \
   --lta affine.lta --mapmovhdr alignedAtlasImage.mgz --affine --sat 50 -verbose 0
 ```
 
-上面两个注册命令尚未由本模块实现或在此次前处理测试中运行。`--mapmovhdr` 的头信息更新和 robust 优化器将单独移植、验收。
+上面两个注册命令不属于此前前处理测试的范围。`--mapmovhdr` 头信息更新和 robust 优化器已有[独立CPU实现与单例验证](README.md)。
 
 ## 5. 精度、耗时与可视化
 
@@ -117,7 +117,7 @@ MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作�
 | --- | --- |
 | 高分辨率resize安装版编译实现 | 仅源定义合同；本例不触发，尚未对真实高分辨率数据验收 |
 | GPU真数据精度/速度 | 未执行；默认GPU链没有接线 |
-| robust rigid/affine、最终ROI | 独立候选17/20原门通过；尚未接入本模块或最终ROI验收 |
+| robust rigid/affine、最终ROI | 正式CPU安装包同例20/20，前期适配器冷／热／新官方三组60/60另列；完整GEMS及最终ROI未验收。旧17/20是修复前记录 |
 
 此前一次GEMS CPU候选完整右侧recipe已完成但最终核团门未过，见[负结果与脑图](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/README.md)。本模块不读取其细分结果或原配准矩阵来提高匹配。
 
@@ -132,7 +132,7 @@ MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作�
 
 - 随后同一真实A/b的CPU三处修正已组合完成自然IRLS：4轮、选第3轮并回退，与SDK参考的40个逐轮记录和4个最终记录全部逐位一致；最终6个参数与9196个权重均无差异。分别修正Float LINPACK QR、按行残差计算和Float保序误差累计，原MAD、Tukey权重及停止条件保持。该阶段仅覆盖这一6列方程，当时完整刚性/仿射、未知输入和GPU仍待验收，保留此前实验17/20结果。
 
-- 最新[完整CPU刚性/仿射候选](../../validation/robust_register/full_cpu_arithmetic_20261007/README.md)已在同一真实案例上通过原20项检查，较旧实验版本17/20改善为20/20。两阶段133点误差为0，13个保存MGH字段均一致，共享FNIT评分采样器的warp和非零支持集差均为0；两份增量LTA仍有约5e−14以内的Double尾差。首次评分沿用旧冻结评分器，遗漏了main已有的大端读取修复；复用该修复后只评分保存输出，没有重复配准或原软件。此结果仅验收一个CPU实验候选，生产模块仍只有前处理；核团、未知输入、GPU回归及同边界速度对照仍待完成。
+- 最新[完整CPU刚性/仿射候选](../../validation/robust_register/full_cpu_arithmetic_20261007/README.md)已在同一真实案例上通过原20项检查，较旧实验版本17/20改善为20/20。两阶段133点误差为0，13个保存MGH字段均一致，共享FNIT评分采样器的warp和非零支持集差均为0；两份增量LTA仍有约5e−14以内的Double尾差。首次评分沿用旧冻结评分器，遗漏了main已有的大端读取修复；复用该修复后只评分保存输出，没有重复配准或原软件。此结果当时仅验收一个CPU实验候选；正式独立接口随后见[注册手册](README.md)。核团、未知输入、GPU回归及同边界速度对照仍待完成。
 
 - 已提供可复用的 CPU 实验适配器和独立 CLI。真实单例的首次调用、同实例缓存调用及新官方结果各通过原20项门，共60/60；先前两份 API 结果和新官方结果保存后，只补评分，没有重算配准。首次 pair API 为2.147秒，同实例缓存后0.790秒；本次官方两条CLI合计1.031秒。冷导入1.713秒、factory0.087秒另计，不把热API与冷CLI混称端到端提速。同实例缓存和关闭契约已验证，旧GPU模块、调用方线程与精度标志保持；GPU计算没有新增回归。核团接入、其它输入及同边界速度仍待验证。
 

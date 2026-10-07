@@ -1,7 +1,7 @@
 {
   "schema": "fnirt_fixed_native_CSC_preconditioner_ablation_public_v1",
   "date": "2026-10-07",
-  "status": "control_complete_not_adopted",
+  "status": "fixed_native_matrix_ablation_pass_and_diagonal_grouping_not_bitexact_not_adopted",
   "scope": "One saved native full damped matrix and one bounded saved parameter epoch; 00 first qualification then10/01. No new complete registration or installed native execution.",
   "units": {
     "A": "1177x1177 Float64 full already-damped assembled native A; immutable CSC once",
@@ -410,5 +410,375 @@
     }
   },
   "original_text_receipt_count": 19,
-  "private_arrays_provider_paths_and_SDK_source_included": false
+  "private_arrays_provider_paths_and_SDK_source_included": false,
+  "source_defined_full_H_grouping_diagonal_control": {
+    "status": "control_pass_numerical_not_bitexact_not_adopted",
+    "scope": "One previously saved real parameter point,6 checkpoint members and accepted saved projection. No reconstruction/interpolation/g/PCG/native/GPU/full-H/new whole-registration.",
+    "grouping": "Complete owned Double data accumulation then2/count; saved half bending diagonal\u00d72 thenlambda/count; add full components; scale sum then2/count; active ratio1.001 last. No native data/reg split observed.",
+    "count": 14341,
+    "lambda": 9049.463427795125,
+    "nudge_factor": 1.001,
+    "metrics": {
+      "full_vs_native_H_before_nudge_diagonal": {
+        "full": {
+          "count": 1177,
+          "bit_mismatches": 1165,
+          "maxabs": 3.637978807091713e-12,
+          "difference_L2": 3.637978883710736e-12,
+          "reference_L2": 5132.688093374891,
+          "relative_L2": 7.087862768062065e-16,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "blocks": {
+          "coefficient_x": {
+            "count": 392,
+            "bit_mismatches": 390,
+            "maxabs": 2.7755575615628914e-16,
+            "difference_L2": 5.296212789398673e-16,
+            "reference_L2": 0.24826196366777492,
+            "relative_L2": 2.1333162402944995e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "coefficient_y": {
+            "count": 392,
+            "bit_mismatches": 385,
+            "maxabs": 1.6653345369377348e-16,
+            "difference_L2": 3.8411361834227313e-16,
+            "reference_L2": 0.163394679564634,
+            "relative_L2": 2.350833083217556e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "coefficient_z": {
+            "count": 392,
+            "bit_mismatches": 389,
+            "maxabs": 1.3877787807814457e-16,
+            "difference_L2": 3.5977047685330646e-16,
+            "reference_L2": 0.23391457608062333,
+            "relative_L2": 1.538042147186691e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "global_scale": {
+            "count": 1,
+            "bit_mismatches": 1,
+            "maxabs": 3.637978807091713e-12,
+            "difference_L2": 3.637978807091713e-12,
+            "reference_L2": 5132.688079439907,
+            "relative_L2": 7.087862638028647e-16,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          }
+        }
+      },
+      "nudged_vs_native_saved_nudged_diagonal": {
+        "full": {
+          "count": 1177,
+          "bit_mismatches": 1165,
+          "maxabs": 3.637978807091713e-12,
+          "difference_L2": 3.637978883882727e-12,
+          "reference_L2": 5137.8207814682655,
+          "relative_L2": 7.080781986410745e-16,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "blocks": {
+          "coefficient_x": {
+            "count": 392,
+            "bit_mismatches": 390,
+            "maxabs": 2.7755575615628914e-16,
+            "difference_L2": 5.302091610470255e-16,
+            "reference_L2": 0.24851022563144265,
+            "relative_L2": 2.1335506806603657e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "coefficient_y": {
+            "count": 392,
+            "bit_mismatches": 385,
+            "maxabs": 1.6653345369377348e-16,
+            "difference_L2": 3.8411642900581474e-16,
+            "reference_L2": 0.16355807424419863,
+            "relative_L2": 2.3485017831178046e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "coefficient_z": {
+            "count": 392,
+            "bit_mismatches": 389,
+            "maxabs": 1.3877787807814457e-16,
+            "difference_L2": 3.6063968628716737e-16,
+            "reference_L2": 0.23414849065670393,
+            "relative_L2": 1.54021785609508e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "global_scale": {
+            "count": 1,
+            "bit_mismatches": 1,
+            "maxabs": 3.637978807091713e-12,
+            "difference_L2": 3.637978807091713e-12,
+            "reference_L2": 5137.820767519346,
+            "relative_L2": 7.080781856172476e-16,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          }
+        }
+      },
+      "old_full_vs_native_H_before_nudge_diagonal": {
+        "full": {
+          "count": 1177,
+          "bit_mismatches": 1166,
+          "maxabs": 3.637978807091713e-12,
+          "difference_L2": 3.637978881922238e-12,
+          "reference_L2": 5132.688093374891,
+          "relative_L2": 7.08786276457754e-16,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "blocks": {
+          "coefficient_x": {
+            "count": 392,
+            "bit_mismatches": 390,
+            "maxabs": 2.498001805406602e-16,
+            "difference_L2": 5.161805130615103e-16,
+            "reference_L2": 0.24826196366777492,
+            "relative_L2": 2.079176791464781e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "coefficient_y": {
+            "count": 392,
+            "bit_mismatches": 389,
+            "maxabs": 1.8041124150158794e-16,
+            "difference_L2": 3.832232141554388e-16,
+            "reference_L2": 0.163394679564634,
+            "relative_L2": 2.345383675750882e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "coefficient_z": {
+            "count": 392,
+            "bit_mismatches": 386,
+            "maxabs": 1.457167719820518e-16,
+            "difference_L2": 3.6216209043763614e-16,
+            "reference_L2": 0.23391457608062333,
+            "relative_L2": 1.5482664505388059e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "global_scale": {
+            "count": 1,
+            "bit_mismatches": 1,
+            "maxabs": 3.637978807091713e-12,
+            "difference_L2": 3.637978807091713e-12,
+            "reference_L2": 5132.688079439907,
+            "relative_L2": 7.087862638028647e-16,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          }
+        }
+      },
+      "old_nudged_vs_native_saved_nudged_diagonal": {
+        "full": {
+          "count": 1177,
+          "bit_mismatches": 1166,
+          "maxabs": 3.637978807091713e-12,
+          "difference_L2": 3.637978882127212e-12,
+          "reference_L2": 5137.8207814682655,
+          "relative_L2": 7.080781982993898e-16,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "blocks": {
+          "coefficient_x": {
+            "count": 392,
+            "bit_mismatches": 390,
+            "maxabs": 2.498001805406602e-16,
+            "difference_L2": 5.168295399345505e-16,
+            "reference_L2": 0.24851022563144265,
+            "relative_L2": 2.079711362465396e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "coefficient_y": {
+            "count": 392,
+            "bit_mismatches": 389,
+            "maxabs": 1.8041124150158794e-16,
+            "difference_L2": 3.8322603134939957e-16,
+            "reference_L2": 0.16355807424419863,
+            "relative_L2": 2.3430578595418535e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "coefficient_z": {
+            "count": 392,
+            "bit_mismatches": 386,
+            "maxabs": 1.457167719820518e-16,
+            "difference_L2": 3.632907295502825e-16,
+            "reference_L2": 0.23414849065670393,
+            "relative_L2": 1.5515399161078516e-15,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          },
+          "global_scale": {
+            "count": 1,
+            "bit_mismatches": 1,
+            "maxabs": 3.637978807091713e-12,
+            "difference_L2": 3.637978807091713e-12,
+            "reference_L2": 5137.820767519346,
+            "relative_L2": 7.080781856172476e-16,
+            "signed_zero_bit_mismatches": 0,
+            "allfinite": true
+          }
+        }
+      }
+    },
+    "first_difference": {
+      "before_nudge": {
+        "vector_index": 0,
+        "block": "coefficient_x",
+        "index_in_block": 0,
+        "candidate_F64": 0.0001976661468893698,
+        "native_F64": 0.00019766614688937034,
+        "no_automatic_extra_block": true
+      },
+      "after_nudge": {
+        "vector_index": 0,
+        "block": "coefficient_x",
+        "index_in_block": 0,
+        "candidate_F64": 0.00019786381303625914,
+        "native_F64": 0.00019786381303625968,
+        "no_automatic_extra_block": true
+      }
+    },
+    "calls": {
+      "design_diagonal": 3,
+      "design_einsum": 9,
+      "saved_bending_diagonal_read": 1,
+      "scale_diagonal": 1,
+      "pack_full_diagonal": 1,
+      "half_to_full": 0,
+      "full_data_scale": 1,
+      "regularizer_half_to_full": 1,
+      "regularizer_scaled": 1,
+      "regularizer_add": 1,
+      "old_full_diagonal_read": 1,
+      "old_nudged_diagonal_read": 1,
+      "candidate_fixed_nudge": 1,
+      "native_pre_diagonal_decode": 1,
+      "native_post_diagonal_decode": 1,
+      "evaluate": 0,
+      "SSD": 0,
+      "g": 0,
+      "projection": 0,
+      "coordinate": 0,
+      "API": 0,
+      "normal": 0,
+      "adjoint": 0,
+      "bending_normal": 0,
+      "bending_diagonal_rebuild": 0,
+      "native": 0,
+      "JIT": 0,
+      "full_H": 0,
+      "PCG": 0,
+      "full": 0,
+      "GPU": 0
+    },
+    "clocks": {
+      "diagonal_arithmetic_seconds": 0.005018039606511593,
+      "worker_seconds": 1.7872748160734773,
+      "supervisor_seconds": 2.1017903685569763,
+      "outer_seconds": 2.168942647986114,
+      "peak_RSS_bytes": 348250112,
+      "scope": "Single saved-state diagnostic, worker includes imports/source/input identity checks; not end-to-end FNIRT speed benchmark."
+    },
+    "control": {
+      "all_gates": 122,
+      "all_gates_passed": true,
+      "source_input_before_after_bindings": 57,
+      "output_files": 8,
+      "PID_start_instances_gone": 4,
+      "own_FD_closed": true,
+      "same_inode_lock_free": true,
+      "six_INDEX_peers_preserved": true,
+      "authorization_closed": true
+    },
+    "native_components_independently_saved": false,
+    "native_data_inferred_from_subtraction": false,
+    "original_text_receipts": {
+      "DEPLOYMENT_PREFLIGHT.private.json": {
+        "bytes": 8451,
+        "sha256": "e9f951fc9317577707360bc2a1a34a6e61677ef7a4eb38aef57b38a74454d7f7"
+      },
+      "REGISTER.private.json": {
+        "bytes": 1458,
+        "sha256": "2c228d8a51d32a2e36b5d0d9e806f4d9f687660a8e9a1011b4af706d8cc127fa"
+      },
+      "PREPARED.private.json": {
+        "bytes": 700,
+        "sha256": "a022ee0a9d47c2bf871cb81bac24c669a73448b5b2a935ccf6658b6a28290b6d"
+      },
+      "AUTHORIZE.private.json": {
+        "bytes": 1649,
+        "sha256": "e7eae3df9395761b3d501733966782b0d78d607880a37f48ac60c2b7540185e1"
+      },
+      "DISPATCH.private.json": {
+        "bytes": 793,
+        "sha256": "e9613429fa1fe74278674d2ae642a6d3ec7cf1108d8df0c26471c68c5789baa7"
+      },
+      "CHILD.private.json": {
+        "bytes": 771,
+        "sha256": "22597b85748e793a0c9615886387085050dd8f047d0c1053ca5ff4752099f07e"
+      },
+      "worker.private.json": {
+        "bytes": 45481,
+        "sha256": "deb62f9d6313809e0415b2d6f356a691663a8b06fab0651b9e6eb2b0df7b6152"
+      },
+      "supervisor.private.json": {
+        "bytes": 1508,
+        "sha256": "1ac68c2a8891ea024b69a8d8239d6b53845cb388e800398c287e7e8c1437164d"
+      },
+      "outer.private.json": {
+        "bytes": 1584,
+        "sha256": "448f0908e52f9344cf2005681ef50e5d60ff33e8849f866ce0ac99cc6a260a00"
+      },
+      "METRICS.private.json": {
+        "bytes": 16185,
+        "sha256": "d2f7009f092927273659541cec74499e2cd9d7f88813b019a5ac6e08474f746f"
+      },
+      "FIRST_DIFFERENCE.private.json": {
+        "bytes": 617,
+        "sha256": "f914bbb43db88f760be21d3083c313275d2a60bf95a69974d2c76ef788bb95df"
+      },
+      "CLOSURE.private.json": {
+        "bytes": 2869,
+        "sha256": "fd61e1cf5e2def181b09a71b425a1d17c89dae7183c6958ad3f79069dcd10670"
+      },
+      "INDEX_CLOSED.private.json": {
+        "bytes": 1926,
+        "sha256": "670f30c155f4fabae8898e7c634091993437648ef2bacce8c78e20e3c034791e"
+      },
+      "FINAL_CLOSE_SAFE_AGGREGATE.private.json": {
+        "bytes": 3068,
+        "sha256": "6447c7655d1bff21a591474b8e9fd6ce97715fbaf14421ea2ca1efcd04947b48"
+      },
+      "worker.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "supervisor.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "DISPATCH.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "original_text_receipt_count": 17,
+    "interpretation": "1165 versus old1166 differing words does not eliminate first coefficient or scale difference; no new PCG performed and no full trajectory/endpoint cause established."
+  }
 }

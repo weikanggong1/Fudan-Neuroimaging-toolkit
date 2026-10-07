@@ -10,6 +10,12 @@
 | TorchFAST / FastVBM | FAST CPU `fsl` 默认及已测非默认八图与官方逐值一致，原少数 PVE 差已消除。默认 `tensor` 仍非原序算法。FNIRT VBM 非线性估计尚未等价，Morph 完整 VBM 13 图也非逐位相同 | 更新 FAST/Morph 修复后的完整 VBM 两链、官方 Morph 冷完整链、pipeline AB-BA、其他 FAST 组合和完整 VBM GPU。FNIRT[实证定位](gems_fixes_20261004/FNIRT_READONLY.md)排除了重采样和最终乘法作为主因；首轮 accepted、共享非零参数和两次共享 PCG 轨迹已对照；浮点敏感性已实证，原完整后续状态仍缺 |
 | 亚区 / recon-all | 丘脑与双侧 HA 逐区门未全过，CPU 仍慢。更接近官方的裁剪预处理候选存在逐区退步，未接入；缓存无 CPU 收益，已撤回。Gaussian 广播 bug 已修复，但四 recipe 不进入该分支。完整 recon v3 仍慢 4.99%，皮层分区和拓扑不同；44 顶点图、12 注释记 NA | 原始 T1 的 CPU `balanced` 全亚区；有效顶点对应、DKT/a2009s/BA 具名逐区摘要、三图谱同公式 no-TH3 体积；其他半球策略、批量入口和当前整合版完整 CPU/GPU 回归。同完整左半球输入的 sphere.reg 已与官方逐点一致、保存负面积面为 0；348.038 s 对官方 261.199 s 仍慢 33.25%，未新跑上游或整链 |
 
+## 2026-10-07 当前定位边界
+
+- **FNIRT**：原版四层GM自然参数观察和Python同输入观察均已完成、关闭；双方最初cf/grad/hess输入参数相同，第一个trial输入已不同。现已具备完整参数首差，仍缺原PCG内部轨迹、同参数各算术分项和最终等价输出。优先核对首更新的预条件器／Hessian累计顺序，不把初始输入参数相同当算子输出相同。详见[完整首差报告](../fnirt_cpu_full_GM_parameter_trajectory_20261007/README.md)。
+- **GEMS**：独立初始对齐桥通过原20项、133点与20,100网格点0误差及有序四面体检查。尚缺真正原版C++网格初始化独立trace，mask／Gaussian支持／优化与后处理定义及完整逐核团Dice/体积门仍未完成。[桥验证](../torchgems/cpu_initial_alignment_20261007/README.md)不替代完整分割。
+- **正式CPU robust入口**：已从运行时AST/实验目录加载改为正常包内imports、Python上下文与单被试CLI；完整wheel及隔离安装已完成，正常包内API真实对照20/20，冷pair2.254秒、导入1.594秒另计。完整冷CLI、更多真实输入和全新Conda环境仍待测试；它是独立CPU接口，不自动替换GEMS或GPU。当前接口验收见[函数说明](../../docs/robust_register/README.md)。
+
 ## 后续定位顺序
 
 1. SR 的 CPU 原固定门已通过，正常 CLI 与旧版基本持平、RSS 降低约 26.7%；GPU 完整旧新输出及显存相同。继续扩展对象模式时保留原数值门，EPI NPZ 的非逐值差异和 GPU 对官方 CPU 的 TF32 差异独立报告。
@@ -56,17 +62,19 @@ SynthSegPlus 目前是普通 SynthSeg 2.0 `--parc`，未实现 robust SynthSeg+�
 
 ## FNIRT 完整 CPU 候选的实际未通过项
 
-2026-10-07，同一真实输入的四层GM候选已完整运行，25次PCG和全部输出写出及运行控制通过；moved、调制图、Jacobian、系数的相对L2分别为5.41%、6.54%、1.23%、7.07%，数值验收未通过，候选未采用。API27.745秒、worker39.845秒与已有官方CLI326.097秒的边界及CPU亲和设置不同，不作等价加速结论。moved/调制图TR和系数单位还有元信息差异，须另修复。
+2026-10-07，同一真实输入的四层GM候选已完整运行，25次PCG和全部输出写出及运行控制通过；moved、调制图、Jacobian、系数的相对L2分别为5.41%、6.54%、1.23%、7.07%，数值验收未通过，候选未采用。API27.745秒、worker39.845秒与已有官方CLI326.097秒的边界及CPU亲和设置不同，不作等价加速结论。该次记录中moved/调制图TR和系数单位有元信息差异；系数单位随后已修复，TR按实际输出步骤分别评估，见下文。
 
 当前可用参考中，第一级第三次求解的差异早于后续拓扑投影；同点PCG算术候选58轮达到相对残差4.0721e−4，更新仍差8.36%，未采用。首次SciPy身份门阻断已在补齐实际扩展后解决，原失败保留。[固定矩阵三臂](../fnirt_cpu_preconditioner_ablation_20261007/README.md)进一步完成：原RHS／对角线精确复现69轮和1177参数；仅替换RHS时69轮、更新差0.835%，仅替换对角线时53轮、更新差11.75%。约1e−15的对角线相对尾差对该系统明显敏感；需优先修JtJ累计、因子与正则项顺序，并核完整轨迹。拒绝试步缓存源码候选尚未覆盖拒绝路径，不能据此归因。原moved／调制对照含官方后续applywarp／fslmaths，TR差不是同一FNIRT iout写出门；系数单位已[修复](../fnirt_output_header_20261007/README.md)。完整算子、拓扑投影、最终数值、其它输入及GPU保护仍待验收，原阈值保持。
 
-## 初始刚体配准的首差观察计划
+随后同一保存状态的[对角线累计分组控制](../fnirt_cpu_preconditioner_ablation_20261007/README.md)只调整完整数据项、正则项及最终因子的分组：1177 项仍有 1165 项非逐位相同，原控制为 1166 项；首个 X 系数仍差 20 ULP，未加扰与加扰后的相对 L2 分别为 7.088e−16、7.081e−16。没有重跑 PCG 或完整配准。该分组未采用；随后[官方与Python四层自然参数轨迹](../fnirt_cpu_full_GM_parameter_trajectory_20261007/README.md)已完成，首个trial输入已分叉。当前继续定位首更新中JtJ／正则项和预条件器的累计顺序。
 
-[只读源码核对](../robust_register/earliest_branch_readonly_20261006/README.md)确认官方活动 robust 路径使用 LINPACK QR，候选使用 Torch reduced QR；停止语义相同，当时尚未捕获同状态求解轨迹。准备图像/M0观察器已独立构建并完成[真实同例对照](../robust_register/prepared_m0_capture_20261006/README.md)：准备图像/几何及Rsrc/Rtrg逐位同，原质心/M0有最大4.12e−13的Double尾差。[保序CPU质心候选](../robust_register/centroid_serial_cpu_probe_20261006/README.md)先使保存两图的6个Double返回值逐位同，随后[完整初始化对照](../robust_register/centroid_m0_cpu_prefix_20261006/README.md)沿同一真实输入重算准备态、质心及M0，两幅图和54个Double初始化值全部逐位同SDK参考。[连续首轮 A/b 对照](../robust_register/first_ab_cpu_prefix_20261007/README.md)已进一步通过18个记录边界，9196×6的A与9196项b逐位同，四阶Schur成功。当时完整实验17/20的结果及阈值保持。[同A/b完整IRLS对照](../robust_register/same_ab_irls_cpu_20261007/README.md)已确认第一轮中心/MAD/尺度/归一化/权重/加权A/b逐位同，首差为QR的6个Float32返回值，最大8.22544e−6；双方4轮停止、选第3轮和回退语义相同。相同权重下的权重和另差0.027832。CPU Float LINPACK候选已在同一保存加权A/b上使6个返回值逐位匹配，残差和最终误差的同输入原语对照已通过，随后三处CPU修正组成的自然IRLS也通过：40逐轮+4最终记录均逐位同，6参数和9196权重无差。上述自然IRLS只覆盖6列真实方程。随后[完整CPU算术候选](../robust_register/full_cpu_arithmetic_20261007/README.md)在同一真实案例上完成刚性和仿射，以原20项阈值全通过20/20：133点、保存MGH字段和共享FNIT评分warp均与参考一致。旧实验版本17/20报告保留；新结果尚未接入生产，核团、其他输入域、GPU回归和同边界速度对照仍待完成。
+## 初始刚体配准的首差与修复记录
+
+[只读源码核对](../robust_register/earliest_branch_readonly_20261006/README.md)确认官方活动 robust 路径使用 LINPACK QR，候选使用 Torch reduced QR；停止语义相同，当时尚未捕获同状态求解轨迹。准备图像/M0观察器已独立构建并完成[真实同例对照](../robust_register/prepared_m0_capture_20261006/README.md)：准备图像/几何及Rsrc/Rtrg逐位同，原质心/M0有最大4.12e−13的Double尾差。[保序CPU质心候选](../robust_register/centroid_serial_cpu_probe_20261006/README.md)先使保存两图的6个Double返回值逐位同，随后[完整初始化对照](../robust_register/centroid_m0_cpu_prefix_20261006/README.md)沿同一真实输入重算准备态、质心及M0，两幅图和54个Double初始化值全部逐位同SDK参考。[连续首轮 A/b 对照](../robust_register/first_ab_cpu_prefix_20261007/README.md)已进一步通过18个记录边界，9196×6的A与9196项b逐位同，四阶Schur成功。当时完整实验17/20的结果及阈值保持。[同A/b完整IRLS对照](../robust_register/same_ab_irls_cpu_20261007/README.md)已确认第一轮中心/MAD/尺度/归一化/权重/加权A/b逐位同，首差为QR的6个Float32返回值，最大8.22544e−6；双方4轮停止、选第3轮和回退语义相同。相同权重下的权重和另差0.027832。CPU Float LINPACK候选已在同一保存加权A/b上使6个返回值逐位匹配，残差和最终误差的同输入原语对照已通过，随后三处CPU修正组成的自然IRLS也通过：40逐轮+4最终记录均逐位同，6参数和9196权重无差。上述自然IRLS只覆盖6列真实方程。随后[完整CPU算术候选](../robust_register/full_cpu_arithmetic_20261007/README.md)在同一真实案例上完成刚性和仿射，以原20项阈值全通过20/20：133点、保存MGH字段和共享FNIT评分warp均与参考一致。旧实验版本17/20报告保留；随后[正式CPU入口](../../docs/robust_register/README.md)已在独立安装包中验收20/20。GEMS默认尚未接入，核团、其他输入域、GPU回归和同边界速度对照仍待完成。
 
 ## 最新可复用CPU配准入口
 
-[独立CPU适配器](../robust_register/full_cpu_arithmetic_20261007/README.md)已经提供：首次、同实例缓存及新官方结果三组各20/20，全60门通过。冷pair2.147秒、热pair0.790秒，冷导入1.713秒与factory0.087秒另计；本次官方两CLI合计1.031秒，尚不是相同边界的冷CLI速度验收。先前失败、保存结果与时钟保留，评分恢复未重算任何pair。GPU模块和调用方策略保持，但没有新增GPU配准回归；生产完整入口、GEMS核团、未知输入与更广CPU速度仍待完成。
+[独立CPU适配器](../robust_register/full_cpu_arithmetic_20261007/README.md)已经提供：首次、同实例缓存及新官方结果三组各20/20，全60门通过。冷pair2.147秒、热pair0.790秒，冷导入1.713秒与factory0.087秒另计；本次官方两CLI合计1.031秒，尚不是相同边界的冷CLI速度验收。先前失败、保存结果与时钟保留，评分恢复未重算任何pair。GPU模块和调用方策略保持，但没有新增GPU配准回归；正式CPU接口后续实测见本页开头；完整GEMS接入、核团、未知输入与更广CPU速度仍待完成。
 
 ## 最新普通33类CPU优化
 

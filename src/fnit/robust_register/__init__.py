@@ -1,7 +1,6 @@
-"""Independent preparation for the source-defined robust registration workflow.
+"""Independent CPU robust registration and subregion target preparation."""
 
-This module does not register images or alter the GEMS default pipeline.
-"""
+from .cpu import CPURegistration, load_cpu_registration
 
 from .preparation import (
     AlignmentTargetPreparation,
@@ -10,6 +9,8 @@ from .preparation import (
 )
 
 __all__ = [
+    "CPURegistration",
+    "load_cpu_registration",
     "AlignmentTargetPreparation",
     "prepare_subregion_alignment_target",
     "reflect_atlas_header",
