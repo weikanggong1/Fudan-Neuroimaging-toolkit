@@ -1,0 +1,171 @@
+{
+  "schema": "FNIT_installed_CPU_robust_API_real_benchmark/v1",
+  "date": "2026-10-07",
+  "package_version": "0.16.0",
+  "result": "PASS_real_installed_CPU_pair_and_original20",
+  "installation": {
+    "existing_Conda_dependencies": true,
+    "isolated_new_pip_target": true,
+    "fresh_Conda_environment_tested": false,
+    "wheel_bytes": 4862712,
+    "wheel_sha256": "2adc251f7959c128eea7532ff88376deb2f741c3b900ec13760e2c92fcc164f0",
+    "CPU_modules16_byte_exact": true,
+    "no_validation_runtime_in_wheel": true,
+    "actual_loaded_FNIT_modules_after_pair": 17,
+    "all_actual_FNIT_modules_from_installed_wheel": true
+  },
+  "input": {
+    "real_case_count": 1,
+    "saved_prepared_3D_images": true,
+    "source": "right atlas preparation image",
+    "target": "corresponding prepared T1-derived foreground mask",
+    "source_target_grid_unchanged": true,
+    "new_prepare_calls": 0,
+    "old_official_outputs_only_scoring_reference": true
+  },
+  "parameters": {
+    "device": "cpu",
+    "saturation": 50.0,
+    "iterations_per_level": 5,
+    "stop_distance": 0.01,
+    "initialize_translation": true,
+    "pyramid_min_size": 16,
+    "pyramid_max_size": -1,
+    "highres_iterations": -1,
+    "spatial_chunk_size": 131072,
+    "memory_budget_gb": 20.0,
+    "tf32": true
+  },
+  "scope": {
+    "factory_calls": 1,
+    "normal_API_pairs": 1,
+    "rigid_calls": 1,
+    "affine_calls": 1,
+    "original20_score_calls": 1,
+    "new_official_commands": 0,
+    "new_prepare_calls": 0,
+    "GPU_calls": 0,
+    "automatic_retry": false
+  },
+  "accuracy": {
+    "original20_passed": true,
+    "original20_check_count": 20,
+    "reference": "previously saved fresh official rigid+affine pair",
+    "sampler_scope": "same FNIT sampler applied to official and own saved mapped-header geometry; not independent official resampler",
+    "stage_metrics": {
+      "rigid": {
+        "point_count": 133,
+        "displacement_RMS_mm": 0.0,
+        "displacement_max_mm": 0.0,
+        "warp_relative_L2": 0.0,
+        "warp_max_absolute": 0.0,
+        "warp_P99_absolute": 0.0,
+        "warp_nonzero_support_difference_voxels": 0,
+        "world_LTA_matrix_max_absolute": 4.973799150320701e-14,
+        "combined_world_matrix_max_absolute": 0.0
+      },
+      "affine": {
+        "point_count": 133,
+        "displacement_RMS_mm": 0.0,
+        "displacement_max_mm": 0.0,
+        "warp_relative_L2": 0.0,
+        "warp_max_absolute": 0.0,
+        "warp_P99_absolute": 0.0,
+        "warp_nonzero_support_difference_voxels": 0,
+        "world_LTA_matrix_max_absolute": 3.9968028886505635e-15,
+        "combined_world_matrix_max_absolute": 0.0
+      }
+    },
+    "mapped_MGH_13_fields_exact_per_stage": {
+      "rigid": true,
+      "affine": true
+    },
+    "mapped_source_voxels_shape_dtype_exact_per_stage": {
+      "rigid": true,
+      "affine": true
+    },
+    "thresholds": {
+      "mapped_geometry_consistency_max_mm": 1e-05,
+      "physical_displacement_RMS_mm_max": 0.001,
+      "physical_displacement_max_mm_max": 0.01,
+      "warped_same_target_grid_relative_L2_max": 1e-05
+    }
+  },
+  "clock_seconds": {
+    "pip_install": 4.271128001622856,
+    "cold_import": 1.5944223823025823,
+    "factory": 2.7458183467388153e-05,
+    "cold_normal_API_pair": 2.253696114756167,
+    "pair_internal": 2.2394783422350883,
+    "rigid_stage_API": 1.8292157826945186,
+    "affine_stage_API": 0.3643603567034006,
+    "original20_scoring": 0.17884494923055172,
+    "identity_instrumented_entry": 13.296154664829373,
+    "controlled_outer": 13.93056368175894,
+    "previous_fresh_official_two_CLI_sum": 1.031013726722449,
+    "previous_fresh_official_workflow": 1.0319316182285547
+  },
+  "clock_scope": {
+    "cold_API_includes_JIT": true,
+    "cold_API_includes_both_stages_and_MGH_save_reload_LTA_save": true,
+    "outside_identity_observers_excluded_from_normal_API": true,
+    "nested_clocks_must_not_be_summed": true,
+    "official_clock_reused_from_previous_same_real_case": true,
+    "official_active_concurrency_observed": false,
+    "installed_warm_API_measured": false,
+    "CLI_real_end_to_end_measured": false,
+    "no_installed_speedup_claim": true
+  },
+  "resource_policy": {
+    "physical_core_affinity_count": 8,
+    "Torch_intra_op": 8,
+    "Torch_interop": 1,
+    "OMP_MKL_OPENBLAS_thread_budget": 8,
+    "AS_limit_bytes": 20000000000,
+    "caller_flags_preserved": true,
+    "CUDA_initialized": false,
+    "context_closed": true,
+    "normal_module_and_JIT_caches_retained": true,
+    "actual_dispatcher_signature_counts": {
+      "qr": 1,
+      "residual": 1,
+      "error": 1,
+      "centroid": 1
+    },
+    "signature_counts_not_total_internal_compile_counts": true,
+    "actual_DSO_checkpoint_counts": [
+      98,
+      121,
+      121
+    ],
+    "literal_runtime_identity_seal_size": 233,
+    "unknown_or_changed_DSOs": 0,
+    "deleted_DSOs": 0
+  },
+  "execution": {
+    "numeric_outputs_durable": true,
+    "original20_and_entry_and_outer_complete": true,
+    "resource_post_exact": 29,
+    "own_core_post_exact": 8,
+    "frozen_post_exact": 12,
+    "loaded_FNIT_post_exact": 17,
+    "loaded_providers_post_exact": 121,
+    "output_files_post_exact": 6,
+    "observed_PID_instances_gone": 7,
+    "FD_closed": true,
+    "common_lock_free": true,
+    "index_peers_preserved": true,
+    "own_authorization_closed": true,
+    "science_reexecuted_for_collection": false,
+    "first_metadata_collection_syntax_error_retained": true,
+    "metadata_only_syntax_recovery_did_not_repeat_science": true
+  },
+  "not_assessed": [
+    "installed same-instance warm performance",
+    "independent official voxel resampling oracle",
+    "13-parameter intensity-scaled affine",
+    "left or additional subjects and grid configurations",
+    "GPU precision or performance regression",
+    "full GEMS segmentation Dice/volume"
+  ]
+}
