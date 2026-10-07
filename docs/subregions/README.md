@@ -20,6 +20,8 @@
 
 原始T1默认共享一次 `SynthSegPlus`（普通 SynthSeg 2.0 `--parc`），生成粗标签、DK68和白质代理，再用TorchFAST校正/归一化及图谱拟合。已有粗标签时按已准备T1直接拟合，跳过自动强度与1mm网格准备；同阶段对照用独立官方norm/aseg/wmparc。两种输入范围不可混为同一个benchmark。
 
+本流程不调用 `prepare_subregion_alignment_target` 或 `reflect_atlas_header`。那两个函数属于 SAMSEG/`mri_robust_register` 的独立对齐前处理：前者需要已有标签并输出二值配准目标，后者只反射 atlas 头几何。右侧海马/杏仁核 recipe 内部对 soft-Dice 对齐做了等价的 affine 反射，但不使用这两个准备函数，也不执行 robust rigid/affine。若业务需要先做该前处理，再运行本分割，应由上层流程显式串联，不能把准备图像当作 `coarse_segmentation` 或分割输出。
+
 ```mermaid
 flowchart LR
   A[原始T1] --> B[共享SynthSegPlus与wmparc代理]

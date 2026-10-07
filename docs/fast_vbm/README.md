@@ -14,7 +14,7 @@
 
 ## 1. 功能简介
 
-`FastVBM` 接收一幅原始 3D T1w 和一幅 GM 模板，输出输入空间的脑提取及三组织分割结果，以及模板空间的 warped GM、nonlinear-only Jacobian 和 modulated GM。它是单被试接口，不负责批量调度。
+`FastVBM` 是仓库唯一的 VBM 实现和共享入口。它接收一幅原始 3D T1w 和一幅 GM 模板，输出输入空间的脑提取及三组织分割结果，以及模板空间的 warped GM、nonlinear-only Jacobian 和 modulated GM。它是单被试接口，不负责批量调度。UKB v1.5 的 `bb_struct_init / bb_vbm` 只在[参考配方页](../ukb_vbm/README.md)中单独说明，不对应第二个 Python 类、`run()` 方法或 CLI。
 
 流程在 Python 进程内运行，不启动 FreeSurfer 或 FSL 可执行文件。CUDA 默认允许 TF32 matmul 和 cuDNN 内核；网络及主要连续图计算使用 float32，不启用 float16 或 bfloat16。实际开关写入 `fast_vbm_report.json`。脑图保留输入 dtype，mask 保存为 uint8，组织标签为 int32，PVE、bias、restore 与标准空间连续图为 float32。
 

@@ -4,6 +4,10 @@
 
 这是一个独立的前处理模块，用于匹配 FreeSurfer 8.2 SAMSEG 核团分割在 `mri_robust_register` 前准备的目标图像。生产模块提供目标准备和 atlas 头信息处理；刚性／仿射另有[独立CPU正式接口](README.md)及[原实验验证记录](../../validation/robust_register/full_cpu_arithmetic_20261007/README.md)，尚未接入 GEMS 默认 pipeline。当前默认 CPU/GPU 分割路径不变。
 
+### 与 `segment_4_subregions` 的边界
+
+`segment_4_subregions` 是从 T1w 到四类脑亚区标签的完整 GEMS 流程，负责共享粗分割、图谱拟合、标签合并和体积统计。这里的 `prepare_subregion_alignment_target` 只根据**已有**粗标签生成 SAMSEG 的二值 `0/255` 目标，`reflect_atlas_header` 只修改 atlas 的 RAS 头信息，不重采样体素，也不进行核团推断。右侧 GEMS recipe 另有一行用于 soft-Dice 对齐的 affine 反射，这与本页的 MGH 头处理和 robust 配准不是同一阶段。因此这些准备函数不是分割步骤，默认不会被 `segment_4_subregions` 调用，也不应直接并入该函数。需要把 SAMSEG 对齐和 GEMS 分割串成一条命令时，应在上层新增显式 orchestration，并保留这两个阶段各自的输入、输出和空间报告。
+
 ```mermaid
 flowchart LR
     A[粗分割与目标标签] --> B[选择标签]

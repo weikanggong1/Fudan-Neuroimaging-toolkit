@@ -12,7 +12,7 @@
 
 ## 1. 功能简介
 
-本页说明[FastVBM](../fast_vbm/README.md)对应的公开UK Biobank v1.5 VBM方法与模板。FNIT没有独立UKB数据下载、字段提取或队列聚合入口；用户提供自己的原始T1w和模板，再调用单被试FastVBM。
+本页说明[FastVBM](../fast_vbm/README.md)对应的公开UK Biobank v1.5 VBM方法与模板。它是同一 `fnit.fast_vbm.FastVBM.run()` 的参考配方页，不是第二个实现。FNIT没有独立UKB数据下载、字段提取或队列聚合入口；用户提供自己的原始T1w和模板，再调用单被试FastVBM。
 
 官方方法以GM PVE为moving、公开GM模板为fixed，进行仿射/非线性配准、nonlinear-only Jacobian及调制。FNIT两分支共用SynthStrip、TorchFAST、TorchFLIRT、重采样与调制，非线性估计器可选SynthMorph或TorchFNIRT。SynthStrip自动脑提取与官方初始化的裁剪/BET前段不同。
 
