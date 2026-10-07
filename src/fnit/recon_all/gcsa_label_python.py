@@ -13,7 +13,7 @@ import nibabel.freesurfer.io as fsio
 import numpy as np
 
 from .gcsa_aseg import relabel_with_aseg
-from .gcsa_feature import mean_curvature_five, principal_directions
+from .gcsa_feature import mean_curvature_and_principal_directions
 from .gcsa_finalize import apply_cortex_label, mode_filter_annotations, ordered_neighbors
 from .gcsa_gibbs import GibbsModel
 from .gcsa_initial import (
@@ -21,6 +21,75 @@ from .gcsa_initial import (
 )
 from .gcsa_islands import relabel_islands, vertex_areas
 from .gcsa_reclassify import reclassify_gibbs
+
+
+def _file_version(path: Path) -> tuple[str, int, int]:
+    """Return an immutable worker-local file identity for cache validation."""
+    resolved = path.resolve(strict=True)
+    stat = resolved.stat()
+    return str(resolved), stat.st_size, stat.st_mtime_ns
+
+
+class GCSAFeatureCache:
+    """Cache geometry-only GCSA inputs for the three atlases of one hemisphere.
+
+    The private hemisphere worker processes the DK, Destrieux and DKT atlases
+    serially on the same ``smoothwm``/``sphere.reg`` mesh. This object caches
+    only read-only geometry, mapped ico indices, curvature directions,
+    adjacency and aseg data. Atlas classifiers, Gibbs models, labels and
+    output writers remain per atlas, preserving label order and seeded
+    permutation semantics. The cache is local to one worker and rejects a
+    different subject/hemi/device or changed input file version.
+    """
+
+    def __init__(self, subject: str | Path, hemi: str, *, device: str = "cpu") -> None:
+        if hemi not in ("lh", "rh"):
+            raise ValueError("hemi must be lh or rh")
+        self.subject = Path(subject).resolve()
+        self.hemi = hemi
+        self.device = str(device)
+        surf = self.subject / "surf"
+        label = self.subject / "label"
+        mri = self.subject / "mri"
+        self.smooth_path = surf / f"{hemi}.smoothwm"
+        self.sphere_path = surf / f"{hemi}.sphere.reg"
+        aseg_path = mri / "aseg.presurf.mgz"
+        cortex_path = label / f"{hemi}.cortex.label"
+        for path in (self.smooth_path, self.sphere_path, aseg_path, cortex_path):
+            if not path.is_file():
+                raise FileNotFoundError(path)
+        self.signature = tuple(_file_version(path) for path in
+                               (self.smooth_path, self.sphere_path, aseg_path, cortex_path))
+        self.smooth, self.faces = fsio.read_geometry(str(self.smooth_path))
+        self.sphere, sphere_faces = fsio.read_geometry(str(self.sphere_path))
+        if not np.array_equal(self.faces, sphere_faces):
+            raise ValueError("smoothwm and sphere.reg topology differs")
+        self.aseg_image = nib.load(str(aseg_path))
+        self.aseg = np.asanyarray(self.aseg_image.dataobj)
+        self.tk_to_vox = np.linalg.inv(self.aseg_image.header.get_vox2ras_tkr())
+        self.feature, self.principal = mean_curvature_and_principal_directions(
+            self.smooth, self.faces, device=device)
+        self.neighbors = ordered_neighbors(self.faces, len(self.smooth))
+        self.vertex_area = vertex_areas(self.smooth, self.faces)
+        self.cortex_vertices = fsio.read_label(str(cortex_path))
+        self._mapped: dict[tuple, tuple[np.ndarray, np.ndarray]] = {}
+
+    def map_initial_nodes(self, ico4_file: str | Path,
+                          ico7_file: str | Path) -> tuple[np.ndarray, np.ndarray]:
+        """Cache sphere-to-ico classifier/prior indices by template versions."""
+        ico4, ico7 = Path(ico4_file), Path(ico7_file)
+        key = _file_version(ico4), _file_version(ico7)
+        if key not in self._mapped:
+            self._mapped[key] = map_initial_nodes(
+                self.sphere, read_ico_vertices(ico4), read_ico_vertices(ico7))
+        return self._mapped[key]
+
+    def validate(self, subject: str | Path, hemi: str, device: str) -> None:
+        """Reject accidental reuse across private workers or CUDA devices."""
+        if Path(subject).resolve() != self.subject or hemi != self.hemi:
+            raise ValueError("GCSA feature cache belongs to another subject/hemi")
+        if str(device) != self.device:
+            raise ValueError("GCSA feature cache belongs to another device")
 
 
 def write_annotation(path: str | Path, labels: np.ndarray, atlas: InitialAtlas) -> None:
@@ -46,27 +115,26 @@ def write_annotation(path: str | Path, labels: np.ndarray, atlas: InitialAtlas) 
 
 def label_surface(subject: str | Path, hemi: str, atlas_file: str | Path,
                   ico4_file: str | Path, ico7_file: str | Path,
-                  output_file: str | Path, *, device: str = "cpu") -> dict:
-    """Run the pinned ``mris_ca_label`` sequence from fixed input files."""
+                  output_file: str | Path, *, device: str = "cpu",
+                  prepared: GCSAFeatureCache | None = None) -> dict:
+    """Run the pinned ``mris_ca_label`` sequence from fixed input files.
+
+    ``prepared`` optionally reuses geometry-only inputs for multiple atlases
+    on one hemisphere. Atlas parsing, Gibbs state and output writing remain
+    per-call; omitting it preserves the original standalone behavior.
+    """
     if hemi not in ("lh", "rh"):
         raise ValueError("hemi must be lh or rh")
     subject = Path(subject)
-    surf = subject / "surf"
-    label = subject / "label"
     started = time.perf_counter()
     atlas = read_initial_atlas(atlas_file, include_gibbs=True)
-    smooth, faces = fsio.read_geometry(str(surf / f"{hemi}.smoothwm"))
-    sphere, sphere_faces = fsio.read_geometry(str(surf / f"{hemi}.sphere.reg"))
-    if not np.array_equal(faces, sphere_faces):
-        raise ValueError("smoothwm and sphere.reg topology differs")
-    classifier, prior = map_initial_nodes(
-        sphere, read_ico_vertices(ico4_file), read_ico_vertices(ico7_file))
-    image = nib.load(str(subject / "mri" / "aseg.presurf.mgz"))
-    aseg = np.asanyarray(image.dataobj)
-    tk_to_vox = np.linalg.inv(image.header.get_vox2ras_tkr())
-    feature = mean_curvature_five(smooth, faces, device=device)
-    principal = principal_directions(smooth, faces, device=device)
-    neighbors = ordered_neighbors(faces, len(smooth))
+    cache = prepared if prepared is not None else GCSAFeatureCache(subject, hemi, device=device)
+    cache.validate(subject, hemi, device)
+    smooth, faces = cache.smooth, cache.faces
+    classifier, prior = cache.map_initial_nodes(ico4_file, ico7_file)
+    aseg, tk_to_vox = cache.aseg, cache.tk_to_vox
+    feature, principal = cache.feature, cache.principal
+    neighbors = cache.neighbors
     loaded = time.perf_counter()
 
     annotation = np.empty(len(smooth), dtype=np.int32)
@@ -87,12 +155,11 @@ def label_surface(subject: str | Path, hemi: str, atlas_file: str | Path,
                                    smooth, aseg, tk_to_vox)
     model.labels = annotation
     second_aseg = time.perf_counter()
-    islands_history = relabel_islands(model, vertex_areas(smooth, faces))
+    islands_history = relabel_islands(model, cache.vertex_area)
     islands = time.perf_counter()
     annotation = mode_filter_annotations(annotation, faces, atlas.color_table)
     filtered = time.perf_counter()
-    cortex_vertices = fsio.read_label(str(label / f"{hemi}.cortex.label"))
-    annotation = apply_cortex_label(annotation, cortex_vertices, atlas,
+    annotation = apply_cortex_label(annotation, cache.cortex_vertices, atlas,
                                     classifier, prior, feature, faces)
     corrected = time.perf_counter()
     Path(output_file).parent.mkdir(parents=True, exist_ok=True)

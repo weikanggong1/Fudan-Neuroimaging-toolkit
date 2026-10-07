@@ -668,14 +668,16 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
         step(f'avg_curv_{hemi}', _run_avg_curv, binaries['paint'], subject, hemi,
              Path(registration_atlases[hemi]), assets)
     elif operation == 'annotation':
-        from .gcsa_label_python import label_surface
+        from .gcsa_label_python import GCSAFeatureCache, label_surface
         value = {}
+        cache = step(f'annot_{hemi}_prepare', GCSAFeatureCache,
+                     subject, hemi, device=device)
         for atlas, prefix in (('aparc', 'DKaparc'), ('aparc.a2009s', 'CDaparc'),
                               ('aparc.DKTatlas', 'DKTaparc')):
             atlas_file = assets / 'average' / f'{hemi}.{prefix}.atlas.acfb40.noaparc.i12.2016-08-02.gcs'
             value[atlas] = step(f'annot_{hemi}_{atlas}', label_surface, subject, hemi,
                   atlas_file, assets / 'lib/bem/ic4.tri', assets / 'lib/bem/ic7.tri',
-                  labels / f'{hemi}.{atlas}.annot', device=device)
+                  labels / f'{hemi}.{atlas}.annot', device=device, prepared=cache)
     elif operation == 'finish_surface':
         value = step(f'finish_surface_{hemi}', _finish_cortical_surface, subject,
                      hemi, binaries['metrics'], assets, device=device, threads=threads, defer_metrics=True,
@@ -718,7 +720,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     from fnit.synthseg_parc import SynthSeg
     from .brain_volume_stats_python import compute_brain_volume_stats
     from .ca_normalize_python import run_ca_normalize
-    from .gcsa_label_python import label_surface
+    from .gcsa_label_python import GCSAFeatureCache, label_surface
     from .input_talairach_chain import run_input_talairach_chain
     from .mri_mask_gpu import mask_volume
     from .n4_wrapper import make_nu
@@ -1063,6 +1065,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                   hemi, registration_atlases[hemi], assets)
 
         for hemi in ("lh", "rh"):
+            cache = stage(f"annot_{hemi}_prepare", GCSAFeatureCache,
+                          subject, hemi, device=device)
             for atlas, prefix in (("aparc", "DKaparc"),
                                   ("aparc.a2009s", "CDaparc"),
                                   ("aparc.DKTatlas", "DKTaparc")):
@@ -1071,7 +1075,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                 stage(f"annot_{hemi}_{atlas}", label_surface, subject, hemi,
                       atlas_file, assets / "lib/bem/ic4.tri",
                       assets / "lib/bem/ic7.tri",
-                      labels / f"{hemi}.{atlas}.annot", device=device)
+                      labels / f"{hemi}.{atlas}.annot", device=device,
+                      prepared=cache)
         for hemi in ("lh", "rh"):
             result = stage(f"finish_surface_{hemi}", _finish_cortical_surface,
                            subject, hemi, metrics_binary[0], assets,

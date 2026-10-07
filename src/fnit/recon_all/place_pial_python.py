@@ -22,7 +22,7 @@ from .place_surface_final_cleanup import pin_medial_wall, repair_intersections
 from .place_surface_geometry import surface_ras_to_voxel
 from .place_surface_gradient_average import average_signed_gradients
 from .place_surface_intensity import intensity_gradient
-from .place_surface_normals import FaceNormalTopology
+from .place_surface_normals import CoordinateNormalCache, FaceNormalTopology
 from .place_surface_objective import (
     intensity_error, pial_placement_sse, surface_total_area, tangential_spring_energy,
 )
@@ -124,8 +124,9 @@ def place_pial_t1(
     thresholds = np.array([float(stats[f"pial_{name}"]) for name in
                            ("inside_hi", "border_hi", "border_low", "outside_low", "outside_hi")])
     normal_topology = FaceNormalTopology(faces, len(xyz))
+    normal_cache = CoordinateNormalCache(normal_topology)
     repulsion_index = OriginalVertexBuckets(xyz, ripped)
-    normals = normal_topology.evaluate(xyz)
+    normals = normal_cache.evaluate(xyz)
     border = compute_border_values_first_pass(
         volume, aseg, xyz, normals, xyz, ripped,
         np.full(len(xyz), -1.0, dtype=np.float32), affine, thresholds,
@@ -139,19 +140,27 @@ def place_pial_t1(
     fixed_normals = original_vertex_normals(xyz, faces, topology=normal_topology)
     original_area = surface_total_area(xyz, faces)
     sigma, n_averages = 2.0, 16
+    objective_cache_vertices: np.ndarray | None = None
+    objective_cache_result: tuple[float, float] | None = None
 
     def objective(current: np.ndarray) -> tuple[float, float]:
-        current_normals = normal_topology.evaluate(current)
+        nonlocal objective_cache_vertices, objective_cache_result
+        if objective_cache_vertices is current and objective_cache_result is not None:
+            return objective_cache_result
+        current_normals = normal_cache.evaluate(current)
         intensity_sse, rms, _ = intensity_error(
             placement, current, values, ripped, affine)
         spring = tangential_spring_energy(
             current, current_normals, faces, ripped,
             ordered_neighbors=ordered)
         area = surface_total_area(current, faces)
-        return pial_placement_sse(intensity_sse, spring, original_area, area), rms
+        result = (pial_placement_sse(intensity_sse, spring, original_area, area), rms)
+        objective_cache_vertices = current
+        objective_cache_result = result
+        return result
 
     def gradient(current: np.ndarray, cropped: np.ndarray) -> np.ndarray:
-        current_normals = normal_topology.evaluate(current)
+        current_normals = normal_cache.evaluate(current)
         if sampler is None:
             intensity = intensity_gradient(
                 placement, current, current_normals, ripped, values, border[5],
@@ -240,7 +249,7 @@ def place_pial_t1(
             outer_pass += 1
             sigma = 2.0 / (1 << outer_pass)
             n_averages = 16 >> outer_pass
-            current_normals = normal_topology.evaluate(current)
+            current_normals = normal_cache.evaluate(current)
             border = compute_border_values_first_pass(
                 volume, aseg, current, current_normals, xyz, ripped,
                 values, affine, thresholds, hemisphere=hemi, surface="pial",
@@ -248,6 +257,10 @@ def place_pial_t1(
             )
             values = average_marked_values(border[0], border[4], ripped, faces, 5)
             original_area = surface_total_area(current, faces)
+            # sigma/values/original_area changed, so a same-coordinate objective
+            # from the preceding pass is no longer valid.
+            objective_cache_vertices = None
+            objective_cache_result = None
             last_sse, last_rms = objective(current)
             dt, reductions = 0.5, 0
     else:

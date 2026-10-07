@@ -23,7 +23,7 @@ from .place_surface_decision import pial_step_decision
 from .place_surface_geometry import surface_ras_to_voxel
 from .place_surface_gradient_average import average_signed_gradients
 from .place_surface_intensity import intensity_gradient
-from .place_surface_normals import initial_vertex_normals
+from .place_surface_normals import CoordinateNormalCache, FaceNormalTopology
 from .place_surface_objective import intensity_error, surface_total_area, tangential_spring_energy
 from .place_surface_rip import rip_white_preaparc_pass
 from .place_surface_self_repulsion import (
@@ -68,7 +68,9 @@ def place_white_preaparc_prefix(
                  if len(line.split()) >= 2)
     vertices, faces, metadata = nib.freesurfer.read_geometry(str(orig), read_metadata=True)
     xyz = average_vertex_positions(vertices, faces, 5)
-    normals = initial_vertex_normals(xyz, faces)
+    normal_topology = FaceNormalTopology(faces, len(xyz))
+    normal_cache = CoordinateNormalCache(normal_topology)
+    normals = normal_cache.evaluate(xyz)
     brain = nib.load(str(brain_path))
     seg_image = nib.load(str(seg_path))
     seg = np.asarray(seg_image.dataobj)
@@ -97,8 +99,14 @@ def place_white_preaparc_prefix(
         faces, len(xyz), ordered_neighbors=ordered)
     original_area = surface_total_area(xyz, faces)
 
+    objective_cache_vertices: np.ndarray | None = None
+    objective_cache_result: tuple[float, float] | None = None
+
     def objective(current: np.ndarray) -> tuple[float, float]:
-        current_normals = initial_vertex_normals(current, faces)
+        nonlocal objective_cache_vertices, objective_cache_result
+        if objective_cache_vertices is current and objective_cache_result is not None:
+            return objective_cache_result
+        current_normals = normal_cache.evaluate(current)
         intensity_sse, rms, _ = intensity_error(volume, current, values, ripped, affine)
         spring = tangential_spring_energy(
             current, current_normals, faces, ripped, ordered_neighbors=ordered)
@@ -108,7 +116,11 @@ def place_white_preaparc_prefix(
         repulsion = self_repulsion_energy(
             current, ripped, offsets, members, two_offsets, two_neighbors, weight=5.0)
         area_scale = float(np.float32(original_area / area))
-        return float(np.float32(0.3)) * spring * area_scale + float(np.float32(0.2)) * intensity_sse + repulsion, rms
+        result = (float(np.float32(0.3)) * spring * area_scale
+                  + float(np.float32(0.2)) * intensity_sse + repulsion, rms)
+        objective_cache_vertices = current
+        objective_cache_result = result
+        return result
 
     prepared_at = time.perf_counter()
     initial_sse, initial_rms = objective(xyz)
@@ -125,7 +137,7 @@ def place_white_preaparc_prefix(
     } if diagnostics is not None else {}
     for step in range(1, steps + 1):
         stage_start = time.perf_counter()
-        normals = initial_vertex_normals(current, faces)
+        normals = normal_cache.evaluate(current)
         intensity = intensity_gradient(
             volume, current, normals, ripped, values, border[5], affine,
             brain.header.get_zooms()[:3], weight=0.2, sigma_global=2.0,

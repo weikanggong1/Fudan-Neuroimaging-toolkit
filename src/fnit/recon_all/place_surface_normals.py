@@ -136,3 +136,40 @@ class FaceNormalTopology:
         triangles = np.asarray(triangles)
         if nvertices != self.nvertices or not np.issubdtype(triangles.dtype, np.integer) or not np.array_equal(triangles, self.faces):
             raise ValueError("cached normals require identical ordered topology")
+
+
+class CoordinateNormalCache:
+    """缓存同一优化上下文中同一坐标数组的法向。
+
+    ``FaceNormalTopology`` 只缓存有序面拓扑，连续放置循环仍会对同一个
+    ``current`` 数组在目标函数和梯度之间重复计算法向。本类按 NumPy 数组
+    对象身份复用一次计算结果；坐标数组一旦换成新对象就重新计算，因此不
+    使用近似坐标、哈希或容差，也不改变 float32 累加顺序。调用方必须把
+    坐标视为只读；若原地修改坐标，应调用 ``clear`` 后再取法向。
+
+    这是 ``mris_place_surface`` 内部优化，没有独立 CLI。缓存只绑定一个
+    ``FaceNormalTopology``，不会跨 white.preaparc、final white 和 pial 网格
+    共享法向。
+    """
+
+    def __init__(self, topology: FaceNormalTopology):
+        if not isinstance(topology, FaceNormalTopology):
+            raise TypeError("topology must be a FaceNormalTopology")
+        self.topology = topology
+        self._vertices: np.ndarray | None = None
+        self._normals: np.ndarray | None = None
+
+    def evaluate(self, vertices: np.ndarray) -> np.ndarray:
+        """返回同一坐标对象的缓存法向，换对象时按原内核重算。"""
+        xyz = np.asarray(vertices, dtype=np.float32)
+        if self._vertices is xyz and self._normals is not None:
+            return self._normals
+        normals = self.topology.evaluate(xyz)
+        self._vertices = xyz
+        self._normals = normals
+        return normals
+
+    def clear(self) -> None:
+        """丢弃坐标引用和法向，供调用方在原地更新坐标后显式失效。"""
+        self._vertices = None
+        self._normals = None

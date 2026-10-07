@@ -6,6 +6,10 @@ import nibabel.freesurfer.io as fsio
 import numpy as np
 
 from fnit.recon_all.gcsa_aseg import relabel_with_aseg
+from fnit.recon_all.gcsa_feature import (
+    mean_curvature_and_principal_directions, mean_curvature_five,
+    principal_directions,
+)
 from fnit.recon_all.gcsa_initial import InitialAtlas
 from fnit.recon_all.gcsa_label_python import write_annotation
 
@@ -45,3 +49,18 @@ def test_native_annotation_writer_roundtrip(tmp_path):
     actual, _, names = fsio.read_annot(str(output), orig_ids=True)
     np.testing.assert_array_equal(actual, expected)
     assert names == [b"unknown", b"Medial_wall"]
+
+
+def test_shared_gcsa_geometry_matches_separate_features():
+    """共享 GPU 准备不能改变 GCSA 的两组特征。"""
+    vertices = np.array([
+        (1, 1, 1), (-1, -1, 1), (-1, 1, -1), (1, -1, -1),
+    ], dtype=np.float32)
+    faces = np.array([
+        (0, 1, 2), (0, 3, 1), (0, 2, 3), (1, 3, 2),
+    ], dtype=np.int32)
+    combined = mean_curvature_and_principal_directions(vertices, faces)
+    np.testing.assert_allclose(combined[0], mean_curvature_five(vertices, faces),
+                               rtol=0, atol=1e-6)
+    np.testing.assert_allclose(combined[1], principal_directions(vertices, faces),
+                               rtol=0, atol=1e-6)
