@@ -57,7 +57,7 @@ Python 示例和参数说明见 [SynthStrip 手册](docs/synthstrip/README.md)�
 
 CPU 的功能覆盖、同节点精度与耗时、GPU 保持检查见[本轮 sMRI 报告](validation/smri_cpu/README.md)。SynthSR 默认 CPU 完整浮点输出、FAST 已测 CPU 模式已与官方匹配；SynthMorph joint 的 192/256 固定门已通过，精确 NumBa 采样的六次完整 CPU 输出与验收版逐位相同。同八核默认 256 的 ABBA 中位数 163.094→155.086 秒，本组缩短 4.91%；局部首次 JIT 仍有成本，共享节点时间不代表稳定吞吐。完整左半球 sphere.reg 的坐标、有序面和解码几何与同输入官方相同；正式 C++ 平均器 ABBA 同源码及八核资源门通过，平均步骤快 2.09 倍，完整配准墙钟仍慢 5.27%，不能视为整步提速。WMH 的 GPU crop 已在 20 GB 内保持旧输出，no-crop 仍需更多显存。丘脑/海马亚区、FNIRT 非线性估计、原始 T1 完整 recon-all 仍有差异，见[剩余清单](validation/smri_cpu/REMAINING.md)。
 
-普通33类 SynthSeg 在[既有 C72 优化](docs/synthseg/CPU_COLUMNS.md)上新增[C24 CPU 列缓冲复用](docs/synthseg/CPU_COLUMNS_C24.md)：同一公开 T1、8线程完整 ABBA 的 API 中位数85.499→80.621秒，缩短5.71%，旧新分割、体积表和几何逐字节相同；GPU 输出、精度与显存保持原样。CPU对官方仍有既有1体素差异，CPU速度目标尚未达到。[详细报告](validation/smri_cpu/seg_columns_c24_integration_20261006/README.md)分别记录API、检查与冷进程时间。独立robust配准候选仍17/20过门，尚未接入GEMS。
+普通33类 SynthSeg 在[既有 C72 优化](docs/synthseg/CPU_COLUMNS.md)上新增[C24 CPU 列缓冲复用](docs/synthseg/CPU_COLUMNS_C24.md)：同一公开 T1、8线程完整 ABBA 的 API 中位数85.499→80.621秒，缩短5.71%，旧新分割、体积表和几何逐字节相同；GPU 输出、精度与显存保持原样。CPU对官方仍有既有1体素差异，CPU速度目标尚未达到。[详细报告](validation/smri_cpu/seg_columns_c24_integration_20261006/README.md)分别记录API、检查与冷进程时间。[独立 robust CPU 配准适配器](validation/robust_register/full_cpu_arithmetic_20261007/README.md)已在同一真实案例完成冷调用、缓存调用及新官方对照，共60/60项通过；完整 GEMS 核团分割和正式包内注册入口仍待验收。
 
 | FNIT 函数 / 类 | 对应原软件包函数 / 命令 | 用途 |
 |---|---|---|
