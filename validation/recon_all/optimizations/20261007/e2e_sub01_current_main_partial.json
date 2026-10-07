@@ -1,0 +1,81 @@
+{
+  "schema": "fnit.recon_all.e2e_receipt.v1",
+  "measurement_status": "partial_retrieval",
+  "end_to_end_status": "not_retrieved",
+  "code_commit": "84713e749b38c34858a78e1cdbc1e0dd69108840",
+  "remote_base_commit": "71b1c8c88022b88baaa1b3f1e1728eae40637282",
+  "source_patch_sha256": "21f0217fc22238abf92c129c8d3512ea018493e7e3f376178f49a2b028896f3c",
+  "host": "gpucw1",
+  "gpu": "H100 PCIe",
+  "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+  "input": {
+    "kind": "real_raw_t1",
+    "subject": "sub-01",
+    "path_on_validation_host": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+    "reference_access": "not_read_by_production_process"
+  },
+  "runtime": {
+    "threads": 4,
+    "hemisphere_workers": 2,
+    "device": "cuda:0",
+    "precision": "float32_with_default_tf32_policy",
+    "half_precision": false,
+    "native_optimizations": "auto",
+    "environment": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env",
+    "native_bundle": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin",
+    "gpu_sampling_note": "External card samples include unrelated shared jobs; the FNIT process-tree sampler may undercount detached hemisphere workers. No final peak is claimed from this partial run."
+  },
+  "startup_attempt": {
+    "status": "failed_before_pipeline",
+    "wall_seconds": 6.566986895,
+    "cause": "missing tifffile in envs/default",
+    "interpretation": "dependency check failure, not an algorithm or end-to-end timing"
+  },
+  "raw_t1_run": {
+    "status_at_last_observation": "running",
+    "completed_stage_count_at_last_observation": 27,
+    "stage_seconds_observed": {
+      "input_talairach": 34.2,
+      "n4": 122.5,
+      "nu": 1.3,
+      "T1_normalize": 47.1,
+      "brainmask": 0.9,
+      "SynthSeg": 15.4,
+      "mri_em_register": 179.1,
+      "mri_ca_normalize": 26.5,
+      "mri_cc": 17.9,
+      "brain_second_normalize": 56.1,
+      "entowm": 1.3,
+      "ants_denoise": 20.9,
+      "mri_segment": 48.6,
+      "mri_edit_wm_with_aseg": 32.2,
+      "wm_pretess": 5.3,
+      "wm_fix_ento": 1.2,
+      "wm_fix_acj": 1.4,
+      "mri_fill": 50.0,
+      "filled_auto_checkpoint": 0.0,
+      "mni_aux": 7.7,
+      "mni_nonlinear": 63.1,
+      "brain_finalsurfs": 6.5,
+      "surface_hemisphere_group": 678.4,
+      "defects_lh": 1.5,
+      "defects_rh": 1.5,
+      "register_hemisphere_group": 213.8,
+      "annotation_hemisphere_group": 144.0
+    },
+    "observed_stage_seconds_sum_nested": 1778.4,
+    "interpretation": "stage timings are nested across parallel groups and are not an end-to-end wall-clock total",
+    "target_600_seconds": "not_met_before_final_surface_and_statistics",
+    "final_report_retrieval": "blocked_by_gpucw1_control_channel_timeout"
+  },
+  "strict_reproduction": "not_assessed_in_this_run",
+  "overall_metric_equivalence": "not_assessed",
+  "output_completeness": "not_retrieved",
+  "mesh_validation": "not_retrieved",
+  "numeric_validation": "not_retrieved",
+  "notes": [
+    "The production run started from a fresh output directory and used current patched source; no official output was read by the production process.",
+    "This receipt is deliberately incomplete because the remote control channel stopped returning data. It must not be used as a successful end-to-end benchmark.",
+    "The historical nine-case median of 2669.520 seconds remains a separate baseline and is not replaced by this partial run."
+  ]
+}

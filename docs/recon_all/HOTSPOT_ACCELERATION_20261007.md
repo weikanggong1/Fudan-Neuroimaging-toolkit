@@ -49,3 +49,13 @@
 ## 十分钟目标的验收边界
 
 600 秒是新的性能目标，不是已建立的精度门槛。当前阶段关键路径显示，仅靠半球并行不能达到该目标；需要 surface/finish/register 主内核获得数量级加速。优化期间继续分别报告：严格逐文件复现、优化是否引入退化、分区 Dice/双向表面距离/厚度面积体积偏差，以及端到端墙钟和同期显存。整体指标等效仍为 `not_assessed`，不得通过放宽阈值或删除失败输出换取通过。
+
+## 当前提交的原始 T1 端到端测评（2026-10-07）
+
+本次以当前提交 `84713e749b38c34858a78e1cdbc1e0dd69108840` 在 gpucw1 的 H100 PCIe 上，从空输出目录启动真实 `sub-01_T1w.nii.gz`。配置为 `cuda:0`、四线程、双半球 worker、默认 TF32 策略，未启用 FP16/BF16。生产进程只读取原始 T1、FNIT 权重/资产和 FNIT 独立编译的 native bundle；没有读取官方参考输出。
+
+首个启动使用主页默认环境，在依赖检查阶段 6.567 秒因缺少 `tifffile` 退出。这不是算法计时。随后切换到仓库已有、包含该依赖的 FNIT 环境重新从原始 T1 启动。该运行至少完成 27 个阶段，已观测的阶段时间包括：`input_talairach` 34.2 s、`n4` 122.5 s、`SynthSeg` 15.4 s、`mri_em_register` 179.1 s、`mri_segment` 48.6 s、`mri_fill` 50.0 s、`mni_nonlinear` 63.1 s、`surface_hemisphere_group` 678.4 s、`register_hemisphere_group` 213.8 s、`annotation_hemisphere_group` 144.0 s；其余已完成阶段见同目录的机器可读收据。27 个阶段计时的嵌套和为 1778.4 s，不能当作墙钟总时间。
+
+在完成 annotation 阶段后，gpucw1 的 SSH 控制链停止返回摘要文件，因此最终 white/pial、统计、输出完整性、网格质量、同期显存和真实端到端 `total_seconds` 尚未取回。此次运行收据明确标记为 `end_to_end_status=not_retrieved`，不是成功 benchmark；600 秒目标在最终表面和统计尚未执行前已经不可能达到。本次部分结果不改变之前九例的 2669.520 s 中位数基线，也不替代严格复现和整体指标等效评估。
+
+机器可读记录：`validation/recon_all/optimizations/20261007/e2e_sub01_current_main_partial.json`。后续应在控制链恢复后只读取同一输出目录的 `e2e_summary.json` 和 `fnit-native-free-run.json`，不重复启动或覆盖本次 run。
