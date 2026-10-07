@@ -117,7 +117,7 @@ MGH比较包含几何与扫描字段；gzip压缩字节和可选MGH标签不作�
 | --- | --- |
 | 高分辨率resize安装版编译实现 | 仅源定义合同；本例不触发，尚未对真实高分辨率数据验收 |
 | GPU真数据精度/速度 | 未执行；默认GPU链没有接线 |
-| robust rigid/affine、最终ROI | 最新独立CPU适配器同例三组共60/60门通过；尚未完成GEMS接入及最终ROI验收。旧17/20是修复前候选记录 |
+| robust rigid/affine、最终ROI | 正式CPU安装包同例20/20，前期适配器冷／热／新官方三组60/60另列；完整GEMS及最终ROI未验收。旧17/20是修复前记录 |
 
 此前一次GEMS CPU候选完整右侧recipe已完成但最终核团门未过，见[负结果与脑图](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/README.md)。本模块不读取其细分结果或原配准矩阵来提高匹配。
 
