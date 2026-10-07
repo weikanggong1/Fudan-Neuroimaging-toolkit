@@ -45,6 +45,11 @@ def _smooth_wm(data, spacing):
         for value in values:
             total = np.float32(total + value)
         coefficients = np.asarray(values, dtype=np.float64) / float(total)
+        if (result.device.type == "cpu" and result.dtype == torch.float32
+                and not result.requires_grad and bool(torch.isfinite(result).all())):
+            from ._bbr_cpu import smooth_axis
+            result = torch.from_numpy(smooth_axis(result.numpy(), coefficients, axis))
+            continue
         pad_shape = list(result.shape)
         pad_shape[axis] = radius
         padded = torch.cat((result.new_zeros(pad_shape), result,
@@ -155,6 +160,18 @@ class _BBRCost:
         self.host_result_transfers = 0
         self._point_cache = {}
         self.use_fused = bool(use_fused)
+        self._cpu_updates = None
+        if (self.device.type == "cpu" and self.use_fused
+                and self.image.dtype == torch.float32 and self.points.dtype == torch.float64
+                and not self.image.requires_grad and not self.points.requires_grad
+                and bool(torch.isfinite(self.image).all())
+                and bool(torch.isfinite(self.points).all())
+                and float(self.image.abs().max()) < np.finfo(np.float32).max / 16):
+            from ._bbr_cpu import cost_updates
+            self._cpu_updates = cost_updates
+        self._cpu_transform_limit = None
+        if self._cpu_updates is not None:
+            self._cpu_transform_limit = (2.0**60) / (4 * (3 * float(self.points.abs().max()) + 1))
 
     def evaluate(self, matrices, step=2):
         """Return ordered float32 costs without a GPU-to-host result transfer."""
@@ -174,6 +191,18 @@ class _BBRCost:
         # Coordinates and all eight sampled corners fit comfortably below 20GB.
         batch_size = min(self.max_batch_size, max(1, int(16 * 2**30 / (points.numel() * 96))))
         for start in range(0, len(matrices), batch_size):
+            current_transforms = transforms[start:start + batch_size]
+            if (self._cpu_updates is not None
+                    and self.image.dtype == torch.float32 and points.dtype == torch.float64
+                    and not self.image.requires_grad and not points.requires_grad
+                    and np.isfinite(current_transforms).all()
+                    and np.max(np.abs(current_transforms)) < self._cpu_transform_limit):
+                updates = self._cpu_updates(self.image.numpy(), points.numpy(),
+                    transforms[start:start + batch_size])
+                # Keep the existing PyTorch float64 reduction order and
+                # final float32 cost, including batched/reference searches.
+                costs.append(torch.from_numpy(updates).mean(-1).to(torch.float32))
+                continue
             # Pageable CPU input is not mutated; Torch stages its asynchronous
             # copy on the same stream as the following cost kernels.
             transform = torch.from_numpy(transforms[start:start + batch_size]).to(
@@ -450,8 +479,10 @@ def register_bbr(epi, t1, wmseg, *, init=None, device=None, grid_search=True,
     timings["initial_flirt"] = time.perf_counter() - stage
     stage = time.perf_counter()
     grey, white, _ = _boundary(wmseg, t1, device=device, reference_sampling=(1.,1.,1.))
+    # The schedule's reference mode controls candidate ordering, independently
+    # of the CPU scalar kernel. CUDA reference keeps its existing tensor path.
     cost = _BBRCost(epi, grey, white, device, max_batch_size=candidate_batch_size,
-                    use_fused=execution == "batched")
+                    use_fused=device.type == "cpu" or execution == "batched")
     centre = cost.centre
     qsform = world_to_flirt_affine(np.eye(4), epi.affine, t1.affine, epi.shape, t1.shape,
                                   epi.header.get_zooms()[:3], t1.header.get_zooms()[:3])

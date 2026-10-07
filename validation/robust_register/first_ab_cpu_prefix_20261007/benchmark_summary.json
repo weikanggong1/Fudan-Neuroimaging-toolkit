@@ -1,0 +1,92 @@
+{
+  "schema": "fnit_robust_register_first_AB_cpu_benchmark/v1",
+  "date": "2026-10-07",
+  "scope": "同原始真实影像，首次粗分辨率线性系统；观察流程完成",
+  "reference": "独立编译的固定 FreeSurfer 源码 SDK；不是安装版程序 trace",
+  "formal_CPU_acceptance": "17/20 unchanged",
+  "production_default_changed": false,
+  "GPU_changed": false,
+  "threads": 8,
+  "memory_limit_bytes": 20000000000,
+  "precision": {
+    "volumes_and_design": "Float32",
+    "centroids_matrices": "Double; source-defined serial CPU initialization"
+  },
+  "observations": {
+    "ordered_boundaries": 18,
+    "first_difference": null,
+    "Float32_volume_pairs": 8,
+    "volume_byte_exact": true,
+    "different_volume_words": 0,
+    "max_volume_absolute_error": 0.0,
+    "Double_field_groups": 7,
+    "Double_field_exact": true,
+    "max_Double_absolute_error": 0.0,
+    "A_shape": [
+      9196,
+      6
+    ],
+    "b_shape": [
+      9196
+    ],
+    "A_byte_exact": true,
+    "b_byte_exact": true,
+    "different_A_b_words": 0,
+    "max_A_b_absolute_error": 0.0,
+    "explicit_selected_row_indices_exported": false,
+    "Schur_bridge_calls": 1,
+    "Schur_n": 4,
+    "Schur_info": 0,
+    "registration_QR_calls": 0,
+    "IRLS_calls": 0,
+    "registration_updates": 0,
+    "full_registration_calls": 0
+  },
+  "seconds": {
+    "native_SDK_prefix_child": 0.29329336155205965,
+    "candidate_prefix_child_including_imports_JIT_identity_checks": 16.505572092719376,
+    "candidate_prefix_import_including_first_runtime_check": 5.463982564397156,
+    "candidate_original_prefix_with_two_runtime_checks_and_JIT": 7.4727220963686705,
+    "additional_NumPy_NumBa_LLVM_import": 0.3616180317476392,
+    "cold_typed_centroid_compile": 0.5960000138729811,
+    "candidate_runtime_checkpoints": [
+      3.068223505280912,
+      3.171234500594437,
+      3.1653068903833628,
+      3.168678402900696
+    ],
+    "centroid_target_kernel_nanoseconds": 543977,
+    "centroid_source_kernel_nanoseconds": 232976,
+    "supervisor_including_whole_two_prefix_group": 30.952327805571258,
+    "outer": 31.05019721854478,
+    "owner": 31.150905875489116
+  },
+  "timing_scope": "嵌套时钟，不累加；4个运行库身份检查点（maps、文件SHA与记录）约12.57秒，生产无诊断门的净算法时间未独立计时",
+  "runtime_seals": {
+    "native_actual_ELF_providers": 23,
+    "candidate_actual_DSO_checkpoint_counts": [
+      99,
+      122,
+      122,
+      122
+    ],
+    "candidate_allowed_literal_union": 123,
+    "actual_literal_subset_exact": true,
+    "source_and_resources_post_exact": true,
+    "new_science_during_closeout": 0,
+    "original_arrays_kept_private": true
+  },
+  "source_scope": {
+    "registration_original_math_AST_preserved": true,
+    "original_inference_mode_decorator_preserved": true,
+    "private_CPU_centroid_callee_uses_previously_tested_serial_kernel": true,
+    "unknown_CPU_domain_not_claimed": true,
+    "candidate_pyramid_halfway_stored_native_MRI_headers_not_fabricated": true
+  },
+  "remaining": [
+    "首轮 weighted A/b、QR/LINPACK 解与 MAD/sigma/weights/IRLS",
+    "首更新及之后迭代、全分辨率 warp 与 inverse/affine 正式门",
+    "生产默认和 GPU 回归，未从此例外推全部数据域"
+  ],
+  "evidence_scope": "服务器原COMPARISON安全聚合及原件大小/SHA；本地未转移原矩阵、影像、A/b、日志，未逐原JSON字节重构"
+}

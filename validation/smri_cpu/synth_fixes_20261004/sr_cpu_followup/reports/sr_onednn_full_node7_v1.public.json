@@ -1,0 +1,115 @@
+{
+  "report": {
+    "scope": "Complete real CPU diagnostic with fixed whole-output gates and RSS sampling.\n\nNo production imports this script. The frozen original full-graph oracle stays\nunchanged. API memory includes retained input/output tensor views for hashing.\n",
+    "source_revision": "626cab69555b2c281245268cf2f948da3a2cbb82+sr_cpu_followup_v8",
+    "driver_sha256": "41231cb0be73a5ec35c049799f8e0e629d32ac902fb6a979956a59a2f74a6e71",
+    "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+    "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+    "torch_version": "2.5.1",
+    "model_sha256": "290d0ae911d8c99f4f87c22936ca497ea45bb57b8f50066b822d9cd10c4661b2",
+    "diagnostic_helpers_sha256": {
+      "elu_onednn_numba": "ca61708e995f6165d23927e3ca3f8fe2e574b4aa235ebe4f15543a07bf3ad4ac",
+      "elu_numba": "f586207e55298f743b31b280e460fc94403ffce47ba0d4183a9c4c27b3375d63",
+      "bn_numba": "862a21495c73c2dc4a610d6bac7f969c2651298bd3919de7a6091a37ce8076f3",
+      "cpu_inference_numba": "14facabd3d59f2a704dea93e9a3e61a49afd86cb3f1c8538fde1de767dd3174f"
+    },
+    "network_calls": [
+      {
+        "seconds": 8.063917982392013,
+        "shape": [
+          1,
+          1,
+          192,
+          224,
+          256
+        ],
+        "dtype": "torch.float32",
+        "input_array_sha256": "c1c2d1ae0ba4adae0a433ec07a9fa61088f448e19166175be3742464ff30b677",
+        "input_exact": true,
+        "output_array_sha256": "10f6bac6f3e2de425ba33e649be297b4e157032ebd808429227c064bfda5a7b4",
+        "frozen_output_file_sha256": "8a789b66686deb69ba06aa6551608568eb28680dc2c56005f2b074d3d76f2bf6",
+        "output_exact": true,
+        "metrics": {
+          "count": 11010048,
+          "different": 0,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_abs": 0.0
+        }
+      },
+      {
+        "seconds": 7.289331126958132,
+        "shape": [
+          1,
+          1,
+          192,
+          224,
+          256
+        ],
+        "dtype": "torch.float32",
+        "input_array_sha256": "326bcb07f12eae3f6268e0dd2ad069138f98299f512782afd92a901eda28a125",
+        "input_exact": true,
+        "output_array_sha256": "708af41301fabc12b7cb51313bd7eeeef9216a49731f8cbfdc7c59baa1b0f790",
+        "frozen_output_file_sha256": "5c9b6552623a3a01a7008e4c4ef252b44f105495263e35145f7c99376733e8ef",
+        "output_exact": true,
+        "metrics": {
+          "count": 11010048,
+          "different": 0,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_abs": 0.0
+        }
+      }
+    ],
+    "rss_sample_interval_seconds": 0.05,
+    "rss_phase_peak_bytes": {
+      "constructor": 459554816,
+      "jit_warmup": 476131328,
+      "api": 7480295424,
+      "save": 760336384,
+      "compare": 917495808
+    },
+    "fixed_float_gate": {
+      "rtol": 1e-05,
+      "atol": 0.001,
+      "passes": true,
+      "failed_values": 0
+    },
+    "cpu_elu_explicit_fma": true,
+    "timing_scope": "constructor/JIT/API/save/compare separately; CNN timers nested in API",
+    "constructor_seconds": 0.49010685458779335,
+    "jit_warmup_seconds": 1.3704234939068556,
+    "api_seconds": 19.67688149213791,
+    "retained_network_view_bytes": 176160768,
+    "save_seconds": 1.9814431937411427,
+    "float": {
+      "count": 9072000,
+      "different": 0,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0
+    },
+    "quantized": {
+      "count": 9072000,
+      "different": 0,
+      "max_abs": 0,
+      "mae": 0.0,
+      "affine_exact": true
+    },
+    "output_sha256": {
+      "image.nii.gz": "dff4ef9d658243a500704c141290c636414e7e871e3d6fccf5b2f211a7328922",
+      "image.npz": "fba3de5d788d11a149db26fbda720c8c3d25f69a26cb91083bc33776487e55f3"
+    },
+    "compare_seconds": 1.0751681737601757,
+    "worker_peak_rss_bytes": 7480381440,
+    "status": "complete"
+  },
+  "time_lines": [
+    "User time (seconds): 116.83",
+    "System time (seconds): 21.60",
+    "Percent of CPU this job got: 478%",
+    "Elapsed (wall clock) time (h:mm:ss or m:ss): 0:28.96",
+    "Maximum resident set size (kbytes): 7305060",
+    "Exit status: 0"
+  ]
+}

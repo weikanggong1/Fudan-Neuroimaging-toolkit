@@ -1,0 +1,56 @@
+{
+  "scope": "Read-only pinned primary source audit; upstream C++ retained only in private outputs, no runtime use or redistribution",
+  "reference_commit": "2ce2b6be69f2954ea704e593a5be79c284a3a8c3",
+  "actual_binary_relation": "This pinned samseg source is not asserted as the exact build source/options of the separately bound installed FreeSurfer8.2 binary. Actual optimizer options/trial sequence still require isolated same-state verification.",
+  "sources": {
+    "kvlAtlasMeshDeformationLBFGSOptimizer.cxx": {
+      "url": "https://raw.githubusercontent.com/freesurfer/samseg/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/gems/kvlAtlasMeshDeformationLBFGSOptimizer.cxx",
+      "bytes": 7833,
+      "sha256": "32689e5d24b179222f18fe86884851e7c62509f3918903b5355897b78df11b84"
+    },
+    "kvlAtlasMeshDeformationOptimizer.cxx": {
+      "url": "https://raw.githubusercontent.com/freesurfer/samseg/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/gems/kvlAtlasMeshDeformationOptimizer.cxx",
+      "bytes": 25246,
+      "sha256": "f5df7627d43d6f62e5eaacb12181a54d80efe39916eac8e8bcf27d7cb990fcf2"
+    },
+    "kvlAtlasMeshDeformationLBFGSOptimizer.h": {
+      "url": "https://raw.githubusercontent.com/freesurfer/samseg/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/gems/kvlAtlasMeshDeformationLBFGSOptimizer.h",
+      "bytes": 1755,
+      "sha256": "55ad39bed3395bb3992c6b5418946ce7850562116a12d789104d0119d988d639"
+    }
+  },
+  "fnit_optimizer_sha256": "f25b7251a6b850dc30716308e2a686399c9339cc39d9324c10f19e3046716c89",
+  "confirmed_source_differences": [
+    {
+      "item": "Initial inverse-Hessian scale and first trial",
+      "reference": "gamma=1/max node gradient norm, direction=-gamma*g, alpha starts1; source StartDistance1 is private",
+      "fnit": "H_diag initially1; direction=-g; trial scalar=min(1,0.5/max node direction norm), actual parameters writtenFP32",
+      "reference_lines": "LBFGS26,121,221; Optimizer368"
+    },
+    {
+      "item": "Line-search acceptance",
+      "reference": "sufficient decrease c1=1e-4 AND strong-Wolfe curvature c2=.9; bracket can expand, then zoom",
+      "fnit": "finite cost/gradient, strict decrease and Armijo with1e-4 only; no curvature acceptance condition; at most20 successive half steps",
+      "reference_lines": "LBFGS228-229; Optimizer410-450,501-551"
+    },
+    {
+      "item": "Search displacement bounds",
+      "reference": "base default max50vox and zoom interval stop.05vox; recipe can override base options",
+      "fnit": "max actual per-node displacement.5vox each trial",
+      "reference_lines": "Optimizer28-29,368"
+    },
+    {
+      "item": "Curvature history",
+      "reference": "12pairs default; use scalar alpha*p as s; accept s dot y >1e-10",
+      "fnit": "12pairs; use actual displacement after FP32 write as s; relative1e-12*norm(s)*norm(y) criterion, FP64 persistent state",
+      "reference_lines": "LBFGS28,127-156"
+    },
+    {
+      "item": "Termination",
+      "reference": "base default maximal deformation threshold.05vox checked each step after first; actual recipe options not checked here",
+      "fnit": "fast zero displacement or3 consecutive <=.005vox; synthetic relative-cost threshold1e-6/patience3",
+      "reference_lines": "Optimizer144-157"
+    }
+  ],
+  "conclusion": "Both use limited-memory BFGS direction concepts, but these source definitions are not the same update/search algorithm. This alone does not identify the cause or magnitude of observed final label error."
+}

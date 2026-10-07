@@ -126,6 +126,9 @@ def _sphere_warp(points,from_vertices,faces,to_vertices,device,execution="optimi
 
 
 def _unit3(points):
+    from . import _point_cpu
+    if _point_cpu.enabled(points):
+        return _point_cpu.normalize(points)
     squared=(points[...,0]*points[...,0]+points[...,1]*points[...,1])+points[...,2]*points[...,2]
     norm=torch.sqrt(squared)
     denominator=torch.where(norm>1e-8,norm,torch.ones_like(norm))
@@ -143,7 +146,11 @@ def _triplet_data_weights(prior,faces,patch,points):
     triangles=prior[faces[patch]]
     first,second,third=triangles.unbind(1)
     normal=_normalize(_cross(_normalize(third-first),_normalize(second-first)))
-    projected=points*(_dot(normal,first)/_dot(normal,points))[:,None]
+    from . import _point_cpu
+    numerator,denominator=_dot(normal,first),_dot(normal,points)
+    ratio=(_point_cpu.divide(numerator,denominator) if _point_cpu.enabled(numerator,denominator)
+           else numerator/denominator)
+    projected=points*ratio[:,None]
     return _area_weights(triangles,projected)
 
 

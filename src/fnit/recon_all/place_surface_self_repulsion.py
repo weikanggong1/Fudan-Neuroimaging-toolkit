@@ -75,7 +75,13 @@ def _force(
     weight: float,
 ) -> np.ndarray:
     result = np.zeros_like(xyz)
+    # Mark each vertex's one/two-ring neighbors once per source vertex.
+    # This preserves source-order accumulation while avoiding an O(degree)
+    # scan for every bucket candidate.
+    neighbor_marks = np.full(len(xyz), -1, dtype=np.int32)
     for vertex in range(len(xyz)):
+        for neighbor in range(neighbor_offsets[vertex], neighbor_offsets[vertex + 1]):
+            neighbor_marks[neighbors[neighbor]] = vertex
         if ripped[vertex]:
             continue
         x, y, z = xyz[vertex]
@@ -85,12 +91,7 @@ def _force(
             other = bucket_members[slot]
             if other == vertex or ripped[other]:
                 continue
-            near = False
-            for neighbor in range(neighbor_offsets[vertex], neighbor_offsets[vertex + 1]):
-                if neighbors[neighbor] == other:
-                    near = True
-                    break
-            if near:
+            if neighbor_marks[other] == vertex:
                 continue
             dx = np.float32(x - xyz[other, 0])
             dy = np.float32(y - xyz[other, 1])
@@ -147,7 +148,10 @@ def _energy(
     weight: float,
 ) -> float:
     total = 0.0
+    neighbor_marks = np.full(len(xyz), -1, dtype=np.int32)
     for vertex in range(len(xyz)):
+        for neighbor in range(neighbor_offsets[vertex], neighbor_offsets[vertex + 1]):
+            neighbor_marks[neighbors[neighbor]] = vertex
         if ripped[vertex]:
             continue
         x, y, z = xyz[vertex]
@@ -156,12 +160,7 @@ def _energy(
             other = bucket_members[slot]
             if other == vertex or ripped[other]:
                 continue
-            near = False
-            for neighbor in range(neighbor_offsets[vertex], neighbor_offsets[vertex + 1]):
-                if neighbors[neighbor] == other:
-                    near = True
-                    break
-            if near:
+            if neighbor_marks[other] == vertex:
                 continue
             dx = np.float32(xyz[other, 0] - x)
             dy = np.float32(xyz[other, 1] - y)

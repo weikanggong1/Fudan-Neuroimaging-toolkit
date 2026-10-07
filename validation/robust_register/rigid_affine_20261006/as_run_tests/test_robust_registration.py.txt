@@ -1,0 +1,340 @@
+"""Bounded mathematical contracts; these are not MRI benchmarks."""
+import json
+
+import nibabel as nib
+import numpy as np
+import pytest
+import torch
+
+from fnit.robust_register import _sampling as sample
+from fnit.robust_register import _solver as solver
+from fnit.robust_register.registration import (
+    _compose_native, _header_after_matrix, _isotropic, _native_fields,
+    _native_geometry, _pyramid_limits, _reorient,
+    _sqrt_matrix, robust_register, robust_rigid_affine,
+)
+
+
+@pytest.fixture(autouse=True)
+def cpu_threads():
+    old = torch.get_num_threads()
+    torch.set_num_threads(1)
+    yield
+    torch.set_num_threads(old)
+
+
+def test_filter_axis_edge_replication_and_ordered_derivative():
+    ramp = torch.arange(7).float()[:, None, None].expand(7, 3, 3).clone()
+    filtered = sample.filter_axis(ramp, (1, 2, 3), 0)
+    assert float(filtered[0, 1, 1]) == 3
+    assert float(filtered[-1, 1, 1]) == 35
+    gx, gy, gz, intensity = sample.partials(ramp)
+    assert gx[3, 1, 1] > 0
+    assert abs(float(gy[3, 1, 1])) < 1e-6
+    assert abs(float(gz[3, 1, 1])) < 1e-6
+    assert intensity.dtype == torch.float32
+
+
+def test_centered_spline_odd_axis_discards_last_before_reflection():
+    line = torch.arange(9).float().reshape(9, 1, 1)
+    expected = sample.reduce_axis(line[:8], 0)
+    actual = sample.reduce_axis(line, 0)
+    line[-1] = 1e8
+    assert torch.equal(actual, expected)
+    assert torch.equal(sample.reduce_axis(line, 0), expected)
+    assert actual.shape == (4, 1, 1)
+    assert actual.dtype == torch.float32
+
+
+def test_centered_spline_constant_and_axis_storage():
+    actual = sample.downsample(torch.ones(9, 8, 7))
+    assert actual.shape == (4, 4, 3)
+    # Source truncates its coefficients to printed decimal precision.
+    assert torch.max((actual - 1).abs()) < 1e-5
+    assert actual.dtype == torch.float32
+
+
+@pytest.mark.parametrize("length", (1, 2, 6, 31))
+def test_recursive_cubic_reconstructs_integer_knots(length):
+    values = torch.arange(length).float().reshape(length, 1, 1)
+    coefficients = sample.cubic_coefficients(values)
+    coords = torch.stack((torch.arange(length).float(), torch.zeros(length), torch.zeros(length)))
+    actual = sample._cubic(coefficients, coords, nonnegative=True)
+    torch.testing.assert_close(actual, values[:, 0, 0], atol=2e-6, rtol=1e-6)
+    assert coefficients.dtype == torch.float32
+
+
+def test_half_voxel_support_rint_ties_and_clamped_interpolation():
+    values = (torch.arange(4).float() + 10).reshape(4, 1, 1)
+    x = torch.tensor([-.5001, -.5, -.1, .5, 3.49, 3.5])
+    actual = sample._linear(values, torch.stack((x, x * 0, x * 0)))
+    torch.testing.assert_close(actual, torch.tensor([0, 10, 10, 10.5, 13, 0]), atol=0, rtol=0)
+    # The even final endpoint3 becomes outside at +.5; endpoint2 stays in.
+    short = values[:3]
+    q = torch.tensor([[2.5], [0], [0]])
+    assert sample._linear(short, q).item() == 12
+
+
+def test_float_matrix_sampling_does_not_enable_tf32_or_resample_twice():
+    values = torch.arange(24).float().reshape(2, 3, 4)
+    old = torch.backends.cuda.matmul.allow_tf32
+    actual = sample.resample(values, values.shape, np.eye(4), chunk_size=5)
+    assert torch.equal(values, actual)
+    assert torch.backends.cuda.matmul.allow_tf32 == old
+
+
+def test_even_median_not_lower_middle():
+    assert solver.median_even(torch.tensor([1., 2., 6., 20.])).item() == 4
+    assert solver.median_even(torch.tensor([1., 6., 20.])).item() == 6
+
+
+def test_float_qr_no_normal_equations_and_exact_linear_model():
+    torch.manual_seed(15)
+    design = torch.randn(100, 6)
+    p = torch.tensor([.1, .02, -.4, .001, -.003, .002])
+    actual = solver.robust_regression(design, design @ p)
+    torch.testing.assert_close(actual.parameters, p, atol=2e-7, rtol=2e-6)
+    assert actual.report["normal_equations"] is False
+    assert actual.report["solver"] == "torch_reduced_QR_triangular_solve"
+
+
+def test_sigma_zero_preserves_unit_weights():
+    design = torch.eye(6)
+    actual = solver.robust_regression(design, torch.zeros(6))
+    assert torch.equal(actual.parameters, torch.zeros(6))
+    assert torch.equal(actual.sqrt_weights, torch.ones(6))
+    assert actual.report["iterations"][0]["sigma"] == 0
+
+
+def test_increasing_residual_restores_parameters_and_weights(monkeypatch):
+    calls = []
+    values = iter((torch.tensor([1.]), torch.tensor([10.])))
+
+    def controlled_qr(design, residual, weights):
+        calls.append(weights.clone())
+        return next(values)
+
+    monkeypatch.setattr(solver, "weighted_qr", controlled_qr)
+    b = torch.tensor([1., 2., 3., 4.])
+    result = solver.robust_regression(torch.ones(4, 1), b)
+    assert torch.equal(result.parameters, torch.tensor([1.]))
+    assert torch.equal(result.sqrt_weights, calls[0])
+    assert result.report["selected_iteration"] == 1
+    assert result.report["stop_reason"].startswith("increasing_error")
+
+
+def test_rank_zero_design_has_no_silent_ridge_fallback():
+    with pytest.raises(ValueError, match="rank deficient"):
+        solver.weighted_qr(torch.zeros(10, 6), torch.ones(10), torch.ones(10))
+
+
+@pytest.mark.parametrize("mode,dof", (("rigid", 6), ("affine", 12)))
+def test_analytic_system_orders_z_x_y_and_uses_raw_overlap(mode, dof):
+    values = torch.arange(7*8*9).float().reshape(7, 8, 9) + 1
+    design, residual, report = solver.analytic_system(values, values, mode=mode)
+    assert design.shape == (7*8*9, dof)
+    assert torch.equal(residual, torch.zeros_like(residual))
+    assert report["row_order"] == "z,x,y"
+    # Affine x-column / translation-column = x; y increments first.
+    if mode == "affine":
+        assert design[1, 0] == 0
+        torch.testing.assert_close(design[1, 1], design[1, 3], atol=0, rtol=0)
+
+
+def test_rigid_rotvec_update_is_rotation_and_double_state():
+    p = torch.tensor([.1, -.2, .3, 0, 0, np.pi/4], dtype=torch.float32)
+    matrix = solver.parameters_to_matrix(p, mode="rigid")
+    np.testing.assert_allclose(matrix[:3, :3].T @ matrix[:3, :3], np.eye(3), atol=1e-14)
+    assert matrix.dtype == np.float64
+    np.testing.assert_allclose(matrix[:3, 3], p[:3].numpy(), atol=0, rtol=0)
+
+
+def test_affine_additive_parameter_order_and_distance():
+    p = torch.arange(12).float() * .001
+    matrix = solver.parameters_to_matrix(p, mode="affine")
+    np.testing.assert_array_equal(matrix[:3] - np.eye(4)[:3], p.double().numpy().reshape(3, 4))
+    translated = np.eye(4)
+    translated[0, 3] = .01
+    assert solver.transform_distance(translated, np.eye(4)) == .01
+    scaled = np.eye(4)
+    scaled[0, 0] += .001
+    assert solver.transform_distance(scaled, np.eye(4)) == pytest.approx(np.sqrt(2000)*.001)
+
+
+def test_halfway_schur_and_updated_matrix_composition():
+    m = np.eye(4)
+    m[:3, 3] = (8, -4, 2)
+    half = _sqrt_matrix(m, rigid=True)
+    np.testing.assert_allclose(half @ half, m, atol=1e-14)
+    update = np.eye(4)
+    update[0, 3] = .1
+    inverse_target_half = np.linalg.inv(half @ np.linalg.inv(m))
+    new = (inverse_target_half @ update) @ half
+    assert new[0, 3] == pytest.approx(8.1)
+
+
+def test_source_reorder_preserves_physical_points_and_reflection():
+    values = torch.arange(24).reshape(2, 3, 4).float()
+    source = np.eye(4, dtype=np.float32)
+    source[0, 0] = -1
+    source[0, 3] = 1
+    new, affine, pull, report = _reorient(values, source, np.eye(4))
+    assert torch.equal(new, values.flip(0))
+    np.testing.assert_array_equal(affine, np.eye(4))
+    np.testing.assert_array_equal(source @ pull, affine)
+    assert report["old_axis_destination_signed"] == [-1, 2, 3]
+
+
+@pytest.mark.parametrize("shape,expected", (((32, 50, 60), (0, 0)),
+                                            ((66, 121, 56), (0, 1)),
+                                            ((128, 128, 128), (0, 2))))
+def test_pyramid_strict_greater_than_min_boundary(shape, expected):
+    assert _pyramid_limits(shape, 16, -1) == expected
+
+
+def test_mapmovhdr_keeps_voxels_and_stored_float_geometry(tmp_path):
+    data = np.arange(4*5*6, dtype=np.float32).reshape(4, 5, 6)
+    image = nib.MGHImage(data, np.eye(4))
+    original, _ = _native_geometry(image)
+    ras = np.eye(4)
+    ras[:3, 3] = (.125, -.25, 2)
+    mapped = _header_after_matrix(image, original, ras)
+    np.testing.assert_array_equal(mapped.dataobj, data)
+    path = tmp_path / "mapped.mgz"
+    nib.save(mapped, path)
+    loaded = nib.load(path)
+    np.testing.assert_array_equal(loaded.dataobj, data)
+    np.testing.assert_allclose(loaded.affine, ras @ original, atol=0, rtol=0)
+
+
+def test_actual_noop_API_report_and_dtype_are_json_safe():
+    # Local geometry/serialization contract, not an MRI registration benchmark.
+    image = nib.MGHImage(np.ones((24, 24, 24), np.float32), np.eye(4))
+    result = robust_register(image, image, device="cpu", highres_iterations=0)
+    serialized = json.loads(json.dumps(result.report, allow_nan=False))
+    assert serialized["source_shape"] == [24, 24, 24]
+    assert serialized["stages"][0]["stop"] == "skipped"
+    assert serialized["image_design_QR_dtype"] == "torch.float32"
+    np.testing.assert_array_equal(result.header_image.dataobj, image.dataobj)
+
+
+def test_affine_mapmovhdr_preserves_delta_instead_of_normalizing_columns():
+    image = nib.MGHImage(np.ones((4, 5, 6), np.float32), np.diag([2., 3., 4., 1.]))
+    source, _ = _native_geometry(image)
+    ras = np.eye(4)
+    ras[0, 0], ras[0, 1] = 1.2, .1
+    mapped = _header_after_matrix(image, source, ras)
+    np.testing.assert_array_equal(mapped.header["delta"], image.header["delta"])
+    np.testing.assert_allclose(mapped.affine, sample.native_matmul(ras, source), atol=1e-6, rtol=0)
+    assert not np.allclose(np.linalg.norm(mapped.header["Mdc"], axis=1), np.ones(3))
+
+
+@pytest.mark.parametrize("kwargs", ({"mode": "warp"}, {"iterations_per_level": 0},
+                                   {"stop_distance": 0}, {"tf32": 1}, {"spatial_chunk_size": 0}))
+def test_bad_options_rejected_before_loading(kwargs):
+    with pytest.raises(ValueError):
+        robust_register("must_not_read.nii.gz", "must_not_read.nii.gz", device="cpu", **kwargs)
+
+
+def test_unavailable_cuda_has_no_cpu_fallback(monkeypatch):
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    with pytest.raises(RuntimeError, match="no CPU fallback"):
+        robust_register("must_not_read.nii.gz", "must_not_read.nii.gz", device="cuda:0")
+
+
+def test_two_stage_rejects_mode_before_creating_output(tmp_path):
+    output = tmp_path / "should_not_exist"
+    with pytest.raises(ValueError, match="fixes mode"):
+        robust_rigid_affine(None, None, stage_directory=output, mode="rigid")
+    assert not output.exists()
+
+
+def test_isotropic_carries_stored_center_without_affine_round_trip(monkeypatch):
+    # Deliberately choose cancellation: Float affine -> center is lossy.
+    shape = (5, 7, 9)
+    fields = (np.array([.7, .9, 1.1], np.float32), np.eye(3, dtype=np.float32),
+              np.array([.01234567, -.07654321, .04123456], np.float32))
+    old = _compose_native(shape, *fields)
+    lost = sample.native_matmul(old, np.r_[np.asarray(shape, np.float32)/2, 1][:, None])[:3, 0]
+    assert not np.array_equal(lost, fields[2])
+    calls = []
+
+    def capture_resample(values, output_shape, pull, **options):
+        calls.append((tuple(output_shape), pull.copy(), options))
+        return torch.zeros(tuple(output_shape))
+
+    monkeypatch.setattr("fnit.robust_register.registration.resample", capture_resample)
+    _, actual, _ = _isotropic(torch.zeros(shape), old, np.float32(1), (6, 8, 10), 23, fields=fields)
+    expected = _compose_native((6, 8, 10), np.ones(3, np.float32), fields[1], fields[2])
+    np.testing.assert_array_equal(actual, expected)
+    assert calls[0][2] == {"cubic": True, "chunk_size": 23}
+
+
+def test_native_reorder_rebuilds_float_fields_and_reslice_matrix():
+    source = nib.MGHImage(np.arange(4*5*6).reshape(4, 5, 6).astype(np.float32), np.eye(4))
+    source.header["Mdc"] = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]], np.float32)
+    source.header["delta"] = [1.1, .7, .9]
+    source.header["Pxyz_c"] = [.1234567, -.7654321, .0123456]
+    fields = _native_fields(source)
+    affine, _ = _native_geometry(source)
+    values = torch.from_numpy(np.asarray(source.dataobj))
+    new, new_affine, pull, report = _reorient(values, affine, np.eye(4), source_fields=fields)
+    assert report["old_axis_destination_signed"] == [-2, 1, 3]
+    assert new.shape == (5, 4, 6)
+    np.testing.assert_array_equal(report["stored_geometry"]["delta"], fields[0][[1, 0, 2]])
+    np.testing.assert_array_equal(pull, sample.native_matmul(sample.native_inverse(affine), new_affine))
+    assert torch.equal(new, values.permute(1, 0, 2).flip(1))
+
+
+def test_tukey_uses_double_intermediate_and_float_storage(monkeypatch):
+    b = torch.tensor([0., .3, 1.1, 2.7, 9.3, 50.1])
+    captured = []
+
+    def zero_qr(design, residual, weights):
+        captured.append(weights.clone())
+        return torch.zeros(design.shape[1])
+
+    monkeypatch.setattr(solver, "weighted_qr", zero_qr)
+    solver.robust_regression(torch.ones(6, 1), b, saturation=7.3)
+    center = solver.median_even(b)
+    sigma = np.float32(1.4826) * np.float32(solver.median_even((b-center).abs()))
+    normalized = (b * float(1/float(sigma))).numpy()
+    expected = np.array([0 if abs(float(r)) >= 7.3 else 1-(float(r)/7.3)**2
+                         for r in normalized], np.float32)
+    np.testing.assert_array_equal(captured[0].numpy(), expected)
+
+
+def test_two_stage_reloads_actual_mgh_header_and_writes_ltas(tmp_path, monkeypatch):
+    from fnit._transforms import AffineTransform, load_lta
+    from fnit.robust_register.registration import RobustRegistrationResult
+    image = nib.MGHImage(np.arange(4*5*6).astype(np.float32).reshape(4, 5, 6), np.eye(4))
+    source, _ = _native_geometry(image)
+    modes = []
+
+    def bounded_register(moving, target, *, mode, **options):
+        modes.append(mode)
+        if mode == "affine":
+            assert isinstance(moving.dataobj, nib.arrayproxy.ArrayProxy)
+            np.testing.assert_allclose(moving.header["Pxyz_c"], image.header["Pxyz_c"] + [.125, 0, 0])
+        ras = np.eye(4)
+        ras[0, 3] = .125 if mode == "rigid" else .25
+        geometry, _ = _native_geometry(moving)
+        mapped = _header_after_matrix(moving, geometry, ras)
+        return RobustRegistrationResult(AffineTransform(ras, source=moving, target=target), mapped, {})
+
+    monkeypatch.setattr("fnit.robust_register.registration.robust_register", bounded_register)
+    out = tmp_path / "stages"
+    result = robust_rigid_affine(image, image, stage_directory=out, device="cpu")
+    assert modes == ["rigid", "affine"]
+    assert result["combined_RAS_matrix"][0, 3] == .375
+    np.testing.assert_array_equal(nib.load(out/"affine.header.mgz").dataobj, image.dataobj)
+    for name in ("rigid", "affine"):
+        loaded = load_lta(out/(name+".lta"))
+        np.testing.assert_array_equal(loaded.matrix, result[name].transform.matrix)
+        assert loaded.space == "world"
+
+
+def test_double_stored_image_is_rejected_before_source_type_rescale():
+    image = nib.Nifti1Image(np.ones((24, 24, 24), np.float64), np.eye(4))
+    with pytest.raises(ValueError, match="stored images"):
+        robust_register(image, image, device="cpu")

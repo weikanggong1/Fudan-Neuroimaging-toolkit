@@ -1,0 +1,4560 @@
+{
+  "schema": "fnit.readme.manual.anatomy.audit.v1",
+  "date": "2026-10-05",
+  "method": "AST source/API/CLI parser; frozen public reports; actual local image paths; assets-v1 manifest",
+  "modules": [
+    {
+      "module": "synthstrip",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "32a7d48f49c734523022c7911622631cbf76a743dadc246811a9b9a4f12fb909",
+      "archive": "validation/synthstrip/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/synthstrip/pipeline.py": "af4978d445f3438a82c06de2548918b0dcc049e746eba8190fc50b889f0a5a48",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/synthstrip/pipeline.py",
+          "line": 202,
+          "entry": "SynthStrip.__init__",
+          "signature": "self, weights=None, device='cpu', no_csf=False, threads=None, *, configure_precision=True",
+          "parameters": [
+            {
+              "name": "weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "官方 checkpoint 文件或目录；省略时按显式配置、FNIT_WEIGHTS 和缓存查找"
+            },
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "no_csf",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "自动选择排除 CSF 的模型；显式 PT 文件优先"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "None",
+              "meaning": "PyTorch CPU 线程预算；None 保留当前值，CLI 默认另见下节"
+            },
+            {
+              "name": "configure_precision",
+              "required": false,
+              "type": "bool",
+              "default": "True",
+              "meaning": "CUDA True 配置默认 TF32，False 保留调用方策略；CPU 不改 CUDA 状态"
+            }
+          ],
+          "label": "模型构造",
+          "runtime_signature": "(self, weights=None, device='cpu', no_csf=False, threads=None, *, configure_precision=True)",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/synthstrip/pipeline.py",
+          "line": 232,
+          "entry": "SynthStrip.__call__",
+          "signature": "self, image, border=1, fill=None, *, precision_report=None",
+          "parameters": [
+            {
+              "name": "image",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "输入影像，格式、维数与预处理约束见输入数据格式"
+            },
+            {
+              "name": "border",
+              "required": false,
+              "type": "float",
+              "default": "1",
+              "meaning": "有符号距离场阈值，单位 mm；小于此值视为脑内"
+            },
+            {
+              "name": "fill",
+              "required": false,
+              "type": "float 或 None",
+              "default": "None",
+              "meaning": "视野外或掩膜外填充值；SynthStrip None 为 min(input.min(),0)"
+            },
+            {
+              "name": "precision_report",
+              "required": false,
+              "type": "list[dict] 或 None",
+              "default": "None",
+              "meaning": "可选列表，追加实际前向设备、dtype、TF32 和 autocast 记录"
+            }
+          ],
+          "label": "单次调用",
+          "runtime_signature": "(self, image, border=1, fill=None, *, precision_report=None)",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "synthstrip": [
+          {
+            "flags": [
+              "-i",
+              "--image"
+            ],
+            "keywords": {
+              "required": "True"
+            },
+            "line": 601
+          },
+          {
+            "flags": [
+              "-o",
+              "--out"
+            ],
+            "keywords": {},
+            "line": 602
+          },
+          {
+            "flags": [
+              "-m",
+              "--mask"
+            ],
+            "keywords": {},
+            "line": 603
+          },
+          {
+            "flags": [
+              "-d",
+              "--sdt"
+            ],
+            "keywords": {},
+            "line": 604
+          },
+          {
+            "flags": [
+              "--weights"
+            ],
+            "keywords": {},
+            "line": 605
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'"
+            },
+            "line": 606
+          },
+          {
+            "flags": [
+              "--no-csf"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 607
+          },
+          {
+            "flags": [
+              "-b",
+              "--border"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "1"
+            },
+            "line": 608
+          },
+          {
+            "flags": [
+              "-f",
+              "--fill"
+            ],
+            "keywords": {
+              "type": "float"
+            },
+            "line": 609
+          },
+          {
+            "flags": [
+              "-j",
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "4"
+            },
+            "line": 610
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu/strip_sr_20261004/reports/synthstrip_cpu_cli.public.json",
+          "exists": true,
+          "sha256": "6617d534fadc31575ad9d80329b118f9b1a994021ab822534a3397978c78eb6f",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu/strip_sr_20261004/in_memory_20261004/report.public.json",
+          "exists": true,
+          "sha256": "5d3766da7df0892abcbf0f3bdd3bd27070075e84d266817c51f3bf245f75ddba",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthstrip.1.pt",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt",
+          "size": 30851709,
+          "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt",
+          "license": "CC BY 4.0"
+        },
+        {
+          "name": "synthstrip.nocsf.1.pt",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.nocsf.1.pt",
+          "size": 30851709,
+          "sha256": "62bf01137c45b5f0cc04d59dbaed5b9ac138b3f25b766c062a7c1a0d696ecb28",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.nocsf.1.pt",
+          "license": "CC BY 4.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "figures/synthstrip_cpu_header_alignment.png",
+          "exists": true,
+          "sha256": "685513a34d6a813b8b6b9d8c07d77cc4041c66b808d8d7196124700a49b5ccc2"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "python-api",
+        "单次调用与结果",
+        "命令行",
+        "权重与-cpugpu-分工",
+        "源码组织",
+        "网络",
+        "每帧处理",
+        "功能差异与验证",
+        "2026-10-04cpu-对照与原始-nifti-几何问题",
+        "默认完全物化-spatialimage-apiv5-冻结",
+        "既有-gpu-完整三维对照cfb7beee",
+        "跨进程卷积选择修复",
+        "冻结版本的几何与原程序对照",
+        "模板空间脑提取示例",
+        "准备同一输入的两组脑图掩膜以及只使用一次的原配准场",
+        "用本包-cpu-采样两组结果保存模板-png匿名统计和私有中间图",
+        "测试与复现",
+        "检查-synthstrip-几何公开接口和默认-tf32-设置",
+        "在装有官方-surfa-的验证环境中对同一真实输入和权重比较几何及回采样",
+        "该验证脚本使用-fnit-推理不从生产接口启动-freesurfer",
+        "最近版本更新与-benchmark",
+        "reference"
+      ],
+      "readme_lines": 203,
+      "benchmark_fraction_lines": 0.1330049261083744,
+      "cli_help": {
+        "synthstrip": {
+          "returncode": 0,
+          "stdout_sha256": "33d8867260ad1aa2d36d2961b71d745ffe6af0e11f585bdf63d827dd5f299e9c",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "synthstrip",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 1,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "2b9c00f98b7a4c0cf3eb52a3959108961b99117811a8e884f81dd3fa590f3bb6",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds003138 v1.0.1 / additional recorded real MRI and CT cases",
+        "original_software": "FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 50,
+      "archive_sha256": "c6554c3d9551179cbecbb985f655e6333efbcea1703d0af61e12516c8b41d11e",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "synthseg",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "546732ac845cb04e13d2e2b924149864cf8c2f774dbe2d67f6b9d9182e529e54",
+      "archive": "validation/synthseg/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/synthseg_parc/synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/synthseg_parc/synthseg.py",
+          "line": 105,
+          "entry": "SynthSeg.__init__",
+          "signature": "self, weights: str | Path | None=None, device: str='cpu', threads: int | None=None, *, cudnn_tf32: bool | None=True",
+          "parameters": [
+            {
+              "name": "weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "官方 checkpoint 文件或目录；省略时按显式配置、FNIT_WEIGHTS 和缓存查找"
+            },
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "None",
+              "meaning": "PyTorch CPU 线程预算；None 保留当前值，CLI 默认另见下节"
+            },
+            {
+              "name": "cudnn_tf32",
+              "required": false,
+              "type": "bool 或 None",
+              "default": "True",
+              "meaning": "该模型前向的 cuDNN TF32：True 开启、False 关闭、None 沿用；恢复调用方设置"
+            }
+          ],
+          "label": "模型构造",
+          "runtime_signature": "(self, weights: 'str | Path | None' = None, device: 'str' = 'cpu', threads: 'int | None' = None, *, cudnn_tf32: 'bool | None' = True)",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/synthseg_parc/synthseg.py",
+          "line": 138,
+          "entry": "SynthSeg.__call__",
+          "signature": "self, image: str | Path | nib.spatialimages.SpatialImage, *, keep_geometry: bool=False, color_lut: str | Path | None=None",
+          "parameters": [
+            {
+              "name": "image",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "输入影像，格式、维数与预处理约束见输入数据格式"
+            },
+            {
+              "name": "keep_geometry",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "标签以最近邻重采样回输入 shape 和 affine"
+            },
+            {
+              "name": "color_lut",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "用户提供的 FreeSurfer 编号/名称/RGBA 文本色表；None 不附加"
+            }
+          ],
+          "label": "单次调用",
+          "runtime_signature": "(self, image: 'str | Path | nib.spatialimages.SpatialImage', *, keep_geometry: 'bool' = False, color_lut: 'str | Path | None' = None) -> 'SynthSegResult'",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "synthseg": [
+          {
+            "flags": [
+              "--i",
+              "-i"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'single 3D T1 image'"
+            },
+            "line": 650
+          },
+          {
+            "flags": [
+              "--o",
+              "-o"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'segmentation image'"
+            },
+            "line": 651
+          },
+          {
+            "flags": [
+              "--csv-vols",
+              "--csv_vols"
+            ],
+            "keywords": {
+              "help": "'FreeSurfer-style soft volumes CSV'"
+            },
+            "line": 652
+          },
+          {
+            "flags": [
+              "--weights"
+            ],
+            "keywords": {
+              "help": "'official SynthSeg 2.0 H5 or containing directory'"
+            },
+            "line": 654
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'"
+            },
+            "line": 655
+          },
+          {
+            "flags": [
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "4"
+            },
+            "line": 656
+          },
+          {
+            "flags": [
+              "--keep-geometry"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'resample labels back to the input image grid'"
+            },
+            "line": 657
+          },
+          {
+            "flags": [
+              "--color-lut"
+            ],
+            "keywords": {
+              "help": "'optional FreeSurfer color lookup table'"
+            },
+            "line": 659
+          },
+          {
+            "flags": [
+              "--parc"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'SynthSeg 2.0 cortical parcellation'"
+            },
+            "line": 660
+          },
+          {
+            "flags": [
+              "--fast"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'SynthSeg --parc fast mode; requires --parc'"
+            },
+            "line": 661
+          },
+          {
+            "flags": [
+              "--parc-weights"
+            ],
+            "keywords": {
+              "help": "'official synthseg_parc_2.0.h5 or directory'"
+            },
+            "line": 663
+          },
+          {
+            "flags": [
+              "--parc-out"
+            ],
+            "keywords": {
+              "help": "'optional cortex-only parcel image'"
+            },
+            "line": 664
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu_20261004/t2_seg/README.md",
+          "exists": true,
+          "sha256": "9ab571cff4fbfb6bf854df0a0e22303d3b40d34f50eebbb251a91ca1dcfb322a",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu_20261004/t2_seg/keep_geometry.public.json",
+          "exists": true,
+          "sha256": "7f3f18cb2c73290ed41fb1eb01980206624544c9cd7c9e88000f3ff52383eab9",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthseg_2.0.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5",
+          "size": 53079152,
+          "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_segmentation_labels_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy",
+          "size": 348,
+          "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_segmentation_names_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy",
+          "size": 7168,
+          "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_topological_classes_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy",
+          "size": 348,
+          "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "figures/synthseg_comparison.png",
+          "exists": true,
+          "sha256": "fcb294c098896514303136e9daea223c5f78a4324981b492fa56ad9d68377971"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "下载模型",
+        "python-api",
+        "recon-all-集成发现的精度设置覆盖",
+        "原版命令与参数对应",
+        "命令行",
+        "与-freesurfer-82-的既有独立对照",
+        "2026-10-04-cpu-优化与回归",
+        "reference"
+      ],
+      "readme_lines": 205,
+      "benchmark_fraction_lines": 0.11219512195121951,
+      "cli_help": {
+        "synthseg": {
+          "returncode": 0,
+          "stdout_sha256": "aab3570841c603d7b14e96cc68e13806e8edf047b3d65d9fe40b5513761a195c",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "synthseg",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 1,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "3f1cca977974fc82978344f09df5ddd90c01f4b763af95b9fa5dd9c3d01b48f7",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds003138 v1.0.1 / additional recorded real MRI and CT cases",
+        "original_software": "FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 30,
+      "archive_sha256": "bbce3ba039b10b0b2db71203f92f3f6bdb0872046cb45a7a85a4fd77b92625bf",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "synthseg_plus",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "fa8af23d2f5740dc23fdefb7f7b16aa01b44ebf2ef1301c620ffbab053b3f6e8",
+      "archive": "validation/synthseg_plus/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/synthseg_parc/synthseg_plus.py": "b49cfbc26f4733e7b6c8ceffaceb102f0f5a6a57044dfb1a5f4a048b3f14786b",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/synthseg_parc/synthseg_plus.py",
+          "line": 73,
+          "entry": "SynthSegPlus.__init__",
+          "signature": "self, weights: str | Path | None=None, parc_weights: str | Path | None=None, device: str | torch.device='cpu'",
+          "parameters": [
+            {
+              "name": "weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "官方 checkpoint 文件或目录；省略时按显式配置、FNIT_WEIGHTS 和缓存查找"
+            },
+            {
+              "name": "parc_weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "官方皮层分区 H5 文件或目录"
+            },
+            {
+              "name": "device",
+              "required": false,
+              "type": "str 或 torch.device",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            }
+          ],
+          "label": "模型构造",
+          "runtime_signature": "(self, weights: 'str | Path | None' = None, parc_weights: 'str | Path | None' = None, device: 'str | torch.device' = 'cpu')",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/synthseg_parc/synthseg_plus.py",
+          "line": 110,
+          "entry": "SynthSegPlus.__call__",
+          "signature": "self, t1: str | Path, *, keep_geometry: bool=True, fast: bool=False, min_pad: int=128, volumes: bool=False",
+          "parameters": [
+            {
+              "name": "t1",
+              "required": true,
+              "type": "str 或 Path",
+              "default": "—",
+              "meaning": "一幅原始 3D T1w；格式见输入数据格式"
+            },
+            {
+              "name": "keep_geometry",
+              "required": false,
+              "type": "bool",
+              "default": "True",
+              "meaning": "标签以最近邻重采样回输入 shape 和 affine"
+            },
+            {
+              "name": "fast",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "普通 SynthSeg --parc 的快速路径；不代表 robust 模型"
+            },
+            {
+              "name": "min_pad",
+              "required": false,
+              "type": "int",
+              "default": "128",
+              "meaning": "各轴网络输入的最小补零尺寸，单位体素"
+            },
+            {
+              "name": "volumes",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "计算软体积并允许写出 CSV；False 不计算"
+            }
+          ],
+          "label": "单次调用",
+          "runtime_signature": "(self, t1: 'str | Path', *, keep_geometry: 'bool' = True, fast: 'bool' = False, min_pad: 'int' = 128, volumes: 'bool' = False) -> 'SynthSegPlusResult'",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "synthseg": [
+          {
+            "flags": [
+              "--i",
+              "-i"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'single 3D T1 image'"
+            },
+            "line": 650
+          },
+          {
+            "flags": [
+              "--o",
+              "-o"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'segmentation image'"
+            },
+            "line": 651
+          },
+          {
+            "flags": [
+              "--csv-vols",
+              "--csv_vols"
+            ],
+            "keywords": {
+              "help": "'FreeSurfer-style soft volumes CSV'"
+            },
+            "line": 652
+          },
+          {
+            "flags": [
+              "--weights"
+            ],
+            "keywords": {
+              "help": "'official SynthSeg 2.0 H5 or containing directory'"
+            },
+            "line": 654
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'"
+            },
+            "line": 655
+          },
+          {
+            "flags": [
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "4"
+            },
+            "line": 656
+          },
+          {
+            "flags": [
+              "--keep-geometry"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'resample labels back to the input image grid'"
+            },
+            "line": 657
+          },
+          {
+            "flags": [
+              "--color-lut"
+            ],
+            "keywords": {
+              "help": "'optional FreeSurfer color lookup table'"
+            },
+            "line": 659
+          },
+          {
+            "flags": [
+              "--parc"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'SynthSeg 2.0 cortical parcellation'"
+            },
+            "line": 660
+          },
+          {
+            "flags": [
+              "--fast"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'SynthSeg --parc fast mode; requires --parc'"
+            },
+            "line": 661
+          },
+          {
+            "flags": [
+              "--parc-weights"
+            ],
+            "keywords": {
+              "help": "'official synthseg_parc_2.0.h5 or directory'"
+            },
+            "line": 663
+          },
+          {
+            "flags": [
+              "--parc-out"
+            ],
+            "keywords": {
+              "help": "'optional cortex-only parcel image'"
+            },
+            "line": 664
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu_20261004/t2_seg/large_pointwise.public.json",
+          "exists": true,
+          "sha256": "1fd6bb4d86b004d55a99a178d8f2d95433e9ad2c03c8027f1a5e25f771db6b29",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu_20261004/t2_seg/keep_geometry.public.json",
+          "exists": true,
+          "sha256": "7f3f18cb2c73290ed41fb1eb01980206624544c9cd7c9e88000f3ff52383eab9",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthseg_2.0.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5",
+          "size": 53079152,
+          "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_parc_2.0.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/c04/403/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5",
+          "size": 53090840,
+          "sha256": "83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684",
+          "release_manifest_matches": true,
+          "official_url_matches": false,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/p0/0f/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_segmentation_labels_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy",
+          "size": 348,
+          "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_segmentation_names_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy",
+          "size": 7168,
+          "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_topological_classes_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy",
+          "size": 348,
+          "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "../../validation/smri_cpu_20261004/t2_seg/large_pointwise_labels.png",
+          "exists": true,
+          "sha256": "7754268bd664a8e705d9cddd5ef02e4030d004c76c7539b54b34837ad2cb2c3c"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "安装与权重",
+        "python-用法",
+        "命令行与原版",
+        "真实数据对照",
+        "2026-10-04-cpu-功能与-gpu-回归",
+        "此前公开-t1w-单例",
+        "大体积-t1-的-cpu-原生崩溃修复",
+        "reference"
+      ],
+      "readme_lines": 210,
+      "benchmark_fraction_lines": 0.11904761904761904,
+      "cli_help": {
+        "synthseg": {
+          "returncode": 0,
+          "stdout_sha256": "aab3570841c603d7b14e96cc68e13806e8edf047b3d65d9fe40b5513761a195c",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "synthseg",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 1,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "7317868187a9f8c503fc76fb4d914c60a940328b86a82383f4adc928e9589789",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds000114 snapshot 1.0.2",
+        "original_software": "FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 22,
+      "archive_sha256": "49af5a3fccbdc089b1f92b41fb4352dc2772a41238da85fb4c7ec025457052ee",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "synthsr",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "9f5414f12caeeb9d555cc2c4610febc5a7a947a8a6f355ab9e06272c6de60524",
+      "archive": "validation/synthsr/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/synthsr/pipeline.py": "c896d8e2e4a1a214546e6674ce3aacdcf84906d1b2010b5397ec1b076f502943",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/synthsr/pipeline.py",
+          "line": 54,
+          "entry": "SynthSR.__init__",
+          "signature": "self, weights=None, device='cpu', lowfield=False, v1=False, threads=None",
+          "parameters": [
+            {
+              "name": "weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "官方 checkpoint 文件或目录；省略时按显式配置、FNIT_WEIGHTS 和缓存查找"
+            },
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "lowfield",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "选择单输入低场 v2 模型；v1=True 时 v1 优先"
+            },
+            {
+              "name": "v1",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "选择 2021 年通用 v1 权重"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "None",
+              "meaning": "PyTorch CPU 线程预算；None 保留当前值，CLI 默认另见下节"
+            }
+          ],
+          "label": "模型构造",
+          "runtime_signature": "(self, weights=None, device='cpu', lowfield=False, v1=False, threads=None)",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/synthsr/pipeline.py",
+          "line": 68,
+          "entry": "SynthSR.__call__",
+          "signature": "self, image, ct=False, disable_flipping=False, disable_sharpening=False",
+          "parameters": [
+            {
+              "name": "image",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "输入影像，格式、维数与预处理约束见输入数据格式"
+            },
+            {
+              "name": "ct",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "CT 按 Hounsfield 单位处理，截到 0–80"
+            },
+            {
+              "name": "disable_flipping",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "关闭左右翻转测试增强"
+            },
+            {
+              "name": "disable_sharpening",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "关闭输出末端锐化"
+            }
+          ],
+          "label": "单次调用",
+          "runtime_signature": "(self, image, ct=False, disable_flipping=False, disable_sharpening=False)",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "synthsr": [
+          {
+            "flags": [
+              "--i",
+              "-i"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'single input image'"
+            },
+            "line": 687
+          },
+          {
+            "flags": [
+              "--o",
+              "-o"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'output image or directory for this image'"
+            },
+            "line": 688
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'"
+            },
+            "line": 689
+          },
+          {
+            "flags": [
+              "--cpu"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'use CPU, matching the original --cpu'"
+            },
+            "line": 690
+          },
+          {
+            "flags": [
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "1"
+            },
+            "line": 691
+          },
+          {
+            "flags": [
+              "--ct"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 692
+          },
+          {
+            "flags": [
+              "--lowfield"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 693
+          },
+          {
+            "flags": [
+              "--v1"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 694
+          },
+          {
+            "flags": [
+              "--disable_sharpening"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 695
+          },
+          {
+            "flags": [
+              "--disable_flipping"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 696
+          },
+          {
+            "flags": [
+              "--weights",
+              "--model"
+            ],
+            "keywords": {
+              "help": "'official checkpoint file or containing directory'"
+            },
+            "line": 697
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu/strip_sr_20261004/reports/synthsr_cpu_functions.public.json",
+          "exists": true,
+          "sha256": "a007e3a74bbe7e6ed53d1d61945781d2c903a9a2f659fda7ddc3aef2ba7cab37",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu/strip_sr_20261004/reports/synthsr_default_float_gate.public.json",
+          "exists": true,
+          "sha256": "5b9fe76c27c5e811015b48c66cdfdef7992e1610bbb622ef080c898462387efd",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthsr_v20_230130.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/f08/bc9/SHA256E-s106163752--a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b.h5/SHA256E-s106163752--a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b.h5",
+          "size": 106163752,
+          "sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/f08/bc9/SHA256E-s106163752--a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b.h5/SHA256E-s106163752--a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthsr_lowfield_v20_230130.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/de0/799/SHA256E-s106163752--a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84.h5/SHA256E-s106163752--a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84.h5",
+          "size": 106163752,
+          "sha256": "a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/de0/799/SHA256E-s106163752--a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84.h5/SHA256E-s106163752--a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthsr_v10_210712.h5",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/dev/mri_synthsr/synthsr_v10_210712.h5",
+          "size": 53075984,
+          "sha256": "2fd59e96196388360eba95254fb6dfc9eb9eb8638018b590575e47e0a387f255",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/dev/mri_synthsr/synthsr_v10_210712.h5",
+          "license": "FreeSurfer Software License 1.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "figures/synthsr_cpu_comparison.png",
+          "exists": true,
+          "sha256": "25feebcb5e907fbb381d79ac577a0a907f01be80525f8ea59b56eb5138ccb4d7"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "原版指令与模型",
+        "python-输入与输出",
+        "单例命令行",
+        "2026-10-04相同-cpu-资源对照",
+        "默认完全物化-spatialimage-apiv5-冻结",
+        "2026-10-04cpu网络首差定位",
+        "2026-09-27既有-gpu-与-cpu-对照",
+        "该次公开-flair-示意图",
+        "最近版本更新与-benchmark",
+        "reference"
+      ],
+      "readme_lines": 204,
+      "benchmark_fraction_lines": 0.1323529411764706,
+      "cli_help": {
+        "synthsr": {
+          "returncode": 0,
+          "stdout_sha256": "9b3a212aa56290d8d28abcf95f23ca017f923c8e03d026e538f4aa68e31ff10b",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "synthsr",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 1,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "ac02dd6773c5d0bc3df33f5fa090380c510088725cd4c4b297fa8d71d6681aa0",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds003138 v1.0.1 / additional recorded real MRI and CT cases",
+        "original_software": "FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 32,
+      "archive_sha256": "7769eac28c81b8dc07d709bdbb0fb765271abc7c116dd3fa9de3a5f65408116d",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "fast",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "59fb77f8e54ba253ec90b7deee23218005781d1c8ef368c1918e387dcd4f83a0",
+      "archive": "validation/fast/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/fast/pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/fast/pipeline.py",
+          "line": 48,
+          "entry": "TorchFAST.__init__",
+          "signature": "self, device='cpu', threads=None, *, init_iterations=15, bias_iterations=4, fixed_iterations=4, bias_fwhm_mm=20.0, init_mrf=0.02, mrf=0.1, mixel_mrf=0.3, pve_steps=100, mean_field_iterations=5, pve_chunk_size=8, execution='tensor'",
+          "parameters": [
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "None",
+              "meaning": "PyTorch CPU 线程预算；None 保留当前值，CLI 默认另见下节"
+            },
+            {
+              "name": "init_iterations",
+              "required": false,
+              "type": "int",
+              "default": "15",
+              "meaning": "初始 GMM 更新次数；实际初始总数另含 fixed_iterations"
+            },
+            {
+              "name": "bias_iterations",
+              "required": false,
+              "type": "int",
+              "default": "4",
+              "meaning": "组织分割与 bias 联合更新次数"
+            },
+            {
+              "name": "fixed_iterations",
+              "required": false,
+              "type": "int",
+              "default": "4",
+              "meaning": "固定 bias 后的组织更新次数"
+            },
+            {
+              "name": "bias_fwhm_mm",
+              "required": false,
+              "type": "float",
+              "default": "20.0",
+              "meaning": "bias 平滑尺度，mm；0 关闭 bias 更新"
+            },
+            {
+              "name": "init_mrf",
+              "required": false,
+              "type": "float",
+              "default": "0.02",
+              "meaning": "bias 阶段和首轮固定阶段的组织空间权重"
+            },
+            {
+              "name": "mrf",
+              "required": false,
+              "type": "float",
+              "default": "0.1",
+              "meaning": "后续固定阶段的组织空间权重"
+            },
+            {
+              "name": "mixel_mrf",
+              "required": false,
+              "type": "float",
+              "default": "0.3",
+              "meaning": "纯组织/混合类型空间权重"
+            },
+            {
+              "name": "pve_steps",
+              "required": false,
+              "type": "int",
+              "default": "100",
+              "meaning": "最终 PVE 比例网格步数；默认100"
+            },
+            {
+              "name": "mean_field_iterations",
+              "required": false,
+              "type": "int",
+              "default": "5",
+              "meaning": "每个 HMRF 外循环扫描遍数；原版默认5"
+            },
+            {
+              "name": "pve_chunk_size",
+              "required": false,
+              "type": "int",
+              "default": "8",
+              "meaning": "tensor/CUDA PVE 候选分块大小；CPU原序路径不由此改变分块"
+            },
+            {
+              "name": "execution",
+              "required": false,
+              "type": "str",
+              "default": "'tensor'",
+              "meaning": "tensor 同步更新；fsl 保留 FAST4 原位顺序，运行时不调用 FSL"
+            }
+          ],
+          "label": "算法构造",
+          "runtime_signature": "(self, device='cpu', threads=None, *, init_iterations=15, bias_iterations=4, fixed_iterations=4, bias_fwhm_mm=20.0, init_mrf=0.02, mrf=0.1, mixel_mrf=0.3, pve_steps=100, mean_field_iterations=5, pve_chunk_size=8, execution='tensor')",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/fast/pipeline.py",
+          "line": 79,
+          "entry": "TorchFAST.__call__",
+          "signature": "self, image, mask=None",
+          "parameters": [
+            {
+              "name": "image",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "输入影像，格式、维数与预处理约束见输入数据格式"
+            },
+            {
+              "name": "mask",
+              "required": false,
+              "type": "str 或 Path 或 nibabel SpatialImage 或 None",
+              "default": "None",
+              "meaning": "可选同网格脑掩膜，与正输入取交集；None 使用 image>0"
+            }
+          ],
+          "label": "单次调用",
+          "runtime_signature": "(self, image, mask=None)",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "fast": [
+          {
+            "flags": [
+              "-i",
+              "--image"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'brain-extracted, single-channel T1 image'"
+            },
+            "line": 700
+          },
+          {
+            "flags": [
+              "-o",
+              "--output-prefix"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'output basename, matching FSL FAST -o'"
+            },
+            "line": 702
+          },
+          {
+            "flags": [
+              "--mask"
+            ],
+            "keywords": {
+              "help": "'optional mask on the input grid'"
+            },
+            "line": 704
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'"
+            },
+            "line": 705
+          },
+          {
+            "flags": [
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "1"
+            },
+            "line": 706
+          },
+          {
+            "flags": [
+              "-W",
+              "--init-iterations"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "15"
+            },
+            "line": 707
+          },
+          {
+            "flags": [
+              "-I",
+              "--bias-iterations"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "4"
+            },
+            "line": 708
+          },
+          {
+            "flags": [
+              "-O",
+              "--fixed-iterations"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "4"
+            },
+            "line": 709
+          },
+          {
+            "flags": [
+              "-l",
+              "--bias-fwhm-mm"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "20.0"
+            },
+            "line": 710
+          },
+          {
+            "flags": [
+              "-f",
+              "--init-mrf"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "0.02"
+            },
+            "line": 711
+          },
+          {
+            "flags": [
+              "-H",
+              "--mrf"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "0.1"
+            },
+            "line": 712
+          },
+          {
+            "flags": [
+              "-R",
+              "--mixel-mrf"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "0.3"
+            },
+            "line": 713
+          },
+          {
+            "flags": [
+              "--pve-steps"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "100"
+            },
+            "line": 714
+          },
+          {
+            "flags": [
+              "--execution"
+            ],
+            "keywords": {
+              "choices": "('tensor', 'fsl')",
+              "default": "'tensor'",
+              "help": "'tensor 同步更新；fsl 保留原 FAST 顺序更新'"
+            },
+            "line": 715
+          },
+          {
+            "flags": [
+              "-N",
+              "--no-bias"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 717
+          },
+          {
+            "flags": [
+              "-b",
+              "--save-bias"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 718
+          },
+          {
+            "flags": [
+              "-B",
+              "--save-restored"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 719
+          },
+          {
+            "flags": [
+              "--overwrite"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 720
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu/fast_fixes_20261004/results/report.json",
+          "exists": true,
+          "sha256": "18066aa33bba0c820cb8e2091545a93b453845c73f3e8b64627b629727c9cade",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [],
+      "figures": [
+        {
+          "link": "../../validation/smri_cpu/fast_fixes_20261004/results/gm_pve_match.png",
+          "exists": true,
+          "sha256": "5fcd17af1e25354a5714d601bfb43080802430c154d866d236bcac6537a36216"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "单被试-python-调用",
+        "单被试命令行",
+        "输入输出合同",
+        "参数",
+        "本轮修复",
+        "2026-10-04-最新-cpu-精度修复与-gpu-回归",
+        "最近版本记录",
+        "既有官方精度-benchmark不同输入与环境",
+        "张量接口与代码结构",
+        "原实现与文献"
+      ],
+      "readme_lines": 202,
+      "benchmark_fraction_lines": 0.13366336633663367,
+      "cli_help": {
+        "fast": {
+          "returncode": 0,
+          "stdout_sha256": "00d06e6921b62c5583c0df5ffeb8d350d351b5a5bc2b6ecb0f99b873761aeda1",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "fast",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 1,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "0feda6b57e5393367908bfc3ff9d97cc1309dba49b3193eed5f3ae8db7d8a0f3",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds003138 v1.0.1 / additional recorded real MRI and CT cases",
+        "original_software": "FSL 6.0.7.4",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 23,
+      "archive_sha256": "f55e3dd718a6e045b57379d21fdc288623a22c88a1e2b1ec8e327eeadb397037",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "wmh_synthseg",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "c62db8ba00a2ed57307eb4686d41cb8b884870d9cbab138f765619b7dcaa7c61",
+      "archive": "validation/wmh_synthseg/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/wmh_synthseg/pipeline.py": "b0cfe39ee0c1fc2a070cdba90265e9b6fbc4f652b484ed7b9db307c5a9fc3643",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/wmh_synthseg/pipeline.py",
+          "line": 69,
+          "entry": "WMHSynthSeg.__init__",
+          "signature": "self, weights=None, device='cpu', threads=None",
+          "parameters": [
+            {
+              "name": "weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "官方 checkpoint 文件或目录；省略时按显式配置、FNIT_WEIGHTS 和缓存查找"
+            },
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "None",
+              "meaning": "PyTorch CPU 线程预算；None 保留当前值，CLI 默认另见下节"
+            }
+          ],
+          "label": "模型构造",
+          "runtime_signature": "(self, weights=None, device='cpu', threads=None)",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/wmh_synthseg/pipeline.py",
+          "line": 92,
+          "entry": "WMHSynthSeg.__call__",
+          "signature": "self, image, crop=False, save_lesion_probabilities=False",
+          "parameters": [
+            {
+              "name": "image",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "输入影像，格式、维数与预处理约束见输入数据格式"
+            },
+            {
+              "name": "crop",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "两遍定位并限制正式推理视野；20 GB GPU 配置显式设 True"
+            },
+            {
+              "name": "save_lesion_probabilities",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "另返回/保存 WMH 标签77的后验概率图"
+            }
+          ],
+          "label": "单次调用",
+          "runtime_signature": "(self, image, crop=False, save_lesion_probabilities=False)",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "wmh-synthseg": [
+          {
+            "flags": [
+              "--i",
+              "-i"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'single 3D input image'"
+            },
+            "line": 641
+          },
+          {
+            "flags": [
+              "--o",
+              "-o"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'segmentation image'"
+            },
+            "line": 642
+          },
+          {
+            "flags": [
+              "--csv_vols",
+              "--csv-vols"
+            ],
+            "keywords": {},
+            "line": 643
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'"
+            },
+            "line": 644
+          },
+          {
+            "flags": [
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "1"
+            },
+            "line": 645
+          },
+          {
+            "flags": [
+              "--crop"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 646
+          },
+          {
+            "flags": [
+              "--save_lesion_probabilities",
+              "--save-lesion-probabilities"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 647
+          },
+          {
+            "flags": [
+              "--weights"
+            ],
+            "keywords": {
+              "help": "'official checkpoint file or containing directory'"
+            },
+            "line": 648
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu/synth_fixes_20261004/reports/wmh_cpu_node7_abba.public.json",
+          "exists": true,
+          "sha256": "f08eee20809f6610a5ab68b587ee28133d89771ecc3417f5639e89a9d8b156c9",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu/synth_fixes_20261004/reports/wmh_final_gpu_acceptance.public.json",
+          "exists": true,
+          "sha256": "e170ce91c8088a46ea61bdaa1ca547d5536af1c55643ccf74b022a7c7860d830",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "WMH-SynthSeg_v10_231110.pth",
+          "official_url": "https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist/WMH-SynthSeg/WMH-SynthSeg_v10_231110.pth",
+          "size": 790531383,
+          "sha256": "0ece39dd651357aa95222fc4d45fa32d00f11e763d2583cae3f869989ce35988",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist/WMH-SynthSeg/WMH-SynthSeg_v10_231110.pth",
+          "license": "FreeSurfer Software License 1.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "../../validation/smri_cpu_20261004/t2_seg/wmh_raw_flair_labels.png",
+          "exists": true,
+          "sha256": "77b5740fc73291f309b68a805df1b22f4f384abb1ac0cfa90729f903c0c4274a"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "原版源码流程与输出几何",
+        "本包单例-python-与命令行",
+        "真实数据验证与更新记录",
+        "2026-10-04生命周期修复与完整-gpu-裁剪回归",
+        "2026-10-04-cpu-对照",
+        "2026-09-27-历史验证",
+        "原版与当前实现示意图",
+        "reference"
+      ],
+      "readme_lines": 205,
+      "benchmark_fraction_lines": 0.13170731707317074,
+      "cli_help": {
+        "wmh-synthseg": {
+          "returncode": 0,
+          "stdout_sha256": "b82e81e4e29bfd504fb90c1b87d7d18530ef6d1f34726ec14ed78c542d8eb5d3",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "wmh-synthseg",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 2,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "57ead8189942c9c8675941a64883d90e2728204afe8bc11d7d781ba562c4d16a",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds003138 v1.0.1 / additional recorded real MRI and CT cases",
+        "original_software": "FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 21,
+      "archive_sha256": "f9d99b16129c6139bba4542d82c5341c544715228fb0a4d22757d73eacdeab8b",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "synthmorph",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "b9298499f549eb7184e1e4d98396b129a1efde0ff793afbd4550f1ddcfcc5178",
+      "archive": "validation/synthmorph/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/synthmorph/pipeline.py": "75044d4484b0c5a73efe31949ae609e5920b514583d1ee067ee440ff4cbc1bfc",
+        "src/fnit/synthmorph/fsl_warp.py": "61177712062c536ec31e7e6985d1f7801c8992a1775312a74d058d8dd7124dd4",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/synthmorph/pipeline.py",
+          "line": 290,
+          "entry": "SynthMorph.__init__",
+          "signature": "self, weights=None, device='cpu', model='joint', extent=256, hyper=0.5, steps=7, configure_precision=True",
+          "parameters": [
+            {
+              "name": "weights",
+              "required": false,
+              "type": "str 或 Path 或 dict[str, 路径] 或 None",
+              "default": "None",
+              "meaning": "官方 checkpoint 文件或目录；省略时按显式配置、FNIT_WEIGHTS 和缓存查找"
+            },
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "model",
+              "required": false,
+              "type": "str",
+              "default": "'joint'",
+              "meaning": "joint、deform、affine 或 rigid 配准模型"
+            },
+            {
+              "name": "extent",
+              "required": false,
+              "type": "int",
+              "default": "256",
+              "meaning": "网络网格每轴体素数，192 或 256"
+            },
+            {
+              "name": "hyper",
+              "required": false,
+              "type": "float",
+              "default": "0.5",
+              "meaning": "非线性正则化参数，0 < hyper < 1；需重建实例改变"
+            },
+            {
+              "name": "steps",
+              "required": false,
+              "type": "int",
+              "default": "7",
+              "meaning": "stationary velocity scaling-and-squaring次数，至少5"
+            },
+            {
+              "name": "configure_precision",
+              "required": false,
+              "type": "bool",
+              "default": "True",
+              "meaning": "CUDA True 配置默认 TF32，False 保留调用方策略；CPU 不改 CUDA 状态"
+            }
+          ],
+          "label": "模型构造",
+          "runtime_signature": "(self, weights=None, device='cpu', model='joint', extent=256, hyper=0.5, steps=7, configure_precision=True)",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/synthmorph/pipeline.py",
+          "line": 335,
+          "entry": "SynthMorph.__call__",
+          "signature": "self, moving, fixed, init=None, mid_space=False, header_only=False, output_dir=None, transform_only=False, compute_inverse=True, precision_report=None",
+          "parameters": [
+            {
+              "name": "moving",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "单幅待配准 3D 图像，路径或 nibabel 空间影像"
+            },
+            {
+              "name": "fixed",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "目标 3D 图像；决定 forward 输出网格"
+            },
+            {
+              "name": "init",
+              "required": false,
+              "type": "str 或 Path 或 AffineTransform 或 4×4 ndarray 或 None",
+              "default": "None",
+              "meaning": "可选带source/target几何的LTA或4×4 moving→fixed世界坐标矩阵"
+            },
+            {
+              "name": "mid_space",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "按初始仿射的中间空间初始化；True 必须有 init"
+            },
+            {
+              "name": "header_only",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "rigid/affine 仅改头信息；不适用于非线性模型"
+            },
+            {
+              "name": "output_dir",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "结果或调试文件的目录；具体自动保存范围见输出"
+            },
+            {
+              "name": "transform_only",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "仅生成变换，跳过最终图像采样"
+            },
+            {
+              "name": "compute_inverse",
+              "required": false,
+              "type": "bool",
+              "default": "True",
+              "meaning": "同时计算 inverse；False 时反向结果为空"
+            },
+            {
+              "name": "precision_report",
+              "required": false,
+              "type": "list[dict] 或 None",
+              "default": "None",
+              "meaning": "可选列表，追加实际前向设备、dtype、TF32 和 autocast 记录"
+            }
+          ],
+          "label": "配准调用",
+          "runtime_signature": "(self, moving, fixed, init=None, mid_space=False, header_only=False, output_dir=None, transform_only=False, compute_inverse=True, precision_report=None)",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/synthmorph/pipeline.py",
+          "line": 498,
+          "entry": "apply_transform",
+          "signature": "image, transformation, method='linear', fill=0, dtype='float32', header_only=False, *, device='cpu', frame_chunk_size=None, boundary='grid-constant', output_mask=None, spatial_chunk_size=262144",
+          "parameters": [
+            {
+              "name": "image",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "输入影像，格式、维数与预处理约束见输入数据格式"
+            },
+            {
+              "name": "transformation",
+              "required": true,
+              "type": "str 或 Path 或 SpatialImage 或 AffineTransform 或 DenseWarp 或 WorldTransformChain",
+              "default": "—",
+              "meaning": "带 source/target 几何的 Affine、DenseWarp 或公共 WorldTransformChain"
+            },
+            {
+              "name": "method",
+              "required": false,
+              "type": "str",
+              "default": "'linear'",
+              "meaning": "linear、nearest；World链另支持公共 volume 的 spline/边界合同"
+            },
+            {
+              "name": "fill",
+              "required": false,
+              "type": "float",
+              "default": "0",
+              "meaning": "视野外或掩膜外填充值；SynthStrip None 为 min(input.min(),0)"
+            },
+            {
+              "name": "dtype",
+              "required": false,
+              "type": "str",
+              "default": "'float32'",
+              "meaning": "输出体素dtype；标签应选整数型并用nearest"
+            },
+            {
+              "name": "header_only",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "rigid/affine 仅改头信息；不适用于非线性模型"
+            },
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "frame_chunk_size",
+              "required": false,
+              "type": "int 或 None",
+              "default": "None",
+              "meaning": "正整数帧缓冲上限；None 自动按CPU/显存预算分块"
+            },
+            {
+              "name": "boundary",
+              "required": false,
+              "type": "str",
+              "default": "'grid-constant'",
+              "meaning": "grid-constant 或公共World链支持的边界政策"
+            },
+            {
+              "name": "output_mask",
+              "required": false,
+              "type": "str 或 Path 或 nibabel SpatialImage 或 None",
+              "default": "None",
+              "meaning": "World链可选目标网格mask；普通变换不支持时明确报错"
+            },
+            {
+              "name": "spatial_chunk_size",
+              "required": false,
+              "type": "int",
+              "default": "262144",
+              "meaning": "公共World链每次查询空间点数，正整数；普通变换只接受默认值"
+            }
+          ],
+          "label": "apply_transform参数",
+          "runtime_signature": "(image, transformation, method='linear', fill=0, dtype='float32', header_only=False, *, device='cpu', frame_chunk_size=None, boundary='grid-constant', output_mask=None, spatial_chunk_size=262144)",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/synthmorph/fsl_warp.py",
+          "line": 13,
+          "entry": "convert_warp_to_fsl",
+          "signature": "warp, *, moving, fixed",
+          "parameters": [
+            {
+              "name": "warp",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "fixed网格的 SynthMorph world-RAS pull 位移，形状(X,Y,Z,3)，mm"
+            },
+            {
+              "name": "moving",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "单幅待配准 3D 图像，路径或 nibabel 空间影像"
+            },
+            {
+              "name": "fixed",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "目标 3D 图像；决定 forward 输出网格"
+            }
+          ],
+          "label": "convert_warp_to_fsl参数",
+          "runtime_signature": "(warp, *, moving, fixed)",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "synthmorph": [
+          {
+            "flags": [
+              "moving"
+            ],
+            "keywords": {},
+            "line": 612
+          },
+          {
+            "flags": [
+              "fixed"
+            ],
+            "keywords": {},
+            "line": 613
+          },
+          {
+            "flags": [
+              "-m",
+              "--model"
+            ],
+            "keywords": {
+              "choices": "('joint', 'deform', 'affine', 'rigid')",
+              "default": "'joint'"
+            },
+            "line": 614
+          },
+          {
+            "flags": [
+              "--weights"
+            ],
+            "keywords": {
+              "help": "'directory containing official checkpoint files'"
+            },
+            "line": 615
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'"
+            },
+            "line": 616
+          },
+          {
+            "flags": [
+              "-o",
+              "--out-moving"
+            ],
+            "keywords": {},
+            "line": 617
+          },
+          {
+            "flags": [
+              "-O",
+              "--out-fixed"
+            ],
+            "keywords": {},
+            "line": 618
+          },
+          {
+            "flags": [
+              "-t",
+              "--trans"
+            ],
+            "keywords": {},
+            "line": 619
+          },
+          {
+            "flags": [
+              "-T",
+              "--inverse"
+            ],
+            "keywords": {},
+            "line": 620
+          },
+          {
+            "flags": [
+              "--fsl-warp"
+            ],
+            "keywords": {
+              "help": "'moving-to-fixed FSL intent-2006 dense warp'"
+            },
+            "line": 621
+          },
+          {
+            "flags": [
+              "-i",
+              "--init"
+            ],
+            "keywords": {},
+            "line": 622
+          },
+          {
+            "flags": [
+              "-M",
+              "--mid-space"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 623
+          },
+          {
+            "flags": [
+              "-H",
+              "--header-only"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 624
+          },
+          {
+            "flags": [
+              "-e",
+              "--extent"
+            ],
+            "keywords": {
+              "choices": "(192, 256)",
+              "type": "int",
+              "default": "256"
+            },
+            "line": 625
+          },
+          {
+            "flags": [
+              "-r",
+              "--hyper"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "0.5"
+            },
+            "line": 626
+          },
+          {
+            "flags": [
+              "-n",
+              "--steps"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "7"
+            },
+            "line": 627
+          },
+          {
+            "flags": [
+              "-j",
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "4"
+            },
+            "line": 628
+          },
+          {
+            "flags": [
+              "-d",
+              "--output-dir"
+            ],
+            "keywords": {},
+            "line": 629
+          }
+        ],
+        "apply": [
+          {
+            "flags": [
+              "transform"
+            ],
+            "keywords": {},
+            "line": 631
+          },
+          {
+            "flags": [
+              "image"
+            ],
+            "keywords": {},
+            "line": 632
+          },
+          {
+            "flags": [
+              "output"
+            ],
+            "keywords": {},
+            "line": 633
+          },
+          {
+            "flags": [
+              "-m",
+              "--method"
+            ],
+            "keywords": {
+              "choices": "('linear', 'nearest')",
+              "default": "'linear'"
+            },
+            "line": 634
+          },
+          {
+            "flags": [
+              "-f",
+              "--fill"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "0"
+            },
+            "line": 635
+          },
+          {
+            "flags": [
+              "-t",
+              "--dtype"
+            ],
+            "keywords": {
+              "choices": "('uint8', 'uint16', 'int16', 'int32', 'float32')",
+              "default": "'float32'"
+            },
+            "line": 636
+          },
+          {
+            "flags": [
+              "-H",
+              "--header-only"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 637
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'",
+              "help": "'CPU or CUDA sampler; coordinates retain CPU rounding'"
+            },
+            "line": 638
+          },
+          {
+            "flags": [
+              "--frame-chunk-size"
+            ],
+            "keywords": {
+              "type": "int",
+              "help": "'positive frame-buffer limit; auto if omitted'"
+            },
+            "line": 639
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/synthmorph/cpu_fixes_20261004/report.public.json",
+          "exists": true,
+          "sha256": "ac42e2cafc6c1689f390ca4cb3e7231c8bb65b4aa610580603a270fbfaabff3e",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthmorph.rigid.1.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.rigid.1.h5",
+          "size": 51656152,
+          "sha256": "284c145fce47e98ecf3fdeda2163f646ac3ebb0240e87dd50d71d879f4d5b3af",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.rigid.1.h5",
+          "license": "CC BY 4.0"
+        },
+        {
+          "name": "synthmorph.affine.2.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.affine.2.h5",
+          "size": 51455312,
+          "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.affine.2.h5",
+          "license": "CC BY 4.0"
+        },
+        {
+          "name": "synthmorph.deform.3.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5",
+          "size": 3508630424,
+          "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5",
+          "license": "CC BY 4.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "../../validation/synthmorph/cpu_fixes_20261004/figures/cpu_official_brains.png",
+          "exists": true,
+          "sha256": "2a5a43d39d436c271f6166d1a4d118a4d5435f99a141a0bf5f97d95123386f5e"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "2-python-调用输入与输出",
+        "配准调用与结果",
+        "应用已有变换",
+        "4d-影像示例",
+        "固定场bbr与逐帧运动的一次采样",
+        "此处文件是已经转换好的world-ras-bbr不能直接传flirt-scaled-mm-mat",
+        "转成-fsl-warp-并应用",
+        "权重与执行位置",
+        "moving_4d需与原moving具有相同采样几何",
+        "省略--frame-chunk-size变化帧缓冲最多8-gib并检查已驻留坐标后的剩余20-gb预算",
+        "若显式指定--frame-chunk-size-8每次最多8帧同样检查剩余额度",
+        "5-精度运行时间与脑图",
+        "51-当前-cpu-续修对照2026-10-04",
+        "511-已归档-cpu-初轮官方对照2026-10-04",
+        "公共world变换链的验证范围",
+        "52-已归档-4d-数据流优化2026-10-02",
+        "53-已归档-joint-配准2026-09-27",
+        "54-已归档-fsl-warp-转换真实-t1w",
+        "6-最近更新与-benchmark-记录",
+        "7-参考文献与原实现"
+      ],
+      "readme_lines": 306,
+      "benchmark_fraction_lines": 0.08823529411764706,
+      "cli_help": {
+        "synthmorph": {
+          "returncode": 0,
+          "stdout_sha256": "69d6f7783e72ec8eb4d934adbc6ce713056d3d78a2ad31152c3ecdbcc302ff9f",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "synthmorph",
+            "--help"
+          ]
+        },
+        "apply": {
+          "returncode": 0,
+          "stdout_sha256": "524c8f4e1405773c866156e5a739fa0643d080fee49abe1a794c3c1d77bc8151",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "apply",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 1,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "1ce18cec1abbe56f075160f58bde6d21fef9628e81fc314a806841b58b5fa6a5",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds003138 v1.0.1 / additional recorded real MRI and CT cases",
+        "original_software": "FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 68,
+      "archive_sha256": "de182ecff4bfda7437e9bf25bde477c5e0149a63dd50989d5fd1d433fb9e112c",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "fast_vbm",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "8e62a839e171313369addeaa99f4f237da596993831dd1409520a44a7716630d",
+      "archive": "validation/fast_vbm/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/fast_vbm/pipeline.py": "6fbef2de2698c3c61d56034d8a2cb91f6c29a91e8048dcde292f23171979ad2a",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/fast_vbm/pipeline.py",
+          "line": 229,
+          "entry": "FastVBM.__init__",
+          "signature": "self, *, device='cpu', threads=None, synthstrip_weights=None, synthmorph_weights=None, bias_correction=True, fast_execution='tensor', synthmorph_extent=256, synthmorph_hyper=0.5, synthmorph_steps=7, registration_backend='synthmorph', fnirt_strides=(4, 2, 1, 1), fnirt_steps=(5, 5, 10, 5), fnirt_input_fwhm_mm=(6.0, 4.0, 2.0, 2.0), fnirt_reference_fwhm_mm=(4.0, 2.0, 0.0, 0.0), fnirt_warp_resolution_mm=10.0, fnirt_regularization=(150.0, 75.0, 50.0, 30.0)",
+          "parameters": [
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "None",
+              "meaning": "PyTorch CPU 线程预算；None 保留当前值，CLI 默认另见下节"
+            },
+            {
+              "name": "synthstrip_weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "SynthStrip PT 文件或目录；仅未提供 brain_mask 时使用"
+            },
+            {
+              "name": "synthmorph_weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "SynthMorph deform H5 文件或目录；仅 synthmorph 后端使用"
+            },
+            {
+              "name": "bias_correction",
+              "required": false,
+              "type": "bool",
+              "default": "True",
+              "meaning": "启用FAST偏置校正；False将bias_fwhm_mm设0"
+            },
+            {
+              "name": "fast_execution",
+              "required": false,
+              "type": "str",
+              "default": "'tensor'",
+              "meaning": "FAST 更新模式：tensor 或内部原序 fsl"
+            },
+            {
+              "name": "synthmorph_extent",
+              "required": false,
+              "type": "int",
+              "default": "256",
+              "meaning": "SynthMorph 网络尺寸，192 或256"
+            },
+            {
+              "name": "synthmorph_hyper",
+              "required": false,
+              "type": "float",
+              "default": "0.5",
+              "meaning": "SynthMorph 正则化，严格0<hyper<1"
+            },
+            {
+              "name": "synthmorph_steps",
+              "required": false,
+              "type": "int",
+              "default": "7",
+              "meaning": "SynthMorph 速度场积分步数，至少5"
+            },
+            {
+              "name": "registration_backend",
+              "required": false,
+              "type": "str",
+              "default": "'synthmorph'",
+              "meaning": "非线性估计器：synthmorph 或 fnirt"
+            },
+            {
+              "name": "fnirt_strides",
+              "required": false,
+              "type": "tuple[int, ...]",
+              "default": "(4, 2, 1, 1)",
+              "meaning": "四个分辨率层的体素采样步长"
+            },
+            {
+              "name": "fnirt_steps",
+              "required": false,
+              "type": "tuple[int, ...]",
+              "default": "(5, 5, 10, 5)",
+              "meaning": "四层 Gauss–Newton 最大更新次数"
+            },
+            {
+              "name": "fnirt_input_fwhm_mm",
+              "required": false,
+              "type": "tuple[float, ...]",
+              "default": "(6.0, 4.0, 2.0, 2.0)",
+              "meaning": "四层 moving GM 平滑 FWHM，mm"
+            },
+            {
+              "name": "fnirt_reference_fwhm_mm",
+              "required": false,
+              "type": "tuple[float, ...]",
+              "default": "(4.0, 2.0, 0.0, 0.0)",
+              "meaning": "四层 fixed GM 平滑 FWHM，mm"
+            },
+            {
+              "name": "fnirt_warp_resolution_mm",
+              "required": false,
+              "type": "float",
+              "default": "10.0",
+              "meaning": "FNIRT 三次 B-spline 控制点间距，mm"
+            },
+            {
+              "name": "fnirt_regularization",
+              "required": false,
+              "type": "tuple[float, ...]",
+              "default": "(150.0, 75.0, 50.0, 30.0)",
+              "meaning": "四层 bending-energy 正则化权重"
+            }
+          ],
+          "label": "pipeline构造",
+          "runtime_signature": "(self, *, device='cpu', threads=None, synthstrip_weights=None, synthmorph_weights=None, bias_correction=True, fast_execution='tensor', synthmorph_extent=256, synthmorph_hyper=0.5, synthmorph_steps=7, registration_backend='synthmorph', fnirt_strides=(4, 2, 1, 1), fnirt_steps=(5, 5, 10, 5), fnirt_input_fwhm_mm=(6.0, 4.0, 2.0, 2.0), fnirt_reference_fwhm_mm=(4.0, 2.0, 0.0, 0.0), fnirt_warp_resolution_mm=10.0, fnirt_regularization=(150.0, 75.0, 50.0, 30.0))",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/fast_vbm/pipeline.py",
+          "line": 533,
+          "entry": "FastVBM.run",
+          "signature": "self, image, template, output_dir, *, brain_mask=None, reference_mask=None, overwrite=False",
+          "parameters": [
+            {
+              "name": "image",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "输入影像，格式、维数与预处理约束见输入数据格式"
+            },
+            {
+              "name": "template",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "3D GM 模板；决定标准空间结果 shape、affine 和空间"
+            },
+            {
+              "name": "output_dir",
+              "required": true,
+              "type": "str 或 Path",
+              "default": "—",
+              "meaning": "结果或调试文件的目录；具体自动保存范围见输出"
+            },
+            {
+              "name": "brain_mask",
+              "required": false,
+              "type": "str 或 Path 或 nibabel SpatialImage 或 None",
+              "default": "None",
+              "meaning": "同 T1 网格非空二值掩膜；有值时跳过 SynthStrip"
+            },
+            {
+              "name": "reference_mask",
+              "required": false,
+              "type": "str 或 Path 或 nibabel SpatialImage 或 None",
+              "default": "None",
+              "meaning": "同模板网格非空 mask；FNIRT使用，SynthMorph仅记录"
+            },
+            {
+              "name": "overwrite",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "已有任何同名结果时是否覆盖"
+            }
+          ],
+          "label": "run输入与保存参数",
+          "runtime_signature": "(self, image, template, output_dir, *, brain_mask=None, reference_mask=None, overwrite=False)",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "fast-vbm": [
+          {
+            "flags": [
+              "-i",
+              "--image"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'single-frame raw T1 image'"
+            },
+            "line": 766
+          },
+          {
+            "flags": [
+              "--template"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'GM template defining the output grid'"
+            },
+            "line": 768
+          },
+          {
+            "flags": [
+              "-o",
+              "--output-dir"
+            ],
+            "keywords": {
+              "required": "True"
+            },
+            "line": 770
+          },
+          {
+            "flags": [
+              "--brain-mask"
+            ],
+            "keywords": {
+              "help": "'optional input-grid mask; skips SynthStrip'"
+            },
+            "line": 771
+          },
+          {
+            "flags": [
+              "--reference-mask"
+            ],
+            "keywords": {
+              "help": "'optional template-grid mask recorded by both backends and used by FNIRT; pass the FSL dilated MNI mask for UKB/FSL parity'"
+            },
+            "line": 773
+          },
+          {
+            "flags": [
+              "--synthstrip-weights"
+            ],
+            "keywords": {
+              "help": "'official SynthStrip checkpoint or containing directory'"
+            },
+            "line": 780
+          },
+          {
+            "flags": [
+              "--synthmorph-weights"
+            ],
+            "keywords": {
+              "help": "'official SynthMorph deform checkpoint; used by the synthmorph backend'"
+            },
+            "line": 782
+          },
+          {
+            "flags": [
+              "--registration-backend"
+            ],
+            "keywords": {
+              "choices": "('synthmorph', 'fnirt')",
+              "default": "'synthmorph'",
+              "help": "'nonlinear registration backend'"
+            },
+            "line": 784
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'"
+            },
+            "line": 787
+          },
+          {
+            "flags": [
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int"
+            },
+            "line": 788
+          },
+          {
+            "flags": [
+              "--fast-execution"
+            ],
+            "keywords": {
+              "choices": "('tensor', 'fsl')",
+              "default": "'tensor'",
+              "help": "'FAST tissue update mode; fsl preserves source-ordered scans'"
+            },
+            "line": 789
+          },
+          {
+            "flags": [
+              "--synthmorph-extent"
+            ],
+            "keywords": {
+              "type": "int",
+              "choices": "(192, 256)",
+              "default": "256"
+            },
+            "line": 792
+          },
+          {
+            "flags": [
+              "--synthmorph-hyper"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "0.5"
+            },
+            "line": 794
+          },
+          {
+            "flags": [
+              "--synthmorph-steps"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "7"
+            },
+            "line": 795
+          },
+          {
+            "flags": [
+              "--fnirt-strides"
+            ],
+            "keywords": {
+              "type": "int",
+              "nargs": "4",
+              "default": "(4, 2, 1, 1)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 796
+          },
+          {
+            "flags": [
+              "--fnirt-steps"
+            ],
+            "keywords": {
+              "type": "int",
+              "nargs": "4",
+              "default": "(5, 5, 10, 5)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 799
+          },
+          {
+            "flags": [
+              "--fnirt-input-fwhm-mm"
+            ],
+            "keywords": {
+              "type": "float",
+              "nargs": "4",
+              "default": "(6.0, 4.0, 2.0, 2.0)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 802
+          },
+          {
+            "flags": [
+              "--fnirt-reference-fwhm-mm"
+            ],
+            "keywords": {
+              "type": "float",
+              "nargs": "4",
+              "default": "(4.0, 2.0, 0.0, 0.0)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 805
+          },
+          {
+            "flags": [
+              "--fnirt-warp-resolution-mm"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "10.0"
+            },
+            "line": 808
+          },
+          {
+            "flags": [
+              "--fnirt-regularization"
+            ],
+            "keywords": {
+              "type": "float",
+              "nargs": "4",
+              "default": "(150.0, 75.0, 50.0, 30.0)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 809
+          },
+          {
+            "flags": [
+              "--no-bias"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'disable TorchFAST bias-field correction'"
+            },
+            "line": 812
+          },
+          {
+            "flags": [
+              "--overwrite"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 814
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/final_v4/report.public.json",
+          "exists": true,
+          "sha256": "4e557817d43610d5bd307fd0713aa4d4dc226c76a40c2d0de96463e5564aa4b6",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/report.public.json",
+          "exists": true,
+          "sha256": "967169aee17b90bc2fa3a2fc04fe02da68b5d9806513f6a639483212804e5ae7",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthstrip.1.pt",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt",
+          "size": 30851709,
+          "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt",
+          "license": "CC BY 4.0"
+        },
+        {
+          "name": "synthmorph.deform.3.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5",
+          "size": 3508630424,
+          "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5",
+          "license": "CC BY 4.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/final_v4/figures/standard_vbm.png",
+          "exists": true,
+          "sha256": "1f5b47c9f6c7c135f411f6b00a425070cffcaf83bc5920b5783123170b9394e8"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "1-功能简介与流程",
+        "2-python-调用输入与输出",
+        "输入",
+        "单被试-python-调用",
+        "构造参数",
+        "两个非线性后端",
+        "fnirt-gm-掩膜",
+        "返回值和文件输出",
+        "坐标warp-和-jacobian",
+        "权重和模板",
+        "与-ukb-v15--fsl-vbm-的对应关系",
+        "5-精度运行时间与脑图",
+        "2026-10-04cpu-官方完整链对照",
+        "2026-10-02gpu-fnirt-完整端到端验证",
+        "2026-09-30原始-t1w-到调制-gm-的-fsl-对照",
+        "6-最近版本与-benchmark-记录",
+        "7-参考文献与原实现"
+      ],
+      "readme_lines": 308,
+      "benchmark_fraction_lines": 0.12012987012987013,
+      "cli_help": {
+        "fast-vbm": {
+          "returncode": 0,
+          "stdout_sha256": "aadb52d8a359691145fd0001b9d0b72d7ab9635e9656543274d2ab455a370e75",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "fast-vbm",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 1,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "2a6fd4a3be703adeaed2e6b4e00aa3babdee5539b46efbe81c2526c9f042ce67",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds003138 v1.0.1 / additional recorded real MRI and CT cases",
+        "original_software": "FSL 6.0.7.4 and FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 41,
+      "archive_sha256": "fd9909db998357d63b4fab966a49734388876a2f044af30d4025e1e512293f30",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "recon_all",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "c982f4b66ecf816a84c71141d8286f8499f3a1a6d63ba2fb35a7aa58061a0e12",
+      "archive": "validation/recon_all/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/recon_all/native_free.py": "fd02095d1fee2eca566090117e51f770e5fcc7deef68e47330a121a019bfd301",
+        "src/fnit/recon_all/batch.py": "e39fdc238f1f6962970f4bc1701186a4ae59d44027e05223179839ac0cd2d523",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1",
+        "src/fnit/recon_all/assets.py": "ee03a40b6d4006b8157e9b84d5cf15ff5ded63bb67f8976e968a95c12f4afa41"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "line": 1154,
+          "entry": "run_recon_all_python",
+          "signature": "t1: str | Path, subject_dir: str | Path, weights_dir: str | Path, assets_dir: str | Path, *, device: str='cuda:0', threads: int=4, native_bin_dir: str | Path | None=None, profile_stages: bool=False, cuda_allocator_cache: str='auto', hemisphere_workers: int=1, native_optimizations: str='auto'",
+          "parameters": [
+            {
+              "name": "t1",
+              "required": true,
+              "type": "str 或 Path",
+              "default": "—",
+              "meaning": "一幅原始 3D T1w；格式见输入数据格式"
+            },
+            {
+              "name": "subject_dir",
+              "required": true,
+              "type": "str 或 Path",
+              "default": "—",
+              "meaning": "不存在或为空的单被试重建输出目录"
+            },
+            {
+              "name": "weights_dir",
+              "required": true,
+              "type": "str 或 Path",
+              "default": "—",
+              "meaning": "已通过大小与 SHA-256 校验的模型权重目录"
+            },
+            {
+              "name": "assets_dir",
+              "required": true,
+              "type": "str 或 Path",
+              "default": "—",
+              "meaning": "已校验的模板和图谱目录"
+            },
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cuda:0'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "4",
+              "meaning": "正整数CPU线程预算；具体每阶段并行度及恢复见输入说明"
+            },
+            {
+              "name": "native_bin_dir",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "None 使用当前 Conda bin；也可指定核验过的源码构建目录"
+            },
+            {
+              "name": "profile_stages",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "记录阶段 CUDA 同步等待；生产默认不增加同步"
+            },
+            {
+              "name": "cuda_allocator_cache",
+              "required": false,
+              "type": "str",
+              "default": "'auto'",
+              "meaning": "auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略"
+            },
+            {
+              "name": "hemisphere_workers",
+              "required": false,
+              "type": "int",
+              "default": "1",
+              "meaning": "1串行；2以独立进程运行左右半球，总线程预算平分"
+            },
+            {
+              "name": "native_optimizations",
+              "required": false,
+              "type": "str",
+              "default": "'auto'",
+              "meaning": "auto 按已验证能力选择完整 native 优化；original 固定原程序"
+            }
+          ],
+          "label": "单被试公开入口",
+          "runtime_signature": "(t1: 'str | Path', subject_dir: 'str | Path', weights_dir: 'str | Path', assets_dir: 'str | Path', *, device: 'str' = 'cuda:0', threads: 'int' = 4, native_bin_dir: 'str | Path | None' = None, profile_stages: 'bool' = False, cuda_allocator_cache: 'str' = 'auto', hemisphere_workers: 'int' = 1, native_optimizations: 'str' = 'auto') -> 'dict'",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/recon_all/batch.py",
+          "line": 13,
+          "entry": "run_recon_all_python_batch",
+          "signature": "jobs: list[dict], weights_dir: str | Path, assets_dir: str | Path, *, devices: tuple[str, ...]=('cuda:0',), threads: int=4, native_bin_dir: str | Path | None=None, profile_stages: bool=False, cuda_allocator_cache: str='auto', hemisphere_workers: int=1, native_optimizations: str='auto'",
+          "parameters": [
+            {
+              "name": "jobs",
+              "required": true,
+              "type": "list[dict]",
+              "default": "—",
+              "meaning": "顺序job列表，每项仅含t1路径和subject_dir空目录；目录不得重叠"
+            },
+            {
+              "name": "weights_dir",
+              "required": true,
+              "type": "str 或 Path",
+              "default": "—",
+              "meaning": "已通过大小与 SHA-256 校验的模型权重目录"
+            },
+            {
+              "name": "assets_dir",
+              "required": true,
+              "type": "str 或 Path",
+              "default": "—",
+              "meaning": "已校验的模板和图谱目录"
+            },
+            {
+              "name": "devices",
+              "required": false,
+              "type": "tuple[str, ...]",
+              "default": "('cuda:0',)",
+              "meaning": "互不重复的cpu/cuda:N设备tuple，每个设备一次一例，启动独立子进程"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "4",
+              "meaning": "正整数CPU线程预算；具体每阶段并行度及恢复见输入说明"
+            },
+            {
+              "name": "native_bin_dir",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "None 使用当前 Conda bin；也可指定核验过的源码构建目录"
+            },
+            {
+              "name": "profile_stages",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "记录阶段 CUDA 同步等待；生产默认不增加同步"
+            },
+            {
+              "name": "cuda_allocator_cache",
+              "required": false,
+              "type": "str",
+              "default": "'auto'",
+              "meaning": "auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略"
+            },
+            {
+              "name": "hemisphere_workers",
+              "required": false,
+              "type": "int",
+              "default": "1",
+              "meaning": "1串行；2以独立进程运行左右半球，总线程预算平分"
+            },
+            {
+              "name": "native_optimizations",
+              "required": false,
+              "type": "str",
+              "default": "'auto'",
+              "meaning": "auto 按已验证能力选择完整 native 优化；original 固定原程序"
+            }
+          ],
+          "label": "批量公开入口",
+          "runtime_signature": "(jobs: 'list[dict]', weights_dir: 'str | Path', assets_dir: 'str | Path', *, devices: 'tuple[str, ...]' = ('cuda:0',), threads: 'int' = 4, native_bin_dir: 'str | Path | None' = None, profile_stages: 'bool' = False, cuda_allocator_cache: 'str' = 'auto', hemisphere_workers: 'int' = 1, native_optimizations: 'str' = 'auto') -> 'list[dict]'",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "fnit-recon-all": [
+          {
+            "flags": [
+              "t1"
+            ],
+            "keywords": {
+              "type": "Path"
+            },
+            "line": 1272
+          },
+          {
+            "flags": [
+              "subject_dir"
+            ],
+            "keywords": {
+              "type": "Path"
+            },
+            "line": 1273
+          },
+          {
+            "flags": [
+              "--weights-dir"
+            ],
+            "keywords": {
+              "type": "Path",
+              "required": "True"
+            },
+            "line": 1274
+          },
+          {
+            "flags": [
+              "--assets-dir"
+            ],
+            "keywords": {
+              "type": "Path",
+              "required": "True"
+            },
+            "line": 1275
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cuda:0'"
+            },
+            "line": 1276
+          },
+          {
+            "flags": [
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "4"
+            },
+            "line": 1277
+          },
+          {
+            "flags": [
+              "--native-bin-dir"
+            ],
+            "keywords": {
+              "type": "Path"
+            },
+            "line": 1278
+          },
+          {
+            "flags": [
+              "--hemisphere-workers"
+            ],
+            "keywords": {
+              "type": "int",
+              "choices": "(1, 2)",
+              "default": "1",
+              "help": "'independent hemisphere processes; total threads split across two workers'"
+            },
+            "line": 1279
+          },
+          {
+            "flags": [
+              "--native-optimizations"
+            ],
+            "keywords": {
+              "choices": "('auto', 'original')",
+              "default": "'auto'",
+              "help": "'validated Conda native hotspot selection; original is the paired control'"
+            },
+            "line": 1281
+          },
+          {
+            "flags": [
+              "--profile-stages"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'record CUDA synchronization and parent/child CPU time'"
+            },
+            "line": 1283
+          },
+          {
+            "flags": [
+              "--cuda-allocator-cache"
+            ],
+            "keywords": {
+              "choices": "('auto', 'enabled', 'disabled')",
+              "default": "'auto'"
+            },
+            "line": 1285
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu/task5/recon_complete_cpu_v3/manifest.public.json",
+          "exists": true,
+          "sha256": "4f86c63a9ebcb86467e72e5dbe594ba567a4549ff3349ae318081945d7298392",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu/task5/recon_complete_cpu_v3/timing.public.json",
+          "exists": true,
+          "sha256": "fa4e186084763a910bd158a8a08f8acb1132cf99b46089dfc5110b0b2eecff08",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu/task5/recon_complete_cpu_v3/README.md",
+          "exists": true,
+          "sha256": "8a39e77d172b083e3f6ee3771cf1bebbb169fc9c666cf32c49191a5644705935",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthstrip.1.pt",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt",
+          "size": 30851709,
+          "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt",
+          "license": "CC BY 4.0"
+        },
+        {
+          "name": "synthmorph.affine.2.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.affine.2.h5",
+          "size": 51455312,
+          "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.affine.2.h5",
+          "license": "CC BY 4.0"
+        },
+        {
+          "name": "synthmorph.deform.3.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5",
+          "size": 3508630424,
+          "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5",
+          "license": "CC BY 4.0"
+        },
+        {
+          "name": "synthseg_2.0.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5",
+          "size": 53079152,
+          "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_segmentation_labels_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy",
+          "size": 348,
+          "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_segmentation_names_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy",
+          "size": 7168,
+          "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_topological_classes_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy",
+          "size": 348,
+          "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+          "size": 3296904,
+          "sha256": "9be55798498331f655acd75d4f0cd5036463e0f497bbb239be0167d6a9129a07",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "entowm.ctab",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.ctab",
+          "size": 318,
+          "sha256": "fa46a74e7c5385b6e474553acbb34f536dac640c52586ec4193a0ea9739948f1",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.ctab",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "mca-dura.both-lh.nstd21.fhs.h5",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/mca-dura.both-lh.nstd21.fhs.h5",
+          "size": 3294856,
+          "sha256": "da6a7b994e3e804cc3dc0e98e965c28a802ddcd38fd9b5c680d75cef285657b0",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/mca-dura.both-lh.nstd21.fhs.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "vsinus.no-sp.m.all.nstd10-070.h5",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/vsinus.no-sp.m.all.nstd10-070.h5",
+          "size": 3296904,
+          "sha256": "3d78948741306a31337468c86be55821913edb73855116fcb063b61135b90f12",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/vsinus.no-sp.m.all.nstd10-070.h5",
+          "license": "FreeSurfer Software License 1.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "../../validation/smri_cpu/task5/recon_complete_cpu_v3/figures/local_region_boundary.png",
+          "exists": true,
+          "sha256": "ccf6efbd530d57c647c715e4b2999a0e6f526063cf2dfaede94be46a393c80b1"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "流程策略",
+        "安装",
+        "运行",
+        "最近版本与-benchmark",
+        "验证与边界",
+        "参考文献与原实现"
+      ],
+      "readme_lines": 313,
+      "benchmark_fraction_lines": 0.08945686900958466,
+      "cli_help": {
+        "fnit-recon-all": {
+          "returncode": 0,
+          "stdout_sha256": "621b61c4dd5782881d6166b2e80c34b4ed00468516f31a0dce0920a4ced1c5b3",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.recon_all.native_free",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 2,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "ab58994abf5254fbcfc03b094782c0cdad65adbab237870b9b28459b36072d17",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds000114 snapshot 1.0.2",
+        "original_software": "FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 57,
+      "archive_sha256": "6f444954dc00a82894c4465e635727835f01a0aadb404e92207559f92d5f5989",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "subregions",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "667aadffe266d193a51c48a0dcac94520420bf8161ca4203e74d6916dde0369e",
+      "archive": "validation/subregions/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/gems/pipeline.py": "20a0df50ce6c3fd0e3eb67b0eb8cbcd588565615cc8c15ed4449ca1644ea3543",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1",
+        "src/fnit/recon_all/assets.py": "ee03a40b6d4006b8157e9b84d5cf15ff5ded63bb67f8976e968a95c12f4afa41"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/gems/pipeline.py",
+          "line": 146,
+          "entry": "segment_4_subregions",
+          "signature": "t1: str | Path | nib.spatialimages.SpatialImage, atlas_root: str | Path | None=None, *, structures: str | list[str] | tuple[str, ...]='all', coarse_segmentation: str | Path | nib.spatialimages.SpatialImage | np.ndarray | None=None, cortical_parcellation: str | Path | nib.spatialimages.SpatialImage | np.ndarray | None=None, wmparc: str | Path | nib.spatialimages.SpatialImage | np.ndarray | None=None, synthseg_weights: str | Path | None=None, synthseg_parc_weights: str | Path | None=None, device: str | torch.device='cuda:0', threads: int=4, optimization: str='fast', output_dir: str | Path | None=None, save_highres: bool=True, save_posteriors: bool=False",
+          "parameters": [
+            {
+              "name": "t1",
+              "required": true,
+              "type": "str 或 Path 或 nib.spatialimages.SpatialImage",
+              "default": "—",
+              "meaning": "一幅原始 3D T1w；格式见输入数据格式"
+            },
+            {
+              "name": "atlas_root",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "准备好的亚区图谱根目录；None 使用 FNIT 缓存，缺失时下载准备"
+            },
+            {
+              "name": "structures",
+              "required": false,
+              "type": "str 或 list[str] 或 tuple[str, ...]",
+              "default": "'all'",
+              "meaning": "all 或脑干、丘脑、左/右海马杏仁核名称及其列表；hippo-amygdala 选双侧"
+            },
+            {
+              "name": "coarse_segmentation",
+              "required": false,
+              "type": "str 或 Path 或 nib.spatialimages.SpatialImage 或 np.ndarray 或 None",
+              "default": "None",
+              "meaning": "同 T1 网格粗标签；有值时按已准备 T1 拟合，跳过自动强度/1mm准备"
+            },
+            {
+              "name": "cortical_parcellation",
+              "required": false,
+              "type": "str 或 Path 或 nib.spatialimages.SpatialImage 或 np.ndarray 或 None",
+              "default": "None",
+              "meaning": "同网格 DK68 皮层标签，用于生成白质代理"
+            },
+            {
+              "name": "wmparc",
+              "required": false,
+              "type": "str 或 Path 或 nib.spatialimages.SpatialImage 或 np.ndarray 或 None",
+              "default": "None",
+              "meaning": "同网格白质分区；提供时海马强度模型直接使用"
+            },
+            {
+              "name": "synthseg_weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "自动初始化的 SynthSeg 主分割模型文件或目录"
+            },
+            {
+              "name": "synthseg_parc_weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "自动初始化的 SynthSeg 皮层分区模型文件或目录"
+            },
+            {
+              "name": "device",
+              "required": false,
+              "type": "str 或 torch.device",
+              "default": "'cuda:0'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "4",
+              "meaning": "正整数CPU线程预算；具体每阶段并行度及恢复见输入说明"
+            },
+            {
+              "name": "optimization",
+              "required": false,
+              "type": "str",
+              "default": "'fast'",
+              "meaning": "fast 速度优先；balanced 增加拟合迭代预算"
+            },
+            {
+              "name": "output_dir",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "结果或调试文件的目录；具体自动保存范围见输出"
+            },
+            {
+              "name": "save_highres",
+              "required": false,
+              "type": "bool",
+              "default": "True",
+              "meaning": "保存结构工作网格标签；Python 默认 True，CLI 需显式开启"
+            },
+            {
+              "name": "save_posteriors",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "保存末维为标签通道的工作网格后验"
+            }
+          ],
+          "label": "完整公开参数",
+          "runtime_signature": "(t1: 'str | Path | nib.spatialimages.SpatialImage', atlas_root: 'str | Path | None' = None, *, structures: 'str | list[str] | tuple[str, ...]' = 'all', coarse_segmentation: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, cortical_parcellation: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, wmparc: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, synthseg_weights: 'str | Path | None' = None, synthseg_parc_weights: 'str | Path | None' = None, device: 'str | torch.device' = 'cuda:0', threads: 'int' = 4, optimization: 'str' = 'fast', output_dir: 'str | Path | None' = None, save_highres: 'bool' = True, save_posteriors: 'bool' = False) -> 'SubregionResult'",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "segment-4-subregions": [
+          {
+            "flags": [
+              "--i",
+              "-i"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'native 3-D T1 image'"
+            },
+            "line": 666
+          },
+          {
+            "flags": [
+              "--o",
+              "-o"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'native-grid labels'"
+            },
+            "line": 667
+          },
+          {
+            "flags": [
+              "--atlas-root"
+            ],
+            "keywords": {
+              "help": "'prepared atlas cache; default is FNIT cache'"
+            },
+            "line": 668
+          },
+          {
+            "flags": [
+              "--structure"
+            ],
+            "keywords": {
+              "action": "'append'",
+              "choices": "('all', 'brainstem', 'thalamus', 'hippo-amygdala-left', 'hippo-amygdala-right', 'hippo-amygdala')",
+              "help": "'select structures; default is all four recipes'"
+            },
+            "line": 669
+          },
+          {
+            "flags": [
+              "--coarse-segmentation"
+            ],
+            "keywords": {
+              "help": "'native-grid coarse labels'"
+            },
+            "line": 673
+          },
+          {
+            "flags": [
+              "--cortical-parcellation"
+            ],
+            "keywords": {
+              "help": "'native-grid DK68 cortical labels'"
+            },
+            "line": 674
+          },
+          {
+            "flags": [
+              "--wmparc"
+            ],
+            "keywords": {
+              "help": "'native-grid white matter parcellation'"
+            },
+            "line": 675
+          },
+          {
+            "flags": [
+              "--synthseg-weights"
+            ],
+            "keywords": {
+              "help": "'SynthSeg weights for initialization'"
+            },
+            "line": 676
+          },
+          {
+            "flags": [
+              "--synthseg-parc-weights"
+            ],
+            "keywords": {
+              "help": "'SynthSeg+ cortical weights'"
+            },
+            "line": 677
+          },
+          {
+            "flags": [
+              "--output-dir"
+            ],
+            "keywords": {
+              "help": "'labels, volumes and report output directory'"
+            },
+            "line": 678
+          },
+          {
+            "flags": [
+              "--save-highres"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'save fine-grid labels'"
+            },
+            "line": 679
+          },
+          {
+            "flags": [
+              "--save-posteriors"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'save fine-grid posterior channels'"
+            },
+            "line": 680
+          },
+          {
+            "flags": [
+              "--report-json"
+            ],
+            "keywords": {
+              "help": "'machine-readable processing report'"
+            },
+            "line": 681
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cuda:0'"
+            },
+            "line": 682
+          },
+          {
+            "flags": [
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "4",
+              "help": "'positive CPU thread count'"
+            },
+            "line": 683
+          },
+          {
+            "flags": [
+              "--optimization"
+            ],
+            "keywords": {
+              "choices": "('fast', 'balanced')",
+              "default": "'fast'",
+              "help": "'fast fine-grid fitting or balanced fitting with a longer mesh budget'"
+            },
+            "line": 684
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu/task5/raw_all_cpu_v5/raw_all_cpu.public.json",
+          "exists": true,
+          "sha256": "ad9b6bad1d0fbda568aee5a38a86a351bb567b8df1621c6939078f393b4c300e",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu/task5/raw_all_cpu_v5/artifact_inventory.public.json",
+          "exists": true,
+          "sha256": "2e47ea0f886b36f3a9958d44a22af02b0ba41fc8b32a08bc211868d82967a74a",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu/task5/brainstem_stage.public.json",
+          "exists": true,
+          "sha256": "615f16f9d11006101f82fbf1ae569453cf0c543b825e80d9e0e7c5fa73dbed64",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthseg_2.0.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5",
+          "size": 53079152,
+          "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_parc_2.0.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/c04/403/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5",
+          "size": 53090840,
+          "sha256": "83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684",
+          "release_manifest_matches": true,
+          "official_url_matches": false,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/p0/0f/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_segmentation_labels_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy",
+          "size": 348,
+          "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_segmentation_names_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy",
+          "size": 7168,
+          "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        },
+        {
+          "name": "synthseg_topological_classes_2.0.npy",
+          "official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy",
+          "size": 348,
+          "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy",
+          "license": "FreeSurfer Software License 1.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "../../validation/smri_cpu/task5/raw_all_cpu_v5/raw_all_thalamus.png",
+          "exists": true,
+          "sha256": "614a73ede9b5cb882ebd5af522db2467d6c1c31d6f1265741cc82c62b3484a1b"
+        },
+        {
+          "link": "../../validation/smri_cpu/task5/raw_all_cpu_v5/raw_all_hippo-amygdala.png",
+          "exists": true,
+          "sha256": "2c488e2be7be566fd4d54aae0ff7054517582d9051dd677bdb3807477b38c902"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "从一张-t1-到完整结果",
+        "python-调用输入输出与参数",
+        "参数",
+        "返回值与保存文件",
+        "cpugpu-与速度配置",
+        "图谱与权重准备",
+        "--model下载并校验自动粗分割和皮层分区所需权重",
+        "--output-root保存四类图谱的根目录省略时使用-fnit-缓存",
+        "--device图谱准备计算设备--asset-dir-可另指定已经校验的资产目录",
+        "命令行",
+        "--i原始-t1--o原网格合并标签--structure结构可重复指定",
+        "--devicecpugpu--threadscpu-线程数--optimizationfast-或-balanced",
+        "--output-dir标签表体积表和报告目录--save-highres保存工作网格标签",
+        "原软件调用",
+        "-i同一公开-t1-ssubject-名-sd独立-subjects-目录",
+        "-all完整官方预处理-openmp每例-cpu-线程数",
+        "精度运行时间与脑图",
+        "2026-10-04同节点-cpu-与受影响-gpu-回归",
+        "2026-10-02十例-gpu-与官方对照",
+        "六区域原网格精度",
+        "全部十例",
+        "新九例排除开发用-sub-01",
+        "2026-10-02-gpu-完整流程-benchmark",
+        "实际分步骤时间",
+        "官方对照脑图",
+        "最近版本-benchmark-记录",
+        "reference"
+      ],
+      "readme_lines": 313,
+      "benchmark_fraction_lines": 0.09904153354632587,
+      "cli_help": {
+        "segment-4-subregions": {
+          "returncode": 0,
+          "stdout_sha256": "4d54397afe0c4d50c75202dad68488a1705922a6d90c16d9ddf7c47f8868a5e4",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "segment-4-subregions",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 2,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "2fb1a635b209bcc0bf51cffe6b4393c18cc8f238ab79ee3864f39dcc1e437d72",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds000114 snapshot 1.0.2",
+        "original_software": "FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 53,
+      "archive_sha256": "5c6ad9bfed7ad265526bbd021cfb8bcf6d9d2ff7c47f09a479ee861d193b10f7",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    },
+    {
+      "module": "ukb_vbm",
+      "documentation_base_commit": "140c3739ac6c7a6826bf9421202ef59bec7ffe67",
+      "old_readme_sha256": "e91d0278216ea905ce03f7302c08c2e4978007cd6e74822b619834632e07666f",
+      "archive": "validation/ukb_vbm/readme_archive_20261005.md",
+      "source_sha256": {
+        "src/fnit/fast_vbm/pipeline.py": "6fbef2de2698c3c61d56034d8a2cb91f6c29a91e8048dcde292f23171979ad2a",
+        "src/fnit/cli.py": "d74b0d2d02f31bc930a16c17d9df946ad8784367b14479f205999039665a4d63",
+        "src/fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+      },
+      "public_apis": [
+        {
+          "path": "src/fnit/fast_vbm/pipeline.py",
+          "line": 229,
+          "entry": "FastVBM.__init__",
+          "signature": "self, *, device='cpu', threads=None, synthstrip_weights=None, synthmorph_weights=None, bias_correction=True, fast_execution='tensor', synthmorph_extent=256, synthmorph_hyper=0.5, synthmorph_steps=7, registration_backend='synthmorph', fnirt_strides=(4, 2, 1, 1), fnirt_steps=(5, 5, 10, 5), fnirt_input_fwhm_mm=(6.0, 4.0, 2.0, 2.0), fnirt_reference_fwhm_mm=(4.0, 2.0, 0.0, 0.0), fnirt_warp_resolution_mm=10.0, fnirt_regularization=(150.0, 75.0, 50.0, 30.0)",
+          "parameters": [
+            {
+              "name": "device",
+              "required": false,
+              "type": "str",
+              "default": "'cpu'",
+              "meaning": "计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES"
+            },
+            {
+              "name": "threads",
+              "required": false,
+              "type": "int 或 None",
+              "default": "None",
+              "meaning": "PyTorch CPU 线程预算；None 保留当前值，CLI 默认另见下节"
+            },
+            {
+              "name": "synthstrip_weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "SynthStrip PT 文件或目录；仅未提供 brain_mask 时使用"
+            },
+            {
+              "name": "synthmorph_weights",
+              "required": false,
+              "type": "str 或 Path 或 None",
+              "default": "None",
+              "meaning": "SynthMorph deform H5 文件或目录；仅 synthmorph 后端使用"
+            },
+            {
+              "name": "bias_correction",
+              "required": false,
+              "type": "bool",
+              "default": "True",
+              "meaning": "启用FAST偏置校正；False将bias_fwhm_mm设0"
+            },
+            {
+              "name": "fast_execution",
+              "required": false,
+              "type": "str",
+              "default": "'tensor'",
+              "meaning": "FAST 更新模式：tensor 或内部原序 fsl"
+            },
+            {
+              "name": "synthmorph_extent",
+              "required": false,
+              "type": "int",
+              "default": "256",
+              "meaning": "SynthMorph 网络尺寸，192 或256"
+            },
+            {
+              "name": "synthmorph_hyper",
+              "required": false,
+              "type": "float",
+              "default": "0.5",
+              "meaning": "SynthMorph 正则化，严格0<hyper<1"
+            },
+            {
+              "name": "synthmorph_steps",
+              "required": false,
+              "type": "int",
+              "default": "7",
+              "meaning": "SynthMorph 速度场积分步数，至少5"
+            },
+            {
+              "name": "registration_backend",
+              "required": false,
+              "type": "str",
+              "default": "'synthmorph'",
+              "meaning": "非线性估计器：synthmorph 或 fnirt"
+            },
+            {
+              "name": "fnirt_strides",
+              "required": false,
+              "type": "tuple[int, ...]",
+              "default": "(4, 2, 1, 1)",
+              "meaning": "四个分辨率层的体素采样步长"
+            },
+            {
+              "name": "fnirt_steps",
+              "required": false,
+              "type": "tuple[int, ...]",
+              "default": "(5, 5, 10, 5)",
+              "meaning": "四层 Gauss–Newton 最大更新次数"
+            },
+            {
+              "name": "fnirt_input_fwhm_mm",
+              "required": false,
+              "type": "tuple[float, ...]",
+              "default": "(6.0, 4.0, 2.0, 2.0)",
+              "meaning": "四层 moving GM 平滑 FWHM，mm"
+            },
+            {
+              "name": "fnirt_reference_fwhm_mm",
+              "required": false,
+              "type": "tuple[float, ...]",
+              "default": "(4.0, 2.0, 0.0, 0.0)",
+              "meaning": "四层 fixed GM 平滑 FWHM，mm"
+            },
+            {
+              "name": "fnirt_warp_resolution_mm",
+              "required": false,
+              "type": "float",
+              "default": "10.0",
+              "meaning": "FNIRT 三次 B-spline 控制点间距，mm"
+            },
+            {
+              "name": "fnirt_regularization",
+              "required": false,
+              "type": "tuple[float, ...]",
+              "default": "(150.0, 75.0, 50.0, 30.0)",
+              "meaning": "四层 bending-energy 正则化权重"
+            }
+          ],
+          "label": "pipeline构造",
+          "runtime_signature": "(self, *, device='cpu', threads=None, synthstrip_weights=None, synthmorph_weights=None, bias_correction=True, fast_execution='tensor', synthmorph_extent=256, synthmorph_hyper=0.5, synthmorph_steps=7, registration_backend='synthmorph', fnirt_strides=(4, 2, 1, 1), fnirt_steps=(5, 5, 10, 5), fnirt_input_fwhm_mm=(6.0, 4.0, 2.0, 2.0), fnirt_reference_fwhm_mm=(4.0, 2.0, 0.0, 0.0), fnirt_warp_resolution_mm=10.0, fnirt_regularization=(150.0, 75.0, 50.0, 30.0))",
+          "runtime_verified": true
+        },
+        {
+          "path": "src/fnit/fast_vbm/pipeline.py",
+          "line": 533,
+          "entry": "FastVBM.run",
+          "signature": "self, image, template, output_dir, *, brain_mask=None, reference_mask=None, overwrite=False",
+          "parameters": [
+            {
+              "name": "image",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "输入影像，格式、维数与预处理约束见输入数据格式"
+            },
+            {
+              "name": "template",
+              "required": true,
+              "type": "str 或 Path 或 nibabel SpatialImage",
+              "default": "—",
+              "meaning": "3D GM 模板；决定标准空间结果 shape、affine 和空间"
+            },
+            {
+              "name": "output_dir",
+              "required": true,
+              "type": "str 或 Path",
+              "default": "—",
+              "meaning": "结果或调试文件的目录；具体自动保存范围见输出"
+            },
+            {
+              "name": "brain_mask",
+              "required": false,
+              "type": "str 或 Path 或 nibabel SpatialImage 或 None",
+              "default": "None",
+              "meaning": "同 T1 网格非空二值掩膜；有值时跳过 SynthStrip"
+            },
+            {
+              "name": "reference_mask",
+              "required": false,
+              "type": "str 或 Path 或 nibabel SpatialImage 或 None",
+              "default": "None",
+              "meaning": "同模板网格非空 mask；FNIRT使用，SynthMorph仅记录"
+            },
+            {
+              "name": "overwrite",
+              "required": false,
+              "type": "bool",
+              "default": "False",
+              "meaning": "已有任何同名结果时是否覆盖"
+            }
+          ],
+          "label": "run输入与保存参数",
+          "runtime_signature": "(self, image, template, output_dir, *, brain_mask=None, reference_mask=None, overwrite=False)",
+          "runtime_verified": true
+        }
+      ],
+      "cli_parser": {
+        "fast-vbm": [
+          {
+            "flags": [
+              "-i",
+              "--image"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'single-frame raw T1 image'"
+            },
+            "line": 766
+          },
+          {
+            "flags": [
+              "--template"
+            ],
+            "keywords": {
+              "required": "True",
+              "help": "'GM template defining the output grid'"
+            },
+            "line": 768
+          },
+          {
+            "flags": [
+              "-o",
+              "--output-dir"
+            ],
+            "keywords": {
+              "required": "True"
+            },
+            "line": 770
+          },
+          {
+            "flags": [
+              "--brain-mask"
+            ],
+            "keywords": {
+              "help": "'optional input-grid mask; skips SynthStrip'"
+            },
+            "line": 771
+          },
+          {
+            "flags": [
+              "--reference-mask"
+            ],
+            "keywords": {
+              "help": "'optional template-grid mask recorded by both backends and used by FNIRT; pass the FSL dilated MNI mask for UKB/FSL parity'"
+            },
+            "line": 773
+          },
+          {
+            "flags": [
+              "--synthstrip-weights"
+            ],
+            "keywords": {
+              "help": "'official SynthStrip checkpoint or containing directory'"
+            },
+            "line": 780
+          },
+          {
+            "flags": [
+              "--synthmorph-weights"
+            ],
+            "keywords": {
+              "help": "'official SynthMorph deform checkpoint; used by the synthmorph backend'"
+            },
+            "line": 782
+          },
+          {
+            "flags": [
+              "--registration-backend"
+            ],
+            "keywords": {
+              "choices": "('synthmorph', 'fnirt')",
+              "default": "'synthmorph'",
+              "help": "'nonlinear registration backend'"
+            },
+            "line": 784
+          },
+          {
+            "flags": [
+              "--device"
+            ],
+            "keywords": {
+              "default": "'cpu'"
+            },
+            "line": 787
+          },
+          {
+            "flags": [
+              "--threads"
+            ],
+            "keywords": {
+              "type": "int"
+            },
+            "line": 788
+          },
+          {
+            "flags": [
+              "--fast-execution"
+            ],
+            "keywords": {
+              "choices": "('tensor', 'fsl')",
+              "default": "'tensor'",
+              "help": "'FAST tissue update mode; fsl preserves source-ordered scans'"
+            },
+            "line": 789
+          },
+          {
+            "flags": [
+              "--synthmorph-extent"
+            ],
+            "keywords": {
+              "type": "int",
+              "choices": "(192, 256)",
+              "default": "256"
+            },
+            "line": 792
+          },
+          {
+            "flags": [
+              "--synthmorph-hyper"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "0.5"
+            },
+            "line": 794
+          },
+          {
+            "flags": [
+              "--synthmorph-steps"
+            ],
+            "keywords": {
+              "type": "int",
+              "default": "7"
+            },
+            "line": 795
+          },
+          {
+            "flags": [
+              "--fnirt-strides"
+            ],
+            "keywords": {
+              "type": "int",
+              "nargs": "4",
+              "default": "(4, 2, 1, 1)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 796
+          },
+          {
+            "flags": [
+              "--fnirt-steps"
+            ],
+            "keywords": {
+              "type": "int",
+              "nargs": "4",
+              "default": "(5, 5, 10, 5)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 799
+          },
+          {
+            "flags": [
+              "--fnirt-input-fwhm-mm"
+            ],
+            "keywords": {
+              "type": "float",
+              "nargs": "4",
+              "default": "(6.0, 4.0, 2.0, 2.0)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 802
+          },
+          {
+            "flags": [
+              "--fnirt-reference-fwhm-mm"
+            ],
+            "keywords": {
+              "type": "float",
+              "nargs": "4",
+              "default": "(4.0, 2.0, 0.0, 0.0)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 805
+          },
+          {
+            "flags": [
+              "--fnirt-warp-resolution-mm"
+            ],
+            "keywords": {
+              "type": "float",
+              "default": "10.0"
+            },
+            "line": 808
+          },
+          {
+            "flags": [
+              "--fnirt-regularization"
+            ],
+            "keywords": {
+              "type": "float",
+              "nargs": "4",
+              "default": "(150.0, 75.0, 50.0, 30.0)",
+              "metavar": "('LEVEL1', 'LEVEL2', 'LEVEL3', 'LEVEL4')"
+            },
+            "line": 809
+          },
+          {
+            "flags": [
+              "--no-bias"
+            ],
+            "keywords": {
+              "action": "'store_true'",
+              "help": "'disable TorchFAST bias-field correction'"
+            },
+            "line": 812
+          },
+          {
+            "flags": [
+              "--overwrite"
+            ],
+            "keywords": {
+              "action": "'store_true'"
+            },
+            "line": 814
+          }
+        ]
+      },
+      "benchmarks": [
+        {
+          "path": "validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/final_v4/report.public.json",
+          "exists": true,
+          "sha256": "4e557817d43610d5bd307fd0713aa4d4dc226c76a40c2d0de96463e5564aa4b6",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        },
+        {
+          "path": "validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/report.public.json",
+          "exists": true,
+          "sha256": "967169aee17b90bc2fa3a2fc04fe02da68b5d9806513f6a639483212804e5ae7",
+          "identity": "Frozen report identity and real data/timing are explicitly retained in section 5."
+        }
+      ],
+      "resources": [
+        {
+          "name": "synthstrip.1.pt",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt",
+          "size": 30851709,
+          "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt",
+          "license": "CC BY 4.0"
+        },
+        {
+          "name": "synthmorph.deform.3.h5",
+          "official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5",
+          "size": 3508630424,
+          "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+          "release_manifest_matches": true,
+          "official_url_matches": true,
+          "release_official_url": "https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5",
+          "license": "CC BY 4.0"
+        }
+      ],
+      "figures": [
+        {
+          "link": "../../validation/smri_cpu_20261004/task04/fast_vbm_cpu_20261004/final_v4/figures/standard_vbm.png",
+          "exists": true,
+          "sha256": "1f5b47c9f6c7c135f411f6b00a425070cffcaf83bc5920b5783123170b9394e8"
+        }
+      ],
+      "unmeasured": [
+        "No MRI executed for this documentation task; frozen results keep original identities."
+      ],
+      "legacy_anchors": [
+        "官方-vbm-步骤",
+        "公开模板",
+        "当前证据边界",
+        "来源"
+      ],
+      "readme_lines": 301,
+      "benchmark_fraction_lines": 0.07973421926910298,
+      "cli_help": {
+        "fast-vbm": {
+          "returncode": 0,
+          "stdout_sha256": "aadb52d8a359691145fd0001b9d0b72d7ab9635e9656543274d2ab455a370e75",
+          "stderr": "",
+          "command": [
+            "/tmp/fnit_bwas_final311/bin/python",
+            "-m",
+            "fnit.cli",
+            "fast-vbm",
+            "--help"
+          ]
+        }
+      },
+      "runtime_errors": [],
+      "python_examples_compile": {
+        "passed": true,
+        "blocks": 2,
+        "execution": "syntax only; no MRI/model inference"
+      },
+      "readme_sha256": "ed58007a4438a830d0ef696b550b6eb8d677f6c80cad9583c48ea97fdf00484e",
+      "benchmarks_metadata": {
+        "real_data": "OpenNeuro ds003138 v1.0.1 / additional recorded real MRI and CT cases",
+        "original_software": "FSL 6.0.7.4 and FreeSurfer 8.2.0-1",
+        "source_identity": "The section 5 summary cites frozen commit or manifest SHA; current documentation base is not assigned to old measured results.",
+        "timing_definition": "Full CLI / cold worker process and API / sampled phases are named separately; uncaptured matched phases explicitly unmeasured.",
+        "current_main_mri_rerun": false,
+        "simulated_benchmark": false,
+        "dtype": "Preserved original float32/TF32 and local existing FP64; no new half precision."
+      },
+      "local_link_errors": [],
+      "local_links_checked": 20,
+      "archive_sha256": "51b449b96e380857efe66574fbfa6f9a97137d105ed378d651eb4ead53ffa1a5",
+      "source_unchanged_during_documentation": true,
+      "public_parameters_documented": true
+    }
+  ],
+  "actual_runtime_verification": {
+    "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+    "torch": "2.5.1",
+    "cuda_visible_devices": "",
+    "scope": "Imports and inspect.signature plus actual fnit.cli --help and Python example compilation only. No model or MRI execution."
+  },
+  "final_documentation_checks": {
+    "seven_sections": true,
+    "all_primary_public_parameters_and_defaults_documented": true,
+    "python_examples_syntax": true,
+    "all_local_files_and_anchors_checked": true,
+    "local_link_errors": [],
+    "scientific_source_unchanged": true,
+    "mri_not_executed": true,
+    "original_benchmark_files_not_modified": true,
+    "asset_inventory_verification": "weights.py size/SHA records versus downloaded public assets-v1 manifest; large weights not re-downloaded",
+    "runtime_signature_records": 23,
+    "runtime_unique_api_entries": 21,
+    "runtime_signatures_passed": true,
+    "runtime_unique_cli_help": 10,
+    "runtime_cli_help_passed": true,
+    "checked_local_links": 417,
+    "sensitive_keyword_scan": "no matches for supplied restricted host/address/field-id/gene-file tokens in the eleven manuals and their archives"
+  },
+  "shared_resource_inventory": {
+    "release_weight_entries": 20,
+    "default_model_union_files": 18,
+    "default_install_bytes": 4845447015,
+    "release_only_unselected_files": [
+      "mca-dura.ctab",
+      "sclimbic.volstats.csv"
+    ],
+    "recon_profile_core_assets": 98,
+    "recon_profile_core_bytes": 264773919,
+    "recon_all_verified_assets": 111,
+    "recon_all_verified_assets_bytes": 374437464,
+    "resource_binary_redownloaded": false
+  },
+  "independent_root_review": {
+    "files": [
+      "docs/connectome/README.md",
+      "docs/WEIGHTS.md",
+      "docs/RESOURCE_MANIFEST.md"
+    ],
+    "benchmark_scope_verified": "8bc337c4, corrected DWI and provided subject, n=10, 40 CLI; no raw TOPUP/EDDY/recon rerun",
+    "benchmark_summary_numbers_verified": true,
+    "resource_manifest_size_sha_records_verified": true,
+    "findings_sent_to_parent": [
+      "recon-options accepts inline JSON or JSON file path",
+      "Release weight records20 versus default model union18; fixed recon profile core98 versus all verified stage assets111"
+    ],
+    "edits_to_root_owned_pages": false
+  }
+}

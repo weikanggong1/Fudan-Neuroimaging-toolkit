@@ -1,0 +1,249 @@
+{
+  "report": {
+    "scope": "Complete original/new CUDA SR comparison with the unchanged 20 GB cap.\n\nFull real arrays remain private on the server. API timing includes numerical\ntrace copies; saving/comparison are separate. GNU wall includes cold imports,\nCUDA initialization, loading, API, saving and the posthoc comparison.\n",
+    "source_revision": "source_sr_v2_gpu_abba_new1",
+    "reference_kind": "old-gpu",
+    "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+    "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+    "driver_sha256": "3526508cfaf248e529b3f9fc737d59a65d91d5e3a3cc1f6ef11eb7c68b9c7ed6",
+    "allocator_budget_bytes": 20000000000,
+    "external_gpu_before": [
+      "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 41630, 39377, 97",
+      "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 46658, 34349, 100"
+    ],
+    "network_calls": [
+      {
+        "seconds": 0.5499950051307678,
+        "shape": [
+          1,
+          1,
+          192,
+          224,
+          256
+        ],
+        "dtype": "torch.float32",
+        "input_array_sha256": "c1c2d1ae0ba4adae0a433ec07a9fa61088f448e19166175be3742464ff30b677",
+        "input_exact": true,
+        "output_array_sha256": "5cede6cc2e14b5ea791501c7137f524b1e29dad1b2751ab89006a0108eccc38e",
+        "output_exact": true,
+        "metrics": {
+          "count": 11010048,
+          "different": 0,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_abs": 0.0
+        }
+      },
+      {
+        "seconds": 0.4047266272827983,
+        "shape": [
+          1,
+          1,
+          192,
+          224,
+          256
+        ],
+        "dtype": "torch.float32",
+        "input_array_sha256": "326bcb07f12eae3f6268e0dd2ad069138f98299f512782afd92a901eda28a125",
+        "input_exact": true,
+        "output_array_sha256": "eb61bd3548a2a82d636d5611ffaf63eabeb47bedf0934aad0d3209c2406a05cc",
+        "output_exact": true,
+        "metrics": {
+          "count": 11010048,
+          "different": 0,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "max_abs": 0.0
+        }
+      }
+    ],
+    "cuda_free_total_after_init_bytes": [
+      40812150784,
+      84942979072
+    ],
+    "torch_version": "2.5.1",
+    "cudnn_version": 90100,
+    "model_sha256": "aa8c577eb728b68b90aa7703153c7156c3bad61e78e5803d0f295b94d60452b5",
+    "cuda_total_memory_bytes": 84942979072,
+    "constructor_seconds": 0.8017032919451594,
+    "conv_weight_strides": [
+      [
+        27,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        648,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        648,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        1296,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        1296,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        2592,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        2592,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        5184,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        5184,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        10368,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        15552,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        5184,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        7776,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        2592,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        3888,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        1296,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        1944,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        648,
+        27,
+        9,
+        3,
+        1
+      ],
+      [
+        24,
+        1,
+        1,
+        1,
+        1
+      ]
+    ],
+    "cuda_policy": {
+      "cudnn_tf32": true,
+      "matmul_tf32": true,
+      "benchmark": false,
+      "deterministic": false
+    },
+    "api_seconds": 6.233953014947474,
+    "peak_allocated_bytes": 10006443008,
+    "peak_reserved_bytes": 13845397504,
+    "cpu_math_imported": false,
+    "cpu_dispatch_imported": false,
+    "external_gpu_after_api": [
+      "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 55376, 25631, 100",
+      "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 46658, 34349, 100"
+    ],
+    "save_seconds": 3.4295908487401903,
+    "float": {
+      "count": 9072000,
+      "different": 0,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0
+    },
+    "quantized": {
+      "different": 0,
+      "max_abs": 0,
+      "affine_exact": true
+    },
+    "header_binary_sha256": "2dffc2e1efb0e4f8f4cfcdbba08e9252378ccb4dcc851568049bda723c9f3613",
+    "header_exact": true,
+    "output_file_sha256": {
+      "image.nii.gz": "23634581c27ef5d1f20edbf596ae8fd0892029f89dde43c39d5349799e18ae68",
+      "image.npz": "af3b4884a0851c6d141da3450aaf267578e7e0601d11dda6b82e63cacb7371c0"
+    },
+    "compare_seconds": 1.6708462918177247,
+    "status": "complete"
+  },
+  "time_lines": [
+    "\tUser time (seconds): 9.59",
+    "\tSystem time (seconds): 5.46",
+    "\tPercent of CPU this job got: 93%",
+    "\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:16.05",
+    "\tMaximum resident set size (kbytes): 2139848",
+    "\tExit status: 0"
+  ]
+}

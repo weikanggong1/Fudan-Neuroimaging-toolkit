@@ -1,0 +1,95 @@
+{
+  "status": "prepared_only_awaiting_root_review_no_upload_no_worker_no_math",
+  "canonical_workspace": "workspaces/smri_cpu_20261004/remaining_20261006/fnirt-initial-precondition-v1",
+  "canonical_run": "runs/smri_cpu_20261004/remaining_20261006/fnirt-initial-precondition-v1",
+  "stage3_report_commit": "4ee61ed34d28e3c48da144c72ac84b3b8f7a56ad",
+  "inputs": {
+    "checkpoint": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-level-rehydrate-v1/stage1/level_state.private.npz",
+      "bytes": 2647508,
+      "sha256": "78abee8589e6e026fede946136c9e78589817b01a1d55d2085aee19758ceae0e"
+    },
+    "stage1_summary": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-level-rehydrate-v1/stage1/summary.public.json",
+      "bytes": 30714,
+      "sha256": "eb31cfd14bf4d8b5a0b82228a72b2f854a86a38d1a969d981cd0d215e09afbf6"
+    },
+    "stage3_summary": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-pcg-v1/stage3/summary.public.json",
+      "bytes": 149216,
+      "sha256": "8730d37a2faace0d100b24c94230ca676f19a3c1aa019c6759e50f5a4ebf0cd3"
+    }
+  },
+  "source_count": 19,
+  "checkpoint_arrays_materialized": [
+    "gradient_half",
+    "diagonal_half"
+  ],
+  "lm_tau": {
+    "value": 0.001,
+    "meaning": "declared controlled LM comparison, not established historical solve3 damping"
+  },
+  "maximum_calls": {
+    "prefixes": 2,
+    "dot_total": 4,
+    "norm_total": 2,
+    "callback": 0,
+    "PCG": 0,
+    "evaluate": 0,
+    "linearize": 0,
+    "new_H": 0,
+    "native": 0,
+    "images": 0,
+    "checkpoint_arrays_read": [
+      "gradient_half",
+      "diagonal_half"
+    ]
+  },
+  "initial_direction_SHA_gates": {
+    "current_torch": "e63284f6f4198c09827ee9815aae3d9b1720585a88d658c6eee129c382749cf4",
+    "owned_cpu": "b3fea96e550d2a7c35369a62e942775b6345524a028a7529af57d9075aaff7ea"
+  },
+  "prefix_AST": {
+    "current_torch": "7256a4037493e504e355c06ddcec146acc2824484a4d821cde3498a77790823f",
+    "owned_cpu": "f6454a6c343ee1e52000f656a9a2291dda7d945268813deb46c520e6b66a5f8e"
+  },
+  "prefix_source_semantics": "original for-loop-before body only; preserve preconditioning/norm/rho order; no loop/callback/post-loop code; postponed annotations preserved explicitly",
+  "cross_controls": "after both direction gates, 2 complementary rho dots; total4dot2norm; active innerfloor/bits/ULP",
+  "unresolved": "current RHS-vs-official7.4e-7 source and final6.97% step difference are not wholly attributed to this first fork",
+  "scheduling": {
+    "common_CPU_lock": true,
+    "host": "nodecw7",
+    "affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "threads": 8,
+    "outer_wait_seconds": 19000,
+    "controller_timeout_seconds": 19600,
+    "child_timeout_seconds": 180,
+    "address_space_cap_bytes": 20000000000
+  },
+  "static_checks": {
+    "AST_compile_JSON": true,
+    "bash_n": true,
+    "source_prefix_function_definitions_compiled_without_calling": true,
+    "current_sources_exact": 19,
+    "candidate_copies_exact": true,
+    "previous_summary_metadata_gates_exact": true,
+    "NumPy_Torch_NumBa_imported": false,
+    "prefix_calls": 0,
+    "dot_calls": 0,
+    "norm_calls": 0,
+    "callback_PCGevaluate_linearize_native_image_calls": 0
+  },
+  "preparation_history": "PREPARATION_HISTORY.public.json; one local Python3.9 annotation-definition failure preserved; no numeric invocation",
+  "worker_upload_or_enqueue": false,
+  "runtime_integration_accepted": false,
+  "publication": "own source/scalar/hash/schema only; no arrays/license/upstream code"
+}

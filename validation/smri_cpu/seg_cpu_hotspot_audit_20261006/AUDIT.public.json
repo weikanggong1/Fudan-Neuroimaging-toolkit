@@ -1,0 +1,525 @@
+{
+  "schema": "fnit_synthseg_cpu_hotspot_readonly_audit/v1",
+  "date": "2026-10-06",
+  "scope": "read-only source and saved real timing audit; no new inference or benchmark",
+  "audit_worktree_commit": "a3936ea49c2aa631be0cf3980a9e6577c6627cca",
+  "root_integrated_commit_observed": "a5a21bdc76ea4c4581b97e3ef85dd2c60fea07f3",
+  "accepted_tf32_source_commit": "46eead65807265395982e6968b0ce48c750c1672",
+  "current_source_files": {
+    "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+    "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+    "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+    "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+    "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+    "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+    "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+    "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+    "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+    "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+    "segment.py": "9329348c6174785df4de2624344e63b141ad7c795238c8b7dd62f47f34495061",
+    "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+    "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+    "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0"
+  },
+  "current_sources_match_complete_precision_candidate_workers": true,
+  "input": {
+    "dataset": "OpenNeuro ds003138 v1.0.1",
+    "license": "CC0",
+    "alias": "case02",
+    "sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21",
+    "network_shape": [
+      192,
+      224,
+      256
+    ]
+  },
+  "evidence": [
+    {
+      "repository_relative_path": "validation/smri_cpu/seg_memory_20261005/CPU_FULL.public.json",
+      "bytes": 643405,
+      "sha256": "9348f42249ec48a99f365b224efde3d8217d9e7f8e7e8b9a8e502dd2fac4da61"
+    },
+    {
+      "repository_relative_path": "validation/smri_cpu/seg_tf32_20261005/CPU_FULL.public.json",
+      "bytes": 593026,
+      "sha256": "863c6be534b6a557a45bb1f1e8520b546cfff2c99eac2ab89949f460237fcfea"
+    },
+    {
+      "repository_relative_path": "validation/smri_cpu/seg_memory_20261005/OFFICIAL_NODE7_FAST_BA_REPEAT.public.json",
+      "bytes": 431314,
+      "sha256": "37a0d5fed95cbd6a3aaae097ea6e7dab5c6473f2f0f54613f813223aa8bc3e55"
+    },
+    {
+      "repository_relative_path": "validation/smri_cpu/seg_memory_20261005/CPU_JOIN_STAGE.public.json",
+      "bytes": 6105,
+      "sha256": "17012fc084e15fc7afce1b27c9cad023646763fc218229caec026988cf55aa33"
+    },
+    {
+      "repository_relative_path": "validation/smri_cpu_20261004/t2_seg/reduction_diagnostic.public.json",
+      "bytes": 8679,
+      "sha256": "fc17f6d2ca80da184776a50038547ccbe8184eb6d648c2f40cb21d218b01d95d"
+    }
+  ],
+  "cpu_full_memory_records": [
+    {
+      "report": "validation/smri_cpu/seg_memory_20261005/CPU_FULL.public.json",
+      "name": "seg33_baseline",
+      "arm": "baseline",
+      "mode": "seg33",
+      "outer_cold_seconds": 115.88571246061474,
+      "preflight_seconds": 2.4022103995084763,
+      "construct_seconds": 0.2771601276472211,
+      "api_seconds": 112.6808187989518,
+      "save_seconds": 0.1553864199668169,
+      "worker_seconds": 115.51729949377477,
+      "maximum_rss_kib": 14981148,
+      "cpu_join_calls": 0,
+      "source_files": {
+        "model.py": "292428207da96cea837919e73b3fa455dc533b5b9e7fb1bca02e3729a92cde52",
+        "segment.py": "ca51439f15ea9b792f2eb4bfb7bdd6cd7f298522e03a5917dda7ed8c9438c441",
+        "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+        "pipeline.py": "030095b124a3556f0508359317ee15108fbb2a3d45a803d80c28350d18776633",
+        "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+        "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f"
+      },
+      "outer_minus_api_seconds": 3.204893661662936,
+      "exclusive_outer_other_seconds": 0.37013671454042196,
+      "api_fraction_of_outer": 0.9723443589928986,
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    },
+    {
+      "report": "validation/smri_cpu/seg_memory_20261005/CPU_FULL.public.json",
+      "name": "seg33_candidate",
+      "arm": "candidate",
+      "mode": "seg33",
+      "outer_cold_seconds": 112.95203952863812,
+      "preflight_seconds": 2.462513309903443,
+      "construct_seconds": 0.18880887795239687,
+      "api_seconds": 109.7770417695865,
+      "save_seconds": 0.15295286662876606,
+      "worker_seconds": 112.58297010045499,
+      "maximum_rss_kib": 13191188,
+      "cpu_join_calls": 8,
+      "source_files": {
+        "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+        "segment.py": "1bc2c3d90a42e4cf664991ec6dd8b0499df4b1c5e788c7adb35d02ce4b2d000e",
+        "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+        "pipeline.py": "030095b124a3556f0508359317ee15108fbb2a3d45a803d80c28350d18776633",
+        "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+        "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+        "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f"
+      },
+      "outer_minus_api_seconds": 3.174997759051621,
+      "exclusive_outer_other_seconds": 0.37072270456701517,
+      "api_fraction_of_outer": 0.9718907443167804,
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    },
+    {
+      "report": "validation/smri_cpu/seg_memory_20261005/CPU_FULL.public.json",
+      "name": "parc_baseline",
+      "arm": "baseline",
+      "mode": "parc",
+      "outer_cold_seconds": 61.64819980505854,
+      "preflight_seconds": 2.0346783315762877,
+      "construct_seconds": 0.0012206453830003738,
+      "api_seconds": 58.70359191019088,
+      "save_seconds": 0.4901819620281458,
+      "worker_seconds": 61.23345601558685,
+      "maximum_rss_kib": 14199436,
+      "cpu_join_calls": 0,
+      "source_files": {
+        "model.py": "292428207da96cea837919e73b3fa455dc533b5b9e7fb1bca02e3729a92cde52",
+        "segment.py": "ca51439f15ea9b792f2eb4bfb7bdd6cd7f298522e03a5917dda7ed8c9438c441",
+        "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+        "pipeline.py": "030095b124a3556f0508359317ee15108fbb2a3d45a803d80c28350d18776633",
+        "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+        "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f"
+      },
+      "outer_minus_api_seconds": 2.9446078948676586,
+      "exclusive_outer_other_seconds": 0.4185269558802247,
+      "api_fraction_of_outer": 0.9522352979620008,
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    },
+    {
+      "report": "validation/smri_cpu/seg_memory_20261005/CPU_FULL.public.json",
+      "name": "parc_candidate",
+      "arm": "candidate",
+      "mode": "parc",
+      "outer_cold_seconds": 55.68400771357119,
+      "preflight_seconds": 2.041830997914076,
+      "construct_seconds": 0.0011736173182725906,
+      "api_seconds": 52.84300823509693,
+      "save_seconds": 0.4468004824593663,
+      "worker_seconds": 55.33634883351624,
+      "maximum_rss_kib": 14193744,
+      "cpu_join_calls": 12,
+      "source_files": {
+        "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+        "segment.py": "1bc2c3d90a42e4cf664991ec6dd8b0499df4b1c5e788c7adb35d02ce4b2d000e",
+        "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+        "pipeline.py": "030095b124a3556f0508359317ee15108fbb2a3d45a803d80c28350d18776633",
+        "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+        "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+        "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f"
+      },
+      "outer_minus_api_seconds": 2.8409994784742594,
+      "exclusive_outer_other_seconds": 0.3511943807825446,
+      "api_fraction_of_outer": 0.9489799747696347,
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    },
+    {
+      "report": "validation/smri_cpu/seg_memory_20261005/CPU_FULL.public.json",
+      "name": "parc-fast_baseline",
+      "arm": "baseline",
+      "mode": "parc-fast",
+      "outer_cold_seconds": 42.71823831927031,
+      "preflight_seconds": 1.7435554452240467,
+      "construct_seconds": 0.0011679017916321754,
+      "api_seconds": 40.082454518415034,
+      "save_seconds": 0.5189617723226547,
+      "worker_seconds": 42.350185042247176,
+      "maximum_rss_kib": 14199116,
+      "cpu_join_calls": 0,
+      "source_files": {
+        "model.py": "292428207da96cea837919e73b3fa455dc533b5b9e7fb1bca02e3729a92cde52",
+        "segment.py": "ca51439f15ea9b792f2eb4bfb7bdd6cd7f298522e03a5917dda7ed8c9438c441",
+        "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+        "pipeline.py": "030095b124a3556f0508359317ee15108fbb2a3d45a803d80c28350d18776633",
+        "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+        "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f"
+      },
+      "outer_minus_api_seconds": 2.635783800855279,
+      "exclusive_outer_other_seconds": 0.37209868151694536,
+      "api_fraction_of_outer": 0.9382983965500686,
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    },
+    {
+      "report": "validation/smri_cpu/seg_memory_20261005/CPU_FULL.public.json",
+      "name": "parc-fast_candidate",
+      "arm": "candidate",
+      "mode": "parc-fast",
+      "outer_cold_seconds": 43.36913002561778,
+      "preflight_seconds": 2.0900103943422437,
+      "construct_seconds": 0.0010402156040072441,
+      "api_seconds": 40.4107814244926,
+      "save_seconds": 0.4626304730772972,
+      "worker_seconds": 42.96831426862627,
+      "maximum_rss_kib": 14193788,
+      "cpu_join_calls": 8,
+      "source_files": {
+        "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+        "segment.py": "1bc2c3d90a42e4cf664991ec6dd8b0499df4b1c5e788c7adb35d02ce4b2d000e",
+        "cpu_conv.py": "78a0fac2300a45a01ff6790d24218f825ebc21a21f2033a8e6b8c58ebb60dc47",
+        "pipeline.py": "030095b124a3556f0508359317ee15108fbb2a3d45a803d80c28350d18776633",
+        "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+        "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+        "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f"
+      },
+      "outer_minus_api_seconds": 2.9583486011251807,
+      "exclusive_outer_other_seconds": 0.4046675181016326,
+      "api_fraction_of_outer": 0.9317867663156326,
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    }
+  ],
+  "cpu_full_latest_precision_records": [
+    {
+      "report": "validation/smri_cpu/seg_tf32_20261005/CPU_FULL.public.json",
+      "name": "parc_baseline_true",
+      "arm": "baseline",
+      "mode": "parc",
+      "outer_cold_seconds": 52.68018707539886,
+      "preflight_seconds": 1.9797637918964028,
+      "constructor_seconds": 0.0010233540087938309,
+      "api_seconds": 49.898318603634834,
+      "save_seconds": 0.45064714923501015,
+      "worker_seconds": 52.333648229949176,
+      "maximum_rss_kib": 14194124,
+      "load_after": [
+        13.44,
+        17.51,
+        108.14
+      ],
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    },
+    {
+      "report": "validation/smri_cpu/seg_tf32_20261005/CPU_FULL.public.json",
+      "name": "parc_candidate_true",
+      "arm": "candidate",
+      "mode": "parc",
+      "outer_cold_seconds": 53.576845650561154,
+      "preflight_seconds": 1.7415780257433653,
+      "constructor_seconds": 0.001022004522383213,
+      "api_seconds": 51.01799672655761,
+      "save_seconds": 0.43942743353545666,
+      "worker_seconds": 53.203717418015,
+      "maximum_rss_kib": 14182960,
+      "load_after": [
+        15.26,
+        17.34,
+        102.87
+      ],
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    },
+    {
+      "report": "validation/smri_cpu/seg_tf32_20261005/CPU_FULL.public.json",
+      "name": "parc-fast_candidate_true",
+      "arm": "candidate",
+      "mode": "parc-fast",
+      "outer_cold_seconds": 38.159689689055085,
+      "preflight_seconds": 1.9634963357821107,
+      "constructor_seconds": 0.0009128786623477936,
+      "api_seconds": 35.347465391270816,
+      "save_seconds": 0.454183641821146,
+      "worker_seconds": 37.77036076039076,
+      "maximum_rss_kib": 14192696,
+      "load_after": [
+        15.51,
+        17.13,
+        99.19
+      ],
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    },
+    {
+      "report": "validation/smri_cpu/seg_tf32_20261005/CPU_FULL.public.json",
+      "name": "parc-fast_baseline_true",
+      "arm": "baseline",
+      "mode": "parc-fast",
+      "outer_cold_seconds": 38.00871806964278,
+      "preflight_seconds": 1.7255535228177905,
+      "constructor_seconds": 0.000920499674975872,
+      "api_seconds": 35.47414528205991,
+      "save_seconds": 0.46944307815283537,
+      "worker_seconds": 37.67386998794973,
+      "maximum_rss_kib": 14235004,
+      "load_after": [
+        15.06,
+        16.75,
+        94.75
+      ],
+      "api_internal_stage_shares": "not_measured_in_this_current_full_record"
+    }
+  ],
+  "native_records": [
+    {
+      "mode": "seg33",
+      "wall_seconds": 373.0870013516396,
+      "record_sha256": "4fe0cac90ce0886cec68c257559d171589ca32486f76498c4c4e22d8c02b9a8c",
+      "used_for_stable_speed_claim": false,
+      "interpretation": "preserved_outlier_excluded"
+    },
+    {
+      "mode": "parc",
+      "wall_seconds": 48.29569184873253,
+      "record_sha256": "8ffe349b5362c4211a52c20b93d994468e5c9bf5588d73cd5f17c2a1155638d8",
+      "used_for_stable_speed_claim": false,
+      "interpretation": "single_cold_observation"
+    },
+    {
+      "mode": "parc-fast",
+      "wall_seconds": 33.784189416095614,
+      "record_sha256": "27c9a544768c03946bddcab9dca3ddc660482232a2bbcb4c4902e5b4c7630542",
+      "used_for_stable_speed_claim": false,
+      "interpretation": "single_cold_observation"
+    },
+    {
+      "mode": "seg33_repeat",
+      "wall_seconds": 55.04640325624496,
+      "record_sha256": "4005010f0ed0e4ab0bcff99b5759cd5605de88e894d2934644a09b940bbd6abc",
+      "interpretation": "normal_single_cold_observation_not_a_replicate_median"
+    }
+  ],
+  "native_source_binding": {
+    "schema": "fnit_synthseg_official_source_binding/v1",
+    "hostname": "nodecw7",
+    "cpu_affinity": "32,36,40,44,48,52,56,60",
+    "threads": 8,
+    "input_sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21",
+    "sources": {
+      "bin/mri_synthseg": {
+        "bytes": 201,
+        "sha256": "97051ef7a81d60797901cad454dd59f69e0f556024f1ec84be5045ec96cec180"
+      },
+      "python/scripts/mri_synthseg": {
+        "bytes": 124294,
+        "sha256": "f3c182cd100721e8ae4ae4e0661b6ac3c45e80453f716d668d53ca0fe189279b"
+      }
+    },
+    "weights": {
+      "synthseg_2.0.h5": {
+        "bytes": 53079152,
+        "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+      },
+      "synthseg_parc_2.0.h5": {
+        "bytes": 53090840,
+        "sha256": "83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684"
+      },
+      "synthseg_segmentation_labels_2.0.npy": {
+        "bytes": 348,
+        "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+      },
+      "synthseg_segmentation_names_2.0.npy": {
+        "bytes": 7168,
+        "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+      },
+      "synthseg_topological_classes_2.0.npy": {
+        "bytes": 348,
+        "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+      }
+    },
+    "controller_sha256": "7f5215188a07a0ed91470527f898c344760dd95f82dc9ef004ad0f0c216d1bb5",
+    "reference_env_sha256": "266407fe88fef4a569b9aa6aa790d0d842de93887f6ec7d70ba6dca120dccab1"
+  },
+  "native_backend_operator_trace": "not_available_in_saved_formal_reports",
+  "timing_boundary_limitations": [
+    "The first native seg33 cold observation is anomalous; its detailed cause is not established.",
+    "Each native mode has one regular cold observation, not a repeated stable benchmark.",
+    "Candidate ordinary parc and parc-fast remain slower than their same-node native cold observations.",
+    "FNIT worker also verifies resource hashes and saves every API output; API and whole-process clocks are reported separately."
+  ],
+  "partial_join_stage": {
+    "scope": "real final decoder nearest+cat operation, not complete network or CLI",
+    "capture": {
+      "status": "partial_capture_complete",
+      "diagnostic_seconds": 30.396625764667988,
+      "scope": "first original CNN stopped before final decoder conv0; no final prediction",
+      "maximum_rss_kib": 10483084
+    },
+    "summary": {
+      "baseline_median_operation_seconds": 0.9722777828574181,
+      "candidate_median_operation_seconds": 0.5294432733207941,
+      "operation_ratio_baseline_over_candidate": 1.836415404353068
+    },
+    "not_complete_inference": true
+  },
+  "rejected_real_first_two_layer_diagnostic": {
+    "scope": "real_input_reduction_diagnostic_not_benchmark",
+    "mode": "first_layer",
+    "torch_version": "2.5.1",
+    "script_sha256": "96cd0c52a2e9f1a68c2b46b13451302bb0de43c46082321020bcc7d74ec8a159",
+    "results": {
+      "down.0.conv0": {
+        "onednn_slab": {
+          "different_values": 0,
+          "value_count": 264241152,
+          "max_absolute": 0.0,
+          "mean_absolute": 0.0,
+          "diagnostic_seconds": 0.7433658912777901
+        },
+        "original_slab": {
+          "different_values": 0,
+          "value_count": 264241152,
+          "max_absolute": 0.0,
+          "mean_absolute": 0.0,
+          "diagnostic_seconds": 0.8415389358997345
+        }
+      },
+      "down.0.conv1": {
+        "onednn_slab": {
+          "different_values": 229059640,
+          "value_count": 264241152,
+          "max_absolute": 1.430511474609375e-05,
+          "mean_absolute": 8.643739323644197e-08,
+          "diagnostic_seconds": 1.6553732454776764
+        },
+        "original_slab": {
+          "different_values": 0,
+          "value_count": 264241152,
+          "max_absolute": 0.0,
+          "mean_absolute": 0.0,
+          "diagnostic_seconds": 6.065174534916878
+        }
+      }
+    }
+  },
+  "legacy_profiles": [
+    {
+      "fnit_relative_path": "runs/smri_cpu_20261004/t2_seg/profiles/t2_synthseg_case01_profile_initial.json",
+      "sha256": "86dfb40200277e97941b71c043166d81a5f5cc5ff605a5da345327c6521dddb6",
+      "read_only_remote_record": true,
+      "hostname": "nodecw10",
+      "input_alias": "case01",
+      "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+      "network_shape": [
+        192,
+        224,
+        224
+      ],
+      "api_seconds": 147.199004,
+      "module_conv_inclusive_seconds": 96.123398,
+      "preprocess_seconds": 9.651901,
+      "postprocess_seconds": 15.087281,
+      "lcc_seconds_nested_in_postprocess": 11.862757,
+      "soft_volumes_seconds": 0.516414,
+      "top_module_conv_seconds": {
+        "up.3.conv0": 47.214438,
+        "up.3.conv1": 12.324698,
+        "down.0.conv1": 11.538015,
+        "up.2.conv0": 8.589036
+      }
+    },
+    {
+      "fnit_relative_path": "runs/smri_cpu_20261004/t2_seg/profiles/t2_parc_case01_profile_initial.json",
+      "sha256": "378ea0760ac78bf4e423999908842893d6e729f3d320969ff08a1513ea89f574",
+      "read_only_remote_record": true,
+      "hostname": "nodecw10",
+      "input_alias": "case01",
+      "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+      "network_shape": [
+        192,
+        224,
+        224
+      ],
+      "fast": true,
+      "api_seconds": 59.238149,
+      "module_conv_inclusive_seconds": 23.99388,
+      "preprocess_seconds": 10.103496,
+      "postprocess_seconds": 3.619563,
+      "lcc_seconds_nested_in_postprocess": 1.748383
+    }
+  ],
+  "legacy_profile_limitations": [
+    "Different case, network grid, source version and host from current complete timing",
+    "Module hooks would disqualify the current no-hooks CPU join optimization",
+    "External F.conv3d Gaussian blur is not in Module convolution totals",
+    "LCC is nested in postprocess; do not add twice",
+    "Plus child loading was done before the old API clock",
+    "Old LCC graph timing predates the current CPU scipy implementation"
+  ],
+  "unmeasured_current_api_stages": [
+    "T1 input read/resample/orient/normalize",
+    "Plus lazy model load",
+    "original CNN",
+    "flipped CNN",
+    "33-channel blur twice",
+    "69-channel blur",
+    "postprocess and nested LCC",
+    "tie argmax",
+    "soft volumes",
+    "slab pad/conv/output copy exclusive fractions"
+  ],
+  "next_minimum_profile": {
+    "status": "proposed_not_executed_in_this_report",
+    "full_fnit_arms": 1,
+    "mode": "ordinary33",
+    "fresh_process": true,
+    "threads": 8,
+    "affinity": "32,36,40,44,48,52,56,60",
+    "common_cpu_lock": true,
+    "cuda_visible_devices": "",
+    "official_arms": 0,
+    "observation": "private Python function/forward timers; no Module hooks; preserve existing arithmetic",
+    "required_gates": [
+      "source/weight/input/config hashes",
+      "8 actual CPU join calls",
+      "complete maps/headers/CSV numerical and saved-file SHA equality",
+      "source unchanged",
+      "exclusive versus nested clocks",
+      "RSS and instrumentation overhead"
+    ],
+    "performance_claim": "diagnostic only; do not replace formal uninstrumented wall times"
+  },
+  "cpu_official_speed_goal_met": false,
+  "new_production_change": false,
+  "new_mri_execution": false,
+  "new_gpu_execution": false
+}

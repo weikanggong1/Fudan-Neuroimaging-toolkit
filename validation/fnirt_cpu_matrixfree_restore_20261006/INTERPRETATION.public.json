@@ -1,0 +1,170 @@
+{
+  "comparison_title": "restored current optimized/reference callbacks and existing current materialized-H CSC action; no native or linear-solve oracle",
+  "original_H_identity": {
+    "bytes": 11082632,
+    "sha256": "426e0d4add9dd6f46a972ecde0b4e06e6f1350301c06be4c6391af4148c4fa8d"
+  },
+  "directions": [
+    {
+      "label": "unit_first",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "optimized_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      }
+    },
+    {
+      "label": "unit_middle",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "optimized_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      }
+    },
+    {
+      "label": "unit_intensity",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "optimized_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      }
+    },
+    {
+      "label": "saved_current_full_g",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "optimized_vs_existing_CSC": {
+        "different_bits": 877,
+        "max_abs": 3.552713678800501e-15,
+        "relative_l2": 2.839669883872303e-19,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 877,
+        "max_abs": 3.552713678800501e-15,
+        "relative_l2": 2.839669883872303e-19,
+        "all_finite": true
+      }
+    },
+    {
+      "label": "saved_old_solution",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "optimized_vs_existing_CSC": {
+        "different_bits": 1128,
+        "max_abs": 1.7763568394002505e-15,
+        "relative_l2": 1.8044984774236337e-16,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 1128,
+        "max_abs": 1.7763568394002505e-15,
+        "relative_l2": 1.8044984774236337e-16,
+        "all_finite": true
+      }
+    },
+    {
+      "label": "saved_new_solution",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "optimized_vs_existing_CSC": {
+        "different_bits": 1143,
+        "max_abs": 1.7763568394002505e-15,
+        "relative_l2": 1.7878525268259794e-16,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 1143,
+        "max_abs": 1.7763568394002505e-15,
+        "relative_l2": 1.7878525268259794e-16,
+        "all_finite": true
+      }
+    },
+    {
+      "label": "saved_new_minus_old",
+      "optimized_vs_reference": {
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "all_finite": true
+      },
+      "optimized_vs_existing_CSC": {
+        "different_bits": 1107,
+        "max_abs": 1.0755285551056204e-16,
+        "relative_l2": 1.3545709522148033e-14,
+        "all_finite": true
+      },
+      "reference_vs_existing_CSC": {
+        "different_bits": 1107,
+        "max_abs": 1.0755285551056204e-16,
+        "relative_l2": 1.3545709522148033e-14,
+        "all_finite": true
+      }
+    }
+  ],
+  "matrixfree_unit_bridge_scope": "Three selected original H columns exactly reproduce after explicit value/stride restoration; not all columns and not arbitrary-direction bitexactness.",
+  "arbitrary_direction_rounding_scope": "The mature composed spline callback and strict CSC use different floating-point accumulation paths. Small observed differences are diagnostic values, not automatically an algorithm bug or a new registration acceptance threshold.",
+  "alias_layout_scope": "68 tensor values and recorded byte strides restore exactly per arm; 4 NPZ-loaded layouts differed from producer before explicit restoration. Old addresses, storage offsets and alias graph are not persisted; new independent storage and before/after operand hashes are verified.",
+  "pointwise_control_result": "All seven mature optimized and forced-reference callback outputs are bitexact in this one frozen state. This control gives no evidence of a pointwise-normal numerical discrepancy on these directions.",
+  "not_established": [
+    "All possible directions or all H columns exact",
+    "matrix-free PCG accuracy/convergence",
+    "native same-system solver equivalence",
+    "full FNIRT nonlinear estimation",
+    "whole CPU precision repair",
+    "paired speedup",
+    "default runtime integration"
+  ],
+  "clock_scope": "Ordered numeric control with cold JIT/packing; callback times are not ABBA or performance ratios."
+}

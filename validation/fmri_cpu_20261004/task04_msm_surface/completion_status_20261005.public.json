@@ -1,0 +1,3502 @@
+{
+  "schema_version": 2,
+  "updated_utc": "2026-10-05",
+  "baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+  "scope": "Complete declared real inputs; one fresh process observation per backend/thread case",
+  "privacy": "Aggregate metrics and SHA-256 only; no individual paths or images",
+  "source_status": "Server frozen candidate observed, not final local snapshot",
+  "timing_policy": "Fresh process includes program startup, read/write and exit; API clocks separately measure FNIT complete calls. MATLAB startup differences are not computation speed.",
+  "suites": {
+    "candidate_registration_cpu1_cpu8": {
+      "status": "executed_with_numeric_comparisons",
+      "host": "nodecw8",
+      "threads": [
+        1,
+        8
+      ],
+      "manifest_sha256": "84a4df3d8665426b7cb1d8e747957999f1ef4abe356b8abf7baf6c7dd34d118d",
+      "captured_receipt_sha256": "1423ed532c490cf24083844463d43ddc478af98a40bfd17a714708681740813f",
+      "resource_sha256": {
+        "resource.newmsm": {
+          "sha256": "af5c04246cfeea19233232168acbc1f31266f28b1a7cb6779b8f1bfa32eb9615",
+          "bytes": 77232
+        },
+        "resource.wb_command": {
+          "sha256": "b0944851ba0da729cfd02a854c949207950e2a2f5c91e0bc222332085ae88458",
+          "bytes": 22347984
+        }
+      },
+      "runtime_source_at_lock_acquisition": {
+        "baseline": {
+          "tree_sha256": "2c954bed6aa028bb8e5bce26b0a33054921961c561260614cfff7c7efb0cb59a",
+          "owned_files": {
+            "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+            "src/fnit/msm/_affine.py": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e",
+            "src/fnit/msm/_execution.py": "e67d43b972dd690c9ec86081c6d3e4fb783935def4bec8f264ab7d232916beae",
+            "src/fnit/msm/_ordered_sparse.py": "440ffd8f634fa42736aa0ea5b5f41de114e685a033146492d1e1f9e7a5364f11",
+            "src/fnit/msm/_spatial.py": "c7319ae9a616dbc2d741a8e8ecb0543cec6ffb7f54914f672f7b6947e6359204",
+            "src/fnit/msm/_sphere_map.py": "51bd19d1c12ef8be3427d4f9ef642dae5591ae8b0e0638b426d89e12173751be",
+            "src/fnit/msm/cli.py": "7f9b9d2df7619818eaff9e4bfac29f239c17cbddc3575968dbacada7f387fe8d",
+            "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+            "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+            "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+            "src/fnit/msm/features.py": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2",
+            "src/fnit/msm/msmall.py": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+            "src/fnit/msm/msmsulc.py": "a4ff7112888d645497ddbcc003059a810231d60a60dd9f06602fa7a94601f924",
+            "src/fnit/msm/prepare.py": "a8f6ca261378768e38a13c53d85d58702a2f4e7f30928e6e2b6b6e1665fd9b11"
+          }
+        },
+        "candidate": {
+          "tree_sha256": "72059515e650f7db02084fd41816ab78abf61bfbc1286e8f398a2ebdfd5b294f",
+          "owned_files": {
+            "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+            "src/fnit/msm/_affine.py": "fcbd622770d9c9f9b09115469e39d2d755385fcfebac212d559eb2a3e595ed3d",
+            "src/fnit/msm/_execution.py": "e67d43b972dd690c9ec86081c6d3e4fb783935def4bec8f264ab7d232916beae",
+            "src/fnit/msm/_ordered_sparse.py": "440ffd8f634fa42736aa0ea5b5f41de114e685a033146492d1e1f9e7a5364f11",
+            "src/fnit/msm/_point_cpu.py": "00184aadad94aae4b9f64f3bfd14f1c19a0cafc921c6d6cf8d46256e3367b543",
+            "src/fnit/msm/_spatial.py": "c7319ae9a616dbc2d741a8e8ecb0543cec6ffb7f54914f672f7b6947e6359204",
+            "src/fnit/msm/_sphere_cpu.py": "5024a69e6713efe0f9f4c3fa7bb3000c786aba31640617d7c1ccd2175c35b161",
+            "src/fnit/msm/_sphere_map.py": "ba07e2b73098ebf1083e86d1eeb24801e60a0c6ff25e371d514b5b6445029521",
+            "src/fnit/msm/cli.py": "7f9b9d2df7619818eaff9e4bfac29f239c17cbddc3575968dbacada7f387fe8d",
+            "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+            "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+            "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+            "src/fnit/msm/features.py": "8be99f074b2e5aa4b6b150e84d90f79800e419ed823ef7a452226eca120410a6",
+            "src/fnit/msm/msmall.py": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+            "src/fnit/msm/msmsulc.py": "52562009f1fd53dde053a8a981fd621813ae6c186ea88910f7d1b2e20ec563f1",
+            "src/fnit/msm/prepare.py": "a8f6ca261378768e38a13c53d85d58702a2f4e7f30928e6e2b6b6e1665fd9b11"
+          }
+        }
+      },
+      "records": [
+        {
+          "case_id": "msmsulc_hcp_default",
+          "threads": 1,
+          "affinity": [
+            3
+          ],
+          "full_process": {
+            "official": [
+              1537.9027004567906
+            ],
+            "baseline": [],
+            "candidate": [
+              455.0841108271852
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 757.996854,
+                  "system_seconds": 3.678319,
+                  "effective_cpu_cores": 0.9753500967084439
+                },
+                {
+                  "user_seconds": 741.94263,
+                  "system_seconds": 3.8982419999999998,
+                  "effective_cpu_cores": 0.9852876369357497
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 431.2881890000001,
+                "system_seconds": 22.466675000000002,
+                "effective_cpu_cores": 0.9970791183529369
+              }
+            ]
+          },
+          "load_before": [
+            98.86,
+            95.41,
+            102.13
+          ],
+          "load_after": [
+            44.88,
+            52.51,
+            74.58
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "L_sphere": {
+                "status": "compared",
+                "vertices": 120035,
+                "faces": 240066,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": true,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 1,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": -36.07202236820285,
+                  "relative_orientation_changed_faces": 1,
+                  "minimum_relative_orientation_ratio": -2.380745230230542,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 1,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": -36.07202236820285,
+                  "relative_orientation_changed_faces": 1,
+                  "minimum_relative_orientation_ratio": -2.380745230230542,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                },
+                "angular_degrees": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                }
+              },
+              "R_sphere": {
+                "status": "compared",
+                "vertices": 122950,
+                "faces": 245896,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": true,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 0.003048996865771869,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.47816522028144076,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 0.003048996865771869,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.47816522028144076,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                },
+                "angular_degrees": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                }
+              }
+            }
+          },
+          "official_output_metadata": {
+            "L_sphere": {
+              "sha256": "b8b1e4447c090ad61da5d214ca98acbc19e28b77ea2a6c16dd6216b32091720d",
+              "bytes": 2957344
+            },
+            "R_sphere": {
+              "sha256": "77b2d199c9e0b95d688277008e5764ad566ec17adc0cb0da3a0541c11f738b4b",
+              "bytes": 3018873
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.historical_single_thread_oracle.L": {
+              "sha256": "b8b1e4447c090ad61da5d214ca98acbc19e28b77ea2a6c16dd6216b32091720d",
+              "bytes": 2957344
+            },
+            "input.historical_single_thread_oracle.R": {
+              "sha256": "77b2d199c9e0b95d688277008e5764ad566ec17adc0cb0da3a0541c11f738b4b",
+              "bytes": 3018873
+            },
+            "input.configuration": {
+              "sha256": "46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203",
+              "bytes": 298
+            },
+            "input.inputs.L.reference_sulc": {
+              "sha256": "10f5e3fd775bb2f77278b0b69126f6f67abefb3c76de6f1233128d9914ddcb5c",
+              "bytes": 846142
+            },
+            "input.inputs.R.reference_sulc": {
+              "sha256": "4eefc7807cdd9076cfc9ffc933da3d0c100a4770d5359c3e5f4fb37d71097520",
+              "bytes": 847311
+            },
+            "input.inputs.L.reference_sphere": {
+              "sha256": "6968ef7d9638de54ade78cdbb7f0c6f25025c60477f72456ab2fb77c53a85cfa",
+              "bytes": 3614784
+            },
+            "input.inputs.R.reference_sphere": {
+              "sha256": "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1",
+              "bytes": 3492005
+            },
+            "input.inputs.L.native_sphere": {
+              "sha256": "725630604c9b7efa848d28990bf05381a54d98de5ef304dd2e4c790d91eeab4e",
+              "bytes": 2950723
+            },
+            "input.inputs.L.affine": {
+              "sha256": "e96525670550f03a214132b8bedec209b8e02bc47b753974d957a43e9aa48478",
+              "bytes": 224
+            },
+            "input.inputs.L.rotated_sphere": {
+              "sha256": "7a2a2d49210b7e1ba7317067a404e606cb93e497bda1d5ba9190da283e40b780",
+              "bytes": 2959302
+            },
+            "input.inputs.L.native_sulc": {
+              "sha256": "bfa6be80c75035e09d5bb0ae571061cc8ccd5049acc11663e2a5bae5d6703056",
+              "bytes": 592269
+            },
+            "input.inputs.R.native_sphere": {
+              "sha256": "ff69ad4a74d39bde95dc6f1184a2bb19535d8661c1b17d419c86bbe8b6215a05",
+              "bytes": 3017972
+            },
+            "input.inputs.R.affine": {
+              "sha256": "4f39e89b49269addfcf522d5ed0a7fed9d15f2397ce8956d21a0a4842470c6ca",
+              "bytes": 226
+            },
+            "input.inputs.R.rotated_sphere": {
+              "sha256": "c261ccbb53669a73ad44e2885afc1d038db3d23f27abb115663da46762ecda6b",
+              "bytes": 3020667
+            },
+            "input.inputs.R.native_sulc": {
+              "sha256": "3578305638120c888756212ff261a3c6ac244e841390086db9dc06bc8bcf4eb4",
+              "bytes": 606614
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                452.69628970045596
+              ],
+              "maximum_rss_kib": 632028,
+              "threads": {
+                "torch": 1,
+                "torch_interop": 1,
+                "numba": 1
+              },
+              "affinity": [
+                3
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "L_sphere": {
+                  "sha256": "9c100ba2897aff5d4c4b9047e2347c165cfe344c9b79e497d9efe30a627c20b0",
+                  "bytes": 2957017
+                },
+                "R_sphere": {
+                  "sha256": "d984302ad57b66b769cf3ec1ccfffa3d67b76eb7676b0b552d7e1db10357cac5",
+                  "bytes": 3018545
+                },
+                "registration_report": {
+                  "sha256": "f8b63ecad1972b56c45185a32512477e86b4fe5d18c0b08e885d4ce392b2f3e9",
+                  "bytes": 13913
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "msmall_wrn_coarse",
+          "threads": 1,
+          "affinity": [
+            3
+          ],
+          "full_process": {
+            "official": [
+              96.7240516571328
+            ],
+            "baseline": [],
+            "candidate": [
+              58.94761910755187
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 59.0761379999999,
+                  "system_seconds": 0.4029810000000005,
+                  "effective_cpu_cores": 0.9989238922471716
+                },
+                {
+                  "user_seconds": 36.676332,
+                  "system_seconds": 0.45099099999999837,
+                  "effective_cpu_cores": 0.9985601525146107
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 39.8173589999999,
+                "system_seconds": 18.453850000000003,
+                "effective_cpu_cores": 0.9885252344743959
+              }
+            ]
+          },
+          "load_before": [
+            44.88,
+            52.51,
+            74.58
+          ],
+          "load_after": [
+            44.13,
+            49.14,
+            69.81
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "L_sphere": {
+                "status": "compared",
+                "vertices": 32492,
+                "faces": 64980,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": true,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 71.39921440926264,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.1840689393612992,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 71.39921440926264,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.1840689393612992,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                },
+                "angular_degrees": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                }
+              },
+              "R_sphere": {
+                "status": "compared",
+                "vertices": 32492,
+                "faces": 64980,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": true,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 32.71429133273887,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.08430763142060055,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 32.71429133273887,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.08430763142060055,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                },
+                "angular_degrees": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                }
+              }
+            }
+          },
+          "official_output_metadata": {
+            "L_sphere": {
+              "sha256": "11621f7349f04547d559131d6da28a769b10818b2e8b9cf2bc073cfc2c3fcfb3",
+              "bytes": 716079
+            },
+            "R_sphere": {
+              "sha256": "ae5959f6b2176207cb216a99e3a76e02b3d00ce9117274e647669b46fdc6c353",
+              "bytes": 703431
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.inputs.L.reference_features": {
+              "sha256": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d",
+              "bytes": 4741054
+            },
+            "input.inputs.L.reference_weights": {
+              "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "bytes": 46170
+            },
+            "input.inputs.L.source_features": {
+              "sha256": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a",
+              "bytes": 4745718
+            },
+            "input.inputs.L.source_weights": {
+              "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "bytes": 46170
+            },
+            "input.inputs.R.reference_features": {
+              "sha256": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29",
+              "bytes": 4746494
+            },
+            "input.inputs.R.reference_weights": {
+              "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "bytes": 47242
+            },
+            "input.inputs.R.source_features": {
+              "sha256": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826",
+              "bytes": 4746734
+            },
+            "input.inputs.R.source_weights": {
+              "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "bytes": 47242
+            },
+            "input.configuration": {
+              "sha256": "ec9348a2bd2aea5ce2bf1a7387997dabb3443784c15a017faa4871e4ea38cc2e",
+              "bytes": 223
+            },
+            "input.inputs.L.initial_sphere": {
+              "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "bytes": 562891
+            },
+            "input.inputs.R.initial_sphere": {
+              "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "bytes": 553052
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                56.16187655646354
+              ],
+              "maximum_rss_kib": 512744,
+              "threads": {
+                "torch": 1,
+                "torch_interop": 1,
+                "numba": 1
+              },
+              "affinity": [
+                3
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "L_sphere": {
+                  "sha256": "1c48567bdfd9f91ca2de0b1144293d979fecdad8095405e6185833b17a9bec0f",
+                  "bytes": 715883
+                },
+                "R_sphere": {
+                  "sha256": "0c24685684c75b8a0c7d875ce926eab20c92d3349d4614752831e8592296e105",
+                  "bytes": 703235
+                },
+                "registration_report": {
+                  "sha256": "1f3d599e74effb6e877ab023aae0bf256453d98355feeb5a6fe7c29598bce740",
+                  "bytes": 6176
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "msmall_wrn_refine",
+          "threads": 1,
+          "affinity": [
+            3
+          ],
+          "full_process": {
+            "official": [
+              2020.025248943828
+            ],
+            "baseline": [],
+            "candidate": [
+              1512.8003346836194
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 876.4883730000001,
+                  "system_seconds": 4.156602999999997,
+                  "effective_cpu_cores": 0.9712320081552651
+                },
+                {
+                  "user_seconds": 1099.968499,
+                  "system_seconds": 5.750934999999998,
+                  "effective_cpu_cores": 0.9931949384110863
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 692.3113670000002,
+                "system_seconds": 777.373531,
+                "effective_cpu_cores": 0.9714995854409061
+              }
+            ]
+          },
+          "load_before": [
+            44.13,
+            49.14,
+            69.81
+          ],
+          "load_after": [
+            111.46,
+            121.46,
+            91.09
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "L_sphere": {
+                "status": "compared",
+                "vertices": 32492,
+                "faces": 64980,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": true,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 173.03013003905835,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.44589772110487685,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 173.03013003905835,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.44589772110487685,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                },
+                "angular_degrees": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                }
+              },
+              "R_sphere": {
+                "status": "compared",
+                "vertices": 32492,
+                "faces": 64980,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": true,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 125.27843943303918,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.32549428774784767,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 125.27843943303918,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.32549428774784767,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                },
+                "angular_degrees": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                }
+              }
+            }
+          },
+          "official_output_metadata": {
+            "L_sphere": {
+              "sha256": "4f5abf87e9109e0cc50c5a7ff85fb9929c7124ec9c9c998f98b441addea02d84",
+              "bytes": 716079
+            },
+            "R_sphere": {
+              "sha256": "54e0595fc7b8fc711c4e4b0daa96ccf1fd1e145846e125a9210c0fae8364cbf5",
+              "bytes": 703407
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.inputs.L.reference_features": {
+              "sha256": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d",
+              "bytes": 4741054
+            },
+            "input.inputs.L.reference_weights": {
+              "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "bytes": 46170
+            },
+            "input.inputs.L.source_features": {
+              "sha256": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a",
+              "bytes": 4745718
+            },
+            "input.inputs.L.source_weights": {
+              "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "bytes": 46170
+            },
+            "input.inputs.R.reference_features": {
+              "sha256": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29",
+              "bytes": 4746494
+            },
+            "input.inputs.R.reference_weights": {
+              "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "bytes": 47242
+            },
+            "input.inputs.R.source_features": {
+              "sha256": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826",
+              "bytes": 4746734
+            },
+            "input.inputs.R.source_weights": {
+              "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "bytes": 47242
+            },
+            "input.configuration": {
+              "sha256": "646f100e7826d0c285f379f2a9121f0c0c8cd61a3d2d200cc241c416617b8555",
+              "bytes": 283
+            },
+            "input.inputs.L.initial_sphere": {
+              "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "bytes": 562891
+            },
+            "input.inputs.R.initial_sphere": {
+              "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "bytes": 553052
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                1510.5175457317382
+              ],
+              "maximum_rss_kib": 1768748,
+              "threads": {
+                "torch": 1,
+                "torch_interop": 1,
+                "numba": 1
+              },
+              "affinity": [
+                3
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "L_sphere": {
+                  "sha256": "c8b9fe43bb3e09d00f9759337714edd7accd8d3cbc2988dfcd05e473c4681aa4",
+                  "bytes": 715883
+                },
+                "R_sphere": {
+                  "sha256": "76390139528627816a2244580435d5a783ae024bfb55dadaf0726722a09f0771",
+                  "bytes": 703211
+                },
+                "registration_report": {
+                  "sha256": "e9b0ea07a7e69b12a6ee19d4cfad600ba9699f1afc1e9d67cfb6228612fb58f1",
+                  "bytes": 13125
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "msmsulc_hcp_default",
+          "threads": 8,
+          "affinity": [
+            3,
+            7,
+            19,
+            27,
+            35,
+            43,
+            47,
+            51
+          ],
+          "full_process": {
+            "official": [
+              466.98597124964
+            ],
+            "baseline": [],
+            "candidate": [
+              173.39347977470607
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 947.0849699999999,
+                  "system_seconds": 3.2158790000000863,
+                  "effective_cpu_cores": 3.8580460224501216
+                },
+                {
+                  "user_seconds": 893.7474729999994,
+                  "system_seconds": 3.5313659999999345,
+                  "effective_cpu_cores": 4.066168801801639
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 465.9595589999999,
+                "system_seconds": 35.736469000000056,
+                "effective_cpu_cores": 2.893396156832796
+              }
+            ]
+          },
+          "load_before": [
+            111.46,
+            121.46,
+            91.09
+          ],
+          "load_after": [
+            62.55,
+            79.22,
+            85.28
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "L_sphere": {
+                "status": "compared",
+                "vertices": 120035,
+                "faces": 240066,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": true,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 1,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": -36.07202236820285,
+                  "relative_orientation_changed_faces": 1,
+                  "minimum_relative_orientation_ratio": -2.380745230230542,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 1,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": -36.07202236820285,
+                  "relative_orientation_changed_faces": 1,
+                  "minimum_relative_orientation_ratio": -2.380745230230542,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                },
+                "angular_degrees": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                }
+              },
+              "R_sphere": {
+                "status": "compared",
+                "vertices": 122950,
+                "faces": 245896,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": true,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 0.003048996865771869,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.47816522028144076,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 0.003048996865771869,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.47816522028144076,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                },
+                "angular_degrees": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                }
+              }
+            }
+          },
+          "official_output_metadata": {
+            "L_sphere": {
+              "sha256": "b8b1e4447c090ad61da5d214ca98acbc19e28b77ea2a6c16dd6216b32091720d",
+              "bytes": 2957344
+            },
+            "R_sphere": {
+              "sha256": "77b2d199c9e0b95d688277008e5764ad566ec17adc0cb0da3a0541c11f738b4b",
+              "bytes": 3018873
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.historical_single_thread_oracle.L": {
+              "sha256": "b8b1e4447c090ad61da5d214ca98acbc19e28b77ea2a6c16dd6216b32091720d",
+              "bytes": 2957344
+            },
+            "input.historical_single_thread_oracle.R": {
+              "sha256": "77b2d199c9e0b95d688277008e5764ad566ec17adc0cb0da3a0541c11f738b4b",
+              "bytes": 3018873
+            },
+            "input.configuration": {
+              "sha256": "46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203",
+              "bytes": 298
+            },
+            "input.inputs.L.reference_sulc": {
+              "sha256": "10f5e3fd775bb2f77278b0b69126f6f67abefb3c76de6f1233128d9914ddcb5c",
+              "bytes": 846142
+            },
+            "input.inputs.R.reference_sulc": {
+              "sha256": "4eefc7807cdd9076cfc9ffc933da3d0c100a4770d5359c3e5f4fb37d71097520",
+              "bytes": 847311
+            },
+            "input.inputs.L.reference_sphere": {
+              "sha256": "6968ef7d9638de54ade78cdbb7f0c6f25025c60477f72456ab2fb77c53a85cfa",
+              "bytes": 3614784
+            },
+            "input.inputs.R.reference_sphere": {
+              "sha256": "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1",
+              "bytes": 3492005
+            },
+            "input.inputs.L.native_sphere": {
+              "sha256": "725630604c9b7efa848d28990bf05381a54d98de5ef304dd2e4c790d91eeab4e",
+              "bytes": 2950723
+            },
+            "input.inputs.L.affine": {
+              "sha256": "e96525670550f03a214132b8bedec209b8e02bc47b753974d957a43e9aa48478",
+              "bytes": 224
+            },
+            "input.inputs.L.rotated_sphere": {
+              "sha256": "7a2a2d49210b7e1ba7317067a404e606cb93e497bda1d5ba9190da283e40b780",
+              "bytes": 2959302
+            },
+            "input.inputs.L.native_sulc": {
+              "sha256": "bfa6be80c75035e09d5bb0ae571061cc8ccd5049acc11663e2a5bae5d6703056",
+              "bytes": 592269
+            },
+            "input.inputs.R.native_sphere": {
+              "sha256": "ff69ad4a74d39bde95dc6f1184a2bb19535d8661c1b17d419c86bbe8b6215a05",
+              "bytes": 3017972
+            },
+            "input.inputs.R.affine": {
+              "sha256": "4f39e89b49269addfcf522d5ed0a7fed9d15f2397ce8956d21a0a4842470c6ca",
+              "bytes": 226
+            },
+            "input.inputs.R.rotated_sphere": {
+              "sha256": "c261ccbb53669a73ad44e2885afc1d038db3d23f27abb115663da46762ecda6b",
+              "bytes": 3020667
+            },
+            "input.inputs.R.native_sulc": {
+              "sha256": "3578305638120c888756212ff261a3c6ac244e841390086db9dc06bc8bcf4eb4",
+              "bytes": 606614
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                171.05650686006993
+              ],
+              "maximum_rss_kib": 835236,
+              "threads": {
+                "torch": 8,
+                "torch_interop": 1,
+                "numba": 8
+              },
+              "affinity": [
+                3,
+                7,
+                19,
+                27,
+                35,
+                43,
+                47,
+                51
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "L_sphere": {
+                  "sha256": "9c100ba2897aff5d4c4b9047e2347c165cfe344c9b79e497d9efe30a627c20b0",
+                  "bytes": 2957017
+                },
+                "R_sphere": {
+                  "sha256": "d984302ad57b66b769cf3ec1ccfffa3d67b76eb7676b0b552d7e1db10357cac5",
+                  "bytes": 3018545
+                },
+                "registration_report": {
+                  "sha256": "608b2b5b79df69eee5ce2309c559d2cf60939bc692db6921ca7ee0a1c9ea15fd",
+                  "bytes": 13926
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "msmall_wrn_coarse",
+          "threads": 8,
+          "affinity": [
+            3,
+            7,
+            19,
+            27,
+            35,
+            43,
+            47,
+            51
+          ],
+          "full_process": {
+            "official": [
+              28.81352174282074
+            ],
+            "baseline": [],
+            "candidate": [
+              26.67107469215989
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 81.76387700000032,
+                  "system_seconds": 0.37698599999998805,
+                  "effective_cpu_cores": 5.8744726842927575
+                },
+                {
+                  "user_seconds": 81.67074299999967,
+                  "system_seconds": 0.4541039999999157,
+                  "effective_cpu_cores": 5.537436122022604
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 41.36545500000011,
+                "system_seconds": 17.509410000000003,
+                "effective_cpu_cores": 2.2074425451369915
+              }
+            ]
+          },
+          "load_before": [
+            62.55,
+            79.22,
+            85.28
+          ],
+          "load_after": [
+            72.2,
+            78.26,
+            84.56
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "L_sphere": {
+                "status": "compared",
+                "vertices": 32492,
+                "faces": 64980,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": true,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 71.39921440926264,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.1840689393612992,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 71.39921440926264,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.1840689393612992,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                },
+                "angular_degrees": {
+                  "mean": 0.0,
+                  "p99": 0.0,
+                  "max": 0.0
+                }
+              },
+              "R_sphere": {
+                "status": "compared",
+                "vertices": 32492,
+                "faces": 64980,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": false,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 32.71429133273887,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.08430763142060055,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 13.56304685906207,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.03495317517056564,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 1.2314875068272084,
+                  "p99": 7.444105546058516,
+                  "max": 22.81525899620657
+                },
+                "angular_degrees": {
+                  "mean": 0.7056577056857269,
+                  "p99": 4.266143811228294,
+                  "max": 13.10070036178568
+                }
+              }
+            }
+          },
+          "official_output_metadata": {
+            "L_sphere": {
+              "sha256": "11621f7349f04547d559131d6da28a769b10818b2e8b9cf2bc073cfc2c3fcfb3",
+              "bytes": 716079
+            },
+            "R_sphere": {
+              "sha256": "24decb13b3a3a173b3abcc426e8a11ba60677190e5e98fe5c7bede1accf44b21",
+              "bytes": 703311
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.inputs.L.reference_features": {
+              "sha256": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d",
+              "bytes": 4741054
+            },
+            "input.inputs.L.reference_weights": {
+              "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "bytes": 46170
+            },
+            "input.inputs.L.source_features": {
+              "sha256": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a",
+              "bytes": 4745718
+            },
+            "input.inputs.L.source_weights": {
+              "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "bytes": 46170
+            },
+            "input.inputs.R.reference_features": {
+              "sha256": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29",
+              "bytes": 4746494
+            },
+            "input.inputs.R.reference_weights": {
+              "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "bytes": 47242
+            },
+            "input.inputs.R.source_features": {
+              "sha256": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826",
+              "bytes": 4746734
+            },
+            "input.inputs.R.source_weights": {
+              "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "bytes": 47242
+            },
+            "input.configuration": {
+              "sha256": "ec9348a2bd2aea5ce2bf1a7387997dabb3443784c15a017faa4871e4ea38cc2e",
+              "bytes": 223
+            },
+            "input.inputs.L.initial_sphere": {
+              "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "bytes": 562891
+            },
+            "input.inputs.R.initial_sphere": {
+              "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "bytes": 553052
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                24.196201800368726
+              ],
+              "maximum_rss_kib": 657456,
+              "threads": {
+                "torch": 8,
+                "torch_interop": 1,
+                "numba": 8
+              },
+              "affinity": [
+                3,
+                7,
+                19,
+                27,
+                35,
+                43,
+                47,
+                51
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "L_sphere": {
+                  "sha256": "1c48567bdfd9f91ca2de0b1144293d979fecdad8095405e6185833b17a9bec0f",
+                  "bytes": 715883
+                },
+                "R_sphere": {
+                  "sha256": "0c24685684c75b8a0c7d875ce926eab20c92d3349d4614752831e8592296e105",
+                  "bytes": 703235
+                },
+                "registration_report": {
+                  "sha256": "108171fc2a5fbb0e20ba76cee7e58f0bba5dcf0f6588f86996e5eea88004ea95",
+                  "bytes": 6172
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "msmall_wrn_refine",
+          "threads": 8,
+          "affinity": [
+            3,
+            7,
+            19,
+            27,
+            35,
+            43,
+            47,
+            51
+          ],
+          "full_process": {
+            "official": [
+              600.4198202565312
+            ],
+            "baseline": [],
+            "candidate": [
+              360.84126217104495
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 1209.195348000001,
+                  "system_seconds": 2.2981600000000526,
+                  "effective_cpu_cores": 5.339671879909728
+                },
+                {
+                  "user_seconds": 2015.745671999999,
+                  "system_seconds": 3.767983999999956,
+                  "effective_cpu_cores": 5.406499275864483
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 672.9510979999995,
+                "system_seconds": 695.361022,
+                "effective_cpu_cores": 3.792005691830766
+              }
+            ]
+          },
+          "load_before": [
+            72.2,
+            78.26,
+            84.56
+          ],
+          "load_after": [
+            50.73,
+            54.91,
+            67.07
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "L_sphere": {
+                "status": "compared",
+                "vertices": 32492,
+                "faces": 64980,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": false,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 173.03013003905835,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.44589772110487685,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 191.85463870990498,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.4966210391908367,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.43828901010265253,
+                  "p99": 1.7096491805567475,
+                  "max": 5.080898870259709
+                },
+                "angular_degrees": {
+                  "mean": 0.25112194133565124,
+                  "p99": 0.9795687474453281,
+                  "max": 2.911453884496668
+                }
+              },
+              "R_sphere": {
+                "status": "compared",
+                "vertices": 32492,
+                "faces": 64980,
+                "finite": true,
+                "ordered_faces_equal": true,
+                "coordinates_exact": false,
+                "vertex_correspondence": "unchanged ordered source vertices and faces; no vertex permutation",
+                "candidate_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 125.27843943303918,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.32549428774784767,
+                  "degenerate_input_faces": 0
+                },
+                "reference_orientation": {
+                  "absolute_negative_faces": 0,
+                  "absolute_zero_faces": 0,
+                  "minimum_signed_determinant": 148.6269957114369,
+                  "relative_orientation_changed_faces": 0,
+                  "minimum_relative_orientation_ratio": 0.3861577325526473,
+                  "degenerate_input_faces": 0
+                },
+                "chord_mm": {
+                  "mean": 0.48424692849422146,
+                  "p99": 2.4758693700359427,
+                  "max": 5.517116184116028
+                },
+                "angular_degrees": {
+                  "mean": 0.2774546435212159,
+                  "p99": 1.418604881856158,
+                  "max": 3.161475770419918
+                }
+              }
+            }
+          },
+          "official_output_metadata": {
+            "L_sphere": {
+              "sha256": "873d78b859f7de42632a2518f55f9f346d3ec036da136ed362b249d3b3ebc56c",
+              "bytes": 716007
+            },
+            "R_sphere": {
+              "sha256": "36fc522cc45dec9e6a7b234a05765ad08436846cda149eb20c580cb199723c07",
+              "bytes": 703447
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.inputs.L.reference_features": {
+              "sha256": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d",
+              "bytes": 4741054
+            },
+            "input.inputs.L.reference_weights": {
+              "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "bytes": 46170
+            },
+            "input.inputs.L.source_features": {
+              "sha256": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a",
+              "bytes": 4745718
+            },
+            "input.inputs.L.source_weights": {
+              "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "bytes": 46170
+            },
+            "input.inputs.R.reference_features": {
+              "sha256": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29",
+              "bytes": 4746494
+            },
+            "input.inputs.R.reference_weights": {
+              "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "bytes": 47242
+            },
+            "input.inputs.R.source_features": {
+              "sha256": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826",
+              "bytes": 4746734
+            },
+            "input.inputs.R.source_weights": {
+              "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "bytes": 47242
+            },
+            "input.configuration": {
+              "sha256": "646f100e7826d0c285f379f2a9121f0c0c8cd61a3d2d200cc241c416617b8555",
+              "bytes": 283
+            },
+            "input.inputs.L.initial_sphere": {
+              "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "bytes": 562891
+            },
+            "input.inputs.R.initial_sphere": {
+              "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "bytes": 553052
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                358.66975381970406
+              ],
+              "maximum_rss_kib": 3016968,
+              "threads": {
+                "torch": 8,
+                "torch_interop": 1,
+                "numba": 8
+              },
+              "affinity": [
+                3,
+                7,
+                19,
+                27,
+                35,
+                43,
+                47,
+                51
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "L_sphere": {
+                  "sha256": "c8b9fe43bb3e09d00f9759337714edd7accd8d3cbc2988dfcd05e473c4681aa4",
+                  "bytes": 715883
+                },
+                "R_sphere": {
+                  "sha256": "76390139528627816a2244580435d5a783ae024bfb55dadaf0726722a09f0771",
+                  "bytes": 703211
+                },
+                "registration_report": {
+                  "sha256": "61d56b8d050ec3597f6f77c8732a55267e266aede70584c1ae07daa3f25dba9c",
+                  "bytes": 13133
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "strict_native1_equivalence": {
+        "msmsulc_hcp_default": {
+          "cpu1_all_coords_and_faces_exact": true,
+          "candidate_cpu1_cpu8_saved_spheres_sha_equal": true,
+          "cpu8_equals_strict_native1": true
+        },
+        "msmall_wrn_coarse": {
+          "cpu1_all_coords_and_faces_exact": true,
+          "candidate_cpu1_cpu8_saved_spheres_sha_equal": true,
+          "cpu8_equals_strict_native1": true
+        },
+        "msmall_wrn_refine": {
+          "cpu1_all_coords_and_faces_exact": true,
+          "candidate_cpu1_cpu8_saved_spheres_sha_equal": true,
+          "cpu8_equals_strict_native1": true
+        }
+      },
+      "native8_vs_native1": {
+        "msmsulc_hcp_default": {
+          "derivation": "Native1 arrays exactly equal candidate1; candidate1/8 saved sphere hashes equal. Candidate8/native8 distances therefore equal native1/native8 distances.",
+          "hemispheres": {
+            "L": {
+              "vertices": 120035,
+              "faces": 240066,
+              "ordered_faces_equal": true,
+              "coordinates_exact": true,
+              "chord_mm": {
+                "mean": 0.0,
+                "p99": 0.0,
+                "max": 0.0
+              },
+              "angular_degrees": {
+                "mean": 0.0,
+                "p99": 0.0,
+                "max": 0.0
+              }
+            },
+            "R": {
+              "vertices": 122950,
+              "faces": 245896,
+              "ordered_faces_equal": true,
+              "coordinates_exact": true,
+              "chord_mm": {
+                "mean": 0.0,
+                "p99": 0.0,
+                "max": 0.0
+              },
+              "angular_degrees": {
+                "mean": 0.0,
+                "p99": 0.0,
+                "max": 0.0
+              }
+            }
+          }
+        },
+        "msmall_wrn_coarse": {
+          "derivation": "Native1 arrays exactly equal candidate1; candidate1/8 saved sphere hashes equal. Candidate8/native8 distances therefore equal native1/native8 distances.",
+          "hemispheres": {
+            "L": {
+              "vertices": 32492,
+              "faces": 64980,
+              "ordered_faces_equal": true,
+              "coordinates_exact": true,
+              "chord_mm": {
+                "mean": 0.0,
+                "p99": 0.0,
+                "max": 0.0
+              },
+              "angular_degrees": {
+                "mean": 0.0,
+                "p99": 0.0,
+                "max": 0.0
+              }
+            },
+            "R": {
+              "vertices": 32492,
+              "faces": 64980,
+              "ordered_faces_equal": true,
+              "coordinates_exact": false,
+              "chord_mm": {
+                "mean": 1.2314875068272084,
+                "p99": 7.444105546058516,
+                "max": 22.81525899620657
+              },
+              "angular_degrees": {
+                "mean": 0.7056577056857269,
+                "p99": 4.266143811228294,
+                "max": 13.10070036178568
+              }
+            }
+          }
+        },
+        "msmall_wrn_refine": {
+          "derivation": "Native1 arrays exactly equal candidate1; candidate1/8 saved sphere hashes equal. Candidate8/native8 distances therefore equal native1/native8 distances.",
+          "hemispheres": {
+            "L": {
+              "vertices": 32492,
+              "faces": 64980,
+              "ordered_faces_equal": true,
+              "coordinates_exact": false,
+              "chord_mm": {
+                "mean": 0.43828901010265253,
+                "p99": 1.7096491805567475,
+                "max": 5.080898870259709
+              },
+              "angular_degrees": {
+                "mean": 0.25112194133565124,
+                "p99": 0.9795687474453281,
+                "max": 2.911453884496668
+              }
+            },
+            "R": {
+              "vertices": 32492,
+              "faces": 64980,
+              "ordered_faces_equal": true,
+              "coordinates_exact": false,
+              "chord_mm": {
+                "mean": 0.48424692849422146,
+                "p99": 2.4758693700359427,
+                "max": 5.517116184116028
+              },
+              "angular_degrees": {
+                "mean": 0.2774546435212159,
+                "p99": 1.418604881856158,
+                "max": 3.161475770419918
+              }
+            }
+          }
+        }
+      }
+    },
+    "candidate_features_node10_cpu1_cpu8": {
+      "status": "executed_with_numeric_comparisons",
+      "host": "nodecw10",
+      "threads": [
+        1,
+        8
+      ],
+      "manifest_sha256": "22b742ce875c8f9cffcaac8dddb8e4eb982543aa732d01f74a5aeb0719da0433",
+      "captured_receipt_sha256": "7e582abe6491c40791576e1a24cb75b13db801d0f7fb464466a8bd936c1e1950",
+      "resource_sha256": {
+        "resource.matlab_wrapper": {
+          "sha256": "00ddd4c68442bbf3dc71718a06ff3adab9a7680153f7b45d13059be73b927511",
+          "bytes": 4700
+        },
+        "resource.hcp_source_manifest": {
+          "sha256": "206374b058cb4c1fdba821c84c7a391e2856e2fd1d484ad731b81bd1bdb99828",
+          "bytes": 21704
+        },
+        "resource.workbench": {
+          "sha256": "b0944851ba0da729cfd02a854c949207950e2a2f5c91e0bc222332085ae88458",
+          "bytes": 22347984
+        },
+        "resource.python": {
+          "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+          "bytes": 25916456
+        },
+        "resource.matlab": {
+          "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2",
+          "bytes": 58216
+        }
+      },
+      "runtime_source_at_lock_acquisition": {
+        "baseline": {
+          "tree_sha256": "2c954bed6aa028bb8e5bce26b0a33054921961c561260614cfff7c7efb0cb59a",
+          "owned_files": {
+            "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+            "src/fnit/msm/_affine.py": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e",
+            "src/fnit/msm/_execution.py": "e67d43b972dd690c9ec86081c6d3e4fb783935def4bec8f264ab7d232916beae",
+            "src/fnit/msm/_ordered_sparse.py": "440ffd8f634fa42736aa0ea5b5f41de114e685a033146492d1e1f9e7a5364f11",
+            "src/fnit/msm/_spatial.py": "c7319ae9a616dbc2d741a8e8ecb0543cec6ffb7f54914f672f7b6947e6359204",
+            "src/fnit/msm/_sphere_map.py": "51bd19d1c12ef8be3427d4f9ef642dae5591ae8b0e0638b426d89e12173751be",
+            "src/fnit/msm/cli.py": "7f9b9d2df7619818eaff9e4bfac29f239c17cbddc3575968dbacada7f387fe8d",
+            "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+            "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+            "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+            "src/fnit/msm/features.py": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2",
+            "src/fnit/msm/msmall.py": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+            "src/fnit/msm/msmsulc.py": "a4ff7112888d645497ddbcc003059a810231d60a60dd9f06602fa7a94601f924",
+            "src/fnit/msm/prepare.py": "a8f6ca261378768e38a13c53d85d58702a2f4e7f30928e6e2b6b6e1665fd9b11"
+          }
+        },
+        "candidate": {
+          "tree_sha256": "72059515e650f7db02084fd41816ab78abf61bfbc1286e8f398a2ebdfd5b294f",
+          "owned_files": {
+            "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+            "src/fnit/msm/_affine.py": "fcbd622770d9c9f9b09115469e39d2d755385fcfebac212d559eb2a3e595ed3d",
+            "src/fnit/msm/_execution.py": "e67d43b972dd690c9ec86081c6d3e4fb783935def4bec8f264ab7d232916beae",
+            "src/fnit/msm/_ordered_sparse.py": "440ffd8f634fa42736aa0ea5b5f41de114e685a033146492d1e1f9e7a5364f11",
+            "src/fnit/msm/_point_cpu.py": "00184aadad94aae4b9f64f3bfd14f1c19a0cafc921c6d6cf8d46256e3367b543",
+            "src/fnit/msm/_spatial.py": "c7319ae9a616dbc2d741a8e8ecb0543cec6ffb7f54914f672f7b6947e6359204",
+            "src/fnit/msm/_sphere_cpu.py": "5024a69e6713efe0f9f4c3fa7bb3000c786aba31640617d7c1ccd2175c35b161",
+            "src/fnit/msm/_sphere_map.py": "ba07e2b73098ebf1083e86d1eeb24801e60a0c6ff25e371d514b5b6445029521",
+            "src/fnit/msm/cli.py": "7f9b9d2df7619818eaff9e4bfac29f239c17cbddc3575968dbacada7f387fe8d",
+            "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+            "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+            "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+            "src/fnit/msm/features.py": "8be99f074b2e5aa4b6b150e84d90f79800e419ed823ef7a452226eca120410a6",
+            "src/fnit/msm/msmall.py": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+            "src/fnit/msm/msmsulc.py": "52562009f1fd53dde053a8a981fd621813ae6c186ea88910f7d1b2e20ec563f1",
+            "src/fnit/msm/prepare.py": "a8f6ca261378768e38a13c53d85d58702a2f4e7f30928e6e2b6b6e1665fd9b11"
+          }
+        }
+      },
+      "records": [
+        {
+          "case_id": "vn_full490",
+          "threads": 1,
+          "affinity": [
+            3
+          ],
+          "full_process": {
+            "official": [
+              107.6213800534606
+            ],
+            "baseline": [],
+            "candidate": [
+              63.37288688123226
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 7.043304,
+                  "system_seconds": 1.530663,
+                  "effective_cpu_cores": 0.07966787822030258
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 3.9246430000000005,
+                "system_seconds": 1.1854649999999998,
+                "effective_cpu_cores": 0.0806355564892744
+              }
+            ]
+          },
+          "load_before": [
+            2428.81,
+            2481.6,
+            2482.88
+          ],
+          "load_after": [
+            2440.16,
+            2433.22,
+            2461.12
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "vn": {
+                "shape_equal": true,
+                "axes_equal": false,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": false,
+                "max_absolute_error": 0.000244140625,
+                "rmse": 1.844439802488972e-05
+              }
+            }
+          },
+          "official_output_metadata": {
+            "vn": {
+              "sha256": "50c5a1a820548caa38b647d5fff9c7a263472b48b76b95cbf5f67d0edd3ac547",
+              "bytes": 987456
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.reference.commands.0.3": {
+              "sha256": "90faa80c7dfcea0d0cafbc623429b351aa9643484eca0148f114c87442332934",
+              "bytes": 791
+            },
+            "input.reference.commands.0.1": {
+              "sha256": "3a5ff67277a431c864cf89e260dba9d713cb039cb8183ab4bafb61f2dd1bfb28",
+              "bytes": 2727
+            },
+            "input.inputs.clean_dtseries": {
+              "sha256": "0ad5ff64fee67992d11acc1ed11dd813e57a7e85779eca7242b791311ad7947a",
+              "bytes": 178136064
+            },
+            "input.inputs.ica_timecourses": {
+              "sha256": "fdcc50e928093435924a5ad8a7e3339f84d3c117830bab42751b06ccbd78c7bc",
+              "bytes": 736298
+            },
+            "input.inputs.noise_components": {
+              "sha256": "aa6e97f68c8cdf65de053b367af6987b0108128abab12cb9bf4cb163280d8abc",
+              "bytes": 251
+            },
+            "input.reference.commands.0.0": {
+              "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+              "bytes": 25916456
+            },
+            "input.reference.commands.0.9": {
+              "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2",
+              "bytes": 58216
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                39.67114085704088
+              ],
+              "maximum_rss_kib": 1742280,
+              "threads": {
+                "torch": 1,
+                "torch_interop": 1,
+                "numba": null
+              },
+              "affinity": [
+                3
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "vn": {
+                  "sha256": "57f7739fecb1d4f567afb131b526c02c39bf0a2a7004b0d35d3bcba8588a3f32",
+                  "bytes": 985040
+                },
+                "vn_report": {
+                  "sha256": "783739bbbe7772da0d19231f089a1cdd14f619dc5628c5f8025624742a9d2ee2",
+                  "bytes": 408
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "dr_full490",
+          "threads": 1,
+          "affinity": [
+            3
+          ],
+          "full_process": {
+            "official": [
+              112.12004861980677
+            ],
+            "baseline": [],
+            "candidate": [
+              86.1355204358697
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 7.405427999999999,
+                  "system_seconds": 1.6745139999999998,
+                  "effective_cpu_cores": 0.08098410687271113
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 5.252221000000002,
+                "system_seconds": 1.1231230000000005,
+                "effective_cpu_cores": 0.07401527230275022
+              }
+            ]
+          },
+          "load_before": [
+            2465.02,
+            2440.13,
+            2462.55
+          ],
+          "load_after": [
+            2532.12,
+            2479.99,
+            2473.53
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "maps": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": false,
+                "max_absolute_error": 5.054473876953125e-05,
+                "rmse": 8.053290151135507e-07
+              },
+              "weights": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": true,
+                "max_absolute_error": 0.0,
+                "rmse": 0.0
+              }
+            }
+          },
+          "official_output_metadata": {
+            "maps": {
+              "sha256": "1380a42806d55bf00ec47c83a184927e2e986e7af2a24b1e0ccd0b3e151afc23",
+              "bytes": 15119712
+            },
+            "weights": {
+              "sha256": "64325fbb8931c6af427083b12436a6b0da94941ae908f2e1d669b339bf30439d",
+              "bytes": 15119712
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.reference.commands.0.3": {
+              "sha256": "78087281796c5c461c31335d895d9ed08e39ec2b06eda292b9417e2d059ba3f0",
+              "bytes": 944
+            },
+            "input.reference.commands.0.1": {
+              "sha256": "3a5ff67277a431c864cf89e260dba9d713cb039cb8183ab4bafb61f2dd1bfb28",
+              "bytes": 2727
+            },
+            "input.inputs.clean_dtseries": {
+              "sha256": "0ad5ff64fee67992d11acc1ed11dd813e57a7e85779eca7242b791311ad7947a",
+              "bytes": 178136064
+            },
+            "input.inputs.reference_maps": {
+              "sha256": "3995c0613542b9f059504cea820579647020ff477f0243c53cbbfd15651f7f3c",
+              "bytes": 15115552
+            },
+            "input.reference.commands.0.0": {
+              "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+              "bytes": 25916456
+            },
+            "input.inputs.component_indices": {
+              "sha256": "3b01bec7f345d61ab62798cfba2630dfb07363379260f61f8b5b27bf5cb69ce5",
+              "bytes": 87
+            },
+            "input.reference.commands.0.9": {
+              "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2",
+              "bytes": 58216
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                60.981664426624775
+              ],
+              "maximum_rss_kib": 1198924,
+              "threads": {
+                "torch": 1,
+                "torch_interop": 1,
+                "numba": null
+              },
+              "affinity": [
+                3
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "maps": {
+                  "sha256": "88562dd72d6fbdfe0b7003d467a527cb857233fc6a7bf343f82a280b2fb06d3d",
+                  "bytes": 15115552
+                },
+                "weights": {
+                  "sha256": "730418d4d663fb05c9090a2bc1e6f283d844ed0f0387a97b71e6513e8607f1e6",
+                  "bytes": 15115552
+                },
+                "nodes": {
+                  "sha256": "397227c83df0df5fadf1f8e6c123f0fcb28da67740e8d671ba7390fa4404acef",
+                  "bytes": 380698
+                },
+                "regression_report": {
+                  "sha256": "f08bfdeb57878b97781fb9a570656fa2ec23e5c3b628a157fe22014b4d532166",
+                  "bytes": 454
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "dr_vn_full490",
+          "threads": 1,
+          "affinity": [
+            3
+          ],
+          "full_process": {
+            "official": [
+              381.63916555047035
+            ],
+            "baseline": [],
+            "candidate": [
+              103.93022425472736
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 9.90804,
+                  "system_seconds": 1.9617629999999995,
+                  "effective_cpu_cores": 0.031102161600419547
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 6.176986999999997,
+                "system_seconds": 1.6955429999999998,
+                "effective_cpu_cores": 0.07574822489274005
+              }
+            ]
+          },
+          "load_before": [
+            2544.69,
+            2495.29,
+            2479.37
+          ],
+          "load_after": [
+            2474.56,
+            2485.07,
+            2483.39
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "maps": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": false,
+                "max_absolute_error": 6.9141387939453125e-06,
+                "rmse": 5.092095413641337e-07
+              },
+              "weights": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": true,
+                "max_absolute_error": 0.0,
+                "rmse": 0.0
+              }
+            }
+          },
+          "official_output_metadata": {
+            "maps": {
+              "sha256": "c26d55496fd16e2579e428f8d3bfbba9d0fbe6fb834e30621e6987b0c4448fc6",
+              "bytes": 15119712
+            },
+            "weights": {
+              "sha256": "8f55d7d70e7e86902413cb329529669935e5bce5af845fb941aecfdfe4ac2621",
+              "bytes": 15119712
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.reference.commands.0.3": {
+              "sha256": "5269ac1fe75ed4e10a0eb9d017f4003306e5be427013cb3191579a5e73faf4b4",
+              "bytes": 1072
+            },
+            "input.reference.commands.0.1": {
+              "sha256": "3a5ff67277a431c864cf89e260dba9d713cb039cb8183ab4bafb61f2dd1bfb28",
+              "bytes": 2727
+            },
+            "input.inputs.clean_dtseries": {
+              "sha256": "0ad5ff64fee67992d11acc1ed11dd813e57a7e85779eca7242b791311ad7947a",
+              "bytes": 178136064
+            },
+            "input.inputs.reference_maps": {
+              "sha256": "3995c0613542b9f059504cea820579647020ff477f0243c53cbbfd15651f7f3c",
+              "bytes": 15115552
+            },
+            "input.inputs.variance_normalization": {
+              "sha256": "57f7739fecb1d4f567afb131b526c02c39bf0a2a7004b0d35d3bcba8588a3f32",
+              "bytes": 985040
+            },
+            "input.reference.commands.0.0": {
+              "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+              "bytes": 25916456
+            },
+            "input.inputs.component_indices": {
+              "sha256": "3b01bec7f345d61ab62798cfba2630dfb07363379260f61f8b5b27bf5cb69ce5",
+              "bytes": 87
+            },
+            "input.reference.commands.0.9": {
+              "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2",
+              "bytes": 58216
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                78.8708608970046
+              ],
+              "maximum_rss_kib": 1480192,
+              "threads": {
+                "torch": 1,
+                "torch_interop": 1,
+                "numba": null
+              },
+              "affinity": [
+                3
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "maps": {
+                  "sha256": "869e580da44b09e95b7d7659120c8dafca1ace1c8f0bc823b7316d2933496ef7",
+                  "bytes": 15115552
+                },
+                "weights": {
+                  "sha256": "730418d4d663fb05c9090a2bc1e6f283d844ed0f0387a97b71e6513e8607f1e6",
+                  "bytes": 15115552
+                },
+                "nodes": {
+                  "sha256": "55af2c461f2c4147145f326bd1b88fe2188dd843537cb3f2b23234e4d771618b",
+                  "bytes": 400701
+                },
+                "regression_report": {
+                  "sha256": "083768f57fe3707d521ba0adbe56e69422c2323e16001d518b15d5001f883e83",
+                  "bytes": 454
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "wrn_full490",
+          "threads": 1,
+          "affinity": [
+            3
+          ],
+          "full_process": {
+            "official": [
+              1943.8381912335753
+            ],
+            "baseline": [],
+            "candidate": [
+              723.3986735790968
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 135.453804,
+                  "system_seconds": 15.004443,
+                  "effective_cpu_cores": 0.07740266020008485
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 51.701277000000005,
+                "system_seconds": 4.560894999999999,
+                "effective_cpu_cores": 0.07777477904629898
+              }
+            ]
+          },
+          "load_before": [
+            2394.55,
+            2459.88,
+            2474.84
+          ],
+          "load_after": [
+            2485.78,
+            2465.64,
+            2466.3
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "maps": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": false,
+                "max_absolute_error": 3.2782554626464844e-06,
+                "rmse": 2.345019527496088e-07
+              },
+              "weights": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": true,
+                "max_absolute_error": 0.0,
+                "rmse": 0.0
+              }
+            }
+          },
+          "official_output_metadata": {
+            "maps": {
+              "sha256": "d0571b49482234403ced40218aca8f22439ab9011ea119b7378861fba6c014e3",
+              "bytes": 15119712
+            },
+            "weights": {
+              "sha256": "ea7a2baab9d03e56036830527f715969d400c92980a3239105b2f9b33150faf1",
+              "bytes": 15119712
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.reference.commands.0.3": {
+              "sha256": "583b5fb7e46dcc69de30e999e36e9ab875632acd1a7227f0cac5c6de48d47770",
+              "bytes": 4124
+            },
+            "input.reference.commands.0.1": {
+              "sha256": "3a5ff67277a431c864cf89e260dba9d713cb039cb8183ab4bafb61f2dd1bfb28",
+              "bytes": 2727
+            },
+            "input.inputs.low_dimensional_maps.3": {
+              "sha256": "bf9ad6eeb6493639d7263f4bf7281c60ff02becde10bd8b493afde0dcc07b479",
+              "bytes": 4245888
+            },
+            "input.inputs.low_dimensional_maps.4": {
+              "sha256": "dc418d1cf13a6666ba297adbb9b20f7dc4c3048d358a134795faad11a1f97532",
+              "bytes": 4608224
+            },
+            "input.inputs.low_dimensional_maps.5": {
+              "sha256": "d734681b50f4d68a7f1dfcbfe083c674e2fd22c82d2e9c69b67945a88fdd44b0",
+              "bytes": 4970544
+            },
+            "input.inputs.low_dimensional_maps.6": {
+              "sha256": "595565e30d287d6c5e0c46fbc1c13159c7a2485a957320bd6746f892f55ae6e6",
+              "bytes": 5332864
+            },
+            "input.inputs.low_dimensional_maps.7": {
+              "sha256": "95042ea9f2bb68c62ef76588ddf390d9fbe331403707267f3b71b3841dbfc9c2",
+              "bytes": 5695184
+            },
+            "input.inputs.low_dimensional_maps.8": {
+              "sha256": "40e78b4decc0803bed87970dac2c641c5a668a2c78c30366cb70c13722be1e6f",
+              "bytes": 6057504
+            },
+            "input.inputs.low_dimensional_maps.9": {
+              "sha256": "87ea88410dc6330011a92276e58d3bc3addb2022f9f13ea3f9cfb4646b1dd5d6",
+              "bytes": 6419824
+            },
+            "input.inputs.low_dimensional_maps.10": {
+              "sha256": "546ca7daa056d5ffc5c43d8c48b7234ede41cd7e3107333fb327c27ecf623870",
+              "bytes": 6782144
+            },
+            "input.inputs.low_dimensional_maps.11": {
+              "sha256": "058eafcb9ebd5efbec8b5133d9208da6ddca3c46a0d8b442fcdde1f4109cdc7a",
+              "bytes": 7144464
+            },
+            "input.inputs.low_dimensional_maps.12": {
+              "sha256": "2df0c011f6b17b08357bc8702201fb633c28345830b0728c6827760fdfaf9aef",
+              "bytes": 7506800
+            },
+            "input.inputs.low_dimensional_maps.13": {
+              "sha256": "57bfa73ad750c68c1435434086955dc2b0bf0b74360922cb5e88a87b691a56cd",
+              "bytes": 7869120
+            },
+            "input.inputs.low_dimensional_maps.14": {
+              "sha256": "bf321d608e1be5d3ffbad4e2cc43a00c6d53fb456ff565eeedfc7e1371f186f2",
+              "bytes": 8231440
+            },
+            "input.inputs.low_dimensional_maps.0": {
+              "sha256": "4d03cd16b3082747f479d632693438b6b9209e1f37f4a40dc6ba2542f1469bc7",
+              "bytes": 3158928
+            },
+            "input.inputs.low_dimensional_maps.1": {
+              "sha256": "9c7639694382cbb02753175fc4f96d0960afb12ff95fa1990cd32d8ddb39df40",
+              "bytes": 3521248
+            },
+            "input.inputs.low_dimensional_maps.2": {
+              "sha256": "c97185d19868e22fbc4189dec014fe02cdad70c1aceaae6bbf011cf1eebf7a67",
+              "bytes": 3883568
+            },
+            "input.inputs.clean_dtseries": {
+              "sha256": "0ad5ff64fee67992d11acc1ed11dd813e57a7e85779eca7242b791311ad7947a",
+              "bytes": 178136064
+            },
+            "input.inputs.reference_maps": {
+              "sha256": "3995c0613542b9f059504cea820579647020ff477f0243c53cbbfd15651f7f3c",
+              "bytes": 15115552
+            },
+            "input.inputs.vertex_area": {
+              "sha256": "e77aa627522a000e4c79a63f927ad4dbc5c13f973cebcb8018c0a984d4409ca7",
+              "bytes": 578032
+            },
+            "input.inputs.variance_normalization": {
+              "sha256": "57f7739fecb1d4f567afb131b526c02c39bf0a2a7004b0d35d3bcba8588a3f32",
+              "bytes": 985040
+            },
+            "input.inputs.left_midthickness": {
+              "sha256": "60b61ab43e0f3bcd843f757d25cade650470928e9f8ef3cdedeeadee8e54f262",
+              "bytes": 723400
+            },
+            "input.inputs.right_midthickness": {
+              "sha256": "41b9d32cae7378cf3f2e6b32a383232847c71b3e6d657251b96149a1358752e8",
+              "bytes": 711756
+            },
+            "input.parameters.wb_command": {
+              "sha256": "b0944851ba0da729cfd02a854c949207950e2a2f5c91e0bc222332085ae88458",
+              "bytes": 22347984
+            },
+            "input.reference.commands.0.0": {
+              "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+              "bytes": 25916456
+            },
+            "input.inputs.component_indices": {
+              "sha256": "3b01bec7f345d61ab62798cfba2630dfb07363379260f61f8b5b27bf5cb69ce5",
+              "bytes": 87
+            },
+            "input.reference.commands.0.9": {
+              "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2",
+              "bytes": 58216
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                699.610055796802
+              ],
+              "maximum_rss_kib": 2535264,
+              "threads": {
+                "torch": 1,
+                "torch_interop": 1,
+                "numba": null
+              },
+              "affinity": [
+                3
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "maps": {
+                  "sha256": "49d3f38c4f185226b1948d7a8e0854af2db8e437defe7a0c5490bbd9e7e25dcc",
+                  "bytes": 15115552
+                },
+                "weights": {
+                  "sha256": "730418d4d663fb05c9090a2bc1e6f283d844ed0f0387a97b71e6513e8607f1e6",
+                  "bytes": 15115552
+                },
+                "nodes": {
+                  "sha256": "fa3965a89441c8eaaff6f370cf86310707cbf4248f1e0d6e12d65bc74105e5f6",
+                  "bytes": 397577
+                },
+                "regression_report": {
+                  "sha256": "680971476ca46555a82c075b44689f20924a4f0321a57c231dd53b08c1ad9668",
+                  "bytes": 526
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "vn_full490",
+          "threads": 8,
+          "affinity": [
+            3,
+            7,
+            19,
+            27,
+            35,
+            43,
+            47,
+            51
+          ],
+          "full_process": {
+            "official": [
+              131.83725143224
+            ],
+            "baseline": [],
+            "candidate": [
+              55.52918650954962
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 7.441610999999995,
+                  "system_seconds": 1.8177400000000006,
+                  "effective_cpu_cores": 0.07023319205618467
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 5.031050000000022,
+                "system_seconds": 1.1730100000000014,
+                "effective_cpu_cores": 0.11172610999682218
+              }
+            ]
+          },
+          "load_before": [
+            2467.66,
+            2468.77,
+            2467.6
+          ],
+          "load_after": [
+            2487.71,
+            2472.07,
+            2468.62
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "vn": {
+                "shape_equal": true,
+                "axes_equal": false,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": false,
+                "max_absolute_error": 0.000244140625,
+                "rmse": 1.844439802488972e-05
+              }
+            }
+          },
+          "official_output_metadata": {
+            "vn": {
+              "sha256": "298db189a9b4fe78bc07b78535e8a5305b1ff615726d6c840003a0008aebd7ca",
+              "bytes": 987456
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.reference.commands.0.3": {
+              "sha256": "90faa80c7dfcea0d0cafbc623429b351aa9643484eca0148f114c87442332934",
+              "bytes": 791
+            },
+            "input.reference.commands.0.1": {
+              "sha256": "3a5ff67277a431c864cf89e260dba9d713cb039cb8183ab4bafb61f2dd1bfb28",
+              "bytes": 2727
+            },
+            "input.inputs.clean_dtseries": {
+              "sha256": "0ad5ff64fee67992d11acc1ed11dd813e57a7e85779eca7242b791311ad7947a",
+              "bytes": 178136064
+            },
+            "input.inputs.ica_timecourses": {
+              "sha256": "fdcc50e928093435924a5ad8a7e3339f84d3c117830bab42751b06ccbd78c7bc",
+              "bytes": 736298
+            },
+            "input.inputs.noise_components": {
+              "sha256": "aa6e97f68c8cdf65de053b367af6987b0108128abab12cb9bf4cb163280d8abc",
+              "bytes": 251
+            },
+            "input.reference.commands.0.0": {
+              "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+              "bytes": 25916456
+            },
+            "input.reference.commands.0.9": {
+              "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2",
+              "bytes": 58216
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                31.96429828554392
+              ],
+              "maximum_rss_kib": 1749108,
+              "threads": {
+                "torch": 8,
+                "torch_interop": 1,
+                "numba": null
+              },
+              "affinity": [
+                3,
+                7,
+                19,
+                27,
+                35,
+                43,
+                47,
+                51
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "vn": {
+                  "sha256": "57f7739fecb1d4f567afb131b526c02c39bf0a2a7004b0d35d3bcba8588a3f32",
+                  "bytes": 985040
+                },
+                "vn_report": {
+                  "sha256": "459307fa13b2f19df1cf77de979c1acdf994a09a4377b345afac3690e7c86e5a",
+                  "bytes": 408
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "dr_full490",
+          "threads": 8,
+          "affinity": [
+            3,
+            7,
+            19,
+            27,
+            35,
+            43,
+            47,
+            51
+          ],
+          "full_process": {
+            "official": [
+              95.74694200605154
+            ],
+            "baseline": [],
+            "candidate": [
+              74.89383782446384
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 8.338215999999989,
+                  "system_seconds": 2.3635069999999985,
+                  "effective_cpu_cores": 0.11177091169474218
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 8.230559,
+                "system_seconds": 1.190640000000002,
+                "effective_cpu_cores": 0.12579404759683174
+              }
+            ]
+          },
+          "load_before": [
+            2502.38,
+            2477.23,
+            2470.45
+          ],
+          "load_after": [
+            2497.86,
+            2483.72,
+            2474.05
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "maps": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": false,
+                "max_absolute_error": 2.09808349609375e-05,
+                "rmse": 6.80522826207649e-07
+              },
+              "weights": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": true,
+                "max_absolute_error": 0.0,
+                "rmse": 0.0
+              }
+            }
+          },
+          "official_output_metadata": {
+            "maps": {
+              "sha256": "d85087985ae307ad3a0dde37cc9d48b78aa1bb0e9c4f66e0e6c2ee876ccafdef",
+              "bytes": 15119712
+            },
+            "weights": {
+              "sha256": "72451295966a746074c6a21c7ea987aef5c07e3a2e1e64ed9f27876c065a3861",
+              "bytes": 15119712
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.reference.commands.0.3": {
+              "sha256": "78087281796c5c461c31335d895d9ed08e39ec2b06eda292b9417e2d059ba3f0",
+              "bytes": 944
+            },
+            "input.reference.commands.0.1": {
+              "sha256": "3a5ff67277a431c864cf89e260dba9d713cb039cb8183ab4bafb61f2dd1bfb28",
+              "bytes": 2727
+            },
+            "input.inputs.clean_dtseries": {
+              "sha256": "0ad5ff64fee67992d11acc1ed11dd813e57a7e85779eca7242b791311ad7947a",
+              "bytes": 178136064
+            },
+            "input.inputs.reference_maps": {
+              "sha256": "3995c0613542b9f059504cea820579647020ff477f0243c53cbbfd15651f7f3c",
+              "bytes": 15115552
+            },
+            "input.reference.commands.0.0": {
+              "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+              "bytes": 25916456
+            },
+            "input.inputs.component_indices": {
+              "sha256": "3b01bec7f345d61ab62798cfba2630dfb07363379260f61f8b5b27bf5cb69ce5",
+              "bytes": 87
+            },
+            "input.reference.commands.0.9": {
+              "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2",
+              "bytes": 58216
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                52.17238146811724
+              ],
+              "maximum_rss_kib": 1222132,
+              "threads": {
+                "torch": 8,
+                "torch_interop": 1,
+                "numba": null
+              },
+              "affinity": [
+                3,
+                7,
+                19,
+                27,
+                35,
+                43,
+                47,
+                51
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "maps": {
+                  "sha256": "7024e421691005dcc27f2b877e2d7d53f6c340fe704ed163a7bfd25091bc8876",
+                  "bytes": 15115552
+                },
+                "weights": {
+                  "sha256": "730418d4d663fb05c9090a2bc1e6f283d844ed0f0387a97b71e6513e8607f1e6",
+                  "bytes": 15115552
+                },
+                "nodes": {
+                  "sha256": "92fc996c5671167b1df55d5eb75c0c10c99d92468bcd6a8556da6b6163ed16fe",
+                  "bytes": 380597
+                },
+                "regression_report": {
+                  "sha256": "5bd8ec0b011e0dbed7683f141cbb25fb30dac9651260de4e243f04659b0a1dc8",
+                  "bytes": 456
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "dr_vn_full490",
+          "threads": 8,
+          "affinity": [
+            3,
+            7,
+            19,
+            27,
+            35,
+            43,
+            47,
+            51
+          ],
+          "full_process": {
+            "official": [
+              184.90648648142815
+            ],
+            "baseline": [],
+            "candidate": [
+              99.7815228998661
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 10.793209000000019,
+                  "system_seconds": 2.7477829999999983,
+                  "effective_cpu_cores": 0.07323156833311018
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 9.04076699999996,
+                "system_seconds": 2.140633000000001,
+                "effective_cpu_cores": 0.11205882286664262
+              }
+            ]
+          },
+          "load_before": [
+            2476.25,
+            2480.45,
+            2473.65
+          ],
+          "load_after": [
+            2505.29,
+            2469.89,
+            2468.06
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "maps": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": false,
+                "max_absolute_error": 8.255243301391602e-06,
+                "rmse": 4.884757622175684e-07
+              },
+              "weights": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": true,
+                "max_absolute_error": 0.0,
+                "rmse": 0.0
+              }
+            }
+          },
+          "official_output_metadata": {
+            "maps": {
+              "sha256": "1c26664dc1303e6c4abb68b3a0aa7d6c158d5ffdbc875bfe773b212e0d770f8f",
+              "bytes": 15119712
+            },
+            "weights": {
+              "sha256": "02f6dc3e13d92ebb117c98ecfbaf95c40837ec0f401e3fc406bcc5f371c56601",
+              "bytes": 15119712
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.reference.commands.0.3": {
+              "sha256": "5269ac1fe75ed4e10a0eb9d017f4003306e5be427013cb3191579a5e73faf4b4",
+              "bytes": 1072
+            },
+            "input.reference.commands.0.1": {
+              "sha256": "3a5ff67277a431c864cf89e260dba9d713cb039cb8183ab4bafb61f2dd1bfb28",
+              "bytes": 2727
+            },
+            "input.inputs.clean_dtseries": {
+              "sha256": "0ad5ff64fee67992d11acc1ed11dd813e57a7e85779eca7242b791311ad7947a",
+              "bytes": 178136064
+            },
+            "input.inputs.reference_maps": {
+              "sha256": "3995c0613542b9f059504cea820579647020ff477f0243c53cbbfd15651f7f3c",
+              "bytes": 15115552
+            },
+            "input.inputs.variance_normalization": {
+              "sha256": "57f7739fecb1d4f567afb131b526c02c39bf0a2a7004b0d35d3bcba8588a3f32",
+              "bytes": 985040
+            },
+            "input.reference.commands.0.0": {
+              "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+              "bytes": 25916456
+            },
+            "input.inputs.component_indices": {
+              "sha256": "3b01bec7f345d61ab62798cfba2630dfb07363379260f61f8b5b27bf5cb69ce5",
+              "bytes": 87
+            },
+            "input.reference.commands.0.9": {
+              "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2",
+              "bytes": 58216
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                74.66002637147903
+              ],
+              "maximum_rss_kib": 1480488,
+              "threads": {
+                "torch": 8,
+                "torch_interop": 1,
+                "numba": null
+              },
+              "affinity": [
+                3,
+                7,
+                19,
+                27,
+                35,
+                43,
+                47,
+                51
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "maps": {
+                  "sha256": "16f95f9ca8f9ab370f266c8ebcb1fd3ad5445cf1d4f30a374b3fe97b726c59f1",
+                  "bytes": 15115552
+                },
+                "weights": {
+                  "sha256": "730418d4d663fb05c9090a2bc1e6f283d844ed0f0387a97b71e6513e8607f1e6",
+                  "bytes": 15115552
+                },
+                "nodes": {
+                  "sha256": "7dc44604cf297817c853b41d9e2d9029f1ef5d3d342b10108e62e8a5d34a161e",
+                  "bytes": 400814
+                },
+                "regression_report": {
+                  "sha256": "9eb72a355204ce98829f2c256d630e671e1d575e39cf917ed68815a17cf40704",
+                  "bytes": 453
+                }
+              }
+            }
+          ]
+        },
+        {
+          "case_id": "wrn_full490",
+          "threads": 8,
+          "affinity": [
+            3,
+            7,
+            19,
+            27,
+            35,
+            43,
+            47,
+            51
+          ],
+          "full_process": {
+            "official": [
+              1373.8765081390738
+            ],
+            "baseline": [],
+            "candidate": [
+              533.7845766171813
+            ]
+          },
+          "process_cpu_usage": {
+            "official": [
+              [
+                {
+                  "user_seconds": 145.629233,
+                  "system_seconds": 21.507913000000002,
+                  "effective_cpu_cores": 0.12165368940356112
+                }
+              ]
+            ],
+            "baseline": [],
+            "candidate": [
+              {
+                "user_seconds": 162.43152500000002,
+                "system_seconds": 6.123575999999993,
+                "effective_cpu_cores": 0.3157736442446595
+              }
+            ]
+          },
+          "load_before": [
+            2502.73,
+            2478.86,
+            2471.46
+          ],
+          "load_after": [
+            2433.9,
+            2467.0,
+            2472.84
+          ],
+          "adapter_accuracy": {
+            "candidate_vs_official": {
+              "maps": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": false,
+                "max_absolute_error": 2.2798776626586914e-06,
+                "rmse": 1.995436885953288e-07
+              },
+              "weights": {
+                "shape_equal": true,
+                "axes_equal": true,
+                "brainmodel_axis_equal": true,
+                "saved_dtype_equal": true,
+                "first_axis_type_equal": true,
+                "all_finite": true,
+                "exact": true,
+                "max_absolute_error": 0.0,
+                "rmse": 0.0
+              }
+            }
+          },
+          "official_output_metadata": {
+            "maps": {
+              "sha256": "60546a78faff697f49fd2ab017693c9239e1dc4535d6df9d8fe3ed6bca2a4a22",
+              "bytes": 15119712
+            },
+            "weights": {
+              "sha256": "5ecadd443be5aa2f4bac10915b4144430465cc946e77e4340576e6671c56e7bb",
+              "bytes": 15119712
+            }
+          },
+          "declared_inputs_unchanged": true,
+          "input_sha256": {
+            "input.reference.commands.0.3": {
+              "sha256": "583b5fb7e46dcc69de30e999e36e9ab875632acd1a7227f0cac5c6de48d47770",
+              "bytes": 4124
+            },
+            "input.reference.commands.0.1": {
+              "sha256": "3a5ff67277a431c864cf89e260dba9d713cb039cb8183ab4bafb61f2dd1bfb28",
+              "bytes": 2727
+            },
+            "input.inputs.low_dimensional_maps.3": {
+              "sha256": "bf9ad6eeb6493639d7263f4bf7281c60ff02becde10bd8b493afde0dcc07b479",
+              "bytes": 4245888
+            },
+            "input.inputs.low_dimensional_maps.4": {
+              "sha256": "dc418d1cf13a6666ba297adbb9b20f7dc4c3048d358a134795faad11a1f97532",
+              "bytes": 4608224
+            },
+            "input.inputs.low_dimensional_maps.5": {
+              "sha256": "d734681b50f4d68a7f1dfcbfe083c674e2fd22c82d2e9c69b67945a88fdd44b0",
+              "bytes": 4970544
+            },
+            "input.inputs.low_dimensional_maps.6": {
+              "sha256": "595565e30d287d6c5e0c46fbc1c13159c7a2485a957320bd6746f892f55ae6e6",
+              "bytes": 5332864
+            },
+            "input.inputs.low_dimensional_maps.7": {
+              "sha256": "95042ea9f2bb68c62ef76588ddf390d9fbe331403707267f3b71b3841dbfc9c2",
+              "bytes": 5695184
+            },
+            "input.inputs.low_dimensional_maps.8": {
+              "sha256": "40e78b4decc0803bed87970dac2c641c5a668a2c78c30366cb70c13722be1e6f",
+              "bytes": 6057504
+            },
+            "input.inputs.low_dimensional_maps.9": {
+              "sha256": "87ea88410dc6330011a92276e58d3bc3addb2022f9f13ea3f9cfb4646b1dd5d6",
+              "bytes": 6419824
+            },
+            "input.inputs.low_dimensional_maps.10": {
+              "sha256": "546ca7daa056d5ffc5c43d8c48b7234ede41cd7e3107333fb327c27ecf623870",
+              "bytes": 6782144
+            },
+            "input.inputs.low_dimensional_maps.11": {
+              "sha256": "058eafcb9ebd5efbec8b5133d9208da6ddca3c46a0d8b442fcdde1f4109cdc7a",
+              "bytes": 7144464
+            },
+            "input.inputs.low_dimensional_maps.12": {
+              "sha256": "2df0c011f6b17b08357bc8702201fb633c28345830b0728c6827760fdfaf9aef",
+              "bytes": 7506800
+            },
+            "input.inputs.low_dimensional_maps.13": {
+              "sha256": "57bfa73ad750c68c1435434086955dc2b0bf0b74360922cb5e88a87b691a56cd",
+              "bytes": 7869120
+            },
+            "input.inputs.low_dimensional_maps.14": {
+              "sha256": "bf321d608e1be5d3ffbad4e2cc43a00c6d53fb456ff565eeedfc7e1371f186f2",
+              "bytes": 8231440
+            },
+            "input.inputs.low_dimensional_maps.0": {
+              "sha256": "4d03cd16b3082747f479d632693438b6b9209e1f37f4a40dc6ba2542f1469bc7",
+              "bytes": 3158928
+            },
+            "input.inputs.low_dimensional_maps.1": {
+              "sha256": "9c7639694382cbb02753175fc4f96d0960afb12ff95fa1990cd32d8ddb39df40",
+              "bytes": 3521248
+            },
+            "input.inputs.low_dimensional_maps.2": {
+              "sha256": "c97185d19868e22fbc4189dec014fe02cdad70c1aceaae6bbf011cf1eebf7a67",
+              "bytes": 3883568
+            },
+            "input.inputs.clean_dtseries": {
+              "sha256": "0ad5ff64fee67992d11acc1ed11dd813e57a7e85779eca7242b791311ad7947a",
+              "bytes": 178136064
+            },
+            "input.inputs.reference_maps": {
+              "sha256": "3995c0613542b9f059504cea820579647020ff477f0243c53cbbfd15651f7f3c",
+              "bytes": 15115552
+            },
+            "input.inputs.vertex_area": {
+              "sha256": "e77aa627522a000e4c79a63f927ad4dbc5c13f973cebcb8018c0a984d4409ca7",
+              "bytes": 578032
+            },
+            "input.inputs.variance_normalization": {
+              "sha256": "57f7739fecb1d4f567afb131b526c02c39bf0a2a7004b0d35d3bcba8588a3f32",
+              "bytes": 985040
+            },
+            "input.inputs.left_midthickness": {
+              "sha256": "60b61ab43e0f3bcd843f757d25cade650470928e9f8ef3cdedeeadee8e54f262",
+              "bytes": 723400
+            },
+            "input.inputs.right_midthickness": {
+              "sha256": "41b9d32cae7378cf3f2e6b32a383232847c71b3e6d657251b96149a1358752e8",
+              "bytes": 711756
+            },
+            "input.parameters.wb_command": {
+              "sha256": "b0944851ba0da729cfd02a854c949207950e2a2f5c91e0bc222332085ae88458",
+              "bytes": 22347984
+            },
+            "input.reference.commands.0.0": {
+              "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+              "bytes": 25916456
+            },
+            "input.inputs.component_indices": {
+              "sha256": "3b01bec7f345d61ab62798cfba2630dfb07363379260f61f8b5b27bf5cb69ce5",
+              "bytes": 87
+            },
+            "input.reference.commands.0.9": {
+              "sha256": "8328ba830885cac3eda7a7bdc0a08b2857473be39d09d64726737ab8e3bba5a2",
+              "bytes": 58216
+            }
+          },
+          "candidate_api": [
+            {
+              "scope": "First adapter call: includes feature imports, load, complete computation, transfer and save; excludes process start and Torch/adapter setup",
+              "seconds": [
+                509.05271830409765
+              ],
+              "maximum_rss_kib": 2486236,
+              "threads": {
+                "torch": 8,
+                "torch_interop": 1,
+                "numba": null
+              },
+              "affinity": [
+                3,
+                7,
+                19,
+                27,
+                35,
+                43,
+                47,
+                51
+              ],
+              "versions": {
+                "torch": "2.5.1",
+                "numpy": "1.26.4",
+                "numba": "0.61.2",
+                "nibabel": "5.4.2"
+              },
+              "tf32": {
+                "matmul": false,
+                "cudnn": true
+              },
+              "cuda_peak_allocation_bytes": null,
+              "output_metadata": {
+                "maps": {
+                  "sha256": "a590efd28174e133fe3e08296423e928ae7b03a01cf94c77fa3f9fc08fe0e171",
+                  "bytes": 15115552
+                },
+                "weights": {
+                  "sha256": "730418d4d663fb05c9090a2bc1e6f283d844ed0f0387a97b71e6513e8607f1e6",
+                  "bytes": 15115552
+                },
+                "nodes": {
+                  "sha256": "4ce3178bf044103b7dfdaf2cfe0b77fbc56ec674524ea59473cf2603a5c5fbe3",
+                  "bytes": 397615
+                },
+                "regression_report": {
+                  "sha256": "c629f9301572136d5f545c50fa85289140d54d4c400b320d865c88ec827bb2db",
+                  "bytes": 526
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "baseline_output_preservation": [
+        {
+          "case_id": "vn_full490",
+          "threads": 1,
+          "same_declared_manifest": true,
+          "candidate_array_inputs_same_hash": true,
+          "changed_reference_bound_roles": [
+            "run_hcp_reference.py"
+          ],
+          "old_inputs_unchanged": true,
+          "saved_output_sha_equal": {
+            "vn": true
+          }
+        },
+        {
+          "case_id": "dr_full490",
+          "threads": 1,
+          "same_declared_manifest": true,
+          "candidate_array_inputs_same_hash": true,
+          "changed_reference_bound_roles": [
+            "run_hcp_reference.py"
+          ],
+          "old_inputs_unchanged": true,
+          "saved_output_sha_equal": {
+            "maps": true,
+            "weights": true,
+            "nodes": true
+          }
+        },
+        {
+          "case_id": "dr_vn_full490",
+          "threads": 1,
+          "same_declared_manifest": true,
+          "candidate_array_inputs_same_hash": true,
+          "changed_reference_bound_roles": [
+            "run_hcp_reference.py"
+          ],
+          "old_inputs_unchanged": true,
+          "saved_output_sha_equal": {
+            "maps": true,
+            "weights": true,
+            "nodes": true
+          }
+        },
+        {
+          "case_id": "wrn_full490",
+          "threads": 1,
+          "same_declared_manifest": true,
+          "candidate_array_inputs_same_hash": true,
+          "changed_reference_bound_roles": [
+            "run_hcp_reference.py"
+          ],
+          "old_inputs_unchanged": true,
+          "saved_output_sha_equal": {
+            "maps": true,
+            "weights": true,
+            "nodes": true
+          }
+        },
+        {
+          "case_id": "vn_full490",
+          "threads": 8,
+          "same_declared_manifest": true,
+          "candidate_array_inputs_same_hash": true,
+          "changed_reference_bound_roles": [
+            "run_hcp_reference.py"
+          ],
+          "old_inputs_unchanged": true,
+          "saved_output_sha_equal": {
+            "vn": true
+          }
+        },
+        {
+          "case_id": "dr_full490",
+          "threads": 8,
+          "same_declared_manifest": true,
+          "candidate_array_inputs_same_hash": true,
+          "changed_reference_bound_roles": [
+            "run_hcp_reference.py"
+          ],
+          "old_inputs_unchanged": true,
+          "saved_output_sha_equal": {
+            "maps": true,
+            "weights": true,
+            "nodes": true
+          }
+        },
+        {
+          "case_id": "dr_vn_full490",
+          "threads": 8,
+          "same_declared_manifest": true,
+          "candidate_array_inputs_same_hash": true,
+          "changed_reference_bound_roles": [
+            "run_hcp_reference.py"
+          ],
+          "old_inputs_unchanged": true,
+          "saved_output_sha_equal": {
+            "maps": true,
+            "weights": true,
+            "nodes": true
+          }
+        }
+      ]
+    }
+  },
+  "gaps": [
+    "Fixed projection and full surface native command_0 failed before candidate; underlying stderr being collected",
+    "Final source GPU three full registrations coordinated separately",
+    "CA/CAT genuine same-subject myelin and bias provenance unavailable",
+    "VN/DR measured complete API still slower than historical native function; full real CPU profile pending"
+  ],
+  "original_nodes_branch": {
+    "status": "complete",
+    "scope": "Original complete nodes, spectra and maps output branch; precision reference, not a matched speed ratio",
+    "manifest_sha256": "22b742ce875c8f9cffcaac8dddb8e4eb982543aa732d01f74a5aeb0719da0433",
+    "records": [
+      {
+        "case_id": "dr_full490",
+        "threads": 1,
+        "affinity": [
+          3
+        ],
+        "returncode": 0,
+        "process_seconds": 380.3738024607301,
+        "user_seconds": 11.75435,
+        "system_seconds": 1.755372,
+        "maximum_rss_kib": 1276648,
+        "load_before": [
+          2452.53,
+          2471.48,
+          2474.29
+        ],
+        "load_after": [
+          2505.14,
+          2485.08,
+          2478.07
+        ],
+        "original_nodes_written": true,
+        "original_spectra_written": true,
+        "original_function": {
+          "validation_complete": true,
+          "operation": "regression",
+          "matlab_version": "9.5.0.944444 (R2018b)",
+          "threads": 1,
+          "function_seconds": 68.785755,
+          "preparation_seconds": 0,
+          "wrapper_seconds": 72.675198,
+          "matlab_process_wall_seconds": 379.5963002219796,
+          "process_outside_wrapper_seconds": 306.9211022219796,
+          "outside_wrapper_scope": "MATLAB startup/shutdown and invocation overhead; separate from original function",
+          "jvm_requested": true,
+          "original_source_manifest_sha256": "206374b058cb4c1fdba821c84c7a391e2856e2fd1d484ad731b81bd1bdb99828"
+        }
+      },
+      {
+        "case_id": "dr_vn_full490",
+        "threads": 1,
+        "affinity": [
+          3
+        ],
+        "returncode": 0,
+        "process_seconds": 192.42143827676773,
+        "user_seconds": 11.333058,
+        "system_seconds": 1.7004610000000002,
+        "maximum_rss_kib": 1276648,
+        "load_before": [
+          2505.14,
+          2485.08,
+          2478.07
+        ],
+        "load_after": [
+          2442.37,
+          2459.33,
+          2469.36
+        ],
+        "original_nodes_written": true,
+        "original_spectra_written": true,
+        "original_function": {
+          "validation_complete": true,
+          "operation": "regression",
+          "matlab_version": "9.5.0.944444 (R2018b)",
+          "threads": 1,
+          "function_seconds": 55.207118,
+          "preparation_seconds": 31.003497,
+          "wrapper_seconds": 88.729658,
+          "matlab_process_wall_seconds": 191.63816583156586,
+          "process_outside_wrapper_seconds": 102.90850783156586,
+          "outside_wrapper_scope": "MATLAB startup/shutdown and invocation overhead; separate from original function",
+          "jvm_requested": true,
+          "original_source_manifest_sha256": "206374b058cb4c1fdba821c84c7a391e2856e2fd1d484ad731b81bd1bdb99828"
+        }
+      },
+      {
+        "case_id": "wrn_full490",
+        "threads": 1,
+        "affinity": [
+          3
+        ],
+        "returncode": 0,
+        "process_seconds": 2119.256837837398,
+        "user_seconds": 104.676562,
+        "system_seconds": 13.097778,
+        "maximum_rss_kib": 1767364,
+        "load_before": [
+          2442.37,
+          2459.33,
+          2469.36
+        ],
+        "load_after": [
+          2448.78,
+          2476.58,
+          2471.81
+        ],
+        "original_nodes_written": true,
+        "original_spectra_written": true,
+        "original_function": {
+          "validation_complete": true,
+          "operation": "regression",
+          "matlab_version": "9.5.0.944444 (R2018b)",
+          "threads": 1,
+          "function_seconds": 1980.056199,
+          "preparation_seconds": 32.207298,
+          "wrapper_seconds": 2015.634831,
+          "matlab_process_wall_seconds": 2118.406409807503,
+          "process_outside_wrapper_seconds": 102.77157880750315,
+          "outside_wrapper_scope": "MATLAB startup/shutdown and invocation overhead; separate from original function",
+          "jvm_requested": true,
+          "original_source_manifest_sha256": "206374b058cb4c1fdba821c84c7a391e2856e2fd1d484ad731b81bd1bdb99828"
+        }
+      },
+      {
+        "case_id": "dr_full490",
+        "threads": 8,
+        "affinity": [
+          3,
+          7,
+          19,
+          27,
+          35,
+          43,
+          47,
+          51
+        ],
+        "returncode": 0,
+        "process_seconds": 217.2914833277464,
+        "user_seconds": 13.455764999999985,
+        "system_seconds": 2.4338760000000015,
+        "maximum_rss_kib": 1767364,
+        "load_before": [
+          2448.78,
+          2476.58,
+          2471.81
+        ],
+        "load_after": [
+          2383.68,
+          2471.37,
+          2473.59
+        ],
+        "original_nodes_written": true,
+        "original_spectra_written": true,
+        "original_function": {
+          "validation_complete": true,
+          "operation": "regression",
+          "matlab_version": "9.5.0.944444 (R2018b)",
+          "threads": 8,
+          "function_seconds": 55.177999,
+          "preparation_seconds": 0,
+          "wrapper_seconds": 57.920731,
+          "matlab_process_wall_seconds": 216.7103760316968,
+          "process_outside_wrapper_seconds": 158.7896450316968,
+          "outside_wrapper_scope": "MATLAB startup/shutdown and invocation overhead; separate from original function",
+          "jvm_requested": true,
+          "original_source_manifest_sha256": "206374b058cb4c1fdba821c84c7a391e2856e2fd1d484ad731b81bd1bdb99828"
+        }
+      },
+      {
+        "case_id": "dr_vn_full490",
+        "threads": 8,
+        "affinity": [
+          3,
+          7,
+          19,
+          27,
+          35,
+          43,
+          47,
+          51
+        ],
+        "returncode": 0,
+        "process_seconds": 165.06402476876974,
+        "user_seconds": 13.248209000000003,
+        "system_seconds": 2.5887119999999975,
+        "maximum_rss_kib": 1767364,
+        "load_before": [
+          2383.68,
+          2471.37,
+          2473.59
+        ],
+        "load_after": [
+          2441.85,
+          2451.85,
+          2464.7
+        ],
+        "original_nodes_written": true,
+        "original_spectra_written": true,
+        "original_function": {
+          "validation_complete": true,
+          "operation": "regression",
+          "matlab_version": "9.5.0.944444 (R2018b)",
+          "threads": 8,
+          "function_seconds": 52.953358,
+          "preparation_seconds": 36.348198,
+          "wrapper_seconds": 91.437306,
+          "matlab_process_wall_seconds": 164.38099797070026,
+          "process_outside_wrapper_seconds": 72.94369197070026,
+          "outside_wrapper_scope": "MATLAB startup/shutdown and invocation overhead; separate from original function",
+          "jvm_requested": true,
+          "original_source_manifest_sha256": "206374b058cb4c1fdba821c84c7a391e2856e2fd1d484ad731b81bd1bdb99828"
+        }
+      },
+      {
+        "case_id": "wrn_full490",
+        "threads": 8,
+        "affinity": [
+          3,
+          7,
+          19,
+          27,
+          35,
+          43,
+          47,
+          51
+        ],
+        "returncode": 0,
+        "process_seconds": 1457.7970197498798,
+        "user_seconds": 111.923767,
+        "system_seconds": 19.450217,
+        "maximum_rss_kib": 1831024,
+        "load_before": [
+          2441.85,
+          2451.85,
+          2464.7
+        ],
+        "load_after": [
+          2481.73,
+          2452.34,
+          2453.7
+        ],
+        "original_nodes_written": true,
+        "original_spectra_written": true,
+        "original_function": {
+          "validation_complete": true,
+          "operation": "regression",
+          "matlab_version": "9.5.0.944444 (R2018b)",
+          "threads": 8,
+          "function_seconds": 1333.960986,
+          "preparation_seconds": 35.452154,
+          "wrapper_seconds": 1371.797538,
+          "matlab_process_wall_seconds": 1457.0319920182228,
+          "process_outside_wrapper_seconds": 85.23445401822278,
+          "outside_wrapper_scope": "MATLAB startup/shutdown and invocation overhead; separate from original function",
+          "jvm_requested": true,
+          "original_source_manifest_sha256": "206374b058cb4c1fdba821c84c7a391e2856e2fd1d484ad731b81bd1bdb99828"
+        }
+      }
+    ],
+    "numeric_comparison_status": "Full original nodes are written; comparison against complete saved candidate nodes requires server-side export."
+  },
+  "replaced_execution_observation": "Replaces initial execution-only receipt with captured complete precision and source/input hashes."
+}

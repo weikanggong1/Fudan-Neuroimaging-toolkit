@@ -1,5 +1,55 @@
 # sMRI 同节点 CPU 对照
 
+## 最新FNIRT采样对照
+
+[真实体积CPU候选](../fnirt_cpu_sampler_case_20261006/README.md)在16,128个记录坐标上，通过plain值、partial值和三个导数逐位门；当前helper仍有2338/813/0/913/1520个word不同。129,024个角点同输入门先通过，四次实际API及冻结源码已独立核验。候选公开在验证目录，默认注册器未替换。随后[同目标坐标/RHS控制](../fnirt_cpu_sampler_case_20261006/affine_coordinate_v3/README.md)通过12个实际消费矩阵word、16,128个坐标键、完整顺序输出、mask及129,024个角点门；候选partial值/三个导数逐位同。FSL序正梯度总相对L2由4.1597e−7降至8.7145e−10，三系数块仍有9.07e−8/3.21e−8/3.16e−8的相对差，1,177个Double word仍非逐位同。完整H/diag、求解与配准输出、fallback和GPU保护仍待验收。各API首编译与时钟分列，不报告加速倍率。
+
+[最新除法投影控制](../fnirt_cpu_sampler_case_20261006/projection_division_v1/README.md)复用同一保存导数，48,384个投影值逐位同。固定lambda的FSL累计序g相对L2由8.7145e−10降至5.26766e−15；XYZ系数块分别3.14e−15/1.47e−15/2.16e−15，仍有1,170个Double words尾差。LM序仍3.62e−8。157项执行门与资源收尾已过，完整H/diag、求解及最终影像尚未验证，默认CPU/GPU路径不变。
+
+[保存几何支持集诊断](../robust_register/support_points_results_20261006/README.md)已完成一次4全网格和4单点验证：原两阶段warp指标精确复现；两个差异点的round域、clamp、rint和FEQUAL整数捷径一致，插值角点记录不同。支持差异仍各1体素，原正式17/20保持；这是保存几何的观察，不证明优化器首差。[根复核](../robust_register/support_points_root_review_20261006.json)核对原回执和四个当前Git文件，没有新注册、GEMS、原软件或GPU调用。
+
+[保存状态的 X0 单列对照](../fnirt_cpu_sampler_case_20261006/hcol_x0_v1/README.md)已完成：196项合同门通过，组合列59/1177个Double词不同，相对L2为2.94287e−15。该边界方向的候选数据项全部为正零，结果主要验证bending及接口，不能代表非零数据项或完整H。data列含冷JIT为1.362秒，worker为88.437秒；其余导入和核验时间未细分，没有API或端到端加速结论。下一步用原始输入自产内部图像与坐标，核对cf/grad缓存、FSL顺序RHS和连续PCG，再验完整CPU配准及GPU保护。
+
+## 最新 FNIRT 完整 CPU 候选
+
+2026-10-07，独立 CPU 候选已从同一套真实 3D NIfTI 输入完成四层 GM 配置，最大迭代数为 5/5/10/5；最后一层使用原参考掩膜。共执行25次PCG，25次试步全部接受，空间网格、数据类型和 affine 与已有官方输出一致。此候选尚未采用。
+
+| 完整输出 | 与已有官方结果的相对 L2 | RMSE |
+|---|---:|---:|
+| moved 图像 | 5.41% | 0.0167201 |
+| Jacobian 调制图像 | 6.54% | 0.0217563 |
+| 非线性 Jacobian | 1.23% | 0.0125859 |
+| B-spline 系数 | 7.07% | 0.123277 |
+
+候选 API 为27.745秒，独立 worker 为39.845秒，峰值RSS为1.820GB；导入与设置（含OMP线程池）及输出保存另记录为8.069秒和0.738秒，冷JIT没有单独计时。已有官方CLI为326.097秒，两者的计时边界和CPU亲和设置不同，没有测量同环境、同边界且输出等价的提速倍数。
+
+moved/调制参考分别来自官方FNIRT之后的 `applywarp`／`fslmaths`，候选来自内部采样／乘法，原5.41%／6.54%是两条终点链的差异。两方TR沿用输入／目标头，不能单独视为FNIRT `--iout` 错误；系数单位缺失已修复，见[写出合同与来源核对](../fnirt_output_header_20261007/README.md)。这些元信息不改变上述像素误差。已有参考检查点显示，第一级第三次求解已有差异，早于第3、4层的拓扑投影；完整官方日志缺少逐试步轨迹，尚不能定位全部终点误差。拒绝试步后复用梯度/Hessian的缓存规则虽有源码候选，本例25次均接受，未覆盖拒绝路径。仅替换PCG算术规则的候选58轮达到残差阈值，但更新向量相对L2仍差8.36%，未采用。
+
+固定矩阵对照首次在SciPy导入身份门前退出，原失败保留；补齐实际两个稀疏扩展后已完成后续求解。[最新三臂控制](../fnirt_cpu_preconditioner_ablation_20261007/README.md)先用原RHS／预条件矩阵精确复现69轮、1177个参数逐位相同，再分开替换：仅候选RHS仍为69轮，更新差0.835%；仅候选预条件矩阵变为53轮，更新差11.75%。对角线约1e−15的相对尾差在这个固定系统中产生明显求解分叉，floor未改变数值。下一步核对JtJ累计、完整因子与正则项的计算顺序，再核完整配准；不把此单点控制称为完整终点误差的唯一原因，默认求解与GPU计算未替换。
+
+## 最新 robust QR 与 IRLS 对照
+
+[首轮 A/b 连续对照](../robust_register/first_ab_cpu_prefix_20261007/README.md)已完成：同一真实输入的准备态、两层金字塔、半空间变换及图像、9196×6 的 A 和 9196 项 b，18 个记录边界全部逐位相同。原 SDK 的一次四阶 Schur 返回成功；参考是固定源码观察器，不是安装程序内部 trace。候选冷子进程为16.506秒，其中四次运行库身份检查约12.573秒，不能据此计算生产函数提速比。此前独立实验版本的完整刚性/仿射为17/20；最新CPU修正版结果如下。
+
+[同一 A/b 的完整 IRLS 对照](../robust_register/same_ab_irls_cpu_20261007/README.md)已定位首差：第一轮的中心值、MAD、尺度、归一化残差、权重及加权 A/b 全部逐位相同，QR 的6个Float32参数首次不同，最大绝对差8.22544e−6。双方都执行4轮并回退到第3轮；最终6个参数最大差3.29018e−5，9196项权重中2473项不同。同一权重输入的累计权重和也相差0.027832，需修复CPU归约顺序。新的CPU Float LINPACK候选在保存的同一加权A/b上求解一次，6个返回值全部逐位匹配原生；核函数为0.595毫秒，首次类型编译为0.919秒。随后同一真实A/b上的三处CPU修正已完成自然IRLS：双方4轮、选第3轮并回退，40个逐轮记录和4个最终记录全部逐位同；最终6参数及9196权重差异为0。MAD、Tukey权重与停止条件保持；独立的累计权重和/加权残差和中间值没有另行观察，不宣称其逐位匹配。
+
+最新[完整CPU算术候选](../robust_register/full_cpu_arithmetic_20261007/README.md)进一步完成刚性→自身MGH保存重读→仿射，沿用原20项阈值，全部通过：
+
+| 输出检查 | 刚性 | 仿射组合 |
+|---|---:|---:|
+| 133个点的RMS / 最大误差（mm） | 0 / 0 | 0 / 0 |
+| 共享FNIT采样器的warp相对L2 | 0 | 0 |
+| 非零支持集不同体素 | 0 | 0 |
+| 保存MGH字段一致 | 13/13 | 13/13 |
+
+组合RAS矩阵也一致，两份增量LTA的最大Double尾差约为4.97e−14、4.00e−15，没有声称所有文件字节一致。修正版仅执行一对配准，沿用此前保存的官方两命令结果；首次评分因旧冻结评分器遗漏main已有的MGH大端读取修复而失败，随后复用该修复，只评分既存输出。配准API14.852秒包含首次JIT和内部身份检查，独立恢复评分计算0.193秒；未测量等价输出下同边界的稳定加速。当前是单例CPU实验验收，生产仍未提供完整robust注册入口；完整核团、其他输入域和GPU回归仍待验证。
+
+随后独立 CPU 适配器的正常 API 已完成首次／同实例缓存两次调用，新官方两命令也完成；三组输出沿原20项评分各全通过，共60/60。两阶段共享采样器warp和支持集差均为0，133点误差0，保存MGH字段13/13相同。冷pair2.147秒、热pair0.790秒；冷导入1.713秒和factory0.087秒位于pair外，官方两CLI合计1.031秒（相同八核预算，官方实际活动线程数未观测）。已提供Python复用入口与CLI，完整CLI冷启动尚未单独benchmark；不是同边界端到端速度验收。此前包装入口失败保留，评分恢复复用全部既存结果，没有额外配准／JIT。GEMS默认、GPU分支与调用方线程／精度策略没有替换。
+
+## 最新C24完整接入结果
+
+[完整CPU/GPU对照](seg_columns_c24_integration_20261006/README.md)已完成一次同公开T1的CPU8 ABBA和GPU AB：API中位85.499→80.621秒（缩短5.71%），分割、CSV、完整header和gzip SHA保持原输出；GPU实际设备/精度/allocated/reserved及采样内存保持。冷进程首臂20.286秒未细分检查使整体15.29%观察含检查时间差异，不能当计算加速。既有Conda冷/暖编译通过，sdist三个源文件逐字节包含；完整wheel/全新安装未测。GEMS与FNIRT严格验收仍未完成。
+
 ## 本轮范围
 
 冻结起点为 `1d31e7baaebbb644ab199471f7fe6282721455fd`。在 nodecw10 对照 FNIT 与独立安装的 FreeSurfer 8.2.0-1、FSL 6.0.7.4，检查已实现的公共功能、精度和完整运行时间。原软件只参与参考测试，FNIT 推理不调用这些安装。
@@ -13,6 +63,12 @@
 | 5 | segment_4_subregions、run_recon_all_python | 110 分区硬/软体积、表面、顶点与脑区指标 |
 
 功能覆盖、参数和复现命令放在各任务目录。官方存在而 FNIT 没有实现的模式单独列明，不计为通过。例如 SynthSegPlus 当前对应普通 SynthSeg 2.0 的 `--parc`，不对应 `--robust`。
+
+最新独立[robust配准前处理](../../docs/robust_register/PREPARATION.md)已完成同例CPU门：目标掩膜和右侧atlas的体素、13项MGH字段及存储affine均与官方相同；仅比较保存网格，gzip和可选tag另列。原报告序列化失败已修复，原两次exit1保留，未重算图像；[独立复核](../robust_register/target_preparation_20261006/ROOT_REVIEW.public.json)验证这一范围。该模块尚未接入GEMS。随后一次刚性→保存重读→仿射对照完成，133个点的最大世界坐标差为7.742e−6 / 4.487e−4 mm；刚性和仿射各有1个支持集体素不同，仿射同采样器warp相对L2为2.588e−5，超过预定1e−5。[独立候选](../robust_register/rigid_affine_20261006/README.md)17/20门通过，未采用；最终核团Dice/体积门仍未通过。
+
+随后独立[Float反矩阵源码顺序合同](../robust_register/inverse_order_20261006/README.md)对六个已保存矩阵的determinant、reciprocal、inverse共18门逐bit通过；[root复核](../robust_register/inverse_order_root_review_20261006.json)核对原receipt与22个Git文件。旧刚体不同word仅为带符号零，四个仿射矩阵有1.19e−7至7.63e−6的非零数值差。该合同不读取MRI、不证明安装binary指令一致，旧17/20影像门保持原结论。
+
+随后[真实求逆顺序候选](../robust_register/inverse_real_20261006/README.md)仍为17/20门通过：仿射同采样器warp相对L2为2.556643e−5，比旧候选降低约1.22%，仍超过原1e−5；两阶段各差1个支持集体素。刚性完整receipt记录26次局部求逆；仿射已保存两输出，但报告因NumPy int32不能JSON序列化而失败，其API时钟与内部flags记NA。随后只评分已保存输出，未重跑注册；[独立复核](../robust_register/inverse_real_root_review_20261006.json)核对518项绑定及原退出码。候选未采用，未形成等价提速结论。
 
 ## 线程和计时
 
@@ -39,22 +95,74 @@ CPU 修改优先保持 CUDA 分支。每个受影响组件还在 gpucw1 的同�
 
 ## 继续修复：nodecw7 与 H100
 
+[同投影Hessian对角线对照](../fnirt_cpu_sampler_case_20261006/diagonal_only_v2/README.md)已完成：未加扰及乘1.001后的1177项对角线相对L2分别为7.08786e−16、7.08078e−16；三个392项系数块约1.5e−15至2.4e−15，整体范数由scale项主导。两向量仍各有1166个Double words不同，不能称逐位同。仅执行一次对角线计算，未计算非对角项、完整H或求解；完整缓存、非线性配准及GPU保护仍待验收。
+
+[Robust完整初始化对照](../robust_register/centroid_m0_cpu_prefix_20261006/README.md)在同一真实输入上使两幅准备图像和全部54个Double初始化值逐位匹配SDK参考。后续迭代及正式17/20完整配准门仍待解决。
+
 本版从已发布的 `f1cbdab1` 继续，CPU 对照迁至现场确认的 nodecw7；不把 nodecw10 时间混入新配对。各组仍限制相同八个物理核心和线程预算，同组串行。GPU 用既有 H100 共用锁；数值、完整 header、显存和实测时钟分别记录。
+
+最新[普通33类 CPU 分步骤观察](seg_cpu_profile_20261006/README.md)只运行一次当前源码的完整 API，未重复官方、parc/fast 或 GPU。当前标签、每区 Dice、完整 header、体积 CSV 和压缩 SHA 与已验收候选相同；106.377秒观察时钟中，CNN81.716秒、平滑13.136秒。正式112.952秒/官方55.046秒保留，分步骤诊断不能记作新的提速。源码、工具与543项事件聚合已[独立复核](seg_cpu_profile_20261006/ROOT_REVIEW.json)。
+
+最新[FNIRT自有CPU归约核验](../fnirt_cpu_reductions_20261006/README.md)通过保存真实系统的465项标量、186项相对范数和自然69轮的全部向量／最终解逐位门，运行前后503项绑定通过。该候选使用现有Numba/llvmlite；没有改生产、重新组装或启动完整配准。当前17文件和28份报告/工具的Git字节已[独立复核](../fnirt_cpu_reductions_20261006/root_review.public.json)；矩阵自由接线和梯度组装差异仍待处理。
+
+随后复用已存当前H/g/独立diagonal完成[旧新PCG两臂](../fnirt_cpu_current_replay_20261006/README.md)：自然53/49轮，同当前系统的真实残差7.82e−4/4.17e−4，均符合原1e−3停止门。与另一存档原生系统解的相对L2为11.53%/14.67%，这组跨系统距离不支持默认替换，也不能单独判定算术bug。只读保存解诊断发现，新旧差方向的逆增益为748.8；这是混合参数坐标中的单个方向，不是全局条件数或voxel误差。矩阵组装和任意方向的matrix-free回调仍待核对。
+
+[一次当前level重建](../fnirt_cpu_level_rehydrate_20261006/README.md)已在第二accepted参数点通过：count、SSD、bending、λ/cost和完整1177项gradient/独立diagonal逐位等于已保存当前系统，linearize含evaluate为2.104秒。只运行一次evaluate/linearize，没有callback、H物化或求解；私有状态可供后续诊断，尚未验证NPZ布局恢复和任意方向算术。30份Git产物、18个当前源码及原始summary已[独立复核](../fnirt_cpu_level_rehydrate_20261006/root_review.public.json)，不作为完整配准提速或官方等价结论。
+
+该回放的41份原报告/工具、17个当前生产源、509项前后绑定、追加10/17/5项绑定及残差标量已经[独立复核](../fnirt_cpu_current_replay_20261006/root_review.public.json)。没有重复计算模型或求解器。
+
+随后[真实matrix-free callback上的PCG两臂](../fnirt_cpu_matrixfree_pcg_20261006/README.md)在同一恢复状态自然49/53轮停止，实际相对残差7.102e−4 / 6.770e−4均达到原1e−3门；两更新向量相对L2差6.9665%。首个方向已在预条件阶段分叉，没有原生同系统解，未接入默认。两个unit门、106次实际callback、完整绑定与原summary已[独立复核](../fnirt_cpu_matrixfree_pcg_20261006/root_review.public.json)；控制tau不是已确认的历史solve3阻尼，冷JIT顺序时钟不作速度比。随后[首方向诊断](../fnirt_cpu_initial_precondition_20261006/README.md)确认内部下限改值0；倒数再乘/直接除法造成332个1 ULP差异，同一向量下的点积/范数尾差单列。两个原首方向已逐位复现；0 callback/PCG/影像/官方，记录已[独立核验](../fnirt_cpu_initial_precondition_20261006/root_review.public.json)。完整更新、组装和非线性配准仍待处理。
+
+后续[普通33类平滑候选](seg_cpu_blur_trial_20261006/README.md)在同一真实概率张量的三次实际逐位门全部通过，局部 worker 峰值RSS最大值10.295→5.592 GB；操作中位数6.963→6.978秒，未证明加速，暂不接入默认。只恢复一次已保存 decoder 末端，不记作完整CNN或T1实测；原始12份产物、14个当前源文件、三次位比较与时钟已[独立核验](seg_cpu_blur_trial_20261006/ROOT_REVIEW.json)。
+
+[FNIRT平滑moving单输入控制](../fnirt_cpu_rhs_moving_control_20261006/README.md)已自然exit0：12项baseline/fixed/scalar/gradient/mask/count门全过，只换官方保存的平滑moving图。固定参数和λ下，总g相对误差8.364e−7→2.359e−7，FSL顺序控制7.366e−7→2.484e−7；三coef分量各改善约21%–30%，全部1177项仍不逐位同。只采样一次，0H/diag/PCG/native/full；官方SSD没有独立记录，不推断完整warp或分割改善。源码/operands/flags及三exit已[现场独立复核](../fnirt_cpu_rhs_moving_control_20261006/root_review.public.json)，默认生产未变。
+
+[当前FNIRT编译CPU平滑](../fnirt_cpu_smoothing_bridge_20261006/README.md)补足旧保存图到当前Numba实现的桥接：plain→旧plain、header adapter→官方保存图两个整图各18,579,456个FP32值逐位同，三exit0。31项源/输入、12项harness与operands/flags前后相同；实际仅2次blur、1次adapter，不运行归一化/RHS/H/PCG/官方/GPU/完整配准。旧完整方向候选误差扩大仍保留，默认未采用；[独立复核](../fnirt_cpu_smoothing_bridge_root_review_20261006.json)只确认预处理身份。
+
+[单处除法顺序控制](../fnirt_cpu_rhs_projection_control_20261006/README.md)已完成：原完整RHS先逐位重现，再仅替换signed-axis FP32除法。17个前置门和所有后门通过，scale逐位不变，但对存档官方总梯度相对L2由2.4836018e−7变为2.4838650e−7，未改善；x轻微改善、y/z轻微变差，因此不接入默认。仅1次采样/2次梯度前缀，无H/PCG/官方/GPU/完整配准。v1的nibabel头信息表示守卫错误及原exit1/1/0完整保留，v2仅修守卫后exit0/0/0；[独立复核](../fnirt_cpu_projection_root_review_20261006.json)确认32项源/输入与15项harness前后身份，尚未证明最终非线性输出一致。
+
+[保存当前moving的scale/SSD累计控制](../fnirt_cpu_scale_accumulation_control_20261006/README.md)已完成一次四成员诊断：baseline两标量逐位复现，Z/Y/X串行Double后scale仅变3.19744e−14、SSD仅变2.13163e−14，同串行和的两种最终分组逐位相同。对当前存档native scale约7.66992e−6的差异没有实质改善；官方moving替换状态的2.54688e−6残差属于另一输入，未在本控制中重建。[根复核](../fnirt_cpu_scale_root_review_20261006.json)核对10个Git文件、原summary/cleanup字节、30源与输入及7operand前后身份。无新采样、H、PCG、原软件或GPU调用；生产未替换。
+
+[单层64MiB卷积分块候选](seg_cpu_conv_slab_trial_20261006/README.md)已在目标Torch2.5.1的第三个短合同停止：实际权重、depth7输入的37,128个FP32值中33,144个不同，maxabs4.292e−6。未运行真实MRI层或ABBA，不形成速度或官方精度结论；14个生产文件和GPU保持原样。记录与Git源码已[独立复核](seg_cpu_conv_slab_trial_20261006/ROOT_REVIEW.json)，下一步只研究保留原GEMM矩阵布局的列缓冲复用。
+
+[列缓冲复用接口](seg_columns_reuse_20261006/README.md)的编译后，[v2短合同](seg_columns_reuse_v2_20261006/README.md)通过6组完整FP32、13组复制及23组fallback门。真实层首次测试因6D权重哈希被误限为5D而在任何卷积前停止，[原失败](seg_columns_real_layer_20261006/README.md)保留。修正哈希守卫后，[真实MRI层ABBA](seg_columns_real_layer_v2_20261006/README.md)四臂完成：三次完整264,241,152个FP32值逐位相同，单层操作中位数15.385730→5.720358秒，本组快2.690倍，RSS最大11.397GB；14个slab的M/K/N、偏置及同一MKL provider保持。原始记录、源和时钟已[独立核验](seg_columns_real_layer_v2_20261006/ROOT_REVIEW.json)。该结果覆盖已保存输入的一层。随后[完整CPU/GPU接入对照](seg_columns_integration_20261006/README.md)完成真实T1的CPU四臂和GPU两臂：冷worker中位数107.937608→90.118916秒，缩短16.508%；API中位数105.144285→87.393578秒。两次CNN前向、分割、全部header、体积表及压缩文件SHA保持旧输出；GPU allocated/reserved为10.712/14.615GB，进程采样最大15.177GB，均与旧版相同。实际已有Conda缓存冷编译1次、暖编译0次，39个守卫/缓存合同及4个调度合同通过。对官方仍仅原1个体素差异，前景最低Dice0.999998569，软体积CSV最大差0.8mm³；对应官方同例CPU8冷CLI55.046秒，仍未达速度目标。缓存只在受测CPU层/权重/运行库下启用；共享GPU时钟不作提速结论，完整新Conda安装仍待测试。
+
+下一层[24通道列缓冲候选](seg_columns_c24_contracts_20261006/README.md)已完成现有Conda编译和短输入检查：实际`down[0].conv1`权重的六组FP32输出、13组复制均逐位相同，30个回退守卫通过；原32层slab、MKL矩阵布局和偏置累计保持。短数值worker峰值RSS0.468GB；[root复核](seg_columns_c24_contracts_root_review_20261006.json)实际重核28项source和12项冻结文件。该短合同没有MRI、完整CNN或GPU调用。随后[原图与翻转图真实单层ABBA](seg_columns_c24_real_results_20261006/README.md)已正常完成，六次完整FP32比较逐位相同；两个pass操作中位数10.889→5.003秒，快2.177倍，RSS最大9.769GB。仅运行一次preprocess、两次conv0和八次conv1，完整CNN/原软件/GPU调用均为0；[独立复核](seg_columns_c24_real_root_review_20261006.json)保存原始回执SHA和计数。此结果尚未接入生产，仍缺完整CPU输出及GPU保护。
 
 | 功能 | 本版已完成的修复或定位 | 完整真实输入证据 |
 |---|---|---|
 | [TorchFAST](fast_fixes_20261004/README.md) | CPU 标量 C 指数/对数修复；默认和一组非默认八图与官方逐值相同 | nodecw7 默认完整 CLI 官方 368.198–411.291 s、FNIT 100.174–110.173 s，中位数比 3.706；完整脑 GPU 两后端各八图/headers 相同、显存相同，共享 GPU 时间另列 |
-| [SynthMorph](../synthmorph/cpu_fixes_20261004/README.md) | CPU slope/intercept 解码顺序、affine/rigid 返回变换与采样契约、joint 归约顺序 | affine/rigid/deform/joint 默认已测门通过，joint 物化 API 与路径输出相同；extent192 场与逆向门通过，正向零边界门未过。最终源码 GPU affine 数组/header 相同 |
+| [SynthMorph](../synthmorph/cpu_fixes_20261004/README.md) | CPU 解码、双向契约、有序插值、oneDNN 和矩阵顺序修复；精确 NumBa 采样与实际 Conda Eigen 缓存修复已接入 | joint 192/256 的完整场、脑内及零边界门通过。最新六次完整 CPU 两图两场及全部元数据与已验收 v29 逐位相同；256 同八核 ABBA 中位数 163.094→155.086 s，本组缩短 4.91%，RSS 11.718–11.799 GB。暖采样快 5.35/6.07 倍，局部冷 256 慢 12.3%，不混作完整时间。CUDA 路线及精度策略保持，14 项隔离门通过；完整 H100 两图两场和 reserved 17.836 GB 来自已绑定父版，未重复 GPU CNN 或宣称新的 GPU 提速 |
 | [WMH-SynthSeg](synth_fixes_20261004/README.md) | 推理激活生命周期、CPU 权重搬运、GPU crop 工作区管理 | 完整 CPU 同官方标签/概率/CSV 相同；GPU crop allocated/reserved 为 18.374/18.438 GB，旧输出 SHA 和 57 次卷积 kernel 全同。默认 no-crop 保留原 GPU 路径、同实例模式恢复通过，但仍约 38 GB allocated |
-| [球面梯度平均](recon_fixes_20261004/README.md) | CPU 顶点间保序并行，不改变顶点内 FP32 累加 | 完整真实表面 256 轮 1.317464→0.314495 s，输出逐值相同；GPU 三轮数输出、内存相同。范围仅为该算子 |
-| [GEMS](gems_fixes_20261004/README.md) | 修复无超参数 Gaussian 类别质量广播；缓存和裁剪候选均未进入默认 | 缓存 CPU 完整状态相同但无提速；裁剪候选存在逐区退步。丘脑/HA 未验收，不把预处理更接近官方写成最终分割通过 |
+| [SynthSeg / 普通皮层分区](seg_memory_20261005/README.md) | CPU decoder 复制到一个目标缓冲，保留原卷积和数值；16 次完整 FNIT CPU/GPU 运行的标签、CSV 和几何旧新相同 | nodecw7 八核候选冷进程 33 类 112.952 s、parc 55.684 s、fast 40.464–43.369 s；同节点官方正常冷 CLI 分别 55.046 / 48.296 / 33.784 s，另保留 33 类首次异常的 373.087 s，不用它作加速分母。两类时钟的校验与输出范围不同，分别报告，官方速度目标未达成。CPU 对官方仍为 1/5/1 个标签差异，没有新增。真实 H100 旧新输出和 allocated/reserved 相同，reserved 最大 18.900 GB；外部负载使本轮不支持稳定 GPU 提速或进程树物理峰值结论。Plus 已有 lazy 构造覆盖 TF32 的问题另列，未在本候选中修复 |
+| [球面配准](recon_fixes_20261004/FULL_REGISTRATION.md) | CPU 平均保序并行；完整左半球同输入与官方逐点比较 | 119,451 点坐标/有序面/解码几何全同官方，旧新轨迹相同。新进程旧 764.907 / 新 348.038 / 官方 261.199 s，新仍慢 33.25%；GPU 平均三轮数输出/内存相同，原始 T1 整链未新跑 |
+| [C++ 持续线程组平均器](average_cpu_persistent_20261004/README.md) | 四次冻结源码完整配准 ABBA；正式源、任务、运行库与相同 CPU 资源门通过 | 四次轨迹、119,451 点坐标、有序面和几何相同；对同输入保存的官方结果也相同，负面积面为 0。候选各 67 次 eligible 调用，实测 C++ team 均为 8。平均步骤中位数 55.151→26.447 s（2.085 倍）；完整进程 914.965→963.223 s，慢 5.27%。Numba 基线没有逐调用 team 采样，绑定的配置、环境和预算均为 8；官方是历史保存参考，未重跑。不能将算子收益称作完整配准加速 |
+| [GEMS](gems_cpu_epsilon_20261004/README.md) | Gaussian 广播修复已验收；定位到 mixture 缺少官方 `1e-15`，完成 CPU 混合内部精度候选的全部 recipe 对照 | 首次完整梯度相对差约 4e−8，但最终 native 通过数仅 37/105→43/105、HR 41/107→45/107；丘脑丢失三个旧通过区，HA 仍有多数区域未过。保存全部 220 行 hard/soft 指标，候选不替换默认；原 CUDA 仍缺 epsilon |
+| [GEMS 同点与首步定位](gems_first_trial_20261005/README.md) | 同一真实初态复现与已安装原版的目标、完整梯度、四面体方向及单次更新 | 三处同点梯度相对差约 5e−8、cost 绝差≤0.004632。旧丘脑/左 HA 对照漏掉负行列式时的 tet 换序，修正的是参考适配器，FNIT prior 不改。右 HA 首步旧 Armijo 最大位移 0.5 voxel、原版 1 voxel，按原搜索定义的探针舍入点相同。仅首步和同点评分，尚未通过完整优化、分割或速度门 |
+| [GEMS CPU 数据目标与有限轨迹](gems_cpu_objective_20261005/README.md) | 平滑阶段的零质量 alpha 导致额外通道归一化改变 mesh 数据项梯度；验证闭包保留 raw prior mass | 真实固定阶段 initial/1/3/37 同点门通过，完整梯度相对差约 2–3e−8。验证闭包还依赖 CPU epsilon、FP64 reference/插值、FP32 owner 与私有 L-BFGS，未接入当前生产。37 步对官方轨迹最大坐标差 0.508 voxel、RMSE 0.008893 voxel、目标值高 242.54，仍未收敛；两者无非正 Jacobian。前 3 步和续 34 步累计 136.523 s，另 2.340 s 为恢复评分，不是 fresh 完整函数 benchmark。继续定位 optimizer，未测试新的完整 recipe 或逐核团 Dice/体积 |
 | [FastVBM/FNIRT 定位](gems_fixes_20261004/FNIRT_READONLY.md) | 大量误差进入非线性估计段；最终乘法不是额外误差来源 | 固定官方场的实际转换/重采样 RMSE 4.39e−6，旧完整链 0.0189811。解析/稠密 Jacobian 定义差异另列 |
 | [FastVBM CPU Jacobian 修复](fnirt_jacobian_20261004/README.md) | CPU FNIRT 采用已有解析 Jacobian；GPU/SynthMorph 保留原路径 | 同官方系数对 `jout` RMSE 7.37e−8；固定真实 GM stage 的 Jacobian RMSE 0.01404→0.01259。调制图 RMSE 略降、最大误差略增；完整 GPU 后处理三图/header/QC 相同，未重测整 pipeline |
-| SynthSR | 第一层 ELU 可匹配，但完整候选仍失败且变慢，未替换正式实现 | 第二层卷积和 BatchNorm 首差已定位；默认浮点原门尚未通过，不影响既有 GPU 源码 |
+| [FNIRT 首轮实测](fnirt_first_diff_20261004/README.md) | 首次分歧为正方向 moving GM 的平滑累计顺序；翻转控制整图逐值相同 | 初始 mask、fixed 平滑相同；首轮梯度/accepted coefficient 差很小。共享真实 FP64 系数 `4→2` 转换最大差 1.35e−12 mm；[完整平滑候选](fnirt_cpu_orientation_20261004/README.md)最终退化，未接入 |
+| [FNIRT 非零状态](fnirt_nonzero_state_20261004/README.md) | 同官方 accepted 参数的 bending、梯度、Hessian 与正则权重状态对照 | regularizer action 相对差约 3.2e−15，未发现量级错误；baseline/flip 完整对照最早在 PCG 80/49 轮分叉，非线性估计仍未等价 |
+| [SynthSegPlus CUDA 精度作用域](seg_tf32_20261005/README.md) | 默认 CPU/GPU 完整三图、CSV、header 与上一版严格相同；构造及异常退出恢复调用方策略，新增 Python True/False/None 选项 | 同病例 False 普通分割对官方 0 voxel 差，fast 2 voxel 差；CSV 尾差 0.20/0.346 mm³。默认 Torch 显存相同；共享 GPU 时间仅作观察 |
+| [GEMS CPU Double 续段](gems_cpu_double_continuation_20261006/README.md) | actual Double point、QR、Gaussian 与保存状态恢复；37步同点 objective/gradient/prior/coverage 原门通过 | 不同末点最大差 0.660 voxel、RMSE 0.009264，cost 高35.49；与前一控制相比 cost 差降低但坐标差增大。仅诊断，未接入默认生产或完成新的 ROI 验收 |
+| [FNIRT 恢复状态的矩阵作用](../fnirt_cpu_matrixfree_restore_20261006/README.md) | 68数组/臂的原stride与逻辑值恢复，3unit列和7个优化CPU/原Torch action逐位通过 | 14callback/7CSC，0solver/native/new assembly；真实方向对CSC最大差3.55e−15。3.515秒含冷JIT，不是速度对照；未接生产，完整非线性差异仍待解决。[独立复核](../fnirt_cpu_matrixfree_restore_20261006/root_review.public.json) |
+| [GEMS CPU 完整右侧 HA 未过门](gems_native_cpu_rha_failure_20261006/README.md) | 未采纳的显式 CPU 候选四真实点/EM/GPU 保护门后，完整 recipe 只执行一次，exit0 | API3110.729秒/RSS11.838GB；native9/28、HR6/28通过原Dice≥0.95/硬体积差≤5%门。逐区CSV、固定网格、五阶段耗时和真实脑图已[独立核验](gems_native_cpu_rha_failure_20261006/ROOT_REVIEW.json)。初始对齐等定义差异已定位，未接入生产；官方同节点新墙钟缺失 |
+| [FNIRT 新共享探针](../fnirt_shared_followup_20261006/README.md) | 固定真实系统的严格CSC/除法/独立官方reductions组合自然69轮，全部向量/scalar与1177解bits相同 | 仍是隔离诊断，不是自有生产修复。当前第二接受点H rel1.03e−9、RHS rel8.36e−7；只换Jte后7.37e−7，完整非线性估计尚未等价 |
+| [FNIRT 共享 PCG](../fnirt_pcg_shared_state_20261004/README.md) | 同 H/RHS/初值/对角/容差重放实际官方与 FNIT solver | 第二次均 24 轮；第三次官方 69、dense 80、严格列序 49、除法控制 79。所有停止门正确；实际 FP64 尾差可放大为不同参数，未改生产求解器或重跑整链 |
+| [SynthSR](synth_fixes_20261004/sr_cpu_followup/README.md) | CPU 推理使用已核验的 FP32 ELU/BN 顺序及临时 channels-last 权重；保留训练、hooks、autocast 和 CUDA 路径 | 默认两分支 22,020,096 CNN 值、9,072,000 浮点/量化值全同官方，3,522 个旧超限值降为 0。四参数分支和六真实域原门均通过；正常 CPU CLI 中位数 28.660→28.340 s，RSS 10.222→7.496 GB。GPU 新旧完整输出/header/文件 SHA 与 allocated/reserved 相同；共享时间另列 |
 
-这版没有宣称全部 sMRI 功能已等价：SynthSR、丘脑/HA、FNIRT 非线性估计和 recon-all 的有效顶点对应仍见[剩余清单](REMAINING.md)。以下保留前一轮源码绑定结果，不改标为本版新测试。
+这版没有宣称全部 sMRI 功能已等价：丘脑/HA、FNIRT 非线性估计和 recon-all 的有效顶点对应仍见[剩余清单](REMAINING.md)。SynthSR 的 EPI NPZ 浮点仍有微差但通过原门；GPU 与旧 GPU 一致，未因此宣称 GPU 同官方 CPU 逐值相同。以下保留前一轮源码绑定结果，不改标为本版新测试。
 
-整合后的本地组件回归为 **931 passed、3 skipped，69.70 秒**，覆盖 FAST、GEMS、SynthMorph、world ApplyWarp、WMH、SynthSR、FastVBM 和受影响的球面算子。两项 warning 来自既有 FastVBM 模拟 profiler 测试未设 warmup；不使用这些测试的时间作 benchmark。完整命令、已测生产提交及修改源码/测试 SHA-256 见[整合记录](integration_20261004.json)。这组回归不代替真实影像与原软件的对照，也没有重新运行原始 T1 的完整 recon-all。
+SynthSR 修复并普通合并最新 main 后，本地组件回归为 **2,092 passed、5 skipped，138.79 秒**。覆盖前述组件及最新 FLIRT/FNIRT、ApplyWarp、ConvertWarp、InvWarp 和空间转换接口；测试和实际源码 SHA 见[最新整合记录](integration_sr_final_20261004.json)。首次整合的两项 NMI 测试固定统计 scatter 调用次数，未覆盖 CPU Numba 后端；已改为逐值检查送入熵计算的完整直方图，数值门未改变，生产数学也未改。两项 warning 来自既有 FastVBM profiler 测试未设 warmup，不能使用测试时间作 benchmark。
+
+该 2,092 项记录早于本次 joint 原始插值与正式 CPP 平均器合并，只覆盖其注明的源码。中间版 `55d7a88f` 的 **2,148 passed、5 skipped，158.32 秒**见[当时整合记录](integration_20261005.json)，当时尚未包括安全 Eigen loader 和精确 NumBa 采样。
+
+2026-10-05 整合版 `c2ceb18e` 的组件回归为 **2,218 passed、5 skipped，158.37 秒**；包含上述两项已验收 CPU 修改、正式 CPP 平均器合同与最新 main 文档合并，实际文件哈希及测试期间不变性见[该版整合记录](integration_final_20261005.json)。该版尚未接入 SynthSeg CPU 拼接优化。
+
+随后 `7e0890a5` 接入保留原数值的 SynthSeg CPU 拼接，整合回归为 **2,288 passed、11 skipped、3 subtests passed，155.04 秒**；包含完整 `tests/synthseg_parc`，外层墙钟 158.44 秒，源码与测试文件在执行期间均未变化，见[接入后记录](integration_seg_20261005.json)。没有采纳 GEMS mixed 或新的 raw-prior 优化目标。两个 warning 仍来自既有 profiler 测试。前一轮 **931 passed、3 skipped，69.70 秒**及其源码仍见[原整合记录](integration_20261004.json)。组件回归不代替真实影像与原软件对照，也没有重新运行原始 T1 的完整 recon-all。
+
+2026-10-06 接入 SynthSegPlus 精度作用域的 `76bb9546` 整合回归为 **2,386 passed、11 skipped、3 subtests passed，165.89 秒**，外层墙钟169.99秒。绑定源码和测试在执行期间保持不变，详见[本次记录](integration_seg_tf32_20261006.json)；真实原始T1的CPU/GPU门见独立精度报告。组件测试不代替MRI速度benchmark。
 
 ## 前一轮 nodecw10 验收记录（已发布）
 

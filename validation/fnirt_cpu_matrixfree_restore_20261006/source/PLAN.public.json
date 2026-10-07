@@ -1,0 +1,147 @@
+{
+  "status": "prepared_only_awaiting_root_review_no_upload_no_worker_no_math",
+  "point": "accepted stage1 solve3 checkpoint",
+  "canonical_workspace": "workspaces/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-restored-v1",
+  "canonical_run": "runs/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-restored-v1",
+  "stage1_commit": "0b691f32bdc47dc68f30516daf7d4e9f369e3235",
+  "inputs": {
+    "gradient": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v2/assembly/gradient.private.f64",
+      "bytes": 9416,
+      "sha256": "79e5d87f1b9d31584f851cbab1e0f67a6201abc4549efa96cf95bc208ad1ab73"
+    },
+    "diagonal": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v2/assembly/diagonal.private.f64",
+      "bytes": 9416,
+      "sha256": "833b3d6ce3915129a3e85e204005fd1c871cec25058d3e3027ea992541b6be4f"
+    },
+    "H": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v2/assembly/H.private.f64",
+      "bytes": 11082632,
+      "sha256": "426e0d4add9dd6f46a972ecde0b4e06e6f1350301c06be4c6391af4148c4fa8d"
+    },
+    "old_solution": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-current-pcg-replay-v1/replay-v1/old_solution.private.f64",
+      "bytes": 9416,
+      "sha256": "58579e0f5cb34fa409d6d26de31a6e4687a011d9346539493b255f538ba316ab"
+    },
+    "new_solution": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-current-pcg-replay-v1/replay-v1/new_solution.private.f64",
+      "bytes": 9416,
+      "sha256": "a798a3cc3ef392573137caba22de268804c2eb0e135e3ded8fd828ae41e10425"
+    },
+    "paired_summary": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-current-pcg-replay-v1/replay-v1/summary.public.json",
+      "bytes": 20372,
+      "sha256": "5651fb99e1d2eee0cf2ed79c686c862b04235f48b5f6669c68bd616c69cdbe21"
+    },
+    "stage1_summary": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-level-rehydrate-v1/stage1/summary.public.json",
+      "bytes": 30714,
+      "sha256": "eb31cfd14bf4d8b5a0b82228a72b2f854a86a38d1a969d981cd0d215e09afbf6"
+    },
+    "checkpoint": {
+      "relative_path": "runs/smri_cpu_20261004/remaining_20261006/fnirt-level-rehydrate-v1/stage1/level_state.private.npz",
+      "bytes": 2647508,
+      "sha256": "78abee8589e6e026fede946136c9e78589817b01a1d55d2085aee19758ceae0e"
+    }
+  },
+  "source_count": 19,
+  "input_count": 8,
+  "two_arms": [
+    "current optimized CPU SpatialNormalCPU",
+    "same current callback AST with cpu_normal=None existing reference branch"
+  ],
+  "directions": [
+    "unit_first",
+    "unit_middle",
+    "unit_intensity",
+    "saved_current_full_g",
+    "saved_old_solution",
+    "saved_new_solution",
+    "saved_new_minus_old"
+  ],
+  "unit_gate": "optimized callback full result must equal the stored dense H column bits; reference and CSC comparisons are recorded; first optimized mismatch stops",
+  "arbitrary_direction_gate": "finite inputs/outputs and unchanged state required; record relative/max/bits. No universal exactness or tolerance acceptance asserted against materialized-H action.",
+  "maximum_calls": {
+    "optimized_callback": 7,
+    "reference_callback": 7,
+    "existing_CSC_action": 7
+  },
+  "forbidden_calls": [
+    "evaluate",
+    "linearize",
+    "gradient",
+    "BendingOperator constructor",
+    "PCG",
+    "new H assembly",
+    "new image preprocessing",
+    "native process",
+    "GPU"
+  ],
+  "checkpoint_restore": "68 logical values and recorded byte strides explicitly restored; two independent storages; no original alias-graph claim",
+  "mutable_operands": "only mature optimized normal scratch/layout; immutable saved input values hash before/after",
+  "source_ast": {
+    "callback_order": [
+      "bend_normal",
+      "data_normal",
+      "matvec"
+    ],
+    "callbacks": {
+      "bend_normal": "45fd59ad2fe9610da6e49879fa70c827b4f093269d9dde760b03e500a19d86c1",
+      "data_normal": "eb29a74d84490bd4b5b8676a2085da8899c0878934ff96b120cfe22d18c34306",
+      "matvec": "d6cee3e8118928ec468a855f878bf6c03f0a64bf5709970d38c5cf7faed04262"
+    },
+    "strict_csc_body_without_decorator": "df4b6416ed16ba82c64e013d97db2d0cc0052ef856e810d58303ace59dbd7b0b",
+    "free_variables": {
+      "bend_normal": [
+        "bend_factor",
+        "coefficient_shape",
+        "coefficients",
+        "self"
+      ],
+      "data_normal": [
+        "coefficient_shape",
+        "count",
+        "cpu_normal",
+        "cross_weights",
+        "scale_weight",
+        "self",
+        "spatial_weights"
+      ],
+      "matvec": [
+        "bend_normal",
+        "data_normal"
+      ]
+    }
+  },
+  "scientific_execution_at_freeze": false,
+  "scheduling": {
+    "common_CPU_lock": true,
+    "host": "nodecw7",
+    "affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "threads": 8,
+    "outer_wait_seconds": 19000,
+    "controller_timeout_seconds": 19600,
+    "child_timeout_seconds": 180,
+    "address_space_cap_bytes": 20000000000
+  },
+  "publication": "future own code/scalars/schema/hash only; existing private arrays remain server-side",
+  "static_checks": {
+    "AST_compile_JSON": true,
+    "shell_bash_n": true,
+    "closure_freevar_compilation_without_callbacks": true,
+    "current_source_hashes_exact": 19,
+    "NumPy_Torch_NumBa_imported": false,
+    "scientific_worker_started": false
+  }
+}

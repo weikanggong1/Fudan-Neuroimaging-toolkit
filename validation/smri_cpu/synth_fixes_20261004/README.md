@@ -1,6 +1,6 @@
 # SynthSR 首差定位与 WMH-SynthSeg 内存修复（2026-10-04）
 
-本轮基于 `f1cbdab10fbfd573c3aa1b3461aa086dab220cfb`，只修改 WMH 子函数、对应测试和说明。SynthSR 生产 `model.py` 保持原 SHA `290d0ae911d8c99f4f87c22936ca497ea45bb57b8f50066b822d9cd10c4661b2`；ELU 原型只在本验证目录中使用。生产没有新增依赖、TensorFlow 调用、低精度或预算调整。
+此前 WMH 修复基于 `f1cbdab10fbfd573c3aa1b3461aa086dab220cfb`，以 `626cab69` 交付；以下 WMH 科学记录保持。随后在独立 SR 分支继续 CPU 精度诊断，冻结 `source_sr_v2` 的生产 helper 已通过原始 T1 完整 CNN/浮点/量化与官方逐值门，以及成熟 GPU 旧新全同门。[SR 后续完整报告](sr_cpu_followup/README.md)记录当前源码、正常CLI及拒绝阶段。生产没有新增依赖、TensorFlow调用、低精度或预算调整。
 
 ## 最终状态
 
@@ -9,7 +9,7 @@
 | WMH CPU、T1 `crop=True` | nodecw7 官方/候选/候选/官方：全部标签、WMH 概率、33 个 CSV 数值、完整 header/affine 逐值相同 | 接入生命周期优化 |
 | WMH CUDA `crop=True` | 硬限额 20,000,000,000 B；三个输出文件 SHA 与旧 GPU 完全相同；57 次实际 cuDNN 卷积 kernel 和三次 CNN 输入 SHA 相同 | 接入已验证的缓冲调度 |
 | WMH CUDA 默认 `crop=False` | 原调度完整输出与旧 GPU 文件 SHA 相同；同实例 full→crop→full 状态恢复 | 保留原 forward/decoder/概率调度，**仍未达到 20 GB** |
-| SynthSR CPU | 首层 Conv+bias 相同，原 ELU 是第一处分歧；诊断可恢复首层逐值同，第二 Conv 布局及随后 BN 仍需处理 | 保持成熟实现；默认浮点门仍失败 |
+| SynthSR CPU | 后续 `source_sr_v2` 两完整CNN及最终浮点/量化逐值同官方冻结整图参考；GPU旧新全同 | CPU受保护推理helper；原GPU forward正文不变，详见后续报告 |
 
 最终源码冻结为服务器 `workspaces/smri_cpu_20261004/remaining_20261004/synth/source_v10`。`model.py` SHA `0896ad2ac73e1f2ce110579cfb71719df1a45e9e422034c7127c59a488baf9cc`，`pipeline.py` SHA `b0cfe39ee0c1fc2a070cdba90265e9b6fbc4f652b484ed7b9db307c5a9fc3643`。空间代码 SHA `d81416104064110511ee0f073998b3e19959748c74ad88675d90488a261db8a6` 不变。
 
@@ -57,9 +57,9 @@ CPU 官方/候选/候选/官方为 **172.064 / 77.134 / 83.876 / 107.942 s**；�
 
 早期 GPU 物理 free 约15 GB 时的大输入 OOM，以及个别初始化失败，保留在 `wmh_large_crop_candidate_v*.json`。allocator hard cap 与物理 free 分别记录；不明初始化错误没有被改记为精度失败或预算失败。最终使用 bare-Torch 初始化及12元素 FP32 kernel probe 后才导入 harness，不改生产 CUDA 初始化。
 
-## SynthSR 第一分歧
+## SynthSR 早期隔离图分歧（历史诊断）
 
-固定官方 TensorFlow 2.13.1、同一 HDF5、真实第一 CNN 输入 `[1,1,192,224,256]`。第一 Conv+bias 全 **264,241,152** 个值相同；原 Torch ELU 有 **32,371,573** 点不同，max `5.96046e-8`。[首层报告](reports/sr_first_candidate_v1.public.json)保留布局控制。官方单独 eager/compiled ELU 与记录结果同，排除该处 Conv/ELU 融合假说。
+固定官方 TensorFlow 2.13.1、同一 HDF5、真实第一 CNN 输入 `[1,1,192,224,256]`。第一 Conv+bias 全 **264,241,152** 个值相同；原 Torch ELU 有 **32,371,573** 点不同，max `5.96046e-8`。[首层报告](reports/sr_first_candidate_v1.public.json)保留布局控制。官方单独 eager/compiled ELU 与该隔离图结果同；这一控制不能排除原完整图的融合执行。后续未改动完整模型的profiler实测18个Conv+Bias+ELU融合op，并保持原whole-oracle SHA，见[后续融合证据](sr_cpu_followup/README.md#原整图的融合证据与参考不变)。
 
 按实际安装的 TensorFlow `relu_op_functor.h` 与 Eigen `GenericPacketMathFunctions.h` 核对 ELU 为 `exp(x)-1`，逐步 FP32、非融合 multiply/add 的 packet 多项式恢复整个第一 ELU 全部逐值同。[完整首 ELU 门](reports/sr_whole_first_elu.public.json)通过，4.504 s 是逐 plane 诊断算术时间；不同版本 Eigen 公式、`expm1` 或只按数学关系替换均不充分。真实中间 plane 上 FMA/addcmul 仍有810点1 ULP差，不能凭 CPU 支持 FMA 就采用融合实现。
 
@@ -67,7 +67,7 @@ CPU 官方/候选/候选/官方为 **172.064 / 77.134 / 83.876 / 107.942 s**；�
 
 在整个官方第一 ELU 输入上，[第二 Conv 定位](reports/sr_second_candidate_node7_v2.public.json)显示：contiguous 有254,863,410点差，max `9.53674e-6`；输入和权重同时 channels-last 可使第二 Conv+bias 全值同，配合诊断 ELU亦同。随后首 BN 仍有147,511,150点差、max `1.90735e-6`；subtract-first/scale-bias 控制也未全同。因此不能把首 ELU 已匹配写成完整网络已匹配。
 
-一次完整 ELU 原型（source_v7）默认 CPU API **66.815 s**，两次 CNN **32.204/30.146 s**；固定 `rtol=1e-5, atol=1e-3` 仍有 **1,935/9,072,000** 点失败，max `0.0193863`，量化457点差1。[拒绝记录](reports/sr_cpu_rejected_prototype.public.json)保留它。成熟默认仍是3,522点浮点失败、max `0.0191345`，量化527点差1且通过既有量化容差；失败且更慢的原型没有进入默认，也没有改 GPU SynthSR。
+一次完整 ELU 原型（source_v7）默认 CPU API **66.815 s**，两次 CNN **32.204/30.146 s**；固定 `rtol=1e-5, atol=1e-3` 仍有 **1,935/9,072,000** 点失败，max `0.0193863`，量化457点差1。[拒绝记录](reports/sr_cpu_rejected_prototype.public.json)保留它。该阶段成熟默认为3,522点浮点失败、max `0.0191345`，量化527点差1且通过既有量化容差；失败且更慢的原型没有接入，也没有改GPU SynthSR。后续CPU helper依据实际融合op和BN公式，完整门已恢复逐值相同；此前失败记录保留，不改写为通过。
 
 ## 复现与参数
 

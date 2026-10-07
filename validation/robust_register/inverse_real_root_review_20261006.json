@@ -1,0 +1,77 @@
+{
+  "passed": true,
+  "review_date": "2026-10-06",
+  "scope": "Isolated Float inverse replacement; saved-output accuracy and original failure provenance",
+  "reviewed_PLAN_sha256": "05a45563f703420f2d70a22e5cf551a3c0e263c28bb94543e875a003ea884bf8",
+  "root_local_six_runtime_source_bindings_exact": true,
+  "root_normalized_original_score_math_AST_exact": true,
+  "normalized_score_math_AST_sha256": "f371279236d132faf32d867efd74fcf939441dbedb45a2672fc0bc28312e6195",
+  "root_original_public_score_source_sha256": "b924059fdba6e3c1dcc399ba1cfe2104569d3885ba2733e2c0aa2b2bbd7c4983",
+  "scorer_as_run_sha256": "bd86147181fa54ef16e89af3652af1965b10f5202a218522f4441bb001267cc0",
+  "original_controller": {
+    "bytes": 820,
+    "sha256": "4aa61a217155c3a57efd4b6c260252591a023e9beb6045d3bdebeaeaa3ef06b6",
+    "exit_code": 1,
+    "status_preserved": "stopped_first_failure"
+  },
+  "original_affine_receipt_failure": "NumPy int32 image shape cannot be JSON serialized; four image/LTA outputs already saved",
+  "affine_internal_API_clock_and_counter_and_flags_receipt": "NA; not persisted or reconstructed",
+  "score_only_recovery_PLAN_sha256": "a0ab26192fd858a915e7f433a54d582dc9cf25d7fa4eeec80a540d56350297f8",
+  "score_only_recovery_controller": {
+    "bytes": 174933,
+    "sha256": "3acf352707315c74a49bc3f771504d5c51d3f6e949cc73d80d20e856abf45561",
+    "exit_code": 2
+  },
+  "original_saved_output_score": {
+    "bytes": 187503,
+    "sha256": "c06d652d5f851cb9c6bcf91af4ccce6b40a325745e96ee661b03069d3e03ca8a",
+    "exit_code": 2,
+    "status": "completed_gates_failed"
+  },
+  "root_live_original_source_input_reference_bindings_rehashed": 518,
+  "all_expected_and_actual_before_after_exact": true,
+  "recovery_19_bindings_before_after_same": true,
+  "root_live_four_saved_outputs_SHA256": {
+    "rigid.header.mgz": "87dd076ec6eec190f79a62f699577e6f0055abe487a1bf606fc0bbf8cf0c9175",
+    "rigid.lta": "1d5e2fdaf1970493c3c9cf29fa3c8b70202bb37276deb35d09ae90cbca1314bf",
+    "affine.header.mgz": "3283ff96c5e08aff779939844a4c3a09ab78c2b4c30dff8289cc2ace94c3bfe1",
+    "affine.lta": "048f260f8663337d551f7136ad02e4135665e8d509b06e95074c8db5e17d259d"
+  },
+  "score_CPU_precision_resource_flags_unchanged": true,
+  "formal_checks_passed": 17,
+  "formal_checks_total": 20,
+  "rigid": {
+    "point_count": 133,
+    "displacement_RMS_mm": 5.044064023421258e-06,
+    "displacement_max_mm": 7.69658051936686e-06,
+    "shared_sampler_warp_relative_L2": 2.5840940291760602e-06,
+    "support_difference_voxels": 1
+  },
+  "affine": {
+    "point_count": 133,
+    "displacement_RMS_mm": 0.00026815100132909157,
+    "displacement_max_mm": 0.00044706803190978125,
+    "shared_sampler_warp_relative_L2": 2.556642902132947e-05,
+    "original_warp_relative_L2_limit": 1e-05,
+    "support_difference_voxels": 1
+  },
+  "official_and_FNIT_mask_Dice_counts_same_does_not_imply_label_equivalence": true,
+  "scientific_accuracy_gates_all_passed": false,
+  "installed_binary_instruction_equivalence": false,
+  "production_CPU_GPU_source_changes": 0,
+  "new_API_or_official_or_GEMS_or_GPU_calls_during_recovery": 0,
+  "root_review_new_numerical_calls": 0,
+  "interpretation": "The matrix source-order contract led to only a small affine warp improvement, and the original three image gates still fail. No tolerance was changed. Scoring uses the unchanged shared FNIT sampler on saved official/new mapped geometry, rather than an independent official resampler. Original affine runtime metadata are missing; this report does not establish complete runtime resource acceptance or equivalent-registration acceleration.",
+  "report_delivery_review": {
+    "producer_commits": [
+      "a0d11d7a5210f29b7317b523332094df0b7b171f",
+      "2715a5e3d02730459cb443cf9808f8522f5049b0"
+    ],
+    "manifest_sha256": "70029f922222ca77cafe2f3e5f3ec78d2a6bd7c244afb930237b33dc20befb00",
+    "root_git_blobs_compared_exact": 23,
+    "root_full_score_raw_result_exact": true,
+    "root_rigid_raw_result_exact": true,
+    "root_original_controller_bytes_exact": true,
+    "metadata_only": true
+  }
+}

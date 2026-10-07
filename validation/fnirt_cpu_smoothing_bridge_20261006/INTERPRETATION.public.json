@@ -1,0 +1,113 @@
+{
+  "purpose": "Current compiled-helper provenance bridge on the original saved normalized moving; old flip equivalence itself was already established.",
+  "plain_current_vs_legacy_saved": {
+    "shape": [
+      224,
+      288,
+      288
+    ],
+    "dtype": "float32",
+    "values": 18579456,
+    "different_bits": 0,
+    "all_value_bits_exact": true,
+    "max_abs": 0.0,
+    "rmse": 0.0,
+    "relative_l2": 0.0,
+    "statistics_scope": "full logical C order; FP64 chunk statistics, not PCG reductions"
+  },
+  "adapter_current_vs_saved_native": {
+    "shape": [
+      224,
+      288,
+      288
+    ],
+    "dtype": "float32",
+    "values": 18579456,
+    "different_bits": 0,
+    "all_value_bits_exact": true,
+    "max_abs": 0.0,
+    "rmse": 0.0,
+    "relative_l2": 0.0,
+    "statistics_scope": "full logical C order; FP64 chunk statistics, not PCG reductions"
+  },
+  "old_full_stage_rejected": {
+    "coeff_rmse_baseline_candidate": [
+      0.084011,
+      0.127315
+    ],
+    "warped_brain_rmse_baseline_candidate": [
+      0.020061,
+      0.031622
+    ],
+    "jacobian_brain_rmse_baseline_candidate": [
+      0.01327,
+      0.020135
+    ]
+  },
+  "runtime": {
+    "versions": {
+      "python": "3.11.16",
+      "torch": "2.5.1",
+      "numpy": "1.26.4",
+      "numba": "0.61.2",
+      "nibabel": "5.4.2"
+    },
+    "llvmlite": "0.44.0",
+    "prefix_basename": "fnit_conda_env_956b1a9",
+    "prefix_path_sha256": "ab97d6f7021fb229f5de9f246cc3a0397e8caadedf2b97ec5cca0df323c88e97",
+    "canonical_default_resolves_to_actual_prefix": true,
+    "interpreter": {
+      "bytes": 25916456,
+      "sha256": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153"
+    },
+    "torch_threads": 8,
+    "torch_interop_threads": 1,
+    "numba_threads": 8,
+    "numba_config_threads": 8,
+    "environment": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "8",
+      "MKL_NUM_THREADS": "8",
+      "NUMBA_NUM_THREADS": "8",
+      "CUDA_VISIBLE_DEVICES": "",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "numba_cache_is_new_run_local": true
+  },
+  "numba_dispatcher_context": {
+    "selected_by_current_helper": "parallel",
+    "serial_signatures": [],
+    "parallel_signatures": [
+      "(Array(float32, 5, 'F', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), int64, bool, Array(float32, 5, 'F', False, aligned=True), int64)"
+    ],
+    "threading_layer": "omp",
+    "assembly_assessed": false,
+    "per_axis_native_runtime_arrays_available": false,
+    "compiled_helper_contains_three_source_bound_axes": true,
+    "axis_runtime_count_not_separately_instrumented": true
+  },
+  "native_decode": {
+    "actual_dtype": "float32",
+    "proxy_slope": 1.0,
+    "proxy_intercept": 0.0,
+    "reference_cast_performed": false
+  },
+  "clocks": {
+    "clock_seconds_import_bind_header_restore": 2.5252609523013234,
+    "clock_seconds_plain_cold": 2.9275706745684147,
+    "clock_seconds_adapter_warm": 0.7290190365165472,
+    "clock_seconds_worker_including_postchecks": 8.044316618703306
+  },
+  "peak_rss_KiB_self": 943660,
+  "timing_limit": "Cold plain then warm adapter, one call each; no speed ratio, no official timing or full-registration claim.",
+  "scope_limits": [
+    "One real saved image/header/current compiled context; not universal Gaussian arithmetic or all headers.",
+    "Conservative q/sform determinant guard is NumPy, not NEWMAT determinant bit equivalence.",
+    "No saved per-axis official arrays; whole-image gates only.",
+    "No machine assembly/FMA audit.",
+    "FSL DSO mappings are before/after snapshots, not full system-call monitoring.",
+    "No repeated RHS, H, PCG, fresh MRI, native or complete registration.",
+    "Existing v27 functional tests and the older complete negative result retain their own scope."
+  ],
+  "next_runtime_patch_authorized": false
+}

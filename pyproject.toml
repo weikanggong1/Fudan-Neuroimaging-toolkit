@@ -61,6 +61,7 @@ fnit-msm-features = "fnit.msm.feature_cli:main"
 fnit-bwas = "fnit.bwas.cli:main"
 fnit-setup-fmri-surface-assets = "fnit.fmri.assets_setup:main"
 fnit-setup-space-assets = "fnit.space_assets:main"
+fnit-setup-standard-assets = "fnit.standard_assets:main"
 fnit-setup-connectome-atlases = "fnit.connectome.assets:main"
 fnit-space-convert = "fnit.space_conversion:main"
 fnit-setup-brainstem-atlas = "fnit.gems.setup:main"
@@ -73,6 +74,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 fnit = [
+  "_release_asset_catalog.json",
   "connectome/atlas_manifest.json",
   "_vendor_fsl/*.md",
   "_vendor_fsl/*.json",
@@ -87,13 +89,16 @@ fnit = [
   "fnirt/*.md",
   "synthstrip/*.md",
   "synthmorph/*.md",
+  "synthmorph/*.cpp",
   "synthseg_parc/*.md",
+  "synthseg_parc/*.cpp",  # FNIT自有可选CPU columns胶水；CUDA不加载
   "wmh_synthseg/*.md",
   "synthsr/*.md",
   "fast/*.md",
   "fast/upstream_fast4/*",
   "fast_vbm/*.md",
   "recon_all/*.md",
+  "recon_all/*.cpp",  # FNIT 自有可选 CPU 平均内核；CUDA 不加载
   "recon_all/*.hpp",  # FNIT 的有限 GCA 评分补丁，供固定源码 Conda 构建使用
   "gems/data/*.txt",
   "mshbm/*.md",

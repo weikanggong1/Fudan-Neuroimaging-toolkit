@@ -1,0 +1,13 @@
+{
+  "schema": "fnit_seg_cpu_blur_trial_harness_failures/v1",
+  "failures": [
+    {
+      "phase": "private_upload_launcher_preflight",
+      "failure": "Embedded Markdown newline made the launcher Python body an unterminated string literal.",
+      "scientific_workers_launched": 0,
+      "model_or_blur_calls_executed": 0,
+      "production_changed": false,
+      "recovery": "Replace the Markdown append with repr of the complete paragraph; parse the complete launcher with ast and verify JSON newline constants before retry. Recheck remote target absence and unchanged production source before transfer."
+    }
+  ]
+}

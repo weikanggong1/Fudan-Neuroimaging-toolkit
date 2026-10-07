@@ -1,0 +1,45 @@
+{
+  "status": "verified_source_semantics_for_complete_ready_surface_case",
+  "CPU_frozen_module_count": 26,
+  "unchanged_modules": 22,
+  "changed_modules": {
+    "src/fnit/fmri/__init__.py": {
+      "CPU_frozen_sha256": "3a3805998e21d880f59fae2fd42056d716abcca3dc8d41292727ffccfd2de2b7",
+      "current_sha256": "514e776dcc734618d8e3aebd1d7b77eafa3918f21c3dbd88bce68ce34f4a6159"
+    },
+    "src/fnit/fmri/surface_volume.py": {
+      "CPU_frozen_sha256": "307a8f1f6b3685c800a542c18ccc9da0e813370754e5e293d009e6cf009b084d",
+      "current_sha256": "25b3885d094fb56bc4640f1ffb45be71c883602ca3f5a7c68589a0e788fdd495"
+    },
+    "src/fnit/msm/_sphere_map.py": {
+      "CPU_frozen_sha256": "ba07e2b73098ebf1083e86d1eeb24801e60a0c6ff25e371d514b5b6445029521",
+      "current_sha256": "6607a0b22a8c2d2b03810ecbb8c8597318da52f4fc5c1fe011fb16dd23e2f0bc"
+    },
+    "src/fnit/msm/_point_cpu.py": {
+      "CPU_frozen_sha256": "00184aadad94aae4b9f64f3bfd14f1c19a0cafc921c6d6cf8d46256e3367b543",
+      "current_sha256": "d14e1e6c02821306a033e368f8760cebcdea0f55c8b7ab1545b25e126729fde5"
+    }
+  },
+  "SphereMap_source_before_sha256": "ba07e2b73098ebf1083e86d1eeb24801e60a0c6ff25e371d514b5b6445029521",
+  "SphereMap_source_after_sha256": "6607a0b22a8c2d2b03810ecbb8c8597318da52f4fc5c1fe011fb16dd23e2f0bc",
+  "SphereMap_actual_original_file_read_and_SHA_checked": true,
+  "SphereMap_only_change": "Private _select CPU guard changes from no-gradient check to _point_cpu.enabled (CPU, float64, no gradient). Constructor cached geometry is float64 and public weights converts points to float64/device before _select/fallback. Complete public CPU calls keep the same branch; CUDA keeps its existing tensor branch.",
+  "surface_volume_only_change": "Presence inspection adds saved BOLD-reference image/sidecar to detect partial derivatives. The complete required-volume ready path is unchanged.",
+  "fmri_init_only_change": "Export of the new BOLD-reference helper; existing surface pipeline entry remains the same.",
+  "numeric_source_reuse_scope": "Actual complete fixed490 projection and ready-volume full180 surface CPU1/8 outputs; no extension of the existing numerical evidence to altered or partial input fixtures.",
+  "GPU_source_reuse_scope": "Final 16-module source freeze complete12 registration old/new calls separately bound to final SphereMap SHA and strict extension SHA.",
+  "privacy": "Source identities/semantics only; no individual image or surface arrays",
+  "Point_scalar_fix": {
+    "before_sha256": "00184aadad94aae4b9f64f3bfd14f1c19a0cafc921c6d6cf8d46256e3367b543",
+    "after_sha256": "d14e1e6c02821306a033e368f8760cebcdea0f55c8b7ab1545b25e126729fde5",
+    "only_changed_function": "divide",
+    "change": "Wrap the NumPy division result with np.asarray before torch.from_numpy, allowing a zero-dimensional NumPy scalar result",
+    "array_behavior": "For array operands the quotient is already ndarray; np.asarray returns the identical array without arithmetic, copying or dtype conversion. Batch scientific results remain unchanged.",
+    "CUDA_guard_unchanged": true,
+    "all_other_Point_function_ASTs_identical": true,
+    "targeted_point_sphere_tests_passed": 29,
+    "test_elapsed_seconds": 8.32,
+    "new_native_build_required": false,
+    "complete_GPU_or_CPU_API_repetitions_added": 0
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "schema": "fnit.assets_release.mshbm_units_fix.v1",
+  "started_utc": "2026-10-06T01:13:48.596112+00:00",
+  "finished_utc": "2026-10-06T01:13:49.155631+00:00",
+  "scope": "Real MNI template cached resource mask writing; no MRI pipeline, inference or GPU",
+  "timing_scope": "prepare_projection_assets cache validation, CPU resampling and NIfTI saving",
+  "elapsed_seconds": 0.5092294339992804,
+  "baseline_commit": "db61cebc9d3683720e6c0a288db3cdc7d6f30a7c",
+  "source_file": "src/fnit/mshbm/assets_setup.py",
+  "initial_installer_source_sha256": "cdf94402c3a806d6d079c4450c76bc4a8444fef937740444436febe0b6cf7e7a",
+  "fixed_installer_source_sha256": "548fd4399a1320370180bf565fa1645ff29739cbeff20e9db88149b46eb07b73",
+  "replay_script_sha256": "96aed8c1a4c042a4140ff6416f9b03bb76bad4e1043e70df088173f379576ac0",
+  "resource_guards": [
+    {
+      "file_name": "left_mni.surf.gii",
+      "size": 723249,
+      "sha256": "ac51edc0f61ee988c6d941e073ae3275ef5da509233df9309bdf586b3b31838a",
+      "retrieval": "Previously verified installation cache; no download"
+    },
+    {
+      "file_name": "right_mni.surf.gii",
+      "size": 710702,
+      "sha256": "6e1c9842efb303945abe0cd780422a9812d1eab59c08d3fa3c72276ec31e6a25",
+      "retrieval": "Previously verified installation cache; no download"
+    },
+    {
+      "file_name": "cortex_estimate.nii.gz",
+      "size": 207362,
+      "sha256": "e4d788be332be76d7429855aba8f20c02693625f400905573e9063b4001f0e2b",
+      "retrieval": "Previously verified installation cache; no download"
+    }
+  ],
+  "reference": {
+    "file_name": "tpl-MNI152NLin6Asym_res-02_T1w.nii.gz",
+    "file_size": 1412252,
+    "file_sha256": "2a814da50173599a857d96246dc057d548072bd6dffa499f75724dbad20792b1",
+    "decoded_voxel_sha256_C_order": "4fa1aa736738cd3613043ed428ad197efe1054b3c251bf5e86227042df752570",
+    "shape": [
+      91,
+      109,
+      91
+    ],
+    "affine": [
+      [
+        2.0,
+        0.0,
+        0.0,
+        -90.0
+      ],
+      [
+        0.0,
+        2.0,
+        0.0,
+        -126.0
+      ],
+      [
+        0.0,
+        0.0,
+        2.0,
+        -72.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "dtype": "int16",
+    "units": [
+      "mm",
+      "unknown"
+    ],
+    "nonzero_voxels": 857785
+  },
+  "before": {
+    "file_name": "cortical_mask.nii.gz",
+    "file_size": 41800,
+    "file_sha256": "d1da7409e7a7342cb061c581006d5bd268efc0b6a9b890a091b5ee2519f7810d",
+    "decoded_voxel_sha256_C_order": "7a2c5be333ced3e051101ba4fc7e59e9c57047995e1f84e92fba2b0fc39c2b27",
+    "shape": [
+      91,
+      109,
+      91
+    ],
+    "affine": [
+      [
+        2.0,
+        0.0,
+        0.0,
+        -90.0
+      ],
+      [
+        0.0,
+        2.0,
+        0.0,
+        -126.0
+      ],
+      [
+        0.0,
+        0.0,
+        2.0,
+        -72.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "dtype": "uint8",
+    "units": [
+      "unknown",
+      "unknown"
+    ],
+    "nonzero_voxels": 128715
+  },
+  "preserved_initial_image": {
+    "file_name": "cortical_mask.units_before_fix.nii.gz",
+    "sha256": "d1da7409e7a7342cb061c581006d5bd268efc0b6a9b890a091b5ee2519f7810d"
+  },
+  "after": {
+    "file_name": "cortical_mask.nii.gz",
+    "file_size": 41802,
+    "file_sha256": "d181d8466a636b22d103f4856cf6aa4c8da7f0f9fc79bdaf3403f156cd47ee1c",
+    "decoded_voxel_sha256_C_order": "7a2c5be333ced3e051101ba4fc7e59e9c57047995e1f84e92fba2b0fc39c2b27",
+    "shape": [
+      91,
+      109,
+      91
+    ],
+    "affine": [
+      [
+        2.0,
+        0.0,
+        0.0,
+        -90.0
+      ],
+      [
+        0.0,
+        2.0,
+        0.0,
+        -126.0
+      ],
+      [
+        0.0,
+        0.0,
+        2.0,
+        -72.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "dtype": "uint8",
+    "units": [
+      "mm",
+      "unknown"
+    ],
+    "nonzero_voxels": 128715
+  },
+  "changed_NIfTI_header_byte_offsets": [
+    123
+  ],
+  "network_attempts": 0,
+  "checks": {
+    "voxel_arrays_identical": true,
+    "decoded_voxel_sha256_identical": true,
+    "affine_identical": true,
+    "shape_identical": true,
+    "dtype_identical": true,
+    "reference_grid_preserved": true,
+    "spatial_unit_inherited": true,
+    "no_network_access": true,
+    "only_xyzt_units_header_byte_changed": true
+  },
+  "passed": true
+}

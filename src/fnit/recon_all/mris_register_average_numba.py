@@ -70,8 +70,11 @@ def average_gradients_exact_cpu(gradient: torch.Tensor,
         thread_budget = 1
     try:
         set_num_threads(thread_budget)
-        result = _average_numpy(gradient.numpy(), neighbors.numpy(), degrees.numpy(),
-                                reciprocals, iterations)
+        from ._average_cpu_cpp import average_numpy_if_supported
+        arrays = gradient.numpy(), neighbors.numpy(), degrees.numpy()
+        result = average_numpy_if_supported(*arrays, reciprocals, iterations, get_num_threads())
+        if result is None:
+            result = _average_numpy(*arrays, reciprocals, iterations)
     finally:
         set_num_threads(previous_threads)
     return torch.from_numpy(result)

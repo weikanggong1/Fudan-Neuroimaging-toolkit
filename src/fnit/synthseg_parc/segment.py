@@ -14,9 +14,12 @@ from torch.nn import functional as F
 from .._dmri import configure_device
 from .model import _Block
 from .cpu_conv import CPUInferenceConv3d, convolution_slabs, cpu_autocast_enabled
+from .cpu_join import cpu_join_allowed, join_nearest_cpu
 from .pipeline import SynthSegParc
 from .postprocess import postprocess_segmentation
 from .preprocess import preprocess_t1
+from .precision import (check_cached_policy, cuda_tf32_scope, tensor_precision,
+                        validate_cudnn_tf32)
 
 
 class SegmentUNet(nn.Module):
@@ -30,6 +33,9 @@ class SegmentUNet(nn.Module):
         self.up = nn.ModuleList(_Block(widths[i + 1] + widths[i], widths[i])
                                 for i in (3, 2, 1, 0))
         self.likelihood = CPUInferenceConv3d(24, 33, 1)
+        # Metadata only: actual CPU shape/weight/provider qualification is lazy.
+        self.up[3].conv0._fnit_columns_reuse = True
+        self.down[0].conv1._fnit_columns_c24 = True
 
     def forward(self, x):
         if x.ndim != 5 or x.shape[1] != 1 or any(size % 32 for size in x.shape[2:]):
@@ -43,8 +49,11 @@ class SegmentUNet(nn.Module):
         skips.pop()
         del skip
         for level, block in enumerate(self.up):
-            x = F.interpolate(x, scale_factor=2, mode="nearest")
-            x = block(torch.cat((skips.pop(), x), dim=1))[0]
+            if cpu_join_allowed(self, skips[-1], x):
+                x = block(join_nearest_cpu(skips.pop(), x))[0]
+            else:
+                x = F.interpolate(x, scale_factor=2, mode="nearest")
+                x = block(torch.cat((skips.pop(), x), dim=1))[0]
         logits = self.likelihood(x)
         del x
         return torch.softmax(logits, dim=1)
@@ -235,6 +244,7 @@ class SynthSegParcResult:
     segmentation_posterior: torch.Tensor | None = None
     parcellation_soft_voxels: np.ndarray | None = None
     voxel_volume_mm3: float = 1.0
+    precision: dict | None = None
 
 
 @torch.inference_mode()
@@ -252,7 +262,39 @@ def run_synthseg_parc_t1(
     volumes: bool = False,
     segmenter: SynthSegSegmenter | None = None,
     parcellator: SynthSegParc | None = None,
+    cudnn_tf32: bool | None = True,
 ) -> SynthSegParcResult:
+    """Run the non-robust 2.0 segmentation and parcel chain from an original T1.
+
+    ``cudnn_tf32=True`` retains default CUDA mathematics. False disables
+    cuDNN TF32 for both networks and every Gaussian blur, including the fast
+    segmentation filter; None inherits the caller's cuDNN flag. CUDA matmul
+    TF32 retains Segmenter's scoped True policy. CPU and caller autocast are
+    unchanged. Both CUDA flags are restored on normal or exceptional exit.
+    Supplied cached models must declare the same policy; a mismatch raises
+    before loading/preprocessing T1. Result ``precision`` records the whole
+    scope, actual child forwards and fast blur. Existing positional result
+    fields and output grid/units are unchanged.
+    """
+    validate_cudnn_tf32(cudnn_tf32)
+    check_cached_policy(segmenter, cudnn_tf32, "segmenter")
+    check_cached_policy(parcellator, cudnn_tf32, "parcellator")
+    precision = {"requested_cudnn_tf32": cudnn_tf32, "fast": fast,
+                 "cache_precision_matches": True, "operations": []}
+    with cuda_tf32_scope(device, cudnn_tf32, precision):
+        result = _run_synthseg_parc_t1(
+            t1, segment_weights, segment_labels, parc_weights, parc_labels,
+            device=device, min_pad=min_pad, topology_classes=topology_classes,
+            fast=fast, volumes=volumes, segmenter=segmenter, parcellator=parcellator,
+            cudnn_tf32=cudnn_tf32, precision=precision)
+    return result
+
+
+def _run_synthseg_parc_t1(
+    t1, segment_weights, segment_labels, parc_weights, parc_labels, *,
+    device, min_pad, topology_classes, fast, volumes, segmenter, parcellator,
+    cudnn_tf32, precision,
+):
     """Run official SynthSeg 2.0 non-robust segmentation and ``--parc`` heads.
 
     Returned label tensors stay on ``device``. Their ``affine`` maps the
@@ -266,9 +308,17 @@ def run_synthseg_parc_t1(
     """
     prepared = preprocess_t1(t1, device=device, min_pad=min_pad)
     if segmenter is None:
-        segmenter = SynthSegSegmenter(segment_weights, segment_labels, device)
+        segmenter = SynthSegSegmenter(segment_weights, segment_labels, device,
+                                     cudnn_tf32=cudnn_tf32)
     raw_posterior = segmenter.posterior(prepared.image, flip=not fast, smooth=not fast)
-    parc_posterior = _blur(raw_posterior[None])[0] if fast else raw_posterior
+    precision["segmentation"] = getattr(segmenter, "precision", None)
+    if fast:
+        row = tensor_precision(raw_posterior, operation="fast_segmentation_gaussian_blur")
+        precision["operations"].append(row)
+        parc_posterior = _blur(raw_posterior[None])[0]
+        row["output_dtype"] = str(parc_posterior.dtype)
+    else:
+        parc_posterior = raw_posterior
     raw_segmentation = segmenter.labels[parc_posterior.argmax(0)]
     del parc_posterior
     if topology_classes is None:
@@ -287,10 +337,12 @@ def run_synthseg_parc_t1(
     segmentation_padded = torch.zeros_like(raw_segmentation)
     segmentation_padded[selection] = segmentation
     if parcellator is None:
-        parcellator = SynthSegParc(parc_weights, parc_labels, device)
+        parcellator = SynthSegParc(parc_weights, parc_labels, device,
+                                  cudnn_tf32=cudnn_tf32)
     parcel_result = parcellator(
         prepared.image, raw_segmentation, segmentation_padded,
         soft_volumes=volumes, content_slices=selection if volumes else None)
+    precision["parcellation"] = getattr(parcellator, "precision", None)
     parcellation_padded, soft_parc = parcel_result if volumes else (parcel_result, None)
     parcellation = parcellation_padded[selection]
     combined = torch.where(parcellation != 0, parcellation, segmentation)
@@ -299,4 +351,4 @@ def run_synthseg_parc_t1(
     return SynthSegParcResult(segmentation, parcellation, combined, affine,
                              prepared.input_affine, prepared.original_shape,
                              segmentation_posterior, soft_parc,
-                             prepared.voxel_volume_mm3)
+                             prepared.voxel_volume_mm3, precision=precision)

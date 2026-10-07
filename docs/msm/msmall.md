@@ -28,7 +28,7 @@ flowchart LR
 fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --msmall --fmriprep
 ```
 
-安装器校验固定 HCP v4.7.0 文件的 SHA-256；新增 WRN d7–d21 的 15 份模板另校验大小，共 86,180,368 字节。这 15 份文件从固定 HCP 上游下载，未列入 FNIT `assets-v1` Release。其他已镜像文件优先使用固定 Release。安装保留 HCP 许可文件，不包含个体特征或个体髓鞘图。
+安装器校验固定HCP v4.7.0文件的SHA-256；WRN d7–d21的15份模板另校验大小，共86,180,368字节。获许可且收录[发布目录](../../src/fnit/_release_asset_catalog.json)的精确文件优先从固定`assets-v1` Release下载，保留固定HCP上游回退；统一步骤见[资源安装说明](../ASSETS.md)。安装保留HCP许可文件，不包含个体特征或个体髓鞘图。
 
 ```python
 from fnit import MSMAllConfig, MSMAllInputs, run_msmall
@@ -127,6 +127,19 @@ newmsm --inmesh=/absolute/path/features/L.sphere.surf.gii \
 
 ## 5. 真实数据精度与速度
 
+### 本轮 CPU 官方配对
+
+[CPU 官方报告](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)完整运行双侧 32,492 顶点、33 列真实 WRN C 特征，保留一级 coarse 与三级 refine 全部停止条件。最新候选 CPU1 的全部坐标、有序 faces 与原版严格单线程逐位相同，0 相对翻面；候选 CPU8 与 CPU1 的球面文件 SHA 相同。
+
+| 完整双侧功能 | CPU 预算 | 原版 fresh / s | FNIT fresh / s | FNIT 完整 API / s |
+| --- | ---: | ---: | ---: | ---: |
+| WRN C coarse | 1 | 96.724 | 58.948 | 56.162 |
+| WRN C coarse | 8 | 28.814 | 26.671 | 24.196 |
+| WRN C refine | 1 | 2020.025 | 1512.800 | 1510.518 |
+| WRN C refine | 8 | 600.420 | 360.841 | 358.670 |
+
+原版多线程会改变结果：coarse 右侧相对单线程平均角差 0.706°、p99 4.266°；refine 左/右平均角差 0.251/0.277°。FNIT CPU1/8 保持严格单线程参照。上述是同预算各一次 fresh-process 观测，包含读写和程序启动；实际源码、输入不变检查和全部角差见[最新回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。最终 GPU 旧/新配对已完成：coarse 旧版 17.887/27.212 s、优化版 29.399/28.669 s；refine 旧版 142.121/140.804 s、优化版 138.971/141.350 s。全部双侧坐标与 faces 相同，最大本任务进程树显存为 1.065/4.161 GB。共享 H100 接近满载，coarse 观测较慢；完整回执和聚合图见 [GPU 回归](README.md#本轮-cpu-优化后的完整-gpu-回归2026-10-05)。
+
 最新匿名汇总、精度与耗时的测量范围见 [MSM 验证页](../../validation/msm/README.md)。对照固定同一真实 BOLD、参考图、特征和权重，分别执行完整官方配置。球面误差按对应顶点计算；490 帧时间序列先逐灰质点计算 Pearson，再取均值。单次成本检查、完整球面和最终时间序列是不同检查项。
 
 以下为当前源码 `249919f2` 的双侧配准，设备为 H100 PCIe、PyTorch 2.5.1/CUDA 11.8，FNIT 的 CPU 线程数为 4；官方 newMSM 为单 CPU 线程。几何和成本用 float64，GIFTI/CIFTI 写出 float32。[正式汇总](../../validation/msm/msmall.current.public.json)保存完整配置、哈希与各级记录。
@@ -153,7 +166,7 @@ newmsm --inmesh=/absolute/path/features/L.sphere.surf.gii \
 
 时间轴和 BrainModel 轴相同；19 个皮层下结构也全部 r=1、MAE/最大差=0。相关是在每点内跨全部时间帧计算，再取均值；恒定序列仅参与绝对误差。投影是独立墙钟，两个分支使用相同 Workbench，不表示 FNIT 改写了 Workbench 算法，也不作为 raw BIDS 到 CIFTI 的完整链测量。
 
-本次未提供可确认来源的个体髓鞘图，测试特征为 `C`。490 帧已清理 CIFTI 选取 90,568 个有效灰质点，WRN d40 参考保留 32 个组件，加 medial-wall 后两侧各为 33 列。完整特征准备耗时 47.498 s；VN 与 WRN 保存地图对独立 NumPy 源码公式逐值一致，节点时序最大差 `1.98e-14`。官方 MATLAB 特征程序因许可及 Runtime 版本未能启动；官方 newMSM 球面求解器另做真实输入对照。特征覆盖、参数和逐项耗时见 [特征功能页](features.md#5-真实数据精度与耗时)与[匿名特征报告](../../validation/msm/msmall.features.current.public.json)。
+该历史专项未提供可确认来源的个体髓鞘图，测试特征为 `C`。490 帧已清理 CIFTI 选取 90,568 个有效灰质点，WRN d40 参考保留 32 个组件，加 medial-wall 后两侧各为 33 列。完整特征准备耗时 47.498 s；VN 与 WRN 保存地图对独立 NumPy 源码公式逐值一致，节点时序最大差 `1.98e-14`。该历史专项的 MATLAB 特征程序未能启动；本轮已在 nodecw10 使用合法 MATLAB R2018b 完成原 HCP 函数对照，见 [CPU 官方报告](../../validation/fmri_cpu_20261004/task04_msm_surface/README.md)。官方 newMSM 球面求解器的结果仍按各自实测版本记录。特征覆盖、参数和逐项耗时见 [特征功能页](features.md#5-真实数据精度与耗时)与[匿名特征报告](../../validation/msm/msmall.features.current.public.json)。
 
 三级配准的第 2 级首次提案已定位到权重面积缓存。两端进入该级的 SOURCE、控制点、标签坐标和三角形索引逐位一致；原权重重采样错误地沿用了固定构网面积。按官方 Mesh 拷贝时重建面积后，在同一真实状态下：
 
@@ -184,6 +197,7 @@ python tools/plot_msmall_reference.py \
 
 ## 6. 更新与基准记录
 
+- 2026-10-04 起：加入 CPU 1/8 实际 newMSM 完整配对；一级和三级 CPU1 基线已验证全双侧坐标逐位一致，CPU containing-face 优化候选继续整例核对。
 - 2026-10：新增独立 MSMAll 多列特征求解、一级/三级 HCP 配置、VN/DR/WRN 准备与 surface 可选接口；安装器补齐 d7–d21。真实 C 特征准备为 47.498 s，保存地图对独立源码公式逐值一致；球面与投影实测集中保留在验证页。
 - 既有 MSMSulc 三角形正则计算提取为共享函数；CPU/CUDA、SSD/Pearson、单状态/八状态共 2,880 个成本逐位保持不变。此前真实 MSMSulc 结果仍按其原测量源码哈希记录。
 - 修复 MSMAll 边界邻域选择及逐级球面重建中的舍入差异：歧义三角形用包内 C++ 保留标量运算和严格距离比较，球面 warp 在一次批量传输后按顶点编号重建与归一化。默认 MSMSulc 未启用这条新增执行路径。

@@ -1,0 +1,97 @@
+{
+  "schema": "fnit-prewhite-same-input-public-v1",
+  "observed_utc": "2026-10-07T03:18:00Z",
+  "case": "ds000030_sub-10206",
+  "hemi": "lh",
+  "scope": "frozen same-input white.preaparc; four sequential arms; CUDA disabled; no raw-T1 rerun",
+  "source_sha256": "deced25ae95465f21684ebf214d5cd6c985eed72e0ce1d720f1027540441cedc",
+  "runner_sha256": "90772fe4ec26d6c13e7a3968e8092afce1dc8b4c4f2a9c0d5fd710c5b0984345",
+  "plan_sha256": "0d342a5f83abbfaa8692bf203985b7573f512229582ab43031456d3e6311fc09",
+  "status": "completed",
+  "zero_intersection_gate": false,
+  "wall_seconds_including_lock_wait": 1360.7475866461173,
+  "arms": [
+    {
+      "name": "official_A",
+      "exitcode": 0,
+      "exec_seconds": 310.93452853383496,
+      "arm_wall_seconds": 321.2837874577381,
+      "vertices": 134290,
+      "faces": 268576,
+      "euler": 2,
+      "closed": true,
+      "faces_preserved": true,
+      "self_intersecting_faces": 16,
+      "coords_f4_sha256": "b63439387a9ee157c3adb06c17cbdcaf370c7be15cefe39a5ad259acf3ec7871"
+    },
+    {
+      "name": "official_B",
+      "exitcode": 0,
+      "exec_seconds": 275.82572671957314,
+      "arm_wall_seconds": 286.05778897181153,
+      "vertices": 134290,
+      "faces": 268576,
+      "euler": 2,
+      "closed": true,
+      "faces_preserved": true,
+      "self_intersecting_faces": 16,
+      "coords_f4_sha256": "b63439387a9ee157c3adb06c17cbdcaf370c7be15cefe39a5ad259acf3ec7871"
+    },
+    {
+      "name": "conda_standard",
+      "exitcode": 0,
+      "exec_seconds": 377.19684511004016,
+      "arm_wall_seconds": 387.38731519086286,
+      "vertices": 134290,
+      "faces": 268576,
+      "euler": 2,
+      "closed": true,
+      "faces_preserved": true,
+      "self_intersecting_faces": 16,
+      "coords_f4_sha256": "95af3c420f7933a366fff40e83038cb46785b617a8538fcbdfda86a9a57d4c43"
+    },
+    {
+      "name": "conda_fast",
+      "exitcode": 0,
+      "exec_seconds": 349.03984952298924,
+      "arm_wall_seconds": 359.53022091509774,
+      "vertices": 134290,
+      "faces": 268576,
+      "euler": 2,
+      "closed": true,
+      "faces_preserved": true,
+      "self_intersecting_faces": 16,
+      "coords_f4_sha256": "95af3c420f7933a366fff40e83038cb46785b617a8538fcbdfda86a9a57d4c43"
+    }
+  ],
+  "comparisons": {
+    "official_B_to_official_A": {
+      "ordered_faces_match": true,
+      "mean_mm": 0.0,
+      "p99_mm": 0.0,
+      "max_mm": 0.0,
+      "coords_f4_bytes_identical": true,
+      "num_different_vertices": 0,
+      "num_different_coords": 0
+    },
+    "conda_standard_to_official_A": {
+      "ordered_faces_match": true,
+      "mean_mm": 0.0012754741977964712,
+      "p99_mm": 0.02669430725774029,
+      "max_mm": 0.6660251798395235,
+      "coords_f4_bytes_identical": false,
+      "num_different_vertices": 124787,
+      "num_different_coords": 297207
+    },
+    "conda_fast_to_official_A": {
+      "ordered_faces_match": true,
+      "mean_mm": 0.0012754741977964712,
+      "p99_mm": 0.02669430725774029,
+      "max_mm": 0.6660251798395235,
+      "coords_f4_bytes_identical": false,
+      "num_different_vertices": 124787,
+      "num_different_coords": 297207
+    }
+  },
+  "interpretation": "Official repeat is bytewise identical; native standard and fast are bytewise identical to each other but differ from official. All four leave 16 self-intersecting faces, so zero-intersection gate fails. This diagnoses a shared input/algorithm or detector issue and does not identify a fast-build regression."
+}

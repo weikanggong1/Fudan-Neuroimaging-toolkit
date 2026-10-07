@@ -1,0 +1,141 @@
+{
+  "schema": "fnit_columns_v2_mechanical_summary/v1",
+  "status": "bounded_contracts_passed_pending_real_layer_review",
+  "frozen_PLAN": {
+    "bytes": 11405,
+    "sha256": "46e7f26f8f7f17cbcf40424418af787f4893720bf4dc8ba40e208d9e0881e673"
+  },
+  "scalar_receipt_identities": {
+    "QUEUE.json": {
+      "bytes": 3965,
+      "sha256": "6c92189de04a4f4254ea63da59ac1c71b487cd021a3eac9f4db0c038e7faeba5"
+    },
+    "INTERFACE_LOAD.json": {
+      "bytes": 7774,
+      "sha256": "ee513f8c1e84e81ae1bb240e9fcb6cd788133c1b2b18ec4b74acfd0e4b6262ef"
+    },
+    "CONTRACTS.json": {
+      "bytes": 18124,
+      "sha256": "00568b0c517afbcc9480e993c38f50caf2ae7d82e95b3ee479c2998a04ff784c"
+    }
+  },
+  "gates": {
+    "metadata_exit0_contract_exit0": true,
+    "original_receipts_match_frozen_plan": true,
+    "original_binary_reused_exact": true,
+    "metadata_ABI_provider_gate": true,
+    "six_complete_FP32_contracts_exact": true,
+    "thirteen_copy_prefix_and_poison_gates": true,
+    "twenty_three_fallback_guards": true,
+    "declared_actual_counts": true,
+    "normal_exception_flags_workspace": true,
+    "source_flags_weight_parameters_hooks_unchanged": true,
+    "same_declared_CPU8_context": true,
+    "bounded_resource_no_CUDA": true,
+    "no_MRI_native_wholeCNN_compile_production": true,
+    "completed_bounded_contracts": true
+  },
+  "all_declared_gates_passed": true,
+  "numeric_cases": [
+    {
+      "case": "single_depth",
+      "shape": [
+        1,
+        72,
+        1,
+        13,
+        17
+      ],
+      "different_bits": 0,
+      "max_abs": 0.0
+    },
+    {
+      "case": "two_depth",
+      "shape": [
+        1,
+        72,
+        2,
+        13,
+        17
+      ],
+      "different_bits": 0,
+      "max_abs": 0.0
+    },
+    {
+      "case": "boundary_internal",
+      "shape": [
+        1,
+        72,
+        7,
+        13,
+        17
+      ],
+      "different_bits": 0,
+      "max_abs": 0.0
+    },
+    {
+      "case": "many_slabs",
+      "shape": [
+        1,
+        72,
+        31,
+        13,
+        17
+      ],
+      "different_bits": 0,
+      "max_abs": 0.0
+    },
+    {
+      "case": "strided_odd_depth",
+      "shape": [
+        1,
+        72,
+        33,
+        13,
+        17
+      ],
+      "different_bits": 0,
+      "max_abs": 0.0
+    },
+    {
+      "case": "cancellation",
+      "shape": [
+        1,
+        72,
+        31,
+        13,
+        17
+      ],
+      "different_bits": 0,
+      "max_abs": 0.0
+    }
+  ],
+  "actual_reported_counts": {
+    "copy_oracle_calls": 13,
+    "candidate_copy_calls": 12,
+    "candidate_SGEMM_calls": 12,
+    "injected_copy_error_calls": 1,
+    "fallback_calls": 23
+  },
+  "process_maxRSS_bytes": 500989952,
+  "worker_observation_seconds": 2.9679889790713787,
+  "controller_worker_wall_seconds": {
+    "load_interface.py": 2.317774146795273,
+    "check_contracts.py": 3.318845096975565
+  },
+  "queue_wait_seconds": 0.0026192013174295425,
+  "MRI_authorized": false,
+  "production_integration_accepted": false,
+  "official_accuracy_or_speed_claim": false,
+  "full_model_accuracy_or_speed_claim": false,
+  "scope_notes": [
+    "Six synthetic inputs use the actual C72->24 weights; no MRI or official CNN ran.",
+    "Reported counts are scoped Python wrappers, not an all-time native trace.",
+    "Injected copy-error call is a Python stub, not a C++ copy invocation.",
+    "Provider error before allocation is source-order evidence; no allocation counter was installed for that negative case.",
+    "The before/after oneDNN=True state is restored; numerical candidate scopes used oneDNN=False and no-grad.",
+    "Meta-device and static guards do not prove complete CUDA output or performance.",
+    "Diagnostic timings include imports, source hashing, weight loading, poison and comparisons; no speed ratio.",
+    "Small M contracts do not prove bit equality at real M=802816/573440; separate layer gate required."
+  ]
+}

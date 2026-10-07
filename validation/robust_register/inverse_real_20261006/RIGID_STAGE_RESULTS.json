@@ -1,0 +1,1056 @@
+{
+  "schema": 1,
+  "scope": "persisted rigid stage result only; affine stage trace missing, not reconstructed",
+  "original_report_bytes": 204672,
+  "original_report_SHA256": "43f50e3064de519f8b2a1187f59469a3b1f00afc0b15992aad737e9d87c4dc0b",
+  "result": {
+    "stage_report": {
+      "experimental_native_equivalence": "not_assessed",
+      "mode": "rigid",
+      "source_shape": [
+        131,
+        241,
+        99
+      ],
+      "target_shape": [
+        39,
+        45,
+        56
+      ],
+      "device": "cpu",
+      "TF32_actual_in_context": null,
+      "image_design_QR_dtype": "torch.float32",
+      "small_matrix_state_dtype": "numpy.float64",
+      "interpolation_weights_dtype": "torch.float64",
+      "coefficient_axis_storage": "torch.float32",
+      "small_matrix_Schur_device": "cpu",
+      "CUDA_image_CPU_fallback": false,
+      "memory_estimate_bytes": 270406328,
+      "memory_budget_gb": 20.0,
+      "parameters": {
+        "saturation": 50.0,
+        "iterations_per_level": 5,
+        "stop_distance": 0.01,
+        "initialize_translation": true,
+        "pyramid_min_size": 16,
+        "pyramid_max_size": -1,
+        "highres_iterations": -1,
+        "spatial_chunk_size": 131072,
+        "tf32": true
+      },
+      "load_seconds": 0.010028962977230549,
+      "preparation_seconds": 0.0974141824990511,
+      "pyramid_seconds": 0.021793746389448643,
+      "stages": [
+        {
+          "level": 1,
+          "shape": [
+            19,
+            22,
+            30
+          ],
+          "steps": [
+            {
+              "iteration": 1,
+              "valid_rows": 9196,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.10877967532724142,
+              "design_seconds": 0.0026447055861353874,
+              "IRLS_QR_seconds": 0.003946627490222454,
+              "step_seconds": 0.11558475997298956,
+              "distance": 14.21721298191761,
+              "converged": false,
+              "matrix": [
+                [
+                  0.987194836192944,
+                  -0.13574192177349018,
+                  0.08378834087882454,
+                  -0.4521599020345469
+                ],
+                [
+                  0.12244063071277098,
+                  0.9814642560932605,
+                  0.14743203845148994,
+                  -2.4715552698094636
+                ],
+                [
+                  -0.10224796988031241,
+                  -0.1352850497451305,
+                  0.9855167720393258,
+                  0.11841158735179347
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 9196,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 0.6478996872901917,
+                    "weighted_error": 16.753454208374023,
+                    "zero_weights": 1676
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 0.3793352544307709,
+                    "weighted_error": 5.057261943817139,
+                    "zero_weights": 1995
+                  },
+                  {
+                    "iteration": 3,
+                    "sigma": 0.28947389125823975,
+                    "weighted_error": 2.993004322052002,
+                    "zero_weights": 2091
+                  },
+                  {
+                    "iteration": 4,
+                    "sigma": 0.3270297646522522,
+                    "weighted_error": 3.939401149749756,
+                    "zero_weights": 1958
+                  }
+                ],
+                "selected_iteration": 3,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            },
+            {
+              "iteration": 2,
+              "valid_rows": 9286,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.0040288157761096954,
+              "design_seconds": 0.0026351967826485634,
+              "IRLS_QR_seconds": 0.0047097885981202126,
+              "step_seconds": 0.011525256559252739,
+              "distance": 7.299732604037692,
+              "converged": false,
+              "matrix": [
+                [
+                  0.984857366706999,
+                  -0.12439471917052808,
+                  0.12075562548155347,
+                  -1.1373353330398088
+                ],
+                [
+                  0.09195002324644819,
+                  0.9652908810932725,
+                  0.24445594307185586,
+                  -3.839826304001663
+                ],
+                [
+                  -0.14697333250604827,
+                  -0.22965075379945588,
+                  0.9621119325792653,
+                  2.0746864670779592
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 9286,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 0.2692162096500397,
+                    "weighted_error": 2.587599039077759,
+                    "zero_weights": 2153
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 0.2049056738615036,
+                    "weighted_error": 1.4841399192810059,
+                    "zero_weights": 2252
+                  },
+                  {
+                    "iteration": 3,
+                    "sigma": 0.15554547309875488,
+                    "weighted_error": 0.8714574575424194,
+                    "zero_weights": 2345
+                  },
+                  {
+                    "iteration": 4,
+                    "sigma": 0.14907893538475037,
+                    "weighted_error": 0.8162971138954163,
+                    "zero_weights": 2334
+                  },
+                  {
+                    "iteration": 5,
+                    "sigma": 0.15345342457294464,
+                    "weighted_error": 0.8618435263633728,
+                    "zero_weights": 2293
+                  }
+                ],
+                "selected_iteration": 4,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            },
+            {
+              "iteration": 3,
+              "valid_rows": 9242,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.0038467738777399063,
+              "design_seconds": 0.002449401654303074,
+              "IRLS_QR_seconds": 0.004544219002127647,
+              "step_seconds": 0.010988134890794754,
+              "distance": 7.394332511358323,
+              "converged": false,
+              "matrix": [
+                [
+                  0.990138880435337,
+                  -0.04641459098997122,
+                  0.13217671199379571,
+                  -2.1647543155674738
+                ],
+                [
+                  0.0028328895441216504,
+                  0.9499588814955423,
+                  0.3123621267128401,
+                  -4.174346576746112
+                ],
+                [
+                  -0.1400606018375189,
+                  -0.3089074444084689,
+                  0.9407227107931122,
+                  3.4458193502712815
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 9242,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 0.17296737432479858,
+                    "weighted_error": 1.1464858055114746,
+                    "zero_weights": 2256
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 0.15706679224967957,
+                    "weighted_error": 0.90488201379776,
+                    "zero_weights": 2285
+                  },
+                  {
+                    "iteration": 3,
+                    "sigma": 0.1208220049738884,
+                    "weighted_error": 0.49634167551994324,
+                    "zero_weights": 2398
+                  },
+                  {
+                    "iteration": 4,
+                    "sigma": 0.10970266908407211,
+                    "weighted_error": 0.4119545519351959,
+                    "zero_weights": 2404
+                  },
+                  {
+                    "iteration": 5,
+                    "sigma": 0.10861914604902267,
+                    "weighted_error": 0.4187508225440979,
+                    "zero_weights": 2373
+                  }
+                ],
+                "selected_iteration": 4,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            },
+            {
+              "iteration": 4,
+              "valid_rows": 9192,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.0038758497685194016,
+              "design_seconds": 0.0025896932929754257,
+              "IRLS_QR_seconds": 0.008243028074502945,
+              "step_seconds": 0.014861168339848518,
+              "distance": 8.104099768356537,
+              "converged": false,
+              "matrix": [
+                [
+                  0.9903329891345967,
+                  0.056744489598312235,
+                  0.12657264132489932,
+                  -3.1312454681550017
+                ],
+                [
+                  -0.10001803202332107,
+                  0.9243693167676452,
+                  0.3681545320768146,
+                  -4.015972830707033
+                ],
+                [
+                  -0.09610912496696934,
+                  -0.37725512470839084,
+                  0.9211089007165989,
+                  4.284406238080882
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 9192,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 0.11504940688610077,
+                    "weighted_error": 0.49790093302726746,
+                    "zero_weights": 2371
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 0.1098344698548317,
+                    "weighted_error": 0.45053768157958984,
+                    "zero_weights": 2383
+                  },
+                  {
+                    "iteration": 3,
+                    "sigma": 0.10145004838705063,
+                    "weighted_error": 0.3816685080528259,
+                    "zero_weights": 2416
+                  },
+                  {
+                    "iteration": 4,
+                    "sigma": 0.0954146534204483,
+                    "weighted_error": 0.33435094356536865,
+                    "zero_weights": 2438
+                  },
+                  {
+                    "iteration": 5,
+                    "sigma": 0.08600611984729767,
+                    "weighted_error": 0.26524820923805237,
+                    "zero_weights": 2480
+                  },
+                  {
+                    "iteration": 6,
+                    "sigma": 0.08003351092338562,
+                    "weighted_error": 0.2230827510356903,
+                    "zero_weights": 2508
+                  },
+                  {
+                    "iteration": 7,
+                    "sigma": 0.07635992765426636,
+                    "weighted_error": 0.19913581013679504,
+                    "zero_weights": 2507
+                  },
+                  {
+                    "iteration": 8,
+                    "sigma": 0.0732923224568367,
+                    "weighted_error": 0.18849144876003265,
+                    "zero_weights": 2521
+                  },
+                  {
+                    "iteration": 9,
+                    "sigma": 0.07329826802015305,
+                    "weighted_error": 0.19150522351264954,
+                    "zero_weights": 2510
+                  }
+                ],
+                "selected_iteration": 8,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            },
+            {
+              "iteration": 5,
+              "valid_rows": 9202,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.003876606933772564,
+              "design_seconds": 0.0026175230741500854,
+              "IRLS_QR_seconds": 0.010951388627290726,
+              "step_seconds": 0.01758948713541031,
+              "distance": 7.774869710490364,
+              "converged": false,
+              "matrix": [
+                [
+                  0.9788665922769688,
+                  0.16043939397908893,
+                  0.12680455584755934,
+                  -4.101076397862454
+                ],
+                [
+                  -0.19913982711339695,
+                  0.88887228490247,
+                  0.41261288199656143,
+                  -3.5276658593697454
+                ],
+                [
+                  -0.04651369455676973,
+                  -0.4291448030582274,
+                  0.9020372576710987,
+                  4.8725201565561225
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 9202,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 0.08025958389043808,
+                    "weighted_error": 0.23070411384105682,
+                    "zero_weights": 2484
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 0.07796942442655563,
+                    "weighted_error": 0.21735742688179016,
+                    "zero_weights": 2484
+                  },
+                  {
+                    "iteration": 3,
+                    "sigma": 0.07442973554134369,
+                    "weighted_error": 0.19676727056503296,
+                    "zero_weights": 2495
+                  },
+                  {
+                    "iteration": 4,
+                    "sigma": 0.07131648063659668,
+                    "weighted_error": 0.18013551831245422,
+                    "zero_weights": 2507
+                  },
+                  {
+                    "iteration": 5,
+                    "sigma": 0.06932467222213745,
+                    "weighted_error": 0.16608956456184387,
+                    "zero_weights": 2513
+                  },
+                  {
+                    "iteration": 6,
+                    "sigma": 0.06510771811008453,
+                    "weighted_error": 0.1470988690853119,
+                    "zero_weights": 2539
+                  },
+                  {
+                    "iteration": 7,
+                    "sigma": 0.0608857236802578,
+                    "weighted_error": 0.12833712995052338,
+                    "zero_weights": 2551
+                  },
+                  {
+                    "iteration": 8,
+                    "sigma": 0.058141328394412994,
+                    "weighted_error": 0.11527732014656067,
+                    "zero_weights": 2569
+                  },
+                  {
+                    "iteration": 9,
+                    "sigma": 0.055012017488479614,
+                    "weighted_error": 0.10341893881559372,
+                    "zero_weights": 2579
+                  },
+                  {
+                    "iteration": 10,
+                    "sigma": 0.05428675562143326,
+                    "weighted_error": 0.09976247698068619,
+                    "zero_weights": 2570
+                  },
+                  {
+                    "iteration": 11,
+                    "sigma": 0.052637454122304916,
+                    "weighted_error": 0.09389658272266388,
+                    "zero_weights": 2585
+                  },
+                  {
+                    "iteration": 12,
+                    "sigma": 0.054057877510786057,
+                    "weighted_error": 0.09964768588542938,
+                    "zero_weights": 2556
+                  }
+                ],
+                "selected_iteration": 11,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            }
+          ],
+          "stop": "iteration_budget_exhausted"
+        },
+        {
+          "level": 0,
+          "shape": [
+            39,
+            45,
+            61
+          ],
+          "steps": [
+            {
+              "iteration": 1,
+              "valid_rows": 13196,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.00913169328123331,
+              "design_seconds": 0.011889497749507427,
+              "IRLS_QR_seconds": 0.0036908918991684914,
+              "step_seconds": 0.02486423123627901,
+              "distance": 7.923675263217203,
+              "converged": false,
+              "matrix": [
+                [
+                  0.9866371348340276,
+                  0.10161635846179684,
+                  0.12736278836247406,
+                  -7.161373467522882
+                ],
+                [
+                  -0.15155277159864788,
+                  0.8593690846661229,
+                  0.4883815452501027,
+                  -9.675645199493855
+                ],
+                [
+                  -0.05982408868732424,
+                  -0.5011575520862415,
+                  0.8632856922245723,
+                  13.783925494714882
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 13196,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 29.588712692260742,
+                    "weighted_error": 4299.119140625,
+                    "zero_weights": 0
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 24.745519638061523,
+                    "weighted_error": 4272.24462890625,
+                    "zero_weights": 0
+                  },
+                  {
+                    "iteration": 3,
+                    "sigma": 24.805662155151367,
+                    "weighted_error": 4272.79248046875,
+                    "zero_weights": 0
+                  }
+                ],
+                "selected_iteration": 2,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            },
+            {
+              "iteration": 2,
+              "valid_rows": 13075,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.00888138823211193,
+              "design_seconds": 0.011811752803623676,
+              "IRLS_QR_seconds": 0.001875407062470913,
+              "step_seconds": 0.022721240296959877,
+              "distance": 1.8327727996391017,
+              "converged": false,
+              "matrix": [
+                [
+                  0.9868864639136092,
+                  0.11657901783040037,
+                  0.11164425621496242,
+                  -6.896009313368893
+                ],
+                [
+                  -0.15731142959949715,
+                  0.8496153663668471,
+                  0.503395315185482,
+                  -9.661413675982669
+                ],
+                [
+                  -0.0361693442220816,
+                  -0.5143569401058252,
+                  0.8568131165566494,
+                  14.079988572893706
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 13075,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 28.67027473449707,
+                    "weighted_error": 3852.78369140625,
+                    "zero_weights": 0
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 28.69628143310547,
+                    "weighted_error": 3853.111572265625,
+                    "zero_weights": 0
+                  }
+                ],
+                "selected_iteration": 1,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            },
+            {
+              "iteration": 3,
+              "valid_rows": 13145,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.00882900319993496,
+              "design_seconds": 0.011907415464520454,
+              "IRLS_QR_seconds": 0.0017954297363758087,
+              "step_seconds": 0.022689164616167545,
+              "distance": 0.9353215306833376,
+              "converged": false,
+              "matrix": [
+                [
+                  0.986533294287673,
+                  0.12690588386768364,
+                  0.10318408744411176,
+                  -6.836324185257142
+                ],
+                [
+                  -0.16196467166341663,
+                  0.8458903649014756,
+                  0.5081701837965411,
+                  -9.610498366863977
+                ],
+                [
+                  -0.02279263905022267,
+                  -0.5180389823233486,
+                  0.85505327810524,
+                  14.015581751749924
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 13145,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 29.017192840576172,
+                    "weighted_error": 3797.93798828125,
+                    "zero_weights": 0
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 29.25914192199707,
+                    "weighted_error": 3798.598388671875,
+                    "zero_weights": 0
+                  }
+                ],
+                "selected_iteration": 1,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            },
+            {
+              "iteration": 4,
+              "valid_rows": 13167,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.008797973394393921,
+              "design_seconds": 0.011940685100853443,
+              "IRLS_QR_seconds": 0.0017488449811935425,
+              "step_seconds": 0.022625628858804703,
+              "distance": 0.3992358859748588,
+              "converged": false,
+              "matrix": [
+                [
+                  0.9862469517067111,
+                  0.13169108743480087,
+                  0.09987195672189798,
+                  -6.834903274862439
+                ],
+                [
+                  -0.16438189602096223,
+                  0.8444150342563113,
+                  0.5098449197378226,
+                  -9.577488004861575
+                ],
+                [
+                  -0.017191349853184143,
+                  -0.5192501395398492,
+                  0.8544493841521998,
+                  13.967248022327993
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 13167,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 29.195505142211914,
+                    "weighted_error": 3792.26708984375,
+                    "zero_weights": 0
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 29.2750244140625,
+                    "weighted_error": 3792.431640625,
+                    "zero_weights": 0
+                  }
+                ],
+                "selected_iteration": 1,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            },
+            {
+              "iteration": 5,
+              "valid_rows": 13161,
+              "row_order": "z,x,y",
+              "outside_value": 0,
+              "gradient_and_outside_threshold": 1e-05,
+              "sampling_seconds": 0.008754762820899487,
+              "design_seconds": 0.01175622083246708,
+              "IRLS_QR_seconds": 0.0018024398013949394,
+              "step_seconds": 0.02245982736349106,
+              "distance": 0.15306541669476068,
+              "converged": false,
+              "matrix": [
+                [
+                  0.986128040185682,
+                  0.13352636049268912,
+                  0.09860121405501718,
+                  -6.834004839821576
+                ],
+                [
+                  -0.16530324464618495,
+                  0.8438572394741909,
+                  0.5104701721907388,
+                  -9.565257634629344
+                ],
+                [
+                  -0.015044124068565368,
+                  -0.5196880510850479,
+                  0.8542236263944212,
+                  13.945435564596703
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "regression": {
+                "rows": 13161,
+                "columns": 6,
+                "dtype": "torch.float32",
+                "solver": "torch_reduced_QR_triangular_solve",
+                "iterations": [
+                  {
+                    "iteration": 1,
+                    "sigma": 29.307985305786133,
+                    "weighted_error": 3793.27294921875,
+                    "zero_weights": 0
+                  },
+                  {
+                    "iteration": 2,
+                    "sigma": 29.329057693481445,
+                    "weighted_error": 3793.290771484375,
+                    "zero_weights": 0
+                  }
+                ],
+                "selected_iteration": 1,
+                "stop_reason": "increasing_error_previous_parameters_and_weights_restored",
+                "normal_equations": false,
+                "ridge_or_svd_fallback": false
+              }
+            }
+          ],
+          "stop": "iteration_budget_exhausted"
+        }
+      ],
+      "axis_reorder": {
+        "old_axis_destination_signed": [
+          1,
+          3,
+          -2
+        ],
+        "reordered": true,
+        "stored_geometry": {
+          "delta": [
+            0.25,
+            0.25,
+            0.25
+          ],
+          "directions": [
+            [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0,
+              0.0
+            ]
+          ],
+          "center": [
+            -32.75,
+            60.25,
+            24.5
+          ]
+        }
+      },
+      "isotropic_shape": [
+        39,
+        45,
+        61
+      ],
+      "isotropic_voxel_mm": 1.0,
+      "initial_voxel_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.562935596864417
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.273462826968803
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -4.573055697891668
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "final_voxel_matrix": [
+        [
+          0.2465320100464205,
+          0.024650303513754294,
+          -0.03338159012317228,
+          0.9079709730886725
+        ],
+        [
+          -0.04132581116154624,
+          0.1276175430476847,
+          -0.21096430986854772,
+          19.328152957216712
+        ],
+        [
+          -0.003761031017141342,
+          0.2135559065986053,
+          0.12992201277126197,
+          -6.275442232039438
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "RAS_matrix": [
+        [
+          0.986128032207489,
+          -0.09860121458768845,
+          0.13352635502815247,
+          55.6055908203125
+        ],
+        [
+          0.015044123865664005,
+          0.8542236089706421,
+          0.519688069820404,
+          -44.12920379638672
+        ],
+        [
+          -0.16530324518680573,
+          -0.5104701519012451,
+          0.8438572287559509,
+          -5.469121932983398
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "source_data_resampled_in_header_output": false,
+      "API_seconds": 0.44281773921102285
+    },
+    "API_call_seconds": 0.4429062157869339,
+    "MGH_save_seconds": 0.021028609946370125,
+    "LTA_save_seconds": 0.001725524663925171,
+    "stage_input_boundary": {
+      "original_moving_sha256": "9b8ffb8867b9c68c22a1178501970fbb125d37bc13d0def77fd530fc430b778b"
+    },
+    "mapped_MGZ": {
+      "bytes": 406544,
+      "sha256": "87dd076ec6eec190f79a62f699577e6f0055abe487a1bf606fc0bbf8cf0c9175"
+    },
+    "LTA": {
+      "bytes": 738,
+      "sha256": "1d5e2fdaf1970493c3c9cf29fa3c8b70202bb37276deb35d09ae90cbca1314bf"
+    },
+    "official_commands_executed": 0,
+    "native_GEMS_calls": 0,
+    "actual_local_inverse_calls": 26,
+    "actual_local_inverse_function_module": "fnit._robust_inverse_validation_20261006._sampling",
+    "actual_local_sampling_source_SHA256": "41eeb53da939d695233902361d830826a2e50d5487c5933dad4dbcc8bdd8290a",
+    "actual_level_count": 2,
+    "actual_parameter_updates": 10
+  },
+  "maxrss_bytes": 431030272,
+  "actual_flags_before": {
+    "CPU_affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "Torch_threads": 8,
+    "Torch_interop_threads": 1,
+    "Torch_version": "2.5.1",
+    "CUDA_initialized": false,
+    "Torch_GPU_allocated_bytes": 0,
+    "Torch_GPU_reserved_bytes": 0,
+    "TF32_CPU_unused": false,
+    "source_namespace_production_loaded": false,
+    "native_GEMS_loaded": false,
+    "address_space_cap_bytes": 20000000000,
+    "system_load": [
+      0.08,
+      0.4,
+      1.24
+    ]
+  },
+  "actual_flags_after": {
+    "CPU_affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "Torch_threads": 8,
+    "Torch_interop_threads": 1,
+    "Torch_version": "2.5.1",
+    "CUDA_initialized": false,
+    "Torch_GPU_allocated_bytes": 0,
+    "Torch_GPU_reserved_bytes": 0,
+    "TF32_CPU_unused": false,
+    "source_namespace_production_loaded": false,
+    "native_GEMS_loaded": false,
+    "address_space_cap_bytes": 20000000000,
+    "system_load": [
+      0.08,
+      0.4,
+      1.24
+    ]
+  },
+  "precision_resource_flags_before_after_exact": true
+}

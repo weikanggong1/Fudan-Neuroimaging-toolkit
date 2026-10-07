@@ -28,11 +28,13 @@ def test_boundary_cost_prefers_correct_alignment():
     assert objective(correct) < objective(np.eye(4))
 
 
-def test_bbr_recovers_shift_and_saves_matrix(tmp_path):
+@pytest.mark.parametrize("execution", ["batched", "reference"])
+def test_bbr_recovers_shift_and_saves_matrix(tmp_path, execution):
     epi, _ = _sphere_case(shift=2)
     t1, wm = _sphere_case()
     t1 = nib.Nifti1Image(np.asarray(t1.dataobj, dtype=np.int16), t1.affine)
-    result = register_bbr(epi, t1, wm, init=np.eye(4), device="cpu", grid_search=False)
+    result = register_bbr(epi, t1, wm, init=np.eye(4), device="cpu", grid_search=False,
+                          execution=execution)
     assert result.final_cost < result.initial_cost
     assert abs(result.matrix[0, 3] - 2.0) < 1.5
     assert result.moved.shape == t1.shape

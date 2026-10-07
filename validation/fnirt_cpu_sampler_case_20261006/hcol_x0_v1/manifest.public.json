@@ -1,0 +1,324 @@
+{
+  "schema": "fnirt-saved-accepted-projection-X0-column-public/v1",
+  "status": "completed_single_isolated_saved_state_column",
+  "formal_default_adopted": false,
+  "numerical_bitexact": false,
+  "input_summary": {
+    "checkpoint_payload_members": 24,
+    "payload_bytes": 96032,
+    "payload_cap_bytes": 128000,
+    "level_shape": [
+      24,
+      28,
+      24
+    ],
+    "coefficient_shape": [
+      7,
+      8,
+      7
+    ],
+    "projection_dtype": "float32",
+    "coefficient_weight_action_dtype": "float64",
+    "count": 14341,
+    "fixed_cf_lambda": 9049.463427795125,
+    "native_dimension": 1177,
+    "column_index": 0,
+    "delta_scale_zero_not_None": true,
+    "official_saved_moving_read": false
+  },
+  "metrics": {
+    "full_column_vs_native_H_before_nudge": {
+      "full": {
+        "count": 1177,
+        "bit_mismatches": 59,
+        "maxabs": 5.421010862427522e-19,
+        "difference_L2": 6.005350392394546e-19,
+        "reference_L2": 0.00020406414510024584,
+        "relative_L2": 2.942873864217762e-15,
+        "signed_zero_bit_mismatches": 0,
+        "allfinite": true
+      },
+      "blocks": {
+        "coefficient_x": {
+          "count": 392,
+          "bit_mismatches": 59,
+          "maxabs": 5.421010862427522e-19,
+          "difference_L2": 6.005350392394546e-19,
+          "reference_L2": 0.00020406414510024584,
+          "relative_L2": 2.942873864217762e-15,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "coefficient_y": {
+          "count": 392,
+          "bit_mismatches": 0,
+          "maxabs": 0.0,
+          "difference_L2": 0.0,
+          "reference_L2": 0.0,
+          "relative_L2": null,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "coefficient_z": {
+          "count": 392,
+          "bit_mismatches": 0,
+          "maxabs": 0.0,
+          "difference_L2": 0.0,
+          "reference_L2": 0.0,
+          "relative_L2": null,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        },
+        "global_scale": {
+          "count": 1,
+          "bit_mismatches": 0,
+          "maxabs": 0.0,
+          "difference_L2": 0.0,
+          "reference_L2": 0.0,
+          "relative_L2": null,
+          "signed_zero_bit_mismatches": 0,
+          "allfinite": true
+        }
+      }
+    },
+    "first_diagonal_vs_previous_direct_candidate_diagonal": {
+      "count": 1,
+      "bit_mismatches": 0,
+      "maxabs": 0.0,
+      "difference_L2": 0.0,
+      "reference_L2": 0.0001976661468893698,
+      "relative_L2": 0.0,
+      "signed_zero_bit_mismatches": 0,
+      "allfinite": true
+    },
+    "nudged_first_diagonal_vs_native_saved_post": {
+      "count": 1,
+      "bit_mismatches": 1,
+      "maxabs": 5.421010862427522e-19,
+      "difference_L2": 5.421010862427522e-19,
+      "reference_L2": 0.00019786381303625968,
+      "relative_L2": 2.739768722355558e-15,
+      "signed_zero_bit_mismatches": 0,
+      "allfinite": true
+    }
+  },
+  "first_difference": {
+    "native_column_before_nudge": {
+      "vector_index": 0,
+      "block": "coefficient_x",
+      "index_in_block": 0
+    },
+    "native_post_first_diagonal": {
+      "vector_index": 0,
+      "block": "coefficient_x",
+      "index_in_block": 0
+    }
+  },
+  "selected_direction_limit": {
+    "candidate_data_column_all_positive_zero_words": true,
+    "zero_identity_check": "existing logical digest checked against zero bytes; no further float decode or new control",
+    "candidate_half_and_regularizer_half_identical_words": true,
+    "native_components_independently_saved": false,
+    "nonzero_data_normal_or_full_H_equivalence_proven": false
+  },
+  "exact_calls": {
+    "weight_setup": 1,
+    "spatial_weight_F32_products": 9,
+    "cross_weight_F32_products": 3,
+    "scale_weight": 1,
+    "unit_delta": 1,
+    "unit_field_expand": 1,
+    "unit_field_einsum": 3,
+    "SpatialNormalCPU_constructor": 1,
+    "SpatialNormalCPU_call": 1,
+    "adjoint": 1,
+    "adjoint_einsum": 3,
+    "bending_normal": 1,
+    "saved_Gram_terms": 6,
+    "bending_internal_expand": 6,
+    "bending_einsum": 18,
+    "pack_data": 1,
+    "pack_regularizer": 1,
+    "combine_half_column": 1,
+    "half_to_full": 1,
+    "candidate_first_diagonal_nudge": 1,
+    "native_H_column_decode": 1,
+    "native_post_first_diagonal_decode": 1,
+    "Numba_pool_metadata_initialization": 1,
+    "evaluate": 0,
+    "SSD": 0,
+    "g": 0,
+    "projection": 0,
+    "coordinate": 0,
+    "API": 0,
+    "normal_warmup": 0,
+    "bending_Gram_rebuild": 0,
+    "design_diagonal": 0,
+    "full_H": 0,
+    "PCG": 0,
+    "native": 0,
+    "full": 0,
+    "GPU": 0,
+    "Numba_observer_get_num_threads": 2
+  },
+  "validation": {
+    "contract_gates": 196,
+    "worker_before_after_bindings": 193,
+    "preflight_inputs_sources_providers_tools_tree": 188,
+    "restored_members": 24,
+    "source_input_provider_immutable": true,
+    "runtime_immutable": true,
+    "observed_processes_exited": 4,
+    "common_lock_released": true,
+    "own_FDs_closed": true,
+    "six_INDEX_locks_peer_preserved": true,
+    "scientific_attempts": 1,
+    "retries": 0
+  },
+  "JIT_runtime": {
+    "backend": "explicit OMP diagnostic constraint",
+    "threads": 8,
+    "torch_intra": 8,
+    "torch_interop": 96,
+    "literal_provider_allowlist_count": 124,
+    "actual_mapped_before": 108,
+    "actual_mapped_after": 120,
+    "selected_dispatcher": "_flat_parallel",
+    "signatures_before": 0,
+    "signatures_after": 1,
+    "cache_hits": 0,
+    "cache_misses": 1,
+    "fresh_own_cache_files": 2,
+    "cache_bytes": 69719,
+    "fallback_or_second_backend_attempts": 0,
+    "production_default_backend_equivalence_proven": false
+  },
+  "clocks_seconds": {
+    "worker": 88.43667914159596,
+    "supervisor": 88.9140394916758,
+    "outer": 88.96671930979937,
+    "data_column_expand_normal_adjoint_including_cold_JIT": 1.3617645744234324,
+    "normal_cold_call_including_JIT_overlaps_data_column_clock": 1.357232696376741,
+    "regularizer_column": 0.0010313279926776886,
+    "worker_remainder_unpartitioned": 87.07388323917985,
+    "pure_JIT_compile": null,
+    "pure_warm_normal_math": null,
+    "metadata_source_provider_hash_only": null,
+    "API_or_end_to_end_benchmark": false
+  },
+  "peak_RSS_bytes": 427126784,
+  "source_AST": {
+    "bend_normal": "45fd59ad2fe9610da6e49879fa70c827b4f093269d9dde760b03e500a19d86c1",
+    "data_normal": "eb29a74d84490bd4b5b8676a2085da8899c0878934ff96b120cfe22d18c34306",
+    "weight_setup": "a0078361002f1b462279988a5937c47da9f3850d148bbeb8113d2d7f9fd53e25",
+    "_pack": "f05db1c98bdb3875ed872c608038093dc2083c1d5a1cd92225482f6a014b2831",
+    "_unpack": "6957a1588c7ef8b8d1177a1668a517dbf921ad1f069b10d620b3af7346b52750",
+    "expand_coefficients": "5e877302d456ed62b8f75508d59aa856ce350d950b3037f217f74852e9121a4d",
+    "adjoint_field": "b40401ef0df93d4dd0bc37d75b249022a0b5ae1154c01594183d95dfe4f9e0e5",
+    "bending_normal": "80df4417e7fbb55b5439c7b0b25c5c6c85eb8bbdc216756136ff4883c89f2402"
+  },
+  "original_text_receipt_identities": {
+    "worker.private.json": {
+      "bytes": 235721,
+      "sha256": "6f7b45df67541104f3e8e83d4f763b0fccb64b9879e7eabddb3c80910ebe7db5"
+    },
+    "CLOSURE.private.json": {
+      "bytes": 61437,
+      "sha256": "e8f739b26f9d59c65071f0ae47d99bc62e662e1f1e00868efeaf006f2445555f"
+    },
+    "METRICS.private.json": {
+      "bytes": 7120,
+      "sha256": "a804ca31e7fca6b5fefba1f09bc08b14242bb2f31e5cfec0d7b795ef9580a4d3"
+    },
+    "FIRST_DIFFERENCE.private.json": {
+      "bytes": 666,
+      "sha256": "991556d761ac096bd5f1d52d3815ad4f96e2d20cc0742d8491e005a549be3feb"
+    },
+    "supervisor.private.json": {
+      "bytes": 1652,
+      "sha256": "343fe6dd83be7ce58a1d78c66b6b94313bf3f69bc6fb2f5b0cb3a526d65015ec"
+    },
+    "outer.private.json": {
+      "bytes": 1546,
+      "sha256": "a5360d8721f82b3cb9ce58e8e4e1876f8e834aac1b13480203b908c0a2a701f2"
+    },
+    "DEPLOYMENT_POST.private.json": {
+      "bytes": 1426,
+      "sha256": "10806a143c784fb2d20fcfa4f061ba55027fb4e85bb38047f1d09b481d03751f"
+    },
+    "DEPLOYMENT_PREFLIGHT.private.json": {
+      "bytes": 71119,
+      "sha256": "1ea49abc77bbd36b5d967d71d12de4e3485e810cbf7c831674c5050a799cbebf"
+    },
+    "REGISTER.private.json": {
+      "bytes": 3991,
+      "sha256": "f74ba7a8cb690ac21e4bc41fc916345359d3496acafff0cc0b706eb1b7b1c651"
+    },
+    "PREPARED.private.json": {
+      "bytes": 1064,
+      "sha256": "f513532bd70ac06128b69ec09246958399a2d5ca062aa3d3cad2f5b1f8f3086c"
+    },
+    "AUTHORIZE.private.json": {
+      "bytes": 3519,
+      "sha256": "25280c8787bed56a089d9f51fb29ca46e316fa883da1c570da77068d94a1d619"
+    },
+    "DISPATCH.private.json": {
+      "bytes": 1751,
+      "sha256": "e2b9aa0c8dd5d34421b9532c9cabf52cabcc26276484908e8f906ebebc4c0fe7"
+    },
+    "CHILD.private.json": {
+      "bytes": 240,
+      "sha256": "0272fdf368362f12932928d79f11273fc3ecb6066a6e8be9f17a4ca1803c9a6b"
+    },
+    "INDEX_CLOSED.private.json": {
+      "bytes": 5258,
+      "sha256": "72b2e8e286185529c285e05917e291475c21f5b13fa2d89e0eedd8e593bc87d4"
+    },
+    "DISPATCH.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "worker.log": {
+      "bytes": 97,
+      "sha256": "bb5d0eadd2f945922a813fd3ed22787c3673f45ce596dc9d472e86a86ba17a3e"
+    },
+    "supervisor.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ROOT_ACTUAL_EXECUTION_AUTH.private.json": {
+      "bytes": 3088,
+      "sha256": "dd2f03e5b61426065eb4a0872639e972f51f32d967e4490744bfa02a5b29b1ac"
+    },
+    "INDEPENDENT_REVIEW.private.json": {
+      "bytes": 11406,
+      "sha256": "c4900b1bd503afc7d494cdfdbd44fab1f1ad0f1fce33438ba1e23783850a2673"
+    },
+    "ROOT_SOURCE_REVIEW.private.json": {
+      "bytes": 1013,
+      "sha256": "c671826b24a300318eaaec70bfbd93a52289e231437d38f3e6a4f283e58be4e7"
+    },
+    "ROOT_DEPLOYMENT_AUTH.private.json": {
+      "bytes": 1510,
+      "sha256": "5ed0350e1b907206d672ece5c2649d1279ddb1180f7d68e0990fa096e0a20733"
+    }
+  },
+  "history": {
+    "previous_diagonal_control_completed": true,
+    "old_X0_restore_gate_compared_old_FNIT_H_not_native_H": true,
+    "old_49_53_vs_native69_matched_operator_test": false,
+    "old_and_new_lambda_count_match": true,
+    "old_and_new_projection_diagonal_match": false,
+    "unexecuted_v1_schema_block_preserved": true,
+    "actual_v2_packet_scientific_attempts": 1,
+    "terminal_relay_collection_only_split_into_four_readonly_chunks": true
+  },
+  "limits": [
+    "one selected boundary column; candidate data zero",
+    "half-normal components versus saved combined native full H column",
+    "only first diagonal scalar nudged1.001, not whole column",
+    "fixed lambda, no dynamic latestSSD/callstate proof",
+    "source formula not native internal binary reduction trace",
+    "no default, full H, PCG, native rerun, whole registration or GPU accuracy/speed claim"
+  ]
+}

@@ -17,6 +17,7 @@ from .labels import PARCELLATION_LABELS, PARCELLATION_NAME_BY_ID
 from .pipeline import SynthSegParc
 from .segment import SynthSegSegmenter, run_synthseg_parc_t1
 from .synthseg import _official_soft_volumes, _segmentation_image
+from .precision import check_cached_policy, validate_cudnn_tf32
 
 
 @dataclass
@@ -29,6 +30,7 @@ class SynthSegPlusResult:
     label_names: dict[int, str]
     volumes_mm3: dict[int, float] | None = None
     total_intracranial_mm3: float | None = None
+    precision: dict | None = None
 
     def mask(self, label: int | str) -> np.ndarray:
         if isinstance(label, str):
@@ -72,7 +74,18 @@ class SynthSegPlus:
 
     def __init__(self, weights: str | Path | None = None,
                  parc_weights: str | Path | None = None,
-                 device: str | torch.device = "cpu"):
+                 device: str | torch.device = "cpu", *,
+                 cudnn_tf32: bool | None = True):
+        """Declare CUDA cuDNN policy without changing process-global flags.
+
+        True preserves default inference; False covers both networks and all
+        Gaussian filters; None inherits the caller's cuDNN flag per call.
+        Policy changes require matching cached child models or a new instance.
+        Caller autocast is preserved; no lower precision is enabled here.
+        """
+        validate_cudnn_tf32(cudnn_tf32)
+        self.cudnn_tf32 = cudnn_tf32
+        self.precision = None
         self.device = device
         self.segment_weights = resolve_weights("synthseg_2.0.h5", explicit=weights)
         self.models = self.segment_weights.parent
@@ -110,13 +123,20 @@ class SynthSegPlus:
     def __call__(self, t1: str | Path, *,
                  keep_geometry: bool = True, fast: bool = False,
                  min_pad: int = 128, volumes: bool = False) -> SynthSegPlusResult:
+        self.precision = None
+        policy = getattr(self, "cudnn_tf32", True)
+        validate_cudnn_tf32(policy)
+        check_cached_policy(self._segmenter, policy, "segmenter")
+        check_cached_policy(self._parcellator, policy, "parcellator")
         reference = nib.load(str(t1))
         if self._segmenter is None:
             self._segmenter = SynthSegSegmenter(
-                self.segment_weights, self.segmentation_labels, self.device)
+                self.segment_weights, self.segmentation_labels, self.device,
+                cudnn_tf32=policy)
         if self._parcellator is None:
             self._parcellator = SynthSegParc(
-                self.parc_weights, PARCELLATION_LABELS, self.device)
+                self.parc_weights, PARCELLATION_LABELS, self.device,
+                cudnn_tf32=policy)
         result = run_synthseg_parc_t1(
             t1,
             self.segment_weights,
@@ -130,7 +150,9 @@ class SynthSegPlus:
             volumes=volumes,
             segmenter=self._segmenter,
             parcellator=self._parcellator,
+            cudnn_tf32=policy,
         )
+        self.precision = result.precision
         volume_map = None
         intracranial = None
         if volumes:
@@ -153,4 +175,4 @@ class SynthSegPlus:
             parc = _native(parc, reference)
             combined = _native(combined, reference)
         return SynthSegPlusResult(segmentation, parc, combined, dict(self.label_names),
-                                  volume_map, intracranial)
+                                  volume_map, intracranial, precision=result.precision)

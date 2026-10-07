@@ -1,0 +1,62 @@
+{
+  "passed": true,
+  "review_date": "2026-10-06",
+  "scope": "Current compiled CPU saved-moving preprocessing identity; no nonlinear registration acceptance",
+  "reviewed_original_summary": {
+    "bytes": 26637,
+    "sha256": "45fb40c70d5fb12b326449ebacc46f1e9ae714996599c128d24cc04719108c8b"
+  },
+  "reviewed_preparation_freeze_SHA256": "6efcc5d57568e26431dbb21c6054a3ccd6abde15be6e86ff28cbddb790eb9bbd",
+  "root_live_source_file_bindings_recomputed": 31,
+  "root_live_harness_bindings_recomputed": 12,
+  "all_exact": true,
+  "actual_exit_codes": [
+    0,
+    0,
+    0
+  ],
+  "gates_passed": 3,
+  "plain_current_vs_legacy_saved": {
+    "values": 18579456,
+    "dtype": "float32",
+    "different_value_bits": 0,
+    "max_absolute": 0.0
+  },
+  "adapter_current_vs_official_saved": {
+    "values": 18579456,
+    "dtype": "float32",
+    "different_value_bits": 0,
+    "max_absolute": 0.0
+  },
+  "actual_calls": {
+    "mature_blur": 2,
+    "compiled_CPU_helper": 2,
+    "adapter": 1,
+    "normalization": 0,
+    "RHS": 0,
+    "H": 0,
+    "PCG": 0,
+    "evaluate": 0,
+    "linearize": 0,
+    "native": 0,
+    "GPU": 0
+  },
+  "Numba_context": {
+    "selected": "parallel",
+    "threading_layer": "omp",
+    "actual_signature": "F5D/F32 volume, C1D/F64 kernel, int64/bool and F5D/F32 output",
+    "serial_signatures": 0,
+    "assembly_assessed": false,
+    "per_axis_native_runtime_arrays_assessed": false
+  },
+  "source_operands_flags_headers_harness_before_after_exact": true,
+  "canonical_default_read_commit": "db61cebc9d3683720e6c0a288db3cdc7d6f30a7c",
+  "peak_RSS_KiB": 943660,
+  "private_run_local_cold_JIT": true,
+  "speed_ratio_claimed": false,
+  "fresh_normalization_assessed": false,
+  "CPU_GPU_production_changed": false,
+  "old_full_orientation_candidate_still_rejected": true,
+  "interpretation": "This binds the current compiled smoothing helper to an earlier saved exact orientation control. The earlier full orientation run worsened coefficient/warp/Jacobian errors and remains unadopted; saved-array equality alone does not prove a final warp improvement.",
+  "root_review_new_numerical_calls": 0
+}

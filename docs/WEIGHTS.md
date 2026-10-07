@@ -1,189 +1,112 @@
-# 预训练权重：下载、校验与公开发布
+# 权重、图谱和模板
 
-Git 仓库和 wheel 均不包含权重。SynthStrip、SynthMorph、33 类 SynthSeg、
-WMH-SynthSeg、SynthSR、Python recon-all 和可选辅助分割阶段使用 FreeSurfer 官方发布的文件；
-配置脚本下载文件、核对大小与 SHA-256，并
-保存权重目录。此后 Python API 和 `fnit` 命令会自动查找它，下载过程无需安装
-FreeSurfer。TorchFAST、TorchFLIRT 和 TorchFNIRT 是数值算法，
-不使用模型权重。FastVBM 和 fMRI 体积流程的默认 SynthMorph 分支使用
-`synthstrip.1.pt` 与 `synthmorph.deform.3.h5`；fMRI 的 PyTorch FNIRT 分支仍需 SynthStrip 做脑提取。
+FNIT仓库及wheel不包含模型权重。使用主页Conda环境中的安装器获取所需资源；
+模型组只负责文件配置，不安装或运行原软件。图谱、标准模板与固定native源码的统一安装说明见[运行资源安装](ASSETS.md)。
 
-## 一次配置，后续自动使用
-
-在仓库根目录运行。默认下载下表 20 个文件到 `~/.cache/fnit/`。优先使用 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)；Release 暂时不可用时回退到表中的官方地址。`synthmorph.deform.3.h5` 在 Release 中分为两卷，安装器合并后核对完整文件的 SHA-256。其他文件也在写入 `.part` 后通过大小和 SHA-256 校验，再更名为正式文件。
+## 选择需要的模型
 
 ```bash
-python tools/setup_weights.py --all
+fnit-setup-weights --model synthstrip
+fnit-setup-weights --model fmri --dest /data/fnit_weights
+fnit-setup-weights --all --dest /data/fnit_weights
 ```
 
-也可只下载所需模型。`joint` 需要 affine 和 deform 两份权重；下例再加默认 SynthStrip 权重，共三个文件：
+| 模型组 | 文件数 | 总大小（B） | 适用功能 |
+|---|---:|---:|---|
+| `synthstrip` | 1 | 30851709 | 对应同名模型/流程；独立调用见功能页。 |
+| `fast-vbm` | 2 | 3539482133 | 对应同名模型/流程；独立调用见功能页。 |
+| `fmri` | 2 | 3539482133 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthstrip-nocsf` | 1 | 30851709 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthmorph-rigid` | 1 | 51656152 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthmorph-affine` | 1 | 51455312 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthmorph-deform` | 1 | 3508630424 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthmorph-joint` | 2 | 3560085736 | 对应同名模型/流程；独立调用见功能页。 |
+| `wmh-synthseg` | 1 | 790531383 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthseg` | 4 | 53087016 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthseg-plus` | 5 | 106177856 | 对应同名模型/流程；独立调用见功能页。 |
+| `recon-all` | 11 | 3653913443 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthsr` | 1 | 106163752 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthsr-lowfield` | 1 | 106163752 | 对应同名模型/流程；独立调用见功能页。 |
+| `synthsr-v1` | 1 | 53075984 | 对应同名模型/流程；独立调用见功能页。 |
+
+`recon-all` 当前为11个文件，包含SynthMorph deform、分割及重建辅助模型，
+不是旧说明中的6或10文件轻量组合。
+权重清单列出20个不同模型相关文件，共4,845,447,631 B；当前模型组联集仅18个文件，
+`--all`/默认实际安装18个，共4,845,447,015 B。
+`mca-dura.ctab`和`sclimbic.volstats.csv`不被当前模型组引用。
+不同模型组共享文件，不应把分组总量相加。
+TorchFAST、TorchFLIRT、TorchFNIRT、DTIFIT等数值模块不读取模型checkpoint。
+
+## 保存位置和离线校验
 
 ```bash
-python tools/setup_weights.py --model synthstrip --model synthmorph-joint
+fnit-setup-weights --model recon-all --dest /data/recon_weights
+fnit-setup-weights --model recon-all --dest /data/recon_weights --verify-only
+export FNIT_WEIGHTS=/data/recon_weights
 ```
 
-只运行 WMH-SynthSeg 时下载其单个 checkpoint：
+安装器检查实际大小和SHA-256，然后保存默认目录配置。
+`--verify-only`只验证，不更改配置；目录不匹配、文件缺失或SHA错误都会报错。
+可在联网机器准备目录后复制到计算节点，再运行离线校验。
+`--model`可重复指定；未指定组时默认处理全部组。
+
+## 固定 Release 与来源回退
+
+[assets-v1](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)
+保存获许可、已发布并核验的模型、图谱和模板。安装器按固定大小和SHA-256选择Release附件，失败时回退固定作者来源；未收录资源仍从作者来源获取。
+大文件 `synthmorph.deform.3.h5` 分为两个附件，本地合并后验证完整大小与SHA。
+
+当前Release文件名、实际大小和SHA见[发布目录](../src/fnit/_release_asset_catalog.json)；原作者地址和许可见[资源来源清单](RESOURCE_MANIFEST.md)。
+安装器只使用已发布目录中的精确内容匹配，不凭文件名推断资源相同。
+
+## fMRI 表面和标准模板
+
+<a id="fmri-templateflow-原站模板"></a>
 
 ```bash
-python tools/setup_weights.py --model wmh-synthseg
+fnit-setup-fmri-surface-assets --output-dir /data/hcp_assets --fmriprep
+fnit-setup-fmri-surface-assets --output-dir /data/hcp_assets --fmriprep --msmall
 ```
 
-Python recon-all 使用另一份 **33 类 SynthSeg** 模型，不能用 WMH-SynthSeg 的 39 类 checkpoint 替代。整例入口下载 6 个实际使用的权重/标签文件；独立 SynthSeg 只需其中四个：
+基础HCP资源含球面、脑沟、ROI、查找表和MSM配置；MSMAll还使用d7–d21低维参考。
+这些文件及TemplateFlow MNI6-2mm T1w、brain mask、HCP dseg均按已发布目录优先使用固定Release，保留固定HCP/TemplateFlow来源回退。
+下载和已存在文件均核验SHA；目录或安装器提供的固定大小同时用于大小检查。
 
-```bash
-python tools/setup_weights.py --model synthseg
-python tools/setup_weights.py --model synthseg-plus
-python tools/setup_weights.py --model recon-all
-```
-
-SynthSR 默认、低场和 v1 是三份不同权重。只需通用 v2 时下载一份；需要全部变体时把三个模型名同时传给脚本：
-
-```bash
-python tools/setup_weights.py --model synthsr
-python tools/setup_weights.py --model synthsr --model synthsr-lowfield --model synthsr-v1
-```
-
-有独立模型目录时，用 `--dest` 指定一次即可。脚本成功后把绝对路径保存在用户缓存目录的 `weights.json`，之后 API 和 CLI 可以省略 `weights=` / `--weights`：
-
-```bash
-python tools/setup_weights.py --all --dest /path/to/models
-python tools/setup_weights.py --all --verify-only
-```
-
-`--verify-only` 只检查当前权重目录，不下载或修改配置。已从联网机器复制了权重时，运行 `python tools/setup_weights.py --all --dest /path/to/copied/models`：现有文件校验成功后直接保存目录，无需重新下载。安装 wheel 后也可使用相同选项的 `fnit-setup-weights` 命令。
-
-可选模型名：`synthstrip`、`synthstrip-nocsf`、`synthmorph-rigid`、`synthmorph-affine`、`synthmorph-deform`、`synthmorph-joint`、`synthseg`、`synthseg-plus`、`wmh-synthseg`、`recon-all`、`synthsr`、`synthsr-lowfield`、`synthsr-v1`、`fast-vbm` 和 `fmri`。`recon-all` 包含 SynthStrip、SynthMorph affine 和 33 类 SynthSeg 的六个文件，重复选择时只下载一次。`fast-vbm` 和 `fmri` 都是 `synthstrip.1.pt` 与 `synthmorph.deform.3.h5` 的依赖别名。端到端 fMRI 选择 `registration_backend="fnirt"` 时只需 `--model synthstrip`；仅单独调用 `register_t1_to_mni`、并已备妥去颅骨 T1 与 MNI 模板时不需要 checkpoint。`--model` 可重复；不写 `--model` 时等同 `--all`。显式 API/CLI 权重路径优先，其次是 `FNIT_WEIGHTS` 环境变量，再次是脚本保存的目录，然后是默认缓存。`XDG_CACHE_HOME` 可改变缓存根目录。单独的模型推理不联网；统一 `segment_4_subregions` 首次运行会下载并校验缺失的 SynthSeg/SynthSeg+ 权重。离线运行前应使用配置脚本备妥权重及图谱。
-
-官方文件于 **2026-09-23 至 2026-09-29** 从 FreeSurfer 官方源码、git-annex 或已安装的官方发行版核对大小和 SHA-256；Release 保留原始字节，不改变权重格式。SynthStrip/SynthMorph 的 SHA-256 来自本包已完成数值验证的权重，并与 FreeSurfer 官方仓库的 git-annex 指针一致；WMH-SynthSeg 和 SynthSR v1 的 SHA-256 来自官方文件的完整下载校验。SynthSR v2 两份文件的大小和 SHA-256 与 FreeSurfer git-annex 对象名一致；配置脚本下载后还会逐字节校验。此处的版本号固定，不会自动跟随上游替换为新模型。
-
-`synthseg-plus` 在 `synthseg` 四个文件之外增加 53,090,840 字节的皮层分区网络；该文件已与 FreeSurfer 8.2.0-1 安装文件核对 SHA-256。`--all` 的总量因此增加 53,090,840 字节。
-
-## 官方文件
-
-| 功能 | 文件与官方下载链接 | 字节数 | 使用场景 |
-|---|---|---:|---|
-| SynthStrip | [synthstrip.1.pt](https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt) | 30,851,709 | 默认脑提取 |
-| SynthStrip | [synthstrip.nocsf.1.pt](https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.nocsf.1.pt) | 30,851,709 | `no_csf=True` / `--no-csf` |
-| SynthMorph | [synthmorph.affine.2.h5](https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.affine.2.h5) | 51,455,312 | affine；joint 的仿射阶段 |
-| SynthMorph | [synthmorph.deform.3.h5](https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.deform.3.h5) | 3,508,630,424 | deform；joint 的非线性阶段 |
-| SynthMorph | [synthmorph.rigid.1.h5](https://surfer.nmr.mgh.harvard.edu/docs/synthmorph/synthmorph.rigid.1.h5) | 51,656,152 | rigid |
-| WMH-SynthSeg | [WMH-SynthSeg_v10_231110.pth](https://ftp.nmr.mgh.harvard.edu/pub/dist/lcnpublic/dist/WMH-SynthSeg/WMH-SynthSeg_v10_231110.pth) | 790,531,383 | `wmh-synthseg`；解剖结构与 WMH 的联合分割 |
-| SynthSR | [synthsr_v20_230130.h5](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/f08/bc9/SHA256E-s106163752--a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b.h5/SHA256E-s106163752--a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b.h5) | 106,163,752 | `synthsr`；默认通用 v2 |
-| SynthSR | [synthsr_lowfield_v20_230130.h5](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/de0/799/SHA256E-s106163752--a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84.h5/SHA256E-s106163752--a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84.h5) | 106,163,752 | `synthsr-lowfield`；低场单输入 v2 |
-| SynthSR | [synthsr_v10_210712.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/dev/mri_synthsr/synthsr_v10_210712.h5) | 53,075,984 | `synthsr-v1`；2021 年通用模型 |
-| 33 类 SynthSeg | [synthseg_2.0.h5](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5) | 53,079,152 | `synthseg`、`recon-all`；33 类分割模型 |
-| SynthSeg+ | `synthseg_parc_2.0.h5` | 53,090,840 | `synthseg-plus`；SHA-256 `83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684` |
-| 33 类 SynthSeg | [synthseg_segmentation_labels_2.0.npy](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy) | 348 | 标签编号 |
-| 33 类 SynthSeg | [synthseg_segmentation_names_2.0.npy](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy) | 7,168 | 标签名称 |
-| 33 类 SynthSeg | [synthseg_topological_classes_2.0.npy](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy) | 348 | 拓扑类别 |
-| 可选辅助分割阶段 | [entowm.fsm31.t1.nstd00-30.nstd21-108.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.fsm31.t1.nstd00-30.nstd21-108.h5) | 3,296,904 | EntoWM 模型 |
-| 可选辅助分割阶段 | [entowm.ctab](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.ctab) | 318 | EntoWM 查找表 |
-| 可选辅助分割阶段 | [mca-dura.both-lh.nstd21.fhs.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/mca-dura.both-lh.nstd21.fhs.h5) | 3,294,856 | MCA/dura 模型 |
-| 可选辅助分割阶段 | [mca-dura.ctab](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/mca-dura.ctab) | 116 | MCA/dura 查找表 |
-| 可选辅助分割阶段 | [vsinus.no-sp.m.all.nstd10-070.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/vsinus.no-sp.m.all.nstd10-070.h5) | 3,296,904 | 静脉窦模型 |
-| 可选辅助分割阶段 | [sclimbic.volstats.csv](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/sclimbic.volstats.csv) | 500 | 上游体积统计字段表 |
-
-合计 **4,845,447,631 字节**，约 4.85 GB（4.51 GiB）。其中 `synthseg` 单独安装需四个文件、53,087,016 字节；`synthseg-plus` 需五个文件、106,177,856 字节；`recon-all` 组需 10 个文件、145,283,019 字节，包含尚待接入整例的 MCA/dura 和静脉窦模型；不下载 deform、额外查找表和统计字段表。只使用默认 SynthStrip 时需要第一个文件；默认 joint 配准需要 affine 和 deform 两个文件；WMH-SynthSeg 只需其单独的 `.pth`；默认 SynthSR 只需通用 v2 的 `.h5`。[33 类 SynthSeg 官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_synthseg) · [辅助分割官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_sclimbic_seg) · [WMH 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_WMHsynthseg) · [SynthSR 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthsr)
-
-SHA-256：
-
-```text
-37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33  synthstrip.1.pt
-62bf01137c45b5f0cc04d59dbaed5b9ac138b3f25b766c062a7c1a0d696ecb28  synthstrip.nocsf.1.pt
-1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6  synthmorph.affine.2.h5
-95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536  synthmorph.deform.3.h5
-284c145fce47e98ecf3fdeda2163f646ac3ebb0240e87dd50d71d879f4d5b3af  synthmorph.rigid.1.h5
-0ece39dd651357aa95222fc4d45fa32d00f11e763d2583cae3f869989ce35988  WMH-SynthSeg_v10_231110.pth
-a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b  synthsr_v20_230130.h5
-a7c5ea91c94fe31f3c716252caae0d181629201bd884dc59af88ddfd75ed4b84  synthsr_lowfield_v20_230130.h5
-2fd59e96196388360eba95254fb6dfc9eb9eb8638018b590575e47e0a387f255  synthsr_v10_210712.h5
-f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e  synthseg_2.0.h5
-5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8  synthseg_segmentation_labels_2.0.npy
-234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc  synthseg_segmentation_names_2.0.npy
-650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a  synthseg_topological_classes_2.0.npy
-9be55798498331f655acd75d4f0cd5036463e0f497bbb239be0167d6a9129a07  entowm.fsm31.t1.nstd00-30.nstd21-108.h5
-fa46a74e7c5385b6e474553acbb34f536dac640c52586ec4193a0ea9739948f1  entowm.ctab
-da6a7b994e3e804cc3dc0e98e965c28a802ddcd38fd9b5c680d75cef285657b0  mca-dura.both-lh.nstd21.fhs.h5
-77faedc95badab7b01ab8ef71889724c5eda33a0862fefa845b5ba33b8bc3e13  mca-dura.ctab
-3d78948741306a31337468c86be55821913edb73855116fcb063b61135b90f12  vsinus.no-sp.m.all.nstd10-070.h5
-691b8e1a1d74668b65a0571e2854a4a83c484438107693d71eef5a081d17380b  sclimbic.volstats.csv
-```
-
-也可在 [provenance.json](provenance.json) 查看 SynthStrip/SynthMorph 权重与参考实现的来源记录。SynthMorph、SynthSR v2 和 33 类 SynthSeg 的 `.h5` 由 FreeSurfer 的 git-annex 管理；直接下载 GitHub 同名 `raw` 路径可能只得到链接文本。本表链接指向实际 annex 对象；新增的十个 FreeSurfer 模型及查找表均已完整下载校验。[官方 SynthMorph 目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthmorph) · [FreeSurfer git-annex 构建说明](https://surfer.nmr.mgh.harvard.edu/fswiki/BuildGuide)
-
-## 手动下载示例
-
-下面下载默认 SynthStrip 权重并检查 SHA-256。其他模型替换为上表的完整 URL、文件名和对应 SHA-256 即可。
-
-```bash
-mkdir -p weights
-curl --fail --location --retry 3 \
-  'https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/requirements/synthstrip.1.pt' \
-  --output weights/synthstrip.1.pt.part
-printf '%s  %s\n' \
-  '37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33' \
-  'weights/synthstrip.1.pt.part' | sha256sum --check - && \
-  mv weights/synthstrip.1.pt.part weights/synthstrip.1.pt
-export FNIT_WEIGHTS="$PWD/weights"
-```
-
-`pip install`、导入模块和推理不下载权重。离线计算节点可从联网机器复制已校验的权重目录。
-
-## TorchFAST 不需要权重
-
-`TorchFAST` 和 `fnit fast` 直接运行 HMRF-EM、
-bias field 和 PVE 数值计算，不读取 checkpoint，也不需要执行
-`tools/setup_weights.py`。只有从原始、未去颅骨 T1 开始并先调用 SynthStrip 时，
-才需要配置 `synthstrip.1.pt`。`setup_weights.py --all` 的 20 个文件属于上表
-学习模型及其查找表，不含 TorchFAST 文件。
-
-`FastVBM` / `fnit fast-vbm` 从原始 T1w 开始，默认调用 SynthStrip，因此需要
-`synthstrip.1.pt`。`registration_backend="synthmorph"` 还读取
-`synthmorph.deform.3.h5`；该分支传入外部线性初始化并设置 `mid_space=False`，因此
-不需要 `synthmorph.affine.2.h5`。`registration_backend="fnirt"` 使用本包 PyTorch
-cubic B-spline 优化器，不读取 SynthMorph 权重。独立 TorchFLIRT、TorchFAST、
-TorchFNIRT、TorchApplyWarp、Jacobian 和 modulation 都不读取 checkpoint。
-
-`python tools/setup_weights.py --model fast-vbm` 配置 SynthStrip 和 deform 两个文件，
-是两个后端的权重超集；只运行 TorchFNIRT 分支可改为 `--model synthstrip`。GM
-template 是独立输入，不是模型权重，也不由本仓库或配置脚本下载。`fnit-setup-weights --model fmri` 只安装默认 fMRI 链的两份权重；其 TemplateFlow MNI152NLin6Asym 2 mm 模板、脑掩膜和 HCP dseg 由独立资源安装器按下节下载，运行时显式提供路径。
-
-## fMRI TemplateFlow 原站模板
-
-体积与 91k 表面流程使用以下固定 TemplateFlow 文件。未逐文件确认其再分发权利，因此仅从原站下载，**不上传 FNIT Release，也不随 Git/wheel 分发**。安装器检查下载文件和已有文件的字节数与 SHA-256，再原子保存；模型推理不会自动下载这些资源。
-
-```bash
-fnit-setup-fmri-surface-assets \
-  --output-dir /absolute/path/hcp_surface_assets \
-  --fmriprep
-```
-
-文件保存在 `hcp_surface_assets/fmriprep/`：
-
-| 原站文件 | 字节数 | SHA-256 |
+| TemplateFlow文件 | 大小（B） | 用途 |
 |---|---:|---|
-| [tpl-MNI152NLin6Asym_res-02_T1w.nii.gz](https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz) | 1,412,252 | `2a814da50173599a857d96246dc057d548072bd6dffa499f75724dbad20792b1` |
-| [tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz](https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz) | 28,557 | `e4e2b284170271afdafe26ac0997b2af5a0f5ddac35e28a7e796b52e8bc5adb1` |
-| [tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz](https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz) | 25,762 | `9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987` |
+| tpl-MNI152NLin6Asym_res-02_T1w.nii.gz | 1,412,252 | volume目标空间。 |
+| tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz | 28,557 | 同目标网格脑mask。 |
+| tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz | 25,762 | CIFTI皮层下BrainModel轴。 |
 
-大小/SHA-256 清单位于[资源安装器](../src/fnit/fmri/assets_setup.py)。T1w 和 brain mask 用于体积配准，HCP dseg 用于 91k CIFTI 的全部 19 个皮层下结构。volume 还核对规范 RAS 的模板网格、仿射与体素内容身份，仅接受固定 MNI152NLin6Asym res-02 完整模板或其固定脑掩膜版本；相同网格的其他模板不会被标为该标准空间。离线部署可复制安装器已校验的资源目录，再在 Python/CLI 中传绝对路径。完整用法见[fMRI 体积流程](fmri/README.md)与[表面流程](fmri/surface.md)。
+完整SHA和来源见[发布目录](../src/fnit/_release_asset_catalog.json)与[资源来源清单](RESOURCE_MANIFEST.md)。
+MNI标签的空间身份不能只由文件名或相同shape推断。
 
-## 权重许可与归属
+## 重建和亚区图谱
 
-**20 个文件中，SynthStrip 与 SynthMorph 的五个权重可选择 MIT 或 CC BY 4.0 许可。** 两个功能的官网 “Code and Weights” 均明确提供这一选择。[SynthStrip](https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/)，[SynthMorph](https://synthmorph.io/#code)
+```bash
+fnit-setup-recon-all-assets --dest /data/recon_assets
+fnit-setup-recon-all-assets --dest /data/recon_assets --verify-only
+fnit-setup-subregion-atlases --output-root /data/subregion_atlases --device cpu
+```
 
-Release 中这五个权重选用 CC BY 4.0，保留原作者、原始模型名称、官方来源和许可链接；文件未经转换或修改。权重归原作者所有，本项目提供独立的 PyTorch 实现及验证，不将这些模型声称为本项目训练所得。Release 说明链接原论文，清单记录逐文件 SHA-256。[MIT 条款](https://choosealicense.com/licenses/mit/) · [CC BY 4.0 条款](https://creativecommons.org/licenses/by/4.0/)
+recon-all模型与默认98项核心图谱/模板是两组资源，安装、大小/SHA和native编译见 [重建手册](recon_all/README.md)。
+默认核心98项共264,773,919 B；`--all`完整111项共374,437,464 B，包含独立阶段验证额外资源。
+已发布的重建图谱（含17项VPNL资源）优先从固定Release获取，大小/SHA必须与源码清单匹配；保留原作者来源和引用。
+亚区图谱由专用安装器配置，BrainstemSS、ThalamicNuclei及HippoSF来源和逐文件SHA见 [亚区手册](subregions/README.md)。
+空间转换与MS-HBM的CBIG资源分别按 [空间转换](space_conversion/README.md) 和 [MS-HBM](mshbm/README.md) 配置；
+两项Caret中层表面及Oxford GM已补充Release；个人FreeSurfer运行许可证仍由用户提供，资源条款见[统一安装说明](ASSETS.md#个人许可证与资源条款)。
 
-**33 类 SynthSeg、WMH-SynthSeg、FreeSurfer 辅助模型/查找表和 SynthSR 权重遵循 [FreeSurfer Software License](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense)。** 官方没有为这些文件宣布上述 MIT 或 CC BY 4.0 双许可。该许可对下载、使用和再分发要求保留条款与归属信息；原文说明软件为研究用途设计，临床应用未获审查或批准。[SynthSeg 官方说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SynthSeg) · [WMH-SynthSeg 官方说明](https://surfer.nmr.mgh.harvard.edu/fswiki/WMH-SynthSeg) · [SynthSR 官方说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SynthSR)
+## 许可和归属
 
-上述许可针对权重。改编代码及依赖继续遵守 [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) 中的 FreeSurfer、Apache 等条款。
+<a id="权重许可与归属"></a>
 
-## 固定版本 Release 与原站下载范围
+SynthStrip和SynthMorph的固定Release权重选择CC BY4.0，保留原作者及论文归属：
+[SynthStrip官网](https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/)、[SynthMorph官网](https://synthmorph.io/#code)。
+其余FreeSurfer模型与查找表按固定清单记录的
+[FreeSurfer Software License](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense)保存许可与归属。
+不能从模型代码采用Apache/MIT推断所有权重也采用相同许可。
 
-[FNIT `assets-v1` Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)保存本页 20 个权重文件。每个附件的原始 URL、字节数、SHA-256 和许可记录在 Release 附带的 `asset-manifest.json`。`synthmorph.deform.3.h5` 拆成两个小于 2 GiB 的附件；安装器在本地合并，并核对上表中的完整 SHA-256。下载器不会调用 FreeSurfer 程序。
-
-Release 同时保存 [HCPpipelines v4.7.0 固定提交](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533)中的 29 个公开 fMRI 表面模板及配置文件，另附原仓库的 `LICENSE.md`。`fnit-setup-fmri-surface-assets` 优先下载这些附件，失败后回退 HCP 原站；`--fmriprep` 的三个 TemplateFlow 文件只使用[上述原站模板清单](#fmri-templateflow-原站模板)，不尝试 Release 镜像。
-
-FreeSurfer recon-all 的外置图谱和模板仍由 `fnit-setup-recon-all-assets` 从 FreeSurfer 原站获取。该组中含 MNI 和其他第三方来源的数据，尚未逐一确认其再分发权利，因此不进入 Release。fMRI 体积流程使用上述从 TemplateFlow 原站获取的固定 T1w 与脑掩膜；Tian atlas 仍由用户按其来源条款提供。
-
-权重与 HCP 模板均保留原作者归属。SynthStrip 和 SynthMorph 的五个模型在 Release 中选用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)；其余 FreeSurfer 权重依 [FreeSurfer Software License](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense)再分发，Release 附完整许可文本。HCP 模板依[HCPpipelines 原仓库许可](https://github.com/Washington-University/HCPpipelines/blob/f8cac6892f88bdf889d644711ff038198eb81533/LICENSE.md)再分发，许可文本也作为附件提供。具体模型论文和原实现链接见各功能说明。
+HCP文件遵循固定上游的 [LICENSE.md](https://github.com/Washington-University/HCPpipelines/blob/f8cac6892f88bdf889d644711ff038198eb81533/LICENSE.md)，
+许可随Release及下载结果保存。
+TemplateFlow与第三方图谱逐资源遵循目录记录的原许可；代码许可不能替代数据许可。个人FreeSurfer运行许可证不在Release中，由用户从官方申请。
+更多代码归属见 [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md)。

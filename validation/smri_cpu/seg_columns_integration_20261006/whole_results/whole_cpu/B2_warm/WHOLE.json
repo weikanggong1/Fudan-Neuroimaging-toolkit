@@ -1,0 +1,310 @@
+{
+  "schema": "fnit_columns_complete33_worker/v1",
+  "status": "complete",
+  "arm": "candidate",
+  "device": "cpu",
+  "source_before": {
+    "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+    "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+    "cpu_conv.py": "35ea804cc9d88e6bdb185f6d392f5d4398327f2faaf3d015a9fc7594fdf8f31b",
+    "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+    "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+    "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+    "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+    "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+    "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+    "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+    "segment.py": "b211f7246883ec0ab2b6963e7eaad63fdb974a398dbc06d20119f3755a3df152",
+    "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+    "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+    "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0",
+    "cpu_columns.py": "9cc29bc05600b0115d2ac559da362d03b72042156dd2747e6a0237f836ffedff",
+    "_cpu_columns_build.py": "31237d750678098a417390bf6a8ac1cc448f3293a90bf1fcd879b1f0a8fd293b",
+    "_columns_reuse.cpp": "2440abe802f1da2c14bd192f8b0f84c46b6f1f518de1dc9f0dca8429b05a2527"
+  },
+  "common_support_before": {
+    "fnit/__init__.py": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4",
+    "fnit/_dmri.py": "0862c7cefbd2b2811e9a56e3b617a209968d70c4e5a5b76c557630b1cd2f0117",
+    "fnit/_nib.py": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+    "fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+  },
+  "worker_sha256": "df0c95e8df1735ff55decb4a31e2e07a1630c6c5b48a8170044a899d8e71598e",
+  "PLAN_sha256": "6daa84b1b18e6c343c493ef9bbff7e6fc83836c8b8149845caaef1f87655e8ed",
+  "resources_before": {
+    "raw_t1": {
+      "bytes": 22870097,
+      "sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21"
+    },
+    "segmentation_weight": {
+      "bytes": 53079152,
+      "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+    },
+    "parcellation_weight": {
+      "bytes": 53090840,
+      "sha256": "83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684"
+    },
+    "segmentation_labels": {
+      "bytes": 348,
+      "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+    },
+    "segmentation_names": {
+      "bytes": 7168,
+      "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+    },
+    "topology_classes": {
+      "bytes": 348,
+      "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+    }
+  },
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "flags_before": {
+    "oneDNN": true,
+    "grad": true,
+    "matmul_TF32": false,
+    "cuDNN_TF32": true,
+    "CPU_autocast": false,
+    "CUDA_autocast": false,
+    "dtype": "torch.float32",
+    "threads": 8
+  },
+  "threads": 8,
+  "interop_threads": 8,
+  "hostname": "nodecw7",
+  "load_before": [
+    9.52,
+    4.09,
+    1.63
+  ],
+  "forward_rows": [
+    {
+      "input_shape": [
+        1,
+        1,
+        192,
+        224,
+        256
+      ],
+      "input_dtype": "torch.float32",
+      "input_device": "cpu",
+      "flags": {
+        "oneDNN": false,
+        "grad": false,
+        "matmul_TF32": false,
+        "cuDNN_TF32": true,
+        "CPU_autocast": false,
+        "CUDA_autocast": false,
+        "dtype": "torch.float32",
+        "threads": 8
+      },
+      "output_dtype": "torch.float32",
+      "output_device": "cpu"
+    },
+    {
+      "input_shape": [
+        1,
+        1,
+        192,
+        224,
+        256
+      ],
+      "input_dtype": "torch.float32",
+      "input_device": "cpu",
+      "flags": {
+        "oneDNN": false,
+        "grad": false,
+        "matmul_TF32": false,
+        "cuDNN_TF32": true,
+        "CPU_autocast": false,
+        "CUDA_autocast": false,
+        "dtype": "torch.float32",
+        "threads": 8
+      },
+      "output_dtype": "torch.float32",
+      "output_device": "cpu"
+    }
+  ],
+  "columns_rows": [
+    {
+      "shape": [
+        1,
+        72,
+        192,
+        224,
+        256
+      ],
+      "dtype": "torch.float32",
+      "device": "cpu",
+      "returned_candidate": true
+    },
+    {
+      "shape": [
+        1,
+        72,
+        192,
+        224,
+        256
+      ],
+      "dtype": "torch.float32",
+      "device": "cpu",
+      "returned_candidate": true
+    }
+  ],
+  "compile_calls": 0,
+  "copy_calls": 28,
+  "SGEMM_calls": 28,
+  "compiler_probe_calls": 2,
+  "build_input_calls": 2,
+  "cache_directory_exists_before": true,
+  "observations_are_Module_hooks": false,
+  "preflight_seconds": 1.9840703578665853,
+  "construct_seconds": 0.15877412538975477,
+  "API_seconds": 86.74357368890196,
+  "precision": {
+    "requested_cudnn_tf32": true,
+    "forwards": [
+      {
+        "pass": "original",
+        "device": "cpu",
+        "matmul_tf32": false,
+        "cudnn_tf32": true,
+        "input_dtype": "torch.float32",
+        "model_dtypes": [
+          "torch.float32"
+        ],
+        "autocast": {
+          "cpu": {
+            "enabled": false,
+            "dtype": "torch.bfloat16"
+          },
+          "cuda": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        },
+        "output_dtype": "torch.float32"
+      },
+      {
+        "pass": "flipped",
+        "device": "cpu",
+        "matmul_tf32": false,
+        "cudnn_tf32": true,
+        "input_dtype": "torch.float32",
+        "model_dtypes": [
+          "torch.float32"
+        ],
+        "autocast": {
+          "cpu": {
+            "enabled": false,
+            "dtype": "torch.bfloat16"
+          },
+          "cuda": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        },
+        "output_dtype": "torch.float32"
+      }
+    ],
+    "posterior_buffer_reused": true,
+    "posterior_ensemble_dtype": "torch.float32"
+  },
+  "model_devices": [
+    "cpu"
+  ],
+  "model_dtypes": [
+    "torch.float32"
+  ],
+  "save_seconds": 0.15170016326010227,
+  "saved_outputs": {
+    "segmentation.nii.gz": {
+      "bytes": 799853,
+      "sha256": "1d679731328e162ea055ec179a199d3bcf1871bcf0368ca4df907fb544547400"
+    },
+    "volumes.csv": {
+      "bytes": 948,
+      "sha256": "6276e3ea7a25ed48d8a384fb6780eab22b6b50cc4817ac0495d6b0a6fe6e5e98"
+    }
+  },
+  "flags_after": {
+    "oneDNN": true,
+    "grad": true,
+    "matmul_TF32": false,
+    "cuDNN_TF32": true,
+    "CPU_autocast": false,
+    "CUDA_autocast": false,
+    "dtype": "torch.float32",
+    "threads": 8
+  },
+  "source_after": {
+    "__init__.py": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+    "color_lut.py": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c",
+    "cpu_conv.py": "35ea804cc9d88e6bdb185f6d392f5d4398327f2faaf3d015a9fc7594fdf8f31b",
+    "cpu_join.py": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f",
+    "labels.py": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+    "model.py": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f",
+    "pipeline.py": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29",
+    "postprocess.py": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+    "precision.py": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147",
+    "preprocess.py": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+    "segment.py": "b211f7246883ec0ab2b6963e7eaad63fdb974a398dbc06d20119f3755a3df152",
+    "synthseg.py": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+    "synthseg_io.py": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+    "synthseg_plus.py": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0",
+    "cpu_columns.py": "9cc29bc05600b0115d2ac559da362d03b72042156dd2747e6a0237f836ffedff",
+    "_cpu_columns_build.py": "31237d750678098a417390bf6a8ac1cc448f3293a90bf1fcd879b1f0a8fd293b",
+    "_columns_reuse.cpp": "2440abe802f1da2c14bd192f8b0f84c46b6f1f518de1dc9f0dca8429b05a2527"
+  },
+  "common_support_after": {
+    "fnit/__init__.py": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4",
+    "fnit/_dmri.py": "0862c7cefbd2b2811e9a56e3b617a209968d70c4e5a5b76c557630b1cd2f0117",
+    "fnit/_nib.py": "8fe4e897c96931e74ccd8288a4c4c67ebc7fac1b58babcd63b1acb50603326f6",
+    "fnit/weights.py": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+  },
+  "common_support_unchanged": true,
+  "resources_after": {
+    "raw_t1": {
+      "bytes": 22870097,
+      "sha256": "73e3866d4e54f9cb253868daab4bf90303a97bc193e8bda21e2e60c53a5dea21"
+    },
+    "segmentation_weight": {
+      "bytes": 53079152,
+      "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+    },
+    "parcellation_weight": {
+      "bytes": 53090840,
+      "sha256": "83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684"
+    },
+    "segmentation_labels": {
+      "bytes": 348,
+      "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+    },
+    "segmentation_names": {
+      "bytes": 7168,
+      "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+    },
+    "topology_classes": {
+      "bytes": 348,
+      "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+    }
+  },
+  "source_unchanged": true,
+  "resources_unchanged": true,
+  "flags_restored": true,
+  "RSS_maximum_bytes": 13445730304,
+  "load_after": [
+    13.14,
+    6.57,
+    2.73
+  ],
+  "worker_seconds": 89.16107573546469,
+  "valid_complete_arm": true
+}

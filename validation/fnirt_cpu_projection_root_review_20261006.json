@@ -1,0 +1,97 @@
+{
+  "passed": true,
+  "review_date": "2026-10-06",
+  "scope": "One archived solve3 derivative-projection control; provenance and fixed-input checks",
+  "reviewed_original_v1_summary": {
+    "bytes": 37674,
+    "sha256": "fd5fd0b04ec9434aa49b7457f366812147fe58e682ac323db185fdd68e02c2b1",
+    "exit_codes": [
+      1,
+      1,
+      0
+    ],
+    "sampler_or_projection_calls": 0,
+    "image_arrays_read": [
+      "current_fixed_level_npy",
+      "official_fixed"
+    ],
+    "failure": "Raw stored NIfTI header compared to nibabel's consumed header representation"
+  },
+  "root_live_header_only_audit": {
+    "raw348_sha256": "fd2f1bfa420691f35ce42e420df37e871ec33d2f459855d9828e757a1a1e390a",
+    "loaded_header_sha256": "762ae12848eaa4e2afcda447b10447155e741ad12d588c398728431fd3a19892",
+    "different_byte_offsets": [
+      110,
+      111,
+      114,
+      115,
+      118,
+      119
+    ],
+    "different_fields": [
+      "vox_offset",
+      "scl_slope",
+      "scl_inter"
+    ],
+    "all_other_bytes_equal": true,
+    "proxy_slope_inter": [
+      1.0,
+      0.0
+    ],
+    "pixel_arrays_materialized": false
+  },
+  "reviewed_v2_freeze_sha256": "780e109610e4f7f1f84bb639185b97950347e18de6fcd68e7f511e1bdead6a93",
+  "reviewed_original_v2_summary": {
+    "bytes": 62103,
+    "sha256": "2aca393df523196d0f22f2c1bd8e0ad9a2af0f95f0108beba9f0a64e5faf501c"
+  },
+  "v2_launch_sha256": "8d7b3a4dbefb2c79ba519772e08eeabebd862007e1452d055624297dc40e026f",
+  "v2_preflight_before_sha256": "45f7ca44ba87685012b22be70a3fa2386f664e9d0aaa8493b0a586ff80d7211f",
+  "v2_preflight_after_sha256": "3499fddb849b0e21063da47de9a79273770a83d3a22b55d1b79e28fffbdb6756",
+  "v2_actual_exit_codes": [
+    0,
+    0,
+    0
+  ],
+  "root_live_source_input_bindings_rehashed": 32,
+  "root_live_harness_bindings_rehashed": 15,
+  "all_expected_and_actual_before_after_bindings_exact": true,
+  "restored_checkpoint_arrays": 29,
+  "controlled_preconditions_passed": 17,
+  "original_baseline_full_RHS_reproduced_bitexact": true,
+  "scale_RHS_unchanged_bitexact": true,
+  "source_operands_flags_after_exact": true,
+  "actual_calls": {
+    "coordinates": 1,
+    "sampler": 1,
+    "current_projection": 1,
+    "division_projection": 1,
+    "scalar_prefix": 1,
+    "FSL_order_gradient_prefix": 2,
+    "bending_normal": 1,
+    "cached_bending_reads": 2,
+    "H_or_diagonal_or_PCG_or_native_or_GPU_or_full_registration": 0
+  },
+  "derivative_FP32_bits_changed": 12267,
+  "full_gradient_values_changed": 1051,
+  "current_vs_saved_native_full_relative_L2": 2.483601764762327e-07,
+  "division_vs_saved_native_full_relative_L2": 2.483864966670823e-07,
+  "scale_max_absolute_error_unchanged": 2.546876526565711e-06,
+  "native_gradient_bit_equivalence": false,
+  "total_RHS_accuracy_improved": false,
+  "production_default_CPU_GPU_changed": false,
+  "original_worker_seconds_including_imports": 4.438787736929953,
+  "original_peak_RSS_KiB": 576780,
+  "speed_ratio_claimed": false,
+  "root_review_new_numerical_calls": 0,
+  "interpretation": "The actual division-order difference is small and reproducible. Coefficient x improves slightly, y and z worsen slightly, and the independent global-scale error remains unchanged. The passing control preconditions establish the comparison, not official RHS or nonlinear-registration equivalence. The candidate remains isolated; the next unresolved causes include assembly and scale reduction.",
+  "report_delivery_review": {
+    "producer_commit": "eb97f568979afaf71661a2bd5008564f5cd1eafb",
+    "root_cherry_pick": "71b7939e92826719851d8ce48dd5a0a166abf3ca",
+    "manifest_sha256": "ae285aa96f360ed0324c4d36f0dd43638bc6dea24c14773fc4b1f43d20818384",
+    "payload_files": 72,
+    "root_git_blobs_compared_exact": 73,
+    "root_stdlib_verify_report_passed": true,
+    "metadata_only": true
+  }
+}

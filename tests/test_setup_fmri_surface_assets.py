@@ -27,7 +27,9 @@ class TestSurfaceAssets(unittest.TestCase):
             return io.BytesIO(payload)
 
         with tempfile.TemporaryDirectory() as directory:
-            with patch.dict(assets.RELEASE_CHECKSUMS, {relative_path: digest}):
+            with patch.object(assets, "release_url_for", return_value=
+                              assets.RELEASE_BASE + "hcp--global--templates--example.gii"), \
+                 patch.object(assets, "release_asset_metadata", return_value={"size": len(payload)}):
                 path = assets._install_one(Path(directory), relative_path, digest, opener)
             self.assertEqual(path.read_bytes(), payload)
         self.assertEqual(requested,
@@ -78,14 +80,65 @@ class TestSurfaceAssets(unittest.TestCase):
             self.assertFalse((root / relative_path).exists())
             self.assertEqual(list((root / "global/templates").iterdir()), [])
 
-    def test_wrn_templates_are_pinned_upstream_without_release_claim(self):
+    def test_wrn_templates_keep_pinned_size_and_checksum(self):
         self.assertEqual(len(assets.MSMALL_LOW_DIM_ASSETS), 15)
         self.assertEqual(sum(assets.ASSET_SIZES[path] for path, _ in
                              assets.MSMALL_LOW_DIM_ASSETS), 86180368)
         for dimension, (path, digest) in enumerate(assets.MSMALL_LOW_DIM_ASSETS, 7):
             self.assertIn(f".ica_d{dimension}_ROW_vn/", path)
-            self.assertNotIn(path, assets.RELEASE_CHECKSUMS)
             self.assertEqual(len(digest), 64)
+
+    def test_templateflow_release_falls_back_to_original_s3(self):
+        relative_path = assets.FMRIPREP_ASSETS[0][0]
+        payload = b"verified TemplateFlow resource"
+        digest = hashlib.sha256(payload).hexdigest()
+        release_url = assets.RELEASE_BASE + "templateflow--example.nii.gz"
+        requested = []
+
+        def opener(url, timeout):
+            requested.append(url)
+            if url == release_url:
+                raise OSError("Release unavailable")
+            return io.BytesIO(payload)
+
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.dict(assets.FMRIPREP_SIZES, {relative_path: len(payload)}), \
+             patch.object(assets, "release_url_for", return_value=release_url):
+            path = assets._install_one(Path(directory), relative_path, digest, opener,
+                                       base_urls=(assets.FMRIPREP_BASE,))
+            self.assertEqual(path.read_bytes(), payload)
+        self.assertEqual(requested, [release_url,
+                                    assets.FMRIPREP_BASE + relative_path.split("/")[-1]])
+
+    def test_published_wrn_asset_uses_catalogue_url(self):
+        relative_path = assets.MSMALL_LOW_DIM_ASSETS[0][0]
+        payload = b"verified low-dimensional WRN resource"
+        digest = hashlib.sha256(payload).hexdigest()
+        release_url = assets.RELEASE_BASE + "hcp--wrn--d7.nii"
+        requested = []
+
+        def opener(url, timeout):
+            requested.append(url)
+            return io.BytesIO(payload)
+
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.dict(assets.ASSET_SIZES, {relative_path: len(payload)}), \
+             patch.object(assets, "release_url_for", return_value=release_url):
+            path = assets._install_one(Path(directory), relative_path, digest, opener)
+            self.assertEqual(path.read_bytes(), payload)
+        self.assertEqual(requested, [release_url])
+
+    def test_catalogue_size_is_checked_for_existing_hcp_file(self):
+        payload = b"verified file with known size"
+        digest = hashlib.sha256(payload).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            destination = root / "global/templates/example.gii"
+            destination.parent.mkdir(parents=True)
+            destination.write_bytes(payload)
+            with patch.object(assets, "release_asset_metadata", return_value={"size": len(payload) + 1}):
+                with self.assertRaisesRegex(ValueError, "size mismatch in existing"):
+                    assets._install_one(root, "global/templates/example.gii", digest)
 
     def test_size_mismatch_is_rejected_even_when_digest_matches(self):
         relative_path = "global/templates/example.gii"

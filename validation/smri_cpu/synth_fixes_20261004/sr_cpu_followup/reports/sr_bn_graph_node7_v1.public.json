@@ -1,0 +1,136 @@
+{
+  "schema": "fnit.synthsr.cpu.bn.actual_graph.v1",
+  "tensorflow_version": "2.13.1",
+  "bn_fused": false,
+  "bn_epsilon": 0.001,
+  "nodes": [
+    {
+      "name": "value",
+      "type": "Placeholder",
+      "inputs": []
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/ReadVariableOp/resource",
+      "type": "Placeholder",
+      "inputs": []
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/ReadVariableOp",
+      "type": "ReadVariableOp",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/ReadVariableOp/resource:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/add/y",
+      "type": "Const",
+      "inputs": []
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/add",
+      "type": "AddV2",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/ReadVariableOp:0",
+        "unet_bn_down_0/batchnorm/add/y:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/Rsqrt",
+      "type": "Rsqrt",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/add:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/mul/ReadVariableOp/resource",
+      "type": "Placeholder",
+      "inputs": []
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/mul/ReadVariableOp",
+      "type": "ReadVariableOp",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/mul/ReadVariableOp/resource:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/mul",
+      "type": "Mul",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/Rsqrt:0",
+        "unet_bn_down_0/batchnorm/mul/ReadVariableOp:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/mul_1",
+      "type": "Mul",
+      "inputs": [
+        "value:0",
+        "unet_bn_down_0/batchnorm/mul:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/ReadVariableOp_1/resource",
+      "type": "Placeholder",
+      "inputs": []
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/ReadVariableOp_1",
+      "type": "ReadVariableOp",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/ReadVariableOp_1/resource:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/mul_2",
+      "type": "Mul",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/ReadVariableOp_1:0",
+        "unet_bn_down_0/batchnorm/mul:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/ReadVariableOp_2/resource",
+      "type": "Placeholder",
+      "inputs": []
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/ReadVariableOp_2",
+      "type": "ReadVariableOp",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/ReadVariableOp_2/resource:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/sub",
+      "type": "Sub",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/ReadVariableOp_2:0",
+        "unet_bn_down_0/batchnorm/mul_2:0"
+      ]
+    },
+    {
+      "name": "unet_bn_down_0/batchnorm/add_1",
+      "type": "AddV2",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/mul_1:0",
+        "unet_bn_down_0/batchnorm/sub:0"
+      ]
+    },
+    {
+      "name": "Identity",
+      "type": "Identity",
+      "inputs": [
+        "unet_bn_down_0/batchnorm/add_1:0"
+      ]
+    },
+    {
+      "name": "NoOp",
+      "type": "NoOp",
+      "inputs": []
+    }
+  ],
+  "driver_sha256": "751728df94e2e41e01c4bca5247fecdbdb6dace8e8a48070dd41a687c0149082",
+  "factor_sha256": "da4ca5c0c61e7fa8533547a154e2e808234b20049af0e36b63d4e061e75361f8",
+  "scope": "graph and 24-channel factors only; no full network execution"
+}

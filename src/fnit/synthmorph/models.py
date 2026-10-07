@@ -66,7 +66,13 @@ class FeatureDetector(nn.Module):
                 raise ValueError(f"Expected 9 affine convolution layers, found {len(groups)}")
             self.layers = nn.ModuleList([_conv(g["kernel"][...], g["bias"][...]) for g in groups])
 
-    def forward(self, x):
+    def forward(self, x, *, cpu_joint_inference=False):
+        if (cpu_joint_inference and x.device.type == 'cpu' and x.dtype == torch.float32
+                and not torch.is_grad_enabled() and torch.backends.mkldnn.is_available()
+                and torch.backends.mkldnn.enabled):
+            from ._cpu_features import detector_features, supported_inference
+            if supported_inference(self, x):
+                return detector_features(self, x)
         for layer in self.layers[:4]:
             x = F.max_pool3d(F.leaky_relu(layer(x), 0.2), 2)
         for layer in self.layers[4:8]:
@@ -88,15 +94,8 @@ def barycenter(features, full_shape):
     return torch.stack(centers, dim=-1), mass
 
 
-def _cpu_joint_barycenter(features, full_shape):
-    """Preserve the reference's distinct confidence and XYZ reduction shapes.
-
-    Confidence masses reduce NHWDC features. Barycenter moments reduce an
-    NCDHW tensor with a final XYZ dimension and their own denominator. Their
-    mathematically equivalent FP32 reductions can round differently, which
-    matters before joint registration's affine square roots. Convolutions
-    and CUDA's established reduction path remain unchanged.
-    """
+def _cpu_joint_barycenter_legacy(features, full_shape):
+    """Keep the published CPU reduction semantics for training and observers."""
     mass = features.permute(0, 2, 3, 4, 1).contiguous().sum((1, 2, 3))
     coordinates = [
         (torch.arange(size, dtype=features.dtype, device=features.device)
@@ -111,11 +110,127 @@ def _cpu_joint_barycenter(features, full_shape):
     return centers, mass
 
 
+def _cpu_joint_inference_enabled(module, moving, fixed, mid_space):
+    if (not mid_space or module.training or moving.device.type != 'cpu'
+            or fixed.device.type != 'cpu' or moving.dtype != torch.float32
+            or fixed.dtype != torch.float32 or torch.is_grad_enabled()):
+        return False
+    from ._cpu_features import supported_inference
+    return supported_inference(module.detector, moving) and supported_inference(module.detector, fixed)
+
+
+def _cpu_inner_sum(values):
+    """FP32 CPU reference order for a contiguous innermost reduction.
+
+    The reference CPU kernel accumulates four streams of eight values,
+    combines streams from left to right, and halves the packet for its
+    horizontal sum. Explicit additions preserve that order without using
+    a reference runtime or changing CUDA reductions.
+    """
+    count = values.shape[-1]
+    packets = [values.new_zeros((*values.shape[:-1], 8)) for _ in range(4)]
+    end = count // 32 * 32
+    for position in range(0, end, 32):
+        for stream in range(4):
+            packets[stream] += values[..., position + stream * 8:position + (stream + 1) * 8]
+    merged = ((packets[0] + packets[1]) + packets[2]) + packets[3]
+    position = end
+    while position + 8 <= count:
+        merged += values[..., position:position + 8]
+        position += 8
+    tail = values.new_zeros(values.shape[:-1])
+    for index in range(position, count):
+        tail += values[..., index]
+    while merged.shape[-1] > 1:
+        middle = merged.shape[-1] // 2
+        merged = merged[..., :middle] + merged[..., middle:]
+    return tail + merged[..., 0]
+
+
+def _cpu_joint_barycenter(features, full_shape):
+    """Match CPU joint confidence masses, XYZ moments and denominators.
+
+    Confidence masses preserve the feature channels and use four staggered
+    spatial streams. XYZ moments accumulate each spatial point in order;
+    their separate denominator uses the contiguous inner reduction above.
+    These distinct FP32 orders matter before the affine square roots.
+    """
+    values = features.contiguous().flatten(2)
+    count = values.shape[-1]
+    streams = [values.new_zeros(values.shape[:-1]) for _ in range(4)]
+    end = count // 4 * 4
+    for position in range(0, end, 4):
+        for stream in range(4):
+            streams[stream] += values[..., position + stream]
+    mass = ((streams[0] + streams[1]) + streams[2]) + streams[3]
+    for position in range(end, count):
+        mass += values[..., position]
+    coordinates = [
+        (torch.arange(size, dtype=features.dtype, device=features.device)
+         - (size - 1) / 2) / size for size in features.shape[2:]
+    ]
+    grid = torch.stack(torch.meshgrid(*coordinates, indexing='ij'), -1).reshape(-1, 3)
+    moment = values.new_zeros((*values.shape[:-1], 3))
+    for position in range(count):
+        moment += values[..., position, None] * grid[position]
+    denominator = _cpu_inner_sum(values).unsqueeze(-1)
+    centers = torch.where(denominator != 0, moment / denominator, 0)
+    centers *= torch.as_tensor(full_shape, dtype=features.dtype, device=features.device)
+    return centers, mass
+
+
 def fit_affine(source, target, weights):
     """Match the original weighted normal equations (target -> source)."""
     x = torch.cat((target, torch.ones_like(target[..., :1])), dim=-1)
     xt = x.transpose(-1, -2) * weights.unsqueeze(-2)
     beta = torch.linalg.inv(xt @ x) @ xt @ source
+    matrix = torch.eye(4, dtype=x.dtype, device=x.device).expand(*x.shape[:-2], 4, 4).clone()
+    matrix[..., :3, :] = beta.transpose(-1, -2)
+    return matrix
+
+
+def _cpu_joint_inverse(matrix):
+    """Four-by-four CPU partial-pivot LU with the reference solve order."""
+    if matrix.shape[-2:] != (4, 4):
+        raise ValueError('CPU joint inverse requires four-by-four matrices')
+    lu = matrix
+    right = torch.eye(4, dtype=matrix.dtype, device=matrix.device).expand_as(matrix)
+    for column in range(4):
+        pivot = lu[..., column:, column].abs().argmax(-1) + column
+        order = torch.arange(4, device=matrix.device).expand(*matrix.shape[:-2], 4).clone()
+        order[..., column] = pivot
+        order.scatter_(-1, pivot.unsqueeze(-1), column)
+        indices = order.unsqueeze(-1).expand_as(matrix)
+        lu = lu.gather(-2, indices)
+        right = right.gather(-2, indices)
+        diagonal = lu[..., column, column]
+        if torch.any(diagonal == 0):
+            raise torch.linalg.LinAlgError('CPU joint inverse: matrix is singular')
+        lower = lu[..., column + 1:, column] / diagonal.unsqueeze(-1)
+        corner = (lu[..., column + 1:, column + 1:]
+                  - lower.unsqueeze(-1) * lu[..., column:column + 1, column + 1:])
+        bottom = torch.cat((lu[..., column + 1:, :column], lower.unsqueeze(-1), corner), -1)
+        lu = torch.cat((lu[..., :column + 1, :], bottom), -2)
+    lower_rows = []
+    for row in range(4):
+        value = right[..., row, :]
+        for column in range(row):
+            value = value - lu[..., row, column, None] * lower_rows[column]
+        lower_rows.append(value)
+    upper_rows = [None] * 4
+    for row in range(3, -1, -1):
+        value = lower_rows[row]
+        for column in range(row + 1, 4):
+            value = value - lu[..., row, column, None] * upper_rows[column]
+        upper_rows[row] = value * (1 / lu[..., row, row, None])
+    return torch.stack(upper_rows, -2)
+
+
+def _cpu_joint_fit_affine(source, target, weights):
+    """CPU joint normal equations with contiguous weighted transpose."""
+    x = torch.cat((target, torch.ones_like(target[..., :1])), -1)
+    xt = (x.transpose(-1, -2) * weights.unsqueeze(-2)).contiguous()
+    beta = _cpu_joint_inverse(xt @ x) @ xt @ source
     matrix = torch.eye(4, dtype=x.dtype, device=x.device).expand(*x.shape[:-2], 4, 4).clone()
     matrix[..., :3, :] = beta.transpose(-1, -2)
     return matrix
@@ -168,6 +283,36 @@ def matrix_sqrt(matrix):
     return y.to(matrix.dtype)
 
 
+def _cpu_joint_matrix_sqrt(matrix):
+    """CPU joint FP32 Schur root; retain Torch's differentiable route."""
+    if matrix.requires_grad or matrix.dtype != torch.float32:
+        return matrix_sqrt(matrix)
+    from ._cpu_eigen import affine_sqrt
+    root = torch.from_numpy(affine_sqrt(matrix.detach().numpy()))
+    residual = torch.linalg.matrix_norm(root.double() @ root.double() - matrix.double())
+    # The Schur output is already rounded to FP32. Check its backward error
+    # against that precision; the public image/field accuracy gates are unchanged.
+    bound = 32 * torch.finfo(matrix.dtype).eps * torch.linalg.matrix_norm(matrix.double())
+    if not torch.all(torch.isfinite(root)) or torch.any(residual > bound):
+        raise ValueError('Affine transform has no converged real principal square root')
+    return root
+
+
+def _cpu_joint_center_affine(matrix, full_shape):
+    """Compose the declared 3x4 half-affine in centered voxel coordinates."""
+    center = torch.eye(4, device=matrix.device, dtype=matrix.dtype)
+    center[:3, 3] = -(torch.as_tensor(full_shape, device=matrix.device) - 1) * 0.5
+    uncenter = center.clone()
+    uncenter[:3, 3] = -center[:3, 3]
+    # The original ComposeTransform consumes 3x4 affines and reconstructs
+    # the homogeneous row at each step. Its reverse traversal evaluates
+    # uncenter @ (half @ center), with the exact positive center translation.
+    row = center[3:].expand(*matrix.shape[:-2], 1, 4)
+    square = torch.cat((matrix[..., :3, :], row), dim=-2)
+    inner = square @ center
+    return uncenter @ torch.cat((inner[..., :3, :], row), dim=-2)
+
+
 class AffineNetwork(nn.Module):
     def __init__(self, weights, rigid=False):
         super().__init__()
@@ -179,24 +324,43 @@ class AffineNetwork(nn.Module):
         if half_res:
             moving = moving[..., ::2, ::2, ::2]
             fixed = fixed[..., ::2, ::2, ::2]
-        feat1, feat2 = self.detector(moving), self.detector(fixed)
+        cpu_inference = _cpu_joint_inference_enabled(self, moving, fixed, mid_space)
+        if cpu_inference:
+            feat1, feat2 = (self.detector(moving, cpu_joint_inference=True),
+                            self.detector(fixed, cpu_joint_inference=True))
+        else:
+            feat1, feat2 = self.detector(moving), self.detector(fixed)
         center_function = (_cpu_joint_barycenter
-                           if mid_space and moving.device.type == 'cpu' else barycenter)
+                           if cpu_inference else
+                           (_cpu_joint_barycenter_legacy if mid_space and moving.device.type == 'cpu' else barycenter))
         cen1, mass1 = center_function(feat1, full_shape)
         cen2, mass2 = center_function(feat2, full_shape)
-        weights = (mass1 / mass1.sum(-1, keepdim=True)) * (mass2 / mass2.sum(-1, keepdim=True))
-        affine1 = fit_affine(cen1, cen2, weights)
-        affine2 = fit_affine(cen2, cen1, weights)
-        affine1 = (affine1 + torch.linalg.inv(affine2)) * 0.5
+        if cpu_inference:
+            weights = (mass1 / _cpu_inner_sum(mass1).unsqueeze(-1)) * (mass2 / _cpu_inner_sum(mass2).unsqueeze(-1))
+        else:
+            weights = (mass1 / mass1.sum(-1, keepdim=True)) * (mass2 / mass2.sum(-1, keepdim=True))
+        fit_function = (_cpu_joint_fit_affine
+                        if cpu_inference else fit_affine)
+        inverse_function = (_cpu_joint_inverse
+                            if cpu_inference else torch.linalg.inv)
+        sqrt_function = (_cpu_joint_matrix_sqrt
+                         if cpu_inference else matrix_sqrt)
+        affine1 = fit_function(cen1, cen2, weights)
+        affine2 = fit_function(cen2, cen1, weights)
+        affine1 = (affine1 + inverse_function(affine2)) * 0.5
         if self.rigid:
             affine1 = _rigid(affine1)
-        affine2 = torch.linalg.inv(affine1)
+        affine2 = inverse_function(affine1)
         if mid_space:
-            affine1, affine2 = matrix_sqrt(affine1), matrix_sqrt(affine2)
+            affine1, affine2 = sqrt_function(affine1), sqrt_function(affine2)
         center = torch.eye(4, device=moving.device, dtype=moving.dtype)
         center[:3, 3] = -(torch.as_tensor(full_shape, device=moving.device) - 1) * 0.5
-        affine1 = torch.linalg.inv(center) @ affine1 @ center
-        affine2 = torch.linalg.inv(center) @ affine2 @ center
+        if cpu_inference:
+            affine1 = _cpu_joint_center_affine(affine1, full_shape)
+            affine2 = _cpu_joint_center_affine(affine2, full_shape)
+        else:
+            affine1 = torch.linalg.inv(center) @ affine1 @ center
+            affine2 = torch.linalg.inv(center) @ affine2 @ center
         out = affine1[0], affine2[0]
         return (*out, feat1, feat2) if return_features else out
 

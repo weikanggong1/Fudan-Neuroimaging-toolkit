@@ -1,0 +1,70 @@
+{
+  "schema": "fnit.synthsr.real.cpu.elu_fix.v1",
+  "source_revision": "626cab69555b2c281245268cf2f948da3a2cbb82+CPU-diagnostic-numba-v1",
+  "driver_sha256": "97a9ac7f2cf12a44f5bd983005e0fad38fbe4e98bd16f77e5cea649a2eddecd5",
+  "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
+  "weight_sha256": "a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b",
+  "torch_version": "2.5.1",
+  "model_sha256": "290d0ae911d8c99f4f87c22936ca497ea45bb57b8f50066b822d9cd10c4661b2",
+  "network_calls": [
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        256
+      ],
+      "dtype": "torch.float32",
+      "seconds": 10.26403802074492
+    },
+    {
+      "shape": [
+        1,
+        1,
+        192,
+        224,
+        256
+      ],
+      "dtype": "torch.float32",
+      "seconds": 7.599643469788134
+    }
+  ],
+  "fixed_float_gate": {
+    "rtol": 1e-05,
+    "atol": 0.001,
+    "passes": false,
+    "failed_values": 172
+  },
+  "timing_scope": "constructor/API/save separately; networks nested in API; excludes comparison",
+  "constructor_seconds": 0.5412553111091256,
+  "jit_warmup_seconds": 0.7057062964886427,
+  "diagnostic_helpers_sha256": {
+    "elu_numba": "e2d15127f7846aaf5b908949867be7b3a4454166ab2afeea270f4de099bed0bb",
+    "bn_numba": "242c6481fbb18be8b8c67ff237e173abf3abfecc6711b6ecedbce02eecc83309",
+    "cpu_inference_numba": "07e5a3b24feb30f768beaff7401d8f86418051aea254039b35fe3b4ebb8d4205"
+  },
+  "scope": "CPU-only diagnostic; no production change or CUDA execution",
+  "fastmath": false,
+  "api_seconds": 22.288134487345815,
+  "save_seconds": 2.0205371929332614,
+  "float": {
+    "count": 9072000,
+    "different": 8179162,
+    "mae": 1.2641836462953428e-05,
+    "rmse": 2.9817522037333293e-05,
+    "max_abs": 0.0068206787109375
+  },
+  "quantized": {
+    "count": 9072000,
+    "different": 192,
+    "max_abs": 1,
+    "mae": 2.1164021164021164e-05,
+    "affine_exact": true
+  },
+  "output_sha256": {
+    "image.nii.gz": "4e7d9fe499906d2f5c6ac02ae0c6dd1b975d3a505bee75e42c5554cb554968d2",
+    "image.npz": "4c0d64ff78fcbfc07faafaf74a2651e6d71ca72c00feacf0797325015b36ab87"
+  },
+  "status": "complete"
+}

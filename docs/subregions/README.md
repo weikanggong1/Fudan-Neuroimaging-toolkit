@@ -1,50 +1,40 @@
 # 四类脑亚区分割：`segment_4_subregions`
 
-[返回首页](../../README.md) · [真实数据验证](../../validation/subregions/README.md) · [十例完整 benchmark](../../validation/subregions/ten_public_t1_20261002/README.md) · [2026-10-02 GPU 配对](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)
+[返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/subregions/readme_archive_20261005.md)
+
+| 项目 | 内容 |
+|---|---|
+| 输入 | 单幅原生3D T1w；可选同网格粗标签/皮层/wmparc |
+| 输出 | 原生int32合并标签、110项软硬体积、可选HR/后验 |
+| 对应原软件 | FreeSurfer recon-all＋segment_subregions三命令 |
+| Python / CLI | fnit.segment_4_subregions；fnit segment-4-subregions |
+| CPU / GPU | CPU/CUDA；PyTorch、Numba、nibabel，recipe顺序执行 |
+
+<a id="2026-10-02-gpu-完整流程-benchmark"></a>
+
+## 1. 功能简介
 
 输入一张三维 T1，一次完成脑干、双侧丘脑、双侧海马和杏仁核分割。返回与输入 T1 **形状和 affine 相同**的 `int32` 标签图，以及标签表、硬体积、软体积和各结构的高分辨率结果；设置 `output_dir` 后自动保存。默认全部结构共有 **110 项亚区统计**，其中某些小亚区在原始 T1 网格上可能没有硬标签体素。
 
 支持 CPU 和 GPU。CUDA 默认使用 FP32/TF32；脑干的小矩阵运算局部使用准确 FP32，部分梯度归约、标量累计和优化器状态使用 FP64，不使用 FP16。脑干 Adam 状态仍为 FP32；具体 recipe 的实际策略以报告为准。`precise_mesh_matrices` 字段目前仅记录请求，不能作为实际 FP64 矩阵计算的证据。计算与读写分别使用项目的 PyTorch 实现和 Nibabel，运行时不调用 FreeSurfer 或 FSL。
 
-## 从一张 T1 到完整结果
-
-默认 `structures="all"` 时，共享一次 SynthSeg+，取得粗结构标签和 Desikan–Killiany（DK）68 区皮层分区。全部同侧皮层分区在同侧白质内竞争最近邻，生成海马强度模型需要的 `wmparc` 代理。自动粗分割后复用 TorchFAST 校正偏置场，将侵蚀白质的强度中位数归一到 110，并从 T1 自身头信息生成 1 mm 冠状工作网格。随后依次拟合四项结构；每项完成后将详细结果移到 CPU，再处理下一项。
+原始T1默认共享一次 `SynthSegPlus`（普通 SynthSeg 2.0 `--parc`），生成粗标签、DK68和白质代理，再用TorchFAST校正/归一化及图谱拟合。已有粗标签时按已准备T1直接拟合，跳过自动强度与1mm网格准备；同阶段对照用独立官方norm/aseg/wmparc。两种输入范围不可混为同一个benchmark。
 
 ```mermaid
-flowchart TD
-    T1[一张三维 T1] --> SS[一次共享 SynthSeg+]
-    SS --> COARSE[粗结构标签]
-    SS --> DK[DK 68 区皮层分区]
-    COARSE --> WM[全部同侧皮层竞争：wmparc 代理]
-    DK --> WM
-    T1 --> FAST[TorchFAST 偏置场校正]
-    COARSE --> FAST
-    FAST --> SCALE[侵蚀白质强度中位数归一到 110]
-    SCALE --> GRID[由原始头信息生成 1 mm 工作网格]
-    COARSE --> GRID
-    WM --> GRID
-    GRID --> BS[脑干 recipe]
-    GRID --> TH[双侧丘脑 recipe]
-    GRID --> HL[左侧海马和杏仁核 recipe]
-    GRID --> HR[右侧海马和杏仁核 recipe]
-    BS --> MERGE[重采样并按结构合并到输入 T1 网格]
-    TH --> MERGE
-    HL --> MERGE
-    HR --> MERGE
-    MERGE --> OUT[统一标签及 110 项硬体积和软体积]
-    OUT --> SAVE[保存 NIfTI、标签表、体积表和报告]
-    BS -. 可选 .-> HIGH[高分辨率标签和后验]
-    TH -. 可选 .-> HIGH
-    HL -. 可选 .-> HIGH
-    HR -. 可选 .-> HIGH
-    HIGH --> SAVE
+flowchart LR
+  A[原始T1] --> B[共享SynthSegPlus与wmparc代理]
+  B --> C[TorchFAST偏置和强度准备]
+  C --> D[GEMS脑干 / 丘脑 / 左右海马杏仁核]
+  E[可选官方同网格粗标签] --> D
+  D --> F[原生网格合并标签 / 软硬体积]
+  D --> G[可选工作网格标签和后验]
 ```
 
-丘脑在 0.5 mm、海马/杏仁核在约 0.333 mm 网格上拟合。各结构先生成处理网格标签并执行支持范围筛选，再将标签、置信度和支持掩膜以最近邻共同映射到原始 T1，按重叠处的置信度合并；硬体积按原始 T1 的体素体积统计。这沿用官方标准标签输出的网格顺序。平均体素间距小于 0.99 mm 的输入保留高分辨率网格；侵蚀白质正样本不足 100 个时保留输入并在报告中记录原因。图中四个 recipe 表示数据流，实际依次运行。
+<a id="python-调用输入输出与参数"></a>
+<a id="参数"></a>
+<a id="返回值与保存文件"></a>
 
-已有同网格的粗标签、皮层分区或 `wmparc` 可直接传入。提供 `coarse_segmentation` 时按已准备的 T1 直接拟合，跳过自动强度校正和 1 mm 网格准备；官方同阶段对照传入 `norm/aseg/wmparc`。只选脑干或丘脑且未提供粗标签时，使用一次 SynthSeg；提供全部所需标签后不再运行模型。
-
-## Python 调用、输入输出与参数
+## 2. Python 调用
 
 ```python
 from fnit import segment_4_subregions
@@ -72,34 +62,33 @@ left_ca1_head_mask = subregion_result.mask("Left-CA1-head")  # 输出：左侧 C
 print(native_label_path)
 ```
 
-### 参数
+### 输入数据格式
 
-| 参数 | 默认值 | 含义 |
-|---|---|---|
-| `t1` | 必填 | 原始三维 T1 路径或 Nibabel 图像。无需预先执行 `recon-all`。 |
-| `atlas_root` | `None` | 图谱根目录。省略时使用 FNIT 缓存，缺失时按资源清单下载并准备。 |
-| `structures` | `"all"` | 可选 `"brainstem"`、`"thalamus"`、`"hippo-amygdala-left"`、`"hippo-amygdala-right"`，或这些名称的列表；`"hippo-amygdala"` 同时选择左右两侧。默认运行全部四项。 |
-| `coarse_segmentation` | `None` | 同 T1 网格的 `aseg` 或 SynthSeg 粗标签；可为路径、Nibabel 图像或三维数组。省略时自动生成并执行强度与工作网格准备；提供时直接使用已准备的 T1。 |
-| `cortical_parcellation` | `None` | 同 T1 网格的 DK 皮层标签，支持路径、Nibabel 图像或三维数组。全部同侧 DK 标签竞争生成白质代理；海马强度模型从对应颞叶白质 3006/3007/3016 及右侧 4006/4007/4016 取样。省略且需要代理时由 SynthSeg+ 生成。 |
-| `wmparc` | `None` | 同 T1 网格的白质分区，支持路径、Nibabel 图像或三维数组。提供时海马强度模型直接使用，不再生成白质代理。 |
-| `synthseg_weights` | `None` | SynthSeg 模型权重文件或目录。省略时解析 FNIT 权重配置，并在需要时下载和校验。 |
-| `synthseg_parc_weights` | `None` | SynthSeg+ 皮层分区权重文件或目录；仅在需要自动皮层分区时读取。 |
-| `device` | `"cuda:0"` | PyTorch 计算设备，例如 `"cuda:1"` 或 `"cpu"`。CUDA 默认启用 TF32。 |
-| `threads` | `4` | PyTorch CPU 线程数，必须至少为 1。CPU 调用还临时设置当前调用线程的 Numba 掩码，正常返回或失败均恢复调用者的两项设置；GPU 保留原有线程设置方式。BLAS、外部库线程和 CPU 亲和性由启动环境控制。 |
-| `optimization` | `"fast"` | `"fast"` 速度优先；`"balanced"` 使用更多网格更新和更严格的停止阈值。两者均保留工作网格和最终输出分辨率；更多迭代不保证每个区域的精度提高，详见下文。 |
-| `output_dir` | `None` | 自动保存目录。省略时返回内存结果，也可稍后调用 `subregion_result.save(output_dir)`。 |
-| `save_highres` | `True` | 保存每项结构的工作网格标签；仅在保存结果时生效。 |
-| `save_posteriors` | `False` | 保存每项结构的后验 NIfTI；最后一维为标签通道，仅在保存结果时生效。 |
+- `t1`：原始3D `(X,Y,Z)` `.nii`、`.nii.gz`、MGH/MGZ路径或nibabel SpatialImage；有效affine、orientation和体素间距，强度无固定单位，不需先recon-all。
+- `coarse_segmentation`、`cortical_parcellation`、`wmparc`：路径、nibabel图或3D数组，shape/affine须同T1；数组无几何由调用者保证来源。分别为aseg/SynthSeg粗标签、DK68皮层编码、海马所需白质分区，均用整数编号。
+- `atlas_root`：预先准备的BrainstemSS、ThalamicNuclei和HippoSF图谱目录；缺失时从原站校验下载。离线先运行fnit-setup-subregion-atlases并备齐SynthSeg权重。
+- 自动前段由T1头信息生成1mm工作网格并按侵蚀白质中位数归一到110；平均间距<0.99mm保留高分辨率网格，样本不足100正值保留输入并记录。
 
-传入的标签图必须与 T1 形状和 affine 一致；数组没有 affine 信息，需由调用者确保来自相同网格。仅选部分结构时，只返回对应亚区的统计。
+### 完整公开参数
 
-### 返回值与保存文件
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `t1` | 是 | `str 或 Path 或 nib.spatialimages.SpatialImage` | `—` | 一幅原始 3D T1w；格式见输入数据格式 |
+| `atlas_root` | 否 | `str 或 Path 或 None` | `None` | 准备好的亚区图谱根目录；None 使用 FNIT 缓存，缺失时下载准备 |
+| `structures` | 否 | `str 或 list[str] 或 tuple[str, ...]` | `'all'` | all 或脑干、丘脑、左/右海马杏仁核名称及其列表；hippo-amygdala 选双侧 |
+| `coarse_segmentation` | 否 | `str 或 Path 或 nib.spatialimages.SpatialImage 或 np.ndarray 或 None` | `None` | 同 T1 网格粗标签；有值时按已准备 T1 拟合，跳过自动强度/1mm准备 |
+| `cortical_parcellation` | 否 | `str 或 Path 或 nib.spatialimages.SpatialImage 或 np.ndarray 或 None` | `None` | 同网格 DK68 皮层标签，用于生成白质代理 |
+| `wmparc` | 否 | `str 或 Path 或 nib.spatialimages.SpatialImage 或 np.ndarray 或 None` | `None` | 同网格白质分区；提供时海马强度模型直接使用 |
+| `synthseg_weights` | 否 | `str 或 Path 或 None` | `None` | 自动初始化的 SynthSeg 主分割模型文件或目录 |
+| `synthseg_parc_weights` | 否 | `str 或 Path 或 None` | `None` | 自动初始化的 SynthSeg 皮层分区模型文件或目录 |
+| `device` | 否 | `str 或 torch.device` | `'cuda:0'` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
+| `threads` | 否 | `int 或 None` | `4` | 正整数CPU线程预算；具体每阶段并行度及恢复见输入说明 |
+| `optimization` | 否 | `str` | `'fast'` | fast 速度优先；balanced 增加拟合迭代预算 |
+| `output_dir` | 否 | `str 或 Path 或 None` | `None` | 结果或调试文件的目录；具体自动保存范围见输出 |
+| `save_highres` | 否 | `bool` | `True` | 保存结构工作网格标签；Python 默认 True，CLI 需显式开启 |
+| `save_posteriors` | 否 | `bool` | `False` | 保存末维为标签通道的工作网格后验 |
 
-`subregion_result.labels` 是原 T1 网格的 Nibabel 标签图。`label_table` 为 `{标签 ID: 名称}`；`label_metadata` 增加所属结构、图谱家族和半球。右侧海马/杏仁核标签采用原 ID 加 10000，避免左右冲突。
-
-`subregion_result.volumes[标签 ID]` 包含 `hard_volume_mm3`（原 T1 网格硬标签体积）和 `soft_volume_mm3`（工作网格后验积分），单位均为 mm³。`confidence` 为拟合最大后验插值到处理网格后的置信度，再随标签以最近邻回到原始网格；它用于结构重叠处的选择。`structure_results` 保存各结构的高分辨率标签、后验、网格及 affine。`initialization` 记录共享预处理来源、模型调用次数、偏置与归一化参数、结构拟合、耗时和 GPU 峰值。
-
-设置 `output_dir` 后生成：
+### 输出
 
 ```text
 sub-01_subregions/
@@ -116,209 +105,175 @@ sub-01_subregions/
 
 `save_posteriors=True` 时，`highres/` 另存各结构的 `*_posterior.nii.gz`，通道顺序对应该图谱的 `compressionLookupTable.txt`。`output_files` 给出所有已保存文件的绝对路径。`timings["compute_seconds"]` 包括预处理、拟合和合并；`timings["save_seconds"]` 包括影像和表格读写，报告 JSON 的最终序列化和落盘不计入此项。
 
-### CPU、GPU 与速度配置
+`subregion_result.labels` 是原 T1 网格的 Nibabel 标签图。`label_table` 为 `{标签 ID: 名称}`；`label_metadata` 增加所属结构、图谱家族和半球。右侧海马/杏仁核标签采用原 ID 加 10000，避免左右冲突。
 
-| 配置 | `fast`（默认） | `balanced` |
+`subregion_result.volumes[标签 ID]` 包含 `hard_volume_mm3`（原 T1 网格硬标签体积）和 `soft_volume_mm3`（工作网格后验积分），单位均为 mm³。`confidence` 为拟合最大后验插值到处理网格后的置信度，再随标签以最近邻回到原始网格；它用于结构重叠处的选择。`structure_results` 保存各结构的高分辨率标签、后验、网格及 affine。`initialization` 记录共享预处理来源、模型调用次数、偏置与归一化参数、结构拟合、耗时和 GPU 峰值。
+
+各工作网格与affine独立，丘脑0.5mm、海马/杏仁核约0.333mm；后验形状(X,Y,Z,C)、float32概率，通道顺序为图谱compressionLookupTable，save_posteriors=True才保存。原生标签int32、shape/affine同T1，背景0；右海马/杏仁核官方ID+10000避免左右冲突。各label ID和名称、家族/半球由labels.tsv给出。
+
+高分辨率后验积分为soft_volume_mm3；原生硬体素×体素体积为hard_volume_mm3，二者单位mm³但定义不同。`output_files`记录保存路径，`mask(编号或名称)`返回原生shape的布尔数组；未传output_dir时内存返回，可`result.save(output_dir,save_highres=True,save_posteriors=False)`。
+
+### 结果表格与单结构选择
+
+| 文件 / 返回键 | 内容与读取方式 |
+|---|---|
+| `labels.tsv` / `label_table` | 标签ID、名称、parent、family、hemisphere、source；不输出背景行 |
+| `volumes.tsv` / `volumes` | 标签ID与名称、结构/半球、硬体积和软体积，均为mm³ |
+| `report.json` / `initialization` | 共享预处理、各recipe、模型来源、网格、时间和检查信息 |
+| `report.json` / `fit_min_jacobians` | 各工作网格最小Jacobian；非有限值记null |
+| `output_files` | 字符串键到绝对`Path`；highres/和posterior/键仅在保存时出现 |
+| `input_source` | 输入路径字符串；内存影像可能没有来源路径 |
+
+只处理部分结构时，参数使用固定名称。相同列表重复名称会去重，空列表或未知名称报错；`hippo-amygdala`展开为左右两项。
+
+```python
+selected_structures = ["brainstem", "thalamus"]  # 只拟合脑干和双侧丘脑
+partial_subregion_result = segment_4_subregions(
+    t1="/data/sub01_T1w.nii.gz",  # 一幅原始3D T1w
+    atlas_root="/data/subregion_atlases",  # 已准备并校验的图谱根目录
+    structures=selected_structures,  # 固定结构名称列表
+    device="cpu",  # CPU设备，不设置CUDA策略
+    threads=4,  # Torch预算；CPU调用同时限制并恢复Numba线程掩码
+    output_dir="/data/sub01_partial",  # 标签、表格和报告保存目录
+    save_highres=False,  # 只保存原生标签和表格
+    save_posteriors=False,  # 不写较大的工作网格概率图
+)
+```
+
+对已准备检查点做stage对照时，T1、coarse_segmentation、cortical_parcellation和wmparc必须来自同一被试、同一网格；传入粗标签会跳过自动前段。只提供wmparc不能自动切换为stage范围。
+
+<a id="命令行"></a>
+
+## 3. 命令行调用
+
+```bash
+fnit segment-4-subregions --i subject_T1w.nii.gz --o results/subregions_native.nii.gz \
+  --output-dir results/subregions --device cuda:0 --threads 4 --save-highres
+```
+
+### fnit segment-4-subregions
+
+| CLI 参数 | Python 参数 / 输出 | 含义 |
 |---|---|---|
-| 丘脑、海马/杏仁核强度拟合：每个外层迭代的网格更新上限 | 20 | 30 |
-| 丘脑网格数据项 | 各阶段使用全部有效体素 | 各阶段使用全部有效体素 |
-| 海马/杏仁核网格数据项 | 各阶段使用全部有效体素 | 各阶段使用全部有效体素 |
-| Gaussian EM 与最终标签、后验 | 完整工作网格 | 完整工作网格 |
-| 停止条件 | 速度优先 | 更严格 |
+| `--i` / `-i` | `t1` | 输入影像路径 |
+| `--o` / `-o` | `labels.save` | 原T1网格合并标签保存路径 |
+| `--atlas-root` | `atlas_root` | 准备好的亚区图谱根目录；None 使用 FNIT 缓存，缺失时下载准备 |
+| `--structure` | `structures` | all 或脑干、丘脑、左/右海马杏仁核名称及其列表；hippo-amygdala 选双侧 |
+| `--coarse-segmentation` | `coarse_segmentation` | 同 T1 网格粗标签；有值时按已准备 T1 拟合，跳过自动强度/1mm准备 |
+| `--cortical-parcellation` | `cortical_parcellation` | 同网格 DK68 皮层标签，用于生成白质代理 |
+| `--wmparc` | `wmparc` | 同网格白质分区；提供时海马强度模型直接使用 |
+| `--synthseg-weights` | `synthseg_weights` | 自动初始化的 SynthSeg 主分割模型文件或目录 |
+| `--synthseg-parc-weights` | `synthseg_parc_weights` | 自动初始化的 SynthSeg 皮层分区模型文件或目录 |
+| `--output-dir` | `output_dir` | 结果或调试文件的目录；具体自动保存范围见输出 |
+| `--save-highres` | `save_highres` | 保存结构工作网格标签；Python 默认 True，CLI 需显式开启 |
+| `--save-posteriors` | `save_posteriors` | 保存末维为标签通道的工作网格后验 |
+| `--report-json` | `报告保存路径` | 另存处理报告JSON |
+| `--device` | `device` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
+| `--threads` | `threads` | 正整数CPU线程预算，默认4；CPU调用恢复Torch/Numba设置 |
+| `--optimization` | `optimization` | fast 速度优先；balanced 增加拟合迭代预算 |
 
-图谱先验平滑、部分容积模拟、Gaussian EM 和网格拟合支持 GPU，默认环境已包含所需依赖。图谱加载、裁剪、三次插值、部分形态学、白质标签传播和最终 Nibabel 重采样仍在 CPU；阶段控制和线搜索也包含 CPU 判断及 GPU 同步。整例时间包含这些步骤。实现与逐组件耗时见 [TorchGEMS](../../src/fnit/gems/core.py)及 [GPU 组件验证](../../validation/subregions/speed_v16/layout_components/README.md)。
+CLI与Python默认差异：Python save_highres=True，CLI默认False；两者device=cuda:0，threads=4。
 
-CPU 入口使用临时线程作用域，修复以前只设置 Torch、未约束 Numba且调用后不恢复线程设置的问题。它保持拟合规则、精度、标签和返回结构；Torch 使用请求的线程数；Numba 使用请求数与导入时线程池容量中的较小值。要让两者都达到请求数，请在新进程启动前设置 `NUMBA_NUM_THREADS`。CPU/GPU 不应在同一进程的多个调用线程中并发修改全局 Torch 设置。`timings["compute_seconds"]` 为内部计算范围；公开 API 和进程墙钟另包含 CPU 线程设置及恢复。当前 CPU 同节点实测状态见[CPU 对照协议](../../validation/smri_cpu/task5/README.md)，GPU 历史时间不改标为 CPU 结果。
+<a id="原软件调用"></a>
 
-合成标签拟合按各结构的阶段预算运行，脑干采用其独立配置；上表的 20/30 上限对应丘脑和海马/杏仁核的强度拟合。
+## 4. 原软件调用
 
-海马部分容积准备修复了 NumPy 组织均值直接赋给 PyTorch 掩膜张量的兼容问题，均值与统计规则保留；测试覆盖薄结构分支。
-
-### 图谱与权重准备
-
-首次缺少 SynthSeg 权重或图谱时自动准备。资源优先从 [FNIT 固定 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)及其清单获取并校验大小、SHA-256；未获明确再分发许可的文件从原作者网站获取。离线运行前可执行：
-
-```bash
-# --model：下载并校验自动粗分割和皮层分区所需权重
-fnit-setup-weights --model synthseg-plus
-
-# --output-root：保存四类图谱的根目录；省略时使用 FNIT 缓存
-# --device：图谱准备计算设备；--asset-dir 可另指定已经校验的资产目录
-fnit-setup-subregion-atlases --output-root /absolute/path/subregion_atlases --device cpu
-```
-
-图谱目录为 `brainstem/`、`thalamus/`、`hippo-amygdala-left/` 和 `hippo-amygdala-right/`。原始图谱文件及校验值见 [资源清单](../../src/fnit/recon_all/assets.py)，模型下载与离线配置见 [权重说明](../WEIGHTS.md)。丘脑和海马先验在个体仿射变换后的参考网格上平滑。
-
-## 命令行
+以下命令用于独立原软件参考环境；FNIT生产入口不执行它。
 
 ```bash
-# --i：原始 T1；--o：原网格合并标签；--structure：结构，可重复指定
-# --device：CPU/GPU；--threads：CPU 线程数；--optimization：fast 或 balanced
-# --output-dir：标签表、体积表和报告目录；--save-highres：保存工作网格标签
-fnit segment-4-subregions --i /absolute/path/sub-01_T1w.nii.gz \
-  --o /absolute/path/sub-01_subregions/subregions_native.nii.gz \
-  --structure all --device cuda:0 --threads 4 --optimization fast \
-  --output-dir /absolute/path/sub-01_subregions --save-highres
+recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
+segment_subregions brainstem --cross sub01 --sd reference/subjects --threads 4
+segment_subregions thalamus --cross sub01 --sd reference/subjects --threads 4
+segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --threads 4
 ```
 
-`--atlas-root`、`--coarse-segmentation`、`--cortical-parcellation`、`--wmparc`、`--synthseg-weights` 和 `--synthseg-parc-weights` 对应 Python 参数。`--save-posteriors` 另存工作网格后验，`--report-json` 可再指定报告路径。仅需原网格标签时可省略输出目录和保存开关。
+| FNIT参数 / 产物 | 原软件参数 / 产物 |
+|---|---|
+| structures=all | 三条segment_subregions命令（hippo-amygdala双侧） |
+| t1 raw | 原软件recon-all的输入T1 |
+| coarse_segmentation / wmparc | 官方aseg.mgz / wmparc.mgz；t1使用norm.mgz作stage对照 |
+| threads | --threads；原始前段-openmp |
+| optimization / output_dir / save_* | FNIT流程预算与结果保存，无一对一原开关 |
 
-## 原软件调用
+对应四结构、110亚区统计；Python自动前段与官方recon-all前段不同，粗标签/白质代理不是官方aseg/wmparc。图谱拟合按固定官方先验移植，整体结构靠近不能替代逐核团精度。参数对齐、对照来源和完整步骤见[官方协议](../../validation/subregions/ten_public_t1_20261002/official_protocol.md)。
 
-以下是 **FreeSurfer 的参考命令**。官方流程先完成 `recon-all`，再读取该 subject 的 `norm.mgz`、`aseg.mgz` 和海马所需的 `wmparc.mgz`：
-
-```bash
-# -i：同一公开 T1；-s：subject 名；-sd：独立 subjects 目录
-# -all：完整官方预处理；-openmp：每例 CPU 线程数
-recon-all -i /absolute/path/sub-01_ses-test_T1w.nii.gz \
-  -s fs_sub01 -sd /absolute/path/subjects -all -openmp 4
-
-segment_subregions brainstem --cross fs_sub01 --sd /absolute/path/subjects --threads 4
-segment_subregions thalamus --cross fs_sub01 --sd /absolute/path/subjects --threads 4
-segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects --threads 4
-```
-
-官方参考在 CPU 上独立运行；本轮每例均从同一公开 T1 新建 subject，没有复用旧预处理。相同阶段对照向 FNIT 传入本例 fresh `norm/aseg/wmparc`；raw 则从公开 T1 自动预处理。[实际官方协议](../../validation/subregions/ten_public_t1_20261002/official_protocol.md)记录版本、环境、准备阶段与输出身份。原实现见 [FreeSurfer 源码](https://github.com/freesurfer/samseg/tree/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/samseg/subregions)和 [官方使用说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SubregionSegmentation)。
-
+<a id="从一张-t1-到完整结果"></a>
+<a id="cpugpu-与速度配置"></a>
+<a id="--output-root保存四类图谱的根目录省略时使用-fnit-缓存"></a>
+<a id="--device图谱准备计算设备--asset-dir-可另指定已经校验的资产目录"></a>
+<a id="--i原始-t1--o原网格合并标签--structure结构可重复指定"></a>
+<a id="--devicecpugpu--threadscpu-线程数--optimizationfast-或-balanced"></a>
+<a id="--output-dir标签表体积表和报告目录--save-highres保存工作网格标签"></a>
+<a id="-i同一公开-t1-ssubject-名-sd独立-subjects-目录"></a>
+<a id="-all完整官方预处理-openmp每例-cpu-线程数"></a>
+<a id="精度运行时间与脑图"></a>
+<a id="2026-10-04同节点-cpu-与受影响-gpu-回归"></a>
+<a id="2026-10-02十例-gpu-与官方对照"></a>
+<a id="六区域原网格精度"></a>
+<a id="全部十例"></a>
+<a id="新九例排除开发用-sub-01"></a>
+<a id="实际分步骤时间"></a>
+<a id="官方对照脑图"></a>
 
 <a id="最新精度运行时间与脑图"></a>
 
-## 精度、运行时间与脑图
+## 5. 最新精度和运行时间
 
-### 2026-10-04：同节点 CPU 与受影响 GPU 回归
+2026-10-05 的[CPU 网格数据项诊断](../../validation/smri_cpu/gems_cpu_objective_20261005/README.md)确认，平滑阶段的零质量 alpha 会使额外 prior 归一化改变梯度。验证性 raw 闭包在真实阶段 initial/1/3/37 的同点评分通过，但 37 步轨迹仍与官方不同，未进入默认实现或完整亚区分割。它还依赖 CPU epsilon、FP64 几何和私有线搜索等共同前提；当前主版本不能通过单改归一化获得该结果。下面的最终分割指标仍属于其注明的历史源码，没有以同点梯度门替代逐区 Dice/体积验收。
 
-GEMS Gaussian 子函数修正了未提供超参数时 `[C,M] / [C]` 的错误广播：现在每类、每模态除以自己的样本质量，返回 `[C,M]` 均值。现有四类亚区的强度拟合均提供超参数，合成拟合使用固定 Gaussian，因此这一修复不改变成熟 recipe 的该分支。另行实测的 CPU 固定 EM 数据缓存没有速度或内存收益，裁剪插值候选虽改善工作图强度，却使部分 GPU 亚区退化，均未作为默认行为合入。实际二值掩膜已进一步定位到坐标精度与最近邻舍入；组合候选仍在隔离验证。输入 hash、完整状态、逐区门与被撤回的补丁见[本轮 GEMS 记录](../../validation/smri_cpu/gems_fixes_20261004/README.md)。
+2026-10-06 的[Double 状态有限续段](../../validation/smri_cpu/gems_cpu_double_continuation_20261006/README.md)保留真实 Double point、QR、Gaussian 和优化历史。同点评分门通过后，显式 CPU 候选已经完成一次[右侧海马/杏仁核完整 recipe](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/README.md)：API 3110.729 秒、峰值 RSS 11.838 GB；28 区中 native 9 区、HR 6 区同时满足 Dice≥0.95、硬体积差≤5%，未通过完整精度。候选源码 `7e9d511a` 没有接入 main 默认 CPU/GPU；报告中的 `cpu_mesh_profile` 示例仅用于复现该冻结候选。官方同节点新墙钟缺失，不能形成速度比。逐区 CSV、五阶段时钟和脑图均已保存并[独立核验](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/ROOT_REVIEW.json)。
 
-nodecw10 的相同八核预算下，脑干逐区门通过；丘脑及海马/杏仁核仍未全部通过，CPU 拟合明显较慢。脑干联合优化在另一固定核组完整旧新配对中将 API 时间从 733.021 降至 668.801 秒，全部后验和拟合状态相同，GPU 脑干回归也通过。原始 T1 的 CPU 全结构流程及完整 recon-all 已执行并评分；下列十例 GPU 结果绑定 2026-10-02 的源码，不能作为本轮最终整合源码的全结构 GPU 验收。详见[本轮完整记录](../../validation/smri_cpu/task5/README.md)。
+最新2026-10-04 raw CPU全结构正式测量使用公开CC0 ds000114 snapshot1.0.2一例原始T1，冻结00fedf3544/v5，参考FreeSurfer8.2.0-1保存亚区输出；其norm/aseg/wmparc已与本轮同T1官方CPU recon核验数组/几何同。CPU评测节点 Xeon Gold6418H同8物理核、Torch/Numba8线程、CPUfloat32并保留既有FP64累加；源码1257文件和图谱权重SHA见[身份及结果](../../validation/smri_cpu/task5/raw_all_cpu_v5/README.md)。
 
-原始 T1 的 CPU v5 整例为 **6241.435 秒（104.024 分钟）**，API 6238.458 秒；共享预处理、脑干、丘脑及左右海马/杏仁核约为 162.214 / 643.776 / 2245.035 / 1583.290 / 1563.757 秒。这些为父阶段，内部计时不再累加。原网格 4/105、HR 5/107 非空区通过既定逐区门，另外 5/3 区双方为空记 NA，输出仍不等价。13 项约定输出齐全，全部后验和脑图见[完整 raw CPU 报告](../../validation/smri_cpu/task5/raw_all_cpu_v5/README.md)。本例未传入官方拟合检查点，官方 norm/aseg/wmparc 的保存参考已与本轮同 T1 官方 CPU recon 核验数组及几何恒等；无单次官方 raw 整链时钟或速度比。
+新增[首次目标函数同状态诊断](../../validation/smri_cpu/gems_first_state_20261004/README.md)：官方在 `Σ prior × likelihood` 后加 `1e-15`，生产 compact objective 原来缺少该项。相同 FP32 输入上，左/右 HA 原完整梯度相对差为 0.377/0.252；加入 epsilon 后约为 6.27e−6/1.37e−4。剩余小 prior 的误差会放大，CPU 混合内部几何探针将梯度差降到约 4e−8。该报告仅含隔离诊断；CPU 混合内部精度完整候选已跑完但未通过逐区验收，未接入默认，详见[全部 recipe 报告](../../validation/smri_cpu/gems_cpu_epsilon_20261004/README.md)，原 GPU fallback/Triton 的同项差异也尚未修复。 早期首状态的部分梯度差还包含参考适配器的负行列式 tet 换序遗漏，后续[同点核验](../../validation/smri_cpu/gems_first_trial_20261005/README.md)已经更正；该项不能归因为生产 prior 符号错误。
 
-### 2026-10-02：十例 GPU 与官方对照
+### 端到端 benchmark
 
-2026-10-02，使用 OpenNeuro ds000114 **snapshot 1.0.2、ses-test 的 sub-01–sub-10 十例公开 T1**。选择在测试前固定，同时单列排除开发用 sub-01 的新九例。公开快照已做去脸，本次未追加处理；这批公开 T1 与此前单例开发派生 T1 分别记录。[数据与许可记录](../../validation/subregions/ten_public_t1_20261002/data_selection.md)保留选择、文件大小和 SHA-256。
+| 指标 | FNIT | 原软件 | 差异 |
+|---|---|---|---|
+| raw全进程wall | 6241.435 s | 未测单次同范围raw全链 | 不相加不同官方命令计时 |
+| raw API / 采样RSS | 6238.458 s /21.647GB | 保存参考用于评分 | 13项约定输出齐全 |
+| 原网格110区门 | 4通过 /101未通过 /5双方空NA | Dice≥0.95及硬体积差≤5% | raw未通过逐区等价 |
+| HR110区门 | 5通过 /102未通过 /3NA | 同固定门 | 不剔除小区 |
+| 官方检查点stage脑干 / 丘脑 /海马完整wall | 764.691 /2464.294 /3455.410 s | 205.553 /275.893 /442.305 s | stage另范围；均未达到速度目标 |
 
-**raw** 从公开 T1 自动完成共享预处理和全部四项分割，原网格为公开 T1 网格。**stage** 从同一病例本轮全新官方 `norm/aseg/wmparc` 开始，原网格为其 norm 网格；用于比较亚区拟合，官方预处理耗时不计入 FNIT stage。两个输入分组报告。
+### 分步骤 benchmark
 
-`f436de5` 于 2026-10-02 对十例分别完成一次独立 `structures="all", optimization="fast"` raw 运行。与原计量版本 `ac692bb` 比较，50 张原网格/高分辨率标签图的体素、shape、affine、dtype 完全相同，1,100 条硬/软体积字典及 160 条上下文记录相同；raw Dice 与脑图因此继承原计量结果。[历史版本实际审计](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/audit/summary.json)保留逐例证据。stage 结果及耗时来自 `ac692bb` 的实际运行，两版 24 个 GEMS 代码与查找表文件逐字节相同。
-
-### 六区域原网格精度
-
-每例先按官方细标签体素数加权得到家族 Dice，再对病例等权汇总。下表为**均值 ± 样本 SD [最小值, 最大值]；有效/计划数，NA 数**，SD 使用 ddof=1，描述病例间差异，不是重复运行波动。
-
-#### 全部十例
-
-| 家族 | raw：公开 T1 原网格 | stage：fresh norm 网格 |
+| 阶段 | FNIT | 原软件 |
 |---|---|---|
-| 脑干 | 0.9612 ± 0.0050 [0.9519, 0.9664]；10/10，NA 0 | 0.9911 ± 0.0088 [0.9667, 0.9966]；10/10，NA 0 |
-| 双侧丘脑细核 | 0.8881 ± 0.0189 [0.8543, 0.9135]；10/10，NA 0 | 0.9400 ± 0.0312 [0.8602, 0.9700]；10/10，NA 0 |
-| 左海马 | 0.8262 ± 0.0242 [0.7895, 0.8821]；10/10，NA 0 | 0.8720 ± 0.0429 [0.7903, 0.9294]；10/10，NA 0 |
-| 右海马 | 0.7957 ± 0.0506 [0.6799, 0.8656]；10/10，NA 0 | 0.8563 ± 0.0428 [0.7838, 0.9039]；10/10，NA 0 |
-| 左杏仁核 | 0.8894 ± 0.0336 [0.8268, 0.9208]；10/10，NA 0 | 0.9272 ± 0.0266 [0.8809, 0.9631]；10/10，NA 0 |
-| 右杏仁核 | 0.8679 ± 0.0303 [0.8139, 0.9280]；10/10，NA 0 | 0.9066 ± 0.0294 [0.8514, 0.9446]；10/10，NA 0 |
+| raw共享预处理 | 162.214 s | 未记录同边界 |
+| raw脑干 /丘脑 | 643.776 /2245.035 s | stage计时不能替代raw |
+| raw左 /右海马杏仁核 | 1583.290 /1563.757 s | 未记录同边界 |
+| raw保存 | 29.235 s | 未记录同边界 |
 
-#### 新九例（排除开发用 sub-01）
+父阶段包含子步骤，不能重复累加。stage脑干4/4区通过，丘脑29/45非空区、左右海马杏仁核3/28及1/28区通过；raw差异包含自动预处理及拟合。GPU完整旧新回归峰值allocated/reserved5.649/6.954GB属于冻结v2，不能代替v5全结构GPU正式验收。旧十例GPU结果仅按f436de5/ac692bb保留第6节链接。
 
-| 家族 | raw：公开 T1 原网格 | stage：fresh norm 网格 |
-|---|---|---|
-| 脑干 | 0.9609 ± 0.0052 [0.9519, 0.9664]；9/9，NA 0 | 0.9911 ± 0.0094 [0.9667, 0.9966]；9/9，NA 0 |
-| 双侧丘脑细核 | 0.8863 ± 0.0192 [0.8543, 0.9135]；9/9，NA 0 | 0.9366 ± 0.0312 [0.8602, 0.9637]；9/9，NA 0 |
-| 左海马 | 0.8271 ± 0.0255 [0.7895, 0.8821]；9/9，NA 0 | 0.8690 ± 0.0443 [0.7903, 0.9294]；9/9，NA 0 |
-| 右海马 | 0.8085 ± 0.0320 [0.7568, 0.8656]；9/9，NA 0 | 0.8597 ± 0.0439 [0.7838, 0.9039]；9/9，NA 0 |
-| 左杏仁核 | 0.8866 ± 0.0343 [0.8268, 0.9208]；9/9，NA 0 | 0.9240 ± 0.0260 [0.8809, 0.9631]；9/9，NA 0 |
-| 右杏仁核 | 0.8683 ± 0.0322 [0.8139, 0.9280]；9/9，NA 0 | 0.9029 ± 0.0286 [0.8514, 0.9446]；9/9，NA 0 |
+![真实raw CPU丘脑官方/FNIT及标签差图](../../validation/smri_cpu/task5/raw_all_cpu_v5/raw_all_thalamus.png)
 
-全部 **110 个分区**各自的均值、样本 SD、有效数与 NA 见[逐分区 Dice 表](../../validation/subregions/ten_public_t1_20261002/analysis/per_region_dice.md)；[880 行 ROI 汇总](../../validation/subregions/ten_public_t1_20261002/analysis/cohort_roi_summary.tsv)包含十例/新九例 × raw/stage × 原网格/高分辨率，另有[4,400 行逐例 ROI](../../validation/subregions/ten_public_t1_20261002/analysis/cohort_roi.tsv)及[逐例家族结果](../../validation/subregions/ten_public_t1_20261002/analysis/cohort_family.tsv)。单方缺失保留 0 Dice；双方硬标签均空和失败为 NA。raw-native 的 Left-Pc（8117）与 Right-Pt（8219）在十例均为双方空，有效 0/10、NA 10；新九例为有效 0/9、NA 9，这两个分区保留在完整表中。
+![同例双侧海马杏仁核官方/FNIT及差图](../../validation/smri_cpu/task5/raw_all_cpu_v5/raw_all_hippo-amygdala.png)
 
-高分辨率统计在固定官方轴向、间距和整数网格相位的共同评价网格上进行。独立 [v2 HR 体素计数守恒审计](../../validation/subregions/ten_public_t1_20261002/official_hr_grid_conservation_v2.json)完成十例 40 张官方 HR 图、1,100 条标签记录：raw_hr 与 stage_hr 计数均保持原值，独立最近邻复查无分歧，原分析元数据未改。首轮报告写入遇到 NumPy 标量 JSON 兼容问题；v2 仅修复报告序列化，计数、网格和指标规则保留。
+<a id="最近版本-benchmark-记录"></a>
 
-### 2026-10-02 GPU 完整流程 benchmark
+## 6. 最近版本和 benchmark
 
-FNIT 使用共享 **NVIDIA H100 PCIe，4 线程，FP32/默认 TF32**，自身进程显存限制 19,073 MiB；当前 raw 采样自身峰值为 **14,748–18,428 MiB**。官方使用 FreeSurfer 8.2.0-1，CPU 每例 4 线程，从同一公开 T1 全新执行 `recon-all -all` 及三个细分割命令。时间均来自本例本轮实际进程，不拼接旧 recon-all 记录。
+成熟 GEMS Gaussian 子函数曾在未提供超参数时错误广播 `[C,M] / [C]`；已改为各类、各模态除以对应样本质量，返回 `[C,M]` 均值。现有四个亚区 recipe 的强度拟合提供超参数，合成拟合使用固定 Gaussian，因此不进入该错误分支。CPU 固定 EM 数据缓存无速度或内存收益，裁剪插值候选使部分 GPU 亚区退步，两者未接入默认；实际状态和被撤回补丁见[本轮 GEMS 记录](../../validation/smri_cpu/gems_fixes_20261004/README.md)。
 
-下表为均值 ± 样本 SD [最小值, 最大值]；有效/计划数，NA 数。除官方整例一行使用分钟外，其余使用秒。
+| 日期 | commit / version | 变化 | benchmark |
+|---|---|---|---|
+| 2026-10-06 | 7e9d511a 未采纳 CPU 候选 | 四个固定真实点、EM 与默认 GPU 保护门后完成唯一右侧 HA recipe；初始对齐、工作图、mask 和后处理仍与官方定义不同 | [完整未过门报告与脑图](../../validation/smri_cpu/gems_native_cpu_rha_failure_20261006/README.md)：native 9/28、HR 6/28；51.85 分钟，不替换默认 |
+| 2026-10-06 | Double 37步冻结诊断 | 同点评分、状态恢复和有限轨迹定位；未替换默认 | [报告](../../validation/smri_cpu/gems_cpu_double_continuation_20261006/README.md)，没有新的ROI通过率 |
+| 2026-10-04 | 00fedf3544/v5 | 大T1投影修复后raw完整CPU执行及评分 | 上节13产物、110区门与脑图 |
+| 2026-10-04 | task5 v2/compact冻结 | CPU线程恢复及离散owner lookup/log-prior缓存 | [stage及GPU实测](../../validation/smri_cpu/task5/README.md) |
+| 2026-10-02 | f436de5 raw /ac692bb stage | 固定十例独立raw回归与官方fresh对照 | [十例全区与新九例](../../validation/subregions/ten_public_t1_20261002/README.md) |
+| 2026-10-02 | reproducibility冻结 | 丘脑完整积分、脑干归约与稳定连通域 | [单例重复性及精度修复](../../validation/subregions/reproducibility_20261002/README.md) |
 
-| 实际计时 | 全部十例 | 新九例 |
-|---|---|---|
-| f436de5 raw：API compute（秒） | 253.66 ± 6.31 [245.68, 261.89]；10/10，NA 0 | 254.46 ± 6.13 [245.68, 261.89]；9/9，NA 0 |
-| f436de5 raw：API total（秒） | 254.26 ± 6.34 [246.25, 262.55]；10/10，NA 0 | 255.06 ± 6.17 [246.25, 262.55]；9/9，NA 0 |
-| f436de5 raw：进程 wall（秒） | 259.37 ± 6.45 [251.26, 267.76]；10/10，NA 0 | 260.21 ± 6.22 [251.26, 267.76]；9/9，NA 0 |
-| f436de5 raw：保存（秒） | 0.55 ± 0.05 [0.48, 0.64]；10/10，NA 0 | 0.55 ± 0.05 [0.48, 0.64]；9/9，NA 0 |
-| ac692bb stage：API compute（秒） | 289.63 ± 11.14 [272.47, 311.13]；10/10，NA 0 | 290.06 ± 11.73 [272.47, 311.13]；9/9，NA 0 |
-| ac692bb stage：API total（秒） | 290.26 ± 11.15 [273.11, 311.85]；10/10，NA 0 | 290.70 ± 11.73 [273.11, 311.85]；9/9，NA 0 |
-| ac692bb stage：进程 wall（秒） | 296.52 ± 11.00 [278.21, 317.26]；10/10，NA 0 | 296.44 ± 11.66 [278.21, 317.26]；9/9，NA 0 |
-| 官方 fresh：recon-all＋三个细分割完整 wall（分钟） | 125.45 ± 12.28 [102.13, 138.90]；10/10，NA 0 | 126.79 ± 12.22 [102.13, 138.90]；9/9，NA 0 |
+每条记录保留真实冻结源码、输入与时间边界；逐例、debug/profiling和更早脑图见[完整归档](../../validation/subregions/readme_archive_20261005.md)。文档整理不重跑MRI，不把执行成功或--help核验作为精度benchmark。
 
-API compute 含共享预处理、拟合和合并；API total 与保存单独记录。进程 wall 从实际启动至独立 wait 完成，含导入、CUDA 初始化、保存和观察器开销；输入及 GPU 预算等待另记，不计入该 wall。[同病例官方/main 配对](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)先逐例计算官方 wall/FNIT wall，再汇总比值，保留 raw 的完整流程与 stage 的三项官方细分割范围。共享资源上分时测得的版本速度变化不归因于单项代码优化。
+<a id="图谱与权重准备"></a>
+<a id="--model下载并校验自动粗分割和皮层分区所需权重"></a>
+<a id="reference"></a>
 
-同病例实际进程 wall 比值如下：先在每例内计算官方/FNIT，再对病例等权汇总，未按精度筛选病例。列出均值 ± 样本 SD、中位数、范围和有效/计划数、NA 数。
-
-| 同病例 wall 比值 | 全部十例 | 新九例 |
-|---|---|---|
-| 官方 fresh 完整流程 / f436de5 raw | 29.010 ± 2.643；中位 29.702；[24.106, 32.966]；10/10，NA 0 | 29.231 ± 2.704；中位 30.331；[24.106, 32.966]；9/9，NA 0 |
-| 官方三项细分割 / ac692bb stage | 5.212 ± 0.457；中位 5.282；[4.476, 5.786]；10/10，NA 0 | 5.293 ± 0.399；中位 5.306；[4.757, 5.786]；9/9，NA 0 |
-
-#### 实际分步骤时间
-
-f436de5 raw 的共享预处理及四项 recipe 总计如下，单位为秒；字段分别为 `shared_preprocessing/seconds`、`brainstem/timing_seconds/total` 和其余三项的 `seconds`。
-
-| f436de5 raw 步骤 | 全部十例 | 新九例 |
-|---|---|---|
-| 共享预处理 | 13.11 ± 0.85 [11.95, 14.74]；10/10，NA 0 | 13.01 ± 0.85 [11.95, 14.74]；9/9，NA 0 |
-| 脑干 recipe | 17.78 ± 0.71 [16.88, 19.24]；10/10，NA 0 | 17.75 ± 0.74 [16.88, 19.24]；9/9，NA 0 |
-| 双侧丘脑 recipe | 74.88 ± 4.76 [67.86, 81.64]；10/10，NA 0 | 75.67 ± 4.32 [68.44, 81.64]；9/9，NA 0 |
-| 左海马/杏仁核 recipe | 64.92 ± 4.18 [57.60, 71.20]；10/10，NA 0 | 65.52 ± 3.95 [57.60, 71.20]；9/9，NA 0 |
-| 右海马/杏仁核 recipe | 64.93 ± 4.03 [55.73, 69.27]；10/10，NA 0 | 64.45 ± 3.96 [55.73, 67.60]；9/9，NA 0 |
-
-ac692bb stage 的实际四项 recipe 总计如下，单位为秒；来自同病例本轮 fresh norm 输入。
-
-| ac692bb stage 步骤 | 全部十例 | 新九例 |
-|---|---|---|
-| 脑干 recipe | 27.39 ± 1.11 [26.34, 29.95]；10/10，NA 0 | 27.51 ± 1.12 [26.34, 29.95]；9/9，NA 0 |
-| 双侧丘脑 recipe | 94.67 ± 4.18 [89.18, 103.65]；10/10，NA 0 | 95.27 ± 3.97 [89.18, 103.65]；9/9，NA 0 |
-| 左海马/杏仁核 recipe | 78.21 ± 4.84 [68.71, 84.31]；10/10，NA 0 | 77.53 ± 4.60 [68.71, 82.57]；9/9，NA 0 |
-| 右海马/杏仁核 recipe | 74.16 ± 8.57 [62.11, 83.05]；10/10，NA 0 | 74.64 ± 8.94 [62.11, 83.05]；9/9，NA 0 |
-
-| 官方实际 command wall（秒） | 全部十例 | 新九例 |
-|---|---|---|
-| recon-all -all | 5981.72 ± 664.15 [4701.85, 6904.68]；10/10，NA 0 | 6038.28 ± 678.41 [4701.85, 6904.68]；9/9，NA 0 |
-| 脑干 | 326.40 ± 39.56 [240.55, 371.25]；10/10，NA 0 | 335.93 ± 27.15 [291.65, 371.25]；9/9，NA 0 |
-| 双侧丘脑 | 455.39 ± 45.26 [400.94, 543.19]；10/10，NA 0 | 461.27 ± 43.77 [400.94, 543.19]；9/9，NA 0 |
-| 双侧海马/杏仁核（一个命令） | 763.30 ± 74.78 [677.19, 898.26]；10/10，NA 0 | 771.72 ± 74.11 [677.19, 898.26]；9/9，NA 0 |
-
-main raw 的全部实际 timer 路径与值见[机器可读对照](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.json)。stage 与官方的对齐、合成准备/拟合、强度准备/拟合及 solver 子步骤来自本轮[分步骤明细](../../validation/subregions/ten_public_t1_20261002/analysis/steps/cohort_steps.tsv)和[汇总](../../validation/subregions/ten_public_t1_20261002/analysis/steps/cohort_steps_summary.tsv)；recon-all 的实际 FSTIME 来源见[日志计时表](../../validation/subregions/ten_public_t1_20261002/analysis/steps/cohort_reconall_fstime.tsv)。未独立记录的步骤耗时为 NA，内部阶段没有双方可比的已保存标签，步骤 Dice 为 NA。recipe 总计包含子步骤，不能重复相加；官方双侧海马/杏仁核 command wall 只计一次。
-
-### 官方对照脑图
-
-本轮 raw-native 脑图按预先定义的全 110 分区加权 Dice 排名，展示开发用 sub-01、中位例 sub-06 和最低例 sub-07。每幅图使用六个 axial slice，官方、FNIT 和标签差异三行共切面、共裁剪与灰度窗；标签显示使用最近邻。显示重采样不改变原评分网格。完整图与切片坐标、文件 SHA 见[实际脑图清单](../../validation/subregions/ten_public_t1_20261002/brain_figures/plot_manifest.json)和[中文结果页](../../validation/subregions/ten_public_t1_20261002/benchmark_results.md#真实-t1-脑图)。
-
-![十例 raw-native 六区域 Dice 热图](../../validation/subregions/ten_public_t1_20261002/brain_figures/cohort_raw_native_family_dice.png)
-
-**按全 110 分区加权 Dice 选择的中位病例 sub-06：海马。**
-
-![中位病例 sub-06 海马，六层轴位官方、FNIT 与标签差异](../../validation/subregions/ten_public_t1_20261002/brain_figures/sub-06_hippocampus_raw_native.png)
-
-**最低病例 sub-07：丘脑和海马。**
-
-![最低病例 sub-07 丘脑，六层轴位官方、FNIT 与标签差异](../../validation/subregions/ten_public_t1_20261002/brain_figures/sub-07_thalamus_raw_native.png)
-
-![最低病例 sub-07 海马，六层轴位官方、FNIT 与标签差异](../../validation/subregions/ten_public_t1_20261002/brain_figures/sub-07_hippocampus_raw_native.png)
-
-
-## 最近版本 benchmark 记录
-
-| 版本与范围 | 官方参考 | 主要记录 |
-|---|---|---|
-| [2026-10-04 同节点 CPU](../../validation/smri_cpu/task5/README.md) | 相同 norm/aseg/wmparc，8 线程配置与 8 物理核预算 | 脑干两个网格均 4/4 区通过，764.691 对 205.553 秒；丘脑原网格 29/45 非空区通过，2464.294 对 275.893 秒；左右海马/杏仁核原网格 3/28、1/28 区通过，3455.410 对 442.305 秒。速度均未通过，全部逐区及脑图保留。[CPU raw v5 整例](../../validation/smri_cpu/task5/raw_all_cpu_v5/README.md)完成，6241.435 秒；原网格 4/105、HR 5/107 非空区通过，仍不等价。全部结构 GPU 旧新标签、后验和表格一致，绑定对应冻结源码。 |
-| [2026-10-02 f436de5 十例 raw 回归](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md) | 同病例本轮 fresh recon-all＋细分割 | f436de5 独立 raw 实测；与 ac692bb 的标签/几何逐值相同，另列新九例 |
-| [十例公开 T1 benchmark](../../validation/subregions/ten_public_t1_20261002/README.md) | 每例完整官方流程，输入/源码/资产哈希已核验 | 固定十例与新九例；110 分区、两类输入、两种评价网格；ac692bb stage 为实际条件测试 |
-| [单例开发重复性与精度修复](../../validation/subregions/reproducibility_20261002/README.md) | 开发病例三次全新官方细分割 | 同参数 all 流程重复性、丘脑完整积分、脑干固定梯度归约、稳定连通域选择；原单例指标、步骤与脑图保留在记录中 |
-| [4178a48](../../validation/subregions/segment_4_subregions/raw_precision_analysis/README.md) | 历史存档；后续重新核对参考来源 | 双侧海马稳定拟合、TorchFAST、白质代理、标准类别图导出 |
-| [入口整合与丘脑回溯修复](../../validation/subregions/segment_4_subregions/stability_fix/README.md) | 历史存档 | 统一公开入口，恢复稳定拟合 |
-| [v16 C6](../../validation/subregions/speed_v16/README.md) | 历史存档，生成来源未闭环核验 | 历史速度基线 |
-
-旧单例结果与十例跨病例统计分开。历史完整 recon-all 与后续细分割的分段时间不当作本轮整例重跑；旧官方存档来源核查及单例前后比较继续保留在原记录中。本轮全部使用同病例 fresh 官方结果，病例间 SD 不用于估计算法随机范围。
-
-## Reference
+## 7. 参考文献、原软件和资源
 
 - 脑干：[Iglesias 等，2015，*NeuroImage*](https://doi.org/10.1016/j.neuroimage.2015.02.065)。
 - 丘脑：[Iglesias 等，2018，*NeuroImage*](https://pmc.ncbi.nlm.nih.gov/articles/PMC6215335/)。
@@ -327,3 +282,42 @@ main raw 的全部实际 timer 路径与值见[机器可读对照](../../validat
 - 粗分割：[Billot 等，2023，*Medical Image Analysis*](https://doi.org/10.1016/j.media.2023.102789)。
 - 皮层分区：[Billot 等，2023，*PNAS*](https://doi.org/10.1073/pnas.2216399120)。
 - [FreeSurfer 亚区原实现](https://github.com/freesurfer/samseg/tree/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/samseg/subregions)及 [GEMS 形变先验实现](https://github.com/freesurfer/samseg/blob/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/gems/kvlAtlasMeshPositionCostAndGradientCalculator.cxx)。
+
+模型使用下列官方原始文件，Git/wheel不包含。固定[assets-v1 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)及公开asset-manifest与当前weights.py逐项大小/SHA记录一致；本轮未重新下载所有大文件。安装器先Release再原站；完整清单见[资源文件清单](../RESOURCE_MANIFEST.md)。
+
+```bash
+fnit-setup-weights --model synthseg-plus --dest /data/fnit-weights
+fnit-setup-weights --model synthseg-plus --dest /data/fnit-weights --verify-only
+```
+
+| 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
+|---|---|---|---|---|---|
+| `synthseg_2.0.h5` | 官方推理权重 / 标签数组 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5) | 53,079,152 B | `f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e` | 允许；FreeSurfer许可，保留条款与归属 |
+| `synthseg_parc_2.0.h5` | 官方推理权重 / 标签数组 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/c04/403/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5) | 53,090,840 B | `83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684` | 允许；FreeSurfer许可，保留条款与归属 |
+| `synthseg_segmentation_labels_2.0.npy` | 官方推理权重 / 标签数组 | [原站](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy) | 348 B | `5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8` | 允许；FreeSurfer许可，保留条款与归属 |
+| `synthseg_segmentation_names_2.0.npy` | 官方推理权重 / 标签数组 | [原站](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy) | 7,168 B | `234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc` | 允许；FreeSurfer许可，保留条款与归属 |
+| `synthseg_topological_classes_2.0.npy` | 官方推理权重 / 标签数组 | [原站](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy) | 348 B | `650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a` | 允许；FreeSurfer许可，保留条款与归属 |
+
+本页列出的模型/数组共5个，106,177,856 B。原始文件许可及归属见[统一资源规则](../WEIGHTS.md#权重许可与归属)。模型推理从本地加载已准备资源。
+
+皮层权重的Release清单official_url仍写annex p0/0f，当前源码使用c04/403；大小与SHA一致。此页采用当前源码原站地址，清单URL差异不当作模型字节变化。
+
+亚区图谱先准备为atlas_root；默认首次运行缺失时自动下载主分割权重/图谱并校验。离线预先执行：
+
+```bash
+fnit-setup-subregion-atlases --output-root /data/subregion_atlases --device cpu
+```
+
+| 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
+|---|---|---|---|---|---|
+| `average/BrainstemSS/atlas/AtlasMesh.gz` | 形变先验/参考网格/标签表 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/0e1/ab4/SHA256E-s1726705--90b0c6a6ade8aa388ef7c682b652ffc6bbd602271fd6b6068f47197514b2df3f.gz/SHA256E-s1726705--90b0c6a6ade8aa388ef7c682b652ffc6bbd602271fd6b6068f47197514b2df3f.gz) | 1,726,705 B | `90b0c6a6ade8aa388ef7c682b652ffc6bbd602271fd6b6068f47197514b2df3f` | 图谱未逐文件确认；仅原站，不镜像 |
+| `average/BrainstemSS/atlas/AtlasDump.mgz` | 形变先验/参考网格/标签表 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/348/313/SHA256E-s48827--14523eaf5e7f596be68d251a50f98ef277f5b7ef8904cca786a3efef8e9e3e7f.mgz/SHA256E-s48827--14523eaf5e7f596be68d251a50f98ef277f5b7ef8904cca786a3efef8e9e3e7f.mgz) | 48,827 B | `14523eaf5e7f596be68d251a50f98ef277f5b7ef8904cca786a3efef8e9e3e7f` | 图谱未逐文件确认；仅原站，不镜像 |
+| `average/BrainstemSS/atlas/compressionLookupTable.txt` | 形变先验/参考网格/标签表 | [原站](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a/distribution/average/BrainstemSS/atlas) | 1,291 B | `8c343757d9ee13ed2d02daeb5f5f5fc764a6adb850b19b9d1b0ad352c96ca15b` | 随包LUT；保留FreeSurfer条款 |
+| `average/ThalamicNuclei/atlas/AtlasMesh.gz` | 形变先验/参考网格/标签表 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/b45/20f/SHA256E-s6844185--7bb5954c43885ddace887fe5fa8e0c0cdcd3bea41beb6185f48a1784e451bd08.gz/SHA256E-s6844185--7bb5954c43885ddace887fe5fa8e0c0cdcd3bea41beb6185f48a1784e451bd08.gz) | 6,844,185 B | `7bb5954c43885ddace887fe5fa8e0c0cdcd3bea41beb6185f48a1784e451bd08` | 图谱未逐文件确认；仅原站，不镜像 |
+| `average/ThalamicNuclei/atlas/AtlasDump.mgz` | 形变先验/参考网格/标签表 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/91d/ce3/SHA256E-s839824--c6bb408e519ebd5fc520dd98da044493f34cb14747f7229fbed224598d129758.mgz/SHA256E-s839824--c6bb408e519ebd5fc520dd98da044493f34cb14747f7229fbed224598d129758.mgz) | 839,824 B | `c6bb408e519ebd5fc520dd98da044493f34cb14747f7229fbed224598d129758` | 图谱未逐文件确认；仅原站，不镜像 |
+| `average/ThalamicNuclei/atlas/compressionLookupTable.txt` | 形变先验/参考网格/标签表 | [原站](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a/distribution/average/ThalamicNuclei/atlas) | 2,130 B | `9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff` | 随包LUT；保留FreeSurfer条款 |
+| `average/HippoSF/atlas/AtlasMesh.gz` | 形变先验/参考网格/标签表 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/690/843/SHA256E-s19911600--fafd5b5a005df3a6dcacf544b164ac6692132f1a1c078d66f8d0484d1022225c.gz/SHA256E-s19911600--fafd5b5a005df3a6dcacf544b164ac6692132f1a1c078d66f8d0484d1022225c.gz) | 19,911,600 B | `fafd5b5a005df3a6dcacf544b164ac6692132f1a1c078d66f8d0484d1022225c` | 图谱未逐文件确认；仅原站，不镜像 |
+| `average/HippoSF/atlas/AtlasDump.mgz` | 形变先验/参考网格/标签表 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bc6/434/SHA256E-s366711--a46221d8efcd5dc5f6488bc4fe9e8a2435cf42ec21ce1f85bbd1e3947f793e2d.mgz/SHA256E-s366711--a46221d8efcd5dc5f6488bc4fe9e8a2435cf42ec21ce1f85bbd1e3947f793e2d.mgz) | 366,711 B | `a46221d8efcd5dc5f6488bc4fe9e8a2435cf42ec21ce1f85bbd1e3947f793e2d` | 图谱未逐文件确认；仅原站，不镜像 |
+| `average/HippoSF/atlas/compressionLookupTable.txt` | 形变先验/参考网格/标签表 | [原站](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a/distribution/average/HippoSF/atlas) | 2,595 B | `5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362` | 随包LUT；保留FreeSurfer条款 |
+
+右侧HippoSF复用同一官方图谱并按右侧recipe生成；平滑数组为FNIT准备产物。AtlasMesh/AtlasDump仅原站；三个标签查找表已随包按原文件大小/SHA校验。逐文件清单见[assets.py](../../src/fnit/recon_all/assets.py)，不将LUT许可推广为第三方图谱镜像许可。

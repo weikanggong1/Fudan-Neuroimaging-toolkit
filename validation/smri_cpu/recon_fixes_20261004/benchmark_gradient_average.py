@@ -77,12 +77,21 @@ def main():
         if args.device == "cuda":
             torch.cuda.synchronize(0)
 
+    gpu_peaks = {}
+
     def measure(key, iterations):
         synchronize()
+        if args.device == "cuda":
+            torch.cuda.reset_peak_memory_stats(0)
         started = time.perf_counter()
         values = averagers[key](gradient, iterations)
         synchronize()
-        return values, time.perf_counter() - started
+        elapsed = time.perf_counter() - started
+        if args.device == "cuda":
+            gpu_peaks.setdefault(key, []).append({"iterations": iterations,
+                "allocated_bytes": torch.cuda.max_memory_allocated(0),
+                "reserved_bytes": torch.cuda.max_memory_reserved(0)})
+        return values, elapsed
 
     report = {"scope": "complete_real_surface_gradient_averaging_only",
               "hostname": socket.gethostname(), "device": args.device,
@@ -117,6 +126,12 @@ def main():
         report["peak_allocated_bytes"] = torch.cuda.max_memory_allocated(0)
         report["peak_reserved_bytes"] = torch.cuda.max_memory_reserved(0)
         report["gpu_name"] = torch.cuda.get_device_name(0)
+        report["variant_GPU_peaks"] = gpu_peaks
+        helper_names = [key for key in sys.modules if key.startswith("fnit.recon_all._average_cpu_cpp")]
+        report["CPU_helper_modules_loaded"] = helper_names
+        if helper_names:
+            raise AssertionError("CUDA averaging loaded the CPU compilation helper")
+        report["gpu_uuid_selected"] = os.environ.get("FNIT_GPU_UUID", "not_recorded")
     report["gate_passed"] = True
     (args.output / "record.public.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report))

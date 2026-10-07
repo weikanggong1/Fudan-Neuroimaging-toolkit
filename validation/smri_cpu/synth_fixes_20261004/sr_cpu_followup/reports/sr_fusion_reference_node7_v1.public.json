@@ -1,0 +1,63 @@
+{
+  "driver_sha256": "27cc8aadbec516d65376eaa11a5407866337009b6cbf9bb7abe9eaf9899d26cb",
+  "tensorflow_version": "2.13.1",
+  "scope": "prefix-only fusion controls; does not replace original full inference oracle or benchmark",
+  "controls": {
+    "original": {
+      "0": {
+        "input_file_sha256": "dcddd2d51bc1da5b238cb29a7b8ff2d2c0bc0fe877acbb7a32c94a5e184e2465",
+        "output_array_sha256": "b12f30571a394cdb9159e25e03891482af34dda5b16f3ad569ee14abdf023bd3",
+        "matches_frozen_whole_graph": false
+      },
+      "1": {
+        "input_file_sha256": "02d85a6aabc6e4e69009b774d87beb09544174e03cff07c35a87c22d9f731df8",
+        "output_array_sha256": "e6aeae422d071fe98f56de822e2872aa9f460eeba920a475a857ee9e7508f35b",
+        "matches_frozen_whole_graph": false
+      },
+      "actual_execution_event_names": [
+        "convert_to_tensor",
+        "model/unet_conv_downarm_0_0/BiasAdd/ReadVariableOp:ReadVariableOp",
+        "model/unet_conv_downarm_0_0/Conv3D/ReadVariableOp:ReadVariableOp",
+        "model/unet_conv_downarm_0_0/Elu:_MklNativeFusedConv3D",
+        "model/unet_conv_downarm_0_1/BiasAdd/ReadVariableOp:ReadVariableOp",
+        "model/unet_conv_downarm_0_1/BiasAdd:_MklNativeFusedConv3D",
+        "model/unet_conv_downarm_0_1/Conv3D/ReadVariableOp:ReadVariableOp",
+        "model/unet_conv_downarm_0_1/Elu:Elu"
+      ],
+      "optimizer_options": {
+        "disable_model_pruning": false,
+        "disable_meta_optimizer": false
+      }
+    },
+    "remapping_disabled": {
+      "0": {
+        "input_file_sha256": "dcddd2d51bc1da5b238cb29a7b8ff2d2c0bc0fe877acbb7a32c94a5e184e2465",
+        "output_array_sha256": "3054fb378a4f896de3859babcf20a94be157b1bf7941106188182907ab11d1f5",
+        "matches_frozen_whole_graph": false
+      },
+      "1": {
+        "input_file_sha256": "02d85a6aabc6e4e69009b774d87beb09544174e03cff07c35a87c22d9f731df8",
+        "output_array_sha256": "2e02459d359fb3a58fba8e38146863dec0e1bf9ee30ca181de6c77095f5fc164",
+        "matches_frozen_whole_graph": false
+      },
+      "actual_execution_event_names": [
+        "convert_to_tensor",
+        "model_1/unet_conv_downarm_0_0/BiasAdd/ReadVariableOp:ReadVariableOp",
+        "model_1/unet_conv_downarm_0_0/BiasAdd:BiasAdd",
+        "model_1/unet_conv_downarm_0_0/Conv3D/ReadVariableOp:ReadVariableOp",
+        "model_1/unet_conv_downarm_0_0/Conv3D:_MklNativeConv3D",
+        "model_1/unet_conv_downarm_0_0/Elu:Elu",
+        "model_1/unet_conv_downarm_0_1/BiasAdd/ReadVariableOp:ReadVariableOp",
+        "model_1/unet_conv_downarm_0_1/BiasAdd:BiasAdd",
+        "model_1/unet_conv_downarm_0_1/Conv3D/ReadVariableOp:ReadVariableOp",
+        "model_1/unet_conv_downarm_0_1/Conv3D:_MklNativeConv3D",
+        "model_1/unet_conv_downarm_0_1/Elu:Elu"
+      ],
+      "optimizer_options": {
+        "remapping": false,
+        "disable_model_pruning": false,
+        "disable_meta_optimizer": false
+      }
+    }
+  }
+}

@@ -1,0 +1,1978 @@
+{
+  "status": "complete",
+  "scope": "Complete real490-frame matched CPU1/8 original CBIG/frozen FNIT/current candidate; fixed17 identities on all64984 vertices",
+  "baseline_commit": "cc9402734faeba93b3a13c29932fa1392eaccf62",
+  "reference_commit": "b69b822a15e2a94f1e439606552fc44b6858cf3c",
+  "input_sha256": "ebf2f4ac854e5e521819b5182233442a6b18271c81e62c4609f03cc0cbb4dcdd",
+  "current_candidate_modules_sha256": {
+    "__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+    "cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+    "volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+    "output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb",
+    "core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e"
+  },
+  "complete_frames": 490,
+  "complete_fsLR_vertices": 64984,
+  "network_identities_permuted": false,
+  "timing_protocol": "One complete fresh-process observation per implementation and thread budget; no warmup or stable speedup inference",
+  "full_process_clock_scope": "GNU time around actual reference/FNIT process; includes interpreter/imports, validation, complete function and report saving; excludes CPU lease wait and preparation",
+  "records": [
+    {
+      "implementation": "cbig",
+      "threads": 1,
+      "affinity": [
+        2
+      ],
+      "hostname": "nodecw10",
+      "load_before": [
+        2519.56,
+        2493.46,
+        2474.6
+      ],
+      "load_after": [
+        2425.57,
+        2439.48,
+        2449.9
+      ],
+      "report_sha256": "569544c4c10fd24b25a114865251e50aaaed10b812d3c9ca322b5cf3451e78d9",
+      "full_process_wall_seconds": 1918.47,
+      "user_seconds": 120.57,
+      "system_seconds": 25.25,
+      "peak_RSS_bytes": 7923331072,
+      "exit_status": 0,
+      "GNU_time_receipt_sha256": "e63f3c346ca9d5db65341cce53fd723371f0de316020f292b33eb80d679cae71",
+      "function_chain_seconds": 1741.111476,
+      "API_clock_scope": "Original CBIG full CIFTI wrapper: original reader, profiles, complete inference and upstream normal save; isolated benchmark label-MAT export after this clock",
+      "reference_commit": "b69b822a15e2a94f1e439606552fc44b6858cf3c",
+      "matlab_version": "9.5.0.944444 (R2018b)"
+    },
+    {
+      "implementation": "fnit",
+      "threads": 1,
+      "affinity": [
+        2
+      ],
+      "hostname": "nodecw10",
+      "load_before": [
+        2425.57,
+        2439.48,
+        2449.9
+      ],
+      "load_after": [
+        2427.23,
+        2450.32,
+        2460.9
+      ],
+      "report_sha256": "241e9eeadaea5217ef6ff7cf76d9e6b7892f8fb0760b5bc9f10161c53074c280",
+      "full_process_wall_seconds": 1204.47,
+      "user_seconds": 61.7,
+      "system_seconds": 33.56,
+      "peak_RSS_bytes": 2810847232,
+      "exit_status": 0,
+      "GNU_time_receipt_sha256": "c8f30d6017550f214fb7c7fb945634a91c00c5ab9389725d822ea41d36643afc",
+      "function_chain_seconds": 1164.583443261683,
+      "stages_seconds": {
+        "load_assets": 0.1855933666229248,
+        "read_cortex": 7.310193486511707,
+        "build_profiles": 53.545284263789654,
+        "parcellate": 1094.2522814273834,
+        "save_results": 8.574255958199501
+      },
+      "API_clock_scope": "Complete FNIT surface call, including normal label/network-timeseries/FC/provenance output save; benchmark validation and report outside this clock",
+      "actual_source_sha256": {
+        "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+        "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+        "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+        "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+        "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+      }
+    },
+    {
+      "implementation": "fnit_candidate",
+      "threads": 1,
+      "affinity": [
+        2
+      ],
+      "hostname": "nodecw10",
+      "load_before": [
+        2427.23,
+        2450.32,
+        2460.9
+      ],
+      "load_after": [
+        2533.5,
+        2497.78,
+        2476.52
+      ],
+      "report_sha256": "d981b0daf341639f1cde374413350b175fc134a4e2aafbf665f3b678620f8b8e",
+      "full_process_wall_seconds": 645.81,
+      "user_seconds": 48.58,
+      "system_seconds": 3.52,
+      "peak_RSS_bytes": 3081650176,
+      "exit_status": 0,
+      "GNU_time_receipt_sha256": "6503ae4d13b751baf7cddb13d9200ec25ed884f8154211a14b13765056bd3710",
+      "function_chain_seconds": 603.3804881721735,
+      "stages_seconds": {
+        "load_assets": 0.41448383778333664,
+        "read_cortex": 12.331960573792458,
+        "build_profiles": 51.52732180804014,
+        "parcellate": 530.732121437788,
+        "save_results": 7.5582635924220085
+      },
+      "API_clock_scope": "Complete FNIT surface call, including normal label/network-timeseries/FC/provenance output save; benchmark validation and report outside this clock",
+      "actual_source_sha256": {
+        "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+        "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+        "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+        "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+        "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+      }
+    },
+    {
+      "implementation": "cbig",
+      "threads": 8,
+      "affinity": [
+        2,
+        6,
+        10,
+        14,
+        18,
+        22,
+        26,
+        30
+      ],
+      "hostname": "nodecw10",
+      "load_before": [
+        2533.5,
+        2497.78,
+        2476.52
+      ],
+      "load_after": [
+        2415.15,
+        2487.09,
+        2487.41
+      ],
+      "report_sha256": "83e51fbb60a002b8b009dbb49568bea3511dc6a960513e5cf5d33d08ba348778",
+      "full_process_wall_seconds": 1361.02,
+      "user_seconds": 219.56,
+      "system_seconds": 91.71,
+      "peak_RSS_bytes": 7942975488,
+      "exit_status": 0,
+      "GNU_time_receipt_sha256": "4003321096c9a571a7dd23d2db730fc11f74a9c7a8fc746123b32d58e0614693",
+      "function_chain_seconds": 1199.322612,
+      "API_clock_scope": "Original CBIG full CIFTI wrapper: original reader, profiles, complete inference and upstream normal save; isolated benchmark label-MAT export after this clock",
+      "reference_commit": "b69b822a15e2a94f1e439606552fc44b6858cf3c",
+      "matlab_version": "9.5.0.944444 (R2018b)"
+    },
+    {
+      "implementation": "fnit",
+      "threads": 8,
+      "affinity": [
+        2,
+        6,
+        10,
+        14,
+        18,
+        22,
+        26,
+        30
+      ],
+      "hostname": "nodecw10",
+      "load_before": [
+        2415.15,
+        2487.09,
+        2487.41
+      ],
+      "load_after": [
+        2539.78,
+        2497.06,
+        2482.12
+      ],
+      "report_sha256": "f1d7a0ad6b0b55ab94c6b0ddd80b82a39f8829792d0a3c2cda5c2284eeff75ea",
+      "full_process_wall_seconds": 817.33,
+      "user_seconds": 70.8,
+      "system_seconds": 35.61,
+      "peak_RSS_bytes": 2813636608,
+      "exit_status": 0,
+      "GNU_time_receipt_sha256": "eb43ea494210467c149b07a86a92272cb16ca55dfe7173550dc1a42f11914302",
+      "function_chain_seconds": 773.1205555349588,
+      "stages_seconds": {
+        "load_assets": 0.39807429164648056,
+        "read_cortex": 13.429934591054916,
+        "build_profiles": 39.44150200486183,
+        "parcellate": 709.9498735740781,
+        "save_results": 8.894949585199356
+      },
+      "API_clock_scope": "Complete FNIT surface call, including normal label/network-timeseries/FC/provenance output save; benchmark validation and report outside this clock",
+      "actual_source_sha256": {
+        "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+        "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+        "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+        "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+        "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+      }
+    },
+    {
+      "implementation": "fnit_candidate",
+      "threads": 8,
+      "affinity": [
+        2,
+        6,
+        10,
+        14,
+        18,
+        22,
+        26,
+        30
+      ],
+      "hostname": "nodecw10",
+      "load_before": [
+        2539.78,
+        2497.06,
+        2482.12
+      ],
+      "load_after": [
+        2472.58,
+        2504.37,
+        2489.32
+      ],
+      "report_sha256": "4df145c382f7afe4ebbef7305784265ed5293889eebf1e6871742a23bcb4301d",
+      "full_process_wall_seconds": 222.57999999999998,
+      "user_seconds": 51.38,
+      "system_seconds": 8.41,
+      "peak_RSS_bytes": 3083960320,
+      "exit_status": 0,
+      "GNU_time_receipt_sha256": "0e9067d4dff737193b33fce3eb827cc27306360374a2c862982e31718671ef70",
+      "function_chain_seconds": 181.45719330757856,
+      "stages_seconds": {
+        "load_assets": 0.2843653932213783,
+        "read_cortex": 13.187945425510406,
+        "build_profiles": 46.93804270029068,
+        "parcellate": 113.35199044644833,
+        "save_results": 6.667521119117737
+      },
+      "API_clock_scope": "Complete FNIT surface call, including normal label/network-timeseries/FC/provenance output save; benchmark validation and report outside this clock",
+      "actual_source_sha256": {
+        "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+        "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+        "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+        "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+        "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+      }
+    }
+  ],
+  "precision_by_CPU_threads": {
+    "1": {
+      "precision_receipt_sha256": "0be1e94f317cc21ef92d057373b8627b53b322c16bd47222732a78cfc725cabc",
+      "report": {
+        "scope": "completed original CBIG versus complete FNIT labels",
+        "full_vertices": 64984,
+        "network_identities_permuted": false,
+        "reference_commit": "b69b822a15e2a94f1e439606552fc44b6858cf3c",
+        "input_sha256": "ebf2f4ac854e5e521819b5182233442a6b18271c81e62c4609f03cc0cbb4dcdd",
+        "reader_values_compared": 29111880,
+        "coordinator_and_input_gates_passed": true,
+        "official_affinity": [
+          2
+        ],
+        "actual_official_functions_sha256": {
+          "CBIG_corr": "cd1e5df5bfaabbd66e524e3cdc697ba803d9f70d702fa534ca6388956e8d7bff",
+          "CBIG_MSHBM_parcellation_single_subject": "74a09143d5ed04db6dada7acb8f4a71fbc893942d1b0b2458ed8b31206909373",
+          "gifti": "a7e30cdc9679849a409f9b09b2636d32c483a948c012e17cdd0ec054fe26b1c2",
+          "ft_write_cifti": "95f3706eb1e1a19799676477a6acee71a26da0f13411b7363ad7eb20fced2d7c",
+          "ft_read_cifti": "cbff4fe5964a9820b2765818f6ec9fbad5e7e9b5e7150690f35b96b6909df7ba",
+          "CBIG_MSHBM_read_fmri": "70dab111a9e08fc93c1c69a59b8801e52784fba0e40e945dbf722d6ce61590f0",
+          "xmltree": "b0b7c78e0024edc8f90dd54e6476421732f80e8dafae3b497651f89692e06f34",
+          "CBIG_MSHBM_generate_individual_parcellation": "ce5c5a8596994c19c88e1a0ddb65dd28b4e3c31ded5887a89dacd667f4d0b3bb",
+          "CBIG_ComputeCorrelationProfile": "2c71f43d67c2db3194298bc0f65b5371c0cd28bed76f6a1ea67f456a03ed72e8"
+        },
+        "official_labels_sha256": "c1a8dce359de814b048b0463a58aac6c0924eb2c086cba6c20e2b0b8961f59ad",
+        "official_report": {
+          "mode": "full",
+          "function_seconds": 1741.111476,
+          "matlab_version": "9.5.0.944444 (R2018b)",
+          "threads": 1,
+          "vertex_count": 64984,
+          "w": 200,
+          "c": 50
+        },
+        "comparisons": [
+          {
+            "kind": "surface",
+            "threads": 1,
+            "device": "cpu",
+            "actual_source_sha256": {
+              "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+              "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+              "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+              "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+              "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+            },
+            "fnit_labels_sha256": "78b75d7bda4aaf46f69f06aa210677485a0a7e5bb5c503db3653e31d11d868cf",
+            "fnit_input_receipts": [
+              {
+                "size": 179548160,
+                "sha256": "ebf2f4ac854e5e521819b5182233442a6b18271c81e62c4609f03cc0cbb4dcdd"
+              }
+            ],
+            "function_chain_seconds": 1164.583443261683,
+            "stages_seconds": {
+              "load_assets": 0.1855933666229248,
+              "read_cortex": 7.310193486511707,
+              "build_profiles": 53.545284263789654,
+              "parcellate": 1094.2522814273834,
+              "save_results": 8.574255958199501
+            },
+            "precision": {
+              "left": {
+                "vertices": 32492,
+                "different_labels": 1,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 1902,
+                    "fnit_vertices": 1902,
+                    "intersection": 1902,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 1888,
+                    "fnit_vertices": 1888,
+                    "intersection": 1888,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 1704,
+                    "fnit_vertices": 1704,
+                    "intersection": 1704,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 1940,
+                    "fnit_vertices": 1939,
+                    "intersection": 1939,
+                    "dice": 0.9997422015983501
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 1818,
+                    "fnit_vertices": 1818,
+                    "intersection": 1818,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 1050,
+                    "fnit_vertices": 1050,
+                    "intersection": 1050,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 2822,
+                    "fnit_vertices": 2822,
+                    "intersection": 2822,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 1843,
+                    "fnit_vertices": 1843,
+                    "intersection": 1843,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 1941,
+                    "fnit_vertices": 1941,
+                    "intersection": 1941,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 2222,
+                    "fnit_vertices": 2222,
+                    "intersection": 2222,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 2167,
+                    "fnit_vertices": 2167,
+                    "intersection": 2167,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 2637,
+                    "fnit_vertices": 2638,
+                    "intersection": 2637,
+                    "dice": 0.9998104265402844
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 866,
+                    "fnit_vertices": 866,
+                    "intersection": 866,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 1165,
+                    "fnit_vertices": 1165,
+                    "intersection": 1165,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 1571,
+                    "fnit_vertices": 1571,
+                    "intersection": 1571,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 1417,
+                    "fnit_vertices": 1417,
+                    "intersection": 1417,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 731,
+                    "fnit_vertices": 731,
+                    "intersection": 731,
+                    "dice": 1.0
+                  }
+                ]
+              },
+              "right": {
+                "vertices": 32492,
+                "different_labels": 0,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 2262,
+                    "fnit_vertices": 2262,
+                    "intersection": 2262,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 1656,
+                    "fnit_vertices": 1656,
+                    "intersection": 1656,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 2139,
+                    "fnit_vertices": 2139,
+                    "intersection": 2139,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 803,
+                    "fnit_vertices": 803,
+                    "intersection": 803,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 1633,
+                    "fnit_vertices": 1633,
+                    "intersection": 1633,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 1315,
+                    "fnit_vertices": 1315,
+                    "intersection": 1315,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 2626,
+                    "fnit_vertices": 2626,
+                    "intersection": 2626,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 2573,
+                    "fnit_vertices": 2573,
+                    "intersection": 2573,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 2423,
+                    "fnit_vertices": 2423,
+                    "intersection": 2423,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 2411,
+                    "fnit_vertices": 2411,
+                    "intersection": 2411,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 1873,
+                    "fnit_vertices": 1873,
+                    "intersection": 1873,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 1585,
+                    "fnit_vertices": 1585,
+                    "intersection": 1585,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 1407,
+                    "fnit_vertices": 1407,
+                    "intersection": 1407,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 1677,
+                    "fnit_vertices": 1677,
+                    "intersection": 1677,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 1476,
+                    "fnit_vertices": 1476,
+                    "intersection": 1476,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 1394,
+                    "fnit_vertices": 1394,
+                    "intersection": 1394,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 456,
+                    "fnit_vertices": 456,
+                    "intersection": 456,
+                    "dice": 1.0
+                  }
+                ]
+              },
+              "both": {
+                "vertices": 64984,
+                "different_labels": 1,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 4164,
+                    "fnit_vertices": 4164,
+                    "intersection": 4164,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 3544,
+                    "fnit_vertices": 3544,
+                    "intersection": 3544,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 3843,
+                    "fnit_vertices": 3843,
+                    "intersection": 3843,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 2743,
+                    "fnit_vertices": 2742,
+                    "intersection": 2742,
+                    "dice": 0.9998176845943483
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 3451,
+                    "fnit_vertices": 3451,
+                    "intersection": 3451,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 2365,
+                    "fnit_vertices": 2365,
+                    "intersection": 2365,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 5448,
+                    "fnit_vertices": 5448,
+                    "intersection": 5448,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 4416,
+                    "fnit_vertices": 4416,
+                    "intersection": 4416,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 4364,
+                    "fnit_vertices": 4364,
+                    "intersection": 4364,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 4633,
+                    "fnit_vertices": 4633,
+                    "intersection": 4633,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 4040,
+                    "fnit_vertices": 4040,
+                    "intersection": 4040,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 4222,
+                    "fnit_vertices": 4223,
+                    "intersection": 4222,
+                    "dice": 0.9998815867377147
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 2273,
+                    "fnit_vertices": 2273,
+                    "intersection": 2273,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 2842,
+                    "fnit_vertices": 2842,
+                    "intersection": 2842,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 3047,
+                    "fnit_vertices": 3047,
+                    "intersection": 3047,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 2811,
+                    "fnit_vertices": 2811,
+                    "intersection": 2811,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 1187,
+                    "fnit_vertices": 1187,
+                    "intersection": 1187,
+                    "dice": 1.0
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "surface",
+            "threads": 1,
+            "device": "cpu",
+            "actual_source_sha256": {
+              "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+              "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+              "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+              "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+              "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+            },
+            "fnit_labels_sha256": "78b75d7bda4aaf46f69f06aa210677485a0a7e5bb5c503db3653e31d11d868cf",
+            "fnit_input_receipts": [
+              {
+                "size": 179548160,
+                "sha256": "ebf2f4ac854e5e521819b5182233442a6b18271c81e62c4609f03cc0cbb4dcdd"
+              }
+            ],
+            "function_chain_seconds": 603.3804881721735,
+            "stages_seconds": {
+              "load_assets": 0.41448383778333664,
+              "read_cortex": 12.331960573792458,
+              "build_profiles": 51.52732180804014,
+              "parcellate": 530.732121437788,
+              "save_results": 7.5582635924220085
+            },
+            "precision": {
+              "left": {
+                "vertices": 32492,
+                "different_labels": 1,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 1902,
+                    "fnit_vertices": 1902,
+                    "intersection": 1902,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 1888,
+                    "fnit_vertices": 1888,
+                    "intersection": 1888,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 1704,
+                    "fnit_vertices": 1704,
+                    "intersection": 1704,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 1940,
+                    "fnit_vertices": 1939,
+                    "intersection": 1939,
+                    "dice": 0.9997422015983501
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 1818,
+                    "fnit_vertices": 1818,
+                    "intersection": 1818,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 1050,
+                    "fnit_vertices": 1050,
+                    "intersection": 1050,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 2822,
+                    "fnit_vertices": 2822,
+                    "intersection": 2822,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 1843,
+                    "fnit_vertices": 1843,
+                    "intersection": 1843,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 1941,
+                    "fnit_vertices": 1941,
+                    "intersection": 1941,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 2222,
+                    "fnit_vertices": 2222,
+                    "intersection": 2222,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 2167,
+                    "fnit_vertices": 2167,
+                    "intersection": 2167,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 2637,
+                    "fnit_vertices": 2638,
+                    "intersection": 2637,
+                    "dice": 0.9998104265402844
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 866,
+                    "fnit_vertices": 866,
+                    "intersection": 866,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 1165,
+                    "fnit_vertices": 1165,
+                    "intersection": 1165,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 1571,
+                    "fnit_vertices": 1571,
+                    "intersection": 1571,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 1417,
+                    "fnit_vertices": 1417,
+                    "intersection": 1417,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 731,
+                    "fnit_vertices": 731,
+                    "intersection": 731,
+                    "dice": 1.0
+                  }
+                ]
+              },
+              "right": {
+                "vertices": 32492,
+                "different_labels": 0,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 2262,
+                    "fnit_vertices": 2262,
+                    "intersection": 2262,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 1656,
+                    "fnit_vertices": 1656,
+                    "intersection": 1656,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 2139,
+                    "fnit_vertices": 2139,
+                    "intersection": 2139,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 803,
+                    "fnit_vertices": 803,
+                    "intersection": 803,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 1633,
+                    "fnit_vertices": 1633,
+                    "intersection": 1633,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 1315,
+                    "fnit_vertices": 1315,
+                    "intersection": 1315,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 2626,
+                    "fnit_vertices": 2626,
+                    "intersection": 2626,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 2573,
+                    "fnit_vertices": 2573,
+                    "intersection": 2573,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 2423,
+                    "fnit_vertices": 2423,
+                    "intersection": 2423,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 2411,
+                    "fnit_vertices": 2411,
+                    "intersection": 2411,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 1873,
+                    "fnit_vertices": 1873,
+                    "intersection": 1873,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 1585,
+                    "fnit_vertices": 1585,
+                    "intersection": 1585,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 1407,
+                    "fnit_vertices": 1407,
+                    "intersection": 1407,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 1677,
+                    "fnit_vertices": 1677,
+                    "intersection": 1677,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 1476,
+                    "fnit_vertices": 1476,
+                    "intersection": 1476,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 1394,
+                    "fnit_vertices": 1394,
+                    "intersection": 1394,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 456,
+                    "fnit_vertices": 456,
+                    "intersection": 456,
+                    "dice": 1.0
+                  }
+                ]
+              },
+              "both": {
+                "vertices": 64984,
+                "different_labels": 1,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 4164,
+                    "fnit_vertices": 4164,
+                    "intersection": 4164,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 3544,
+                    "fnit_vertices": 3544,
+                    "intersection": 3544,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 3843,
+                    "fnit_vertices": 3843,
+                    "intersection": 3843,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 2743,
+                    "fnit_vertices": 2742,
+                    "intersection": 2742,
+                    "dice": 0.9998176845943483
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 3451,
+                    "fnit_vertices": 3451,
+                    "intersection": 3451,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 2365,
+                    "fnit_vertices": 2365,
+                    "intersection": 2365,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 5448,
+                    "fnit_vertices": 5448,
+                    "intersection": 5448,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 4416,
+                    "fnit_vertices": 4416,
+                    "intersection": 4416,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 4364,
+                    "fnit_vertices": 4364,
+                    "intersection": 4364,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 4633,
+                    "fnit_vertices": 4633,
+                    "intersection": 4633,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 4040,
+                    "fnit_vertices": 4040,
+                    "intersection": 4040,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 4222,
+                    "fnit_vertices": 4223,
+                    "intersection": 4222,
+                    "dice": 0.9998815867377147
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 2273,
+                    "fnit_vertices": 2273,
+                    "intersection": 2273,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 2842,
+                    "fnit_vertices": 2842,
+                    "intersection": 2842,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 3047,
+                    "fnit_vertices": 3047,
+                    "intersection": 3047,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 2811,
+                    "fnit_vertices": 2811,
+                    "intersection": 2811,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 1187,
+                    "fnit_vertices": 1187,
+                    "intersection": 1187,
+                    "dice": 1.0
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "8": {
+      "precision_receipt_sha256": "dcf6b6602bacef2d3ffa6ce02984adcd26a8123f62578ae2d9ab9c9187218c3b",
+      "report": {
+        "scope": "completed original CBIG versus complete FNIT labels",
+        "full_vertices": 64984,
+        "network_identities_permuted": false,
+        "reference_commit": "b69b822a15e2a94f1e439606552fc44b6858cf3c",
+        "input_sha256": "ebf2f4ac854e5e521819b5182233442a6b18271c81e62c4609f03cc0cbb4dcdd",
+        "reader_values_compared": 29111880,
+        "coordinator_and_input_gates_passed": true,
+        "official_affinity": [
+          2,
+          6,
+          10,
+          14,
+          18,
+          22,
+          26,
+          30
+        ],
+        "actual_official_functions_sha256": {
+          "CBIG_MSHBM_read_fmri": "70dab111a9e08fc93c1c69a59b8801e52784fba0e40e945dbf722d6ce61590f0",
+          "gifti": "a7e30cdc9679849a409f9b09b2636d32c483a948c012e17cdd0ec054fe26b1c2",
+          "xmltree": "b0b7c78e0024edc8f90dd54e6476421732f80e8dafae3b497651f89692e06f34",
+          "CBIG_corr": "cd1e5df5bfaabbd66e524e3cdc697ba803d9f70d702fa534ca6388956e8d7bff",
+          "CBIG_ComputeCorrelationProfile": "2c71f43d67c2db3194298bc0f65b5371c0cd28bed76f6a1ea67f456a03ed72e8",
+          "CBIG_MSHBM_generate_individual_parcellation": "ce5c5a8596994c19c88e1a0ddb65dd28b4e3c31ded5887a89dacd667f4d0b3bb",
+          "CBIG_MSHBM_parcellation_single_subject": "74a09143d5ed04db6dada7acb8f4a71fbc893942d1b0b2458ed8b31206909373",
+          "ft_read_cifti": "cbff4fe5964a9820b2765818f6ec9fbad5e7e9b5e7150690f35b96b6909df7ba",
+          "ft_write_cifti": "95f3706eb1e1a19799676477a6acee71a26da0f13411b7363ad7eb20fced2d7c"
+        },
+        "official_labels_sha256": "d909e5ff03324ca5af784f910ce1d1994b5b802673d3042db05a4f361c9c578f",
+        "official_report": {
+          "mode": "full",
+          "function_seconds": 1199.322612,
+          "matlab_version": "9.5.0.944444 (R2018b)",
+          "threads": 8,
+          "vertex_count": 64984,
+          "w": 200,
+          "c": 50
+        },
+        "comparisons": [
+          {
+            "kind": "surface",
+            "threads": 8,
+            "device": "cpu",
+            "actual_source_sha256": {
+              "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+              "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+              "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+              "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+              "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+            },
+            "fnit_labels_sha256": "78b75d7bda4aaf46f69f06aa210677485a0a7e5bb5c503db3653e31d11d868cf",
+            "fnit_input_receipts": [
+              {
+                "size": 179548160,
+                "sha256": "ebf2f4ac854e5e521819b5182233442a6b18271c81e62c4609f03cc0cbb4dcdd"
+              }
+            ],
+            "function_chain_seconds": 773.1205555349588,
+            "stages_seconds": {
+              "load_assets": 0.39807429164648056,
+              "read_cortex": 13.429934591054916,
+              "build_profiles": 39.44150200486183,
+              "parcellate": 709.9498735740781,
+              "save_results": 8.894949585199356
+            },
+            "precision": {
+              "left": {
+                "vertices": 32492,
+                "different_labels": 0,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 1902,
+                    "fnit_vertices": 1902,
+                    "intersection": 1902,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 1888,
+                    "fnit_vertices": 1888,
+                    "intersection": 1888,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 1704,
+                    "fnit_vertices": 1704,
+                    "intersection": 1704,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 1939,
+                    "fnit_vertices": 1939,
+                    "intersection": 1939,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 1818,
+                    "fnit_vertices": 1818,
+                    "intersection": 1818,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 1050,
+                    "fnit_vertices": 1050,
+                    "intersection": 1050,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 2822,
+                    "fnit_vertices": 2822,
+                    "intersection": 2822,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 1843,
+                    "fnit_vertices": 1843,
+                    "intersection": 1843,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 1941,
+                    "fnit_vertices": 1941,
+                    "intersection": 1941,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 2222,
+                    "fnit_vertices": 2222,
+                    "intersection": 2222,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 2167,
+                    "fnit_vertices": 2167,
+                    "intersection": 2167,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 2638,
+                    "fnit_vertices": 2638,
+                    "intersection": 2638,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 866,
+                    "fnit_vertices": 866,
+                    "intersection": 866,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 1165,
+                    "fnit_vertices": 1165,
+                    "intersection": 1165,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 1571,
+                    "fnit_vertices": 1571,
+                    "intersection": 1571,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 1417,
+                    "fnit_vertices": 1417,
+                    "intersection": 1417,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 731,
+                    "fnit_vertices": 731,
+                    "intersection": 731,
+                    "dice": 1.0
+                  }
+                ]
+              },
+              "right": {
+                "vertices": 32492,
+                "different_labels": 0,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 2262,
+                    "fnit_vertices": 2262,
+                    "intersection": 2262,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 1656,
+                    "fnit_vertices": 1656,
+                    "intersection": 1656,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 2139,
+                    "fnit_vertices": 2139,
+                    "intersection": 2139,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 803,
+                    "fnit_vertices": 803,
+                    "intersection": 803,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 1633,
+                    "fnit_vertices": 1633,
+                    "intersection": 1633,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 1315,
+                    "fnit_vertices": 1315,
+                    "intersection": 1315,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 2626,
+                    "fnit_vertices": 2626,
+                    "intersection": 2626,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 2573,
+                    "fnit_vertices": 2573,
+                    "intersection": 2573,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 2423,
+                    "fnit_vertices": 2423,
+                    "intersection": 2423,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 2411,
+                    "fnit_vertices": 2411,
+                    "intersection": 2411,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 1873,
+                    "fnit_vertices": 1873,
+                    "intersection": 1873,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 1585,
+                    "fnit_vertices": 1585,
+                    "intersection": 1585,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 1407,
+                    "fnit_vertices": 1407,
+                    "intersection": 1407,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 1677,
+                    "fnit_vertices": 1677,
+                    "intersection": 1677,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 1476,
+                    "fnit_vertices": 1476,
+                    "intersection": 1476,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 1394,
+                    "fnit_vertices": 1394,
+                    "intersection": 1394,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 456,
+                    "fnit_vertices": 456,
+                    "intersection": 456,
+                    "dice": 1.0
+                  }
+                ]
+              },
+              "both": {
+                "vertices": 64984,
+                "different_labels": 0,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 4164,
+                    "fnit_vertices": 4164,
+                    "intersection": 4164,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 3544,
+                    "fnit_vertices": 3544,
+                    "intersection": 3544,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 3843,
+                    "fnit_vertices": 3843,
+                    "intersection": 3843,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 2742,
+                    "fnit_vertices": 2742,
+                    "intersection": 2742,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 3451,
+                    "fnit_vertices": 3451,
+                    "intersection": 3451,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 2365,
+                    "fnit_vertices": 2365,
+                    "intersection": 2365,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 5448,
+                    "fnit_vertices": 5448,
+                    "intersection": 5448,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 4416,
+                    "fnit_vertices": 4416,
+                    "intersection": 4416,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 4364,
+                    "fnit_vertices": 4364,
+                    "intersection": 4364,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 4633,
+                    "fnit_vertices": 4633,
+                    "intersection": 4633,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 4040,
+                    "fnit_vertices": 4040,
+                    "intersection": 4040,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 4223,
+                    "fnit_vertices": 4223,
+                    "intersection": 4223,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 2273,
+                    "fnit_vertices": 2273,
+                    "intersection": 2273,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 2842,
+                    "fnit_vertices": 2842,
+                    "intersection": 2842,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 3047,
+                    "fnit_vertices": 3047,
+                    "intersection": 3047,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 2811,
+                    "fnit_vertices": 2811,
+                    "intersection": 2811,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 1187,
+                    "fnit_vertices": 1187,
+                    "intersection": 1187,
+                    "dice": 1.0
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "surface",
+            "threads": 8,
+            "device": "cpu",
+            "actual_source_sha256": {
+              "src/fnit/mshbm/__init__.py": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04",
+              "src/fnit/mshbm/core.py": "eabb4d62c810fc180d71f41c0e783bcf2dfd9c1bb6ae42fcc699e44859a9aa9e",
+              "src/fnit/mshbm/cli.py": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e",
+              "src/fnit/mshbm/volume.py": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe",
+              "src/fnit/mshbm/output.py": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+            },
+            "fnit_labels_sha256": "78b75d7bda4aaf46f69f06aa210677485a0a7e5bb5c503db3653e31d11d868cf",
+            "fnit_input_receipts": [
+              {
+                "size": 179548160,
+                "sha256": "ebf2f4ac854e5e521819b5182233442a6b18271c81e62c4609f03cc0cbb4dcdd"
+              }
+            ],
+            "function_chain_seconds": 181.45719330757856,
+            "stages_seconds": {
+              "load_assets": 0.2843653932213783,
+              "read_cortex": 13.187945425510406,
+              "build_profiles": 46.93804270029068,
+              "parcellate": 113.35199044644833,
+              "save_results": 6.667521119117737
+            },
+            "precision": {
+              "left": {
+                "vertices": 32492,
+                "different_labels": 0,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 1902,
+                    "fnit_vertices": 1902,
+                    "intersection": 1902,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 1888,
+                    "fnit_vertices": 1888,
+                    "intersection": 1888,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 1704,
+                    "fnit_vertices": 1704,
+                    "intersection": 1704,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 1939,
+                    "fnit_vertices": 1939,
+                    "intersection": 1939,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 1818,
+                    "fnit_vertices": 1818,
+                    "intersection": 1818,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 1050,
+                    "fnit_vertices": 1050,
+                    "intersection": 1050,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 2822,
+                    "fnit_vertices": 2822,
+                    "intersection": 2822,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 1843,
+                    "fnit_vertices": 1843,
+                    "intersection": 1843,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 1941,
+                    "fnit_vertices": 1941,
+                    "intersection": 1941,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 2222,
+                    "fnit_vertices": 2222,
+                    "intersection": 2222,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 2167,
+                    "fnit_vertices": 2167,
+                    "intersection": 2167,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 2638,
+                    "fnit_vertices": 2638,
+                    "intersection": 2638,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 866,
+                    "fnit_vertices": 866,
+                    "intersection": 866,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 1165,
+                    "fnit_vertices": 1165,
+                    "intersection": 1165,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 1571,
+                    "fnit_vertices": 1571,
+                    "intersection": 1571,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 1417,
+                    "fnit_vertices": 1417,
+                    "intersection": 1417,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 731,
+                    "fnit_vertices": 731,
+                    "intersection": 731,
+                    "dice": 1.0
+                  }
+                ]
+              },
+              "right": {
+                "vertices": 32492,
+                "different_labels": 0,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 2262,
+                    "fnit_vertices": 2262,
+                    "intersection": 2262,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 1656,
+                    "fnit_vertices": 1656,
+                    "intersection": 1656,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 2139,
+                    "fnit_vertices": 2139,
+                    "intersection": 2139,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 803,
+                    "fnit_vertices": 803,
+                    "intersection": 803,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 1633,
+                    "fnit_vertices": 1633,
+                    "intersection": 1633,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 1315,
+                    "fnit_vertices": 1315,
+                    "intersection": 1315,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 2626,
+                    "fnit_vertices": 2626,
+                    "intersection": 2626,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 2573,
+                    "fnit_vertices": 2573,
+                    "intersection": 2573,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 2423,
+                    "fnit_vertices": 2423,
+                    "intersection": 2423,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 2411,
+                    "fnit_vertices": 2411,
+                    "intersection": 2411,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 1873,
+                    "fnit_vertices": 1873,
+                    "intersection": 1873,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 1585,
+                    "fnit_vertices": 1585,
+                    "intersection": 1585,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 1407,
+                    "fnit_vertices": 1407,
+                    "intersection": 1407,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 1677,
+                    "fnit_vertices": 1677,
+                    "intersection": 1677,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 1476,
+                    "fnit_vertices": 1476,
+                    "intersection": 1476,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 1394,
+                    "fnit_vertices": 1394,
+                    "intersection": 1394,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 456,
+                    "fnit_vertices": 456,
+                    "intersection": 456,
+                    "dice": 1.0
+                  }
+                ]
+              },
+              "both": {
+                "vertices": 64984,
+                "different_labels": 0,
+                "background_different": 0,
+                "per_network": [
+                  {
+                    "network": 1,
+                    "original_vertices": 4164,
+                    "fnit_vertices": 4164,
+                    "intersection": 4164,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 2,
+                    "original_vertices": 3544,
+                    "fnit_vertices": 3544,
+                    "intersection": 3544,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 3,
+                    "original_vertices": 3843,
+                    "fnit_vertices": 3843,
+                    "intersection": 3843,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 4,
+                    "original_vertices": 2742,
+                    "fnit_vertices": 2742,
+                    "intersection": 2742,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 5,
+                    "original_vertices": 3451,
+                    "fnit_vertices": 3451,
+                    "intersection": 3451,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 6,
+                    "original_vertices": 2365,
+                    "fnit_vertices": 2365,
+                    "intersection": 2365,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 7,
+                    "original_vertices": 5448,
+                    "fnit_vertices": 5448,
+                    "intersection": 5448,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 8,
+                    "original_vertices": 4416,
+                    "fnit_vertices": 4416,
+                    "intersection": 4416,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 9,
+                    "original_vertices": 4364,
+                    "fnit_vertices": 4364,
+                    "intersection": 4364,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 10,
+                    "original_vertices": 4633,
+                    "fnit_vertices": 4633,
+                    "intersection": 4633,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 11,
+                    "original_vertices": 4040,
+                    "fnit_vertices": 4040,
+                    "intersection": 4040,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 12,
+                    "original_vertices": 4223,
+                    "fnit_vertices": 4223,
+                    "intersection": 4223,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 13,
+                    "original_vertices": 2273,
+                    "fnit_vertices": 2273,
+                    "intersection": 2273,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 14,
+                    "original_vertices": 2842,
+                    "fnit_vertices": 2842,
+                    "intersection": 2842,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 15,
+                    "original_vertices": 3047,
+                    "fnit_vertices": 3047,
+                    "intersection": 3047,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 16,
+                    "original_vertices": 2811,
+                    "fnit_vertices": 2811,
+                    "intersection": 2811,
+                    "dice": 1.0
+                  },
+                  {
+                    "network": 17,
+                    "original_vertices": 1187,
+                    "fnit_vertices": 1187,
+                    "intersection": 1187,
+                    "dice": 1.0
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "privacy": "Aggregate metrics and source receipts only; no individual label arrays, brain maps or private paths"
+}

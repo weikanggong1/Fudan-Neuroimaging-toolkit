@@ -1,0 +1,103 @@
+{
+  "scope": "local_small_contracts_not_real_MRI_benchmark",
+  "preparation_tests": {
+    "passed": 34,
+    "wall_seconds": 4.81,
+    "source_sha256": "d97f26274813e23a97dda0a49d0480e6cdab88cf72ebe115ea20725ff29028ee",
+    "nodeids": [
+      "tests/robust_register/test_preparation.py::test_crop_keeps_ras_origin_and_mgh_storage",
+      "tests/robust_register/test_preparation.py::test_radius_one_morphology_and_border_one[interior-None]",
+      "tests/robust_register/test_preparation.py::test_radius_one_morphology_and_border_one[interior-forward]",
+      "tests/robust_register/test_preparation.py::test_radius_one_morphology_and_border_one[interior-backward]",
+      "tests/robust_register/test_preparation.py::test_radius_one_morphology_and_border_one[boundary-None]",
+      "tests/robust_register/test_preparation.py::test_radius_one_morphology_and_border_one[boundary-forward]",
+      "tests/robust_register/test_preparation.py::test_radius_one_morphology_and_border_one[boundary-backward]",
+      "tests/robust_register/test_preparation.py::test_radius_one_morphology_and_border_one[empty-None]",
+      "tests/robust_register/test_preparation.py::test_radius_one_morphology_and_border_one[empty-forward]",
+      "tests/robust_register/test_preparation.py::test_radius_one_morphology_and_border_one[empty-backward]",
+      "tests/robust_register/test_preparation.py::test_nearest_domain_and_away_half_ties[-0.01-False]",
+      "tests/robust_register/test_preparation.py::test_nearest_domain_and_away_half_ties[0-False]",
+      "tests/robust_register/test_preparation.py::test_nearest_domain_and_away_half_ties[0.49999997-False]",
+      "tests/robust_register/test_preparation.py::test_nearest_domain_and_away_half_ties[0.5-True]",
+      "tests/robust_register/test_preparation.py::test_nearest_domain_and_away_half_ties[1.5-False]",
+      "tests/robust_register/test_preparation.py::test_nearest_domain_and_away_half_ties[2.99-False]",
+      "tests/robust_register/test_preparation.py::test_nearest_domain_and_away_half_ties[3.0-False]",
+      "tests/robust_register/test_preparation.py::test_rounding_at_last_half_voxel_clamps_after_validity",
+      "tests/robust_register/test_preparation.py::test_resize_center_phase_ceil_and_chunk_invariance",
+      "tests/robust_register/test_preparation.py::test_resize_trigger_is_strict_mean_099[0.98-True]",
+      "tests/robust_register/test_preparation.py::test_resize_trigger_is_strict_mean_099[0.99-False]",
+      "tests/robust_register/test_preparation.py::test_resize_trigger_is_strict_mean_099[1.0-False]",
+      "tests/robust_register/test_preparation.py::test_resize_matching_requested_size_is_copy_not_ceil",
+      "tests/robust_register/test_preparation.py::test_mgh_fields_are_promoted_before_product",
+      "tests/robust_register/test_preparation.py::test_reflection_changes_header_only_and_preserves_footer",
+      "tests/robust_register/test_preparation.py::test_large_nonmatching_label_does_not_wrap_int32",
+      "tests/robust_register/test_preparation.py::test_invalid_options_rejected[option0]",
+      "tests/robust_register/test_preparation.py::test_invalid_options_rejected[option1]",
+      "tests/robust_register/test_preparation.py::test_invalid_options_rejected[option2]",
+      "tests/robust_register/test_preparation.py::test_invalid_options_rejected[option3]",
+      "tests/robust_register/test_preparation.py::test_invalid_options_rejected[option4]",
+      "tests/robust_register/test_preparation.py::test_invalid_options_rejected[option5]",
+      "tests/robust_register/test_preparation.py::test_workspace_budget_checked_before_device_allocation",
+      "tests/robust_register/test_preparation.py::test_nifti_mm_input_and_invalid_spatial_units"
+    ],
+    "stdout_sha256": "49fe2bd054fd91356499454170def62ad9950acd502fd42fde72d9fd6a4b8e36"
+  },
+  "runner_contracts": {
+    "scope": "stub_process_boundaries_only_no_imaging_or_registration",
+    "cases": [
+      {
+        "case": "success",
+        "exit": 0,
+        "worker_count": 3,
+        "own_child_reaped": true,
+        "gate": true
+      },
+      {
+        "case": "science_failure",
+        "exit": 7,
+        "worker_count": 1,
+        "own_child_reaped": true,
+        "gate": true
+      },
+      {
+        "case": "child_timeout",
+        "exit": 124,
+        "worker_count": 1,
+        "own_child_reaped": true,
+        "gate": true
+      },
+      {
+        "case": "outer_wait_deadline",
+        "exit": 124,
+        "worker_count": 0,
+        "own_child_reaped": true,
+        "gate": true
+      },
+      {
+        "case": "signal",
+        "exit": 143,
+        "worker_count": 1,
+        "own_child_reaped": true,
+        "gate": true
+      }
+    ],
+    "controller_sha256": "a47c423ab9648f6b1f6b302fe1ff0d3738af6861faa98a60ecb69259ccc40495",
+    "source_sha256": "79bfd1d8ae4036a4fe35e04e2aa25e2051b6851d10d5830a585f0f261274fda5",
+    "all_gates_pass": true
+  },
+  "preserved_prior_setup_failure": [
+    {
+      "scope": "first local fixture",
+      "failed": 1,
+      "passed": 33,
+      "cause": "expected selected label53 incorrectly multiplied by255 instead of binary selection255; corrected test fixture, module result unchanged"
+    },
+    {
+      "scope": "collect-only without source path",
+      "cause": "new uninstalled module absent from import path; source-based collect-only repeated with PYTHONPATH=src, no numerical test repeated"
+    }
+  ],
+  "registration_calls": 0,
+  "whole_GEMS_calls": 0,
+  "real_worker_dispatched": false
+}

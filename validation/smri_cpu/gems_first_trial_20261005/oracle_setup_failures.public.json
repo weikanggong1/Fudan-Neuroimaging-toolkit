@@ -1,0 +1,35 @@
+{
+  "scope": "Oracle setup failures before first cost/gradient evaluation; not numerical failed trials",
+  "attempts": [
+    {
+      "scorer": "native v3",
+      "stage": "old_run_path_lookup",
+      "exit_code": 1,
+      "reason": "right capture uses right-v1 leaf; model-name interpolation produced a nonexistent input run",
+      "cost_or_gradient_executed": false,
+      "fnit_first_step_repeated": false,
+      "actual_scorer_code_sha256": "ef5720fccd22eb06711668560afac9ac220078ecf3c504a0d6520d911a66bd34"
+    },
+    {
+      "scorer": "native v3 retry",
+      "stage": "native_written_topology_lookup",
+      "exit_code": 1,
+      "reason": "official collection.write unconditionally appends .gz; the scorer requested .gz and then looked up the wrong filename",
+      "cost_or_gradient_executed": false,
+      "fnit_first_step_repeated": false,
+      "actual_scorer_code_sha256": "ef5720fccd22eb06711668560afac9ac220078ecf3c504a0d6520d911a66bd34"
+    },
+    {
+      "scorer": "native v4",
+      "stage": "native_dump_raw_id_comparison",
+      "exit_code": 1,
+      "reason": "static native Read compacts sparse source IDs to input-row IDs; original IDs are different while all tet corner rows already match",
+      "cost_or_gradient_executed": false,
+      "fnit_first_step_repeated": false,
+      "actual_scorer_code_sha256": "06fdf43d4f84890e3b66dcad4ea82555cea7288ac59d0c6c61a900e92adc2b7a"
+    }
+  ],
+  "native_v3_code_sha256": "ef5720fccd22eb06711668560afac9ac220078ecf3c504a0d6520d911a66bd34",
+  "original_failed_logs_and_partial_private_mesh_preserved": true,
+  "native_v5_code_sha256": "bd0dcbcd995e330849cd4cdd311481bb7db0038a5ba348c2267af7b6a70e437d"
+}

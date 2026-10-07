@@ -1,144 +1,224 @@
 # SynthSeg+ 体积分区
 
-[返回首页](../../README.md) · [33 类 SynthSeg](../synthseg/README.md) · [权重](../WEIGHTS.md)
+[返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/synthseg_plus/readme_archive_20261005.md) · [CUDA精度声明](precision.md)
+
+| 项目 | 内容 |
+|---|---|
+| 输入 | 单幅3D T1w |
+| 输出 | 33类主分割、68区皮层及合并标签、可选软体积 |
+| 对应原软件 | FreeSurfer mri_synthseg --parc（普通2.0） |
+| Python / CLI | fnit.SynthSegPlus；fnit synthseg --parc |
+| CPU / GPU | CPU/CUDA；读写和部分后处理在CPU |
+
+## 1. 功能简介
 
 `SynthSegPlus` 在已有 PyTorch SynthSeg 2.0 的 33 类分割后运行官方 69 通道皮层分区网络，输出左右半球 68 个体积脑区标签。推理只依赖 FNIT 的 Python/Conda 环境和官方权重；对照测试才使用 FreeSurfer 8.2。这里的分区是体素标签，不是 recon-all 的表面 DKT 分区，因而不提供表面面积或厚度。
 [原版 `mri_synthseg` 源码](https://github.com/freesurfer/freesurfer/blob/v8.2.0/mri_synthseg/mri_synthseg)中的 `--parc` 网络输入、皮层背景重置和 `--vol` 后验求和，是这里的对应步骤。
 
 FNIT 的类名 `SynthSegPlus` 对应普通 SynthSeg 2.0 **加 `--parc`**。原论文中的 SynthSeg+ 是鲁棒分割方法，对应原版 `--robust`，使用不同模型和后处理；FNIT 当前没有实现这条模式。`fast=True` 对应普通 `--parc --fast`，不能代替 `--robust`。
 
-同一个 `SynthSegPlus` 对象会保留已经载入的两套网络权重。再次调用时无需重新读取 H5；每次调用仍只处理一幅 T1w。
+模型重复使用时复用主分割及皮层分区权重。CPU大体积末层投影已按深度分块以修复oneDNN崩溃；其他网络与GPU策略保持原样。
 
-共享的 `SynthSegSegmenter` 已修正构造时覆盖调用方精度设置的问题，并复用
-33 类后验缓冲；默认 GPU 卷积 TF32 保持开启，recon-all 的 FP32 例外不会
-改成此入口的默认策略。[子函数改动与同输入回归](../synthseg/README.md#recon-all-集成发现的精度设置覆盖)
-分别记录实际前向设置及测试版本。2026-10-04 的 CPU 与 GPU 回归见下文单独小节；此前单例表保留历史源码与计时范围。
+<a id="python-用法"></a>
 
-## 安装与权重
-
-按首页 `environment.yml` 创建环境，然后运行：
-
-```bash
-fnit-setup-weights --model synthseg-plus --dest /absolute/path/weights
-```
-
-这一组包括 SynthSeg 2.0 主网络、皮层分区网络、主分割标签/名称/拓扑数组。下载器检查文件大小和 SHA-256，推理过程不联网。皮层分区标签顺序与 FreeSurfer 8.2 `synthseg_parcellation_labels.npy` 的 69 项一致。
-
-## Python 用法
+## 2. Python 调用
 
 ```python
 from fnit import SynthSegPlus
 
-model = SynthSegPlus(
+parcellation_model = SynthSegPlus(
     weights="/absolute/path/weights",       # 主网络及三个主分割 npy 所在目录
     parc_weights="/absolute/path/weights",  # 皮层分区 H5 所在目录
     device="cuda:0",                         # 计算设备；CPU 可写 "cpu"
+    cudnn_tf32=True,                         # 默认cuDNN TF32；False关闭，None逐次继承
 )
-result = model(
+parcellation_result = parcellation_model(
     t1="sub-01_T1w.nii.gz",  # 输入：一幅 3D T1 NIfTI/MGZ 路径
     keep_geometry=False,    # 输出：使用原版默认的 RAS、约 1 mm 推理网格
     fast=False,             # 使用原版普通 --parc 的左右翻转集成
     min_pad=128,            # 网络输入各轴的最小补零尺寸，单位为体素
     volumes=True,           # 计算 --vol 软体积；默认 False，关闭时推理较快
 )
-result.segmentation.save("sub-01_33class.nii.gz")          # 33 类主分割
-result.cortical_parcellation.save("sub-01_cortex.nii.gz")  # 仅皮层的 68 区标签
-result.combined.save("sub-01_synthseg_plus.nii.gz")        # 主分割与皮层分区合并
-result.write_volumes_csv(
+parcellation_result.segmentation.save("sub-01_33class.nii.gz")          # 33 类主分割
+parcellation_result.cortical_parcellation.save("sub-01_cortex.nii.gz")  # 仅皮层的 68 区标签
+parcellation_result.combined.save("sub-01_synthseg_plus.nii.gz")        # 主分割与皮层分区合并
+parcellation_result.write_volumes_csv(
     source="sub-01_T1w.nii.gz",  # CSV 第一列的被试名由此路径生成
     path="sub-01_volumes.csv",  # 输出：101 个数值列的软体积表，单位 mm³
 )
-left_precentral = result.mask("ctx-lh-precentral")         # 布尔掩膜；shape 与 combined 相同
+left_precentral_mask = parcellation_result.mask("ctx-lh-precentral")         # 布尔掩膜；shape 与 combined 相同
 ```
 
-输入 `t1` 为单幅三维结构像路径。`weights`、`parc_weights` 可省略，按 `FNIT_WEIGHTS`、已配置目录和默认缓存查找。`fast=True` 采用较短的后处理路径；要对照原版普通 `--parc`，保持 `False`。`keep_geometry=False` 返回预处理后的 RAS、约 1 mm 网格，与命令行默认值相同。
+### 输入数据格式
 
-返回对象的 `segmentation` 为 33 类解剖标签，`cortical_parcellation` 仅在皮层为 68 个脑区编号，`combined` 在 33 类标签上用脑区编号替换左右皮层 3/42。三者均为 `FNITNifti1Image`，标签 dtype 为 `int32`；`label_names` 为 `{编号: 名称}`，`mask(编号或名称)` 返回与 `combined` 同 shape 的布尔数组。`keep_geometry=True` 会对三张标签图以最近邻法重采样，使 shape 和 affine 与输入一致；软体积仍在推理网格上计算，不受这一步影响。
+- `t1`：单幅3D `(X,Y,Z)` T1w路径，`.nii`、`.nii.gz`、`.mgz`；原生空间、有效affine和体素间距，强度无固定单位，无需先去颅骨。
+- 内部生成RAS、约1mm网格；**Python默认keep_geometry=True，CLI默认False**。示例显式False用于原版默认输出对照。
+- `weights`为主模型与三份NPY所在目录，`parc_weights`为皮层模型H5或目录。两者可省略用FNIT已配置缓存；不在推理中联网。
 
-`volumes=True` 时，`volumes_mm3` 返回 `{标签编号: 软体积 mm³}`，顺序为 32 个非背景主分割标签、左侧 34 个皮层区、右侧 34 个皮层区；`total_intracranial_mm3` 单独给出颅内容积。它们依据网络后验概率求和，不能由合并硬标签直接推算。`volumes=False` 时两项为 `None`，调用 `write_volumes_csv` 会报错。`source` 决定 CSV 第一列被试名，`path` 是写出的 CSV 路径。
+### 模型构造
 
-三张 NIfTI 标签图的 shape、affine、`int32` 类型和 qform/sform 代码与本页原版对照相同。FreeSurfer 默认还在合并 NIfTI 中嵌入颜色表扩展，FNIT 当前未写入该扩展；可用 `label_names` 查询编号对应的名称。
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `weights` | 否 | `str 或 Path 或 None` | `None` | 官方 checkpoint 文件或目录；省略时按显式配置、FNIT_WEIGHTS 和缓存查找 |
+| `parc_weights` | 否 | `str 或 Path 或 None` | `None` | 官方皮层分区 H5 文件或目录 |
+| `device` | 否 | `str 或 torch.device` | `'cpu'` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
+| `cudnn_tf32` | 否 | `bool 或 None`，关键字参数 | `True` | 两个CUDA网络及全部平滑的cuDNN TF32；False关闭，None继承每次调用前cuDNN；作用域内matmul TF32仍True，退出恢复两开关 |
 
-## 命令行与原版
+### 单次调用
+
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `t1` | 是 | `str 或 Path` | `—` | 一幅原始 3D T1w；格式见输入数据格式 |
+| `keep_geometry` | 否 | `bool` | `True` | 标签以最近邻重采样回输入 shape 和 affine |
+| `fast` | 否 | `bool` | `False` | 普通 SynthSeg --parc 的快速路径；不代表 robust 模型 |
+| `min_pad` | 否 | `int` | `128` | 各轴网络输入的最小补零尺寸，单位体素 |
+| `volumes` | 否 | `bool` | `False` | 计算软体积并允许写出 CSV；False 不计算 |
+
+### 输出
+
+```text
+sub-01_33class.nii.gz      # 33类主分割
+sub-01_cortex.nii.gz       # 仅皮层的左右68区
+sub-01_synthseg_plus.nii.gz # 主分割+皮层合并
+sub-01_volumes.csv         # volumes=True时101个数值列，mm³
+```
+
+`SynthSegPlusResult`中`segmentation`、`cortical_parcellation`和`combined`均为int32的nibabel兼容3D图，qform/sform code0/2。keep_geometry=True时shape/affine与输入同；False时为处理后的RAS约1mm网格。combined用官方皮层编号替换主分割3/42，标签名在`label_names`；`mask(编号或名称)`返回同shape布尔数组。
+
+### 结果辅助方法
+
+| 方法 / 参数 | 必需 | 类型 / 默认值 | 含义 |
+|---|---|---|---|
+| `mask(label)`的`label` | 是 | `int 或 str` | combined标签编号或唯一名称；返回同shape布尔数组，名称不匹配抛KeyError |
+| `write_volumes_csv(source,path)`的`source` | 是 | `str 或 Path` | CSV被试名来源，取文件名并去掉`.nii.gz` |
+| `write_volumes_csv(source,path)`的`path` | 是 | `str 或 Path` | CSV保存路径；自动创建父目录 |
+
+`volumes_mm3`在`volumes=False`时为None，在True时按主分割32项及皮层68项保存软体积。CSV另有total intracranial，共101个数值列；皮层体积在各半球皮层概率内分配，不是硬标签体素数。
+
+`precision`是结果末尾默认None的可选字段，记录本次实际网络/平滑的dtype、device、autocast和CUDA开关；模型实例`.precision`在缓存拒绝或内部分区调用失败时为None。CPU不写CUDA状态，CUDA调用正常/异常退出均恢复原开关。缓存按声明True/False/None匹配，不匹配在读T1前报错；None缓存可逐次继承。完整语义及串行/独立进程要求见[精度说明](precision.md)。
+
+`volumes=True`才计算101列软体积，定义与原--vol相同；`write_volumes_csv(source,path)`两参必需，不可在volumes=False后调用。Python需显式保存；CLI默认只保存combined，--parc-out另存仅皮层图。
+
+<a id="命令行与原版"></a>
+
+## 3. 命令行调用
 
 ```bash
-fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg_plus.nii.gz \
-  --parc --parc-out sub-01_cortex.nii.gz --csv-vols sub-01_volumes.csv \
-  --weights /absolute/path/weights --parc-weights /absolute/path/weights \
-  --device cuda:0 --threads 4
-
-mri_synthseg --i sub-01_T1w.nii.gz --o sub-01_official_parc.nii.gz \
-  --parc --vol sub-01_official_volumes.csv --threads 4
+fnit synthseg --parc --i sub-01_T1w.nii.gz --o sub-01_synthseg_plus.nii.gz \
+  --csv-vols sub-01_volumes.csv --device cuda:0 --threads 4
 ```
 
-`--i` 是输入 T1，`--o` 是合并后的标签图，`--parc-out` 是可选的皮层单独标签图，`--csv-vols` 指定软体积 CSV。`--weights` 指主网络目录，`--parc-weights` 指皮层网络目录，`--device` 指 PyTorch 设备，`--threads` 控制 CPU 线程数。`--fast` 仅能与 `--parc` 一起使用，对应原版普通 `--parc --fast`；普通 33 类入口传 `--fast` 会报错。命令行不加 `--keep-geometry` 与原版不加 `--keepgeom` 一样，输出在推理网格；两端同时加上对应参数才比较原 T1 网格输出。原版 `mri_synthseg --parc` 只输出合并标签图；FNIT 的三个 Python 返回图用于分别检查主分割和分区。
+### fnit synthseg
 
-`--csv-vols` 对应原版 `--vol`；两份 CSV 均以被试名开头，然后是颅内容积、32 个主分割软体积和 68 个皮层区软体积。不需要 CSV 时去掉这两个参数，FNIT 会省去概率体积的计算和传输。
+| CLI 参数 | Python 参数 / 输出 | 含义 |
+|---|---|---|
+| `--i` / `-i` | `image / t1（--parc）` | 输入影像路径 |
+| `--o` / `-o` | `segmentation.save / combined.save（--parc）` | 硬标签影像保存路径 |
+| `--csv-vols` / `--csv_vols` | `write_volumes_csv` | 写出软体积 CSV，mm³ |
+| `--weights` | `weights` | 官方 checkpoint 文件或目录；省略时按显式配置、FNIT_WEIGHTS 和缓存查找 |
+| `--device` | `device` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
+| `--threads` | `SynthSeg.threads / CLI进程线程（--parc）` | PyTorch CPU 线程预算；None 保留当前值，CLI 默认另见下节 |
+| `--keep-geometry` | `keep_geometry` | 标签以最近邻重采样回输入 shape 和 affine |
+| `--color-lut` | `color_lut` | 用户提供的 FreeSurfer 编号/名称/RGBA 文本色表；None 不附加 |
+| `--parc` | `选择 SynthSegPlus` | 选择普通 SynthSeg 2.0皮层分区 |
+| `--fast` | `fast` | 普通 SynthSeg --parc 的快速路径；不代表 robust 模型 |
+| `--parc-weights` | `parc_weights` | 官方皮层分区 H5 文件或目录 |
+| `--parc-out` | `cortical_parcellation.save` | 另存仅皮层标签图 |
 
-## 真实数据对照
+CLI与Python默认差异：Python keep_geometry=True，CLI默认False；CLI threads=4，Python构造不含threads；只有--csv-vols才计算volumes。CLI仍使用默认cudnn_tf32=True，没有新增精度参数；False/None用Python声明。
 
-### 2026-10-04 CPU 功能与 GPU 回归
+## 4. 原软件调用
 
-共享的分割写出函数修复了斜位 T1 在 `keep_geometry=True` 时重编码未启用 qform、改变 `pixdim` 的问题。实际 GPU 公共 CLI `--parc --fast --keep-geometry` 已保存并回读，shape、affine、pixdim 与原始输入逐值相同，int32 标签和 qform/sform code 为 0/2。此项验证输出几何；CPU/GPU 网络精度与耗时仍分别按各冻结源码记录，见[保存几何记录](../../validation/smri_cpu_20261004/t2_seg/keep_geometry.public.json)。
+以下命令用于独立原软件参考环境；FNIT生产入口不执行它。
 
-本次矩阵分别安排普通 `--parc`、`--parc --fast`、输入网格输出和软体积 CSV，完成状态及数值见[8 线程验证记录](../../validation/smri_cpu_20261004/t2_seg/README.md)。计时配对只保存原版也输出的合并标签图与 CSV；Python 返回的主分割、单独皮层图和 `mask()` 功能另作输出检查，不向计时流程添加额外写盘。
+```bash
+mri_synthseg --parc --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg_plus.nii.gz \
+  --vol reference/sub-01_volumes.csv --threads 4 --noaddctab
+```
 
-共享预处理修复真实影像少一层问题，3 幅 CPU 网络输入 float32 数组 SHA 与官方相同；CPU 连通域使用 6 邻接 SciPy。最初将所有 CPU 卷积切片的候选使 fast 从旧 FNIT 56.33/52.57 秒变成 63.59/58.33 秒，因此当时冻结 v2 在 Plus 保留完整 oneDNN 卷积，仅普通 SynthSeg 的既有保护上下文启用保留原后端的切片。case01 此 v2 策略公共 CLI 的 fast baseline 为 54.33/58.35 秒，候选为 51.83/50.07 秒；非 fast baseline 为 73.87/71.11 秒，候选为 71.86/70.36 秒。两种模式的硬标签和数值 CSV 均与同输入 baseline 逐值相同。随后大 T1 暴露末层崩溃，最新的最小投影分块修复与回归见下方单独小节。
+| FNIT参数 / 产物 | 原软件参数 / 产物 |
+|---|---|
+| SynthSegPlus / fast | --parc / --fast |
+| keep_geometry | --keepgeom |
+| volumes / write_volumes_csv | --vol |
+| weights / parc_weights | 主分割 / 皮层H5 |
+| device=cpu / threads | --cpu / --threads |
 
-对官方 fast 仍差 1 个体素、最小 Dice 0.99990777、CSV 最大差 0.10 mm³；非 fast 差 6 个体素、最小 Dice 0.99961215、CSV 最大差 0.90 mm³。第二例的原版剩余误差和更早全层分块变慢的结果均保留，不能称官方逐值一致。`--parc` 与 `--color-lut` 的组合尚不支持，最终共享 CLI 明确拒绝该组合。CUDA 前向仍走原卷积；CPU 调用保留同进程的 CUDA 精度与性能开关。新版本和下列历史验证按源码和核组分别记录。
+当前为普通2.0加皮层体积分区，未实现原论文SynthSeg+的robust路径；不提供表面厚度/面积或QC。--parc与--color-lut组合当前明确拒绝。CLI设置线程，Python此类构造没有threads参数。
 
-### 此前公开 T1w 单例
+<a id="真实数据对照"></a>
+<a id="2026-10-04-cpu-功能与-gpu-回归"></a>
+<a id="此前公开-t1w-单例"></a>
+<a id="大体积-t1-的-cpu-原生崩溃修复"></a>
 
-这份历史单例的详细命令、逐标签结果及计时范围见[验证记录](../../validation/synthseg_plus/README.md)。GPU 使用 TF32；未使用 float16 或 bfloat16。
+## 5. 最新精度和运行时间
 
-| 项目 | 与 FreeSurfer 8.2.0-1 的本例对照 |
-|---|---:|
-| 合并标签图 | shape / affine 一致；逐体素一致率 `0.9999758`；最低标签 Dice `0.9983427` |
-| `--vol` / `--csv-vols` | 101 个数值列及列名顺序一致；68 个皮层区平均 / 最大绝对差 `2.11 / 7.55 mm³` |
-| CPU 完整命令的输出 | 合并图仅差 `6` 个体素；101 列软体积平均 / 最大绝对差 `0.028 / 0.293 mm³` |
-| 官方 CPU / FNIT CPU 完整命令 | `241.48 / 210.19 s`，同输入、同输出范围 |
-| 官方 GPU / FNIT GPU 完整命令 | `542.08 / 18.71 s`，同输入、同输出范围，H100 共享负载不同 |
-| FNIT H100 Python 调用，含软体积 | 首轮 `16.68 s`，同一对象复用权重后 `13.10 s`；不含写盘 |
+2026-10-06 修复首次调用的lazy皮层模型构造覆盖全局TF32的问题。构造不写开关，普通/fast的两个网络及全部高斯平滑统一使用声明True/False/None，并在正常和异常退出时恢复调用者状态。默认True的原始T1 **CPU4arm、H1004arm**三张图、完整影像头及101列软体积均与旧版逐值相同，连压缩NIfTI和CSV文件SHA也相同；GPU allocated/reserved旧新相同。新增False/None另有四个完整GPUarm，并单独核验继承和恢复。[七节报告及逐区/逐列数值](../../validation/smri_cpu/seg_tf32_20261005/README.md)。
 
-完整命令可以按输出范围对照，但共享 GPU 的负载不同，不能把单次结果作为稳定加速倍数。Python 调用不含写盘，与完整命令的计时范围不同。QC 输出尚未实现；此历史单例未覆盖 `fast=True`，2026-10-04 CPU 对照已覆盖 fast 与非 fast。
+对同输入官方，CPU默认普通/fast仍差 **5/1体素**、CSV最大 **0.657/0.220mm³**；GPU默认仍差 **328/498体素**、CSV最大 **118.280/121.600mm³**，没有改变默认数学。GPU新增False普通硬标签0差、Dice1、CSV最大0.20mm³；fast差2体素、最小Dice0.99997630、CSV最大0.346mm³。None继承关闭状态逐值同False。这是单例可选政策效果，不代表所有输入或全部官方数值完全等价。
 
-![公开 T1w 的原版与 FNIT SynthSeg+ 分区](figures/synthseg_plus_comparison.png)
+同节点八核默认CPU旧/新API普通 **49.898/51.018s**、fast **35.474/35.347s**，冷worker外层 **52.680/53.577s**及 **38.009/38.160s**。本次每功能一组，普通新API约慢2.2%、fast约快0.36%，不作提速声明。既有同节点官方冷CLI **48.296/33.784s**；双方保存输出/校验边界不同且已分别列出，CPU总速度目标仍未通过。
 
-### 大体积 T1 的 CPU 原生崩溃修复
+H100默认普通/fast旧/新API **10.068/9.732s**及 **7.097/6.937s**，allocated均12.568GB、reserved18.207/18.900GB旧新相同。本进程树driver采样最大18.772/19.464GB，小于20GB；最大采样间隔0.786s，不能称未采样绝对物理峰值。整GPU同时约66–67GB共享背景，墙钟不作稳定加速倍率。False/None普通/fast reserved15.162/15.590GB。此前CPU单缓冲拼接及大体积CPU末层投影防崩保留，[上一阶段验收](../../validation/smri_cpu/seg_memory_20261005/README.md)。
 
-原始影像驱动的亚区 pipeline 暴露了成熟 `SynthSegPlus` 子函数的问题：公开
-ds000114 T1 的网络张量为 `224×288×288`，CPU 分割网络最后的 24→33 通道
-`1×1×1` 卷积在 oneDNN 3.5.3 中触发 SIGSEGV，尚未保存分割。逐层控制与
-原生栈定位到该投影，不代表整个 CPU 环境不可用。33 通道输出逻辑大小为
-2,452,488,192 B，日志中的 48 通道填充布局为 3,567,255,552 B；现有栈不能
-确定具体地址或溢出原因。
+前版大T1崩溃修复用公开ds000114完整真实T1，网络张量224×288×288，nodecw10同8物理核/8线程，CPUfloat32；原版FreeSurfer8.2.0-1。普通--parc的冷进程ABBA含加载、计算、CSV和合并图保存。源码SHA与逐区结果绑定[正式记录](../../validation/smri_cpu_20261004/t2_seg/large_pointwise.public.json)。
 
-修复只将 CPU FP32 推理中估算填充大小超过 `2**31-1` B 的 `1×1×1` 投影按
-深度分块，保留 oneDNN、所有通道与体素顺序；其他 oneDNN 层沿用完整卷积。
-没有更改模型、翻转集成、后处理、GPU 精度或调用者全局设置。未带 batch 的
-4D `Conv3d` 继续走 PyTorch 原路径。该修复不需要新增依赖或调用原软件。
+### 端到端 benchmark
 
-同一真实 T1、nodecw10 相同 8 物理核/8 线程，冷进程 ABBA 的完整命令包含
-权重载入、计算、CSV 和标签图保存：
+| 指标 | FNIT | 原软件 | 差异 |
+|---|---|---|---|
+| 普通--parc完整CLI两次 | 102.13 / 106.16 s | 325.90 / 118.17 s | 官方首轮有文件读取等待 |
+| 合并标签不同体素 / 最小Dice | 5 / 0.99980350 | 独立官方输出 | 不是逐值一致 |
+| 101列软体积最大差 | 0.683 mm³ | 独立官方输出 | 候选两次数字/几何逐值同 |
+| GPU完整输入allocated峰值 | 12.57 GB | 未测相同预算 | 旧新普通/fast数组与CSV相同 |
 
-| 普通 `--parc` | 第一次 wall | 第二次 wall |
-|---|---:|---:|
-| 官方 CPU | 325.90 s | 118.17 s |
-| FNIT 大投影分块 | 102.13 s | 106.16 s |
+### 分步骤 benchmark
 
-官方首轮有网络文件读取等待，两次原值均保留，不以首轮计算稳定加速倍数。
-两轮同网格对照均差 5 个标签体素，前景最小 Dice 为 0.99980350，101 列软体积
-最大绝对差 0.683 mm³；候选两次保存的硬标签、数值 CSV 与几何逐值相同。
-两个已有病例普通/fast 模式的旧新配对，硬标签、101 列数值 CSV 与几何逐值
-相同；最终源码的真实 GPU 普通/fast 配对也全部逐值相同，allocated 峰值
-12.57 GB，维持 20 GB 预算。GPU 完整 wall 普通为旧 15.03／新 12.53 秒，fast
-为旧 10.04／新 10.03 秒；共享负载观测范围及全部实际回归状态，
-见[专项记录](../../validation/smri_cpu_20261004/t2_seg/README.md#9-大体积-plus-cpu-崩溃定位与修复)
-和[逐区证据](../../validation/smri_cpu_20261004/t2_seg/large_pointwise.public.json)。
+| 阶段 | FNIT | 原软件 |
+|---|---|---|
+| 主分割 / 皮层网络 / 后处理 | 原报告含逐层崩溃定位；未保存统一双方阶段计时 | 未记录同边界阶段表 |
+| GPU普通完整worker旧/新 | 15.03 / 12.53 s | 非原软件对照 |
+| GPUfast完整worker旧/新 | 10.04 / 10.03 s | 非原软件对照 |
 
-![大体积真实 T1 的官方与 FNIT CPU 标签及差异位置](../../validation/smri_cpu_20261004/t2_seg/large_pointwise_labels.png)
+只分块估算填充超过2³¹−1 B的CPUFP32 1×1×1投影，两个已有病例普通/fast以及最终GPU配对硬标签、CSV和几何均同；未将较早全层切片变慢候选接入。共享负载不同，单组时间不能作为稳定提速。[协议和所有状态](../../validation/smri_cpu_20261004/t2_seg/README.md#9-大体积-plus-cpu-崩溃定位与修复)。
 
-## Reference
+![真实大T1官方和FNIT CPU标签及差异位置](../../validation/smri_cpu_20261004/t2_seg/large_pointwise_labels.png)
+
+## 6. 最近版本和 benchmark
+
+| 日期 | commit / version | 变化 | benchmark |
+|---|---|---|---|
+| 2026-10-06 | `46eead65` 源码 | 普通/fast统一cuDNN策略，修复lazy构造覆盖开关；True默认不变，False/None新增 | 12完整arm及真实特征/异常门；见[本次报告](../../validation/smri_cpu/seg_tf32_20261005/README.md) |
+| 2026-10-05 | `585bf181` 源码；`b1d46705` 完整报告 | CPU 单缓冲拼接；原卷积、GPU 数学与精度政策不变 | 普通/fast 完整旧新输出相同，fast ABBA 近似持平；同节点官方仍较快，见[最新记录](../../validation/smri_cpu/seg_memory_20261005/README.md) |
+| 2026-10-04 | large_pointwise冻结源码 | 最小末层CPU投影分块，修复SIGSEGV | 上节ABBA及CPU/GPU配对 |
+| 2026-10-04 | t2_seg v2 | 共享endpoint、CPU连通域与保存几何 | [矩阵与保存合同](../../validation/smri_cpu_20261004/t2_seg/README.md) |
+| 较早单例 | synthseg_plus报告源码SHA | 普通parc及101列软体积 | [历史完整CPU/GPU对照](../../validation/synthseg_plus/README.md) |
+
+每条记录保留真实冻结源码、输入与时间边界；逐例、debug/profiling和更早脑图见[完整归档](../../validation/synthseg_plus/readme_archive_20261005.md)。文档整理不重跑MRI，不把执行成功或--help核验作为精度benchmark。
+
+<a id="安装与权重"></a>
+<a id="reference"></a>
+
+## 7. 参考文献、原软件和资源
 
 - 参考文献：Billot et al., *Robust machine learning segmentation for large-scale analysis of heterogeneous clinical brain MRI datasets*, PNAS (2023), [doi:10.1073/pnas.2216399120](https://doi.org/10.1073/pnas.2216399120)。
 - 原实现代码库：[FreeSurfer `mri_synthseg --parc`](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthseg)。
+
+模型使用下列官方原始文件，Git/wheel不包含。固定[assets-v1 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)及公开asset-manifest与当前weights.py逐项大小/SHA记录一致；本轮未重新下载所有大文件。安装器先Release再原站；完整清单见[资源文件清单](../RESOURCE_MANIFEST.md)。
+
+```bash
+fnit-setup-weights --model synthseg-plus --dest /data/fnit-weights
+fnit-setup-weights --model synthseg-plus --dest /data/fnit-weights --verify-only
+```
+
+| 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
+|---|---|---|---|---|---|
+| `synthseg_2.0.h5` | 官方推理权重 / 标签数组 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5) | 53,079,152 B | `f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e` | 允许；FreeSurfer许可，保留条款与归属 |
+| `synthseg_parc_2.0.h5` | 官方推理权重 / 标签数组 | [原站](https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/c04/403/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5) | 53,090,840 B | `83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684` | 允许；FreeSurfer许可，保留条款与归属 |
+| `synthseg_segmentation_labels_2.0.npy` | 官方推理权重 / 标签数组 | [原站](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy) | 348 B | `5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8` | 允许；FreeSurfer许可，保留条款与归属 |
+| `synthseg_segmentation_names_2.0.npy` | 官方推理权重 / 标签数组 | [原站](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy) | 7,168 B | `234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc` | 允许；FreeSurfer许可，保留条款与归属 |
+| `synthseg_topological_classes_2.0.npy` | 官方推理权重 / 标签数组 | [原站](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy) | 348 B | `650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a` | 允许；FreeSurfer许可，保留条款与归属 |
+
+本页列出的模型/数组共5个，106,177,856 B。原始文件许可及归属见[统一资源规则](../WEIGHTS.md#权重许可与归属)。模型推理从本地加载已准备资源。
+
+皮层权重的Release清单official_url仍写annex p0/0f，当前源码使用c04/403；大小与SHA一致。此页采用当前源码原站地址，清单URL差异不当作模型字节变化。

@@ -1,0 +1,129 @@
+{
+  "status": "v2_prepared_only_zero_science_upload_enqueue",
+  "scope": "ONE saved-moving derivative projection RHS control: current reciprocal projection first exact; only signed-axis FP32 division substituted; scale bits invariant; no H/diag/PCG/native/raw MRI/GPU/full",
+  "main_head_required": "7ff215ee86c49414b2fa6156fdf6769aa54d00f8",
+  "canonical_leaf": "smri_cpu_20261004/remaining_20261006/fnirt-rhs-projection-control-v2",
+  "source_bindings": {
+    "FNIRT_files": 17,
+    "mature_import_files": 5,
+    "existing_FSL_order_FNIT_harness": 1,
+    "total": 23
+  },
+  "input_bindings": {
+    "files": 9,
+    "checkpoint_schema_arrays": 68,
+    "checkpoint_arrays_restored": 29,
+    "raw_MRI": 0
+  },
+  "one_changed_input": "state.gradient_fsl only; same raw derivative, signed FP32 division by positive header pixdim instead of stored FP32 reciprocal multiplication",
+  "gate_order": [
+    "all source/input/freeze/current HEAD guards before numerical import",
+    "restored values/stride/no alias and solve3 packed point",
+    "raw fixed exactly same; moving header known consistent forms",
+    "ONE coords/sampler; four saved intermediate contracts + mask/count",
+    "header-derived axis signs and stored diagonal reciprocal geometry",
+    "ONE current projection and saved projected derivative SHA",
+    "ONE state scalar prefix: residual/count/SSD/fixed lambda cost bits",
+    "ONE bending.normal and ONE original FSL-order prefix full g SHA/scale bits",
+    "ONLY THEN ONE candidate division with explicit aten.div.Tensor and [3,1,1,1] non-0D F32 divisor",
+    "if projection bits unchanged skip redundant prefix; otherwise one candidate prefix and scale bit0 strict gate",
+    "ONLY THEN read saved native total g for post-hoc comparison",
+    "finally source/input/immutable values/flags/CUDA/DSO snapshot checks on success or error"
+  ],
+  "maximum_calls": {
+    "sampler": 1,
+    "coordinates": 1,
+    "current_projection": 1,
+    "candidate_projection": 1,
+    "state_scalar_prefix": 1,
+    "LM_gradient_prefix": 0,
+    "FSL_order_prefix": 2,
+    "actual_bending_normal": 1,
+    "cached_gradient_bending_reads": 2,
+    "evaluate": 0,
+    "linearize": 0,
+    "gradient_method": 0,
+    "dense_field_expansion": 0,
+    "design_diagonal": 0,
+    "PCG": 0,
+    "SCG": 0,
+    "H_callback": 0,
+    "native": 0,
+    "new_H": 0,
+    "diag_read_or_created": 0,
+    "normal_cache": 0,
+    "raw_MRI": 0,
+    "image_payloads_read": 3
+  },
+  "resources": {
+    "CPU_threads": 8,
+    "CPU_affinity": [
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60
+    ],
+    "address_space_bytes": 20000000000,
+    "outer_lock_wait_seconds": 120,
+    "inner_lock_wait_seconds": 20,
+    "controller_seconds": 360,
+    "science_seconds": 180,
+    "kill_after_seconds": 5,
+    "lock_failure_calls": 0,
+    "retry": false,
+    "metadata_six_index_lock_timeout_seconds": 25,
+    "metadata_six_index_lock_mode": "LOCK_EX|LOCK_NB"
+  },
+  "sampler_image": "archived official smoothed moving, same as previous successful moving-control replacement; no smoothing/re-normalization",
+  "lambda": {
+    "fixed_value": 9049.463427795125,
+    "same_as_saved_native_solve3": true,
+    "current_state_before_override": 9049.463406053183,
+    "native_base_lambda": 150.0,
+    "native_Lambda_definition": "latest_ssd*lambda when ssd_lambda enabled; cf updates latest_ssd; grad uses it without computing a new SSD",
+    "native_SSD_explicitly_saved": false,
+    "native_SSD_bit_identity_established": false,
+    "lambda_over_150_is_not_an_exact_native_SSD_record": true,
+    "new_SSD_does_not_update_effective_lambda": true,
+    "native_cost_before": 61.819243802234425,
+    "new_cost_uses_same_restored_FNIT_bending_energy": true
+  },
+  "limitations": [
+    "Native samepoint effective lambda is stored and equal; native SSD was not separately saved. New SSD does not update the controlled lambda.",
+    "The baseline reuses archived official smoothed moving original-storage values with current mature sampler and current FNIT state. Native partial/warp/Jte caches were not saved.",
+    "Installed source and ELF establish axis division definition, not equality of this trial derivative with actual archived native derivatives.",
+    "Only derivative projection changes. Global-scale RHS must remain bitexact and its remaining discrepancy is not explained by projection.",
+    "FNIT separable adjoint and scale reduction still differ from official serial assembly; no unique total RHS cause is presumed.",
+    "Prior orientation candidate full registration worsened and remains rejected; smoothing whole-image equivalence is not a registration acceptance.",
+    "Native total g enters only after own gradients have been computed; no official trajectory selects trial mathematics.",
+    "Three coefficient blocks and global scale have mixed units; errors are not warp voxel displacement.",
+    "Before/after FSL DSO maps are snapshots, not a full-time loader audit.",
+    "Cold/warm wall observations are not a speed ratio. No production/default/GPU integration, solver, or full registration."
+  ],
+  "default_GPU_policy": "no production file edits; CUDA_VISIBLE_DEVICES empty; no CUDA initialization or TF32/defaultdtype/autocast mutation; Torch CPU computation only",
+  "official_implementation_use": "installed source/ELF read-only definition audit only; runtime imports/links/calls no FSL",
+  "expected_outcomes": [
+    "mismatch stops before next arm without retry",
+    "unchanged projection completes diagnostic without redundant RHS",
+    "changed projection reports three coefficient blocks and unchanged scale; no registration equivalence inference"
+  ],
+  "metadata_lock_policy": "prepared/queued/completed use sorted six nonblocking locks with one shared 25s acquisition deadline; all fds close on failure before INDEX read/write; no lifecycle retry or scientific launch",
+  "header_guard_correction": {
+    "v1_summary": {
+      "bytes": 37674,
+      "sha256": "fd5fd0b04ec9434aa49b7457f366812147fe58e682ac323db185fdd68e02c2b1"
+    },
+    "v1_rc": [
+      1,
+      1,
+      0
+    ],
+    "v1_calls": "all sampler/projection/RHS/bending zero; guard representation bug, no algorithm failure evidence",
+    "v2": "raw gzip348 SHA + loaded spatial fields bitexact; classify actual same loaded header",
+    "raw_spatial_inputs_changed": false
+  }
+}

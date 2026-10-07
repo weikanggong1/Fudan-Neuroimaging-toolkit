@@ -1,146 +1,205 @@
-# TorchBEDPOSTX：扩散方向后验估计
+# TorchBEDPOSTX：纤维方向后验估计
 
-[返回首页](../../README.md) · [源码目录](../../src/fnit/bedpostx/) · [验证记录](../../validation/bedpostx/README.md)
+| 项目 | 内容 |
+|---|---|
+| 输入 | 单被试DWI/mask/bvals/bvecs目录 |
+| 输出 | 每纤维方向、分数后验及均值图 |
+| 对应原软件 | FSL BEDPOSTX/xfibres |
+| Python / CLI | TorchBEDPOSTX / fnit-bedpostx |
+| CPU / GPU | CPU/CUDA；float32、CUDA允许TF32 |
 
-`TorchBEDPOSTX` 从单被试扩散 MRI 中估计最多三条交叉纤维的方向、体积分数和不确定性。模型采用 ball-and-stick 信号、Gaussian 残差、次要纤维稀疏先验和 Metropolis 采样；默认 `model=2` 用 Gamma 分布描述多壳层扩散率。CPU 和 CUDA 均使用 float32，CUDA 默认允许 TF32，不使用 float16 或 bfloat16。运行时不调用 FSL。
+## 1. 功能简介
 
-## 输入
+`TorchBEDPOSTX` 为每个diffusion体素估计最多三条交叉纤维的方向轴、体积分数及后验不确定性，输出可被概率追踪读取的BEDPOSTX目录。默认model2使用Gamma分布描述多shell扩散率，model1使用单扩散率。
 
-`subject_dir` 必须包含以下文件：
+算法采用ball-and-stick信号、Gaussian残差、次要纤维ARD先验和Metropolis采样。FNIT用PyTorch拟合、nibabel读写，运行时不调用FSL；CUDA似然使用torch.compile融合。CPU/CUDA均为float32，允许TF32且不使用FP16/BF16。
 
-```text
-subject/
-├── data.nii.gz                 # 4D、已完成运动/涡流/磁敏感校正的 DWI
-├── nodif_brain_mask.nii.gz     # 与 DWI 前三维和 affine 一致的 3D 脑掩膜
-├── bvals                       # N 个 b-value
-└── bvecs                       # 3×N 或 N×3；通常使用 EDDY 旋转后的方向
-```
-
-| Python 参数 | 类型与默认值 | 含义 |
-|---|---|---|
-| `subject_dir` | 路径，必需 | 上述单被试输入目录。 |
-| `output_dir` | 路径或 `None` | 输出目录；省略时为 `<subject_dir>.bedpostX`。 |
-| `device` | `"cpu"`、`"cuda"` 或 `"cuda:N"` | PyTorch 设备。 |
-| `threads` | 正整数或 `None` | CPU 线程数。 |
-| `nfibres` | `3` | 每个体素拟合的最大纤维数。 |
-| `model` | `2` | `1` 为单扩散率，`2` 为 Gamma 扩散率。 |
-| `burnin` | `1000` | burn-in 跳数。 |
-| `njumps` | `1250` | burn-in 后的采样跳数。 |
-| `sample_every` | `25` | 每隔多少跳保存一次；默认产生 50 个样本。 |
-| `ard_weight` | `1.0` | 次要纤维的 ARD 权重。 |
-| `chunk_size` | 实现默认值 | 一次并行处理的 mask 体素数，用于控制显存。 |
-| `seed` | 实现默认值 | 随机种子。 |
-| `overwrite` | `False` | 是否覆盖非空输出目录。 |
-
-## Python 单被试调用
+## 2. Python 调用
 
 ```python
 from fnit.bedpostx import TorchBEDPOSTX
 
-model = TorchBEDPOSTX(
-    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
-    threads=1,  # CPU 线程：输入输出和辅助计算使用 1 线程
-    nfibres=3,  # 模型：每个体素最多拟合三条纤维
-    model=2,  # 模型：使用多壳层 Gamma 扩散率
-    burnin=1000,  # MCMC：burn-in 跳数
-    njumps=1250,  # MCMC：burn-in 后的采样跳数
-    sample_every=25,  # MCMC：每 25 跳保存一次
-    ard_weight=1.0,  # 先验：次要纤维 ARD 权重
-    chunk_size=4096,  # 资源：每批并行处理的 mask 体素数
-    seed=8665904,  # 随机性：固定种子便于复现
+posterior_model = TorchBEDPOSTX(
+    device="cuda:0",  # 指定GPU设备
+    threads=1,  # 辅助CPU计算线程数
+    chunk_size=4096,  # 每批脑体素数；小于默认以减少工作区
+    seed=8665904,  # 固定MCMC随机种子
 )
-result = model(
-    subject_dir="/absolute/path/subject",  # 输入：含 DWI、mask、bval、bvec 的目录
-    output_dir="/absolute/path/subject.bedpostX",  # 输出：后验样本目录
-    overwrite=False,  # 写盘策略：不覆盖已有结果
+posterior_result = posterior_model(
+    subject_dir="/data/dwi/subject",  # 四个必需输入文件的目录
+    output_dir="/data/results/subject.bedpostX",  # 方向后验输出目录
+    overwrite=False,  # 已有非空目录时报错
 )
+posterior_sample_count = posterior_result.nsamples  # 每体素后验样本数
+fitted_voxel_count = posterior_result.nvoxels  # 参与拟合体素数
+```
+### 输入数据格式
+
+- DWI：单被试 NIfTI，shape 为 `[X,Y,Z,N]`，至少含 b0 和扩散方向；信号强度沿用输入单位。读入转 float32，不在此入口做运动、涡流或磁敏感校正。
+- mask：NIfTI `[X,Y,Z]`，须与 DWI 的 affine、orientation、体素尺寸和原生 diffusion 空间一致。不自动配准或重排梯度；mask 外结果为零。
+- bval：纯文本 N 个有限 b-value，单位 s/mm²，顺序与第四维一致。
+- bvec：纯文本 `3×N` 或 `N×3`，每个非 b0方向对应同一 volume；已完成 EDDY 时用旋转后的 bvec。
+- 路径接受字符串或 PathLike。示例使用用户自己的真实文件；多被试调度由调用方组织。
+本入口从固定文件名读取：
+
+```text
+subject/
+├── data.nii.gz                 # 校正DWI [X,Y,Z,N]
+├── nodif_brain_mask.nii.gz      # 同shape/affine的3D脑mask
+├── bvals                       # N个b-value
+└── bvecs                       # 3×N或N×3方向
 ```
 
-`result.output_dir` 是输出目录，`result.nvoxels` 是参与拟合的 mask 体素数，`result.nsamples` 是每个体素保存的后验样本数。`result.elapsed_seconds` 记录完整调用墙钟时间。
+mask值>0才参与拟合；mask非空、masked DWI与梯度必须有限。至少一个b≤50的b0和六个b>50方向，程序单位化bvec。默认1250跳、每25跳保存，得到50个后验样本。
 
-## 命令行与原软件对应
+保存全部后验会占用主机内存和磁盘；`chunk_size`只限制拟合批工作区，不限制所有输出数组驻留。小ROI首次运行可能主要花在CUDA初始化和编译。
 
-FNIT 单被试命令：
+**`TorchBEDPOSTX.__init__` 参数**
 
-```bash
-fnit bedpostx \
-  --subject-dir /absolute/path/subject \
-  --output-dir /absolute/path/subject.bedpostX \
-  --device cuda:0 \
-  --nfibres 3 --model 2 \
-  --burnin 1000 --njumps 1250 --sample-every 25 \
-  --ard-weight 1 --chunk-size 4096 --seed 8665904 --threads 1
-```
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `device` | 否 | `str/torch.device/None` | `'cpu'` | PyTorch 设备；None 自动选择可用 CUDA，否则 CPU。 |
+| `threads` | 否 | `int或None` | `None` | 正整数 CPU 线程数；None 保留 PyTorch 设置。 |
+| `nfibres` | 否 | `int` | `3` | 每体素最大纤维数，支持1–3。 |
+| `model` | 否 | `int` | `2` | 1为单扩散率；2为 Gamma 多壳层扩散率。 |
+| `burnin` | 否 | `int` | `1000` | 丢弃的 MCMC 预热跳数。 |
+| `njumps` | 否 | `int` | `1250` | 预热后 MCMC 总跳数。 |
+| `sample_every` | 否 | `int` | `25` | 保存后验的跳数间隔；样本数为 njumps//sample_every。 |
+| `ard_weight` | 否 | `float` | `1.0` | 次要纤维的 ARD 稀疏先验权重。 |
+| `chunk_size` | 否 | `int` | `16384` | 每批并行拟合的脑内体素数，必须为正整数。 |
+| `seed` | 否 | `int` | `8665904` | 随机种子；固定并不保证不同软件随机轨迹相同。 |
 
-独立入口 `fnit-bedpostx` 接受同一组参数。对应的 FSL wrapper 调用为：
+**`TorchBEDPOSTX.__call__` 参数**
 
-```bash
-bedpostx /absolute/path/subject \
-  --nf=3 --model=2 --fudge=1 \
-  --bi=1000 --nj=1250 --se=25
-bedpostx_gpu /absolute/path/subject \
-  -NJOBS 1 -n 3 -model 2 -w 1 \
-  -b 1000 -j 1250 -s 25
-```
+| 参数 | 必需 | 类型 | 默认值 | 含义 |
+|---|---|---|---|---|
+| `subject_dir` | 是 | `路径` | `—` | 一名被试的输入目录，文件结构见下文。 |
+| `output_dir` | 否 | `路径` | `None` | 本次结果目录；路径按当前工作目录解析。 |
+| `overwrite` | 否 | `bool` | `False` | 是否允许覆盖已有结果；默认已有结果时报错。 |
 
-两条命令读取同一目录结构。`--nf/--model/--fudge/--bi/--nj/--se` 分别对应 `nfibres/model/ard_weight/burnin/njumps/sample_every`。FNIT 另有 `device`、`chunk_size`、`seed`、`threads` 和显式输出目录；随机数生成器、初始化和并行归约顺序与 FSL 不同。
-
-## 输出与结构
+### 输出
 
 ```text
 subject.bedpostX/
-├── merged_th1samples.nii.gz    # 第1条纤维的 theta 后验，[X,Y,Z,Nsample]
-├── merged_ph1samples.nii.gz    # 第1条纤维的 phi 后验，[X,Y,Z,Nsample]
-├── merged_f1samples.nii.gz     # 第1条纤维的分数后验，[X,Y,Z,Nsample]
-├── ...                         # 按 nfibres 重复 th/ph/f 文件
-├── mean_f1samples.nii.gz       # 后验平均纤维分数，[X,Y,Z]
-├── dyads1.nii.gz               # 后验平均方向轴，[X,Y,Z,3]
-├── mean_dsamples.nii.gz        # 平均扩散率，[X,Y,Z]
-├── mean_d_stdsamples.nii.gz    # model=2 的扩散率标准差，[X,Y,Z]
-├── mean_S0samples.nii.gz       # 平均基线信号，[X,Y,Z]
-├── nodif_brain_mask.nii.gz     # 追踪互操作所需的脑掩膜
-└── run.json                    # 参数、体素数、样本数和时间
+├── merged_th1samples.nii.gz
+├── merged_ph1samples.nii.gz
+├── merged_f1samples.nii.gz
+├── mean_f1samples.nii.gz
+├── dyads1.nii.gz
+├── ...                         # 按nfibres重复上述文件
+├── mean_dsamples.nii.gz
+├── mean_d_stdsamples.nii.gz     # 仅model2
+├── mean_S0samples.nii.gz
+├── nodif_brain_mask.nii.gz
+└── run.json
 ```
 
-各纤维按体素内后验平均分数降序排列。方向是轴而非有向向量，比较时应使用符号不变夹角。文件名与 FSL `probtrackx2` 读取的 BEDPOSTX 后验一致；轨迹计数受 seed 体素数和每体素样本数影响，不能直接解释成解剖连接概率。
+| 文件 | 格式、单位与含义 |
+|---|---|
+| merged_th/ph | `[X,Y,Z,Nsample]` float32；球坐标角，弧度。 |
+| merged_f | `[X,Y,Z,Nsample]` float32；纤维分数，无量纲。 |
+| mean_f | 3D float32；后验平均分数。 |
+| dyads | `[X,Y,Z,3]` float32；后验平均方向轴，正负号等价。 |
+| mean_d / mean_d_std | 3D float32；平均扩散率/标准差，mm²/s。 |
+| mean_S0 | 3D float32；平均基线信号，输入强度单位。 |
+| run.json | 参数、体素/样本计数和完整调用时间。 |
 
-## 与 FSL 的真实数据对照
+全部NIfTI保留输入DWI原生网格、affine和orientation；mask外为零。纤维按每体素后验平均分数降序重排。`BedpostXResult`返回目录、nvoxels、nsamples和elapsed_seconds；时间包含输入读取、采样、后处理和写出。
 
-当前报告使用一例真实 UK Biobank dMRI 的两个诊断裁剪：14 个弱纤维体素，以及从 FSL 后验图中富集得到的 64 个交叉纤维体素。标准设置为 model 2、三纤维、ARD=1、1000/1250 跳、每 25 跳保存一次和 seed 8665904。FSL 6.0.7.22 使用 `xfibres --cnonlinear`；GPU 核心另用相同参数的 `xfibres_gpu` 测量。FNIT CUDA 路径把重复的 float32 似然计算交给 `torch.compile` 融合。测试在已有其他任务占用的 H100 GPU 1 上依次进行，PyTorch 进程显存上限设为 GPU 总量的 20%。
+文件命名与FSL追踪后验接口相同，但随机数、初始化及归约顺序不同，不声明全部后验逐值相等。
 
-| 当前 GPU 对 FSL CPU | MAE | Pearson r | 其他结果 |
-|---|---:|---:|---|
-| 第一纤维平均分数 | 0.01088 | 0.99918 | 主轴夹角中位数 0.66° |
-| 第二纤维平均分数 | 0.01282 | 0.52640 | 双方均无分数 ≥0.1 的共同支持体素 |
-| 第三纤维平均分数 | 0.004538 | 0.58033 | 双方均无分数 ≥0.1 的共同支持体素 |
-| 平均扩散率 | 0.0001170 mm²/s | 0.96080 | — |
-| 扩散率标准差 | 0.0002166 mm²/s | 0.52974 | 短链估计不稳定 |
+## 3. 命令行调用
 
-| 同机 14 体素 | 墙钟时间 |
+```bash
+fnit-bedpostx --subject-dir /data/dwi/subject    --output-dir /data/results/subject.bedpostX --device cuda:0    --threads 1 --nfibres 3 --model 2 --burnin 1000 --njumps 1250    --sample-every 25 --ard-weight 1 --chunk-size 4096 --seed 8665904
+```
+
+统一入口 `fnit bedpostx`接受同一组参数。
+
+| CLI | Python参数 | 含义 |
+|---|---|---|
+| `--subject-dir`、`--output-dir` | 调用参数同名下划线形式 | 输入及结果目录 |
+| `--device`、`--threads` | 构造参数同名 | 设备和线程 |
+| `--nfibres`、`--model` | 同名 | 最大纤维数和模型 |
+| `--burnin`、`--njumps`、`--sample-every` | `burnin/njumps/sample_every` | MCMC设置 |
+| `--ard-weight` | `ard_weight` | ARD权重 |
+| `--chunk-size`、`--seed` | `chunk_size/seed` | 批大小与随机种子 |
+| `--overwrite` | `overwrite=True` | 覆盖非空目录 |
+
+CLI和Python的device均默认cpu；使用CUDA必须明确指定。批大小影响吞吐/显存，也可能通过随机样本组织影响MCMC结果。
+
+## 4. 原软件调用
+
+原软件在独立参考环境读取同一subject目录：
+
+```bash
+bedpostx /data/dwi/subject --nf=3 --model=2 --fudge=1    --bi=1000 --nj=1250 --se=25
+bedpostx_gpu /data/dwi/subject -NJOBS 1 -n 3 -model 2 -w 1    -b 1000 -j 1250 -s 25
+```
+
+| FNIT | 原BEDPOSTX |
+|---|---|
+| nfibres / model / ard_weight | --nf / --model / --fudge；GPU为-n/-model/-w |
+| burnin / njumps / sample_every | --bi/--nj/--se；GPU为-b/-j/-s |
+| subject_dir | wrapper位置参数 |
+| device、chunk_size、threads、output_dir | FNIT运行选项，wrapper调度语义不同 |
+
+当前不覆盖FSL的全部模型和采样扩展，支持model1/2、Gaussian残差、最多三纤维。FSL的拆分、调度与合并成本必须与核心xfibres计时分开。
+
+## 5. 最新精度和运行时间
+
+最新独立真实对照为[2026-09-29报告](../../validation/bedpostx/report.public.json)，以core.py SHA `a1b2f8fd…`绑定。真实DWI同一例的14弱纤维体素和64交叉纤维富集体素，后者按FSL后验筛选，不能代表无偏全脑。参照FSL6.0.7.22，H100共享GPU，CPU14体素控制为1线程；本轮未重跑该benchmark。
+
+| 14体素完整进程 | 时间 |
 |---|---:|
-| FSL CPU，完整命令 | 10.99 s |
-| Torch CPU，1 线程 | 22.54 s |
-| Torch H100 GPU，优化前完整进程 | 39.32 s |
-| Torch H100 GPU，优化后完整进程 | 18.89 s |
-| FSL H100 GPU，`xfibres_gpu` 核心 | 2.20 s |
+| FSL CPU | 10.99 s |
+| FNIT CPU | 22.54 s |
+| FNIT GPU优化前→后 | 39.32→18.89 s |
+| FSL GPU xfibres核心 | 2.20 s，仅核心，非完整wrapper |
 
-FSL GPU 的 2.20 秒只含拟合核心，不含 `bedpostx_gpu` 的拆分、合并与调度等待，不能与完整进程直接相除。FNIT 进程内 14 体素调用由 37.21 秒降至 15.98 秒；64 体素由 35.88 秒降至 21.65 秒，峰值 PyTorch 已分配显存为 0.27 GiB。14 体素的 19 个 NIfTI 输出在优化前后逐元素相同。64 体素的 MCMC 链因融合后浮点运算而分叉，因此重新计算了对 FSL 的精度：f2/f3 全体素相关为 0.742/0.576；双方分数均 ≥0.1 时相关为 0.727（61 体素）/0.714（26 体素），主轴夹角中位数为 5.39°/7.97°。这些裁剪不代表无偏全脑精度或速度。
+FNIT进程内14/64体素优化后调用为15.98/21.65 s，峰值allocated为0.27 GiB。FNIT完整进程含载入、CUDA/编译、采样和写盘；原GPU核心不含调度/合并，不能直接计算端到端比。float32、CUDA允许TF32，测试前后GPU非空闲。
 
-![真实 UK Biobank dMRI 诊断 ROI 中 FSL 与 FNIT 的第二、第三纤维方向轴](figures/bedpostx_real_ukb_direction_axes.png)
+| 真实精度 | 对FSL CPU结果 |
+|---|---|
+| 14体素f1 MAE / r / 主轴角中位数 | 0.01088 / 0.99918 / 0.66° |
+| 64体素共同f≥0.1的f2/f3 r | 0.727 / 0.714；61/26体素 |
+| 64体素f2/f3轴角中位数 | 5.39° / 7.97° |
 
-图中每行分别为 f2 和 f3。左列是 FSL `xfibres`，中列是当前 FNIT H100 输出，右列是符号不变的锐角差。点位是诊断裁剪内的体素坐标，线段表示方向轴在平面上的投影；图中只显示双方分数均 ≥0.1 的体素，f2 为 61 个、f3 为 26 个。绘图脚本见[plot_real_axes.py](../../validation/bedpostx/plot_real_axes.py)。
+14体素优化前后19张图逐值相同；64体素融合引起MCMC链分叉，已重新对FSL统计。没有独立全脑精度、全脑端到端时间或完整逐阶段配对报告。
 
-仓库已公开这份 64 体素裁剪的去标识方向轴图，原始 DWI 和完整后验仍保留在授权服务器。该裁剪按 FSL 后验估计富集，只用于检查受支持的次要纤维；它不能代表全脑无偏精度。机器可读指标和这一适用范围见 [`report.public.json`](../../validation/bedpostx/report.public.json)。
+![64真实诊断体素的FSL/FNIT第二和第三纤维方向轴](figures/bedpostx_real_ukb_direction_axes.png)
 
-## 合成回归示例
+图只显示共同分数支持的体素，报告保留筛选定义。合成示例仅用于功能回归，不计作科学benchmark。
 
-[`synthetic_example.py`](synthetic_example.py) 生成 8×8×1 的已知双交叉纤维信号；[`synthetic_example.png`](synthetic_example.png) 用于检查模型和画图流程。性能与精度结论采用上面的真实数据。
+## 6. 最近版本和 benchmark
 
-## 来源与限制
+| 日期 | commit/version | 变化 | benchmark |
+|---|---|---|---|
+| 2026-09-29 | 6f379535 | 融合重复似然计算 | 14/64真实诊断体素精度和时间 |
+| 2026-09-28 | 2ad53c5b | 刷新真实数据与来源审计 | 独立FSLCPU/GPU核心边界 |
+| 2026-09-26 | 12555da | 加入BEDPOSTX与后验文件合同 | 最早发布验证；不是当前全脑验收 |
 
-该实现复现已发表模型和采样算法，并非 FSL `xfibres` C++ 的逐句翻译。tensor 初始化、随机数流、浮点归约和 proposal history 均不同，因此不声明后验体积逐元素等价。方法与许可见 [FSL BEDPOSTX 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/bedpostx.html)、Behrens et al. (NeuroImage, 2007)、Jbabdi et al. (MRM, 2012) 以及 [FSL 软件许可](https://fsl.fmrib.ox.ac.uk/fsl/docs/license.html)。
+更早的debug、profiling和长表保留在[旧README归档](../../validation/bedpostx/readme_archive_20261005.md)。归档已修复相对链接；旧科学报告与原始产物不修改。
 
-## Reference
+<a id="输入"></a>
+<a id="python-单被试调用"></a>
+<a id="命令行与原软件对应"></a>
+<a id="输出与结构"></a>
+<a id="与-fsl-的真实数据对照"></a>
+<a id="合成回归示例"></a>
+<a id="来源与限制"></a>
+<a id="reference"></a>
 
-- 参考文献：Behrens et al., *Probabilistic diffusion tractography with multiple fibre orientations: What can we gain?*, NeuroImage (2007), [doi:10.1016/j.neuroimage.2006.09.018](https://doi.org/10.1016/j.neuroimage.2006.09.018)。
-- 原实现代码库：[FSL `fdt`（含 `xfibres`/BEDPOSTX）](https://git.fmrib.ox.ac.uk/fsl/fdt)。
+## 7. 参考文献、原软件和资源
+
+- 官方：[FSL BEDPOSTX](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/bedpostx.html)、[FDT代码](https://git.fmrib.ox.ac.uk/fsl/fdt)中的`xfibres`、`CUDA/xfibres_gpu`与wrapper。
+- Behrens等，2007，[Probabilistic diffusion tractography with multiple fibre orientations](https://doi.org/10.1016/j.neuroimage.2006.09.018)；Jbabdi等，2012，[Model-based analysis of multishell diffusion MR data](https://doi.org/10.1002/mrm.24204)。
+- FNIT：[core.py](../../src/fnit/bedpostx/core.py)、[验证索引](../../validation/bedpostx/README.md)。
+
+### 外部资源
+
+本功能不需要预训练权重、图谱或模板，也不自动下载真实输入数据。用户输入与参考软件的许可由各自来源决定。
+
+| 资源 | 用途 | 官方来源 | 大小 | SHA-256 | 是否允许 FNIT 再分发 |
+|---|---|---|---|---|---|
+| 无额外模型资源 | — | — | 不适用 | 不适用 | 不适用 |

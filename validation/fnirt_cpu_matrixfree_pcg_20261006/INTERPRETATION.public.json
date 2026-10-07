@@ -1,0 +1,48 @@
+{
+  "system": "same frozen restored half matrix-free LM system for this two-arm comparison",
+  "lm_tau": {
+    "value": 0.001,
+    "meaning": "declared controlled LM comparison, not established historical solve3 damping"
+  },
+  "effective_lambda_not_tau": 9049.463427795125,
+  "rhs": "negative checkpoint gradient_half",
+  "operator": "mature restored half action + controlled tau*damping_diagonal*value",
+  "coordinate_units": "mixed displacement-coefficient/intensity coordinates; max_abs is not voxel displacement",
+  "current_control": "current optimizer.py original Torch CPU PCG; internally re-floors supplied preconditioner then reciprocal*multiply",
+  "candidate": "unchanged private CPU algorithm: direct division, owned Dot/Norm, its beta expression; full algorithm differential",
+  "same_system_results": {
+    "current_torch": {
+      "iterations": 49,
+      "true_relative_residual": 0.0007101809160836206
+    },
+    "owned_cpu": {
+      "iterations": 53,
+      "true_relative_residual": 0.0006769837850851172
+    }
+  },
+  "prior_materialized_comparison": {
+    "leaf": "../fnirt_cpu_current_replay_20261006/",
+    "old_iterations": 53,
+    "new_iterations": 49,
+    "operator": "existing materialized full H + controlled .001 full diagonal, strict CSC action",
+    "rhs": "positive stored full current gradient",
+    "not_the_same_floating_point_system_as_this_probe": true,
+    "must_not_use_iteration_reversal_as_causal_isolation": true
+  },
+  "two_step_comparison": {
+    "different_bits": 1177,
+    "max_abs": 0.7198678639661988,
+    "relative_l2_to_current_torch": 0.06966489368470974,
+    "reference_is_current_torch_not_native": true,
+    "no_numerical_improvement_claim": true
+  },
+  "conclusions": [
+    "Both natural recursive stopping reports and true residual checks pass the declared 1e-3 gate in this system.",
+    "A small residual alone does not bound step error without properties of the operator; no global condition number or native step accuracy is established.",
+    "The 6.97% step difference is a comparison between two FNIT-produced controls, not proof of candidate improvement, implementation bug, native equivalence or a production fix.",
+    "Sequential old/new clock observations include different JIT state and are not a speed benchmark.",
+    "Default runtime integration remains rejected pending evidence about full nonlinear precision."
+  ],
+  "runtime_integration_accepted": false,
+  "additional_math_performed_for_interpretation": false
+}

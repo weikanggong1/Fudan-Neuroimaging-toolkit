@@ -1,0 +1,14 @@
+Waiting for shared CPU lock; no numerical import before lock.
+{"phase": "before", "all_bindings_match": true, "production_source_count": 17, "main_head_at_read": "7ff215ee86c49414b2fa6156fdf6769aa54d00f8"}
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-rhs-projection-control-v1/projection_control.py", line 450, in <module>
+    main()
+  File "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-rhs-projection-control-v1/projection_control.py", line 253, in main
+    official_moving = read_official("official_moving")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-rhs-projection-control-v1/projection_control.py", line 236, in read_official
+    require(hashlib.sha256(image.header.binaryblock).hexdigest() == expected["official_moving_header"]["header348_sha256"], "saved moving header bytes")
+  File "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-rhs-projection-control-v1/projection_control.py", line 93, in require
+    raise RuntimeError(message)
+RuntimeError: saved moving header bytes
+{"phase": "after", "all_bindings_match": true, "production_source_count": 17, "main_head_at_read": "7ff215ee86c49414b2fa6156fdf6769aa54d00f8"}

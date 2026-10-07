@@ -1,0 +1,22 @@
+{
+  "scope": "actual installed arithmetic source identity, read without modifying headers or production",
+  "reference_root": "/public/software/apps/FSL/6.0.7.4",
+  "hessian_storage": "fnirtfns.cpp line590 --numprec defaults to double; actual config does not override it",
+  "sources": {
+    "include/armawrap/function_dotproduct.hpp": {
+      "bytes": 548,
+      "sha256": "c5cc1579a450d8dd38e5ace0d1ae37729c0d45300e4c0996db352f09042eb0de",
+      "behavior": "NEWMAT alias forwards DotProduct to arma::dot"
+    },
+    "include/armadillo_bits/op_dot_meat.hpp": {
+      "bytes": 13139,
+      "sha256": "b1a368bb3e57021c60d67bd6aef0873c9cacb33721ad3dbdd326d326a006d392",
+      "behavior": "installed source contains direct_dot_arma and conditional BLAS dispatch; source existence alone is not a kernel trace"
+    },
+    "include/armadillo_bits/fn_norm.hpp": {
+      "bytes": 6588,
+      "sha256": "cbc334fbefc05d2e571f86140d382299a621869ab63a1206250049358a05fe5b"
+    }
+  },
+  "observed_evidence": "actual same native r,z,p,q yield at most3ULP Torch dot differences; all native-alpha vector updates exact. Same-direction CSC matvec exact for all93saved rounds."
+}

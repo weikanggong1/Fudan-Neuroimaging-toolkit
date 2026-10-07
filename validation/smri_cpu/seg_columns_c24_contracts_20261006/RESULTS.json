@@ -1,0 +1,836 @@
+{
+  "schema": "fnit_C24_short_contracts_results/v1",
+  "status": "short_contracts_passed_not_real_MRI_or_production",
+  "prepare_commit": "5ee75b6828c94d2652f68eb95bfef64e3735bb80",
+  "prepare_PLAN": {
+    "bytes": 14738,
+    "sha256": "c1f4445a9b7196b6b1f8b0fa1aabd4187c9a61d24ff55084baabf9ceac4f85dc"
+  },
+  "prepare_freeze": {
+    "bytes": 4587,
+    "sha256": "2cf0567aeea404c4718ac901b4ade1fccab5d925a2bbe92089376f81b53ccfe6"
+  },
+  "production_baseline": "7ff215ee86c49414b2fa6156fdf6769aa54d00f8",
+  "queue": {
+    "status": "compile_and_short_contracts_passed_no_MRI",
+    "completed": true,
+    "valid_queue": true,
+    "sources_unchanged": true,
+    "outer_observation_seconds": 6.330317496322095
+  },
+  "worker_exit_codes": [
+    0,
+    0
+  ],
+  "controller_OS_exit_code": "not_captured; completed valid QUEUE and original empty controller log, process gone",
+  "compile": {
+    "status": "compiled_loaded_interface_only",
+    "valid_interface": true,
+    "compile_calls": 1,
+    "compiler_rc": 0,
+    "binary": {
+      "bytes": 17656,
+      "sha256": "b8fd9829d92619fcd031b0c1af5e0fb9e04dee1209909211aa04a6133210d4e7"
+    },
+    "worker_observation_seconds": 2.912187279202044,
+    "RSS_maximum_bytes": 342417408,
+    "compiler_maxRSS_bytes": 342413312,
+    "tensor_allocation_calls": 0,
+    "copy_calls": 0,
+    "SGEMM_calls": 0,
+    "flags_unchanged": true,
+    "Torch_threads_before": {
+      "intra": 8,
+      "interop": 96
+    },
+    "Torch_threads_after": {
+      "intra": 8,
+      "interop": 96
+    },
+    "Torch_thread_setters_called": 0
+  },
+  "contracts": {
+    "status": "bounded_contracts_passed_no_MRI",
+    "valid_bounded_contracts": true,
+    "numeric_rows": [
+      {
+        "case": "single_depth",
+        "shape": [
+          1,
+          24,
+          1,
+          13,
+          17
+        ],
+        "old_candidate_slab_depth": 32,
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "finite": true,
+        "shape_stride_dtype_equal": true,
+        "input_unchanged": true,
+        "weight_bias_unchanged": true,
+        "output_independent": true,
+        "explicit_workspace_allocations": 3,
+        "workspace_released_on_return": true,
+        "poisoned_columns_each_slab": true
+      },
+      {
+        "case": "two_depth",
+        "shape": [
+          1,
+          24,
+          2,
+          13,
+          17
+        ],
+        "old_candidate_slab_depth": 32,
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "finite": true,
+        "shape_stride_dtype_equal": true,
+        "input_unchanged": true,
+        "weight_bias_unchanged": true,
+        "output_independent": true,
+        "explicit_workspace_allocations": 3,
+        "workspace_released_on_return": true,
+        "poisoned_columns_each_slab": true
+      },
+      {
+        "case": "boundary_internal",
+        "shape": [
+          1,
+          24,
+          7,
+          13,
+          17
+        ],
+        "old_candidate_slab_depth": 32,
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "finite": true,
+        "shape_stride_dtype_equal": true,
+        "input_unchanged": true,
+        "weight_bias_unchanged": true,
+        "output_independent": true,
+        "explicit_workspace_allocations": 3,
+        "workspace_released_on_return": true,
+        "poisoned_columns_each_slab": true
+      },
+      {
+        "case": "many_slabs",
+        "shape": [
+          1,
+          24,
+          65,
+          13,
+          17
+        ],
+        "old_candidate_slab_depth": 32,
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "finite": true,
+        "shape_stride_dtype_equal": true,
+        "input_unchanged": true,
+        "weight_bias_unchanged": true,
+        "output_independent": true,
+        "explicit_workspace_allocations": 3,
+        "workspace_released_on_return": true,
+        "poisoned_columns_each_slab": true
+      },
+      {
+        "case": "strided_odd_depth",
+        "shape": [
+          1,
+          24,
+          67,
+          13,
+          17
+        ],
+        "old_candidate_slab_depth": 32,
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "finite": true,
+        "shape_stride_dtype_equal": true,
+        "input_unchanged": true,
+        "weight_bias_unchanged": true,
+        "output_independent": true,
+        "explicit_workspace_allocations": 3,
+        "workspace_released_on_return": true,
+        "poisoned_columns_each_slab": true
+      },
+      {
+        "case": "cancellation",
+        "shape": [
+          1,
+          24,
+          65,
+          13,
+          17
+        ],
+        "old_candidate_slab_depth": 32,
+        "different_bits": 0,
+        "max_abs": 0.0,
+        "finite": true,
+        "shape_stride_dtype_equal": true,
+        "input_unchanged": true,
+        "weight_bias_unchanged": true,
+        "output_independent": true,
+        "explicit_workspace_allocations": 3,
+        "workspace_released_on_return": true,
+        "poisoned_columns_each_slab": true
+      }
+    ],
+    "copy_rows": [
+      {
+        "case": "single_depth",
+        "start": 0,
+        "depth": 1,
+        "M": 221,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          221,
+          1
+        ],
+        "poisoned_before_copy": true
+      },
+      {
+        "case": "two_depth",
+        "start": 0,
+        "depth": 2,
+        "M": 442,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          442,
+          1
+        ],
+        "poisoned_before_copy": true
+      },
+      {
+        "case": "boundary_internal",
+        "start": 0,
+        "depth": 7,
+        "M": 1547,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          1547,
+          1
+        ],
+        "poisoned_before_copy": true
+      },
+      {
+        "case": "many_slabs",
+        "start": 0,
+        "depth": 32,
+        "M": 7072,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          7072,
+          1
+        ],
+        "poisoned_before_copy": true
+      },
+      {
+        "case": "many_slabs",
+        "start": 32,
+        "depth": 32,
+        "M": 7072,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          7072,
+          1
+        ],
+        "poisoned_before_copy": true
+      },
+      {
+        "case": "many_slabs",
+        "start": 64,
+        "depth": 1,
+        "M": 221,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          221,
+          1
+        ],
+        "poisoned_before_copy": true,
+        "unconsumed_tail_poison_unchanged": true
+      },
+      {
+        "case": "strided_odd_depth",
+        "start": 0,
+        "depth": 32,
+        "M": 7072,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          7072,
+          1
+        ],
+        "poisoned_before_copy": true
+      },
+      {
+        "case": "strided_odd_depth",
+        "start": 32,
+        "depth": 32,
+        "M": 7072,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          7072,
+          1
+        ],
+        "poisoned_before_copy": true
+      },
+      {
+        "case": "strided_odd_depth",
+        "start": 64,
+        "depth": 3,
+        "M": 663,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          663,
+          1
+        ],
+        "poisoned_before_copy": true,
+        "unconsumed_tail_poison_unchanged": true
+      },
+      {
+        "case": "cancellation",
+        "start": 0,
+        "depth": 32,
+        "M": 7072,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          7072,
+          1
+        ],
+        "poisoned_before_copy": true
+      },
+      {
+        "case": "cancellation",
+        "start": 32,
+        "depth": 32,
+        "M": 7072,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          7072,
+          1
+        ],
+        "poisoned_before_copy": true
+      },
+      {
+        "case": "cancellation",
+        "start": 64,
+        "depth": 1,
+        "M": 221,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          221,
+          1
+        ],
+        "poisoned_before_copy": true,
+        "unconsumed_tail_poison_unchanged": true
+      },
+      {
+        "case": "height_width_singleton",
+        "start": 0,
+        "depth": 2,
+        "M": 2,
+        "different_bits": 0,
+        "compact_prefix_stride": [
+          2,
+          1
+        ],
+        "poisoned_before_copy": true
+      }
+    ],
+    "guard_rows": [
+      {
+        "name": "reverse_grad_enabled",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "oneDNN_enabled",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "training",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "float64_input",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "meta_device_guard_only_no_CUDA",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "input_requires_grad",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "CPU_autocast_enabled_no_low_precision_kernel",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "local__forward_pre_hooks",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "local__forward_hooks",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "local__backward_pre_hooks",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "local__backward_hooks",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "global__global_forward_pre_hooks",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "global__global_forward_hooks",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "global__global_backward_pre_hooks",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "global__global_backward_hooks",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "image_subclass",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "weight_subclass",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "bias_subclass",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "image_forward_AD_dual",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "weight_forward_AD_dual",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "bias_forward_AD_dual",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "image_negative_view",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "weight_negative_view",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "bias_negative_view",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "weight_value_SHA_mismatch",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "bias_value_SHA_mismatch",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "bias_missing",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "thread_budget_mismatch",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "unsupported_shape",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      },
+      {
+        "name": "layer_subclass",
+        "fallback_identity": true,
+        "numeric_calls": 0
+      }
+    ],
+    "copy_oracle_calls": 13,
+    "candidate_copy_calls": 12,
+    "candidate_SGEMM_calls": 12,
+    "fallback_calls": 30,
+    "injected_copy_error_calls": 1,
+    "worker_observation_seconds": 2.7370281582698226,
+    "RSS_maximum_bytes": 468205568,
+    "threads": 8,
+    "interop_threads": 8,
+    "flags_before": {
+      "CUDA_initialized": false,
+      "oneDNN": true,
+      "matmul_TF32": false,
+      "cuDNN_TF32": true,
+      "CPU_autocast": false,
+      "grad_enabled": true,
+      "default_dtype": "torch.float32"
+    },
+    "flags_after": {
+      "CUDA_initialized": false,
+      "oneDNN": true,
+      "matmul_TF32": false,
+      "cuDNN_TF32": true,
+      "CPU_autocast": false,
+      "grad_enabled": true,
+      "default_dtype": "torch.float32"
+    },
+    "flags_unchanged": true,
+    "parameter_bits_unchanged": true,
+    "weight_file_unchanged": true,
+    "binary_unchanged": true,
+    "exception_workspace_released": true,
+    "exception_flags_restored": true,
+    "normal_scope_flags_restored": true,
+    "global_hook_tables_unchanged": true,
+    "postcondition_failures": {}
+  },
+  "scope": {
+    "MRI_calls": 0,
+    "native_calls": 0,
+    "GPU_calls": 0,
+    "whole_model_forward_calls": 0,
+    "production_changes": 0,
+    "old_C72_changes": 0,
+    "new_compiles": 1,
+    "short_numeric_workers": 1,
+    "additional_uploads_after_resume": 0,
+    "existing_frozen_files_reused": 13,
+    "new_real_layer_or_CNN_benchmark": false,
+    "fresh_conda_environment_test": false,
+    "official_accuracy_test": false,
+    "GPU_performance_test": false,
+    "real_layer_authorized": false
+  },
+  "old_C72_files": {
+    "PLAN.json": {
+      "fnit_relative_path": "workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-reuse-v1/PLAN.json",
+      "bytes": 11068,
+      "sha256": "e931fb45ae3caf197155dbceacdc08d02513efea86fa3c62615315080355ff3e"
+    },
+    "columns_reuse.cpp": {
+      "fnit_relative_path": "workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-reuse-v1/columns_reuse.cpp",
+      "bytes": 4385,
+      "sha256": "2440abe802f1da2c14bd192f8b0f84c46b6f1f518de1dc9f0dca8429b05a2527"
+    },
+    "COMPILE.json": {
+      "fnit_relative_path": "runs/smri_cpu_20261004/remaining_20261006/seg-columns-reuse-v1/compile/COMPILE.private.json",
+      "bytes": 5359,
+      "sha256": "74d1b96c3d56caeefb1f211271c7678586decc0277ec918b6b5707ba89d3ca11"
+    },
+    "columns_reuse.so": {
+      "fnit_relative_path": "runs/smri_cpu_20261004/remaining_20261006/seg-columns-reuse-v1/compile/columns_reuse.so",
+      "bytes": 17640,
+      "sha256": "e70100b60d0c7981f04d4c381e782f28fbfeda97190a5cbafcce85f03b9cd958"
+    }
+  },
+  "source17": {
+    "src/fnit/synthseg_parc/__init__.py": {
+      "bytes": 472,
+      "sha256": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a"
+    },
+    "src/fnit/synthseg_parc/_columns_reuse.cpp": {
+      "bytes": 4385,
+      "sha256": "2440abe802f1da2c14bd192f8b0f84c46b6f1f518de1dc9f0dca8429b05a2527"
+    },
+    "src/fnit/synthseg_parc/_cpu_columns_build.py": {
+      "bytes": 10983,
+      "sha256": "31237d750678098a417390bf6a8ac1cc448f3293a90bf1fcd879b1f0a8fd293b"
+    },
+    "src/fnit/synthseg_parc/color_lut.py": {
+      "bytes": 2658,
+      "sha256": "265c631e0a4f1cf82faa24d4289873561c81ac19fb062c821327a3b0ca60d91c"
+    },
+    "src/fnit/synthseg_parc/cpu_columns.py": {
+      "bytes": 11596,
+      "sha256": "9cc29bc05600b0115d2ac559da362d03b72042156dd2747e6a0237f836ffedff"
+    },
+    "src/fnit/synthseg_parc/cpu_conv.py": {
+      "bytes": 6318,
+      "sha256": "35ea804cc9d88e6bdb185f6d392f5d4398327f2faaf3d015a9fc7594fdf8f31b"
+    },
+    "src/fnit/synthseg_parc/cpu_join.py": {
+      "bytes": 2283,
+      "sha256": "196a2c05e32f94b9e27442a4813ad9a9bb9fb2138820c653ca89cf1a77707b8f"
+    },
+    "src/fnit/synthseg_parc/labels.py": {
+      "bytes": 1596,
+      "sha256": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e"
+    },
+    "src/fnit/synthseg_parc/model.py": {
+      "bytes": 4395,
+      "sha256": "3268749e8f36783b217a20bd6f536e1f590b462c5bfe095e01fb8981f849c26f"
+    },
+    "src/fnit/synthseg_parc/pipeline.py": {
+      "bytes": 5813,
+      "sha256": "9405c223a6fe3c8b1caa18c8d5a0b1112187bc011d3e0f627ad53b71bb509f29"
+    },
+    "src/fnit/synthseg_parc/postprocess.py": {
+      "bytes": 4068,
+      "sha256": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936"
+    },
+    "src/fnit/synthseg_parc/precision.py": {
+      "bytes": 3548,
+      "sha256": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147"
+    },
+    "src/fnit/synthseg_parc/preprocess.py": {
+      "bytes": 7490,
+      "sha256": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e"
+    },
+    "src/fnit/synthseg_parc/segment.py": {
+      "bytes": 18000,
+      "sha256": "b211f7246883ec0ab2b6963e7eaad63fdb974a398dbc06d20119f3755a3df152"
+    },
+    "src/fnit/synthseg_parc/synthseg.py": {
+      "bytes": 9742,
+      "sha256": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f"
+    },
+    "src/fnit/synthseg_parc/synthseg_io.py": {
+      "bytes": 6503,
+      "sha256": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c"
+    },
+    "src/fnit/synthseg_parc/synthseg_plus.py": {
+      "bytes": 8500,
+      "sha256": "6ee00e460e2aed9156b3981950aefa007c06c78b6e9a731d68429aee4e4870a0"
+    }
+  },
+  "actual_weight": {
+    "fnit_relative_path": "workspaces/smri_cpu_20261004/assets/weights/synthseg_2.0.h5",
+    "bytes": 53079152,
+    "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+  },
+  "actual_layer": {
+    "name": "SegmentUNet.down[0].conv1",
+    "h5_key": "unet_conv_downarm_0_1",
+    "raw_kernel_shape": [
+      3,
+      3,
+      3,
+      24,
+      24
+    ],
+    "raw_kernel_dtype": "float32",
+    "raw_bias_dtype": "float32",
+    "kernel_shape": [
+      24,
+      24,
+      3,
+      3,
+      3
+    ],
+    "bias_shape": [
+      24
+    ],
+    "kernel_bytes": 62208,
+    "bias_bytes": 96,
+    "dtype": "float32",
+    "kernel_value_sha256": "080e9e82b43ebd3eb35fa991a5d264b073c35e0c027aea9534510470e552d699",
+    "bias_value_sha256": "e5c6f0bafe28b340b599bd6b52faaec3a1c462edd6676103c0efddfbd6a73944",
+    "conversion": "same np.asarray(F32).transpose(4,3,0,1,2).copy used by SegmentUNet.load_h5; no parameter arithmetic"
+  },
+  "limits": {
+    "shared_CPU_lock_wait_seconds": 120,
+    "outer_total_seconds": 480,
+    "compile_worker_seconds": 180,
+    "compiler_child_seconds": 120,
+    "compiler_version_probe_seconds": 10,
+    "numeric_worker_seconds": 180,
+    "compile_AS_bytes": 4000000000,
+    "contract_AS_bytes": 8000000000,
+    "RSS_ceiling_bytes": 32000000000,
+    "first_failure": "stop all remaining contracts; no automatic retry, no relaxed tolerance",
+    "queue_children": 2,
+    "numerical_contract_workers": 1
+  },
+  "affinity": [
+    32,
+    36,
+    40,
+    44,
+    48,
+    52,
+    56,
+    60
+  ],
+  "provenance": {
+    "receipts/run/check_contracts.py.log": {
+      "original": {
+        "bytes": 177,
+        "sha256": "b5349ee01c6703b5ef9bb77c235395c30d2563193ad01a472671e687d1a8fdd7"
+      },
+      "public": {
+        "bytes": 177,
+        "sha256": "b5349ee01c6703b5ef9bb77c235395c30d2563193ad01a472671e687d1a8fdd7"
+      },
+      "only_redactions": []
+    },
+    "receipts/run/compile_probe.py.log": {
+      "original": {
+        "bytes": 121,
+        "sha256": "a48a292ab674ab3a777f0e5df5fba3cc661a882bebeea8cf365a56f3d3a5fd49"
+      },
+      "public": {
+        "bytes": 121,
+        "sha256": "a48a292ab674ab3a777f0e5df5fba3cc661a882bebeea8cf365a56f3d3a5fd49"
+      },
+      "only_redactions": []
+    },
+    "receipts/run/CONTRACTS.json": {
+      "original": {
+        "bytes": 21547,
+        "sha256": "f3d07a427562f834599539004774d66a7a5a30ec5d35fc81ce19e12e3e2f39e8"
+      },
+      "public": {
+        "bytes": 21547,
+        "sha256": "f3d07a427562f834599539004774d66a7a5a30ec5d35fc81ce19e12e3e2f39e8"
+      },
+      "only_redactions": []
+    },
+    "receipts/run/controller.log": {
+      "original": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "public": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "only_redactions": []
+    },
+    "receipts/run/QUEUE.json": {
+      "original": {
+        "bytes": 10506,
+        "sha256": "628b8236dc3a21761c956cc33d73ab277d7d95dab2efbcd7fb7a0f3c0a041001"
+      },
+      "public": {
+        "bytes": 10506,
+        "sha256": "628b8236dc3a21761c956cc33d73ab277d7d95dab2efbcd7fb7a0f3c0a041001"
+      },
+      "only_redactions": []
+    },
+    "receipts/run/compile/COMPILE.json": {
+      "original": {
+        "bytes": 12677,
+        "sha256": "8703f61f78b741f1586fdaeb9d11256d90805d108cff1de992b0334337c5484e"
+      },
+      "public": {
+        "bytes": 12410,
+        "sha256": "873caf203929d7de24031098c4c18d0a2623f3acbe6c74c8a64612cc7eaaa3f5"
+      },
+      "only_redactions": [
+        {
+          "from": "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9",
+          "to": "<CONDA_PREFIX>"
+        },
+        {
+          "from": "/home1/gongwk/anaconda3",
+          "to": "<CONDA_BASE>"
+        },
+        {
+          "from": "/cwStorage/home/gongwk/anaconda3",
+          "to": "<CONDA_BASE>"
+        }
+      ]
+    },
+    "receipts/run/compile/compiler.stderr.log": {
+      "original": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "public": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "only_redactions": []
+    },
+    "receipts/run/compile/compiler.stdout.log": {
+      "original": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "public": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "only_redactions": []
+    },
+    "POST_BINDINGS.json": {
+      "original": {
+        "bytes": 6771,
+        "sha256": "6939a3f90d217673c6c7731bac1b17d72d4d430ca45fbb33bd34f5967f79ccae"
+      },
+      "public": {
+        "bytes": 6771,
+        "sha256": "6939a3f90d217673c6c7731bac1b17d72d4d430ca45fbb33bd34f5967f79ccae"
+      },
+      "only_redactions": []
+    },
+    "receipts/run/dispatch.public.json": {
+      "original": {
+        "bytes": 1237,
+        "sha256": "dac6b71228ed4f809deaa0dd058a7f94c92617a7d1db4b03e2a6eb141b33e1cb"
+      },
+      "public": {
+        "bytes": 1237,
+        "sha256": "dac6b71228ed4f809deaa0dd058a7f94c92617a7d1db4b03e2a6eb141b33e1cb"
+      },
+      "only_redactions": []
+    },
+    "receipts/run/index_completed.public.json": {
+      "original": {
+        "bytes": 6161,
+        "sha256": "65da36d0db25adcce791f1518308b4d28854490d2d28985b9e11185b6bb686b3"
+      },
+      "public": {
+        "bytes": 6161,
+        "sha256": "65da36d0db25adcce791f1518308b4d28854490d2d28985b9e11185b6bb686b3"
+      },
+      "only_redactions": []
+    }
+  }
+}

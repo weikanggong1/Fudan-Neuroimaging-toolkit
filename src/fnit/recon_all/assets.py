@@ -13,6 +13,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 from fnit.weights import cache_dir, verify_file
+from fnit._release_assets import release_url_for
 
 
 # Relative path: (size, SHA-256, key extension for direct annex-backed files).
@@ -217,6 +218,14 @@ def _annex_url(size, sha256, extension):
 
 
 def asset_url(name):
+    """Return a verified FNIT Release URL, or the pinned upstream fallback."""
+    if name in BUNDLED_SUBREGION_LUTS:
+        raise ValueError(f"{name} is included in the FNIT package")
+    size, sha256, _ = ASSET_FILES[name]
+    return release_url_for(sha256, size) or _upstream_asset_url(name)
+
+
+def _upstream_asset_url(name):
     if name in BUNDLED_SUBREGION_LUTS:
         raise ValueError(f"{name} is included in the FNIT package")
     if name in SOURCE_FILES:
@@ -273,6 +282,15 @@ def download_asset(name, directory, verify_only=False):
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, target)
                 return target
+    release_url = release_url_for(sha256, size)
+    if release_url is not None:
+        try:
+            # Individual archive members are mirrored separately; fetching one
+            # template no longer requires downloading the full upstream bundle.
+            return _download_verified(release_url, target, size, sha256)
+        except (OSError, ValueError):
+            # Do not resume bytes from a failed mirror against another source.
+            target.with_name(target.name + ".part").unlink(missing_ok=True)
     if name in ARCHIVE_MEMBERS:
         archive = Path(directory) / ".downloads" / "mni_icbm152_nlin_asym_09c.tar.gz"
         archive_size, archive_sha = ARCHIVE_SIZE, ARCHIVE_SHA256
@@ -282,8 +300,8 @@ def download_asset(name, directory, verify_only=False):
         archive_size, archive_sha = FSAVERAGE_ARCHIVE_SIZE, FSAVERAGE_ARCHIVE_SHA256
         members, prefix = FSAVERAGE_ARCHIVE_MEMBERS, "subjects/"
     else:
-        return _download_verified(asset_url(name), target, size, sha256)
-    _download_verified(asset_url(name), archive, archive_size, archive_sha)
+        return _download_verified(_upstream_asset_url(name), target, size, sha256)
+    _download_verified(_upstream_asset_url(name), archive, archive_size, archive_sha)
     _extract_archive_members(archive, Path(directory), members, prefix)
     archive.unlink()
     if not verify_file(target, size, sha256):

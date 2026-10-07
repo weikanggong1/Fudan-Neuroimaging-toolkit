@@ -28,6 +28,8 @@ class TinyModel(torch.nn.Module):
         super().__init__()
         self.parameter = torch.nn.Parameter(torch.zeros(1))
         self.channels, self.fail = channels, fail
+        # Match the mature WMH pipeline's inference-mode state contract.
+        self._memory_efficient_inference = True
 
     def load_h5(self, path):
         return self

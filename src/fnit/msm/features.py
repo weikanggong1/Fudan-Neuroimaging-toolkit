@@ -40,21 +40,25 @@ def _pinv(values):
     return torch.linalg.pinv(values, rtol=max(values.shape) * np.finfo(np.float64).eps)
 
 
-def _node_timeseries(data, maps, weights=None):
+def _node_timeseries(data, maps, weights=None, *, observations=None):
     if weights is None:
         design = _demean(maps, 0)
-        observations = _demean(data, 0)
+        if observations is None:
+            observations = _demean(data, 0)
     else:
         root = torch.sqrt(weights)[:, None]
         # The source demeans the weighted design, but weights already
         # spatially demeaned observations. These orders are different.
         design = _demean(maps * root, 0)
-        observations = _demean(data, 0) * root
+        if observations is None:
+            observations = _demean(data, 0) * root
     return _demean((_pinv(design) @ observations).T, 0)
 
 
-def _spatial_maps(data, node_timeseries):
-    return (_pinv(node_timeseries) @ _demean(data.T, 0)).T
+def _spatial_maps(data, node_timeseries, *, observations=None):
+    if observations is None:
+        observations = _demean(data.T, 0)
+    return (_pinv(node_timeseries) @ observations).T
 
 
 def _regression(data, reference_maps, *, method, cortical_area=None,
@@ -69,12 +73,21 @@ def _regression(data, reference_maps, *, method, cortical_area=None,
         raise ValueError("WRN requires cortical vertex areas, d7–d21 maps and 14 mm smoothing")
     area = torch.ones(len(data), dtype=data.dtype, device=data.device)
     area[:len(cortical_area)] = cortical_area
+    # All d7--d21 passes use the same complete BOLD and cortical area.
+    # Reuse these two literal reductions on CPU rather than allocating and
+    # centering the large BOLD matrix in each of the 31 area-weighted passes.
+    # CUDA and differentiable data keep the existing evaluation sequence.
+    cache_observations = data.device.type == "cpu" and not any(
+        value.requires_grad for value in (data, reference_maps, cortical_area, *low_maps))
+    area_observations = (_demean(data, 0) * torch.sqrt(area)[:, None]
+                         if cache_observations else None)
+    temporal_observations = _demean(data.T, 0) if cache_observations else None
     correlations = []
     for low_dimensional_maps in low_maps:
-        nodes = _node_timeseries(data, low_dimensional_maps, area)
-        maps = _spatial_maps(data, nodes)
-        nodes = _node_timeseries(data, maps, area)
-        maps = _spatial_maps(data, nodes)
+        nodes = _node_timeseries(data, low_dimensional_maps, area, observations=area_observations)
+        maps = _spatial_maps(data, nodes, observations=temporal_observations)
+        nodes = _node_timeseries(data, maps, area, observations=area_observations)
+        maps = _spatial_maps(data, nodes, observations=temporal_observations)
         x = _demean(maps, 1)
         y = _demean(low_dimensional_maps, 1)
         numerator = (x * y).sum(1)
@@ -87,9 +100,9 @@ def _regression(data, reference_maps, *, method, cortical_area=None,
     spatial_weights = (fisher.mean() + fisher - smoothed).clamp_min(0).pow(3)
     weights = area * spatial_weights
     nodes = _node_timeseries(data, reference_maps, weights)
-    maps = _spatial_maps(data, nodes)
-    nodes = _node_timeseries(data, maps, area)
-    maps = _spatial_maps(data, nodes)
+    maps = _spatial_maps(data, nodes, observations=temporal_observations)
+    nodes = _node_timeseries(data, maps, area, observations=area_observations)
+    maps = _spatial_maps(data, nodes, observations=temporal_observations)
     cortical_count = len(cortical_area)
     original = reference_maps[:cortical_count]
     generated = maps[:cortical_count]

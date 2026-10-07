@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "date": "2026-10-05",
+  "scope": "Small arithmetic, format, autograd and CPU/CUDA execution controls; not an MRI benchmark",
+  "versions": {
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "numba": "0.67.0"
+  },
+  "checks": [
+    {
+      "modules": [
+        "tests/test_msm_point_cpu.py",
+        "tests/test_msm_sphere_cpu.py",
+        "tests/test_msmall_features.py"
+      ],
+      "passed": 30,
+      "failed": 0,
+      "wall_seconds": 9.16
+    },
+    {
+      "modules": [
+        "tests/test_msm_sphere_execution.py"
+      ],
+      "passed": 11,
+      "failed": 0,
+      "wall_seconds": 8.49,
+      "devices": [
+        "cpu",
+        "cuda:0"
+      ]
+    }
+  ],
+  "owned_hashes": {
+    "src/fnit/msm/_point_cpu.py": "00184aadad94aae4b9f64f3bfd14f1c19a0cafc921c6d6cf8d46256e3367b543",
+    "src/fnit/msm/_sphere_cpu.py": "5024a69e6713efe0f9f4c3fa7bb3000c786aba31640617d7c1ccd2175c35b161",
+    "src/fnit/msm/_sphere_map.py": "6607a0b22a8c2d2b03810ecbb8c8597318da52f4fc5c1fe011fb16dd23e2f0bc",
+    "src/fnit/msm/_affine.py": "fcbd622770d9c9f9b09115469e39d2d755385fcfebac212d559eb2a3e595ed3d",
+    "src/fnit/msm/msmsulc.py": "52562009f1fd53dde053a8a981fd621813ae6c186ea88910f7d1b2e20ec563f1",
+    "src/fnit/msm/features.py": "8be99f074b2e5aa4b6b150e84d90f79800e419ed823ef7a452226eca120410a6",
+    "tests/test_msm_point_cpu.py": "360ccdab4095a13b6a21463c8160754d229aae1ded6b71ce4a5b6ee1b73af7b2",
+    "tests/test_msm_sphere_cpu.py": "58ef7022aa0eec632ffe315df72d04760f3b5a0f8197a7e982ce1dab278dc80d",
+    "tests/test_msmall_features.py": "77fc197c0c7ab9e77cb0101a99d1548986b4d645957a62760a940bb9e3915b70",
+    "tests/test_msm_sphere_execution.py": "9cfd136a2fede04d0f530c4762cc0f69ee26b30ba923b8f7aeb7e52bdb504fc1"
+  },
+  "server_freezes_modified": false,
+  "full_real_gpu_regression": "coordinator pending; these tests do not establish unchanged full GPU performance"
+}
