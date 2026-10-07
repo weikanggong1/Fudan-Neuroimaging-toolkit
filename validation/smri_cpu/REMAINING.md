@@ -10,6 +10,12 @@
 | TorchFAST / FastVBM | FAST CPU `fsl` 默认及已测非默认八图与官方逐值一致，原少数 PVE 差已消除。默认 `tensor` 仍非原序算法。FNIRT VBM 非线性估计尚未等价，Morph 完整 VBM 13 图也非逐位相同 | 更新 FAST/Morph 修复后的完整 VBM 两链、官方 Morph 冷完整链、pipeline AB-BA、其他 FAST 组合和完整 VBM GPU。FNIRT[实证定位](gems_fixes_20261004/FNIRT_READONLY.md)排除了重采样和最终乘法作为主因；首轮 accepted、共享非零参数和两次共享 PCG 轨迹已对照；浮点敏感性已实证，原完整后续状态仍缺 |
 | 亚区 / recon-all | 丘脑与双侧 HA 逐区门未全过，CPU 仍慢。更接近官方的裁剪预处理候选存在逐区退步，未接入；缓存无 CPU 收益，已撤回。Gaussian 广播 bug 已修复，但四 recipe 不进入该分支。完整 recon v3 仍慢 4.99%，皮层分区和拓扑不同；44 顶点图、12 注释记 NA | 原始 T1 的 CPU `balanced` 全亚区；有效顶点对应、DKT/a2009s/BA 具名逐区摘要、三图谱同公式 no-TH3 体积；其他半球策略、批量入口和当前整合版完整 CPU/GPU 回归。同完整左半球输入的 sphere.reg 已与官方逐点一致、保存负面积面为 0；348.038 s 对官方 261.199 s 仍慢 33.25%，未新跑上游或整链 |
 
+## 2026-10-07 当前定位边界
+
+- **FNIRT**：原版四层GM自然参数观察和Python同输入观察均已完成、关闭；双方最初cf/grad/hess输入参数相同，第一个trial输入已不同。现已具备完整参数首差，仍缺原PCG内部轨迹、同参数各算术分项和最终等价输出。优先核对首更新的预条件器／Hessian累计顺序，不把初始输入参数相同当算子输出相同。详见[完整首差报告](../fnirt_cpu_full_GM_parameter_trajectory_20261007/README.md)。
+- **GEMS**：独立初始对齐桥通过原20项、133点与20,100网格点0误差及有序四面体检查。尚缺真正原版C++网格初始化独立trace，mask／Gaussian支持／优化与后处理定义及完整逐核团Dice/体积门仍未完成。[桥验证](../torchgems/cpu_initial_alignment_20261007/README.md)不替代完整分割。
+- **正式CPU robust入口**：已从运行时AST/实验目录加载改为正常包内imports、Python上下文与单被试CLI；完整wheel及隔离安装已完成，正常包内API真实对照20/20，冷pair2.254秒、导入1.594秒另计。完整冷CLI、更多真实输入和全新Conda环境仍待测试；它是独立CPU接口，不自动替换GEMS或GPU。当前接口验收见[函数说明](../../docs/robust_register/README.md)。
+
 ## 后续定位顺序
 
 1. SR 的 CPU 原固定门已通过，正常 CLI 与旧版基本持平、RSS 降低约 26.7%；GPU 完整旧新输出及显存相同。继续扩展对象模式时保留原数值门，EPI NPZ 的非逐值差异和 GPU 对官方 CPU 的 TF32 差异独立报告。
