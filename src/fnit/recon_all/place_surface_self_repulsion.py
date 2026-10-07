@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 from numba import njit
 
-from .place_surface_repulsion import vertex_buckets
+from .place_surface_repulsion import OriginalVertexBuckets, vertex_buckets
 
 
 def vertex_buckets_current(
@@ -20,18 +20,17 @@ def vertex_buckets_current(
         return vertex_buckets(vertices, vertices, ripped)
     xyz = np.asarray(vertices, dtype=np.float32)
     spacing = np.float32(resolution)
-    key = np.float32(np.float32(xyz / spacing) + np.float32(1000)).astype(np.int32)
-    buckets: dict[tuple[int, int, int], list[int]] = {}
-    for vertex in range(len(key)):
-        if not ripped[vertex]:
-            buckets.setdefault(tuple(key[vertex]), []).append(vertex)
-    offsets = np.zeros(len(key) + 1, dtype=np.int32)
-    flat: list[int] = []
-    for vertex in range(len(key)):
-        if not ripped[vertex]:
-            flat.extend(buckets.get(tuple(key[vertex]), ()))
-        offsets[vertex + 1] = len(flat)
-    return offsets, np.asarray(flat, dtype=np.int32)
+    if not np.isfinite(spacing) or spacing <= 0:
+        raise ValueError("resolution must be finite and positive")
+    # The old dict implementation used the exact key expression below and
+    # appended vertices in ascending index order.  Scaling both arrays first
+    # lets the already compiled OriginalVertexBuckets query produce the same
+    # CSR order without a Python dict/list allocation for every objective
+    # evaluation.  Keys are still formed by float32 add-then-cast, matching
+    # the original MHT rule.
+    scaled = np.float32(xyz / spacing)
+    index = OriginalVertexBuckets(scaled, np.asarray(ripped, dtype=np.bool_))
+    return index.query(scaled)
 
 
 @njit(cache=True)

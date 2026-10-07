@@ -17,6 +17,10 @@
 
 ## 五个串行控制任务
 
+### 本轮低风险候选：白质当前网格桶索引
+
+`place_surface_self_repulsion.vertex_buckets_current` 在 `resolution != 1` 的目标函数路径中原先每次用 Python `dict/list` 重建 MHT 桶。候选实现先按原规则用 float32 缩放坐标，再复用已有 `OriginalVertexBuckets` 的 Numba CSR 查询；桶成员仍按顶点编号升序，偏移和候选顺序保持不变。回归测试见 `tests/recon_all/test_white_repulsion_buckets.py`，覆盖负坐标、边界坐标、多个 spacing 和 rip mask。headcw 的 FNIT Conda 环境中，16 万顶点、3% ripped、0.7 mm spacing 的 7 次微基准中位数由 0.2821 s 降至 0.0462 s（6.10 倍），CSR 候选逐元素一致；完整收据见 `validation/recon_all/optimizations/20261007/white_bucket_microbenchmark.json`。这只是内核微基准，真实白/pial 和端到端尚未重跑，不能把 6.10 倍外推为整例提速。
+
 1. **white/pial 碰撞内核（已提交候选，待同输入回归）**
    - 文件：`src/fnit/recon_all/place_surface_self_repulsion.py`。
    - 方法：用 Numba 标记数组执行一/二环邻域 membership，保留候选顺序、累加顺序和 float32 运算；避免每个空间桶候选再次线性扫描邻域。
