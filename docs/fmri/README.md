@@ -361,6 +361,12 @@ DeepPrep内部采用作者fMRIPrep24开发版fork。三方各用同十例、完�
 NRMSE以各对参照端RMS归一；FNIT API与冷容器时钟边界不同，见[独立十例报告](../../validation/fmri/threeway_20261004/final10/REPORT.md)。
 旧十例不混入本轮两例中位数，也不标作当前main重测；这些一致性指标尚未建立整链数值等价。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+当前 H100 完整 volume API 为 **1225.84 s**，PyTorch peak allocation **13.31 GB**；FEAT **700.033 s**、PICA/ICA-AROMA/混杂回归 **171.502 s**、clean MNI 重采样 **47.151 s**、T1w/MNI 单次插值与写出 **254.356 s**。本轮使用 95 个 ICA 成分、37 次迭代和 39 个 AROMA 噪声成分。fMRIPrep 25.2.4 体积-only、STC 关闭、8 线程的一次完整 wall clock 为 **3775.517 s**；硬件、缓存与流程范围不同，不能直接换算通用加速比。FNIT 优化前后十项科学输出共 395,140,404 个值逐值一致。CPU 的 FNIRT/SynthMorph 1/8 线程和 MNI 全网格误差保留在本节原表；统一入口见 [benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 <!-- 旧文档链接兼容锚点；原始记录在本页第6节的历史链接中。 -->

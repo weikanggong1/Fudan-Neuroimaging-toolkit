@@ -113,6 +113,8 @@ Python 示例和参数说明见 [SynthStrip 手册](docs/synthstrip/README.md)�
 
 真实数据 benchmark 摘要见各功能页，详细记录见 [validation](validation)；图像示例见 [真实脑图索引](docs/figures/README.md)。具体算法仍在持续验证，是否适合某项分析应以对应功能的当前结果为依据。
 
+最新 CPU/GPU 聚合结果与各子功能公开报告入口见 [统一 benchmark 索引](docs/BENCHMARK_INDEX.md)。
+
 ## 文档与许可
 
 - [统一用户手册模板](docs/README_TEMPLATE.md)

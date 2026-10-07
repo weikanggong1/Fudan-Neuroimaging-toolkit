@@ -258,6 +258,12 @@ matrix1/2/3 CPU真实配对支持Dice0.739/0.789/0.770，虽高权重边r>0.9998
 
 该图属于2026-09-29网络设置，不重标为NbM waypoint新模式。全部长表和失败/未覆盖选项见历史归档及原JSON。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+两组真实完整流程的 CPU 优化结果为：旧版 **6818/6086 s**，优化版 **4275/4317 s**，完整输出严格一致，约缩短 37%/29%（限定为同输入、同线程的两次观察）。GPU 单 way-point/avoid 结果仍按本页既有报告解释：peak allocation 2.81 GB，随机数流不同，不作逐轨迹等价。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit/version | 变化 | benchmark |

@@ -218,6 +218,12 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 最新质量诊断发现一例保存球面出现1个新增反向面，不能当几何质量通过；[CON10保存质量](../../validation/fmri/public_ten_20261003/reconstruction_completed/CON10.saved-MSM-absolute.public.json)。完整MSM独立函数本轮未新增公开脑图；[历史专项球面可视化与证据](../../validation/msm/README.md)。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+MSMSulc FNIT 双侧冷/热 **201.99/198.08 s**，官方 newMSM 单线程/8线程 **1587.70/378.03 s**；固定 490 帧 fsLR32k/91k 输出逐值一致。MSMAll C 模式 coarse **23.237→11.430 s**、refine **181.790→90.796 s**，坐标和拓扑严格一致。CPU 严格配对与共享 H100 的边界仍按本页既有报告解释。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 2026-10-04 起：新增 CPU1/8 完整官方对照、Point 舍入修复和 containing-face 缓存；最新 CPU 实测与最终 GPU 配对分别记录。

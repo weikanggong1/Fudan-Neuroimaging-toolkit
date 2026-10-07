@@ -263,6 +263,12 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 <a id="最近版本与-benchmark"></a>
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+完整 T1 链 CPU：官方 **76.67 min**，FNIT **80.50 min**；68 个皮层区平均厚度绝对差 **0.017 mm**，顶点网格未建立有效对应，不能写成表面逐点等价。原始 T1 全亚区 FNIT **104.02 min**，原网格 4/105、高分辨率 5/105 分区通过；GCSA cache 优化本轮没有新的端到端 H100 时钟。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit / version | 变化 | benchmark |

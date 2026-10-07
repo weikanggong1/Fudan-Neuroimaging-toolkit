@@ -188,6 +188,12 @@ Intel Xeon Gold6430配H100 GPU，CPU参照使用同一真实输入；计时含�
 
 图示为原报告绑定的真实输出；更多逐图指标和绘图来源保留在原JSON，不把单例推广成全队列结论。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+真实第二壳层 CLI（含读写）耗时 **3.43 s**；FA 最大绝对差 `1.19e-7`，tensor/eigenvalue 最大差 `2.33e-10`。MO 和方向图仍有单体素较大差异，不能将本结果写成全输出精度通过；官方同范围秒数本轮未形成可复核公开表。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit/version | 变化 | benchmark |

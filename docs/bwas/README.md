@@ -198,6 +198,12 @@ FNIT沿用原版以n-p计算t，再以n-p-1转换z的约定；不是一般统一
 
 图从真实显著簇抽取体素对，以模板空间轮廓作参考；曲线仅用于连接显示，不是解剖纤维束。图不含个体ID或用户目标名称。当前没有全脑reference/FNIT/difference脑图成套配对。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+ABIDE II 32 人、512 个中心体素的 130,816 对连接中，FNIT 与原 BWAS 的 z 统计 MAE **3.70e-6**、最大差 **7.75e-5**，CDT disagreement **0**；原 CPU 核心 1.05 s，FNIT 完整 `run_bwas`（含 BIDS I/O、平滑、聚类和写出）1.79 s，范围不同。ABIDE I+II 1748 人、6,296,047,005 对连接的 FNIT GPU `run_bwas` 为 **3828.74 s**、peak allocation **11.66 GB**；抽样 224,428 对 MAE **3.34e-6**、最大差 **3.78e-5**，CDT3/5 disagreement **0**。共享 GPU 单次观察，不外推稳定倍率。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit/version | 变化 | benchmark |

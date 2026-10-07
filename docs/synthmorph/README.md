@@ -283,6 +283,12 @@ CPU joint 的 Eigen 适配器是 FNIT 自有小段 C++，不调用原软件。�
 
 显示前应用独立原版脑 mask 并裁出脑部显示框；数值验收始终使用完整 FOV。差图色标为脑内绝对误差 P99，最低0.01；完整误差、版本、源码/权重/输出指纹、所有失败历史和复现命令见[续修说明](../../validation/synthmorph/cpu_fixes_20261004/README.md)。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+8 核、256 ABBA 的 CPU 中位数由 **163.094 s 降至 155.086 s**（4.91%，首次 JIT 成本单列）；六次 CPU 输出逐位一致。对象输入相对 CLI 的正/逆向 NRMSE 为 `4.7e-6/5.1e-5`，逆向边界门仍未通过；GPU 本轮无新的完整端到端时钟。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | 更新 | 验证记录 |

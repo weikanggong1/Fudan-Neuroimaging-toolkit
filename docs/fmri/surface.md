@@ -343,6 +343,12 @@ NRMSE使用全部91,282灰坐标，恒定时序仍保留；不筛零值或拟合
 
 ![真实全180帧平均皮层信号与固定输入零差](../../validation/fmri/reference_alignment_20261004/surface/figures/CON01_same_input.png)
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮 GPU/并行 benchmark 摘要（2026-10-08）
+
+在相同固定输入上，surface API（不含 recon-all/volume）旧串行、新串行、左右半球并行分别为 **436.245/343.056/243.695 s**，PyTorch allocation 为 **0.344/0.644/1.049 GB**。官方 CIFTI 时间序列 mean/median `r=0.977911/0.997039`；19 个皮层下结构逐体素一致，皮层和 sphere 仍不是逐值一致。MSMSulc FNIT 双侧冷/热 **201.99/198.08 s**，官方 newMSM 单线程/8线程 **1587.70/378.03 s**；固定 490 帧 fsLR32k/91k 输出逐值一致。MSMAll C 模式 coarse **23.237→11.430 s**、refine **181.790→90.796 s**，坐标和拓扑严格一致。既有 CPU 固定输入与 fresh 180 帧结果保留在上表；完整范围见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 <!-- 旧文档链接兼容锚点；原始记录在本页第6节的历史链接中。 -->

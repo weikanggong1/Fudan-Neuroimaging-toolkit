@@ -258,6 +258,12 @@ CBIG_MSHBM_parcellation_single_subject(params);
 
 ![真实MNI皮层标签，FNIT与官方FIX参照](figures/mshbm_volume_release.png)
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+真实 490 帧、8 线程：FNIT **603.380 s**，官方 **1741.111 s**；优化版输出与官方在 CPU8 全部标签一致（CPU1 有 1 个标签差异）。MSC02 100 帧配对为 FNIT **141.29 s**、CBIG **145.71 s**，64,984 标签逐值一致、Dice=1；本轮没有新的可复核 GPU 端到端时钟。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit/version | 变化 | benchmark |

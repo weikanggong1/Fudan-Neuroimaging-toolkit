@@ -186,6 +186,12 @@ mri_synthseg --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg.nii.gz \
 
 ![既有公开T1的官方与FNIT SynthSeg；冻结版本见原报告](figures/synthseg_comparison.png)
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+C24、8 线程 API 由 **85.499 s 降至 80.621 s**（5.71%）；FNIT 优化前后输出逐字节一致，但与官方仍有 1 个体素差异。GPU 路径保持功能不变，本轮没有新的显存峰值表；SynthSegPlus 尚无完整等价验收。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit / version | 变化 | benchmark |

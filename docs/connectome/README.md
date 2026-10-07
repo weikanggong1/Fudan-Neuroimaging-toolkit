@@ -360,6 +360,12 @@ host时钟存在异步与嵌套，不求和替代总墙钟。
 
 ![真实病例保存的labels、FA和矩形count结果](../../validation/connectome/paired_pipeline_20261003/CON01_pair_outputs.png)
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+CSD GPU 完整 API 旧/新为 **3436.72/3376.50 s**；WM、GM、CSF 三套数组及 NPY 逐位一致。但 CUDA 进程显存监测失败，故只通过数值回归，资源和速度不作正式验收，也不宣称稳定 GPU 加速。本轮没有新增可复核 CPU 端到端时钟；MMORF 官方参照因程序完整性失败退出，不纳入官方对照。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 <!-- 旧文档链接兼容锚点；原始记录在本页第6节的历史链接中。 -->
