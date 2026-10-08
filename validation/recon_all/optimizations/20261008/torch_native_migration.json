@@ -1,0 +1,43 @@
+{
+  "code_branch": "work/recon-review-20261007",
+  "code_head_before_commit": "52781029",
+  "host": "gpucw1",
+  "device_observation": "H100 shared node; subsequent CUDA smoke rerun hit OOM while other jobs occupied the GPU",
+  "input": "ds000114_sub-07/attempt_01/subject/mri/{nu.mgz,brainmask.mgz,antsdn.brain.mgz}",
+  "gca": {
+    "backend": "FNIT PyTorch chunked candidate scorer + Python FP32 EM",
+    "cpu_seconds": 420.5066363881342,
+    "torch_cuda_seconds": 335.0842737639323,
+    "speedup_ratio": 1.25496,
+    "translation_seconds": 13.449621973093599,
+    "linear_search_seconds": 296.1481362930499,
+    "em_seconds": 8.475997697096318,
+    "matrix_max_abs_difference": 0.0,
+    "downstream_norm_different_voxels": 0,
+    "downstream_norm_max_abs": 0.0,
+    "candidate_chunk": 64,
+    "sample_chunk": 8192,
+    "reduce_on_device": true,
+    "strict_full_gpu_em": false
+  },
+  "wm_segmentation": {
+    "backend": "FNIT PyTorch hybrid",
+    "cpu_and_cuda_outputs_different_voxels": 0,
+    "reference_different_voxels": 64,
+    "reference_max_abs": 230.0,
+    "reference_dice": 0.9999401770107866,
+    "timing": "not_retrieved",
+    "cuda_rerun": "OOM under shared gpucw1 load; not used to claim a speedup"
+  },
+  "surface_kernel": {
+    "cpu_smoke": "passed",
+    "cuda_smoke": "blocked by shared-GPU OOM",
+    "production_wiring": "not enabled; standalone geometry cache kernel only"
+  },
+  "not_claimed": [
+    "complete pure-PyTorch recon-all",
+    "N4/ITK equivalence",
+    "topology, remesh, inflate, white/pial or defects replacement",
+    "end-to-end 600-second runtime"
+  ]
+}

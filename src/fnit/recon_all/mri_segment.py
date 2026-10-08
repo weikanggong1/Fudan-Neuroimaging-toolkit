@@ -865,22 +865,30 @@ def _fill_planar_holes(result: np.ndarray, strand: np.ndarray) -> None:
             break
 
 
-def segment_white_matter(image: torch.Tensor) -> torch.Tensor:
-    """Run the fixed 1 mm MP-RAGE ``mri_segment -wsizemm 13`` pipeline."""
-    first = intensity_segmentation(image, wm_low=79, wm_hi=125, gray_hi=99)
-    first = histogram_segmentation(image, first, wm_low=79, wm_hi=125,
+def segment_white_matter(image: torch.Tensor, *, device: str | torch.device | None = None) -> torch.Tensor:
+    """Run fixed ``mri_segment -wsizemm 13`` with optional Torch device.
+
+    Vectorized classification uses ``device``; histogram, scan-order strand
+    components and ordered fills remain CPU/NumPy to preserve FreeSurfer's
+    update order. CUDA is therefore a hybrid backend, not a complete rewrite.
+    """
+    if image.ndim != 3 or image.dtype != torch.uint8:
+        raise ValueError("expected a 3D uint8 FreeSurfer intensity volume")
+    target = image if device is None else image.to(device)
+    first = intensity_segmentation(target, wm_low=79, wm_hi=125, gray_hi=99)
+    first = histogram_segmentation(target, first, wm_low=79, wm_hi=125,
                                    gray_hi=99)
-    thresholds = detect_intensity_thresholds(image, first)
-    second = intensity_segmentation(image, wm_low=thresholds.wm_low,
+    thresholds = detect_intensity_thresholds(target, first)
+    second = intensity_segmentation(target, wm_low=thresholds.wm_low,
                                     wm_hi=125, gray_hi=thresholds.gray_hi)
-    second = histogram_segmentation(image, second, wm_low=thresholds.wm_low,
+    second = histogram_segmentation(target, second, wm_low=thresholds.wm_low,
                                     wm_hi=125, gray_hi=thresholds.gray_hi)
-    labels = median_curve_segmentation(image, second, gray_hi=thresholds.gray_hi,
+    labels = median_curve_segmentation(target, second, gray_hi=thresholds.gray_hi,
                                        wm_low=thresholds.wm_low)
-    labels = reclassify_border(image, labels, wm_low=thresholds.wm_low - 5,
+    labels = reclassify_border(target, labels, wm_low=thresholds.wm_low - 5,
                                gray_hi=thresholds.gray_hi)
-    masked = mask_white_labels(image, labels)
-    masked = recover_bright_white(image, masked, wm_low=thresholds.wm_low,
+    masked = mask_white_labels(target, labels)
+    masked = recover_bright_white(target, masked, wm_low=thresholds.wm_low,
                                   wm_hi=125, white_sigma=thresholds.white_sigma)
     masked = remove_wrong_direction(masked, low=thresholds.wm_low - 5,
                                     high=thresholds.gray_hi)
@@ -890,13 +898,13 @@ def segment_white_matter(image: torch.Tensor) -> torch.Tensor:
     thin = thin_strand_candidates(masked).cpu().numpy()
     segments = _strand_segments(thin)
     _dilate_strand_segments(segments, source)
-    thickened, _ = _thicken_strands_core(image.cpu().numpy(), source, closed,
+    thickened, _ = _thicken_strands_core(target.cpu().numpy(), source, closed,
                                          segments, planar_holes=True)
-    masked = remove_bright_nonwhite(image, torch.from_numpy(thickened))
-    return filter_diagonal_morphology(masked).to(image.device)
+    masked = remove_bright_nonwhite(target, torch.from_numpy(thickened).to(target.device))
+    return filter_diagonal_morphology(masked).to(target.device)
 
 
-def segment_white_matter_mgz(source_path: str | Path, output_path: str | Path) -> None:
+def segment_white_matter_mgz(source_path: str | Path, output_path: str | Path, *, device: str | torch.device = "cpu") -> dict:
     """Read a uint8 MGZ, run the fixed profile, and preserve its MGH header."""
     import nibabel as nib
 
@@ -904,6 +912,8 @@ def segment_white_matter_mgz(source_path: str | Path, output_path: str | Path) -
     source = np.asarray(source_image.dataobj)
     if source.ndim != 3 or source.dtype != np.uint8:
         raise ValueError("expected a 3D uint8 MGH input")
-    segmented = segment_white_matter(torch.from_numpy(source.copy())).cpu().numpy()
+    segmented = segment_white_matter(torch.from_numpy(source.copy()), device=device).cpu().numpy()
     nib.save(nib.MGHImage(segmented, source_image.affine,
                           header=source_image.header.copy()), str(output_path))
+    return {"implementation": "FNIT PyTorch hybrid", "device": str(device),
+            "ordered_cpu_rules": True, "output": str(output_path)}

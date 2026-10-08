@@ -50,7 +50,8 @@ reconstruction_report = run_recon_all_python(
     device="cuda:0",  # PyTorch 阶段的设备；无 GPU 时为 "cpu"
     threads=4,  # 当前被试计算预算；双半球并行时各2线程，报告线程设置与恢复
     hemisphere_workers=2,  # 显式启用左右侧独立进程；默认1，共享缺陷体积仍顺序累计
-    native_optimizations="auto",  # 按已验证能力选择完整GCA缓存及white快速程序；pial保留原程序
+    native_optimizations="auto",  # auto在CUDA上启用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分
+    wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
     backend="native",  # native为当前可验收混合流程；python-gpu缺少完整替代时在创建输出前明确失败
     native_bin_dir=None,  # None 表示使用当前 Conda 环境的 bin/
     profile_stages=False,  # 生产默认不增加阶段 CUDA 同步；True 记录同步等待
@@ -80,7 +81,8 @@ reconstruction_report = run_recon_all_python(
 | `profile_stages` | 否 | `bool` | `False` | 记录阶段 CUDA 同步等待；生产默认不增加同步 |
 | `cuda_allocator_cache` | 否 | `str` | `'auto'` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
-| `native_optimizations` | 否 | `str` | `'auto'` | auto 按已验证能力选择完整 native 优化；original 固定原程序 |
+| `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
+| `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch使用FNIT PyTorch/CPU有序混合分割 |
 | `backend` | 否 | `str` | `'native'` | `native` 为当前混合流程；`python-gpu` 为严格纯 Python/CUDA profile，未完成阶段会在输出前抛出结构化错误 |
 
 ### 批量公开入口
@@ -96,7 +98,8 @@ reconstruction_report = run_recon_all_python(
 | `profile_stages` | 否 | `bool` | `False` | 记录阶段 CUDA 同步等待；生产默认不增加同步 |
 | `cuda_allocator_cache` | 否 | `str` | `'auto'` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
-| `native_optimizations` | 否 | `str` | `'auto'` | auto 按已验证能力选择完整 native 优化；original 固定原程序 |
+| `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
+| `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch使用FNIT PyTorch/CPU有序混合分割 |
 
 ### 输出
 
@@ -185,7 +188,7 @@ reconstruction_reports = run_recon_all_python_batch(
     devices=("cuda:0",),  # 每设备一次一例，当前一张GPU顺序处理
     threads=4,  # 每被试总CPU预算
     hemisphere_workers=2,  # 每侧分得2线程，需要总预算至少2
-    native_optimizations="auto",  # 使用已验证的完整程序能力
+    native_optimizations="auto",  # CUDA上用FNIT GCA候选评分；CPU按已验证能力选择
     backend="native",  # 严格 python-gpu 尚未完成，不能静默回退
 )
 ```
@@ -215,7 +218,8 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--threads` | `threads` | 正整数CPU线程预算，默认4；双侧并行平分此预算 |
 | `--native-bin-dir` | `native_bin_dir` | None 使用当前 Conda bin；也可指定核验过的源码构建目录 |
 | `--hemisphere-workers` | `hemisphere_workers` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
-| `--native-optimizations` | `native_optimizations` | auto 按已验证能力选择完整 native 优化；original 固定原程序 |
+| `--native-optimizations` | `native_optimizations` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分 |
+| `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch使用FNIT PyTorch/CPU有序混合分割 |
 | `--backend` | `backend` | `native` 为当前混合流程；`python-gpu` 要求所有阶段都有完整 Python/CUDA 实现，否则提前失败 |
 | `--profile-stages` | `profile_stages` | 记录阶段 CUDA 同步等待；生产默认不增加同步 |
 | `--cuda-allocator-cache` | `cuda_allocator_cache` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |

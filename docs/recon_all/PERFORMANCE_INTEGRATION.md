@@ -18,18 +18,30 @@ report = run_recon_all_python(
     device="cuda:0",  # 明确目标设备；不自动启用FP16/BF16
     threads=4,  # 总线程预算；双半球各2线程
     hemisphere_workers=2,  # 独立exec和私有目录，保留共享文件发布顺序
-    native_optimizations="auto",  # 按验证能力选择完整GCA缓存和white快速程序
+    native_optimizations="auto",  # auto在CUDA上启用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分
+    wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
     profile_stages=True,  # 本次配对验证同步计时；日常调用可设False
     cuda_allocator_cache="auto",  # 已初始化API保留实际分配器；新进程保留低显存策略
 )
 ```
 
-`native_optimizations` 默认 `auto`：仅 GCA capability version 2 且
-`reduction=upstream_ROMP_partials`、总线程为4时启用完整原生缓存；旧程序或
-其他线程预算使用原始评分。`original` 固定原始原生评分及放置，用作同程序
+`native_optimizations` 默认 `auto`：CUDA 设备优先使用 FNIT PyTorch 分块 GCA
+候选评分；CPU 或显式 `original` 保持原生评分；GPU 不可用时不自动切换到
+不完整后端。`cpu_cached` 仍只在显式的 CPU 受控选择中按 capability version 2、
+`reduction=upstream_ROMP_partials` 和4线程启用。`original` 固定原始原生评分及放置，用作同程序
 控制。标准pial始终使用保留的 `mris_place_surface`；独立程序
 `mris_place_surface_white_fast` 仅供white.preaparc及最终white。
 已安装快速white程序能力或固定源码版本不符时明确失败，不静默混用。
+
+`native_optimizations="torch"` 只替换 GCA 的候选平移/线性搜索：分块
+`grid_sample`、似然评分和设备端归约运行在 PyTorch CUDA，EM 精修和 LTA 写出
+仍由 FNIT Python FP32 完成。它不读取官方 LTA，也不声称完整 CUDA EM 等价；
+真实 sub-07 同输入矩阵与 CPU 路径一致，速度收据需绑定当前硬件和共享负载。
+
+`wm_backend="torch"` 使用仓库已有 `mri_segment.py`：向量化分类可放在 CUDA，
+FreeSurfer 扫描顺序的直方图、连通组件和有序填充仍在 CPU，随后交给现有
+`mri_edit_wm_with_aseg`。该模式是显式混合迁移，默认仍为 `native`，在当前
+真实 T1 完成逐体素比较前不会静默替换生产默认。
 
 CUDA WM 两次后编辑调用成熟 `fix_ento_wm_gpu`，输入/输出仍为对应 conformed
 MRI 网格的MGH/MGZ，保存原强度dtype和几何；完整分割及aseg编辑核心保留
@@ -53,7 +65,7 @@ NIfTI world RAS 位移（mm），没有用负前向场替代求逆。报告记�
 python -m fnit.recon_all.native_free /data/sub-01_T1w.nii.gz /data/fnit/sub-01 \
   --weights-dir /data/fnit_weights --assets-dir /data/fnit_assets \
   --device cuda:0 --threads 4 --hemisphere-workers 2 \
-  --native-optimizations auto --profile-stages
+  --native-optimizations auto --wm-backend native --profile-stages
 ```
 
 完整流程参考为 `recon-all -s SUBJECT -i T1 -all`。优化只是对应完整

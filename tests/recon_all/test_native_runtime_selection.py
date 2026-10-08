@@ -22,6 +22,20 @@ class NativeSelectionTests(unittest.TestCase):
         self.assertEqual(result["white_binary"], result["pial_binary"])
         self.assertEqual(result["em_backend"], "original")
 
+    def test_torch_selects_fnit_gpu_candidate_search_without_probing_binary(self):
+        with patch.object(module.subprocess, "run") as run:
+            result = module.select_native_optimizations("/tmp/fnit-native", threads=4, mode="torch")
+        run.assert_not_called()
+        self.assertEqual(result["em_backend"], "torch")
+        self.assertIn("PyTorch", result["gca_reason"])
+
+    def test_auto_uses_torch_search_on_cuda(self):
+        with patch.object(module.subprocess, "run") as run:
+            result = module.select_native_optimizations("/tmp/fnit-native", threads=4,
+                                                        mode="auto", device="cuda:0")
+        run.assert_not_called()
+        self.assertEqual(result["em_backend"], "torch")
+
     def test_old_or_partial_capability_cannot_enable_cache(self):
         for capability in (None, {}, {"version": 2, "fnit_gca_cached_search": True},
                            {"version": 2, "fnit_gca_cached_search": True,

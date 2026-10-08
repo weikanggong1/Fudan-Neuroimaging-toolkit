@@ -75,6 +75,20 @@ def _run_native_wm_segment(binary: Path, mri: Path, assets: Path) -> None:
                    cwd=mri, env=env, check=True)
 
 
+def _run_torch_wm_segment(mri: Path, *, device: str) -> dict:
+    """Run FNIT's existing WM segmentation port without an external binary.
+
+    The vectorized Torch portions use ``device``; ordered histogram/strand
+    rules remain CPU and are reported explicitly by ``mri_segment``.  This is
+    a connected hybrid replacement for ``mri_segment`` and is opt-in until a
+    current real-T1 output comparison is recorded.
+    """
+    from .mri_segment import segment_white_matter_mgz
+
+    return segment_white_matter_mgz(
+        mri / "antsdn.brain.mgz", mri / "wm.seg.mgz", device=device)
+
+
 def _run_native_wm_edit(binary: Path, mri: Path, assets: Path) -> None:
     env = dict(os.environ, FREESURFER_HOME=str(assets))
     subprocess.run([str(binary), "-keep-in", "-fix-ento-wm", "entowm.mgz",
@@ -94,7 +108,8 @@ def _folding_atlas(assets: Path, hemi: str) -> Path:
 
 def _run_native_em_register(binary: Path, mri: Path, atlas: Path,
                             assets: Path, *, backend: str = "original",
-                            binary_sha256: str | None = None, threads: int = 4) -> None:
+                            binary_sha256: str | None = None, threads: int = 4,
+                            device: str = "cpu") -> None:
     """运行完整原生注册；缓存后端只改变已验证的搜索密度复用。
 
     binary为独立Conda程序；mri含自产conformed nu/brainmask和transforms。
@@ -103,6 +118,23 @@ def _run_native_em_register(binary: Path, mri: Path, atlas: Path,
     输出talairach.lta包含4×4 voxel空间变换与两侧几何，返回None。
     原生执行/输入/输出/能力失败抛异常；完整参数见GCA及性能接入说明。
     """
+    if backend == "torch":
+        # The expensive translation/linear candidate search is implemented by
+        # FNIT's chunked Torch scorer.  EM refinement and LTA serialization stay
+        # in the existing Python implementation, so this is an explicit
+        # hybrid backend rather than a claim of a complete GPU GCA rewrite.
+        from .mri_em_register_python import register_t1
+
+        if not str(device).startswith("cuda"):
+            raise ValueError("GCA torch backend requires an explicit CUDA device")
+        result = register_t1(
+            mri / "nu.mgz", atlas, mri / "brainmask.mgz",
+            mri / "transforms/talairach.lta", device=device,
+            search_backend="torch", candidate_chunk=64, sample_chunk=8192,
+            reduce_on_device=True)
+        if not (mri / "transforms/talairach.lta").is_file():
+            raise FileNotFoundError(mri / "transforms/talairach.lta")
+        return result
     if backend == "cpu_cached":
         from .mri_em_register_cached_conda import run_cached_em_register
         run_cached_em_register(binary=binary, mri=mri, atlas=atlas, assets=assets,
@@ -698,6 +730,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          cuda_allocator_cache: str = "auto",
                          hemisphere_workers: int = 1,
                          native_optimizations: str = "auto",
+                         wm_backend: str = "native",
                          backend: str = "native") -> dict:
     """从单幅原始 T1 连续生成 conform 体积、双侧表面和脑区统计。
 
@@ -706,6 +739,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     device 默认 cuda:0，threads 默认 4；不自动使用 FP16/BF16。
     native_optimizations=auto 查询独立构建产物能力，4线程完整 GCA 使用
     已验证缓存，white 使用专用快速程序，pial保留原程序；original用于控制。
+    native_optimizations=torch 将 GCA 的候选平移/线性搜索切换到 FNIT
+    的分块 PyTorch CUDA scorer；EM 精修仍为 Python FP32，并在报告中明确标注。
     hemisphere_workers 默认1保持串行，2用独立 exec 半球进程；总 threads
     在双侧之间平分（奇数向下取整），父进程保留依赖屏障和共享发布。
     profile_stages=False 不增加阶段 CUDA 同步；True 分别记录前同步、函数、
@@ -719,6 +754,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     """
     if backend not in {"native", "python-gpu"}:
         raise ValueError("backend must be native or python-gpu")
+    if wm_backend not in {"native", "torch"}:
+        raise ValueError("wm_backend must be native or torch")
+    if wm_backend == "torch" and not str(device).startswith("cuda"):
+        raise ValueError("wm_backend='torch' requires an explicit CUDA device")
     if backend == "python-gpu":
         # Fail before validating/creating subject output and, critically,
         # before resolving any Conda native binary.  The capability report is
@@ -770,7 +809,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     metrics_binary = _native_surface_metrics_binary(native_bin_dir)
     from .native_runtime_selection import select_native_optimizations
     native_selection = select_native_optimizations(native_bin_dir, threads=threads,
-                                                   mode=native_optimizations)
+                                                   mode=native_optimizations, device=device)
     white_binary = _native_binary(native_bin_dir, Path(native_selection["white_binary"]).name)
     inflate_binary = _native_inflate_binary(native_bin_dir)
     intersection_binary = _native_binary(native_bin_dir, "mris_remove_intersection")
@@ -779,7 +818,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     defect_binary = _native_binary(native_bin_dir, "mri_label2vol")
     warp_binaries = tuple(_native_binary(native_bin_dir, name) for name in
                           ("mri_warp_convert", "mri_ca_register", "mri_convert"))
-    wm_segment_binary = _native_binary(native_bin_dir, "mri_segment")
+    wm_segment_binary = (_native_binary(native_bin_dir, "mri_segment")
+                         if wm_backend == "native" else None)
     wm_edit_binary = _native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
     registration_atlases = {hemi: _folding_atlas(assets, hemi)
                             for hemi in ("lh", "rh")}
@@ -814,9 +854,14 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                                "validation_seconds": validation_seconds},
                     "stages": [], "status": "running"}
     report["hemisphere_scheduling"] = {"workers": hemisphere_workers, "total_thread_budget": threads, "groups": [], "mode": "serial" if hemisphere_workers == 1 else "independent-exec-private-subjects"}
-    report["gca_registration"] = {"implementation": "native-c++",
-                                  "binary": str(native_em[0]), "sha256": native_em[1],
-                                  "backend": native_selection["em_backend"]}
+    gca_backend = native_selection["em_backend"]
+    report["gca_registration"] = {
+        "implementation": ("FNIT PyTorch candidate scorer + Python EM"
+                           if gca_backend == "torch" else "native-c++"),
+        "binary": str(native_em[0]), "sha256": native_em[1],
+        "backend": gca_backend,
+        "device": device if gca_backend == "torch" else "cpu",
+        "strict_native_em": gca_backend != "torch"}
     report["native_optimizations"] = native_selection
     report["topology_repair"] = {
         "implementation": "native-c++", "binary": str(topology_binary[0]),
@@ -825,8 +870,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "intersection_sha256": intersection_binary[1],
         "upstream": "intensity-derived WM and aseg-guided fill"}
     report["white_matter_chain"] = {
-        "implementation": "Python + Conda C++",
-        "mri_segment_sha256": wm_segment_binary[1],
+        "implementation": ("FNIT PyTorch hybrid segmentation + Conda C++ edit"
+                           if wm_backend == "torch" else "Python + Conda C++"),
+        "mri_segment_sha256": wm_segment_binary[1] if wm_segment_binary else None,
+        "segmentation_backend": wm_backend,
         "mri_edit_wm_with_aseg_sha256": wm_edit_binary[1]}
     report["white_preaparc"] = {
         "implementation": "Python MNI/aux/finalsurfs + Conda C++ placement",
@@ -890,6 +937,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             row["postprocess"] = value.get("postprocess")
         if isinstance(value, dict) and "timings_seconds" in value:
             row["timings_seconds"] = value["timings_seconds"]
+        if isinstance(value, dict) and isinstance(value.get("timing"), dict):
+            row["substep_seconds"] = value["timing"]
         if isinstance(value, dict) and isinstance(value.get("seconds"), dict):
             row["substep_seconds"] = value["seconds"]
         if isinstance(value, dict) and value.get("talairach_child_gpu"):
@@ -944,7 +993,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     lta = mri / "transforms/talairach.lta"
     gca = assets / "average/RB_all_2020-01-02.gca"
     stage("mri_em_register", _run_native_em_register, native_em[0], mri, gca, assets,
-          backend=native_selection["em_backend"], binary_sha256=native_em[1], threads=threads)
+          backend=native_selection["em_backend"], binary_sha256=native_em[1],
+          threads=threads, device=device)
     stage("mri_ca_normalize", run_ca_normalize, mri / "nu.mgz",
           mri / "brainmask.mgz", gca,
           lta, mri / "norm.mgz", mri / "ctrl_pts.mgz")
@@ -976,8 +1026,11 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["precision"]["EntoWM_actual_forwards"] = auxiliary_forwards
     stage("ants_denoise", denoise_volume, mri / "brain.mgz",
           mri / "antsdn.brain.mgz")
-    stage("mri_segment", _run_native_wm_segment,
-          wm_segment_binary[0], mri, assets)
+    if wm_backend == "torch":
+        stage("mri_segment", _run_torch_wm_segment, mri, device=device)
+    else:
+        stage("mri_segment", _run_native_wm_segment,
+              wm_segment_binary[0], mri, assets)
     stage("mri_edit_wm_with_aseg", _run_native_wm_edit,
           wm_edit_binary[0], mri, assets)
     stage("wm_pretess", pretess_mgh, mri / "wm.asegedit.mgz", "wm",
@@ -1182,6 +1235,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          cuda_allocator_cache: str = "auto",
                          hemisphere_workers: int = 1,
                          native_optimizations: str = "auto",
+                         wm_backend: str = "native",
                          backend: str = "native") -> dict:
     """从原始单 T1 连续重建；输入、输出及坐标定义见 recon-all 中文说明。
 
@@ -1260,6 +1314,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache,
                     **({"hemisphere_workers": hemisphere_workers} if hemisphere_workers != 1 else {}),
                     **({"native_optimizations": native_optimizations} if native_optimizations != "auto" else {}),
+                    **({"wm_backend": wm_backend} if wm_backend != "native" else {}),
                     backend=backend)
             except Exception as error:
                 pipeline_error = error
@@ -1305,8 +1360,10 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=1,
                         help="independent hemisphere processes; total threads split across two workers")
-    parser.add_argument("--native-optimizations", choices=("auto", "original"), default="auto",
-                        help="validated Conda native hotspot selection; original is the paired control")
+    parser.add_argument("--native-optimizations", choices=("auto", "original", "torch"), default="auto",
+                        help="auto/original use Conda GCA; torch uses FNIT's CUDA candidate scorer with Python EM")
+    parser.add_argument("--wm-backend", choices=("native", "torch"), default="native",
+                        help="native mri_segment or FNIT Torch/CPU hybrid segmentation")
     parser.add_argument("--backend", choices=("native", "python-gpu"), default="native",
                         help="native: current validated mixed pipeline; python-gpu: strict profile, fails before output while required ports are incomplete")
     parser.add_argument("--profile-stages", action="store_true",
@@ -1322,6 +1379,7 @@ def main(argv: list[str] | None = None) -> None:
                                   cuda_allocator_cache=args.cuda_allocator_cache,
                                   hemisphere_workers=args.hemisphere_workers,
                                   native_optimizations=args.native_optimizations,
+                                  wm_backend=args.wm_backend,
                                   backend=args.backend)
     print(json.dumps(report, indent=2))
 

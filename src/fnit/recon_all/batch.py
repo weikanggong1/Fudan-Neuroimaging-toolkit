@@ -17,6 +17,7 @@ def run_recon_all_python_batch(
     profile_stages: bool = False, cuda_allocator_cache: str = "auto",
     hemisphere_workers: int = 1,
     native_optimizations: str = "auto",
+    wm_backend: str = "native",
     backend: str = "native",
 ) -> list[dict]:
     """每设备独立子进程执行单 T1，按 jobs 顺序返回完整报告列表。
@@ -44,8 +45,12 @@ def run_recon_all_python_batch(
         raise ValueError("threads must be positive")
     if cuda_allocator_cache not in {"auto", "enabled", "disabled"}:
         raise ValueError("cuda_allocator_cache must be auto, enabled, or disabled")
-    if native_optimizations not in {"auto", "original"}:
-        raise ValueError("native_optimizations must be auto or original")
+    if native_optimizations not in {"auto", "original", "torch"}:
+        raise ValueError("native_optimizations must be auto, original, or torch")
+    if wm_backend not in {"native", "torch"}:
+        raise ValueError("wm_backend must be native or torch")
+    if wm_backend == "torch" and any(device == "cpu" for device in devices):
+        raise ValueError("wm_backend='torch' requires CUDA devices")
     if backend not in {"native", "python-gpu"}:
         raise ValueError("backend must be native or python-gpu")
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
@@ -73,6 +78,8 @@ def run_recon_all_python_batch(
                        "--assets-dir", str(assets), "--device", device,
                        "--threads", str(threads), "--cuda-allocator-cache", cuda_allocator_cache]
             command += ["--backend", backend]
+            if wm_backend != "native":
+                command += ["--wm-backend", wm_backend]
             if hemisphere_workers != 1:
                 command += ["--hemisphere-workers", str(hemisphere_workers)]
             if native_optimizations != "auto":
