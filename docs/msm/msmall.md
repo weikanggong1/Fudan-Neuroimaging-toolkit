@@ -4,7 +4,7 @@
 |---|---|
 | 输入 | 左右同网格的多列 C/CA/CAT 特征、可选权重与初始球面。 |
 | 输出 | 双侧 MSMAll 注册球面、registration report，可接入 surface pipeline。 |
-| 可选分支 | 仅 `msmall_inputs` 时执行 MSMSulc→MSMAll；没有它时只执行 MSMSulc。 |
+| 可选分支 | 在 surface pipeline 中，提供 `msmall_inputs` 才执行 MSMSulc→MSMAll；否则只执行 MSMSulc。 |
 | 数据要求 | C-only 只需要 fMRI 连接特征；CA 需要个体 myelin；CAT 还需要功能拓扑。T2w/FLAIR 不自动替代 myelin。 |
 | 设备 | PyTorch CPU/CUDA，几何与代价 float64，写出 float32；左右半球可并行。 |
 
