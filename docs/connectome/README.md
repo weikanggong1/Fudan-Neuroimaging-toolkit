@@ -358,6 +358,8 @@ host时钟存在异步与嵌套，不求和替代总墙钟。
 30次核心恢复内容一致；本轮聚合验证不代替独立原软件轨迹分布与完整raw一致性。
 历史原软件比较按原版本保留在 [精度记录](ACCURACY_OPTIMIZATION_20261003.md)。
 
+追踪热路径的无损 GPU 索引复用、gpucw1 七次热调用基准和未采用候选见[追踪性能优化记录](TRACKING_PERFORMANCE_OPTIMIZATION.md)。
+
 ![真实病例保存的labels、FA和矩形count结果](../../validation/connectome/paired_pipeline_20261003/CON01_pair_outputs.png)
 
 
@@ -378,6 +380,7 @@ CSD GPU 完整 API 旧/新为 **3436.72/3376.50 s**；WM、GM、CSF 三套数组
 | 2026-10-03～04 | `8bc337c4`冻结 / `7ba73de2`整合 | 两模板、checkpoint与输入保护。 | [10例40CLI及源码收据](../../validation/connectome/paired_pipeline_20261003/README.md)。 |
 | 2026-10-03 | accuracy_20261003 | 梯度、FA与ACT方向修正。 | [历史原软件比较](ACCURACY_OPTIMIZATION_20261003.md)。 |
 | 2026-10-02 | tenraw_20261002 | 数据流与矩阵构建优化。 | [历史完整矩阵判定](FINAL_RAW_MATRIX_RESULTS.md)。 |
+| 2026-10-09 | `work/connectome-index-reuse-20261009` | 拒绝采样保留有序未完成 seed 索引；同输入逐轨迹一致。 | [gpucw1 热调用基准](TRACKING_PERFORMANCE_OPTIMIZATION.md)。 |
 
 早期版本、逐被试长表和候选profiling见 [迁移前技术记录](../../validation/connectome/readme_archive_20261005.md)。
 源码入口 [pipeline.py](../../src/fnit/connectome/pipeline.py)，CLI [cli.py](../../src/fnit/cli.py)。

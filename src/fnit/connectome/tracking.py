@@ -88,8 +88,13 @@ def _initial_directions(
     initial[:, 0] = 1
     valid = torch.zeros(batch, dtype=torch.bool, device=coefficients.device)
     attempts = torch.zeros(batch, dtype=torch.int32, device=coefficients.device)
+    # Keep unresolved rows as an index vector.  Recomputing ``(~valid).nonzero``
+    # over the full batch at every proposal round launches a full-batch
+    # compaction kernel even after most seeds have already accepted.  Filtering
+    # the previous vector preserves row order and therefore the random-draw
+    # sequence and first-accepted proposal semantics.
+    pending = torch.arange(batch, device=coefficients.device, dtype=torch.long)
     for offset in range(0, 1000, 16):
-        pending = (~valid).nonzero(as_tuple=False).flatten()
         if pending.numel() == 0:
             break
         count = min(16, 1000 - offset)
@@ -113,6 +118,7 @@ def _initial_directions(
         selected = pending[success]
         initial[selected] = candidate[success, first[success]]
         valid[selected] = True
+        pending = pending[~success]
     return initial, valid, attempts
 
 
@@ -490,8 +496,8 @@ def _grow(
         mid_metric = seeds.new_zeros(batch)
         end_metric = seeds.new_zeros(batch)
         moving = torch.zeros_like(active)
+        indices = pending.nonzero(as_tuple=False).flatten()
         for first_trial in range(0, 1000, proposals_per_step):
-            indices = pending.nonzero(as_tuple=False).flatten()
             if indices.numel() == 0:
                 break
             width = min(proposals_per_step, 1000 - first_trial)
@@ -520,7 +526,10 @@ def _grow(
             mid_metric[selected] = mid_amp[success, choice]
             end_metric[selected] = end_amp[success, choice]
             moving[selected] = True
-            pending[selected] = False
+            # ``indices`` has the same order as ``pending.nonzero()``.  Remove
+            # accepted rows from this compact vector instead of rescanning the
+            # complete batch on the next rejection round.
+            indices = indices[~success]
         half_log_start = torch.where(moving, .5 * end_metric.clamp_min(1e-20).log(),
                                      half_log_start)
         mid_tissue = _five_tissue_mrtrix(five_tissue, chosen_mid, five_inverse)
