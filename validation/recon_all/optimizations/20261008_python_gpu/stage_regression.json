@@ -1,0 +1,37 @@
+{
+  "tested_commit": "953680ce0cd31e107e01288543fbdff8fc9e0be3",
+  "host": "gpucw1",
+  "gpu": "NVIDIA H100 PCIe 80GB",
+  "torch": "2.5.1",
+  "cuda": "11.8",
+  "input_case": "public ds000114 sub-07 FNIT-produced recon-all intermediate directory",
+  "runs": {
+    "finalsurfs": {
+      "cpu_seconds": 6.537773669231683,
+      "cuda_seconds": 6.03086174512282,
+      "cuda_speedup_percent": 7.753586308662089,
+      "shape": [256, 256, 256],
+      "dtype": "uint8",
+      "different_voxels": 0,
+      "max_abs_difference": 0,
+      "gpu_sha256": "f3a0be999f18f824a08859670b6950b1693d4ff0a8f8c2acb20d862bec390a55",
+      "cpu_sha256": "f3a0be999f18f824a08859670b6950b1693d4ff0a8f8c2acb20d862bec390a55"
+    },
+    "jacobian_experiment": {
+      "vertices": 114342,
+      "cpu_seconds": 0.07884543901309371,
+      "cuda_seconds": 1.1548651661723852,
+      "max_abs_difference": 9.5367431640625e-07,
+      "p99_abs_difference": 2.384185791015625e-07,
+      "different_float32_values": 56465,
+      "production_selection": "cpu"
+    }
+  },
+  "tests": {
+    "py_compile": "passed",
+    "test_white_mri_device_wiring": "2/2 passed on gpucw1",
+    "python_gpu_capability_matrix": "passed: ready=9, blocked=9, complete=false, native_programs=[]",
+    "full_recon_all_138": "not_run",
+    "clean_environment": "not_verified"
+  }
+}
