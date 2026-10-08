@@ -17,6 +17,7 @@ def run_recon_all_python_batch(
     profile_stages: bool = False, cuda_allocator_cache: str = "auto",
     hemisphere_workers: int = 1,
     native_optimizations: str = "auto",
+    backend: str = "native",
 ) -> list[dict]:
     """每设备独立子进程执行单 T1，按 jobs 顺序返回完整报告列表。
 
@@ -29,7 +30,8 @@ def run_recon_all_python_batch(
     单例入口。输入非法抛 ValueError/FileNotFoundError，任务失败汇总为
     RuntimeError。每设备仅执行一个被试；hemisphere_workers 默认1，设2时被试内部
     独立进程并行双侧，threads 在双侧之间分配（总预算不翻倍）。
-    native_optimizations=auto按已验证能力选择完整GCA缓存及white快速程序；
+    backend=python-gpu使用严格纯Python/CUDA profile；只要仍有未完成阶段就
+    在创建被试目录前失败，不回退到原生程序。native_optimizations=auto按已验证能力选择完整GCA缓存及white快速程序；
     original用于原生阶段配对控制，原样传递给每个被试CLI。
     """
     from .hemisphere_parallel import validate_hemisphere_workers
@@ -44,6 +46,8 @@ def run_recon_all_python_batch(
         raise ValueError("cuda_allocator_cache must be auto, enabled, or disabled")
     if native_optimizations not in {"auto", "original"}:
         raise ValueError("native_optimizations must be auto or original")
+    if backend not in {"native", "python-gpu"}:
+        raise ValueError("backend must be native or python-gpu")
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
     if not weights.is_dir() or not assets.is_dir():
         raise FileNotFoundError("weights_dir and assets_dir must exist")
@@ -68,6 +72,7 @@ def run_recon_all_python_batch(
                        str(t1), str(subject), "--weights-dir", str(weights),
                        "--assets-dir", str(assets), "--device", device,
                        "--threads", str(threads), "--cuda-allocator-cache", cuda_allocator_cache]
+            command += ["--backend", backend]
             if hemisphere_workers != 1:
                 command += ["--hemisphere-workers", str(hemisphere_workers)]
             if native_optimizations != "auto":

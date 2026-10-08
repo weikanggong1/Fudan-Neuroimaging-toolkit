@@ -10,12 +10,13 @@
 | 输出 | 138项体积/表面/顶点图/标注/统计及JSON |
 | 对应原软件 | FreeSurfer8.2 recon-all单T1默认路径 |
 | Python / CLI | fnit.recon_all.native_free.run_recon_all_python；fnit-recon-all |
-| CPU / GPU | 混合CPU/PyTorch CUDA/Numba/固定源码Conda native程序 |
+| CPU / GPU | 默认是混合CPU/PyTorch CUDA/Numba/固定源码Conda native程序；严格 `python-gpu` profile 只在全部替代阶段完成后开放 |
 
 <a id="流程策略"></a>
 
 
 当前十分钟目标的热点和五个优化任务见 [2026-10-07 性能热点与任务](HOTSPOT_ACCELERATION_20261007.md)。
+当前纯 Python GPU 迁移矩阵和阻断项见 [2026-10-08 迁移状态](PYTHON_GPU_STATUS_20261008.md)。
 ## 1. 功能简介
 
 `fnit-recon-all`从一幅原始T1w生成体积分割、双侧white/pial表面、顶点指标、脑区标注与统计。标准单T1入口目前不支持多T1、T2/FLAIR或纵向重建。
@@ -47,6 +48,7 @@ reconstruction_report = run_recon_all_python(
     threads=4,  # 当前被试计算预算；双半球并行时各2线程，报告线程设置与恢复
     hemisphere_workers=2,  # 显式启用左右侧独立进程；默认1，共享缺陷体积仍顺序累计
     native_optimizations="auto",  # 按已验证能力选择完整GCA缓存及white快速程序；pial保留原程序
+    backend="native",  # native为当前可验收混合流程；python-gpu缺少完整替代时在创建输出前明确失败
     native_bin_dir=None,  # None 表示使用当前 Conda 环境的 bin/
     profile_stages=False,  # 生产默认不增加阶段 CUDA 同步；True 记录同步等待
     cuda_allocator_cache="auto",  # 首次 CUDA 默认关闭缓存；已初始化 API 保留实际策略
@@ -76,6 +78,7 @@ reconstruction_report = run_recon_all_python(
 | `cuda_allocator_cache` | 否 | `str` | `'auto'` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto 按已验证能力选择完整 native 优化；original 固定原程序 |
+| `backend` | 否 | `str` | `'native'` | `native` 为当前混合流程；`python-gpu` 为严格纯 Python/CUDA profile，未完成阶段会在输出前抛出结构化错误 |
 
 ### 批量公开入口
 
@@ -180,6 +183,7 @@ reconstruction_reports = run_recon_all_python_batch(
     threads=4,  # 每被试总CPU预算
     hemisphere_workers=2,  # 每侧分得2线程，需要总预算至少2
     native_optimizations="auto",  # 使用已验证的完整程序能力
+    backend="native",  # 严格 python-gpu 尚未完成，不能静默回退
 )
 ```
 
@@ -209,6 +213,7 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--native-bin-dir` | `native_bin_dir` | None 使用当前 Conda bin；也可指定核验过的源码构建目录 |
 | `--hemisphere-workers` | `hemisphere_workers` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `--native-optimizations` | `native_optimizations` | auto 按已验证能力选择完整 native 优化；original 固定原程序 |
+| `--backend` | `backend` | `native` 为当前混合流程；`python-gpu` 要求所有阶段都有完整 Python/CUDA 实现，否则提前失败 |
 | `--profile-stages` | `profile_stages` | 记录阶段 CUDA 同步等待；生产默认不增加同步 |
 | `--cuda-allocator-cache` | `cuda_allocator_cache` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
 

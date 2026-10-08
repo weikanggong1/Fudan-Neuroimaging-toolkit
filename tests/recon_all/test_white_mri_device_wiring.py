@@ -31,7 +31,7 @@ class WhiteMriDeviceWiringTest(unittest.TestCase):
                 self.assertEqual(calls["mni_nonlinear"]["postprocess_backend"],
                                  "gpu" if device.startswith("cuda") else "conda")
                 self.assertEqual(calls["mni_aux"]["device"], device)
-                self.assertEqual(calls["brain_finalsurfs"]["device"], "cpu")
+                self.assertEqual(calls["brain_finalsurfs"]["device"], device)
                 self.assertFalse(calls["mni_aux"]["actual_cudnn_tf32"])
                 self.assertTrue(calls["mni_nonlinear"]["actual_cudnn_tf32"])
                 self.assertTrue(calls["brain_finalsurfs"]["actual_cudnn_tf32"])

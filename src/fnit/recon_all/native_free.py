@@ -347,7 +347,10 @@ def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
           warp_convert=warp_binaries[0], ca_register=warp_binaries[1],
           mri_convert=warp_binaries[2], device=device, threads=threads,
           postprocess_backend="gpu" if torch.device(device).type == "cuda" else "conda")
-    stage("brain_finalsurfs", run_finalsurfs, subject, device="cpu")
+    # ``finalsurfs_python`` has a validated CUDA implementation for the
+    # volume masks and entorhinal/ACJ edits. Keep its FP32 semantics while
+    # avoiding an unnecessary device round-trip on GPU recon-all runs.
+    stage("brain_finalsurfs", run_finalsurfs, subject, device=device)
     return auxiliary["runtime"]
 
 
@@ -694,7 +697,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          profile_stages: bool = False,
                          cuda_allocator_cache: str = "auto",
                          hemisphere_workers: int = 1,
-                         native_optimizations: str = "auto") -> dict:
+                         native_optimizations: str = "auto",
+                         backend: str = "native") -> dict:
     """从单幅原始 T1 连续生成 conform 体积、双侧表面和脑区统计。
 
     t1、subject_dir、weights_dir、assets_dir 是输入影像、空输出目录、
@@ -713,6 +717,15 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     体积为 1 mm conform 网格，表面使用 surface RAS（mm）；完整参数、
     输出结构、限制、官方命令和真实数据见 docs/recon_all/README.md。
     """
+    if backend not in {"native", "python-gpu"}:
+        raise ValueError("backend must be native or python-gpu")
+    if backend == "python-gpu":
+        # Fail before validating/creating subject output and, critically,
+        # before resolving any Conda native binary.  The capability report is
+        # machine-readable so each blocked stage can be migrated and tested
+        # independently rather than silently falling back to C++.
+        from .python_gpu_profile import require_complete
+        require_complete(device=device)
     started = time.perf_counter()
     from .hemisphere_parallel import validate_hemisphere_workers
     validate_hemisphere_workers(hemisphere_workers, threads)
@@ -779,6 +792,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     caller_autocast = {kind: autocast_state(kind) for kind in ("cpu", "cuda")}
     report: dict = {"profile": profile, "input": str(t1),
                     "subject_dir": str(subject), "device": device,
+                    "backend": backend,
                     "n4_binary": {"binary": str(n4_binary[0]),
                                   "sha256": n4_binary[1]}, "threads": threads,
                     "precision": {"matmul_tf32_default": True,
@@ -1088,6 +1102,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     from .vol2surf_contrast_python import write_contrast_percentage
 
     for hemi in ("lh", "rh"):
+        # The GPU kernel remains available for explicit stage experiments, but
+        # the complete 114k-vertex map is launch/I/O bound on the reference
+        # H100 (1.155 s CUDA vs 0.079 s CPU in the paired real-subject test).
+        # Keep the measured faster CPU path in the production critical path.
         stage(f"jacobian_{hemi}", jacobian_map,
               surf / f"{hemi}.white.preaparc", surf / f"{hemi}.sphere.reg",
               surf / f"{hemi}.jacobian_white", device="cpu")
@@ -1163,7 +1181,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          profile_stages: bool = False,
                          cuda_allocator_cache: str = "auto",
                          hemisphere_workers: int = 1,
-                         native_optimizations: str = "auto") -> dict:
+                         native_optimizations: str = "auto",
+                         backend: str = "native") -> dict:
     """从原始单 T1 连续重建；输入、输出及坐标定义见 recon-all 中文说明。
 
     t1 为原始影像；subject_dir 须为空；weights_dir/assets_dir 为已校验资源；
@@ -1172,7 +1191,9 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     hemisphere_workers=1保持串行，2启用私有被试目录的双侧 exec 进程，
     总 threads 平分，须至少2；返回 hemisphere_scheduling 组墙钟/worker报告，
     所有共享发布失败均传播到主报告。并行要求 caller autocast 关闭。
-    native_optimizations=auto 仅按已验证的原生能力选择 GCA 缓存和 white
+    backend=native 使用当前已验证的混合 FNIT/Conda 实现；backend=python-gpu
+    是严格纯 Python/CUDA profile，若仍有未完成阶段会在创建输出前抛出结构化
+    PurePythonGpuUnavailable，不回退到原生程序。native_optimizations=auto 仅按已验证的原生能力选择 GCA 缓存和 white
     快速程序；original固定原始原生实现。CUDA WM 后编辑使用已有 GPU
     函数；完整 EM/WM 核心及pial不被不完整Python算法替代。
     profile_stages=False 不插入阶段同步；True 分列 CUDA 等待与父子 CPU 秒数。
@@ -1238,7 +1259,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     device=device, threads=threads, native_bin_dir=native_bin_dir,
                     profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache,
                     **({"hemisphere_workers": hemisphere_workers} if hemisphere_workers != 1 else {}),
-                    **({"native_optimizations": native_optimizations} if native_optimizations != "auto" else {}))
+                    **({"native_optimizations": native_optimizations} if native_optimizations != "auto" else {}),
+                    backend=backend)
             except Exception as error:
                 pipeline_error = error
                 raise
@@ -1285,6 +1307,8 @@ def main(argv: list[str] | None = None) -> None:
                         help="independent hemisphere processes; total threads split across two workers")
     parser.add_argument("--native-optimizations", choices=("auto", "original"), default="auto",
                         help="validated Conda native hotspot selection; original is the paired control")
+    parser.add_argument("--backend", choices=("native", "python-gpu"), default="native",
+                        help="native: current validated mixed pipeline; python-gpu: strict profile, fails before output while required ports are incomplete")
     parser.add_argument("--profile-stages", action="store_true",
                         help="record CUDA synchronization and parent/child CPU time")
     parser.add_argument("--cuda-allocator-cache", choices=("auto", "enabled", "disabled"),
@@ -1297,7 +1321,8 @@ def main(argv: list[str] | None = None) -> None:
                                   profile_stages=args.profile_stages,
                                   cuda_allocator_cache=args.cuda_allocator_cache,
                                   hemisphere_workers=args.hemisphere_workers,
-                                  native_optimizations=args.native_optimizations)
+                                  native_optimizations=args.native_optimizations,
+                                  backend=args.backend)
     print(json.dumps(report, indent=2))
 
 
