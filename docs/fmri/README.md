@@ -21,14 +21,63 @@ T1w→MNI 使用所选 SynthMorph，或 TorchFLIRT 仿射接 TorchFNIRT。
 接口默认 `registration_backend="synthmorph"`；下方例子明确选择 FNIRT。
 
 ```mermaid
-flowchart LR
-    A[原始 BIDS BOLD + T1w] --> B[脑提取 + BOLD参考 + 运动校正]
-    B --> C[BOLD到T1w BBR + T1w到MNI配准]
-    C --> D[组合变换 + preproc重采样]
-    B --> E[FEAT + PICA/AROMA + 可选回归]
-    C --> E
-    D --> F[T1w/MNI preproc + 原生/MNI clean + 变换]
-    E --> F
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "lineColor": "#000000", "secondaryColor": "#ffffff", "tertiaryColor": "#ffffff"}}}%%
+flowchart TD
+    classDef fnit fill:#ffffff,stroke:#000000,color:#000000,stroke-width:1.5px;
+    classDef decision fill:#ffffff,stroke:#000000,color:#000000,stroke-width:1.5px;
+    classDef output fill:#ffffff,stroke:#000000,color:#000000,stroke-width:1.5px;
+
+    A0[原始 BIDS<br/>BOLD run + JSON + T1w]:::fnit --> A1[选择唯一 subject/session/task/run/echo<br/>检查 affine、TR、帧数与有限值]:::fnit
+    A1 --> A2{slice_timing?<br/>默认关闭}:::decision
+    A2 -->|否| A3[保留原始时间采样]:::fnit
+    A2 -->|是且 JSON 有效| A4[Slice Timing 校正<br/>写入 preproc provenance]:::fnit
+    A3 --> B0
+    A4 --> B0
+
+    subgraph ANAT[解剖与标准空间准备]
+        B0[T1w 脑提取<br/>生成源空间 brain mask]:::fnit
+        B1[载入 MNI152NLin6Asym 2 mm<br/>模板与可选目标 mask]:::fnit
+        B2{registration_backend}:::decision
+        B3[SynthMorph<br/>T1w→MNI 非线性变换]:::fnit
+        B4[TorchFLIRT 仿射初始化<br/>+ TorchFNIRT 非线性变换]:::fnit
+        B0 --> B2
+        B1 --> B2
+        B2 -->|synthmorph| B3
+        B2 -->|fnirt| B4
+    end
+
+    subgraph BOLD[原生 BOLD 准备]
+        C0[SBRef 或 robust/middle BOLD reference]:::fnit
+        C1[逐帧运动估计<br/>多尺度刚体 pull 矩阵]:::fnit
+        C2[BOLD reference→T1w<br/>BBR 线性配准]:::fnit
+        C0 --> C1 --> C2
+    end
+    A1 --> C0
+    B0 --> C2
+
+    B3 --> D0[组合 pull 变换<br/>BOLD→T1w→MNI]:::fnit
+    B4 --> D0
+    C2 --> D0
+    D0 --> D1[单次空间插值与写出<br/>preproc native/T1w/MNI]:::fnit
+
+    subgraph CLEAN[clean 分支，可选]
+        E0[FEAT 强度缩放与高通]:::fnit
+        E1[PICA 空间分解]:::fnit
+        E2[ICA-AROMA 运动成分分类]:::fnit
+        E3[可选混杂回归<br/>WM/CSF/GSR/运动/带通]:::fnit
+        E4[clean native]:::fnit
+        E0 --> E1 --> E2 --> E3 --> E4
+    end
+    C1 --> E0
+    D0 --> E5[clean MNI 单次重采样]:::fnit
+    E4 --> E5
+
+    D1 --> F0[preproc 输出<br/>原生/T1w/MNI BOLD]:::output
+    E4 --> F1[clean native 输出]:::output
+    E5 --> F2[clean MNI 输出]:::output
+    D0 --> F3[变换、mask、JSON provenance、阶段计时]:::output
+
+    class A0,A1,A2,A3,A4,B0,B1,B2,B3,B4,C0,C1,C2,D0,D1,E0,E1,E2,E3,E4,E5,F0,F1,F2,F3 fnit;
 ```
 
 需要皮层时序时，直接使用 [Surface pipeline](surface.md)，由入口检查并自动完成缺失的 volume。
