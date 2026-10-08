@@ -1,0 +1,87 @@
+{
+  "benchmark": "ten-subject paired T1w/rest-fMRI C-only MSMAll integration",
+  "cohort": {
+    "subjects": 10,
+    "frames_per_run": 180,
+    "repetition_time_seconds": 2.1,
+    "grayordinates": 91282,
+    "surface_mesh": "fsLR32k",
+    "surface_source": "official fMRIPrep/FreeSurfer-derived private inputs"
+  },
+  "reference": {
+    "components": 20,
+    "regression": "DR",
+    "variance_normalization_supplied": false,
+    "modalities": ["C"],
+    "feature_columns_after_preparation": 21,
+    "hcp_template_family": "MSMAll d20",
+    "full_hcp_ca_cat": false
+  },
+  "feature_preparation_cpu": {
+    "finite_subjects": 10,
+    "regression_seconds_mean": 1.4192353038,
+    "regression_seconds_min": 1.3400690053,
+    "regression_seconds_max": 1.4546781033,
+    "total_seconds_mean": 3.2590472513,
+    "total_seconds_min": 3.1953021009,
+    "total_seconds_max": 3.3392799143
+  },
+  "coarse_stability_run": {
+    "config": {
+      "simval": [2],
+      "iterations": [10],
+      "control_grid": [2],
+      "sampling_grid": [4],
+      "data_grid": [4],
+      "regularization": [0.05],
+      "shear_modulus": 0.4,
+      "bulk_modulus": 1.6,
+      "strain_exponent": 2.0,
+      "regularization_exponent": 2.0
+    },
+    "cpu_threads_requested": 8,
+    "subjects_completed": 10,
+    "seconds_wall_mean": 6.9595989378,
+    "seconds_wall_min": 4.4264444029,
+    "seconds_wall_max": 15.3096507760,
+    "folded_output_faces_total": 0,
+    "folded_solver_faces_total": 0,
+    "degenerate_input_faces_total": 0,
+    "minimum_orientation_ratio_range": [0.5954160837, 0.6787454556]
+  },
+  "coarse_stability_run_gpu_observation": {
+    "device": "H100, CUDA_VISIBLE_DEVICES=1",
+    "subjects_completed": 10,
+    "seconds_wall_mean": 13.146,
+    "seconds_wall_range": [10.287, 15.629],
+    "peak_allocated_gb_range": [0.2121, 0.2325],
+    "folded_output_faces_total": 0,
+    "folded_solver_faces_total": 0,
+    "degenerate_input_faces_total": 0,
+    "shared_gpu_load": true,
+    "timing_scope": "single shared-GPU observation; not a stable speed claim"
+  },
+  "refine": {
+    "cpu_ten_subject_run": "not_completed",
+    "gpu_single_subject_smoke": {
+      "completed": true,
+      "seconds_wall": 148.994,
+      "folded_output_faces": 0,
+      "folded_solver_faces": 0,
+      "minimum_orientation_ratio": {
+        "left": 0.630386,
+        "right": 0.569805
+      }
+    }
+  },
+  "interpretation": {
+    "status": "C-only constrained integration benchmark",
+    "default_lambda_1e-5_d20_c_only": "failed fold QC in the first subject",
+    "lambda_0.05": "stability configuration; not the official HCP CA/CAT default",
+    "not_claimed": [
+      "full HCP CA_CAT equivalence",
+      "FreeSurfer runtime dependency",
+      "stable GPU speedup under shared load"
+    ]
+  }
+}

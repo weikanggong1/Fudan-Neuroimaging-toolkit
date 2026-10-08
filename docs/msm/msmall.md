@@ -142,6 +142,21 @@ newmsm --inmesh=/absolute/path/features/L.sphere.surf.gii \
 
 最新匿名汇总、精度与耗时的测量范围见 [MSM 验证页](../../validation/msm/README.md)。对照固定同一真实 BOLD、参考图、特征和权重，分别执行完整官方配置。球面误差按对应顶点计算；490 帧时间序列先逐灰质点计算 Pearson，再取均值。单次成本检查、完整球面和最终时间序列是不同检查项。
 
+### 十人配对 C-only 集成基准（2026-10-08）
+
+本轮使用公开配对 T1w/rest-fMRI 基准的 10 个病例。官方 fMRIPrep 产物中的 FreeSurfer 派生表面只作为私有输入准备；FNIT 运行时没有调用 FreeSurfer。每个 run 为 180 帧、TR 2.1 s、91,282 个 grayordinates。使用 HCP MSMAll d20 参考图，DR 回归不提供 VN，左右半球在固定 fsLR32k 球面上生成 `C` 特征。每侧最终为 20 个连接特征加 1 个 medial-wall 通道，共 21 列；所有 10 例输出均为 finite。
+
+| 阶段 | 设备/线程 | 10 例耗时 | 结果 |
+| --- | --- | ---: | --- |
+| DR 回归 | CPU，8 线程预算 | 均值 1.419 s（1.340–1.455） | 10/10 finite |
+| 特征准备 | CPU，左右并行 | 总均值 3.259 s（3.195–3.339） | 10/10 成功 |
+| coarse，稳定配置 | CPU，8 线程预算 | 均值 6.960 s（4.426–15.310） | 翻折 0，退化输入 0 |
+| coarse，稳定配置 | H100，左右并行 | 均值 13.146 s（10.287–15.629） | 翻折 0；峰值 allocation 0.212–0.233 GB |
+
+为避免低维 `C` 特征在 32k 网格上发生折叠，本轮 coarse 使用 `regularization=0.05`、`simval=(2,)`、`iterations=(10,)`、`control_grid=(2,)`、`sampling_grid=(4,)`、`data_grid=(4,)`。这是 C-only 的稳定性配置，不是 HCP 默认 CA/CAT 参数。默认 `regularization=1e-5` 在该 d20 C-only 输入的首例出现翻折，未继续作为通过结果。CPU coarse 的 10/10 最小方向比范围为 0.595–0.679；GPU 观察批次为 0.595–0.677。GPU 当时共享 H100 负载较高，时间只作一次观测，不能解释为稳定加速。
+
+三级 refine 的单例 GPU 试跑完成（148.994 s，翻折 0，最小方向比 0.630/0.570）；十人 refine 尚未纳入通过统计。仅凭 T1w 和 fMRI 不能生成完整 HCP `CA_CAT` 所需的个体 myelin 与 topography，因此本节结果称为 **20-component C-only constrained MSMAll integration**，不称为完整 HCP MSMAll 等价。匿名聚合字段见 [`msmall_c_only_ten.public.json`](../../validation/msm/msmall_c_only_ten.public.json)。
+
 以下为当前源码 `249919f2` 的双侧配准，设备为 H100 PCIe、PyTorch 2.5.1/CUDA 11.8，FNIT 的 CPU 线程数为 4；官方 newMSM 为单 CPU 线程。几何和成本用 float64，GIFTI/CIFTI 写出 float32。[正式汇总](../../validation/msm/msmall.current.public.json)保存完整配置、哈希与各级记录。
 
 | 双侧配准配置 | 官方 CPU 1 线程 | FNIT H100 冷调用 | 热调用 | 峰值已分配显存 |
@@ -204,7 +219,7 @@ python tools/plot_msmall_reference.py \
 - 权重重采样按官方定义先找包含三角形，再比较其三个角点，严格并列时保留原三角形顺序。全局最近顶点在非均匀球面上并不等价；该错误在真实左侧第三级影响 33 个权重值，已修正后再测。
 - 修复独立 Python 进程首次调用 CUDA 时，显存统计早于 CUDA 初始化而报错的问题；MSMAll 与共享 MSMSulc 入口均在统计前完成初始化。两种入口的新进程 GPU 调用回归测试通过。初始化位于配准阶段计时前，几何、成本和求解步骤不变。
 - 修正权重重采样的面积缓存：官方 Mesh 拷贝会重建三角形，重新计算拷贝时坐标的面积。参考权重使用归一化 DATA 网格的面积；绝对权重使用当前变形 SOURCE 和控制网格的面积。此前沿用构网时的固定面积，与这些拷贝边界不同。真实第 2 级检查点已确认此项是权重及候选成本差异的原因；特征初始化的 VN 面积缓存与默认 MSMSulc 保持原定义。
-- 2026-10-08：修复 surface pipeline 的 native MSMAll 拓扑门。注册前改用实际 MSMSulc sphere 比对 source faces；midthickness 三角形序列变化不再误拒绝合法特征。固定服务器 Conda 环境中 `tests/test_msmall_surface_composition.py` 与 `tests/test_msm_multivariate.py` 通过 **29 passed, 1 skipped**。当前真实配对特征与 surface native sphere 的网格仍不匹配，因此 MSMAll 完整 surface E2E 继续保持待补齐状态。
+- 2026-10-08：修复 surface pipeline 的 native MSMAll 拓扑门。注册前改用实际 MSMSulc sphere 比对 source faces；midthickness 三角形序列变化不再误拒绝合法特征。固定服务器 Conda 环境中 `tests/test_msmall_surface_composition.py` 与 `tests/test_msm_multivariate.py` 通过 **29 passed, 1 skipped**。新增十人 d20 C-only 配对输入基准：特征准备 10/10 finite，coarse 稳定配置 CPU/H100 均 10/10 无翻折；默认低正则 d20 C-only 首例翻折，已明确记录为稳定性边界。三级 refine 仅完成单例 GPU 观察，完整 surface pipeline E2E 仍需用 FNIT 自身 MSMSulc 投影输出重建特征后复测。
 
 ## 7. 参考文献与源码
 
