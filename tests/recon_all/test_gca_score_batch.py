@@ -73,6 +73,34 @@ def test_cached_logs_match_numba_reference_not_python_libm():
     reference=_sample_log_values(coordinates,means,variances,priors,source,np.eye(4,dtype=np.float32))
     assert np.array_equal(terms[:,0]+terms[:,1],reference)
 
+
+def test_device_reduction_retains_score_order_and_ties():
+    import torch
+    if not torch.cuda.is_available():
+        raise RuntimeError('CUDA required for reduction regression')
+    rng=np.random.default_rng(73)
+    coordinates=rng.integers(0,12,(300,3),dtype=np.int32)
+    samples=StableSamples(coordinates,np.full(300,2,np.int32),
+                          rng.uniform(30,160,300).astype(np.float32),
+                          rng.uniform(1,120,300).astype(np.float32),
+                          rng.uniform(.1,1,300).astype(np.float32))
+    source=rng.integers(0,256,(24,24,24),dtype=np.uint8)
+    matrices=np.repeat(np.eye(4,dtype=np.float32)[None],4,axis=0)
+    matrices[1,0,3]=1
+    matrices[2,1,3]=-1
+    matrices[3]=matrices[1]
+    ordered=GCASearchScorer(samples,source,device='cuda:0',candidate_chunk=2,sample_chunk=64)
+    reduced=GCASearchScorer(samples,source,device='cuda:0',candidate_chunk=2,sample_chunk=64,
+                            reduce_on_device=True)
+    first=ordered.score_many(matrices)
+    second=reduced.score_many(matrices)
+    # Device reduction changes the summation tree for very negative
+    # out-of-bounds scores; the score can differ by a few 1e-3 while candidate
+    # ordering and ties remain stable.
+    assert np.allclose(first,second,atol=1e-2,rtol=0)
+    assert first[1]==first[3] and second[1]==second[3]
+    assert int(np.argmax(first))==int(np.argmax(second))
+
 if __name__ == "__main__":
     test_batch_retains_every_candidate_and_order()
     test_empty_candidate_batch()

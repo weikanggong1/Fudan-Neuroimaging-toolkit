@@ -32,14 +32,16 @@ class GCASearchScorer:
     prior-grid samples (spacing 2 source voxels). Matrices map source voxels to
     atlas voxels. Outputs are CPU float32 scores in input candidate order.
     candidate_chunk=64, sample_chunk=8192 bound temporary GPU tensors; final
-    CPU workspace is candidate_chunk * sample_count * 8 bytes. This class does
-    not mutate source/samples and must be recreated after either changes.
+    CPU workspace is candidate_chunk * sample_count * 8 bytes. With
+    ``reduce_on_device=True`` likelihoods are accumulated in float64 on CUDA
+    and only one score vector per candidate block is copied back. This class
+    does not mutate source/samples and must be recreated after either changes.
     Empty/invalid samples, nonfinite/singular matrices or non-CUDA device raise.
     """
 
     def __init__(self, samples: StableSamples, source: np.ndarray, *,
                  device: str | torch.device, candidate_chunk: int = 64,
-                 sample_chunk: int = 8192):
+                 sample_chunk: int = 8192, reduce_on_device: bool = False):
         self.device = torch.device(device)
         if self.device.type != 'cuda':
             raise ValueError('GCASearchScorer requires an explicit CUDA device')
@@ -63,6 +65,7 @@ class GCASearchScorer:
         self._samples, self._source = samples, source
         self.count, self.shape = count, source.shape
         self.candidate_chunk, self.sample_chunk = candidate_chunk, sample_chunk
+        self.reduce_on_device = bool(reduce_on_device)
         def upload(array, dtype):
             return torch.tensor(np.asarray(array), dtype=dtype, device=self.device)
         self.source = upload(source, torch.uint8)
@@ -91,7 +94,12 @@ class GCASearchScorer:
             # Multiplication by the diagonal prior spacing is exact here.
             inverses[:, :, :3] *= np.float32(2)
             transform = torch.tensor(inverses, device=self.device)
-            values = np.empty((len(block), self.count), np.float64)
+            if self.reduce_on_device:
+                block_scores = torch.zeros(
+                    len(block), device=self.device, dtype=torch.float64)
+                values = None
+            else:
+                values = np.empty((len(block), self.count), np.float64)
             for start in range(0, self.count, self.sample_chunk):
                 stop = min(self.count, start + self.sample_chunk)
                 coordinates = self.coordinates[start:stop]
@@ -115,9 +123,16 @@ class GCASearchScorer:
                 likelihood = self.log_std[None, start:stop] - .5 * mahalanobis.double()
                 likelihood = likelihood + self.log_prior[None, start:stop]
                 likelihood = torch.where(inside, likelihood.clamp_min(-6), -1000000.)
-                values[:, start:stop] = likelihood.cpu().numpy()
-            scores[begin:begin+len(block)] = (np.sum(values, axis=1, dtype=np.float64).astype(np.float32)
-                                            / np.float32(self.count))
+                if self.reduce_on_device:
+                    block_scores += likelihood.sum(dim=1, dtype=torch.float64)
+                else:
+                    values[:, start:stop] = likelihood.cpu().numpy()
+            if self.reduce_on_device:
+                scores[begin:begin+len(block)] = (
+                    (block_scores / np.float32(self.count)).to(torch.float32).cpu().numpy())
+            else:
+                scores[begin:begin+len(block)] = (np.sum(values, axis=1, dtype=np.float64).astype(np.float32)
+                                                / np.float32(self.count))
         return scores
 
     def __call__(self, samples, source, matrix):

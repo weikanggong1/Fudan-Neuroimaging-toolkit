@@ -63,10 +63,12 @@ report = register_t1(
     search_backend="torch",  # 只将候选评分迁移到 Torch
     candidate_chunk=64,  # GPU 候选分块，控制显存
     sample_chunk=8192,  # GCA 样本分块，控制显存
+    reduce_on_device=True,  # 在 GPU 上累加 likelihood，减少同步和 D2H
 )
 ```
 
-该返回值包含 LTA 路径、矩阵、EM cost、各阶段耗时、搜索后端和分块设置。
+该返回值包含 LTA 路径、矩阵、EM cost、各阶段耗时、搜索后端、分块设置和
+`reduce_on_device` 状态。设备端归约使用 float64 累加，未启用 FP16/BF16。
 输入坐标保持 GCA/voxel-LTA 约定，体积张量仍按 FNIT 的 `(x,y,z)` 数组读取；
 候选评分阶段不启用 FP16/BF16。`search_backend="torch"` 只在显式指定
 CUDA 时可用，默认 `cpu` 不变。
@@ -89,3 +91,19 @@ FNIT 生产调度默认仍使用现有 Python/Conda 混合阶段；`search_backe
 候选分块得到相同结果，以及 GPU/CPU 均在最终候选选择时只产生一个索引。
 真实 T1 的速度、显存和 LTA 一致性尚未建立，因此文档不会把该模块标成
 默认或等价实现。
+
+在 gpucw1 的共享 H100 环境，对 ds000114 sub-07 的同一 `nu.mgz`、GCA 和
+brainmask 做完整 Python 注册配对：
+
+| 配置 | 总耗时 | 翻译 | 线性搜索 | EM | LTA 矩阵 |
+|---|---:|---:|---:|---:|---|
+| CPU source-order | 420.51 s | 17.47 s | 379.13 s | 8.62 s | 基线 |
+| Torch GPU，逐块回传 | 481.06 s | 19.24 s | 435.21 s | 8.81 s | 逐元素相同 |
+| Torch GPU，`reduce_on_device=True` | 335.08 s | 13.45 s | 296.15 s | 8.48 s | 逐元素相同 |
+
+Torch 设备端归约相对 CPU 观测加速 **20.3%**。GPU 当时同时运行其他作业，
+该数字是共享负载观测，不能当作独占设备吞吐。设备端 float64 reduction
+改变了极端越界候选的求和树，单个 score 在测试中最大相差 `0.0078125`；
+真实 sub-07 的最终候选和 LTA 矩阵逐元素相同。下一步需在空闲 GPU 上复测，
+并将同一 LTA 送入 `norm/brain/wm/filled` 连续链。生产 recon-all 默认仍不
+启用该后端。

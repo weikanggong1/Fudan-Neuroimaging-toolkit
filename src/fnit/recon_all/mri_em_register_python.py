@@ -22,15 +22,19 @@ from .mri_em_register_translation_source import find_optimal_translation_source
 def register_t1(nu_path: str | Path, atlas_path: str | Path,
                 mask_path: str | Path, output_path: str | Path, *,
                 device: str = "cpu", search_backend: str = "cpu",
-                candidate_chunk: int = 64, sample_chunk: int = 8192) -> dict:
+                candidate_chunk: int = 64, sample_chunk: int = 8192,
+                reduce_on_device: bool = False) -> dict:
     """Build a Talairach LTA without invoking a FreeSurfer executable.
 
     ``search_backend="cpu"`` keeps the validated source-order NumPy/Numba
     search. ``search_backend="torch"`` reuses FNIT's resident, chunked
     ``GCASearchScorer`` for translation and linear candidate scoring on an
     explicit CUDA device, while the EM refinement and LTA writing remain the
-    existing Python implementation. The Torch path is opt-in until its LTA
-    and downstream norm regression is complete.
+    existing Python implementation. ``reduce_on_device`` accumulates sample
+    likelihoods in CUDA before copying one score vector per candidate block;
+    it is opt-in until its numeric result is checked against ordered CPU
+    reduction. The Torch path is opt-in until its LTA and downstream norm
+    regression is complete.
     """
     if search_backend not in {"cpu", "torch"}:
         raise ValueError("search_backend must be 'cpu' or 'torch'")
@@ -52,7 +56,8 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
 
         scorer = GCASearchScorer(
             stable_samples, source, device=device,
-            candidate_chunk=candidate_chunk, sample_chunk=sample_chunk)
+            candidate_chunk=candidate_chunk, sample_chunk=sample_chunk,
+            reduce_on_device=reduce_on_device)
 
     started = time.perf_counter()
     translated, translation_history = find_optimal_translation_source(
@@ -80,6 +85,7 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
         "linear_iterations": len(linear_history), "timing": timing,
         "search_backend": search_backend, "device": device,
         "candidate_chunk": candidate_chunk, "sample_chunk": sample_chunk,
+        "reduce_on_device": reduce_on_device,
     }
 
 
@@ -93,11 +99,13 @@ def main() -> None:
     parser.add_argument("--search-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--candidate-chunk", type=int, default=64)
     parser.add_argument("--sample-chunk", type=int, default=8192)
+    parser.add_argument("--reduce-on-device", action="store_true")
     args = parser.parse_args()
     print(json.dumps(register_t1(
         args.nu, args.atlas, args.mask, args.output,
         device=args.device, search_backend=args.search_backend,
-        candidate_chunk=args.candidate_chunk, sample_chunk=args.sample_chunk), indent=2))
+        candidate_chunk=args.candidate_chunk, sample_chunk=args.sample_chunk,
+        reduce_on_device=args.reduce_on_device), indent=2))
 
 
 if __name__ == "__main__":
