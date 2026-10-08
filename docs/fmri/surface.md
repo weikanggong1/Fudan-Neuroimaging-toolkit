@@ -406,6 +406,8 @@ NRMSE使用全部91,282灰坐标，恒定时序仍保留；不筛零值或拟合
 
 当前没有可公开的 MSMAll full-surface E2E GPU 计时：现有真实 paired workspace 的 native sphere 顶点数为 120,035/122,950，而官方 SOURCE 特征为 40,962，缺少网格匹配的真实特征包。补齐匹配特征后需重新运行同一 490 帧、H100、20 GB 上限协议，才能发布包含 BOLD 投影和 CIFTI 的完整链路数字。本限制不影响上面的 MSMAll 注册核心精度门禁。
 
+2026-10-08 修复了一个会在进入 MSMAll 前误拒绝合法输入的拓扑判定问题：`_refine_msmall` 现在以实际传入的 MSMSulc 注册球面作为 native source 的拓扑基准；Workbench 导出的 midthickness 仅用于后续面积表面投影，不再承担球面拓扑判断。这样即使 midthickness 保持相同顶点而改变三角形序列，native MSMAll 特征仍会进入注册。固定服务器 Conda 环境中的 `tests/test_msmall_surface_composition.py` 与 `tests/test_msm_multivariate.py` 为 **29 passed, 1 skipped**，新增回归覆盖该三角形序列变化；其余完整 MSMSulc GPU E2E 指标沿用上面的已公开报告。MSMAll full-surface E2E 仍待网格匹配的真实特征包，不能用 C-only 注册核心数字替代。
+
 #### 本轮进一步提速
 
 在 `925c5866` 中，`RadialSphereMap` 的 optimized CUDA + source-precision 路径只在 GPU containment 不确定、边界重叠或缺失时把 query/nearest 缓存复制到主机；已证明的点不再发生整批 D2H。CPU、reference 和所有 fallback 的 FP64/native 算术顺序保持不变。远端 Conda 环境的 `tests/test_msm_sphere_execution.py` 与 `tests/test_msm_sphere_cpu.py` 为 **14 passed, 5 skipped**；需要 native FastPD 扩展的严格 source-precision 测试因该环境缺少 `_fastpd_native`，未被伪造为通过。GPU 全链的新稳定加速比待匹配 MSMAll 特征补齐后与上述 E2E 协议一并复测。

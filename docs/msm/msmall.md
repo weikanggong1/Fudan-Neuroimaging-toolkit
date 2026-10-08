@@ -204,6 +204,7 @@ python tools/plot_msmall_reference.py \
 - 权重重采样按官方定义先找包含三角形，再比较其三个角点，严格并列时保留原三角形顺序。全局最近顶点在非均匀球面上并不等价；该错误在真实左侧第三级影响 33 个权重值，已修正后再测。
 - 修复独立 Python 进程首次调用 CUDA 时，显存统计早于 CUDA 初始化而报错的问题；MSMAll 与共享 MSMSulc 入口均在统计前完成初始化。两种入口的新进程 GPU 调用回归测试通过。初始化位于配准阶段计时前，几何、成本和求解步骤不变。
 - 修正权重重采样的面积缓存：官方 Mesh 拷贝会重建三角形，重新计算拷贝时坐标的面积。参考权重使用归一化 DATA 网格的面积；绝对权重使用当前变形 SOURCE 和控制网格的面积。此前沿用构网时的固定面积，与这些拷贝边界不同。真实第 2 级检查点已确认此项是权重及候选成本差异的原因；特征初始化的 VN 面积缓存与默认 MSMSulc 保持原定义。
+- 2026-10-08：修复 surface pipeline 的 native MSMAll 拓扑门。注册前改用实际 MSMSulc sphere 比对 source faces；midthickness 三角形序列变化不再误拒绝合法特征。固定服务器 Conda 环境中 `tests/test_msmall_surface_composition.py` 与 `tests/test_msm_multivariate.py` 通过 **29 passed, 1 skipped**。当前真实配对特征与 surface native sphere 的网格仍不匹配，因此 MSMAll 完整 surface E2E 继续保持待补齐状态。
 
 ## 7. 参考文献与源码
 

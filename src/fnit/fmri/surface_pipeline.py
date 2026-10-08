@@ -237,7 +237,14 @@ def _refine_msmall(inputs, native_spheres, native_geometry, assets, output,
     for hemi, native_sphere, geometry in zip(("L", "R"), native_spheres, native_geometry):
         entry = inputs[hemi]
         source_points, source_faces = _surface(entry.source_sphere)
-        native_points, native_faces = _surface(geometry.midthickness)
+        # The registration sphere is the coordinate mesh for MSMAll.  A
+        # midthickness GIFTI is allowed to carry the same vertices with a
+        # different triangle ordering (for example after a Workbench export),
+        # so using it as the topology oracle can reject valid native feature
+        # files before MSMAll starts.  Compare against the actual MSMSulc
+        # sphere passed to this stage; the midthickness geometry is only used
+        # later for area-surface projection.
+        native_points, native_faces = _surface(native_sphere)
         atlas_file = assets / MESH / f"{hemi}.sphere.32k_fs_LR.surf.gii"
         atlas_points, atlas_faces = _surface(atlas_file)
         if len(source_points) == len(native_points) and np.array_equal(source_faces, native_faces):
