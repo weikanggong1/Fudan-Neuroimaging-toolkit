@@ -1,5 +1,13 @@
 # FNIT MSMAll 多模态球面配准
 
+| 项目 | 内容 |
+|---|---|
+| 输入 | 左右同网格的多列 C/CA/CAT 特征、可选权重与初始球面。 |
+| 输出 | 双侧 MSMAll 注册球面、registration report，可接入 surface pipeline。 |
+| 可选分支 | 仅 `msmall_inputs` 时执行 MSMSulc→MSMAll；没有它时只执行 MSMSulc。 |
+| 数据要求 | C-only 只需要 fMRI 连接特征；CA 需要个体 myelin；CAT 还需要功能拓扑。T2w/FLAIR 不自动替代 myelin。 |
+| 设备 | PyTorch CPU/CUDA，几何与代价 float64，写出 float32；左右半球可并行。 |
+
 ## 1. 功能
 
 `run_msmall` 在已有球面配准基础上，以每个顶点的多列特征做加权 Pearson 匹配，结合三角形应变、HOCR 和 FastPD 求解位移。它复现 HCP 的一级 coarse 与三级 refine 配置，复用 [MSMSulc](README.md) 已验证的网格变形、标签提案、展开和联合优化。计算使用 PyTorch 与包内 C++ 扩展，运行时不调用官方 newMSM、FSL、FreeSurfer 或 MATLAB。
@@ -7,6 +15,7 @@
 MSMAll 的输入是准备好的个体和参考特征。`C` 使用静息态连接特征；`CA` 增加个体髓鞘图；`CAT` 再加入功能拓扑。没有个体 MyelinMap 时须明确选择 `C`。HCP 默认的 `CA_CAT` 外层流程、UKB 专用 DeDrift 和 FIX 不由本函数执行。本次真实数据对照采用 `C`，不将它称为标准 HCP/UKB 最终 MSMAll。
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "lineColor": "#000000"}}}%%
 flowchart LR
     B[已清理的 MSMSulc CIFTI] --> V[已有 ICA mixing 与分类计算 VN]
     B --> R[DR 或 WRN 得到个体连接图]
@@ -96,6 +105,45 @@ print(registered_spheres["R"])
 
 配准结果可通过 [surface pipeline](../fmri/surface.md) 的 `msmall_inputs` 接入。该流程默认先估计 MSMSulc；32k 特征的注册结果合成到原生 MSMSulc 球面，再执行 ribbon 投影。默认 `signal="preproc"` 对应 `desc-MSMAllpreproc`；显式选择 `signal="clean"` 使用已去噪 volume，输出 `desc-MSMAllclean`。注册球面的描述分别为 `MSMAllpreprocReg` / `MSMAllcleanReg`，与默认 MSMSulc 结果分别保存。
 
+
+### Surface pipeline 的两个可选分支
+
+| 调用条件 | 实际链路 | 输出与限制 |
+|---|---|---|
+| 未提供 `msmall_inputs` | `prepare_msmsulc_inputs` → MSMSulc | 默认只生成 `desc-MSMSulcpreproc/clean`；`msm_config` 只控制 MSMSulc。 |
+| 提供 L/R `msmall_inputs` | MSMSulc → MSMAll → native sphere 合成 → 投影/CIFTI | 输出 `desc-MSMAllpreproc/clean`；`msmall_config` 只控制 MSMAll，缺省为三级 refine。 |
+| 提供 `registered_spheres` | 跳过 MSMSulc 与 MSMAll | 不能同时传 `msm_config` 或 `msmall_inputs`。 |
+
+C-only 是可以在 T1w+fMRI 数据上严格运行的约束分支；它不需要 T2w 或 FLAIR。CA 必须显式提供个体与参考 myelin，CAT 还必须提供双方功能拓扑及权重；缺少输入时直接报错，不静默降级到 C。surface pipeline 的最终 native sphere QC 由 `msmsulc_qc_policy="report"|"repair"|"error"` 控制，详见 [MSMSulc 说明](README.md)。
+
+```python
+from fnit.fmri import fMRISurface_pipeline
+
+result = fMRISurface_pipeline(
+    bids_root="/absolute/path/bids",
+    derivatives_root="/absolute/path/derivatives",
+    subject="0001",
+    hcp_assets_dir="/absolute/path/hcp_surface_assets",
+    recon_all="/absolute/path/recon-all/sub-0001",
+    msmall_inputs="/absolute/path/msmall.inputs.json",  # L/R C/CA/CAT 特征清单
+    msmall_config="/absolute/path/MSMAllStrainFinalconf1to1_1to3_2",
+    msmsulc_qc_policy="report",                      # 官方对照；repair 为显式安全模式
+    device="cuda:0", parallel=True, cpu_threads=8,
+)
+```
+
+命令行对应：
+
+```bash
+fnit-fmri surface --bids-root /absolute/path/bids \
+  --derivatives-root /absolute/path/derivatives --subject 0001 \
+  --recon-all /absolute/path/recon-all/sub-0001 \
+  --surface-assets-dir /absolute/path/hcp_surface_assets \
+  --msmall-inputs-json /absolute/path/msmall.inputs.json \
+  --msmall-config /absolute/path/MSMAllStrainFinalconf1to1_1to3_2 \
+  --msmsulc-qc-policy report --threads 8 --device cuda:0
+```
+
 ## 3. 命令行
 
 ```bash
@@ -168,6 +216,15 @@ newmsm --inmesh=/absolute/path/features/L.sphere.surf.gii \
 
 每套配置的冷、热调用保存球面都与官方左右两侧逐值相同：角差和弦长差的 mean、median、p95、maximum 均为 **0**，双方实际 float32 输出的翻折面数均为 **0**。本例相对官方单线程的冷调用速度分别为 5.17 倍和 12.85 倍。计时包含输入读取、配准及球面/报告写盘，排除导入、CUDA 初始化、离线比较和 BOLD 投影。冷调用指初始化后的首次配准，未清空文件系统缓存；coarse 与 refine 是相同固定特征的两次独立验收，不能相加为 HCP `CA_CAT` 外层的全流程时间。
 
+
+### 本轮分支验证（2026-10-08）
+
+- [MSMSulc QC policy 单例报告](../../validation/msm/msmsulc_qc_policy_con01.public.json)：`report` 157.970 s、左/右翻折 2/0；`repair` 169.099 s、修复后 0/0。默认 report 保持官方插值。
+- [C-only MSMAll 分支核心报告](../../validation/msm/msmall_branch_c_only_one_case.public.json)：真实 21 列（20 个连接特征+medial-wall）双侧 fsLR32k，CPU 8 线程 coarse 稳定配置 **121.940 s**，输出 finite，翻折 0，最小方向比 L/R **0.625952/0.596072**。
+  当前源码独立复跑为 **63.893 s**，21 列、finite、翻折 0 和拓扑结果完全一致；该时间是在 warm filesystem 状态下的单次观察，报告同时保留原始对照值。
+
+该 C-only 结果验证了 surface pipeline 的可选 MSMAll 分支和 native composition 核心，不代表 CA/CAT，也不代表从 raw BIDS 到 CIFTI 的完整 E2E。此前 full outer C-only 观察仍保留在[十人配对章节](#十人配对-c-only-集成基准2026-10-08)：MSMAll 层 QC 通过，但初始 MSMSulc 左侧存在官方同样可见的翻折，因此不宣称全链 QC 通过。
+
 ### 固定 BOLD 到 fsLR32k / 91k
 
 每套 32k 变形都合成到同一原生 MSMSulc 球面，分别生成 32k 面积表面，再用相同固定 BOLD、几何、ROI 和 Workbench 投影。当前入口初始化修复后的保存球面，与本次投影实际使用的球面逐值一致。
@@ -213,6 +270,8 @@ python tools/plot_msmall_reference.py \
 `component` 为一基组件编号；`color-limit` 为红蓝对称色标的最大绝对值，省略时取皮层绝对值的第 98 百分位；`threshold` 以下显示灰色脑表面。图像和来源 JSON 写入 `output` 指定位置，无 GPU 绘图依赖。
 
 ## 6. 更新与基准记录
+
+- 2026-10-08：surface pipeline 明确 MSMSulc-only 与 MSMSulc→MSMAll 两个可选分支；新增 report/repair/error native sphere QC 策略和真实 C-only 分支核心报告。
 
 - 2026-10-04 起：加入 CPU 1/8 实际 newMSM 完整配对；一级和三级 CPU1 基线已验证全双侧坐标逐位一致，CPU containing-face 优化候选继续整例核对。
 - 2026-10：新增独立 MSMAll 多列特征求解、一级/三级 HCP 配置、VN/DR/WRN 准备与 surface 可选接口；安装器补齐 d7–d21。真实 C 特征准备为 47.498 s，保存地图对独立源码公式逐值一致；球面与投影实测集中保留在验证页。

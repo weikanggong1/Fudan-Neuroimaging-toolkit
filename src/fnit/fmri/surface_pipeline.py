@@ -291,6 +291,7 @@ def fMRISurface_pipeline(
     registered_spheres: tuple[str | Path, str | Path] | None = None,
     msm_config: MSMSulcConfig | str | Path | None = None,
     msm_execution: str = "optimized",
+    msmsulc_qc_policy: str = "report",
     msmall_inputs: dict[str, MSMAllInputs] | str | Path | None = None,
     msmall_config: MSMAllConfig | str | Path | None = None,
     goodvoxels: str | Path | None = None,
@@ -323,6 +324,9 @@ def fMRISurface_pipeline(
     projection branches. ``cpu_threads`` is the shared total budget; None
     uses OMP_NUM_THREADS or the current PyTorch thread count. A budget of one
     selects serial execution. Parent process settings are preserved.
+    ``msmsulc_qc_policy`` defaults to ``report`` for source-compatible
+    native interpolation; ``repair`` explicitly unfolds a folded native sphere
+    before publication, while ``error`` refuses to write one.
     """
     started = time.perf_counter()
     budget = resolve_cpu_threads(cpu_threads)
@@ -362,6 +366,8 @@ def fMRISurface_pipeline(
             raise TypeError("msmall_config must be MSMAllConfig or a config path")
     if msm_execution not in ("optimized", "reference"):
         raise ValueError("msm_execution must be 'optimized' or 'reference'")
+    if msmsulc_qc_policy not in ("report", "repair", "error"):
+        raise ValueError("msmsulc_qc_policy must be 'report', 'repair' or 'error'")
     if msm_config is None:
         configuration = MSMSulcConfig()
     elif isinstance(msm_config, MSMSulcConfig):
@@ -548,7 +554,8 @@ def fMRISurface_pipeline(
             )
             estimates = run_msmsulc(sulc_inputs, work / "msmsulc", device=device,
                                    config=configuration, execution=msm_execution,
-                                   parallel=parallel, cpu_threads=budget)
+                                   parallel=parallel, cpu_threads=budget,
+                                   qc_policy=msmsulc_qc_policy)
             spheres = (Path(estimates["L"]), Path(estimates["R"]))
             registration = "MSMSulc-HOCR-FastPD"
             registration_qc = {
@@ -565,11 +572,13 @@ def fMRISurface_pipeline(
                 "Method": "FNIT MSMSulc-HOCR-FastPD",
                 "Configuration": configuration.to_dict(),
                 "Execution": msm_execution,
+                "QCPolicy": msmsulc_qc_policy,
                 "Hemispheres": {
                     hemi: {key: report[hemi][key] for key in (
                         "seconds", "peak_allocated_gb", "folded_output_faces",
                         "folded_solver_faces", "minimum_output_orientation_ratio",
                         "minimum_solver_orientation_ratio", "degenerate_input_faces",
+                        "native_output_qc_before_repair", "fold_repair", "orientation_qc",
                     ) if key in report[hemi]} for hemi in ("L", "R")
                 },
             }

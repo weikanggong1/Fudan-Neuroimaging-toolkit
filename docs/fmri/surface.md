@@ -189,6 +189,7 @@ surface_result = fMRISurface_pipeline(                 # 从原始MRI完成缺�
 | `registered_spheres` | 否 | 左右路径二元组/None | `None` | 现成的原生顶点顺序注册球面；给出时不重新估计MSM。 |
 | `msm_config` | 否 | MSMSulcConfig/路径/None | `None` | None为默认HCP四级配置；与provided球面互斥。 |
 | `msm_execution` | 否 | str | `'optimized'` | optimized或reference，同算法执行策略。 |
+| `msmsulc_qc_policy` | 否 | str | `report` | native sphere QC：report 保持官方插值，repair 显式修复翻折，error 拒绝写出。 |
 | `msmall_inputs` | 否 | dict/路径/None | `None` | 明确的L/R MSMAllInputs或JSON清单；提供后在MSMSulc后refine。 |
 | `msmall_config` | 否 | MSMAllConfig/路径/None | `None` | 默认三级refine；仅有msmall_inputs时可用。 |
 | `goodvoxels` | 否 | 路径/None | `None` | 额外三维volume ROI，须与T1w BOLD同网格。 |
@@ -262,6 +263,13 @@ CIFTI的皮层下部分使用MNI6-2mm影像affine；皮层部分使用表面轴�
 固定轴与fMRIPrep的对应采样契约兼容，但整体输出一致性须以同版本、同输入比较为依据。
 所有输入subject和ZIP保持只读；临时native准备文件不是稳定公共输出。
 
+
+### MSMSulc 与 MSMAll 分支
+
+不提供 `msmall_inputs` 时，surface pipeline 执行 `MSMSulc → ribbon 投影 → CIFTI`；提供 L/R `msmall_inputs` 后，执行 `MSMSulc → MSMAll → native sphere 合成 → ribbon 投影 → CIFTI`，输出描述改为 `desc-MSMAllpreproc/clean`。`msm_config` 只控制 MSMSulc，`msmall_config` 只控制 MSMAll；`registered_spheres` 与两者互斥。
+
+C-only 分支只需要真实 fMRI 连接特征；CA 需要个体 T1w/T2w-derived myelin，CAT 还需要功能拓扑。T2w/FLAIR 不是可静默替代项，缺少 CA/CAT 输入时直接报错。最终 native sphere 的 report/repair/error 语义见 [MSMSulc 说明](../msm/README.md)。
+
 ## 3. 命令行调用
 
 ```bash
@@ -302,6 +310,7 @@ Python及CLI的volume后端默认仍为SynthMorph；该默认需要额外模型�
 | `--goodvoxels` | `goodvoxels` | 额外三维volume ROI，须与T1w BOLD同网格。 |
 | `--msm-config` | `msm_config` | None为默认HCP四级配置；与provided球面互斥。 |
 | `--msm-execution` | `msm_execution` | optimized或reference，同算法执行策略。 |
+| `--msmsulc-qc-policy` | `msmsulc_qc_policy` | report/repair/error；最终 native sphere 翻折策略。 |
 | `--msmall-inputs-json` | `msmall_inputs` | 明确的L/R MSMAllInputs或JSON清单；提供后在MSMSulc后refine。 |
 | `--msmall-config` | `msmall_config` | 默认三级refine；仅有msmall_inputs时可用。 |
 | `--require-volume` | `auto_volume=False` | 要求已有完整volume，不自动执行。 |

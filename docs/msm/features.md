@@ -1,8 +1,29 @@
 # MSMAll 特征准备：VN、DR/WRN 和 C/CA/CAT
 
+| 项目 | 内容 |
+|---|---|
+| 输入 | 已清理 CIFTI、参考 RSN 图、可选个体 myelin/topography。 |
+| 输出 | VN、回归地图、节点时序及 C/CA/CAT GIFTI 特征与权重。 |
+| 设备 | PyTorch CPU/CUDA；Workbench 仅用于规定的表面平滑/重采样。 |
+| 分支 | C 只需 fMRI；CA 需个体 myelin；CAT 另需功能拓扑。 |
+
 ## 1. 功能
 
 这三个独立函数生成 [MSMAll](msmall.md) 使用的 VN、连接图及配准特征。VN 和回归使用 PyTorch；WRN 的 14 mm sigma 平滑使用 Connectome Workbench。输入为已清理的 CIFTI，不重新进行 ICA 分类或噪声清理。
+
+```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "lineColor": "#000000"}}}%%
+flowchart LR
+    B[已清理 CIFTI] --> V[VN / DR / WRN 回归]
+    V --> C[C 连接特征]
+    M[个体与参考 myelin] --> A[CA 特征]
+    T[功能拓扑与权重] --> G[CAT 特征]
+    C --> F[写出 GIFTI 特征与权重]
+    A --> F
+    G --> F
+    classDef fnit fill:#ffffff,stroke:#000000,color:#000000,stroke-width:1px;
+    class B,V,C,M,A,T,G,F fnit;
+```
 
 ## 2. Python 调用、输入和输出
 
@@ -61,6 +82,8 @@ WRN 要求每个输入灰质点的 BOLD 随时间变化。恒定时序的相关�
 - `subject_myelin`、`reference_myelin`：CA/CAT必需的个体与参考单列 myelin GIFTI，不能把参考图当作个体图。
 - `subject_myelin_bias`：CA/CAT当前轮 bias 单列 GIFTI。HCP 外层先做个体32k myelin减reference，再以 sqrt(200) mm sigma平滑并重采样回source。此函数接收计算好的bias。
 - `source_topography`、`reference_topography`及相应 `_weights`：CAT必需，四者一起提供；已有地图须完成当前轮空间重采样。
+
+> **模态边界**：`C` 只使用静息态 fMRI 连接特征，不需要 T2w 或 FLAIR；`CA` 必须同时提供个体和参考 myelin 以及当前轮 bias；`CAT` 在此基础上还必须提供 source/reference topography 及权重。FLAIR 不能静默替代 HCP T1w/T2w myelin，缺少必需文件时函数直接报错。
 
 返回 `MSMAllInputs`。目录内生成 source/reference features 和 weights 共4个GIFTI，加 `features.json`。按HCP定义计算各模态缩放、附加medial-wall特征、应用权重和移除参考权重全零的组件；保留组件名称与顺序。
 
