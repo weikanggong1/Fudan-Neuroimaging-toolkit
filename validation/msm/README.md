@@ -4,6 +4,8 @@
 
 最新十人配对 C-only 集成基准见 [`msmall_c_only_ten.public.json`](msmall_c_only_ten.public.json) 及 [MSMAll 说明](../../docs/msm/msmall.md#十人配对-c-only-集成基准2026-10-08)。该报告只保存聚合指标，不保存被试标识、原始影像、FreeSurfer license 或服务器路径。它验证的是 HCP d20 参考图、DR 特征准备和 C-only coarse 稳定配置；不代表完整 HCP `CA_CAT` 等价。默认低正则在该受限 C-only 输入出现翻折，因此没有把默认参数写成通过结果。
 
+一例严格同链的 outer pipeline 观察见 [`msmall_outer_e2e_one_case.public.json`](msmall_outer_e2e_one_case.public.json)。该链从 FNIT stage-A dtseries 生成特征，MSMAll 层 QC 通过；初始 MSMSulc 左半球出现翻折，因此全链状态仍为观察结果。
+
 用法与参数见 [MSMSulc 功能页](../../docs/msm/README.md)。本目录保存匿名汇总；原生球面、逐点成本表和真实 BOLD/CIFTI 留在验证服务器。
 
 ## 对照定义

@@ -157,6 +157,8 @@ newmsm --inmesh=/absolute/path/features/L.sphere.surf.gii \
 
 三级 refine 的单例 GPU 试跑完成（148.994 s，翻折 0，最小方向比 0.630/0.570）；十人 refine 尚未纳入通过统计。仅凭 T1w 和 fMRI 不能生成完整 HCP `CA_CAT` 所需的个体 myelin 与 topography，因此本节结果称为 **20-component C-only constrained MSMAll integration**，不称为完整 HCP MSMAll 等价。匿名聚合字段见 [`msmall_c_only_ten.public.json`](../../validation/msm/msmall_c_only_ten.public.json)。
 
+随后用同一基准中的一例完成了 matched outer `fMRISurface_pipeline`：先用官方 FreeSurfer 派生表面和显式 RAS 变换运行 FNIT MSMSulc，再从 FNIT stage-A 的 91k dtseries 生成 d20 C 特征，最后运行 MSMAll 并合成回 native MSMSulc 球面。总墙钟 **460.962 s**，其中初始 MSMSulc **266.999 s**、第二次 MSMSulc **155.431 s**、MSMAll 注册和 native composition **201.426 s**、左右投影 **73.538 s**、CIFTI 写出 **9.852 s**。MSMAll 层自身为 21 列、左右翻折面 0、最小方向比 0.644/0.585，输出 finite；但初始 MSMSulc 左半球有 2 个翻折面且最小方向比为 −4.375，因此这次只算 **outer C-only integration observation**，不能写成全链 QC 通过。聚合字段见 [`msmall_outer_e2e_one_case.public.json`](../../validation/msm/msmall_outer_e2e_one_case.public.json)。
+
 以下为当前源码 `249919f2` 的双侧配准，设备为 H100 PCIe、PyTorch 2.5.1/CUDA 11.8，FNIT 的 CPU 线程数为 4；官方 newMSM 为单 CPU 线程。几何和成本用 float64，GIFTI/CIFTI 写出 float32。[正式汇总](../../validation/msm/msmall.current.public.json)保存完整配置、哈希与各级记录。
 
 | 双侧配准配置 | 官方 CPU 1 线程 | FNIT H100 冷调用 | 热调用 | 峰值已分配显存 |
@@ -219,7 +221,7 @@ python tools/plot_msmall_reference.py \
 - 权重重采样按官方定义先找包含三角形，再比较其三个角点，严格并列时保留原三角形顺序。全局最近顶点在非均匀球面上并不等价；该错误在真实左侧第三级影响 33 个权重值，已修正后再测。
 - 修复独立 Python 进程首次调用 CUDA 时，显存统计早于 CUDA 初始化而报错的问题；MSMAll 与共享 MSMSulc 入口均在统计前完成初始化。两种入口的新进程 GPU 调用回归测试通过。初始化位于配准阶段计时前，几何、成本和求解步骤不变。
 - 修正权重重采样的面积缓存：官方 Mesh 拷贝会重建三角形，重新计算拷贝时坐标的面积。参考权重使用归一化 DATA 网格的面积；绝对权重使用当前变形 SOURCE 和控制网格的面积。此前沿用构网时的固定面积，与这些拷贝边界不同。真实第 2 级检查点已确认此项是权重及候选成本差异的原因；特征初始化的 VN 面积缓存与默认 MSMSulc 保持原定义。
-- 2026-10-08：修复 surface pipeline 的 native MSMAll 拓扑门。注册前改用实际 MSMSulc sphere 比对 source faces；midthickness 三角形序列变化不再误拒绝合法特征。固定服务器 Conda 环境中 `tests/test_msmall_surface_composition.py` 与 `tests/test_msm_multivariate.py` 通过 **29 passed, 1 skipped**。新增十人 d20 C-only 配对输入基准：特征准备 10/10 finite，coarse 稳定配置 CPU/H100 均 10/10 无翻折；默认低正则 d20 C-only 首例翻折，已明确记录为稳定性边界。三级 refine 仅完成单例 GPU 观察，完整 surface pipeline E2E 仍需用 FNIT 自身 MSMSulc 投影输出重建特征后复测。
+- 2026-10-08：修复 surface pipeline 的 native MSMAll 拓扑门。注册前改用实际 MSMSulc sphere 比对 source faces；midthickness 三角形序列变化不再误拒绝合法特征。固定服务器 Conda 环境中 `tests/test_msmall_surface_composition.py` 与 `tests/test_msm_multivariate.py` 通过 **29 passed, 1 skipped**。新增十人 d20 C-only 配对输入基准：特征准备 10/10 finite，coarse 稳定配置 CPU/H100 均 10/10 无翻折；默认低正则 d20 C-only 首例翻折，已明确记录为稳定性边界。三级 refine 完成单例 GPU 观察；一例 matched outer pipeline 也已完成，但前置 MSMSulc 左半球 QC 未通过，故未宣称全链通过。
 
 ## 7. 参考文献与源码
 

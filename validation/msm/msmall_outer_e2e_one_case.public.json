@@ -1,0 +1,58 @@
+{
+  "benchmark": "one-case outer fMRISurface C-only MSMAll composition",
+  "case_count": 1,
+  "input": {
+    "frames": 180,
+    "grayordinates": 91282,
+    "varying_grayordinates": 90877,
+    "repetition_time_seconds": 2.1,
+    "feature_source": "FNIT MSMSulc stage-A preprocessed fsLR91k dtseries",
+    "reconstruction_input": "official FreeSurfer-derived subject directory",
+    "modalities": ["C"],
+    "feature_columns": 21
+  },
+  "timing_seconds": {
+    "stage_a_msmsulc_and_projection_total": 266.999,
+    "stage_a_msmsulc": 162.324,
+    "feature_regression_and_preparation": 4.458,
+    "stage_b_msmsulc": 155.431,
+    "stage_b_msmall_registration_and_native_composition": 201.426,
+    "stage_b_projection_hemispheres": 73.538,
+    "stage_b_cifti": 9.852,
+    "outer_total": 460.962
+  },
+  "msmall_qc": {
+    "left_folded_output_faces": 0,
+    "right_folded_output_faces": 0,
+    "left_folded_solver_faces": 0,
+    "right_folded_solver_faces": 0,
+    "left_degenerate_input_faces": 0,
+    "right_degenerate_input_faces": 0,
+    "minimum_orientation_ratio": {
+      "left": 0.643929,
+      "right": 0.585032
+    },
+    "finite_output": true
+  },
+  "initial_msmsulc_qc": {
+    "left_folded_output_faces": 2,
+    "right_folded_output_faces": 0,
+    "left_minimum_orientation_ratio": -4.375,
+    "right_minimum_orientation_ratio": 0.505,
+    "status": "preflight QC failed on left hemisphere; output retained as observation"
+  },
+  "configuration": {
+    "regularization": 0.05,
+    "simval": [2],
+    "iterations": [10],
+    "control_grid": [2],
+    "sampling_grid": [4],
+    "data_grid": [4]
+  },
+  "interpretation": {
+    "status": "outer C-only integration observation",
+    "full_hcp_ca_cat": false,
+    "full_chain_qc_pass": false,
+    "reason": "initial FNIT MSMSulc left-hemisphere QC failed; MSMAll layer itself passed its mesh QC"
+  }
+}
