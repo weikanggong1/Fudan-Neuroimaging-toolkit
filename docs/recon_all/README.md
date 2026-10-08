@@ -17,6 +17,9 @@
 
 当前十分钟目标的热点和五个优化任务见 [2026-10-07 性能热点与任务](HOTSPOT_ACCELERATION_20261007.md)。
 当前纯 Python GPU 迁移矩阵和阻断项见 [2026-10-08 迁移状态](PYTHON_GPU_STATUS_20261008.md)。
+N4 的纯 PyTorch 实验后端及真实数据误差见 [N4_TORCH_BACKEND.md](N4_TORCH_BACKEND.md)；
+GCA 候选评分实验见 [MRI_EM_TORCH_BACKEND.md](MRI_EM_TORCH_BACKEND.md)。两者均为
+显式实验入口，尚未替换生产默认。
 ## 1. 功能简介
 
 `fnit-recon-all`从一幅原始T1w生成体积分割、双侧white/pial表面、顶点指标、脑区标注与统计。标准单T1入口目前不支持多T1、T2/FLAIR或纵向重建。

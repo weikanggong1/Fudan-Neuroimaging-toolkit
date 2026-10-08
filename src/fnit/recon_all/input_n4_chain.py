@@ -12,12 +12,17 @@ from .n4_wrapper import make_nu
 
 def run_input_n4_chain(t1: str | Path, subject_dir: str | Path,
                        weights_dir: str | Path, assets_dir: str | Path,
-                       *, n4_binary: str | Path, device: str = "cpu",
-                       threads: int = 4) -> dict:
+                       *, n4_binary: str | Path | None = None, device: str = "cpu",
+                       threads: int = 4,
+                       n4_backend: str = "native") -> dict:
     """Produce orig, synthstrip, talairach.xfm and nu.mgz from one T1.
 
-    The neural calls use ``device``. The Conda C++ N4 binary runs on CPU. The subject
-    directory must be empty, as required by ``run_input_talairach_chain``.
+    The neural calls use ``device``. ``n4_backend="native"`` runs the validated
+    Conda ITK implementation on CPU. ``n4_backend="torch"`` uses the existing
+    FNIT PyTorch experiment and keeps the volume on ``device``; it is explicitly
+    experimental because its current real-data output is not equivalent to ITK
+    N4 and is never selected by the production default. The subject directory
+    must be empty, as required by ``run_input_talairach_chain``.
     """
     result = run_input_talairach_chain(
         t1, subject_dir, weights_dir, assets_dir,
@@ -27,13 +32,25 @@ def run_input_n4_chain(t1: str | Path, subject_dir: str | Path,
     scratch.mkdir(exist_ok=True)
     nu0 = scratch / "nu0.mgz"
     nu = mri / "nu.mgz"
+    if n4_backend not in {"native", "torch"}:
+        raise ValueError("n4_backend must be 'native' or 'torch'")
     started = time.perf_counter()
-    correct_volume(mri / "orig.mgz", nu0, binary=n4_binary)
+    if n4_backend == "native":
+        if n4_binary is None:
+            raise ValueError("n4_binary is required when n4_backend='native'")
+        correct_volume(mri / "orig.mgz", nu0, binary=n4_binary)
+    else:
+        # Keep this branch explicit and opt-in. n4_gpu is an FNIT approximation
+        # under active validation, not a silent replacement for ITK N4.
+        from .n4_gpu import run as run_n4_torch
+
+        run_n4_torch(mri / "orig.mgz", nu0, device=device)
     n4_seconds = time.perf_counter() - started
     started = time.perf_counter()
     scale, histogram_bins = make_nu(
         mri / "orig.mgz", nu0, result["talairach_xfm"], nu)
     wrapper_seconds = time.perf_counter() - started
     return {**result, "nu0": str(nu0), "nu": str(nu),
+            "n4_backend": n4_backend,
             "n4_seconds": n4_seconds, "n4_wrapper_seconds": wrapper_seconds,
             "n4_global_mean_scale": scale, "n4_histogram_bins": histogram_bins}

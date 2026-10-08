@@ -20,8 +20,20 @@ from .mri_em_register_translation_source import find_optimal_translation_source
 
 
 def register_t1(nu_path: str | Path, atlas_path: str | Path,
-                mask_path: str | Path, output_path: str | Path) -> dict:
-    """Build a Talairach LTA without invoking a FreeSurfer executable."""
+                mask_path: str | Path, output_path: str | Path, *,
+                device: str = "cpu", search_backend: str = "cpu",
+                candidate_chunk: int = 64, sample_chunk: int = 8192) -> dict:
+    """Build a Talairach LTA without invoking a FreeSurfer executable.
+
+    ``search_backend="cpu"`` keeps the validated source-order NumPy/Numba
+    search. ``search_backend="torch"`` reuses FNIT's resident, chunked
+    ``GCASearchScorer`` for translation and linear candidate scoring on an
+    explicit CUDA device, while the EM refinement and LTA writing remain the
+    existing Python implementation. The Torch path is opt-in until its LTA
+    and downstream norm regression is complete.
+    """
+    if search_backend not in {"cpu", "torch"}:
+        raise ValueError("search_backend must be 'cpu' or 'torch'")
 
     timing = {}
     overall_started = time.perf_counter()
@@ -34,14 +46,23 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
     center = gca_centroid(gca_mean_volume(atlas))
     timing["prepare_seconds"] = time.perf_counter() - started
 
+    scorer = None
+    if search_backend == "torch":
+        from .mri_em_register_score_gpu import GCASearchScorer
+
+        scorer = GCASearchScorer(
+            stable_samples, source, device=device,
+            candidate_chunk=candidate_chunk, sample_chunk=sample_chunk)
+
     started = time.perf_counter()
     translated, translation_history = find_optimal_translation_source(
-        stable_samples, source, np.eye(4, dtype=np.float32))
+        stable_samples, source, np.eye(4, dtype=np.float32), scorer=scorer)
     timing["translation_seconds"] = time.perf_counter() - started
 
     started = time.perf_counter()
     pre_em, linear_history = find_optimal_linear_transform_source(
-        stable_samples, source, translated, center, translation_history[-1][0])
+        stable_samples, source, translated, center, translation_history[-1][0],
+        scorer=scorer)
     timing["linear_search_seconds"] = time.perf_counter() - started
 
     started = time.perf_counter()
@@ -57,6 +78,8 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
         "output": str(output_path), "matrix": matrix.tolist(),
         "em_cost": cost, "em_trials": len(trials),
         "linear_iterations": len(linear_history), "timing": timing,
+        "search_backend": search_backend, "device": device,
+        "candidate_chunk": candidate_chunk, "sample_chunk": sample_chunk,
     }
 
 
@@ -66,8 +89,15 @@ def main() -> None:
     parser.add_argument("atlas", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--mask", type=Path, required=True)
+    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--search-backend", choices=("cpu", "torch"), default="cpu")
+    parser.add_argument("--candidate-chunk", type=int, default=64)
+    parser.add_argument("--sample-chunk", type=int, default=8192)
     args = parser.parse_args()
-    print(json.dumps(register_t1(args.nu, args.atlas, args.mask, args.output), indent=2))
+    print(json.dumps(register_t1(
+        args.nu, args.atlas, args.mask, args.output,
+        device=args.device, search_backend=args.search_backend,
+        candidate_chunk=args.candidate_chunk, sample_chunk=args.sample_chunk), indent=2))
 
 
 if __name__ == "__main__":
