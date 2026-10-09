@@ -9,7 +9,7 @@ import sys
 import tempfile
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from fnit.recon_all import native_free
 from fnit.recon_all.batch import run_recon_all_python_batch
@@ -34,8 +34,9 @@ class NormalizationControlsWiringTest(unittest.TestCase):
 
     def test_public_api_forwards_explicit_backend_and_retains_default(self):
         with tempfile.TemporaryDirectory() as directory:
-            subject = Path(directory) / "subject"
             for backend in ("cpu", "torch"):
+                subject = Path(directory) / backend
+                subject.mkdir()  # 成功的内部流程会建立目录；这里只替代内部计算。
                 with patch("fnit.recon_all.native_free._run_recon_all_python",
                            return_value={"total_seconds": 0.}) as run:
                     native_free.run_recon_all_python(
@@ -44,7 +45,7 @@ class NormalizationControlsWiringTest(unittest.TestCase):
                         normalization_controls_backend=backend)
                 self.assertEqual(run.call_args.kwargs["device"], "cuda:1")
                 self.assertEqual(run.call_args.kwargs.get("normalization_controls_backend", "cpu"), backend)
-                self.assertFalse(subject.exists())
+                self.assertTrue((subject / "fnit-native-free-run.json").is_file())
 
     def test_cli_forwards_nondefault_backend_without_changing_device(self):
         with patch("fnit.recon_all.native_free.run_recon_all_python",
@@ -69,7 +70,9 @@ class NormalizationControlsWiringTest(unittest.TestCase):
                 (subject / "fnit-native-free-run.json").write_text(json.dumps({"status": "complete"}))
                 return SimpleNamespace(returncode=0)
 
-            with patch("fnit.recon_all.batch.subprocess.run", side_effect=launch) as run:
+            run = Mock(side_effect=launch)
+            # 替换调度器的模块引用；不拦截其他依赖导入时的 subprocess 探测。
+            with patch("fnit.recon_all.batch.subprocess", SimpleNamespace(run=run)):
                 run_recon_all_python_batch(
                     jobs=[{"t1": raw, "subject_dir": subject}], weights_dir=weights,
                     assets_dir=assets, devices=("cuda:1",), normalization_controls_backend="torch")
