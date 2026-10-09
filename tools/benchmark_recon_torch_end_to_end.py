@@ -36,6 +36,7 @@ def sha(path: Path) -> str:
 
 
 def main():
+    setup_tick = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--t1", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
@@ -44,6 +45,8 @@ def main():
     parser.add_argument("--native-bin-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
+    parser.add_argument("--n4-backend", choices=("native", "torch"), default="native")
+    parser.add_argument("--n4-execution", choices=("in-process", "isolated"), default="in-process")
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=2)
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="torch")
     parser.add_argument("--wm-edit-backend", choices=("native", "torch-hybrid"), default="native")
@@ -57,6 +60,8 @@ def main():
     parser.add_argument("--native-optimizations", choices=("auto", "original", "torch"), default="auto")
     parser.add_argument("--code-version", required=True)
     args = parser.parse_args()
+    from fnit.recon_all.input_n4_chain import validate_n4_execution
+    validate_n4_execution(n4_backend=args.n4_backend, n4_execution=args.n4_execution, device=args.device)
     if args.output_root.exists():
         raise FileExistsError("output-root must not exist: " + str(args.output_root))
     if not args.t1.is_file():
@@ -64,9 +69,12 @@ def main():
     args.output_root.mkdir(parents=True)
     import fnit
     source = Path(fnit.__file__).parent
-    setup_tick = time.perf_counter()
+    hash_tick = time.perf_counter()
     report = {
         "scope": "raw T1 + empty subject directory, CLI end-to-end including process startup",
+        "full_harness_timing_version": "main-entry-v2",
+        "full_harness_scope": "main entry including argument parsing, input/preflight validation, source/resource hashing, CLI startup/execution/output IO and prior report writes; excludes parent interpreter initial imports and current final metadata publication",
+        "cli_wall_scope": "child interpreter startup, validation, model loading, transfers, compute, output IO and process exit",
         "code_version": args.code_version, "source_sha256": {
             str(path.relative_to(source)): sha(path) for path in source.rglob("*.py")},
         "script_sha256": sha(Path(__file__)), "input_sha256": sha(args.t1),
@@ -83,6 +91,7 @@ def main():
         "sphere_normals_backend": args.sphere_normals_backend,
         "wm_edit_backend": args.wm_edit_backend,
         "wm_backend": args.wm_backend,
+        "n4_backend": args.n4_backend, "n4_execution": args.n4_execution,
         "wm_execution": args.wm_execution,
         "gca_inverse_backend": args.gca_inverse_backend,
         "gca_candidate_chunk": args.gca_candidate_chunk,
@@ -95,7 +104,7 @@ def main():
         "strict_reproduction": "not_assessed", "optimization_regression": "not_assessed",
         "overall_metric_equivalence": "not_assessed", "isolation_validation": "not_verified",
     }
-    report["harness_hash_validation_seconds"] = time.perf_counter() - setup_tick
+    report["harness_hash_validation_seconds"] = time.perf_counter() - hash_tick
     report_path = args.output_root / "benchmark.json"
     save_report(report_path, report)
     subject = args.output_root / "subject"
@@ -111,6 +120,7 @@ def main():
     command += ["--wm-backend", args.wm_backend, "--gca-inverse-backend", args.gca_inverse_backend,
                 "--gca-candidate-chunk", str(args.gca_candidate_chunk), "--gca-execution", args.gca_execution,
                 "--fill-backend", args.fill_backend]
+    command += ["--n4-backend", args.n4_backend, "--n4-execution", args.n4_execution]
     command += ["--wm-execution", args.wm_execution]
     report["cli_command"] = command
     tick = time.perf_counter()

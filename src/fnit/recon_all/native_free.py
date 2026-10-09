@@ -803,6 +803,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          cuda_allocator_cache: str = "auto",
                          hemisphere_workers: int = 1,
                          native_optimizations: str = "auto",
+                         n4_backend: str = "native",
+                         n4_execution: str = "in-process",
                          wm_backend: str = "native",
                          wm_execution: str = "in-process",
                          wm_edit_backend: str = "native",
@@ -818,6 +820,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     t1、subject_dir、weights_dir、assets_dir 是输入影像、空输出目录、
     已校验权重和资产的路径；native_bin_dir=None 时使用当前 Conda bin。
     device 默认 cuda:0，threads 默认 4；不自动使用 FP16/BF16。
+    n4_backend默认native保留Conda ITK；torch复用完整200轮PyTorch N4。
+    n4_execution默认in-process；isolated仅Torch/cuda:N，完整缓存exec
+    保留父CUDA/精度，输入输出SHA、实际迭代和子显存另记，不读取参考。
     native_optimizations=auto在CUDA使用已有FNIT Torch评分+Python EM；CPU
     查询独立产物能力，4线程可使用验证过的GCA缓存。white使用专用快速
     程序，pial保留原程序；original固定原生GCA用于控制。
@@ -849,6 +854,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     体积为 1 mm conform 网格，表面使用 surface RAS（mm）；完整参数、
     输出结构、限制、官方命令和真实数据见 docs/recon_all/README.md。
     """
+    from .input_n4_chain import validate_n4_execution
+    validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=device)
     if backend not in {"native", "python-gpu"}:
         raise ValueError("backend must be native or python-gpu")
     if wm_backend not in {"native", "torch", "torch-optimized"}:
@@ -929,7 +936,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     validate_core_assets(assets)
     native_bin_dir = _native_bin_directory(native_bin_dir)
     native_em = _native_em_register_binary(native_bin_dir)
-    n4_binary = _native_binary(native_bin_dir, "fnit_n4_itk")
+    n4_binary = (_native_binary(native_bin_dir, "fnit_n4_itk")
+                 if n4_backend == "native" else None)
     topology_binary = _native_topology_binary(native_bin_dir)
     metrics_binary = _native_surface_metrics_binary(native_bin_dir)
     from .native_runtime_selection import select_native_optimizations
@@ -960,8 +968,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report: dict = {"profile": profile, "input": str(t1),
                     "subject_dir": str(subject), "device": device,
                     "backend": backend,
-                    "n4_binary": {"binary": str(n4_binary[0]),
-                                  "sha256": n4_binary[1]}, "threads": threads,
+                    "n4_binary": ({"binary": str(n4_binary[0]),
+                                   "sha256": n4_binary[1]} if n4_binary else None), "threads": threads,
                     "precision": {"matmul_tf32_default": True,
                                   "cudnn_tf32_default": True,
                                   "cuda_policy_applied": torch.device(device).type == "cuda",
@@ -981,6 +989,12 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                                "validation_seconds": validation_seconds},
                     "stages": [], "status": "running"}
     report["hemisphere_scheduling"] = {"workers": hemisphere_workers, "total_thread_budget": threads, "groups": [], "mode": "serial" if hemisphere_workers == 1 else "independent-exec-private-subjects"}
+    report["n4_configuration"] = {
+        "backend": n4_backend, "execution": n4_execution,
+        "implementation": "Conda ITK" if n4_backend == "native" else "FNIT complete PyTorch N4",
+        "device": "cpu" if n4_backend == "native" else device,
+        "production_default_changed": False,
+        "known_strict_intensity_differences": n4_backend == "torch"}
     gca_backend = native_selection["em_backend"]
     report["gca_registration"] = {
         "implementation": ("FNIT PyTorch candidate scorer + Python EM"
@@ -1079,6 +1093,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                 "not additive with the synchronized stage wall")
         if isinstance(value, dict) and value.get("actual_forwards"):
             row["actual_forwards"] = value["actual_forwards"]
+        if name == "n4" and isinstance(value, dict):
+            row["n4_runtime"] = value
         if name == "mni_nonlinear" and isinstance(value, dict):
             row["precision"] = value.get("precision")
             row["postprocess_backend"] = value.get("postprocess_backend")
@@ -1106,11 +1122,15 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     for folder in (surf, labels, stats, mri / "tmp", subject / "scripts"):
         folder.mkdir(parents=True, exist_ok=True)
     nu0 = mri / "tmp/nu0.mgz"
-    from .n4_itk import correct_volume
+    from .input_n4_chain import run_n4_stage
     n4_profile = subject / "scripts/n4.profile.json"
-    stage("n4", correct_volume, mri / "orig.mgz", nu0, binary=n4_binary[0],
-          reconstruction_threads=1, profile_path=n4_profile)
-    report["n4_runtime"] = json.loads(n4_profile.read_text())
+    report["n4_runtime"] = stage(
+        "n4", run_n4_stage, input_path=mri / "orig.mgz", output_path=nu0,
+        n4_backend=n4_backend, n4_execution=n4_execution,
+        native_binary=n4_binary[0] if n4_binary else None,
+        device=device, threads=threads, profile=profile_stages,
+        report_path=subject / "scripts/n4-isolated.json" if n4_execution == "isolated"
+        else n4_profile if n4_backend == "native" else None)
     stage("nu", make_nu, mri / "orig.mgz", nu0,
           initial["talairach_xfm"], mri / "nu.mgz")
     stage("T1_normalize", normalize_t1, mri / "nu.mgz",
@@ -1405,6 +1425,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          cuda_allocator_cache: str = "auto",
                          hemisphere_workers: int = 1,
                          native_optimizations: str = "auto",
+                         n4_backend: str = "native",
+                         n4_execution: str = "in-process",
                          wm_backend: str = "native",
                          wm_execution: str = "in-process",
                          wm_edit_backend: str = "native",
@@ -1428,6 +1450,9 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     PurePythonGpuUnavailable，不回退到原生程序。native_optimizations=auto在CUDA使用已有Torch GCA评分+Python EM，CPU
     按原生产物能力选择缓存；white选择专用快速程序，pial保留原生。
     original固定原始原生实现。Torch GCA与原生仍有既有数值差异，单列报告。
+    n4_backend默认native，torch使用完整N4；n4_execution默认in-process，
+    isolated只允许Torch/cuda:N，复用局部缓存worker并记录完整阶段/子显存。
+    非法组合在创建被试目录前报错，既有N4系统强度差异单列，不判整体等效。
     defects_backend=native 使用原生缺陷投射，torch 用本项目完整投射规则
     并保持双侧累积顺序；仅颜色表换成固定颜色，当前默认为 native。
     wm_edit_backend=native 调用独立构建编辑程序；torch-hybrid 使用 CUDA
@@ -1506,6 +1531,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache,
                     **({"hemisphere_workers": hemisphere_workers} if hemisphere_workers != 1 else {}),
                     **({"native_optimizations": native_optimizations} if native_optimizations != "auto" else {}),
+                    **({"n4_backend": n4_backend} if n4_backend != "native" else {}),
+                    **({"n4_execution": n4_execution} if n4_execution != "in-process" else {}),
                     **({"wm_backend": wm_backend} if wm_backend != "native" else {}),
                     **({"wm_execution": wm_execution} if wm_execution != "in-process" else {}),
                     **({"wm_edit_backend": wm_edit_backend} if wm_edit_backend != "native" else {}),
@@ -1558,6 +1585,10 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--assets-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
+    parser.add_argument("--n4-backend", choices=("native", "torch"), default="native",
+                        help="native Conda ITK or existing complete PyTorch N4; default unchanged")
+    parser.add_argument("--n4-execution", choices=("in-process", "isolated"), default="in-process",
+                        help="isolated only for Torch cuda:N; cached child preserves parent allocator")
     parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=1,
                         help="independent hemisphere processes; total threads split across two workers")
@@ -1594,6 +1625,8 @@ def main(argv: list[str] | None = None) -> None:
                                   cuda_allocator_cache=args.cuda_allocator_cache,
                                   hemisphere_workers=args.hemisphere_workers,
                                   native_optimizations=args.native_optimizations,
+                                  n4_backend=args.n4_backend,
+                                  n4_execution=args.n4_execution,
                                   wm_backend=args.wm_backend,
                                   wm_execution=args.wm_execution,
                                   wm_edit_backend=args.wm_edit_backend,

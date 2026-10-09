@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "FNIT_ROOT/workspaces/recon_input_n4_torch_20261009/v3/validation/recon_all/optimizations/20261009_n4_torch_substages/benchmark_input_n4_execution.py", line 121, in <module>
+    if __name__=="__main__":main()
+                            ^^^^^^
+  File "FNIT_ROOT/workspaces/recon_input_n4_torch_20261009/v3/validation/recon_all/optimizations/20261009_n4_torch_substages/benchmark_input_n4_execution.py", line 93, in main
+    row["vs_prior_complete_inprocess"]={path:metrics(subject/path,reference/path,brain) for path in paths}
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/workspaces/recon_input_n4_torch_20261009/v3/validation/recon_all/optimizations/20261009_n4_torch_substages/benchmark_input_n4_execution.py", line 93, in <dictcomp>
+    row["vs_prior_complete_inprocess"]={path:metrics(subject/path,reference/path,brain) for path in paths}
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/workspaces/recon_input_n4_torch_20261009/v3/validation/recon_all/optimizations/20261009_n4_torch_substages/benchmark_input_chain.py", line 53, in metrics
+    'whole':region(np.ones(a.shape,bool)),'brain':region(brain),'outside_brain':region(~brain),
+                                                  ^^^^^^^^^^^^^
+  File "FNIT_ROOT/workspaces/recon_input_n4_torch_20261009/v3/validation/recon_all/optimizations/20261009_n4_torch_substages/benchmark_input_chain.py", line 42, in region
+    d=delta[mask];s=np.abs(d)
+      ~~~~~^^^^^^
+IndexError: boolean index did not match indexed array along dimension 1; dimension is 156 but corresponding boolean dimension is 256

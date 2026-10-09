@@ -17,6 +17,8 @@ def run_recon_all_python_batch(
     profile_stages: bool = False, cuda_allocator_cache: str = "auto",
     hemisphere_workers: int = 1,
     native_optimizations: str = "auto",
+    n4_backend: str = "native",
+    n4_execution: str = "in-process",
     wm_backend: str = "native",
     wm_execution: str = "in-process",
     wm_edit_backend: str = "native",
@@ -43,6 +45,9 @@ def run_recon_all_python_batch(
     在创建被试目录前失败，不回退到原生程序。native_optimizations=auto在CUDA选择已有Torch GCA，CPU查询GCA缓存能力；
     white使用专用快速程序，pial保持原生；
     original用于原生阶段配对控制，原样传递给每个被试CLI。
+    n4_backend=native与n4_execution=in-process保持默认；torch复用完整N4，
+    isolated只允许cuda:N设备，以缓存exec保留父策略及完整子阶段报告。
+    这两个选项原样传入CLI，非法组合在调度/创建输出前拒绝。
     defects_backend 默认 native；torch 将缺陷投射交给同设备 PyTorch，
     保持左清零/右合并顺序和标签含义，调色板采用确定性颜色。
     wm_backend 默认 native；torch 选择已有完整混合 WM segmentation。
@@ -58,6 +63,9 @@ def run_recon_all_python_batch(
     不改变已初始化父CUDA或精度，仅可CUDA Torch后端。
     numba使用同顺序CPU堆，torch-numba另使用CUDA初始边界。原样传入CLI。
     """
+    from .input_n4_chain import validate_n4_execution
+    for target in devices:
+        validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=target)
     from .hemisphere_parallel import validate_hemisphere_workers
     validate_hemisphere_workers(hemisphere_workers, threads)
     if not devices or len(set(devices)) != len(devices) or any(
@@ -129,6 +137,10 @@ def run_recon_all_python_batch(
                        "--assets-dir", str(assets), "--device", device,
                        "--threads", str(threads), "--cuda-allocator-cache", cuda_allocator_cache]
             command += ["--backend", backend]
+            if n4_backend != "native":
+                command += ["--n4-backend", n4_backend]
+            if n4_execution != "in-process":
+                command += ["--n4-execution", n4_execution]
             if wm_backend != "native":
                 command += ["--wm-backend", wm_backend]
             if wm_execution != "in-process":

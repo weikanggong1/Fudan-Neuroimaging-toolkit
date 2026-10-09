@@ -25,6 +25,7 @@ result = run_input_n4_chain(
     device="cuda:0",  # 目标GPU，不启用半精度
     threads=4,  # 前段预算，native N4仍单线程
     n4_backend="torch",  # 完整反馈实验后端，默认native
+    n4_execution="isolated",  # 仅torch/cuda:N，默认in-process保持父策略
     profile=False,  # 可选同步剖析，默认关闭
 )
 ```
@@ -40,6 +41,7 @@ python -m fnit.recon_all.input_n4_chain \
   --weights-dir resources/weights \
   --assets-dir resources/assets \
   --n4-backend torch \
+  --n4-execution isolated \
   --device cuda:0 \
   --threads 4 \
   --report runs/sub-07-input-n4.json

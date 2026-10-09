@@ -33,6 +33,7 @@ report = run_input_n4_chain(
     device="cuda:0",  # 神经推理与Torch N4目标GPU；默认cpu，不自动回退
     threads=4,  # 前段CPU/Torch线程预算；native N4拟合和重建仍各1线程
     n4_backend="torch",  # 显式完整实验后端；默认native保持不变
+    n4_execution="isolated",  # 新exec局部缓存，父策略保持；默认in-process
     profile=False,  # 默认关闭；True同步N4子段用于剖析，并包含该开销
 )
 ```
@@ -47,6 +48,7 @@ report = run_input_n4_chain(
 | `device` | str，默认 cpu；显式 CUDA 控制 SynthStrip、Talairach及Torch N4，不改变native CPU计算 |
 | `threads` | int，默认4；沿用前段线程预算，CLI要求正整数；native N4仍固定单线程 |
 | `n4_backend` | str，默认native；仅native/torch，非法值在加载模型前报错 |
+| `n4_execution` | str，默认in-process；isolated仅允许torch与显式cuda:N，非法组合在创建输出前报错；保留父allocator/精度 |
 | `profile` | bool，默认False；native写 `scripts/n4.profile.json`；Torch记录同步子段 |
 
 返回前段原有字段加本轮 N4 字段，不只返回一个目录：
@@ -62,6 +64,7 @@ report = run_input_n4_chain(
 | `nu0`，`mri/tmp/nu0.mgz` | 完整N4后同orig网格、uint8；不是旧近似float32 |
 | `nu`，`mri/nu.mgz` | 均值缩放、50mm Talairach球内直方图和uchar写出后，同orig网格uint8 |
 | `n4_backend` / `n4_details` | 实际路由与算法；Torch含shape、dtype、iterations和耗时；native含固定线程及可选profile |
+| `n4_execution` / `scripts/n4-isolated.json` | 实际执行方式；isolated详情在`n4_details.api`，另保留200轮、输入输出SHA、父CUDA状态、子实际precision/allocator和allocated/reserved峰 |
 | `n4_seconds` / `n4_wrapper_seconds` | N4文件API和后处理完整墙钟，含相应加载/搬运/读写 |
 | `n4_global_mean_scale` / `n4_histogram_bins` | 浮点均值缩放和两个int直方图索引；是强度参数，不是空间变换 |
 | `actual_forwards` / `talairach_child_gpu` | 既有神经前向实际精度和隔离子进程观测，保留已验证FP32例外 |
@@ -81,12 +84,15 @@ python -m fnit.recon_all.input_n4_chain \
   --weights-dir resources/weights \
   --assets-dir resources/assets \
   --n4-backend torch \
+  --n4-execution isolated \
   --device cuda:0 \
   --threads 4 \
   --report runs/sub-07-input-n4.json
 ```
 
-CLI与Python同参数；`--report` 必填JSON，`--profile` 可选，native额外提供 `--n4-binary resources/native/bin/fnit_n4_itk`。本CLI只在其进程默认开启TF32，保留前段局部FP32例外，并报告调用前CUDA是否已初始化及恢复后的策略。外部进程墙钟还需包含导入，不能与API时间混用。当前主页Conda已包含全部生产依赖，无新依赖；pytest只是固定独立测试层。
+CLI与Python同参数；`--report` 必填JSON，`--profile` 可选，native额外提供 `--n4-binary resources/native/bin/fnit_n4_itk`。默认组合为native/in-process；isolated只适用于torch/cuda:N，不能与native或CPU混用。本CLI只在其进程默认开启TF32，保留前段局部FP32例外，并报告调用前CUDA是否已初始化及恢复后的策略。外部进程墙钟还需包含导入，不能与API时间混用。当前主页Conda已包含全部生产依赖，无新依赖；pytest只是固定独立测试层。
+
+`run_n4_stage()` 是输入链与整例共用的内部文件阶段，不另造算法。全部具名参数为`input_path/output_path`（自产三维影像路径，同网格uint8）、`n4_backend="native"/n4_execution="in-process"`、`native_binary=None`（native必填）、`device="cpu"`、`threads=4`、`profile=False`及`report_path=None`（isolated必填新JSON；native非None时写原生profile）。返回实际阶段报告；native同时保留原生profile顶层字段，Torch in-process保留完整correct_volume字段，isolated原样保留worker全部字段。输入/参数/算法/执行失败抛异常，不回退。`validate_n4_execution()`只检查这三个路由参数，返回None、非法值抛ValueError，无影像或空间输出。这两个内部步骤没有独立原软件CLI。
 
 真实复现脚本 `benchmark_input_chain.py` 位于 `validation/recon_all/optimizations/20261009_n4_torch_substages/`。`--config` 是 `case/input/public_source_url/sha256` 数组；`--weights/--assets/--native` 为声明资源；`--output` 必须不存在；`--profiling-module` 为带SHA的FNIT同期采样器；`--device cuda:0 --threads 4 --seed 1729` 固定资源/种子。它交替native/Torch顺序，每个backend从原始T1重新生成，GPU计时同步，比较仅在候选完成后进行。
 
@@ -125,13 +131,30 @@ nu0脑内/外差异为1235/2781与1289/1970；nu脑内/外为1235/2474与1292/79
 
 0.5秒父子树同期采样使用显式GPU，实际最大采样间隔8.784s；观测目标卡峰8,229,224,448字节、全部计算进程上界8,214,544,384字节。容器/驱动PID无法归属，tree峰值为null；这些是不同查询时刻的观测上界，可能漏瞬时峰，并非精确父子合计。关闭缓存时allocated/reserved不可用，不能记0。没有物理干净环境隔离或最终脑区/表面指标结论。
 
-进一步复用同一个完整N4本体，在独立exec里仅对子进程开启缓存：两例冷CLI10–11s、已初始化父CUDA API也约11s，四组输出与上述cache-off完整nu0逐体素精确相同，没有新增差异。实际exec/读写、线程/精度与显存见[完整N4缓存隔离](N4_CACHED_WORKER.md)。这仍是自产orig冻结同输入阶段，不等于已经重新跑了cached-worker原始链；本函数的显式Torch分支目前仍直接调用完整实现，生产默认native不变。
+进一步复用同一个完整N4本体，在独立exec里仅对子进程开启缓存：两例冷CLI10–11s、已初始化父CUDA API也约11s，四组输出与上述cache-off完整nu0逐体素精确相同，没有新增差异。实际exec/读写、线程/精度与显存见[完整N4缓存隔离](N4_CACHED_WORKER.md)。这组v2仍是自产orig冻结同输入阶段，不等于其时已重新跑cached-worker原始链。新参数`n4_execution="isolated"`现已贯通输入链和完整recon-all，原始输入回归另列本页，生产默认native/in-process不变。
 
 完整机器报告见[报告索引](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/README.md)：[原始链JSON](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/raw_pair/summary.json)、[LTA补充与缓存隔离JSON](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/cached_worker/summary.json)、[测试XML](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/logs/unit_v2.xml)和[运行后程序/动态库核验](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/runtime_receipt.json)。固定原生N4程序SHA为 `5c6156bd2e05806dee387abea24050a4bbb92b16ea4988747ca1ddd60d9c437b`，14个已解析动态库另有SHA；这是同runtime核验，不是干净环境部署证明。公开导出26份收据，3800个数值/布尔/null字段与私有原件不变，PNG逐字节保留；公开目录/主机替换范围与原包SHA见[导出收据](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/publication_receipt.json)。
+
+### 显式isolated输入链的新空目录回归
+
+新增参数接线后，两例原始T1各自从新空目录运行`torch/isolated`到nu，GPU0、CPU0–3/4线程不变，完整200轮。
+
+| 病例 | 新isolated完整输入链，s | N4含exec/校验/写出，s | 对此前完整in-process新增体素差 |
+|---|---:|---:|---:|
+| sub-06 | 71.881 | 13.556 | rawavg/orig/SynthStrip/nu0/nu全0 |
+| sub-07 | 76.739 | 11.962 | rawavg/orig/SynthStrip/nu0/nu全0 |
+
+两例shape、affine、dtype与Talairach两种LTA矩阵全部保持。新链合计148.619s，对照此前302.519s；本组GPU有其他任务驻留，与前组并非同期ABBA，不将这一观察当稳定提速或完整recon-all收益。包括校验、两链与诊断的研究墙钟202.524s另计。相对固定native的nu0/nu差异仍为4016/3709、3259/9230，系统偏移没有消失或被门槛掩盖。
+
+子allocated/reserved仍为1,295,297,024/1,384,120,320字节。GPU0启动前已有其他任务14,658MiB驻留；采样目标卡峰24,920,457,216字节、全部计算进程上界24,899,485,696字节，tree峰null。最大实际间隔7.827s，1次SMI查询超时；不能从卡峰判定FNIT总峰或宣布整例20GB通过。
+
+[v4机器报告](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/execution_wiring_a100_20261009_v4/raw_isolated/summary.json)和[索引/实际源码](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/execution_wiring_a100_20261009_v4/README.md)绑定`3f021ec3`加7个冻结补丁；37项路由/CLI/批次/harness契约3.85s通过。原v3在sub-06计算完成后的诊断中，将conform脑mask用于原始rawavg网格而失败；失败收据保留，v4只修诊断网格，不改生产算法/接线SHA，并重新从新目录完成两例。rawavg只作自身网格全体积比较，不编造脑区ROI。图中的nu/误差是前述v2真实结果，v4逐体素与其一致，不把旧绘图来源改标新版本。
 
 ## 6．最近更新与验证记录
 
 2026-10-09 v1：修复完整实现未被输入链复用的bug，显式Torch分支由旧平滑残差算法切换完整固定配方；默认native不变。补前置错误检查、详细返回/完整墙钟和具名CLI，完成四条空目录原始输入链。v2仅校正输入类型docstring为三维NIfTI-1，并以去docstring后的AST SHA证明执行代码与已测v1一致；原冻结v1不覆盖。另新增隔离缓存完整N4 worker并完成同输入两种父CUDA状态回归。原始链模块/资源和补充worker报告分别绑定真实SHA。旧近似独立API及其直接结构测试保留，历史旧近似benchmark不作为当前结果。
+
+v3/v4新增`n4_execution`，共享`run_n4_stage()`贯通输入链、单例/批次API、fnit-recon-all和整例harness；无新生产依赖，默认native/in-process不变。harness新计时从main首行起，包含参数解析与前置校验；不追改此前803整例的数值或时间范围。
 
 ## 7．参考文献与源码
 

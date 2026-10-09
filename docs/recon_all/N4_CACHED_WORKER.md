@@ -54,6 +54,19 @@ python -m fnit.recon_all.n4_torch_worker \
 
 `benchmark_input_n4_worker.py` 接受 `--raw-pair` 完成的原始链报告/输出、`--output`新目录、`--source-root`当前冻结源码、`--previous-source`原始链冻结源码、`--profiling-module`固定采样器、`--device cuda:0 --threads 4`。先冷CLI两例（父CUDA未初始化），再已初始化父API两例；父保留该例真实orig的64MiB FP32 GPU张量，不用模拟影像当benchmark。先证明两条原始链的orig数据/几何相同，再做缓存策略同输入对照。参考只用于输出完成后的比较。
 
+整例显式候选示例（其余步骤仍是混合流程）：
+
+```bash
+fnit-recon-all data/sub-07_T1w.nii.gz runs/sub-07 \
+  --weights-dir resources/weights \
+  --assets-dir resources/assets \
+  --native-bin-dir resources/native/bin \
+  --device cuda:0 --threads 4 \
+  --n4-backend torch --n4-execution isolated
+```
+
+新增参数在创建输出前检查；完整输入/输出和其余参数见[recon-all](README.md)。本轮整例harness从main首行计时，包含解析、前置校验、资源哈希、子CLI启动/退出及影像读写；父解释器初始导入和当前最终元数据发布不在该值中，旧803报告的时间/范围保持原样。
+
 ## 4．对应原实现
 
 固定ITK5.4.7 N4与recon-all包装器见[ITK Conda实现](N4_ITK_CONDA.md)。本接口只执行完整N4到nu0，后续全局缩放/Talairach直方图由 `make_nu()` 完成；不能把nu0和nu混称。原软件参考命令是固定参数 `N4BiasFieldCorrection`，本新exec接口属于执行策略，没有另外的原软件CLI。
@@ -77,9 +90,11 @@ A100-SXM4-80GB，同一CPU0–3/4线程，TF32开启，无半精度。输入来�
 
 [完整机器报告](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/cached_worker/summary.json)保留四组子收据、两例输入/output SHA、200次迭代、实际精度/线程及采样序列。[源码manifest](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/source/worker_v2_patch_manifest.json)与docstring-only AST桥接绑定实际v2，不把旧冻结v1覆盖。[报告索引及导出校验](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/README.md)记录26份白名单收据原件/公开SHA；没有影像、权重、许可证或服务器地址。
 
+新增生产显式路由的两例原始空目录输入链已完成：到nu为71.881/76.739s、N4含exec为13.556/11.962s，所有体素/几何/LTA对此前完整Torch零新增差。与旧组共享负载不同，不宣称同期ABBA或整例收益；native系统差异原样保留。详见[输入链新回归](INPUT_N4_CHAIN.md#显式isolated输入链的新空目录回归)和[v4报告](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/execution_wiring_a100_20261009_v4/README.md)。GPU卡峰约24.9GB包含其他任务，tree归属null；子张量峰约1.3/1.4GB不能替代整例合计显存。
+
 ## 6．更新和验证记录
 
-2026-10-09复用完整N4新增exec策略；不改原核心数学或全局allocator。六项worker契约检查参数/父策略/exec/输出哈希/初始化状态，与四条原始输入链契约合计十项2.91s通过。两例两种父CUDA状态同输入回归完成，已有严格N4差异独立记录。当前为可显式调用阶段，尚未把cached worker接入生产默认或再次运行该策略的原始T1整例。
+2026-10-09复用完整N4新增exec策略；不改原核心数学或全局allocator。六项worker契约检查参数/父策略/exec/输出哈希/初始化状态，与四条原始输入链契约合计十项2.91s通过。两例两种父CUDA状态同输入回归完成，已有严格N4差异独立记录。新增`n4_backend="torch", n4_execution="isolated"`已显式接入输入链、单例/批次recon-all API、fnit-recon-all CLI和整例测评脚本。native/in-process默认不变，纯python-gpu全流程仍由完整能力门控制。原始T1到nu的两例回归另见[输入链](INPUT_N4_CHAIN.md)，不是完整recon-all测评。
 
 ## 7．参考文献和源码
 
