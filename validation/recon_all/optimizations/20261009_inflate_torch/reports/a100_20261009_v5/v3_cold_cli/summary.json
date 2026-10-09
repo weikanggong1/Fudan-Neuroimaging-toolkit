@@ -1,0 +1,605 @@
+{
+  "scope": "four_real_mesh_cold_python_CLI_not_recon_all",
+  "device": "cuda:0",
+  "threads": 4,
+  "empty_jit_cache_on_first_child": true,
+  "subsequent_children_share_jit_cache": true,
+  "source_sha256": {
+    "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/validation/recon_all/optimizations/20261009_inflate_torch/benchmark_cli.py": "adda1cd95f2e8008d9e9b8e4784ce891b362297b983e244b507ed05360ad25fe"
+  },
+  "pair_summary_sha256": "5de08f76ed5893e144128089648377d519c84521b36d1c921feda348d8c4a220",
+  "status": "complete_cold_cli_pair",
+  "rows": [
+    {
+      "case": "ds000114_sub-06",
+      "hemisphere": "lh",
+      "command": [
+        "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "fnit.recon_all.inflate_standard_run",
+        "--input-surface",
+        "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/public_inputs_v1/ds000114_sub-06/lh.smoothwm",
+        "--inflated-output",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/lh/lh.inflated",
+        "--sulc-output",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/lh/lh.sulc",
+        "--backend",
+        "torch",
+        "--device",
+        "cuda:0",
+        "--threads",
+        "4",
+        "--report",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/lh/cli.json"
+      ],
+      "wall_seconds": 7.341489512473345,
+      "returncode": 0,
+      "jit_cache_scope": "empty on first child",
+      "api": {
+        "input_surface": "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/public_inputs_v1/ds000114_sub-06/lh.smoothwm",
+        "inflated_output": "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/lh/lh.inflated",
+        "sulc_output": "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/lh/lh.sulc",
+        "backend": "torch",
+        "device": "cuda:0",
+        "profile_synchronizes_substages": false,
+        "vertices": 130346,
+        "faces": 260688,
+        "niterations_per_scale": 10,
+        "read_validation_seconds": 0.03509960416704416,
+        "setup_and_transfer_seconds": 2.7542804908007383,
+        "compute_transfer_finalize_seconds": 4.8673410434275866,
+        "write_seconds": 0.0252782441675663,
+        "integration": {
+          "steps": 60,
+          "final_rms": 0.020697495986477337,
+          "stopped_by_rms": false,
+          "timings_seconds": {},
+          "integration_wall_seconds": 2.086455716751516
+        },
+        "total_seconds_including_io": 4.927979437634349,
+        "production_default_changed": false,
+        "source_sha256": {
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_standard_run.py": "1186db4d73b43edc7bea7580a57b73f490b5ef3669241e3c99837f630718d3bb",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_torch.py": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_topology.py": "52245a1f107cf0f39f828dc334c3b033b3f57089454ccbcae83936883206c8f5",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/place_surface_normals.py": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/mris_register_average_numba.py": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b"
+        },
+        "threads": 4,
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "half_precision": false,
+        "cuda_initialized_before_api": false,
+        "peak_allocated_bytes": 351421952,
+        "peak_reserved_bytes": 473956352,
+        "process_wall_including_module_imports_api_hashes_seconds": 6.636799274012446
+      },
+      "to_native": {
+        "same_ordered_topology": true,
+        "vertices": 130346,
+        "faces": 260688,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "cras": true,
+          "filename": true,
+          "voxelsize": true,
+          "zras": true,
+          "valid": true,
+          "yras": true,
+          "volume": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      },
+      "to_gpu_v2": {
+        "same_ordered_topology": true,
+        "vertices": 130346,
+        "faces": 260688,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "cras": true,
+          "filename": true,
+          "voxelsize": true,
+          "zras": true,
+          "valid": true,
+          "yras": true,
+          "volume": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      },
+      "inflated_sha256": "bdec9787875dd019e7fbc3e1191720c5124070175ad777fc30d22af60a2c2939",
+      "sulc_sha256": "5f6117900c41c4d5b02b50c031400cb8c36ccab041ea87c17579ac2742795804"
+    },
+    {
+      "case": "ds000114_sub-06",
+      "hemisphere": "rh",
+      "command": [
+        "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "fnit.recon_all.inflate_standard_run",
+        "--input-surface",
+        "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/public_inputs_v1/ds000114_sub-06/rh.smoothwm",
+        "--inflated-output",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/rh/rh.inflated",
+        "--sulc-output",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/rh/rh.sulc",
+        "--backend",
+        "torch",
+        "--device",
+        "cuda:0",
+        "--threads",
+        "4",
+        "--report",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/rh/cli.json"
+      ],
+      "wall_seconds": 7.770388440228999,
+      "returncode": 0,
+      "jit_cache_scope": "reuse shared cache",
+      "api": {
+        "input_surface": "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/public_inputs_v1/ds000114_sub-06/rh.smoothwm",
+        "inflated_output": "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/rh/rh.inflated",
+        "sulc_output": "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-06/rh/rh.sulc",
+        "backend": "torch",
+        "device": "cuda:0",
+        "profile_synchronizes_substages": false,
+        "vertices": 132837,
+        "faces": 265670,
+        "niterations_per_scale": 10,
+        "read_validation_seconds": 0.03714960254728794,
+        "setup_and_transfer_seconds": 3.6625853842124343,
+        "compute_transfer_finalize_seconds": 5.268264350481331,
+        "write_seconds": 0.0349773159250617,
+        "integration": {
+          "steps": 60,
+          "final_rms": 0.02055335515457762,
+          "stopped_by_rms": false,
+          "timings_seconds": {},
+          "integration_wall_seconds": 1.5584486303851008
+        },
+        "total_seconds_including_io": 5.340634291060269,
+        "production_default_changed": false,
+        "source_sha256": {
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_standard_run.py": "1186db4d73b43edc7bea7580a57b73f490b5ef3669241e3c99837f630718d3bb",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_torch.py": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_topology.py": "52245a1f107cf0f39f828dc334c3b033b3f57089454ccbcae83936883206c8f5",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/place_surface_normals.py": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/mris_register_average_numba.py": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b"
+        },
+        "threads": 4,
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "half_precision": false,
+        "cuda_initialized_before_api": false,
+        "peak_allocated_bytes": 380396544,
+        "peak_reserved_bytes": 494927872,
+        "process_wall_including_module_imports_api_hashes_seconds": 7.0625339448452
+      },
+      "to_native": {
+        "same_ordered_topology": true,
+        "vertices": 132837,
+        "faces": 265670,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "cras": true,
+          "filename": true,
+          "voxelsize": true,
+          "zras": true,
+          "valid": true,
+          "yras": true,
+          "volume": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      },
+      "to_gpu_v2": {
+        "same_ordered_topology": true,
+        "vertices": 132837,
+        "faces": 265670,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "cras": true,
+          "filename": true,
+          "voxelsize": true,
+          "zras": true,
+          "valid": true,
+          "yras": true,
+          "volume": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      },
+      "inflated_sha256": "c4787e415a595d882c5f64c5552ad87f1c6d1be54c8a0d5a0cc94bea3cfc7f5e",
+      "sulc_sha256": "6ca58ab82631f4a86101952cf65391231bc1051604cb30902d544b39623e0ed7"
+    },
+    {
+      "case": "ds000114_sub-07",
+      "hemisphere": "lh",
+      "command": [
+        "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "fnit.recon_all.inflate_standard_run",
+        "--input-surface",
+        "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/public_inputs_v1/ds000114_sub-07/lh.smoothwm",
+        "--inflated-output",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/lh/lh.inflated",
+        "--sulc-output",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/lh/lh.sulc",
+        "--backend",
+        "torch",
+        "--device",
+        "cuda:0",
+        "--threads",
+        "4",
+        "--report",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/lh/cli.json"
+      ],
+      "wall_seconds": 13.768306670710444,
+      "returncode": 0,
+      "jit_cache_scope": "reuse shared cache",
+      "api": {
+        "input_surface": "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/public_inputs_v1/ds000114_sub-07/lh.smoothwm",
+        "inflated_output": "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/lh/lh.inflated",
+        "sulc_output": "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/lh/lh.sulc",
+        "backend": "torch",
+        "device": "cuda:0",
+        "profile_synchronizes_substages": false,
+        "vertices": 114342,
+        "faces": 228680,
+        "niterations_per_scale": 10,
+        "read_validation_seconds": 0.02782487589865923,
+        "setup_and_transfer_seconds": 7.854121214710176,
+        "compute_transfer_finalize_seconds": 9.823434562422335,
+        "write_seconds": 0.0466080317273736,
+        "integration": {
+          "steps": 60,
+          "final_rms": 0.020420256816937803,
+          "stopped_by_rms": false,
+          "timings_seconds": {},
+          "integration_wall_seconds": 1.9429662423208356
+        },
+        "total_seconds_including_io": 9.898101654835045,
+        "production_default_changed": false,
+        "source_sha256": {
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_standard_run.py": "1186db4d73b43edc7bea7580a57b73f490b5ef3669241e3c99837f630718d3bb",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_torch.py": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_topology.py": "52245a1f107cf0f39f828dc334c3b033b3f57089454ccbcae83936883206c8f5",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/place_surface_normals.py": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/mris_register_average_numba.py": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b"
+        },
+        "threads": 4,
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "half_precision": false,
+        "cuda_initialized_before_api": false,
+        "peak_allocated_bytes": 338504192,
+        "peak_reserved_bytes": 442499072,
+        "process_wall_including_module_imports_api_hashes_seconds": 12.668681697919965
+      },
+      "to_native": {
+        "same_ordered_topology": true,
+        "vertices": 114342,
+        "faces": 228680,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "cras": true,
+          "filename": true,
+          "voxelsize": true,
+          "zras": true,
+          "valid": true,
+          "yras": true,
+          "volume": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      },
+      "to_gpu_v2": {
+        "same_ordered_topology": true,
+        "vertices": 114342,
+        "faces": 228680,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "cras": true,
+          "filename": true,
+          "voxelsize": true,
+          "zras": true,
+          "valid": true,
+          "yras": true,
+          "volume": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      },
+      "inflated_sha256": "903caa0358fd5573eec73fe24fc484c96b6f80bc67a0323c89d7d38196a4e405",
+      "sulc_sha256": "bc5fe6a34a561fb6bc23896849177aacea07a048fbec6a467ec400e0c15d52ef"
+    },
+    {
+      "case": "ds000114_sub-07",
+      "hemisphere": "rh",
+      "command": [
+        "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "fnit.recon_all.inflate_standard_run",
+        "--input-surface",
+        "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/public_inputs_v1/ds000114_sub-07/rh.smoothwm",
+        "--inflated-output",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/rh/rh.inflated",
+        "--sulc-output",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/rh/rh.sulc",
+        "--backend",
+        "torch",
+        "--device",
+        "cuda:0",
+        "--threads",
+        "4",
+        "--report",
+        "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/rh/cli.json"
+      ],
+      "wall_seconds": 8.918371180072427,
+      "returncode": 0,
+      "jit_cache_scope": "reuse shared cache",
+      "api": {
+        "input_surface": "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/public_inputs_v1/ds000114_sub-07/rh.smoothwm",
+        "inflated_output": "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/rh/rh.inflated",
+        "sulc_output": "FNIT_ROOT/runs/inflate_cold_cli_a100_two_cases_20261009_v3/ds000114_sub-07/rh/rh.sulc",
+        "backend": "torch",
+        "device": "cuda:0",
+        "profile_synchronizes_substages": false,
+        "vertices": 114824,
+        "faces": 229644,
+        "niterations_per_scale": 10,
+        "read_validation_seconds": 0.029458438977599144,
+        "setup_and_transfer_seconds": 3.670209998264909,
+        "compute_transfer_finalize_seconds": 5.193629566580057,
+        "write_seconds": 0.005583108402788639,
+        "integration": {
+          "steps": 60,
+          "final_rms": 0.020106180401317793,
+          "stopped_by_rms": false,
+          "timings_seconds": {},
+          "integration_wall_seconds": 1.497462191618979
+        },
+        "total_seconds_including_io": 5.228887154720724,
+        "production_default_changed": false,
+        "source_sha256": {
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_standard_run.py": "1186db4d73b43edc7bea7580a57b73f490b5ef3669241e3c99837f630718d3bb",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_torch.py": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/inflate_topology.py": "52245a1f107cf0f39f828dc334c3b033b3f57089454ccbcae83936883206c8f5",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/place_surface_normals.py": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+          "FNIT_ROOT/workspaces/recon_inflate_torch_20261009/v3/src/fnit/recon_all/mris_register_average_numba.py": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b"
+        },
+        "threads": 4,
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "half_precision": false,
+        "cuda_initialized_before_api": false,
+        "peak_allocated_bytes": 299857920,
+        "peak_reserved_bytes": 425721856,
+        "process_wall_including_module_imports_api_hashes_seconds": 8.3596195820719
+      },
+      "to_native": {
+        "same_ordered_topology": true,
+        "vertices": 114824,
+        "faces": 229644,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "cras": true,
+          "filename": true,
+          "voxelsize": true,
+          "zras": true,
+          "valid": true,
+          "yras": true,
+          "volume": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      },
+      "to_gpu_v2": {
+        "same_ordered_topology": true,
+        "vertices": 114824,
+        "faces": 229644,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "cras": true,
+          "filename": true,
+          "voxelsize": true,
+          "zras": true,
+          "valid": true,
+          "yras": true,
+          "volume": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      },
+      "inflated_sha256": "2cb7c88476b792fdc6c31221bdfb713cf03bdd627788fc5de6974cb0ebfb2103",
+      "sulc_sha256": "e148dff50238c86d972a82350fafa4ab5e860779bb487d63a0ea43b79ee5dd14"
+    }
+  ],
+  "whole_recon_all_acceleration": "not measured",
+  "production_default_changed": false,
+  "parent_cuda_initialized": false
+}

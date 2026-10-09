@@ -226,8 +226,31 @@ def rms_tangent_height(xyz: np.ndarray, normals: np.ndarray,
 
 def inflate_updates(xyz: np.ndarray, faces: np.ndarray, niterations: int = 10,
                     first_averages: int = 16, snapshot=None,
-                    rms_target: float | None = 0.015) -> np.ndarray:
+                    rms_target: float | None = 0.015, *,
+                    sulc: np.ndarray | None = None, diagnostics: dict | None = None) -> np.ndarray:
+    """执行原有完整默认积分，可显式累积 sulc 和记录子段墙钟。
+
+    xyz 为 FP32(N,3) surface RAS/mm，faces 为有序整数(F,3)。niterations
+    默认每档10步，first_averages默认16，依次16/8/4/2/1/0；rms_target
+    默认0.015。snapshot可接收(step,xyz)。返回新FP32坐标，不改xyz。
+    sulc 若给定须为可写FP32(N,)零数组，逐步原地累积更新前法向投影；
+    此处不去均值，文件完整接口最后处理。diagnostics若给定接收各子段
+    秒数/步数/RMS；计时不改算法。对应固定 mris_inflate 的内部积分。
+    """
+    import time
     xyz = np.asarray(xyz, np.float32).copy()
+    if sulc is not None and (sulc.shape != (len(xyz),) or sulc.dtype != np.float32
+                             or not sulc.flags.writeable or np.any(sulc != 0)):
+        raise ValueError("sulc must be a writable zero float32 vector (N,)")
+    timings = {}
+    def timed(name, function, *args):
+        if diagnostics is None:
+            return function(*args)
+        begin = time.perf_counter()
+        result = function(*args)
+        timings[name] = timings.get(name, 0.0) + time.perf_counter() - begin
+        return result
+    setup_begin = time.perf_counter()
     one = ordered_neighbors(faces, len(xyz))
     one_indices, one_degree = matrix(one)
     two_indices, two_degree = matrix(two_ring_neighbors(one))
@@ -240,31 +263,47 @@ def inflate_updates(xyz: np.ndarray, faces: np.ndarray, niterations: int = 10,
     area = original_area
     current_dist = original_dist.copy()
     reached = False
+    rms = None
+    if diagnostics is not None:
+        timings["topology_initial_metric_normals_including_jit"] = time.perf_counter() - setup_begin
     for averages in (16, 8, 4, 2, 1, 0):
         if averages > first_averages:
             continue
         weight = np.float32(np.float32(0.1) * np.sqrt(averages))
         for _ in range(niterations):
-            gradient = distance_gradient(xyz, normals, two_indices, two_degree,
+            gradient = timed("distance_gradient", distance_gradient, xyz, normals, two_indices, two_degree,
                                          original_dist, current_dist, original_area,
                                          area, weight, average_neighbors)
-            gradient = average_gradient(gradient, one_indices, one_degree, averages)
-            gradient = add_spring(gradient, xyz, normals, one_indices, one_degree,
+            gradient = timed("ordered_averaging", average_gradient, gradient, one_indices, one_degree, averages)
+            gradient = timed("normalized_spring", add_spring, gradient, xyz, normals, one_indices, one_degree,
                                   original_area, area)
+            update_begin = time.perf_counter()
             previous = (gradient.astype(np.float64) * float(np.float32(0.9)) +
                         (np.float32(0.9) * previous).astype(np.float64)).astype(np.float32)
             xyz += previous
-            normals = vertex_normals(xyz, faces)
-            area = face_area_total(xyz, faces)
-            current_dist = distances(xyz, two_indices, two_degree)
+            if sulc is not None:
+                projection = previous[:, 0] * normals[:, 0]
+                projection += previous[:, 1] * normals[:, 1]
+                projection += previous[:, 2] * normals[:, 2]
+                sulc += projection
+            if diagnostics is not None:
+                timings["momentum_and_sulc"] = timings.get("momentum_and_sulc", 0.0) + time.perf_counter() - update_begin
+            normals = timed("normals", vertex_normals, xyz, faces)
+            area = timed("face_area", face_area_total, xyz, faces)
+            current_dist = timed("distances", distances, xyz, two_indices, two_degree)
             step += 1
             if snapshot is not None:
                 snapshot(step, xyz)
-            if rms_target is not None and rms_tangent_height(xyz, normals, two_indices, two_degree) < rms_target:
+            rms = (timed("rms_tangent_height", rms_tangent_height, xyz, normals, two_indices, two_degree)
+                   if rms_target is not None else None)
+            if rms_target is not None and rms < rms_target:
                 reached = True
                 break
         if reached:
             break
+    if diagnostics is not None:
+        diagnostics.update({"steps": step, "stopped_by_rms": reached,
+                            "final_rms": rms, "timings_seconds": timings})
     return xyz
 
 
