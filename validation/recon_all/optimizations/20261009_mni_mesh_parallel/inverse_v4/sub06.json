@@ -1,0 +1,68 @@
+{
+  "input_sha256": "cf0605c8751a2817c57c6a30933695002f6dc37f210c68a8d493b0da71ba779f",
+  "old_source_sha256": "bba7ece7d49a07c909b3123ac1339f362b96b8a71b4d7358096b4be9cceb758c",
+  "new_source_sha256": "5bd1ee57342ed59c692a88a6d1814e4787d767c407b3644bdc5fe1ef6578cdc4",
+  "benchmark_sha256": "579194315f59bbe6cce734273349f0e555db49b6adcc575a191b51f1706a3711",
+  "target_device": "cuda:1",
+  "scope": "same-input complete inverse API, old current1/new current0, same physical GPU1; no model rerun",
+  "old": {
+    "complete_api_wall_seconds": 30.416170650161803,
+    "api": {
+      "voronoi_iterations": 76,
+      "soap_iterations_xyz": [
+        50,
+        50,
+        50
+      ],
+      "splat": "ordered CPU Numba FP32 (no atomics)",
+      "fill": "CUDA Triton ordered FP32; FP64 stopping test",
+      "timings_seconds": {
+        "load_convert_ordered_splat": 5.9320729142054915,
+        "transfer_fill_soap_download": 9.36109478212893,
+        "displacement_conversion": 4.10703245177865,
+        "save": 11.009367424994707
+      },
+      "total_seconds": 30.41293564811349,
+      "device": "cuda:1",
+      "output": "$FNIT/runs/recon_mni_inverse_device_v4_20261009/sub06/old.nii.gz",
+      "full_grid": true
+    },
+    "current_device_before": 1,
+    "current_device_after": 1
+  },
+  "new": {
+    "complete_api_wall_seconds": 23.516200667247176,
+    "api": {
+      "voronoi_iterations": 76,
+      "soap_iterations_xyz": [
+        50,
+        50,
+        50
+      ],
+      "splat": "ordered CPU Numba FP32 (no atomics)",
+      "fill": "CUDA Triton ordered FP32; FP64 stopping test",
+      "timings_seconds": {
+        "load_convert_ordered_splat": 4.367689182050526,
+        "transfer_fill_soap_download": 6.1725218603387475,
+        "displacement_conversion": 3.269388788379729,
+        "save": 9.702423661015928
+      },
+      "total_seconds": 23.51412669569254,
+      "device": "cuda:1",
+      "output": "$FNIT/runs/recon_mni_inverse_device_v4_20261009/sub06/new.nii.gz",
+      "full_grid": true
+    },
+    "current_device_before": 0,
+    "current_device_after": 0
+  },
+  "comparison": {
+    "different_voxels": 0,
+    "maximum": 0.0,
+    "p99": 0.0,
+    "affine_equal": true,
+    "dtype_equal": true,
+    "header_equal": true,
+    "file_sha_equal": true
+  },
+  "iteration_stats_equal": true
+}

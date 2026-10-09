@@ -96,7 +96,9 @@ mri_convert -rt nearest orig.mgz -at forward.nii.gz test.nii.gz
 
 ## 成熟子函数的兼容修复
 
-本轮核对固定源码后修正 `ca_register_inverse.py` 的最后半个体素边界：原实现过早夹到 `size-1`，漏掉 `MRIindexNotInVolume` 的 `rint` 拒绝步骤；原生只在坐标达到 `size` 后夹取。修复 counts 和三个坐标 sums 的相同判断，保留公共接口和有序累加。专项单元测试涵盖最后半体素、半整数奇偶边界及真正越界后的夹取；真实两例上新旧散射的差异另记于报告。该文件是本任务唯一必要的既有逆场兼容修改。
+2026-10-02 核对固定源码后修正 `ca_register_inverse.py` 的最后半个体素边界：原实现过早夹到 `size-1`，漏掉 `MRIindexNotInVolume` 的 `rint` 拒绝步骤；原生只在坐标达到 `size` 后夹取。修复 counts 和三个坐标 sums 的相同判断，保留公共接口和有序累加。专项单元测试涵盖最后半体素、半整数奇偶边界及真正越界后的夹取；真实两例上新旧散射的差异另记于报告。
+
+2026-10-09 补充 `fill_inverse_fields(averages, control, *, device="cuda:0")` 的目标设备修复。`averages` 为 CPU FP32 `(3,X,Y,Z)` 目标体素绝对坐标，`control` 为同网格 bool 控制点；返回 CPU FP32 同形坐标及原有 Voronoi/soap 迭代统计。原函数在当前CUDA0、输入放在CUDA1时，Triton使用当前stream而报指针不可访问，并非OOM。现在仅为CUDA分配、完整expand/soap迭代和下载增加 `torch.cuda.device(selected)` 局部作用域，正常与异常退出均恢复原设备，不改变TF32、allocator、公式或停止阈值。参数、输入检查和失败传播保持。双GPU正常/异常合同及两例真实同输入完整逆场对照见 [MNI与网格并行说明](MNI_MESH_PARALLEL.md)；旧失败日志也保留。本函数属于 `GCAMinvert` 内部填充，没有独立官方CLI。
 
 ## 当前版本、真实 benchmark 与验证
 

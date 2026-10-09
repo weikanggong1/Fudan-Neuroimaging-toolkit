@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "$FNIT/workspaces/recon_mni_mesh_parallel_v1_20261009/overlay/recon_mni_mesh_parallel.py", line 100, in <module>
+    if __name__ == "__main__": main()
+                               ^^^^^^
+  File "$FNIT/workspaces/recon_mni_mesh_parallel_v1_20261009/overlay/recon_mni_mesh_parallel.py", line 66, in main
+    result = run_mni_and_validate(subject=subject, weights=args.weights, assets=args.assets,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/workspaces/recon_mni_mesh_parallel_v1_20261009/overlay/mni_mesh_parallel.py", line 153, in run_mni_and_validate
+    report["mni_nonlinear"] = run_mni_stage(**kwargs)
+                              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/workspaces/recon_mni_mesh_parallel_v1_20261009/overlay/mni_mesh_parallel.py", line 49, in run_mni_stage
+    result = mni_nonlinear_chain.run_mni_nonlinear_chain(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/workspaces/recon_normalization_neighbors_v4_20261009/src/fnit/recon_all/mni_nonlinear_chain.py", line 100, in run_mni_nonlinear_chain
+    postprocess_report["inverse"] = invert_mni_warp(forward, inverse, device=device)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/workspaces/recon_normalization_neighbors_v4_20261009/src/fnit/recon_all/mni_warp_inverse.py", line 103, in invert_mni_warp
+    fields, report = fill_inverse_fields(averages, control, device=device)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/workspaces/recon_normalization_neighbors_v4_20261009/src/fnit/recon_all/mni_warp_inverse.py", line 42, in fill_inverse_fields
+    _expand[grid](fields, marked, next_marked, w, h, d, 128,
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/runtime/jit.py", line 345, in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/runtime/jit.py", line 691, in run
+    kernel.run(grid_0, grid_1, grid_2, stream, kernel.function, kernel.packed_metadata, launch_metadata,
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/backends/nvidia/driver.py", line 365, in __call__
+    self.launch(*args, **kwargs)
+ValueError: Pointer argument (at 0) cannot be accessed from Triton (cpu tensor?)
+{"cold_process_wall_seconds": 54.66432185471058, "maximum_RSS_KiB": 1547548, "exit_code": 1}
