@@ -303,3 +303,9 @@ def test_complete_white_forwards_explicit_retained_policy(white_inputs,monkeypat
         candidate_backend="snapshot",retained_mht_backend="compiled")
     assert result["retained_mht_backend"]=="compiled"
     assert observed_retained==["compiled"]*12
+
+
+def test_nondefault_cleanup_grid_requires_source_torch(tmp_path):
+    with pytest.raises(ValueError,match="cleanup candidate grid requires source_torch"):
+        stage.place_white_preaparc(subject_dir=tmp_path,hemi="lh",output=tmp_path/"white",
+                                  cleanup_candidate_grid_cells_per_axis=3)

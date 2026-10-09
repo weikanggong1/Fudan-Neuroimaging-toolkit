@@ -17,6 +17,7 @@ def mark_source_intersections(
     vertices: np.ndarray, faces: np.ndarray, *, face_ripped: np.ndarray | None = None,
     predicate_backend: str = "numba", device: str | None = None,
     block_faces: int = 256, block_pairs: int = 65536,
+    candidate_grid_cells_per_axis: int = 2,
 ) -> tuple[np.ndarray, int]:
     """按有向源谓词与共享MHT桶标记每个面，再汇总受影响顶点。
 
@@ -27,6 +28,8 @@ def mark_source_intersections(
     改精度设置、不使用半精度、不静默回退。源谓词按FP64/固定阈值。
     block_faces默认256、block_pairs默认65536，只限制批次，完整候选
     不截断。非有限坐标、非法shape/索引/后端或非正批次会抛ValueError。
+    candidate_grid_cells_per_axis默认2；显式3仅用于Torch完整空间索引，
+    不变更4mm守恒查询余量、源桶或面对谓词；其他后端非默认值报错。
 
     球半径额外4mm仅用于产生1mm源hash桶可能共有的完整候选；不把
     几何AABB当作带容差源谓词的排除条件。最终阳性必须通过已有源
@@ -46,6 +49,10 @@ def mark_source_intersections(
         raise ValueError("invalid predicate backend or block size")
     if predicate_backend == "torch" and device is None:
         raise ValueError("torch predicate requires explicit device")
+    if candidate_grid_cells_per_axis not in (2,3):
+        raise ValueError("candidate_grid_cells_per_axis must be 2 or 3")
+    if candidate_grid_cells_per_axis!=2 and predicate_backend!="torch":
+        raise ValueError("nondefault candidate grid requires torch predicate")
     triangles = triangles.astype(np.int32, copy=False)
     face_flags = np.zeros(len(triangles), dtype=bool) if face_ripped is None else np.asarray(face_ripped, dtype=bool)
     if face_flags.shape != (len(triangles),):
@@ -99,7 +106,8 @@ def mark_source_intersections(
             centers, centers, radii + maximum + 4., device=device,
             source_low=boxes_low, source_high=boxes_high,
             query_low=boxes_low, query_high=boxes_high, motion_bound=0.,
-            source_faces=triangles, query_faces=triangles)
+            source_faces=triangles, query_faces=triangles,
+            grid_cells_per_axis=candidate_grid_cells_per_axis)
         first = np.repeat(np.arange(len(triangles), dtype=np.int64), np.diff(offsets))
         keep = (first < ids) & ~face_flags[first] & ~face_flags[ids]
         first, second = first[keep], ids[keep]

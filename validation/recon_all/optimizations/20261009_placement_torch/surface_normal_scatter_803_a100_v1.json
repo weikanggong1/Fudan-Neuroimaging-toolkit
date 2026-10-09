@@ -1,0 +1,471 @@
+{
+  "scope": "same_real_mesh_capture_actual_normal_inputs_and_fixed_contribution_CUDA_scatter_replay",
+  "hostname": "authorized-a100-benchmark-host",
+  "torch": "2.5.1",
+  "device": "cuda:0",
+  "script_sha256": "ef16087aeb880d3e17896dcb5ecef5f70759da21ad45cd9b24ecfc4e9bc13b3c",
+  "input_surface_sha256": "fbbc03477c860762e66708df9e3e042588db65b2ed5a20b6fa2c786c6689fd24",
+  "normal_source_sha256": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961",
+  "TF32_matmul": true,
+  "TF32_cudnn": true,
+  "half_precision": false,
+  "FNIT_module_source_changed": false,
+  "instrumentation": "process-local Tensor.index_add_ observer calls original operator unchanged and restored in finally",
+  "status": "complete",
+  "observed_normal_runs": [
+    {
+      "iteration": 0,
+      "same_shape_dtype": true,
+      "shape": [
+        114247,
+        3
+      ],
+      "dtype": "float32",
+      "finite_elements": 342741,
+      "different_elements": 0,
+      "max_absolute_difference": 0.0,
+      "p99_absolute_difference": 0.0,
+      "mean_absolute_difference": 0.0,
+      "array_sha256": "37a14d7333a29bcb68ed1ccc22f68926f5efff27172d574fa599256dc93f233e",
+      "reference_array_sha256": "37a14d7333a29bcb68ed1ccc22f68926f5efff27172d574fa599256dc93f233e",
+      "corner_contributions": [
+        {
+          "corner": 0,
+          "indices": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490
+            ],
+            "dtype": "int64",
+            "finite_elements": 228490,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "9ebb33c876fa0f40df31c2e13e3c7c2413b1c590666b54de07bc3cc08487bd62",
+            "reference_array_sha256": "9ebb33c876fa0f40df31c2e13e3c7c2413b1c590666b54de07bc3cc08487bd62"
+          },
+          "face_normals": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490,
+              3
+            ],
+            "dtype": "float32",
+            "finite_elements": 685470,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "fd27ef6ed430d3b727647161940ba23398221dcb46b9d4135f73622ddc3a2578",
+            "reference_array_sha256": "fd27ef6ed430d3b727647161940ba23398221dcb46b9d4135f73622ddc3a2578"
+          }
+        },
+        {
+          "corner": 1,
+          "indices": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490
+            ],
+            "dtype": "int64",
+            "finite_elements": 228490,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "87b3d58b6d15d189c0697f78cb5022cbb53ce549f81027b6b5c242461e2b8365",
+            "reference_array_sha256": "87b3d58b6d15d189c0697f78cb5022cbb53ce549f81027b6b5c242461e2b8365"
+          },
+          "face_normals": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490,
+              3
+            ],
+            "dtype": "float32",
+            "finite_elements": 685470,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "adecfe98ad118a0230ee426dc9f198f49a668c3206f56ab8a5fcf6bb2d7d4d78",
+            "reference_array_sha256": "adecfe98ad118a0230ee426dc9f198f49a668c3206f56ab8a5fcf6bb2d7d4d78"
+          }
+        },
+        {
+          "corner": 2,
+          "indices": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490
+            ],
+            "dtype": "int64",
+            "finite_elements": 228490,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "eec9a9903bf64bed834e392cbee34e4b5c17b3e74767255436ba7ae6a51d727c",
+            "reference_array_sha256": "eec9a9903bf64bed834e392cbee34e4b5c17b3e74767255436ba7ae6a51d727c"
+          },
+          "face_normals": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490,
+              3
+            ],
+            "dtype": "float32",
+            "finite_elements": 685470,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "976b2d7427cdd89be8dae869002111cdeba05dae318c0b2e92943c3d3c330797",
+            "reference_array_sha256": "976b2d7427cdd89be8dae869002111cdeba05dae318c0b2e92943c3d3c330797"
+          }
+        }
+      ]
+    },
+    {
+      "iteration": 1,
+      "same_shape_dtype": true,
+      "shape": [
+        114247,
+        3
+      ],
+      "dtype": "float32",
+      "finite_elements": 342741,
+      "different_elements": 20338,
+      "max_absolute_difference": 2.2910535335540771e-07,
+      "p99_absolute_difference": 5.960464477539063e-08,
+      "mean_absolute_difference": 2.2136730228237122e-09,
+      "array_sha256": "559797ffafc8733718a3c919bde33b611e58eee224f83a087db20389146b0e84",
+      "reference_array_sha256": "37a14d7333a29bcb68ed1ccc22f68926f5efff27172d574fa599256dc93f233e",
+      "corner_contributions": [
+        {
+          "corner": 0,
+          "indices": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490
+            ],
+            "dtype": "int64",
+            "finite_elements": 228490,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "9ebb33c876fa0f40df31c2e13e3c7c2413b1c590666b54de07bc3cc08487bd62",
+            "reference_array_sha256": "9ebb33c876fa0f40df31c2e13e3c7c2413b1c590666b54de07bc3cc08487bd62"
+          },
+          "face_normals": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490,
+              3
+            ],
+            "dtype": "float32",
+            "finite_elements": 685470,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "fd27ef6ed430d3b727647161940ba23398221dcb46b9d4135f73622ddc3a2578",
+            "reference_array_sha256": "fd27ef6ed430d3b727647161940ba23398221dcb46b9d4135f73622ddc3a2578"
+          }
+        },
+        {
+          "corner": 1,
+          "indices": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490
+            ],
+            "dtype": "int64",
+            "finite_elements": 228490,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "87b3d58b6d15d189c0697f78cb5022cbb53ce549f81027b6b5c242461e2b8365",
+            "reference_array_sha256": "87b3d58b6d15d189c0697f78cb5022cbb53ce549f81027b6b5c242461e2b8365"
+          },
+          "face_normals": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490,
+              3
+            ],
+            "dtype": "float32",
+            "finite_elements": 685470,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "adecfe98ad118a0230ee426dc9f198f49a668c3206f56ab8a5fcf6bb2d7d4d78",
+            "reference_array_sha256": "adecfe98ad118a0230ee426dc9f198f49a668c3206f56ab8a5fcf6bb2d7d4d78"
+          }
+        },
+        {
+          "corner": 2,
+          "indices": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490
+            ],
+            "dtype": "int64",
+            "finite_elements": 228490,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "eec9a9903bf64bed834e392cbee34e4b5c17b3e74767255436ba7ae6a51d727c",
+            "reference_array_sha256": "eec9a9903bf64bed834e392cbee34e4b5c17b3e74767255436ba7ae6a51d727c"
+          },
+          "face_normals": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490,
+              3
+            ],
+            "dtype": "float32",
+            "finite_elements": 685470,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "976b2d7427cdd89be8dae869002111cdeba05dae318c0b2e92943c3d3c330797",
+            "reference_array_sha256": "976b2d7427cdd89be8dae869002111cdeba05dae318c0b2e92943c3d3c330797"
+          }
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "same_shape_dtype": true,
+      "shape": [
+        114247,
+        3
+      ],
+      "dtype": "float32",
+      "finite_elements": 342741,
+      "different_elements": 20193,
+      "max_absolute_difference": 1.7881393432617188e-07,
+      "p99_absolute_difference": 5.960464477539063e-08,
+      "mean_absolute_difference": 2.2018868083254405e-09,
+      "array_sha256": "3bfa17ae74da18c0813c2dbec12d03f518ff2be1ce9bf5e0d84af8a0a9566b82",
+      "reference_array_sha256": "37a14d7333a29bcb68ed1ccc22f68926f5efff27172d574fa599256dc93f233e",
+      "corner_contributions": [
+        {
+          "corner": 0,
+          "indices": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490
+            ],
+            "dtype": "int64",
+            "finite_elements": 228490,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "9ebb33c876fa0f40df31c2e13e3c7c2413b1c590666b54de07bc3cc08487bd62",
+            "reference_array_sha256": "9ebb33c876fa0f40df31c2e13e3c7c2413b1c590666b54de07bc3cc08487bd62"
+          },
+          "face_normals": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490,
+              3
+            ],
+            "dtype": "float32",
+            "finite_elements": 685470,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "fd27ef6ed430d3b727647161940ba23398221dcb46b9d4135f73622ddc3a2578",
+            "reference_array_sha256": "fd27ef6ed430d3b727647161940ba23398221dcb46b9d4135f73622ddc3a2578"
+          }
+        },
+        {
+          "corner": 1,
+          "indices": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490
+            ],
+            "dtype": "int64",
+            "finite_elements": 228490,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "87b3d58b6d15d189c0697f78cb5022cbb53ce549f81027b6b5c242461e2b8365",
+            "reference_array_sha256": "87b3d58b6d15d189c0697f78cb5022cbb53ce549f81027b6b5c242461e2b8365"
+          },
+          "face_normals": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490,
+              3
+            ],
+            "dtype": "float32",
+            "finite_elements": 685470,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "adecfe98ad118a0230ee426dc9f198f49a668c3206f56ab8a5fcf6bb2d7d4d78",
+            "reference_array_sha256": "adecfe98ad118a0230ee426dc9f198f49a668c3206f56ab8a5fcf6bb2d7d4d78"
+          }
+        },
+        {
+          "corner": 2,
+          "indices": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490
+            ],
+            "dtype": "int64",
+            "finite_elements": 228490,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "eec9a9903bf64bed834e392cbee34e4b5c17b3e74767255436ba7ae6a51d727c",
+            "reference_array_sha256": "eec9a9903bf64bed834e392cbee34e4b5c17b3e74767255436ba7ae6a51d727c"
+          },
+          "face_normals": {
+            "same_shape_dtype": true,
+            "shape": [
+              228490,
+              3
+            ],
+            "dtype": "float32",
+            "finite_elements": 685470,
+            "different_elements": 0,
+            "max_absolute_difference": 0.0,
+            "p99_absolute_difference": 0.0,
+            "mean_absolute_difference": 0.0,
+            "array_sha256": "976b2d7427cdd89be8dae869002111cdeba05dae318c0b2e92943c3d3c330797",
+            "reference_array_sha256": "976b2d7427cdd89be8dae869002111cdeba05dae318c0b2e92943c3d3c330797"
+          }
+        }
+      ]
+    }
+  ],
+  "fixed_contribution_runs": [
+    {
+      "iteration": 0,
+      "sum": {
+        "same_shape_dtype": true,
+        "shape": [
+          114247,
+          3
+        ],
+        "dtype": "float32",
+        "finite_elements": 342741,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "mean_absolute_difference": 0.0,
+        "array_sha256": "590e65eb22948a7aac87681120530a2df4211c5d68bf5e7ff3fdee9232202c70",
+        "reference_array_sha256": "590e65eb22948a7aac87681120530a2df4211c5d68bf5e7ff3fdee9232202c70"
+      },
+      "normal": {
+        "same_shape_dtype": true,
+        "shape": [
+          114247,
+          3
+        ],
+        "dtype": "float32",
+        "finite_elements": 342741,
+        "different_elements": 0,
+        "max_absolute_difference": 0.0,
+        "p99_absolute_difference": 0.0,
+        "mean_absolute_difference": 0.0,
+        "array_sha256": "05198522cb883e51ac3cd2f876754866d57ab6a73febf6b613a9011d37d0cdde",
+        "reference_array_sha256": "05198522cb883e51ac3cd2f876754866d57ab6a73febf6b613a9011d37d0cdde"
+      }
+    },
+    {
+      "iteration": 1,
+      "sum": {
+        "same_shape_dtype": true,
+        "shape": [
+          114247,
+          3
+        ],
+        "dtype": "float32",
+        "finite_elements": 342741,
+        "different_elements": 16686,
+        "max_absolute_difference": 9.5367431640625e-07,
+        "p99_absolute_difference": 4.76837158203125e-07,
+        "mean_absolute_difference": 1.3262442847625968e-08,
+        "array_sha256": "e218f84e07e3629f575d61e2f8800710afba5f70ecb3b55357c77375376a4913",
+        "reference_array_sha256": "590e65eb22948a7aac87681120530a2df4211c5d68bf5e7ff3fdee9232202c70"
+      },
+      "normal": {
+        "same_shape_dtype": true,
+        "shape": [
+          114247,
+          3
+        ],
+        "dtype": "float32",
+        "finite_elements": 342741,
+        "different_elements": 19217,
+        "max_absolute_difference": 1.7881393432617188e-07,
+        "p99_absolute_difference": 5.960464477539063e-08,
+        "mean_absolute_difference": 2.1071609798366833e-09,
+        "array_sha256": "8a42292d6ca8c3b64e9714dd5aefcc3e620626c90e0f160fa4add026ef63849b",
+        "reference_array_sha256": "05198522cb883e51ac3cd2f876754866d57ab6a73febf6b613a9011d37d0cdde"
+      }
+    },
+    {
+      "iteration": 2,
+      "sum": {
+        "same_shape_dtype": true,
+        "shape": [
+          114247,
+          3
+        ],
+        "dtype": "float32",
+        "finite_elements": 342741,
+        "different_elements": 16846,
+        "max_absolute_difference": 9.5367431640625e-07,
+        "p99_absolute_difference": 4.76837158203125e-07,
+        "mean_absolute_difference": 1.3463487962194535e-08,
+        "array_sha256": "6ce97ef8d80a0a02f4abbceb5ab9560da127a55927cd8a354be47b572eae4561",
+        "reference_array_sha256": "590e65eb22948a7aac87681120530a2df4211c5d68bf5e7ff3fdee9232202c70"
+      },
+      "normal": {
+        "same_shape_dtype": true,
+        "shape": [
+          114247,
+          3
+        ],
+        "dtype": "float32",
+        "finite_elements": 342741,
+        "different_elements": 19579,
+        "max_absolute_difference": 1.7881393432617188e-07,
+        "p99_absolute_difference": 5.960464477539063e-08,
+        "mean_absolute_difference": 2.1497214502055944e-09,
+        "array_sha256": "2388841a7fade8c8cb1412c2a91a0a548ce10b6138f1fae3c712252bb2541ab2",
+        "reference_array_sha256": "05198522cb883e51ac3cd2f876754866d57ab6a73febf6b613a9011d37d0cdde"
+      }
+    }
+  ],
+  "all_actual_source_contributions_exact": true,
+  "fixed_input_scatter_differences_detected": true,
+  "original_Tensor_method_restored": true,
+  "public_report_provenance": {
+    "raw_report_sha256": "5c0149897787c0d55e311e2c2b23be77709c2a40c5901423d8ce3e0c3cfc7601",
+    "redacted_fields": [
+      "absolute private FNIT prefix",
+      "hostname"
+    ],
+    "numeric_measurements_unchanged": true
+  }
+}

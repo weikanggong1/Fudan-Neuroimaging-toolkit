@@ -65,6 +65,7 @@ white_report = place_white_preaparc(
     collision_profile=False,  # 可选候选构建/有序接受分项，不改变接受规则
     retained_mht_backend="tree",  # 默认原桶重试；compiled仅显式实验
     cleanup_marking_backend="source_torch",  # 实验有向MHT标记；初始与最终同规则
+    cleanup_candidate_grid_cells_per_axis=2,  # 清理默认完整2桶；3单独显式选择
     device="cuda:0",  # 当前进程内明确的目标 GPU
     trace_callback=None,  # 可选每步诊断回调；坐标和记录是独立副本
 )
@@ -101,6 +102,7 @@ white_report = place_white_preaparc(
 | `collision_profile` | `False`；True另存每trial的候选数量、构建和有序接受秒，不把耗时放进决定轨迹 |
 | `retained_mht_backend` | `"tree"`；显式 `"compiled"` 要求snapshot候选，编译实时有序循环、真正三角命中仍调用原FP64桶重放；非法组合抛ValueError，首次JIT计入墙钟 |
 | `cleanup_marking_backend` | `"legacy"`；`"source_numba"`/`"source_torch"`按固定源码逐方向和共享MHT桶标记；后者要求显式device；只复用同次清理中完全相同的坐标 |
+| `cleanup_candidate_grid_cells_per_axis` | 2；显式3要求source_torch，初始及最终清理使用较小完整空间单元；与碰撞试步的candidate_grid独立，不改变方向、soap或最终零相交门；非法组合抛ValueError |
 | `device` | `None`；PyTorch 后端须显式指定如 `"cuda:0"` 或 `"cpu"`，不静默回退 CPU |
 | `trace_callback` | `None`；接收 `(step, pass_index, vertices_copy, record_copy)`；记录包含实际试步、SSE/RMS、接受/拒绝和步长；回调耗时计入墙钟 |
 
@@ -110,6 +112,7 @@ white_report = place_white_preaparc(
 |---|---|
 | `output/output_volume` | 实际输出路径；未指定体积时为 `None` |
 | `hemisphere/regularization_backend/sampling_backend/candidate_backend/cleanup_marking_backend/device` | 实际选择 |
+| `candidate_grid_cells_per_axis/cleanup_candidate_grid_cells_per_axis/retained_mht_backend/collision_profile` | 实际碰撞和清理空间索引、保留MHT重试和剖析策略；默认2/2/tree/False |
 | `complete_four_passes` | 成功返回时为 `True`；仅表示四轮计算完成，不表示官方数值验收通过 |
 | `vertices/faces/ripped_vertices/held_vertices/steps` | 网格大小、最终冻结和最近一次试步受阻顶点数、总迭代数 |
 | `pass_ends` | 四个全局迭代终点 |
@@ -143,6 +146,7 @@ python -m fnit.recon_all.place_white_preaparc_python \
   --sampling-backend torch \
   --candidate-backend tree \
   --cleanup-marking-backend source_torch \
+  --cleanup-candidate-grid-cells-per-axis 2 \
   --device cuda:0
 ```
 
@@ -316,6 +320,17 @@ allocator峰allocated约0.71GB、reserved约1.71GB；容器PID归属仍未解，
 间隔10.03/4.40秒、首组3次查询超时原样记录，未证明20GB整例预算。
 31项本地契约通过，模拟几何仅检查分支，不替代上述真实完整配对。
 
+v12显式将初始和最终清理改用3桶，保持v10碰撞3桶/compiled、CPU正则
+与强度采样。完整34步/四轮已完成，全部逐步坐标及接受拒绝记录、最终
+surface/MRI文件SHA均与v10相同，最终相交0。同步完整API为245.176秒，
+CUDA初始化2.311秒另计；该单次只验证集成，不与v10 ABBA作稳定提速结论。
+allocator峰allocated707,280,384、reserved1,184,890,880字节，外部树PID
+归属未解。[v12完整报告](../../validation/recon_all/optimizations/20261009_placement_torch/white_cleanup_grid3_a100_v12.json)
+和[完整轨迹/文件核对](../../validation/recon_all/optimizations/20261009_placement_torch/white_cleanup_grid3_a100_v12_comparison.json)
+绑定实际源码与前置SHA。独立清理ABBA中位18.817→13.995秒，见
+[源规则清理](SOURCE_INTERSECTION_CLEANUP.md)。两个提速比例不能相加，
+此次没有原始T1整例或改变生产white默认。
+
 同一A100主机、四线程、相同五项输入与相同源码构建程序的新参考验证：
 
 | 验证 | 完整墙钟 | 执行/几何结果 |
@@ -413,6 +428,8 @@ python validation/recon_all/python_gpu_port/benchmark_placement_full_white.py \
 |---|---|
 | 2026-10-09，源marker v6 | 完整CPU/GPU34步和最终几何无差异、最终0相交；对原生局部误差仍单列 |
 | 2026-10-09，v8/13邻居阈值修复 | 两例white/pial MRI-only与原生0差异；完整sub07LH表面和轨迹与v6相同，MRI与原生0差异 |
+| 2026-10-09，v9/v10 | 完整空间3桶与保留MHT编译有序循环分开ABBA；所有34步和最终文件SHA不变，观察整阶段分别少11.51%和25.00% |
+| 2026-10-09，v11/v12 | 源清理3桶完整ABBA少25.62%；white完整接线与v10轨迹/输出0差异，仅显式实验 |
 | 2026-10-09，本轮实验接线 | 接通preaparc四轮、轮间冻结与目标重估、完整试步记录、uint8诊断体积；保留旧失败质量门证据 |
 | 2026-10-09，`4939d41c` 及模块 SHA | 首步 PyTorch 正则同输入无新差异；仅首步阶段证据 |
 | 既有白质首轮诊断 | 1–17 步对照接口保留，承担定位参考作用；没有删除仍使用的诊断算子 |

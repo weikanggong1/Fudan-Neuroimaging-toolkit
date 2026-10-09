@@ -20,6 +20,7 @@ def pin_medial_wall(pial: np.ndarray, white: np.ndarray, cortex_vertices: np.nda
 def repair_intersections(
     vertices: np.ndarray, faces: np.ndarray, ripped: np.ndarray,
     *, marking_backend: str = "legacy", device: str | None = None,
+    candidate_grid_cells_per_axis: int = 2,
 ) -> tuple[np.ndarray, dict]:
     """源顺序100次soap-bubble/轮；新有向marker仍为显式实验选项。
 
@@ -30,12 +31,18 @@ def repair_intersections(
     非零残余，修复停滞时按源规则返回最佳状态，由调用阶段检查质量。
     有向后端在同一次清理中仅复用逐元素完全相同的坐标标记，停滞时不
     重建空间索引；任一坐标变化即失效，不跨阶段缓存。错误后端或缺少
-    Torch设备抛ValueError。对应mris_remove_intersection。
+    Torch设备抛ValueError。candidate_grid_cells_per_axis默认2；显式3
+    仅用于source_torch完整候选索引，不裁剪面对或改变soap/停止规则，
+    其他后端非默认值报错。对应mris_remove_intersection。
     """
     if marking_backend not in ("legacy", "source_numba", "source_torch"):
         raise ValueError("invalid intersection marking_backend")
     if marking_backend == "source_torch" and device is None:
         raise ValueError("source_torch marking requires explicit device")
+    if candidate_grid_cells_per_axis not in (2,3):
+        raise ValueError("candidate_grid_cells_per_axis must be 2 or 3")
+    if candidate_grid_cells_per_axis!=2 and marking_backend!="source_torch":
+        raise ValueError("nondefault cleanup candidate grid requires source_torch")
     marker = mark_intersections
     marker_calls = marker_evaluations = marker_cache_hits = 0
     if marking_backend != "legacy":
@@ -51,7 +58,7 @@ def repair_intersections(
                 return previous_marks.copy(), previous_count
             marked, count = mark_source_intersections(
                 xyz, tris, predicate_backend="torch" if marking_backend == "source_torch" else "numba",
-                device=device)
+                device=device,candidate_grid_cells_per_axis=candidate_grid_cells_per_axis)
             marker_evaluations += 1
             previous_coordinates, previous_marks, previous_count = xyz.copy(), marked.copy(), count
             return marked, count

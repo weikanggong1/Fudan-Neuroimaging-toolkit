@@ -55,6 +55,7 @@ def main():
     parser.add_argument("--candidate-backend", choices=("tree", "snapshot", "torch_snapshot"), default="tree")
     parser.add_argument("--candidate-grid-cells-per-axis", type=int, choices=(2, 3), default=2)
     parser.add_argument("--control-grid-cells-per-axis", type=int, choices=(2, 3), default=2)
+    parser.add_argument("--cleanup-grid-cells-per-axis",type=int,choices=(2,3),default=2)
     parser.add_argument("--collision-profile", action="store_true")
     parser.add_argument("--retained-mht-backend", choices=("tree", "compiled"), default="tree")
     parser.add_argument("--control-retained-mht-backend", choices=("tree", "compiled"), default="tree")
@@ -223,6 +224,7 @@ def main():
                 cleanup_marking_backend=args.cleanup_marking_backend,
                 candidate_grid_cells_per_axis=args.candidate_grid_cells_per_axis if backend == "torch" else args.control_grid_cells_per_axis,
                 retained_mht_backend=args.retained_mht_backend if backend == "torch" else args.control_retained_mht_backend,
+                cleanup_candidate_grid_cells_per_axis=args.cleanup_grid_cells_per_axis if backend=="torch" else 2,
                 collision_profile=args.collision_profile,
                 device=str(device) if gpu_components else None,
                 trace_callback=callback,

@@ -30,6 +30,24 @@ def test_shared_vertex_is_excluded_before_predicate(crossing):
     assert count == 0 and not marked.any()
 
 
+def test_explicit_smaller_complete_grid_preserves_source_rules(crossing):
+    xyz,faces=crossing
+    for flags in (None,np.array([True,False])):
+        control=marking.mark_source_intersections(xyz,faces,face_ripped=flags,
+            predicate_backend="torch",device="cpu",candidate_grid_cells_per_axis=2)
+        candidate=marking.mark_source_intersections(xyz,faces,face_ripped=flags,
+            predicate_backend="torch",device="cpu",candidate_grid_cells_per_axis=3)
+        np.testing.assert_array_equal(candidate[0],control[0]);assert candidate[1]==control[1]
+
+
+def test_nondefault_grid_is_not_ignored(crossing):
+    with pytest.raises(ValueError,match="requires torch predicate"):
+        marking.mark_source_intersections(*crossing,candidate_grid_cells_per_axis=3)
+    from fnit.recon_all.place_surface_final_cleanup import repair_intersections
+    with pytest.raises(ValueError,match="requires source_torch"):
+        repair_intersections(*crossing,np.zeros(len(crossing[0]),bool),candidate_grid_cells_per_axis=3)
+
+
 def test_reverse_positive_does_not_mark_forward_face(crossing, monkeypatch):
     from fnit.recon_all import place_surface_collision_torch as source
     calls = []

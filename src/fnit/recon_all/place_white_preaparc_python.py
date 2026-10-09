@@ -46,6 +46,7 @@ def _place_white_preaparc(
     candidate_grid_cells_per_axis: int = 2,
     collision_profile: bool = False,
     retained_mht_backend: str = "tree",
+    cleanup_candidate_grid_cells_per_axis: int = 2,
 ) -> dict:
     """共享现有白质算子；complete 选择四轮而非首轮诊断调度。"""
     started = time.perf_counter()
@@ -66,6 +67,10 @@ def _place_white_preaparc(
         raise ValueError("compiled retained MHT requires snapshot candidates")
     if cleanup_marking_backend not in ("legacy", "source_numba", "source_torch"):
         raise ValueError("invalid cleanup_marking_backend")
+    if cleanup_candidate_grid_cells_per_axis not in (2,3):
+        raise ValueError("cleanup_candidate_grid_cells_per_axis must be 2 or 3")
+    if cleanup_candidate_grid_cells_per_axis!=2 and cleanup_marking_backend!="source_torch":
+        raise ValueError("nondefault cleanup candidate grid requires source_torch")
     if cleanup_marking_backend == "source_torch" and device is None:
         raise ValueError("source_torch cleanup requires an explicit device")
     if sampling_backend not in ("cpu", "torch", "triton"):
@@ -100,7 +105,8 @@ def _place_white_preaparc(
         if cleanup_marking_backend == "legacy":
             return repair_intersections(current, faces, rip_flags)
         return repair_intersections(current, faces, rip_flags,
-            marking_backend=cleanup_marking_backend, device=device)
+            marking_backend=cleanup_marking_backend, device=device,
+            candidate_grid_cells_per_axis=cleanup_candidate_grid_cells_per_axis)
     if complete:
         xyz, initial_cleanup = clean_intersections(xyz, np.zeros(len(xyz), dtype=np.bool_))
         # 固定源码的 MRISremoveIntersections 可在非零残余时正常返回，随后
@@ -421,6 +427,7 @@ def _place_white_preaparc(
         "per_step": records,
         "candidate_grid_cells_per_axis": candidate_grid_cells_per_axis,
         "retained_mht_backend": retained_mht_backend,
+        "cleanup_candidate_grid_cells_per_axis": cleanup_candidate_grid_cells_per_axis,
         "collision_profile": bool(collision_profile), "collision_details": collision_details,
         "prepare_components": prepare_components,
         "seconds": finished_at - started,
@@ -463,6 +470,7 @@ def place_white_preaparc(
     candidate_grid_cells_per_axis: int = 2,
     collision_profile: bool = False,
     retained_mht_backend: str = "tree",
+    cleanup_candidate_grid_cells_per_axis: int = 2,
 ) -> dict:
     """实验性完整preaparc白质四轮；不替代带aparc的最终white或生产默认。
 
@@ -481,6 +489,8 @@ def place_white_preaparc(
     候选构建/有序接受秒，诊断与接受轨迹分开，不在生产默认增加同步。
     retained_mht_backend默认tree；显式compiled仅用于snapshot候选，将重试的
     有序循环编译，实际三角命中仍调用原FP64桶规则和实时坐标，非纯GPU。
+    cleanup_candidate_grid_cells_per_axis默认2；显式3仅用于source_torch
+    初始/最终清理完整索引，源4mm余量、面对、soap和最终零相交门不变。
     返回路径、有序网格大小、四轮边界、rip/目标/接受轨迹、完整清理与分项秒。
     输入/参数、未完成四轮、残余相交及CUDA异常传播，不写未完成表面。
     对应mris_place_surface --white --nsmooth 5 --rip-bg-no-annot --rip-bg。
@@ -506,6 +516,7 @@ def place_white_preaparc(
         candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
         collision_profile=collision_profile,
         retained_mht_backend=retained_mht_backend,
+        cleanup_candidate_grid_cells_per_axis=cleanup_candidate_grid_cells_per_axis,
     )
 
 
@@ -537,6 +548,7 @@ def main() -> None:
     parser.add_argument("--candidate-grid-cells-per-axis", type=int, choices=(2, 3), default=2)
     parser.add_argument("--collision-profile", action="store_true")
     parser.add_argument("--retained-mht-backend", choices=("tree", "compiled"), default="tree")
+    parser.add_argument("--cleanup-candidate-grid-cells-per-axis", type=int, choices=(2,3),default=2)
     parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
     parser.add_argument("--cleanup-marking-backend", choices=("legacy", "source_numba", "source_torch"), default="legacy")
     args = parser.parse_args()
@@ -552,6 +564,7 @@ def main() -> None:
             candidate_grid_cells_per_axis=args.candidate_grid_cells_per_axis,
             collision_profile=args.collision_profile,
             retained_mht_backend=args.retained_mht_backend,
+            cleanup_candidate_grid_cells_per_axis=args.cleanup_candidate_grid_cells_per_axis,
             device=args.device,
         ), indent=2))
         return
@@ -559,7 +572,7 @@ def main() -> None:
             or args.candidate_backend != "tree" or args.sampling_backend != "cpu"
             or args.cleanup_marking_backend != "legacy"
             or args.candidate_grid_cells_per_axis != 2 or args.collision_profile
-            or args.retained_mht_backend != "tree"):
+            or args.retained_mht_backend != "tree" or args.cleanup_candidate_grid_cells_per_axis!=2):
         parser.error("--output-volume, --max-steps, --sampling-backend and --candidate-backend require --complete")
     print(json.dumps(place_white_preaparc_prefix(
         subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,

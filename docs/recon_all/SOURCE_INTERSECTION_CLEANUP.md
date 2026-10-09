@@ -45,6 +45,7 @@ marked_vertices, intersecting_face_count = mark_source_intersections(
     device="cuda:0",  # 明确进程内CUDA设备
     block_faces=256,  # CPU候选的查询分块；不限制候选总量
     block_pairs=65536,  # 面对谓词分块；不截断面对
+    candidate_grid_cells_per_axis=2,  # 默认完整2桶索引；3是显式加速实验
 )
 cleaned_vertices, cleanup_report = repair_intersections(
     vertices=surface_vertices,  # 该清理阶段实际输入坐标
@@ -52,6 +53,7 @@ cleaned_vertices, cleanup_report = repair_intersections(
     ripped=np.zeros(len(surface_vertices), dtype=bool),  # (N,)顶点冻结标志
     marking_backend="source_torch",  # 明确实验有向标记后端
     device="cuda:0",  # 标记用GPU；有序soap更新仍在CPU
+    candidate_grid_cells_per_axis=2,  # 初始和最终清理均保持所选完整候选规则
 )
 ```
 
@@ -66,6 +68,7 @@ cleaned_vertices, cleanup_report = repair_intersections(
 | `device` | `None`；Torch 必须明确 `cpu` 或有编号的 `cuda:0`，不静默回退 |
 | `block_faces` | 256，正整数；CPU 候选查询分块 |
 | `block_pairs` | 65536，正整数；CPU/GPU 谓词分块 |
+| `candidate_grid_cells_per_axis` | 2；显式3仅用于Torch较小的完整空间单元。查询仍覆盖全部3³相邻桶，并保留原FP64范围、方向和MHT检查；非法值或用于非Torch后端抛ValueError |
 
 返回 `(marked_vertices, intersecting_face_count)`：前者为 `(N,)` bool，
 后者为被源规则标记的面数，不能以标记顶点数代替。非法参数、索引或
@@ -77,6 +80,8 @@ cleaned_vertices, cleanup_report = repair_intersections(
 周期及迭代数。有向后端另给出 `marker_calls`、`marker_evaluations` 和
 `marker_identical_geometry_cache_hits`。停滞时按源规则返回最佳状态；
 是否允许残余由调用阶段决定。完整 white 最终写出仍要求零相交。
+清理器的 `candidate_grid_cells_per_axis` 也默认2；显式3只接受
+`marking_backend="source_torch"`。不改变soap更新或停滞规则。
 
 ## 3. 命令行与复现
 
@@ -104,6 +109,27 @@ GPU计时同步指定设备；CUDA初始化、诊断和完整清理分别记录�
 脚本另给出包含网格读取、计算和写出的文件 API 墙钟；进程启动和冷导入
 另计。外部显存监测可复用 `monitor_placement_benchmark.py`，不可把
 PyTorch allocated 当作整个进程占用。
+
+较小空间单元的完整文件API ABBA使用 `benchmark_source_cleanup_grid.py`：
+
+```bash
+CUDA_VISIBLE_DEVICES=2 OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
+python validation/recon_all/python_gpu_port/benchmark_source_cleanup_grid.py \
+  --input-surface /data/frozen/sub07/lh.smoothed-orig.surface \
+  --candidate-directory /data/frozen-code/src/fnit/recon_all \
+  --output-directory /data/runs/cleanup-grid-abba \
+  --code-base-commit ACTUAL_TESTED_COMMIT \
+  --device cuda:0 --threads 4 \
+  --native-binary /data/benchmark-native/bin/mris_remove_intersection \
+  --native-repeat 2
+```
+
+输入是已经冻结的清理前表面，本脚本不重复平滑。`--candidate-directory`
+指定实际候选模块；`--output-directory`须不存在；版本字符串和模块SHA
+一并记录。`--threads`默认4，`--device`默认cuda:0且必须有CUDA编号。
+`--native-binary`默认None，指定后仅在诊断目录重复同输入原生参考；
+`--native-repeat`默认2且须为正整数。先记录两个冷调用，再执行2/3/3/2
+完整配对。返回JSON、六个诊断表面、可选原生表面和私有日志；不进入生产链。
 
 ## 4. 原软件调用与规则来源
 
@@ -165,6 +191,26 @@ v4相对同一GPU未复用版减少61.7%计算时间。v7追加两例双侧完�
 外部采样的进程树归属未解，树峰为null；整卡占用上界单列，不写成零显存。
 CUDA缓存未全局关闭，TF32策略未被改写，没有FP16/BF16。
 
+v11在同一真实sub07 LH清理前表面上比较2桶/3桶完整空间索引。表格范围为
+已导入文件API，包含网格读取、同步计算与写出；不把冷JIT混入ABBA中位数。
+
+| 顺序 | 默认2桶 | 显式3桶 |
+|---|---:|---:|
+| 第一组 | 18.886 s | 13.612 s |
+| 反向组 | 18.747 s | 14.378 s |
+| 中位 | 18.817 s | 13.995 s |
+
+观察中位减少25.62%。六次完整清理均为相同23次标记、22周期和2200次
+soap，全部坐标、有序面、完整清理记录0差异。同期两次同输入Conda源码
+构建程序为30.990/30.765秒，重复几何一致，FNIT与参考全部坐标一致；
+原生文件头不同，不能称整文件逐字节一致。原生列包含冷子进程启动，
+不以这两列直接宣布CLI提速。中间1面残余仍按源流程返回。
+
+[v11完整报告](../../validation/recon_all/optimizations/20261009_placement_torch/source_cleanup_grid_a100_v11_sub07_lh.json)
+与外部采样记录包含实际源码、程序和输入SHA。新索引已在v12完整四轮
+white验证34步及最终表面/MRI SHA不变、最终相交数0；该单次245.176秒
+是集成回归，未建立整体提速或最终white对原生等效。
+
 实际输入、源码、程序和报告SHA及逐轮坐标SHA分别见
 [CPU源规则报告](../../validation/recon_all/optimizations/20261009_placement_torch/source_ordered_cleanup_a100_v2.json)、
 [GPU完整候选报告](../../validation/recon_all/optimizations/20261009_placement_torch/source_ordered_cleanup_a100_v3.json)、
@@ -189,6 +235,8 @@ CUDA缓存未全局关闭，TF32策略未被改写，没有FP16/BF16。
 - v3：复用既有PyTorch空间索引，完整清理坐标与原生一致，但计算仍有重复。
 - v4：仅复用完全相同坐标的标记，保留所有周期与清理规则，真实完整回归通过。
 - v7：两例双侧完整文件API与当前Conda原生有序面/坐标0差异。
+- v11：显式3桶完整空间索引，真实完整清理ABBA中位减少25.62%；保留默认2桶。
+- v12：完整white四轮接线回归34步及表面/MRI SHA与v10相同、最终0相交。
 - 本地32项控制测试覆盖方向、桶、共享顶点/rip、GPU接口、缓存失效及white四轮状态；模拟测试不替代上表真实数据。
 
 旧v1/v2失败或慢版报告保留为排错证据，不替换其SHA或改写为当前成功。
