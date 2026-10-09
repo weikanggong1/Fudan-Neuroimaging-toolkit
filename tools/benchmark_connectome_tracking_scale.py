@@ -52,6 +52,8 @@ def main() -> None:
     )
     if args.device.startswith("cuda"):
         torch.cuda.synchronize(args.device)
+    # Freeze the synchronized tracking interval before hashing files or reading outputs.
+    tracking_seconds = time.perf_counter() - start
     report = {
         "input_sha256": {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in
                          (("fod", args.fod), ("five_tissue", args.five_tissue), ("gmwmi", args.gmwmi))},
@@ -64,7 +66,7 @@ def main() -> None:
         "seed": args.seed,
         "accepted_streamlines": len(tracks.paths),
         "total_path_points": sum(len(path) for path in tracks.paths),
-        "tracking_seconds_with_inputs_loaded": time.perf_counter() - start,
+        "tracking_seconds_with_inputs_loaded": tracking_seconds,
         "peak_torch_allocated_gib": (torch.cuda.max_memory_allocated(args.device) / 2**30
                                      if args.device.startswith("cuda") else None),
         "peak_torch_reserved_gib": (torch.cuda.max_memory_reserved(args.device) / 2**30

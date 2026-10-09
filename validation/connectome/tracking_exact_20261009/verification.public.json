@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-09",
+  "scope": "local benchmark infrastructure and existing tracking CPU regressions; not GPU performance or full connectome parity",
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "nibabel": "5.4.2",
+  "pytest": "9.1.1",
+  "checks": {
+    "py_compile": "passed",
+    "git_diff_check": "passed",
+    "standalone_source_loading": "passed; same FOD/SH function objects used by both tracking modules",
+    "snapshot_strict_comparison": "passed; identical outputs equal, mutated path differs",
+    "digest_mutation_detection": "passed",
+    "focused_cpu_pytest": {
+      "passed": 17,
+      "skipped": 16,
+      "seconds": 9.63,
+      "files": [
+        "test_tracking_sampling_context.py",
+        "test_tracking_collection.py",
+        "test_tracking_act_seed.py",
+        "test_act_seed_direction.py",
+        "test_tracking_sh_precomputed.py"
+      ]
+    },
+    "real_gpu_candidate_gate": "not run: SSH connection lost; original forwarded entry refuses/times out",
+    "full_suite": "not run"
+  }
+}

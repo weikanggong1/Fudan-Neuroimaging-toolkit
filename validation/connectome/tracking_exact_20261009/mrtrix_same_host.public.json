@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-09",
+  "dataset": "OpenNeuro ds004666; same fixed NIfTI WM FOD, 5TT and GMWMI as historical 100k report",
+  "input_sha256": {
+    "fod": "18addc15596dadf7fb60727ae9af8d1cbd98c139964712454a33a718c5f4e7c1",
+    "five_tissue": "704539238d29c10eeaf4fab31831bc3ced9648ce6a59f4e9bd75c7b7d6d03fbf",
+    "gmwmi": "06243e393410bad709c2569e68d5eeed49d5f28500e607890a06e217a19a9823"
+  },
+  "reference": {
+    "software": "MRtrix3",
+    "version": "3.0.3-103-g026e850d",
+    "cpu": "Intel Xeon Gold 6430",
+    "threads": 8,
+    "n_seeds": 100000,
+    "algorithm": "iFOD2",
+    "act": true,
+    "seed_gmwmi": true,
+    "select": 0,
+    "max_length_mm": 250,
+    "cutoff": 0.1,
+    "samples": 3,
+    "power": 0.5,
+    "timing_boundary": "Full tckgen subprocess wall time including input and TCK output I/O; TCK read/statistics excluded"
+  },
+  "runs": [
+    {
+      "seed": 0,
+      "wall_seconds": 16.18756110407412,
+      "returncode": 0,
+      "accepted_streamlines": 27685,
+      "path_points": 1153474,
+      "length_mean_mm": 40.24758098260448,
+      "length_percentiles_mm": [
+        4.98883318901062,
+        10.007880926132202,
+        25.362825751304626,
+        58.812785506248474,
+        120.4259760260582
+      ],
+      "output_read_seconds": 0.3069091150537133
+    },
+    {
+      "seed": 1,
+      "wall_seconds": 16.032133081927896,
+      "returncode": 0,
+      "accepted_streamlines": 27673,
+      "path_points": 1154229,
+      "length_mean_mm": 40.291383602359154,
+      "length_percentiles_mm": [
+        4.988465988636017,
+        10.437259376049042,
+        25.403953194618225,
+        58.782155215740204,
+        120.44782820940004
+      ],
+      "output_read_seconds": 0.3326710732653737
+    },
+    {
+      "seed": 2,
+      "wall_seconds": 16.2861969480291,
+      "returncode": 0,
+      "accepted_streamlines": 27693,
+      "path_points": 1151332,
+      "length_mean_mm": 40.156276928211085,
+      "length_percentiles_mm": [
+        4.986266088485718,
+        9.989993929862976,
+        24.98543643951416,
+        58.72098594903946,
+        120.1253267049789
+      ],
+      "output_read_seconds": 0.32417690893635154
+    }
+  ],
+  "length_percentiles": [
+    5,
+    25,
+    50,
+    75,
+    95
+  ],
+  "fnit_status": "pending: SSH connection dropped after official runs; former forwarded port refuses connections",
+  "candidate_commit": "9c118b748700e04224cd5b235b23a712145eae7e",
+  "further_candidate_status": "active-row calibration experimental; no real GPU equality or timing acceptance yet; not installed into runtime",
+  "provenance": "Numeric records read live from completed remote run log. Original report, logs and TCKs remain on server; no new FNIT or end-to-end SC parity result is asserted."
+}
