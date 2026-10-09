@@ -865,24 +865,40 @@ def _fill_planar_holes(result: np.ndarray, strand: np.ndarray) -> None:
             break
 
 
-def segment_white_matter(image: torch.Tensor, *, device: str | torch.device | None = None) -> torch.Tensor:
-    """Run fixed ``mri_segment -wsizemm 13`` with optional Torch device.
+def segment_white_matter(image: torch.Tensor, *, device: str | torch.device | None = None,
+                         histogram_backend: str = "cpu",
+                         histogram_batch_size: int = 2048) -> torch.Tensor:
+    """执行固定单T1的 mri_segment -wsizemm 13 -mprage 分割。
 
-    Vectorized classification uses ``device``; histogram, scan-order strand
-    components and ordered fills remain CPU/NumPy to preserve FreeSurfer's
-    update order. CUDA is therefore a hybrid backend, not a complete rewrite.
+    image为非空三维uint8、x/y/z体素网格。device默认None保留输入设备；
+    histogram_backend默认cpu使用原NumPy参考，torch复用分块PyTorch，
+    histogram_batch_size默认2048正整数，只控制torch临时内存。
+    返回新uint8 WM，shape不变，device为明确目标。不改输入、不重采样。
+    strand及有序填充保持CPU更新顺序；不是完整GPU转写。输入/backend/
+    batch错误抛ValueError；CUDA错误传播，不自动回退。TF32策略由调用者
+    管理，本函数不全局修改精度，不使用半精度。
     """
-    if image.ndim != 3 or image.dtype != torch.uint8:
+    if image.ndim != 3 or image.dtype != torch.uint8 or not image.numel():
         raise ValueError("expected a 3D uint8 FreeSurfer intensity volume")
+    if histogram_backend not in {"cpu", "torch"}:
+        raise ValueError("histogram_backend must be cpu or torch")
+    if not isinstance(histogram_batch_size, int) or histogram_batch_size < 1:
+        raise ValueError("histogram_batch_size must be positive")
+    histogram = histogram_segmentation
+    histogram_options = {}
+    if histogram_backend == "torch":
+        from .mri_segment_histogram_torch import histogram_segmentation_torch
+        histogram = histogram_segmentation_torch
+        histogram_options = {"batch_size": histogram_batch_size}
     target = image if device is None else image.to(device)
     first = intensity_segmentation(target, wm_low=79, wm_hi=125, gray_hi=99)
-    first = histogram_segmentation(target, first, wm_low=79, wm_hi=125,
-                                   gray_hi=99)
+    first = histogram(target, first, wm_low=79, wm_hi=125,
+                      gray_hi=99, **histogram_options)
     thresholds = detect_intensity_thresholds(target, first)
     second = intensity_segmentation(target, wm_low=thresholds.wm_low,
                                     wm_hi=125, gray_hi=thresholds.gray_hi)
-    second = histogram_segmentation(target, second, wm_low=thresholds.wm_low,
-                                    wm_hi=125, gray_hi=thresholds.gray_hi)
+    second = histogram(target, second, wm_low=thresholds.wm_low,
+                       wm_hi=125, gray_hi=thresholds.gray_hi, **histogram_options)
     labels = median_curve_segmentation(target, second, gray_hi=thresholds.gray_hi,
                                        wm_low=thresholds.wm_low)
     labels = reclassify_border(target, labels, wm_low=thresholds.wm_low - 5,
@@ -904,16 +920,32 @@ def segment_white_matter(image: torch.Tensor, *, device: str | torch.device | No
     return filter_diagonal_morphology(masked).to(target.device)
 
 
-def segment_white_matter_mgz(source_path: str | Path, output_path: str | Path, *, device: str | torch.device = "cpu") -> dict:
-    """Read a uint8 MGZ, run the fixed profile, and preserve its MGH header."""
+def segment_white_matter_mgz(source_path: str | Path, output_path: str | Path, *,
+                             device: str | torch.device = "cpu",
+                             histogram_backend: str = "cpu",
+                             histogram_batch_size: int = 2048) -> dict:
+    """nibabel读取3D uint8 MGZ，执行固定WM配方，保留MGH头与affine。
+
+    source_path为强度文件；output_path为新WM文件，uint8、原网格和mm
+    affine，不作scanner/surface RAS变换。device默认cpu；histogram_backend
+    默认cpu、torch为显式分块候选；histogram_batch_size默认2048。
+    返回implementation/device/backend/batch/ordered_cpu_rules/output字典。
+    标签语义及有序CPU扫描不变；读取/写出/CUDA异常传播，错误dtype或网格
+    抛ValueError。没有官方文件读取或原生程序调用；无生产额外同步。
+    """
     import nibabel as nib
 
     source_image = nib.load(str(source_path))
     source = np.asarray(source_image.dataobj)
     if source.ndim != 3 or source.dtype != np.uint8:
         raise ValueError("expected a 3D uint8 MGH input")
-    segmented = segment_white_matter(torch.from_numpy(source.copy()), device=device).cpu().numpy()
+    segmented = segment_white_matter(
+        torch.from_numpy(source.copy()), device=device,
+        histogram_backend=histogram_backend,
+        histogram_batch_size=histogram_batch_size).cpu().numpy()
     nib.save(nib.MGHImage(segmented, source_image.affine,
                           header=source_image.header.copy()), str(output_path))
     return {"implementation": "FNIT PyTorch hybrid", "device": str(device),
+            "histogram_backend": histogram_backend,
+            "histogram_batch_size": histogram_batch_size,
             "ordered_cpu_rules": True, "output": str(output_path)}

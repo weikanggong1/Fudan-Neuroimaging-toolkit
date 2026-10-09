@@ -1,0 +1,281 @@
+{
+  "scope": "frozen_same_input_two_histogram_passes; not_whole_WM_or_recon_all",
+  "code_commit": "57cc115f68133069930565d885195ab6f2b18f2b",
+  "code_commit_role": "baseline plus modules bound by executed SHA-256",
+  "benchmark_sha256": "0388a22eaeda8f887ae7ae813598f250021df7ec208cbed84d287a364fcf96fa",
+  "report_helper_sha256": "99c329c4ac5597ecc338b813052798b978cf92da9965bcd617c56cfcc54504dc",
+  "source_modules": {
+    "mri_segment.py": "b936606983538fe556177a419a3e5f30bbbb4db5c7a47cef45c97d5b7c540210",
+    "mri_segment_histogram_torch.py": "73e3b832da7f81ff944a75c69b056f63fc591aeb5877c26ec104c4d5b63a152e"
+  },
+  "host": "gpucw1",
+  "pid": 63630,
+  "threads": 4,
+  "actual_torch_threads": 4,
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4"
+  },
+  "device": "cuda:0",
+  "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+  "gpu": "NVIDIA H100 PCIe",
+  "context_seconds": 0.28534731874242425,
+  "torch": "2.5.1",
+  "torch_cuda": "11.8",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "arithmetic": "int32 histogram counts; ordered float32 smoothing; C-double MIN_STD comparison; no half"
+  },
+  "reference_program_sha256": "3fa5b05e61229e39dfa83773bfe84614fd8a868bea2e91968abc076bf1a13af6",
+  "reference_sources_sha256": {
+    "mri_segment/mri_segment.cpp": "de0aad4ee1020f6dbe92afa1f6ca9d33e3259fbde256dee14b191191ed17f5d0",
+    "utils/mrihisto.cpp": "da0fa4d2c9da038064036af92c126bd3a89cb09287e2ebe697d467121adc5aee",
+    "utils/histo.cpp": "f5a630b5ea6c2a67af52bb49ee976d176dd90e53aea55ee416eadd02b83680a7"
+  },
+  "native_diagnostic_start_utc": "2026-10-09T05:08:56Z",
+  "native_diagnostic_end_utc": "2026-10-09T05:12:39Z",
+  "native_diagnostic_timing_use": "reference generation only; concurrent root whole run; not an algorithm time",
+  "inputs": {
+    "source": {
+      "sha256": "580d743e7bcedaf2e39ea2ed6eaf701e6fb76cf0444db6b347e57a2852adae39",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "uint8",
+      "affine_mm": [
+        [
+          -0.9999998807907104,
+          -3.725290298461914e-09,
+          -6.51925802230835e-09,
+          130.5413055419922
+        ],
+        [
+          5.005858838558197e-09,
+          -3.725290298461914e-09,
+          1.0,
+          -102.80550384521484
+        ],
+        [
+          -3.725290298461914e-09,
+          -0.9999999403953552,
+          -7.450580596923828e-09,
+          116.7668228149414
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "derived_statistics": {
+    "white_mean": 104.96393585205078,
+    "white_sigma": 4.847011089324951,
+    "gray_mean": 65.1773681640625,
+    "gray_sigma": 11.965222358703613,
+    "wm_low": 77.14259338378906,
+    "gray_hi": 89.1078109741211
+  },
+  "passes": {
+    "1": {
+      "parameters_float": {
+        "wm_low": 79.0,
+        "wm_hi": 125.0,
+        "gray_hi": 99.0
+      },
+      "parameters_native_int": {
+        "wm_low": 79,
+        "wm_hi": 125,
+        "gray_hi": 99
+      },
+      "candidate_count": 232058,
+      "intensity_label_vs_native": {
+        "different_voxels": 0,
+        "max_abs": 0,
+        "p99_abs": 0.0,
+        "label_dice": {
+          "1": 1.0,
+          "128": 1.0,
+          "255": 1.0
+        }
+      },
+      "input_labels_sha256": "055feafbcfcc854aea8466b0861e03a3859de1a53742f2c236c25faf308db2ad",
+      "native_output_sha256": "6b6e06b514930b8c619c0cfe46878d1e48febd705ac0e9612f09184136fbab8f",
+      "measurement": "complete histogram array stage; all candidates; preloaded arrays; excludes file IO/H2D/D2H",
+      "order": [
+        "cpu",
+        "cuda",
+        "cuda",
+        "cpu"
+      ],
+      "samples_seconds": {
+        "cpu": [
+          45.44085262995213,
+          43.27229076437652
+        ],
+        "cuda": [
+          0.4434520239010453,
+          0.335551287047565
+        ]
+      },
+      "results": {
+        "0_cpu": {
+          "different_voxels": 0,
+          "max_abs": 0,
+          "p99_abs": 0.0,
+          "label_dice": {
+            "1": 1.0,
+            "128": 1.0,
+            "255": 1.0
+          }
+        },
+        "1_cuda": {
+          "different_voxels": 0,
+          "max_abs": 0,
+          "p99_abs": 0.0,
+          "label_dice": {
+            "1": 1.0,
+            "128": 1.0,
+            "255": 1.0
+          }
+        },
+        "2_cuda": {
+          "different_voxels": 0,
+          "max_abs": 0,
+          "p99_abs": 0.0,
+          "label_dice": {
+            "1": 1.0,
+            "128": 1.0,
+            "255": 1.0
+          }
+        },
+        "3_cpu": {
+          "different_voxels": 0,
+          "max_abs": 0,
+          "p99_abs": 0.0,
+          "label_dice": {
+            "1": 1.0,
+            "128": 1.0,
+            "255": 1.0
+          }
+        }
+      },
+      "medians_seconds": {
+        "cpu": 44.35657169716433,
+        "cuda": 0.38950165547430515
+      },
+      "speedup_vs_existing_python": 113.88031622908073
+    },
+    "2": {
+      "parameters_float": {
+        "wm_low": 77.14259338378906,
+        "wm_hi": 125.0,
+        "gray_hi": 89.1078109741211
+      },
+      "parameters_native_int": {
+        "wm_low": 77,
+        "wm_hi": 125,
+        "gray_hi": 89
+      },
+      "candidate_count": 130258,
+      "intensity_label_vs_native": {
+        "different_voxels": 0,
+        "max_abs": 0,
+        "p99_abs": 0.0,
+        "label_dice": {
+          "1": 1.0,
+          "128": 1.0,
+          "255": 1.0
+        }
+      },
+      "input_labels_sha256": "e5a4653ba3c780c0b0f45b47539bcb6122838cfdd0d566bb81979843fa6a9a19",
+      "native_output_sha256": "776d289ffbe2d1c1b257ff37fc2bfa7f7ff7c4a173210c2707f08ce1d54dc563",
+      "measurement": "complete histogram array stage; all candidates; preloaded arrays; excludes file IO/H2D/D2H",
+      "order": [
+        "cpu",
+        "cuda",
+        "cuda",
+        "cpu"
+      ],
+      "samples_seconds": {
+        "cpu": [
+          24.91335507808253,
+          25.17339851986617
+        ],
+        "cuda": [
+          0.18702934682369232,
+          0.21457651583477855
+        ]
+      },
+      "results": {
+        "0_cpu": {
+          "different_voxels": 0,
+          "max_abs": 0,
+          "p99_abs": 0.0,
+          "label_dice": {
+            "1": 1.0,
+            "128": 1.0,
+            "255": 1.0
+          }
+        },
+        "1_cuda": {
+          "different_voxels": 0,
+          "max_abs": 0,
+          "p99_abs": 0.0,
+          "label_dice": {
+            "1": 1.0,
+            "128": 1.0,
+            "255": 1.0
+          }
+        },
+        "2_cuda": {
+          "different_voxels": 0,
+          "max_abs": 0,
+          "p99_abs": 0.0,
+          "label_dice": {
+            "1": 1.0,
+            "128": 1.0,
+            "255": 1.0
+          }
+        },
+        "3_cpu": {
+          "different_voxels": 0,
+          "max_abs": 0,
+          "p99_abs": 0.0,
+          "label_dice": {
+            "1": 1.0,
+            "128": 1.0,
+            "255": 1.0
+          }
+        }
+      },
+      "medians_seconds": {
+        "cpu": 25.04337679897435,
+        "cuda": 0.20080293132923543
+      },
+      "speedup_vs_existing_python": 124.71619130854899
+    }
+  },
+  "whole_recon_speedup": "not_measured",
+  "whole_metric_equivalence": "not_assessed",
+  "isolated_deployment": "not_verified",
+  "process_memory": {
+    "scope": "benchmark parent process on explicit GPU; native child uses CPU only",
+    "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+    "pid": 63630,
+    "requested_interval_seconds": 0.25,
+    "max_interval_seconds": 0.4111473299562931,
+    "peak_process_bytes": 796917760,
+    "status": "sampled",
+    "errors": []
+  },
+  "torch_peak_allocated_bytes": 218211840,
+  "torch_peak_reserved_bytes": 245366784,
+  "benchmark_wall_seconds": 152.93960063019767
+}
