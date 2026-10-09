@@ -51,7 +51,7 @@ _READY: tuple[PythonGpuCapability, ...] = (
 
 _BLOCKED: tuple[PythonGpuCapability, ...] = (
     PythonGpuCapability("N4", "Conda ITK C++", "cpu", False,
-                        "complete fixed-recipe Torch N4 is experimental: one real full run is biased low and downstream regression is pending; default stays ITK"),
+                        "complete cached Torch N4 has two raw-T1 runs: sub06 completes, sub07 fails the unchanged final white self-intersection gate; cross-input diagnosis shows quantization and case-dependent GCA amplification; default stays ITK"),
     PythonGpuCapability("mri_em_register/GCA", "FNIT PyTorch scorer + Python EM", "cuda", False,
                         "CUDA translation/linear scoring and Python EM have two raw-T1 empty-directory regressions (803aec50/0cd9cbd5); EM remains CPU and the strict pure-PyTorch GPU profile is not complete"),
     PythonGpuCapability("WM segmentation", "FNIT PyTorch/CPU hybrid", "cuda", False,
@@ -63,9 +63,9 @@ _BLOCKED: tuple[PythonGpuCapability, ...] = (
     PythonGpuCapability("inflate/remesh/intersection", "mixed", "cpu", False,
                         "complete standard Torch inflated/sulc is wired and raw-T1 tested (589e2749); nofix inflation, dynamic remesh and intersection still retain CPU/native components"),
     PythonGpuCapability("white.preaparc/final white", "Conda FreeSurfer C++", "cpu", False,
-                        "complete four-pass Python white.preaparc candidate and GPU substages exist; final-white annotation/rip branches and production replacement/native same-input/connected-chain acceptance remain incomplete"),
+                        "complete four-pass Python final white now matches four same-input original Conda references after label-rip correction; preaparc and pial step-norm precision are corrected; current production-fast timing and raw-T1 replacement acceptance are separate, with ordered CPU kernels still present"),
     PythonGpuCapability("pial placement", "FNIT Numba/Torch (opt-in) and Conda C++ default", "mixed cpu/cuda", False,
-                        "complete four-pass/39-step Python pial with GPU candidates and compiled ordered updates is validated (edaac8e7/eae29511); source cleanup ABBA 126.246 to 11.158 s, full phase still 221.206 vs native 138-141 s; CPU sampling/gradients/SOAP and pre-existing native geometry differences remain"),
+                        "complete four-pass Python pial with GPU candidates matches all four frozen Conda geometries after the float-sqrt correction (3644f50c); ordered CPU sampling/gradients/SOAP remain, paired production speed and raw-T1 replacement are not established; native default retained"),
     PythonGpuCapability("defects projection", "FNIT PyTorch (opt-in)", "cuda", False,
                         "complete projection is exact on two real frozen inputs; raw-T1 integration pending; topology GA is a separate blocked stage"),
     PythonGpuCapability("curvature statistics", "FNIT Torch discrete/principal maps (opt-in); Conda stats default", "mixed cpu/cuda", False,

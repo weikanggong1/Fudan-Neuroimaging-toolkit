@@ -1,0 +1,100 @@
+[
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_region_stats.py",
+      "--reference",
+      "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+      "--code-commit",
+      "79a41cdd:raw-T1:native-N4+ordered-Gibbs-numba+remesh-double-python;archive=e0a9a418669035f39f979e25cfb4b65e8cc93e200485eae7d93a2d22ddcfcaec",
+      "--output",
+      "$FNIT/runs/evaluate_gcsa_remesh_79a41cdd_sub07_official_20261010_v1/region_candidate_vs_official.json"
+    ],
+    "seconds": 0.22304585296660662,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_parcellation_dice.py",
+      "--reference",
+      "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+      "--code-commit",
+      "79a41cdd:raw-T1:native-N4+ordered-Gibbs-numba+remesh-double-python;archive=e0a9a418669035f39f979e25cfb4b65e8cc93e200485eae7d93a2d22ddcfcaec",
+      "--output",
+      "$FNIT/runs/evaluate_gcsa_remesh_79a41cdd_sub07_official_20261010_v1/dice_candidate_vs_official.json",
+      "--label-table",
+      "$FNIT/assets/recon_resources_20261009_v1/assets/FreeSurferColorLUT.txt"
+    ],
+    "seconds": 15.060168247669935,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py",
+      "--subject",
+      "$FNIT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+      "--output",
+      "$FNIT/runs/evaluate_gcsa_remesh_79a41cdd_sub07_official_20261010_v1/quality_candidate",
+      "--code-version",
+      "79a41cdd:raw-T1:native-N4+ordered-Gibbs-numba+remesh-double-python;archive=e0a9a418669035f39f979e25cfb4b65e8cc93e200485eae7d93a2d22ddcfcaec",
+      "--source-kind",
+      "fnit",
+      "--threads",
+      "4",
+      "--cross-timeout-seconds",
+      "180",
+      "--max-bbox-pairs",
+      "20000000"
+    ],
+    "seconds": 34.83130215574056,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py",
+      "--subject",
+      "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--output",
+      "$FNIT/runs/evaluate_gcsa_remesh_79a41cdd_sub07_official_20261010_v1/quality_official",
+      "--code-version",
+      "FreeSurfer 8.2.0 d932c45",
+      "--source-kind",
+      "official",
+      "--threads",
+      "4",
+      "--cross-timeout-seconds",
+      "180",
+      "--max-bbox-pairs",
+      "20000000"
+    ],
+    "seconds": 30.931533965282142,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/plot_recon_all_comparison.py",
+      "--reference",
+      "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+      "--region-report",
+      "$FNIT/runs/evaluate_gcsa_remesh_79a41cdd_sub07_official_20261010_v1/region_candidate_vs_official.json",
+      "--dice-report",
+      "$FNIT/runs/evaluate_gcsa_remesh_79a41cdd_sub07_official_20261010_v1/dice_candidate_vs_official.json",
+      "--output-dir",
+      "$FNIT/runs/evaluate_gcsa_remesh_79a41cdd_sub07_official_20261010_v1/figures",
+      "--code-commit",
+      "79a41cdd:raw-T1:native-N4+ordered-Gibbs-numba+remesh-double-python;archive=e0a9a418669035f39f979e25cfb4b65e8cc93e200485eae7d93a2d22ddcfcaec"
+    ],
+    "seconds": 5.621559311635792,
+    "exit_code": 0
+  }
+]

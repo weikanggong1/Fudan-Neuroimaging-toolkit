@@ -1,0 +1,42 @@
+{
+  "callable": "fnit.recon_all.native_free:_hemisphere_operation",
+  "operation": "annotation",
+  "kwargs": {
+    "assets": "$FNIT/assets/recon_resources_20261009_v1/assets",
+    "sphere_normals_backend": "numba",
+    "inflate_backend": "torch",
+    "sphere_finish_backend": "torch",
+    "annotation_gibbs_backend": "numba",
+    "remesh_scalar_storage": "python",
+    "binaries": {
+      "topology": "$FNIT/assets/recon_resources_20261009_v1/native/bin/mris_fix_topology_fnit",
+      "inflate": "$FNIT/assets/recon_resources_20261009_v1/native/bin/mris_inflate",
+      "intersection": "$FNIT/assets/recon_resources_20261009_v1/native/bin/mris_remove_intersection",
+      "metrics": "$FNIT/assets/recon_resources_20261009_v1/native/bin/mris_place_surface",
+      "white": "$FNIT/assets/recon_resources_20261009_v1/native/bin/mris_place_surface_white_fast",
+      "defect": "$FNIT/assets/recon_resources_20261009_v1/native/bin/mri_label2vol",
+      "paint": "$FNIT/assets/recon_resources_20261009_v1/native/bin/mrisp_paint"
+    },
+    "registration_atlases": {
+      "lh": "$FNIT/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+      "rh": "$FNIT/assets/recon_resources_20261009_v1/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif"
+    },
+    "subject": "$FNIT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/scripts/hemi-annotation-l7cer547/rh/subject",
+    "hemi": "rh",
+    "device": "cuda:0",
+    "threads": 2,
+    "operation": "annotation"
+  },
+  "device": "cuda:0",
+  "threads": 2,
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true
+  },
+  "profile_stages": true,
+  "allocator_policy": "disabled",
+  "ready_path": "$FNIT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/scripts/hemi-annotation-l7cer547/rh.1.ready.json",
+  "go_path": "$FNIT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/scripts/hemi-annotation-l7cer547/rh.1.go.json",
+  "parent_pid": 65980,
+  "startup_deadline_monotonic": 4352827.81891061
+}

@@ -340,9 +340,9 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 ## 5. 最新精度和运行时间
 
-最新已完成自产配对及官方评分的A100原始T1整例冻结为 `e34a1829`：完整dense GPU球面收尾接入后，两例CLI **2122.900/2056.372秒**。相对 `765c0fe9`，sub-06慢0.2653%、sub-07快0.2485%，没有测到可靠整例提速。完整138输出、16张同序表面、七张分割和68区统计保持；20/44顶点图有零容差尾差。实际官方严格复现仍为6/138、7/138，厚度MAE **0.044824/0.050676mm**，整体指标等效未判定；扩展穿越和球面负向面问题保留。完整阶段、实际官方指标、脑图、47.26/41.62GB整卡峰与任务归属未知的边界见[GPU球面收尾两例整例报告](../../validation/recon_all/optimizations/20261010_whole_sphere_finish_a100_e34a1829/README.md)。十分钟目标尚未达到，阶段收益不叠加成整例提速。
+最新完整自产配对及实际官方评分冻结为 **79a41cdd**：复用完整有序Numba Gibbs与CPU remesh双精度标量存储后，两例从原始T1/空目录连续完成，CLI **2718.390/2653.001秒**，完整harness **2737.822/2672.439秒**。相对同机同线程e34，本组慢28.0508%/29.0136%，没有整例提速；注释组缩短17.675/13.171秒，多个未改算法阶段也变慢，因果原因尚未隔离。138输出、生产网格、16张同序表面、七分割及68区统计保持，20/44顶点图有零容差尾差。实际官方严格复现仍6/138、7/138，厚度MAE **0.044824/0.050676mm**，整体等效未判定。完整阶段、544条逐区误差、实际官方距离/脑图、显存归属未知和安装范围见[本版两例完整报告](../../validation/recon_all/optimizations/20261010_whole_gcsa_remesh_a100_79a41cdd/README.md)，[变慢分解](../../validation/recon_all/optimizations/20261010_gcsa_remesh_runtime_diagnostics/README.md)保留全部观察。默认仍为旧Gibbs/remesh后端，十分钟与纯PyTorch目标尚未达到。
 
-后续完整Torch N4的原始连续链已检查到filled：少量N4量化差异在注册/归一化与WM链放大，默认仍为ITK；完整结果见[本次前段诊断](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)。
+后续完整Torch N4的原始连续链已检查到filled：少量N4量化差异在注册/归一化与WM链放大，默认仍为ITK；完整结果见[本次前段诊断](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)。 新增[两例四输入交叉归因](../../validation/recon_all/optimizations/20261010_n4_gca_cross_inputs/README.md)及[完整下游/失败形状诊断](N4_WHOLE_DIAGNOSTICS_20261010.md)：sub07仍因RH white自相交10面失败，诊断恢复不改变生产失败状态。[最终white实验接口](PYTHON_FINAL_WHITE.md)四侧匹配当前生产程序，但原始整例替换尚未测。
 
 2026-10-09 A100 整例冻结 `803aec50`：两例原始T1空目录控制/候选均完成，CLI **6137.234→2255.064秒、6040.677→2281.571秒**，同硬件/四线程配对提速 **2.72×、2.65×**。四次138输出与生产网格完整；新旧138项容差比较通过，有序面、表面坐标、分割及68区统计相同，零容差顶点图尾差仍完整保留。与官方严格复现为6/138、7/138，整体指标等效未判定。全部阶段、官方误差、局部质量、显存限制和脑图见[两例完整配对结果](../../validation/recon_all/optimizations/20261009_whole_pair_a100_803aec50/README.md)。该整例未包含后续N4、WM和GPU归一化实验；新接线的整例另行验证，十分钟目标尚未达到。
 
@@ -382,6 +382,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-10 | 79a41cdd / A100 | 完整有序Gibbs与remesh容器候选；默认不变 | [两例真实完整对照/官方评分](../../validation/recon_all/optimizations/20261010_whole_gcsa_remesh_a100_79a41cdd/README.md)：2718.390/2653.001秒，本组慢28–29%，同序几何/分区/统计保持，因果未隔离 |
 | 2026-10-10 | e34a1829 / A100 | 完整dense GPU球面收尾；其余规则保持 | [两例原始T1完整对照与实际官方评分](../../validation/recon_all/optimizations/20261010_whole_sphere_finish_a100_e34a1829/README.md)：2122.900/2056.372秒，无可靠整例提速，指标/有序几何保持 |
 | 2026-10-09 | 765c0fe9 / A100 | 完整MNI与末尾CPU网格检查并行 | [两例原始T1完整结果](../../validation/recon_all/optimizations/20261009_whole_late_mni_a100_765c0fe9/README.md)：2117.283/2061.494秒，相对589缩短1.148%/2.344% |
 | 2026-10-09 | 589e2749 / A100 | 完整PyTorch标准inflation接入、只启用surface worker缓存；nofix和后续算法保持 | [两例原始T1整例与官方回归](../../validation/recon_all/optimizations/20261009_whole_inflate_a100_589e2749/README.md)：2141.872/2110.975秒，比0cd9缩短0.464%/0.859%；16表面/标签/脑区统计相同，局部质量问题保留 |

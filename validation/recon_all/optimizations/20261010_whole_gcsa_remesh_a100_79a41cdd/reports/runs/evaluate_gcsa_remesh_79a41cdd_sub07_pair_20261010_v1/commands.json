@@ -1,0 +1,36 @@
+[
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_region_stats.py",
+      "--reference",
+      "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+      "--code-commit",
+      "79a41cdd:raw-T1:native-N4+ordered-Gibbs-numba+remesh-double-python;archive=e0a9a418669035f39f979e25cfb4b65e8cc93e200485eae7d93a2d22ddcfcaec",
+      "--output",
+      "$FNIT/runs/evaluate_gcsa_remesh_79a41cdd_sub07_pair_20261010_v1/region_candidate_vs_control.json"
+    ],
+    "seconds": 0.3180657271295786,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_parcellation_dice.py",
+      "--reference",
+      "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+      "--code-commit",
+      "79a41cdd:raw-T1:native-N4+ordered-Gibbs-numba+remesh-double-python;archive=e0a9a418669035f39f979e25cfb4b65e8cc93e200485eae7d93a2d22ddcfcaec",
+      "--output",
+      "$FNIT/runs/evaluate_gcsa_remesh_79a41cdd_sub07_pair_20261010_v1/dice_candidate_vs_control.json",
+      "--label-table",
+      "$FNIT/assets/recon_resources_20261009_v1/assets/FreeSurferColorLUT.txt"
+    ],
+    "seconds": 14.778694337233901,
+    "exit_code": 0
+  }
+]

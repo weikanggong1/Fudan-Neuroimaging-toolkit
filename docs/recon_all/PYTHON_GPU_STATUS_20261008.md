@@ -2,7 +2,7 @@
 
 ## 1. 功能与支持范围
 
-入口核对版本为 `79a41cdd`；本页最近完成自产配对及官方评分的两例原始 T1 benchmark 冻结为 `e34a1829`。二者分别记录代码接线和实际影像运行，不能混为同一测试版本。当前可运行的是完整单 T1 混合流程；严格 `backend="python-gpu"` 仍未开放。
+最近两例完整原始T1、自产配对及实际官方评分均冻结为 `79a41cdd`；最终white独立同输入接口另绑定 `6de797b4` 和 `617d496a`。交付说明与实际影像运行分别绑定，不追标后续提交。当前可运行的是完整单 T1 混合流程；严格 `backend="python-gpu"` 仍未开放。
 
 ```mermaid
 flowchart LR
@@ -17,7 +17,7 @@ flowchart LR
 | 阶段 | 已有实现与生产接入 | 尚存边界 |
 |---|---|---|
 | conform、SynthStrip、affine、SynthSeg、brainmask | FNIT PyTorch CUDA；保留已验证 FP32 例外 | 网络实际前向精度单独记录，不启用半精度 |
-| 完整固定 N4 | 已有完整四层、最多 200 次反馈的 Torch 实验后端；可用隔离缓存 worker | 两例raw整例已运行：sub06完成2148.430秒，sub07最终RH white自相交10面而失败；默认Conda ITK，官方/形状诊断进行中 |
+| 完整固定 N4 | 已有完整四层、最多 200 次反馈的 Torch 实验后端；可用隔离缓存 worker | 两例raw整例及官方/形状诊断已完成：sub06完成2148.430秒，sub07原生产因RH white自相交10面失败，RH sphere/sphere.reg负向面103/95；默认Conda ITK |
 | 两轮归一化 | 已有 GPU 邻域和第二轮初始偏置，显式后端；0cd9 两例原始 T1 整例回归通过 | 有序控制选择、距离和部分偏置步骤仍在 CPU |
 | 完整 GCA/EM | 候选评分与批量求逆用 Torch，隔离缓存 worker 已有两例原始 T1 回归 | EM 顺序更新仍在 CPU；不是纯 GPU |
 | 完整 WM segmentation | Torch 直方图、平面几何与有序 CPU 核心；完整文件 API、缓存隔离已测 | 对 native 仍有 64/235 个 uint8 差异；默认 native，整例替换尚待测 |
@@ -26,7 +26,7 @@ flowchart LR
 | 标准 inflated/sulc | 完整 Torch 后端已接入；589 两例原始 T1 整例回归通过 | nofix inflation 默认 native |
 | 标准 sphere 与配准 | 已有 GPU 有序法向/平均；完整 dense GPU 收尾已接入显式选项 | 主优化仍有 CPU；同输入完整链与e34两例整例均已测；未观察到可靠整例提速 |
 | 拓扑 GA / remesh / intersection | GA保留固定源码Conda C++；remesh为Python/Numba，双精度存储候选四侧同输入保持并已接入口 | 动态拓扑转写仍未完成，不以投射缺陷代替拓扑修复 |
-| white.preaparc / final white / pial | 预白质与pial已有完整四轮Python候选及GPU子阶段；生产默认独立Conda构建 | 最终white的annotation/rip分支尚未转写；预白质不能替代final white。候选同输入精度/性能持续验证 |
+| white.preaparc / final white / pial | 预白质与pial已有完整四轮Python候选及GPU子阶段；生产默认独立Conda构建 | 完整最终white已补齐annotation/rip语义，两例四侧同输入坐标、面与MRI匹配标准及当前production-fast程序；候选仍含有序CPU核，生产接线/配对速度与原始整例替换另测 |
 | 缺陷体积投射 | 完整 Torch 显式后端，两例冻结双侧标签及空间一致 | 约 3 秒的完整 GPU API 无稳定收益；原始 T1 接入另测 |
 | 厚度/面积/平均曲率与统计 | CUDA默认复用自有Torch顶点图函数；多图谱统计缓存与TH3顶点体积已接入 | CPU设备仍用原生顶点图；smoothwm曲率衍生图/curv.stats尚有C++。TH3不替代-no-th3脑区体积 |
 | MNI 非线性与后处理 | FNIT GPU 实现；parallel-late 已接入、保持完整算法 | 两例完整组 ABBA 与原始 T1 765 整例、独立官方评分均已完成 |
@@ -67,26 +67,30 @@ recon-all -i input/T1w.nii.gz -s subject -sd reference -all -openmp 4
 
 ## 5. 最新真实精度、时间与显存
 
-e34两例原始T1、新空目录、同A100/四线程完整CLI为 **2122.900/2056.372秒**；相对765分别慢0.2653%/快0.2485%，没有可靠整例提速。138输出与生产网格通过；新旧16张有序表面、七张标签和68区统计保持，20/44顶点图有零容差尾差。实际官方严格复现仍为6/138、7/138；五组完整指标逐字段与765相同，整体指标等效未判定，扩展穿越/球面负向面异常保留。
+79两例原始T1、新空目录、同A100/四线程完整CLI为 **2718.390/2653.001秒**，完整harness2737.822/2672.439秒；相对e34慢28.0508%/29.0136%，本轮没有整例提速。138输出与生产网格通过；新旧16张有序表面、七张标签与68区统计相同，20/44顶点图有零容差尾差。实际官方严格诊断6/138、7/138；五组数值指标与e34相同，来源文件SHA变动单独保留，整体等效未判定。
 
-| e34当前阶段墙钟，秒 | sub-06 | sub-07 |
+| 79当前阶段墙钟，秒 | sub-06 | sub-07 |
 |---|---:|---:|
-| N4 | 171.212 | 168.317 |
-| 初始双侧表面组 | 687.041 | 728.750 |
-| 双侧球面配准组 | 281.788 | 288.875 |
-| 双侧注释组 | 103.918 | 89.796 |
-| 双侧最终white/pial组 | 377.466 | 308.161 |
-| 末尾MNI/网格并行组 | 81.871 | 72.544 |
+| N4 | 199.539 | 200.376 |
+| 初始双侧表面组 | 903.320 | 970.375 |
+| 双侧球面配准组 | 375.839 | 390.971 |
+| 双侧注释组 | 86.243 | 76.625 |
+| 双侧最终white/pial组 | 475.841 | 388.259 |
+| 末尾MNI/网格并行组 | 91.467 | 82.480 |
 
-组内时间重叠，不累加成整例；全部输入、源码/程序SHA、线程和精度保存。目标整卡峰47.255/41.619GB包含其他共享任务，树归属未知，父子合计峰为null，最大采样间隔7.933/6.198秒；尚未证明FNIT连续20GB预算。完整官方指标、局部距离、脑图与采样见[e34两例完整报告](../../validation/recon_all/optimizations/20261010_whole_sphere_finish_a100_e34a1829/README.md)。十分钟与纯PyTorch全流程均未完成。
+组内时间重叠不累加。注释组缩短17.675/13.171秒，但未改算法的N4、GA、white和配准等同时变慢；[只读分解](../../validation/recon_all/optimizations/20261010_gcsa_remesh_runtime_diagnostics/README.md)显示球面决策轨迹与解码几何完全同，当前40CPU容器配额不能证明历史限流因果。目标整卡峰44.770/26.930GB包含共享任务，树归属未知，父子合计峰null，实际最大采样间隔7.936/8.080秒；连续20GB预算未证明。[本版完整报告](../../validation/recon_all/optimizations/20261010_whole_gcsa_remesh_a100_79a41cdd/README.md)含实际官方距离、544条逐区记录、局部异常及脑图；默认后端不变，十分钟与纯PyTorch目标仍未完成。
 
 标准 dense GPU 收尾在已实现 inflation→sphere 完整冷链中为 245.389→173.390 秒，全部逐步轨迹和有序输出相同；这是阶段证据，不能叠加成整例提速。完整 N4 与 WM 的既有实验差异见[N4](N4_COMPLETE_TORCH_20261009.md)、[WM](WM_PLANAR_TORCH.md)，不将其近似解释为随机性。
 
 完整缓存Torch N4在e34的原始连续前段中，nu0不同4016/3259体素、最大1；filled则不同4671/2291体素，最低半球Dice0.995364/0.997221。此处T1、brainmask、norm、brain和WM的局部放大均[单独保留](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)，不能按N4 P99为零认定其下游无影响，尚未判整体等效。
 
+本次[四组交叉输入归因](../../validation/recon_all/optimizations/20261010_n4_gca_cross_inputs/README.md)已完成两例：原生程序控制重复LTA、norm与控制图均为零差异；只改掩膜不影响最终LTA/norm。sub06的强度变动在既有Torch注册中改变4个矩阵元素并放大归一化，sub07没有相同注册放大，不能一概归因随机性。[完整下游诊断](N4_WHOLE_DIAGNOSTICS_20261010.md)保留失败和不同网格的双向三角面距离。
+
+[完整最终white接口](PYTHON_FINAL_WHITE.md)补齐cortex/aparc与独立rip-surface语义；共享步长范数的float sqrt顺序已修复。四侧完整候选与标准及当前生产程序解码几何/MRI均0差异；跨时段单次计时尚不能证明稳定速度，默认保持原生，严格pure profile仍blocked。
+
 ## 6. 更新和 benchmark 记录
 
-- 79a41cdd：复用已有完整有序Numba Gibbs与CPU双精度remesh存储，61入口契约通过，两例原始T1空目录整例运行中；不追标到e34结果。
+- 79a41cdd：复用已有完整有序Numba Gibbs与CPU双精度remesh存储，61入口契约及553模块安装通过，两例原始T1整例、自产配对、实际官方评分均完成；实际2718.390/2653.001秒，本组没有整例提速，默认不变。
 - e34a1829：完整GPU收尾两例原始T1与实际官方评分均完成；45入口契约及独立wheel安装通过；仍采用 dense 算法，实验 marked 更新独立保留。更新 capability 的说明，ready/blocked 和 fail-fast 行为未变。
 - 765c0fe9：[完整MNI末尾并行的两例原始T1及实际官方评分](../../validation/recon_all/optimizations/20261009_whole_late_mni_a100_765c0fe9/README.md)，保留MNI正逆场与完整网格门。
 - 589e2749：完整标准 Torch inflation 的两例原始 T1 回归；旧性能、官方误差与局部质量分别记录。
