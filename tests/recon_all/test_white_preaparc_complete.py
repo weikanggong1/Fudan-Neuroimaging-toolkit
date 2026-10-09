@@ -148,11 +148,29 @@ def test_incomplete_four_passes_and_residual_intersections_do_not_write(white_in
     with pytest.raises(RuntimeError, match="did not complete four passes"):
         stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=output, max_steps=3)
     assert not output.exists()
+    observed["rip"].clear()
     monkeypatch.setattr(stage, "repair_intersections", lambda vertices, *a:
                         (vertices, {"intersecting_faces_after": 2}))
-    with pytest.raises(RuntimeError, match="initialization"):
+    with pytest.raises(RuntimeError, match="white cleanup") as error:
         stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=output)
+    assert error.value.intersection_cleanup["initial"]["intersecting_faces_after"] == 2
+    assert error.value.intersection_cleanup["final"]["intersecting_faces_after"] == 2
     assert not output.exists()
+
+
+def test_initial_residual_continues_placement_but_final_mesh_must_be_clear(white_inputs, monkeypatch):
+    subject, xyz, faces, observed = white_inputs
+    output = subject / "diagnostic/white"
+    cleanups = iter(({"intersecting_faces_after": 2}, {"intersecting_faces_after": 0}))
+    monkeypatch.setattr(stage, "repair_intersections", lambda vertices, *a: (vertices, next(cleanups)))
+    monkeypatch.setattr(stage, "pial_step_decision", lambda ls, lr, s, r, dt, red:
+                        (dt * .5, red + 1, True, True, red + 1 > 2))
+    result = stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=output)
+    assert result["complete_four_passes"]
+    assert len(result["passes"]) == 4
+    assert result["initial_cleanup"]["intersecting_faces_after"] == 2
+    assert result["cleanup"]["intersecting_faces_after"] == 0
+    assert output.exists()
 
 
 def test_prefix_preserves_original_rejected_stop_failure(white_inputs, monkeypatch):

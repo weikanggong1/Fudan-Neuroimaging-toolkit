@@ -1,0 +1,132 @@
+{
+  "scope": "partial_real_ordered_dynamic_triangle_pairs_replay_only",
+  "hostname": "same_cfff_a100_node_anonymized",
+  "code_commit": "a756fffb",
+  "device": "cuda:0",
+  "threads": 4,
+  "python_executable": "FNIT_ENV/bin/python",
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "autocast": false,
+  "precision_exception": "source float64 geometry from float32 mesh",
+  "reference": "same-input Numba placement Moller predicate",
+  "predicate_differences_allowed_before_run": 0,
+  "limitations": [
+    "partial captured pairs, not complete first trial or complete pial",
+    "does not validate live GPU vertex acceptance",
+    "official full-stage repeat and comparison reported separately"
+  ],
+  "chunks": [
+    {
+      "input_sha256": "b3f1fa06224f22b65eb35557884e3623a4cf293c5723e06b989aa23fba2ac02c",
+      "pairs": 65572,
+      "different_predicates": 0,
+      "source_hits": 491,
+      "cold_source_seconds": 3.6702413223683834,
+      "cold_torch_seconds": 1.2414013724774122,
+      "paired": [
+        {
+          "backend": "source",
+          "seconds": 0.039496636018157005,
+          "boolean_sha256": "d6e1a6e6ab96eee5337be2a12aeb563ff9eccad0b2a5f6623fcc8ce4cc858da2"
+        },
+        {
+          "backend": "torch",
+          "seconds": 0.015973581932485104,
+          "boolean_sha256": "d6e1a6e6ab96eee5337be2a12aeb563ff9eccad0b2a5f6623fcc8ce4cc858da2"
+        },
+        {
+          "backend": "torch",
+          "seconds": 0.015404489822685719,
+          "boolean_sha256": "d6e1a6e6ab96eee5337be2a12aeb563ff9eccad0b2a5f6623fcc8ce4cc858da2"
+        },
+        {
+          "backend": "source",
+          "seconds": 0.039384166710078716,
+          "boolean_sha256": "d6e1a6e6ab96eee5337be2a12aeb563ff9eccad0b2a5f6623fcc8ce4cc858da2"
+        }
+      ],
+      "median_seconds": {
+        "source": 0.03944040136411786,
+        "torch": 0.01568903587758541
+      },
+      "speed_ratio_source_over_torch": 2.513883050039137,
+      "diagnostic": {
+        "pairs": 65572,
+        "source_rechecked_pairs": 0,
+        "dtype": "float64 geometry from float32 vertices",
+        "device": "cuda:0",
+        "chunk_size": 65536,
+        "source_recheck": true,
+        "input_transfer_scope": "one_chunk_at_a_time",
+        "changes_vertex_update_order": false
+      },
+      "peak_allocated_bytes": 51184128,
+      "peak_reserved_bytes": 56623104
+    },
+    {
+      "input_sha256": "108bc0de118e64f283adc70bb2496d2735b90a3a6f62effd709b7987fc811f1d",
+      "pairs": 65536,
+      "different_predicates": 0,
+      "source_hits": 373,
+      "cold_source_seconds": 0.039520987309515476,
+      "cold_torch_seconds": 0.008573081344366074,
+      "paired": [
+        {
+          "backend": "source",
+          "seconds": 0.0401143878698349,
+          "boolean_sha256": "d09575c9a1fbd9dfc2587ba3e671391a6c8d7c3dfa5b4be84ce9dbb4e8a416ab"
+        },
+        {
+          "backend": "torch",
+          "seconds": 0.008421128615736961,
+          "boolean_sha256": "d09575c9a1fbd9dfc2587ba3e671391a6c8d7c3dfa5b4be84ce9dbb4e8a416ab"
+        },
+        {
+          "backend": "torch",
+          "seconds": 0.007987866178154945,
+          "boolean_sha256": "d09575c9a1fbd9dfc2587ba3e671391a6c8d7c3dfa5b4be84ce9dbb4e8a416ab"
+        },
+        {
+          "backend": "source",
+          "seconds": 0.03954051434993744,
+          "boolean_sha256": "d09575c9a1fbd9dfc2587ba3e671391a6c8d7c3dfa5b4be84ce9dbb4e8a416ab"
+        }
+      ],
+      "median_seconds": {
+        "source": 0.03982745110988617,
+        "torch": 0.008204497396945953
+      },
+      "speed_ratio_source_over_torch": 4.854343804741966,
+      "diagnostic": {
+        "pairs": 65536,
+        "source_rechecked_pairs": 0,
+        "dtype": "float64 geometry from float32 vertices",
+        "device": "cuda:0",
+        "chunk_size": 65536,
+        "source_recheck": true,
+        "input_transfer_scope": "one_chunk_at_a_time",
+        "changes_vertex_update_order": false
+      },
+      "peak_allocated_bytes": 51183616,
+      "peak_reserved_bytes": 56623104
+    }
+  ],
+  "source_sha256": {
+    "place_surface_collision_torch.py": "adac1598f162d5c0fb27afeac6d8625c8da7d66ae781205c1153b00403ba799a",
+    "place_surface_collision.py": "97506203743d40959df2ad040dc1567d9d358e03b7713cf1a5e7c197022c938d"
+  },
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz",
+  "affinity_cpu_count": 4,
+  "execution_status": "complete",
+  "total_pairs": 131108,
+  "total_different_predicates": 0,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "cuda_initialized": true,
+  "whole_process_gpu_memory": "not measured; allocator only if CUDA target",
+  "raw_report_sha256": "77fa011a32a61c2b6c894c6642eb5f5ac753f89a1048824b482409f2062ec71b",
+  "public_receipt": "infrastructure location anonymized; numerical values/source/input hashes retained"
+}

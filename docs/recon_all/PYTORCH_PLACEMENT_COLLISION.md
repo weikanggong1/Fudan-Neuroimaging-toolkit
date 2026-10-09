@@ -130,8 +130,34 @@ python validation/recon_all/python_gpu_port/benchmark_placement_collision_trial_
 有序接受。可选`--historical-reference`只在计算完成后比较，不参与候选或
 接受；不同主机的历史差异独立记录。输出冷pair、热ABBA、实际坐标/动量/
 接受顺序、候选诊断、源码和输入SHA。完整首试步与面对谓词回放仍分开
-报告；这也不是完整四轮或整例验收。当前脚本已完成语法/CLI检查，真实
-GPU完整当轮回放仍待验证。
+报告；这也不是完整四轮或整例验收。真实sub-07 LH完整当轮回放结果见下。
+
+需要同时记录进程显存时，可用标准库监测器包裹上述命令：
+
+```bash
+CUDA_VISIBLE_DEVICES=2 \
+python validation/recon_all/python_gpu_port/monitor_placement_benchmark.py \
+  --physical-gpu 2 \
+  --output /data/runs/collision-first-trial-v1-memory.json \
+  --interval-seconds 0.25 \
+  -- python validation/recon_all/python_gpu_port/benchmark_placement_collision_trial_replay.py \
+     --input /data/frozen/first_trial_input.npz \
+     --candidate-directory /data/frozen-code/src/fnit/recon_all \
+     --output-directory /data/runs/collision-first-trial-v1 \
+     --code-commit ACTUAL_TESTED_COMMIT --device cuda:0 --threads 4
+```
+
+`--physical-gpu`是机器物理编号，`CUDA_VISIBLE_DEVICES`映射后的`cuda:0`是
+内部计算设备；二者都要明确指定。`--output`是新JSON路径，记录命令、代码
+SHA、分配缓存环境、每次采样的目标设备总占用和本次命令父子进程的合计
+占用；`--interval-seconds`默认0.25秒，实际间隔和查询成本同时保存。
+`--`后是完整benchmark命令。使用系统GPU驱动附带的`nvidia-smi`，不增加
+Python依赖。采样值以整数MiB保存，乘以1,048,576换算字节；这是同时占用
+的采样峰值，可能遗漏短峰。查询错误单列，不以零替代。命令非零退出码
+原样传播，已有报告路径会报错。外部报告与阶段allocator计数一起解读；
+不能将各进程不同时间的最大值相加。
+若驱动PID与容器PID无法对应，进程树字段为`null`，记录归属未解决；
+此时只用同期设备总占用作为显存上界，不解释为本次任务零显存。
 
 ## 4. 原软件对应
 
@@ -142,6 +168,32 @@ GPU完整当轮回放仍待验证。
 预装FreeSurfer，也不读取官方结果。官方参考只能由独立benchmark产生。
 
 ## 5. 当前精度与耗时
+
+最新同输入GPU测试在同一A100-SXM4-80GB节点、Xeon Platinum8369B、
+四线程、固定CPU8–11和物理GPU2完成，实际算法源`a756fffb`及逐文件SHA
+绑定报告。CPU与GPU都重新计算，不读取保存的参考接受状态。
+
+| 实测范围 | 原CPU热ABBA中位数 | GPU候选热ABBA中位数 | 加速 | 不同输出 |
+|---|---:|---:|---:|---:|
+| 65,572对真实面对谓词 | 0.039440 s | 0.015689 s | 2.514倍 | 0 |
+| 65,536对真实面对谓词 | 0.039827 s | 0.008204 s | 4.854倍 | 0 |
+| sub-07 LH完整首试步，有序接受 | 15.053547 s | 3.423716 s | 4.397倍 | 0 |
+
+前两行共131,108对，源判断相交864对，GPU边界CPU复核0对，分别见
+[面对完整报告](../../validation/recon_all/optimizations/20261009_placement_torch/collision_replay_a100_gpu2_v1.json)。
+完整首试步为114,342顶点、228,680面，输出坐标、接受offsets及108,597顶点
+接受顺序全部逐项相同；冷pair和热ABBA均通过。GPU完整候选10,527,436对，
+热候选建立约2.01秒，有序实时接受约1.13秒，GPU宽相位没有截断候选。
+历史H100同输入检查点比较也为0差异，作为跨环境结果单列，见
+[完整当轮报告](../../validation/recon_all/optimizations/20261009_placement_torch/collision_first_trial_a100_gpu2_v1.json)。
+这项计时包括本轮索引建立、传输、顺序接受及结果回传，MRI准备和四轮
+placement未包含其中；不能据此宣称完整pial、white或recon-all提速。
+
+外部显存采样请求250ms，面对/完整首试步目标卡同期峰值分别553/1,937MiB，
+后者为2,031,091,712字节。容器驱动PID归属未能解析，原监测器的进程树0
+值不可解释为零显存；保留私有原报告，公开解释报告将未归属值记为`null`，
+并记录原报告SHA。采样可能漏掉短峰，allocator计数另见每次运行，见
+[外部显存报告](../../validation/recon_all/optimizations/20261009_placement_torch/collision_memory_a100_gpu2_v1.json)。
 
 CPU算子和有序首试步单元回归7/7通过，包含阈值两侧、共面、接触、退化、
 零半径、完整候选、投影、rip和retained-MHT回退。模拟几何用于排错；

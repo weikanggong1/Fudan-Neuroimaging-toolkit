@@ -1,0 +1,226 @@
+{
+  "scope": "complete_frozen_real_first_collision_trial_ordered_acceptance_only",
+  "hostname": "same_cfff_a100_node_anonymized",
+  "threads": 4,
+  "device": "cuda:0",
+  "cpu_affinity_count": 4,
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "code_commit": "a756fffb",
+  "input_sha256": "cff532fca2edcd852cb7834fc5a66cfe779efc9137df58e5c66163a34510a6b0",
+  "script_sha256": "a12a7e5bca3b559fc18d1172335decd913c61fda2ee40ef3c6923abf73334b1b",
+  "source_sha256": {
+    "place_surface_collision.py": "97506203743d40959df2ad040dc1567d9d358e03b7713cf1a5e7c197022c938d",
+    "place_surface_candidates_torch.py": "3b3110ca9d4c520f972d7c7fb7d710556aea4d1b6689e40cdc4d02daa120438b",
+    "place_surface_snapshot.py": "d1bf437b0c889639e3a4b9099cc670e92521ebceabead30b3943962e8e5779ff"
+  },
+  "tolerance_before_run": {
+    "coordinate_mm": 0,
+    "acceptance_offsets": 0,
+    "order": 0
+  },
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "half_precision": false,
+  "strategy": "GPU conservative widephase followed by unchanged live ordered Numba narrowphase",
+  "reference": "same-host current tree implementation; saved H100 reference reported separately",
+  "full_pial": "not_run",
+  "whole_recon_all": "not_run",
+  "overall_metric_equivalence": "not_assessed",
+  "process_memory": "not_measured; only target-device allocator counters",
+  "runs": [
+    {
+      "kind": "cold",
+      "backend": "tree",
+      "seconds": 19.493360448628664,
+      "diagnostics": {
+        "effective_candidate_backend": "tree"
+      },
+      "coordinate_sha256": "d74483e33aef1c7f5352e7c908a05358047bb4f7b9dfca9272802783ee08a32e",
+      "order_sha256": "f68b4eaeb606545f0bb0a6b3257b70b15cc608e19a8a15df01b5f8a384c6dc18",
+      "accepted_offset_sha256": "a53af567b5130be1cd2ae3bd7cbe37141d351b92a17396d1563b0ef267488c7d",
+      "peak_allocated_bytes": 0,
+      "peak_reserved_bytes": 0
+    },
+    {
+      "kind": "cold",
+      "backend": "torch_snapshot",
+      "seconds": 5.295552419498563,
+      "diagnostics": {
+        "source_faces": 228680,
+        "query_faces": 228680,
+        "device": "cuda:0",
+        "query_chunk_size": 2048,
+        "maximum_chunk_candidates": 4000000,
+        "bbox_motion_bound_mm": 0.6100079219502047,
+        "excludes_shared_vertices": true,
+        "candidate_truncation": false,
+        "grid_candidates": 1586531836,
+        "sphere_candidates": 109124833,
+        "retained_candidates": 10527436,
+        "adaptive_chunk_reductions": 1002,
+        "grid_cell_width_mm": 15.3527912919334,
+        "candidate_build_seconds": 2.750059947371483,
+        "motion_bound_mm": 0.6100079219502047,
+        "candidate_pairs": 10527436,
+        "effective_candidate_backend": "torch_snapshot",
+        "ordered_acceptance_seconds": 2.2684215400367975
+      },
+      "coordinate_sha256": "d74483e33aef1c7f5352e7c908a05358047bb4f7b9dfca9272802783ee08a32e",
+      "order_sha256": "f68b4eaeb606545f0bb0a6b3257b70b15cc608e19a8a15df01b5f8a384c6dc18",
+      "accepted_offset_sha256": "a53af567b5130be1cd2ae3bd7cbe37141d351b92a17396d1563b0ef267488c7d",
+      "peak_allocated_bytes": 697693184,
+      "peak_reserved_bytes": 1507852288
+    },
+    {
+      "kind": "paired",
+      "backend": "tree",
+      "seconds": 15.099101551808417,
+      "diagnostics": {
+        "effective_candidate_backend": "tree"
+      },
+      "coordinate_sha256": "d74483e33aef1c7f5352e7c908a05358047bb4f7b9dfca9272802783ee08a32e",
+      "order_sha256": "f68b4eaeb606545f0bb0a6b3257b70b15cc608e19a8a15df01b5f8a384c6dc18",
+      "accepted_offset_sha256": "a53af567b5130be1cd2ae3bd7cbe37141d351b92a17396d1563b0ef267488c7d",
+      "peak_allocated_bytes": 0,
+      "peak_reserved_bytes": 1507852288
+    },
+    {
+      "kind": "paired",
+      "backend": "torch_snapshot",
+      "seconds": 3.427152586169541,
+      "diagnostics": {
+        "source_faces": 228680,
+        "query_faces": 228680,
+        "device": "cuda:0",
+        "query_chunk_size": 2048,
+        "maximum_chunk_candidates": 4000000,
+        "bbox_motion_bound_mm": 0.6100079219502047,
+        "excludes_shared_vertices": true,
+        "candidate_truncation": false,
+        "grid_candidates": 1586531836,
+        "sphere_candidates": 109124833,
+        "retained_candidates": 10527436,
+        "adaptive_chunk_reductions": 1002,
+        "grid_cell_width_mm": 15.3527912919334,
+        "candidate_build_seconds": 2.01382171548903,
+        "motion_bound_mm": 0.6100079219502047,
+        "candidate_pairs": 10527436,
+        "effective_candidate_backend": "torch_snapshot",
+        "ordered_acceptance_seconds": 1.1357197631150484
+      },
+      "coordinate_sha256": "d74483e33aef1c7f5352e7c908a05358047bb4f7b9dfca9272802783ee08a32e",
+      "order_sha256": "f68b4eaeb606545f0bb0a6b3257b70b15cc608e19a8a15df01b5f8a384c6dc18",
+      "accepted_offset_sha256": "a53af567b5130be1cd2ae3bd7cbe37141d351b92a17396d1563b0ef267488c7d",
+      "peak_allocated_bytes": 697693184,
+      "peak_reserved_bytes": 1507852288
+    },
+    {
+      "kind": "paired",
+      "backend": "torch_snapshot",
+      "seconds": 3.420278479345143,
+      "diagnostics": {
+        "source_faces": 228680,
+        "query_faces": 228680,
+        "device": "cuda:0",
+        "query_chunk_size": 2048,
+        "maximum_chunk_candidates": 4000000,
+        "bbox_motion_bound_mm": 0.6100079219502047,
+        "excludes_shared_vertices": true,
+        "candidate_truncation": false,
+        "grid_candidates": 1586531836,
+        "sphere_candidates": 109124833,
+        "retained_candidates": 10527436,
+        "adaptive_chunk_reductions": 1002,
+        "grid_cell_width_mm": 15.3527912919334,
+        "candidate_build_seconds": 2.010877682827413,
+        "motion_bound_mm": 0.6100079219502047,
+        "candidate_pairs": 10527436,
+        "effective_candidate_backend": "torch_snapshot",
+        "ordered_acceptance_seconds": 1.1294747730717063
+      },
+      "coordinate_sha256": "d74483e33aef1c7f5352e7c908a05358047bb4f7b9dfca9272802783ee08a32e",
+      "order_sha256": "f68b4eaeb606545f0bb0a6b3257b70b15cc608e19a8a15df01b5f8a384c6dc18",
+      "accepted_offset_sha256": "a53af567b5130be1cd2ae3bd7cbe37141d351b92a17396d1563b0ef267488c7d",
+      "peak_allocated_bytes": 697693184,
+      "peak_reserved_bytes": 1507852288
+    },
+    {
+      "kind": "paired",
+      "backend": "tree",
+      "seconds": 15.00799304805696,
+      "diagnostics": {
+        "effective_candidate_backend": "tree"
+      },
+      "coordinate_sha256": "d74483e33aef1c7f5352e7c908a05358047bb4f7b9dfca9272802783ee08a32e",
+      "order_sha256": "f68b4eaeb606545f0bb0a6b3257b70b15cc608e19a8a15df01b5f8a384c6dc18",
+      "accepted_offset_sha256": "a53af567b5130be1cd2ae3bd7cbe37141d351b92a17396d1563b0ef267488c7d",
+      "peak_allocated_bytes": 0,
+      "peak_reserved_bytes": 1507852288
+    }
+  ],
+  "vertices": 114342,
+  "faces": 228680,
+  "execution_status": "complete",
+  "cuda_context_setup_seconds": 1.8621966550126672,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "cold_comparison": {
+    "different_coordinate_elements": 0,
+    "max_coordinate_difference_mm": 0.0,
+    "different_order_elements": 0,
+    "same_order": true,
+    "different_accepted_offset_elements": 0
+  },
+  "paired_comparison_to_cold_tree": [
+    {
+      "backend": "tree",
+      "different_coordinate_elements": 0,
+      "max_coordinate_difference_mm": 0.0,
+      "different_order_elements": 0,
+      "same_order": true,
+      "different_accepted_offset_elements": 0
+    },
+    {
+      "backend": "torch_snapshot",
+      "different_coordinate_elements": 0,
+      "max_coordinate_difference_mm": 0.0,
+      "different_order_elements": 0,
+      "same_order": true,
+      "different_accepted_offset_elements": 0
+    },
+    {
+      "backend": "torch_snapshot",
+      "different_coordinate_elements": 0,
+      "max_coordinate_difference_mm": 0.0,
+      "different_order_elements": 0,
+      "same_order": true,
+      "different_accepted_offset_elements": 0
+    },
+    {
+      "backend": "tree",
+      "different_coordinate_elements": 0,
+      "max_coordinate_difference_mm": 0.0,
+      "different_order_elements": 0,
+      "same_order": true,
+      "different_accepted_offset_elements": 0
+    }
+  ],
+  "strict_same_input_reproduction": "passed",
+  "new_degradation_under_declared_exact_trial_gate": "none_detected",
+  "paired_median_seconds": {
+    "tree": 15.053547299932688,
+    "torch_snapshot": 3.423715532757342
+  },
+  "speed_ratio_tree_over_torch_snapshot": 4.39684522732795,
+  "historical_reference_sha256": "c5b03186acae32356ae3e69d2177ee9ed5ac8c3506856edc79bc079f256f7c14",
+  "cross_environment_comparison_to_historical": {
+    "different_coordinate_elements": 0,
+    "max_coordinate_difference_mm": 0.0,
+    "different_order_elements": 0,
+    "same_order": true,
+    "different_accepted_offset_elements": 0
+  },
+  "raw_report_sha256": "2b987f92bd32f293ea2e6bff728b2069cec561eea6cb9e2efe045afb013c34dd",
+  "public_receipt": "infrastructure location anonymized; numerical values/source/input hashes retained"
+}

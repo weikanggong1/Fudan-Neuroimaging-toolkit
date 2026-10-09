@@ -53,11 +53,14 @@ def main():
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--max-steps", type=int, default=400)
     parser.add_argument("--candidate-backend", choices=("tree", "snapshot", "torch_snapshot"), default="tree")
+    parser.add_argument("--control-candidate-backend", choices=("tree", "snapshot", "torch_snapshot"))
+    parser.add_argument("--candidate-regularization-backend", choices=("cpu", "torch"), default="torch")
     parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
     parser.add_argument("--official-binary", type=Path)
     parser.add_argument("--conda-binary", type=Path)
     parser.add_argument("--assets-directory", type=Path)
     parser.add_argument("--reference-repeat", type=int, default=2)
+    parser.add_argument("--native-only", action="store_true", help="仅重跑具名原生参考，不执行Python候选")
     args = parser.parse_args()
     if args.threads < 1 or args.max_steps < 1 or args.reference_repeat < 1:
         parser.error("threads/max-steps/reference-repeat must be positive")
@@ -67,6 +70,10 @@ def main():
               (("official", args.official_binary), ("conda", args.conda_binary)) if binary is not None]
     if native and args.assets_directory is None:
         parser.error("native reference requires --assets-directory")
+    if args.native_only:
+        if not native:
+            parser.error("--native-only requires an explicit reference binary")
+        args.backends = []
     device = torch.device(args.device)
     gpu_requested = "torch" in args.backends or args.candidate_backend == "torch_snapshot"
     if gpu_requested and device.type == "cuda" and device.index is None:
@@ -103,10 +110,15 @@ def main():
         "script_sha256": sha256(__file__), "source_sha256": {},
         "python_order": args.backends, "python_runs": {}, "native_runs": {},
         "sampling_backend_candidate": args.sampling_backend,
+        "control_candidate_backend": args.control_candidate_backend or args.candidate_backend,
+        "candidate_candidate_backend": args.candidate_backend,
+        "candidate_regularization_backend": args.candidate_regularization_backend,
         "gpu_process_memory_sampling": "not_measured; allocator counters are not total process memory",
         "whole_recon_all": "not_run", "overall_metric_equivalence": "not_assessed",
         "admission_requirement": "same ordered geometry and pass/trial decisions for backend replacement",
         "instrumentation": "coordinate SHA and incremental trace/report writes included in wall time",
+        "strict_python_backend_reproduction": "not_run",
+        "new_degradation_under_declared_exact_backend_gate": "not_assessed",
     }
 
     def current_sources():
@@ -134,8 +146,14 @@ def main():
         output = args.output_directory / f"{hemi}.white.preaparc.{backend}"
         output_volume = args.output_directory / f"mrisps.wpa.{backend}.mgz"
         trace = []
-        use_cuda = (backend == "torch" or args.candidate_backend == "torch_snapshot") and device.type == "cuda"
-        row = {"status": "running", "trace": trace}
+        run_candidate = ((args.control_candidate_backend or args.candidate_backend)
+                         if backend == "cpu" else args.candidate_backend)
+        run_regularization = "cpu" if backend == "cpu" else args.candidate_regularization_backend
+        run_sampling = "cpu" if backend == "cpu" else args.sampling_backend
+        gpu_components = run_regularization == "torch" or run_candidate == "torch_snapshot" or run_sampling != "cpu"
+        use_cuda = gpu_components and device.type == "cuda"
+        row = {"status": "running", "trace": trace, "regularization_backend": run_regularization,
+               "candidate_backend": run_candidate, "sampling_backend": run_sampling}
         report["python_runs"][backend] = row
         context_started = time.perf_counter()
         if use_cuda:
@@ -162,10 +180,9 @@ def main():
         try:
             result = stage.place_white_preaparc(
                 subject_dir=args.subject, hemi=hemi, output=output, max_steps=args.max_steps,
-                output_volume=output_volume, regularization_backend=backend,
-                sampling_backend=args.sampling_backend if backend == "torch" else "cpu",
-                candidate_backend=args.candidate_backend,
-                device=str(device) if backend == "torch" or args.candidate_backend == "torch_snapshot" else None,
+                output_volume=output_volume, regularization_backend=run_regularization,
+                sampling_backend=run_sampling, candidate_backend=run_candidate,
+                device=str(device) if gpu_components else None,
                 trace_callback=callback,
             )
             if use_cuda:
@@ -179,6 +196,8 @@ def main():
         except Exception as exc:
             row.update(status="failed", wall_seconds=time.perf_counter() - started,
                        error=str(exc), traceback=traceback.format_exc())
+            if hasattr(exc, "intersection_cleanup"):
+                row["intersection_cleanup"] = exc.intersection_cleanup
             save()
             raise
         after = {str(path.relative_to(args.subject)): sha256(path) for path in inputs}

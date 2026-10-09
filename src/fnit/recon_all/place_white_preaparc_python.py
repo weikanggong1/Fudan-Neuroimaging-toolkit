@@ -81,8 +81,8 @@ def _place_white_preaparc(
     initial_cleanup = None
     if complete:
         xyz, initial_cleanup = repair_intersections(xyz, faces, np.zeros(len(xyz), dtype=np.bool_))
-        if initial_cleanup["intersecting_faces_after"]:
-            raise RuntimeError("white initialization has unresolved intersections")
+        # 固定源码的 MRISremoveIntersections 可在非零残余时正常返回，随后
+        # placement 继续优化几何。保留初始化诊断；零相交门只用于最终输出。
     normal_topology = FaceNormalTopology(faces, len(xyz))
     normal_cache = CoordinateNormalCache(normal_topology)
     normals = normal_cache.evaluate(xyz)
@@ -326,7 +326,9 @@ def _place_white_preaparc(
         current, cleanup = repair_intersections(current, faces, ripped)
         cleanup_seconds = time.perf_counter() - cleanup_started
         if cleanup["intersecting_faces_after"]:
-            raise RuntimeError("white cleanup left unresolved intersections")
+            error = RuntimeError("white cleanup left unresolved intersections")
+            error.intersection_cleanup = {"initial": initial_cleanup, "final": cleanup}
+            raise error
     before_write = time.perf_counter()
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_vertices_like(orig, output, current)

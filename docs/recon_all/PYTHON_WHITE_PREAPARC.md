@@ -37,6 +37,10 @@ rip 改变时重建 PyTorch 正则上下文。初始参考坐标始终保持在�
 的状态，不随轮间更新变化。最后清理复用已实现的完整 soap-bubble 修复，
 残余相交会抛异常。
 
+初始化清理沿用原流程语义：`MRISremoveIntersections` 可以带少量残余正常
+返回，再由 white 放置继续调整几何。接口记录这项中间残余，继续执行四轮；
+最终写出仍要求相交面数为0。不能把初始化残余误当成最终网格合格。
+
 依赖均已在主页 Conda 环境中声明：PyTorch、NumPy、Numba、SciPy 和
 nibabel。函数自身不执行 FreeSurfer 或其他外部程序，不自动启用 FP16/BF16，
 也不改变调用方的全局 TF32 策略。
@@ -107,7 +111,7 @@ white_report = place_white_preaparc(
 | `seconds/stage_seconds` | 函数墙钟及分项秒；包含校验、读取、准备、传输、梯度、碰撞、目标函数、轮间重估、清理、写出与回调；各项和为墙钟 |
 
 失败抛异常，不返回伪造完成状态。缺文件、无效参数、MRI 网格不一致、
-未完成四轮、残余相交、CUDA 不可用或 OOM 均保留原异常；算法失败前不写
+未完成四轮、最终残余相交、CUDA 不可用或 OOM 均保留原异常；算法失败前不写
 表面。实际 I/O 失败可能留下部分输出，调用者应保留异常及运行日志。
 
 旧 `place_white_preaparc_prefix()`/`first_white_preaparc_step()` 继续作为
@@ -167,6 +171,17 @@ RequireAnnot 分支影响区域选择。最终 white 使用的 annotation、labe
 保留有序面/几何以及输出体积空间，GPU sampler 缓存与逐轮新状态绑定。
 GPU sampler 的控制契约使用替身，不是实际 CUDA 数值验收；白质真实数据
 采样回归尚待执行。模拟契约不替代真实影像验收。
+
+2026-10-09在同一A100节点的真实sub-07 LH测试中，v1接口在初始化额外要求
+零相交，53.112秒后抛错，尚未进入white迭代。独立诊断复现初始6面，修复后
+仍有4面；同输入固定源码Conda程序则在初始化明确记录剩1面后继续迭代。
+因此修正版移除这个中间阶段的额外阻断，保留最终零相交要求；v1失败记录
+保留，不能改称完整四轮。当前NumPy标记按无序面对同时标两面，而源谓词
+存在反向差异：最终诊断候选2,139对中有5对反向结果不同，单向NumPy/源谓词
+本身0差异，逐有序源谓词标记8面。该检测语义问题另列排错，不归因于随机性。
+修正版CPU/PyTorch完整对照与同输入Conda重复测试正在进行。
+完整日志摘要与源码/输入SHA见[v1失败记录](../../validation/recon_all/optimizations/20261009_placement_torch/white_sub07_lh_a100_v1_failed.json)
+和[初始化诊断](../../validation/recon_all/optimizations/20261009_placement_torch/white_initial_cleanup_sub07_lh_a100_v2.json)。
 [本轮机器可读契约记录](../../validation/recon_all/optimizations/20261009_placement_torch/white_complete_contracts_v2.json)
 绑定实际测试的模块 SHA；相关既有回归合计 19 项通过，2 项实际 CUDA 测试
 因本地 CUDA 不可用跳过。
@@ -211,7 +226,7 @@ python validation/recon_all/python_gpu_port/benchmark_placement_full_white.py \
 
 | 日期/版本 | 修改与证据 |
 |---|---|
-| 2026-10-09，本轮实验接线 | 接通 preaparc 四轮、初始/最终清理、轮间冻结与目标重估、完整试步记录、uint8 诊断体积；9 项控制契约通过；真实四轮待测 |
+| 2026-10-09，本轮实验接线 | 接通 preaparc 四轮、初始/最终清理、轮间冻结与目标重估、完整试步记录、uint8 诊断体积；模拟控制契约另列；真实四轮待测 |
 | 2026-10-09，`4939d41c` 及模块 SHA | 首步 PyTorch 正则同输入无新差异；仅首步阶段证据 |
 | 既有白质首轮诊断 | 1–17 步对照接口保留，承担定位参考作用；没有删除仍使用的诊断算子 |
 
