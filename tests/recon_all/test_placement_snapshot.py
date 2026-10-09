@@ -15,15 +15,23 @@ class PlacementSnapshotTest(unittest.TestCase):
         proposal=np.float32(xyz+displacement)
         ripped=np.array([False]*7+[True])
         for stale in (None,proposal):
-            accepted_tree=displacement.copy();accepted_snapshot=displacement.copy()
+            accepted_tree=displacement.copy()
             args=dict(offsets=displacement,stale_mht_trial=stale)
             tree,tree_order=asynchronous_first_step(xyz,faces,proposal,ripped,
                         accepted_offsets=accepted_tree,candidate_backend='tree',**args)
-            snapshot,snapshot_order=asynchronous_first_step(xyz,faces,proposal,ripped,
-                        accepted_offsets=accepted_snapshot,candidate_backend='snapshot',**args)
-            np.testing.assert_array_equal(snapshot,tree)
-            np.testing.assert_array_equal(snapshot_order,tree_order)
-            np.testing.assert_array_equal(accepted_snapshot,accepted_tree)
+            for backend in ('snapshot', 'torch_snapshot'):
+                accepted_snapshot=displacement.copy()
+                diagnostic={}
+                snapshot,snapshot_order=asynchronous_first_step(xyz,faces,proposal,ripped,
+                            accepted_offsets=accepted_snapshot,candidate_backend=backend,
+                            candidate_device='cpu' if backend=='torch_snapshot' else None,
+                            candidate_diagnostics=diagnostic,**args)
+                np.testing.assert_array_equal(snapshot,tree)
+                np.testing.assert_array_equal(snapshot_order,tree_order)
+                np.testing.assert_array_equal(accepted_snapshot,accepted_tree)
+                if backend=='torch_snapshot':
+                    self.assertEqual(diagnostic['effective_candidate_backend'],
+                                     'torch_snapshot' if stale is None else 'tree_retained_mht')
 
     def test_unknown_backend_rejected(self):
         with self.assertRaises(ValueError):

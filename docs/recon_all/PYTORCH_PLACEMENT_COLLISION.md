@@ -1,0 +1,149 @@
+# PyTorch 表面碰撞候选与谓词
+
+## 1. 功能与流程
+
+本模块复用现有 placement 碰撞规则，提供完整 GPU 空间候选和固定面对的
+FP64 Möller 谓词。`place_pial_t1(candidate_backend="torch_snapshot")` 是
+显式实验选项：只迁移首试步的保守候选构建，随后按原顶点次序执行 close
+neighbor 投影、读取已经接受的坐标、碰撞判断和更新。拒绝后的 retained-MHT
+重试仍执行原树查询与保留桶规则。默认 `tree` 保持现有行为。
+
+```mermaid
+flowchart LR
+    A[当前网格和有界试步] --> B[GPU空间网格完整候选]
+    B --> C[运动上界AABB筛选和共享顶点排除]
+    C --> D[CPU原顺序投影与实时碰撞接受]
+    D --> E[原目标函数和缩步规则]
+    E --> F[原四轮与最终相交清理]
+```
+
+`triangle_pairs_intersect_torch()` 可以批量回放实际迭代中的面对。它不根据
+初始几何预先决定动态接受。静态面对回放与完整首试步接受是两项独立验证。
+新增代码只依赖主页已有的 PyTorch、NumPy、Numba、SciPy、nibabel。
+
+## 2. Python 调用与输入输出
+
+```python
+from pathlib import Path
+from fnit.recon_all.place_pial_python import place_pial_t1
+
+pial_report = place_pial_t1(
+    subject=Path("/data/fnit/sub-01"),  # FNIT自产MRI、white、标签和阈值
+    hemisphere="lh",  # 左半球；右半球使用rh
+    output=Path("/data/diagnostic/lh.pial.T1"),  # 独立诊断输出
+    max_steps=200,  # 四轮总迭代保护上限，达到时抛异常
+    sampling_backend="cpu",  # 强度采样沿用当前实现
+    regularization_backend="cpu",  # 独立于碰撞候选的正则梯度后端
+    candidate_backend="torch_snapshot",  # GPU完整空间候选，CPU有序接受
+    device="cuda:0",  # 明确进程内目标设备编号
+    trace_callback=None,  # 每轮只读诊断回调
+    profile=True,  # 完整分项墙钟，诊断模式同步明确的目标设备
+)
+```
+
+七项前置文件、MRI 网格、surface RAS/mm、完整返回结构与四轮语义见
+[Python pial](PYTHON_PIAL_PLACEMENT.md)。本选项返回实际 `candidate_backend`；
+输入缺失、非法参数、运行时运动超过候选上界、CUDA/OOM 异常均传播，
+不会截断候选或静默换成近似表面。
+
+### 完整空间候选接口
+
+`conservative_face_candidates_torch()` 的参数如下。
+
+| 参数 | 格式、默认值和含义 |
+|---|---|
+| `source_centers` | `(F,3)` float64，初始源三角面中心，surface RAS/mm |
+| `query_centers` | `(Q,3)` float64，查询中心，同一坐标空间 |
+| `radii` | `(Q,)` float64，非负查询半径/mm |
+| `device` | 默认 `cuda:0`，须明确CUDA编号；`cpu`仅用于回归 |
+| `query_chunk_size` | 默认2048，初始查询分块数 |
+| `maximum_chunk_candidates` | 默认4000000，限制临时候选内存；超限减小块，单查询仍超限抛MemoryError，不删候选 |
+| `source_low/source_high` | 可选 `(F,3)` float32/float64，初始源面AABB下/上界 |
+| `query_low/query_high` | 可选 `(Q,3)` float32/float64，初始查询面AABB；四项须同时提供 |
+| `motion_bound` | 默认None；配合AABB，调用方须保证并检查每个顶点相对初始位置的位移不超过此值/mm |
+| `source_faces/query_faces` | 默认None；成对提供整数 `(F/Q,3)` 顶点编号时，排除共享顶点的面对 |
+
+返回 `offsets:int64(Q+1,)`、`candidates:int32(M,)` NumPy CSR 和诊断字典。
+半径过滤只保守增加浮点边界候选；AABB在双方均可能移动时使用两倍运动
+上界。首试步运行时检查实际投影终点上界，失败直接报错。
+空间索引使用整数格编码和 `searchsorted`，没有全体顶点 `cdist`。
+候选顺序可与KD树不同，只有首试步相交bool的OR不依赖此顺序；retained-MHT
+重试不能把该候选序列用于决定先命中哪个桶。
+
+### 批量固定面对接口
+
+```python
+from fnit.recon_all.place_surface_collision_torch import triangle_pairs_intersect_torch
+
+collision_mask, collision_diagnostics = triangle_pairs_intersect_torch(
+    first=first_triangles,  # float32(P,3,3)，实际有序状态中的移动三角面
+    second=second_triangles,  # float32(P,3,3)，逐项对应的候选三角面
+    device="cuda:0",  # 明确目标GPU
+    chunk_size=65536,  # 内存分块，不删除面对
+    source_recheck=True,  # 共面、阈值和接触模糊区使用原FP64谓词复核
+)
+```
+
+返回目标设备 `bool(P,)` Tensor 与面对数量、源规则复核数量、设备、精度
+和分块诊断。输入必须有限、float32、同长度，坐标为surface RAS/mm。
+全量谓词用float64计算，保留源程序不对称的 `1e-5/1e-6` 平面阈值和共面
+规则；保护范围只选择需要源规则复核的面对，不放宽相交判定。False只供
+原始GPU谓词诊断。它不修改全局TF32，不启用FP16/BF16。
+
+## 3. 命令行
+
+两项子算子没有独立生产CLI。真实首轮首试步脚本如下，读写都在独立目录。
+
+```bash
+python validation/recon_all/python_gpu_port/benchmark_placement_collision_torch.py \
+  --subject /data/fnit/sub-01 \
+  --hemisphere lh \
+  --candidate-directory /data/candidate/src/fnit/recon_all \
+  --output-directory /data/benchmark/pial_collision_lh \
+  --device cuda:0 \
+  --threads 4 \
+  --code-commit <实际候选提交> \
+  --capture
+```
+
+`--subject`是冻结自产输入；`--candidate-directory`指定候选源码；可选
+`--dependency-directory`声明另一个只读冻结依赖目录，不复制或修改其内容。
+`--output-directory`保存输入/接受检查点、实际面对、逐顶点碰撞参考和报告；
+`--capture`完整捕获原有序状态中的AABB有效面对，捕获成本另计。代码、输入
+和检查点SHA绑定报告。GPU计时显式同步，ABBA包含索引建立、传输、接受和
+结果回传；MRI准备和首次JIT单列。
+
+## 4. 原软件对应
+
+对应 `mris_place_surface` 的内部碰撞步骤，没有独立官方CLI。完整pial
+官方命令及全部参数见[Python pial](PYTHON_PIAL_PLACEMENT.md)。原实现来自
+固定FreeSurfer源码 `d932c45` 的 `tritri.cpp`、`mrisurf_mri.cpp`、MHT和
+有序placement更新；许可证见仓库 `licenses/FreeSurfer.txt`。生产不调用
+预装FreeSurfer，也不读取官方结果。官方参考只能由独立benchmark产生。
+
+## 5. 当前精度与耗时
+
+CPU算子和有序首试步单元回归7/7通过，包含阈值两侧、共面、接触、退化、
+零半径、完整候选、投影、rip和retained-MHT回退。模拟几何用于排错；
+不替代真实脑影像benchmark。真实首试步和活跃面对回放结果正在生成。
+完整pial、第二例双侧、整例显存和整例提速尚未由该碰撞选项验证。
+
+已有正则梯度的完整同输入pial配对见
+[正则项结果](PYTORCH_PLACEMENT_REGULARIZATION.md)：最终几何/接受轨迹相同，
+整步却慢6.22%，因此仍为显式选项。这项结果不能用于证明新碰撞选项提速。
+
+## 6. 更新与验证记录
+
+- 2026-10-09：新增完整空间候选、保守运动AABB、FP64批量面对谓词和源边界
+  复核；新增 `torch_snapshot` 显式选项，保留有序接受和原重试路径。
+- 完整GPU接受仍需处理Gauss-Seidel依赖：当前顶点的近邻投影读取先前已接受
+  顶点，碰撞读取候选三角面当前状态。共享面、近邻、完整候选面的顶点均属
+  依赖边；不能只按左右半球或互不邻接顶点组批，更不能用Jacobi取代。
+  本版只批量预计算安全宽相位和回放实际状态谓词，没有绕过依赖。
+
+## 7. 参考文献与源码
+
+- [FreeSurfer源代码](https://github.com/freesurfer/freesurfer)，固定源码及
+  完整placement来源见现有pial页面。
+- Möller T. A Fast Triangle-Triangle Intersection Test. J Graph Tools. 1997.
+- Dale AM, Fischl B, Sereno MI. Cortical surface-based analysis I. NeuroImage. 1999.

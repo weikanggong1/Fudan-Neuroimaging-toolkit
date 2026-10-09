@@ -75,6 +75,10 @@ def place_pial_t1(
     and runs signed averaging, spring and quadratic curvature in PyTorch.
     It is opt-in; collision acceptance, objective and final cleanup retain the
     original CPU implementation. Neither backend changes the four-pass order.
+    ``candidate_backend="torch_snapshot"`` is an independent opt-in for complete
+    GPU spatial candidate construction on ``device``. Live close-neighbor
+    projection and triangle acceptance remain ordered CPU operations; retained
+    rejected-trial MHT retries use the original tree rules. No Jacobi updates.
     ``trace_callback(step, pass_index, coordinates_copy, diagnostics)`` is an
     optional read-only diagnostic sink called after every completed step.
     Its diagnostics include all trial decisions; a rejected terminal step
@@ -86,8 +90,10 @@ def place_pial_t1(
     CUDA target at section boundaries; default execution does not add barriers.
     """
     started = time.perf_counter()
-    if candidate_backend not in ("tree", "snapshot"):
-        raise ValueError("candidate_backend must be tree or snapshot")
+    if candidate_backend not in ("tree", "snapshot", "torch_snapshot"):
+        raise ValueError("candidate_backend must be tree, snapshot or torch_snapshot")
+    if candidate_backend == "torch_snapshot" and device is None:
+        raise ValueError("torch_snapshot requires an explicit device")
     if sampling_backend not in ("cpu", "torch", "triton"):
         raise ValueError("sampling_backend must be cpu, torch or triton")
     if regularization_backend not in ("cpu", "torch"):
@@ -99,7 +105,7 @@ def place_pial_t1(
     stage_seconds = dict.fromkeys(("prepare", "gradient", "collision", "objective",
                                  "border_updates", "cleanup", "write"), 0.0) if profile else None
     profile_torch = profile_device = None
-    if profile and device is not None and (sampling_backend != "cpu" or regularization_backend == "torch"):
+    if profile and device is not None and (sampling_backend != "cpu" or regularization_backend == "torch" or candidate_backend == "torch_snapshot"):
         import torch
         profile_torch, profile_device = torch, torch.device(device)
         if profile_device.type == "cuda" and profile_device.index is None:
@@ -261,7 +267,8 @@ def place_pial_t1(
                 current, faces, proposal, ripped, fast=True,
                 offsets=displacement, accepted_offsets=momentum,
                 stale_mht_trial=stale_trial, ordered_neighbors=ordered,
-                candidate_backend=candidate_backend)
+                candidate_backend=candidate_backend,
+                candidate_device=device if candidate_backend == "torch_snapshot" else None)
             record_section("collision", collision_started)
             blocked = np.any(proposal != current, axis=1) & np.all(
                 candidate == current, axis=1)

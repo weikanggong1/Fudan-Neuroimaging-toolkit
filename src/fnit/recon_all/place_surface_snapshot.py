@@ -6,6 +6,7 @@ FreeSurfer Software License: licenses/FreeSurfer.txt.
 from itertools import chain
 import numpy as np
 from numba import njit
+import time
 from .place_surface_collision import _moved_face_geometry,_candidate_collision,_project_close_neighbors
 
 
@@ -68,13 +69,20 @@ def _ordered_snapshot_step(initial,triangles,proposal,order,incident,incident_of
 
 def snapshot_ordered_step(xyz,triangles,proposal,order,incident,incident_offsets,
                           neighbors,neighbor_valid,offsets,accepted_offsets,geometry,
-                          vertex_svi,min_neighbor_mm,tree,centers,radii,maximum_radius):
+                          vertex_svi,min_neighbor_mm,tree,centers,radii,maximum_radius,
+                          *, candidate_device=None, candidate_diagnostics=None):
     """One first trial; build a conservative union then filter exact query radii.
 
     Every vertex moves only after preceding accepted updates. Current candidate
     triangle coordinates are read by the existing compiled intersection test.
     The union is rebuilt for each input/trial. Rejected retained-MHT trials use
     the original tree path in the caller, never this CSR.
+    candidate_device=None preserves cKDTree; indexed CUDA selects the complete
+    Torch grid and conservative initial AABB filter. candidate_diagnostics is
+    an optional mutable dictionary for counts and complete wall times. Runtime
+    motion-bound failure raises ValueError; CUDA and candidate budget failures
+    propagate. Dynamic triangle predicates and close-neighbor projection remain
+    the original ordered Numba kernels, rather than fixed-state GPU decisions.
     """
     displacement=np.asarray(proposal,dtype=np.float64)-np.asarray(xyz,dtype=np.float64)
     maximum=np.linalg.norm(displacement,axis=1).max(initial=0)
@@ -84,22 +92,41 @@ def snapshot_ordered_step(xyz,triangles,proposal,order,incident,incident_offsets
     bound=2.0*float(maximum)+0.01
     # Center can move by bound, radius by 2*bound. All live tree queries are
     # therefore contained in the union sphere expanded by 3*bound.
-    counts=np.empty(len(triangles),np.int64);chunks=[]
-    for start in range(0,len(triangles),4096):
-        end=min(start+4096,len(triangles))
-        lists=tree.query_ball_point(centers[start:end],((radii[start:end]+maximum_radius)+1.0)+3.0*bound,
-                                   return_sorted=False,workers=1)
-        sizes=np.fromiter((len(row) for row in lists),np.int64,count=len(lists))
-        counts[start:end]=sizes
-        chunks.append(np.fromiter(chain.from_iterable(lists),np.int32,count=int(sizes.sum())))
-    candidate_offsets=np.empty(len(triangles)+1,np.int64);candidate_offsets[0]=0
-    np.cumsum(counts,out=candidate_offsets[1:]);candidates=np.concatenate(chunks) if chunks else np.empty(0,np.int32)
+    build_started=time.perf_counter()
+    if candidate_device is None:
+        counts=np.empty(len(triangles),np.int64);chunks=[]
+        for start in range(0,len(triangles),4096):
+            end=min(start+4096,len(triangles))
+            lists=tree.query_ball_point(centers[start:end],((radii[start:end]+maximum_radius)+1.0)+3.0*bound,
+                                       return_sorted=False,workers=1)
+            sizes=np.fromiter((len(row) for row in lists),np.int64,count=len(lists))
+            counts[start:end]=sizes
+            chunks.append(np.fromiter(chain.from_iterable(lists),np.int32,count=int(sizes.sum())))
+        candidate_offsets=np.empty(len(triangles)+1,np.int64);candidate_offsets[0]=0
+        np.cumsum(counts,out=candidate_offsets[1:]);candidates=np.concatenate(chunks) if chunks else np.empty(0,np.int32)
+    else:
+        from .place_surface_candidates_torch import conservative_face_candidates_torch
+        initial_points=xyz[triangles]
+        low,high=initial_points.min(axis=1),initial_points.max(axis=1)
+        candidate_offsets,candidates,details=conservative_face_candidates_torch(
+            centers,centers,((radii+maximum_radius)+1.0)+3.0*bound,
+            source_low=low,source_high=high,query_low=low,query_high=high,
+            motion_bound=bound,source_faces=triangles,query_faces=triangles,
+            device=candidate_device)
+        if candidate_diagnostics is not None:candidate_diagnostics.update(details)
+    if candidate_diagnostics is not None:
+        candidate_diagnostics.update(candidate_build_seconds=time.perf_counter()-build_started,
+            motion_bound_mm=bound,candidate_pairs=len(candidates),
+            effective_candidate_backend="torch_snapshot" if candidate_device is not None else "snapshot")
     has_offsets=offsets is not None
     if not has_offsets:
         offsets=np.zeros_like(xyz);neighbors=np.empty((len(xyz),0),np.int32);neighbor_valid=np.empty((len(xyz),0),np.bool_)
     update_offsets=accepted_offsets is not None
     if not update_offsets:accepted_offsets=np.zeros_like(xyz)
-    return _ordered_snapshot_step(xyz,triangles,proposal,order,incident,incident_offsets,
+    ordered_started=time.perf_counter()
+    result=_ordered_snapshot_step(xyz,triangles,proposal,order,incident,incident_offsets,
                neighbors,neighbor_valid,offsets,has_offsets,accepted_offsets,update_offsets,
                geometry,vertex_svi,np.float32(min_neighbor_mm),centers,maximum_radius,
                candidate_offsets,candidates,bound)
+    if candidate_diagnostics is not None:candidate_diagnostics["ordered_acceptance_seconds"]=time.perf_counter()-ordered_started
+    return result
