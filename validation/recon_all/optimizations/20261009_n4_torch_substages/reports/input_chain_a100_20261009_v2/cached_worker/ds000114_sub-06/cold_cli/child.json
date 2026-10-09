@@ -1,0 +1,75 @@
+{
+  "scope": "same-input complete N4 cached exec; not raw-T1 whole recon-all",
+  "input_sha256": "4107fc4dbf62e4e5b070b7fc4bd7e8047dbb1d263d6b0730a90867dd042f6ea4",
+  "output_sha256": "2f4181ec8487d8f28bf4f610b46db862fea005618a493ab5b387f909c9e98659",
+  "code_version": "803aec50+frozen-N4-worker-v2",
+  "source_sha256": {
+    "worker": "b58342d9e08f06aa19c29222d94ef655b6fbdb38871b1c10539dbdfdf42f77f1",
+    "full_n4": "fdc7731ecc7c98546d23fa90d970cf87664a39bc22fdfdbfae498ae5d0867a8b",
+    "bspline_fit": "f2edca71b52a7b06b6dca0edffdbfa5de5d3e2ce45fddd1ac8e2e4c256048e9b"
+  },
+  "worker_pid": 113133,
+  "cuda_allocator": {
+    "requested": "enabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": null,
+    "effective": "enabled",
+    "torch_stats_known_valid": true,
+    "torch_stats_known_unavailable": false
+  },
+  "logical_device": "cuda:0",
+  "cuda_visible_devices": "0",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast": {
+      "enabled": false,
+      "dtype": "torch.float16"
+    },
+    "half_requested": false
+  },
+  "threads": {
+    "torch": 4,
+    "requested": 4,
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "gpu_name": "NVIDIA A100-SXM4-80GB",
+  "torch_version": "2.5.1",
+  "api": {
+    "backend": "experimental_complete_n4_torch_fixed_itk547_recipe",
+    "device": "cuda:0",
+    "input_path": "FNIT_ROOT/runs/input_n4_raw_t1_a100_two_cases_20261009_v1/ds000114_sub-06/native/subject/mri/orig.mgz",
+    "output_path": "FNIT_ROOT/runs/n4_cached_exec_same_orig_a100_two_cases_20261009_v2/ds000114_sub-06/cold_cli/nu0.mgz",
+    "shape": [
+      256,
+      256,
+      256
+    ],
+    "dtype": "uint8",
+    "iterations": 200,
+    "timings": {
+      "geometry_cache": 0.5983390845358372,
+      "sharpening": 0.7417000019922853,
+      "fitting": 0.22103595547378063,
+      "small_reconstruction": 0.1602364582940936,
+      "refinement": 0.0523080425336957,
+      "full_reconstruction": 0.0005407556891441345,
+      "exp_divide": 4.172232002019882e-05,
+      "wall_tensor_seconds": 1.9232310149818659
+    },
+    "total_seconds": 5.105532351881266,
+    "strict_reproduction": "requires comparison; changed reduction/FFT/log/exp rounding",
+    "production_default_changed": false
+  },
+  "allocated_peak_bytes": 1295297024,
+  "reserved_peak_bytes": 1384120320,
+  "worker_api_wall_seconds_including_validation_init_read_transfer_write": 7.699213105253875,
+  "whole_metrics_equivalence": "not assessed",
+  "production_default_changed": false
+}

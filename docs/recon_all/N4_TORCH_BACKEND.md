@@ -1,64 +1,64 @@
-# N4 的纯 PyTorch 实验后端
+# N4 的 PyTorch 实验入口
 
-## 功能简介
+## 1．功能与流程
 
-`fnit.recon_all.n4_gpu` 使用 PyTorch 在目标 GPU 上估计平滑的对数偏置场，
-并输出 float32 的校正体积。`run_input_n4_chain(..., n4_backend="torch")`
-提供显式实验入口；生产默认仍使用已经验证的 ITK N4 C++ 程序。
+`run_input_n4_chain(n4_backend="torch")` 现已复用完整固定 N4，实现直方图锐化、四层 B-spline 拟合/细化和最多 200 次自产反馈。输入链的完整空间/文件约定见[原始 T1 到 nu](INPUT_N4_CHAIN.md)，算法见[完整 N4](N4_COMPLETE_TORCH_20261009.md)。生产默认仍为独立 Conda ITK。
 
-该实现目前是 FNIT 的 GPU 近似算法，不是 ITK N4 的逐步翻译。它不能在
-没有真实同输入验证时替换默认 recon-all，也不能把相关性或运行时间直接解释
-为整体等效。
+```mermaid
+flowchart LR
+    A[原始T1] --> B[conform / SynthStrip / Talairach]
+    B --> C[完整N4 / nu0]
+    C --> D[缩放与直方图 / nu]
+```
 
-## Python 调用
+## 2．Python 输入与输出
 
 ```python
 from fnit.recon_all.input_n4_chain import run_input_n4_chain
 
 result = run_input_n4_chain(
-    t1="/data/sub-07_T1w.nii.gz",  # 原始 T1w，NIfTI，三维
-    subject_dir="/work/sub-07",  # 空的 FNIT/FreeSurfer 风格输出目录
-    weights_dir="/models",  # SynthStrip/Talairach 所需权重目录
-    assets_dir="/assets",  # 模板和固定资产目录
-    device="cuda:0",  # GPU 设备；不启用 FP16/BF16
-    threads=8,  # 前置 CPU 阶段线程数
-    n4_backend="torch",  # 显式选择实验后端
+    t1="data/sub-07_T1w.nii.gz",  # 原始三维NIfTI-1
+    subject_dir="runs/sub-07-input-n4",  # 新空输出目录
+    weights_dir="resources/weights",  # SynthStrip和affine权重
+    assets_dir="resources/assets",  # MNI305模板
+    n4_binary=None,  # 显式Torch不需要原生程序；native必须指定
+    device="cuda:0",  # 目标GPU，不启用半精度
+    threads=4,  # 前段预算，native N4仍单线程
+    n4_backend="torch",  # 完整反馈实验后端，默认native
+    profile=False,  # 可选同步剖析，默认关闭
 )
 ```
 
-输入是原始 T1w 和前置链生成的 `mri/orig.mgz`；输出包括 `tmp/nu0.mgz`、
-`mri/nu.mgz`、N4 运行时间、后处理时间和 `n4_backend`。`nu0.mgz` 保持
-float32，`nu.mgz` 继续经过现有强度缩放、Talairach-ball 直方图和 uchar
-写出流程。坐标和体素网格沿用 `orig.mgz`，单位是图像强度和毫米仿射。
+`nu0` 和 `nu` 均为同conformed网格的uint8 MGH/MGZ；不是旧近似float32。输入/输出、全部返回字段、单位、默认值、失败行为及精度例外在[输入链参数表](INPUT_N4_CHAIN.md#2python-调用输入输出与空间)。
 
-## 命令行与原软件
-
-现有 recon-all 命令仍默认调用：
+## 3．命令行
 
 ```bash
-fnit-recon-all --t1 /data/sub-07_T1w.nii.gz --subject-dir /work/sub-07
+python -m fnit.recon_all.input_n4_chain \
+  --t1 data/sub-07_T1w.nii.gz \
+  --subject-dir runs/sub-07-input-n4 \
+  --weights-dir resources/weights \
+  --assets-dir resources/assets \
+  --n4-backend torch \
+  --device cuda:0 \
+  --threads 4 \
+  --report runs/sub-07-input-n4.json
 ```
 
-对应的 FreeSurfer 参考步骤是 `mri_nu_correct.mni`/`N4BiasFieldCorrection`
-及其后续 `mri_segstats`、`mri_make_uchar`。纯 PyTorch 后端目前只提供
-Python API 的显式实验选项，尚未接入默认 CLI。
+这是独立显式实验接口，没有切换 recon-all 默认。参数解释与复现脚本见[输入链命令](INPUT_N4_CHAIN.md#3命令行和复现)。已有主页Conda覆盖所需依赖。
 
-## 真实数据验证
+## 4．原软件与固定实现
 
-在 gpucw1 的 H100 上，对公开 ds000114 sub-07 的 `orig.mgz` 运行当前实验
-实现，输入形状为 `256×256×256`，同步耗时 **1.242 s**，峰值 allocated
-**285,213,184 bytes**，峰值 reserved **297,795,584 bytes**。与现有 ITK
-`nu0.mgz` 同输入比较：Pearson `r=0.996332`、RMSE `19.2208`、P99 绝对误差
-`70.8477`、最大绝对误差 `110.836`。校正后有效体素均值为 `29.1619`，ITK
-参考为 `16.7821`。
+对应固定 `N4BiasFieldCorrection` 和 `mri_nu_correct.mni` 的后处理链；ITK5.4.7 recipe与独立Conda源码路径见[ITK说明](N4_ITK_CONDA.md)。原程序只用于独立benchmark，生产Torch分支不启动它，不读取参考影像。
 
-这些误差仍然过大，故本次没有把 `n4_backend="torch"` 设为生产默认，也
-没有声称 recon-all 已经完成纯 PyTorch 迁移。下一步应先实现 ITK N4 的多层
-B-spline、直方图锐化和收敛策略，再做两例以上真实 T1 的同输入和下游
-`norm/brain/wm/filled` 回归。
+## 5．精度、耗时和资源
 
-## 参考
+本轮两例原始T1→nu已从新空目录完成native/Torch配对，合计输入链墙钟461.280→302.519s；这是到nu的mini-chain，未测完整recon-all提速。nu0分别有4016/3259体素全部+1，nu最大差3；系统偏移及后处理误差传播独立保留。结果绑定实际源码/资源SHA并写在[输入链结果](INPUT_N4_CHAIN.md#5本版真实精度时间与显存)。进一步的[缓存隔离N4](N4_CACHED_WORKER.md)四组完整阶段约10–11s，与cache-off完整实现新增体素差为0；不改变全局allocator或native默认。此前200次完整N4冻结同输入结果见[完整N4实测](N4_COMPLETE_TORCH_20261009.md)，不能代替本次连续输入链。整体等效尚未判定，未宣布整例十分钟。
 
-- Tustison et al., N4ITK: Improved N3 Bias Correction, IEEE TMI (2010)。
-- FNIT 的 ITK 封装：`fnit.recon_all.n4_itk`。
-- FNIT 的 GPU 实验实现：`fnit.recon_all.n4_gpu`。
+## 6．近期更新与旧接口
+
+2026-10-09修复入口复用bug：以前输入链仍指向 `n4_gpu.run()` 的平滑残差算法；现指向完整 `n4_itk_torch_experimental.correct_volume()`。旧近似仅保留独立实验函数和直接结构测试，不能称为ITK N4或用于recon-all输出。旧近似的历史误差/耗时不再作为本版结果，Git历史可查。
+
+## 7．参考
+
+Tustison等，N4ITK: Improved N3 Bias Correction，IEEE TMI，2010。[DOI](https://doi.org/10.1109/TMI.2010.2046908)。[ITK源码](https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4.7/Modules/Filtering/BiasCorrection/include/itkN4BiasFieldCorrectionImageFilter.hxx)、[FreeSurfer](https://github.com/freesurfer/freesurfer)。
