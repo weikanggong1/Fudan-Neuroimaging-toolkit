@@ -167,6 +167,9 @@ RequireAnnot 分支影响区域选择。最终 white 使用的 annotation、labe
 保留有序面/几何以及输出体积空间，GPU sampler 缓存与逐轮新状态绑定。
 GPU sampler 的控制契约使用替身，不是实际 CUDA 数值验收；白质真实数据
 采样回归尚待执行。模拟契约不替代真实影像验收。
+[本轮机器可读契约记录](../../validation/recon_all/optimizations/20261009_placement_torch/white_complete_contracts_v2.json)
+绑定实际测试的模块 SHA；相关既有回归合计 19 项通过，2 项实际 CUDA 测试
+因本地 CUDA 不可用跳过。
 
 此前同输入 `sub-07` 左侧**首步**在 H100 上测得 CPU 68.221 s、PyTorch
 62.148 s，坐标/有序面/接受决定无差异。记录绑定当次 `4939d41c` 加模块

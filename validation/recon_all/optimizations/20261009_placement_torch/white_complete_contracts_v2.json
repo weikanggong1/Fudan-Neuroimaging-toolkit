@@ -1,0 +1,55 @@
+{
+  "scope": "local_synthetic_control_and_dependency_contracts_only_not_real_benchmark",
+  "source_commit": "3c9aea47",
+  "actual_source_sha256": {
+    "src/fnit/recon_all/place_white_preaparc_python.py": "5d4ebf57f9014126743cba137b849faf8c3ba125d4a010cf1217f7eb25307e15",
+    "src/fnit/recon_all/place_surface_sampling.py": "886e64a4fc0c8dbc11e30a365844f47f68a9fc1851ae80031f82b4d5b412eb96",
+    "src/fnit/recon_all/place_surface_regularization_torch.py": "9ce7501275af99be9619a1fa1f29355760f15e59f96e275291747373ee9058e8",
+    "tests/recon_all/test_white_preaparc_complete.py": "af7be1a186f8238e37f0d1ceaa0b00837d665daae889ab20685cb136ce89394b",
+    "validation/recon_all/python_gpu_port/benchmark_placement_full_white.py": "e75d989d6dea0d6496d876001806e03d030b5288b24303686057324be8212418"
+  },
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "host_alias": "local_WSL",
+  "cuda_available": false,
+  "pytest_command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/recon_all/test_white_preaparc_complete.py",
+    "tests/recon_all/test_pial_rejected_stop.py",
+    "tests/recon_all/test_white_repulsion_buckets.py",
+    "tests/recon_all/test_placement_regularization_torch.py",
+    "tests/recon_all/test_placement_sampling_gpu.py"
+  ],
+  "result": {
+    "passed": 19,
+    "skipped": 2,
+    "pytest_wall_seconds": 12.92,
+    "white_new_contracts_passed": 9,
+    "skipped_scope": "actual CUDA sampler tests; no local CUDA numerical claim"
+  },
+  "verified_contracts": [
+    "white averages 4/2/1/0 and sigma 2/1/.5/.25",
+    "100 iterations per pass",
+    "two initialization rip calls and three pass rip calls",
+    "terminal rejection restores coordinates and proceeds",
+    "new targets and initial SSE/RMS recomputed",
+    "GPU regularizer rip context recreated",
+    "existing GPU sampler cache created once and receives fresh state",
+    "output ordered faces and geometry footer preserved",
+    "optional uint8 volume geometry preserved",
+    "incomplete or intersecting initialization raises without surface write",
+    "independent trace copies",
+    "output/input collision prevented"
+  ],
+  "real_complete_white_preaparc": "pending_CFFF_environment",
+  "official_same_input_white_reference": "not_run",
+  "final_white_annotation_branch": "not_implemented_by_this_interface",
+  "whole_recon_all": "not_run",
+  "overall_metric_equivalence": "not_assessed",
+  "production_default": "unchanged_native_stage",
+  "gpu_full_stage_speed": "not_measured",
+  "gpu_process_memory": "not_measured"
+}

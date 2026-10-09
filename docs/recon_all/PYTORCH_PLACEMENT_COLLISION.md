@@ -113,6 +113,26 @@ python validation/recon_all/python_gpu_port/benchmark_placement_collision_torch.
 和检查点SHA绑定报告。GPU计时显式同步，ABBA包含索引建立、传输、接受和
 结果回传；MRI准备和首次JIT单列。
 
+已保存完整首试步输入时，可以直接重放该迭代，避免重复MRI边界准备：
+
+```bash
+OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 NUMBA_NUM_THREADS=4 \
+python validation/recon_all/python_gpu_port/benchmark_placement_collision_trial_replay.py \
+  --input /data/frozen/first_trial_input.npz \
+  --historical-reference /data/frozen/first_trial_reference.npz \
+  --candidate-directory /data/frozen-code/src/fnit/recon_all \
+  --output-directory /data/runs/collision-first-trial-v1 \
+  --code-commit ACTUAL_TESTED_COMMIT --device cuda:0 --threads 4
+```
+
+`--input`包含当前顶点、面、建议位置、rip、动量、offsets和有序邻接；
+它只提供该次迭代的起点。当前CPU原树与GPU候选均从相同起点重新执行完整
+有序接受。可选`--historical-reference`只在计算完成后比较，不参与候选或
+接受；不同主机的历史差异独立记录。输出冷pair、热ABBA、实际坐标/动量/
+接受顺序、候选诊断、源码和输入SHA。完整首试步与面对谓词回放仍分开
+报告；这也不是完整四轮或整例验收。当前脚本已完成语法/CLI检查，真实
+GPU完整当轮回放仍待验证。
+
 ## 4. 原软件对应
 
 对应 `mris_place_surface` 的内部碰撞步骤，没有独立官方CLI。完整pial
