@@ -238,6 +238,7 @@ CPU connectome全套：1014 passed、6 CUDA缺失skip、362 subtests passed；
 测试覆盖header/sform、未知种子、源码/binary/library内容校验、配置隔离与缓存失效。
 测试中的模拟控制只用于接口/失败行为；以上benchmark均使用真实MRI及实际官方程序。
 普通命令行入口另完整运行成功，实际保存两atlas的八个CSV；尺寸、对称性、非有限值与文件SHA见[CLI收据](cli.public.json)。该次重新计算，未宣告缓存命中，整数分辨率墙钟275秒。
+安装包在服务器独立target目录安装，未修改既有Conda环境；35个科学源码SHA与整链测试一致。外置native cache离线校验成功，系统PATH无tckgen；真实100seeds单线程的28条轨迹与独立官方再次逐字节一致。wheel大小、SHA与范围见[安装收据](package.public.json)。
 
 ## 7. 源码、资源许可和参考文献
 
