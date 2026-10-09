@@ -12,20 +12,16 @@ import subprocess
 import time
 
 
-def descendants(process_id):
-    """返回仍存活的本次 benchmark 进程树，不包含其他人的任务。"""
-    found, pending = set(), [process_id]
-    while pending:
-        process = pending.pop()
-        if process in found:
-            continue
-        found.add(process)
-        try:
-            pending.extend(int(value) for value in Path(
-                f"/proc/{process}/task/{process}/children").read_text().split())
-        except (FileNotFoundError, ProcessLookupError, PermissionError):
-            pass
-    return found
+def load_sampler_module(profiling_source):
+    """复用生产显存归属修复，并返回实际加载模块用于SHA绑定。"""
+    if profiling_source is None:
+        from fnit.recon_all import profiling
+        return profiling
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("placement_benchmark_profiling", profiling_source)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def query(arguments):
@@ -34,24 +30,12 @@ def query(arguments):
     return [line.strip().split(", ") for line in result.stdout.splitlines() if line.strip()]
 
 
-def namespace_aliases(family):
-    """读取本次进程的公开PID映射；旧内核可能不提供NSpid。"""
-    aliases = set(family)
-    for process in family:
-        try:
-            for line in Path(f"/proc/{process}/status").read_text().splitlines():
-                if line.startswith("NSpid:"):
-                    aliases.update(int(value) for value in line.split()[1:])
-        except (FileNotFoundError, ProcessLookupError, PermissionError):
-            pass
-    return aliases
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--physical-gpu", type=int, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--interval-seconds", type=float, default=0.25)
+    parser.add_argument("--profiling-source", type=Path, help="显式冻结profiling.py；未指定时使用已安装FNIT")
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
@@ -59,9 +43,15 @@ def main():
         raise ValueError("需要非空命令、正采样间隔和不存在的报告路径")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     started = time.perf_counter()
+    started_monotonic = time.monotonic()
     gpu = query([f"--id={args.physical_gpu}", "--query-gpu=index,uuid,name",
                  "--format=csv,noheader,nounits"])[0]
+    profiling = load_sampler_module(args.profiling_source)
     process = subprocess.Popen(command)
+    sampler = profiling.ProcessTreeDeviceSampler(
+        device="cuda:0", parent_pid=process.pid, interval=args.interval_seconds)
+    # 外部监测器不建立CUDA context；UUID来自明确物理卡查询。
+    sampler.uuid = gpu[1]
     report = {
         "scope": "placement_stage_external_process_memory_not_whole_recon_all",
         "hostname": platform.node(), "physical_gpu_index": args.physical_gpu,
@@ -75,38 +65,35 @@ def main():
             "CUDA_VISIBLE_DEVICES", "PYTORCH_CUDA_ALLOC_CONF", "PYTORCH_ALLOC_CONF",
             "PYTORCH_NO_CUDA_MEMORY_CACHING", "OMP_NUM_THREADS", "MKL_NUM_THREADS",
             "OPENBLAS_NUM_THREADS", "NUMBA_NUM_THREADS")},
+        "profiling_sha256": hashlib.sha256(Path(profiling.__file__).read_bytes()).hexdigest(),
         "samples": [], "sampling_errors": [],
     }
     while process.poll() is None:
         tick = time.perf_counter()
-        try:
-            family = namespace_aliases(descendants(process.pid))
-            processes = query(["--query-compute-apps=gpu_uuid,pid,used_gpu_memory",
-                               "--format=csv,noheader,nounits"])
-            device_mib = int(query([f"--id={args.physical_gpu}", "--query-gpu=memory.used",
-                                    "--format=csv,noheader,nounits"])[0][0])
-            target = [row for row in processes if row[0] == gpu[1]]
-            local = [row for row in target if int(row[1]) in family]
-            unresolved = len(local) != len(target) or (not target and device_mib > 4)
-            report["samples"].append({
-                "seconds": tick - started, "device_used_mib": device_mib,
-                "device_compute_process_used_mib": sum(int(row[2]) for row in target),
-                "benchmark_tree_used_mib": None if unresolved else sum(int(row[2]) for row in local),
-                "process_ownership": "unresolved_driver_pid_namespace_or_other_process"
-                                     if unresolved else "all_target_compute_pids_mapped_to_benchmark",
-                "benchmark_tree_gpu_processes": [{"pid": int(row[1]), "used_mib": int(row[2])}
-                                                 for row in local],
-                "sampling_seconds": time.perf_counter() - tick,
-            })
-        except (subprocess.CalledProcessError, ValueError, IndexError) as error:
-            report["sampling_errors"].append({"seconds": tick - started, "error": str(error)})
+        sampler.sample_if_due(force=True)
         time.sleep(max(0, args.interval_seconds - (time.perf_counter() - tick)))
+    sampled = sampler.report()
+    report["shared_process_sampler"] = sampled
+    report["sampling_errors"] = sampled["failed_samples"]
+    report["samples"] = [{
+        "seconds": row["monotonic"] - started_monotonic,
+        "device_used_mib": row["target_device_used_bytes"] / 1048576
+                           if row["target_device_used_bytes"] is not None else None,
+        "device_compute_process_used_mib": row["target_compute_process_sum_bytes"] / 1048576,
+        "benchmark_tree_used_mib": row["tree_total_bytes"] / 1048576
+                                  if row["tree_total_bytes"] is not None else None,
+        "process_ownership": row["ownership"],
+        "benchmark_tree_gpu_processes": row["processes"],
+        "sampling_seconds": row["sample_query_seconds"],
+    } for row in sampled["samples"]]
     report["returncode"] = process.wait()
     report["wall_seconds_including_monitor_setup_and_sampling"] = time.perf_counter() - started
     for field in ("device_used_mib", "device_compute_process_used_mib", "benchmark_tree_used_mib"):
         values = [row[field] for row in report["samples"] if row[field] is not None]
         report[f"sampled_peak_{field}"] = max(values, default=None)
-    if any(row["benchmark_tree_used_mib"] is None for row in report["samples"]):
+    if not report["samples"]:
+        report["process_tree_memory_status"] = "unavailable; no completed memory samples"
+    elif any(row["benchmark_tree_used_mib"] is None for row in report["samples"]):
         report["sampled_peak_benchmark_tree_used_mib"] = None
         report["process_tree_memory_status"] = "incomplete_pid_attribution; use device occupancy as upper bound"
     else:

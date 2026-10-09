@@ -159,6 +159,35 @@ Python依赖。采样值以整数MiB保存，乘以1,048,576换算字节；这�
 若驱动PID与容器PID无法对应，进程树字段为`null`，记录归属未解决；
 此时只用同期设备总占用作为显存上界，不解释为本次任务零显存。
 
+### 完整阶段外部显存采样
+
+`monitor_placement_benchmark.py`复用FNIT的`ProcessTreeDeviceSampler`，不自行
+按宿主机PID数值猜测归属。`physical_gpu`明确物理卡编号；`profiling_source`
+可指定冻结的`profiling.py`，未指定时使用已安装FNIT并记录实际SHA；
+`interval_seconds`默认0.25秒。监测器不建立CUDA上下文，UUID来自显式
+物理卡查询。输出保留整卡同期占用、可确认的进程树占用、未知归属和
+失败采样；空采样或未知归属为`null`，不能称零显存。这个工具是剖析
+包装器，没有独立原软件影像处理命令。CPU契约3项通过，真实整例内存
+仍由独立整例报告给出。
+
+```bash
+# 子命令显式限制到物理GPU2；监测器按同一物理卡查询UUID。
+CUDA_VISIBLE_DEVICES=2 python validation/recon_all/python_gpu_port/monitor_placement_benchmark.py \
+  --physical-gpu 2 \
+  --interval-seconds 0.25 \
+  --profiling-source /data/frozen-code/src/fnit/recon_all/profiling.py \
+  --output /data/runs/white-collision.memory.json -- \
+  python validation/recon_all/python_gpu_port/benchmark_placement_full_white.py \
+  --subject /data/frozen/sub-07 \
+  --candidate-directory /data/frozen-code/src/fnit/recon_all \
+  --output-directory /data/runs/white-collision \
+  --code-base-commit ACTUAL_TESTED_COMMIT \
+  --hemisphere lh --backends cpu torch --device cuda:0 --threads 4 \
+  --max-steps 400 --control-candidate-backend tree \
+  --candidate-backend torch_snapshot \
+  --candidate-regularization-backend cpu --sampling-backend cpu
+```
+
 ## 4. 原软件对应
 
 对应 `mris_place_surface` 的内部碰撞步骤，没有独立官方CLI。完整pial

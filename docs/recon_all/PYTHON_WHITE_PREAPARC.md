@@ -166,7 +166,7 @@ RequireAnnot 分支影响区域选择。最终 white 使用的 annotation、labe
 ## 5. 当前精度、耗时与可视化
 
 **完整四轮真实数据 benchmark 尚未完成，不能报告完整 white 提速或官方
-等效。** 本轮本地 CPU 控制契约 9/9 通过，包括四轮平均次数/sigma、目标
+等效。** 本轮本地 CPU 控制契约 10/10 通过，包括四轮平均次数/sigma、目标
 与 SSE 重估、rip 掩膜更新、终止拒绝恢复、100 次每轮上限、未完成不写出、
 保留有序面/几何以及输出体积空间，GPU sampler 缓存与逐轮新状态绑定。
 GPU sampler 的控制契约使用替身，不是实际 CUDA 数值验收；白质真实数据
@@ -179,11 +179,62 @@ GPU sampler 的控制契约使用替身，不是实际 CUDA 数值验收；白�
 保留，不能改称完整四轮。当前NumPy标记按无序面对同时标两面，而源谓词
 存在反向差异：最终诊断候选2,139对中有5对反向结果不同，单向NumPy/源谓词
 本身0差异，逐有序源谓词标记8面。该检测语义问题另列排错，不归因于随机性。
-修正版CPU/PyTorch完整对照与同输入Conda重复测试正在进行。
+修正版CPU/PyTorch完整对照已在独立队列执行，尚未完成；同输入Conda重复结果见下表。
 完整日志摘要与源码/输入SHA见[v1失败记录](../../validation/recon_all/optimizations/20261009_placement_torch/white_sub07_lh_a100_v1_failed.json)
 和[初始化诊断](../../validation/recon_all/optimizations/20261009_placement_torch/white_initial_cleanup_sub07_lh_a100_v2.json)。
+
+同一A100主机、四线程、相同五项输入与相同源码构建程序的新参考验证：
+
+| 验证 | 完整墙钟 | 执行/几何结果 |
+|---|---:|---|
+| v2 首次原生调用 | 85.601 s | 第10步附近 `SIGBUS`，未生成表面；保留失败 |
+| v4 致命信号追踪 | 264.325 s | 四轮完成，无致命信号；该时间包含追踪开销，不作性能基线 |
+| v5 无追踪重复1 | 235.183 s | 完成 |
+| v5 无追踪重复2 | 188.737 s | 完成；与重复1有序面与全部坐标一致，文件头不同 |
+
+该程序SHA为 `78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44`。
+v4每250ms采样一次，1,056个样本的原生RSS峰为1,260,244,992字节；整个
+共享cgroup同期峰为189,507,588,096字节，故障计数增量为0。两者是CPU
+内存，不是CUDA显存。v4追踪输出与两次无追踪输出的有序面、全部坐标和256³ uint8输出体积也均无差异。
+本次成功不能证明此前SIGBUS原因，也不能称已修复
+原生故障或完成独立部署。未将原生软件认作PyTorch候选的数值真值，独立
+官方程序在该主机的同输入比较仍未执行。
+[v2失败](../../validation/recon_all/optimizations/20261009_placement_torch/white_native_failed_a100_v2.json)、
+[v4追踪](../../validation/recon_all/optimizations/20261009_placement_torch/white_native_signal_a100_v4.json)与
+[v5重复](../../validation/recon_all/optimizations/20261009_placement_torch/white_native_repeat_a100_v5.json)和
+[追踪/无追踪数值对照](../../validation/recon_all/optimizations/20261009_placement_torch/white_native_cross_trace_a100_v5.json)
+分别绑定实际输入、程序、脚本和模块SHA；运行负载不同，不能把两次时间
+差当成加速结果。
+
+诊断工具 `trace_placement_native_signal.py` 仅支持Linux x86-64，跟踪本次
+新启动的子进程及其线程，不附加已有任务。输入是具名程序、完整参数、
+新建报告/日志路径和工作目录；输出JSON保存致命信号、故障PC与所在映射、
+输入/程序SHA、250ms cgroup/RSS样本和退出标记，原生日志独立保存。
+失败原样保留原生信号；新子进程core大小限制为0，不输出MRI、许可证内存或原始core。本地自己的成功退出与线程SIGBUS契约均通过，
+见[诊断契约](../../validation/recon_all/optimizations/20261009_placement_torch/native_tracer_cpu_contracts_v6.json)。故障PC符号
+使用系统已有的 `addr2line`，没有完整栈回溯；这是benchmark诊断工具，没有
+对应影像处理CLI。完整参数示例：
+
+```bash
+# 环境中的SUBJECTS_DIR和FREESURFER_HOME必须对应本次冻结输入与声明资产。
+# report.json/native.log必须不存在；下列程序只在隔离参考路径调用。
+python validation/recon_all/python_gpu_port/trace_placement_native_signal.py \
+  --output /data/diagnostic/native-signal/report.json \
+  --log /data/diagnostic/native-signal/native.log \
+  --working-directory /data/diagnostic/native-signal -- \
+  /data/conda-bin/mris_place_surface \
+  --adgws-in /data/frozen/sub-07/surf/autodet.gw.stats.lh.dat \
+  --wm /data/frozen/sub-07/mri/wm.mgz --threads 4 \
+  --invol /data/frozen/sub-07/mri/brain.finalsurfs.mgz --lh \
+  --i /data/frozen/sub-07/surf/lh.orig \
+  --o /data/diagnostic/native-signal/lh.white.preaparc \
+  --white --seg /data/frozen/sub-07/mri/aseg.presurf.mgz \
+  --restore-255 --nsmooth 5 --rip-bg-no-annot --rip-bg --rip-bg-lof \
+  --outvol /data/diagnostic/native-signal/mrisps.wpa.mgz
+```
+
 [本轮机器可读契约记录](../../validation/recon_all/optimizations/20261009_placement_torch/white_complete_contracts_v2.json)
-绑定实际测试的模块 SHA；相关既有回归合计 19 项通过，2 项实际 CUDA 测试
+绑定实际测试的模块 SHA；相关既有回归合计 20 项通过，2 项实际 CUDA 测试
 因本地 CUDA 不可用跳过。
 
 此前同输入 `sub-07` 左侧**首步**在 H100 上测得 CPU 68.221 s、PyTorch
@@ -196,7 +247,9 @@ SHA，不是本轮完整四轮结果，也不能推断本轮完整耗时。
 复现脚本
 [benchmark_placement_full_white.py](../../validation/recon_all/python_gpu_port/benchmark_placement_full_white.py)
 固定五项输入 SHA，绑定实际导入源码与脚本 SHA、线程、主机、TF32 和显式
-GPU，逐步保存坐标摘要及决策。CPU/PyTorch 完整几何与轨迹分开比较；可选
+GPU，逐步保存坐标摘要及决策。本轮完整GPU碰撞配对分别设置
+`control_candidate_backend=tree`、`candidate_backend=torch_snapshot`，
+正则与采样均固定CPU，避免把其他后端差异混入碰撞优化。CPU/PyTorch 完整几何与轨迹分开比较；可选
 官方与 Conda 程序在相同五项输入重跑，默认参考重复两次。参考输出不会被
 候选读取。
 
