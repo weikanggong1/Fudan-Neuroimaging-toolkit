@@ -1,0 +1,52 @@
+EE.
+======================================================================
+ERROR: test_full_control_feedback_and_details (__main__.NeighborCudaTests.test_full_control_feedback_and_details)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$FNIT/workspaces/recon_normalization_neighbors_20261009/tests/recon_all/test_normalize_neighbor_sum_torch.py", line 61, in test_full_control_feedback_and_details
+    candidate, gpu_details = controls_3d(source=image, wm_peak=110., gm_peak=75.,
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/workspaces/recon_normalization_neighbors_20261009/src/fnit/recon_all/normalization/normalize_3d_controls.py", line 135, in controls_3d
+    count, total = (neighbor_context(control) if neighbor_context is not None else
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/workspaces/recon_normalization_neighbors_20261009/src/fnit/recon_all/normalization/normalize_neighbor_sum_torch.py", line 58, in __call__
+    neighbor_sum(source=self.source, control=self.control, count=self.count,
+  File "$FNIT/workspaces/recon_normalization_neighbors_20261009/src/fnit/recon_all/normalization/_normalization_neighbors_cuda.py", line 39, in neighbor_sum
+    _neighbor_sum[(triton.cdiv(shape[0] * shape[1] * shape[2], 256),)](
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/runtime/jit.py", line 345, in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/runtime/jit.py", line 691, in run
+    kernel.run(grid_0, grid_1, grid_2, stream, kernel.function, kernel.packed_metadata, launch_metadata,
+    ^^^^^^^^^^
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/compiler/compiler.py", line 381, in __getattribute__
+    self._init_handles()
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/compiler/compiler.py", line 376, in _init_handles
+    self.module, self.function, self.n_regs, self.n_spills = driver.active.utils.load_binary(
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Triton Error [CUDA]: context is destroyed
+
+======================================================================
+ERROR: test_six_cube_and_nearest_boundaries (__main__.NeighborCudaTests.test_six_cube_and_nearest_boundaries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$FNIT/workspaces/recon_normalization_neighbors_20261009/tests/recon_all/test_normalize_neighbor_sum_torch.py", line 43, in test_six_cube_and_nearest_boundaries
+    actual = context(control=control)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/workspaces/recon_normalization_neighbors_20261009/src/fnit/recon_all/normalization/normalize_neighbor_sum_torch.py", line 58, in __call__
+    neighbor_sum(source=self.source, control=self.control, count=self.count,
+  File "$FNIT/workspaces/recon_normalization_neighbors_20261009/src/fnit/recon_all/normalization/_normalization_neighbors_cuda.py", line 39, in neighbor_sum
+    _neighbor_sum[(triton.cdiv(shape[0] * shape[1] * shape[2], 256),)](
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/runtime/jit.py", line 345, in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/runtime/jit.py", line 691, in run
+    kernel.run(grid_0, grid_1, grid_2, stream, kernel.function, kernel.packed_metadata, launch_metadata,
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/triton/backends/nvidia/driver.py", line 365, in __call__
+    self.launch(*args, **kwargs)
+ValueError: Pointer argument (at 0) cannot be accessed from Triton (cpu tensor?)
+
+----------------------------------------------------------------------
+Ran 3 tests in 4.274s
+
+FAILED (errors=2)

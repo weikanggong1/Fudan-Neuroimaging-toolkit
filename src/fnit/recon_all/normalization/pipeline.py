@@ -22,11 +22,28 @@ from .normalize_3d_controls import controls_3d
 
 def normalize_t1(input_file: str | Path, xfm_file: str | Path, output_file: str | Path,
                  device: str | None = None, three_d_iterations: int = 2,
-                 diagnostic_dir: Path | None = None) -> dict:
-    """Run 1D, gentle, and zero to two 3D normalization passes on a T1 MGH/MGZ."""
+                 diagnostic_dir: Path | None = None, *,
+                 controls_neighbor_backend: str = "cpu") -> dict:
+    """同网格 uint8 T1→两轮强度归一化 MGZ，返回逐步秒数及控制点信息。
+
+    input_file 为 conform 1mm 强度图，xfm_file 为配套 Talairach 3×4 变换；
+    output_file 保留输入网格、毫米 affine、MGH 头和 uint8 类型。device=None
+    时有 CUDA 选 cuda:0 否则 cpu；three_d_iterations 仅0/1/2，默认2。
+    diagnostic_dir=None 不额外写检查点，给目录则保存各轮float32图/控制图。
+    controls_neighbor_backend 默认 cpu，torch 仅替换三维扩展的独立邻域统计，
+    外层迭代、有序离群清理和参数不变，须 CUDA 设备。返回 dict 含 device、
+    three_d_iterations、steps、total_seconds、peaks、controls、propagation、
+    smoothing、three_d_passes；计时含加载、传输及写出，不含解释器启动。
+    参数/网格或组织峰值不符合要求时抛异常，不回退近似；文件错误原样传播。
+    对应 mri_normalize -g 1 -seed 1234 -mprage，完整具名示例见中文功能页。
+    """
     if three_d_iterations not in (0, 1, 2):
         raise ValueError("three_d_iterations must be 0, 1, or 2")
     device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
+    if controls_neighbor_backend not in {"cpu", "torch"}:
+        raise ValueError("controls_neighbor_backend must be cpu or torch")
+    if controls_neighbor_backend == "torch" and not str(device).startswith("cuda:"):
+        raise ValueError("torch controls_neighbor_backend requires an explicit CUDA device")
     input_file, xfm_file, output_file = Path(input_file), Path(xfm_file), Path(output_file)
     started = time.perf_counter()
     image = nib.load(str(input_file))
@@ -76,7 +93,8 @@ def normalize_t1(input_file: str | Path, xfm_file: str | Path, output_file: str 
                 nib.save(nib.MGHImage(current.cpu().numpy(), image.affine),
                          str(diagnostic_dir / f"src{pass_index}.mgh"))
             tick = time.perf_counter()
-            control_3d, details_3d = controls_3d(current.cpu().numpy())
+            control_3d, details_3d = controls_3d(current.cpu().numpy(),
+                neighbor_backend=controls_neighbor_backend, device=str(device))
             steps[f"three_d_{pass_index + 1}_controls_seconds"] = time.perf_counter() - tick
             control_3d = torch.as_tensor(control_3d, device=device)
             if diagnostic_dir is not None:
@@ -114,6 +132,7 @@ def normalize_t1(input_file: str | Path, xfm_file: str | Path, output_file: str 
     save_same_dtype_mgh(input_file, output_file, result.cpu().numpy())
     steps["apply_write_seconds"] = time.perf_counter() - tick
     return {"device": device, "three_d_iterations": three_d_iterations,
+            "controls_neighbor_backend": controls_neighbor_backend,
             "steps": steps, "total_seconds": time.perf_counter() - started,
             "peaks": peaks, "controls": controls, "propagation": propagation,
             "smoothing": smoothing, "three_d_passes": passes}
@@ -127,9 +146,11 @@ def main() -> None:
     parser.add_argument("--device", default=None)
     parser.add_argument("--three-d-iterations", type=int, choices=(0, 1, 2), default=2)
     parser.add_argument("--diagnostic-dir", type=Path)
+    parser.add_argument("--controls-neighbor-backend", choices=("cpu", "torch"), default="cpu")
     args = parser.parse_args()
     print(json.dumps(normalize_t1(args.input, args.xfm, args.output, args.device,
-                                  args.three_d_iterations, args.diagnostic_dir)))
+                                  args.three_d_iterations, args.diagnostic_dir,
+                                  controls_neighbor_backend=args.controls_neighbor_backend)))
 
 
 if __name__ == "__main__":

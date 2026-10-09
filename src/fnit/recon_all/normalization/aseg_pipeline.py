@@ -23,8 +23,17 @@ from .normalize_voronoi_source import voronoi_fill, voronoi_fill_torch
 
 
 def _complete_from_initial(initial: np.ndarray, device: str,
-                           three_d_iterations: int) -> tuple[np.ndarray, dict]:
-    """Run native gentle and 3D passes from the float32 aseg bias output."""
+                           three_d_iterations: int, *,
+                           controls_neighbor_backend: str = "cpu") -> tuple[np.ndarray, dict]:
+    """从同网格 float32 初始偏置校正图完成温和/三维迭代。
+
+    initial 是 (x,y,z) NumPy 强度图；device 为调用者设备字符串，
+    three_d_iterations 由公开接口限定为0/1/2；controls_neighbor_backend
+    默认 cpu，torch 为显式 GPU 邻域统计。输出同 shape uint8 NumPy 图
+    及含 steps/gentle_controls 的 dict，步骤单位秒；不负责 affine 或文件。
+    保留 CPU 控制点选择、有序离群更新和各轮浮点图，错误原样传播。
+    属于 mri_normalize -aseg 内部完成阶段，没有独立官方 CLI。
+    """
     source = torch.as_tensor(np.ascontiguousarray(initial, dtype=np.float32), device=device)
     steps = {}
     tick = time.perf_counter()
@@ -45,7 +54,8 @@ def _complete_from_initial(initial: np.ndarray, device: str,
     current = apply_gentle_bias_float(source, bias)
     for index in range(three_d_iterations):
         tick = time.perf_counter()
-        control_3d, detail = controls_3d(current.cpu().numpy())
+        control_3d, detail = controls_3d(current.cpu().numpy(),
+            neighbor_backend=controls_neighbor_backend, device=str(device))
         steps[f"three_d_{index + 1}_controls_seconds"] = time.perf_counter() - tick
         tick = time.perf_counter()
         if source.is_cuda:
@@ -66,11 +76,28 @@ def _complete_from_initial(initial: np.ndarray, device: str,
 
 def normalize_t1_aseg(norm_file: str | Path, aseg_file: str | Path,
                       brainmask_file: str | Path, output_file: str | Path,
-                      device: str | None = None, three_d_iterations: int = 2) -> dict:
-    """Normalize a conformed T1 using aseg WM controls without FreeSurfer binaries."""
+                      device: str | None = None, three_d_iterations: int = 2, *,
+                      controls_neighbor_backend: str = "cpu") -> dict:
+    """同网格 norm/aseg/brainmask→uint8 brain.mgz，返回完整步骤记录。
+
+    norm_file 为1mm conform uint8强度，aseg_file 为同网格整数标签，
+    brainmask_file 为同网格掩膜，output_file 保留 norm 的毫米 affine/MGH头。
+    device=None 有 CUDA 时选 cuda:0 否则 cpu，three_d_iterations 默认2，
+    仅接受0/1/2。controls_neighbor_backend 默认 cpu，torch 只替换三维扩展
+    邻域统计并要求 CUDA；ridge、有序过滤、初始偏置及外层反馈均保留。
+    返回 dict 的 total_seconds、ridge_seconds、initial_bias_seconds 单位秒；
+    ridge、removed_controls、wm_peak、completion 记录控制点和后续步骤。
+    total_seconds 从图像头与同网格检查后开始，完整文件 API 应外层计时。
+    无效参数、网格不匹配和组织峰失败抛异常，不调用 FreeSurfer或静默回退。
+    对应 mri_normalize -seed 1234 -mprage -aseg ... -mask ...，详见中文页。
+    """
     if three_d_iterations not in (0, 1, 2):
         raise ValueError("three_d_iterations must be 0, 1, or 2")
     device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
+    if controls_neighbor_backend not in {"cpu", "torch"}:
+        raise ValueError("controls_neighbor_backend must be cpu or torch")
+    if controls_neighbor_backend == "torch" and not str(device).startswith("cuda:"):
+        raise ValueError("torch controls_neighbor_backend requires an explicit CUDA device")
     norm_file, aseg_file, brainmask_file = map(Path, (norm_file, aseg_file, brainmask_file))
     images = [nib.load(str(path)) for path in (norm_file, brainmask_file, aseg_file)]
     if any(image.shape != images[0].shape or not np.array_equal(image.affine, images[0].affine)
@@ -86,9 +113,11 @@ def normalize_t1_aseg(norm_file: str | Path, aseg_file: str | Path,
     tick = time.perf_counter()
     initial = apply_initial_aseg_bias(masked, controls)
     initial_bias_seconds = time.perf_counter() - tick
-    result, completion = _complete_from_initial(initial, device, three_d_iterations)
+    result, completion = _complete_from_initial(initial, device, three_d_iterations,
+        controls_neighbor_backend=controls_neighbor_backend)
     save_same_dtype_mgh(norm_file, output_file, result)
     return {"device": device, "three_d_iterations": three_d_iterations,
+            "controls_neighbor_backend": controls_neighbor_backend,
             "ridge_seconds": ridge_seconds, "initial_bias_seconds": initial_bias_seconds,
             "ridge": ridge_details, "removed_controls": int(np.count_nonzero(removed)),
             "wm_peak": wm_peak, "completion": completion,
@@ -103,9 +132,11 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device")
     parser.add_argument("--three-d-iterations", type=int, choices=(0, 1, 2), default=2)
+    parser.add_argument("--controls-neighbor-backend", choices=("cpu", "torch"), default="cpu")
     args = parser.parse_args()
     print(json.dumps(normalize_t1_aseg(args.norm, args.aseg, args.brainmask,
-                                       args.output, args.device, args.three_d_iterations)))
+                                       args.output, args.device, args.three_d_iterations,
+                                       controls_neighbor_backend=args.controls_neighbor_backend)))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,419 @@
+{
+  "scope": "same-input full normalization API replacement; not whole recon-all; official not freshly rerun",
+  "dataset": "OpenNeuro ds000114 CC0",
+  "baseline_commit": "803aec50248385b3e4170cc8cdaa9667035f7288",
+  "candidate_tested_source": "803 frozen full source plus normalization file SHA overlay; code_commit field is ancestry, not the full uncommitted overlay",
+  "hardware": "A100-SXM4 80GB, cuda:1, CPU affinity4-7, four threads",
+  "acceptance": "same stage float32 round inputs, controls, output file SHA and geometry unchanged",
+  "cases": {
+    "sub06-aseg": {
+      "cpu_api_seconds": [
+        131.08775724470615,
+        63.002801517024636
+      ],
+      "gpu_neighbor_api_seconds": [
+        101.50764426309615,
+        73.91724957153201
+      ],
+      "cpu_median_seconds": 97.0452793808654,
+      "gpu_median_seconds": 87.71244691731408,
+      "observed_median_ratio": 1.1064026006747858,
+      "different_voxels": 0,
+      "max_abs": 0,
+      "p99_abs": 0,
+      "all_output_sha_equal": true,
+      "round_source_controls_details_equal": true,
+      "round_traces": [
+        {
+          "round": 1,
+          "input_data_sha256": "4355827c50d211f7fc750903adb56942f1a9b32c34ab62a8bb74d438058f3221",
+          "input_shape": [
+            256,
+            256,
+            256
+          ],
+          "input_dtype": "float32",
+          "control_data_sha256": "b5e9ffaae0063642dca90960c76d7384e4af32d567e0a0a8acbf32a753fc1e63",
+          "control_dtype": "uint8",
+          "details": {
+            "initial_7": 25153,
+            "initial_5": 43897,
+            "tissue_peaks": {
+              "selected_wm_peak": 109.55284118652344,
+              "wm_index": 109,
+              "gm_index": 50,
+              "wm_peak": 108.8658676147461,
+              "gm_peak": 49.93846893310547,
+              "bin_size": 0.9987694025039673
+            },
+            "adaptive_7": 25153,
+            "adaptive_5": 56951,
+            "three_added": 68310,
+            "six_added": 70856,
+            "before_outlier_removal": 196117,
+            "after_outlier_removal": 196117
+          }
+        },
+        {
+          "round": 2,
+          "input_data_sha256": "a1c7acd91a22d22b8a1aa177edfca20de8cd5cbecc85f73061246a663ad6cb48",
+          "input_shape": [
+            256,
+            256,
+            256
+          ],
+          "input_dtype": "float32",
+          "control_data_sha256": "2a3d7bed3195ce7c87f2d04fa029142dc6022dd18cfb1c6297177f3c5320c1c4",
+          "control_dtype": "uint8",
+          "details": {
+            "initial_7": 27255,
+            "initial_5": 49788,
+            "tissue_peaks": {
+              "selected_wm_peak": 110.33270263671875,
+              "wm_index": 110,
+              "gm_index": 51,
+              "wm_peak": 109.9454574584961,
+              "gm_peak": 50.97471237182617,
+              "bin_size": 0.9995041489601135
+            },
+            "adaptive_7": 27255,
+            "adaptive_5": 61678,
+            "three_added": 70682,
+            "six_added": 70606,
+            "before_outlier_removal": 202966,
+            "after_outlier_removal": 202966
+          }
+        }
+      ],
+      "interpretation": "unchanged CPU ridge/bias varied substantially; no stable whole-second-normalization speed claim",
+      "input_sha256": {
+        "norm.mgz": "3c8979c72f261f60361bff8fe0a08b1c543bf95e854bbb0f7c467bdf36c7bbd4",
+        "aseg.presurf.mgz": "0e2efe5625d11bb33f4cc17f94af6a5c231eb1d522bff6deb6f4fb51c658f003",
+        "brainmask.mgz": "3c8656e31226b8fb59fa80aff9f78f14d8900210e53112190ec76b62828411af"
+      },
+      "output_sha256": "de6896e108e8979f12909e58f239c534b26b9a3eb12dea951ee96177fbf177c5"
+    },
+    "sub06-t1": {
+      "cpu_api_seconds": [
+        93.34835779853165,
+        98.69493042491376
+      ],
+      "gpu_neighbor_api_seconds": [
+        49.9079788569361,
+        47.32625248655677
+      ],
+      "cpu_median_seconds": 96.02164411172271,
+      "gpu_median_seconds": 48.61711567174643,
+      "observed_median_ratio": 1.9750584292174527,
+      "different_voxels": 0,
+      "max_abs": 0,
+      "p99_abs": 0,
+      "all_output_sha_equal": true,
+      "round_source_controls_details_equal": true,
+      "round_traces": [
+        {
+          "round": 1,
+          "input_data_sha256": "b5afee996c45d17a0a8fe4d93dd919494a3a977ff43f71bd627a6ad79e557344",
+          "input_shape": [
+            256,
+            256,
+            256
+          ],
+          "input_dtype": "float32",
+          "control_data_sha256": "0d6093086244cf118e9aa4da145c758f072cec33a3b4a2352da64b7c798b0a55",
+          "control_dtype": "uint8",
+          "details": {
+            "initial_7": 21603,
+            "initial_5": 36680,
+            "tissue_peaks": {
+              "selected_wm_peak": 110.3179931640625,
+              "wm_index": 107,
+              "gm_index": 74,
+              "wm_peak": 106.8476333618164,
+              "gm_peak": 73.8946304321289,
+              "bin_size": 0.9985760450363159
+            },
+            "adaptive_7": 21609,
+            "adaptive_5": 26589,
+            "three_added": 27687,
+            "six_added": 40907,
+            "before_outlier_removal": 95183,
+            "after_outlier_removal": 95170
+          }
+        },
+        {
+          "round": 2,
+          "input_data_sha256": "e31af3bb1db386be197ebb0e0dbd283a14602d67c0ab5f499330f0f356ba35f0",
+          "input_shape": [
+            256,
+            256,
+            256
+          ],
+          "input_dtype": "float32",
+          "control_data_sha256": "950dd41018ccf9413263be68bed1ccb9347d7c38c3dc1fa63e65d8318f3db5ce",
+          "control_dtype": "uint8",
+          "details": {
+            "initial_7": 22805,
+            "initial_5": 37473,
+            "tissue_peaks": {
+              "selected_wm_peak": 110.1491470336914,
+              "wm_index": 110,
+              "gm_index": 77,
+              "wm_peak": 109.9001235961914,
+              "gm_peak": 76.93008422851562,
+              "bin_size": 0.9990920424461365
+            },
+            "adaptive_7": 22813,
+            "adaptive_5": 26986,
+            "three_added": 23347,
+            "six_added": 39361,
+            "before_outlier_removal": 89694,
+            "after_outlier_removal": 89685
+          }
+        }
+      ],
+      "interpretation": "first normalization observed speed gain",
+      "input_sha256": {
+        "nu.mgz": "90222e8c443d122389b305c1b018ce243e7a2bab729bc83f6bec2359caf87922",
+        "transforms/talairach.xfm": "3404ca7e867857c11e8880a52d264b513104f8d63522e0ee594d75e166cf611c"
+      },
+      "output_sha256": "b7fe4e404f31a5f290e456bd663e2144d863cb06232364daefe7fbc2cd3dba3a"
+    },
+    "sub07-t1": {
+      "cpu_api_seconds": [
+        75.50223834812641,
+        66.40645292215049
+      ],
+      "gpu_neighbor_api_seconds": [
+        38.69694005511701,
+        42.4525852939114
+      ],
+      "cpu_median_seconds": 70.95434563513845,
+      "gpu_median_seconds": 40.574762674514204,
+      "observed_median_ratio": 1.748731008097954,
+      "different_voxels": 0,
+      "max_abs": 0,
+      "p99_abs": 0,
+      "all_output_sha_equal": true,
+      "round_source_controls_details_equal": true,
+      "round_traces": [
+        {
+          "round": 1,
+          "input_data_sha256": "f7c4f49b9036978f21ab4c9be9524bb2a8c1ea3de6b273465f8ac7dddc651e98",
+          "input_shape": [
+            256,
+            256,
+            256
+          ],
+          "input_dtype": "float32",
+          "control_data_sha256": "9b60845fbdebc496b3430707d946d1b938a91311506981b9119d237d09096e18",
+          "control_dtype": "uint8",
+          "details": {
+            "initial_7": 29994,
+            "initial_5": 55247,
+            "tissue_peaks": {
+              "selected_wm_peak": 110.10260772705078,
+              "wm_index": 109,
+              "gm_index": 50,
+              "wm_peak": 108.88355255126953,
+              "gm_peak": 49.94658279418945,
+              "bin_size": 0.9989316463470459
+            },
+            "adaptive_7": 29994,
+            "adaptive_5": 64285,
+            "three_added": 63007,
+            "six_added": 55101,
+            "before_outlier_removal": 182393,
+            "after_outlier_removal": 182391
+          }
+        },
+        {
+          "round": 2,
+          "input_data_sha256": "f48cb25c8b357f0f515fc2056f14646a887633b9b92630925e36160ce2bf490c",
+          "input_shape": [
+            256,
+            256,
+            256
+          ],
+          "input_dtype": "float32",
+          "control_data_sha256": "86b9460c47b66fb5624c0bc4c0b70f648700e84487cdf74f08e3a0f52920ff86",
+          "control_dtype": "uint8",
+          "details": {
+            "initial_7": 32504,
+            "initial_5": 60101,
+            "tissue_peaks": {
+              "selected_wm_peak": 109.65322875976562,
+              "wm_index": 110,
+              "gm_index": 50,
+              "wm_peak": 110.0789566040039,
+              "gm_peak": 50.035888671875,
+              "bin_size": 1.0007177591323853
+            },
+            "adaptive_7": 32504,
+            "adaptive_5": 71649,
+            "three_added": 67951,
+            "six_added": 60839,
+            "before_outlier_removal": 200439,
+            "after_outlier_removal": 200439
+          }
+        }
+      ],
+      "interpretation": "first normalization observed speed gain",
+      "input_sha256": {
+        "nu.mgz": "53a16dcbddf12248195ea9afbd894abab1e0c1ace859983c9323badee6b86e43",
+        "transforms/talairach.xfm": "699167b41984f30e208b46a9fb211cb3ce519160885a2a3a6e62a84844177162"
+      },
+      "output_sha256": "97ca49ad60c6f1d6bc71e62c5a1019da3a5e78197f8cce5fe59337b795cdaa55"
+    },
+    "sub07-aseg": {
+      "cpu_api_seconds": [
+        101.13964540977031,
+        121.34661673102528
+      ],
+      "gpu_neighbor_api_seconds": [
+        105.21152971405536,
+        99.46766006294638
+      ],
+      "cpu_median_seconds": 111.2431310703978,
+      "gpu_median_seconds": 102.33959488850087,
+      "observed_median_ratio": 1.086999916225947,
+      "different_voxels": 0,
+      "max_abs": 0,
+      "p99_abs": 0,
+      "all_output_sha_equal": true,
+      "round_source_controls_details_equal": true,
+      "round_traces": [
+        {
+          "round": 1,
+          "input_data_sha256": "07b7ed4d6d8ee4e674ded133739e4c9a6bb8025ee397541131e551943a8720c2",
+          "input_shape": [
+            256,
+            256,
+            256
+          ],
+          "input_dtype": "float32",
+          "control_data_sha256": "7c71a737c745ab5e04245c33a3a6ceabd652047825e7f3e5668cf18d5749676e",
+          "control_dtype": "uint8",
+          "details": {
+            "initial_7": 29759,
+            "initial_5": 55268,
+            "tissue_peaks": {
+              "selected_wm_peak": 110.1020736694336,
+              "wm_index": 109,
+              "gm_index": 57,
+              "wm_peak": 108.75862884521484,
+              "gm_peak": 56.873779296875,
+              "bin_size": 0.9977855682373047
+            },
+            "adaptive_7": 29759,
+            "adaptive_5": 59774,
+            "three_added": 61825,
+            "six_added": 55521,
+            "before_outlier_removal": 177120,
+            "after_outlier_removal": 177112
+          }
+        },
+        {
+          "round": 2,
+          "input_data_sha256": "703c2ec7eecb171ea23821ac5487797cbf944f6eda98c787c59bc5b2dac6313a",
+          "input_shape": [
+            256,
+            256,
+            256
+          ],
+          "input_dtype": "float32",
+          "control_data_sha256": "7b806cb0981bb34785e4d100f4dd6213d96713b49f71735261181293db88ca65",
+          "control_dtype": "uint8",
+          "details": {
+            "initial_7": 31757,
+            "initial_5": 59193,
+            "tissue_peaks": {
+              "selected_wm_peak": 110.29484558105469,
+              "wm_index": 110,
+              "gm_index": 54,
+              "wm_peak": 109.99166107177734,
+              "gm_peak": 53.995906829833984,
+              "bin_size": 0.9999241828918457
+            },
+            "adaptive_7": 31757,
+            "adaptive_5": 66607,
+            "three_added": 67168,
+            "six_added": 59489,
+            "before_outlier_removal": 193264,
+            "after_outlier_removal": 193264
+          }
+        }
+      ],
+      "interpretation": "unchanged CPU ridge/bias varied; no stable whole-second-normalization speed claim",
+      "input_sha256": {
+        "norm.mgz": "7ada257bd83f734dadaf6eae3d793574345b9a9dfc2830f58e5c9ab00d064911",
+        "aseg.presurf.mgz": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c",
+        "brainmask.mgz": "775fd034413599dbfaa58b0dd0adf9fbc35938361381d4693922131b6752f3ed"
+      },
+      "output_sha256": "977f6fb298d38e10588cd636f4db38ca8c3456265b24d6d80d00d54e60e98eed"
+    }
+  },
+  "whole_recon_speedup": "not_measured",
+  "overall_metric_equivalence": "not_assessed",
+  "new_official_same_input_test": "not_run",
+  "candidate_source_sha256": {
+    "normalize_1d_source.py": "0e2c0130899d49938e077dd0c8b8d662912099a9b942df8c941dca9b9e96e57d",
+    "normalize_tissue_peaks.py": "c5e0a55d1b8583dbdf4b6b1938b859444655202606a5c374dfe365d1bc898042",
+    "normalize_3d_controls.py": "34d4580a86192aba94de3067bc5ce8c0a4a5418f640becfbeb0ae14cb9c6a28b",
+    "normalize_gentle_source.py": "1791a86e5a63e3a8dc4ebd4a612d58668cd2e2d9f9f7932434a68fa1fc692fab",
+    "normalize_voronoi_source.py": "cf92e4dcab2a02fefd56bff9070eda3a867aa8fc99465be14e00e82dbf164efa",
+    "normalize_gaussian_source.py": "fe4ac89208f3b07272a797dcc7dd44b7645e4c8ea6ea2033bd0925074e28a4e3",
+    "pipeline.py": "605b68b844929c852d2978fb38050cc56dcd18ff997742cb852946dfe12860ef",
+    "normalize_aseg_ridge.py": "01eb47a651805bb27c4cd44b72c5db69d094a913161fdb674e89e7bc0af9ff35",
+    "normalize_aseg_source.py": "18afb533a17aaae08b8b1cbdb0f4b688e14529290e791f89f53d8b8035362c51",
+    "aseg_pipeline.py": "cd3375c4bb576c0496db1e02dbf898469412b9301cd2bf5a43898b9af55fa588",
+    "__init__.py": "a3dbc39eb024387c4a73b687fe59784893b59222c678d82a74576be6fc120ff1",
+    "normalize_neighbor_sum_torch.py": "07dd051c23f531e8dcd2e571a83446ef0a334be88ff2cdaa787c381cb1ccc1d6",
+    "_normalization_cuda.py": "a8204bee3f37e49a0be7d886c028ce687f7f9ec8482c3d2c2ad7319d0ebd35b6",
+    "_normalization_neighbors_cuda.py": "3e78b47fca4b706f03a3f7116ee055de1fd898c239419c9b7f9a44431c815668"
+  },
+  "candidate_local_file_sha256": {
+    "src/fnit/recon_all/normalization/aseg_pipeline.py": "cd3375c4bb576c0496db1e02dbf898469412b9301cd2bf5a43898b9af55fa588",
+    "src/fnit/recon_all/normalization/normalize_1d_source.py": "0e2c0130899d49938e077dd0c8b8d662912099a9b942df8c941dca9b9e96e57d",
+    "src/fnit/recon_all/normalization/normalize_3d_controls.py": "34d4580a86192aba94de3067bc5ce8c0a4a5418f640becfbeb0ae14cb9c6a28b",
+    "src/fnit/recon_all/normalization/normalize_aseg_ridge.py": "01eb47a651805bb27c4cd44b72c5db69d094a913161fdb674e89e7bc0af9ff35",
+    "src/fnit/recon_all/normalization/normalize_aseg_source.py": "18afb533a17aaae08b8b1cbdb0f4b688e14529290e791f89f53d8b8035362c51",
+    "src/fnit/recon_all/normalization/normalize_gaussian_source.py": "fe4ac89208f3b07272a797dcc7dd44b7645e4c8ea6ea2033bd0925074e28a4e3",
+    "src/fnit/recon_all/normalization/normalize_gentle_source.py": "1791a86e5a63e3a8dc4ebd4a612d58668cd2e2d9f9f7932434a68fa1fc692fab",
+    "src/fnit/recon_all/normalization/normalize_neighbor_sum_torch.py": "07dd051c23f531e8dcd2e571a83446ef0a334be88ff2cdaa787c381cb1ccc1d6",
+    "src/fnit/recon_all/normalization/normalize_tissue_peaks.py": "c5e0a55d1b8583dbdf4b6b1938b859444655202606a5c374dfe365d1bc898042",
+    "src/fnit/recon_all/normalization/normalize_voronoi_source.py": "cf92e4dcab2a02fefd56bff9070eda3a867aa8fc99465be14e00e82dbf164efa",
+    "src/fnit/recon_all/normalization/pipeline.py": "605b68b844929c852d2978fb38050cc56dcd18ff997742cb852946dfe12860ef",
+    "src/fnit/recon_all/normalization/_normalization_cuda.py": "a8204bee3f37e49a0be7d886c028ce687f7f9ec8482c3d2c2ad7319d0ebd35b6",
+    "src/fnit/recon_all/normalization/_normalization_neighbors_cuda.py": "3e78b47fca4b706f03a3f7116ee055de1fd898c239419c9b7f9a44431c815668",
+    "src/fnit/recon_all/normalization/__init__.py": "a3dbc39eb024387c4a73b687fe59784893b59222c678d82a74576be6fc120ff1"
+  },
+  "candidate_local_matches_tested_source": true,
+  "software_post_run_snapshot": {
+    "python": "3.11",
+    "torch": "2.5.1+cu118",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "scipy": "1.17.1",
+    "numba": "0.67.0",
+    "triton": "3.1.0",
+    "scope": "additional package versions read after completed runs in same immutable environment; per-run primary versions are in reports"
+  },
+  "strict_stage_replication": {
+    "completed_apis": 16,
+    "byte_equal_apis": 16,
+    "round_input_controls_and_selection_details_equal": true
+  },
+  "producer_checkpoints": {
+    "sub06": "$FNIT/runs/recon_e2e_803aec50_cfff_20261009/sub06-candidate/subject/mri",
+    "sub07": "$FNIT/runs/recon_e2e_803aec50_cfff_20261009/sub07-control/subject/mri",
+    "scope": "finished normalization outputs within continuing raw-T1 runs; not relabeled as a new complete end-to-end run"
+  },
+  "sub07_producer_snapshot": {
+    "code_version": "803aec50:raw-T1:control;archive=b66241f677c5afe59a70bad30f0d3594a04013b6bd21adb53843bb5be337b389",
+    "device": "cuda:0",
+    "input_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+    "execution": "running",
+    "note": "producer benchmark snapshot read after brain.mgz existed; execution running refers to whole pipeline; physical GPU mapping is in raw parent report, not inferred from logical cuda0"
+  }
+}

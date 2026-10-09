@@ -69,7 +69,8 @@ def _remove_outliers_ordered(control: np.ndarray) -> int:
 
 
 def controls_3d(source: np.ndarray, wm_peak: float | None = None,
-                gm_peak: float | None = None) -> tuple[np.ndarray, dict]:
+                gm_peak: float | None = None, *, neighbor_backend: str = "cpu",
+                device: str | None = None) -> tuple[np.ndarray, dict]:
     """从归一化强度图选择三维白质控制点，不调用外部软件。
 
     输入 ``source`` 为三维 (x, y, z) 强度数组，使用输入体素网格，无 RAS
@@ -77,11 +78,18 @@ def controls_3d(source: np.ndarray, wm_peak: float | None = None,
     ``gm_peak`` 是白质、灰质强度峰（归一化强度单位），默认 None；任一
     未给出时重新估计两者。返回同 shape 的 uint8 控制图（0/1）和 dict，
     其中各键记录锚点、扩展及离群清理数量，自动估计时另含组织峰报告。
-    非三维输入抛出 ValueError；没有可选组织区域时保留现有失败行为。
+    neighbor_backend 默认 cpu，保留 SciPy 邻域；torch 复用固定 ROI 的 GPU
+    源强度/缓冲，仅替换邻域数量和总量计算，device 须显式 CUDA 设备。
+    外层控制点扩展、终止、峰值及有序清理保持原规则。非三维/无效后端
+    输入抛出 ValueError；没有可选组织区域时保留现有失败行为。
     对应 ``mri_normalize`` 的内部三维控制点阶段，参数不改变输出空间。
     """
     if source.ndim != 3:
         raise ValueError("expected a 3D float image")
+    if neighbor_backend not in {"cpu", "torch"}:
+        raise ValueError("neighbor_backend must be cpu or torch")
+    if neighbor_backend == "torch" and (device is None or not str(device).startswith("cuda:")):
+        raise ValueError("torch neighbor_backend requires an explicit CUDA device")
     raw = np.asarray(source, dtype=np.float32)
     image = raw.astype(np.int16)  # InWindow assigns MRIgetVoxVal to int.
     control = np.zeros(image.shape, dtype=bool)
@@ -118,9 +126,14 @@ def controls_3d(source: np.ndarray, wm_peak: float | None = None,
     eligible = (raw >= lower) & (raw <= upper) & neighborhood_ok
     region = _candidate_region(eligible)
     candidates, selected, values = eligible[region], control[region], raw[region]
+    neighbor_context = None
+    if neighbor_backend == "torch":
+        from .normalize_neighbor_sum_torch import NeighborSumTorch
+        neighbor_context = NeighborSumTorch(raw, six, region, device=device)
     three_added = 0
     while True:
-        count, total = _neighbor_sum(raw, control, six, region)
+        count, total = (neighbor_context(control) if neighbor_context is not None else
+                        _neighbor_sum(raw, control, six, region))
         mean = np.divide(total, count, out=np.zeros(count.shape, dtype=np.float32), where=count>0)
         additions = candidates & ~selected & (count > 0) & ((values >= 110) | (mean - values < adaptive / 2))
         added = int(additions.sum())
@@ -137,9 +150,12 @@ def controls_3d(source: np.ndarray, wm_peak: float | None = None,
     region = _candidate_region(eligible)
     candidates, selected, values = eligible[region], control[region], raw[region]
     cube = np.ones((3, 3, 3), dtype=np.int16)
+    if neighbor_backend == "torch":
+        neighbor_context = NeighborSumTorch(raw, cube, region, device=device)
     six_added = 0
     while True:
-        count, total = _neighbor_sum(raw, control, cube, region)
+        count, total = (neighbor_context(control) if neighbor_context is not None else
+                        _neighbor_sum(raw, control, cube, region))
         mean = np.divide(total, count, out=np.zeros(count.shape, dtype=np.float32), where=count>0)
         additions = candidates & ~selected & (count >= 4) & ((values >= 110) | (mean - values < adaptive / 2))
         added = int(additions.sum())

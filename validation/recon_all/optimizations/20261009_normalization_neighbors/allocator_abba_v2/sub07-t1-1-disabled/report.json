@@ -1,0 +1,1246 @@
+{
+  "scope": "same-input full existing normalization API allocator ABBA component; not raw T1 end-to-end",
+  "stage": "t1",
+  "cache": "disabled",
+  "code_commit": "803aec50248385b3e4170cc8cdaa9667035f7288",
+  "source_sha256": {
+    "normalize_1d_source.py": "0e2c0130899d49938e077dd0c8b8d662912099a9b942df8c941dca9b9e96e57d",
+    "normalize_tissue_peaks.py": "c5e0a55d1b8583dbdf4b6b1938b859444655202606a5c374dfe365d1bc898042",
+    "normalize_3d_controls.py": "636f4260537de2103401dc678476dc55bd0f76645366d3073b21759b777d7189",
+    "normalize_gentle_source.py": "1791a86e5a63e3a8dc4ebd4a612d58668cd2e2d9f9f7932434a68fa1fc692fab",
+    "normalize_voronoi_source.py": "cf92e4dcab2a02fefd56bff9070eda3a867aa8fc99465be14e00e82dbf164efa",
+    "normalize_gaussian_source.py": "fe4ac89208f3b07272a797dcc7dd44b7645e4c8ea6ea2033bd0925074e28a4e3",
+    "pipeline.py": "ad9a206a35e6ac2334f1c8006ef3f6245985a14d6169e7c8e308171162e29ec5",
+    "normalize_aseg_ridge.py": "01eb47a651805bb27c4cd44b72c5db69d094a913161fdb674e89e7bc0af9ff35",
+    "normalize_aseg_source.py": "18afb533a17aaae08b8b1cbdb0f4b688e14529290e791f89f53d8b8035362c51",
+    "aseg_pipeline.py": "8060c5b7311433c51f3161269ee7092d2656d8d0ab80e329de081d8cbdece494",
+    "__init__.py": "a3dbc39eb024387c4a73b687fe59784893b59222c678d82a74576be6fc120ff1",
+    "_normalization_cuda.py": "a8204bee3f37e49a0be7d886c028ce687f7f9ec8482c3d2c2ad7319d0ebd35b6"
+  },
+  "script_sha256": "74dc0a922f5ebe14b17902543a0d17f0e70d6da155c265707b5b6ff97fc5a833",
+  "profiling_sha256": "a4b1cc19794c1af90d6218f7d757cede491ade7da9406e3a3012a628fa2bf3ec",
+  "input_sha256": {
+    "nu.mgz": "53a16dcbddf12248195ea9afbd894abab1e0c1ace859983c9323badee6b86e43",
+    "transforms/talairach.xfm": "699167b41984f30e208b46a9fb211cb3ce519160885a2a3a6e62a84844177162"
+  },
+  "input_unchanged": {
+    "nu.mgz": true,
+    "transforms/talairach.xfm": true
+  },
+  "reference_kind": "same frozen self-produced 803 chain stage output; comparison only",
+  "reference_sha256": "97ca49ad60c6f1d6bc71e62c5a1019da3a5e78197f8cce5fe59337b795cdaa55",
+  "output_sha256": "97ca49ad60c6f1d6bc71e62c5a1019da3a5e78197f8cce5fe59337b795cdaa55",
+  "host": "A100_BENCHMARK_HOST",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz",
+  "cpu_affinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "torch_threads": 4,
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4"
+  },
+  "device": "cuda:1",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "nibabel": "5.4.2",
+  "torch_cuda": "11.8",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast": false,
+    "fp16_bf16_used": false
+  },
+  "allocator": {
+    "requested": "disabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "initialization_seconds": 2.845357494428754,
+  "full_API": {
+    "name": "normalize_t1",
+    "seconds": 73.94892615266144,
+    "function_seconds": 73.94868571963161,
+    "cuda_pre_sync_seconds": 9.206775575876236e-05,
+    "cuda_post_sync_seconds": 4.946906119585037e-05,
+    "cuda_synchronized": true,
+    "cuda_synchronization_requested": true,
+    "parent_cpu_seconds": 73.353108165,
+    "child_cpu_seconds": 7.218432,
+    "torch_memory_stats_status": "unavailable"
+  },
+  "api": {
+    "device": "cuda:1",
+    "three_d_iterations": 2,
+    "steps": {
+      "one_d_seconds": 0.13642683252692223,
+      "controls_seconds": 3.3851047633215785,
+      "voronoi_seconds": 3.421891324222088,
+      "smoothing_seconds": 0.2564203441143036,
+      "gentle_apply_seconds": 0.09654428251087666,
+      "three_d_1_controls_seconds": 30.601842091418803,
+      "three_d_1_voronoi_seconds": 2.40741073153913,
+      "three_d_1_smoothing_seconds": 0.04027722589671612,
+      "three_d_1_apply_seconds": 0.049526507034897804,
+      "three_d_2_controls_seconds": 26.412468012422323,
+      "three_d_2_voronoi_seconds": 1.9523157980293036,
+      "three_d_2_smoothing_seconds": 0.12071152497082949,
+      "three_d_2_apply_seconds": 0.006342556327581406,
+      "apply_write_seconds": 4.73957141675055
+    },
+    "total_seconds": 73.93960749637336,
+    "peaks": {
+      "origin": [
+        129,
+        110,
+        143
+      ],
+      "window": 10,
+      "window_step": 5,
+      "npeaks": 18,
+      "raw_peak_positions": [
+        45.0,
+        50.0,
+        55.0,
+        60.0,
+        65.0,
+        70.0,
+        75.0,
+        80.0,
+        85.0,
+        90.0,
+        95.0,
+        100.0,
+        105.0,
+        110.0,
+        115.0,
+        120.0,
+        125.0,
+        130.0,
+        135.0,
+        140.0,
+        145.0,
+        150.0,
+        155.0
+      ],
+      "raw_peak_intensities": [
+        102.0,
+        87.0,
+        102.0,
+        102.0,
+        104.0,
+        107.0,
+        108.0,
+        108.0,
+        108.0,
+        108.0,
+        108.0,
+        108.0,
+        107.0,
+        106.0,
+        107.0,
+        107.0,
+        107.0,
+        103.0,
+        102.0,
+        74.0,
+        87.0,
+        87.0,
+        87.0
+      ],
+      "knots": [
+        45.0,
+        55.0,
+        60.0,
+        65.0,
+        70.0,
+        75.0,
+        80.0,
+        85.0,
+        90.0,
+        95.0,
+        100.0,
+        105.0,
+        110.0,
+        115.0,
+        120.0,
+        125.0,
+        130.0,
+        135.0
+      ],
+      "peak_intensities": [
+        102.0,
+        102.0,
+        102.0,
+        104.0,
+        107.0,
+        108.0,
+        108.0,
+        108.0,
+        108.0,
+        108.0,
+        108.0,
+        107.0,
+        106.0,
+        107.0,
+        107.0,
+        107.0,
+        103.0,
+        102.0
+      ],
+      "scale_min": 1.017853021621704,
+      "scale_max": 1.0799639225006104
+    },
+    "controls": {
+      "first_7x7x7": 18500,
+      "after_5x5x5": 43410,
+      "after_outlier_removal": 43361
+    },
+    "propagation": {
+      "levels": 133,
+      "controls": 43361,
+      "wall_seconds": 3.4015132505446672
+    },
+    "smoothing": {
+      "sigma": 8.0,
+      "kernel_length": 65,
+      "device": "cuda:1",
+      "wall_seconds": 0.24892670940607786
+    },
+    "three_d_passes": [
+      {
+        "controls": {
+          "initial_7": 29994,
+          "initial_5": 55247,
+          "tissue_peaks": {
+            "selected_wm_peak": 110.10260772705078,
+            "wm_index": 109,
+            "gm_index": 50,
+            "wm_peak": 108.88355255126953,
+            "gm_peak": 49.94658279418945,
+            "bin_size": 0.9989316463470459
+          },
+          "adaptive_7": 29994,
+          "adaptive_5": 64285,
+          "three_added": 63007,
+          "six_added": 55101,
+          "before_outlier_removal": 182393,
+          "after_outlier_removal": 182391
+        },
+        "propagation": {
+          "levels": 118,
+          "controls": 182391,
+          "wall_seconds": 2.40219496935606
+        },
+        "smoothing": {
+          "sigma": 8.0,
+          "kernel_length": 65,
+          "device": "cuda:1",
+          "wall_seconds": 0.03803964797407389
+        }
+      },
+      {
+        "controls": {
+          "initial_7": 32504,
+          "initial_5": 60101,
+          "tissue_peaks": {
+            "selected_wm_peak": 109.65322875976562,
+            "wm_index": 110,
+            "gm_index": 50,
+            "wm_peak": 110.0789566040039,
+            "gm_peak": 50.035888671875,
+            "bin_size": 1.0007177591323853
+          },
+          "adaptive_7": 32504,
+          "adaptive_5": 71649,
+          "three_added": 67951,
+          "six_added": 60839,
+          "before_outlier_removal": 200439,
+          "after_outlier_removal": 200439
+        },
+        "propagation": {
+          "levels": 116,
+          "controls": 200439,
+          "wall_seconds": 1.9414062704890966
+        },
+        "smoothing": {
+          "sigma": 8.0,
+          "kernel_length": 65,
+          "device": "cuda:1",
+          "wall_seconds": 0.11051894910633564
+        }
+      }
+    ]
+  },
+  "cpu_helpers": {
+    "aseg_pipeline.prepare_aseg_source": {
+      "calls": 0,
+      "seconds": 0.0,
+      "cpu_seconds": 0.0
+    },
+    "aseg_pipeline.medial_ridge": {
+      "calls": 0,
+      "seconds": 0.0,
+      "cpu_seconds": 0.0
+    },
+    "aseg_pipeline.filter_aseg_ridge": {
+      "calls": 0,
+      "seconds": 0.0,
+      "cpu_seconds": 0.0
+    },
+    "aseg_pipeline.apply_initial_aseg_bias": {
+      "calls": 0,
+      "seconds": 0.0,
+      "cpu_seconds": 0.0
+    },
+    "normalize_3d_controls._homogeneous": {
+      "calls": 8,
+      "seconds": 8.349949640221894,
+      "cpu_seconds": 8.363323164999986
+    },
+    "normalize_3d_controls._neighbor_sum": {
+      "calls": 157,
+      "seconds": 34.435644974932075,
+      "cpu_seconds": 34.51583070200002
+    },
+    "normalize_3d_controls.tissue_peaks": {
+      "calls": 2,
+      "seconds": 0.7763377968221903,
+      "cpu_seconds": 0.7776825599999988
+    },
+    "normalize_3d_controls._remove_outliers_ordered": {
+      "calls": 2,
+      "seconds": 0.24217847734689713,
+      "cpu_seconds": 0.24249887199999876
+    },
+    "normalize_gentle_source._remove_outliers_ordered": {
+      "calls": 1,
+      "seconds": 0.6189323859289289,
+      "cpu_seconds": 0.5688271090000008
+    }
+  },
+  "timing_includes": "first API validation, file loading, H2D/D2H, control search, first JIT/cache load, all two iterations and compressed write; target CUDA pre/post sync",
+  "timing_excludes": "Python import, CUDA initialization, SHA collection and comparison; shell records cold process separately",
+  "helper_timing_scope": "CPU helper wall/process time; nested values not summed; no additional GPU synchronization",
+  "shape": [
+    256,
+    256,
+    256
+  ],
+  "dtype": "uint8",
+  "different_voxels": 0,
+  "max_abs": 0.0,
+  "p99_abs": 0.0,
+  "affine_equal": true,
+  "mgh_header_equal": true,
+  "byte_equal": true,
+  "process_tree_GPU_memory": {
+    "status": "ownership_unresolved",
+    "target_gpu_uuid": "GPU-53efd149-9181-8bcf-b5d9-9e9489a90bf9",
+    "sampling_interval_seconds": 0.5,
+    "max_observed_interval_seconds": 2.5022517079487443,
+    "failed_samples": [],
+    "samples": [
+      {
+        "monotonic": 4326319.3789459,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 547356672
+          }
+        ],
+        "target_compute_process_sum_bytes": 10997465088,
+        "target_device_used_bytes": 11012145152,
+        "device_query_error": null,
+        "sample_query_seconds": 1.9696099925786257
+      },
+      {
+        "monotonic": 4326321.848863114,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 547356672
+          }
+        ],
+        "target_compute_process_sum_bytes": 10997465088,
+        "target_device_used_bytes": 11045699584,
+        "device_query_error": null,
+        "sample_query_seconds": 2.001968566328287
+      },
+      {
+        "monotonic": 4326324.351114822,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 580911104
+          }
+        ],
+        "target_compute_process_sum_bytes": 11031019520,
+        "target_device_used_bytes": 11314135040,
+        "device_query_error": null,
+        "sample_query_seconds": 1.5953168701380491
+      },
+      {
+        "monotonic": 4326326.44709645,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4750630790367723
+      },
+      {
+        "monotonic": 4326328.422457776,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4222569987177849
+      },
+      {
+        "monotonic": 4326330.344892973,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.5306049371138215
+      },
+      {
+        "monotonic": 4326332.375730444,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.655264695174992
+      },
+      {
+        "monotonic": 4326334.532082298,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.83301458414644
+      },
+      {
+        "monotonic": 4326336.865267289,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.188534022308886
+      },
+      {
+        "monotonic": 4326338.553987457,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.3235285924747586
+      },
+      {
+        "monotonic": 4326340.37773788,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.6519860895350575
+      },
+      {
+        "monotonic": 4326342.52988919,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.8716049613431096
+      },
+      {
+        "monotonic": 4326344.90168071,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 10450108416
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 11215568896,
+        "target_device_used_bytes": 11230248960,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4899766389280558
+      },
+      {
+        "monotonic": 4326346.891857553,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 681574400
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 1447034880,
+        "target_device_used_bytes": 1461714944,
+        "device_query_error": null,
+        "sample_query_seconds": 1.3052279138937593
+      },
+      {
+        "monotonic": 4326348.69726937,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 1530920960,
+        "target_device_used_bytes": 1545601024,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4155943002551794
+      },
+      {
+        "monotonic": 4326350.61303601,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 1530920960,
+        "target_device_used_bytes": 1545601024,
+        "device_query_error": null,
+        "sample_query_seconds": 1.1175370579585433
+      },
+      {
+        "monotonic": 4326352.230759813,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 1530920960,
+        "target_device_used_bytes": 1545601024,
+        "device_query_error": null,
+        "sample_query_seconds": 1.3285890519618988
+      },
+      {
+        "monotonic": 4326354.059516955,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 1530920960,
+        "target_device_used_bytes": 1545601024,
+        "device_query_error": null,
+        "sample_query_seconds": 1.563066154718399
+      },
+      {
+        "monotonic": 4326356.122760716,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 765460480
+          }
+        ],
+        "target_compute_process_sum_bytes": 1530920960,
+        "target_device_used_bytes": 1545601024,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4715652270242572
+      },
+      {
+        "monotonic": 4326358.09507415,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 799014912
+          }
+        ],
+        "target_compute_process_sum_bytes": 1564475392,
+        "target_device_used_bytes": 1579155456,
+        "device_query_error": null,
+        "sample_query_seconds": 0.9160800473764539
+      },
+      {
+        "monotonic": 4326359.511367831,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.2219961732625961
+      },
+      {
+        "monotonic": 4326361.233567267,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.2820398239418864
+      },
+      {
+        "monotonic": 4326363.015784668,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.3919734889641404
+      },
+      {
+        "monotonic": 4326364.9079164,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.3294703615829349
+      },
+      {
+        "monotonic": 4326366.737578173,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.080841425806284
+      },
+      {
+        "monotonic": 4326368.318620396,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4157984405755997
+      },
+      {
+        "monotonic": 4326370.23461779,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.0466783260926604
+      },
+      {
+        "monotonic": 4326371.781483862,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4566316399723291
+      },
+      {
+        "monotonic": 4326373.738281119,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4358708513900638
+      },
+      {
+        "monotonic": 4326375.674291201,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.0895308004692197
+      },
+      {
+        "monotonic": 4326377.263973925,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.153021135367453
+      },
+      {
+        "monotonic": 4326378.917164691,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4146090894937515
+      },
+      {
+        "monotonic": 4326380.831958319,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.5358364069834352
+      },
+      {
+        "monotonic": 4326382.867961999,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.339900279417634
+      },
+      {
+        "monotonic": 4326384.708007796,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 916455424
+          }
+        ],
+        "target_compute_process_sum_bytes": 1681915904,
+        "target_device_used_bytes": 1696595968,
+        "device_query_error": null,
+        "sample_query_seconds": 1.0944834724068642
+      },
+      {
+        "monotonic": 4326386.303062556,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 933232640
+          }
+        ],
+        "target_compute_process_sum_bytes": 1698693120,
+        "target_device_used_bytes": 1713373184,
+        "device_query_error": null,
+        "sample_query_seconds": 1.2183274729177356
+      },
+      {
+        "monotonic": 4326388.021543715,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 933232640
+          }
+        ],
+        "target_compute_process_sum_bytes": 1698693120,
+        "target_device_used_bytes": 1713373184,
+        "device_query_error": null,
+        "sample_query_seconds": 1.9084330117329955
+      },
+      {
+        "monotonic": 4326390.43007665,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 933232640
+          }
+        ],
+        "target_compute_process_sum_bytes": 1698693120,
+        "target_device_used_bytes": 1713373184,
+        "device_query_error": null,
+        "sample_query_seconds": 1.0359650328755379
+      },
+      {
+        "monotonic": 4326391.966233072,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 933232640
+          }
+        ],
+        "target_compute_process_sum_bytes": 1698693120,
+        "target_device_used_bytes": 1310720000,
+        "device_query_error": null,
+        "sample_query_seconds": 1.4111243840306997
+      },
+      {
+        "monotonic": 4326393.377514063,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 110267,
+            "bytes": 765460480
+          },
+          {
+            "pid": 67884,
+            "bytes": 513802240
+          }
+        ],
+        "target_compute_process_sum_bytes": 1279262720,
+        "target_device_used_bytes": 1293942784,
+        "device_query_error": null,
+        "sample_query_seconds": 1.1847731797024608
+      }
+    ],
+    "peak_tree_total_bytes": null,
+    "observed_resolved_tree_peak_bytes": null,
+    "peak_target_compute_process_sum_bytes": 11215568896,
+    "peak_target_device_used_bytes": 11314135040,
+    "scope": "simultaneous process snapshot on target GPU; unresolved host/container PID ownership is null; device total is separate and includes other users; consecutive queries are not exactly simultaneous",
+    "worker_pids": []
+  },
+  "strict_stage_replication": "pass",
+  "overall_metric_equivalence": "not_assessed",
+  "whole_recon_speedup": "not_measured"
+}
