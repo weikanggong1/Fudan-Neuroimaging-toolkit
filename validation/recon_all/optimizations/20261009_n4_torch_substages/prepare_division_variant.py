@@ -49,8 +49,14 @@ def prepare(*, source_workspace: Path, output_workspace: Path) -> dict:
     outputs = dict(originals)
     outputs[relative_paths[0]] = fitting.encode()
     outputs[relative_paths[1]] = complete.encode()
+    # A namespace-only directory can lose import precedence to an installed fnit.
+    # The diagnostic package deliberately imports no production batch machinery.
+    generated = {
+        "src/fnit/__init__.py": b'"""Independent frozen N4 diagnostic package."""\n',
+        "src/fnit/recon_all/__init__.py": b'"""Independent N4 modules; production defaults are not imported."""\n',
+    }
     output_workspace.mkdir(parents=True)
-    for relative, data in outputs.items():
+    for relative, data in {**outputs, **generated}.items():
         destination = output_workspace / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(data)
@@ -64,6 +70,8 @@ def prepare(*, source_workspace: Path, output_workspace: Path) -> dict:
             "source_sha256": hashlib.sha256(originals[relative]).hexdigest(),
             "variant_sha256": hashlib.sha256(outputs[relative]).hexdigest(),
         } for relative in relative_paths},
+        "generated_package_files": {relative: hashlib.sha256(data).hexdigest()
+                                    for relative, data in generated.items()},
     }
     (output_workspace / "division_variant_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest
