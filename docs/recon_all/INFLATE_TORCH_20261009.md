@@ -70,6 +70,23 @@ python -m fnit.recon_all.inflate_standard_run \
 
 真实阶段比较使用 `validation/recon_all/optimizations/20261009_inflate_torch/benchmark_complete.py`：`--data` 是逐 SHA 的公开 smoothwm manifest 目录，`--native` 是 FNIT 独立 Conda 源码构建的参考程序，`--output` 必须不存在。`--device` 默认 `cuda:0`，`--threads` 默认 4，`--repeats` 默认 2；可重复 `--case case/lh` 筛选。配对顺序为 native/NumPy/Torch，再 Torch/NumPy/native，GPU 每次完整 API 前后同步。输入、算法模块和参考程序均记录实际 SHA。参考只在候选全部计算后用于诊断比较。
 
+`--backends` 默认 `native numpy torch`，保持既有 ABC/CBA 配方；指定 `--backends native torch` 使用完整 API ABBA，只跳过已验证的 CPU 候选重复计算。后端不可重复、须包含 native 和至少一个候选；此选项不影响计算函数或比较门槛。
+
+双侧接入和已初始化 CUDA 的 Python API 用完整组 ABBA 验证：
+
+```bash
+python validation/recon_all/optimizations/20261009_inflate_torch/benchmark_hemisphere_group.py \
+  --data public_smoothwm_package \
+  --native declared_native_bin/mris_inflate \
+  --output new_complete_group_pair \
+  --device cuda:0 \
+  --threads 4
+```
+
+`--data` 是相同 SHA 输入包，每例必须同时有 lh/rh；`--native` 为声明 Conda 源码构建程序；`--output` 必须是新目录；`--device` 默认 `cuda:0` 且须显式 CUDA 编号；`--threads` 默认 4，两个 worker 合计预算且至少为 2。父进程关闭缓存、初始化 CUDA 并持有 FP32 活张量，子进程仅局部开启缓存。每例按 native/Torch/Torch/native 执行真实完整双侧组，两种后端均包含私有复制、fresh exec、导入、CUDA 初始化、JIT、API、读写和发布。新空 JIT 目录由调用环境指定，后续组复用缓存；与每次独立冷 JIT 的配准试验范围不同。
+
+脚本 `callback(subject=..., hemi=..., device=..., threads=..., operation=..., backend=..., native=...)` 是本次可信 benchmark worker，没有独立官方 CLI。输入仅私有被试目录的对应 `smoothwm`，Torch 复用本页完整接口，native 执行第4节完整命令；返回含读写的 API 报告、实际线程/TF32/缓存字段，生成同序 `inflated/sulc`。输出 `summary.json` 保留输入、源码、程序 SHA、四组实际 worker 报告、父活张量与环境合同、同期显存和严格比较。失败保留 JSON/日志并返回 1；成功返回 0。它不生成原始 T1 整例、不修改生产默认或参考输出。
+
 `prepare_inputs.py` 的 `--config` 为 JSON 数组，每项明确指定 `case`、`hemisphere`、`surface`、`public_source_url` 和 `source_recipe`；`--output`/`--archive` 都必须是新路径。只复制显式公开表面和清单，不递归复制被试、权重或许可证，不修改源影像。
 
 冷进程与缓存策略分别用 `benchmark_cli.py` 和 `benchmark_allocator.py` 检查。两者均要求 `--source-root` 是冻结候选源码、`--data` 是公开输入包、`--pair` 是状态为 `complete_stage_pair` 的同输入对照、`--output` 是新目录，`--device cuda:0 --threads 4` 显式选择资源。CLI 检查从空 NumBa/Triton 缓存开始，每张表面新建 Python 进程，后续子进程可复用编译缓存；它记录外部完整墙钟与子进程 API 时间。缓存关闭检查须在进程启动前设置 `PYTORCH_NO_CUDA_MEMORY_CACHING=1`，另指定 `--profiling-module` 为带 SHA 的 FNIT 同期显存采样模块；不会在已初始化进程中更改分配器。
@@ -89,6 +106,36 @@ mris_inflate -threads 4 subject/surf/lh.smoothwm diagnostic/lh.inflated
 源码固定为 `d932c45b7941662ea380a05efef580568b98d41a`：[CLI](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mris_inflate/mris_inflate.cpp)、[MRISinflateBrain](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_integrate.cpp)、[sulc tracking / zeroMeanCurvature](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_metricProperties.cpp)。这些是该 CLI 的内部步骤，没有独立官方命令；只在临时诊断目录审查，不把无关上游源码复制发布。
 
 ## 5．本版真实精度、耗时和资源
+
+**最新 v6/v7 使用已完成原始 T1 整例的 803aec50 自产两例双侧 smoothwm。** 输入不是以下早期冻结网格，也不读取官方产物。完整算法沿用已提交 v3 数值核心，新增的是当前网格回归、可选择的 benchmark 后端和已初始化父 CUDA 的真实双侧接入检查；本页结果不等于新的原始 T1 整例。
+
+同主机 A100、CPU64–67、4线程、TF32开启且无半精度完成 native/Torch/Torch/native API 配对。每个表面两次 Torch、两次 native 的有序坐标、sulc 全部元素和九项体积几何头均相同；最大/P99/RMSE为0。参考程序自身重复也精确。当前网格为 sub-06 LH/RH 130679/132459 顶点、261354/264914面，sub-07 LH/RH 114247/114951顶点、228490/229898面；不能把早期网格顶点数当作本次值。
+
+| 当前自产表面 | native 第1/2次，s | Torch 第1/2次，s | 新 Python CLI 完整外部墙钟，s |
+|---|---:|---:|---:|
+| sub-06 LH | 20.627 / 16.815 | 5.621 / 1.643 | 13.975 |
+| sub-06 RH | 17.634 / 19.528 | 1.485 / 1.148 | 10.836 |
+| sub-07 LH | 17.738 / 21.033 | 2.449 / 1.576 | 12.107 |
+| sub-07 RH | 17.876 / 17.637 | 1.456 / 1.230 | 10.227 |
+
+四个新解释器 CLI 也均与同输入 native 和 API 逐元素一致。API 计时含校验、传输、完整积分与读写，不含解释器导入；完整 CLI 另计启动、导入、CUDA 初始化和 JIT。首个 API 含冷编译及逐段剖析，第二次不作逐段同步；此节点当前共享负载使 native 与早期时间明显不同，不能跨组相减作为性能结果。
+
+v7 进一步保持父进程 CUDA 已初始化、缓存关闭、活张量不变，两侧 fresh exec **仅局部启用缓存**，每组 CPU 总4线程、每侧2线程。native 与 Torch 均经过相同私有复制、启动、JIT、完整计算、IO和发布流程。
+
+| 双侧完整组 ABBA | native 两次，s | Torch 两次，s | 中位数 native→Torch，s | 阶段缩短 |
+|---|---:|---:|---:|---:|
+| sub-06 | 46.299 / 44.547 | 27.270 / 17.765 | 45.423 → 22.518 | 50.427% |
+| sub-07 | 37.682 / 33.902 | 18.248 / 18.768 | 35.792 → 18.508 | 48.291% |
+
+首个 Torch 双侧组使用新空 JIT 缓存，其后复用；两种后端均新建 worker。12份候选/重复的双侧网格比较全部坐标、sulc、几何头零差异。8组父活张量SHA、父缓存环境、子实际enabled、每侧线程和TF32合同均通过。**严格同输入复现通过，未观察到优化退化；整体指标等效未判定，整例加速未测。**显式接线只适用于本页完整标准 `inflated/sulc`；nofix的 `-no-save-sulc`、quick sphere和拓扑GA不由此接口替换。球面配准缓存ABBA[未获整步收益](SPHERE_REGISTRATION_ALLOCATOR.md)，其默认inherit保持。
+
+v7每个Torch worker的 allocated 峰值315,037,184–358,849,024字节、reserved394,264,576–473,956,352字节，不把不同worker的峰值相加作为同期值。指定目标卡采样峰值12,583,960,576字节，全部计算进程同期合计上界12,557,746,176字节，含共享任务；进程树归属未解决，父子树峰值null。名义间隔0.5s、最大实际间隔5.678s、无查询失败。只支持采样范围，不能保证连续峰值或宣布整例20,000,000,000字节验收通过。
+
+![当前803自产四网格与完整inflation误差](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_current_self_803aec50_v7/figures/smoothwm_inflated_error.png)
+
+当前图为全部顶点矢状投影，误差色标0–0.001mm，四网格最大同索引距离均0。完整[机器报告及复现身份](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_current_self_803aec50_v7/README.md)保留两例输入、代码/程序/动态库SHA、实际线程精度、父子生命周期、同期显存上界、逐步时间与图SHA。27份收据仅替换私有目录和主机，5,227个数字/布尔/null字段不变。物理无预装软件的隔离运行仍未验证。
+
+### 仍承担当前回归作用的 v1–v5 记录
 
 本轮选择公开 ds000114 sub-06/sub-07 的 FNIT 自产冻结双侧 smoothwm；四个表面已逐 SHA 核验，12,886,865 字节的小包只迁移到获授权私有目录。这是固定同输入完整阶段验证，不是原始 T1 空目录整例。A100-SXM4-80GB、Xeon Platinum 8369B，同主机 CPU affinity 0–3、4 线程；Torch 2.5.1/CUDA 11.8，TF32 开启、无半精度。参考程序为相同固定源码的独立 Conda 构建产物，SHA `8c3e5f688a635a4bf7e1c49efec9737bef2310a2fcc5b221332fffc54667be17`。
 
@@ -129,6 +176,8 @@ GPU 张量 allocated/reserved 显式选择目标设备：v2 最大分别为 378,
 完整 [v2 同输入阶段报告](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_20261009_v5/v2_fourmesh/summary.json)、[冷 CLI](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_20261009_v5/v3_cold_cli/summary.json)、[缓存关闭反例](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_20261009_v5/v4_cache_disabled/summary.json) 及源码/输入/程序/动态库 SHA 均保留。冻结基底为 `a756fffb`，候选以逐模块 SHA 和三版 patch manifest 绑定；未把基底 commit 等同于含未提交补丁的全部实现。40 份公开收据仅替换私有目录与主机名，3476 个数字/布尔/null 字段保持原样；[映射清单](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_20261009_v5/public_export_manifest.json) 记录原始与公开 SHA。原始私有包 SHA 为 `7cec9a18f7b4e70e385069727e26d530bd336c084232aa8de1f89226e37f1c22`。依赖检查属于已声明 Conda 运行时，未验证物理上无预装软件的干净环境隔离。
 
 ## 6．更新与验证记录
+
+2026-10-09 v6/v7复用完整已提交算法，在当前803自产两例四网格完成API与冷CLI回归；新增真实双侧完整组ABBA和已初始化父CUDA的局部缓存隔离验证，保持生产默认、严格诊断和共享输出语义。完整阶段中位数缩短50.427%/48.291%，原始T1整例待统一接线后重新运行。未把旧网格时间、热kernel或单worker峰值替代新整例结果。
 
 2026-10-09 v1 补已有积分的可选 sulc 和子段诊断，新增完整双输出 runner 和 Torch 全积分实验后端；完整 sub-07 LH 对照通过后发现 5.8 秒整数拓扑瓶颈。v2 用有序 CSR/Numba 缓存完整邻域，四网格两次配对通过。v3 保留同一数值算法，补独立冷 CLI 边界与显存报告。v4 独立诊断生产缓存关闭策略，确认同输出仍明显慢，保存启动参数/最小包缺辅助导入的失败日志。v5 收据导出在相同运行时核对库哈希，并去除私有路径。成熟 normals/averaging 内核复用，保留原 API、生产原生默认、原严格诊断和既有球面实现。五项结构测试检查整数邻域顺序/重复/空行、完整档次、更新前 sulc、输入不变、非法参数和 CPU/GPU 对照；模拟小网格只属于测试，真实证据另保留。
 

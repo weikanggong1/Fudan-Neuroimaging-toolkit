@@ -1,0 +1,957 @@
+{
+  "scope": "two_public_self_produced_frozen_smoothwm_complete_inflate_not_recon_all",
+  "host": "BENCHMARK_HOST",
+  "device": "cuda:0",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "torch": "2.5.1",
+  "cuda": "11.8",
+  "cpu_affinity": [
+    64,
+    65,
+    66,
+    67
+  ],
+  "threads": 4,
+  "matmul_tf32": true,
+  "cudnn_tf32": true,
+  "half_precision": false,
+  "source_sha256": {
+    "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/validation/recon_all/optimizations/20261009_inflate_torch/benchmark_complete.py": "46efeca316d5155283d8f231c0af37993ed649fef6f3020aeb40141f8dac5a7e",
+    "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/src/fnit/recon_all/inflate_python.py": "01561d309ae100b86f15b5c7b677d4b60302864b8c75cd6fa87436358e9aae98",
+    "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/src/fnit/recon_all/inflate_torch.py": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+    "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/src/fnit/recon_all/inflate_standard_run.py": "1186db4d73b43edc7bea7580a57b73f490b5ef3669241e3c99837f630718d3bb",
+    "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/src/fnit/recon_all/place_surface_normals.py": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+    "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/src/fnit/recon_all/mris_register_average_numba.py": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+    "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/src/fnit/recon_all/inflate_topology.py": "52245a1f107cf0f39f828dc334c3b033b3f57089454ccbcae83936883206c8f5"
+  },
+  "native_sha256": "8c3e5f688a635a4bf7e1c49efec9737bef2310a2fcc5b221332fffc54667be17",
+  "data_manifest_sha256": "781610cc7f3ff01b270462899dcc0e0493407489468bdd00537d9846b505788d",
+  "native_ldd": "\tlinux-vdso.so.1 (0x00007ffd77d76000)\n\tlibz.so.1 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/libz.so.1 (0x00007f146fce9000)\n\tlibitkvnl_algo-5.4.so.1 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/libitkvnl_algo-5.4.so.1 (0x00007f146fbec000)\n\tlibitkvnl-5.4.so.1 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/libitkvnl-5.4.so.1 (0x00007f145fd3c000)\n\tlibitkv3p_netlib-5.4.so.1 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/libitkv3p_netlib-5.4.so.1 (0x00007f145fc1e000)\n\tlibgomp.so.1 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/libgomp.so.1 (0x00007f145fb26000)\n\tlibpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f145f907000)\n\tlibcrypt.so.2 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/libcrypt.so.2 (0x00007f146fba8000)\n\tlibrt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f145f6ff000)\n\tlibtiff.so.6 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/libtiff.so.6 (0x00007f146fb09000)\n\tlibstdc++.so.6 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/libstdc++.so.6 (0x00007f145f44a000)\n\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f145f0ac000)\n\tlibgcc_s.so.1 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/libgcc_s.so.1 (0x00007f145f07e000)\n\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f145ec8d000)\n\tlibdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f145ea89000)\n\t/lib64/ld-linux-x86-64.so.2 (0x00007f146fadd000)\n\tlibwebp.so.7 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/./libwebp.so.7 (0x00007f145e9d3000)\n\tlibzstd.so.1 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/./libzstd.so.1 (0x00007f145e8ba000)\n\tliblzma.so.5 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/./liblzma.so.5 (0x00007f145e887000)\n\tlibLerc.so.4 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/./libLerc.so.4 (0x00007f145e7b9000)\n\tlibjpeg.so.8 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/./libjpeg.so.8 (0x00007f145e6ea000)\n\tlibdeflate.so.0 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/./libdeflate.so.0 (0x00007f145e6d1000)\n\tlibsharpyuv.so.0 => FNIT_ROOT/envs/recon_main_20261009_v3/lib/././libsharpyuv.so.0 (0x00007f145e6c4000)\n",
+  "gpu_load_before": "104661, GPU-c3953aa9-15e8-fe79-6ff9-fb995f48b956, 18278 MiB\n12212, GPU-53efd149-9181-8bcf-b5d9-9e9489a90bf9, 490 MiB\n85649, GPU-a4fbd69e-67c8-8612-1bcd-b1355c3987b8, 6658 MiB\n104660, GPU-5cde39b3-bfe4-98a3-d19c-3cb092d5ad47, 18278 MiB\n91922, GPU-12fc6ce3-9773-5316-6ee5-38be1d5fb4f2, 6370 MiB\n19594, GPU-12fc6ce3-9773-5316-6ee5-38be1d5fb4f2, 416 MiB\n88735, GPU-e92ea062-9dbe-4d7f-54a9-deded0295fb5, 6370 MiB\n99454, GPU-ed4141f0-3e7c-6723-cf82-4a8370d6f9aa, 496 MiB\n19735, GPU-ed4141f0-3e7c-6723-cf82-4a8370d6f9aa, 414 MiB\n99453, GPU-c73c197f-ed60-b001-2c90-a538e261907b, 496 MiB\n18934, GPU-c73c197f-ed60-b001-2c90-a538e261907b, 414 MiB\n",
+  "production_default_changed": false,
+  "whole_recon_all_acceleration": "not measured",
+  "whole_metrics_equivalence": "not assessed",
+  "rows": [
+    {
+      "case": "ds000114_sub06",
+      "hemisphere": "lh",
+      "input_sha256": "1b4e53fc737a0629885e2fa146b9322d031689f5bee0ab8097438c43c7594719",
+      "runs": [
+        {
+          "repeat": 1,
+          "backend": "native",
+          "wall_seconds": 20.62689100485295,
+          "api": null,
+          "inflated_sha256": "71055fe81c1338506100ed13b7498ccf740bd8cb8f8817f10a4982cf5617d294",
+          "sulc_sha256": "b2e1dc5c1349ad82f85239edea3ada5353900bbd0249dbffb79ba43cbc8ad1c5"
+        },
+        {
+          "repeat": 1,
+          "backend": "torch",
+          "wall_seconds": 5.621059481985867,
+          "api": {
+            "input_surface": "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/public_inputs_v6/ds000114_sub06/lh.smoothwm",
+            "inflated_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub06/lh/torch_1/lh.inflated",
+            "sulc_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub06/lh/torch_1/lh.sulc",
+            "backend": "torch",
+            "device": "cuda:0",
+            "profile_synchronizes_substages": true,
+            "vertices": 130679,
+            "faces": 261354,
+            "niterations_per_scale": 10,
+            "read_validation_seconds": 0.07504967041313648,
+            "setup_and_transfer_seconds": 2.3300701789557934,
+            "compute_transfer_finalize_seconds": 5.517252074554563,
+            "write_seconds": 0.028051219880580902,
+            "integration": {
+              "steps": 60,
+              "final_rms": 0.020217614714630766,
+              "stopped_by_rms": false,
+              "timings_seconds": {
+                "face_area": 0.11979192681610584,
+                "normals": 0.4468441465869546,
+                "distances": 0.08081528078764677,
+                "distance_gradient": 0.43253419548273087,
+                "ordered_averaging": 1.7418043976649642,
+                "normalized_spring": 0.09030871372669935,
+                "rms_tangent_height": 0.16030570212751627
+              },
+              "integration_wall_seconds": 3.1348760295659304
+            },
+            "total_seconds_including_io": 5.62078420817852,
+            "production_default_changed": false
+          },
+          "inflated_sha256": "e30bd78036d3edf7a89da6511a20412d86ccdd554a9e6ea93a9099ca78b0ac5b",
+          "sulc_sha256": "b2e1dc5c1349ad82f85239edea3ada5353900bbd0249dbffb79ba43cbc8ad1c5",
+          "peak_allocated_bytes": 352959488,
+          "peak_reserved_bytes": 473956352
+        },
+        {
+          "repeat": 2,
+          "backend": "torch",
+          "wall_seconds": 1.6433260953053832,
+          "api": {
+            "input_surface": "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/public_inputs_v6/ds000114_sub06/lh.smoothwm",
+            "inflated_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub06/lh/torch_2/lh.inflated",
+            "sulc_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub06/lh/torch_2/lh.sulc",
+            "backend": "torch",
+            "device": "cuda:0",
+            "profile_synchronizes_substages": false,
+            "vertices": 130679,
+            "faces": 261354,
+            "niterations_per_scale": 10,
+            "read_validation_seconds": 0.06272218562662601,
+            "setup_and_transfer_seconds": 0.3761178329586983,
+            "compute_transfer_finalize_seconds": 1.5500342333689332,
+            "write_seconds": 0.029989784583449364,
+            "integration": {
+              "steps": 60,
+              "final_rms": 0.020217614714630766,
+              "stopped_by_rms": false,
+              "timings_seconds": {},
+              "integration_wall_seconds": 1.1679555689916015
+            },
+            "total_seconds_including_io": 1.6431507263332605,
+            "production_default_changed": false
+          },
+          "inflated_sha256": "e30bd78036d3edf7a89da6511a20412d86ccdd554a9e6ea93a9099ca78b0ac5b",
+          "sulc_sha256": "b2e1dc5c1349ad82f85239edea3ada5353900bbd0249dbffb79ba43cbc8ad1c5",
+          "peak_allocated_bytes": 352959488,
+          "peak_reserved_bytes": 473956352
+        },
+        {
+          "repeat": 2,
+          "backend": "native",
+          "wall_seconds": 16.815299081616104,
+          "api": null,
+          "inflated_sha256": "7758362aa006bd9f2ce4e702fa1f02e957c13238d198e76240f88b28c8be8302",
+          "sulc_sha256": "b2e1dc5c1349ad82f85239edea3ada5353900bbd0249dbffb79ba43cbc8ad1c5"
+        }
+      ],
+      "comparisons": [
+        {
+          "repeat": 1,
+          "backend": "torch",
+          "to_same_repeat_native": {
+            "same_ordered_topology": true,
+            "vertices": 130679,
+            "faces": 261354,
+            "coordinate_float32": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "vertex_distance_mm": {
+              "max": 0.0,
+              "p99": 0.0,
+              "rmse": 0.0
+            },
+            "sulc_mm": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "volume_geometry_fields_equal": {
+              "head": true,
+              "volume": true,
+              "zras": true,
+              "yras": true,
+              "valid": true,
+              "cras": true,
+              "voxelsize": true,
+              "filename": true,
+              "xras": true
+            },
+            "existing_inflate_vertex_gate_0p001mm": true,
+            "strict_decoded_geometry_and_sulc": true,
+            "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+            "nonmanifold_connectivity": "unchanged ordered faces",
+            "self_intersections": "not evaluated in this stage benchmark"
+          }
+        },
+        {
+          "repeat": 2,
+          "backend": "torch",
+          "to_same_repeat_native": {
+            "same_ordered_topology": true,
+            "vertices": 130679,
+            "faces": 261354,
+            "coordinate_float32": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "vertex_distance_mm": {
+              "max": 0.0,
+              "p99": 0.0,
+              "rmse": 0.0
+            },
+            "sulc_mm": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "volume_geometry_fields_equal": {
+              "head": true,
+              "volume": true,
+              "zras": true,
+              "yras": true,
+              "valid": true,
+              "cras": true,
+              "voxelsize": true,
+              "filename": true,
+              "xras": true
+            },
+            "existing_inflate_vertex_gate_0p001mm": true,
+            "strict_decoded_geometry_and_sulc": true,
+            "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+            "nonmanifold_connectivity": "unchanged ordered faces",
+            "self_intersections": "not evaluated in this stage benchmark"
+          }
+        }
+      ],
+      "native_repeat_sulc_byte_exact": true,
+      "native_repeat_decoded": {
+        "same_ordered_topology": true,
+        "vertices": 130679,
+        "faces": 261354,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "volume": true,
+          "zras": true,
+          "yras": true,
+          "valid": true,
+          "cras": true,
+          "voxelsize": true,
+          "filename": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      }
+    },
+    {
+      "case": "ds000114_sub06",
+      "hemisphere": "rh",
+      "input_sha256": "2a1d5d76f9f5ee5eb4839d620f5146ea29babcb813e516a137fbe403745eacae",
+      "runs": [
+        {
+          "repeat": 1,
+          "backend": "native",
+          "wall_seconds": 17.633791845291853,
+          "api": null,
+          "inflated_sha256": "c63346f4439eaeb5310d245f3f71ed96221073f8d7d590e7c78ed5351370ba57",
+          "sulc_sha256": "43560c126601b6e523b46690ea9e97781ce1ccb1bb3f9d37baad4cf5ef5f047b"
+        },
+        {
+          "repeat": 1,
+          "backend": "torch",
+          "wall_seconds": 1.484635311178863,
+          "api": {
+            "input_surface": "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/public_inputs_v6/ds000114_sub06/rh.smoothwm",
+            "inflated_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub06/rh/torch_1/rh.inflated",
+            "sulc_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub06/rh/torch_1/rh.sulc",
+            "backend": "torch",
+            "device": "cuda:0",
+            "profile_synchronizes_substages": true,
+            "vertices": 132459,
+            "faces": 264914,
+            "niterations_per_scale": 10,
+            "read_validation_seconds": 0.04197203740477562,
+            "setup_and_transfer_seconds": 0.3077951967716217,
+            "compute_transfer_finalize_seconds": 1.4015852799639106,
+            "write_seconds": 0.04027183447033167,
+            "integration": {
+              "steps": 60,
+              "final_rms": 0.020397599841693804,
+              "stopped_by_rms": false,
+              "timings_seconds": {
+                "face_area": 0.025830241851508617,
+                "normals": 0.3295858623459935,
+                "distances": 0.02476129774004221,
+                "distance_gradient": 0.3193384502083063,
+                "ordered_averaging": 0.24041477870196104,
+                "normalized_spring": 0.05156252346932888,
+                "rms_tangent_height": 0.08028382807970047
+              },
+              "integration_wall_seconds": 1.091383084654808
+            },
+            "total_seconds_including_io": 1.4844561945647001,
+            "production_default_changed": false
+          },
+          "inflated_sha256": "f9513008c9a899409a17ae042ab241598751480397d7c85ea22ba8c54c547379",
+          "sulc_sha256": "43560c126601b6e523b46690ea9e97781ce1ccb1bb3f9d37baad4cf5ef5f047b",
+          "peak_allocated_bytes": 359155712,
+          "peak_reserved_bytes": 473956352
+        },
+        {
+          "repeat": 2,
+          "backend": "torch",
+          "wall_seconds": 1.1476278733462095,
+          "api": {
+            "input_surface": "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/public_inputs_v6/ds000114_sub06/rh.smoothwm",
+            "inflated_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub06/rh/torch_2/rh.inflated",
+            "sulc_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub06/rh/torch_2/rh.sulc",
+            "backend": "torch",
+            "device": "cuda:0",
+            "profile_synchronizes_substages": false,
+            "vertices": 132459,
+            "faces": 264914,
+            "niterations_per_scale": 10,
+            "read_validation_seconds": 0.03884696587920189,
+            "setup_and_transfer_seconds": 0.2829686440527439,
+            "compute_transfer_finalize_seconds": 1.073256691917777,
+            "write_seconds": 0.03208283707499504,
+            "integration": {
+              "steps": 60,
+              "final_rms": 0.020397599841693804,
+              "stopped_by_rms": false,
+              "timings_seconds": {},
+              "integration_wall_seconds": 0.7878797110170126
+            },
+            "total_seconds_including_io": 1.1445735786110163,
+            "production_default_changed": false
+          },
+          "inflated_sha256": "f9513008c9a899409a17ae042ab241598751480397d7c85ea22ba8c54c547379",
+          "sulc_sha256": "43560c126601b6e523b46690ea9e97781ce1ccb1bb3f9d37baad4cf5ef5f047b",
+          "peak_allocated_bytes": 359155712,
+          "peak_reserved_bytes": 473956352
+        },
+        {
+          "repeat": 2,
+          "backend": "native",
+          "wall_seconds": 19.528339441865683,
+          "api": null,
+          "inflated_sha256": "001e32c9b226d7efc7f28ad3e2dcca253dfba30321a1730047778e33f3f316be",
+          "sulc_sha256": "43560c126601b6e523b46690ea9e97781ce1ccb1bb3f9d37baad4cf5ef5f047b"
+        }
+      ],
+      "comparisons": [
+        {
+          "repeat": 1,
+          "backend": "torch",
+          "to_same_repeat_native": {
+            "same_ordered_topology": true,
+            "vertices": 132459,
+            "faces": 264914,
+            "coordinate_float32": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "vertex_distance_mm": {
+              "max": 0.0,
+              "p99": 0.0,
+              "rmse": 0.0
+            },
+            "sulc_mm": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "volume_geometry_fields_equal": {
+              "head": true,
+              "volume": true,
+              "zras": true,
+              "yras": true,
+              "valid": true,
+              "cras": true,
+              "voxelsize": true,
+              "filename": true,
+              "xras": true
+            },
+            "existing_inflate_vertex_gate_0p001mm": true,
+            "strict_decoded_geometry_and_sulc": true,
+            "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+            "nonmanifold_connectivity": "unchanged ordered faces",
+            "self_intersections": "not evaluated in this stage benchmark"
+          }
+        },
+        {
+          "repeat": 2,
+          "backend": "torch",
+          "to_same_repeat_native": {
+            "same_ordered_topology": true,
+            "vertices": 132459,
+            "faces": 264914,
+            "coordinate_float32": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "vertex_distance_mm": {
+              "max": 0.0,
+              "p99": 0.0,
+              "rmse": 0.0
+            },
+            "sulc_mm": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "volume_geometry_fields_equal": {
+              "head": true,
+              "volume": true,
+              "zras": true,
+              "yras": true,
+              "valid": true,
+              "cras": true,
+              "voxelsize": true,
+              "filename": true,
+              "xras": true
+            },
+            "existing_inflate_vertex_gate_0p001mm": true,
+            "strict_decoded_geometry_and_sulc": true,
+            "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+            "nonmanifold_connectivity": "unchanged ordered faces",
+            "self_intersections": "not evaluated in this stage benchmark"
+          }
+        }
+      ],
+      "native_repeat_sulc_byte_exact": true,
+      "native_repeat_decoded": {
+        "same_ordered_topology": true,
+        "vertices": 132459,
+        "faces": 264914,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "volume": true,
+          "zras": true,
+          "yras": true,
+          "valid": true,
+          "cras": true,
+          "voxelsize": true,
+          "filename": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      }
+    },
+    {
+      "case": "ds000114_sub07",
+      "hemisphere": "lh",
+      "input_sha256": "d0ad4a5b176fadb7c9fdaf7c02bbd48ced52116c9e31fe2846e15e8bf8ff4fae",
+      "runs": [
+        {
+          "repeat": 1,
+          "backend": "native",
+          "wall_seconds": 17.738337643444538,
+          "api": null,
+          "inflated_sha256": "f814dec4cf9dd143ab8eb1410edf6718c7a42f0165b88cd9592ad3eeb1dffbb9",
+          "sulc_sha256": "1db585f2290e35f7e467a41a445979b0e38b3c6361f13dc92cd640a507d4eed4"
+        },
+        {
+          "repeat": 1,
+          "backend": "torch",
+          "wall_seconds": 2.4492761250585318,
+          "api": {
+            "input_surface": "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/public_inputs_v6/ds000114_sub07/lh.smoothwm",
+            "inflated_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub07/lh/torch_1/lh.inflated",
+            "sulc_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub07/lh/torch_1/lh.sulc",
+            "backend": "torch",
+            "device": "cuda:0",
+            "profile_synchronizes_substages": true,
+            "vertices": 114247,
+            "faces": 228490,
+            "niterations_per_scale": 10,
+            "read_validation_seconds": 0.05388979613780975,
+            "setup_and_transfer_seconds": 0.38482868392020464,
+            "compute_transfer_finalize_seconds": 2.385558847337961,
+            "write_seconds": 0.009102706797420979,
+            "integration": {
+              "steps": 60,
+              "final_rms": 0.0196704976015181,
+              "stopped_by_rms": false,
+              "timings_seconds": {
+                "face_area": 0.12974052596837282,
+                "normals": 0.42611080035567284,
+                "distances": 0.13416642881929874,
+                "distance_gradient": 0.4928140016272664,
+                "ordered_averaging": 0.3453888101503253,
+                "normalized_spring": 0.1431168420240283,
+                "rms_tangent_height": 0.18328275624662638
+              },
+              "integration_wall_seconds": 1.9929124806076288
+            },
+            "total_seconds_including_io": 2.449021897278726,
+            "production_default_changed": false
+          },
+          "inflated_sha256": "e6e03164f390eae4215e2f1e82dbace88ff5b84faea823d716a22a25383b220c",
+          "sulc_sha256": "1db585f2290e35f7e467a41a445979b0e38b3c6361f13dc92cd640a507d4eed4",
+          "peak_allocated_bytes": 312138752,
+          "peak_reserved_bytes": 473956352
+        },
+        {
+          "repeat": 2,
+          "backend": "torch",
+          "wall_seconds": 1.57640446908772,
+          "api": {
+            "input_surface": "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/public_inputs_v6/ds000114_sub07/lh.smoothwm",
+            "inflated_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub07/lh/torch_2/lh.inflated",
+            "sulc_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub07/lh/torch_2/lh.sulc",
+            "backend": "torch",
+            "device": "cuda:0",
+            "profile_synchronizes_substages": false,
+            "vertices": 114247,
+            "faces": 228490,
+            "niterations_per_scale": 10,
+            "read_validation_seconds": 0.07586148846894503,
+            "setup_and_transfer_seconds": 0.35749482549726963,
+            "compute_transfer_finalize_seconds": 1.4921875428408384,
+            "write_seconds": 0.007540896534919739,
+            "integration": {
+              "steps": 60,
+              "final_rms": 0.0196704976015181,
+              "stopped_by_rms": false,
+              "timings_seconds": {},
+              "integration_wall_seconds": 1.1315533723682165
+            },
+            "total_seconds_including_io": 1.5761256255209446,
+            "production_default_changed": false
+          },
+          "inflated_sha256": "e6e03164f390eae4215e2f1e82dbace88ff5b84faea823d716a22a25383b220c",
+          "sulc_sha256": "1db585f2290e35f7e467a41a445979b0e38b3c6361f13dc92cd640a507d4eed4",
+          "peak_allocated_bytes": 312138752,
+          "peak_reserved_bytes": 473956352
+        },
+        {
+          "repeat": 2,
+          "backend": "native",
+          "wall_seconds": 21.032797070220113,
+          "api": null,
+          "inflated_sha256": "c5f55182538485e87b385915370eaf03ecad089e46364b3e53911e5c0cf2f892",
+          "sulc_sha256": "1db585f2290e35f7e467a41a445979b0e38b3c6361f13dc92cd640a507d4eed4"
+        }
+      ],
+      "comparisons": [
+        {
+          "repeat": 1,
+          "backend": "torch",
+          "to_same_repeat_native": {
+            "same_ordered_topology": true,
+            "vertices": 114247,
+            "faces": 228490,
+            "coordinate_float32": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "vertex_distance_mm": {
+              "max": 0.0,
+              "p99": 0.0,
+              "rmse": 0.0
+            },
+            "sulc_mm": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "volume_geometry_fields_equal": {
+              "head": true,
+              "volume": true,
+              "zras": true,
+              "yras": true,
+              "valid": true,
+              "cras": true,
+              "voxelsize": true,
+              "filename": true,
+              "xras": true
+            },
+            "existing_inflate_vertex_gate_0p001mm": true,
+            "strict_decoded_geometry_and_sulc": true,
+            "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+            "nonmanifold_connectivity": "unchanged ordered faces",
+            "self_intersections": "not evaluated in this stage benchmark"
+          }
+        },
+        {
+          "repeat": 2,
+          "backend": "torch",
+          "to_same_repeat_native": {
+            "same_ordered_topology": true,
+            "vertices": 114247,
+            "faces": 228490,
+            "coordinate_float32": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "vertex_distance_mm": {
+              "max": 0.0,
+              "p99": 0.0,
+              "rmse": 0.0
+            },
+            "sulc_mm": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "volume_geometry_fields_equal": {
+              "head": true,
+              "volume": true,
+              "zras": true,
+              "yras": true,
+              "valid": true,
+              "cras": true,
+              "voxelsize": true,
+              "filename": true,
+              "xras": true
+            },
+            "existing_inflate_vertex_gate_0p001mm": true,
+            "strict_decoded_geometry_and_sulc": true,
+            "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+            "nonmanifold_connectivity": "unchanged ordered faces",
+            "self_intersections": "not evaluated in this stage benchmark"
+          }
+        }
+      ],
+      "native_repeat_sulc_byte_exact": true,
+      "native_repeat_decoded": {
+        "same_ordered_topology": true,
+        "vertices": 114247,
+        "faces": 228490,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "volume": true,
+          "zras": true,
+          "yras": true,
+          "valid": true,
+          "cras": true,
+          "voxelsize": true,
+          "filename": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      }
+    },
+    {
+      "case": "ds000114_sub07",
+      "hemisphere": "rh",
+      "input_sha256": "2968ddc901caf919735d8c92dbb5bf5fbcccd2ee2e52b7fa8ff5a2f6eb845446",
+      "runs": [
+        {
+          "repeat": 1,
+          "backend": "native",
+          "wall_seconds": 17.876265082508326,
+          "api": null,
+          "inflated_sha256": "cefb3614212924780a2d8829c747cc3d7e6658f617ad19a1a6bccf03d271bbfd",
+          "sulc_sha256": "7bd3f0266081ae3e495fcb2f8270ef46ef17b031084a91963f73bf57a8ba1c64"
+        },
+        {
+          "repeat": 1,
+          "backend": "torch",
+          "wall_seconds": 1.4560973849147558,
+          "api": {
+            "input_surface": "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/public_inputs_v6/ds000114_sub07/rh.smoothwm",
+            "inflated_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub07/rh/torch_1/rh.inflated",
+            "sulc_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub07/rh/torch_1/rh.sulc",
+            "backend": "torch",
+            "device": "cuda:0",
+            "profile_synchronizes_substages": true,
+            "vertices": 114951,
+            "faces": 229898,
+            "niterations_per_scale": 10,
+            "read_validation_seconds": 0.06192466989159584,
+            "setup_and_transfer_seconds": 0.26787921227514744,
+            "compute_transfer_finalize_seconds": 1.3862511748448014,
+            "write_seconds": 0.007266790606081486,
+            "integration": {
+              "steps": 60,
+              "final_rms": 0.020165174764160288,
+              "stopped_by_rms": false,
+              "timings_seconds": {
+                "face_area": 0.02920712251216173,
+                "normals": 0.35860928148031235,
+                "distances": 0.023097649216651917,
+                "distance_gradient": 0.3344346806406975,
+                "ordered_averaging": 0.2231225622817874,
+                "normalized_spring": 0.05266651511192322,
+                "rms_tangent_height": 0.07460722420364618
+              },
+              "integration_wall_seconds": 1.1160500552505255
+            },
+            "total_seconds_including_io": 1.455897245556116,
+            "production_default_changed": false
+          },
+          "inflated_sha256": "35f874c0bb5b5cb8b98649449457694e01765ec15e7938c42a4e4b9fe0975561",
+          "sulc_sha256": "7bd3f0266081ae3e495fcb2f8270ef46ef17b031084a91963f73bf57a8ba1c64",
+          "peak_allocated_bytes": 320227840,
+          "peak_reserved_bytes": 476053504
+        },
+        {
+          "repeat": 2,
+          "backend": "torch",
+          "wall_seconds": 1.2301721461117268,
+          "api": {
+            "input_surface": "FNIT_ROOT/workspaces/inflate_current_self_20261009_v6/public_inputs_v6/ds000114_sub07/rh.smoothwm",
+            "inflated_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub07/rh/torch_2/rh.inflated",
+            "sulc_output": "FNIT_ROOT/runs/inflate_current_self_a100_20261009_v6/complete_pair/ds000114_sub07/rh/torch_2/rh.sulc",
+            "backend": "torch",
+            "device": "cuda:0",
+            "profile_synchronizes_substages": false,
+            "vertices": 114951,
+            "faces": 229898,
+            "niterations_per_scale": 10,
+            "read_validation_seconds": 0.041282424703240395,
+            "setup_and_transfer_seconds": 0.3250240944325924,
+            "compute_transfer_finalize_seconds": 1.17954389937222,
+            "write_seconds": 0.008547339588403702,
+            "integration": {
+              "steps": 60,
+              "final_rms": 0.020165174764160288,
+              "stopped_by_rms": false,
+              "timings_seconds": {},
+              "integration_wall_seconds": 0.8520184587687254
+            },
+            "total_seconds_including_io": 1.2299139061942697,
+            "production_default_changed": false
+          },
+          "inflated_sha256": "35f874c0bb5b5cb8b98649449457694e01765ec15e7938c42a4e4b9fe0975561",
+          "sulc_sha256": "7bd3f0266081ae3e495fcb2f8270ef46ef17b031084a91963f73bf57a8ba1c64",
+          "peak_allocated_bytes": 320227840,
+          "peak_reserved_bytes": 476053504
+        },
+        {
+          "repeat": 2,
+          "backend": "native",
+          "wall_seconds": 17.636539477854967,
+          "api": null,
+          "inflated_sha256": "75e1f25770351639c771108927a58dda9596d4a4c4ccb6b4f8170b806159c208",
+          "sulc_sha256": "7bd3f0266081ae3e495fcb2f8270ef46ef17b031084a91963f73bf57a8ba1c64"
+        }
+      ],
+      "comparisons": [
+        {
+          "repeat": 1,
+          "backend": "torch",
+          "to_same_repeat_native": {
+            "same_ordered_topology": true,
+            "vertices": 114951,
+            "faces": 229898,
+            "coordinate_float32": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "vertex_distance_mm": {
+              "max": 0.0,
+              "p99": 0.0,
+              "rmse": 0.0
+            },
+            "sulc_mm": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "volume_geometry_fields_equal": {
+              "head": true,
+              "volume": true,
+              "zras": true,
+              "yras": true,
+              "valid": true,
+              "cras": true,
+              "voxelsize": true,
+              "filename": true,
+              "xras": true
+            },
+            "existing_inflate_vertex_gate_0p001mm": true,
+            "strict_decoded_geometry_and_sulc": true,
+            "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+            "nonmanifold_connectivity": "unchanged ordered faces",
+            "self_intersections": "not evaluated in this stage benchmark"
+          }
+        },
+        {
+          "repeat": 2,
+          "backend": "torch",
+          "to_same_repeat_native": {
+            "same_ordered_topology": true,
+            "vertices": 114951,
+            "faces": 229898,
+            "coordinate_float32": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "vertex_distance_mm": {
+              "max": 0.0,
+              "p99": 0.0,
+              "rmse": 0.0
+            },
+            "sulc_mm": {
+              "different_elements": 0,
+              "max_abs": 0.0,
+              "p99_abs": 0.0,
+              "rmse": 0.0,
+              "mean_signed": 0.0
+            },
+            "volume_geometry_fields_equal": {
+              "head": true,
+              "volume": true,
+              "zras": true,
+              "yras": true,
+              "valid": true,
+              "cras": true,
+              "voxelsize": true,
+              "filename": true,
+              "xras": true
+            },
+            "existing_inflate_vertex_gate_0p001mm": true,
+            "strict_decoded_geometry_and_sulc": true,
+            "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+            "nonmanifold_connectivity": "unchanged ordered faces",
+            "self_intersections": "not evaluated in this stage benchmark"
+          }
+        }
+      ],
+      "native_repeat_sulc_byte_exact": true,
+      "native_repeat_decoded": {
+        "same_ordered_topology": true,
+        "vertices": 114951,
+        "faces": 229898,
+        "coordinate_float32": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "vertex_distance_mm": {
+          "max": 0.0,
+          "p99": 0.0,
+          "rmse": 0.0
+        },
+        "sulc_mm": {
+          "different_elements": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "rmse": 0.0,
+          "mean_signed": 0.0
+        },
+        "volume_geometry_fields_equal": {
+          "head": true,
+          "volume": true,
+          "zras": true,
+          "yras": true,
+          "valid": true,
+          "cras": true,
+          "voxelsize": true,
+          "filename": true,
+          "xras": true
+        },
+        "existing_inflate_vertex_gate_0p001mm": true,
+        "strict_decoded_geometry_and_sulc": true,
+        "sulc_operator_equivalence_gate": "not established; strict diagnostic retained",
+        "nonmanifold_connectivity": "unchanged ordered faces",
+        "self_intersections": "not evaluated in this stage benchmark"
+      }
+    }
+  ],
+  "status": "complete_stage_pair",
+  "backends": [
+    "native",
+    "torch"
+  ],
+  "timing_scope": "same host forward/reverse backend order; API includes validation, setup, transfers, I/O; native process startup included; Python imports excluded",
+  "process_gpu_memory": "PID namespace unresolved in this environment; tensor counters only, no zero-process claim",
+  "control_wall_seconds": 166.14830520749092,
+  "gpu_load_after": "104661, GPU-c3953aa9-15e8-fe79-6ff9-fb995f48b956, 18278 MiB\n54034, GPU-53efd149-9181-8bcf-b5d9-9e9489a90bf9, 490 MiB\n85649, GPU-a4fbd69e-67c8-8612-1bcd-b1355c3987b8, 10890 MiB\n104660, GPU-5cde39b3-bfe4-98a3-d19c-3cb092d5ad47, 18278 MiB\n91922, GPU-12fc6ce3-9773-5316-6ee5-38be1d5fb4f2, 10726 MiB\n19594, GPU-12fc6ce3-9773-5316-6ee5-38be1d5fb4f2, 944 MiB\n88735, GPU-e92ea062-9dbe-4d7f-54a9-deded0295fb5, 10726 MiB\n99454, GPU-ed4141f0-3e7c-6723-cf82-4a8370d6f9aa, 516 MiB\n99453, GPU-c73c197f-ed60-b001-2c90-a538e261907b, 516 MiB\n"
+}

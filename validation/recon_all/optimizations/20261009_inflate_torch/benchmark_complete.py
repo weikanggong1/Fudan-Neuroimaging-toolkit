@@ -63,10 +63,14 @@ def main():
     parser.add_argument("--device",default="cuda:0")
     parser.add_argument("--threads",type=int,default=4)
     parser.add_argument("--repeats",type=int,default=2)
+    parser.add_argument("--backends",nargs="+",choices=("native","numpy","torch"),
+                        default=("native","numpy","torch"),help="默认ABC/CBA；native torch采用完整API ABBA，避免已验证CPU分支重复计算")
     parser.add_argument("--case",action="append",help="可选case/lh或case/rh筛选，可重复")
     args=parser.parse_args()
     if args.output.exists():raise FileExistsError(args.output)
     if args.threads<1 or args.repeats<1:raise ValueError("threads/repeats must be positive")
+    if (len(args.backends)!=len(set(args.backends)) or 'native' not in args.backends or len(args.backends)<2):
+        raise ValueError('unique backends require native and at least one candidate')
     torch.set_num_threads(args.threads);torch.set_num_interop_threads(1)
     torch.backends.cuda.matmul.allow_tf32=True;torch.backends.cudnn.allow_tf32=True
     from numba import set_num_threads
@@ -90,7 +94,8 @@ def main():
             "gpu_load_before":subprocess.run(['nvidia-smi','--query-compute-apps=pid,gpu_uuid,used_memory','--format=csv,noheader'],capture_output=True,text=True).stdout,
             "production_default_changed":False,"whole_recon_all_acceleration":"not measured",
             "whole_metrics_equivalence":"not assessed","rows":[],"status":"running",
-            "timing_scope":"same host ABC/CBA; API includes validation, setup, transfers, I/O; native process startup included; Python imports excluded",
+            "backends":list(args.backends),
+            "timing_scope":"same host forward/reverse backend order; API includes validation, setup, transfers, I/O; native process startup included; Python imports excluded",
             "process_gpu_memory":"PID namespace unresolved in this environment; tensor counters only, no zero-process claim"}
     started=time.perf_counter()
     def save():
@@ -107,7 +112,7 @@ def main():
             row={'case':entry['case'],'hemisphere':hemi,'input_sha256':entry['sha256'],'runs':[]}
             report['rows'].append(row);save()
             for repeat in range(args.repeats):
-                order=('native','numpy','torch') if repeat%2==0 else ('torch','numpy','native')
+                order=tuple(args.backends) if repeat%2==0 else tuple(reversed(args.backends))
                 destinations={}
                 for backend in order:
                     output=case_dir/(backend+'_'+str(repeat+1));output.mkdir()
@@ -132,7 +137,7 @@ def main():
                         item['peak_reserved_bytes']=torch.cuda.max_memory_reserved(device)
                     row['runs'].append(item);save()
                     print('DONE',key,backend,repeat+1,wall,flush=True)
-                for backend in ('numpy','torch'):
+                for backend in (backend for backend in args.backends if backend!='native'):
                     row.setdefault('comparisons',[]).append({'repeat':repeat+1,'backend':backend,
                         'to_same_repeat_native':compare(destinations[backend],destinations['native'],hemi)})
                 save()
