@@ -10,15 +10,16 @@ import torch.nn.functional as F
 from .mgh_compat import save_same_dtype_mgh
 
 
-def amygdala_cortex_junction_gpu(aseg: torch.Tensor) -> torch.Tensor:
-    """Same 7030/7031 junction labels as wm_edits_python, including last-neighbor ties.
+def _amygdala_cortex_junction_torch(aseg: torch.Tensor) -> torch.Tensor:
+    """复用ACJ内核生成7030/7031标签，保留最后邻居决定同分的规则。
 
-    Input is a 3D integer aseg CUDA tensor in x/y/z voxel order. Output is same
-    grid, int32 on that device. Neighborhood is 26 neighbors plus the center;
-    edge amygdala seeds are excluded. No interpolation, RAS or mm conversion.
+    aseg为3D整数标签张量，按x/y/z体素顺序；私有诊断内核允许CPU或
+    CUDA。输出同网格、同设备int32。邻域为26邻居与中心，排除边缘
+    杏仁核种子；无插值、RAS变换或mm换算。无可调参数，不修改输入。
+    shape或dtype错误抛ValueError；设备运行故障原样传播。
     """
-    if aseg.ndim != 3 or aseg.device.type != 'cuda' or aseg.dtype.is_floating_point:
-        raise ValueError('expected a 3D integer CUDA aseg tensor')
+    if aseg.ndim != 3 or aseg.dtype.is_floating_point or aseg.dtype == torch.bool:
+        raise ValueError('expected a 3D integer aseg tensor')
     cortex = (aseg == 3) | (aseg == 42)
     seeds = []
     boundaries = []
@@ -44,6 +45,18 @@ def amygdala_cortex_junction_gpu(aseg: torch.Tensor) -> torch.Tensor:
                 local[overlap[target] & seeds[0][source]]=7030
                 local[overlap[target] & seeds[1][source]]=7031
     return result
+
+
+def amygdala_cortex_junction_gpu(aseg: torch.Tensor) -> torch.Tensor:
+    """返回CUDA上同网格int32的7030/7031 ACJ标签，不修改aseg。
+
+    aseg须3D整数CUDA张量，坐标为x/y/z体素；无可调参数、插值或
+    空间变换。CPU、shape或dtype错误抛ValueError。CPU公共接口保留
+    在原模块；此接口不会静默回退。
+    """
+    if aseg.device.type != 'cuda':
+        raise ValueError('expected a 3D integer CUDA aseg tensor')
+    return _amygdala_cortex_junction_torch(aseg)
 
 
 def _native_voxel_array(image):

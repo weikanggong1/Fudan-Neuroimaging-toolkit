@@ -144,15 +144,23 @@ def _set_filled(wm: np.ndarray, filled: np.ndarray, x: int, y: int, z: int) -> N
 
 
 @njit(cache=True)
-def _edit_until_propagation(wm: np.ndarray, seg: np.ndarray) -> None:
-    """Source lines 452-1007: first edit pass, ventricular border, WM propagation."""
+def _edit_until_propagation(wm: np.ndarray, seg: np.ndarray,
+                             fill_seg_wm: bool = False,
+                             fill_seed=None, propagate_wm: bool = True) -> np.ndarray:
+    """原有序首两遍编辑及可选WM传播，原位修改wm并返回uint8 filled。
+
+    wm为3D uint8，seg为同网格整数标签；fill_seg_wm默认False。
+    fill_seed默认None，可给同网格bool静态候选，仅在首遍WM分支消费。
+    propagate_wm默认True；False留下固定filled供独立GPU传播。
+    此私有Numba内核不做参数验证，调用者须先检查网格与dtype。
+    """
     width, height, depth = wm.shape
     filled = np.zeros(wm.shape, dtype=np.uint8)
     for z in range(depth):
         for y in range(height - 2, 0, -1):
             for x in range(1, width - 1):
                 label = int(seg[x, y, z])
-                if label in (0, 7, 8, 46, 47, 85):
+                if label in (0, 6, 7, 8, 45, 46, 47, 85):
                     if wm[x, y, z] < 5:
                         continue
                     if label == 0 and not _unknown_nbhd(seg, x, y, z):
@@ -223,6 +231,16 @@ def _edit_until_propagation(wm: np.ndarray, seg: np.ndarray) -> None:
                 elif label in (2, 41):
                     if seg[x, y - 1, z] in (5, 44) and wm[x, y, z] < 5:
                         _set_filled(wm, filled, x, y, z)
+                    if fill_seg_wm:
+                        # Native FillSegWM is inside this ordered first scan,
+                        # after the inferior-lateral-ventricle condition.
+                        if fill_seed is None:
+                            selected = (not _neighbor(seg, x, y, z, 1, 3)
+                                        and not _neighbor(seg, x, y, z, 1, 42))
+                        else:
+                            selected = fill_seed[x, y, z]
+                        if selected:
+                            _set_filled(wm, filled, x, y, z)
 
     for z in range(depth):
         for y in range(height):
@@ -236,6 +254,20 @@ def _edit_until_propagation(wm: np.ndarray, seg: np.ndarray) -> None:
                     if _neighbor(seg, x, y, z, 2, 2 if label == 4 else 41):
                         _set_filled(wm, filled, x, y, z)
 
+    if propagate_wm:
+        _propagate_from_filled(wm, seg, filled)
+    return filled
+
+
+@njit(cache=True)
+def _propagate_from_filled(wm: np.ndarray, seg: np.ndarray,
+                            filled: np.ndarray) -> None:
+    """固定filled的26邻域WM传播，原位修改uint8 wm，不扩展filled。
+
+    seg为同网格整数标签，filled为uint8非零标志。坐标为x/y/z体素，
+    邻域按原生边缘夹取；私有内核不验证输入。包含IS_WM的186/187。
+    """
+    width, height, depth = wm.shape
     for z in range(depth):
         for y in range(height):
             for x in range(width):
@@ -248,7 +280,8 @@ def _edit_until_propagation(wm: np.ndarray, seg: np.ndarray) -> None:
                         for dz in range(-1, 2):
                             zz = _clamp(z + dz, depth)
                             label = int(seg[xx, yy, zz])
-                            if label in (2, 41, 28, 60, 7, 46, 251, 252, 253, 254, 255) and wm[xx, yy, zz] < 5:
+                            if label in (2, 41, 186, 187, 28, 60, 7, 46,
+                                         251, 252, 253, 254, 255) and wm[xx, yy, zz] < 5:
                                 wm[xx, yy, zz] = 250
 
 
@@ -468,12 +501,24 @@ def edit_segmentation_no_fill(wm: np.ndarray, brain: np.ndarray,
     This does not include the optional ``-fill-seg-wm`` branch or the later
     ``spackle_wm_superior_to_mtl`` call.
     """
+    return edit_segmentation_profile(wm, brain, aseg, fill_seg_wm=False)
+
+
+def edit_segmentation_profile(wm: np.ndarray, brain: np.ndarray,
+                               aseg: np.ndarray, *,
+                               fill_seg_wm: bool = False) -> np.ndarray:
+    """运行有序edit_segmentation，fill在原生第一遍WM分支处执行。
+
+    输入同网格3D uint8 WM、强度brain、整数aseg；fill_seg_wm默认False。
+    返回新uint8 WM，不修改输入；包含WM传播及海马下方规则，不包含
+    remove_paths或末尾spackle。网格/dtype错误抛ValueError。
+    """
     if not (wm.ndim == brain.ndim == aseg.ndim == 3 and
             wm.shape == brain.shape == aseg.shape and wm.dtype == np.uint8):
         raise ValueError("Expected matching 3D WM, brain, aseg volumes and uint8 WM")
     result = wm.copy()
     labels = aseg.astype(np.int32, copy=False)
-    _edit_until_propagation(result, labels)
+    _edit_until_propagation(result, labels, fill_seg_wm=fill_seg_wm)
     _post_spackle_early(result, brain, labels)
     _post_spackle_late(result, labels)
     _add_aseg_wm_below_hippocampus(result, labels)

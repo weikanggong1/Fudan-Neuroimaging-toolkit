@@ -1,0 +1,641 @@
+{
+  "scope": "frozen_same_input_substages",
+  "code_commit": "937263e04eb1be1a5053952ff2b673213cdf966f",
+  "code_commit_role": "frozen baseline before overlay; executed modules bound by sources SHA-256",
+  "benchmark_sha256": "996959a165a19d503df55bcc7176dafba0ab779a7574ea7c8c6d1466d2d78151",
+  "host": "gpucw1",
+  "cpu": "x86_64",
+  "threads": 4,
+  "torch": "2.5.1",
+  "torch_cuda": "11.8",
+  "python_executable": "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python",
+  "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+  "device": "cuda:1",
+  "pid": 94089,
+  "context_init_seconds": 0.2640592660754919,
+  "context_free_bytes": 80150855680,
+  "context_total_bytes": 84942979072,
+  "gpu": "NVIDIA H100 PCIe",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "arithmetic": "uint8/int32 predicates and float32 binary max_pool, no FP16/BF16"
+  },
+  "inputs": {
+    "wm.seg": {
+      "sha256": "760eb5d0046379eeb18f32044b161cb6d779fd920e19915aef3f0ec7d981c2a0",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "storage_dtype": "uint8",
+      "compute_dtype": "uint8",
+      "affine_mm": [
+        [
+          -1.0,
+          0.0,
+          2.3283064365386963e-10,
+          124.00959777832031
+        ],
+        [
+          2.3283064365386963e-10,
+          0.0,
+          0.9999999403953552,
+          -105.79763793945312
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          101.8306655883789
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "brain": {
+      "sha256": "1653dc9e7a8ea1010b6e56693d7014fd84617635c020ef136564c7958b59388e",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "storage_dtype": "uint8",
+      "compute_dtype": "uint8",
+      "affine_mm": [
+        [
+          -1.0,
+          0.0,
+          2.3283064365386963e-10,
+          124.00959777832031
+        ],
+        [
+          2.3283064365386963e-10,
+          0.0,
+          0.9999999403953552,
+          -105.79763793945312
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          101.8306655883789
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "aseg.presurf": {
+      "sha256": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "storage_dtype": ">f4",
+      "compute_dtype": "int32",
+      "affine_mm": [
+        [
+          -1.0,
+          0.0,
+          2.3283064365386963e-10,
+          124.00959777832031
+        ],
+        [
+          2.3283064365386963e-10,
+          0.0,
+          0.9999999403953552,
+          -105.79763793945312
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          101.8306655883789
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "entowm": {
+      "sha256": "2473b55ef9674c0b145845b54db227a5b7fbf10255ef6026536a60ce3dbd3d9a",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "storage_dtype": ">i4",
+      "compute_dtype": "int32",
+      "affine_mm": [
+        [
+          -1.0,
+          0.0,
+          2.3283064365386963e-10,
+          124.00959777832031
+        ],
+        [
+          2.3283064365386963e-10,
+          0.0,
+          0.9999999403953552,
+          -105.79763793945312
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          101.8306655883789
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "wm.asegedit": {
+      "sha256": "05a4f1bab08edd518dfc1385fe9ef07d3b2b0fb60f7f47ca96c181f7ce5c8d15",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "storage_dtype": "uint8",
+      "compute_dtype": "uint8",
+      "affine_mm": [
+        [
+          -1.0,
+          0.0,
+          2.3283064365386963e-10,
+          124.00959777832031
+        ],
+        [
+          2.3283064365386963e-10,
+          0.0,
+          0.9999999403953552,
+          -105.79763793945312
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          101.8306655883789
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "sources": {
+    "edit_wm_aseg_core_python.py": "bc01a8c8c056c2a52f2cb8c7cefbccf15bd9440e630b09c915ac39376569a81f",
+    "edit_wm_aseg_late_python.py": "40075349415aa1d3285df81669c9bdc886bd3f7afbce28bc40533f2504bc9f08",
+    "edit_wm_aseg_torch.py": "3cf6368da9ff26083b2a739c72e401811ca131d30071b1aa37f73464ca540a95",
+    "wm_edits_gpu.py": "521216e638bbea0dcfe236f473f95ddaa4d077da787966f1050c3c5be78c1929"
+  },
+  "stages": {},
+  "existing_native_reference": {
+    "receipt_sha256": "6c445417985a7d80a858cfa6bcfe1d405f311d2f22b9911773d541f7a3ff0c7a",
+    "white_matter_chain": {
+      "implementation": "Python + Conda C++",
+      "mri_segment_sha256": "3fa5b05e61229e39dfa83773bfe84614fd8a868bea2e91968abc076bf1a13af6",
+      "mri_edit_wm_with_aseg_sha256": "b38f118c8f30bd49f95853c5c427ff8b98d667559cdc08a68a0405425fe88563",
+      "post_edit_implementation": "FNIT PyTorch CUDA"
+    },
+    "code_commit": null,
+    "use": "output-only diagnostic; never supplied to candidate algorithm"
+  },
+  "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "reference_source_sha256": "6cddf001f37981e7f96d5f4658bd16eb0b06d51cf8d235cac46ff8d8f9da6f21",
+  "reference_label_header_sha256": "25184e2b78990f42f424d7ab608bb12b33c2456c20772b55af59622dfc47f4b5",
+  "diagnostic_core_cpu_seconds": 16.93217943701893,
+  "diagnostic_full": {
+    "path_proof_changed": 0,
+    "torch_vs_cpu": {
+      "different_voxels": 0,
+      "max_abs": 0,
+      "p99_abs": 0.0,
+      "label_dice": {
+        "0": 1.0,
+        "74": 1.0,
+        "75": 1.0,
+        "76": 1.0,
+        "77": 1.0,
+        "78": 1.0,
+        "79": 1.0,
+        "80": 1.0,
+        "81": 1.0,
+        "82": 1.0,
+        "83": 1.0,
+        "84": 1.0,
+        "85": 1.0,
+        "86": 1.0,
+        "87": 1.0,
+        "88": 1.0,
+        "89": 1.0,
+        "90": 1.0,
+        "91": 1.0,
+        "92": 1.0,
+        "93": 1.0,
+        "94": 1.0,
+        "95": 1.0,
+        "96": 1.0,
+        "97": 1.0,
+        "98": 1.0,
+        "99": 1.0,
+        "100": 1.0,
+        "101": 1.0,
+        "102": 1.0,
+        "103": 1.0,
+        "104": 1.0,
+        "105": 1.0,
+        "106": 1.0,
+        "107": 1.0,
+        "108": 1.0,
+        "109": 1.0,
+        "110": 1.0,
+        "111": 1.0,
+        "112": 1.0,
+        "113": 1.0,
+        "114": 1.0,
+        "115": 1.0,
+        "116": 1.0,
+        "117": 1.0,
+        "118": 1.0,
+        "119": 1.0,
+        "120": 1.0,
+        "121": 1.0,
+        "122": 1.0,
+        "123": 1.0,
+        "124": 1.0,
+        "125": 1.0,
+        "126": 1.0,
+        "127": 1.0,
+        "128": 1.0,
+        "200": 1.0,
+        "210": 1.0,
+        "230": 1.0,
+        "250": 1.0,
+        "255": 1.0
+      }
+    },
+    "torch_vs_existing_native_output": {
+      "different_voxels": 0,
+      "max_abs": 0,
+      "p99_abs": 0.0,
+      "label_dice": {
+        "0": 1.0,
+        "74": 1.0,
+        "75": 1.0,
+        "76": 1.0,
+        "77": 1.0,
+        "78": 1.0,
+        "79": 1.0,
+        "80": 1.0,
+        "81": 1.0,
+        "82": 1.0,
+        "83": 1.0,
+        "84": 1.0,
+        "85": 1.0,
+        "86": 1.0,
+        "87": 1.0,
+        "88": 1.0,
+        "89": 1.0,
+        "90": 1.0,
+        "91": 1.0,
+        "92": 1.0,
+        "93": 1.0,
+        "94": 1.0,
+        "95": 1.0,
+        "96": 1.0,
+        "97": 1.0,
+        "98": 1.0,
+        "99": 1.0,
+        "100": 1.0,
+        "101": 1.0,
+        "102": 1.0,
+        "103": 1.0,
+        "104": 1.0,
+        "105": 1.0,
+        "106": 1.0,
+        "107": 1.0,
+        "108": 1.0,
+        "109": 1.0,
+        "110": 1.0,
+        "111": 1.0,
+        "112": 1.0,
+        "113": 1.0,
+        "114": 1.0,
+        "115": 1.0,
+        "116": 1.0,
+        "117": 1.0,
+        "118": 1.0,
+        "119": 1.0,
+        "120": 1.0,
+        "121": 1.0,
+        "122": 1.0,
+        "123": 1.0,
+        "124": 1.0,
+        "125": 1.0,
+        "126": 1.0,
+        "127": 1.0,
+        "128": 1.0,
+        "200": 1.0,
+        "210": 1.0,
+        "230": 1.0,
+        "250": 1.0,
+        "255": 1.0
+      }
+    },
+    "hybrid_report": {
+      "implementation": "FNIT ordered Numba + PyTorch CUDA diagnostic",
+      "device": "cuda:1",
+      "used_native_programs": false,
+      "ordered_cpu_seconds": 7.013319184537977,
+      "torch_seconds_including_transfers": 0.2890650713816285,
+      "timing_parts_seconds": {
+        "remove_paths_cpu": 1.8908003703691065,
+        "label_upload_and_fill_seed": 0.08525390876457095,
+        "first_ordered_scans_cpu": 3.557904878165573,
+        "fixed_filled_propagation_and_transfers": 0.0685117463581264,
+        "post_ordered_scans_cpu": 1.5646139360032976,
+        "mtl_late_and_transfers": 0.13529941625893116
+      },
+      "total_seconds": 7.302416587248445,
+      "path_proof_changed": 0,
+      "fill_seg_wm": true,
+      "fill_insertion": "native first ordered WM-case scan; fixed filled flags GPU propagation",
+      "production_default": false
+    },
+    "full_native_equivalence": "same-input WM stage tested; remove-paths proof still required; whole recon not_assessed"
+  },
+  "complete_native_vs_hybrid_api": {
+    "measurement": "complete same-input native vs hybrid API including reads/transfers/write, warm file cache",
+    "native_program_sha256": "b38f118c8f30bd49f95853c5c427ff8b98d667559cdc08a68a0405425fe88563",
+    "order": [
+      "native",
+      "hybrid",
+      "hybrid",
+      "native"
+    ],
+    "samples_seconds": {
+      "native": [
+        34.22466483572498,
+        34.59053714061156
+      ],
+      "hybrid": [
+        7.7762470417656,
+        8.597753897774965
+      ]
+    },
+    "comparison": {
+      "different_voxels": 0,
+      "max_abs": 0,
+      "p99_abs": 0.0,
+      "label_dice": {
+        "0": 1.0,
+        "74": 1.0,
+        "75": 1.0,
+        "76": 1.0,
+        "77": 1.0,
+        "78": 1.0,
+        "79": 1.0,
+        "80": 1.0,
+        "81": 1.0,
+        "82": 1.0,
+        "83": 1.0,
+        "84": 1.0,
+        "85": 1.0,
+        "86": 1.0,
+        "87": 1.0,
+        "88": 1.0,
+        "89": 1.0,
+        "90": 1.0,
+        "91": 1.0,
+        "92": 1.0,
+        "93": 1.0,
+        "94": 1.0,
+        "95": 1.0,
+        "96": 1.0,
+        "97": 1.0,
+        "98": 1.0,
+        "99": 1.0,
+        "100": 1.0,
+        "101": 1.0,
+        "102": 1.0,
+        "103": 1.0,
+        "104": 1.0,
+        "105": 1.0,
+        "106": 1.0,
+        "107": 1.0,
+        "108": 1.0,
+        "109": 1.0,
+        "110": 1.0,
+        "111": 1.0,
+        "112": 1.0,
+        "113": 1.0,
+        "114": 1.0,
+        "115": 1.0,
+        "116": 1.0,
+        "117": 1.0,
+        "118": 1.0,
+        "119": 1.0,
+        "120": 1.0,
+        "121": 1.0,
+        "122": 1.0,
+        "123": 1.0,
+        "124": 1.0,
+        "125": 1.0,
+        "126": 1.0,
+        "127": 1.0,
+        "128": 1.0,
+        "200": 1.0,
+        "210": 1.0,
+        "230": 1.0,
+        "250": 1.0,
+        "255": 1.0
+      }
+    },
+    "native_repeat_comparison": {
+      "different_voxels": 0,
+      "max_abs": 0,
+      "p99_abs": 0.0,
+      "label_dice": {
+        "0": 1.0,
+        "74": 1.0,
+        "75": 1.0,
+        "76": 1.0,
+        "77": 1.0,
+        "78": 1.0,
+        "79": 1.0,
+        "80": 1.0,
+        "81": 1.0,
+        "82": 1.0,
+        "83": 1.0,
+        "84": 1.0,
+        "85": 1.0,
+        "86": 1.0,
+        "87": 1.0,
+        "88": 1.0,
+        "89": 1.0,
+        "90": 1.0,
+        "91": 1.0,
+        "92": 1.0,
+        "93": 1.0,
+        "94": 1.0,
+        "95": 1.0,
+        "96": 1.0,
+        "97": 1.0,
+        "98": 1.0,
+        "99": 1.0,
+        "100": 1.0,
+        "101": 1.0,
+        "102": 1.0,
+        "103": 1.0,
+        "104": 1.0,
+        "105": 1.0,
+        "106": 1.0,
+        "107": 1.0,
+        "108": 1.0,
+        "109": 1.0,
+        "110": 1.0,
+        "111": 1.0,
+        "112": 1.0,
+        "113": 1.0,
+        "114": 1.0,
+        "115": 1.0,
+        "116": 1.0,
+        "117": 1.0,
+        "118": 1.0,
+        "119": 1.0,
+        "120": 1.0,
+        "121": 1.0,
+        "122": 1.0,
+        "123": 1.0,
+        "124": 1.0,
+        "125": 1.0,
+        "126": 1.0,
+        "127": 1.0,
+        "128": 1.0,
+        "200": 1.0,
+        "210": 1.0,
+        "230": 1.0,
+        "250": 1.0,
+        "255": 1.0
+      }
+    },
+    "geometry_exact": true,
+    "dtype_exact": true,
+    "medians_seconds": {
+      "native": 34.40760098816827,
+      "hybrid": 8.187000469770283
+    },
+    "speedup": 4.202711495524527
+  },
+  "cuda_peak_allocated_bytes": 738197504,
+  "cuda_peak_reserved_bytes": 826277888,
+  "cuda_process_sampling": {
+    "status": "not_measured",
+    "note": "allocated/reserved cover PyTorch tensors, not CUDA context/driver allocation or concurrent unrelated jobs"
+  },
+  "benchmark_total_seconds": 123.87658523395658,
+  "whole_recon_speedup": "not_measured",
+  "official_program_repeatability": {
+    "scope": "complete native WM edit command, fixed input/environment/threads",
+    "comparison": {
+      "different_voxels": 0,
+      "max_abs": 0,
+      "p99_abs": 0.0,
+      "label_dice": {
+        "0": 1.0,
+        "74": 1.0,
+        "75": 1.0,
+        "76": 1.0,
+        "77": 1.0,
+        "78": 1.0,
+        "79": 1.0,
+        "80": 1.0,
+        "81": 1.0,
+        "82": 1.0,
+        "83": 1.0,
+        "84": 1.0,
+        "85": 1.0,
+        "86": 1.0,
+        "87": 1.0,
+        "88": 1.0,
+        "89": 1.0,
+        "90": 1.0,
+        "91": 1.0,
+        "92": 1.0,
+        "93": 1.0,
+        "94": 1.0,
+        "95": 1.0,
+        "96": 1.0,
+        "97": 1.0,
+        "98": 1.0,
+        "99": 1.0,
+        "100": 1.0,
+        "101": 1.0,
+        "102": 1.0,
+        "103": 1.0,
+        "104": 1.0,
+        "105": 1.0,
+        "106": 1.0,
+        "107": 1.0,
+        "108": 1.0,
+        "109": 1.0,
+        "110": 1.0,
+        "111": 1.0,
+        "112": 1.0,
+        "113": 1.0,
+        "114": 1.0,
+        "115": 1.0,
+        "116": 1.0,
+        "117": 1.0,
+        "118": 1.0,
+        "119": 1.0,
+        "120": 1.0,
+        "121": 1.0,
+        "122": 1.0,
+        "123": 1.0,
+        "124": 1.0,
+        "125": 1.0,
+        "126": 1.0,
+        "127": 1.0,
+        "128": 1.0,
+        "200": 1.0,
+        "210": 1.0,
+        "230": 1.0,
+        "250": 1.0,
+        "255": 1.0
+      }
+    }
+  },
+  "isolated_deployment": "not_verified",
+  "process_memory": {
+    "scope": "benchmark parent process on explicit GPU; native child uses CPU only",
+    "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "pid": 94089,
+    "requested_interval_seconds": 0.25,
+    "max_interval_seconds": 4.481319853104651,
+    "peak_process_bytes": 1377828864,
+    "status": "sampled",
+    "errors": []
+  }
+}
