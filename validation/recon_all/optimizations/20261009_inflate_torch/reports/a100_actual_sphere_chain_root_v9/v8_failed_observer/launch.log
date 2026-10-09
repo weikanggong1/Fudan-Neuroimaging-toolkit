@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "FNIT_ROOT/workspaces/inflate_integration_c886a003_root_v1_20261009/src/fnit/recon_all/hemisphere_parallel.py", line 358, in run_hemisphere_group
+    raise RuntimeError('hemisphere worker failed; sibling cancelled')
+RuntimeError: hemisphere worker failed; sibling cancelled
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "FNIT_ROOT/workspaces/sphere_chain_inflate_20261009_v8_controls/benchmark_sphere_prepare_group.py", line 195, in main
+    group = hemisphere_parallel.run_hemisphere_group(subject=subject, operation='accurate_sphere_chain',
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/workspaces/inflate_integration_c886a003_root_v1_20261009/src/fnit/recon_all/hemisphere_parallel.py", line 415, in run_hemisphere_group
+    raise failure from error
+fnit.recon_all.hemisphere_parallel.HemisphereGroupError: accurate_sphere_chain hemisphere group failed: hemisphere worker failed; sibling cancelled

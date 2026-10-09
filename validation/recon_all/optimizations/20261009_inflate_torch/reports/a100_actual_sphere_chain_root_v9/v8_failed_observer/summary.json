@@ -1,0 +1,48 @@
+{
+  "status": "failed",
+  "scope": "actual production smoothwm-inflate-sulc-standard-sphere fixed-input bilateral chain; not whole recon-all",
+  "code_version": "c886a003_plus_root_5file_overlay_v1",
+  "expected_native_free_sha256": "be1e044e2db43a4d59c9b6752f997643a4d7e5f9749ba6b30b464b37b557002b",
+  "device": "cuda:0",
+  "threads_total": 4,
+  "cpu_affinity": [
+    64,
+    65,
+    66,
+    67
+  ],
+  "rows": [
+    {
+      "case": "ds000114_sub07",
+      "input_sha256": {
+        "lh": "d0ad4a5b176fadb7c9fdaf7c02bbd48ced52116c9e31fe2846e15e8bf8ff4fae",
+        "rh": "2968ddc901caf919735d8c92dbb5bf5fbcccd2ee2e52b7fa8ff5a2f6eb845446"
+      },
+      "runs": []
+    }
+  ],
+  "production_defaults_changed": false,
+  "overall_metric_equivalence": "not assessed",
+  "timing_scope": "whole hemisphere group with readonly per-update trace, copy/exec/imports/CUDA/JIT/full chain/transfer/I/O/publish; independent cold JIT per strategy",
+  "data_manifest_sha256": "781610cc7f3ff01b270462899dcc0e0493407489468bdd00537d9846b505788d",
+  "native_sha256": "8c3e5f688a635a4bf7e1c49efec9737bef2310a2fcc5b221332fffc54667be17",
+  "script_sha256": "f41b1b85d88dd6bf4439828d692d3f514c40eabd390aeb855e5df38ea7edd3bc",
+  "hemisphere_parallel_sha256": "c618fc805bcb779a2ace1cbc55def2a7412a535270815e31cb76504160485e2f",
+  "torch_version": "2.5.1",
+  "cuda_runtime": "11.8",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "parent_allocator": {
+    "requested": "disabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "parent_cuda_initialized_before_group": true,
+  "parent_live_sha256": "c7c0a32d5f43b1b6ec256a55fc5c1bf2d789a5a28d188cd3b69f50866dc16482",
+  "error": "HemisphereGroupError('accurate_sphere_chain hemisphere group failed: hemisphere worker failed; sibling cancelled')",
+  "traceback": "Traceback (most recent call last):\n  File \"FNIT_ROOT/workspaces/inflate_integration_c886a003_root_v1_20261009/src/fnit/recon_all/hemisphere_parallel.py\", line 358, in run_hemisphere_group\n    raise RuntimeError('hemisphere worker failed; sibling cancelled')\nRuntimeError: hemisphere worker failed; sibling cancelled\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"FNIT_ROOT/workspaces/sphere_chain_inflate_20261009_v8_controls/benchmark_sphere_prepare_group.py\", line 195, in main\n    group = hemisphere_parallel.run_hemisphere_group(subject=subject, operation='accurate_sphere_chain',\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"FNIT_ROOT/workspaces/inflate_integration_c886a003_root_v1_20261009/src/fnit/recon_all/hemisphere_parallel.py\", line 415, in run_hemisphere_group\n    raise failure from error\nfnit.recon_all.hemisphere_parallel.HemisphereGroupError: accurate_sphere_chain hemisphere group failed: hemisphere worker failed; sibling cancelled\n",
+  "main_seconds": 202.73122547846287
+}
