@@ -51,6 +51,8 @@ def main():
     parser.add_argument("--normalization-initial-bias-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--inflate-backend", choices=("native", "torch"), default="native")
     parser.add_argument("--sphere-finish-backend", choices=("cpu", "torch"), default="cpu")
+    parser.add_argument("--annotation-gibbs-backend", choices=("python", "numba"), default="python")
+    parser.add_argument("--remesh-scalar-storage", choices=("numpy", "python"), default="numpy")
     parser.add_argument("--mni-execution", choices=("in-process", "parallel-late"), default="in-process")
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=2)
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="torch")
@@ -67,7 +69,10 @@ def main():
     args = parser.parse_args()
     from fnit.recon_all.native_free import (_normalization_controls_options, _normalization_initial_bias_options,
                                           _validate_inflate_backend, _validate_mni_execution,
-                                          _validate_sphere_finish_backend)
+                                          _validate_sphere_finish_backend, _validate_annotation_gibbs_backend,
+                                          _validate_remesh_scalar_storage)
+    _validate_annotation_gibbs_backend(args.annotation_gibbs_backend)
+    _validate_remesh_scalar_storage(args.remesh_scalar_storage)
     _normalization_controls_options(args.normalization_controls_backend, args.device)
     _normalization_initial_bias_options(args.normalization_initial_bias_backend, args.device)
     _validate_inflate_backend(args.inflate_backend, args.device, args.hemisphere_workers)
@@ -109,6 +114,8 @@ def main():
         "normalization_initial_bias_backend": args.normalization_initial_bias_backend,
         "inflate_backend": args.inflate_backend,
         "sphere_finish_backend": args.sphere_finish_backend,
+        "annotation_gibbs_backend": args.annotation_gibbs_backend,
+        "remesh_scalar_storage": args.remesh_scalar_storage,
         "mni_execution": args.mni_execution,
         "wm_execution": args.wm_execution,
         "gca_inverse_backend": args.gca_inverse_backend,
@@ -143,6 +150,8 @@ def main():
     command += ["--normalization-initial-bias-backend", args.normalization_initial_bias_backend]
     command += ["--inflate-backend", args.inflate_backend]
     command += ["--sphere-finish-backend", args.sphere_finish_backend]
+    command += ["--annotation-gibbs-backend", args.annotation_gibbs_backend]
+    command += ["--remesh-scalar-storage", args.remesh_scalar_storage]
     command += ["--mni-execution", args.mni_execution]
     command += ["--wm-execution", args.wm_execution]
     report["cli_command"] = command

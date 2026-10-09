@@ -236,7 +236,17 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
                              assets: Path, device: str,
                              native_inflate_binary: Path,
                              intersection_binary: Path,
+                             *, remesh_scalar_storage: str = "numpy",
                              ) -> tuple[float, float, dict[str, float], float, float]:
+    """完成nofix/拓扑/remesh/清理；remesh存储候选不改任何几何规则。
+
+    路径、半球、设备和声明程序沿用表面主接口；新增remesh_scalar_storage
+    默认numpy，python复用同算法的CPU双精度标量存储。返回Python总秒、
+    原生拓扑秒、nofix子时间、remesh秒、intersection秒；均含读写。
+    表面为surface RAS/mm，orig的有序面由完整算法生成；失败传播。
+    官方步骤/完整参数及实测见CONDA_CPP_STAGES和REMESH_SCALAR_STORAGE。
+    """
+    _validate_remesh_scalar_storage(remesh_scalar_storage)
     from .mris_remesh_python import remesh_surface
     from .mris_remove_intersection_python import remove_intersection_surface
     from .smooth_surface_python import smooth_surface
@@ -262,7 +272,8 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
     _run_native_topology(binary, subject, hemi, assets)
     native_seconds = time.perf_counter() - native_started
     tick = time.perf_counter()
-    remesh_surface(surf / f"{hemi}.orig.premesh", surf / f"{hemi}.orig", iterations=3)
+    remesh_surface(surf / f"{hemi}.orig.premesh", surf / f"{hemi}.orig", iterations=3,
+                   scalar_storage=remesh_scalar_storage)
     remesh_seconds = time.perf_counter() - tick
     tick = time.perf_counter()
     orig = surf / f"{hemi}.orig"
@@ -564,7 +575,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   defects_backend: str = "native",
                   sphere_normals_backend: str = "numba",
                   inflate_backend: str = "native",
-                  sphere_finish_backend: str = "cpu") -> dict:
+                  sphere_finish_backend: str = "cpu",
+                  remesh_scalar_storage: str = "numpy") -> dict:
     """从自产filled生成单半球orig、预白质和标准球面，返回完整阶段报告。
 
     subject/hemi指被试目录和lh/rh；filled/norm为conform体积，网格为
@@ -573,10 +585,13 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     顺序发布共享缺陷。defects_backend=native/torch、sphere_normals_backend
     =numba/torch、inflate_backend=native/torch沿用各成熟函数。新
     sphere_finish_backend=cpu/torch只选择完整dense收尾设备，默认cpu。
+    remesh_scalar_storage默认numpy，python复用已验CPU双精度存储；
+    堆顺序、拆缩边/接受规则和完整Numba顺序平滑均保持。
     返回顶点/面数、组件、分阶段时间、预白质/球面实际报告及placement_pending；
     写出同序标准表面/标签，后续最终放置另行执行。输入、网格或计算失败
     传播；不读取参考，不占位。原命令/真实数据见recon-all各功能页。
     """
+    _validate_remesh_scalar_storage(remesh_scalar_storage)
     from .extract_main_component_python import extract_main_component
     from .label_cortex_fix_ga_python import label_cortex_fix_ga
     from .label_cortex_python import label_cortex
@@ -596,7 +611,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                  labels / f"{hemi}.nofix.cortex.label")
     topology_python_seconds, topology_native_seconds, pre_sphere_seconds, remesh_seconds, intersection_seconds = (
         _prepare_native_topology(topology_binary, subject, hemi, assets,
-                                 device, inflate_binary, intersection_binary))
+                                 device, inflate_binary, intersection_binary,
+                                 remesh_scalar_storage=remesh_scalar_storage))
     if not defer_defects:
         _run_defects_volume(defect_binary, subject, hemi, assets,
                             backend=defects_backend, device=device)
@@ -618,6 +634,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
             "topology_python_seconds": topology_python_seconds,
             "topology_native_seconds": topology_native_seconds,
             "topology_remesh_seconds": remesh_seconds,
+            "remesh_scalar_storage": remesh_scalar_storage,
             "topology_intersection_seconds": intersection_seconds,
             "sphere_seconds": {**pre_sphere_seconds, **sphere_timings},
             "standard_sphere_report": sphere_report,
@@ -792,7 +809,8 @@ def _write_hemisphere_stats(subject: Path, hemi: str, volumes: dict, cache,
 def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                           binaries=None, registration_atlases=None,
                           sphere_normals_backend="numba", inflate_backend="native",
-                          sphere_finish_backend="cpu"):
+                          sphere_finish_backend="cpu", annotation_gibbs_backend="python",
+                          remesh_scalar_storage="numpy"):
     """可exec的半球阶段入口，返回原结果与逐步读写/设备时间列表。
 
     subject为私有worker被试目录，hemi=lh/rh，device/threads为设备与
@@ -800,11 +818,17 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
     operation=surface/register/annotation/finish_surface选择原完整阶段。
     sphere_normals_backend默认numba，inflate_backend默认native，
     sphere_finish_backend默认cpu；仅surface消费这些选项，其余阶段算法保持。
+    annotation_gibbs_backend默认python；numba复用已有完整有序Gibbs实现，
+    仅annotation消费，GPU几何/随机序列/标签语义和缓存失效规则保持。
+    remesh_scalar_storage默认numpy，仅surface消费python双精度存储候选，
+    不改算法、GPU精度或线程预算。
     返回result/stages；体积为conform网格，表面为surface RAS/mm，发布
     和共享输出屏障由父调度负责。非法阶段或计算失败抛异常，不读取参考。
     原软件命令与真实阶段结果见各功能页；本内部门口无独立官方CLI。
     """
     from .profiling import StageProfiler, configure_cuda_allocator
+    _validate_annotation_gibbs_backend(annotation_gibbs_backend)
+    _validate_remesh_scalar_storage(remesh_scalar_storage)
     subject, assets = Path(subject), Path(assets)
     binaries = {name: Path(value) for name, value in (binaries or {}).items()}
     profiler = StageProfiler(device=device, synchronize=False,
@@ -824,7 +848,8 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                      place_binary=binaries.get('white', binaries['metrics']), defect_binary=binaries.get('defect'),
                      assets=assets, defer_defects=True,
                      sphere_normals_backend=sphere_normals_backend, inflate_backend=inflate_backend,
-                     sphere_finish_backend=sphere_finish_backend)
+                     sphere_finish_backend=sphere_finish_backend,
+                     remesh_scalar_storage=remesh_scalar_storage)
     elif operation == 'register':
         from .mris_register_run import run_register_sphere
         value = step(f'register_{hemi}', run_register_sphere,
@@ -843,7 +868,8 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
             atlas_file = assets / 'average' / f'{hemi}.{prefix}.atlas.acfb40.noaparc.i12.2016-08-02.gcs'
             value[atlas] = step(f'annot_{hemi}_{atlas}', label_surface, subject, hemi,
                   atlas_file, assets / 'lib/bem/ic4.tri', assets / 'lib/bem/ic7.tri',
-                  labels / f'{hemi}.{atlas}.annot', device=device, prepared=cache)
+                  labels / f'{hemi}.{atlas}.annot', device=device, prepared=cache,
+                  gibbs_backend=annotation_gibbs_backend)
     elif operation == 'finish_surface':
         value = step(f'finish_surface_{hemi}', _finish_cortical_surface, subject,
                      hemi, binaries['metrics'], assets, device=device, threads=threads, defer_metrics=True,
@@ -851,6 +877,29 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
     else:
         raise ValueError(f'unknown hemisphere operation: {operation}')
     return {'result': value, 'stages': steps}
+
+
+def _validate_remesh_scalar_storage(storage: str) -> None:
+    """只校验已有remesh双精度存储选择；无设备/文件/线程副作用。
+
+    storage为numpy默认或python候选，返回None；其他值抛ValueError。
+    两者都是CPU双精度，不使用半精度、Jacobi更新或近似重网格。
+    属于mris_remesh的内部执行方式，没有独立等价官方CLI。
+    """
+    if storage not in {"numpy", "python"}:
+        raise ValueError("remesh_scalar_storage must be numpy or python")
+
+
+def _validate_annotation_gibbs_backend(backend: str) -> None:
+    """在读写/设备设置前校验有序注释后端；python默认，numba为已验证候选。
+
+    backend为字符串python/numba，返回None；非法名称抛ValueError。
+    不读取网格、改变标签、初始化CUDA或调整线程。两种后端共用现有
+    label_surface几何/随机序列及有序反馈，仅完整Gibbs循环执行器不同。
+    它属于mris_ca_label内部步骤，没有独立官方命令。
+    """
+    if backend not in {"python", "numba"}:
+        raise ValueError("annotation_gibbs_backend must be python or numba")
 
 
 def _normalization_controls_options(backend: str, device: str) -> dict:
@@ -988,6 +1037,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          sphere_normals_backend: str = "numba",
                          inflate_backend: str = "native",
                          sphere_finish_backend: str = "cpu",
+                         annotation_gibbs_backend: str = "python",
+                         remesh_scalar_storage: str = "numpy",
                          mni_execution: str = "in-process",
                          gca_inverse_backend: str = "cpu",
                          gca_candidate_chunk: int = 64,
@@ -1011,6 +1062,11 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     缓存。nofix、球面优化/配准和父进程CUDA策略保持，失败不回退。
     sphere_finish_backend默认cpu；torch仅将标准sphere完整dense收尾迁往
     主CUDA，须cuda:N和两个fresh缓存worker，投影/停止和其余球面算法保持。
+    annotation_gibbs_backend默认python；numba复用完整有序Gibbs核，
+    三图谱共享现有版本化几何缓存，保留随机序列/同分规则/逐顶点反馈；
+    首次JIT及打包成本计入阶段，GPU几何设备与总CPU预算不变。
+    remesh_scalar_storage默认numpy；python复用同序拆缩/双精度平滑，
+    仅减少CPU标量调度开销，不改拓扑/阈值/停止规则，读写计入秒数。
     mni_execution默认in-process；parallel-late将完整非线性延后到全部
     半球写出之后，与CPU网格检查按同一threads预算并行，join后检查输出。
     要求cuda:N及显式整数threads>=2；错误传播，不生成占位文件。
@@ -1049,6 +1105,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     initial_bias_options = _normalization_initial_bias_options(normalization_initial_bias_backend, device)
     _validate_inflate_backend(inflate_backend, device, hemisphere_workers)
     _validate_sphere_finish_backend(sphere_finish_backend, device, hemisphere_workers)
+    _validate_annotation_gibbs_backend(annotation_gibbs_backend)
+    _validate_remesh_scalar_storage(remesh_scalar_storage)
     _validate_mni_execution(mni_execution, device, threads)
     from .input_n4_chain import validate_n4_execution
     validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=device)
@@ -1239,6 +1297,13 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            else "Conda source-built C++"),
         "binary": str(metrics_binary[0]),
         "sha256": metrics_binary[1], "upstream": "placed final white/pial"}
+    report["annotation"] = {"gibbs_backend": annotation_gibbs_backend,
+        "geometry_device": device, "ordered_feedback_device": "cpu",
+        "implementation": "FNIT Torch geometry + ordered " + annotation_gibbs_backend,
+        "random_sequence": "existing VnlRandom/permutation; no seed or order change"}
+    report["remesh"] = {"implementation": "FNIT ordered Python/Numba CPU",
+        "scalar_storage": remesh_scalar_storage, "precision": "float64; no precision reduction",
+        "iterations": 3, "topology_and_update_order": "unchanged"}
     report["sphere_generation"] = {
         "implementation": ("FNIT Torch standard inflate + Conda nofix inflate + Python quick/standard sphere"
                            if inflate_backend == "torch" else
@@ -1469,6 +1534,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                   'sphere_normals_backend': sphere_normals_backend,
                   'inflate_backend': inflate_backend,
                   'sphere_finish_backend': sphere_finish_backend,
+                  'annotation_gibbs_backend': annotation_gibbs_backend,
+                  'remesh_scalar_storage': remesh_scalar_storage,
                   'binaries': {name: str(value) for name, value in (
                       ('topology', topology_binary[0]), ('inflate', inflate_binary[0]),
                       ('intersection', intersection_binary[0]), ('metrics', metrics_binary[0]),
@@ -1529,7 +1596,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            defect_binary=defect_binary[0] if defect_binary else None,
                            assets=assets, defects_backend=defects_backend,
                            sphere_normals_backend=sphere_normals_backend, inflate_backend=inflate_backend,
-                           sphere_finish_backend=sphere_finish_backend)
+                           sphere_finish_backend=sphere_finish_backend,
+                           remesh_scalar_storage=remesh_scalar_storage)
             report.setdefault("surfaces", {})[hemi] = result
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
 
@@ -1559,7 +1627,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                       atlas_file, assets / "lib/bem/ic4.tri",
                       assets / "lib/bem/ic7.tri",
                       labels / f"{hemi}.{atlas}.annot", device=device,
-                      prepared=cache)
+                      prepared=cache, gibbs_backend=annotation_gibbs_backend)
         for hemi in ("lh", "rh"):
             result = stage(f"finish_surface_{hemi}", _finish_cortical_surface,
                            subject, hemi, metrics_binary[0], assets,
@@ -1660,6 +1728,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          sphere_normals_backend: str = "numba",
                          inflate_backend: str = "native",
                          sphere_finish_backend: str = "cpu",
+                         annotation_gibbs_backend: str = "python",
+                         remesh_scalar_storage: str = "numpy",
                          mni_execution: str = "in-process",
                          gca_inverse_backend: str = "cpu",
                          gca_candidate_chunk: int = 64,
@@ -1692,6 +1762,11 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     sphere_finish_backend=cpu保留收尾，torch复用既有完整dense GPU收尾，
     要求cuda:N与两个隔离worker；局部缓存不改变父allocator/精度。
     非法组合在CUDA初始化和创建输出前抛ValueError，执行失败不回退。
+    annotation_gibbs_backend=python保持原循环；numba复用已有完整有序
+    Gibbs核，三图谱共享现有版本化几何缓存，不改随机序列/标签语义。
+    GPU几何设备/线程预算保持，编译/打包/读写计入实际阶段报告。
+    remesh_scalar_storage默认numpy；python为完整有序remesh的CPU双精度
+    存储候选，算法/阈值/停止及总线程保持；不称GPU重网格。
     mni_execution=in-process保留默认；parallel-late在全部统计/半球写出后
     运行完整MNI GPU子exec，与CPU网格检查共享总threads预算（至少2）。
     要求cuda:N；返回mni_mesh_parallel完整报告及原mni_nonlinear.runtime，
@@ -1733,6 +1808,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     _normalization_initial_bias_options(normalization_initial_bias_backend, device)
     _validate_inflate_backend(inflate_backend, device, hemisphere_workers)
     _validate_sphere_finish_backend(sphere_finish_backend, device, hemisphere_workers)
+    _validate_annotation_gibbs_backend(annotation_gibbs_backend)
+    _validate_remesh_scalar_storage(remesh_scalar_storage)
     _validate_mni_execution(mni_execution, device, threads)
     from .thread_budget import thread_budget
 
@@ -1793,6 +1870,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                        if sphere_normals_backend != "numba" else {}),
                     **({"inflate_backend": inflate_backend} if inflate_backend != "native" else {}),
                     **({"sphere_finish_backend": sphere_finish_backend} if sphere_finish_backend != "cpu" else {}),
+                    **({"annotation_gibbs_backend": annotation_gibbs_backend}
+                       if annotation_gibbs_backend != "python" else {}),
+                    **({"remesh_scalar_storage": remesh_scalar_storage}
+                       if remesh_scalar_storage != "numpy" else {}),
                     **({"mni_execution": mni_execution} if mni_execution != "in-process" else {}),
                     **({"gca_inverse_backend": gca_inverse_backend} if gca_inverse_backend != "cpu" else {}),
                     **({"gca_candidate_chunk": gca_candidate_chunk} if gca_candidate_chunk != 64 else {}),
@@ -1852,6 +1933,10 @@ def main(argv: list[str] | None = None) -> None:
                         help="standard smoothwm inflation; torch requires cuda:N and two cached hemisphere workers; nofix unchanged")
     parser.add_argument("--mni-execution", choices=("in-process", "parallel-late"), default="in-process",
                         help="complete MNI in a late exec overlapping CPU mesh validation; explicit cuda:N and >=2 total threads")
+    parser.add_argument("--annotation-gibbs-backend", choices=("python", "numba"), default="python",
+                        help="ordered GCSA reclassification; numba reuses the exact compiled feedback loop")
+    parser.add_argument("--remesh-scalar-storage", choices=("numpy", "python"), default="numpy",
+                        help="ordered CPU double-precision remesh storage; algorithm and update order preserved")
     parser.add_argument("--sphere-finish-backend", choices=("cpu", "torch"), default="cpu",
                         help="existing full dense standard-sphere overlap cleanup; torch requires cuda:N and two cached surface workers")
     parser.add_argument("--native-bin-dir", type=Path)
@@ -1901,6 +1986,8 @@ def main(argv: list[str] | None = None) -> None:
                                   sphere_normals_backend=args.sphere_normals_backend,
                                   inflate_backend=args.inflate_backend,
                                   sphere_finish_backend=args.sphere_finish_backend,
+                                  annotation_gibbs_backend=args.annotation_gibbs_backend,
+                                  remesh_scalar_storage=args.remesh_scalar_storage,
                                   mni_execution=args.mni_execution,
                                   gca_inverse_backend=args.gca_inverse_backend,
                                   gca_candidate_chunk=args.gca_candidate_chunk,

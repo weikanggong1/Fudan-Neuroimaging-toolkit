@@ -28,6 +28,8 @@ def run_recon_all_python_batch(
     sphere_normals_backend: str = "numba",
     inflate_backend: str = "native",
     sphere_finish_backend: str = "cpu",
+    annotation_gibbs_backend: str = "python",
+    remesh_scalar_storage: str = "numpy",
     mni_execution: str = "in-process",
     gca_inverse_backend: str = "cpu",
     gca_candidate_chunk: int = 64,
@@ -62,6 +64,10 @@ def run_recon_all_python_batch(
     nofix/球面/注册及父策略保持。非法组合在任务调度前抛ValueError。
     sphere_finish_backend默认cpu；torch选择既有完整dense GPU球面收尾，
     所有设备须cuda:N与两个隔离surface worker，局部缓存、原规则保持。
+    annotation_gibbs_backend默认python；numba复用完整有序Gibbs重分类，
+    原样传入CLI，GPU几何、缓存版本/随机序列/总线程不变；首次JIT计入。
+    remesh_scalar_storage默认numpy；python仅优化已有CPU完整remesh的双精度
+    标量存储，原有拆缩顺序、堆规则及平滑保持，原样传入每个被试CLI。
     mni_execution默认in-process；parallel-late在所有半球写出后，将完整
     MNI非线性与CPU网格检查并行，所有设备须cuda:N且threads至少2。
     总线程在这两个任务间分配，join后才检查138输出；原样传入CLI。
@@ -82,7 +88,10 @@ def run_recon_all_python_batch(
     """
     from .native_free import (_normalization_controls_options, _normalization_initial_bias_options,
                               _validate_inflate_backend, _validate_mni_execution,
-                              _validate_sphere_finish_backend)
+                              _validate_sphere_finish_backend, _validate_annotation_gibbs_backend,
+                              _validate_remesh_scalar_storage)
+    _validate_annotation_gibbs_backend(annotation_gibbs_backend)
+    _validate_remesh_scalar_storage(remesh_scalar_storage)
     for target in devices:
         _normalization_controls_options(normalization_controls_backend, target)
         _normalization_initial_bias_options(normalization_initial_bias_backend, target)
@@ -185,6 +194,10 @@ def run_recon_all_python_batch(
                 command += ["--inflate-backend", inflate_backend]
             if sphere_finish_backend != "cpu":
                 command += ["--sphere-finish-backend", sphere_finish_backend]
+            if annotation_gibbs_backend != "python":
+                command += ["--annotation-gibbs-backend", annotation_gibbs_backend]
+            if remesh_scalar_storage != "numpy":
+                command += ["--remesh-scalar-storage", remesh_scalar_storage]
             if mni_execution != "in-process":
                 command += ["--mni-execution", mni_execution]
             if wm_backend != "native":
