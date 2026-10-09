@@ -5,7 +5,7 @@
 | 输入 | 原始BIDS DWI/T1w，或已校正DWI和同源解剖；一套或两套ROI模板。 |
 | 输出 | 流线、共享模型checkpoint、四类连接矩阵与节点/来源记录。 |
 | 对应原软件 | UKB-connectomics流程及MRtrix3 ACT、SIFT2、connectome。 |
-| Python / CLI | `fnit.UKBConnectome_pipeline` / `fnit connectome`。 |
+| Python / CLI | `fnit.UKBConnectome_pipeline` / `fnit UKBConnectome_pipeline`；CLI 兼容别名为 `fnit connectome`。 |
 | CPU / GPU | FNIT核心支持CUDA，默认TF32；解剖/模板有CPU/native阶段。 |
 
 ## 1. 功能简介
@@ -234,7 +234,7 @@ OUTPUT_DIR/
 ## 3. 命令行调用
 
 ```bash
-fnit connectome --bids-root /data/bids --subject 01 \
+fnit UKBConnectome_pipeline --bids-root /data/bids --subject 01 \
   --freesurfer-subject-dir /data/subjects/sub-01 --recon-backend provided \
   --n-seeds 100000 --output-dir /data/connectome/sub-01 --device cuda:0
 ```
@@ -291,7 +291,7 @@ JSON和节点表实际格式见 [模板说明](template_pairs.md)。
 CLI配对模式不与非默认命名 `--atlas` 混用。
 CLI直接读取 `--dwi-to-t1-world` 文本矩阵，Python接收数组；
 `--recon-options`可为内联JSON对象或JSON文件路径，Python为Mapping。
-全部真实选项见 `fnit connectome --help`。
+全部真实选项见 `fnit UKBConnectome_pipeline --help`。
 
 ## 4. 原软件调用
 
