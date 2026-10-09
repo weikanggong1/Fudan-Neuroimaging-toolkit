@@ -675,24 +675,26 @@ def _five_tissue_mrtrix(
     nonzero = (five_tissue[nearest[:, 0], nearest[:, 1], nearest[:, 2]] != 0).any(-1)
     lower = torch.floor(voxel).long()
     fraction = (voxel - lower).float()
-    # Reuse axis indices and weights; accumulate the same eight corners in
-    # dz -> dy -> dx order with the original FP32 multiplication grouping.
     indices = tuple(tuple((lower[:, axis] + offset).clamp(0, shape[axis] - 1)
                           for offset in (0, 1)) for axis in range(3))
     weights = tuple((1 - fraction[:, axis], fraction[:, axis]) for axis in range(3))
+    # Gather all eight corners in the original dz -> dy -> dx order.
+    # Integer advanced indexing also supports noncontiguous input volumes.
+    corner_order = tuple((dx, dy, dz) for dz in (0, 1) for dy in (0, 1) for dx in (0, 1))
+    corner_x = torch.stack(tuple(indices[0][dx] for dx, dy, dz in corner_order), dim=1)
+    corner_y = torch.stack(tuple(indices[1][dy] for dx, dy, dz in corner_order), dim=1)
+    corner_z = torch.stack(tuple(indices[2][dz] for dx, dy, dz in corner_order), dim=1)
+    corner_values = five_tissue[corner_x, corner_y, corner_z]
+    corner_wx = torch.stack(tuple(weights[0][dx] for dx, dy, dz in corner_order), dim=1)
+    corner_wy = torch.stack(tuple(weights[1][dy] for dx, dy, dz in corner_order), dim=1)
+    corner_wz = torch.stack(tuple(weights[2][dz] for dx, dy, dz in corner_order), dim=1)
+    # Keep the original FP32 wx * (wy * wz) grouping and strict threshold.
+    weight = corner_wx * (corner_wy * corner_wz)
+    weighted = corner_values * torch.where(weight < 1e-6, 0., weight)[..., None]
     result = five_tissue.new_zeros((len(points), 5))
-    for dz in (0, 1):
-        iz = indices[2][dz]
-        wz = weights[2][dz]
-        for dy in (0, 1):
-            iy = indices[1][dy]
-            wy = weights[1][dy]
-            partial = wy * wz
-            for dx in (0, 1):
-                ix = indices[0][dx]
-                wx = weights[0][dx]
-                weight = wx * partial
-                result += five_tissue[ix, iy, iz] * torch.where(weight < 1e-6, 0., weight)[:, None]
+    # Eight ordered additions preserve the reference accumulation and rounding.
+    for corner in range(8):
+        result += weighted[:, corner]
     return torch.where((inside & nonzero)[:, None], result.clamp(0, 1), 0.)
 
 

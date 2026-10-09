@@ -309,7 +309,7 @@ def gpu_snapshot(device: torch.device) -> dict | None:
             "--format=csv,noheader,nounits"], check=True, capture_output=True,
             text=True, timeout=10)
         return {"utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                "query_columns": ["uuid", "gpu_utilization_percent", "total_memory_mib",
+                "query_columns": ["uuid", "gpu_utilization_percent", "memory_used_mib",
                                   "power_watts", "sm_clock_mhz"],
                 "row": result.stdout.strip()}
     except (OSError, subprocess.SubprocessError) as error:
