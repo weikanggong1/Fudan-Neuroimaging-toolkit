@@ -131,6 +131,22 @@ CPU算子和有序首试步单元回归7/7通过，包含阈值两侧、共面�
 时间，见[中断记录](../../validation/recon_all/optimizations/20261009_placement_torch/collision_sub07_lh_v3_interrupted.json)。
 完整pial、第二例双侧、整例显存和整例提速尚未由该碰撞选项验证。
 
+保留实际面对后，在headcw的Xeon Gold6418H、同一Conda环境、四线程、
+CUDA未初始化的条件下完成固定面对CPU回放。候选代码 `85b85837`，实际
+Torch谓词源码SHA为 `adac1598f162d5c0fb27afeac6d8625c8da7d66ae781205c1153b00403ba799a`。
+两块共131,108对、源相交864对，逐对bool和SHA全部一致；源边界复核0对，
+没有靠全量CPU复核掩盖算子差异。
+
+| 实际面对 | 源Numba热ABBA中位数 | Torch CPU热ABBA中位数 | 不同谓词 |
+|---|---:|---:|---:|
+| 65,572对，491对相交 | 0.034877 s | 0.036486 s | 0 |
+| 65,536对，373对相交 | 0.031787 s | 0.033302 s | 0 |
+
+CPU Torch子算子在这两块略慢约4.6%；不据此判断GPU性能。首次源JIT/cache
+加载和Torch调用单列在[完整机器报告](../../validation/recon_all/optimizations/20261009_placement_torch/collision_replay_cpu_v5.json)。
+这是中断作业留下的**部分真实动态状态面对**，不是完整当轮接受回归，
+也不是完整pial或整例。GPU allocator字段为null；不把它记录为零显存。
+
 已有正则梯度的完整同输入pial配对见
 [正则项结果](PYTORCH_PLACEMENT_REGULARIZATION.md)：最终几何/接受轨迹相同，
 整步却慢6.22%，因此仍为显式选项。这项结果不能用于证明新碰撞选项提速。
@@ -142,6 +158,8 @@ CPU算子和有序首试步单元回归7/7通过，包含阈值两侧、共面�
 - 对大规模host面对改为只上传当前块，避免先上传全体输入后才分块计算。
   真实benchmark新增每个完成测量边界的原子JSON写出，外部中断时保留
   已完成的测量和明确状态；完整状态只有 `execution_status="complete"`。
+- 验证脚本对 `@torch.no_grad` 和Numba包装进行unwrap后记录实际算法文件SHA，
+  避免把Torch装饰器文件当成候选kernel；v5真实回放已绑定实际源码。
 - 完整GPU接受仍需处理Gauss-Seidel依赖：当前顶点的近邻投影读取先前已接受
   顶点，碰撞读取候选三角面当前状态。共享面、近邻、完整候选面的顶点均属
   依赖边；不能只按左右半球或互不邻接顶点组批，更不能用Jacobi取代。

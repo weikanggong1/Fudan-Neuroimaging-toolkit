@@ -90,3 +90,13 @@ SSE/RMS、dt、接受/拒绝以及四轮边界。完整报告将检查输出文�
 退出；原失败日志保留服务器 `regularizer_sub07_startup_import_failure.log`。
 固定梯度 benchmark 改用旧 CPU 兼容法向入口；完整 pial 仅上传本轮模块和
 必要的当前法向/斥力依赖到独立 workspace，未替换服务器正式 repo 或环境。
+## 碰撞迁移补充（2026-10-09）
+
+`collision_sub07_lh_v3_interrupted.json`保留gpucw1作业中断和实际检查点SHA，
+没有最终报告、没有完成的精度或性能结论；不得把先前已写的检查点当作通过。
+
+`collision_replay_cpu_v5.json`是headcw四线程CPU上部分真实动态面对的回放，
+131,108对（864对源相交）逐对bool零差异。Torch CPU热中位数0.036486/0.033302秒，
+源Numba0.034877/0.031787秒；CUDA未初始化。此文件不证明GPU性能、完整迭代、
+完整pial或整例。脚本与输入/实际kernel版本见报告，中文说明见
+[碰撞页面](../../../../docs/recon_all/PYTORCH_PLACEMENT_COLLISION.md)。
