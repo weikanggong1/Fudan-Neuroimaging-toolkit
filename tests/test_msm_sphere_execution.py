@@ -29,7 +29,7 @@ def test_cached_radial_lookup_is_bitwise_equal_to_reference(device, project):
 
 @pytest.mark.parametrize('device', ['cpu', pytest.param('cuda:0', marks=pytest.mark.skipif(
     not torch.cuda.is_available(), reason='CUDA required'))])
-def test_cached_radial_lookup_keeps_fallback_points_order(device):
+def test_cached_radial_lookup_keeps_nonuniform_queries_order(device):
     vertices, faces = _ico(1)
     # A deliberately irregular but unfolded sphere forces some queries outside
     # the closest vertex's incident triangles.
@@ -46,15 +46,13 @@ def test_cached_radial_lookup_keeps_fallback_points_order(device):
     tensor = torch.as_tensor(points, device=device)
     reference = RadialSphereMap(vertices, faces, device, execution='reference')
     optimized = RadialSphereMap(vertices, faces, device, execution='optimized')
-    original = optimized._fallback; missing_points = []
-    def capture(points, query, face, projection, missing):
-        missing_points.extend(query[missing].tolist())
-        return original(points, query, face, projection, missing)
-    optimized._fallback = capture
     expected = reference.weights(tensor, batch_size=100)
     actual = optimized.weights(tensor, batch_size=250)
-    assert missing_points
     for first, second in zip(expected, actual): assert torch.equal(first, second)
+    permutation = rng.permutation(len(points))
+    reordered = optimized.weights(tensor[torch.as_tensor(permutation, device=device)], batch_size=91)
+    for first, second in zip(actual, reordered):
+        assert torch.equal(first[torch.as_tensor(permutation, device=device)], second)
 
 
 @pytest.mark.parametrize('device', ['cpu', pytest.param('cuda:0', marks=pytest.mark.skipif(

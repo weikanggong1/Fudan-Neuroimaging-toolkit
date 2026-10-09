@@ -330,61 +330,57 @@ def _unfold_incident(face_bytes,count):
     return faces,incident,table
 
 
-def _unfold(vertices,faces):
-    """The newMSM sequential area-gradient/step-halving unfolding operation."""
+def _unfold(vertices,faces,*,maximum_sweeps=1000):
+    """Source scalar unfolding with a conservative device clear-mesh gate."""
+    if vertices.dtype not in (torch.float32,torch.float64):
+        raise ValueError("sphere unfolding requires float32 or float64 coordinates")
     faces_np=np.asarray(faces,dtype=np.int64)
-    faces_np,incident,table=_unfold_incident(faces_np.tobytes(),len(vertices))
+    faces_np,_,table=_unfold_incident(faces_np.tobytes(),len(vertices))
     ids=torch.as_tensor(faces_np,device=vertices.device)
     local=torch.as_tensor(table,device=vertices.device)
     triangles=vertices[ids]
-    normals=F.normalize(torch.cross(triangles[:,2]-triangles[:,0],
-                                    triangles[:,1]-triangles[:,0],dim=-1),dim=-1)
-    intersections=(normals[local[:,0]][:,None,:]*normals[local]).sum(-1)<=0.5
-    if not bool(intersections.any()):return vertices,0
-    points=vertices.detach().cpu().numpy().copy()
-    moved=0
-    def normals_for(vertex):
-        triangle=points[faces_np[incident[vertex]]]
-        normal=np.cross(triangle[:,2]-triangle[:,0],triangle[:,1]-triangle[:,0])
-        normal/=np.linalg.norm(normal,axis=1,keepdims=True)
-        return normal
-    def folded(vertex):
-        normal=normals_for(vertex)
-        return np.any((normal[0]*normal).sum(1)<=0.5)
-    for _ in range(1000):
-        triangle=points[faces_np]
-        normal=np.cross(triangle[:,2]-triangle[:,0],triangle[:,1]-triangle[:,0])
-        normal/=np.linalg.norm(normal,axis=1,keepdims=True)
-        selected=np.flatnonzero(((normal[table[:,0]][:,None,:]*normal[table]).sum(-1)<=0.5).any(1))
-        if not len(selected):break
-        gradients=[]
-        for vertex in selected:
-            grad=np.zeros(3)
-            for face in incident[vertex]:
-                triangle_ids=faces_np[face]
-                corner=int(np.flatnonzero(triangle_ids==vertex)[0])
-                a,b,c=points[triangle_ids[[((corner+1)%3),((corner+2)%3),corner]]]
-                first=c-a;second=b-a
-                length=np.linalg.norm(second)
-                first=first/max(np.linalg.norm(first),1e-10)
-                second=second/max(length,1e-10)
-                n=np.cross(first,second);n/=max(np.linalg.norm(n),1e-10)
-                edge=np.cross(second,n)
-                if np.dot(first,edge)<0:edge=-edge
-                grad+=edge*(0.5*length)
-            gradients.append(grad)
-        # The gradients are frozen for this sweep; trial moves are applied in
-        # original vertex order and each checks the already moved neighbours.
-        for vertex,grad in zip(selected,gradients):
-            start=points[vertex].copy();step=1.0
-            while True:
-                proposed=start-grad*step
-                proposed/=np.linalg.norm(proposed)
-                points[vertex]=proposed*100
-                step*=0.5
-                if not folded(vertex) or step<=1e-3:break
-            moved+=1
-    return torch.as_tensor(points,dtype=vertices.dtype,device=vertices.device),moved
+    edge_a=triangles[:,2]-triangles[:,0]
+    edge_b=triangles[:,1]-triangles[:,0]
+    raw_normals=torch.cross(edge_a,edge_b,dim=-1)
+    squared=(raw_normals[:,0]*raw_normals[:,0]+raw_normals[:,1]*raw_normals[:,1])+raw_normals[:,2]*raw_normals[:,2]
+    length=torch.sqrt(squared)
+    normals=raw_normals/torch.where(length>1e-8,length,torch.ones_like(length))[:,None]
+    first=normals[local[:,0]][:,None,:];others=normals[local]
+    agreement=(first[...,0]*others[...,0]+first[...,1]*others[...,1])+first[...,2]*others[...,2]
+    # GPU/CPU reduction rounding must not exclude an upstream folded vertex.
+    # Near the 0.5 boundary and on degenerate/nonfinite normals use the literal
+    # scalar decision; only clearly smooth meshes retain the device fast path.
+    epsilon=torch.finfo(vertices.dtype).eps
+    # Bound both edge subtraction and each difference of products. This
+    # covers a fused device cross versus separately rounded scalar Point
+    # arithmetic, including long, almost parallel edges. An absolute cosine
+    # tolerance alone would not cover cancellation followed by normalization.
+    a_error=4*epsilon*(triangles[:,2].abs()+triangles[:,0].abs())
+    b_error=4*epsilon*(triangles[:,1].abs()+triangles[:,0].abs())
+    def product_error(left,right):
+        return (a_error[:,left]*edge_b[:,right].abs()
+                + b_error[:,right]*edge_a[:,left].abs()
+                + a_error[:,left]*b_error[:,right]
+                + 4*epsilon*(edge_a[:,left]*edge_b[:,right]).abs())
+    cross_error=sum(product_error(left,right)+product_error(right,left)
+                    for left,right in ((1,2),(2,0),(0,1)))
+    length_error=cross_error+8*epsilon*length
+    # Only normalized normals that are provably above Point::normalize's
+    # 1e-8 cutoff may take the clear path. Otherwise use the exact source gate.
+    lower_length=(length-length_error).clamp_min(torch.finfo(vertices.dtype).tiny)
+    normal_error=8*length_error/lower_length+8*epsilon
+    first_error=normal_error[local[:,0]][:,None]
+    other_error=normal_error[local]
+    tolerance=max(1e-12,32*epsilon)+4*(first_error+other_error+first_error*other_error)
+    uncertain=(length<=1e-8+length_error).any() | (~torch.isfinite(length)).any() | (~torch.isfinite(agreement)).any() | (~torch.isfinite(tolerance)).any()
+    if not bool(uncertain | (agreement<=0.5+tolerance).any()):return vertices,0
+    from . import _fastpd_native
+    points=vertices.detach().cpu().numpy().astype(np.float64,copy=False)
+    data,moved=_fastpd_native.source_unfold(points.tobytes(),faces_np.tobytes(),
+                                           len(points),len(faces_np),maximum_sweeps)
+    if not moved:return vertices,0
+    result=np.frombuffer(data,dtype=np.float64).reshape(-1,3).copy()
+    return torch.as_tensor(result,dtype=vertices.dtype,device=vertices.device),moved
 
 
 def _native_output_qc(vertices,faces,original):
@@ -400,17 +396,31 @@ def _native_output_qc(vertices,faces,original):
     before=np.asarray(original,dtype=np.float64)[faces]
     baseline=(np.cross(before[:,1]-before[:,0],before[:,2]-before[:,0])*before[:,0]).sum(1)
     usable=baseline!=0
+    sign=1 if np.count_nonzero(baseline>0)>=np.count_nonzero(baseline<0) else -1
     def orientation(coordinates):
         triangles=np.asarray(coordinates,dtype=np.float64)[faces]
         signed=(np.cross(triangles[:,1]-triangles[:,0],triangles[:,2]-triangles[:,0])*triangles[:,0]).sum(1)
         ratios=np.divide(signed,baseline,out=np.full_like(signed,np.nan),where=usable)
-        return int(np.count_nonzero(ratios<=0)),float(ratios[usable].min()) if usable.any() else None
-    folded_solver,min_solver=orientation(points)
-    folded_written,min_written=orientation(points.astype(np.float32))
+        absolute_ratios=np.divide(signed*sign,np.abs(baseline),
+                                  out=np.full_like(signed,np.nan),where=usable)
+        return (int(np.count_nonzero(ratios<=0)),float(ratios[usable].min()) if usable.any() else None,
+                int(np.count_nonzero(signed*sign<=0)),
+                float(absolute_ratios[usable].min()) if usable.any() else None,
+                int(np.count_nonzero((ratios<=0)&(baseline*sign>0))))
+    folded_solver,min_solver,absolute_solver,min_absolute_solver,new_solver=orientation(points)
+    folded_written,min_written,absolute_written,min_absolute_written,new_written=orientation(points.astype(np.float32))
     return {"folded_output_faces":folded_written,"folded_solver_faces":folded_solver,
             "minimum_output_orientation_ratio":min_written,
             "minimum_solver_orientation_ratio":min_solver,
-            "degenerate_input_faces":int(np.count_nonzero(~usable))}
+            "degenerate_input_faces":int(np.count_nonzero(~usable)),
+            "absolute_orientation_reference_sign":sign,
+            "absolute_folded_input_faces":int(np.count_nonzero(baseline*sign<=0)),
+            "absolute_folded_solver_faces":absolute_solver,
+            "absolute_folded_output_faces":absolute_written,
+            "minimum_absolute_solver_orientation_ratio":min_absolute_solver,
+            "minimum_absolute_output_orientation_ratio":min_absolute_written,
+            "new_relative_folded_solver_faces":new_solver,
+            "new_relative_folded_output_faces":new_written}
 
 
 def run_msmsulc(
@@ -592,20 +602,24 @@ def _register_msmsulc_one(entry, output, *, hemi, device, config, execution, qc_
                           previous_faces,previous_positions,selected,execution=execution).detach().cpu().numpy()
     output_qc_before_repair=_native_output_qc(vertices,native_faces,native)
     repair = {"policy": qc_policy, "applied": False, "moved_vertices": 0}
-    if output_qc_before_repair["folded_output_faces"]:
+    if (output_qc_before_repair["absolute_folded_output_faces"]
+            or output_qc_before_repair["degenerate_input_faces"]):
         if qc_policy == "error":
             raise RuntimeError(
                 f"{hemi} MSMSulc native sphere has "
-                f"{output_qc_before_repair['folded_output_faces']} folded faces"
+                f"{output_qc_before_repair['absolute_folded_output_faces']} folded faces"
             )
         if qc_policy == "repair":
-            repaired, moved = _unfold(
-                torch.as_tensor(vertices, dtype=torch.float64, device=selected), native_faces
+            from ._native_repair import repair_native_sphere
+
+            repaired, repair_details = repair_native_sphere(
+                torch.as_tensor(vertices, dtype=torch.float64, device=selected), native_faces, native
             )
             vertices = repaired.detach().cpu().numpy()
-            repair.update(applied=True, moved_vertices=int(moved))
+            repair.update(repair_details)
     output_qc=_native_output_qc(vertices,native_faces,native)
-    repair["success"] = output_qc["folded_output_faces"] == 0
+    repair["success"] = (output_qc["absolute_folded_output_faces"] == 0
+                         and output_qc["degenerate_input_faces"] == 0)
     if qc_policy == "repair" and not repair["success"]:
         raise RuntimeError(f"{hemi} MSMSulc native sphere fold repair did not pass QC")
     # ``report`` preserves the official final interpolation for exact

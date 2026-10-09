@@ -10,6 +10,7 @@ from types import SimpleNamespace
 
 import nibabel as nib
 import numpy as np
+import numpy.testing  # Load NumPy CPU probing before subprocess.run is mocked.
 import pytest
 
 from fnit.fmri.derivatives import fmri_derivative_paths, sidecar, write_json
@@ -77,14 +78,29 @@ def public_case(tmp_path, monkeypatch):
     files.mkdir()
     field_paths = {}
     for field in ("white", "pial", "midthickness", "sphere", "roi"):
-        path = files / field
-        path.write_bytes(field.encode())
+        path = files / ("sphere.surf.gii" if field == "sphere" else field)
+        if field == "sphere":
+            from fnit.msm.msmsulc import _ico
+            points, faces = _ico(0)
+            nib.save(nib.GiftiImage(darrays=[
+                nib.gifti.GiftiDataArray(points.astype(np.float32), intent=1008),
+                nib.gifti.GiftiDataArray(faces.astype(np.int32), intent=1009),
+            ]), path)
+        else:
+            path.write_bytes(field.encode())
         field_paths[field] = path
     geometry = SimpleNamespace(**{key: field_paths[key] for key in ("white", "pial", "midthickness")})
     prepared = SimpleNamespace(geometry=SimpleNamespace(left=geometry, right=geometry),
                                initial_spheres=(field_paths["sphere"], field_paths["sphere"]),
                                individual_rois=(field_paths["roi"], field_paths["roi"]))
-    monkeypatch.setattr(pipeline, "prepare_fmriprep_surface_inputs", lambda **kwargs: prepared)
+    def prepare(**kwargs):
+        import shutil
+        output = kwargs["output_dir"]
+        output.mkdir(parents=True)
+        for hemisphere in "LR":
+            shutil.copyfile(field_paths["sphere"], output / f"{hemisphere}.sphere.FS.native.surf.gii")
+        return prepared
+    monkeypatch.setattr(pipeline, "prepare_fmriprep_surface_inputs", prepare)
     from fnit.msm.prepare import MSMSulcInputs
     msm_input = MSMSulcInputs(*(field_paths["sphere"] for _ in range(6)))
     monkeypatch.setattr(pipeline, "prepare_msmsulc_inputs", lambda **kwargs: {
@@ -94,7 +110,7 @@ def public_case(tmp_path, monkeypatch):
         output.mkdir()
         write_json(output / "registration_report.json", {
             hemi: {"configuration": {"it": [50, 10, 15, 15]},
-                   "folded_output_triangles": 0, "stages": [{"iterations": [{"energy": 1.0}]}]}
+                   "folded_output_faces": 0, "stages": [{"iterations": [{"energy": 1.0}]}]}
             for hemi in ("L", "R")})
         return {"L": field_paths["sphere"], "R": field_paths["sphere"]}
 
@@ -142,6 +158,9 @@ def test_default_preproc_selects_metadata_t1_and_preserves_qc_spheres(public_cas
     assert qc["MSM"]["Report"]["R"]["stages"][0]["iterations"][0]["energy"] == 1.0
     assert qc["MSM"]["InputsSHA256"]["L"]["affine"] == "b" * 64
     assert metadata["FNIT"]["RegistrationQC"].startswith("bids::")
+    assert qc["OrientationQC"]["all_stages"] == "pass"
+    assert qc["OrientationQC"]["solver_msmall"]["status"] == "not_applicable"
+    assert qc["MSM"]["FinalNative"]["L"]["coordinates"] == "saved GIFTI coordinates"
 
 
 @pytest.mark.parametrize("signal", ["preproc", "clean"])
@@ -158,11 +177,17 @@ def test_msmall_outputs_coexist_with_default_registration(public_case, monkeypat
 
     def refine(inputs, spheres, native_geometry, assets, work, configuration, device, execution,
                wb_command, **kwargs):
+        assert kwargs["qc_policy"] == "report"
         output = work / "msmall"
         output.mkdir()
         write_json(output / "registration_report.json", {
-            hemisphere: {"feature_count": 33, "weighted_cost": True}
+            hemisphere: {"feature_count": 33, "weighted_cost": True, "folded_output_faces": 0}
             for hemisphere in "LR"})
+        write_json(output / "native_composition_report.json", {
+            hemisphere: pipeline._saved_native_sphere_qc(
+                sphere, kwargs["native_qc_references"][hemisphere], baseline="undeformed native sphere"
+            ) for hemisphere, sphere in zip("LR", spheres)
+        })
         return spheres, {"L": "fsLR32k", "R": "fsLR32k"}
 
     monkeypatch.setattr(pipeline, "_refine_msmall", refine)
@@ -178,10 +203,53 @@ def test_msmall_outputs_coexist_with_default_registration(public_case, monkeypat
     assert details["Signal"] == signal and details["Registration"] == "MSMAll-HOCR-FastPD"
     assert details["RegistrationDetails"]["InitialRegistration"]["Method"] == "FNIT MSMSulc-HOCR-FastPD"
     assert details["RegistrationDetails"]["FeatureTopology"] == {"L": "fsLR32k", "R": "fsLR32k"}
+    assert details["RegistrationDetails"]["QCPolicy"] == "report"
     assert "msmall_registration_and_native_composition" in details["TimingSeconds"]
     qc = json.loads(refined.qc_report.read_text())["MSM"]
     assert qc["MSMAll"]["Report"]["L"]["feature_count"] == 33
     assert qc["InitialMSMSulc"]["Report"]["L"]["configuration"]["it"] == [50, 10, 15, 15]
+    assert qc["FinalNative"]["L"]["vertex_count"] > 0
+    assert qc["OrientationQC"]["all_stages"] == "pass"
+    assert details["RegistrationDetails"]["HemispheresScope"].startswith("MSMAll solver output")
+
+
+def test_msmall_clean_final_output_preserves_initial_msmsulc_warning(public_case, monkeypatch):
+    from fnit.msm import MSMAllInputs
+    register = pipeline.run_msmsulc
+
+    def folded_initial(inputs, output, **kwargs):
+        paths = register(inputs, output, **kwargs)
+        report = json.loads((output / "registration_report.json").read_text())
+        report["L"].update(folded_output_faces=2, orientation_qc="warning")
+        write_json(output / "registration_report.json", report)
+        return paths
+
+    def refine(inputs, spheres, native_geometry, assets, work, configuration, device, execution,
+               wb_command, **kwargs):
+        output = work / "msmall"
+        output.mkdir()
+        write_json(output / "registration_report.json", {
+            hemi: {"feature_count": 21, "folded_output_faces": 0} for hemi in "LR"
+        })
+        write_json(output / "native_composition_report.json", {
+            hemi: pipeline._saved_native_sphere_qc(
+                sphere, kwargs["native_qc_references"][hemi], baseline="undeformed native sphere"
+            ) for hemi, sphere in zip("LR", spheres)
+        })
+        return spheres, {"L": "fsLR32k", "R": "fsLR32k"}
+
+    monkeypatch.setattr(pipeline, "run_msmsulc", folded_initial)
+    monkeypatch.setattr(pipeline, "_refine_msmall", refine)
+    entry = MSMAllInputs(*(public_case.sphere for _ in range(4)))
+    result = pipeline.fMRISurface_pipeline(**public_case.arguments,
+                                           msmall_inputs={"L": entry, "R": entry})
+    qc = json.loads(result.qc_report.read_text())
+    orientation = qc["OrientationQC"]
+    assert orientation["initial_msmsulc"]["status"] == "warning"
+    assert orientation["solver_msmall"]["status"] == orientation["final_native"]["status"] == "pass"
+    assert orientation["all_stages"] == "warning"
+    metadata = json.loads(result.metadata.read_text())
+    assert metadata["FNIT"]["RegistrationDetails"]["OrientationQC"] == orientation
 
 
 @pytest.mark.parametrize("signal", ["preproc", "clean"])
@@ -314,7 +382,61 @@ def test_external_spheres_are_not_labeled_as_estimated_msmsulc(public_case):
     metadata = json.loads(result.metadata.read_text())
     assert metadata["FNIT"]["Registration"] == "provided registered spheres"
     assert not metadata["FNIT"]["RegisteredSpheres"]["L"]["EstimatedHere"]
-    assert json.loads(result.qc_report.read_text())["MSM"] is None
+    qc = json.loads(result.qc_report.read_text())
+    assert "Report" not in qc["MSM"]
+    assert qc["MSM"]["FinalNative"]["L"]["orientation_qc"] == "pass"
+    assert qc["OrientationQC"]["initial_msmsulc"]["status"] == "not_assessed"
+    assert qc["OrientationQC"]["all_stages"] == "not_assessed"
+
+
+@pytest.mark.parametrize("policy", ["repair", "error"])
+def test_external_spheres_reject_inapplicable_msmsulc_policy(public_case, policy):
+    with pytest.raises(ValueError, match="msmsulc_qc_policy cannot be applied to supplied"):
+        pipeline.fMRISurface_pipeline(
+            **public_case.arguments, registered_spheres=(public_case.sphere, public_case.sphere),
+            msmsulc_qc_policy=policy,
+        )
+    assert not public_case.calls
+
+
+@pytest.mark.parametrize("policy", ["repair", "error"])
+def test_msmsulc_final_saved_qc_rejects_fold_despite_clean_solver_report(
+    public_case, monkeypatch, policy,
+):
+    import shutil
+    register = pipeline.run_msmsulc
+    def folded_saved_output(inputs, output, **kwargs):
+        assert kwargs["qc_policy"] == policy
+        clean_paths = register(inputs, output, **kwargs)
+        paths = {}
+        for hemi in "LR":
+            destination = output / f"{hemi}.sphere.MSMSulc.native.surf.gii"
+            shutil.copyfile(clean_paths[hemi], destination)
+            if hemi == "L":
+                image = nib.load(destination)
+                points = image.darrays[0].data.copy()
+                first, second, third = image.darrays[1].data[0]
+                points[first] = 0.55 * points[second] + 0.55 * points[third] - 0.1 * points[first]
+                points[first] *= 100 / np.linalg.norm(points[first])
+                image.darrays[0].data = points
+                nib.save(image, destination)
+            paths[hemi] = destination
+        # The initial report intentionally still claims zero folds. The saved
+        # native check must independently block the coordinates consumed later.
+        return paths
+    monkeypatch.setattr(pipeline, "run_msmsulc", folded_saved_output)
+    def forbidden(*args, **kwargs):
+        raise AssertionError("final QC must fail before area-surface resampling")
+    monkeypatch.setattr(pipeline.subprocess, "run", forbidden)
+    previous = public_case.paths.left
+    previous.write_bytes(b"previous")
+    with pytest.raises(RuntimeError, match="final saved native sphere failed orientation QC"):
+        pipeline.fMRISurface_pipeline(**public_case.arguments, msmsulc_qc_policy=policy,
+                                     overwrite=True)
+    assert not public_case.calls
+    assert previous.read_bytes() == b"previous"
+    assert not public_case.paths.dtseries.exists()
+    assert not sidecar(public_case.paths.left).exists()
 
 
 def test_late_projection_failure_preserves_all_previous_public_results(public_case, monkeypatch):
@@ -502,3 +624,64 @@ def test_symlinked_freesurfer_directory_preserves_relative_middle_provenance(pub
     geometry = json.loads(result.metadata.read_text())["FNIT"]["Geometry"]
     assert geometry["MidthicknessSource"]["L"]["File"].startswith("surf/")
     assert geometry["MidthicknessSource"]["R"]["File"].startswith("surf/")
+
+
+@pytest.mark.parametrize("policy", ["repair", "error"])
+def test_final_native_policy_requires_msmall_branch(public_case, policy):
+    with pytest.raises(ValueError, match="msmall_qc_policy requires prepared msmall_inputs"):
+        pipeline.fMRISurface_pipeline(**public_case.arguments, msmall_qc_policy=policy)
+    assert not public_case.calls
+
+
+def test_invalid_final_native_policy_is_rejected(public_case):
+    from fnit.msm import MSMAllInputs
+    entry = MSMAllInputs(*(public_case.sphere for _ in range(4)))
+    with pytest.raises(ValueError, match="msmall_qc_policy must be"):
+        pipeline.fMRISurface_pipeline(**public_case.arguments,
+                                     msmall_inputs={"L": entry, "R": entry},
+                                     msmall_qc_policy="invalid")
+    assert not public_case.calls
+
+
+@pytest.mark.parametrize("policy", ["report", "repair", "error"])
+def test_final_native_policy_is_forwarded_to_msmall_and_retained(public_case, monkeypatch, policy):
+    from fnit.msm import MSMAllInputs
+    def refine(inputs, spheres, native_geometry, assets, work, configuration, device, execution,
+               wb_command, **kwargs):
+        assert kwargs["qc_policy"] == policy
+        output = work / "msmall"
+        output.mkdir()
+        write_json(output / "registration_report.json", {
+            hemi: {"feature_count": 21, "folded_output_faces": 0} for hemi in "LR"
+        })
+        write_json(output / "native_composition_report.json", {
+            hemi: pipeline._saved_native_sphere_qc(
+                sphere, kwargs["native_qc_references"][hemi], baseline="undeformed native sphere"
+            ) for hemi, sphere in zip("LR", spheres)
+        })
+        return spheres, {"L": "fsLR32k", "R": "fsLR32k"}
+    monkeypatch.setattr(pipeline, "_refine_msmall", refine)
+    entry = MSMAllInputs(*(public_case.sphere for _ in range(4)))
+    result = pipeline.fMRISurface_pipeline(**public_case.arguments,
+                                          msmall_inputs={"L": entry, "R": entry},
+                                          msmall_qc_policy=policy)
+    details = json.loads(result.metadata.read_text())["FNIT"]["RegistrationDetails"]
+    assert details["QCPolicy"] == policy
+    assert len(public_case.calls) == 1
+
+
+def test_final_native_error_refuses_projection_and_publication(public_case, monkeypatch):
+    from fnit.msm import MSMAllInputs
+    def folded_output(*args, **kwargs):
+        assert kwargs["qc_policy"] == "error"
+        raise RuntimeError("MSMAll final native sphere has failed orientation QC; BOLD projection refused")
+    monkeypatch.setattr(pipeline, "_refine_msmall", folded_output)
+    entry = MSMAllInputs(*(public_case.sphere for _ in range(4)))
+    with pytest.raises(RuntimeError, match="BOLD projection refused"):
+        pipeline.fMRISurface_pipeline(**public_case.arguments,
+                                     msmall_inputs={"L": entry, "R": entry},
+                                     msmall_qc_policy="error")
+    assert not public_case.calls
+    assert not public_case.paths.left.exists()
+    assert not public_case.paths.dtseries.exists()
+    assert not tuple(public_case.paths.func_dir.glob("*MSMAll*"))

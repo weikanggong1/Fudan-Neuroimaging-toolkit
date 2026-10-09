@@ -108,6 +108,8 @@ def main(argv=None):
                          help="native MSMSulc sphere QC: preserve/report, repair folds, or error")
     surface.add_argument("--msmall-inputs-json", help="Prepared L/R multimodal feature manifest for optional MSMAll refinement")
     surface.add_argument("--msmall-config", help="Official MSMAll configuration; defaults to the HCP three-level refinement")
+    surface.add_argument("--msmall-qc-policy", choices=("report", "repair", "error"), default="report",
+                         help="final MSMAll native sphere QC: preserve/report, repair folds, or error before projection")
     args = parser.parse_args(argv)
     common = dict(
         bids_root=args.bids_root, derivatives_root=args.derivatives_root,
@@ -169,6 +171,7 @@ def main(argv=None):
             msmsulc_qc_policy=args.msmsulc_qc_policy,
             msmall_inputs=args.msmall_inputs_json,
             msmall_config=args.msmall_config,
+            msmall_qc_policy=args.msmall_qc_policy,
             parallel=not args.serial_hemispheres, cpu_threads=args.threads,
             recon_all_backend=args.recon_all_backend,
             recon_all_output_dir=args.recon_all_output_dir,

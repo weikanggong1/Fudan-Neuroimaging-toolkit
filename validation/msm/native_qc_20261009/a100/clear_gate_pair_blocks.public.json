@@ -1,0 +1,844 @@
+{
+  "schema_version": "fnit.validation.public.scalar.v1",
+  "status": "complete",
+  "scope": "Clear gate only; same scalar native mathematics, complete standalone bilateral MSMSulc report-policy and actual-fresh-case01 weighted21C MSMAll APIs; native repair helper not loaded.",
+  "timing_scope": "Full bilateral API including data reads and sphere/report writes; imports, context initialization, hashes, metrics excluded; shared-host observation",
+  "performance_scope": "Two separate observed pairs (AB and BA). Shared-resource wait and counter change separate blocks. No mean across blocks and no claim of a stable ABBA time window or stable speedup.",
+  "configuration": {
+    "msmsulc": {
+      "simval": [
+        3,
+        2,
+        2,
+        2
+      ],
+      "iterations": [
+        50,
+        10,
+        15,
+        15
+      ],
+      "control_grid": [
+        6,
+        2,
+        3,
+        4
+      ],
+      "sampling_grid": [
+        6,
+        4,
+        5,
+        6
+      ],
+      "data_grid": [
+        6,
+        4,
+        5,
+        6
+      ],
+      "regularization": [
+        0.0,
+        10.0,
+        7.5,
+        7.5
+      ],
+      "affine_step_size": 0.009999999776482582,
+      "affine_gradient_spacing": 0.5,
+      "shear_modulus": 0.4000000059604645,
+      "bulk_modulus": 1.600000023841858,
+      "strain_exponent": 2.0,
+      "regularization_exponent": 2.0
+    },
+    "msmall": {
+      "simval": [
+        2,
+        2,
+        2
+      ],
+      "iterations": [
+        10,
+        15,
+        15
+      ],
+      "control_grid": [
+        2,
+        3,
+        4
+      ],
+      "sampling_grid": [
+        4,
+        5,
+        6
+      ],
+      "data_grid": [
+        4,
+        5,
+        6
+      ],
+      "regularization": [
+        0.05000000074505806,
+        0.05000000074505806,
+        0.05000000074505806
+      ],
+      "shear_modulus": 0.4000000059604645,
+      "bulk_modulus": 1.600000023841858,
+      "strain_exponent": 2.0,
+      "regularization_exponent": 2.0
+    }
+  },
+  "only_changed_source_file": "src/fnit/msm/msmsulc.py",
+  "focused_source_sha256": {
+    "A": {
+      "src/fnit/msm/_affine.py": "fcbd622770d9c9f9b09115469e39d2d755385fcfebac212d559eb2a3e595ed3d",
+      "src/fnit/msm/msmall.py": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+      "src/fnit/msm/msmsulc.py": "a0bfa3be00571764706b4e3bcfbb0ce83deb4eece354b7eb002891006516dd73",
+      "src/fnit/msm/_execution.py": "1dd2af6bafcd87b07d20904047236c95b2564145eae7c958792bdb7c5335fd2b",
+      "src/fnit/msm/_sphere_map.py": "c006099177fb1f934ea443a683f4f5e563c787b946eca62afab80bd6bb59a6e0",
+      "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "612f58990560471a411bd2def88904dec3c1ace5090c1c0e23c2e3c6663aed8d",
+      "src/fnit/msm/_fastpd_src/ordered_face_octree.h": "8b1fe937d516ac7aeb337a9094ac618d0613b3198424be06147c9ba4fdb4b7fe",
+      "src/fnit/msm/_fastpd_src/source_unfold.h": "02acf6c20d3593b553eaadad1a86ba1765c7dbcb737c025fe9def783833ac443"
+    },
+    "B": {
+      "src/fnit/msm/_affine.py": "fcbd622770d9c9f9b09115469e39d2d755385fcfebac212d559eb2a3e595ed3d",
+      "src/fnit/msm/msmall.py": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+      "src/fnit/msm/msmsulc.py": "8b9c5c341b9414348efaac12249f14b7c158ed5a14cc2b99de9bf7fd3c3bc5c9",
+      "src/fnit/msm/_execution.py": "1dd2af6bafcd87b07d20904047236c95b2564145eae7c958792bdb7c5335fd2b",
+      "src/fnit/msm/_sphere_map.py": "c006099177fb1f934ea443a683f4f5e563c787b946eca62afab80bd6bb59a6e0",
+      "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "612f58990560471a411bd2def88904dec3c1ace5090c1c0e23c2e3c6663aed8d",
+      "src/fnit/msm/_fastpd_src/ordered_face_octree.h": "8b1fe937d516ac7aeb337a9094ac618d0613b3198424be06147c9ba4fdb4b7fe",
+      "src/fnit/msm/_fastpd_src/source_unfold.h": "02acf6c20d3593b553eaadad1a86ba1765c7dbcb737c025fe9def783833ac443"
+    }
+  },
+  "exporter_sha256": "ad304972121d2181addafb53c5e9eb206b389450417601a5ad4302b1db08e179",
+  "runs": {
+    "a1": {
+      "environment": {
+        "physical_gpu_index": 1,
+        "gpu": "NVIDIA A100-SXM4-80GB",
+        "affinity": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "cpu_budget": 8,
+        "hemisphere_cpu_budget": {
+          "L": 4,
+          "R": 4
+        },
+        "torch": "2.5.1+cu118",
+        "numpy": "1.26.4",
+        "allocator_limit_bytes": 20000000000,
+        "registration_dtype": "float64",
+        "output_dtype": "float32",
+        "tf32_matmul": true,
+        "tf32_cudnn": true
+      },
+      "native_sha256": "57a40c704be965466a00f89bb877f08d256a437eaa715da15ff3de20d164738d",
+      "source_native_inputs_unchanged": true,
+      "original_runtime_loaded": false,
+      "native_repair_helper_loaded": false,
+      "runs": {
+        "msmsulc": {
+          "bilateral_api_wall_seconds": 101.71791414916515,
+          "per_hemisphere_api_seconds": {
+            "L": 83.26244969945401,
+            "R": 101.68425102252513
+          },
+          "peak_allocated_gb": 2.354372608,
+          "precision": {
+            "L": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 2,
+                "minimum_absolute_orientation_ratio": -4.451905686232996,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 2,
+                "minimum_absolute_orientation_ratio": -4.451905686232996,
+                "degenerate_basis_faces": 0
+              }
+            },
+            "R": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.4887621978378854,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.4887621978378854,
+                "degenerate_basis_faces": 0
+              }
+            }
+          }
+        },
+        "msmall": {
+          "bilateral_api_wall_seconds": 77.5262589994818,
+          "per_hemisphere_api_seconds": {
+            "L": 70.8540138406679,
+            "R": 77.51052509900182
+          },
+          "peak_allocated_gb": 2.274472448,
+          "precision": {
+            "L": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.6303641815672515,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.6303641815672515,
+                "degenerate_basis_faces": 0
+              }
+            },
+            "R": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.01709613911447015,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.01709613911447015,
+                "degenerate_basis_faces": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "b1": {
+      "environment": {
+        "physical_gpu_index": 1,
+        "gpu": "NVIDIA A100-SXM4-80GB",
+        "affinity": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "cpu_budget": 8,
+        "hemisphere_cpu_budget": {
+          "L": 4,
+          "R": 4
+        },
+        "torch": "2.5.1+cu118",
+        "numpy": "1.26.4",
+        "allocator_limit_bytes": 20000000000,
+        "registration_dtype": "float64",
+        "output_dtype": "float32",
+        "tf32_matmul": true,
+        "tf32_cudnn": true
+      },
+      "native_sha256": "57a40c704be965466a00f89bb877f08d256a437eaa715da15ff3de20d164738d",
+      "source_native_inputs_unchanged": true,
+      "original_runtime_loaded": false,
+      "native_repair_helper_loaded": false,
+      "runs": {
+        "msmsulc": {
+          "bilateral_api_wall_seconds": 102.07407103665173,
+          "per_hemisphere_api_seconds": {
+            "L": 83.37184052728117,
+            "R": 102.04525776114315
+          },
+          "peak_allocated_gb": 2.389820928,
+          "precision": {
+            "L": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 2,
+                "minimum_absolute_orientation_ratio": -4.451905686232996,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 2,
+                "minimum_absolute_orientation_ratio": -4.451905686232996,
+                "degenerate_basis_faces": 0
+              }
+            },
+            "R": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.4887621978378854,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.4887621978378854,
+                "degenerate_basis_faces": 0
+              }
+            }
+          }
+        },
+        "msmall": {
+          "bilateral_api_wall_seconds": 71.9000651659444,
+          "per_hemisphere_api_seconds": {
+            "L": 64.23133211489767,
+            "R": 71.89274918474257
+          },
+          "peak_allocated_gb": 2.27771648,
+          "precision": {
+            "L": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.6303641815672515,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.6303641815672515,
+                "degenerate_basis_faces": 0
+              }
+            },
+            "R": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.01709613911447015,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.01709613911447015,
+                "degenerate_basis_faces": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "b2": {
+      "environment": {
+        "physical_gpu_index": 1,
+        "gpu": "NVIDIA A100-SXM4-80GB",
+        "affinity": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "cpu_budget": 8,
+        "hemisphere_cpu_budget": {
+          "L": 4,
+          "R": 4
+        },
+        "torch": "2.5.1+cu118",
+        "numpy": "1.26.4",
+        "allocator_limit_bytes": 20000000000,
+        "registration_dtype": "float64",
+        "output_dtype": "float32",
+        "tf32_matmul": true,
+        "tf32_cudnn": true
+      },
+      "native_sha256": "57a40c704be965466a00f89bb877f08d256a437eaa715da15ff3de20d164738d",
+      "source_native_inputs_unchanged": true,
+      "original_runtime_loaded": false,
+      "native_repair_helper_loaded": false,
+      "runs": {
+        "msmsulc": {
+          "bilateral_api_wall_seconds": 87.33683995716274,
+          "per_hemisphere_api_seconds": {
+            "L": 71.60556330904365,
+            "R": 87.31167241558433
+          },
+          "peak_allocated_gb": 2.238025216,
+          "precision": {
+            "L": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 2,
+                "minimum_absolute_orientation_ratio": -4.451905686232996,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 2,
+                "minimum_absolute_orientation_ratio": -4.451905686232996,
+                "degenerate_basis_faces": 0
+              }
+            },
+            "R": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.4887621978378854,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.4887621978378854,
+                "degenerate_basis_faces": 0
+              }
+            }
+          }
+        },
+        "msmall": {
+          "bilateral_api_wall_seconds": 64.79603297263384,
+          "per_hemisphere_api_seconds": {
+            "L": 57.81327114906162,
+            "R": 64.79139359481633
+          },
+          "peak_allocated_gb": 2.26742528,
+          "precision": {
+            "L": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.6303641815672515,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.6303641815672515,
+                "degenerate_basis_faces": 0
+              }
+            },
+            "R": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.01709613911447015,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.01709613911447015,
+                "degenerate_basis_faces": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "a2": {
+      "environment": {
+        "physical_gpu_index": 1,
+        "gpu": "NVIDIA A100-SXM4-80GB",
+        "affinity": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "cpu_budget": 8,
+        "hemisphere_cpu_budget": {
+          "L": 4,
+          "R": 4
+        },
+        "torch": "2.5.1+cu118",
+        "numpy": "1.26.4",
+        "allocator_limit_bytes": 20000000000,
+        "registration_dtype": "float64",
+        "output_dtype": "float32",
+        "tf32_matmul": true,
+        "tf32_cudnn": true
+      },
+      "native_sha256": "57a40c704be965466a00f89bb877f08d256a437eaa715da15ff3de20d164738d",
+      "source_native_inputs_unchanged": true,
+      "original_runtime_loaded": false,
+      "native_repair_helper_loaded": false,
+      "runs": {
+        "msmsulc": {
+          "bilateral_api_wall_seconds": 106.76907462626696,
+          "per_hemisphere_api_seconds": {
+            "L": 87.21911447588354,
+            "R": 106.67973426636308
+          },
+          "peak_allocated_gb": 2.239121408,
+          "precision": {
+            "L": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 2,
+                "minimum_absolute_orientation_ratio": -4.451905686232996,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 2,
+                "minimum_absolute_orientation_ratio": -4.451905686232996,
+                "degenerate_basis_faces": 0
+              }
+            },
+            "R": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.4887621978378854,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.4887621978378854,
+                "degenerate_basis_faces": 0
+              }
+            }
+          }
+        },
+        "msmall": {
+          "bilateral_api_wall_seconds": 83.30767207872123,
+          "per_hemisphere_api_seconds": {
+            "L": 74.87866348866373,
+            "R": 83.29420258849859
+          },
+          "peak_allocated_gb": 2.27771648,
+          "precision": {
+            "L": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.6303641815672515,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.6303641815672515,
+                "degenerate_basis_faces": 0
+              }
+            },
+            "R": {
+              "saved_float32_coordinates_bit_exact": true,
+              "faces_exact": true,
+              "changed_vertices": 0,
+              "coordinates_dtype": "float32",
+              "coordinates_finite": true,
+              "mean_angle_deg": 0.0,
+              "p95_angle_deg": 0.0,
+              "max_angle_deg": 0.0,
+              "mean_chord_mm": 0.0,
+              "max_chord_mm": 0.0,
+              "fnit_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.01709613911447015,
+                "degenerate_basis_faces": 0
+              },
+              "official_saved_qc": {
+                "absolute_folded_faces": 0,
+                "minimum_absolute_orientation_ratio": 0.01709613911447015,
+                "degenerate_basis_faces": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "blocks": {
+    "block1": {
+      "order": [
+        "a1",
+        "b1"
+      ],
+      "status": "complete",
+      "comparisons": {
+        "msmsulc": {
+          "A_wall_seconds": 101.71791414916515,
+          "B_wall_seconds": 102.07407103665173,
+          "B_over_A": 1.0035014175277355,
+          "B_minus_A_percent": 0.3501417527735473,
+          "saved_outputs_and_qc_identical": true,
+          "trajectory": {
+            "L": {
+              "iteration_changed_applied_and_unfold_counts_exact": true,
+              "maximum_recorded_energy_difference": 0.0
+            },
+            "R": {
+              "iteration_changed_applied_and_unfold_counts_exact": true,
+              "maximum_recorded_energy_difference": 0.0
+            }
+          }
+        },
+        "msmall": {
+          "A_wall_seconds": 77.5262589994818,
+          "B_wall_seconds": 71.9000651659444,
+          "B_over_A": 0.9274285396181053,
+          "B_minus_A_percent": -7.257146038189466,
+          "saved_outputs_and_qc_identical": true,
+          "trajectory": {
+            "L": {
+              "iteration_changed_applied_and_unfold_counts_exact": true,
+              "maximum_recorded_energy_difference": 0.0
+            },
+            "R": {
+              "iteration_changed_applied_and_unfold_counts_exact": true,
+              "maximum_recorded_energy_difference": 0.0
+            }
+          }
+        }
+      },
+      "between_run_seconds": 99.085049
+    },
+    "block2": {
+      "order": [
+        "b2",
+        "a2"
+      ],
+      "status": "complete",
+      "comparisons": {
+        "msmsulc": {
+          "A_wall_seconds": 106.76907462626696,
+          "B_wall_seconds": 87.33683995716274,
+          "B_over_A": 0.8179975359239129,
+          "B_minus_A_percent": -18.20024640760871,
+          "saved_outputs_and_qc_identical": true,
+          "trajectory": {
+            "L": {
+              "iteration_changed_applied_and_unfold_counts_exact": true,
+              "maximum_recorded_energy_difference": 0.0
+            },
+            "R": {
+              "iteration_changed_applied_and_unfold_counts_exact": true,
+              "maximum_recorded_energy_difference": 0.0
+            }
+          }
+        },
+        "msmall": {
+          "A_wall_seconds": 83.30767207872123,
+          "B_wall_seconds": 64.79603297263384,
+          "B_over_A": 0.7777919050649393,
+          "B_minus_A_percent": -22.220809493506067,
+          "saved_outputs_and_qc_identical": true,
+          "trajectory": {
+            "L": {
+              "iteration_changed_applied_and_unfold_counts_exact": true,
+              "maximum_recorded_energy_difference": 0.0
+            },
+            "R": {
+              "iteration_changed_applied_and_unfold_counts_exact": true,
+              "maximum_recorded_energy_difference": 0.0
+            }
+          }
+        }
+      },
+      "between_run_seconds": 45.607525
+    }
+  },
+  "cross_block_resource_observation": {
+    "shared_memory_failure_counter_first": 548656,
+    "shared_memory_failure_counter_latest": 658869,
+    "failure_counter_changed": true,
+    "interpretation": "Failure-counter growth describes shared cgroup charge failures; it does not by itself establish a task OOM kill.",
+    "precision_and_trajectory_comparisons": {
+      "msmsulc/L/b1_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmsulc/R/b1_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmsulc/L/b2_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmsulc/R/b2_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmsulc/L/a2_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmsulc/R/a2_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmall/L/b1_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmall/R/b1_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmall/L/b2_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmall/R/b2_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmall/L/a2_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      },
+      "msmall/R/a2_vs_a1": {
+        "changed_applied_counts_exact": true,
+        "maximum_energy_difference": 0.0
+      }
+    },
+    "block1_finished_to_block2_started_seconds": 1555.241285
+  },
+  "hardware_fields_consistent": {
+    "gpu_uuid": true,
+    "boot_id": true,
+    "cgroup": true,
+    "pid_namespace": true,
+    "mnt_namespace": true
+  },
+  "all_runs_precision_and_saved_qc_identical": true,
+  "source_manifests_unchanged": true,
+  "limitations": [
+    "Report-policy MSMSulc retains official folded native coordinates; strict saved-coordinate equality is not final native orientation QC.",
+    "Actual fresh features are retained from the earlier case01 pipeline; this component replay does not validate later repaired pipeline features or a complete HCP pipeline."
+  ],
+  "privacy_scope": "Whitelist of scalar observations, configuration and program-source/native hashes. Individual input/output/reference hashes, paths, coordinates, face arrays and grid fingerprints are excluded."
+}

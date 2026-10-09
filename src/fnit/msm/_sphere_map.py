@@ -1,17 +1,15 @@
-"""Radial newMSM sphere interpolation with cached static geometry.
+"""Radial newMSM interpolation with ordered Octree candidate pools.
 
-The optimized execution keeps the reference containment tests, distance and face-order tie
-break, unsigned areas and fallback candidates. It queues chunk work before one
-host mask transfer; ``execution='reference'`` retains per-chunk transfers.
+The leaf builder and native scalar fallback are part of FNIT's existing extension.
+GPU containment and feature interpolation stay in PyTorch, with one instability
+mask transfer per lookup and literal Point selection for shared boundaries.
 """
 from __future__ import annotations
 
 import numpy as np
-from scipy.spatial import cKDTree
 import torch
 
 from ._execution import cpu_workers, record_statistics
-from ._spatial import ExactCellNearest
 from . import _point_cpu
 
 
@@ -79,215 +77,194 @@ def _area_weights(triangles, points):
 
 
 class RadialSphereMap:
+    """Pinned newMSM ordered leaf lookup with GPU interior containment.
+
+    Candidate pools follow the original incremental Octree and its inclusive
+    XYZ child order. Ordinary unique interiors stay on the device; overlapping
+    or boundary containment uses literal scalar Point operations in the shared
+    FNIT extension for both values of the historical ``source_precision`` flag.
+    The caller still controls its subsequent warp arithmetic with that flag.
+    """
+
     def __init__(self, vertices, faces, device, *, execution='optimized', source_precision=False):
         if execution not in ('optimized', 'reference'):
             raise ValueError("sphere execution must be 'optimized' or 'reference'")
+        from . import _fastpd_native
+
         self.execution = execution
         self.source_precision = source_precision
         self.device = torch.device(device)
-        self.vertices = torch.as_tensor(vertices, dtype=torch.float64, device=self.device)
-        self.faces = torch.as_tensor(faces, dtype=torch.long, device=self.device)
-        self.tree = cKDTree(np.asarray(vertices))
+        # Native bytes, the Octree and tensor geometry must describe the same
+        # snapshot even if the caller later mutates its NumPy arrays.
+        vertex_array = np.array(vertices, dtype=np.float64, copy=True)
+        face_array = np.array(faces, dtype=np.int64, copy=True)
+        self.vertex_bytes = vertex_array.tobytes()
+        self.face_bytes = face_array.tobytes()
         self.cpu_threads = cpu_workers()
-        self.gpu_nearest = (ExactCellNearest(vertices, self.device)
-                            if self.device.type == "cuda" and execution == "optimized" else None)
-        incident = [[] for _ in range(len(vertices))]
-        for face_id, triangle in enumerate(faces):
-            for vertex in triangle: incident[vertex].append(face_id)
-        width = max(map(len, incident))
-        table = np.empty((len(vertices), width), np.int64)
-        for vertex, items in enumerate(incident):
-            table[vertex] = items+[items[0]]*(width-len(items))
-        self.incident = torch.as_tensor(table, device=self.device)
-        if source_precision:
-            self.incident_cpu = table
-            self.vertex_bytes = np.asarray(vertices, dtype=np.float64).tobytes()
-            self.face_bytes = np.asarray(faces, dtype=np.int64).tobytes()
-        if execution == 'optimized':
-            self.triangles = self.vertices[self.faces]
-            self.normal, self.normal_dot_a, self.edge_normals = _projection_geometry(self.triangles)
+        self.vertices = torch.as_tensor(vertex_array, dtype=torch.float64, device=self.device)
+        self.faces = torch.as_tensor(face_array, dtype=torch.long, device=self.device)
+        tree = _fastpd_native.build_ordered_face_octree(
+            self.vertex_bytes, np.asarray(face_array, np.int32).tobytes(), len(vertices), len(faces))
+        self.tree_buffers = tree
+        count = tree['n_nodes']
+        children = np.frombuffer(tree['children'], np.int32).reshape(count, 8)
+        midpoint = np.frombuffer(tree['mid'], np.float64).reshape(count, 3)
+        leaf_index = np.frombuffer(tree['leaf_index'], np.int32)
+        parent = np.frombuffer(tree['parent'], np.int32)
+        self.node_children = torch.tensor(children, dtype=torch.long, device=self.device)
+        self.node_midpoints = torch.tensor(midpoint, dtype=torch.float64, device=self.device)
+        self.node_is_leaf = torch.tensor(leaf_index >= 0, device=self.device)
+        depth = np.zeros(count, np.int64)
+        for node in range(1, count):
+            depth[node] = depth[parent[node]] + 1
+        self.max_depth = int(depth.max())
+        offsets = np.frombuffer(tree['leaf_offsets'], np.int64)
+        pools = np.frombuffer(tree['leaf_faces'], np.int32)
+        width = max(1, int(np.max(offsets[1:] - offsets[:-1])))
+        table = np.zeros((count, width), np.int64)
+        valid = np.zeros_like(table, bool)
+        for node in np.flatnonzero(leaf_index >= 0):
+            pool = pools[offsets[node]:offsets[node+1]]
+            if len(pool):
+                table[node] = np.r_[pool, np.full(width-len(pool), pool[0], dtype=np.int32)]
+                valid[node, :len(pool)] = True
+        self.leaf_candidates = torch.tensor(table, device=self.device)
+        self.leaf_candidate_valid = torch.tensor(valid, device=self.device)
+        # Reference execution needs the cache for final interpolation as well
+        # as diagnostic comparison; it can still recompute candidate normals.
+        self.triangles = self.vertices[self.faces]
+        self.normal, self.normal_dot_a, self.edge_normals = _projection_geometry(self.triangles)
+        # Candidate geometry depends only on this mapper's frozen surface.
+        # Stack the three edge tests so each CUDA operation handles all of
+        # them together, preserving Point's scalar arithmetic order.
+        if self.execution == 'optimized' and self.device.type == 'cuda':
+            a, b, c = self.triangles.unbind(-2)
+            self.containment_edges = torch.stack((b-a, c-b, a-c), -2)
+            self.containment_normals = torch.stack(self.edge_normals, -2)
+            self.edge_l1 = self.containment_edges.abs().sum(-1)
+            self.normal_l1 = self.containment_normals.abs().sum(-1)
 
-    def _select(self, points, nearest):
-        if (self.device.type == 'cpu' and self.execution == 'optimized'
-                and _point_cpu.enabled(
-                    points, self.triangles, self.normal, self.normal_dot_a, *self.edge_normals)):
-            # Independent CPU query rows avoid materializing point-by-face
-            # triangle/cross-product tensors. Cached PyTorch geometry and
-            # scalar operation order are retained. CUDA stays on its batched
-            # tensor path; differentiable callers retain that path as well.
-            from ._sphere_cpu import select_faces
-            values = select_faces(
-                points.numpy(), nearest.numpy(), self.incident.numpy(),
-                self.triangles.numpy(), self.normal.numpy(), self.normal_dot_a.numpy(),
-                *(edge.numpy() for edge in self.edge_normals), cpu_threads=self.cpu_threads)
-            face, projected, exists, ambiguous = (torch.from_numpy(value) for value in values)
-            return face, projected, exists, ambiguous if self.source_precision else None
-        candidates = self.incident[nearest].reshape(len(points), -1)
-        if self.execution == 'optimized':
-            triangles = self.triangles[candidates]
-            normal = self.normal[candidates]
-            top = self.normal_dot_a[candidates]
-            ab, bc, ca = (value[candidates] for value in self.edge_normals)
+    def _leaf_nodes(self, points):
+        node = torch.zeros(len(points), dtype=torch.long, device=self.device)
+        for _ in range(self.max_depth):
+            active = ~self.node_is_leaf[node]
+            upper = points >= self.node_midpoints[node]
+            child = upper[:, 0].long()*4 + upper[:, 1].long()*2 + upper[:, 2].long()
+            # Bounds are inclusive upstream: exact split-plane ties keep the
+            # last containing XYZ child, which is the upper half on each axis.
+            node = torch.where(active, self.node_children[node, child], node)
+        return node
+
+    def _native_selection(self, points, node_ids):
+        from . import _fastpd_native
+        tree = self.tree_buffers
+        query = points.detach().cpu().numpy()
+        node_array = node_ids.detach().cpu().numpy().astype(np.int32, copy=False)
+        raw = _fastpd_native.source_ordered_selection(
+            self.vertex_bytes, self.face_bytes, query.tobytes(), node_array.tobytes(),
+            tree['leaf_offsets'], tree['leaf_faces'], tree['fallback_offsets'], tree['fallback_faces'],
+            len(self.vertices), len(self.faces), len(points), self.cpu_threads)
+        value = np.frombuffer(raw, np.float64).reshape(-1, 4)
+        patches = torch.tensor(value[:, 0].astype(np.int64), device=self.device)
+        projection = torch.tensor(value[:, 1:], dtype=torch.float64, device=self.device)
+        # Face selection is discrete. Preserve projection gradients for
+        # differentiable queries/geometry without detaching the coordinates.
+        if points.requires_grad or self.vertices.requires_grad:
+            projection = self._project_selected(points, patches)
+        return patches, projection
+
+    def _project_selected(self, points, patches):
+        if self.execution == 'reference':
+            normal, top, _ = _projection_geometry(self.vertices[self.faces[patches]])
         else:
-            triangles = self.vertices[self.faces[candidates]]
-            normal, top, (ab, bc, ca) = _projection_geometry(triangles)
-        a, b, c = triangles.unbind(-2)
+            normal, top = self.normal[patches], self.normal_dot_a[patches]
+        denominator = _dot(normal, points)
+        ratio = (_point_cpu.divide(top, denominator) if _point_cpu.enabled(top, denominator)
+                 else top/denominator)
+        return points*ratio[:, None]
+
+    def _tensor_selection(self, points, nodes):
+        candidates = self.leaf_candidates[nodes]
+        valid = self.leaf_candidate_valid[nodes]
+        triangles = self.triangles[candidates]
+        if self.execution == 'reference' or self.device.type != 'cuda':
+            normal, top, normals = _projection_geometry(triangles)
+            a, b, c = triangles.unbind(-2)
+            edges = torch.stack((b-a, c-b, a-c), -2)
+            orthogonals = torch.stack(normals, -2)
+            edge_l1 = edges.abs().sum(-1)
+            normal_l1 = orthogonals.abs().sum(-1)
+        else:
+            normal, top = self.normal[candidates], self.normal_dot_a[candidates]
+            edges = self.containment_edges[candidates]
+            orthogonals = self.containment_normals[candidates]
+            edge_l1 = self.edge_l1[candidates]
+            normal_l1 = self.normal_l1[candidates]
         denominator = _dot(normal, points[:, None, :])
         ratio = (_point_cpu.divide(top, denominator) if _point_cpu.enabled(top, denominator)
                  else top/denominator)
         projected = points[:, None, :]*ratio[:, :, None]
-        inside_ab = _dot(_cross(b-a, projected-a), ab) > -1e-8
-        inside_bc = _dot(_cross(c-b, projected-b), bc) > -1e-8
-        inside_ca = _dot(_cross(a-c, projected-c), ca) > -1e-8
-        inside = inside_ab & inside_bc & inside_ca & torch.isfinite(projected).all(-1)
-        # Official Octree compares projected points' finite-edge/vertex
-        # distances. Only exact distance ties keep the first mesh face.
-        distance = torch.where(inside, _edge_distance(projected, triangles), torch.inf)
-        minimum = distance.min(-1).values
-        best = inside & (distance == minimum[:, None])
-        sentinel = torch.full_like(candidates, len(self.faces))
-        ordered = torch.where(best, candidates, sentinel)
-        exists = torch.isfinite(minimum)
-        choice = ordered.argmin(-1)
+        a, b, c = triangles.unbind(-2)
+        delta = torch.stack((projected-a, projected-b, projected-c), -2)
+        margins = _dot(_cross(edges, delta), orthogonals)
+        inside = ((margins > -1e-8).all(-1) & valid
+                  & torch.isfinite(projected).all(-1))
+        unique = inside.sum(-1) == 1
+        choice = inside.long().argmax(-1)
         row = torch.arange(len(points), device=self.device)
-        ambiguous = inside.sum(-1) > 1 if self.source_precision else None
-        return candidates[row, choice], projected[row, choice], exists, ambiguous
-
-    def _source_select(self, query, nearest, face, projection, ambiguous):
-        """Resolve only overlapping containing candidates in scalar order."""
-        if ambiguous.any():
-            from . import _fastpd_native
-            selected = np.flatnonzero(ambiguous)
-            candidates = self.incident_cpu[nearest[selected]].reshape(len(selected), -1)
-            candidates = np.sort(candidates, axis=1).astype(np.int64, copy=False)
-            values = np.frombuffer(_fastpd_native.source_radial_selection(
-                self.vertex_bytes, self.face_bytes,
-                np.asarray(query[selected], dtype=np.float64).tobytes(), candidates.tobytes(),
-                len(self.vertices), len(self.faces), len(selected), candidates.shape[1]),
-                dtype=np.float64).reshape(-1, 4)
-            if np.any(values[:, 0] < 0):
-                raise RuntimeError('no containing source-precision sphere candidate')
-            ids = torch.as_tensor(selected, device=self.device)
-            face[ids] = torch.as_tensor(values[:, 0].astype(np.int64), device=self.device)
-            projection[ids] = torch.tensor(values[:, 1:], device=self.device)
-        return face, projection
-
-    def _fallback(self, points, query, face, projection, missing):
-        if missing.any():
-            if query is None:
-                query = points.detach().cpu().numpy()
-            missing_ids = np.flatnonzero(missing)
-            record_statistics(tree_expanded_face_queries=len(missing_ids))
-            k = min(32, len(self.vertices))
-            expanded = self.tree.query(query[missing], k=k, workers=self.cpu_threads)[1]
-            expanded = np.asarray(expanded).reshape(len(missing_ids), k)
-            ids = torch.as_tensor(missing_ids, device=self.device)
-            better, q, found, _ = self._select(points[ids], torch.as_tensor(expanded, device=self.device))
-            if not bool(found.all()):
-                raise RuntimeError('no containing radial sphere triangle; check folded input mesh')
-            if self.source_precision:
-                better, q = self._source_select(query[missing], expanded, better, q,
-                                                np.ones(len(expanded), dtype=bool))
-            face[ids] = better
-            projection[ids] = q
-        return face, projection
+        patch = candidates[row, choice]
+        projection = projected[row, choice]
+        # Accepted epsilon plus a conservative FP64 operation-scale guard.
+        # Every source-leaf candidate must have a stable interior/outside
+        # classification. This rejects overlaps, source shared edges and
+        # degenerate projections before using the GPU-only choice.
+        scale = (edge_l1*delta.abs().sum(-1))*normal_l1
+        guard = 1e-8 + (4096*np.finfo(np.float64).eps)*torch.clamp(scale, min=1.0)
+        positive = (margins > guard).all(-1)
+        outside = (margins < -guard).any(-1)
+        classified = positive | outside | ~valid
+        safe = (unique & positive[row, choice] & classified.all(-1)
+                & (points >= -101.0).all(-1) & (points <= 101.0).all(-1)
+                & torch.isfinite(points).all(-1))
+        return patch, projection, safe
 
     def weights(self, points, batch_size=None, *, project=True):
+        points = points.to(device=self.device, dtype=torch.float64)
         if batch_size is None:
             batch_size = 32768 if self.execution == 'optimized' else 4096
         if batch_size <= 0:
             raise ValueError('sphere batch_size must be positive')
-        points = points.to(dtype=torch.float64, device=self.device)
         if not len(points):
-            empty_ids = torch.empty((0, 3), dtype=torch.long, device=self.device)
-            empty_weights = torch.empty((0, 3), dtype=torch.float64, device=self.device)
-            return empty_ids, empty_weights, empty_ids[:, 0]
-        # Source-precision native tie/fallback paths need host coordinates only
-        # for ambiguous or missing GPU cells.  Keeping this lazy avoids a full
-        # device-to-host copy for the common proven-containment path while
-        # retaining the exact FP64/native arithmetic whenever a fallback is
-        # actually required.  CPU-tree execution still needs the query up
-        # front, as before.
-        query = points.detach().cpu().numpy() if self.gpu_nearest is None else None
-        if self.gpu_nearest is None:
-            nearest_cpu = self.tree.query(query, k=1, workers=self.cpu_threads)[1][:, None]
-            record_statistics(tree_nearest_queries=len(points))
-            nearest = torch.as_tensor(nearest_cpu, device=self.device)
+            ids = torch.empty((0, 3), dtype=torch.long, device=self.device)
+            return ids, torch.empty((0, 3), dtype=torch.float64, device=self.device), ids[:, 0]
+        nodes = self._leaf_nodes(points)
+        if self.device.type == 'cpu' and self.execution == 'optimized':
+            patches, projection = self._native_selection(points, nodes)
+            record_statistics(octree_native_queries=len(points))
         else:
-            nearest, uncertain = self.gpu_nearest.query(points)
-            masks = torch.stack((uncertain, self.gpu_nearest.last_ties), -1).detach().cpu().numpy()
-            uncertain_cpu = masks[:, 0]
-            fallback_count = np.count_nonzero(uncertain_cpu)
-            record_statistics(cuda_nearest_queries=len(points),
-                              cuda_nearest_proved_queries=len(points)-fallback_count,
-                              tree_nearest_queries=fallback_count,
-                              nearest_tie_fallback_queries=np.count_nonzero(masks[:, 1]))
-            if uncertain_cpu.any():
-                ids = np.flatnonzero(uncertain_cpu)
-                unresolved_query = points[torch.as_tensor(ids, device=self.device)].detach().cpu().numpy()
-                fallback = self.tree.query(unresolved_query, k=1, workers=self.cpu_threads)[1]
-                nearest[torch.as_tensor(ids, device=self.device)] = torch.as_tensor(fallback, device=self.device)
-            nearest = nearest[:, None]
-            nearest_cpu = None
-        chosen_faces = []; chosen_weights = []; chosen_patches = []
-        blocks = []
-        for start in range(0, len(points), batch_size):
-            stop = min(start+batch_size, len(points)); p = points[start:stop]
-            near = nearest[start:stop]
-            face, projection, inside, ambiguous = self._select(p, near)
-            if self.execution == 'reference':
-                if self.source_precision:
-                    if query is None:
-                        query = points.detach().cpu().numpy()
-                    if nearest_cpu is None:
-                        nearest_cpu = nearest.detach().cpu().numpy()
-                    masks = torch.stack((~inside, ambiguous), -1).detach().cpu().numpy()
-                    missing = masks[:, 0]
-                    face, projection = self._source_select(query[start:stop], nearest_cpu[start:stop],
-                                                          face, projection, masks[:, 1])
-                else:
-                    missing = (~inside).detach().cpu().numpy()
-                face, projection = self._fallback(p, query[start:stop] if query is not None else None, face, projection, missing)
-                w = _area_weights(self.vertices[self.faces[face]], projection if project else p)
-                chosen_faces.append(self.faces[face]); chosen_weights.append(w); chosen_patches.append(face)
-            else:
-                blocks.append((start, stop, face, projection, inside, ambiguous))
-        if self.execution == 'optimized':
-            # The only containment-mask transfer for the entire call. All
-            # chunks retain their original order and fallback candidate order.
-            inside_all = torch.cat([item[4] for item in blocks])
-            if self.source_precision:
-                masks = torch.stack((~inside_all, torch.cat([item[5] for item in blocks])), -1).detach().cpu().numpy()
-                missing_all = masks[:, 0]
-                # Delay both host buffers until a native ambiguity or a tree
-                # fallback is present.  This is the only path that consumes
-                # source vertex IDs or query coordinates on the host.
-                if missing_all.any() or masks[:, 1].any():
-                    if query is None:
-                        query = points.detach().cpu().numpy()
-                    if nearest_cpu is None:
-                        nearest_cpu = nearest.detach().cpu().numpy()
-            else:
-                missing_all = (~inside_all).detach().cpu().numpy()
-            for start, stop, face, projection, _, _ in blocks:
-                p = points[start:stop]
-                if self.source_precision:
-                    host_query = query[start:stop] if query is not None else None
-                    host_nearest = nearest_cpu[start:stop] if nearest_cpu is not None else None
-                    face, projection = self._source_select(host_query, host_nearest,
-                                                          face, projection, masks[start:stop, 1])
-                missing = missing_all[start:stop]
-                fallback_query = (query[start:stop] if query is not None else
-                                  p.detach().cpu().numpy() if missing.any() else np.empty((len(p), 3)))
-                face, projection = self._fallback(p, fallback_query, face, projection, missing)
-                w = _area_weights(self.triangles[face], projection if project else p)
-                chosen_faces.append(self.faces[face]); chosen_weights.append(w); chosen_patches.append(face)
-        return torch.cat(chosen_faces), torch.cat(chosen_weights), torch.cat(chosen_patches)
+            blocks = []
+            for start in range(0, len(points), batch_size):
+                stop = min(start+batch_size, len(points))
+                patch, projection, safe = self._tensor_selection(points[start:stop], nodes[start:stop])
+                blocks.append((patch, projection, safe))
+            patches = torch.cat([block[0] for block in blocks])
+            projection = torch.cat([block[1] for block in blocks])
+            safe = torch.cat([block[2] for block in blocks])
+            # One mask transfer per lookup. Only unstable rows move query
+            # coordinates and node IDs to host, never all ordinary GPU points.
+            mask = (~safe).detach().cpu().numpy()
+            record_statistics(octree_device_containment_queries=int(np.count_nonzero(~mask)),
+                              octree_native_queries=int(np.count_nonzero(mask)))
+            if mask.any():
+                ids = torch.as_tensor(np.flatnonzero(mask), device=self.device)
+                chosen, literal = self._native_selection(points[ids], nodes[ids])
+                patches[ids] = chosen
+                projection[ids] = literal
+        vertices = self.faces[patches]
+        weights = _area_weights(self.vertices[vertices], projection if project else points)
+        return vertices, weights, patches
 
     def sample(self, points, metric):
-        # The likelihood samples unsigned areas at the original point, while
-        # metric resampling uses its radial projection to the containing face.
         ids, weights, _ = self.weights(points, project=False)
         weighted = metric[ids]*weights
-        # barycentric_interpolation accumulates in triangle corner order.
         return (weighted[:, 0]+weighted[:, 1])+weighted[:, 2]
