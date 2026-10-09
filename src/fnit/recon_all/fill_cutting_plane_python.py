@@ -150,8 +150,22 @@ def save_filled_mgz(wm_file: str | Path, output_file: str | Path,
 
 def fill_mgz(wm_file: str | Path, aseg_file: str | Path, lta_file: str | Path,
              colortable_file: str | Path, output_file: str | Path,
-             cut_log_file: str | Path | None = None) -> tuple[int, int, int]:
-    """Run the complete aseg-guided mri_fill path without a FreeSurfer runtime."""
+             cut_log_file: str | Path | None = None, *,
+             cc_boundary_backend: str = "python", device: str = "cpu",
+             cc_marching_backend: str = "python",
+             cc_profiles: list[dict] | None = None) -> tuple[int, int, int]:
+    """nibabel读取同网格WM/aseg，复用完整aseg引导fill并写出MGZ。
+
+    wm_file为3D uint8；aseg_file为同mm affine的整数语义标签；lta_file
+    为type0 VOX_TO_VOX；colortable_file为已声明LUT；output_file保持WM
+    网格/头并写0/127/255。cut_log_file默认None，可写CC体素/Talairach
+    mm坐标；返回CC种子(x,y,z)体素。cc_boundary_backend默认python，
+    torch只替换外部距离边界初始化；device默认cpu；cc_profiles默认
+    None，指定list追加两侧分段秒。cc_marching_backend默认python，
+    numba编译同一有序堆传播，首次JIT需时间。其余算法/有序扫描不变，
+    不调用原生。
+    参数/几何错误抛ValueError，读取/写出/CUDA异常传播，不静默回退。
+    """
     wm_image = nib.load(str(wm_file))
     aseg_image = nib.load(str(aseg_file))
     wm = np.asarray(wm_image.dataobj)
@@ -159,7 +173,9 @@ def fill_mgz(wm_file: str | Path, aseg_file: str | Path, lta_file: str | Path,
     if wm.shape != aseg.shape or not np.allclose(wm_image.affine, aseg_image.affine):
         raise ValueError("wm and aseg must have matching voxel geometry")
     matrix, tal_cras = read_vox_to_tal_lta(lta_file)
-    classified = _replace_cc_with_wm(aseg)
+    classified = _replace_cc_with_wm(aseg, boundary_backend=cc_boundary_backend,
+                                    device=device, marching_backend=cc_marching_backend,
+                                    profiles=cc_profiles)
     cut, seed = compute_cc_cut_mask(wm, classified, matrix)
     filled = _fill_preclassified(wm, classified, float(wm_image.header["delta"][0]), cut)
     provenance = ("fnit.recon_all.fill_cutting_plane_python "
@@ -187,8 +203,14 @@ def main() -> None:
     parser.add_argument("colortable")
     parser.add_argument("output")
     parser.add_argument("--cut-log")
+    parser.add_argument("--cc-boundary-backend", choices=("python", "torch"), default="python")
+    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--cc-marching-backend", choices=("python", "numba"), default="python")
     args = parser.parse_args()
-    fill_mgz(args.wm, args.aseg, args.lta, args.colortable, args.output, args.cut_log)
+    fill_mgz(wm_file=args.wm, aseg_file=args.aseg, lta_file=args.lta,
+             colortable_file=args.colortable, output_file=args.output, cut_log_file=args.cut_log,
+             cc_boundary_backend=args.cc_boundary_backend, device=args.device,
+             cc_marching_backend=args.cc_marching_backend)
 
 
 if __name__ == "__main__":

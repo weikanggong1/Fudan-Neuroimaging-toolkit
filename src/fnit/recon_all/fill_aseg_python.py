@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 from numba import njit
 from scipy import ndimage as ndi
+import time
 
 
 _LEFT = (2, 3, 4, 5, 10, 11, 12, 13, 17, 18, 19, 20, 25, 30, 26, 28, 31, 27,
@@ -15,8 +16,24 @@ _ERASE = (7, 8, 16, 46, 47)
 _WMSA = (77, 78, 79, 87, 88)
 
 
-def _cc_outside_distance(seg: np.ndarray, cc: np.ndarray, label: int) -> np.ndarray:
-    """Fast-marching outside distance, stopping once all CC voxels are settled."""
+def _cc_outside_distance(seg: np.ndarray, cc: np.ndarray, label: int, *,
+                         boundary_backend: str = "python", device: str = "cpu",
+                         marching_backend: str = "python",
+                         profile: dict | None = None) -> np.ndarray:
+    """固定标签的外部fast marching距离，所有CC查询决定后停止。
+
+    seg/cc为同三维x/y/z网格整数分割和bool查询，label为2或41。
+    boundary_backend默认python保留原扫描，torch仅替换完整边界初始化；
+    device默认cpu、torch后端可明确cuda。返回同网格float32体素距离；
+    marching_backend默认python，numba编译同有序heap/eikonal，关闭
+    fastmath并明确double sqrt提升。profile默认None；指定dict写分段秒，
+    不改变计算。无目标标签仍保留原空数组失败，非法后端抛ValueError。
+    """
+    if boundary_backend not in {"python", "torch"}:
+        raise ValueError("boundary_backend must be python or torch")
+    if marching_backend not in {"python", "numba"}:
+        raise ValueError("marching_backend must be python or numba")
+    started = time.perf_counter() if profile is not None else 0.
     points = np.argwhere(cc)
     label_points = np.argwhere(seg == label)
     lo = np.maximum(np.minimum(points.min(axis=0), label_points.min(axis=0)) - 12, 0)
@@ -24,6 +41,7 @@ def _cc_outside_distance(seg: np.ndarray, cc: np.ndarray, label: int) -> np.ndar
     area = tuple(slice(int(a), int(b)) for a, b in zip(lo, hi))
     target = seg[area] == label
     query = cc[area]
+    prepared = time.perf_counter() if profile is not None else 0.
     # FreeSurfer initializes outside boundary voxels at +0.5 voxel.
     distance = np.full(target.shape, np.float32(100.0), dtype=np.float32)
     state = np.zeros(target.shape, dtype=np.uint8)  # 0 far, 1 trial, 2 alive
@@ -42,23 +60,31 @@ def _cc_outside_distance(seg: np.ndarray, cc: np.ndarray, label: int) -> np.ndar
             state[x, y, z] = 2
             alive.append((x, y, z))
 
-    for z in range(sz):
-        for y in range(sy):
-            for x in range(sx):
-                val = target[x, y, z]
-                changed = False
-                if x + 1 < sx and val != target[x + 1, y, z]:
-                    changed = True
-                    add_alive(x + 1, y, z)
-                if y + 1 < sy and val != target[x, y + 1, z]:
-                    changed = True
-                    add_alive(x, y + 1, z)
-                if z + 1 < sz and val != target[x, y, z + 1]:
-                    changed = True
-                    add_alive(x, y, z + 1)
-                if changed:
-                    add_alive(x, y, z)
+    if boundary_backend == "python":
+        for z in range(sz):
+            for y in range(sy):
+                for x in range(sx):
+                    val = target[x, y, z]
+                    changed = False
+                    if x + 1 < sx and val != target[x + 1, y, z]:
+                        changed = True
+                        add_alive(x + 1, y, z)
+                    if y + 1 < sy and val != target[x, y + 1, z]:
+                        changed = True
+                        add_alive(x, y + 1, z)
+                    if z + 1 < sz and val != target[x, y, z + 1]:
+                        changed = True
+                        add_alive(x, y, z + 1)
+                    if changed:
+                        add_alive(x, y, z)
+    else:
+        import torch
+        from .fill_boundary_torch import initialize_cc_boundary_torch
+        boundary = initialize_cc_boundary_torch(torch.from_numpy(target).to(device))
+        distance, state = (tensor.cpu().numpy() for tensor in boundary[:2])
+        alive = [tuple(point) for point in boundary[2].cpu().tolist()]
     surface = state == 2
+    initialized = time.perf_counter() if profile is not None else 0.
 
     def priority(point: tuple[int, int, int]) -> float:
         return float(distance[point])
@@ -137,17 +163,38 @@ def _cc_outside_distance(seg: np.ndarray, cc: np.ndarray, label: int) -> np.ndar
                 if not initial or state[xx, yy, zz] == 0:
                     update(xx, yy, zz)
 
-    for x, y, z in alive:
-        update_neighbors(x, y, z, initial=True)
-    remaining = int(np.count_nonzero(query & ~surface))
-    while remaining and heap:
-        x, y, z = pop()
-        state[x, y, z] = 2
-        if query[x, y, z]:
-            remaining -= 1
-        update_neighbors(x, y, z)
+    if marching_backend == "numba":
+        from .fill_marching_numba import march_cc_distance_numba
+        trial_initialized = initialized
+        remaining = march_cc_distance_numba(distance, state,
+            np.asarray(alive, dtype=np.int64).reshape(-1, 3), query)
+    else:
+        for x, y, z in alive:
+            update_neighbors(x, y, z, initial=True)
+        remaining = int(np.count_nonzero(query & ~surface))
+        trial_initialized = time.perf_counter() if profile is not None else 0.
+        while remaining and heap:
+            x, y, z = pop()
+            state[x, y, z] = 2
+            if query[x, y, z]:
+                remaining -= 1
+            update_neighbors(x, y, z)
+    iterated = time.perf_counter() if profile is not None else 0.
     result = np.full(seg.shape, np.float32(100.0), dtype=np.float32)
     result[area] = distance
+    if profile is not None:
+        finished = time.perf_counter()
+        profile.update({"label": int(label), "boundary_backend": boundary_backend,
+            "marching_backend": marching_backend,
+            "numba_heap_timing_includes_trial_initialization": marching_backend == "numba",
+            "boundary_device": str(device) if boundary_backend == "torch" else "cpu",
+            "crop_shape": [int(axis) for axis in target.shape], "alive_count": len(alive),
+            "preparation_seconds": prepared - started,
+            "boundary_initialization_seconds": initialized - prepared,
+            "trial_initialization_seconds": trial_initialized - initialized,
+            "heap_eikonal_seconds": iterated - trial_initialized,
+            "output_assembly_seconds": finished - iterated,
+            "total_seconds": finished - started, "unsettled_cc_queries": remaining})
     return result
 
 
@@ -209,12 +256,34 @@ def _largest_then_fill_holes(mask: np.ndarray) -> np.ndarray:
     return ndi.binary_fill_holes(mask, structure=ndi.generate_binary_structure(3, 1))
 
 
-def _replace_cc_with_wm(aseg: np.ndarray) -> np.ndarray:
+def _replace_cc_with_wm(aseg: np.ndarray, *, boundary_backend: str = "python",
+                         device: str = "cpu", marching_backend: str = "python",
+                         profiles: list[dict] | None = None) -> np.ndarray:
+    """将251..255 CC按有序外部距离分成2/41；返回新int32分割。
+
+    aseg为三维整数语义x/y/z网格。boundary_backend默认python、torch只
+    改边界初始化；device默认cpu；profiles默认None，可追加两侧分段秒。
+    marching_backend默认python，可指定numba编译同一有序传播。
+    不改变输入、标签同距选右规则或heap；无CC时直接返回副本。
+    """
+    if boundary_backend not in {"python", "torch"}:
+        raise ValueError("boundary_backend must be python or torch")
+    if marching_backend not in {"python", "numba"}:
+        raise ValueError("marching_backend must be python or numba")
     seg = np.asarray(aseg, dtype=np.int32).copy()
     if np.any((seg >= 251) & (seg <= 255)):
         cc = (seg >= 251) & (seg <= 255)
-        left_distance = _cc_outside_distance(seg, cc, 2)
-        right_distance = _cc_outside_distance(seg, cc, 41)
+        for label in (2, 41):
+            row = {} if profiles is not None else None
+            distance = _cc_outside_distance(seg, cc, label,
+                boundary_backend=boundary_backend, device=device,
+                marching_backend=marching_backend, profile=row)
+            if profiles is not None:
+                profiles.append(row)
+            if label == 2:
+                left_distance = distance
+            else:
+                right_distance = distance
         seg[cc] = np.where(left_distance[cc] < right_distance[cc], 2, 41)
     return seg
 
@@ -256,9 +325,20 @@ def _fill_preclassified(wm: np.ndarray, seg: np.ndarray, voxel_xsize: float,
 
 
 def fill_with_aseg(wm: np.ndarray, aseg: np.ndarray, voxel_xsize: float = 1.0,
-                   cc_cut_mask: np.ndarray | None = None) -> np.ndarray:
-    """Return the 0/127/255 aseg-guided fill from FreeSurfer CRS voxel arrays."""
+                  cc_cut_mask: np.ndarray | None = None, *,
+                   cc_boundary_backend: str = "python", device: str = "cpu",
+                   cc_marching_backend: str = "python") -> np.ndarray:
+    """既有完整aseg引导填充，返回新三维uint8的0/127/255标签。
+
+    wm/aseg为同x/y/z体素网格，wm为uint8；voxel_xsize默认1.0mm；
+    cc_cut_mask默认None、存在时为同网格切割bool；cc_boundary_backend
+    默认python，torch仅替换CC距离边界；device默认cpu。
+    cc_marching_backend默认python，numba复用同序传播，首次JIT单列。
+    输入不改、
+    有序Voronoi/heap/孔填充不变；非法输入抛ValueError，CUDA失败传播。
+    """
     if wm.shape != aseg.shape or wm.ndim != 3 or wm.dtype != np.uint8:
         raise ValueError("wm and aseg must be equal-shape 3D volumes, wm uint8")
-    seg = _replace_cc_with_wm(aseg)
+    seg = _replace_cc_with_wm(aseg, boundary_backend=cc_boundary_backend, device=device,
+                            marching_backend=cc_marching_backend)
     return _fill_preclassified(wm, seg, voxel_xsize, cc_cut_mask)
