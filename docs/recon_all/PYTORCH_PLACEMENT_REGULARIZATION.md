@@ -45,6 +45,7 @@ pial_report = place_pial_t1(
     candidate_backend="tree",  # 保留原动态候选完整扩展规则
     device="cuda:0",  # 当前进程内明确的目标 GPU
     trace_callback=None,  # 可选每一步只读诊断回调
+    profile=True,  # 分步骤剖析；明确同步cuda:0，生产默认False不新增同步
 )
 ```
 
@@ -52,6 +53,14 @@ pial_report = place_pial_t1(
 [完整 Python pial 说明](PYTHON_PIAL_PLACEMENT.md)。返回字典增加
 `regularization_backend`，明确实际选择。`"torch"` 必须显式给出 `device`；
 CUDA 不可用或内存不足传播 PyTorch 异常，不静默退回 CPU。
+
+`profile` 默认 `False`。显式开启后，返回 `stage_seconds`，包含准备、
+梯度、按顺序碰撞、目标函数、轮间边界更新、最终清理、实际文件写出和
+剩余控制工作；单位都是秒，各项合计为函数墙钟 `seconds`。准备包含输入
+读取、静态索引及设备上下文建立；`control` 包含前置校验、试步决策和
+诊断回调。若选择了 GPU 后端，只有该模式在各测量边界同步明确目标设备，
+并在 `profile_cuda_target` 记录目标。CPU 默认流程不初始化 CUDA；生产
+调用关闭该模式时不增加 CUDA barrier。
 
 ### 内部固定网格上下文
 
@@ -116,6 +125,10 @@ MRI 是原 conform 体素网格。`output` 保留 orig 的有序三角面和完�
 `regularization_backend/device`。`steps`、半球、后端或输入无效、拒绝所有
 试步时抛异常。`first_white_preaparc_step()` 参数相同但没有 `steps`，
 固定调用第一步。
+
+white 首轮诊断的 `stage_seconds.write` 仅表示最终网格和可选 NPZ 的真实
+写出时间；循环控制和记录工作单独列为 `control`。此前通过减去几项内核
+时间得到的余量同时含循环开销，不能解释成 I/O 时间。
 
 ## 3. 命令行
 

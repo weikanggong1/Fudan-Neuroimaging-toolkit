@@ -3,10 +3,12 @@ from pathlib import Path
 import nibabel as nib
 import nibabel.freesurfer.io as fs
 import numpy as np
+import pytest
 from fnit.recon_all import place_pial_python as stage
 
 
-def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp_path, monkeypatch):
+@pytest.mark.parametrize("profile", [False, True])
+def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp_path, monkeypatch, profile):
     for folder in ('surf', 'mri', 'label'):
         (tmp_path/folder).mkdir()
     xyz = np.array([[0,0,0], [1,0,0], [0,1,0]], dtype=np.float32)
@@ -39,7 +41,7 @@ def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp
     monkeypatch.setattr(stage, 'repair_intersections', lambda vertices,*a: (vertices,{'intersecting_faces_after':0}))
     trace=[]
     report=stage.place_pial_t1(subject=tmp_path, hemisphere='lh', output=tmp_path/'surf/lh.pial.T1',
-                              max_steps=4, trace_callback=lambda *args: trace.append(args))
+                              max_steps=4, profile=profile, trace_callback=lambda *args: trace.append(args))
     assert report['pass_ends']==[1,2,3,4]
     actual,actual_faces=fs.read_geometry(report['output'])
     np.testing.assert_array_equal(actual,xyz)
@@ -47,3 +49,10 @@ def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp
     assert [row[1] for row in trace]==[0,1,2,3]
     assert all(len(row[3]['trials'])==3 for row in trace)
     assert all(row[3]['trials'][-1]['rejected'] and row[3]['trials'][-1]['stop'] for row in trace)
+    assert report['profile'] is profile
+    if profile:
+        assert all(seconds >= 0 for seconds in report['stage_seconds'].values())
+        assert sum(report['stage_seconds'].values()) == pytest.approx(report['seconds'])
+        assert report['profile_cuda_target'] is None
+    else:
+        assert 'stage_seconds' not in report

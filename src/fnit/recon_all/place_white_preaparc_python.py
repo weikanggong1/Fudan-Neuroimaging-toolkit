@@ -237,6 +237,7 @@ def place_white_preaparc_prefix(
                 )
         if stop:
             break
+    before_write = time.perf_counter()
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_vertices_like(orig, output, current)
     if diagnostics is not None:
@@ -260,8 +261,9 @@ def place_white_preaparc_prefix(
             "gradient": gradient_seconds,
             "collision": collision_seconds,
             "step_objective": objective_seconds,
-            "write": finished_at - initial_objective_at - gradient_seconds
-                     - collision_seconds - objective_seconds,
+            "write": finished_at - before_write,
+            "control": before_write - initial_objective_at - gradient_seconds
+                       - collision_seconds - objective_seconds,
         },
     }
 

@@ -61,6 +61,7 @@ def place_pial_t1(
     candidate_backend: str = "tree",
     device: str | None = None,
     trace_callback=None,
+    profile: bool = False,
 ) -> dict:
     """Place and save one hemisphere's pial.T1 using the native four-pass order.
 
@@ -79,7 +80,12 @@ def place_pial_t1(
     Its diagnostics include all trial decisions; a rejected terminal step
     restores its starting coordinates and ends the pass, matching native.
     ``max_steps`` guards against non-convergence; hitting it raises an error.
+    ``profile=True`` adds ``stage_seconds`` for preparation, gradients,
+    ordered collision, objectives, border updates, cleanup, output I/O and
+    remaining control work. Only this diagnostic mode synchronizes the explicit
+    CUDA target at section boundaries; default execution does not add barriers.
     """
+    started = time.perf_counter()
     if candidate_backend not in ("tree", "snapshot"):
         raise ValueError("candidate_backend must be tree or snapshot")
     if sampling_backend not in ("cpu", "torch", "triton"):
@@ -90,7 +96,27 @@ def place_pial_t1(
         raise ValueError("Torch regularization requires an explicit device")
     if sampling_backend != "cpu" and device is None:
         raise ValueError("GPU sampling requires an explicit device")
-    started = time.perf_counter()
+    stage_seconds = dict.fromkeys(("prepare", "gradient", "collision", "objective",
+                                 "border_updates", "cleanup", "write"), 0.0) if profile else None
+    profile_torch = profile_device = None
+    if profile and device is not None and (sampling_backend != "cpu" or regularization_backend == "torch"):
+        import torch
+        profile_torch, profile_device = torch, torch.device(device)
+
+    def profile_boundary() -> float:
+        if stage_seconds is None:
+            return 0.0
+        # Do not initialize CUDA just for timing a CPU section. Context/model
+        # initialization is included in preparation when the GPU backend starts.
+        if profile_device is not None and profile_device.type == "cuda" and profile_torch.cuda.is_initialized():
+            profile_torch.cuda.synchronize(profile_device)
+        return time.perf_counter()
+
+    def record_section(name: str, tick: float) -> None:
+        if stage_seconds is not None:
+            stage_seconds[name] += profile_boundary() - tick
+
+    prepare_started = profile_boundary()
     subject = Path(subject)
     if hemisphere not in ("lh", "rh"):
         raise ValueError("hemisphere must be 'lh' or 'rh'")
@@ -154,6 +180,7 @@ def place_pial_t1(
             candidates=two_candidates, ripped=ripped, device=device)
     fixed_normals = original_vertex_normals(xyz, faces, topology=normal_topology)
     original_area = surface_total_area(xyz, faces)
+    record_section("prepare", prepare_started)
     sigma, n_averages = 2.0, 16
     objective_cache_vertices: np.ndarray | None = None
     objective_cache_result: tuple[float, float] | None = None
@@ -211,16 +238,21 @@ def place_pial_t1(
             direction="tangent", ordered_neighbors=ordered)
         return np.float32(with_curvature + tangent)
 
+    objective_started = profile_boundary()
     last_sse, last_rms = objective(xyz)
+    record_section("objective", objective_started)
     current, cropped = xyz.copy(), np.zeros(len(xyz), dtype=np.int32)
     dt, reductions, outer_pass = 0.5, 0, 0
     pass_ends: list[int] = []
     for step in range(1, max_steps + 1):
+        gradient_started = profile_boundary()
         momentum = gradient(current, cropped)
+        record_section("gradient", gradient_started)
         stale_trial = None
         accepted = None
         trial_trace = [] if trace_callback is not None else None
         for trial_index in range(3):
+            collision_started = profile_boundary()
             proposal, displacement = unconstrained_step_with_offsets(
                 current, momentum, ripped, dt=dt)
             candidate, _ = asynchronous_first_step(
@@ -228,11 +260,14 @@ def place_pial_t1(
                 offsets=displacement, accepted_offsets=momentum,
                 stale_mht_trial=stale_trial, ordered_neighbors=ordered,
                 candidate_backend=candidate_backend)
+            record_section("collision", collision_started)
             blocked = np.any(proposal != current, axis=1) & np.all(
                 candidate == current, axis=1)
             trial_cropped = np.where(
                 ripped, cropped, np.where(blocked, cropped + 1, 0)).astype(np.int32)
+            objective_started = profile_boundary()
             sse, rms = objective(candidate)
+            record_section("objective", objective_started)
             trial_dt = dt
             dt, reductions, reduced, rejected, stop = pial_step_decision(
                 last_sse, last_rms, sse, rms, dt, reductions)
@@ -268,6 +303,7 @@ def place_pial_t1(
             outer_pass += 1
             sigma = 2.0 / (1 << outer_pass)
             n_averages = 16 >> outer_pass
+            border_started = profile_boundary()
             current_normals = normal_cache.evaluate(current)
             border = compute_border_values_first_pass(
                 volume, aseg, current, current_normals, xyz, ripped,
@@ -280,18 +316,31 @@ def place_pial_t1(
             # from the preceding pass is no longer valid.
             objective_cache_vertices = None
             objective_cache_result = None
+            record_section("border_updates", border_started)
+            objective_started = profile_boundary()
             last_sse, last_rms = objective(current)
+            record_section("objective", objective_started)
             dt, reductions = 0.5, 0
     else:
         raise RuntimeError(f"pial optimizer did not finish four passes in {max_steps} steps")
 
+    cleanup_started = profile_boundary()
     pinned = pin_medial_wall(current, xyz, fs.read_label(str(cortex)))
     repaired, cleanup = repair_intersections(pinned, faces, ripped)
+    record_section("cleanup", cleanup_started)
+    write_started = profile_boundary()
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_vertices_like(white, output, repaired)
-    return {"output": str(output), "hemisphere": hemi, "steps": step,
+    record_section("write", write_started)
+    seconds = time.perf_counter() - started
+    result = {"output": str(output), "hemisphere": hemi, "steps": step,
             "pass_ends": pass_ends, "cleanup": cleanup,
             "sampling_backend": sampling_backend, "device": device,
             "regularization_backend": regularization_backend,
             "candidate_backend": candidate_backend,
-            "seconds": time.perf_counter() - started}
+            "seconds": seconds, "profile": bool(profile)}
+    if stage_seconds is not None:
+        stage_seconds["control"] = seconds - sum(stage_seconds.values())
+        result["stage_seconds"] = stage_seconds
+        result["profile_cuda_target"] = str(profile_device) if profile_device is not None and profile_device.type == "cuda" else None
+    return result
