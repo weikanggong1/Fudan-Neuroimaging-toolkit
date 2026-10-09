@@ -1,7 +1,7 @@
 """真实 NIfTI 输入上逐轨严格比较两个 tracking 源码，并交错计时。
 
 两个 tracking 源码复用 --fod-module 指定的同一 FOD/SH 实现。
-默认两轮配对的计时顺序为 baseline、candidate、candidate、baseline。
+默认三轮全量配对按 AB/BA/AB 执行；单列首次调用后每版至少两个热样本。
 每版首次全量调用单列，不以小规模预热证明全量编译已完成。
 输入读取、H2D、tracking、D2H、摘要及写盘分别计时；不生成模拟影像。
 示例（输入路径须先由 FNIT 服务器索引及 SHA-256 核对）：
@@ -14,7 +14,7 @@
       --five-tissue /path/to/real/5tt.nii.gz \\
       --gmwmi /path/to/real/gmwmi.nii.gz \\
       --n-seeds 1000 --batch-size 1000 --seed 0 --device cuda:0 \\
-      --repeats 2 --output /path/to/run/tracking_exact.json --profile
+      --repeats 3 --output /path/to/run/tracking_exact.json --profile
 
 --compile-arc 对两版一同生效；比较未编译实现时省略此参数。
 --cold 单列每版首次调用，不能消除共享 FOD、CUDA 和编译缓存的顺序影响。
@@ -200,19 +200,34 @@ def output_summary(snapshot: Snapshot) -> dict:
     }
 
 
+def raw_tensor_equal(reference: torch.Tensor, actual: torch.Tensor) -> bool:
+    """严格比较 CPU 张量的 dtype、shape 和原始字节，包含空张量。"""
+    if reference.dtype != actual.dtype or reference.shape != actual.shape:
+        return False
+    expected = reference.detach().contiguous().numpy().reshape(-1).view(np.uint8)
+    observed = actual.detach().contiguous().numpy().reshape(-1).view(np.uint8)
+    return bool(np.array_equal(expected, observed))
+
+
 def strict_compare(reference: Snapshot, actual: Snapshot) -> dict:
     path_count_equal = len(reference.paths) == len(actual.paths)
     mismatch_indices = []
+    raw_mismatch_indices = []
     paths_equal = path_count_equal
+    paths_raw_equal = path_count_equal
     # 不使用误差阈值或只比较摘要：每一条实际路径都执行 torch.equal。
     for index, (expected, observed) in enumerate(zip(reference.paths, actual.paths)):
         equal = torch.equal(expected, observed)
+        raw_equal = raw_tensor_equal(expected, observed)
         paths_equal &= equal
-        if not equal and len(mismatch_indices) < 10:
+        paths_raw_equal &= raw_equal
+        if not (equal and raw_equal) and len(mismatch_indices) < 10:
             mismatch_indices.append(index)
+        if not raw_equal and len(raw_mismatch_indices) < 10:
+            raw_mismatch_indices.append(index)
     fields = {
         name: torch.equal(getattr(reference, name), getattr(actual, name))
-        for name in ("point_counts", "accepted_seeds", "lengths_mm", "endpoints")
+        for name in ("point_counts", "packed_points", "accepted_seeds", "lengths_mm", "endpoints")
     }
     fields["paths"] = bool(paths_equal)
     fields["seeds_attempted"] = reference.seeds_attempted == actual.seeds_attempted
@@ -220,10 +235,21 @@ def strict_compare(reference: Snapshot, actual: Snapshot) -> dict:
         reference.mean_fa is None and actual.mean_fa is None if reference.mean_fa is None
         or actual.mean_fa is None else torch.equal(reference.mean_fa, actual.mean_fa)
     )
+    raw_fields = {
+        name: raw_tensor_equal(getattr(reference, name), getattr(actual, name))
+        for name in ("point_counts", "packed_points", "accepted_seeds", "lengths_mm", "endpoints")
+    }
+    raw_fields["paths"] = bool(paths_raw_equal)
+    raw_fields["mean_fa"] = (
+        reference.mean_fa is None and actual.mean_fa is None if reference.mean_fa is None
+        or actual.mean_fa is None else raw_tensor_equal(reference.mean_fa, actual.mean_fa)
+    )
     return {
-        "assessed": True, "all_equal": all(fields.values()), "torch_equal": fields,
+        "assessed": True, "all_equal": all(fields.values()) and all(raw_fields.values()),
+        "torch_equal": fields, "dtype_shape_bytes_equal": raw_fields,
         "path_count_equal": path_count_equal,
         "first_mismatched_path_indices": mismatch_indices,
+        "first_mismatched_raw_path_indices": raw_mismatch_indices,
     }
 
 
@@ -242,6 +268,8 @@ def profile_top_events(profiler) -> list[dict]:
     events.sort(key=lambda event: getattr(event, "self_device_time_total", 0.), reverse=True)
     return [{
         "name": event.key, "count": event.count,
+        "device_type": str(event.device_type),
+        "is_user_annotation": bool(getattr(event, "is_user_annotation", False)),
         "cpu_seconds_inclusive": event.cpu_time_total / 1e6,
         "cpu_seconds_self": event.self_cpu_time_total / 1e6,
         "device_seconds_inclusive": getattr(event, "device_time_total", 0.) / 1e6,
@@ -249,9 +277,50 @@ def profile_top_events(profiler) -> list[dict]:
     } for event in events[:60]]
 
 
+def profile_summary(profiler) -> dict:
+    """每个原始 CUDA kernel 只计一次，排除注释与内存传输/填充。"""
+    kernels = []
+    for event in profiler.events():
+        if event.device_type != torch.autograd.DeviceType.CUDA or getattr(event, "is_user_annotation", False):
+            continue
+        name = event.name.lower()
+        if name.startswith(("memcpy", "memset", "[cuda memcpy", "[cuda memset")):
+            continue
+        kernels.append(event)
+    return {
+        "kernel_count": len(kernels),
+        "kernel_device_seconds": sum(event.device_time_total for event in kernels) / 1e6,
+        "aggregation": "Each raw CUDA kernel event is counted once; annotations, transfers, memset and operator inclusive totals are excluded.",
+    }
+
+
+def gpu_snapshot(device: torch.device) -> dict | None:
+    """Outside timed scope; physical UUID accounts for CUDA_VISIBLE_DEVICES."""
+    if device.type != "cuda":
+        return None
+    identity = getattr(torch.cuda.get_device_properties(device), "uuid", None)
+    if identity is None:
+        return {"unavailable": "selected physical GPU UUID unavailable"}
+    identity = "GPU-" + str(identity).removeprefix("GPU-")
+    try:
+        result = subprocess.run([
+            "nvidia-smi", "-i", identity,
+            "--query-gpu=uuid,utilization.gpu,memory.used,power.draw,clocks.current.sm",
+            "--format=csv,noheader,nounits"], check=True, capture_output=True,
+            text=True, timeout=10)
+        return {"utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "query_columns": ["uuid", "gpu_utilization_percent", "total_memory_mib",
+                                  "power_watts", "sm_clock_mhz"],
+                "row": result.stdout.strip()}
+    except (OSError, subprocess.SubprocessError) as error:
+        return {"unavailable": type(error).__name__}
+
+
 def run_once(module, variant: str, phase: str, ordinal: int, inputs: dict,
              options: dict, device: torch.device, trace_path: Path | None = None):
     sync(device)
+    load_before = list(os.getloadavg()) if hasattr(os, "getloadavg") else None
+    gpu_before = gpu_snapshot(device)
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
     profiler = None
@@ -266,17 +335,24 @@ def run_once(module, variant: str, phase: str, ordinal: int, inputs: dict,
         span = torch.profiler.record_function(f"tracking/{variant}") if profiler else nullcontext()
         with span, torch.inference_mode():
             sync(device)
+            started_cpu = time.process_time()
             started = time.perf_counter()
             tracks = module.probabilistic_tractography(**inputs, **options)
             sync(device)
             tracking_seconds = time.perf_counter() - started
+            tracking_process_cpu_seconds = time.process_time() - started_cpu
     tracking_memory = memory_stats(device)
+    gpu_after = gpu_snapshot(device)
     snapshot, pack_seconds, d2h_seconds = cpu_snapshot(tracks, device)
     memory_after_pack = memory_stats(device)
     del tracks
     record = {
         "variant": variant, "phase": phase, "ordinal": ordinal,
         "n_seeds": options["n_seeds"], "tracking_seconds": tracking_seconds,
+        "tracking_process_cpu_seconds": tracking_process_cpu_seconds,
+        "system_load_before": load_before,
+        "gpu_before": gpu_before, "gpu_after": gpu_after,
+        "system_load_after": list(os.getloadavg()) if hasattr(os, "getloadavg") else None,
         "d2h_seconds": d2h_seconds, "path_pack_seconds": pack_seconds,
         "tracking_memory": tracking_memory,
         "tracking_and_d2h_memory": memory_after_pack,
@@ -288,6 +364,7 @@ def run_once(module, variant: str, phase: str, ordinal: int, inputs: dict,
         record["profile_export_seconds"] = time.perf_counter() - started
         record["profile_trace"] = str(trace_path)
         record["profile_top_events"] = profile_top_events(profiler)
+        record["profile_summary"] = profile_summary(profiler)
     return record, snapshot
 
 
@@ -315,8 +392,8 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=8192, help="两版相同的并行播种批量")
     parser.add_argument("--seed", type=int, default=0, help="两版相同的 PyTorch 随机种子")
     parser.add_argument("--device", default="cuda:0", help="显式 CPU 或 CUDA 设备")
-    parser.add_argument("--repeats", type=int, default=2,
-                        help="热配对次数，交替 AB/BA；默认两次得到 ABBA")
+    parser.add_argument("--repeats", type=int, default=3,
+                        help="全量配对次数，交替 AB/BA；默认三次，单列首次调用后每版至少两个热样本")
     parser.add_argument("--warmup", type=int, default=1, help="每版额外预热调用次数")
     parser.add_argument("--warmup-seeds", type=int, default=128,
                         help="小规模预热播种数；0禁用预热；不计入全量计时")
@@ -409,6 +486,7 @@ def main() -> int:
         "device": device_metadata, "torch_version": str(torch.__version__),
         "cuda_version": torch.version.cuda, "python_version": platform.python_version(),
         "cpu_threads": torch.get_num_threads(),
+        "cpu_affinity": sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else None,
         "cpu_interop_threads": torch.get_num_interop_threads(),
         "tf32_matmul": bool(torch.backends.cuda.matmul.allow_tf32),
         "tf32_cudnn": bool(torch.backends.cudnn.allow_tf32),
@@ -420,7 +498,7 @@ def main() -> int:
         "shared_input_timing": {"input_hashing_seconds": input_hashing_seconds,
                                 "io_seconds": io_seconds, "h2d_seconds": h2d_seconds,
                                 "device_initialization_seconds": device_initialization_seconds},
-        "timing_note": "Tracking excludes I/O, H2D, D2H, hashing, comparison and TCK writes. Each variant first full call is separate unless a prior full cold/warmup call was made. Profile timings are excluded from hot summaries.",
+        "timing_note": "Tracking excludes input I/O/H2D, final output snapshot D2H, hashing, comparison and TCK writes. Internal metadata D2H remains included in tracking. Each variant first full call is separate unless a prior full cold/warmup call was made. Profile timings are excluded from hot summaries.",
         "cold_note": "Optional cold entries are each implementation's first call in this process; CUDA/FOD/Inductor caches are shared.",
         "warmup_seeds": args.warmup_seeds, "profile_seeds": args.profile_seeds,
         "runs": [],
