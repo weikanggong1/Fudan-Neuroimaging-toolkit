@@ -249,7 +249,14 @@ FNIT峰，也不保证捕获连续峰。CUDA初始化另计2.740秒。
 [修复前后/原生比较](../../validation/recon_all/optimizations/20261009_placement_torch/white_threshold13_full_comparison_a100_v8.json)
 绑定本次输入与模块SHA。
 
-下图是该真实conformed MRI上的white.preaparc叠加：青色为同输入原生、
+2026-10-10的限幅子函数修复已在新的自产sub07/LH输入上完成完整三方回归：
+旧版34步最大误差1.207718 mm，修复后33步最终坐标、有序面及预处理MRI均
+与本机独立Conda源码构建双重复0差异。完整API393.967→374.650秒；原生
+同输入500.977/521.503秒，均为共享负载观察。源码/输入SHA、试步及误差见
+[最新限幅回归](PIAL_STEP_NORM_DIAGNOSTIC.md)。最终white的独立aparc/rip-surface
+分支不是preaparc，未通过完整验证前不接生产默认。
+
+下图是v8冻结输入的真实conformed MRI与white.preaparc叠加：青色为同输入原生、
 品红为FNIT；中图聚焦全网格最大同索引误差所在平面，颜色为距离/mm。
 右图为表面误差投影，统计使用全部顶点；未显示的顶点不从误差统计删去。
 

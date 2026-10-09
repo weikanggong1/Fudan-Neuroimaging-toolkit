@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import argparse
-import shlex
-import subprocess
+import hashlib
+import json
+from native_probe_build import compile_probe, link_probe
 from pathlib import Path
 
 
@@ -17,6 +18,8 @@ def main() -> None:
     parser.add_argument("--capture-iteration", type=int, default=0)
     parser.add_argument("--capture-through", type=int)
     parser.add_argument("--capture-white-repulsion", action="store_true")
+    parser.add_argument("--basic-terms-only", action="store_true",
+                        help="Only instrument optimizer stages; leave individual kernel objects unchanged")
     parser.add_argument("--capture-light-after", type=int)
     parser.add_argument("--stop-after-capture", action="store_true")
     args = parser.parse_args()
@@ -109,6 +112,9 @@ def main() -> None:
     else:
         dump = dump.replace("CAPTURE_GUARD", f"n >= {args.capture_through}")
         dump = dump.replace("CAPTURE_PATH", 'snprintf(path, STRLEN, "%s.step%02d.%s", prefix, n + 1, stage);')
+        # 每轮 CBV 会更新 val/val2，不能只保留末步目标后回放前一步。
+        dump = dump.replace('snprintf(path, STRLEN, "%s.intensity_input", prefix);',
+                            'snprintf(path, STRLEN, "%s.step%02d.intensity_input", prefix, n + 1);')
         crop = """
       if (strcmp(stage, "clear") == 0 || strcmp(stage, "after_collision") == 0) {
         snprintf(path, STRLEN, "%s.step%02d.%s.cropped", prefix, n + 1, stage);
@@ -160,23 +166,22 @@ def main() -> None:
     patched = args.out / "mrisurf_mri_gradient_probe.cpp"
     patched.write_text(prefix + "// #POS" + source)
 
-    target = args.build / "utils/CMakeFiles/utils.dir"
-    definitions = {}
-    for line in (target / "flags.make").read_text().splitlines():
-        if " = " in line:
-            key, value = line.split(" = ", 1)
-            definitions[key] = shlex.split(value)
-    definitions["CXX_INCLUDES"] = [
-        token.replace("/tmp/fs_full_source_d932", str(args.source))
-        for token in definitions["CXX_INCLUDES"]
-    ]
-    compiler = "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-g++"
     compiled = args.out / "mrisurf_mri_gradient_probe.o"
-    command = [compiler]
-    for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
-        command += definitions[key]
-    command += ["-I", str(args.source / "include"), "-I", str(args.source / "utils"), "-c", str(patched), "-o", str(compiled)]
-    subprocess.run(command, check=True)
+    compile_command = compile_probe(source=args.source, build=args.build,
+        target="utils/CMakeFiles/utils.dir/mrisurf_mri.cpp.o", patched=patched, output=compiled)
+    if args.basic_terms_only:
+        executable = args.out / "mris_place_surface_gradient_probe"
+        link_command = link_probe(build=args.build, main_object=args.main_object,
+            output=executable, extra_objects=(compiled,))
+        receipt = {"scope": "isolated native optimizer diagnostic build",
+            "basic_terms_only": True, "capture_through": args.capture_through,
+            "compiler_command": compile_command, "link_command": link_command,
+            "source_sha256": hashlib.sha256((args.source / "utils/mrisurf_mri.cpp").read_bytes()).hexdigest(),
+            "patched_sha256": hashlib.sha256(patched.read_bytes()).hexdigest(),
+            "executable_sha256": hashlib.sha256(executable.read_bytes()).hexdigest()}
+        (args.out / "build-receipt.json").write_text(json.dumps(receipt, indent=2)+"\n")
+        print(executable)
+        return
 
     spring_source = (args.source / "utils/mrisurf_compute_dxyz.cpp").read_text()
     repulse_start = spring_source.index("int mrisComputeSurfaceRepulsionTerm(")
@@ -345,11 +350,9 @@ def main() -> None:
     spring_patched = args.out / "mrisurf_compute_dxyz_spring_probe.cpp"
     spring_patched.write_text(spring_source)
     spring_object = args.out / "mrisurf_compute_dxyz_spring_probe.o"
-    spring_command = [compiler]
-    for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
-        spring_command += definitions[key]
-    spring_command += ["-I", str(args.source / "include"), "-I", str(args.source / "utils"), "-c", str(spring_patched), "-o", str(spring_object)]
-    subprocess.run(spring_command, check=True)
+    compile_probe(source=args.source, build=args.build,
+        target="utils/CMakeFiles/utils.dir/mrisurf_compute_dxyz.cpp.o",
+        patched=spring_patched, output=spring_object)
 
     average_source = (args.source / "utils/mrisurf_metricProperties.cpp").read_text()
     begin = average_source.index("int mrisAverageSignedGradients(")
@@ -376,24 +379,12 @@ def main() -> None:
     average_patched = args.out / "mrisurf_metricProperties_average_probe.cpp"
     average_patched.write_text(average_source)
     average_object = args.out / "mrisurf_metricProperties_average_probe.o"
-    average_command = [compiler]
-    for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
-        average_command += definitions[key]
-    average_command += ["-I", str(args.source / "include"), "-I", str(args.source / "utils"), "-c", str(average_patched), "-o", str(average_object)]
-    subprocess.run(average_command, check=True)
-
-    link = shlex.split((args.build / "mris_make_surfaces/CMakeFiles/mris_place_surface.dir/link.txt").read_text())
-    link = [
-        str(args.main_object) if token == "CMakeFiles/mris_place_surface.dir/mris_place_surface.cpp.o"
-        else f"-Wl,-Map,{args.out / 'link.map'}" if token == "-Wl,-Map,ld_map.txt"
-        else token
-        for token in link
-    ]
-    link.insert(link.index("../utils/libutils.a"), str(compiled))
-    link.insert(link.index("../utils/libutils.a"), str(spring_object))
-    link.insert(link.index("../utils/libutils.a"), str(average_object))
-    link[link.index("-o") + 1] = str(args.out / "mris_place_surface_gradient_probe")
-    subprocess.run(link, cwd=args.build / "mris_make_surfaces", check=True)
+    compile_probe(source=args.source, build=args.build,
+        target="utils/CMakeFiles/utils.dir/mrisurf_metricProperties.cpp.o",
+        patched=average_patched, output=average_object)
+    link_probe(build=args.build, main_object=args.main_object,
+        output=args.out / "mris_place_surface_gradient_probe",
+        extra_objects=(compiled, spring_object, average_object))
     print(args.out / "mris_place_surface_gradient_probe")
 
 

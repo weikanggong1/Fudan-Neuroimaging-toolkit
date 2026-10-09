@@ -7,8 +7,9 @@ already built pinned source libraries without changing their objects or source.
 from __future__ import annotations
 
 import argparse
-import shlex
-import subprocess
+import hashlib
+import json
+from native_probe_build import compile_probe, link_probe
 from pathlib import Path
 
 
@@ -102,34 +103,18 @@ def main() -> None:
     patched = args.out / "mris_place_surface_first_iteration.cpp"
     patched.write_text(original)
 
-    target = args.build / "mris_make_surfaces/CMakeFiles/mris_place_surface.dir"
-    definitions = {}
-    for line in (target / "flags.make").read_text().splitlines():
-        if " = " in line:
-            key, value = line.split(" = ", 1)
-            definitions[key] = shlex.split(value)
-    definitions["CXX_INCLUDES"] = [
-        token.replace("/tmp/fs_full_source_d932", str(args.source))
-        for token in definitions["CXX_INCLUDES"]
-    ]
-    compiler = "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-g++"
     compiled = args.out / "mris_place_surface_first_iteration.o"
-    command = [compiler]
-    for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
-        command += definitions[key]
-    command += ["-I", str(args.source / "include"), "-I", str(args.source / "mris_make_surfaces"),
-                "-c", str(patched), "-o", str(compiled)]
-    subprocess.run(command, check=True)
-
-    link = shlex.split((target / "link.txt").read_text())
-    link = [
-        str(compiled) if token == "CMakeFiles/mris_place_surface.dir/mris_place_surface.cpp.o"
-        else f"-Wl,-Map,{args.out / 'link.map'}" if token == "-Wl,-Map,ld_map.txt"
-        else token
-        for token in link
-    ]
-    link[link.index("-o") + 1] = str(args.out / "mris_place_surface_first_iteration")
-    subprocess.run(link, cwd=args.build / "mris_make_surfaces", check=True)
+    compile_command = compile_probe(source=args.source, build=args.build,
+        target="mris_make_surfaces/CMakeFiles/mris_place_surface.dir/mris_place_surface.cpp.o",
+        patched=patched, output=compiled)
+    executable = args.out / "mris_place_surface_first_iteration"
+    link_command = link_probe(build=args.build, main_object=compiled, output=executable)
+    receipt = {"scope": "isolated native diagnostic build", "iterations": args.iterations,
+        "compiler_command": compile_command, "link_command": link_command,
+        "source_sha256": hashlib.sha256((args.source / "mris_make_surfaces/mris_place_surface.cpp").read_bytes()).hexdigest(),
+        "patched_sha256": hashlib.sha256(patched.read_bytes()).hexdigest(),
+        "executable_sha256": hashlib.sha256(executable.read_bytes()).hexdigest()}
+    (args.out / "build-receipt.json").write_text(json.dumps(receipt, indent=2)+"\n")
     print(args.out / "mris_place_surface_first_iteration")
 
 

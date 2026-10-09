@@ -48,6 +48,8 @@ def main():
     parser.add_argument("--label", required=True)
     parser.add_argument("--surface-kind", choices=("white.preaparc", "pial.T1"), default="white.preaparc")
     parser.add_argument("--annotation", type=Path)
+    parser.add_argument("--diagnostic-vertex-index", type=int,
+                        help="显式选择对照局部位置，便于修复前后在同一MRI平面展示；不改变统计")
     args = parser.parse_args()
     if args.output.exists() or args.output.with_suffix(".json").exists():
         raise FileExistsError("new figure and metadata paths required")
@@ -64,15 +66,18 @@ def main():
     reference_voxel = nib.affines.apply_affine(inverse_tkr, reference)
     distances = np.linalg.norm(vertices-reference, axis=1)
     maximum_vertex = int(np.argmax(distances))
+    plane_vertex = maximum_vertex if args.diagnostic_vertex_index is None else args.diagnostic_vertex_index
+    if not 0 <= plane_vertex < len(vertices):
+        raise ValueError("diagnostic vertex index outside surface")
     annotation_name = None
     if args.annotation is not None:
         labels, _, names = fs.read_annot(str(args.annotation))
         if len(labels) != len(vertices):
             raise ValueError("annotation must address this same vertex order")
-        label_index = int(labels[maximum_vertex])
+        label_index = int(labels[plane_vertex])
         annotation_name = (names[label_index].decode("utf8") if 0 <= label_index < len(names)
                            else "unannotated")
-    target = candidate_voxel[maximum_vertex]
+    target = candidate_voxel[plane_vertex] if args.diagnostic_vertex_index is None else reference_voxel[plane_vertex]
     slice_y = int(np.clip(round(float(target[1])), 0, brain.shape[1]-1))
     candidate_lines = plane_lines(candidate_voxel, faces, slice_y)
     reference_lines = plane_lines(reference_voxel, faces, slice_y)
@@ -85,7 +90,8 @@ def main():
         ax.set_xlabel("conformed voxel x")
         ax.set_ylabel("conformed voxel z")
     axes[0].set_title(f"MRI plane y={slice_y}: reference / FNIT")
-    axes[1].set_title("Local boundary near maximum error" +
+    axes[1].set_title(("Local boundary near maximum error" if args.diagnostic_vertex_index is None
+                      else f"Fixed local boundary at vertex {plane_vertex}") +
                       (f"\n{annotation_name}" if annotation_name is not None else ""))
     axes[1].set_xlim(target[0]-18, target[0]+18)
     axes[1].set_ylim(target[2]-18, target[2]+18)
@@ -116,7 +122,9 @@ def main():
         "figure_sha256": sha(args.output), "same_ordered_faces": True,
         "MRI_space": "conformed voxel grid; surface coordinates transformed with inverse vox2ras_tkr",
         "surface_space": "surface RAS in mm", "slice_axis": "voxel y", "slice_index": slice_y,
-        "plane_selection": "nearest coronal voxel plane to maximum same-index error; no algorithm change",
+        "plane_selection": ("nearest coronal voxel plane to maximum same-index error; no algorithm change"
+                            if args.diagnostic_vertex_index is None else "explicit vertex on reference geometry; same comparison plane, all vertices in statistics"),
+        "diagnostic_vertex_index": plane_vertex,
         "maximum_vertex_index": maximum_vertex,
         "surface_kind": args.surface_kind,
         "maximum_error_region_name": annotation_name,
