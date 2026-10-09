@@ -53,6 +53,7 @@ def main():
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--max-steps", type=int, default=400)
     parser.add_argument("--candidate-backend", choices=("tree", "snapshot", "torch_snapshot"), default="tree")
+    parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
     parser.add_argument("--official-binary", type=Path)
     parser.add_argument("--conda-binary", type=Path)
     parser.add_argument("--assets-directory", type=Path)
@@ -101,6 +102,7 @@ def main():
         "input_sha256": {str(path.relative_to(args.subject)): sha256(path) for path in inputs},
         "script_sha256": sha256(__file__), "source_sha256": {},
         "python_order": args.backends, "python_runs": {}, "native_runs": {},
+        "sampling_backend_candidate": args.sampling_backend,
         "gpu_process_memory_sampling": "not_measured; allocator counters are not total process memory",
         "whole_recon_all": "not_run", "overall_metric_equivalence": "not_assessed",
         "admission_requirement": "same ordered geometry and pass/trial decisions for backend replacement",
@@ -161,6 +163,7 @@ def main():
             result = stage.place_white_preaparc(
                 subject_dir=args.subject, hemi=hemi, output=output, max_steps=args.max_steps,
                 output_volume=output_volume, regularization_backend=backend,
+                sampling_backend=args.sampling_backend if backend == "torch" else "cpu",
                 candidate_backend=args.candidate_backend,
                 device=str(device) if backend == "torch" or args.candidate_backend == "torch_snapshot" else None,
                 trace_callback=callback,

@@ -11,7 +11,8 @@ pial 优化器。
 本接口显式选择实验路径，生产 recon-all 默认仍调用独立 Conda 构建组件。
 它对应 `white.preaparc`；带 aparc、`rip-label` 和独立 `rip-surf` 的最终
 `white` 是另一个调用分支，尚未由本接口完成。PyTorch 可处理 signed
-averaging、normal/tangent spring 和两跳二次曲率；边界搜索、自斥力、
+averaging、normal/tangent spring 和两跳二次曲率，强度项可显式复用已实现
+的 `PlacementSampling` PyTorch/Triton GPU 采样；边界搜索、自斥力、
 目标函数、有序 Gauss–Seidel 碰撞接受及相交清理仍在 CPU。它尚不是完整
 纯 GPU 表面放置。
 
@@ -53,6 +54,7 @@ white_report = place_white_preaparc(
     max_steps=400,  # 四轮总迭代保护上限；每轮仍至多100步
     output_volume=Path("/data/diagnostic/sub-07/mrisps.wpa.lh.mgz"),  # 可选预处理MRI
     regularization_backend="torch",  # 显式接入已有 PyTorch 固定网格正则梯度
+    sampling_backend="torch",  # 复用已有 GPU 强度采样，MRI与变换只缓存一次
     candidate_backend="tree",  # 原完整动态候选与有序接受；默认保留
     device="cuda:0",  # 当前进程内明确的目标 GPU
     trace_callback=None,  # 可选每步诊断回调；坐标和记录是独立副本
@@ -84,6 +86,7 @@ white_report = place_white_preaparc(
 | `max_steps` | 400，正整数；达到上限但未完成四轮时抛异常 |
 | `output_volume` | `None`；指定时写 uint8 MGZ，保留 `brain.finalsurfs` 的 shape、affine、体素大小；不能覆盖输入或表面输出 |
 | `regularization_backend` | `"cpu"`；`"torch"` 使用已实现的固定网格正则上下文，并要求明确 `device` |
+| `sampling_backend` | `"cpu"`；`"torch"`/`"triton"` 复用现有 GPU 强度梯度，要求显式 CUDA 编号；每步读取实际 rip、目标、顶点 sigma，MRI/affine 仅缓存一次；目标函数仍沿用 CPU 原算法 |
 | `candidate_backend` | `"tree"`；`"snapshot"` 和 `"torch_snapshot"` 是保守预候选实验，仍保留实时顺序窄相接受；后者要求明确 `device` |
 | `device` | `None`；PyTorch 后端须显式指定如 `"cuda:0"` 或 `"cpu"`，不静默回退 CPU |
 | `trace_callback` | `None`；接收 `(step, pass_index, vertices_copy, record_copy)`；记录包含实际试步、SSE/RMS、接受/拒绝和步长；回调耗时计入墙钟 |
@@ -93,7 +96,7 @@ white_report = place_white_preaparc(
 | 字段 | 结构与单位 |
 |---|---|
 | `output/output_volume` | 实际输出路径；未指定体积时为 `None` |
-| `hemisphere/regularization_backend/candidate_backend/device` | 实际选择 |
+| `hemisphere/regularization_backend/sampling_backend/candidate_backend/device` | 实际选择 |
 | `complete_four_passes` | 成功返回时为 `True`；仅表示四轮计算完成，不表示官方数值验收通过 |
 | `vertices/faces/ripped_vertices/held_vertices/steps` | 网格大小、最终冻结和最近一次试步受阻顶点数、总迭代数 |
 | `pass_ends` | 四个全局迭代终点 |
@@ -119,6 +122,7 @@ python -m fnit.recon_all.place_white_preaparc_python \
   --max-steps 400 \
   --output-volume /data/diagnostic/sub-07/mrisps.wpa.lh.mgz \
   --regularization-backend torch \
+  --sampling-backend torch \
   --candidate-backend tree \
   --device cuda:0
 ```
@@ -158,9 +162,11 @@ RequireAnnot 分支影响区域选择。最终 white 使用的 annotation、labe
 ## 5. 当前精度、耗时与可视化
 
 **完整四轮真实数据 benchmark 尚未完成，不能报告完整 white 提速或官方
-等效。** 本轮本地 CPU 控制契约 7/7 通过，包括四轮平均次数/sigma、目标
+等效。** 本轮本地 CPU 控制契约 9/9 通过，包括四轮平均次数/sigma、目标
 与 SSE 重估、rip 掩膜更新、终止拒绝恢复、100 次每轮上限、未完成不写出、
-保留有序面/几何以及输出体积空间。模拟契约不替代真实影像验收。
+保留有序面/几何以及输出体积空间，GPU sampler 缓存与逐轮新状态绑定。
+GPU sampler 的控制契约使用替身，不是实际 CUDA 数值验收；白质真实数据
+采样回归尚待执行。模拟契约不替代真实影像验收。
 
 此前同输入 `sub-07` 左侧**首步**在 H100 上测得 CPU 68.221 s、PyTorch
 62.148 s，坐标/有序面/接受决定无差异。记录绑定当次 `4939d41c` 加模块
@@ -186,6 +192,7 @@ python validation/recon_all/python_gpu_port/benchmark_placement_full_white.py \
   --code-base-commit ACTUAL_TESTED_COMMIT \
   --hemisphere lh --backends cpu torch --device cuda:0 --threads 4 \
   --max-steps 400 --candidate-backend tree \
+  --sampling-backend cpu \
   --official-binary /data/reference-bin/mris_place_surface \
   --conda-binary /data/conda-bin/mris_place_surface \
   --assets-directory /data/declared-assets --reference-repeat 2
@@ -201,7 +208,7 @@ python validation/recon_all/python_gpu_port/benchmark_placement_full_white.py \
 
 | 日期/版本 | 修改与证据 |
 |---|---|
-| 2026-10-09，本轮实验接线 | 接通 preaparc 四轮、初始/最终清理、轮间冻结与目标重估、完整试步记录、uint8 诊断体积；7 项控制契约通过；真实四轮待测 |
+| 2026-10-09，本轮实验接线 | 接通 preaparc 四轮、初始/最终清理、轮间冻结与目标重估、完整试步记录、uint8 诊断体积；9 项控制契约通过；真实四轮待测 |
 | 2026-10-09，`4939d41c` 及模块 SHA | 首步 PyTorch 正则同输入无新差异；仅首步阶段证据 |
 | 既有白质首轮诊断 | 1–17 步对照接口保留，承担定位参考作用；没有删除仍使用的诊断算子 |
 

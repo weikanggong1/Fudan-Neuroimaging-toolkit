@@ -182,3 +182,34 @@ def test_different_mri_grid_fails_before_optimization(white_inputs):
     with pytest.raises(ValueError, match="MRI grids differ"):
         stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=subject / "diagnostic/white")
     assert not observed["border"]
+
+
+@pytest.mark.parametrize("implementation", ["torch", "triton"])
+def test_gpu_sampler_caches_mri_once_and_receives_fresh_white_pass_state(white_inputs, monkeypatch, implementation):
+    subject, xyz, faces, observed = white_inputs
+    from fnit.recon_all import place_surface_sampling as sampling
+    created, calls = [], []
+
+    class Sampler:
+        def __init__(self, volume, affine, *, device, implementation):
+            created.append((volume.copy(), affine.copy(), device, implementation))
+
+        def gradient(self, current, normals, ripped, values, sigmas, sizes, *, weight, sigma_global):
+            calls.append((sigma_global, values.copy(), ripped.copy(), weight))
+            return np.ones_like(current)
+
+    monkeypatch.setattr(sampling, "PlacementSampling", Sampler)
+    monkeypatch.setattr(stage, "intensity_gradient", lambda *a, **k: pytest.fail("CPU intensity was called"))
+    monkeypatch.setattr(stage, "pial_step_decision", lambda ls, lr, s, r, dt, red:
+                        (dt * .5, red + 1, True, True, red + 1 > 2))
+    report = stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=subject / "diagnostic/white",
+                                       max_steps=4, sampling_backend=implementation, device="cuda:0")
+    assert len(created) == 1
+    assert created[0][2:] == ("cuda:0", implementation)
+    assert created[0][0].dtype == np.uint8
+    assert [row[0] for row in calls] == [2., 1., .5, .25]
+    for index, row in enumerate(calls):
+        np.testing.assert_array_equal(row[1], np.full(3, index + 1))
+        np.testing.assert_array_equal(row[2], observed["rip"][index + 1])
+        assert row[3] == .2
+    assert report["sampling_backend"] == implementation

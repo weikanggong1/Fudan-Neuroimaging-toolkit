@@ -41,7 +41,7 @@ def _place_white_preaparc(
     *, steps: int = 1, diagnostics: str | Path | None = None,
     regularization_backend: str = "cpu", device: str | None = None,
     complete: bool = False, candidate_backend: str = "tree", trace_callback=None,
-    output_volume: str | Path | None = None,
+    output_volume: str | Path | None = None, sampling_backend: str = "cpu",
 ) -> dict:
     """共享现有白质算子；complete 选择四轮而非首轮诊断调度。"""
     started = time.perf_counter()
@@ -52,6 +52,10 @@ def _place_white_preaparc(
         raise ValueError("steps must be from 1 to 17")
     if candidate_backend not in ("tree", "snapshot", "torch_snapshot"):
         raise ValueError("invalid candidate_backend")
+    if sampling_backend not in ("cpu", "torch", "triton"):
+        raise ValueError("sampling_backend must be cpu, torch or triton")
+    if sampling_backend != "cpu" and device is None:
+        raise ValueError("GPU sampling requires an explicit device")
     if candidate_backend == "torch_snapshot" and device is None:
         raise ValueError("torch_snapshot requires an explicit device")
     if hemi not in ("lh", "rh"):
@@ -102,6 +106,10 @@ def _place_white_preaparc(
             ripped=ripped, values=values,
         )
     affine = surface_ras_to_voxel(brain.header, metadata)
+    sampler = None
+    if sampling_backend != "cpu":
+        from .place_surface_sampling import PlacementSampling
+        sampler = PlacementSampling(volume, affine, device=device, implementation=sampling_backend)
     thresholds = np.array([float(stats[f"white_{name}"]) for name in
                            ("inside_hi", "border_hi", "border_low", "outside_low", "outside_hi")])
     border = compute_border_values_first_pass(
@@ -164,10 +172,16 @@ def _place_white_preaparc(
     for step in range(1, steps + 1):
         stage_start = time.perf_counter()
         normals = normal_cache.evaluate(current)
-        intensity = intensity_gradient(
-            volume, current, normals, ripped, values, border[5], affine,
-            brain.header.get_zooms()[:3], weight=0.2, sigma_global=sigma,
-        )
+        if sampler is None:
+            intensity = intensity_gradient(
+                volume, current, normals, ripped, values, border[5], affine,
+                brain.header.get_zooms()[:3], weight=0.2, sigma_global=sigma,
+            )
+        else:
+            intensity = sampler.gradient(
+                current, normals, ripped, values, border[5], brain.header.get_zooms()[:3],
+                weight=0.2, sigma_global=sigma,
+            )
         bucket_offsets, bucket_members = vertex_buckets_current(current, ripped)
         self_repulsion = self_repulsion_gradient(
             current, ripped, bucket_offsets, bucket_members,
@@ -330,6 +344,7 @@ def _place_white_preaparc(
     return {
         "output": str(output), "hemisphere": hemi, "steps": len(records),
         "regularization_backend": regularization_backend, "device": device,
+        "sampling_backend": sampling_backend,
         "complete_four_passes": complete, "candidate_backend": candidate_backend,
         "pass_ends": pass_ends, "passes": pass_records, "initial_cleanup": initial_cleanup,
         "cleanup": cleanup, "output_volume": str(output_volume) if output_volume is not None else None,
@@ -373,7 +388,8 @@ def place_white_preaparc_prefix(
 def place_white_preaparc(
     subject_dir: str | Path, hemi: str, output: str | Path, *, max_steps: int = 400,
     output_volume: str | Path | None = None, regularization_backend: str = "cpu",
-    candidate_backend: str = "tree", device: str | None = None, trace_callback=None,
+    candidate_backend: str = "tree", sampling_backend: str = "cpu",
+    device: str | None = None, trace_callback=None,
 ) -> dict:
     """实验性完整preaparc白质四轮；不替代带aparc的最终white或生产默认。
 
@@ -381,7 +397,9 @@ def place_white_preaparc(
     网格，表面为surface RAS/mm。output必须独立于输入orig；可选output_volume
     写uint8预处理MRI、保留MRI几何。max_steps默认400，总保护上限；每轮
     最多100步，averages4/2/1/0、sigma2/1/.5/.25。默认CPU；Torch正则/候选
-    须明确device。trace_callback接收(step,pass_index,坐标副本,试步诊断)。
+    须明确device。sampling_backend=cpu默认，torch/triton复用既有GPU强度
+    采样，MRI仅缓存一次；每步仍传入当前rip/目标/sigma，不复用过期状态。
+    trace_callback接收(step,pass_index,坐标副本,试步诊断)。
     返回路径、有序网格大小、四轮边界、rip/目标/接受轨迹、完整清理与分项秒。
     输入/参数、未完成四轮、残余相交及CUDA异常传播，不写未完成表面。
     对应mris_place_surface --white --nsmooth 5 --rip-bg-no-annot --rip-bg。
@@ -402,7 +420,7 @@ def place_white_preaparc(
         subject_dir=subject_dir, hemi=hemi, output=output, steps=max_steps,
         complete=True, output_volume=output_volume,
         regularization_backend=regularization_backend, candidate_backend=candidate_backend,
-        device=device, trace_callback=trace_callback,
+        sampling_backend=sampling_backend, device=device, trace_callback=trace_callback,
     )
 
 
@@ -431,6 +449,7 @@ def main() -> None:
     parser.add_argument("--max-steps", type=int, default=400)
     parser.add_argument("--output-volume", type=Path)
     parser.add_argument("--candidate-backend", choices=("tree", "snapshot", "torch_snapshot"), default="tree")
+    parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
     args = parser.parse_args()
     if args.complete:
         if args.diagnostics is not None or args.steps != 1:
@@ -439,11 +458,13 @@ def main() -> None:
             subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,
             max_steps=args.max_steps, output_volume=args.output_volume,
             regularization_backend=args.regularization_backend,
-            candidate_backend=args.candidate_backend, device=args.device,
+            candidate_backend=args.candidate_backend, sampling_backend=args.sampling_backend,
+            device=args.device,
         ), indent=2))
         return
-    if args.output_volume is not None or args.max_steps != 400 or args.candidate_backend != "tree":
-        parser.error("--output-volume, --max-steps and --candidate-backend require --complete")
+    if (args.output_volume is not None or args.max_steps != 400
+            or args.candidate_backend != "tree" or args.sampling_backend != "cpu"):
+        parser.error("--output-volume, --max-steps, --sampling-backend and --candidate-backend require --complete")
     print(json.dumps(place_white_preaparc_prefix(
         subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,
         steps=args.steps, diagnostics=args.diagnostics,
