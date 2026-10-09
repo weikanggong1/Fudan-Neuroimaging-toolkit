@@ -1,0 +1,39 @@
+{
+  "code_version": "937263e04eb1be1a5053952ff2b673213cdf966f+ordered-normals-dirty",
+  "source_sha256_at_failure": "989f5dbd4a255443b56a3c25c9015ff15e13e3e63eddd179c8a018518ab1a88a",
+  "device": "cuda:0",
+  "torch_version": "2.5.1",
+  "torch_cuda_version": "11.8",
+  "gpu0_memory_used_mib": 3702,
+  "gpu0_memory_free_mib": 77305,
+  "gpu0_utilization_pct": 33,
+  "attempts": [
+    {
+      "kind": "unit_regression_fresh_process",
+      "result": "1 failed, 4 passed",
+      "first_cuda_tensor_allocation_bytes": 120,
+      "error": "RuntimeError: CUDA error: out of memory",
+      "line": "self.previous = torch.from_numpy(previous).to(self.device)"
+    },
+    {
+      "kind": "unit_regression_retry_fresh_process",
+      "result": "1 failed, 4 passed",
+      "first_cuda_tensor_allocation_bytes": 120,
+      "error": "RuntimeError: CUDA error: out of memory"
+    },
+    {
+      "kind": "minimum_cudart_probe",
+      "result": "failed before application tensor allocation",
+      "operation": "torch.cuda.mem_get_info()",
+      "error": "RuntimeError: CUDA error: out of memory"
+    }
+  ],
+  "allocator_environment": {
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "PYTORCH_ALLOC_CONF": null,
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": null
+  },
+  "root_cause": "not_determined",
+  "cuda_precision_benchmark": "not_run",
+  "cuda_speed_benchmark": "not_run"
+}

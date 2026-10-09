@@ -1,0 +1,959 @@
+{
+  "code_version": "937263e04eb1be1a5053952ff2b673213cdf966f+ordered-normals-device-frozen",
+  "source_sha256": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+  "hostname": "gpucw1",
+  "platform": "Linux-3.10.0-1160.119.1.el7.x86_64-x86_64-with-glibc2.17",
+  "torch_version": "2.5.1",
+  "numba_version": "0.61.2",
+  "device": "cpu",
+  "device_name": "x86_64",
+  "threads": 4,
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127
+  ],
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "dtype": "float32",
+  "autocast": false,
+  "max_component_error_threshold": 5e-07,
+  "official_program_comparison": "not_run_no_independent_cli",
+  "whole_pipeline_comparison": "not_run",
+  "nvidia_smi": "0, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 2678 MiB, 63 %\n1, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 813 MiB, 0 %\n",
+  "process_memory_sampling": "not_measured_kernel_only_pytorch_peaks",
+  "meshes": [
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.orig",
+      "input_sha256": "e797888a4b725cbf220144dd645d0d308e94bef261a1e68ac0a84f9cd200803c",
+      "vertices": 130346,
+      "faces": 260688,
+      "max_degree": 9,
+      "read_seconds": 0.013590308371931314,
+      "cpu_setup_seconds": 0.10277175204828382,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.5197327481582761
+        ],
+        "median_seconds": 0.5197327481582761
+      },
+      "torch_setup_seconds": 0.15036681294441223,
+      "cpu_hot": {
+        "seconds": [
+          0.1869819089770317,
+          0.1878082132898271,
+          0.18447853811085224,
+          0.18536509573459625,
+          0.18706222996115685,
+          0.18682088935747743
+        ],
+        "median_seconds": 0.18690139916725457
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.03165959706529975,
+          0.031288701575249434,
+          0.030887363012880087
+        ],
+        "median_seconds": 0.031288701575249434
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.032621482852846384,
+          0.03139189025387168,
+          0.042999076191335917,
+          0.04890400404110551,
+          0.035490692127496004,
+          0.03165961988270283
+        ],
+        "median_seconds": 0.034056087490171194
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 9096,
+        "max_abs": 1.1920928955078125e-07,
+        "p99_abs": 2.9802322387695312e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.white.preaparc",
+      "input_sha256": "8a8bcd0f599d01622a6d5b5baa2a98b79f59f442380b623879683e77dbfc42db",
+      "vertices": 130346,
+      "faces": 260688,
+      "max_degree": 9,
+      "read_seconds": 0.006195863708853722,
+      "cpu_setup_seconds": 0.08841611398383975,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.19074594927951694
+        ],
+        "median_seconds": 0.19074594927951694
+      },
+      "torch_setup_seconds": 0.1429204549640417,
+      "cpu_hot": {
+        "seconds": [
+          0.15331470919772983,
+          0.15716504724696279,
+          0.1538917450234294,
+          0.15098193706944585,
+          0.15089230379089713,
+          0.15158902062103152
+        ],
+        "median_seconds": 0.15245186490938067
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.03091581305488944,
+          0.03206803975626826,
+          0.03065179195255041
+        ],
+        "median_seconds": 0.03091581305488944
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.031731161288917065,
+          0.031030723825097084,
+          0.04634540108963847,
+          0.03454320831224322,
+          0.030953802168369293,
+          0.030639573000371456
+        ],
+        "median_seconds": 0.031380942557007074
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 9137,
+        "max_abs": 1.1920928955078125e-07,
+        "p99_abs": 5.960464477539063e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/lh.sphere",
+      "input_sha256": "c0025fc7a3b907b6a6f6b3dca3fa32c9e7626d77ee9f535625fced8e54c05f30",
+      "vertices": 130346,
+      "faces": 260688,
+      "max_degree": 9,
+      "read_seconds": 0.003162228036671877,
+      "cpu_setup_seconds": 0.08614641008898616,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.16560546914115548
+        ],
+        "median_seconds": 0.16560546914115548
+      },
+      "torch_setup_seconds": 0.14505760883912444,
+      "cpu_hot": {
+        "seconds": [
+          0.13825008179992437,
+          0.13741008704528213,
+          0.14044879004359245,
+          0.13870642706751823,
+          0.13754227478057146,
+          0.17179940221831203
+        ],
+        "median_seconds": 0.1384782544337213
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.03005467914044857,
+          0.030073286965489388,
+          0.032558294013142586
+        ],
+        "median_seconds": 0.030073286965489388
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.029736858792603016,
+          0.029816273134201765,
+          0.02938516577705741,
+          0.03728796588256955,
+          0.030309864319860935,
+          0.02945153834298253
+        ],
+        "median_seconds": 0.02977656596340239
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 5486,
+        "max_abs": 1.1920928955078125e-07,
+        "p99_abs": 1.4901161193847656e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.orig",
+      "input_sha256": "319db7f90d53e326c3e07c7a9bec759e3c8cce28c7101ed14eb03ecd98107a00",
+      "vertices": 132837,
+      "faces": 265670,
+      "max_degree": 11,
+      "read_seconds": 0.004146254155784845,
+      "cpu_setup_seconds": 0.0857042521238327,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.14025638392195106
+        ],
+        "median_seconds": 0.14025638392195106
+      },
+      "torch_setup_seconds": 0.14345182524994016,
+      "cpu_hot": {
+        "seconds": [
+          0.14368848176673055,
+          0.14200079580768943,
+          0.1395897138863802,
+          0.14050614181905985,
+          0.1421441873535514,
+          0.1479886551387608
+        ],
+        "median_seconds": 0.1420724915806204
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.03629938093945384,
+          0.036529241129755974,
+          0.036496812012046576
+        ],
+        "median_seconds": 0.036496812012046576
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.03686584299430251,
+          0.03699540812522173,
+          0.03723261272534728,
+          0.03798257280141115,
+          0.0378169771283865,
+          0.0363818327896297
+        ],
+        "median_seconds": 0.037114010425284505
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 9237,
+        "max_abs": 1.7881393432617188e-07,
+        "p99_abs": 5.960464477539063e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.white.preaparc",
+      "input_sha256": "e22016368d6d709fc185cac34b9794ff0e4013fdb7816a1ba090f650d5002159",
+      "vertices": 132837,
+      "faces": 265670,
+      "max_degree": 11,
+      "read_seconds": 0.003351055085659027,
+      "cpu_setup_seconds": 0.08492133300751448,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.1420919499360025
+        ],
+        "median_seconds": 0.1420919499360025
+      },
+      "torch_setup_seconds": 0.13572309026494622,
+      "cpu_hot": {
+        "seconds": [
+          0.14114654995501041,
+          0.14300379110500216,
+          0.14163323305547237,
+          0.13933711405843496,
+          0.13802293175831437,
+          0.1394799412228167
+        ],
+        "median_seconds": 0.14031324558891356
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.03620605496689677,
+          0.03652386134490371,
+          0.03598991688340902
+        ],
+        "median_seconds": 0.03620605496689677
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.03721549594774842,
+          0.03636837471276522,
+          0.04084266209974885,
+          0.037569134030491114,
+          0.03645114507526159,
+          0.03611584100872278
+        ],
+        "median_seconds": 0.03683332051150501
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 9517,
+        "max_abs": 1.7881393432617188e-07,
+        "p99_abs": 5.960464477539063e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/subject/surf/rh.sphere",
+      "input_sha256": "3611af18b90b156b57a6b54569eacdb9ac52446265d299eb204b399def049236",
+      "vertices": 132837,
+      "faces": 265670,
+      "max_degree": 11,
+      "read_seconds": 0.0035331868566572666,
+      "cpu_setup_seconds": 0.09137554466724396,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.14097503386437893
+        ],
+        "median_seconds": 0.14097503386437893
+      },
+      "torch_setup_seconds": 0.13548376224935055,
+      "cpu_hot": {
+        "seconds": [
+          0.14177421294152737,
+          0.14175029331818223,
+          0.1388827869668603,
+          0.13873168593272567,
+          0.1383279599249363,
+          0.13971152575686574
+        ],
+        "median_seconds": 0.13929715636186302
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.036393818911165,
+          0.040346141904592514,
+          0.04039684822782874
+        ],
+        "median_seconds": 0.040346141904592514
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.037140836007893085,
+          0.03636056696996093,
+          0.03627935191616416,
+          0.03734330227598548,
+          0.036662045400589705,
+          0.03658915404230356
+        ],
+        "median_seconds": 0.03662559972144663
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 5473,
+        "max_abs": 1.7881393432617188e-07,
+        "p99_abs": 1.4901161193847656e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.orig",
+      "input_sha256": "8ce7a9a61eb20cd68c930ba1242f441e82d6edffa99f3ab1373f9cd19b333d22",
+      "vertices": 114342,
+      "faces": 228680,
+      "max_degree": 11,
+      "read_seconds": 0.002530342899262905,
+      "cpu_setup_seconds": 0.07173754507675767,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.12129507027566433
+        ],
+        "median_seconds": 0.12129507027566433
+      },
+      "torch_setup_seconds": 0.1106823910959065,
+      "cpu_hot": {
+        "seconds": [
+          0.12174016982316971,
+          0.12180107878521085,
+          0.11993438610807061,
+          0.12116673914715648,
+          0.1203615851700306,
+          0.12037235358729959
+        ],
+        "median_seconds": 0.12076954636722803
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.03194226510822773,
+          0.032040508929640055,
+          0.032006559893488884
+        ],
+        "median_seconds": 0.032006559893488884
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.03223747294396162,
+          0.031895821914076805,
+          0.03192522702738643,
+          0.037510663736611605,
+          0.03264089534059167,
+          0.03197409585118294
+        ],
+        "median_seconds": 0.03210578439757228
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 8263,
+        "max_abs": 1.1920928955078125e-07,
+        "p99_abs": 4.470348358154297e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.white.preaparc",
+      "input_sha256": "4e32bfe0136fddbf61a47977b5087db28829c1822f094b1008ae061162ca145a",
+      "vertices": 114342,
+      "faces": 228680,
+      "max_degree": 11,
+      "read_seconds": 0.0027003679424524307,
+      "cpu_setup_seconds": 0.0768735152669251,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.12165000988170505
+        ],
+        "median_seconds": 0.12165000988170505
+      },
+      "torch_setup_seconds": 0.1083577130921185,
+      "cpu_hot": {
+        "seconds": [
+          0.12132651591673493,
+          0.12279732199385762,
+          0.12038666103035212,
+          0.1191804208792746,
+          0.11787510011345148,
+          0.11950546503067017
+        ],
+        "median_seconds": 0.11994606303051114
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.03197061596438289,
+          0.03218761784955859,
+          0.03226937772706151
+        ],
+        "median_seconds": 0.03218761784955859
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.032958701718598604,
+          0.03386144898831844,
+          0.03265090798959136,
+          0.033152131363749504,
+          0.03240723488852382,
+          0.03260737983509898
+        ],
+        "median_seconds": 0.03280480485409498
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 8064,
+        "max_abs": 1.7881393432617188e-07,
+        "p99_abs": 2.9802322387695312e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/lh.sphere",
+      "input_sha256": "9b91a454654a66e75e8c74420e1e82fe38a211da66fdf3fded6fcdca708e625e",
+      "vertices": 114342,
+      "faces": 228680,
+      "max_degree": 11,
+      "read_seconds": 0.004312423057854176,
+      "cpu_setup_seconds": 0.0712867989204824,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.12007306888699532
+        ],
+        "median_seconds": 0.12007306888699532
+      },
+      "torch_setup_seconds": 0.12150239571928978,
+      "cpu_hot": {
+        "seconds": [
+          0.118953722063452,
+          0.11776774702593684,
+          0.1172615741379559,
+          0.11746172793209553,
+          0.11751451529562473,
+          0.12275490909814835
+        ],
+        "median_seconds": 0.11764113116078079
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.031895328778773546,
+          0.031987672206014395,
+          0.03165918728336692
+        ],
+        "median_seconds": 0.031895328778773546
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.031781872268766165,
+          0.0317503260448575,
+          0.03190212370827794,
+          0.03245731210336089,
+          0.033782461658120155,
+          0.03346466599032283
+        ],
+        "median_seconds": 0.032179717905819416
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 4669,
+        "max_abs": 1.7881393432617188e-07,
+        "p99_abs": 1.4901161193847656e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.orig",
+      "input_sha256": "9053c5430713dcd457ff1ac6fbfb12bc80897d2b8b19048b1f8dd740ae571c1f",
+      "vertices": 114824,
+      "faces": 229644,
+      "max_degree": 9,
+      "read_seconds": 0.00388403981924057,
+      "cpu_setup_seconds": 0.07308425381779671,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.1226476700976491
+        ],
+        "median_seconds": 0.1226476700976491
+      },
+      "torch_setup_seconds": 0.10586225893348455,
+      "cpu_hot": {
+        "seconds": [
+          0.1271008551120758,
+          0.12444667983800173,
+          0.1221890551969409,
+          0.12199693080037832,
+          0.12211682787165046,
+          0.12213325873017311
+        ],
+        "median_seconds": 0.122161156963557
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.026358666829764843,
+          0.026199933141469955,
+          0.026137166190892458
+        ],
+        "median_seconds": 0.026199933141469955
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.027239335235208273,
+          0.026266241911798716,
+          0.026876550633460283,
+          0.02711194008588791,
+          0.02663878770545125,
+          0.02631444577127695
+        ],
+        "median_seconds": 0.026757669169455767
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 7948,
+        "max_abs": 1.1920928955078125e-07,
+        "p99_abs": 2.9802322387695312e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.white.preaparc",
+      "input_sha256": "4309fefd36ceb6255d93e8243338cbb2dceb52b329c17b7c15239263597436cf",
+      "vertices": 114824,
+      "faces": 229644,
+      "max_degree": 9,
+      "read_seconds": 0.0025364262983202934,
+      "cpu_setup_seconds": 0.07152564777061343,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.12312951404601336
+        ],
+        "median_seconds": 0.12312951404601336
+      },
+      "torch_setup_seconds": 0.1065203920006752,
+      "cpu_hot": {
+        "seconds": [
+          0.12291273707523942,
+          0.12188966618850827,
+          0.12012729281559587,
+          0.12082386296242476,
+          0.1207307931035757,
+          0.12060594698414207
+        ],
+        "median_seconds": 0.12077732803300023
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.02633372787386179,
+          0.02628750540316105,
+          0.026182500179857016
+        ],
+        "median_seconds": 0.02628750540316105
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.02636998286470771,
+          0.05973888607695699,
+          0.026662774849683046,
+          0.02691446803510189,
+          0.02670400496572256,
+          0.02620355086401105
+        ],
+        "median_seconds": 0.026683389907702804
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 7885,
+        "max_abs": 1.1920928955078125e-07,
+        "p99_abs": 2.9802322387695312e-08,
+        "finite": true,
+        "passed": true
+      }
+    },
+    {
+      "input": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-07/attempt_01/subject/surf/rh.sphere",
+      "input_sha256": "360e4ae0df991785e4850eecbfc472810917c95215d16d43c96282556eb2f53b",
+      "vertices": 114824,
+      "faces": 229644,
+      "max_degree": 9,
+      "read_seconds": 0.002351098693907261,
+      "cpu_setup_seconds": 0.07211500126868486,
+      "cpu_first_call_including_jit": {
+        "seconds": [
+          0.12240630201995373
+        ],
+        "median_seconds": 0.12240630201995373
+      },
+      "torch_setup_seconds": 0.10621431469917297,
+      "cpu_hot": {
+        "seconds": [
+          0.12345251301303506,
+          0.12170581799000502,
+          0.12276530684903264,
+          0.12153053283691406,
+          0.1216832441277802,
+          0.12143329298123717
+        ],
+        "median_seconds": 0.12169453105889261
+      },
+      "torch_resident_kernel": {
+        "seconds": [
+          0.02624401217326522,
+          0.026371507439762354,
+          0.025993729941546917
+        ],
+        "median_seconds": 0.02624401217326522
+      },
+      "torch_numpy_api_including_transfers": {
+        "seconds": [
+          0.02629623096436262,
+          0.026419907808303833,
+          0.026705678086727858,
+          0.028919160831719637,
+          0.026482490357011557,
+          0.02630093600600958
+        ],
+        "median_seconds": 0.026451199082657695
+      },
+      "pair_sequence": [
+        "numba",
+        "torch",
+        "torch",
+        "numba",
+        "torch",
+        "numba",
+        "numba",
+        "torch",
+        "numba",
+        "torch",
+        "torch",
+        "numba"
+      ],
+      "precision": {
+        "different_components": 4947,
+        "max_abs": 1.7881393432617188e-07,
+        "p99_abs": 1.4901161193847656e-08,
+        "finite": true,
+        "passed": true
+      }
+    }
+  ],
+  "peak_allocated_bytes": null,
+  "peak_reserved_bytes": null,
+  "all_meshes_passed": true
+}

@@ -6,6 +6,14 @@ import numpy as np
 from numba import njit, prange
 
 
+def _torch_vertex_normals(vertices: np.ndarray, triangles: np.ndarray, *,
+                          device: str = "cuda") -> np.ndarray:
+    """显式 Torch 有序法向兼容入口；缓存接口见 TorchFaceNormalTopology。"""
+    context = TorchFaceNormalTopology(triangles=triangles,
+                                      nvertices=len(vertices), device=device)
+    return context.evaluate(vertices=vertices)
+
+
 @njit(cache=True)
 def _unit(vector: np.ndarray) -> None:
     length = np.float32(np.sqrt(np.float32(
@@ -173,3 +181,84 @@ class CoordinateNormalCache:
         """丢弃坐标引用和法向，供调用方在原地更新坐标后显式失效。"""
         self._vertices = None
         self._normals = None
+
+
+class TorchFaceNormalTopology(FaceNormalTopology):
+    """固定有序面的 PyTorch 法向缓存，逐 CSR 位置并行顶点。
+
+    triangles 为整数 (F,3)，nvertices 为 N；device 默认 cuda，可显式 cpu
+    诊断。缓存每顶点有序关联面的前/后角点索引和有效掩膜，不缓存坐标或法向。
+    evaluate_tensor 接收 float32 (N,3) torch.Tensor（surface RAS/mm），返回
+    同设备 float32 (N,3) 单位法向；evaluate 兼容 NumPy 边界并包含 H2D/D2H。
+    每顶点面贡献按原 CSR 顺序相加；不使用原子归约、不使用稠密 N×N 邻接，
+    不改变 TF32、autocast 或默认 dtype。零长度向量保持零，极小非零向量不
+    钳制。坐标或拓扑改变时按原缓存规则失效；CUDA 不可用直接报错。
+    这是 mris_place_surface/mris_sphere 的内部几何步骤，没有独立官方 CLI。
+    """
+
+    def __init__(self, triangles: np.ndarray, nvertices: int, *, device: str = "cuda"):
+        import torch
+        super().__init__(triangles=triangles, nvertices=nvertices)
+        self.device = torch.device(device)
+        if self.device.type not in ("cpu", "cuda"):
+            raise ValueError("device must be cpu or cuda")
+        degree = np.diff(self.offsets)
+        self.max_degree = int(degree.max(initial=0))
+        shape = (self.max_degree, nvertices)
+        previous = np.zeros(shape, dtype=np.int64)
+        following = np.zeros(shape, dtype=np.int64)
+        active = np.zeros(shape, dtype=np.bool_)
+        vertex_ids = np.repeat(np.arange(nvertices, dtype=np.int64), degree)
+        rank = np.arange(len(self.face_ids), dtype=np.int64) - np.repeat(self.offsets[:-1], degree)
+        previous[rank, vertex_ids] = self.faces[self.face_ids, (self.corners + 2) % 3]
+        following[rank, vertex_ids] = self.faces[self.face_ids, (self.corners + 1) % 3]
+        active[rank, vertex_ids] = True
+        self.previous = torch.from_numpy(previous).to(self.device)
+        # Freeze an unindexed "cuda" request to the device actually allocated;
+        # later changes of the process current device must not move coordinates.
+        self.device = self.previous.device
+        self.following = torch.from_numpy(following).to(self.device)
+        self.active = torch.from_numpy(active).to(self.device)
+
+    @staticmethod
+    def _unit_tensor(vector):
+        import torch
+        # Keep the source float32 expression tree; a nonzero tiny vector is
+        # normalized without an epsilon.  Guard only the exact zero divisor.
+        length = torch.sqrt((vector[:, 0] * vector[:, 0]
+                             + vector[:, 1] * vector[:, 1])
+                            + vector[:, 2] * vector[:, 2])
+        denominator = torch.where(length > 0, length, torch.ones_like(length))
+        return vector / denominator[:, None]
+
+    def evaluate_tensor(self, vertices):
+        """float32(N,3)坐标→同设备单位法向；不读写文件，不改变输入。"""
+        import torch
+        if not isinstance(vertices, torch.Tensor):
+            raise TypeError("vertices must be a torch.Tensor")
+        if vertices.shape != (self.nvertices, 3) or vertices.dtype != torch.float32:
+            raise ValueError("vertices must be float32 with cached shape (N,3)")
+        if vertices.device != self.previous.device:
+            raise ValueError("vertices device differs from cached topology")
+        with torch.no_grad():
+            normal = torch.zeros_like(vertices)
+            for entry in range(self.max_degree):
+                v0 = self._unit_tensor(vertices - vertices[self.previous[entry]])
+                v1 = self._unit_tensor(vertices[self.following[entry]] - vertices)
+                face_normal = torch.stack((
+                    -v1[:, 1] * v0[:, 2] + v0[:, 1] * v1[:, 2],
+                    v1[:, 0] * v0[:, 2] - v0[:, 0] * v1[:, 2],
+                    -v1[:, 0] * v0[:, 1] + v0[:, 0] * v1[:, 1],
+                ), dim=1)
+                face_normal = self._unit_tensor(face_normal)
+                normal = normal + torch.where(self.active[entry, :, None],
+                                               face_normal, torch.zeros_like(face_normal))
+            return self._unit_tensor(normal)
+
+    def evaluate(self, vertices: np.ndarray) -> np.ndarray:
+        """NumPy兼容调用，包含坐标上传、法向计算及结果下载。"""
+        import torch
+        xyz = np.asarray(vertices, dtype=np.float32)
+        if xyz.shape != (self.nvertices, 3):
+            raise ValueError("coordinates differ from cached topology shape")
+        return self.evaluate_tensor(torch.as_tensor(xyz, device=self.device)).cpu().numpy()

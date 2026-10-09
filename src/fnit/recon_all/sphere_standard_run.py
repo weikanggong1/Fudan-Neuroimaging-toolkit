@@ -13,7 +13,7 @@ import numpy as np
 import torch
 
 from .sphere_python import project_radially
-from .place_surface_normals import FaceNormalTopology
+from .place_surface_normals import FaceNormalTopology, TorchFaceNormalTopology
 from .mris_register_average_numba import RegistrationGradientAverager
 from .sphere_standard_average import average_standard_gradient
 from .sphere_standard_finish import finish_standard_sphere
@@ -30,11 +30,14 @@ from .sphere_standard_unfold import _face_geometry, first_epoch_gradient
 
 def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
                         output: str | Path, *, finish_device: str = "cpu",
-                        averaging_device: str = "cpu") -> dict:
+                        averaging_device: str = "cpu",
+                        normals_device: str | None = None) -> dict:
     """Read same-face-order inflated/smoothwm meshes and write an ordered sphere.
 
     averaging_device默认cpu；显式CUDA时复用RegistrationGradientAverager，
     只迁移有序Jacobi平均，包含必要H2D/D2H，不改TF32或精度。主体SSE仍CPU。
+    normals_device=None默认原有Numba；显式cpu/cuda启用Torch有序法向候选，
+    缓存角点索引，包含Numpy边界H2D/D2H。只替换法向，完整收敛及清理不变。
     缓存本次有序面的整数CSR及原smoothwm面积；坐标、法向每次重算。
     Return paths, device, negative-area fraction, setup/finish/total seconds,
     ordered update dicts (index, stage, weight, averages, dt, seconds), and
@@ -65,7 +68,9 @@ def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
     original_total = np.float32(np.sum(original_area, dtype=np.float64))
     setup_metric_seconds = time.perf_counter() - t0
     topology_tick = time.perf_counter()
-    normal_topology = FaceNormalTopology(faces, len(xyz))
+    normal_topology = (FaceNormalTopology(faces, len(xyz)) if normals_device is None
+                       else TorchFaceNormalTopology(triangles=faces, nvertices=len(xyz),
+                                                    device=normals_device))
     original_metric = (original_area, original_total)
     average = None
     if torch.device(averaging_device).type == "cuda":
@@ -137,6 +142,8 @@ def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
     write_standard_sphere_surface(output, finished, faces, inflated)
     return {"inflated": str(inflated), "smoothwm": str(smoothwm),
             "output": str(output), "finish_device": finish_device, "averaging_device": averaging_device,
+            "normals_device": normals_device,
+            "normals_backend": "numba" if normals_device is None else "torch-ordered",
             "initial_negative_area_pct": negative_pct,
             "projection_seconds": setup_projection_seconds,
             "metric_seconds_including_jit": setup_metric_seconds,
@@ -153,11 +160,14 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("output", type=Path)
     parser.add_argument("--finish-device", default="cpu")
     parser.add_argument("--averaging-device", default="cpu")
+    parser.add_argument("--normals-device", default=None,
+                        help="explicit experimental ordered Torch normals backend")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args(argv)
     report = run_standard_sphere(
         args.inflated, args.smoothwm, args.output,
-        finish_device=args.finish_device, averaging_device=args.averaging_device)
+        finish_device=args.finish_device, averaging_device=args.averaging_device,
+        normals_device=args.normals_device)
     content = json.dumps(report, indent=2) + "\n"
     if args.report:
         args.report.write_text(content)
