@@ -713,9 +713,33 @@ def _dilate_strand_segments(
 def _thicken_strands_core(
     image: np.ndarray, source: np.ndarray, closed: np.ndarray,
     segments: list[list[tuple[int, int, int]]], *, count: int = 20,
-    wm_hi: int = 125, planar_holes: bool = False
+    wm_hi: int = 125, planar_holes: bool = False,
+    planar_backend: str = "python", planar_device: str = "cpu",
+    planar_batch_size: int = 256,
 ) -> tuple[np.ndarray, list[np.ndarray]]:
-    """Thicken the twenty largest dilated components along the MRI y axis."""
+    """按原顺序沿MRI y轴加厚最多count个最大组件，并可作平面补洞。
+
+    image/source/closed为同XYZ三维uint8强度、当前WM、闭运算WM；
+    segments为有序组件列表，每项为XYZ体素三元组。count默认20，
+    同大小组件按原索引排列；wm_hi默认125灰度。planar_holes默认False，
+    True才执行22平面规则。planar_backend默认python，cached显式复用
+    Torch静态几何与Numba有序反馈；planar_device默认cpu，仅控制静态
+    几何；planar_batch_size默认256正整数。返回新uint8 WM和按选择顺序
+    的uint8组件图列表。输入不修改，不重采样，更新仍为CPU顺序。
+    无效后端/批量抛ValueError，底层几何或CUDA错误传播；无隐式回退。
+    属于mri_segment内部步骤，没有独立原软件CLI。
+    """
+    if planar_backend not in {"python", "cached"}:
+        raise ValueError("planar_backend must be python or cached")
+    if not isinstance(planar_batch_size, int) or planar_batch_size < 1:
+        raise ValueError("planar_batch_size must be positive")
+    planar_fill = _fill_planar_holes
+    if planar_backend == "cached":
+        from .mri_segment_planar_torch import fill_planar_holes_cached
+
+        def planar_fill(result, strand):
+            return fill_planar_holes_cached(result=result, strand=strand,
+                device=planar_device, batch_size=planar_batch_size)
     result = source.copy()
     selected = sorted(range(len(segments)), key=lambda i: (-len(segments[i]), i))[:count]
     segment_images = []
@@ -762,7 +786,7 @@ def _thicken_strands_core(
                     break
         _fill_strand_neighborhood(image, result, strand, wm_hi=wm_hi)
         if planar_holes:
-            _fill_planar_holes(result, strand)
+            planar_fill(result, strand)
         segment_images.append(strand)
     return result, segment_images
 
@@ -867,12 +891,16 @@ def _fill_planar_holes(result: np.ndarray, strand: np.ndarray) -> None:
 
 def segment_white_matter(image: torch.Tensor, *, device: str | torch.device | None = None,
                          histogram_backend: str = "cpu",
-                         histogram_batch_size: int = 2048) -> torch.Tensor:
+                         histogram_batch_size: int = 2048,
+                         planar_backend: str = "python",
+                         planar_batch_size: int = 256) -> torch.Tensor:
     """执行固定单T1的 mri_segment -wsizemm 13 -mprage 分割。
 
     image为非空三维uint8、x/y/z体素网格。device默认None保留输入设备；
     histogram_backend默认cpu使用原NumPy参考，torch复用分块PyTorch，
     histogram_batch_size默认2048正整数，只控制torch临时内存。
+    planar_backend默认python；cached复用静态平面索引缓存与Numba顺序
+    扫描，几何位于目标device；planar_batch_size默认256正整数。
     返回新uint8 WM，shape不变，device为明确目标。不改输入、不重采样。
     strand及有序填充保持CPU更新顺序；不是完整GPU转写。输入/backend/
     batch错误抛ValueError；CUDA错误传播，不自动回退。TF32策略由调用者
@@ -884,6 +912,10 @@ def segment_white_matter(image: torch.Tensor, *, device: str | torch.device | No
         raise ValueError("histogram_backend must be cpu or torch")
     if not isinstance(histogram_batch_size, int) or histogram_batch_size < 1:
         raise ValueError("histogram_batch_size must be positive")
+    if planar_backend not in {"python", "cached"}:
+        raise ValueError("planar_backend must be python or cached")
+    if not isinstance(planar_batch_size, int) or planar_batch_size < 1:
+        raise ValueError("planar_batch_size must be positive")
     histogram = histogram_segmentation
     histogram_options = {}
     if histogram_backend == "torch":
@@ -915,7 +947,8 @@ def segment_white_matter(image: torch.Tensor, *, device: str | torch.device | No
     segments = _strand_segments(thin)
     _dilate_strand_segments(segments, source)
     thickened, _ = _thicken_strands_core(target.cpu().numpy(), source, closed,
-                                         segments, planar_holes=True)
+        segments, planar_holes=True, planar_backend=planar_backend,
+        planar_device=str(target.device), planar_batch_size=planar_batch_size)
     masked = remove_bright_nonwhite(target, torch.from_numpy(thickened).to(target.device))
     return filter_diagonal_morphology(masked).to(target.device)
 
@@ -923,12 +956,16 @@ def segment_white_matter(image: torch.Tensor, *, device: str | torch.device | No
 def segment_white_matter_mgz(source_path: str | Path, output_path: str | Path, *,
                              device: str | torch.device = "cpu",
                              histogram_backend: str = "cpu",
-                             histogram_batch_size: int = 2048) -> dict:
+                             histogram_batch_size: int = 2048,
+                             planar_backend: str = "python",
+                             planar_batch_size: int = 256) -> dict:
     """nibabel读取3D uint8 MGZ，执行固定WM配方，保留MGH头与affine。
 
     source_path为强度文件；output_path为新WM文件，uint8、原网格和mm
     affine，不作scanner/surface RAS变换。device默认cpu；histogram_backend
     默认cpu、torch为显式分块候选；histogram_batch_size默认2048。
+    planar_backend默认python，cached显式复用静态几何缓存与有序Numba；
+    planar_batch_size默认256，仅控制缓存几何批量，目标为相同device。
     返回implementation/device/backend/batch/ordered_cpu_rules/output字典。
     标签语义及有序CPU扫描不变；读取/写出/CUDA异常传播，错误dtype或网格
     抛ValueError。没有官方文件读取或原生程序调用；无生产额外同步。
@@ -942,10 +979,12 @@ def segment_white_matter_mgz(source_path: str | Path, output_path: str | Path, *
     segmented = segment_white_matter(
         torch.from_numpy(source.copy()), device=device,
         histogram_backend=histogram_backend,
-        histogram_batch_size=histogram_batch_size).cpu().numpy()
+        histogram_batch_size=histogram_batch_size,
+        planar_backend=planar_backend, planar_batch_size=planar_batch_size).cpu().numpy()
     nib.save(nib.MGHImage(segmented, source_image.affine,
                           header=source_image.header.copy()), str(output_path))
     return {"implementation": "FNIT PyTorch hybrid", "device": str(device),
             "histogram_backend": histogram_backend,
             "histogram_batch_size": histogram_batch_size,
+            "planar_backend": planar_backend, "planar_batch_size": planar_batch_size,
             "ordered_cpu_rules": True, "output": str(output_path)}

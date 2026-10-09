@@ -120,7 +120,7 @@ mri_fill -a ponscc.cut.log -xform talairach.lta \
 OpenNeuro ds000114 sub-07/sub-06 的已授权 CC0 冻结自产前段。
 输入原始公开 T1 的 SHA、冻结阶段输入 SHA、执行模块 SHA 见报告。
 这里比较当前原 Python 与优化路径，并核对既有 FNIT 冻结 filled。
-新的同环境原生参考、GPU 完整 API 及原始 T1 整例结果另行记录。
+新的同环境原生参考和原始 T1 整例结果另行记录；A100 GPU初始化完整API配对见本节后表。
 
 | 完整文件 API / 配对各两次 | 旧 Python 中位秒 | Torch CPU 边界＋Numba 中位秒 | 相对旧实现 | 不同体素 / 标签 Dice |
 | --- | ---: | ---: | ---: | --- |
@@ -137,7 +137,7 @@ sub-07 旧实现两次为 33.20/40.41 秒，共享 CPU 负载波动保留，不�
 33.9457→25.8181 秒、sub-06 39.2865→29.9735 秒，也均逐体素一致。
 它证明边界扫描可独立替换；完整更大收益来自编译实际主要瓶颈。
 
-GPU 完整 API 显存、A100 新同主机原生比较及整例提速尚未完成。
+A100完整GPU初始化API及采样显存已完成，见下表；新同主机原生比较及整例提速尚未完成。
 本轮报告分别保留严格复现、优化退化和整体等效；整体等效仍为
 `not_assessed`，不以局部结果替代整例验收。
 
@@ -151,6 +151,21 @@ JSON。`benchmark/plot_fill_boundary_torch.py` 的 `--source` 为强度，
 uint8、网格、标签及范围，无坐标变换。
 
 ![完整filled同输入标签与差异](../../validation/recon_all/optimizations/20261009_fill_boundary_torch/sub07_filled_overlay_v3.png)
+
+### A100完整GPU初始化/有序Numba文件API回归
+
+相同公开冻结两例、Xeon Platinum 8369B、四线程及相同CPU亲和性，旧Python→Torch边界+Numba→Torch+Numba→旧Python的完整文件API配对已完成：
+
+| 例 | 旧Python中位秒 | GPU初始化+有序Numba中位秒 | 同机速度比 | 4次完整filled不同体素 |
+| --- | ---: | ---: | ---: | ---: |
+| sub-07 | 51.8721 | 14.9040 | 3.480× | 全部0 |
+| sub-06 | 59.4067 | 10.1074 | 5.878× | 全部0 |
+
+0/127/255逐标签Dice为1，最大/P99误差0，dtype/affine相同。GPU初始化是确定性边界和firstvisit排序，heap/eikonal仍是单线程有序CPU；不能称完整GPU fast marching。完整API含读取、变换、搬运和压缩写出，不含解释器、依赖导入和CUDA初始化，非原始T1整例。每次独立进程的Numba首次签名/缓存载入包含在API内，不能用CPU节点的暖缓存秒数代替本表。
+
+GPU allocated均72,811,008字节；首个GPU进程reserved为96,468,992/109,051,904字节。目标整卡上界包括其他任务，不作为FNIT占用；原NVML父进程采样匹配失败记为None，不能写0或据此宣称整例显存达标。共享CPU/GPU负载有记录，本表只支持本时段配对观测。起止cgroup累计failcnt未增加，没有本轮CPU限额失败证据；历史中断原因保持未确定。
+
+[GPU完整JSON、显式设备/输入/程序版本与资源记录](../../validation/recon_all/optimizations/20261009_fill_boundary_torch/cfff_a100)。新原生命令参考仍未在迁移环境获得，不把旧FNIT frozen-filled比较冒称新的同机原生比较。原始T1整例提速、整体指标等效与隔离安装尚待整例验收。
 
 ## 6. 更新与 benchmark 记录
 
@@ -166,6 +181,8 @@ far-only 更新规则。将两种循环显式分开后，真实初始化的距�
 Numba `float(np.float32)` 与 Python 的提升区别也通过显式 float64
 平方根/解计算消除，最终按原步骤转 float32。失败报告保留，未用于
 生产。回归新增不规则多次边界访问，模拟测试只验证算子语义。
+
+绘图脚本另有`--label-kind`：默认`filled`严格检查0/127/255，`wm`仅用于WM掩膜显示；完整uint8差异比较不变。`--runtime-label`默认`warm CPU API`，GPU初始化报告可显式改为实际计算范围；该参数只影响标题。
 
 ## 7. 原代码与参考文献
 

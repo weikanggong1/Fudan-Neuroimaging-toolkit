@@ -125,7 +125,8 @@ class HistogramTorchTests(unittest.TestCase):
 
     def test_complete_wm_backend_rejects_invalid_options_before_computing(self):
         image = torch.zeros((3, 4, 5), dtype=torch.uint8)
-        for kwargs in ({"histogram_backend": "native"}, {"histogram_batch_size": 0}):
+        for kwargs in ({"histogram_backend": "native"}, {"histogram_batch_size": 0},
+                       {"planar_backend": "native"}, {"planar_batch_size": 0}):
             with self.assertRaises(ValueError):
                 segment_white_matter(image, **kwargs)
 

@@ -1,0 +1,1118 @@
+{
+  "scope": "complete_frozen_same_input_WM_file_API; not_raw_T1_whole_recon",
+  "code_commit": "a756fffb",
+  "code_commit_role": "baseline plus executed file SHA-256 overlay",
+  "source_modules": {
+    "mri_segment.py": "d0500805368a8991f6376de96efc005ad102daa74c13d223ff19fb1925bf620f",
+    "mri_segment_histogram_torch.py": "73e3b832da7f81ff944a75c69b056f63fc591aeb5877c26ec104c4d5b63a152e"
+  },
+  "benchmark_sha256": "0d7a2b320bca17c454d2e3ce1f8b827c46c48320b01d574665de8a63959c098a",
+  "helper_sha256": "99c329c4ac5597ecc338b813052798b978cf92da9965bcd617c56cfcc54504dc",
+  "reference_program_sha256": "5877f6d14a3261ce32089c3713c8f9628192b60977bbbf92e9d24bf7e23c42c7",
+  "reference_sources_sha256": {
+    "mri_segment/mri_segment.cpp": "de0aad4ee1020f6dbe92afa1f6ca9d33e3259fbde256dee14b191191ed17f5d0",
+    "utils/mrihisto.cpp": "da0fa4d2c9da038064036af92c126bd3a89cb09287e2ebe697d467121adc5aee",
+    "utils/histo.cpp": "f5a630b5ea6c2a67af52bb49ee976d176dd90e53aea55ee416eadd02b83680a7"
+  },
+  "input": {
+    "sha256": "7772ed0bed1c066b6a6f93375c73305063f503246978e7a05471702c668ec25f",
+    "shape": [
+      256,
+      256,
+      256
+    ],
+    "dtype": "uint8",
+    "affine_mm": [
+      [
+        -1.0,
+        0.0,
+        2.3283064365386963e-10,
+        124.00959777832031
+      ],
+      [
+        2.3283064365386963e-10,
+        0.0,
+        0.9999999403953552,
+        -105.79763793945312
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0,
+        101.8306655883789
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "host": "A100_BENCHMARK_HOST",
+  "pid": 47462,
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz",
+  "threads": 4,
+  "actual_torch_threads": 4,
+  "cpu_affinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4"
+  },
+  "allocator_environment": {
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": null,
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "CUDA_VISIBLE_DEVICES": null
+  },
+  "device": "cuda:1",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "gpu_uuid": "GPU-53efd149-9181-8bcf-b5d9-9e9489a90bf9",
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "nibabel": "5.4.2",
+  "torch_cuda": "11.8",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "no_half": true
+  },
+  "measurement": "whole file API/command including load, H2D/D2H, ordered scans and compressed write; target CUDA synchronized; per-stage sync only in benchmark",
+  "timing_excludes": "interpreter startup, top-level module imports and CUDA context initialization; not whole recon-all timing",
+  "cold_scope": "first complete Python file API in this process; filesystem cache not flushed; compilation/cache state recorded by separate cold call",
+  "order": [
+    "native",
+    "cpu",
+    "torch",
+    "torch",
+    "cpu",
+    "native"
+  ],
+  "records": [
+    {
+      "backend": "native",
+      "seconds": 43.98688564542681,
+      "api": {
+        "command": [
+          "mri_segment",
+          "-wsizemm",
+          "13",
+          "-mprage",
+          "source.mgz",
+          "output.mgz"
+        ],
+        "diag_write": false
+      },
+      "file_sha256": "b0762a0514fd355c354cfc345dca5d9c9e5b5c675498bdce1f0e31064ba6d78f",
+      "vs_native": {
+        "different_voxels": 0,
+        "max_abs": 0,
+        "p99_abs": 0.0,
+        "label_dice": {
+          "0": 1.0,
+          "74": 1.0,
+          "75": 1.0,
+          "76": 1.0,
+          "77": 1.0,
+          "78": 1.0,
+          "79": 1.0,
+          "80": 1.0,
+          "81": 1.0,
+          "82": 1.0,
+          "83": 1.0,
+          "84": 1.0,
+          "85": 1.0,
+          "86": 1.0,
+          "87": 1.0,
+          "88": 1.0,
+          "89": 1.0,
+          "90": 1.0,
+          "91": 1.0,
+          "92": 1.0,
+          "93": 1.0,
+          "94": 1.0,
+          "95": 1.0,
+          "96": 1.0,
+          "97": 1.0,
+          "98": 1.0,
+          "99": 1.0,
+          "100": 1.0,
+          "101": 1.0,
+          "102": 1.0,
+          "103": 1.0,
+          "104": 1.0,
+          "105": 1.0,
+          "106": 1.0,
+          "107": 1.0,
+          "108": 1.0,
+          "109": 1.0,
+          "110": 1.0,
+          "111": 1.0,
+          "112": 1.0,
+          "113": 1.0,
+          "114": 1.0,
+          "115": 1.0,
+          "116": 1.0,
+          "117": 1.0,
+          "118": 1.0,
+          "119": 1.0,
+          "120": 1.0,
+          "121": 1.0,
+          "122": 1.0,
+          "123": 1.0,
+          "124": 1.0,
+          "125": 1.0,
+          "126": 1.0,
+          "127": 1.0,
+          "128": 1.0,
+          "200": 1.0,
+          "210": 1.0,
+          "230": 1.0
+        }
+      },
+      "dtype": "uint8",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "affine_equal_source": true,
+      "mgh_header_equal_source": true,
+      "stage_profile": []
+    },
+    {
+      "backend": "cpu",
+      "seconds": 115.96025287359953,
+      "api": {
+        "implementation": "FNIT PyTorch hybrid",
+        "device": "cuda:1",
+        "histogram_backend": "cpu",
+        "histogram_batch_size": 2048,
+        "ordered_cpu_rules": true,
+        "output": "$FNIT/runs/recon_torch_wm_fill_20261009/sub-07/full_wm_three_way_a100_v1/1-cpu.mgz"
+      },
+      "file_sha256": "4aef7e877a1f11875d2adff51eb003d663ba0fc98919d0dcf01613442799a090",
+      "vs_native": {
+        "different_voxels": 64,
+        "max_abs": 230,
+        "p99_abs": 0.0,
+        "label_dice": {
+          "0": 0.9999983146955514,
+          "74": 1.0,
+          "75": 1.0,
+          "76": 1.0,
+          "77": 1.0,
+          "78": 1.0,
+          "79": 1.0,
+          "80": 1.0,
+          "81": 1.0,
+          "82": 1.0,
+          "83": 1.0,
+          "84": 1.0,
+          "85": 1.0,
+          "86": 1.0,
+          "87": 1.0,
+          "88": 1.0,
+          "89": 1.0,
+          "90": 1.0,
+          "91": 1.0,
+          "92": 1.0,
+          "93": 1.0,
+          "94": 1.0,
+          "95": 1.0,
+          "96": 1.0,
+          "97": 1.0,
+          "98": 1.0,
+          "99": 1.0,
+          "100": 0.9999008133306884,
+          "101": 0.999950458261085,
+          "102": 1.0,
+          "103": 1.0,
+          "104": 0.9999072270154931,
+          "105": 1.0,
+          "106": 1.0,
+          "107": 0.9999265138154027,
+          "108": 0.9999723901819487,
+          "109": 0.9999840186661979,
+          "110": 0.9999898884698222,
+          "111": 0.999734113267748,
+          "112": 0.9980830670926517,
+          "113": 0.9938837920489296,
+          "114": 0.9945652173913043,
+          "115": 0.990909090909091,
+          "116": 0.9882352941176471,
+          "117": 0.9929078014184397,
+          "118": 1.0,
+          "119": 0.9615384615384616,
+          "120": 0.972972972972973,
+          "121": 0.975609756097561,
+          "122": 1.0,
+          "123": 1.0,
+          "124": 0.8888888888888888,
+          "125": 0.8,
+          "126": 1.0,
+          "127": 0.75,
+          "128": 1.0,
+          "200": 1.0,
+          "210": 1.0,
+          "230": 0.9829728485964105
+        }
+      },
+      "dtype": "uint8",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "affine_equal_source": true,
+      "mgh_header_equal_source": true,
+      "stage_profile": [
+        {
+          "function": "intensity_segmentation",
+          "seconds": 0.0006014881655573845
+        },
+        {
+          "function": "histogram_segmentation",
+          "seconds": 34.558867163956165
+        },
+        {
+          "function": "detect_intensity_thresholds",
+          "seconds": 0.5226404992863536
+        },
+        {
+          "function": "intensity_segmentation",
+          "seconds": 0.0006341710686683655
+        },
+        {
+          "function": "histogram_segmentation",
+          "seconds": 14.862398251891136
+        },
+        {
+          "function": "median_curve_segmentation",
+          "seconds": 9.888464900664985
+        },
+        {
+          "function": "reclassify_border",
+          "seconds": 2.636732555925846
+        },
+        {
+          "function": "mask_white_labels",
+          "seconds": 0.000775311142206192
+        },
+        {
+          "function": "recover_bright_white",
+          "seconds": 0.4645031485706568
+        },
+        {
+          "function": "remove_wrong_direction",
+          "seconds": 0.4199013514444232
+        },
+        {
+          "function": "remove_1d_structures",
+          "seconds": 0.20402761921286583
+        },
+        {
+          "function": "_closed_strand_volume",
+          "seconds": 0.9384334767237306
+        },
+        {
+          "function": "_closed_strand_volume",
+          "seconds": 0.9492439096793532
+        },
+        {
+          "function": "thin_strand_candidates",
+          "seconds": 1.10180498752743
+        },
+        {
+          "function": "_strand_segments",
+          "seconds": 0.25490863248705864
+        },
+        {
+          "function": "_dilate_strand_segments",
+          "seconds": 0.8875731276348233
+        },
+        {
+          "function": "_thicken_strands_core",
+          "seconds": 46.49484012182802
+        },
+        {
+          "function": "remove_bright_nonwhite",
+          "seconds": 2.096338991075754
+        },
+        {
+          "function": "filter_diagonal_morphology",
+          "seconds": 0.3290084656327963
+        }
+      ]
+    },
+    {
+      "backend": "torch",
+      "seconds": 67.44515882618725,
+      "api": {
+        "implementation": "FNIT PyTorch hybrid",
+        "device": "cuda:1",
+        "histogram_backend": "torch",
+        "histogram_batch_size": 2048,
+        "ordered_cpu_rules": true,
+        "output": "$FNIT/runs/recon_torch_wm_fill_20261009/sub-07/full_wm_three_way_a100_v1/2-torch.mgz"
+      },
+      "file_sha256": "4aef7e877a1f11875d2adff51eb003d663ba0fc98919d0dcf01613442799a090",
+      "vs_native": {
+        "different_voxels": 64,
+        "max_abs": 230,
+        "p99_abs": 0.0,
+        "label_dice": {
+          "0": 0.9999983146955514,
+          "74": 1.0,
+          "75": 1.0,
+          "76": 1.0,
+          "77": 1.0,
+          "78": 1.0,
+          "79": 1.0,
+          "80": 1.0,
+          "81": 1.0,
+          "82": 1.0,
+          "83": 1.0,
+          "84": 1.0,
+          "85": 1.0,
+          "86": 1.0,
+          "87": 1.0,
+          "88": 1.0,
+          "89": 1.0,
+          "90": 1.0,
+          "91": 1.0,
+          "92": 1.0,
+          "93": 1.0,
+          "94": 1.0,
+          "95": 1.0,
+          "96": 1.0,
+          "97": 1.0,
+          "98": 1.0,
+          "99": 1.0,
+          "100": 0.9999008133306884,
+          "101": 0.999950458261085,
+          "102": 1.0,
+          "103": 1.0,
+          "104": 0.9999072270154931,
+          "105": 1.0,
+          "106": 1.0,
+          "107": 0.9999265138154027,
+          "108": 0.9999723901819487,
+          "109": 0.9999840186661979,
+          "110": 0.9999898884698222,
+          "111": 0.999734113267748,
+          "112": 0.9980830670926517,
+          "113": 0.9938837920489296,
+          "114": 0.9945652173913043,
+          "115": 0.990909090909091,
+          "116": 0.9882352941176471,
+          "117": 0.9929078014184397,
+          "118": 1.0,
+          "119": 0.9615384615384616,
+          "120": 0.972972972972973,
+          "121": 0.975609756097561,
+          "122": 1.0,
+          "123": 1.0,
+          "124": 0.8888888888888888,
+          "125": 0.8,
+          "126": 1.0,
+          "127": 0.75,
+          "128": 1.0,
+          "200": 1.0,
+          "210": 1.0,
+          "230": 0.9829728485964105
+        }
+      },
+      "dtype": "uint8",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "affine_equal_source": true,
+      "mgh_header_equal_source": true,
+      "stage_profile": [
+        {
+          "function": "intensity_segmentation",
+          "seconds": 0.0006336420774459839
+        },
+        {
+          "function": "histogram_segmentation_torch",
+          "seconds": 0.5483733899891376
+        },
+        {
+          "function": "detect_intensity_thresholds",
+          "seconds": 0.5312444875016809
+        },
+        {
+          "function": "intensity_segmentation",
+          "seconds": 0.0005891639739274979
+        },
+        {
+          "function": "histogram_segmentation_torch",
+          "seconds": 0.12978390511125326
+        },
+        {
+          "function": "median_curve_segmentation",
+          "seconds": 10.33269302919507
+        },
+        {
+          "function": "reclassify_border",
+          "seconds": 2.61107668466866
+        },
+        {
+          "function": "mask_white_labels",
+          "seconds": 0.0007442478090524673
+        },
+        {
+          "function": "recover_bright_white",
+          "seconds": 0.4614617917686701
+        },
+        {
+          "function": "remove_wrong_direction",
+          "seconds": 0.3722753869369626
+        },
+        {
+          "function": "remove_1d_structures",
+          "seconds": 0.20409763604402542
+        },
+        {
+          "function": "_closed_strand_volume",
+          "seconds": 0.9661280764266849
+        },
+        {
+          "function": "_closed_strand_volume",
+          "seconds": 0.9382192669436336
+        },
+        {
+          "function": "thin_strand_candidates",
+          "seconds": 1.1006233980879188
+        },
+        {
+          "function": "_strand_segments",
+          "seconds": 0.3487635385245085
+        },
+        {
+          "function": "_dilate_strand_segments",
+          "seconds": 0.8687776690348983
+        },
+        {
+          "function": "_thicken_strands_core",
+          "seconds": 46.19329316355288
+        },
+        {
+          "function": "remove_bright_nonwhite",
+          "seconds": 2.172284422442317
+        },
+        {
+          "function": "filter_diagonal_morphology",
+          "seconds": 0.3206056887283921
+        }
+      ]
+    },
+    {
+      "backend": "torch",
+      "seconds": 66.55828084144741,
+      "api": {
+        "implementation": "FNIT PyTorch hybrid",
+        "device": "cuda:1",
+        "histogram_backend": "torch",
+        "histogram_batch_size": 2048,
+        "ordered_cpu_rules": true,
+        "output": "$FNIT/runs/recon_torch_wm_fill_20261009/sub-07/full_wm_three_way_a100_v1/3-torch.mgz"
+      },
+      "file_sha256": "4aef7e877a1f11875d2adff51eb003d663ba0fc98919d0dcf01613442799a090",
+      "vs_native": {
+        "different_voxels": 64,
+        "max_abs": 230,
+        "p99_abs": 0.0,
+        "label_dice": {
+          "0": 0.9999983146955514,
+          "74": 1.0,
+          "75": 1.0,
+          "76": 1.0,
+          "77": 1.0,
+          "78": 1.0,
+          "79": 1.0,
+          "80": 1.0,
+          "81": 1.0,
+          "82": 1.0,
+          "83": 1.0,
+          "84": 1.0,
+          "85": 1.0,
+          "86": 1.0,
+          "87": 1.0,
+          "88": 1.0,
+          "89": 1.0,
+          "90": 1.0,
+          "91": 1.0,
+          "92": 1.0,
+          "93": 1.0,
+          "94": 1.0,
+          "95": 1.0,
+          "96": 1.0,
+          "97": 1.0,
+          "98": 1.0,
+          "99": 1.0,
+          "100": 0.9999008133306884,
+          "101": 0.999950458261085,
+          "102": 1.0,
+          "103": 1.0,
+          "104": 0.9999072270154931,
+          "105": 1.0,
+          "106": 1.0,
+          "107": 0.9999265138154027,
+          "108": 0.9999723901819487,
+          "109": 0.9999840186661979,
+          "110": 0.9999898884698222,
+          "111": 0.999734113267748,
+          "112": 0.9980830670926517,
+          "113": 0.9938837920489296,
+          "114": 0.9945652173913043,
+          "115": 0.990909090909091,
+          "116": 0.9882352941176471,
+          "117": 0.9929078014184397,
+          "118": 1.0,
+          "119": 0.9615384615384616,
+          "120": 0.972972972972973,
+          "121": 0.975609756097561,
+          "122": 1.0,
+          "123": 1.0,
+          "124": 0.8888888888888888,
+          "125": 0.8,
+          "126": 1.0,
+          "127": 0.75,
+          "128": 1.0,
+          "200": 1.0,
+          "210": 1.0,
+          "230": 0.9829728485964105
+        }
+      },
+      "dtype": "uint8",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "affine_equal_source": true,
+      "mgh_header_equal_source": true,
+      "stage_profile": [
+        {
+          "function": "intensity_segmentation",
+          "seconds": 0.0006234832108020782
+        },
+        {
+          "function": "histogram_segmentation_torch",
+          "seconds": 0.2893647123128176
+        },
+        {
+          "function": "detect_intensity_thresholds",
+          "seconds": 0.5475046820938587
+        },
+        {
+          "function": "intensity_segmentation",
+          "seconds": 0.0005963500589132309
+        },
+        {
+          "function": "histogram_segmentation_torch",
+          "seconds": 0.12574114091694355
+        },
+        {
+          "function": "median_curve_segmentation",
+          "seconds": 10.563489966094494
+        },
+        {
+          "function": "reclassify_border",
+          "seconds": 2.5746764736250043
+        },
+        {
+          "function": "mask_white_labels",
+          "seconds": 0.0007548229768872261
+        },
+        {
+          "function": "recover_bright_white",
+          "seconds": 0.4578687213361263
+        },
+        {
+          "function": "remove_wrong_direction",
+          "seconds": 0.36864760611206293
+        },
+        {
+          "function": "remove_1d_structures",
+          "seconds": 0.20474021788686514
+        },
+        {
+          "function": "_closed_strand_volume",
+          "seconds": 0.9196295971050858
+        },
+        {
+          "function": "_closed_strand_volume",
+          "seconds": 0.9259009463712573
+        },
+        {
+          "function": "thin_strand_candidates",
+          "seconds": 1.0737318629398942
+        },
+        {
+          "function": "_strand_segments",
+          "seconds": 0.2507706778123975
+        },
+        {
+          "function": "_dilate_strand_segments",
+          "seconds": 0.8823171351104975
+        },
+        {
+          "function": "_thicken_strands_core",
+          "seconds": 45.66847626212984
+        },
+        {
+          "function": "remove_bright_nonwhite",
+          "seconds": 2.0565732261165977
+        },
+        {
+          "function": "filter_diagonal_morphology",
+          "seconds": 0.3078141249716282
+        }
+      ]
+    },
+    {
+      "backend": "cpu",
+      "seconds": 117.43945156317204,
+      "api": {
+        "implementation": "FNIT PyTorch hybrid",
+        "device": "cuda:1",
+        "histogram_backend": "cpu",
+        "histogram_batch_size": 2048,
+        "ordered_cpu_rules": true,
+        "output": "$FNIT/runs/recon_torch_wm_fill_20261009/sub-07/full_wm_three_way_a100_v1/4-cpu.mgz"
+      },
+      "file_sha256": "4aef7e877a1f11875d2adff51eb003d663ba0fc98919d0dcf01613442799a090",
+      "vs_native": {
+        "different_voxels": 64,
+        "max_abs": 230,
+        "p99_abs": 0.0,
+        "label_dice": {
+          "0": 0.9999983146955514,
+          "74": 1.0,
+          "75": 1.0,
+          "76": 1.0,
+          "77": 1.0,
+          "78": 1.0,
+          "79": 1.0,
+          "80": 1.0,
+          "81": 1.0,
+          "82": 1.0,
+          "83": 1.0,
+          "84": 1.0,
+          "85": 1.0,
+          "86": 1.0,
+          "87": 1.0,
+          "88": 1.0,
+          "89": 1.0,
+          "90": 1.0,
+          "91": 1.0,
+          "92": 1.0,
+          "93": 1.0,
+          "94": 1.0,
+          "95": 1.0,
+          "96": 1.0,
+          "97": 1.0,
+          "98": 1.0,
+          "99": 1.0,
+          "100": 0.9999008133306884,
+          "101": 0.999950458261085,
+          "102": 1.0,
+          "103": 1.0,
+          "104": 0.9999072270154931,
+          "105": 1.0,
+          "106": 1.0,
+          "107": 0.9999265138154027,
+          "108": 0.9999723901819487,
+          "109": 0.9999840186661979,
+          "110": 0.9999898884698222,
+          "111": 0.999734113267748,
+          "112": 0.9980830670926517,
+          "113": 0.9938837920489296,
+          "114": 0.9945652173913043,
+          "115": 0.990909090909091,
+          "116": 0.9882352941176471,
+          "117": 0.9929078014184397,
+          "118": 1.0,
+          "119": 0.9615384615384616,
+          "120": 0.972972972972973,
+          "121": 0.975609756097561,
+          "122": 1.0,
+          "123": 1.0,
+          "124": 0.8888888888888888,
+          "125": 0.8,
+          "126": 1.0,
+          "127": 0.75,
+          "128": 1.0,
+          "200": 1.0,
+          "210": 1.0,
+          "230": 0.9829728485964105
+        }
+      },
+      "dtype": "uint8",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "affine_equal_source": true,
+      "mgh_header_equal_source": true,
+      "stage_profile": [
+        {
+          "function": "intensity_segmentation",
+          "seconds": 0.0006257127970457077
+        },
+        {
+          "function": "histogram_segmentation",
+          "seconds": 34.891421233303845
+        },
+        {
+          "function": "detect_intensity_thresholds",
+          "seconds": 0.4988537011668086
+        },
+        {
+          "function": "intensity_segmentation",
+          "seconds": 0.000651603564620018
+        },
+        {
+          "function": "histogram_segmentation",
+          "seconds": 15.108094763942063
+        },
+        {
+          "function": "median_curve_segmentation",
+          "seconds": 10.812403918243945
+        },
+        {
+          "function": "reclassify_border",
+          "seconds": 2.7959548635408282
+        },
+        {
+          "function": "mask_white_labels",
+          "seconds": 0.0007978547364473343
+        },
+        {
+          "function": "recover_bright_white",
+          "seconds": 0.4666673904284835
+        },
+        {
+          "function": "remove_wrong_direction",
+          "seconds": 0.4164244355633855
+        },
+        {
+          "function": "remove_1d_structures",
+          "seconds": 0.20624556206166744
+        },
+        {
+          "function": "_closed_strand_volume",
+          "seconds": 0.9167476668953896
+        },
+        {
+          "function": "_closed_strand_volume",
+          "seconds": 0.9178277272731066
+        },
+        {
+          "function": "thin_strand_candidates",
+          "seconds": 1.082615278661251
+        },
+        {
+          "function": "_strand_segments",
+          "seconds": 0.2635594503954053
+        },
+        {
+          "function": "_dilate_strand_segments",
+          "seconds": 0.9042646400630474
+        },
+        {
+          "function": "_thicken_strands_core",
+          "seconds": 46.329646996222436
+        },
+        {
+          "function": "remove_bright_nonwhite",
+          "seconds": 2.126708472147584
+        },
+        {
+          "function": "filter_diagonal_morphology",
+          "seconds": 0.33685771375894547
+        }
+      ]
+    },
+    {
+      "backend": "native",
+      "seconds": 43.98823832627386,
+      "api": {
+        "command": [
+          "mri_segment",
+          "-wsizemm",
+          "13",
+          "-mprage",
+          "source.mgz",
+          "output.mgz"
+        ],
+        "diag_write": false
+      },
+      "file_sha256": "38b18b7ce0a8278225075f6ed02ae892ef4819a2f43a0400d7de9bbbfb8bba4d",
+      "vs_native": {
+        "different_voxels": 0,
+        "max_abs": 0,
+        "p99_abs": 0.0,
+        "label_dice": {
+          "0": 1.0,
+          "74": 1.0,
+          "75": 1.0,
+          "76": 1.0,
+          "77": 1.0,
+          "78": 1.0,
+          "79": 1.0,
+          "80": 1.0,
+          "81": 1.0,
+          "82": 1.0,
+          "83": 1.0,
+          "84": 1.0,
+          "85": 1.0,
+          "86": 1.0,
+          "87": 1.0,
+          "88": 1.0,
+          "89": 1.0,
+          "90": 1.0,
+          "91": 1.0,
+          "92": 1.0,
+          "93": 1.0,
+          "94": 1.0,
+          "95": 1.0,
+          "96": 1.0,
+          "97": 1.0,
+          "98": 1.0,
+          "99": 1.0,
+          "100": 1.0,
+          "101": 1.0,
+          "102": 1.0,
+          "103": 1.0,
+          "104": 1.0,
+          "105": 1.0,
+          "106": 1.0,
+          "107": 1.0,
+          "108": 1.0,
+          "109": 1.0,
+          "110": 1.0,
+          "111": 1.0,
+          "112": 1.0,
+          "113": 1.0,
+          "114": 1.0,
+          "115": 1.0,
+          "116": 1.0,
+          "117": 1.0,
+          "118": 1.0,
+          "119": 1.0,
+          "120": 1.0,
+          "121": 1.0,
+          "122": 1.0,
+          "123": 1.0,
+          "124": 1.0,
+          "125": 1.0,
+          "126": 1.0,
+          "127": 1.0,
+          "128": 1.0,
+          "200": 1.0,
+          "210": 1.0,
+          "230": 1.0
+        }
+      },
+      "dtype": "uint8",
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "affine_equal_source": true,
+      "mgh_header_equal_source": true,
+      "stage_profile": []
+    }
+  ],
+  "whole_recon_speedup": "not_measured",
+  "whole_metric_equivalence": "not_assessed",
+  "isolated_deployment": "not_verified",
+  "cold_python": {
+    "seconds": 116.16262770630419,
+    "api": {
+      "implementation": "FNIT PyTorch hybrid",
+      "device": "cuda:1",
+      "histogram_backend": "cpu",
+      "histogram_batch_size": 2048,
+      "ordered_cpu_rules": true,
+      "output": "$FNIT/runs/recon_torch_wm_fill_20261009/sub-07/full_wm_three_way_a100_v1/cold-cpu.mgz"
+    },
+    "stage_profile": [
+      {
+        "function": "intensity_segmentation",
+        "seconds": 0.4636126346886158
+      },
+      {
+        "function": "histogram_segmentation",
+        "seconds": 34.55793717876077
+      },
+      {
+        "function": "detect_intensity_thresholds",
+        "seconds": 0.5835432624444366
+      },
+      {
+        "function": "intensity_segmentation",
+        "seconds": 0.0008096499368548393
+      },
+      {
+        "function": "histogram_segmentation",
+        "seconds": 15.07789358496666
+      },
+      {
+        "function": "median_curve_segmentation",
+        "seconds": 9.687597026117146
+      },
+      {
+        "function": "reclassify_border",
+        "seconds": 2.518465807661414
+      },
+      {
+        "function": "mask_white_labels",
+        "seconds": 0.06880299001932144
+      },
+      {
+        "function": "recover_bright_white",
+        "seconds": 0.46242855582386255
+      },
+      {
+        "function": "remove_wrong_direction",
+        "seconds": 0.41936378739774227
+      },
+      {
+        "function": "remove_1d_structures",
+        "seconds": 0.21062596421688795
+      },
+      {
+        "function": "_closed_strand_volume",
+        "seconds": 0.9120672522112727
+      },
+      {
+        "function": "_closed_strand_volume",
+        "seconds": 0.9074246976524591
+      },
+      {
+        "function": "thin_strand_candidates",
+        "seconds": 1.0502397203817964
+      },
+      {
+        "function": "_strand_segments",
+        "seconds": 0.2535047037526965
+      },
+      {
+        "function": "_dilate_strand_segments",
+        "seconds": 0.8757559973746538
+      },
+      {
+        "function": "_thicken_strands_core",
+        "seconds": 45.519995084032416
+      },
+      {
+        "function": "remove_bright_nonwhite",
+        "seconds": 2.0608751252293587
+      },
+      {
+        "function": "filter_diagonal_morphology",
+        "seconds": 1.0395223032683134
+      }
+    ],
+    "vs_reference": {
+      "different_voxels": 64,
+      "max_abs": 230,
+      "p99_abs": 0.0,
+      "label_dice": {
+        "0": 0.9999983146955514,
+        "74": 1.0,
+        "75": 1.0,
+        "76": 1.0,
+        "77": 1.0,
+        "78": 1.0,
+        "79": 1.0,
+        "80": 1.0,
+        "81": 1.0,
+        "82": 1.0,
+        "83": 1.0,
+        "84": 1.0,
+        "85": 1.0,
+        "86": 1.0,
+        "87": 1.0,
+        "88": 1.0,
+        "89": 1.0,
+        "90": 1.0,
+        "91": 1.0,
+        "92": 1.0,
+        "93": 1.0,
+        "94": 1.0,
+        "95": 1.0,
+        "96": 1.0,
+        "97": 1.0,
+        "98": 1.0,
+        "99": 1.0,
+        "100": 0.9999008133306884,
+        "101": 0.999950458261085,
+        "102": 1.0,
+        "103": 1.0,
+        "104": 0.9999072270154931,
+        "105": 1.0,
+        "106": 1.0,
+        "107": 0.9999265138154027,
+        "108": 0.9999723901819487,
+        "109": 0.9999840186661979,
+        "110": 0.9999898884698222,
+        "111": 0.999734113267748,
+        "112": 0.9980830670926517,
+        "113": 0.9938837920489296,
+        "114": 0.9945652173913043,
+        "115": 0.990909090909091,
+        "116": 0.9882352941176471,
+        "117": 0.9929078014184397,
+        "118": 1.0,
+        "119": 0.9615384615384616,
+        "120": 0.972972972972973,
+        "121": 0.975609756097561,
+        "122": 1.0,
+        "123": 1.0,
+        "124": 0.8888888888888888,
+        "125": 0.8,
+        "126": 1.0,
+        "127": 0.75,
+        "128": 1.0,
+        "200": 1.0,
+        "210": 1.0,
+        "230": 0.9829728485964105
+      }
+    }
+  },
+  "median_seconds": {
+    "native": 43.987561985850334,
+    "cpu": 116.69985221838579,
+    "torch": 67.00171983381733
+  },
+  "speedup_vs_existing_python": 1.7417441299691034,
+  "speedup_vs_source_built_native": 0.6565139237463093,
+  "process_memory": {
+    "scope": "benchmark parent process on explicit GPU; native child uses CPU only",
+    "gpu_uuid": "GPU-53efd149-9181-8bcf-b5d9-9e9489a90bf9",
+    "pid": 47462,
+    "requested_interval_seconds": 0.25,
+    "max_interval_seconds": 1.7340847300365567,
+    "peak_process_bytes": null,
+    "status": "no_process_memory_observed",
+    "errors": []
+  },
+  "torch_peak_allocated_bytes": 211688448,
+  "torch_peak_reserved_bytes": 255852544
+}

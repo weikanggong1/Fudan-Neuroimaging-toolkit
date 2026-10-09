@@ -11,6 +11,7 @@ from pathlib import Path
 import platform
 import subprocess
 import time
+import threading
 
 import nibabel as nib
 import numpy as np
@@ -33,6 +34,10 @@ def main():
     parser.add_argument("--reference-sha256", required=True)
     parser.add_argument("--reference-source-root", type=Path, required=True)
     parser.add_argument("--reference-assets", type=Path, required=True)
+    parser.add_argument("--comparison", choices=("histogram", "planar"), default="histogram",
+                        help="默认CPU/GPU histogram；planar固定GPU histogram，比较旧/缓存平面后端")
+    parser.add_argument("--module-dir", type=Path,
+                        help="本轮独立recon模块目录；其余包保持只读冻结版本")
     args = parser.parse_args()
     if sha(args.reference_binary) != args.reference_sha256:
         raise ValueError("declared reference executable hash mismatch")
@@ -46,6 +51,9 @@ def main():
     torch.backends.cudnn.allow_tf32 = True
     torch.zeros(1, device=device)
     torch.cuda.synchronize(device)
+    if args.module_dir is not None:
+        import fnit.recon_all
+        fnit.recon_all.__path__.insert(0, str(args.module_dir.resolve()))
     from fnit.recon_all import mri_segment as wm
     from fnit.recon_all import mri_segment_histogram_torch as histogram
     helper_path = Path(__file__).with_name("recon_wm_aseg_torch.py")
@@ -56,10 +64,28 @@ def main():
         "--query-gpu=uuid", "--format=csv,noheader"], text=True).strip()
     sampler = helper.ProcessMemorySampler(uuid)
     sampler.start()
+    card_rows, card_errors = [], []
+    card_stop = threading.Event()
+    card_started = time.perf_counter()
+
+    def sample_target_card():
+        while not card_stop.is_set():
+            try:
+                free, total = torch.cuda.mem_get_info(device)
+                card_rows.append({"t_seconds": time.perf_counter() - card_started,
+                    "used_bytes": int(total - free), "total_bytes": int(total)})
+            except RuntimeError as error:
+                card_errors.append(str(error))
+            card_stop.wait(.25)
+
+    card_thread = threading.Thread(target=sample_target_card, daemon=True)
+    card_thread.start()
     torch.cuda.reset_peak_memory_stats(device)
     source_image = nib.load(args.source)
+    old_backend, new_backend = ("cpu", "torch") if args.comparison == "histogram" else ("python", "cached")
     report = {
         "scope": "complete_frozen_same_input_WM_file_API; not_raw_T1_whole_recon",
+        "comparison": args.comparison,
         "code_commit": args.code_commit,
         "code_commit_role": "baseline plus executed file SHA-256 overlay",
         "source_modules": {Path(module.__file__).name: sha(module.__file__)
@@ -87,10 +113,13 @@ def main():
         "measurement": "whole file API/command including load, H2D/D2H, ordered scans and compressed write; target CUDA synchronized; per-stage sync only in benchmark",
         "timing_excludes": "interpreter startup, top-level module imports and CUDA context initialization; not whole recon-all timing",
         "cold_scope": "first complete Python file API in this process; filesystem cache not flushed; compilation/cache state recorded by separate cold call",
-        "order": ["native", "cpu", "torch", "torch", "cpu", "native"],
+        "order": ["native", old_backend, new_backend, new_backend, old_backend, "native"],
         "records": [], "whole_recon_speedup": "not_measured", "whole_metric_equivalence": "not_assessed",
         "isolated_deployment": "not_verified",
     }
+    if args.comparison == "planar":
+        from fnit.recon_all import mri_segment_planar_torch as planar
+        report["source_modules"]["mri_segment_planar_torch.py"] = sha(planar.__file__)
     current_profile = []
     names = ("intensity_segmentation", "histogram_segmentation", "detect_intensity_thresholds",
              "median_curve_segmentation", "reclassify_border", "mask_white_labels",
@@ -124,20 +153,24 @@ def main():
                                check=True, stdout=stream, stderr=subprocess.STDOUT)
             return {"command": [args.reference_binary.name, "-wsizemm", "13", "-mprage",
                                 "source.mgz", "output.mgz"], "diag_write": False}
+        parameters = {"histogram_backend": backend, "histogram_batch_size": 2048}
+        if args.comparison == "planar":
+            parameters = {"histogram_backend": "torch", "histogram_batch_size": 2048,
+                          "planar_backend": backend, "planar_batch_size": 256}
         return wm.segment_white_matter_mgz(
-            source_path=args.source, output_path=path, device=device,
-            histogram_backend=backend, histogram_batch_size=2048)
+            source_path=args.source, output_path=path, device=device, **parameters)
 
     # The cold full API populates any existing ordered NumPy/Numba caches and
     # is reported separately rather than mixed into the paired warm median.
     cold_path = args.output_dir / "cold-cpu.mgz"
     tick = time.perf_counter()
-    cold_result = call("cpu", cold_path)
+    cold_result = call(old_backend, cold_path)
     torch.cuda.synchronize(device)
     report["cold_python"] = {"seconds": time.perf_counter() - tick,
                              "api": cold_result, "stage_profile": list(current_profile)}
     current_profile.clear()
     native_reference = None
+    python_reference = None
     for index, backend in enumerate(report["order"]):
         path = args.output_dir / f"{index}-{backend}.mgz"
         torch.cuda.synchronize(device)
@@ -157,14 +190,30 @@ def main():
                "affine_equal_source": bool(np.array_equal(image.affine, source_image.affine)),
                "mgh_header_equal_source": image.header.binaryblock == source_image.header.binaryblock,
                "stage_profile": list(current_profile)}
+        if backend == old_backend and python_reference is None:
+            python_reference = array.copy()
+        if python_reference is not None and backend != "native":
+            row["vs_existing_python"] = helper.compare(array, python_reference)
         current_profile.clear()
         report["records"].append(row)
+        # 中断时仍保留已完成的同输入测量；partial 不冒充完整 ABBA。
+        (args.output_dir / "partial_report.json").write_text(json.dumps(report, indent=2))
         print(json.dumps(row), flush=True)
     report["median_seconds"] = {backend: float(np.median([row["seconds"] for row in report["records"]
-        if row["backend"] == backend])) for backend in ("native", "cpu", "torch")}
-    report["speedup_vs_existing_python"] = report["median_seconds"]["cpu"] / report["median_seconds"]["torch"]
-    report["speedup_vs_source_built_native"] = report["median_seconds"]["native"] / report["median_seconds"]["torch"]
+        if row["backend"] == backend])) for backend in ("native", old_backend, new_backend)}
+    report["speedup_vs_existing_python"] = report["median_seconds"][old_backend] / report["median_seconds"][new_backend]
+    report["speedup_vs_source_built_native"] = report["median_seconds"]["native"] / report["median_seconds"][new_backend]
     memory = sampler.finish()
+    card_stop.set()
+    card_thread.join(timeout=5)
+    intervals = np.diff([row["t_seconds"] for row in card_rows])
+    report["target_card_memory_upper_bound"] = {
+        "scope": "explicit target CUDA total-free; includes all processes/driver",
+        "requested_interval_seconds": .25,
+        "max_interval_seconds": float(intervals.max()) if len(intervals) else None,
+        "peak_card_used_bytes": max((row["used_bytes"] for row in card_rows), default=None),
+        "errors": card_errors, "samples": card_rows,
+    }
     (args.output_dir / "process_memory.json").write_text(json.dumps(memory, indent=2))
     report["process_memory"] = {key: value for key, value in memory.items() if key != "samples"}
     report["torch_peak_allocated_bytes"] = torch.cuda.max_memory_allocated(device)

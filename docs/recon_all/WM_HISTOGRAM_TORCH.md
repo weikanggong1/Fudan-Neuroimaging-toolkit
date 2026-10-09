@@ -69,10 +69,11 @@ classified_labels_tensor = histogram_segmentation_torch(
 作为独立生产 API。所有临时张量都保持输入 device。
 
 完整 WM 的张量 API `segment_white_matter(image, *, device=None,
-histogram_backend="cpu", histogram_batch_size=2048)` 返回新 uint8 WM。
+histogram_backend="cpu", histogram_batch_size=2048, planar_backend="python",
+planar_batch_size=256)` 返回新 uint8 WM。
 `device=None` 保留输入设备；两个新增选项分别选择 histogram 实现和
 批量，不改变后续扫描、标签或空间。无效后端、批量或空图像在计算前
-报错。默认行为与旧版相同。
+报错。平面后端默认`python`；显式`cached`复用静态Torch几何与有序Numba扫描，批量默认256，详见[平面功能页](WM_PLANAR_TORCH.md)。默认行为与旧版相同。
 
 文件 API 参数与返回值如下；读取、传输和压缩写出均在调用内。
 
@@ -85,11 +86,13 @@ wm_segmentation_report = segment_white_matter_mgz(
     device="cuda:0",                           # 默认 cpu；这里明确目标 GPU
     histogram_backend="torch",                # 默认 cpu；这里复用新增 GPU 分块算子
     histogram_batch_size=2048,                 # 默认 2048；全部候选按此批量处理
+    planar_backend="python",                 # 默认旧平面；cached为已回归的有序缓存候选
+    planar_batch_size=256,                    # 缓存平面几何候选批量，不删减候选
 )
 ```
 
 返回字典含 `implementation`、`device`、`histogram_backend`、
-`histogram_batch_size`、`ordered_cpu_rules=True` 和 `output`。不执行额外
+`histogram_batch_size`、`planar_backend`、`planar_batch_size`、`ordered_cpu_rules=True` 和 `output`。不执行额外
 生产同步，不修改调用者的全局精度设置。读取/写出失败抛相应异常；错误
 输入 dtype 或维度抛 `ValueError`，CUDA 失败传播。
 
@@ -177,6 +180,21 @@ PyTorch allocated 峰值为 217,635,840 / 218,211,840，reserved 为
 249,561,088 / 245,366,784 字节。申请 0.25 秒采样，实测最大间隔
 0.728 / 0.411 秒；这是采样峰值，不保证捕获连续峰值。节点另有
 connectome 任务，实际共享负载单列，不作为稳定吞吐结论。
+
+### A100 完整WM文件API三方配对
+
+同一A100节点、四线程、相同输入下，完整API/原生命令包含校验、读取、上传、全部WM步骤、下载与压缩写出；不含解释器、顶层导入和CUDA初始化。这里“旧CPU”仅指CPU histogram，其余既有Torch阶段仍选择相同GPU。冷API单列，不混入暖配对。
+
+| 例 | 原生命令中位秒 | 旧CPU histogram完整API秒 | GPU histogram完整API秒 | 相对旧API | 新旧WM新增差异 | 对原生既有差异 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| sub-07 V1完整 | 43.9876 | 116.6999 | 67.0017 | 1.742× | 0 | 64体素 |
+| sub-06 V2完整 | 51.6003 | 161.0779 | 95.8278 | 1.681× | 0 | 235体素 |
+
+原生命令均重复两次且完全重现；旧/新Python输出文件SHA相同，最大/P99新增误差0，affine、MGH头和dtype相同。原生差异保留为原有WM算法问题，不归因于随机性，也不把数值标签相关性当分割Dice。完整GPU histogram仍比原生命令慢，暂不替换原生默认。新增[平面补洞缓存](WM_PLANAR_TORCH.md)继续处理完整剖析的46–70秒热点，单独验证。
+
+sub-06 V1在3/6次测量后会话消失，缺退出码和traceback，原因未确定；不能称ABBA完成或推断OOM。独立V2带faulthandler、退出收据和1秒cgroup记录正常结束，累计failcnt在起止均548656，没有本次新增限额失败证据。
+
+A100共享节点存在其他项目和FNIT任务，不将这些配对观测称独占稳定吞吐。allocated峰值为211,688,448/213,785,600字节，V1进程采样没有匹配PID，实际进程占用为None；不能写0或据此宣称低于20GB。V2明确目标设备的整卡采样上界为23,480,303,616字节，包含其他进程及驱动，不是FNIT自身峰值。原始完整JSON、已去私有路径的公开副本及原始SHA保存在[本轮报告](../../validation/recon_all/optimizations/20261009_wm_histogram_torch/cfff_a100)。
 
 原生诊断命令的时间包含大量诊断写出，未用作本表单个算子的速度基线。
 固定原生两遍输出可重复性与完整 WM 三方配对由后续完整文件 API 报告

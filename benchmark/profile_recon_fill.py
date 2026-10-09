@@ -10,6 +10,7 @@ from pathlib import Path
 import platform
 import resource
 import time
+import threading
 
 import nibabel as nib
 import numpy as np
@@ -79,6 +80,9 @@ def main():
     cc_profiles = []
     device = torch.device(args.device)
     sampler = None
+    card_stop = threading.Event()
+    card_rows, card_errors = [], []
+    card_thread = None
     if device.type == "cuda":
         if args.boundary_backend != "torch":
             raise ValueError("CUDA device requires the explicit torch boundary backend")
@@ -94,6 +98,20 @@ def main():
         gpu_index, gpu_uuid, gpu_name = [part.strip() for part in gpu_row.split(",", 2)]
         sampler = ProcessMemorySampler(gpu_uuid)
         sampler.start()
+        card_started = time.perf_counter()
+
+        def sample_target_card():
+            while not card_stop.is_set():
+                try:
+                    free, total = torch.cuda.mem_get_info(device)
+                    card_rows.append({"t_seconds": time.perf_counter() - card_started,
+                        "used_bytes": int(total - free), "total_bytes": int(total)})
+                except RuntimeError as error:
+                    card_errors.append(str(error))
+                card_stop.wait(.25)
+
+        card_thread = threading.Thread(target=sample_target_card, daemon=True)
+        card_thread.start()
     started = time.perf_counter()
     seed = cutting.fill_mgz(
         wm_file=input_files["wm"], aseg_file=input_files["aseg"], lta_file=input_files["lta"],
@@ -105,6 +123,9 @@ def main():
         torch.cuda.synchronize(device)
     seconds = time.perf_counter() - started
     memory = sampler.finish() if sampler is not None else None
+    card_stop.set()
+    if card_thread is not None:
+        card_thread.join(timeout=5)
     reference_image, output_image = nib.load(reference_file), nib.load(output_file)
     reference, output = np.asarray(reference_image.dataobj), np.asarray(output_image.dataobj)
     dice = {}
@@ -146,12 +167,20 @@ def main():
         from fnit.recon_all import fill_marching_numba
         report["modules_sha256"]["fill_marching_numba.py"] = sha(fill_marching_numba.__file__)
     if device.type == "cuda":
+        intervals = np.diff([row["t_seconds"] for row in card_rows])
         report.update({"gpu_index": gpu_index, "gpu_uuid": gpu_uuid, "gpu_name": gpu_name,
                        "matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
                        "cudnn_tf32": torch.backends.cudnn.allow_tf32,
                        "allocated_peak_bytes": torch.cuda.max_memory_allocated(device),
                        "reserved_peak_bytes": torch.cuda.max_memory_reserved(device),
-                       "process_memory_sampling": memory})
+                       "process_memory_sampling": memory,
+                       "target_card_memory_upper_bound": {
+                           "scope": "explicit target CUDA total-free; includes all processes/driver",
+                           "requested_interval_seconds": .25,
+                           "max_interval_seconds": float(intervals.max()) if len(intervals) else None,
+                           "peak_card_used_bytes": max((row["used_bytes"] for row in card_rows), default=None),
+                           "errors": card_errors, "samples": card_rows,
+                       }})
     (args.output_dir / "profile.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report), flush=True)
 

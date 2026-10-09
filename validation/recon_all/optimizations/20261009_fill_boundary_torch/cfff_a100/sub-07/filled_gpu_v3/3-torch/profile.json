@@ -1,0 +1,815 @@
+{
+  "scope": "complete_existing_FNIT_fill_file_API_profile; frozen_inputs; not whole_recon timing",
+  "code_commit": "a756fffbcff0ed46e8849aef0c25123768c67d60",
+  "code_commit_role": "baseline plus executed module hashes",
+  "module_overlay": true,
+  "modules_sha256": {
+    "fill_aseg_python.py": "6506cc73cab6f4d00389110a8403ad89a781a1c4285b1d8d6c43a94a72c807a2",
+    "fill_cutting_plane_python.py": "5bc61b2e68d6ed47dadc0dafdc488c61807435b9e28dc12c48d5e7dbf3981a04",
+    "fill_boundary_torch.py": "b3bc1ab88154bcc819add3433b4c849bfaa403ff024a493cfd2aa18691a1bc0b",
+    "fill_marching_numba.py": "8c9f1c289922d36289ead98db7ffd3540f8ec783a9a2c046032c5d303c2dfc16"
+  },
+  "script_sha256": "e37253655fe69f078e67f941923a6d7cfb7fc13dc5a3f0b8ce24c70406ad5279",
+  "input_sha256": {
+    "wm": "5647023b94038cd7b8e2a05d22bedaa94090e22b34fbd993bf36b78774380678",
+    "aseg": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a",
+    "lta": "63b772dc614ec8786b331eec3f3d7a90a63cd4c246c558e76080098fa0fdb2a2",
+    "colortable": "65957c41244153d6614aeaf08c16ee956c09e2c8b5e198aa64c81946f75e93b6"
+  },
+  "reference_kind": "existing FNIT frozen same-input filled only; new native reference is separate",
+  "reference_sha256": "71acf70c6505b034f37ed32b0ca7f079a9c56427198a58c0c1479e51418ecdfb",
+  "output_sha256": "56119d00bec170d29002bf1c8a91da08d9a575a8b07c760546685b2fe0f1eec8",
+  "host": "A100_BENCHMARK_HOST",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz",
+  "cpu_affinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "threads": 4,
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4"
+  },
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "scipy": "1.17.1",
+  "nibabel": "5.4.2",
+  "device": "cuda:1",
+  "cc_boundary_backend": "torch",
+  "cc_marching_backend": "numba",
+  "precision": "existing NumPy/SciPy/Numba arithmetic unchanged; Torch boundary int64/bool/float32 constants; no half",
+  "full_API_seconds": 12.806385139003396,
+  "peak_RSS_bytes": 1398423552,
+  "profile_rows_nested_do_not_sum": [
+    {
+      "function": "_cc_outside_distance",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 1.4263366349041462,
+      "target_label": 2
+    },
+    {
+      "function": "_cc_outside_distance",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.9569548480212688,
+      "target_label": 41
+    },
+    {
+      "function": "_replace_cc_with_wm",
+      "module": "fnit.recon_all.fill_cutting_plane_python",
+      "seconds": 2.7703817607834935
+    },
+    {
+      "function": "affine_transform",
+      "module": "scipy.ndimage",
+      "seconds": 1.0760400779545307,
+      "parameters": {
+        "order": "1",
+        "mode": "constant",
+        "output": "<class 'numpy.float64'>"
+      }
+    },
+    {
+      "function": "affine_transform",
+      "module": "scipy.ndimage",
+      "seconds": 0.5044606477022171,
+      "parameters": {
+        "order": "0",
+        "mode": "constant",
+        "cval": "0"
+      }
+    },
+    {
+      "function": "convolve1d",
+      "module": "scipy.ndimage",
+      "seconds": 0.09087696578353643
+    },
+    {
+      "function": "convolve1d",
+      "module": "scipy.ndimage",
+      "seconds": 0.11782979220151901
+    },
+    {
+      "function": "label",
+      "module": "scipy.ndimage",
+      "seconds": 0.0006872816011309624
+    },
+    {
+      "function": "affine_transform",
+      "module": "scipy.ndimage",
+      "seconds": 0.8203794816508889,
+      "parameters": {
+        "order": "1",
+        "mode": "constant",
+        "cval": "0",
+        "output": "<class 'numpy.uint8'>"
+      }
+    },
+    {
+      "function": "compute_cc_cut_mask",
+      "module": "fnit.recon_all.fill_cutting_plane_python",
+      "seconds": 3.0313159488141537
+    },
+    {
+      "function": "distance_transform_cdt",
+      "module": "scipy.ndimage",
+      "seconds": 0.5314842602238059
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.02067638374865055,
+      "coordinates": 178524,
+      "radius": 1
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.009803678840398788,
+      "coordinates": 110508,
+      "radius": 2
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01077224686741829,
+      "coordinates": 104540,
+      "radius": 3
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.007738535292446613,
+      "coordinates": 105106,
+      "radius": 4
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.008317030034959316,
+      "coordinates": 107128,
+      "radius": 5
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.009162740781903267,
+      "coordinates": 109509,
+      "radius": 6
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.009476346895098686,
+      "coordinates": 112289,
+      "radius": 7
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.010248623788356781,
+      "coordinates": 115385,
+      "radius": 8
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.009645732119679451,
+      "coordinates": 118619,
+      "radius": 9
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.010881652124226093,
+      "coordinates": 122001,
+      "radius": 10
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.008807746693491936,
+      "coordinates": 125545,
+      "radius": 11
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.010597135871648788,
+      "coordinates": 129190,
+      "radius": 12
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01189353782683611,
+      "coordinates": 132913,
+      "radius": 13
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.011114564724266529,
+      "coordinates": 136709,
+      "radius": 14
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.011888250708580017,
+      "coordinates": 140454,
+      "radius": 15
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.011722154915332794,
+      "coordinates": 144365,
+      "radius": 16
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01371313538402319,
+      "coordinates": 148357,
+      "radius": 17
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.013232584111392498,
+      "coordinates": 152383,
+      "radius": 18
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.013180914334952831,
+      "coordinates": 156424,
+      "radius": 19
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.012953943572938442,
+      "coordinates": 160461,
+      "radius": 20
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.013031463138759136,
+      "coordinates": 164534,
+      "radius": 21
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01345655508339405,
+      "coordinates": 168601,
+      "radius": 22
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.013621571473777294,
+      "coordinates": 172516,
+      "radius": 23
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.020050724036991596,
+      "coordinates": 176659,
+      "radius": 24
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.017062497325241566,
+      "coordinates": 180659,
+      "radius": 25
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.016815239563584328,
+      "coordinates": 184840,
+      "radius": 26
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01741351094096899,
+      "coordinates": 188973,
+      "radius": 27
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.022844194434583187,
+      "coordinates": 193273,
+      "radius": 28
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01835395023226738,
+      "coordinates": 197647,
+      "radius": 29
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01675385143607855,
+      "coordinates": 202216,
+      "radius": 30
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01844791602343321,
+      "coordinates": 206840,
+      "radius": 31
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.016895458102226257,
+      "coordinates": 211529,
+      "radius": 32
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.02044629491865635,
+      "coordinates": 216338,
+      "radius": 33
+    },
+    {
+      "function": "_edited_on_votes",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.02949972078204155
+    },
+    {
+      "function": "label",
+      "module": "scipy.ndimage",
+      "seconds": 0.1389566045254469
+    },
+    {
+      "function": "binary_fill_holes",
+      "module": "scipy.ndimage",
+      "seconds": 0.7845423808321357
+    },
+    {
+      "function": "_largest_then_fill_holes",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 1.0887607764452696
+    },
+    {
+      "function": "label",
+      "module": "scipy.ndimage",
+      "seconds": 0.1396764488890767
+    },
+    {
+      "function": "binary_fill_holes",
+      "module": "scipy.ndimage",
+      "seconds": 0.7932398319244385
+    },
+    {
+      "function": "_largest_then_fill_holes",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 1.0837145587429404
+    },
+    {
+      "function": "_fill_preclassified",
+      "module": "fnit.recon_all.fill_cutting_plane_python",
+      "seconds": 5.405945396982133
+    },
+    {
+      "function": "save_filled_mgz",
+      "module": "fnit.recon_all.fill_cutting_plane_python",
+      "seconds": 1.1345463674515486
+    }
+  ],
+  "cc_seed_voxel": [
+    127,
+    125,
+    149
+  ],
+  "cc_distance_phase_profiles": [
+    {
+      "label": 2,
+      "boundary_backend": "torch",
+      "marching_backend": "numba",
+      "numba_heap_timing_includes_trial_initialization": true,
+      "boundary_device": "cuda:1",
+      "crop_shape": [
+        91,
+        120,
+        186
+      ],
+      "alive_count": 71046,
+      "preparation_seconds": 0.0955383824184537,
+      "boundary_initialization_seconds": 0.3839306803420186,
+      "trial_initialization_seconds": 0.0,
+      "heap_eikonal_seconds": 0.9204432377591729,
+      "output_assembly_seconds": 0.0245240805670619,
+      "total_seconds": 1.4244363810867071,
+      "unsettled_cc_queries": 0
+    },
+    {
+      "label": 41,
+      "boundary_backend": "torch",
+      "marching_backend": "numba",
+      "numba_heap_timing_includes_trial_initialization": true,
+      "boundary_device": "cuda:1",
+      "crop_shape": [
+        93,
+        115,
+        189
+      ],
+      "alive_count": 70897,
+      "preparation_seconds": 0.0918085491284728,
+      "boundary_initialization_seconds": 0.1514232400804758,
+      "trial_initialization_seconds": 0.0,
+      "heap_eikonal_seconds": 0.6871239980682731,
+      "output_assembly_seconds": 0.024276153184473515,
+      "total_seconds": 0.9546319404616952,
+      "unsettled_cc_queries": 0
+    }
+  ],
+  "shape": [
+    256,
+    256,
+    256
+  ],
+  "dtype": "uint8",
+  "affine_equal_reference": true,
+  "different_voxels": 0,
+  "max_abs": 0.0,
+  "p99_abs": 0.0,
+  "label_dice": {
+    "0": 1.0,
+    "127": 1.0,
+    "255": 1.0
+  },
+  "scope_limit": "headcw diagnostic may differ from gpucw1 hardware/load; no direct speed comparison to 53.16s production measurement",
+  "gpu_index": "1",
+  "gpu_uuid": "GPU-53efd149-9181-8bcf-b5d9-9e9489a90bf9",
+  "gpu_name": "NVIDIA A100-SXM4-80GB",
+  "matmul_tf32": true,
+  "cudnn_tf32": true,
+  "allocated_peak_bytes": 72811008,
+  "reserved_peak_bytes": 96468992,
+  "process_memory_sampling": {
+    "scope": "benchmark parent process on explicit GPU; native child uses CPU only",
+    "gpu_uuid": "GPU-53efd149-9181-8bcf-b5d9-9e9489a90bf9",
+    "pid": 126427,
+    "requested_interval_seconds": 0.25,
+    "max_interval_seconds": 1.1899394923821092,
+    "peak_process_bytes": null,
+    "status": "no_process_memory_observed",
+    "samples": [
+      {
+        "t_seconds": 0.3088296800851822,
+        "processes": []
+      },
+      {
+        "t_seconds": 0.7628812957555056,
+        "processes": []
+      },
+      {
+        "t_seconds": 1.3059067772701383,
+        "processes": []
+      },
+      {
+        "t_seconds": 2.4958462696522474,
+        "processes": []
+      },
+      {
+        "t_seconds": 3.334574186243117,
+        "processes": []
+      },
+      {
+        "t_seconds": 3.725986396893859,
+        "processes": []
+      },
+      {
+        "t_seconds": 4.160456722602248,
+        "processes": []
+      },
+      {
+        "t_seconds": 4.586064849048853,
+        "processes": []
+      },
+      {
+        "t_seconds": 5.008409741334617,
+        "processes": []
+      },
+      {
+        "t_seconds": 5.696535536088049,
+        "processes": []
+      },
+      {
+        "t_seconds": 6.277499481104314,
+        "processes": []
+      },
+      {
+        "t_seconds": 6.859663276001811,
+        "processes": []
+      },
+      {
+        "t_seconds": 7.3848395720124245,
+        "processes": []
+      },
+      {
+        "t_seconds": 7.790180270560086,
+        "processes": []
+      },
+      {
+        "t_seconds": 8.141829541884363,
+        "processes": []
+      },
+      {
+        "t_seconds": 8.558168760500848,
+        "processes": []
+      },
+      {
+        "t_seconds": 9.099608943797648,
+        "processes": []
+      },
+      {
+        "t_seconds": 9.508051196113229,
+        "processes": []
+      },
+      {
+        "t_seconds": 9.918579996563494,
+        "processes": []
+      },
+      {
+        "t_seconds": 10.449080822058022,
+        "processes": []
+      },
+      {
+        "t_seconds": 10.878288120031357,
+        "processes": []
+      },
+      {
+        "t_seconds": 11.282240247353911,
+        "processes": []
+      },
+      {
+        "t_seconds": 12.330151043832302,
+        "processes": []
+      },
+      {
+        "t_seconds": 12.995004734024405,
+        "processes": []
+      }
+    ],
+    "errors": []
+  },
+  "target_card_memory_upper_bound": {
+    "scope": "explicit target CUDA total-free; includes all processes/driver",
+    "requested_interval_seconds": 0.25,
+    "max_interval_seconds": 0.9271065881475806,
+    "peak_card_used_bytes": 24595988480,
+    "errors": [],
+    "samples": [
+      {
+        "t_seconds": 0.0003789858892560005,
+        "used_bytes": 24419827712,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 0.26763241551816463,
+        "used_bytes": 24419827712,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 0.5178747493773699,
+        "used_bytes": 24419827712,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 0.7691024672240019,
+        "used_bytes": 24419827712,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 1.0269580893218517,
+        "used_bytes": 24593891328,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 1.3023053333163261,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 2.2294119214639068,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 2.492224682122469,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 3.1838762452825904,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 3.4342034813016653,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 3.6845811968669295,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 3.9348850017413497,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 4.1851256573572755,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 4.436632499098778,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 4.686895509250462,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 4.9377115005627275,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 5.188114983960986,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 5.439181520603597,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 5.6905333725735545,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 5.9411989338696,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 6.192591589875519,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 6.443911235779524,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 6.6945118717849255,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 6.946404103189707,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 7.197692438960075,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 7.448064195923507,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 7.698312629014254,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 7.950484116561711,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 8.20074744336307,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 8.451545387506485,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 8.70269114524126,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 8.95423342473805,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 9.20622349344194,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 9.456504323519766,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 9.712250771000981,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 9.962897120043635,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 10.21363363508135,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 10.463991112075746,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 10.714757180772722,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 10.965048981830478,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 11.215255465358496,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 11.466097814030945,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 11.716392422094941,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 12.368683253414929,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 12.6306569641456,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 12.887691062875092,
+        "used_bytes": 24595988480,
+        "total_bytes": 84974239744
+      }
+    ]
+  }
+}

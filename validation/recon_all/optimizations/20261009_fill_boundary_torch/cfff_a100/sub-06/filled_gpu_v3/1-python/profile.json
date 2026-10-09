@@ -1,0 +1,445 @@
+{
+  "scope": "complete_existing_FNIT_fill_file_API_profile; frozen_inputs; not whole_recon timing",
+  "code_commit": "a756fffbcff0ed46e8849aef0c25123768c67d60",
+  "code_commit_role": "baseline plus executed module hashes",
+  "module_overlay": true,
+  "modules_sha256": {
+    "fill_aseg_python.py": "6506cc73cab6f4d00389110a8403ad89a781a1c4285b1d8d6c43a94a72c807a2",
+    "fill_cutting_plane_python.py": "5bc61b2e68d6ed47dadc0dafdc488c61807435b9e28dc12c48d5e7dbf3981a04"
+  },
+  "script_sha256": "e37253655fe69f078e67f941923a6d7cfb7fc13dc5a3f0b8ce24c70406ad5279",
+  "input_sha256": {
+    "wm": "284b2504693f53d3e579f18fb9a8fa6bf55b8dfe0d02dcee9ddcb2afcd030fab",
+    "aseg": "636a3c45a66b4fc66d6a9c1bbf4f1cb5cc9f7a1f77b07c72e03cee7e796e76b1",
+    "lta": "7f9fdd6b528a9ca6f5c936c93400cb8bf7c3b6ed222c420d418adbd0d8c5b6d3",
+    "colortable": "65957c41244153d6614aeaf08c16ee956c09e2c8b5e198aa64c81946f75e93b6"
+  },
+  "reference_kind": "existing FNIT frozen same-input filled only; new native reference is separate",
+  "reference_sha256": "5cf9a14ac98921a42ab5f742dabc3d6ff5a10a38f2d6a7f9dca653fd5d1cf46e",
+  "output_sha256": "1819eb456b1936d6472b505dcd8ec6a4a149a90920bb29f4095f35ab1385d1aa",
+  "host": "A100_BENCHMARK_HOST",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz",
+  "cpu_affinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "threads": 4,
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4"
+  },
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "scipy": "1.17.1",
+  "nibabel": "5.4.2",
+  "device": "cpu",
+  "cc_boundary_backend": "python",
+  "cc_marching_backend": "python",
+  "precision": "existing NumPy/SciPy/Numba arithmetic unchanged; Torch boundary int64/bool/float32 constants; no half",
+  "full_API_seconds": 60.86861147545278,
+  "peak_RSS_bytes": 1069293568,
+  "profile_rows_nested_do_not_sum": [
+    {
+      "function": "_cc_outside_distance",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 26.078213803470135,
+      "target_label": 2
+    },
+    {
+      "function": "_cc_outside_distance",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 24.935672847554088,
+      "target_label": 41
+    },
+    {
+      "function": "_replace_cc_with_wm",
+      "module": "fnit.recon_all.fill_cutting_plane_python",
+      "seconds": 51.23143398575485
+    },
+    {
+      "function": "affine_transform",
+      "module": "scipy.ndimage",
+      "seconds": 1.0048294346779585,
+      "parameters": {
+        "order": "1",
+        "mode": "constant",
+        "output": "<class 'numpy.float64'>"
+      }
+    },
+    {
+      "function": "affine_transform",
+      "module": "scipy.ndimage",
+      "seconds": 0.623879293911159,
+      "parameters": {
+        "order": "0",
+        "mode": "constant",
+        "cval": "0"
+      }
+    },
+    {
+      "function": "convolve1d",
+      "module": "scipy.ndimage",
+      "seconds": 0.07119209319353104
+    },
+    {
+      "function": "convolve1d",
+      "module": "scipy.ndimage",
+      "seconds": 0.10258794110268354
+    },
+    {
+      "function": "label",
+      "module": "scipy.ndimage",
+      "seconds": 0.00044711679220199585
+    },
+    {
+      "function": "affine_transform",
+      "module": "scipy.ndimage",
+      "seconds": 0.875971345230937,
+      "parameters": {
+        "order": "1",
+        "mode": "constant",
+        "cval": "0",
+        "output": "<class 'numpy.uint8'>"
+      }
+    },
+    {
+      "function": "compute_cc_cut_mask",
+      "module": "fnit.recon_all.fill_cutting_plane_python",
+      "seconds": 2.9707832150161266
+    },
+    {
+      "function": "distance_transform_cdt",
+      "module": "scipy.ndimage",
+      "seconds": 0.524691510014236
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 1.4625219320878386,
+      "coordinates": 224085,
+      "radius": 1
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.008621782064437866,
+      "coordinates": 130843,
+      "radius": 2
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.011571107432246208,
+      "coordinates": 117996,
+      "radius": 3
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.008512339554727077,
+      "coordinates": 117687,
+      "radius": 4
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.007382359355688095,
+      "coordinates": 119772,
+      "radius": 5
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.0073963673785328865,
+      "coordinates": 122592,
+      "radius": 6
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.007581828162074089,
+      "coordinates": 125733,
+      "radius": 7
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.007780524902045727,
+      "coordinates": 129022,
+      "radius": 8
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.007892747409641743,
+      "coordinates": 132525,
+      "radius": 9
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.008166362531483173,
+      "coordinates": 136165,
+      "radius": 10
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.008361505344510078,
+      "coordinates": 139920,
+      "radius": 11
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.008613329380750656,
+      "coordinates": 143779,
+      "radius": 12
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.030117472633719444,
+      "coordinates": 147774,
+      "radius": 13
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.008967517875134945,
+      "coordinates": 151843,
+      "radius": 14
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.009215339086949825,
+      "coordinates": 156009,
+      "radius": 15
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.009438521228730679,
+      "coordinates": 160118,
+      "radius": 16
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.009480269625782967,
+      "coordinates": 164233,
+      "radius": 17
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.0099363187327981,
+      "coordinates": 168421,
+      "radius": 18
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.010017544031143188,
+      "coordinates": 171885,
+      "radius": 19
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.010166066698729992,
+      "coordinates": 175838,
+      "radius": 20
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.010553203523159027,
+      "coordinates": 179941,
+      "radius": 21
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01053776778280735,
+      "coordinates": 184202,
+      "radius": 22
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01085613202303648,
+      "coordinates": 188445,
+      "radius": 23
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.01121800672262907,
+      "coordinates": 192865,
+      "radius": 24
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.011355961672961712,
+      "coordinates": 197337,
+      "radius": 25
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.011712859384715557,
+      "coordinates": 201892,
+      "radius": 26
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.011805943213403225,
+      "coordinates": 206541,
+      "radius": 27
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.012027638964354992,
+      "coordinates": 211257,
+      "radius": 28
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.012784097343683243,
+      "coordinates": 216005,
+      "radius": 29
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.012639620341360569,
+      "coordinates": 220743,
+      "radius": 30
+    },
+    {
+      "function": "_voronoi_round",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.013223343528807163,
+      "coordinates": 225581,
+      "radius": 31
+    },
+    {
+      "function": "_edited_on_votes",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.03295684140175581
+    },
+    {
+      "function": "label",
+      "module": "scipy.ndimage",
+      "seconds": 0.10983991622924805
+    },
+    {
+      "function": "binary_fill_holes",
+      "module": "scipy.ndimage",
+      "seconds": 0.5759624876081944
+    },
+    {
+      "function": "_largest_then_fill_holes",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.7697687931358814
+    },
+    {
+      "function": "label",
+      "module": "scipy.ndimage",
+      "seconds": 0.10976285487413406
+    },
+    {
+      "function": "binary_fill_holes",
+      "module": "scipy.ndimage",
+      "seconds": 0.5259581785649061
+    },
+    {
+      "function": "_largest_then_fill_holes",
+      "module": "fnit.recon_all.fill_aseg_python",
+      "seconds": 0.7152087399736047
+    },
+    {
+      "function": "_fill_preclassified",
+      "module": "fnit.recon_all.fill_cutting_plane_python",
+      "seconds": 5.519852519035339
+    },
+    {
+      "function": "save_filled_mgz",
+      "module": "fnit.recon_all.fill_cutting_plane_python",
+      "seconds": 0.6814274052157998
+    }
+  ],
+  "cc_seed_voxel": [
+    127,
+    124,
+    155
+  ],
+  "cc_distance_phase_profiles": [
+    {
+      "label": 2,
+      "boundary_backend": "python",
+      "marching_backend": "python",
+      "numba_heap_timing_includes_trial_initialization": false,
+      "boundary_device": "cpu",
+      "crop_shape": [
+        95,
+        126,
+        202
+      ],
+      "alive_count": 81542,
+      "preparation_seconds": 0.08364684879779816,
+      "boundary_initialization_seconds": 7.104061478748918,
+      "trial_initialization_seconds": 1.7875127475708723,
+      "heap_eikonal_seconds": 17.083478393033147,
+      "output_assembly_seconds": 0.014396191574633121,
+      "total_seconds": 26.073095659725368,
+      "unsettled_cc_queries": 0
+    },
+    {
+      "label": 41,
+      "boundary_backend": "python",
+      "marching_backend": "python",
+      "numba_heap_timing_includes_trial_initialization": false,
+      "boundary_device": "cpu",
+      "crop_shape": [
+        95,
+        130,
+        201
+      ],
+      "alive_count": 80793,
+      "preparation_seconds": 0.08498120680451393,
+      "boundary_initialization_seconds": 7.2504125777632,
+      "trial_initialization_seconds": 1.7157148588448763,
+      "heap_eikonal_seconds": 15.865171649493277,
+      "output_assembly_seconds": 0.013690647669136524,
+      "total_seconds": 24.929970940575004,
+      "unsettled_cc_queries": 0
+    }
+  ],
+  "shape": [
+    256,
+    256,
+    256
+  ],
+  "dtype": "uint8",
+  "affine_equal_reference": true,
+  "different_voxels": 0,
+  "max_abs": 0.0,
+  "p99_abs": 0.0,
+  "label_dice": {
+    "0": 1.0,
+    "127": 1.0,
+    "255": 1.0
+  },
+  "scope_limit": "headcw diagnostic may differ from gpucw1 hardware/load; no direct speed comparison to 53.16s production measurement"
+}
