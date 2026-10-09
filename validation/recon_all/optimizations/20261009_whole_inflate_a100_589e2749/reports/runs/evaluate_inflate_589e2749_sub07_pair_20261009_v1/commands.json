@@ -1,0 +1,36 @@
+[
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_region_stats.py",
+      "--reference",
+      "$FNIT/runs/recon_e2e_normalization_0cd9cbd5_20261009_v1/sub07-candidate/subject",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub07-candidate/subject",
+      "--code-commit",
+      "589e2749:raw-T1:GPU-normalization+standard-inflate;archive=06f4cf1c72bce4b47812c9094710bb635f71fc7796a5ff57c9e1f9c87e650bde",
+      "--output",
+      "$FNIT/runs/evaluate_inflate_589e2749_sub07_pair_20261009_v1/region_candidate_vs_control.json"
+    ],
+    "seconds": 0.2988215861842036,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_parcellation_dice.py",
+      "--reference",
+      "$FNIT/runs/recon_e2e_normalization_0cd9cbd5_20261009_v1/sub07-candidate/subject",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub07-candidate/subject",
+      "--code-commit",
+      "589e2749:raw-T1:GPU-normalization+standard-inflate;archive=06f4cf1c72bce4b47812c9094710bb635f71fc7796a5ff57c9e1f9c87e650bde",
+      "--output",
+      "$FNIT/runs/evaluate_inflate_589e2749_sub07_pair_20261009_v1/dice_candidate_vs_control.json",
+      "--label-table",
+      "$FNIT/assets/recon_resources_20261009_v1/assets/FreeSurferColorLUT.txt"
+    ],
+    "seconds": 20.80303295236081,
+    "exit_code": 0
+  }
+]

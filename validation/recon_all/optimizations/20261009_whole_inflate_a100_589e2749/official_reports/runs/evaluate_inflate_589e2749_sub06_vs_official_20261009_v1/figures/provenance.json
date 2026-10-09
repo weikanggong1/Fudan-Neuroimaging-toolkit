@@ -1,0 +1,58 @@
+{
+  "code_commit": "589e2749:raw-T1:GPU-normalization+standard-inflate;archive=06f4cf1c72bce4b47812c9094710bb635f71fc7796a5ff57c9e1f9c87e650bde",
+  "candidate_calculation_commit": "589e2749:raw-T1:GPU-normalization+standard-inflate;archive=06f4cf1c72bce4b47812c9094710bb635f71fc7796a5ff57c9e1f9c87e650bde",
+  "candidate": "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject",
+  "reference": "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06",
+  "space": "conform voxel slices",
+  "purpose": "qualitative localization; no equivalence gates applied",
+  "scope": "render existing results and reports; no metric recomputation",
+  "command": [
+    "$FNIT/envs/recon_main_20261009_v3/bin/python",
+    "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/plot_recon_all_comparison.py",
+    "--reference",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06",
+    "--candidate",
+    "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject",
+    "--region-report",
+    "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/region_candidate_vs_official.json",
+    "--dice-report",
+    "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/dice_candidate_vs_official.json",
+    "--output-dir",
+    "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/figures",
+    "--code-commit",
+    "589e2749:raw-T1:GPU-normalization+standard-inflate;archive=06f4cf1c72bce4b47812c9094710bb635f71fc7796a5ff57c9e1f9c87e650bde"
+  ],
+  "rendering": {
+    "dpi": 160,
+    "bbox_inches": "tight",
+    "pad_inches": 0.15,
+    "overlay_layout_rect": [
+      0,
+      0.07,
+      1,
+      0.95
+    ]
+  },
+  "inputs_sha256": {
+    "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/region_candidate_vs_official.json": "ba1587d4537ff57705abdf1dfd3b4e232ea07b6aa5f5c8b0a0acdd3208085b78",
+    "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/dice_candidate_vs_official.json": "dcb4bcd3b24252d6efd531b3e0e4bddb04305f503f986cf349420768a41ae17b",
+    "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject/mri/orig.mgz": "551ff7045bb41cd624c1e1bf8776016517125272246dd800e8e4f72c36ea2244",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06/mri/orig.mgz": "fee095d7a5865fe8fc9daeb34dd5af749677b3e5f1b17ca8152740750398e2e6",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06/surf/lh.white": "b107628d276ec4531b1db78595c68f357a2d4f70f3401bf0ea1faf3842e31e34",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06/surf/lh.pial": "7e15618a65d0f6cae148a581d9a13973532982e9278bd877ccc3ee6ed339a6f5",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06/surf/rh.white": "48aa7b805fc9b6c42dd700ab98450e1ff37989aa9f41807257bb7e7c70f6fbbf",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06/surf/rh.pial": "1c89610d8a222bcce8b4fade425b60f1d5444e2c7fbbfe1592c062bd30b2cb36",
+    "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject/surf/lh.white": "e36cd3580c9e5fa7fb6f8fc5c46594c967640f6d2888f2abbc77236d0925b212",
+    "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject/surf/lh.pial": "0772268690c28fb084fb65ae3ff2158bf4b20a096cd6fc663620a0e6b574aded",
+    "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject/surf/rh.white": "3932db084373c16f8c53cc9be318e4b71e227c35badc6629df1abe3faacc9d3b",
+    "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject/surf/rh.pial": "45d1d5bad74c8447279bac53c234e1334092c2cdbd5b6f7f8080223e9650151b",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06/mri/aparc.a2009s+aseg.mgz": "2233d02ad153874b7327d03e79e563c16978aa101976d5dc757a13218d4a532d",
+    "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject/mri/aparc.a2009s+aseg.mgz": "1b8993497b0ba5968f8f03ecb174903349b60193eb1feaf7b272a3dd90c6ff91"
+  },
+  "script_sha256": "c9adfdb8338f3a8213461320667013cb28ca6723217ee0d98702a6215acfe7eb",
+  "outputs_sha256": {
+    "local_region_boundary.png": "597d098a6cb0b99a9b3b5445601da0de166c69984048f32a67c2dc3df948f7b9",
+    "region_errors.png": "11e2fe5961848502e1af3696fe96f8c0628e9efac863ca2cffeb2efa03782d17",
+    "t1_surface_overlay.png": "15f32190798b42729324bcf56b0c0ec275417237e98c2283e9dc3f53ec9467ab"
+  }
+}

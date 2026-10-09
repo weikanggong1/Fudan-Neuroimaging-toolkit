@@ -1,0 +1,100 @@
+[
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_region_stats.py",
+      "--reference",
+      "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject",
+      "--code-commit",
+      "589e2749:raw-T1:GPU-normalization+standard-inflate;archive=06f4cf1c72bce4b47812c9094710bb635f71fc7796a5ff57c9e1f9c87e650bde",
+      "--output",
+      "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/region_candidate_vs_official.json"
+    ],
+    "seconds": 0.1684050690382719,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_parcellation_dice.py",
+      "--reference",
+      "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject",
+      "--code-commit",
+      "589e2749:raw-T1:GPU-normalization+standard-inflate;archive=06f4cf1c72bce4b47812c9094710bb635f71fc7796a5ff57c9e1f9c87e650bde",
+      "--output",
+      "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/dice_candidate_vs_official.json",
+      "--label-table",
+      "$FNIT/assets/recon_resources_20261009_v1/assets/FreeSurferColorLUT.txt"
+    ],
+    "seconds": 11.328152223490179,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py",
+      "--subject",
+      "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject",
+      "--output",
+      "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/quality_candidate",
+      "--code-version",
+      "589e2749:raw-T1:GPU-normalization+standard-inflate;archive=06f4cf1c72bce4b47812c9094710bb635f71fc7796a5ff57c9e1f9c87e650bde",
+      "--source-kind",
+      "fnit",
+      "--threads",
+      "4",
+      "--cross-timeout-seconds",
+      "180",
+      "--max-bbox-pairs",
+      "20000000"
+    ],
+    "seconds": 49.82971332129091,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py",
+      "--subject",
+      "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06",
+      "--output",
+      "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/quality_official",
+      "--code-version",
+      "FreeSurfer 8.2.0 d932c45",
+      "--source-kind",
+      "official",
+      "--threads",
+      "4",
+      "--cross-timeout-seconds",
+      "180",
+      "--max-bbox-pairs",
+      "20000000"
+    ],
+    "seconds": 34.29017629288137,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "$FNIT/envs/recon_main_20261009_v3/bin/python",
+      "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/plot_recon_all_comparison.py",
+      "--reference",
+      "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-06",
+      "--candidate",
+      "$FNIT/runs/recon_e2e_inflate_589e2749_20261009_v1/sub06-candidate/subject",
+      "--region-report",
+      "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/region_candidate_vs_official.json",
+      "--dice-report",
+      "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/dice_candidate_vs_official.json",
+      "--output-dir",
+      "$FNIT/runs/evaluate_inflate_589e2749_sub06_vs_official_20261009_v1/figures",
+      "--code-commit",
+      "589e2749:raw-T1:GPU-normalization+standard-inflate;archive=06f4cf1c72bce4b47812c9094710bb635f71fc7796a5ff57c9e1f9c87e650bde"
+    ],
+    "seconds": 7.910815154202282,
+    "exit_code": 0
+  }
+]

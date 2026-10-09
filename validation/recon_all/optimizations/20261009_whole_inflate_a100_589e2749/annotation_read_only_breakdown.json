@@ -1,0 +1,112 @@
+{
+  "scope": "read-only actual 589 raw annotation worker diagnostics; no cache-enabled benchmark or implementation change",
+  "cases": {
+    "06": {
+      "lh": {
+        "operation_wall_seconds": 94.14776521734893,
+        "geometry_feature_prepare_seconds": 10.10751136764884,
+        "three_atlas_substeps_sum_seconds": {
+          "prepare": 6.783103044144809,
+          "initial_classifier": 0.868606124073267,
+          "aseg_first": 0.03476500324904919,
+          "gibbs": 53.47478123754263,
+          "aseg_second": 0.03138161730021238,
+          "islands": 1.4100319715216756,
+          "mode_filter": 2.8542822962626815,
+          "cortex_label": 17.51267618034035,
+          "write": 0.006240943446755409
+        },
+        "allocator": {
+          "requested": "disabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": "1",
+          "environment_after_selection": "1",
+          "effective": "disabled",
+          "torch_stats_known_valid": false,
+          "torch_stats_known_unavailable": true
+        },
+        "input_report_sha256": "d8582df35354ef11e0ef092710fecf20153165fd84b783df39ae8640b7811a01"
+      },
+      "rh": {
+        "operation_wall_seconds": 94.1754315039143,
+        "geometry_feature_prepare_seconds": 10.183768535964191,
+        "three_atlas_substeps_sum_seconds": {
+          "prepare": 6.882904014550149,
+          "initial_classifier": 0.9690932305529714,
+          "aseg_first": 0.03618618194013834,
+          "gibbs": 52.392228403128684,
+          "aseg_second": 0.031866407953202724,
+          "islands": 1.7398589821532369,
+          "mode_filter": 2.9786411058157682,
+          "cortex_label": 17.923128006979823,
+          "write": 0.005872434005141258
+        },
+        "allocator": {
+          "requested": "disabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": "1",
+          "environment_after_selection": "1",
+          "effective": "disabled",
+          "torch_stats_known_valid": false,
+          "torch_stats_known_unavailable": true
+        },
+        "input_report_sha256": "619ad0707a4a57311c84eaff314dc7849b50ec7cc5ab435facbce80b223211bb"
+      }
+    },
+    "07": {
+      "lh": {
+        "operation_wall_seconds": 79.85212934575975,
+        "geometry_feature_prepare_seconds": 7.619001694954932,
+        "three_atlas_substeps_sum_seconds": {
+          "prepare": 6.362871169112623,
+          "initial_classifier": 0.7651984309777617,
+          "aseg_first": 0.02947153151035309,
+          "gibbs": 45.750459127128124,
+          "aseg_second": 0.02832022402435541,
+          "islands": 1.4727993812412024,
+          "mode_filter": 2.1893386766314507,
+          "cortex_label": 14.994795862585306,
+          "write": 0.006092291325330734
+        },
+        "allocator": {
+          "requested": "disabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": "1",
+          "environment_after_selection": "1",
+          "effective": "disabled",
+          "torch_stats_known_valid": false,
+          "torch_stats_known_unavailable": true
+        },
+        "input_report_sha256": "9c9e7d6794792357eb2e2a5fc252a5b4b768e76ac8f57c2203614bb0112e4fbf"
+      },
+      "rh": {
+        "operation_wall_seconds": 77.15764855407178,
+        "geometry_feature_prepare_seconds": 7.527796985581517,
+        "three_atlas_substeps_sum_seconds": {
+          "prepare": 6.428742960095406,
+          "initial_classifier": 0.7752797435969114,
+          "aseg_first": 0.029767101630568504,
+          "gibbs": 43.287336898967624,
+          "aseg_second": 0.02931829635053873,
+          "islands": 1.1266179494559765,
+          "mode_filter": 2.3239412857219577,
+          "cortex_label": 15.01033482234925,
+          "write": 0.006306414492428303
+        },
+        "allocator": {
+          "requested": "disabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": "1",
+          "environment_after_selection": "1",
+          "effective": "disabled",
+          "torch_stats_known_valid": false,
+          "torch_stats_known_unavailable": true
+        },
+        "input_report_sha256": "11281e1f25aa0834c80e84a9357cc947c68e12ec59dba731f948ba2ab5b6ed71"
+      }
+    }
+  },
+  "observation": "existing GCSAFeatureCache already shares geometry/curvature/SVD across three atlases; most remaining time is ordered Python Gibbs plus cortex labeling",
+  "candidate_to_validate": "cache GPU allocator affects only geometry prepare7.5\u201310.2s, not ordered Gibbs; complete cache inherit/enabled ABBA needed before any speed conclusion",
+  "backend_default_changed": false
+}
