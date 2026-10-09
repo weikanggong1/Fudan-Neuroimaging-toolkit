@@ -340,7 +340,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 ## 5. 最新精度和运行时间
 
-最新已完成自产配对及官方评分的A100原始T1整例冻结为 `765c0fe9`：完整MNI与末尾网格检查并行后，两例CLI **2117.283/2061.494秒**，相对 `589e2749` 缩短 **1.148%/2.344%**。完整138输出、16张同序表面、七张分割和68区厚度/面积/体积保持；20/44顶点图有零容差尾差。实际官方严格复现仍为6/138、7/138，厚度MAE **0.044824/0.050676mm**，整体指标等效未判定；生产网格门通过，扩展穿越和球面负向面仍有失败。完整阶段、官方指标、脑图与显存边界见[末尾MNI并行两例整例报告](../../validation/recon_all/optimizations/20261009_whole_late_mni_a100_765c0fe9/README.md)。十分钟目标尚未达到，阶段收益不叠加成整例提速。
+最新已完成自产配对及官方评分的A100原始T1整例冻结为 `e34a1829`：完整dense GPU球面收尾接入后，两例CLI **2122.900/2056.372秒**。相对 `765c0fe9`，sub-06慢0.2653%、sub-07快0.2485%，没有测到可靠整例提速。完整138输出、16张同序表面、七张分割和68区统计保持；20/44顶点图有零容差尾差。实际官方严格复现仍为6/138、7/138，厚度MAE **0.044824/0.050676mm**，整体指标等效未判定；扩展穿越和球面负向面问题保留。完整阶段、实际官方指标、脑图、47.26/41.62GB整卡峰与任务归属未知的边界见[GPU球面收尾两例整例报告](../../validation/recon_all/optimizations/20261010_whole_sphere_finish_a100_e34a1829/README.md)。十分钟目标尚未达到，阶段收益不叠加成整例提速。
 
 后续完整Torch N4的原始连续链已检查到filled：少量N4量化差异在注册/归一化与WM链放大，默认仍为ITK；完整结果见[本次前段诊断](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)。
 
@@ -382,6 +382,8 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-10 | e34a1829 / A100 | 完整dense GPU球面收尾；其余规则保持 | [两例原始T1完整对照与实际官方评分](../../validation/recon_all/optimizations/20261010_whole_sphere_finish_a100_e34a1829/README.md)：2122.900/2056.372秒，无可靠整例提速，指标/有序几何保持 |
+| 2026-10-09 | 765c0fe9 / A100 | 完整MNI与末尾CPU网格检查并行 | [两例原始T1完整结果](../../validation/recon_all/optimizations/20261009_whole_late_mni_a100_765c0fe9/README.md)：2117.283/2061.494秒，相对589缩短1.148%/2.344% |
 | 2026-10-09 | 589e2749 / A100 | 完整PyTorch标准inflation接入、只启用surface worker缓存；nofix和后续算法保持 | [两例原始T1整例与官方回归](../../validation/recon_all/optimizations/20261009_whole_inflate_a100_589e2749/README.md)：2141.872/2110.975秒，比0cd9缩短0.464%/0.859%；16表面/标签/脑区统计相同，局部质量问题保留 |
 | 2026-10-09 | 0cd9cbd5 / A100 | 两轮GPU邻域和第二轮初始偏置显式接入；其余链保持 | [两例原始T1整例回归](../../validation/recon_all/optimizations/20261009_whole_normalization_a100_0cd9cbd5/README.md)：2151.856/2129.266秒，相对上一候选缩短4.58%/6.68%；表面、标签和脑区统计相同，整体等效未判定 |
 | 2026-10-09 | 803aec50 / A100 | GCA独立缓存、分块GPU求逆与有序fill；未包含后续阶段实验 | [两例原始T1完整配对与官方比较](../../validation/recon_all/optimizations/20261009_whole_pair_a100_803aec50/README.md)，配对2.72×/2.65×，整体等效未判定 |
@@ -400,7 +402,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 标准inflation可显式选择`inflate_backend="torch"`，复用[完整inflated/sulc GPU算法](INFLATE_TORCH_20261009.md)。要求明确cuda:N与两个半球worker，只在surface组子exec启用缓存；nofix和后续球面/配准算法保持。非法组合在创建输出前失败；默认仍native。该选项的同输入完整链与589整例分别记录，不能叠加阶段收益。
 
-完整MNI与末尾CPU网格检查可选`mni_execution="parallel-late"`，算法与输出语义见[MNI并行说明](MNI_MESH_PARALLEL.md)。在所有表面/统计写出后使用独立GPU进程，父子分配同一线程预算，join后才检查138输出。两例同输入完整组ABBA为160.421→94.287秒和142.240→72.892秒；该组收益尚未作为新整例提速发布，默认in-process保持。
+完整MNI与末尾CPU网格检查可选`mni_execution="parallel-late"`，算法与输出语义见[MNI并行说明](MNI_MESH_PARALLEL.md)。在所有表面/统计写出后使用独立GPU进程，父子分配同一线程预算，join后才检查138输出。两例同输入完整组ABBA为160.421→94.287秒和142.240→72.892秒；同输入组与765两例原始T1整例分别验证，不能相加；默认in-process保持。
 
 ## 7. 参考文献、原软件和资源
 

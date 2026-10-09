@@ -1,0 +1,175 @@
+{
+  "status": "complete",
+  "pid": 17439,
+  "started_monotonic": 4346442.698543385,
+  "logical_device": "cuda:0",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true
+  },
+  "operation_entered": true,
+  "cuda_allocator": {
+    "requested": "auto",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "actual_cuda_device": {
+    "name": "NVIDIA A100-SXM4-80GB",
+    "uuid": "ed4141f0-3e7c-6723-cf82-4a8370d6f9aa"
+  },
+  "cuda_bootstrap_seconds": 2.976357559673488,
+  "operation_started_monotonic": 4346447.218558645,
+  "value": {
+    "forward": "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub06-candidate/subject/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz",
+    "inverse": "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub06-candidate/subject/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz",
+    "check": "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub06-candidate/subject/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz",
+    "model": "pytorch-synthmorph-deform",
+    "device": "cuda:0",
+    "precision": {
+      "cuda_fp32_exception": true,
+      "fp16_or_bf16": false,
+      "actual_forwards": [
+        {
+          "model": "deform",
+          "compute_inverse": false,
+          "device": "cuda:0",
+          "input_dtype": "torch.float32",
+          "model_devices": [
+            "cuda:0"
+          ],
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "matmul_tf32": false,
+          "cudnn_tf32": false,
+          "cudnn_enabled": true,
+          "cudnn_benchmark": false,
+          "cudnn_deterministic": false,
+          "autocast": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        }
+      ]
+    },
+    "timings_seconds": {
+      "deform_model_and_save": 17.254405945539474,
+      "warp_convert": 11.80153904017061,
+      "warp_inverse": 17.76925491821021,
+      "resample_check": 8.058465655893087
+    },
+    "postprocess_backend": "gpu",
+    "postprocess": {
+      "conversion": {
+        "load_convert_seconds": 2.0609449287876487,
+        "composition_download_seconds": 7.7245051600039005,
+        "save_seconds": 2.016086590476334,
+        "total_seconds": 11.80153904017061,
+        "device": "cuda:0",
+        "chunk_slices": 16
+      },
+      "inverse": {
+        "voronoi_iterations": 76,
+        "soap_iterations_xyz": [
+          50,
+          50,
+          50
+        ],
+        "splat": "ordered CPU Numba FP32 (no atomics)",
+        "fill": "CUDA Triton ordered FP32; FP64 stopping test",
+        "timings_seconds": {
+          "load_convert_ordered_splat": 4.020794083364308,
+          "transfer_fill_soap_download": 1.9651493169367313,
+          "displacement_conversion": 2.1503147510811687,
+          "save": 9.631196456030011
+        },
+        "total_seconds": 17.76925491821021,
+        "device": "cuda:0",
+        "output": "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub06-candidate/subject/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz",
+        "full_grid": true
+      },
+      "check": {
+        "save_seconds": 0.16555817238986492,
+        "total_seconds": 8.058465655893087,
+        "device": "cuda:0",
+        "chunk_slices": 16
+      }
+    },
+    "inputs_sha256": {
+      "orig": "79fb14f26f3b79adc17d9c5cc07f7ed55c700667069c64c0982d7a83dc236529",
+      "crop": "c8c75145c21a903f8df3b001b5adbdde26fe1070a914b75c0b61a33bbfcf7562",
+      "affine": "4a67eaa4c16f52698e2ba2065b6d46d9d29d24962698fcbd992329f53e3d82de",
+      "deform_weight": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+      "cropped_template": "ef89b7aa615dcb4a68a1cad725a9b99314227f9777ed86f42aae61e4e89da19a",
+      "full_template": "e4e1a25b66fef6b2cde8e4916d4a03d4369de6f24b0d3d4736baffc3d4a8c575"
+    },
+    "declared_programs": {
+      "0": {
+        "sha256": "a6834f3b941a8267eccac15658dc1a7a35a67c2e67ba48a32eef7ad1909627a9",
+        "executed": false
+      },
+      "1": {
+        "sha256": "69dc4f7c8f6a80617308d1a34dbf61f36526ed2aa6916e050aa49091ffd4e0dc",
+        "executed": false
+      },
+      "2": {
+        "sha256": "82ff94e4b5a788027853dbaede4e8f318d076d69d51e3c786cae3b5866431b55",
+        "executed": false
+      }
+    },
+    "outputs_sha256": {
+      "forward": "cf0605c8751a2817c57c6a30933695002f6dc37f210c68a8d493b0da71ba779f",
+      "inverse": "5b72cd9e39c6393200b48347969ac9535e063b60dd53b62854199f0b2aa62ff6",
+      "check": "658064b983579cdab6724edd9b110cfa426bec91b8bbbd79b36aba4a25cc18dd"
+    },
+    "source_sha256": {
+      "mni_mesh_parallel": "8b322c3fc01394840d0e8d40bb2b4e4460dd65ac0b80412a2993f3143f25da16",
+      "mni_nonlinear_chain": "943c1e3bd95c0ab4edcb6d080b8b877f4e89bab09bf36df24c73c41ef257fff4",
+      "mni_aux_chain": "60b5c9d1255208df19f9a1eb6ccda300562829d5476a012488784e8ae7f4a2be",
+      "mni_warp_sampling": "84dd8fae47346dbb69ba74ce753c3286ea534828dededf30756d43738787da3d",
+      "mni_warp_inverse": "5bd1ee57342ed59c692a88a6d1814e4787d767c407b3644bdc5fe1ef6578cdc4",
+      "hemisphere_worker": "95b21eb66e63c79be864bc971ad83ad49bd132f32deee78f3647926b60103c15",
+      "profiling": "a4b1cc19794c1af90d6218f7d757cede491ade7da9406e3a3012a628fa2bf3ec",
+      "thread_budget": "bf0b40e5c6c7232d0de23dee3c491a3c27850d79922d81df71689933a9692fca"
+    }
+  },
+  "operation_finished_monotonic": 4346506.837039124,
+  "stage": {
+    "name": "MNI_nonlinear",
+    "seconds": 59.61844837013632,
+    "function_seconds": 59.61824618652463,
+    "cuda_pre_sync_seconds": 3.939587622880936e-05,
+    "cuda_post_sync_seconds": 7.352419197559357e-05,
+    "cuda_synchronized": true,
+    "cuda_synchronization_requested": true,
+    "parent_cpu_seconds": 48.420920413000005,
+    "child_cpu_seconds": 0.029445,
+    "torch_memory_stats_status": "unavailable"
+  },
+  "thread_budget": {
+    "requested_threads": 2,
+    "scope": "Torch process intraop and current caller Numba thread mask",
+    "torch": {
+      "before": 2,
+      "effective": 2,
+      "interop_unchanged": 1,
+      "restored": 2
+    },
+    "numba": {
+      "before": 2,
+      "effective": 2,
+      "initial_capacity": 2,
+      "mask_only": true,
+      "threading_layer": "tbb",
+      "restored": 2
+    },
+    "environment_modified": false,
+    "restoration_complete": true
+  },
+  "finished_monotonic": 4346506.837121972,
+  "total_seconds": 64.13857858721167
+}

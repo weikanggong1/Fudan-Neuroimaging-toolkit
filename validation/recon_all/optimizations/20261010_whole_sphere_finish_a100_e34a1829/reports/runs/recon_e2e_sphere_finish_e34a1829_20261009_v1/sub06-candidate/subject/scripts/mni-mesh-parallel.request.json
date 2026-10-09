@@ -1,0 +1,24 @@
+{
+  "callable": "fnit.recon_all.mni_mesh_parallel:run_mni_stage",
+  "operation": "MNI_nonlinear",
+  "kwargs": {
+    "subject": "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub06-candidate/subject",
+    "weights": "$FNIT/assets/recon_resources_20261009_v1/weights",
+    "assets": "$FNIT/assets/recon_resources_20261009_v1/assets",
+    "warp_binaries": [
+      "$FNIT/assets/recon_resources_20261009_v1/native/bin/mri_warp_convert",
+      "$FNIT/assets/recon_resources_20261009_v1/native/bin/mri_ca_register",
+      "$FNIT/assets/recon_resources_20261009_v1/native/bin/mri_convert"
+    ],
+    "device": "cuda:0",
+    "threads": 2
+  },
+  "device": "cuda:0",
+  "threads": 2,
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true
+  },
+  "profile_stages": true,
+  "allocator_policy": "auto"
+}

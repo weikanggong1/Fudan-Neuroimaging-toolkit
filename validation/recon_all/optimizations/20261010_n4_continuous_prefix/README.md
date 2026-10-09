@@ -33,7 +33,7 @@ prefix_diagnostic = compare_prefix(
 
 六个输入均必需且无路径默认值。前两个目录包含下表14张体积和 `mri/transforms/talairach.lta`。两份 benchmark 必须具有相同原始 T1、源码、资源、程序、主机、目标设备、线程与 CPU 亲和性，后端选择可不同。此处 reference 是 FNIT 控制流程，不是官方输入。
 
-返回 JSON 字典包含实际版本、输入/源码/比较器 SHA、逐体积不同体素数、最大/P99、affine/header/dtype、LTA 16 元素误差、逐标签 Dice 和诊断墙钟。体积位于同一 conform 网格；强度误差是存储数值，affine 平移为 mm，LTA 的线性项与平移单位分别为无量纲/mm，Dice 无量纲。filled 使用自身 255=左、127=右的语义；aseg 使用 LUT。WM 强度图不按每个 uint8 值当作解剖标签。
+返回 JSON 字典包含实际版本、输入/源码/比较器 SHA、逐体积不同体素数、最大/P99、affine/header/dtype、LTA 16 元素误差、逐标签 Dice 和诊断墙钟。体积位于同一 conform 网格；强度误差是存储数值，affine 平移为 mm，本链type-0 LTA映射源影像voxel到atlas voxel，线性项为voxel尺度比，平移为atlas voxel；不把矩阵元素差直接解释为解剖mm距离，Dice 无量纲。filled 使用自身 255=左、127=右的语义；aseg 使用 LUT。WM 强度图不按每个 uint8 值当作解剖标签。
 
 比较复用 `compare_complete_subject._volume/_error` 的既有门槛，不新增整体等效门。读取前后核对体积 SHA；缺文件、配置不同、LTA 格式错误或文件写入中变化会抛异常。数值差异保留为诊断，`overall_metric_equivalence` 固定为 `not_assessed`。CLI 输出路径不得存在，失败不覆盖旧报告。
 

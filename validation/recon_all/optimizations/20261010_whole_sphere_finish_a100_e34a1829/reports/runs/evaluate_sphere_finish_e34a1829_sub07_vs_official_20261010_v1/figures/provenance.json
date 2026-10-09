@@ -1,0 +1,58 @@
+{
+  "code_commit": "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933",
+  "candidate_calculation_commit": "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933",
+  "candidate": "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject",
+  "reference": "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+  "space": "conform voxel slices",
+  "purpose": "qualitative localization; no equivalence gates applied",
+  "scope": "render existing results and reports; no metric recomputation",
+  "command": [
+    "$FNIT/envs/recon_main_20261009_v3/bin/python",
+    "$FNIT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/plot_recon_all_comparison.py",
+    "--reference",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+    "--candidate",
+    "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject",
+    "--region-report",
+    "$FNIT/runs/evaluate_sphere_finish_e34a1829_sub07_vs_official_20261010_v1/region_candidate_vs_official.json",
+    "--dice-report",
+    "$FNIT/runs/evaluate_sphere_finish_e34a1829_sub07_vs_official_20261010_v1/dice_candidate_vs_official.json",
+    "--output-dir",
+    "$FNIT/runs/evaluate_sphere_finish_e34a1829_sub07_vs_official_20261010_v1/figures",
+    "--code-commit",
+    "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933"
+  ],
+  "rendering": {
+    "dpi": 160,
+    "bbox_inches": "tight",
+    "pad_inches": 0.15,
+    "overlay_layout_rect": [
+      0,
+      0.07,
+      1,
+      0.95
+    ]
+  },
+  "inputs_sha256": {
+    "$FNIT/runs/evaluate_sphere_finish_e34a1829_sub07_vs_official_20261010_v1/region_candidate_vs_official.json": "cd3b6612c0d3b2fda0b0c199020491185b7332ff5cb7141631a3f8deff26091b",
+    "$FNIT/runs/evaluate_sphere_finish_e34a1829_sub07_vs_official_20261010_v1/dice_candidate_vs_official.json": "687c9ea59982a099f53741486d60fdd2a2344f256791668e5d4afd2962e1e1c3",
+    "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject/mri/orig.mgz": "86c348e5ae308e6346a7f835872f66889410068313fb176d63379e816798a5c1",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07/mri/orig.mgz": "5268c7e20df18f29dcfbd7513470fb334741ce6edc60415f0b83f0736e7edffc",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07/surf/lh.white": "4bff790379b7dc2a18898b7c1332aadaec3b2e3fc320d80ce22391b1722590dc",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07/surf/lh.pial": "b3c1b2b5f2d93a7aa9d8f067c41e4efc4a365588d38af97b99e32a93bc706f82",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07/surf/rh.white": "1583a54bcfab9f762b530c56b92426ee2792ad855895726f6248f5a839d18149",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07/surf/rh.pial": "bdfb3f3f22dfc0d95d129a08bf425aac9f6de56d7b0fe14ba9ac9e7a4289f551",
+    "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject/surf/lh.white": "c855aa98ed407867709604da0840fc609ad1f69ffad193421cda29f3ce9638bc",
+    "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject/surf/lh.pial": "70345ae1d791f04710713d90d751eb870f5186678cb789a6243d214073ad2e2d",
+    "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject/surf/rh.white": "8391d18cfb96bd6de8d0a65cb593982e0da1c147ceb49a8cd391cac470126fea",
+    "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject/surf/rh.pial": "99cbd3e94d0ee2e60e3a458db3b831c49cf1691bc1fd154d2751ae6b9e55a8a1",
+    "$FNIT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07/mri/aparc.a2009s+aseg.mgz": "5d28a4f0a553b4da47128ed6a9befd143aa853680b6dd373a9af2ab6ba7829c3",
+    "$FNIT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject/mri/aparc.a2009s+aseg.mgz": "ebe4aa57002f39d5b5374d279651b759143345b2ecbef5f98a082433608ae86c"
+  },
+  "script_sha256": "c9adfdb8338f3a8213461320667013cb28ca6723217ee0d98702a6215acfe7eb",
+  "outputs_sha256": {
+    "local_region_boundary.png": "21d46b2d60c995f194ce8f1b2180ce1d718d764e1f06e3d1dcc7506f3988f64a",
+    "region_errors.png": "d6fc44b525ee6a016561cd0630cc39a2fe7ee054855f35710db89fb1da25c901",
+    "t1_surface_overlay.png": "fcf7f37d4424e720da99ae0da774c1752a05222e1dcdc4479be93dca7b1cbdd4"
+  }
+}
