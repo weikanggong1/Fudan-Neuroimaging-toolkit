@@ -1,0 +1,82 @@
+{
+  "kind": "fixed_lattice_and_fixed_field_diagnostic_not_complete_n4",
+  "host": "BENCHMARK_HOST",
+  "device": "cuda:0",
+  "threads": 1,
+  "process_affinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "torch": "2.5.1",
+  "cuda": "11.8",
+  "matmul_tf32": true,
+  "cudnn_tf32": true,
+  "half_precision": false,
+  "sources_sha256": {
+    "FNIT_ROOT/workspaces/n4_torch_cfff_20261009/control/benchmark_frozen_fields.py": "9309fc3f09dbec26d6a6c481525d33ea9ec828d0f0b239401d88537305bbf783",
+    "FNIT_ROOT/workspaces/n4_torch_cfff_20261009/v1/src/fnit/recon_all/n4_bspline_torch.py": "f2edca71b52a7b06b6dca0edffdbfa5de5d3e2ce45fddd1ac8e2e4c256048e9b",
+    "FNIT_ROOT/workspaces/n4_torch_cfff_20261009/v1/src/fnit/recon_all/n4_itk_torch_experimental.py": "fdc7731ecc7c98546d23fa90d970cf87664a39bc22fdfdbfae498ae5d0867a8b"
+  },
+  "inputs_sha256": {
+    "FNIT_ROOT/datasets/n4_stage_transfer_20261009_v1/ds000114_sub-02/input.raw": "df36b2f6b46f4ca815f68eff285997c087a8917fcff9b93712ac05e3150b98a7",
+    "FNIT_ROOT/runs/n4_complete_pair_cfff_20261009_v1/ds000114_sub-02/native_1.final.raw": "648d12d8464deb33943c1a347cd3085fd3083d6860cfc897cde00e3115f89f6c",
+    "FNIT_ROOT/runs/n4_complete_pair_cfff_20261009_v1/ds000114_sub-02/diagnostic.profile.json.final_lattice.raw": "d7cfaf540fe5b229947028b6e0cb984ab13cb0829306263ed565a44adaeb1660",
+    "FNIT_ROOT/runs/n4_complete_pair_cfff_20261009_v1/ds000114_sub-02/diagnostic.profile.json.logfield.raw": "62e1cf55e1700b26481031504dcf285077ae043bfca37c9d809012a728d4e1da",
+    "FNIT_ROOT/runs/n4_complete_pair_cfff_20261009_v1/ds000114_sub-02/diagnostic.profile.json.expfield.raw": "da417dd8778bd2fca0cde039dcccc00696c839145332e5acf45dae925f10a89d"
+  },
+  "comparisons": {
+    "identical_lattice_to_logfield": {
+      "different": 15029719,
+      "max_abs": 1.6391277313232422e-07,
+      "p99_abs": 7.450580596923828e-08,
+      "mean_signed": 6.623009615603216e-09,
+      "rmse": 2.900448182035397e-08,
+      "negative": 5988974,
+      "positive": 9040745,
+      "compute_seconds": 0.030784045346081257,
+      "d2h_seconds": 0.014189186505973339
+    },
+    "identical_logfield_exp": {
+      "different": 4026063,
+      "max_abs": 1.1920928955078125e-07,
+      "p99_abs": 1.1920928955078125e-07,
+      "mean_signed": -1.8548988123257004e-08,
+      "rmse": 5.820118131256162e-08,
+      "negative": 3319191,
+      "positive": 706872,
+      "compute_seconds": 0.004581584595143795,
+      "d2h_seconds": 0.014333296567201614
+    },
+    "identical_expfield_divide": {
+      "different": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mean_signed": 0.0,
+      "rmse": 0.0,
+      "negative": 0,
+      "positive": 0,
+      "compute_seconds": 0.0002489611506462097,
+      "d2h_seconds": 0.014266340993344784
+    },
+    "identical_logfield_exp_divide": {
+      "different": 559173,
+      "max_abs": 3.0517578125e-05,
+      "p99_abs": 7.62939453125e-06,
+      "mean_signed": 8.041435961558818e-09,
+      "rmse": 1.2048507708554072e-06,
+      "negative": 273806,
+      "positive": 285367,
+      "compute_seconds": 0.00029035285115242004,
+      "d2h_seconds": 0.014437688514590263
+    }
+  },
+  "production_default_changed": false,
+  "whole_n4_equivalence": "not evaluated",
+  "gpu_name": "NVIDIA A100-SXM4-80GB",
+  "load_tensor_h2d_seconds": 0.4044451639056206,
+  "reconstruction_geometry_cache_seconds": 0.03870906215161085,
+  "peak_allocated_bytes": 405560832,
+  "peak_reserved_bytes": 425721856
+}

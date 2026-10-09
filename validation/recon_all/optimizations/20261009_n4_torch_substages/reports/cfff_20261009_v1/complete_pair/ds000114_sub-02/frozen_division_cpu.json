@@ -1,0 +1,79 @@
+{
+  "kind": "fixed_lattice_and_fixed_field_diagnostic_not_complete_n4",
+  "host": "BENCHMARK_HOST",
+  "device": "cpu",
+  "threads": 1,
+  "process_affinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "torch": "2.5.1",
+  "cuda": "11.8",
+  "matmul_tf32": true,
+  "cudnn_tf32": true,
+  "half_precision": false,
+  "sources_sha256": {
+    "FNIT_ROOT/workspaces/n4_torch_cfff_20261009/control/benchmark_frozen_fields.py": "9309fc3f09dbec26d6a6c481525d33ea9ec828d0f0b239401d88537305bbf783",
+    "FNIT_ROOT/workspaces/n4_torch_cfff_20261009/division_variant/src/fnit/recon_all/n4_bspline_torch.py": "f59fd9c522c7babb7dbef484eb8b651535c9a542fdd0b02e07b33f99a0cbfd5e",
+    "FNIT_ROOT/workspaces/n4_torch_cfff_20261009/division_variant/src/fnit/recon_all/n4_itk_torch_experimental.py": "2f9289a98371a010de59681d491a17cb3bef6f14e5c70ce4e074aba5c03795a4"
+  },
+  "inputs_sha256": {
+    "FNIT_ROOT/datasets/n4_stage_transfer_20261009_v1/ds000114_sub-02/input.raw": "df36b2f6b46f4ca815f68eff285997c087a8917fcff9b93712ac05e3150b98a7",
+    "FNIT_ROOT/runs/n4_complete_pair_cfff_20261009_v1/ds000114_sub-02/native_1.final.raw": "648d12d8464deb33943c1a347cd3085fd3083d6860cfc897cde00e3115f89f6c",
+    "FNIT_ROOT/runs/n4_complete_pair_cfff_20261009_v1/ds000114_sub-02/diagnostic.profile.json.final_lattice.raw": "d7cfaf540fe5b229947028b6e0cb984ab13cb0829306263ed565a44adaeb1660",
+    "FNIT_ROOT/runs/n4_complete_pair_cfff_20261009_v1/ds000114_sub-02/diagnostic.profile.json.logfield.raw": "62e1cf55e1700b26481031504dcf285077ae043bfca37c9d809012a728d4e1da",
+    "FNIT_ROOT/runs/n4_complete_pair_cfff_20261009_v1/ds000114_sub-02/diagnostic.profile.json.expfield.raw": "da417dd8778bd2fca0cde039dcccc00696c839145332e5acf45dae925f10a89d"
+  },
+  "comparisons": {
+    "identical_lattice_to_logfield": {
+      "different": 15079280,
+      "max_abs": 1.6391277313232422e-07,
+      "p99_abs": 7.450580596923828e-08,
+      "mean_signed": -2.058028000106885e-09,
+      "rmse": 2.9628174009483852e-08,
+      "negative": 8064499,
+      "positive": 7014781,
+      "compute_seconds": 0.168234352953732,
+      "d2h_seconds": 8.476991206407547e-05
+    },
+    "identical_logfield_exp": {
+      "different": 74259,
+      "max_abs": 1.1920928955078125e-07,
+      "p99_abs": 0.0,
+      "mean_signed": 4.665849928642274e-10,
+      "rmse": 7.85997423920331e-09,
+      "negative": 4065,
+      "positive": 70194,
+      "compute_seconds": 0.016660911962389946,
+      "d2h_seconds": 4.101172089576721e-05
+    },
+    "identical_expfield_divide": {
+      "different": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mean_signed": 0.0,
+      "rmse": 0.0,
+      "negative": 0,
+      "positive": 0,
+      "compute_seconds": 0.019992978312075138,
+      "d2h_seconds": 2.6366673409938812e-05
+    },
+    "identical_logfield_exp_divide": {
+      "different": 20206,
+      "max_abs": 3.0517578125e-05,
+      "p99_abs": 0.0,
+      "mean_signed": -4.584933321893914e-09,
+      "rmse": 2.3606713233539873e-07,
+      "negative": 17167,
+      "positive": 3039,
+      "compute_seconds": 0.03675853926688433,
+      "d2h_seconds": 3.7590041756629944e-05
+    }
+  },
+  "production_default_changed": false,
+  "whole_n4_equivalence": "not evaluated",
+  "load_tensor_h2d_seconds": 0.394695520401001,
+  "reconstruction_geometry_cache_seconds": 0.0026266267523169518
+}

@@ -42,8 +42,12 @@ def main():
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=1)
     parser.add_argument("--profile", action="store_true")
+    parser.add_argument("--export-final-fields", action="store_true", help="独立计时导出最终 lattice/logfield；不计入标准 API 墙钟")
+    parser.add_argument("--capture-level-trace", action="store_true", help="保存首轮 phi；含回调成本，不用于纯性能配对")
     args = parser.parse_args()
     torch.set_num_threads(args.threads); torch.set_num_interop_threads(1)
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
     device = torch.device(args.device)
     report = {"kind": "complete_single_input_n4_feedback_not_recon_all",
               "host": platform.node(), "threads": args.threads, "interop_threads": 1,
@@ -51,6 +55,10 @@ def main():
               "matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
               "cudnn_tf32": torch.backends.cudnn.allow_tf32, "half_precision": False,
               "profile_synchronizes_each_phase": args.profile,
+              "capture_level_trace": args.capture_level_trace or args.frozen_prefix is not None,
+              "process_affinity": sorted(os.sched_getaffinity(0)),
+              "cuda_allocator_disable_cache_env": os.environ.get("PYTORCH_NO_CUDA_MEMORY_CACHING"),
+              "cuda_allocator_conf_env": os.environ.get("PYTORCH_CUDA_ALLOC_CONF"),
               "recipe": {"shrink": 4, "levels": 4, "max_iterations": [50]*4,
                          "convergence_threshold": 0, "bins": 200, "fwhm": .15,
                          "wiener_noise": .01, "spline_order": 3, "mask": "all ones"},
@@ -61,6 +69,7 @@ def main():
     for source in (Path(__file__), Path(fit_module.__file__), Path(full_module.__file__)):
         report["source_sha256"][str(source.resolve())] = sha(source)
     samples = []; stop = threading.Event()
+    setup_started = time.perf_counter()
     if device.type == "cuda":
         torch.empty(1, dtype=torch.float32, device=device)
         torch.cuda.synchronize(device)
@@ -80,6 +89,7 @@ def main():
                                         "gpu_uuid": fields[1], "process_bytes": int(fields[2].split()[0])*1024**2})
                 stop.wait(.1)
         thread = threading.Thread(target=monitor, daemon=True); thread.start()
+    report["gpu_probe_monitor_setup_seconds"] = time.perf_counter() - setup_started
     args.output.parent.mkdir(parents=True, exist_ok=True)
     started = time.perf_counter()
     array = np.fromfile(args.input_raw, np.float32).reshape(tuple(args.shape), order="F")
@@ -100,11 +110,23 @@ def main():
             entry["produced_phi_vs_itk"] = compare(current_phi, reference_phi)
             entry["kind"] = "continuous_upstream_not_frozen_same_input_operator"
         trace.append(entry)
-    result = correct_tensor(image=image, spacing=args.spacing, profile=args.profile, callback=capture)
+    callback = capture if args.capture_level_trace or args.frozen_prefix is not None else None
+    result = correct_tensor(image=image, spacing=args.spacing, profile=args.profile, callback=callback)
     floating = result.corrected.cpu().numpy()
     destination = args.output.parent / "full_candidate.final.raw"
     floating.ravel(order="F").tofile(destination)
     report["total_api_load_transfer_compute_write_seconds"] = time.perf_counter() - started
+    report["stage_gpu_setup_load_transfer_compute_write_seconds"] = (
+        report["gpu_probe_monitor_setup_seconds"] + report["total_api_load_transfer_compute_write_seconds"])
+    if args.export_final_fields:
+        export_started = time.perf_counter()
+        lattice_path = args.output.parent / "candidate.final_lattice.raw"
+        field_path = args.output.parent / "candidate.logfield.raw"
+        result.lattice.cpu().numpy().ravel(order="F").tofile(lattice_path)
+        result.log_bias_field.cpu().numpy().ravel(order="F").tofile(field_path)
+        report["final_diagnostic_export_seconds"] = time.perf_counter() - export_started
+        report["final_diagnostic_sha256"] = {str(p): sha(p) for p in (lattice_path, field_path)}
+        report["final_lattice_shape"] = list(result.lattice.shape)
     report["iterations"] = result.iteration_count; report["timings"] = result.timings
     report["convergence_values"] = result.convergence
     report["first_iteration_each_level"] = trace
@@ -127,6 +149,7 @@ def main():
     if device.type == "cuda":
         report["peak_allocated_bytes"] = torch.cuda.max_memory_allocated(device)
         report["peak_reserved_bytes"] = torch.cuda.max_memory_reserved(device)
+        report["torch_memory_counter_caveat"] = "allocator-disabled counters can be uninformative; process sampling is reported separately"
         stop.set(); thread.join(timeout=5)
         report["process_gpu_samples"] = samples
         report["process_gpu_sampling_requested_seconds"] = .1
