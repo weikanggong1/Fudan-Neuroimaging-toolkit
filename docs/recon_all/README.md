@@ -63,6 +63,7 @@ reconstruction_report = run_recon_all_python(
     hemisphere_workers=2,  # 显式启用左右侧独立进程；默认1，共享缺陷体积仍顺序累计
     native_optimizations="auto",  # auto在CUDA上启用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分
     wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
+    wm_execution="in-process",  # isolated仅配torch-optimized，子exec局部缓存、父策略保持
     defects_backend="native",  # torch启用完整PyTorch缺陷投射；标签相同，颜色表不同
     wm_edit_backend="native",  # torch-hybrid启用静态CUDA编辑，有序核心仍用Numba CPU
     sphere_normals_backend="numba",  # torch只迁移标准sphere法向；其余算法和finish保留
@@ -101,6 +102,7 @@ reconstruction_report = run_recon_all_python(
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
+| `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `defects_backend` | 否 | `str` | `'native'` | torch使用完整缺陷投射；保持双侧顺序/标签，采用确定性颜色 |
 | `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid用CUDA静态编辑及Numba有序核心；要求CUDA，证明失败报错 |
 | `sphere_normals_backend` | 否 | `str` | `'numba'` | torch迁移标准sphere法向；要求CUDA，完整优化与CPU finish保持 |
@@ -125,6 +127,7 @@ reconstruction_report = run_recon_all_python(
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
+| `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid复用CUDA静态编辑与Numba有序核心，要求CUDA |
 | `defects_backend` | 否 | `str` | `'native'` | torch完整缺陷投射；半球共享输出仍按左、右顺序 |
 | `sphere_normals_backend` | 否 | `str` | `'numba'` | torch仅迁移标准球面法向，要求CUDA |
@@ -256,6 +259,7 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--hemisphere-workers` | `hemisphere_workers` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `--native-optimizations` | `native_optimizations` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分 |
 | `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
+| `--wm-execution` | `wm_execution` | in-process保留父缓存；isolated为完整WM缓存worker，须配torch-optimized |
 | `--defects-backend` | `defects_backend` | native调用Conda mri_label2vol；torch使用完整PyTorch投射，不要求该原生程序 |
 | `--wm-edit-backend` | `wm_edit_backend` | native调用Conda编辑程序；torch-hybrid用CUDA静态编辑及Numba有序核心 |
 | `--sphere-normals-backend` | `sphere_normals_backend` | numba保留已有标准sphere法向；torch用同设备有序Torch法向 |
@@ -332,6 +336,8 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 <a id="安装"></a>
 <a id="参考文献与原实现"></a>
+
+本轮缓存策略、WM隔离接入及内部计时说明见[阶段执行说明](PIPELINE_STAGE_EXECUTION_20261009.md)。整例优化前后仍按实际源码和原始T1新目录分别测量。
 
 ## 7. 参考文献、原软件和资源
 

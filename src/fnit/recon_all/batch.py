@@ -18,6 +18,7 @@ def run_recon_all_python_batch(
     hemisphere_workers: int = 1,
     native_optimizations: str = "auto",
     wm_backend: str = "native",
+    wm_execution: str = "in-process",
     wm_edit_backend: str = "native",
     defects_backend: str = "native",
     sphere_normals_backend: str = "numba",
@@ -49,6 +50,8 @@ def run_recon_all_python_batch(
     Numba WM/aseg 核心。sphere_normals_backend 默认 numba；torch 只迁移
     标准球面法向。后三种 Torch 选择均要求 CUDA，失败不静默回退。
     wm_backend=torch-optimized复用Torch直方图和缓存平面几何，有序反馈为CPU。
+    wm_execution默认in-process；isolated只允许torch-optimized，以新exec
+    启用阶段缓存并保留父CUDA状态，记录完整阶段墙钟，原样传入每个CLI。
     gca_inverse_backend=cpu和gca_candidate_chunk=64保留旧评分；torch求逆及
     非默认分块只允许CUDA的Torch GCA。fill_backend=python保留旧完整fill；
     gca_execution=in-process保留父缓存；isolated以新exec启用局部GCA缓存，
@@ -71,6 +74,10 @@ def run_recon_all_python_batch(
         raise ValueError("wm_backend must be native, torch or torch-optimized")
     if wm_backend != "native" and any(device == "cpu" for device in devices):
         raise ValueError("Torch WM backends require CUDA devices")
+    if wm_execution not in {"in-process", "isolated"}:
+        raise ValueError("wm_execution must be in-process or isolated")
+    if wm_execution == "isolated" and wm_backend != "torch-optimized":
+        raise ValueError("isolated WM requires torch-optimized backend")
     if gca_inverse_backend not in {"cpu", "torch"}:
         raise ValueError("gca_inverse_backend must be cpu or torch")
     if isinstance(gca_candidate_chunk, bool) or not isinstance(gca_candidate_chunk, int) or gca_candidate_chunk < 1:
@@ -124,6 +131,8 @@ def run_recon_all_python_batch(
             command += ["--backend", backend]
             if wm_backend != "native":
                 command += ["--wm-backend", wm_backend]
+            if wm_execution != "in-process":
+                command += ["--wm-execution", wm_execution]
             if wm_edit_backend != "native":
                 command += ["--wm-edit-backend", wm_edit_backend]
             if defects_backend != "native":

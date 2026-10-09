@@ -150,8 +150,10 @@ class StandardReconWiringTest(unittest.TestCase):
                 contextlib.redirect_stdout(io.StringIO()):
             main(["t1.nii.gz", "subject", "--weights-dir", "weights", "--assets-dir", "assets",
                   "--wm-backend", "torch-optimized", "--gca-inverse-backend", "torch",
+                  "--wm-execution", "isolated",
                   "--gca-candidate-chunk", "1024", "--gca-execution", "isolated", "--fill-backend", "numba"])
         self.assertEqual(run.call_args.kwargs["wm_backend"], "torch-optimized")
+        self.assertEqual(run.call_args.kwargs["wm_execution"], "isolated")
         self.assertEqual(run.call_args.kwargs["gca_inverse_backend"], "torch")
         self.assertEqual(run.call_args.kwargs["gca_candidate_chunk"], 1024)
         self.assertEqual(run.call_args.kwargs["gca_execution"], "isolated")
@@ -174,6 +176,28 @@ class StandardReconWiringTest(unittest.TestCase):
                 run_recon_all_python("missing.nii.gz", subject, "weights", "assets",
                                      native_optimizations="original", gca_inverse_backend="torch")
             self.assertFalse(subject.exists())
+
+    def test_isolated_wm_uses_own_inputs_and_shared_worker(self):
+        with patch("fnit.recon_all.wm_torch_worker.run_isolated_segmentation",
+                   return_value={"isolated_cli_wall_seconds": 3.}) as worker:
+            result = _run_torch_wm_segment(Path("/subject/mri"), device="cuda:1",
+                optimized=True, execution="isolated", threads=2, profile_stages=True)
+        self.assertEqual(worker.call_args.kwargs, {
+            "source_path": Path("/subject/mri/antsdn.brain.mgz"),
+            "output_path": Path("/subject/mri/wm.seg.mgz"),
+            "report_path": Path("/subject/scripts/wm-isolated.json"),
+            "device": "cuda:1", "threads": 2, "histogram_batch_size": 2048,
+            "planar_batch_size": 256, "profile_stages": True})
+        self.assertEqual(result["isolated_cli_wall_seconds"], 3.)
+
+    def test_incompatible_wm_isolation_fails_before_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            subject = Path(directory) / "subject"
+            for backend in ("native", "torch"):
+                with self.subTest(backend=backend), self.assertRaisesRegex(ValueError, "torch-optimized"):
+                    run_recon_all_python("missing.nii.gz", subject, "weights", "assets",
+                        wm_backend=backend, wm_execution="isolated")
+                self.assertFalse(subject.exists())
 
 
 if __name__ == "__main__":

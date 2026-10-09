@@ -84,9 +84,11 @@ class BatchPythonTest(unittest.TestCase):
                 run_recon_all_python_batch(
                     [{"t1": t1, "subject_dir": subject}], root / "weights", root / "assets",
                     wm_backend="torch-optimized", gca_inverse_backend="torch",
+                    wm_execution="isolated",
                     gca_candidate_chunk=1024, gca_execution="isolated", fill_backend="numba")
             command = runner.call_args.args[0]
             for flag, value in (("--wm-backend", "torch-optimized"),
+                                ("--wm-execution", "isolated"),
                                 ("--gca-inverse-backend", "torch"),
                                 ("--gca-candidate-chunk", "1024"), ("--gca-execution", "isolated"),
                                 ("--fill-backend", "numba")):

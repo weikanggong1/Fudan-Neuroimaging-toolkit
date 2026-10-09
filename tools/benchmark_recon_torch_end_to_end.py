@@ -48,6 +48,7 @@ def main():
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="torch")
     parser.add_argument("--wm-edit-backend", choices=("native", "torch-hybrid"), default="native")
     parser.add_argument("--wm-backend", choices=("native", "torch", "torch-optimized"), default="native")
+    parser.add_argument("--wm-execution", choices=("in-process", "isolated"), default="in-process")
     parser.add_argument("--gca-inverse-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--gca-candidate-chunk", type=int, default=64)
     parser.add_argument("--gca-execution", choices=("in-process", "isolated"), default="in-process")
@@ -82,6 +83,7 @@ def main():
         "sphere_normals_backend": args.sphere_normals_backend,
         "wm_edit_backend": args.wm_edit_backend,
         "wm_backend": args.wm_backend,
+        "wm_execution": args.wm_execution,
         "gca_inverse_backend": args.gca_inverse_backend,
         "gca_candidate_chunk": args.gca_candidate_chunk,
         "gca_execution": args.gca_execution,
@@ -109,6 +111,7 @@ def main():
     command += ["--wm-backend", args.wm_backend, "--gca-inverse-backend", args.gca_inverse_backend,
                 "--gca-candidate-chunk", str(args.gca_candidate_chunk), "--gca-execution", args.gca_execution,
                 "--fill-backend", args.fill_backend]
+    command += ["--wm-execution", args.wm_execution]
     report["cli_command"] = command
     tick = time.perf_counter()
     with (args.output_root / "run.log").open("w") as log:
