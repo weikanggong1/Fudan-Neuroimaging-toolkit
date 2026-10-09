@@ -249,7 +249,7 @@ PYTHONPATH=/private/fnit/n4_workspace/v1/src python \
 
 最终 lattice→field、exp/divide、第二例完整反馈及文件接口已经完成，下一步应冻结同一轮 sharpening 输出和拟合残差，分开定位归约与反馈放大的偏差，再从 FNIT 自产 orig 连续运行 nu→注册/归一化→filled。该链未完成之前，保持原生 N4 默认；不按被试选择变体，不事后降低门槛，也不据阶段结果推测原始 T1 整例。
 
-`publish_reports.py` 接收明确的私有 `--source` 目录、新 `--output` 目录，以及可重复的 `--private-prefix`/`--hostname`。它仅输出 JSON、CSV、日志、JUnit XML 和未改字节的 PNG；拒绝符号链接、影像格式、覆盖输出或 PNG 中的私有文本。原始报告另行私有保留，公开映射记录两个版本的 SHA；这项导出不重新计算或修改 benchmark 数值。
+`publish_reports.py` 接收明确的私有 `--source` 目录、新 `--output` 目录，以及可重复的 `--private-prefix`/`--hostname`。它输出 JSON、CSV、日志、JUnit XML 和未改字节的 PNG，CSV 换行统一为 LF；拒绝符号链接、影像格式、覆盖输出或 PNG 中的私有文本。原始报告另行私有保留，公开映射记录两个版本的 SHA；这项导出不重新计算或修改 benchmark 数值。
 
 ## 7．参考文献
 

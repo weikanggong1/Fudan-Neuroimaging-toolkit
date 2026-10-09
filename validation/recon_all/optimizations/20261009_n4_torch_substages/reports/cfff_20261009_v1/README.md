@@ -18,7 +18,7 @@
 `29947cd327eae9cdba5e7e8213b9738b4a79b95b19441a99a75312dbd8bba34d`。
 其中 88 个导出文件在发布前逐项核验；原始包另行私有保留。
 
-公开副本仅将实际存储目录前缀和容器主机名替换为 `FNIT_ROOT` 与 `BENCHMARK_HOST`。所有算法、输入、程序和产物 SHA 保留。`public_export_manifest.json` 给出 91 个初始发布文件各自的原始/公开 SHA，包含原始导出清单及后续镜像/CSV收据；`public_export_validation.json` 核对数值和哈希未改变，JSON/XML 可解析，PNG 字节未改变。原始文件 SHA 不能直接校验脱敏后的 JSON 或日志。README 与最终验证收据属于额外的公开说明，不是假装服务器生成的原始产物。
+公开副本将实际存储目录前缀和容器主机名替换为 `FNIT_ROOT` 与 `BENCHMARK_HOST`；派生 CSV 使用 LF 换行，保证 Git clone 后的文件 SHA 仍能校验。所有算法、输入、程序和产物 SHA 保留。`public_export_manifest.json` 给出 91 个初始发布文件各自的原始/公开 SHA，包含原始导出清单及后续镜像/CSV收据；`public_export_validation.json` 核对数值和哈希未改变，JSON/XML 可解析，PNG 字节未改变。原始文件 SHA 不能直接校验脱敏后的 JSON、日志或换行转换后的 CSV。README 与最终验证收据属于额外的公开说明，不是假装服务器生成的原始产物。
 
 公开内容不包含 MRI 数组、浮点场、许可证、凭据或服务器地址。复现需要单独获取声明的公开输入并按 manifest 核验；路径占位符不是可直接访问的数据下载地址。
 

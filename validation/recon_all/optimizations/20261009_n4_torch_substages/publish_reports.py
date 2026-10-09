@@ -1,7 +1,8 @@
 """生成 N4 公开收据副本，仅替换私有目录前缀和主机名。
 
 输入是已经核验的私有报告目录，不含影像、许可证或凭据。--output 必须
-不存在；只允许 JSON、CSV、日志、JUnit XML 和 PNG。--private-prefix 与
+不存在；只允许 JSON、CSV、日志、JUnit XML 和 PNG。CSV 使用 LF 换行，以免
+Git 转换换行后令公开文件校验失败。--private-prefix 与
 --hostname 可重复传入，原字符串不会写入公开映射。数值、源码和程序哈希
 保持原样；每个文件记录原始/公开 SHA-256，原始收据必须另行私有保留。
 """
@@ -48,6 +49,9 @@ def publish(*, source: Path, output: Path, private_prefixes: list[str],
             published = published.replace(value.encode(), b"FNIT_ROOT")
         for value in names:
             published = published.replace(value.encode(), b"BENCHMARK_HOST")
+        line_endings_normalized = path.suffix.lower() == ".csv" and b"\r\n" in published
+        if line_endings_normalized:
+            published = published.replace(b"\r\n", b"\n")
         # Binary plots must stay byte-identical; confidential metadata needs a
         # separately reviewed image export, not blind PNG byte replacement.
         if path.suffix.lower() == ".png" and published != original:
@@ -61,7 +65,8 @@ def publish(*, source: Path, output: Path, private_prefixes: list[str],
         manifest["files"][relative] = {
             "original_sha256": digest(original), "original_bytes": len(original),
             "published_sha256": digest(published), "published_bytes": len(published),
-            "private_text_replaced": original != published}
+            "private_text_replaced": any(value.encode() in original for value in prefixes + names),
+            "csv_line_endings_normalized": line_endings_normalized}
     (output / "public_export_manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n")
     return manifest
