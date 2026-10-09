@@ -27,6 +27,7 @@ def run_recon_all_python_batch(
     defects_backend: str = "native",
     sphere_normals_backend: str = "numba",
     inflate_backend: str = "native",
+    mni_execution: str = "in-process",
     gca_inverse_backend: str = "cpu",
     gca_candidate_chunk: int = 64,
     gca_execution: str = "in-process",
@@ -58,6 +59,9 @@ def run_recon_all_python_batch(
     inflate_backend默认native；torch复用完整标准inflated/sulc，要求
     全部目标cuda:N与hemisphere_workers=2，仅surface子exec启用缓存，
     nofix/球面/注册及父策略保持。非法组合在任务调度前抛ValueError。
+    mni_execution默认in-process；parallel-late在所有半球写出后，将完整
+    MNI非线性与CPU网格检查并行，所有设备须cuda:N且threads至少2。
+    总线程在这两个任务间分配，join后才检查138输出；原样传入CLI。
     defects_backend 默认 native；torch 将缺陷投射交给同设备 PyTorch，
     保持左清零/右合并顺序和标签含义，调色板采用确定性颜色。
     wm_backend 默认 native；torch 选择已有完整混合 WM segmentation。
@@ -74,11 +78,14 @@ def run_recon_all_python_batch(
     numba使用同顺序CPU堆，torch-numba另使用CUDA初始边界。原样传入CLI。
     """
     from .native_free import (_normalization_controls_options, _normalization_initial_bias_options,
-                              _validate_inflate_backend)
+                              _validate_inflate_backend, _validate_mni_execution)
     for target in devices:
         _normalization_controls_options(normalization_controls_backend, target)
         _normalization_initial_bias_options(normalization_initial_bias_backend, target)
         _validate_inflate_backend(inflate_backend, target, hemisphere_workers)
+        _validate_mni_execution(mni_execution, target, threads)
+    if mni_execution not in {"in-process", "parallel-late"}:
+        raise ValueError("mni_execution must be in-process or parallel-late")
     if inflate_backend not in {"native", "torch"}:
         raise ValueError("inflate_backend must be native or torch")
     if normalization_controls_backend not in {"cpu", "torch"}:
@@ -169,6 +176,8 @@ def run_recon_all_python_batch(
                 command += ["--normalization-initial-bias-backend", normalization_initial_bias_backend]
             if inflate_backend != "native":
                 command += ["--inflate-backend", inflate_backend]
+            if mni_execution != "in-process":
+                command += ["--mni-execution", mni_execution]
             if wm_backend != "native":
                 command += ["--wm-backend", wm_backend]
             if wm_execution != "in-process":

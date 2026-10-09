@@ -68,6 +68,7 @@ reconstruction_report = run_recon_all_python(
     normalization_controls_backend="cpu",  # torch复用两轮同规则GPU邻域；仅显式cuda:N
     normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置GPU传播/平滑，保持原除乘精度
     inflate_backend="native",  # torch复用完整标准inflated/sulc；须cuda:N和两个半球worker
+    mni_execution="in-process",  # parallel-late在末尾将完整MNI与CPU网格检查并行；总线程至少2
     wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
     wm_execution="in-process",  # isolated仅配torch-optimized，子exec局部缓存、父策略保持
     defects_backend="native",  # torch启用完整PyTorch缺陷投射；标签相同，颜色表不同
@@ -112,6 +113,7 @@ reconstruction_report = run_recon_all_python(
 | `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮的GPU邻域计数/求和与缓冲；显式cuda:N，有序选择/其余偏置步骤不变 |
 | `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch只迁移第二轮初始偏置传播/平滑；距离/排序仍CPU，原float64除后乘/float32输出保持，显式cuda:N |
 | `inflate_backend` | 否 | `str` | `'native'` | torch复用完整标准inflated/sulc；须cuda:N与hemisphere_workers=2，仅surface子exec局部启用缓存；nofix和后续球面算法保持 |
+| `mni_execution` | 否 | `str` | `'in-process'` | parallel-late须cuda:N及整数threads≥2，caller autocast关闭；全部半球写出后，完整MNI与CPU网格检查分配同一线程预算并行，join后检查输出；返回完整mni_mesh_parallel报告 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `defects_backend` | 否 | `str` | `'native'` | torch使用完整缺陷投射；保持双侧顺序/标签，采用确定性颜色 |
@@ -142,6 +144,7 @@ reconstruction_report = run_recon_all_python(
 | `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮同规则GPU邻域；所有目标设备须为cuda:N，非法组合调度前拒绝 |
 | `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch复用第二轮初始偏置GPU算子，所有目标设备须为cuda:N，非法组合调度前拒绝 |
 | `inflate_backend` | 否 | `str` | `'native'` | torch使用完整标准inflated/sulc GPU算法；所有设备须cuda:N且hemisphere_workers=2，非法组合调度前拒绝 |
+| `mni_execution` | 否 | `str` | `'in-process'` | parallel-late须cuda:N及整数threads≥2，caller autocast关闭；全部半球写出后，完整MNI与CPU网格检查分配同一线程预算并行，join后检查输出；返回完整mni_mesh_parallel报告 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid复用CUDA静态编辑与Numba有序核心，要求CUDA |
@@ -247,6 +250,7 @@ reconstruction_reports = run_recon_all_python_batch(
     normalization_controls_backend="cpu",  # torch仅显式cuda:N；保留原控制点选择与偏置规则
     normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置；保留原float64除乘与float32输出
     inflate_backend="native",  # torch仅支持显式CUDA和两个半球worker，标准表面输出同序
+    mni_execution="in-process",  # parallel-late要求全部cuda:N；完整MNI与末尾网格检查并行
     wm_edit_backend="native",  # torch-hybrid为同输入已验证的WM/aseg混合候选
     defects_backend="native",  # torch保持完整缺陷标签投射；不等于拓扑GA
     sphere_normals_backend="numba",  # torch仅替换标准sphere法向
@@ -284,6 +288,7 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--normalization-controls-backend` | `normalization_controls_backend` | cpu保留原邻域；torch复用两轮GPU缓冲，显式cuda:N，其余算法不变 |
 | `--normalization-initial-bias-backend` | `normalization_initial_bias_backend` | cpu保留第二轮初始偏置；torch复用GPU传播/平滑，保持算术顺序和精度，显式cuda:N |
 | `--inflate-backend` | `inflate_backend` | 默认native；torch仅替换标准inflated/sulc，须cuda:N和两个半球worker，surface子exec局部启用缓存 |
+| `--mni-execution` | `mni_execution` | 默认in-process；parallel-late在末尾并行完整MNI/CPU网格检查，明确cuda:N与至少2个总线程，join后检查138输出 |
 | `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `--wm-execution` | `wm_execution` | in-process保留父缓存；isolated为完整WM缓存worker，须配torch-optimized |
 | `--defects-backend` | `defects_backend` | native调用Conda mri_label2vol；torch使用完整PyTorch投射，不要求该原生程序 |
@@ -376,6 +381,8 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 本轮缓存策略、WM隔离接入及内部计时说明见[阶段执行说明](PIPELINE_STAGE_EXECUTION_20261009.md)。整例优化前后仍按实际源码和原始T1新目录分别测量。
 
 标准inflation可显式选择`inflate_backend="torch"`，复用[完整inflated/sulc GPU算法](INFLATE_TORCH_20261009.md)。要求明确cuda:N与两个半球worker，只在surface组子exec启用缓存；nofix和后续球面/配准算法保持。非法组合在创建输出前失败；默认仍native。该选项的同输入完整链验证与上表0cd9整例分开，不能叠加阶段收益。
+
+完整MNI与末尾CPU网格检查可选`mni_execution="parallel-late"`，算法与输出语义见[MNI并行说明](MNI_MESH_PARALLEL.md)。在所有表面/统计写出后使用独立GPU进程，父子分配同一线程预算，join后才检查138输出。两例同输入完整组ABBA为160.421→94.287秒和142.240→72.892秒；该组收益尚未作为新整例提速发布，默认in-process保持。
 
 ## 7. 参考文献、原软件和资源
 

@@ -443,7 +443,7 @@ def _run_defects_volume(binary: Path | None, subject: Path, hemi: str,
 
 def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
                          threads: int, warp_binaries: tuple[Path, Path, Path],
-                         stage, *, device: str) -> dict:
+                         stage, *, device: str, defer_mni_nonlinear: bool = False) -> dict:
     """生成 MNI 辅助图、非线性变换和 finalsurfs；显式传递主设备。
 
     subject 提供自产 conform MRI；weights、assets 为已校验资源，threads
@@ -452,8 +452,11 @@ def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
     前向记录字典；原生程序或计算失败抛异常。全部网络使用 device，
     辅助网络卷积在局部作用域采用经同输入验证的FP32，matmul TF32不变；
     CUDA 的 MNI warp 转换、完整求逆和检查图采用自有 GPU 后处理，CPU
-    使用原有 Conda 程序；finalsurfs 后处理使用 CPU。空间、命令与实测
+    使用原有 Conda 程序；finalsurfs复用所选device的既有后处理。空间、命令与实测
     见 MNI_NONLINEAR_CHAIN.md。后处理失败抛出异常，不静默切换后端。
+    defer_mni_nonlinear默认False；True仅延后非线性，MNI affine/crop和
+    finalsurfs照常生成。调用方必须在输出检查前运行完整非线性并join；
+    延后本身没有近似/占位变换，也不生成标准warp文件。
     """
     from .finalsurfs_python import run_finalsurfs
     from .mni_aux_chain import run_mni_aux_chain
@@ -462,10 +465,11 @@ def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
     with torch.backends.cudnn.flags(allow_tf32=False):
         auxiliary = stage("mni_aux", run_mni_aux_chain, subject, weights, assets,
               device=device, threads=threads)
-    stage("mni_nonlinear", run_mni_nonlinear_chain, subject, weights, assets,
-          warp_convert=warp_binaries[0], ca_register=warp_binaries[1],
-          mri_convert=warp_binaries[2], device=device, threads=threads,
-          postprocess_backend="gpu" if torch.device(device).type == "cuda" else "conda")
+    if not defer_mni_nonlinear:
+        stage("mni_nonlinear", run_mni_nonlinear_chain, subject, weights, assets,
+              warp_convert=warp_binaries[0], ca_register=warp_binaries[1],
+              mri_convert=warp_binaries[2], device=device, threads=threads,
+              postprocess_backend="gpu" if torch.device(device).type == "cuda" else "conda")
     # ``finalsurfs_python`` has a validated CUDA implementation for the
     # volume masks and entorhinal/ACJ edits. Keep its FP32 semantics while
     # avoiding an unnecessary device round-trip on GPU recon-all runs.
@@ -868,6 +872,54 @@ def _validate_inflate_backend(backend: str, device: str, hemisphere_workers: int
             raise ValueError("torch inflate_backend requires two cached hemisphere workers")
 
 
+def _validate_mni_execution(execution: str, device: str, threads: int) -> None:
+    """校验完整MNI调度方式；不初始化CUDA或创建目录。
+
+    in-process保留默认；parallel-late须显式cuda:N且总线程至少2，
+    完成全部半球写出后才与CPU网格检查并行，caller autocast须关闭；非法
+    组合抛ValueError，fresh exec不继承autocast而TF32策略保持。
+    """
+    if execution not in {"in-process", "parallel-late"}:
+        raise ValueError("mni_execution must be in-process or parallel-late")
+    if execution == "parallel-late":
+        target = torch.device(device)
+        if target.type != "cuda" or target.index is None:
+            raise ValueError("parallel-late MNI requires explicit cuda:N")
+        if isinstance(threads, bool) or not isinstance(threads, int) or threads < 2:
+            raise ValueError("parallel-late MNI requires an integer thread budget >=2")
+        from .profiling import autocast_state
+        if any(autocast_state(kind)["enabled"] for kind in ("cpu", "cuda")):
+            raise ValueError("parallel-late MNI requires caller autocast disabled; FP16/BF16 is not authorized")
+
+
+def _complete_output_validation(subject: Path, stage, *, late_mni_options: dict | None = None) -> dict:
+    """join完整MNI/网格检查后列出138输出，返回原始分项报告和路径。
+
+    subject为自产目录；stage是原计时/异常回调。late_mni_options默认
+    None保留串行网格检查，否则为既有run_mni_and_validate具名输入字典，
+    不读取官方结果，设备/线程须由入口预校验。返回output_validation、
+    mesh_validation、outputs和可选mni_mesh_parallel完整报告。表面RAS/mm，
+    warp为原scanner RAS毫米；本函数不变换数据或判定指标等效。
+    任一阶段失败传播；不会在子任务join前报告输出缺失或完成。
+    """
+    result = {}
+    if late_mni_options is not None:
+        from .mni_mesh_parallel import run_mni_and_validate
+        group = stage("mni_mesh_parallel", run_mni_and_validate, **late_mni_options)
+        result.update(mni_mesh_parallel=group, mesh_validation=group["mesh_validation"])
+    else:
+        result["mesh_validation"] = stage("mesh_validation", _validate_meshes, subject)
+    from .expected_outputs import paths as expected_paths
+    expected = expected_paths()
+    present = {name: (subject / name).is_file() for name in expected}
+    missing = [name for name, exists in present.items() if not exists]
+    result["output_validation"] = {"profile": "single-t1-138", "expected": len(expected),
+        "present": len(expected) - len(missing), "missing": missing,
+        "status": "passed" if not missing else "failed"}
+    result["outputs"] = {name: str(subject / name) for name in expected if present[name]}
+    return result
+
+
 def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
@@ -886,6 +938,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          defects_backend: str = "native",
                          sphere_normals_backend: str = "numba",
                          inflate_backend: str = "native",
+                         mni_execution: str = "in-process",
                          gca_inverse_backend: str = "cpu",
                          gca_candidate_chunk: int = 64,
                          gca_execution: str = "in-process",
@@ -906,6 +959,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     inflate_backend默认native；torch复用完整标准inflated/sulc GPU算法，
     仅支持显式cuda:N和hemisphere_workers=2，在surface子exec局部启用
     缓存。nofix、球面优化/配准和父进程CUDA策略保持，失败不回退。
+    mni_execution默认in-process；parallel-late将完整非线性延后到全部
+    半球写出之后，与CPU网格检查按同一threads预算并行，join后检查输出。
+    要求cuda:N及显式整数threads>=2；错误传播，不生成占位文件。
     native_optimizations=auto在CUDA使用已有FNIT Torch评分+Python EM；CPU
     查询独立产物能力，4线程可使用验证过的GCA缓存。white使用专用快速
     程序，pial保留原程序；original固定原生GCA用于控制。
@@ -940,6 +996,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     normalization_options = _normalization_controls_options(normalization_controls_backend, device)
     initial_bias_options = _normalization_initial_bias_options(normalization_initial_bias_backend, device)
     _validate_inflate_backend(inflate_backend, device, hemisphere_workers)
+    _validate_mni_execution(mni_execution, device, threads)
     from .input_n4_chain import validate_n4_execution
     validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=device)
     if backend not in {"native", "python-gpu"}:
@@ -1000,8 +1057,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
 
     if threads < 1:
         raise ValueError("threads must be positive")
-    if hemisphere_workers == 2 and any(autocast_state(kind)["enabled"] for kind in ("cpu", "cuda")):
-        raise ValueError("parallel hemispheres require caller autocast disabled; FP16/BF16 is not authorized")
+    if (hemisphere_workers == 2 or mni_execution == "parallel-late") and any(
+            autocast_state(kind)["enabled"] for kind in ("cpu", "cuda")):
+        raise ValueError("parallel stages require caller autocast disabled; FP16/BF16 is not authorized")
     allocator = configure_cuda_allocator(device, cuda_allocator_cache)
     t1, subject = Path(t1).resolve(), Path(subject_dir).resolve()
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
@@ -1163,6 +1221,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            "PyTorch deform + Conda source-built warp conversion"),
         "postprocess_backend": "gpu" if torch.device(device).type == "cuda" else "conda",
         "native_programs_used": torch.device(device).type != "cuda",
+        "execution": mni_execution,
         "device": device,
         "precision": "FP32 CUDA exception" if torch.device(device).type == "cuda" else "FP32 CPU",
         "native_sha256": {name: binary[1] for name, binary in zip(
@@ -1200,6 +1259,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             row["precision"] = value.get("precision")
             row["postprocess_backend"] = value.get("postprocess_backend")
             row["postprocess"] = value.get("postprocess")
+        if name == "mni_mesh_parallel" and isinstance(value, dict):
+            row["mni_runtime"] = value.get("mni_nonlinear")
+            row["parallel_intervals"] = value.get("intervals")
         if isinstance(value, dict) and "timings_seconds" in value:
             row["timings_seconds"] = value["timings_seconds"]
         if isinstance(value, dict) and isinstance(value.get("timing"), dict):
@@ -1338,7 +1400,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     try:
         report["Synth_auxiliary_runtime"] = _run_white_mri_chain(subject, weights, assets, threads,
                              tuple(binary[0] for binary in warp_binaries), stage,
-                             device=device)
+                             device=device,
+                             **({"defer_mni_nonlinear": True}
+                                if mni_execution == "parallel-late" else {}))
     except Exception as error:
         if report["status"] != "failed":
             report.update(status="failed", failed_stage="white_mri_chain",
@@ -1498,20 +1562,18 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
               subject, hemi, stats / f"{hemi}.w-g.pct.stats")
         stage(f"stats_{hemi}_curv", _run_curvature_stats,
               curvature_stats_binary[0], subject, hemi, assets)
-    from .expected_outputs import paths as expected_paths
-
-    expected = expected_paths()
-    present = {name: (subject / name).is_file() for name in expected}
-    missing = [name for name, exists in present.items() if not exists]
-    report["output_validation"] = {
-        "profile": "single-t1-138", "expected": len(expected),
-        "present": len(expected) - len(missing), "missing": missing,
-        "status": "passed" if not missing else "failed"}
-    report["mesh_validation"] = stage("mesh_validation", _validate_meshes, subject)
+    late_mni_options = None
+    if mni_execution == "parallel-late":
+        late_mni_options = {"subject": subject, "weights": weights, "assets": assets,
+            "warp_binaries": tuple(binary[0] for binary in warp_binaries),
+            "report_path": subject / "scripts/mni-mesh-parallel.json", "device": device,
+            "threads": threads, "execution": "parallel", "profile_stages": profile_stages}
+    report.update(_complete_output_validation(subject, stage, late_mni_options=late_mni_options))
+    if late_mni_options is not None:
+        report["mni_nonlinear"]["runtime"] = report["mni_mesh_parallel"]["mni_nonlinear"]
     report["numeric_validation"] = {"status": "not_run",
                                     "reason": "reference_subject_not_provided"}
-    report["outputs"] = {name: str(subject / name) for name in expected if present[name]}
-    valid = not missing and report["mesh_validation"]["status"] == "passed"
+    valid = report["output_validation"]["status"] == "passed" and report["mesh_validation"]["status"] == "passed"
     report.update(status="complete" if valid else "incomplete",
                   total_seconds=time.perf_counter() - started)
     report["timing"]["pipeline_seconds"] = time.perf_counter() - pipeline_started
@@ -1540,6 +1602,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          defects_backend: str = "native",
                          sphere_normals_backend: str = "numba",
                          inflate_backend: str = "native",
+                         mni_execution: str = "in-process",
                          gca_inverse_backend: str = "cpu",
                          gca_candidate_chunk: int = 64,
                          gca_execution: str = "in-process",
@@ -1569,6 +1632,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     同序inflated/sulc，须cuda:N与hemisphere_workers=2。仅surface组的
     fresh worker局部启用缓存；nofix、sphere及注册算法保持，父策略不变。
     非法组合在CUDA初始化和创建输出前抛ValueError，执行失败不回退。
+    mni_execution=in-process保留默认；parallel-late在全部统计/半球写出后
+    运行完整MNI GPU子exec，与CPU网格检查共享总threads预算（至少2）。
+    要求cuda:N；返回mni_mesh_parallel完整报告及原mni_nonlinear.runtime，
+    join后才检查138输出；同一原始scanner RAS毫米变换，失败传播。
     defects_backend=native 使用原生缺陷投射，torch 用本项目完整投射规则
     并保持双侧累积顺序；仅颜色表换成固定颜色，当前默认为 native。
     wm_edit_backend=native 调用独立构建编辑程序；torch-hybrid 使用 CUDA
@@ -1605,6 +1672,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     _normalization_controls_options(normalization_controls_backend, device)
     _normalization_initial_bias_options(normalization_initial_bias_backend, device)
     _validate_inflate_backend(inflate_backend, device, hemisphere_workers)
+    _validate_mni_execution(mni_execution, device, threads)
     from .thread_budget import thread_budget
 
     report_path = Path(subject_dir) / "fnit-native-free-run.json"
@@ -1663,6 +1731,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"sphere_normals_backend": sphere_normals_backend}
                        if sphere_normals_backend != "numba" else {}),
                     **({"inflate_backend": inflate_backend} if inflate_backend != "native" else {}),
+                    **({"mni_execution": mni_execution} if mni_execution != "in-process" else {}),
                     **({"gca_inverse_backend": gca_inverse_backend} if gca_inverse_backend != "cpu" else {}),
                     **({"gca_candidate_chunk": gca_candidate_chunk} if gca_candidate_chunk != 64 else {}),
                     **({"gca_execution": gca_execution} if gca_execution != "in-process" else {}),
@@ -1719,6 +1788,8 @@ def main(argv: list[str] | None = None) -> None:
                         help="second normalization initial bias; torch reuses existing propagation/smoothing with original arithmetic")
     parser.add_argument("--inflate-backend", choices=("native", "torch"), default="native",
                         help="standard smoothwm inflation; torch requires cuda:N and two cached hemisphere workers; nofix unchanged")
+    parser.add_argument("--mni-execution", choices=("in-process", "parallel-late"), default="in-process",
+                        help="complete MNI in a late exec overlapping CPU mesh validation; explicit cuda:N and >=2 total threads")
     parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=1,
                         help="independent hemisphere processes; total threads split across two workers")
@@ -1765,6 +1836,7 @@ def main(argv: list[str] | None = None) -> None:
                                   defects_backend=args.defects_backend,
                                   sphere_normals_backend=args.sphere_normals_backend,
                                   inflate_backend=args.inflate_backend,
+                                  mni_execution=args.mni_execution,
                                   gca_inverse_backend=args.gca_inverse_backend,
                                   gca_candidate_chunk=args.gca_candidate_chunk,
                                   gca_execution=args.gca_execution,
