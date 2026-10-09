@@ -148,16 +148,14 @@ def triangle_pairs_intersect_torch(first, second, *, device: str = "cuda:0",
         if isinstance(value, torch.Tensor):
             if value.dtype != torch.float32:
                 raise TypeError("triangle coordinates must be float32")
-            data = value.to(target)
+            data = value
         else:
             array = np.asarray(value)
             if array.dtype != np.float32:
                 raise TypeError("triangle coordinates must be float32")
-            data = torch.as_tensor(array, device=target)
+            data = torch.as_tensor(array)
         if data.ndim != 3 or tuple(data.shape[1:]) != (3, 3):
             raise ValueError("triangles must have shape (P,3,3)")
-        if not bool(torch.isfinite(data).all()):
-            raise ValueError("triangle coordinates must be finite")
         return data
     a, b = prepare(first), prepare(second)
     if a.shape != b.shape:
@@ -166,16 +164,22 @@ def triangle_pairs_intersect_torch(first, second, *, device: str = "cuda:0",
     rechecked = 0
     for start in range(0, len(a), chunk_size):
         stop = min(start + chunk_size, len(a))
-        hits, ambiguous = _pair_kernel(a[start:stop], b[start:stop])
+        # 只上传当前块。此前先将完整host面对搬到CUDA，再分块计算，
+        # 会让chunk_size失去控制输入驻留显存的作用。
+        aa, bb = a[start:stop].to(target), b[start:stop].to(target)
+        if not bool(torch.isfinite(aa).all()) or not bool(torch.isfinite(bb).all()):
+            raise ValueError("triangle coordinates must be finite")
+        hits, ambiguous = _pair_kernel(aa, bb)
         if source_recheck:
             selected = ambiguous.nonzero().flatten()
             rechecked += len(selected)
             if len(selected):
-                aa, bb = a[start:stop][selected].cpu().numpy(), b[start:stop][selected].cpu().numpy()
-                verified = _source_pairs(aa, bb)
+                selected_a, selected_b = aa[selected].cpu().numpy(), bb[selected].cpu().numpy()
+                verified = _source_pairs(selected_a, selected_b)
                 hits[selected] = torch.as_tensor(verified, dtype=torch.bool, device=target)
         result[start:stop] = hits
     return result, {"pairs": len(a), "source_rechecked_pairs": rechecked,
                     "dtype": "float64 geometry from float32 vertices", "device": str(target),
                     "chunk_size": chunk_size, "source_recheck": bool(source_recheck),
+                    "input_transfer_scope": "one_chunk_at_a_time",
                     "changes_vertex_update_order": False}

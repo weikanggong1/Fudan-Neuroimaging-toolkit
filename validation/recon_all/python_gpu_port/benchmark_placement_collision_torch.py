@@ -70,6 +70,12 @@ def main():
         official_reference='not a complete stage; separate frozen-input complete pial report',
         tolerance_before_run=dict(coordinates_max_mm=0,accepted_offsets_max=0,decision_differences=0),
         default_admission='opt-in; complete pial and end-to-end not assessed')
+    def persist(status):
+        report['execution_status']=status
+        temporary=output/'report.json.tmp'
+        temporary.write_text(json.dumps(report,ensure_ascii=False,indent=2))
+        temporary.replace(output/'report.json')
+        print(json.dumps(dict(status=status,hostname=platform.node()),ensure_ascii=False),flush=True)
     source_functions=(collision.asynchronous_first_step,triangle_pairs_intersect_torch,
         conservative_face_candidates_torch,snapshot_ordered_step,quadratic_curvature,
         intensity_gradient,average_signed_gradients,unconstrained_step_with_offsets)
@@ -111,9 +117,12 @@ def main():
     np.savez(state,vertices=xyz,faces=faces,proposal=proposal,ripped=ripped,
         momentum=momentum,offsets=displacement,neighbors=neighbors,valid=valid)
     report['checkpoint_sha256']={state.name:sha256(state)}
+    persist('prepared')
     def run(backend):
         accepted=momentum.copy();diagnostic={}
-        torch.cuda.synchronize(device);tick=time.perf_counter()
+        torch.cuda.synchronize(device)
+        report.setdefault('gpu',torch.cuda.get_device_name(device))
+        tick=time.perf_counter()
         result,order=collision.asynchronous_first_step(xyz,faces,proposal,ripped,
             offsets=displacement,accepted_offsets=accepted,ordered_neighbors=ordered,
             candidate_backend=backend,candidate_device=str(device) if backend=='torch_snapshot' else None,
@@ -131,6 +140,7 @@ def main():
     reference_path=output/'first_trial_reference.npz'
     np.savez(reference_path,coordinates=baseline[0],order=baseline[1],accepted_offsets=baseline[2])
     report['checkpoint_sha256'][reference_path.name]=sha256(reference_path)
+    persist('cold_pair_complete')
     torch.cuda.reset_peak_memory_stats(device);rows=[]
     for backend in ('tree','torch_snapshot','torch_snapshot','tree'):
         result=run(backend)
@@ -143,6 +153,7 @@ def main():
     report['median_seconds']=medians;report['speed_ratio_tree_over_torch_snapshot']=medians['tree']/medians['torch_snapshot']
     report['peak_allocated_bytes']=torch.cuda.max_memory_allocated(device)
     report['peak_reserved_bytes']=torch.cuda.max_memory_reserved(device)
+    persist('paired_complete')
     if args.capture:
         original=collision._vertex_collision_batch;chunks=[];pair_a=[];pair_b=[];pair_vertex=[];pair_count=0
         references=np.zeros(len(xyz),np.bool_);called=np.zeros(len(xyz),np.bool_)
@@ -152,6 +163,8 @@ def main():
             path=output/f'live_pairs_{len(chunks):05d}.npz'
             np.savez(path,first=np.concatenate(pair_a),second=np.concatenate(pair_b),vertex=np.concatenate(pair_vertex))
             chunks.append(path);pair_a.clear();pair_b.clear();pair_vertex.clear();pair_count=0
+            report['capture_checkpoint']=dict(chunks=len(chunks),last_chunk=path.name,last_sha256=sha256(path))
+            persist('capture_in_progress')
         def capture(current,triangles,face_ids,vertex,endpoint,tree,maximum_radius):
             nonlocal pair_count
             moved,centers,radii,lows,highs=collision._incident_face_geometry(current,triangles,face_ids,vertex,endpoint)
@@ -174,6 +187,8 @@ def main():
         try:captured=run('tree');flush()
         finally:collision._vertex_collision_batch=original
         capture_seconds=time.perf_counter()-tick
+        report['capture_seconds']=capture_seconds
+        persist('capture_complete')
         hits=np.zeros(len(xyz),np.bool_);predicate_rows=[]
         for path in chunks:
             with np.load(path) as saved:
@@ -183,6 +198,8 @@ def main():
                 seconds=time.perf_counter()-tick
                 np.logical_or.at(hits,saved['vertex'],result)
                 predicate_rows.append(dict(pairs=len(result),seconds=seconds,diagnostics=diagnostic,sha256=sha256(path)))
+                report['replay_checkpoint']=dict(chunks_completed=len(predicate_rows),chunks_total=len(chunks))
+                persist('replay_in_progress')
         report['live_predicate_replay']=dict(capture_seconds=capture_seconds,called_vertices=int(called.sum()),
             pairs=sum(row['pairs'] for row in predicate_rows),source_collision_vertices=int(references.sum()),
             difference_vertices=int(np.count_nonzero(hits[called]!=references[called])),chunks=predicate_rows,
@@ -192,7 +209,8 @@ def main():
         reference_bool=output/'live_pair_reference.npz';np.savez(reference_bool,called=called,collision=references)
         report['checkpoint_sha256'][reference_bool.name]=sha256(reference_bool)
     report['whole_process_gpu_memory']='not measured; allocator only, same-input subprocess'
-    (output/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+    report['allocator_peak_scope']='ABBA complete first trial, after cold compilation/context setup'
+    persist('complete')
     print(json.dumps(report,ensure_ascii=False),flush=True)
 
 

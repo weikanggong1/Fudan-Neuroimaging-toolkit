@@ -125,7 +125,10 @@ python validation/recon_all/python_gpu_port/benchmark_placement_collision_torch.
 
 CPU算子和有序首试步单元回归7/7通过，包含阈值两侧、共面、接触、退化、
 零半径、完整候选、投影、rip和retained-MHT回退。模拟几何用于排错；
-不替代真实脑影像benchmark。真实首试步和活跃面对回放结果正在生成。
+不替代真实脑影像benchmark。真实sub-07 LH的v3作业已生成输入、有序接受
+和两块实际面对检查点，但连接结束时没有最终报告；此时新worker SSH也
+出现连接拒绝。中断原因未确认，不能把检查点当成通过或引用丢失的ABBA
+时间，见[中断记录](../../validation/recon_all/optimizations/20261009_placement_torch/collision_sub07_lh_v3_interrupted.json)。
 完整pial、第二例双侧、整例显存和整例提速尚未由该碰撞选项验证。
 
 已有正则梯度的完整同输入pial配对见
@@ -136,6 +139,9 @@ CPU算子和有序首试步单元回归7/7通过，包含阈值两侧、共面�
 
 - 2026-10-09：新增完整空间候选、保守运动AABB、FP64批量面对谓词和源边界
   复核；新增 `torch_snapshot` 显式选项，保留有序接受和原重试路径。
+- 对大规模host面对改为只上传当前块，避免先上传全体输入后才分块计算。
+  真实benchmark新增每个完成测量边界的原子JSON写出，外部中断时保留
+  已完成的测量和明确状态；完整状态只有 `execution_status="complete"`。
 - 完整GPU接受仍需处理Gauss-Seidel依赖：当前顶点的近邻投影读取先前已接受
   顶点，碰撞读取候选三角面当前状态。共享面、近邻、完整候选面的顶点均属
   依赖边；不能只按左右半球或互不邻接顶点组批，更不能用Jacobi取代。
