@@ -7,6 +7,12 @@ import pytest
 from fnit.recon_all import place_pial_python as stage
 
 
+def test_profile_rejects_ambiguous_cuda_device_before_input_reads(tmp_path):
+    with pytest.raises(ValueError, match="explicitly indexed"):
+        stage.place_pial_t1(subject=tmp_path, hemisphere="lh", profile=True,
+                            regularization_backend="torch", device="cuda")
+
+
 @pytest.mark.parametrize("profile", [False, True])
 def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp_path, monkeypatch, profile):
     for folder in ('surf', 'mri', 'label'):

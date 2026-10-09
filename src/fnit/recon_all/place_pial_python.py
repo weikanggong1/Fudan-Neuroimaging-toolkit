@@ -102,6 +102,8 @@ def place_pial_t1(
     if profile and device is not None and (sampling_backend != "cpu" or regularization_backend == "torch"):
         import torch
         profile_torch, profile_device = torch, torch.device(device)
+        if profile_device.type == "cuda" and profile_device.index is None:
+            raise ValueError("CUDA profiling requires an explicitly indexed device, e.g. cuda:0")
 
     def profile_boundary() -> float:
         if stage_seconds is None:

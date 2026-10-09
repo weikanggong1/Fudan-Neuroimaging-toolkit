@@ -40,18 +40,44 @@ OpenMP/BLAS 四线程；CPU亲和性未固定，当前允许 0–127。TF32 默�
 处理，并在非有限 QR 梯度进入优化器前明确报错；15 项 CPU 回归包含该版本。
 未将旧 GPU 报告哈希改成最终文件哈希。
 
-## 正在运行及未验证
+## 完整 pial、最终源码和官方对照
 
-完整 LH pial CPU→Torch 同输入配对保存在服务器固定目录：
+完整 LH pial CPU→Torch 同输入配对已经完成，原始产物保存在服务器固定目录：
 `runs/recon_torch_surface_20261009/full_pial_sub07_lh_v1/`。
 持久会话为 headcw 的 `fnit-surface-full-pial-20261009`，每步保存坐标哈希、
 SSE/RMS、dt、接受/拒绝以及四轮边界。完整报告将检查输出文件、有序面、
-坐标与全部试步轨迹；结束前不发布整步加速。此次冻结 v1 不在运行时改写。
+坐标与全部试步轨迹。此次冻结 v1 未在运行时改写。
+
+| 范围 | CPU(s) | Torch(s) | 优化退化诊断 |
+|---|---:|---:|---|
+| sub07 LH完整四轮pial，v1 | 1396.651 | 1483.542 | 41步及全部决策、坐标、文件SHA相同；本对慢6.22%，继续opt-in |
+| sub07 LH首轮white完整一步，final_v2 | 68.221 | 62.148 | 坐标、面、逐步决策相同；单对包含冷/热差异 |
+
+完整 pial 双方清理均为 23→0；allocator/reserved 峰值为
+141131264/197132288 bytes，整进程显存未采样。完整调用是共享节点的
+单对观察，不能用静态正则梯度的2.2倍解释为整步提速。机器报告为
+[完整pial](full_pial_sub07_lh_v1.json)。
+
+独立最终源码 regularizer SHA
+`9ce7501275af99be9619a1fa1f29355760f15e59f96e275291747373ee9058e8`
+的 sub06/sub07 双侧共四组均每元素相同：
+[sub07](regularizer_sub07_final_v2_gpu0.json)、
+[sub06](regularizer_sub06_final_v2_gpu0.json)。
+它们没有覆盖 v1 已冻结报告。完整 white 仍未实现；
+[white首步](white_prefix_sub07_lh_final_v2_gpu0.json)只验证第一轮一步。
+
+官方 FreeSurfer8.2同一输入重复两次，坐标与有序面0diff，墙钟
+150.877/160.181秒；输出文件SHA不同，不把几何重现描述为字节重现。
+与Python CPU/Torch均为1560个坐标元素不同，mean/P99/max顶点差
+0.0000443/0/0.256908mm。现有Conda二进制44ad399...运行207.409秒，
+相对Pythonmean/P99/max为0.005510/0.109754/1.210214mm；这些前置
+输入SHA均匹配。报告为[官方](native_official_sub07_lh_v1.json)和
+[Conda](native_conda_sub07_lh_v1.json)。官方重复几何稳定，不能将这些
+局部误差解释成官方随机；还不能据三方差异认定某个编译器或库为原因。
 
 原始 T1 整例、最终 white 完整实现、整体指标等效及干净环境隔离未验证；
-完整 pial 相对官方/当前 Conda 的同输入比较需使用新增的独立参考脚本。
-官方重复性须针对本次七项输入哈希重测或找到匹配记录，当前为
-`not_assessed`。无法用历史 sub01 的一致性为当前 sub07 背书。
+最终源码完整pial、右侧及第二例完整pial、相交跨越扩展质量检查未完成。
+整体等效维持`not_assessed`，不使用历史sub01的一致性为sub07背书。
 
 ## 复现入口
 

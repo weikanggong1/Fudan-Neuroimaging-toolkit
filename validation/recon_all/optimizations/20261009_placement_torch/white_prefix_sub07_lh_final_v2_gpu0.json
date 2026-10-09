@@ -1,0 +1,154 @@
+{
+  "scope": "frozen_same_input_first_white_pass_prefix_only",
+  "hostname": "gpucw1",
+  "code_base_commit": "4939d41c",
+  "torch": "2.5.1",
+  "threads": 4,
+  "device": "cuda:0",
+  "steps_requested": 1,
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "half_precision": false,
+  "input_sha256": {
+    "lh.orig": "8ce7a9a61eb20cd68c930ba1242f441e82d6edffa99f3ab1373f9cd19b333d22",
+    "autodet.gw.stats.lh.dat": "5a6849afc2ffaa306d8aef7ab90a0c6e8f59ab540c107e6021c8609190f34aea",
+    "brain.finalsurfs.mgz": "f3a0be999f18f824a08859670b6950b1693d4ff0a8f8c2acb20d862bec390a55",
+    "wm.mgz": "5647023b94038cd7b8e2a05d22bedaa94090e22b34fbd993bf36b78774380678",
+    "aseg.presurf.mgz": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a"
+  },
+  "stages": {
+    "cpu": {
+      "status": "complete",
+      "wall_seconds": 68.22127875499427,
+      "stage": {
+        "output": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_torch_surface_20261009/white_prefix_sub07_lh_final_v2_gpu0/lh.white-prefix.cpu",
+        "hemisphere": "lh",
+        "steps": 1,
+        "regularization_backend": "cpu",
+        "device": null,
+        "vertices": 114342,
+        "faces": 228680,
+        "ripped_vertices": 5628,
+        "held_vertices": 29,
+        "initial_sse": 4175028.729268011,
+        "initial_rms": 13.645893194535923,
+        "step_sse": 2334292.4587573144,
+        "step_rms": 10.079898647913822,
+        "per_step": [
+          {
+            "step": 1,
+            "trials": 1,
+            "sse": 2334292.4587573144,
+            "rms": 10.079898647913822,
+            "next_dt": 0.5,
+            "reductions": 0,
+            "held_vertices": 29
+          }
+        ],
+        "seconds": 68.21614315500483,
+        "stage_seconds": {
+          "prepare": 54.83319979393855,
+          "initial_objective": 0.9736525700427592,
+          "gradient": 1.102013989817351,
+          "collision": 10.755632551852614,
+          "step_objective": 0.5273229731246829,
+          "write": 0.020737061742693186,
+          "control": 0.003584214486181736
+        }
+      },
+      "output_sha256": "2ae3adee9b35ba29772fcfe833a80578855ce555318fc604d03eb5ea35ecb47a",
+      "peak_allocated_bytes": null,
+      "peak_reserved_bytes": null
+    },
+    "torch": {
+      "status": "complete",
+      "wall_seconds": 62.14800173416734,
+      "stage": {
+        "output": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_torch_surface_20261009/white_prefix_sub07_lh_final_v2_gpu0/lh.white-prefix.torch",
+        "hemisphere": "lh",
+        "steps": 1,
+        "regularization_backend": "torch",
+        "device": "cuda:0",
+        "vertices": 114342,
+        "faces": 228680,
+        "ripped_vertices": 5628,
+        "held_vertices": 29,
+        "initial_sse": 4175028.729268011,
+        "initial_rms": 13.645893194535923,
+        "step_sse": 2334292.4587573144,
+        "step_rms": 10.079898647913822,
+        "per_step": [
+          {
+            "step": 1,
+            "trials": 1,
+            "sse": 2334292.4587573144,
+            "rms": 10.079898647913822,
+            "next_dt": 0.5,
+            "reductions": 0,
+            "held_vertices": 29
+          }
+        ],
+        "seconds": 62.142852581106126,
+        "stage_seconds": {
+          "prepare": 50.36658668005839,
+          "initial_objective": 0.27683454705402255,
+          "gradient": 0.6974259167909622,
+          "collision": 10.266317043919116,
+          "step_objective": 0.5061802850104868,
+          "write": 0.025838139932602644,
+          "control": 0.0036699683405458927
+        }
+      },
+      "output_sha256": "2ae3adee9b35ba29772fcfe833a80578855ce555318fc604d03eb5ea35ecb47a",
+      "peak_allocated_bytes": 141131264,
+      "peak_reserved_bytes": 197132288
+    }
+  },
+  "source_sha256": {
+    "place_surface_border.py": "07eb6e586dec01add03d6762841a7ef44a65bfa8cca97a2854359d910f93a560",
+    "place_surface_collision.py": "b40a25c5d930bf9468cae91e1fa464f067afaab0edeec2ec78cb4622c1c538dc",
+    "place_surface_curvature.py": "641f3607187aeffd96eb4b84e4413ae7351d0937ec23bfc340ea4501846bdb33",
+    "place_surface_decision.py": "fb3bae2275a051b490f1a77ee083493012b40bfb5bd13a3863d4677dd59abfcf",
+    "place_surface_smoothing.py": "5e413a3df69833020be34fdbf8e4b2b6b80e00ddc6b54ac09717527dbf718d07",
+    "place_surface_final_cleanup.py": "f749f5c7210a733e3d9bca586980a5f5eda355612d40d3b25ec30810f82495a5",
+    "place_surface_geometry.py": "0df4ebcc4e53d03ed97dabbda6d17d0be5f98001e2528f4ddcd6487079d7082f",
+    "place_surface_gradient_average.py": "4613acd65fb234d6839a84c60b883a43551e51c92717881a606e65ac274f4200",
+    "place_surface_intensity.py": "86f9c7e8b15240f8418ddc444016d6a71bba02f6c35ac94482e0e064a070b7b2",
+    "place_surface_normals.py": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+    "place_surface_objective.py": "84a233d7dc32b8d3b130221192212fbddb6cd6c9819ebc4eefc7b6a26b6a630a",
+    "place_surface_repulsion.py": "f6d04774adce1c171962c4fd122185b32104b4c9ad43ae5f387fb1ed8574850e",
+    "place_surface_rip.py": "d3f7726a5ca09bae60a998303d55f1c130e775775f4a837f2c135dcf34b302b2",
+    "place_surface_spring.py": "8bc6f39231464acb428ee2199f852a2c0a675fc35edafd73ed9f3b24ed7614da",
+    "place_surface_step.py": "f56bec854415954add422dc7a3a9642356aaf9da40f80d208c757d5207c468ee",
+    "place_surface_volume.py": "067006169f1dca0bcfb5c163d0bea678d447b7bc9a98e7a3a91ab7287028f4d4",
+    "place_pial_python.py": "34ec98dad1027a0b7ab4deb74f19e21943e4bfcd9b0a2a659d0b7cc0da199a7f",
+    "place_surface_self_repulsion.py": "5891a457071c7fdca419fe20677b4c1b8147390451eba9f198a16d34fcf3da94",
+    "place_white_preaparc_python.py": "e7aa8f1ebe5128b83d34abbca2de29fb71cf8910f4d6af880d948f9f0fdd471f",
+    "benchmark_placement_white_prefix.py": "0993ab0be85b7bbf512a873502b2daa89cf410c4096099807e9a91f2a6911ad9",
+    "place_surface_regularization_torch.py": "9ce7501275af99be9619a1fa1f29355760f15e59f96e275291747373ee9058e8"
+  },
+  "order": [
+    "cpu",
+    "torch"
+  ],
+  "repetitions": 1,
+  "admission_requirement": "identical ordered prefix geometry and step decisions",
+  "complete_white_validation": "not_assessed",
+  "overall_metric_equivalence": "not_assessed",
+  "process_gpu_memory_sampling": "not_measured",
+  "comparison": {
+    "same_vertex_count_and_ordered_faces": true,
+    "same_per_step": true,
+    "different_coordinate_elements": 0,
+    "max_vertex_distance_mm": 0.0,
+    "p99_vertex_distance_mm": 0.0,
+    "speed_ratio_cpu_over_torch": 1.0977228044564467
+  },
+  "input_sha256_after": {
+    "lh.orig": "8ce7a9a61eb20cd68c930ba1242f441e82d6edffa99f3ab1373f9cd19b333d22",
+    "autodet.gw.stats.lh.dat": "5a6849afc2ffaa306d8aef7ab90a0c6e8f59ab540c107e6021c8609190f34aea",
+    "brain.finalsurfs.mgz": "f3a0be999f18f824a08859670b6950b1693d4ff0a8f8c2acb20d862bec390a55",
+    "wm.mgz": "5647023b94038cd7b8e2a05d22bedaa94090e22b34fbd993bf36b78774380678",
+    "aseg.presurf.mgz": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a"
+  }
+}
