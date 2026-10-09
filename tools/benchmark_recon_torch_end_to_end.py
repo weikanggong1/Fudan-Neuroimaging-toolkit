@@ -47,6 +47,7 @@ def main():
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--n4-backend", choices=("native", "torch"), default="native")
     parser.add_argument("--n4-execution", choices=("in-process", "isolated"), default="in-process")
+    parser.add_argument("--normalization-controls-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=2)
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="torch")
     parser.add_argument("--wm-edit-backend", choices=("native", "torch-hybrid"), default="native")
@@ -60,6 +61,8 @@ def main():
     parser.add_argument("--native-optimizations", choices=("auto", "original", "torch"), default="auto")
     parser.add_argument("--code-version", required=True)
     args = parser.parse_args()
+    from fnit.recon_all.native_free import _normalization_controls_options
+    _normalization_controls_options(args.normalization_controls_backend, args.device)
     from fnit.recon_all.input_n4_chain import validate_n4_execution
     validate_n4_execution(n4_backend=args.n4_backend, n4_execution=args.n4_execution, device=args.device)
     if args.output_root.exists():
@@ -92,6 +95,7 @@ def main():
         "wm_edit_backend": args.wm_edit_backend,
         "wm_backend": args.wm_backend,
         "n4_backend": args.n4_backend, "n4_execution": args.n4_execution,
+        "normalization_controls_backend": args.normalization_controls_backend,
         "wm_execution": args.wm_execution,
         "gca_inverse_backend": args.gca_inverse_backend,
         "gca_candidate_chunk": args.gca_candidate_chunk,
@@ -121,6 +125,7 @@ def main():
                 "--gca-candidate-chunk", str(args.gca_candidate_chunk), "--gca-execution", args.gca_execution,
                 "--fill-backend", args.fill_backend]
     command += ["--n4-backend", args.n4_backend, "--n4-execution", args.n4_execution]
+    command += ["--normalization-controls-backend", args.normalization_controls_backend]
     command += ["--wm-execution", args.wm_execution]
     report["cli_command"] = command
     tick = time.perf_counter()

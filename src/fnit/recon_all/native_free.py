@@ -795,6 +795,24 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
     return {'result': value, 'stages': steps}
 
 
+def _normalization_controls_options(backend: str, device: str) -> dict:
+    """校验控制点邻域后端，返回两轮归一化共用的具名选项。
+
+    backend 默认由入口传入 cpu，保留原 CPU 邻域；torch 复用同规则的
+    GPU 邻域，device 必须为 cuda:N。只校验名称，不初始化 CUDA 或创建
+    输出。返回空 dict 或 controls_neighbor_backend 字符串参数；非法值
+    抛 ValueError。不改变强度、坐标、TF32 或其余归一化步骤。
+    """
+    if backend not in {"cpu", "torch"}:
+        raise ValueError("normalization_controls_backend must be cpu or torch")
+    if backend == "torch":
+        target = torch.device(device)
+        if target.type != "cuda" or target.index is None:
+            raise ValueError("torch normalization controls require an explicit cuda:N device")
+        return {"controls_neighbor_backend": "torch"}
+    return {}
+
+
 def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
@@ -805,6 +823,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          native_optimizations: str = "auto",
                          n4_backend: str = "native",
                          n4_execution: str = "in-process",
+                         normalization_controls_backend: str = "cpu",
                          wm_backend: str = "native",
                          wm_execution: str = "in-process",
                          wm_edit_backend: str = "native",
@@ -823,6 +842,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     n4_backend默认native保留Conda ITK；torch复用完整200轮PyTorch N4。
     n4_execution默认in-process；isolated仅Torch/cuda:N，完整缓存exec
     保留父CUDA/精度，输入输出SHA、实际迭代和子显存另记，不读取参考。
+    normalization_controls_backend默认cpu；torch复用两轮归一化的GPU邻域，
+    须显式cuda:N。控制点规则、有序离群清理及其余偏置步骤保持原算法。
     native_optimizations=auto在CUDA使用已有FNIT Torch评分+Python EM；CPU
     查询独立产物能力，4线程可使用验证过的GCA缓存。white使用专用快速
     程序，pial保留原程序；original固定原生GCA用于控制。
@@ -854,6 +875,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     体积为 1 mm conform 网格，表面使用 surface RAS（mm）；完整参数、
     输出结构、限制、官方命令和真实数据见 docs/recon_all/README.md。
     """
+    normalization_options = _normalization_controls_options(normalization_controls_backend, device)
     from .input_n4_chain import validate_n4_execution
     validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=device)
     if backend not in {"native", "python-gpu"}:
@@ -995,6 +1017,15 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "device": "cpu" if n4_backend == "native" else device,
         "production_default_changed": False,
         "known_strict_intensity_differences": n4_backend == "torch"}
+    report["normalization_configuration"] = {
+        "controls_neighbor_backend": normalization_controls_backend,
+        "requested_device": device,
+        "stages": ["T1_normalize", "brain_second_normalize"],
+        "implementation": ("FNIT resident PyTorch/Triton neighbor buffers"
+                           if normalization_controls_backend == "torch" else "FNIT SciPy CPU neighbors"),
+        "ordered_control_selection": "CPU; original update and rejection rules",
+        "remaining_bias_steps": "existing implementation; device unchanged",
+        "production_default_changed": False}
     gca_backend = native_selection["em_backend"]
     report["gca_registration"] = {
         "implementation": ("FNIT PyTorch candidate scorer + Python EM"
@@ -1134,7 +1165,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     stage("nu", make_nu, mri / "orig.mgz", nu0,
           initial["talairach_xfm"], mri / "nu.mgz")
     stage("T1_normalize", normalize_t1, mri / "nu.mgz",
-          initial["talairach_xfm"], mri / "T1.mgz", device=device)
+          initial["talairach_xfm"], mri / "T1.mgz", device=device, **normalization_options)
     stage("brainmask", mask_volume, mri / "T1.mgz",
           initial["synthstrip"], mri / "brainmask.mgz", device=device)
     if torch.device(device).type == "cuda":
@@ -1186,7 +1217,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
 
     stage("brain_second_normalize", normalize_t1_aseg,
           mri / "norm.mgz", mri / "aseg.presurf.mgz",
-          mri / "brainmask.mgz", mri / "brain.mgz", device=device)
+          mri / "brainmask.mgz", mri / "brain.mgz", device=device, **normalization_options)
     auxiliary_forwards = []
     with torch.backends.cudnn.flags(allow_tf32=False):
         stage("entowm", mri_entowm_seg, mri / "nu.mgz", mri / "entowm.mgz",
@@ -1427,6 +1458,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          native_optimizations: str = "auto",
                          n4_backend: str = "native",
                          n4_execution: str = "in-process",
+                         normalization_controls_backend: str = "cpu",
                          wm_backend: str = "native",
                          wm_execution: str = "in-process",
                          wm_edit_backend: str = "native",
@@ -1453,6 +1485,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     n4_backend默认native，torch使用完整N4；n4_execution默认in-process，
     isolated只允许Torch/cuda:N，复用局部缓存worker并记录完整阶段/子显存。
     非法组合在创建被试目录前报错，既有N4系统强度差异单列，不判整体等效。
+    normalization_controls_backend=cpu保留原邻域；torch在两轮归一化复用
+    同规则GPU邻域，须显式cuda:N，其余步骤/设备不变。实际选择写入报告。
     defects_backend=native 使用原生缺陷投射，torch 用本项目完整投射规则
     并保持双侧累积顺序；仅颜色表换成固定颜色，当前默认为 native。
     wm_edit_backend=native 调用独立构建编辑程序；torch-hybrid 使用 CUDA
@@ -1486,6 +1520,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     差值为 None，并在 scope 中注明内部计时尚未完成，不推算缺失时间。
     """
     tick = time.perf_counter()
+    _normalization_controls_options(normalization_controls_backend, device)
     from .thread_budget import thread_budget
 
     report_path = Path(subject_dir) / "fnit-native-free-run.json"
@@ -1533,6 +1568,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"native_optimizations": native_optimizations} if native_optimizations != "auto" else {}),
                     **({"n4_backend": n4_backend} if n4_backend != "native" else {}),
                     **({"n4_execution": n4_execution} if n4_execution != "in-process" else {}),
+                    **({"normalization_controls_backend": normalization_controls_backend}
+                       if normalization_controls_backend != "cpu" else {}),
                     **({"wm_backend": wm_backend} if wm_backend != "native" else {}),
                     **({"wm_execution": wm_execution} if wm_execution != "in-process" else {}),
                     **({"wm_edit_backend": wm_edit_backend} if wm_edit_backend != "native" else {}),
@@ -1589,6 +1626,8 @@ def main(argv: list[str] | None = None) -> None:
                         help="native Conda ITK or existing complete PyTorch N4; default unchanged")
     parser.add_argument("--n4-execution", choices=("in-process", "isolated"), default="in-process",
                         help="isolated only for Torch cuda:N; cached child preserves parent allocator")
+    parser.add_argument("--normalization-controls-backend", choices=("cpu", "torch"), default="cpu",
+                        help="same-rule control-point neighbors; torch requires cuda:N, remaining solver unchanged")
     parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=1,
                         help="independent hemisphere processes; total threads split across two workers")
@@ -1627,6 +1666,7 @@ def main(argv: list[str] | None = None) -> None:
                                   native_optimizations=args.native_optimizations,
                                   n4_backend=args.n4_backend,
                                   n4_execution=args.n4_execution,
+                                  normalization_controls_backend=args.normalization_controls_backend,
                                   wm_backend=args.wm_backend,
                                   wm_execution=args.wm_execution,
                                   wm_edit_backend=args.wm_edit_backend,

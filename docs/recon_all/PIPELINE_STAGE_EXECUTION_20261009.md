@@ -31,6 +31,7 @@ reconstruction_report = run_recon_all_python(
     threads=4,  # 被试总线程预算
     wm_backend="torch-optimized",  # 复用完整 WM，保持有序更新
     wm_execution="isolated",  # 仅子进程开启缓存，父 CUDA 状态保持
+    normalization_controls_backend="torch",  # 两轮复用GPU邻域缓冲，不改变有序选择
     profile_stages=True,  # 阶段首尾同步并记录完整墙钟，生产默认 False
 )
 ```
@@ -42,6 +43,8 @@ WM 读取自产 `mri/antsdn.brain.mgz`，写 `mri/wm.seg.mgz`。输入输出均�
 参数组合非法在创建输出前抛 `ValueError`；读取、计算、写出与子进程错误向上传递，不退回原生程序。WM worker 要求新输出和报告路径。TF32 默认开启，无 FP16/BF16。
 
 报告增加 `stages[*].algorithm_substep_seconds`：保留已有函数的顶层秒数、`steps`、`completion.steps`，例如初次归一化的控制点/传播/平滑，以及第二次归一化的 ridge/初始 bias/后续迭代。来源路径保留，内部计时可能异步或嵌套，不与阶段墙钟相加，也不额外同步 GPU。
+
+`normalization_controls_backend` 默认 `'cpu'`；`'torch'` 复用现有两轮归一化的 PyTorch/Triton 邻域计数与求和。固定源图、ROI 和输出缓冲驻留 GPU，控制图按原迭代上传；有序控制点选择、离群清理、ridge 和其他偏置步骤保持原实现。仅接受显式 `cuda:N`，非法组合在校验资源或创建输出前报错，无静默 CPU 回退。单例、batch、CLI 和整例 benchmark 原样传递选项，报告增加 `normalization_configuration`。函数的全部输入、uint8 同网格输出、内部接口及坐标说明见[归一化 GPU 邻域](NORMALIZATION_GPU_NEIGHBORS.md)。新增依赖为零，使用主页环境既有 Triton。
 
 ```python
 from fnit.recon_all.stage_metadata import extract_algorithm_seconds
@@ -66,10 +69,11 @@ python -m fnit.recon_all.native_free input/T1w.nii.gz output/subject \
   --threads 4 \
   --wm-backend torch-optimized \
   --wm-execution isolated \
+  --normalization-controls-backend torch \
   --profile-stages
 ```
 
-`tools/benchmark_recon_torch_end_to_end.py` 接受相同的两个 WM 选项，原始 T1 加空目录运行，记录解释器启动、加载、传输、读写和进程树显存。`--output-root` 必须不存在；失败保留检查点，不补跑。内部报告提取函数没有独立 CLI。
+`tools/benchmark_recon_torch_end_to_end.py` 接受相同的 WM 和归一化邻域选项，原始 T1 加空目录运行，记录解释器启动、加载、传输、读写和进程树显存。`--output-root` 必须不存在；失败保留检查点，不补跑。内部报告提取函数没有独立 CLI。
 
 已完成整例的评估入口为 `tools/evaluate_recon_torch_run.py`，复用原比较器，不重新运行生产：
 
@@ -93,6 +97,8 @@ python tools/evaluate_recon_torch_run.py \
 
 对应 WM 配方为 `mri_segment -wsizemm 13 -mprage antsdn.brain.mgz wm.seg.mgz`。官方命令只用于独立 benchmark。生产隔离 worker 不调用它。缓存策略和计时整理属于执行/报告实现，没有独立的 FreeSurfer 算法命令。
 
+归一化分别对应 `mri_normalize -g 1 -seed 1234 -mprage nu.mgz T1.mgz` 和 `mri_normalize -seed 1234 -mprage -aseg aseg.presurf.mgz -mask brainmask.mgz norm.mgz brain.mgz`。邻域缓存是这些命令内部步骤，没有独立官方 CLI。
+
 ## 5. 当前真实数据证据
 
 同 A100、四线程、两例公开 ds000114 T1 的完整 WM 文件接口结果：
@@ -109,6 +115,8 @@ python tools/evaluate_recon_torch_run.py \
 冻结 `803aec50` 的 sub-06 候选从原始 T1、新空目录连续完成，CLI 墙钟2255.064秒，138/138输出完整，双侧white/pial自相交为0、封闭网格检查通过；该候选仅改变GCA局部缓存/分块求逆及有序fill，尚未使用后续WM或N4实验。相同硬件/线程的该例控制以及sub-07配对仍在运行，整例实际提速暂未给出。官方参考来自既有FreeSurfer 8.2.0 d932c45，原始输入SHA相同，但生成主机与当前候选不同，历史秒数不能作为本轮配对速度。当前候选的完整独立比较已完成：严格6/138，68区厚度MAE0.044824mm；完整Dice、表面距离、white/pial相互穿越和脑图见[本次结果](../../validation/recon_all/optimizations/20261009_whole_a100_803aec50/README.md)。生产自相交门不覆盖所有相互穿越，扩展质量状态单列。以上阶段数据不等于整例提速；整体指标等效未判定。干净 Conda 安装/物理隔离部署尚未验收。新增执行入口只使用主页已声明的 Python/PyTorch/Numba/nibabel 依赖。
 
 ## 6. 最近更新和 benchmark
+
+2026-10-09：显式接入两轮归一化的已有 GPU 邻域。两例完整首次文件 API 的 ABBA 中位数为96.022→48.617秒、70.954→40.575秒；共16次两轮 API 的输出、几何、逐轮强度/控制图及报告算法计数一致。第二轮邻域算子更快，但整体耗时波动，尚不能声称第二轮稳定提速。本次接线尚未完成原始T1整例回归；不能将旧803aec50整例改标为该接口的验证。完整数据及采样限制见[阶段报告](NORMALIZATION_GPU_NEIGHBORS.md)。
 
 2026-10-09：复用完整隔离 WM worker，接入单例、batch、CLI 与整例测量脚本；保留默认后端。修复归一化 `steps` / `completion.steps` 在整例报告中丢失的问题，新增字段不改变计算、同步和原有计时。
 

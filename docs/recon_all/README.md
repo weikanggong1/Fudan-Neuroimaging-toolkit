@@ -18,6 +18,7 @@
 当前十分钟目标的热点和五个优化任务见 [2026-10-07 性能热点与任务](HOTSPOT_ACCELERATION_20261007.md)。
 当前纯 Python GPU 迁移矩阵和阻断项见 [2026-10-08 迁移状态](PYTHON_GPU_STATUS_20261008.md)。
 完整固定N4 PyTorch实验及真实误差见 [本轮N4](N4_COMPLETE_TORCH_20261009.md)；
+显式N4缓存隔离与原始输入链见 [N4输入链](INPUT_N4_CHAIN.md) 和 [阶段worker](N4_CACHED_WORKER.md)；
 GCA局部缓存与CLI/API验证见 [GCA阶段隔离](GCA_ISOLATED_TORCH_20261009.md)；
 GCA候选评分及新批量求逆见 [GCA说明](MRI_EM_TORCH_BACKEND.md)。
 N4默认仍为ITK，GCA新批量求逆尚未替换已存在的CUDA评分路径。
@@ -62,6 +63,9 @@ reconstruction_report = run_recon_all_python(
     threads=4,  # 当前被试计算预算；双半球并行时各2线程，报告线程设置与恢复
     hemisphere_workers=2,  # 显式启用左右侧独立进程；默认1，共享缺陷体积仍顺序累计
     native_optimizations="auto",  # auto在CUDA上启用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分
+    n4_backend="native",  # torch显式使用完整200轮N4，已知强度偏移单列
+    n4_execution="in-process",  # isolated仅配torch/cuda:N，缓存子exec保持父策略
+    normalization_controls_backend="cpu",  # torch复用两轮同规则GPU邻域；仅显式cuda:N
     wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
     wm_execution="in-process",  # isolated仅配torch-optimized，子exec局部缓存、父策略保持
     defects_backend="native",  # torch启用完整PyTorch缺陷投射；标签相同，颜色表不同
@@ -101,6 +105,9 @@ reconstruction_report = run_recon_all_python(
 | `cuda_allocator_cache` | 否 | `str` | `'auto'` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
+| `n4_backend` | 否 | `str` | 'native' | torch显式复用完整N4；已知系统强度差异单列，不改变默认 |
+| `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N，在新exec局部缓存；非法组合输出前报错，子完整报告保留 |
+| `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮的GPU邻域计数/求和与缓冲；显式cuda:N，有序选择/其余偏置步骤不变 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `defects_backend` | 否 | `str` | `'native'` | torch使用完整缺陷投射；保持双侧顺序/标签，采用确定性颜色 |
@@ -126,6 +133,9 @@ reconstruction_report = run_recon_all_python(
 | `cuda_allocator_cache` | 否 | `str` | `'auto'` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
+| `n4_backend` | 否 | `str` | 'native' | torch显式复用完整N4；已知系统强度差异单列，不改变默认 |
+| `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N，在新exec局部缓存；非法组合输出前报错，子完整报告保留 |
+| `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮同规则GPU邻域；所有目标设备须为cuda:N，非法组合调度前拒绝 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid复用CUDA静态编辑与Numba有序核心，要求CUDA |
@@ -203,6 +213,8 @@ subjects/sub01/
 | `timing` | `dict`，s | 内部pipeline及wrapper剩余开销；最终公开元数据写出不在API计时内 |
 | `precision` | `dict` | 实际CUDA策略、调用方autocast和FP32局部例外 |
 | `thread_budget` | `dict` | 当前预算、原值及恢复结果 |
+| `n4_configuration` / `n4_runtime` | `dict` | 实际N4后端/执行策略、完整迭代；isolated另含输入输出/源码SHA、父状态、子allocated/reserved；不等于父子同期峰 |
+| `normalization_configuration` | `dict` | 两轮控制点邻域后端、请求设备、原有序规则及未迁移步骤；完整子步骤耗时见stages，不把阶段提速相加为整例提速 |
 | `hemisphere_scheduling` | `dict` | worker数、总线程预算及各并行组wall |
 | `native_optimizations` | `dict` | 选择的原生程序、能力与实现归属 |
 
@@ -226,6 +238,7 @@ reconstruction_reports = run_recon_all_python_batch(
     hemisphere_workers=2,  # 每侧分得2线程，需要总预算至少2
     native_optimizations="auto",  # CUDA上用FNIT GCA候选评分；CPU按已验证能力选择
     backend="native",  # 严格 python-gpu 尚未完成，不能静默回退
+    normalization_controls_backend="cpu",  # torch仅显式cuda:N；保留原控制点选择与偏置规则
     wm_edit_backend="native",  # torch-hybrid为同输入已验证的WM/aseg混合候选
     defects_backend="native",  # torch保持完整缺陷标签投射；不等于拓扑GA
     sphere_normals_backend="numba",  # torch仅替换标准sphere法向
@@ -258,6 +271,9 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--native-bin-dir` | `native_bin_dir` | None 使用当前 Conda bin；也可指定核验过的源码构建目录 |
 | `--hemisphere-workers` | `hemisphere_workers` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `--native-optimizations` | `native_optimizations` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分 |
+| `--n4-backend` | `n4_backend` | native为Conda ITK；torch为完整200轮N4，系统强度差异单列 |
+| `--n4-execution` | `n4_execution` | in-process保留父策略；isolated仅Torch/cuda:N，完整缓存子exec |
+| `--normalization-controls-backend` | `normalization_controls_backend` | cpu保留原邻域；torch复用两轮GPU缓冲，显式cuda:N，其余算法不变 |
 | `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `--wm-execution` | `wm_execution` | in-process保留父缓存；isolated为完整WM缓存worker，须配torch-optimized |
 | `--defects-backend` | `defects_backend` | native调用Conda mri_label2vol；torch使用完整PyTorch投射，不要求该原生程序 |
@@ -296,6 +312,8 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 ## 5. 最新精度和运行时间
 
+2026-10-09 A100 GPU 整例为实际冻结 `803aec50` 的 sub-06：原始T1与空目录连续完成，CLI **2255.064秒**、138/138输出齐全；严格复现6/138，整体等效及优化相对控制是否退化尚未判定。同主机控制及第二例仍在运行，没有整例提速比例。68区厚度/面积/体积、逐标签Dice、双向表面距离和white/pial穿越，以及全部SHA、分步骤时间和三张脑图，见[本次完整结果](../../validation/recon_all/optimizations/20261009_whole_a100_803aec50/README.md)。该整例未包含后续N4、WM和GPU邻域实验，不能把阶段收益叠加到这里。
+
 最新2026-10-04正式CPU全链为冻结v3（e91dd25，实际归档/逐文件SHA见[身份](../../validation/smri_cpu/task5/recon_complete_cpu_v3/manifest.public.json)），公开CC0 OpenNeuro ds000114 snapshot1.0.2一例原始T1。参考FreeSurfer8.2.0-1默认-all-openmp8；CPU评测节点 Xeon Gold6418H同8物理核预算、8线程，CPU未启用CUDA。完整wall含新进程、校验、读写和全部计算，排除锁等待及事后评分；非ABBA且共享负载。
 
 ### 端到端 benchmark
@@ -316,7 +334,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 | 左右最终white/pial和指标 | 319.185 /340.307 s | 未生成相同父阶段 |
 | MNI完整非线性 / SynthSeg / N4 | 205.866 /202.935 /118.109 s | 实际FSTIME见CSV；非同边界 |
 
-44份顶点图和12份annotation因两端顶点/有序面不对应，逐点差异记NA；另报告全顶点到完整三角面双向距离。七张标签图含601条非背景记录，小区不剔除；a2009s最低Dice0.632353。生产自相交门通过，独立扫描仍有white↔pial穿越，见[完整几何和脑图](../../validation/smri_cpu/task5/recon_complete_cpu_v3/README.md)。本次不重标为后续main。最新已收集GPU结果是本文开头的冻结3a九例；8d750e2两例仍为历史性能证据，其父子采样峰8.75/10.90GB见第6节。
+44份顶点图和12份annotation因两端顶点/有序面不对应，逐点差异记NA；另报告全顶点到完整三角面双向距离。七张标签图含601条非背景记录，小区不剔除；a2009s最低Dice0.632353。生产自相交门通过，独立扫描仍有white↔pial穿越，见[完整几何和脑图](../../validation/smri_cpu/task5/recon_complete_cpu_v3/README.md)。本次不重标为后续main。此前GPU冻结3a九例及8d750e2两例仍为各版本的历史证据；8d750e2父子采样峰8.75/10.90GB见第6节。
 
 ![真实T1最低Dice局部脑区边界；cyan官方、red FNIT](../../validation/smri_cpu/task5/recon_complete_cpu_v3/figures/local_region_boundary.png)
 
@@ -326,6 +344,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-09 | 803aec50 / A100 | GCA独立缓存、分块GPU求逆与有序fill；未包含后续阶段实验 | [一例原始T1完整结果与官方比较](../../validation/recon_all/optimizations/20261009_whole_a100_803aec50/README.md)，配对/第二例未完成 |
 | 2026-10-07 | raw3a / API比较工具ed16 | 取回九例完整比较，未重跑原始T1 | [九例精度、耗时、显存与局部问题](../../validation/recon_all/accuracy_20261003/runtime/server_refresh_20261007/README.md) |
 | 2026-10-04 | e91dd25/v3 | CPU完整链、异常报告与缺失依赖补测 | 138输出与完整表面/统计评分；本例慢4.99% |
 | 2026-10-02 | 8d750e2 | 半球独立进程、WM/MNI/几何热点整合 | [两例完整GPU三方比较](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md) |
