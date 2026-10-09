@@ -11,18 +11,34 @@ from .gcsa_permutation import VnlRandom, vertex_permutation
 
 def reclassify_gibbs(model: GibbsModel, atlas: InitialAtlas, *, seed: int = 1234,
                      max_iterations: int | None = None,
-                     snapshot=None) -> list[dict]:
-    """Run ``GCSAreclassifyUsingGibbsPriors`` on mapped surface vertices."""
+                     snapshot=None, backend: str = "python") -> list[dict]:
+    """按固定种子/顶点顺序运行GCSAreclassifyUsingGibbsPriors。
+
+    model为同网格GibbsModel，atlas为其InitialAtlas；seed默认1234，
+    max_iterations默认None沿原收敛条件，snapshot接收每轮标签原视图。
+    backend默认python，numba显式使用CSR有序CPU内核，无并行更新。
+    返回iteration/changed/examined整数列表，原位改变model.labels；标签为
+    int32打包RGB，无空间变换。非法后端、概率或算子失败抛异常。
+    """
     labels = model.labels
     mark = np.ones(len(labels), np.uint8)
     random = VnlRandom(seed)
     random.open_ran1()  # setRandomSeed primes OpenRan1 once.
+    if backend not in ("python", "numba"):
+        raise ValueError("Gibbs backend must be python or numba")
+    if backend == "numba":
+        from .gcsa_gibbs_numba import pack_model, ordered_sweep
+        packed = pack_model(model, atlas)
     history = []
     iteration = 0
     while True:
         changed = 0
         examined = 0
-        for vertex in vertex_permutation(random, len(labels)):
+        permutation = vertex_permutation(random, len(labels))
+        if backend == "numba":
+            changed, examined = ordered_sweep(packed=packed, permutation=permutation,
+                mark=mark, feature=model.feature, labels=labels)
+        for vertex in (() if backend == "numba" else permutation):
             if mark[vertex] == 0:
                 continue
             mark[vertex] = 0

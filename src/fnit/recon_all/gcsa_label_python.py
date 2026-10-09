@@ -55,11 +55,11 @@ class GCSAFeatureCache:
         self.sphere_path = surf / f"{hemi}.sphere.reg"
         aseg_path = mri / "aseg.presurf.mgz"
         cortex_path = label / f"{hemi}.cortex.label"
-        for path in (self.smooth_path, self.sphere_path, aseg_path, cortex_path):
+        self._input_paths = (self.smooth_path, self.sphere_path, aseg_path, cortex_path)
+        for path in self._input_paths:
             if not path.is_file():
                 raise FileNotFoundError(path)
-        self.signature = tuple(_file_version(path) for path in
-                               (self.smooth_path, self.sphere_path, aseg_path, cortex_path))
+        self.signature = tuple(_file_version(path) for path in self._input_paths)
         self.smooth, self.faces = fsio.read_geometry(str(self.smooth_path))
         self.sphere, sphere_faces = fsio.read_geometry(str(self.sphere_path))
         if not np.array_equal(self.faces, sphere_faces):
@@ -85,11 +85,20 @@ class GCSAFeatureCache:
         return self._mapped[key]
 
     def validate(self, subject: str | Path, hemi: str, device: str) -> None:
-        """Reject accidental reuse across private workers or CUDA devices."""
+        """核对被试、半球、设备及四个输入文件的worker内版本。
+
+        输入为被试目录、lh/rh和设备字符串，无返回数据或坐标变换。
+        表面、aseg或cortex的路径/大小/纳秒mtime改变时抛ValueError，
+        文件删除时抛FileNotFoundError；应重新构造缓存，不跨表面版本复用。
+        该轻量身份检查不是内容SHA验证，完整benchmark另记录SHA-256。
+        """
         if Path(subject).resolve() != self.subject or hemi != self.hemi:
             raise ValueError("GCSA feature cache belongs to another subject/hemi")
         if str(device) != self.device:
             raise ValueError("GCSA feature cache belongs to another device")
+        current = tuple(_file_version(path) for path in self._input_paths)
+        if current != self.signature:
+            raise ValueError("GCSA feature cache input file version changed; rebuild the cache")
 
 
 def write_annotation(path: str | Path, labels: np.ndarray, atlas: InitialAtlas) -> None:
@@ -116,15 +125,20 @@ def write_annotation(path: str | Path, labels: np.ndarray, atlas: InitialAtlas) 
 def label_surface(subject: str | Path, hemi: str, atlas_file: str | Path,
                   ico4_file: str | Path, ico7_file: str | Path,
                   output_file: str | Path, *, device: str = "cpu",
-                  prepared: GCSAFeatureCache | None = None) -> dict:
+                  prepared: GCSAFeatureCache | None = None,
+                  gibbs_backend: str = "python") -> dict:
     """Run the pinned ``mris_ca_label`` sequence from fixed input files.
 
     ``prepared`` optionally reuses geometry-only inputs for multiple atlases
     on one hemisphere. Atlas parsing, Gibbs state and output writing remain
     per-call; omitting it preserves the original standalone behavior.
+    gibbs_backend默认python；numba仅编译同顺序Gibbs评分和原位更新，
+    不修改GPU特征、随机排列、颜色表、islands或cortex规则。
     """
     if hemi not in ("lh", "rh"):
         raise ValueError("hemi must be lh or rh")
+    if gibbs_backend not in ("python", "numba"):
+        raise ValueError("gibbs_backend must be python or numba")
     subject = Path(subject)
     started = time.perf_counter()
     atlas = read_initial_atlas(atlas_file, include_gibbs=True)
@@ -149,7 +163,10 @@ def label_surface(subject: str | Path, hemi: str, atlas_file: str | Path,
 
     model = GibbsModel(atlas, classifier, prior, feature, smooth, neighbors,
                        principal, annotation)
-    gibbs_history = reclassify_gibbs(model, atlas)
+    if gibbs_backend == "python":
+        gibbs_history = reclassify_gibbs(model, atlas)
+    else:
+        gibbs_history = reclassify_gibbs(model, atlas, backend=gibbs_backend)
     gibbs = time.perf_counter()
     annotation = relabel_with_aseg(annotation, atlas, classifier, prior, feature,
                                    smooth, aseg, tk_to_vox)
@@ -165,7 +182,7 @@ def label_surface(subject: str | Path, hemi: str, atlas_file: str | Path,
     Path(output_file).parent.mkdir(parents=True, exist_ok=True)
     write_annotation(output_file, annotation, atlas)
     finished = time.perf_counter()
-    return {"vertices": len(annotation), "device": device,
+    return {"vertices": len(annotation), "device": device, "gibbs_backend": gibbs_backend,
             "gibbs_history": gibbs_history, "islands_history": islands_history,
             "seconds": {"prepare": loaded - started,
                         "initial_classifier": initially_labeled - loaded,
@@ -188,9 +205,11 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--ico7", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--gibbs-backend", choices=("python", "numba"), default="python")
     args = parser.parse_args(argv)
     result = label_surface(args.subject, args.hemi, args.atlas, args.ico4,
-                           args.ico7, args.output, device=args.device)
+                           args.ico7, args.output, device=args.device,
+                           gibbs_backend=args.gibbs_backend)
     print(json.dumps(result, indent=2))
 
 
