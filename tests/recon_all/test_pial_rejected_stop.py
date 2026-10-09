@@ -14,7 +14,8 @@ def test_profile_rejects_ambiguous_cuda_device_before_input_reads(tmp_path):
 
 
 @pytest.mark.parametrize("profile", [False, True])
-def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp_path, monkeypatch, profile):
+@pytest.mark.parametrize("compiled", [False, True])
+def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp_path, monkeypatch, profile, compiled):
     for folder in ('surf', 'mri', 'label'):
         (tmp_path/folder).mkdir()
     xyz = np.array([[0,0,0], [1,0,0], [0,1,0]], dtype=np.float32)
@@ -40,14 +41,25 @@ def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp
     monkeypatch.setattr(stage, 'spring_gradient', lambda *a,**k: np.zeros((3,3),dtype=np.float32))
     monkeypatch.setattr(stage, 'quadratic_curvature', lambda *a,**k: np.zeros(3,dtype=np.float32))
     monkeypatch.setattr(stage, 'unconstrained_step_with_offsets', lambda current,*a,**k: (current+.1,np.ones_like(current)*.1))
-    monkeypatch.setattr(stage, 'asynchronous_first_step', lambda current,faces,proposal,*a,**k: (proposal,None))
+    calls=[]
+    def accept(current, faces, proposal, *args, **kwargs):
+        calls.append(kwargs)
+        return proposal,None
+    monkeypatch.setattr(stage, 'asynchronous_first_step', accept)
     # 所有试步RMS均上升；第3次拒绝达到终止规则，应还原本步起点。
     monkeypatch.setattr(stage, 'pial_step_decision', lambda ls,lr,s,r,dt,red:
         (dt*.5,red+1,True,True,red+1>2))
-    monkeypatch.setattr(stage, 'repair_intersections', lambda vertices,*a: (vertices,{'intersecting_faces_after':0}))
+    cleanup_calls=[]
+    def cleanup(vertices, *args, **kwargs):
+        cleanup_calls.append(kwargs)
+        return vertices,{'intersecting_faces_after':0}
+    monkeypatch.setattr(stage, 'repair_intersections', cleanup)
     trace=[]
+    selected={} if not compiled else dict(candidate_backend='torch_snapshot',
+        candidate_grid_cells_per_axis=3,retained_mht_backend='compiled',
+        cleanup_marking_backend='source_torch',cleanup_candidate_grid_cells_per_axis=3,device='cpu')
     report=stage.place_pial_t1(subject=tmp_path, hemisphere='lh', output=tmp_path/'surf/lh.pial.T1',
-                              max_steps=4, profile=profile, trace_callback=lambda *args: trace.append(args))
+                              max_steps=4, profile=profile, trace_callback=lambda *args: trace.append(args),**selected)
     assert report['pass_ends']==[1,2,3,4]
     actual,actual_faces=fs.read_geometry(report['output'])
     np.testing.assert_array_equal(actual,xyz)
@@ -56,9 +68,28 @@ def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp
     assert all(len(row[3]['trials'])==3 for row in trace)
     assert all(row[3]['trials'][-1]['rejected'] and row[3]['trials'][-1]['stop'] for row in trace)
     assert report['profile'] is profile
+    assert all(call['candidate_grid_cells_per_axis']==(3 if compiled else 2) for call in calls)
+    assert all(call['retained_mht_backend']==('compiled' if compiled else 'tree') for call in calls)
+    assert cleanup_calls==([{'marking_backend':'source_torch','device':'cpu',
+                            'candidate_grid_cells_per_axis':3}] if compiled else [{}])
     if profile:
         assert all(seconds >= 0 for seconds in report['stage_seconds'].values())
         assert sum(report['stage_seconds'].values()) == pytest.approx(report['seconds'])
         assert report['profile_cuda_target'] is None
     else:
         assert 'stage_seconds' not in report
+
+
+@pytest.mark.parametrize('options,message',[
+    ({'candidate_grid_cells_per_axis':4},'must be 2 or 3'),
+    ({'candidate_grid_cells_per_axis':3},'requires torch_snapshot'),
+    ({'retained_mht_backend':'missing'},'must be tree or compiled'),
+    ({'retained_mht_backend':'compiled'},'requires snapshot'),
+    ({'cleanup_marking_backend':'missing'},'invalid cleanup'),
+    ({'cleanup_candidate_grid_cells_per_axis':4},'must be 2 or 3'),
+    ({'cleanup_candidate_grid_cells_per_axis':3},'requires source_torch'),
+    ({'cleanup_marking_backend':'source_torch'},'explicit device'),
+])
+def test_explicit_experiment_options_rejected_before_reading_inputs(tmp_path,options,message):
+    with pytest.raises(ValueError,match=message):
+        stage.place_pial_t1(subject=tmp_path,hemisphere='lh',**options)

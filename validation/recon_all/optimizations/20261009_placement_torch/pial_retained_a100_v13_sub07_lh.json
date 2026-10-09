@@ -1,0 +1,2284 @@
+{
+  "scope": "frozen_same_input_complete_python_pial",
+  "hostname": "authorized-a100-benchmark-host",
+  "code_base_commit": "caadaeb3-plus-pial-retained-v13",
+  "candidate_snapshot": "source_sha256",
+  "torch": "2.5.1",
+  "threads": 4,
+  "device": "cuda:0",
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "half_precision": false,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "input_sha256": {
+    "lh.white": "ff5190d8e160d67f623e1694582415a40adffcf55f896fd2098340a24fd5be74",
+    "autodet.gw.stats.lh.dat": "7ebd1251638bf1b8a8e1056a3f45010bce53c1a9a3c1ec91934ac601da86d1e9",
+    "lh.cortex.label": "74a609ee0fc0e528108aac56b8a635706de56a05887ad80a053503112c734940",
+    "lh.cortex+hipamyg.label": "f74902a68b9f13d1b37ca54a17766bdc00cf1e2fc851def4cdb422a68de6c633",
+    "brain.finalsurfs.mgz": "0a6e3bdfe92cd2bb5a2d1b798b91428023b1527596e6bbb32151575d9a780a27",
+    "wm.mgz": "3271723eea691889345d843565342321d2aff2f8af4332a1d6e4a9087aaf9435",
+    "aseg.presurf.mgz": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c"
+  },
+  "stages": {
+    "cpu": {
+      "status": "complete",
+      "wall_seconds": 1148.8164525385946,
+      "CUDA_setup_seconds": 0.0,
+      "stage": {
+        "output": "FNIT_ROOT/runs/recon_torch_surface_20261009/pial_sub07_lh_retained_v13_control_first/lh.pial.cpu",
+        "hemisphere": "lh",
+        "steps": 39,
+        "pass_ends": [
+          22,
+          29,
+          34,
+          39
+        ],
+        "cleanup": {
+          "intersecting_faces_before": 15,
+          "intersecting_faces_after": 0,
+          "intersecting_faces_trace": [
+            15,
+            0
+          ],
+          "marked_vertices": 24,
+          "smoothed_vertices": 24,
+          "smoothing_cycles": 1,
+          "smoothing_iterations": 100
+        },
+        "sampling_backend": "cpu",
+        "device": null,
+        "regularization_backend": "cpu",
+        "candidate_backend": "tree",
+        "candidate_grid_cells_per_axis": 2,
+        "retained_mht_backend": "tree",
+        "cleanup_marking_backend": "legacy",
+        "cleanup_candidate_grid_cells_per_axis": 2,
+        "seconds": 1148.8150661345571,
+        "profile": true,
+        "stage_seconds": {
+          "prepare": 31.08093574270606,
+          "gradient": 15.577261988073587,
+          "collision": 1027.5742493644357,
+          "objective": 2.1437934059649706,
+          "border_updates": 21.290622589178383,
+          "cleanup": 50.90760114509612,
+          "write": 0.03762219287455082,
+          "control": 0.2029797062277794
+        },
+        "profile_cuda_target": null
+      },
+      "output_sha256": "e7669199d83888b84ece84bac0ab10607727765b79d948f801d3e7deb29bf164",
+      "trace": [
+        {
+          "step": 1,
+          "pass": 0,
+          "coordinate_sha256": "75c74a494185fcd2b9db2757cf531d7ab43ac10b8162790849561454fcfe062d",
+          "diagnostics": {
+            "sse": 18286945.84629565,
+            "rms": 28.910830647823527,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 18286945.84629565,
+                "rms": 28.910830647823527,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 2,
+          "pass": 0,
+          "coordinate_sha256": "df552ef15920f0bfa9854753ecfc62501ed2150ce8e221e23a1947c63ad569b2",
+          "diagnostics": {
+            "sse": 12145844.52504328,
+            "rms": 23.505233819474068,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 12145844.52504328,
+                "rms": 23.505233819474068,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 3,
+          "pass": 0,
+          "coordinate_sha256": "3becb0d32db213adc5429597217b844ec40097a0e07c3c1a05a833db79769214",
+          "diagnostics": {
+            "sse": 8057940.126445909,
+            "rms": 19.074339131593778,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 8057940.126445909,
+                "rms": 19.074339131593778,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 4,
+          "pass": 0,
+          "coordinate_sha256": "4542d5d66fe72a4639d61293d2629725d83ed3c7f553cd5aea7db7e74cf95e85",
+          "diagnostics": {
+            "sse": 5510388.401860986,
+            "rms": 15.690756726750026,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 5510388.401860986,
+                "rms": 15.690756726750026,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 5,
+          "pass": 0,
+          "coordinate_sha256": "761a0fde0559a01ebd67173df71ee3b51f94de17bf890ec5b5305913fbe06489",
+          "diagnostics": {
+            "sse": 3910166.119732749,
+            "rms": 13.125223014731926,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 3910166.119732749,
+                "rms": 13.125223014731926,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 6,
+          "pass": 0,
+          "coordinate_sha256": "b8f3e1f99b6a7b95112d90a044f26a607bd44eeec542235f048acf8e56c56e6b",
+          "diagnostics": {
+            "sse": 2820594.093773285,
+            "rms": 11.041224012053185,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 2820594.093773285,
+                "rms": 11.041224012053185,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 7,
+          "pass": 0,
+          "coordinate_sha256": "a5eaa8209ca478046942c764f96e6c88af8b10270b2bdd5fc8455033965ae645",
+          "diagnostics": {
+            "sse": 2044404.1157283324,
+            "rms": 9.273191237458164,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 2044404.1157283324,
+                "rms": 9.273191237458164,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 8,
+          "pass": 0,
+          "coordinate_sha256": "782f4b75291200f92bb4a2a44cac5a006ea38a39038642ed4657cc8f90ae8fdf",
+          "diagnostics": {
+            "sse": 1486249.3562326648,
+            "rms": 7.754219437124141,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 1486249.3562326648,
+                "rms": 7.754219437124141,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 9,
+          "pass": 0,
+          "coordinate_sha256": "4db7ac399ad6410f6d2c2bed3baeac5f0072ae50e0cb5183bc93d6920ced369f",
+          "diagnostics": {
+            "sse": 1101092.9654028388,
+            "rms": 6.5002398583446235,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 1101092.9654028388,
+                "rms": 6.5002398583446235,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 10,
+          "pass": 0,
+          "coordinate_sha256": "027f34d0bd3a7eaf0e673305ade268687e8173a0de1f7bdc277004b8e0f6fdc4",
+          "diagnostics": {
+            "sse": 852319.5592836268,
+            "rms": 5.538363351878624,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 852319.5592836268,
+                "rms": 5.538363351878624,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 11,
+          "pass": 0,
+          "coordinate_sha256": "921d2f29e1ed264d23db65d9b20197fa2b8da12af7f811293785cc06f4c6897a",
+          "diagnostics": {
+            "sse": 709951.7540031017,
+            "rms": 4.900948861082831,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 709951.7540031017,
+                "rms": 4.900948861082831,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 12,
+          "pass": 0,
+          "coordinate_sha256": "226cfe1203bca401dce2ed56486de258a9ba2b8d9aa8d0561cd9419c8e329c2b",
+          "diagnostics": {
+            "sse": 629709.2040460983,
+            "rms": 4.499583019978488,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 629709.2040460983,
+                "rms": 4.499583019978488,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 13,
+          "pass": 0,
+          "coordinate_sha256": "0df30f164a8e023a07b0feddce470e16b3942751b5d43abe435c49765e9d2f5b",
+          "diagnostics": {
+            "sse": 584579.7798423717,
+            "rms": 4.255088385094513,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 584579.7798423717,
+                "rms": 4.255088385094513,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 14,
+          "pass": 0,
+          "coordinate_sha256": "a87b4adadf60721e22f0800867d9b4499e84ffc9f906835c718f3e08fde03a07",
+          "diagnostics": {
+            "sse": 549226.8038048092,
+            "rms": 4.052291368948052,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 549226.8038048092,
+                "rms": 4.052291368948052,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 15,
+          "pass": 0,
+          "coordinate_sha256": "8ab3986dfcd1e8ccb4431ee390765d29a884f6650192ed609374e11aef911699",
+          "diagnostics": {
+            "sse": 528552.4201621008,
+            "rms": 3.9271974071932507,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 528552.4201621008,
+                "rms": 3.9271974071932507,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 16,
+          "pass": 0,
+          "coordinate_sha256": "32a239065940464a06df59f79710017ee547ccf76ffbacd23b10bc58f02631e9",
+          "diagnostics": {
+            "sse": 516022.2200000121,
+            "rms": 3.8474268978135853,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 516022.2200000121,
+                "rms": 3.8474268978135853,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 17,
+          "pass": 0,
+          "coordinate_sha256": "737d8dbdc34a614ca4f8390821a6148d335a221f86b6cdc750cc0e47ecd070bc",
+          "diagnostics": {
+            "sse": 508930.19589994976,
+            "rms": 3.799906883509957,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.25,
+                "sse": 508930.19589994976,
+                "rms": 3.799906883509957,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 18,
+          "pass": 0,
+          "coordinate_sha256": "d91e0a593b19d1d7f5e7d68bfa1c54962c7ebf6e5dd2dedca3ae40dfdba85a01",
+          "diagnostics": {
+            "sse": 420913.23099774175,
+            "rms": 3.197584803408676,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 420913.23099774175,
+                "rms": 3.197584803408676,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 19,
+          "pass": 0,
+          "coordinate_sha256": "ce809f4cc0f137553dd0c7041c6d9622dda1fdf232eed7456c6d3e17296f63cc",
+          "diagnostics": {
+            "sse": 400909.35398170864,
+            "rms": 3.0460453085425865,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 400909.35398170864,
+                "rms": 3.0460453085425865,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 20,
+          "pass": 0,
+          "coordinate_sha256": "71cf7f447322d06c5d99af90fe1cc3d59803556735bbe127fab1648bda4980df",
+          "diagnostics": {
+            "sse": 396647.87766470725,
+            "rms": 3.0110000427592585,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.125,
+                "sse": 396647.87766470725,
+                "rms": 3.0110000427592585,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 21,
+          "pass": 0,
+          "coordinate_sha256": "c08c0993296b73f3860e2a9e4b841d2097a7c947176d0d13e1df4358a823b717",
+          "diagnostics": {
+            "sse": 384612.57592825417,
+            "rms": 2.913677960656344,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.125,
+                "sse": 384612.57592825417,
+                "rms": 2.913677960656344,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 22,
+          "pass": 0,
+          "coordinate_sha256": "ca4add47f770fea6d6c5d7d1d59d30d5a6556b4b2d2e00e5fa11c402ae08a7f4",
+          "diagnostics": {
+            "sse": 381774.22439047555,
+            "rms": 2.8900507260706925,
+            "dt": 0.0625,
+            "reductions": 3,
+            "stop": true,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.0625,
+                "sse": 381774.22439047555,
+                "rms": 2.8900507260706925,
+                "reduced": true,
+                "rejected": false,
+                "stop": true,
+                "reductions": 3
+              }
+            ]
+          }
+        },
+        {
+          "step": 23,
+          "pass": 1,
+          "coordinate_sha256": "7bef8503182f2cfca8c2797215bcffeeb6fe5cd7d645cc442a73137a74ddb188",
+          "diagnostics": {
+            "sse": 509993.2801511272,
+            "rms": 3.507076869070253,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 509993.2801511272,
+                "rms": 3.507076869070253,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 24,
+          "pass": 1,
+          "coordinate_sha256": "77d36c7698dde727a475e715a180b0e12c7a6c8329a1273c0bdf65c139b3eb12",
+          "diagnostics": {
+            "sse": 458903.75905596185,
+            "rms": 3.1491557911850663,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.25,
+                "sse": 510611.45343684347,
+                "rms": 3.5258161749321464,
+                "reduced": true,
+                "rejected": true,
+                "stop": false,
+                "reductions": 1
+              },
+              {
+                "trial": 1,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 458903.75905596185,
+                "rms": 3.1491557911850663,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 25,
+          "pass": 1,
+          "coordinate_sha256": "f09c30a4294e3b7fbb15c26b98bc0f4a7ed4263085c428316efbb5430a446151",
+          "diagnostics": {
+            "sse": 435014.63465221296,
+            "rms": 2.969403647549838,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 435014.63465221296,
+                "rms": 2.969403647549838,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 26,
+          "pass": 1,
+          "coordinate_sha256": "480676c1b41a235e27e9b4b1b252be4816440bc5edaf436354a7bb6b5f97f809",
+          "diagnostics": {
+            "sse": 426976.7972967719,
+            "rms": 2.9048458766014194,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 426976.7972967719,
+                "rms": 2.9048458766014194,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 27,
+          "pass": 1,
+          "coordinate_sha256": "a688ca12af861e201d8e539cbe714fc20f05dd1e3e0ff67ee95d0274ea1ba7db",
+          "diagnostics": {
+            "sse": 422097.6921954835,
+            "rms": 2.865399046204432,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.125,
+                "sse": 422097.6921954835,
+                "rms": 2.865399046204432,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 28,
+          "pass": 1,
+          "coordinate_sha256": "3c69e67c5b3ef8b99adcd9bf0114c84e43f2a7dd6196ebfda500b797f8a54978",
+          "diagnostics": {
+            "sse": 411779.76427660487,
+            "rms": 2.77804931176969,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.125,
+                "sse": 411779.76427660487,
+                "rms": 2.77804931176969,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 29,
+          "pass": 1,
+          "coordinate_sha256": "6077f44ca83dcc9ea1aadac748e227aa3fcaa78c6a931d7cd2140e1d3ec455cd",
+          "diagnostics": {
+            "sse": 408873.94431939535,
+            "rms": 2.7531276878052457,
+            "dt": 0.0625,
+            "reductions": 3,
+            "stop": true,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.0625,
+                "sse": 408873.94431939535,
+                "rms": 2.7531276878052457,
+                "reduced": true,
+                "rejected": false,
+                "stop": true,
+                "reductions": 3
+              }
+            ]
+          }
+        },
+        {
+          "step": 30,
+          "pass": 2,
+          "coordinate_sha256": "bde17bdfc67295d1cbf94866d80764c3f4969413c184226ab3ed2faf59293618",
+          "diagnostics": {
+            "sse": 440892.83657955483,
+            "rms": 2.9714881946836336,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.25,
+                "sse": 473988.1935843525,
+                "rms": 3.2213845290197347,
+                "reduced": true,
+                "rejected": true,
+                "stop": false,
+                "reductions": 1
+              },
+              {
+                "trial": 1,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 440892.83657955483,
+                "rms": 2.9714881946836336,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 31,
+          "pass": 2,
+          "coordinate_sha256": "0bf96b9ced1b2f1785c63a11be48f3ed1780460e4b63108cb44fe4d76af9f536",
+          "diagnostics": {
+            "sse": 423370.6170254636,
+            "rms": 2.8311799112746834,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 423370.6170254636,
+                "rms": 2.8311799112746834,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 32,
+          "pass": 2,
+          "coordinate_sha256": "36d1a87fb404b7a18a1342070b1fa470e26b5d972418def0f173798609bea096",
+          "diagnostics": {
+            "sse": 419321.11972502887,
+            "rms": 2.798953558924422,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.125,
+                "sse": 419321.11972502887,
+                "rms": 2.798953558924422,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 33,
+          "pass": 2,
+          "coordinate_sha256": "7b44f13318ba1c1287490c296ee98adbcd441d0bbc8b47ca468858532c74bd03",
+          "diagnostics": {
+            "sse": 410167.36427574814,
+            "rms": 2.7204640782003437,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.125,
+                "sse": 410167.36427574814,
+                "rms": 2.7204640782003437,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 34,
+          "pass": 2,
+          "coordinate_sha256": "fcbd34328606d3e15923ed770e4466e5438978943a513cd4000ef9b64fb22ad9",
+          "diagnostics": {
+            "sse": 407011.49955576763,
+            "rms": 2.693788911356528,
+            "dt": 0.0625,
+            "reductions": 3,
+            "stop": true,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.0625,
+                "sse": 407011.49955576763,
+                "rms": 2.693788911356528,
+                "reduced": true,
+                "rejected": false,
+                "stop": true,
+                "reductions": 3
+              }
+            ]
+          }
+        },
+        {
+          "step": 35,
+          "pass": 3,
+          "coordinate_sha256": "fa476087a31c3c569ca21f1ca39bd7f2fd9a2485ac0113dd21d1e63c07a989be",
+          "diagnostics": {
+            "sse": 425310.3053020521,
+            "rms": 2.8354904071515037,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.25,
+                "sse": 462842.854912092,
+                "rms": 3.1324007515553856,
+                "reduced": true,
+                "rejected": true,
+                "stop": false,
+                "reductions": 1
+              },
+              {
+                "trial": 1,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 425310.3053020521,
+                "rms": 2.8354904071515037,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 36,
+          "pass": 3,
+          "coordinate_sha256": "1a7a7636fc111086e3adc073701ba28b1a497fc22ab6b86c3543cc8c13699ad6",
+          "diagnostics": {
+            "sse": 412316.22770422895,
+            "rms": 2.7301052205684093,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 412316.22770422895,
+                "rms": 2.7301052205684093,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 37,
+          "pass": 3,
+          "coordinate_sha256": "2b1e5dcf314792abb6c9e4248a449d3047df62581bc6de573b4aaef37e0bc15e",
+          "diagnostics": {
+            "sse": 410100.43613970967,
+            "rms": 2.7147095917895037,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.125,
+                "sse": 410100.43613970967,
+                "rms": 2.7147095917895037,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 38,
+          "pass": 3,
+          "coordinate_sha256": "b89aa996d9bd3ec280cf9a22c9ad54d951e2675fd34828b9a70c198ed016fc94",
+          "diagnostics": {
+            "sse": 401074.3615863103,
+            "rms": 2.6356255212514603,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.125,
+                "sse": 401074.3615863103,
+                "rms": 2.6356255212514603,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 39,
+          "pass": 3,
+          "coordinate_sha256": "2df8f5f29b482d01acf9ce1e5e7d555748d837719b137374539cae598e07bc7a",
+          "diagnostics": {
+            "sse": 398168.7716914676,
+            "rms": 2.6114064563609167,
+            "dt": 0.0625,
+            "reductions": 3,
+            "stop": true,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.0625,
+                "sse": 398168.7716914676,
+                "rms": 2.6114064563609167,
+                "reduced": true,
+                "rejected": false,
+                "stop": true,
+                "reductions": 3
+              }
+            ]
+          }
+        }
+      ],
+      "peak_allocated_bytes": null,
+      "peak_reserved_bytes": null
+    },
+    "torch": {
+      "status": "complete",
+      "wall_seconds": 266.08419610280544,
+      "CUDA_setup_seconds": 1.2119291946291924,
+      "stage": {
+        "output": "FNIT_ROOT/runs/recon_torch_surface_20261009/pial_sub07_lh_retained_v13_control_first/lh.pial.torch",
+        "hemisphere": "lh",
+        "steps": 39,
+        "pass_ends": [
+          22,
+          29,
+          34,
+          39
+        ],
+        "cleanup": {
+          "intersecting_faces_before": 15,
+          "intersecting_faces_after": 0,
+          "intersecting_faces_trace": [
+            15,
+            0
+          ],
+          "marked_vertices": 24,
+          "smoothed_vertices": 24,
+          "smoothing_cycles": 1,
+          "smoothing_iterations": 100
+        },
+        "sampling_backend": "cpu",
+        "device": "cuda:0",
+        "regularization_backend": "cpu",
+        "candidate_backend": "torch_snapshot",
+        "candidate_grid_cells_per_axis": 3,
+        "retained_mht_backend": "compiled",
+        "cleanup_marking_backend": "legacy",
+        "cleanup_candidate_grid_cells_per_axis": 2,
+        "seconds": 266.08318746462464,
+        "profile": true,
+        "stage_seconds": {
+          "prepare": 25.861339083872736,
+          "gradient": 12.859847717918456,
+          "collision": 154.60885704588145,
+          "objective": 1.7964910510927439,
+          "border_updates": 21.044755871407688,
+          "cleanup": 49.62266761530191,
+          "write": 0.05065185111016035,
+          "control": 0.2385772280395031
+        },
+        "profile_cuda_target": "cuda:0"
+      },
+      "output_sha256": "e7669199d83888b84ece84bac0ab10607727765b79d948f801d3e7deb29bf164",
+      "trace": [
+        {
+          "step": 1,
+          "pass": 0,
+          "coordinate_sha256": "75c74a494185fcd2b9db2757cf531d7ab43ac10b8162790849561454fcfe062d",
+          "diagnostics": {
+            "sse": 18286945.84629565,
+            "rms": 28.910830647823527,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 18286945.84629565,
+                "rms": 28.910830647823527,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 2,
+          "pass": 0,
+          "coordinate_sha256": "df552ef15920f0bfa9854753ecfc62501ed2150ce8e221e23a1947c63ad569b2",
+          "diagnostics": {
+            "sse": 12145844.52504328,
+            "rms": 23.505233819474068,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 12145844.52504328,
+                "rms": 23.505233819474068,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 3,
+          "pass": 0,
+          "coordinate_sha256": "3becb0d32db213adc5429597217b844ec40097a0e07c3c1a05a833db79769214",
+          "diagnostics": {
+            "sse": 8057940.126445909,
+            "rms": 19.074339131593778,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 8057940.126445909,
+                "rms": 19.074339131593778,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 4,
+          "pass": 0,
+          "coordinate_sha256": "4542d5d66fe72a4639d61293d2629725d83ed3c7f553cd5aea7db7e74cf95e85",
+          "diagnostics": {
+            "sse": 5510388.401860986,
+            "rms": 15.690756726750026,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 5510388.401860986,
+                "rms": 15.690756726750026,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 5,
+          "pass": 0,
+          "coordinate_sha256": "761a0fde0559a01ebd67173df71ee3b51f94de17bf890ec5b5305913fbe06489",
+          "diagnostics": {
+            "sse": 3910166.119732749,
+            "rms": 13.125223014731926,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 3910166.119732749,
+                "rms": 13.125223014731926,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 6,
+          "pass": 0,
+          "coordinate_sha256": "b8f3e1f99b6a7b95112d90a044f26a607bd44eeec542235f048acf8e56c56e6b",
+          "diagnostics": {
+            "sse": 2820594.093773285,
+            "rms": 11.041224012053185,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 2820594.093773285,
+                "rms": 11.041224012053185,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 7,
+          "pass": 0,
+          "coordinate_sha256": "a5eaa8209ca478046942c764f96e6c88af8b10270b2bdd5fc8455033965ae645",
+          "diagnostics": {
+            "sse": 2044404.1157283324,
+            "rms": 9.273191237458164,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 2044404.1157283324,
+                "rms": 9.273191237458164,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 8,
+          "pass": 0,
+          "coordinate_sha256": "782f4b75291200f92bb4a2a44cac5a006ea38a39038642ed4657cc8f90ae8fdf",
+          "diagnostics": {
+            "sse": 1486249.3562326648,
+            "rms": 7.754219437124141,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 1486249.3562326648,
+                "rms": 7.754219437124141,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 9,
+          "pass": 0,
+          "coordinate_sha256": "4db7ac399ad6410f6d2c2bed3baeac5f0072ae50e0cb5183bc93d6920ced369f",
+          "diagnostics": {
+            "sse": 1101092.9654028388,
+            "rms": 6.5002398583446235,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 1101092.9654028388,
+                "rms": 6.5002398583446235,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 10,
+          "pass": 0,
+          "coordinate_sha256": "027f34d0bd3a7eaf0e673305ade268687e8173a0de1f7bdc277004b8e0f6fdc4",
+          "diagnostics": {
+            "sse": 852319.5592836268,
+            "rms": 5.538363351878624,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 852319.5592836268,
+                "rms": 5.538363351878624,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 11,
+          "pass": 0,
+          "coordinate_sha256": "921d2f29e1ed264d23db65d9b20197fa2b8da12af7f811293785cc06f4c6897a",
+          "diagnostics": {
+            "sse": 709951.7540031017,
+            "rms": 4.900948861082831,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 709951.7540031017,
+                "rms": 4.900948861082831,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 12,
+          "pass": 0,
+          "coordinate_sha256": "226cfe1203bca401dce2ed56486de258a9ba2b8d9aa8d0561cd9419c8e329c2b",
+          "diagnostics": {
+            "sse": 629709.2040460983,
+            "rms": 4.499583019978488,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 629709.2040460983,
+                "rms": 4.499583019978488,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 13,
+          "pass": 0,
+          "coordinate_sha256": "0df30f164a8e023a07b0feddce470e16b3942751b5d43abe435c49765e9d2f5b",
+          "diagnostics": {
+            "sse": 584579.7798423717,
+            "rms": 4.255088385094513,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 584579.7798423717,
+                "rms": 4.255088385094513,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 14,
+          "pass": 0,
+          "coordinate_sha256": "a87b4adadf60721e22f0800867d9b4499e84ffc9f906835c718f3e08fde03a07",
+          "diagnostics": {
+            "sse": 549226.8038048092,
+            "rms": 4.052291368948052,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 549226.8038048092,
+                "rms": 4.052291368948052,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 15,
+          "pass": 0,
+          "coordinate_sha256": "8ab3986dfcd1e8ccb4431ee390765d29a884f6650192ed609374e11aef911699",
+          "diagnostics": {
+            "sse": 528552.4201621008,
+            "rms": 3.9271974071932507,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 528552.4201621008,
+                "rms": 3.9271974071932507,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 16,
+          "pass": 0,
+          "coordinate_sha256": "32a239065940464a06df59f79710017ee547ccf76ffbacd23b10bc58f02631e9",
+          "diagnostics": {
+            "sse": 516022.2200000121,
+            "rms": 3.8474268978135853,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 516022.2200000121,
+                "rms": 3.8474268978135853,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 17,
+          "pass": 0,
+          "coordinate_sha256": "737d8dbdc34a614ca4f8390821a6148d335a221f86b6cdc750cc0e47ecd070bc",
+          "diagnostics": {
+            "sse": 508930.19589994976,
+            "rms": 3.799906883509957,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.25,
+                "sse": 508930.19589994976,
+                "rms": 3.799906883509957,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 18,
+          "pass": 0,
+          "coordinate_sha256": "d91e0a593b19d1d7f5e7d68bfa1c54962c7ebf6e5dd2dedca3ae40dfdba85a01",
+          "diagnostics": {
+            "sse": 420913.23099774175,
+            "rms": 3.197584803408676,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 420913.23099774175,
+                "rms": 3.197584803408676,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 19,
+          "pass": 0,
+          "coordinate_sha256": "ce809f4cc0f137553dd0c7041c6d9622dda1fdf232eed7456c6d3e17296f63cc",
+          "diagnostics": {
+            "sse": 400909.35398170864,
+            "rms": 3.0460453085425865,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 400909.35398170864,
+                "rms": 3.0460453085425865,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 20,
+          "pass": 0,
+          "coordinate_sha256": "71cf7f447322d06c5d99af90fe1cc3d59803556735bbe127fab1648bda4980df",
+          "diagnostics": {
+            "sse": 396647.87766470725,
+            "rms": 3.0110000427592585,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.125,
+                "sse": 396647.87766470725,
+                "rms": 3.0110000427592585,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 21,
+          "pass": 0,
+          "coordinate_sha256": "c08c0993296b73f3860e2a9e4b841d2097a7c947176d0d13e1df4358a823b717",
+          "diagnostics": {
+            "sse": 384612.57592825417,
+            "rms": 2.913677960656344,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.125,
+                "sse": 384612.57592825417,
+                "rms": 2.913677960656344,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 22,
+          "pass": 0,
+          "coordinate_sha256": "ca4add47f770fea6d6c5d7d1d59d30d5a6556b4b2d2e00e5fa11c402ae08a7f4",
+          "diagnostics": {
+            "sse": 381774.22439047555,
+            "rms": 2.8900507260706925,
+            "dt": 0.0625,
+            "reductions": 3,
+            "stop": true,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.0625,
+                "sse": 381774.22439047555,
+                "rms": 2.8900507260706925,
+                "reduced": true,
+                "rejected": false,
+                "stop": true,
+                "reductions": 3
+              }
+            ]
+          }
+        },
+        {
+          "step": 23,
+          "pass": 1,
+          "coordinate_sha256": "7bef8503182f2cfca8c2797215bcffeeb6fe5cd7d645cc442a73137a74ddb188",
+          "diagnostics": {
+            "sse": 509993.2801511272,
+            "rms": 3.507076869070253,
+            "dt": 0.5,
+            "reductions": 0,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.5,
+                "sse": 509993.2801511272,
+                "rms": 3.507076869070253,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 0
+              }
+            ]
+          }
+        },
+        {
+          "step": 24,
+          "pass": 1,
+          "coordinate_sha256": "77d36c7698dde727a475e715a180b0e12c7a6c8329a1273c0bdf65c139b3eb12",
+          "diagnostics": {
+            "sse": 458903.75905596185,
+            "rms": 3.1491557911850663,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.25,
+                "sse": 510611.45343684347,
+                "rms": 3.5258161749321464,
+                "reduced": true,
+                "rejected": true,
+                "stop": false,
+                "reductions": 1
+              },
+              {
+                "trial": 1,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 458903.75905596185,
+                "rms": 3.1491557911850663,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 25,
+          "pass": 1,
+          "coordinate_sha256": "f09c30a4294e3b7fbb15c26b98bc0f4a7ed4263085c428316efbb5430a446151",
+          "diagnostics": {
+            "sse": 435014.63465221296,
+            "rms": 2.969403647549838,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 435014.63465221296,
+                "rms": 2.969403647549838,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 26,
+          "pass": 1,
+          "coordinate_sha256": "480676c1b41a235e27e9b4b1b252be4816440bc5edaf436354a7bb6b5f97f809",
+          "diagnostics": {
+            "sse": 426976.7972967719,
+            "rms": 2.9048458766014194,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 426976.7972967719,
+                "rms": 2.9048458766014194,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 27,
+          "pass": 1,
+          "coordinate_sha256": "a688ca12af861e201d8e539cbe714fc20f05dd1e3e0ff67ee95d0274ea1ba7db",
+          "diagnostics": {
+            "sse": 422097.6921954835,
+            "rms": 2.865399046204432,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.125,
+                "sse": 422097.6921954835,
+                "rms": 2.865399046204432,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 28,
+          "pass": 1,
+          "coordinate_sha256": "3c69e67c5b3ef8b99adcd9bf0114c84e43f2a7dd6196ebfda500b797f8a54978",
+          "diagnostics": {
+            "sse": 411779.76427660487,
+            "rms": 2.77804931176969,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.125,
+                "sse": 411779.76427660487,
+                "rms": 2.77804931176969,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 29,
+          "pass": 1,
+          "coordinate_sha256": "6077f44ca83dcc9ea1aadac748e227aa3fcaa78c6a931d7cd2140e1d3ec455cd",
+          "diagnostics": {
+            "sse": 408873.94431939535,
+            "rms": 2.7531276878052457,
+            "dt": 0.0625,
+            "reductions": 3,
+            "stop": true,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.0625,
+                "sse": 408873.94431939535,
+                "rms": 2.7531276878052457,
+                "reduced": true,
+                "rejected": false,
+                "stop": true,
+                "reductions": 3
+              }
+            ]
+          }
+        },
+        {
+          "step": 30,
+          "pass": 2,
+          "coordinate_sha256": "bde17bdfc67295d1cbf94866d80764c3f4969413c184226ab3ed2faf59293618",
+          "diagnostics": {
+            "sse": 440892.83657955483,
+            "rms": 2.9714881946836336,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.25,
+                "sse": 473988.1935843525,
+                "rms": 3.2213845290197347,
+                "reduced": true,
+                "rejected": true,
+                "stop": false,
+                "reductions": 1
+              },
+              {
+                "trial": 1,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 440892.83657955483,
+                "rms": 2.9714881946836336,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 31,
+          "pass": 2,
+          "coordinate_sha256": "0bf96b9ced1b2f1785c63a11be48f3ed1780460e4b63108cb44fe4d76af9f536",
+          "diagnostics": {
+            "sse": 423370.6170254636,
+            "rms": 2.8311799112746834,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 423370.6170254636,
+                "rms": 2.8311799112746834,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 32,
+          "pass": 2,
+          "coordinate_sha256": "36d1a87fb404b7a18a1342070b1fa470e26b5d972418def0f173798609bea096",
+          "diagnostics": {
+            "sse": 419321.11972502887,
+            "rms": 2.798953558924422,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.125,
+                "sse": 419321.11972502887,
+                "rms": 2.798953558924422,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 33,
+          "pass": 2,
+          "coordinate_sha256": "7b44f13318ba1c1287490c296ee98adbcd441d0bbc8b47ca468858532c74bd03",
+          "diagnostics": {
+            "sse": 410167.36427574814,
+            "rms": 2.7204640782003437,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.125,
+                "sse": 410167.36427574814,
+                "rms": 2.7204640782003437,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 34,
+          "pass": 2,
+          "coordinate_sha256": "fcbd34328606d3e15923ed770e4466e5438978943a513cd4000ef9b64fb22ad9",
+          "diagnostics": {
+            "sse": 407011.49955576763,
+            "rms": 2.693788911356528,
+            "dt": 0.0625,
+            "reductions": 3,
+            "stop": true,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.0625,
+                "sse": 407011.49955576763,
+                "rms": 2.693788911356528,
+                "reduced": true,
+                "rejected": false,
+                "stop": true,
+                "reductions": 3
+              }
+            ]
+          }
+        },
+        {
+          "step": 35,
+          "pass": 3,
+          "coordinate_sha256": "fa476087a31c3c569ca21f1ca39bd7f2fd9a2485ac0113dd21d1e63c07a989be",
+          "diagnostics": {
+            "sse": 425310.3053020521,
+            "rms": 2.8354904071515037,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.5,
+                "dt_next": 0.25,
+                "sse": 462842.854912092,
+                "rms": 3.1324007515553856,
+                "reduced": true,
+                "rejected": true,
+                "stop": false,
+                "reductions": 1
+              },
+              {
+                "trial": 1,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 425310.3053020521,
+                "rms": 2.8354904071515037,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 36,
+          "pass": 3,
+          "coordinate_sha256": "1a7a7636fc111086e3adc073701ba28b1a497fc22ab6b86c3543cc8c13699ad6",
+          "diagnostics": {
+            "sse": 412316.22770422895,
+            "rms": 2.7301052205684093,
+            "dt": 0.25,
+            "reductions": 1,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.25,
+                "sse": 412316.22770422895,
+                "rms": 2.7301052205684093,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 1
+              }
+            ]
+          }
+        },
+        {
+          "step": 37,
+          "pass": 3,
+          "coordinate_sha256": "2b1e5dcf314792abb6c9e4248a449d3047df62581bc6de573b4aaef37e0bc15e",
+          "diagnostics": {
+            "sse": 410100.43613970967,
+            "rms": 2.7147095917895037,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.25,
+                "dt_next": 0.125,
+                "sse": 410100.43613970967,
+                "rms": 2.7147095917895037,
+                "reduced": true,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 38,
+          "pass": 3,
+          "coordinate_sha256": "b89aa996d9bd3ec280cf9a22c9ad54d951e2675fd34828b9a70c198ed016fc94",
+          "diagnostics": {
+            "sse": 401074.3615863103,
+            "rms": 2.6356255212514603,
+            "dt": 0.125,
+            "reductions": 2,
+            "stop": false,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.125,
+                "sse": 401074.3615863103,
+                "rms": 2.6356255212514603,
+                "reduced": false,
+                "rejected": false,
+                "stop": false,
+                "reductions": 2
+              }
+            ]
+          }
+        },
+        {
+          "step": 39,
+          "pass": 3,
+          "coordinate_sha256": "2df8f5f29b482d01acf9ce1e5e7d555748d837719b137374539cae598e07bc7a",
+          "diagnostics": {
+            "sse": 398168.7716914676,
+            "rms": 2.6114064563609167,
+            "dt": 0.0625,
+            "reductions": 3,
+            "stop": true,
+            "trials": [
+              {
+                "trial": 0,
+                "dt_used": 0.125,
+                "dt_next": 0.0625,
+                "sse": 398168.7716914676,
+                "rms": 2.6114064563609167,
+                "reduced": true,
+                "rejected": false,
+                "stop": true,
+                "reductions": 3
+              }
+            ]
+          }
+        }
+      ],
+      "peak_allocated_bytes": 706536960,
+      "peak_reserved_bytes": 2896166912
+    }
+  },
+  "order": [
+    "cpu",
+    "torch"
+  ],
+  "repetitions": 1,
+  "admission_requirement": "identical ordered final geometry and pass/trial decisions",
+  "overall_metric_equivalence": "not_assessed",
+  "source_sha256": {
+    "place_surface_border.py": "07eb6e586dec01add03d6762841a7ef44a65bfa8cca97a2854359d910f93a560",
+    "place_surface_collision.py": "f36213cfa1c8e65b2dfa69490ab4978e140d7852cbefb0834ed3f991ac84b166",
+    "place_surface_curvature.py": "641f3607187aeffd96eb4b84e4413ae7351d0937ec23bfc340ea4501846bdb33",
+    "place_surface_decision.py": "fb3bae2275a051b490f1a77ee083493012b40bfb5bd13a3863d4677dd59abfcf",
+    "place_surface_smoothing.py": "5e413a3df69833020be34fdbf8e4b2b6b80e00ddc6b54ac09717527dbf718d07",
+    "place_surface_final_cleanup.py": "cee87f5e12e48d12a9aadd0198f2b06e68a9eca875cefa0d91b3b7f93ff2f8c0",
+    "place_surface_geometry.py": "0df4ebcc4e53d03ed97dabbda6d17d0be5f98001e2528f4ddcd6487079d7082f",
+    "place_surface_gradient_average.py": "4613acd65fb234d6839a84c60b883a43551e51c92717881a606e65ac274f4200",
+    "place_surface_intensity.py": "86f9c7e8b15240f8418ddc444016d6a71bba02f6c35ac94482e0e064a070b7b2",
+    "place_surface_normals.py": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+    "place_surface_objective.py": "84a233d7dc32b8d3b130221192212fbddb6cd6c9819ebc4eefc7b6a26b6a630a",
+    "place_surface_repulsion.py": "f6d04774adce1c171962c4fd122185b32104b4c9ad43ae5f387fb1ed8574850e",
+    "place_surface_rip.py": "d3f7726a5ca09bae60a998303d55f1c130e775775f4a837f2c135dcf34b302b2",
+    "place_surface_spring.py": "8bc6f39231464acb428ee2199f852a2c0a675fc35edafd73ed9f3b24ed7614da",
+    "place_surface_step.py": "f56bec854415954add422dc7a3a9642356aaf9da40f80d208c757d5207c468ee",
+    "place_surface_volume.py": "bd184cbb34ca59781ddc5cd069b58749eaa77921accc3c12ba3c55ac0204df44",
+    "place_pial_python.py": "3413fb9dac99d1870d0d0e1f0353af4c36d8a24709894826e8dc241310c56033",
+    "benchmark_placement_full_pial.py": "32318a85787ea0c7e0b58d5cf08b122c1a3a0951ffa3015cec4ce380cbe96d4a",
+    "place_surface_snapshot.py": "c2bac9c2f9065454d295981c38c85b58657b0a75f7278f8c124f4f6a979facbf",
+    "place_surface_candidates_torch.py": "502b5da1aaa2275d48b106885a603fe797c74fb24fadcca1a53e0a641db243b8",
+    "place_surface_intersection_marking.py": "63ea29f2af2183abc2ded01a6cf0053aa659a753d158c4710f8212c5e4fe4e71",
+    "place_surface_collision_torch.py": "adac1598f162d5c0fb27afeac6d8625c8da7d66ae781205c1153b00403ba799a"
+  },
+  "process_gpu_memory_sampling": "external sampler; allocator peaks separately recorded",
+  "cpu_affinity_count": 4,
+  "cuda_allocator_environment": {
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": null,
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "PYTORCH_ALLOC_CONF": null
+  },
+  "candidate_strategy": {
+    "candidate_backend": "torch_snapshot",
+    "grid_cells_per_axis": 3,
+    "retained_mht_backend": "compiled",
+    "regularization_backend": "cpu"
+  },
+  "cleanup_strategy": {
+    "backend": "legacy",
+    "grid_cells_per_axis": 2
+  },
+  "native_reference_kind": "current independently Conda source-built program, fresh same-host same-input; not installed official",
+  "native_runs": [
+    {
+      "status": "complete",
+      "seconds_cold_CLI_including_read_compute_write": 141.03068735823035,
+      "native_input_sha256": {
+        "surf/lh.white": "ff5190d8e160d67f623e1694582415a40adffcf55f896fd2098340a24fd5be74",
+        "surf/autodet.gw.stats.lh.dat": "7ebd1251638bf1b8a8e1056a3f45010bce53c1a9a3c1ec91934ac601da86d1e9",
+        "label/lh.cortex.label": "74a609ee0fc0e528108aac56b8a635706de56a05887ad80a053503112c734940",
+        "label/lh.cortex+hipamyg.label": "f74902a68b9f13d1b37ca54a17766bdc00cf1e2fc851def4cdb422a68de6c633",
+        "mri/brain.finalsurfs.mgz": "0a6e3bdfe92cd2bb5a2d1b798b91428023b1527596e6bbb32151575d9a780a27",
+        "mri/wm.mgz": "3271723eea691889345d843565342321d2aff2f8af4332a1d6e4a9087aaf9435",
+        "mri/aseg.presurf.mgz": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c",
+        "label/lh.aparc.annot": "497ee1826c35132deb1663cd2845aeb1960025b3f3866dbf37758e2261499788"
+      },
+      "output_sha256": "6c2d8f1ed1d5e4e18efbb8cedd5afb21a0207491b77b1a37775f27633322f76f",
+      "same_vertex_count_and_ordered_faces": true,
+      "different_coordinate_elements": 238944,
+      "p99_vertex_distance_mm": 0.08446967536557305,
+      "max_vertex_distance_mm": 2.83842260072749,
+      "source_directional_intersecting_face_count": 0,
+      "repeat_same_ordered_faces": true,
+      "repeat_different_coordinate_elements": 0
+    },
+    {
+      "status": "complete",
+      "seconds_cold_CLI_including_read_compute_write": 138.21430495753884,
+      "native_input_sha256": {
+        "surf/lh.white": "ff5190d8e160d67f623e1694582415a40adffcf55f896fd2098340a24fd5be74",
+        "surf/autodet.gw.stats.lh.dat": "7ebd1251638bf1b8a8e1056a3f45010bce53c1a9a3c1ec91934ac601da86d1e9",
+        "label/lh.cortex.label": "74a609ee0fc0e528108aac56b8a635706de56a05887ad80a053503112c734940",
+        "label/lh.cortex+hipamyg.label": "f74902a68b9f13d1b37ca54a17766bdc00cf1e2fc851def4cdb422a68de6c633",
+        "mri/brain.finalsurfs.mgz": "0a6e3bdfe92cd2bb5a2d1b798b91428023b1527596e6bbb32151575d9a780a27",
+        "mri/wm.mgz": "3271723eea691889345d843565342321d2aff2f8af4332a1d6e4a9087aaf9435",
+        "mri/aseg.presurf.mgz": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c",
+        "label/lh.aparc.annot": "497ee1826c35132deb1663cd2845aeb1960025b3f3866dbf37758e2261499788"
+      },
+      "output_sha256": "1bcd2d319d60cbe119724b9fb3e53e8b52f1e51114f634272263c7826e36b495",
+      "same_vertex_count_and_ordered_faces": true,
+      "different_coordinate_elements": 238944,
+      "p99_vertex_distance_mm": 0.08446967536557305,
+      "max_vertex_distance_mm": 2.83842260072749,
+      "source_directional_intersecting_face_count": 0,
+      "repeat_same_ordered_faces": true,
+      "repeat_different_coordinate_elements": 0
+    }
+  ],
+  "status": "complete",
+  "comparison": {
+    "same_vertex_count_and_ordered_faces": true,
+    "same_file_bytes": true,
+    "same_trace": true,
+    "different_coordinate_elements": 0,
+    "max_vertex_distance_mm": 0.0,
+    "p99_vertex_distance_mm": 0.0,
+    "speed_ratio_cpu_over_torch": 4.317492242548418
+  },
+  "strict_backend_reproduction": "passed",
+  "new_degradation_under_declared_exact_backend_gate": "passed",
+  "mesh_quality_not_in_stage_timing": {
+    "cpu": {
+      "finite_coordinates": true,
+      "source_directional_intersecting_face_count": 0
+    },
+    "torch": {
+      "finite_coordinates": true,
+      "source_directional_intersecting_face_count": 0
+    }
+  },
+  "mesh_quality_status": "passed",
+  "native_program_sha256": "78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44",
+  "input_sha256_after": {
+    "lh.white": "ff5190d8e160d67f623e1694582415a40adffcf55f896fd2098340a24fd5be74",
+    "autodet.gw.stats.lh.dat": "7ebd1251638bf1b8a8e1056a3f45010bce53c1a9a3c1ec91934ac601da86d1e9",
+    "lh.cortex.label": "74a609ee0fc0e528108aac56b8a635706de56a05887ad80a053503112c734940",
+    "lh.cortex+hipamyg.label": "f74902a68b9f13d1b37ca54a17766bdc00cf1e2fc851def4cdb422a68de6c633",
+    "brain.finalsurfs.mgz": "0a6e3bdfe92cd2bb5a2d1b798b91428023b1527596e6bbb32151575d9a780a27",
+    "wm.mgz": "3271723eea691889345d843565342321d2aff2f8af4332a1d6e4a9087aaf9435",
+    "aseg.presurf.mgz": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c"
+  },
+  "public_report_provenance": {
+    "raw_report_sha256": "bd2a84dcd682e5c183b627d71ea01b2b9edf914c9538f24f8afa365325f067a8",
+    "redacted_fields": [
+      "absolute private FNIT prefix",
+      "hostname"
+    ],
+    "numeric_measurements_unchanged": true
+  }
+}

@@ -151,4 +151,152 @@ pial_report = place_pial_t1(
 
 服务器7项单元回归通过（10.22 s，6项缓存+1项完整四轮控制流）；控制流测试强制终止拒绝，验证四轮均完成、顶点恢复、面和输出保留，不代替真实benchmark。初次测试因测试表面缺体积几何失败，补齐合法测试输入后通过，原失败记录仍保留服务器会话输出。同输入完整阶段序列已在 gpucw1 排队：white.preaparc/最终white分别比较官方与当前Conda；完整pial比较官方/Conda/Python，先LH后RH。Python white只有前缀，不参与完整white三方。各stage单独取得并释放共享锁，输入始终从同一旧自产冻结目录复制，官方输出不喂入下一项生产或候选。此处是算法诊断，不能冒充本轮10例整例。
 
-官方固定CLI不输出每轮完整坐标快照，因此本轮native报告逐轮步长、SSE/RMS、拒绝次数和清理消息；Python额外保存四轮结束表面与全部试步。仅有日志标量时不宣称完整坐标逐轮对应。机器报告和复现入口见 `validation/recon_all/accuracy_20261003/task_05/placement_probe.py` 与 `run_placement_stages.sh`；阶段真实结果、GPU速度及10例指标尚待返回，整体等效仍为 `not_assessed`。
+## 完整有序候选实验（2026-10-09）
+
+复用已在完整white四轮验证的GPU完整空间索引和编译有序MHT重试，
+不重写pial梯度、目标或边界搜索。候选只预计算可以覆盖整次试步的面对，
+窄相按原subvolume/顶点顺序读取实时坐标，真正碰撞继续按原FP64桶重放。
+这不是并行Jacobi或完整纯GPU实现；CPU正则、采样、目标及有序接受保留。
+
+```mermaid
+flowchart LR
+    A[冻结自产white与七项前置] --> B[原pial强度 边界与目标]
+    B --> C[原梯度与步长]
+    C --> D[GPU完整空间候选]
+    D --> E[编译实时有序更新 原MHT命中重放]
+    E --> F[原目标与接受拒绝]
+    F --> C
+    F --> G[四轮结束 内侧壁固定 完整清理 写出]
+```
+
+新增参数均为显式实验，原调用及生产Conda默认保持：
+
+| 参数 | 默认值、输入与限制 |
+|---|---|
+| `candidate_grid_cells_per_axis` | 2；显式3只用于torch_snapshot较小完整单元，仍覆盖全部候选；非法值或其他后端抛ValueError |
+| `retained_mht_backend` | tree；compiled只允许snapshot/torch_snapshot，将已有实时有序重试循环编译，真正命中仍使用原桶规则；首次JIT计入阶段时间 |
+| `cleanup_marking_backend` | legacy；source_numba/source_torch显式复用源有向MHT标记，后者要求device；不换soap或停滞规则，源清理最终非零抛异常，不写表面 |
+| `cleanup_candidate_grid_cells_per_axis` | 2；显式3只用于source_torch，与试步网格选项独立；非法组合在读取前拒绝 |
+
+成功报告新增同名字段，记录实际选项。其余全部参数、坐标/单位和七项
+前置保持本文定义；profile仅诊断时同步指定GPU，不给默认CPU路径加屏障。
+
+```python
+from fnit.recon_all.place_pial_python import place_pial_t1
+
+pial_report = place_pial_t1(
+    subject="/data/fnit/sub07",  # 自产七项前置，生产不读官方参考
+    hemisphere="lh",  # 单个左侧；另一侧独立指定rh
+    output="/data/diagnostic/sub07/lh.pial.gpu-experiment",  # 独立实验表面
+    max_steps=200,  # 完整四轮累计保护上限，不跳过必要轮次
+    sampling_backend="cpu",  # 首轮配对保持同一既有采样策略
+    regularization_backend="cpu",  # 隔离碰撞候选优化的影响
+    candidate_backend="torch_snapshot",  # GPU完整保守面对，不截断数量
+    candidate_grid_cells_per_axis=3,  # 显式较小完整空间单元
+    retained_mht_backend="compiled",  # 重试复用编译的实时有序循环
+    cleanup_marking_backend="legacy",  # 首轮配对保持相同完整清理策略
+    cleanup_candidate_grid_cells_per_axis=2,  # 默认清理网格；不冒充GPU清理
+    device="cuda:0",  # 明确当前进程GPU编号；TF32/float32不变
+    trace_callback=None,  # 可选完整每步坐标与所有试步决定的只读回调
+    profile=True,  # 诊断同步并记录准备、碰撞、目标、清理与写出
+)
+```
+
+完整同输入诊断复用现有 `benchmark_placement_full_pial.py`：
+
+```bash
+CUDA_VISIBLE_DEVICES=2 OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 \
+python validation/recon_all/python_gpu_port/benchmark_placement_full_pial.py \
+  --subject /data/fnit/sub07 --hemisphere lh \
+  --candidate-directory /data/frozen-code/src/fnit/recon_all \
+  --output-directory /data/runs/pial-control-candidate \
+  --code-base-commit ACTUAL_TESTED_COMMIT --threads 4 --device cuda:0 \
+  --max-steps 200 --python-order cpu torch \
+  --candidate-backend torch_snapshot --candidate-grid-cells-per-axis 3 \
+  --retained-mht-backend compiled --candidate-regularization-backend cpu \
+  --cleanup-marking-backend legacy --cleanup-grid-cells-per-axis 2 \
+  --native-binary /data/benchmark-native/bin/mris_place_surface \
+  --assets-directory /data/fnit-assets --native-repeat 2
+```
+
+`--subject`指定真实七输入目录；原生参考还需要同一上游aparc.annot。
+`--hemisphere`默认lh，`--max-steps`200，`--threads`4，`--device`cuda:0。
+候选目录、全新输出目录与基线版本必填；实际模块SHA另作精确绑定。
+`--python-order`默认cpu torch，必须各一次，可反向；cpu标签表示旧树控制，
+torch标签表示显式候选。候选默认tree/2/tree/Torch正则，本例明确仅换
+候选与MHT循环，正则仍CPU。两组清理同一backend/grid，默认legacy/2。
+`--native-binary`默认None，指定时要求assets目录；`--native-repeat`默认2，
+参考八项输入只复制到独立benchmark目录，不写生产目录。
+
+输出包括控制与候选诊断表面、完整每步SHA/所有trial、JSON、独立网格质量
+记录、可选两份原生参考及私有日志。同步阶段墙钟含校验、读写和回调，
+CUDA初始化单列；质量核对在计时外；外部显存与allocated/reserved分开。
+固定标准是候选对控制全部有序几何及接受决定0差异，不改变既有官方门。
+
+### 最新同输入完整阶段结果
+
+公开ds000114的sub07左半球，使用FNIT 803自产final white及七项前置。
+同一A100、四核/四线程，按CPU控制→GPU候选顺序各运行一次完整API；
+CUDA初始化单列，阶段时间包含校验、读写、全部试步回调和最终清理。
+这是冻结同输入pial阶段，不是从原始T1开始的整例，也不是稳定吞吐ABBA。
+
+| 实现与实际策略 | 完整阶段墙钟 | 动态碰撞及有序更新 | 最终清理 |
+|---|---:|---:|---:|
+| FNIT Python/Numba CPU，原树与原MHT重试 | 1148.816 s | 1027.574 s | 50.908 s |
+| FNIT PyTorch GPU完整候选，编译实时有序MHT；梯度、采样和清理仍CPU | 266.084 s | 154.609 s | 49.623 s |
+| 固定FreeSurfer源码的独立Conda C++，同输入冷CLI第1遍 | 141.031 s | 原生命令未提供同口径子项 | 包含在完整时间 |
+| 同一Conda程序第2遍 | 138.214 s | 原生命令未提供同口径子项 | 包含在完整时间 |
+
+候选相对自身CPU控制，本组完整阶段快4.317倍、时间减少76.84%。原生参考
+仍更快；本轮没有将候选设为生产默认，也没有宣称整例或原生提速。
+21项本地控制、选项及静态索引回归通过；真实完整阶段结论如下。
+
+- 四轮结束于第22、29、34、39步；39步坐标SHA、全部试步的步长、目标、
+  接受/拒绝及停止决定完全一致。最终有序面、坐标及表面文件字节均0差异。
+- 两组最终清理均为15→0个标记相交面，24个顶点、1轮100次soap；独立
+  源有向标记复核也为0，坐标有限。优化未引入本次固定严格门下的退化。
+- 两次本机Conda参考的有序面和坐标完全重现；文件头SHA不同，因此只报告
+  几何重复一致。它是本机独立源码构建参考，不冒充未在本机重跑的官方发行版。
+- Python及相同GPU输出对本机Conda仍有既有几何差异：平均0.004235 mm，
+  P99 0.084470 mm，最大2.838423 mm，901个顶点超过0.1 mm；最大点位于
+  insula。该差异在优化前后不变，不能归因于本次加速或一概称为随机尾差。
+  整体指标等效仍为`not_assessed`。
+
+候选PyTorch allocated峰值706,536,960字节，reserved峰值2,896,166,912字节。
+外部采样间隔0.25秒；容器PID归属未解决，进程树峰值为null，同期整卡3273 MiB
+只作共享设备上界，不能当作进程占用或整例20 GB验收。TF32设置开启，未使用
+半精度；三个分配器环境变量均未设置，未由reserved反推有效缓存策略。
+
+完整报告绑定`caadaeb3-plus-pial-retained-v13`及实际源码SHA，而非后续main。
+`place_pial_python.py` SHA为`3413fb9dac99d1870d0d0e1f0353af4c36d8a24709894826e8dc241310c56033`；
+参考程序SHA为`78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44`。
+全部输入、其余源码、逐步轨迹、分项时间及两次参考记录见
+[完整JSON](../../validation/recon_all/optimizations/20261009_placement_torch/pial_retained_a100_v13_sub07_lh.json)和
+[外部显存收据](../../validation/recon_all/optimizations/20261009_placement_torch/pial_retained_a100_v13_sub07_lh.memory.json)。
+
+下图是同一自产T1上的实际表面叠加、最大误差脑区处的局部表面边界及全顶点误差图。
+青色为本机Conda参考，品红色为FNIT；表面采用surface RAS/mm，T1切面用
+`vox2ras_tkr`逆变换，分区注释沿相同顶点顺序读取。图片与输入哈希见
+[图像收据](../../validation/recon_all/optimizations/20261009_placement_torch/pial_sub07_lh_a100_v13.figure.json)。
+
+![sub07左侧pial真实误差](../../validation/recon_all/optimizations/20261009_placement_torch/pial_sub07_lh_a100_v13.png)
+
+```bash
+python validation/recon_all/python_gpu_port/plot_full_white_diagnostics.py \
+  --candidate-surface /data/runs/pial-control-candidate/lh.pial.torch \
+  --reference-surface /data/runs/pial-control-candidate/native-0-subject/surf/lh.pial.T1 \
+  --brain-mri /data/fnit/sub07/mri/brain.finalsurfs.mgz \
+  --comparison-report /data/runs/pial-control-candidate/report.json \
+  --annotation /data/fnit/sub07/label/lh.aparc.annot \
+  --surface-kind pial.T1 --label sub07-lh \
+  --output /data/runs/pial-control-candidate/pial-native-error.png
+```
+
+候选、参考均为相同有序顶点表面；`--brain-mri`为实际T1/强度图，
+`--comparison-report`为完整配对JSON，用于图像版本绑定；
+`--annotation`可选同顺序分区标签，默认None。`--surface-kind`默认white.preaparc，
+本例显式pial.T1；`--label`为图中文字；`--output`为PNG，并写同名JSON。
+输入与输出路径必填；顶点数或有序面不匹配时拒绝同索引误差图。
+本轮只新增实验选项并复用已有内核，没有新增依赖或替换现版生产实现。
+
+历史冻结诊断的官方固定CLI不输出每轮完整坐标快照，因此对应native报告只有逐轮步长、SSE/RMS、拒绝次数和清理消息；Python额外保存四轮结束表面与全部试步。仅有日志标量时不宣称完整坐标逐轮对应。该组入口见 `validation/recon_all/accuracy_20261003/task_05/placement_probe.py` 与 `run_placement_stages.sh`；不替代上面的本机v13阶段记录或10例整例指标。

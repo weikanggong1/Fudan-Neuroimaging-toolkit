@@ -1,4 +1,4 @@
-"""绘制冻结同输入white的真实MRI叠加、同索引误差和局部边界，不改候选输出。"""
+"""绘制冻结同输入表面的真实MRI叠加、同索引误差与局部边界；默认white。"""
 from __future__ import annotations
 
 import argparse
@@ -46,6 +46,8 @@ def main():
     parser.add_argument("--comparison-report", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--label", required=True)
+    parser.add_argument("--surface-kind", choices=("white.preaparc", "pial.T1"), default="white.preaparc")
+    parser.add_argument("--annotation", type=Path)
     args = parser.parse_args()
     if args.output.exists() or args.output.with_suffix(".json").exists():
         raise FileExistsError("new figure and metadata paths required")
@@ -62,6 +64,14 @@ def main():
     reference_voxel = nib.affines.apply_affine(inverse_tkr, reference)
     distances = np.linalg.norm(vertices-reference, axis=1)
     maximum_vertex = int(np.argmax(distances))
+    annotation_name = None
+    if args.annotation is not None:
+        labels, _, names = fs.read_annot(str(args.annotation))
+        if len(labels) != len(vertices):
+            raise ValueError("annotation must address this same vertex order")
+        label_index = int(labels[maximum_vertex])
+        annotation_name = (names[label_index].decode("utf8") if 0 <= label_index < len(names)
+                           else "unannotated")
     target = candidate_voxel[maximum_vertex]
     slice_y = int(np.clip(round(float(target[1])), 0, brain.shape[1]-1))
     candidate_lines = plane_lines(candidate_voxel, faces, slice_y)
@@ -75,7 +85,8 @@ def main():
         ax.set_xlabel("conformed voxel x")
         ax.set_ylabel("conformed voxel z")
     axes[0].set_title(f"MRI plane y={slice_y}: reference / FNIT")
-    axes[1].set_title("Local boundary near maximum error")
+    axes[1].set_title("Local boundary near maximum error" +
+                      (f"\n{annotation_name}" if annotation_name is not None else ""))
     axes[1].set_xlim(target[0]-18, target[0]+18)
     axes[1].set_ylim(target[2]-18, target[2]+18)
     near_plane = np.abs(candidate_voxel[:, 1]-slice_y) < 1.0
@@ -92,12 +103,12 @@ def main():
     axes[2].set_ylabel("surface RAS z (mm)")
     axes[2].set_title("Vertex error: all values used in statistics")
     fig.colorbar(error_points, ax=axes[2], label="distance (mm)", shrink=.7)
-    fig.suptitle(f"{args.label}: frozen-input white.preaparc, not recon-all equivalence", fontsize=12)
+    fig.suptitle(f"{args.label}: frozen-input {args.surface_kind}, not recon-all equivalence", fontsize=12)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.output, dpi=160)
     plt.close(fig)
     metadata = {
-        "scope": "frozen_same_input_white_preaparc_MRI_overlay_and_local_boundary_not_final_white_or_recon_all",
+        "scope": f"frozen_same_input_{args.surface_kind}_MRI_overlay_and_local_boundary_not_recon_all_equivalence",
         "script_sha256": sha(__file__),
         "input_sha256": {"candidate_surface": sha(args.candidate_surface),
                          "reference_surface": sha(args.reference_surface),
@@ -107,10 +118,14 @@ def main():
         "surface_space": "surface RAS in mm", "slice_axis": "voxel y", "slice_index": slice_y,
         "plane_selection": "nearest coronal voxel plane to maximum same-index error; no algorithm change",
         "maximum_vertex_index": maximum_vertex,
+        "surface_kind": args.surface_kind,
+        "maximum_error_region_name": annotation_name,
         "mean_distance_mm": float(distances.mean()), "p99_distance_mm": float(np.percentile(distances, 99)),
         "max_distance_mm": float(distances.max()), "vertices_over_0_1_mm": int(np.count_nonzero(distances > .1)),
         "raster_visualization_stride": stride,
     }
+    if args.annotation is not None:
+        metadata["input_sha256"]["annotation"] = sha(args.annotation)
     args.output.with_suffix(".json").write_text(json.dumps(metadata, indent=2)+"\n")
 
 

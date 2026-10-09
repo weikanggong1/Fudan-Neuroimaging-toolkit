@@ -59,6 +59,10 @@ def place_pial_t1(
     sampling_backend: str = "cpu",
     regularization_backend: str = "cpu",
     candidate_backend: str = "tree",
+    candidate_grid_cells_per_axis: int = 2,
+    retained_mht_backend: str = "tree",
+    cleanup_marking_backend: str = "legacy",
+    cleanup_candidate_grid_cells_per_axis: int = 2,
     device: str | None = None,
     trace_callback=None,
     profile: bool = False,
@@ -79,6 +83,14 @@ def place_pial_t1(
     GPU spatial candidate construction on ``device``. Live close-neighbor
     projection and triangle acceptance remain ordered CPU operations; retained
     rejected-trial MHT retries use the original tree rules. No Jacobi updates.
+    显式candidate_grid_cells_per_axis=3只改变完整GPU候选单元；
+    retained_mht_backend="compiled"复用已有实时有序循环，实际命中仍按
+    原FP64 MHT桶重放。两者默认2/tree，不改变拒绝状态或接受顺序。
+    cleanup_marking_backend默认legacy；source_numba/source_torch显式复用
+    源有向标记，source_torch要求device，清理candidate_grid默认为2，
+    显式3只允许source_torch。源清理最终残余非零会抛异常而不写表面。
+    七项输入、MRI网格、surface RAS/mm、有序输出和全部参数/真实验证见
+    docs/recon_all/PYTHON_PIAL_PLACEMENT.md。函数不执行外部程序或启用半精度。
     ``trace_callback(step, pass_index, coordinates_copy, diagnostics)`` is an
     optional read-only diagnostic sink called after every completed step.
     Its diagnostics include all trial decisions; a rejected terminal step
@@ -94,6 +106,22 @@ def place_pial_t1(
         raise ValueError("candidate_backend must be tree, snapshot or torch_snapshot")
     if candidate_backend == "torch_snapshot" and device is None:
         raise ValueError("torch_snapshot requires an explicit device")
+    if candidate_grid_cells_per_axis not in (2, 3):
+        raise ValueError("candidate_grid_cells_per_axis must be 2 or 3")
+    if candidate_grid_cells_per_axis != 2 and candidate_backend != "torch_snapshot":
+        raise ValueError("nondefault candidate grid requires torch_snapshot")
+    if retained_mht_backend not in ("tree", "compiled"):
+        raise ValueError("retained_mht_backend must be tree or compiled")
+    if retained_mht_backend == "compiled" and candidate_backend == "tree":
+        raise ValueError("compiled retained MHT requires snapshot candidates")
+    if cleanup_marking_backend not in ("legacy", "source_numba", "source_torch"):
+        raise ValueError("invalid cleanup_marking_backend")
+    if cleanup_candidate_grid_cells_per_axis not in (2, 3):
+        raise ValueError("cleanup_candidate_grid_cells_per_axis must be 2 or 3")
+    if cleanup_candidate_grid_cells_per_axis != 2 and cleanup_marking_backend != "source_torch":
+        raise ValueError("nondefault cleanup grid requires source_torch")
+    if cleanup_marking_backend == "source_torch" and device is None:
+        raise ValueError("source_torch cleanup requires an explicit device")
     if sampling_backend not in ("cpu", "torch", "triton"):
         raise ValueError("sampling_backend must be cpu, torch or triton")
     if regularization_backend not in ("cpu", "torch"):
@@ -105,7 +133,7 @@ def place_pial_t1(
     stage_seconds = dict.fromkeys(("prepare", "gradient", "collision", "objective",
                                  "border_updates", "cleanup", "write"), 0.0) if profile else None
     profile_torch = profile_device = None
-    if profile and device is not None and (sampling_backend != "cpu" or regularization_backend == "torch" or candidate_backend == "torch_snapshot"):
+    if profile and device is not None and (sampling_backend != "cpu" or regularization_backend == "torch" or candidate_backend == "torch_snapshot" or cleanup_marking_backend == "source_torch"):
         import torch
         profile_torch, profile_device = torch, torch.device(device)
         if profile_device.type == "cuda" and profile_device.index is None:
@@ -268,6 +296,8 @@ def place_pial_t1(
                 offsets=displacement, accepted_offsets=momentum,
                 stale_mht_trial=stale_trial, ordered_neighbors=ordered,
                 candidate_backend=candidate_backend,
+                candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
+                retained_mht_backend=retained_mht_backend,
                 candidate_device=device if candidate_backend == "torch_snapshot" else None)
             record_section("collision", collision_started)
             blocked = np.any(proposal != current, axis=1) & np.all(
@@ -335,7 +365,14 @@ def place_pial_t1(
 
     cleanup_started = profile_boundary()
     pinned = pin_medial_wall(current, xyz, fs.read_label(str(cortex)))
-    repaired, cleanup = repair_intersections(pinned, faces, ripped)
+    if cleanup_marking_backend == "legacy":
+        repaired, cleanup = repair_intersections(pinned, faces, ripped)
+    else:
+        repaired, cleanup = repair_intersections(
+            pinned, faces, ripped, marking_backend=cleanup_marking_backend,
+            device=device, candidate_grid_cells_per_axis=cleanup_candidate_grid_cells_per_axis)
+        if cleanup["intersecting_faces_after"]:
+            raise RuntimeError("source pial cleanup has residual intersections; output not written")
     record_section("cleanup", cleanup_started)
     write_started = profile_boundary()
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -347,6 +384,10 @@ def place_pial_t1(
             "sampling_backend": sampling_backend, "device": device,
             "regularization_backend": regularization_backend,
             "candidate_backend": candidate_backend,
+            "candidate_grid_cells_per_axis": candidate_grid_cells_per_axis,
+            "retained_mht_backend": retained_mht_backend,
+            "cleanup_marking_backend": cleanup_marking_backend,
+            "cleanup_candidate_grid_cells_per_axis": cleanup_candidate_grid_cells_per_axis,
             "seconds": seconds, "profile": bool(profile)}
     if stage_seconds is not None:
         stage_seconds["control"] = seconds - sum(stage_seconds.values())
