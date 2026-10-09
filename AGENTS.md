@@ -54,7 +54,7 @@
 - 协调者独占根AGENTS.md、主页README、共享环境/安装入口和总报告；各任务提交专属文档、测试及验证报告。
 - 各任务不推main；协调者审查、合并最新main、相同输入回归及两例原始T1空目录整例后普通推送。
 - 具体已批准的提示词见 validation/recon_all/optimizations/20261002_parallel/dispatch_prompts.json；协调状态写入任务提示词给定目录。
-- 完整GPU模式维持既有Synth GPU实现；当前厚度/面积/曲率也已经GPU接入，不重复实现。
+- 完整GPU模式维持既有Synth GPU实现；CUDA默认厚度/面积/平均曲率已接入自有PyTorch，CPU接口仍保留原生顶点图，smoothwm衍生图/curv.stats等需另核对，不重复实现或仅由函数存在推断接入状态。
 
 ## 5. 各任务必须保持的算法边界
 

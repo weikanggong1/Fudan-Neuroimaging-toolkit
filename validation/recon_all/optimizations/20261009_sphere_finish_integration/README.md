@@ -49,6 +49,10 @@ python validation/recon_all/optimizations/20261009_sphere_finish_integration/run
 
 `source-root` 是冻结 src/tests/tools；`code-version` 是实际基线提交与覆盖SHA；`output-report` 必须是新JSON。输入/导入失败抛异常，测试失败返回非零并保留逐项日志。本脚本只测入口契约，不以模拟数据代替真实MRI benchmark。
 
+### e34 提交的实际安装和入口回归
+
+冻结 `e34a1829145b34158f7b37b5d3046f8b02c03617` 已在现有声明的 Conda 环境完成独立 wheel 构建（14.761秒）、私有 target 安装（2.479秒）和实际已安装 CLI 检查（1.992秒）。13份相关模块安装前后字节相同，包括完整sphere收尾与marked候选；已安装CLI包含 `--sphere-finish-backend`。wheel为5,015,256字节、SHA-256 `b146a3cd80383d6b601122352ab57c7f96b98c96ad7a58500b7da2e26d925684`。同提交45项入口契约通过。见[完整安装收据](package_e34/report.json)、[源码身份](package_e34/VALIDATION_SOURCE_PROVENANCE.json)及[契约报告](package_e34/contracts.json)。这是现有环境的无依赖安装/接口验证，未执行安装产物MRI推理，不当作全新Conda或物理隔离整例。
+
 ## 4. 原软件对应
 
 复用 FNIT 已有 standard sphere；对应 `mris_sphere` 的内部末尾 overlap cleanup，没有独立官方收尾CLI。完整命令、固定源码和参数见[标准sphere及本轮收尾说明](../../../../docs/recon_all/SPHERE_FINISH_TORCH_20261009.md)。不读取官方结果，不省略投影或减少1001轮上限。

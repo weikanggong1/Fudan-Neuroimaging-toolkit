@@ -92,6 +92,8 @@ A100-SXM4-80GB，同一CPU0–3/4线程，TF32开启，无半精度。输入来�
 
 新增生产显式路由的两例原始空目录输入链已完成：到nu为71.881/76.739s、N4含exec为13.556/11.962s，所有体素/几何/LTA对此前完整Torch零新增差。与旧组共享负载不同，不宣称同期ABBA或整例收益；native系统差异原样保留。详见[输入链新回归](INPUT_N4_CHAIN.md#显式isolated输入链的新空目录回归)和[v4报告](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/execution_wiring_a100_20261009_v4/README.md)。GPU卡峰约24.9GB包含其他任务，tree归属null；子张量峰约1.3/1.4GB不能替代整例合计显存。
 
+完整原始T1连续链到filled的后续验证已发现下游放大：nu0仅4016/3259个量化差异，但filled差4671/2291体素，sub-06注册与归一化出现更大局部差异。见[两例逐阶段实际报告](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)。这不改变上述同输入worker精度/性能证据；生产默认仍ITK，不能以阶段提速或P99为零直接接管整例。
+
 ## 6．更新和验证记录
 
 2026-10-09复用完整N4新增exec策略；不改原核心数学或全局allocator。六项worker契约检查参数/父策略/exec/输出哈希/初始化状态，与四条原始输入链契约合计十项2.91s通过。两例两种父CUDA状态同输入回归完成，已有严格N4差异独立记录。新增`n4_backend="torch", n4_execution="isolated"`已显式接入输入链、单例/批次recon-all API、fnit-recon-all CLI和整例测评脚本。native/in-process默认不变，纯python-gpu全流程仍由完整能力门控制。原始T1到nu的两例回归另见[输入链](INPUT_N4_CHAIN.md)，不是完整recon-all测评。

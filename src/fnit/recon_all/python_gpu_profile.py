@@ -63,7 +63,7 @@ _BLOCKED: tuple[PythonGpuCapability, ...] = (
     PythonGpuCapability("inflate/remesh/intersection", "mixed", "cpu", False,
                         "complete standard Torch inflated/sulc is wired and raw-T1 tested (589e2749); nofix inflation, dynamic remesh and intersection still retain CPU/native components"),
     PythonGpuCapability("white.preaparc/final white", "Conda FreeSurfer C++", "cpu", False,
-                        "complete four-pass Python white candidates and GPU substages exist; preaparc/final-white production replacement and native same-input/connected-chain acceptance remain incomplete"),
+                        "complete four-pass Python white.preaparc candidate and GPU substages exist; final-white annotation/rip branches and production replacement/native same-input/connected-chain acceptance remain incomplete"),
     PythonGpuCapability("pial placement", "FNIT Numba/Torch (opt-in) and Conda C++ default", "mixed cpu/cuda", False,
                         "complete four-pass/39-step Python pial with GPU candidates and compiled ordered updates is validated (edaac8e7/eae29511); source cleanup ABBA 126.246 to 11.158 s, full phase still 221.206 vs native 138-141 s; CPU sampling/gradients/SOAP and pre-existing native geometry differences remain"),
     PythonGpuCapability("defects projection", "FNIT PyTorch (opt-in)", "cuda", False,

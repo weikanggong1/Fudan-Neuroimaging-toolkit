@@ -69,6 +69,7 @@ reconstruction_report = run_recon_all_python(
     normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置GPU传播/平滑，保持原除乘精度
     inflate_backend="native",  # torch复用完整标准inflated/sulc；须cuda:N和两个半球worker
     sphere_finish_backend="cpu",  # torch复用完整dense GPU球面收尾；须cuda:N和两个隔离worker
+    annotation_gibbs_backend="python",  # numba复用完整有序重分类；GPU几何/随机序列不变
     mni_execution="in-process",  # parallel-late在末尾将完整MNI与CPU网格检查并行；总线程至少2
     wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
     wm_execution="in-process",  # isolated仅配torch-optimized，子exec局部缓存、父策略保持
@@ -115,6 +116,7 @@ reconstruction_report = run_recon_all_python(
 | `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch只迁移第二轮初始偏置传播/平滑；距离/排序仍CPU，原float64除后乘/float32输出保持，显式cuda:N |
 | `inflate_backend` | 否 | `str` | `'native'` | torch复用完整标准inflated/sulc；须cuda:N与hemisphere_workers=2，仅surface子exec局部启用缓存；nofix和后续球面算法保持 |
 | `sphere_finish_backend` | 否 | `str` | `'cpu'` | torch复用完整dense GPU标准sphere收尾，全部设备须cuda:N与hemisphere_workers=2，surface子exec局部缓存；原负面标记/SOAP/全投影/停止保持，不选择实验marked |
+| `annotation_gibbs_backend` | 否 | `str` | `'python'` | numba复用完整有序Gibbs重分类；共用GPU几何缓存，保持随机序列、标签/坐标及总线程，首次JIT/打包计入阶段 |
 | `mni_execution` | 否 | `str` | `'in-process'` | parallel-late须cuda:N及整数threads≥2，caller autocast关闭；全部半球写出后，完整MNI与CPU网格检查分配同一线程预算并行，join后检查输出；返回完整mni_mesh_parallel报告 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
@@ -254,6 +256,7 @@ reconstruction_reports = run_recon_all_python_batch(
     normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置；保留原float64除乘与float32输出
     inflate_backend="native",  # torch仅支持显式CUDA和两个半球worker，标准表面输出同序
     sphere_finish_backend="cpu",  # torch在表面子exec复用完整GPU收尾；父精度和缓存保持
+    annotation_gibbs_backend="python",  # numba原样传给每例CLI，有序反馈不改标签
     mni_execution="in-process",  # parallel-late要求全部cuda:N；完整MNI与末尾网格检查并行
     wm_edit_backend="native",  # torch-hybrid为同输入已验证的WM/aseg混合候选
     defects_backend="native",  # torch保持完整缺陷标签投射；不等于拓扑GA
@@ -293,6 +296,7 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--normalization-initial-bias-backend` | `normalization_initial_bias_backend` | cpu保留第二轮初始偏置；torch复用GPU传播/平滑，保持算术顺序和精度，显式cuda:N |
 | `--inflate-backend` | `inflate_backend` | 默认native；torch仅替换标准inflated/sulc，须cuda:N和两个半球worker，surface子exec局部启用缓存 |
 | `--sphere-finish-backend` | `sphere_finish_backend` | 默认cpu；torch仅迁移既有完整dense标准sphere收尾，须cuda:N和两个缓存surface worker；注册收尾保持 |
+| `--annotation-gibbs-backend` | `annotation_gibbs_backend` | 默认python；numba复用完整有序重分类，三图谱共享原特征，首次JIT/打包/读写计入墙钟 |
 | `--mni-execution` | `mni_execution` | 默认in-process；parallel-late在末尾并行完整MNI/CPU网格检查，明确cuda:N与至少2个总线程，join后检查138输出 |
 | `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `--wm-execution` | `wm_execution` | in-process保留父缓存；isolated为完整WM缓存worker，须配torch-optimized |
@@ -332,7 +336,9 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 ## 5. 最新精度和运行时间
 
-最新已完成输出回归的A100原始T1整例冻结为 `589e2749`：复用完整PyTorch标准inflation后，两例CLI **2141.872/2110.975秒**，相对 `0cd9cbd5` 缩短 **0.464%/0.859%**。完整138输出、16张同序表面、七张分割和68区厚度/面积/体积保持；20/44顶点图有零容差尾差。实际官方严格复现仍为6/138、7/138，整体指标等效未判定；生产网格门通过，扩展穿越和球面负向面仍有失败。完整阶段、官方误差、脑图与显存测量边界见[GPU inflation两例整例报告](../../validation/recon_all/optimizations/20261009_whole_inflate_a100_589e2749/README.md)。十分钟目标尚未达到，阶段收益不叠加成整例提速。
+最新已完成自产配对及官方评分的A100原始T1整例冻结为 `765c0fe9`：完整MNI与末尾网格检查并行后，两例CLI **2117.283/2061.494秒**，相对 `589e2749` 缩短 **1.148%/2.344%**。完整138输出、16张同序表面、七张分割和68区厚度/面积/体积保持；20/44顶点图有零容差尾差。实际官方严格复现仍为6/138、7/138，厚度MAE **0.044824/0.050676mm**，整体指标等效未判定；生产网格门通过，扩展穿越和球面负向面仍有失败。完整阶段、官方指标、脑图与显存边界见[末尾MNI并行两例整例报告](../../validation/recon_all/optimizations/20261009_whole_late_mni_a100_765c0fe9/README.md)。十分钟目标尚未达到，阶段收益不叠加成整例提速。
+
+后续完整Torch N4的原始连续链已检查到filled：少量N4量化差异在注册/归一化与WM链放大，默认仍为ITK；完整结果见[本次前段诊断](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)。
 
 2026-10-09 A100 整例冻结 `803aec50`：两例原始T1空目录控制/候选均完成，CLI **6137.234→2255.064秒、6040.677→2281.571秒**，同硬件/四线程配对提速 **2.72×、2.65×**。四次138输出与生产网格完整；新旧138项容差比较通过，有序面、表面坐标、分割及68区统计相同，零容差顶点图尾差仍完整保留。与官方严格复现为6/138、7/138，整体指标等效未判定。全部阶段、官方误差、局部质量、显存限制和脑图见[两例完整配对结果](../../validation/recon_all/optimizations/20261009_whole_pair_a100_803aec50/README.md)。该整例未包含后续N4、WM和GPU归一化实验；新接线的整例另行验证，十分钟目标尚未达到。
 

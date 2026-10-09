@@ -1,0 +1,63 @@
+{
+  "status": "passed",
+  "commit": "e34a1829145b34158f7b37b5d3046f8b02c03617",
+  "scope": "build wheel and install private target within existing declared Conda runtime; not fresh Conda or physical isolation",
+  "precision": "no inference performed; no GPU precision changed",
+  "stages": {
+    "wheel": {
+      "wall_seconds": 14.761116612702608,
+      "command": [
+        "$FNIT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "pip",
+        "wheel",
+        "$FNIT/workspaces/package_sphere_finish_e34a1829_20261009_v1",
+        "--no-deps",
+        "--no-build-isolation",
+        "--wheel-dir",
+        "$FNIT/runs/package_sphere_finish_e34a1829_20261009_v1/wheels"
+      ]
+    },
+    "install": {
+      "wall_seconds": 2.478966722264886,
+      "command": [
+        "$FNIT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--no-deps",
+        "--target",
+        "$FNIT/runs/package_sphere_finish_e34a1829_20261009_v1/installed_target",
+        "$FNIT/runs/package_sphere_finish_e34a1829_20261009_v1/wheels/fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl"
+      ]
+    },
+    "installed_cli_help": {
+      "wall_seconds": 1.9924444165080786,
+      "command": [
+        "$FNIT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "fnit.recon_all.native_free",
+        "--help"
+      ]
+    }
+  },
+  "compiler": "$FNIT/envs/recon_main_20261009_v3/bin/x86_64-conda-linux-gnu-c++",
+  "source_pyproject_sha256": "5f05b9ff2917a1334272ba750d8aac0d392732d3ad57990d778f7fc8f23ef4ba",
+  "wheel_sha256": "b146a3cd80383d6b601122352ab57c7f96b98c96ad7a58500b7da2e26d925684",
+  "wheel_bytes": 5015256,
+  "installed_modules_sha256": {
+    "recon_all/sphere_standard_run.py": "8bb5def7ffd5e854bd580d7dbfb338969518f212d1ac9a13dd85fb66bc4b3e6a",
+    "recon_all/sphere_standard_finish.py": "ea000ac45f4008b1635c8c7e04af161ac937758e97cbd0ab980af3b8b04b15fc",
+    "recon_all/mris_register_overlap.py": "a3a205070387fb9544b686a92e5e08205bb823b5b9f9bc24050d9c57e65e887b",
+    "recon_all/mris_register_overlap_marked.py": "608db8a10022b88ec16f9439b4b2da5eebe342707cc1280d13232c2ce02f84f9",
+    "recon_all/native_free.py": "ee088f75b3f624f39a5fa5a676ba9be1ec7d167cf4c182d2f26b54a84eecf56a",
+    "recon_all/batch.py": "5ee64ccfb70fc3f5c77d7e0f51e8479f2729c89d16a27c2015cc4768bea1348b",
+    "recon_all/mni_mesh_parallel.py": "8b322c3fc01394840d0e8d40bb2b4e4460dd65ac0b80412a2993f3143f25da16",
+    "recon_all/mni_warp_inverse.py": "5bd1ee57342ed59c692a88a6d1814e4787d767c407b3644bdc5fe1ef6578cdc4",
+    "recon_all/inflate_standard_run.py": "1186db4d73b43edc7bea7580a57b73f490b5ef3669241e3c99837f630718d3bb",
+    "recon_all/inflate_torch.py": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+    "recon_all/hemisphere_parallel.py": "c618fc805bcb779a2ace1cbc55def2a7412a535270815e31cb76504160485e2f",
+    "recon_all/normalization/pipeline.py": "605b68b844929c852d2978fb38050cc56dcd18ff997742cb852946dfe12860ef",
+    "recon_all/normalization/aseg_pipeline.py": "bb4175e69e71ec14e06bad7895d85152632438192c642f9c7027438a3e11832c"
+  }
+}
