@@ -57,6 +57,7 @@ def place_pial_t1(
     *,
     max_steps: int = 200,
     sampling_backend: str = "cpu",
+    regularization_backend: str = "cpu",
     candidate_backend: str = "tree",
     device: str | None = None,
     trace_callback=None,
@@ -69,6 +70,10 @@ def place_pial_t1(
     the output path, accepted step count, pass boundaries, cleanup, and seconds.
     ``sampling_backend`` defaults to cpu; torch/triton select explicit CUDA MRI
     sampling through ``device``. Ordered updates and objective remain CPU.
+    ``regularization_backend="torch"`` caches ordered adjacency on ``device``
+    and runs signed averaging, spring and quadratic curvature in PyTorch.
+    It is opt-in; collision acceptance, objective and final cleanup retain the
+    original CPU implementation. Neither backend changes the four-pass order.
     ``trace_callback(step, pass_index, coordinates_copy, diagnostics)`` is an
     optional read-only diagnostic sink called after every completed step.
     Its diagnostics include all trial decisions; a rejected terminal step
@@ -79,6 +84,10 @@ def place_pial_t1(
         raise ValueError("candidate_backend must be tree or snapshot")
     if sampling_backend not in ("cpu", "torch", "triton"):
         raise ValueError("sampling_backend must be cpu, torch or triton")
+    if regularization_backend not in ("cpu", "torch"):
+        raise ValueError("regularization_backend must be cpu or torch")
+    if regularization_backend == "torch" and device is None:
+        raise ValueError("Torch regularization requires an explicit device")
     if sampling_backend != "cpu" and device is None:
         raise ValueError("GPU sampling requires an explicit device")
     started = time.perf_counter()
@@ -137,6 +146,12 @@ def place_pial_t1(
     ordered = (neighbor_indices, neighbor_valid)
     two_offsets, two_candidates = two_ring_neighbors(
         faces, len(xyz), ordered_neighbors=ordered)
+    regularizer = None
+    if regularization_backend == "torch":
+        from .place_surface_regularization_torch import PlacementRegularizationTorch
+        regularizer = PlacementRegularizationTorch(
+            neighbors=neighbor_indices, valid=neighbor_valid, offsets=two_offsets,
+            candidates=two_candidates, ripped=ripped, device=device)
     fixed_normals = original_vertex_normals(xyz, faces, topology=normal_topology)
     original_area = surface_total_area(xyz, faces)
     sigma, n_averages = 2.0, 16
@@ -177,6 +192,10 @@ def place_pial_t1(
             offsets, candidates, weight=5.0, cropped=cropped,
         )
         with_repulsion = np.float32(intensity + repulsion)
+        if regularizer is not None:
+            return regularizer.regularize(
+                vertices=current, normals=current_normals, gradient=with_repulsion,
+                iterations=n_averages, spring_weight=0.3)
         averaged = average_signed_gradients(
             with_repulsion, faces, ripped, n_averages, ordered_neighbors=ordered)
         normal = spring_gradient(
@@ -273,5 +292,6 @@ def place_pial_t1(
     return {"output": str(output), "hemisphere": hemi, "steps": step,
             "pass_ends": pass_ends, "cleanup": cleanup,
             "sampling_backend": sampling_backend, "device": device,
+            "regularization_backend": regularization_backend,
             "candidate_backend": candidate_backend,
             "seconds": time.perf_counter() - started}

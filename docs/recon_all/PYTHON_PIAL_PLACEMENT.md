@@ -131,7 +131,7 @@ _incident_faces_collide输入这些量及完整候选CSR并返回首次碰撞boo
 
 特别说明成熟完整 pial 子函数的控制流缺口：上游 `MRISpositionSurface` 的第三次缩步后若 RMS 仍升高，会恢复本步起始坐标并结束当前轮；原 Python 函数在相同情况下报“rejected every trial”。本轮候选保留当前坐标、进入下一轮，最后仍执行内侧壁固定和相交清理；非终止拒绝继续重试。未更换生产 Conda 程序，也未增加 GPU/CPU 回退或更改精度。默认无诊断回调时不建立试步轨迹列表。
 
-现有所有参数：`subject` 是含本文七项输入的目录；`hemisphere` 必须是 `lh` 或 `rh`；`output=None` 默认 `surf/{hemi}.pial.T1`；`max_steps=200` 是四轮累计上限，未收敛抛 `RuntimeError`；`sampling_backend="cpu"` 可选 `cpu/torch/triton`；`candidate_backend="tree"` 可选 `tree/snapshot`；`device=None` 仅CPU允许，GPU采样须显式指定；`trace_callback=None` 可指定只读函数 `(step, pass_index, coordinates_copy, diagnostics)`。坐标为 `(N,3)` float32、surface RAS/mm，面为输入 white 的 `(F,3)` 有序整数索引；MRI沿用其conform网格。诊断字典的 `trials` 列表新增 `trial`、`dt_used`、`dt_next`、`sse`、`rms`、`reduced`、`rejected`、`stop`、`reductions`，不改变已有诊断字段。终止拒绝时回调坐标是已还原的当前坐标，SSE/RMS保留该步起点值；拒绝试步本身的指标在 `trials` 内。最终报告结构及标准CLI不变，此内部优化器仍没有独立官方CLI。
+现有所有参数：`subject` 是含本文七项输入的目录；`hemisphere` 必须是 `lh` 或 `rh`；`output=None` 默认 `surf/{hemi}.pial.T1`；`max_steps=200` 是四轮累计上限，未收敛抛 `RuntimeError`；`sampling_backend="cpu"` 可选 `cpu/torch/triton`；`regularization_backend="cpu"` 可选 `cpu/torch`，GPU固定网格梯度见[专页](PYTORCH_PLACEMENT_REGULARIZATION.md)；`candidate_backend="tree"` 可选 `tree/snapshot`；`device=None` 仅CPU允许，GPU采样或Torch正则梯度须显式指定；`trace_callback=None` 可指定只读函数 `(step, pass_index, coordinates_copy, diagnostics)`。坐标为 `(N,3)` float32、surface RAS/mm，面为输入 white 的 `(F,3)` 有序整数索引；MRI沿用其conform网格。诊断字典的 `trials` 列表新增 `trial`、`dt_used`、`dt_next`、`sse`、`rms`、`reduced`、`rejected`、`stop`、`reductions`，不改变已有诊断字段。终止拒绝时回调坐标是已还原的当前坐标，SSE/RMS保留该步起点值；拒绝试步本身的指标在 `trials` 内。最终报告增加实际 `regularization_backend`，标准CLI不变，此内部优化器仍没有独立官方CLI。
 
 ```python
 from fnit.recon_all.place_pial_python import place_pial_t1

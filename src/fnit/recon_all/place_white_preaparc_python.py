@@ -38,6 +38,7 @@ from .place_surface_volume import prepare_placement_volume
 def place_white_preaparc_prefix(
     subject_dir: str | Path, hemi: str, output: str | Path,
     *, steps: int = 1, diagnostics: str | Path | None = None,
+    regularization_backend: str = "cpu", device: str | None = None,
 ) -> dict:
     """Run a prefix of the first pass and write the current diagnostic mesh.
 
@@ -48,12 +49,20 @@ def place_white_preaparc_prefix(
     arrays to compare against a pinned-source probe. ``steps`` is 1–17
     iterations of the first pass; the output contains coordinates after the
     last requested step and the return dict includes each step's SSE/RMS.
+    ``regularization_backend="torch"`` batches the existing signed averaging,
+    springs and quadratic curvature on explicit ``device``; default cpu retains
+    the original functions. Ordered self-repulsion, collision and objective
+    remain CPU. This switch does not make the prefix a complete white stage.
     """
     started = time.perf_counter()
     if not 1 <= steps <= 17:
         raise ValueError("steps must be from 1 to 17")
     if hemi not in ("lh", "rh"):
         raise ValueError("hemi must be lh or rh")
+    if regularization_backend not in ("cpu", "torch"):
+        raise ValueError("regularization_backend must be cpu or torch")
+    if regularization_backend == "torch" and device is None:
+        raise ValueError("Torch regularization requires an explicit device")
     subject = Path(subject_dir)
     orig = subject / f"surf/{hemi}.orig"
     stats_path = subject / f"surf/autodet.gw.stats.{hemi}.dat"
@@ -97,6 +106,12 @@ def place_white_preaparc_prefix(
     ordered = (ordered_indices, ordered_valid)
     two_offsets, two_neighbors = two_ring_neighbors(
         faces, len(xyz), ordered_neighbors=ordered)
+    regularizer = None
+    if regularization_backend == "torch":
+        from .place_surface_regularization_torch import PlacementRegularizationTorch
+        regularizer = PlacementRegularizationTorch(
+            neighbors=ordered_indices, valid=ordered_valid, offsets=two_offsets,
+            candidates=two_neighbors, ripped=ripped, device=device)
     original_area = surface_total_area(xyz, faces)
 
     objective_cache_vertices: np.ndarray | None = None
@@ -142,27 +157,34 @@ def place_white_preaparc_prefix(
             volume, current, normals, ripped, values, border[5], affine,
             brain.header.get_zooms()[:3], weight=0.2, sigma_global=2.0,
         )
-        averaged = average_signed_gradients(
-            intensity, faces, ripped, 4, ordered_neighbors=ordered)
         bucket_offsets, bucket_members = vertex_buckets_current(current, ripped)
         self_repulsion = self_repulsion_gradient(
             current, ripped, bucket_offsets, bucket_members,
             two_offsets, two_neighbors, weight=5.0,
         )
-        with_repulsion = np.float32(averaged + self_repulsion)
-        normal = spring_gradient(
-            current, normals, faces, ripped, weight=0.3, direction="normal",
-            ordered_neighbors=ordered,
-        )
-        with_normal = np.float32(with_repulsion + normal)
-        curvature = quadratic_curvature(
-            current, normals, tangent_basis(normals), ripped, two_offsets, two_neighbors)
-        with_curvature = np.float32(with_normal + np.float32(curvature[:, None] * normals))
-        tangent = spring_gradient(
-            current, normals, faces, ripped, weight=0.3, direction="tangent",
-            ordered_neighbors=ordered,
-        )
-        gradient = np.float32(with_curvature + tangent)
+        # Diagnostics retains the original individual arrays; the optional
+        # Torch result is still used for the actual candidate step below.
+        if regularizer is None or diagnostics is not None:
+            averaged = average_signed_gradients(
+                intensity, faces, ripped, 4, ordered_neighbors=ordered)
+            with_repulsion = np.float32(averaged + self_repulsion)
+            normal = spring_gradient(
+                current, normals, faces, ripped, weight=0.3, direction="normal",
+                ordered_neighbors=ordered,
+            )
+            with_normal = np.float32(with_repulsion + normal)
+            curvature = quadratic_curvature(
+                current, normals, tangent_basis(normals), ripped, two_offsets, two_neighbors)
+            with_curvature = np.float32(with_normal + np.float32(curvature[:, None] * normals))
+            tangent = spring_gradient(
+                current, normals, faces, ripped, weight=0.3, direction="tangent",
+                ordered_neighbors=ordered,
+            )
+            gradient = np.float32(with_curvature + tangent)
+        if regularizer is not None:
+            gradient = regularizer.regularize(
+                vertices=current, normals=normals, gradient=intensity,
+                iterations=4, spring_weight=.3, after_average=self_repulsion)
         gradient_seconds += time.perf_counter() - stage_start
         before_collision = gradient.copy() if diagnostics is not None else None
         if diagnostics is not None:
@@ -224,6 +246,7 @@ def place_white_preaparc_prefix(
     finished_at = time.perf_counter()
     return {
         "output": str(output), "hemisphere": hemi, "steps": len(records),
+        "regularization_backend": regularization_backend, "device": device,
         "vertices": int(len(xyz)), "faces": int(len(faces)),
         "ripped_vertices": int(np.count_nonzero(ripped)),
         "held_vertices": records[-1]["held_vertices"],
@@ -246,11 +269,13 @@ def place_white_preaparc_prefix(
 def first_white_preaparc_step(
     subject_dir: str | Path, hemi: str, output: str | Path,
     *, diagnostics: str | Path | None = None,
+    regularization_backend: str = "cpu", device: str | None = None,
 ) -> dict:
     """Run one diagnostic white optimizer step without final surface cleanup."""
     return place_white_preaparc_prefix(
         subject_dir=subject_dir, hemi=hemi, output=output,
         steps=1, diagnostics=diagnostics,
+        regularization_backend=regularization_backend, device=device,
     )
 
 def main() -> None:
@@ -260,10 +285,13 @@ def main() -> None:
     parser.add_argument("output", type=Path)
     parser.add_argument("--diagnostics", type=Path)
     parser.add_argument("--steps", type=int, choices=range(1, 18), default=1)
+    parser.add_argument("--regularization-backend", choices=("cpu", "torch"), default="cpu")
+    parser.add_argument("--device")
     args = parser.parse_args()
     print(json.dumps(place_white_preaparc_prefix(
         subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,
         steps=args.steps, diagnostics=args.diagnostics,
+        regularization_backend=args.regularization_backend, device=args.device,
     ), indent=2))
 
 
