@@ -1,7 +1,9 @@
 """Resident, chunked GCA search scoring; not a complete EM registration backend.
 
-Keep VNL inverse and final ordered double reduction on CPU. The GPU performs
-separate float32 coordinate products/additions, rounding and sample likelihood.
+The default keeps the VNL inverse and final ordered double reduction on CPU.
+Explicit options batch the same cofactor inverse and likelihood reduction on
+the target GPU. The GPU performs separate float32 coordinate products/additions,
+rounding and sample likelihood.
 No matmul/autocast is used and the caller's global TF32 policy is unchanged.
 """
 from __future__ import annotations
@@ -12,6 +14,37 @@ import torch
 from numba import njit
 
 from .mri_em_register import StableSamples, _vnl_affine_inverse
+
+
+@torch.no_grad()
+def vnl_affine_inverse_tensor(matrices: torch.Tensor) -> torch.Tensor:
+    """固定VNL余子式顺序的批量4x4仿射求逆，不用TF32矩阵乘法。
+
+    输入同设备FP32(B,4,4)，仿射末行为[0,0,0,1]，输出同形状同设备。
+    非有限/奇异检查由scorer执行，内部不增加逐元素同步；det倒数以double
+    除法后转FP32复现现有NumPy标量规则。属于mri_em_register内部步骤，无独立CLI。
+    """
+    if matrices.dtype != torch.float32 or matrices.ndim != 3 or matrices.shape[1:] != (4, 4):
+        raise ValueError("matrices must be float32 (B,4,4)")
+    a, b, c = matrices[:, 0, 0], matrices[:, 0, 1], matrices[:, 0, 2]
+    d, e, f = matrices[:, 1, 0], matrices[:, 1, 1], matrices[:, 1, 2]
+    g, h, i = matrices[:, 2, 0], matrices[:, 2, 1], matrices[:, 2, 2]
+    t0, t1, t2 = matrices[:, 0, 3], matrices[:, 1, 3], matrices[:, 2, 3]
+    determinant = ((((a*e*i-a*f*h)-b*d*i)+b*f*g)+c*d*h)-c*e*g
+    reciprocal = torch.ones_like(determinant, dtype=torch.float64).div(determinant.double()).float()
+    rows = (
+        (e*i-f*h, c*h-b*i, b*f-c*e,
+         -b*f*t2+b*t1*i+e*c*t2-e*t0*i-h*c*t1+h*t0*f),
+        (f*g-d*i, a*i-c*g, c*d-a*f,
+         a*f*t2-a*t1*i-d*c*t2+d*t0*i+g*c*t1-g*t0*f),
+        (d*h-e*g, b*g-a*h, a*e-b*d,
+         -a*e*t2+a*t1*h+d*b*t2-d*t0*h-g*b*t1+g*t0*e),
+    )
+    result = torch.zeros_like(matrices)
+    for row, values in enumerate(rows):
+        result[:, row] = torch.stack(values, dim=-1) * reciprocal[:, None]
+    result[:, 3, 3] = 1
+    return result
 
 
 @njit(cache=True)
@@ -36,12 +69,16 @@ class GCASearchScorer:
     ``reduce_on_device=True`` likelihoods are accumulated in float64 on CUDA
     and only one score vector per candidate block is copied back. This class
     does not mutate source/samples and must be recreated after either changes.
+    inverse_backend="cpu" retains the scalar source formula; "torch" batches
+    exactly that cofactor order on the target GPU, including its FP32 reciprocal.
+    This opt-in does not use matrix inverses with a different numerical method.
     Empty/invalid samples, nonfinite/singular matrices or non-CUDA device raise.
     """
 
     def __init__(self, samples: StableSamples, source: np.ndarray, *,
                  device: str | torch.device, candidate_chunk: int = 64,
-                 sample_chunk: int = 8192, reduce_on_device: bool = False):
+                 sample_chunk: int = 8192, reduce_on_device: bool = False,
+                 inverse_backend: str = "cpu"):
         self.device = torch.device(device)
         if self.device.type != 'cuda':
             raise ValueError('GCASearchScorer requires an explicit CUDA device')
@@ -66,6 +103,9 @@ class GCASearchScorer:
         self.count, self.shape = count, source.shape
         self.candidate_chunk, self.sample_chunk = candidate_chunk, sample_chunk
         self.reduce_on_device = bool(reduce_on_device)
+        if inverse_backend not in {"cpu", "torch"}:
+            raise ValueError("inverse_backend must be cpu or torch")
+        self.inverse_backend = inverse_backend
         def upload(array, dtype):
             return torch.tensor(np.asarray(array), dtype=dtype, device=self.device)
         self.source = upload(source, torch.uint8)
@@ -88,12 +128,18 @@ class GCASearchScorer:
         scores = np.empty(len(matrices), np.float32)
         for begin in range(0, len(matrices), self.candidate_chunk):
             block = matrices[begin:begin + self.candidate_chunk]
-            inverses = np.stack([_vnl_affine_inverse(m) for m in block])
-            if not np.isfinite(inverses).all():
-                raise ValueError('matrices must be nonsingular')
-            # Multiplication by the diagonal prior spacing is exact here.
-            inverses[:, :, :3] *= np.float32(2)
-            transform = torch.tensor(inverses, device=self.device)
+            if self.inverse_backend == "torch":
+                transform = vnl_affine_inverse_tensor(torch.tensor(block, device=self.device))
+                if not bool(torch.isfinite(transform).all()):
+                    raise ValueError('matrices must be nonsingular')
+                # 与现有CPU相同，固定prior spacing只缩放前三列。
+                transform[:, :, :3] *= 2
+            else:
+                inverses = np.stack([_vnl_affine_inverse(m) for m in block])
+                if not np.isfinite(inverses).all():
+                    raise ValueError('matrices must be nonsingular')
+                inverses[:, :, :3] *= np.float32(2)
+                transform = torch.tensor(inverses, device=self.device)
             if self.reduce_on_device:
                 block_scores = torch.zeros(
                     len(block), device=self.device, dtype=torch.float64)

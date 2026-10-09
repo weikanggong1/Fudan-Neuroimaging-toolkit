@@ -18,6 +18,9 @@ def run_recon_all_python_batch(
     hemisphere_workers: int = 1,
     native_optimizations: str = "auto",
     wm_backend: str = "native",
+    wm_edit_backend: str = "native",
+    defects_backend: str = "native",
+    sphere_normals_backend: str = "numba",
     backend: str = "native",
 ) -> list[dict]:
     """每设备独立子进程执行单 T1，按 jobs 顺序返回完整报告列表。
@@ -34,6 +37,12 @@ def run_recon_all_python_batch(
     backend=python-gpu使用严格纯Python/CUDA profile；只要仍有未完成阶段就
     在创建被试目录前失败，不回退到原生程序。native_optimizations=auto按已验证能力选择完整GCA缓存及white快速程序；
     original用于原生阶段配对控制，原样传递给每个被试CLI。
+    defects_backend 默认 native；torch 将缺陷投射交给同设备 PyTorch，
+    保持左清零/右合并顺序和标签含义，调色板采用确定性颜色。
+    wm_backend 默认 native；torch 选择已有完整混合 WM segmentation。
+    wm_edit_backend 默认 native；torch-hybrid 选择静态 CUDA 子步骤与有序
+    Numba WM/aseg 核心。sphere_normals_backend 默认 numba；torch 只迁移
+    标准球面法向。后三种 Torch 选择均要求 CUDA，失败不静默回退。
     """
     from .hemisphere_parallel import validate_hemisphere_workers
     validate_hemisphere_workers(hemisphere_workers, threads)
@@ -51,6 +60,16 @@ def run_recon_all_python_batch(
         raise ValueError("wm_backend must be native or torch")
     if wm_backend == "torch" and any(device == "cpu" for device in devices):
         raise ValueError("wm_backend='torch' requires CUDA devices")
+    if wm_edit_backend not in {"native", "torch-hybrid"}:
+        raise ValueError("wm_edit_backend must be native or torch-hybrid")
+    if wm_edit_backend == "torch-hybrid" and any(device == "cpu" for device in devices):
+        raise ValueError("wm_edit_backend='torch-hybrid' requires CUDA devices")
+    if defects_backend not in {"native", "torch"}:
+        raise ValueError("defects_backend must be native or torch")
+    if sphere_normals_backend not in {"numba", "torch"}:
+        raise ValueError("sphere_normals_backend must be numba or torch")
+    if sphere_normals_backend == "torch" and any(device == "cpu" for device in devices):
+        raise ValueError("sphere_normals_backend='torch' requires CUDA devices")
     if backend not in {"native", "python-gpu"}:
         raise ValueError("backend must be native or python-gpu")
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
@@ -80,6 +99,12 @@ def run_recon_all_python_batch(
             command += ["--backend", backend]
             if wm_backend != "native":
                 command += ["--wm-backend", wm_backend]
+            if wm_edit_backend != "native":
+                command += ["--wm-edit-backend", wm_edit_backend]
+            if defects_backend != "native":
+                command += ["--defects-backend", defects_backend]
+            if sphere_normals_backend != "numba":
+                command += ["--sphere-normals-backend", sphere_normals_backend]
             if hemisphere_workers != 1:
                 command += ["--hemisphere-workers", str(hemisphere_workers)]
             if native_optimizations != "auto":

@@ -23,7 +23,8 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
                 mask_path: str | Path, output_path: str | Path, *,
                 device: str = "cpu", search_backend: str = "cpu",
                 candidate_chunk: int = 64, sample_chunk: int = 8192,
-                reduce_on_device: bool = False) -> dict:
+                reduce_on_device: bool = False,
+                inverse_backend: str = "cpu") -> dict:
     """Build a Talairach LTA without invoking a FreeSurfer executable.
 
     ``search_backend="cpu"`` keeps the validated source-order NumPy/Numba
@@ -35,9 +36,13 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
     it is opt-in until its numeric result is checked against ordered CPU
     reduction. The Torch path is opt-in until its LTA and downstream norm
     regression is complete.
+    inverse_backend=cpu保留逐候选VNL余子式求逆；torch批量使用同公式Torch，
+    要求search_backend=torch。不改变搜索网格、候选顺序、EM或LTA空间语义。
     """
     if search_backend not in {"cpu", "torch"}:
         raise ValueError("search_backend must be 'cpu' or 'torch'")
+    if inverse_backend not in {"cpu", "torch"} or (inverse_backend == "torch" and search_backend != "torch"):
+        raise ValueError("inverse_backend='torch' requires search_backend='torch'")
 
     timing = {}
     overall_started = time.perf_counter()
@@ -57,7 +62,7 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
         scorer = GCASearchScorer(
             stable_samples, source, device=device,
             candidate_chunk=candidate_chunk, sample_chunk=sample_chunk,
-            reduce_on_device=reduce_on_device)
+            reduce_on_device=reduce_on_device, inverse_backend=inverse_backend)
 
     started = time.perf_counter()
     translated, translation_history = find_optimal_translation_source(
@@ -86,6 +91,7 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
         "search_backend": search_backend, "device": device,
         "candidate_chunk": candidate_chunk, "sample_chunk": sample_chunk,
         "reduce_on_device": reduce_on_device,
+        "inverse_backend": inverse_backend,
     }
 
 
@@ -100,12 +106,13 @@ def main() -> None:
     parser.add_argument("--candidate-chunk", type=int, default=64)
     parser.add_argument("--sample-chunk", type=int, default=8192)
     parser.add_argument("--reduce-on-device", action="store_true")
+    parser.add_argument("--inverse-backend", choices=("cpu", "torch"), default="cpu")
     args = parser.parse_args()
     print(json.dumps(register_t1(
         args.nu, args.atlas, args.mask, args.output,
         device=args.device, search_backend=args.search_backend,
         candidate_chunk=args.candidate_chunk, sample_chunk=args.sample_chunk,
-        reduce_on_device=args.reduce_on_device), indent=2))
+        reduce_on_device=args.reduce_on_device, inverse_backend=args.inverse_backend), indent=2))
 
 
 if __name__ == "__main__":

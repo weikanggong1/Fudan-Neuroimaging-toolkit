@@ -11,7 +11,8 @@ from unittest.mock import patch
 
 from fnit.recon_all.expected_outputs import paths
 from fnit.recon_all.native_free import (
-    _project_exvivo_annotations, _run_defects_volume, main, run_recon_all_python,
+    _project_exvivo_annotations, _run_defects_volume, _run_torch_wm_edit,
+    _run_accurate_sphere_pair, main, run_recon_all_python,
 )
 
 
@@ -84,6 +85,64 @@ class StandardReconWiringTest(unittest.TestCase):
             "lh.V2_exvivo.label", "lh.MT_exvivo.label",
             "lh.perirhinal_exvivo.label", "lh.entorhinal_exvivo.label",
         ])
+
+    def test_torch_defects_preserves_merge_order_without_native_command(self):
+        with tempfile.TemporaryDirectory() as directory:
+            subject = Path(directory)
+            for folder in ("mri", "surf", "label"):
+                (subject / folder).mkdir()
+            (subject / "mri/orig.mgz").write_bytes(b"orig")
+            for hemi in ("lh", "rh"):
+                (subject / f"surf/{hemi}.defect_labels").write_bytes(b"defects")
+                (subject / f"label/{hemi}.nofix.cortex.label").write_bytes(b"cortex")
+            def project(**kwargs):
+                kwargs["output_file"].write_bytes(b"volume")
+                return {"device": kwargs["device"]}
+            with patch("fnit.recon_all.defects_label_volume_torch.defects_to_volume",
+                       side_effect=project) as call, \
+                    patch("fnit.recon_all.native_free.subprocess.run") as command:
+                for hemi in ("lh", "rh"):
+                    result = _run_defects_volume(None, subject, hemi, Path("/assets"),
+                                                 backend="torch", device="cuda:1")
+                    self.assertEqual(result["device"], "cuda:1")
+            left, right = [item.kwargs for item in call.call_args_list]
+            self.assertEqual(left["template_file"], subject / "mri/orig.mgz")
+            self.assertEqual((left["offset"], left["merge"]), (1000, False))
+            self.assertEqual(right["template_file"], subject / "mri/surface.defects.mgz")
+            self.assertEqual((right["offset"], right["merge"]), (2000, True))
+            command.assert_not_called()
+
+    def test_torch_defects_cli_option_reaches_api(self):
+        with patch("fnit.recon_all.native_free.run_recon_all_python",
+                   return_value={"status": "complete"}) as run:
+            with contextlib.redirect_stdout(io.StringIO()):
+                main(["t1.nii.gz", "subject", "--weights-dir", "weights",
+                      "--assets-dir", "assets", "--defects-backend", "torch",
+                      "--wm-edit-backend", "torch-hybrid", "--sphere-normals-backend", "torch"])
+        self.assertEqual(run.call_args.kwargs["defects_backend"], "torch")
+        self.assertEqual(run.call_args.kwargs["wm_edit_backend"], "torch-hybrid")
+        self.assertEqual(run.call_args.kwargs["sphere_normals_backend"], "torch")
+
+    def test_torch_wm_edit_uses_only_candidate_inputs(self):
+        with patch("fnit.recon_all.edit_wm_aseg_torch.write_wm_asegedit_hybrid_diagnostic",
+                   return_value={"device": "cuda:1"}) as edit:
+            _run_torch_wm_edit(Path("/subject/mri"), device="cuda:1")
+        self.assertEqual(edit.call_args.kwargs, {
+            "wm_file": Path("/subject/mri/wm.seg.mgz"),
+            "brain_file": Path("/subject/mri/brain.mgz"),
+            "aseg_file": Path("/subject/mri/aseg.presurf.mgz"),
+            "entowm_file": Path("/subject/mri/entowm.mgz"),
+            "output_file": Path("/subject/mri/wm.asegedit.mgz"),
+            "device": "cuda:1", "fill_seg_wm": True})
+
+    def test_sphere_normals_backend_is_explicit_and_keeps_finish_cpu(self):
+        with patch("fnit.recon_all.native_free._run_native_sphere_step", return_value=1.), \
+                patch("fnit.recon_all.sphere_standard_run.run_standard_sphere",
+                      return_value={"total_seconds_including_io": 2.}) as sphere:
+            _run_accurate_sphere_pair(Path("/bin/inflate"), Path("/subject"), "lh",
+                                      Path("/assets"), device="cuda:1", normals_backend="torch")
+        self.assertEqual(sphere.call_args.kwargs, {
+            "finish_device": "cpu", "averaging_device": "cuda:1", "normals_device": "cuda:1"})
 
 
 if __name__ == "__main__":

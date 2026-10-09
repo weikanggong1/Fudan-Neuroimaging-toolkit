@@ -17,9 +17,18 @@
 
 当前十分钟目标的热点和五个优化任务见 [2026-10-07 性能热点与任务](HOTSPOT_ACCELERATION_20261007.md)。
 当前纯 Python GPU 迁移矩阵和阻断项见 [2026-10-08 迁移状态](PYTHON_GPU_STATUS_20261008.md)。
-N4 的纯 PyTorch 实验后端及真实数据误差见 [N4_TORCH_BACKEND.md](N4_TORCH_BACKEND.md)；
-GCA 候选评分实验见 [MRI_EM_TORCH_BACKEND.md](MRI_EM_TORCH_BACKEND.md)。两者均为
-显式实验入口，尚未替换生产默认。
+完整固定N4 PyTorch实验及真实误差见 [本轮N4](N4_COMPLETE_TORCH_20261009.md)；
+GCA候选评分及新批量求逆见 [GCA说明](MRI_EM_TORCH_BACKEND.md)。
+N4默认仍为ITK，GCA新批量求逆尚未替换已存在的CUDA评分路径。
+
+2026-10-09的阶段迁移见 [有序GPU法向](SURFACE_NORMALS_TORCH_20261009.md)、
+[white/pial正则项](PYTORCH_PLACEMENT_REGULARIZATION.md)、
+[WM/aseg编辑](WM_ASEG_TORCH.md)、[WM直方图](WM_HISTOGRAM_TORCH.md)及[完整缺陷投射](DEFECTS_TORCH.md)。
+[固定主曲率的GPU衍生图](CURVATURE_DERIVATIVES_TORCH_20261009.md)单列算子精度，
+不替代离散主曲率计算；新的[离散八图实验](DISCRETE_CURVATURE_TORCH_20261009.md)
+已完成两例双侧同输入回归，尚未满足全部探索门，不替代完整curv.stats。
+原始T1空目录配对采用[整例复现脚本](TORCH_INTEGRATION_20261009.md)。
+局部内核收益与完整阶段、整例收益分别记录，纯GPU全流程仍未完成。
 ## 1. 功能简介
 
 `fnit-recon-all`从一幅原始T1w生成体积分割、双侧white/pial表面、顶点指标、脑区标注与统计。标准单T1入口目前不支持多T1、T2/FLAIR或纵向重建。
@@ -52,6 +61,9 @@ reconstruction_report = run_recon_all_python(
     hemisphere_workers=2,  # 显式启用左右侧独立进程；默认1，共享缺陷体积仍顺序累计
     native_optimizations="auto",  # auto在CUDA上启用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分
     wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
+    defects_backend="native",  # torch启用完整PyTorch缺陷投射；标签相同，颜色表不同
+    wm_edit_backend="native",  # torch-hybrid启用静态CUDA编辑，有序核心仍用Numba CPU
+    sphere_normals_backend="numba",  # torch只迁移标准sphere法向；其余算法和finish保留
     backend="native",  # native为当前可验收混合流程；python-gpu缺少完整替代时在创建输出前明确失败
     native_bin_dir=None,  # None 表示使用当前 Conda 环境的 bin/
     profile_stages=False,  # 生产默认不增加阶段 CUDA 同步；True 记录同步等待
@@ -83,6 +95,9 @@ reconstruction_report = run_recon_all_python(
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch使用FNIT PyTorch/CPU有序混合分割 |
+| `defects_backend` | 否 | `str` | `'native'` | torch使用完整缺陷投射；保持双侧顺序/标签，采用确定性颜色 |
+| `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid用CUDA静态编辑及Numba有序核心；要求CUDA，证明失败报错 |
+| `sphere_normals_backend` | 否 | `str` | `'numba'` | torch迁移标准sphere法向；要求CUDA，完整优化与CPU finish保持 |
 | `backend` | 否 | `str` | `'native'` | `native` 为当前混合流程；`python-gpu` 为严格纯 Python/CUDA profile，未完成阶段会在输出前抛出结构化错误 |
 
 ### 批量公开入口
@@ -100,6 +115,10 @@ reconstruction_report = run_recon_all_python(
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch使用FNIT PyTorch/CPU有序混合分割 |
+| `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid复用CUDA静态编辑与Numba有序核心，要求CUDA |
+| `defects_backend` | 否 | `str` | `'native'` | torch完整缺陷投射；半球共享输出仍按左、右顺序 |
+| `sphere_normals_backend` | 否 | `str` | `'numba'` | torch仅迁移标准球面法向，要求CUDA |
+| `backend` | 否 | `str` | `'native'` | native为混合流程；python-gpu未完成时提前失败 |
 
 ### 输出
 
@@ -190,6 +209,9 @@ reconstruction_reports = run_recon_all_python_batch(
     hemisphere_workers=2,  # 每侧分得2线程，需要总预算至少2
     native_optimizations="auto",  # CUDA上用FNIT GCA候选评分；CPU按已验证能力选择
     backend="native",  # 严格 python-gpu 尚未完成，不能静默回退
+    wm_edit_backend="native",  # torch-hybrid为同输入已验证的WM/aseg混合候选
+    defects_backend="native",  # torch保持完整缺陷标签投射；不等于拓扑GA
+    sphere_normals_backend="numba",  # torch仅替换标准sphere法向
 )
 ```
 
@@ -220,6 +242,9 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--hemisphere-workers` | `hemisphere_workers` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `--native-optimizations` | `native_optimizations` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分 |
 | `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch使用FNIT PyTorch/CPU有序混合分割 |
+| `--defects-backend` | `defects_backend` | native调用Conda mri_label2vol；torch使用完整PyTorch投射，不要求该原生程序 |
+| `--wm-edit-backend` | `wm_edit_backend` | native调用Conda编辑程序；torch-hybrid用CUDA静态编辑及Numba有序核心 |
+| `--sphere-normals-backend` | `sphere_normals_backend` | numba保留已有标准sphere法向；torch用同设备有序Torch法向 |
 | `--backend` | `backend` | `native` 为当前混合流程；`python-gpu` 要求所有阶段都有完整 Python/CUDA 实现，否则提前失败 |
 | `--profile-stages` | `profile_stages` | 记录阶段 CUDA 同步等待；生产默认不增加同步 |
 | `--cuda-allocator-cache` | `cuda_allocator_cache` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |

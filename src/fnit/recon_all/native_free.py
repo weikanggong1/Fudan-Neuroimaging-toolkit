@@ -98,6 +98,20 @@ def _run_native_wm_edit(binary: Path, mri: Path, assets: Path) -> None:
                     "wm.asegedit.mgz"], cwd=mri, env=env, check=True)
 
 
+def _run_torch_wm_edit(mri: Path, *, device: str) -> dict:
+    """自产同网格WM/brain/aseg/EntoWM→wm.asegedit，保留有序Numba反馈。
+
+    device为明确CUDA；固定keep-in/fill/SCM-HA/EntoWM/ACJ配方。
+    返回完整读写时间和CPU/GPU分段。原byte-path几何证明不成立、原存储
+    不受支持或CUDA错误直接抛出，不能回退原生或读取参考来补齐。
+    """
+    from .edit_wm_aseg_torch import write_wm_asegedit_hybrid_diagnostic
+    return write_wm_asegedit_hybrid_diagnostic(
+        wm_file=mri / "wm.seg.mgz", brain_file=mri / "brain.mgz",
+        aseg_file=mri / "aseg.presurf.mgz", entowm_file=mri / "entowm.mgz",
+        output_file=mri / "wm.asegedit.mgz", device=device, fill_seg_wm=True)
+
+
 def _folding_atlas(assets: Path, hemi: str) -> Path:
     atlas = assets / "average" / (
         f"{hemi}.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif")
@@ -221,7 +235,8 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
 
 
 def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
-                              hemi: str, assets: Path, *, device: str = "cpu") -> tuple[dict, dict]:
+                              hemi: str, assets: Path, *, device: str = "cpu",
+                              normals_backend: str = "numba") -> tuple[dict, dict]:
     from .sphere_standard_run import run_standard_sphere
 
     surf = subject / "surf"
@@ -231,7 +246,8 @@ def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
         [str(surf / f"{hemi}.smoothwm"), str(inflated)], (inflated, sulc))
     sphere_report = run_standard_sphere(
         inflated, surf / f"{hemi}.smoothwm", surf / f"{hemi}.sphere",
-        finish_device="cpu", averaging_device=device)
+        finish_device="cpu", averaging_device=device,
+        **({"normals_device": device} if normals_backend == "torch" else {}))
     return ({"inflate": inflate_seconds,
              "sphere": sphere_report["total_seconds_including_io"]}, sphere_report)
 
@@ -332,8 +348,9 @@ def _run_curvature_stats(binary: Path, subject: Path, hemi: str,
             raise FileNotFoundError(path)
 
 
-def _run_defects_volume(binary: Path, subject: Path, hemi: str,
-                        assets: Path) -> None:
+def _run_defects_volume(binary: Path | None, subject: Path, hemi: str,
+                        assets: Path, *, backend: str = "native",
+                        device: str = "cpu") -> dict | None:
     """按固定 recon-all --defects 命令将拓扑缺陷投射到 conform 网格。"""
     mri, surf, labels = (subject / name for name in ("mri", "surf", "label"))
     output = mri / "surface.defects.mgz"
@@ -343,6 +360,17 @@ def _run_defects_volume(binary: Path, subject: Path, hemi: str,
     for required in (template, defect_labels, cortex):
         if not required.is_file():
             raise FileNotFoundError(required)
+    if backend == "torch":
+        from .defects_label_volume_torch import defects_to_volume
+        return defects_to_volume(
+            surface_file=surf / f"{hemi}.orig.nofix", defect_file=defect_labels,
+            template_file=template, output_file=output,
+            offset=1000 if hemi == "lh" else 2000, merge=hemi == "rh",
+            cortex_file=cortex, device=device)
+    if backend != "native":
+        raise ValueError("defects backend must be native or torch")
+    if binary is None:
+        raise ValueError("native defects backend requires mri_label2vol")
     env = dict(os.environ, SUBJECTS_DIR=str(subject.parent),
                FREESURFER_HOME=str(assets))
     subprocess.run([str(binary), "--defects", str(surf / f"{hemi}.orig.nofix"),
@@ -460,8 +488,10 @@ def _write_principal_curvature_maps(surf: Path, hemi: str,
 def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   *, device: str, threads: int, topology_binary: Path,
                   inflate_binary: Path, intersection_binary: Path,
-                  place_binary: Path, defect_binary: Path,
-                  assets: Path, defer_defects: bool = False) -> dict:
+                  place_binary: Path, defect_binary: Path | None,
+                  assets: Path, defer_defects: bool = False,
+                  defects_backend: str = "native",
+                  sphere_normals_backend: str = "numba") -> dict:
     """从 filled 生成已修复 orig、预白质表面及标准球面。"""
     from .extract_main_component_python import extract_main_component
     from .label_cortex_fix_ga_python import label_cortex_fix_ga
@@ -484,7 +514,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
         _prepare_native_topology(topology_binary, subject, hemi, assets,
                                  device, inflate_binary, intersection_binary))
     if not defer_defects:
-        _run_defects_volume(defect_binary, subject, hemi, assets)
+        _run_defects_volume(defect_binary, subject, hemi, assets,
+                            backend=defects_backend, device=device)
     preaparc = _place_preaparc_and_smooth(subject, hemi, place_binary,
                                          assets, threads)
     base, ga = label_cortex_fix_ga(
@@ -493,7 +524,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     label_cortex(surf / f"{hemi}.white.preaparc", mri / "aseg.presurf.mgz",
                  labels / f"{hemi}.cortex+hipamyg.label", keep_hip_amyg=True)
     sphere_timings, sphere_report = _run_accurate_sphere_pair(
-        inflate_binary, subject, hemi, assets, device=device)
+        inflate_binary, subject, hemi, assets, device=device,
+        normals_backend=sphere_normals_backend)
     _write_principal_curvature_maps(surf, hemi, device)
     white, faces = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
     return {"hemisphere": hemi, "vertices": len(white), "faces": len(faces),
@@ -673,7 +705,8 @@ def _write_hemisphere_stats(subject: Path, hemi: str, volumes: dict, cache,
 
 
 def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
-                          binaries=None, registration_atlases=None):
+                          binaries=None, registration_atlases=None,
+                          sphere_normals_backend="numba"):
     """可 exec 的半球阶段入口；维持现有子函数接口与依赖屏障。"""
     from .profiling import StageProfiler, configure_cuda_allocator
     subject, assets = Path(subject), Path(assets)
@@ -692,8 +725,9 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                      mri / 'filled.mgz', mri / 'norm.mgz', device=device,
                      threads=threads, topology_binary=binaries['topology'],
                      inflate_binary=binaries['inflate'], intersection_binary=binaries['intersection'],
-                     place_binary=binaries.get('white', binaries['metrics']), defect_binary=binaries['defect'],
-                     assets=assets, defer_defects=True)
+                     place_binary=binaries.get('white', binaries['metrics']), defect_binary=binaries.get('defect'),
+                     assets=assets, defer_defects=True,
+                     sphere_normals_backend=sphere_normals_backend)
     elif operation == 'register':
         from .mris_register_run import run_register_sphere
         value = step(f'register_{hemi}', run_register_sphere,
@@ -731,6 +765,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          hemisphere_workers: int = 1,
                          native_optimizations: str = "auto",
                          wm_backend: str = "native",
+                         wm_edit_backend: str = "native",
+                         defects_backend: str = "native",
+                         sphere_normals_backend: str = "numba",
                          backend: str = "native") -> dict:
     """从单幅原始 T1 连续生成 conform 体积、双侧表面和脑区统计。
 
@@ -741,6 +778,12 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     已验证缓存，white 使用专用快速程序，pial保留原程序；original用于控制。
     native_optimizations=torch 将 GCA 的候选平移/线性搜索切换到 FNIT
     的分块 PyTorch CUDA scorer；EM 精修仍为 Python FP32，并在报告中明确标注。
+    defects_backend=native 使用原生投射；torch 使用完整 PyTorch 投射，仍按
+    左侧清零、右侧合并执行。标签值/空间保持，随机调色板改为固定颜色。
+    wm_edit_backend 默认 native；torch-hybrid 将完整 WM/aseg 编辑的静态
+    子步骤交给 CUDA，有序反馈仍复用 Numba CPU，几何/存储 guard 失败即报错。
+    sphere_normals_backend 默认 numba；torch 只替换标准 sphere 的有序面法向，
+    完整目标函数、迭代决策及 CPU finish 保持。两个实验后端均要求 CUDA。
     hemisphere_workers 默认1保持串行，2用独立 exec 半球进程；总 threads
     在双侧之间平分（奇数向下取整），父进程保留依赖屏障和共享发布。
     profile_stages=False 不增加阶段 CUDA 同步；True 分别记录前同步、函数、
@@ -758,6 +801,16 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         raise ValueError("wm_backend must be native or torch")
     if wm_backend == "torch" and not str(device).startswith("cuda"):
         raise ValueError("wm_backend='torch' requires an explicit CUDA device")
+    if wm_edit_backend not in {"native", "torch-hybrid"}:
+        raise ValueError("wm_edit_backend must be native or torch-hybrid")
+    if wm_edit_backend == "torch-hybrid" and not str(device).startswith("cuda"):
+        raise ValueError("wm_edit_backend='torch-hybrid' requires an explicit CUDA device")
+    if defects_backend not in {"native", "torch"}:
+        raise ValueError("defects_backend must be native or torch")
+    if sphere_normals_backend not in {"numba", "torch"}:
+        raise ValueError("sphere_normals_backend must be numba or torch")
+    if sphere_normals_backend == "torch" and not str(device).startswith("cuda"):
+        raise ValueError("sphere_normals_backend='torch' requires an explicit CUDA device")
     if backend == "python-gpu":
         # Fail before validating/creating subject output and, critically,
         # before resolving any Conda native binary.  The capability report is
@@ -815,12 +868,14 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     intersection_binary = _native_binary(native_bin_dir, "mris_remove_intersection")
     paint_binary = _native_binary(native_bin_dir, "mrisp_paint")
     curvature_stats_binary = _native_binary(native_bin_dir, "mris_curvature_stats")
-    defect_binary = _native_binary(native_bin_dir, "mri_label2vol")
+    defect_binary = (_native_binary(native_bin_dir, "mri_label2vol")
+                     if defects_backend == "native" else None)
     warp_binaries = tuple(_native_binary(native_bin_dir, name) for name in
                           ("mri_warp_convert", "mri_ca_register", "mri_convert"))
     wm_segment_binary = (_native_binary(native_bin_dir, "mri_segment")
                          if wm_backend == "native" else None)
-    wm_edit_binary = _native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
+    wm_edit_binary = (_native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
+                      if wm_edit_backend == "native" else None)
     registration_atlases = {hemi: _folding_atlas(assets, hemi)
                             for hemi in ("lh", "rh")}
     if torch.device(device).type == "cuda":
@@ -874,7 +929,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            if wm_backend == "torch" else "Python + Conda C++"),
         "mri_segment_sha256": wm_segment_binary[1] if wm_segment_binary else None,
         "segmentation_backend": wm_backend,
-        "mri_edit_wm_with_aseg_sha256": wm_edit_binary[1]}
+        "edit_backend": wm_edit_backend,
+        "edit_implementation": "Conda C++" if wm_edit_binary else "ordered Numba + PyTorch CUDA",
+        "mri_edit_wm_with_aseg_sha256": wm_edit_binary[1] if wm_edit_binary else None}
     report["white_preaparc"] = {
         "implementation": "Python MNI/aux/finalsurfs + Conda C++ placement",
         "binary": str(white_binary[0]), "sha256": white_binary[1],
@@ -888,6 +945,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["sphere_generation"] = {
         "implementation": "Conda mris_inflate + Python quick/standard sphere",
         "mris_inflate": {"binary": str(inflate_binary[0]), "sha256": inflate_binary[1]},
+        "normals_backend": sphere_normals_backend,
+        "normals_device": device if sphere_normals_backend == "torch" else "cpu",
         "finish_device": "cpu", "upstream": "repaired topology"}
     registration_device = torch.device(device)
     if registration_device.type == "cuda" and registration_device.index is None:
@@ -899,8 +958,14 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["extra_curvature"] = {
         "mrisp_paint_sha256": paint_binary[1],
         "mris_curvature_stats_sha256": curvature_stats_binary[1]}
-    report["defects_volume"] = {"binary": str(defect_binary[0]),
-                                 "sha256": defect_binary[1]}
+    report["defects_volume"] = ({"backend": "native", "binary": str(defect_binary[0]),
+                                 "sha256": defect_binary[1]} if defect_binary else
+                                {"backend": "torch", "device": device,
+                                 "palette": "deterministic colors; original label names and values"})
+    if defects_backend == "torch":
+        from . import defects_label_volume_torch
+        report["defects_volume"]["source_sha256"] = hashlib.sha256(
+            Path(defects_label_volume_torch.__file__).read_bytes()).hexdigest()
     report["mni_nonlinear"] = {
         "implementation": ("PyTorch deform + FNIT GPU warp conversion/inversion/check"
                            if torch.device(device).type == "cuda" else
@@ -1031,8 +1096,12 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     else:
         stage("mri_segment", _run_native_wm_segment,
               wm_segment_binary[0], mri, assets)
-    stage("mri_edit_wm_with_aseg", _run_native_wm_edit,
-          wm_edit_binary[0], mri, assets)
+    if wm_edit_backend == "torch-hybrid":
+        report["white_matter_chain"]["edit_runtime"] = stage(
+            "mri_edit_wm_with_aseg", _run_torch_wm_edit, mri, device=device)
+    else:
+        stage("mri_edit_wm_with_aseg", _run_native_wm_edit,
+              wm_edit_binary[0], mri, assets)
     stage("wm_pretess", pretess_mgh, mri / "wm.asegedit.mgz", "wm",
           mri / "norm.mgz", mri / "wm.mgz")
     stage("wm_fix_ento", wm_edit_function, mri / "wm.mgz",
@@ -1061,11 +1130,13 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     if hemisphere_workers == 2:
         from .hemisphere_parallel import run_hemisphere_group, HemisphereGroupError
         common = {'assets': str(assets),
+                  'sphere_normals_backend': sphere_normals_backend,
                   'binaries': {name: str(value) for name, value in (
                       ('topology', topology_binary[0]), ('inflate', inflate_binary[0]),
                       ('intersection', intersection_binary[0]), ('metrics', metrics_binary[0]),
                       ('white', white_binary[0]),
-                      ('defect', defect_binary[0]), ('paint', paint_binary[0]))},
+                      *((('defect', defect_binary[0]),) if defect_binary else ()),
+                      ('paint', paint_binary[0]))},
                   'registration_atlases': {hemi: str(path) for hemi, path in registration_atlases.items()}}
         for operation in ('surface', 'register', 'annotation', 'finish_surface'):
             try:
@@ -1101,7 +1172,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                 # 此诊断无下游计算依赖，但左右累计有先后依赖。
                 for hemi in ('lh', 'rh'):
                     stage(f'defects_{hemi}', _run_defects_volume,
-                          defect_binary[0], subject, hemi, assets)
+                          defect_binary[0] if defect_binary else None, subject, hemi, assets,
+                          backend=defects_backend, device=device)
             (subject / 'fnit-native-free-run.json').write_text(json.dumps(report, indent=2))
         surf = subject / 'surf'
     else:
@@ -1113,7 +1185,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            inflate_binary=inflate_binary[0],
                            intersection_binary=intersection_binary[0],
                            place_binary=white_binary[0],
-                           defect_binary=defect_binary[0], assets=assets)
+                           defect_binary=defect_binary[0] if defect_binary else None,
+                           assets=assets, defects_backend=defects_backend,
+                           sphere_normals_backend=sphere_normals_backend)
             report.setdefault("surfaces", {})[hemi] = result
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
 
@@ -1236,6 +1310,9 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          hemisphere_workers: int = 1,
                          native_optimizations: str = "auto",
                          wm_backend: str = "native",
+                         wm_edit_backend: str = "native",
+                         defects_backend: str = "native",
+                         sphere_normals_backend: str = "numba",
                          backend: str = "native") -> dict:
     """从原始单 T1 连续重建；输入、输出及坐标定义见 recon-all 中文说明。
 
@@ -1250,6 +1327,12 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     PurePythonGpuUnavailable，不回退到原生程序。native_optimizations=auto 仅按已验证的原生能力选择 GCA 缓存和 white
     快速程序；original固定原始原生实现。CUDA WM 后编辑使用已有 GPU
     函数；完整 EM/WM 核心及pial不被不完整Python算法替代。
+    defects_backend=native 使用原生缺陷投射，torch 用本项目完整投射规则
+    并保持双侧累积顺序；仅颜色表换成固定颜色，当前默认为 native。
+    wm_edit_backend=native 调用独立构建编辑程序；torch-hybrid 使用 CUDA
+    静态编辑和 Numba 有序核心，不是纯 GPU；输入证明不成立时抛异常。
+    sphere_normals_backend=numba 使用已有法向；torch 使用同设备有序
+    Torch 法向，其余标准 sphere 阶段保持原计算，要求显式 CUDA 设备。
     profile_stages=False 不插入阶段同步；True 分列 CUDA 等待与父子 CPU 秒数。
     球面配准在 device 上执行完整有序 float32 梯度平均，其余目标函数、
     步长决策及末尾清理保持 CPU；不自动启用半精度，计时包含往返传输。
@@ -1315,6 +1398,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"hemisphere_workers": hemisphere_workers} if hemisphere_workers != 1 else {}),
                     **({"native_optimizations": native_optimizations} if native_optimizations != "auto" else {}),
                     **({"wm_backend": wm_backend} if wm_backend != "native" else {}),
+                    **({"wm_edit_backend": wm_edit_backend} if wm_edit_backend != "native" else {}),
+                    **({"defects_backend": defects_backend} if defects_backend != "native" else {}),
+                    **({"sphere_normals_backend": sphere_normals_backend}
+                       if sphere_normals_backend != "numba" else {}),
                     backend=backend)
             except Exception as error:
                 pipeline_error = error
@@ -1364,6 +1451,12 @@ def main(argv: list[str] | None = None) -> None:
                         help="auto/original use Conda GCA; torch uses FNIT's CUDA candidate scorer with Python EM")
     parser.add_argument("--wm-backend", choices=("native", "torch"), default="native",
                         help="native mri_segment or FNIT Torch/CPU hybrid segmentation")
+    parser.add_argument("--wm-edit-backend", choices=("native", "torch-hybrid"), default="native",
+                        help="native edit or ordered NumBa + Torch GPU edit, rejects unsupported byte-access paths")
+    parser.add_argument("--defects-backend", choices=("native", "torch"), default="native",
+                        help="native mri_label2vol or FNIT PyTorch exact voxel projection; colors differ")
+    parser.add_argument("--sphere-normals-backend", choices=("numba", "torch"), default="numba",
+                        help="ordered sphere normals on CPU or explicit CUDA; remaining solver unchanged")
     parser.add_argument("--backend", choices=("native", "python-gpu"), default="native",
                         help="native: current validated mixed pipeline; python-gpu: strict profile, fails before output while required ports are incomplete")
     parser.add_argument("--profile-stages", action="store_true",
@@ -1380,6 +1473,9 @@ def main(argv: list[str] | None = None) -> None:
                                   hemisphere_workers=args.hemisphere_workers,
                                   native_optimizations=args.native_optimizations,
                                   wm_backend=args.wm_backend,
+                                  wm_edit_backend=args.wm_edit_backend,
+                                  defects_backend=args.defects_backend,
+                                  sphere_normals_backend=args.sphere_normals_backend,
                                   backend=args.backend)
     print(json.dumps(report, indent=2))
 

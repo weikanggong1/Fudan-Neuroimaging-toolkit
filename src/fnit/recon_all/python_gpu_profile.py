@@ -51,23 +51,25 @@ _READY: tuple[PythonGpuCapability, ...] = (
 
 _BLOCKED: tuple[PythonGpuCapability, ...] = (
     PythonGpuCapability("N4", "Conda ITK C++", "cpu", False,
-                        "n4_gpu.py is an experimental non-ITK approximation"),
+                        "complete fixed-recipe Torch N4 is experimental: one real full run is biased low and downstream regression is pending; default stays ITK"),
     PythonGpuCapability("mri_em_register/GCA", "FNIT PyTorch scorer + Python EM", "cuda", False,
                         "Torch translation/linear search is opt-in; EM refinement remains CPU and lacks connected-chain acceptance"),
     PythonGpuCapability("WM segmentation", "FNIT PyTorch/CPU hybrid", "cuda", False,
-                        "vectorized classification can use CUDA, but scan-order histogram/strand rules remain CPU and need current real-T1 regression"),
-    PythonGpuCapability("WM/aseg core edit", "Conda FreeSurfer C++", "cpu", False,
-                        "Python port is CPU and must preserve ordered mutations"),
+                        "complete histogram passes are exact on two real inputs with opt-in Torch; ordered strand stays CPU and full-file/raw-T1 regression is pending"),
+    PythonGpuCapability("WM/aseg core edit", "FNIT Numba/Torch hybrid (opt-in)", "mixed cpu/cuda", False,
+                        "complete guarded hybrid is exact on two frozen real inputs; ordered feedback stays CPU; raw-T1 integration pending"),
     PythonGpuCapability("topology GA", "Conda FreeSurfer C++", "cpu", False,
                         "Python module is only a preflight, not the patch search"),
     PythonGpuCapability("inflate/remesh/intersection", "mixed", "cpu", False,
                         "complete dynamic mesh GPU kernels are not implemented"),
     PythonGpuCapability("white.preaparc/final white", "Conda FreeSurfer C++", "cpu", False,
                         "Python white implementation is a first-pass prefix"),
-    PythonGpuCapability("pial placement", "Conda FreeSurfer C++", "cpu", False,
-                        "Python implementation still performs ordered CPU updates"),
-    PythonGpuCapability("defects/curvature statistics", "Conda FreeSurfer C++", "cpu", False,
-                        "no complete Python replacement is wired into production"),
+    PythonGpuCapability("pial placement", "FNIT Numba/Torch (opt-in) and Conda C++ default", "mixed cpu/cuda", False,
+                        "complete Python pial retains ordered CPU updates; GPU regularizers do not speed the full stage and pre-existing official differences remain"),
+    PythonGpuCapability("defects projection", "FNIT PyTorch (opt-in)", "cuda", False,
+                        "complete projection is exact on two real frozen inputs; raw-T1 integration pending; topology GA is a separate blocked stage"),
+    PythonGpuCapability("curvature statistics", "FNIT Torch discrete/principal maps (opt-in); Conda stats default", "mixed cpu/cuda", False,
+                        "two real bilateral raw eight-map tests are complete but the exploratory error gate fails; filtering/smoothing/full curv.stats remain native"),
 )
 
 

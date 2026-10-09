@@ -1,0 +1,107 @@
+wsizemm = 13, voxres = 1, wsize = 13
+Widening wm low from 89 to 79
+assuming input volume is MGH (Van der Kouwe) MP-RAGE
+wm mean:  110
+wsize:    13
+wm low:   79
+wm hi:    125
+gray low: 30
+gray hi:  99
+Doing initial trinary intensity segmentation 
+MRIintensitySegmentation() wm_low=79, wm_hi=125, gray_hi=99
+white = 219388, nonwhite = 16370056, ambig = 187772, nmask = 0
+Using local statistics to label ambiguous voxels
+Autodetecting stats
+Computing class statistics for intensity windows...
+CCS WM (103.0): 104.1 +- 4.2 [79.0 --> 125.0]
+CCS GM (69.0) : 67.4 +- 10.1 [30.0 --> 95.0]
+ white_mean 104.144
+ white_sigma 4.16193
+ gray_mean 67.447
+ gray_sigma 10.1395
+setting bottom of white matter range wm_low to 77.6
+setting top of gray matter range gray_hi to 87.7
+ wm_low 77.5865
+ wm_hi  125
+ gray_low 30
+ gray_hi  87.726
+Redoing initial intensity segmentation...
+MRIintensitySegmentation() wm_low=77.5865, wm_hi=125, gray_hi=87.726
+white = 328628, nonwhite = 16361131, ambig = 87457, nmask = 0
+Recomputing local statistics to label ambiguous voxels...
+ wm_low 77.5865
+ wm_hi  125
+ gray_low 30
+ gray_hi  87.726
+using local geometry to label remaining ambiguous voxels...
+polvwsize = 5, polvlen = 3, gray_hi = 87.726, wm_low = 77.5865
+MRIcpolvMedianCurveSegment(): wsize=5, len=3, gmhi=87.726, wmlow=77.5865
+     86646 voxels processed (0.52%)
+     40691 voxels white (0.24%)
+     45955 voxels non-white (0.27%)
+
+Reclassifying voxels using Gaussian border classifier niter=1
+MRIreclassify(): wm_low=72.5865, gray_hi=87.726, wsize=13
+    135196 voxels tested (0.81%)
+     35127 voxels changed (0.21%)
+     30023 multi-scale searches  (0.18%)
+Recovering bright white
+MRIrecoverBrightWhite()
+ wm_low 77.5865
+ wm_hi 125
+ slack 4.16193
+ pct_thresh 0.33
+ intensity_thresh 129.162
+ nvox_thresh 8.58
+       33 voxels tested (0.00%)
+        7 voxels changed (0.00%)
+
+removing voxels with positive offset direction...
+MRIremoveWrongDirection() wsize=3, lowthr=72.5865, hithr=87.726
+  smoothing input volume with sigma = 0.250
+    65566 voxels tested (0.39%)
+    13700 voxels changed (0.08%)
+thicken = 1
+removing 1-dimensional structures...
+MRIremove1dStructures(): max_iter=10000, thresh=2, WM_MIN_VAL=5
+ 3250 sparsely connected voxels removed in 1 iterations
+thickening thin strands....
+thickness 4
+nsegments 20
+wm_hi 125
+897 diagonally connected voxels added...
+MRIthickenThinWMStrands(): thickness=4, nsegments=20
+  20 segments, 4545 filled
+MRIfindBrightNonWM(): 367 bright non-wm voxels segmented.
+MRIfilterMorphology() WM_MIN_VAL=5, DIAGONAL_FILL=230
+white matter segmentation took 0.8 minutes
+writing output to wm.seg.mgz...
+/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin/mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz 
+preserving editing changes in input volume...
+mri_edit_wm_wit supposed to be reproducible but seed not set
+auto filling took 0.44 minutes
+Fixing entowm 3 255 255
+LabelAmygalaCortalJunction((): nhits = 3303
+Fixing ACJ 255 255
+FixSCM HA 1
+reading wm segmentation from wm.seg.mgz...
+0 voxels added to wm to prevent paths from MTL structures to cortex
+14937 additional wm voxels added
+0 additional wm voxels added
+SEG EDIT: 228153 voxels turned on, 24075 voxels turned off.
+Dilating 1 voxels in 3d
+propagating editing to output volume from wm.seg.mgz
+MRIfixEntoWM(): 255 255 Level=3
+MRIfixEntoWM(): nchanged = 1453
+MRIfixEntoWM(): 255 255 Level=3
+MRIfixEntoWM(): nchanged = 598
+writing edited volume to wm.asegedit.mgz....
+mri_label2vol supposed to be reproducible but seed not set
+Contraining to label /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_torch_e2e_20261009_v2/control/subject/label/lh.nofix.cortex.label
+Changing input type 0 to MRI_INT
+Converting defects to volume: offset=1000, merge=0
+Writing to /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_torch_e2e_20261009_v2/control/subject/mri/surface.defects.mgz
+mri_label2vol supposed to be reproducible but seed not set
+Contraining to label /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_torch_e2e_20261009_v2/control/subject/label/rh.nofix.cortex.label
+Converting defects to volume: offset=2000, merge=1
+Writing to /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_torch_e2e_20261009_v2/control/subject/mri/surface.defects.mgz
