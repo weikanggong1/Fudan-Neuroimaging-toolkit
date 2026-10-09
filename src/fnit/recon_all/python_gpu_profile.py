@@ -53,7 +53,7 @@ _BLOCKED: tuple[PythonGpuCapability, ...] = (
     PythonGpuCapability("N4", "Conda ITK C++", "cpu", False,
                         "complete fixed-recipe Torch N4 is experimental: one real full run is biased low and downstream regression is pending; default stays ITK"),
     PythonGpuCapability("mri_em_register/GCA", "FNIT PyTorch scorer + Python EM", "cuda", False,
-                        "Torch translation/linear search is opt-in; EM refinement remains CPU and lacks connected-chain acceptance"),
+                        "CUDA translation/linear scoring and Python EM have two raw-T1 empty-directory regressions (803aec50/0cd9cbd5); EM remains CPU and the strict pure-PyTorch GPU profile is not complete"),
     PythonGpuCapability("WM segmentation", "FNIT PyTorch/CPU hybrid", "cuda", False,
                         "complete histogram passes are exact on two real inputs with opt-in Torch; ordered strand stays CPU and full-file/raw-T1 regression is pending"),
     PythonGpuCapability("WM/aseg core edit", "FNIT Numba/Torch hybrid (opt-in)", "mixed cpu/cuda", False,
@@ -61,11 +61,11 @@ _BLOCKED: tuple[PythonGpuCapability, ...] = (
     PythonGpuCapability("topology GA", "Conda FreeSurfer C++", "cpu", False,
                         "Python module is only a preflight, not the patch search"),
     PythonGpuCapability("inflate/remesh/intersection", "mixed", "cpu", False,
-                        "complete dynamic mesh GPU kernels are not implemented"),
+                        "complete standard Torch inflated/sulc is wired and raw-T1 tested (589e2749); nofix inflation, dynamic remesh and intersection still retain CPU/native components"),
     PythonGpuCapability("white.preaparc/final white", "Conda FreeSurfer C++", "cpu", False,
-                        "Python white implementation is a first-pass prefix"),
+                        "complete four-pass Python white candidates and GPU substages exist; preaparc/final-white production replacement and native same-input/connected-chain acceptance remain incomplete"),
     PythonGpuCapability("pial placement", "FNIT Numba/Torch (opt-in) and Conda C++ default", "mixed cpu/cuda", False,
-                        "complete Python pial retains ordered CPU updates; GPU regularizers do not speed the full stage and pre-existing official differences remain"),
+                        "complete four-pass/39-step Python pial with GPU candidates and compiled ordered updates is validated (edaac8e7/eae29511); source cleanup ABBA 126.246 to 11.158 s, full phase still 221.206 vs native 138-141 s; CPU sampling/gradients/SOAP and pre-existing native geometry differences remain"),
     PythonGpuCapability("defects projection", "FNIT PyTorch (opt-in)", "cuda", False,
                         "complete projection is exact on two real frozen inputs; raw-T1 integration pending; topology GA is a separate blocked stage"),
     PythonGpuCapability("curvature statistics", "FNIT Torch discrete/principal maps (opt-in); Conda stats default", "mixed cpu/cuda", False,
@@ -82,7 +82,13 @@ class PurePythonGpuUnavailable(RuntimeError):
 
 
 def capability_report(*, device: str = "cuda:0") -> dict:
-    """Return the current strict-profile matrix without reading image data."""
+    """返回严格pure profile的实现状态，不读取影像或初始化CUDA。
+
+    device默认cuda:0，仅描述请求设备；返回profile/device/native_programs、
+    ready/blocked各阶段结构(stage/implementation/device/complete/reason)。
+    已有混合实现/阶段速度证据不会自动转成纯GPU完成，不判数值或指标等效。
+    当前关键原生/CPU阶段未全替代，complete保持False；不是benchmark执行器。
+    """
     is_cuda = str(device).startswith("cuda")
     rows = [*(_READY if is_cuda else tuple(
         PythonGpuCapability(row.stage, row.implementation, "cpu", False,
@@ -99,7 +105,11 @@ def capability_report(*, device: str = "cuda:0") -> dict:
 
 
 def require_complete(*, device: str = "cuda:0") -> dict:
-    """Validate strict pure mode and fail before creating a subject directory."""
+    """校验严格pure模式；device同capability_report，不创建被试目录。
+
+    完整时返回状态字典；未完整抛PurePythonGpuUnavailable并附同一机器
+    可读capabilities，生产不会回退系统程序。没有独立原软件CLI或影像输出。
+    """
     report = capability_report(device=device)
     if not report["complete"]:
         raise PurePythonGpuUnavailable(report)

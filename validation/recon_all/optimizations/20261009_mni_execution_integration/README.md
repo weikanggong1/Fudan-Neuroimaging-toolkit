@@ -58,6 +58,8 @@ python validation/recon_all/optimizations/20261009_mni_execution_integration/run
 
 完整 helper 的两例八次 ABBA 已单独完成：sub06 160.421→94.287秒，sub07 142.240→72.892秒；全部正式变换及检查图体素、几何、文件SHA和原网格报告一致，见[带版本和图像的真实数据报告](../20261009_mni_mesh_parallel/README.md)。这些是同输入完整组结果，不能算作接线后原始T1整例收益。接线后的原始T1整例、干净Conda部署及同期20GB进程树门槛尚未在本报告判定；整体指标等效为 `not_assessed`。
 
+独立安装范围：765c0fe9使用声明Conda编译器构建wheel14.126秒、安装到新私有目标3.223秒、实际安装包CLI2.994秒；9个相关模块字节与冻结源码相同，wheel SHA为`f00365dd866d779a1d4f2efdb97827c7000e6cd1861c1dd7b2f55c3c451f8483`。完整[安装报告](package/package_report.json)、[源码记录](package/package_source.json)和[复现工具](package/run_package_validation.py)单列。这没有新建Conda环境，也未在安装包路径执行MRI整例，不能宣布独立部署通过。
+
 ## 6. 版本与收据
 
 测试基线为 `eae295116c9503699cbc175f7eed40005d17de64` 加本次根调度覆盖；实际SHA列于 [SOURCE_PROVENANCE.json](reports/SOURCE_PROVENANCE.json)，39项详细结果见 [contracts.json](reports/contracts.json)。报告的逐文件SHA与实际提交源码核对后再接入；不把后续提交号追写为已测试版本。

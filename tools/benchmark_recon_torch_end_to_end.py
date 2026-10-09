@@ -50,6 +50,7 @@ def main():
     parser.add_argument("--normalization-controls-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--normalization-initial-bias-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--inflate-backend", choices=("native", "torch"), default="native")
+    parser.add_argument("--sphere-finish-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--mni-execution", choices=("in-process", "parallel-late"), default="in-process")
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=2)
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="torch")
@@ -65,10 +66,12 @@ def main():
     parser.add_argument("--code-version", required=True)
     args = parser.parse_args()
     from fnit.recon_all.native_free import (_normalization_controls_options, _normalization_initial_bias_options,
-                                          _validate_inflate_backend, _validate_mni_execution)
+                                          _validate_inflate_backend, _validate_mni_execution,
+                                          _validate_sphere_finish_backend)
     _normalization_controls_options(args.normalization_controls_backend, args.device)
     _normalization_initial_bias_options(args.normalization_initial_bias_backend, args.device)
     _validate_inflate_backend(args.inflate_backend, args.device, args.hemisphere_workers)
+    _validate_sphere_finish_backend(args.sphere_finish_backend, args.device, args.hemisphere_workers)
     _validate_mni_execution(args.mni_execution, args.device, args.threads)
     from fnit.recon_all.input_n4_chain import validate_n4_execution
     validate_n4_execution(n4_backend=args.n4_backend, n4_execution=args.n4_execution, device=args.device)
@@ -105,6 +108,7 @@ def main():
         "normalization_controls_backend": args.normalization_controls_backend,
         "normalization_initial_bias_backend": args.normalization_initial_bias_backend,
         "inflate_backend": args.inflate_backend,
+        "sphere_finish_backend": args.sphere_finish_backend,
         "mni_execution": args.mni_execution,
         "wm_execution": args.wm_execution,
         "gca_inverse_backend": args.gca_inverse_backend,
@@ -138,6 +142,7 @@ def main():
     command += ["--normalization-controls-backend", args.normalization_controls_backend]
     command += ["--normalization-initial-bias-backend", args.normalization_initial_bias_backend]
     command += ["--inflate-backend", args.inflate_backend]
+    command += ["--sphere-finish-backend", args.sphere_finish_backend]
     command += ["--mni-execution", args.mni_execution]
     command += ["--wm-execution", args.wm_execution]
     report["cli_command"] = command

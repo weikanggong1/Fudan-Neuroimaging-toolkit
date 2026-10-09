@@ -60,7 +60,7 @@ parallel_result = run_mni_and_validate(
 
 ## 3. 命令行验证
 
-此helper尚无独立生产CLI。可用阶段脚本做相同输入诊断，所有路径显式指定：
+完整recon-all入口已提供`--mni-execution parallel-late`（默认in-process），在所有半球写出后使用本helper，join后检查138输出；要求显式cuda:N、总threads至少2及caller autocast关闭。单例、批量与benchmark接线通过39项契约，见[接线收据](../../validation/recon_all/optimizations/20261009_mni_execution_integration/README.md)。此helper没有单独生产CLI。可用阶段脚本做相同输入诊断，所有路径显式指定：
 
 ```bash
 python benchmark/recon_mni_mesh_parallel.py \
@@ -109,7 +109,7 @@ python benchmark/recon_mni_mesh_parallel.py \
 - v3：局部设备作用域修复；helper5项、双GPU正常/异常恢复2项合同通过，真实两例配对另列。
 - v4/v5：分别用于同前向场公共完整逆场API对照和未初始化父CUDA的冷CLI验证，单列证据范围。
 
-本轮阶段验证不替代原始T1空目录端到端提速；生产默认尚由协调者回归接线。现有模型FP32例外、CPU有序散射与整体指标验收保持。
+本轮阶段验证不替代原始T1空目录端到端提速；765c0fe9已提供显式接线且保持默认in-process。该提交wheel构建、独立目标安装和CLI已通过，见[安装收据](../../validation/recon_all/optimizations/20261009_mni_execution_integration/package/package_report.json)；现有Conda安装验证不能算物理隔离或安装产物MRI整例验收。现有模型FP32例外、CPU有序散射与整体指标验收保持。
 
 ## 7. 原代码与参考文献
 
