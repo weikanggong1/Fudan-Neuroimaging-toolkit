@@ -193,6 +193,12 @@ def main():
             speed_ratio_cpu_over_torch=report["python_runs"]["cpu"]["wall_seconds"] /
                                       report["python_runs"]["torch"]["wall_seconds"],
         )
+        comparison = report["python_comparison"]
+        report["strict_python_backend_reproduction"] = "passed" if (
+            comparison["same_vertex_count_and_ordered_faces"]
+            and comparison["different_coordinate_elements"] == 0 and comparison["same_trace"]) else "failed"
+        report["new_degradation_under_declared_exact_backend_gate"] = (
+            "none_detected" if report["strict_python_backend_reproduction"] == "passed" else "detected")
         save()
     env = dict(os.environ, FREESURFER_HOME=str(args.assets_directory),
                SUBJECTS_DIR=str(args.subject.parent), OMP_NUM_THREADS=str(args.threads),

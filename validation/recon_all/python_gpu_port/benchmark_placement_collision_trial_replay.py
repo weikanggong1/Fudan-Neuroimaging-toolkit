@@ -130,6 +130,12 @@ def main():
         report["cold_comparison"] = compare(cold_results["tree"], cold_results["torch_snapshot"])
         report["paired_comparison_to_cold_tree"] = [
             {"backend": backend, **compare(cold_results["tree"], result)} for backend, result in paired_results]
+        comparisons = [report["cold_comparison"], *report["paired_comparison_to_cold_tree"]]
+        report["strict_same_input_reproduction"] = "passed" if all(
+            row["different_coordinate_elements"] == 0 and row["same_order"]
+            and row["different_accepted_offset_elements"] == 0 for row in comparisons) else "failed"
+        report["new_degradation_under_declared_exact_trial_gate"] = (
+            "none_detected" if report["strict_same_input_reproduction"] == "passed" else "detected")
         medians = {backend: statistics.median(row["seconds"] for row in report["runs"]
             if row["kind"] == "paired" and row["backend"] == backend) for backend in ("tree", "torch_snapshot")}
         report["paired_median_seconds"] = medians
