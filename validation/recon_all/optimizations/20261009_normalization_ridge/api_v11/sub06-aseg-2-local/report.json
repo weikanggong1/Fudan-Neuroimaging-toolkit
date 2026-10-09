@@ -1,0 +1,481 @@
+{
+  "scope": "same-input full existing normalization API allocator ABBA component; not raw T1 end-to-end",
+  "stage": "aseg",
+  "cache": "disabled",
+  "code_commit": "5f6ca781",
+  "controls_neighbor_backend": "torch",
+  "initial_bias_backend": "torch",
+  "source_sha256": {
+    "normalize_1d_source.py": "0e2c0130899d49938e077dd0c8b8d662912099a9b942df8c941dca9b9e96e57d",
+    "normalize_tissue_peaks.py": "c5e0a55d1b8583dbdf4b6b1938b859444655202606a5c374dfe365d1bc898042",
+    "normalize_3d_controls.py": "34d4580a86192aba94de3067bc5ce8c0a4a5418f640becfbeb0ae14cb9c6a28b",
+    "normalize_gentle_source.py": "1791a86e5a63e3a8dc4ebd4a612d58668cd2e2d9f9f7932434a68fa1fc692fab",
+    "normalize_voronoi_source.py": "cf92e4dcab2a02fefd56bff9070eda3a867aa8fc99465be14e00e82dbf164efa",
+    "normalize_gaussian_source.py": "fe4ac89208f3b07272a797dcc7dd44b7645e4c8ea6ea2033bd0925074e28a4e3",
+    "pipeline.py": "605b68b844929c852d2978fb38050cc56dcd18ff997742cb852946dfe12860ef",
+    "normalize_aseg_ridge.py": "d17af13218b997247d8526467d3a57b8ba59bc52a6c3837f7899680be94052e3",
+    "normalize_aseg_source.py": "6745b05a1977dcaeba6a50dc30bc2472e2c2f4660afb67cbd594f23598262912",
+    "aseg_pipeline.py": "bb4175e69e71ec14e06bad7895d85152632438192c642f9c7027438a3e11832c",
+    "__init__.py": "a3dbc39eb024387c4a73b687fe59784893b59222c678d82a74576be6fc120ff1",
+    "normalize_ridge_local.py": "c44117227745056a6ee11478f4ddf14354f1e582745ac24d778a49acfd0542cf",
+    "normalize_neighbor_sum_torch.py": "07dd051c23f531e8dcd2e571a83446ef0a334be88ff2cdaa787c381cb1ccc1d6",
+    "_normalization_cuda.py": "a8204bee3f37e49a0be7d886c028ce687f7f9ec8482c3d2c2ad7319d0ebd35b6",
+    "_normalization_neighbors_cuda.py": "3e78b47fca4b706f03a3f7116ee055de1fd898c239419c9b7f9a44431c815668"
+  },
+  "script_sha256": "81ca4d212b2eb0846ae5e0f98296325090cf1e4ed009063cb4b8fd6a86bcf59c",
+  "profiling_sha256": "a4b1cc19794c1af90d6218f7d757cede491ade7da9406e3a3012a628fa2bf3ec",
+  "input_sha256": {
+    "norm.mgz": "3c8979c72f261f60361bff8fe0a08b1c543bf95e854bbb0f7c467bdf36c7bbd4",
+    "aseg.presurf.mgz": "0e2efe5625d11bb33f4cc17f94af6a5c231eb1d522bff6deb6f4fb51c658f003",
+    "brainmask.mgz": "3c8656e31226b8fb59fa80aff9f78f14d8900210e53112190ec76b62828411af"
+  },
+  "input_unchanged": {
+    "norm.mgz": true,
+    "aseg.presurf.mgz": true,
+    "brainmask.mgz": true
+  },
+  "reference_kind": "same frozen self-produced 803 chain stage output; comparison only",
+  "reference_sha256": "de6896e108e8979f12909e58f239c534b26b9a3eb12dea951ee96177fbf177c5",
+  "output_sha256": "de6896e108e8979f12909e58f239c534b26b9a3eb12dea951ee96177fbf177c5",
+  "host": "A100_BENCHMARK_HOST",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz",
+  "cpu_affinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "torch_threads": 4,
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4"
+  },
+  "device": "cuda:1",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "nibabel": "5.4.2",
+  "torch_cuda": "11.8",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast": false,
+    "fp16_bf16_used": false
+  },
+  "allocator": {
+    "requested": "disabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "initialization_seconds": 14.036930952221155,
+  "full_API": {
+    "name": "normalize_t1_aseg",
+    "seconds": 38.366630979813635,
+    "function_seconds": 38.366366662085056,
+    "cuda_pre_sync_seconds": 7.454585283994675e-05,
+    "cuda_post_sync_seconds": 7.33938068151474e-05,
+    "cuda_synchronized": true,
+    "cuda_synchronization_requested": true,
+    "parent_cpu_seconds": 30.619078412,
+    "child_cpu_seconds": 1.925632,
+    "torch_memory_stats_status": "unavailable"
+  },
+  "api": {
+    "device": "cuda:1",
+    "three_d_iterations": 2,
+    "controls_neighbor_backend": "torch",
+    "initial_bias_backend": "torch",
+    "ridge_seconds": 3.9370836038142443,
+    "initial_bias_seconds": 5.6895796451717615,
+    "ridge": {
+      "marching": [
+        [
+          162175,
+          179549
+        ],
+        [
+          158207,
+          298329
+        ]
+      ],
+      "outside_query_voxels": 295955,
+      "distance_scope": "all WM and its external 26-neighbor band; distant background sentinel",
+      "ridge_voxels": 55675,
+      "marching_backend": "local-consumer"
+    },
+    "removed_controls": 6168,
+    "wm_peak": 101,
+    "completion": {
+      "steps": {
+        "gentle_controls_seconds": 2.440835894085467,
+        "gentle_bias_seconds": 2.273360094986856,
+        "three_d_1_controls_seconds": 7.554313900880516,
+        "three_d_1_bias_seconds": 2.0193090615794063,
+        "three_d_1_controls": {
+          "initial_7": 25153,
+          "initial_5": 43897,
+          "tissue_peaks": {
+            "selected_wm_peak": 109.55284118652344,
+            "wm_index": 109,
+            "gm_index": 50,
+            "wm_peak": 108.8658676147461,
+            "gm_peak": 49.93846893310547,
+            "bin_size": 0.9987694025039673
+          },
+          "adaptive_7": 25153,
+          "adaptive_5": 56951,
+          "three_added": 68310,
+          "six_added": 70856,
+          "before_outlier_removal": 196117,
+          "after_outlier_removal": 196117
+        },
+        "three_d_2_controls_seconds": 9.19183466117829,
+        "three_d_2_bias_seconds": 2.302349328994751,
+        "three_d_2_controls": {
+          "initial_7": 27255,
+          "initial_5": 49788,
+          "tissue_peaks": {
+            "selected_wm_peak": 110.33270263671875,
+            "wm_index": 110,
+            "gm_index": 51,
+            "wm_peak": 109.9454574584961,
+            "gm_peak": 50.97471237182617,
+            "bin_size": 0.9995041489601135
+          },
+          "adaptive_7": 27255,
+          "adaptive_5": 61678,
+          "three_added": 70682,
+          "six_added": 70606,
+          "before_outlier_removal": 202966,
+          "after_outlier_removal": 202966
+        }
+      },
+      "gentle_controls": {
+        "first_7x7x7": 10979,
+        "after_5x5x5": 26592,
+        "after_outlier_removal": 26477
+      }
+    },
+    "total_seconds": 38.08597057312727
+  },
+  "cpu_helpers": {
+    "aseg_pipeline.prepare_aseg_source": {
+      "calls": 1,
+      "seconds": 0.20985133852809668,
+      "cpu_seconds": 0.19908822799999992
+    },
+    "aseg_pipeline.medial_ridge": {
+      "calls": 1,
+      "seconds": 3.3360412549227476,
+      "cpu_seconds": 2.7123042610000008
+    },
+    "aseg_pipeline.filter_aseg_ridge": {
+      "calls": 1,
+      "seconds": 0.6010072929784656,
+      "cpu_seconds": 0.43942701099999937
+    },
+    "aseg_pipeline.apply_initial_aseg_bias": {
+      "calls": 1,
+      "seconds": 5.689563812687993,
+      "cpu_seconds": 3.245012709000001
+    },
+    "normalize_3d_controls._homogeneous": {
+      "calls": 8,
+      "seconds": 7.227232543751597,
+      "cpu_seconds": 6.802414381999995
+    },
+    "normalize_3d_controls._neighbor_sum": {
+      "calls": 0,
+      "seconds": 0.0,
+      "cpu_seconds": 0.0
+    },
+    "normalize_3d_controls.tissue_peaks": {
+      "calls": 2,
+      "seconds": 0.5445906296372414,
+      "cpu_seconds": 0.522513355000001
+    },
+    "normalize_3d_controls._remove_outliers_ordered": {
+      "calls": 2,
+      "seconds": 0.4161343118175864,
+      "cpu_seconds": 0.23383070899999936
+    },
+    "normalize_gentle_source._remove_outliers_ordered": {
+      "calls": 1,
+      "seconds": 0.15193334128707647,
+      "cpu_seconds": 0.08791122600000101
+    },
+    "NeighborSumTorch.complete_transfer_kernel_download": {
+      "calls": 159,
+      "seconds": 1.02095927298069,
+      "cpu_seconds": 0.5336552929999989
+    }
+  },
+  "three_d_control_traces": [
+    {
+      "round": 1,
+      "input_data_sha256": "4355827c50d211f7fc750903adb56942f1a9b32c34ab62a8bb74d438058f3221",
+      "input_shape": [
+        256,
+        256,
+        256
+      ],
+      "input_dtype": "float32",
+      "control_data_sha256": "b5e9ffaae0063642dca90960c76d7384e4af32d567e0a0a8acbf32a753fc1e63",
+      "control_dtype": "uint8",
+      "details": {
+        "initial_7": 25153,
+        "initial_5": 43897,
+        "tissue_peaks": {
+          "selected_wm_peak": 109.55284118652344,
+          "wm_index": 109,
+          "gm_index": 50,
+          "wm_peak": 108.8658676147461,
+          "gm_peak": 49.93846893310547,
+          "bin_size": 0.9987694025039673
+        },
+        "adaptive_7": 25153,
+        "adaptive_5": 56951,
+        "three_added": 68310,
+        "six_added": 70856,
+        "before_outlier_removal": 196117,
+        "after_outlier_removal": 196117
+      }
+    },
+    {
+      "round": 2,
+      "input_data_sha256": "a1c7acd91a22d22b8a1aa177edfca20de8cd5cbecc85f73061246a663ad6cb48",
+      "input_shape": [
+        256,
+        256,
+        256
+      ],
+      "input_dtype": "float32",
+      "control_data_sha256": "2a3d7bed3195ce7c87f2d04fa029142dc6022dd18cfb1c6297177f3c5320c1c4",
+      "control_dtype": "uint8",
+      "details": {
+        "initial_7": 27255,
+        "initial_5": 49788,
+        "tissue_peaks": {
+          "selected_wm_peak": 110.33270263671875,
+          "wm_index": 110,
+          "gm_index": 51,
+          "wm_peak": 109.9454574584961,
+          "gm_peak": 50.97471237182617,
+          "bin_size": 0.9995041489601135
+        },
+        "adaptive_7": 27255,
+        "adaptive_5": 61678,
+        "three_added": 70682,
+        "six_added": 70606,
+        "before_outlier_removal": 202966,
+        "after_outlier_removal": 202966
+      }
+    }
+  ],
+  "initial_bias_trace": {
+    "source_data_sha256": "82408e9a58f8e6cb5c222eb1064567d0d1547d7ebd552d1527b7be011e544587",
+    "controls_data_sha256": "2b45fb044d86255fa0b3580e1e470623f8cc16b689f398d83606d7eb1d036a4e",
+    "output_data_sha256": "bdf5fd322d4b6dcff6a69a1e8e2388882a0b76023cc8ef5f9f1b912180871786",
+    "dtype": "float32"
+  },
+  "timing_includes": "first API validation, file loading, H2D/D2H, control search, first JIT/cache load, all two iterations and compressed write; target CUDA pre/post sync",
+  "timing_excludes": "Python import, CUDA initialization, SHA collection and comparison; shell records cold process separately",
+  "helper_timing_scope": "CPU helpers or GPU initial bias/full neighbor upload/kernel/synchronous download; nested values not summed; no additional synchronization; initial and round input/control/output data SHA tracing included in paired API",
+  "shape": [
+    256,
+    256,
+    256
+  ],
+  "dtype": "uint8",
+  "different_voxels": 0,
+  "max_abs": 0.0,
+  "p99_abs": 0.0,
+  "affine_equal": true,
+  "mgh_header_equal": true,
+  "byte_equal": true,
+  "process_tree_GPU_memory": {
+    "status": "ownership_unresolved",
+    "target_gpu_uuid": "GPU-53efd149-9181-8bcf-b5d9-9e9489a90bf9",
+    "sampling_interval_seconds": 0.5,
+    "max_observed_interval_seconds": 5.682015268132091,
+    "failed_samples": [
+      {
+        "monotonic": 4334604.710527977,
+        "error": "TimeoutExpired(['nvidia-smi', '--query-gpu=index,uuid', '--format=csv,noheader,nounits'], 3)"
+      },
+      {
+        "monotonic": 4334608.814056682,
+        "error": "TimeoutExpired(['nvidia-smi', '--query-compute-apps=pid,gpu_uuid,used_gpu_memory', '--format=csv,noheader,nounits'], 3)"
+      },
+      {
+        "monotonic": 4334615.266051706,
+        "error": "TimeoutExpired(['nvidia-smi', '--query-compute-apps=pid,gpu_uuid,used_gpu_memory', '--format=csv,noheader,nounits'], 3)"
+      }
+    ],
+    "samples": [
+      {
+        "monotonic": 4334618.908051863,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 101637,
+            "bytes": 799014912
+          }
+        ],
+        "target_compute_process_sum_bytes": 799014912,
+        "target_device_used_bytes": 808452096,
+        "device_query_error": null,
+        "sample_query_seconds": 2.4936302984133363
+      },
+      {
+        "monotonic": 4334621.901823403,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 101637,
+            "bytes": 799014912
+          }
+        ],
+        "target_compute_process_sum_bytes": 799014912,
+        "target_device_used_bytes": 808452096,
+        "device_query_error": null,
+        "sample_query_seconds": 2.3253090670332313
+      },
+      {
+        "monotonic": 4334624.727304793,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 101637,
+            "bytes": 834666496
+          }
+        ],
+        "target_compute_process_sum_bytes": 834666496,
+        "target_device_used_bytes": 842006528,
+        "device_query_error": null,
+        "sample_query_seconds": 4.651716832071543
+      },
+      {
+        "monotonic": 4334629.880060714,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 101637,
+            "bytes": 815792128
+          }
+        ],
+        "target_compute_process_sum_bytes": 815792128,
+        "target_device_used_bytes": 825229312,
+        "device_query_error": null,
+        "sample_query_seconds": 3.4194681253284216
+      },
+      {
+        "monotonic": 4334633.800059014,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 101637,
+            "bytes": 843055104
+          }
+        ],
+        "target_compute_process_sum_bytes": 843055104,
+        "target_device_used_bytes": 860880896,
+        "device_query_error": null,
+        "sample_query_seconds": 5.177283436991274
+      },
+      {
+        "monotonic": 4334639.482074282,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 101637,
+            "bytes": 832569344
+          }
+        ],
+        "target_compute_process_sum_bytes": 832569344,
+        "target_device_used_bytes": 842006528,
+        "device_query_error": null,
+        "sample_query_seconds": 1.7358211372047663
+      },
+      {
+        "monotonic": 4334642.420061832,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 101637,
+            "bytes": 513802240
+          }
+        ],
+        "target_compute_process_sum_bytes": 513802240,
+        "target_device_used_bytes": 523239424,
+        "device_query_error": null,
+        "sample_query_seconds": 3.359187113121152
+      },
+      {
+        "monotonic": 4334645.780054844,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 101637,
+            "bytes": 513802240
+          }
+        ],
+        "target_compute_process_sum_bytes": 513802240,
+        "target_device_used_bytes": 523239424,
+        "device_query_error": null,
+        "sample_query_seconds": 3.877389481291175
+      }
+    ],
+    "peak_tree_total_bytes": null,
+    "observed_resolved_tree_peak_bytes": null,
+    "peak_target_compute_process_sum_bytes": 843055104,
+    "peak_target_device_used_bytes": 860880896,
+    "scope": "simultaneous process snapshot on target GPU; unresolved host/container PID ownership is null; device total is separate and includes other users; consecutive queries are not exactly simultaneous",
+    "worker_pids": []
+  },
+  "strict_stage_replication": "pass",
+  "overall_metric_equivalence": "not_assessed",
+  "whole_recon_speedup": "not_measured",
+  "ridge_backend": "local-consumer",
+  "ridge_wrapper_sha256": "377098d34589e8b0b723c3c4ba11206196f8f86487166bf93258c38df2765c3d",
+  "delegated_driver_sha256": "81ca4d212b2eb0846ae5e0f98296325090cf1e4ed009063cb4b8fd6a86bcf59c"
+}

@@ -1,0 +1,196 @@
+{
+  "scope": "actual same-input existing CPU signed marching/nonmax/ordered filtering profile; not full normalization or raw T1",
+  "code_commit": "0c8872b2ee15997f04e0eff5d424a6ba2d3a649d",
+  "source_sha256": {
+    "fnit/recon_all/normalization/normalize_aseg_ridge.py": "01eb47a651805bb27c4cd44b72c5db69d094a913161fdb674e89e7bc0af9ff35",
+    "fnit/recon_all/normalization/normalize_aseg_source.py": "18afb533a17aaae08b8b1cbdb0f4b688e14529290e791f89f53d8b8035362c51"
+  },
+  "script_sha256": "257b5f034bc589461520cd9c20f918d2426e5864729826a41df2a94f2b71ce00",
+  "input_sha256": {
+    "norm.mgz": "3c8979c72f261f60361bff8fe0a08b1c543bf95e854bbb0f7c467bdf36c7bbd4",
+    "aseg.presurf.mgz": "0e2efe5625d11bb33f4cc17f94af6a5c231eb1d522bff6deb6f4fb51c658f003",
+    "brainmask.mgz": "3c8656e31226b8fb59fa80aff9f78f14d8900210e53112190ec76b62828411af"
+  },
+  "input_unchanged": {
+    "norm.mgz": true,
+    "aseg.presurf.mgz": true,
+    "brainmask.mgz": true
+  },
+  "host": "A100_BENCHMARK_HOST",
+  "python": "3.11.16",
+  "numpy": "1.26.4",
+  "numba": "0.67.0",
+  "affinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "numba_threads": 4,
+  "thread_env": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4"
+  },
+  "loading_seconds": 0.752649387344718,
+  "calls": [
+    {
+      "repetition": 0,
+      "medial_seconds": 29.954012374393642,
+      "filtering_seconds": 0.6349004926159978,
+      "calls": [
+        {
+          "name": "_march_pass",
+          "seconds": 28.331419163383543,
+          "cpu_seconds": 28.299548139000002,
+          "sign": 1,
+          "alive": 162175,
+          "processed": 16158505
+        },
+        {
+          "name": "_march_pass",
+          "seconds": 1.3456563325598836,
+          "cpu_seconds": 1.3456209139999942,
+          "sign": -1,
+          "alive": 158207,
+          "processed": 298329
+        },
+        {
+          "name": "_nonmax",
+          "seconds": 0.05523872748017311,
+          "cpu_seconds": 0.05515006699999958
+        },
+        {
+          "name": "_filter_ridge",
+          "seconds": 0.15805280674248934,
+          "cpu_seconds": 0.15796219399999956
+        }
+      ],
+      "details": {
+        "marching": [
+          [
+            162175,
+            16158505
+          ],
+          [
+            158207,
+            298329
+          ]
+        ],
+        "ridge_voxels": 55675
+      },
+      "distance_sha256": "896ecc73859c0a0197ae22395a8a52dde699276553f7f437a7eb7920a6fecab8",
+      "ridge_sha256": "1f38280aaf10277b9538c261e02c98dc1455e97a8ac12c6fe490757603a75bc0",
+      "control_sha256": "2b45fb044d86255fa0b3580e1e470623f8cc16b689f398d83606d7eb1d036a4e",
+      "removed_sha256": "9b3c74bfaf4be1eb42e6dcffc258d820b5b75d59f1898e4c160f55704e8c2efb",
+      "wm_peak": 101,
+      "removed_voxels": 6168
+    },
+    {
+      "repetition": 1,
+      "medial_seconds": 30.232565510086715,
+      "filtering_seconds": 0.4611135749146342,
+      "calls": [
+        {
+          "name": "_march_pass",
+          "seconds": 29.059942791238427,
+          "cpu_seconds": 29.049618243000005,
+          "sign": 1,
+          "alive": 162175,
+          "processed": 16158505
+        },
+        {
+          "name": "_march_pass",
+          "seconds": 0.8718029297888279,
+          "cpu_seconds": 0.8716188089999974,
+          "sign": -1,
+          "alive": 158207,
+          "processed": 298329
+        },
+        {
+          "name": "_nonmax",
+          "seconds": 0.03861017618328333,
+          "cpu_seconds": 0.038612215999989985
+        },
+        {
+          "name": "_filter_ridge",
+          "seconds": 0.13948490656912327,
+          "cpu_seconds": 0.13945411000000263
+        }
+      ],
+      "details": {
+        "marching": [
+          [
+            162175,
+            16158505
+          ],
+          [
+            158207,
+            298329
+          ]
+        ],
+        "ridge_voxels": 55675
+      },
+      "distance_sha256": "896ecc73859c0a0197ae22395a8a52dde699276553f7f437a7eb7920a6fecab8",
+      "ridge_sha256": "1f38280aaf10277b9538c261e02c98dc1455e97a8ac12c6fe490757603a75bc0",
+      "control_sha256": "2b45fb044d86255fa0b3580e1e470623f8cc16b689f398d83606d7eb1d036a4e",
+      "removed_sha256": "9b3c74bfaf4be1eb42e6dcffc258d820b5b75d59f1898e4c160f55704e8c2efb",
+      "wm_peak": 101,
+      "removed_voxels": 6168
+    },
+    {
+      "repetition": 2,
+      "medial_seconds": 18.453023498877883,
+      "filtering_seconds": 0.38221828918904066,
+      "calls": [
+        {
+          "name": "_march_pass",
+          "seconds": 17.83638086542487,
+          "cpu_seconds": 17.834875639000003,
+          "sign": 1,
+          "alive": 162175,
+          "processed": 16158505
+        },
+        {
+          "name": "_march_pass",
+          "seconds": 0.4282869193702936,
+          "cpu_seconds": 0.42828447000000835,
+          "sign": -1,
+          "alive": 158207,
+          "processed": 298329
+        },
+        {
+          "name": "_nonmax",
+          "seconds": 0.03194546606391668,
+          "cpu_seconds": 0.0319454579999956
+        },
+        {
+          "name": "_filter_ridge",
+          "seconds": 0.13417968899011612,
+          "cpu_seconds": 0.13417721899999435
+        }
+      ],
+      "details": {
+        "marching": [
+          [
+            162175,
+            16158505
+          ],
+          [
+            158207,
+            298329
+          ]
+        ],
+        "ridge_voxels": 55675
+      },
+      "distance_sha256": "896ecc73859c0a0197ae22395a8a52dde699276553f7f437a7eb7920a6fecab8",
+      "ridge_sha256": "1f38280aaf10277b9538c261e02c98dc1455e97a8ac12c6fe490757603a75bc0",
+      "control_sha256": "2b45fb044d86255fa0b3580e1e470623f8cc16b689f398d83606d7eb1d036a4e",
+      "removed_sha256": "9b3c74bfaf4be1eb42e6dcffc258d820b5b75d59f1898e4c160f55704e8c2efb",
+      "wm_peak": 101,
+      "removed_voxels": 6168
+    }
+  ],
+  "timing_scope": "medial includes mask/distance allocation/both ordered passes/nonmax; filtering includes peak histogram and dynamic scan; first call includes cache load or JIT; hashes excluded"
+}

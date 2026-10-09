@@ -1,0 +1,21 @@
+{"full_API_seconds": 33.82176046166569, "different_voxels": 0, "cpu_helpers": {"aseg_pipeline.prepare_aseg_source": {"calls": 1, "seconds": 0.2575603136792779, "cpu_seconds": 0.21614378599999995}, "aseg_pipeline.medial_ridge": {"calls": 1, "seconds": 4.007496356032789, "cpu_seconds": 3.6371959289999998}, "aseg_pipeline.filter_aseg_ridge": {"calls": 1, "seconds": 0.6989608993753791, "cpu_seconds": 0.6235782919999995}, "aseg_pipeline.apply_initial_aseg_bias": {"calls": 1, "seconds": 4.371808442287147, "cpu_seconds": 3.9348842380000004}, "normalize_3d_controls._homogeneous": {"calls": 8, "seconds": 6.772940082475543, "cpu_seconds": 6.402039130999999}, "normalize_3d_controls._neighbor_sum": {"calls": 0, "seconds": 0.0, "cpu_seconds": 0.0}, "normalize_3d_controls.tissue_peaks": {"calls": 2, "seconds": 0.5858058203011751, "cpu_seconds": 0.5476231079999998}, "normalize_3d_controls._remove_outliers_ordered": {"calls": 2, "seconds": 0.17891736142337322, "cpu_seconds": 0.1775893929999981}, "normalize_gentle_source._remove_outliers_ordered": {"calls": 1, "seconds": 0.10057220328599215, "cpu_seconds": 0.090748885}, "NeighborSumTorch.complete_transfer_kernel_download": {"calls": 159, "seconds": 0.6551672779023647, "cpu_seconds": 0.5076185809999991}}}
+Traceback (most recent call last):
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/nibabel/loadsave.py", line 104, in load
+    stat_result = os.stat(filename)
+                  ^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '$FNIT/runs/recon_normalization_ridge_local_v11_api_20261009/sub06-aseg-2-local/normalized.mgz'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "$FNIT/workspaces/recon_normalization_initial_v7_20261009/benchmark/plot_recon_normalization_neighbors.py", line 70, in <module>
+    main()
+  File "$FNIT/workspaces/recon_normalization_initial_v7_20261009/benchmark/plot_recon_normalization_neighbors.py", line 36, in main
+    images = [nib.load(str(path)) for path in (args.reference, args.candidate)]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/workspaces/recon_normalization_initial_v7_20261009/benchmark/plot_recon_normalization_neighbors.py", line 36, in <listcomp>
+    images = [nib.load(str(path)) for path in (args.reference, args.candidate)]
+              ^^^^^^^^^^^^^^^^^^^
+  File "$FNIT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/nibabel/loadsave.py", line 106, in load
+    raise FileNotFoundError(f"No such file or no access: '{filename}'")
+FileNotFoundError: No such file or no access: '$FNIT/runs/recon_normalization_ridge_local_v11_api_20261009/sub06-aseg-2-local/normalized.mgz'

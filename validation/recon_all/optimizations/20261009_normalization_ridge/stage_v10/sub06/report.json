@@ -1,0 +1,145 @@
+{
+  "scope": "same-input signed-marching consumer regression; no full distance equivalence or raw T1 timing",
+  "code_commit": "5f6ca781",
+  "source_sha256": {
+    "reference.normalize_aseg_ridge": "01eb47a651805bb27c4cd44b72c5db69d094a913161fdb674e89e7bc0af9ff35",
+    "reference.normalize_aseg_source": "18afb533a17aaae08b8b1cbdb0f4b688e14529290e791f89f53d8b8035362c51",
+    "candidate.normalize_aseg_ridge": "d17af13218b997247d8526467d3a57b8ba59bc52a6c3837f7899680be94052e3",
+    "candidate.normalize_ridge_local": "c44117227745056a6ee11478f4ddf14354f1e582745ac24d778a49acfd0542cf"
+  },
+  "script_sha256": "377098d34589e8b0b723c3c4ba11206196f8f86487166bf93258c38df2765c3d",
+  "input_sha256": {
+    "norm.mgz": "3c8979c72f261f60361bff8fe0a08b1c543bf95e854bbb0f7c467bdf36c7bbd4",
+    "aseg.presurf.mgz": "0e2efe5625d11bb33f4cc17f94af6a5c231eb1d522bff6deb6f4fb51c658f003",
+    "brainmask.mgz": "3c8656e31226b8fb59fa80aff9f78f14d8900210e53112190ec76b62828411af"
+  },
+  "input_dtype": {
+    "norm.mgz": "uint8",
+    "aseg.presurf.mgz": ">f4",
+    "brainmask.mgz": "uint8"
+  },
+  "input_unchanged": {
+    "norm.mgz": true,
+    "aseg.presurf.mgz": true,
+    "brainmask.mgz": true
+  },
+  "host": "A100_BENCHMARK_HOST",
+  "affinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "numba_threads": 4,
+  "numpy": "1.26.4",
+  "numba": "0.67.0",
+  "calls": [
+    {
+      "repetition": 0,
+      "full_seconds": 25.157483926974237,
+      "local_seconds": 1.3465506872162223,
+      "reference_marching": [
+        [
+          162175,
+          16158505
+        ],
+        [
+          158207,
+          298329
+        ]
+      ],
+      "candidate_details": {
+        "marching": [
+          [
+            162175,
+            179549
+          ],
+          [
+            158207,
+            298329
+          ]
+        ],
+        "outside_query_voxels": 295955,
+        "distance_scope": "all WM and its external 26-neighbor band; distant background sentinel"
+      },
+      "required_distance_voxels": 752491,
+      "required_distance_different": 0,
+      "required_distance_max_abs": 0.0,
+      "required_distance_p99_abs": 0.0,
+      "reference_peak": 101,
+      "candidate_peak": 101,
+      "comparisons": {
+        "ridge": {
+          "different": 0,
+          "reference_sha256": "1f38280aaf10277b9538c261e02c98dc1455e97a8ac12c6fe490757603a75bc0",
+          "candidate_sha256": "1f38280aaf10277b9538c261e02c98dc1455e97a8ac12c6fe490757603a75bc0"
+        },
+        "controls": {
+          "different": 0,
+          "reference_sha256": "2b45fb044d86255fa0b3580e1e470623f8cc16b689f398d83606d7eb1d036a4e",
+          "candidate_sha256": "2b45fb044d86255fa0b3580e1e470623f8cc16b689f398d83606d7eb1d036a4e"
+        },
+        "removed": {
+          "different": 0,
+          "reference_sha256": "9b3c74bfaf4be1eb42e6dcffc258d820b5b75d59f1898e4c160f55704e8c2efb",
+          "candidate_sha256": "9b3c74bfaf4be1eb42e6dcffc258d820b5b75d59f1898e4c160f55704e8c2efb"
+        }
+      },
+      "far_background_field_scope": "not computed by local candidate, must not be used as generic distance"
+    },
+    {
+      "repetition": 1,
+      "full_seconds": 11.583614859730005,
+      "local_seconds": 1.4078657794743776,
+      "reference_marching": [
+        [
+          162175,
+          16158505
+        ],
+        [
+          158207,
+          298329
+        ]
+      ],
+      "candidate_details": {
+        "marching": [
+          [
+            162175,
+            179549
+          ],
+          [
+            158207,
+            298329
+          ]
+        ],
+        "outside_query_voxels": 295955,
+        "distance_scope": "all WM and its external 26-neighbor band; distant background sentinel"
+      },
+      "required_distance_voxels": 752491,
+      "required_distance_different": 0,
+      "required_distance_max_abs": 0.0,
+      "required_distance_p99_abs": 0.0,
+      "reference_peak": 101,
+      "candidate_peak": 101,
+      "comparisons": {
+        "ridge": {
+          "different": 0,
+          "reference_sha256": "1f38280aaf10277b9538c261e02c98dc1455e97a8ac12c6fe490757603a75bc0",
+          "candidate_sha256": "1f38280aaf10277b9538c261e02c98dc1455e97a8ac12c6fe490757603a75bc0"
+        },
+        "controls": {
+          "different": 0,
+          "reference_sha256": "2b45fb044d86255fa0b3580e1e470623f8cc16b689f398d83606d7eb1d036a4e",
+          "candidate_sha256": "2b45fb044d86255fa0b3580e1e470623f8cc16b689f398d83606d7eb1d036a4e"
+        },
+        "removed": {
+          "different": 0,
+          "reference_sha256": "9b3c74bfaf4be1eb42e6dcffc258d820b5b75d59f1898e4c160f55704e8c2efb",
+          "candidate_sha256": "9b3c74bfaf4be1eb42e6dcffc258d820b5b75d59f1898e4c160f55704e8c2efb"
+        }
+      },
+      "far_background_field_scope": "not computed by local candidate, must not be used as generic distance"
+    }
+  ],
+  "timing_scope": "each complete medial ridge and peak/filter consumer, preloaded arrays; hashes excluded; first JIT included"
+}

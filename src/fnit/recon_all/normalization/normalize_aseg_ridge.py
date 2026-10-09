@@ -119,7 +119,7 @@ def _add_alive(index, status, distance, alive, count, sign):
 
 
 @njit(cache=True)
-def _march_pass(mask, distance, sign, sx, sy, sz):
+def _march_pass(mask, distance, sign, sx, sy, sz, stop_query=None):
     nvox = sx * sy * sz
     stride = sy * sz
     limit = np.float32(sign * 2 * max(sx, sy, sz))
@@ -164,13 +164,25 @@ def _march_pass(mask, distance, sign, sx, sy, sz):
                                                    limit, sx, sy, sz)
                 heap_count = _heap_push(heap, heap_count, neighbor, distance, sign)
     processed = 0
+    # 默认完整距离场不变。限域调用只在所有下游查询点已确定时结束；
+    # 已pop的状态0永不重新更新，所以前缀逐步与完整堆完全相同。
+    remaining_query = -1
+    if stop_query is not None:
+        remaining_query = 0
+        for index in range(nvox):
+            if stop_query[index] and status[index] != 0:
+                remaining_query += 1
     while heap_count:
+        if remaining_query == 0:
+            break
         index = heap[0]
         if np.float32(sign * distance[index]) >= np.float32(sign * limit):
             break
         index, heap_count = _heap_pop(heap, heap_count, distance, sign)
         status[index] = 0
         processed += 1
+        if stop_query is not None and stop_query[index]:
+            remaining_query -= 1
         x = index // stride
         y = (index // sz) % sy
         z = index % sz
@@ -187,6 +199,8 @@ def _march_pass(mask, distance, sign, sx, sy, sz):
             elif status[neighbor] == 1:
                 distance[neighbor] = _update_value(neighbor, distance, status, sign,
                                                    limit, sx, sy, sz)
+    if stop_query is not None and remaining_query > 0:
+        raise RuntimeError("marching terminated before every requested point settled")
     while heap_count:
         index, heap_count = _heap_pop(heap, heap_count, distance, sign)
         status[index] = 2
