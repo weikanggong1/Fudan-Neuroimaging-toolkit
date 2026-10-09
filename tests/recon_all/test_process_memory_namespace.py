@@ -49,3 +49,9 @@ def test_empty_device_and_empty_process_query_are_observed_zero():
     report = sample('', device_bytes_mib=0)
     assert report['status'] == 'available'
     assert report['peak_tree_total_bytes'] == 0
+
+
+def test_visible_external_pid_does_not_prove_empty_parent_is_zero():
+    report = sample('999, GPU-test, 553\n', visible=True)
+    assert report['status'] == 'ownership_unresolved'
+    assert report['peak_tree_total_bytes'] is None

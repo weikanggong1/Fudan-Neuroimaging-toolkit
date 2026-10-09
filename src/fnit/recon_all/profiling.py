@@ -301,7 +301,9 @@ class ProcessTreeDeviceSampler:
             except Exception as error:
                 device_error = repr(error)
             ownership_known = not unresolved
-            if not entries and device_bytes and not external:
+            if not entries and (external or device_bytes):
+                # 宿主 PID 也可能碰巧等于无关的容器 PID。空自身列表加
+                # 非零卡负载不足以确认自身为零，不依赖 /proc 可见性猜归属。
                 ownership_known = False
             self.samples.append({'monotonic': now, 'processes': entries,
                                  'tree_total_bytes': sum(row['bytes'] for row in entries) if ownership_known else None,
