@@ -1,13 +1,13 @@
-"""First-pass prefix of FreeSurfer 8.2 white.preaparc from matched inputs.
+"""同输入 white.preaparc 的首轮诊断及显式四轮实验接口。
 
-This first-pass diagnostic does not create a complete white surface. It reuses the
-independently validated MRI, ripping, border, and collision operators and adds
-the white-specific current-surface self-repulsion force.
+复用已有白质 MRI、rip、目标强度、自斥力和异步碰撞实现。完整实验接口
+执行四轮与相交清理；首轮诊断接口保持原行为。两者均不替代生产默认路径。
 """
 
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import json
 from pathlib import Path
 import time
@@ -21,6 +21,7 @@ from .place_surface_collision import asynchronous_first_step
 from .place_surface_curvature import quadratic_curvature, tangent_basis, two_ring_neighbors
 from .place_surface_decision import pial_step_decision
 from .place_surface_geometry import surface_ras_to_voxel
+from .place_surface_final_cleanup import repair_intersections
 from .place_surface_gradient_average import average_signed_gradients
 from .place_surface_intensity import intensity_gradient
 from .place_surface_normals import CoordinateNormalCache, FaceNormalTopology
@@ -35,28 +36,24 @@ from .place_surface_step import unconstrained_step_with_offsets
 from .place_surface_volume import prepare_placement_volume
 
 
-def place_white_preaparc_prefix(
+def _place_white_preaparc(
     subject_dir: str | Path, hemi: str, output: str | Path,
     *, steps: int = 1, diagnostics: str | Path | None = None,
     regularization_backend: str = "cpu", device: str | None = None,
+    complete: bool = False, candidate_backend: str = "tree", trace_callback=None,
+    output_volume: str | Path | None = None,
 ) -> dict:
-    """Run a prefix of the first pass and write the current diagnostic mesh.
-
-    ``subject_dir`` contains ``surf/H.orig``, the gray/white threshold file,
-    and ``mri/{brain.finalsurfs,wm,aseg.presurf}.mgz``. ``output`` is a
-    diagnostic FreeSurfer surface, not ``H.white.preaparc``. Optional
-    ``diagnostics`` writes a NumPy ``.npz`` of intermediate force and mesh
-    arrays to compare against a pinned-source probe. ``steps`` is 1–17
-    iterations of the first pass; the output contains coordinates after the
-    last requested step and the return dict includes each step's SSE/RMS.
-    ``regularization_backend="torch"`` batches the existing signed averaging,
-    springs and quadratic curvature on explicit ``device``; default cpu retains
-    the original functions. Ordered self-repulsion, collision and objective
-    remain CPU. This switch does not make the prefix a complete white stage.
-    """
+    """共享现有白质算子；complete 选择四轮而非首轮诊断调度。"""
     started = time.perf_counter()
-    if not 1 <= steps <= 17:
+    if complete:
+        if steps < 1:
+            raise ValueError("max_steps must be positive")
+    elif not 1 <= steps <= 17:
         raise ValueError("steps must be from 1 to 17")
+    if candidate_backend not in ("tree", "snapshot", "torch_snapshot"):
+        raise ValueError("invalid candidate_backend")
+    if candidate_backend == "torch_snapshot" and device is None:
+        raise ValueError("torch_snapshot requires an explicit device")
     if hemi not in ("lh", "rh"):
         raise ValueError("hemi must be lh or rh")
     if regularization_backend not in ("cpu", "torch"):
@@ -77,14 +74,24 @@ def place_white_preaparc_prefix(
                  if len(line.split()) >= 2)
     vertices, faces, metadata = nib.freesurfer.read_geometry(str(orig), read_metadata=True)
     xyz = average_vertex_positions(vertices, faces, 5)
+    initial_cleanup = None
+    if complete:
+        xyz, initial_cleanup = repair_intersections(xyz, faces, np.zeros(len(xyz), dtype=np.bool_))
+        if initial_cleanup["intersecting_faces_after"]:
+            raise RuntimeError("white initialization has unresolved intersections")
     normal_topology = FaceNormalTopology(faces, len(xyz))
     normal_cache = CoordinateNormalCache(normal_topology)
     normals = normal_cache.evaluate(xyz)
     brain = nib.load(str(brain_path))
     seg_image = nib.load(str(seg_path))
+    wm_image = nib.load(str(wm_path))
+    if complete:
+        for image, path in ((seg_image, seg_path), (wm_image, wm_path)):
+            if image.shape != brain.shape or not np.array_equal(image.affine, brain.affine):
+                raise ValueError(f"white MRI grids differ: {path}")
     seg = np.asarray(seg_image.dataobj)
     volume, _ = prepare_placement_volume(
-        np.asarray(brain.dataobj), np.asarray(nib.load(str(wm_path)).dataobj),
+        np.asarray(brain.dataobj), np.asarray(wm_image.dataobj),
         surface="white", mid_gray=float(stats["MID_GRAY"]),
     )
     rip_affine = surface_ras_to_voxel(seg_image.header, metadata)
@@ -144,6 +151,10 @@ def place_white_preaparc_prefix(
     last_sse, last_rms = initial_sse, initial_rms
     cropped = np.zeros(len(xyz), dtype=np.int32)
     dt, reductions = 0.5, 0
+    outer_pass, pass_iteration, sigma, n_averages = 0, 0, 2.0, 4
+    pass_initial_sse, pass_initial_rms = initial_sse, initial_rms
+    pass_ends, pass_records = [], []
+    border_seconds = cleanup_seconds = 0.0
     gradient_seconds = collision_seconds = objective_seconds = 0.0
     records: list[dict] = []
     snapshots: dict[str, np.ndarray | float] = {
@@ -155,7 +166,7 @@ def place_white_preaparc_prefix(
         normals = normal_cache.evaluate(current)
         intensity = intensity_gradient(
             volume, current, normals, ripped, values, border[5], affine,
-            brain.header.get_zooms()[:3], weight=0.2, sigma_global=2.0,
+            brain.header.get_zooms()[:3], weight=0.2, sigma_global=sigma,
         )
         bucket_offsets, bucket_members = vertex_buckets_current(current, ripped)
         self_repulsion = self_repulsion_gradient(
@@ -166,7 +177,7 @@ def place_white_preaparc_prefix(
         # Torch result is still used for the actual candidate step below.
         if regularizer is None or diagnostics is not None:
             averaged = average_signed_gradients(
-                intensity, faces, ripped, 4, ordered_neighbors=ordered)
+                intensity, faces, ripped, n_averages, ordered_neighbors=ordered)
             with_repulsion = np.float32(averaged + self_repulsion)
             normal = spring_gradient(
                 current, normals, faces, ripped, weight=0.3, direction="normal",
@@ -184,20 +195,23 @@ def place_white_preaparc_prefix(
         if regularizer is not None:
             gradient = regularizer.regularize(
                 vertices=current, normals=normals, gradient=intensity,
-                iterations=4, spring_weight=.3, after_average=self_repulsion)
+                iterations=n_averages, spring_weight=.3, after_average=self_repulsion)
         gradient_seconds += time.perf_counter() - stage_start
         before_collision = gradient.copy() if diagnostics is not None else None
         if diagnostics is not None:
             snapshots[f"step{step}_initial"] = current.copy()
             snapshots[f"step{step}_tangential_spring"] = before_collision
         stale_trial = None
+        trial_trace = []
+        accepted = None
         for trial in range(3):
             trial_start = time.perf_counter()
             proposed, offsets = unconstrained_step_with_offsets(current, gradient, ripped, dt=dt)
             placed, _ = asynchronous_first_step(
                 current, faces, proposed, ripped, fast=True, offsets=offsets,
                 accepted_offsets=gradient, stale_mht_trial=stale_trial,
-                ordered_neighbors=ordered,
+                ordered_neighbors=ordered, candidate_backend=candidate_backend,
+                candidate_device=device if candidate_backend == "torch_snapshot" else None,
             )
             collision_seconds += time.perf_counter() - trial_start
             blocked = np.any(proposed != current, axis=1) & np.all(placed == current, axis=1)
@@ -207,19 +221,30 @@ def place_white_preaparc_prefix(
             objective_seconds += time.perf_counter() - objective_start
             next_dt, reductions, reduced, rejected, stop = pial_step_decision(
                 last_sse, last_rms, step_sse, step_rms, dt, reductions)
+            trial_trace.append({
+                "trial": trial, "dt_used": dt, "dt_next": next_dt,
+                "sse": step_sse, "rms": step_rms, "reduced": bool(reduced),
+                "rejected": bool(rejected), "stop": bool(stop), "reductions": reductions,
+            })
             dt = next_dt
             if rejected:
                 stale_trial = placed
                 if stop:
+                    if complete:
+                        accepted = current
+                        step_sse, step_rms = last_sse, last_rms
+                        break
                     raise RuntimeError(f"white prefix rejected step {step} after {trial + 1} trials")
                 continue
+            accepted = placed
             break
         else:
-            raise RuntimeError(f"white prefix rejected all trials at step {step}")
-        current = placed
+            raise RuntimeError(f"white optimizer rejected all trials at step {step}")
+        current = accepted
         last_sse, last_rms = step_sse, step_rms
         records.append({
-            "step": step, "trials": trial + 1, "sse": step_sse, "rms": step_rms,
+            "step": step, "pass_index": outer_pass, "sigma": sigma, "averages": n_averages,
+            "trials": trial + 1, "trial_trace": trial_trace, "sse": step_sse, "rms": step_rms,
             "next_dt": dt, "reductions": reductions,
             "held_vertices": int(np.count_nonzero(blocked)),
         })
@@ -235,11 +260,68 @@ def place_white_preaparc_prefix(
                     proposed=proposed, after_collision=current.copy(),
                     step_sse=step_sse, step_rms=step_rms,
                 )
-        if stop:
-            break
+        if trace_callback is not None:
+            trace_callback(step, outer_pass, current.copy(), deepcopy(records[-1]))
+        pass_iteration += 1
+        if stop or (complete and pass_iteration == 100):
+            if not complete:
+                break
+            pass_ends.append(step)
+            pass_records.append({
+                "pass_index": outer_pass, "iterations": pass_iteration,
+                "sigma": sigma, "averages": n_averages,
+                "ripped_vertices": int(np.count_nonzero(ripped)),
+                "initial_sse": pass_initial_sse, "initial_rms": pass_initial_rms,
+                "final_sse": last_sse, "final_rms": last_rms,
+                "reason": "max_reductions" if stop else "iteration_limit",
+            })
+            if outer_pass == 3:
+                break
+            outer_pass += 1
+            pass_iteration, sigma, n_averages = 0, 2.0 / (1 << outer_pass), 4 >> outer_pass
+            border_started = time.perf_counter()
+            current_normals = normal_cache.evaluate(current)
+            ripped, values = rip_white_preaparc_pass(
+                current, current_normals, faces, seg, volume, rip_affine,
+                hemisphere=hemi, ripped=ripped, values=values,
+            )
+            border = compute_border_values_first_pass(
+                volume, seg, current, current_normals, xyz, ripped, values,
+                affine, thresholds, hemisphere=hemi, surface="white", sigma=sigma,
+            )
+            values = average_marked_values(border[0], border[4], ripped, faces, 5)
+            original_area = surface_total_area(current, faces)
+            if regularizer is not None:
+                regularizer = PlacementRegularizationTorch(
+                    neighbors=ordered_indices, valid=ordered_valid, offsets=two_offsets,
+                    candidates=two_neighbors, ripped=ripped, device=device,
+                )
+            objective_cache_vertices = objective_cache_result = None
+            border_seconds += time.perf_counter() - border_started
+            objective_started = time.perf_counter()
+            last_sse, last_rms = objective(current)
+            pass_initial_sse, pass_initial_rms = last_sse, last_rms
+            objective_seconds += time.perf_counter() - objective_started
+            dt, reductions = 0.5, 0
+    else:
+        if complete:
+            raise RuntimeError(f"white optimizer did not complete four passes in {steps} steps")
+    cleanup = None
+    if complete:
+        cleanup_started = time.perf_counter()
+        current, cleanup = repair_intersections(current, faces, ripped)
+        cleanup_seconds = time.perf_counter() - cleanup_started
+        if cleanup["intersecting_faces_after"]:
+            raise RuntimeError("white cleanup left unresolved intersections")
     before_write = time.perf_counter()
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_vertices_like(orig, output, current)
+    if complete and output_volume is not None:
+        volume_output = Path(output_volume)
+        volume_output.parent.mkdir(parents=True, exist_ok=True)
+        volume_header = brain.header.copy()
+        volume_header.set_data_dtype(np.uint8)
+        nib.save(nib.MGHImage(volume, brain.affine, header=volume_header), str(volume_output))
     if diagnostics is not None:
         diagnostic_path = Path(diagnostics)
         diagnostic_path.parent.mkdir(parents=True, exist_ok=True)
@@ -248,6 +330,9 @@ def place_white_preaparc_prefix(
     return {
         "output": str(output), "hemisphere": hemi, "steps": len(records),
         "regularization_backend": regularization_backend, "device": device,
+        "complete_four_passes": complete, "candidate_backend": candidate_backend,
+        "pass_ends": pass_ends, "passes": pass_records, "initial_cleanup": initial_cleanup,
+        "cleanup": cleanup, "output_volume": str(output_volume) if output_volume is not None else None,
         "vertices": int(len(xyz)), "faces": int(len(faces)),
         "ripped_vertices": int(np.count_nonzero(ripped)),
         "held_vertices": records[-1]["held_vertices"],
@@ -261,11 +346,64 @@ def place_white_preaparc_prefix(
             "gradient": gradient_seconds,
             "collision": collision_seconds,
             "step_objective": objective_seconds,
+            "border_updates": border_seconds, "cleanup": cleanup_seconds,
             "write": finished_at - before_write,
             "control": before_write - initial_objective_at - gradient_seconds
-                       - collision_seconds - objective_seconds,
+                       - collision_seconds - objective_seconds - border_seconds - cleanup_seconds,
         },
     }
+
+
+
+def place_white_preaparc_prefix(
+    subject_dir: str | Path, hemi: str, output: str | Path,
+    *, steps: int = 1, diagnostics: str | Path | None = None,
+    regularization_backend: str = "cpu", device: str | None = None,
+) -> dict:
+    """首轮1–17步诊断；输入MRI/conform和orig surface RAS/mm，非完整white。
+
+    参数、输出NPZ及失败行为保持原接口；不执行完整四轮或最终清理。
+    """
+    return _place_white_preaparc(
+        subject_dir=subject_dir, hemi=hemi, output=output, steps=steps,
+        diagnostics=diagnostics, regularization_backend=regularization_backend, device=device,
+    )
+
+
+def place_white_preaparc(
+    subject_dir: str | Path, hemi: str, output: str | Path, *, max_steps: int = 400,
+    output_volume: str | Path | None = None, regularization_backend: str = "cpu",
+    candidate_backend: str = "tree", device: str | None = None, trace_callback=None,
+) -> dict:
+    """实验性完整preaparc白质四轮；不替代带aparc的最终white或生产默认。
+
+    输入orig、灰白阈值、brain.finalsurfs/wm/aseg.presurf，MRI为同一conform
+    网格，表面为surface RAS/mm。output必须独立于输入orig；可选output_volume
+    写uint8预处理MRI、保留MRI几何。max_steps默认400，总保护上限；每轮
+    最多100步，averages4/2/1/0、sigma2/1/.5/.25。默认CPU；Torch正则/候选
+    须明确device。trace_callback接收(step,pass_index,坐标副本,试步诊断)。
+    返回路径、有序网格大小、四轮边界、rip/目标/接受轨迹、完整清理与分项秒。
+    输入/参数、未完成四轮、残余相交及CUDA异常传播，不写未完成表面。
+    对应mris_place_surface --white --nsmooth 5 --rip-bg-no-annot --rip-bg。
+    """
+    subject = Path(subject_dir)
+    inputs = {
+        (subject / f"surf/{hemi}.orig").resolve(),
+        (subject / f"surf/autodet.gw.stats.{hemi}.dat").resolve(),
+        *((subject / f"mri/{name}.mgz").resolve()
+          for name in ("brain.finalsurfs", "wm", "aseg.presurf")),
+    }
+    destinations = [Path(output).resolve()]
+    if output_volume is not None:
+        destinations.append(Path(output_volume).resolve())
+    if any(path in inputs for path in destinations) or len(set(destinations)) != len(destinations):
+        raise ValueError("experimental white outputs cannot overwrite inputs or each other")
+    return _place_white_preaparc(
+        subject_dir=subject_dir, hemi=hemi, output=output, steps=max_steps,
+        complete=True, output_volume=output_volume,
+        regularization_backend=regularization_backend, candidate_backend=candidate_backend,
+        device=device, trace_callback=trace_callback,
+    )
 
 
 def first_white_preaparc_step(
@@ -289,7 +427,23 @@ def main() -> None:
     parser.add_argument("--steps", type=int, choices=range(1, 18), default=1)
     parser.add_argument("--regularization-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--device")
+    parser.add_argument("--complete", action="store_true", help="实验性完整 white.preaparc 四轮")
+    parser.add_argument("--max-steps", type=int, default=400)
+    parser.add_argument("--output-volume", type=Path)
+    parser.add_argument("--candidate-backend", choices=("tree", "snapshot", "torch_snapshot"), default="tree")
     args = parser.parse_args()
+    if args.complete:
+        if args.diagnostics is not None or args.steps != 1:
+            parser.error("--complete uses --max-steps and does not accept prefix diagnostics/steps")
+        print(json.dumps(place_white_preaparc(
+            subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,
+            max_steps=args.max_steps, output_volume=args.output_volume,
+            regularization_backend=args.regularization_backend,
+            candidate_backend=args.candidate_backend, device=args.device,
+        ), indent=2))
+        return
+    if args.output_volume is not None or args.max_steps != 400 or args.candidate_backend != "tree":
+        parser.error("--output-volume, --max-steps and --candidate-backend require --complete")
     print(json.dumps(place_white_preaparc_prefix(
         subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,
         steps=args.steps, diagnostics=args.diagnostics,

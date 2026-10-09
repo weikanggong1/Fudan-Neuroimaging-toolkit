@@ -1,0 +1,184 @@
+"""完整 preaparc 的轮间状态与失败契约；模拟输入不充当真实 benchmark。"""
+
+import nibabel as nib
+import nibabel.freesurfer.io as fs
+import numpy as np
+import pytest
+
+from fnit.recon_all import place_white_preaparc_python as stage
+
+
+@pytest.fixture
+def white_inputs(tmp_path, monkeypatch):
+    for folder in ("surf", "mri"):
+        (tmp_path / folder).mkdir()
+    xyz = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0]], dtype=np.float32)
+    faces = np.array([[0, 1, 2]], dtype=np.int32)
+    fs.write_geometry(str(tmp_path / "surf/lh.orig"), xyz, faces, volume_info={
+        "head": np.array([20]), "valid": "1", "filename": "contract.mgz",
+        "volume": np.array([4, 4, 4]), "voxelsize": np.ones(3),
+        "xras": np.array([1., 0, 0]), "yras": np.array([0., 1, 0]),
+        "zras": np.array([0., 0, 1]), "cras": np.zeros(3),
+    })
+    for name in ("brain.finalsurfs", "wm", "aseg.presurf"):
+        nib.save(nib.MGHImage(np.ones((4, 4, 4), dtype=np.uint8), np.eye(4)),
+                 str(tmp_path / f"mri/{name}.mgz"))
+    (tmp_path / "surf/autodet.gw.stats.lh.dat").write_text(
+        "MID_GRAY 50\n" + "".join(f"white_{name} 50\n" for name in
+        ("inside_hi", "border_hi", "border_low", "outside_low", "outside_hi")))
+    observed = {"rip": [], "border": [], "average": [], "cleanup": [], "context": [], "gpu_average": []}
+    monkeypatch.setattr(stage, "average_vertex_positions", lambda vertices, *a: vertices.copy())
+    monkeypatch.setattr(stage, "prepare_placement_volume", lambda image, *a, **k: (image, None))
+
+    def rip(vertices, *args, ripped=None, values=None, **kwargs):
+        flags = np.zeros(3, dtype=np.int32) if ripped is None else ripped.copy()
+        # 第一轮两次初始化；随后每轮扩展冻结集合，检验 GPU 上下文须更新。
+        if len(observed["rip"]) >= 2:
+            flags[len(observed["rip"]) - 2] = 1
+        observed["rip"].append(flags.copy())
+        return flags, np.zeros(3, dtype=np.float32) if values is None else values.copy()
+
+    def border(volume, seg, current, normals, original, ripped, values, *args, **kwargs):
+        observed["border"].append((kwargs["sigma"], kwargs["surface"], original.copy()))
+        target = np.full(3, len(observed["border"]), dtype=np.float32)
+        return target, None, None, None, np.ones(3, dtype=np.bool_), np.ones(3)
+
+    def average(values, faces, ripped, iterations, **kwargs):
+        observed["average"].append(iterations)
+        return values
+
+    def cleanup(vertices, faces, ripped):
+        observed["cleanup"].append(ripped.copy())
+        return vertices.copy(), {"intersecting_faces_after": 0}
+
+    monkeypatch.setattr(stage, "rip_white_preaparc_pass", rip)
+    monkeypatch.setattr(stage, "compute_border_values_first_pass", border)
+    monkeypatch.setattr(stage, "average_marked_values", lambda values, *a: values)
+    monkeypatch.setattr(stage, "intensity_error", lambda volume, current, values, *a: (float(values[0]), 1., None))
+    monkeypatch.setattr(stage, "intensity_gradient", lambda *a, **k: np.ones((3, 3), dtype=np.float32))
+    monkeypatch.setattr(stage, "average_signed_gradients", average)
+    monkeypatch.setattr(stage, "spring_gradient", lambda *a, **k: np.zeros((3, 3), dtype=np.float32))
+    monkeypatch.setattr(stage, "quadratic_curvature", lambda *a, **k: np.zeros(3, dtype=np.float32))
+    monkeypatch.setattr(stage, "self_repulsion_gradient", lambda *a, **k: np.zeros((3, 3), dtype=np.float32))
+    monkeypatch.setattr(stage, "self_repulsion_energy", lambda *a, **k: 0.)
+    monkeypatch.setattr(stage, "mean_vertex_spacing", lambda *a: 1.)
+    monkeypatch.setattr(stage, "vertex_buckets_current", lambda *a, **k: (None, None))
+    monkeypatch.setattr(stage, "tangential_spring_energy", lambda *a, **k: 0.)
+    monkeypatch.setattr(stage, "surface_total_area", lambda *a: 1.)
+    monkeypatch.setattr(stage, "unconstrained_step_with_offsets",
+                        lambda current, *a, **k: (current + np.float32(.1), np.ones_like(current) * .1))
+    monkeypatch.setattr(stage, "asynchronous_first_step", lambda current, faces, proposal, *a, **k: (proposal, None))
+    monkeypatch.setattr(stage, "repair_intersections", cleanup)
+    return tmp_path, xyz, faces, observed
+
+
+@pytest.mark.parametrize("backend", ["cpu", "torch"])
+def test_terminal_rejection_restores_coordinates_and_refreshes_pass_state(white_inputs, monkeypatch, backend):
+    subject, xyz, faces, observed = white_inputs
+    if backend == "torch":
+        from fnit.recon_all import place_surface_regularization_torch as regularization
+
+        class Context:
+            def __init__(self, *, ripped, **kwargs):
+                observed["context"].append(ripped.copy())
+
+            def regularize(self, *, gradient, iterations, **kwargs):
+                observed["gpu_average"].append(iterations)
+                return gradient
+
+        monkeypatch.setattr(regularization, "PlacementRegularizationTorch", Context)
+    monkeypatch.setattr(stage, "pial_step_decision", lambda ls, lr, s, r, dt, red:
+                        (dt * .5, red + 1, True, True, red + 1 > 2))
+    trace = []
+    volume_output = subject / "diagnostic/placement.mgz"
+    report = stage.place_white_preaparc(
+        subject_dir=subject, hemi="lh", output=subject / "diagnostic/lh.white.preaparc",
+        max_steps=4, output_volume=volume_output, regularization_backend=backend,
+        device="cpu" if backend == "torch" else None,
+        trace_callback=lambda *args: trace.append(args),
+    )
+    assert report["complete_four_passes"] is True
+    assert report["pass_ends"] == [1, 2, 3, 4]
+    assert [item[0] for item in observed["border"]] == [2., 1., .5, .25]
+    assert all(item[1] == "white" for item in observed["border"])
+    assert len(observed["rip"]) == 5
+    np.testing.assert_array_equal([row["initial_sse"] for row in report["passes"]],
+                                  np.float32(.2) * np.arange(1, 5))
+    assert all(row["trials"] == 3 and row["trial_trace"][-1]["rejected"] for row in report["per_step"])
+    assert all(row["trial_trace"][0]["dt_used"] == .5 for row in report["per_step"])
+    assert [row[1] for row in trace] == [0, 1, 2, 3]
+    trace[0][3]["trial_trace"].clear()
+    assert len(report["per_step"][0]["trial_trace"]) == 3
+    actual, actual_faces, metadata = fs.read_geometry(report["output"], read_metadata=True)
+    np.testing.assert_array_equal(actual, xyz)
+    np.testing.assert_array_equal(actual_faces, faces)
+    assert metadata["filename"] == "contract.mgz"
+    assert len(observed["cleanup"]) == 2
+    assert not observed["cleanup"][0].any()
+    np.testing.assert_array_equal(observed["cleanup"][-1], observed["rip"][-1])
+    if backend == "torch":
+        assert observed["gpu_average"] == [4, 2, 1, 0]
+        assert len(observed["context"]) == 4
+        for actual_mask, expected in zip(observed["context"], [observed["rip"][1], *observed["rip"][2:]]):
+            np.testing.assert_array_equal(actual_mask, expected)
+    else:
+        assert observed["average"] == [4, 2, 1, 0]
+    actual_volume = nib.load(str(volume_output))
+    assert actual_volume.get_data_dtype() == np.dtype("uint8")
+    np.testing.assert_array_equal(actual_volume.affine, nib.load(str(subject / "mri/brain.finalsurfs.mgz")).affine)
+    assert sum(report["stage_seconds"].values()) == pytest.approx(report["seconds"])
+
+
+def test_each_pass_obeys_native_100_iteration_limit(white_inputs, monkeypatch):
+    subject, xyz, faces, observed = white_inputs
+    monkeypatch.setattr(stage, "pial_step_decision", lambda ls, lr, s, r, dt, red:
+                        (dt, red, False, False, False))
+    report = stage.place_white_preaparc(subject_dir=subject, hemi="lh",
+                                       output=subject / "diagnostic/white", max_steps=400)
+    assert report["pass_ends"] == [100, 200, 300, 400]
+    assert all(row["reason"] == "iteration_limit" for row in report["passes"])
+    assert observed["average"] == [4] * 100 + [2] * 100 + [1] * 100 + [0] * 100
+
+
+def test_incomplete_four_passes_and_residual_intersections_do_not_write(white_inputs, monkeypatch):
+    subject, xyz, faces, observed = white_inputs
+    output = subject / "diagnostic/white"
+    monkeypatch.setattr(stage, "pial_step_decision", lambda ls, lr, s, r, dt, red:
+                        (dt * .5, red + 1, True, True, red + 1 > 2))
+    with pytest.raises(RuntimeError, match="did not complete four passes"):
+        stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=output, max_steps=3)
+    assert not output.exists()
+    monkeypatch.setattr(stage, "repair_intersections", lambda vertices, *a:
+                        (vertices, {"intersecting_faces_after": 2}))
+    with pytest.raises(RuntimeError, match="initialization"):
+        stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=output)
+    assert not output.exists()
+
+
+def test_prefix_preserves_original_rejected_stop_failure(white_inputs, monkeypatch):
+    subject, xyz, faces, observed = white_inputs
+    monkeypatch.setattr(stage, "pial_step_decision", lambda ls, lr, s, r, dt, red:
+                        (dt * .5, red + 1, True, True, red + 1 > 2))
+    with pytest.raises(RuntimeError, match="white prefix rejected"):
+        stage.place_white_preaparc_prefix(subject_dir=subject, hemi="lh",
+                                          output=subject / "diagnostic/prefix")
+    assert not observed["cleanup"]
+
+
+def test_outputs_cannot_overwrite_inputs_or_each_other(tmp_path):
+    with pytest.raises(ValueError, match="overwrite"):
+        stage.place_white_preaparc(subject_dir=tmp_path, hemi="lh", output=tmp_path / "surf/lh.orig")
+    with pytest.raises(ValueError, match="overwrite"):
+        stage.place_white_preaparc(subject_dir=tmp_path, hemi="lh", output=tmp_path / "new",
+                                   output_volume=tmp_path / "mri/brain.finalsurfs.mgz")
+    with pytest.raises(ValueError, match="overwrite"):
+        stage.place_white_preaparc(subject_dir=tmp_path, hemi="lh", output=tmp_path / "new",
+                                   output_volume=tmp_path / "new")
+
+
+def test_different_mri_grid_fails_before_optimization(white_inputs):
+    subject, xyz, faces, observed = white_inputs
+    nib.save(nib.MGHImage(np.ones((3, 4, 4), dtype=np.uint8), np.eye(4)), str(subject / "mri/wm.mgz"))
+    with pytest.raises(ValueError, match="MRI grids differ"):
+        stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=subject / "diagnostic/white")
+    assert not observed["border"]
