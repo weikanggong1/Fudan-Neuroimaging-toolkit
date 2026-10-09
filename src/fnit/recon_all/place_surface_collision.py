@@ -466,6 +466,7 @@ def asynchronous_first_step(
     candidate_backend: str = "tree",
     candidate_device: str | None = None,
     candidate_diagnostics: dict | None = None,
+    candidate_grid_cells_per_axis: int = 2,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Replay sorted subvolumes with dynamic triangle collision tests.
 
@@ -489,6 +490,8 @@ def asynchronous_first_step(
         raise ValueError("candidate_backend must be tree, snapshot or torch_snapshot")
     if candidate_backend == "torch_snapshot" and candidate_device is None:
         raise ValueError("torch_snapshot requires an explicit candidate_device")
+    if candidate_grid_cells_per_axis not in (2, 3):
+        raise ValueError("candidate_grid_cells_per_axis must be 2 or 3")
     xyz = np.asarray(vertices, dtype=np.float32)
     if stale_mht_trial is not None and not fast:
         raise ValueError("retained MHT replay requires fast collision mode")
@@ -532,7 +535,8 @@ def asynchronous_first_step(
             neighbor_valid if offsets is not None else None, offsets, accepted_offsets,
             geometry, vertex_svi, min_neighbor_mm, tree, initial_centers, initial_radii, maximum_radius,
             candidate_device=candidate_device if candidate_backend == "torch_snapshot" else None,
-            candidate_diagnostics=candidate_diagnostics)
+            candidate_diagnostics=candidate_diagnostics,
+            candidate_grid_cells_per_axis=candidate_grid_cells_per_axis)
         return result, order
     if candidate_diagnostics is not None:
         candidate_diagnostics["effective_candidate_backend"]="tree_retained_mht" if trial is not None else "tree"

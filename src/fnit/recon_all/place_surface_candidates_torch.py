@@ -18,6 +18,7 @@ def conservative_face_candidates_torch(
     query_chunk_size: int = 2048, maximum_chunk_candidates: int = 4000000,
     source_low=None, source_high=None, query_low=None, query_high=None,
     motion_bound: float | None = None, source_faces=None, query_faces=None,
+    grid_cells_per_axis: int = 2,
 ):
     """以完整网格单元查询构建球候选CSR，可安全排除不可能接触的面。
 
@@ -32,12 +33,16 @@ def conservative_face_candidates_torch(
     面对，复用源placement固定拓扑语义。输出候选顺序可以与KD树不同；
     首试步相交bool不依赖候选顺序，retained-MHT重试不得使用本入口。
     CUDA/OOM及输入/坐标编码异常传播，不静默切CPU或截断查询。
+    grid_cells_per_axis默认2；实验3使用更小完整单元和最多27桶查询，
+    不减少半径或候选、保持相同FP64球/bbox/共享顶点过滤。
     """
     target = torch.device(device)
     if target.type not in ("cpu", "cuda") or target.type == "cuda" and target.index is None:
         raise ValueError("device must be cpu or an explicitly indexed CUDA target")
     if query_chunk_size < 1 or maximum_chunk_candidates < 1:
         raise ValueError("chunk sizes must be positive")
+    if not isinstance(grid_cells_per_axis, int) or grid_cells_per_axis not in (2, 3):
+        raise ValueError("grid_cells_per_axis must be 2 or 3")
     def prepare(value, name, dtype=torch.float64):
         tensor = value.to(target) if isinstance(value, torch.Tensor) else torch.as_tensor(np.asarray(value), device=target)
         if tensor.dtype != dtype:
@@ -85,12 +90,13 @@ def conservative_face_candidates_torch(
             "excludes_shared_vertices": sf is not None, "candidate_truncation": False,
             "grid_candidates": 0, "sphere_candidates": 0, "retained_candidates": 0,
             "adaptive_chunk_reductions": 0}
+    info["grid_cells_per_axis"] = grid_cells_per_axis
     if not len(sources) or not len(queries):
         return np.zeros(len(queries)+1, np.int64), np.empty(0, np.int32), info
     eps = torch.finfo(torch.float64).eps
     guard = 64 * eps * (queries.abs() + radius[:, None] + 1)
     maximum_radius, maximum_guard = float(radius.max()), float(guard.max())
-    width = max(1.0, 2 * (maximum_radius + maximum_guard) + 1e-8)
+    width = max(1.0, 2 * (maximum_radius + maximum_guard) / (grid_cells_per_axis-1) + 1e-8)
     if not math.isfinite(width) or width <= 0:
         raise ValueError("query geometry exceeds finite grid encoding")
     info["grid_cell_width_mm"] = width
@@ -100,8 +106,8 @@ def conservative_face_candidates_torch(
     if any(bool((cells.abs() >= 2**61).any()) for cells in (source_float_cells, low_float_cells, high_float_cells)):
         raise ValueError("grid coordinates exceed safe int64 encoding")
     source_cells, low_cells, high_cells = source_float_cells.to(torch.int64), low_float_cells.to(torch.int64), high_float_cells.to(torch.int64)
-    if bool((high_cells-low_cells > 1).any()):
-        raise RuntimeError("complete query needs more than two cells per axis")
+    if bool((high_cells-low_cells > grid_cells_per_axis-1).any()):
+        raise RuntimeError("complete query exceeds configured cells per axis")
     origin = torch.minimum(source_cells.amin(0), low_cells.amin(0))
     last = torch.maximum(source_cells.amax(0), high_cells.amax(0))
     dimensions = (last-origin+1).cpu().tolist()
@@ -113,7 +119,10 @@ def conservative_face_candidates_torch(
     source_keys = encode(source_cells)
     order = torch.argsort(source_keys, stable=True)
     sorted_keys = source_keys[order]
-    shifts = torch.tensor([[x,y,z] for x in (0,1) for y in (0,1) for z in (0,1)], dtype=torch.int64, device=target)
+    shifts = torch.tensor([[x,y,z] for x in range(grid_cells_per_axis)
+                          for y in range(grid_cells_per_axis) for z in range(grid_cells_per_axis)],
+                          dtype=torch.int64, device=target)
+    cells_per_query = len(shifts)
     offsets, parts, start = [0], [], 0
     while start < len(queries):
         stop = min(start+query_chunk_size, len(queries))
@@ -134,7 +143,7 @@ def conservative_face_candidates_torch(
         info["grid_candidates"] += total
         if total:
             prefix = torch.cumsum(counts, 0)-counts
-            query_ids = torch.repeat_interleave(torch.arange(stop-start, device=target).repeat_interleave(8), counts, output_size=total)
+            query_ids = torch.repeat_interleave(torch.arange(stop-start, device=target).repeat_interleave(cells_per_query), counts, output_size=total)
             locations = torch.repeat_interleave(begin, counts, output_size=total)+torch.arange(total, device=target)-torch.repeat_interleave(prefix, counts, output_size=total)
             ids = order[locations]
             delta = sources[ids]-queries[start:stop][query_ids]

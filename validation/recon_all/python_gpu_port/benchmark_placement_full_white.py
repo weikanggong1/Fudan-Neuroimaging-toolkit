@@ -53,6 +53,8 @@ def main():
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--max-steps", type=int, default=400)
     parser.add_argument("--candidate-backend", choices=("tree", "snapshot", "torch_snapshot"), default="tree")
+    parser.add_argument("--candidate-grid-cells-per-axis", type=int, choices=(2, 3), default=2)
+    parser.add_argument("--collision-profile", action="store_true")
     parser.add_argument("--control-candidate-backend", choices=("tree", "snapshot", "torch_snapshot"))
     parser.add_argument("--candidate-regularization-backend", choices=("cpu", "torch"), default="torch")
     parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
@@ -189,6 +191,8 @@ def main():
                 output_volume=output_volume, regularization_backend=run_regularization,
                 sampling_backend=run_sampling, candidate_backend=run_candidate,
                 cleanup_marking_backend=args.cleanup_marking_backend,
+                candidate_grid_cells_per_axis=args.candidate_grid_cells_per_axis if backend == "torch" else 2,
+                collision_profile=args.collision_profile,
                 device=str(device) if gpu_components else None,
                 trace_callback=callback,
             )

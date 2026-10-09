@@ -61,6 +61,8 @@ white_report = place_white_preaparc(
     regularization_backend="torch",  # 显式接入已有 PyTorch 固定网格正则梯度
     sampling_backend="torch",  # 复用已有 GPU 强度采样，MRI与变换只缓存一次
     candidate_backend="tree",  # 原完整动态候选与有序接受；默认保留
+    candidate_grid_cells_per_axis=2,  # GPU候选的默认完整网格；3仅用于显式实验
+    collision_profile=False,  # 可选候选构建/有序接受分项，不改变接受规则
     cleanup_marking_backend="source_torch",  # 实验有向MHT标记；初始与最终同规则
     device="cuda:0",  # 当前进程内明确的目标 GPU
     trace_callback=None,  # 可选每步诊断回调；坐标和记录是独立副本
@@ -94,6 +96,8 @@ white_report = place_white_preaparc(
 | `regularization_backend` | `"cpu"`；`"torch"` 使用已实现的固定网格正则上下文，并要求明确 `device` |
 | `sampling_backend` | `"cpu"`；`"torch"`/`"triton"` 复用现有 GPU 强度梯度，要求显式 CUDA 编号；每步读取实际 rip、目标、顶点 sigma，MRI/affine 仅缓存一次；目标函数仍沿用 CPU 原算法 |
 | `candidate_backend` | `"tree"`；`"snapshot"` 和 `"torch_snapshot"` 是保守预候选实验，仍保留实时顺序窄相接受；后者要求明确 `device` |
+| `candidate_grid_cells_per_axis` | 2；显式3仅用于 `torch_snapshot` 较小完整单元，每轴最多3桶，半径/FP64过滤/接受规则不变；非法或用于其他后端抛ValueError |
+| `collision_profile` | `False`；True另存每trial的候选数量、构建和有序接受秒，不把耗时放进决定轨迹 |
 | `cleanup_marking_backend` | `"legacy"`；`"source_numba"`/`"source_torch"`按固定源码逐方向和共享MHT桶标记；后者要求显式device；只复用同次清理中完全相同的坐标 |
 | `device` | `None`；PyTorch 后端须显式指定如 `"cuda:0"` 或 `"cpu"`，不静默回退 CPU |
 | `trace_callback` | `None`；接收 `(step, pass_index, vertices_copy, record_copy)`；记录包含实际试步、SSE/RMS、接受/拒绝和步长；回调耗时计入墙钟 |
@@ -113,6 +117,7 @@ white_report = place_white_preaparc(
 | `initial_cleanup/cleanup` | 起始/最终相交修复记录：相交面数、平滑周期和实际修复信息 |
 | `seconds/stage_seconds` | 函数墙钟及分项秒；包含校验、读取、准备、传输、梯度、碰撞、目标函数、轮间重估、清理、写出与回调；各项和为墙钟 |
 | `prepare_components` | MRI/表面读取、初始平滑与清理、法向、亮区体积、rip、首次边界搜索及上下文的细分秒；和为 `stage_seconds.prepare` |
+| `collision_details` | 启用collision_profile时逐trial列表：step/trial/effective_backend/候选数/构建秒/有序接受秒；retained-MHT记录原树回退；否则为空 |
 
 失败抛异常，不返回伪造完成状态。缺文件、无效参数、MRI 网格不一致、
 未完成四轮、最终残余相交、CUDA 不可用或 OOM 均保留原异常；算法失败前不写
@@ -261,7 +266,27 @@ SHA。必须有相同顶点数和有序面，使用MGH头vox2ras_tkr将surface R
 变换到conformed体素网格；不成立则报错，不绘伪逐顶点误差。
 
 严格后端复现已通过；同输入原生严格复现未通过；整体脑区指标等效未评估。
-原生188.737–235.183秒仍快于GPU314.405秒，当前不将GPU路径设为生产默认。
+v9同源同输入GPU完整候选索引改用较小3桶网格，两个正反配对完整API为：
+
+| 顺序 | 默认2桶控制 | 显式3桶候选 |
+|---|---:|---:|
+| 控制先运行 | 322.950 s | 276.988 s |
+| 候选先运行 | 305.439 s | 279.076 s |
+| 中位 | 314.194 s | 278.032 s |
+
+中位缩短11.51%；四次全部34步、四轮、零最终相交，坐标/接受拒绝轨迹、
+表面与MRI文件SHA一致。候选构建总秒约55.69–56.16→26.68–26.86，
+有序接受仍37.40–38.43秒，保留MHT树重试仍72.26–73.89秒。
+[完整机器汇总](../../validation/recon_all/optimizations/20261009_placement_torch/white_grid_a100_v9_abba.json)
+和两组原始机器报告保留实际源码、五输入SHA、线程、精度、各轮与完整墙钟。
+API包含校验、读取、传输、四轮与清理、trace/输出写入；CUDA上下文另列。
+GPU峰allocated控制704,253,952/候选706,767,872字节，reserved均
+1,704,984,576字节；外部树PID归属未解，整卡22,982MiB含其他项目，
+不能作为FNIT精确峰或20GB整例证明。fresh进程cache环境三项None，调用
+源码未改分配缓存；无运行时getter核验，生产全局cacheoff尚未配对。
+3桶只改候选索引开销；原生严格几何差异保持，整体指标等效未判定。
+原生188.737–235.183秒仍快于本次GPU阶段，当前不设生产默认。
+
 
 同一A100主机、四线程、相同五项输入与相同源码构建程序的新参考验证：
 

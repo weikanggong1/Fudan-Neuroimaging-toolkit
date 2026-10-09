@@ -21,8 +21,9 @@ flowchart LR
 初始几何预先决定动态接受。静态面对回放与完整首试步接受是两项独立验证。
 新增代码只依赖主页已有的 PyTorch、NumPy、Numba、SciPy、nibabel。
 
-白质完整四轮可复用相同候选后端；当前34步真实旧/新对照的坐标和接受
-轨迹完全相同，但旧清理规则的最终零相交门未通过，不能据此默认替换。
+白质完整四轮复用相同候选后端。修正源marker后的34步CPU/GPU坐标和接受
+轨迹完全相同，最终零相交已通过；对原生white仍有局部误差，完整耗时仍
+慢于原生，不默认替换。最新完整报告见[white说明](PYTHON_WHITE_PREAPARC.md)。
 清理器逐方向标记问题及新的显式GPU清理接口见
 [源规则有向清理](SOURCE_INTERSECTION_CLEANUP.md)。
 
@@ -67,6 +68,7 @@ pial_report = place_pial_t1(
 | `query_low/query_high` | 可选 `(Q,3)` float32/float64，初始查询面AABB；四项须同时提供 |
 | `motion_bound` | 默认None；配合AABB，调用方须保证并检查每个顶点相对初始位置的位移不超过此值/mm |
 | `source_faces/query_faces` | 默认None；成对提供整数 `(F/Q,3)` 顶点编号时，排除共享顶点的面对 |
+| `grid_cells_per_axis` | 默认2；显式实验3使用较小单元、每轴最多3桶，仍保留所有球/bbox候选和相同FP64过滤；只改变索引开销 |
 
 返回 `offsets:int64(Q+1,)`、`candidates:int32(M,)` NumPy CSR 和诊断字典。
 半径过滤只保守增加浮点边界候选；AABB在双方均可能移动时使用两倍运动
@@ -129,6 +131,9 @@ python validation/recon_all/python_gpu_port/benchmark_placement_collision_trial_
   --output-directory /data/runs/collision-first-trial-v1 \
   --code-commit ACTUAL_TESTED_COMMIT --device cuda:0 --threads 4
 ```
+
+加 `--compare-grid-cells` 时，控制和候选均使用GPU完整索引，ABBA分别
+选2桶/3桶；有序接受完全相同，报告保留实际网格数量、构建/接受分项。
 
 `--input`包含当前顶点、面、建议位置、rip、动量、offsets和有序邻接；
 它只提供该次迭代的起点。当前CPU原树与GPU候选均从相同起点重新执行完整
@@ -203,7 +208,7 @@ CUDA_VISIBLE_DEVICES=2 python validation/recon_all/python_gpu_port/monitor_place
 
 ## 5. 当前精度与耗时
 
-最新同输入GPU测试在同一A100-SXM4-80GB节点、Xeon Platinum8369B、
+首批同输入GPU测试在同一A100-SXM4-80GB节点、Xeon Platinum8369B、
 四线程、固定CPU8–11和物理GPU2完成，实际算法源`a756fffb`及逐文件SHA
 绑定报告。CPU与GPU都重新计算，不读取保存的参考接受状态。
 
@@ -222,6 +227,29 @@ CUDA_VISIBLE_DEVICES=2 python validation/recon_all/python_gpu_port/monitor_place
 [完整当轮报告](../../validation/recon_all/optimizations/20261009_placement_torch/collision_first_trial_a100_gpu2_v1.json)。
 这项计时包括本轮索引建立、传输、顺序接受及结果回传，MRI准备和四轮
 placement未包含其中；不能据此宣称完整pial、white或recon-all提速。
+
+v9复用现有索引测试较小完整网格：每轴2桶改为3桶，单元宽度缩半，
+先查至多27个更小桶，再执行相同球/AABB/共享顶点过滤；不降低查询半径。
+同一真实首trial的GPU完整ABBA中位数为3.722690→2.456041秒，缩短34.03%。
+临时候选从1,586,531,836降为707,092,193，最终保留都为10,527,436；
+候选构建中位约2.2414→1.0045秒，有序接受约1.1902→1.1582秒。
+所有坐标、acceptedOffsets和108,597有序顶点均0差异，历史检查点也0差异，
+见[新网格完整当轮报告](../../validation/recon_all/optimizations/20261009_placement_torch/collision_grid2_grid3_a100_v9.json)。
+
+这是完整首trial优化，34.03%不是完整white或整例提速。随后同源完整
+white.preaparc双向配对已完成：2桶控制322.950/305.439秒，3桶候选
+276.988/279.076秒；中位314.194→278.032秒，缩短11.51%。四次都是
+34步、四轮、最终零相交，全部坐标/接受拒绝轨迹、表面与MRI文件SHA相同。
+这是单被试左侧冻结同输入阶段，不能外推最终white或recon-all整例。
+2桶默认保持；[完整ABBA汇总](../../validation/recon_all/optimizations/20261009_placement_torch/white_grid_a100_v9_abba.json)
+保存四次墙钟、分项和源码/输入SHA。保留MHT树重试仍每次72.258–73.887秒。
+默认TF32，未半精度；fresh benchmark cache启动环境三项None，调用源码
+不修改分配缓存。它没有验证生产全局cacheoff下的时间或整例占用。
+这组每次候选峰allocated706,767,872字节，控制704,253,952字节，reserved
+均1,704,984,576字节。外部请求0.25秒采样；PID归属未解、树峰为null，
+整卡上界22,982MiB包含其他项目，不能据此宣称FNIT超过或满足20GB预算。
+
+
 
 外部显存采样请求250ms，面对/完整首试步目标卡同期峰值分别553/1,937MiB，
 后者为2,031,091,712字节。容器驱动PID归属未能解析，原监测器的进程树0

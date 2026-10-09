@@ -255,3 +255,28 @@ def test_gpu_sampler_caches_mri_once_and_receives_fresh_white_pass_state(white_i
         np.testing.assert_array_equal(row[2], observed["rip"][index + 1])
         assert row[3] == .2
     assert report["sampling_backend"] == implementation
+
+
+def test_collision_profile_is_separate_from_trial_decisions(white_inputs, monkeypatch):
+    subject, xyz, faces, observed = white_inputs
+    monkeypatch.setattr(stage, "pial_step_decision", lambda ls, lr, s, r, dt, red:
+                        (dt, red, False, False, True))
+
+    def collision(current, faces, proposal, *args, candidate_diagnostics=None, **kwargs):
+        candidate_diagnostics.update(candidate_pairs=23, candidate_build_seconds=.001,
+                                     ordered_acceptance_seconds=.002)
+        return proposal, None
+
+    monkeypatch.setattr(stage, "asynchronous_first_step", collision)
+    result = stage.place_white_preaparc(subject_dir=subject, hemi="lh",
+        output=subject / "diagnostic/white", max_steps=4, collision_profile=True)
+    assert len(result["collision_details"]) == 4
+    assert all(row["candidate_pairs"] == 23 for row in result["collision_details"])
+    assert all("candidate_build_seconds" not in row for row in result["per_step"])
+
+
+def test_nondefault_grid_is_not_silently_ignored(white_inputs):
+    subject, *_ = white_inputs
+    with pytest.raises(ValueError, match="nondefault candidate grid"):
+        stage.place_white_preaparc(subject_dir=subject, hemi="lh",
+            output=subject / "diagnostic/white", candidate_grid_cells_per_axis=3)

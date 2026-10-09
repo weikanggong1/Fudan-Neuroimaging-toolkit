@@ -43,6 +43,8 @@ def _place_white_preaparc(
     complete: bool = False, candidate_backend: str = "tree", trace_callback=None,
     output_volume: str | Path | None = None, sampling_backend: str = "cpu",
     cleanup_marking_backend: str = "legacy",
+    candidate_grid_cells_per_axis: int = 2,
+    collision_profile: bool = False,
 ) -> dict:
     """共享现有白质算子；complete 选择四轮而非首轮诊断调度。"""
     started = time.perf_counter()
@@ -53,6 +55,10 @@ def _place_white_preaparc(
         raise ValueError("steps must be from 1 to 17")
     if candidate_backend not in ("tree", "snapshot", "torch_snapshot"):
         raise ValueError("invalid candidate_backend")
+    if candidate_grid_cells_per_axis not in (2, 3):
+        raise ValueError("candidate_grid_cells_per_axis must be 2 or 3")
+    if candidate_grid_cells_per_axis != 2 and candidate_backend != "torch_snapshot":
+        raise ValueError("nondefault candidate grid requires torch_snapshot")
     if cleanup_marking_backend not in ("legacy", "source_numba", "source_torch"):
         raise ValueError("invalid cleanup_marking_backend")
     if cleanup_marking_backend == "source_torch" and device is None:
@@ -193,6 +199,7 @@ def _place_white_preaparc(
     pass_ends, pass_records = [], []
     border_seconds = cleanup_seconds = 0.0
     gradient_seconds = collision_seconds = objective_seconds = 0.0
+    collision_details = []
     records: list[dict] = []
     snapshots: dict[str, np.ndarray | float] = {
         "initial": xyz, "ripped": ripped, "target_values": values,
@@ -249,14 +256,21 @@ def _place_white_preaparc(
         accepted = None
         for trial in range(3):
             trial_start = time.perf_counter()
+            candidate_details = {} if collision_profile else None
             proposed, offsets = unconstrained_step_with_offsets(current, gradient, ripped, dt=dt)
             placed, _ = asynchronous_first_step(
                 current, faces, proposed, ripped, fast=True, offsets=offsets,
                 accepted_offsets=gradient, stale_mht_trial=stale_trial,
                 ordered_neighbors=ordered, candidate_backend=candidate_backend,
                 candidate_device=device if candidate_backend == "torch_snapshot" else None,
+                candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
+                candidate_diagnostics=candidate_details,
             )
-            collision_seconds += time.perf_counter() - trial_start
+            collision_elapsed = time.perf_counter() - trial_start
+            collision_seconds += collision_elapsed
+            if candidate_details is not None:
+                collision_details.append({"step": step, "trial": trial,
+                    "total_collision_seconds": collision_elapsed, **candidate_details})
             blocked = np.any(proposed != current, axis=1) & np.all(placed == current, axis=1)
             cropped = np.where(ripped, cropped, np.where(blocked, cropped + 1, 0)).astype(np.int32)
             objective_start = time.perf_counter()
@@ -399,6 +413,8 @@ def _place_white_preaparc(
         "initial_sse": initial_sse, "initial_rms": initial_rms,
         "step_sse": last_sse, "step_rms": last_rms,
         "per_step": records,
+        "candidate_grid_cells_per_axis": candidate_grid_cells_per_axis,
+        "collision_profile": bool(collision_profile), "collision_details": collision_details,
         "prepare_components": prepare_components,
         "seconds": finished_at - started,
         "stage_seconds": {
@@ -437,6 +453,8 @@ def place_white_preaparc(
     candidate_backend: str = "tree", sampling_backend: str = "cpu",
     device: str | None = None, trace_callback=None,
     cleanup_marking_backend: str = "legacy",
+    candidate_grid_cells_per_axis: int = 2,
+    collision_profile: bool = False,
 ) -> dict:
     """实验性完整preaparc白质四轮；不替代带aparc的最终white或生产默认。
 
@@ -450,6 +468,9 @@ def place_white_preaparc(
     cleanup_marking_backend默认legacy；source_numba/source_torch按固定源码
     逐方向及共享1mm桶标记，Torch需device。两次清理使用同一后端，
     初始允许源程序既有残余，最终仍要求零相交；不改已验证pial默认。
+    candidate_grid_cells_per_axis默认2，显式3仅Torch候选使用较小完整网格；
+    不裁剪候选或改变有序接受。collision_profile默认False，True记录每次
+    候选构建/有序接受秒，诊断与接受轨迹分开，不在生产默认增加同步。
     返回路径、有序网格大小、四轮边界、rip/目标/接受轨迹、完整清理与分项秒。
     输入/参数、未完成四轮、残余相交及CUDA异常传播，不写未完成表面。
     对应mris_place_surface --white --nsmooth 5 --rip-bg-no-annot --rip-bg。
@@ -472,6 +493,8 @@ def place_white_preaparc(
         regularization_backend=regularization_backend, candidate_backend=candidate_backend,
         sampling_backend=sampling_backend, device=device, trace_callback=trace_callback,
         cleanup_marking_backend=cleanup_marking_backend,
+        candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
+        collision_profile=collision_profile,
     )
 
 
@@ -500,6 +523,8 @@ def main() -> None:
     parser.add_argument("--max-steps", type=int, default=400)
     parser.add_argument("--output-volume", type=Path)
     parser.add_argument("--candidate-backend", choices=("tree", "snapshot", "torch_snapshot"), default="tree")
+    parser.add_argument("--candidate-grid-cells-per-axis", type=int, choices=(2, 3), default=2)
+    parser.add_argument("--collision-profile", action="store_true")
     parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
     parser.add_argument("--cleanup-marking-backend", choices=("legacy", "source_numba", "source_torch"), default="legacy")
     args = parser.parse_args()
@@ -512,12 +537,15 @@ def main() -> None:
             regularization_backend=args.regularization_backend,
             candidate_backend=args.candidate_backend, sampling_backend=args.sampling_backend,
             cleanup_marking_backend=args.cleanup_marking_backend,
+            candidate_grid_cells_per_axis=args.candidate_grid_cells_per_axis,
+            collision_profile=args.collision_profile,
             device=args.device,
         ), indent=2))
         return
     if (args.output_volume is not None or args.max_steps != 400
             or args.candidate_backend != "tree" or args.sampling_backend != "cpu"
-            or args.cleanup_marking_backend != "legacy"):
+            or args.cleanup_marking_backend != "legacy"
+            or args.candidate_grid_cells_per_axis != 2 or args.collision_profile):
         parser.error("--output-volume, --max-steps, --sampling-backend and --candidate-backend require --complete")
     print(json.dumps(place_white_preaparc_prefix(
         subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,

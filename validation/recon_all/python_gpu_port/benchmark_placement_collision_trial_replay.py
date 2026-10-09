@@ -40,6 +40,7 @@ def main():
     parser.add_argument("--code-commit", required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
+    parser.add_argument("--compare-grid-cells", action="store_true", help="保持GPU有序接受，配对完整2³/3³桶索引")
     args = parser.parse_args()
     if args.threads < 1:
         raise ValueError("threads must be positive")
@@ -93,9 +94,13 @@ def main():
         report["cuda_context_setup_seconds"] = time.perf_counter() - context_started
         report["gpu"] = torch.cuda.get_device_name(device)
         cold_results, paired_results = {}, []
-        for kind, backend in (("cold", "tree"), ("cold", "torch_snapshot"),
-                              ("paired", "tree"), ("paired", "torch_snapshot"),
-                              ("paired", "torch_snapshot"), ("paired", "tree")):
+        control_name, candidate_name = (("torch_snapshot_grid2", "torch_snapshot_grid3")
+            if args.compare_grid_cells else ("tree", "torch_snapshot"))
+        sequence = (("cold", control_name), ("cold", candidate_name),
+                    ("paired", control_name), ("paired", candidate_name),
+                    ("paired", candidate_name), ("paired", control_name))
+        report["paired_scope"] = "same GPU complete grid2 versus grid3" if args.compare_grid_cells else "tree versus GPU"
+        for kind, backend in sequence:
             torch.cuda.synchronize(device)
             torch.cuda.reset_peak_memory_stats(device)
             started = time.perf_counter()
@@ -104,8 +109,9 @@ def main():
             coordinates, order = collision.asynchronous_first_step(
                 vertices, faces, proposal, ripped, offsets=offsets,
                 accepted_offsets=accepted, ordered_neighbors=(neighbors, valid),
-                candidate_backend=backend,
-                candidate_device=str(device) if backend == "torch_snapshot" else None,
+                candidate_backend="torch_snapshot" if args.compare_grid_cells else backend,
+                candidate_grid_cells_per_axis=3 if backend == "torch_snapshot_grid3" else 2,
+                candidate_device=str(device) if backend != "tree" else None,
                 candidate_diagnostics=diagnostics,
             )
             torch.cuda.synchronize(device)
@@ -127,9 +133,9 @@ def main():
                 paired_results.append((backend, result))
             report["runs"].append(row)
             save("running")
-        report["cold_comparison"] = compare(cold_results["tree"], cold_results["torch_snapshot"])
+        report["cold_comparison"] = compare(cold_results[control_name], cold_results[candidate_name])
         report["paired_comparison_to_cold_tree"] = [
-            {"backend": backend, **compare(cold_results["tree"], result)} for backend, result in paired_results]
+            {"backend": backend, **compare(cold_results[control_name], result)} for backend, result in paired_results]
         comparisons = [report["cold_comparison"], *report["paired_comparison_to_cold_tree"]]
         report["strict_same_input_reproduction"] = "passed" if all(
             row["different_coordinate_elements"] == 0 and row["same_order"]
@@ -137,14 +143,16 @@ def main():
         report["new_degradation_under_declared_exact_trial_gate"] = (
             "none_detected" if report["strict_same_input_reproduction"] == "passed" else "detected")
         medians = {backend: statistics.median(row["seconds"] for row in report["runs"]
-            if row["kind"] == "paired" and row["backend"] == backend) for backend in ("tree", "torch_snapshot")}
+            if row["kind"] == "paired" and row["backend"] == backend) for backend in (control_name, candidate_name)}
         report["paired_median_seconds"] = medians
-        report["speed_ratio_tree_over_torch_snapshot"] = medians["tree"] / medians["torch_snapshot"]
+        report["speed_ratio_control_over_candidate"] = medians[control_name] / medians[candidate_name]
+        if not args.compare_grid_cells:
+            report["speed_ratio_tree_over_torch_snapshot"] = medians[control_name] / medians[candidate_name]
         if args.historical_reference is not None:
             with np.load(args.historical_reference) as data:
                 historical = (data["coordinates"], data["order"], data["accepted_offsets"])
             report["historical_reference_sha256"] = sha256(args.historical_reference)
-            report["cross_environment_comparison_to_historical"] = compare(cold_results["tree"], historical)
+            report["cross_environment_comparison_to_historical"] = compare(cold_results[control_name], historical)
         if sha256(args.input) != report["input_sha256"]:
             raise RuntimeError("frozen collision input changed during replay")
         save("complete")

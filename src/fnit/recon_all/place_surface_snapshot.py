@@ -70,7 +70,8 @@ def _ordered_snapshot_step(initial,triangles,proposal,order,incident,incident_of
 def snapshot_ordered_step(xyz,triangles,proposal,order,incident,incident_offsets,
                           neighbors,neighbor_valid,offsets,accepted_offsets,geometry,
                           vertex_svi,min_neighbor_mm,tree,centers,radii,maximum_radius,
-                          *, candidate_device=None, candidate_diagnostics=None):
+                          *, candidate_device=None, candidate_diagnostics=None,
+                          candidate_grid_cells_per_axis=2):
     """One first trial; build a conservative union then filter exact query radii.
 
     Every vertex moves only after preceding accepted updates. Current candidate
@@ -112,7 +113,7 @@ def snapshot_ordered_step(xyz,triangles,proposal,order,incident,incident_offsets
             centers,centers,((radii+maximum_radius)+1.0)+3.0*bound,
             source_low=low,source_high=high,query_low=low,query_high=high,
             motion_bound=bound,source_faces=triangles,query_faces=triangles,
-            device=candidate_device)
+            device=candidate_device, grid_cells_per_axis=candidate_grid_cells_per_axis)
         if candidate_diagnostics is not None:candidate_diagnostics.update(details)
     if candidate_diagnostics is not None:
         candidate_diagnostics.update(candidate_build_seconds=time.perf_counter()-build_started,
