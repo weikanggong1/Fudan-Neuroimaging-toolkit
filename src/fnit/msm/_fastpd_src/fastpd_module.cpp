@@ -14,7 +14,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <thread>
 #include "FastPD.h"
+#include "ordered_face_octree.h"
+#include "source_unfold.h"
 
 namespace {
 
@@ -524,6 +527,179 @@ PyObject* source_radial_selection(PyObject*, PyObject* args) {
     release(); return output;
 }
 
+struct OrderedScalarTriangle {
+    std::array<Point3, 3> corners;
+    Point3 normal;
+    double plane;
+    std::array<Point3, 3> edges, side_origins, side_normals;
+    explicit OrderedScalarTriangle(const std::array<Point3, 3>& values): corners(values) {
+        auto first = subtract_point(corners[2], corners[0]); normalize_point(first);
+        auto second = subtract_point(corners[1], corners[0]); normalize_point(second);
+        normal = cross_point(first, second); normalize_point(normal);
+        plane = dot_point(normal, corners[0]);
+        const int order[3][3] = {{0,1,2},{1,2,0},{2,0,1}};
+        for (int side = 0; side < 3; ++side) {
+            const auto& ids = order[side];
+            side_origins[side] = corners[ids[1]];
+            edges[side] = subtract_point(corners[ids[2]], corners[ids[1]]);
+            side_normals[side] = cross_point(edges[side], subtract_point(corners[ids[0]], corners[ids[1]]));
+        }
+    }
+    Point3 project(const Point3& point) const {
+        const double scale = plane / dot_point(normal, point);
+        return {{point[0] * scale, point[1] * scale, point[2] * scale}};
+    }
+    bool contains(const Point3& point) const {
+        for (int side = 0; side < 3; ++side)
+            if (!(dot_point(cross_point(edges[side], subtract_point(point, side_origins[side])), side_normals[side]) > -1e-8)) return false;
+        return true;
+    }
+};
+
+PyObject* source_ordered_selection(PyObject*, PyObject* args) {
+    // Independent literal-double ordered leaf, direct-sibling and nearest
+    // sibling-corner selection. All input arrays are immutable snapshots;
+    // per-row work has independent state and a caller-controlled CPU budget.
+    Py_buffer vertices{}, faces{}, queries{}, node_ids{}, leaf_offsets{}, leaf_faces{}, fallback_offsets{}, fallback_faces{};
+    Py_ssize_t vertex_count, face_count, query_count, worker_count;
+    auto release = [&]() {
+        for (auto* buffer: {&vertices, &faces, &queries, &node_ids, &leaf_offsets, &leaf_faces, &fallback_offsets, &fallback_faces})
+            if (buffer->obj) PyBuffer_Release(buffer);
+    };
+    if (!PyArg_ParseTuple(args, "y*y*y*y*y*y*y*y*nnnn", &vertices, &faces, &queries, &node_ids,
+                         &leaf_offsets, &leaf_faces, &fallback_offsets, &fallback_faces,
+                         &vertex_count, &face_count, &query_count, &worker_count)) { release(); return nullptr; }
+    const auto maximum = std::numeric_limits<Py_ssize_t>::max();
+    const Py_ssize_t node_count = leaf_offsets.len / Py_ssize_t(sizeof(std::int64_t)) - 1;
+    if (vertex_count < 1 || face_count < 1 || query_count < 0 || worker_count < 1 || worker_count > 1024 || node_count < 1 ||
+        vertex_count > maximum / (3 * Py_ssize_t(sizeof(double))) || face_count > maximum / (3 * Py_ssize_t(sizeof(std::int64_t))) ||
+        query_count > maximum / (4 * Py_ssize_t(sizeof(double))) ||
+        vertices.len != vertex_count * 3 * Py_ssize_t(sizeof(double)) || faces.len != face_count * 3 * Py_ssize_t(sizeof(std::int64_t)) ||
+        queries.len != query_count * 3 * Py_ssize_t(sizeof(double)) || node_ids.len != query_count * Py_ssize_t(sizeof(std::int32_t)) ||
+        leaf_offsets.len % sizeof(std::int64_t) || fallback_offsets.len != leaf_offsets.len ||
+        leaf_faces.len % sizeof(std::int32_t) || fallback_faces.len % sizeof(std::int32_t)) {
+        release(); PyErr_SetString(PyExc_ValueError, "invalid ordered-selection buffer dimensions"); return nullptr;
+    }
+    auto* output = PyBytes_FromStringAndSize(nullptr, query_count * 4 * sizeof(double));
+    if (!output) { release(); return nullptr; }
+    char* output_data = PyBytes_AS_STRING(output);
+    BufferSnapshot v_copy(vertices), f_copy(faces), q_copy(queries), n_copy(node_ids),
+        lo_copy(leaf_offsets), lf_copy(leaf_faces), fo_copy(fallback_offsets), ff_copy(fallback_faces);
+    if (!v_copy.object || !f_copy.object || !q_copy.object || !n_copy.object || !lo_copy.object || !lf_copy.object || !fo_copy.object || !ff_copy.object) {
+        release(); Py_DECREF(output); return nullptr;
+    }
+    const auto read_point = [](const char* bytes, Py_ssize_t index) {
+        Point3 point; std::memcpy(point.data(), bytes + index * 3 * sizeof(double), 3 * sizeof(double)); return point;
+    };
+    const auto read_i64 = [](const char* bytes, Py_ssize_t index) {
+        std::int64_t value; std::memcpy(&value, bytes + index * sizeof(value), sizeof(value)); return value;
+    };
+    const auto read_i32 = [](const char* bytes, Py_ssize_t index) {
+        std::int32_t value; std::memcpy(&value, bytes + index * sizeof(value), sizeof(value)); return value;
+    };
+    try {
+        ReleasedGIL unlocked;
+        // Reject malformed offsets/indices before starting worker threads.
+        const struct { const char* offsets; const char* faces; Py_ssize_t entries; } pools[] = {
+            {lo_copy.data(), lf_copy.data(), leaf_faces.len / Py_ssize_t(sizeof(std::int32_t))},
+            {fo_copy.data(), ff_copy.data(), fallback_faces.len / Py_ssize_t(sizeof(std::int32_t))}};
+        for (const auto& pool: pools) {
+            const auto* offsets = pool.offsets;
+            const auto entries = pool.entries;
+            if (read_i64(offsets, 0) != 0 || read_i64(offsets, node_count) != entries)
+                throw std::invalid_argument("ordered face offsets do not span their pool");
+            for (Py_ssize_t node = 0; node < node_count; ++node)
+                if (read_i64(offsets, node) < 0 || read_i64(offsets, node + 1) < read_i64(offsets, node))
+                    throw std::invalid_argument("ordered face offsets are not monotonic");
+            for (Py_ssize_t index = 0; index < entries; ++index) {
+                const auto face = read_i32(pool.faces, index);
+                if (face < 0 || face >= face_count) throw std::invalid_argument("ordered face candidate is outside the mesh");
+            }
+        }
+        std::vector<OrderedScalarTriangle> triangles;
+        triangles.reserve(static_cast<std::size_t>(face_count));
+        for (Py_ssize_t face = 0; face < face_count; ++face) {
+            std::array<Point3, 3> corners;
+            for (int corner = 0; corner < 3; ++corner) {
+                const auto vertex = read_i64(f_copy.data(), face * 3 + corner);
+                if (vertex < 0 || vertex >= vertex_count) throw std::invalid_argument("ordered triangle vertex is outside the mesh");
+                corners[corner] = read_point(v_copy.data(), vertex);
+                for (double value: corners[corner]) if (!std::isfinite(value)) throw std::invalid_argument("ordered sphere coordinates must be finite");
+            }
+            triangles.emplace_back(corners);
+        }
+        const auto select_rows = [&](Py_ssize_t begin, Py_ssize_t end) {
+            for (Py_ssize_t row = begin; row < end; ++row) {
+                const Point3 point = read_point(q_copy.data(), row);
+                for (double value: point) if (!std::isfinite(value) || value < -101.0 || value > 101.0)
+                    throw std::invalid_argument("ordered query must be finite and within [-101,101] root");
+                const auto node = read_i32(n_copy.data(), row);
+                if (node < 0 || node >= node_count) throw std::invalid_argument("ordered flat node is outside the tree");
+                double result[4] = {-1, 0, 0, 0};
+                const auto select_pool = [&](const char* offsets, const char* pool) {
+                    double best = std::numeric_limits<double>::max();
+                    for (auto entry = read_i64(offsets, node); entry < read_i64(offsets, node + 1); ++entry) {
+                        const auto face = read_i32(pool, static_cast<Py_ssize_t>(entry));
+                        const auto& triangle = triangles[face];
+                        const auto projected = triangle.project(point);
+                        if (!triangle.contains(projected)) continue;
+                        const auto distance = finite_triangle_distance(projected, triangle.corners);
+                        if (distance < best) {
+                            best = distance; result[0] = static_cast<double>(face);
+                            for (int axis = 0; axis < 3; ++axis) result[axis + 1] = projected[axis];
+                        }
+                    }
+                };
+                select_pool(lo_copy.data(), lf_copy.data());
+                if (result[0] < 0) select_pool(fo_copy.data(), ff_copy.data());
+                if (result[0] < 0) {
+                    // Source's final fallback scans direct siblings only,
+                    // retaining face/corner order and strict distance ties.
+                    double best = std::numeric_limits<double>::max();
+                    std::int32_t chosen = -1;
+                    for (auto entry = read_i64(fo_copy.data(), node); entry < read_i64(fo_copy.data(), node + 1); ++entry) {
+                        const auto face = read_i32(ff_copy.data(), static_cast<Py_ssize_t>(entry));
+                        for (const auto& corner: triangles[face].corners) {
+                            const auto chord = point_norm(subtract_point(corner, point));
+                            const auto distance = 200.0 * std::asin(chord / 200.0);
+                            if (distance < best) { best = distance; chosen = face; }
+                        }
+                    }
+                    if (chosen < 0) throw std::invalid_argument("ordered leaf/direct-sibling fallback has no selected triangle");
+                    const auto projected = triangles[chosen].project(point);
+                    result[0] = static_cast<double>(chosen);
+                    for (int axis = 0; axis < 3; ++axis) result[axis + 1] = projected[axis];
+                }
+                std::memcpy(output_data + row * 4 * sizeof(double), result, sizeof(result));
+            }
+        };
+        const Py_ssize_t workers = std::min(worker_count, std::max(Py_ssize_t(1), query_count));
+        if (workers == 1) select_rows(0, query_count);
+        else {
+            std::vector<std::thread> threads;
+            std::vector<std::exception_ptr> errors(static_cast<std::size_t>(workers));
+            threads.reserve(static_cast<std::size_t>(workers));
+            try {
+                for (Py_ssize_t worker = 0; worker < workers; ++worker)
+                    threads.emplace_back([&, worker]() {
+                        try {
+                            const auto chunk = query_count / workers, remainder = query_count % workers;
+                            const auto begin = chunk * worker + std::min(worker, remainder);
+                            const auto end = begin + chunk + (worker < remainder ? 1 : 0);
+                            select_rows(begin, end);
+                        }
+                        catch (...) { errors[worker] = std::current_exception(); }
+                    });
+            } catch (...) { for (auto& thread: threads) thread.join(); throw; }
+            for (auto& thread: threads) thread.join();
+            for (const auto& error: errors) if (error) std::rethrow_exception(error);
+        }
+    } catch (const std::exception& error) {
+        release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, error.what()); return nullptr;
+    }
+    release(); return output;
+}
+
 PyObject* source_sphere_warp(PyObject*, PyObject* args) {
     // Rebuild a sphere point in scalar order at the warp boundary. The
     // face lookup remains batched; no host crossings occur per point.
@@ -680,7 +856,57 @@ PyObject* source_triangle_nearest(PyObject*, PyObject* args) {
     release(); return output;
 }
 
+PyObject* source_unfold(PyObject*,PyObject* args) {
+    Py_buffer vertices{},faces{};Py_ssize_t count,face_count,maximum_sweeps;
+    if(!PyArg_ParseTuple(args,"y*y*nnn",&vertices,&faces,&count,&face_count,&maximum_sweeps)) {
+        if(vertices.obj)PyBuffer_Release(&vertices);
+        if(faces.obj)PyBuffer_Release(&faces);
+        return nullptr;
+    }
+    const auto release=[&](){PyBuffer_Release(&vertices);PyBuffer_Release(&faces);};
+    const auto maximum=std::numeric_limits<Py_ssize_t>::max();
+    if(count<1 || face_count<1 || count>maximum/24 || face_count>maximum/24 ||
+       maximum_sweeps<0 || maximum_sweeps>1000000 || vertices.len!=count*24 || faces.len!=face_count*24) {
+        release();PyErr_SetString(PyExc_ValueError,"invalid float64/int64 unfolding buffers or sweep limit");return nullptr;
+    }
+    BufferSnapshot points_copy(vertices),faces_copy(faces);
+    if(!points_copy.object || !faces_copy.object){release();return nullptr;}
+    std::vector<fnit_source_unfold::Point> points;
+    std::vector<fnit_source_unfold::Face> triangles;
+    std::uint64_t updates=0;
+    try {
+        ReleasedGIL unlocked;
+        points.resize(static_cast<std::size_t>(count));
+        triangles.resize(static_cast<std::size_t>(face_count));
+        std::memcpy(points.data(),points_copy.data(),vertices.len);
+        std::memcpy(triangles.data(),faces_copy.data(),faces.len);
+        std::vector<std::vector<std::int64_t>> incident(static_cast<std::size_t>(count));
+        for(const auto& point:points)for(double value:point)
+            if(!std::isfinite(value))throw std::invalid_argument("unfolding coordinates must be finite");
+        for(std::int64_t face=0;face<face_count;++face)for(const auto vertex:triangles[face]) {
+            if(vertex<0 || vertex>=count)throw std::invalid_argument("unfolding face index outside mesh");
+            incident[vertex].push_back(face);
+        }
+        for(const auto& neighbours:incident)
+            if(neighbours.empty())throw std::invalid_argument("unfolding requires an incident face for every vertex");
+        updates=fnit_source_unfold::unfold(points,triangles,incident,maximum_sweeps);
+        for(const auto& point:points)for(double value:point)
+            if(!std::isfinite(value))throw std::invalid_argument("unfolding produced nonfinite coordinates");
+    }catch(const std::exception& error) {
+        release();PyErr_SetString(PyExc_ValueError,error.what());return nullptr;
+    }
+    release();
+    return Py_BuildValue("(y#K)",reinterpret_cast<const char*>(points.data()),count*24,
+                         static_cast<unsigned long long>(updates));
+}
+
 PyMethodDef methods[] = {
+    {"source_unfold",source_unfold,METH_VARARGS,
+     "Sequential scalar source unfolding: float64 vertices, int64 faces, V,F,sweep_limit -> coordinates, update count."},
+    {"build_ordered_face_octree", fnit_ordered_octree::build, METH_VARARGS,
+     "Build source-ordered octree node/leaf/direct-sibling buffers."},
+    {"source_ordered_selection", source_ordered_selection, METH_VARARGS,
+     "Strict scalar ordered leaf/direct-sibling sphere face selection."},
     {"optimize", optimize, METH_VARARGS, "HOCR and FastPD fusion for triangle costs."},
     {"source_wls_cost", source_wls_cost, METH_VARARGS,
      "Ordered source WLS reduction: float64 distance/similarity/valid buffer, rows, width, sigma."},

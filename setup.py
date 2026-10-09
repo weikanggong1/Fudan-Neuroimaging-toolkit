@@ -12,7 +12,8 @@ setup(
             language="c++",
             # Source WLS and HOCR require separately rounded products/sums.
             extra_compile_args=["/O2", "/std:c++17", "/fp:strict"] if os.name == "nt"
-            else ["-O3", "-std=c++17", "-fno-fast-math", "-ffp-contract=off"],
+            else ["-O3", "-std=c++17", "-fno-fast-math", "-ffp-contract=off", "-pthread"],
+            extra_link_args=[] if os.name == "nt" else ["-pthread"],
         )
     ]
 )

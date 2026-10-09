@@ -53,16 +53,43 @@ restriction remains applicable to this component.
 FNIT's triangle-to-quadratic HOCR reduction in `fastpd_module.cpp` is an
 independent implementation. Upstream ELC source is not included. Its
 `source_wls_cost`, `source_rotation_matrices`, `source_radial_selection`, and
-`source_sphere_warp`, and `source_triangle_nearest` helpers reproduce the pinned newMSM weighted-similarity,
+`source_sphere_warp`, `source_triangle_nearest`, and `source_unfold` helpers reproduce the pinned newMSM weighted-similarity,
 Point/Rodrigues, radial projection, and sphere reconstruction arithmetic using standard
 C++ double operations and libm; the newMSM MIT notice applies to these
 source-derived helpers. They do not link to newMSM or FSL libraries.
+`src/fnit/msm/_fastpd_src/source_unfold.h` independently implements the sequential
+area-gradient unfolding and preserves the source's scalar multiply, dot,
+normalization and vertex-update order. The pinned `reg_tools.cpp`, `point.cpp`
+and `triangle.cpp` MIT notices are retained in that header; source and relevant
+arithmetic-section SHA-256 values are recorded in `docs/provenance.json`.
+`src/fnit/msm/_native_repair.py` adds an explicit final-output correction with
+bounded unfolding and local orientation tests at saved float32 precision.
+It is separate from the default source-compatible registration policy.
 `src/fnit/msm/_affine.py`, `_sphere_map.py`, `config.py`, and `msmsulc.py`
 are modified Python/PyTorch implementations of the same pinned newMSM
 MSMSulc geometry, rigid initialization, resampling, label proposals and
 strain objective. The newMSM MIT notice above applies to these source-derived
 parts. Official newMSM binaries and additional upstream test-oracle source
 are not distributed or invoked at runtime.
+
+`src/fnit/msm/_fastpd_src/ordered_face_octree.h`, the
+`build_ordered_face_octree` and `source_ordered_selection` helpers in
+`fastpd_module.cpp`, and the ordered face search in `_sphere_map.py` are
+independent adaptations of the leaf insertion, candidate ordering and
+triangle selection rules in newMSM's pinned
+[`node.cpp`](https://github.com/rbesenczi/newMSM/blob/260718953547743c028a45f8c885d163441df87a/libraries/msm-newresampler/src/node.cpp)
+and
+[`octree.cpp`](https://github.com/rbesenczi/newMSM/blob/260718953547743c028a45f8c885d163441df87a/libraries/msm-newresampler/src/octree.cpp).
+These files are covered by the
+[`msm-newresampler` MIT license](https://github.com/rbesenczi/newMSM/blob/260718953547743c028a45f8c885d163441df87a/libraries/msm-newresampler/LICENSE),
+Copyright (c) 2022 King's College London, MeTrICS Lab, Renato Besenczi.
+Their headers also attribute the Octree search to Tim Coalson, used with his
+permission under the same license, and Copyright (C) Washington University
+School of Medicine. FNIT preserves this complete MIT notice and attribution
+in `ordered_face_octree.h`; the two pinned source hashes are recorded in
+[`docs/provenance.json`](docs/provenance.json). FNIT does not distribute these
+two upstream source files or link to upstream Octree libraries. The existing
+FastPD research and non-commercial restriction continues to apply to FastPD.
 
 `src/fnit/fmri/surface_fmriprep.py` adapts the 91k CIFTI assembly and metadata
 rules of [NiWorkflows 1.14.4](https://github.com/nipreps/niworkflows/blob/1.14.4/niworkflows/interfaces/cifti.py),

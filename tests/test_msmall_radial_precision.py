@@ -86,12 +86,22 @@ def test_source_precision_boundary_selection_is_execution_independent(device):
     np.testing.assert_allclose(outputs[0][1].cpu().sum(1), 1, rtol=0, atol=3e-16)
 
 
-def test_mature_sulc_lookup_does_not_enable_new_scalar_selection(monkeypatch):
+def test_sulc_lookup_uses_shared_ordered_point_selection_for_both_precision_flags(monkeypatch):
     def forbidden(*args):
-        raise AssertionError("MSMSulc reference-compatible default must remain unchanged")
+        raise AssertionError("ordered leaf lookup must not use the old incident-candidate selector")
     monkeypatch.setattr(_fastpd_native, "source_radial_selection", forbidden)
+    native = _fastpd_native.source_ordered_selection
+    calls = []
+    def capture(*args):
+        calls.append(args[-2])
+        return native(*args)
+    monkeypatch.setattr(_fastpd_native, "source_ordered_selection", capture)
     vertices, faces = _ico(1)
-    RadialSphereMap(vertices, faces, "cpu").weights(torch.as_tensor(vertices))
+    outputs = [RadialSphereMap(vertices, faces, "cpu", source_precision=flag).weights(torch.as_tensor(vertices))
+               for flag in (False, True)]
+    assert calls == [len(vertices), len(vertices)]
+    for first, second in zip(*outputs):
+        assert torch.equal(first, second)
 
 
 @pytest.mark.parametrize("device", ["cpu", "cuda:0"])

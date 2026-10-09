@@ -25,7 +25,9 @@ def execution_budget(cpu_threads):
                                   "tree_nearest_queries": 0, "nearest_tie_fallback_queries": 0,
                                   "cuda_adaptive_resampling_calls": 0,
                                   "tree_expanded_face_queries": 0,
-                                  "adaptive_cpu_layout_fallback_calls": 0})
+                                  "adaptive_cpu_layout_fallback_calls": 0,
+                                  "octree_device_containment_queries": 0,
+                                  "octree_native_queries": 0})
     try:
         yield
     finally:
@@ -51,7 +53,8 @@ def register_hemispheres(function, device, *, parallel=True, cpu_threads=None):
     waits for the caller's current stream and is synchronized on every exit.
     Host tensors/arrays and native graph states remain private to the worker.
     CPU PyTorch operations use its existing shared intra-op pool; the local
-    budget bounds cKDTree work and Workbench subprocesses, not that pool.
+    budget bounds native ordered lookup workers and Workbench subprocesses,
+    not that pool.
     """
     selected = torch.device(device)
     # Capture an unindexed CUDA device on the caller thread. New host

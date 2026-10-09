@@ -1,0 +1,1812 @@
+{
+  "schema_version": "fnit.validation.public.gpu_abba.v1",
+  "status": "complete",
+  "order": [
+    "A1",
+    "B1",
+    "B2",
+    "A2"
+  ],
+  "scope": "Complete bilateral MSMSulc and three-stage 21-feature C-only MSMAll core APIs; no feature generation or CIFTI projection",
+  "native_extension_sha256": "ed1541e222ff306bd1ac974b3f4c945b298d2fe2e8b2ae8078766b3465e08123",
+  "runner_sha256": "f30c59c5a2d4508d9c15216b745edda359c80910a2c46008e420a48021ce16f8",
+  "source_manifests_sha256": {
+    "A": "b4e6c65fffa98dfc852f1eb7e3bcf1bd8e52c03c062c100111cab8082d5547ab",
+    "B": "293086c0a4f7db305c254140e8f6ffb1ae404d35b4295b86350d51beae278ddc"
+  },
+  "source_manifest_file_counts": {
+    "A": 763,
+    "B": 763
+  },
+  "mapper_sha256": {
+    "A": "1b51a170e12d70f5a82d6a870e58abd433a49e1c7167635223543286384dae09",
+    "B": "c006099177fb1f934ea443a683f4f5e563c787b946eca62afab80bd6bb59a6e0"
+  },
+  "full_source_manifests_recorded_in_each_core_report": true,
+  "oracle_configuration_sha256": {
+    "msmsulc": "2161d00a4253e9533c28f76c52e71044609b3372edbe27ed5e512b22b2615147",
+    "msmall": "b7997acaf75994f35fabdbaf3bef5d4090de845d7d4091532b444d912d934c12"
+  },
+  "configuration": {
+    "msmsulc": {
+      "simval": [
+        3,
+        2,
+        2,
+        2
+      ],
+      "iterations": [
+        50,
+        10,
+        15,
+        15
+      ],
+      "control_grid": [
+        6,
+        2,
+        3,
+        4
+      ],
+      "sampling_grid": [
+        6,
+        4,
+        5,
+        6
+      ],
+      "data_grid": [
+        6,
+        4,
+        5,
+        6
+      ],
+      "regularization": [
+        0.0,
+        10.0,
+        7.5,
+        7.5
+      ],
+      "affine_step_size": 0.009999999776482582,
+      "affine_gradient_spacing": 0.5,
+      "shear_modulus": 0.4000000059604645,
+      "bulk_modulus": 1.600000023841858,
+      "strain_exponent": 2.0,
+      "regularization_exponent": 2.0
+    },
+    "msmall": {
+      "simval": [
+        2,
+        2,
+        2
+      ],
+      "iterations": [
+        10,
+        15,
+        15
+      ],
+      "control_grid": [
+        2,
+        3,
+        4
+      ],
+      "sampling_grid": [
+        4,
+        5,
+        6
+      ],
+      "data_grid": [
+        4,
+        5,
+        6
+      ],
+      "regularization": [
+        0.05000000074505806,
+        0.05000000074505806,
+        0.05000000074505806
+      ],
+      "shear_modulus": 0.4000000059604645,
+      "bulk_modulus": 1.600000023841858,
+      "strain_exponent": 2.0,
+      "regularization_exponent": 2.0
+    }
+  },
+  "strict_reference_scope": "These core runs bind previously saved fixed-newMSM strict CPU1 reference spheres. Independent newly run same-host official CPU1 and CPU4 validation for the same prepared core inputs is complete in the separate supplemental report gpu_fresh_official_precision.public.json; that supplemental validation is distinct from the newly generated features in the ten-person surface pipeline.",
+  "timing_definition": "Each complete public API wall includes input reading, registration and sphere/report writing. Imports, input/source hashing, CUDA initialization and output comparison are outside API timing. One observation on shared GPU; no stable speedup inference.",
+  "qc_scope": "Report policy preserves reference geometry: MSMSulc folds L/R 2/0 match the strict original; this is not all-chain zero-fold QC",
+  "rows": [
+    {
+      "label": "A1",
+      "version": "A",
+      "initial_gpu_load": {
+        "index": 0,
+        "memory_used_mib": 0,
+        "gpu_utilization_percent": 0,
+        "provenance": "A1 controller prelaunch observation independently reported by task owner; not retrospectively sampled"
+      },
+      "environment": {
+        "device": "cuda:0",
+        "cpu_affinity": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "physical_gpu_index": 0,
+        "cpu_total_threads": 8,
+        "threads_per_hemisphere": 4,
+        "hemisphere_parallel": true,
+        "api_execution": "serial",
+        "torch": "2.5.1+cu118",
+        "numpy": "1.26.4",
+        "nibabel": "5.4.2",
+        "registration_dtype": "float64",
+        "output_dtype": "float32",
+        "allocator_limit_bytes": 20000000000,
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OMP_THREAD_LIMIT": "8",
+          "MKL_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "OMP_DYNAMIC": "FALSE",
+          "MKL_DYNAMIC": "FALSE"
+        },
+        "cuda_initialized_during_dry_run": false,
+        "gpu": "NVIDIA A100-SXM4-80GB",
+        "cuda": "11.8",
+        "cuda_initialization_seconds_excluded": 0.972970511764288
+      },
+      "started_at_utc": "2026-10-09T07:08:13.587114+00:00",
+      "finished_at_utc": "2026-10-09T07:11:00.172943+00:00",
+      "cores": {
+        "msmsulc": {
+          "api_wall_seconds": 91.59951722063124,
+          "peak_allocated_gb": 1.75840768,
+          "peak_reserved_gb": 2.373976064,
+          "process_peak_rss_gb": 1.190182912,
+          "tf32_matmul_actual": true,
+          "tf32_cudnn_actual": true,
+          "source_unchanged": true,
+          "native_extension_unchanged": true,
+          "inputs_unchanged": true,
+          "official_saved_spheres_unchanged": true,
+          "oracle_configurations_unchanged": true,
+          "original_helper_runtime_loaded": false,
+          "comparison_seconds_excluded": 1.385976368561387,
+          "hemispheres": {
+            "L": {
+              "registration_wall_seconds": 74.2717348607257,
+              "affine_seconds": 8.10568251926452,
+              "stage_wall_seconds": [
+                9.551855025812984,
+                16.950784095562994,
+                38.458743473514915
+              ],
+              "stage_iterations": [
+                8,
+                10,
+                8
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 8,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 139060260,
+                "octree_native_queries": 115944
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 142173,
+                "faces": 284342,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 99.9999999950896,
+                  "median": 99.99999999120773,
+                  "p95": 100.00000315324219,
+                  "maximum": 100.00000557876999
+                },
+                "fnit_folded_faces": 2,
+                "official_folded_faces": 2,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 2,
+                  "official_absolute_folded_faces": 2,
+                  "fnit_relative_folded_faces": 2,
+                  "official_relative_folded_faces": 2
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            },
+            "R": {
+              "registration_wall_seconds": 91.59174775518477,
+              "affine_seconds": 8.423479920253158,
+              "stage_wall_seconds": [
+                8.150197476148605,
+                12.631390461698174,
+                61.32719764765352
+              ],
+              "stage_iterations": [
+                6,
+                8,
+                15
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 8,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 216235690,
+                "octree_native_queries": 145422
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 148403,
+                "faces": 296802,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 100.00000000240328,
+                  "median": 100.000000005377,
+                  "p95": 100.0000031516868,
+                  "maximum": 100.00000541200555
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            }
+          }
+        },
+        "msmall": {
+          "api_wall_seconds": 72.11189015768468,
+          "peak_allocated_gb": 1.789684224,
+          "peak_reserved_gb": 6.765412352,
+          "process_peak_rss_gb": 1.311125504,
+          "tf32_matmul_actual": true,
+          "tf32_cudnn_actual": true,
+          "source_unchanged": true,
+          "native_extension_unchanged": true,
+          "inputs_unchanged": true,
+          "official_saved_spheres_unchanged": true,
+          "oracle_configurations_unchanged": true,
+          "original_helper_runtime_loaded": false,
+          "comparison_seconds_excluded": 0.202026579529047,
+          "hemispheres": {
+            "L": {
+              "registration_wall_seconds": 65.78621479962021,
+              "affine_seconds": null,
+              "stage_wall_seconds": [
+                4.858516301959753,
+                9.747559872455895,
+                50.6261386340484
+              ],
+              "stage_iterations": [
+                8,
+                6,
+                10
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 54,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 147714674,
+                "octree_native_queries": 274180
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 32492,
+                "faces": 64980,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 100.00000001521535,
+                  "median": 100.00000002977595,
+                  "p95": 100.00000316438397,
+                  "maximum": 100.00000536442668
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            },
+            "R": {
+              "registration_wall_seconds": 72.10808642208576,
+              "affine_seconds": null,
+              "stage_wall_seconds": [
+                4.748553639277816,
+                18.328755726106465,
+                48.68757136631757
+              ],
+              "stage_iterations": [
+                8,
+                10,
+                10
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 62,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 160551502,
+                "octree_native_queries": 221840
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 32492,
+                "faces": 64980,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 99.9999999719444,
+                  "median": 99.99999997107528,
+                  "p95": 100.00000314876549,
+                  "maximum": 100.00000548510891
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            }
+          }
+        }
+      },
+      "strict_saved_coordinate_and_topology_gate": true
+    },
+    {
+      "label": "B1",
+      "version": "B",
+      "initial_gpu_load": {
+        "index": 0,
+        "name": "NVIDIA A100-SXM4-80GB",
+        "memory_total_mib": 81920,
+        "memory_used_mib": 0,
+        "memory_free_mib": 81037,
+        "gpu_utilization_percent": 0,
+        "memory_utilization_percent": 0,
+        "sampled_before_launch_utc": "2026-10-09T07:17:36Z"
+      },
+      "environment": {
+        "device": "cuda:0",
+        "cpu_affinity": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "physical_gpu_index": 0,
+        "cpu_total_threads": 8,
+        "threads_per_hemisphere": 4,
+        "hemisphere_parallel": true,
+        "api_execution": "serial",
+        "torch": "2.5.1+cu118",
+        "numpy": "1.26.4",
+        "nibabel": "5.4.2",
+        "registration_dtype": "float64",
+        "output_dtype": "float32",
+        "allocator_limit_bytes": 20000000000,
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OMP_THREAD_LIMIT": "8",
+          "MKL_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "OMP_DYNAMIC": "FALSE",
+          "MKL_DYNAMIC": "FALSE"
+        },
+        "cuda_initialized_during_dry_run": false,
+        "gpu": "NVIDIA A100-SXM4-80GB",
+        "cuda": "11.8",
+        "cuda_initialization_seconds_excluded": 1.8249356765300035
+      },
+      "started_at_utc": "2026-10-09T07:17:51.647336+00:00",
+      "finished_at_utc": "2026-10-09T07:20:30.747411+00:00",
+      "cores": {
+        "msmsulc": {
+          "api_wall_seconds": 84.55369851924479,
+          "peak_allocated_gb": 2.24018176,
+          "peak_reserved_gb": 2.938109952,
+          "process_peak_rss_gb": 1.229492224,
+          "tf32_matmul_actual": true,
+          "tf32_cudnn_actual": true,
+          "source_unchanged": true,
+          "native_extension_unchanged": true,
+          "inputs_unchanged": true,
+          "official_saved_spheres_unchanged": true,
+          "oracle_configurations_unchanged": true,
+          "original_helper_runtime_loaded": false,
+          "comparison_seconds_excluded": 1.46356659848243,
+          "hemispheres": {
+            "L": {
+              "registration_wall_seconds": 69.04097243770957,
+              "affine_seconds": 7.2293650563806295,
+              "stage_wall_seconds": [
+                8.667633710429072,
+                16.435192693024874,
+                35.60092544555664
+              ],
+              "stage_iterations": [
+                8,
+                10,
+                8
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 8,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 139060260,
+                "octree_native_queries": 115944
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 142173,
+                "faces": 284342,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 99.9999999950896,
+                  "median": 99.99999999120773,
+                  "p95": 100.00000315324219,
+                  "maximum": 100.00000557876999
+                },
+                "fnit_folded_faces": 2,
+                "official_folded_faces": 2,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 2,
+                  "official_absolute_folded_faces": 2,
+                  "fnit_relative_folded_faces": 2,
+                  "official_relative_folded_faces": 2
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            },
+            "R": {
+              "registration_wall_seconds": 84.51409143023193,
+              "affine_seconds": 7.351694195531309,
+              "stage_wall_seconds": [
+                7.6633619870990515,
+                12.11683372873813,
+                56.21235058829188
+              ],
+              "stage_iterations": [
+                6,
+                8,
+                15
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 8,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 216235690,
+                "octree_native_queries": 145422
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 148403,
+                "faces": 296802,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 100.00000000240328,
+                  "median": 100.000000005377,
+                  "p95": 100.0000031516868,
+                  "maximum": 100.00000541200555
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            }
+          }
+        },
+        "msmall": {
+          "api_wall_seconds": 70.6745721641928,
+          "peak_allocated_gb": 2.26499328,
+          "peak_reserved_gb": 7.375683584,
+          "process_peak_rss_gb": 1.229492224,
+          "tf32_matmul_actual": true,
+          "tf32_cudnn_actual": true,
+          "source_unchanged": true,
+          "native_extension_unchanged": true,
+          "inputs_unchanged": true,
+          "official_saved_spheres_unchanged": true,
+          "oracle_configurations_unchanged": true,
+          "original_helper_runtime_loaded": false,
+          "comparison_seconds_excluded": 0.2294524135068059,
+          "hemispheres": {
+            "L": {
+              "registration_wall_seconds": 65.1186733385548,
+              "affine_seconds": null,
+              "stage_wall_seconds": [
+                5.333806180395186,
+                9.267353705130517,
+                50.14534871280193
+              ],
+              "stage_iterations": [
+                8,
+                6,
+                10
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 54,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 147714674,
+                "octree_native_queries": 274180
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 32492,
+                "faces": 64980,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 100.00000001521535,
+                  "median": 100.00000002977595,
+                  "p95": 100.00000316438397,
+                  "maximum": 100.00000536442668
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            },
+            "R": {
+              "registration_wall_seconds": 70.6707236142829,
+              "affine_seconds": null,
+              "stage_wall_seconds": [
+                5.374029319733381,
+                20.213395876809955,
+                44.7219177801162
+              ],
+              "stage_iterations": [
+                8,
+                10,
+                10
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 62,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 160551502,
+                "octree_native_queries": 221840
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 32492,
+                "faces": 64980,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 99.9999999719444,
+                  "median": 99.99999997107528,
+                  "p95": 100.00000314876549,
+                  "maximum": 100.00000548510891
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            }
+          }
+        }
+      },
+      "strict_saved_coordinate_and_topology_gate": true
+    },
+    {
+      "label": "B2",
+      "version": "B",
+      "initial_gpu_load": {
+        "index": 0,
+        "name": "NVIDIA A100-SXM4-80GB",
+        "memory_total_mib": 81920,
+        "memory_used_mib": 3,
+        "memory_free_mib": 81034,
+        "gpu_utilization_percent": 0,
+        "memory_utilization_percent": 0,
+        "compute_process_count": 0,
+        "sampled_before_launch_utc": "2026-10-09T07:27:58.575359+00:00",
+        "provenance": "measured nvidia-smi immediately before launch"
+      },
+      "environment": {
+        "device": "cuda:0",
+        "cpu_affinity": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "physical_gpu_index": 0,
+        "cpu_total_threads": 8,
+        "threads_per_hemisphere": 4,
+        "hemisphere_parallel": true,
+        "api_execution": "serial",
+        "torch": "2.5.1+cu118",
+        "numpy": "1.26.4",
+        "nibabel": "5.4.2",
+        "registration_dtype": "float64",
+        "output_dtype": "float32",
+        "allocator_limit_bytes": 20000000000,
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OMP_THREAD_LIMIT": "8",
+          "MKL_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "OMP_DYNAMIC": "FALSE",
+          "MKL_DYNAMIC": "FALSE"
+        },
+        "cuda_initialized_during_dry_run": false,
+        "gpu": "NVIDIA A100-SXM4-80GB",
+        "cuda": "11.8",
+        "cuda_initialization_seconds_excluded": 2.490968898870051
+      },
+      "started_at_utc": "2026-10-09T07:28:00.538419+00:00",
+      "finished_at_utc": "2026-10-09T07:30:35.310536+00:00",
+      "cores": {
+        "msmsulc": {
+          "api_wall_seconds": 83.32362691964954,
+          "peak_allocated_gb": 2.331060224,
+          "peak_reserved_gb": 2.938109952,
+          "process_peak_rss_gb": 1.227603968,
+          "tf32_matmul_actual": true,
+          "tf32_cudnn_actual": true,
+          "source_unchanged": true,
+          "native_extension_unchanged": true,
+          "inputs_unchanged": true,
+          "official_saved_spheres_unchanged": true,
+          "oracle_configurations_unchanged": true,
+          "original_helper_runtime_loaded": false,
+          "comparison_seconds_excluded": 1.3755344487726688,
+          "hemispheres": {
+            "L": {
+              "registration_wall_seconds": 67.83382478542626,
+              "affine_seconds": 7.023227150551975,
+              "stage_wall_seconds": [
+                8.50807885825634,
+                16.076590259559453,
+                35.15572510007769
+              ],
+              "stage_iterations": [
+                8,
+                10,
+                8
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 8,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 139060260,
+                "octree_native_queries": 115944
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 142173,
+                "faces": 284342,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 99.9999999950896,
+                  "median": 99.99999999120773,
+                  "p95": 100.00000315324219,
+                  "maximum": 100.00000557876999
+                },
+                "fnit_folded_faces": 2,
+                "official_folded_faces": 2,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 2,
+                  "official_absolute_folded_faces": 2,
+                  "fnit_relative_folded_faces": 2,
+                  "official_relative_folded_faces": 2
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            },
+            "R": {
+              "registration_wall_seconds": 83.27017212752253,
+              "affine_seconds": 7.086676596663892,
+              "stage_wall_seconds": [
+                7.499367320910096,
+                11.864133625291288,
+                55.6296552317217
+              ],
+              "stage_iterations": [
+                6,
+                8,
+                15
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 8,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 216235690,
+                "octree_native_queries": 145422
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 148403,
+                "faces": 296802,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 100.00000000240328,
+                  "median": 100.000000005377,
+                  "p95": 100.0000031516868,
+                  "maximum": 100.00000541200555
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            }
+          }
+        },
+        "msmall": {
+          "api_wall_seconds": 67.04392813425511,
+          "peak_allocated_gb": 2.258504704,
+          "peak_reserved_gb": 7.375683584,
+          "process_peak_rss_gb": 1.227603968,
+          "tf32_matmul_actual": true,
+          "tf32_cudnn_actual": true,
+          "source_unchanged": true,
+          "native_extension_unchanged": true,
+          "inputs_unchanged": true,
+          "official_saved_spheres_unchanged": true,
+          "oracle_configurations_unchanged": true,
+          "original_helper_runtime_loaded": false,
+          "comparison_seconds_excluded": 0.20565298479050398,
+          "hemispheres": {
+            "L": {
+              "registration_wall_seconds": 61.65092669799924,
+              "affine_seconds": null,
+              "stage_wall_seconds": [
+                5.190360778011382,
+                9.315410051494837,
+                46.79377247672528
+              ],
+              "stage_iterations": [
+                8,
+                6,
+                10
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 54,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 147714674,
+                "octree_native_queries": 274180
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 32492,
+                "faces": 64980,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 100.00000001521535,
+                  "median": 100.00000002977595,
+                  "p95": 100.00000316438397,
+                  "maximum": 100.00000536442668
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            },
+            "R": {
+              "registration_wall_seconds": 67.03781386371702,
+              "affine_seconds": null,
+              "stage_wall_seconds": [
+                5.298260758630931,
+                17.06073050852865,
+                44.33326707594097
+              ],
+              "stage_iterations": [
+                8,
+                10,
+                10
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 62,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 160551502,
+                "octree_native_queries": 221840
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 32492,
+                "faces": 64980,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 99.9999999719444,
+                  "median": 99.99999997107528,
+                  "p95": 100.00000314876549,
+                  "maximum": 100.00000548510891
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            }
+          }
+        }
+      },
+      "strict_saved_coordinate_and_topology_gate": true
+    },
+    {
+      "label": "A2",
+      "version": "A",
+      "initial_gpu_load": {
+        "index": 0,
+        "name": "NVIDIA A100-SXM4-80GB",
+        "memory_total_mib": 81920,
+        "memory_used_mib": 3,
+        "memory_free_mib": 81034,
+        "gpu_utilization_percent": 0,
+        "memory_utilization_percent": 0,
+        "compute_process_count": 0,
+        "sampled_before_launch_utc": "2026-10-09T07:30:38.160263+00:00",
+        "provenance": "measured nvidia-smi immediately before launch"
+      },
+      "environment": {
+        "device": "cuda:0",
+        "cpu_affinity": [
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "physical_gpu_index": 0,
+        "cpu_total_threads": 8,
+        "threads_per_hemisphere": 4,
+        "hemisphere_parallel": true,
+        "api_execution": "serial",
+        "torch": "2.5.1+cu118",
+        "numpy": "1.26.4",
+        "nibabel": "5.4.2",
+        "registration_dtype": "float64",
+        "output_dtype": "float32",
+        "allocator_limit_bytes": 20000000000,
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OMP_THREAD_LIMIT": "8",
+          "MKL_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "OMP_DYNAMIC": "FALSE",
+          "MKL_DYNAMIC": "FALSE"
+        },
+        "cuda_initialized_during_dry_run": false,
+        "gpu": "NVIDIA A100-SXM4-80GB",
+        "cuda": "11.8",
+        "cuda_initialization_seconds_excluded": 4.055895083583891
+      },
+      "started_at_utc": "2026-10-09T07:30:40.584105+00:00",
+      "finished_at_utc": "2026-10-09T07:33:29.524072+00:00",
+      "cores": {
+        "msmsulc": {
+          "api_wall_seconds": 90.61830602493137,
+          "peak_allocated_gb": 1.759069184,
+          "peak_reserved_gb": 2.373976064,
+          "process_peak_rss_gb": 1.18949888,
+          "tf32_matmul_actual": true,
+          "tf32_cudnn_actual": true,
+          "source_unchanged": true,
+          "native_extension_unchanged": true,
+          "inputs_unchanged": true,
+          "official_saved_spheres_unchanged": true,
+          "oracle_configurations_unchanged": true,
+          "original_helper_runtime_loaded": false,
+          "comparison_seconds_excluded": 1.4588305409997702,
+          "hemispheres": {
+            "L": {
+              "registration_wall_seconds": 73.11494827270508,
+              "affine_seconds": 7.5400803796947,
+              "stage_wall_seconds": [
+                8.976648594252765,
+                16.990419921465218,
+                38.52697557210922
+              ],
+              "stage_iterations": [
+                8,
+                10,
+                8
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 8,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 139060260,
+                "octree_native_queries": 115944
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 142173,
+                "faces": 284342,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 99.9999999950896,
+                  "median": 99.99999999120773,
+                  "p95": 100.00000315324219,
+                  "maximum": 100.00000557876999
+                },
+                "fnit_folded_faces": 2,
+                "official_folded_faces": 2,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 2,
+                  "official_absolute_folded_faces": 2,
+                  "fnit_relative_folded_faces": 2,
+                  "official_relative_folded_faces": 2
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            },
+            "R": {
+              "registration_wall_seconds": 90.47017742972821,
+              "affine_seconds": 7.492002782411873,
+              "stage_wall_seconds": [
+                7.5614824909716845,
+                12.729710023850203,
+                61.37426671665162
+              ],
+              "stage_iterations": [
+                6,
+                8,
+                15
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 8,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 216235690,
+                "octree_native_queries": 145422
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 148403,
+                "faces": 296802,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 100.00000000240328,
+                  "median": 100.000000005377,
+                  "p95": 100.0000031516868,
+                  "maximum": 100.00000541200555
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            }
+          }
+        },
+        "msmall": {
+          "api_wall_seconds": 72.21223529987037,
+          "peak_allocated_gb": 1.78860288,
+          "peak_reserved_gb": 6.765412352,
+          "process_peak_rss_gb": 1.23047936,
+          "tf32_matmul_actual": true,
+          "tf32_cudnn_actual": true,
+          "source_unchanged": true,
+          "native_extension_unchanged": true,
+          "inputs_unchanged": true,
+          "official_saved_spheres_unchanged": true,
+          "oracle_configurations_unchanged": true,
+          "original_helper_runtime_loaded": false,
+          "comparison_seconds_excluded": 0.22678429167717695,
+          "hemispheres": {
+            "L": {
+              "registration_wall_seconds": 66.18986815866083,
+              "affine_seconds": null,
+              "stage_wall_seconds": [
+                5.117514004930854,
+                9.854549241252244,
+                50.79794613458216
+              ],
+              "stage_iterations": [
+                8,
+                6,
+                10
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 54,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 147714674,
+                "octree_native_queries": 274180
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 32492,
+                "faces": 64980,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 100.00000001521535,
+                  "median": 100.00000002977595,
+                  "p95": 100.00000316438397,
+                  "maximum": 100.00000536442668
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            },
+            "R": {
+              "registration_wall_seconds": 72.20817034039646,
+              "affine_seconds": null,
+              "stage_wall_seconds": [
+                5.232290495187044,
+                18.40169113408774,
+                48.224001246504486
+              ],
+              "stage_iterations": [
+                8,
+                10,
+                10
+              ],
+              "execution_counts": {
+                "cuda_nearest_queries": 0,
+                "cuda_nearest_proved_queries": 0,
+                "tree_nearest_queries": 0,
+                "nearest_tie_fallback_queries": 0,
+                "cuda_adaptive_resampling_calls": 62,
+                "tree_expanded_face_queries": 0,
+                "adaptive_cpu_layout_fallback_calls": 0,
+                "octree_device_containment_queries": 160551502,
+                "octree_native_queries": 221840
+              },
+              "precision": {
+                "native_topology_exact": true,
+                "vertices": 32492,
+                "faces": 64980,
+                "sphere_angle_deg": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "chord_difference_mm": {
+                  "mean": 0.0,
+                  "median": 0.0,
+                  "p95": 0.0,
+                  "maximum": 0.0
+                },
+                "radius_mm": {
+                  "mean": 99.9999999719444,
+                  "median": 99.99999997107528,
+                  "p95": 100.00000314876549,
+                  "maximum": 100.00000548510891
+                },
+                "fnit_folded_faces": 0,
+                "official_folded_faces": 0,
+                "saved_float32_coordinates_exact": true,
+                "saved_float32_coordinate_entries_differ": 0,
+                "saved_coordinates_maxabs": 0.0,
+                "ordered_faces_exact": true,
+                "initial_faces_exact": true,
+                "orientation": {
+                  "global_expected_sign_from_initial_median": 1,
+                  "initial_absolute_folded_faces": 0,
+                  "fnit_absolute_folded_faces": 0,
+                  "official_absolute_folded_faces": 0,
+                  "fnit_relative_folded_faces": 0,
+                  "official_relative_folded_faces": 0
+                },
+                "saved_dtype": {
+                  "fnit": "float32",
+                  "official": "float32"
+                }
+              },
+              "cpu_threads": 4
+            }
+          }
+        }
+      },
+      "strict_saved_coordinate_and_topology_gate": true
+    }
+  ],
+  "speed_summary": {
+    "msmsulc": {
+      "baseline_seconds": [
+        91.59951722063124,
+        90.61830602493137
+      ],
+      "candidate_seconds": [
+        84.55369851924479,
+        83.32362691964954
+      ],
+      "baseline_mean_seconds": 91.1089116227813,
+      "candidate_mean_seconds": 83.93866271944717,
+      "baseline_mean_over_candidate_mean": 1.0854224819771034,
+      "candidate_mean_seconds_reduction_percent": 7.8699753686238285,
+      "scope": "Descriptive mean of two complete observations per version; not a population timing estimate"
+    },
+    "msmall": {
+      "baseline_seconds": [
+        72.11189015768468,
+        72.21223529987037
+      ],
+      "candidate_seconds": [
+        70.6745721641928,
+        67.04392813425511
+      ],
+      "baseline_mean_seconds": 72.16206272877753,
+      "candidate_mean_seconds": 68.85925014922395,
+      "baseline_mean_over_candidate_mean": 1.0479646898912796,
+      "candidate_mean_seconds_reduction_percent": 4.57693759665277,
+      "scope": "Descriptive mean of two complete observations per version; not a population timing estimate"
+    }
+  },
+  "prior_controller_initialization_failure_retained": {
+    "kind": "private controller interpreter compatibility before any B2/A2 launch",
+    "location": "gpu_core_abba/controller failure reports",
+    "benchmark_outputs_changed_or_removed": false
+  },
+  "prior_idle_check_failure_retained": {
+    "kind": "zero-MiB idle check stopped before B2 despite 3 MiB residual, zero utilization and no GPU0 compute processes",
+    "location": "gpu_core_abba_v2/controller failure reports",
+    "revised_idle_gate": "zero compute processes and GPU utilization; no more than 16 MiB residual, exact initial load retained",
+    "benchmark_outputs_changed_or_removed": false
+  },
+  "optimization_trajectory_comparison_vs_a1": {
+    "A1": {
+      "msmsulc": {
+        "L": {
+          "stage_iteration_counts": [
+            8,
+            10,
+            8
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        },
+        "R": {
+          "stage_iteration_counts": [
+            6,
+            8,
+            15
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        }
+      },
+      "msmall": {
+        "L": {
+          "stage_iteration_counts": [
+            8,
+            6,
+            10
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        },
+        "R": {
+          "stage_iteration_counts": [
+            8,
+            10,
+            10
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        }
+      }
+    },
+    "B1": {
+      "msmsulc": {
+        "L": {
+          "stage_iteration_counts": [
+            8,
+            10,
+            8
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        },
+        "R": {
+          "stage_iteration_counts": [
+            6,
+            8,
+            15
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        }
+      },
+      "msmall": {
+        "L": {
+          "stage_iteration_counts": [
+            8,
+            6,
+            10
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        },
+        "R": {
+          "stage_iteration_counts": [
+            8,
+            10,
+            10
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        }
+      }
+    },
+    "B2": {
+      "msmsulc": {
+        "L": {
+          "stage_iteration_counts": [
+            8,
+            10,
+            8
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        },
+        "R": {
+          "stage_iteration_counts": [
+            6,
+            8,
+            15
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        }
+      },
+      "msmall": {
+        "L": {
+          "stage_iteration_counts": [
+            8,
+            6,
+            10
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        },
+        "R": {
+          "stage_iteration_counts": [
+            8,
+            10,
+            10
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        }
+      }
+    },
+    "A2": {
+      "msmsulc": {
+        "L": {
+          "stage_iteration_counts": [
+            8,
+            10,
+            8
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        },
+        "R": {
+          "stage_iteration_counts": [
+            6,
+            8,
+            15
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        }
+      },
+      "msmall": {
+        "L": {
+          "stage_iteration_counts": [
+            8,
+            6,
+            10
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        },
+        "R": {
+          "stage_iteration_counts": [
+            8,
+            10,
+            10
+          ],
+          "iteration_decisions_exact_vs_a1": true,
+          "maximum_iteration_energy_abs_difference_vs_a1": 0.0,
+          "execution_counts_exact_vs_a1": true
+        }
+      }
+    }
+  },
+  "memory_scope": {
+    "api_peak_allocated_gb": "PyTorch allocator peak externally reset before each complete API; shared by both hemisphere streams",
+    "api_peak_reserved_gb": "PyTorch reserved allocator peak for each API; cached blocks from the preceding API can remain",
+    "process_peak_rss_gb": "Cumulative process ru_maxrss at the end of an API; MSMAll RSS can include the preceding MSMSulc peak",
+    "candidate_max_peak_allocated_gb": 2.331060224,
+    "baseline_max_peak_allocated_gb": 1.789684224,
+    "candidate_max_peak_reserved_gb": 7.375683584,
+    "baseline_max_peak_reserved_gb": 6.765412352
+  },
+  "final_gpu0_release_observation": {
+    "memory_used_mib": 3,
+    "gpu_utilization_percent": 0,
+    "compute_process_count": 0,
+    "cuda_registration_jobs_exited": true,
+    "subsequent_diagnostic_cuda_context_created": false
+  },
+  "strict_reference_supplemental_report": "gpu_fresh_official_precision.public.json",
+  "privacy_scope": "Scalar metrics, parameter values and program/source hashes only. Individual input/output/reference fingerprints are omitted; full integrity evidence remains private."
+}

@@ -39,6 +39,7 @@ def test_surface_cli_forwards_requested_msm_config(monkeypatch, custom):
     assert seen["msm_config"] == custom
     assert seen["msm_execution"] == "optimized"
     assert seen["msmsulc_qc_policy"] == "report"
+    assert seen["msmall_qc_policy"] == "report"
 
 
 @pytest.mark.parametrize("policy", ["report", "repair", "error"])
@@ -57,6 +58,27 @@ def test_surface_cli_forwards_msmsulc_qc_policy(monkeypatch, policy):
         "--surface-assets-dir", "/assets", "--msmsulc-qc-policy", policy,
     ]) == 0
     assert seen["msmsulc_qc_policy"] == policy
+
+
+@pytest.mark.parametrize("policy", ["report", "repair", "error"])
+def test_surface_cli_forwards_msmall_qc_policy_independently(monkeypatch, policy):
+    from fnit.fmri import cli
+
+    seen = {}
+
+    def surface(**kwargs):
+        seen.update(kwargs)
+        return SimpleNamespace(dtseries="/result.dtseries.nii")
+
+    monkeypatch.setattr(cli, "fMRISurface_pipeline", surface)
+    assert cli.main([
+        "surface", "--bids-root", "/bids", "--derivatives-root", "/derivatives",
+        "--subject", "0001", "--recon-all", "/recon-all",
+        "--surface-assets-dir", "/assets", "--msmall-inputs-json", "/features.json",
+        "--msmsulc-qc-policy", "error", "--msmall-qc-policy", policy,
+    ]) == 0
+    assert seen["msmsulc_qc_policy"] == "error"
+    assert seen["msmall_qc_policy"] == policy
 
 
 def test_invalid_msmsulc_qc_policy_is_rejected_before_loading_bids():

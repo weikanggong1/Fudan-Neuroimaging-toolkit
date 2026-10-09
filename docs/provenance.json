@@ -530,5 +530,88 @@
       "templateflow_files_in_repository_or_wheel": false,
       "templateflow_download_validation": "Per-file byte count and SHA-256 in assets_setup.py"
     }
+  },
+  "newmsm_ordered_octree_reference": {
+    "repository": "https://github.com/rbesenczi/newMSM",
+    "commit": "260718953547743c028a45f8c885d163441df87a",
+    "implementation_files": [
+      "src/fnit/msm/_fastpd_src/ordered_face_octree.h",
+      "src/fnit/msm/_fastpd_src/fastpd_module.cpp",
+      "src/fnit/msm/_sphere_map.py"
+    ],
+    "implementation_type": "Independent adaptation of source-ordered Octree insertion, leaf candidates, direct-sibling fallback and scalar triangle selection; batched PyTorch routing and interior projection with native scalar boundary handling",
+    "sources": [
+      {
+        "path": "libraries/msm-newresampler/src/node.cpp",
+        "url": "https://github.com/rbesenczi/newMSM/blob/260718953547743c028a45f8c885d163441df87a/libraries/msm-newresampler/src/node.cpp",
+        "sha256": "f0317a3b0f214584b75fb8bd9e903ab0a8a5d4de912b1de84bfc77b48ef84d31"
+      },
+      {
+        "path": "libraries/msm-newresampler/src/octree.cpp",
+        "url": "https://github.com/rbesenczi/newMSM/blob/260718953547743c028a45f8c885d163441df87a/libraries/msm-newresampler/src/octree.cpp",
+        "sha256": "ef452d391bf36dfe6275137a1d307fa20ca6286a176e734992dd9532ac01208e"
+      }
+    ],
+    "license": "MIT",
+    "license_url": "https://github.com/rbesenczi/newMSM/blob/260718953547743c028a45f8c885d163441df87a/libraries/msm-newresampler/LICENSE",
+    "license_sha256": "b2d70110927bea91eff5b2553d8983337e38c2bcb57134b8e2aa6f41ccc34b33",
+    "license_notice_file": "src/fnit/msm/_fastpd_src/ordered_face_octree.h",
+    "copyright": [
+      "Copyright (c) 2022 King's College London, MeTrICS Lab, Renato Besenczi",
+      "Copyright (C) Washington University School of Medicine"
+    ],
+    "secondary_attribution": {
+      "notice": "Octree search code used with the permission of Tim Coalson under the same licence as above.",
+      "original_source_links_from_headers": [
+        "https://github.com/Washington-University/workbench/blob/master/src/Common/OctTree.h",
+        "https://github.com/Washington-University/workbench/blob/master/src/Files/SignedDistanceHelper.h",
+        "https://github.com/Washington-University/workbench/blob/master/src/Files/SignedDistanceHelper.cxx"
+      ]
+    },
+    "referenced_octree_source_files_distributed": false,
+    "upstream_octree_runtime_dependency": false,
+    "fastpd_license_scope": "The separate existing FastPD research and non-commercial restriction remains applicable to FastPD."
+  },
+  "newmsm_scalar_unfold_reference": {
+    "repository": "https://github.com/rbesenczi/newMSM",
+    "commit": "260718953547743c028a45f8c885d163441df87a",
+    "implementation_files": [
+      "src/fnit/msm/_fastpd_src/source_unfold.h",
+      "src/fnit/msm/_fastpd_src/fastpd_module.cpp",
+      "src/fnit/msm/msmsulc.py"
+    ],
+    "implementation_type": "Independent sequential scalar unfolding preserving source multiply, dot, norm and frozen-gradient vertex-update order, with a conservative PyTorch clear-mesh gate",
+    "sources": [
+      {
+        "path": "libraries/msm-newmeshreg/src/reg_tools.cpp",
+        "url": "https://github.com/rbesenczi/newMSM/blob/260718953547743c028a45f8c885d163441df87a/libraries/msm-newmeshreg/src/reg_tools.cpp",
+        "sha256": "3ad6617bf27c813c80d63af11a4395644e0d2f00dc52a19a03926d2b09ec70b5",
+        "arithmetic_section_sha256": "723f73b14ddfa7269218e62dc4a56a2aa13cea731b2e40f7269bfe355bc45389"
+      },
+      {
+        "path": "libraries/msm-newresampler/src/point.cpp",
+        "url": "https://github.com/rbesenczi/newMSM/blob/260718953547743c028a45f8c885d163441df87a/libraries/msm-newresampler/src/point.cpp",
+        "sha256": "92a6cd2be4e223f6c37be0a870e9c66b020cb9421a9668e806af9e365e482476",
+        "arithmetic_section_sha256": "add848ba4e4ce862a6006c0a0775c5dcb3fa582cee0f0e508347f490d5c4a6de"
+      },
+      {
+        "path": "libraries/msm-newresampler/src/triangle.cpp",
+        "url": "https://github.com/rbesenczi/newMSM/blob/260718953547743c028a45f8c885d163441df87a/libraries/msm-newresampler/src/triangle.cpp",
+        "sha256": "a4d10cec22f73a6cd19a11518ad0937acdd34cd61c07f2b92a6dfa1ca4df4371",
+        "arithmetic_section_sha256": "8f3668365142afa9e643217f6044db097011ee1fb269aa2681d4e8f9c93f6e6c"
+      }
+    ],
+    "license": "MIT",
+    "license_notice_file": "src/fnit/msm/_fastpd_src/source_unfold.h",
+    "copyright": [
+      "Copyright (c) 2023 King's College London, MeTrICS Lab, Renato Besenczi",
+      "Copyright (c) 2022 King's College London, MeTrICS Lab, Renato Besenczi"
+    ],
+    "upstream_unfold_runtime_dependency": false,
+    "referenced_source_files_distributed": false,
+    "native_output_repair": {
+      "implementation_file": "src/fnit/msm/_native_repair.py",
+      "scope": "Explicit native-output policy only; majority absolute orientation target, bounded source unfolding and local float32-tested correction; default report coordinates remain source-compatible"
+    }
   }
 }

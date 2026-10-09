@@ -484,7 +484,9 @@ def test_final_native_output_preserves_source_transform_and_reports_fold(tmp_pat
                     expected.append(result.detach().cpu().numpy().astype(np.float32))
             return result
         monkeypatch.setattr(implementation,'_sphere_warp',terminal_warp)
-        outputs=run_msmsulc({'L':entry,'R':entry},tmp_path/'output',device='cpu',config=config)
+        # This fixture deliberately counts terminal warps in hemisphere order.
+        outputs=run_msmsulc({'L':entry,'R':entry},tmp_path/'output',device='cpu',config=config,
+                           parallel=False,cpu_threads=1)
         report=json.loads((tmp_path/'output/registration_report.json').read_text())
         assert len(expected)==2
         for i,hemisphere in enumerate('LR'):

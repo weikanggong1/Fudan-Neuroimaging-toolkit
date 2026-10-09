@@ -220,17 +220,106 @@ def _tr_matches(image, tr):
     )
 
 
+def _saved_native_sphere_qc(sphere, reference, *, baseline):
+    """Check the actual saved native mesh, separately from a 32k solver mesh."""
+    from ..msm._affine import _surface
+    from ..msm.msmsulc import _native_output_qc
+
+    points, faces = _surface(sphere)
+    original, original_faces = _surface(reference)
+    if points.shape != original.shape or not np.array_equal(faces, original_faces):
+        raise ValueError("final native sphere must preserve the reference vertex order and topology")
+    qc = _native_output_qc(points, faces, original)
+    # A saved-sphere reread cannot recover pre-save solver coordinates.
+    qc.pop("folded_solver_faces")
+    qc.pop("minimum_solver_orientation_ratio")
+    qc.pop("absolute_folded_solver_faces")
+    qc.pop("minimum_absolute_solver_orientation_ratio")
+    qc.pop("new_relative_folded_solver_faces")
+
+    def determinants(vertices):
+        triangles = vertices[faces]
+        return (np.cross(triangles[:, 1] - triangles[:, 0],
+                         triangles[:, 2] - triangles[:, 0]) * triangles[:, 0]).sum(1)
+
+    before, after = determinants(original), determinants(points)
+    # Use the reference mesh's majority winding, while also retaining the
+    # raw signed counts. A relative ratio alone can conceal an existing fold
+    # when its reference face already points inward.
+    sign = 1 if np.count_nonzero(before > 0) >= np.count_nonzero(before < 0) else -1
+    qc.update(
+        baseline=baseline,
+        coordinates="saved GIFTI coordinates",
+        reference_sha256=_sha256(Path(reference)),
+        output_sha256=_sha256(Path(sphere)),
+        vertex_count=len(points), face_count=len(faces),
+        absolute_orientation_reference_sign=sign,
+        absolute_folded_input_faces=int(np.count_nonzero(before * sign <= 0)),
+        absolute_folded_output_faces=int(np.count_nonzero(after * sign <= 0)),
+        negative_input_faces=int(np.count_nonzero(before < 0)),
+        negative_output_faces=int(np.count_nonzero(after < 0)),
+        degenerate_output_faces=int(np.count_nonzero(after == 0)),
+    )
+    qc["orientation_qc"] = "warning" if (
+        qc["absolute_folded_output_faces"] or qc["degenerate_input_faces"]
+    ) else "pass"
+    return qc
+
+
+def _orientation_stage(report):
+    """Summarize orientation only; never promote an unavailable check to pass."""
+    hemispheres = {}
+    for hemi in ("L", "R"):
+        item = report.get(hemi, {}) if isinstance(report, dict) else {}
+        folded_key = ("absolute_folded_output_faces" if "absolute_folded_output_faces" in item
+                      else "folded_output_faces")
+        if any(item.get(key, 0) > 0 for key in (
+            folded_key, "degenerate_input_faces",
+        )) or item.get("orientation_qc") == "warning":
+            status = "warning"
+        elif "folded_output_faces" in item:
+            status = "pass"
+        else:
+            status = "not_assessed"
+        hemispheres[hemi] = status
+    statuses = tuple(hemispheres.values())
+    status = "warning" if "warning" in statuses else (
+        "not_assessed" if "not_assessed" in statuses else "pass"
+    )
+    return {"status": status, "hemispheres": hemispheres}
+
+
+def _orientation_chain(initial, solver, final):
+    stages = {
+        "initial_msmsulc": _orientation_stage(initial),
+        "solver_msmall": _orientation_stage(solver) if solver is not None
+        else {"status": "not_applicable"},
+        "final_native": _orientation_stage(final),
+    }
+    statuses = tuple(item["status"] for item in stages.values())
+    stages["all_stages"] = "warning" if "warning" in statuses else (
+        "not_assessed" if "not_assessed" in statuses else "pass"
+    )
+    return stages
+
+
 def _refine_msmall(inputs, native_spheres, native_geometry, assets, output,
                    configuration, device, execution, wb_command,
-                   parallel=True, cpu_threads=None):
+                   parallel=True, cpu_threads=None, native_qc_references=None,
+                   qc_policy="report"):
     """Refine native features or compose a prepared fsLR32k registration.
 
     Native feature arrays retain recon-all vertex order. Features on the
     canonical 32k sphere describe the MSMSulc representation; their estimated
     warp is composed onto the native MSMSulc spheres before BOLD projection.
+    Final saved native coordinates have their own explicit QC policy; a
+    clean solver mesh does not establish that the composed native mesh is clean.
     """
     from ..msm import run_msmall
     from ..msm._affine import _surface
+
+    if qc_policy not in ("report", "repair", "error"):
+        raise ValueError("qc_policy must be 'report', 'repair' or 'error'")
 
     entries = {}
     topology = {}
@@ -277,7 +366,59 @@ def _refine_msmall(inputs, native_spheres, native_geometry, assets, output,
             str(entries[hemi].source_sphere), str(registered[hemi]), str(final),
         ], check=True, capture_output=True, text=True, env=workbench_environment(threads))
         return final
-    return map_hemispheres(compose, parallel=parallel, cpu_threads=cpu_threads), topology
+    final_spheres = map_hemispheres(compose, parallel=parallel, cpu_threads=cpu_threads)
+    references = native_qc_references or dict(zip(("L", "R"), native_spheres))
+    baseline = "undeformed native sphere" if native_qc_references is not None else "input MSMSulc native sphere"
+    native_report = {}
+    checked_spheres = []
+    for hemi, final in zip(("L", "R"), final_spheres):
+        before = _saved_native_sphere_qc(final, references[hemi], baseline=baseline)
+        repair = {"policy": qc_policy, "applied": False, "moved_vertices": 0,
+                  "unfold_updates": 0, "seconds": 0.0}
+        if qc_policy == "repair" and before["orientation_qc"] == "warning":
+            import torch
+            from ..msm._native_repair import repair_native_sphere
+
+            repair_started = time.perf_counter()
+            points, faces = _surface(final)
+            reference_points, _ = _surface(references[hemi])
+            repaired, repair_details = repair_native_sphere(
+                torch.as_tensor(points, dtype=torch.float64, device=device), faces, reference_points
+            )
+            vertices = repaired.detach().cpu().numpy().astype(np.float32)
+            # Keep solver coordinates available for independent precision/QC
+            # comparisons, including when source features use native topology.
+            if final == registered[hemi]:
+                final = output / "msmall" / f"{hemi}.sphere.MSMAll.repaired-native.surf.gii"
+            # Preserve GIFTI metadata and face order from the composed output.
+            image = nib.load(str(final_spheres[0 if hemi == "L" else 1]))
+            image.get_arrays_from_intent("NIFTI_INTENT_POINTSET")[0].data = vertices
+            nib.save(image, str(final))
+            repair.update(repair_details,
+                          seconds=time.perf_counter() - repair_started)
+        # Re-read the actual float32 GIFTI after repair; solver/double precision
+        # QC cannot certify the coordinates consumed by Workbench projection.
+        after = (_saved_native_sphere_qc(final, references[hemi], baseline=baseline)
+                 if repair["applied"] else before)
+        repair["success"] = after["orientation_qc"] == "pass"
+        native_report[hemi] = {**after, "native_output_qc_before_repair": before,
+                               "fold_repair": repair}
+        checked_spheres.append(final)
+    final_spheres = tuple(checked_spheres)
+    native_report["scope"] = "final saved native sphere after MSMAll and optional fsLR32k composition"
+    native_report["qc_policy"] = qc_policy
+    native_report["orientation_qc"] = _orientation_stage(native_report)["status"]
+    (output / "msmall" / "native_composition_report.json").write_text(
+        json.dumps(native_report, indent=2) + "\n", encoding="utf-8"
+    )
+    if qc_policy in ("repair", "error") and native_report["orientation_qc"] != "pass":
+        failures = ", ".join(
+            f"{hemi}: {native_report[hemi]['absolute_folded_output_faces']} folded faces"
+            for hemi in ("L", "R") if native_report[hemi]["orientation_qc"] != "pass"
+        )
+        action = "fold repair did not pass QC" if qc_policy == "repair" else "has failed orientation QC"
+        raise RuntimeError(f"MSMAll final native sphere {action} ({failures}); BOLD projection refused")
+    return final_spheres, topology
 
 
 def fMRISurface_pipeline(
@@ -294,6 +435,7 @@ def fMRISurface_pipeline(
     msmsulc_qc_policy: str = "report",
     msmall_inputs: dict[str, MSMAllInputs] | str | Path | None = None,
     msmall_config: MSMAllConfig | str | Path | None = None,
+    msmall_qc_policy: str = "report",
     goodvoxels: str | Path | None = None,
     signal: str = "preproc",
     fsnative_to_t1w: str | Path | np.ndarray | None = None,
@@ -324,9 +466,14 @@ def fMRISurface_pipeline(
     projection branches. ``cpu_threads`` is the shared total budget; None
     uses OMP_NUM_THREADS or the current PyTorch thread count. A budget of one
     selects serial execution. Parent process settings are preserved.
-    ``msmsulc_qc_policy`` defaults to ``report`` for source-compatible
-    native interpolation; ``repair`` explicitly unfolds a folded native sphere
-    before publication, while ``error`` refuses to write one.
+    ``msmsulc_qc_policy`` controls the initial MSMSulc sphere: ``report``
+    preserves source-compatible interpolation, ``repair`` explicitly unfolds
+    it, and ``error`` refuses to write it when folded. ``msmall_qc_policy``
+    independently controls MSMAll's final saved native sphere: ``report``
+    retains the composed coordinates, ``repair`` unfolds and rechecks the
+    saved float32 GIFTI, and ``error`` rejects folds before projection.
+    MSMAll solver output and final native composition are checked separately;
+    their reports do not replace a warning in the initial registration.
     """
     started = time.perf_counter()
     budget = resolve_cpu_threads(cpu_threads)
@@ -344,10 +491,14 @@ def fMRISurface_pipeline(
         raise ValueError("registered_spheres must contain left and right paths")
     if registered_spheres is not None and msm_config is not None:
         raise ValueError("msm_config cannot be applied to supplied registered_spheres")
+    if registered_spheres is not None and msmsulc_qc_policy != "report":
+        raise ValueError("msmsulc_qc_policy cannot be applied to supplied registered_spheres")
     if registered_spheres is not None and msmall_inputs is not None:
         raise ValueError("msmall_inputs cannot be applied to supplied registered_spheres")
     if msmall_inputs is None and msmall_config is not None:
         raise ValueError("msmall_config requires prepared msmall_inputs")
+    if msmall_inputs is None and msmall_qc_policy != "report":
+        raise ValueError("msmall_qc_policy requires prepared msmall_inputs")
     msmall_configuration = None
     if msmall_inputs is not None:
         from ..msm.cli import load_inputs
@@ -368,6 +519,8 @@ def fMRISurface_pipeline(
         raise ValueError("msm_execution must be 'optimized' or 'reference'")
     if msmsulc_qc_policy not in ("report", "repair", "error"):
         raise ValueError("msmsulc_qc_policy must be 'report', 'repair' or 'error'")
+    if msmall_qc_policy not in ("report", "repair", "error"):
+        raise ValueError("msmall_qc_policy must be 'report', 'repair' or 'error'")
     if msm_config is None:
         configuration = MSMSulcConfig()
     elif isinstance(msm_config, MSMSulcConfig):
@@ -545,6 +698,8 @@ def fMRISurface_pipeline(
             parallel=parallel, cpu_threads=budget,
         )
         preparation_seconds = time.perf_counter() - preparation_started
+        initial_msmsulc_report = None
+        msmall_report = None
         if registered_spheres is None:
             registration_started = time.perf_counter()
             sulc_inputs = prepare_msmsulc_inputs(
@@ -568,6 +723,10 @@ def fMRISurface_pipeline(
             }
             registration_seconds = time.perf_counter() - registration_started
             report = registration_qc["Report"]
+            initial_msmsulc_report = report
+            native_qc_references = {
+                hemi: entry.rotated_sphere for hemi, entry in sulc_inputs.items()
+            }
             registration_details = {
                 "Method": "FNIT MSMSulc-HOCR-FastPD",
                 "Configuration": configuration.to_dict(),
@@ -578,6 +737,10 @@ def fMRISurface_pipeline(
                         "seconds", "peak_allocated_gb", "folded_output_faces",
                         "folded_solver_faces", "minimum_output_orientation_ratio",
                         "minimum_solver_orientation_ratio", "degenerate_input_faces",
+                        "absolute_orientation_reference_sign", "absolute_folded_input_faces",
+                        "absolute_folded_solver_faces", "absolute_folded_output_faces",
+                        "minimum_absolute_solver_orientation_ratio", "minimum_absolute_output_orientation_ratio",
+                        "new_relative_folded_solver_faces", "new_relative_folded_output_faces",
                         "native_output_qc_before_repair", "fold_repair", "orientation_qc",
                     ) if key in report[hemi]} for hemi in ("L", "R")
                 },
@@ -586,6 +749,10 @@ def fMRISurface_pipeline(
             spheres = tuple(Path(path).expanduser().resolve() for path in registered_spheres)
             registration = "provided registered spheres"
             registration_qc = None
+            native_qc_references = {
+                hemi: work / "prepared" / f"{hemi}.sphere.FS.native.surf.gii"
+                for hemi in ("L", "R")
+            }
         msmall_seconds = None
         if msmall_inputs is not None:
             msmall_started = time.perf_counter()
@@ -593,6 +760,8 @@ def fMRISurface_pipeline(
                 msmall_inputs, spheres, (prepared.geometry.left, prepared.geometry.right),
                 assets, work, msmall_configuration, device, msm_execution, wb_command,
                 parallel=parallel, cpu_threads=budget,
+                native_qc_references=native_qc_references,
+                qc_policy=msmall_qc_policy,
             )
             msmall_seconds = time.perf_counter() - msmall_started
             msmall_report = json.loads((work / "msmall/registration_report.json").read_text())
@@ -609,10 +778,37 @@ def fMRISurface_pipeline(
                 "Method": "FNIT MSMAll-HOCR-FastPD",
                 "InitialRegistration": registration_details,
                 "Configuration": msmall_configuration.to_dict(), "Execution": msm_execution,
+                "QCPolicy": msmall_qc_policy,
                 "FeatureTopology": feature_topology,
                 "FeaturePreparation": "provided multimodal feature/weight files",
+                "HemispheresScope": "MSMAll solver output on the source feature topology",
                 "Hemispheres": msmall_report,
             }
+            final_native_report = json.loads(
+                (work / "msmall/native_composition_report.json").read_text()
+            )
+        else:
+            final_native_report = {
+                hemi: _saved_native_sphere_qc(sphere, native_qc_references[hemi],
+                                             baseline="undeformed native sphere")
+                for hemi, sphere in zip(("L", "R"), spheres)
+            }
+            # A policy check inside the solver does not certify a later saved
+            # mesh or reveal folds already present in its relative reference.
+            # Reapply strict policies at the actual projection boundary.
+            if (msmsulc_qc_policy != "report"
+                    and _orientation_stage(final_native_report)["status"] != "pass"):
+                raise RuntimeError("MSMSulc final saved native sphere failed orientation QC; "
+                                   "BOLD projection refused")
+        orientation_qc = _orientation_chain(
+            initial_msmsulc_report, msmall_report, final_native_report
+        )
+        registration_details["FinalNativeHemispheres"] = final_native_report
+        registration_details["OrientationQC"] = orientation_qc
+        if registration_qc is None:
+            registration_qc = {}
+        registration_qc["FinalNative"] = final_native_report
+        registration_qc["OrientationQC"] = orientation_qc
         def area_surface(hemi, threads):
             index = 0 if hemi == "L" else 1
             geometry = prepared.geometry.left if hemi == "L" else prepared.geometry.right
@@ -722,6 +918,7 @@ def fMRISurface_pipeline(
             "Sources": details["Sources"], "Registration": registration,
             "RegisteredSpheres": sphere_info, "Geometry": identity,
             "MSM": registration_qc,
+            "OrientationQC": orientation_qc,
             "VolumePrerequisite": volume_details, "Reconstruction": recon_result.metadata,
             "Coverage": coverage, "TimingSeconds": timing,
         })

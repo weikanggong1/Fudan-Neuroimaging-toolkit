@@ -8,7 +8,9 @@
     "repetition_time_seconds": 2.1,
     "feature_source": "FNIT MSMSulc stage-A preprocessed fsLR91k dtseries",
     "reconstruction_input": "official FreeSurfer-derived subject directory",
-    "modalities": ["C"],
+    "modalities": [
+      "C"
+    ],
     "feature_columns": 21
   },
   "timing_seconds": {
@@ -19,7 +21,7 @@
     "stage_b_msmall_registration_and_native_composition": 201.426,
     "stage_b_projection_hemispheres": 73.538,
     "stage_b_cifti": 9.852,
-    "outer_total": 460.962
+    "stage_b_surface_total": 460.962
   },
   "msmall_qc": {
     "left_folded_output_faces": 0,
@@ -43,16 +45,32 @@
   },
   "configuration": {
     "regularization": 0.05,
-    "simval": [2],
-    "iterations": [10],
-    "control_grid": [2],
-    "sampling_grid": [4],
-    "data_grid": [4]
+    "simval": [
+      2
+    ],
+    "iterations": [
+      10
+    ],
+    "control_grid": [
+      2
+    ],
+    "sampling_grid": [
+      4
+    ],
+    "data_grid": [
+      4
+    ]
   },
   "interpretation": {
     "status": "outer C-only integration observation",
     "full_hcp_ca_cat": false,
     "full_chain_qc_pass": false,
     "reason": "initial FNIT MSMSulc left-hemisphere QC failed; MSMAll layer itself passed its mesh QC"
+  },
+  "timing_scope": {
+    "stage_a": "first surface API from completed volume and supplied reconstruction",
+    "stage_b_surface_total": "second surface API including MSMSulc, MSMAll, composition, projection, CIFTI, QC and publication; excludes stage-A and feature preparation",
+    "complete_outer_wall_seconds": "not independently measured",
+    "scope_audit": "2026-10-09: verified against the original stage-A and stage-B runner timer placement; historical outer_total renamed, measured values unchanged"
   }
 }
