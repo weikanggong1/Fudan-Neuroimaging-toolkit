@@ -10,8 +10,10 @@ Python/Numba CPU 移植，保留完整步骤；生产不执行原软件命令。
 
 本页 remesh/quick 实测绑定 **`c24852054f3321c1142b1ae88fa3d2bf68329bb3`**；
 标准球面接口与新实测绑定 **`74ae022edd932e9f3c57c6e253678f13853f8842`**。
-真实配对实际运行的是下面记录的源码归档，当前 remesh/quick 模块与实测
-归档 SHA 相同。两例从原始T1开始的新整例已完成：GPU命令墙钟减少14.676%，CPU减少0.388%，不能将局部阶段提速等同于整例提速；[完整配对](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)保留未修改原生阶段变慢的实测。
+真实配对实际运行的是下面记录的源码归档。remesh 后续增加了默认关闭的
+显式双精度标量候选，最新源码与实测绑定见
+[标量存储优化](REMESH_SCALAR_STORAGE_20261010.md)；本页旧数值不改标为新版本。
+两例从原始T1开始的新整例已完成：GPU命令墙钟减少14.676%，CPU减少0.388%，不能将局部阶段提速等同于整例提速；[完整配对](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)保留未修改原生阶段变慢的实测。
 Numba 已在主页 [environment.yml](../../environment.yml) 和
 [pyproject.toml](../../pyproject.toml) 中声明，无新增依赖或半精度。
 
@@ -74,8 +76,8 @@ Jacobi 梯度平均；目标函数的独立顶点行用 Numba 四线程计算，
 
 | 函数 | 完整输入与默认值 | 输出及空间 |
 | --- | --- | --- |
-| `remesh_geometry(vertices, faces, iterations=3)` | 有限 (N,3) mm 坐标；有序 (F,3) 整数三角面；非负迭代数 | 新编号的 float32(Nnew,3) 坐标、int32(Fnew,3) 面；surface RAS |
-| `remesh_surface(input_path, output_path, iterations=3)` | FreeSurfer 三角表面路径、输出路径、非负迭代数 | 写坐标/面并保留输入原始 volume-info 等尾部；返回 None |
+| `remesh_geometry(vertices, faces, iterations=3, *, scalar_storage="numpy")` | 有限 (N,3) mm 坐标；有序 (F,3) 整数三角面；非负迭代数；默认 `numpy` 保留旧标量表示，显式 `python` 选择 Python 双精度标量 | 新编号的 float32(Nnew,3) 坐标、int32(Fnew,3) 面；surface RAS |
+| `remesh_surface(input_path, output_path, iterations=3, *, scalar_storage="numpy")` | FreeSurfer 三角表面路径、输出路径、非负迭代数；标量策略同上 | 写坐标/面并保留输入原始 volume-info 等尾部；返回 None |
 | `smooth(mesh, repeats=2)` | 内部 Mesh 的点、面、边邻接及边界标志；平滑轮数 | 原位更新 `Mesh.points` 的 float64 坐标三元组列表；返回 None |
 | `quick_sphere_from_inflated(vertices, faces, niterations=25)` | (N,3) mm inflated 坐标、有序三角面；每个线搜索阶段最大迭代数 | float32(N,3) radius=100 mm 球面，以及 `(k,averages,mode,dt)` 有序 trace；面及顶点编号不变 |
 | `quick_sphere_from_projected(vertices, faces, original_face_area, original_total_area, niterations=25, initial_momentum=None)` | 已按上游规则投影的 float32(N,3) mm 球面、有序(F,3)面、初始化(F,)mm²面积及总mm²面积；线搜索上限25；可选float32(N,3)继承动量，None表示零 | 同上；此诊断接口要求调用者提供正确上游状态，不能用任意投影替代标准前处理；动量相位仍固定10轮 |
@@ -121,6 +123,7 @@ remesh_surface(
     input_path="/data/fnit_subject/surf/lh.orig.premesh",  # 自产拓扑修复后的三角网格，surface RAS/mm
     output_path="/data/validation/remesh_new/lh.orig",   # 新诊断目录的重划分结果；后续另执行相交检查
     iterations=3,                                        # 标准流程固定的三轮拆边/缩边/平滑
+    scalar_storage="numpy",                              # 保持旧默认；显式 python 候选实测见标量优化专页
 )
 write_quick_sphere(
     input_path="/data/fnit_subject/surf/lh.inflated.nofix",  # 自产未修复拓扑的 inflated 网格

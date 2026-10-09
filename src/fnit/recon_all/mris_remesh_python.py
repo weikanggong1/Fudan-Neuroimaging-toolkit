@@ -245,8 +245,20 @@ def subtract(a, b):
 
 
 class Mesh:
-    def __init__(self, points, faces):
-        self.points = points
+    def __init__(self, points, faces, *, scalar_storage="numpy"):
+        """可变顺序网格；显式python候选只更换坐标标量表示，不改精度。
+
+        points为(N,3)双精度surface RAS/mm坐标三元组列表，faces为(F,3)
+        整数面列表。scalar_storage默认numpy保留旧列表及np.float64标量；
+        python创建含Python float的三元组列表，两者均IEEE双精度。
+        构建原有动态拓扑；非法策略抛ValueError，无读写或GPU调用。
+        属于mris_remesh内部网格，不是独立官方命令。
+        """
+        if scalar_storage not in {"numpy", "python"}:
+            raise ValueError("scalar_storage must be numpy or python")
+        self.scalar_storage = scalar_storage
+        self.points = ([tuple(map(float, row)) for row in points]
+                       if scalar_storage == "python" else points)
         self.faces = faces
         self.rebuild()
 
@@ -539,17 +551,24 @@ def smooth(mesh, repeats=2):
                              dtype=np.int32, count=int(offsets[-1]))
     _smooth_ordered(points, faces, offsets, neighbours,
                     np.asarray(mesh.onboundary, np.bool_), repeats)
-    mesh.points = [tuple(row) for row in points]
+    # Python控制流中的numpy标量每次运算都需NumPy标量dispatch。显式候选
+    # 仅在Numba完整双精度有序平滑结束后恢复为Python双精度标量；不改内核。
+    mesh.points = ([tuple(map(float, row)) for row in points]
+                   if getattr(mesh, "scalar_storage", "numpy") == "python"
+                   else [tuple(row) for row in points])
 
 
 
-def remesh_geometry(vertices: np.ndarray, faces: np.ndarray, iterations: int = 3
+def remesh_geometry(vertices: np.ndarray, faces: np.ndarray, iterations: int = 3,
+                    *, scalar_storage: str = "numpy"
                     ) -> tuple[np.ndarray, np.ndarray]:
     """按固定上游拆边、缩边及顺序平滑规则重新划分三角网格。
 
     vertices 是 (N,3) 有限 surface RAS/mm 坐标，faces 是 (F,3) 有序三角面
     顶点索引；内部坐标为 float64，iterations 默认 3 且不得为负。目标边长
-    固定为初始平均边长的 0.8，不改变拆边/缩边阈值或顺序。
+    固定为初始平均边长的 0.8，不改变拆边/缩边阈值或顺序。scalar_storage
+    默认numpy保留旧np.float64标量；python显式选择Python双精度标量，
+    仍保留全体逐边更新、heap同分规则与Numba有序Gauss-Seidel平滑。
     返回 float32(Nnew,3) 坐标与 int32(Fnew,3) 面，保留算法生成的编号顺序；
     不读写文件、不单独修复相交。非法迭代数抛 ValueError，索引/非流形拓扑
     和退化法线抛原有异常。对应 mris_remesh --remesh --iters 3。
@@ -557,7 +576,7 @@ def remesh_geometry(vertices: np.ndarray, faces: np.ndarray, iterations: int = 3
     if iterations < 0:
         raise ValueError("iterations must be nonnegative")
     mesh = Mesh([tuple(row) for row in np.asarray(vertices, dtype=np.float64)],
-                np.asarray(faces, dtype=np.int32).tolist())
+                np.asarray(faces, dtype=np.int32).tolist(), scalar_storage=scalar_storage)
     total_length = 0.0
     for a, b in mesh.edge_vertices:
         total_length += edge_length(mesh.points, a, b)
@@ -568,7 +587,7 @@ def remesh_geometry(vertices: np.ndarray, faces: np.ndarray, iterations: int = 3
         while split_pass(mesh.points, mesh.faces, edge_index, edge_vertices,
                          edge_faces, face_edges, target * 4.0 / 3.0):
             pass
-        mesh = Mesh(mesh.points, mesh.faces)
+        mesh = Mesh(mesh.points, mesh.faces, scalar_storage=scalar_storage)
         while mesh.collapse_pass(target * 4.0 / 5.0):
             pass
         smooth(mesh)
@@ -597,15 +616,19 @@ def _copy_footer(input_path: str | Path, output_path: str | Path) -> None:
 
 
 def remesh_surface(input_path: str | Path, output_path: str | Path,
-                   iterations: int = 3) -> None:
+                   iterations: int = 3, *, scalar_storage: str = "numpy") -> None:
     """读取三角表面，重划分后写出坐标、面和输入的原始几何尾部。
 
     input_path/output_path 为文件路径；surface RAS 坐标单位 mm，iterations
-    默认 3。使用 nibabel 读写 float32 坐标/int32 面，随后保留 volume-info
+    默认 3。scalar_storage默认numpy，python为显式CPU双精度标量候选，
+    不更改算法或自动使用GPU。使用 nibabel 读写 float32 坐标/int32 面，随后保留 volume-info
     等尾部；返回 None。输入格式、算法或文件读写失败会抛异常，失败文件不
     应视为有效输出。对应 mris_remesh --remesh --iters 3 INPUT OUTPUT。
     """
+    if scalar_storage not in {"numpy", "python"}:
+        raise ValueError("scalar_storage must be numpy or python")
     vertices, faces = fs.read_geometry(input_path)
-    result_vertices, result_faces = remesh_geometry(vertices, faces, iterations)
+    result_vertices, result_faces = remesh_geometry(vertices, faces, iterations,
+                                                  scalar_storage=scalar_storage)
     fs.write_geometry(output_path, result_vertices, result_faces)
     _copy_footer(input_path, output_path)
