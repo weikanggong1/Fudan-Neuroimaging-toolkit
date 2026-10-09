@@ -217,6 +217,26 @@ class ProcessTreeDeviceSampler:
                     pass
         return found
 
+    @staticmethod
+    def _pid_aliases(tree):
+        """返回子树在可见 PID namespace 的别名；不猜测宿主机 PID。"""
+        from pathlib import Path
+        aliases = {pid: pid for pid in tree}
+        for pid in tree:
+            try:
+                for line in Path(f'/proc/{pid}/status').read_text().splitlines():
+                    if line.startswith('NSpid:'):
+                        for alias in line.split()[1:]:
+                            aliases[int(alias)] = pid
+            except (OSError, ValueError):
+                pass
+        return aliases
+
+    @staticmethod
+    def _pid_visible(pid):
+        from pathlib import Path
+        return Path(f'/proc/{pid}').exists()
+
     def sample_if_due(self, *, force=False):
         import subprocess
         now = time.monotonic()
@@ -249,9 +269,10 @@ class ProcessTreeDeviceSampler:
                     else:
                         self.uuid = devices[selector]
             tree = self._tree(self.parent_pid)
+            aliases = self._pid_aliases(tree)
             raw = subprocess.check_output(['nvidia-smi', '--query-compute-apps=pid,gpu_uuid,used_gpu_memory',
                 '--format=csv,noheader,nounits'], text=True, timeout=3)
-            entries, external = [], []
+            entries, external, unresolved = [], [], []
             for line in raw.strip().splitlines():
                 if not line:
                     continue
@@ -259,20 +280,56 @@ class ProcessTreeDeviceSampler:
                 if uuid != self.uuid:
                     continue
                 entry = {'pid': int(pid), 'bytes': int(memory) * 1024 * 1024}
-                (entries if int(pid) in tree else external).append(entry)
+                if int(pid) in aliases:
+                    entry['local_pid'] = aliases[int(pid)]
+                    entries.append(entry)
+                elif self._pid_visible(int(pid)):
+                    external.append(entry)
+                else:
+                    # 容器中 nvidia-smi 可能返回不可见的宿主机 PID。
+                    # 不能把它当成已确认的外部负载，再将自身占用记为零。
+                    unresolved.append(entry)
+            device_bytes, device_error = None, None
+            try:
+                device_raw = subprocess.check_output(
+                    ['nvidia-smi', '--query-gpu=uuid,memory.used',
+                     '--format=csv,noheader,nounits'], text=True, timeout=3)
+                for line in device_raw.strip().splitlines():
+                    uuid, memory = (value.strip() for value in line.split(','))
+                    if uuid == self.uuid:
+                        device_bytes = int(memory) * 1024 * 1024
+            except Exception as error:
+                device_error = repr(error)
+            ownership_known = not unresolved
+            if not entries and device_bytes and not external:
+                ownership_known = False
             self.samples.append({'monotonic': now, 'processes': entries,
-                                 'tree_total_bytes': sum(row['bytes'] for row in entries),
-                                 'external_processes': external})
+                                 'tree_total_bytes': sum(row['bytes'] for row in entries) if ownership_known else None,
+                                 'known_tree_bytes': sum(row['bytes'] for row in entries),
+                                 'ownership': 'resolved' if ownership_known else 'unresolved',
+                                 'external_processes': external,
+                                 'unresolved_processes': unresolved,
+                                 'target_compute_process_sum_bytes': sum(row['bytes'] for row in entries + external + unresolved),
+                                 'target_device_used_bytes': device_bytes,
+                                 'device_query_error': device_error,
+                                 'sample_query_seconds': time.monotonic() - now})
         except Exception as error:
             self.errors.append({'monotonic': now, 'error': repr(error)})
 
     def report(self):
         gaps = [b['monotonic'] - a['monotonic'] for a, b in zip(self.samples, self.samples[1:])]
+        unresolved = any(row.get('ownership') == 'unresolved' for row in self.samples)
+        known = [row['tree_total_bytes'] for row in self.samples if row['tree_total_bytes'] is not None]
+        device = [row['target_device_used_bytes'] for row in self.samples if row.get('target_device_used_bytes') is not None]
         return {'status': 'not_applicable' if not self.device.startswith('cuda') else
+                         'ownership_unresolved' if unresolved else
                          'available' if self.samples else 'unavailable',
                 'target_gpu_uuid': self.uuid, 'sampling_interval_seconds': self.interval,
                 'max_observed_interval_seconds': max(gaps, default=None),
                 'failed_samples': self.errors, 'samples': self.samples,
-                'peak_tree_total_bytes': max((row['tree_total_bytes'] for row in self.samples), default=None),
-                'scope': 'simultaneous parent and all live descendants on target GPU; external load separate',
+                'peak_tree_total_bytes': None if unresolved else max(known, default=None),
+                'observed_resolved_tree_peak_bytes': max(known, default=None),
+                'peak_target_compute_process_sum_bytes': max((row.get('target_compute_process_sum_bytes', 0) for row in self.samples), default=None),
+                'peak_target_device_used_bytes': max(device, default=None),
+                'scope': 'simultaneous process snapshot on target GPU; unresolved host/container PID ownership is null; device total is separate and includes other users; consecutive queries are not exactly simultaneous',
                 'worker_pids': self.worker_pids}

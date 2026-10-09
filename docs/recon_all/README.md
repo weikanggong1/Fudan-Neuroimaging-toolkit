@@ -28,6 +28,7 @@ N4默认仍为ITK，GCA新批量求逆尚未替换已存在的CUDA评分路径�
 不替代离散主曲率计算；新的[离散八图实验](DISCRETE_CURVATURE_TORCH_20261009.md)
 已完成两例双侧同输入回归，尚未满足全部探索门，不替代完整curv.stats。
 原始T1空目录配对采用[整例复现脚本](TORCH_INTEGRATION_20261009.md)。
+容器 PID 与 GPU 显存归属的记录规则见[进程显存说明](GPU_PROCESS_MEMORY.md)。
 局部内核收益与完整阶段、整例收益分别记录，纯GPU全流程仍未完成。
 ## 1. 功能简介
 
