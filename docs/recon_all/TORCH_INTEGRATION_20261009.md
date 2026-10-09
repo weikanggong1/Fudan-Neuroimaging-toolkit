@@ -39,7 +39,14 @@ flowchart LR
 | `--gca-execution` | `in-process` | isolated将已有Torch GCA放入缓存开启的新exec，父低显存策略保持 |
 | `--fill-backend` | `python` | numba为有序CPU堆；torch-numba另用CUDA初始边界 |
 | `--wm-edit-backend` | `native` | torch-hybrid选择静态GPU与Numba有序核心，要求CUDA |
-| `--sphere-normals-backend` | `numba` | torch选择有序GPU法向；其余sphere优化及finish保持 |
+| `--sphere-normals-backend` | `numba` | torch选择有序GPU法向；标准finish由独立选项控制 |
+| `--sphere-finish-backend` | `cpu` | torch复用完整dense GPU收尾；显式cuda:N与两个surface worker |
+| `--inflate-backend` | `native` | torch复用完整标准inflated/sulc，nofix保持native；仅surface worker启用缓存 |
+| `--mni-execution` | `in-process` | parallel-late将完整非线性与末尾CPU网格检查并行，join后验收138输出 |
+| `--n4-backend` / `--n4-execution` | `native` / `in-process` | torch为完整固定N4候选；isolated仅允许torch与cuda:N，在fresh worker开启缓存 |
+| `--wm-execution` | `in-process` | isolated仅允许torch-optimized，复用完整分割的缓存worker |
+| `--normalization-controls-backend` | `cpu` | torch复用两轮GPU邻域，其他控制点顺序保持 |
+| `--normalization-initial-bias-backend` | `cpu` | torch复用第二轮初始Voronoi/平滑，距离及排序保持CPU |
 | `--native-optimizations` | `auto` | 复用现有已验证评分/原生加速；original为控制；torch强制评分 |
 | `--code-version` | 必填 | 实际提交与候选身份；另逐模块记录SHA，不能伪称main版本 |
 
@@ -92,36 +99,27 @@ recon-all -i /data/sub01_T1w.nii.gz -s sub01 -sd /data/reference -all -openmp 4
 
 ## 5. 最新实测及范围
 
-2026-10-09冻结v2启动一例原始T1、空目录、控制后候选串行配对，源代码模块SHA
-在各报告记录。完整recon环境接线9/9通过。控制保存42个完成阶段后，GPU节点SSH
-不可达，原持久会话已结束，无CLI退出码；候选未启动。
-原因未确定，不归因OOM，没有新整例耗时与严格138结果。
-[原记录及中断收据](../../validation/recon_all/optimizations/20261009_torch_integration/README.md)保留原始状态。
-当前阶段证据为WM/aseg两例34.408→8.187秒与34.581→7.946秒、零体素差异；
-单左侧standard sphere170.63→133.57秒、完整文件SHA相同；完整缺陷投射两例约3秒，
-GPU未显示稳定收益。详见各子功能页，不能累加阶段收益推断整例已经少于600秒。
+最新已发布完整评分为 589e2749 的两例原始 T1、新空目录 A100/四线程运行。CLI **2141.872/2110.975 秒**，相对 0cd9 的观察缩短 **0.464%/0.859%**；含外层哈希校验和全部加载/传输/读写的 harness 为 **2150.563/2119.676 秒**。两例完成 138/138 输出与生产网格检查，16 张有序表面坐标/面、七张标签及 68 区统计保持，零容差顶点图差异仍保留。新评分未判整体指标等效，十分钟目标尚未达到。
 
-Python pial完整阶段1396.651→1483.542秒，GPU正则项单次配对慢6.22%，
-此选项未纳入生产默认或本次整例候选。完整pial仍存在官方差异，单列排错。
-新优化的严格复现、是否引入退化、整体指标等效分别记录，后者保持未判定。
-当前已有环境包含原生组件；无预装软件隔离整例和全新主页安装尚未验证。
+官方严格复现仍为 6/138、7/138；68 区厚度 MAE **0.04482/0.05068 mm**、面积 **31.397/35.868 mm²**、GM 体积 **151.147/153.956 mm³**。本次直接评分与上一冻结版本的五组官方指标一致。官方参考由另一主机生成，历史时间不构成本轮同机性能比；white/pial 穿越和 sphere 局部负向面未隐去。全部阶段、精度、源/程序 SHA 与脑图见[589 完整报告](../../validation/recon_all/optimizations/20261009_whole_inflate_a100_589e2749/README.md)。
 
-本次控制的GCA为444.146秒，其中400.532秒在线性搜索；N4为122.778秒。
-两者是继续优化的实际依据。初版先控制后候选，存在Numba磁盘缓存及共享负载偏差，
-即使完成也不能把单次差值当作稳定提速。后续均衡配对须使用新空目录与独立缓存。
+父子树 NVML 归属为未知，不能把 null 写成 0；目标卡快照峰约 12.3 GB，另列计算进程快照上界，两类查询时间不同。名义间隔 0.5 秒，最大实际间隔 7.943/5.215 秒；不能据此宣布连续 20 GB 预算已证明。已有独立 wheel 安装及入口验证另有范围，不等于全新 Conda 或物理隔离整例。
 
-### 本轮 A100 整例控制
+### 最近其他完整版本
 
-两例 ds000114 sub-06/sub-07 使用冻结 `a756fffb`、各四线程和独立可见 GPU，
-从原始T1与空目录启动。两次CLI分别在914.044、913.811秒收到SIGBUS（返回−7），
-最后已完成阶段为SynthSeg，下一GCA没有完成记录。执行失败，没有完整138项、
-最终指标或整例提速结论。正在以完整同输入GCA与原生white重复运行定位；
-当前不将原因写成显存OOM或随机性。旧显存采样无法归属宿主PID，进程峰值未知。
+- 0cd9cbd5 GPU 归一化：CLI 2151.856/2129.266 秒，新旧表面、标签及脑区统计保持，见[原始 T1 回归](../../validation/recon_all/optimizations/20261009_whole_normalization_a100_0cd9cbd5/README.md)。
+- 803aec50 GCA 缓存/求逆/fill：完整控制/候选 6137.234→2255.064 秒和 6040.677→2281.571 秒，见[完整配对](../../validation/recon_all/optimizations/20261009_whole_pair_a100_803aec50/README.md)。不是相对官方的提速。
+- 765 MNI/mesh 与 e34 dense GPU finish 使用独立冻结源码和新空目录评测，未在本页用局部收益推算总时间。
 
-本轮迁移使用的是既有Conda环境和固定源码构建产物的私有安装副本，
-已核对资源、程序哈希及动态库，不等同于全新主页安装或物理隔离验收。
+### 保留的中断诊断
+
+旧 v2 控制保存 42 阶段后 SSH 不可达，未取得 CLI 返回码；候选未启动。原[失败记录](../../validation/recon_all/optimizations/20261009_torch_integration/README.md)保持原身份，不当作最新结果。更后的 a756fffb 两例控制分别在 914.044/913.811 秒收到 SIGBUS（−7），最后完成 SynthSeg，GCA 没有完成记录；没有完整指标，也没有确定为 OOM。后续已完成的版本单独记录，不抹去失败。
+
+Python pial 旧 GPU regularizer 的完整配对曾慢 6.22%；后续 GPU 候选索引、编译更新和清理的完整结果见[当前 pial 说明](PYTHON_PIAL_PLACEMENT.md)。不同源码/配方的阶段时间不累加为整例收益，默认生产放置仍由已声明独立构建程序执行。
 
 ## 6. 更新记录
+
+589/e34：发布两例完整标准inflation回归，接入既有完整dense GPU sphere收尾及late MNI选项；各自完整阶段、整例、安装和入口契约保留独立证据。
 
 2026-10-09增加后端接线、原始T1整例包装及同设备进程树采样。
 新增显式候选接线复用已有GCA批量求逆、WM缓存几何和Numba fill，默认未切换；
