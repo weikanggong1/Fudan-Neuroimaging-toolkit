@@ -33,6 +33,8 @@ flowchart LR
 DWI准备见 [dMRI](../dmri_pipeline/README.md)、[TOPUP](../topup/README.md)、[EDDY](../eddy/README.md)；
 解剖见 [recon-all](../recon_all/README.md)，两模板定义见 [template_pairs](template_pairs.md)。
 
+最新组件更新（2026-10-09）：5TT 采样合并角点取值及权重，保持有序累加；固定真实输入的 100k 追踪与旧版逐字节一致。默认模式热中位数 238.65 → 177.53 秒，原有编译模式 116.34 → 107.34 秒；共享负载下的观测及全部样本见[追踪性能页](TRACKING_PERFORMANCE_OPTIMIZATION.md)。这次计时从固定 FOD/5TT/GMWMI 开始，完整原始 BIDS 与最终矩阵精度继续以原端到端报告为准。
+
 ## 2. Python 调用
 
 以下例子读取已有同源subject，原始DWI由入口准备：

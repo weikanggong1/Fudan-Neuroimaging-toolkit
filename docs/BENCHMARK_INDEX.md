@@ -1,6 +1,6 @@
 # FNIT 最新 CPU/GPU benchmark 索引
 
-> 更新：2026-10-08。这里集中列出各子功能说明页中**当前可公开、可复核**的真实数据结果。原有功能页的输入、参数、原软件命令、历史版本和脑图结构不变；本页只提供统一入口和最新聚合数字。共享节点、冷启动、I/O 和不同流程范围会单独标注，不能把不同口径的墙钟直接相加或外推为稳定加速比。
+> 更新：2026-10-09。这里集中列出各子功能说明页中**当前可公开、可复核**的真实数据结果。原有功能页的输入、参数、原软件命令、历史版本和脑图结构不变；本页只提供统一入口和最新聚合数字。共享节点、冷启动、I/O 和不同流程范围会单独标注，不能把不同口径的墙钟直接相加或外推为稳定加速比。
 
 ## 读表规则
 
@@ -30,6 +30,7 @@
 | `TorchProbtrackX` | 两组真实完整流程：旧版 6818/6086 s，CPU 优化版 4275/4317 s；完整输出严格一致。 | 单 way-point/avoid H100 公开配对仍见原页，peak allocation 2.81 GB；随机数流不同，非逐轨迹等价。 | 两组 CPU 结果约缩短 37%/29%，限定为同输入、同线程两次观察。见 [ProbtrackX 页](probtrackx/README.md)。 |
 | `TorchDTIFIT` | 真实第二壳层 CLI（含 I/O）3.43 s；官方同范围秒数当前未形成可复核公开表。 | 本轮没有独立、完整资源记录。 | FA max abs 1.19×10⁻⁷、tensor/eigenvalue max 2.33×10⁻¹⁰；MO/方向图仍有单体素较大差异，不能写成全输出通过。见 [DTIFIT 页](dtifit/README.md)。 |
 | `UKBConnectome_pipeline` CSD | 本轮没有可复核 CPU 端到端速度表。 | CSD 完整 API 旧/新 3436.72/3376.50 s；WM/GM/CSF 三套数组及 NPY 逐位一致。 | CUDA 进程显存监测失败，因此精度回归通过但资源/速度验收不通过；不得写成稳定 GPU 加速。见 [Connectome 页](connectome/README.md)。 |
+| `UKBConnectome_pipeline` iFOD2/ACT | 同机 MRtrix 8 线程完整 tckgen（含 I/O）：100k seeds 为 16.032–16.286 s。 | 单 H100 固定输入追踪：默认热中位数 238.650 → 177.532 s；已有编译模式 116.345 → 107.344 s。Torch allocation/reserved 最大 1.076/1.216 GB。 | 新旧版在相同模式中全部流线与 TCK 逐字节一致，74 项 GPU 回归通过。每版两个热样本、共享负载波动，不承诺稳定倍率；不是原始 DWI 全流程或 MRtrix 随机重复等价验收。见 [追踪性能页](connectome/TRACKING_PERFORMANCE_OPTIMIZATION.md)。 |
 | `MMORF` | 未发布官方速度/精度对照。 | 未发布官方速度/精度对照。 | 官方参照程序完整性失败并异常退出，故不纳入 benchmark；生产实现仍可按自身验证记录使用。 |
 
 ## sMRI、配准与重建

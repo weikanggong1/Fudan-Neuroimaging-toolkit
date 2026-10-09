@@ -1,14 +1,14 @@
 # ACT/iFOD2 追踪与 SH、体积采样
 
-[流程入口](README.md) · [本轮精度优化总说明](ACCURACY_OPTIMIZATION_20261003.md) · [本轮追踪组件验证](../../validation/connectome/accuracy_20261003/task_03/README.md)
+[流程入口](README.md) · [2026-10-03 精度总说明](ACCURACY_OPTIMIZATION_20261003.md) · [2026-10-03 精度验证](../../validation/connectome/accuracy_20261003/task_03/README.md) · [最新无损性能实测](TRACKING_PERFORMANCE_OPTIMIZATION.md)
 
 ## 1. 功能简介
 
 `probabilistic_tractography` 从归一化 WM FOD 和 5TT/GMWMI 生成 RAS 毫米坐标的流线。一次生成全部种子，再按固定批量初始化方向、前向追踪、后向追踪，最后保留符合 ACT 和长度规则的路径。生产采用 FNIT PyTorch，实现不启动 MRtrix。
 
-前轮（2026-10-02）数据流加速复用 SH 系数索引、FOD 布局及坐标尺度，以及 5TT 各轴的角点索引和权重。SH 仍按原阶数递推；FOD 系数逐元素相乘后沿系数轴求和。5TT 按 `dz → dy → dx` 的八角点顺序做 FP32 加和，保留 `weight < 1e-6`、最近体素非零判断和图像边界规则。路径仍为 tuple；单向路径引用 forward 缓冲区。前轮同输入逐值比较和耗时记录见第 5 节。
+前轮（2026-10-02）数据流加速复用 SH 系数索引、FOD 布局及坐标尺度，以及 5TT 各轴的角点索引和权重。SH 仍按原阶数递推；FOD 系数逐元素相乘后沿系数轴求和。2026-10-09 正式实现进一步合并八角点取值和权重计算，仍按 `dz → dy → dx` 的八角点顺序做 FP32 加和，保留 `weight < 1e-6`、最近体素非零判断和图像边界规则。路径仍为 tuple；单向路径引用 forward 缓冲区。本轮默认/原有编译模式的完整 100k 流线分别与旧版逐字节一致，GPU 回归 74 项通过；最新计时与脑图见[无损性能实测](TRACKING_PERFORMANCE_OPTIMIZATION.md)，前轮记录仍见第 5 节。
 
-本轮（2026-10-03）精度候选修正 SGM 退出截断：在降采样之前，按相邻内部顶点的弦方向评价 FOD，再选择 SGM 段内的最小点。此前使用圆弧切线，可能选到不同截断点。圆弧概率仍使用切线，RNG 和校准循环保留原规则。active-only 校准实验没有速度收益，已撤回；本轮十二次完整 raw 与十例比较已完成，矩阵 1388/2400、轨迹分布 85/250，整体未匹配；两组配对耗时观测合计 −2.80%（CON03 +0.50%），原显存监测缺口与独立补测另列。
+前轮（2026-10-03）精度候选修正 SGM 退出截断：在降采样之前，按相邻内部顶点的弦方向评价 FOD，再选择 SGM 段内的最小点。此前使用圆弧切线，可能选到不同截断点。圆弧概率仍使用切线，RNG 和校准循环保留原规则。active-only 校准实验没有速度收益，已撤回；该轮十二次完整 raw 与十例比较已完成，矩阵 1388/2400、轨迹分布 85/250，整体未匹配；两组配对耗时观测合计 −2.80%（CON03 +0.50%），原显存监测缺口与独立补测另列。
 
 ```mermaid
 flowchart LR
@@ -81,8 +81,8 @@ SH 和内部采样上下文没有独立生产 CLI。原始 BIDS 入口见 [pipel
 ```bash
 # 按实际冻结基线导出 fod.py 和 tracking.py；source目录内只需这两个文件。
 # manifest是前轮10例下载数据的许可、配对、SHA记录，checkpoint保留全部输入张量和header间距。
-flock /tmp/fnit-connectome-tenraw-gongwk.gpu0.lock \
-  env CUDA_VISIBLE_DEVICES=GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e \
+flock /tmp/fnit-connectome.gpu0.lock \
+  env CUDA_VISIBLE_DEVICES=0 \
   python validation/connectome/tenraw_20261002/task_03/run_tracking_checkpoint.py run \
   --source /data/task_03/baseline \
   --source-commit f436de588647a0de80735e4a98d53df5d88e502d \
@@ -101,8 +101,8 @@ python validation/connectome/tenraw_20261002/task_03/run_tracking_checkpoint.py 
 随机重复另用 `run_tracking_seed_repeat.py`，它只在明确给出 `--seed-repeat --seed 0..4` 时覆盖随机种子，保持原 PT 张量、种子数量、batch及所有追踪参数。该工具独立于冻结的 ABBA worker。示例：
 
 ```bash
-flock /tmp/fnit-connectome-tenraw-gongwk.gpu0.lock \
-  env CUDA_VISIBLE_DEVICES=GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e \
+flock /tmp/fnit-connectome.gpu0.lock \
+  env CUDA_VISIBLE_DEVICES=0 \
   python validation/connectome/tenraw_20261002/task_03/run_tracking_seed_repeat.py run \
   --source /data/task_03/candidate \
   --source-commit c4811b4b192014cd59e1031385e359cd992ef9e5 \
@@ -136,7 +136,11 @@ tckgen wm_fod.mif reference_tracks.tck \
 
 ## 5. 最新精度、耗时与脑图
 
-### 本轮精度优化：2026-10-03
+### 最新无损优化：2026-10-09
+
+合并 5TT 八角点取值与权重，保持原有序累加。默认/已有编译模式分别完成完整 100k 预热与 ABBA，全部输出和 TCK 逐字节一致。热中位数为 238.650→177.532 / 116.345→107.344 秒；共享负载波动明显，完整样本与脑图见[性能说明](TRACKING_PERFORMANCE_OPTIMIZATION.md)，不更新原始 DWI 全流程的精度结论。
+
+### 前轮精度优化：2026-10-03
 
 本轮正式候选保留 SGM 弦方向截断修正；SH 布局、组织采样及既有数据流加速继续复用前轮实现。公开参数、尝试播种预算、圆弧概率、默认 TF32 和 `compile_arc=False` 均保留。
 
@@ -158,7 +162,7 @@ tckgen wm_fod.mif reference_tracks.tck \
 
 完整生成解剖合同回归（100 seeds、75条接受路径、2573个点）与冻结基线在所有points、endpoints、lengths、mean_fa、accepted seeds逐值一致；这是单元/合同回归，不作真实benchmark。见 [合同JSON](../../validation/connectome/tenraw_20261002/task_03/tracking_contract.json)。
 
-SH算子诊断覆盖CPU/CUDA、lmax=0,2,4,6,8,10,12、随机方向、极轴和旧真实方向样本，与冻结基线逐值一致。这是算子回归；重复旧fixture的吞吐测量不能替代前轮新下载受试者benchmark。GPU 1（UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`）共享锁内AB/BA算子计时如下，单位为每次同步调用的毫秒；只描述CPU dispatch与CUDA执行合计，不拆成kernel比例。
+SH算子诊断覆盖CPU/CUDA、lmax=0,2,4,6,8,10,12、随机方向、极轴和旧真实方向样本，与冻结基线逐值一致。这是算子回归；重复旧fixture的吞吐测量不能替代前轮新下载受试者benchmark。GPU 1共享锁内AB/BA算子计时如下，单位为每次同步调用的毫秒；只描述CPU dispatch与CUDA执行合计，不拆成kernel比例。
 
 | 方向数 | 基线 | 候选 | 耗时下降 |
 | --- | ---: | ---: | ---: |
@@ -168,7 +172,7 @@ SH算子诊断覆盖CPU/CUDA、lmax=0,2,4,6,8,10,12、随机方向、极轴和�
 
 原始AB/BA、源码/fixture SHA和Torch版本见 [算子JSON](../../validation/connectome/tenraw_20261002/task_03/sh_operator_diagnostic.json)。前轮真实 CON03 tracking 数据如下；当轮官方多 seed 矩阵、两例 1M 与十例 raw 整链结果分别保留于对应报告，整链汇总见[pipeline 前轮结果](README.md#前轮数据流加速2026-10-02-轮实际结果)。旧脑图保留原输入与版本标签。
 
-CON03：前轮新下载 ds001226，CC0，snapshot `fb4d0fda44f2ab7a732fb4ab6cd62add09dc1cd7`。直接复用 root 实际调用原子导出的PT，SHA-256 `35fc586482c2366ae4cbf0b4360356fbc0e255e221b8def92d9555960275f07b`，不从NIfTI重建仿射。FOD `[96,96,60,45]`、5TT `[256,256,256,5]`、仿射float64；seed=0，100000次播种，batch=8192，lmax=8，arc_proposals=16，max_length_mm=250，cutoff=0.1，power=0.5，compile_arc=False，其余参数完整见报告。GPU0 UUID `GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e`，Torch2.5.1，TF32，8 CPU threads，allocator `expandable_segments:True`。
+CON03：前轮新下载 ds001226，CC0，snapshot `fb4d0fda44f2ab7a732fb4ab6cd62add09dc1cd7`。直接复用 root 实际调用原子导出的PT，SHA-256 `35fc586482c2366ae4cbf0b4360356fbc0e255e221b8def92d9555960275f07b`，不从NIfTI重建仿射。FOD `[96,96,60,45]`、5TT `[256,256,256,5]`、仿射float64；seed=0，100000次播种，batch=8192，lmax=8，arc_proposals=16，max_length_mm=250，cutoff=0.1，power=0.5，compile_arc=False，其余参数完整见报告。GPU0，Torch2.5.1，TF32，8 CPU threads，allocator `expandable_segments:True`。
 
 | 顺序 | 版本 | tracking同步wall/秒 | 接受轨迹 | 轨迹点 |
 | --- | --- | ---: | ---: | ---: |
@@ -218,7 +222,8 @@ CON03两轮路径逻辑数据均48,259,644 bytes，实际去重storage均2,419,3
 
 | 版本/日期 | 更新与证据 |
 | --- | --- |
-| 本轮精度组件/2026-10-03 | SGM 退出截断改用降采样前内部点弦方向；局部选择差异 20/324→0/324。active-only 性能候选撤回，完整 raw 12 次 CLI 验收进行中，见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)。 |
+| d4327049/2026-10-09 | 有序八角点 gather＋权重批量计算；同模式完整 100k 路径与 TCK 逐字节一致，74 项 GPU 回归通过，计时及实验取舍见[最新性能页](TRACKING_PERFORMANCE_OPTIMIZATION.md)。 |
+| 前轮精度组件/2026-10-03 | SGM 退出截断改用降采样前内部点弦方向；局部选择差异 20/324→0/324。active-only 性能候选撤回，完整 raw 12 次 CLI 验收已完成、整体仍未匹配，见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)。 |
 | 前轮随机重复证据汇总/2026-10-03 | CON03实际seed0–4完成，输入、源码、参数与输出结构审计通过，三类显存峰值均符合预算。只增加独立重复/审计工具与报告，当时生产算法为c4811b4；两例1M A/B的五类二进制数组SHA相同，三种观测峰值均<20GB；CON03 B1采样最大间隔8.709秒，组件结果不作为正式rawcase完整显存gate通过证据；原软件矩阵和整例验收由总控完成。 |
 | 前轮数据流候选/2026-10-02 | SH同阶分组写回；FOD调用内上下文；5TT轴索引/权重复用。只减少重复准备，保留求和、ACT、RNG和路径视图。两例真实100k同PT ABBA逐位一致，CON03共享负载下观测耗时下降18.75%；五seed跟踪和两例1M A/B容量检查已完成，整例由总控验收。 |
 | f436de5/2026-10-02 | 前轮冻结基线；既有路径收集合同由`test_tracking_collection.py`保护。 |
