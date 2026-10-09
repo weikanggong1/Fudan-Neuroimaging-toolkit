@@ -213,14 +213,52 @@ GPU sampler 的控制契约使用替身，不是实际 CUDA 数值验收；白�
 0.004488 mm、P99 0.085020 mm、最大1.033601 mm，792个顶点超过0.1 mm。
 两后端同样存在该差异，不能归因于GPU预候选引入退化。v6 MRI有3体素差异；
 已定位到共用亮区准备函数的邻居阈值误读，修复与两例MRI-only回归见
-[放置强度图说明](PLACEMENT_VOLUME_PREPARATION.md)。修复版完整白质另行冻结v8
-验证，不改写v6结果。
+[放置强度图说明](PLACEMENT_VOLUME_PREPARATION.md)。修复版完整白质已另行冻结v8验证，不改写v6结果。
 
 [完整GPU报告](../../validation/recon_all/optimizations/20261009_placement_torch/white_source_marker_torch_a100_v6.json)、
 [CPU控制](../../validation/recon_all/optimizations/20261009_placement_torch/white_source_marker_cpu_a100_v6.json)与
 [完整同输入比较](../../validation/recon_all/optimizations/20261009_placement_torch/white_source_marker_full_comparison_a100_v6.json)
 保存全部轨迹和误差。外部监测实际间隔约数秒，进程归属未解；树峰为null，
 整卡采样上界11,744,051,200字节含其他进程，不能代表FNIT精确峰或整例预算。
+
+修复版v8完整GPU为325.188秒/34步/最终0相交，与v6全部坐标、有序面、
+表面文件SHA与接受轨迹相同；MRI改成与两次稳定原生参考0体素差异。
+因此本例white局部几何误差没有由那3个MRI差异导致。v8较v6墙钟多3.43%，
+是单次不同负载观察，不能视为优化提速或稳定退化。
+
+v8新增准备细分：总79.123秒中，初始平滑与清理31.467秒、首次rip15.218秒、
+首次边界搜索与目标平均17.531秒、拓扑/目标上下文8.314秒、法向3.054秒、
+亮区强度图3.071秒、MRI读取与物化0.463秒。后续碰撞174.616秒、轮间边界
+重估49.482秒是主要计算热点，不能把准备慢简单归为亮区3³卷积。
+PyTorch峰allocated704,253,952字节、reserved1,704,984,576字节；进程树
+归属仍未解，外部采样整卡上界13,524,533,248字节包含其他项目，不等于
+FNIT峰，也不保证捕获连续峰。CUDA初始化另计2.740秒。
+
+[最新完整报告](../../validation/recon_all/optimizations/20261009_placement_torch/white_threshold13_torch_a100_v8.json)与
+[修复前后/原生比较](../../validation/recon_all/optimizations/20261009_placement_torch/white_threshold13_full_comparison_a100_v8.json)
+绑定本次输入与模块SHA。
+
+下图是该真实conformed MRI上的white.preaparc叠加：青色为同输入原生、
+品红为FNIT；中图聚焦全网格最大同索引误差所在平面，颜色为距离/mm。
+右图为表面误差投影，统计使用全部顶点；未显示的顶点不从误差统计删去。
+
+![真实MRI叠加、局部边界和同索引白质误差](../../validation/recon_all/optimizations/20261009_placement_torch/white_threshold13_diagnostics_a100_v8.png)
+
+具名复现：
+
+```bash
+python validation/recon_all/python_gpu_port/plot_full_white_diagnostics.py \
+  --candidate-surface /data/runs/lh.white.preaparc.torch \
+  --reference-surface /data/reference/lh.white.preaparc \
+  --brain-mri /data/frozen/sub07/mri/brain.finalsurfs.mgz \
+  --comparison-report /data/runs/complete-white-comparison.json \
+  --output /data/figures/white-diagnostics.png \
+  --label "public ds000114 sub07 LH"
+```
+
+三个输入影像/表面均为冻结同输入阶段对象；比较报告与输出PNG/旁JSON保存
+SHA。必须有相同顶点数和有序面，使用MGH头vox2ras_tkr将surface RAS/mm
+变换到conformed体素网格；不成立则报错，不绘伪逐顶点误差。
 
 严格后端复现已通过；同输入原生严格复现未通过；整体脑区指标等效未评估。
 原生188.737–235.183秒仍快于GPU314.405秒，当前不将GPU路径设为生产默认。
@@ -314,15 +352,14 @@ python validation/recon_all/python_gpu_port/benchmark_placement_full_white.py \
 脚本包含坐标哈希和增量报告写入的实际墙钟；GPU 测量前后同步明确目标
 设备。allocated/reserved 仅是 PyTorch 分配器峰值，整个进程及并发进程
 同时显存仍需外部采样，不能据分配器值宣布满足 20,000,000,000 字节整例
-预算。完整 brain overlay/异常区域图待真实四轮结果生成；此时不附模拟
-脑图冒充当前 benchmark。不同硬件的历史记录分开报告。
+预算。当前真实MRI叠加/异常边界图见上文；不同硬件的历史记录分开报告。
 
 ## 6. 更新记录
 
 | 日期/版本 | 修改与证据 |
 |---|---|
 | 2026-10-09，源marker v6 | 完整CPU/GPU34步和最终几何无差异、最终0相交；对原生局部误差仍单列 |
-| 2026-10-09，13邻居阈值修复 | 两例white/pial MRI-only与原生0差异；完整修正版另测，不覆盖v6 |
+| 2026-10-09，v8/13邻居阈值修复 | 两例white/pial MRI-only与原生0差异；完整sub07LH表面和轨迹与v6相同，MRI与原生0差异 |
 | 2026-10-09，本轮实验接线 | 接通preaparc四轮、轮间冻结与目标重估、完整试步记录、uint8诊断体积；保留旧失败质量门证据 |
 | 2026-10-09，`4939d41c` 及模块 SHA | 首步 PyTorch 正则同输入无新差异；仅首步阶段证据 |
 | 既有白质首轮诊断 | 1–17 步对照接口保留，承担定位参考作用；没有删除仍使用的诊断算子 |

@@ -129,8 +129,9 @@ pial模式将`--white`改为`--pial`并要求`--repulse-surf`。本次MRI-only�
 机器可读报告分别为
 [sub06 v2](../../validation/recon_all/optimizations/20261009_placement_torch/prepare_volume_threshold13_a100_v2_sub06.json)与
 [sub07 v2](../../validation/recon_all/optimizations/20261009_placement_torch/prepare_volume_threshold13_a100_v2_sub07.json)。
-它们绑定本次实际模块SHA，不以旧记录代替当前结果。完整修正版white
-另行运行；不能从MRI-only相同推出表面或最终统计量相同。
+它们绑定本次实际模块SHA，不以旧记录代替当前结果。完整sub07LH修正版white已运行34步/325.188秒，输出MRI也与两个稳定原生
+参考0差异；最终表面与修复前v6相同，原生局部几何差异未消除，见
+[完整white说明](PYTHON_WHITE_PREAPARC.md)。不能从MRI-only相同推出表面或最终统计量相同。
 
 ## 6. 更新与 benchmark 记录
 

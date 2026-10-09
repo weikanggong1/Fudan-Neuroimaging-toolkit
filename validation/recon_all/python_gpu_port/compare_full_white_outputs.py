@@ -51,6 +51,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--control-report", type=Path, required=True)
     parser.add_argument("--candidate-report", type=Path)
+    parser.add_argument("--control-backend", choices=("cpu", "torch"), default="cpu")
+    parser.add_argument("--candidate-backend", choices=("cpu", "torch"), default="torch")
     parser.add_argument("--native-reference-report", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -64,15 +66,16 @@ def main():
     if native["input_sha256"] != control["input_sha256"] or (
         candidate is not None and candidate["input_sha256"] != control["input_sha256"]):
         raise ValueError("reports must bind exactly the same five stage input hashes")
-    a = control["python_runs"]["cpu"]
+    a = control["python_runs"][args.control_backend]
     report = {"scope": "frozen_same_input_complete_white_preaparc_only_not_final_white_or_recon_all",
         "control_report_sha256": sha(args.control_report), "native_reference_report_sha256": sha(args.native_reference_report),
         "candidate_report_sha256": sha(args.candidate_report) if args.candidate_report else None,
         "script_sha256": sha(__file__), "input_sha256": control["input_sha256"],
+        "control_backend": args.control_backend, "candidate_backend": args.candidate_backend if candidate else None,
         "control_wall_seconds": a["wall_seconds"], "native_comparisons": {},
         "overall_metric_equivalence": "not_assessed", "strict_official_reproduction": "not_run_when_only_Conda_reference_is_present"}
     if candidate is not None:
-        b = candidate["python_runs"]["torch"]
+        b = candidate["python_runs"][args.candidate_backend]
         report.update(candidate_wall_seconds=b["wall_seconds"], same_pass_trial_coordinate_trace=a["trace"] == b["trace"],
             backend_geometry=geometry(a["stage"]["output"], b["stage"]["output"]),
             backend_volume=volume(a["stage"]["output_volume"], b["stage"]["output_volume"]),
