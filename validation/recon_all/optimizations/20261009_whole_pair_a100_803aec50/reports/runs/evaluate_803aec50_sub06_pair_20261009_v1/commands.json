@@ -1,0 +1,36 @@
+[
+  {
+    "command": [
+      "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+      "[PRIVATE_FNIT]/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_region_stats.py",
+      "--reference",
+      "[PRIVATE_FNIT]/runs/recon_e2e_803aec50_cfff_20261009/sub06-control/subject",
+      "--candidate",
+      "[PRIVATE_FNIT]/runs/recon_e2e_803aec50_cfff_20261009/sub06-candidate/subject",
+      "--code-commit",
+      "803aec50:raw-T1:candidate;archive=b66241f677c5afe59a70bad30f0d3594a04013b6bd21adb53843bb5be337b389",
+      "--output",
+      "[PRIVATE_FNIT]/runs/evaluate_803aec50_sub06_pair_20261009_v1/region_candidate_vs_control.json"
+    ],
+    "seconds": 0.24351307190954685,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+      "[PRIVATE_FNIT]/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_parcellation_dice.py",
+      "--reference",
+      "[PRIVATE_FNIT]/runs/recon_e2e_803aec50_cfff_20261009/sub06-control/subject",
+      "--candidate",
+      "[PRIVATE_FNIT]/runs/recon_e2e_803aec50_cfff_20261009/sub06-candidate/subject",
+      "--code-commit",
+      "803aec50:raw-T1:candidate;archive=b66241f677c5afe59a70bad30f0d3594a04013b6bd21adb53843bb5be337b389",
+      "--output",
+      "[PRIVATE_FNIT]/runs/evaluate_803aec50_sub06_pair_20261009_v1/dice_candidate_vs_control.json",
+      "--label-table",
+      "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/FreeSurferColorLUT.txt"
+    ],
+    "seconds": 11.892253330908716,
+    "exit_code": 0
+  }
+]

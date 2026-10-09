@@ -1,0 +1,100 @@
+[
+  {
+    "command": [
+      "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+      "[PRIVATE_FNIT]/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_region_stats.py",
+      "--reference",
+      "[PRIVATE_FNIT]/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--candidate",
+      "[PRIVATE_FNIT]/runs/recon_e2e_803aec50_cfff_20261009/sub07-control/subject",
+      "--code-commit",
+      "803aec50:raw-T1:control;archive=b66241f677c5afe59a70bad30f0d3594a04013b6bd21adb53843bb5be337b389",
+      "--output",
+      "[PRIVATE_FNIT]/runs/evaluate_803aec50_sub07_control_vs_official_20261009_v1/region_candidate_vs_official.json"
+    ],
+    "seconds": 0.19835678860545158,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+      "[PRIVATE_FNIT]/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_parcellation_dice.py",
+      "--reference",
+      "[PRIVATE_FNIT]/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--candidate",
+      "[PRIVATE_FNIT]/runs/recon_e2e_803aec50_cfff_20261009/sub07-control/subject",
+      "--code-commit",
+      "803aec50:raw-T1:control;archive=b66241f677c5afe59a70bad30f0d3594a04013b6bd21adb53843bb5be337b389",
+      "--output",
+      "[PRIVATE_FNIT]/runs/evaluate_803aec50_sub07_control_vs_official_20261009_v1/dice_candidate_vs_official.json",
+      "--label-table",
+      "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/FreeSurferColorLUT.txt"
+    ],
+    "seconds": 11.958498304709792,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+      "[PRIVATE_FNIT]/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py",
+      "--subject",
+      "[PRIVATE_FNIT]/runs/recon_e2e_803aec50_cfff_20261009/sub07-control/subject",
+      "--output",
+      "[PRIVATE_FNIT]/runs/evaluate_803aec50_sub07_control_vs_official_20261009_v1/quality_candidate",
+      "--code-version",
+      "803aec50:raw-T1:control;archive=b66241f677c5afe59a70bad30f0d3594a04013b6bd21adb53843bb5be337b389",
+      "--source-kind",
+      "fnit",
+      "--threads",
+      "4",
+      "--cross-timeout-seconds",
+      "180",
+      "--max-bbox-pairs",
+      "20000000"
+    ],
+    "seconds": 29.084010737016797,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+      "[PRIVATE_FNIT]/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py",
+      "--subject",
+      "[PRIVATE_FNIT]/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--output",
+      "[PRIVATE_FNIT]/runs/evaluate_803aec50_sub07_control_vs_official_20261009_v1/quality_official",
+      "--code-version",
+      "FreeSurfer 8.2.0 d932c45",
+      "--source-kind",
+      "official",
+      "--threads",
+      "4",
+      "--cross-timeout-seconds",
+      "180",
+      "--max-bbox-pairs",
+      "20000000"
+    ],
+    "seconds": 23.907593340612948,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+      "[PRIVATE_FNIT]/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/plot_recon_all_comparison.py",
+      "--reference",
+      "[PRIVATE_FNIT]/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--candidate",
+      "[PRIVATE_FNIT]/runs/recon_e2e_803aec50_cfff_20261009/sub07-control/subject",
+      "--region-report",
+      "[PRIVATE_FNIT]/runs/evaluate_803aec50_sub07_control_vs_official_20261009_v1/region_candidate_vs_official.json",
+      "--dice-report",
+      "[PRIVATE_FNIT]/runs/evaluate_803aec50_sub07_control_vs_official_20261009_v1/dice_candidate_vs_official.json",
+      "--output-dir",
+      "[PRIVATE_FNIT]/runs/evaluate_803aec50_sub07_control_vs_official_20261009_v1/figures",
+      "--code-commit",
+      "803aec50:raw-T1:control;archive=b66241f677c5afe59a70bad30f0d3594a04013b6bd21adb53843bb5be337b389"
+    ],
+    "seconds": 5.441657528281212,
+    "exit_code": 0
+  }
+]

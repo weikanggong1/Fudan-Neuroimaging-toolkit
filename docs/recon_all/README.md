@@ -317,7 +317,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 ## 5. 最新精度和运行时间
 
-2026-10-09 A100 GPU 整例为实际冻结 `803aec50` 的 sub-06：原始T1与空目录连续完成，CLI **2255.064秒**、138/138输出齐全；严格复现6/138，整体等效及优化相对控制是否退化尚未判定。同主机控制及第二例仍在运行，没有整例提速比例。68区厚度/面积/体积、逐标签Dice、双向表面距离和white/pial穿越，以及全部SHA、分步骤时间和三张脑图，见[本次完整结果](../../validation/recon_all/optimizations/20261009_whole_a100_803aec50/README.md)。该整例未包含后续N4、WM和GPU邻域实验，不能把阶段收益叠加到这里。
+2026-10-09 A100 整例冻结 `803aec50`：两例原始T1空目录控制/候选均完成，CLI **6137.234→2255.064秒、6040.677→2281.571秒**，同硬件/四线程配对提速 **2.72×、2.65×**。四次138输出与生产网格完整；新旧138项容差比较通过，有序面、表面坐标、分割及68区统计相同，零容差顶点图尾差仍完整保留。与官方严格复现为6/138、7/138，整体指标等效未判定。全部阶段、官方误差、局部质量、显存限制和脑图见[两例完整配对结果](../../validation/recon_all/optimizations/20261009_whole_pair_a100_803aec50/README.md)。该整例未包含后续N4、WM和GPU归一化实验；新接线的整例另行验证，十分钟目标尚未达到。
 
 最新2026-10-04正式CPU全链为冻结v3（e91dd25，实际归档/逐文件SHA见[身份](../../validation/smri_cpu/task5/recon_complete_cpu_v3/manifest.public.json)），公开CC0 OpenNeuro ds000114 snapshot1.0.2一例原始T1。参考FreeSurfer8.2.0-1默认-all-openmp8；CPU评测节点 Xeon Gold6418H同8物理核预算、8线程，CPU未启用CUDA。完整wall含新进程、校验、读写和全部计算，排除锁等待及事后评分；非ABBA且共享负载。
 
@@ -355,7 +355,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
-| 2026-10-09 | 803aec50 / A100 | GCA独立缓存、分块GPU求逆与有序fill；未包含后续阶段实验 | [一例原始T1完整结果与官方比较](../../validation/recon_all/optimizations/20261009_whole_a100_803aec50/README.md)，配对/第二例未完成 |
+| 2026-10-09 | 803aec50 / A100 | GCA独立缓存、分块GPU求逆与有序fill；未包含后续阶段实验 | [两例原始T1完整配对与官方比较](../../validation/recon_all/optimizations/20261009_whole_pair_a100_803aec50/README.md)，配对2.72×/2.65×，整体等效未判定 |
 | 2026-10-07 | raw3a / API比较工具ed16 | 取回九例完整比较，未重跑原始T1 | [九例精度、耗时、显存与局部问题](../../validation/recon_all/accuracy_20261003/runtime/server_refresh_20261007/README.md) |
 | 2026-10-04 | e91dd25/v3 | CPU完整链、异常报告与缺失依赖补测 | 138输出与完整表面/统计评分；本例慢4.99% |
 | 2026-10-02 | 8d750e2 | 半球独立进程、WM/MNI/几何热点整合 | [两例完整GPU三方比较](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md) |
