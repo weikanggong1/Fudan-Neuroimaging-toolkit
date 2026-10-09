@@ -68,9 +68,39 @@ def filter_aseg_ridge(source: np.ndarray, ridge: np.ndarray) -> tuple[np.ndarray
     return controls, removed, peak
 
 
-def apply_initial_aseg_bias(source: np.ndarray, controls: np.ndarray) -> np.ndarray:
-    """Reproduce the aseg branch's initial Voronoi, sigma-8 bias, and correction."""
+def apply_initial_aseg_bias(source: np.ndarray, controls: np.ndarray, *,
+                            backend: str = "cpu", device: str | None = None) -> np.ndarray:
+    """按 aseg 初始规则传播、sigma-8平滑并校正同网格强度。
+
+    source为三维(x,y,z)NumPy强度，转float32；controls为同shape非零控制点图。
+    网格由调用者保证，sigma单位体素，不改变RAS。backend默认cpu，完整保留
+    原NumPy/Numba路径；torch复用已有Voronoi/高斯GPU实现，要求显式CUDA设备。
+    平滑传全零控制图，不恢复控制点强度；最后先float64除法再乘法，转float32。
+    返回同shape CPU NumPy float32图，含同步下载，不修改source/controls或TF32。
+    后端/设备无效、形状不符、空控制集抛异常；CUDA错误向上传播，不自动回退。
+    属于mri_normalize -aseg的内部步骤，无独立原软件CLI。
+    """
+    if backend not in {"cpu", "torch"}:
+        raise ValueError("initial bias backend must be cpu or torch")
     source = np.asarray(source, dtype=np.float32)
+    if backend == "torch":
+        import torch
+        from .normalize_gaussian_source import smooth_bias_torch
+        from .normalize_voronoi_source import voronoi_fill_torch
+        if device is None:
+            raise ValueError("torch initial bias requires an explicit CUDA device")
+        target = torch.device(device)
+        if target.type != "cuda" or target.index is None:
+            raise ValueError("torch initial bias requires an explicit CUDA device")
+        # 各既有内核按目标CUDA stream执行，退出后恢复父API当前设备。
+        with torch.cuda.device(target):
+            image = torch.as_tensor(np.ascontiguousarray(source), device=target)
+            selected = torch.as_tensor(np.ascontiguousarray(controls), device=target)
+            filled, _ = voronoi_fill_torch(source=image, control=selected)
+            bias, _ = smooth_bias_torch(voronoi=filled, source=image,
+                control=torch.zeros_like(selected), sigma=8.0)
+            corrected = (image.double() * (110.0 / bias.double())).float()
+            return corrected.cpu().numpy()
     voronoi, _ = voronoi_fill(source, controls)
     bias, _ = smooth_bias(voronoi, source, np.zeros_like(controls), strict=True)
     return np.float32(source.astype(np.float64) * (110.0 / bias.astype(np.float64)))

@@ -28,6 +28,8 @@ def main():
     parser.add_argument("--candidate", type=Path, required=True, help="完整候选输出")
     parser.add_argument("--output", type=Path, required=True, help="新PNG路径")
     parser.add_argument("--label", required=True, help="公开被试和阶段名称，不含私有路径")
+    parser.add_argument("--candidate-title", default="GPU neighbor candidate",
+                        help="候选面板标题；默认邻域候选，初始偏场可显式命名")
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
@@ -40,7 +42,7 @@ def main():
     difference = np.abs(baseline - candidate)
     slice_index = baseline.shape[2] // 2
     figure, axes = plt.subplots(1, 3, figsize=(10, 3.7), constrained_layout=True)
-    for axis, data, title in zip(axes[:2], (baseline, candidate), ("Existing FNIT", "GPU neighbor candidate")):
+    for axis, data, title in zip(axes[:2], (baseline, candidate), ("Existing FNIT", args.candidate_title)):
         axis.imshow(data[:, :, slice_index].T, origin="lower", cmap="gray", vmin=0, vmax=255)
         axis.set_title(title)
         axis.axis("off")
@@ -57,6 +59,7 @@ def main():
         "scope": "mid-index source grid slice; no RAS resampling or clinical claim",
         "reference_sha256": sha(args.reference), "candidate_sha256": sha(args.candidate),
         "script_sha256": sha(__file__), "figure_sha256": sha(args.output),
+        "candidate_title": args.candidate_title,
         "shape": list(baseline.shape), "slice_axis": 2, "slice_index": slice_index,
         "different_voxels": int(np.count_nonzero(difference)), "max_abs": float(difference.max()),
         "p99_abs": float(np.percentile(difference, 99)), "affine_equal": True,

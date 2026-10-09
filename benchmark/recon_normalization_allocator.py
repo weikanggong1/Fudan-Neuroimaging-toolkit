@@ -5,6 +5,7 @@ import argparse
 from contextlib import contextmanager
 import hashlib
 import importlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -88,6 +89,8 @@ def main():
                         help="启动前已选择的分配器；不能在 CUDA 初始化后切换")
     parser.add_argument("--source-dir", type=Path, required=True,
                         help="冻结 FNIT 源码包的 src 目录")
+    parser.add_argument("--candidate-overlay", type=Path,
+                        help="可选只读两文件覆盖目录；只加载normalize_aseg_source/aseg_pipeline")
     parser.add_argument("--mri-dir", type=Path, required=True,
                         help="自产检查点目录；不作为原始 T1 整例验收")
     parser.add_argument("--reference", type=Path, required=True,
@@ -99,9 +102,13 @@ def main():
     parser.add_argument("--code-commit", required=True, help="冻结源码 commit；实际另绑定文件 SHA")
     parser.add_argument("--controls-neighbor-backend", choices=("cpu", "torch"), default="cpu",
                         help="默认现有 CPU 邻域；torch 仅用于已冻结候选显式 GPU 邻域")
+    parser.add_argument("--initial-bias-backend", choices=("cpu", "torch"), default="cpu",
+                        help="aseg 初始偏场；torch 复用既有GPU传播和严格平滑")
     args = parser.parse_args()
     if args.threads < 1:
         raise ValueError("threads must be positive")
+    if args.stage != "aseg" and args.initial_bias_backend != "cpu":
+        raise ValueError("initial bias backend only applies to aseg stage")
     disabled = os.environ.get("PYTORCH_NO_CUDA_MEMORY_CACHING") is not None
     if disabled != (args.cache == "disabled"):
         raise ValueError("allocator environment must be selected before Python startup")
@@ -112,6 +119,19 @@ def main():
     # 源码路径只能读取；不改正在运行的冻结包。
     import sys
     sys.path.insert(0, str(args.source_dir.resolve()))
+    if args.candidate_overlay is not None:
+        # 诊断只装载明确的两个候选模块，避免复制既有整个workspace。
+        namespace = importlib.import_module("fnit.recon_all.normalization")
+        for name in ("normalize_aseg_source", "aseg_pipeline"):
+            full_name = "fnit.recon_all.normalization." + name
+            file = args.candidate_overlay / (name + ".py")
+            if not file.is_file():
+                raise FileNotFoundError(file)
+            spec = importlib.util.spec_from_file_location(full_name, file)
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[full_name] = module
+            spec.loader.exec_module(module)
+            setattr(namespace, name, module)
     modules = [importlib.import_module("fnit.recon_all.normalization." + name)
                for name in ("pipeline", "aseg_pipeline", "normalize_3d_controls", "normalize_gentle_source")]
     from fnit.recon_all.profiling import (configure_cuda_allocator, StageProfiler,
@@ -162,6 +182,21 @@ def main():
         if args.controls_neighbor_backend == "torch" else None)
     extra = ({} if args.controls_neighbor_backend == "cpu" else
              {"controls_neighbor_backend": args.controls_neighbor_backend})
+    if args.initial_bias_backend != "cpu":
+        extra["initial_bias_backend"] = args.initial_bias_backend
+    initial_trace = {}
+    original_initial_bias = modules[1].apply_initial_aseg_bias
+
+    def trace_initial_bias(source, controls, **keywords):
+        initial_trace["source_data_sha256"] = hashlib.sha256(np.ascontiguousarray(source).tobytes()).hexdigest()
+        initial_trace["controls_data_sha256"] = hashlib.sha256(np.ascontiguousarray(controls).tobytes()).hexdigest()
+        initial = original_initial_bias(source, controls, **keywords)
+        initial_trace["output_data_sha256"] = hashlib.sha256(np.ascontiguousarray(initial).tobytes()).hexdigest()
+        initial_trace["dtype"] = str(initial.dtype)
+        return initial
+
+    if args.stage == "aseg":
+        modules[1].apply_initial_aseg_bias = trace_initial_bias
     try:
         with timed_cpu_helpers(modules, helpers, gpu_context_class=gpu_context_class):
             if args.stage == "t1":
@@ -175,6 +210,7 @@ def main():
                     device=str(device), three_d_iterations=2, **extra)
     finally:
         active_pipeline.controls_3d = original_controls
+        modules[1].apply_initial_aseg_bias = original_initial_bias
         stop.set()
         monitor.join(timeout=10)
     sampler.sample_if_due(force=True)
@@ -192,6 +228,7 @@ def main():
         "scope": "same-input full existing normalization API allocator ABBA component; not raw T1 end-to-end",
         "stage": args.stage, "cache": args.cache, "code_commit": args.code_commit,
         "controls_neighbor_backend": args.controls_neighbor_backend,
+        "initial_bias_backend": args.initial_bias_backend,
         "source_sha256": loaded_modules, "script_sha256": sha(__file__),
         "profiling_sha256": sha(sys.modules["fnit.recon_all.profiling"].__file__),
         "input_sha256": input_hashes, "input_unchanged": unchanged,
@@ -211,9 +248,10 @@ def main():
         "allocator": allocator, "initialization_seconds": initialization_seconds,
         "full_API": profiler.last_row, "api": api, "cpu_helpers": helpers,
         "three_d_control_traces": control_traces,
+        "initial_bias_trace": initial_trace,
         "timing_includes": "first API validation, file loading, H2D/D2H, control search, first JIT/cache load, all two iterations and compressed write; target CUDA pre/post sync",
         "timing_excludes": "Python import, CUDA initialization, SHA collection and comparison; shell records cold process separately",
-        "helper_timing_scope": "CPU helpers or full GPU neighbor upload/kernel/synchronous download; nested values not summed; no additional synchronization; round input/control data SHA tracing included in paired API",
+        "helper_timing_scope": "CPU helpers or GPU initial bias/full neighbor upload/kernel/synchronous download; nested values not summed; no additional synchronization; initial and round input/control/output data SHA tracing included in paired API",
         "shape": list(rhs.shape), "dtype": str(rhs.dtype), "different_voxels": int(np.count_nonzero(difference)),
         "max_abs": float(difference.max()), "p99_abs": float(np.percentile(difference, 99)),
         "affine_equal": bool(np.array_equal(result.affine, reference.affine)),

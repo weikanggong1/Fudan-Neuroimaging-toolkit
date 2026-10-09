@@ -77,14 +77,16 @@ def _complete_from_initial(initial: np.ndarray, device: str,
 def normalize_t1_aseg(norm_file: str | Path, aseg_file: str | Path,
                       brainmask_file: str | Path, output_file: str | Path,
                       device: str | None = None, three_d_iterations: int = 2, *,
-                      controls_neighbor_backend: str = "cpu") -> dict:
+                      controls_neighbor_backend: str = "cpu",
+                      initial_bias_backend: str = "cpu") -> dict:
     """同网格 norm/aseg/brainmask→uint8 brain.mgz，返回完整步骤记录。
 
     norm_file 为1mm conform uint8强度，aseg_file 为同网格整数标签，
     brainmask_file 为同网格掩膜，output_file 保留 norm 的毫米 affine/MGH头。
     device=None 有 CUDA 时选 cuda:0 否则 cpu，three_d_iterations 默认2，
     仅接受0/1/2。controls_neighbor_backend 默认 cpu，torch 只替换三维扩展
-    邻域统计并要求 CUDA；ridge、有序过滤、初始偏置及外层反馈均保留。
+    邻域统计并要求 CUDA；initial_bias_backend 默认 cpu，torch 复用已有GPU
+    初始偏置传播/平滑，算术与zero-control规则不变。ridge、有序过滤保留CPU。
     返回 dict 的 total_seconds、ridge_seconds、initial_bias_seconds 单位秒；
     ridge、removed_controls、wm_peak、completion 记录控制点和后续步骤。
     total_seconds 从图像头与同网格检查后开始，完整文件 API 应外层计时。
@@ -98,6 +100,10 @@ def normalize_t1_aseg(norm_file: str | Path, aseg_file: str | Path,
         raise ValueError("controls_neighbor_backend must be cpu or torch")
     if controls_neighbor_backend == "torch" and not str(device).startswith("cuda:"):
         raise ValueError("torch controls_neighbor_backend requires an explicit CUDA device")
+    if initial_bias_backend not in {"cpu", "torch"}:
+        raise ValueError("initial_bias_backend must be cpu or torch")
+    if initial_bias_backend == "torch" and not str(device).startswith("cuda:"):
+        raise ValueError("torch initial_bias_backend requires an explicit CUDA device")
     norm_file, aseg_file, brainmask_file = map(Path, (norm_file, aseg_file, brainmask_file))
     images = [nib.load(str(path)) for path in (norm_file, brainmask_file, aseg_file)]
     if any(image.shape != images[0].shape or not np.array_equal(image.affine, images[0].affine)
@@ -111,13 +117,15 @@ def normalize_t1_aseg(norm_file: str | Path, aseg_file: str | Path,
     controls, removed, wm_peak = filter_aseg_ridge(masked, ridge)
     ridge_seconds = time.perf_counter() - tick
     tick = time.perf_counter()
-    initial = apply_initial_aseg_bias(masked, controls)
+    initial = apply_initial_aseg_bias(masked, controls, backend=initial_bias_backend,
+                                    device=str(device))
     initial_bias_seconds = time.perf_counter() - tick
     result, completion = _complete_from_initial(initial, device, three_d_iterations,
         controls_neighbor_backend=controls_neighbor_backend)
     save_same_dtype_mgh(norm_file, output_file, result)
     return {"device": device, "three_d_iterations": three_d_iterations,
             "controls_neighbor_backend": controls_neighbor_backend,
+            "initial_bias_backend": initial_bias_backend,
             "ridge_seconds": ridge_seconds, "initial_bias_seconds": initial_bias_seconds,
             "ridge": ridge_details, "removed_controls": int(np.count_nonzero(removed)),
             "wm_peak": wm_peak, "completion": completion,
@@ -133,10 +141,12 @@ def main() -> None:
     parser.add_argument("--device")
     parser.add_argument("--three-d-iterations", type=int, choices=(0, 1, 2), default=2)
     parser.add_argument("--controls-neighbor-backend", choices=("cpu", "torch"), default="cpu")
+    parser.add_argument("--initial-bias-backend", choices=("cpu", "torch"), default="cpu")
     args = parser.parse_args()
     print(json.dumps(normalize_t1_aseg(args.norm, args.aseg, args.brainmask,
                                        args.output, args.device, args.three_d_iterations,
-                                       controls_neighbor_backend=args.controls_neighbor_backend)))
+                                       controls_neighbor_backend=args.controls_neighbor_backend,
+                                       initial_bias_backend=args.initial_bias_backend)))
 
 
 if __name__ == "__main__":

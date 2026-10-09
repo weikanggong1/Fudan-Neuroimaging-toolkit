@@ -19,7 +19,8 @@ flowchart LR
 
 默认仍为 `controls_neighbor_backend="cpu"`；`"torch"` 是显式候选。
 这不是整条归一化都在 GPU 上，也不改变 recon-all 的默认调度。
-第二次归一化的 ridge 和初始偏置仍使用已有 CPU 路径。
+第二次归一化默认的 ridge 和初始偏置仍使用已有 CPU 路径。
+初始偏场另有独立显式候选，见[已有GPU偏场复用](NORMALIZATION_ASEG_INITIAL_GPU.md)。
 
 ## 2. Python 调用、输入与输出
 
