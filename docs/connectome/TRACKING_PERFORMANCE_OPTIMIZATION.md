@@ -134,6 +134,8 @@ MRtrix RNG seed 0/1/2 的完整 tckgen 墙钟为 16.188 / 16.032 / 16.286 秒，
 
 默认组 Torch allocated/reserved 最大为 1.048/1.202 GB，编译组为 1.076/1.216 GB；这些数值不含 CUDA 上下文。GPU 回归 74 项全通过，CPU 回归 41 项通过、33 项因无 CUDA 跳过。全部样本、源码 SHA、输入 SHA、内存口径和未采用实验见[验证页](../../validation/connectome/tracking_exact_20261009/README.md)。
 
+另一次完整默认模式 100k 显存审计包含初始化、H2D、完整追踪和 snapshot D2H：本进程采样峰值 3.127 GB，Torch allocated/reserved 1.048/1.227 GB，关键阶段采样无缺失/错误、最大间隔 0.503 秒，输出 SHA 相同。达到声明的采样 <20 GB gate，不证明采样间隔内的连续上界；该调用不加入速度表。[审计与复现](../../validation/connectome/tracking_exact_20261009/MEMORY_REPRODUCE.md)
+
 共享节点上默认基线前后增加约 14%，编译基线下降约 14%；每版只有两个热样本，因此以上是本轮观测，不能承诺稳定的加速倍率。同机 MRtrix 完整命令约 16.17 秒，FNIT 已有编译模式追踪约 107.34 秒，仍有明显差距；两者 I/O 计时边界不同。本轮没有把历史 782–807 秒与当前值相除作为优化倍率，也没有更新原始 DWI 全流程精度结论。
 
 ### 瓶颈诊断

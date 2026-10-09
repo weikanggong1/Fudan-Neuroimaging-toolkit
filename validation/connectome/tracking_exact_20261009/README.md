@@ -62,6 +62,8 @@
 
 Torch allocator 限为 18 GB，给 CUDA 上下文留余量。Torch 指标不含上下文、驱动和其他进程；正式 ABBA 仅有离散整卡快照，不能据此称连续进程显存峰值。本轮另用自己的进程记录 GPU 回归显存：allocated 0.037 GB、reserved 0.038 GB，NVML 采样峰值 1.938 GB；这是回归测试规模，不冒充 100k 的进程峰值。
 
+正式实现又独立运行一次完整默认模式 100k 显存审计：本进程采样峰值 **3.126854 GB**，Torch allocated/reserved 为 **1.047712/1.226834 GB**；H2D→完整追踪→snapshot D2H 共 365 个有效样本，无缺失/错误，最大间隔 **0.503236 秒**，输出 SHA 与正式默认组相同。满足声明的采样显存 gate（18 GB allocator cap、进程采样峰值严格 <20 GB）；采样不能证明间隔内短峰值的连续上界。该调用包含监测开销，不加入前面的 ABBA 速度统计。[完整审计报告](memory_audit_100000.public.json) · [脚本、参数与复现](MEMORY_REPRODUCE.md)
+
 - [GPU 回归](gpu_regression.public.json)：74 passed，pytest 9.13 秒；覆盖真实圆弧 fixture、非连续/空采样、斜切 affine、`1e-6` 上下边界、dtype/字节、输入与 RNG 不变性。
 - [总验证记录](verification.public.json)：CPU 41 passed / 33 skipped；现工具元数据修正后 benchmark CPU 测试 7 passed。没有运行 FNIT 全项目测试。
 - 首次 GPU runner 缺少可选 pynvml；改用标准库调用 nvidia-smi，不改环境。第二次传输漏了已有真实圆弧 fixture，72 项通过、2 项因缺文件失败；补齐并校验 SHA 后 74 项全部通过。失败记录保留。
