@@ -1,0 +1,178 @@
+{
+  "status": "complete",
+  "scope": "same-input full first candidate-grid scoring only; not a full optimization trajectory, final LTA or end-to-end recon-all",
+  "code_version": "a756fffb",
+  "inputs_sha256": {
+    "nu": "192958d5b392a2cf9b566a2311317df47583482de4a287775eae81166d68c1de",
+    "mask": "ae72c43ece869a3c209536c3367084af4c41921afd84f683a210fec9c4c548b1",
+    "atlas": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+  },
+  "source_sha256": {
+    "score": "d6c9092cbad86c147ecd8e1c2443132eeb7904b5de5b5fab23e284dba14de719",
+    "source": "61bb275aab464aabf2684eeab8deda044cdbd893143298513c3e9dc29171d0e3",
+    "script": "605d0e60135d06e062bd07c46649e1b7eec75bfd5160e5934ff06ebc109e2b0b"
+  },
+  "device": "cuda:0",
+  "threads": 4,
+  "torch": "2.5.1",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "3",
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": null
+  },
+  "matrix_grid": "source search grid from identity at real atlas centroid; not a production optimization trajectory",
+  "precision": "FP32 source arithmetic; source reciprocal and likelihood use FP64; TF32 enabled; no half precision",
+  "acceptance_before_test": {
+    "inverse": "float32 bits exact",
+    "score_strict_reproduction": "float32 bits exact (diagnostic)",
+    "optimization_regression": "existing scorer abs tolerance 1e-2 and first argmax unchanged; full registration still required",
+    "existing_score_abs": 0.01
+  },
+  "whole_metric_equivalence": "not_assessed",
+  "cuda_init_seconds": 0.7240671217441559,
+  "preparation_seconds": 12.105514476075768,
+  "sample_count": 2841,
+  "shared_numba_log_terms_warmup_seconds": 0.15569035802036524,
+  "matrix_generation_seconds": 0.6719138650223613,
+  "candidate_count": 91125,
+  "matrix_sha256": "8901522951a786d4ffb1af57c6c9582a0e20b6ae7b7ea61eec5d3c0daa75ee13",
+  "inverse_comparison": {
+    "different_float32_bits": 0,
+    "max_abs": 0.0
+  },
+  "strict_reproduction": "exact_for_fixed_grid",
+  "optimization_regression": "fixed_grid_only_selection_unchanged",
+  "host_alias": "A100-8 benchmark node",
+  "raw_private_report_sha256": "4dccca741c5163b9cbafc09bb13611d11009de42771d869c1542f49f7a3d9fbe",
+  "device_model": "NVIDIA A100-SXM4-80GB",
+  "sampling_correction": "Original sampler cannot map NVML host PIDs to container PIDs; zero process memory is invalid, replaced by null in this derived public report. Full original report preserved privately.",
+  "trials": [
+    {
+      "inverse_backend": "cpu",
+      "candidate_chunk": 64,
+      "setup_and_transfer_seconds": 0.0032629426568746567,
+      "complete_scoring_seconds": 3.31627647113055,
+      "different_score_bits": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "first_argmax": 86739,
+      "first_argmax_same": true,
+      "allocated_peak_bytes": 31070208,
+      "reserved_peak_bytes": 50331648,
+      "process_memory": {
+        "status": "ownership_unresolved",
+        "peak_tree_total_bytes": null,
+        "requested_interval_seconds": 0.2,
+        "max_observed_interval_seconds": 0.5280539253726602,
+        "failed_samples": [],
+        "sample_count": 10
+      }
+    },
+    {
+      "inverse_backend": "torch",
+      "candidate_chunk": 64,
+      "setup_and_transfer_seconds": 0.002146097831428051,
+      "complete_scoring_seconds": 2.6022976767271757,
+      "different_score_bits": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "first_argmax": 86739,
+      "first_argmax_same": true,
+      "allocated_peak_bytes": 31070208,
+      "reserved_peak_bytes": 50331648,
+      "process_memory": {
+        "status": "ownership_unresolved",
+        "peak_tree_total_bytes": null,
+        "requested_interval_seconds": 0.2,
+        "max_observed_interval_seconds": 0.5423517907038331,
+        "failed_samples": [],
+        "sample_count": 6
+      }
+    },
+    {
+      "inverse_backend": "torch",
+      "candidate_chunk": 256,
+      "setup_and_transfer_seconds": 0.0022060414776206017,
+      "complete_scoring_seconds": 0.70459970459342,
+      "different_score_bits": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "first_argmax": 86739,
+      "first_argmax_same": true,
+      "allocated_peak_bytes": 74843648,
+      "reserved_peak_bytes": 113246208,
+      "process_memory": {
+        "status": "ownership_unresolved",
+        "peak_tree_total_bytes": null,
+        "requested_interval_seconds": 0.2,
+        "max_observed_interval_seconds": null,
+        "failed_samples": [],
+        "sample_count": 1
+      }
+    },
+    {
+      "inverse_backend": "torch",
+      "candidate_chunk": 1024,
+      "setup_and_transfer_seconds": 0.0022958312183618546,
+      "complete_scoring_seconds": 0.29857332818210125,
+      "different_score_bits": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "first_argmax": 86739,
+      "first_argmax_same": true,
+      "allocated_peak_bytes": 243871232,
+      "reserved_peak_bytes": 339738624,
+      "process_memory": {
+        "status": "ownership_unresolved",
+        "peak_tree_total_bytes": null,
+        "requested_interval_seconds": 0.2,
+        "max_observed_interval_seconds": null,
+        "failed_samples": [],
+        "sample_count": 1
+      }
+    },
+    {
+      "inverse_backend": "torch",
+      "candidate_chunk": 256,
+      "setup_and_transfer_seconds": 0.0025611519813537598,
+      "complete_scoring_seconds": 0.6598816476762295,
+      "different_score_bits": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "first_argmax": 86739,
+      "first_argmax_same": true,
+      "allocated_peak_bytes": 75450880,
+      "reserved_peak_bytes": 339738624,
+      "process_memory": {
+        "status": "ownership_unresolved",
+        "peak_tree_total_bytes": null,
+        "requested_interval_seconds": 0.2,
+        "max_observed_interval_seconds": null,
+        "failed_samples": [],
+        "sample_count": 1
+      }
+    },
+    {
+      "inverse_backend": "cpu",
+      "candidate_chunk": 64,
+      "setup_and_transfer_seconds": 0.0022338591516017914,
+      "complete_scoring_seconds": 3.302733175456524,
+      "different_score_bits": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "first_argmax": 86739,
+      "first_argmax_same": true,
+      "allocated_peak_bytes": 31070208,
+      "reserved_peak_bytes": 339738624,
+      "process_memory": {
+        "status": "ownership_unresolved",
+        "peak_tree_total_bytes": null,
+        "requested_interval_seconds": 0.2,
+        "max_observed_interval_seconds": 0.8290795246139169,
+        "failed_samples": [],
+        "sample_count": 9
+      }
+    }
+  ],
+  "performance_scope": "CUDA allocator caching enabled; first/last CPU-inverse64 and two Torch-inverse256 measurements; Torch1024 has one measurement per case. Not a balanced full-stage speedup.",
+  "overall_metric_equivalence": "not_assessed"
+}

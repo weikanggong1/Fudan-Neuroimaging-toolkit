@@ -21,6 +21,10 @@ def run_recon_all_python_batch(
     wm_edit_backend: str = "native",
     defects_backend: str = "native",
     sphere_normals_backend: str = "numba",
+    gca_inverse_backend: str = "cpu",
+    gca_candidate_chunk: int = 64,
+    gca_execution: str = "in-process",
+    fill_backend: str = "python",
     backend: str = "native",
 ) -> list[dict]:
     """每设备独立子进程执行单 T1，按 jobs 顺序返回完整报告列表。
@@ -35,7 +39,8 @@ def run_recon_all_python_batch(
     RuntimeError。每设备仅执行一个被试；hemisphere_workers 默认1，设2时被试内部
     独立进程并行双侧，threads 在双侧之间分配（总预算不翻倍）。
     backend=python-gpu使用严格纯Python/CUDA profile；只要仍有未完成阶段就
-    在创建被试目录前失败，不回退到原生程序。native_optimizations=auto按已验证能力选择完整GCA缓存及white快速程序；
+    在创建被试目录前失败，不回退到原生程序。native_optimizations=auto在CUDA选择已有Torch GCA，CPU查询GCA缓存能力；
+    white使用专用快速程序，pial保持原生；
     original用于原生阶段配对控制，原样传递给每个被试CLI。
     defects_backend 默认 native；torch 将缺陷投射交给同设备 PyTorch，
     保持左清零/右合并顺序和标签含义，调色板采用确定性颜色。
@@ -43,6 +48,12 @@ def run_recon_all_python_batch(
     wm_edit_backend 默认 native；torch-hybrid 选择静态 CUDA 子步骤与有序
     Numba WM/aseg 核心。sphere_normals_backend 默认 numba；torch 只迁移
     标准球面法向。后三种 Torch 选择均要求 CUDA，失败不静默回退。
+    wm_backend=torch-optimized复用Torch直方图和缓存平面几何，有序反馈为CPU。
+    gca_inverse_backend=cpu和gca_candidate_chunk=64保留旧评分；torch求逆及
+    非默认分块只允许CUDA的Torch GCA。fill_backend=python保留旧完整fill；
+    gca_execution=in-process保留父缓存；isolated以新exec启用局部GCA缓存，
+    不改变已初始化父CUDA或精度，仅可CUDA Torch后端。
+    numba使用同顺序CPU堆，torch-numba另使用CUDA初始边界。原样传入CLI。
     """
     from .hemisphere_parallel import validate_hemisphere_workers
     validate_hemisphere_workers(hemisphere_workers, threads)
@@ -56,10 +67,24 @@ def run_recon_all_python_batch(
         raise ValueError("cuda_allocator_cache must be auto, enabled, or disabled")
     if native_optimizations not in {"auto", "original", "torch"}:
         raise ValueError("native_optimizations must be auto, original, or torch")
-    if wm_backend not in {"native", "torch"}:
-        raise ValueError("wm_backend must be native or torch")
-    if wm_backend == "torch" and any(device == "cpu" for device in devices):
-        raise ValueError("wm_backend='torch' requires CUDA devices")
+    if wm_backend not in {"native", "torch", "torch-optimized"}:
+        raise ValueError("wm_backend must be native, torch or torch-optimized")
+    if wm_backend != "native" and any(device == "cpu" for device in devices):
+        raise ValueError("Torch WM backends require CUDA devices")
+    if gca_inverse_backend not in {"cpu", "torch"}:
+        raise ValueError("gca_inverse_backend must be cpu or torch")
+    if isinstance(gca_candidate_chunk, bool) or not isinstance(gca_candidate_chunk, int) or gca_candidate_chunk < 1:
+        raise ValueError("gca_candidate_chunk must be a positive integer")
+    if gca_execution not in {"in-process", "isolated"}:
+        raise ValueError("gca_execution must be in-process or isolated")
+    if (gca_inverse_backend != "cpu" or gca_candidate_chunk != 64 or gca_execution != "in-process") and (
+        native_optimizations == "original" or any(device == "cpu" for device in devices)
+    ):
+        raise ValueError("GCA candidate options require the CUDA Torch GCA backend")
+    if fill_backend not in {"python", "numba", "torch-numba"}:
+        raise ValueError("fill_backend must be python, numba or torch-numba")
+    if fill_backend == "torch-numba" and any(device == "cpu" for device in devices):
+        raise ValueError("fill_backend='torch-numba' requires CUDA devices")
     if wm_edit_backend not in {"native", "torch-hybrid"}:
         raise ValueError("wm_edit_backend must be native or torch-hybrid")
     if wm_edit_backend == "torch-hybrid" and any(device == "cpu" for device in devices):
@@ -105,6 +130,14 @@ def run_recon_all_python_batch(
                 command += ["--defects-backend", defects_backend]
             if sphere_normals_backend != "numba":
                 command += ["--sphere-normals-backend", sphere_normals_backend]
+            if gca_inverse_backend != "cpu":
+                command += ["--gca-inverse-backend", gca_inverse_backend]
+            if gca_candidate_chunk != 64:
+                command += ["--gca-candidate-chunk", str(gca_candidate_chunk)]
+            if gca_execution != "in-process":
+                command += ["--gca-execution", gca_execution]
+            if fill_backend != "python":
+                command += ["--fill-backend", fill_backend]
             if hemisphere_workers != 1:
                 command += ["--hemisphere-workers", str(hemisphere_workers)]
             if native_optimizations != "auto":

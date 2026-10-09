@@ -1,7 +1,7 @@
 """真实同输入完整GCA注册：旧Torch/批量求逆与独立Conda原生配对。
 
 每次包括读入、准备、搜索、EM、LTA写出；GPU前后同步。冷进程导入不计入
-单次API，另记本driver完整墙钟。不生成原始T1整例或宣布整体指标等效。
+单次API或main函数墙钟；完整CLI须由外部启动器计时。不生成原始T1整例。
 """
 from __future__ import annotations
 
@@ -70,6 +70,9 @@ def main():
         'native_sha256': sha(args.native_binary),
         'native_ldd': subprocess.run(['ldd', str(args.native_binary)], capture_output=True, text=True).stdout,
         'environment': {key: os.environ.get(key) for key in ('CUDA_VISIBLE_DEVICES', 'NUMBA_CACHE_DIR', 'PYTORCH_NO_CUDA_MEMORY_CACHING')},
+        'timing_scope': {'api': 'synchronized read/preparation/search/EM/LTA write',
+                         'main': 'argument parsing, hashes, CUDA initialization and all trials; Python imports excluded',
+                         'cold_process_cli': 'not measured by this script; use external launcher'},
         'acceptance_before_test': {'strict_reproduction': 'matrix entries exact; reference repeats checked separately',
                                   'optimization_regression': 'final LTA matrix exact to old Torch; no change to search/EM/output semantics'},
         'overall_metric_equivalence': 'not_assessed', 'trials': [],
@@ -123,11 +126,13 @@ def main():
                 monitor.join()
             matrix = read_matrix(lta)
             matrices.append(matrix)
+            cache_disabled = os.environ.get('PYTORCH_NO_CUDA_MEMORY_CACHING') is not None
             report['trials'].append({
                 'kind': kind, 'api_wall_seconds_including_read_transfer_write': seconds,
                 'matrix': matrix.tolist(), 'lta_sha256': sha(lta), 'api_result': result,
-                'allocated_peak_bytes': torch.cuda.max_memory_allocated(args.device),
-                'reserved_peak_bytes': torch.cuda.max_memory_reserved(args.device),
+                'allocated_peak_bytes': None if cache_disabled else torch.cuda.max_memory_allocated(args.device),
+                'reserved_peak_bytes': None if cache_disabled else torch.cuda.max_memory_reserved(args.device),
+                'torch_memory_stats_status': 'unavailable_allocator_cache_disabled' if cache_disabled else 'available',
                 'process_memory': memory.report(),
                 'jit_cache_scope': 'same declared cache; first calls may compile and are retained',
             })
@@ -147,10 +152,10 @@ def main():
                     for row in report['trials'] if row['kind']==kind])) for kind in ('conda','old_torch','batched_torch')}
         report['median_api_wall_seconds'] = timings
         report['speedup_to_old_torch'] = timings['old_torch']/timings['batched_torch']
-        report.update(status='complete', full_driver_wall_seconds=time.perf_counter()-started)
+        report.update(status='complete', main_wall_seconds_excluding_imports=time.perf_counter()-started)
         save(report_path, report)
     except BaseException as error:
-        report.update(status='failed',error=repr(error),full_driver_wall_seconds=time.perf_counter()-started)
+        report.update(status='failed',error=repr(error),main_wall_seconds_excluding_imports=time.perf_counter()-started)
         save(report_path, report)
         raise
 

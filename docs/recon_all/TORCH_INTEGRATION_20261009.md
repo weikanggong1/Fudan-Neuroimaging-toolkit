@@ -33,6 +33,11 @@ flowchart LR
 | `--threads` | `4` | 每被试CPU预算；双侧并行时平分 |
 | `--hemisphere-workers` | `2` | 1串行，2独立双侧worker；共享缺陷体积仍顺序累积 |
 | `--defects-backend` | `torch` | 此实验脚本默认Torch投射；生产入口默认仍native |
+| `--wm-backend` | `native` | torch为已有混合分割，torch-optimized复用直方图与缓存几何；反馈仍为CPU |
+| `--gca-inverse-backend` | `cpu` | torch复用同公式的批量求逆；仅CUDA Torch评分 |
+| `--gca-candidate-chunk` | `64` | 完整候选分块的正整数，较大块增加显存 |
+| `--gca-execution` | `in-process` | isolated将已有Torch GCA放入缓存开启的新exec，父低显存策略保持 |
+| `--fill-backend` | `python` | numba为有序CPU堆；torch-numba另用CUDA初始边界 |
 | `--wm-edit-backend` | `native` | torch-hybrid选择静态GPU与Numba有序核心，要求CUDA |
 | `--sphere-normals-backend` | `numba` | torch选择有序GPU法向；其余sphere优化及finish保持 |
 | `--native-optimizations` | `auto` | 复用现有已验证评分/原生加速；original为控制；torch强制评分 |
@@ -105,9 +110,23 @@ Python pial完整阶段1396.651→1483.542秒，GPU正则项单次配对慢6.22%
 两者是继续优化的实际依据。初版先控制后候选，存在Numba磁盘缓存及共享负载偏差，
 即使完成也不能把单次差值当作稳定提速。后续均衡配对须使用新空目录与独立缓存。
 
+### 本轮 A100 整例控制
+
+两例 ds000114 sub-06/sub-07 使用冻结 `a756fffb`、各四线程和独立可见 GPU，
+从原始T1与空目录启动。两次CLI分别在914.044、913.811秒收到SIGBUS（返回−7），
+最后已完成阶段为SynthSeg，下一GCA没有完成记录。执行失败，没有完整138项、
+最终指标或整例提速结论。正在以完整同输入GCA与原生white重复运行定位；
+当前不将原因写成显存OOM或随机性。旧显存采样无法归属宿主PID，进程峰值未知。
+
+本轮迁移使用的是既有Conda环境和固定源码构建产物的私有安装副本，
+已核对资源、程序哈希及动态库，不等同于全新主页安装或物理隔离验收。
+
 ## 6. 更新记录
 
 2026-10-09增加后端接线、原始T1整例包装及同设备进程树采样。
+新增显式候选接线复用已有GCA批量求逆、WM缓存几何和Numba fill，默认未切换；
+增加显式GCA阶段隔离，不全局移除低显存措施；父CUDA已初始化时也使用exec。
+新增CLI无缓冲日志、faulthandler、终止信号与完整命令记录，用于硬信号故障定位。
 没有新增依赖；PyTorch、NumPy、Numba、nibabel均在主页Conda路径声明。
 基础环境曾因缺少tifffile接线失败，不把修复环境中的回归当作原环境成功。
 冻结源码运行期间不修改；历史报告保留自身版本，新结果完成后另列。

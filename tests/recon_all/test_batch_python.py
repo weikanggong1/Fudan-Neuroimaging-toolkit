@@ -66,6 +66,32 @@ class BatchPythonTest(unittest.TestCase):
                                                native_bin_dir=root / "native-bin")
                 runner.assert_not_called()
 
+    def test_candidate_backends_are_passed_to_each_subject_process(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "weights").mkdir()
+            (root / "assets").mkdir()
+            t1 = root / "input.nii.gz"
+            t1.write_bytes(b"test")
+            subject = root / "subject"
+
+            def fake_run(command, **kwargs):
+                subject.mkdir()
+                (subject / "fnit-native-free-run.json").write_text(json.dumps({"status": "complete"}))
+                return type("Completed", (), {"returncode": 0})()
+
+            with patch("fnit.recon_all.batch.subprocess.run", side_effect=fake_run) as runner:
+                run_recon_all_python_batch(
+                    [{"t1": t1, "subject_dir": subject}], root / "weights", root / "assets",
+                    wm_backend="torch-optimized", gca_inverse_backend="torch",
+                    gca_candidate_chunk=1024, gca_execution="isolated", fill_backend="numba")
+            command = runner.call_args.args[0]
+            for flag, value in (("--wm-backend", "torch-optimized"),
+                                ("--gca-inverse-backend", "torch"),
+                                ("--gca-candidate-chunk", "1024"), ("--gca-execution", "isolated"),
+                                ("--fill-backend", "numba")):
+                self.assertEqual(command[command.index(flag) + 1], value)
+
 
 if __name__ == "__main__":
     unittest.main()

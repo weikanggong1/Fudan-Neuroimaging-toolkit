@@ -149,7 +149,7 @@ FP64除法后转FP32，不使用 `torch.linalg.inv` 或 TF32矩阵乘法。
 返回包括4×4 LTA矩阵、输出路径、EM cost/trials、linear_iterations、实际后端和
 prepare/translation/linear/EM/write/total秒数。失败直接抛异常，部分文件不代表成功。
 PyTorch CPU 两项契约回归通过：128个普通/病态矩阵与既有公式逐位一致，非法接口拒绝。
-真实GPU评分、完整注册与显存尚未验证：gpucw1入口不可达，默认尚未改变。
+真实GPU首轮固定网格评分已完成两例验证；完整注册仍在复测，默认尚未改变。
 
 `tools/benchmark_recon_gca_inverse.py` 接收具名 `--nu/--mask/--atlas/--output`
 和 `--code-version`，`--device=cuda:0`、`--threads=4`；输出完整首轮矩阵/分数npy及
@@ -159,6 +159,57 @@ PyTorch CPU 两项契约回归通过：128个普通/病态矩阵与既有公式�
 严格复现诊断；固定候选优化回归沿用仓库原有1e-2分数容差，并要求首次argmax不变。
 该标准在首次GPU评分前写入脚本；固定网格通过仍须完整注册和LTA回归，
 不以小分数尾差或局部速度代替最终指标检查。
+
+### 两例 A100 固定网格实测
+
+测试使用 `a756fffb`、PyTorch 2.5.1、A100 80 GB 和四线程，输入为已有公开
+ds000114 sub-06/sub-07 的冻结 nu、brainmask 与同一 GCA。每例完整评分
+91,125 个候选；候选、输入和函数 SHA-256 见
+[sub-06 报告](../../validation/recon_all/optimizations/20261009_gca_first_grid_a100/sub06.json) 与
+[sub-07 报告](../../validation/recon_all/optimizations/20261009_gca_first_grid_a100/sub07.json)。
+
+| 首轮完整评分 | sub-06 秒 | sub-07 秒 |
+|---|---:|---:|
+| CPU 逐候选求逆，64 候选块，两次中位数 | 3.434 | 3.310 |
+| Torch 批量求逆，256 候选块，两次中位数 | 0.670 | 0.682 |
+| Torch 批量求逆，1024 候选块，单次观察 | 0.303 | 0.299 |
+
+两例求逆和评分均为零位差异，首次最优候选不变。1024 块的 PyTorch
+allocated 峰值约 244 MB；这不包括完整 CUDA 进程占用。原采样器无法匹配
+容器与宿主 PID，其进程显存 0 已在派生报告中标记为未知，原记录私下保留。
+
+上述测试启用 CUDA 分配缓存，只覆盖固定首轮网格；不能外推完整 GCA 或
+整例提速。完整注册配对另用生产 CLI 的缓存关闭策略，从读入、搜索、EM 到
+LTA 写出计时，检查最终矩阵和参考重跑稳定性。整体指标等效尚未判定。
+
+复现完整阶段时用以下具名参数；`--output` 必须是不存在的目录。脚本的
+API 秒数包含读入、准备、传输、完整搜索、EM 和写出，并在前后同步 GPU。
+`main_wall_seconds_excluding_imports` 不含导入；完整冷 CLI 需外部计时器。
+
+```bash
+CUDA_VISIBLE_DEVICES=0 PYTORCH_NO_CUDA_MEMORY_CACHING=1 \
+python -X faulthandler -u tools/benchmark_recon_gca_complete.py \
+  --nu /data/subject/mri/nu.mgz \
+  --mask /data/subject/mri/brainmask.mgz \
+  --atlas /assets/average/RB_all_2020-01-02.gca \
+  --native-binary /conda/libexec/fnit/mri_em_register \
+  --assets-dir /assets \
+  --output /results/gca_complete_new \
+  --device cuda:0 \
+  --threads 4 \
+  --candidate-chunk 1024 \
+  --code-version ACTUAL_TESTED_COMMIT
+```
+
+`nu/mask/atlas` 分别为同网格强度图、脑掩膜和固定图谱；`native-binary`
+只能是独立源码构建程序，`assets-dir` 为其声明资产。`device` 为可见 GPU，
+`threads` 为四线程预算，`candidate-chunk` 只改变分块，`code-version` 绑定
+实际版本。输出为每次 LTA、原生日志和原子更新的 `report.json`，含重复运行、
+旧新严格矩阵对照和耗时；运行失败保留已完成记录并抛异常。整体指标不由此
+脚本判定。CUDA 缓存关闭时 allocated/reserved 标记未知，不把 0 当作零显存。
+
+完整注册与局部缓存的两例CLI/API结果见 [GCA阶段隔离](GCA_ISOLATED_TORCH_20261009.md)。
+旧Torch与原生的既有矩阵差异分开记录；默认路径未切换。
 
 本次没有新增依赖；PyTorch/NumPy/Numba/nibabel均在主页Conda环境声明。
 原算法与资料：[固定mri_em_register源码](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a/mri_em_register)，

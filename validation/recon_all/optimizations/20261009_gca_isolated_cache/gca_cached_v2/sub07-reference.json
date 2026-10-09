@@ -1,0 +1,220 @@
+{
+  "status": "complete",
+  "scope": "isolated diagnostic baseline; frozen own same-input volumes, no raw-T1 E2E",
+  "inputs_sha256": {
+    "nu": "192958d5b392a2cf9b566a2311317df47583482de4a287775eae81166d68c1de",
+    "mask": "ae72c43ece869a3c209536c3367084af4c41921afd84f683a210fec9c4c548b1",
+    "atlas": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+  },
+  "code_version": "algorithm=a756fffb;baseline wrapper SHA;isolated cached old Torch math64CPU-inverse",
+  "source_sha256": {
+    "wrapper": "8e989b459c6de4b244a132c7905f5fe4cba2be72528177b7d8333b29d322a26d"
+  },
+  "native_sha256": "00f19086b91444d6dc79e80f4fd29d8afb4b4ac037e4951cd3c5017c99289e2b",
+  "device": "cuda:0;physical GPU4;different window than v4",
+  "trials": [
+    {
+      "kind": "old_torch",
+      "matrix": [
+        [
+          1.119976878166199,
+          0.03196442127227783,
+          -0.00330263189971447,
+          -20.88686561584473
+        ],
+        [
+          -0.0276108980178833,
+          1.235058784484863,
+          0.2686343193054199,
+          -40.61320495605469
+        ],
+        [
+          0.008245470002293587,
+          -0.2143732458353043,
+          0.9960576891899109,
+          8.258819580078125
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "api_result": {
+        "output": "[PRIVATE_FNIT]/runs/gca_cached_cfff_20261009_v2/sub07-baseline/old.lta",
+        "matrix": [
+          [
+            1.1199768781661987,
+            0.03196442127227783,
+            -0.00330263189971447,
+            -20.886865615844727
+          ],
+          [
+            -0.0276108980178833,
+            1.2350587844848633,
+            0.2686343193054199,
+            -40.61320495605469
+          ],
+          [
+            0.008245470002293587,
+            -0.21437324583530426,
+            0.9960576891899109,
+            8.258819580078125
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "em_cost": 3.696977138519287,
+        "em_trials": 20,
+        "linear_iterations": 7,
+        "timing": {
+          "prepare_seconds": 12.058300663717091,
+          "translation_seconds": 2.824646254070103,
+          "linear_search_seconds": 54.72274231724441,
+          "em_seconds": 6.891234613023698,
+          "write_seconds": 0.10507662780582905,
+          "total_seconds": 76.79518215171993
+        },
+        "search_backend": "torch",
+        "device": "cuda:0",
+        "candidate_chunk": 64,
+        "sample_chunk": 8192,
+        "reduce_on_device": true,
+        "inverse_backend": "cpu",
+        "scope": "same-input complete FNIT GCA in isolated cached worker; not raw-T1 end-to-end",
+        "code_version": "algorithm=a756fffb;worker=frozen-v2-cache-enabled-old-math",
+        "worker_pid": 44997,
+        "cuda_allocator": {
+          "requested": "enabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": null,
+          "environment_after_selection": null,
+          "effective": "enabled",
+          "torch_stats_known_valid": true,
+          "torch_stats_known_unavailable": false
+        },
+        "inputs_sha256": {
+          "nu": "192958d5b392a2cf9b566a2311317df47583482de4a287775eae81166d68c1de",
+          "mask": "ae72c43ece869a3c209536c3367084af4c41921afd84f683a210fec9c4c548b1",
+          "atlas": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+        },
+        "threads": {
+          "torch": 4,
+          "cpu_affinity": [
+            20,
+            21,
+            22,
+            23
+          ],
+          "environment": {
+            "OMP_NUM_THREADS": "4",
+            "MKL_NUM_THREADS": "4",
+            "OPENBLAS_NUM_THREADS": "4",
+            "NUMBA_NUM_THREADS": "4"
+          }
+        },
+        "torch_version": "2.5.1",
+        "logical_device": "cuda:0",
+        "cuda_visible_devices": "4",
+        "source_sha256": {
+          "worker": "823dc7be2ed9fe2b149ade62d7e32850511358b140916c045bf6d2e453dbdb87",
+          "registration": "0e3c39684314f84b47a158266550f35baaf1ef67e5c7bb36df8f145aed772aef",
+          "scorer": "d6c9092cbad86c147ecd8e1c2443132eeb7904b5de5b5fab23e284dba14de719"
+        },
+        "precision": {
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "autocast": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          },
+          "half_requested": false
+        },
+        "gpu_name": "NVIDIA A100-SXM4-80GB",
+        "allocated_peak_bytes": 29433856,
+        "reserved_peak_bytes": 44040192,
+        "scoring_profile": {
+          "calls": 20952,
+          "candidates": 1339766,
+          "wall_seconds": 51.90794270951301,
+          "scope": "existing score_many including its final CPU copy; no added CUDA synchronization"
+        },
+        "worker_api_wall_seconds_including_validation_init_read_transfer_write": 78.92872067168355,
+        "overall_metric_equivalence": "not_assessed",
+        "isolated_cli_wall_seconds": 81.20504972152412,
+        "isolation": "fresh exec; child cache enabled; parent allocator preserved"
+      },
+      "api_wall_seconds_including_read_transfer_write": 76.79518215171993,
+      "lta_sha256": "1178e502c74dec60e069073f1e772208eccb6cdc44a7b0ae7d9a1ef202116dd5"
+    },
+    {
+      "kind": "conda",
+      "matrix": [
+        [
+          1.119976878166199,
+          0.03196442127227783,
+          -0.00330263189971447,
+          -20.88686561584473
+        ],
+        [
+          -0.0276108980178833,
+          1.235058784484863,
+          0.2686343193054199,
+          -40.61320495605469
+        ],
+        [
+          0.008245470002293587,
+          -0.2143732458353043,
+          0.9960576891899109,
+          8.258819580078125
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "api_wall_seconds_including_read_transfer_write": 121.40061443392187,
+      "lta_sha256": "5c2db36cb6ec8fd367566029278ae9f470384b5348a26e84c371139810db0d83"
+    },
+    {
+      "kind": "conda",
+      "matrix": [
+        [
+          1.119976878166199,
+          0.03196442127227783,
+          -0.00330263189971447,
+          -20.88686561584473
+        ],
+        [
+          -0.0276108980178833,
+          1.235058784484863,
+          0.2686343193054199,
+          -40.61320495605469
+        ],
+        [
+          0.008245470002293587,
+          -0.2143732458353043,
+          0.9960576891899109,
+          8.258819580078125
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "api_wall_seconds_including_read_transfer_write": 124.26876018475741,
+      "lta_sha256": "51e28fc16a387707a4377620e264b347e40843df1aeaeb842ae02d58e0ec63e3"
+    }
+  ],
+  "overall_metric_equivalence": "not_assessed",
+  "conda_repeat_exact": true
+}

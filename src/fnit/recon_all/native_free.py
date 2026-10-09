@@ -75,18 +75,21 @@ def _run_native_wm_segment(binary: Path, mri: Path, assets: Path) -> None:
                    cwd=mri, env=env, check=True)
 
 
-def _run_torch_wm_segment(mri: Path, *, device: str) -> dict:
+def _run_torch_wm_segment(mri: Path, *, device: str, optimized: bool = False) -> dict:
     """Run FNIT's existing WM segmentation port without an external binary.
 
     The vectorized Torch portions use ``device``; ordered histogram/strand
     rules remain CPU and are reported explicitly by ``mri_segment``.  This is
     a connected hybrid replacement for ``mri_segment`` and is opt-in until a
-    current real-T1 output comparison is recorded.
+    current real-T1 output comparison is recorded. optimized=True只复用已有
+    Torch直方图和缓存平面几何；Numba仍按原顺序反馈，不省略补洞规则。
     """
     from .mri_segment import segment_white_matter_mgz
 
+    options = ({"histogram_backend": "torch", "histogram_batch_size": 2048,
+                "planar_backend": "cached", "planar_batch_size": 256} if optimized else {})
     return segment_white_matter_mgz(
-        mri / "antsdn.brain.mgz", mri / "wm.seg.mgz", device=device)
+        mri / "antsdn.brain.mgz", mri / "wm.seg.mgz", device=device, **options)
 
 
 def _run_native_wm_edit(binary: Path, mri: Path, assets: Path) -> None:
@@ -123,14 +126,20 @@ def _folding_atlas(assets: Path, hemi: str) -> Path:
 def _run_native_em_register(binary: Path, mri: Path, atlas: Path,
                             assets: Path, *, backend: str = "original",
                             binary_sha256: str | None = None, threads: int = 4,
-                            device: str = "cpu") -> None:
+                            device: str = "cpu", inverse_backend: str = "cpu",
+                            candidate_chunk: int = 64,
+                            execution: str = "in-process") -> dict | None:
     """运行完整原生注册；缓存后端只改变已验证的搜索密度复用。
 
     binary为独立Conda程序；mri含自产conformed nu/brainmask和transforms。
     atlas/assets为已校验GCA和资产路径。backend默认original；cpu_cached
     验证binary_sha256及能力2，threads默认4控制新子进程，保持父环境。
     输出talairach.lta包含4×4 voxel空间变换与两侧几何，返回None。
-    原生执行/输入/输出/能力失败抛异常；完整参数见GCA及性能接入说明。
+    inverse_backend默认cpu、candidate_chunk默认64；仅Torch评分使用这些
+    参数。torch求逆复用同余子式，不改变候选网格、EM和LTA几何。
+    execution=in-process保留父allocator；isolated仅用于Torch，新exec阶段
+    内开启CUDA缓存，退出释放资源，不改变已初始化父CUDA/精度/缓存设置。
+    原生执行/输入/输出/能力失败抛异常；Torch返回分段报告，原生返回None。
     """
     if backend == "torch":
         # The expensive translation/linear candidate search is implemented by
@@ -141,14 +150,27 @@ def _run_native_em_register(binary: Path, mri: Path, atlas: Path,
 
         if not str(device).startswith("cuda"):
             raise ValueError("GCA torch backend requires an explicit CUDA device")
-        result = register_t1(
-            mri / "nu.mgz", atlas, mri / "brainmask.mgz",
-            mri / "transforms/talairach.lta", device=device,
-            search_backend="torch", candidate_chunk=64, sample_chunk=8192,
-            reduce_on_device=True)
+        if execution == "isolated":
+            from .gca_torch_worker import run_isolated_registration
+            result = run_isolated_registration(
+                nu_path=mri / "nu.mgz", mask_path=mri / "brainmask.mgz",
+                atlas_path=atlas, output_path=mri / "transforms/talairach.lta",
+                report_path=mri.parent / "scripts/gca-isolated.json", device=device,
+                threads=threads, candidate_chunk=candidate_chunk,
+                inverse_backend=inverse_backend)
+        elif execution == "in-process":
+            result = register_t1(
+                mri / "nu.mgz", atlas, mri / "brainmask.mgz",
+                mri / "transforms/talairach.lta", device=device,
+                search_backend="torch", candidate_chunk=candidate_chunk, sample_chunk=8192,
+                reduce_on_device=True, inverse_backend=inverse_backend)
+        else:
+            raise ValueError("invalid GCA execution")
         if not (mri / "transforms/talairach.lta").is_file():
             raise FileNotFoundError(mri / "transforms/talairach.lta")
         return result
+    if execution != "in-process":
+        raise ValueError("isolated execution requires the Torch GCA backend")
     if backend == "cpu_cached":
         from .mri_em_register_cached_conda import run_cached_em_register
         run_cached_em_register(binary=binary, mri=mri, atlas=atlas, assets=assets,
@@ -768,14 +790,19 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          wm_edit_backend: str = "native",
                          defects_backend: str = "native",
                          sphere_normals_backend: str = "numba",
+                         gca_inverse_backend: str = "cpu",
+                         gca_candidate_chunk: int = 64,
+                         gca_execution: str = "in-process",
+                         fill_backend: str = "python",
                          backend: str = "native") -> dict:
     """从单幅原始 T1 连续生成 conform 体积、双侧表面和脑区统计。
 
     t1、subject_dir、weights_dir、assets_dir 是输入影像、空输出目录、
     已校验权重和资产的路径；native_bin_dir=None 时使用当前 Conda bin。
     device 默认 cuda:0，threads 默认 4；不自动使用 FP16/BF16。
-    native_optimizations=auto 查询独立构建产物能力，4线程完整 GCA 使用
-    已验证缓存，white 使用专用快速程序，pial保留原程序；original用于控制。
+    native_optimizations=auto在CUDA使用已有FNIT Torch评分+Python EM；CPU
+    查询独立产物能力，4线程可使用验证过的GCA缓存。white使用专用快速
+    程序，pial保留原程序；original固定原生GCA用于控制。
     native_optimizations=torch 将 GCA 的候选平移/线性搜索切换到 FNIT
     的分块 PyTorch CUDA scorer；EM 精修仍为 Python FP32，并在报告中明确标注。
     defects_backend=native 使用原生投射；torch 使用完整 PyTorch 投射，仍按
@@ -784,6 +811,13 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     子步骤交给 CUDA，有序反馈仍复用 Numba CPU，几何/存储 guard 失败即报错。
     sphere_normals_backend 默认 numba；torch 只替换标准 sphere 的有序面法向，
     完整目标函数、迭代决策及 CPU finish 保持。两个实验后端均要求 CUDA。
+    wm_backend=torch-optimized复用Torch直方图与缓存平面几何，有序反馈为Numba。
+    gca_inverse_backend默认cpu，torch按同公式批量求逆；gca_candidate_chunk
+    默认64，只改变完整候选的分块，非默认设置须使用CUDA的Torch GCA后端。
+    gca_execution=in-process保留父缓存策略；isolated在独立exec内启用缓存，
+    子进程结束释放GPU资源，不修改父CUDA状态；仅CUDA Torch GCA可用。
+    fill_backend默认python；numba复用有序CPU堆，torch-numba另用CUDA初始边界。
+    三者均保留切割、距离场与标签规则；torch-numba要求CUDA，失败不回退。
     hemisphere_workers 默认1保持串行，2用独立 exec 半球进程；总 threads
     在双侧之间平分（奇数向下取整），父进程保留依赖屏障和共享发布。
     profile_stages=False 不增加阶段 CUDA 同步；True 分别记录前同步、函数、
@@ -797,10 +831,24 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     """
     if backend not in {"native", "python-gpu"}:
         raise ValueError("backend must be native or python-gpu")
-    if wm_backend not in {"native", "torch"}:
-        raise ValueError("wm_backend must be native or torch")
-    if wm_backend == "torch" and not str(device).startswith("cuda"):
-        raise ValueError("wm_backend='torch' requires an explicit CUDA device")
+    if wm_backend not in {"native", "torch", "torch-optimized"}:
+        raise ValueError("wm_backend must be native, torch or torch-optimized")
+    if wm_backend != "native" and not str(device).startswith("cuda"):
+        raise ValueError("Torch WM backends require an explicit CUDA device")
+    if gca_inverse_backend not in {"cpu", "torch"}:
+        raise ValueError("gca_inverse_backend must be cpu or torch")
+    if isinstance(gca_candidate_chunk, bool) or not isinstance(gca_candidate_chunk, int) or gca_candidate_chunk < 1:
+        raise ValueError("gca_candidate_chunk must be a positive integer")
+    if gca_execution not in {"in-process", "isolated"}:
+        raise ValueError("gca_execution must be in-process or isolated")
+    if (gca_inverse_backend != "cpu" or gca_candidate_chunk != 64 or gca_execution != "in-process") and (
+        native_optimizations == "original" or not str(device).startswith("cuda")
+    ):
+        raise ValueError("GCA candidate options require the CUDA Torch GCA backend")
+    if fill_backend not in {"python", "numba", "torch-numba"}:
+        raise ValueError("fill_backend must be python, numba or torch-numba")
+    if fill_backend == "torch-numba" and not str(device).startswith("cuda"):
+        raise ValueError("fill_backend='torch-numba' requires an explicit CUDA device")
     if wm_edit_backend not in {"native", "torch-hybrid"}:
         raise ValueError("wm_edit_backend must be native or torch-hybrid")
     if wm_edit_backend == "torch-hybrid" and not str(device).startswith("cuda"):
@@ -915,6 +963,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            if gca_backend == "torch" else "native-c++"),
         "binary": str(native_em[0]), "sha256": native_em[1],
         "backend": gca_backend,
+        "inverse_backend": gca_inverse_backend if gca_backend == "torch" else None,
+        "candidate_chunk": gca_candidate_chunk if gca_backend == "torch" else None,
+        "execution": gca_execution if gca_backend == "torch" else "native-subprocess",
         "device": device if gca_backend == "torch" else "cpu",
         "strict_native_em": gca_backend != "torch"}
     report["native_optimizations"] = native_selection
@@ -926,7 +977,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "upstream": "intensity-derived WM and aseg-guided fill"}
     report["white_matter_chain"] = {
         "implementation": ("FNIT PyTorch hybrid segmentation + Conda C++ edit"
-                           if wm_backend == "torch" else "Python + Conda C++"),
+                           if wm_backend != "native" else "Python + Conda C++"),
         "mri_segment_sha256": wm_segment_binary[1] if wm_segment_binary else None,
         "segmentation_backend": wm_backend,
         "edit_backend": wm_edit_backend,
@@ -1057,9 +1108,11 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["precision"]["SynthSeg_actual_forward"] = result.precision
     lta = mri / "transforms/talairach.lta"
     gca = assets / "average/RB_all_2020-01-02.gca"
-    stage("mri_em_register", _run_native_em_register, native_em[0], mri, gca, assets,
+    report["gca_registration"]["stage_result"] = stage(
+          "mri_em_register", _run_native_em_register, native_em[0], mri, gca, assets,
           backend=native_selection["em_backend"], binary_sha256=native_em[1],
-          threads=threads, device=device)
+          threads=threads, device=device, inverse_backend=gca_inverse_backend,
+          candidate_chunk=gca_candidate_chunk, execution=gca_execution)
     stage("mri_ca_normalize", run_ca_normalize, mri / "nu.mgz",
           mri / "brainmask.mgz", gca,
           lta, mri / "norm.mgz", mri / "ctrl_pts.mgz")
@@ -1091,8 +1144,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["precision"]["EntoWM_actual_forwards"] = auxiliary_forwards
     stage("ants_denoise", denoise_volume, mri / "brain.mgz",
           mri / "antsdn.brain.mgz")
-    if wm_backend == "torch":
-        stage("mri_segment", _run_torch_wm_segment, mri, device=device)
+    if wm_backend != "native":
+        stage("mri_segment", _run_torch_wm_segment, mri, device=device,
+              optimized=wm_backend == "torch-optimized")
     else:
         stage("mri_segment", _run_native_wm_segment,
               wm_segment_binary[0], mri, assets)
@@ -1110,10 +1164,18 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     stage("wm_fix_acj", wm_edit_function, mri / "wm.mgz",
           mri / "aseg.presurf.mgz", mri / "wm.mgz", level=3,
           left_value=255, right_value=255, acj=True, **wm_edit_device)
+    fill_options = {}
+    if fill_backend != "python":
+        fill_options["cc_marching_backend"] = "numba"
+    if fill_backend == "torch-numba":
+        fill_options.update(cc_boundary_backend="torch", device=device)
+    report["fill"] = {"backend": fill_backend,
+                      "marching_device": "cpu", "ordered_feedback_preserved": True,
+                      "initial_boundary_device": device if fill_backend == "torch-numba" else "cpu"}
     stage("mri_fill", fill_mgz, mri / "wm.mgz",
           mri / "aseg.presurf.mgz", lta,
           assets / "SubCorticalMassLUT.txt", mri / "filled.mgz",
-          subject / "scripts/ponscc.cut.log")
+          subject / "scripts/ponscc.cut.log", **fill_options)
     # 固定 recon-all 脚本此处执行 cp filled.mgz filled.auto.mgz。
     stage("filled_auto_checkpoint", shutil.copyfile,
           mri / "filled.mgz", mri / "filled.auto.mgz")
@@ -1313,6 +1375,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          wm_edit_backend: str = "native",
                          defects_backend: str = "native",
                          sphere_normals_backend: str = "numba",
+                         gca_inverse_backend: str = "cpu",
+                         gca_candidate_chunk: int = 64,
+                         gca_execution: str = "in-process",
+                         fill_backend: str = "python",
                          backend: str = "native") -> dict:
     """从原始单 T1 连续重建；输入、输出及坐标定义见 recon-all 中文说明。
 
@@ -1324,13 +1390,19 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     所有共享发布失败均传播到主报告。并行要求 caller autocast 关闭。
     backend=native 使用当前已验证的混合 FNIT/Conda 实现；backend=python-gpu
     是严格纯 Python/CUDA profile，若仍有未完成阶段会在创建输出前抛出结构化
-    PurePythonGpuUnavailable，不回退到原生程序。native_optimizations=auto 仅按已验证的原生能力选择 GCA 缓存和 white
-    快速程序；original固定原始原生实现。CUDA WM 后编辑使用已有 GPU
-    函数；完整 EM/WM 核心及pial不被不完整Python算法替代。
+    PurePythonGpuUnavailable，不回退到原生程序。native_optimizations=auto在CUDA使用已有Torch GCA评分+Python EM，CPU
+    按原生产物能力选择缓存；white选择专用快速程序，pial保留原生。
+    original固定原始原生实现。Torch GCA与原生仍有既有数值差异，单列报告。
     defects_backend=native 使用原生缺陷投射，torch 用本项目完整投射规则
     并保持双侧累积顺序；仅颜色表换成固定颜色，当前默认为 native。
     wm_edit_backend=native 调用独立构建编辑程序；torch-hybrid 使用 CUDA
     静态编辑和 Numba 有序核心，不是纯 GPU；输入证明不成立时抛异常。
+    wm_backend=torch-optimized复用已有Torch直方图和缓存平面几何；有序反馈仍CPU。
+    gca_inverse_backend=cpu、gca_candidate_chunk=64保留旧GCA；torch求逆和
+    非默认分块要求CUDA Torch后端。gca_execution=in-process保留父策略，
+    isolated使用新exec局部缓存，不修改父精度或已初始化allocator。
+    fill_backend=python保留旧fill，numba复用
+    有序CPU堆，torch-numba另用CUDA初始边界；所有实验均失败报错而不回退。
     sphere_normals_backend=numba 使用已有法向；torch 使用同设备有序
     Torch 法向，其余标准 sphere 阶段保持原计算，要求显式 CUDA 设备。
     profile_stages=False 不插入阶段同步；True 分列 CUDA 等待与父子 CPU 秒数。
@@ -1402,6 +1474,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"defects_backend": defects_backend} if defects_backend != "native" else {}),
                     **({"sphere_normals_backend": sphere_normals_backend}
                        if sphere_normals_backend != "numba" else {}),
+                    **({"gca_inverse_backend": gca_inverse_backend} if gca_inverse_backend != "cpu" else {}),
+                    **({"gca_candidate_chunk": gca_candidate_chunk} if gca_candidate_chunk != 64 else {}),
+                    **({"gca_execution": gca_execution} if gca_execution != "in-process" else {}),
+                    **({"fill_backend": fill_backend} if fill_backend != "python" else {}),
                     backend=backend)
             except Exception as error:
                 pipeline_error = error
@@ -1448,9 +1524,15 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=1,
                         help="independent hemisphere processes; total threads split across two workers")
     parser.add_argument("--native-optimizations", choices=("auto", "original", "torch"), default="auto",
-                        help="auto/original use Conda GCA; torch uses FNIT's CUDA candidate scorer with Python EM")
-    parser.add_argument("--wm-backend", choices=("native", "torch"), default="native",
-                        help="native mri_segment or FNIT Torch/CPU hybrid segmentation")
+                        help="auto uses Torch GCA on CUDA, validated Conda selection on CPU; original fixes Conda; torch requests FNIT scorer")
+    parser.add_argument("--wm-backend", choices=("native", "torch", "torch-optimized"), default="native",
+                        help="native, existing Torch hybrid, or Torch histograms/cached geometry with ordered CPU feedback")
+    parser.add_argument("--gca-inverse-backend", choices=("cpu", "torch"), default="cpu")
+    parser.add_argument("--gca-candidate-chunk", type=int, default=64)
+    parser.add_argument("--gca-execution", choices=("in-process", "isolated"), default="in-process",
+                        help="isolated Torch GCA enables caching in a fresh child, preserving parent allocator")
+    parser.add_argument("--fill-backend", choices=("python", "numba", "torch-numba"), default="python",
+                        help="ordered fill; numba CPU heap, optionally CUDA initial boundary")
     parser.add_argument("--wm-edit-backend", choices=("native", "torch-hybrid"), default="native",
                         help="native edit or ordered NumBa + Torch GPU edit, rejects unsupported byte-access paths")
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="native",
@@ -1476,6 +1558,10 @@ def main(argv: list[str] | None = None) -> None:
                                   wm_edit_backend=args.wm_edit_backend,
                                   defects_backend=args.defects_backend,
                                   sphere_normals_backend=args.sphere_normals_backend,
+                                  gca_inverse_backend=args.gca_inverse_backend,
+                                  gca_candidate_chunk=args.gca_candidate_chunk,
+                                  gca_execution=args.gca_execution,
+                                  fill_backend=args.fill_backend,
                                   backend=args.backend)
     print(json.dumps(report, indent=2))
 

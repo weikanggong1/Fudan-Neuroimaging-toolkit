@@ -47,6 +47,11 @@ def main():
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=2)
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="torch")
     parser.add_argument("--wm-edit-backend", choices=("native", "torch-hybrid"), default="native")
+    parser.add_argument("--wm-backend", choices=("native", "torch", "torch-optimized"), default="native")
+    parser.add_argument("--gca-inverse-backend", choices=("cpu", "torch"), default="cpu")
+    parser.add_argument("--gca-candidate-chunk", type=int, default=64)
+    parser.add_argument("--gca-execution", choices=("in-process", "isolated"), default="in-process")
+    parser.add_argument("--fill-backend", choices=("python", "numba", "torch-numba"), default="python")
     parser.add_argument("--sphere-normals-backend", choices=("numba", "torch"), default="numba")
     parser.add_argument("--native-optimizations", choices=("auto", "original", "torch"), default="auto")
     parser.add_argument("--code-version", required=True)
@@ -76,6 +81,11 @@ def main():
         "device": args.device, "defects_backend": args.defects_backend,
         "sphere_normals_backend": args.sphere_normals_backend,
         "wm_edit_backend": args.wm_edit_backend,
+        "wm_backend": args.wm_backend,
+        "gca_inverse_backend": args.gca_inverse_backend,
+        "gca_candidate_chunk": args.gca_candidate_chunk,
+        "gca_execution": args.gca_execution,
+        "fill_backend": args.fill_backend,
         "environment": {key: os.environ.get(key) for key in (
             "CUDA_VISIBLE_DEVICES", "OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS",
             "MKL_NUM_THREADS", "NUMBA_NUM_THREADS", "PYTORCH_NO_CUDA_MEMORY_CACHING")},
@@ -87,7 +97,8 @@ def main():
     report_path = args.output_root / "benchmark.json"
     save_report(report_path, report)
     subject = args.output_root / "subject"
-    command = [sys.executable, "-m", "fnit.recon_all.native_free", str(args.t1), str(subject),
+    # 仅benchmark子进程启用故障栈与无缓冲日志，硬信号失败仍保留定位信息。
+    command = [sys.executable, "-X", "faulthandler", "-u", "-m", "fnit.recon_all.native_free", str(args.t1), str(subject),
                "--weights-dir", str(args.weights_dir), "--assets-dir", str(args.assets_dir),
                "--native-bin-dir", str(args.native_bin_dir), "--device", args.device,
                "--threads", str(args.threads), "--hemisphere-workers", str(args.hemisphere_workers),
@@ -95,6 +106,10 @@ def main():
                "--defects-backend", args.defects_backend, "--profile-stages"]
     command += ["--sphere-normals-backend", args.sphere_normals_backend]
     command += ["--wm-edit-backend", args.wm_edit_backend]
+    command += ["--wm-backend", args.wm_backend, "--gca-inverse-backend", args.gca_inverse_backend,
+                "--gca-candidate-chunk", str(args.gca_candidate_chunk), "--gca-execution", args.gca_execution,
+                "--fill-backend", args.fill_backend]
+    report["cli_command"] = command
     tick = time.perf_counter()
     with (args.output_root / "run.log").open("w") as log:
         process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
@@ -126,6 +141,8 @@ def main():
                 time.sleep(.05)
             report["cli_wall_seconds"] = time.perf_counter() - tick
             report["exit_code"] = process.returncode
+            report["termination_signal"] = (signal.Signals(-process.returncode).name
+                                             if process.returncode < 0 else None)
             report["process_memory"] = sampler.report()
         except BaseException as error:
             report.update(execution="interrupted", harness_error=repr(error),

@@ -12,7 +12,7 @@ from unittest.mock import patch
 from fnit.recon_all.expected_outputs import paths
 from fnit.recon_all.native_free import (
     _project_exvivo_annotations, _run_defects_volume, _run_torch_wm_edit,
-    _run_accurate_sphere_pair, main, run_recon_all_python,
+    _run_accurate_sphere_pair, _run_torch_wm_segment, main, run_recon_all_python,
 )
 
 
@@ -143,6 +143,37 @@ class StandardReconWiringTest(unittest.TestCase):
                                       Path("/assets"), device="cuda:1", normals_backend="torch")
         self.assertEqual(sphere.call_args.kwargs, {
             "finish_device": "cpu", "averaging_device": "cuda:1", "normals_device": "cuda:1"})
+
+    def test_performance_candidates_reach_cli_api_without_changing_defaults(self):
+        with patch("fnit.recon_all.native_free.run_recon_all_python",
+                   return_value={"status": "complete"}) as run, \
+                contextlib.redirect_stdout(io.StringIO()):
+            main(["t1.nii.gz", "subject", "--weights-dir", "weights", "--assets-dir", "assets",
+                  "--wm-backend", "torch-optimized", "--gca-inverse-backend", "torch",
+                  "--gca-candidate-chunk", "1024", "--gca-execution", "isolated", "--fill-backend", "numba"])
+        self.assertEqual(run.call_args.kwargs["wm_backend"], "torch-optimized")
+        self.assertEqual(run.call_args.kwargs["gca_inverse_backend"], "torch")
+        self.assertEqual(run.call_args.kwargs["gca_candidate_chunk"], 1024)
+        self.assertEqual(run.call_args.kwargs["gca_execution"], "isolated")
+        self.assertEqual(run.call_args.kwargs["fill_backend"], "numba")
+
+    def test_optimized_wm_reuses_existing_kernels_and_candidate_inputs(self):
+        with patch("fnit.recon_all.mri_segment.segment_white_matter_mgz",
+                   return_value={"device": "cuda:1"}) as segment:
+            _run_torch_wm_segment(Path("/subject/mri"), device="cuda:1", optimized=True)
+        self.assertEqual(segment.call_args.args, (
+            Path("/subject/mri/antsdn.brain.mgz"), Path("/subject/mri/wm.seg.mgz")))
+        self.assertEqual(segment.call_args.kwargs, {
+            "device": "cuda:1", "histogram_backend": "torch", "histogram_batch_size": 2048,
+            "planar_backend": "cached", "planar_batch_size": 256})
+
+    def test_native_gca_cannot_silently_ignore_torch_candidate_options(self):
+        with tempfile.TemporaryDirectory() as directory:
+            subject = Path(directory) / "subject"
+            with self.assertRaisesRegex(ValueError, "CUDA Torch GCA"):
+                run_recon_all_python("missing.nii.gz", subject, "weights", "assets",
+                                     native_optimizations="original", gca_inverse_backend="torch")
+            self.assertFalse(subject.exists())
 
 
 if __name__ == "__main__":

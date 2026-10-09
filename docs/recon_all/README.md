@@ -18,6 +18,7 @@
 当前十分钟目标的热点和五个优化任务见 [2026-10-07 性能热点与任务](HOTSPOT_ACCELERATION_20261007.md)。
 当前纯 Python GPU 迁移矩阵和阻断项见 [2026-10-08 迁移状态](PYTHON_GPU_STATUS_20261008.md)。
 完整固定N4 PyTorch实验及真实误差见 [本轮N4](N4_COMPLETE_TORCH_20261009.md)；
+GCA局部缓存与CLI/API验证见 [GCA阶段隔离](GCA_ISOLATED_TORCH_20261009.md)；
 GCA候选评分及新批量求逆见 [GCA说明](MRI_EM_TORCH_BACKEND.md)。
 N4默认仍为ITK，GCA新批量求逆尚未替换已存在的CUDA评分路径。
 
@@ -65,6 +66,10 @@ reconstruction_report = run_recon_all_python(
     defects_backend="native",  # torch启用完整PyTorch缺陷投射；标签相同，颜色表不同
     wm_edit_backend="native",  # torch-hybrid启用静态CUDA编辑，有序核心仍用Numba CPU
     sphere_normals_backend="numba",  # torch只迁移标准sphere法向；其余算法和finish保留
+    gca_inverse_backend="cpu",  # torch显式复用相同公式的批量求逆；完整注册仍需回归
+    gca_candidate_chunk=64,  # 完整候选的分块大小；较大块增加显存
+    gca_execution="in-process",  # isolated以独立exec复用缓存，不改变父allocator/精度
+    fill_backend="python",  # numba为有序CPU堆；torch-numba另把初始边界放到GPU
     backend="native",  # native为当前可验收混合流程；python-gpu缺少完整替代时在创建输出前明确失败
     native_bin_dir=None,  # None 表示使用当前 Conda 环境的 bin/
     profile_stages=False,  # 生产默认不增加阶段 CUDA 同步；True 记录同步等待
@@ -95,10 +100,14 @@ reconstruction_report = run_recon_all_python(
 | `cuda_allocator_cache` | 否 | `str` | `'auto'` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
-| `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch使用FNIT PyTorch/CPU有序混合分割 |
+| `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `defects_backend` | 否 | `str` | `'native'` | torch使用完整缺陷投射；保持双侧顺序/标签，采用确定性颜色 |
 | `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid用CUDA静态编辑及Numba有序核心；要求CUDA，证明失败报错 |
 | `sphere_normals_backend` | 否 | `str` | `'numba'` | torch迁移标准sphere法向；要求CUDA，完整优化与CPU finish保持 |
+| `gca_inverse_backend` | 否 | `str` | `'cpu'` | torch批量求逆；非默认设置仅允许CUDA的Torch GCA |
+| `gca_candidate_chunk` | 否 | `int` | `64` | 正整数完整候选分块，不删候选；非默认仅用于CUDA Torch GCA |
+| `gca_execution` | 否 | `str` | `'in-process'` | isolated为新exec中的局部CUDA缓存，父策略保持；仅Torch GCA |
+| `fill_backend` | 否 | `str` | `'python'` | numba为有序CPU堆；torch-numba另用CUDA初始边界，要求CUDA |
 | `backend` | 否 | `str` | `'native'` | `native` 为当前混合流程；`python-gpu` 为严格纯 Python/CUDA profile，未完成阶段会在输出前抛出结构化错误 |
 
 ### 批量公开入口
@@ -115,10 +124,14 @@ reconstruction_report = run_recon_all_python(
 | `cuda_allocator_cache` | 否 | `str` | `'auto'` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
 | `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
-| `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch使用FNIT PyTorch/CPU有序混合分割 |
+| `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid复用CUDA静态编辑与Numba有序核心，要求CUDA |
 | `defects_backend` | 否 | `str` | `'native'` | torch完整缺陷投射；半球共享输出仍按左、右顺序 |
 | `sphere_normals_backend` | 否 | `str` | `'numba'` | torch仅迁移标准球面法向，要求CUDA |
+| `gca_inverse_backend` | 否 | `str` | `'cpu'` | torch批量求逆；非默认设置仅允许CUDA的Torch GCA |
+| `gca_candidate_chunk` | 否 | `int` | `64` | 正整数完整候选分块，不删候选；非默认仅用于CUDA Torch GCA |
+| `gca_execution` | 否 | `str` | `'in-process'` | isolated为新exec中的局部CUDA缓存，父策略保持；仅Torch GCA |
+| `fill_backend` | 否 | `str` | `'python'` | numba为有序CPU堆；torch-numba另用CUDA初始边界，要求CUDA |
 | `backend` | 否 | `str` | `'native'` | native为混合流程；python-gpu未完成时提前失败 |
 
 ### 输出
@@ -242,10 +255,14 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--native-bin-dir` | `native_bin_dir` | None 使用当前 Conda bin；也可指定核验过的源码构建目录 |
 | `--hemisphere-workers` | `hemisphere_workers` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `--native-optimizations` | `native_optimizations` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分 |
-| `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch使用FNIT PyTorch/CPU有序混合分割 |
+| `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `--defects-backend` | `defects_backend` | native调用Conda mri_label2vol；torch使用完整PyTorch投射，不要求该原生程序 |
 | `--wm-edit-backend` | `wm_edit_backend` | native调用Conda编辑程序；torch-hybrid用CUDA静态编辑及Numba有序核心 |
 | `--sphere-normals-backend` | `sphere_normals_backend` | numba保留已有标准sphere法向；torch用同设备有序Torch法向 |
+| `--gca-inverse-backend` | `gca_inverse_backend` | cpu为原求逆，torch为同公式批量求逆；仅CUDA Torch GCA |
+| `--gca-candidate-chunk` | `gca_candidate_chunk` | 完整候选的正整数分块；默认64 |
+| `--gca-execution` | `gca_execution` | in-process保留父缓存；isolated使用新exec局部缓存 |
+| `--fill-backend` | `fill_backend` | python、numba、torch-numba；保留有序距离场和标签规则 |
 | `--backend` | `backend` | `native` 为当前混合流程；`python-gpu` 要求所有阶段都有完整 Python/CUDA 实现，否则提前失败 |
 | `--profile-stages` | `profile_stages` | 记录阶段 CUDA 同步等待；生产默认不增加同步 |
 | `--cuda-allocator-cache` | `cuda_allocator_cache` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
