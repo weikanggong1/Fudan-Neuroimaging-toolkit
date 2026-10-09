@@ -1,0 +1,344 @@
+{
+  "kind": "real_frozen_single_level_n4_fit_not_complete_n4",
+  "hostname": "gpucw1",
+  "cpu": "x86_64",
+  "threads": 1,
+  "interop_threads": 1,
+  "torch": "2.5.1",
+  "cuda": "11.8",
+  "device": "cpu",
+  "matmul_tf32": false,
+  "cudnn_tf32": true,
+  "half_precision": false,
+  "omp_threads": "1",
+  "predeclared_candidate_gate": {
+    "max_phi_abs": 1e-05,
+    "p99_phi_abs": 1e-06,
+    "not_complete_n4_or_metric_equivalence_gate": true
+  },
+  "reduction": "point product FP32 then control-point segment sum FP64; differs source FP32 order",
+  "source_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/n4_torch_substages_20261009/validation/recon_all/optimizations/20261009_n4_torch_substages/benchmark_fit.py": "f148e005f9e4ac54dfd6096bc5be199a9583f304b16376ea94417c33f166b353",
+    "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/n4_torch_substages_20261009/src/fnit/recon_all/n4_bspline_torch.py": "f2edca71b52a7b06b6dca0edffdbfa5de5d3e2ce45fddd1ac8e2e4c256048e9b"
+  },
+  "cases": [
+    {
+      "control_shape": [
+        4,
+        4,
+        4
+      ],
+      "field_shape": [
+        64,
+        64,
+        64
+      ],
+      "metadata": {
+        "field_shape": [
+          64,
+          64,
+          64
+        ],
+        "control_shape": [
+          4,
+          4,
+          4
+        ],
+        "spacing": [
+          4,
+          4,
+          4
+        ],
+        "origin": [
+          1.5,
+          1.5,
+          1.5
+        ],
+        "dtype": "float32",
+        "order": "Fortran x-fast",
+        "mask": "all ones, no confidence"
+      },
+      "input_sha256": {
+        "diagnostic.profile.json.cp4.json": "75a76db22835cfef3f5e43f81b48e0ad422b307ead0b17756096ebc45ff46a1f",
+        "diagnostic.profile.json.cp4.residual.raw": "c33070596596d7b7fca41f5dce38ae0b0ac7cdf7053893982f8b949264d6b4d0",
+        "diagnostic.profile.json.cp4.phi.raw": "981f105bf37cdaa50399419e6251afba23c62cb3b9cfde12bac5f8da6235dda7"
+      },
+      "source_cache_first_including_jit_seconds": 1.7335235122591257,
+      "source_first_fit_including_jit_seconds": 0.2786566847935319,
+      "torch_cache_load_transfer_seconds": 3.4347235606983304,
+      "torch_first_fit_seconds": 0.29576998902484775,
+      "source_cached_abba_seconds": [
+        0.024773853830993176,
+        0.024825457949191332
+      ],
+      "torch_cached_abba_seconds": [
+        0.31249397713690996,
+        0.30709801707416773
+      ],
+      "source_cached_median_seconds": 0.024799655890092254,
+      "torch_cached_median_seconds": 0.30979599710553885,
+      "cache_bytes": 134218496,
+      "source_numba_vs_frozen_itk": {
+        "different_elements": 63,
+        "different_fp32_bits": 63,
+        "max_abs": 1.1641532182693481e-10,
+        "p99_abs": 9.120412869378914e-11,
+        "rmse": 2.1589969944837237e-11
+      },
+      "torch_vs_frozen_itk": {
+        "different_elements": 64,
+        "different_fp32_bits": 64,
+        "max_abs": 3.5306584322825074e-09,
+        "p99_abs": 3.2367188396165135e-09,
+        "rmse": 9.044115150885712e-10
+      },
+      "repeatability": {
+        "different_elements": 0,
+        "different_fp32_bits": 0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "rmse": 0.0
+      },
+      "candidate_gate_pass": true
+    },
+    {
+      "control_shape": [
+        5,
+        5,
+        5
+      ],
+      "field_shape": [
+        64,
+        64,
+        64
+      ],
+      "metadata": {
+        "field_shape": [
+          64,
+          64,
+          64
+        ],
+        "control_shape": [
+          5,
+          5,
+          5
+        ],
+        "spacing": [
+          4,
+          4,
+          4
+        ],
+        "origin": [
+          1.5,
+          1.5,
+          1.5
+        ],
+        "dtype": "float32",
+        "order": "Fortran x-fast",
+        "mask": "all ones, no confidence"
+      },
+      "input_sha256": {
+        "diagnostic.profile.json.cp5.json": "9d47fa2bd62e90a9049e54cdb12cc85dd33460d63774015d7bdb73584ee74dbe",
+        "diagnostic.profile.json.cp5.residual.raw": "3922940c415f2ef4bc55b2a40b8e16b9444d93a26ba7a48e6ccb818a7f3d597d",
+        "diagnostic.profile.json.cp5.phi.raw": "ceabac23b1e8284b4e0ad4be8817884c1119800ccd8007fc484988ecee542030"
+      },
+      "source_cache_first_including_jit_seconds": 0.1533718081191182,
+      "source_first_fit_including_jit_seconds": 0.017442073207348585,
+      "torch_cache_load_transfer_seconds": 3.001025766134262,
+      "torch_first_fit_seconds": 0.2927534757182002,
+      "source_cached_abba_seconds": [
+        0.017979726195335388,
+        0.028082650620490313
+      ],
+      "torch_cached_abba_seconds": [
+        0.29021672112867236,
+        0.29113674722611904
+      ],
+      "source_cached_median_seconds": 0.02303118840791285,
+      "torch_cached_median_seconds": 0.2906767341773957,
+      "cache_bytes": 134219228,
+      "source_numba_vs_frozen_itk": {
+        "different_elements": 114,
+        "different_fp32_bits": 114,
+        "max_abs": 1.862645149230957e-09,
+        "p99_abs": 1.3131648302078265e-09,
+        "rmse": 3.5072480321059576e-10
+      },
+      "torch_vs_frozen_itk": {
+        "different_elements": 125,
+        "different_fp32_bits": 125,
+        "max_abs": 6.498303264379501e-07,
+        "p99_abs": 6.012804806232453e-07,
+        "rmse": 1.4059988916473488e-07
+      },
+      "repeatability": {
+        "different_elements": 0,
+        "different_fp32_bits": 0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "rmse": 0.0
+      },
+      "candidate_gate_pass": true
+    },
+    {
+      "control_shape": [
+        7,
+        7,
+        7
+      ],
+      "field_shape": [
+        64,
+        64,
+        64
+      ],
+      "metadata": {
+        "field_shape": [
+          64,
+          64,
+          64
+        ],
+        "control_shape": [
+          7,
+          7,
+          7
+        ],
+        "spacing": [
+          4,
+          4,
+          4
+        ],
+        "origin": [
+          1.5,
+          1.5,
+          1.5
+        ],
+        "dtype": "float32",
+        "order": "Fortran x-fast",
+        "mask": "all ones, no confidence"
+      },
+      "input_sha256": {
+        "diagnostic.profile.json.cp7.json": "73431534c20c00dd1c30a6b1ec8fa86dea22842e5e29217de0b7355ba8d04ce5",
+        "diagnostic.profile.json.cp7.residual.raw": "5ffe1abd3171c513a1a4a2334c1bcc5e7fdc8237a9a99dfb7b99fe98d826d6dc",
+        "diagnostic.profile.json.cp7.phi.raw": "66d8b2e69b35c4547d0c22f165357ee538bd2d216023614e852edb916fb660f8"
+      },
+      "source_cache_first_including_jit_seconds": 0.1486125821247697,
+      "source_first_fit_including_jit_seconds": 0.016809862107038498,
+      "torch_cache_load_transfer_seconds": 2.8703612070530653,
+      "torch_first_fit_seconds": 0.2924121040850878,
+      "source_cached_abba_seconds": [
+        0.016907631885260344,
+        0.016983536072075367
+      ],
+      "torch_cached_abba_seconds": [
+        0.31274652387946844,
+        0.31525694904848933
+      ],
+      "source_cached_median_seconds": 0.016945583978667855,
+      "torch_cached_median_seconds": 0.3140017364639789,
+      "cache_bytes": 134221844,
+      "source_numba_vs_frozen_itk": {
+        "different_elements": 308,
+        "different_fp32_bits": 308,
+        "max_abs": 1.3969838619232178e-09,
+        "p99_abs": 8.335337042808496e-10,
+        "rmse": 2.8721176620200834e-10
+      },
+      "torch_vs_frozen_itk": {
+        "different_elements": 341,
+        "different_fp32_bits": 341,
+        "max_abs": 3.771856427192688e-07,
+        "p99_abs": 1.5067867934703826e-07,
+        "rmse": 4.433929589468244e-08
+      },
+      "repeatability": {
+        "different_elements": 0,
+        "different_fp32_bits": 0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "rmse": 0.0
+      },
+      "candidate_gate_pass": true
+    },
+    {
+      "control_shape": [
+        11,
+        11,
+        11
+      ],
+      "field_shape": [
+        64,
+        64,
+        64
+      ],
+      "metadata": {
+        "field_shape": [
+          64,
+          64,
+          64
+        ],
+        "control_shape": [
+          11,
+          11,
+          11
+        ],
+        "spacing": [
+          4,
+          4,
+          4
+        ],
+        "origin": [
+          1.5,
+          1.5,
+          1.5
+        ],
+        "dtype": "float32",
+        "order": "Fortran x-fast",
+        "mask": "all ones, no confidence"
+      },
+      "input_sha256": {
+        "diagnostic.profile.json.cp11.json": "7aaf1f0965dc05363e39f5fa5f1ee137be035182a0460daf3eff15f3e3834292",
+        "diagnostic.profile.json.cp11.residual.raw": "3c23e296c11c40839f2804ae12196519607b9afefabe98104cd035f309cff744",
+        "diagnostic.profile.json.cp11.phi.raw": "140188f53f90424a6fac96362d042f8b310f5e74cca62c08a67fb64442b8be4f"
+      },
+      "source_cache_first_including_jit_seconds": 0.1481534349732101,
+      "source_first_fit_including_jit_seconds": 0.01694517955183983,
+      "torch_cache_load_transfer_seconds": 2.788045668043196,
+      "torch_first_fit_seconds": 0.29144405387341976,
+      "source_cached_abba_seconds": [
+        0.017052907962352037,
+        0.017084544990211725
+      ],
+      "torch_cached_abba_seconds": [
+        0.2862554248422384,
+        0.2864301949739456
+      ],
+      "source_cached_median_seconds": 0.01706872647628188,
+      "torch_cached_median_seconds": 0.286342809908092,
+      "cache_bytes": 134233700,
+      "source_numba_vs_frozen_itk": {
+        "different_elements": 1201,
+        "different_fp32_bits": 1201,
+        "max_abs": 5.587935447692871e-09,
+        "p99_abs": 2.3130269255489134e-09,
+        "rmse": 7.010611837232947e-10
+      },
+      "torch_vs_frozen_itk": {
+        "different_elements": 1316,
+        "different_fp32_bits": 1316,
+        "max_abs": 4.302710294723511e-07,
+        "p99_abs": 8.847564458847046e-08,
+        "rmse": 2.512647678053986e-08
+      },
+      "repeatability": {
+        "different_elements": 0,
+        "different_fp32_bits": 0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "rmse": 0.0
+      },
+      "candidate_gate_pass": true
+    }
+  ],
+  "wall_seconds_including_load_transfer_write_jit": 20.303287291899323,
+  "candidate_cases_pass": 4
+}
