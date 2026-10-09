@@ -275,18 +275,38 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
 
 def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
                               hemi: str, assets: Path, *, device: str = "cpu",
-                              normals_backend: str = "numba") -> tuple[dict, dict]:
+                              normals_backend: str = "numba",
+                              inflate_backend: str = "native") -> tuple[dict, dict]:
+    """同序smoothwm→标准inflated/sulc→sphere，返回阶段秒数与球面报告。
+
+    subject/hemi提供surface RAS mm网格；assets和inflate_binary供native
+    默认路径。inflate_backend可显式torch，复用完整GPU算法与真实sulc；
+    device为其明确CUDA设备，缓存由外层fresh worker选择。球面默认Numba
+    法向/CPU收尾保持；normals_backend仅选择既有法向。报告含inflate实际
+    后端与完整读写秒数；异常向上传播，不复制参考或回退。nofix不属此接口。
+    """
     from .sphere_standard_run import run_standard_sphere
 
     surf = subject / "surf"
     inflated, sulc = surf / f"{hemi}.inflated", surf / f"{hemi}.sulc"
-    inflate_seconds = _run_native_sphere_step(
-        inflate_binary, subject, assets,
-        [str(surf / f"{hemi}.smoothwm"), str(inflated)], (inflated, sulc))
+    if inflate_backend == "torch":
+        from .inflate_standard_run import run_standard_inflate
+        inflate_report = run_standard_inflate(
+            input_surface=surf / f"{hemi}.smoothwm", inflated_output=inflated,
+            sulc_output=sulc, backend="torch", device=device, profile=False)
+        inflate_seconds = inflate_report["total_seconds_including_io"]
+    elif inflate_backend == "native":
+        inflate_seconds = _run_native_sphere_step(
+            inflate_binary, subject, assets,
+            [str(surf / f"{hemi}.smoothwm"), str(inflated)], (inflated, sulc))
+        inflate_report = {"backend": "native", "total_seconds_including_io": inflate_seconds}
+    else:
+        raise ValueError("inflate_backend must be native or torch")
     sphere_report = run_standard_sphere(
         inflated, surf / f"{hemi}.smoothwm", surf / f"{hemi}.sphere",
         finish_device="cpu", averaging_device=device,
         **({"normals_device": device} if normals_backend == "torch" else {}))
+    sphere_report["inflate_runtime"] = inflate_report
     return ({"inflate": inflate_seconds,
              "sphere": sphere_report["total_seconds_including_io"]}, sphere_report)
 
@@ -530,7 +550,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   place_binary: Path, defect_binary: Path | None,
                   assets: Path, defer_defects: bool = False,
                   defects_backend: str = "native",
-                  sphere_normals_backend: str = "numba") -> dict:
+                  sphere_normals_backend: str = "numba",
+                  inflate_backend: str = "native") -> dict:
     """从 filled 生成已修复 orig、预白质表面及标准球面。"""
     from .extract_main_component_python import extract_main_component
     from .label_cortex_fix_ga_python import label_cortex_fix_ga
@@ -564,7 +585,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                  labels / f"{hemi}.cortex+hipamyg.label", keep_hip_amyg=True)
     sphere_timings, sphere_report = _run_accurate_sphere_pair(
         inflate_binary, subject, hemi, assets, device=device,
-        normals_backend=sphere_normals_backend)
+        normals_backend=sphere_normals_backend, inflate_backend=inflate_backend)
     _write_principal_curvature_maps(surf, hemi, device)
     white, faces = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
     return {"hemisphere": hemi, "vertices": len(white), "faces": len(faces),
@@ -745,7 +766,7 @@ def _write_hemisphere_stats(subject: Path, hemi: str, volumes: dict, cache,
 
 def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                           binaries=None, registration_atlases=None,
-                          sphere_normals_backend="numba"):
+                          sphere_normals_backend="numba", inflate_backend="native"):
     """可 exec 的半球阶段入口；维持现有子函数接口与依赖屏障。"""
     from .profiling import StageProfiler, configure_cuda_allocator
     subject, assets = Path(subject), Path(assets)
@@ -766,7 +787,7 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                      inflate_binary=binaries['inflate'], intersection_binary=binaries['intersection'],
                      place_binary=binaries.get('white', binaries['metrics']), defect_binary=binaries.get('defect'),
                      assets=assets, defer_defects=True,
-                     sphere_normals_backend=sphere_normals_backend)
+                     sphere_normals_backend=sphere_normals_backend, inflate_backend=inflate_backend)
     elif operation == 'register':
         from .mris_register_run import run_register_sphere
         value = step(f'register_{hemi}', run_register_sphere,
@@ -830,6 +851,23 @@ def _normalization_initial_bias_options(backend: str, device: str) -> dict:
     return {}
 
 
+def _validate_inflate_backend(backend: str, device: str, hemisphere_workers: int) -> None:
+    """校验生产标准inflate后端；不初始化CUDA或创建输出。
+
+    native保留默认流程；torch须cuda:N与两个隔离半球worker，确保只在
+    fresh子进程启用已验证缓存，父CUDA和注册策略保持。非法参数抛异常。
+    不改变nofix/qsphere或标准sphere步骤，真实输出/速度见inflate专页。
+    """
+    if backend not in {"native", "torch"}:
+        raise ValueError("inflate_backend must be native or torch")
+    if backend == "torch":
+        selected = torch.device(device)
+        if selected.type != "cuda" or selected.index is None:
+            raise ValueError("torch inflate_backend requires explicit cuda:N")
+        if hemisphere_workers != 2:
+            raise ValueError("torch inflate_backend requires two cached hemisphere workers")
+
+
 def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
@@ -847,6 +885,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          wm_edit_backend: str = "native",
                          defects_backend: str = "native",
                          sphere_normals_backend: str = "numba",
+                         inflate_backend: str = "native",
                          gca_inverse_backend: str = "cpu",
                          gca_candidate_chunk: int = 64,
                          gca_execution: str = "in-process",
@@ -864,6 +903,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     须显式cuda:N。控制点规则、有序离群清理及其余偏置步骤保持原算法。
     normalization_initial_bias_backend默认cpu；torch只在第二轮复用GPU
     初始偏置传播/平滑，保留CPU距离/排序、原除乘顺序和float32输出。
+    inflate_backend默认native；torch复用完整标准inflated/sulc GPU算法，
+    仅支持显式cuda:N和hemisphere_workers=2，在surface子exec局部启用
+    缓存。nofix、球面优化/配准和父进程CUDA策略保持，失败不回退。
     native_optimizations=auto在CUDA使用已有FNIT Torch评分+Python EM；CPU
     查询独立产物能力，4线程可使用验证过的GCA缓存。white使用专用快速
     程序，pial保留原程序；original固定原生GCA用于控制。
@@ -897,6 +939,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     """
     normalization_options = _normalization_controls_options(normalization_controls_backend, device)
     initial_bias_options = _normalization_initial_bias_options(normalization_initial_bias_backend, device)
+    _validate_inflate_backend(inflate_backend, device, hemisphere_workers)
     from .input_n4_chain import validate_n4_execution
     validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=device)
     if backend not in {"native", "python-gpu"}:
@@ -1086,9 +1129,14 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "binary": str(metrics_binary[0]),
         "sha256": metrics_binary[1], "upstream": "placed final white/pial"}
     report["sphere_generation"] = {
-        "implementation": "Conda mris_inflate + Python quick/standard sphere",
+        "implementation": ("FNIT Torch standard inflate + Conda nofix inflate + Python quick/standard sphere"
+                           if inflate_backend == "torch" else
+                           "Conda mris_inflate + Python quick/standard sphere"),
         "mris_inflate": {"binary": str(inflate_binary[0]), "sha256": inflate_binary[1]},
         "normals_backend": sphere_normals_backend,
+        "standard_inflate_backend": inflate_backend,
+        "nofix_inflate_backend": "native",
+        "surface_worker_cache": "enabled" if inflate_backend == "torch" else "inherit",
         "normals_device": device if sphere_normals_backend == "torch" else "cpu",
         "finish_device": "cpu", "upstream": "repaired topology"}
     registration_device = torch.device(device)
@@ -1301,6 +1349,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         from .hemisphere_parallel import run_hemisphere_group, HemisphereGroupError
         common = {'assets': str(assets),
                   'sphere_normals_backend': sphere_normals_backend,
+                  'inflate_backend': inflate_backend,
                   'binaries': {name: str(value) for name, value in (
                       ('topology', topology_binary[0]), ('inflate', inflate_binary[0]),
                       ('intersection', intersection_binary[0]), ('metrics', metrics_binary[0]),
@@ -1312,7 +1361,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             try:
                 group = stage(f'{operation}_hemisphere_group', run_hemisphere_group,
                               subject, operation, device=str(registration_device), threads=threads,
-                              workers=hemisphere_workers, profile_stages=profile_stages, kwargs=common)
+                              workers=hemisphere_workers, profile_stages=profile_stages, kwargs=common,
+                              cuda_allocator_cache=("enabled" if operation == "surface" and
+                                                    inflate_backend == "torch" else "inherit"))
             except HemisphereGroupError as error:
                 report['hemisphere_scheduling']['groups'].append(error.report)
                 try:
@@ -1357,7 +1408,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            place_binary=white_binary[0],
                            defect_binary=defect_binary[0] if defect_binary else None,
                            assets=assets, defects_backend=defects_backend,
-                           sphere_normals_backend=sphere_normals_backend)
+                           sphere_normals_backend=sphere_normals_backend, inflate_backend=inflate_backend)
             report.setdefault("surfaces", {})[hemi] = result
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
 
@@ -1488,6 +1539,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          wm_edit_backend: str = "native",
                          defects_backend: str = "native",
                          sphere_normals_backend: str = "numba",
+                         inflate_backend: str = "native",
                          gca_inverse_backend: str = "cpu",
                          gca_candidate_chunk: int = 64,
                          gca_execution: str = "in-process",
@@ -1513,6 +1565,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     同规则GPU邻域，须显式cuda:N，其余步骤/设备不变。实际选择写入报告。
     normalization_initial_bias_backend=cpu保留第二轮初始偏置；torch仅
     复用该轮既有GPU传播/平滑，要求cuda:N，除乘/输出精度与原规则相同。
+    inflate_backend=native保留标准inflation；torch复用完整GPU算法生成
+    同序inflated/sulc，须cuda:N与hemisphere_workers=2。仅surface组的
+    fresh worker局部启用缓存；nofix、sphere及注册算法保持，父策略不变。
+    非法组合在CUDA初始化和创建输出前抛ValueError，执行失败不回退。
     defects_backend=native 使用原生缺陷投射，torch 用本项目完整投射规则
     并保持双侧累积顺序；仅颜色表换成固定颜色，当前默认为 native。
     wm_edit_backend=native 调用独立构建编辑程序；torch-hybrid 使用 CUDA
@@ -1548,6 +1604,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     tick = time.perf_counter()
     _normalization_controls_options(normalization_controls_backend, device)
     _normalization_initial_bias_options(normalization_initial_bias_backend, device)
+    _validate_inflate_backend(inflate_backend, device, hemisphere_workers)
     from .thread_budget import thread_budget
 
     report_path = Path(subject_dir) / "fnit-native-free-run.json"
@@ -1605,6 +1662,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"defects_backend": defects_backend} if defects_backend != "native" else {}),
                     **({"sphere_normals_backend": sphere_normals_backend}
                        if sphere_normals_backend != "numba" else {}),
+                    **({"inflate_backend": inflate_backend} if inflate_backend != "native" else {}),
                     **({"gca_inverse_backend": gca_inverse_backend} if gca_inverse_backend != "cpu" else {}),
                     **({"gca_candidate_chunk": gca_candidate_chunk} if gca_candidate_chunk != 64 else {}),
                     **({"gca_execution": gca_execution} if gca_execution != "in-process" else {}),
@@ -1659,6 +1717,8 @@ def main(argv: list[str] | None = None) -> None:
                         help="same-rule control-point neighbors; torch requires cuda:N, remaining solver unchanged")
     parser.add_argument("--normalization-initial-bias-backend", choices=("cpu", "torch"), default="cpu",
                         help="second normalization initial bias; torch reuses existing propagation/smoothing with original arithmetic")
+    parser.add_argument("--inflate-backend", choices=("native", "torch"), default="native",
+                        help="standard smoothwm inflation; torch requires cuda:N and two cached hemisphere workers; nofix unchanged")
     parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=1,
                         help="independent hemisphere processes; total threads split across two workers")
@@ -1704,6 +1764,7 @@ def main(argv: list[str] | None = None) -> None:
                                   wm_edit_backend=args.wm_edit_backend,
                                   defects_backend=args.defects_backend,
                                   sphere_normals_backend=args.sphere_normals_backend,
+                                  inflate_backend=args.inflate_backend,
                                   gca_inverse_backend=args.gca_inverse_backend,
                                   gca_candidate_chunk=args.gca_candidate_chunk,
                                   gca_execution=args.gca_execution,

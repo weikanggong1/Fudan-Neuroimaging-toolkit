@@ -26,6 +26,7 @@ def run_recon_all_python_batch(
     wm_edit_backend: str = "native",
     defects_backend: str = "native",
     sphere_normals_backend: str = "numba",
+    inflate_backend: str = "native",
     gca_inverse_backend: str = "cpu",
     gca_candidate_chunk: int = 64,
     gca_execution: str = "in-process",
@@ -54,6 +55,9 @@ def run_recon_all_python_batch(
     仅支持显式cuda:N设备；其余控制点选择与偏置流程保持，原样传给CLI。
     normalization_initial_bias_backend 默认cpu；torch仅迁移第二轮初始
     偏置传播/平滑，要求cuda:N，原除乘/输出精度保持，原样传给CLI。
+    inflate_backend默认native；torch复用完整标准inflated/sulc，要求
+    全部目标cuda:N与hemisphere_workers=2，仅surface子exec启用缓存，
+    nofix/球面/注册及父策略保持。非法组合在任务调度前抛ValueError。
     defects_backend 默认 native；torch 将缺陷投射交给同设备 PyTorch，
     保持左清零/右合并顺序和标签含义，调色板采用确定性颜色。
     wm_backend 默认 native；torch 选择已有完整混合 WM segmentation。
@@ -69,10 +73,14 @@ def run_recon_all_python_batch(
     不改变已初始化父CUDA或精度，仅可CUDA Torch后端。
     numba使用同顺序CPU堆，torch-numba另使用CUDA初始边界。原样传入CLI。
     """
-    from .native_free import _normalization_controls_options, _normalization_initial_bias_options
+    from .native_free import (_normalization_controls_options, _normalization_initial_bias_options,
+                              _validate_inflate_backend)
     for target in devices:
         _normalization_controls_options(normalization_controls_backend, target)
         _normalization_initial_bias_options(normalization_initial_bias_backend, target)
+        _validate_inflate_backend(inflate_backend, target, hemisphere_workers)
+    if inflate_backend not in {"native", "torch"}:
+        raise ValueError("inflate_backend must be native or torch")
     if normalization_controls_backend not in {"cpu", "torch"}:
         raise ValueError("normalization_controls_backend must be cpu or torch")
     if normalization_initial_bias_backend not in {"cpu", "torch"}:
@@ -159,6 +167,8 @@ def run_recon_all_python_batch(
                 command += ["--normalization-controls-backend", normalization_controls_backend]
             if normalization_initial_bias_backend != "cpu":
                 command += ["--normalization-initial-bias-backend", normalization_initial_bias_backend]
+            if inflate_backend != "native":
+                command += ["--inflate-backend", inflate_backend]
             if wm_backend != "native":
                 command += ["--wm-backend", wm_backend]
             if wm_execution != "in-process":

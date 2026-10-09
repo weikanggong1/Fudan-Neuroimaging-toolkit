@@ -67,6 +67,7 @@ reconstruction_report = run_recon_all_python(
     n4_execution="in-process",  # isolated仅配torch/cuda:N，缓存子exec保持父策略
     normalization_controls_backend="cpu",  # torch复用两轮同规则GPU邻域；仅显式cuda:N
     normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置GPU传播/平滑，保持原除乘精度
+    inflate_backend="native",  # torch复用完整标准inflated/sulc；须cuda:N和两个半球worker
     wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
     wm_execution="in-process",  # isolated仅配torch-optimized，子exec局部缓存、父策略保持
     defects_backend="native",  # torch启用完整PyTorch缺陷投射；标签相同，颜色表不同
@@ -110,6 +111,7 @@ reconstruction_report = run_recon_all_python(
 | `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N，在新exec局部缓存；非法组合输出前报错，子完整报告保留 |
 | `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮的GPU邻域计数/求和与缓冲；显式cuda:N，有序选择/其余偏置步骤不变 |
 | `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch只迁移第二轮初始偏置传播/平滑；距离/排序仍CPU，原float64除后乘/float32输出保持，显式cuda:N |
+| `inflate_backend` | 否 | `str` | `'native'` | torch复用完整标准inflated/sulc；须cuda:N与hemisphere_workers=2，仅surface子exec局部启用缓存；nofix和后续球面算法保持 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `defects_backend` | 否 | `str` | `'native'` | torch使用完整缺陷投射；保持双侧顺序/标签，采用确定性颜色 |
@@ -139,6 +141,7 @@ reconstruction_report = run_recon_all_python(
 | `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N，在新exec局部缓存；非法组合输出前报错，子完整报告保留 |
 | `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮同规则GPU邻域；所有目标设备须为cuda:N，非法组合调度前拒绝 |
 | `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch复用第二轮初始偏置GPU算子，所有目标设备须为cuda:N，非法组合调度前拒绝 |
+| `inflate_backend` | 否 | `str` | `'native'` | torch使用完整标准inflated/sulc GPU算法；所有设备须cuda:N且hemisphere_workers=2，非法组合调度前拒绝 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid复用CUDA静态编辑与Numba有序核心，要求CUDA |
@@ -243,6 +246,7 @@ reconstruction_reports = run_recon_all_python_batch(
     backend="native",  # 严格 python-gpu 尚未完成，不能静默回退
     normalization_controls_backend="cpu",  # torch仅显式cuda:N；保留原控制点选择与偏置规则
     normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置；保留原float64除乘与float32输出
+    inflate_backend="native",  # torch仅支持显式CUDA和两个半球worker，标准表面输出同序
     wm_edit_backend="native",  # torch-hybrid为同输入已验证的WM/aseg混合候选
     defects_backend="native",  # torch保持完整缺陷标签投射；不等于拓扑GA
     sphere_normals_backend="numba",  # torch仅替换标准sphere法向
@@ -279,6 +283,7 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--n4-execution` | `n4_execution` | in-process保留父策略；isolated仅Torch/cuda:N，完整缓存子exec |
 | `--normalization-controls-backend` | `normalization_controls_backend` | cpu保留原邻域；torch复用两轮GPU缓冲，显式cuda:N，其余算法不变 |
 | `--normalization-initial-bias-backend` | `normalization_initial_bias_backend` | cpu保留第二轮初始偏置；torch复用GPU传播/平滑，保持算术顺序和精度，显式cuda:N |
+| `--inflate-backend` | `inflate_backend` | 默认native；torch仅替换标准inflated/sulc，须cuda:N和两个半球worker，surface子exec局部启用缓存 |
 | `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `--wm-execution` | `wm_execution` | in-process保留父缓存；isolated为完整WM缓存worker，须配torch-optimized |
 | `--defects-backend` | `defects_backend` | native调用Conda mri_label2vol；torch使用完整PyTorch投射，不要求该原生程序 |
@@ -355,6 +360,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-09 | 0cd9cbd5 / A100 | 两轮GPU邻域和第二轮初始偏置显式接入；其余链保持 | [两例原始T1整例回归](../../validation/recon_all/optimizations/20261009_whole_normalization_a100_0cd9cbd5/README.md)：2151.856/2129.266秒，相对上一候选缩短4.58%/6.68%；表面、标签和脑区统计相同，整体等效未判定 |
 | 2026-10-09 | 803aec50 / A100 | GCA独立缓存、分块GPU求逆与有序fill；未包含后续阶段实验 | [两例原始T1完整配对与官方比较](../../validation/recon_all/optimizations/20261009_whole_pair_a100_803aec50/README.md)，配对2.72×/2.65×，整体等效未判定 |
 | 2026-10-07 | raw3a / API比较工具ed16 | 取回九例完整比较，未重跑原始T1 | [九例精度、耗时、显存与局部问题](../../validation/recon_all/accuracy_20261003/runtime/server_refresh_20261007/README.md) |
 | 2026-10-04 | e91dd25/v3 | CPU完整链、异常报告与缺失依赖补测 | 138输出与完整表面/统计评分；本例慢4.99% |
@@ -368,6 +374,8 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 <a id="参考文献与原实现"></a>
 
 本轮缓存策略、WM隔离接入及内部计时说明见[阶段执行说明](PIPELINE_STAGE_EXECUTION_20261009.md)。整例优化前后仍按实际源码和原始T1新目录分别测量。
+
+标准inflation可显式选择`inflate_backend="torch"`，复用[完整inflated/sulc GPU算法](INFLATE_TORCH_20261009.md)。要求明确cuda:N与两个半球worker，只在surface组子exec启用缓存；nofix和后续球面/配准算法保持。非法组合在创建输出前失败；默认仍native。该选项的同输入完整链验证与上表0cd9整例分开，不能叠加阶段收益。
 
 ## 7. 参考文献、原软件和资源
 
