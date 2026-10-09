@@ -21,6 +21,11 @@ flowchart LR
 初始几何预先决定动态接受。静态面对回放与完整首试步接受是两项独立验证。
 新增代码只依赖主页已有的 PyTorch、NumPy、Numba、SciPy、nibabel。
 
+白质完整四轮可复用相同候选后端；当前34步真实旧/新对照的坐标和接受
+轨迹完全相同，但旧清理规则的最终零相交门未通过，不能据此默认替换。
+清理器逐方向标记问题及新的显式GPU清理接口见
+[源规则有向清理](SOURCE_INTERSECTION_CLEANUP.md)。
+
 ## 2. Python 调用与输入输出
 
 ```python

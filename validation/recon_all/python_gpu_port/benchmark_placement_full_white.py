@@ -56,6 +56,7 @@ def main():
     parser.add_argument("--control-candidate-backend", choices=("tree", "snapshot", "torch_snapshot"))
     parser.add_argument("--candidate-regularization-backend", choices=("cpu", "torch"), default="torch")
     parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
+    parser.add_argument("--cleanup-marking-backend", choices=("legacy", "source_numba", "source_torch"), default="legacy")
     parser.add_argument("--official-binary", type=Path)
     parser.add_argument("--conda-binary", type=Path)
     parser.add_argument("--assets-directory", type=Path)
@@ -75,7 +76,8 @@ def main():
             parser.error("--native-only requires an explicit reference binary")
         args.backends = []
     device = torch.device(args.device)
-    gpu_requested = "torch" in args.backends or args.candidate_backend == "torch_snapshot"
+    gpu_requested = ("torch" in args.backends or args.candidate_backend == "torch_snapshot"
+                     or args.cleanup_marking_backend == "source_torch")
     if gpu_requested and device.type == "cuda" and device.index is None:
         parser.error("CUDA benchmarking requires an explicitly indexed device")
     args.subject = args.subject.resolve()
@@ -113,6 +115,9 @@ def main():
         "control_candidate_backend": args.control_candidate_backend or args.candidate_backend,
         "candidate_candidate_backend": args.candidate_backend,
         "candidate_regularization_backend": args.candidate_regularization_backend,
+        "cleanup_marking_backend": args.cleanup_marking_backend,
+        "cuda_allocator_environment": {key: os.environ.get(key) for key in
+            ("PYTORCH_NO_CUDA_MEMORY_CACHING", "PYTORCH_CUDA_ALLOC_CONF", "PYTORCH_ALLOC_CONF")},
         "gpu_process_memory_sampling": "not_measured; allocator counters are not total process memory",
         "whole_recon_all": "not_run", "overall_metric_equivalence": "not_assessed",
         "admission_requirement": "same ordered geometry and pass/trial decisions for backend replacement",
@@ -150,7 +155,8 @@ def main():
                          if backend == "cpu" else args.candidate_backend)
         run_regularization = "cpu" if backend == "cpu" else args.candidate_regularization_backend
         run_sampling = "cpu" if backend == "cpu" else args.sampling_backend
-        gpu_components = run_regularization == "torch" or run_candidate == "torch_snapshot" or run_sampling != "cpu"
+        gpu_components = (run_regularization == "torch" or run_candidate == "torch_snapshot"
+                          or run_sampling != "cpu" or args.cleanup_marking_backend == "source_torch")
         use_cuda = gpu_components and device.type == "cuda"
         row = {"status": "running", "trace": trace, "regularization_backend": run_regularization,
                "candidate_backend": run_candidate, "sampling_backend": run_sampling}
@@ -182,6 +188,7 @@ def main():
                 subject_dir=args.subject, hemi=hemi, output=output, max_steps=args.max_steps,
                 output_volume=output_volume, regularization_backend=run_regularization,
                 sampling_backend=run_sampling, candidate_backend=run_candidate,
+                cleanup_marking_backend=args.cleanup_marking_backend,
                 device=str(device) if gpu_components else None,
                 trace_callback=callback,
             )
@@ -198,6 +205,19 @@ def main():
                        error=str(exc), traceback=traceback.format_exc())
             if hasattr(exc, "intersection_cleanup"):
                 row["intersection_cleanup"] = exc.intersection_cleanup
+            if hasattr(exc, "partial_stage"):
+                row["partial_stage"] = exc.partial_stage
+            if hasattr(exc, "intersection_coordinates"):
+                failed_path = args.output_directory / f"{backend}-failed-cleanup.diagnostic.npz"
+                np.savez(failed_path, vertices=exc.intersection_coordinates, faces=exc.intersection_faces)
+                row["failed_cleanup_checkpoint"] = {"path": str(failed_path), "sha256": sha256(failed_path)}
+            if use_cuda:
+                try:
+                    torch.cuda.synchronize(device)
+                    row.update(peak_allocated_bytes=torch.cuda.max_memory_allocated(device),
+                               peak_reserved_bytes=torch.cuda.max_memory_reserved(device))
+                except Exception as memory_error:
+                    row["allocator_report_error"] = str(memory_error)
             save()
             raise
         after = {str(path.relative_to(args.subject)): sha256(path) for path in inputs}

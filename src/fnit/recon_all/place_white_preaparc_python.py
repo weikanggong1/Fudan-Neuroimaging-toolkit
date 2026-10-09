@@ -42,6 +42,7 @@ def _place_white_preaparc(
     regularization_backend: str = "cpu", device: str | None = None,
     complete: bool = False, candidate_backend: str = "tree", trace_callback=None,
     output_volume: str | Path | None = None, sampling_backend: str = "cpu",
+    cleanup_marking_backend: str = "legacy",
 ) -> dict:
     """共享现有白质算子；complete 选择四轮而非首轮诊断调度。"""
     started = time.perf_counter()
@@ -52,6 +53,10 @@ def _place_white_preaparc(
         raise ValueError("steps must be from 1 to 17")
     if candidate_backend not in ("tree", "snapshot", "torch_snapshot"):
         raise ValueError("invalid candidate_backend")
+    if cleanup_marking_backend not in ("legacy", "source_numba", "source_torch"):
+        raise ValueError("invalid cleanup_marking_backend")
+    if cleanup_marking_backend == "source_torch" and device is None:
+        raise ValueError("source_torch cleanup requires an explicit device")
     if sampling_backend not in ("cpu", "torch", "triton"):
         raise ValueError("sampling_backend must be cpu, torch or triton")
     if sampling_backend != "cpu" and device is None:
@@ -77,15 +82,23 @@ def _place_white_preaparc(
     stats = dict(line.split()[:2] for line in stats_path.read_text().splitlines()
                  if len(line.split()) >= 2)
     vertices, faces, metadata = nib.freesurfer.read_geometry(str(orig), read_metadata=True)
+    surface_loaded_at = time.perf_counter()
     xyz = average_vertex_positions(vertices, faces, 5)
     initial_cleanup = None
+    def clean_intersections(current, rip_flags):
+        if cleanup_marking_backend == "legacy":
+            return repair_intersections(current, faces, rip_flags)
+        return repair_intersections(current, faces, rip_flags,
+            marking_backend=cleanup_marking_backend, device=device)
     if complete:
-        xyz, initial_cleanup = repair_intersections(xyz, faces, np.zeros(len(xyz), dtype=np.bool_))
+        xyz, initial_cleanup = clean_intersections(xyz, np.zeros(len(xyz), dtype=np.bool_))
         # 固定源码的 MRISremoveIntersections 可在非零残余时正常返回，随后
         # placement 继续优化几何。保留初始化诊断；零相交门只用于最终输出。
+    initial_cleanup_finished_at = time.perf_counter()
     normal_topology = FaceNormalTopology(faces, len(xyz))
     normal_cache = CoordinateNormalCache(normal_topology)
     normals = normal_cache.evaluate(xyz)
+    initial_normals_finished_at = time.perf_counter()
     brain = nib.load(str(brain_path))
     seg_image = nib.load(str(seg_path))
     wm_image = nib.load(str(wm_path))
@@ -94,10 +107,14 @@ def _place_white_preaparc(
             if image.shape != brain.shape or not np.array_equal(image.affine, brain.affine):
                 raise ValueError(f"white MRI grids differ: {path}")
     seg = np.asarray(seg_image.dataobj)
+    brain_data, wm_data = np.asarray(brain.dataobj), np.asarray(wm_image.dataobj)
+    mri_loaded_at = time.perf_counter()
     volume, _ = prepare_placement_volume(
-        np.asarray(brain.dataobj), np.asarray(wm_image.dataobj),
+        brain_data, wm_data,
         surface="white", mid_gray=float(stats["MID_GRAY"]),
     )
+    del brain_data, wm_data
+    volume_prepared_at = time.perf_counter()
     rip_affine = surface_ras_to_voxel(seg_image.header, metadata)
     ripped = values = None
     for _ in range(2):
@@ -105,6 +122,7 @@ def _place_white_preaparc(
             xyz, normals, faces, seg, volume, rip_affine, hemisphere=hemi,
             ripped=ripped, values=values,
         )
+    initial_ripping_finished_at = time.perf_counter()
     affine = surface_ras_to_voxel(brain.header, metadata)
     sampler = None
     if sampling_backend != "cpu":
@@ -117,6 +135,7 @@ def _place_white_preaparc(
         hemisphere=hemi, surface="white", sigma=2.0,
     )
     values = average_marked_values(border[0], border[4], ripped, faces, 5)
+    first_border_finished_at = time.perf_counter()
     ordered_indices, ordered_valid, _ = _ordered_neighbors(faces, len(xyz))
     ordered = (ordered_indices, ordered_valid)
     two_offsets, two_neighbors = two_ring_neighbors(
@@ -153,6 +172,16 @@ def _place_white_preaparc(
         return result
 
     prepared_at = time.perf_counter()
+    prepare_components = {
+        "input_validation_stats_and_surface_read": surface_loaded_at - started,
+        "surface_smoothing_and_initial_cleanup": initial_cleanup_finished_at - surface_loaded_at,
+        "initial_normals": initial_normals_finished_at - initial_cleanup_finished_at,
+        "MRI_read_geometry_check_and_materialization": mri_loaded_at - initial_normals_finished_at,
+        "placement_volume_preparation": volume_prepared_at - mri_loaded_at,
+        "initial_ripping": initial_ripping_finished_at - volume_prepared_at,
+        "sampling_setup_first_border_and_target_smoothing": first_border_finished_at - initial_ripping_finished_at,
+        "topology_context_and_objective_setup": prepared_at - first_border_finished_at,
+    }
     initial_sse, initial_rms = objective(xyz)
     initial_objective_at = time.perf_counter()
     current = xyz.copy()
@@ -323,11 +352,24 @@ def _place_white_preaparc(
     cleanup = None
     if complete:
         cleanup_started = time.perf_counter()
-        current, cleanup = repair_intersections(current, faces, ripped)
+        current, cleanup = clean_intersections(current, ripped)
         cleanup_seconds = time.perf_counter() - cleanup_started
         if cleanup["intersecting_faces_after"]:
             error = RuntimeError("white cleanup left unresolved intersections")
             error.intersection_cleanup = {"initial": initial_cleanup, "final": cleanup}
+            error.intersection_coordinates = current.copy()
+            error.intersection_faces = faces.copy()
+            error.partial_stage = {
+                "passes": pass_records, "steps": len(records), "per_step": records,
+                "cleanup_marking_backend": cleanup_marking_backend,
+                "prepare_components": prepare_components,
+                "seconds_to_failed_final_gate": time.perf_counter() - started,
+                "measured_stage_seconds": {"prepare": prepared_at - started,
+                    "initial_objective": initial_objective_at - prepared_at,
+                    "gradient": gradient_seconds, "collision": collision_seconds,
+                    "step_objective": objective_seconds, "border_updates": border_seconds,
+                    "cleanup": cleanup_seconds},
+            }
             raise error
     before_write = time.perf_counter()
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -348,6 +390,7 @@ def _place_white_preaparc(
         "regularization_backend": regularization_backend, "device": device,
         "sampling_backend": sampling_backend,
         "complete_four_passes": complete, "candidate_backend": candidate_backend,
+        "cleanup_marking_backend": cleanup_marking_backend,
         "pass_ends": pass_ends, "passes": pass_records, "initial_cleanup": initial_cleanup,
         "cleanup": cleanup, "output_volume": str(output_volume) if output_volume is not None else None,
         "vertices": int(len(xyz)), "faces": int(len(faces)),
@@ -356,6 +399,7 @@ def _place_white_preaparc(
         "initial_sse": initial_sse, "initial_rms": initial_rms,
         "step_sse": last_sse, "step_rms": last_rms,
         "per_step": records,
+        "prepare_components": prepare_components,
         "seconds": finished_at - started,
         "stage_seconds": {
             "prepare": prepared_at - started,
@@ -392,6 +436,7 @@ def place_white_preaparc(
     output_volume: str | Path | None = None, regularization_backend: str = "cpu",
     candidate_backend: str = "tree", sampling_backend: str = "cpu",
     device: str | None = None, trace_callback=None,
+    cleanup_marking_backend: str = "legacy",
 ) -> dict:
     """实验性完整preaparc白质四轮；不替代带aparc的最终white或生产默认。
 
@@ -402,6 +447,9 @@ def place_white_preaparc(
     须明确device。sampling_backend=cpu默认，torch/triton复用既有GPU强度
     采样，MRI仅缓存一次；每步仍传入当前rip/目标/sigma，不复用过期状态。
     trace_callback接收(step,pass_index,坐标副本,试步诊断)。
+    cleanup_marking_backend默认legacy；source_numba/source_torch按固定源码
+    逐方向及共享1mm桶标记，Torch需device。两次清理使用同一后端，
+    初始允许源程序既有残余，最终仍要求零相交；不改已验证pial默认。
     返回路径、有序网格大小、四轮边界、rip/目标/接受轨迹、完整清理与分项秒。
     输入/参数、未完成四轮、残余相交及CUDA异常传播，不写未完成表面。
     对应mris_place_surface --white --nsmooth 5 --rip-bg-no-annot --rip-bg。
@@ -423,6 +471,7 @@ def place_white_preaparc(
         complete=True, output_volume=output_volume,
         regularization_backend=regularization_backend, candidate_backend=candidate_backend,
         sampling_backend=sampling_backend, device=device, trace_callback=trace_callback,
+        cleanup_marking_backend=cleanup_marking_backend,
     )
 
 
@@ -452,6 +501,7 @@ def main() -> None:
     parser.add_argument("--output-volume", type=Path)
     parser.add_argument("--candidate-backend", choices=("tree", "snapshot", "torch_snapshot"), default="tree")
     parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
+    parser.add_argument("--cleanup-marking-backend", choices=("legacy", "source_numba", "source_torch"), default="legacy")
     args = parser.parse_args()
     if args.complete:
         if args.diagnostics is not None or args.steps != 1:
@@ -461,11 +511,13 @@ def main() -> None:
             max_steps=args.max_steps, output_volume=args.output_volume,
             regularization_backend=args.regularization_backend,
             candidate_backend=args.candidate_backend, sampling_backend=args.sampling_backend,
+            cleanup_marking_backend=args.cleanup_marking_backend,
             device=args.device,
         ), indent=2))
         return
     if (args.output_volume is not None or args.max_steps != 400
-            or args.candidate_backend != "tree" or args.sampling_backend != "cpu"):
+            or args.candidate_backend != "tree" or args.sampling_backend != "cpu"
+            or args.cleanup_marking_backend != "legacy"):
         parser.error("--output-volume, --max-steps, --sampling-backend and --candidate-backend require --complete")
     print(json.dumps(place_white_preaparc_prefix(
         subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,

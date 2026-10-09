@@ -1,0 +1,159 @@
+{
+  "scope": "frozen_same_input_MRI_preparation_only_not_surface_placement_or_recon_all",
+  "hostname": "authorized-a100-benchmark-host",
+  "code_commit": "edaeb922-plus-threshold13",
+  "script_sha256": "b34eaec64dc7e79dcb2fb9347442461bfef0263061201dd059f208fbb3c64ec7",
+  "source_sha256": {
+    "legacy": "067006169f1dca0bcfb5c163d0bea678d447b7bc9a98e7a3a91ab7287028f4d4",
+    "candidate": "bd184cbb34ca59781ddc5cd069b58749eaa77921accc3c12ba3c55ac0204df44"
+  },
+  "native_sha256": "78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44",
+  "threads": 4,
+  "cpu_affinity_count": 4,
+  "input_sha256": {
+    "mri/brain.finalsurfs.mgz": "f3a0be999f18f824a08859670b6950b1693d4ff0a8f8c2acb20d862bec390a55",
+    "mri/wm.mgz": "5647023b94038cd7b8e2a05d22bedaa94090e22b34fbd993bf36b78774380678",
+    "mri/aseg.presurf.mgz": "9e68818d3e7e237dfb3dc9b50024dee0b873391c875818dc8333297cffa32f9a",
+    "surf/lh.orig": "8ce7a9a61eb20cd68c930ba1242f441e82d6edffa99f3ab1373f9cd19b333d22",
+    "surf/autodet.gw.stats.lh.dat": "5a6849afc2ffaa306d8aef7ab90a0c6e8f59ab540c107e6021c8609190f34aea"
+  },
+  "shape": [
+    256,
+    256,
+    256
+  ],
+  "brain_dtype": "uint8",
+  "wm_dtype": "uint8",
+  "same_input_grid": true,
+  "gpu": "not_used; existing_CPU_volume_prepare",
+  "execution_status": "failed_native",
+  "modes": {
+    "white": {
+      "legacy": {
+        "seconds_compute_preloaded_arrays": 3.3609075658023357,
+        "label_counts": {
+          "0": 16765823,
+          "100": 620,
+          "130": 10773
+        },
+        "same_dtype": true,
+        "error_against_native": {
+          "different_voxels": 3,
+          "maximum_absolute_error": 110.0,
+          "p99_absolute_error": 0.0
+        }
+      },
+      "reference_stage": "white_invol_equals_CBV_and_PS",
+      "candidate": {
+        "seconds_compute_preloaded_arrays": 3.109233431518078,
+        "label_counts": {
+          "0": 16765829,
+          "100": 620,
+          "130": 10767
+        },
+        "same_dtype": true,
+        "error_against_native": {
+          "different_voxels": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0
+        }
+      },
+      "native": {
+        "command": [
+          "FNIT_ROOT/assets/recon_resources_20261009_v1/native/bin/mris_place_surface",
+          "--adgws-in",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/surf/autodet.gw.stats.lh.dat",
+          "--wm",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/mri/wm.mgz",
+          "--threads",
+          "4",
+          "--invol",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/mri/brain.finalsurfs.mgz",
+          "--lh",
+          "--i",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/surf/lh.orig",
+          "--o",
+          "FNIT_ROOT/runs/recon_torch_surface_20261009/prepare_volume_threshold13_v1_sub07/unused-white.diagnostic-surface",
+          "--white",
+          "--seg",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/mri/aseg.presurf.mgz",
+          "--restore-255",
+          "--nsmooth",
+          "0",
+          "--no-rip",
+          "--no-pin-medial-wall",
+          "--outvol-only",
+          "FNIT_ROOT/runs/recon_torch_surface_20261009/prepare_volume_threshold13_v1_sub07/native-white-invol.mgz"
+        ],
+        "returncode": 0,
+        "seconds_including_process_read_write": 4.186050273478031,
+        "shape": [
+          256,
+          256,
+          256
+        ],
+        "dtype": "uint8",
+        "same_shape_affine": true,
+        "volume_sha256": "7817b6b5a428f2d8f349ca4c65ccef7e09a3f93bcc180bf65faa20f5fb7399d4"
+      },
+      "changed_output_voxels": 3
+    },
+    "pial": {
+      "legacy": {
+        "seconds_compute_preloaded_arrays": 3.3924854043871164,
+        "label_counts": {
+          "0": 16765823,
+          "100": 620,
+          "130": 10773
+        }
+      },
+      "reference_stage": "pial_invol_after_border_replacement_not_CBV_or_PS",
+      "candidate": {
+        "seconds_compute_preloaded_arrays": 3.1541165336966515,
+        "label_counts": {
+          "0": 16765829,
+          "100": 620,
+          "130": 10767
+        }
+      },
+      "native": {
+        "command": [
+          "FNIT_ROOT/assets/recon_resources_20261009_v1/native/bin/mris_place_surface",
+          "--adgws-in",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/surf/autodet.gw.stats.lh.dat",
+          "--wm",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/mri/wm.mgz",
+          "--threads",
+          "4",
+          "--invol",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/mri/brain.finalsurfs.mgz",
+          "--lh",
+          "--i",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/surf/lh.orig",
+          "--o",
+          "FNIT_ROOT/runs/recon_torch_surface_20261009/prepare_volume_threshold13_v1_sub07/unused-pial.diagnostic-surface",
+          "--pial",
+          "--seg",
+          "FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/subjects/sub07/mri/aseg.presurf.mgz",
+          "--restore-255",
+          "--nsmooth",
+          "0",
+          "--no-rip",
+          "--no-pin-medial-wall",
+          "--outvol-only",
+          "FNIT_ROOT/runs/recon_torch_surface_20261009/prepare_volume_threshold13_v1_sub07/native-pial-invol.mgz"
+        ],
+        "returncode": 1,
+        "seconds_including_process_read_write": 0.022394945845007896
+      }
+    }
+  },
+  "public_report_provenance": {
+    "raw_report_sha256": "8d3316243342e928e612a00b74bb6773a1ec57c6616d8eb768f51014454bc85b",
+    "redacted_fields": [
+      "absolute_private_workspace_prefix",
+      "hostname"
+    ],
+    "numeric_measurements_unchanged": true
+  }
+}

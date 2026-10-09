@@ -1,0 +1,115 @@
+{
+  "scope": "frozen_real_initial_white_cleanup_only_not_complete_white",
+  "hostname": "authorized-a100-benchmark-host",
+  "code_commit": "edaeb922-plus-source-marker-v4",
+  "script_sha256": "c57af651f7ebc3d68709a47eaedf06eacd2bfe8bc362d3f99861f9719ff78bac",
+  "orig_sha256": "198ecc76038c00f80006bc64efd936a7b4faff89d6f5dbdc50753b1ac13faab9",
+  "checkpoint_sha256": null,
+  "source_sha256": {
+    "fnit.recon_all.place_surface_final_cleanup": "130d075e4ee6376bced62a71f7e433027b8d8648f4d60cac1f183c5dea40dd0d",
+    "fnit.recon_all.place_surface_intersection_marking": "a0ec77f139c9ba4251fc713814a56991a0a4d20ccf32d620b48a363b231f3d9c",
+    "fnit.recon_all.mris_remove_intersection_python": "e74908d742e4670560d236a77980ee3d5b23068e6f5ec20fa6c6b96c5f66851c",
+    "fnit.recon_all.place_surface_collision": "97506203743d40959df2ad040dc1567d9d358e03b7713cf1a5e7c197022c938d",
+    "fnit.recon_all.place_surface_collision_torch": "adac1598f162d5c0fb27afeac6d8625c8da7d66ae781205c1153b00403ba799a"
+  },
+  "native_sha256": "f1ffce58956f9089e15f4709af0d3b64ddcced3c16943d6f522439351c3f2b47",
+  "vertices": 132837,
+  "faces": 265670,
+  "cpu_affinity_count": 4,
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4"
+  },
+  "cuda_allocator_environment": {
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": null,
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "PYTORCH_ALLOC_CONF": null
+  },
+  "cleanup_marking_backend": "source_torch",
+  "execution_status": "complete",
+  "source_calls": [
+    {
+      "count": 0,
+      "marked_vertices": 0,
+      "coordinate_sha256": "35bc4091e041260eba753838358c855acc26c5eecd190f944924e963bcc38e7f",
+      "seconds": 2.343493756838143
+    }
+  ],
+  "legacy_initial": {
+    "count": 0,
+    "marked_vertices": 0,
+    "seconds": 1.445404983125627
+  },
+  "source_initial": {
+    "count": 0,
+    "marked_vertices": 0,
+    "different_marked_vertices_from_legacy": 0,
+    "seconds": 2.658965917304158
+  },
+  "native_initial_mark": {
+    "command": [
+      "FNIT_ROOT/assets/recon_resources_20261009_v1/native/bin/mris_remove_intersection",
+      "-map",
+      "FNIT_ROOT/runs/recon_torch_surface_20261009/source_ordered_fileapi_v7_sub06_rh/smoothed-orig.diagnostic-surface",
+      "FNIT_ROOT/runs/recon_torch_surface_20261009/source_ordered_fileapi_v7_sub06_rh/native-initial-mark.mgz"
+    ],
+    "returncode": 0,
+    "marked_vertices": 0,
+    "different_source_marked_vertices": 0,
+    "different_legacy_marked_vertices": 0
+  },
+  "source_cleanup": {
+    "seconds": 2.3460833448916674,
+    "diagnostics": {
+      "intersecting_faces_before": 0,
+      "intersecting_faces_after": 0,
+      "marked_vertices": 0,
+      "smoothing_cycles": 0
+    },
+    "allocated_peak_bytes": 714634752,
+    "reserved_peak_bytes": 1663041536
+  },
+  "source_file_api": {
+    "seconds_including_read_compute_write": 2.35812259465456,
+    "read_seconds": 0.003227761946618557,
+    "write_seconds": 0.008555218577384949,
+    "scope": "warm_imported_file_API; CUDA_setup_and_initial_diagnostic_excluded; trace_IO_included"
+  },
+  "torch_initial": {
+    "device": "cuda:0",
+    "count": 0,
+    "seconds": 2.1667411839589477,
+    "different_marked_vertices": 0,
+    "allocated_peak_bytes": 714634752,
+    "reserved_peak_bytes": 1663041536
+  },
+  "native": {
+    "command": [
+      "FNIT_ROOT/assets/recon_resources_20261009_v1/native/bin/mris_remove_intersection",
+      "FNIT_ROOT/runs/recon_torch_surface_20261009/source_ordered_fileapi_v7_sub06_rh/smoothed-orig.diagnostic-surface",
+      "FNIT_ROOT/runs/recon_torch_surface_20261009/source_ordered_fileapi_v7_sub06_rh/native-cleanup.diagnostic-surface"
+    ],
+    "returncode": 0,
+    "seconds": 4.071547626517713,
+    "cycle_counts": [],
+    "terminal_count": []
+  },
+  "source_native_comparison": {
+    "ordered_faces_same": true,
+    "different_coordinate_elements": 0,
+    "p99_distance_mm": 0.0,
+    "max_distance_mm": 0.0
+  },
+  "final_zero_intersection_gate": "passed",
+  "benchmark_total_wall_seconds": 30.000150416977704,
+  "public_report_provenance": {
+    "raw_report_sha256": "4dac6456d3304f014a3b65d8e9af5ce9057577482c9098bfafdbc81c44e43453",
+    "redacted_fields": [
+      "absolute_private_workspace_prefix",
+      "hostname"
+    ],
+    "numeric_measurements_unchanged": true
+  }
+}

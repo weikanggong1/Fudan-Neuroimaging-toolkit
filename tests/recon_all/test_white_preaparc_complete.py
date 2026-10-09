@@ -127,6 +127,7 @@ def test_terminal_rejection_restores_coordinates_and_refreshes_pass_state(white_
     assert actual_volume.get_data_dtype() == np.dtype("uint8")
     np.testing.assert_array_equal(actual_volume.affine, nib.load(str(subject / "mri/brain.finalsurfs.mgz")).affine)
     assert sum(report["stage_seconds"].values()) == pytest.approx(report["seconds"])
+    assert sum(report["prepare_components"].values()) == pytest.approx(report["stage_seconds"]["prepare"])
 
 
 def test_each_pass_obeys_native_100_iteration_limit(white_inputs, monkeypatch):
@@ -155,7 +156,30 @@ def test_incomplete_four_passes_and_residual_intersections_do_not_write(white_in
         stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=output)
     assert error.value.intersection_cleanup["initial"]["intersecting_faces_after"] == 2
     assert error.value.intersection_cleanup["final"]["intersecting_faces_after"] == 2
+    assert error.value.partial_stage["steps"] == 4
+    assert len(error.value.partial_stage["passes"]) == 4
+    assert error.value.intersection_coordinates.shape == (3, 3)
+    assert error.value.intersection_faces.shape == (1, 3)
     assert not output.exists()
+
+
+@pytest.mark.parametrize("backend", ["source_numba", "source_torch"])
+def test_same_explicit_marker_is_used_for_initial_and_final_cleanup(white_inputs, monkeypatch, backend):
+    subject, xyz, faces, observed = white_inputs
+    calls = []
+
+    def cleanup(vertices, faces, ripped, **kwargs):
+        calls.append(kwargs)
+        return vertices.copy(), {"intersecting_faces_after": 0}
+
+    monkeypatch.setattr(stage, "repair_intersections", cleanup)
+    monkeypatch.setattr(stage, "pial_step_decision", lambda ls, lr, s, r, dt, red:
+                        (dt * .5, red + 1, True, True, red + 1 > 2))
+    result = stage.place_white_preaparc(subject_dir=subject, hemi="lh", output=subject / "diagnostic/white",
+        cleanup_marking_backend=backend, device="cpu" if backend == "source_torch" else None)
+    assert len(calls) == 2
+    assert all(call["marking_backend"] == backend for call in calls)
+    assert result["cleanup_marking_backend"] == backend
 
 
 def test_initial_residual_continues_placement_but_final_mesh_must_be_clear(white_inputs, monkeypatch):

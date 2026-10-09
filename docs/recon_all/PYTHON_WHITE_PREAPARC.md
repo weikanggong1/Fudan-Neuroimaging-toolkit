@@ -13,8 +13,9 @@ pial 优化器。
 `white` 是另一个调用分支，尚未由本接口完成。PyTorch 可处理 signed
 averaging、normal/tangent spring 和两跳二次曲率，强度项可显式复用已实现
 的 `PlacementSampling` PyTorch/Triton GPU 采样；边界搜索、自斥力、
-目标函数、有序 Gauss–Seidel 碰撞接受及相交清理仍在 CPU。它尚不是完整
-纯 GPU 表面放置。
+目标函数和有序 Gauss–Seidel 碰撞接受仍在 CPU。相交清理可显式复用
+已有GPU空间索引与面对谓词，soap-bubble更新仍在CPU，详见
+[源规则有向清理](SOURCE_INTERSECTION_CLEANUP.md)。它尚不是完整纯GPU表面放置。
 
 ```mermaid
 flowchart TD
@@ -60,6 +61,7 @@ white_report = place_white_preaparc(
     regularization_backend="torch",  # 显式接入已有 PyTorch 固定网格正则梯度
     sampling_backend="torch",  # 复用已有 GPU 强度采样，MRI与变换只缓存一次
     candidate_backend="tree",  # 原完整动态候选与有序接受；默认保留
+    cleanup_marking_backend="source_torch",  # 实验有向MHT标记；初始与最终同规则
     device="cuda:0",  # 当前进程内明确的目标 GPU
     trace_callback=None,  # 可选每步诊断回调；坐标和记录是独立副本
 )
@@ -92,6 +94,7 @@ white_report = place_white_preaparc(
 | `regularization_backend` | `"cpu"`；`"torch"` 使用已实现的固定网格正则上下文，并要求明确 `device` |
 | `sampling_backend` | `"cpu"`；`"torch"`/`"triton"` 复用现有 GPU 强度梯度，要求显式 CUDA 编号；每步读取实际 rip、目标、顶点 sigma，MRI/affine 仅缓存一次；目标函数仍沿用 CPU 原算法 |
 | `candidate_backend` | `"tree"`；`"snapshot"` 和 `"torch_snapshot"` 是保守预候选实验，仍保留实时顺序窄相接受；后者要求明确 `device` |
+| `cleanup_marking_backend` | `"legacy"`；`"source_numba"`/`"source_torch"`按固定源码逐方向和共享MHT桶标记；后者要求显式device；只复用同次清理中完全相同的坐标 |
 | `device` | `None`；PyTorch 后端须显式指定如 `"cuda:0"` 或 `"cpu"`，不静默回退 CPU |
 | `trace_callback` | `None`；接收 `(step, pass_index, vertices_copy, record_copy)`；记录包含实际试步、SSE/RMS、接受/拒绝和步长；回调耗时计入墙钟 |
 
@@ -100,7 +103,7 @@ white_report = place_white_preaparc(
 | 字段 | 结构与单位 |
 |---|---|
 | `output/output_volume` | 实际输出路径；未指定体积时为 `None` |
-| `hemisphere/regularization_backend/sampling_backend/candidate_backend/device` | 实际选择 |
+| `hemisphere/regularization_backend/sampling_backend/candidate_backend/cleanup_marking_backend/device` | 实际选择 |
 | `complete_four_passes` | 成功返回时为 `True`；仅表示四轮计算完成，不表示官方数值验收通过 |
 | `vertices/faces/ripped_vertices/held_vertices/steps` | 网格大小、最终冻结和最近一次试步受阻顶点数、总迭代数 |
 | `pass_ends` | 四个全局迭代终点 |
@@ -109,10 +112,14 @@ white_report = place_white_preaparc(
 | `initial_sse/initial_rms/step_sse/step_rms` | 初始及最后一次接受坐标对应的目标值；SSE 为既有加权目标，RMS 为影像强度误差 |
 | `initial_cleanup/cleanup` | 起始/最终相交修复记录：相交面数、平滑周期和实际修复信息 |
 | `seconds/stage_seconds` | 函数墙钟及分项秒；包含校验、读取、准备、传输、梯度、碰撞、目标函数、轮间重估、清理、写出与回调；各项和为墙钟 |
+| `prepare_components` | MRI/表面读取、初始平滑与清理、法向、亮区体积、rip、首次边界搜索及上下文的细分秒；和为 `stage_seconds.prepare` |
 
 失败抛异常，不返回伪造完成状态。缺文件、无效参数、MRI 网格不一致、
 未完成四轮、最终残余相交、CUDA 不可用或 OOM 均保留原异常；算法失败前不写
 表面。实际 I/O 失败可能留下部分输出，调用者应保留异常及运行日志。
+最终相交门失败时，异常额外携带 `intersection_cleanup`、`partial_stage`
+和当前有序坐标/面；benchmark保存独立诊断NPZ、真实分项时间和可用的GPU
+allocator峰，不补出标准文件。
 
 旧 `place_white_preaparc_prefix()`/`first_white_preaparc_step()` 继续作为
 首轮 1–17 步诊断，不执行完整清理，也不改为完整 white 输出。
@@ -128,6 +135,7 @@ python -m fnit.recon_all.place_white_preaparc_python \
   --regularization-backend torch \
   --sampling-backend torch \
   --candidate-backend tree \
+  --cleanup-marking-backend source_torch \
   --device cuda:0
 ```
 
@@ -165,8 +173,8 @@ RequireAnnot 分支影响区域选择。最终 white 使用的 annotation、labe
 
 ## 5. 当前精度、耗时与可视化
 
-**完整四轮真实数据 benchmark 尚未完成，不能报告完整 white 提速或官方
-等效。** 本轮本地 CPU 控制契约 10/10 通过，包括四轮平均次数/sigma、目标
+**修正源规则相交标记后，完整四轮已生成标准实验输出且最终零相交。CPU
+与GPU后端结果一致；当前同输入Conda原生几何仍有局部差异，生产默认不变。** 本轮本地控制契约通过，包括四轮平均次数/sigma、目标
 与 SSE 重估、rip 掩膜更新、终止拒绝恢复、100 次每轮上限、未完成不写出、
 保留有序面/几何以及输出体积空间，GPU sampler 缓存与逐轮新状态绑定。
 GPU sampler 的控制契约使用替身，不是实际 CUDA 数值验收；白质真实数据
@@ -179,9 +187,43 @@ GPU sampler 的控制契约使用替身，不是实际 CUDA 数值验收；白�
 保留，不能改称完整四轮。当前NumPy标记按无序面对同时标两面，而源谓词
 存在反向差异：最终诊断候选2,139对中有5对反向结果不同，单向NumPy/源谓词
 本身0差异，逐有序源谓词标记8面。该检测语义问题另列排错，不归因于随机性。
-修正版CPU/PyTorch完整对照已在独立队列执行，尚未完成；同输入Conda重复结果见下表。
+后续source marker已按固定源码逐面方向与实际MHT桶修正并通过完整初始化
+清理回归；CPU源版与GPU源版均与原生最终有序面/坐标0差异。显式后端与
+真实初始清理时间见[有向清理专页](SOURCE_INTERSECTION_CLEANUP.md)；生产默认
+不在本轮据单阶段结果改写。同输入Conda重复结果见下表。
 完整日志摘要与源码/输入SHA见[v1失败记录](../../validation/recon_all/optimizations/20261009_placement_torch/white_sub07_lh_a100_v1_failed.json)
 和[初始化诊断](../../validation/recon_all/optimizations/20261009_placement_torch/white_initial_cleanup_sub07_lh_a100_v2.json)。
+
+同一A100、四线程、相同五输入的旧marker完整四轮已执行34步。CPU树候选
+697.969秒、GPU保守候选427.095秒；34个坐标SHA、全部接受/拒绝轨迹与最终
+清理记录完全相同，但最终仍有2个相交面，均不写标准表面。因此38.8%的
+缩短仅是执行至失败质量门的观察，不是通过验收的white或整例提速。CUDA
+缓存未关闭。历史失败文件不修改。修正marker后的新冻结v6已完成：
+
+| 同输入完整白质 preaparc | 墙钟 | 必要步骤与数值结果 |
+|---|---:|---|
+| CPU实时树候选，源GPU清理 | 641.539 s | 34步、四轮、最终0相交；实际写表面与MRI |
+| GPU保守预候选，源GPU清理 | 314.405 s | 34步坐标SHA、全部接受轨迹、最终表面/MRI与控制完全相同 |
+
+观察墙钟缩短50.99%，尚未做隔离ABBA或整例验收。实时有序窄相和soap
+更新仍为CPU；采样与正则在这组配对中也固定CPU。分项中碰撞499.839→
+182.710秒、准备71.216→65.912秒、轮间边界重估49.195→47.882秒。
+
+对本机两次稳定Conda原生结果，顶点数和有序面相同，GPU候选平均距离
+0.004488 mm、P99 0.085020 mm、最大1.033601 mm，792个顶点超过0.1 mm。
+两后端同样存在该差异，不能归因于GPU预候选引入退化。v6 MRI有3体素差异；
+已定位到共用亮区准备函数的邻居阈值误读，修复与两例MRI-only回归见
+[放置强度图说明](PLACEMENT_VOLUME_PREPARATION.md)。修复版完整白质另行冻结v8
+验证，不改写v6结果。
+
+[完整GPU报告](../../validation/recon_all/optimizations/20261009_placement_torch/white_source_marker_torch_a100_v6.json)、
+[CPU控制](../../validation/recon_all/optimizations/20261009_placement_torch/white_source_marker_cpu_a100_v6.json)与
+[完整同输入比较](../../validation/recon_all/optimizations/20261009_placement_torch/white_source_marker_full_comparison_a100_v6.json)
+保存全部轨迹和误差。外部监测实际间隔约数秒，进程归属未解；树峰为null，
+整卡采样上界11,744,051,200字节含其他进程，不能代表FNIT精确峰或整例预算。
+
+严格后端复现已通过；同输入原生严格复现未通过；整体脑区指标等效未评估。
+原生188.737–235.183秒仍快于GPU314.405秒，当前不将GPU路径设为生产默认。
 
 同一A100主机、四线程、相同五项输入与相同源码构建程序的新参考验证：
 
@@ -279,7 +321,9 @@ python validation/recon_all/python_gpu_port/benchmark_placement_full_white.py \
 
 | 日期/版本 | 修改与证据 |
 |---|---|
-| 2026-10-09，本轮实验接线 | 接通 preaparc 四轮、初始/最终清理、轮间冻结与目标重估、完整试步记录、uint8 诊断体积；模拟控制契约另列；真实四轮待测 |
+| 2026-10-09，源marker v6 | 完整CPU/GPU34步和最终几何无差异、最终0相交；对原生局部误差仍单列 |
+| 2026-10-09，13邻居阈值修复 | 两例white/pial MRI-only与原生0差异；完整修正版另测，不覆盖v6 |
+| 2026-10-09，本轮实验接线 | 接通preaparc四轮、轮间冻结与目标重估、完整试步记录、uint8诊断体积；保留旧失败质量门证据 |
 | 2026-10-09，`4939d41c` 及模块 SHA | 首步 PyTorch 正则同输入无新差异；仅首步阶段证据 |
 | 既有白质首轮诊断 | 1–17 步对照接口保留，承担定位参考作用；没有删除仍使用的诊断算子 |
 
