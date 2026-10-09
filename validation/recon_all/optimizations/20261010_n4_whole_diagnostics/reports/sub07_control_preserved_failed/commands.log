@@ -1,0 +1,44 @@
+aparc matched: 68; aseg matched: 45; wmparc matched: 70
+{"aseg.mgz": {"minimum_dice": 0.9666244007031025, "p05_dice": 0.9870773614415468, "median_dice": 1.0}, "aparc+aseg.mgz": {"minimum_dice": 0.8685776095186587, "p05_dice": 0.9002119403193976, "median_dice": 0.9495419264665603}, "aparc.a2009s+aseg.mgz": {"minimum_dice": 0.7071129707112971, "p05_dice": 0.7971843670244594, "median_dice": 0.9096059226145546}, "aparc.DKTatlas+aseg.mgz": {"minimum_dice": 0.9082774049217002, "p05_dice": 0.9153799797841072, "median_dice": 0.9550155102194204}, "wmparc.mgz": {"minimum_dice": 0.8302193338748984, "p05_dice": 0.8917838955276559, "median_dice": 0.9476069102237327}, "ribbon.mgz": {"minimum_dice": 0.9599743073073954, "p05_dice": 0.9611451350260657, "median_dice": 0.9791658391580731}, "filled.mgz": {"minimum_dice": 0.9972209767519434, "p05_dice": 0.9972507472029386, "median_dice": 0.9975186812618952}}
+Traceback (most recent call last):
+  File "FNIT_ROOT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py", line 358, in <module>
+    main()
+  File "FNIT_ROOT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py", line 301, in main
+    "semantic_checks": semantic_checks(), "hemispheres": {}}
+                       ^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py", line 253, in semantic_checks
+    assert vertex_links(tetra, 4)["noncycle_links"] == 0
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py", line 91, in vertex_links
+    status = _link_status(offsets, opposite_a[order], opposite_b[order])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/numba/core/dispatcher.py", line 441, in _compile_for_args
+    raise e
+  File "FNIT_ROOT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/numba/core/dispatcher.py", line 374, in _compile_for_args
+    return_val = self.compile(tuple(argtypes))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/numba/core/dispatcher.py", line 887, in compile
+    cres = self._cache.load_overload(sig, self.targetctx)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/numba/core/caching.py", line 721, in load_overload
+    return self._load_overload(sig, target_context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/numba/core/caching.py", line 728, in _load_overload
+    data = self._cache_file.load(key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/numba/core/caching.py", line 576, in load
+    return self._load_data(data_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/numba/core/caching.py", line 618, in _load_data
+    tup = pickle.loads(data)
+          ^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/envs/recon_main_20261009_v3/lib/python3.11/site-packages/numba/core/environment.py", line 51, in _rebuild_env
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "FNIT_ROOT/envs/recon_main_20261009_v3/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1140, in _find_and_load_unlocked
+ModuleNotFoundError: No module named '_failed_existing_quality'

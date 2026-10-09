@@ -1,0 +1,58 @@
+[
+  {
+    "command": [
+      "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+      "FNIT_ROOT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_region_stats.py",
+      "--reference",
+      "FNIT_ROOT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--candidate",
+      "FNIT_ROOT/runs/recon_e2e_n4_cached_e34a1829_20261009_v1/sub07-candidate/subject",
+      "--code-commit",
+      "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish+cached-full-Torch-N4;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933",
+      "--output",
+      "FNIT_ROOT/runs/n4_whole_diagnostics_20261010_v1/sub07_official_preserved_failed/region_candidate_vs_official.json"
+    ],
+    "seconds": 0.2892021965235472,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+      "FNIT_ROOT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/compare_parcellation_dice.py",
+      "--reference",
+      "FNIT_ROOT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--candidate",
+      "FNIT_ROOT/runs/recon_e2e_n4_cached_e34a1829_20261009_v1/sub07-candidate/subject",
+      "--code-commit",
+      "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish+cached-full-Torch-N4;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933",
+      "--output",
+      "FNIT_ROOT/runs/n4_whole_diagnostics_20261010_v1/sub07_official_preserved_failed/dice_candidate_vs_official.json",
+      "--label-table",
+      "FNIT_ROOT/assets/recon_resources_20261009_v1/assets/FreeSurferColorLUT.txt"
+    ],
+    "seconds": 15.373524839058518,
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+      "FNIT_ROOT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py",
+      "--subject",
+      "FNIT_ROOT/datasets/benchmark_references_official_pair_20261009_v2/subjects/ds000114_sub-07",
+      "--output",
+      "FNIT_ROOT/runs/n4_whole_diagnostics_20261010_v1/sub07_official_preserved_failed/quality_reference",
+      "--code-version",
+      "FreeSurfer 8.2.0 d932c45",
+      "--source-kind",
+      "official",
+      "--threads",
+      "4",
+      "--cross-timeout-seconds",
+      "180",
+      "--max-bbox-pairs",
+      "20000000"
+    ],
+    "seconds": 2.800511476583779,
+    "exit_code": 1
+  }
+]

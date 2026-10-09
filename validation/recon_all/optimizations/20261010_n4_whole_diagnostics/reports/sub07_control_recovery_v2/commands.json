@@ -1,0 +1,47 @@
+[
+  {
+    "command": [
+      "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+      "FNIT_ROOT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/benchmark_surface_quality_extended.py",
+      "--subject",
+      "FNIT_ROOT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject",
+      "--output",
+      "FNIT_ROOT/runs/n4_whole_diagnostics_20261010_v1/sub07_control_recovery_v2/quality_reference",
+      "--code-version",
+      "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933",
+      "--source-kind",
+      "fnit",
+      "--threads",
+      "4",
+      "--cross-timeout-seconds",
+      "180",
+      "--max-bbox-pairs",
+      "20000000"
+    ],
+    "seconds": 46.14675896707922,
+    "exit_code": 0,
+    "numba_cache": "FNIT_ROOT/runs/n4_whole_diagnostics_20261010_v1/sub07_control_recovery_v2/jit_reference",
+    "parent_numba_cache_unchanged": true,
+    "scope": "reference QC subprocess only; no algorithm or producer modification"
+  },
+  {
+    "command": [
+      "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+      "FNIT_ROOT/workspaces/evaluate_current_whole_20261009_v1/validation/recon_all/python_gpu_port/plot_recon_all_comparison.py",
+      "--reference",
+      "FNIT_ROOT/runs/recon_e2e_sphere_finish_e34a1829_20261009_v1/sub07-candidate/subject",
+      "--candidate",
+      "FNIT_ROOT/runs/recon_e2e_n4_cached_e34a1829_20261009_v1/sub07-candidate/subject",
+      "--region-report",
+      "FNIT_ROOT/runs/n4_whole_diagnostics_20261010_v1/sub07_control_recovery_v2/region_candidate_vs_control.json",
+      "--dice-report",
+      "FNIT_ROOT/runs/n4_whole_diagnostics_20261010_v1/sub07_control_recovery_v2/dice_candidate_vs_control.json",
+      "--output-dir",
+      "FNIT_ROOT/runs/n4_whole_diagnostics_20261010_v1/sub07_control_recovery_v2/figures",
+      "--code-commit",
+      "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish+cached-full-Torch-N4;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933"
+    ],
+    "seconds": 4.707521024160087,
+    "exit_code": 0
+  }
+]
