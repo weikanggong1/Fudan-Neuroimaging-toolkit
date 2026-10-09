@@ -106,7 +106,7 @@ python tools/evaluate_recon_torch_run.py \
 
 隔离子进程 allocated 峰值为 211–214 MB、reserved 为 254–258 MB。已初始化父进程保留 64,000,000 字节活跃张量，状态保持测试通过。容器 PID 无法映射宿主 NVML PID，父子同期归属显存为未知；整卡采样上界另列，不能用计数 0 代替显存，也不保证捕获连续尖峰。详细 JSON、采样和图像示例见 [WM 说明](WM_PLANAR_TORCH.md)与[完整报告](../../validation/recon_all/optimizations/20261009_wm_planar_torch/README.md)。
 
-冻结 `803aec50` 的 sub-06 候选从原始 T1、新空目录连续完成，CLI 墙钟2255.064秒，138/138输出完整，双侧white/pial自相交为0、封闭网格检查通过；该候选仅改变GCA局部缓存/分块求逆及有序fill，尚未使用后续WM或N4实验。相同硬件/线程的该例控制以及sub-07配对仍在运行，整例实际提速暂未给出。官方参考来自既有FreeSurfer 8.2.0 d932c45，原始输入SHA相同，但生成主机与当前候选不同，历史秒数不能作为本轮配对速度。当前候选的138项严格诊断和最终脑区指标由上述评估入口另行测量。以上阶段数据不等于整例提速；整体指标等效未判定。干净 Conda 安装/物理隔离部署尚未验收。新增执行入口只使用主页已声明的 Python/PyTorch/Numba/nibabel 依赖。
+冻结 `803aec50` 的 sub-06 候选从原始 T1、新空目录连续完成，CLI 墙钟2255.064秒，138/138输出完整，双侧white/pial自相交为0、封闭网格检查通过；该候选仅改变GCA局部缓存/分块求逆及有序fill，尚未使用后续WM或N4实验。相同硬件/线程的该例控制以及sub-07配对仍在运行，整例实际提速暂未给出。官方参考来自既有FreeSurfer 8.2.0 d932c45，原始输入SHA相同，但生成主机与当前候选不同，历史秒数不能作为本轮配对速度。当前候选的完整独立比较已完成：严格6/138，68区厚度MAE0.044824mm；完整Dice、表面距离、white/pial相互穿越和脑图见[本次结果](../../validation/recon_all/optimizations/20261009_whole_a100_803aec50/README.md)。生产自相交门不覆盖所有相互穿越，扩展质量状态单列。以上阶段数据不等于整例提速；整体指标等效未判定。干净 Conda 安装/物理隔离部署尚未验收。新增执行入口只使用主页已声明的 Python/PyTorch/Numba/nibabel 依赖。
 
 ## 6. 最近更新和 benchmark
 
