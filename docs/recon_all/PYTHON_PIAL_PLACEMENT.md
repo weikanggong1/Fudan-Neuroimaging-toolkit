@@ -262,6 +262,27 @@ CUDA初始化单列，阶段时间包含校验、读写、全部试步回调和�
   insula。该差异在优化前后不变，不能归因于本次加速或一概称为随机尾差。
   整体指标等效仍为`not_assessed`。
 
+两份本机原生日志的四轮设置（平均次数16/8/4/2、sigma 2/1/0.5/0.25）
+与39步打印SSE/RMS也完全重现，见[数值轨迹收据](../../validation/recon_all/optimizations/20261009_placement_torch/pial_retained_a100_v13_sub07_lh.native_numeric.json)。
+Python与原生打印RMS在第19步开始超出其三位小数的舍入区间，最终差0.010406；
+清理初始相交面分别为15和14。两者清理前坐标已不同，不能根据这两个计数
+直接判定标记器错误。该收据只有原生命令的打印标量，不提供每步原生坐标；
+后续应从有序更新和强度目标中定位更早的几何差异。
+
+打印数值收据复现：
+
+```bash
+python validation/recon_all/python_gpu_port/collect_pial_native_numeric_trace.py \
+  --native-logs /data/diagnostic/native-0.private.log /data/diagnostic/native-1.private.log \
+  --python-report /data/runs/pial-control-candidate/report.json \
+  --output /data/diagnostic/native-numeric-receipt.json
+```
+
+三个参数均必填：两份原生日志须来自相同输入的独立重跑；Python报告提供
+同输入SHA与完整trial；输出为新JSON，含四轮设置、39步打印数值、两个日志
+SHA及标量比较。缺少四轮或清理记录时抛ValueError，已存在输出不覆盖。
+仅提取指定格式的数值，原日志继续保留在私有benchmark目录。
+
 候选PyTorch allocated峰值706,536,960字节，reserved峰值2,896,166,912字节。
 外部采样间隔0.25秒；容器PID归属未解决，进程树峰值为null，同期整卡3273 MiB
 只作共享设备上界，不能当作进程占用或整例20 GB验收。TF32设置开启，未使用
@@ -298,5 +319,64 @@ python validation/recon_all/python_gpu_port/plot_full_white_diagnostics.py \
 本例显式pial.T1；`--label`为图中文字；`--output`为PNG，并写同名JSON。
 输入与输出路径必填；顶点数或有序面不匹配时拒绝同索引误差图。
 本轮只新增实验选项并复用已有内核，没有新增依赖或替换现版生产实现。
+
+### 复用源清理的完整pial对照（v14）
+
+在相同自产七输入上，固定全部放置为GPU完整候选3桶、compiled有序MHT、
+CPU采样和梯度。仅将最终source标记从Num ba换为已有Torch完整标记；
+SOAP仍执行同一轮100次。两次完整API中保存实际清理前的坐标、面和rip，
+再用该NPZ做完整清理CPU→GPU→GPU→CPU回放。
+
+| 实际实现 | 完整pial API（单配对） | 完整清理分项 | 同输入清理文件API ABBA |
+|---|---:|---:|---:|
+| source_numba，原CPU完整查询/标记 | 347.802 s | 117.603 s | 121.493 / 130.998 s |
+| source_torch，GPU完整索引/谓词，3桶 | 221.206 s | 10.831 s | 11.267 / 11.048 s |
+
+清理文件API中位126.246→11.158秒，本组快11.31倍；包含实际NPZ读取、
+完整清理及表面写出。完整pial本次配对快1.572倍，完整API的CUDA初始化
+2.755秒另计。全阶段不是ABBA，原生pial的138–141秒仍更快。
+CPU回放仍需121–131秒，不能把整个差距归为首次JIT。CPU标记依然逐面
+生成和筛选cKDTree候选，Torch复用已验证的批量完整索引及双方向谓词；
+保留所有面对、MHT桶核对、顶点冻结与SOAP更新。
+
+两次完整API的39步全部坐标SHA/trial、清理前xyz/faces/rip、清理记录及
+最终文件字节完全相同，source独立最终相交门为0。四次完整清理回放也
+坐标和完整清理轨迹0差异。两组均为15→0、24个顶点、1轮100次SOAP；
+与v13 legacy完整轨迹和最终坐标也0差异，已有原生局部误差保持。
+本次输出字节与v13一致，因此可复用上面的真实叠加和局部误差图。
+本例相同输出不建立legacy与source在一般输入上的规则等价；源规则的
+有向面标记及MHT桶条件见[清理说明](SOURCE_INTERSECTION_CLEANUP.md)。
+
+完整API allocated峰706,536,960字节、reserved峰2,908,749,824字节。
+外部0.25秒采样的进程树峰值仍为null，同期整卡3273 MiB为上界。
+TF32保持开启，无半精度；有效分配器策略没有从reserved反推。
+全部结果绑定`edaac8e7-plus-cleanup-observer-v14`和实际源码SHA，见
+[完整阶段与清理回放JSON](../../validation/recon_all/optimizations/20261009_placement_torch/pial_source_cleanup_a100_v14_sub07_lh.json)和
+[外部显存收据](../../validation/recon_all/optimizations/20261009_placement_torch/pial_source_cleanup_a100_v14_sub07_lh.memory.json)。
+
+```bash
+CUDA_VISIBLE_DEVICES=2 OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 NUMBA_NUM_THREADS=4 \
+python validation/recon_all/python_gpu_port/benchmark_pial_source_cleanup.py \
+  --subject /data/fnit/sub07 --hemisphere lh \
+  --candidate-directory /data/frozen-code/src/fnit/recon_all \
+  --output-directory /data/runs/pial-source-cleanup \
+  --code-base-commit ACTUAL_TESTED_COMMIT --device cuda:0 --threads 4 --max-steps 200 \
+  --order numba torch \
+  --legacy-baseline-report /data/runs/pial-control-candidate/report.json \
+  --legacy-baseline-surface /data/runs/pial-control-candidate/lh.pial.torch
+```
+
+输入仍为本文的七个前置文件。subject、候选目录、新输出目录和实际基线
+版本必填；hemisphere默认lh、device默认cuda:0、threads默认4、max_steps
+默认200。`--order`默认numba torch torch numba，也允许完整正反两组配对；
+本次显式仅numba torch。两项legacy基线默认None，须同时指定；仅在完整
+放置之后读取用于比较，不供候选计算读取。输出包括完整表面、四轮完整
+trial/坐标SHA、实际清理前NPZ及其哈希、四次清理回放表面、质量与墙钟JSON。
+NPZ含float32 `(N,3)` surface RAS/mm坐标、int32 `(F,3)`有序面、bool `(N,)`
+rip，仅保留私有诊断目录。非法顺序、含糊CUDA或已存在目录抛ValueError；
+清理最终非零或严格门失败则失败退出，报告和检查点保留。
+
+v13增加显式完整GPU候选与编译MHT，v14验证现有源清理的完整接入。
+生产仍用Conda pial，Python API默认仍tree/legacy；没有新增依赖。
 
 历史冻结诊断的官方固定CLI不输出每轮完整坐标快照，因此对应native报告只有逐轮步长、SSE/RMS、拒绝次数和清理消息；Python额外保存四轮结束表面与全部试步。仅有日志标量时不宣称完整坐标逐轮对应。该组入口见 `validation/recon_all/accuracy_20261003/task_05/placement_probe.py` 与 `run_placement_stages.sh`；不替代上面的本机v13阶段记录或10例整例指标。

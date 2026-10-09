@@ -211,6 +211,27 @@ soap，全部坐标、有序面、完整清理记录0差异。同期两次同输
 white验证34步及最终表面/MRI SHA不变、最终相交数0；该单次245.176秒
 是集成回归，未建立整体提速或最终white对原生等效。
 
+v14将相同现有source清理接入公开sub07 LH的完整pial，固定GPU候选3桶、
+compiled实时有序MHT及CPU采样/梯度，仅改变最终标记后端。完整API
+source_numba347.802秒、source_torch221.206秒；清理分项117.603→10.831秒。
+两次39步/四轮的trial和坐标SHA、清理前xyz/faces/rip、清理轨迹、最终
+表面字节均相同，独立source最终相交数0。
+
+对实际清理前NPZ做CPU→GPU→GPU→CPU完整文件API回放，CPU为
+121.493/130.998秒，GPU为11.267/11.048秒，中位126.246→11.158秒，本组
+11.31倍。四次均15→0个面、24个顶点、1轮100次SOAP，全部坐标与清理
+记录0差异。原CPU逐面cKDTree候选与筛选占用仍存在于重复调用，首次JIT
+不足以解释差距；GPU复用完整索引及双向源谓词，未减少必要迭代。
+
+完整pial是单配对1.572倍，仍慢于本机Conda原生138–141秒。对v13 legacy
+的最终坐标及39步轨迹0差异，已有对原生的局部误差不变；默认仍legacy。
+allocated706,536,960字节、reserved2,908,749,824字节，进程树占用因PID
+归属未解为null，同期整卡上界3273 MiB。TF32和精度策略保持，没有新依赖。
+[完整v14报告](../../validation/recon_all/optimizations/20261009_placement_torch/pial_source_cleanup_a100_v14_sub07_lh.json)
+和[显存收据](../../validation/recon_all/optimizations/20261009_placement_torch/pial_source_cleanup_a100_v14_sub07_lh.memory.json)
+绑定实际源/输入SHA；全部输入输出、具名参数、复现命令与真实T1叠加见
+[完整pial说明](PYTHON_PIAL_PLACEMENT.md#复用源清理的完整pial对照v14)。
+
 实际输入、源码、程序和报告SHA及逐轮坐标SHA分别见
 [CPU源规则报告](../../validation/recon_all/optimizations/20261009_placement_torch/source_ordered_cleanup_a100_v2.json)、
 [GPU完整候选报告](../../validation/recon_all/optimizations/20261009_placement_torch/source_ordered_cleanup_a100_v3.json)、
@@ -237,6 +258,7 @@ white验证34步及最终表面/MRI SHA不变、最终相交数0；该单次245.
 - v7：两例双侧完整文件API与当前Conda原生有序面/坐标0差异。
 - v11：显式3桶完整空间索引，真实完整清理ABBA中位减少25.62%；保留默认2桶。
 - v12：完整white四轮接线回归34步及表面/MRI SHA与v10相同、最终0相交。
+- v14：完整pial只替换source标记，39步及输出0差异；真实清理ABBA中位11.31倍，pial单配对1.572倍，默认保持。
 - 本地32项控制测试覆盖方向、桶、共享顶点/rip、GPU接口、缓存失效及white四轮状态；模拟测试不替代上表真实数据。
 
 旧v1/v2失败或慢版报告保留为排错证据，不替换其SHA或改写为当前成功。
