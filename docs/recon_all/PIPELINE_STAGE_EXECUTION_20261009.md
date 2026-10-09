@@ -32,6 +32,7 @@ reconstruction_report = run_recon_all_python(
     wm_backend="torch-optimized",  # 复用完整 WM，保持有序更新
     wm_execution="isolated",  # 仅子进程开启缓存，父 CUDA 状态保持
     normalization_controls_backend="torch",  # 两轮复用GPU邻域缓冲，不改变有序选择
+    normalization_initial_bias_backend="torch",  # 第二轮复用GPU传播/平滑；原除乘/输出精度保持
     profile_stages=True,  # 阶段首尾同步并记录完整墙钟，生产默认 False
 )
 ```
@@ -45,6 +46,8 @@ WM 读取自产 `mri/antsdn.brain.mgz`，写 `mri/wm.seg.mgz`。输入输出均�
 报告增加 `stages[*].algorithm_substep_seconds`：保留已有函数的顶层秒数、`steps`、`completion.steps`，例如初次归一化的控制点/传播/平滑，以及第二次归一化的 ridge/初始 bias/后续迭代。来源路径保留，内部计时可能异步或嵌套，不与阶段墙钟相加，也不额外同步 GPU。
 
 `normalization_controls_backend` 默认 `'cpu'`；`'torch'` 复用现有两轮归一化的 PyTorch/Triton 邻域计数与求和。固定源图、ROI 和输出缓冲驻留 GPU，控制图按原迭代上传；有序控制点选择、离群清理、ridge 和其他偏置步骤保持原实现。仅接受显式 `cuda:N`，非法组合在校验资源或创建输出前报错，无静默 CPU 回退。单例、batch、CLI 和整例 benchmark 原样传递选项，报告增加 `normalization_configuration`。函数的全部输入、uint8 同网格输出、内部接口及坐标说明见[归一化 GPU 邻域](NORMALIZATION_GPU_NEIGHBORS.md)。新增依赖为零，使用主页环境既有 Triton。
+
+`normalization_initial_bias_backend` 默认 `'cpu'`，`'torch'` 只在第二轮复用已有 Voronoi 传播和高斯平滑。距离和稳定排序仍为 CPU；零控制图平滑、float64 的除后乘及 float32 返回保持。它独立于邻域选项，同样须显式 `cuda:N`，失败不回退。完整第二轮 API 的两例 ABBA 中位数128.937→70.577秒、134.061→82.456秒，8次输出和所有中间浮点/控制图一致；这组测量两边都使用GPU邻域，只改变初始偏置。新接线的整例尚未完成，完整输入、输出、逐项参数、脑图和显存范围见[初始偏置GPU页](NORMALIZATION_ASEG_INITIAL_GPU.md)。
 
 ```python
 from fnit.recon_all.stage_metadata import extract_algorithm_seconds
@@ -70,6 +73,7 @@ python -m fnit.recon_all.native_free input/T1w.nii.gz output/subject \
   --wm-backend torch-optimized \
   --wm-execution isolated \
   --normalization-controls-backend torch \
+  --normalization-initial-bias-backend torch \
   --profile-stages
 ```
 

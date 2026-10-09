@@ -813,6 +813,23 @@ def _normalization_controls_options(backend: str, device: str) -> dict:
     return {}
 
 
+def _normalization_initial_bias_options(backend: str, device: str) -> dict:
+    """校验第二轮初始偏置后端，返回aseg归一化的具名选项。
+
+    backend为cpu/torch，device为入口设备；cpu返回空dict保留原路径。
+    torch须cuda:N，复用已有传播/平滑，返回initial_bias_backend参数；
+    其余有序控制点规则、float64除后乘及float32输出保持。不创建输出
+    或初始化CUDA；非法后端抛ValueError，设备解析异常沿PyTorch传播。
+    没有独立官方命令，空间/单位与第二轮归一化输入相同。
+    """
+    if backend not in {"cpu", "torch"}:
+        raise ValueError("normalization_initial_bias_backend must be cpu or torch")
+    if backend == "torch":
+        _normalization_controls_options("torch", device)
+        return {"initial_bias_backend": "torch"}
+    return {}
+
+
 def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
@@ -824,6 +841,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          n4_backend: str = "native",
                          n4_execution: str = "in-process",
                          normalization_controls_backend: str = "cpu",
+                         normalization_initial_bias_backend: str = "cpu",
                          wm_backend: str = "native",
                          wm_execution: str = "in-process",
                          wm_edit_backend: str = "native",
@@ -844,6 +862,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     保留父CUDA/精度，输入输出SHA、实际迭代和子显存另记，不读取参考。
     normalization_controls_backend默认cpu；torch复用两轮归一化的GPU邻域，
     须显式cuda:N。控制点规则、有序离群清理及其余偏置步骤保持原算法。
+    normalization_initial_bias_backend默认cpu；torch只在第二轮复用GPU
+    初始偏置传播/平滑，保留CPU距离/排序、原除乘顺序和float32输出。
     native_optimizations=auto在CUDA使用已有FNIT Torch评分+Python EM；CPU
     查询独立产物能力，4线程可使用验证过的GCA缓存。white使用专用快速
     程序，pial保留原程序；original固定原生GCA用于控制。
@@ -876,6 +896,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     输出结构、限制、官方命令和真实数据见 docs/recon_all/README.md。
     """
     normalization_options = _normalization_controls_options(normalization_controls_backend, device)
+    initial_bias_options = _normalization_initial_bias_options(normalization_initial_bias_backend, device)
     from .input_n4_chain import validate_n4_execution
     validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=device)
     if backend not in {"native", "python-gpu"}:
@@ -1019,6 +1040,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "known_strict_intensity_differences": n4_backend == "torch"}
     report["normalization_configuration"] = {
         "controls_neighbor_backend": normalization_controls_backend,
+        "initial_bias_backend": normalization_initial_bias_backend,
         "requested_device": device,
         "stages": ["T1_normalize", "brain_second_normalize"],
         "implementation": ("FNIT resident PyTorch/Triton neighbor buffers"
@@ -1217,7 +1239,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
 
     stage("brain_second_normalize", normalize_t1_aseg,
           mri / "norm.mgz", mri / "aseg.presurf.mgz",
-          mri / "brainmask.mgz", mri / "brain.mgz", device=device, **normalization_options)
+          mri / "brainmask.mgz", mri / "brain.mgz", device=device,
+          **normalization_options, **initial_bias_options)
     auxiliary_forwards = []
     with torch.backends.cudnn.flags(allow_tf32=False):
         stage("entowm", mri_entowm_seg, mri / "nu.mgz", mri / "entowm.mgz",
@@ -1459,6 +1482,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          n4_backend: str = "native",
                          n4_execution: str = "in-process",
                          normalization_controls_backend: str = "cpu",
+                         normalization_initial_bias_backend: str = "cpu",
                          wm_backend: str = "native",
                          wm_execution: str = "in-process",
                          wm_edit_backend: str = "native",
@@ -1487,6 +1511,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     非法组合在创建被试目录前报错，既有N4系统强度差异单列，不判整体等效。
     normalization_controls_backend=cpu保留原邻域；torch在两轮归一化复用
     同规则GPU邻域，须显式cuda:N，其余步骤/设备不变。实际选择写入报告。
+    normalization_initial_bias_backend=cpu保留第二轮初始偏置；torch仅
+    复用该轮既有GPU传播/平滑，要求cuda:N，除乘/输出精度与原规则相同。
     defects_backend=native 使用原生缺陷投射，torch 用本项目完整投射规则
     并保持双侧累积顺序；仅颜色表换成固定颜色，当前默认为 native。
     wm_edit_backend=native 调用独立构建编辑程序；torch-hybrid 使用 CUDA
@@ -1521,6 +1547,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     """
     tick = time.perf_counter()
     _normalization_controls_options(normalization_controls_backend, device)
+    _normalization_initial_bias_options(normalization_initial_bias_backend, device)
     from .thread_budget import thread_budget
 
     report_path = Path(subject_dir) / "fnit-native-free-run.json"
@@ -1570,6 +1597,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"n4_execution": n4_execution} if n4_execution != "in-process" else {}),
                     **({"normalization_controls_backend": normalization_controls_backend}
                        if normalization_controls_backend != "cpu" else {}),
+                    **({"normalization_initial_bias_backend": normalization_initial_bias_backend}
+                       if normalization_initial_bias_backend != "cpu" else {}),
                     **({"wm_backend": wm_backend} if wm_backend != "native" else {}),
                     **({"wm_execution": wm_execution} if wm_execution != "in-process" else {}),
                     **({"wm_edit_backend": wm_edit_backend} if wm_edit_backend != "native" else {}),
@@ -1628,6 +1657,8 @@ def main(argv: list[str] | None = None) -> None:
                         help="isolated only for Torch cuda:N; cached child preserves parent allocator")
     parser.add_argument("--normalization-controls-backend", choices=("cpu", "torch"), default="cpu",
                         help="same-rule control-point neighbors; torch requires cuda:N, remaining solver unchanged")
+    parser.add_argument("--normalization-initial-bias-backend", choices=("cpu", "torch"), default="cpu",
+                        help="second normalization initial bias; torch reuses existing propagation/smoothing with original arithmetic")
     parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=1,
                         help="independent hemisphere processes; total threads split across two workers")
@@ -1667,6 +1698,7 @@ def main(argv: list[str] | None = None) -> None:
                                   n4_backend=args.n4_backend,
                                   n4_execution=args.n4_execution,
                                   normalization_controls_backend=args.normalization_controls_backend,
+                                  normalization_initial_bias_backend=args.normalization_initial_bias_backend,
                                   wm_backend=args.wm_backend,
                                   wm_execution=args.wm_execution,
                                   wm_edit_backend=args.wm_edit_backend,

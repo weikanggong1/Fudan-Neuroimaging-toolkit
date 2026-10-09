@@ -94,3 +94,7 @@ mri_normalize -seed 1234 -mprage -aseg aseg.presurf.mgz -mask brainmask.mgz norm
 - [FreeSurfer mri_normalize](https://github.com/freesurfer/freesurfer/tree/d932c45/mri_normalize)
 - [FNIT](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit)
 - Fischl et al. (2002), *Whole brain segmentation: automated labeling of neuroanatomical structures in the human brain*, Neuron 33:341–355。
+
+### 第二轮初始偏置 GPU 接线（v3）
+
+新增 `normalization_initial_bias_backend="torch"`，只传给第二轮归一化；第一轮仍只接收邻域选项。Python、批量、CLI 和整例 harness 的非法设备、转发、默认值及报告契约在实际 Python 3.11.16 / PyTorch 2.5.1 环境通过 **24/24**，耗时 **1.8157 秒**。实际测试为 `3695a24c` 加五文件未提交覆盖，源码 SHA 见 [报告](reports/initial_bias_contracts_v3/contracts.json)；不把入口测试当作真实影像整例。两例完整同输入数值及 ABBA 性能见 [初始偏置专页](../../../../docs/recon_all/NORMALIZATION_ASEG_INITIAL_GPU.md)。新选项保持默认 `cpu`，显式 `torch` 要求 `cuda:N`，未修改总体等效阈值。

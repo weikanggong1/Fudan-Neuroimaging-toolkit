@@ -66,6 +66,7 @@ reconstruction_report = run_recon_all_python(
     n4_backend="native",  # torch显式使用完整200轮N4，已知强度偏移单列
     n4_execution="in-process",  # isolated仅配torch/cuda:N，缓存子exec保持父策略
     normalization_controls_backend="cpu",  # torch复用两轮同规则GPU邻域；仅显式cuda:N
+    normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置GPU传播/平滑，保持原除乘精度
     wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
     wm_execution="in-process",  # isolated仅配torch-optimized，子exec局部缓存、父策略保持
     defects_backend="native",  # torch启用完整PyTorch缺陷投射；标签相同，颜色表不同
@@ -108,6 +109,7 @@ reconstruction_report = run_recon_all_python(
 | `n4_backend` | 否 | `str` | 'native' | torch显式复用完整N4；已知系统强度差异单列，不改变默认 |
 | `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N，在新exec局部缓存；非法组合输出前报错，子完整报告保留 |
 | `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮的GPU邻域计数/求和与缓冲；显式cuda:N，有序选择/其余偏置步骤不变 |
+| `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch只迁移第二轮初始偏置传播/平滑；距离/排序仍CPU，原float64除后乘/float32输出保持，显式cuda:N |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `defects_backend` | 否 | `str` | `'native'` | torch使用完整缺陷投射；保持双侧顺序/标签，采用确定性颜色 |
@@ -136,6 +138,7 @@ reconstruction_report = run_recon_all_python(
 | `n4_backend` | 否 | `str` | 'native' | torch显式复用完整N4；已知系统强度差异单列，不改变默认 |
 | `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N，在新exec局部缓存；非法组合输出前报错，子完整报告保留 |
 | `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮同规则GPU邻域；所有目标设备须为cuda:N，非法组合调度前拒绝 |
+| `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch复用第二轮初始偏置GPU算子，所有目标设备须为cuda:N，非法组合调度前拒绝 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid复用CUDA静态编辑与Numba有序核心，要求CUDA |
@@ -239,6 +242,7 @@ reconstruction_reports = run_recon_all_python_batch(
     native_optimizations="auto",  # CUDA上用FNIT GCA候选评分；CPU按已验证能力选择
     backend="native",  # 严格 python-gpu 尚未完成，不能静默回退
     normalization_controls_backend="cpu",  # torch仅显式cuda:N；保留原控制点选择与偏置规则
+    normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置；保留原float64除乘与float32输出
     wm_edit_backend="native",  # torch-hybrid为同输入已验证的WM/aseg混合候选
     defects_backend="native",  # torch保持完整缺陷标签投射；不等于拓扑GA
     sphere_normals_backend="numba",  # torch仅替换标准sphere法向
@@ -274,6 +278,7 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `--n4-backend` | `n4_backend` | native为Conda ITK；torch为完整200轮N4，系统强度差异单列 |
 | `--n4-execution` | `n4_execution` | in-process保留父策略；isolated仅Torch/cuda:N，完整缓存子exec |
 | `--normalization-controls-backend` | `normalization_controls_backend` | cpu保留原邻域；torch复用两轮GPU缓冲，显式cuda:N，其余算法不变 |
+| `--normalization-initial-bias-backend` | `normalization_initial_bias_backend` | cpu保留第二轮初始偏置；torch复用GPU传播/平滑，保持算术顺序和精度，显式cuda:N |
 | `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `--wm-execution` | `wm_execution` | in-process保留父缓存；isolated为完整WM缓存worker，须配torch-optimized |
 | `--defects-backend` | `defects_backend` | native调用Conda mri_label2vol；torch使用完整PyTorch投射，不要求该原生程序 |
