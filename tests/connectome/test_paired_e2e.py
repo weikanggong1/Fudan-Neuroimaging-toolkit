@@ -35,6 +35,9 @@ def file_contents(directory):
 
 @pytest.fixture
 def setup(tmp_path, monkeypatch):
+    # Numerical-core fixtures must not download or build an actual tckgen.
+    monkeypatch.setattr(pipeline, "_native_tracking_fingerprint", lambda: {
+        "backend": "unit-test-core", "binary_sha256": "0" * 64})
     shape = (5, 5, 5)
     subject = tmp_path / "subject"
     for folder in ("mri", "surf", "label"):
@@ -78,7 +81,8 @@ def setup(tmp_path, monkeypatch):
         eye = torch.eye(4, dtype=torch.float64)
         tracks = pipeline.Tractogram(tuple(p.clone() for p in endpoints), endpoints.clone(),
                                      torch.tensor([10., 20., 30.]), torch.tensor([.2, .4, .6]),
-                                     options["n_seeds"], endpoints[:, 0].clone())
+                                     options["n_seeds"], None,
+                                     {"backend": "unit-test-core", "tck_header": {"step_size": "0.5"}})
         return dict(seg=torch.tensor(segmentation), seg_affine=eye,
                     five=torch.ones((*shape, 5)), gmwmi=torch.ones(shape),
                     transform=eye, five_affine=eye, wm_sh=torch.ones((*shape, 45)),

@@ -10,6 +10,13 @@ import torch
 from fnit.cli import main
 
 
+@pytest.fixture(autouse=True)
+def native_runtime_for_cli_contract(monkeypatch):
+    # These tests exercise CLI routing and files, not a compiler installation.
+    monkeypatch.setattr("fnit.connectome.pipeline._native_tracking_fingerprint",
+                        lambda: {"source_commit": "contract-source", "binary_sha256": "contract-binary"})
+
+
 def _command(tmp_path):
     inputs = {}
     for name in ("dwi", "bvals", "bvecs", "t1", "t1_segmentation", "atlas_dwi", "brain_mask"):
@@ -79,14 +86,14 @@ def test_connectome_cli_writes_named_outputs(tmp_path, monkeypatch, capsys, incl
         position = argv.index("--brain-mask")
         del argv[position:position + 2]
     else:
-        argv.append("--compile-arc")
+        argv.extend(("--tracking-threads", "3"))
     main(argv)
     assert calls[1][1]["brain_mask"] == (tmp_path / "brain_mask" if include_mask else None)
     assert "seed_attempts=12 accepted_streamlines=2" in capsys.readouterr().out
     assert calls[0] == {"device": "cpu"}
     assert calls[1][1]["n_seeds"] == 12
     assert calls[1][1]["seed"] == 7
-    assert calls[1][1]["compile_arc"] is include_mask
+    assert calls[1][1]["tracking_threads"] == (3 if include_mask else 8)
     assert np.array_equal(np.loadtxt(output / "connectome_count.csv", delimiter=","),
                           [[2, 1], [1, 3]])
     for name in ("sift2_fbc", "mean_length", "mean_fa"):

@@ -43,7 +43,7 @@ from .checkpoints import (
 
 # Saved BIDS matrices must be recalculated after numerical fixes even when
 # the package version and original image paths remain unchanged.
-CONNECTOME_NUMERICAL_REVISION = "accuracy-20261003-v1"
+CONNECTOME_NUMERICAL_REVISION = "native-mrtrix-tracking-20261009-v2"
 
 SCHAEFER_TIAN_ATLASES = {
     "schaefer200+tian-s1": (200, 1),
@@ -252,7 +252,7 @@ def _core_source_fingerprint(*, registration: bool) -> dict:
     """
     package = Path(__file__).parent
     names = ("anatomy", "bet", "response", "fod", "masks", "mtnormalise",
-             "tracking", "sift2", "sift2_fixels", "sift2_mapping",
+             "tracking", "native_runtime", "sift2", "sift2_fixels", "sift2_mapping",
              "sift2_optimizer", "sift2_proc_mask", "tcksample_precise")
     paths = {name: package / (name + ".py") for name in names}
     paths.update(act_lut=package / "FreeSurfer2ACT_sgm_amyg_hipp_ids.tsv",
@@ -281,6 +281,16 @@ _CORE_ARRAYS = ("seg", "seg_affine", "five", "gmwmi", "transform", "five_affine"
                 "wm_sh", "fa", "mask", "weights", "dwi_affine")
 
 
+def _native_tracking_fingerprint() -> dict:
+    """Bind checkpoints to the verified FNIT-owned executable and source."""
+    from .native_runtime import ensure_tckgen, native_runtime_manifest
+    manifest = native_runtime_manifest(ensure_tckgen())
+    keys = ("schema_version", "source_commit", "source_archive_sha256",
+            "source_file_sha256", "configuration_isolation", "builder_sha256",
+            "binary_sha256", "binary_size", "version", "runtime_files")
+    return {name: manifest[name] for name in keys if name in manifest}
+
+
 def _pack_core(core: dict) -> tuple[dict, dict]:
     tracks = core["tracks"]
     counts = np.asarray([len(path) for path in tracks.paths], dtype=np.int64)
@@ -288,17 +298,27 @@ def _pack_core(core: dict) -> tuple[dict, dict]:
     arrays = {name: core[name] for name in _CORE_ARRAYS}
     arrays.update(track_points=StreamlinePoints(tracks.paths), track_offsets=offsets,
                   track_endpoints=tracks.endpoints, track_lengths=tracks.lengths_mm,
-                  track_mean_fa=tracks.mean_fa, track_seeds=tracks.accepted_seeds)
+                  track_mean_fa=tracks.mean_fa)
+    if tracks.accepted_seeds is not None:
+        arrays["track_seeds"] = tracks.accepted_seeds
     metadata = dict(dwi_shape=list(core["dwi_shape"]), track_count=len(tracks.paths),
-                    seeds_attempted=tracks.seeds_attempted, format_revision=1)
+                    seeds_attempted=tracks.seeds_attempted, format_revision=2,
+                    accepted_seed_coordinates=("unknown" if tracks.accepted_seeds is None else "stored"),
+                    native_provenance=tracks.native_provenance)
     return arrays, metadata
 
 
 def _restore_core(arrays: dict, metadata: dict, device: torch.device) -> dict:
     """Validate stage structure before any transfer; retain all numeric values."""
     expected = {*_CORE_ARRAYS, "track_points", "track_offsets", "track_endpoints",
-                "track_lengths", "track_mean_fa", "track_seeds"}
-    if set(arrays) != expected or metadata["format_revision"] != 1:
+                "track_lengths", "track_mean_fa"}
+    seeds_stored = metadata.get("accepted_seed_coordinates") == "stored"
+    if seeds_stored:
+        expected.add("track_seeds")
+    if (set(arrays) != expected or metadata["format_revision"] != 2
+            or metadata.get("accepted_seed_coordinates") not in ("stored", "unknown")
+            or (metadata.get("native_provenance") is not None
+                and not isinstance(metadata["native_provenance"], dict))):
         raise ValueError("incomplete shared-core checkpoint")
     shape = tuple(metadata["dwi_shape"])
     n = metadata["track_count"]
@@ -313,11 +333,13 @@ def _restore_core(arrays: dict, metadata: dict, device: torch.device) -> dict:
             or not bool(((offsets[1:] - offsets[:-1]) >= 2).all())):
         raise ValueError("invalid packed streamline offsets/points")
     for name, expected_shape in (("track_endpoints", (n, 2, 3)),
-                                 ("track_seeds", (n, 3)), ("track_lengths", (n,)),
+                                 ("track_lengths", (n,)),
                                  ("track_mean_fa", (n,)), ("weights", (n,)),
                                  ("fa", shape), ("mask", shape), ("wm_sh", (*shape, 45))):
         if tuple(arrays[name].shape) != expected_shape:
             raise ValueError(f"invalid shared-core shape: {name}")
+    if seeds_stored and arrays["track_seeds"].shape != (n, 3):
+        raise ValueError("invalid shared-core shape: track_seeds")
     seg_shape = tuple(arrays["seg"].shape)
     if (len(seg_shape) != 3 or tuple(arrays["five"].shape) != (*seg_shape, 5)
             or tuple(arrays["gmwmi"].shape) != seg_shape):
@@ -327,8 +349,9 @@ def _restore_core(arrays: dict, metadata: dict, device: torch.device) -> dict:
             raise ValueError(f"invalid shared-core affine: {name}")
     if arrays["weights"].dtype != torch.float64 or arrays["mask"].dtype != torch.bool:
         raise ValueError("invalid shared-core weight/mask dtype")
-    for name in ("seg", "five", "gmwmi", "wm_sh", "fa", "track_points",
-                 "track_endpoints", "track_lengths", "track_mean_fa", "track_seeds"):
+    float_fields = ("seg", "five", "gmwmi", "wm_sh", "fa", "track_points",
+                    "track_endpoints", "track_lengths", "track_mean_fa")
+    for name in float_fields + (("track_seeds",) if seeds_stored else ()):
         if arrays[name].dtype != torch.float32:
             raise ValueError(f"invalid shared-core field dtype: {name}")
     # No isfinite gate on FA/statistics: preserve legitimate NaN/Inf diagnostics.
@@ -339,13 +362,15 @@ def _restore_core(arrays: dict, metadata: dict, device: torch.device) -> dict:
         tuple(points[begin:end] for begin, end in zip(boundary[:-1], boundary[1:])),
         arrays["track_endpoints"].to(device), arrays["track_lengths"].to(device),
         arrays["track_mean_fa"].to(device), metadata["seeds_attempted"],
-        arrays["track_seeds"].to(device),
+        arrays["track_seeds"].to(device) if seeds_stored else None,
+        metadata.get("native_provenance"),
     )
     core["dwi_shape"] = shape
     return core
 
 
 def _shared_core_checkpoint(options: dict, *, checkpoint_dir, overwrite: bool):
+    native_fingerprint = _native_tracking_fingerprint()
     if checkpoint_dir is None:
         return _compute_shared_core(**options), {"status": "completed", "enabled": False}, None
     paths = {name: options[name] for name in (
@@ -353,7 +378,8 @@ def _shared_core_checkpoint(options: dict, *, checkpoint_dir, overwrite: bool):
         "response_mask", "fod_mask", "normalise_mask", "fa_map")}
     inputs = fingerprint_paths(paths)
     parameters = dict(n_seeds=options["n_seeds"], seed=options["seed"],
-                      compile_arc=options["compile_arc"],
+                      tracking_threads=options["tracking_threads"],
+                      native_tracking=native_fingerprint,
                       shell_bvals=tensor_fingerprint(options["shell_bvals"]),
                       dwi_to_t1_world=tensor_fingerprint(options["dwi_to_t1_world"]))
     device = options["device"]
@@ -372,13 +398,15 @@ def _shared_core_checkpoint(options: dict, *, checkpoint_dir, overwrite: bool):
         else:
             # Inputs must still match after restoration as well as before it.
             if (fingerprint_paths(paths) != inputs or _checkpoint_policy(device) != policy
-                    or _core_source_fingerprint(registration=options["dwi_to_t1_world"] is None) != source):
+                    or _core_source_fingerprint(registration=options["dwi_to_t1_world"] is None) != source
+                    or _native_tracking_fingerprint() != native_fingerprint):
                 raise RuntimeError("shared-core input/source/device policy changed during restoration")
             return core, dict(status="skipped", enabled=True, key=key), store
     core = _compute_shared_core(**options)
     def validate_publication():
         if (fingerprint_paths(paths) != inputs or _checkpoint_policy(device) != policy
-                or _core_source_fingerprint(registration=options["dwi_to_t1_world"] is None) != source):
+                or _core_source_fingerprint(registration=options["dwi_to_t1_world"] is None) != source
+                or _native_tracking_fingerprint() != native_fingerprint):
             raise RuntimeError("shared-core input/source/device policy changed during computation; not publishing")
     validate_publication()
     arrays, metadata = _pack_core(core)
@@ -390,7 +418,7 @@ def _shared_core_checkpoint(options: dict, *, checkpoint_dir, overwrite: bool):
 def _compute_shared_core(*, dwi, bvals, bvecs, t1_brain, t1_segmentation,
                          brain_mask, shell_bvals, response_mask, fod_mask,
                          normalise_mask, fa_map, dwi_to_t1_world, n_seeds,
-                         seed, compile_arc, device):
+                         seed, tracking_threads, device):
     """Run the unchanged numerical chain through precise per-track FA."""
     reference = nib.load(str(dwi))
     dwi_data, dwi_affine = _image(dwi, device)
@@ -447,12 +475,12 @@ def _compute_shared_core(*, dwi, bvals, bvecs, t1_brain, t1_segmentation,
     tracks = probabilistic_tractography(
         wm_sh, dwi_affine, five, five_affine, gmwmi,
         n_seeds=n_seeds, seed=seed,
-        compile_arc=compile_arc,
+        tracking_threads=tracking_threads,
         five_tissue_spacing_mm=nib.load(str(t1_segmentation)).header.get_zooms()[:3],
     )
     if not tracks.paths:
         raise RuntimeError("ACT tracking accepted no streamlines")
-    step_size_mm = float(torch.linalg.vector_norm(dwi_affine[:3, :3], dim=0).prod().pow(1 / 3)) / 2
+    step_size_mm = float(tracks.native_provenance["tck_header"]["step_size"])
     weights = estimate_sift2_weights(
         tracks.paths, wm_sh, dwi_affine, five, five_affine,
         step_size_mm=step_size_mm,
@@ -469,9 +497,12 @@ class UKBConnectome_pipeline:
 
     The paired T1 segmentation uses completed FreeSurfer-format ``recon-all``
     aparc+aseg. ``run_bids`` selects or reuses its reconstruction backend. PyTorch
-    computes response, FOD, mtnormalise, 5TT/GMWMI, ACT tracking, SIFT2,
-    precise per-track FA and the four matrices. A completed FreeSurfer subject
-    directory supplies T1 and one or more atlas choices; explicit T1/atlas inputs
+    computes response, FOD, mtnormalise, 5TT/GMWMI, SIFT2,
+    precise per-track FA and the four matrices.
+    FNIT's pinned, independently built MRtrix tckgen performs iFOD2/ACT tracking
+    with CPU threads; it does not require an installed MRtrix distribution.
+    A completed FreeSurfer subject directory supplies T1 and one or more atlas
+    choices; explicit T1/atlas inputs
     remain available for fixed-input comparisons. The caller may provide a
     fixed BET brain mask; otherwise the LAS DWI
     mean b0 is skull stripped with native PyTorch BET. CUDA uses TF32
@@ -583,6 +614,7 @@ class UKBConnectome_pipeline:
         fa_map: str | Path | None = None,
         dwi_to_t1_world: np.ndarray | torch.Tensor | None = None,
         seed: int = 0,
+        tracking_threads: int = 8,
         compile_arc: bool = False,
         template_pairs: Sequence | None = None,
         assignment_radius: float = 4.0,
@@ -625,9 +657,9 @@ class UKBConnectome_pipeline:
         without it, MRtrix-style DWI tensor fitting produces FA. Optional
         DWI→T1 RAS-mm transform freezes registration; otherwise TorchFLIRT
         runs 6-DOF/normmi. ``n_seeds`` counts tracking attempts and ``seed``
-        seeds the PyTorch generator, whose sequence differs from MRtrix.
-        ``compile_arc`` compiles the CUDA iFOD2 probability kernel on first
-        use, with startup cost but lower steady propagation time.
+        sets the pinned tckgen's ``MRTRIX_RNG_SEED``. ``tracking_threads``
+        sets its CPU worker count (8 by default, 1 for deterministic tracking
+        order). ``compile_arc=True`` is a retired option and raises an error.
         ``checkpoint_dir=None`` disables core checkpoints for this direct call;
         a directory enables SHA-verified, atomic stage reuse. ``overwrite=True``
         bypasses valid checkpoints while preserving their old generations.
@@ -654,6 +686,10 @@ class UKBConnectome_pipeline:
             raise ValueError("atlas must contain one or more distinct names")
         if n_seeds < 1:
             raise ValueError("n_seeds must be positive")
+        if compile_arc:
+            raise ValueError("compile_arc is retired; tracking uses FNIT's pinned native tckgen")
+        if type(tracking_threads) is not int or tracking_threads < 1:
+            raise ValueError("tracking_threads must be a positive integer")
         if not math.isfinite(assignment_radius) or assignment_radius <= 0:
             raise ValueError("assignment_radius must be finite and positive")
         if freesurfer_subject_dir is not None:
@@ -690,7 +726,7 @@ class UKBConnectome_pipeline:
             shell_bvals=shell_bvals, response_mask=response_mask,
             fod_mask=fod_mask, normalise_mask=normalise_mask, fa_map=fa_map,
             dwi_to_t1_world=dwi_to_t1_world, n_seeds=n_seeds,
-            seed=seed, compile_arc=compile_arc, device=self.device,
+            seed=seed, tracking_threads=tracking_threads, device=self.device,
         )
         core, core_status, store = _shared_core_checkpoint(
             core_options, checkpoint_dir=checkpoint_dir, overwrite=overwrite,

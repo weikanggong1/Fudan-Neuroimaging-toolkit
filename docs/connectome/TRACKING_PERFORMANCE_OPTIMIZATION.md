@@ -1,212 +1,161 @@
-# Connectome 追踪：无损优化与同机实测
+# Connectome 追踪性能：原生后端与历史结果
 
-[完整 pipeline](README.md) · [追踪输入、全部参数和输出](TRACKING_OPERATORS.md) · [最新 A100 结果](../../validation/connectome/tracking_cfff_20261009/README.md) · [前次 H100 结果](../../validation/connectome/tracking_exact_20261009/README.md)
+[完整 pipeline](README.md) · [追踪组件、全部参数与安装](TRACKING_OPERATORS.md) · [最新版端到端实测](../../validation/connectome/native_tracking_20261009/README.md)
 
 ## 1. 功能与策略
 
-本轮优化从真实、已经归一化的 WM FOD 和 5TT/GMWMI 开始，到完整流线输出结束。保持原 iFOD2/ACT、随机数顺序、浮点精度、截断规则和输出结构。SIFT2、FA 采样及矩阵构造继续使用既有实现。
+本版将 PyTorch iFOD2/ACT 替换为 FNIT 从固定 MRtrix 源码独立构建的 `tckgen`。追踪在 CPU 上运行，其余响应、FOD、解剖、SIFT2、精准 FA 和连接矩阵阶段沿用 FNIT 实现。程序来自已核验的 FNIT 外置缓存，不依赖系统 MRtrix 安装，不通过 `PATH` 查找 MRtrix。
 
-正式实现保留前次 5TT 八角点 gather、权重计算及八次有序累加。本次将 SH 的正/负阶离散列操作合并：保持 512 层查表、全部 45 个系数、原 cos/sin 递推和乘法分组，减少重复索引及写回。请求梯度或进入 `torch.compile` 时执行原 SH 运算；仅 eager inference 使用合并路径。ACT、RNG、播种数、proposal 和输出结构保持原规则。
+过去的 GPU 实现花费大量时间调度逐步采样、拒绝循环和 ACT 状态检查。本版直接执行固定官方 iFOD2/ACT 算法，避免继续用 PyTorch 逐步重实现这部分。完整性能需要计算影像暂存、CPU 追踪、TCK 读取与流线传回 GPU 的共同耗时，不能只计原生程序内部推进。
 
-~~~mermaid
+```mermaid
 flowchart LR
-    INPUT[固定真实 FOD / 5TT / GMWMI] --> SEED[原播种与随机数序列]
-    SEED --> ARC[原 iFOD2 圆弧与拒绝采样]
-    ARC --> SH[512 层 SH 查表<br/>eager 合并列操作<br/>编译/梯度保留原运算]
-    SH --> SAMPLE[合并八角点取值<br/>原权重与有序累加]
-    SAMPLE --> ACT[原 ACT 状态判断]
-    ACT --> GROW[前向与反向推进<br/>原截断与降采样]
-    GROW --> OUT[完整路径、端点、长度与接受种子]
-    OUT --> CHECK[新旧版逐字节核对<br/>交错重复计时]
-~~~
+    INPUT[归一化 FOD / 5TT / GMWMI] --> IO[保留数值与几何的 NIfTI-2 暂存]
+    IO --> NATIVE[FNIT 固定 tckgen<br/>CPU iFOD2＋ACT]
+    NATIVE --> TCK[TCK 读取与连续流线缓冲]
+    TCK --> GPU[一次点缓冲 H2D<br/>FNIT SIFT2＋精准 FA＋矩阵]
+    GPU --> CACHE[共享核心 checkpoint]
+    NEW[更换 atlas / 模板对] --> MATRIX[复用核心，仅更新模板与矩阵]
+    CACHE --> MATRIX
+```
 
-CPU/CUDA 的 ACT 均保留原表达式。compile_arc 仍只控制原有圆弧编译，默认 False；本轮比较分别在相同模式内进行。原有两种模式的输出本来就可能不同，本轮没有更改这个选项或把两种模式视为逐位等价。
+科学参数保持 `-algorithm iFOD2 -seed_gmwmi -act -seeds N -select 0 -maxlength 250 -angle 45 -cutoff 0.1 -samples 3 -power 0.5`。省略步长和最短长度时，固定官方实现按 FOD header 间距计算默认值；SIFT2 使用实际 TCK header 的步长。没有降低影像精度、减少体素或减少播种预算。
 
-## 2. Python 输入与输出
+原生 TCK 不保存播种坐标，因此 `accepted_seeds=None`；请求预算、生成候选数和接受数分别记录。FA 一直通过成熟精准体素穿越函数计算。存储点连续打包后只进行一次 GPU 传输，各条路径引用对应区间，不保留旧追踪的整批 padded propagation 缓冲。
 
-完整调用及每个参数见 [追踪算子页第 2 节](TRACKING_OPERATORS.md#2-python-调用输入与输出)。从已经保存的真实调用检查点重放：
+## 2. Python 输入、输出与参数
 
-~~~python
-import torch
+```python
 from fnit.connectome.tracking import probabilistic_tractography
 
-tracking_device = torch.device("cuda:0")
-tracking_inputs = torch.load(
-    "tracking_inputs.pt", map_location="cpu", weights_only=True
+tracking_result = probabilistic_tractography(
+    wm_sh="wm_fod_normalized.nii.gz",       # float32 [Xf,Yf,Zf,45]
+    five_tissue="five_tissue_dwi_world.nii.gz",  # float32 [Xa,Ya,Za,5]
+    gmwmi="gmwmi_dwi_world.nii.gz",         # 同一解剖网格 [Xa,Ya,Za]
+    n_seeds=100000,                        # 播种预算；不是目标接受数
+    seed=0,                               # 官方 MRTRIX_RNG_SEED
+    tracking_threads=8,                    # CPU 追踪线程数
+    device="cuda:0",                       # 返回张量供后续 GPU 计算
+    output_tck="tracks_native.tck",        # 保留原生结果，新文件路径
 )
-tracking_options = dict(tracking_inputs["tracking_kwargs"])  # 包括原 five_tissue_spacing_mm
-tractogram = probabilistic_tractography(
-    wm_sh=tracking_inputs["wm_sh"].to(tracking_device),
-    fod_affine=tracking_inputs["fod_affine"].to(tracking_device),
-    five_tissue=tracking_inputs["five_tissue"].to(tracking_device),
-    five_tissue_affine=tracking_inputs["five_tissue_affine"].to(tracking_device),
-    gmwmi=tracking_inputs["gmwmi"].to(tracking_device),
-    fa=None if tracking_inputs["fa"] is None else tracking_inputs["fa"].to(tracking_device),
-    **tracking_options,
-)
-~~~
+```
 
-检查点保留原调用的张量、affine、header 间距和参数；不要通过 NIfTI 重写改变几何。也可以按算子页直接传入张量。
-
-| 输入 | 格式与含义 |
+| 输入/输出 | 格式与含义 |
 | --- | --- |
-| wm_sh | float32 [XF,YF,ZF,CSH]，归一化白质球谐 FOD；本例 lmax=8，CSH=45。 |
-| fod_affine | float64 [4,4]，FOD 体素中心到 RAS 毫米坐标。 |
-| five_tissue | float32 [XA,YA,ZA,5]；皮层灰质、皮层下灰质、白质、CSF、病理组织。 |
-| five_tissue_affine | float64 [4,4]，5TT 到同一世界坐标。 |
-| gmwmi | float32 [XA,YA,ZA]，与 5TT 网格一致的界面播种权重。 |
-| five_tissue_spacing_mm | 5TT 原 header 三轴毫米间距。 |
-| fa | 可选 float32 FOD 网格 FA；None 不计算接口的逐路径点采样均值。 |
-| tracking_kwargs | 原种子数、seed、batch_size、arc_proposals、长度、步长、角度、cutoff、power、compile_arc 等参数。 |
+| `wm_sh` | 归一化 WM 实球谐系数 `[Xf,Yf,Zf,C]`；默认 `lmax=8`、45 列。 |
+| `five_tissue` / `gmwmi` | 五组织概率和播种权重，保留解剖网格；两张影像须共享体素中心。 |
+| 两份 affine | Tensor/数组输入时提供 `[4,4]` 体素到 DWI RAS-mm 变换；文件输入读取自己的 header。 |
+| `paths` / `endpoints` | float32 RAS-mm，逐条 `[Pi,3]` 与 `[T,2,3]`，保持 TCK 记录顺序。 |
+| `lengths_mm` / `mean_fa` | float32 `[T]`，保存折线长度与可选精准长度加权 FA。 |
+| `accepted_seeds` | `None`，没有从路径推造种子坐标。 |
+| `native_provenance` | 输入/源程序/部署补丁 SHA、实际参数、header、原生命令与适配器计时。 |
 
-输出 Tractogram 保留原结构：paths 为 N 条 [Pi,3] RAS 毫米路径的 tuple；endpoints 为 [N,2,3]；lengths_mm 为 [N]；accepted_seeds 为 [N,3]；mean_fa 为 [N] 或 None；seeds_attempted 为尝试数。后续算法无需改变。
+Tensor/nibabel image/文件三种输入、全部 22 个追踪参数、NIfTI-2 几何规则及错误行为见[组件手册第 2 节](TRACKING_OPERATORS.md#2-python-调用输入与输出)。
 
-## 3. 命令行与计时
+执行配置由 `tracking_threads` 和输出/设备选项控制：`tracking_threads` 默认 8，需要确定性逐轨迹对照时用 1。科学参数单独保持固定后比较速度。原 PyTorch `batch_size`、`arc_proposals` 显式传入报错，`compile_arc=True` 同样报错；`compile_arc=False` 只兼容旧 Python 默认调用。没有 CUDA 追踪编译分支。
 
-pipeline 的标准 BIDS 命令见 [完整入口](README.md#3-命令行调用)。下列工具独立比较两份冻结 tracking 源码，使用 nibabel 读真实影像：
+## 3. 安装、CLI 与计时范围
 
-~~~bash
-BASELINE_TRACKING=/data/frozen/tracking.py         # 已核对的旧版源码
-CANDIDATE_TRACKING=/data/candidate/tracking.py     # 待验证源码
-BASELINE_FOD_MODULE=/data/frozen/fod.py           # 旧版 FOD / SH 源码
-CANDIDATE_FOD_MODULE=/data/candidate/fod.py       # 新版 FOD / SH 源码
-REAL_FOD=/data/inputs/fod_reference.nii.gz        # [X,Y,Z,45]
-REAL_FIVE_TISSUE=/data/inputs/five_reference.nii.gz # [A,B,C,5]
-REAL_GMWMI=/data/inputs/gmwmi_reference.nii.gz     # [A,B,C]
-BENCHMARK_JSON=/data/results/tracking_exact.json
-TRACK_OUTPUT_DIR=/data/results/tracks
+先在项目 Conda 环境中独立构建。构建 `jobs` 与追踪线程数分开：
 
-python tools/benchmark_connectome_tracking_exact.py \
-  --baseline-tracking "$BASELINE_TRACKING" \
-  --candidate-tracking "$CANDIDATE_TRACKING" \
-  --baseline-fod-module "$BASELINE_FOD_MODULE" \
-  --candidate-fod-module "$CANDIDATE_FOD_MODULE" \
-  --fod "$REAL_FOD" --five-tissue "$REAL_FIVE_TISSUE" --gmwmi "$REAL_GMWMI" \
-  --n-seeds 100000 --batch-size 8192 --seed 0 --device cuda:0 \
-  --warmup 1 --warmup-seeds 100000 --repeats 2 --memory-budget-gb 20 \
-  --save-tck "$TRACK_OUTPUT_DIR" --output "$BENCHMARK_JSON"
-~~~
+```bash
+export FNIT_NATIVE_CACHE=/data/cache/fnit-env-01/connectome-native
+python -m fnit.connectome.native_runtime --jobs 8
 
-| 参数 | 意义 |
+fnit UKBConnectome_pipeline \
+  --dwi /data/subject/corrected_dwi.nii.gz \
+  --bvals /data/subject/dwi.bval \
+  --bvecs /data/subject/eddy_rotated.bvec \
+  --freesurfer-subject-dir /data/subjects/sub-01 \
+  --atlas fs-aparc fs-aparc-a2009s \
+  --n-seeds 100000 --seed 0 --tracking-threads 8 \
+  --device cuda:0 \
+  --checkpoint-dir /data/results/sub-01/checkpoints \
+  --output-dir /data/results/sub-01
+```
+
+每个 Conda 环境设置独立缓存，不跨 prefix 移动或共享旧程序。已构建的缓存可离线校验使用；源码、构建器、程序/库和配置隔离补丁均绑定 SHA。自动配置读取由 FNIT 部署补丁隔离，官方算法默认值及显式 `-config` 保持。
+
+| 时间/资源 | 统计范围 |
 | --- | --- |
-| baseline-tracking / candidate-tracking | 冻结的追踪源码；SHA-256 实际绑定版本。 |
-| baseline-fod-module / candidate-fod-module | 成对提供两版 FOD/SH 源码；各 tracking 绑定自己的 FOD 函数。 |
-| fod-module | 旧共享 FOD 模式仍可使用；与上面的成对参数互斥。不用于验证 FOD 自身的改动。 |
-| fod / five-tissue / gmwmi | 上表真实 NIfTI；GMWMI 与 5TT 必须同 shape、同 affine。 |
-| n-seeds / seed / batch-size | 尝试数、两版固定 RNG seed 和相同批量；本例 100000 / 0 / 8192。 |
-| device | 单个 CPU/CUDA 设备；两版在同一张 GPU 交错运行。 |
-| warmup / warmup-seeds | 每版预热次数及规模；本例完整 100k 预热。 |
-| repeats | 配对轮数；2 为 AB、BA，完整预热后每版两个热样本。默认 3 为 AB、BA、AB。 |
-| memory-budget-gb | 十进制 GB；Torch allocator 限为预算的 90%，本例 18 GB。 |
-| save-tck / output | 可选逐次实际 TCK 输出目录及必需 JSON 报告。 |
-| compile-arc | 同时启用两版原有圆弧编译；未给出时两版均关闭。 |
-| cold | 额外单列首次完整调用；同进程共享 CUDA/FOD/编译缓存，不代表隔离的冷启动比较。 |
-| profile / profile-seeds / profile-dir | 正式计时后单独采集候选 profiler、其播种数及 trace 目录；默认 128 seeds。 |
-| baseline-commit / candidate-commit | 调用者已核对的版本标签；不替代源码 SHA 校验。 |
+| 首次源码构建 | 下载、校验、编译和程序安装；独立记录，不当作一次常规追踪时间。 |
+| 原生命令 `command_seconds` | 已暂存影像后的子进程执行，包含原生加载影像、追踪与写 TCK。 |
+| 内部适配器 `native_provenance.adapter_seconds` | 影像暂存、原生命令、TCK 读取、路径打包/传输、输入与输出 SHA；开始点在运行时校验之后，不含可选 FA 后采样。端到端公开报告对应 `native_adapter_seconds`。 |
+| 追踪组件完整调用 | 整链报告中 `probabilistic_tractography` 的阶段秒数、100k 组件报告中 `rows[*].adapter_seconds`；包含该调用自身的运行时校验，CUDA 计时按目标设备同步。100k 文件输入模式保留原文件，不写暂存影像。 |
+| 连续链总墙钟 | 已校正 DWI/解剖读取至模型、追踪、SIFT2、FA、atlas 与矩阵；嵌套阶段不重复相加。 |
+| raw BIDS 总墙钟 | 只有实际重新运行 TOPUP、EDDY 和 recon-all 时才计入这些阶段；已有校正 DWI/subject 的测试不能称为新原始输入整链。 |
+| 显存 | 原生追踪不申请 CUDA；完整 pipeline 监测父进程 GPU 峰值和覆盖情况，不能以 native 的零 CUDA 申请代替整个 pipeline 的显存验收。 |
 
-每次从同一 seed 重新执行完整追踪。tracking 时间包含函数内的路径整理与 metadata 同步；外部读盘、H2D、路径打包、最终 D2H、严格比较和 TCK 写盘分别计时。首次完整执行单列；小规模预热不能证明完整编译已结束。
+## 4. 官方对照
 
-工具检查 dtype、shape、torch.equal 与原始字节，包括所有路径、接受种子、端点、长度及提供时的 mean_fa；SHA 仅作为额外可追溯记录。allocated/reserved 是 Torch 峰值，不含 CUDA 上下文；报告另记录实际 GPU 状态，缺失监测保留缺失值。冻结工具的 GPU 快照列名 total_memory_mib 实际来自 memory.used 查询；本次公开汇总及现工具已纠正为 memory_used_mib。这只是记录字段错误，未影响追踪或 Torch 峰值；冻结 v5 SHA 对应 a1f41246 提交。
+官方参考使用独立固定版本程序，读取与本版实际相同的序列化影像：
 
-## 4. 对应官方命令
+```bash
+REFERENCE_TCKGEN=/data/reference/bin/tckgen
+MRTRIX_RNG_SEED=0 MRTRIX_CONFIGFILE=/dev/null \
+  "$REFERENCE_TCKGEN" wm_fod.nii reference_tracks.tck \
+  -algorithm iFOD2 -seed_gmwmi gmwmi.nii -act five_tissue.nii \
+  -seeds 100000 -select 0 -maxlength 250 -angle 45 \
+  -cutoff 0.1 -samples 3 -power 0.5 -nthreads 8 \
+  -config RealignTransform false -config NIfTIUseSform true \
+  -config NIfTIAutoLoadJSON false -config TckgenEarlyExit false
+```
 
-官方软件仅用于独立 benchmark；FNIT 计算路径不调用它。
+逐轨迹核对使用同输入、同种子、单线程；常规多线程跟踪按官方随机重复范围评价。固定同一 TCK 后，再用独立 `tcksift2`、`tcksample -precise -stat_tck mean`、`tck2connectome` 核对 FNIT 下游。原生算法相同不自动证明响应、FOD、配准和最终 SC 完全等价。
 
-~~~bash
-MRTRIX_RNG_SEED=0 tckgen "$REAL_FOD" reference_seed0.tck \
-  -algorithm iFOD2 -seed_gmwmi "$REAL_GMWMI" -act "$REAL_FIVE_TISSUE" \
-  -seeds 100000 -select 0 -maxlength 250 -cutoff 0.1 \
-  -samples 3 -power 0.5 -nthreads 8
-~~~
+未打 FNIT 配置隔离补丁的官方参考仍会读取用户 `.mrtrix.conf`；参考环境应控制并记录该文件，详见[官方配置与序列化规则](TRACKING_OPERATORS.md#4-原软件等价调用)。
 
-[MRtrix tckgen 3.0.3 文档](https://mrtrix.readthedocs.io/en/3.0.3/reference/commands/tckgen.html)定义这些参数。select=0 按尝试数结束；不能把 100k seeds 解释成 100k 保留流线。
+## 5. 最新真实 benchmark 与脑图
 
-## 5. 最新 A100 真实输入结果与脑图
+本版已校正 DWI＋已有 recon-all→两个 atlas 的连续链、固定输入追踪、同 TCK 下游与缓存核验由同一[原生追踪评测报告](../../validation/connectome/native_tracking_20261009/README.md)汇总。该页保存完整耗时、源与输入 SHA、官方参数、矩阵误差、执行范围和未完成项目；这里摘录关键结果。
 
-固定 OpenNeuro ds004666 的同三份真实输入；许可、尺寸与 SHA 见[本轮验证页](../../validation/connectome/tracking_cfff_20261009/README.md)。FOD 为 [104,104,72,45]，5TT/GMWMI 为 [256,256,256]。共享节点为 Xeon Platinum 8369B、A100-SXM4-80GB；每个 FNIT 进程只用一张卡和 8 个 CPU 线程，Python 3.11.17、Torch 2.5.1+cu118，FP32/TF32。
+关键计时来自公开 ds004666 真实输入，单张 A100、CPU 8 线程：
 
-基线为 `4f56cc9d`，最终候选 FOD 源码 SHA 前缀为 `76a6b293`，tracking 源码未改。两版使用独立 FOD 模块并检查实际函数绑定；不是让旧版共用新版 SH。每版先完整预热，再以 AB、BA 交替运行，每版两个热样本。
+| 范围 | FNIT / s | 独立官方 / s |
+|---|---:|---:|
+| 固定文件输入 100k seeds，8 线程，三次中位数 | 14.35 组件完整调用；13.24 原生命令 | 13.60 原生命令 |
+| 本次整链的 10k seeds 追踪 | 5.32 组件完整调用；5.10 内部适配器；1.62 原生命令 | 1.67–1.68 原生命令 |
+| corrected DWI＋已有 recon-all → 两 atlas SC | 274.17 | 本轮未重跑官方整链 |
+| 复用共享核心 | 3.05 | — |
 
-| 同模式对照 | 基线两个热样本 / s | 最终源码两个热样本 / s | 中位数：基线 → 最终 / s |
-| --- | --- | --- | --- |
-| 10k 默认模式 | 24.837 / 25.578 | 22.367 / 21.904 | 25.207 → 22.136 |
-| 100k 默认模式 | 319.212 / 280.044 | 198.814 / 157.553 | 299.628 → 178.184 |
-| 100k 原有编译模式 | 118.314 / 106.868 | 122.995 / 102.842 | 112.591 → 112.919 |
+单线程 10k 的 3173 条轨迹、134261 个点和 offsets 逐字节一致；同 TCK 的两 atlas count 逐值一致。SIFT2 加权 FBC relative L1 为 0.2178%/0.2494%，保留真实数值差异。100k 文件输入与整链内张量序列化的输入准备不同，计时边界不能混合计算速度倍数。
 
-10k 两对均较快，中位数耗时减少 12.19%。100k 默认组观测下降 40.53%，但期间其他作业开始使用多张 GPU，基线与候选样本波动较大，不能把这个值当成稳定加速倍率。编译模式无明确收益；本次保留原编译 SH 图。全部样本及共享 GPU 数值快照保留在 JSON，未剔除慢样本。
+本次 allocated/reserved 峰值 7.69/8.77 GB；完整进程 GPU 占用未可靠测得，不能据此宣布严格小于 20 GB。完整分步骤数值、重复样本和图像以原报告为准。
 
-100k 默认首次完整调用为 179.789 / 256.694 秒，编译为 132.906 / 142.158 秒；它们属于完整预热，包含当时初始化/编译和负载，不是隔离冷启动比较。两模式分别在自己的同一张卡内对照，不能将不同卡或历史 H100 时间相除。
+![最新版真实原生 FNIT 与独立官方流线投影](../../validation/connectome/native_tracking_20261009/native_tracking_qc.png)
 
-两组各六次完整调用的输出与 TCK SHA 相同，四次可评估比较均通过 shape、dtype、值和原始字节核对。默认保留 27506 条，编译保留 27745 条；这两种原有模式互相没有逐位等价承诺。FA=None，本轮从 FOD 到完整流线结束；原始 BIDS 到 SC 的结论继续见[端到端精度页](ACCURACY_OPTIMIZATION_20261003.md)。
+历史 GPU SH 优化的图与时间在第 6 节保留版本标签，不作为本版速度或精度结果。
 
-最终源码 119 项聚焦 GPU 回归通过；CPU 为 86 passed、33 CUDA skipped。CUDA SH 控制覆盖原 140 组/35868 个方向、10 个规模/布局控制及 8 个梯度控制，输入与 RNG 均不变。独立 128 seeds profiler 的实际 CUDA kernel 数为 394737 → 350321，减少 11.25%；两次均保留 38 条流线。profiler 墙钟受插桩及共享负载影响，不作为正常吞吐；计数仅累计实际 kernel，不重复累计 inclusive operator 时间。
+## 6. 最近版本与历史记录
 
-Torch allocated/reserved 最大约 1.05/1.21 GB，allocator 上限仍为 18 GB。另一次完整编译 100k 显存审计的输出摘要与本卡基线相同，Torch 峰值 1.050/1.206 GB；但当前容器的可见 PID 与驱动 PID 不一致，进程 NVML 采样缺失，完整进程 <20 GB gate **未通过**。不把整卡总显存或缺失值当成本进程峰值。[实际审计报告](../../validation/connectome/tracking_cfff_20261009/memory_audit_100k.public.json)
-
-### 同机官方参考
-
-同三份输入、同 100k 播种预算和 8 CPU 线程，官方 `tckgen` seed 0/1/2 墙钟为 16.319 / 14.193 / 13.888 秒，保留 27615 / 27627 / 27690 条流线。计时包含输入和 TCK 写盘；FNIT 表中 tracking 时间排除这些外部 I/O。官方源码固定为 `026e850d171ec2a12f09865d31b8332d23d7ecf6`，独立归档构建报告版本为 3.0.3；没有伪造 git describe 后缀。[官方完整记录](../../validation/connectome/tracking_cfff_20261009/mrtrix_100k.public.json)
-
-当前 FNIT 编译追踪约 113 秒，官方完整命令中位数约 14.19 秒，追踪仍有明显差距。新旧 FNIT 逐字节一致证明这次优化未改变既有输出；不同 RNG 的 MRtrix 比较继续采用重复分布，不能由一次流线计数或脑图推断 SC 已完全匹配。
-
-### 最新输出示例
-
-![真实 A100 100k 追踪与同机官方参考](../../validation/connectome/tracking_cfff_20261009/real100k_qc.png)
-
-图为最终源码默认模式和本机 MRtrix seed 0 的实际 TCK，各独立抽样最多 2000 条。保存折线平均长度为 39.379 / 40.058 mm，中位数为 24.437 / 25.375 mm，长度 KS 距离 0.011389。5TT 只在离线显示时重采样；这里的长度是保存点之间的距离之和，不是内部圆弧积分长度。[统计及绘图复现](../../validation/connectome/tracking_cfff_20261009/README.md#5-脑图复现)
-
-## 6. 前次 H100 5TT 优化记录
-
-固定 OpenNeuro ds004666 输入，FOD [104,104,72,45]、5TT/GMWMI [256,256,256]。三份输入 SHA 见本轮 JSON；数据源的 [dataset description](https://raw.githubusercontent.com/OpenNeuroDatasets/ds004666/master/dataset_description.json)声明 CC0。参考为 MRtrix3 3.0.3-103-g026e850d、Xeon Gold 6430、8 线程；每个 FNIT 测试进程使用同机单张 H100、8 个 CPU 线程及 FP32/TF32。
-
-MRtrix RNG seed 0/1/2 的完整 tckgen 墙钟为 16.188 / 16.032 / 16.286 秒，包含输入与 TCK 输出 I/O；分别保留 27685 / 27673 / 27693 条流线。统计从成功输出的 TCK 读取。[官方完整汇总](../../validation/connectome/tracking_exact_20261009/mrtrix_same_host.public.json)
-
-完整 100k 预热后，每种模式在同一张 GPU 按 AB、BA 顺序测量；A 为 `9c118b7`，B 为本轮正式实现 `d4327049`。
-
-| 100k seeds 模式 | 旧版两个热样本 / s | 新版两个热样本 / s | 热中位数：旧 → 新 / s | 观测耗时减少 |
-| --- | --- | --- | --- | --- |
-| 默认 `compile_arc=False` | 222.929 / 254.371 | 178.422 / 176.643 | 238.650 → 177.532 | 25.61% |
-| 原有 `compile_arc=True` | 125.195 / 107.494 | 108.288 / 106.400 | 116.345 → 107.344 | 7.74% |
-
-默认模式第一次完整调用为 223.474 → 207.125 秒；编译模式为 151.125 → 175.853 秒。它们单列为完整预热，包含当时的初始化/编译成本，同进程共享缓存，不作为隔离冷启动比较。默认组与编译组用了不同的单张 H100，只在各组内部比较。
-
-两组各六次完整调用的输出 SHA 与 TCK SHA 均一致；四次可评估比较全部通过 dtype、shape、数值和原始字节检查。默认组保留 27411 条流线，编译组为 27537 条；两种模式之间没有逐位一致的承诺。FA 输入为 None，本轮未重新验证 FA 采样或 SC 矩阵。
-
-默认组 Torch allocated/reserved 最大为 1.048/1.202 GB，编译组为 1.076/1.216 GB；这些数值不含 CUDA 上下文。GPU 回归 74 项全通过，CPU 回归 41 项通过、33 项因无 CUDA 跳过。全部样本、源码 SHA、输入 SHA、内存口径和未采用实验见[验证页](../../validation/connectome/tracking_exact_20261009/README.md)。
-
-另一次完整默认模式 100k 显存审计包含初始化、H2D、完整追踪和 snapshot D2H：本进程采样峰值 3.127 GB，Torch allocated/reserved 1.048/1.227 GB，关键阶段采样无缺失/错误、最大间隔 0.503 秒，输出 SHA 相同。达到声明的采样 <20 GB gate，不证明采样间隔内的连续上界；该调用不加入速度表。[审计与复现](../../validation/connectome/tracking_exact_20261009/MEMORY_REPRODUCE.md)
-
-共享节点上默认基线前后增加约 14%，编译基线下降约 14%；每版只有两个热样本，因此以上是本轮观测，不能承诺稳定的加速倍率。同机 MRtrix 完整命令约 16.17 秒，FNIT 已有编译模式追踪约 107.34 秒，仍有明显差距；两者 I/O 计时边界不同。本轮没有把历史 782–807 秒与当前值相除作为优化倍率，也没有更新原始 DWI 全流程精度结论。
-
-### 瓶颈诊断
-
-未采用的活动行校准候选在 128 个真实 GMWMI seed 上的独立 profiler 记录 440926 个实际 CUDA kernel，去重 kernel 时间合计 0.9047 秒，含 profiler 开销的完整追踪墙钟为 8.4598 秒。大量逐元素判断、索引、采样及主机调度仍是优化方向。未累计 CPU operator 的 inclusive device time，也未把注释 span 计作 kernel；这个诊断不能外推正常 100k 吞吐。[诊断记录](../../validation/connectome/tracking_exact_20261009/profile_eager_128.public.json)
-
-### 输出示例
-
-![真实 100k 流线正交投影](../../validation/connectome/tracking_exact_20261009/real100k_qc.png)
-
-图取实际 FNIT 9c 编译基线与 MRtrix seed 0 TCK，各确定性抽样最多 2000 条。本轮新实现的编译组 TCK 与图中 FNIT 输入 SHA 相同，因此可复用该图，仍保留原生产者标签。5TT 重采样只用于离线显示。保存折线平均长度为 38.967 / 40.248 mm，中位数为 23.915 / 25.363 mm，KS 距离 0.019626；长度采用保存点间的距离之和，与内部积分长度分开。图、统计及[绘图复现](../../validation/connectome/tracking_exact_20261009/QC_REPRODUCE.md)不证明端点、SC 矩阵或原始 DWI 全流程已匹配。
-
-## 7. 更新与未采用实验
-
-| 版本 / 日期 | 记录 |
+| 版本 | 范围与证据 |
 | --- | --- |
-| SH 源码 76a6b293 / 2026-10-09 | eager 合并 SH 列操作；编译/梯度保留原运算。A100 两模式 100k 全部字节/TCK 一致、119 GPU 回归；最终 10k 中位数 25.207→22.136 秒。 |
-| d4327049 / 2026-10-09 | 合并 5TT 角点取值与权重；两种模式分别完成 100k 严格比较；74 项 GPU 回归通过。真实同机 MRtrix 三 seed、全量计时和 profiler 见本轮验证页。 |
-| 9c118b7 | 拒绝采样保留有序 pending 索引；原随机数和 proposal 顺序不变。旧合成检查只作为回归。 |
-| 2026-10-03 | SGM 退出截断按内部点弦方向评价 FOD；完整原始数据结果见[精度记录](ACCURACY_OPTIMIZATION_20261003.md)。 |
-| 2026-10-02 | SH、采样布局和原 5TT 轴索引复用，见[前轮记录](TRACKING_OPERATORS.md#6-最近更新与-benchmark-记录)。 |
+| 原生后端 / 2026-10-09 | 固定官方源码独立构建、配置隔离、CPU iFOD2/ACT、连续点缓冲、实际 TCK header 与 runtime checkpoint 身份。[最新版报告](../../validation/connectome/native_tracking_20261009/README.md)。 |
+| 历史 [`6ae32945`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/commit/6ae3294513be8cd9d9df8b92846f3235913c1955) | 旧 PyTorch SH eager 数据流优化，两种旧模式分别验证 byte exact。[原 A100 完整报告](../../validation/connectome/tracking_cfff_20261009/README.md)。 |
+| 历史 `d4327049` | 旧 PyTorch 5TT 有序八角点取值与权重合并。[原 H100 完整报告](../../validation/connectome/tracking_exact_20261009/README.md)。 |
+| 历史精度轮 / 2026-10-03 | SGM 退出截断、旧十例 raw→SC 判断。[原精度记录](ACCURACY_OPTIMIZATION_20261003.md)。 |
 
-本次初始方向索引候选无收益，追踪成功行索引收益不明确；压缩 lookup 列未显示相对普通合并路径的额外收益，均未采用。未保护编译路径的 SH 候选虽在 eager 一致，但编译 100k 接受数 27745→27750、原始字节不一致，已拒绝并改为保留原编译图。[完整未采用记录](../../validation/connectome/tracking_cfff_20261009/README.md#3-候选取舍)
+### 6ae32945 的 A100 历史计时
 
-前次只校准活动行在真实 100k 热调用中 113.556 → 116.156 秒，虽输出一致但没有收益，未采用。只合并八角点 gather、仍逐角计算权重的候选，也没有稳定整体收益。共享 GPU 时段的慢样本和首次 CUDA 分配失败保留在实验记录，不从统计中删除。扩大 proposal 块、跳过反向传播或改变精度会改变输出，本轮没有采用。
+下表仅重述当时实际热样本中位数；旧 GPU tracking 排除外部影像加载和最终 TCK 写盘，不能与新适配器时间直接相除。
 
-依赖沿用主页 Conda 环境的 PyTorch、Triton、编译器、nibabel 和 NumPy；离线脑图使用既有 Matplotlib，未新增计算依赖。
+| 旧 PyTorch 同模式对照 | 旧基线 → 6ae / s | 原始数据 |
+| --- | --- | --- |
+| 10k eager | 25.207 → 22.136 | [原 JSON](../../validation/connectome/tracking_cfff_20261009/sh_preserved_10k.public.json) |
+| 100k eager | 299.628 → 178.184，共享负载波动明显 | [原 JSON](../../validation/connectome/tracking_cfff_20261009/sh_preserved_default_100k.public.json) |
+| 100k compiled | 112.591 → 112.919，无明确收益 | [原 JSON](../../validation/connectome/tracking_cfff_20261009/sh_preserved_compiled_100k.public.json) |
+| 同机独立官方 100k | 16.319 / 14.193 / 13.888，包含原生 I/O | [原 JSON](../../validation/connectome/tracking_cfff_20261009/mrtrix_100k.public.json) |
 
-## 8. 参考与原实现
+当时新旧同模式 100k 路径字节一致、119 项 GPU 回归通过；该容器的进程 NVML 映射缺失，完整进程 <20 GB gate 未通过。所有慢样本、未采用实验及显存边界仍在原报告中。
 
-- [MRtrix3 源码](https://github.com/MRtrix3/mrtrix3)、[tckgen 3.0.3](https://mrtrix.readthedocs.io/en/3.0.3/reference/commands/tckgen.html)。
-- Tournier, Calamante & Connelly. Improved probabilistic streamlines tractography by 2nd order integration over fibre orientation distributions. ISMRM 2010, 1670.
-- Smith et al. Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information. NeuroImage 62, 1924–1938 (2012). DOI: 10.1016/j.neuroimage.2012.06.005.
-- Manzano-Patron et al. EDDEN 数据说明与引用：[Imaging Neuroscience 2024](https://doi.org/10.1162/imag_a_00060)。
+![历史 6ae PyTorch 与官方 MRtrix 真实 100k 流线投影；不是本版原生结果](../../validation/connectome/tracking_cfff_20261009/real100k_qc.png)
+
+历史 SH 压缩列、成功行索引与未保护编译候选的原结果见[原候选记录](../../validation/connectome/tracking_cfff_20261009/README.md#3-候选取舍)。不再保留这些候选的当前生产调用说明。
+
+## 7. 原实现与参考文献
+
+- [固定 MRtrix 源码](https://github.com/MRtrix3/mrtrix3/tree/026e850d171ec2a12f09865d31b8332d23d7ecf6)、[`tckgen.cpp`](https://github.com/MRtrix3/mrtrix3/blob/026e850d171ec2a12f09865d31b8332d23d7ecf6/cmd/tckgen.cpp)、[MPL-2.0](https://github.com/MRtrix3/mrtrix3/blob/026e850d171ec2a12f09865d31b8332d23d7ecf6/LICENCE.txt)。许可与构建器细节见[组件手册](TRACKING_OPERATORS.md)。
+- [官方 `tckgen` 参数](https://mrtrix.readthedocs.io/en/3.0.3/reference/commands/tckgen.html)。
+- Tournier, Calamante & Connelly. Improved probabilistic streamlines tractography by 2nd order integration over fibre orientation distributions. ISMRM 2010, 1670。
+- Smith RE et al. Anatomically-constrained tractography. *NeuroImage* 62 (2012), 1924–1938. [DOI](https://doi.org/10.1016/j.neuroimage.2012.06.005)。
+- Tournier JD et al. MRtrix3: A fast, flexible and open software framework for medical image processing and visualisation. *NeuroImage* 202 (2019), 116137. [DOI](https://doi.org/10.1016/j.neuroimage.2019.116137)。

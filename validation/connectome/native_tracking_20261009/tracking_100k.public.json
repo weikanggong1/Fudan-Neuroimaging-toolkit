@@ -1,0 +1,137 @@
+{
+  "status": "completed",
+  "benchmark_sha256": "19ee56b28732f9e6b989f0c5978bb8e5f1a1b5137456350e4fa7bc4eb11630a1",
+  "private_report_sha256": "8d9430d6f76ed5058736ae3312b8d1d2052cd3a6ede26535051b7d92bf5d1c00",
+  "scope": "unchanged real files; adapter includes SHA checks/TCK read/packed H2D; command timings are separate",
+  "parameters": {
+    "n_seeds": 100000,
+    "strict_seeds": 10000,
+    "threads": 8,
+    "repeats": 3,
+    "device": "cuda:0"
+  },
+  "inputs": {
+    "fod": {
+      "sha256": "80e40c7f91f590d5e7ec82b8a4eee5f12dc810a70c324d2a382d22ccd2d6d4fb",
+      "bytes": 140175904
+    },
+    "five_tissue": {
+      "sha256": "61526c023f0787938070125d3f777797ab19b8b4d7cc616dfd9a7864504d3a11",
+      "bytes": 335544864
+    },
+    "gmwmi": {
+      "sha256": "48ce7793327647ed5f208812b3fec5d90bfeff7856a6712a0a889a3f096994e1",
+      "bytes": 67109408
+    },
+    "official_tckgen": {
+      "sha256": "e53460623df2a5a95d35f72ad8b258933722e5f0c72d8e613876c48b5e9d223f",
+      "bytes": 2486376
+    }
+  },
+  "rows": [
+    {
+      "mode": "strict",
+      "seed": 0,
+      "seeds": 10000,
+      "threads": 1,
+      "adapter_seconds": 13.662507922388613,
+      "native_command_seconds": 12.593667240813375,
+      "official_command_seconds": 11.074083678424358,
+      "candidate_digest": {
+        "streamlines": 3173,
+        "points": 134261,
+        "points_sha256": "030f23f931657c57971f4dd2fb50d9fabaea2ba544245ade9ab12814d1db4dc9",
+        "offsets_sha256": "1b3916719474ec4af7512ec03050509815e62f4c5de308c025921ee8cb17eab9"
+      },
+      "reference_digest": {
+        "streamlines": 3173,
+        "points": 134261,
+        "points_sha256": "030f23f931657c57971f4dd2fb50d9fabaea2ba544245ade9ab12814d1db4dc9",
+        "offsets_sha256": "1b3916719474ec4af7512ec03050509815e62f4c5de308c025921ee8cb17eab9"
+      },
+      "ordered_points_and_offsets_equal": true,
+      "cuda_allocator": {
+        "allocated_bytes": 1700352,
+        "reserved_bytes": 23068672
+      }
+    },
+    {
+      "mode": "threaded",
+      "seed": 0,
+      "seeds": 100000,
+      "threads": 8,
+      "adapter_seconds": 19.245737076736987,
+      "native_command_seconds": 18.004933428019285,
+      "official_command_seconds": 15.41738888528198,
+      "candidate_digest": {
+        "streamlines": 31872,
+        "points": 1368671,
+        "points_sha256": "14ae4dcdd30084a9bd2fe2cace0cb83fba21ce75e1a98183092d8cb37112c416",
+        "offsets_sha256": "2e546bd919fa21c6c32ddf716a22cf3513d8058dcbff5484a9401f53ac6b423f"
+      },
+      "reference_digest": {
+        "streamlines": 31839,
+        "points": 1367243,
+        "points_sha256": "71d9cbf7e32d6df0c8d97b846e4fe4d943a50696ac1fa53342fa0283bafcfcdf",
+        "offsets_sha256": "abcc48c72dfd06a7ccbcb7eaf57b365998af5b598be3fc22d14a8a2bd05a8f1a"
+      },
+      "ordered_points_and_offsets_equal": false,
+      "cuda_allocator": {
+        "allocated_bytes": 17316864,
+        "reserved_bytes": 23068672
+      }
+    },
+    {
+      "mode": "threaded",
+      "seed": 1,
+      "seeds": 100000,
+      "threads": 8,
+      "adapter_seconds": 14.333275615237653,
+      "native_command_seconds": 13.19779105950147,
+      "official_command_seconds": 13.385641006752849,
+      "candidate_digest": {
+        "streamlines": 31788,
+        "points": 1371378,
+        "points_sha256": "6ba41d5c883076ee3d552d684b7046daca95e4b400b77d05ee751632f0dcabc1",
+        "offsets_sha256": "b2fc64800a6f70e0d418645dbc5c5670442fcb7c13311c8e93fd6ba0212160c3"
+      },
+      "reference_digest": {
+        "streamlines": 31804,
+        "points": 1372534,
+        "points_sha256": "709e365ce480c9f63eb3607061048607fbe096ed53085656005f5dbd4aa22b7d",
+        "offsets_sha256": "9d1f447cddb9f171d60f0ee107f7332ff278cc900ce674a3d99fd5d5bf65601a"
+      },
+      "ordered_points_and_offsets_equal": false,
+      "cuda_allocator": {
+        "allocated_bytes": 17347584,
+        "reserved_bytes": 23068672
+      }
+    },
+    {
+      "mode": "threaded",
+      "seed": 2,
+      "seeds": 100000,
+      "threads": 8,
+      "adapter_seconds": 14.345584130845964,
+      "native_command_seconds": 13.241546106524765,
+      "official_command_seconds": 13.599237000569701,
+      "candidate_digest": {
+        "streamlines": 31886,
+        "points": 1378219,
+        "points_sha256": "7d527ca744db63e873a6efdf690e57026c2a12acf8db01f3930c23f15b192511",
+        "offsets_sha256": "9bb98d928ffd538676b29d7fcdc453092796d1d75af7f8348195b78906c3c009"
+      },
+      "reference_digest": {
+        "streamlines": 31894,
+        "points": 1377472,
+        "points_sha256": "62d0d2c63af4a232d70bffdf69679d148008f08192a739a48cd40bb9a018864e",
+        "offsets_sha256": "7d09379d630ca1d13caf1b60fb4ff31a55dcc7f11b4866e5fcb3ead2dfa01849"
+      },
+      "ordered_points_and_offsets_equal": false,
+      "cuda_allocator": {
+        "allocated_bytes": 17432576,
+        "reserved_bytes": 23068672
+      }
+    }
+  ]
+}

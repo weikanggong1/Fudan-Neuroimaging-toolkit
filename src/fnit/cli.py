@@ -295,13 +295,14 @@ def _run_fast_vbm(args):
 
 def _connectome_run_options(args, atlas_names):
     """Bind cached matrices to inputs, parameters and numerical implementation."""
-    from .connectome.pipeline import CONNECTOME_NUMERICAL_REVISION
+    from .connectome.pipeline import CONNECTOME_NUMERICAL_REVISION, _native_tracking_fingerprint
 
     return {
         "fnit_version": __version__, "numerical_revision": CONNECTOME_NUMERICAL_REVISION,
         "atlas": list(atlas_names), "n_seeds": args.n_seeds, "seed": args.seed,
         "device": args.device, "eddy_gp_seed": args.eddy_gp_seed,
-        "shell_bvals": args.shell_bvals, "compile_arc": args.compile_arc,
+        "shell_bvals": args.shell_bvals, "tracking_threads": args.tracking_threads,
+        "tracking_runtime": _native_tracking_fingerprint(),
     }
 
 
@@ -313,6 +314,8 @@ def _run_connectome(args):
 
     if args.n_seeds < 1:
         raise ValueError("--n-seeds must be positive")
+    if args.tracking_threads < 1:
+        raise ValueError("--tracking-threads must be positive")
     if getattr(args, "template_pairs", None):
         from .connectome.paired_cli import run_paired_connectome
         return run_paired_connectome(args)
@@ -501,7 +504,7 @@ def _run_connectome(args):
         dwi_to_t1_world=transform,
         n_seeds=args.n_seeds,
         seed=args.seed,
-        compile_arc=args.compile_arc,
+        tracking_threads=args.tracking_threads,
         checkpoint_dir=(getattr(args, "checkpoint_dir", None) or
                         output_dir / "checkpoints" if args.bids_root else
                         getattr(args, "checkpoint_dir", None)),
@@ -883,8 +886,8 @@ def main(argv=None):
     connectome.add_argument('--device', default='cuda:0')
     connectome.add_argument('--n-seeds', type=int, required=True)
     connectome.add_argument('--seed', type=int, default=0)
-    connectome.add_argument('--compile-arc', action='store_true',
-                            help='compile the CUDA iFOD2 arc kernel for large seed counts')
+    connectome.add_argument('--tracking-threads', type=int, default=8,
+                            help='CPU threads for FNIT source-built MRtrix iFOD2/ACT (default 8)')
     connectome.add_argument('--overwrite', action='store_true')
     # Standalone SynthSeg must not import unrelated pipelines or their dependencies.
     selected = sys.argv[1:] if argv is None else argv

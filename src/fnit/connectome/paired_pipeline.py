@@ -19,7 +19,7 @@ from .template_inputs import (
 )
 from .paired_assignment import build_pair_connectomes
 
-PAIR_NUMERICAL_REVISION = "paired-templates-20261003-v1"
+PAIR_NUMERICAL_REVISION = "paired-templates-native-tracking-20261009-v2"
 MATRIX_NAMES = ("count", "sift2_fbc", "mean_length", "mean_fa")
 
 

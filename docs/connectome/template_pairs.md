@@ -6,6 +6,8 @@
 
 追踪使用同一份全脑 iFOD2＋ACT 轨迹。播种、传播、ACT 约束及尝试次数由共享核心确定；模板准备后，按已接受轨迹的两个端点筛选第一套 ROI 与第二套 ROI 之间的连接。模板不用于 ROI 播种、waypoint 约束或重新追踪。更换模板仅重做相应标签准备、端点分配和矩阵；已有有效的 DWI、解剖、FOD、追踪与 SIFT2 检查点继续复用。
 
+当前追踪由 FNIT 从固定 MRtrix 源码独立构建的 CPU `tckgen` 执行，无需系统安装 MRtrix；默认 `tracking_threads=8`。其余 PyTorch 阶段继续使用所选设备。程序安装、参数及输入输出见[追踪算子](TRACKING_OPERATORS.md)，本版真实整链对照见[原生追踪评测](../../validation/connectome/native_tracking_20261009/README.md)。
+
 ```mermaid
 flowchart TD
     D[原始 BIDS DWI 或已校正 DWI] --> P[TOPUP / EDDY 或有效缓存]
@@ -14,9 +16,9 @@ flowchart TD
     R --> A
     P --> F[响应 / CSD / mtnormalise]
     A --> G[5TT / GMWMI]
-    F --> W[全脑 iFOD2 + ACT]
+    F --> W[固定源码 CPU tckgen：全脑 iFOD2 + ACT]
     G --> W
-    W --> S[SIFT2 / 长度 / FA]
+    W --> S[PyTorch SIFT2 / 长度 / precise FA]
     S --> C[与模板无关的轨迹检查点]
     X[第一套用户模板] --> L[显式空间转换 / 连续 ROI 编号]
     Y[第二套用户模板] --> L
@@ -82,6 +84,7 @@ result = pipeline.run_bids(
     )],
     n_seeds=100000,                        # 尝试播种次数，模板不会改变它
     seed=0,
+    tracking_threads=8,                    # 原生 CPU 追踪线程数，与 recon 线程独立
     assignment_radius=4.0,                 # mm；默认保持现有 UKB 定义
 )
 
@@ -210,7 +213,7 @@ fnit UKBConnectome_pipeline \
   --recon-backend provided \
   --template-pairs template_pairs.json \
   --assignment-radius 4 \
-  --n-seeds 100000 --seed 0 --device cuda:0 \
+  --n-seeds 100000 --seed 0 --tracking-threads 8 --device cuda:0 \
   --output-dir derivatives/connectome/sub-001
 ```
 
@@ -245,6 +248,8 @@ tck2connectome tracks.tck atlas_dwi.nii.gz count.csv \
 MRtrix 的上述 `tck2connectome` 命令接收一张标签图；它没有本页定义的、对两张重叠模板分别搜索与去重的单个等价命令。两模板结果用同一 TCK 的逐轨迹端点 oracle 核对；原单模板 builder 继续用已有官方比较。合并两图后直接截取矩阵，仅在两图不重叠且端点半径内模板归属无歧义时可用作额外参考，不能代替一般重叠场景的 oracle。
 
 ## 5. 当前验证、精度与时间
+
+当前原生追踪整链与缓存核验集中在[本版评测](../../validation/connectome/native_tracking_20261009/README.md)。以下 2026-10-03 记录使用旧 PyTorch 追踪，验证当时的模板配对、输入检查与缓存；其耗时不代表当前追踪后端。
 
 本页新组件基于 `231dfaa1`，首个实现提交 `ea3cb054`。已执行的独立 CPU 回归包含原 endpoint assignment/surface/FreeSurfer 节点测试和新 pair 测试，**30 passed**。新测试覆盖双向匹配、重叠去重、交换轴、严格半径、空节点、两模板不同 affine、旧 square 四矩阵逐值保持，以及 native/fsaverage/GIFTI/MNI 已有变换分支。
 

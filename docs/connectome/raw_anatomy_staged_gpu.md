@@ -1,5 +1,7 @@
 # 本轮原始 T1 解剖准备与候选 GPU 版本绑定
 
+本页保留旧 PyTorch 追踪后端的历史编排任务；其中 GPU 追踪候选选项不适用于当前原生 CPU 后端。当前安装、参数及结果见[追踪算子](TRACKING_OPERATORS.md)和[本版评测](../../validation/connectome/native_tracking_20261009/README.md)。
+
 ## 1. 功能和流程
 
 `tools/benchmark_connectome_staged_gpu.py` 是正式十例评测的私有编排工具。先前已经在新的候选命名空间从原始 T1w 完整执行官方 `recon-all`；候选 FNIT 代码完成组件验证并实际冻结后，本工具把这批解剖结果与候选代码绑定。每例原始 DWI 都在新的输出目录完整执行 TOPUP、EDDY、配准、组织/FOD 建模、追踪、SIFT2 和各 atlas 的矩阵计算。
@@ -82,8 +84,8 @@ return_code = main([
 在 headcw 的已认证连接中运行；下面的候选配置必须已经由总控制器真实冻结。工具实现交付时尚未启动此命令。
 
 ```bash
-benchmark_root=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002
-benchmark_python=/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python
+benchmark_root=/data/reference/fnit_connectome_tenraw_20261002
+benchmark_python=/data/environments/fnit/bin/python
 benchmark_harness="$benchmark_root/formal_harness_staged_gpu_v2"
 
 "$benchmark_python" "$benchmark_harness/benchmark_connectome_staged_gpu.py" \

@@ -19,6 +19,10 @@ import fnit.connectome.pipeline as module
 
 @pytest.fixture
 def fixture(tmp_path, monkeypatch):
+    # This cache contract stubs the entire numerical core. Resolving/building
+    # the real native runtime would be unrelated to its assertions.
+    monkeypatch.setattr(module, "_native_tracking_fingerprint", lambda: {
+        "backend": "unit-test-core", "binary_sha256": "0" * 64})
     shape = (4, 3, 2)
     dwi = tmp_path / "dwi.nii"
     nib.save(nib.Nifti1Image(np.ones((*shape, 2), np.float32), np.eye(4)), dwi)
@@ -48,7 +52,8 @@ def fixture(tmp_path, monkeypatch):
                     fa=fa.clone(), mask=torch.ones(shape, dtype=torch.bool),
                     tracks=module.Tractogram(paths, torch.stack([p[[0, -1]] for p in paths]),
                                              torch.tensor([3., 3.]), torch.tensor([.45, .55]),
-                                             options["n_seeds"], torch.stack([p[0] for p in paths])),
+                                             options["n_seeds"], None,
+                                             {"backend": "unit-test-core", "tck_header": {"step_size": "0.5"}}),
                     weights=torch.tensor([.75, 1.25], dtype=torch.float64),
                     dwi_affine=eye, dwi_shape=shape)
 
@@ -72,8 +77,10 @@ def assert_result_same(a, b):
         torch.testing.assert_close(a.matrices[name], b.matrices[name], rtol=0, atol=0, equal_nan=True)
     for first, second in zip(a.tractogram.paths, b.tractogram.paths, strict=True):
         assert torch.equal(first, second)
-    for name in ("endpoints", "lengths_mm", "mean_fa", "accepted_seeds"):
+    for name in ("endpoints", "lengths_mm", "mean_fa"):
         assert torch.equal(getattr(a.tractogram, name), getattr(b.tractogram, name))
+    assert a.tractogram.accepted_seeds is b.tractogram.accepted_seeds is None
+    assert a.tractogram.native_provenance == b.tractogram.native_provenance
     assert a.tractogram.seeds_attempted == b.tractogram.seeds_attempted
 
 
@@ -117,7 +124,7 @@ def test_template_pair_hook_receives_only_completed_shared_fields(fixture, monke
     assert observed[1][0].cache_status["core"] == "skipped"
 
 
-@pytest.mark.parametrize("change", ["input", "seed", "transform", "shells", "revision", "policy"])
+@pytest.mark.parametrize("change", ["input", "seed", "transform", "shells", "revision", "policy", "native"])
 def test_numerical_inputs_parameters_revision_policy_invalidate_core(fixture, monkeypatch, change):
     runner, options, calls = fixture
     first = runner(**options)
@@ -135,6 +142,9 @@ def test_numerical_inputs_parameters_revision_policy_invalidate_core(fixture, mo
         options["shell_bvals"] = (0., 1000.)
     elif change == "revision":
         monkeypatch.setattr(module, "CONNECTOME_NUMERICAL_REVISION", "test-changed")
+    elif change == "native":
+        monkeypatch.setattr(module, "_native_tracking_fingerprint", lambda: {
+            "backend": "unit-test-core", "binary_sha256": "1" * 64})
     else:
         original = module._checkpoint_policy
         monkeypatch.setattr(module, "_checkpoint_policy", lambda device: {**original(device), "test_policy": 2})

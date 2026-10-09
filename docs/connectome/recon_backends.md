@@ -2,7 +2,7 @@
 
 ## 1. 功能与策略
 
-结构像只在解剖准备阶段重建一次。用户可以提供已经完成的 subject 目录，或明确选择官方 FreeSurfer / FNIT 重建。后续配准、5TT、GMWMI、追踪和 SC 均使用 FNIT 已有实现。
+结构像只在解剖准备阶段重建一次。用户可以提供已经完成的 subject 目录，或明确选择官方 FreeSurfer / FNIT 重建。后续配准、5TT、GMWMI、SIFT2 和 SC 复用 FNIT 已有实现；iFOD2/ACT 由 FNIT 从固定 MRtrix 源码独立构建的 CPU `tckgen` 执行，不依赖系统安装 MRtrix。追踪的安装、参数和当前验证见[追踪算子](TRACKING_OPERATORS.md)。
 
 ```mermaid
 flowchart TD
@@ -15,7 +15,7 @@ flowchart TD
     READ --> ANATOMY["brain / aparc+aseg / ribbon / white / pial"]
     CHECK --> ANATOMY
     FNITCHECK --> ANATOMY
-    ANATOMY --> DOWNSTREAM["共享核心：配准 → 5TT/GMWMI → 全脑 ACT → SIFT2"]
+    ANATOMY --> DOWNSTREAM["共享核心：配准 → 5TT/GMWMI → CPU tckgen → PyTorch SIFT2"]
     DOWNSTREAM --> ASSIGN["已有全脑轨迹的端点分配 → 模板矩阵"]
     ANATOMY --> MAP["模板映射到 DWI / 固定节点表"]
     MAP --> ASSIGN
@@ -42,6 +42,7 @@ connectome_result = UKBConnectome_pipeline(device="cuda:0").run_bids(
     freesurfer_subject_dir="/data/subjects/sub-01",  # 用户已完成的官方或 FNIT subject
     recon_backend="provided",  # 只读消费该目录
     n_seeds=100000,  # 保留既有追踪参数含义
+    tracking_threads=8,  # CPU tckgen 线程数，与 recon_options.threads 独立
     atlas="fs-aparc",  # 模板或模板配对接口见主说明
 )
 ```
@@ -62,6 +63,7 @@ connectome_result = UKBConnectome_pipeline(device="cuda:0").run_bids(
         "hemisphere_workers": 1,  # 默认串行；2 使用已有双半球隔离调度
     },
     n_seeds=100000,
+    tracking_threads=8,
     atlas="fs-aparc",
 )
 ```
@@ -80,6 +82,7 @@ connectome_result = UKBConnectome_pipeline(device="cuda:0").run_bids(
         "threads": 4,  # 传给 -openmp，并设置 OpenMP/ITK 线程预算
     },
     n_seeds=100000,
+    tracking_threads=8,
     atlas="fs-aparc",
 )
 ```
@@ -114,6 +117,7 @@ connectome_result = UKBConnectome_pipeline(device="cuda:0").run_bids(
 | 官方 `executable` | 未提供时从 PATH 查找 recon-all；仍需显式选择官方 backend。 |
 | 官方 `freesurfer_home` | 未提供时继承 `FREESURFER_HOME`；两者都缺失则报错。目录必须含官方 `SetUpFreeSurfer.sh` 和 `FreeSurferEnv.sh`。 |
 | `device` | 来自 `UKBConnectome_pipeline(device=...)`，原样传给 FNIT 单设备任务。官方 recon-all 由官方程序执行。 |
+| `tracking_threads` | 管线默认 8；原生 CPU 追踪的正整数线程数，独立于 recon 的 `threads`。 |
 | `overwrite` | False；True 发起新的空目录尝试，保留旧结果，不删除用户或历史 subject。 |
 
 ### 输出与缓存
@@ -151,13 +155,13 @@ recon_result = prepare_recon_subject(
 ```bash
 fnit UKBConnectome_pipeline --bids-root /data/bids --subject 01 \
   --recon-backend provided --freesurfer-subject-dir /data/subjects/sub-01 \
-  --atlas fs-aparc --n-seeds 100000 --device cuda:0 \
+  --atlas fs-aparc --n-seeds 100000 --tracking-threads 8 --device cuda:0 \
   --output-dir /data/results/sub-01
 
 fnit UKBConnectome_pipeline --bids-root /data/bids --subject 01 \
   --recon-backend fnit \
   --recon-options '{"weights_dir":"/data/fnit-weights","assets_dir":"/data/fnit-recon-assets","threads":4}' \
-  --atlas fs-aparc --n-seeds 100000 --device cuda:0 \
+  --atlas fs-aparc --n-seeds 100000 --tracking-threads 8 --device cuda:0 \
   --output-dir /data/results/sub-01
 ```
 
@@ -188,6 +192,8 @@ provided 的目录读取与文件/几何检查没有独立官方重建命令。
 自定义模板配对发生在全脑追踪之后。原生注释必须对应实际消费的 subject 顶点顺序；更换重建来源时使用匹配新网格的注释，或从同一 fsaverage 模板映射。跨被试的 volume/surface 两轴应分别提供固定 `nodes_tsv`，格式和缺失节点规则见[模板说明](template_pairs.md#跨被试比较的固定节点表)。
 
 ## 5. 当前验证与精度/耗时范围
+
+当前追踪后端的整链与缓存核验见[原生追踪评测](../../validation/connectome/native_tracking_20261009/README.md)。本节保留 2026-10-03 接入记录；其中 SC 时间使用旧 PyTorch 追踪，不代表当前后端，recon-all 来源接口与对应的真实接入证据保持原范围。
 
 本功能修改来源选择、完成检查和重用策略，复用原 recon-all 数值实现。专用测试覆盖内容改变且大小/mtime不变、触摸重用、失败不缓存、完整138文件/网格完成报告、非法 volume/surface、后端冲突与源目录只读。[本轮真实 CPU 预检](../../validation/connectome/recon_backends_20261003/README.md)中，10例已有官方 subject 全部通过格式/几何检查；已有 FNIT 队列6例完成138项输出并通过网格报告，2例输出未齐、2例尚无目录。六例FNIT实际输入与原始BIDS T1体素/affine一致，全部原始T1 SHA-256核对下载manifest。专用CPU测试34项通过。它检查已有真实 subject 的可消费性，不计为新的原始 T1 重建或官方数值等价。
 
