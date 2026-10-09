@@ -19,7 +19,7 @@
 
 当前生产auto选择的white专用程序是`mris_place_surface_white_fast`，SHA
 `810c8086eb1b3088a1952be6f205500d99de2f3feff8c29476c99a5e67b8b427`。
-本组没有该程序的同输入性能运行；表中标准参考不能替代生产性能控制。
+v19的标准参考不能替代生产性能控制；后续v20补测当前生产程序，单独记录。
 跨环境官方安装结果和当前生产整例由协调者另行评估。
 
 ## 完整阶段结果
@@ -42,8 +42,29 @@ source标记相交数为0。输入SHA在候选和两次参考运行前后相同�
 候选API包含验证、MRI加载、传输、当前进程JIT、四轮优化、清理、读写和
 逐步报告写出；CUDA上下文1.80–3.69秒另计。外部monitor完整进程墙钟另列。
 共享GPU负载和采样延迟变化，本组不是隔离ABBA速度门，也不据此宣布整例
-提速。严格阶段输出复现通过；生产后端性能控制、原始T1整例和整体指标
-等效未由本组判定。
+提速。严格阶段输出复现通过；原始T1整例和整体指标等效未由本组判定。
+
+## 当前生产white_fast补测（v20）
+
+四次fresh native-only运行均使用上述实际生产程序SHA，输入与v19逐项相同，
+完整命令的线程为4、CPU亲和性与各侧候选相同；生产程序是CPU计算。
+候选及标准双参考不重跑，原有v19报告不改标为v20。
+
+| 被试/侧 | 生产fast完整调用/s | 候选v19 API/s | fast对标准参考 / 候选对fast |
+|---|---:|---:|---|
+| sub07 LH | 200.891559 | 173.576610 | 坐标、有序面、MRI均0差异 |
+| sub07 RH | 183.399960 | 180.302315 | 坐标、有序面、MRI均0差异 |
+| sub06 LH | 235.018735 | 220.791466 | 坐标、有序面、MRI均0差异 |
+| sub06 RH | 225.571066 | 248.107786 | 坐标、有序面、MRI均0差异 |
+
+候选实测模块SHA与运行后SHA相同，七个输入SHA在所有运行前后相同。
+每侧fast只运行一次，fast独立重复性未测；标准参考已有双重复稳定证据。
+共享主机跨时段负载、候选API与原生子程序计时边界不同，故本表不构成
+ABBA速度门，不用一次比值决定生产替换，也不宣称整例提速。原生默认保持。
+
+`production_fast_report_v20.json`保存完整去敏原始fast报告、每次输入/程序/
+候选源码SHA、四组表面与MRI比较和外部monitor收据SHA。采样包含其他
+项目的整卡占用，不能把CPU参考monitor的整卡值当作本接口显存。
 
 ## 具体误差定位
 
@@ -91,10 +112,33 @@ python validation/recon_all/python_gpu_port/publish_final_white_receipts.py \
 输出不得已存在；原始报告未完成、输入变化、输入SHA不同或没有双重复时
 明确报错。比较器复用现有`compare_subject._topology`。
 
+生产程序按同一benchmark加`--native-only --reference-repeat 1`写入独立
+`production_fast_v20`目录后，只读汇总如下：
+
+```bash
+python validation/recon_all/python_gpu_port/compare_final_white_production.py \
+  --run-root /data/diagnostic/final-white \
+  --output /data/reports/final-white-production-v20.json \
+  --expected-fast-sha256 810c8086eb1b3088a1952be6f205500d99de2f3feff8c29476c99a5e67b8b427 \
+  --case sub07:lh:v19:v17:v20 \
+  --case sub07:rh:v19:v19:v20 \
+  --case sub06:lh:v19:v19:v20 \
+  --case sub06:rh:v19:v19:v20
+```
+
+`run-root`为已有三组冻结产物的共同目录；`output`为新JSON路径，不覆盖；
+`expected-fast-sha256`必须是实际生产选择的程序哈希；每个`case`依次指定
+被试、半球、候选版本、标准参考版本、fast版本。工具不执行放置算法，
+输入未完成/改变/不匹配、fast程序SHA错误或子程序失败会报错；面顺序不
+匹配时不报告同索引距离。输出逐项比较坐标、面、MRI体素/affine/dtype，
+保留源码和运行哈希、计时边界及原始报告SHA；一次运行不会转写为双重复。
+
 ## 文件
 
 - `complete_report.json`：四侧全部原始去敏报告、实际输入/源码/程序SHA、
   每轮/试步/清理、计时/显存、参考重复性、坐标/MRI和网格质量。
+- `production_fast_report_v20.json`：当前生产程序的四侧完整同输入补测；
+  v19收据与严格契约保持独立，不能由本表外推原始T1整例。
 - `sub07_figure_comparison.json`：生成修复前后脑图时实际使用的比较收据。
 - `final_white_v17_reference_plane.*`、`final_white_v19_reference_plane.*`：
   真实MRI叠加、局部异常区边界、全顶点误差图和机器元数据。
