@@ -79,7 +79,8 @@ def main():
     source_functions=(collision.asynchronous_first_step,triangle_pairs_intersect_torch,
         conservative_face_candidates_torch,snapshot_ordered_step,quadratic_curvature,
         intensity_gradient,average_signed_gradients,unconstrained_step_with_offsets)
-    report['source_sha256']={Path(inspect.getfile(f)).name:sha256(inspect.getfile(f)) for f in source_functions}
+    report['source_sha256']={Path(inspect.getfile(inspect.unwrap(getattr(f,'py_func',f)))).name:
+        sha256(inspect.getfile(inspect.unwrap(getattr(f,'py_func',f)))) for f in source_functions}
     started=time.perf_counter();hemi=args.hemisphere
     paths={name:args.subject/path for name,path in dict(white=f'surf/{hemi}.white',
         label=f'label/{hemi}.cortex+hipamyg.label',brain='mri/brain.finalsurfs.mgz',
