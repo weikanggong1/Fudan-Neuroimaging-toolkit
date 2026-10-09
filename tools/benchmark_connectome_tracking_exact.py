@@ -1,6 +1,8 @@
 """真实 NIfTI 输入上逐轨严格比较两个 tracking 源码，并交错计时。
 
-两个 tracking 源码复用 --fod-module 指定的同一 FOD/SH 实现。
+默认两个 tracking 源码复用 --fod-module 指定的同一 FOD/SH 实现。
+比较 FOD/SH 改动时，用 --baseline-fod-module 和 --candidate-fod-module
+成对指定各自源码；与显式 --fod-module 互斥，报告分别记录实际函数绑定。
 默认三轮全量配对按 AB/BA/AB 执行；单列首次调用后每版至少两个热样本。
 每版首次全量调用单列，不以小规模预热证明全量编译已完成。
 输入读取、H2D、tracking、D2H、摘要及写盘分别计时；不生成模拟影像。
@@ -103,6 +105,64 @@ def load_sources(baseline_path: Path, candidate_path: Path, fod_path: Path):
         if getattr(baseline, function_name, None) is not getattr(candidate, function_name, None):
             raise ValueError(f"baseline did not reuse current FOD function {function_name}")
     return modules, fod
+
+
+def load_source_pairs(baseline_path: Path, candidate_path: Path,
+                      fod_path: Path | None = None, *,
+                      baseline_fod_path: Path | None = None,
+                      candidate_fod_path: Path | None = None):
+    """返回 tracking 和 FOD 字典；共享模式保留 load_sources 的加载行为。"""
+    paired = baseline_fod_path is not None or candidate_fod_path is not None
+    if paired:
+        if baseline_fod_path is None or candidate_fod_path is None:
+            raise ValueError("baseline_fod_path and candidate_fod_path must be supplied together")
+        if fod_path is not None:
+            raise ValueError("fod_path cannot be combined with paired FOD sources")
+        modules, fods = {}, {}
+        for variant, tracking_path, variant_fod_path in (
+            ("baseline", baseline_path, baseline_fod_path),
+            ("candidate", candidate_path, candidate_fod_path),
+        ):
+            # 每版独立 package，tracking 的相对导入只解析本版 FOD 源码。
+            package_name = "_fnit_tracking_exact_" + variant
+            package = types.ModuleType(package_name)
+            package.__path__ = []
+            sys.modules[package_name] = package
+            fods[variant] = load_source(package_name + ".fod", variant_fod_path)
+            package.fod = fods[variant]
+            modules[variant] = load_source(package_name + ".tracking", tracking_path)
+            package.tracking = modules[variant]
+    else:
+        if fod_path is None:
+            fod_path = candidate_path.parent / "fod.py"
+        modules, fod = load_sources(baseline_path, candidate_path, fod_path)
+        fods = {"baseline": fod, "candidate": fod}
+    for variant, module in modules.items():
+        if not callable(getattr(module, "probabilistic_tractography", None)):
+            raise ValueError(f"{variant} tracking source lacks probabilistic_tractography")
+        for function_name in ("tracking_sh_precomputed", "real_sh"):
+            fod_function = getattr(fods[variant], function_name, None)
+            if not callable(fod_function) or getattr(module, function_name, None) is not fod_function:
+                raise ValueError(f"{variant} did not bind its FOD function {function_name}")
+    return modules, fods
+
+
+def fod_source_identity(modules: dict, fods: dict) -> dict:
+    """记录实际 object identity，不能用同 SHA 或相同函数名替代。"""
+    function_names = ("tracking_sh_precomputed", "real_sh")
+    bindings = {
+        variant: {name: getattr(module, name, None) is getattr(fods[variant], name, None)
+                  for name in function_names}
+        for variant, module in modules.items()
+    }
+    shared = {
+        name: getattr(modules["baseline"], name, None) is getattr(modules["candidate"], name, None)
+        for name in function_names
+    }
+    return {"fod_mode": "shared" if fods["baseline"] is fods["candidate"] else "paired",
+            "fod_function_identity": bindings,
+            "cross_variant_fod_function_identity": shared,
+            "fixed_fod_function_identity_equal": all(shared.values())}
 
 
 def load_real_inputs(paths: dict[str, Path]):
@@ -377,7 +437,7 @@ def current_commit(source: Path) -> str | None:
         return None
 
 
-def parse_args():
+def parse_args(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     for name in ("baseline-tracking", "fod", "five-tissue", "gmwmi", "output"):
@@ -386,6 +446,10 @@ def parse_args():
                         help="候选 tracking.py；默认当前仓库 src/fnit/connectome/tracking.py")
     parser.add_argument("--fod-module", type=Path,
                         help="两版共享的 fod.py；默认候选 tracking.py 的同目录 fod.py")
+    parser.add_argument("--baseline-fod-module", type=Path,
+                        help="基线 fod.py；必须与 --candidate-fod-module 成对，不能与 --fod-module 合用")
+    parser.add_argument("--candidate-fod-module", type=Path,
+                        help="候选 fod.py；必须与 --baseline-fod-module 成对，不能与 --fod-module 合用")
     parser.add_argument("--baseline-commit", help="可选：调用者已核对的基线 commit 标签")
     parser.add_argument("--candidate-commit", help="可选：调用者已核对的候选 commit 标签")
     parser.add_argument("--n-seeds", type=int, default=1000, help="真实 GMWMI 播种次数")
@@ -406,7 +470,13 @@ def parse_args():
     parser.add_argument("--profile-seeds", "--profile-n-seeds", dest="profile_seeds",
                         type=int, default=128, help="候选 profiler 播种次数上限")
     parser.add_argument("--profile-dir", type=Path, help="默认 JSON 同目录下的 <stem>_profile")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    paired_fod = args.baseline_fod_module is not None or args.candidate_fod_module is not None
+    if paired_fod:
+        if args.baseline_fod_module is None or args.candidate_fod_module is None:
+            parser.error("--baseline-fod-module and --candidate-fod-module must be supplied together")
+        if args.fod_module is not None:
+            parser.error("--fod-module cannot be combined with paired FOD modules")
     for name in ("n_seeds", "batch_size", "repeats", "profile_seeds"):
         if getattr(args, name) < 1:
             parser.error("--" + name.replace("_", "-") + " must be positive")
@@ -414,9 +484,11 @@ def parse_args():
         parser.error("warmup counts must be nonnegative and --memory-budget-gb must be in (0,20]")
     if args.candidate_tracking is None:
         args.candidate_tracking = Path(__file__).resolve().parents[1] / "src/fnit/connectome/tracking.py"
-    if args.fod_module is None:
+    if args.fod_module is None and not paired_fod:
         args.fod_module = args.candidate_tracking.parent / "fod.py"
-    for name in ("baseline_tracking", "candidate_tracking", "fod_module", "fod", "five_tissue", "gmwmi"):
+    source_names = (("baseline_fod_module", "candidate_fod_module") if paired_fod else
+                    ("fod_module",))
+    for name in ("baseline_tracking", "candidate_tracking", *source_names, "fod", "five_tissue", "gmwmi"):
         path = getattr(args, name).resolve()
         if not path.is_file():
             parser.error(f"--{name.replace('_', '-')} is not an existing file: {path}")
@@ -432,7 +504,10 @@ def main() -> int:
         raise ValueError("this benchmark supports CPU and CUDA devices")
     if args.compile_arc and device.type != "cuda":
         raise ValueError("--compile-arc requires CUDA")
-    modules, fixed_fod = load_sources(args.baseline_tracking, args.candidate_tracking, args.fod_module)
+    modules, fods = load_source_pairs(
+        args.baseline_tracking, args.candidate_tracking, args.fod_module,
+        baseline_fod_path=args.baseline_fod_module,
+        candidate_fod_path=args.candidate_fod_module)
     paths = {"fod": args.fod, "five_tissue": args.five_tissue, "gmwmi": args.gmwmi}
     started = time.perf_counter()
     input_hashes = {name: {"name": path.name, "size_bytes": path.stat().st_size,
@@ -471,8 +546,11 @@ def main() -> int:
                "compile_arc": args.compile_arc}
     source_paths = {"baseline_tracking": args.baseline_tracking,
                     "candidate_tracking": args.candidate_tracking,
-                    "fixed_fod": Path(fixed_fod.__file__).resolve(),
+                    "baseline_fod": Path(fods["baseline"].__file__).resolve(),
+                    "candidate_fod": Path(fods["candidate"].__file__).resolve(),
                     "benchmark": Path(__file__).resolve()}
+    if fods["baseline"] is fods["candidate"]:
+        source_paths["fixed_fod"] = source_paths["baseline_fod"]
     report = {
         "schema_version": 1, "status": "running",
         "input_kind": "existing real NIfTI; no generated inputs",
@@ -482,7 +560,7 @@ def main() -> int:
         "source_sha256": {name: file_sha256(path) for name, path in source_paths.items()},
         "baseline_commit": args.baseline_commit,
         "candidate_commit": args.candidate_commit or current_commit(source_paths["candidate_tracking"]),
-        "fixed_fod_function_identity_equal": True,
+        **fod_source_identity(modules, fods),
         "device": device_metadata, "torch_version": str(torch.__version__),
         "cuda_version": torch.version.cuda, "python_version": platform.python_version(),
         "cpu_threads": torch.get_num_threads(),

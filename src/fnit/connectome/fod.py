@@ -11,6 +11,11 @@ from functools import lru_cache
 
 import torch
 
+try:
+    from torch.compiler import is_compiling as _tracking_is_compiling
+except ImportError:  # Compatibility with the declared older PyTorch minimum.
+    from torch._dynamo import is_compiling as _tracking_is_compiling
+
 
 def _associated_legendre(l: int, m: int, z: torch.Tensor) -> torch.Tensor:
     """Condon-Shortley associated Legendre polynomial P_l^m(z)."""
@@ -96,6 +101,19 @@ def _tracking_sh_indices(lmax: int, device: torch.device):
     return centres, tuple(orders)
 
 
+@lru_cache(maxsize=8)
+def _tracking_sh_packed_indices(lmax: int, device: torch.device):
+    """Cache disjoint SH coefficient columns in the original m-major order."""
+    centres, orders = _tracking_sh_indices(lmax, device)
+    if not orders:
+        return centres, None, None, None
+    positive = torch.cat(tuple(pair[0] for pair in orders))
+    negative = torch.cat(tuple(pair[1] for pair in orders))
+    harmonic = torch.cat(tuple(torch.full_like(pair[0], index)
+                               for index, pair in enumerate(orders)))
+    return centres, positive, negative, harmonic
+
+
 def tracking_sh_precomputed(directions: torch.Tensor, lmax: int = 8) -> torch.Tensor:
     """Evaluate tracking SH via MRtrix iFOD2's 512-elevation lookup rule.
 
@@ -121,18 +139,45 @@ def tracking_sh_precomputed(directions: torch.Tensor, lmax: int = 8) -> torch.Te
     radius = torch.linalg.vector_norm(unit[:, :2], dim=-1)
     cosine = torch.where(radius > 0, unit[:, 0] / radius.clamp_min(1e-20), 1)
     sine = torch.where(radius > 0, unit[:, 1] / radius.clamp_min(1e-20), 0)
-    output = torch.zeros_like(basis)
-    centres, orders = _tracking_sh_indices(lmax, unit.device)
-    output.index_copy_(1, centres, basis.index_select(1, centres))
-    cos_m = torch.ones_like(cosine)
-    sin_m = torch.zeros_like(sine)
-    for positive, negative in orders:
-        next_cos = cos_m * cosine - sin_m * sine
-        next_sin = sin_m * cosine + cos_m * sine
-        values = basis.index_select(1, positive)
-        output.index_copy_(1, positive, values * next_cos[:, None])
-        output.index_copy_(1, negative, values * next_sin[:, None])
-        cos_m, sin_m = next_cos, next_sin
+    # Eager packing preserves forward bytes but changes the compiled graph
+    # and backward scatter ordering. Retain the original operations in both
+    # cases; only eager inference uses the packed-column optimization.
+    if _tracking_is_compiling() or (torch.is_grad_enabled() and directions.requires_grad):
+        output = torch.zeros_like(basis)
+        centres, orders = _tracking_sh_indices(lmax, unit.device)
+        output.index_copy_(1, centres, basis.index_select(1, centres))
+        cos_m = torch.ones_like(cosine)
+        sin_m = torch.zeros_like(sine)
+        for positive, negative in orders:
+            next_cos = cos_m * cosine - sin_m * sine
+            next_sin = sin_m * cosine + cos_m * sine
+            values = basis.index_select(1, positive)
+            output.index_copy_(1, positive, values * next_cos[:, None])
+            output.index_copy_(1, negative, values * next_sin[:, None])
+            cos_m, sin_m = next_cos, next_sin
+    else:
+        # Every output column is written exactly once: m=0 centres, then the
+        # disjoint positive/negative columns. No zero-initialized value is read.
+        output = torch.empty_like(basis)
+        centres, positive, negative, harmonic = _tracking_sh_packed_indices(lmax, unit.device)
+        output.index_copy_(1, centres, basis.index_select(1, centres))
+        if positive is not None:
+            cos_m = torch.ones_like(cosine)
+            sin_m = torch.zeros_like(sine)
+            cos_columns, sin_columns = [], []
+            for _ in range(lmax):
+                # Preserve both recurrence expressions and their original ordering;
+                # do not replace these with trigonometry or fused multiplication.
+                next_cos = cos_m * cosine - sin_m * sine
+                next_sin = sin_m * cosine + cos_m * sine
+                cos_columns.append(next_cos)
+                sin_columns.append(next_sin)
+                cos_m, sin_m = next_cos, next_sin
+            cos_values = torch.stack(cos_columns, dim=1).index_select(1, harmonic)
+            sin_values = torch.stack(sin_columns, dim=1).index_select(1, harmonic)
+            values = basis.index_select(1, positive)
+            output.index_copy_(1, positive, values * cos_values)
+            output.index_copy_(1, negative, values * sin_values)
     return output.reshape(*shape, -1)
 
 

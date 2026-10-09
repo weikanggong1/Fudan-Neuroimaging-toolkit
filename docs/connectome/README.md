@@ -33,7 +33,7 @@ flowchart LR
 DWI准备见 [dMRI](../dmri_pipeline/README.md)、[TOPUP](../topup/README.md)、[EDDY](../eddy/README.md)；
 解剖见 [recon-all](../recon_all/README.md)，两模板定义见 [template_pairs](template_pairs.md)。
 
-最新组件更新（2026-10-09）：5TT 采样合并角点取值及权重，保持有序累加；固定真实输入的 100k 追踪与旧版逐字节一致。默认模式热中位数 238.65 → 177.53 秒，原有编译模式 116.34 → 107.34 秒；共享负载下的观测及全部样本见[追踪性能页](TRACKING_PERFORMANCE_OPTIMIZATION.md)。这次计时从固定 FOD/5TT/GMWMI 开始，完整原始 BIDS 与最终矩阵精度继续以原端到端报告为准。
+最新组件更新（2026-10-09）：eager SH 合并列操作，编译和梯度路径保留原运算。共享 A100 上最终源码 10k 热中位数 25.21 → 22.14 秒；100k 两模式与旧版逐字节一致，119 项 GPU 回归通过。100k 计时受共享负载影响，完整样本、同机 MRtrix、显存审计和脑图见[追踪性能页](TRACKING_PERFORMANCE_OPTIMIZATION.md)。本次范围为固定 FOD/5TT/GMWMI 到流线；完整 BIDS 与 SC 精度继续以原端到端报告为准。
 
 ## 2. Python 调用
 
@@ -360,7 +360,7 @@ host时钟存在异步与嵌套，不求和替代总墙钟。
 30次核心恢复内容一致；本轮聚合验证不代替独立原软件轨迹分布与完整raw一致性。
 历史原软件比较按原版本保留在 [精度记录](ACCURACY_OPTIMIZATION_20261003.md)。
 
-追踪热路径的无损 GPU 索引复用、gpucw1 七次热调用基准和未采用候选见[追踪性能优化记录](TRACKING_PERFORMANCE_OPTIMIZATION.md)。
+追踪的最新单 GPU 无损优化、同机官方参考及未采用候选见[追踪性能优化记录](TRACKING_PERFORMANCE_OPTIMIZATION.md)，H100 历史结果单独保留。
 
 ![真实病例保存的labels、FA和矩形count结果](../../validation/connectome/paired_pipeline_20261003/CON01_pair_outputs.png)
 
@@ -379,6 +379,7 @@ CSD GPU 完整 API 旧/新为 **3436.72/3376.50 s**；WM、GM、CSF 三套数组
 
 | 日期 | commit/version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-09 | SH 源码 `76a6b293` | eager 合并 SH 列；编译与梯度保留原运算。 | [A100 两模式 100k、119 项回归及官方参考](../../validation/connectome/tracking_cfff_20261009/README.md)。 |
 | 2026-10-03～04 | `8bc337c4`冻结 / `7ba73de2`整合 | 两模板、checkpoint与输入保护。 | [10例40CLI及源码收据](../../validation/connectome/paired_pipeline_20261003/README.md)。 |
 | 2026-10-03 | accuracy_20261003 | 梯度、FA与ACT方向修正。 | [历史原软件比较](ACCURACY_OPTIMIZATION_20261003.md)。 |
 | 2026-10-02 | tenraw_20261002 | 数据流与矩阵构建优化。 | [历史完整矩阵判定](FINAL_RAW_MATRIX_RESULTS.md)。 |

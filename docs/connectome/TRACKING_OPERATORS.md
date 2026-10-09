@@ -6,7 +6,7 @@
 
 `probabilistic_tractography` 从归一化 WM FOD 和 5TT/GMWMI 生成 RAS 毫米坐标的流线。一次生成全部种子，再按固定批量初始化方向、前向追踪、后向追踪，最后保留符合 ACT 和长度规则的路径。生产采用 FNIT PyTorch，实现不启动 MRtrix。
 
-前轮（2026-10-02）数据流加速复用 SH 系数索引、FOD 布局及坐标尺度，以及 5TT 各轴的角点索引和权重。SH 仍按原阶数递推；FOD 系数逐元素相乘后沿系数轴求和。2026-10-09 正式实现进一步合并八角点取值和权重计算，仍按 `dz → dy → dx` 的八角点顺序做 FP32 加和，保留 `weight < 1e-6`、最近体素非零判断和图像边界规则。路径仍为 tuple；单向路径引用 forward 缓冲区。本轮默认/原有编译模式的完整 100k 流线分别与旧版逐字节一致，GPU 回归 74 项通过；最新计时与脑图见[无损性能实测](TRACKING_PERFORMANCE_OPTIMIZATION.md)，前轮记录仍见第 5 节。
+前轮数据流加速复用 SH 索引、FOD 布局及坐标尺度，5TT 进一步合并八角点取值与权重，保留 `dz → dy → dx` 八次有序 FP32 加和及全部边界规则。最新实现合并 eager SH 的离散列取值、乘法和写回；512 层表、全部系数、cos/sin 递推及 FOD 系数求和不变。编译或请求梯度时执行原 SH 运算。路径仍为 tuple，单向路径引用 forward 缓冲区。共享 A100 上两模式完整 100k 与旧版逐字节一致，119 项聚焦 GPU 回归通过；最新样本与脑图见[无损性能实测](TRACKING_PERFORMANCE_OPTIMIZATION.md)。
 
 前轮（2026-10-03）精度候选修正 SGM 退出截断：在降采样之前，按相邻内部顶点的弦方向评价 FOD，再选择 SGM 段内的最小点。此前使用圆弧切线，可能选到不同截断点。圆弧概率仍使用切线，RNG 和校准循环保留原规则。active-only 校准实验没有速度收益，已撤回；该轮十二次完整 raw 与十例比较已完成，矩阵 1388/2400、轨迹分布 85/250，整体未匹配；两组配对耗时观测合计 −2.80%（CON03 +0.50%），原显存监测缺口与独立补测另列。
 
@@ -70,7 +70,7 @@ tracks = probabilistic_tractography(
 
 拒绝全部路径时返回空 tuple 和相应零长度张量；pipeline 会进一步报错。输入结构、SH宽度、种子/批量/候选数、长度和间距不合法时抛出 ValueError。GMWMI 权重为空或负值报错；投影20轮仍无法获得要求种子数时报 RuntimeError。
 
-`tracking_sh_precomputed(directions, lmax=8)` 只计算追踪 SH：输入 float32 `[...,3]`，输出同设备 float32 `[...,C]`，系数顺序为偶数 `l` 后按 `m=-l…l` 排列。512层 Legendre 表和正/负/零阶系数索引按设备与最高阶缓存；缓存各最多8组。方向归一化及方位递推不变。
+`tracking_sh_precomputed(directions, lmax=8)` 只计算追踪 SH：输入 float32 `[...,3]`，输出同设备 float32 `[...,C]`，系数顺序为偶数 `l` 后按 `m=-l…l` 排列。512层 Legendre 表和正/负/零阶、合并列索引按设备与最高阶缓存；缓存各最多8组。方向归一化及方位递推不变。eager inference 合并离散列操作；`torch.compile` 或 `requires_grad` 路径保留原操作顺序。
 
 `_VolumeSampler(volume, inverse_affine)` 是内部调用上下文，准备 `[X,Y,Z,C]` 到 `grid_sample` 的布局视图、float64 RAS到体素仿射切片和归一化尺度。它返回 `[N,C]` 样本，不复制完整体积；上下文只在一次 tracking 内使用。`_sample` 的独立接口保持原实现。`_five_tissue_mrtrix` 输入 5TT、RAS点和其 float64 逆仿射，输出 `[N,5]`；最近体素全零或位置出图像时返回零。
 
@@ -138,7 +138,7 @@ tckgen wm_fod.mif reference_tracks.tck \
 
 ### 最新无损优化：2026-10-09
 
-合并 5TT 八角点取值与权重，保持原有序累加。默认/已有编译模式分别完成完整 100k 预热与 ABBA，全部输出和 TCK 逐字节一致。热中位数为 238.650→177.532 / 116.345→107.344 秒；共享负载波动明显，完整样本与脑图见[性能说明](TRACKING_PERFORMANCE_OPTIMIZATION.md)，不更新原始 DWI 全流程的精度结论。
+最新 A100 验证合并 eager SH 列操作，保留原编译/梯度路径。完整 100k 两模式均与旧版逐字节一致；最终 10k 热中位数 25.207→22.136 秒。119 项 GPU 回归通过，完整共享负载样本、同机官方参考与脑图见[性能说明](TRACKING_PERFORMANCE_OPTIMIZATION.md)。前次 H100 的 5TT 优化仍保留为历史记录；原始 DWI 全流程精度见下方对应版本。
 
 ### 前轮精度优化：2026-10-03
 
@@ -222,6 +222,7 @@ CON03两轮路径逻辑数据均48,259,644 bytes，实际去重storage均2,419,3
 
 | 版本/日期 | 更新与证据 |
 | --- | --- |
+| SH 源码76a6b293/2026-10-09 | 合并 eager SH 离散列，编译/梯度用原运算；A100 两模式 100k 字节/TCK 一致、119 GPU 回归，见[最新结果](../../validation/connectome/tracking_cfff_20261009/README.md)。 |
 | d4327049/2026-10-09 | 有序八角点 gather＋权重批量计算；同模式完整 100k 路径与 TCK 逐字节一致，74 项 GPU 回归通过，计时及实验取舍见[最新性能页](TRACKING_PERFORMANCE_OPTIMIZATION.md)。 |
 | 前轮精度组件/2026-10-03 | SGM 退出截断改用降采样前内部点弦方向；局部选择差异 20/324→0/324。active-only 性能候选撤回，完整 raw 12 次 CLI 验收已完成、整体仍未匹配，见[精度总说明](ACCURACY_OPTIMIZATION_20261003.md)。 |
 | 前轮随机重复证据汇总/2026-10-03 | CON03实际seed0–4完成，输入、源码、参数与输出结构审计通过，三类显存峰值均符合预算。只增加独立重复/审计工具与报告，当时生产算法为c4811b4；两例1M A/B的五类二进制数组SHA相同，三种观测峰值均<20GB；CON03 B1采样最大间隔8.709秒，组件结果不作为正式rawcase完整显存gate通过证据；原软件矩阵和整例验收由总控完成。 |

@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "benchmark_kind": "official_fixed_input_tracking",
+  "source_commit": "026e850d171ec2a12f09865d31b8332d23d7ecf6",
+  "binary_sha256": "e53460623df2a5a95d35f72ad8b258933722e5f0c72d8e613876c48b5e9d223f",
+  "binary_matches_build_manifest": true,
+  "version": {
+    "software": "MRtrix3 tckgen",
+    "reported_version": "3.0.3"
+  },
+  "runner_sha256": "fff936a4961acb3cc8c99a0f62ad4aaa5111f66dccb4f0a920fb9c93d3286f74",
+  "software_environment": {
+    "python": "3.11.17",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2"
+  },
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz",
+  "input_sha256": {
+    "fod": "18addc15596dadf7fb60727ae9af8d1cbd98c139964712454a33a718c5f4e7c1",
+    "five_tissue": "704539238d29c10eeaf4fab31831bc3ced9648ce6a59f4e9bd75c7b7d6d03fbf",
+    "gmwmi": "06243e393410bad709c2569e68d5eeed49d5f28500e607890a06e217a19a9823"
+  },
+  "parameters": {
+    "n_seeds": 100000,
+    "threads": 8,
+    "rng_seeds": [
+      0,
+      1,
+      2
+    ],
+    "algorithm": "iFOD2",
+    "seeding": "seed_gmwmi",
+    "act": true,
+    "select": 0,
+    "maxlength_mm": 250,
+    "cutoff": 0.1,
+    "samples": 3,
+    "power": 0.5
+  },
+  "child_environment": {
+    "CUDA_VISIBLE_DEVICES_is_empty": true,
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1"
+  },
+  "timing_scope": "new tckgen subprocess, including input loading and TCK writing; later TCK statistics excluded",
+  "length_definition": "stored RAS-mm polyline, float64 differences/norm/sum; not internal arc integration length",
+  "samples": [
+    {
+      "sample_index": 0,
+      "rng_seed": 0,
+      "status": "success",
+      "wall_seconds": 16.318865246139467,
+      "returncode": 0,
+      "statistics": {
+        "actual_streamlines": 27615,
+        "total_path_points": 1145203,
+        "stored_polyline_length_mm": {
+          "mean": 40.057816956155534,
+          "std_ddof0": 38.65104780614214,
+          "percentiles_linear": {
+            "p0": 4.440319898144998,
+            "p5": 4.98773445027035,
+            "p25": 10.012672031909517,
+            "p50": 25.37485955365528,
+            "p75": 58.678611557776975,
+            "p95": 119.47576306738277,
+            "p100": 247.14909741570546
+          }
+        },
+        "points_per_streamline": {
+          "min": 6,
+          "max": 250,
+          "mean": 41.470324099221436
+        },
+        "header": {
+          "count": 27615,
+          "total_count": 96519,
+          "datatype": "Float32LE",
+          "method": "iFOD2"
+        },
+        "header_captured_before_lazy_iteration": true,
+        "tck_sha256": "3ca355dbac37b8468e2582ad16e2a002923e0b1ee264bbd6dcee599e582344b4",
+        "header_count_matches_actual": true
+      }
+    },
+    {
+      "sample_index": 1,
+      "rng_seed": 1,
+      "status": "success",
+      "wall_seconds": 14.192504152655602,
+      "returncode": 0,
+      "statistics": {
+        "actual_streamlines": 27627,
+        "total_path_points": 1148618,
+        "stored_polyline_length_mm": {
+          "mean": 40.16108112864499,
+          "std_ddof0": 38.83834666940503,
+          "percentiles_linear": {
+            "p0": 4.440319898144998,
+            "p5": 4.987135225804963,
+            "p25": 10.004165148380281,
+            "p50": 25.371188286809264,
+            "p75": 58.73353406794369,
+            "p95": 119.98598202504192,
+            "p100": 247.14909741570546
+          }
+        },
+        "points_per_streamline": {
+          "min": 6,
+          "max": 250,
+          "mean": 41.575922105186955
+        },
+        "header": {
+          "count": 27627,
+          "total_count": 96512,
+          "datatype": "Float32LE",
+          "method": "iFOD2"
+        },
+        "header_captured_before_lazy_iteration": true,
+        "tck_sha256": "646fe3227d41b15d4c537a8572646e5971fd4b8ea14220f649ace1bb6d2a8a21",
+        "header_count_matches_actual": true
+      }
+    },
+    {
+      "sample_index": 2,
+      "rng_seed": 2,
+      "status": "success",
+      "wall_seconds": 13.888335220515728,
+      "returncode": 0,
+      "statistics": {
+        "actual_streamlines": 27690,
+        "total_path_points": 1149165,
+        "stored_polyline_length_mm": {
+          "mean": 40.08546854343262,
+          "std_ddof0": 38.82121108098323,
+          "percentiles_linear": {
+            "p0": 4.440319898144998,
+            "p5": 4.986659722753359,
+            "p25": 9.993427819309051,
+            "p50": 24.951465541901385,
+            "p75": 58.361242745352975,
+            "p95": 119.6920869854035,
+            "p100": 247.14909741570546
+          }
+        },
+        "points_per_streamline": {
+          "min": 6,
+          "max": 250,
+          "mean": 41.50108342361864
+        },
+        "header": {
+          "count": 27690,
+          "total_count": 96529,
+          "datatype": "Float32LE",
+          "method": "iFOD2"
+        },
+        "header_captured_before_lazy_iteration": true,
+        "tck_sha256": "ff258803e31baa5a7661003a9e766b1769867cb7d6c6848285906f7aba7b545c",
+        "header_count_matches_actual": true
+      }
+    }
+  ],
+  "complete": true,
+  "successful_samples": 3,
+  "failed_samples": 0,
+  "median_wall_seconds_successful": 14.192504152655602,
+  "all_planned_samples_attempted": true,
+  "all_samples_succeeded": true
+}

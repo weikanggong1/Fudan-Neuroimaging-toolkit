@@ -1,0 +1,191 @@
+{
+  "scope": "Exact SH controls only; no tractography or speed benchmark",
+  "status": "passed",
+  "baseline_commit": "4f56cc9d5937a766c432743809ab3b5baf11ca78",
+  "baseline_fod_sha256": "f82d2174109d05b9f820b6abe98e3792e48ae63e02ace2f2640f10c4c2052aaa",
+  "candidate_fod_sha256": "76a6b29364fdda8c33509aca7e8243b10c05f5418267e7bfb21ba0b6502d7310",
+  "fixture_sha256": "ceb70dad84f0cfc6d1e59fbd8dea99a87916a0430ac78ffe7a43b3bfad164791",
+  "runner_sha256": "6bfa433d6e51f917e39f81fc39f1cdd44a48b628b2469ab5bc9b5a9a03e9ebcf",
+  "benchmark_tool_sha256": "d85962361d9cbe31a7c911541e21fe3268a6c1547eeab5da88b4fa8511b786d9",
+  "tracking_source_sha256": "6ed4e6bedc45fa0eaf2b026541056ec2976eb7d205d397c8dff4f3e899047dbd",
+  "source_loader": "benchmark_load_source_pairs",
+  "fod_module_identity_distinct": true,
+  "sh_function_identity_distinct": true,
+  "torch_version": "2.5.1+cu118",
+  "torch_cuda_version": "11.8",
+  "cpu_threads": 8,
+  "device": {
+    "type": "cuda",
+    "name": "NVIDIA A100-SXM4-80GB",
+    "memory_cap_bytes": 18000000000,
+    "total_memory_bytes": 84974239744
+  },
+  "cuda_matmul_allow_tf32": true,
+  "cudnn_allow_tf32": true,
+  "autocast_enabled": false,
+  "original_control_cases": 140,
+  "original_evaluated_directions": 35868,
+  "lmax": [
+    0,
+    2,
+    4,
+    6,
+    8,
+    10,
+    12
+  ],
+  "complete_unique_column_coverage": [
+    1,
+    6,
+    15,
+    28,
+    45,
+    66,
+    91
+  ],
+  "raw_bytes_equal": true,
+  "input_unchanged": true,
+  "rng_unchanged": true,
+  "large_controls": [
+    {
+      "directions": 1,
+      "strided": false,
+      "raw_bytes_equal": true
+    },
+    {
+      "directions": 1,
+      "strided": true,
+      "raw_bytes_equal": true
+    },
+    {
+      "directions": 128,
+      "strided": false,
+      "raw_bytes_equal": true
+    },
+    {
+      "directions": 128,
+      "strided": true,
+      "raw_bytes_equal": true
+    },
+    {
+      "directions": 8192,
+      "strided": false,
+      "raw_bytes_equal": true
+    },
+    {
+      "directions": 8192,
+      "strided": true,
+      "raw_bytes_equal": true
+    },
+    {
+      "directions": 32768,
+      "strided": false,
+      "raw_bytes_equal": true
+    },
+    {
+      "directions": 32768,
+      "strided": true,
+      "raw_bytes_equal": true
+    },
+    {
+      "directions": 131072,
+      "strided": false,
+      "raw_bytes_equal": true
+    },
+    {
+      "directions": 131072,
+      "strided": true,
+      "raw_bytes_equal": true
+    }
+  ],
+  "empty_input_existing_behavior": [
+    {
+      "lmax": 0,
+      "same_exception": true,
+      "exception": "RuntimeError"
+    },
+    {
+      "lmax": 8,
+      "same_exception": true,
+      "exception": "RuntimeError"
+    }
+  ],
+  "gradient_controls": [
+    {
+      "lmax": 0,
+      "strided": false,
+      "forward_raw_bytes_equal": true,
+      "backward_raw_bytes_equal": true,
+      "no_grad_raw_bytes_equal": true
+    },
+    {
+      "lmax": 0,
+      "strided": true,
+      "forward_raw_bytes_equal": true,
+      "backward_raw_bytes_equal": true,
+      "no_grad_raw_bytes_equal": true
+    },
+    {
+      "lmax": 2,
+      "strided": false,
+      "forward_raw_bytes_equal": true,
+      "backward_raw_bytes_equal": true,
+      "no_grad_raw_bytes_equal": true
+    },
+    {
+      "lmax": 2,
+      "strided": true,
+      "forward_raw_bytes_equal": true,
+      "backward_raw_bytes_equal": true,
+      "no_grad_raw_bytes_equal": true
+    },
+    {
+      "lmax": 8,
+      "strided": false,
+      "forward_raw_bytes_equal": true,
+      "backward_raw_bytes_equal": true,
+      "no_grad_raw_bytes_equal": true
+    },
+    {
+      "lmax": 8,
+      "strided": true,
+      "forward_raw_bytes_equal": true,
+      "backward_raw_bytes_equal": true,
+      "no_grad_raw_bytes_equal": true
+    },
+    {
+      "lmax": 12,
+      "strided": false,
+      "forward_raw_bytes_equal": true,
+      "backward_raw_bytes_equal": true,
+      "no_grad_raw_bytes_equal": true
+    },
+    {
+      "lmax": 12,
+      "strided": true,
+      "forward_raw_bytes_equal": true,
+      "backward_raw_bytes_equal": true,
+      "no_grad_raw_bytes_equal": true
+    }
+  ],
+  "host_aten_operator_counts_lmax8_8192": {
+    "baseline": {
+      "aten::mul": 50,
+      "aten::zeros_like": 2,
+      "aten::zero_": 2,
+      "aten::index_select": 9,
+      "aten::index_copy_": 17
+    },
+    "candidate": {
+      "aten::mul": 36,
+      "aten::index_select": 4,
+      "aten::index_copy_": 3,
+      "aten::zeros_like": 1,
+      "aten::zero_": 1,
+      "aten::stack": 2,
+      "aten::cat": 2
+    }
+  },
+  "peak_cuda_allocated_bytes": 131693056,
+  "peak_cuda_reserved_bytes": 159383552
+}

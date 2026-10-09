@@ -1,0 +1,201 @@
+{
+  "kind": "offline descriptive tractography QC; no equivalence claim",
+  "dataset": {
+    "label": "OpenNeuro ds004666",
+    "source": "https://openneuro.org/datasets/ds004666",
+    "license": "CC0",
+    "metadata_provenance": "caller-supplied case-specific manifest; all input SHA-256 bindings checked offline",
+    "acknowledgement_doi": "10.1162/imag_a_00060"
+  },
+  "length_method": "Sum of Euclidean distances between consecutive stored RAS-mm TCK points, float64 arithmetic; no streamline resampling",
+  "length_limitations": "Stored-polyline length depends on stored point spacing/downsampling; it is not each implementation internal integration length.",
+  "comparison": {
+    "measure": "two-sample Kolmogorov-Smirnov D for stored-polyline lengths",
+    "ks_d": 0.01138853131104256,
+    "alternative": "two-sided",
+    "method": "scipy.stats.ks_2samp(method=asymp)",
+    "interpretation": "descriptive distribution distance only; RNGs differ; no software equivalence conclusion",
+    "mean_length_difference_fnit_minus_mrtrix_mm": -0.678348585831138,
+    "streamline_count_difference_fnit_minus_mrtrix": -109
+  },
+  "endpoint_parity_assessed": false,
+  "structural_connectivity_matrix_parity_assessed": false,
+  "raw_inputs_uploaded": false,
+  "gpu_executed": false,
+  "offline_only": true,
+  "runtime": {
+    "nibabel": "5.4.2",
+    "matplotlib": "3.9.4",
+    "numpy": "1.26.4",
+    "scipy": "1.15.3"
+  },
+  "tcks": [
+    {
+      "software": "FNIT",
+      "tck_sha256": "dab33e9b511496f60b09f647fd4236bf028508d6665a012030169519f1f67870",
+      "size_bytes": 13808407,
+      "streamline_count": 27506,
+      "header_streamline_count": 27506,
+      "configured_seed_budget": 100000,
+      "seed_budget_provenance": "caller-provided --n-seeds; not inferred from TCK header or stored streamlines",
+      "stored_polyline_length_mm": {
+        "mean": 39.379468370324396,
+        "median": 24.436798737447745,
+        "percentiles": {
+          "5": 4.983785952772921,
+          "25": 9.962093356050701,
+          "75": 57.31015630907716,
+          "95": 117.90494373936866
+        },
+        "min": 4.4375578405150495,
+        "max": 246.97141934195585
+      },
+      "stored_points_per_streamline": {
+        "mean": 40.834290700210865,
+        "median": 26.0,
+        "percentiles": {
+          "5": 6.0,
+          "25": 11.0,
+          "75": 59.0,
+          "95": 120.0
+        },
+        "min": 6.0,
+        "max": 249.0
+      },
+      "coordinates": "RAS+ world millimetres",
+      "coordinate_dtype_on_disk": "float32",
+      "length_accumulation_dtype": "float64",
+      "plot_sample_count": 2000,
+      "plot_selected_index_sha256": "2d3b84329afdccc0b7e546ac2c36520fdd10de57b7f406de1eb92265bbec6748",
+      "variant": "FNIT SH-preserved 76a6b293, eager A100, 100k seeds",
+      "mrtrix_version": "unknown; not recorded in this TCK",
+      "downsample_factor_header": null,
+      "total_count_header": null
+    },
+    {
+      "software": "MRtrix3",
+      "tck_sha256": "3ca355dbac37b8468e2582ad16e2a002923e0b1ee264bbd6dcee599e582344b4",
+      "size_bytes": 14075592,
+      "streamline_count": 27615,
+      "header_streamline_count": 27615,
+      "configured_seed_budget": 100000,
+      "seed_budget_provenance": "caller-provided --n-seeds; not inferred from TCK header or stored streamlines",
+      "stored_polyline_length_mm": {
+        "mean": 40.057816956155534,
+        "median": 25.37485955365528,
+        "percentiles": {
+          "5": 4.98773445027035,
+          "25": 10.012672031909517,
+          "75": 58.678611557776975,
+          "95": 119.47576306738277
+        },
+        "min": 4.440319898144998,
+        "max": 247.14909741570546
+      },
+      "stored_points_per_streamline": {
+        "mean": 41.470324099221436,
+        "median": 27.0,
+        "percentiles": {
+          "5": 6.0,
+          "25": 12.0,
+          "75": 60.0,
+          "95": 121.0
+        },
+        "min": 6.0,
+        "max": 250.0
+      },
+      "coordinates": "RAS+ world millimetres",
+      "coordinate_dtype_on_disk": "float32",
+      "length_accumulation_dtype": "float64",
+      "plot_sample_count": 2000,
+      "plot_selected_index_sha256": "856c812670481ae430e8d3b832a8839fb1855ebb71028302969fea03e403b74b",
+      "variant": "MRtrix3 iFOD2",
+      "mrtrix_version": "3.0.3",
+      "downsample_factor_header": "2",
+      "total_count_header": "96519"
+    }
+  ],
+  "plot": {
+    "sha256": "1ad28a373235e263683f54577215702d2ad912d8db8c077a550fc9ab4d0d278c",
+    "sampling": "For each TCK, independently reset numpy default_rng to the same seed; choose up to 2000 unique streamline indices uniformly, without replacement; sort indices",
+    "sample_seed": 20261009,
+    "sample_count_per_software": 2000,
+    "coordinate_system": "RAS+ world millimetres; neurological left-to-right orientation",
+    "background": "Maximum intensity projections of 5TT cGM+sGM+WM; resampled at 1.5 mm only for display",
+    "voxel_exact": false,
+    "color_rule": "normalized absolute endpoint displacement, R=red, A=green, S=blue",
+    "fnit_variant": "FNIT SH-preserved 76a6b293, eager A100, 100k seeds"
+  },
+  "five_tissue": {
+    "sha256": "704539238d29c10eeaf4fab31831bc3ced9648ce6a59f4e9bd75c7b7d6d03fbf",
+    "shape": [
+      256,
+      256,
+      256,
+      5
+    ],
+    "affine": [
+      [
+        -0.9999845623970032,
+        -0.0037051839753985405,
+        -0.004160537850111723,
+        130.02682495117188
+      ],
+      [
+        -0.004148044157773256,
+        -0.0033732738811522722,
+        0.9999857544898987,
+        -102.60282897949219
+      ],
+      [
+        0.0037191645242273808,
+        -0.9999876618385315,
+        -0.0033579382579773664,
+        151.58485412597656
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "native_orientation": [
+      "L",
+      "I",
+      "A"
+    ],
+    "display_orientation": [
+      "R",
+      "A",
+      "S"
+    ],
+    "display_affine": [
+      [
+        1.5,
+        0.0,
+        0.0,
+        -126.97499752556905
+      ],
+      [
+        0.0,
+        1.5,
+        0.0,
+        -104.5207650794182
+      ],
+      [
+        0.0,
+        0.0,
+        1.5,
+        -104.2682738986332
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "plot_source_sha256": "f68cbc5b2882b17a036bd64487be8f7e9fe864cc267613deb8fb57c77becd9e7"
+}

@@ -1,18 +1,19 @@
 # Connectome 追踪：无损优化与同机实测
 
-[完整 pipeline](README.md) · [追踪输入、全部参数和输出](TRACKING_OPERATORS.md) · [本轮结果](../../validation/connectome/tracking_exact_20261009/README.md)
+[完整 pipeline](README.md) · [追踪输入、全部参数和输出](TRACKING_OPERATORS.md) · [最新 A100 结果](../../validation/connectome/tracking_cfff_20261009/README.md) · [前次 H100 结果](../../validation/connectome/tracking_exact_20261009/README.md)
 
 ## 1. 功能与策略
 
 本轮优化从真实、已经归一化的 WM FOD 和 5TT/GMWMI 开始，到完整流线输出结束。保持原 iFOD2/ACT、随机数顺序、浮点精度、截断规则和输出结构。SIFT2、FA 采样及矩阵构造继续使用既有实现。
 
-本轮正式实现将 5TT 八角点取值合并为一次 gather，并批量计算权重，保留原乘法分组和八次有序累加。拒绝采样继续使用已有的有序活动索引复用；ACT 保持原 eager 状态判断。ACT 状态编译作为独立实验记录，未加入默认实现。
+正式实现保留前次 5TT 八角点 gather、权重计算及八次有序累加。本次将 SH 的正/负阶离散列操作合并：保持 512 层查表、全部 45 个系数、原 cos/sin 递推和乘法分组，减少重复索引及写回。请求梯度或进入 `torch.compile` 时执行原 SH 运算；仅 eager inference 使用合并路径。ACT、RNG、播种数、proposal 和输出结构保持原规则。
 
 ~~~mermaid
 flowchart LR
     INPUT[固定真实 FOD / 5TT / GMWMI] --> SEED[原播种与随机数序列]
     SEED --> ARC[原 iFOD2 圆弧与拒绝采样]
-    ARC --> SAMPLE[合并八角点取值<br/>原权重与有序累加]
+    ARC --> SH[512 层 SH 查表<br/>eager 合并列操作<br/>编译/梯度保留原运算]
+    SH --> SAMPLE[合并八角点取值<br/>原权重与有序累加]
     SAMPLE --> ACT[原 ACT 状态判断]
     ACT --> GROW[前向与反向推进<br/>原截断与降采样]
     GROW --> OUT[完整路径、端点、长度与接受种子]
@@ -67,7 +68,8 @@ pipeline 的标准 BIDS 命令见 [完整入口](README.md#3-命令行调用)。
 ~~~bash
 BASELINE_TRACKING=/data/frozen/tracking.py         # 已核对的旧版源码
 CANDIDATE_TRACKING=/data/candidate/tracking.py     # 待验证源码
-FOD_MODULE=/data/frozen/fod.py                    # 两版共用的 FOD / SH 实现
+BASELINE_FOD_MODULE=/data/frozen/fod.py           # 旧版 FOD / SH 源码
+CANDIDATE_FOD_MODULE=/data/candidate/fod.py       # 新版 FOD / SH 源码
 REAL_FOD=/data/inputs/fod_reference.nii.gz        # [X,Y,Z,45]
 REAL_FIVE_TISSUE=/data/inputs/five_reference.nii.gz # [A,B,C,5]
 REAL_GMWMI=/data/inputs/gmwmi_reference.nii.gz     # [A,B,C]
@@ -76,7 +78,9 @@ TRACK_OUTPUT_DIR=/data/results/tracks
 
 python tools/benchmark_connectome_tracking_exact.py \
   --baseline-tracking "$BASELINE_TRACKING" \
-  --candidate-tracking "$CANDIDATE_TRACKING" --fod-module "$FOD_MODULE" \
+  --candidate-tracking "$CANDIDATE_TRACKING" \
+  --baseline-fod-module "$BASELINE_FOD_MODULE" \
+  --candidate-fod-module "$CANDIDATE_FOD_MODULE" \
   --fod "$REAL_FOD" --five-tissue "$REAL_FIVE_TISSUE" --gmwmi "$REAL_GMWMI" \
   --n-seeds 100000 --batch-size 8192 --seed 0 --device cuda:0 \
   --warmup 1 --warmup-seeds 100000 --repeats 2 --memory-budget-gb 20 \
@@ -85,7 +89,9 @@ python tools/benchmark_connectome_tracking_exact.py \
 
 | 参数 | 意义 |
 | --- | --- |
-| baseline-tracking / candidate-tracking / fod-module | 冻结的 Python 源码；SHA-256 实际绑定版本。 |
+| baseline-tracking / candidate-tracking | 冻结的追踪源码；SHA-256 实际绑定版本。 |
+| baseline-fod-module / candidate-fod-module | 成对提供两版 FOD/SH 源码；各 tracking 绑定自己的 FOD 函数。 |
+| fod-module | 旧共享 FOD 模式仍可使用；与上面的成对参数互斥。不用于验证 FOD 自身的改动。 |
 | fod / five-tissue / gmwmi | 上表真实 NIfTI；GMWMI 与 5TT 必须同 shape、同 affine。 |
 | n-seeds / seed / batch-size | 尝试数、两版固定 RNG seed 和相同批量；本例 100000 / 0 / 8192。 |
 | device | 单个 CPU/CUDA 设备；两版在同一张 GPU 交错运行。 |
@@ -115,7 +121,41 @@ MRTRIX_RNG_SEED=0 tckgen "$REAL_FOD" reference_seed0.tck \
 
 [MRtrix tckgen 3.0.3 文档](https://mrtrix.readthedocs.io/en/3.0.3/reference/commands/tckgen.html)定义这些参数。select=0 按尝试数结束；不能把 100k seeds 解释成 100k 保留流线。
 
-## 5. 真实输入结果与脑图
+## 5. 最新 A100 真实输入结果与脑图
+
+固定 OpenNeuro ds004666 的同三份真实输入；许可、尺寸与 SHA 见[本轮验证页](../../validation/connectome/tracking_cfff_20261009/README.md)。FOD 为 [104,104,72,45]，5TT/GMWMI 为 [256,256,256]。共享节点为 Xeon Platinum 8369B、A100-SXM4-80GB；每个 FNIT 进程只用一张卡和 8 个 CPU 线程，Python 3.11.17、Torch 2.5.1+cu118，FP32/TF32。
+
+基线为 `4f56cc9d`，最终候选 FOD 源码 SHA 前缀为 `76a6b293`，tracking 源码未改。两版使用独立 FOD 模块并检查实际函数绑定；不是让旧版共用新版 SH。每版先完整预热，再以 AB、BA 交替运行，每版两个热样本。
+
+| 同模式对照 | 基线两个热样本 / s | 最终源码两个热样本 / s | 中位数：基线 → 最终 / s |
+| --- | --- | --- | --- |
+| 10k 默认模式 | 24.837 / 25.578 | 22.367 / 21.904 | 25.207 → 22.136 |
+| 100k 默认模式 | 319.212 / 280.044 | 198.814 / 157.553 | 299.628 → 178.184 |
+| 100k 原有编译模式 | 118.314 / 106.868 | 122.995 / 102.842 | 112.591 → 112.919 |
+
+10k 两对均较快，中位数耗时减少 12.19%。100k 默认组观测下降 40.53%，但期间其他作业开始使用多张 GPU，基线与候选样本波动较大，不能把这个值当成稳定加速倍率。编译模式无明确收益；本次保留原编译 SH 图。全部样本及共享 GPU 数值快照保留在 JSON，未剔除慢样本。
+
+100k 默认首次完整调用为 179.789 / 256.694 秒，编译为 132.906 / 142.158 秒；它们属于完整预热，包含当时初始化/编译和负载，不是隔离冷启动比较。两模式分别在自己的同一张卡内对照，不能将不同卡或历史 H100 时间相除。
+
+两组各六次完整调用的输出与 TCK SHA 相同，四次可评估比较均通过 shape、dtype、值和原始字节核对。默认保留 27506 条，编译保留 27745 条；这两种原有模式互相没有逐位等价承诺。FA=None，本轮从 FOD 到完整流线结束；原始 BIDS 到 SC 的结论继续见[端到端精度页](ACCURACY_OPTIMIZATION_20261003.md)。
+
+最终源码 119 项聚焦 GPU 回归通过；CPU 为 86 passed、33 CUDA skipped。CUDA SH 控制覆盖原 140 组/35868 个方向、10 个规模/布局控制及 8 个梯度控制，输入与 RNG 均不变。独立 128 seeds profiler 的实际 CUDA kernel 数为 394737 → 350321，减少 11.25%；两次均保留 38 条流线。profiler 墙钟受插桩及共享负载影响，不作为正常吞吐；计数仅累计实际 kernel，不重复累计 inclusive operator 时间。
+
+Torch allocated/reserved 最大约 1.05/1.21 GB，allocator 上限仍为 18 GB。另一次完整编译 100k 显存审计的输出摘要与本卡基线相同，Torch 峰值 1.050/1.206 GB；但当前容器的可见 PID 与驱动 PID 不一致，进程 NVML 采样缺失，完整进程 <20 GB gate **未通过**。不把整卡总显存或缺失值当成本进程峰值。[实际审计报告](../../validation/connectome/tracking_cfff_20261009/memory_audit_100k.public.json)
+
+### 同机官方参考
+
+同三份输入、同 100k 播种预算和 8 CPU 线程，官方 `tckgen` seed 0/1/2 墙钟为 16.319 / 14.193 / 13.888 秒，保留 27615 / 27627 / 27690 条流线。计时包含输入和 TCK 写盘；FNIT 表中 tracking 时间排除这些外部 I/O。官方源码固定为 `026e850d171ec2a12f09865d31b8332d23d7ecf6`，独立归档构建报告版本为 3.0.3；没有伪造 git describe 后缀。[官方完整记录](../../validation/connectome/tracking_cfff_20261009/mrtrix_100k.public.json)
+
+当前 FNIT 编译追踪约 113 秒，官方完整命令中位数约 14.19 秒，追踪仍有明显差距。新旧 FNIT 逐字节一致证明这次优化未改变既有输出；不同 RNG 的 MRtrix 比较继续采用重复分布，不能由一次流线计数或脑图推断 SC 已完全匹配。
+
+### 最新输出示例
+
+![真实 A100 100k 追踪与同机官方参考](../../validation/connectome/tracking_cfff_20261009/real100k_qc.png)
+
+图为最终源码默认模式和本机 MRtrix seed 0 的实际 TCK，各独立抽样最多 2000 条。保存折线平均长度为 39.379 / 40.058 mm，中位数为 24.437 / 25.375 mm，长度 KS 距离 0.011389。5TT 只在离线显示时重采样；这里的长度是保存点之间的距离之和，不是内部圆弧积分长度。[统计及绘图复现](../../validation/connectome/tracking_cfff_20261009/README.md#5-脑图复现)
+
+## 6. 前次 H100 5TT 优化记录
 
 固定 OpenNeuro ds004666 输入，FOD [104,104,72,45]、5TT/GMWMI [256,256,256]。三份输入 SHA 见本轮 JSON；数据源的 [dataset description](https://raw.githubusercontent.com/OpenNeuroDatasets/ds004666/master/dataset_description.json)声明 CC0。参考为 MRtrix3 3.0.3-103-g026e850d、Xeon Gold 6430、8 线程；每个 FNIT 测试进程使用同机单张 H100、8 个 CPU 线程及 FP32/TF32。
 
@@ -148,20 +188,23 @@ MRtrix RNG seed 0/1/2 的完整 tckgen 墙钟为 16.188 / 16.032 / 16.286 秒，
 
 图取实际 FNIT 9c 编译基线与 MRtrix seed 0 TCK，各确定性抽样最多 2000 条。本轮新实现的编译组 TCK 与图中 FNIT 输入 SHA 相同，因此可复用该图，仍保留原生产者标签。5TT 重采样只用于离线显示。保存折线平均长度为 38.967 / 40.248 mm，中位数为 23.915 / 25.363 mm，KS 距离 0.019626；长度采用保存点间的距离之和，与内部积分长度分开。图、统计及[绘图复现](../../validation/connectome/tracking_exact_20261009/QC_REPRODUCE.md)不证明端点、SC 矩阵或原始 DWI 全流程已匹配。
 
-## 6. 更新与未采用实验
+## 7. 更新与未采用实验
 
 | 版本 / 日期 | 记录 |
 | --- | --- |
+| SH 源码 76a6b293 / 2026-10-09 | eager 合并 SH 列操作；编译/梯度保留原运算。A100 两模式 100k 全部字节/TCK 一致、119 GPU 回归；最终 10k 中位数 25.207→22.136 秒。 |
 | d4327049 / 2026-10-09 | 合并 5TT 角点取值与权重；两种模式分别完成 100k 严格比较；74 项 GPU 回归通过。真实同机 MRtrix 三 seed、全量计时和 profiler 见本轮验证页。 |
 | 9c118b7 | 拒绝采样保留有序 pending 索引；原随机数和 proposal 顺序不变。旧合成检查只作为回归。 |
 | 2026-10-03 | SGM 退出截断按内部点弦方向评价 FOD；完整原始数据结果见[精度记录](ACCURACY_OPTIMIZATION_20261003.md)。 |
 | 2026-10-02 | SH、采样布局和原 5TT 轴索引复用，见[前轮记录](TRACKING_OPERATORS.md#6-最近更新与-benchmark-记录)。 |
 
-只校准活动行在真实 100k 热调用中 113.556 → 116.156 秒，虽输出一致但没有收益，未采用。只合并八角点 gather、仍逐角计算权重的候选，也没有稳定整体收益。共享 GPU 时段的慢样本和首次 CUDA 分配失败保留在实验记录，不从统计中删除。扩大 proposal 块、跳过反向传播或改变精度会改变输出，本轮没有采用。
+本次初始方向索引候选无收益，追踪成功行索引收益不明确；压缩 lookup 列未显示相对普通合并路径的额外收益，均未采用。未保护编译路径的 SH 候选虽在 eager 一致，但编译 100k 接受数 27745→27750、原始字节不一致，已拒绝并改为保留原编译图。[完整未采用记录](../../validation/connectome/tracking_cfff_20261009/README.md#3-候选取舍)
+
+前次只校准活动行在真实 100k 热调用中 113.556 → 116.156 秒，虽输出一致但没有收益，未采用。只合并八角点 gather、仍逐角计算权重的候选，也没有稳定整体收益。共享 GPU 时段的慢样本和首次 CUDA 分配失败保留在实验记录，不从统计中删除。扩大 proposal 块、跳过反向传播或改变精度会改变输出，本轮没有采用。
 
 依赖沿用主页 Conda 环境的 PyTorch、Triton、编译器、nibabel 和 NumPy；离线脑图使用既有 Matplotlib，未新增计算依赖。
 
-## 7. 参考与原实现
+## 8. 参考与原实现
 
 - [MRtrix3 源码](https://github.com/MRtrix3/mrtrix3)、[tckgen 3.0.3](https://mrtrix.readthedocs.io/en/3.0.3/reference/commands/tckgen.html)。
 - Tournier, Calamante & Connelly. Improved probabilistic streamlines tractography by 2nd order integration over fibre orientation distributions. ISMRM 2010, 1670.

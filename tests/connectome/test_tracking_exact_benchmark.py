@@ -164,3 +164,113 @@ def test_cpu_run_once_records_scalar_timings_and_no_gpu(benchmark, monkeypatch, 
     assert record["profile_summary"]["kernel_device_seconds"] == 0
     assert trace.is_file()
     json.dumps(record)
+
+
+def _source_pair(tmp_path):
+    tracking = "from .fod import tracking_sh_precomputed, real_sh\n" \
+               "def probabilistic_tractography():\n    return real_sh()\n"
+    paths = {}
+    for variant in ("baseline", "candidate"):
+        directory = tmp_path / variant
+        directory.mkdir()
+        paths[variant] = directory / "tracking.py"
+        paths[variant].write_text(tracking)
+        paths[variant + "_fod"] = directory / "fod.py"
+        paths[variant + "_fod"].write_text(
+            f"def real_sh():\n    return {variant!r}\n"
+            f"def tracking_sh_precomputed():\n    return {variant!r}\n")
+    return paths
+
+
+def test_paired_fod_sources_bind_only_to_their_own_functions(benchmark, tmp_path):
+    paths = _source_pair(tmp_path)
+    modules, fods = benchmark.load_source_pairs(
+        paths["baseline"], paths["candidate"],
+        baseline_fod_path=paths["baseline_fod"],
+        candidate_fod_path=paths["candidate_fod"])
+    assert fods["baseline"] is not fods["candidate"]
+    assert modules["baseline"].__package__ != modules["candidate"].__package__
+    assert benchmark.file_sha256(paths["baseline_fod"]) != benchmark.file_sha256(paths["candidate_fod"])
+    for variant in ("baseline", "candidate"):
+        assert modules[variant].probabilistic_tractography() == variant
+        for name in ("real_sh", "tracking_sh_precomputed"):
+            assert getattr(modules[variant], name) is getattr(fods[variant], name)
+    identity = benchmark.fod_source_identity(modules, fods)
+    assert identity["fod_mode"] == "paired"
+    assert not identity["fixed_fod_function_identity_equal"]
+    assert not any(identity["cross_variant_fod_function_identity"].values())
+    assert all(all(values.values()) for values in identity["fod_function_identity"].values())
+
+
+def test_default_shared_fod_preserves_existing_loader_and_identity(benchmark, tmp_path):
+    paths = _source_pair(tmp_path)
+    for loader in (benchmark.load_sources, benchmark.load_source_pairs):
+        result = loader(paths["baseline"], paths["candidate"], paths["candidate_fod"])
+        modules = result[0]
+        fods = (result[1] if isinstance(result[1], dict) else
+                {"baseline": result[1], "candidate": result[1]})
+        assert fods["baseline"] is fods["candidate"]
+        assert modules["baseline"].probabilistic_tractography() == "candidate"
+        assert modules["candidate"].probabilistic_tractography() == "candidate"
+        identity = benchmark.fod_source_identity(modules, fods)
+        assert identity["fod_mode"] == "shared"
+        assert identity["fixed_fod_function_identity_equal"]
+        assert all(identity["cross_variant_fod_function_identity"].values())
+    # Omitting the source still selects candidate's neighbouring fod.py.
+    modules, fods = benchmark.load_source_pairs(paths["baseline"], paths["candidate"])
+    assert Path(fods["baseline"].__file__) == paths["candidate_fod"]
+    assert benchmark.fod_source_identity(modules, fods)["fixed_fod_function_identity_equal"]
+
+
+def test_paired_loader_rejects_tracking_that_overrides_its_fod_function(benchmark, tmp_path):
+    paths = _source_pair(tmp_path)
+    with paths["baseline"].open("a") as stream:
+        stream.write("def real_sh():\n    return 'wrong binding'\n")
+    with pytest.raises(ValueError, match="baseline did not bind its FOD function real_sh"):
+        benchmark.load_source_pairs(
+            paths["baseline"], paths["candidate"],
+            baseline_fod_path=paths["baseline_fod"],
+            candidate_fod_path=paths["candidate_fod"])
+
+
+@pytest.mark.parametrize("extra", [
+    ["--baseline-fod-module", "baseline_fod"],
+    ["--candidate-fod-module", "candidate_fod"],
+    ["--fod-module", "candidate_fod", "--baseline-fod-module", "baseline_fod",
+     "--candidate-fod-module", "candidate_fod"],
+])
+def test_cli_rejects_unpaired_or_conflicting_fod_sources(benchmark, tmp_path, capsys, extra):
+    paths = _source_pair(tmp_path)
+    arguments = ["--baseline-tracking", str(paths["baseline"]),
+                 "--candidate-tracking", str(paths["candidate"]),
+                 "--fod", str(paths["baseline"]), "--five-tissue", str(paths["baseline"]),
+                 "--gmwmi", str(paths["baseline"]), "--output", str(tmp_path / "report.json")]
+    arguments += [str(paths[value]) if value in paths else value for value in extra]
+    with pytest.raises(SystemExit) as failure:
+        benchmark.parse_args(arguments)
+    assert failure.value.code == 2
+    error = capsys.readouterr().err
+    assert "must be supplied together" in error or "cannot be combined" in error
+
+
+@pytest.mark.parametrize("mode", ["default", "shared", "paired"])
+def test_cli_resolves_only_the_selected_fod_sources(benchmark, tmp_path, mode):
+    paths = _source_pair(tmp_path)
+    arguments = ["--baseline-tracking", str(paths["baseline"]),
+                 "--candidate-tracking", str(paths["candidate"]),
+                 "--fod", str(paths["baseline"]), "--five-tissue", str(paths["baseline"]),
+                 "--gmwmi", str(paths["baseline"]), "--output", str(tmp_path / "report.json")]
+    if mode == "shared":
+        arguments += ["--fod-module", str(paths["baseline_fod"])]
+    elif mode == "paired":
+        arguments += ["--baseline-fod-module", str(paths["baseline_fod"]),
+                      "--candidate-fod-module", str(paths["candidate_fod"])]
+    args = benchmark.parse_args(arguments)
+    if mode == "paired":
+        assert args.fod_module is None
+        assert args.baseline_fod_module == paths["baseline_fod"].resolve()
+        assert args.candidate_fod_module == paths["candidate_fod"].resolve()
+    else:
+        expected = paths["baseline_fod"] if mode == "shared" else paths["candidate_fod"]
+        assert args.fod_module == expected.resolve()
+        assert args.baseline_fod_module is args.candidate_fod_module is None
