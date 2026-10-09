@@ -5,9 +5,12 @@ FreeSurfer Software License: licenses/FreeSurfer.txt.
 """
 from itertools import chain
 import numpy as np
-from numba import njit
+from numba import njit, objmode
 import time
-from .place_surface_collision import _moved_face_geometry,_candidate_collision,_project_close_neighbors
+from .place_surface_collision import (
+    _moved_face_geometry, _candidate_collision, _project_close_neighbors,
+    _retry_face_in_mht,
+)
 
 
 @njit(cache=True)
@@ -67,17 +70,82 @@ def _ordered_snapshot_step(initial,triangles,proposal,order,incident,incident_of
     return current
 
 
+@njit(cache=False)
+def _ordered_retained_snapshot_step(initial,triangles,proposal,order,incident,incident_offsets,
+                           neighbors,neighbor_valid,offsets,has_offsets,accepted_offsets,
+                           update_offsets,geometry,vertex_svi,min_neighbor_mm,
+                           initial_centers,maximum_radius,candidate_offsets,candidates,motion_bound,
+                           stale_trial,order_rank):
+    """Compile the ordered loop, retaining the original Python bucket predicate.
+
+    Object mode is entered only for a live triangle hit. It reads current
+    coordinates before the next vertex update, never a snapshot acceptance map.
+    Separate compilation keeps the established first-trial cached kernel intact.
+    """
+    current=initial.copy()
+    mht_checks=0
+    for vertex in order:
+        unchanged=True
+        for axis in range(3):
+            if proposal[vertex,axis]!=initial[vertex,axis]:unchanged=False
+        if unchanged:continue
+        endpoint=proposal[vertex].copy()
+        final_offset=offsets[vertex].copy()
+        if has_offsets:
+            projected,valid=_project_close_neighbors(current,int(vertex),neighbors,neighbor_valid,
+                         offsets[vertex],geometry,int(vertex_svi[vertex]),min_neighbor_mm)
+            if not valid:continue
+            endpoint=(initial[vertex]+projected).astype(np.float32)
+            final_offset=projected
+        squared=0.0
+        for axis in range(3):
+            displacement=float(endpoint[axis])-float(initial[vertex,axis])
+            squared+=displacement*displacement
+        if squared>motion_bound*motion_bound:
+            raise ValueError('projected endpoint exceeds trial snapshot motion bound')
+        collision=False
+        for slot in range(incident_offsets[vertex],incident_offsets[vertex+1]):
+            face=incident[slot]
+            moved,center,radius,low,high=_moved_face_geometry(current,triangles,face,int(vertex),endpoint)
+            nearby=_query_radius_candidates(candidates[candidate_offsets[face]:candidate_offsets[face+1]],
+                            initial_centers,center,(radius+maximum_radius)+1.0)
+            hit=_candidate_collision(current,triangles,moved,triangles[face],low,high,nearby)
+            while hit:
+                other=hit-1
+                mht_checks+=1
+                with objmode(bucket_hit='boolean'):
+                    bucket_hit=_retry_face_in_mht(moved,int(other),triangles,initial,
+                                                stale_trial,current,order_rank,int(order_rank[vertex]))
+                if bucket_hit:
+                    collision=True
+                    break
+                first=0
+                while first<len(nearby) and nearby[first]!=other:first+=1
+                nearby=nearby[first+1:]
+                hit=_candidate_collision(current,triangles,moved,triangles[face],low,high,nearby)
+            if collision:break
+        if collision:
+            if update_offsets:accepted_offsets[vertex]=0.0
+        else:
+            current[vertex]=endpoint
+            if update_offsets:accepted_offsets[vertex]=final_offset
+    return current,mht_checks
+
+
 def snapshot_ordered_step(xyz,triangles,proposal,order,incident,incident_offsets,
                           neighbors,neighbor_valid,offsets,accepted_offsets,geometry,
                           vertex_svi,min_neighbor_mm,tree,centers,radii,maximum_radius,
                           *, candidate_device=None, candidate_diagnostics=None,
-                          candidate_grid_cells_per_axis=2):
+                          candidate_grid_cells_per_axis=2,
+                          stale_mht_trial=None,order_rank=None):
     """One first trial; build a conservative union then filter exact query radii.
 
     Every vertex moves only after preceding accepted updates. Current candidate
     triangle coordinates are read by the existing compiled intersection test.
-    The union is rebuilt for each input/trial. Rejected retained-MHT trials use
-    the original tree path in the caller, never this CSR.
+    The union is rebuilt for each input/trial. Explicit stale_mht_trial selects
+    the experimental compiled retained-MHT loop; true triangle hits still use
+    the original source bucket replay on live coordinates. Caller supplies the
+    exact original order_rank. Defaults preserve the cached first-trial kernel.
     candidate_device=None preserves cKDTree; indexed CUDA selects the complete
     Torch grid and conservative initial AABB filter. candidate_diagnostics is
     an optional mutable dictionary for counts and complete wall times. Runtime
@@ -125,9 +193,18 @@ def snapshot_ordered_step(xyz,triangles,proposal,order,incident,incident_offsets
     update_offsets=accepted_offsets is not None
     if not update_offsets:accepted_offsets=np.zeros_like(xyz)
     ordered_started=time.perf_counter()
-    result=_ordered_snapshot_step(xyz,triangles,proposal,order,incident,incident_offsets,
+    arguments=(xyz,triangles,proposal,order,incident,incident_offsets,
                neighbors,neighbor_valid,offsets,has_offsets,accepted_offsets,update_offsets,
                geometry,vertex_svi,np.float32(min_neighbor_mm),centers,maximum_radius,
                candidate_offsets,candidates,bound)
+    if stale_mht_trial is None:
+        result=_ordered_snapshot_step(*arguments)
+    else:
+        if order_rank is None:raise ValueError('retained MHT requires the exact vertex order_rank')
+        result,mht_checks=_ordered_retained_snapshot_step(*arguments,stale_mht_trial,order_rank)
+        if candidate_diagnostics is not None:
+            candidate_diagnostics.update(retained_mht_checks=int(mht_checks),
+                effective_candidate_backend='compiled_retained_mht',
+                retained_bucket_predicate='original_python_FP64_live_coordinates')
     if candidate_diagnostics is not None:candidate_diagnostics["ordered_acceptance_seconds"]=time.perf_counter()-ordered_started
     return result

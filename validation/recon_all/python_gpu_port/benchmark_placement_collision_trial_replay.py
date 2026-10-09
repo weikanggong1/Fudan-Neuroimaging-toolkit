@@ -41,9 +41,13 @@ def main():
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--compare-grid-cells", action="store_true", help="保持GPU有序接受，配对完整2³/3³桶索引")
+    parser.add_argument("--compare-retained-mht", action="store_true",
+                        help="读真实拒绝重试检查点，原桶树循环与显式编译循环ABBA")
     args = parser.parse_args()
     if args.threads < 1:
         raise ValueError("threads must be positive")
+    if args.compare_grid_cells and args.compare_retained_mht:
+        parser.error("grid tuning and retained MHT must be measured separately")
     if args.output_directory.exists():
         raise FileExistsError(args.output_directory)
     args.output_directory.mkdir(parents=True)
@@ -78,7 +82,16 @@ def main():
         report["source_sha256"][source.name] = sha256(source)
     with np.load(args.input) as data:
         vertices, faces, proposal, ripped = (data[name] for name in ("vertices", "faces", "proposal", "ripped"))
-        momentum, offsets, neighbors, valid = (data[name] for name in ("momentum", "offsets", "neighbors", "valid"))
+        if args.compare_retained_mht:
+            momentum,offsets,neighbors,valid,stale=(data[name] for name in
+                ("accepted_offsets_initial","offsets","neighbors","neighbor_valid","stale_mht_trial"))
+            checkpoint_expected=tuple(data[name] for name in
+                ("expected_coordinates","expected_order","expected_accepted_offsets"))
+            report["scope"]="complete_frozen_real_retained_MHT_trial_ordered_acceptance_only"
+            report["reference"]="same-host source tree loop and saved real stage trial; not official geometry"
+        else:
+            momentum, offsets, neighbors, valid = (data[name] for name in ("momentum", "offsets", "neighbors", "valid"))
+            stale=None
     report["vertices"], report["faces"] = len(vertices), len(faces)
 
     def save(status):
@@ -94,12 +107,14 @@ def main():
         report["cuda_context_setup_seconds"] = time.perf_counter() - context_started
         report["gpu"] = torch.cuda.get_device_name(device)
         cold_results, paired_results = {}, []
-        control_name, candidate_name = (("torch_snapshot_grid2", "torch_snapshot_grid3")
-            if args.compare_grid_cells else ("tree", "torch_snapshot"))
+        control_name,candidate_name=(("retained_tree","retained_compiled") if args.compare_retained_mht
+            else (("torch_snapshot_grid2", "torch_snapshot_grid3") if args.compare_grid_cells
+                  else ("tree", "torch_snapshot")))
         sequence = (("cold", control_name), ("cold", candidate_name),
                     ("paired", control_name), ("paired", candidate_name),
                     ("paired", candidate_name), ("paired", control_name))
-        report["paired_scope"] = "same GPU complete grid2 versus grid3" if args.compare_grid_cells else "tree versus GPU"
+        report["paired_scope"]=("retained source bucket tree versus compiled live loop; complete grid3"
+            if args.compare_retained_mht else ("same GPU complete grid2 versus grid3" if args.compare_grid_cells else "tree versus GPU"))
         for kind, backend in sequence:
             torch.cuda.synchronize(device)
             torch.cuda.reset_peak_memory_stats(device)
@@ -109,8 +124,10 @@ def main():
             coordinates, order = collision.asynchronous_first_step(
                 vertices, faces, proposal, ripped, offsets=offsets,
                 accepted_offsets=accepted, ordered_neighbors=(neighbors, valid),
-                candidate_backend="torch_snapshot" if args.compare_grid_cells else backend,
-                candidate_grid_cells_per_axis=3 if backend == "torch_snapshot_grid3" else 2,
+                candidate_backend="torch_snapshot" if args.compare_grid_cells or args.compare_retained_mht else backend,
+                candidate_grid_cells_per_axis=3 if backend == "torch_snapshot_grid3" or args.compare_retained_mht else 2,
+                retained_mht_backend="compiled" if backend=="retained_compiled" else "tree",
+                stale_mht_trial=stale,
                 candidate_device=str(device) if backend != "tree" else None,
                 candidate_diagnostics=diagnostics,
             )
@@ -137,6 +154,9 @@ def main():
         report["paired_comparison_to_cold_tree"] = [
             {"backend": backend, **compare(cold_results[control_name], result)} for backend, result in paired_results]
         comparisons = [report["cold_comparison"], *report["paired_comparison_to_cold_tree"]]
+        if args.compare_retained_mht:
+            report["comparison_to_saved_live_trial"]=compare(cold_results[control_name],checkpoint_expected)
+            comparisons.append(report["comparison_to_saved_live_trial"])
         report["strict_same_input_reproduction"] = "passed" if all(
             row["different_coordinate_elements"] == 0 and row["same_order"]
             and row["different_accepted_offset_elements"] == 0 for row in comparisons) else "failed"
@@ -146,7 +166,7 @@ def main():
             if row["kind"] == "paired" and row["backend"] == backend) for backend in (control_name, candidate_name)}
         report["paired_median_seconds"] = medians
         report["speed_ratio_control_over_candidate"] = medians[control_name] / medians[candidate_name]
-        if not args.compare_grid_cells:
+        if not args.compare_grid_cells and not args.compare_retained_mht:
             report["speed_ratio_tree_over_torch_snapshot"] = medians[control_name] / medians[candidate_name]
         if args.historical_reference is not None:
             with np.load(args.historical_reference) as data:

@@ -280,3 +280,26 @@ def test_nondefault_grid_is_not_silently_ignored(white_inputs):
     with pytest.raises(ValueError, match="nondefault candidate grid"):
         stage.place_white_preaparc(subject_dir=subject, hemi="lh",
             output=subject / "diagnostic/white", candidate_grid_cells_per_axis=3)
+
+
+def test_compiled_retained_requires_snapshot_before_reading_inputs(tmp_path):
+    with pytest.raises(ValueError,match="compiled retained MHT requires snapshot"):
+        stage.place_white_preaparc(subject_dir=tmp_path,hemi="lh",output=tmp_path/"white",
+                                  retained_mht_backend="compiled")
+
+
+def test_complete_white_forwards_explicit_retained_policy(white_inputs,monkeypatch):
+    subject,xyz,faces,observed=white_inputs
+    observed_retained=[]
+
+    def collision(current,faces,proposal,*args,**kwargs):
+        observed_retained.append(kwargs["retained_mht_backend"])
+        return proposal,None
+
+    monkeypatch.setattr(stage,"asynchronous_first_step",collision)
+    monkeypatch.setattr(stage,"pial_step_decision",lambda ls,lr,s,r,dt,red:
+                        (dt*.5,red+1,True,True,red+1>2))
+    result=stage.place_white_preaparc(subject_dir=subject,hemi="lh",output=subject/"white",
+        candidate_backend="snapshot",retained_mht_backend="compiled")
+    assert result["retained_mht_backend"]=="compiled"
+    assert observed_retained==["compiled"]*12

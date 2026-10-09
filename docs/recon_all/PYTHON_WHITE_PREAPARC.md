@@ -63,6 +63,7 @@ white_report = place_white_preaparc(
     candidate_backend="tree",  # 原完整动态候选与有序接受；默认保留
     candidate_grid_cells_per_axis=2,  # GPU候选的默认完整网格；3仅用于显式实验
     collision_profile=False,  # 可选候选构建/有序接受分项，不改变接受规则
+    retained_mht_backend="tree",  # 默认原桶重试；compiled仅显式实验
     cleanup_marking_backend="source_torch",  # 实验有向MHT标记；初始与最终同规则
     device="cuda:0",  # 当前进程内明确的目标 GPU
     trace_callback=None,  # 可选每步诊断回调；坐标和记录是独立副本
@@ -98,6 +99,7 @@ white_report = place_white_preaparc(
 | `candidate_backend` | `"tree"`；`"snapshot"` 和 `"torch_snapshot"` 是保守预候选实验，仍保留实时顺序窄相接受；后者要求明确 `device` |
 | `candidate_grid_cells_per_axis` | 2；显式3仅用于 `torch_snapshot` 较小完整单元，每轴最多3桶，半径/FP64过滤/接受规则不变；非法或用于其他后端抛ValueError |
 | `collision_profile` | `False`；True另存每trial的候选数量、构建和有序接受秒，不把耗时放进决定轨迹 |
+| `retained_mht_backend` | `"tree"`；显式 `"compiled"` 要求snapshot候选，编译实时有序循环、真正三角命中仍调用原FP64桶重放；非法组合抛ValueError，首次JIT计入墙钟 |
 | `cleanup_marking_backend` | `"legacy"`；`"source_numba"`/`"source_torch"`按固定源码逐方向和共享MHT桶标记；后者要求显式device；只复用同次清理中完全相同的坐标 |
 | `device` | `None`；PyTorch 后端须显式指定如 `"cuda:0"` 或 `"cpu"`，不静默回退 CPU |
 | `trace_callback` | `None`；接收 `(step, pass_index, vertices_copy, record_copy)`；记录包含实际试步、SSE/RMS、接受/拒绝和步长；回调耗时计入墙钟 |
@@ -117,7 +119,7 @@ white_report = place_white_preaparc(
 | `initial_cleanup/cleanup` | 起始/最终相交修复记录：相交面数、平滑周期和实际修复信息 |
 | `seconds/stage_seconds` | 函数墙钟及分项秒；包含校验、读取、准备、传输、梯度、碰撞、目标函数、轮间重估、清理、写出与回调；各项和为墙钟 |
 | `prepare_components` | MRI/表面读取、初始平滑与清理、法向、亮区体积、rip、首次边界搜索及上下文的细分秒；和为 `stage_seconds.prepare` |
-| `collision_details` | 启用collision_profile时逐trial列表：step/trial/effective_backend/候选数/构建秒/有序接受秒；retained-MHT记录原树回退；否则为空 |
+| `collision_details` | 启用collision_profile时逐trial列表：step/trial/effective_backend/候选数/构建秒/有序接受秒；默认重试为tree，显式compiled还记录原桶核对次数和规则；否则为空 |
 
 失败抛异常，不返回伪造完成状态。缺文件、无效参数、MRI 网格不一致、
 未完成四轮、最终残余相交、CUDA 不可用或 OOM 均保留原异常；算法失败前不写
@@ -287,6 +289,32 @@ GPU峰allocated控制704,253,952/候选706,767,872字节，reserved均
 3桶只改候选索引开销；原生严格几何差异保持，整体指标等效未判定。
 原生188.737–235.183秒仍快于本次GPU阶段，当前不设生产默认。
 
+v10保持相同3桶/CPU正则和强度采样，显式compiled仅编译保留MHT的
+有序循环，真正三角命中仍用原桶函数和实时坐标。完整正反配对：
+
+| 顺序 | 原保留MHT树循环 | 显式compiled循环 |
+|---|---:|---:|
+| 控制先运行 | 298.520 s | 226.887 s |
+| 候选先运行 | 306.976 s | 227.213 s |
+| 中位 | 302.748 s | 227.050 s |
+
+观察中位缩短25.00%。四次34步与四轮、最终零相交，全部坐标/接受拒绝
+轨迹、表面/MRI文件SHA同控制，且与v9输出SHA相同。4次保留MHT重试
+73.57–75.74→7.33–7.69秒；真正原桶核对只有20次。主要开销来自原先
+Python遍历和逐顶点空间查询，编译后继续按源顺序读写当前坐标。
+[完整v10报告](../../validation/recon_all/optimizations/20261009_placement_torch/white_retained_a100_v10_abba.json)
+包含四个完整墙钟、分项、实际源码和输入SHA；每次捕获的真实重试输入/
+输出已逐数组核对，9项输入及3项接受输出全0差异，未将期望输出送入计算。
+完整API包含检查点和输出写入、首次JIT；CUDA上下文另列。
+CPU有序窄相与soap、强度/正则仍保留，本结果不是纯GPU或recon-all整例。
+同输入原生的既有局部几何误差1.0336mm仍存在，整体指标等效未判定。
+对原生188.737–235.183秒的既有冷CLI观察，不用本阶段227.050中位宣称
+稳定胜过原生。生产默认保持native；3桶/compiled均为显式实验选项。
+
+allocator峰allocated约0.71GB、reserved约1.71GB；容器PID归属仍未解，
+外部树峰null。两组整卡采样上界26,298/34,074MiB含其他项目，最大实际
+间隔10.03/4.40秒、首组3次查询超时原样记录，未证明20GB整例预算。
+31项本地契约通过，模拟几何仅检查分支，不替代上述真实完整配对。
 
 同一A100主机、四线程、相同五项输入与相同源码构建程序的新参考验证：
 

@@ -1,0 +1,241 @@
+{
+  "scope": "complete_frozen_real_retained_MHT_trial_ordered_acceptance_only",
+  "hostname": "authorized-a100-benchmark-host",
+  "threads": 4,
+  "device": "cuda:0",
+  "cpu_affinity_count": 4,
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "code_commit": "39cbf95d-plus-frozen-retained-v10",
+  "input_sha256": "ebeb9a423ca28ea880eddfb2d071560efd0106e960ebd7c73b6b6242fdfe008c",
+  "script_sha256": "c9ef470f58b8c7be73e5ff526ec392d5976b50dd77bb425e1a778f3e410e7bf4",
+  "source_sha256": {
+    "place_surface_collision.py": "f36213cfa1c8e65b2dfa69490ab4978e140d7852cbefb0834ed3f991ac84b166",
+    "place_surface_candidates_torch.py": "502b5da1aaa2275d48b106885a603fe797c74fb24fadcca1a53e0a641db243b8",
+    "place_surface_snapshot.py": "c2bac9c2f9065454d295981c38c85b58657b0a75f7278f8c124f4f6a979facbf"
+  },
+  "tolerance_before_run": {
+    "coordinate_mm": 0,
+    "acceptance_offsets": 0,
+    "order": 0
+  },
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "half_precision": false,
+  "strategy": "GPU conservative widephase followed by unchanged live ordered Numba narrowphase",
+  "reference": "same-host source tree loop and saved real stage trial; not official geometry",
+  "full_pial": "not_run",
+  "whole_recon_all": "not_run",
+  "overall_metric_equivalence": "not_assessed",
+  "process_memory": "not_measured; only target-device allocator counters",
+  "runs": [
+    {
+      "kind": "cold",
+      "backend": "retained_tree",
+      "seconds": 18.034886283800006,
+      "diagnostics": {
+        "effective_candidate_backend": "tree_retained_mht"
+      },
+      "coordinate_sha256": "40646fdfd7ab324764c05e816d0526cdb8428b0be6680aa63240b8292f01d4ec",
+      "order_sha256": "77bcb6ed78d3a3c4a506096af8f2134f9770c72f21d8ae1e1f0c40922d0613e6",
+      "accepted_offset_sha256": "c640b3a01ec1919bae06cc944f314ea19ea1b8e1aa1815afac99b0f5e9149c21",
+      "peak_allocated_bytes": 0,
+      "peak_reserved_bytes": 0
+    },
+    {
+      "kind": "cold",
+      "backend": "retained_compiled",
+      "seconds": 3.9602495934814215,
+      "diagnostics": {
+        "source_faces": 228680,
+        "query_faces": 228680,
+        "device": "cuda:0",
+        "query_chunk_size": 2048,
+        "maximum_chunk_candidates": 4000000,
+        "bbox_motion_bound_mm": 0.1600076255676934,
+        "excludes_shared_vertices": true,
+        "candidate_truncation": false,
+        "grid_candidates": 261107520,
+        "sphere_candidates": 40216922,
+        "retained_candidates": 759132,
+        "adaptive_chunk_reductions": 0,
+        "grid_cells_per_axis": 3,
+        "grid_cell_width_mm": 5.2774938173827906,
+        "candidate_build_seconds": 0.6742272274568677,
+        "motion_bound_mm": 0.1600076255676934,
+        "candidate_pairs": 759132,
+        "effective_candidate_backend": "compiled_retained_mht",
+        "retained_mht_checks": 4,
+        "retained_bucket_predicate": "original_python_FP64_live_coordinates",
+        "ordered_acceptance_seconds": 2.99728437513113
+      },
+      "coordinate_sha256": "40646fdfd7ab324764c05e816d0526cdb8428b0be6680aa63240b8292f01d4ec",
+      "order_sha256": "77bcb6ed78d3a3c4a506096af8f2134f9770c72f21d8ae1e1f0c40922d0613e6",
+      "accepted_offset_sha256": "c640b3a01ec1919bae06cc944f314ea19ea1b8e1aa1815afac99b0f5e9149c21",
+      "peak_allocated_bytes": 488561152,
+      "peak_reserved_bytes": 926941184
+    },
+    {
+      "kind": "paired",
+      "backend": "retained_tree",
+      "seconds": 17.989299146458507,
+      "diagnostics": {
+        "effective_candidate_backend": "tree_retained_mht"
+      },
+      "coordinate_sha256": "40646fdfd7ab324764c05e816d0526cdb8428b0be6680aa63240b8292f01d4ec",
+      "order_sha256": "77bcb6ed78d3a3c4a506096af8f2134f9770c72f21d8ae1e1f0c40922d0613e6",
+      "accepted_offset_sha256": "c640b3a01ec1919bae06cc944f314ea19ea1b8e1aa1815afac99b0f5e9149c21",
+      "peak_allocated_bytes": 0,
+      "peak_reserved_bytes": 926941184
+    },
+    {
+      "kind": "paired",
+      "backend": "retained_compiled",
+      "seconds": 1.3514161501079798,
+      "diagnostics": {
+        "source_faces": 228680,
+        "query_faces": 228680,
+        "device": "cuda:0",
+        "query_chunk_size": 2048,
+        "maximum_chunk_candidates": 4000000,
+        "bbox_motion_bound_mm": 0.1600076255676934,
+        "excludes_shared_vertices": true,
+        "candidate_truncation": false,
+        "grid_candidates": 261107520,
+        "sphere_candidates": 40216922,
+        "retained_candidates": 759132,
+        "adaptive_chunk_reductions": 0,
+        "grid_cells_per_axis": 3,
+        "grid_cell_width_mm": 5.2774938173827906,
+        "candidate_build_seconds": 0.45676314271986485,
+        "motion_bound_mm": 0.1600076255676934,
+        "candidate_pairs": 759132,
+        "effective_candidate_backend": "compiled_retained_mht",
+        "retained_mht_checks": 4,
+        "retained_bucket_predicate": "original_python_FP64_live_coordinates",
+        "ordered_acceptance_seconds": 0.5524147916585207
+      },
+      "coordinate_sha256": "40646fdfd7ab324764c05e816d0526cdb8428b0be6680aa63240b8292f01d4ec",
+      "order_sha256": "77bcb6ed78d3a3c4a506096af8f2134f9770c72f21d8ae1e1f0c40922d0613e6",
+      "accepted_offset_sha256": "c640b3a01ec1919bae06cc944f314ea19ea1b8e1aa1815afac99b0f5e9149c21",
+      "peak_allocated_bytes": 490036224,
+      "peak_reserved_bytes": 926941184
+    },
+    {
+      "kind": "paired",
+      "backend": "retained_compiled",
+      "seconds": 1.405427542515099,
+      "diagnostics": {
+        "source_faces": 228680,
+        "query_faces": 228680,
+        "device": "cuda:0",
+        "query_chunk_size": 2048,
+        "maximum_chunk_candidates": 4000000,
+        "bbox_motion_bound_mm": 0.1600076255676934,
+        "excludes_shared_vertices": true,
+        "candidate_truncation": false,
+        "grid_candidates": 261107520,
+        "sphere_candidates": 40216922,
+        "retained_candidates": 759132,
+        "adaptive_chunk_reductions": 0,
+        "grid_cells_per_axis": 3,
+        "grid_cell_width_mm": 5.2774938173827906,
+        "candidate_build_seconds": 0.46160405036062,
+        "motion_bound_mm": 0.1600076255676934,
+        "candidate_pairs": 759132,
+        "effective_candidate_backend": "compiled_retained_mht",
+        "retained_mht_checks": 4,
+        "retained_bucket_predicate": "original_python_FP64_live_coordinates",
+        "ordered_acceptance_seconds": 0.588600205257535
+      },
+      "coordinate_sha256": "40646fdfd7ab324764c05e816d0526cdb8428b0be6680aa63240b8292f01d4ec",
+      "order_sha256": "77bcb6ed78d3a3c4a506096af8f2134f9770c72f21d8ae1e1f0c40922d0613e6",
+      "accepted_offset_sha256": "c640b3a01ec1919bae06cc944f314ea19ea1b8e1aa1815afac99b0f5e9149c21",
+      "peak_allocated_bytes": 490036224,
+      "peak_reserved_bytes": 926941184
+    },
+    {
+      "kind": "paired",
+      "backend": "retained_tree",
+      "seconds": 18.20771614741534,
+      "diagnostics": {
+        "effective_candidate_backend": "tree_retained_mht"
+      },
+      "coordinate_sha256": "40646fdfd7ab324764c05e816d0526cdb8428b0be6680aa63240b8292f01d4ec",
+      "order_sha256": "77bcb6ed78d3a3c4a506096af8f2134f9770c72f21d8ae1e1f0c40922d0613e6",
+      "accepted_offset_sha256": "c640b3a01ec1919bae06cc944f314ea19ea1b8e1aa1815afac99b0f5e9149c21",
+      "peak_allocated_bytes": 0,
+      "peak_reserved_bytes": 926941184
+    }
+  ],
+  "vertices": 114342,
+  "faces": 228680,
+  "execution_status": "complete",
+  "cuda_context_setup_seconds": 3.298047517426312,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "paired_scope": "retained source bucket tree versus compiled live loop; complete grid3",
+  "cold_comparison": {
+    "different_coordinate_elements": 0,
+    "max_coordinate_difference_mm": 0.0,
+    "different_order_elements": 0,
+    "same_order": true,
+    "different_accepted_offset_elements": 0
+  },
+  "paired_comparison_to_cold_tree": [
+    {
+      "backend": "retained_tree",
+      "different_coordinate_elements": 0,
+      "max_coordinate_difference_mm": 0.0,
+      "different_order_elements": 0,
+      "same_order": true,
+      "different_accepted_offset_elements": 0
+    },
+    {
+      "backend": "retained_compiled",
+      "different_coordinate_elements": 0,
+      "max_coordinate_difference_mm": 0.0,
+      "different_order_elements": 0,
+      "same_order": true,
+      "different_accepted_offset_elements": 0
+    },
+    {
+      "backend": "retained_compiled",
+      "different_coordinate_elements": 0,
+      "max_coordinate_difference_mm": 0.0,
+      "different_order_elements": 0,
+      "same_order": true,
+      "different_accepted_offset_elements": 0
+    },
+    {
+      "backend": "retained_tree",
+      "different_coordinate_elements": 0,
+      "max_coordinate_difference_mm": 0.0,
+      "different_order_elements": 0,
+      "same_order": true,
+      "different_accepted_offset_elements": 0
+    }
+  ],
+  "comparison_to_saved_live_trial": {
+    "different_coordinate_elements": 0,
+    "max_coordinate_difference_mm": 0.0,
+    "different_order_elements": 0,
+    "same_order": true,
+    "different_accepted_offset_elements": 0
+  },
+  "strict_same_input_reproduction": "passed",
+  "new_degradation_under_declared_exact_trial_gate": "none_detected",
+  "paired_median_seconds": {
+    "retained_tree": 18.098507646936923,
+    "retained_compiled": 1.3784218463115394
+  },
+  "speed_ratio_control_over_candidate": 13.12987580352557,
+  "public_report_provenance": {
+    "raw_report_sha256": "7a7d86545450dd74903bf0d1f480bc8be60018387462932ee76ae1e6a7b6adf9",
+    "redacted_fields": [
+      "absolute private FNIT prefix",
+      "hostname"
+    ],
+    "numeric_measurements_unchanged": true
+  }
+}

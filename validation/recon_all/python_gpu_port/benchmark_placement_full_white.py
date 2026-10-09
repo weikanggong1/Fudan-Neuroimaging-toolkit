@@ -54,7 +54,12 @@ def main():
     parser.add_argument("--max-steps", type=int, default=400)
     parser.add_argument("--candidate-backend", choices=("tree", "snapshot", "torch_snapshot"), default="tree")
     parser.add_argument("--candidate-grid-cells-per-axis", type=int, choices=(2, 3), default=2)
+    parser.add_argument("--control-grid-cells-per-axis", type=int, choices=(2, 3), default=2)
     parser.add_argument("--collision-profile", action="store_true")
+    parser.add_argument("--retained-mht-backend", choices=("tree", "compiled"), default="tree")
+    parser.add_argument("--control-retained-mht-backend", choices=("tree", "compiled"), default="tree")
+    parser.add_argument("--record-retained-trials", action="store_true",
+                        help="保存真实重试输入/输出供隔离回放；写出计入API墙钟")
     parser.add_argument("--control-candidate-backend", choices=("tree", "snapshot", "torch_snapshot"))
     parser.add_argument("--candidate-regularization-backend", choices=("cpu", "torch"), default="torch")
     parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
@@ -185,13 +190,39 @@ def main():
             print(json.dumps({"backend": backend, **trace[-1]}, ensure_ascii=False), flush=True)
             save()
 
+        collision_function=stage.asynchronous_first_step
+        if args.record_retained_trials:
+            row["retained_trial_checkpoints"]=[]
+
+            def record_collision(vertices,faces,proposed,ripped,**kwargs):
+                if kwargs.get("stale_mht_trial") is None:
+                    return collision_function(vertices,faces,proposed,ripped,**kwargs)
+                capture_started=time.perf_counter()
+                neighbors,valid=kwargs["ordered_neighbors"]
+                captured={"vertices":vertices.copy(),"faces":faces.copy(),
+                    "proposal":proposed.copy(),"ripped":ripped.copy(),
+                    "offsets":kwargs["offsets"].copy(),
+                    "accepted_offsets_initial":kwargs["accepted_offsets"].copy(),
+                    "stale_mht_trial":kwargs["stale_mht_trial"].copy(),
+                    "neighbors":neighbors.copy(),"neighbor_valid":valid.copy()}
+                result,order=collision_function(vertices,faces,proposed,ripped,**kwargs)
+                captured.update(expected_coordinates=result,expected_order=order,
+                    expected_accepted_offsets=kwargs["accepted_offsets"].copy())
+                path=args.output_directory/f"retained-{backend}-{len(row['retained_trial_checkpoints'])}.npz"
+                np.savez(path,**captured)
+                row["retained_trial_checkpoints"].append({"path":str(path),
+                    "sha256":sha256(path),"capture_and_collision_seconds":time.perf_counter()-capture_started})
+                return result,order
+
+            stage.asynchronous_first_step=record_collision
         try:
             result = stage.place_white_preaparc(
                 subject_dir=args.subject, hemi=hemi, output=output, max_steps=args.max_steps,
                 output_volume=output_volume, regularization_backend=run_regularization,
                 sampling_backend=run_sampling, candidate_backend=run_candidate,
                 cleanup_marking_backend=args.cleanup_marking_backend,
-                candidate_grid_cells_per_axis=args.candidate_grid_cells_per_axis if backend == "torch" else 2,
+                candidate_grid_cells_per_axis=args.candidate_grid_cells_per_axis if backend == "torch" else args.control_grid_cells_per_axis,
+                retained_mht_backend=args.retained_mht_backend if backend == "torch" else args.control_retained_mht_backend,
                 collision_profile=args.collision_profile,
                 device=str(device) if gpu_components else None,
                 trace_callback=callback,
@@ -224,6 +255,8 @@ def main():
                     row["allocator_report_error"] = str(memory_error)
             save()
             raise
+        finally:
+            stage.asynchronous_first_step=collision_function
         after = {str(path.relative_to(args.subject)): sha256(path) for path in inputs}
         row["input_sha256_after"] = after
         save()

@@ -249,6 +249,31 @@ white.preaparc双向配对已完成：2桶控制322.950/305.439秒，3桶候选
 均1,704,984,576字节。外部请求0.25秒采样；PID归属未解、树峰为null，
 整卡上界22,982MiB包含其他项目，不能据此宣称FNIT超过或满足20GB预算。
 
+显式 `retained_mht_backend="compiled"` 继续复用同一完整候选、当前坐标与
+原顺序，将Python逐顶点循环编译；真正三角命中才进入原FP64桶保留函数。
+默认 `tree`；仅支持fast且snapshot/torch_snapshot，非法组合抛ValueError。
+新内核与原首试缓存内核独立，首次JIT计入完整API。它不改变桶扩展、
+close-neighbor投影或接受顺序，也不把当前坐标换成静态GPU接受图。
+本地31项契约通过；v10完整同源/同输入/同3桶/同线程正反配对已经完成。
+旧树完整API为298.520/306.976秒，新循环226.887/227.213秒，中位
+302.748→227.050秒，缩短25.00%。四次34步与四轮、最终零相交，坐标/
+接受拒绝轨迹、表面与MRI文件SHA完全相同，与v9输出也相同。四次真实
+retained重试总秒73.57–75.74→7.33–7.69；真正原桶核对仅4/5/11/0次。
+优化定位到逐顶点Python循环和重复KD查询，不把20次桶谓词归为主要热点。
+见[完整v10 ABBA](../../validation/recon_all/optimizations/20261009_placement_torch/white_retained_a100_v10_abba.json)。
+
+两组保存的4次实际重试中，9项输入数组及coords/order/acceptedOffsets
+全0差异；回放重新计算，保存的期望状态只用于比较。独立当轮ABBA
+18.098508→1.378422秒、输出0diff，但该13.13倍是重试步骤而非white整步。
+见[完整当轮回放](../../validation/recon_all/optimizations/20261009_placement_torch/retained_trial0_abba_a100_v10.json)。
+完整API含trace和真实重试检查点写入、retained内核首次JIT；CUDA初始
+上下文另列、Python导入另属监测包装器冷墙钟。整体指标等效未评估，
+原生局部误差没有因本优化消失，生产white和pial默认仍不改。
+外部PID归属未解、树峰null；整卡采样26,298/34,074MiB包含其他项目，
+最大实际间隔10.03/4.40秒、首组3次查询超时均保留，不能声称FNIT整例
+在20GB内。allocator峰、完整采样及实际源码SHA保留在两组机器报告。
+参数位于 `asynchronous_first_step`，MRI/表面单位、返回网格/顺序不变。
+
 
 
 外部显存采样请求250ms，面对/完整首试步目标卡同期峰值分别553/1,937MiB，

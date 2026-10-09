@@ -38,5 +38,36 @@ class PlacementSnapshotTest(unittest.TestCase):
             asynchronous_first_step(np.empty((0,3)),np.empty((0,3),np.int32),
                                     np.empty((0,3)),np.empty(0,bool),candidate_backend='invalid')
 
+    def test_compiled_retained_live_bucket_matches_tree(self):
+        # 两个相交三角面形成真实命中；改变保留状态可让原桶判据接受/拒绝。
+        xyz=np.array([[0,0,0],[1,0,0],[0,1,0],
+                      [.25,.25,-.3],[.25,.25,.3],[.75,.25,0]],np.float32)
+        faces=np.array([[0,1,2],[3,4,5]],np.int32)
+        displacement=np.array([[.02,0,.05],[0,0,.05],[0,0,.05],
+                               [.01,0,.01],[.01,0,-.01],[.01,0,.01]],np.float32)
+        proposed=np.float32(xyz+displacement)
+        ripped=np.zeros(len(xyz),bool)
+        for stale in (proposed, proposed+np.float32(8)):
+            old_offsets=displacement.copy()
+            expected,expected_order=asynchronous_first_step(xyz,faces,proposed,ripped,
+                offsets=displacement,accepted_offsets=old_offsets,stale_mht_trial=stale)
+            for backend in ('snapshot','torch_snapshot'):
+                candidate_offsets=displacement.copy()
+                diagnostic={}
+                actual,actual_order=asynchronous_first_step(xyz,faces,proposed,ripped,
+                    offsets=displacement,accepted_offsets=candidate_offsets,stale_mht_trial=stale,
+                    candidate_backend=backend,candidate_device='cpu' if backend=='torch_snapshot' else None,
+                    retained_mht_backend='compiled',candidate_diagnostics=diagnostic)
+                np.testing.assert_array_equal(actual,expected)
+                np.testing.assert_array_equal(actual_order,expected_order)
+                np.testing.assert_array_equal(candidate_offsets,old_offsets)
+                self.assertEqual(diagnostic['effective_candidate_backend'],'compiled_retained_mht')
+                self.assertGreater(diagnostic['retained_mht_checks'],0)
+
+    def test_compiled_retained_rejects_missing_snapshot(self):
+        with self.assertRaisesRegex(ValueError,'requires fast snapshot'):
+            asynchronous_first_step(np.empty((0,3)),np.empty((0,3),np.int32),
+                np.empty((0,3)),np.empty(0,bool),retained_mht_backend='compiled')
+
 
 if __name__=='__main__':unittest.main()

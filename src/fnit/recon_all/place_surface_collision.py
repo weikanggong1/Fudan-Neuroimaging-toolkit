@@ -467,6 +467,7 @@ def asynchronous_first_step(
     candidate_device: str | None = None,
     candidate_diagnostics: dict | None = None,
     candidate_grid_cells_per_axis: int = 2,
+    retained_mht_backend: str = "tree",
 ) -> tuple[np.ndarray, np.ndarray]:
     """Replay sorted subvolumes with dynamic triangle collision tests.
 
@@ -482,7 +483,10 @@ def asynchronous_first_step(
     bounds and static shared-vertex exclusions. `candidate_device` must name an
     indexed CUDA target (cpu only for regression); `candidate_diagnostics` can
     receive candidate counts, build/acceptance wall times and the effective
-    backend. Coordinates and offsets are float32 surface RAS/mm; face indices
+    backend. retained_mht_backend="compiled" is an explicit snapshot-only
+    experiment: the live ordered loop is compiled, while actual triangle hits
+    retain the original FP64 Python face-bucket replay. Default tree is unchanged.
+    Coordinates and offsets are float32 surface RAS/mm; face indices
     and returned order address the unchanged mesh. Invalid input, exceeded
     motion bounds and CUDA/OOM errors propagate. No candidate limit truncation.
     """
@@ -492,6 +496,10 @@ def asynchronous_first_step(
         raise ValueError("torch_snapshot requires an explicit candidate_device")
     if candidate_grid_cells_per_axis not in (2, 3):
         raise ValueError("candidate_grid_cells_per_axis must be 2 or 3")
+    if retained_mht_backend not in ("tree", "compiled"):
+        raise ValueError("retained_mht_backend must be tree or compiled")
+    if retained_mht_backend == "compiled" and (candidate_backend == "tree" or not fast):
+        raise ValueError("compiled retained MHT requires fast snapshot candidates")
     xyz = np.asarray(vertices, dtype=np.float32)
     if stale_mht_trial is not None and not fast:
         raise ValueError("retained MHT replay requires fast collision mode")
@@ -528,7 +536,7 @@ def asynchronous_first_step(
     incident_offsets = np.zeros(len(xyz) + 1, dtype=np.int64)
     incident_offsets[1:] = np.cumsum(np.bincount(flat, minlength=len(xyz)))
     maximum_radius = float(initial_radii.max())
-    if candidate_backend in ("snapshot", "torch_snapshot") and fast and trial is None:
+    if candidate_backend in ("snapshot", "torch_snapshot") and fast and (trial is None or retained_mht_backend == "compiled"):
         from .place_surface_snapshot import snapshot_ordered_step
         result = snapshot_ordered_step(xyz, triangles, next_xyz, order, incident, incident_offsets,
             neighbor_indices if offsets is not None else None,
@@ -536,7 +544,8 @@ def asynchronous_first_step(
             geometry, vertex_svi, min_neighbor_mm, tree, initial_centers, initial_radii, maximum_radius,
             candidate_device=candidate_device if candidate_backend == "torch_snapshot" else None,
             candidate_diagnostics=candidate_diagnostics,
-            candidate_grid_cells_per_axis=candidate_grid_cells_per_axis)
+            candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
+            stale_mht_trial=trial,order_rank=order_rank)
         return result, order
     if candidate_diagnostics is not None:
         candidate_diagnostics["effective_candidate_backend"]="tree_retained_mht" if trial is not None else "tree"
