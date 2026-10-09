@@ -47,7 +47,7 @@ WM 读取自产 `mri/antsdn.brain.mgz`，写 `mri/wm.seg.mgz`。输入输出均�
 
 `normalization_controls_backend` 默认 `'cpu'`；`'torch'` 复用现有两轮归一化的 PyTorch/Triton 邻域计数与求和。固定源图、ROI 和输出缓冲驻留 GPU，控制图按原迭代上传；有序控制点选择、离群清理、ridge 和其他偏置步骤保持原实现。仅接受显式 `cuda:N`，非法组合在校验资源或创建输出前报错，无静默 CPU 回退。单例、batch、CLI 和整例 benchmark 原样传递选项，报告增加 `normalization_configuration`。函数的全部输入、uint8 同网格输出、内部接口及坐标说明见[归一化 GPU 邻域](NORMALIZATION_GPU_NEIGHBORS.md)。新增依赖为零，使用主页环境既有 Triton。
 
-`normalization_initial_bias_backend` 默认 `'cpu'`，`'torch'` 只在第二轮复用已有 Voronoi 传播和高斯平滑。距离和稳定排序仍为 CPU；零控制图平滑、float64 的除后乘及 float32 返回保持。它独立于邻域选项，同样须显式 `cuda:N`，失败不回退。完整第二轮 API 的两例 ABBA 中位数128.937→70.577秒、134.061→82.456秒，8次输出和所有中间浮点/控制图一致；这组测量两边都使用GPU邻域，只改变初始偏置。新接线的整例尚未完成，完整输入、输出、逐项参数、脑图和显存范围见[初始偏置GPU页](NORMALIZATION_ASEG_INITIAL_GPU.md)。
+`normalization_initial_bias_backend` 默认 `'cpu'`，`'torch'` 只在第二轮复用已有 Voronoi 传播和高斯平滑。距离和稳定排序仍为 CPU；零控制图平滑、float64 的除后乘及 float32 返回保持。它独立于邻域选项，同样须显式 `cuda:N`，失败不回退。完整第二轮 API 的两例 ABBA 中位数128.937→70.577秒、134.061→82.456秒，8次输出和所有中间浮点/控制图一致；这组测量两边都使用GPU邻域，只改变初始偏置。后续0cd9cbd5两例原始T1完整接线已通过回归，完整输入、输出、逐项参数、脑图和阶段显存范围见[初始偏置GPU页](NORMALIZATION_ASEG_INITIAL_GPU.md)。
 
 ```python
 from fnit.recon_all.stage_metadata import extract_algorithm_seconds
@@ -120,7 +120,9 @@ python tools/evaluate_recon_torch_run.py \
 
 ## 6. 最近更新和 benchmark
 
-2026-10-09：显式接入两轮归一化的已有 GPU 邻域，入口契约24/24通过；首次测试夹具错误及修正收据完整保留于[接线报告](../../validation/recon_all/optimizations/20261009_normalization_integration/README.md)。两例完整首次文件 API 的 ABBA 中位数为96.022→48.617秒、70.954→40.575秒；共16次两轮 API 的输出、几何、逐轮强度/控制图及报告算法计数一致。第二轮邻域算子更快，但整体耗时波动，尚不能声称第二轮稳定提速。本次接线尚未完成原始T1整例回归；不能将旧803aec50整例改标为该接口的验证。完整数据及采样限制见[阶段报告](NORMALIZATION_GPU_NEIGHBORS.md)。
+2026-10-09：冻结0cd9cbd5从两例原始T1/新空目录完成GPU归一化完整接线：上一候选2255.064/2281.571秒→2151.856/2129.266秒，整例缩短4.58%/6.68%；同硬件/四线程，尚无完整ABBA。两例138输出及生产网格通过，现有138容差全部通过；16表面坐标/面、标签Dice、68区和-no-th3统计相同。零容差顶点图尾差、显存归属null及整体等效未判定分开保留，见[完整新版报告](../../validation/recon_all/optimizations/20261009_whole_normalization_a100_0cd9cbd5/README.md)。N4、WM、white/pial和标准inflation在本版未换后端；后续实验不属于这个整例。
+
+2026-10-09：显式接入两轮归一化的已有 GPU 邻域，入口契约24/24通过；首次测试夹具错误及修正收据完整保留于[接线报告](../../validation/recon_all/optimizations/20261009_normalization_integration/README.md)。两例完整首次文件 API 的 ABBA 中位数为96.022→48.617秒、70.954→40.575秒；共16次两轮 API 的输出、几何、逐轮强度/控制图及报告算法计数一致。第二轮邻域算子更快，但整体耗时波动，尚不能声称仅邻域带来第二轮稳定提速。完整数据及采样限制见[阶段报告](NORMALIZATION_GPU_NEIGHBORS.md)。
 
 2026-10-09：复用完整隔离 WM worker，接入单例、batch、CLI 与整例测量脚本；保留默认后端。修复归一化 `steps` / `completion.steps` 在整例报告中丢失的问题，新增字段不改变计算、同步和原有计时。
 

@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "commit": "589e274956e5fa5768aa6aa39b4296317ee6eece",
+  "scope": "build wheel and install private target within existing declared Conda runtime; not fresh Conda or physical isolation",
+  "precision": "no inference performed; no GPU precision changed",
+  "stages": {
+    "wheel": {
+      "wall_seconds": 15.246667737141252,
+      "command": [
+        "$FNIT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "pip",
+        "wheel",
+        "$FNIT/workspaces/package_inflate_589e2749_20261009_v1",
+        "--no-deps",
+        "--no-build-isolation",
+        "--wheel-dir",
+        "$FNIT/runs/package_inflate_589e2749_20261009_v1/wheels"
+      ]
+    },
+    "install": {
+      "wall_seconds": 3.504756163805723,
+      "command": [
+        "$FNIT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--no-deps",
+        "--target",
+        "$FNIT/runs/package_inflate_589e2749_20261009_v1/installed_target",
+        "$FNIT/runs/package_inflate_589e2749_20261009_v1/wheels/fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl"
+      ]
+    },
+    "installed_cli_help": {
+      "wall_seconds": 2.6116181826218963,
+      "command": [
+        "$FNIT/envs/recon_main_20261009_v3/bin/python",
+        "-m",
+        "fnit.recon_all.native_free",
+        "--help"
+      ]
+    }
+  },
+  "compiler": "$FNIT/envs/recon_main_20261009_v3/bin/x86_64-conda-linux-gnu-c++",
+  "source_pyproject_sha256": "5f05b9ff2917a1334272ba750d8aac0d392732d3ad57990d778f7fc8f23ef4ba",
+  "wheel_sha256": "26329a26920fb370b68e98685e60174292146bf728dc052afe941f65ed80ea4c",
+  "wheel_bytes": 5007328,
+  "installed_modules_sha256": {
+    "recon_all/native_free.py": "f625646302f31ebb45c5d0764f55480e7190d1b0a9d0bcf72272caa7d0279cb0",
+    "recon_all/batch.py": "f0a070aed1bb5b600c04328d2879d4e68e0750df3d0bfe88d5712f80443931a7",
+    "recon_all/inflate_standard_run.py": "1186db4d73b43edc7bea7580a57b73f490b5ef3669241e3c99837f630718d3bb",
+    "recon_all/inflate_torch.py": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+    "recon_all/hemisphere_parallel.py": "c618fc805bcb779a2ace1cbc55def2a7412a535270815e31cb76504160485e2f",
+    "recon_all/normalization/pipeline.py": "605b68b844929c852d2978fb38050cc56dcd18ff997742cb852946dfe12860ef",
+    "recon_all/normalization/aseg_pipeline.py": "bb4175e69e71ec14e06bad7895d85152632438192c642f9c7027438a3e11832c"
+  }
+}
