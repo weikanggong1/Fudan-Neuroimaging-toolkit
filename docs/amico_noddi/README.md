@@ -212,6 +212,12 @@ SaveParamsAsNIfTI('fit.mat','roi.mat','mask.nii.gz','noddi'); % 参数图
 
 此图属于所链接旧源码精度记录；最新源码的独立AMICO/classic原软件同输入全脑精度未重测。classic最新完整raw-to-MNI真实队列benchmark未测。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+最新可公开的单被试 GPU 对照为 H100、104×104×72×105 DWI、242,261 体素全脑 mask、进程显存上限 20%：`fit_method="amico"` 为 **81.79 s / 9.95 GB**，`fit_method="classic"` 为 **209.55 s / 9.95 GB**（均含读写；classic 初始化 84.63 s、Watson 拟合 118.09 s）。两次运行时共享 GPU 利用率 99–100%，因此只报告观察值，不外推稳定加速比。五张输出图均为有限值、同网格且 mask 外为零；另有 24 个真实体素与 MATLAB NODDI 数值核对。CPU 同输入完整 wall clock 本轮未形成可复核公开记录。完整汇总见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit/version | 变化 | benchmark |

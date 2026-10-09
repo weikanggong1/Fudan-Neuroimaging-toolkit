@@ -2,7 +2,7 @@
 
 ## 1. 功能与策略
 
-`UKBConnectome_pipeline` 将校正后 DWI 的共享重建结果保存到有内容校验的 checkpoint。更换用户模板时可以复用已完成的重建、追踪和 SIFT2。调整端点径向搜索半径时只影响矩阵；默认仍为 **4 mm**。统计定义、TF32 策略和张量 dtype 保持原实现。
+`UKBConnectome_pipeline` 将校正后 DWI 的共享重建结果保存到有内容校验的 checkpoint。更换用户模板时可以复用已完成的重建、追踪和 SIFT2。调整端点径向搜索半径时只影响矩阵；默认仍为 **4 mm**。当前追踪使用固定源码构建的 CPU `tckgen`，其余 PyTorch 阶段保留原统计定义、TF32 策略和张量 dtype。
 
 ```mermaid
 flowchart TD
@@ -35,7 +35,8 @@ result = pipeline(
     bvecs="eddy_rotated.bvec",              # FSL 3×N 或 N×3 旋转后梯度
     freesurfer_subject_dir="subjects/sub-01", # 完成的 recon-all 格式目录
     n_seeds=100000,                          # 全脑追踪尝试数
-    seed=0,                                 # PyTorch 追踪随机种子
+    seed=0,                                 # 原生追踪的 MRTRIX_RNG_SEED
+    tracking_threads=8,                      # CPU tckgen 线程数
     checkpoint_dir="out/checkpoints",       # 直接调用明确启用；默认 None
     assignment_radius=4.0,                   # RAS mm；不属于共享核心依赖
     overwrite=False,                        # 验证成功时复用；True 发布新一代
@@ -47,6 +48,7 @@ raw_result = pipeline.run_bids(
     bids_root="bids", output_dir="out/sub-01", subject="01", n_seeds=100000,
     freesurfer_subject_dir="subjects/sub-01", recon_backend="provided",
     seed=0,                                 # 追踪种子
+    tracking_threads=8,                      # 不影响 recon 和 EDDY 线程策略
     eddy_gp_seed=12345,                      # 独立的 EDDY GP 抽样种子
 )
 print(raw_result.preparation_stages)
@@ -54,7 +56,9 @@ print(raw_result.preparation_stages)
 
 `checkpoint_dir` 是专用缓存目录；未标记的非空旧目录会报错。`overwrite=True` 跳过复用，不删除旧 generation。直接调用默认 `None`，不读写 checkpoint；`run_bids` 默认 `output_dir/checkpoints`，可显式选择另一个目录。`recon_backend/recon_options` 原样传给 BIDS 准备器。
 
-核心 key 包含：DWI、bval/bvec、T1 brain/aparc+aseg、所有显式 mask 和 FA 文件的路径/大小/**内容 SHA-256**，`n_seeds`、`seed`、`compile_arc`、`shell_bvals`、提供的 DWI→T1 变换、数值 revision、实际核心源码和数值资源、设备/软件版本/TF32/autocast/确定性/线程策略。mtime 不进入 key；同大小、同 mtime 改动仍会失效。模板、模板配对、MNI 模板变换和 `assignment_radius` 不进入核心 key。
+核心 key 包含：DWI、bval/bvec、T1 brain/aparc+aseg、所有显式 mask 和 FA 文件的路径/大小/**内容 SHA-256**，`n_seeds`、`seed`、`tracking_threads`、`shell_bvals`、提供的 DWI→T1 变换、数值 revision、实际核心源码和数值资源、设备/软件版本/TF32/autocast/确定性/线程策略。mtime 不进入 key；同大小、同 mtime 改动仍会失效。模板、模板配对、MNI 模板变换和 `assignment_radius` 不进入核心 key。
+
+原生程序身份另外绑定固定源码 commit/归档 SHA、数值源文件 SHA、构建器 SHA、配置隔离补丁、实际 `tckgen` 大小/SHA、版本与运行库清单。恢复或发布前后重新校验实际程序；BIDS 完成指纹也包含这个身份。旧 PyTorch 追踪与其矩阵缓存因数值 revision 和程序身份变化失效。`compile_arc=False` 仅保留 Python 兼容，不能选回旧后端；`True` 明确报错，CLI 已去掉该选项。
 
 模板映射 key 另包含自身标签/注释和 `nodes_tsv` 内容、空间、目标 DWI 网格与 DWI→T1 变换。MNI 分支另绑定实际 T1 reference 内容/网格和 warp，命中后也核对 target；自动 SynthMorph warp 的 key 绑定 MNI/T1 intensity 与权重。配对矩阵 key 依赖两张已映射模板和端点/长度/FA/权重及半径。保持文件内容和数值策略一致的 A→B→A 模板更换可重新命中 A 的已保存 generation。
 
@@ -87,7 +91,9 @@ EDDY 输入身份覆盖以上四种 TOPUP 必要产物：系数与运动参数�
 
 这是完成判断修复；TOPUP/EDDY 的参数、算法、dtype 和数值求解没有改变。旧命名 atlas CLI 的通用 fingerprint-only 完成合同保留，不能把新 raw stage 的产物完整性门解释为该旧矩阵缓存的额外保证。变更只更新当前代码，既有冻结 benchmark 源码及其 marker 不会改写。
 
-FA/FOD/5TT/GMWMI、完整 affine、transform、mask、Double SIFT2 weights 都按原 dtype 保存。轨迹用 Float32 `points[P,3]` 与 Int64 `offsets[T+1]` 存储，恢复为原来的 `tuple[Tensor[Pi,3], ...]`，保留端点、长度、每轨迹 FA 和接受种子顺序。坐标仍为 DWI RAS mm。原来的 square 矩阵 count Int64，其余三种 Float32；默认对角线处理不变。
+FA/FOD/5TT/GMWMI、完整 affine、transform、mask、Double SIFT2 weights 都按原 dtype 保存。轨迹用 Float32 `points[P,3]` 与 Int64 `offsets[T+1]` 存储，恢复为 `tuple[Tensor[Pi,3], ...]`，保留 TCK 中的轨迹顺序、端点、长度和每轨迹 FA。坐标仍为 DWI RAS mm。原来的 square 矩阵 count Int64，其余三种 Float32；默认对角线处理不变。
+
+共享核心 payload 使用 `format_revision=2`，保存 `native_provenance` 与 `accepted_seed_coordinates="unknown"`。官方 TCK 没有每条轨迹的原始种子坐标，恢复后的 `accepted_seeds` 仍为 `None`，不创建虚构的 `track_seeds` 数组。兼容字段 `seeds_attempted` 记录传入的播种预算，不是实测尝试数或 TCK 的 `total_count`。TCK header、输入和程序 SHA、真实调用参数及计时保存在 provenance；字段说明见[追踪手册](TRACKING_OPERATORS.md)。通用 checkpoint 容器的 `schema_version=1` 与原始准备 marker 的 schema 2 是不同层次。
 
 ## 3. CLI
 
@@ -97,7 +103,7 @@ checkpoint 没有独立 CLI。主 pipeline 的入口仍是：
 fnit UKBConnectome_pipeline \
   --bids-root bids --subject 01 \
   --freesurfer-subject-dir subjects/sub-01 --recon-backend provided \
-  --n-seeds 100000 --seed 0 --device cuda:0 \
+  --n-seeds 100000 --seed 0 --tracking-threads 8 --device cuda:0 \
   --checkpoint-dir out/sub-01/checkpoints --output-dir out/sub-01
 ```
 
@@ -105,7 +111,7 @@ fnit UKBConnectome_pipeline \
 
 ## 4. 对应原软件阶段与安全机制
 
-原软件对应 mean b0/BET、`dwi2mask legacy`、`dwi2tensor`/`tensor2metric`、`dwi2response dhollander`、`dwi2fod msmt_csd`、`mtnormalise`、`5ttgen freesurfer`、`5tt2gmwmi`、FLIRT、`tckgen`、`tcksift2` 和 `tcksample -precise`。checkpoint 是这些已完成数值结果的存储策略，没有官方对应的独立计算命令；它不会改写任何统计步骤或调用官方软件计算。
+原软件对应 mean b0/BET、`dwi2mask legacy`、`dwi2tensor`/`tensor2metric`、`dwi2response dhollander`、`dwi2fod msmt_csd`、`mtnormalise`、`5ttgen freesurfer`、`5tt2gmwmi`、FLIRT、`tckgen`、`tcksift2` 和 `tcksample -precise`。追踪执行的是 FNIT 独立构建的固定 `tckgen`；checkpoint 本身只是已完成结果的存储策略，没有对应的官方独立计算命令。
 
 缓存只读取 JSON 和 `allow_pickle=False` 数值 NPY。每份 payload 验证文件大小、内容 SHA、shape、dtype；核心恢复进一步验证所有必要字段、轨迹 offset 和各体积网格形状。用户数据不通过 `torch.load` 或 pickle 执行。NaN/Inf 原值保留，FA 非有限诊断不会被填零或删除。
 
@@ -124,7 +130,9 @@ checkpoints/
 
 每次计算写独立 generation，所有文件完成并 fsync 后，最后原子发布 `complete.json`。发布前再核对原输入、源码和精度策略；加载前后也核对。缺文件、checksum/结构不符、没有完成 marker、半写或者写入失败的 generation 不会恢复。读取或写入 IO 失败、内存不足或输入在处理期间改变时会明确失败；不会静默换 dtype、删体素或回退算法。已经独立完成并发布的核心可在后续模板阶段失败后复用。
 
-## 5. 本轮验证、耗时与脑图范围
+## 5. 当前验证与历史结果
+
+本版原生追踪的真实核心恢复、模板复用、整链耗时及脑图集中在[原生追踪评测](../../validation/connectome/native_tracking_20261009/README.md)。以下 CPU 与十例记录来自 2026-10-03 的旧 PyTorch 追踪版本；它们保留缓存合同的历史证据，不是当前后端的性能结果。
 
 gpucw1 的现有 Conda 环境，CUDA 隐藏、CPU 4 线程；[原始 CPU 回归报告](../../validation/connectome/paired_20261003/task_03/cpu_gate_v3.json) 与 [日志](../../validation/connectome/paired_20261003/task_03/focused_cpu_v3.log) 绑定实际源码 SHA，前后相同，CUDA 初始化前后均 `False`。
 
@@ -145,6 +153,10 @@ gpucw1 的现有 Conda 环境，CUDA 隐藏、CPU 4 线程；[原始 CPU 回归�
 十例真实四阶段全部完成，共40次正常CLI调用、400个统计数组核对；首次 1111.52 s、同模板复用 18.83 s、换模板 13.21 s、改半径 19.28 s（逐例范围见报告）。30次核心恢复逐值一致、十例同模板对旧square builder一致；本进程采样峰值5.2995 GB，PyTorch allocated/reserved峰值2.9191/3.3848 GB。实际输出脑图、分步时间及源码绑定见[十例配对评测](../../validation/connectome/paired_pipeline_20261003/README.md)。该结果验证模板矩阵与缓存数值一致；独立MRtrix原始DWI→SC对照属于主说明中的历史精度轮。
 
 ## 6. 版本、部署与复现
+
+2026-10-09：共享核心升级为 payload revision 2，支持未知的接受种子坐标，并绑定原生程序/库/配置隔离补丁与 `tracking_threads`。追踪参数或原生身份改变会使核心与依赖矩阵失效；同输入的模板变化仍复用已完成核心。安装使用每个 Conda 环境独立的 `FNIT_NATIVE_CACHE`，详见[原生运行时安装](TRACKING_OPERATORS.md#一次性构建与离线复用)。
+
+下面是旧版本的复现入口；现版验证与部署以本版报告为准。
 
 实现提交：`0b12fa381de44ba66a5c10bb4214c6bec422f6d7`，起点 `231dfaa16f479c8f076a8ce38d4bfe690768217b`。最终 CPU 样本位于服务器统一入口 `FNIT/workspaces/connectome_paired_20261003_v1/task_03/cpu_source_v3`，报告在 `FNIT/runs/connectome_paired_20261003_v1/task_03`；原 Conda prefix 和旧科学冻结产物保持实际来源。
 

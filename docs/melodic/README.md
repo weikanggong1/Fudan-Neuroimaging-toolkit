@@ -177,6 +177,12 @@ melodic -i /data/preproc/bold.nii.gz -m /data/preproc/mask.nii.gz    -o /data/re
 
 图通过同一原配准场进入MNI2mm，只显示原报告绑定的三个匹配成分。完整原流水线的旧651.87 s还包含HTML/统计/绘图，边界不同。fMRI全链新结果不能当成独立ICA重新测量。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+固定 490 帧、95 成分、40 步的 GPU 对照中，FNIT fit+write **117.49 s**，原始完整命令 **651.87 s**（含 HTML 生成）。时间成分和空间成分中位相关分别为 **0.999999978/0.999999970**，阈值图 Dice 中位数 **0.999562**。本轮没有新增同口径 CPU 全链时钟；原命令与 FNIT 的范围差异保留在本页说明。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit/version | 变化 | benchmark |

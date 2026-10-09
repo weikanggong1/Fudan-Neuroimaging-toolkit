@@ -1,10 +1,12 @@
 # UKBConnectome_pipeline 精度优化：2026-10-03
 
+本页是旧 PyTorch 追踪后端的历史任务记录，不代表当前后端；最新原生 CPU 追踪与完整下游验证见[本版评测](../../validation/connectome/native_tracking_20261009/README.md)。
+
 ## 1. 功能与本轮目标
 
 本轮从已发布的 `7af34e6d072e843fb2558c931bb2781f1d4b0be9` 开始，优化原始 BIDS DWI、已有官方 FreeSurfer subject 到 structural connectome 的精度。复用前一轮新下载的 ds001226 十例原始 AP/PA/T1（CON01、CON03–CON11，CC0）；FreeSurfer 科学输入保持固定，原始 MRI 和旧产物不改写。
 
-服务器先读 `/cwStorage/home/gongwk/Notebook_code/FNIT/README.md` 和索引；本任务入口为 `FNIT/workspaces/fnit_connectome_accuracy_20261003_v1`，链接至原运行实体，冻结源码与 Conda prefix 保持原路径。
+服务器先读统一 FNIT 入口的 `README.md` 和索引；本任务入口为 `FNIT/workspaces/fnit_connectome_accuracy_20261003_v1`，链接至原运行实体，冻结源码与 Conda prefix 保持原路径。
 
 每例仍为 100,000 次尝试播种、八套 atlas、四种矩阵。精度以同输入官方组件及独立 raw 链的官方五次重复范围验收；耗时以相同硬件、参数和计时范围的配对基线验收。不能增加播种数、优化迭代或追踪样本数换取精度，不能改变 SC 的统计定义。
 

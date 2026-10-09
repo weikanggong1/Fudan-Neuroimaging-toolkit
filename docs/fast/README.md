@@ -180,6 +180,12 @@ fast -t 1 -n 3 -I 4 -W 15 -O 4 -f 0.02 -l 20 -H 0.1 -R 0.3 \
 
 <a id="最近版本记录"></a>
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+FSL 兼容 CPU 实测约 **388–395 s**，FNIT **122–133 s**；PVE 存在少量差异，因此保留原页的精度限制。GPU 本轮没有新的完整端到端时钟。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit / version | 变化 | benchmark |

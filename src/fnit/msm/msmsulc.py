@@ -417,8 +417,17 @@ def run_msmsulc(
     inputs: dict[str, MSMSulcInputs], output_dir: str | Path, *,
     device: str = "cuda:0", config: MSMSulcConfig | str | Path | None = None,
     execution: str = "optimized", parallel: bool = True, cpu_threads: int | None = None,
+    qc_policy: str = "report",
 ) -> dict[str, Path]:
-    """Register both sulcal spheres with the explicit official MSMSulc schedule."""
+    """Register both sulcal spheres with the explicit official MSMSulc schedule.
+
+    ``qc_policy`` controls the native-sphere output boundary. ``report`` keeps
+    the source-compatible interpolation and records any folded faces,
+    ``repair`` applies sequential unfolding to a folded native output, and
+    ``error`` refuses to write a folded sphere. The standalone function and
+    the surface pipeline both keep ``report`` as the compatibility default;
+    repair is an explicit production option.
+    """
     from . import _fastpd_native
     if set(inputs) != {"L", "R"}:
         raise ValueError("inputs must contain L and R MSMSulc inputs")
@@ -426,6 +435,8 @@ def run_msmsulc(
     elif isinstance(config,(str,Path)):config=MSMSulcConfig.from_file(config)
     elif not isinstance(config,MSMSulcConfig):raise TypeError("config must be MSMSulcConfig or a config path")
     if execution not in ("optimized","reference"):raise ValueError("execution must be optimized or reference")
+    if qc_policy not in ("report", "repair", "error"):
+        raise ValueError("qc_policy must be 'report', 'repair' or 'error'")
     selected=torch.device(device)
     if selected.type == "cuda":
         torch.backends.cuda.matmul.allow_tf32=True
@@ -435,7 +446,8 @@ def run_msmsulc(
     output.mkdir(parents=True,exist_ok=True)
     def register(hemi, threads):
         path, report = _register_msmsulc_one(inputs[hemi],output,hemi=hemi,
-                                           device=device,config=config,execution=execution)
+                                           device=device,config=config,execution=execution,
+                                           qc_policy=qc_policy)
         report["cpu_threads"] = threads
         report["execution_counts"] = current_statistics()
         return path, report
@@ -450,7 +462,7 @@ def run_msmsulc(
     return {hemi:output/f"{hemi}.sphere.MSMSulc.native.surf.gii" for hemi in "LR"}
 
 
-def _register_msmsulc_one(entry, output, *, hemi, device, config, execution):
+def _register_msmsulc_one(entry, output, *, hemi, device, config, execution, qc_policy="report"):
     from . import _fastpd_native
     selected=torch.device(device)
     started=time.perf_counter()
@@ -578,12 +590,27 @@ def _register_msmsulc_one(entry, output, *, hemi, device, config, execution):
                        "iterations":iterations,"seconds":time.perf_counter()-stage_started})
     vertices=_sphere_warp(torch.as_tensor(native,device=selected),previous_grid,
                           previous_faces,previous_positions,selected,execution=execution).detach().cpu().numpy()
+    output_qc_before_repair=_native_output_qc(vertices,native_faces,native)
+    repair = {"policy": qc_policy, "applied": False, "moved_vertices": 0}
+    if output_qc_before_repair["folded_output_faces"]:
+        if qc_policy == "error":
+            raise RuntimeError(
+                f"{hemi} MSMSulc native sphere has "
+                f"{output_qc_before_repair['folded_output_faces']} folded faces"
+            )
+        if qc_policy == "repair":
+            repaired, moved = _unfold(
+                torch.as_tensor(vertices, dtype=torch.float64, device=selected), native_faces
+            )
+            vertices = repaired.detach().cpu().numpy()
+            repair.update(applied=True, moved_vertices=int(moved))
     output_qc=_native_output_qc(vertices,native_faces,native)
-    # User-authorized source-compatible output: official transform() saves
-    # this interpolation directly. Its dense native output can contain a
-    # folded face even with unfolded DATA/control grids; the real paired
-    # oracle has confirmed the same face. Keep both actual-precision counts
-    # in the report and do not introduce an additional final deformation.
+    repair["success"] = output_qc["folded_output_faces"] == 0
+    if qc_policy == "repair" and not repair["success"]:
+        raise RuntimeError(f"{hemi} MSMSulc native sphere fold repair did not pass QC")
+    # ``report`` preserves the official final interpolation for exact
+    # source-compatible comparisons. ``repair`` is explicit and changes
+    # native coordinates; the pre-repair QC remains available for audit.
     path=output/f"{hemi}.sphere.MSMSulc.native.surf.gii"
     nib.save(nib.GiftiImage(darrays=[
         nib.gifti.GiftiDataArray(vertices.astype(np.float32),intent="NIFTI_INTENT_POINTSET"),
@@ -592,5 +619,8 @@ def _register_msmsulc_one(entry, output, *, hemi, device, config, execution):
                   "affine_angles_deg":angles,"affine_seconds":affine_seconds,
                   "affine":affine_report,"config":config.to_dict(),"execution":execution,
                   **output_qc,
+                  "native_output_qc_before_repair": output_qc_before_repair,
+                  "fold_repair": repair,
+                  "orientation_qc": "pass" if repair["success"] else "warning",
                   "stages":stages}
     return path, report

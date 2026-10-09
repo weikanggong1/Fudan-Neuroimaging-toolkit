@@ -32,7 +32,10 @@ def setup_case(tmp_path, native_features):
     for hemisphere in "LR":
         native = save_mesh(tmp_path / f"{hemisphere}.native.surf.gii", 2)
         atlas = save_mesh(assets / MESH / f"{hemisphere}.sphere.32k_fs_LR.surf.gii", 1)
-        native_spheres.append(tmp_path / f"{hemisphere}.MSMSulc.surf.gii")
+        # This is the actual registration sphere consumed by MSMAll.  Keep it
+        # separate from midthickness so the topology oracle is exercised.
+        registration = save_mesh(tmp_path / f"{hemisphere}.MSMSulc.surf.gii", 2)
+        native_spheres.append(registration)
         geometry.append(SimpleNamespace(midthickness=native))
         inputs[hemisphere] = MSMAllInputs(native if native_features else atlas,
                                           tmp_path / "individual.func.gii", atlas,
@@ -75,6 +78,32 @@ def test_native_features_use_initial_native_registration_without_atlas_compositi
     monkeypatch.setattr("fnit.fmri.surface_pipeline.subprocess.run", forbidden)
     _, topology = _refine_msmall(inputs, native_spheres, geometry, assets, tmp_path / "result",
                                 MSMAllConfig(), "cpu", "optimized", "wb_command", parallel=False)
+    assert topology == {"L": "native", "R": "native"}
+    assert observed["inputs"]["L"].initial_sphere == native_spheres[0]
+
+
+def test_native_feature_topology_uses_registration_sphere_not_midthickness_order(tmp_path, monkeypatch):
+    inputs, native_spheres, geometry, assets = setup_case(tmp_path, True)
+    # Workbench exports can preserve the native vertex set while serializing
+    # midthickness triangles in another order.  MSMAll features still follow
+    # the registration sphere's order and must not be rejected for that.
+    reordered = []
+    for item in geometry:
+        faces = np.asarray(nib.load(item.midthickness).darrays[1].data).copy()[:, ::-1]
+        path = tmp_path / f"{len(reordered)}.midthickness.reordered.surf.gii"
+        points = np.asarray(nib.load(item.midthickness).darrays[0].data)
+        nib.save(nib.GiftiImage(darrays=[
+            nib.gifti.GiftiDataArray(points, intent="NIFTI_INTENT_POINTSET"),
+            nib.gifti.GiftiDataArray(faces, intent="NIFTI_INTENT_TRIANGLE"),
+        ]), path)
+        reordered.append(SimpleNamespace(midthickness=path))
+    observed = {}; mock_solver(monkeypatch, observed)
+    monkeypatch.setattr("fnit.fmri.surface_pipeline.subprocess.run",
+                        lambda *args, **kwargs: (_ for _ in ()).throw(
+                            AssertionError("native MSMAll must not call Workbench composition")))
+    _, topology = _refine_msmall(inputs, native_spheres, tuple(reordered), assets,
+                                tmp_path / "result", MSMAllConfig(), "cpu", "optimized",
+                                "wb_command", parallel=False)
     assert topology == {"L": "native", "R": "native"}
     assert observed["inputs"]["L"].initial_sphere == native_spheres[0]
 

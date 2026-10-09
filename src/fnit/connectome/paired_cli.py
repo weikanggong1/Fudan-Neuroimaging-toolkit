@@ -233,7 +233,7 @@ def run_paired_connectome(args):
         response_mask=args.response_mask, fod_mask=args.fod_mask,
         normalise_mask=args.normalise_mask, fa_map=args.fa_map,
         dwi_to_t1_world=transform, n_seeds=args.n_seeds, seed=args.seed,
-        compile_arc=args.compile_arc, checkpoint_dir=checkpoint, overwrite=args.overwrite,
+        tracking_threads=args.tracking_threads, checkpoint_dir=checkpoint, overwrite=args.overwrite,
         template_pairs=pairs, assignment_radius=args.assignment_radius,
         mni_to_t1_transform=args.mni_to_t1_transform)
     if preparation is not None:

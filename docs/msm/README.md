@@ -57,6 +57,7 @@ spheres = run_msmsulc(
     execution="optimized",                          # 缓存和合并传输；reference 用于执行方式对照
     parallel=True,                                   # 左右独立配准；False 保留串行执行
     cpu_threads=8,                                   # 局部邻域搜索的总 CPU 预算
+    qc_policy="report",                             # report/repair/error；默认保留官方插值结果
 )
 print(spheres["L"])  # L.sphere.MSMSulc.native.surf.gii
 print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
@@ -70,6 +71,14 @@ print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 
 `registration_report.json` 记录实际配置、仿射角度、逐级能量、更新数量、停止位置、展开操作、耗时、峰值已分配显存和写出折叠数。球面可传给 `fMRISurface_pipeline(registered_spheres=(spheres["L"], spheres["R"]))` 做固定球面投影对照；使用已注册球面时不再指定 `msm_config`。独立配准输出是工作文件，最终 fMRI 时间序列由 surface 流程写成 BIDS Derivatives。
 
+`qc_policy` 明确控制最终 native sphere 的翻折处理：
+
+- `report`（默认）保留官方兼容的 native 插值坐标；若存在翻折，写入 `native_output_qc_before_repair`、`fold_repair` 和 `orientation_qc="warning"`，不静默改坐标，适合官方精度对照。
+- `repair` 在写出前对 native sphere 做显式顺序 unfolding，并同时保存修复前后 QC；修复成功时 `orientation_qc="pass"`。这会改变最终坐标，不能再称为严格官方等价。
+- `error` 发现翻折时立即报错且不写出该侧球面。
+
+中间 DATA/control 网格仍按原流程逐级检查和展开；该策略只作用于最终 native 插值边界。MSMSulc 本身只需要 native sphere、sulc 和 HCP 参考资源，不需要 T2w 或 FLAIR。
+
 ### 输入参数
 
 | 参数 | 必需 | 类型 | 默认值 | 含义 |
@@ -81,6 +90,7 @@ print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 | `execution` | 否 | str | `'optimized'` | 执行策略；本页说明实际支持值。 |
 | `parallel` | 否 | bool | `True` | 左右半球独立并行；预算1时自动串行。 |
 | `cpu_threads` | 否 | int / None | `None` | 双侧合计CPU预算；None读环境/PyTorch线程设置。 |
+| `qc_policy` | 否 | `"report"` / `"repair"` / `"error"` | `"report"` | 最终 native sphere 翻折策略；report 保持官方插值，repair 显式修复，error 拒绝写出。 |
 
 准备接口`prepare_msmsulc_inputs`参数：
 
@@ -143,6 +153,7 @@ JSON 顶层含 `L`、`R`；每侧填 `MSMSulcInputs` 的六个文件路径，可
 | `--inputs-json` | `inputs` | L/R六路径；相对路径以JSON目录为基准 |
 | `--output-dir / --device / --config` | `output_dir / device / config` | 输出、设备与官方配置 |
 | `--execution` | `execution` | optimized/reference |
+| `--qc-policy` | `qc_policy` | report/repair/error；最终 native sphere 的翻折策略。 |
 | `--no-parallel / --cpu-threads` | `parallel=False / cpu_threads` | 执行与总CPU预算 |
 
 ## 4. 原软件调用
@@ -218,13 +229,28 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 最新质量诊断发现一例保存球面出现1个新增反向面，不能当几何质量通过；[CON10保存质量](../../validation/fmri/public_ten_20261003/reconstruction_completed/CON10.saved-MSM-absolute.public.json)。完整MSM独立函数本轮未新增公开脑图；[历史专项球面可视化与证据](../../validation/msm/README.md)。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+MSMSulc FNIT 双侧冷/热 **201.99/198.08 s**，官方 newMSM 单线程/8线程 **1587.70/378.03 s**；固定 490 帧 fsLR32k/91k 输出逐值一致。MSMAll C 模式 coarse **23.237→11.430 s**、refine **181.790→90.796 s**，坐标和拓扑严格一致。MSMAll 数字是完整双侧 `run_msmall` 配准核心（含输入读取和 sphere/report 写盘），不含特征估计、BOLD 投影、CIFTI 或完整 `fMRISurface_pipeline`；现有公开真实特征与 native sphere 网格不匹配，暂不冒充 full-surface E2E。CPU 严格配对与共享 H100 的边界仍按本页既有报告解释。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
+`925c5866` 进一步延迟 optimized CUDA + source-precision 的主机复制：只有 containment 不确定、边界重叠或缺失时才 materialize query/nearest，已证明点保持在 GPU；CPU、reference、fallback 及 FP64/native 算术顺序不变。远端 FNIT 环境的 sphere execution/CPU 回归为 **14 passed, 5 skipped**；需要 `_fastpd_native` 的 source-precision 严格测试因环境缺少扩展而未计入通过。该提交的稳定 GPU 加速比需在匹配 MSMAll 特征补齐后按 surface E2E 协议复测。
+
+
+### 本轮 native sphere QC policy 真实验证（2026-10-08）
+
+[匿名聚合报告](../../validation/msm/msmsulc_qc_policy_con01.public.json)使用同一真实单被试、H100 PCIe、CPU 总预算 8 和 optimized 执行。`report` 用时 **157.970 s**，左/右翻折面为 **2/0**，最小方向比为 **−4.375429/0.505472**；同输入的官方 fMRIPrep 25.2.4 路径也为左 2、右 0，因此该结果保留为 source-compatible warning。显式 `repair` 用时 **169.099 s**，左侧移动 9 个顶点后翻折面为 **0/0**，最小方向比为 **0.003251/0.505472**；修复改变 native 坐标，不能作为严格官方等价结果。该验证不需要 T2w 或 FLAIR。当前源码独立复跑为 `report=108.706 s`、`repair=114.151 s`，QC 字段完全一致；这是共享节点上的单次墙钟观察，公开对照表保留原始测量值。
+
 ## 6. 最近版本和 benchmark
 
 2026-10-04 起：新增 CPU1/8 完整官方对照、Point 舍入修复和 containing-face 缓存；最新 CPU 实测与最终 GPU 配对分别记录。
 
 | 实测或更新 | 范围与记录 |
 |---|---|
+| `msmsulc_qc_policy` | 默认 `report` 保留官方 native 插值；`repair` 和 `error` 为显式 QC 分支，真实单例结果见上文聚合报告。 |
 | `9f9f63e` GPU 重采样与双侧并行 | 严格最近邻证明、有序 GPU CSR、独立 stream 与原生 GIL 释放；完整 surface 的球面/490 帧时序保持旧版数值。MSM 准备＋配准串行/并行为 **116.361 / 94.773 s**，完整 API 为 **343.056 / 243.695 s**；两次物理 GPU 不同。修复调用方峰值统计和空标签形状，见[最新完整复测](../../validation/fmri/surface_gpu_parallel/README.md)。 |
+| `925c5866` 延迟 source-precision D2H | optimized CUDA 路径延迟 query/nearest 主机缓存，保持 CPU/reference/fallback 精度顺序；14 项 sphere execution/CPU 测试通过，5 项跳过。完整 GPU 稳定加速比待匹配 MSMAll 特征复测。 |
 | `4f7bd9f2` 独立 MSMSulc | 修复缓存面积、浮点配置、刚性 WLS 和 Rodrigues 顺序；本例保存球面及固定 clean 时序逐值相同，见上表和[专项报告](../../validation/msm/current.public.json)。 |
 | `7102c187` 完整 surface 历史 | 重新准备几何、估计球面并投影 preproc；CIFTI 时间 r 均值 0.977911，范围包含完整 surface，见[历史完整报告](../../validation/fmri/surface_e2e/README.md)。 |
 | 2026-10 MSMAll 扩展 | 新增独立 MSMAll、VN/DR/WRN 与 C/CA/CAT 特征准备；共享应变成本保留既有 MSMSulc 运算顺序。MSMAll 的真实 C 模式结果单独记录，以上测量保留原源码快照。 |

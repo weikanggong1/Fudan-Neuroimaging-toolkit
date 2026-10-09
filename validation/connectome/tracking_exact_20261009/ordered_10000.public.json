@@ -1,0 +1,827 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "scope": "real-input tracking implementation comparison",
+  "adoption_status": "adopted after full100k strict equality and GPU regressions",
+  "input_kind": "existing real NIfTI; no generated inputs",
+  "input_files": {
+    "fod": {
+      "size_bytes": 36519533,
+      "sha256": "18addc15596dadf7fb60727ae9af8d1cbd98c139964712454a33a718c5f4e7c1"
+    },
+    "five_tissue": {
+      "size_bytes": 926676,
+      "sha256": "704539238d29c10eeaf4fab31831bc3ced9648ce6a59f4e9bd75c7b7d6d03fbf"
+    },
+    "gmwmi": {
+      "size_bytes": 416098,
+      "sha256": "06243e393410bad709c2569e68d5eeed49d5f28500e607890a06e217a19a9823"
+    }
+  },
+  "input_shapes": {
+    "fod": [
+      104,
+      104,
+      72,
+      45
+    ],
+    "five_tissue": [
+      256,
+      256,
+      256,
+      5
+    ],
+    "gmwmi": [
+      256,
+      256,
+      256
+    ]
+  },
+  "source_sha256": {
+    "baseline_tracking": "693f015e8f0e7153e8886dc49950caa4cb5f924022888ffe061f1392978e31a4",
+    "candidate_tracking": "6ed4e6bedc45fa0eaf2b026541056ec2976eb7d205d397c8dff4f3e899047dbd",
+    "fixed_fod": "f82d2174109d05b9f820b6abe98e3792e48ae63e02ace2f2640f10c4c2052aaa",
+    "benchmark": "1853518212093f38d006564142ceb663430c4afcc555f2534e5ee6ffb3fe0494"
+  },
+  "baseline_commit": "9c118b748700e04224cd5b235b23a712145eae7e",
+  "candidate_commit": "gpu1_ordered_experimental",
+  "candidate_commit_note": "The candidate label identifies an experiment; source_sha256 records the measured source bytes.",
+  "fixed_fod_function_identity_equal": true,
+  "mode": {
+    "baseline": {
+      "arc": "eager",
+      "five_tissue": "baseline",
+      "act": "eager"
+    },
+    "candidate": {
+      "arc": "eager",
+      "five_tissue": "ordered corner gather",
+      "act": "eager"
+    }
+  },
+  "hardware": {
+    "cpu_model": null,
+    "cpu_model_status": "not recorded in this report",
+    "cpu_threads": 8,
+    "cpu_interop_threads": 64,
+    "cpu_thread_status": "recorded in this report",
+    "gpu_model": "NVIDIA H100 PCIe",
+    "gpu_total_memory_bytes": 84942979072
+  },
+  "torch_version": "2.5.1",
+  "cuda_version": "11.8",
+  "python_version": "3.11.16",
+  "cpu_threads": 8,
+  "cpu_interop_threads": 64,
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "autocast": false,
+  "input_dtype": "float32",
+  "affine_dtype": "float64",
+  "memory_budget_bytes": 20000000000,
+  "torch_allocator_budget_bytes": 18000000000,
+  "options": {
+    "n_seeds": 10000,
+    "lmax": 8,
+    "five_tissue_spacing_mm": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "seed": 0,
+    "batch_size": 8192,
+    "arc_proposals": 16,
+    "max_length_mm": 250.0,
+    "min_length_mm": null,
+    "step_mm": null,
+    "max_angle_degrees": 45.0,
+    "cutoff": 0.1,
+    "power": 0.5,
+    "compile_arc": false
+  },
+  "fa_input": null,
+  "mean_fa_not_evaluated": true,
+  "mean_fa_comparison_note": "No FA image was supplied. A true mean_fa equality flag means that both values were None; it does not test an FA tensor.",
+  "shared_input_timing": {
+    "input_hashing_seconds": 0.05092274723574519,
+    "io_seconds": 4.896556666120887,
+    "h2d_seconds": 0.14706469792872667,
+    "device_initialization_seconds": 0.28879613894969225
+  },
+  "memory_note": "Torch allocated/reserved exclude other processes and CUDA context allocations.",
+  "timing_note": "Tracking excludes input I/O/H2D, final output snapshot D2H, hashing, comparison and TCK writes. Internal metadata D2H remains included in tracking. Each variant first full call is separate unless a prior full cold/warmup call was made. Profile timings are excluded from hot summaries.",
+  "cold_note": "Optional cold entries are each implementation's first call in this process; CUDA/FOD/Inductor caches are shared.",
+  "warmup_seeds": 128,
+  "profile_seeds": 128,
+  "phase_note": "The first full calls follow a 128-seed warmup. Both phases are preserved separately.",
+  "gpu_snapshot_note": "Only UTC and numeric utilization, memory.used, power and SM clock telemetry are exported. Snapshots do not measure continuous GPU occupancy.",
+  "tck_hash_status": "not recorded in this report",
+  "runs": [
+    {
+      "variant": "baseline",
+      "phase": "warmup",
+      "ordinal": 0,
+      "n_seeds": 128,
+      "tracking_seconds": 4.941529461182654,
+      "tracking_process_cpu_seconds": 6.333221973000001,
+      "system_load_before": [
+        6.43,
+        7.1,
+        6.92
+      ],
+      "system_load_after": [
+        7.05,
+        7.21,
+        6.96
+      ],
+      "d2h_seconds": 0.0008864807896316051,
+      "path_pack_seconds": 0.00031100865453481674,
+      "summary_seconds": 0.005615307949483395,
+      "comparison_seconds": 4.886183887720108e-06,
+      "gpu_before": {
+        "utc": "2026-10-09T04:18:32Z",
+        "gpu_utilization_percent": 3,
+        "memory_used_mib": 1786,
+        "power_watts": 79.74,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:18:39Z",
+        "gpu_utilization_percent": 42,
+        "memory_used_mib": 3218,
+        "power_watts": 79.98,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 596419072,
+        "peak_reserved_bytes": 618659840,
+        "peak_allocated_gb": 0.596419072,
+        "peak_reserved_gb": 0.61865984
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 596419072,
+        "peak_reserved_bytes": 618659840,
+        "peak_allocated_gb": 0.596419072,
+        "peak_reserved_gb": 0.61865984
+      },
+      "output": {
+        "accepted_streamlines": 38,
+        "total_path_points": 1215,
+        "seeds_attempted": 128,
+        "field_sha256": {
+          "point_counts": "7140bae87dc4b001b707d6e81a30c6fb99dc9327ed608df4418c04ce50979b7d",
+          "packed_points": "e5f2c533b625a4f721fa0443b8d5f7c430c371a361f357f2289efedabdc8bf05",
+          "accepted_seeds": "4183d458e4b68de27f82e3c54f7ec79b2b3b8e6a33fb817cc9fb64bc633eff17",
+          "lengths_mm": "36fc9e466d1f895394df500fc8987baa74a53588a90abb0d7623449a8e3ea6de",
+          "endpoints": "81d5fb4c1d63344b078e9659aa4b8dfecd70d58b0f72ea96b9416f89c0f697c5"
+        },
+        "output_sha256": "b51eea4583885c15a7133821cbe9746a46dc5b489f3cbe91b48e2fd091de5097"
+      },
+      "strict_comparison": {
+        "assessed": false,
+        "all_equal": null,
+        "reason": "no same-scale reference output"
+      },
+      "tck_write_seconds": null,
+      "tck_sha256": null
+    },
+    {
+      "variant": "candidate",
+      "phase": "warmup",
+      "ordinal": 0,
+      "n_seeds": 128,
+      "tracking_seconds": 4.11616422701627,
+      "tracking_process_cpu_seconds": 5.517546586,
+      "system_load_before": [
+        7.05,
+        7.21,
+        6.96
+      ],
+      "system_load_after": [
+        6.81,
+        7.16,
+        6.95
+      ],
+      "d2h_seconds": 0.0005752663128077984,
+      "path_pack_seconds": 0.00020879600197076797,
+      "summary_seconds": 0.004948223941028118,
+      "comparison_seconds": 0.002278262749314308,
+      "gpu_before": {
+        "utc": "2026-10-09T04:18:41Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 3218,
+        "power_watts": 79.84,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:18:48Z",
+        "gpu_utilization_percent": 41,
+        "memory_used_mib": 3218,
+        "power_watts": 79.79,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 596519936,
+        "peak_reserved_bytes": 618659840,
+        "peak_allocated_gb": 0.596519936,
+        "peak_reserved_gb": 0.61865984
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 596519936,
+        "peak_reserved_bytes": 618659840,
+        "peak_allocated_gb": 0.596519936,
+        "peak_reserved_gb": 0.61865984
+      },
+      "output": {
+        "accepted_streamlines": 38,
+        "total_path_points": 1215,
+        "seeds_attempted": 128,
+        "field_sha256": {
+          "point_counts": "7140bae87dc4b001b707d6e81a30c6fb99dc9327ed608df4418c04ce50979b7d",
+          "packed_points": "e5f2c533b625a4f721fa0443b8d5f7c430c371a361f357f2289efedabdc8bf05",
+          "accepted_seeds": "4183d458e4b68de27f82e3c54f7ec79b2b3b8e6a33fb817cc9fb64bc633eff17",
+          "lengths_mm": "36fc9e466d1f895394df500fc8987baa74a53588a90abb0d7623449a8e3ea6de",
+          "endpoints": "81d5fb4c1d63344b078e9659aa4b8dfecd70d58b0f72ea96b9416f89c0f697c5"
+        },
+        "output_sha256": "b51eea4583885c15a7133821cbe9746a46dc5b489f3cbe91b48e2fd091de5097"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": null,
+      "tck_sha256": null
+    },
+    {
+      "variant": "baseline",
+      "phase": "first_full_call",
+      "ordinal": 0,
+      "n_seeds": 10000,
+      "tracking_seconds": 26.568179917987436,
+      "tracking_process_cpu_seconds": 27.970189266,
+      "system_load_before": [
+        6.81,
+        7.16,
+        6.95
+      ],
+      "system_load_after": [
+        6.54,
+        7.06,
+        6.92
+      ],
+      "d2h_seconds": 0.012367174960672855,
+      "path_pack_seconds": 0.0022763018496334553,
+      "summary_seconds": 0.10705181304365396,
+      "comparison_seconds": 3.661029040813446e-06,
+      "gpu_before": {
+        "utc": "2026-10-09T04:18:48Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 3218,
+        "power_watts": 79.8,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:19:16Z",
+        "gpu_utilization_percent": 42,
+        "memory_used_mib": 3350,
+        "power_watts": 80.15,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 728526848,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.728526848,
+        "peak_reserved_gb": 0.75497472
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 728526848,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.728526848,
+        "peak_reserved_gb": 0.75497472
+      },
+      "output": {
+        "accepted_streamlines": 2718,
+        "total_path_points": 109553,
+        "seeds_attempted": 10000,
+        "field_sha256": {
+          "point_counts": "4b5af380c415dcc019bbac2e31f65415a34bacc24ebc1c60f21853b10bfdb948",
+          "packed_points": "4fc5375a4ee0b0fbad2d9c12de97ebb7d4c3dd87d8164de719afa79ce1465541",
+          "accepted_seeds": "6d0cdea7d18c69d82d09ada91ff90d0b26099dafb9c8230af52ceb704f8f38b3",
+          "lengths_mm": "a9b2eb1e1e5d3463666562dc3f28d950f09cdbf7935e3d2d4c01837a44d6444d",
+          "endpoints": "482d68f8ac82c03a089ab3b512c595ae1dab173f3d619e37c7d1c7e85d0d0c25"
+        },
+        "output_sha256": "ff7924bcb423c7ef872c57eb406c9edca1a5c517bdd9fb4341d1d1f6c4e99f6c"
+      },
+      "strict_comparison": {
+        "assessed": false,
+        "all_equal": null,
+        "reason": "no same-scale reference output"
+      },
+      "tck_write_seconds": null,
+      "tck_sha256": null
+    },
+    {
+      "variant": "candidate",
+      "phase": "first_full_call",
+      "ordinal": 0,
+      "n_seeds": 10000,
+      "tracking_seconds": 24.706514137797058,
+      "tracking_process_cpu_seconds": 26.115354789999998,
+      "system_load_before": [
+        6.54,
+        7.06,
+        6.92
+      ],
+      "system_load_after": [
+        6.26,
+        6.96,
+        6.89
+      ],
+      "d2h_seconds": 0.007955134846270084,
+      "path_pack_seconds": 0.0022854660637676716,
+      "summary_seconds": 0.12467156909406185,
+      "comparison_seconds": 0.030592715833336115,
+      "gpu_before": {
+        "utc": "2026-10-09T04:19:16Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 3350,
+        "power_watts": 80.12,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:19:42Z",
+        "gpu_utilization_percent": 42,
+        "memory_used_mib": 3350,
+        "power_watts": 82,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 739152384,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.739152384,
+        "peak_reserved_gb": 0.75497472
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 739152384,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.739152384,
+        "peak_reserved_gb": 0.75497472
+      },
+      "output": {
+        "accepted_streamlines": 2718,
+        "total_path_points": 109553,
+        "seeds_attempted": 10000,
+        "field_sha256": {
+          "point_counts": "4b5af380c415dcc019bbac2e31f65415a34bacc24ebc1c60f21853b10bfdb948",
+          "packed_points": "4fc5375a4ee0b0fbad2d9c12de97ebb7d4c3dd87d8164de719afa79ce1465541",
+          "accepted_seeds": "6d0cdea7d18c69d82d09ada91ff90d0b26099dafb9c8230af52ceb704f8f38b3",
+          "lengths_mm": "a9b2eb1e1e5d3463666562dc3f28d950f09cdbf7935e3d2d4c01837a44d6444d",
+          "endpoints": "482d68f8ac82c03a089ab3b512c595ae1dab173f3d619e37c7d1c7e85d0d0c25"
+        },
+        "output_sha256": "ff7924bcb423c7ef872c57eb406c9edca1a5c517bdd9fb4341d1d1f6c4e99f6c"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": null,
+      "tck_sha256": null
+    },
+    {
+      "variant": "candidate",
+      "phase": "hot",
+      "ordinal": 1,
+      "n_seeds": 10000,
+      "tracking_seconds": 24.49672181205824,
+      "tracking_process_cpu_seconds": 26.089608568000003,
+      "system_load_before": [
+        6.26,
+        6.96,
+        6.89
+      ],
+      "system_load_after": [
+        6.03,
+        6.85,
+        6.86
+      ],
+      "d2h_seconds": 0.006372614298015833,
+      "path_pack_seconds": 0.0014755879528820515,
+      "summary_seconds": 0.10977151012048125,
+      "comparison_seconds": 0.030647732317447662,
+      "gpu_before": {
+        "utc": "2026-10-09T04:19:42Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 3350,
+        "power_watts": 81.07,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:20:06Z",
+        "gpu_utilization_percent": 43,
+        "memory_used_mib": 3882,
+        "power_watts": 83.7,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 739152384,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.739152384,
+        "peak_reserved_gb": 0.75497472
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 739152384,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.739152384,
+        "peak_reserved_gb": 0.75497472
+      },
+      "output": {
+        "accepted_streamlines": 2718,
+        "total_path_points": 109553,
+        "seeds_attempted": 10000,
+        "field_sha256": {
+          "point_counts": "4b5af380c415dcc019bbac2e31f65415a34bacc24ebc1c60f21853b10bfdb948",
+          "packed_points": "4fc5375a4ee0b0fbad2d9c12de97ebb7d4c3dd87d8164de719afa79ce1465541",
+          "accepted_seeds": "6d0cdea7d18c69d82d09ada91ff90d0b26099dafb9c8230af52ceb704f8f38b3",
+          "lengths_mm": "a9b2eb1e1e5d3463666562dc3f28d950f09cdbf7935e3d2d4c01837a44d6444d",
+          "endpoints": "482d68f8ac82c03a089ab3b512c595ae1dab173f3d619e37c7d1c7e85d0d0c25"
+        },
+        "output_sha256": "ff7924bcb423c7ef872c57eb406c9edca1a5c517bdd9fb4341d1d1f6c4e99f6c"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": null,
+      "tck_sha256": null
+    },
+    {
+      "variant": "baseline",
+      "phase": "hot",
+      "ordinal": 1,
+      "n_seeds": 10000,
+      "tracking_seconds": 26.576703279279172,
+      "tracking_process_cpu_seconds": 28.180504713000005,
+      "system_load_before": [
+        6.03,
+        6.85,
+        6.86
+      ],
+      "system_load_after": [
+        6.18,
+        6.8,
+        6.84
+      ],
+      "d2h_seconds": 0.005230448208749294,
+      "path_pack_seconds": 0.0018373462371528149,
+      "summary_seconds": 0.10668545309454203,
+      "comparison_seconds": 0.03034446481615305,
+      "gpu_before": {
+        "utc": "2026-10-09T04:20:07Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 3882,
+        "power_watts": 82.92,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:20:33Z",
+        "gpu_utilization_percent": 40,
+        "memory_used_mib": 4590,
+        "power_watts": 83.09,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 728526848,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.728526848,
+        "peak_reserved_gb": 0.75497472
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 728526848,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.728526848,
+        "peak_reserved_gb": 0.75497472
+      },
+      "output": {
+        "accepted_streamlines": 2718,
+        "total_path_points": 109553,
+        "seeds_attempted": 10000,
+        "field_sha256": {
+          "point_counts": "4b5af380c415dcc019bbac2e31f65415a34bacc24ebc1c60f21853b10bfdb948",
+          "packed_points": "4fc5375a4ee0b0fbad2d9c12de97ebb7d4c3dd87d8164de719afa79ce1465541",
+          "accepted_seeds": "6d0cdea7d18c69d82d09ada91ff90d0b26099dafb9c8230af52ceb704f8f38b3",
+          "lengths_mm": "a9b2eb1e1e5d3463666562dc3f28d950f09cdbf7935e3d2d4c01837a44d6444d",
+          "endpoints": "482d68f8ac82c03a089ab3b512c595ae1dab173f3d619e37c7d1c7e85d0d0c25"
+        },
+        "output_sha256": "ff7924bcb423c7ef872c57eb406c9edca1a5c517bdd9fb4341d1d1f6c4e99f6c"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": null,
+      "tck_sha256": null
+    },
+    {
+      "variant": "baseline",
+      "phase": "hot",
+      "ordinal": 2,
+      "n_seeds": 10000,
+      "tracking_seconds": 26.71939015807584,
+      "tracking_process_cpu_seconds": 28.320012477000006,
+      "system_load_before": [
+        6.18,
+        6.8,
+        6.84
+      ],
+      "system_load_after": [
+        6.31,
+        6.79,
+        6.84
+      ],
+      "d2h_seconds": 0.007585718762129545,
+      "path_pack_seconds": 0.0020943190902471542,
+      "summary_seconds": 0.11041078809648752,
+      "comparison_seconds": 0.03059296403080225,
+      "gpu_before": {
+        "utc": "2026-10-09T04:20:33Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 4590,
+        "power_watts": 82.3,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:21:01Z",
+        "gpu_utilization_percent": 43,
+        "memory_used_mib": 4590,
+        "power_watts": 81.69,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 728526848,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.728526848,
+        "peak_reserved_gb": 0.75497472
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 728526848,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.728526848,
+        "peak_reserved_gb": 0.75497472
+      },
+      "output": {
+        "accepted_streamlines": 2718,
+        "total_path_points": 109553,
+        "seeds_attempted": 10000,
+        "field_sha256": {
+          "point_counts": "4b5af380c415dcc019bbac2e31f65415a34bacc24ebc1c60f21853b10bfdb948",
+          "packed_points": "4fc5375a4ee0b0fbad2d9c12de97ebb7d4c3dd87d8164de719afa79ce1465541",
+          "accepted_seeds": "6d0cdea7d18c69d82d09ada91ff90d0b26099dafb9c8230af52ceb704f8f38b3",
+          "lengths_mm": "a9b2eb1e1e5d3463666562dc3f28d950f09cdbf7935e3d2d4c01837a44d6444d",
+          "endpoints": "482d68f8ac82c03a089ab3b512c595ae1dab173f3d619e37c7d1c7e85d0d0c25"
+        },
+        "output_sha256": "ff7924bcb423c7ef872c57eb406c9edca1a5c517bdd9fb4341d1d1f6c4e99f6c"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": null,
+      "tck_sha256": null
+    },
+    {
+      "variant": "candidate",
+      "phase": "hot",
+      "ordinal": 2,
+      "n_seeds": 10000,
+      "tracking_seconds": 24.637742691207677,
+      "tracking_process_cpu_seconds": 26.233235138999987,
+      "system_load_before": [
+        6.31,
+        6.79,
+        6.84
+      ],
+      "system_load_after": [
+        6.25,
+        6.74,
+        6.82
+      ],
+      "d2h_seconds": 0.007445424795150757,
+      "path_pack_seconds": 0.0018163593485951424,
+      "summary_seconds": 0.11059646029025316,
+      "comparison_seconds": 0.030525933019816875,
+      "gpu_before": {
+        "utc": "2026-10-09T04:21:01Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 4590,
+        "power_watts": 80.79,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:21:26Z",
+        "gpu_utilization_percent": 42,
+        "memory_used_mib": 4590,
+        "power_watts": 83.65,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 739152384,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.739152384,
+        "peak_reserved_gb": 0.75497472
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 739152384,
+        "peak_reserved_bytes": 754974720,
+        "peak_allocated_gb": 0.739152384,
+        "peak_reserved_gb": 0.75497472
+      },
+      "output": {
+        "accepted_streamlines": 2718,
+        "total_path_points": 109553,
+        "seeds_attempted": 10000,
+        "field_sha256": {
+          "point_counts": "4b5af380c415dcc019bbac2e31f65415a34bacc24ebc1c60f21853b10bfdb948",
+          "packed_points": "4fc5375a4ee0b0fbad2d9c12de97ebb7d4c3dd87d8164de719afa79ce1465541",
+          "accepted_seeds": "6d0cdea7d18c69d82d09ada91ff90d0b26099dafb9c8230af52ceb704f8f38b3",
+          "lengths_mm": "a9b2eb1e1e5d3463666562dc3f28d950f09cdbf7935e3d2d4c01837a44d6444d",
+          "endpoints": "482d68f8ac82c03a089ab3b512c595ae1dab173f3d619e37c7d1c7e85d0d0c25"
+        },
+        "output_sha256": "ff7924bcb423c7ef872c57eb406c9edca1a5c517bdd9fb4341d1d1f6c4e99f6c"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": null,
+      "tck_sha256": null
+    }
+  ],
+  "hot_order": [
+    "candidate",
+    "baseline",
+    "baseline",
+    "candidate"
+  ],
+  "hot_summary": {
+    "baseline": {
+      "tracking_seconds": [
+        26.576703279279172,
+        26.71939015807584
+      ],
+      "sample_count": 2,
+      "median_seconds": 26.648046718677506,
+      "mean_seconds": 26.648046718677506,
+      "min_seconds": 26.576703279279172,
+      "max_seconds": 26.71939015807584
+    },
+    "candidate": {
+      "tracking_seconds": [
+        24.49672181205824,
+        24.637742691207677
+      ],
+      "sample_count": 2,
+      "median_seconds": 24.56723225163296,
+      "mean_seconds": 24.56723225163296,
+      "min_seconds": 24.49672181205824,
+      "max_seconds": 24.637742691207677
+    }
+  },
+  "candidate_speedup_from_hot_medians": 1.084698774600718,
+  "strict_comparison_count": 6,
+  "all_strict_equal": true,
+  "private_report_sha256": "93b36be4d34c00ed61eaf68d225cf50c33b8030d6ebdd33922ded038971e59fa",
+  "public_export_note": "Whitelisted scalar summaries, hashes, exact comparisons and complete recorded timing samples; no file locations, account/device identifiers or per-streamline digest lists.",
+  "adopted_source_commit": "d4327049c012b7c6a510de15a48e27c1c4715281"
+}

@@ -1,0 +1,946 @@
+{
+  "status": "completed",
+  "scope": "corrected DWI + completed recon-all to SC",
+  "raw_topup_eddy_recon_all_rerun": false,
+  "timing_scope": "real full call with synchronized per-stage diagnostics; export and reference outside timer",
+  "benchmark_sha256": "b3ea3b9ba6f7c4a4aa8646f58bfbdd1abd0fcb64af0d6256462dd599ddce9404",
+  "environment": {
+    "python": "3.11.17",
+    "torch": "2.5.1+cu118",
+    "nibabel": "5.4.2",
+    "numpy": "1.26.4"
+  },
+  "stages": [
+    {
+      "stage": "_bet_on_dwi_grid",
+      "seconds": 2.7373151127249002
+    },
+    {
+      "stage": "dwi2mask_legacy",
+      "seconds": 1.4312951564788818
+    },
+    {
+      "stage": "fit_mrtrix_dhollander_tensor",
+      "seconds": 1.0253775687888265
+    },
+    {
+      "stage": "freesurfer_five_tissue",
+      "seconds": 0.127305643633008
+    },
+    {
+      "stage": "gmwmi_from_five_tissue",
+      "seconds": 0.0475875586271286
+    },
+    {
+      "stage": "_registration",
+      "seconds": 11.29693993087858
+    },
+    {
+      "stage": "estimate_mrtrix_dhollander",
+      "seconds": 1.3803174002096057
+    },
+    {
+      "stage": "fit_mrtrix_msmt_csd",
+      "seconds": 220.81015281192958
+    },
+    {
+      "stage": "normalise_mrtrix_three_tissue",
+      "seconds": 0.3466614559292793
+    },
+    {
+      "stage": "probabilistic_tractography",
+      "seconds": 5.321806180290878
+    },
+    {
+      "stage": "estimate_sift2_weights",
+      "seconds": 22.09531919285655
+    },
+    {
+      "stage": "sample_streamline_mean_precise",
+      "seconds": 0.02325535472482443
+    },
+    {
+      "stage": "fs_aparc_atlas",
+      "seconds": 0.0029926886782050133
+    },
+    {
+      "stage": "resample_labels_nearest",
+      "seconds": 0.002076205797493458
+    },
+    {
+      "stage": "build_connectomes",
+      "seconds": 0.005738925188779831
+    },
+    {
+      "stage": "fs_aparc_a2009s_atlas",
+      "seconds": 0.020463095046579838
+    },
+    {
+      "stage": "resample_labels_nearest",
+      "seconds": 0.0012989798560738564
+    },
+    {
+      "stage": "build_connectomes",
+      "seconds": 0.004700696095824242
+    }
+  ],
+  "full_call_seconds": 274.16530384030193,
+  "accepted_streamlines": 3180,
+  "cuda_allocator_peak": {
+    "allocated_bytes": 7690108416,
+    "reserved_bytes": 8768192512,
+    "process_total_under_20_gb_assessed": false
+  },
+  "tf32": {
+    "matmul": true,
+    "cudnn": true
+  },
+  "schema_version": 1,
+  "dataset": {
+    "name": "OpenNeuro ds004666",
+    "license": "CC0",
+    "doi": "10.18112/openneuro.ds004666.v1.0.8",
+    "license_source": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004666/master/dataset_description.json"
+  },
+  "hardware": {
+    "gpu": "NVIDIA A100-SXM4-80GB",
+    "visible_gpu_count": 1,
+    "cpu_threads": 8
+  },
+  "private_report_sha256": "c771677088068d9f19a02dbf599f074c76e27e6d599ed15443260ee8ba9677fd",
+  "input_sha256": {
+    "dwi": {
+      "bytes": 286940194,
+      "sha256": "666c28c75b2a378a65af7d39026525bf8c8ddc98ace542d9abbb43476eb8ba18"
+    },
+    "bvals": {
+      "bytes": 492,
+      "sha256": "86e91a4f22a8687765d29db41a9a19e2cbcd713a6e60e01392adc25c278b8ff3"
+    },
+    "bvecs": {
+      "bytes": 4575,
+      "sha256": "27166f5857bc0f2bec33afeae129b641fb938503011d8c330b3c8711fb967911"
+    },
+    "recon_all/mri/brain.mgz": {
+      "bytes": 1331737,
+      "sha256": "2d9b845fb67472651548d5a17717e6b23fdfc538bb0c446f7d170d7747c6458d"
+    },
+    "recon_all/mri/aparc+aseg.mgz": {
+      "bytes": 531499,
+      "sha256": "02e0dac0bb322e689d6c5910babe1f91b181c767d45d0bd2cdba72f508c476ab"
+    },
+    "recon_all/mri/aparc.a2009s+aseg.mgz": {
+      "bytes": 562728,
+      "sha256": "a7e1a88174de11a80f80ec3f85e9a9874b4c405386dede9aad64e34ed392e903"
+    },
+    "recon_all/label/lh.aparc.a2009s.annot": {
+      "bytes": 1179000,
+      "sha256": "6f40346206d64087cae08ab9a91a112fe03abf2dd69b1ecd72c0bee917b798be"
+    },
+    "recon_all/label/rh.aparc.a2009s.annot": {
+      "bytes": 1161520,
+      "sha256": "7ca7054382b0b62425fe207be32eaae7fdfc263d907f7c75bb85b377a9ce7095"
+    }
+  },
+  "input_and_source_unchanged": true,
+  "source_sha256": {
+    "FreeSurfer2ACT_sgm_amyg_hipp_ids.tsv": "752e35be8f5831f839e05218269ecb8136af8c298c606d1877736bf03f30de9e",
+    "__init__.py": "bb846a26b16587b4f9093f5553913ce70ac096654a80bdb67f131fdea8221601",
+    "anatomy.py": "49dcf7dd05bd83d8c83e383c1749a63a0d3f3662ea7658795052b7c1d24aa516",
+    "assets.py": "4e8da59aeab8f60be4165f15ee60efbb874576d8dc2716951159a466c9081863",
+    "assignment.py": "c8b21b5aedd0ef63520d5429d7defa39532c9f4a05c1b414b653a04384dc50e0",
+    "atlas_builder.py": "0e14c434148ac40e60d76b6d7947d9b78f259448da27250c82ab1d04eba5d42c",
+    "atlas_surface.py": "1a322452dbc745f9043d07e29fc5822e91405536eb45ebc24abbe40820d481e7",
+    "atlas_tian.py": "953813c8f62eef4e0ed1d6b250e710d3f8a02058299b25cf82907bd01d5df9b5",
+    "bet.py": "aa42b1ab45321257e56aebf3b3472b283df9b5b6b577fdbee16740834926f6ee",
+    "bids.py": "113335e1bedd1e802c1a216141f2c468a9efc768f3b18bf2cdcdb41ed943fd77",
+    "checkpoints.py": "6584025922e8318106f3003a15c88095d95e7d96a7c3b6a87fee94d47c9c4d65",
+    "data/fs_aparc84.tsv": "ef0633831a8a0b299d29522f2f1bb21ca76aafdf6fd1c75e4b116413cfab3fcf",
+    "data/mrtrix_sift2_1281.npz": "7c510ebd2ce05a5eed75f55544323168e2fe807de81b4fbefa079d8db812a52d",
+    "first_5tt.py": "e6def2ce99a9ca2d84595ec2b6ad849127cf1010f208f8f9255a0cee9f701cce",
+    "first_mesh_pve.py": "2e3a4ec6c63aed1223a95d93e96263a251f02c64a30b8f3dcb65b2f034eea375",
+    "fod.py": "87bfdc802d5aa78773c924dc498805250f7a4551c1ae9ed665f37fc67b1356e3",
+    "freesurfer_subject.py": "06bd75ae9b5433ecd09f351df3a6d583249e7dbbf5d3db3da06d0d24c570a688",
+    "input_protection.py": "81ce0e1aedb1638317dab026b0bc18fdb79c16980a1080a2a97a1d4e196bdfc3",
+    "masks.py": "fb8c0a8753e71c342cfb40b19532fb9441f7c13afa230ba153fb6c6b70f1b809",
+    "mtnormalise.py": "549a899aa19a1865860008fbce133e7197b942550ae074aace88b93adec96a4d",
+    "native_runtime.py": "fbff6d829c0e44556e166bdd8854c47d8345186808908a0279cc5252b343311a",
+    "paired_assignment.py": "17ca7913215a1ad1500303d8fc2dd39f5fedfcb30808346732e9a023848b938d",
+    "paired_cli.py": "d6d1c1fd11c51b7afd57533bca7b901bd1821b0f3ecb251b673a39cba8712058",
+    "paired_pipeline.py": "748f57058db0ba5bffb5d929966a4691b62fb753c4561293ef4d2307ea2568a6",
+    "pipeline.py": "5277b579553b2eae2460c93e677094cfb83e685a7d9403e6ba34f180fba12cee",
+    "recon_backend.py": "15762bad8691d632cedb39c3388de17766a24c40bfd626b45a18456d2207b182",
+    "response.py": "2a595044ff31a6497df5efcdeb5df7fe5a651c89a00f629dd819105707e40ebb",
+    "sift2.py": "8481bc75ac482c99b6768f4adf946df3dcd49bfc4d81e7b45972fb69e1cf06a1",
+    "sift2_fixels.py": "c23e376c4c33df2bb49f1af9eece1aea0531ad5f8e66db622e9372f719e0bba4",
+    "sift2_mapping.py": "64ed607d612dc157c1f91006f511ee73c07a1afd0f2ad53913828bcfca48d826",
+    "sift2_optimizer.py": "810615c533141f7ac145f563fa35712705225cc1683de5283b901a6f63c01281",
+    "sift2_proc_mask.py": "03f2e6ea47fb42168768c540a9a2bac08b75b4db53a47683fb1eed8e15a28ca1",
+    "tcksample_precise.py": "f428520f1f804008007f61ea58f00c47ca05cd01fe915fe6582dfcc3143fa0ee",
+    "template_inputs.py": "fceaf9733ed3d9aa4694e9e01bb33a0fa4a221a1ee1f0bfd985f5de095d440e2",
+    "tracking.py": "15b1ca12725c4628178ab292d4c0c21db6dbd72fc3e496158b0bc48f506b030e"
+  },
+  "parameters": {
+    "atlas": [
+      "fs-aparc",
+      "fs-aparc-a2009s"
+    ],
+    "reuse_atlas": "fs-aparc-a2009s",
+    "n_seeds": 10000,
+    "seed": 0,
+    "tracking_threads": 8,
+    "reference_threads": 8,
+    "strict_tracking_seeds": 100,
+    "reference_repeats": 3,
+    "assignment_radius": 4.0
+  },
+  "runtime": {
+    "source_commit": "026e850d171ec2a12f09865d31b8332d23d7ecf6",
+    "source_archive_sha256": "5ee1dc1c8a2e302e5321c77bbb26f6ec8c0891d63877f83e30ff7cc099701990",
+    "source_archives": {
+      "mrtrix": {
+        "filename": "mrtrix3-026e850d171ec2a12f09865d31b8332d23d7ecf6.tar.gz",
+        "folder": "mrtrix3-026e850d171ec2a12f09865d31b8332d23d7ecf6",
+        "url": "https://codeload.github.com/MRtrix3/mrtrix3/tar.gz/026e850d171ec2a12f09865d31b8332d23d7ecf6",
+        "size": 2550496,
+        "sha256": "5ee1dc1c8a2e302e5321c77bbb26f6ec8c0891d63877f83e30ff7cc099701990"
+      },
+      "eigen": {
+        "filename": "eigen-3.4.0.tar.gz",
+        "folder": "eigen-3.4.0",
+        "url": "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz",
+        "size": 2705005,
+        "sha256": "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"
+      },
+      "zlib": {
+        "filename": "zlib-1.3.1.tar.gz",
+        "folder": "zlib-1.3.1",
+        "url": "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
+        "size": 1512791,
+        "sha256": "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23"
+      }
+    },
+    "source_file_sha256": {
+      "configure": "96d5a14424afd3ca5259663301c921fe31a6b779118479e219134102126b14ee",
+      "build": "4e59144b62af4cddd2f837e4b7d9141496a605687f91a617532fc21fdb4e04dc",
+      "LICENCE.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+      "core/file/config.cpp": "06e787a036f13892224b1d4368bd655f6639d776e73504feacfc3dcf8feb83fa"
+    },
+    "configuration_isolation": {
+      "file": "core/file/config.cpp",
+      "original_sha256": "06e787a036f13892224b1d4368bd655f6639d776e73504feacfc3dcf8feb83fa",
+      "patched_sha256": "d6e755afa3c1edd67b5b16699e696ab9da3e517e523917d3d7b9dacc12379960",
+      "environment_variable": "FNIT_MRTRIX_ISOLATED_CONFIG",
+      "enabled_value": "1",
+      "scope": "skip automatic system/user config reads only; defaults and CLI -config unchanged"
+    },
+    "builder_sha256": "fbff6d829c0e44556e166bdd8854c47d8345186808908a0279cc5252b343311a",
+    "binary_sha256": "89e06a8dd55d33cb436e7e07a438fa3f78022dbbc1005be84238847574fa83b2",
+    "binary_size": 2515104,
+    "runtime_files": {
+      "bin/tckgen": {
+        "sha256": "89e06a8dd55d33cb436e7e07a438fa3f78022dbbc1005be84238847574fa83b2",
+        "size": 2515104
+      },
+      "MRtrix-LICENCE.txt": {
+        "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85",
+        "size": 16726
+      },
+      "lib/libmrtrix.so": {
+        "sha256": "288ea738f0f01de2cab0b85498995465e21501e176903a056782b4be24d093fb",
+        "size": 3886456
+      }
+    },
+    "license": "MPL-2.0",
+    "arch": "native",
+    "configure_args": [
+      "-nogui",
+      "-conda"
+    ],
+    "build_target": "bin/tckgen",
+    "jobs": 8,
+    "dependency_linking": "pinned zlib static; MRtrix library in FNIT cache lib directory",
+    "installed_mrtrix_used": false,
+    "build_records": [
+      {
+        "stage": "zlib-configure",
+        "seconds": 0.27422259747982025,
+        "returncode": 0
+      },
+      {
+        "stage": "zlib-build",
+        "seconds": 0.46234465669840574,
+        "returncode": 0
+      },
+      {
+        "stage": "zlib-install",
+        "seconds": 0.025357838720083237,
+        "returncode": 0
+      },
+      {
+        "stage": "configure",
+        "seconds": 3.406957808881998,
+        "returncode": 0
+      },
+      {
+        "stage": "build",
+        "seconds": 64.29067736491561,
+        "returncode": 0
+      }
+    ],
+    "compiler": "GCC/G++ 7.5.0; isolated CFFF validation environment"
+  },
+  "native_input_geometry": {
+    "wm_fod": {
+      "sha256": "80e40c7f91f590d5e7ec82b8a4eee5f12dc810a70c324d2a382d22ccd2d6d4fb",
+      "size_bytes": 140175904,
+      "shape": [
+        104,
+        104,
+        72,
+        45
+      ],
+      "affine": [
+        [
+          -2.0190157890319824,
+          -0.00035246246261522174,
+          0.029186515137553215,
+          104.79640197753906
+        ],
+        [
+          -0.006562471855431795,
+          1.9737639427185059,
+          -0.42197805643081665,
+          -75.12086486816406
+        ],
+        [
+          0.028729278594255447,
+          0.4260859489440918,
+          1.9547590017318726,
+          -69.23046875
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "voxel_spacing_mm": [
+        2.0192308421391147,
+        2.019230908463189,
+        2.000000021906698
+      ],
+      "serialized_nifti2": true
+    },
+    "five_tissue": {
+      "sha256": "61526c023f0787938070125d3f777797ab19b8b4d7cc616dfd9a7864504d3a11",
+      "size_bytes": 335544864,
+      "shape": [
+        256,
+        256,
+        256,
+        5
+      ],
+      "affine": [
+        [
+          -0.9998400989297913,
+          0.0154939951641003,
+          -0.008926580536848295,
+          127.49627433432671
+        ],
+        [
+          -0.00901955265079844,
+          -0.005941055436800523,
+          0.9999417319543051,
+          -101.66172621598074
+        ],
+        [
+          -0.015440058086829992,
+          -0.9998623202211692,
+          -0.00607983645728589,
+          155.1332703432592
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "voxel_spacing_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "serialized_nifti2": true
+    },
+    "gmwmi": {
+      "sha256": "48ce7793327647ed5f208812b3fec5d90bfeff7856a6712a0a889a3f096994e1",
+      "size_bytes": 67109408,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "affine": [
+        [
+          -0.9998400989297913,
+          0.0154939951641003,
+          -0.008926580536848295,
+          127.49627433432671
+        ],
+        [
+          -0.00901955265079844,
+          -0.005941055436800523,
+          0.9999417319543051,
+          -101.66172621598074
+        ],
+        [
+          -0.015440058086829992,
+          -0.9998623202211692,
+          -0.00607983645728589,
+          155.1332703432592
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "voxel_spacing_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "serialized_nifti2": true
+    }
+  },
+  "native_command_seconds": 1.6172230020165443,
+  "native_adapter_seconds": 5.100714665837586,
+  "strict_one_thread": {
+    "requested_seed_budget": 100,
+    "candidate_seconds": 4.332173049449921,
+    "candidate_digest": {
+      "streamlines": 28,
+      "points": 1186,
+      "points_sha256": "c1a49927c0a9ef1f68c17640c1cf6c00a5e4e1b84f9eecbb869bea11c71d8683",
+      "offsets_sha256": "35bb14a01b4d5fe63254177023984ef4beff2603b53495ceb8ddc0fc0866ff83"
+    },
+    "reference_digest": {
+      "streamlines": 28,
+      "points": 1186,
+      "points_sha256": "c1a49927c0a9ef1f68c17640c1cf6c00a5e4e1b84f9eecbb869bea11c71d8683",
+      "offsets_sha256": "35bb14a01b4d5fe63254177023984ef4beff2603b53495ceb8ddc0fc0866ff83"
+    },
+    "ordered_points_and_offsets_equal": true
+  },
+  "official_tracking_commands": {
+    "strict_one_thread": {
+      "binary_sha256": "e53460623df2a5a95d35f72ad8b258933722e5f0c72d8e613876c48b5e9d223f",
+      "wall_seconds": 1.1866206731647253,
+      "returncode": 0
+    },
+    "seed_0": {
+      "binary_sha256": "e53460623df2a5a95d35f72ad8b258933722e5f0c72d8e613876c48b5e9d223f",
+      "wall_seconds": 1.6823583049699664,
+      "returncode": 0
+    },
+    "seed_1": {
+      "binary_sha256": "e53460623df2a5a95d35f72ad8b258933722e5f0c72d8e613876c48b5e9d223f",
+      "wall_seconds": 1.6798616787418723,
+      "returncode": 0
+    },
+    "seed_2": {
+      "binary_sha256": "e53460623df2a5a95d35f72ad8b258933722e5f0c72d8e613876c48b5e9d223f",
+      "wall_seconds": 1.6676555220037699,
+      "returncode": 0
+    }
+  },
+  "threaded_independent_repeats": [
+    {
+      "seed": 0,
+      "accepted_streamlines": 3176,
+      "requested_seed_budget": 10000,
+      "length_definition": "sum of Euclidean stored-polyline segment lengths",
+      "mean_polyline_length_mm": 41.39096758010966,
+      "mean_candidate_polyline_length_mm": 41.30705512013051,
+      "length_ks": 0.0019370910761529077,
+      "header_total_count": "9961"
+    },
+    {
+      "seed": 1,
+      "accepted_streamlines": 3164,
+      "requested_seed_budget": 10000,
+      "length_definition": "sum of Euclidean stored-polyline segment lengths",
+      "mean_polyline_length_mm": 41.33622072023304,
+      "mean_candidate_polyline_length_mm": 41.30705512013051,
+      "length_ks": 0.006257901390644753,
+      "header_total_count": "9960"
+    },
+    {
+      "seed": 2,
+      "accepted_streamlines": 3151,
+      "requested_seed_budget": 10000,
+      "length_definition": "sum of Euclidean stored-polyline segment lengths",
+      "mean_polyline_length_mm": 41.24150220681144,
+      "mean_candidate_polyline_length_mm": 41.30705512013051,
+      "length_ks": 0.011885115836242462,
+      "header_total_count": "9965"
+    }
+  ],
+  "repeat_envelope_acceptance_claim": null,
+  "fixed_tck_reference": {
+    "scope": "same candidate TCK/FOD/5TT/FA/atlas; official downstream programs only",
+    "per_track_vectors": {
+      "sift2_weights": {
+        "shape": [
+          3180
+        ],
+        "finite_pairs": 3180,
+        "unequal_values": 2941,
+        "nonfinite_mismatch": 0,
+        "max_abs": 0.10384842733946309,
+        "mae": 0.0014585551838314202,
+        "relative_l1": 0.0037780697370049356,
+        "pearson": 0.9998733893850177
+      },
+      "mean_fa": {
+        "shape": [
+          3180
+        ],
+        "finite_pairs": 3180,
+        "unequal_values": 3180,
+        "nonfinite_mismatch": 0,
+        "max_abs": 0.0001594125748626829,
+        "mae": 5.384119755682577e-07,
+        "relative_l1": 1.2805351767844192e-06,
+        "pearson": 0.9999999990625985
+      }
+    },
+    "atlas_matrices": {
+      "fs-aparc": {
+        "count": {
+          "shape": [
+            3486
+          ],
+          "finite_pairs": 3486,
+          "unequal_values": 0,
+          "nonfinite_mismatch": 0,
+          "max_abs": 0.0,
+          "mae": 0.0,
+          "relative_l1": 0.0,
+          "pearson": 1.0,
+          "matrix_shape": [
+            84,
+            84
+          ],
+          "full_matrix": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite_pairs": 7056,
+            "unequal_values": 0,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0,
+            "mae": 0.0,
+            "relative_l1": 0.0,
+            "pearson": 1.0
+          },
+          "support_dice": 1.0,
+          "candidate_support": 546,
+          "reference_support": 546,
+          "common_support": {
+            "shape": [
+              546
+            ],
+            "finite_pairs": 546,
+            "unequal_values": 0,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0,
+            "mae": 0.0,
+            "relative_l1": 0.0,
+            "pearson": 1.0
+          }
+        },
+        "sift2_fbc": {
+          "shape": [
+            3486
+          ],
+          "finite_pairs": 3486,
+          "unequal_values": 542,
+          "nonfinite_mismatch": 0,
+          "max_abs": 0.0678187310695666,
+          "mae": 0.0003526692336924037,
+          "relative_l1": 0.0021777872828177246,
+          "pearson": 0.9999930929153644,
+          "matrix_shape": [
+            84,
+            84
+          ],
+          "full_matrix": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite_pairs": 7056,
+            "unequal_values": 1161,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.10111902654170679,
+            "mae": 0.0005120505977953599,
+            "relative_l1": 0.0020231900346176163,
+            "pearson": 0.999996915430761
+          },
+          "support_dice": 1.0,
+          "candidate_support": 546,
+          "reference_support": 546,
+          "common_support": {
+            "shape": [
+              546
+            ],
+            "finite_pairs": 546,
+            "unequal_values": 542,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0678187310695666,
+            "mae": 0.0022516574151130397,
+            "relative_l1": 0.0021777872828177246,
+            "pearson": 0.9999889430059777
+          }
+        },
+        "mean_length": {
+          "shape": [
+            3486
+          ],
+          "finite_pairs": 3486,
+          "unequal_values": 521,
+          "nonfinite_mismatch": 0,
+          "max_abs": 0.5019685548499311,
+          "mae": 0.0020162382444733153,
+          "relative_l1": 0.00017773694300334694,
+          "pearson": 0.9999998840093904,
+          "matrix_shape": [
+            84,
+            84
+          ],
+          "full_matrix": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite_pairs": 7056,
+            "unequal_values": 1121,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.5019685548499311,
+            "mae": 0.0021601059088666745,
+            "relative_l1": 0.00018994197748909992,
+            "pearson": 0.9999998800195076
+          },
+          "support_dice": 1.0,
+          "candidate_support": 546,
+          "reference_support": 546,
+          "common_support": {
+            "shape": [
+              546
+            ],
+            "finite_pairs": 546,
+            "unequal_values": 521,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.5019685548499311,
+            "mae": 0.012872905714714243,
+            "relative_l1": 0.00017773694300334694,
+            "pearson": 0.9999996395263288
+          }
+        },
+        "mean_fa": {
+          "shape": [
+            3486
+          ],
+          "finite_pairs": 3486,
+          "unequal_values": 542,
+          "nonfinite_mismatch": 0,
+          "max_abs": 0.0013850219383987339,
+          "mae": 7.46470637216186e-06,
+          "relative_l1": 9.80350861618566e-05,
+          "pearson": 0.999999952143592,
+          "matrix_shape": [
+            84,
+            84
+          ],
+          "full_matrix": {
+            "shape": [
+              84,
+              84
+            ],
+            "finite_pairs": 7056,
+            "unequal_values": 1164,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0018751475696378028,
+            "mae": 9.255393620794456e-06,
+            "relative_l1": 0.00011686976014006738,
+            "pearson": 0.9999999362332046
+          },
+          "support_dice": 1.0,
+          "candidate_support": 546,
+          "reference_support": 546,
+          "common_support": {
+            "shape": [
+              546
+            ],
+            "finite_pairs": 546,
+            "unequal_values": 542,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0013850219383987339,
+            "mae": 4.765927914534111e-05,
+            "relative_l1": 9.80350861618566e-05,
+            "pearson": 0.999998790994503
+          }
+        }
+      },
+      "fs-aparc-a2009s": {
+        "count": {
+          "shape": [
+            13366
+          ],
+          "finite_pairs": 13366,
+          "unequal_values": 0,
+          "nonfinite_mismatch": 0,
+          "max_abs": 0.0,
+          "mae": 0.0,
+          "relative_l1": 0.0,
+          "pearson": 1.0,
+          "matrix_shape": [
+            164,
+            164
+          ],
+          "full_matrix": {
+            "shape": [
+              164,
+              164
+            ],
+            "finite_pairs": 26896,
+            "unequal_values": 0,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0,
+            "mae": 0.0,
+            "relative_l1": 0.0,
+            "pearson": 1.0
+          },
+          "support_dice": 1.0,
+          "candidate_support": 898,
+          "reference_support": 898,
+          "common_support": {
+            "shape": [
+              898
+            ],
+            "finite_pairs": 898,
+            "unequal_values": 0,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0,
+            "mae": 0.0,
+            "relative_l1": 0.0,
+            "pearson": 1.0
+          }
+        },
+        "sift2_fbc": {
+          "shape": [
+            13366
+          ],
+          "finite_pairs": 13366,
+          "unequal_values": 885,
+          "nonfinite_mismatch": 0,
+          "max_abs": 0.0678187310695666,
+          "mae": 0.00013409639408662306,
+          "relative_l1": 0.0024938574271815123,
+          "pearson": 0.9999918410677017,
+          "matrix_shape": [
+            164,
+            164
+          ],
+          "full_matrix": {
+            "shape": [
+              164,
+              164
+            ],
+            "finite_pairs": 26896,
+            "unequal_values": 1904,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.1145237088203448,
+            "mae": 0.00017490394575247383,
+            "relative_l1": 0.0024248705746673462,
+            "pearson": 0.9999945480560067
+          },
+          "support_dice": 1.0,
+          "candidate_support": 898,
+          "reference_support": 898,
+          "common_support": {
+            "shape": [
+              898
+            ],
+            "finite_pairs": 898,
+            "unequal_values": 885,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0678187310695666,
+            "mae": 0.0019959158166612512,
+            "relative_l1": 0.0024938574271815123,
+            "pearson": 0.9999867691184358
+          }
+        },
+        "mean_length": {
+          "shape": [
+            13366
+          ],
+          "finite_pairs": 13366,
+          "unequal_values": 854,
+          "nonfinite_mismatch": 0,
+          "max_abs": 0.5019685548499311,
+          "mae": 0.0008289498833745475,
+          "relative_l1": 0.0001857916154063436,
+          "pearson": 0.9999998656005308,
+          "matrix_shape": [
+            164,
+            164
+          ],
+          "full_matrix": {
+            "shape": [
+              164,
+              164
+            ],
+            "finite_pairs": 26896,
+            "unequal_values": 1848,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.5019685548499311,
+            "mae": 0.0008871765082753999,
+            "relative_l1": 0.00019689250841076615,
+            "pearson": 0.999999863176119
+          },
+          "support_dice": 1.0,
+          "candidate_support": 898,
+          "reference_support": 898,
+          "common_support": {
+            "shape": [
+              898
+            ],
+            "finite_pairs": 898,
+            "unequal_values": 854,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.5019685548499311,
+            "mae": 0.012338245146084857,
+            "relative_l1": 0.0001857916154063436,
+            "pearson": 0.9999995847703885
+          }
+        },
+        "mean_fa": {
+          "shape": [
+            13366
+          ],
+          "finite_pairs": 13366,
+          "unequal_values": 892,
+          "nonfinite_mismatch": 0,
+          "max_abs": 0.0021699266737601475,
+          "mae": 3.41465749751674e-06,
+          "relative_l1": 0.00010707957862268339,
+          "pearson": 0.9999999343974382,
+          "matrix_shape": [
+            164,
+            164
+          ],
+          "full_matrix": {
+            "shape": [
+              164,
+              164
+            ],
+            "finite_pairs": 26896,
+            "unequal_values": 1924,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0021699266737601475,
+            "mae": 4.135114983920397e-06,
+            "relative_l1": 0.00012353669831125874,
+            "pearson": 0.9999999233137192
+          },
+          "support_dice": 1.0,
+          "candidate_support": 898,
+          "reference_support": 898,
+          "common_support": {
+            "shape": [
+              898
+            ],
+            "finite_pairs": 898,
+            "unequal_values": 892,
+            "nonfinite_mismatch": 0,
+            "max_abs": 0.0021699266737601475,
+            "mae": 5.082440101537722e-05,
+            "relative_l1": 0.00010707957862268339,
+            "pearson": 0.999998372909883
+          }
+        }
+      }
+    },
+    "native_tracking_equivalence_assessed_here": false,
+    "official_commands": {
+      "sift2": {
+        "binary_sha256": "d47bd8f7e7a34cfa95673b429b8d7eb91a25b50eeabe784a5df868ba98a40dae",
+        "wall_seconds": 17.39978844486177,
+        "returncode": 0
+      },
+      "fa": {
+        "binary_sha256": "c6bceedd8ac350aa00f6083f7abb9a0a8aa52a6d7cac81b8f8fd745e1a1e9c58",
+        "wall_seconds": 0.019855794496834278,
+        "returncode": 0
+      },
+      "fs-aparc": {
+        "count": {
+          "binary_sha256": "addef0d2de59e1eb418275cd859ea00aac9d442375dbffccad905088399b38c5",
+          "wall_seconds": 0.034873384051024914,
+          "returncode": 0
+        },
+        "sift2_fbc": {
+          "binary_sha256": "addef0d2de59e1eb418275cd859ea00aac9d442375dbffccad905088399b38c5",
+          "wall_seconds": 0.03389512933790684,
+          "returncode": 0
+        },
+        "mean_length": {
+          "binary_sha256": "addef0d2de59e1eb418275cd859ea00aac9d442375dbffccad905088399b38c5",
+          "wall_seconds": 0.034002101980149746,
+          "returncode": 0
+        },
+        "mean_fa": {
+          "binary_sha256": "addef0d2de59e1eb418275cd859ea00aac9d442375dbffccad905088399b38c5",
+          "wall_seconds": 0.034573037177324295,
+          "returncode": 0
+        }
+      },
+      "fs-aparc-a2009s": {
+        "count": {
+          "binary_sha256": "addef0d2de59e1eb418275cd859ea00aac9d442375dbffccad905088399b38c5",
+          "wall_seconds": 0.03989678714424372,
+          "returncode": 0
+        },
+        "sift2_fbc": {
+          "binary_sha256": "addef0d2de59e1eb418275cd859ea00aac9d442375dbffccad905088399b38c5",
+          "wall_seconds": 0.038170027546584606,
+          "returncode": 0
+        },
+        "mean_length": {
+          "binary_sha256": "addef0d2de59e1eb418275cd859ea00aac9d442375dbffccad905088399b38c5",
+          "wall_seconds": 0.038966355845332146,
+          "returncode": 0
+        },
+        "mean_fa": {
+          "binary_sha256": "addef0d2de59e1eb418275cd859ea00aac9d442375dbffccad905088399b38c5",
+          "wall_seconds": 0.04242819454520941,
+          "returncode": 0
+        }
+      }
+    }
+  },
+  "cache_reuse": {
+    "seconds": 3.051337788812816,
+    "atlas": "fs-aparc-a2009s",
+    "paths_equal": true,
+    "weights_equal": true,
+    "core": "skipped"
+  },
+  "scientific_scope": "Real corrected-DWI-to-two-atlas SC execution; tracking equivalence on fixed FNIT-produced inputs and fixed-TCK downstream comparison; not a new full official preprocessing/anatomy pipeline comparison."
+}

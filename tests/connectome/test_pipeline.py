@@ -73,6 +73,8 @@ def test_multiple_atlases_reuse_anatomy_with_identical_outputs(tmp_path, monkeyp
     """
     import fnit.connectome.pipeline as module
 
+    monkeypatch.setattr(module, "_native_tracking_fingerprint", lambda: {
+        "backend": "unit-test-core", "binary_sha256": "0" * 64})
     shape = (5, 4, 3)
     dwi_path = tmp_path / "dwi.nii.gz"
     nib.save(nib.Nifti1Image(np.ones((*shape, 2), np.float32), np.eye(4)), dwi_path)
@@ -101,7 +103,8 @@ def test_multiple_atlases_reuse_anatomy_with_identical_outputs(tmp_path, monkeyp
     monkeypatch.setattr(module, "probabilistic_tractography", lambda *args, **kwargs: module.Tractogram(
         paths=paths, endpoints=torch.stack([path[[0, -1]] for path in paths]),
         lengths_mm=torch.tensor([4., 2.]), mean_fa=None, seeds_attempted=2,
-        accepted_seeds=torch.stack([path[0] for path in paths]),
+        accepted_seeds=None,
+        native_provenance={"backend": "unit-test-core", "tck_header": {"step_size": "0.5"}},
     ))
     monkeypatch.setattr(module, "estimate_sift2_weights", lambda *args, **kwargs: torch.tensor([.75, 1.25], dtype=torch.float64))
     monkeypatch.setattr(module, "sample_streamline_mean_precise", lambda *args: torch.tensor([.45, .55]))

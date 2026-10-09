@@ -262,6 +262,12 @@ segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --thread
 
 <a id="最近版本-benchmark-记录"></a>
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+脑干拟合约占 API **91%**；优化后后验和拟合状态相同，API 降低 **8.76%**，但仍未达到官方速度。原始 T1 全亚区 FNIT **104.02 min**；原网格 4/105、高分辨率 5/105 分区通过，官方同范围完整时钟缺失。GPU 本轮没有新的完整端到端时钟。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 成熟 GEMS Gaussian 子函数曾在未提供超参数时错误广播 `[C,M] / [C]`；已改为各类、各模态除以对应样本质量，返回 `[C,M]` 均值。现有四个亚区 recipe 的强度拟合提供超参数，合成拟合使用固定 Gaussian，因此不进入该错误分支。CPU 固定 EM 数据缓存无速度或内存收益，裁剪插值候选使部分 GPU 亚区退步，两者未接入默认；实际状态和被撤回补丁见[本轮 GEMS 记录](../../validation/smri_cpu/gems_fixes_20261004/README.md)。

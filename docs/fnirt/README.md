@@ -309,6 +309,12 @@ GPU为共享H100、TF32、20GB上限，完整TBSS保存16次，与FNIT基线1d31
 
 公开ds000114 CC0脑图绑定v27 CPU8，分别展示重采样T1和非线性Jacobian；[图示范围/SHA](assets/cpu-public-v27-node8/figures.public.json)。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+新增的 saved-basis 有限对照包含 **392** 项累加：最大绝对误差 `1.1926e-18`、relative L2 `3.2073e-15`，参考计算约 **1.074 s**、监督总计约 **1.468 s**。该范围不含完整 1177 项 Hessian、PCG、采样和最终非线性配准；生产 CPU/GPU 路径未因该诊断改变，因此不能外推为完整 FNIRT 等价或速度结论。见 [有限阶段报告](../../validation/fnirt_bending_saved_basis_first392_20261007/README.md)和[统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | 更新与验收 |

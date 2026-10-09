@@ -119,3 +119,22 @@ def test_feature_cli_preserves_wrn_template_order_and_workbench_command(tmp_path
     assert feature_cli.main(["regression", "--inputs-json", str(path)]) == 0
     assert observed["low_dimensional_maps"] == [str(tmp_path / "d7.nii"), str(tmp_path / "d8.nii")]
     assert observed["method"] == "WRN" and observed["wb_command"] == "wb_command"
+
+
+def test_msmsulc_cli_forwards_qc_policy(tmp_path, monkeypatch):
+    import fnit.msm as msm
+    from fnit.msm import cli
+    observed = {}
+    def register(inputs, output_dir, **options):
+        observed.update(options)
+        return {"L": Path("/results/L.surf.gii"), "R": Path("/results/R.surf.gii")}
+    monkeypatch.setattr(msm, "run_msmsulc", register)
+    values = {"native_sphere": "native.surf.gii", "rotated_sphere": "rotated.surf.gii",
+              "native_sulc": "native.shape.gii", "reference_sphere": "reference.surf.gii",
+              "reference_sulc": "reference.shape.gii", "affine": "affine.txt"}
+    path = tmp_path / "msmsulc.inputs.json"
+    path.write_text(json.dumps({"L": values, "R": values}))
+    assert cli.main(["msmsulc", "--inputs-json", str(path),
+                     "--output-dir", "/results", "--device", "cpu",
+                     "--qc-policy", "repair"]) == 0
+    assert observed["qc_policy"] == "repair"

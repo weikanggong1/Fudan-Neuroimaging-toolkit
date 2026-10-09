@@ -17,6 +17,7 @@ Conda/PyPI依赖仍按[主页环境](../README.md#安装)安装，不制作离�
 | fMRI volume/surface、MSMAll | `fnit-setup-fmri-surface-assets` | HCP/fsLR模板、MSM配置、WRN低维参考；可选MNI6-2mm资源。 |
 | MNI/fsaverage/fsLR转换 | `fnit-setup-space-assets` | HCP2017球面/面积和CBIG RF-ANTs映射。 |
 | 标准结构连接组atlas | `fnit-setup-connectome-atlases` | 按所选atlas安装Tian及Schaefer文件。 |
+| 结构连接组追踪程序 | `fnit-setup-connectome-native` | 从固定 MRtrix、Eigen、zlib 源码构建 FNIT 自有缓存中的 tckgen；无需系统 MRtrix。 |
 | dMRI和配准标准模板 | `fnit-setup-standard-assets` | FSL标准数据文件；不安装或执行FSL。 |
 | MS-HBM volume投影 | `python -m fnit.mshbm.assets_setup` | 群体MNI中层表面和皮层估计掩膜。 |
 

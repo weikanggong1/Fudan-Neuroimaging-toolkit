@@ -34,6 +34,8 @@ flowchart TD
 1. `run_msmsulc` 与 MSMAll 原先逐侧重置全设备 CUDA 峰值，影响调用方完整 API 的统计。本轮移除内部重置，报告明确为调用方上次重置以来的 allocator 峰值；双侧共享该范围。真实驱动在外层统一初始化、重置和最终同步。
 2. `_label_samples` 在粗采样网格或小搜索半径内没有非零标签时，原返回形状 `(0,)`，使后续 `vstack` 失败。本轮将空结果保留为 `(0,3)`；常规配置的标签数、顺序与数值不变。
 
+3. `925c5866` 将 optimized CUDA 的 source-precision `RadialSphereMap` 主机缓存延迟到 containment 不确定、边界重叠或缺失时。已证明的点不再复制整批 query/nearest；CPU、reference、fallback 和 FP64/native 算术顺序保持不变。远端 Conda 环境的 `tests/test_msm_sphere_execution.py` 与 `tests/test_msm_sphere_cpu.py` 为 14 passed、5 skipped。
+
 两项均由共享 MSMSulc/MSMAll 控制测试覆盖；算法说明同步到 [MSMSulc 功能页](../../../docs/msm/README.md#左右并行与资源预算)和 [surface 功能页](../../../docs/fmri/surface.md#实际计算设备)。
 
 ## 数值门禁与官方参照
@@ -70,6 +72,8 @@ CIFTI 共比较 **44,728,180 个值**，其中 **28,936,116 个不同**，MAE �
 四次调用均为新进程、物理 GPU 0、局部 CPU 总预算 8、20 GB 上限，启动环境为 `CUDA_MODULE_LOADING=LAZY`。API 包含既有特征/球面读取、配准和结果写盘，排除特征估计、包导入、CUDA 初始化、哈希检查、BOLD 投影和 HCP 外层迭代。每种条件只测一次，不作为重复计时分布。
 
 另读取历史保存的单线程官方 newMSM 球面：两种配置、双侧坐标与拓扑也逐值相同，但 GIFTI metadata 不同；历史未逐输入保存 SHA，因此仅作为保存结果回归，不称本轮新跑的官方同输入对照。完整配置、文件 SHA、编译来源和边界见[MSMAll 配对聚合](msmall_paired.public.json)，功能范围见[MSMAll](../../../docs/msm/msmall.md)。
+
+这组 MSMAll 数字是完整双侧 `run_msmall` 注册核心的 GPU 记录，不是完整 `fMRISurface_pipeline` 端到端结果：当前真实 paired workspace 的 native sphere 网格与官方 SOURCE 特征网格不匹配，无法安全接入 BOLD 投影、CIFTI 和最终发布。匹配的真实特征资产补齐后，将复用本页的 490 帧、H100、20 GB 上限、CPU 总预算 8 和左右并行协议重新测量。
 
 ## 计时、环境与来源
 

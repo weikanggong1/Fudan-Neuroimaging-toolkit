@@ -168,6 +168,12 @@ mri_synthstrip -i subject_T1w.nii.gz -o reference/subject_brain.nii.gz \
 <a id="冻结版本的几何与原程序对照"></a>
 <a id="最近版本更新与-benchmark"></a>
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+两例真实 CPU 对照为官方→FNIT **45.56→14.90 s**、**49.20→14.03 s**，脑图和掩膜相同；真实 b0 GPU 掩膜 Dice **0.9999908**（约 27.1 万脑内体素仅 5 个不同）。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit / version | 变化 | benchmark |

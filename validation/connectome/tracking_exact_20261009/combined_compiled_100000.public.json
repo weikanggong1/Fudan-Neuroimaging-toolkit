@@ -1,0 +1,658 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "scope": "real-input tracking implementation comparison",
+  "adoption_status": "experimental not adopted",
+  "input_kind": "existing real NIfTI; no generated inputs",
+  "input_files": {
+    "fod": {
+      "size_bytes": 36519533,
+      "sha256": "18addc15596dadf7fb60727ae9af8d1cbd98c139964712454a33a718c5f4e7c1"
+    },
+    "five_tissue": {
+      "size_bytes": 926676,
+      "sha256": "704539238d29c10eeaf4fab31831bc3ced9648ce6a59f4e9bd75c7b7d6d03fbf"
+    },
+    "gmwmi": {
+      "size_bytes": 416098,
+      "sha256": "06243e393410bad709c2569e68d5eeed49d5f28500e607890a06e217a19a9823"
+    }
+  },
+  "input_shapes": {
+    "fod": [
+      104,
+      104,
+      72,
+      45
+    ],
+    "five_tissue": [
+      256,
+      256,
+      256,
+      5
+    ],
+    "gmwmi": [
+      256,
+      256,
+      256
+    ]
+  },
+  "source_sha256": {
+    "baseline_tracking": "693f015e8f0e7153e8886dc49950caa4cb5f924022888ffe061f1392978e31a4",
+    "candidate_tracking": "6ca147ea3a828b56f28491ee379801dd64a740521eb9c745061366996f3098aa",
+    "fixed_fod": "f82d2174109d05b9f820b6abe98e3792e48ae63e02ace2f2640f10c4c2052aaa",
+    "benchmark": "bc689db275c72321ea1dc616259f8b7b3d9fba8ef91fcbc19cbfcec721264ff2"
+  },
+  "baseline_commit": "9c118b748700e04224cd5b235b23a712145eae7e",
+  "candidate_commit": "ordered-5tt-and-act-boolean-experimental",
+  "candidate_commit_note": "The candidate label identifies an experiment; source_sha256 records the measured source bytes.",
+  "fixed_fod_function_identity_equal": true,
+  "mode": {
+    "baseline": {
+      "arc": "compiled",
+      "five_tissue": "baseline",
+      "act": "eager"
+    },
+    "candidate": {
+      "arc": "compiled",
+      "five_tissue": "ordered corner gather",
+      "act": "automatic compiled Boolean core"
+    }
+  },
+  "hardware": {
+    "cpu_model": null,
+    "cpu_model_status": "not recorded in this report",
+    "cpu_threads": 8,
+    "cpu_interop_threads": 64,
+    "cpu_thread_status": "recorded in this report",
+    "gpu_model": "NVIDIA H100 PCIe",
+    "gpu_total_memory_bytes": 84942979072
+  },
+  "torch_version": "2.5.1",
+  "cuda_version": "11.8",
+  "python_version": "3.11.16",
+  "cpu_threads": 8,
+  "cpu_interop_threads": 64,
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "autocast": false,
+  "input_dtype": "float32",
+  "affine_dtype": "float64",
+  "memory_budget_bytes": 20000000000,
+  "torch_allocator_budget_bytes": 18000000000,
+  "options": {
+    "n_seeds": 100000,
+    "lmax": 8,
+    "five_tissue_spacing_mm": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "seed": 0,
+    "batch_size": 8192,
+    "arc_proposals": 16,
+    "max_length_mm": 250.0,
+    "min_length_mm": null,
+    "step_mm": null,
+    "max_angle_degrees": 45.0,
+    "cutoff": 0.1,
+    "power": 0.5,
+    "compile_arc": true
+  },
+  "fa_input": null,
+  "mean_fa_not_evaluated": true,
+  "mean_fa_comparison_note": "No FA image was supplied. A true mean_fa equality flag means that both values were None; it does not test an FA tensor.",
+  "shared_input_timing": {
+    "input_hashing_seconds": 0.057591167744249105,
+    "io_seconds": 5.110211995895952,
+    "h2d_seconds": 0.10165045596659184,
+    "device_initialization_seconds": 0.29395036306232214
+  },
+  "memory_note": "Torch allocated/reserved exclude other processes and CUDA context allocations.",
+  "timing_note": "Tracking excludes input I/O/H2D, final output snapshot D2H, hashing, comparison and TCK writes. Internal metadata D2H remains included in tracking. Each variant first full call is separate unless a prior full cold/warmup call was made. Profile timings are excluded from hot summaries.",
+  "cold_note": "Optional cold entries are each implementation's first call in this process; CUDA/FOD/Inductor caches are shared.",
+  "warmup_seeds": 100000,
+  "profile_seeds": 128,
+  "phase_note": "The first full calls are recorded as warmup with 100000 seeds. No separate first_full_call entries were recorded.",
+  "gpu_snapshot_note": "Only UTC and numeric utilization, memory.used, power and SM clock telemetry are exported. Snapshots do not measure continuous GPU occupancy.",
+  "tck_hash_status": "recorded per run",
+  "runs": [
+    {
+      "variant": "baseline",
+      "phase": "warmup",
+      "ordinal": 0,
+      "n_seeds": 100000,
+      "tracking_seconds": 131.9199595930986,
+      "tracking_process_cpu_seconds": 131.840747851,
+      "system_load_before": [
+        12.13,
+        8.12,
+        7.25
+      ],
+      "system_load_after": [
+        10.49,
+        8.71,
+        7.58
+      ],
+      "d2h_seconds": 0.03368171397596598,
+      "path_pack_seconds": 0.01322592282667756,
+      "summary_seconds": 0.9979384783655405,
+      "comparison_seconds": 3.700610250234604e-06,
+      "gpu_before": {
+        "utc": "2026-10-09T04:26:28Z",
+        "gpu_utilization_percent": 7,
+        "memory_used_mib": 1786,
+        "power_watts": 81.65,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:28:43Z",
+        "gpu_utilization_percent": 31,
+        "memory_used_mib": 3698,
+        "power_watts": 79.77,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 1076033024,
+        "peak_reserved_bytes": 1119879168,
+        "peak_allocated_gb": 1.076033024,
+        "peak_reserved_gb": 1.119879168
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 1076033024,
+        "peak_reserved_bytes": 1119879168,
+        "peak_allocated_gb": 1.076033024,
+        "peak_reserved_gb": 1.119879168
+      },
+      "output": {
+        "accepted_streamlines": 27537,
+        "total_path_points": 1113078,
+        "seeds_attempted": 100000,
+        "field_sha256": {
+          "point_counts": "c5e8fa63fe941df49b248631997f24eeea40e31f23b1dab6bc7378daba780f63",
+          "packed_points": "00a70f9a689e95c51227fe91bbe1e6464109153a543c78996924dc3e180b049c",
+          "accepted_seeds": "0d3a4f97f731682816e385c2193f9577e04c976eeed4be6f02d718a0dbf068d9",
+          "lengths_mm": "84325a57f2f3ba2c8def0f41e70bd9064960b762d6f76cc44bf0cc8d4f1028b0",
+          "endpoints": "de5257af5bc5bf3fe8f16bd70c9be8154261138ae3c89fd56de64b2fbc25309a"
+        },
+        "output_sha256": "064c19574441001d50e38d2ce97eabe9682abaec6801646ac7615fd8d308a1d6"
+      },
+      "strict_comparison": {
+        "assessed": false,
+        "all_equal": null,
+        "reason": "no same-scale reference output"
+      },
+      "tck_write_seconds": 0.6117546772584319,
+      "tck_sha256": "5b782a6c7b3de5a03b227c44663b25f5c660b3f06ce533fa49177d3d750946c7"
+    },
+    {
+      "variant": "candidate",
+      "phase": "warmup",
+      "ordinal": 0,
+      "n_seeds": 100000,
+      "tracking_seconds": 176.1067634280771,
+      "tracking_process_cpu_seconds": 176.592791706,
+      "system_load_before": [
+        10.49,
+        8.71,
+        7.58
+      ],
+      "system_load_after": [
+        8.89,
+        8.85,
+        7.84
+      ],
+      "d2h_seconds": 0.034042545594275,
+      "path_pack_seconds": 0.01338465278968215,
+      "summary_seconds": 0.9928723722696304,
+      "comparison_seconds": 0.31167291197925806,
+      "gpu_before": {
+        "utc": "2026-10-09T04:28:47Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 3698,
+        "power_watts": 79.73,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:31:44Z",
+        "gpu_utilization_percent": 32,
+        "memory_used_mib": 4038,
+        "power_watts": 79.88,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 1076328448,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076328448,
+        "peak_reserved_gb": 1.476395008
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 1076328448,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076328448,
+        "peak_reserved_gb": 1.476395008
+      },
+      "output": {
+        "accepted_streamlines": 27537,
+        "total_path_points": 1113078,
+        "seeds_attempted": 100000,
+        "field_sha256": {
+          "point_counts": "c5e8fa63fe941df49b248631997f24eeea40e31f23b1dab6bc7378daba780f63",
+          "packed_points": "00a70f9a689e95c51227fe91bbe1e6464109153a543c78996924dc3e180b049c",
+          "accepted_seeds": "0d3a4f97f731682816e385c2193f9577e04c976eeed4be6f02d718a0dbf068d9",
+          "lengths_mm": "84325a57f2f3ba2c8def0f41e70bd9064960b762d6f76cc44bf0cc8d4f1028b0",
+          "endpoints": "de5257af5bc5bf3fe8f16bd70c9be8154261138ae3c89fd56de64b2fbc25309a"
+        },
+        "output_sha256": "064c19574441001d50e38d2ce97eabe9682abaec6801646ac7615fd8d308a1d6"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": 0.3309782287105918,
+      "tck_sha256": "5b782a6c7b3de5a03b227c44663b25f5c660b3f06ce533fa49177d3d750946c7"
+    },
+    {
+      "variant": "baseline",
+      "phase": "hot",
+      "ordinal": 0,
+      "n_seeds": 100000,
+      "tracking_seconds": 108.17857680981979,
+      "tracking_process_cpu_seconds": 109.60492293800002,
+      "system_load_before": [
+        8.89,
+        8.85,
+        7.84
+      ],
+      "system_load_after": [
+        9.77,
+        9.01,
+        8.0
+      ],
+      "d2h_seconds": 1.108727845363319,
+      "path_pack_seconds": 0.013667067047208548,
+      "summary_seconds": 1.0554087981581688,
+      "comparison_seconds": 1.2652017176151276e-06,
+      "gpu_before": {
+        "utc": "2026-10-09T04:31:48Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 4038,
+        "power_watts": 79.78,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:33:36Z",
+        "gpu_utilization_percent": 35,
+        "memory_used_mib": 4612,
+        "power_watts": 82.71,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 1076045824,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076045824,
+        "peak_reserved_gb": 1.476395008
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 1076045824,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076045824,
+        "peak_reserved_gb": 1.476395008
+      },
+      "output": {
+        "accepted_streamlines": 27537,
+        "total_path_points": 1113078,
+        "seeds_attempted": 100000,
+        "field_sha256": {
+          "point_counts": "c5e8fa63fe941df49b248631997f24eeea40e31f23b1dab6bc7378daba780f63",
+          "packed_points": "00a70f9a689e95c51227fe91bbe1e6464109153a543c78996924dc3e180b049c",
+          "accepted_seeds": "0d3a4f97f731682816e385c2193f9577e04c976eeed4be6f02d718a0dbf068d9",
+          "lengths_mm": "84325a57f2f3ba2c8def0f41e70bd9064960b762d6f76cc44bf0cc8d4f1028b0",
+          "endpoints": "de5257af5bc5bf3fe8f16bd70c9be8154261138ae3c89fd56de64b2fbc25309a"
+        },
+        "output_sha256": "064c19574441001d50e38d2ce97eabe9682abaec6801646ac7615fd8d308a1d6"
+      },
+      "strict_comparison": {
+        "assessed": false,
+        "all_equal": null,
+        "reason": "no same-scale reference output"
+      },
+      "tck_write_seconds": 0.3534157066605985,
+      "tck_sha256": "5b782a6c7b3de5a03b227c44663b25f5c660b3f06ce533fa49177d3d750946c7"
+    },
+    {
+      "variant": "candidate",
+      "phase": "hot",
+      "ordinal": 0,
+      "n_seeds": 100000,
+      "tracking_seconds": 105.1531292758882,
+      "tracking_process_cpu_seconds": 106.58094169700001,
+      "system_load_before": [
+        9.79,
+        9.03,
+        8.01
+      ],
+      "system_load_after": [
+        15.5,
+        11.47,
+        9.01
+      ],
+      "d2h_seconds": 0.032810859847813845,
+      "path_pack_seconds": 0.014557470101863146,
+      "summary_seconds": 1.0344304721802473,
+      "comparison_seconds": 0.3276549680158496,
+      "gpu_before": {
+        "utc": "2026-10-09T04:33:39Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 4612,
+        "power_watts": 79.96,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:35:25Z",
+        "gpu_utilization_percent": 32,
+        "memory_used_mib": 4038,
+        "power_watts": 82.93,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 1076328448,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076328448,
+        "peak_reserved_gb": 1.476395008
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 1076328448,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076328448,
+        "peak_reserved_gb": 1.476395008
+      },
+      "output": {
+        "accepted_streamlines": 27537,
+        "total_path_points": 1113078,
+        "seeds_attempted": 100000,
+        "field_sha256": {
+          "point_counts": "c5e8fa63fe941df49b248631997f24eeea40e31f23b1dab6bc7378daba780f63",
+          "packed_points": "00a70f9a689e95c51227fe91bbe1e6464109153a543c78996924dc3e180b049c",
+          "accepted_seeds": "0d3a4f97f731682816e385c2193f9577e04c976eeed4be6f02d718a0dbf068d9",
+          "lengths_mm": "84325a57f2f3ba2c8def0f41e70bd9064960b762d6f76cc44bf0cc8d4f1028b0",
+          "endpoints": "de5257af5bc5bf3fe8f16bd70c9be8154261138ae3c89fd56de64b2fbc25309a"
+        },
+        "output_sha256": "064c19574441001d50e38d2ce97eabe9682abaec6801646ac7615fd8d308a1d6"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": 0.342682340182364,
+      "tck_sha256": "5b782a6c7b3de5a03b227c44663b25f5c660b3f06ce533fa49177d3d750946c7"
+    },
+    {
+      "variant": "candidate",
+      "phase": "hot",
+      "ordinal": 1,
+      "n_seeds": 100000,
+      "tracking_seconds": 103.72759998589754,
+      "tracking_process_cpu_seconds": 105.15414777899991,
+      "system_load_before": [
+        15.5,
+        11.47,
+        9.01
+      ],
+      "system_load_after": [
+        7.2,
+        9.73,
+        8.64
+      ],
+      "d2h_seconds": 0.044356624130159616,
+      "path_pack_seconds": 0.015619201119989157,
+      "summary_seconds": 1.0316105731762946,
+      "comparison_seconds": 0.3387189139612019,
+      "gpu_before": {
+        "utc": "2026-10-09T04:35:27Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 4038,
+        "power_watts": 79.76,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:37:11Z",
+        "gpu_utilization_percent": 32,
+        "memory_used_mib": 4038,
+        "power_watts": 82.9,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 1076328448,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076328448,
+        "peak_reserved_gb": 1.476395008
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 1076328448,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076328448,
+        "peak_reserved_gb": 1.476395008
+      },
+      "output": {
+        "accepted_streamlines": 27537,
+        "total_path_points": 1113078,
+        "seeds_attempted": 100000,
+        "field_sha256": {
+          "point_counts": "c5e8fa63fe941df49b248631997f24eeea40e31f23b1dab6bc7378daba780f63",
+          "packed_points": "00a70f9a689e95c51227fe91bbe1e6464109153a543c78996924dc3e180b049c",
+          "accepted_seeds": "0d3a4f97f731682816e385c2193f9577e04c976eeed4be6f02d718a0dbf068d9",
+          "lengths_mm": "84325a57f2f3ba2c8def0f41e70bd9064960b762d6f76cc44bf0cc8d4f1028b0",
+          "endpoints": "de5257af5bc5bf3fe8f16bd70c9be8154261138ae3c89fd56de64b2fbc25309a"
+        },
+        "output_sha256": "064c19574441001d50e38d2ce97eabe9682abaec6801646ac7615fd8d308a1d6"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": 0.3562739477492869,
+      "tck_sha256": "5b782a6c7b3de5a03b227c44663b25f5c660b3f06ce533fa49177d3d750946c7"
+    },
+    {
+      "variant": "baseline",
+      "phase": "hot",
+      "ordinal": 1,
+      "n_seeds": 100000,
+      "tracking_seconds": 111.73238883726299,
+      "tracking_process_cpu_seconds": 113.13491689800003,
+      "system_load_before": [
+        7.11,
+        9.67,
+        8.63
+      ],
+      "system_load_after": [
+        37.78,
+        15.61,
+        10.65
+      ],
+      "d2h_seconds": 0.03478765394538641,
+      "path_pack_seconds": 0.011657780967652798,
+      "summary_seconds": 1.3662412809208035,
+      "comparison_seconds": 0.4991425289772451,
+      "gpu_before": {
+        "utc": "2026-10-09T04:37:14Z",
+        "gpu_utilization_percent": 0,
+        "memory_used_mib": 4038,
+        "power_watts": 79.74,
+        "sm_clock_mhz": 1755
+      },
+      "gpu_after": {
+        "utc": "2026-10-09T04:39:05Z",
+        "gpu_utilization_percent": 30,
+        "memory_used_mib": 4038,
+        "power_watts": 82.35,
+        "sm_clock_mhz": 1755
+      },
+      "tracking_memory": {
+        "peak_allocated_bytes": 1076045824,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076045824,
+        "peak_reserved_gb": 1.476395008
+      },
+      "tracking_and_d2h_memory": {
+        "peak_allocated_bytes": 1076045824,
+        "peak_reserved_bytes": 1476395008,
+        "peak_allocated_gb": 1.076045824,
+        "peak_reserved_gb": 1.476395008
+      },
+      "output": {
+        "accepted_streamlines": 27537,
+        "total_path_points": 1113078,
+        "seeds_attempted": 100000,
+        "field_sha256": {
+          "point_counts": "c5e8fa63fe941df49b248631997f24eeea40e31f23b1dab6bc7378daba780f63",
+          "packed_points": "00a70f9a689e95c51227fe91bbe1e6464109153a543c78996924dc3e180b049c",
+          "accepted_seeds": "0d3a4f97f731682816e385c2193f9577e04c976eeed4be6f02d718a0dbf068d9",
+          "lengths_mm": "84325a57f2f3ba2c8def0f41e70bd9064960b762d6f76cc44bf0cc8d4f1028b0",
+          "endpoints": "de5257af5bc5bf3fe8f16bd70c9be8154261138ae3c89fd56de64b2fbc25309a"
+        },
+        "output_sha256": "064c19574441001d50e38d2ce97eabe9682abaec6801646ac7615fd8d308a1d6"
+      },
+      "strict_comparison": {
+        "assessed": true,
+        "all_equal": true,
+        "torch_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "seeds_attempted": true,
+          "mean_fa": true
+        },
+        "dtype_shape_bytes_equal": {
+          "point_counts": true,
+          "packed_points": true,
+          "accepted_seeds": true,
+          "lengths_mm": true,
+          "endpoints": true,
+          "paths": true,
+          "mean_fa": true
+        },
+        "path_count_equal": true,
+        "first_mismatched_path_indices": [],
+        "first_mismatched_raw_path_indices": []
+      },
+      "tck_write_seconds": 0.4630432571284473,
+      "tck_sha256": "5b782a6c7b3de5a03b227c44663b25f5c660b3f06ce533fa49177d3d750946c7"
+    }
+  ],
+  "hot_order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "hot_summary": {
+    "baseline": {
+      "tracking_seconds": [
+        108.17857680981979,
+        111.73238883726299
+      ],
+      "sample_count": 2,
+      "median_seconds": 109.95548282354139,
+      "mean_seconds": 109.95548282354139,
+      "min_seconds": 108.17857680981979,
+      "max_seconds": 111.73238883726299
+    },
+    "candidate": {
+      "tracking_seconds": [
+        105.1531292758882,
+        103.72759998589754
+      ],
+      "sample_count": 2,
+      "median_seconds": 104.44036463089287,
+      "mean_seconds": 104.44036463089287,
+      "min_seconds": 103.72759998589754,
+      "max_seconds": 105.1531292758882
+    }
+  },
+  "candidate_speedup_from_hot_medians": 1.0528063858465042,
+  "strict_comparison_count": 4,
+  "all_strict_equal": true,
+  "cpu_affinity": [
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31
+  ],
+  "private_report_sha256": "1e5e9fa2e01164e2ff79e6696996c4f5b2894657458c03b29b5a676a3d7da9e8",
+  "public_export_note": "Whitelisted scalar summaries, hashes, exact comparisons and complete recorded timing samples; no file locations, account/device identifiers or per-streamline digest lists."
+}

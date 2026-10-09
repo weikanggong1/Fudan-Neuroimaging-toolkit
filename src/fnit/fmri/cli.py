@@ -104,6 +104,8 @@ def main(argv=None):
     surface.add_argument("--goodvoxels", help="optional 3D ROI on the T1w BOLD grid")
     surface.add_argument("--msm-config", help="official MSMSulc configuration file; default HCP schedule")
     surface.add_argument("--msm-execution", choices=("optimized", "reference"), default="optimized")
+    surface.add_argument("--msmsulc-qc-policy", choices=("report", "repair", "error"), default="report",
+                         help="native MSMSulc sphere QC: preserve/report, repair folds, or error")
     surface.add_argument("--msmall-inputs-json", help="Prepared L/R multimodal feature manifest for optional MSMAll refinement")
     surface.add_argument("--msmall-config", help="Official MSMAll configuration; defaults to the HCP three-level refinement")
     args = parser.parse_args(argv)
@@ -164,6 +166,7 @@ def main(argv=None):
             registered_spheres=args.registered_spheres, goodvoxels=args.goodvoxels,
             msm_config=args.msm_config,
             msm_execution=args.msm_execution,
+            msmsulc_qc_policy=args.msmsulc_qc_policy,
             msmall_inputs=args.msmall_inputs_json,
             msmall_config=args.msmall_config,
             parallel=not args.serial_hemispheres, cpu_threads=args.threads,

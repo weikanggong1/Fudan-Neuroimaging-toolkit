@@ -38,6 +38,8 @@ def main(argv=None):
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--config", help="Official configuration file; defaults to the canonical schedule")
     parser.add_argument("--execution", choices=("optimized", "reference"), default="optimized")
+    parser.add_argument("--qc-policy", choices=("report", "repair", "error"), default="report",
+                        help="MSMSulc native sphere QC; ignored for msmall")
     parser.add_argument("--no-parallel", action="store_true", help="Run L/R hemispheres sequentially")
     parser.add_argument("--cpu-threads", type=int, help="Total host thread budget, split between L/R")
     args = parser.parse_args(argv)
@@ -47,9 +49,13 @@ def main(argv=None):
     else:
         from . import MSMAllInputs, run_msmall
         input_type, register = MSMAllInputs, run_msmall
-    result = register(load_inputs(args.inputs_json, input_type), args.output_dir,
-                      device=args.device, config=args.config, execution=args.execution,
-                      parallel=not args.no_parallel, cpu_threads=args.cpu_threads)
+    options = dict(device=args.device, config=args.config, execution=args.execution,
+                   parallel=not args.no_parallel, cpu_threads=args.cpu_threads)
+    if args.method == "msmsulc":
+        options["qc_policy"] = args.qc_policy
+    elif args.qc_policy != "report":
+        parser.error("--qc-policy applies only to msmsulc")
+    result = register(load_inputs(args.inputs_json, input_type), args.output_dir, **options)
     for hemisphere in ("L", "R"):
         print(f"{hemisphere}: {result[hemisphere]}")
     return 0

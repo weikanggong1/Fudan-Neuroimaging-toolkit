@@ -274,6 +274,12 @@ reference_outputs = SupervisedFLICA(
 
 当前仓库图含具体用户目标展示文本，本页不重新嵌入。适合公开的匿名真实reference/FNIT/difference脑图尚未提供；原始图/指标保留不改，公开入口用户可自行用通用labels重画自己的模型。
 
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮统一 benchmark 摘要（2026-10-08）
+
+5000 人、20 成分、3000/1000/1000 划分、50 epoch 的公开真实结果是 GPU-only：H100 完整 API **660.04 s**，训练/选模/预测 **101.37 s**，空间统计/脑图 **18.30 s**，allocation/RSS **12.25/1.39 GiB**；连续目标测试 `r/R²=0.1731/0.0254`，二分类 `AUC/balanced accuracy=0.7226/0.6716`。本轮没有同输入、同线程 CPU 全链对照；新旧 HDF5 输入的模型、course 和预测逐值相同，空间图最大差 `4.77e-7`。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
+
 ## 6. 最近版本和 benchmark
 
 | 日期 | commit/version | 变化 | benchmark |

@@ -1,0 +1,852 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "scope": "real-input 5TT operator microbenchmark",
+  "adoption_status": "adopted after full100k strict equality and GPU regressions",
+  "input_kind": "existing real NIfTI; no generated images",
+  "input_files": {
+    "five_tissue": {
+      "size_bytes": 926676,
+      "sha256": "704539238d29c10eeaf4fab31831bc3ced9648ce6a59f4e9bd75c7b7d6d03fbf"
+    },
+    "gmwmi": {
+      "size_bytes": 416098,
+      "sha256": "06243e393410bad709c2569e68d5eeed49d5f28500e607890a06e217a19a9823"
+    }
+  },
+  "source_sha256": {
+    "baseline_tracking": "693f015e8f0e7153e8886dc49950caa4cb5f924022888ffe061f1392978e31a4",
+    "candidate_tracking": "6ed4e6bedc45fa0eaf2b026541056ec2976eb7d205d397c8dff4f3e899047dbd"
+  },
+  "source_files": {
+    "baseline_tracking": {
+      "size_bytes": 48651,
+      "sha256": "693f015e8f0e7153e8886dc49950caa4cb5f924022888ffe061f1392978e31a4"
+    },
+    "candidate_tracking": {
+      "size_bytes": 49241,
+      "sha256": "6ed4e6bedc45fa0eaf2b026541056ec2976eb7d205d397c8dff4f3e899047dbd"
+    }
+  },
+  "mode": {
+    "baseline": "original eight ordered corner reads",
+    "candidate": "ordered corner gather"
+  },
+  "hardware": {
+    "cpu_model": null,
+    "cpu_model_status": "not recorded in this report",
+    "cpu_threads": null,
+    "cpu_interop_threads": null,
+    "cpu_thread_status": "not recorded in this report",
+    "gpu_model": "NVIDIA H100 PCIe",
+    "gpu_total_memory_bytes": 84942979072
+  },
+  "cpu_threads": null,
+  "cpu_interop_threads": null,
+  "torch_version": "2.5.1",
+  "cuda_version": null,
+  "python_version": null,
+  "version_note": "CUDA and Python versions were not recorded in this operator report.",
+  "allocator_budget_bytes": 18000000000,
+  "memory_budget_bytes": 20000000000,
+  "tf32_matmul": true,
+  "autocast": false,
+  "input_dtype": "float32",
+  "affine_dtype": "float64",
+  "options": {
+    "sizes": [
+      128,
+      8192,
+      32768,
+      131072
+    ],
+    "rounds": 5,
+    "window_order": "ABBA",
+    "calls_per_window": 10,
+    "warmup_calls_per_variant": 3,
+    "offset_mm": 0.5,
+    "layouts": [
+      "contiguous",
+      "noncontiguous"
+    ]
+  },
+  "fa_input": null,
+  "mean_fa_not_evaluated": true,
+  "mean_fa_comparison_note": "No FA image was supplied. A true mean_fa equality flag means that both values were None; it does not test an FA tensor.",
+  "warmup_timings": null,
+  "warmup_timing_note": "Only warmup call counts were recorded. No separate warmup or first-call duration samples were recorded.",
+  "timing_note": "CUDA event stream interval includes launch gaps. I/O, H2D, point construction and equality checks are outside windows.",
+  "memory_note": "Torch allocator cap reserves 10% budget for context. Allocated/reserved exclude context and other processes.",
+  "hashing_seconds": 0.0051981788128614426,
+  "io_seconds": 3.299195274244994,
+  "input_shape": [
+    256,
+    256,
+    256,
+    5
+  ],
+  "point_preparation_seconds": 0.5183487026952207,
+  "point_sources": {
+    "fixed_direction_vectors_ras": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      [
+        0.5773502691896258,
+        0.5773502691896258,
+        0.5773502691896258
+      ],
+      [
+        -0.5773502691896258,
+        -0.5773502691896258,
+        -0.5773502691896258
+      ]
+    ],
+    "all_final_queries_inside_image": true,
+    "sampling_rule": "Deterministic stratified positive GMWMI voxel centers, plus cyclic fixed unit RAS directions; outside queries removed and valid queries deterministically repeated when needed.",
+    "128": {
+      "source_positive_voxels": 336136,
+      "queries_removed_outside_image": 0,
+      "unique_queries": 128,
+      "points_sha256": "f1949fc6ee4c0691ee00009fc9b5f0990b20fcd61fe9c7c301101ca3db3f311c"
+    },
+    "8192": {
+      "source_positive_voxels": 336136,
+      "queries_removed_outside_image": 0,
+      "unique_queries": 8192,
+      "points_sha256": "479642947036c4d944e30a95094bcdb76f89a622c3e5ff3b5fcd2b173c45f1ff"
+    },
+    "32768": {
+      "source_positive_voxels": 336136,
+      "queries_removed_outside_image": 0,
+      "unique_queries": 32768,
+      "points_sha256": "14d0d109228df7c2e79774d711cd344cd0fc88ce3e3cacc7c547d529599e59f9"
+    },
+    "131072": {
+      "source_positive_voxels": 336136,
+      "queries_removed_outside_image": 0,
+      "unique_queries": 131072,
+      "points_sha256": "1b9fc2f778223d560197425e5bd34869bf2163ba629bcc09df1359302272b537"
+    }
+  },
+  "gpu_before": {
+    "utc": null,
+    "gpu_utilization_percent": 0,
+    "memory_used_mib": 1266,
+    "power_watts": null,
+    "sm_clock_mhz": null
+  },
+  "gpu_after": {
+    "utc": null,
+    "gpu_utilization_percent": 50,
+    "memory_used_mib": 1636,
+    "power_watts": null,
+    "sm_clock_mhz": null
+  },
+  "gpu_snapshot_note": "Only numeric utilization and memory.used were recorded. Timestamp, power and SM clock are null because this operator report did not record them.",
+  "results": [
+    {
+      "layout": "contiguous",
+      "n_points": 128,
+      "volume_stride": [
+        327680,
+        1280,
+        5,
+        1
+      ],
+      "volume_is_contiguous": true,
+      "layout_h2d_seconds": 0.055709321051836014,
+      "cuda_event_speedup_from_medians": 1.364293472961601,
+      "wall_speedup_from_medians": 1.3639033461908692,
+      "all_timed_windows_strict_equal": true,
+      "initial_comparison": {
+        "torch_equal": true,
+        "bitwise_equal": true,
+        "dtype": "torch.float32"
+      },
+      "timings": {
+        "baseline": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            1.0919296264648437,
+            1.0411423683166503,
+            1.0263808250427247,
+            1.025875186920166,
+            1.0195775985717774,
+            1.0132320404052735,
+            1.021331214904785,
+            1.0176735877990724,
+            1.013535976409912,
+            1.0145471572875977
+          ],
+          "synchronized_wall_ms_per_call": [
+            1.0931876953691244,
+            1.041696686297655,
+            1.0269655380398035,
+            1.02648357860744,
+            1.020100899040699,
+            1.0138737969100475,
+            1.0219001211225986,
+            1.0182606987655163,
+            1.014146814122796,
+            1.01516991853714
+          ],
+          "cuda_event_median_ms_per_call": 1.0204544067382812,
+          "wall_median_ms_per_call": 1.0210005100816488,
+          "peak_allocated_bytes": 369135104,
+          "peak_reserved_bytes": 371195904
+        },
+        "candidate": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            1.0855968475341797,
+            0.7549503803253174,
+            0.7569536209106446,
+            0.7728831768035889,
+            0.745747184753418,
+            0.7349247932434082,
+            0.7442592144012451,
+            0.7396768093109131,
+            0.7501984119415284,
+            0.7423456192016602
+          ],
+          "synchronized_wall_ms_per_call": [
+            1.0864539071917534,
+            0.7555280812084675,
+            0.7575239986181259,
+            0.7735006976872683,
+            0.7463821209967136,
+            0.7356137968599796,
+            0.744876591488719,
+            0.7402799092233181,
+            0.7507921662181616,
+            0.7428882177919149
+          ],
+          "cuda_event_median_ms_per_call": 0.7479727983474731,
+          "wall_median_ms_per_call": 0.7485871436074376,
+          "peak_allocated_bytes": 369216000,
+          "peak_reserved_bytes": 371195904
+        }
+      }
+    },
+    {
+      "layout": "contiguous",
+      "n_points": 8192,
+      "volume_stride": [
+        327680,
+        1280,
+        5,
+        1
+      ],
+      "volume_is_contiguous": true,
+      "layout_h2d_seconds": 0.055709321051836014,
+      "cuda_event_speedup_from_medians": 1.3659666352302602,
+      "wall_speedup_from_medians": 1.3657479462276616,
+      "all_timed_windows_strict_equal": true,
+      "initial_comparison": {
+        "torch_equal": true,
+        "bitwise_equal": true,
+        "dtype": "torch.float32"
+      },
+      "timings": {
+        "baseline": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            1.0149503707885743,
+            1.0578304290771485,
+            1.021571159362793,
+            1.030671977996826,
+            1.0310943603515625,
+            1.018937587738037,
+            1.0313183784484863,
+            1.025049591064453,
+            1.0277600288391113,
+            1.0131744384765624
+          ],
+          "synchronized_wall_ms_per_call": [
+            1.0154413059353828,
+            1.0584602132439613,
+            1.0221592616289854,
+            1.0312528815120459,
+            1.0316445026546717,
+            1.019526505842805,
+            1.031919801607728,
+            1.0256633162498474,
+            1.0283656883984804,
+            1.013751421123743
+          ],
+          "cuda_event_median_ms_per_call": 1.0264048099517822,
+          "wall_median_ms_per_call": 1.027014502324164,
+          "peak_allocated_bytes": 371311104,
+          "peak_reserved_bytes": 396361728
+        },
+        "candidate": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.7549727916717529,
+            0.7437056064605713,
+            0.753331184387207,
+            0.746940803527832,
+            0.7521279811859131,
+            0.7773439884185791,
+            0.7506976127624512,
+            0.7457056045532227,
+            0.7741951942443848,
+            0.7463136196136475
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.7555857300758362,
+            0.7442935835570097,
+            0.7539661135524511,
+            0.7475684396922588,
+            0.7527123671025038,
+            0.7779865060001612,
+            0.7512466982007027,
+            0.7463380694389343,
+            0.7748504169285297,
+            0.74693881906569
+          ],
+          "cuda_event_median_ms_per_call": 0.7514127969741822,
+          "wall_median_ms_per_call": 0.7519795326516032,
+          "peak_allocated_bytes": 376464384,
+          "peak_reserved_bytes": 396361728
+        }
+      }
+    },
+    {
+      "layout": "contiguous",
+      "n_points": 32768,
+      "volume_stride": [
+        327680,
+        1280,
+        5,
+        1
+      ],
+      "volume_is_contiguous": true,
+      "layout_h2d_seconds": 0.055709321051836014,
+      "cuda_event_speedup_from_medians": 1.3794438219814968,
+      "wall_speedup_from_medians": 1.3791388039372146,
+      "all_timed_windows_strict_equal": true,
+      "initial_comparison": {
+        "torch_equal": true,
+        "bitwise_equal": true,
+        "dtype": "torch.float32"
+      },
+      "timings": {
+        "baseline": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            1.0021120071411134,
+            1.0071840286254883,
+            1.0068160057067872,
+            1.0049471855163574,
+            1.0012576103210449,
+            1.0072064399719238,
+            0.9985152244567871,
+            1.0094016075134278,
+            1.047760009765625,
+            1.0036992073059081
+          ],
+          "synchronized_wall_ms_per_call": [
+            1.002654479816556,
+            1.0077346116304398,
+            1.0074225720018148,
+            1.005544001236558,
+            1.0018171276897192,
+            1.0077758692204952,
+            0.9991192258894444,
+            1.0099867824465036,
+            1.0483744088560343,
+            1.0042792186141014
+          ],
+          "cuda_event_median_ms_per_call": 1.0058815956115723,
+          "wall_median_ms_per_call": 1.0064832866191864,
+          "peak_allocated_bytes": 377946624,
+          "peak_reserved_bytes": 404750336
+        },
+        "candidate": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.7406784057617187,
+            0.7488383769989013,
+            0.7326047897338868,
+            0.7241663932800293,
+            0.7632895946502686,
+            0.7266560077667237,
+            0.7227456092834472,
+            0.7215295791625976,
+            0.7317311763763428,
+            0.7258431911468506
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.7412965409457684,
+            0.7494427729398012,
+            0.7331876084208488,
+            0.7247223053127527,
+            0.7638843264430761,
+            0.7272311951965094,
+            0.7232990115880966,
+            0.7220909930765629,
+            0.7323510944843292,
+            0.726425601169467
+          ],
+          "cuda_event_median_ms_per_call": 0.7291935920715332,
+          "wall_median_ms_per_call": 0.7297911448404193,
+          "peak_allocated_bytes": 398558208,
+          "peak_reserved_bytes": 404750336
+        }
+      }
+    },
+    {
+      "layout": "contiguous",
+      "n_points": 131072,
+      "volume_stride": [
+        327680,
+        1280,
+        5,
+        1
+      ],
+      "volume_is_contiguous": true,
+      "layout_h2d_seconds": 0.055709321051836014,
+      "cuda_event_speedup_from_medians": 1.3203739600623705,
+      "wall_speedup_from_medians": 1.320191519075852,
+      "all_timed_windows_strict_equal": true,
+      "initial_comparison": {
+        "torch_equal": true,
+        "bitwise_equal": true,
+        "dtype": "torch.float32"
+      },
+      "timings": {
+        "baseline": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            1.0808256149291993,
+            1.1058879852294923,
+            1.0731807708740235,
+            1.066579246520996,
+            1.0695808410644532,
+            1.0703968048095702,
+            1.0769023895263672,
+            1.0453248023986816,
+            1.0027071952819824,
+            0.9985823631286621
+          ],
+          "synchronized_wall_ms_per_call": [
+            1.0814053937792778,
+            1.106518879532814,
+            1.0738108307123184,
+            1.0671896394342184,
+            1.0701858904212713,
+            1.0710145812481642,
+            1.0775061789900064,
+            1.0457197669893503,
+            1.0032111313194036,
+            0.9991853032261133
+          ],
+          "cuda_event_median_ms_per_call": 1.0699888229370118,
+          "wall_median_ms_per_call": 1.0706002358347178,
+          "peak_allocated_bytes": 406585856,
+          "peak_reserved_bytes": 509607936
+        },
+        "candidate": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.8095359802246094,
+            0.8138175964355469,
+            0.8102879524230957,
+            0.8134783744812012,
+            0.8104351997375489,
+            0.8103008270263672,
+            0.8123519897460938,
+            0.8125247955322266,
+            0.7878592014312744,
+            0.7826367855072022
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.8100986015051603,
+            0.8143926970660686,
+            0.8108632173389196,
+            0.8140094112604856,
+            0.8110093418508768,
+            0.8108769077807665,
+            0.8129358757287264,
+            0.8130779024213552,
+            0.7884311024099588,
+            0.7831700146198273
+          ],
+          "cuda_event_median_ms_per_call": 0.810368013381958,
+          "wall_median_ms_per_call": 0.8109431248158216,
+          "peak_allocated_bytes": 489030656,
+          "peak_reserved_bytes": 509607936
+        }
+      }
+    },
+    {
+      "layout": "noncontiguous",
+      "n_points": 128,
+      "volume_stride": [
+        5,
+        1280,
+        327680,
+        1
+      ],
+      "volume_is_contiguous": false,
+      "layout_h2d_seconds": 0.03812062228098512,
+      "cuda_event_speedup_from_medians": 1.3663060681522403,
+      "wall_speedup_from_medians": 1.366017836304694,
+      "all_timed_windows_strict_equal": true,
+      "initial_comparison": {
+        "torch_equal": true,
+        "bitwise_equal": true,
+        "dtype": "torch.float32"
+      },
+      "timings": {
+        "baseline": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.9498368263244629,
+            0.9515999794006348,
+            0.942080020904541,
+            0.955020809173584,
+            0.9418560028076172,
+            0.9424736022949218,
+            0.9424223899841309,
+            0.9504735946655274,
+            0.9496992111206055,
+            0.9478048324584961
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.9503897279500961,
+            0.9522303007543087,
+            0.9426277130842209,
+            0.9555897209793329,
+            0.9424435906112194,
+            0.9431214071810246,
+            0.9430569130927324,
+            0.9511106181889772,
+            0.9502795990556479,
+            0.9483707137405872
+          ],
+          "cuda_event_median_ms_per_call": 0.9487520217895509,
+          "wall_median_ms_per_call": 0.9493251563981175,
+          "peak_allocated_bytes": 369135104,
+          "peak_reserved_bytes": 371195904
+        },
+        "candidate": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.6975391864776611,
+            0.6951263904571533,
+            0.6945248126983643,
+            0.6902336120605469,
+            0.6942592144012452,
+            0.6875008106231689,
+            0.6912415981292724,
+            0.6967487812042237,
+            0.6918623924255372,
+            0.6992576122283936
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.6981795653700829,
+            0.6957050878554583,
+            0.69508939050138,
+            0.6908103358000517,
+            0.6948268041014671,
+            0.6880763918161392,
+            0.6918448954820633,
+            0.6973590701818466,
+            0.6924441084265709,
+            0.6997826043516397
+          ],
+          "cuda_event_median_ms_per_call": 0.6943920135498047,
+          "wall_median_ms_per_call": 0.6949580973014235,
+          "peak_allocated_bytes": 369216000,
+          "peak_reserved_bytes": 371195904
+        }
+      }
+    },
+    {
+      "layout": "noncontiguous",
+      "n_points": 8192,
+      "volume_stride": [
+        5,
+        1280,
+        327680,
+        1
+      ],
+      "volume_is_contiguous": false,
+      "layout_h2d_seconds": 0.03812062228098512,
+      "cuda_event_speedup_from_medians": 1.3721346767063867,
+      "wall_speedup_from_medians": 1.3718117603730176,
+      "all_timed_windows_strict_equal": true,
+      "initial_comparison": {
+        "torch_equal": true,
+        "bitwise_equal": true,
+        "dtype": "torch.float32"
+      },
+      "timings": {
+        "baseline": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.9489664077758789,
+            0.9616928100585938,
+            0.9573951721191406,
+            0.9554559707641601,
+            8.897776031494141,
+            0.9637568473815918,
+            0.9691455841064454,
+            0.9563199996948242,
+            0.9716863632202148,
+            1.0149215698242187
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.9494283702224493,
+            0.9622934274375439,
+            0.9580102749168873,
+            0.9560517035424709,
+            8.898687222972512,
+            0.9643726982176304,
+            0.9696728084236383,
+            0.956939859315753,
+            0.9722378104925156,
+            1.0154633317142725
+          ],
+          "cuda_event_median_ms_per_call": 0.9627248287200928,
+          "wall_median_ms_per_call": 0.9633330628275871,
+          "peak_allocated_bytes": 371311104,
+          "peak_reserved_bytes": 396361728
+        },
+        "candidate": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.698799991607666,
+            0.7014368057250977,
+            0.6973951816558838,
+            0.7001311779022217,
+            0.7190944194793701,
+            0.7227903842926026,
+            0.7018144130706787,
+            0.7126751899719238,
+            0.7027040004730225,
+            0.7010528087615967
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.6994047202169895,
+            0.7020551711320877,
+            0.6980355363339186,
+            0.7006753701716661,
+            0.7196808233857155,
+            0.7234056945890188,
+            0.7024131249636412,
+            0.7132841739803553,
+            0.7032946217805147,
+            0.7016787305474281
+          ],
+          "cuda_event_median_ms_per_call": 0.7016256093978882,
+          "wall_median_ms_per_call": 0.7022341480478644,
+          "peak_allocated_bytes": 376464384,
+          "peak_reserved_bytes": 396361728
+        }
+      }
+    },
+    {
+      "layout": "noncontiguous",
+      "n_points": 32768,
+      "volume_stride": [
+        5,
+        1280,
+        327680,
+        1
+      ],
+      "volume_is_contiguous": false,
+      "layout_h2d_seconds": 0.03812062228098512,
+      "cuda_event_speedup_from_medians": 1.3722212692628664,
+      "wall_speedup_from_medians": 1.372008851154733,
+      "all_timed_windows_strict_equal": true,
+      "initial_comparison": {
+        "torch_equal": true,
+        "bitwise_equal": true,
+        "dtype": "torch.float32"
+      },
+      "timings": {
+        "baseline": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.9425567626953125,
+            0.9327296257019043,
+            0.9291744232177734,
+            0.9278719902038575,
+            0.9203136444091797,
+            0.9275424003601074,
+            0.9181440353393555,
+            0.9188896179199219,
+            0.9569760322570801,
+            0.924499225616455
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.9430409874767065,
+            0.9333482943475246,
+            0.9298056364059448,
+            0.928517384454608,
+            0.9208972100168467,
+            0.9281403385102749,
+            0.9186777751892805,
+            0.9189176838845015,
+            0.9575700853019953,
+            0.9250898845493793
+          ],
+          "cuda_event_median_ms_per_call": 0.9277071952819824,
+          "wall_median_ms_per_call": 0.9283288614824414,
+          "peak_allocated_bytes": 377946624,
+          "peak_reserved_bytes": 404750336
+        },
+        "candidate": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.6971424102783204,
+            0.6803743839263916,
+            0.6753695964813232,
+            0.6759039878845214,
+            0.6762207984924317,
+            0.6837503910064697,
+            0.679859209060669,
+            0.6689727783203125,
+            0.6749504089355469,
+            0.6663680076599121
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.6977388169616461,
+            0.6810006685554981,
+            0.675969896838069,
+            0.6764567457139492,
+            0.6767835933715105,
+            0.6842968054115772,
+            0.6804781965911388,
+            0.6695401854813099,
+            0.675505306571722,
+            0.6669158581644297
+          ],
+          "cuda_event_median_ms_per_call": 0.6760623931884766,
+          "wall_median_ms_per_call": 0.6766201695427299,
+          "peak_allocated_bytes": 398558208,
+          "peak_reserved_bytes": 404750336
+        }
+      }
+    },
+    {
+      "layout": "noncontiguous",
+      "n_points": 131072,
+      "volume_stride": [
+        5,
+        1280,
+        327680,
+        1
+      ],
+      "volume_is_contiguous": false,
+      "layout_h2d_seconds": 0.03812062228098512,
+      "cuda_event_speedup_from_medians": 1.267867762589094,
+      "wall_speedup_from_medians": 1.2677108570845477,
+      "all_timed_windows_strict_equal": true,
+      "initial_comparison": {
+        "torch_equal": true,
+        "bitwise_equal": true,
+        "dtype": "torch.float32"
+      },
+      "timings": {
+        "baseline": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            1.0145536422729493,
+            0.9911871910095215,
+            0.9904319763183593,
+            0.9954815864562988,
+            1.0241215705871582,
+            0.9977375984191894,
+            0.9920063972473144,
+            0.9926176071166992,
+            0.9934559822082519,
+            0.9931488037109375
+          ],
+          "synchronized_wall_ms_per_call": [
+            1.0150481946766376,
+            0.9917902294546366,
+            0.9910184890031815,
+            0.9960674215108156,
+            1.0246997233480215,
+            0.9983627591282129,
+            0.9926205966621637,
+            0.9932148735970259,
+            0.9940328076481819,
+            0.9937407914549112
+          ],
+          "cuda_event_median_ms_per_call": 0.9933023929595948,
+          "wall_median_ms_per_call": 0.9938867995515466,
+          "peak_allocated_bytes": 406585856,
+          "peak_reserved_bytes": 509607936
+        },
+        "candidate": {
+          "window_count": 10,
+          "cuda_event_ms_per_call": [
+            0.8057567596435546,
+            0.7825056076049804,
+            0.7840960025787354,
+            0.7838592052459716,
+            0.7801824092864991,
+            0.780079984664917,
+            0.785100793838501,
+            0.8062591552734375,
+            0.7827328205108642,
+            0.7830272197723389
+          ],
+          "synchronized_wall_ms_per_call": [
+            0.8063542190939188,
+            0.7830833084881306,
+            0.7847202010452747,
+            0.7844037842005491,
+            0.7807536981999874,
+            0.780651206150651,
+            0.7856642361730337,
+            0.8068091236054897,
+            0.7833139039576054,
+            0.7835985627025366
+          ],
+          "cuda_event_median_ms_per_call": 0.7834432125091553,
+          "wall_median_ms_per_call": 0.7840011734515429,
+          "peak_allocated_bytes": 489030656,
+          "peak_reserved_bytes": 509607936
+        }
+      }
+    }
+  ],
+  "output_hash_status": "Only input query point hashes and direct operator equality were recorded; tracking output and TCK hashes are not applicable.",
+  "private_report_sha256": "84baa348d9025810140d8b36b9ecbaaf083624dc04793d76da16b8b143b25930",
+  "public_export_note": "Whitelisted scalar summaries, hashes, exact comparisons and complete recorded timing samples; no file locations, account/device identifiers or per-streamline digest lists.",
+  "adopted_source_commit": "d4327049c012b7c6a510de15a48e27c1c4715281"
+}

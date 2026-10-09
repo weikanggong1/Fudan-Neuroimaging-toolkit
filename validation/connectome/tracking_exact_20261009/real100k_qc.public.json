@@ -1,0 +1,243 @@
+{
+  "kind": "offline descriptive tractography QC; no equivalence claim",
+  "dataset": {
+    "label": "OpenNeuro ds004666",
+    "accession": "OpenNeuro ds004666",
+    "name": "EDDEN",
+    "license": "CC0",
+    "license_source": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004666/master/dataset_description.json",
+    "license_source_verified_date": "2026-10-09",
+    "acknowledgement_doi": "10.1162/imag_a_00060",
+    "source": "https://raw.githubusercontent.com/OpenNeuroDatasets/ds004666/master/dataset_description.json",
+    "metadata_provenance": "caller-supplied case-specific manifest; all input SHA-256 bindings checked offline"
+  },
+  "metadata_manifest": {
+    "file": "real100k_qc.case_manifest.json",
+    "sha256": "f74c5bf2d8ed11b6fdb38aabf17a1eebd9ca0d09f2dfae9b667c496ebadbeb2f",
+    "input_sha256_bindings_verified": true
+  },
+  "tcks": [
+    {
+      "software": "FNIT",
+      "tck_sha256": "5b782a6c7b3de5a03b227c44663b25f5c660b3f06ce533fa49177d3d750946c7",
+      "size_bytes": 13687459,
+      "streamline_count": 27537,
+      "header_streamline_count": 27537,
+      "configured_seed_budget": 100000,
+      "seed_budget_provenance": "caller-provided --n-seeds; not inferred from TCK header or stored streamlines",
+      "stored_polyline_length_mm": {
+        "mean": 38.96724051776329,
+        "median": 23.914998577237846,
+        "percentiles": {
+          "5": 4.983911889864109,
+          "25": 9.517750572380146,
+          "75": 56.803795172974816,
+          "95": 116.53417479726107
+        },
+        "min": 4.442821843453163,
+        "max": 247.96924755149777
+      },
+      "stored_points_per_streamline": {
+        "mean": 40.42117877764462,
+        "median": 25.0,
+        "percentiles": {
+          "5": 6.0,
+          "25": 11.0,
+          "75": 58.0,
+          "95": 118.0
+        },
+        "min": 6.0,
+        "max": 250.0
+      },
+      "coordinates": "RAS+ world millimetres",
+      "coordinate_dtype_on_disk": "float32",
+      "length_accumulation_dtype": "float64",
+      "plot_sample_count": 2000,
+      "plot_selected_index_sha256": "42a6de6182d8a5bd6aedbead69a0355f4fbfddbe075175d07db41ebae849e296",
+      "variant": "9c compiled baseline",
+      "mrtrix_version": "unknown; not recorded in this TCK",
+      "downsample_factor_header": null,
+      "total_count_header": null
+    },
+    {
+      "software": "MRtrix3",
+      "tck_sha256": "07c5126808d960cc31dae3fe2fbbb8158c124bea3bfb3b18ebbeba06adf6fbc0",
+      "size_bytes": 14175504,
+      "streamline_count": 27685,
+      "header_streamline_count": 27685,
+      "configured_seed_budget": 100000,
+      "seed_budget_provenance": "caller-provided --n-seeds; not inferred from TCK header or stored streamlines",
+      "stored_polyline_length_mm": {
+        "mean": 40.24758098581791,
+        "median": 25.36282578881759,
+        "percentiles": {
+          "5": 4.988833314739907,
+          "25": 10.007880868224602,
+          "75": 58.81278541804765,
+          "95": 120.42597616030724
+        },
+        "min": 4.443949671973799,
+        "max": 246.6847422957197
+      },
+      "stored_points_per_streamline": {
+        "mean": 41.66422250316056,
+        "median": 27.0,
+        "percentiles": {
+          "5": 6.0,
+          "25": 11.0,
+          "75": 60.0,
+          "95": 122.0
+        },
+        "min": 6.0,
+        "max": 249.0
+      },
+      "coordinates": "RAS+ world millimetres",
+      "coordinate_dtype_on_disk": "float32",
+      "length_accumulation_dtype": "float64",
+      "plot_sample_count": 2000,
+      "plot_selected_index_sha256": "f6349878b98cf0847490814dbd2d788a90158cfbc833bb6423102f86e081a775",
+      "variant": "MRtrix3 iFOD2",
+      "mrtrix_version": "3.0.3-103-g026e850d",
+      "downsample_factor_header": "2",
+      "total_count_header": "96522"
+    }
+  ],
+  "length_method": "Sum of Euclidean distances between consecutive stored RAS-mm TCK points, float64 arithmetic; no streamline resampling",
+  "length_limitations": "Stored-polyline length depends on stored point spacing/downsampling; it is not each implementation internal integration length.",
+  "comparison": {
+    "measure": "two-sample Kolmogorov-Smirnov D for stored-polyline lengths",
+    "ks_d": 0.01962613698223581,
+    "alternative": "two-sided",
+    "method": "scipy.stats.ks_2samp(method=asymp)",
+    "interpretation": "descriptive distribution distance only; RNGs differ; no software equivalence conclusion",
+    "mean_length_difference_fnit_minus_mrtrix_mm": -1.280340468054625,
+    "streamline_count_difference_fnit_minus_mrtrix": -148
+  },
+  "plot": {
+    "sha256": "5249708d8fc805f0cc06048a165e099166e80f99c8ba2f03a5c2c472d949e2a8",
+    "sampling": "For each TCK, independently reset numpy default_rng to the same seed; choose up to 2000 unique streamline indices uniformly, without replacement; sort indices",
+    "sample_seed": 20261009,
+    "sample_count_per_software": 2000,
+    "coordinate_system": "RAS+ world millimetres; neurological left-to-right orientation",
+    "background": "Maximum intensity projections of 5TT cGM+sGM+WM; resampled at 1.5 mm only for display",
+    "voxel_exact": false,
+    "color_rule": "normalized absolute endpoint displacement, R=red, A=green, S=blue",
+    "fnit_variant": "9c compiled baseline",
+    "file": "real100k_qc.png",
+    "baseline_scope_note": "This figure and the earlier figure use the same 9c compiled baseline TCK; neither represents an unaccepted candidate."
+  },
+  "five_tissue": {
+    "sha256": "704539238d29c10eeaf4fab31831bc3ced9648ce6a59f4e9bd75c7b7d6d03fbf",
+    "shape": [
+      256,
+      256,
+      256,
+      5
+    ],
+    "affine": [
+      [
+        -0.9999845623970032,
+        -0.0037051839753985405,
+        -0.004160537850111723,
+        130.02682495117188
+      ],
+      [
+        -0.004148044157773256,
+        -0.0033732738811522722,
+        0.9999857544898987,
+        -102.60282897949219
+      ],
+      [
+        0.0037191645242273808,
+        -0.9999876618385315,
+        -0.0033579382579773664,
+        151.58485412597656
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "native_orientation": [
+      "L",
+      "I",
+      "A"
+    ],
+    "display_orientation": [
+      "R",
+      "A",
+      "S"
+    ],
+    "display_affine": [
+      [
+        1.5,
+        0.0,
+        0.0,
+        -126.97499752556905
+      ],
+      [
+        0.0,
+        1.5,
+        0.0,
+        -104.5207650794182
+      ],
+      [
+        0.0,
+        0.0,
+        1.5,
+        -104.2682738986332
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "endpoint_parity_assessed": false,
+  "structural_connectivity_matrix_parity_assessed": false,
+  "raw_inputs_uploaded": false,
+  "gpu_executed": false,
+  "offline_only": true,
+  "script": {
+    "file": "plot_real_tracking_qc.py",
+    "sha256": "f68cbc5b2882b17a036bd64487be8f7e9fe864cc267613deb8fb57c77becd9e7"
+  },
+  "runtime": {
+    "nibabel": "5.4.2",
+    "matplotlib": "3.11.2",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "python_version": "3.11.16"
+  },
+  "reproduction_parameters": {
+    "n_seeds": 100000,
+    "fnit_label": "9c compiled baseline",
+    "dataset_label": "OpenNeuro ds004666",
+    "sample_count": 2000,
+    "sample_seed": 20261009,
+    "metadata_manifest": "real100k_qc.case_manifest.json"
+  },
+  "verification_against_original": {
+    "all_tck_sha_count_length_quantiles_equal": true,
+    "ks_comparison_exactly_equal": true,
+    "sampling_index_hashes_equal": true,
+    "five_tissue_hash_geometry_equal": true,
+    "default_source_license_unknown_checked": true,
+    "mismatched_manifest_hash_rejected": true,
+    "n_seeds_explicitly_caller_provided": true
+  },
+  "source_hashes": {
+    "local_cli_stats_sha256": "704e44f0049f8cda2cdc3bb1fe6e22b5c1bc947a0e8c9e208a691f4c029cfd46",
+    "local_original_stats_sha256": "d3a01f46f66260b84fa3a20a8e31d05db7a6cabd73ce4354a2ec386d14fc8232",
+    "local_case_manifest_sha256": "4e134554a29063edda1a6c64d3c42ae4d2e5a9fbe8a9317117aa6c2bce16bf5f"
+  },
+  "publication": {
+    "whitelist_sanitized": true,
+    "raw_input_files_included": false,
+    "note": "Only the plotting utility, derived image, scalar summaries, geometry and hash-bound case metadata are included."
+  }
+}

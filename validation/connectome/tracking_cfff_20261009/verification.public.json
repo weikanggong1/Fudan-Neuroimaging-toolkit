@@ -1,0 +1,46 @@
+{
+  "scope": "same-platform lossless tracking data-flow optimization",
+  "baseline_commit": "4f56cc9d5937a766c432743809ab3b5baf11ca78",
+  "production_source_sha256": {
+    "src/fnit/connectome/fod.py": "76a6b29364fdda8c33509aca7e8243b10c05f5418267e7bfb21ba0b6502d7310",
+    "src/fnit/connectome/tracking.py": "6ed4e6bedc45fa0eaf2b026541056ec2976eb7d205d397c8dff4f3e899047dbd",
+    "tools/benchmark_connectome_tracking_exact.py": "d85962361d9cbe31a7c911541e21fe3268a6c1547eeab5da88b4fa8511b786d9",
+    "tools/audit_connectome_tracking_process_memory.py": "60d165cf6fc947b3023df71b054022165777dfdfe3e03af3194e95a4639339f5"
+  },
+  "verification": {
+    "same_mode_full100k_eager_raw_bytes_equal": true,
+    "same_mode_full100k_compiled_raw_bytes_equal": true,
+    "final_source_10k_raw_bytes_equal": true,
+    "gpu_focused_tests_passed": 119,
+    "cpu_focused_tests_passed": 86,
+    "cpu_cuda_tests_skipped": 33,
+    "full_own_process_memory_gate_passed": false,
+    "raw_dwi_to_matrix_parity_reassessed": false,
+    "fa_supplied_in_real_tracking_benchmark": false
+  },
+  "artifacts": {
+    "README.md": "bb3d72a52496ef2d9381bec756f36d31e2f50f2e973fc91f02edb934a9142562",
+    "baseline_10k_sanity.public.json": "2c97e72914033b2d553d3c71231e54f21a04db27628071260d881c763741a0b7",
+    "compile_guard_controls_cpu.public.json": "097512115cc751d2a9356922e571e8e4ec45b6709603c1e302ebf09bd3af3a95",
+    "export_public.py": "312921116c265c018c11badf77e6ff3cb1319da198059c5df5819f92483a5115",
+    "gpu_regression.public.json": "f10585b69c39d214a9d9e19d649544ccce04abd6d9caf6c3c65bfbc2658dce58",
+    "grow_success_10k.public.json": "f1d11dc2ad3864e9bc84c7800c54d7c6c83324b939346021bfa912025fe6a79f",
+    "memory_audit_100k.public.json": "09848faa031768115ae8cf28e0543fa9d9b5ff4fed7eb21820fbfd189ecffb2c",
+    "mrtrix_100k.public.json": "da53b7bae9e4d31ffe36d55475ad7e04a5683c74d09f4d4ab9b00cc3e38324e1",
+    "real100k_qc.png": "1ad28a373235e263683f54577215702d2ad912d8db8c077a550fc9ab4d0d278c",
+    "real100k_qc.public.json": "15785b20e81b08508bc86286fb1c9678cebe600f8f58815f0ac5f10579ed6139",
+    "seed_index_10k.public.json": "80f8044eddaddae11b777e37bdc93f88ddaec84fc8a981afb4d5df1884e256c8",
+    "sh_compact_10k.public.json": "d18e71d21916ea2c2d14877a48bf2384d3caa1cf310eb20214dc3a2724afce76",
+    "sh_controls.py": "6bfa433d6e51f917e39f81fc39f1cdd44a48b628b2469ab5bc9b5a9a03e9ebcf",
+    "sh_cpu_controls.public.json": "3a56ec16b31a3d44b5769fa12000412ccacfee23e62e77ecb4eb7e4708258af3",
+    "sh_cuda_controls.public.json": "f72d1c246c1d148efb5148e0efc8ef791462087ec4a43b2f204f1a387a18faef",
+    "sh_packed_10k.public.json": "9826f950e5d5b8792b181e9147336b43a1ed54381adae6646d6ad1e61911658b",
+    "sh_packed_compiled_100k.public.json": "2cc44eae3c7fca4fa0f869c142d764a9c24ffba37069f6d8a873b6d154ad77ec",
+    "sh_packed_default_100k.public.json": "092ecbf679c59712f3b46a57a0bc7776d58595a6445e14e2c70f199bda852856",
+    "sh_preserved_10k.public.json": "280263e18ca1434a6f87093c05810500863823c2b03dde13f9bd3657888296ee",
+    "sh_preserved_compiled_100k.public.json": "dd53e39f7d8e6cae693df52559aaa1bd38d7059c1ae8cac0c9f720417a674084",
+    "sh_preserved_default_100k.public.json": "ae95103d8115bb7cb7424fb78a8dc7fd3c48df26686ebe81a4fcb807143b6b9d",
+    "sh_preserved_profile128.public.json": "22c674487487799278153f0d0e5a9c4d7bd24ea2d42f4d7204a8e4f21554b705"
+  },
+  "publication_scope": "Whitelisted aggregate timings, exact comparisons, source/input hashes, controls, documentation and CC0-derived example plot; no MRI/TCK, per-streamline digest lists, private paths, server addresses or device identifiers."
+}

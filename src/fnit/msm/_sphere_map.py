@@ -202,7 +202,13 @@ class RadialSphereMap:
             empty_ids = torch.empty((0, 3), dtype=torch.long, device=self.device)
             empty_weights = torch.empty((0, 3), dtype=torch.float64, device=self.device)
             return empty_ids, empty_weights, empty_ids[:, 0]
-        query = points.detach().cpu().numpy() if self.gpu_nearest is None or self.source_precision else None
+        # Source-precision native tie/fallback paths need host coordinates only
+        # for ambiguous or missing GPU cells.  Keeping this lazy avoids a full
+        # device-to-host copy for the common proven-containment path while
+        # retaining the exact FP64/native arithmetic whenever a fallback is
+        # actually required.  CPU-tree execution still needs the query up
+        # front, as before.
+        query = points.detach().cpu().numpy() if self.gpu_nearest is None else None
         if self.gpu_nearest is None:
             nearest_cpu = self.tree.query(query, k=1, workers=self.cpu_threads)[1][:, None]
             record_statistics(tree_nearest_queries=len(points))
@@ -222,7 +228,7 @@ class RadialSphereMap:
                 fallback = self.tree.query(unresolved_query, k=1, workers=self.cpu_threads)[1]
                 nearest[torch.as_tensor(ids, device=self.device)] = torch.as_tensor(fallback, device=self.device)
             nearest = nearest[:, None]
-            nearest_cpu = nearest.detach().cpu().numpy() if self.source_precision else None
+            nearest_cpu = None
         chosen_faces = []; chosen_weights = []; chosen_patches = []
         blocks = []
         for start in range(0, len(points), batch_size):
@@ -231,6 +237,10 @@ class RadialSphereMap:
             face, projection, inside, ambiguous = self._select(p, near)
             if self.execution == 'reference':
                 if self.source_precision:
+                    if query is None:
+                        query = points.detach().cpu().numpy()
+                    if nearest_cpu is None:
+                        nearest_cpu = nearest.detach().cpu().numpy()
                     masks = torch.stack((~inside, ambiguous), -1).detach().cpu().numpy()
                     missing = masks[:, 0]
                     face, projection = self._source_select(query[start:stop], nearest_cpu[start:stop],
@@ -249,12 +259,22 @@ class RadialSphereMap:
             if self.source_precision:
                 masks = torch.stack((~inside_all, torch.cat([item[5] for item in blocks])), -1).detach().cpu().numpy()
                 missing_all = masks[:, 0]
+                # Delay both host buffers until a native ambiguity or a tree
+                # fallback is present.  This is the only path that consumes
+                # source vertex IDs or query coordinates on the host.
+                if missing_all.any() or masks[:, 1].any():
+                    if query is None:
+                        query = points.detach().cpu().numpy()
+                    if nearest_cpu is None:
+                        nearest_cpu = nearest.detach().cpu().numpy()
             else:
                 missing_all = (~inside_all).detach().cpu().numpy()
             for start, stop, face, projection, _, _ in blocks:
                 p = points[start:stop]
                 if self.source_precision:
-                    face, projection = self._source_select(query[start:stop], nearest_cpu[start:stop],
+                    host_query = query[start:stop] if query is not None else None
+                    host_nearest = nearest_cpu[start:stop] if nearest_cpu is not None else None
+                    face, projection = self._source_select(host_query, host_nearest,
                                                           face, projection, masks[start:stop, 1])
                 missing = missing_all[start:stop]
                 fallback_query = (query[start:stop] if query is not None else

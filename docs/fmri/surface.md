@@ -21,12 +21,61 @@ FNIT重建使用PyTorch/Numba和Conda中独立编译的native节点；皮层采�
 所以本流程仍有CPU/C++阶段，不能称为全GPU或全部纯PyTorch。
 
 ```mermaid
-flowchart LR
-    A[原始BIDS T1w + BOLD] --> B[检查或自动完成volume预处理]
-    A --> C[FNIT重建或已有重建]
-    B --> D[几何准备 + 球面配准 + 皮层采样]
-    C --> D
-    D --> E[fsLR32k GIFTI + 91k CIFTI + QC]
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#ffffff", "primaryTextColor": "#000000", "primaryBorderColor": "#000000", "lineColor": "#000000", "secondaryColor": "#ffffff", "tertiaryColor": "#ffffff"}}}%%
+flowchart TD
+    classDef fnit fill:#ffffff,stroke:#000000,color:#000000,stroke-width:1.5px;
+    classDef decision fill:#ffffff,stroke:#000000,color:#000000,stroke-width:1.5px;
+    classDef output fill:#ffffff,stroke:#000000,color:#000000,stroke-width:1.5px;
+
+    A0[原始 BIDS<br/>T1w + BOLD + JSON]:::fnit --> A1[选择 run 并校验<br/>网格、TR、帧数、affine、有限值]:::fnit
+    A1 --> A2{volume 是否完整且来源匹配?}:::decision
+    A2 -->|是| B0[复用已验证 volume<br/>preproc/clean 按 signal 选择]:::fnit
+    A2 -->|否且 auto_volume=True| B1[调用 Volume pipeline<br/>默认 slice timing 关闭]:::fnit
+    B1 --> B0
+    A2 -->|否且 auto_volume=False| BX[报告 partial/invalid<br/>停止 surface]:::output
+
+    A1 --> C0{recon_all 来源}:::decision
+    C0 -->|provided| C1[只读已有 subject/ZIP<br/>检查 orig、white、pial、mid、sphere]:::fnit
+    C0 -->|fnit| C2[FNIT 重建<br/>左右解剖与表面阶段缓存]:::fnit
+    C0 -->|freesurfer 参考| C3[仅独立 benchmark<br/>不作为 FNIT 运行时依赖]:::fnit
+
+    B0 --> D0[体表几何准备<br/>white/pial/midthickness/thickness/sulc]:::fnit
+    C1 --> D0
+    C2 --> D0
+    C3 --> D0
+    D0 --> D1[建立 native sphere 与 sphere.reg<br/>核验顶点/三角拓扑]:::fnit
+
+    subgraph REG[球面注册，可按左右半球并行]
+        E0{registered_spheres 已提供?}:::decision
+        E1[复用并校验注册球面]:::fnit
+        E2[MSMSulc<br/>基于 sulc 的多级球面注册]:::fnit
+        E3{msmall_inputs 已提供?}:::decision
+        E4[MSMAll 可选 C/CA/CAT 特征<br/>多级 refine]:::fnit
+        E0 -->|是| E1
+        E0 -->|否| E2
+        E2 --> E3
+        E3 -->|否| E5[保留 MSMSulc 结果]:::fnit
+        E3 -->|是| E4
+    end
+    D1 --> E0
+    E1 --> F0
+    E4 --> F0
+    E5 --> F0
+
+    subgraph SAMPLE[体表采样与下皮层组装]
+        F0[固定 fsLR32k 模板<br/>ROI、sulc、HCP 分区资源]:::fnit
+        F1[左右半球并行<br/>Workbench ribbon/metric 采样]:::fnit
+        F2[皮层下 dseg 采样<br/>保留 MNI BOLD 时间轴]:::fnit
+        F3[生成左右 fsLR32k GIFTI<br/>每帧与顶点坐标核验]:::fnit
+        F4[组装 91k CIFTI<br/>皮层 + 皮层下 axis]:::fnit
+        F0 --> F1 --> F3
+        F0 --> F2 --> F4
+        F3 --> F4
+    end
+    F4 --> G0[有限值、shape、拓扑、空间与时间轴 QC]:::fnit
+    G0 --> H0[输出 dtseries/ptseries、注册球面、<br/>sidecar、QC 与阶段计时]:::output
+
+    class A0,A1,A2,B0,B1,C0,C1,C2,C3,D0,D1,E0,E1,E2,E3,E4,E5,F0,F1,F2,F3,F4,G0,H0 fnit;
 ```
 
 模块说明见 [recon-all](../recon_all/README.md)、[MSM](../msm/README.md) 和 [volume](README.md)。
@@ -140,6 +189,7 @@ surface_result = fMRISurface_pipeline(                 # 从原始MRI完成缺�
 | `registered_spheres` | 否 | 左右路径二元组/None | `None` | 现成的原生顶点顺序注册球面；给出时不重新估计MSM。 |
 | `msm_config` | 否 | MSMSulcConfig/路径/None | `None` | None为默认HCP四级配置；与provided球面互斥。 |
 | `msm_execution` | 否 | str | `'optimized'` | optimized或reference，同算法执行策略。 |
+| `msmsulc_qc_policy` | 否 | str | `report` | native sphere QC：report 保持官方插值，repair 显式修复翻折，error 拒绝写出。 |
 | `msmall_inputs` | 否 | dict/路径/None | `None` | 明确的L/R MSMAllInputs或JSON清单；提供后在MSMSulc后refine。 |
 | `msmall_config` | 否 | MSMAllConfig/路径/None | `None` | 默认三级refine；仅有msmall_inputs时可用。 |
 | `goodvoxels` | 否 | 路径/None | `None` | 额外三维volume ROI，须与T1w BOLD同网格。 |
@@ -213,6 +263,13 @@ CIFTI的皮层下部分使用MNI6-2mm影像affine；皮层部分使用表面轴�
 固定轴与fMRIPrep的对应采样契约兼容，但整体输出一致性须以同版本、同输入比较为依据。
 所有输入subject和ZIP保持只读；临时native准备文件不是稳定公共输出。
 
+
+### MSMSulc 与 MSMAll 分支
+
+不提供 `msmall_inputs` 时，surface pipeline 执行 `MSMSulc → ribbon 投影 → CIFTI`；提供 L/R `msmall_inputs` 后，执行 `MSMSulc → MSMAll → native sphere 合成 → ribbon 投影 → CIFTI`，输出描述改为 `desc-MSMAllpreproc/clean`。`msm_config` 只控制 MSMSulc，`msmall_config` 只控制 MSMAll；`registered_spheres` 与两者互斥。
+
+C-only 分支只需要真实 fMRI 连接特征；CA 需要个体 T1w/T2w-derived myelin，CAT 还需要功能拓扑。T2w/FLAIR 不是可静默替代项，缺少 CA/CAT 输入时直接报错。最终 native sphere 的 report/repair/error 语义见 [MSMSulc 说明](../msm/README.md)。
+
 ## 3. 命令行调用
 
 ```bash
@@ -253,6 +310,7 @@ Python及CLI的volume后端默认仍为SynthMorph；该默认需要额外模型�
 | `--goodvoxels` | `goodvoxels` | 额外三维volume ROI，须与T1w BOLD同网格。 |
 | `--msm-config` | `msm_config` | None为默认HCP四级配置；与provided球面互斥。 |
 | `--msm-execution` | `msm_execution` | optimized或reference，同算法执行策略。 |
+| `--msmsulc-qc-policy` | `msmsulc_qc_policy` | report/repair/error；最终 native sphere 翻折策略。 |
 | `--msmall-inputs-json` | `msmall_inputs` | 明确的L/R MSMAllInputs或JSON清单；提供后在MSMSulc后refine。 |
 | `--msmall-config` | `msmall_config` | 默认三级refine；仅有msmall_inputs时可用。 |
 | `--require-volume` | `auto_volume=False` | 要求已有完整volume，不自动执行。 |
@@ -342,6 +400,28 @@ NRMSE使用全部91,282灰坐标，恒定时序仍保留；不筛零值或拟合
 本次没有重新测完整冷重建的独立surface耗时。
 
 ![真实全180帧平均皮层信号与固定输入零差](../../validation/fmri/reference_alignment_20261004/surface/figures/CON01_same_input.png)
+
+
+<!-- FNIT-UNIFIED-BENCHMARK-20261008 -->
+### 本轮 GPU/并行 benchmark 摘要（2026-10-08）
+
+#### MSMSulc：完整 surface API
+
+在相同固定输入上，surface API（不含 recon-all/volume）旧串行、新串行、左右半球并行分别为 **436.245/343.056/243.695 s**，PyTorch allocation 为 **0.344/0.644/1.049 GB**。官方 CIFTI 时间序列 mean/median `r=0.977911/0.997039`；19 个皮层下结构逐体素一致，皮层和 sphere 仍不是逐值一致。MSMSulc FNIT 双侧冷/热 **201.99/198.08 s**，官方 newMSM 单线程/8线程 **1587.70/378.03 s**；固定 490 帧 fsLR32k/91k 输出逐值一致。该项目范围包含几何与 ROI 准备、双侧 MSMSulc、面积表面、全部时序投影、CIFTI、QC 和发布写盘，排除已经完成的 volume/recon-all。
+
+#### MSMAll：真实 GPU 配准核心（full-surface 入口的可复用阶段）
+
+现有真实配对输入可严格验证 `fMRISurface_pipeline(..., msmall_inputs=...)` 所调用的 MSMAll 注册核心，但不能把它误写成完整 surface E2E：C-only coarse **23.237→11.430 s**、三级 refine **181.790→90.796 s**，PyTorch allocation 分别为 **0.2194/1.4662 GB**，双侧坐标、拓扑和 metadata 严格一致。该记录包含特征/球面读取、注册和 sphere/report 写盘，排除特征估计、BOLD 投影、CIFTI、Workbench 外层发布和 Python/CUDA 冷启动；详见 [MSMAll 配对报告](../../validation/fmri/surface_gpu_parallel/msmall_paired.public.json)。
+
+当前没有可公开的 MSMAll full-surface E2E GPU 计时：现有真实 paired workspace 的 native sphere 顶点数为 120,035/122,950，而官方 SOURCE 特征为 40,962，缺少网格匹配的真实特征包。补齐匹配特征后需重新运行同一 490 帧、H100、20 GB 上限协议，才能发布包含 BOLD 投影和 CIFTI 的完整链路数字。本限制不影响上面的 MSMAll 注册核心精度门禁。
+
+2026-10-08 修复了一个会在进入 MSMAll 前误拒绝合法输入的拓扑判定问题：`_refine_msmall` 现在以实际传入的 MSMSulc 注册球面作为 native source 的拓扑基准；Workbench 导出的 midthickness 仅用于后续面积表面投影，不再承担球面拓扑判断。这样即使 midthickness 保持相同顶点而改变三角形序列，native MSMAll 特征仍会进入注册。固定服务器 Conda 环境中的 `tests/test_msmall_surface_composition.py` 与 `tests/test_msm_multivariate.py` 为 **29 passed, 1 skipped**，新增回归覆盖该三角形序列变化；其余完整 MSMSulc GPU E2E 指标沿用上面的已公开报告。MSMAll full-surface E2E 仍待网格匹配的真实特征包，不能用 C-only 注册核心数字替代。
+
+#### 本轮进一步提速
+
+在 `925c5866` 中，`RadialSphereMap` 的 optimized CUDA + source-precision 路径只在 GPU containment 不确定、边界重叠或缺失时把 query/nearest 缓存复制到主机；已证明的点不再发生整批 D2H。CPU、reference 和所有 fallback 的 FP64/native 算术顺序保持不变。远端 Conda 环境的 `tests/test_msm_sphere_execution.py` 与 `tests/test_msm_sphere_cpu.py` 为 **14 passed, 5 skipped**；需要 native FastPD 扩展的严格 source-precision 测试因该环境缺少 `_fastpd_native`，未被伪造为通过。GPU 全链的新稳定加速比待匹配 MSMAll 特征补齐后与上述 E2E 协议一并复测。
+
+既有 CPU 固定输入与 fresh 180 帧结果保留在上表；完整范围见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
 
 ## 6. 最近版本和 benchmark
 

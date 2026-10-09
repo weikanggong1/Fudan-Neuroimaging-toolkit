@@ -1,5 +1,7 @@
 # Fudan Neuroimaging Toolkit（FNIT）
 
+# 本工具尚在开发验证阶段，多数函数未达到原软件精度，切不可作为真实分析使用的标准化工具
+
 FNIT 提供 MRI 处理、连接组构建和群体分析的 Python API 与命令行工具。先选择功能页，按输入要求运行，再查看该功能的真实数据验证结果。
 
 ## 安装
@@ -14,6 +16,15 @@ fnit --help
 ```
 
 环境定义见 [environment.yml](environment.yml)，安装验证见 [Conda 环境报告](validation/environment/README.md)。需要独立编译程序的功能，按对应功能页完成安装。
+
+`UKBConnectome_pipeline` 的 iFOD2/ACT 追踪使用 FNIT 自己从固定 MRtrix 源码构建的程序。首次追踪会自动构建，也可以提前安装；无需系统 MRtrix 或 Qt：
+
+```bash
+export FNIT_NATIVE_CACHE=/data/fnit_resources/connectome_native
+fnit-setup-connectome-native --jobs 8
+```
+
+同一缓存验证通过后可离线复用。构建源、依赖、SHA-256、许可证和真实全链对照见[追踪手册](docs/connectome/TRACKING_OPERATORS.md)。
 
 ## 开始使用
 
@@ -109,9 +120,11 @@ Python 示例和参数说明见 [SynthStrip 手册](docs/synthstrip/README.md)�
 
 各功能页说明 CPU/GPU 支持、运行资源、输出格式与最新真实数据验证结果。
 
-原软件用于独立对照。生产示例采用 FNIT 实现或只读已有结果；现有兼容接口中显式调用官方 FreeSurfer 的选项仅用于独立参考实验。recon-all 的独立 native 程序及 surface 的 Workbench 依赖见相应手册。
+原软件用于独立对照。生产示例采用 FNIT 实现或只读已有结果；connectome 追踪调用 FNIT 源码构建缓存中的 MRtrix 程序。现有兼容接口中显式调用官方 FreeSurfer 的选项仅用于独立参考实验。recon-all 的独立 native 程序及 surface 的 Workbench 依赖见相应手册。
 
 真实数据 benchmark 摘要见各功能页，详细记录见 [validation](validation)；图像示例见 [真实脑图索引](docs/figures/README.md)。具体算法仍在持续验证，是否适合某项分析应以对应功能的当前结果为依据。
+
+最新 CPU/GPU 聚合结果与各子功能公开报告入口见 [统一 benchmark 索引](docs/BENCHMARK_INDEX.md)。
 
 ## 文档与许可
 
