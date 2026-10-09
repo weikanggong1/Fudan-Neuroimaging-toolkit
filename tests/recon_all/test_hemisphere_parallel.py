@@ -15,6 +15,7 @@ from fnit.recon_all.hemisphere_parallel import (
     HemisphereGroupError, run_hemisphere_group, validate_hemisphere_workers,
     _cancel, _live_group, inherited_allocator_policy, resolve_worker_device,
     release_idle_parent_cuda_cache,
+    worker_cuda_cache_environment,
 )
 from fnit.recon_all.profiling import parallel_intervals, ProcessTreeDeviceSampler
 from fnit.recon_all.native_free import main, _finish_cortical_surface
@@ -55,9 +56,9 @@ class HemisphereParallelTests(unittest.TestCase):
         self.env.start()
         self.addCleanup(self.env.stop)
 
-    def run_group(self, operation='test', workers=2):
+    def run_group(self, operation='test', workers=2, **kwargs):
         return run_hemisphere_group(self.subject, operation, device='cpu', threads=4,
-            workers=workers, callable_path='hemi_test_target:execute')
+            workers=workers, callable_path='hemi_test_target:execute', **kwargs)
 
     def test_real_exec_private_writes_and_right_overwrite(self):
         report = self.run_group()
@@ -406,6 +407,34 @@ class HemisphereParallelTests(unittest.TestCase):
             report=self.run_group()
         self.assertEqual(report['worker_allocator_selection']['selected_policy'],'enabled')
         self.assertEqual(report['workers']['lh']['cuda_allocator']['requested'],'enabled')
+
+    def test_explicit_worker_cache_never_changes_parent_environment(self):
+        for entry in ('1', '0', ''):
+            parent = {'PYTORCH_NO_CUDA_MEMORY_CACHING': entry, 'OMP_NUM_THREADS': '2'}
+            child, selected = worker_cuda_cache_environment(parent, cuda_allocator_cache='enabled')
+            self.assertNotIn('PYTORCH_NO_CUDA_MEMORY_CACHING', child)
+            self.assertEqual(selected['selected_policy'], 'enabled')
+            self.assertEqual(parent['PYTORCH_NO_CUDA_MEMORY_CACHING'], entry)
+            self.assertEqual(child['OMP_NUM_THREADS'], '2')
+        child, selected = worker_cuda_cache_environment({}, cuda_allocator_cache='disabled')
+        self.assertEqual(child['PYTORCH_NO_CUDA_MEMORY_CACHING'], '1')
+        self.assertEqual(selected['selected_policy'], 'disabled')
+        with patch.dict(os.environ, {'PYTORCH_NO_CUDA_MEMORY_CACHING': '1'}):
+            report = self.run_group(cuda_allocator_cache='enabled')
+            self.assertEqual(os.environ['PYTORCH_NO_CUDA_MEMORY_CACHING'], '1')
+        self.assertEqual(report['worker_allocator_selection']['requested'], 'enabled')
+        for hemi in ('lh', 'rh'):
+            self.assertEqual(report['workers'][hemi]['cuda_allocator']['requested'], 'enabled')
+            self.assertEqual(report['workers'][hemi]['environment']['cuda_allocator_cache']['selected_policy'], 'enabled')
+            request = json.loads((self.subject / f'scripts/test.{hemi}.request.json').read_text())
+            self.assertEqual(request['allocator_policy'], 'enabled')
+            self.assertEqual(request['threads'], 2)
+
+    def test_invalid_worker_cache_is_rejected_before_private_outputs(self):
+        for value in ('auto', '', False, None, {}):
+            with self.assertRaises(ValueError):
+                self.run_group(cuda_allocator_cache=value)
+        self.assertFalse(list((self.subject / 'scripts').iterdir()))
 
     def test_idle_cache_release_never_initializes_cpu_or_fresh_cuda(self):
         with patch('torch.cuda.is_initialized', return_value=False), \

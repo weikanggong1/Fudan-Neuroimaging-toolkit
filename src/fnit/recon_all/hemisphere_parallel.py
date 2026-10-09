@@ -69,6 +69,30 @@ def inherited_allocator_policy(environ):
     return 'disabled' if 'PYTORCH_NO_CUDA_MEMORY_CACHING' in environ else 'enabled'
 
 
+def worker_cuda_cache_environment(environ, *, cuda_allocator_cache='inherit'):
+    """返回fresh exec的环境副本与缓存选择报告，不修改父环境/已初始化CUDA。
+
+    environ是完整父环境Mapping；cuda_allocator_cache默认inherit，保持
+    PYTORCH_NO_CUDA_MEMORY_CACHING的存在语义；enabled移除该变量，
+    disabled设为字符串1。无影像或坐标输入；返回(child_env,report)。
+    只影响新进程第一次CUDA分配前的策略，不改变精度、线程或live tensor。
+    非法选项在复制环境/创建输出前抛ValueError；无独立原软件CLI。
+    """
+    if not isinstance(cuda_allocator_cache, str) or cuda_allocator_cache not in {'inherit', 'enabled', 'disabled'}:
+        raise ValueError('hemisphere cuda_allocator_cache must be inherit, enabled, or disabled')
+    child = dict(environ)
+    entry = child.get('PYTORCH_NO_CUDA_MEMORY_CACHING')
+    if cuda_allocator_cache == 'enabled':
+        child.pop('PYTORCH_NO_CUDA_MEMORY_CACHING', None)
+    elif cuda_allocator_cache == 'disabled':
+        child['PYTORCH_NO_CUDA_MEMORY_CACHING'] = '1'
+    return child, {'requested': cuda_allocator_cache,
+                   'selected_policy': inherited_allocator_policy(child),
+                   'environment_at_entry': entry,
+                   'environment_at_fresh_exec': child.get('PYTORCH_NO_CUDA_MEMORY_CACHING'),
+                   'parent_environment_unchanged': True}
+
+
 def release_idle_parent_cuda_cache(device):
     """在新 worker 启动前释放父进程空闲缓存；保留 live tensor 与 allocator 策略。
 
@@ -137,7 +161,7 @@ def _cancel(processes):
 
 def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
                          profile_stages=False, callable_path='fnit.recon_all.native_free:_hemisphere_operation',
-                         kwargs=None, startup_wait_seconds=30):
+                         kwargs=None, startup_wait_seconds=30, cuda_allocator_cache='inherit'):
     """在私有完整拷贝中执行双侧任务，成功屏障后逐文件原子发布。
 
     subject 是自产被试目录；operation 标识阶段；kwargs 为 JSON 可序列化
@@ -147,6 +171,9 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
     0禁资源重启但单次启动仍有90秒期限。仅可信的pre-GO CUDA OOM可重启。
     返回 values[lh/rh]、独立 workers 报告、组墙钟、重叠及同期显存记录。
     启动 worker 前同步 CUDA 并释放父进程空闲缓存，不改变 live tensor 或缓存策略。
+    cuda_allocator_cache默认inherit，另可enabled/disabled，仅为新exec
+    子进程选择缓存。父API即使已初始化CUDA也保持其原策略，worker报告
+    记录实际fresh策略与allocated/reserved，缓存关闭时不把计数0当零占用。
     发布失败不会生成成功状态；失败子树终止，保留 worker 日志和失败报告。
     不发布缺陷体积：父调用者必须按 lh、rh 顺序串行累计。
     """
@@ -154,6 +181,7 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
     from .thread_budget import native_thread_environment
     import torch
     validate_hemisphere_workers(workers, threads)
+    _, cache_selection = worker_cuda_cache_environment(os.environ, cuda_allocator_cache=cuda_allocator_cache)
     if (isinstance(startup_wait_seconds, bool) or not isinstance(startup_wait_seconds, (int, float))
             or not math.isfinite(startup_wait_seconds) or startup_wait_seconds < 0):
         raise ValueError('startup_wait_seconds must be finite and >= 0')
@@ -172,7 +200,7 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
                   'historical parameters; private subject paths are cleaned after this group',
               'caller_device': caller_device, 'worker_device': device,
               'worker_allocator_selection': {'basis': 'environment at fresh exec',
-                  'selected_policy': inherited_allocator_policy(os.environ),
+                  **cache_selection,
                   'parent_preinitialized_actual_state': 'not_inferred_from_environment'}}
     precision = {'matmul_tf32': bool(torch.backends.cuda.matmul.allow_tf32),
                  'cudnn_tf32': bool(torch.backends.cudnn.allow_tf32)}
@@ -215,10 +243,13 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
             go_path = root / f'{hemi}.{attempt}.go.json'
             child_kwargs = dict(kwargs or {}, subject=str(private), hemi=hemi,
                                 device=device, threads=threads // workers, operation=operation)
+            env, environment_report = native_thread_environment(threads=threads // workers)
+            env, worker_cache = worker_cuda_cache_environment(env, cuda_allocator_cache=cuda_allocator_cache)
+            environment_report['cuda_allocator_cache'] = worker_cache
             request = {'callable': callable_path, 'operation': operation,
                        'kwargs': child_kwargs, 'device': device, 'threads': threads // workers,
                        'precision': precision, 'profile_stages': profile_stages,
-                       'allocator_policy': inherited_allocator_policy(os.environ),
+                       'allocator_policy': worker_cache['selected_policy'],
                        'ready_path': str(ready_path), 'go_path': str(go_path),
                        'parent_pid': os.getpid(), 'startup_deadline_monotonic': deadline}
             request_path.write_text(json.dumps(request, indent=2))
@@ -228,7 +259,6 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
             temporary.replace(retained_request)
             report['requests'][hemi] = {'path': str(retained_request),
                 'private_subject': str(private), 'private_path_scope': 'historical path; cleaned after group'}
-            env, environment_report = native_thread_environment(threads=threads // workers)
             source_root = str(Path(__file__).resolve().parents[2])
             env.setdefault('TORCH_SHOW_CPP_STACKTRACES', '1')
             environment_report['TORCH_SHOW_CPP_STACKTRACES'] = env['TORCH_SHOW_CPP_STACKTRACES']
