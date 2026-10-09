@@ -47,6 +47,10 @@ CPU报告是冻结thicken阶段ABBA和完整WM同输入回归；A100独立窗口
 完整配对allocated峰值211,383,296/213,785,600字节，reserved257,949,696/253,755,392字节；整卡采样上界781,189,120/10,916,265,984字节，包含其他任务，采样最大间隔0.455/0.587秒。先前子阶段窗口有约24.75GB共享整卡上界单列，不能当自身显存。自有输出回归通过；相对原生严格复现未通过。整体指标等效、原始T1整例提速、整例显存及干净环境安装尚未完成。
 
 
+### 生产cacheoff的补测
+
+V4缓存开启；关闭缓存完整cached WM各一次为68.5310/85.2088秒，0体素差且文件SHA相同。这是策略回归单次观测，不能当ABBA或原始T1整例。`cfff_a100/sub-*/wm_allocator_cacheoff_v5/report.json`记录实际环境`PYTORCH_NO_CUDA_MEMORY_CACHING=1`；allocated/reserved为0代表计数器不可用，目标卡采样上界均735,051,776字节。`allocator_cacheoff_summary.csv`与exit/cgroup日志保留完整结果。新exec worker只在子进程开启缓存，已完成两例fresh/initialized父API各一次，完整exec分别34.6650/32.6214、39.8800/35.2188秒，全部文件SHA相同、0diff/Dice1、父精度/线程/CUDA/allocator状态保持。`wm_isolated_v6/*/{report,worker}.json`和`isolated_WM_summary.csv`记录读写/子导入/退出时间、公共显存采样和版本；5/5 CPU隔离测试通过，exit0/cgroup failcnt增量0。同期父子PID映射未知记None，目标卡上界约0.78–1.37GB且最大采样间隔达到10.60秒，不能用它证明连续峰值。每种模式只测一次，不称ABBA或整例提速。不全局切换缓存或生产WM默认。
+
 ## 复现
 
 [中文功能、完整输入输出和示例](../../../../docs/recon_all/WM_PLANAR_TORCH.md)。执行`reproduce.sh`时使用独立、已授权公开数据输入和原生比较文件目录；源码及输出必须先确定。本脚本只做冻结阶段，不是整例入口。所有设备和线程显式设置，GPU计时同步目标设备；生产无额外同步。

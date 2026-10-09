@@ -64,6 +64,31 @@ wm_report = segment_white_matter_mgz(
 
 输入 dtype、网格、偏移或批量错误抛 `ValueError`。原配方会读取正边缘之外的活跃候选时显式抛 `IndexError`，避免编译版本越界读取。输入读写和 CUDA 异常传播。首次 Numba 编译单列，`fastmath=False`，没有 FP16/BF16。
 
+### 独立WM子阶段接口
+
+`wm_torch_worker.run_isolated_segmentation`复用上述完整函数，用新exec进程局部启用缓存，退出释放子CUDA资源。它复用公共`configure_cuda_allocator`、`StageProfiler`与`native_thread_environment`，不修改父进程的allocator、已初始化CUDA、TF32或线程数，不调用原生程序。动态Numba/CPU规则仍保留，不是纯GPU WM。
+
+```python
+from pathlib import Path
+from fnit.recon_all.wm_torch_worker import run_isolated_segmentation
+
+isolated_wm_report = run_isolated_segmentation(
+    source_path=Path("mri/antsdn.brain.mgz"),  # 自产三维uint8强度，XYZ网格
+    output_path=Path("mri/wm.seg.mgz"),       # 新uint8 WM，原毫米affine和MGH头
+    report_path=Path("scripts/wm-isolated.json"),  # 新JSON，绑定输入/源码/输出SHA
+    device="cuda:1",                         # 必填明确逻辑设备，保留父可见GPU映射
+    threads=4,                               # 默认4，仅为子进程设置各库线程环境
+    histogram_batch_size=2048,               # 默认2048，全部候选分块
+    planar_batch_size=256,                   # 默认256，静态平面几何分块
+    profile_stages=False,                    # 默认False；True使用公共同步剖析
+    code_version="ACTUAL_COMMIT_AND_MODULE_SHA",  # 默认FNIT-source-hashes；发布记录实际版本
+)
+```
+
+前三路径为必填`Path`；输出和报告须为不同的新路径。返回字典包含`api`、源强度/输出/执行模块SHA、`worker_pid`、实际`logical_device`、GPU名称、子进程缓存策略、TF32/autocast状态、线程环境、阶段报告与allocated/reserved字节。`isolated_cli_wall_seconds`包含父参数校验、子exec/导入/初始化、哈希、全部文件API和退出；`worker_api_wall_seconds_including_validation_init_read_transfer_write`排除模块导入。allocated/reserved不是进程树显存，后者由benchmark公共采样器记录。
+
+底层`run_worker`参数与上例相同，device默认cuda:0、code_version必填，必须在CUDA初始化前新进程调用。它开启子TF32，没有半精度或参考输入。不支持GPU输入张量直接传给子进程，避免fork继承CUDA；传递源图路径。非法线程/批量/设备抛`ValueError`，已有输出/报告抛`FileExistsError`，子失败抛`CalledProcessError`、保留失败现场，不自动换原生或重试。生产默认仍保留native WM，原生64/235已有差异不能因隔离而消除。
+
 ## 3. 命令行与复现
 
 该内部子阶段没有生产独立 CLI。真实同输入脚本 `benchmark/recon_wm_planar_stage.py` 先捕获 FNIT 自产 thicken 输入，再按旧→缓存→缓存→旧运行完整 thicken；候选计算不读取原生中间结果。最后运行完整 WM 文件 API，比较新旧输出与冻结原生分割。
@@ -106,6 +131,23 @@ PYTHONPATH=src python -X faulthandler benchmark/recon_wm_segment_histogram_backe
 计时完成后，`benchmark/recon_wm_mask_diagnostic.py --output-root diagnostic --case sub-07`读取该例`full_wm_planar_a100_v4`的`0-native.mgz`、`1-python.mgz`、`2-cached.mgz`。输出同目录`wm_mask_post_timing.json`，含全部文件/脚本SHA、`>=5`掩膜Dice、不同体素、完整uint8最大/P99误差；不修改影像、不重新计时。两个参数必填，`--case`只接受已声明公开例sub-07/sub-06。三份输入必须是同网格三维uint8、affine完全相同，否则抛`ValueError`；读取错误传播。该诊断没有官方CLI，不是候选算法或整体等效标准。
 
 剖析额外同步只用于 benchmark，生产算子没有逐点 GPU 同步。整卡 `total-free` 为含其他进程及驱动的上界，不能作为 FNIT 自身占用。缺少父子进程采样时标为未测，不写成零。捕获完整 API 含诊断输入复制，只用于回归；正式完整文件API三方配对使用`benchmark/recon_wm_segment_histogram_backend.py --comparison planar`，不含捕获复制。原始 T1 整例耗时另测。
+
+独立WM也可直接调用模块CLI（输出必须是新路径）：
+
+```bash
+OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 NUMBA_NUM_THREADS=4 \
+PYTHONPATH=src python -m fnit.recon_all.wm_torch_worker \
+  --source mri/antsdn.brain.mgz \
+  --output mri/wm.seg.mgz \
+  --report scripts/wm-isolated.json \
+  --device cuda:1 --threads 4 \
+  --histogram-batch-size 2048 --planar-batch-size 256 \
+  --code-version ACTUAL_TESTED_COMMIT
+```
+
+`--source/--output/--report/--code-version`必填；device默认cuda:0、线程4、两批量2048/256。可选`--profile-stages`默认关闭；worker在初始化前使用公共enabled策略，父API推荐调用上面的新exec接口。没有新增依赖，主页Conda已包含Torch、Numba、SciPy和nibabel。
+
+`benchmark/recon_wm_isolated_regression.py`的必填`--source`为自产图、`--reference`只用于比较V4 cached输出、`--output-dir`为新诊断目录、`--module-dir`为冻结模块路径、`--parent-mode`为fresh或initialized、`--code-commit`为实际基线；设备默认cuda:1、线程4。父必须在Python启动前cacheoff；initialized保留64,000,000字节活跃uint8张量，检查子退出后父CUDA/线程/precision/environment不变。父TF32=False仅作为该验证的状态保持诊断，生产不全局关闭。公共`ProcessTreeDeviceSampler`记录父子同期显存和整卡上界；来源/对照/脚本/子模块SHA及所有标签误差写JSON。候选不读取reference。该脚本不把单次回归当ABBA，异常传播，不回退。
 
 ## 4. 对应原软件
 
@@ -151,6 +193,29 @@ mri_segment -wsizemm 13 -mprage antsdn.brain.mgz wm.seg.mgz
 完整配对GPU managed allocated峰值211,383,296/213,785,600字节，reserved257,949,696/253,755,392字节；目标卡采样上界781,189,120/10,916,265,984字节包含其他任务和驱动。目标GPU明确为cuda:1，采样请求0.25秒，最大实际间隔0.455/0.587秒。父子进程PID显存采样仍未匹配，记录为None，不是0；这里只能说明本次采样上界，不能证明连续峰值或整例20GB要求。先前子阶段窗口的整卡上界约24.75GB，由共享任务污染，独立保留，不混合成候选自身显存。
 
 完整配对退出码为0；共享容器主机内存限额214,748,364,800字节，周期采样峰值193,556,492,288字节，failcnt起止均548656、增量0。历史max_usage达到限额不能当成本次峰值。当前默认未切换，整体指标等效`not_assessed`、原始T1整例速度`not_measured`，干净隔离安装未验证。模拟测试不代替真实benchmark。
+
+### CLI分配器策略的完整回归
+
+V4完整配对的`PYTORCH_NO_CUDA_MEMORY_CACHING`未设置，即缓存开启。生产CLI首次CUDA默认关闭缓存，不能把V4秒数直接外推到整例。同一源码、两例相同输入、同A100与四线程，重新启动cacheoff完整缓存WM文件API各一次：sub-07为68.5310秒，sub-06为85.2088秒。两份文件SHA与V4 cached输出相同，体素差0、逐标签Dice1、MGH头/affine/dtype相同；这两次不是ABBA中位数。
+
+目标cuda:1整卡采样上界均735,051,776字节，最大采样间隔0.537/0.529秒。关闭缓存时allocated/reserved计数器返回0，报告明确其统计不可用，不能当作零显存。两例exit0；阶段策略的速度代价已实测，保留现有低显存策略，新exec子阶段局部缓存验证见下表，不改变父进程或全局缓存。
+
+`benchmark/recon_wm_allocator_regression.py`必须在Python启动前设置`PYTORCH_NO_CUDA_MEMORY_CACHING=1`；`--source`为自产uint8强度，`--reference`只比较V4 cached输出，`--output-dir`为新目录，`--module-dir`为冻结模块目录，`--code-commit`必填；`--device`默认cuda:1须有显式索引，`--threads`默认4。脚本只生成完整WM及JSON，不调用原生或修补候选；错误参数/已有目录/CUDA失败抛异常。记录实际模块SHA、读取/传输/压缩写出时间和目标卡采样，解释器/导入/CUDA初始化排除。源API自身的校验和JIT/cache载入包含在调用内。
+
+### 独立exec的完整文件API与已初始化父CUDA
+
+复用公共缓存/线程/剖析实现，子阶段cached、父CLI仍cacheoff的完整wrapper已在两例各做fresh和initialized回归。initialized父进程持有64,000,000字节uint8 CUDA张量；子TF32开启，父TF32=False诊断状态、CUDA初始化状态、线程数和环境1在退出后均保持。完整wrapper包括新exec/导入/哈希/初始化/文件API/写出/退出，内部worker时间也单列。完整wrapper排除调用者benchmark的解释器/导入、受控父CUDA预初始化和最终比较；内部worker排除最终JSON序列化，父完整API包含：
+
+| 例 / 父状态 | 完整exec API秒 | 子内部API秒 | 新旧完整输出不同体素 | 父状态保持 |
+| --- | ---: | ---: | ---: | --- |
+| sub-07 / fresh | 34.6650 | 32.1373 | 0 | 是 |
+| sub-07 / initialized | 32.6214 | 30.5014 | 0 | 是 |
+| sub-06 / fresh | 39.8800 | 36.9807 | 0 | 是 |
+| sub-06 / initialized | 35.2188 | 33.2690 | 0 | 是 |
+
+四份MGZ与V4 cached输出SHA相同，逐标签Dice1、最大/P99误差0、dtype/affine/MGH头相同；原生已有64/235差异保留。五项标准库隔离测试通过：父策略保留、已初始化worker拒绝、禁止覆盖、无效参数、带空格路径/成功报告；这些测试不代替真实回归。
+
+子allocated峰值211,383,296/213,785,600字节、reserved257,949,696/253,755,392字节。公共ProcessTreeDeviceSampler因容器PID归属不明记`ownership_unresolved`、父子同期合计None；四个窗口目标卡采样保守上界分别871,366,656、1,365,245,952、776,994,816、1,361,051,648字节。请求间隔0.5秒，实际最大间隔4.210/10.600/3.610/3.287秒，NVML查询耗时明显；没有连续峰值证明。全部退出0、cgroup failcnt增量0。这里每种父状态各一次，不能当ABBA/稳定吞吐；与V4原生三方中位数只并列，不能宣称配对原生速度比。原始T1整例提速与整体等效仍未测。
 
 [完整JSON、源码/输入SHA及复现记录](../../validation/recon_all/optimizations/20261009_wm_planar_torch/README.md)。
 

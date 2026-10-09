@@ -1,0 +1,1791 @@
+{
+  "scope": "single complete same-input cached WM API allocator regression; not ABBA or whole recon",
+  "code_commit": "89e2a25d2672506ba5048e73f63f3921015d3814",
+  "code_commit_role": "baseline plus executed module SHA",
+  "modules_sha256": {
+    "mri_segment.py": "32adcb2b7e35c902763731d0e406f5fb88e080e453ee8f64347939652b3e3382",
+    "mri_segment_histogram_torch.py": "73e3b832da7f81ff944a75c69b056f63fc591aeb5877c26ec104c4d5b63a152e",
+    "mri_segment_planar_torch.py": "40a1a10dd6421b6b11b7d3561f1cc1e28c4a3fc2219d23175fd68e93513fb587"
+  },
+  "script_sha256": "066b5792efaf755783c87bd33e7ed72455c314ec4829918c1906230cc5e5ec22",
+  "input_sha256": "580d743e7bcedaf2e39ea2ed6eaf701e6fb76cf0444db6b347e57a2852adae39",
+  "reference_kind": "same-input validated cache-enabled FNIT cached WM; comparison only",
+  "reference_sha256": "5adc78fb12f624fa6346d642aed818e76886173ea25f6120053830f209e9cf81",
+  "output_sha256": "5adc78fb12f624fa6346d642aed818e76886173ea25f6120053830f209e9cf81",
+  "host": "A100_BENCHMARK_HOST",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz",
+  "cpu_affinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "threads": 4,
+  "actual_torch_threads": 4,
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4"
+  },
+  "allocator_environment": {
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "CUDA_VISIBLE_DEVICES": null
+  },
+  "device": "cuda:1",
+  "gpu_uuid": "GPU-53efd149-9181-8bcf-b5d9-9e9489a90bf9",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "numpy": "1.26.4",
+  "nibabel": "5.4.2",
+  "torch_cuda": "11.8",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "no_half": true
+  },
+  "full_API_seconds": 85.20875046122819,
+  "api": {
+    "implementation": "FNIT PyTorch hybrid",
+    "device": "cuda:1",
+    "histogram_backend": "torch",
+    "histogram_batch_size": 2048,
+    "planar_backend": "cached",
+    "planar_batch_size": 256,
+    "ordered_cpu_rules": true,
+    "output": "$FNIT/runs/recon_torch_wm_fill_20261009/sub-06/wm_allocator_cacheoff_v5/wm.seg.mgz"
+  },
+  "timing_includes": "first file API including parameter checks, loading, H2D/D2H, ordered stages, JIT/cache loading and compressed write; target CUDA sync",
+  "timing_excludes": "interpreter/import/CUDA initialization; not cold whole recon",
+  "shape": [
+    256,
+    256,
+    256
+  ],
+  "dtype": "uint8",
+  "affine_equal_source": true,
+  "affine_equal_reference": true,
+  "mgh_header_equal_reference": true,
+  "different_voxels": 0,
+  "max_abs": 0,
+  "p99_abs": 0.0,
+  "label_dice": {
+    "0": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0,
+    "77": 1.0,
+    "78": 1.0,
+    "79": 1.0,
+    "80": 1.0,
+    "81": 1.0,
+    "82": 1.0,
+    "83": 1.0,
+    "84": 1.0,
+    "85": 1.0,
+    "86": 1.0,
+    "87": 1.0,
+    "88": 1.0,
+    "89": 1.0,
+    "90": 1.0,
+    "91": 1.0,
+    "92": 1.0,
+    "93": 1.0,
+    "94": 1.0,
+    "95": 1.0,
+    "96": 1.0,
+    "97": 1.0,
+    "98": 1.0,
+    "99": 1.0,
+    "100": 1.0,
+    "101": 1.0,
+    "102": 1.0,
+    "103": 1.0,
+    "104": 1.0,
+    "105": 1.0,
+    "106": 1.0,
+    "107": 1.0,
+    "108": 1.0,
+    "109": 1.0,
+    "110": 1.0,
+    "111": 1.0,
+    "112": 1.0,
+    "113": 1.0,
+    "114": 1.0,
+    "115": 1.0,
+    "116": 1.0,
+    "117": 1.0,
+    "118": 1.0,
+    "119": 1.0,
+    "120": 1.0,
+    "121": 1.0,
+    "122": 1.0,
+    "123": 1.0,
+    "124": 1.0,
+    "125": 1.0,
+    "126": 1.0,
+    "127": 1.0,
+    "128": 1.0,
+    "129": 1.0,
+    "200": 1.0,
+    "210": 1.0,
+    "230": 1.0
+  },
+  "torch_peak_allocated_bytes": 0,
+  "torch_peak_reserved_bytes": 0,
+  "torch_counter_scope": "allocator cache disabled; zero counters do not represent process GPU memory",
+  "process_tree_GPU_memory": "not_measured",
+  "target_card_memory_upper_bound": {
+    "scope": "explicit target CUDA total-free; includes all processes and driver",
+    "requested_interval_seconds": 0.25,
+    "max_interval_seconds": 0.5287776943296194,
+    "peak_card_used_bytes": 735051776,
+    "samples": [
+      {
+        "t_seconds": 0.005560673773288727,
+        "used_bytes": 523239424,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 0.42157960031181574,
+        "used_bytes": 592445440,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 0.6832193993031979,
+        "used_bytes": 611319808,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 0.9624847089871764,
+        "used_bytes": 644874240,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 1.2230590200051665,
+        "used_bytes": 663748608,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 1.4767565336078405,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 1.7364897346124053,
+        "used_bytes": 735051776,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 1.9899736577644944,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 2.2864074436947703,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 2.5437504639849067,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 2.80897805839777,
+        "used_bytes": 670040064,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 3.0623661102727056,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 3.314364447258413,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 3.57404129486531,
+        "used_bytes": 663748608,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 3.8245542347431183,
+        "used_bytes": 611319808,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 4.07785061839968,
+        "used_bytes": 596639744,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 4.3346504624933,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 4.58742062561214,
+        "used_bytes": 714080256,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 4.878908906131983,
+        "used_bytes": 596639744,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 5.131844853051007,
+        "used_bytes": 640679936,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 5.389455488882959,
+        "used_bytes": 611319808,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 5.6586525132879615,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 5.912581108510494,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 6.180256539024413,
+        "used_bytes": 663748608,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 6.432042486034334,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 6.683595462702215,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 6.948266847990453,
+        "used_bytes": 632291328,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 7.205746952444315,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 7.46281080879271,
+        "used_bytes": 628097024,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 7.718414414674044,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 7.975549620576203,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 8.226844852790236,
+        "used_bytes": 663748608,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 8.479325623251498,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 8.731395340524614,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 8.98271646630019,
+        "used_bytes": 684720128,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 9.23289776686579,
+        "used_bytes": 735051776,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 9.529317044652998,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 9.780294113792479,
+        "used_bytes": 638582784,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 10.062767256051302,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 10.313247427344322,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 10.57435217499733,
+        "used_bytes": 636485632,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 10.828088582493365,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 11.089985398575664,
+        "used_bytes": 640679936,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 11.340594707988203,
+        "used_bytes": 670040064,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 11.598692987114191,
+        "used_bytes": 670040064,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 11.85646490007639,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 12.108357651159167,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 12.365038452669978,
+        "used_bytes": 670040064,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 12.6189178917557,
+        "used_bytes": 592445440,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 12.881380818784237,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 13.14041587524116,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 13.394994099624455,
+        "used_bytes": 615514112,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 13.695422757416964,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 13.949440727941692,
+        "used_bytes": 716177408,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 14.281767284497619,
+        "used_bytes": 628097024,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 14.533574433997273,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 14.785305259749293,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 15.036457465961576,
+        "used_bytes": 684720128,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 15.287958381697536,
+        "used_bytes": 632291328,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 15.5399753972888,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 15.795150756835938,
+        "used_bytes": 670040064,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 16.10127444565296,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 16.351580694317818,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 16.61461277026683,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 16.86914871726185,
+        "used_bytes": 609222656,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 17.12002511508763,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 17.37394085805863,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 17.62434348836541,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 17.895303934812546,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 18.14750634599477,
+        "used_bytes": 651165696,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 18.41467815078795,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 18.666306397877634,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 18.958068902604282,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 19.211312230676413,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 19.49320649076253,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 19.745007934048772,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 19.998942179605365,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 20.249123292975128,
+        "used_bytes": 640679936,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 20.525447910651565,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 20.775582388043404,
+        "used_bytes": 684720128,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 21.051216551102698,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 21.301939577795565,
+        "used_bytes": 657457152,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 21.57744562625885,
+        "used_bytes": 670040064,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 21.829874207265675,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 22.082084163092077,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 22.334585919976234,
+        "used_bytes": 657457152,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 22.610123939812183,
+        "used_bytes": 628097024,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 22.862152187153697,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 23.113293575122952,
+        "used_bytes": 621805568,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 23.366408647038043,
+        "used_bytes": 611319808,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 23.61756190471351,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 23.880885905586183,
+        "used_bytes": 663748608,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 24.13308543432504,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 24.38537344802171,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 24.703422003425658,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 24.956143314018846,
+        "used_bytes": 609222656,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 25.212163959629834,
+        "used_bytes": 678428672,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 25.469131657853723,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 25.7250221837312,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 26.030774561688304,
+        "used_bytes": 657457152,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 26.282876362092793,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 26.535130602307618,
+        "used_bytes": 592445440,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 26.79001000802964,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 27.042755988426507,
+        "used_bytes": 644874240,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 27.293495601043105,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 27.54391677863896,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 27.798650410957634,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 28.069299534894526,
+        "used_bytes": 596639744,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 28.34527446143329,
+        "used_bytes": 588251136,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 28.595947092399,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 28.847839339636266,
+        "used_bytes": 684720128,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 29.101669217459857,
+        "used_bytes": 596639744,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 29.383911287412047,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 29.6341967638582,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 29.905646632425487,
+        "used_bytes": 632291328,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 30.15830200444907,
+        "used_bytes": 556793856,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 30.41616533882916,
+        "used_bytes": 556793856,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 30.668850081041455,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 30.929351476952434,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 31.179618726484478,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 31.45400126837194,
+        "used_bytes": 680525824,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 31.708190452307463,
+        "used_bytes": 615514112,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 31.996140074916184,
+        "used_bytes": 605028352,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 32.251921674236655,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 32.50238360464573,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 32.774845879524946,
+        "used_bytes": 615514112,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 33.02645913884044,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 33.36870456673205,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 33.625679483637214,
+        "used_bytes": 609222656,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 33.88586760032922,
+        "used_bytes": 611319808,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 34.14028640091419,
+        "used_bytes": 609222656,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 34.41190858930349,
+        "used_bytes": 661651456,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 34.66299387533218,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 34.91361795179546,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 35.17227642610669,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 35.42310850508511,
+        "used_bytes": 657457152,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 35.67457335535437,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 35.92589344456792,
+        "used_bytes": 655360000,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 36.17749101854861,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 36.43915692809969,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 36.690647582523525,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 36.96161082573235,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 37.22658923827112,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 37.49397502839565,
+        "used_bytes": 642777088,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 37.746683329343796,
+        "used_bytes": 670040064,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 37.99799924250692,
+        "used_bytes": 613416960,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 38.273764916695654,
+        "used_bytes": 613416960,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 38.52396871801466,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 38.78480379842222,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 39.036604470573366,
+        "used_bytes": 661651456,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 39.31309500802308,
+        "used_bytes": 615514112,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 39.563936554826796,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 39.833108104765415,
+        "used_bytes": 615514112,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 40.08554135542363,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 40.34633909538388,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 40.599647647701204,
+        "used_bytes": 602931200,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 40.877162646502256,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 41.127413728274405,
+        "used_bytes": 611319808,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 41.397586196660995,
+        "used_bytes": 655360000,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 41.649588868021965,
+        "used_bytes": 634388480,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 41.93811970204115,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 42.2053889464587,
+        "used_bytes": 636485632,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 42.46037144586444,
+        "used_bytes": 667942912,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 42.72438396979123,
+        "used_bytes": 695205888,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 42.98004131298512,
+        "used_bytes": 667942912,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 43.24592018686235,
+        "used_bytes": 615514112,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 43.499114281497896,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 43.7929943818599,
+        "used_bytes": 707788800,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 44.04377474356443,
+        "used_bytes": 630194176,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 44.296653838828206,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 44.55497518274933,
+        "used_bytes": 726663168,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 44.80594286043197,
+        "used_bytes": 649068544,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 45.158618630841374,
+        "used_bytes": 609222656,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 45.40969800390303,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 45.6621757466346,
+        "used_bytes": 613416960,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 45.91570298373699,
+        "used_bytes": 630194176,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 46.16997340787202,
+        "used_bytes": 638582784,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 46.42582798097283,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 46.68711702525616,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 47.00693416688591,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 47.257218135520816,
+        "used_bytes": 613416960,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 47.53826718963683,
+        "used_bytes": 611319808,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 47.78841878566891,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 48.04083684831858,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 48.292050294578075,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 48.544482356868684,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 48.797606508247554,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 49.06359172426164,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 49.32104025967419,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 49.58059425652027,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 49.833475657738745,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 50.083612689748406,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 50.335209710523486,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 50.58790927194059,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 50.84247402660549,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 51.09261974878609,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 51.36076377611607,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 51.611913012340665,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 51.89997677039355,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 52.151941888965666,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 52.40289624687284,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 52.65436611324549,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 52.90967091266066,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 53.160600539296865,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 53.41383503191173,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 53.666891891509295,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 53.92077349126339,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 54.17536571715027,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 54.42673273291439,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 54.67741869576275,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 54.93943923711777,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 55.1896783746779,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 55.445113422349095,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 55.717344271950424,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 55.96757389139384,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 56.22313453536481,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 56.47325765248388,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 56.72818956524134,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 56.978622931055725,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 57.23035701550543,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 57.48080376628786,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 57.73098888806999,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 57.98223686777055,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 58.23660474549979,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 58.49592152796686,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 58.74617146886885,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 58.998876025900245,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 59.25696726329625,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 59.514596646651626,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 59.77151855640113,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 60.02238707058132,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 60.27806673757732,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 60.5302735324949,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 60.7813411867246,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 61.033348651602864,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 61.28475356660783,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 61.53585918061435,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 61.78902572672814,
+        "used_bytes": 573571072,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 62.04031872190535,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 62.29260439891368,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 62.54286636412144,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 62.79529490508139,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 63.04602526407689,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 63.302870200015604,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 63.553944835439324,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 63.8074758509174,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 64.05871853698045,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 64.3095444245264,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 64.56044949311763,
+        "used_bytes": 590348288,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 64.81693370174617,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 65.06709777098149,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 65.31743446644396,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 65.56759367790073,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 65.82912375405431,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 66.07926520612091,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 66.33033454790711,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 66.58229530137032,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 66.83347512595356,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 67.08412795793265,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 67.33451081905514,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 67.58503314759582,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 67.83884372189641,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 68.10403331927955,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 68.36506933532655,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 68.62583512999117,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 68.89968023262918,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 69.16221989877522,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 69.42246936168522,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 69.67268621735275,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 69.93095329869539,
+        "used_bytes": 621805568,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 70.18241910077631,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 70.43938298057765,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 70.69062917213887,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 70.95110589358956,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 71.20495931338519,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 71.45610441081226,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 71.70993217546493,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 71.96456340141594,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 72.23871971014887,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 72.49557138513774,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 72.74807389453053,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 73.01101107057184,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 73.26193413604051,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 73.51628956478089,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 73.79461462050676,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 74.04629819467664,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 74.31858559139073,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 74.5724131418392,
+        "used_bytes": 621805568,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 74.82567416504025,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 75.08100677561015,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 75.3337087277323,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 75.60339496377856,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 75.85354516841471,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 76.10998506098986,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 76.36022445000708,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 76.62160768266767,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 76.87216984014958,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 77.12883070204407,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 77.3790895966813,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 77.62922959215939,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 77.89944546949118,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 78.14960971195251,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 78.40839853230864,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 78.65866715926677,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 78.90998811926693,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 79.16014321893454,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 79.42207916267216,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 79.6723486315459,
+        "used_bytes": 621805568,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 79.92318403162062,
+        "used_bytes": 607125504,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 80.18241530936211,
+        "used_bytes": 617611264,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 80.43578783236444,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 80.70847901608795,
+        "used_bytes": 621805568,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 80.95864587835968,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 81.21143960393965,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 81.46340144705027,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 81.73197236470878,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 81.98291776701808,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 82.24098917189986,
+        "used_bytes": 625999872,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 82.49543601181358,
+        "used_bytes": 619708416,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 82.75400476902723,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 83.00421323347837,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 83.26032733544707,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 83.51722724363208,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 83.76771447155625,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 84.02086188737303,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 84.27774774003774,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 84.53123002871871,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      },
+      {
+        "t_seconds": 85.06000772304833,
+        "used_bytes": 623902720,
+        "total_bytes": 84974239744
+      }
+    ],
+    "errors": []
+  },
+  "whole_metric_equivalence": "not_assessed",
+  "whole_recon_speedup": "not_measured"
+}
