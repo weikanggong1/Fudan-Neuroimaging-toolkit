@@ -1,0 +1,175 @@
+{
+  "status": "complete",
+  "pid": 45090,
+  "started_monotonic": 4343474.412256304,
+  "logical_device": "cuda:0",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true
+  },
+  "operation_entered": true,
+  "cuda_allocator": {
+    "requested": "auto",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "actual_cuda_device": {
+    "name": "NVIDIA A100-SXM4-80GB",
+    "uuid": "c73c197f-ed60-b001-2c90-a538e261907b"
+  },
+  "cuda_bootstrap_seconds": 1.512770994566381,
+  "operation_started_monotonic": 4343492.011410618,
+  "value": {
+    "forward": "$FNIT/runs/recon_e2e_late_mni_765c0fe9_20261009_v1/sub07-candidate/subject/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz",
+    "inverse": "$FNIT/runs/recon_e2e_late_mni_765c0fe9_20261009_v1/sub07-candidate/subject/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz",
+    "check": "$FNIT/runs/recon_e2e_late_mni_765c0fe9_20261009_v1/sub07-candidate/subject/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz",
+    "model": "pytorch-synthmorph-deform",
+    "device": "cuda:0",
+    "precision": {
+      "cuda_fp32_exception": true,
+      "fp16_or_bf16": false,
+      "actual_forwards": [
+        {
+          "model": "deform",
+          "compute_inverse": false,
+          "device": "cuda:0",
+          "input_dtype": "torch.float32",
+          "model_devices": [
+            "cuda:0"
+          ],
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "matmul_tf32": false,
+          "cudnn_tf32": false,
+          "cudnn_enabled": true,
+          "cudnn_benchmark": false,
+          "cudnn_deterministic": false,
+          "autocast": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        }
+      ]
+    },
+    "timings_seconds": {
+      "deform_model_and_save": 16.097427350468934,
+      "warp_convert": 8.44335977267474,
+      "warp_inverse": 21.065002630464733,
+      "resample_check": 6.062162469141185
+    },
+    "postprocess_backend": "gpu",
+    "postprocess": {
+      "conversion": {
+        "load_convert_seconds": 1.780157819390297,
+        "composition_download_seconds": 4.7270909724757075,
+        "save_seconds": 1.9361083675175905,
+        "total_seconds": 8.44335977267474,
+        "device": "cuda:0",
+        "chunk_slices": 16
+      },
+      "inverse": {
+        "voronoi_iterations": 91,
+        "soap_iterations_xyz": [
+          50,
+          50,
+          50
+        ],
+        "splat": "ordered CPU Numba FP32 (no atomics)",
+        "fill": "CUDA Triton ordered FP32; FP64 stopping test",
+        "timings_seconds": {
+          "load_convert_ordered_splat": 5.177893817424774,
+          "transfer_fill_soap_download": 4.228271991945803,
+          "displacement_conversion": 2.1737852776423097,
+          "save": 9.483135528862476
+        },
+        "total_seconds": 21.065002630464733,
+        "device": "cuda:0",
+        "output": "$FNIT/runs/recon_e2e_late_mni_765c0fe9_20261009_v1/sub07-candidate/subject/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz",
+        "full_grid": true
+      },
+      "check": {
+        "save_seconds": 0.15706111304461956,
+        "total_seconds": 6.062162469141185,
+        "device": "cuda:0",
+        "chunk_slices": 16
+      }
+    },
+    "inputs_sha256": {
+      "orig": "4e64d381db96d497b62d944c294dae2d3321f4ca6a2eac759eb2258ec8a0ca82",
+      "crop": "3d6a44356524cefe7040e5d8468314c2d9e5aee06bd1d00816f872cba2989a69",
+      "affine": "a97460e46695114206bb7219cb3eb404aa77261c8e784f4051fe63b093b18a45",
+      "deform_weight": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+      "cropped_template": "ef89b7aa615dcb4a68a1cad725a9b99314227f9777ed86f42aae61e4e89da19a",
+      "full_template": "e4e1a25b66fef6b2cde8e4916d4a03d4369de6f24b0d3d4736baffc3d4a8c575"
+    },
+    "declared_programs": {
+      "0": {
+        "sha256": "a6834f3b941a8267eccac15658dc1a7a35a67c2e67ba48a32eef7ad1909627a9",
+        "executed": false
+      },
+      "1": {
+        "sha256": "69dc4f7c8f6a80617308d1a34dbf61f36526ed2aa6916e050aa49091ffd4e0dc",
+        "executed": false
+      },
+      "2": {
+        "sha256": "82ff94e4b5a788027853dbaede4e8f318d076d69d51e3c786cae3b5866431b55",
+        "executed": false
+      }
+    },
+    "outputs_sha256": {
+      "forward": "10b75b3861a0e6c7b279feee5ff71adbcc14dddd78d44e4eeba0b90636f9e6bb",
+      "inverse": "5159e3f41246a4e31a7177a4313aca11ebcaa8371e1235eef71cade2b4f3eaac",
+      "check": "487849ae1a97a6997377307b79f5e0df3805da7d2c07afc04fae29a561343537"
+    },
+    "source_sha256": {
+      "mni_mesh_parallel": "8b322c3fc01394840d0e8d40bb2b4e4460dd65ac0b80412a2993f3143f25da16",
+      "mni_nonlinear_chain": "943c1e3bd95c0ab4edcb6d080b8b877f4e89bab09bf36df24c73c41ef257fff4",
+      "mni_aux_chain": "60b5c9d1255208df19f9a1eb6ccda300562829d5476a012488784e8ae7f4a2be",
+      "mni_warp_sampling": "84dd8fae47346dbb69ba74ce753c3286ea534828dededf30756d43738787da3d",
+      "mni_warp_inverse": "5bd1ee57342ed59c692a88a6d1814e4787d767c407b3644bdc5fe1ef6578cdc4",
+      "hemisphere_worker": "95b21eb66e63c79be864bc971ad83ad49bd132f32deee78f3647926b60103c15",
+      "profiling": "a4b1cc19794c1af90d6218f7d757cede491ade7da9406e3a3012a628fa2bf3ec",
+      "thread_budget": "bf0b40e5c6c7232d0de23dee3c491a3c27850d79922d81df71689933a9692fca"
+    }
+  },
+  "operation_finished_monotonic": 4343552.2998622,
+  "stage": {
+    "name": "MNI_nonlinear",
+    "seconds": 60.288423247635365,
+    "function_seconds": 60.28815205767751,
+    "cuda_pre_sync_seconds": 4.2389146983623505e-05,
+    "cuda_post_sync_seconds": 0.00010909419506788254,
+    "cuda_synchronized": true,
+    "cuda_synchronization_requested": true,
+    "parent_cpu_seconds": 47.235669782,
+    "child_cpu_seconds": 0.031398999999999996,
+    "torch_memory_stats_status": "unavailable"
+  },
+  "thread_budget": {
+    "requested_threads": 2,
+    "scope": "Torch process intraop and current caller Numba thread mask",
+    "torch": {
+      "before": 2,
+      "effective": 2,
+      "interop_unchanged": 1,
+      "restored": 2
+    },
+    "numba": {
+      "before": 2,
+      "effective": 2,
+      "initial_capacity": 2,
+      "mask_only": true,
+      "threading_layer": "tbb",
+      "restored": 2
+    },
+    "environment_modified": false,
+    "restoration_complete": true
+  },
+  "finished_monotonic": 4343552.299969347,
+  "total_seconds": 77.88771304301918
+}
