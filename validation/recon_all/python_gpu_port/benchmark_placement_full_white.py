@@ -48,6 +48,7 @@ def main():
     parser.add_argument("--output-directory", type=Path, required=True)
     parser.add_argument("--code-base-commit", required=True)
     parser.add_argument("--hemisphere", choices=("lh", "rh"), default="lh")
+    parser.add_argument("--white-stage", choices=("preaparc", "final"), default="preaparc")
     parser.add_argument("--backends", nargs="+", choices=("cpu", "torch"), default=("cpu", "torch"))
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
@@ -96,17 +97,24 @@ def main():
     import fnit.recon_all
     fnit.recon_all.__path__.insert(0, str(args.candidate_directory.resolve()))
     from fnit.recon_all import place_white_preaparc_python as stage
+    runner = stage.place_white_preaparc
+    if args.white_stage == "final":
+        from fnit.recon_all.place_final_white_python import place_final_white
+        runner = place_final_white
     torch.set_num_threads(args.threads)
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
     hemi = args.hemisphere
-    orig = args.subject / f"surf/{hemi}.orig"
+    orig = args.subject / f"surf/{hemi}.{'white.preaparc' if args.white_stage == 'final' else 'orig'}"
     stats = args.subject / f"surf/autodet.gw.stats.{hemi}.dat"
     brain, wm, seg = (args.subject / f"mri/{name}.mgz"
                       for name in ("brain.finalsurfs", "wm", "aseg.presurf"))
     inputs = (orig, stats, brain, wm, seg)
+    if args.white_stage == "final":
+        inputs += (args.subject / f"label/{hemi}.cortex.label", args.subject / f"label/{hemi}.aparc.annot")
+    output_kind = "white" if args.white_stage == "final" else "white.preaparc"
     report = {
-        "scope": "frozen_same_input_complete_white_preaparc_only",
+        "scope": f"frozen_same_input_complete_{args.white_stage}_white_only",
         "hostname": platform.node(), "platform": platform.platform(),
         "cpu_affinity_count": len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else None,
         "threads": args.threads, "thread_environment": {key: os.environ.get(key) for key in
@@ -156,7 +164,7 @@ def main():
     save()
     traces, outputs = {}, {}
     for backend in args.backends:
-        output = args.output_directory / f"{hemi}.white.preaparc.{backend}"
+        output = args.output_directory / f"{hemi}.{output_kind}.{backend}"
         output_volume = args.output_directory / f"mrisps.wpa.{backend}.mgz"
         trace = []
         run_candidate = ((args.control_candidate_backend or args.candidate_backend)
@@ -217,7 +225,7 @@ def main():
 
             stage.asynchronous_first_step=record_collision
         try:
-            result = stage.place_white_preaparc(
+            result = runner(
                 subject_dir=args.subject, hemi=hemi, output=output, max_steps=args.max_steps,
                 output_volume=output_volume, regularization_backend=run_regularization,
                 sampling_backend=run_sampling, candidate_backend=run_candidate,
@@ -285,13 +293,18 @@ def main():
         runs = []
         report["native_runs"][name] = {"binary_sha256": sha256(binary), "runs": runs}
         for index in range(args.reference_repeat):
-            output = args.output_directory / f"{hemi}.white.preaparc.{name}-{index}"
+            output = args.output_directory / f"{hemi}.{output_kind}.{name}-{index}"
             command = [str(binary.resolve()), "--adgws-in", str(stats), "--wm", str(wm),
                        "--threads", str(args.threads), "--invol", str(brain), f"--{hemi}",
                        "--i", str(orig), "--o", str(output), "--white", "--seg", str(seg),
-                       "--restore-255", "--nsmooth", "5", "--rip-bg-no-annot", "--rip-bg",
+                       "--restore-255", "--nsmooth", "5" if args.white_stage == "preaparc" else "0", "--rip-bg",
                        "--rip-bg-lof", "--restore-255", "--outvol",
                        str(args.output_directory / f"mrisps.wpa.{name}-{index}.mgz")]
+            if args.white_stage == "preaparc":
+                command.append("--rip-bg-no-annot")
+            else:
+                command += ["--rip-label", str(args.subject / f"label/{hemi}.cortex.label"),
+                            "--rip-surf", str(orig), "--aparc", str(args.subject / f"label/{hemi}.aparc.annot")]
             started = time.perf_counter()
             with (args.output_directory / f"{name}-{index}.log").open("w") as stream:
                 completed = subprocess.run(command, cwd=args.output_directory, env=env,

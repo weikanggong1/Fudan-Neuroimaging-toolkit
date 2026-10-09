@@ -47,6 +47,7 @@ def _place_white_preaparc(
     collision_profile: bool = False,
     retained_mht_backend: str = "tree",
     cleanup_candidate_grid_cells_per_axis: int = 2,
+    final_white: bool = False,
 ) -> dict:
     """共享现有白质算子；complete 选择四轮而非首轮诊断调度。"""
     started = time.perf_counter()
@@ -86,7 +87,7 @@ def _place_white_preaparc(
     if regularization_backend == "torch" and device is None:
         raise ValueError("Torch regularization requires an explicit device")
     subject = Path(subject_dir)
-    orig = subject / f"surf/{hemi}.orig"
+    orig = subject / f"surf/{hemi}.{'white.preaparc' if final_white else 'orig'}"
     stats_path = subject / f"surf/autodet.gw.stats.{hemi}.dat"
     brain_path = subject / "mri/brain.finalsurfs.mgz"
     wm_path = subject / "mri/wm.mgz"
@@ -99,7 +100,7 @@ def _place_white_preaparc(
                  if len(line.split()) >= 2)
     vertices, faces, metadata = nib.freesurfer.read_geometry(str(orig), read_metadata=True)
     surface_loaded_at = time.perf_counter()
-    xyz = average_vertex_positions(vertices, faces, 5)
+    xyz = np.asarray(vertices, dtype=np.float32).copy() if final_white else average_vertex_positions(vertices, faces, 5)
     initial_cleanup = None
     def clean_intersections(current, rip_flags):
         if cleanup_marking_backend == "legacy":
@@ -133,12 +134,35 @@ def _place_white_preaparc(
     del brain_data, wm_data
     volume_prepared_at = time.perf_counter()
     rip_affine = surface_ras_to_voxel(seg_image.header, metadata)
+    final_rip = None
+    if final_white:
+        from .place_surface_final_white_rip import final_white_rip_flags
+        from .place_surface_rip import rip_outside_label
+        cortex_path = subject / f"label/{hemi}.cortex.label"
+        annot_path = subject / f"label/{hemi}.aparc.annot"
+        for path in (cortex_path, annot_path):
+            if not path.is_file():
+                raise FileNotFoundError(path)
+        annotation, color_table, names = nib.freesurfer.read_annot(str(annot_path), orig_ids=True)
+        rip_coordinates = np.asarray(vertices, dtype=np.float32)
+        rip_normals = normal_topology.evaluate(rip_coordinates)
+        # --rip-surf每次读同一preaparc、零rip标记；仅将ripflag并回当前surface。
+        # 其val/marked2不传回，因此这里不改变当前目标值。固定输入可缓存flags。
+        final_rip = np.maximum(rip_outside_label(len(xyz), nib.freesurfer.read_label(str(cortex_path))),
+            final_white_rip_flags(rip_coordinates, rip_normals, seg,
+                rip_affine, annotation, color_table, names, hemisphere=hemi))
+
+    def ripping(current, current_normals, current_ripped, current_values):
+        if final_rip is None:
+            return rip_white_preaparc_pass(current, current_normals, faces, seg, volume,
+                rip_affine, hemisphere=hemi, ripped=current_ripped, values=current_values)
+        flags = final_rip.copy() if current_ripped is None else np.maximum(final_rip, current_ripped)
+        targets = np.full(len(xyz), -1., np.float32) if current_values is None else current_values.copy()
+        return flags, targets
+
     ripped = values = None
     for _ in range(2):
-        ripped, values = rip_white_preaparc_pass(
-            xyz, normals, faces, seg, volume, rip_affine, hemisphere=hemi,
-            ripped=ripped, values=values,
-        )
+        ripped, values = ripping(xyz, normals, ripped, values)
     initial_ripping_finished_at = time.perf_counter()
     affine = surface_ras_to_voxel(brain.header, metadata)
     sampler = None
@@ -350,10 +374,7 @@ def _place_white_preaparc(
             pass_iteration, sigma, n_averages = 0, 2.0 / (1 << outer_pass), 4 >> outer_pass
             border_started = time.perf_counter()
             current_normals = normal_cache.evaluate(current)
-            ripped, values = rip_white_preaparc_pass(
-                current, current_normals, faces, seg, volume, rip_affine,
-                hemisphere=hemi, ripped=ripped, values=values,
-            )
+            ripped, values = ripping(current, current_normals, ripped, values)
             border = compute_border_values_first_pass(
                 volume, seg, current, current_normals, xyz, ripped, values,
                 affine, thresholds, hemisphere=hemi, surface="white", sigma=sigma,
@@ -413,6 +434,7 @@ def _place_white_preaparc(
     finished_at = time.perf_counter()
     return {
         "output": str(output), "hemisphere": hemi, "steps": len(records),
+        "white_stage": "final_white" if final_white else "white_preaparc",
         "regularization_backend": regularization_backend, "device": device,
         "sampling_backend": sampling_backend,
         "complete_four_passes": complete, "candidate_backend": candidate_backend,

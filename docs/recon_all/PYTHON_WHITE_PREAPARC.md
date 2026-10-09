@@ -10,7 +10,8 @@ pial 优化器。
 
 本接口显式选择实验路径，生产 recon-all 默认仍调用独立 Conda 构建组件。
 它对应 `white.preaparc`；带 aparc、`rip-label` 和独立 `rip-surf` 的最终
-`white` 是另一个调用分支，尚未由本接口完成。PyTorch 可处理 signed
+`white` 是另一个调用分支，使用[独立最终white接口](PYTHON_FINAL_WHITE.md)。
+PyTorch 可处理 signed
 averaging、normal/tangent spring 和两跳二次曲率，强度项可显式复用已实现
 的 `PlacementSampling` PyTorch/Triton GPU 采样；边界搜索、自斥力、
 目标函数和有序 Gauss–Seidel 碰撞接受仍在 CPU。相交清理可显式复用
@@ -433,6 +434,8 @@ python validation/recon_all/python_gpu_port/benchmark_placement_full_white.py \
 
 | 日期/版本 | 修改与证据 |
 |---|---|
+| 2026-10-10，最终white v19 | 独立七输入接口复用白质四轮；修正`--rip-label`关闭midline的语义，两例四侧完整坐标/面/MRI匹配原始Conda参考；生产fast性能另测 |
+| 2026-10-10，限幅精度修复 | 源`float sqrt`先舍入再转double；新自产sub07LH完整preaparc与本机原生坐标/面/MRI0差异，旧最大1.2077mm差异保留 |
 | 2026-10-09，源marker v6 | 完整CPU/GPU34步和最终几何无差异、最终0相交；对原生局部误差仍单列 |
 | 2026-10-09，v8/13邻居阈值修复 | 两例white/pial MRI-only与原生0差异；完整sub07LH表面和轨迹与v6相同，MRI与原生0差异 |
 | 2026-10-09，v9/v10 | 完整空间3桶与保留MHT编译有序循环分开ABBA；所有34步和最终文件SHA不变，观察整阶段分别少11.51%和25.00% |
@@ -441,9 +444,10 @@ python validation/recon_all/python_gpu_port/benchmark_placement_full_white.py \
 | 2026-10-09，`4939d41c` 及模块 SHA | 首步 PyTorch 正则同输入无新差异；仅首步阶段证据 |
 | 既有白质首轮诊断 | 1–17 步对照接口保留，承担定位参考作用；没有删除仍使用的诊断算子 |
 
-完整四轮同输入回归通过之后，才考虑生产接线；最终 white 的独立 rip 与
-annotation 分支仍需实现、同输入验证及两例双侧复核。严格复现、优化新
-退化和整例指标等效分别报告，不降低既有门槛。
+完整四轮通过后，生产接线仍须用当前生产程序完成性能控制。最终white
+的独立rip与annotation已在[专页](PYTHON_FINAL_WHITE.md)完成两例双侧同输入
+验证；该结果不把本preaparc函数改名为最终white。严格复现、优化新退化和
+整例指标等效分别报告，不降低既有门槛。
 
 ## 7. 参考文献与源码
 

@@ -46,7 +46,7 @@ def main():
     parser.add_argument("--comparison-report", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--label", required=True)
-    parser.add_argument("--surface-kind", choices=("white.preaparc", "pial.T1"), default="white.preaparc")
+    parser.add_argument("--surface-kind", choices=("white.preaparc", "white", "pial.T1"), default="white.preaparc")
     parser.add_argument("--annotation", type=Path)
     parser.add_argument("--diagnostic-vertex-index", type=int,
                         help="显式选择对照局部位置，便于修复前后在同一MRI平面展示；不改变统计")
@@ -96,20 +96,28 @@ def main():
     axes[1].set_xlim(target[0]-18, target[0]+18)
     axes[1].set_ylim(target[2]-18, target[2]+18)
     near_plane = np.abs(candidate_voxel[:, 1]-slice_y) < 1.0
+    maximum_distance = float(distances.max())
+    color_options = (dict(c=distances[near_plane], cmap="inferno", vmin=0, vmax=maximum_distance)
+                     if maximum_distance else dict(color="black"))
     points = axes[1].scatter(candidate_voxel[near_plane, 0], candidate_voxel[near_plane, 2],
-                            c=distances[near_plane], s=7, cmap="inferno", vmin=0,
-                            vmax=max(float(distances.max()), 1e-12))
-    fig.colorbar(points, ax=axes[1], label="same-index distance (mm)", shrink=.7)
+                            s=7, **color_options)
+    if maximum_distance:
+        fig.colorbar(points, ax=axes[1], label="same-index distance (mm)", shrink=.7)
     stride = max(1, len(vertices)//100000)
+    color_options = (dict(c=distances[::stride], cmap="inferno", vmin=0, vmax=maximum_distance)
+                     if maximum_distance else dict(color="black"))
     error_points = axes[2].scatter(vertices[::stride, 0], vertices[::stride, 2],
-                                  c=distances[::stride], s=.6, cmap="inferno", vmin=0,
-                                  vmax=max(float(distances.max()), 1e-12), rasterized=True)
+                                  s=.6, rasterized=True, **color_options)
     axes[2].set_aspect("equal")
     axes[2].set_xlabel("surface RAS x (mm)")
     axes[2].set_ylabel("surface RAS z (mm)")
     axes[2].set_title("Vertex error: all values used in statistics")
-    fig.colorbar(error_points, ax=axes[2], label="distance (mm)", shrink=.7)
-    fig.suptitle(f"{args.label}: frozen-input {args.surface_kind}, not recon-all equivalence", fontsize=12)
+    if maximum_distance:
+        fig.colorbar(error_points, ax=axes[2], label="distance (mm)", shrink=.7)
+    else:
+        axes[2].text(.03,.96,"Every vertex: 0 mm",transform=axes[2].transAxes,
+                     va="top",bbox=dict(facecolor="white",alpha=.85,edgecolor="none"))
+    fig.suptitle(f"{args.label}: frozen-input {args.surface_kind} stage", fontsize=12)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.output, dpi=160)
     plt.close(fig)
