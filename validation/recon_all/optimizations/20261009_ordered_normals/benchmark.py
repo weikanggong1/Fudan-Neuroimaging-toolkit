@@ -116,6 +116,8 @@ def main():
         cpu_time, api_time = paired["numba"], paired["torch"]
         error = np.abs(observed.astype(np.float64) - expected.astype(np.float64))
         component = {"different_components": int(np.count_nonzero(observed != expected)),
+                     "different_bit_patterns": int(np.count_nonzero(observed.view(np.uint32) != expected.view(np.uint32))),
+                     "bitwise_equal": bool(np.array_equal(observed.view(np.uint32), expected.view(np.uint32))),
                      "max_abs": float(error.max(initial=0)), "p99_abs": float(np.percentile(error, 99)) if error.size else 0.0,
                      "finite": bool(np.isfinite(observed).all()), "passed": bool(error.max(initial=0) <= MAX_COMPONENT_ERROR)}
         report["meshes"].append({"input": str(path), "input_sha256": sha256(path),
